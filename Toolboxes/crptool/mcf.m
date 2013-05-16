@@ -26,14 +26,21 @@ function [a_out, b_out]=mcf(x,y,w,T)
 %
 %    See also: ACE
 
-% Copyright (c) 2001-2004 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2001-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2007/12/20 16:26:06 $
-% $Revision: 1.10 $
+% $Date: 2009/03/24 08:32:57 $
+% $Revision: 1.11 $
 %
 % $Log: mcf.m,v $
+% Revision 1.11  2009/03/24 08:32:57  marwan
+% copyright address changed
+%
 % Revision 1.10  2007/12/20 16:26:06  marwan
 % changed gpl splash behaviour
 %

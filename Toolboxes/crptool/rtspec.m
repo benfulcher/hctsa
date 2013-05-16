@@ -19,14 +19,21 @@ function varargout = rtspec(varargin)
 %    See also CRP, RRSPEC.
 %    
 
-% Copyright (c) 2008 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2008/07/02 12:01:13 $
-% $Revision: 5.1 $
+% $Date: 2009/03/24 08:36:24 $
+% $Revision: 5.2 $
 %
 % $Log: rtspec.m,v $
+% Revision 5.2  2009/03/24 08:36:24  marwan
+% correction of frequency scale
+%
 % Revision 5.1  2008/07/02 12:01:13  marwan
 % initial import
 %

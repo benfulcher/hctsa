@@ -8,13 +8,17 @@ function crpclean
 %    the MAKEINSTALL tool. For further information
 %    visit http://matlab.pucicu.de
 
-% Copyright (c) 2002-2006 by AMRON
+% Copyright (c) 2008-2012
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2002-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% Generation date: 24-Sep-2008 12:09:53
-% $Date: 2008/02/25 12:32:53 $
-% $Revision: 3.17 $
+% Generation date: 14-Nov-2012 14:07:46
+% $Date: 2012/04/07 12:47:22 $
+% $Revision: 3.20.9 $
 
 error(nargchk(0,0,nargin));
 
@@ -128,8 +132,8 @@ catch
     fprintf(fid,'%s\n','name etc.). Provide a brief description of what you were');
     fprintf(fid,'%s\n','doing when this problem occurred.');
     fprintf(fid,'%s\n','E-mail or FAX this information to us at:');
-    fprintf(fid,'%s\n','    E-mail:  marwan@agnld.uni-potsdam.de');
-    fprintf(fid,'%s\n','       Fax:  ++49 +331 977 1142');
+    fprintf(fid,'%s\n','    E-mail:  marwan@pik-potsdam.de');
+    fprintf(fid,'%s\n','       Fax:  ++49 +331 288 2640');
     fprintf(fid,'%s\n\n\n','Thank you for your assistance.');
     fprintf(fid,'%s\n',repmat('-',50,1));
     fprintf(fid,'%s\n',datestr(now,0));
@@ -157,8 +161,8 @@ catch
     disp('   Provide a brief description of what you were doing when ')
     disp('   this problem occurred.'), disp(' ')
     disp('   E-mail or FAX this information to us at:')
-    disp('       E-mail:  marwan@agnld.uni-potsdam.de')
-    disp('          Fax:  ++49 +331 977 1142'), disp(' ')
+    disp('       E-mail:  marwan@pik-potsdam.de')
+    disp('          Fax:  ++49 +331 288 2640'), disp(' ')
     disp('   Thank you for your assistance.')
   end
   warning('on')

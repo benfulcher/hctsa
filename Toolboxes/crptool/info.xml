@@ -1,7 +1,7 @@
 <productinfo
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="optional">
-<?xml-stylesheet type="text/xsl" href="optional"?>
+  xsi:noNamespaceSchemaLocation="http://www.mathworks.com/namespace/info/v1/info.xsd">
+<?xml-stylesheet type="text/xsl" href="http://www.mathworks.com/namespace/info/v1/info.xsl"?>
 
 <matlabrelease>NaN</matlabrelease>
 <name>Cross Recurrence Plot Toolbox</name>

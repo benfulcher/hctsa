@@ -1,0 +1,26 @@
+% mgui.rc
+% here you can entry your own matlab programmes using the following syntax:
+% 1st parameter: matlab m-file
+% 2nd parameter: minimal number of arguments (current version: min>0)
+% 3rd parameter: maximal number of arguments (current version: max=4)
+plot 1 4
+pl 1 1
+comet 1 2
+plot3 3 3
+comet3 3 3
+bar 1 4
+hist 1 1
+hist2 1 1
+winplot 1 1
+first 1 1
+mig 1 2
+xcf 2 2
+mcf 2 2
+ace 2 2
+arfit 1 2
+phasespace 1 3
+crp 1 2
+crp_big 1 2
+crp2 1 2
+crqa 1 2
+plotyy 4 4

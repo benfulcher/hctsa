@@ -37,7 +37,7 @@ function xout=crp2(varargin)
 %      minnorm     - Minimum norm.
 %      nrmnorm     - Euclidean norm between normalized vectors
 %                    (all vectors have the length one).
-%      maxnorm     - Maximum norm, fixed recurrence rate.
+%      rr          - Maximum norm, fixed recurrence rate.
 %      fan         - Fixed amount of nearest neighbours.
 %      omatrix     - Order matrix (disabled).
 %      opattern    - Order patterns recurrence plot.
@@ -74,14 +74,27 @@ function xout=crp2(varargin)
 %    Cross Recurrence Plot Based Synchronization of Time Series,
 %    Nonlin. Proc. Geophys., 9, 2002.
 
-% Copyright (c) 1998-2007 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 1998-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2008/07/02 11:59:22 $
-% $Revision: 5.16 $
+% $Date: 2012/10/22 14:18:33 $
+% $Revision: 5.19 $
 %
 % $Log: crp2.m,v $
+% Revision 5.19  2012/10/22 14:18:33  marwan
+% bug fix: normalisation of data when data contains Inf
+%
+% Revision 5.18  2010/06/29 12:47:30  marwan
+% some minor bugs in output and test of time series lengths (of x and y)
+%
+% Revision 5.17  2009/03/24 08:31:17  marwan
+% copyright address changed
+%
 % Revision 5.16  2008/07/02 11:59:22  marwan
 % new norms: DTW and Levenshtein
 % bug fix for logical data vectors
@@ -288,22 +301,37 @@ if isnumeric(varargin{1}) 		% read commandline input
             'Either too much NaN or the number of columns in the vectors do not match.'])
   end
 
-    Nx=size(x,1); Ny=size(y,1);
-    NX=Nx-t*(m0-1);NY=Ny-t*(m0-1);
-    x0=zeros(Nx,m);y0=zeros(Ny,m);
-    x0(1:size(x,1),1:size(x,2))=x; 
-    y0(1:size(y,1),1:size(y,2))=y; 
+  Nx=size(x,1); Ny=size(y,1);
+  NX=Nx-t*(m0-1);NY=Ny-t*(m0-1);
+  x0=zeros(Nx,m);y0=zeros(Ny,m);
+  x0(1:size(x,1),1:size(x,2))=x; 
+  y0(1:size(y,1),1:size(y,2))=y; 
 
-    if nonorm==1, 
-	 x=(x0-repmat(mean(x0),Nx,1))./repmat(std(x0),Nx,1);
-	 y=(y0-repmat(mean(y0),Ny,1))./repmat(std(y0),Ny,1);
-    end
+  % normalise the data
+  if nonorm == 1,
+      for k = 1:size(x0,2)
+          idx = find(~isinf(x0(:,k)));
+          stdx = std(x0(idx,k));
+          meanx = mean(x0(idx,k));
+          x(:,k) = (x0(:,k) - meanx) / stdx;
+      end
+      for k = 1:size(y0,2)
+          idy = find(~isinf(x0(:,k)));
+          stdy = std(y0(idy,k));
+          meany = mean(y0(idy,k));
+          y(:,k) = (y0(:,k) - meany) / stdy;
+      end
+  end
 
   if ~isempty(find(isnan(x))), for k=1:size(x,2),  x(find(isnan(x(:,k))),:)=[]; end, end
   if ~isempty(find(isnan(y))), for k=1:size(y,2),  y(find(isnan(y(:,k))),:)=[]; end, end
+
   if size(x,1) < t*(m0-1)+1 | size(y,1) < t*(m0-1)+1
      error(['Too less data',10,...
             'Either too much NaN or the number of columns in the vectors do not match.'])
+  end
+  if(size(x,2) ~= size(y,2)) 
+     error(['Matrix dimensions must agree.'])
   end
   ds=eye(m);
 
@@ -432,6 +460,8 @@ if nogui>0
        tx(8)={'order matrix'};
        tx(9)={'order pattern'};
        tx(10)={'distance plot'};
+       tx(11)={'distance plot'};
+       tx(12)={'distance plot'};
        disp(['use method: ', char(tx(method))]);
        if nonorm==1, disp('normalize data'); else disp('do not normalize data'); end
    end
@@ -1106,7 +1136,7 @@ switch(action)
       if check_stop(hCRP,hCtrl,nogui,obj), return, end
 
       set(findobj('Tag','Status','Parent',findobj('Parent',hCRP,'Tag','CRPPlot')),'String','Building CRP Matrix'),drawnow
-      X=reshape(uint8(255*s/max(s))<(255*e/max(s)),Ny,Nx); clear s x1 y1 
+      X=uint8(reshape((s/max(s))<(e/max(s)),Ny,Nx)); clear s x1 y1 
       matext=[num2str(round(100*e)/100) unit ' (normalized distance euclidean norm)'];
 
 
@@ -1693,13 +1723,16 @@ set(0,'ShowHidden','Off')
 
 %if 0
 catch
-  try, if nogui==0
-    for i=1:length(obj.enable), set(obj.children(i),'Enable',obj.enable{i}); end
-    set(h(1),'String','Apply',...
-             'ToolTip','Starts the computation - be patient.',...
-             'Callback','crp compute')
-    setptr([hCRP,hCtrl],'arrow')
-  end, end
+  try
+    if nogui==0
+        for i=1:length(obj.enable), set(obj.children(i),'Enable',obj.enable{i}); end
+        set(h(1),'String','Apply',...
+                 'ToolTip','Starts the computation - be patient.',...
+                 'Callback','crp compute')
+        setptr([hCRP,hCtrl],'arrow')
+    end
+    if nargout, xout = NaN; end
+  end
   z=whos;x=lasterr;y=lastwarn;in=varargin{1};
   print_error('crp2',z,x,y,in,mflag,action)
   try, set(0,props.root), end

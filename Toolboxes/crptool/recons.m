@@ -17,14 +17,21 @@ function varargout=recons(varargin)
 %    How much information is contained in a recurrence plot?, 
 %    Phys. Lett. A, 330, 2004.
 
-% Copyright (c) 2005-2006 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2005-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2008/06/24 14:11:55 $
-% $Revision: 5.2 $
+% $Date: 2009/03/24 08:34:10 $
+% $Revision: 5.3 $
 %
 % $Log: recons.m,v $
+% Revision 5.3  2009/03/24 08:34:10  marwan
+% copyright address changed
+%
 % Revision 5.2  2008/06/24 14:11:55  marwan
 % Including of a abort condition in order to avoid infinite loops.
 %
@@ -197,8 +204,8 @@ catch
     err=fprintf(fid,'%s\n','Please send us the following error report. Provide a brief');
     err=fprintf(fid,'%s\n','description of what you were doing when this problem occurred.');
     err=fprintf(fid,'%s\n','E-mail or FAX this information to us at:');
-    err=fprintf(fid,'%s\n','    E-mail:  marwan@agnld.uni-potsdam.de');
-    err=fprintf(fid,'%s\n','       Fax:  ++49 +331 977 1142');
+    err=fprintf(fid,'%s\n','    E-mail:  marwan@pik-potsdam.de');
+    err=fprintf(fid,'%s\n','       Fax:  ++49 +331 288 2640');
     err=fprintf(fid,'%s\n\n\n','Thank you for your assistance.');
     err=fprintf(fid,'%s\n',repmat('-',50,1));
     err=fprintf(fid,'%s\n',datestr(now,0));
@@ -230,8 +237,8 @@ catch
     disp('   Provide a brief description of what you were doing when ')
     disp('   this problem occurred.'), disp(' ')
     disp('   E-mail or FAX this information to us at:')
-    disp('       E-mail:  marwan@agnld.uni-potsdam.de')
-    disp('          Fax:  ++49 +331 977 1142'), disp(' ')
+    disp('       E-mail:  marwan@pik-potsdam.de')
+    disp('          Fax:  ++49 +331 288 2640'), disp(' ')
     disp('   Thank you for your assistance.')
     warning('on')
   end

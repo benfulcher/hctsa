@@ -62,15 +62,22 @@ function out=crqad_big(varargin)
 %    Nonlinear analysis of bivariate data with cross recurrence plots,
 %    Phys. Lett. A, 302, 2002.
 
-% Copyright (c) 2002-2006 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2002-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
 %
-% $Date: 2007/07/18 17:18:44 $
-% $Revision: 5.3 $
+% $Date: 2009/03/24 08:32:09 $
+% $Revision: 5.4 $
 %
 % $Log: crqad_big.m,v $
+% Revision 5.4  2009/03/24 08:32:09  marwan
+% copyright address changed
+%
 % Revision 5.3  2007/07/18 17:18:44  marwan
 % integer values in the arguments supported
 %

@@ -38,7 +38,7 @@ function xout=crp(varargin)
 %      minnorm     - Minimum norm.
 %      nrmnorm     - Euclidean norm between normalized vectors
 %                    (all vectors have the length one).
-%      maxnorm     - Maximum norm, fixed recurrence rate.
+%      rr          - Maximum norm, fixed recurrence rate.
 %      fan         - Fixed amount of nearest neighbours.
 %      inter       - Interdependent neighbours.
 %      omatrix     - Order matrix.
@@ -72,14 +72,27 @@ function xout=crp(varargin)
 %
 %    See also CRP2, CRP_BIG, JRP, TAUCRP, CRQA.
 
-% Copyright (c) 1998-2007 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 1998-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2008/07/02 11:59:04 $
-% $Revision: 5.14 $
+% $Date: 2012/10/22 14:18:33 $
+% $Revision: 5.17 $
 %
 % $Log: crp.m,v $
+% Revision 5.17  2012/10/22 14:18:33  marwan
+% bug fix: normalisation of data when data contains Inf
+%
+% Revision 5.16  2010/06/29 12:46:47  marwan
+% bug in checking the lengths of x and y
+%
+% Revision 5.15  2009/03/24 08:31:17  marwan
+% copyright address changed
+%
 % Revision 5.14  2008/07/02 11:59:04  marwan
 % new norms: DTW and Levenshtein
 % bug fix for logical data vectors
@@ -263,15 +276,6 @@ if isnumeric(varargin{1}) 		% read commandline input
      end
      action='init';
 
-    Nx=length(x); Ny=length(y);
-    NX=Nx-t*(m-1);NY=Ny-t*(m-1);  
-    if (NX<1 | NY<1) & nogui==0;
-         errordlg('The embedding vectors cannot be created. Dimension M and/ or delay T are to big. Please use smaller values.','Dimension/ delay to big')
-         waitforbuttonpress
-    end
-  if size(x,1)<size(x,2), x=x'; end
-  if size(y,1)<size(y,2), y=y'; end
-
   if ~isempty(find(isnan(x)))
      disp('Warning: NaN detected (in first variable) - will be cleared.')
      for k=1:size(x,2),  x(find(isnan(x(:,k))),:)=[]; end
@@ -280,23 +284,37 @@ if isnumeric(varargin{1}) 		% read commandline input
      disp('Warning: NaN detected (in second variable) - will be cleared.')
      for k=1:size(y,2),  y(find(isnan(y(:,k))),:)=[]; end
   end
+     
+  if size(x,1)<size(x,2), x=x'; end
+  if size(y,1)<size(y,2), y=y'; end
 
+    Nx=length(x); Ny=length(y);
+    NX=Nx-t*(m-1);NY=Ny-t*(m-1);  
+    if (NX<1 | NY<1) & nogui==0;
+         errordlg('The embedding vectors cannot be created. Dimension M and/ or delay T are to big. Please use smaller values.','Dimension/ delay to big')
+         waitforbuttonpress
+    end
+  % normalise the data   
   if size(x,2)>=2
      xscale=x(:,1); 
      if ~isempty(find(diff(xscale)<0)), error('First column of the first vector must be monotonically non-decreasing.'),end
-     if nonorm==1, x=(x(:,2)-mean(x(:,2)))/std(x(:,2)); else x=x(:,2); end
+     idx = find(~isinf(x(:,2)));
+     if nonorm==1, x=(x(:,2)-mean(x(idx,2)))/std(x(idx,2)); else x=x(:,2); end
   else
-     if nonorm==1, x=(x-mean(x))/std(x); end
+     idx = find(~isinf(x));
+     if nonorm==1, x=(x-mean(x(idx)))/std(x(idx)); end
      xscale=(1:length(x))'; 
   end
 
   if size(y,2)>=2
      yscale=y(:,1); 
      if ~isempty(find(diff(yscale)<0)), error('First column of the second vector must be monotonically non-decreasing.'),end
-     if nonorm==1, y=(y(:,2)-mean(y(:,2)))/std(y(:,2)); else y=y(:,2); end
+     idx = find(~isinf(y(:,2)));
+     if nonorm==1, y=(y(:,2)-mean(y(idx,2)))/std(y(idx,2)); else y=y(:,2); end
   else
-      if nonorm==1, y=(y-mean(y))/std(y); end
-      yscale=(1:length(y))';
+     idx = find(~isinf(y));
+     if nonorm==1, y=(y-mean(y(idx)))/std(y(idx)); end
+     yscale=(1:length(y))';
   end
   ds=eye(m);
   
@@ -685,7 +703,7 @@ switch(action)
       if check_stop(hCRP,hCtrl,nogui,obj), return, end
 
       set(findobj('Tag','Status','Parent',findobj('Parent',hCRP,'Tag','CRPPlot')'),'String','Building CRP Matrix'),drawnow
-      X=(uint8(255*s/max(s(:)))<(255*e/max(s(:))))'; clear s s1 x1 y1 px py
+      X=uint8((s/max(s(:)))<(e/max(s(:))))'; clear s s1 x1 y1 px py
       matext=[num2str(round(100*e)/100) unit ' (normalized distance euclidean norm)'];
 
 

@@ -1,6 +1,6 @@
 function S = sqlescapestring(s)
 % Input s, turns into a string that won't interfere with MySQL queries
-% Ben Fulcher 30/11/2009
+% Romesh Abeysuriya 10/12/2012
 
 % From MySQL manual pages:
 % http://dev.mysql.com/doc/refman/4.1/en/string-syntax.html
@@ -17,30 +17,6 @@ function S = sqlescapestring(s)
 
 % s
 
-% Backslashes (must be done first -- or else picking up on backslashed added by commands)
-a = strfind(s,'\');
-if ~isempty(a), s = SUB_addbackslash(s,a); end
+S = regexprep(s,'([\''\\])','\\$1'); % Replace backslashes and single quotes
+%S2 = regexprep(s,'([\''\\\_\%])','\\$1'); % Replace backslashes and single quotes
 
-% Single quotes
-a = strfind(s,'''');
-if ~isempty(a), s = SUB_addbackslash(s,a); end
-
-% Percentage signs
-% a = strfind(s,'%');
-% if ~isempty(a), s = SUB_addbackslash(s,a); end
-
-% Underscores
-% a = strfind(s,'_');
-% if ~isempty(a), s = SUB_addbackslash(s,a); end
-
-S = s;
-
-function s1 = SUB_addbackslash(s1,a)
-	a = sort(a,'descend'); % so insertions don't change the string indicies
-	for i=1:length(a)
-		s1 = [s1(1:a(i)-1) '\' s1(a(i):end)];
-	end
-end
-
-
-end

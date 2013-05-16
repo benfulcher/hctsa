@@ -32,7 +32,7 @@ function out=crqad(varargin)
 %      minnorm     - Minimum norm.
 %      nrmnorm     - Euclidean norm between normalized vectors
 %                    (all vectors have the length one).
-%      maxnorm     - Maximum norm, fixed recurrence rate.
+%      rr          - Maximum norm, fixed recurrence rate.
 %      fan         - Fixed amount of nearest neighbours.
 %      inter       - Interdependent neighbours.
 %      omatrix     - Order matrix.
@@ -56,21 +56,31 @@ function out=crqad(varargin)
 %              b = sin(0:.1:80) + randn(1,801);
 %              crqad(a,b,3,15,.1,100,'fan')
 %
-%    See also CRQA, CRQAD_BIG, CRP, CRP2, CRP_BIG, DL, TT.
+%    See also CRQA, CRQAD_BIG, CRP, CRP2, CRP_BIG, DL, TT, RPDE.
 %
 %    References: 
 %    Marwan, N., Kurths, J.:
 %    Nonlinear analysis of bivariate data with cross recurrence plots,
 %    Phys. Lett. A, 302, 2002.
 
-% Copyright (c) 2002-2007 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2002-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2007/07/18 17:18:44 $
-% $Revision: 2.8 $
+% $Date: 2010/06/30 12:03:02 $
+% $Revision: 2.10 $
 %
 % $Log: crqad.m,v $
+% Revision 2.10  2010/06/30 12:03:02  marwan
+% Help text modified
+%
+% Revision 2.9  2009/03/24 08:35:19  marwan
+% corrected XCF calculation
+%
 % Revision 2.8  2007/07/18 17:18:44  marwan
 % integer values in the arguments supported
 %
@@ -307,7 +317,7 @@ if nargout, XCF=xcf(x1,x2,w,1); end
 if ~nargout
 subplot(2,2,1)
 clim=1;
-xcf(x1,x2,w)
+xcf(x1(:,1),x2(:,1),w)
 set(gca,'fonta','i')
 xlabel('Lag'), axis([-w w -clim clim])
 ylabel('Cross Correlation')

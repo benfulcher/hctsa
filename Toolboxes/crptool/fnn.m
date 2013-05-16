@@ -43,14 +43,33 @@ function out=fnn(varargin)
 %    Determining embedding dimension for phase-space reconstruction
 %    using a geometrical construction, Phys. Rev. A, 45, 1992.
 
-% Copyright (c) 2006
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2006-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2007/12/13 12:02:01 $
-% $Revision: 5.3 $
+% $Date: 2011/05/18 09:46:17 $
+% $Revision: 5.8 $
 %
 % $Log: fnn.m,v $
+% Revision 5.8  2011/05/18 09:46:17  marwan
+% default figure background color bug fixed
+%
+% Revision 5.7  2010/01/15 12:16:58  marwan
+% bug on check of data length
+%
+% Revision 5.6  2010/01/06 08:59:24  marwan
+% bugfix if embedding exceeds data length
+%
+% Revision 5.5  2009/07/21 11:24:26  marwan
+% missing default t
+%
+% Revision 5.4  2009/03/24 08:35:39  marwan
+% copyright address updated
+%
 % Revision 5.3  2007/12/13 12:02:01  marwan
 % added embedding delay
 %
@@ -95,7 +114,7 @@ set(0,'ShowHidden','on')
 delete(findobj('Tag','msgbox'))
 nogui=0;
 maxM_init = 10;
-t = 1;
+t_init = 1;
 maxM=maxM_init; % maximal dimension
 r_init = 10;
 r=r_init; % r-criterion for neighbours distance
@@ -112,6 +131,7 @@ if nargin & isnumeric(varargin{1})
     i_x = i_double(i_length > 1);
     x = varargin{i_x(1)}(:);
     N = length(x);
+    t = t_init;
     if isempty(x), error('Not a valid input vector.'), end
     i_x = i_double(i_length < 2);
     switch length(i_x)
@@ -205,7 +225,18 @@ end
 % correct invalid inputs
 N = length(x);
 if isempty(maxM) | maxM > N/2, maxM = maxM_init; end
+if isempty(t) | t > N/2 | t < 1, t = t_init; end
 if maxM < 2, maxM = 2; end
+if (maxM-1) * t > N - 5
+    maxM = maxM_init; t = 1; 
+    warning('Embedding exceeds data length (m-1) * tau > N. Please check!')
+    h = findobj('Tag','delay');
+    if ~isempty(h)
+        set(h,'string',num2str(t))
+    end
+    
+
+end
 if isempty(r), r = r_init; end
 if isempty(s), s = s_init; end
 if isempty(maxN)
@@ -493,11 +524,11 @@ case 'compute'
             % distance in the m-dimensional space
             switch method
               case 1
-                distance = max(abs(x2-repmat(x(jx(idx(i),:))',length(x2),1))');
+                distance = max(abs(x2-repmat(x(jx(idx(i),:))',size(x2,1),1))');
               case 2
-                distance = sqrt(sum((x2-repmat(x(jx(idx(i),:))',length(x2),1)).^2,2));
+                distance = sqrt(sum((x2-repmat(x(jx(idx(i),:))',size(x2,1),1)).^2,2));
               case 3
-                distance = sum(abs(x2-repmat(x(jx(idx(i),:))',length(x2),1)),2);
+                distance = sum(abs(x2-repmat(x(jx(idx(i),:))',size(x2,1),1)),2);
             end
             [distance is] = sort(distance);
             
@@ -555,7 +586,7 @@ case 'compute'
     if nogui
        out=FNN;
     end
-    
+   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% output
 
 case 'plot_fnn'
@@ -584,6 +615,7 @@ case 'end'
 
 end
 set(0,'ShowHidden','off')
+try set(0,props.root), end
 
 
 
@@ -600,8 +632,8 @@ catch
     err=fprintf(fid,'%s\n','Please send us the following error report. Provide a brief');
     err=fprintf(fid,'%s\n','description of what you were doing when this problem occurred.');
     err=fprintf(fid,'%s\n','E-mail or FAX this information to us at:');
-    err=fprintf(fid,'%s\n','    E-mail:  marwan@agnld.uni-potsdam.de');
-    err=fprintf(fid,'%s\n','       Fax:  ++49 +331 977 1142');
+    err=fprintf(fid,'%s\n','    E-mail:  marwan@pik-potsdam.de');
+    err=fprintf(fid,'%s\n','       Fax:  ++49 +331 288 2640');
     err=fprintf(fid,'%s\n\n\n','Thank you for your assistance.');
     err=fprintf(fid,'%s\n',repmat('-',50,1));
     err=fprintf(fid,'%s\n',datestr(now,0));
@@ -650,8 +682,8 @@ catch
     disp('   Provide a brief description of what you were doing when ')
     disp('   this problem occurred.'), disp(' ')
     disp('   E-mail or FAX this information to us at:')
-    disp('       E-mail:  marwan@agnld.uni-potsdam.de')
-    disp('          Fax:  ++49 +331 977 1142'), disp(' ')
+    disp('       E-mail:  marwan@pik-potsdam.de')
+    disp('          Fax:  ++49 +331 288 2640'), disp(' ')
     disp('   Thank you for your assistance.')
     warning('on')
   end

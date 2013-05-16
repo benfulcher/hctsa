@@ -71,7 +71,7 @@ void entropy(double	*data,
 	/*allocate memory for the counters*/
 	tally = (unsigned long int *) calloc(pow(bin,depth),sizeof(unsigned long int));
         for (i=0; i<pow(bin,depth); i++) 
-	  *(tally+os)=0;
+	  *(tally+i)=0;
 
 	/* now calculate the entropy */
 	length=length-depth+1;

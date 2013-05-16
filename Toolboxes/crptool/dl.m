@@ -14,14 +14,21 @@ function [a_out, b_out]=dl(x)
 %
 %    See also CRQA, TT.
 
-% Copyright (c) 2001-2004 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2001-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2005/11/23 07:29:14 $
-% $Revision: 3.3 $
+% $Date: 2009/03/24 08:32:09 $
+% $Revision: 3.4 $
 %
 % $Log: dl.m,v $
+% Revision 3.4  2009/03/24 08:32:09  marwan
+% copyright address changed
+%
 % Revision 3.3  2005/11/23 07:29:14  marwan
 % help text updated
 %

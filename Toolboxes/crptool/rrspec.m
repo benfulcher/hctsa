@@ -18,15 +18,29 @@ function varargout = rrspec(varargin)
 %
 %    See also TAUCRP, RTSPEC.
 %    
+%    References: 
+%    Zbilut, J. P., Marwan, N.: 
+%    The Wiener-Khinchin theorem and recurrence quantification, 
+%    Phys. Lett. A, 372, 2008.
 
-% Copyright (c) 2008 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2008/07/02 12:01:13 $
-% $Revision: 5.1 $
+% $Date: 2010/06/29 12:51:28 $
+% $Revision: 5.3 $
 %
 % $Log: rrspec.m,v $
+% Revision 5.3  2010/06/29 12:51:28  marwan
+% added reference
+%
+% Revision 5.2  2009/03/24 08:36:24  marwan
+% correction of frequency scale
+%
 % Revision 5.1  2008/07/02 12:01:13  marwan
 % initial import
 %

@@ -6,6 +6,7 @@
 #include "NNSearcher/nn_aux.cpp"
 #include "mextools/Utilities.cpp"
 //#include "NNSearcher/nn_predictor.h"
+#include <string.h>
 
 
 

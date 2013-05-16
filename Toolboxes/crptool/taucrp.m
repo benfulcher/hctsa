@@ -22,7 +22,7 @@ function X = taucrp(varargin)
 %      maxnorm     - Maximum norm.
 %      euclidean   - Euclidean norm.
 %      minnorm     - Minimum norm.
-%      maxnorm     - Maximum norm, fixed recurrence rate.
+%      rr          - Maximum norm, fixed recurrence rate.
 %      fan         - Fixed amount of nearest neighbours.
 %      distance    - Distance coded matrix (global CRP, Euclidean norm).
 %
@@ -45,14 +45,21 @@ function X = taucrp(varargin)
 %    Recurrence Plots for the Analysis of Complex Systems, Physics 
 %    Reports, 438(5-6), 2007.
 
-% Copyright (c) 2008 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2008/01/25 12:47:26 $
-% $Revision: 5.1 $
+% $Date: 2009/03/24 08:33:47 $
+% $Revision: 5.2 $
 %
 % $Log: taucrp.m,v $
+% Revision 5.2  2009/03/24 08:33:47  marwan
+% copyright address changed
+%
 % Revision 5.1  2008/01/25 12:47:26  marwan
 % initial import
 %

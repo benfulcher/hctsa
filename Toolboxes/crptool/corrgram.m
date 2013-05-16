@@ -33,12 +33,16 @@ function [c_out, l_out, t_out] = corrgram(varargin)
 %
 %   See also CORRCOEF, CORR, XCORR, MIGRAM.
 
-% Copyright (c) 2007 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2007-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2007/12/20 16:26:05 $
-% $Revision: 5.2 $
+% $Date: 2009/03/24 08:30:55 $
+% $Revision: 5.3 $
 
 
 error(nargchk(2,5,nargin))

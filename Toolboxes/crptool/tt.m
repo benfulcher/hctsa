@@ -13,16 +13,26 @@ function [a_out, b_out, c_out]=tt(x)
 %              [v v_dist] = tt(X);
 %              hist(v_dist,200)
 %
-%    See also CRQA, DL.
+%    See also CRQA, DL, RPDE.
 
-% Copyright (c) 2001-2003 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2001-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2008/04/29 14:50:06 $
-% $Revision: 3.5 $
+% $Date: 2010/06/30 12:02:52 $
+% $Revision: 3.7 $
 %
 % $Log: tt.m,v $
+% Revision 3.7  2010/06/30 12:02:52  marwan
+% Help text modified
+%
+% Revision 3.6  2009/03/24 08:33:47  marwan
+% copyright address changed
+%
 % Revision 3.5  2008/04/29 14:50:06  marwan
 % fixed problem of empty RP
 %

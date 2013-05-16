@@ -54,7 +54,7 @@ function xout=crqa(varargin)
 %      minnorm     - Minimum norm.
 %      nrmnorm     - Euclidean norm between normalized vectors
 %                    (all vectors have the length one).
-%      maxnorm     - Maximum norm, fixed recurrence rate.
+%      rr          - Maximum norm, fixed recurrence rate.
 %      fan         - Fixed amount of nearest neighbours.
 %      inter       - Interdependent neighbours.
 %      omatrix     - Order matrix.
@@ -82,6 +82,9 @@ function xout=crqa(varargin)
 %      Y(:, 8) = Vmax   (maximal vertical line length)
 %      Y(:, 9) = T1     (recurrence time of 1st type)
 %      Y(:,10) = T2     (recurrence time of 2nd type)
+%      Y(:,11) = RTE    (recurrence time entropy, i.e., RPDE)
+%      Y(:,12) = Clust  (clustering coefficient)
+%      Y(:,13) = Trans  (transitivity)
 %
 %    The window of length w is applied on the data and not on the RP, 
 %    i.e. the RP will have smaller size than the window, thus w-(m-1)*tau. 
@@ -118,31 +121,66 @@ function xout=crqa(varargin)
 %    See also CRQAD, CRQAD_BIG, CRP, CRP2, CRP_BIG, DL, TT, PSS.
 %
 %    References: 
-%    Trulla, L. L., Giuliani, A., Zbilut, J. P., Webber Jr., C. L.: 
-%    Recurrence quantification analysis of the logistic equation with 
-%    transients, Phys. Lett. A, 223, 1996.
+%    Marwan, N., Romano, M. C., Thiel, M., Kurths, J.: 
+%    Recurrence Plots for the Analysis of Complex Systems, 
+%    Phys. Rep., 438, 2007.
 %
-%    Marwan, N., Wessel, N., Meyerfeldt, U., Schirdewan, A., Kurths, J.: 
-%    Recurrence Plot Based Measures of Complexity and its Application to 
-%    Heart Rate Variability Data, Phys. Rev. E, 66(2), 2002.
+%    Little, M., McSharry, P., Roberts, S., Costello, D., Moroz, I.:
+%    Exploiting Nonlinear Recurrence and Fractal Scaling Properties 
+%    for Voice Disorder Detection, Biomed. Eng. Online, 6, 2007.
 %
-%    Gao, J. B.: 
-%    Recurrence Time Statistics for Chaotic Systems and Their 
-%    Applications, Phys. Rev. Lett., 83(16), 1999.
+%    Boccaletti, S., Latora, V., Moreno, Y., Chavez, M., Hwang, D.-U.:
+%    Complex networks: Structures and dynamics,
+%    Phys. Rep., 424, 2006.
 %
-%    Thiel, M., Romano, M. C., Kurths, J., Meucci, R., Allaria, E., 
-%    Arecchi, F. T.:
-%    Influence of observational noise on the recurrence quantification 
-%    analysis, Physica D, 171(3), 2002.
+%    Marwan, N., Donges, J. F., Zou, Y., Donner, R. V., Kurths, J.: 
+%    Complex network approach for recurrence analysis of time series, 
+%    Phys. Lett. A, 373(46), 2009. 
 
-% Copyright (c) 1998-2007 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 1998-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2008/03/05 17:43:08 $
-% $Revision: 5.35 $
+% $Date: 2012/11/14 13:07:03 $
+% $Revision: 5.45 $
 %
 % $Log: crqa.m,v $
+% Revision 5.45  2012/11/14 13:07:03  marwan
+% bugfix for RTE for very short time series
+%
+% Revision 5.44  2010/09/09 10:40:01  marwan
+% bugfix in cross version for calculation of network measures
+%
+% Revision 5.43  2010/08/27 11:16:31  marwan
+% fix output of network measures
+%
+% Revision 5.42  2010/07/07 08:26:30  marwan
+% updated references
+% bug in mean clustering coefficient
+%
+% Revision 5.41  2010/06/30 12:01:53  marwan
+% RPDE, Clustering and Transitivity added
+%
+% Revision 5.40  2010/06/29 12:48:56  marwan
+% better debugging performance if error occurs
+%
+% Revision 5.39  2010/01/06 08:58:59  marwan
+% adding pdist as an alternative to get the RP
+%
+% Revision 5.38  2009/05/14 16:20:32  marwan
+% automatic window length determination restored back
+% further argument checking (extreme embedding) added
+%
+% Revision 5.37  2009/03/31 12:28:26  marwan
+% automatic window length determination corrected
+%
+% Revision 5.36  2009/03/24 08:35:00  marwan
+% corrected DET calculation when using Theiler window
+%
 % Revision 5.35  2008/03/05 17:43:08  marwan
 % missed Vmax
 %
@@ -259,9 +297,10 @@ hw=-1;
 xscale = [];
 yscale = [];
 undocumented = 0;
-argout_index=[1,2,3,4,5,6,7,8,9,10];
+argout_index=[1,2,3,4,5,6,7,8,9,10,11,12,13];
+RTE = NaN; Clust = NaN; Trans = NaN;
 
-
+flag_pdist = 0; % use Matlab function PDIST, but only working for single x
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% check the input
 
 error(nargchk(1,13,nargin));
@@ -511,16 +550,30 @@ errcode=1;
      end
    end
    if m < 1; m = 1; end
+
+
+   if (Nx - (m-1) * t) < 5
+        disp('Error using ==> crqa')
+        disp('Too less data.')
+        xout = [];
+        return
+   end
+
+
+%   if isempty(w), w=Nx-(m-1)*t; wstep=1; end
    if isempty(w), w=Nx; wstep=1; end
    if w < 5+(m-1)*t, 
      w=5+(m-1)*t;
-     if ~nogui, warndlg('The window size W exceeds the valid range.','Check Data')
+     if w > Nx, w = Nx; end
+     if ~nogui, warndlg('The window size W falls below the valid range.','Check Data')
         waitforbuttonpress
         h=findobj('Tag','crqa_w');
         if ~isempty(h), set(h(1),'String',num2str(w)), end
-     else, disp('The window size W exceeds the valid range.'), end
+     else, disp('The window size W falls below the valid range.'), end
    end
+%   if w>Nx-(m-1)*t, 
    if w>Nx, 
+%     w=Nx-(m-1)*t; wstep=1;; 
      w=Nx; wstep=1;; 
      if ~nogui, warndlg('The window size W exceeds the valid range.','Check Data')
         waitforbuttonpress
@@ -562,6 +615,7 @@ errcode=1;
    end
    if x~=y, theiler_window=0; end
    t=round(t); m=round(m); w=round(w); wstep=round(wstep); vmin=round(vmin); lmin=round(lmin); theiler_window=round(theiler_window);
+   
 
    % normalize data if necessary
    if nonorm
@@ -724,7 +778,7 @@ case 'init'
   ylabel('TT')
 
   h=axes(props.axes,...
-            'Tag','crqa_axes_T1',...
+            'Tag','crqa_axes_RTE',...
             'Box','On',...
             'Position',[11.2017    axes_base+0*(axes_height+axes_hoffset)   28.1785+15    axes_height]);    
   ylabel('T_1')
@@ -904,7 +958,7 @@ case 'init'
   
   set(0,'ShowHidden','on')
   set(h8, 'HandleVis','CallBack')
-  tags={'crqa_Fig';'axes_logo';'text_logo';'crqa_theiler';'frame';'text';'crqa_axes_Data';'crqa_axes_Var';'crqa_axes_CoVar';'crqa_axes_RR';'crqa_axes_DET';'crqa_axes_L';'crqa_axes_ENTR';'crqa_axes_LAM';'crqa_axes_TT';'crqa_axes_T1';'crqa_axes_T2';'crqa_m';'crqa_maxLag';'crqa_method';'crqa_eps';'crqa_lmin';'crqa_vmin';'crqa_w';'crqa_ws';'crqa_button_store';'crqa_button_print';'crqa_button_close';'crqa_button_apply'};
+  tags={'crqa_Fig';'axes_logo';'text_logo';'crqa_theiler';'frame';'text';'crqa_axes_Data';'crqa_axes_Var';'crqa_axes_CoVar';'crqa_axes_RR';'crqa_axes_DET';'crqa_axes_L';'crqa_axes_ENTR';'crqa_axes_LAM';'crqa_axes_TT';'crqa_axes_RTE';'crqa_axes_T2';'crqa_m';'crqa_maxLag';'crqa_method';'crqa_eps';'crqa_lmin';'crqa_vmin';'crqa_w';'crqa_ws';'crqa_button_store';'crqa_button_print';'crqa_button_close';'crqa_button_apply'};
   h=[];
   for i=1:length(tags); h=[h; findobj('Tag',tags{i})]; end
   set(h,'Units','Norm')
@@ -954,7 +1008,7 @@ case 'store'
     h=findobj('Tag','crqa_axes_ENTR','Parent',gcf); h_axes.h(6)=h(1);
     h=findobj('Tag','crqa_axes_LAM','Parent',gcf); h_axes.h(7)=h(1);
     h=findobj('Tag','crqa_axes_TT','Parent',gcf); h_axes.h(8)=h(1);
-    h=findobj('Tag','crqa_axes_T1','Parent',gcf); h_axes.h(9)=h(1);
+    h=findobj('Tag','crqa_axes_RTE','Parent',gcf); h_axes.h(9)=h(1);
     h=findobj('Tag','crqa_axes_T2','Parent',gcf); h_axes.h(10)=h(1);
     h=findobj('Tag','uniLogo');
     tags={'text_logo';'frame';'text';'crqa_m';'crqa_maxLag';'crqa_method';'crqa_eps';'crqa_lmin';'crqa_vmin';'crqa_theiler';'crqa_w';'crqa_ws';'crqa_button_store';'crqa_button_print';'crqa_button_close';'crqa_button_apply';};
@@ -1146,17 +1200,29 @@ for i=1:wstep:Nx-w;
      
          errcode=25;
          try
-         %  X=crp_big(x(i:i+w-1,:),y(i:i+w-1,:),m,t,e,'fan','silent');
-             if time_scale_flag
-               if length(x(i:i+w-1,:)) > 2000
-                  X=crp_big(x(i:i+w-1,:),y(i:i+w-1,:),m,t,e,method,'nonorm','silent');
-               else
-                  X=crp(x(i:i+w-1,:),y(i:i+w-1,:),m,t,e,method,'nonorm','silent');
-               end
-             else
-               X=crp2(x(i:i+w-1,:),y(i:i+w-1,:),m,t,e,method,'nonorm','silent');
-             end
+             if ~flag_pdist
+                 if time_scale_flag
+                   if length(x(i:i+w-1,:)) > 2000
+                      X=crp_big(x(i:i+w-1,:),y(i:i+w-1,:),m,t,e,method,'nonorm','silent');
+                   else
+                      X=crp(x(i:i+w-1,:),y(i:i+w-1,:),m,t,e,method,'nonorm','silent');
+                   end
+                 else
+                   X=crp2(x(i:i+w-1,:),y(i:i+w-1,:),m,t,e,method,'nonorm','silent');
+                 end
            %  X=crp(x(i:i+w-1,:),y(i:i+w-1,:),m,t,e,varargin{i_char},'silent');
+           else
+               %%%%%%%%%%%%
+               % alternative using pdist
+
+               xcor = @(x,y) sqrt(sum((repmat(x,size(y,1),1)-y).^2,2));
+
+               x_dist = pdist(x(i:i+w-1,:),xcor);
+               X = squareform(x_dist);
+           end
+           
+           %%%%%%%%%%%%
+           
            warning off 
            if nogui~=2 & ishandle(h1), set(h1,'str',[num2str(i),'/',num2str(Nx-w)]); waitbar(i/(Nx-w)); drawnow, end
 
@@ -1213,12 +1279,20 @@ for i=1:wstep:Nx-w;
          d(find(d<vmin))=[];
 
          errcode=273;
-         RR=sum(X_theiler(:))/(N(1)*N(2));
+         N_all = (N(1)*N(2));
+         % reduce the number of possible states by the Theiler window;
+         % because the Theiler window is applied symmetrically (on the LOI)
+         % we only use N(1) and not N(2)
+         if theiler_window >= 1
+             N_all = N_all - N(1) - 2*((theiler_window-1)*N(1) - sum(1:(theiler_window-1)));
+         end
+         
+         RR=sum(X_theiler(:))/N_all;
          %b(find(b>=max(N)-lmin))=[]; if isempty(b), b=0; end
          if isempty(b), b=0; end
          errcode=274;
-         if sum(sum(X_theiler)) > 0
-           DET=sum(b)/sum(sum(X_theiler));
+         if sum(X_theiler(:)) > 0
+           DET=sum(b)/sum(X_theiler(:));
          else
            DET=NaN;
          end
@@ -1227,7 +1301,7 @@ for i=1:wstep:Nx-w;
          histL=hist(b(:),[1:min(N)]);
          ENTR=entropy(histL(:));
          errcode=276;
-         if sum(d)>0
+         if sum(X_theiler(:))>0
            LAM=sum(d)/sum(sum(X_theiler));
          else
            LAM=NaN;
@@ -1252,6 +1326,30 @@ for i=1:wstep:Nx-w;
          b=[b;0]; Lmax=max(b);
          d=[d;0]; Vmax=max(d);
          
+         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+         %% new measures
+         % RPDE
+         errcode=278;
+         bins = [.5:max(dw)+.5];
+         
+         dwh = histc(dw,bins); dwh = dwh(:);
+         %dwh
+         if max(dw) > 0 && numel(bins) > 3
+            RTE = entropy(dwh) / log(max(dw));
+         else
+            RTE = NaN;
+         end
+        
+         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+         %% network measures
+         % global clustering coefficient
+         errcode=279;
+         kv = sum(X_theiler,1); % degree of nodes
+         Clust = mean(diag(double(X_theiler)*double(X_theiler)*double(X_theiler))' ./ (kv .* (kv-1)));
+         % transitivity
+         denom = sum(sum(double(X_theiler) * double(X_theiler)));
+         Trans = trace(double(X_theiler)*double(X_theiler)*double(X_theiler))/denom;
+         
      end % end plugin
   
      warning on
@@ -1267,18 +1365,22 @@ for i=1:wstep:Nx-w;
      Y(i,8)=Vmax;
      Y(i,9)=t1;
      Y(i,10)=t2;
+     Y(i,11)=RTE;
+     Y(i,12)=Clust;
+     Y(i,13)=Trans;
      if undocumented
-         Y(i,11)=RT;
-         Y(i,12)=RTmax;
-         Y(i,13)=RF;
-         Y(i,14)=ENTW;
+         Y(i,14)=RT;
+         Y(i,15)=RTmax;
+         Y(i,16)=RF;
+         Y(i,17)=ENTW;
+     else
+         Y(i,15)=x_var;
+         Y(i,16)=y_var;
+         Y(i,17)=xy_var;
      end
-     Y(i,15)=x_var;
-     Y(i,16)=y_var;
-     Y(i,17)=xy_var;
  end % end window loop
  
- % significance by bootstrap
+% significance by bootstrap
  
 % nboot = 100; 
 % nD = round(mean(N_hist_l(N_hist_l>0)));
@@ -1330,16 +1432,16 @@ if ~nogui
     set(0,'showhidden','on')
     errcode=30;
     h=findobj('Tag','crqa_Fig'); if ~isempty(h), set(0,'CurrentFigure',h(1)); end
-    tx={'RR';'DET';'L';'ENTR';'LAM';'TT';'T_1';'T_2';'Variance';'Covariance'};
-    index=[1,2,3,5,6,7,9,10,15,16,17];
-    tags={'crqa_axes_RR','crqa_axes_DET','crqa_axes_L','crqa_axes_ENTR','crqa_axes_LAM','crqa_axes_TT','crqa_axes_T1','crqa_axes_T2','crqa_axes_Var','crqa_axes_CoVar'};
+    tx={'RR';'DET';'L';'ENTR';'LAM';'TT';'RTE';'T_2';'Variance';'Covariance'};
+    index=[1,2,3,5,6,7,9,11,15,16,17];
+    tags={'crqa_axes_RR','crqa_axes_DET','crqa_axes_L','crqa_axes_ENTR','crqa_axes_LAM','crqa_axes_TT','crqa_axes_RTE','crqa_axes_T2','crqa_axes_Var','crqa_axes_CoVar'};
     h=findobj('Tag','crqa_axes_RR','Parent',gcf); h_axes.h(1)=h(1);
     h=findobj('Tag','crqa_axes_DET','Parent',gcf); h_axes.h(2)=h(1);
     h=findobj('Tag','crqa_axes_L','Parent',gcf); h_axes.h(3)=h(1);
     h=findobj('Tag','crqa_axes_ENTR','Parent',gcf); h_axes.h(4)=h(1);
     h=findobj('Tag','crqa_axes_LAM','Parent',gcf); h_axes.h(5)=h(1);
     h=findobj('Tag','crqa_axes_TT','Parent',gcf); h_axes.h(6)=h(1);
-    h=findobj('Tag','crqa_axes_T1','Parent',gcf); h_axes.h(7)=h(1);
+    h=findobj('Tag','crqa_axes_RTE','Parent',gcf); h_axes.h(7)=h(1);
     h=findobj('Tag','crqa_axes_T2','Parent',gcf); h_axes.h(8)=h(1);
     h=findobj('Tag','crqa_axes_Var','Parent',gcf); h_axes.h(9)=h(1);
     if ~all(x(:)==y(:)), h=findobj('Tag','crqa_axes_CoVar','Parent',gcf); h_axes.h(10)=h(1); end
@@ -1399,6 +1501,7 @@ end
 %if 0
 catch
   if nogui~=2, if ishandle(hw), close(hw), end , end
+  if nargout, xout = NaN; end
       
   z=whos;x=lasterr;y=lastwarn;in=varargin{1};
   print_error('crqa',z,x,y,in,method,action)

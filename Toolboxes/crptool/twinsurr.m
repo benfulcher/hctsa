@@ -28,15 +28,22 @@ function [y nTw] = twinsurr(varargin)
 %    Twin Surrogates to Test for Complex Synchronisation, 
 %    Europhys. Lett., 75, 2006.
 
-% Copyright (c) 2008 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2008/07/02 12:00:48 $
-% $Revision: 5.2 $
+% $Date: 2009/03/24 08:33:47 $
+% $Revision: 5.4 $
 %
 % $Log: twinsurr.m,v $
-% Revision 5.3  2008/09/24 12:00:48  marwan
+% Revision 5.4  2009/03/24 08:33:47  marwan
+% copyright address changed
+%
+% Revision 5.3  2009/03/17 09:18:17  marwan
 % serious bug fix, zero columns were also considered as twins!
 %
 % Revision 5.2  2008/07/02 12:00:48  marwan

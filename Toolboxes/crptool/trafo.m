@@ -11,14 +11,21 @@ function y=trafo(x,a)
 %             y = trafo(x,0); 
 %             subplot(2,1,2), hist(y,20)   % normally distributed
 
-% Copyright (c) 2001-2002 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2001-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2005/03/16 11:19:02 $
-% $Revision: 2.2 $
+% $Date: 2009/03/24 08:33:47 $
+% $Revision: 2.3 $
 %
 % $Log: trafo.m,v $
+% Revision 2.3  2009/03/24 08:33:47  marwan
+% copyright address changed
+%
 % Revision 2.2  2005/03/16 11:19:02  marwan
 % help text modified
 %

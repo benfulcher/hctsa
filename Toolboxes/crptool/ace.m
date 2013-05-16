@@ -41,14 +41,21 @@ function varargout=ace(x,y,w,ii,oi)
 %
 %    See also: MCF
 
-% Copyright (c) 2001-2003 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2001-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2005/03/16 11:19:02 $
-% $Revision: 1.6 $
+% $Date: 2009/03/24 08:30:23 $
+% $Revision: 1.7 $
 %
 % $Log: ace.m,v $
+% Revision 1.7  2009/03/24 08:30:23  marwan
+% copyright address changed
+%
 % Revision 1.6  2005/03/16 11:19:02  marwan
 % help text modified
 %

@@ -33,14 +33,21 @@ function [tout, Nout] = trackplot(varargin)
 %    Marwan, N., Thiel, M., Nowaczyk, N.: Cross Recurrence Plot Based 
 %    Synchronization of Time Series, Nonlin. Proc. Geophys., 2001.
 
-% Copyright (c) 1998-2005 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 1998-2008
 % Norbert Marwan, Falko Zetsche, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2007/12/20 16:26:06 $
-% $Revision: 4.11 $
+% $Date: 2009/03/24 08:33:47 $
+% $Revision: 4.12 $
 %
 % $Log: trackplot.m,v $
+% Revision 4.12  2009/03/24 08:33:47  marwan
+% copyright address changed
+%
 % Revision 4.11  2007/12/20 16:26:06  marwan
 % changed gpl splash behaviour
 %

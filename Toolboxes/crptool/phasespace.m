@@ -28,14 +28,21 @@ function phasespace(varargin)
 %    Detecting Strange Attractors in Turbulence,
 %    Lecture Notes in Mathematics, 898, Springer, Berlin, 1981
 
-% Copyright (c) 2002-2006 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2002-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2007/12/20 16:26:06 $
-% $Revision: 2.4 $
+% $Date: 2009/03/24 08:34:24 $
+% $Revision: 2.5 $
 %
 % $Log: phasespace.m,v $
+% Revision 2.5  2009/03/24 08:34:24  marwan
+% copyright address changed
+%
 % Revision 2.4  2007/12/20 16:26:06  marwan
 % changed gpl splash behaviour
 %

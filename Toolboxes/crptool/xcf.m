@@ -7,14 +7,21 @@ function [c_out,s_out]=xcf(varargin)
 %
 %    See also COR, COV, XCORR, ACF
 
-% Copyright (c) 2001-2002 by AMRON
+% Copyright (c) 2008-2009
+% Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
+% http://www.pik-potsdam.de
+%
+% Copyright (c) 2001-2008
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2007/12/20 16:26:07 $
-% $Revision: 2.2 $
+% $Date: 2009/03/24 08:33:47 $
+% $Revision: 2.3 $
 %
 % $Log: xcf.m,v $
+% Revision 2.3  2009/03/24 08:33:47  marwan
+% copyright address changed
+%
 % Revision 2.2  2007/12/20 16:26:07  marwan
 % changed gpl splash behaviour
 %
