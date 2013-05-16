@@ -1,0 +1,28 @@
+<html> 
+<head><title>Three point autocorrelation statistic</title></head>
+<body bgcolor="#ffffff">
+<h3>Three point autocorrelation statistic</h3>
+<font color=blue><tt>autocor3 [-d# -D# -l# -x# -c# -h] </tt><em> file(s)</em>
+</font>
+<blockquote>
+   <br> 	<font color=blue><tt> -d  </tt></font>delay one (1)
+   <br> 	<font color=blue><tt> -D  </tt></font>delay two (2x delay one)
+   <br> 	<font color=blue><tt> -l  </tt></font>number of points (whole file)
+   <br> 	<font color=blue><tt> -x  </tt></font>number of values to be skipped (0)
+   <br> 	<font color=blue><tt> -c  </tt></font>column to be read (1 or <font color=blue><em>file</em></font>,#)
+   <br> 	<font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Computes 
+<pre>
+               _         _         _
+        &lt; (y - y)*(y   - y)*(y   - y) &gt;
+            n       n-d       n-D
+       --------------------------------
+                        _ 3
+                &lt; (y  - y)  &gt;
+                    n
+</pre>
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

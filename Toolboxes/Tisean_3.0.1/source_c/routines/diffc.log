@@ -1,0 +1,11 @@
+--- get_multi_series.c	2004-07-23 10:01:25.000000000 +0200
++++ /home/hegger/TISEAN_2.1/source_c/routines/get_multi_series.c	2000-05-26 08:24:44.000000000 +0200
+@@ -135,7 +135,7 @@
+ 	    fprintf(stderr,"Line %lu ignored: %s",allcount,input);
+ 	  break;
+ 	}
+-      if ((count == 0) && (i == *col) && (verbosity&VER_FIRST_LINE)) {
++      if ((verbosity&VER_FIRST_LINE) && (count == 0)) {
+ 	fprintf(stderr,"get_multi_series: first data item(s) used:\n");
+ 	for (i=0;i< *col;i++)
+ 	  fprintf(stderr,"%lf ",x[i][0]);

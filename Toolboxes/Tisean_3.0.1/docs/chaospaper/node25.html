@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Nonlinear noise reduction in a data stream</TITLE>
+<META NAME="description" CONTENT="Nonlinear noise reduction in a data stream">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html324" HREF="node26.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html322" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html318" HREF="node24.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html325" HREF="node26.html">Lyapunov exponents</A>
+<B>Up:</B> <A NAME="tex2html323" HREF="node22.html">Nonlinear noise reduction</A>
+<B> Previous:</B> <A NAME="tex2html319" HREF="node24.html">Locally projective nonlinear noise </A>
+<BR> <P>
+<H2><A NAME="SECTION00063000000000000000">Nonlinear noise reduction in a data stream</A></H2>
+<P>
+<A NAME="subsecnoise_stream">&#160;</A>
+In Ref.&nbsp;[<A HREF="citation.html#Filter">65</A>], a number of modifications of the above procedure have
+been discussed which enable the use of nonlinear projective filtering in a data
+stream. In this case, only points in the past are available for the formation
+of neighborhoods. Therefore the neighbor search strategy has to be modified.
+Since the algorithm is described in detail in Ref.&nbsp;[<A HREF="citation.html#Filter">65</A>], we only give
+an example of its use here. Figure&nbsp;<A HREF="node25.html#figmcgnoise"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> shows the result of
+nonlinear noise reduction on a magneto-cardiogram (see Figs.&nbsp;<A HREF="node6.html#figmcgd"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> 
+and&nbsp;<A HREF="node10.html#figmcg_pc"><IMG  ALIGN=BOTTOM ALT="gif"
+SRC="icons/cross_ref_motif.gif"></A>) with the program
+<tt>noise</tt> (no longer part of TISEAN). The same program has also been
+used successfully for the extraction of the fetal ECG&nbsp;[<A HREF="citation.html#fetal2">66</A>].
+<P>
+<P><blockquote><A NAME="5428">&#160;</A><IMG WIDTH=337 HEIGHT=279 ALIGN=BOTTOM ALT="figure1311" SRC="img100.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figmcgnoise">&#160;</A>
+   Real time nonlinear projective filtering of a magneto-cardiogram time
+   series. The top panel shows the unfiltered data. Bottom: Two iterations were
+   done using projections from <I>m</I>=10 down to <I>q</I>=2 dimensions (delay
+   0.01&nbsp;s). Neighborhoods were limited to a radius of 0.1 units (0.05 in the
+   second iteration) and to maximally 200 points. Neighbors were only sought
+   up to 5&nbsp;s back in time. Thus the first 5&nbsp;s of data are not filtered
+   optimally and are not shown here. Since the output of each iteration leaps
+   behind its input by one delay window the last 0.2&nbsp;s cannot be processed
+   given the data in the upper panel.<BR>
+</blockquote><P><HR><A NAME="tex2html324" HREF="node26.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html322" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html318" HREF="node24.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html325" HREF="node26.html">Lyapunov exponents</A>
+<B>Up:</B> <A NAME="tex2html323" HREF="node22.html">Nonlinear noise reduction</A>
+<B> Previous:</B> <A NAME="tex2html319" HREF="node24.html">Locally projective nonlinear noise </A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

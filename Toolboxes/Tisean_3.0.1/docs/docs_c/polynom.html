@@ -1,0 +1,97 @@
+<html>
+<head>
+<title>
+polynom
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>polynom
+</font>
+</h1>
+<hr>
+This programs models the data making a polynomial ansatz.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>polynom [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#
+<td>embedding dimension
+<td>2
+</tr>
+<tr>
+<th>-d#
+<td>delay
+<td>1
+</tr>
+<tr>
+<th>-p#
+<td>order of the polynomial
+<td>2
+</tr>
+<tr>
+<th>-n#
+<td>number of points for the fit;<br>The other points are used to
+estimate the out of sample error
+<td>number of data
+</tr>
+<tr>
+<th>-L#
+<td>determines the length of the predicted series
+<td>none
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>; without -o default is used
+<td>'datafile'.pol
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The output file contains: The coefficients of the model, the forecast
+errors and if the -L flag was set the predicted points.
+<hr>
+View the <a href="../../source_c/polynom.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

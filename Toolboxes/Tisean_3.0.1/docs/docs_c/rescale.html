@@ -1,0 +1,101 @@
+<html>
+<head>
+<title>
+rescale
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>rescale</font>
+</h1>
+<hr>
+This program takes a possibly multivariate time series and rescales it
+to either a desired interval or to have average zero and/or variance 1.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>rescale [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>ignore the first # rows
+<td>0
+</tr>
+<tr>
+<th>-m#
+<td># of components to read
+<td>1
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>columns to be read</a>
+<td>1,...,# of components
+</tr>
+<tr>
+<th>-z#
+<td>Minimum of the rescaled series
+<td>0
+</tr>
+<tr>
+<th>-Z#
+<td>Maximum of the rescaled series
+<td>1
+</tr>
+<tr>
+<th>-a
+<td>subtract the average (overwrites -Z and -z)
+<td> not set
+</tr>
+<tr>
+<th>-v
+<td>set the variance to 1 (overwrites -Z and -z)
+<td>not set
+</tr>
+<tr>
+<th>-o[#]
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.res<br>
+(or stdin.res if stdin was read)<br>
+If no -o is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td> none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output</h2>
+The rescaled time series.
+<hr>
+View the <a href="../../source_c/rescale.c">C source</a>.
+<hr>
+See also <a href="../docs_f/rms.html">rms</a> 
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>
+

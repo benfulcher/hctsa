@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Iterative Fourier transform method</TITLE>
+<META NAME="description" CONTENT="Iterative Fourier transform method">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html450" HREF="node38.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html448" HREF="node35.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html442" HREF="node36.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html451" HREF="node38.html">General constrained randomization</A>
+<B>Up:</B> <A NAME="tex2html449" HREF="node35.html">Testing for nonlinearity</A>
+<B> Previous:</B> <A NAME="tex2html443" HREF="node36.html">The concept of surrogate </A>
+<BR> <P>
+<H2><A NAME="SECTION00092000000000000000">Iterative Fourier transform method</A></H2>
+<P>
+Very few real time series which are suspected to show nonlinearity follow a
+Gaussian single time distribution. Non-Gaussianity is the simplest kind of
+nonlinear signature but it may have a trivial reason: The data may have been
+distorted in the measurement process. Thus a possible null hypothesis would be
+that there is a stationary Gaussian linear stochastic process that generates a
+sequence <IMG WIDTH=32 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7961" SRC="img176.gif">, but the actual observations are <IMG WIDTH=73 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7963" SRC="img177.gif"> where
+<IMG WIDTH=22 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6547" SRC="img13.gif"> is a monotonic function. Constrained realizations of this null
+hypothesis would require the generation of random sequences with the same power
+spectrum (fully specifying the linear process) and the same single time
+distribution (specifying the effect of the measurement function) as the
+observed data. The <B>A</B>mplitude <B>A</B>djusted <B>F</B>ourier <B>T</B>ransform
+(AAFT) method proposed in&nbsp;[<A HREF="citation.html#theiler1">82</A>] attempts to invert the measurement
+function <IMG WIDTH=22 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6547" SRC="img13.gif"> by rescaling the data to a Gaussian distribution. Then
+the Fourier phases are randomized and the rescaling is inverted. As discussed
+in&nbsp;[<A HREF="citation.html#surrowe">83</A>], this procedure is biased towards a flatter spectrum since
+the inverse of <IMG WIDTH=22 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6547" SRC="img13.gif"> is not available exactly. In the same reference,
+a scheme is introduced that removes this bias by iteratively adjusting the
+spectrum and the distribution of the surrogates. Alternatingly, the surrogates
+are rescaled to the exact values taken by the data and then the Fourier
+transform is brought to the exact amplitudes obtained from the data.
+The discrepancy between both steps either converges to zero with the number
+of iterations or to a finite inaccuracy which decreases with the length of the
+time series. The program <a href="../docs_f/surrogates.html">surrogates</a> performs iterations until no further
+improvement can be made. The last two stages are returned, one having the exact
+Fourier amplitudes and one taking on the same values as the data. For not too 
+exotic data these two versions should be almost identical. The relative
+discrepancy is also printed.
+<P>
+<P><blockquote><A NAME="6024">&#160;</A><IMG WIDTH=214 HEIGHT=489 ALIGN=BOTTOM ALT="figure1881" SRC="img175.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figb_s">&#160;</A>
+   Upper: The human breath rate data from Fig.&nbsp;<A HREF="node23.html#figb"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>. Lower:
+   the noise component extracted by the noise reduction scheme has been
+   randomized in order to destroy correlations with the signal. The result 
+   appears slightly but significantly less structured than the original.<BR>
+</blockquote><P>
+In Fig.&nbsp;<A HREF="node37.html#figb_s"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> we used this procedure to assess the hypothesis that 
+the noise reduction on the breath data reported in Fig.&nbsp;<A HREF="node23.html#figb"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> removed 
+an additive noise component which was independent of the signal. If the
+hypothesis were true, we could equally well add back on the noise sequence
+or a randomized version of it which lacks any correlations to the signal.
+In the upper panel of Fig.&nbsp;<A HREF="node37.html#figb_s"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> we show the original data. In the
+lower panel we took the noise reduced version (c.f.&nbsp;Fig.&nbsp;<A HREF="node23.html#figb"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>, bottom)
+and added a surrogate of the supposed noise sequence. The result is similar but
+still significantly different from the original to make the additivity
+assumption implausible.
+<P>
+Fourier based randomization schemes suffer from some caveats due to the the
+inherent assumption that the data constitutes one period of a periodic signal,
+which is not what we really expect. The possible artefacts are discussed for
+example in&nbsp;[<A HREF="citation.html#theiler_sfi">84</A>] and can, in summary, lead to spurious rejection
+of the null hypothesis. One precaution that should be taken when using
+<a href="../docs_f/surrogates.html">surrogates</a> is to make sure that the beginning and the end of the data
+approximately match in value and phase. Then, the periodicity assumption is not
+too far wrong and harmless. Usually, this amounts to the loss of a few points
+of the series. One should note, however, that the routine may truncate the data
+by a few points itself in order to be able to perform a <EM>fast</EM> Fourier
+transform which requires the number of points to be factorizable by small prime
+factors.
+<P><HR><A NAME="tex2html450" HREF="node38.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html448" HREF="node35.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html442" HREF="node36.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html451" HREF="node38.html">General constrained randomization</A>
+<B>Up:</B> <A NAME="tex2html449" HREF="node35.html">Testing for nonlinearity</A>
+<B> Previous:</B> <A NAME="tex2html443" HREF="node36.html">The concept of surrogate </A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

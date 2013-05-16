@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Global function fits</TITLE>
+<META NAME="description" CONTENT="Global function fits">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html283" HREF="node22.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html281" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html277" HREF="node20.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html284" HREF="node22.html">Nonlinear noise reduction</A>
+<B>Up:</B> <A NAME="tex2html282" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html278" HREF="node20.html">Locally linear prediction</A>
+<BR> <P>
+<H2><A NAME="SECTION00055000000000000000">Global function fits</A></H2>
+<P>
+The local linear fits are very flexible, but can go wrong on parts of the
+phase space where the points do not span the available space dimensions and
+where the inverse of the matrix involved in the solution of the minimization
+does not exist.  Moreover, very often a large set of different linear maps is
+unsatisfying. Therefore many authors suggested to fit global nonlinear
+functions to the data, i.e. to solve
+<BR><A NAME="eqpredictglobal">&#160;</A><IMG WIDTH=500 HEIGHT=33 ALIGN=BOTTOM ALT="equation5013" SRC="img67.gif"><BR>
+where <IMG WIDTH=14 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline7063" SRC="img68.gif"> is now a nonlinear function in closed form with parameters <I>p</I>,
+with respect to which the minimization is done. Polynomials, radial basis
+functions, neural nets, orthogonal polynomials, and many other approaches have
+been used for this purpose. The results depend on how far the chosen ansatz
+<IMG WIDTH=14 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline7063" SRC="img68.gif"> is suited to model the unknown nonlinear function, and on how well the
+data are deterministic at all. We included the routines <a
+href="../docs_c/rbf.html">rbf</a> and <a href="../docs_c/polynom.html">polynom</a>
+in the TISEAN package, where <IMG WIDTH=14 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline7063" SRC="img68.gif"> is modeled by radial basis
+functions&nbsp;[<A HREF="citation.html#rbf">54</A>, <A HREF="citation.html#lenny_rbf">55</A>] and polynomials&nbsp;[<A HREF="citation.html#Casdagli_pred">56</A>],
+respectively. The advantage of these two models is that the parameters <I>p</I>
+occur linearly in the function <I>f</I> and can thus be determined by simple linear algebra, and the solution is unique. Both features are lost for
+models where the parameters enter nonlinearly.
+<P>
+In order to make global nonlinear predictions, one has to supply the embedding
+dimension and time delay as usual. Further, for <a href="../docs_c/polynom.html">polynom</a> the order of the
+polynomial has to be given. The program returns the coefficients of the model.
+In <a href="../docs_c/rbf.html">rbf</a> one has to specify the number of basis functions to be distributed
+on the data.  The width of the radial basis functions (Lorentzians in our
+program) is another parameter, but since the minimization is so fast, the
+program runs many trial values and returns parameters for the
+best. Figure&nbsp;<A HREF="node21.html#figpredictINOrbf"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> shows the result of a fit to the CO<IMG WIDTH=6 HEIGHT=11 ALIGN=MIDDLE ALT="tex2html_wrap_inline6701" SRC="img39.gif">
+laser time series (Fig.&nbsp;<A HREF="node11.html#figdelayPoincare"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) with radial basis functions.
+<P>
+<P><blockquote><A NAME="5085">&#160;</A><IMG WIDTH=235 HEIGHT=223 ALIGN=BOTTOM ALT="figure948" SRC="img69.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figpredictINOrbf">&#160;</A>
+   Attractor obtained by iterating the model that has been obtained by a fit 
+   with 40 radial basis functions in two dimensions to the time series
+   shown in Fig.&nbsp;<A HREF="node11.html#figdelayPoincare"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>. Compare also 
+   Fig.&nbsp;<A HREF="node20.html#figpredictINOnstep"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>.<BR>
+</blockquote><P>
+<P>
+If global models are desired in order to infer the structure and properties of
+the underlying system, they should be tested by iterating them. The prediction
+errors, although small in size, could be systematic and thus repel the
+iterated trajectory from the range where the original data are located.  It
+can be useful to study a dependence of the size or the sign of the prediction
+errors on the position in the embedding space, since systematic errors can be
+reduced by a different model.  Global models are attractive because they yield
+closed expressions for the full dynamics. One must not forget, however, that
+these models describe the observed process only in regions of the space which
+have been visited by the data. Outside this area, the shape of the model
+depends exclusively on the chosen ansatz. In particular, polynomials diverge
+outside the range of the data and hence can be unstable under iteration.
+<P>
+<HR><A NAME="tex2html283" HREF="node22.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html281" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html277" HREF="node20.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html284" HREF="node22.html">Nonlinear noise reduction</A>
+<B>Up:</B> <A NAME="tex2html282" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html278" HREF="node20.html">Locally linear prediction</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

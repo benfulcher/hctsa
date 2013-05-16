@@ -1,0 +1,135 @@
+<html>
+<head>
+<title>
+Correlation dimension (scalar data)
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: 
+<font color=Blue>
+d2
+</font>
+</h1>
+<hr>
+This program estimates the correlation sum, the correlation dimension and
+the correlation entropy of a given scalar data set. It uses the box
+assisted search algorithm and is quite fast as long as one is not interested
+in large length scales. All length scales are computed simultaneously and
+the output is written every 2 min (real time not cpu time). It is possible
+to set a maximum number of pairs. If this number is reached for a given
+length scale, the length scale will no longer be treated for the rest
+of the estimate.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>d2 [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data points to be used
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td>column to read
+<td>1
+</tr>
+<tr>
+<th>-d#
+<td>delay for the delay vectors
+<td>1
+</tr>
+<tr>
+<th>-M#
+<td>maximal embedding dimension
+<td>10
+</tr>
+<tr>
+<th>-t#
+<td>theiler window
+<td>0
+</tr>
+<tr>
+<th>-E#
+<td>maximal length scale 
+<td>1 (data are rescaled to [0:1])
+</tr>
+<tr>
+<th>-e#
+<td>minimal length scale
+<td>1e-3
+</tr>
+<tr>
+<th>-##
+<td>number of epsilon values
+<td>100
+</tr>
+<tr>
+<th>-N#
+<td>maximal number of pairs to be used <br>
+(0 means all possible pairs)
+<td>1000
+</tr>
+<tr>
+<th>-o[#]
+<td> name of the output files (without extensions)
+<td> 'datafile'[.c2][.d2][.h2][.stat]<br>
+(or if data were read from stdin: stdin[.c2][.d2][.h2][.stat])
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The files with the extensions c2, d2 and h2 contain for each embedding
+dimension (from 1 to <font color=blue>M</font>) and each epsilon value
+three columns:<br>
+<b>first column:</b> epsilon (in natural units)<br>
+<b>second column:</b> the estimated quantity (correlation sum, dimension,
+entropy)<br>
+<b>third column:</b> epsilon (in rescaled units)<br>.
+<ul>
+<li><b>extension .c2</b>: This file contains the correlation 
+sums for all treated length scales and embedding dimensions.
+<li><b>extension .d2</b>: This file contains the local slopes of the logarithm
+of the correlation sum, the correlation dimension.
+<li><b>extension .h2</b>: This file contains the correlation entropies.
+<li><b>extension .stat</b>: This file shows the current status of the
+estimate. 
+</ul>
+The output is written every two minutes (real time not cputime). So,
+you can see preliminary results even if the program is still running.
+Post-processing can be done using the program <a href="av-d2.html">av-d2</a>,
+but also <a href="../wuppertal/c2d.html">c2d</a>, 
+<a href="../wuppertal/c2t.html">c2t</a>, and
+<a href="../wuppertal/c2g.html">c2g</a>.
+<hr>
+View the <a href="../../source_c/d2.c">C-source</a>.
+<hr>
+See also <a href="../wuppertal/c2.html">c2</a>, <a
+href="../wuppertal/c2naive.html">c2naive</a>, and 
+<a href="../wuppertal/c1.html">c1</a> 
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

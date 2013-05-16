@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Annealed surrogates</TITLE>
+<META NAME="description" CONTENT="Annealed surrogates">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html426" HREF="node36.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html424" HREF="node32.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html420" HREF="node34.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html427" HREF="node36.html">References</A>
+<B>Up:</B> <A NAME="tex2html425" HREF="node32.html">The TISEAN implementation</A>
+<B> Previous:</B> <A NAME="tex2html421" HREF="node34.html">Iterative FFT surrogates</A>
+<BR> <P>
+<H2><A NAME="SECTION000103000000000000000">Annealed surrogates</A></H2>
+<P>
+For cases where the iterative scheme does not reach the necessary accuracy, or
+whenever a more general null hypothesis is considered, the TISEAN package
+offers an implementation of the constrained randomisation algorithm using a
+cost function minimised by simulated annealing, as introduced in
+Ref.&nbsp;[<A HREF="node36.html#anneal">26</A>] and described in Sec.&nbsp;<A HREF="node16.html#secanneal">5</A>. Since one of the
+main advantages of the approach is its flexibility, the implementation more
+resembles a toolbox than a single program. The main driving routine <TT>
+randomize</TT> takes care of the data input and output and operates the simulated
+annealing procedure.  It must be linked together with modules that implement a
+cooling schedule, a cost function, and a permutation scheme. Within TISEAN,
+several choices for each of these are already implemented but it is relatively
+easy to add individual variants or completely different cost functions, cooling
+or permutation schemes. With the development structure provided, the final
+executables will then have names reflecting the components linked together, in
+the form <font color=blue><TT>randomize_</TT><I>A</I>_<I>B</I>_<I>C</I></font>,
+where <I>A</I> is a cost function module,
+<I>B</I> a cooling scheme, and <I>C</I> a permutation scheme.
+<P>
+Currently, two permutation schemes are implemented. In general, one will use a
+scheme <a href="../docs_f/randomize_perm.html">random</a> that selects a pair at random. It is, however, possible to
+specify a list of points to be excluded from the permutations. This is useful
+when the time series contains artifacts or some data points are missing and
+have been replaced by dummy values. It is planned to add a
+temperature-sensitive scheme that selects pairs close in magnitude at low
+temperatures.  For certain cost functions (e.g. the spike train spectrum), an
+update can only be carried out efficiently if two consecutive points are
+exchanged. This is implemented in an alternative permutation scheme <a href="../docs_f/randomize_perm.html">event</a>.
+<P>
+The only cooling scheme supported in the present version of TISEAN (2.0) is
+exponential cooling (<a href="../docs_f/randomize_cool.html">exp</a>). This means that whenever a certain condition
+is reached, the temperature is multiplied by a factor <IMG WIDTH=38 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2526" SRC="img206.gif">. Apart from
+<IMG WIDTH=10 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline1914" SRC="img7.gif"> and the initial temperature <IMG WIDTH=15 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline2530" SRC="img207.gif">, two important parameters control
+the cooling schedule. Cooling is performed either if a maximal total number of
+trials <IMG WIDTH=34 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2532" SRC="img208.gif"> is exceeded, or if a maximal number
+<IMG WIDTH=31 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2534" SRC="img209.gif"> of trials has been successfull since the last
+cooling. Finally, a minimal number of successes <IMG WIDTH=30 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2536" SRC="img210.gif"> can be
+specified below which the procedure is considered to be ``stuck''. All these
+parameters can be specified explicitly.  However, it is sometimes very
+difficult to derive reasonable values except by trial and error. Slow cooling
+is necessary if the desired accuracy of the constraint is high.  It seems
+reasonable to increase <IMG WIDTH=31 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2534" SRC="img209.gif"> and <IMG WIDTH=34 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2532" SRC="img208.gif">
+with the system size, but also with the number of constraints incorporated in
+the cost function. It can be convenient to use an automatic scheme that starts
+with fast parameter settings and re-starts the procedure with slower settings
+whenever it gets stuck, until a desired accuracy is reached. The initial
+temperature can be selected automatically using the following algorithm.  Start
+with an arbitrary small initial temperature. Let the system evolve for
+<IMG WIDTH=34 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2532" SRC="img208.gif"> steps (or <IMG WIDTH=31 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2534" SRC="img209.gif"> successes). If
+less than 2/3 of the trials were successes, increase the initial temperature by
+a factor of ten to ``melt'' the system. This procedure is repeated until more
+than 2/3 successes are reached. This ensures that we start with a temperature
+that is high enough to leave all false minima. If the automatic scheme gets
+stuck (the low temperature allows too few changes to take place), it re-starts
+at the determined melting temperature. At the same time, the cooling rate is
+decreased by <IMG WIDTH=59 HEIGHT=27 ALIGN=MIDDLE ALT="tex2html_wrap_inline2546" SRC="img211.gif">, and <IMG WIDTH=119 HEIGHT=30 ALIGN=MIDDLE ALT="tex2html_wrap_inline2548" SRC="img212.gif">.  We suggest to create one surrogate with
+the automatic scheme and then use the final values of <IMG WIDTH=15 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline2530" SRC="img207.gif">, <IMG WIDTH=10 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline1914" SRC="img7.gif"> and
+<IMG WIDTH=34 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2532" SRC="img208.gif"> for subsequent runs. Of course, other more
+sophisticated cooling schemes may be suitable depending on the specific
+situation. The reader is referred to the standard literature&nbsp;[<A HREF="node36.html#annealbook">38</A>].
+<P>
+Several cost functions are currently implemented in TISEAN. Each of them is of
+the general form (<A HREF="node17.html#eqE">22</A>) and the constraints can be matched
+in either the <IMG WIDTH=16 HEIGHT=14 ALIGN=BOTTOM ALT="tex2html_wrap_inline2112" SRC="img86.gif">, <IMG WIDTH=17 HEIGHT=14 ALIGN=BOTTOM ALT="tex2html_wrap_inline2108" SRC="img85.gif">, or the <IMG WIDTH=23 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline2560" SRC="img213.gif"> (or maximum) norms.
+In the <IMG WIDTH=16 HEIGHT=14 ALIGN=BOTTOM ALT="tex2html_wrap_inline2112" SRC="img86.gif"> and <IMG WIDTH=17 HEIGHT=14 ALIGN=BOTTOM ALT="tex2html_wrap_inline2108" SRC="img85.gif"> norms, autocorrelations are weighted by
+<IMG WIDTH=64 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2566" SRC="img214.gif"> and frequencies by <IMG WIDTH=68 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2568" SRC="img215.gif">.
+<P>
+Autocorrelations (<a href="../docs_f/randomize_auto.html">auto</a>, or a periodic version <a href="../docs_f/randomize_auto.html#autop">autop</a>) are the most
+common constraints available. Apart from the type of
+average, one has to specify the maximal lag <IMG WIDTH=29 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline2128" SRC="img92.gif"> (see
+e.g. Eq.(<A HREF="node17.html#eqcost">23</A>)). This can save a substantial fraction of the
+computation time if only short range correlations are present.  For each
+update, only <IMG WIDTH=54 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2572" SRC="img216.gif"> terms have to be updated.
+<P>
+For unevenly sampled data (see Sec.&nbsp;<A HREF="node25.html#secuneven">6.3</A>), the cost function <TT>
+uneven</TT> implements binned autocorrelations as defined by
+Eq.(<A HREF="node25.html#eqcdelta">26</A>). The update of the histogram at each annealing step takes
+a number of steps proportional to the number of bins. The user has to specify
+the bin size <IMG WIDTH=12 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline2330" SRC="img140.gif"> and the total lag time covered contiguously by the bins.
+<P>
+For surrogate spike trains, either the spike train peridogram
+Eq.(<A HREF="node26.html#eqspower">28</A>) or binned correlations Eq.(<A HREF="node26.html#eqcspike">29</A>) can be used.
+In the former case, the cost function is coded in <TT>spikespec</TT>.  The user
+has to give the total number of frequencies and the frequency
+resolution. Internally, the event times <IMG WIDTH=13 HEIGHT=20 ALIGN=MIDDLE ALT="tex2html_wrap_inline2576" SRC="img217.gif"> are used. A computationally
+feasible update is only possible if two consecutive intervals <IMG WIDTH=62 HEIGHT=18 ALIGN=MIDDLE ALT="tex2html_wrap_inline2578" SRC="img218.gif"> and
+<IMG WIDTH=63 HEIGHT=21 ALIGN=MIDDLE ALT="tex2html_wrap_inline2580" SRC="img219.gif"> are exchanged by <IMG WIDTH=153 HEIGHT=21 ALIGN=MIDDLE ALT="tex2html_wrap_inline2582" SRC="img220.gif"> (done by the
+permutation scheme <TT>event</TT>).  As a consequence, coverage of permutation
+space is quite inefficient. With binned autocorrelations <TT>spikeauto</TT>,
+intervals are kept internally and any two intervals may be swapped, using the
+standard permutation scheme <TT>random</TT>.
+<P>
+The documentation distributed with the TISEAN package describes how to add
+further cost functions. Essentially, one needs to provide cost function
+specific option parsing and input/output functions, a module that computes the
+full cost function and one that performs an update upon permutation. The latter
+should be coded very carefully. First it is the single spot that uses most of
+the computation time and second, it must keep the cost function consistent for
+all possible permutations. It is advisable to make extensive tests against
+freshly computed cost functions before entering production.
+<P>
+In future releases of TISEAN, it is planned to include routines for cross
+correlations in mutivariate data, multivariate spike trains, and mixed signals.
+We hope that users take the present modular implementation as a starting point
+for the implementation of other null hypotheses.
+<P>
+<HR><A NAME="tex2html426" HREF="node36.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html424" HREF="node32.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html420" HREF="node34.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html427" HREF="node36.html">References</A>
+<B>Up:</B> <A NAME="tex2html425" HREF="node32.html">The TISEAN implementation</A>
+<B> Previous:</B> <A NAME="tex2html421" HREF="node34.html">Iterative FFT surrogates</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

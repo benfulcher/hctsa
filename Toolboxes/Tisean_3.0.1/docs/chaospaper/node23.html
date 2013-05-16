@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Simple nonlinear noise reduction</TITLE>
+<META NAME="description" CONTENT="Simple nonlinear noise reduction">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html306" HREF="node24.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html304" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html298" HREF="node22.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html307" HREF="node24.html">Locally projective nonlinear noise </A>
+<B>Up:</B> <A NAME="tex2html305" HREF="node22.html">Nonlinear noise reduction</A>
+<B> Previous:</B> <A NAME="tex2html299" HREF="node22.html">Nonlinear noise reduction</A>
+<BR> <P>
+<H2><A NAME="SECTION00061000000000000000">Simple nonlinear noise reduction</A></H2>
+<P>
+The simplest nonlinear noise reduction algorithm we know of replaces
+the central coordinate of each embedding vector by the local average of this
+coordinate. This amounts to a locally constant approximation of the dynamics
+and is based on the assumption that the dynamics is continuous. The algorithm
+is described in&nbsp;[<A HREF="citation.html#lazy">59</A>], a similar approach is proposed in&nbsp;[<A HREF="citation.html#Arkady">43</A>].
+In an unstable, for example chaotic, system, it is essential not to replace 
+the first and last coordinates of the embedding vectors by local averages.
+Due to the instability, initial errors in these coordinates are magnified
+instead of being averaged out.
+<P>
+This noise reduction scheme is implemented quite easily. First an embedding
+has to be chosen. Except for extremely oversampled data, it is advantageous to
+choose a short time delay. The program <a href="../docs_f/lazy.html">lazy</a> always uses unit delay.  The
+embedding dimension <I>m</I> should be chosen somewhat higher than that required by
+the embedding theorems. Then for each embedding vector <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6675" SRC="img35.gif">, a
+neighborhood <IMG WIDTH=28 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline7109" SRC="img70.gif"> is formed in phase space containing
+all points <IMG WIDTH=34 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7111" SRC="img71.gif"> such that <IMG WIDTH=97 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7113" SRC="img72.gif">. The
+radius of the neighborhoods <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif"> should be taken large enough in order
+to cover the noise extent, but still smaller than a typical curvature radius.
+These conditions cannot always be fulfilled simultaneously, in which case one
+has to repeat the process with several choices and carefully evaluate the
+results. If the noise level is substantially smaller than the typical radius
+of curvature, neighborhoods of radius about 2-3 times the noise level gave the
+best results with artificial data. For each embedding vector
+<IMG WIDTH=163 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline7117" SRC="img73.gif"> (the delay time has been set to unity), a
+corrected middle coordinate <IMG WIDTH=48 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline7119" SRC="img74.gif"> is computed by averaging over
+the neighborhood <IMG WIDTH=28 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline7109" SRC="img70.gif">:
+<BR><A NAME="eqlazy">&#160;</A><IMG WIDTH=500 HEIGHT=48 ALIGN=BOTTOM ALT="equation5091" SRC="img75.gif"><BR>
+After one complete sweep through the time series, all measurements <IMG WIDTH=14 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6689" SRC="img37.gif"> are
+replaced by the corrected values <IMG WIDTH=14 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7125" SRC="img76.gif">. Of course, for the first and last
+(<I>m</I>-1)/2 points (if <I>m</I> is odd), no correction is available. The average
+correction can be taken as a new neighborhood radius for the next iteration.
+Note that the neighborhood of each point at least contains the point itself.
+If that is the only member, the average Eq.(<A HREF="node23.html#eqlazy"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) is simply the
+uncorrected measurement and no change is made. Thus one can safely perform
+multiple iterations with decreasing values of <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif"> until no further
+change is made.
+<P>
+Let us illustrate the use of this scheme with an example, a recording of the
+air flow through the nose of a human as an indicator of breath
+activity. (The
+data is part of data set B of the Santa Fe time series contest held in
+1991/92&nbsp;[<A HREF="citation.html#SFI">17</A>], see Rigney et al.&nbsp;[<A HREF="citation.html#b.dat">60</A>] for a description.)
+The result of simple nonlinear noise reduction is shown in Fig.&nbsp;<A HREF="node23.html#figb"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>.
+<P>
+<P><blockquote><A NAME="5218">&#160;</A><IMG WIDTH=214 HEIGHT=489 ALIGN=BOTTOM ALT="figure1024" SRC="img77.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figb">&#160;</A>
+  Simple nonlinear noise reduction of human breath rate data. Three iterations
+  have been carried out, staring with neighborhoods of size 0.4&nbsp;units.
+  Embeddings in 7 dimensions at unit delay have been used. Arguably, the
+  resulting series (lower panel) is less noisy. However, in
+  Sec.&nbsp;<A HREF="node35.html#secsurro"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> we will show evidence that the noise is not just
+  additive and independent of the signal. <BR>
+</blockquote><P><HR><A NAME="tex2html306" HREF="node24.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html304" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html298" HREF="node22.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html307" HREF="node24.html">Locally projective nonlinear noise </A>
+<B>Up:</B> <A NAME="tex2html305" HREF="node22.html">Nonlinear noise reduction</A>
+<B> Previous:</B> <A NAME="tex2html299" HREF="node22.html">Nonlinear noise reduction</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

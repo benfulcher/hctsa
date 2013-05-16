@@ -1,0 +1,165 @@
+<html> 
+<head><title>Custom constraints</title></head>
+<body bgcolor="#ffffff">
+<h3>Custom constraints</h3>
+
+This page describes how to extend the set of modules that implement
+constraints, cooling schemes, and permutation schemes for annealed surrogates.
+I have tried to keep everything as modular as possible with FORTRAN. Therefore,
+it seems extremely unlikely that, when you supply a new module for any one of
+the three tasks, you might want to change any of the others, or even the main
+module, <font color=blue><tt>randomize.f</tt></font>.  Experts in simulated
+annealing are likely to know better cooling and permutation schemes than those
+available in this package. Experts, however, are likely to figure out how to
+provide these and I will therefore concentrate on the implementation of other
+cost functions.
+<p>
+If you want to supply any changed or new modules, here is the recommended 
+sequence of actions. 
+<ul>
+<li>Choose a new name for the module and place the source in the appropriate 
+    directory (<font color=blue><tt>cost</tt></font>,
+    <font color=blue><tt>cool</tt>, or 
+    </font><font color=blue><tt>perm</tt></font>)
+<li>Add a line for the target <font color=blue><tt>all:</tt></font> 
+    to the <font color=blue><tt>Makefile</tt></font> in the
+    directory <font color=blue><tt>randomize</tt></font>
+<li>Create the new executable by running <font color=blue><tt>make</tt></font>
+</ul>
+For example, you could start from <font
+color=blue><tt>cost/auto.f</tt></font> by adding or deleting constraints and
+then name the source <font color=blue><tt>cost/mycost.f</tt></font> Then add
+the line 
+<blockquote><font color=blue><tt>$(TEMPLATE) COST=mycost COOL=exp PERM=rand
+$(XFLAGS)</tt></font> 
+</blockquote>
+to <font color=blue><tt>Makefile</tt></font> and run
+<font color=blue><tt>make</tt></font>.
+<p>
+<hr>
+<p>
+
+<h4>Cost function entry points</h4>
+In order for the modularity to work, the subroutine calls must be kept
+identical through all constraint/cost function modules. This means that any
+additional information has to be exchanged and stored by means of common
+blocks. The blank common block
+<br><font color=blue><tt>common nmax,cost,temp,cmin,rate,x</tt></font>
+<br>contains some useful items which are likely to be needed by the
+modules. These are the number <tt>nmax</tt> of data points, the current cost
+<tt>cost</tt>, the current temperature <tt>temp</tt>, the minimal cost
+<tt>cmin</tt>, the current rate of acceptance <tt>rate</tt> and the data set
+as a real array <tt>x</tt>. Note that  <tt>x</tt> needs to be of fixed length
+syntactically, but since it is the last item of the common block, this is not
+essential as long as it is declared large enough to store <tt>nmax</tt> items.
+<p>
+The following entry points must be provided:
+<p>
+<font color=blue><tt>subroutine opts_cost(ncol)</tt></font>
+<blockquote>
+Scans the command line for options specific to the cost function. Set <font
+color=blue><tt>ncol</tt></font> to the number of columns needed from the input
+file. On input, it is set to what is deduced from the
+<font color=blue><tt> -c </tt></font> and <font color=blue><tt> -m </tt></font>
+options.
+
+<p><font color=red><b>Example: </b></font> 
+   in <font color=blue><tt>cost/auto.f</tt></font> the number of desired lags
+   is determined from the command line option 
+   <font color=blue><tt> -D </tt></font> and stored as an item in a common
+   block to be available for the actual cost function. Similarly the option
+   <font color=blue><tt> -W </tt></font> is scanned for the desired weighting.
+</blockquote>
+
+<p>
+<font color=blue><tt>subroutine what_cost()</tt></font>
+<blockquote>
+Just prints a line saying which cost function is implemented.
+</blockquote>
+
+<p>
+<font color=blue><tt>subroutine usage_cost()</tt></font>
+<blockquote>
+Prints that part of the usage message specific to the cost function, in
+particular maybe explaining the command line options.
+</blockquote>
+
+<p>
+<font color=blue><tt>subroutine cost_init()</tt></font>
+<blockquote>
+Does all necessary initializations of the cost function. In particular, the
+goal value of some quantities, typically derived from the original time series,
+can be set. 
+<p><font color=red><b>Example: </b></font> 
+   in <font color=blue><tt>cost/auto.f</tt></font> the number of lags is
+   truncated to fit into the available space. Then the autocorrelation function
+   of the data (<tt>x</tt> in the blank common block) is computed and stored as
+   an array <tt>c0</tt> in the common block <tt>/costcom/</tt> for later use.
+</blockquote>
+<p>
+
+<p>
+<font color=blue><tt>subroutine cost_transform(nmax,mcmax,nxdum,x)</tt></font>
+<blockquote>
+Does any initial transformation on the data. The data length <font
+color=blue><tt>nmax</tt></font>, the number of columns <font
+color=blue><tt>mcmax</tt></font>, and the first dimension <font
+color=blue><tt>nxdum</tt></font> is provided in case that is needed.  Finally,
+<font color=blue><tt>x</tt></font> is the data.
+
+<p><font color=red><b>Example: </b></font> 
+   in <font color=blue><tt>cost/auto.f</tt></font> the data is normalized to
+   zero mean and unit variance, mean and variance are stored.
+</blockquote>
+
+<p>
+<font color=blue><tt>subroutine cost_inverse(nmax,mcmax,nxdum,x,y)</tt></font>
+<blockquote>
+Inverts any initial transformation on the data. The data length <font
+color=blue><tt>nmax</tt></font>, the number of columns <font
+color=blue><tt>mcmax</tt></font>, and the first dimension <font
+color=blue><tt>nxdum</tt></font> is provided in case that is needed.  Finally,
+<font color=blue><tt>x</tt></font> is the data and <font
+color=blue><tt>y</tt></font> a back transformed copy.
+
+<p><font color=red><b>Example: </b></font> 
+   in <font color=blue><tt>cost/auto.f</tt></font> the data is restored to its
+   original mean and variance.
+</blockquote>
+
+<p>
+<font color=blue><tt>subroutine cost_full(iv)</tt></font>
+<blockquote>
+Determines the value of the cost function given a configuration <tt>x</tt>.
+A nonzero value <tt>iv</tt> indicates that diagnostic output is desired.
+<p><font color=red><b>Example: </b></font> 
+   in <font color=blue><tt>cost/auto.f</tt></font> the autocorrelation function
+   of the data is computed and averaged to yield the total cost, which is
+   returned by the function.
+</blockquote>
+
+<p>
+<font color=blue><tt>subroutine cost_update(n1,n2,cmax,iaccept,iv)</tt></font>
+<blockquote>
+Determines the value of the cost function when the data items <tt>n1</tt> and
+<tt>n2</tt> are exchanged. If the resulting cost is less than <tt>cmax</tt>,
+the change is accepted. In that case, <tt>iaccept</tt> is set to one. The new
+cost is stored in the blank common blok. On nonacceptance, its value is left
+unchanged. A nonzero value <tt>iv</tt> indicates that diagnostic output is
+desired.  
+<p><font color=red><b>Example: </b></font> 
+   it is important to note that while the complete cost function requires 
+   O(<tt>nlag*nmax</tt>) computations, the interchange of two items can be
+   monitored by O(<tt>nlag</tt>) computations. This is taken care of in
+   <font color=blue><tt>cost/auto.f</tt></font>. Be absolutely sure that the
+   update is done correctly for all possible cases! A mismatch between assumed
+   cost and actual cost can lead to a desaster. Because of possible roundoff
+   problems, the full computation is called for regularly by the cooling
+   scheme. 
+</blockquote>
+<p>
+    <a href="randomize.html"><em>constrained randomization</em></a> *
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+
+

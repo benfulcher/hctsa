@@ -1,0 +1,106 @@
+<html> 
+<head><title>Clustering a dissimilarity matrix</title></head>
+<body bgcolor="#ffffff">
+<h3>Clustering a dissimilarity matrix</h3>
+<font color=blue><tt>cluster <font color=red>-##</font> 
+   [-= -X </tt><em>xfile</em><tt>] </tt><em>file</em></font>
+<blockquote>
+   <br>     <font color=red><tt> -#  </tt></font>number of clusters
+   <br>     <font color=blue><tt> -=  </tt></font>if set, bias towards similar size clusters
+   <br>     <font color=blue><tt> -X  </tt><em>ffile</em></font>list of indices with fixed cluster assignments
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em><tt>_clust</tt></font>
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+<p>
+<a href=../general.html#verbosity>verbosity level</a> (add what you want): 
+<p>
+      <font color=blue> 	1</font> = input/output
+<br>   <font color=blue> 	2</font> = state of clustering
+<br>   <font color=blue> 	8</font> = temperature / cost at cooling
+</blockquote>
+The program reads a dissimilarity matrix of the form <font color=blue>i, j,
+d<sub>i,j</sub></font> (columns 1,2,3 of the input file). Any missing values
+are filled in by the mean of the given values. Now <font color=red><tt> -#
+</tt></font> clusters are formed by minimising the average dissimilarity of
+each entity to all the entities within each cluster. The method is described in
+<a href="../chaospaper/citation.html#cluster">Schreiber and Schmitz</a>.
+Certain indices may be assigned to a cluster by listing the index and the
+cluster number in <font color=blue><em>ffile</em></font> 9the argument of the
+<font color=blue><tt> -X  </tt></font> option).
+<p>
+Progress is monitored by a string printed at brief intervals. Here, clusters
+are lettered by A, B,&nbsp;... On output, the clustering is described by giving
+for each index the cluster number and the average dissimilarities of that item
+to each cluster.
+<p>
+As an example, consider four time series 1,2,3,4 where 1 and 2 are very
+similar, 3 and 4 as well, but teh two groups are quite dissimilar. This may be
+reflected in the dissimilarity matrix
+<blockquote>
+<table noborder cellpadding=0 cellspacing=0>
+<tr><th>i</th><th>j</th><th>d<sub>i,j</sub></th></tr>
+<tr><td colspan=3><hr with=100%></td></tr>
+<tr><td>     1 </td><td>1 </td><td>0 </td></tr>	
+<tr><td>     1 </td><td>2 </td><td>0 </td></tr>	
+<tr><td>     1 </td><td>3 </td><td>1 </td></tr>	
+<tr><td>     1 </td><td>4 </td><td>1 </td></tr>	
+<tr><td>     2 </td><td>1 </td><td>0 </td></tr>	
+<tr><td>     2 </td><td>2 </td><td>0 </td></tr>	
+<tr><td>     2 </td><td>3 </td><td>1 </td></tr>	
+<tr><td>     2 </td><td>4 </td><td>1 </td></tr>	
+<tr><td>     3 </td><td>1 </td><td>1 </td></tr>	
+<tr><td>     3 </td><td>2 </td><td>1 </td></tr>	
+<tr><td>     3 </td><td>3 </td><td>0 </td></tr>	
+<tr><td>     3 </td><td>4 </td><td>0 </td></tr>	
+<tr><td>     4 </td><td>1 </td><td>1 </td></tr>	
+<tr><td>     4 </td><td>2 </td><td>1 </td></tr>	
+<tr><td>     4 </td><td>3 </td><td>0 </td></tr>	
+<tr><td>     4 </td><td>4 </td><td>0 </td></tr>	
+</table>
+</blockquote>
+Running
+<blockquote>
+   <font color=blue><tt>&gt; cluster -#2</tt></font> 
+</blockquote>
+on this data will yield as output
+<pre>
+ 1  0.  1.
+ 1  0.  1.
+ 2  1.  0.
+ 2  1.  0.
+</pre>
+This means that, as expected, set 1 and two are in cluster 1. Also, 3 and 4 are
+in cluster 2. They all have average distance 0. to their home cluster and 1. to
+the other cluster. 
+<p>
+Dissimilarity matrices for time series can be produced either using <a
+herf="../docs_c/nstat_z.htm">nstat_z</a> or by computing any other
+dissimilarity measure (<a
+herf="../docs_c/xc2.html">xc2</a>, <a
+herf="../docs_c/xzero.html">xzero</a>, <a
+herf="../docs_c/xcor.html">xcor</a>, with appropriate settings)
+in a loop.
+<p>
+Here one more example for UNIX users using pipelines:
+<blockquote>
+   <font color=blue><tt>&gt;  ( henon -l 1000 ; ikeda -l 1000 ) | nstat_z -#10 | cluster -#2</tt></font> 
+</blockquote>
+A time series of 2000 points is produced, the first 1000 from the H&eacute;non
+map, the second from the Ikeda map. Splitting it into 10 segments, <a
+href="../docs_c/nstat_z.htm">nstat_z</a> produces a 10 by 10 matrix which is
+then used to form 2 clusters:
+<pre> 1  0.510285676  1.51835787
+ 1  0.515677989  1.47538877
+ 1  0.505068302  1.50731277
+ 1  0.526149631  1.50477791
+ 1  0.54192245  1.5086087
+ 2  1.49558449  0.900290847
+ 2  1.49753571  0.912206411
+ 2  1.50899839  0.89825052
+ 2  1.49374235  0.903614342
+ 2  1.51858497  0.915635824
+</pre>
+Indeed, the first 5 segments form one cluster and segments 6-10 the other.
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>

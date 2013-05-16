@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Surrogate time series</TITLE>
+<META NAME="description" CONTENT="Surrogate time series">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html29" HREF="node1.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif_gr.gif"> <IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif">   <BR>
+<B> Next:</B> <A NAME="tex2html30" HREF="node1.html">Introduction</A>
+<BR> <P>
+<P>
+<H1 ALIGN=CENTER>Surrogate time series</H1>
+<P ALIGN=CENTER><STRONG>Thomas Schreiber and Andreas Schmitz<BR> 
+      Physics Department, University of Wuppertal,
+      D-42097 Wuppertal, Germany</STRONG></P><P>
+<P>
+<EM>Abstract</EM>&nbsp; Before we apply nonlinear techniques, for example those
+  inspired by chaos theory, to dynamical phenomena occurring in nature, it is
+  necessary to first ask if the use of such advanced techniques is justified
+  <EM>by the data</EM>. While many processes in nature seem very unlikely a priori
+  to be linear, the possible nonlinear nature might not be evident in specific
+  aspects of their dynamics. The method of surrogate data has become a very
+  popular tool to address such a question. However, while it was meant to
+  provide a statistically rigorous, foolproof framework, some limitations and
+  caveats have shown up in its practical use. In this paper, recent efforts to
+  understand the caveats, avoid the pitfalls, and to overcome some of the
+  limitations, are reviewed and augmented by new material. In particular, we
+  will discuss specific as well as more general approaches to constrained
+  randomisation, providing a full range of examples. New algorithms will be
+  introduced for unevenly sampled and multivariate data and for surrogate spike
+  trains.  The main limitation, which lies in the interpretability of the test
+  results, will be illustrated through instructive case studies. We will also
+  discuss some implementational aspects of the realisation of these methods in
+  the TISEAN software package.
+<P>
+<H3>Note:</H3>
+<P>A version of this document has been published as a journal article:
+<blockquote> 
+[<font color=red>Physica D <b>142</b> 346 (2000)</font>]
+</blockquote>
+which constitutes the correct reference
+to this work.
+Preprint <a href="http://xxx.lanl.gov/abs/chao-dyn/9909037">paper versions</a> 
+are also available.
+</P><P>
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html31" HREF="node1.html#SECTION00010000000000000000">Introduction</A>
+<LI> <A NAME="tex2html32" HREF="node2.html#SECTION00020000000000000000">Detecting weak nonlinearity</A>
+<UL>
+<LI> <A NAME="tex2html33" HREF="node3.html#SECTION00021000000000000000">Higher order statistics</A>
+<LI> <A NAME="tex2html34" HREF="node4.html#SECTION00022000000000000000">Phase space observables</A>
+</UL> 
+<LI> <A NAME="tex2html35" HREF="node5.html#SECTION00030000000000000000">Surrogate data testing</A>
+<UL>
+<LI> <A NAME="tex2html36" HREF="node6.html#SECTION00031000000000000000">Typical vs. constrained realisations</A>
+<LI> <A NAME="tex2html37" HREF="node7.html#SECTION00032000000000000000">The null hypothesis: model class vs. properties</A>
+<LI> <A NAME="tex2html38" HREF="node8.html#SECTION00033000000000000000">Test design</A>
+</UL> 
+<LI> <A NAME="tex2html39" HREF="node9.html#SECTION00040000000000000000">Fourier based surrogates</A>
+<UL>
+<LI> <A NAME="tex2html40" HREF="node10.html#SECTION00041000000000000000">Rescaled Gaussian linear process</A>
+<LI> <A NAME="tex2html41" HREF="node11.html#SECTION00042000000000000000">Flatness bias of AAFT surrogates</A>
+<LI> <A NAME="tex2html42" HREF="node12.html#SECTION00043000000000000000">Iteratively refined surrogates</A>
+<LI> <A NAME="tex2html43" HREF="node13.html#SECTION00044000000000000000">Example: Southern oscillation index</A>
+<LI> <A NAME="tex2html44" HREF="node14.html#SECTION00045000000000000000">Periodicity artefacts</A>
+<LI> <A NAME="tex2html45" HREF="node15.html#SECTION00046000000000000000">Iterative multivariate surrogates</A>
+</UL> 
+<LI> <A NAME="tex2html46" HREF="node16.html#SECTION00050000000000000000">General constrained randomisation</A>
+<UL>
+<LI> <A NAME="tex2html47" HREF="node17.html#SECTION00051000000000000000">Null hypotheses, constraints, and cost functions</A>
+<LI> <A NAME="tex2html48" HREF="node18.html#SECTION00052000000000000000">Computational issues of simulated annealing</A>
+<LI> <A NAME="tex2html49" HREF="node19.html#SECTION00053000000000000000">Example: avoiding periodicity artefacts</A>
+<LI> <A NAME="tex2html50" HREF="node20.html#SECTION00054000000000000000">Combinatorial minimisation and accuracy</A>
+<LI> <A NAME="tex2html51" HREF="node21.html#SECTION00055000000000000000">The curse of accuracy</A>
+</UL> 
+<LI> <A NAME="tex2html52" HREF="node22.html#SECTION00060000000000000000">Various Examples</A>
+<UL>
+<LI> <A NAME="tex2html53" HREF="node23.html#SECTION00061000000000000000">Including non-stationarity</A>
+<LI> <A NAME="tex2html54" HREF="node24.html#SECTION00062000000000000000">Multivariate data</A>
+<LI> <A NAME="tex2html55" HREF="node25.html#SECTION00063000000000000000">Uneven sampling</A>
+<LI> <A NAME="tex2html56" HREF="node26.html#SECTION00064000000000000000">Spike trains</A>
+</UL> 
+<LI> <A NAME="tex2html57" HREF="node27.html#SECTION00070000000000000000">Questions of interpretation</A>
+<UL>
+<LI> <A NAME="tex2html58" HREF="node28.html#SECTION00071000000000000000">Non-dynamic nonlinearity</A>
+<LI> <A NAME="tex2html59" HREF="node29.html#SECTION00072000000000000000">Non-stationarity</A>
+</UL> 
+<LI> <A NAME="tex2html60" HREF="node30.html#SECTION00080000000000000000">Conclusions: Testing a Hypothesis<BR> vs. Testing Against Surrogates</A>
+<LI> <A NAME="tex2html61" HREF="node32.html#SECTION000100000000000000000">The TISEAN implementation</A>
+<UL>
+<LI> <A NAME="tex2html62" HREF="node33.html#SECTION000101000000000000000">Measures of nonlinearity</A>
+<LI> <A NAME="tex2html63" HREF="node34.html#SECTION000102000000000000000">Iterative FFT surrogates</A>
+<LI> <A NAME="tex2html64" HREF="node35.html#SECTION000103000000000000000">Annealed surrogates</A>
+</UL> 
+<LI> <A NAME="tex2html65" HREF="node36.html#SECTION000110000000000000000">References</A>
+<LI> <A NAME="tex2html66" HREF="node37.html#SECTION000120000000000000000">  About this document ... </A>
+</UL>
+<HR><A NAME="tex2html29" HREF="node1.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif_gr.gif"> <IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif">   <BR>
+<B> Next:</B> <A NAME="tex2html30" HREF="node1.html">Introduction</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

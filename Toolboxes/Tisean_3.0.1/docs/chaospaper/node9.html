@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>False nearest neighbors</TITLE>
+<META NAME="description" CONTENT="False nearest neighbors">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html162" HREF="node10.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html160" HREF="node7.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html156" HREF="node8.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html163" HREF="node10.html">Principal components</A>
+<B>Up:</B> <A NAME="tex2html161" HREF="node7.html">Embedding parameters</A>
+<B> Previous:</B> <A NAME="tex2html157" HREF="node8.html">Mutual information</A>
+<BR> <P>
+<H3><A NAME="SECTION00032200000000000000">False nearest neighbors</A></H3>
+<P>
+A method to determine the minimal sufficient embedding dimension <I>m</I> was
+proposed by Kennel et al.&nbsp;[<A HREF="citation.html#kennelFNN">28</A>]. It is called the <I>false nearest
+neighbor</I> method. The idea is quite intuitive. Suppose the minimal embedding
+dimension for a given time series <IMG WIDTH=27 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6615" SRC="img23.gif"> is <IMG WIDTH=20 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6617" SRC="img24.gif">. This means that in a
+<IMG WIDTH=20 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6617" SRC="img24.gif">-dimensional delay space the reconstructed attractor is a one-to-one image
+of the attractor in the original phase space. Especially, the topological
+properties are preserved. Thus the neighbors of a given point are mapped onto
+neighbors in the delay space. Due to the assumed smoothness of the dynamics,
+neighborhoods of the points are mapped onto neighborhoods again. Of course the
+shape and the diameter of the neighborhoods is changed according to the
+Lyapunov exponents.  But suppose now you embed in an <I>m</I>-dimensional space with
+<IMG WIDTH=55 HEIGHT=18 ALIGN=MIDDLE ALT="tex2html_wrap_inline6623" SRC="img25.gif">. Due to this projection the topological structure is no longer
+preserved. Points are projected into neighborhoods of other points to which
+they wouldn't belong in higher dimensions. These points are called <I>false
+neighbors</I>. If now the dynamics is applied, these false neighbors are not
+typically mapped into the image of the neighborhood, but somewhere else, so
+that the average ``diameter'' becomes quite large.
+<P>
+The idea of the algorithm <a href="../docs_c/false_nearest.html">false_nearest</a> is the following. For each point <IMG WIDTH=10 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6625" SRC="img26.gif">
+in the time series look for its nearest neighbor <IMG WIDTH=11 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline6627" SRC="img27.gif"> in a
+<I>m</I>-dimensional space. Calculate the distance <IMG WIDTH=59 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline6631" SRC="img28.gif">.
+Iterate both points and compute
+<BR><IMG WIDTH=500 HEIGHT=39 ALIGN=BOTTOM ALT="equation4487" SRC="img29.gif"><BR>
+If <IMG WIDTH=16 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline6633" SRC="img30.gif"> exceeds a given heuristic threshold <IMG WIDTH=16 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline6635" SRC="img31.gif">, this point is marked as
+having a false nearest neighbor&nbsp;[<A HREF="citation.html#kennelFNN">28</A>].  The criterion that the
+embedding dimension is high enough is that the fraction of points for which
+<IMG WIDTH=55 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline6637" SRC="img32.gif"> is zero, or at least sufficiently small. Two examples are shown in
+Fig.&nbsp;<A HREF="node9.html#figfnn"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>. One is for the Lorenz system (crosses), one for the H&#233;non
+system (filled circles), and one for a H&#233;non time series corrupted by 10% of
+Gaussian white noise (open circles). One clearly sees that, as expected, <I>m</I>=2
+is sufficient for the H&#233;non and <I>m</I>=3 for the Lorenz system, whereas the
+signature is less clear in the noisy case.
+<P>
+<P><blockquote><A NAME="4482">&#160;</A><IMG WIDTH=338 HEIGHT=214 ALIGN=BOTTOM ALT="figure346" SRC="img22.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figfnn">&#160;</A>
+   The fraction of false nearest neighbors as a function of the embedding
+   dimension for noise free Lorenz (blue) and H&#233;non (red)
+   time series, as well as a H&#233;non time series (green) corrupted by
+   10% of noise.<BR>
+</blockquote><P>
+The introduction of the false nearest neighbors concept and other ad hoc
+instruments was partly a reaction to the finding that many results obtained for
+the genuine invariants, like the correlation dimension, has been spurious
+due to caveats of the estimation procedure. In the latter case, serial
+correlations and small sample fluctuations can easily be mistaken for  
+nonlinear determinism. It turns out, however, that the ad hoc quantities
+basically suffer from the same problems - which can be cured by the same
+precautions. The implementation <a href="../docs_c/false_nearest.html">false_nearest</a> therefore allows to specify a minimal
+temporal separation of valid neighbors.
+<P>
+Other software for the analysis of false nearest neighbors is available in
+source form from Kennel&nbsp;[<A HREF="citation.html#kennel">29</A>]. Or, if you prefer to pay for a license,
+from Ref.&nbsp;[<A HREF="citation.html#abla">30</A>].
+<P><HR><A NAME="tex2html162" HREF="node10.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html160" HREF="node7.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html156" HREF="node8.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html163" HREF="node10.html">Principal components</A>
+<B>Up:</B> <A NAME="tex2html161" HREF="node7.html">Embedding parameters</A>
+<B> Previous:</B> <A NAME="tex2html157" HREF="node8.html">Mutual information</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

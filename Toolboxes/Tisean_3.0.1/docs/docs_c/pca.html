@@ -1,0 +1,107 @@
+<html>
+<head>
+<title>
+pca
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>pca
+</font>
+</h1>
+<hr>
+This program performs a global principal component analysis (PCA). It
+gives the eigenvalues of the covariance matrix and depending on the
+<font color=red>-W</font> flag eigenvectors, projections... of the
+input time series.
+
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>pca [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to be used
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>columns to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#,#
+<td>no. of input columns,embedding dimension
+<td>2,1
+</tr>
+<tr>
+<th>-d#
+<td>delay
+<td>1
+</tr>
+<tr>
+<th>-W#
+<td><b>0:</b> Just write the eigenvalues<br>
+<b>1:</b> Write the eigenvectors. The columns of the output matrix are the
+eigenvectors.<br>
+<b>2:</b> Transformation of the time series onto the eigenvector basis. The
+number of components printed is determined by the <font
+color=red>-q</font> flag.<br>
+<b>3:</b> Project the time series onto the first <font
+color=red>-q</font> eigenvectors (global noise reduction).
+<td>0
+</tr>
+<tr>
+<th>-q#
+<td>depending on <font color=red>-W</font>:<br>
+<b><font color=red>-W2</font>:</b> Number of components written<br>
+<b><font color=red>-W3</font>:</b> Projection dimension
+<td>full dimension
+</tr>
+<tr>
+<th>-o[#]
+<td><a href=../general.html#outfile>output file name</a>
+<td>-o without argument means 'datafile'.pca<br>
+(or stdin.pca if data were read from stdin)<br>
+without -o means stdout
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The output consists of the eigenvalues and depending on the <font
+color=blue>-W</font> flag of the eigenvectors, the new components or
+the projected time series.
+<hr>
+View the <a href="../../source_c/pca.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

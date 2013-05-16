@@ -1,0 +1,99 @@
+<html> 
+<head><title>Make srrogate data, also multivariate</title></head>
+<body bgcolor="#ffffff">
+<h3>Make surrogate data, also multivariate</h3>
+<font color=blue><tt>surrogates [-n# -i# -S -I# -o </tt><em>outfile</em><tt> -l#
+-x# -m# -c#[,#] -V# -h] </tt><em> file</em>
+</font>
+<blockquote>
+   <br> 	<font color=blue><tt> -n  </tt></font>number of surrogates (1)
+   <br> 	<font color=blue><tt> -i  </tt></font>number of iterations (until no change)
+   <br> 	<font color=blue><tt> -S  </tt></font>make spectrum exact rather than distribution
+   <br> 	<font color=blue><tt> -I  </tt></font>seed for random numbers 
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_surr(_nnn)</tt></font>
+   <br> 	<font color=blue><tt> -l  </tt></font>number of points (whole file)
+   <br> 	<font color=blue><tt> -x  </tt></font>number of values to be skipped (0)
+   <br> 	<font color=blue><tt> -m  </tt></font>number of <a href=../general.html#columns>columns to be read</a> (1)
+   <br> 	<font color=blue><tt> -c  </tt></font><a href=../general.html#columns>columns to be read</a> (1)
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br> 	<font color=blue><tt> -h  </tt></font>show usage message
+<p>
+   <a href=../general.html#verbosity>verbosity level</a> (add what you want):
+<p>
+      <font color=blue> 	1</font> = input/output
+<br>   <font color=blue> 	2</font> = print # of iterations / discrepancy
+</blockquote>
+Reads data from a file and creates surrogate data with the same Fourier
+amplitudes and the same distribution of values. If more than one columns are
+specified by either giving their number with 
+<font color=blue><tt> -m  </tt></font> or a comma
+seperated list with <font color=blue><tt> -c</tt></font>, multivariate
+surrogates are prepared. In that case, also the relative Fourier phases 
+of the channels are matched to those of the data.
+Since for finite length, distribution and spectral properties cannot
+be guaranteed exactly at the same time, the default output contains
+the iteration stage with the exact amplitudes. With the option
+<font color=blue><tt> -S  </tt></font> set, the stage with the exact spectrum
+(resp. relative phases) is given. Asymptotically, the difference between both 
+should converge to zero.
+<p>
+The setting <font color=blue><tt>-i0</tt></font> yields a random permutation,
+or, if the option
+<font color=blue><tt> -S  </tt></font> set,
+an unrescaled FFT surrogate.
+The setting <font color=blue><tt>-i1</tt></font> yields a 
+surrogate that is close to the result of the AAFT procedure, but not quite the
+same. 
+<p>
+Surrogates are written to <font
+color=blue><tt>stdout</tt></font> by default. With the <font
+color=blue><tt> -o </tt></font> option to <font
+color=blue><em>file</em><tt>_surr_</tt><em>n</em></font>,
+n=1...<em>number</em>. For each surrogate, the iteration count and the rms
+discrepancy between the exact spectrum and exact amplitude stages (normalised
+to the rms amplitude of the data) are printed.
+<p>
+<font color=red><b>Note:</b></font> The length of the sequence will be
+truncated to the largest sub-sequence factorizable with factors 2,3, and 5.
+This is necessary in order to use an efficient FFT.
+<p>
+<font color=red><b>Note:</b></font> It is advisable to select a suitable sub-sequence to minimize end effects by
+using <a href="endtoend.html">endtoend</a> before preparing surrogates. By no
+means should the data be zero-padded.
+<p>
+<font color=red><b>Note:</b></font> Successive identical calls to this routine
+will always yield the same surrogates, since "random" numbers on a computer are
+deterministic. It is, however, possible to set the seed of the random number
+generator explicitly by using the option <font
+color=blue><tt> -I </tt></font>, so that calls with different seeds yield
+different surogates.
+<p>
+See also the page on <a href="test.html">nonlinearity testing</a>.
+<p>
+This routine is based on
+<blockquote>T. Schreiber and A. Schmitz
+<br><a href="http://xxx.lanl.gov/abs/chao-dyn/9909041">
+<em>Improved surrogate data for nonlinearity tests</em></a>
+<br><a href=
+"http://ojps.aip.org/journals/doc/PRLTAO-home/top.html">Phys. Rev. Lett.</a> 
+<b>77</b>, 635 (1996).
+</blockquote>
+<p>
+
+<hr>
+<h3>Usage example</h3>
+Try also just running: <font color=blue><tt>gnuplot surrogates.gnu</tt></font> 
+in the <font color=blue><tt>examples</tt></font> directory.
+<p>
+<pre>
+gnuplot&gt; <font color=blue><tt>plot 'spike.dat'</tt></font>
+gnuplot&gt; <font color=blue><tt>plot '< surrogates spike.dat'</tt></font>
+</pre>
+<p>
+<IMG SRC="spike.gif" alt="spike data">
+<p>
+<IMG SRC="surrogates.gif" alt="spike surrogate">
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

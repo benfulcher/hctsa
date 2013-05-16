@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Correlation dimension</TITLE>
+<META NAME="description" CONTENT="Correlation dimension">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html379" HREF="node31.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html377" HREF="node29.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html371" HREF="node29.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html380" HREF="node31.html">Takens-Theiler estimator</A>
+<B>Up:</B> <A NAME="tex2html378" HREF="node29.html">Dimensions and entropies</A>
+<B> Previous:</B> <A NAME="tex2html372" HREF="node29.html">Dimensions and entropies</A>
+<BR> <P>
+<H2><A NAME="SECTION00081000000000000000">Correlation dimension</A></H2>
+<A NAME="secdimc2">&#160;</A>
+Roughly speaking, the idea behind certain quantifiers of dimensions is that
+the weight <IMG WIDTH=27 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7557" SRC="img131.gif"> of a typical <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">-ball covering part of the
+invariant set scales with its diameter like <IMG WIDTH=65 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline7561" SRC="img132.gif">,
+where the value for <I>D</I> depends also on the precise way one defines the
+weight. Using the square of the probability <IMG WIDTH=13 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6569" SRC="img20.gif"> to find a point of the set
+inside the ball, the dimension is called the correlation dimension <IMG WIDTH=19 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7567" SRC="img133.gif">,
+which is computed most efficiently by the correlation sum&nbsp;[<A HREF="citation.html#GP">73</A>]:
+<BR><A NAME="eqdim2c2">&#160;</A><IMG WIDTH=500 HEIGHT=50 ALIGN=BOTTOM ALT="equation5740" SRC="img134.gif"><BR>
+where <IMG WIDTH=11 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline7569" SRC="img135.gif"> are <I>m</I>-dimensional delay vectors, <IMG WIDTH=283 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7573" SRC="img136.gif"> the number of pairs of points covered by the sums,
+<IMG WIDTH=11 HEIGHT=13 ALIGN=BOTTOM ALT="tex2html_wrap_inline6897" SRC="img52.gif"> is the Heaviside step function and <I>w</I> will be discussed below. On
+sufficiently small length scales and when the embedding dimension <I>m</I> exceeds
+the box-dimension of the attractor&nbsp;[<A HREF="citation.html#SauerYorke">74</A>],
+<BR><IMG WIDTH=500 HEIGHT=19 ALIGN=BOTTOM ALT="equation5742" SRC="img137.gif"><BR>
+Since one does not know the box-dimension <I>a priori</I>, one checks for
+convergence of the estimated values of <IMG WIDTH=19 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7567" SRC="img133.gif"> in <I>m</I>.
+<P>
+The literature on the correct and spurious estimation of the correlation
+dimension is huge and this is certainly not the place to repeat all the
+arguments. The relevant caveats and misconceptions are reviewed for example in
+Refs.&nbsp;[<A HREF="citation.html#theiler_dim">75</A>, <A HREF="citation.html#gss">11</A>, <A HREF="citation.html#dim">76</A>, <A HREF="citation.html#KantzSchreiber">2</A>]. The most prominent precaution
+is to exclude temporally correlated points from the pair counting by the so
+called Theiler window <I>w</I>&nbsp;[<A HREF="citation.html#theiler_dim">75</A>]. In order to become a consistent
+estimator of the correlation <EM>integral</EM> (from which the dimension is
+derived) the correlation <EM>sum</EM> should cover a random sample of points drawn
+independently according to the invariant measure on the attractor. Successive
+elements of a time series are not usually independent. In particular for highly
+sampled flow data subsequent delay vectors are highly correlated. Theiler
+suggested to remove this spurious effect by simply ignoring all pairs of points
+in Eq.(<A HREF="node30.html#eqdim2c2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) whose time indices differ by less than <I>w</I>, where <I>w</I>
+should be chosen generously. With <i>O(N&#178;)</i> pairs available, the loss of <I>O</I>(<I>N</I>)
+pairs is not dramatic as long as <IMG WIDTH=50 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline7595" SRC="img138.gif">. At the very least, pairs with <I>j</I>=<I>k</I>
+have to be excluded&nbsp;[<A HREF="citation.html#grass_finite">77</A>], since otherwise the strong bias to
+<IMG WIDTH=49 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7599" SRC="img139.gif">, the mathematically correct value for a finite set of points, reduces
+the scaling range drastically. Choosing <I>w</I>, the first zero of the
+auto-correlation function, sometimes even the decay time of the autocorrelation
+function, are not large enough since they reflect only overall linear
+correlations&nbsp;[<A HREF="citation.html#theiler_dim">75</A>, <A HREF="citation.html#dim">76</A>]. The space-time-separation plot
+(Sec.&nbsp;<A HREF="node15.html#secstp"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) provides a good means of determining a sufficient value
+for <I>w</I>, as discussed for example in&nbsp;[<A HREF="citation.html#stp">41</A>, <A HREF="citation.html#KantzSchreiber">2</A>]. In some cases,
+notably processes with inverse power law spectra, inspection requires <I>w</I> to be
+of the order of the length of the time series. This indicates that the data
+does not sample an invariant attractor sufficiently and the estimation of 
+invariants like <IMG WIDTH=19 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7567" SRC="img133.gif"> or Lyapunov exponents should be abandoned.
+<P>
+Parameters in the routines <a href="../docs_c/d2.html">d2</a> and 
+<a href="../docs_f/c2naive.html">c2naive</a> are as usual the 
+embedding parameters <I>m</I> and <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6553" SRC="img16.gif">, the time delay, and the embedding
+dimension, as well as the Theiler window.
+<P>
+Fast implementation of the correlation sum have been proposed by several
+authors. At small length scales, the computation of pairs can be done in
+<I>O(N</I>log<I>N)</I> or even <I>O</I>(<I>N</I>) time rather than
+<i>O(N&#178;)</i>  without loosing any of
+the precious pairs, see Ref.&nbsp;[<A HREF="citation.html#neigh">20</A>].  However, for intermediate size data
+sets we also need the correlation sum at intermediate length scales where
+neighbor searching becomes expensive. Many authors have tried to limit the use
+of computational resources by restricting one of the sums in
+Eq.(<A HREF="node30.html#eqdim2c2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) to a fraction of the available points. By this practice,
+however, one looses valuable statistics at the small length scales where points
+are so scarce anyway that all pairs are needed for stable
+results. In&nbsp;[<A HREF="citation.html#buzug">62</A>], buth approaches were combined for the first time by
+using fast neighbor search for <IMG WIDTH=40 HEIGHT=18 ALIGN=MIDDLE ALT="tex2html_wrap_inline7619" SRC="img140.gif"> and restricting the sum
+for <IMG WIDTH=40 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7621"
+SRC="img141.gif">. The TISEAN implementation 
+<a href="../docs_c/d2.html">d2</a>
+goes one step further and selects the range for the sums individually for each
+length scale to be processed. This turns out to give a major improvement in
+speed. The user can specify a desired number of pairs which seems large enough
+for a stable estimation of <IMG WIDTH=29 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7623" SRC="img142.gif">, typically 1000 pairs will
+suffice. Then the sums are extended to a range which guarantees that number of
+pairs, or, if this cannot be achieved, to the whole time series. At the largest
+length scales, this range may be rather small and the user may choose to give a
+minimal number of reference points to ensure a representative average.  
+In the program
+<IMG WIDTH=16 HEIGHT=10 ALIGN=BOTTOM ALT="tex2html_wrap_inline7625"
+SRC="img143.gif">, rather than restricting the range of the
+sums, only a randomly selected subset is used. The randomization however
+requires a sophisticated program structure in order to avoid an 
+overhead in computation time.
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html381" HREF="node31.html#SECTION00081100000000000000">Takens-Theiler estimator</A>
+<LI> <A NAME="tex2html382" HREF="node32.html#SECTION00081200000000000000">Gaussian kernel correlation integral</A>
+</UL>
+<HR><A NAME="tex2html379" HREF="node31.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html377" HREF="node29.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html371" HREF="node29.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html380" HREF="node31.html">Takens-Theiler estimator</A>
+<B>Up:</B> <A NAME="tex2html378" HREF="node29.html">Dimensions and entropies</A>
+<B> Previous:</B> <A NAME="tex2html372" HREF="node29.html">Dimensions and entropies</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

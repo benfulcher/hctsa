@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>General constrained randomization</TITLE>
+<META NAME="description" CONTENT="General constrained randomization">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html460" HREF="node39.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html458" HREF="node35.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html452" HREF="node37.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html461" HREF="node39.html">Measuring weak nonlinearity</A>
+<B>Up:</B> <A NAME="tex2html459" HREF="node35.html">Testing for nonlinearity</A>
+<B> Previous:</B> <A NAME="tex2html453" HREF="node37.html">Iterative Fourier transform method</A>
+<BR> <P>
+<H2><A NAME="SECTION00093000000000000000">General constrained randomization</A></H2>
+<P>
+In&nbsp;[<A HREF="citation.html#anneal">85</A>], a general method has been proposed to create random data
+which fulfill specified constraints. With this method, the artefacts and
+remaining imprecision of the Fourier based randomization schemes can be
+avoided by specifying the autocorrelation function rather than the Fourier
+transform. The former does not assume periodic continuation. Maybe more
+importantly, the restriction to a rather narrow null hypothesis can be relaxed
+since in principle arbitrary statistical observables can be imposed on the
+surrogates. A desired property of the data has to be formulated in terms of a
+cost function which assumes an absolute minimum when the property is fulfilled.
+States arbitrarily close to this minimal cost can be reached by the method of
+simulated annealing. The cost function is minimised among all possible
+permutations of the data. See&nbsp;[<A HREF="citation.html#anneal">85</A>] for a description of the approach.
+<P>
+The TISEAN package contains the building blocks for a library of surrogate
+data routines implementing user specified cost functions. Currently, only the
+autocorrelation function with and without periodic continuation have been
+implemented. Further, a template is given from which the user may
+derive her/his 
+own routines. A module is provided that drives the simulated annealing process
+through an exponential cooling scheme. The user may replace this module by 
+other scheme of her/his choice. 
+A module that performs random pair permutations is
+given which allows to exclude a list of points from the permutation scheme.
+More sophisticated permutation schemes can be substituted if desired.
+Most importantly, the cost function has to be given as another module. 
+The autocorrelation modules use <IMG WIDTH=200 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline8065" SRC="img183.gif">, where <IMG WIDTH=31 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline8067" SRC="img184.gif"> is the
+autocorrelation function with or without periodic continuation.
+<P>
+<P><blockquote><A NAME="6070">&#160;</A><IMG WIDTH=327 HEIGHT=244 ALIGN=BOTTOM ALT="figure1966" SRC="img181.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figspike">&#160;</A>
+   Upper trace: Data from a stationary Gaussian linear stochastic process
+   (<IMG WIDTH=129 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline7971" SRC="img178.gif">) 
+   measured by <IMG WIDTH=75 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline7973" SRC="img179.gif">. Samples 200-220 are an artefact. With the
+   Fourier based scheme (middle trace) the artefact results in an increased
+   number of spikes in the surrogates and reduced predictability. In the lower
+   trace, the artefact has been preserved along with the distribution of values
+   and lags 1,...,25 of the autocorrelation function.<BR>
+</blockquote><P>
+In Fig.&nbsp;<A HREF="node38.html#figspike"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> we show an example fulfilling the null hypothesis of a
+rescaled stationary Gaussian linear stochastic process which has been
+contaminated by an artefact at samples 200-220. The Fourier based schemes are
+unable to implement the artefact part of the null hypothesis. They spread the
+structure given by the artefact evenly over the whole time span, resulting in
+more spikes and less predictability. In fact, the null hypothesis of a
+stationary rescaled Gaussian linear stochastic process can be rejected at the
+95% level of significance using nonlinear prediction errors. The artefact
+would spuriously be mistaken for nonlinearity. With the program <a href="../docs_f/randomize.html">randomize_auto_exp_random</a>,
+we can exclude the artefact from the randomization scheme and obtain a correct
+test.
+<P>
+<P><blockquote><A NAME="6443">&#160;</A><IMG WIDTH=379 HEIGHT=560 ALIGN=BOTTOM ALT="figure2000" SRC="img182.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="fighenon">&#160;</A>
+  Randomization of 500 points generated by the the H&#233;non map.  <B>(a)</B>
+  Original data; <B>(b)</B> Same autocorrelations and distribution; <B>
+  (c)</B>-<B>(f)</B> Different stages of annealing with a cost function <I>C</I>
+  involving three and four-point correlations. <B>(c)</B> A random shuffle,
+  <I>C</I>=2400; <B>(d)</B> <I>C</I>=150; <B>(e)</B> <I>C</I>=15; <B>(f)</B> <I>C</I>=0.002. See
+  text.<BR>
+</blockquote><P>
+<P>
+As an example of a more exotic cost function, let us show the randomization 
+of 500 iterates of the H&#233;non map, Fig.&nbsp;<A HREF="node38.html#fighenon"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>&nbsp;<B>(a)</B>. Panel <B>
+(b)</B> shows the output of <a href="../docs_f/surrogates.html">surrogates</a> having the same spectrum and
+distribution. Starting from a random permutation <B>(c)</B>, the cost function
+<BR><IMG WIDTH=500 HEIGHT=64 ALIGN=BOTTOM ALT="eqnarray6462" SRC="img185.gif"><BR>
+is minimized (<a href="../docs_f/randomize.html">randomize_generic_exp_random</a>). It involves are all the higher order
+autocorrelations which would be needed for a least squares fit with the ansatz
+<IMG WIDTH=167 HEIGHT=26 ALIGN=MIDDLE ALT="tex2html_wrap_inline8069" SRC="img186.gif"> and in this sense fully specifies the quadratic
+structure of the data. The random shuffle yields <I>C</I>=2400, panels 
+<B>(c)</B>-<B>(f)</B> correspond to <I>C</I>=150,15,0.002 respectively.
+<P>
+Since the annealing process can be very CPU time consuming, it is important to
+provide efficient code for the cost function.  Specifying
+<IMG WIDTH=30 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline8075" SRC="img187.gif"> lags for <I>N</I> data points requires
+<IMG WIDTH=68 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline8079" SRC="img188.gif"> multiplications for the calculation of the
+cost function. An update after a pair has been exchanged, however, can be
+obtained with <IMG WIDTH=54 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline8081" SRC="img189.gif"> multiplications. Often, the
+full sum or supremum can be truncated since after the first terms it
+is clear that a large increase of the cost is unavoidable. The driving
+Metropolis algorithm provides the current maximal permissable cost for that
+purpose.
+<P>
+The computation time required to reach the desired accuracy depends on the
+choice and implementation of the cost function but also critically on the
+annealing schedule. There is a vast literature on simulated annealing which
+cannot be reviewed here. Experimentation with cooling schemes should keep in
+mind the basic concept of simulated annealing. At each stage, the system -
+here the surrogate to be created - is kept at a certain ``temperature''.
+Like in thermodynamics, the temperature determines how likely fluctuations
+around the mean energy - here the value of the cost function <I>C</I> - are.  At
+temperature <I>T</I>, a deviation of size <IMG WIDTH=24 HEIGHT=13 ALIGN=BOTTOM ALT="tex2html_wrap_inline8087" SRC="img190.gif"> occurs with the Boltzmann
+probability <IMG WIDTH=109 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline8089" SRC="img191.gif">. In a Metropolis simulation, this is
+achieved by accepting <EM>all</EM> downhill changes (<IMG WIDTH=54 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline8091" SRC="img192.gif">), but also
+uphill changes with probability <IMG WIDTH=93 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline8093" SRC="img193.gif">. Here the changes are
+permutations of two randomly selected data items. The present implementation
+offers an exponential cooling scheme, that is, the temperature is lowered by a
+fixed factor whenever one of two conditions is fulfilled: Either a specified
+number of changes has been <EM>tried</EM>, or a specified number of changes has
+been <EM>accepted</EM>. Both these numbers and the cooling factor can be chosen
+by the user. If the state is cooled too fast it gets stuck, or ``freezes'' in
+a false minimum. When this happens, the system must be ``melted'' again and
+cooling is taken up at a slower rate. This can be done automatically until a
+goal accuracy is reached. It is, however, difficult to predict how many steps
+it will take. The detailed behavior of the scheme is still subject to ongoing
+research and in all but the simplest cases, experimentation by the user will
+be necessary. To facilitate the supervision of the cooling, the current state
+is written to a file whenever a substantial improvement has been
+made. Further, the verbosity of the diagnostic output can be selected.
+<P>
+<HR><A NAME="tex2html460" HREF="node39.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html458" HREF="node35.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html452" HREF="node37.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html461" HREF="node39.html">Measuring weak nonlinearity</A>
+<B>Up:</B> <A NAME="tex2html459" HREF="node35.html">Testing for nonlinearity</A>
+<B> Previous:</B> <A NAME="tex2html453" HREF="node37.html">Iterative Fourier transform method</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

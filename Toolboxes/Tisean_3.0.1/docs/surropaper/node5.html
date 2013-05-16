@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Surrogate data testing</TITLE>
+<META NAME="description" CONTENT="Surrogate data testing">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html115" HREF="node6.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html113" HREF="Surrogates.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html107" HREF="node4.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html116" HREF="node6.html">Typical vs. constrained realisations</A>
+<B>Up:</B> <A NAME="tex2html114" HREF="Surrogates.html">Surrogate time series</A>
+<B> Previous:</B> <A NAME="tex2html108" HREF="node4.html">Phase space observables</A>
+<BR> <P>
+<H1><A NAME="SECTION00030000000000000000">Surrogate data testing</A></H1>
+<P>
+All of the measures of nonlinearity mentioned above share a common property.
+Their probability distribution on finite data sets is not known analytically -
+except maybe when strong additional assumptions about the data are made. Some
+authors have tried to give error bars for measures like predictabilities (e.g.
+Barahona and Poon&nbsp;[<A HREF="node36.html#volterra">21</A>]) or averages of pointwise dimensions (e.g.
+Skinner et al.&nbsp;[<A HREF="node36.html#skinner">22</A>]) based on the observation that these quantities
+are averages (mean values or medians) of many individual terms, in which case
+the variance (or quartile points) of the individual values yield an error
+estimate. This reasoning is however only valid if the individual terms are
+independent, which is usually not the case for time series data. In fact, it is
+found empirically that nonlinearity measures often do not even follow a
+Gaussian distribution.  Also the standard error given by
+Roulston&nbsp;[<A HREF="node36.html#roulston">23</A>] for the mutual information is fully correct only for
+uniformly distributed data. His derivation assumes a smooth rescaling to
+uniformity. In practice, however, we have to rescale either to <EM>exact</EM>
+uniformity or by rank-ordering uniform variates. Both transformations are in
+general non-smooth and introduce a bias in the joint probabilities.  In view of
+the serious difficulties encountered when deriving confidence limits or
+probability distributions of nonlinear statistics with analytical methods, it
+is highly preferable to use a Monte Carlo resampling technique for this
+purpose.
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html117" HREF="node6.html#SECTION00031000000000000000">Typical vs. constrained realisations</A>
+<LI> <A NAME="tex2html118" HREF="node7.html#SECTION00032000000000000000">The null hypothesis: model class vs. properties</A>
+<LI> <A NAME="tex2html119" HREF="node8.html#SECTION00033000000000000000">Test design</A>
+</UL>
+<HR><A NAME="tex2html115" HREF="node6.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html113" HREF="Surrogates.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html107" HREF="node4.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html116" HREF="node6.html">Typical vs. constrained realisations</A>
+<B>Up:</B> <A NAME="tex2html114" HREF="Surrogates.html">Surrogate time series</A>
+<B> Previous:</B> <A NAME="tex2html108" HREF="node4.html">Phase space observables</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

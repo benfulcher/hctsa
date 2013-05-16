@@ -1,0 +1,114 @@
+<html>
+<head>
+<title>
+make_ps
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>make_ps
+</font>
+</h1>
+<hr>
+This program takes a scalar or a three component time series and creates
+a postscript file with a three dimensional plot, where the third component
+is encoded in colors. (Beta version) 
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>make_ps [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of points to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td>column to read or datafile,# (only if -3 is not set)
+<td>1
+</tr>
+<tr>
+<th>-d#
+<td>delay
+<td>1
+</tr>
+<tr>
+<th>-C#
+<td>number of colors to use
+<td>32
+</tr>
+<tr>
+<th>-s#
+<td>size of the plot in cm
+<td>16
+</tr>
+<tr>
+<th>-w#
+<td>width of lines (size of points) in dots
+<td>1
+</tr>
+<tr>
+<th>-t#
+<td>textwidth
+<td>15
+</tr>
+<tr>
+<th>-p
+<td>plot with points instead of lines
+<td>lines
+</tr>
+<tr>
+<th>-a
+<td>make xy tics
+<td>no tics
+</tr>
+<tr>
+<th>-3
+<td> read 3 columns. Do not use delay coordinates
+<td> delay coordinates
+</tr>
+<tr>
+<th>-F#
+<td>read the specified columns in the specified order<br>
+(separated by commas, must not contain spaces)<br>
+only in connection with -3
+<td>1,2,3
+</tr>
+<tr>
+<th>-o#
+<td>name of output file
+<td>'datafile'.ps<br>
+(or stdin.ps if data were read from stdin)
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The output is a postscript file, which shows a 3D representation of
+the data, where the third direction is color coded.
+<hr>
+View the <a href="../c/make_ps.cc"> C++-sources</a>.
+<hr>
+<a href="index.html">Dresden index</a> * <a href="../../contents.html">general index</a> * <a href="../../index.html">TISEAN home</a>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>7.2.2 Installation of TSTOOL</TITLE>
+<META NAME="description" CONTENT="7.2.2 Installation of TSTOOL">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node86.html">
+<LINK REL="previous" HREF="node84.html">
+<LINK REL="up" HREF="node83.html">
+<LINK REL="next" HREF="node86.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html1910"
+  HREF="node86.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1906"
+  HREF="node83.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1900"
+  HREF="node84.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1908"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1911"
+  HREF="node86.html">7.2.3 Working with TSTOOL</A>
+<B> Up:</B> <A NAME="tex2html1907"
+  HREF="node83.html">7.2 Answers</A>
+<B> Previous:</B> <A NAME="tex2html1901"
+  HREF="node84.html">7.2.1 Introduction and general</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html1912"
+  HREF="node85.html#SECTION00822100000000000000">7.2.2.1 All lines in the <TT>OpenTSTOOL/tstoolbox/mex/*.m</TT> are comments, is this right?</A>
+<LI><A NAME="tex2html1913"
+  HREF="node85.html#SECTION00822200000000000000">7.2.2.2 Where are the precompiled Mex-Files?</A>
+<LI><A NAME="tex2html1914"
+  HREF="node85.html#SECTION00822300000000000000">7.2.2.3 There are more than one file called e.g. amutual.m, why?</A>
+<LI><A NAME="tex2html1915"
+  HREF="node85.html#SECTION00822400000000000000">7.2.2.4 What does the error message ''Attempt to execute SCRIPT ...as a function.'' mean?</A>
+<LI><A NAME="tex2html1916"
+  HREF="node85.html#SECTION00822500000000000000">7.2.2.5 What does the error message ''This application has
+  failed to start because the application configuration is incorrect.'' mean?</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H2><A NAME="SECTION00822000000000000000">
+7.2.2 Installation of TSTOOL</A>
+</H2>
+
+<H3><A NAME="SECTION00822100000000000000"></A><A NAME="faq:ins:1"></A>
+<BR>
+7.2.2.1 All lines in the <TT>OpenTSTOOL/tstoolbox/mex/*.m</TT> are comments, is this right?
+</H3>
+Yes, this are the comment-texts for the compiled mex functions (e.g. type <TT>help amutual</TT> at the matlab prompt).  
+
+<H3><A NAME="SECTION00822200000000000000"></A><A NAME="faq:ins:2"></A>
+<BR>
+7.2.2.2 Where are the precompiled Mex-Files?
+</H3>
+They are in <TT>OpenTSTOOL/tstoolbox/mex/&lt;MEXEXT&gt;</TT>, where <TT>  &lt;MEXEXT&gt;</TT> is the extension for mex files on your system. You can
+determine this extension by using the command <TT>mexext</TT> in Matlab.
+
+<P>
+
+<H3><A NAME="SECTION00822300000000000000"></A><A NAME="faq:ins:3"></A>
+<BR>
+7.2.2.3 There are more than one file called e.g. amutual.m, why?
+</H3>
+For some functions there are up to three versions of the file:
+
+<UL>
+<LI><TT>OpenTSTOOL/tstoolbox/@signal/amutual.m</TT>
+Function that invokes the underlying mex function. It uses signal objects as output and input.
+</LI>
+<LI><TT>OpenTSTOOL/tstoolbox/mex/amutual.m</TT>
+Help text for the compiled mex function (e.g. type <TT>help amutual</TT> on the matlab prompt).
+</LI>
+<LI><TT>OpenTSTOOL/tstoolbox/mex/mexsol/amutual.mexsol,
+</TT>
+<P>
+<TT>OpenTSTOOL/tstoolbox/mex/mexsg64/amutual.mexsg64,
+</TT>
+<P>
+<TT>OpenTSTOOL/tstoolbox/mex/mexglx/amutual.mexglx,
+</TT>
+<P>
+<TT>OpenTSTOOL/tstoolbox/mex/mexw32/amutual.mexw32</TT>
+
+<P>
+Precompiled mex files for Linux x86, Windows, Mac OS X and
+          Solaris are shipped with TSTOOL. Only one of these files may
+          be present on your system, depending on the version of
+          TSTOOL you have downloaded.
+</LI>
+</UL>
+
+<P>
+
+<H3><A NAME="SECTION00822400000000000000"></A><A NAME="faq:ins:4"></A>
+<BR>
+7.2.2.4 What does the error message ''Attempt to execute SCRIPT ...as a function.'' mean?
+</H3>
+Matlab cannot find the correct mex files for this systems and so it tries to execute the 
+<EM>scripts</EM> OpenTSTOOL/mex/*.m (which are only the help texts for the mex files).
+There are many possibilities for this error:
+
+<UL>
+<LI>You downloaded the wrong version of TSTOOL.
+</LI>
+<LI>The path setting made by <TT>settspath.m</TT> are not correct. Type <TT>path</TT> at the matlab prompt and look for
+the path setting for the mex directory (see <A HREF="#faq:ins:3">7.2.2.3</A>).
+</LI>
+<LI>The mex files are not present in the directory noted in <A HREF="#faq:ins:3">7.2.2.3</A>.
+</LI>
+</UL>
+
+<P>
+
+<H3><A NAME="SECTION00822500000000000000"></A><A NAME="faq:ins:5"></A>
+<BR>
+7.2.2.5 What does the error message ''This application has
+  failed to start because the application configuration is incorrect.'' mean?
+</H3>
+This happens on Windows systems without the Visual C++ 2008 run-time
+libraries. Since the mex-files for Windows are compiled with VC++
+2008, these run-time libraries are needed for the proper execution of
+the compiled Windows mex-files that ship with TSTOOL. Please see the
+installation section for details on how to install the run-time
+libraries. 
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html1910"
+  HREF="node86.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1906"
+  HREF="node83.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1900"
+  HREF="node84.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1908"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1911"
+  HREF="node86.html">7.2.3 Working with TSTOOL</A>
+<B> Up:</B> <A NAME="tex2html1907"
+  HREF="node83.html">7.2 Answers</A>
+<B> Previous:</B> <A NAME="tex2html1901"
+  HREF="node84.html">7.2.1 Introduction and general</A>
+ &nbsp; <B>  <A NAME="tex2html1909"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

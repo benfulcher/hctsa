@@ -1,0 +1,251 @@
+<html>
+<head><title>TISEAN: List of changes (Wuppertal)</title></head>
+<body bgcolor="#ffffff">
+
+<center>
+<h3>Nonlinear Time Series Routines<br> (FORTRAN branch)</h3>
+<h3>List of changes</h3>
+</center>
+
+<a name="tisean2.1"></a>
+<h4>TISEAN_2.1 -&gt; TISEAN_3.0.0</h4>
+<ul>
+<li>Due to a bug in a subroutine the only result of <a
+href="xc2.html">xc2</a> was a segmentation fault. This bug was
+removed. 
+</li>
+<li>A program performing a cross recurrence plot <a
+href="xrecurr.html">xrecurr</a> was added.
+</li>
+
+</ul>
+
+<a name="tisean2.0"></a>
+<h4>TISEAN_2.0 -&gt; TISEAN_2.1</h4>
+<ul>
+<li>The input routines for time series had to be changed. A safety feature made
+   them too slow on many platforms. In the new version, the user has to ensure
+   that the file has enough columns for the task planned since otherwise,
+   missing data is read from the following line(s).
+<li>An internal change worth mentioning is the calling sequence for
+   <font color=blue><tt>neigh</tt></font>. The array containing the time series
+   has to be given twice. The reason is that this allows two different arrays
+   to be specified. Distances across series are necessary for <a
+   href="xc2.html">xc2</a>.
+<li><a name="c1"> The program <a
+   href="../docs_f/c1.html"</a>c1</a> now accepts mutivariate time series
+   and can perform mixed embeddings. Also, embedding dimension 1 is now
+   allowed. As a further important change, the center points are now selected
+   randomly ratehr than taken to be the first points in the set. The comparison
+   is however still performed with points starting from the beginning of the
+   series. 
+<li><a name="project"><a name="predict"><a name="lazy"><a name="xc2">
+   In <a href="../docs_f/project.html"</a>project</a>,
+      <a href="../docs_f/preict.html"</a>predict</a><a
+      href="../docs_f/lazy.html"</a>lazy</a>, 
+      and <a href="../docs_f/xc2.html"</a>xc2</a>,
+   the restriction that the embedding dimension must be at least 2 has been
+   removed. 
+<li><a name="wiener">
+   The Wiener filter <a href="../docs_f/wiener.html"</a>wiener1/2</a> has
+   been improved by offering a smoothed spectral estimator rather than raw
+   periodograms. 
+</ul>
+
+
+
+<a name="tisean1.2"></a>
+<h4>TISEAN_1.2 -&gt; TISEAN_2.0</h4>
+<ul>
+<li><a name="events"><a name="intervals">
+   Utilities for the conversion of inter-event intervals to event times and
+   vice versa have been added. They are called <a href="events.html">events</a>
+   and <a href="intervals.html">intervals</a>. 
+<li><a name="noise"></a>
+   <font color=blue>noise</font> is no longer supported. If you are
+   desperate, you can find it still in the <font
+   color=blue><tt>unsupported</tt></font> directory.
+<li><a name="autocor3"></a>
+   <font color=blue>autocor3</font> is no longer supported. If you are
+   desperate, you can find it still in the <font
+   color=blue><tt>unsupported</tt></font> directory. I never used it myself and
+   it was in C. It had to go.
+<li><a name="lyapunov"></a>
+   <font color=blue>lyapunov</font> is no longer supported due to its
+   redundancy with <a href="../docs_c/lyap_k.html">lyap_k</a>. If you are
+   desperate, you can find it still in the <font
+   color=blue><tt>unsupported</tt></font> directory.
+<li><a name="surrogates"></a>
+   <a href="surrogates.html"</a>surrogates</a> has been rewritten in FORTRAN
+   with a slight change in its functionality.
+<li><a name="timrev"></a>
+   <a href="timerev.html"</a>timerev</a> has been rewritten in FORTRAN,
+   same functionality.
+<li><a name="addnoise"></a>
+   <a href="addnoise.html"</a>addnoise</a>
+   can now run without input files, just as a random number generator.
+<li><a name="randomize"></a>
+   There are three new members in the <a href="randomize.html"</a>randomize</a>
+   family, one for unevenly sampled data and two  suitable for inter-spike 
+   interval series.
+<li>An interference between option names has been removed. In the <a
+   href="randomize.html">randomize</a> family, <font
+   color=blue><tt>-w</tt></font> has been changed to <font
+   color=blue><tt>-u</tt></font>.  
+<li><a name="c1"><a name="c2naive">
+    <a name="c2d"><a name="c2g"><a name="c2t">
+    The output of the correlation sum programs has been partially
+   restructured. Seperate files for different embedding dimensions are no
+   longer written, everything come in  a single file, seperated by double blank
+   lines. Thus, <a href="c1.html"</a>c1</a>, <a href="c2.html"</a>c2</a>, and
+   <a href="c2naive.html"</a>c2naive</a> are now compatible with
+   <a href="../docs_c/d2.html"</a>d2</a>. These changes also affect 
+   <a href="c2d.html"</a>c2d</a>,
+   <a href="c2g.html"</a>c2g</a>, and <a href="c2t.html"</a>c2t</a>,
+   which thereby also become usable for <a href="../docs_c/d2.html"</a>d2</a>.
+   Writing to stdout is now the default and stdin is acceptable as input file.
+<li><a name="stp">The output of <a href="stp.html"</a>stp</a> can now be better
+   controlled, specifying the spacing of level lines and the number of time
+   steps. 
+<li><a name="xc2"><a name="compare">
+   The output of the correlation sum programs has been partially
+   restructured. This applies to <a href="../docs_c/xc2.html"</a>xc2</a> as
+   well. Also, rather than reading from two files, now two columns from the
+   same file are read. The latter also applies to 
+   <a href="compare.html"</a>compare</a>.
+<li>The program <font color=blue><tt>randomize_generic_exp_random</tt></font> 
+   was quite useless and has therefore been removed.
+<li><a name="c1">As a personal service to Remo Badii, a "feature" of <a
+   href="../docs_f/c1.html"</a>c1</a> was removed that caused small values
+   of k to be computed more than once, a result of having k discrete but in a 
+   logarithmic loop.
+<li><a name="randomize">The module structure is changed slightly to enable the
+   future incorporation of multivariate data. Please check the new <a
+   href="randomize_extend.html">extension guide</a>. 
+<li>A new program is available to <a href="cluster.html">cluster</a> a 
+   dissimilarity matrix.
+</ul>
+
+
+
+
+<a name="tisean1.0"></a>
+<h4>TISEAN_1.0 -&gt; TISEAN_1.2</h4>
+<ul>
+<li><a name="c2t"></a><a name="c2g"></a>
+   An oddity with the command line parsing of 
+   <a href="c2t.html">c2t</a> and
+   <a href="c2g.html">c2g</a> has been fixed.
+<li><a name="ar-run"></a>
+   A back end to <a href="../docs_c/ar-model.html">ar-model</a> 
+   has been added that runs an
+   autoregressive model. It is called <a href="ar-run.html">ar-run</a>. 
+
+</ul>
+
+
+<a name="tisean0.9"></a>
+<h4>TISEAN_0.9 -&gt; TISEAN_1.0</h4>
+<ul>
+<li>A few of the FORTRAN programs confused one compiler due to the order
+    of declarations, which has now been changed to be conservative.
+<li>Depending on the number of data points, the necessary zero padding in
+    <a href="wiener.html">wiener1</a>
+    was awkward, if not outright wrong. This has been fixed now.
+</ul>
+
+
+
+<a name="tisean0.5"></a>
+<h4>TISEAN_0.5 -&gt; TISEAN_0.9</h4>
+<ul>
+<li>Changed the output file behaviour in accordance with what the Dresden
+    programs do: By default, most programs write to stdout now, independent of
+    the input source. The option <font color=blue><tt>-o</tt></font> tells the
+    program to build file names from the input file name, or "stdin" if
+    appropriate. Finally, <font color=blue><tt>-o </tt> <em>outfile</em></font>
+    specifies an <a href=../general.html#outfile>output file name</a> explicitly. Somewhat awkwardly, this will be
+    the same for all input files processed and results are <font
+    color=red>overwritten</font> if you don't move the files fast enough. 
+    This behaviour may be changed in later releases once I have a good idea
+    what else to do.
+<li>Quite a number of options have changed in the course of the re-unification
+    process. Most propminently, 
+    <font color=blue><tt>-r</tt></font>/<font color=blue><tt>-R</tt></font> 
+    replaces
+    <font color=blue><tt>-e</tt></font>/<font color=blue><tt>-E</tt></font> 
+    for absolute lengths scales.
+<li>Gradually, more and more programs respond meaningfully to the <font
+    color=blue><tt>-V</tt></font> (verbosity) option. 
+</ul>
+
+<a name="tisean0.4"></a>
+<h4>TISEAN_0.4 -&gt; TISEAN_0.5</h4>
+<ul>
+<li>Recovered correct version of 
+    <a href="c2.html">c2</a> which was
+    (slightly) broken in release 0.4.
+<li>The realisation of <a href="randomize.html">randomize</a> that 
+    implements the
+    autocorrelation function suffered from a last-minute change that didn't
+    quite work out and was unusable. Now fixed.
+<li>All programs interpret anything which is not a valid option or its value as
+    a file name. This allows to give file names at arbitrary places on the
+    command line, a tiny step towards re-unification of the Dresden and
+    Wuppertal branches.
+<li>All programs, when called without a file name, act as if a "-" was given,
+    and read from stdin if that is appropriate. As a side effect, a few
+    programs have to be called with <font color=blue><tt>-h</tt></font> in
+    order to see the command line options, since a call with no arguments would
+    be a valid execution.
+</ul>
+
+
+<a name="tisean0.3"></a>
+<h4>TISEAN_0.3 -&gt; TISEAN_0.4</h4>
+<ul>
+<li>Almost all (FORTRAN) programs now accept an option 
+    <font color=blue><tt> -V# </tt></font> that specifies the level of
+    diagnostic output. The default is as a rule what was there in
+    TISEAN_0.3. Specifying <font color=blue><tt> -V0 </tt></font> now switches 
+    off all but fatal error messages. No more reporting of file opening etc.
+<li>Introduced utilities for usage message, removing repetitions of the same
+    code sequences through all sources. 
+<li>Unstable periodic orbits and their
+    stabilities (<a href="upo.html">upo</a>). Stabilities are still somewhat
+    experimental.  
+<li>Embedding of periodic orbits (<a href="upoembed.html">upoembed</a>). 
+<li>General constrained
+    randomization (<a href="randomize.html">randomize</a>). Contains modules
+    for constraints involving linear correlations, others are planned. Own
+    programming efforts to specify exotic constraints are encouraged.
+</ul>
+
+<a name="tisean0.2"></a>
+<h4>TISEAN_0.2 -&gt; TISEAN_0.3</h4>
+<ul>
+<li><a href="timerev.html">timerev</a> and
+    <a href="autocor3.html">autocor3</a>:
+    bug that prevented from reading input removed.
+<li>Made parsing of commandline arguments more stable (hopefully): larger
+    numbers (up to 20 digits) are handled.
+</ul>
+
+
+
+<a name="tisean0.1"></a>
+<h4>TISEAN_0.1 -&gt; TISEAN_0.2</h4>
+
+<ul>
+<li><a href="pc.html">pc</a> prints out the
+    fractions of the variance covered by the principal directions. 
+<li>Recovered correct versions of 
+    <a href="lazy.html">lazy</a>  and 
+    <a href="project.html">project</a>:
+    the difference in the second columns are now formed corerctly,
+    with respect to the raw data, not to the last iterate.
+</ul>
+
+</body></html>
+
+

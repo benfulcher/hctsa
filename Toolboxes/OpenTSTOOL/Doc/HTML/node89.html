@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>7.2.6 Frequently encountered errors</TITLE>
+<META NAME="description" CONTENT="7.2.6 Frequently encountered errors">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="node88.html">
+<LINK REL="up" HREF="node83.html">
+<LINK REL="next" HREF="node90.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html1975"
+  HREF="node90.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1971"
+  HREF="node83.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1967"
+  HREF="node88.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1973"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1976"
+  HREF="node90.html">Bibliography</A>
+<B> Up:</B> <A NAME="tex2html1972"
+  HREF="node83.html">7.2 Answers</A>
+<B> Previous:</B> <A NAME="tex2html1968"
+  HREF="node88.html">7.2.5 Miscellaneous questions</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html1977"
+  HREF="node89.html#SECTION00826100000000000000">7.2.6.1 Using a column vector to create a one-dimensional signal</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H2><A NAME="SECTION00826000000000000000">
+7.2.6 Frequently encountered errors</A>
+</H2>
+
+<P>
+<A NAME="f216:Q400"></A>
+<H3><A NAME="SECTION00826100000000000000">
+7.2.6.1 Using a column vector to create a one-dimensional signal</A>
+</H3>
+
+<P>
+<A NAME="f216:Q410"></A>TSTOOL stores one-dimensional signals always as row vectors. Giving a column vector will
+cause unexpected behaviour with most routines that process signals:
+
+<P>
+<PRE> 
+&gt;&gt; s = signal(sin(0:0.5:100))
+  s = signal object 
+ 
+  Dlens : 1  201
+  X-Axis 1 :  | 
+  X-Axis 2 :  | 
+ 
+  Name : 
+  Type : 
+ 
+  Attributes of data values : 
+   | 
+ 
+  Comment : 
+ 
+  History : 
+16-Aug-1999 19:15:01 : Imported from MATLAB workspace
+</PRE>
+
+<P>
+Instead, a row vector must be given to create the desired
+one-dimensional signal:
+
+<P>
+<PRE> 
+&gt;&gt; s = signal(sin(0:0.5:100)')
+  s = signal object 
+ 
+  Dlens : 201
+  X-Axis 1 :  | 
+ 
+  Name : 
+  Type : 
+ 
+  Attributes of data values : 
+   | 
+ 
+  Comment : 
+ 
+  History : 
+16-Aug-1999 19:16:58 : Imported from MATLAB workspace
+</PRE>
+
+<P>
+
+
+<P>
+<BR><HR>
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

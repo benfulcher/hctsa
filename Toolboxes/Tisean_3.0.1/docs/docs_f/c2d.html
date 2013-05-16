@@ -1,0 +1,32 @@
+<html>
+<head><title>Local slopes from correlation sums</title></head>
+<body bgcolor="#ffffff">
+<h3>Local slopes from correlation sums</h3>
+<font color=blue><tt>c2d [-a# -o </tt><em>outfile</em><tt> -V# -h] </tt><em> file</em>
+</font>
+<blockquote>
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_d</tt></font>
+   <br>     <font color=blue><tt> -a  </tt></font>average using -#,...,+# (1)
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Reads two columns, r(i), c(i) from <font color=blue><em>file</em></font> 
+(correlation integral output of <a href="c2naive.html">c2naive</a>,
+<a href="c1.html">c1</a>,
+or <a href="../docs_c/d2.html">d2</a>)
+and computes local slopes by fitting straight lines. The range of the fits
+is specified by the option <font color=blue><tt> -a  </tt></font>. For the
+local slope at abscissa r(i), the values c(i-a), ..., c(i+a) are used,
+where a is the argument to the <font color=blue> -a</font> option.
+<p>
+Output is to <font color=blue><tt>stdout</tt></font>, or to 
+file <font color=blue><em>file</em><tt>_d</tt></font> if 
+<font color=blue><tt> -o</tt></font> is given.
+<p>
+Alternatives to local slopes are Takens' estimator <a href="c2t.html">c2t</a>
+or to use Gaussian kernel smoothing <a href="c2g.html">c2g</a> before 
+computing slopes.
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

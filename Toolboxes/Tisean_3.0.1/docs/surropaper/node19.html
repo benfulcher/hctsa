@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Example: avoiding periodicity artefacts</TITLE>
+<META NAME="description" CONTENT="Example: avoiding periodicity artefacts">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html265" HREF="node20.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html263" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html257" HREF="node18.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html266" HREF="node20.html">Combinatorial minimisation and accuracy</A>
+<B>Up:</B> <A NAME="tex2html264" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html258" HREF="node18.html">Computational issues of simulated </A>
+<BR> <P>
+<H2><A NAME="SECTION00053000000000000000">Example: avoiding periodicity artefacts</A></H2>
+<P>
+<blockquote><A NAME="959">&#160;</A><IMG WIDTH=338 HEIGHT=493 ALIGN=BOTTOM ALT="figure1075" SRC="img111.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figendanneal">&#160;</A>
+   Progressive stages of the simulated annealing scheme. The data used in
+   Fig.&nbsp;<A HREF="node14.html#figend">6</A> is used to generate an annealed surrogate that minimises
+   <IMG WIDTH=184 HEIGHT=29 ALIGN=MIDDLE ALT="tex2html_wrap_inline2218" SRC="img110.gif"> over all
+   permutations of the data. From top to bottom, the values for <I>E</I> are: 0
+   (original data), 1.01 (random scramble), 0.51, 0.12, 0.015, and 0.00013.<BR>
+</blockquote>
+<P>
+Let us illustrate the use of the annealing method in the case of the standard
+null hypothesis of a rescaled linear process. We will show how the periodicity
+artefact discussed in Sec.&nbsp;<A HREF="node14.html#secperiod">4.5</A> can be avoided by using a more
+suitable cost function. We prepare a surrogate for the data shown in
+Fig.&nbsp;<A HREF="node14.html#figend">6</A> (almost unstable AR(2) process) without truncating its
+length. We minimise the cost function given by Eq.(<A HREF="node17.html#eqcost">23</A>), involving
+all lags up to <IMG WIDTH=76 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline2222" SRC="img112.gif">. Also, we excluded the first and
+last points from permutations as a cheap way of imposing the long range
+correlation. In Fig.&nbsp;<A HREF="node19.html#figendanneal">11</A> we show progressive stages of the
+annealing procedure, starting from a random scramble. The temperature <I>T</I> is
+decreased by 0.1% after either <IMG WIDTH=21 HEIGHT=15 ALIGN=BOTTOM ALT="tex2html_wrap_inline2226" SRC="img113.gif"> permutations have been tried or <IMG WIDTH=21 HEIGHT=15 ALIGN=BOTTOM ALT="tex2html_wrap_inline2228" SRC="img114.gif">
+have been successful.  The final surrogate neither has spuriously matching ends
+nor the additional high frequency components we saw in Fig.&nbsp;<A HREF="node14.html#figend">6</A>. The
+price we had to pay was that the generation of one single surrogate took 6&nbsp;h of
+CPU time on a Pentium&nbsp;II PC at 350&nbsp;MHz.  If we had taken care of the long range
+correlation by leaving the end points loose but taking <IMG WIDTH=93 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline2130" SRC="img93.gif">, convergence would have been prohibitively slow.  Note that for a
+proper test, we would need at least 19 surrogates. We should stress that this
+example with its very slow decay of correlations is particularly nasty -- but
+still feasible. Obviously, sacrificing 10% of the points to get rid of the
+end point mismatch is preferable here to spending several days of CPU time
+on the annealing scheme. In other cases, however, we may not have such a
+choice.
+<P>
+<HR><A NAME="tex2html265" HREF="node20.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html263" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html257" HREF="node18.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html266" HREF="node20.html">Combinatorial minimisation and accuracy</A>
+<B>Up:</B> <A NAME="tex2html264" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html258" HREF="node18.html">Computational issues of simulated </A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

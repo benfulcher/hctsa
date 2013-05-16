@@ -1,0 +1,20 @@
+function rs = intspikeint(s, len)
+
+% signal/movav
+% rs = movav(s, len)
+% moving average of width len (samples) for a scalar time series  (len should be odd)
+%
+%  C.Merkwirth,J.Wichard,K.Peters,F.Bauer,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
+
+error(nargchk(2,2,nargin));
+
+
+c = movav(s.core, len);
+rs = signal(c, s);				% special constructor calling syntax for working routines
+
+
+a = getaxis(rs,1);
+a = setfirst(a, ((len+1)/2) * delta(a));
+
+rs = setaxis(rs, 1, a);
+rs = addhistory(rs,  ['Moving average with window of ' num2str(len) ' samples'] );

@@ -1,0 +1,9 @@
+Exception: STATUS_ACCESS_VIOLATION at eip=004049B0
+eax=011503A0 ebx=6127EC64 ecx=00425B94 edx=00000000 esi=FFFFFFFF edi=00000000
+ebp=0027CD48 esp=0027CC4C program=C:\Cygwin\bin\grep.exe, pid 2508, thread main
+cs=0023 ds=002B es=002B fs=0053 gs=002B ss=002B
+Stack trace:
+Frame     Function  Args
+0027CD48  004049B0  (00000002, 6127EC64, 011400F8, 610049D9)
+0027CD78  61006DEA  (00000000, 0027CDB0, 610066C0, 7EFDE000)
+End of stack trace

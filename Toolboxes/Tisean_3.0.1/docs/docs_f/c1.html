@@ -1,0 +1,71 @@
+<html>
+<head><title>Fixed mass estimation of D1</title></head>
+<body bgcolor="#ffffff">
+<h3>Fixed mass estimation of C1 (information dimension)</h3>
+<font color=blue><tt>c1 <font color=red>-d# -m# -M# -t# -n#</font> [-## -K# -o </tt><em>outfile</em><tt> -l# -x# -c#[,#] -V# -h] </tt><em> file</em>
+</font>
+<blockquote>
+   <br>     <font color=red><tt> -d  </tt></font>delay
+   <br>     <font color=red><tt> -m  </tt></font>minimal embedding dimension
+   <br>     <font color=red><tt> -M  </tt></font>maximal embedding dimension (at least 2)
+   <br>     <font color=red><tt> -t  </tt></font>minimal time separation
+   <br>     <font color=red><tt> -n  </tt></font>minimal number of center points
+   <br>     <font color=blue><tt> -#  </tt></font>resolution, values per octave (2)
+   <br>     <font color=blue><tt> -K  </tt></font>maximal number of neighbours (100)
+   <br>     <font color=blue><tt> -l  </tt></font>number of values to be read (all)
+   <br>     <font color=blue><tt> -x  </tt></font>number of values to be skipped (0)
+   <br>     <font color=blue><tt> -c  </tt></font><a href=../general.html#column>column(s) to be read</a> (1 or <font color=blue><em>file</em></font>,#)
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_c1</tt></font>
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Computes curves for the fixed mass computation of the <a href="../chaospaper/node33.html">information dimension</a>.
+The output is written to a
+file named <font color=blue><em>file</em><tt>_c1</tt></font>, 
+containing as two columns the
+necessary radius and the `mass'. Although the `mass' is the independent
+quantity here, this is to conform with the output of <a
+href="c2naive.html">c2naive</a> and <a href="../docs_c/d2.html">d2</a>.
+
+<p>A logarithmic range of masses between 1/N and 1 is realised by varying
+the neighbour order k as well as the subsequence length n. For a given mass
+k/n, n is chosen as small is possible as long as k is not smaller than the
+value specified by <font color=blue><tt> -K  </tt></font>.
+
+<p>The number of reference points has to be selected by specifying
+<font color=blue><tt> -n  </tt></font>. That number of points are selected
+at random from all time indices.
+
+<p>It is possible to use multivariate data, also with mixed embeddings.
+Contrary to the convention, the embedding dimension here specifies the total
+number of phase space coordinates. The number of components of the time series
+to be considered can only be given by explicit enumeration with the option
+<font color=blue><tt> -c  </tt></font>.
+
+<p><font color=red><b>Note:</b></font> 
+You will probably use the auxiliary programs
+<a href="c2d.html">c2d</a> or <a href="c2t.html">c2t</a> 
+to process the output further. The formula used for the Gaussian kernel 
+correlation sum does not apply to the information dimension.
+See also the example below. 
+
+<p>
+<hr>
+<h3>Usage example</h3>
+Try also just running: <font color=blue><tt>gnuplot c1.gnu</tt></font> in the 
+<font color=blue><tt>examples</tt></font> directory.
+<p>
+<pre>
+&gt; <font color=blue><tt>henon -l10000 &gt; data</tt></font>
+&gt; <font color=blue><tt>c1 -m2 -M6 -d1 -t50 -n500 data </tt></font>
+
+gnuplot&gt; <font color=blue><tt>set logscale x</tt></font>
+gnuplot&gt; <font color=blue><tt>set yrange [0:3]</tt></font>
+gnuplot&gt; <font color=blue><tt>plot '&lt; c2d -a2 data_c1', 1.2 </tt></font>
+</pre>
+<p>
+<IMG SRC="c1.gif" alt="correlation sum">
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

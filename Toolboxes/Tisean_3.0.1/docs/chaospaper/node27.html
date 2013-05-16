@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>The maximal exponent</TITLE>
+<META NAME="description" CONTENT="The maximal exponent">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html346" HREF="node28.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html344" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html338" HREF="node26.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html347" HREF="node28.html">The Lyapunov spectrum</A>
+<B>Up:</B> <A NAME="tex2html345" HREF="node26.html">Lyapunov exponents</A>
+<B> Previous:</B> <A NAME="tex2html339" HREF="node26.html">Lyapunov exponents</A>
+<BR> <P>
+<H2><A NAME="SECTION00071000000000000000">The maximal exponent</A></H2>
+<A NAME="seclyapmax">&#160;</A>
+The maximal Lyapunov exponent can be determined without the explicit
+construction of a model for the time series. A reliable characterization
+requires that the independence of embedding parameters and the exponential law
+for the growth of distances are checked&nbsp;[<A HREF="citation.html#Holger">69</A>, <A HREF="citation.html#rose">70</A>] explicitly.
+Consider the representation of the time series data as a trajectory in the
+embedding space, and assume that you observe a very close return <IMG WIDTH=18 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline7443" SRC="img107.gif"> to
+a previously visited point <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6691" SRC="img38.gif">.  Then one can consider the distance
+<IMG WIDTH=94 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline7447" SRC="img108.gif"> as a small perturbation, which should grow
+exponentially in time. Its future can be read from the time series:
+<IMG WIDTH=120 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7449" SRC="img109.gif">. If one finds that <IMG WIDTH=85 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline7451" SRC="img110.gif"> then <IMG WIDTH=8 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline7375" SRC="img103.gif"> is (with probability one) the maximal
+Lyapunov exponent. In practice, there will be fluctuations because of many
+effects, which are discussed in detail in&nbsp;[<A HREF="citation.html#Holger">69</A>]. Based on this
+understanding, one can derive a robust consistent and unbiased estimator for
+the maximal Lyapunov exponent.  One computes
+<BR><A NAME="eqS">&#160;</A><IMG WIDTH=500 HEIGHT=58 ALIGN=BOTTOM ALT="equation5543" SRC="img111.gif"><BR>
+If <IMG WIDTH=61 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7455" SRC="img112.gif"> exhibits a linear increase with identical slope for all
+<I>m</I> larger than some <IMG WIDTH=20 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6617" SRC="img24.gif"> and for a reasonable range of <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">, then this
+slope can be taken as an estimate of the maximal exponent <IMG WIDTH=13 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7463" SRC="img113.gif">.
+<P>
+The formula is implemented in the routine <a href="../docs_f/lyapunov.html">lyapunov</a> in a
+straightforward way. (The program <a href="../docs_c/lyap_r.html">lyap_r</a> implements the very similar
+algorithm of Ref.&nbsp;[<A HREF="citation.html#rose">70</A>] where only the closest neighbor is followed for
+each reference point. Also, the Euclidean norm is used.)  Apart from parameters
+characterizing the embedding, the initial neighborhood size <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif"> is of
+relevance: The smaller <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">, the large the linear range of <I>S</I>, if there
+is one. Obviously, noise and the finite number of data points limit <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">
+from below.  It is not always necessary to extend the average in Eq.(<A HREF="node27.html#eqS"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) over
+the whole available data, reasonable averages can be obtained already with a
+few hundred reference points <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline7473" SRC="img114.gif">. If some of the reference points have very
+few neighbors, the corresponding inner sum in Eq.(<A HREF="node27.html#eqS"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) is dominated by
+fluctuations. Therefore one may choose to exclude those reference points which
+have less than, say, ten neighbors. However, discretion has to be applied with
+this parameter since it may introduce a bias against sparsely populated
+regions. This could in theory affect the estimated exponents due to
+multifractality. Like other quantities, Lyapunov estimates may be affected by
+serial correlations between reference points and neighbors. Therefore, a
+minimum time for |<I>n</I>-<I>n</I>'| can and should be specified here as well. See also
+Sec.<A HREF="node29.html#secdimension"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>.
+<P>
+<P><blockquote><A NAME="5542">&#160;</A><IMG WIDTH=345 HEIGHT=458 ALIGN=BOTTOM ALT="figure1368" SRC="img106.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figlyap1">&#160;</A>
+  Estimating the maximal Lyapunov exponent of the CO<IMG WIDTH=6 HEIGHT=11 ALIGN=MIDDLE ALT="tex2html_wrap_inline6701" SRC="img39.gif"> laser data. The
+  top panel shows results for the Poincar&#233; map data, where the average time
+  interval <IMG WIDTH=21 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7371" SRC="img101.gif"> is 52.2 samples of the flow, and the
+  straight line indicates <IMG WIDTH=58 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline7373" SRC="img102.gif">. For comparison: The iteration of the
+  radial basis function model of Fig.&nbsp;<A HREF="node21.html#figpredictINOrbf"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> yields
+  <IMG WIDTH=8 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline7375" SRC="img103.gif">=0.35. Bottom panel: Lyapunov exponents determined directly from the
+  flow data. The straight line has slope
+  <IMG WIDTH=66 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline7377" SRC="img104.gif">. In good approximation, <IMG WIDTH=108 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7379" SRC="img105.gif">. Here, the
+  time window <I>w</I> to suppress correlated neighbors has been set to 1000, and
+  the delay time was 6&nbsp;units.<BR>
+</blockquote><P>
+Let us discuss a few typical outcomes. The data underlying the top panel of
+Fig.&nbsp;<A HREF="node27.html#figlyap1"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> are the values of the maxima of the CO<IMG WIDTH=6 HEIGHT=11 ALIGN=MIDDLE ALT="tex2html_wrap_inline6701" SRC="img39.gif"> laser
+data. Since this laser exhibits low dimensional chaos with a reasonable noise
+level, we observe a clear linear increase in this semi-logarithmic plot,
+reflecting the exponential divergence of nearby trajectories. The exponent is
+<IMG WIDTH=58 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline7479" SRC="img115.gif"> per iteration (map data!), or, when introducing the
+average time interval, 0.007 per <IMG WIDTH=9 HEIGHT=16 ALIGN=MIDDLE ALT="tex2html_wrap_inline7481" SRC="img116.gif">s. In the bottom panel we show the result
+for the same system, but now computed on the original flow-like data with a
+sampling rate of 1&nbsp;MHz. As additional structure, an initial steep increase and
+regular oscillations are visible. The initial increase is due to non-normality
+and effects of alignment of distances towards the locally most unstable
+direction, and the oscillations are an effect of the locally different
+velocities and thus different densities. Both effects can be much more dramatic
+in less favorable cases, but as long as the regular oscillations possess a
+linearly increasing average, this can be taken as the estimate of the Lyapunov
+exponent. Normalizing by the sampling rate, we again find <IMG WIDTH=25 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline7483" SRC="img117.gif">
+0.007 per <IMG WIDTH=9 HEIGHT=16 ALIGN=MIDDLE ALT="tex2html_wrap_inline7481" SRC="img116.gif">s, but it is obvious that the linearity is less pronounced then
+for the map-like data.  Finally, we show in Fig.&nbsp;<A HREF="node27.html#figlyap2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> an example
+of a negative result: We study the human breath rate data used before. No
+linear part exists, and one cannot draw any reasonable conclusion. It is worth
+considering the figure on a doubly logarithmic scale in order to detect a power
+law behavior, which, with power 1/2, could be present for a diffusive growth
+of distances. In this particular example, there is no convincing power law
+either.
+<P>
+<P><blockquote><A NAME="5715">&#160;</A><IMG WIDTH=341 HEIGHT=215 ALIGN=BOTTOM ALT="figure1470" SRC="img118.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figlyap2">&#160;</A>
+   The breath rate data (c.f. Fig.&nbsp;<A HREF="node23.html#figb"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) exhibit no linear increase,
+   reflecting the lack of exponential divergence of nearby trajectories.<BR>
+</blockquote><P><HR><A NAME="tex2html346" HREF="node28.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html344" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html338" HREF="node26.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html347" HREF="node28.html">The Lyapunov spectrum</A>
+<B>Up:</B> <A NAME="tex2html345" HREF="node26.html">Lyapunov exponents</A>
+<B> Previous:</B> <A NAME="tex2html339" HREF="node26.html">Lyapunov exponents</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

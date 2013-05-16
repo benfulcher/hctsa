@@ -1,0 +1,101 @@
+<html>
+<head>
+<title>
+mem_spec
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>mem_spec
+</font>
+</h1>
+<hr>
+This program estimates the power spectrum of a scalar data set on the
+basis of the maximum entropy principle. A theoretical description of the
+idea behind is given in the <a
+href="../chaospaper/citation.html#numrec">Numerical 
+Recipes</a>.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>mem_spec [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential
+datafile name. Given no datafile at all, means read stdin. Also <font
+color=Red>-</font> means stdin 
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-p#
+<td>number of poles
+<td>128
+</tr>
+<tr>
+<th>-P#
+<td>number of frequences to print
+<td>2000
+</tr>
+<tr>
+<th>-f#
+<td>sampling rate in Hz
+<td>1
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.spec<br>
+(or stdin.spec if data were read from stdin)<br>
+Without -o data is written to stdout
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages<br>
+&nbsp;&nbsp;2: add the AR coefficients to the output
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The first line shows the average forecast error of the AR-model
+fitted.
+The following <font color=blue>p</font> lines contain the coefficients
+of the fitted AR-model and 
+the last <font color=blue>P</font> lines contain the power spectrum.
+<hr>
+View the <a href="../../source_c/mem_spec.c">C-source</a>.
+<hr>
+See also <a href="../docs_f/spectrum.html">spectrum</a> 
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

@@ -1,0 +1,34 @@
+_______________________________________________________________________________
+
+        _/_/_/_/_/  _/     _/_/_/     _/_/_/_/     _/_/     _/      _/ 
+           _/      _/   _/      _/   _/         _/    _/   _/      _/  
+          _/      _/   _/           _/         _/    _/   _/_/    _/   
+         _/      _/     _/_/_/     _/_/_/_/   _/_/_/_/   _/  _/  _/    
+        _/      _/           _/   _/         _/    _/   _/    _/_/     
+       _/      _/   _/      _/   _/         _/    _/   _/      _/      
+      _/      _/     _/_/_/     _/_/_/_/   _/    _/   _/      _/       
+     
+     Nonlinear time series project
+     Copyright (C) Rainer Hegger & Thomas Schreiber (1998-2007) 
+_______________________________________________________________________________
+
+All programs are given WITHOUT ANY WARRANTY; without even the implied 
+warranty of merchantability or fitness for a particular purpose. If you decide
+to use them, you do so AT YOUR OWN RISK.
+
+The copyright to each program is held by the person named in the source code.
+You may use and refer to them as you do with any scientific publication.
+
+** To get started, use a html browser and view the documentation, e.g.
+
+> netscape index.html
+
+** To install type 
+
+> ./configue
+> make
+> make install
+
+and observe the warnings :-)
+
+Have fun.

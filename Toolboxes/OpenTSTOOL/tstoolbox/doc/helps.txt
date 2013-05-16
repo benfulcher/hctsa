@@ -1,0 +1,1127 @@
+%   TSTOOL - Nonlinear time series analysis toolbox 
+%     [rlvm, frvals, frvecs, trnsfrmd, mn, dv] = pca(data, mode, maxpercent, silent) 
+%   
+%     principal component analysis of column orientated data set <data> 
+%      
+%     input arguments : 
+%   
+%     - each row of data is one 'observation', e.g. the sample values of 
+%       all channels in a multichannel measurement at one point in time 
+%   
+%     - mode can be one of the following : 'normalized' (default), 'mean', 'raw' 
+%       - in mode 'normalized' each column of data is centered by removing its mean 
+%         and then normalized by dividing through its standard deviation before 
+%         the covariance matrix is calculated 
+%       - in mode 'mean' only the mean of every column of data is removed 
+%       - in mode 'raw' no preprocessing is applied to data 
+%   
+%     - maxpercent gives the limit of the accumulated percentage of the resulting 
+%       eigenvalues, default is 95 %   
+%     - silent is an optional flag which supresses output of text and plot on the matlab 
+%       screen. Returned values (see below) are in no way affected 
+%   
+%     output arguments : 
+%   
+%     - rlvm : number of relevant modes to reach maxpercent 
+%     - frvals : first rlvm relevant eigenvalues  
+%     - frvecs : first rlvm relevant eigenvectors (eigenmodes, or principal components) 
+%     - trnsfrmd : data points transformed to the coordinate system given be the eigenvectors  
+%     - mn : mean of the original data set (only in mode 'mean' and 'normalized') 
+%     - dv : standard deviation of the original data set (only in mode 'normalized') 
+%   
+%     Christian Merkwirth (cmerk) Maerz 1997 
+%     cmerk Jan.  1998 
+%   core/db 
+%   cout = db(cin, ref, scf, dbmin) 
+%   
+%   compute decibel values to reference value ref 
+%   and scaling factor (10 or 20) scf 
+%   
+%   cmerk 1998 
+%  
+ 
+%     help core/db.m 
+%   core/spec 
+%   compute power spectrum for real valued signals 
+%   
+%   cmerk 1998 
+%  
+ 
+%     help core/spec.m 
+%   core/acf 
+%   autocorrelation function via fft 
+%  
+ 
+%     help core/acf.m 
+%   core/data 
+%   
+%   with no extra arguments, data returns the data array of a signal object, 
+%   another possible call is data(signal, ':,:,1:20') 
+%  
+ 
+%     help core/data.m 
+%   core/embed 
+%   
+%   cout = embed(cin, dim, delay) 
+%    
+%   create time delay vectors with dimension dim, delay is measured 
+%   in samples 
+%   The input must be a scalar time series 
+%   
+%   The result is a n by dim array, each row contains the coordinates 
+%   of one point 
+%  
+ 
+%     help core/embed.m 
+%   core/rms 
+%   compute root mean square value of each column of c1 
+%  
+ 
+%     help core/rms.m 
+%   core/ccf 
+%   cross correlation function via fft 
+%  
+ 
+%     help core/ccf.m 
+%   core/surrogate1 
+%   
+%   create surrogate data for a scalar time series 
+%   
+%   
+%   see : James Theiler et al.'Using Surrogate Data to Detect Nonlinearity in Time Series', APPENDIX : ALGORITHM II 
+%   
+%    
+%  
+ 
+%     help core/surrogate2.m 
+%   core/surrogate1 
+%   
+%   create surrogate data for a scalar time series 
+%   by randomizing phases of fourier spectrum 
+%   
+%   see : James Theiler et al.'Using Surrogate Data to Detect Nonlinearity in Time Series', APPENDIX : ALGORITHM I 
+%   
+%    
+%  
+ 
+%     help core/surrogate1.m 
+%  
+ 
+%     help core/vertcat.m 
+%   return number of dimensions, a scalar value has 0 dimensions 
+%  
+ 
+%     help core/ndim.m 
+%   core/dlens 
+%   returns sizes of dimensions (same as function 'size' under matlab) 
+%  
+ 
+%     help core/dlens.m 
+%   core/isempty 
+%   r = isempty(s) 
+%   test if core contains no (valid) data 
+%  
+ 
+%     help core/isempty.m 
+%   core/normalize 
+%   cout = normalize(cin) 
+%   normalize each single column of a the core object to be within [low,upp] 
+%  
+ 
+%     help core/normalize.m 
+%   core/compare 
+%   compare(c1,c2, tolerance) 
+%   compare two signals whether they have equal values 
+%   slight differences due to rounding errors are ignored 
+%   depending on the value of tolerance 
+%   when signals are found to be not equal, a zero is returned 
+%  
+ 
+%     help core/compare.m 
+%   core/diff 
+%   cout = diff(cin, delta) 
+%   
+%   nth numerical derivative along dimension 1 when data was sampled 
+%   equidistantly with samplerate = 1/delta   
+%  
+ 
+%     help core/diff.m 
+%   core/int 
+%   cout = int(cin, delta) 
+%   
+%   numerical integration along dimension 1 when data was sampled 
+%   equidistantly with samplerate = 1/delta   
+%  
+ 
+%     help core/int.m 
+%   inverse fft for fourier coefficents from real valued  original data 
+%   needs the length of the original time series from which the fft was computed 
+%   see also : realfft 
+%   fft for real valued data, returns only the necessary  
+%   fourier coefficients 
+%   root mean square of time series data 
+%   
+%   cmerk Feb 1998 
+%   gauss(N) 
+%    
+%   returns N normally distributed random numbers 
+%   reference : Num. Recipes, Chapter 7.2 Normal Deviates 
+%   Replacement for size  
+%   Returns only one value for a column vector 
+%   Cuts of any trailing ones 
+%  
+ 
+%     help core/display.m 
+%  
+ 
+%     help core/plus.m 
+%  
+ 
+%     help core/uminus.m 
+%  
+ 
+%     help core/minus.m 
+%   core/core 
+%   core class constructor 
+%   a core object contains the pure data part of a signal object 
+%   
+%   c = core(<double array>) 
+%   
+%   methods : ndim dlens data 
+%  
+ 
+%     help core/core.m 
+%   list2 = append(list, string); 
+%   list2 = append(list, list); 
+%  
+ 
+%     help list/append.m 
+%   s = get(l, nr) 
+%   returns string number nr from list l 
+%  
+ 
+%     help list/get.m 
+%   len = length(l) 
+%   returns the number of strings in list l 
+%  
+ 
+%     help list/length.m 
+%   returns a char array from list l 
+%  
+ 
+%     help list/char.m 
+%   list/list 
+%   list class constructor 
+%   
+%   an object of type list contains a list of strings 
+%   
+%   l = list; 	%   
+%   methods : append remove get length sort char 
+%  
+ 
+%     help list/list.m 
+%  
+ 
+%     help list/display.m 
+%   sort list l in increasing order 
+%  
+ 
+%     help list/sort.m 
+%  
+ 
+%     help unit/eq.m 
+%   returns name of unit q 
+%  
+ 
+%     help unit/name.m 
+%   returns reference value for 0 dB 
+%   when calculating decibel values from data of this unit 
+%  
+ 
+%     help unit/dbref.m 
+%  
+ 
+%     help unit/label.m 
+%   gives a row vector which's first elemnent contains the unit's factor 
+%   and the remaining elements contain the exponents of the SI basic units 
+%  
+ 
+%     help unit/double.m 
+%   returns factor of unit q 
+%  
+ 
+%     help unit/factor.m 
+%   returns quantity name of unit q 
+%   if argument which is omitted, the english quantity name will be returned 
+%  
+ 
+%     help unit/quantity.m 
+%  
+ 
+%     help unit/mrdivide.m 
+%   returns scaling value when calculating 
+%   decibel values from data of this unit 
+%   
+%   returns either 10 (for power or energy units (e.g. Watt)) 
+%   or 20 (for all other units (e.g. Volt) 
+%  
+ 
+%     help unit/dbscale.m 
+%   unit/mpower 
+%   mpower(u,p) 
+%    
+%   take unit u to power p, 
+%   p must be a scalar 
+%  
+ 
+%     help unit/mpower.m 
+%   gives the unit's label (e.g. V for Volt) back 
+%  
+ 
+%     help unit/char.m 
+%   returns dimension exponents of unit q 
+%  
+ 
+%     help unit/exponents.m 
+%   Script to generate a .mat file called 
+%   units.mat which is the database for the unit class 
+%   After appending new units please execute this script in 
+%   directory @unit/private 
+%   finds factor, exponents and name for a given unit label 
+%   finds label and name for a given set of factors and exponents 
+%   disp(['Factor    :   ' num2str(u.factor)]); 
+%   disp(['Exponents of :   ']); 
+%   disp(['  mass                :   ' num2str(u.exponents(1))]); 
+%   disp(['  length              :   ' num2str(u.exponents(2))]); 
+%   disp(['  time                :   ' num2str(u.exponents(3))]); 
+%   disp(['  current             :   ' num2str(u.exponents(4))]); 
+%   disp(['  temperature         :   ' num2str(u.exponents(5))]); 
+%   disp(['  luminal intensity   :   ' num2str(u.exponents(6))]); 
+%   disp(['  mole                :   ' num2str(u.exponents(7))]); 
+%   disp(['  plane_angle         :   ' num2str(u.exponents(8))]); 
+%   disp(' '); 
+%  
+ 
+%     help unit/display.m 
+%  
+ 
+%     help unit/mtimes.m 
+%   unit class constructor 
+%   class 'unit' tries to modell physical units 
+%   a physical unit is mainly can be described by the exponents of the basic SI units, 
+%   namely mass, length, time, current, temperature,luminal_intensity, mole and plane_angle 
+%   
+%   each unit belongs to a quantity, e.g. the unit 's' (second) is used when measuring the 
+%   quantity TIME 
+%    
+%   each unit has a name, e.g. 'Ampere', 'Volt' , 'Joule', 'hour', and 
+%   an abbreviation, called label ('A', 'V', 'J', 'h') 
+%    
+%   unfortunately, the correspondence between these items is not always bijectiv 
+%   to find corresponding items, a table of units in the file units.mat is used 
+%   
+%   a unit object can be created with different types of arguments : 
+%    
+%   1. by giving the label : unit('Hz') looks up the remaining data (exponents, name, quantity) in the table 
+%   2. by giving the exponents  
+%   
+%   some arithmetic can be done with units : 
+%   
+%   units can be multiplied unit('V') * unit('A') = unit('Watt') 
+%   or taken to an integer or rational power unit('m')^2 
+%  
+ 
+%     help unit/unit.m 
+%   achse/eq 
+%   test if achse a and achse b are equal 
+%   first is not (!) taken into account for this test 
+%  
+ 
+%     help achse/eq.m 
+%   achse/scale 
+%   r = scale(a,f) 
+%   scale achses delta by factor f 
+%  
+ 
+%     help achse/scale.m 
+%  
+ 
+%     help achse/name.m 
+%   achse/setdelta 
+%   a = setdelta(a,f) 
+%  
+ 
+%     help achse/setdelta.m 
+%  
+ 
+%     help achse/label.m 
+%  
+ 
+%     help achse/first.m 
+%  
+ 
+%     help achse/horzcat.m 
+%  
+ 
+%     help achse/quantity.m 
+%   achse/setname 
+%   a = setname(a, newname) 
+%  
+ 
+%     help achse/setname.m 
+%  
+ 
+%     help achse/resolution.m 
+%   achse class constructor 
+%   used to describe the different dimensions (axes) of a signal object 
+%   
+%   a = achse;                 creates default achse object 
+%   a = achse(axs);            copies achse object axs into a 
+%   a = achse(unt);            creates achse object using unit unt, with linear spacing, first = 0, delta = 1 
+%   a = achse(vec);            creates achse object with arbitrary spacing, using values in vec as spacing data 
+%   a = achse(unt, vec);       creates achse object using unit unt with arbitrary spacing,  
+%                              using values in vec as spacing data 
+%   a = achse(unt, first, delta);  	 creates achse object with linear spacing, using delta and first 
+%   a = achse(unt, first, delta, 'log'); creates achse object with logarithmic spacing, using delta and first 
+%   example : a = achse(unit('Hz'), 0.01, 10, 'log') creates a logarithmic frequency axis with values 0.01 Hz, 0.1 Hz, 1 Hz, 10 Hz 
+%   
+%   a = achse(label, samplerate);        has the same result as : 
+%   a = achse(unit(label), 0, 1/samplerate);  
+%   
+%   see also : delta first horzcat label name quantity resolution samplerate scale setname spacing unit 
+%  
+ 
+%     help achse/achse.m 
+%  
+ 
+%     help achse/display.m 
+%   achse/setfirst 
+%   a = setfirst(a,f) 
+%  
+ 
+%     help achse/setfirst.m 
+%  
+ 
+%     help achse/delta.m 
+%  
+ 
+%     help achse/unit.m 
+%   achse/spacing 
+%   function v = values(a, len) 
+%   returns spacing values for linear, logarithmic or arbitary spacing 
+%   in case of lin. or log. spacing, len values are returned, 
+%   in case of arbitary spacing, all stored values are returned 
+%  
+ 
+%     help achse/spacing.m 
+%   achse/samplerate 
+%   
+%   function rate = samplerate(a) 
+%   returns samplerate of achse object 
+%  
+ 
+%     help achse/samplerate.m 
+%   Versuch eines sehr schnellen Naechsten-Nachbar-Algorithmus 
+%   speziell fuer Time-Delay-Vektoren 
+%   
+%   Dieser Algorithmus wird nur mit der skalaren Zeitreihe und nicht 
+%   mit den schon eingebetteten Punkten versorgt ! 
+%   
+%   timeseries muss als Spaltenvektor gegeben werden ! 
+%   
+%   nn ist wieder ein Spaltenvektor, der die Indizes jeweils des 
+%   naechsten Nachbarns (bzgl. Maximumsnorm) enthaelt 
+figure
+subplot(3,3,1);
+echo on
+clc
+
+
+% This is an introduction to tstool
+% tstool is a matlab toolbox for time series analysis
+% 
+% The basic object of interest in such a package is
+% a "signal". A signal is a combination of raw data values
+% and a descriptive part wich gives information about the
+% raw data values, for example what physical unit they have
+% and at which samplerate they were measured. Most information
+% in the descriptive part is optional and not needed to do
+% computations with that signal.
+
+% When a signal is displayed at the matlab prompt, parts of
+% the descriptive information is shown.
+
+% Hit a key to continue 
+pause; clc
+% There are several different ways to create a signal object :
+
+% The first methods is to use a matlab array as raw data for
+% the new signal object. This gives you the possibility to use 
+% results of other matlab scripts/functions/toolboxes in an easy
+% way in the tstool package.
+
+tmp = sin(0:0.1:79.9);
+s = signal(tmp')
+
+% Hit a key to continue
+pause; clc
+% Once you have a signal, you can use 
+% command "view" to display the signal :
+
+view(s);
+
+% Hit a key to continue
+pause; clc
+% Okay, but this could be done in matlab without any additional packages. 
+
+% Let's go to some more sophisticated stuff :
+% Assume your time series was sampled with 8000 Hz and the data values
+% are measured in Volts.
+
+s = signal(tmp', 8000);
+s = setyunit(s, unit('V'));
+subplot(3,3,2);
+view(s);
+
+% Have a look at the plot now !
+% Hit a key to continue
+pause; clc
+% Now its time to do some computations with signals.
+% Let's beginn with the power spectrum of the signal.
+
+subplot(3,3,3);
+view(spec(s));
+
+% What about the maximum of the recently calculated spectrum ?
+
+max(spec(s));
+
+% Hit a key to continue
+pause; clc
+
+% Let's view the auto correlation function (acf) of the sunspots signal
+
+s2 = acf(s);
+subplot(3,3,4);
+view(s2);
+
+
+% Where is the first zero crossing ?
+
+firstzero(s2);
+
+
+% Hit a key to continue
+pause; clc
+
+% Another way to create a signal object is to load data from
+% an ASCII, WAVE, AU or netCDF file
+
+sunspots = signal('/home/wenders/tstool/data/sunspots.dat', 'ASC');
+sunspots = addcomment(sunspots, 'Index of sunspot activity')
+
+subplot(3,3,5);
+view(sunspots);
+
+% Hit a key to continue
+pause; clc
+% For a spectrum in dB of the recently loaded time series use :
+
+subplot(3,3,6)
+view(db(spec(sunspots)));
+
+% By dragging a rectangular region in the plot (holding
+% left mouse button down) you can zoom in.
+% To zoom out, press the right mouse button several times.
+
+
+% Hit a key to continue
+pause; clc
+
+% An important topic in nonlinear time series analysis is the generating
+% of surrogate data. Here's an example of surrogate data calculated from
+% the sunspots signal by Theilers Algorithm Nr. II.
+
+subplot(3,3,7);
+view(surrogate2(sunspots));
+
+% Hit a key to continue
+pause; clc
+
+
+
+
+%   gauss(N) 
+%    
+%   returns N normally distributed random numbers 
+%   with zeo mean and  
+%   reference : Num. Recipes, Chapter 7.2 Normal Deviates 
+%   normalize 
+%   normalize each column of a matrix to be within [low,upp] 
+%   signal/gen 
+%   
+%   generate various kind of signals with time axis 
+%   
+%   si = gen(mode, len, frequency, samplerate, amplitude, startphase, yunit) 
+%   
+%   len is measured in seconds 
+%   frequency, samplerate in Hertz 
+%   amplitude is measured in the current yunit (default is dimensionless) 
+%   startphase in radians 
+%   yunit is an optional argument 
+%   
+%   mode may be one of the following : 
+%   sine              - sinusodial signal between [-amplitude +amplitude] 
+%   unoise            - uniform distrubuted random numbers in interval [-amplitude +amplitude] 
+%   gnoise            - gaussian random numbers with zero mean 
+%   fnoise            - spectral flat noise with zero mean (DC value = 0) 
+%   rect				- rectangular signal with values discret values 0 and amplitude 
+%   symmrect          - rectangular signal with values discret values -amplitude and amplitude 
+%   comb              - train of (one sample wide) spikes of height amplitude, otherwise signal is zero 
+%    
+%   
+%   cmerk Feb. 1998 
+%   n nearest neighbour algorithm 
+%   find n nearest neighbours (in order of increasing distances) in the data set "points"  
+%   for each given reference point 
+%    
+%   uses sequential searching, distances are calculated with maximumsnorm 
+%   
+%   before searching, each coordinate of points is scaled to be between [0 .. 1] 
+%   
+%   input arguments: 
+%   points (matrix) : data set of points, given as row vectors   
+%   indices_ref (vector) : the indices of the reference points (each between 1 and number of vectors in 'points') 
+%                 which must be chosen out of the original data set (in 'points') 
+%   past : a nearest neighbour is only valid if it is as least past timesteps away from the reference point 
+%   past = 1 means : use all points but ref_point itself 
+%    
+%   output arguments: 
+%   nn : (cell array of index vectors) indices of nearest neighbours, length(nn) = length(indices_ref) 
+%   
+%   to get the coordinates of the nearest neighbours simply type : points(nn, :) 
+%   
+%   see also : nearneigh fnearneigh fnnearneigh normalize 
+%   
+%   cmerk 1998 
+%   fast nearest neighbour algorithm 
+%   uses 2-d segmentation for acceleration of search 
+%   
+%   input arguments: 
+%   points : data set of points, given as row vectors   
+%   indices_ref : the indices of the reference points (each between 1 and number of vectors in 'points') 
+%                 which must be chosen out of the original data set (in 'points') 
+%   past : a nearest neighbour is only valid if it is as least past timesteps away from the reference point 
+%   boxes : number of boxes for the 2-d presegmentation, default is 100 
+%   
+%   output arguments: 
+%   nn : indices of nearest neighbours, length(nn) = length(indices_ref) 
+%   
+%   to get the coordinates of the nearest neighbours simply type : points(nn, :) 
+%   
+%   cmerk 1998 
+%   nearest neighbour algorithm 
+%   find one nearest neighbour in the data set "points" for each given reference point  
+%   
+%   uses sequential searching, distances are calculated with maximumsnorm 
+%   
+%   before searching, each coordinate of points is scaled to be between [0 .. 1] 
+%   
+%   input arguments: 
+%   points (matrix) : data set of points, given as row vectors   
+%   indices_ref (vector) : the indices of the reference points (each between 1 and number of vectors in 'points') 
+%                 which must be chosen out of the original data set (in 'points') 
+%   past : a nearest neighbour is only valid if it is as least past timesteps away from the reference point 
+%   past = 1 means : use all points but ref_point itself 
+%    
+%   output arguments: 
+%   nn : (vector) indices of nearest neighbours, length(nn) = length(indices_ref) 
+%   
+%   to get the coordinates of the nearest neighbours simply type : points(nn, :) 
+%   
+%   see also : nnearneigh fnearneigh fnnearneigh 
+%   
+%   cmerk 1998 
+%   n nearest neighbour algorithm 
+%   find n nearest neighbours (in order of increasing distances) in the data set "points"  
+%   for each given reference point 
+%    
+%   uses sequential searching, distances are calculated with maximumsnorm 
+%   
+%   no preprocessing is applied to the data 
+%   
+%   input arguments: 
+%   points (matrix) : data set of points, given as row vectors   
+%   refpoints (matrix) : the reference points to which the nearest neighbours will be calculated, 
+%                        given as row vectors 
+%   
+%    
+%   output arguments: 
+%   nn : (cell array of index vectors) indices of nearest neighbours, length(nn) = length(refpoints) 
+%   dist : (cell array of distance vectors) the corresponding distances 
+%    
+%   to get the coordinates of the nearest neighbours for refpoint 1, simply type : points(nn{1}, :) 
+%   
+%   see also : nearneigh fnearneigh fnnearneigh normalize 
+%   
+%   cmerk 1998 
+%   signal/pca 
+%   
+%   [rs, eigvals, eigvecs] = pca(s, mode, maxpercent) 
+%   
+%     principal component analysis of column orientated data set <data> 
+%      
+%     input arguments : 
+%   
+%     - each row of data is one 'observation', e.g. the sample values of 
+%       all channels in a multichannel measurement at one point in time 
+%   
+%     - mode can be one of the following : 'normalized' (default), 'mean', 'raw' 
+%       - in mode 'normalized' each column of data is centered by removing its mean 
+%         and then normalized by dividing through its standard deviation before 
+%         the covariance matrix is calculated 
+%       - in mode 'mean' only the mean of every column of data is removed 
+%       - in mode 'raw' no preprocessing is applied to data 
+%   
+%     - maxpercent gives the limit of the accumulated percentage of the resulting 
+%       eigenvalues, default is 95 %   
+%   
+%     Christian Merkwirth  
+%     cmerk 1998 
+%  
+ 
+%     help signal/pca.m 
+%   signal/db 
+%   rs = db(s, ref, dbmin) 
+%   compute decibel values to reference value ref 
+%   
+%   cmerk 1998 
+%  
+ 
+%     help signal/db.m 
+%   signal/spec 
+%   compute power spectrum for real valued signals 
+%   
+%   cmerk 1998 
+%  
+ 
+%     help signal/spec.m 
+%   signal/acf 
+%   
+%   acf(s, len) 
+%   autocorrelation function for real scalar signals, 
+%   using fft (of length len) 
+%  
+ 
+%     help signal/acf.m 
+%   signal/scale 
+%   scale(signal, factor) 
+%   
+%   scale signal by factor f 
+%  
+ 
+%     help signal/scale.m 
+%   signal/embed 
+%   
+%   embeds signal s with embedding dimension dim  
+%   and delay delay (in samples) 
+%    
+%  
+ 
+%     help signal/embed.m 
+%   signal/merge 
+%   merge(signal1, signal2, dB) 
+%    
+%   merges signal s1 and s2 into a new signal with energy ration dB (in decibel) 
+%   a positive value of dB increases the amount of signal1 in the resulting signal 
+%   
+%   default value for dB is 0 
+%  
+ 
+%     help signal/merge.m 
+%   signal/rms 
+%    
+%   calculate root mean square value for signal along dimension 1 
+%   
+%   cmerk 1998 
+%  
+ 
+%     help signal/rms.m 
+%   signal/ccf 
+%   
+%   ccf(signal1, signal2, len) 
+%   cross correlation function for real scalar signals, 
+%   using fft (of length len) 
+%  
+ 
+%     help signal/ccf.m 
+%   signal/surrogate2 
+%   
+%   create surrogate data for a scalar time series 
+%   
+%   see : James Theiler et al.'Using Surrogate Data to Detect Nonlinearity in Time Series', APPENDIX : ALGORITHM II 
+%   
+%  
+ 
+%     help signal/surrogate2.m 
+%   signal/surrogate1 
+%   
+%   create surrogate data for a scalar time series 
+%   by randomizing phases of fourier spectrum 
+%   
+%   see : James Theiler et al.'Using Surrogate Data to Detect Nonlinearity in Time Series', APPENDIX : ALGORITHM I 
+%   
+%  
+ 
+%     help signal/surrogate1.m 
+%   signal/removeaxis 
+%   removeaxis one of the current xaxes 
+%   
+%   s = removeaxis(s, dim) 
+%  
+ 
+%     help signal/removeaxis.m 
+%   signal/normalize 
+%   normalize(s, low, upp) 
+%   
+%   normalize signal along dimension 1 to be within [low,upp] 
+%   default is [0,1] 
+%  
+ 
+%     help signal/normalize.m 
+%   signal/view 
+%   
+%   view(signal, fontsize) 
+%   
+%   signal viewer that decides from the signal's attributes 
+%   which kind of plot to produce 
+%   
+%   there are several types of plots which are used ; 
+%   
+%   'graph' 
+%   'xyplot' 
+%   '3dcurve' 
+%   'spectrogramplot' 
+%   
+%   returns 0 on SUCCESS, every other value indicates an error 
+%   
+%   cmerk 1998 
+%  
+ 
+%     help signal/view.m 
+%   signal/diff 
+%   
+%   diff(s, nth) 
+%   nth numerical derivative along dimension 1 when data were sampled equidistantly  
+%   
+%   cmerk 1998 
+%  
+ 
+%     help signal/diff.m 
+%   signal/int 
+%   
+%   int(s) 
+%   numerical integration along dimension 1 when data were sampled equidistantly  
+%   
+%   cmerk 1998 
+%  
+ 
+%     help signal/int.m 
+%   signal/write 
+%   status = write(s, filename) 
+%   status = write(s, filename, 'ASCII') 
+%   status = write(s, filename, 'WAV') 
+%   status = write(s, filename, 'AU') 
+%   
+%   writes a signal object to file filename 
+%   (uses matlab's file format) 
+%   
+%   cmerk 1997 
+%  
+ 
+%     help signal/write.m 
+%   compute sin(Lx/2)/sin(x/2)  
+%   signal/getaxis 
+%   get one of the current xaxes 
+%   
+%   a = getaxis(s, dim) 
+%   signal/addaxis 
+%   append new axis to current xaxes 
+%   
+%   s = addaxis(s)    %   s = addaxis(s, axis)	%   signal/setaxis 
+%   change one of the current xaxes 
+%   
+%   s = setaxis(s, dim, achse)	%   signal/display 
+%  
+ 
+%     help signal/display.m 
+%   signal/firstzero 
+%   [xpos, unit] = firstzero(s) 
+%   
+%   give information about first zero crossing of scalar signal s, 
+%   using linear interpolation  
+%   
+%   cmerk 1998 
+%  
+ 
+%     help signal/firstzero.m 
+%   signal/plot 
+%   
+%   semiautomatic plot routine that decides from the signal's attributes 
+%   which kind of plot to produce 
+%   there are several types of plots which are used ; 
+%   
+%   'graph' 
+%   'xyplot' 
+%   '3dcurve' 
+%   'spectrogramplot' 
+%  
+ 
+%     help signal/plot.m 
+%   signal/plus 
+%  
+ 
+%     help signal/plus.m 
+%   signal/max 
+%   [maximum, yunit, xpos, xunit] = max(s) 
+%   
+%   give information about maximum of scalar signal s 
+%   
+%   cmerk 1998 
+%  
+ 
+%     help signal/max.m 
+%   signal/min 
+%   [minimum, yunit, xpos, xunit] = min(s) 
+%   
+%   give information about minimum of scalar signal s 
+%   
+%   cmerk 1998 
+%  
+ 
+%     help signal/min.m 
+%   signal/getaxis 
+%   get one of the current xaxes 
+%   
+%   a = getaxis(s, dim) 
+%  
+ 
+%     help signal/getaxis.m 
+%   signal/predict 
+%   predict(s, len, dim, delay, n) 
+%   
+%   append a prediction of lenght "len" (in samples) of scalar input signal s 
+%   
+%   prediction is done with time-delay vectors of dimension "dim" and 
+%   delay "delay" using a local constant modell with "n" nearest neighbours 
+%     
+%   cmerk 1998 
+%  
+ 
+%     help signal/predict.m 
+%   signal/signal 
+%   signal class constructor 
+%   
+%   A signal object contains signal data, that is a collection of real or complex valued samples. 
+%   A signal can be one or multi-dimensional. The number of dimensions is the number of axes that  
+%   are needed to describe the the data.   
+%   An example for an one-dimensional signal is a one-channel 
+%   measurement (timeseries), or the power spectrum of a one-channel measurement. 
+%   An example for a two-dimensional signal is a twelve-channel measurement, with one 
+%   time axis and a 'channel' axis. Another example for a two-dimensional signal is 
+%   a short time spectrogramm of a time series, where we have a time axis and a frequency axis. 
+%    
+%   Each axis can have a physical unit(e.g. 's' or 'Hz'), a starting point and a step value. 
+%   E.g. if a time-series is sampled with 1000 Hz, beginning at 1 min 12 sec, the unit is 's',  
+%   the starting point is 72 and the step value (delta) is 0.001. 
+%    
+%   But not only the axes have physical units, also the sample value themselve can have a  
+%   unit, maybe 'V' or 'Pa', depending on what the sampled data represent (=> yunit) 
+%    
+%   All units are stored as objects of class 'unit', all axes are stored as objects 
+%   of class 'achse' (this somewhat peculiar name was chosen because of conflicts with 
+%   reserved matlab keywords 'axis' and 'axes', which otherwise would have been the first choice). 
+%   
+%   Calling syntax : 
+%   
+%   s = signal(array) creates a new signal object from a data array 'array' 
+%                     the data inside the object can be retrieved with x = data(s); 
+%   s = signal(array, achse1, achse2, ...) creates a new signal object from a data array 'array', 
+%                                           using axisis1 etc. as xachse entries 
+%   s = signal(array, unit1, unit2, ...)   creates a new signal object from a data array 'array', 
+%                                           using unit1 etc. to create xachse objects  
+%   s = signal(array, samplerate1, samplerate2, ...)  creates a new signal object from a data array 'array', 
+%                                           using as xunit 's' (second) and scalar samplerate1 as samplerate(s) 
+%   
+%   Example for creating a 2-dimensional signal with y-unit set to 'Volt', the first dimension's unit is 
+%   'second' (time), the second dimension's unit is 'n' (Channels) 
+%    
+%   tmp = rand(100, 10); 
+%    
+%   s = signal(tmp, unit('s'), unit('n')); 
+%   s = setyunit(s, unit('V')); 
+%   s = addcomment(s, 'Example signal with two dimensions') 
+%    
+%   Loading from disk : 
+%   
+%   s = signal(filename) loads a previously stored signal object 
+%   
+%   Importing from other file formats : 
+%   
+%   ASCII : s = signal('data/spalte1.dat', 'ASCII') 
+%   
+%   WAVE : s = signal('data/Sounds/hat.wav', 'WAVE') 
+%   
+%   AU (SUN AUDIO) : s = signal('data/Sounds/hat.au', 'AU') 
+%   
+%   
+%   see also :  
+%   
+%   Christian Merkwirth 1997-1998 DPI Goettingen 
+%  
+ 
+%     help signal/signal.m 
+%   signal/spacing 
+%   return spacing values for dimension dim 
+%   
+%   v = spacing(s, dim) 
+%  
+ 
+%     help signal/spacing.m 
+%   signal/minus 
+%  
+ 
+%     help signal/minus.m 
+%   signal/setaxis 
+%   change one of the current xaxes 
+%   
+%   s = setaxis(s, dim, achse)	%  
+ 
+%     help signal/setaxis.m 
+%   tstool/cellsort 
+%   sort an cell-array x of strings 
+%   result is an cell array containing the strings in ascending order 
+%   index contains the permutation order 
+%   tstool/linsert 
+%   status = linsert(filename, lhandle) 
+%   Einfuegen eines Namens in die Liste, gleichzeitig wird die 
+%   Selektion auf diesen Namen gesetzt 
+%   Elimiert doppelt vorkommende Strings  
+%   einer Liste (als Cell-Array) 
+%   tstool/loadall 
+%   load all filenames with extensions matching filter in current directory cwd 
+%   the names are inserted into the tstool file list 
+%   returns a filename that does not yet exist using the old name and extension,  
+%   a praefix and a suffix and if necessary a number 
+%   tstool/lremove 
+%   function status = lremove(lhandle) 
+%   Loeschen des aktuellen Eintrags aus der Listbox und den UserData-Field der Figure, aber keine physik. Entfernung 
+%   des Files 
+%  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   tstool/lsort 
+%   sorts the entries in the listbox with handle lboxhandle 
+%   and removes duplicate entries 
+%   status = tsinfo(filename)  
+%   display information about signal file 'filename' 
+%   tstool/tstool - Software package for nonlinear time series analysis 
+%   Creates a grpahical user interface that allows 
+%   the user to perform data manipulation and analysis 
+%   with a wide range of classical and modern nonlinear methods 
+%   
+%   Christian Merkwirth 
+%   Drittes Physikalisches Institut 
+%   Georg-August Universitaet Goettingen 
+%   Germany, 1997  
+%   description/setyunit 
+%   d = setyunit(d, unit) 
+%   d = setyunit(d, label) e.g. d = setyunit(d, 'Hz') 
+%  
+ 
+%     help description/setyunit.m 
+%  
+ 
+%     help description/yname.m 
+%  
+ 
+%     help description/name.m 
+%  
+ 
+%     help description/label.m 
+%   description/merge 
+%   d = merge(d1, d2) 
+%   merge two descriptions 
+%   most items are taken from first description 
+%   history is taken from both descriptions 
+%   
+%   this function may be useful when writing binary operators for class signal 
+%  
+ 
+%     help description/merge.m 
+%  
+ 
+%     help description/creator.m 
+%   description/comment 
+%  
+ 
+%     help description/comment.m 
+%   description/addcomment 
+%  
+ 
+%     help description/addcomment.m 
+%   description/description 
+%   description class constructor 
+%   an object of class description contains auxiliary information of a signal 
+%   
+%   d = description(name) 
+%   d = description(name, type) 
+%   d = description(yunit) 
+%   
+%   methods : addcomment addhistory comment history name type creator yname yunit xaxis 
+%  
+ 
+%     help description/description.m 
+%   description/setname 
+%   d = setname(d, name) 
+%    
+%   the name field of a descriptiom is used when the signal is loaded 
+%   from file, it will not be continued through several processing steps 
+%   
+%   see also : setlabel 
+%  
+ 
+%     help description/setname.m 
+%   description/addhistory 
+%   adds text to current history list 
+%   always the current time and date is written into the first line 
+%  
+ 
+%     help description/addhistory.m 
+%   description/history 
+%  
+ 
+%     help description/history.m 
+%  
+ 
+%     help description/type.m 
+%   description/display 
+%  
+ 
+%     help description/display.m 
+%   description/setlabel 
+%   d = setlabel(d, label) 
+%    
+%   the label field of a description is used to give a signal 
+%   some 'tag' which remains constant through various processing steps 
+%   e.g. which topic this signal belongs to 
+%  
+ 
+%     help description/setlabel.m 
+%  
+ 
+%     help description/yunit.m 
+%  
+ 
+%     help description/setyname.m 
+%   tstool/tscallback 
+%   callback handler for tstool graphical user interface 
+%   action is a string that specifies the action to be done 
+%   should only be invoked by the tstool figure 

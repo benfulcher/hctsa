@@ -1,0 +1,17 @@
+function display(s)
+
+%tstoolbox/@signal/display
+%
+% Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
+error(nargchk(1,1, nargin));
+
+disp(['  ' inputname(1) ' = signal object '])
+disp(' ');
+display(s.core)
+for i=1:ndim(s)
+	a = getaxis(s, i);
+	disp(['  X-Axis ' num2str(i) ' : ' label(a) ' | ' name(a)]);
+end
+disp(' ');
+display(s.description)
+

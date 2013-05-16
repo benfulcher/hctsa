@@ -1,0 +1,80 @@
+<html>
+<head><title>Installation</title></head>
+<body bgcolor="#ffffff">
+<h1>Installation</h1> 
+<font color=red><b>Note:</b></font> As you may know, we are not a software
+company and, after all, you got this package for free, so don't expect anything
+to be fool-proof, or even comfortable. We have compiled this package only under
+linux on PCs (32 and 64 bit) and digital unix on alpha
+workstations. We use it routinely on linux PCs and on Hewlett-Packard alpha. 
+<p>
+All you probably have to do is to say
+<blockquote>
+    <tt>&gt; <font color=blue>./configure</font></tt>
+<br><tt>&gt; <font color=blue>make</font></tt>
+<br><tt>&gt; <font color=blue>make install</font></tt>
+</blockquote>
+<p>
+By default, the executables go to <font color=blue><tt>$HOME/bin</tt></font>,
+you can change that to <font color=blue><tt>mydir</tt></font> by
+<blockquote>
+   <tt>&gt; <font color=blue>./configure --prefix=mydir</font></tt>
+</blockquote>
+In the tcsh, you may need to do as well:
+<blockquote>
+   <tt>&gt; <font color=blue>rehash</font></tt>
+</blockquote>
+
+<p>
+If you have a recent version of <font color=blue><tt>gnuplot</tt></font>
+installed at your site and you are impatient, you can now change to the <font
+color=blue><tt>examples</tt></font> directory and try to run gnuplot on
+any of the <font color=blue><tt>.gnu</tt></font> files.  These should produce
+plots similar to those shown as examples in the documentation pages.
+
+<p>
+<h2>Possible installation problems</h2> 
+
+<font color=red><b>make:</b></font> 
+There are many versions of <font color=blue><tt>make</tt></font>. 
+We have verified the Makefile with GNU make (Linux: PC) and
+True64 make (Hewlett-Packard: alpha). Who knows what else can go wrong. 
+
+<p>
+<font color=red><b>f77/g77, gcc/cc/acc:</b></font> You can
+override what <font color=blue><tt>configure</tt></font> finds by setting the
+environment variables <font color=blue><tt>FC</tt></font> and <font
+color=blue><tt>CC</tt></font>,
+respectively. Use double quotes for a multi-word command.  We have tested the
+Fortran routines on g77 (Linux: PC),  PGI compiler (Linux: PC), Intel
+compiler (Linux: PC) and True64 f77 (Hewlett-Packard: alpha).
+The C routines were tested with gcc (Linux: PC) and True64 cc
+(Hewlett-Packard: alpha). In any case, the C compiler must 
+be able to handle <font color=red>ANSI C</font> function headers.
+
+<p>
+<font color=red><b>size:</b></font> The Fortran programs allocate memory which
+might exceed what you can make available. In such a case you need to edit the
+programs and change these sizes, sometimes also in major sub-programs, sorry.
+Also, if you request things for which the allocated space is too small, the
+programs will stop with a brief message asking you to make certain parameters
+larger. Before you do so, think twice if you aren't misusing the programs - the
+sizes are chosen generously for normal purposes. 
+
+<p>
+<font color=red><b><p>machine constants:</b></font> Some of the Fortran
+programs use machine constants. In an emergency, these may be changed in
+<font color=blue><tt>i1mach.f</tt></font>,
+<font color=blue><tt>r1mach.f</tt></font>, and
+<font color=blue><tt>d1mach.f</tt></font> in
+<font color=blue><tt>source_f/slatec</tt></font>
+<hr>
+<p>
+<em>Copyright &#169; (1998-2007) Rainer Hegger, Holger Kantz, Thomas
+Schreiber</em> 
+</p>
+<p>
+<a href="../index.html" target="_top">TISEAN home</a>
+</p>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<html>
+<head>
+<title>
+resample
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>resample
+</font>
+</h1>
+<hr>
+This program resamples the data with a new sampling time, which can be
+given as a fraction of the original one via the flag <font
+color=blue>-s</font>. This is achieved by interpolating the data
+locally by a polynomial of an order given by the <font
+color=blue>-p</font> flag.<br>
+<font color=red>Remark 1:</font> Of course, this program only makes
+sense for time continous systems.<br>
+<font color=red>Remark 2:</font> We did not try to implement any kind
+of antialiasing in frequency space. Therefore the rescaling might
+produce some artefacts in the power spectrum.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>resample [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-s#
+<td>new sampling time in units of the original one
+<td>0.5
+</tr>
+<tr>
+<th>-p#
+<td>order of the polynomial for the interpolation
+<td>4
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.rs<br>
+(or stdin.rs if stdin was used)<br>
+if no -o is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+Just one column: The resampled time series.
+<hr>
+View the <a href="../../source_c/resample.c">C-sources</a>
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

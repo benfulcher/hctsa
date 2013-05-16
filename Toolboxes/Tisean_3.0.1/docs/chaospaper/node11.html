@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Poincar&#233; sections</TITLE>
+<META NAME="description" CONTENT="Poincar&#233; sections">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html182" HREF="node12.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html180" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html174" HREF="node10.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html183" HREF="node12.html">SVD filters</A>
+<B>Up:</B> <A NAME="tex2html181" HREF="node5.html">Phase space representation</A>
+<B> Previous:</B> <A NAME="tex2html175" HREF="node10.html">Principal components</A>
+<BR> <P>
+<H2><A NAME="SECTION00034000000000000000">Poincar&#233; sections</A></H2>
+<P>
+Highly sampled data representing the continuous time of a differential
+equation are called <EM>flow</EM> data. They are characterized by the fact that
+errors in the direction tangent to the trajectory do neither shrink nor
+increase exponentially (so called marginally stable direction) and thus
+possess one Lyapunov exponent which is zero, since any perturbation in this
+direction can be compensated by a simple shift of the time. Since in many data
+analysis tasks this direction is of low interest, one might wish to eliminate
+it. The theoretical concept to do so is called the Poincar&#233; section. After
+having chosen an (<I>m</I>-1)-dimensional hyperplane in the <I>m</I>-dimensional
+(embedding) space, one creates a compressed time series of only the
+intersections of the time continuous trajectory with this hyperplane <I>in a
+  predefined orientation</I>. These data are then vector valued discrete time
+<I>map like</I> data.  One can consider the projection of these
+(<I>m</I>-1)-dimensional vectors onto the real numbers as another measurement
+function (e.g. by recording the value of <IMG WIDTH=14 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6689" SRC="img37.gif"> when <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6691" SRC="img38.gif"> passes the
+Poincar&#233; surface), so that one can create a new scalar time series if
+desirable. The program <a href="../docs_c/poincare.html">poincare</a> constructs a sequence of vectors from a
+scalar flow-like data set, if one specifies the hyperplane, the orientation,
+and the embedding parameters. The intersections of the discretely sampled
+trajectory with the Poincar&#233; plane are computed by a third order
+interpolation.
+<P>
+<P><blockquote><A NAME="4630">&#160;</A><IMG WIDTH=237 HEIGHT=478 ALIGN=BOTTOM ALT="figure481" SRC="img40.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figdelayPoincare">&#160;</A>
+   Poincar&#233; surface of section using <a href="../docs_c/extrema.html">extrema</a>: A two-dimensional delay
+   plot of the sequence of maxima (top) and of the time intervals between
+   successive maxima (bottom). 
+   without employing the
+   option <TT>-t</TT> <I>time</I>, where <I>time</I> is the number of time steps
+   after the last extremum during which no further extrema are searched for
+   (here: 3), one finds some fake extrema due to noise showing up close to the
+   diagonal of the delay representation.
+   Data: Time series of the output power of a CO<IMG WIDTH=6 HEIGHT=11 ALIGN=MIDDLE ALT="tex2html_wrap_inline6701" SRC="img39.gif"> 
+   laser&nbsp;[<A HREF="citation.html#INO">35</A>]. <BR>
+</blockquote><P>
+<P>
+The placement of the Poincar&#233; surface is of high relevance for the usefulness
+of the result. An optimal surface maximizes the number of intersections, i.e.\
+minimizes the time intervals between them, if at the same time the attractor
+remains connected. One avoids the trials and errors related to that if one
+defines a surface by the zero crossing of the temporal derivative of the
+signal, which is synonymous with collecting all maxima or all minima,
+respectively.  This is done by <a href="../docs_c/extrema.html">extrema</a>. However, this method suffers more from
+noise, since for small time derivatives (i.e. close to the extrema) additional
+extrema can be produced by perturbations.  Another aspect for the choice of the
+surface of section is that one should try to maximize the variance of the data
+inside the section, since their absolute noise level is independent of the
+section. One last remark: Time intervals between intersections are phase space
+observables as well&nbsp;[<A HREF="citation.html#Hegger+">36</A>] and the embedding theorems are thus
+valid. For time series with pronounced spikes, one often likes to study the
+sequence of interspike time intervals, e.g. in cardiology the RR-intervals. If
+these time intervals are constructed in a way to yield time intervals of a
+Poincar&#233; map, they are suited to reflect the deterministic structure (if
+any). For complications see&nbsp;[<A HREF="citation.html#Hegger+">36</A>].
+<P>
+For a periodically driven non-autonomous system the best surface of section is
+usually given by a fixed phase of the driving term, which is also called a
+<I>stroboscopic view</I>. Here again the selection of the phase should be
+guided by the variance of the signal inside the section.
+<P>
+<HR><A NAME="tex2html182" HREF="node12.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html180" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html174" HREF="node10.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html183" HREF="node12.html">SVD filters</A>
+<B>Up:</B> <A NAME="tex2html181" HREF="node5.html">Phase space representation</A>
+<B> Previous:</B> <A NAME="tex2html175" HREF="node10.html">Principal components</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,87 @@
+<html>
+<head>
+<title>
+Histogram
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>
+Description of the program: <font color=Blue>histogram</font>
+</h1>
+<hr>
+This program estimates the scalar distribution of a data set. 
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>histogram [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-b#
+<td>number of intervals
+<td>50
+</tr>
+<tr>
+<th>-o[#]
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.his<br>
+(or stdin.his if data were read from stdin)<br>
+If no -o is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td> none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the output:</h2>
+The first three lines contain 1. interval of the data, 2. the
+average of the data and 3. the standard deviation of the data. The
+following lines then contain the histogram.<br>
+If you are only interested in the first three lines set the value of
+the <font color=blue>-b</font> flag to <font color=blue>0</font>.
+<hr>
+View the <a href="../../source_c/histogram.c">C source</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a
+href="../../index.html" target="_top">TISEAN home</a>
+<p>
+<hr>
+You can find the old more fancy but buggy version in the unsorted
+directory as histogram_tisean_2.1.c.
+</p>
+</body>
+</html>

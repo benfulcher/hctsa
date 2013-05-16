@@ -1,0 +1,221 @@
+<html>
+<head>
+<title>
+d2
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: 
+<font color=Blue>
+d2
+</font>
+</h1>
+<hr>
+This program estimates the correlation sum, 
+the <a href="../chaospaper/node30.html">correlation dimension</a>
+and the <a href="../chaospaper/node34.html">correlation entropy</a> 
+of a given, possibly multivariate, data set. 
+It uses
+the box assisted search algorithm and is quite fast as long as one is
+not interested in large length scales. All length scales are computed
+simultaneously and the output is written every 2&nbsp;min (real time, not
+cpu time). It is possible to set a maximum number of pairs. If this
+number is reached for a given length scale, the length scale will no
+longer be treated for the rest of the estimate.
+<p>
+Please consult the <a href="../chaospaper/node29.html">introduction</a> paper
+for initial material on dimension estimation. If you are serious, you will need
+to study some of the literature cited there as well.
+<p>
+In extension to what is described there, the simultaneous use
+of multivariate data and temporal embedding is possible using <font color=blue>d2</font>. Thus one has
+to give two numbers in order to specify the embedding dimension. 
+The first is the number of multivariate components, the
+second the number of lags in the temporal embedding. 
+This is realized by giving two numbers
+to the option <font color=blue>-M</font>, seperated by a comma.
+For a standard scalar time series, set the first number to 1. If your
+multivariate data spans the whole phase space and no further temporal
+embedding is desired, set the second value to 1.
+In any case, the total embedding dimension in the sense of the embedding
+theorems is the product of the two numbers.
+<p>
+In order to be able to assess the convergence with increasing embedding
+dimension, results are reported for several such values.  The inner loop steps
+through the number of components until the first argument of <font
+color=blue>M</font> is reached. The outer loop increases the number of time
+lags until the second argument of <font color=blue>M</font> is reached.
+
+<h4>Usage of the <font color=blue>-c</font> and <font color=blue>-M</font> 
+flags</b></h4>
+
+Suppose, the option <font color=blue>-M<em> x,y</em></font> has been specified.
+By default, the first <font color=blue><em> x</em></font> columns of a file 
+are used. This behaviour can
+be modified by means of the <font color=blue>-c</font> flag. It takes
+a series of numbers separated by commas. The numbers represent the
+colomns. For instance <font color=red>-M 3,1 -c 3,5,7</font> means,
+use three components with no additional temporal embedding, reading
+columns 3, 5 and 7.  It is not necessary to give the full number of
+components to the <font color=blue>-c</font> flag. If numbers are
+missing, the string is filled up starting with the smallest number,
+larger than the largest given. For instance, <font color=red>-M 3,1 -c
+3 </font> would result in reading columns 3, 4 and 5.
+
+</p>
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>d2 [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile
+name. Given no datafile at all means read stdin. Also <font color=Red>-</font>
+means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data points to be used
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-d#
+<td>delay for the delay vectors
+<td>1
+</tr>
+<tr>
+<th>-M#,#
+<td># of components,maximal embedding dimension
+<td>1,10
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#columns>columns to be read</a>
+<td>1,...,# of components
+</tr>
+<tr>
+<th>-t#
+<td>theiler window
+<td>0
+</tr>
+<tr>
+<th>-R#
+<td>maximal length scale 
+<td>(max data interval)
+</tr>
+<tr>
+<th>-r#
+<td>minimal length scale
+<td>(max data interval)/1000
+</tr>
+<tr>
+<th>-##
+<td>number of epsilon values
+<td>100
+</tr>
+<tr>
+<th>-N#
+<td>maximal number of pairs to be used <br>
+(0 means all possible pairs)
+<td>1000
+</tr>
+<tr>
+<th>-E
+<td>use data that is normalized to [0,1] for all components
+<td>not set (use natural units of the data)
+</tr>
+<tr>
+<th>-o[#]
+<td> <a href=../general.html#outfile>output file name</a> (without extensions)
+<td> 'datafile'[.c2][.d2][.h2][.stat]<br>
+(or if data were read from stdin: stdin[.c2][.d2][.h2][.stat])
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages<br>
+&nbsp;&nbsp;2: add input/output messages each time output file is
+opened
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The files with the extensions c2, d2 and h2 contain for each embedding
+dimension  and each length scale
+two columns:<br>
+<b>first column:</b> epsilon (in units chosen)<br>
+<b>second column:</b> the estimated quantity (correlation sum, dimension,
+entropy)<br>.
+<ul>
+<li><b>extension .c2</b>: This file contains the correlation 
+sums for all treated length scales and embedding dimensions.
+<li><b>extension .d2</b>: This file contains the local slopes of the logarithm
+of the correlation sum, the correlation dimension.
+<li><b>extension .h2</b>: This file contains the correlation entropies.
+<li><b>extension .stat</b>: This file shows the current status of the
+estimate. 
+</ul>
+The output is written every two minutes (real time, not cpu time). So,
+you can see preliminary results even if the program is still running.
+Post-processing can be done in the following ways.
+Either of the output sequences can be <b>smoothed</b> by <a
+href="av-d2.html">av-d2</a>.
+<b>Takens' estimator</b> can be obtained from the correlation sum (extension
+<b>.c2</b>) using <a href="../docs_f/c2t.html">c2t</a> and then plotted 
+versus upper cut-off length.
+The <b>Gaussian kernel</b> correlation integral can be 
+obtained from the standard correlation sum (extension
+<b>.c2</b>) 
+using <a href="../docs_f/c2g.html">c2g</a>.
+
+<h2 align=center>How to get D<sub>2</sub> from the data</h2>
+The file with the extension <b>.d2</b> contains the skeleton to
+estimate the correlation dimension. As written above it contains the
+local slopes of the correlation sums for the different embedding
+dimension. To get an idea of the correlation dimension it is always a
+good idea to plot the file using a log scale for the x-axis.<br>
+The figures you get could look something like one of the following
+ones.
+<img src="d2-hen.gif"></img>
+<img src="d2-noi.gif"></img>
+The first figure clearly shows a plateau. This means for a wide range
+of length scales (x-axis) and for all embedding dimensions larger than
+a minimal one, the curves collapse and are flat. The value of the
+plateau gives an estimate for the dimension (1.2... in this case). The
+second figure does not give any dimension estimate, at all. All curves
+behave different and there is no common behaviour. From this figure
+one can not conclude any dimension for the system.<br>
+
+Typically one finds something in between the two extremes shown
+above.
+
+<hr>
+View the <a href="../../source_c/d2.c">C-source</a>.
+<hr>
+See also <a href="../docs_f/c2naive.html">c2naive</a>, and <a
+href="../docs_f/c1.html">c1</a>. 
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

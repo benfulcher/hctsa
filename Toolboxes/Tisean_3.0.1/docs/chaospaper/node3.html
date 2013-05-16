@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Philosophy of the TISEAN implementation</TITLE>
+<META NAME="description" CONTENT="Philosophy of the TISEAN implementation">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html97" HREF="node4.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html95" HREF="node2.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html89" HREF="node2.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html98" HREF="node4.html">General computational issues</A>
+<B>Up:</B> <A NAME="tex2html96" HREF="node2.html">Introduction</A>
+<B> Previous:</B> <A NAME="tex2html90" HREF="node2.html">Introduction</A>
+<BR> <P>
+<H2><A NAME="SECTION00021000000000000000">Philosophy of the TISEAN implementation</A></H2>
+<A NAME="secphilo">&#160;</A>
+A number of different people have been credited for the saying that every
+complicated question has a simple answer which is wrong. Analysing a time
+series with a nonlinear approach is definitely a complicated problem. Simple
+answers have been repeatedly offered in the literature, quoting numerical
+values for attractor dimensions for any conceivable system.  The present
+implementation reflects our scepticism against such simple answers which are
+the inevitable result of using black box algorithms.  Thus, for example, none
+of the ``dimension'' programs will actually print a number which can be quoted
+as the estimated attractor dimension. Instead, the correlation sum is computed
+and basic tools are provided for its interpretation. It is up to the scientist
+who does the analysis to put these results into their proper context and to
+infer what information she or he may find useful and plausible. We should
+stress that this is not simply a question of error bars. Error bars don't tell
+about systematic errors and neither do they tell if the underlying assumptions
+are justified.
+<P>
+The TISEAN project has emerged from work of the involved research groups
+over several years. Some of the programs are in fact based on code published in
+Ref.&nbsp;[<A HREF="citation.html#KantzSchreiber">2</A>]. Nevertheless, we still like to see it as a starting
+point rather than a conclusive step. First of all, nonlinear time series
+analysis is still a rapidly evolving field, in particular with respect to
+applications. This implies that the selection of topics in this article and the
+selection of algorithms implemented in TISEAN are highly biased towards what
+we know now and found useful so far. But even the well established concepts
+like dimension estimation and noise reduction leave considerable room for
+alternatives to the present implementation. Sometimes this resulted in two or
+more concurring and almost redundant programs entering the package. We have
+deliberately not eliminated these redundancies since the user may benefit from
+having a choice.  In any case it is healthy to know that for most of the
+algorithms the final word hasn't been spoken yet - nor is ever to be.
+<P>
+While the TISEAN package does contain a number of tools for <EM>linear</EM>
+time series analysis (spectrum, autocorrelations, histograms, etc.), these are
+only suitable for a quick inspection of the data. Spectral or even ARMA
+estimation are industries in themselves and we refer the reader - and the user
+of TISEAN - to the existing literature and available statistics software
+for optimal, up-to-date implementations of these important methods.
+<P>
+Some users will miss a convenient graphical interface to the programs. We felt
+that at this point the extra implementational effort would not be justified by
+the expected additional functionality of the package. Work is in progress,
+however, to provide interfaces to higher level mathematics (or statistics)
+software.
+<P>
+<HR><A NAME="tex2html97" HREF="node4.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html95" HREF="node2.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html89" HREF="node2.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html98" HREF="node4.html">General computational issues</A>
+<B>Up:</B> <A NAME="tex2html96" HREF="node2.html">Introduction</A>
+<B> Previous:</B> <A NAME="tex2html90" HREF="node2.html">Introduction</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Locally linear prediction</TITLE>
+<META NAME="description" CONTENT="Locally linear prediction">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html275" HREF="node21.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html273" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html267" HREF="node19.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html276" HREF="node21.html">Global function fits</A>
+<B>Up:</B> <A NAME="tex2html274" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html268" HREF="node19.html">Finding unstable periodic orbits</A>
+<BR> <P>
+<H2><A NAME="SECTION00054000000000000000">Locally linear prediction</A></H2>
+<P>
+If there is a good reason to assume that the relation <IMG WIDTH=89 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6971" SRC="img59.gif"> is
+fulfilled by the experimental data in good approximation (say, within 5%) for
+some unknown <I>f</I> and that <I>f</I> is smooth, predictions can be improved by
+fitting local linear models. They can be considered as the local Taylor
+expansion of the unknown <I>f</I>, and are easily determined by minimizing
+<BR><A NAME="eqpredictloclin1">&#160;</A><IMG WIDTH=500 HEIGHT=37 ALIGN=BOTTOM ALT="equation4924" SRC="img60.gif"><BR>
+with respect to <IMG WIDTH=17 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6979" SRC="img61.gif"> and <IMG WIDTH=14 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline6981" SRC="img62.gif">, where <IMG WIDTH=18 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline6983" SRC="img63.gif"> is the
+<IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">-neighborhood of <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6691" SRC="img38.gif">, excluding <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6691" SRC="img38.gif"> itself, as before. Then,
+the prediction is <IMG WIDTH=120 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline6991" SRC="img64.gif">. The minimization problem can
+be solved through a set of coupled linear equations, a standard linear algebra
+problem.  This scheme is implemented in <a href="../docs_c/onestep.html">onestep</a>. For moderate noise levels
+and time series lengths this can give a reasonable improvement over <a href="../docs_c/zeroth.html">zeroth</a>
+and <a href="../docs_f/predict.html">predict</a>. Moreover, as discussed in Sec.<A HREF="node26.html#seclyap"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>, these linear maps
+are needed for the computation of the Lyapunov spectrum. Locally linear
+approximation was introduced in&nbsp;[<A HREF="citation.html#Eckmann">45</A>, <A HREF="citation.html#fsid0">46</A>]. We should note that the
+straight least squares solution of Eq.(<A HREF="node20.html#eqpredictloclin1"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) is not always
+optimal and a number of strategies are available to regularize the problem if 
+the matrix becomes nearly singular and to remove the bias due to the errors in
+the ``independent'' variables. These strategies have in common that any
+possible improvement is bought with considerable complication of the procedure,
+requiring subtle parameter adjustments. We refer the reader to
+Refs.&nbsp;[<A HREF="citation.html#kugiLL">51</A>, <A HREF="citation.html#jaeger">52</A>] for advanced material.
+<P>
+In Fig.&nbsp;<A HREF="node20.html#figpredictINOnstep"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> we show iterated predictions of the
+Poincar&#233; map data from the CO<IMG WIDTH=6 HEIGHT=11 ALIGN=MIDDLE ALT="tex2html_wrap_inline6701" SRC="img39.gif"> laser (Fig.&nbsp;<A HREF="node11.html#figdelayPoincare"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) in a
+delay representation (using <a href="../docs_c/nstep.html">nstep</a> in two dimensions). The resulting data do
+not only have the correct marginal distribution and power spectrum, but also
+form a perfect skeleton of the original noisy attractor. There are
+of course artefacts due to noise and the roughness of this approach,
+but there are good reasons to assume that the line-like substructure
+reflects fractality of the unperturbed system.
+<P>
+<P><blockquote><A NAME="4961">&#160;</A><IMG WIDTH=235 HEIGHT=223 ALIGN=BOTTOM ALT="figure836" SRC="img65.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figpredictINOnstep">&#160;</A>
+   Time delay representation of 5000 iterations of the local linear predictor
+   <a href="../docs_c/nstep.html">nstep</a> in two dimensions, starting from the last delay vector of
+   Fig.&nbsp;<A HREF="node11.html#figdelayPoincare"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>.<BR>
+</blockquote><P>
+<P>
+<a name="casdagli"></a>Casdagli&nbsp;[<A HREF="citation.html#Casdagli_royal">53</A>] suggested to use local linear models as a test 
+for nonlinearity: He computed the average forecast error as a
+function of the neighborhood size on which the fit for <IMG WIDTH=17 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6979" SRC="img61.gif"> and <IMG WIDTH=14 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline6981" SRC="img62.gif"> is
+performed. If the optimum occurs at large neighborhood sizes, the data are (in
+this embedding space) best described by a linear stochastic process, whereas an
+optimum at rather small sizes supports the idea of the existence of a nonlinear
+almost deterministic equation of motion. This protocol is implemented in the
+routine <a href="../docs_c/ll-ar.html">ll-ar</a>, see Fig.&nbsp;<A HREF="node20.html#figpredictcasdagli"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>.
+<P>
+<P><blockquote><A NAME="5011">&#160;</A><IMG WIDTH=334 HEIGHT=250 ALIGN=BOTTOM ALT="figure901" SRC="img66.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figpredictcasdagli">&#160;</A>
+   The Casdagli test for nonlinearity: The rms prediction error of local linear
+   models as a function of the neighborhood size <IMG WIDTH=6 HEIGHT=7
+   ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">. Lower (green) curve: The
+   CO<IMG WIDTH=6 HEIGHT=11 ALIGN=MIDDLE ALT="tex2html_wrap_inline6701" SRC="img39.gif"> laser data. These data are obviously highly deterministic in
+   <I>m</I>=4 dimensions and with lag <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM
+   ALT="tex2html_wrap_inline6553" SRC="img16.gif">=6.  Central (blue) curve: The breath rate data
+   shown in Fig.&nbsp;<A HREF="node23.html#figb"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> with <I>m</I>=4 and <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6553" SRC="img16.gif">=1. Determinism is weaker
+   (presumably due to a much higher noise level), but still the nonlinear
+   structure is dominant. Upper (red) curve: Numerically generated data of an AR(5)
+   process, a linearly correlated random process (<I>m</I>=5, <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6553" SRC="img16.gif">=1).<BR>
+</blockquote><P><HR><A NAME="tex2html275" HREF="node21.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html273" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html267" HREF="node19.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html276" HREF="node21.html">Global function fits</A>
+<B>Up:</B> <A NAME="tex2html274" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html268" HREF="node19.html">Finding unstable periodic orbits</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

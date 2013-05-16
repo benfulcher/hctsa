@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>4.5 Example session</TITLE>
+<META NAME="description" CONTENT="4.5 Example session">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="node19.html">
+<LINK REL="up" HREF="node15.html">
+<LINK REL="next" HREF="node24.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html483"
+  HREF="node24.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html479"
+  HREF="node15.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html475"
+  HREF="node22.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html481"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html484"
+  HREF="node24.html">5. Handling the Graphical</A>
+<B> Up:</B> <A NAME="tex2html480"
+  HREF="node15.html">4. Nearest Neighbors Searching</A>
+<B> Previous:</B> <A NAME="tex2html476"
+  HREF="node22.html">4.4.3 range_search</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00550000000000000000">
+4.5 Example session</A>
+</H1>
+
+<P>
+<A NAME="f19:EXAMPLE"></A><PRE> 
+% create a 3-dimensional data set with 100000 points
+
+pointset = rand(100000, 3);
+
+% do the preprocessing for this point set
+
+atria = nn_prepare(pointset, 'euclidian');
+
+% now search for 2 (exact) nearest neighbors, using points 1 to 
+% 10 as query points, excluding self-matches
+
+[index, distance] = nn_search(pointset, atria, 1:10, 2, 0)
+
+index =
+
+        5618       96574
+       38209       84549
+       54991       60397
+       38429       59732
+        4114       76991
+       72121         452
+       13678       59332
+       26022       16718
+       86042       38436
+       24830       44434
+
+
+distance =
+
+    0.0101    0.0175
+    0.0078    0.0134
+    0.0132    0.0167
+    0.0050    0.0223
+    0.0087    0.0097
+    0.0124    0.0189
+    0.0129    0.0168
+    0.0046    0.0110
+    0.0101    0.0103
+    0.0156    0.0177
+
+% now do a range search for radius 0.0224, using points 1 to 10 as
+% query points, excluding self-matches
+
+[count, neighbors] = range_search(pointset, atria, 1:10, 0.0224, 0)   
+
+count =
+
+     4
+    10
+     7
+     2
+     5
+     6
+     2
+     4
+     7
+     5
+
+
+neighbors = 
+
+    [1x4  double]    [1x4  double]
+    [1x10 double]    [1x10 double]
+    [1x7  double]    [1x7  double]
+    [1x2  double]    [1x2  double]
+    [1x5  double]    [1x5  double]
+    [1x6  double]    [1x6  double]
+    [1x2  double]    [1x2  double]
+    [1x4  double]    [1x4  double]
+    [1x7  double]    [1x7  double]
+    [1x5  double]    [1x5  double]
+
+% let's see the indices of the points that are within range to the first query point
+
+neighbors{1,1}
+
+ans =
+
+       56921       97100       96574        5618
+
+
+% let's see the corresponding distances of the points that are 
+% within range to the first query point
+
+neighbors{1,2}
+
+ans =
+
+    0.0176    0.0186    0.0175    0.0101
+</PRE>
+
+<P>
+
+
+<P>
+<BR><HR>
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

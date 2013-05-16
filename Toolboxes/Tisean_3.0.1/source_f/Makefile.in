@@ -1,0 +1,71 @@
+SHELL = /bin/sh
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+BINDIR = ${exec_prefix}/@bindir@
+
+FC = @FC@
+FFLAGS = @FFLAGS@
+LDFLAGS = @LDFLAGS@
+AR = @AR@
+ARFLAGS = @ARFLAGS@
+RANLIB = @RANLIB@
+INSTALL = @INSTALL@
+LOADLIBES = libtsa.a libsla.a
+ERRUNIT = @ERRUNIT@
+
+# list of executables we want to produce
+   BINS = c1 c2naive xc2 \
+          c2d c2g c2t \
+          pc predict stp \
+          lazy project addnoise compare upo upoembed cluster \
+          choose rms notch autocor spectrum wiener1 wiener2 \
+	  surrogates endtoend timerev \
+          events intervals spikespec spikeauto \
+          henon ikeda lorenz ar-run xrecur 
+
+# list of objects to be put in libtsa.a 
+   INC  = readfile.o xreadfile.o \
+          arguments.o commandline.o any_s.o istdio.o help.o verbose.o \
+          d1.o neigh.o normal.o rank.o \
+          nmore.o store_spec.o tospec.o
+
+all: $(BINS) Randomize
+
+istdio.o: istdio_temp.f
+	sed "s#ERRUNIT#${ERRUNIT}#" istdio_temp.f > istdio.f
+	$(FC) $(FFLAGS) -c istdio.f -o istdio.o
+
+$(BINS): libtsa.a libsla.a *.f
+	-$(FC) $(FFLAGS) -o $@ $@.f $(LOADLIBES) $(LDFLAGS)
+
+libtsa.a: $(INC)
+	$(AR) $(ARFLAGS) libtsa.a $?
+	$(RANLIB) libtsa.a
+
+libsla.a: slatec/*.f
+	(cd slatec && $(MAKE))
+
+Randomize: libtsa.a libsla.a
+	-(cd randomize && $(MAKE))
+
+clean:
+	@rm -f istdio.f
+	@rm -f $(BINS)
+	-(cd randomize && $(MAKE) clean)
+
+install: $(BINS)
+	-for bin in $(BINS); do $(INSTALL) $$bin $(BINDIR); done
+	-(cd randomize && $(MAKE) $@)
+
+missing:
+	-@for bin in $(BINS); do \
+	   test -z "`$$bin -h 2>&1 | grep Usage`" \
+	      && echo   $$bin "(Wuppertal Fortran)" >>  ../missing.log; \
+	   $$bin -h 2>&1 | cat >> ../install.log; \
+	  done; :
+	-@(cd randomize && $(MAKE) $@)
+
+uninstall:
+	-@for bin in $(BINS); do rm -f $(BINDIR)/$$bin;	done
+	-@(cd randomize && $(MAKE) $@)

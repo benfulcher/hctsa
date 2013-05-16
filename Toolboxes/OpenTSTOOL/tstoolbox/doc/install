@@ -1,0 +1,31 @@
+Installation of TSTOOL
+
+
+I. Unpack the TSTOOL-package in an empty directory, maybe D:\tstool.
+   This directory now contains something like :
+   
+   startup.m         - the matlab startup script that calls tstoolpath.m
+   tstoolpath.m      - a script that sets parameters to run tstool
+   tstoolbox         - the directory that contains all executable files, documentation etc.
+
+II. Adjust startup.m :
+	
+	There must be a call to the script 'tstoolpath'
+	in the startup.m script. Nothing more is required. 
+	If you already have a startup script that contains
+	settings for other packages, simply add tstoolpath
+	to the end of the existing startup file.
+
+	Make sure that startup.m is executed from Matlab when
+	Matlab is started !
+
+III. Adjust tstoolpath.m
+	
+	In file tstoolpath.m some site specific settings have to be done
+	in oder to be able to start and work with tstool.
+	Some hints are written as comment to this file.
+    
+
+cmerk@physik3.gwdg.de
+Christian Merkwirth Jan. 1998
+Georg-August Universitaet Goettingen

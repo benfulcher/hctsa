@@ -1,0 +1,33 @@
+function rs = plosivity(s, memory, thresh)
+
+% signal/plosivity
+%
+% p = plosivity(s, memory, thresh)
+%
+% Compute plosivity of a spectrogram
+% 
+% C.Merkwirth,J.Wichard,K.Peters,F.Bauer,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
+
+error(nargchk(3,3,nargin));
+
+
+d = data(s);
+
+N = dlens(s,1);
+channels = dlens(s,2);
+
+x = diff(d,1);
+x(find(x<0)) = 0;   % zero all negative values
+
+out = zeros(N-memory, channels);
+
+for i=1:N-memory
+    out(i,:) = x(i+memory-1,:) ./ mean(d(i:i+memory-1,:),1);
+end
+
+out(find(out < thresh)) = 0;
+
+out = mean(out,1);
+
+rs = signal(out(:));
+

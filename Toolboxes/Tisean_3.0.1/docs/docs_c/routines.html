@@ -1,0 +1,279 @@
+<html>
+<head>
+<title>
+Some useful routines
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Some useful routines from the library 
+<font color=red>ddtsa</font></h1>
+This page shortly describes the routines which are included in the
+library libddtsa.a. This library is created in the directory
+../../source_c/routines. The related header file is <a
+href="../../source_c/routines/tsa.h">tsa.h</a>
+<h3 align=center>Description of the routines</h3>
+<ul>
+<li><p><a href="../../source_c/routines/scan_help.c">int scan_help</a>
+  <font color=red>(int argc,char **argv)</font><br>
+  This routine just scans the options for a -h and returns a 1 if found
+  and a 0 if not.</p></li>
+
+<li><p><a href="../../source_c/routines/get_series.c">double *get_series</a>
+  <font color=red>(char *name,
+  unsigned long *l,unsigned long ex, unsigned int col,
+  unsigned int verbosity)</font><br> 
+  This routine reads
+  a scalar time series from the file <font color=red>name</font> into
+  the array which is returned.<font color=red>l</font> is the number of
+  data read (will on return be the minimum of the file size and the value 
+  given). The first <font color=red>ex</font> lines of the
+  file are ignored and the time series is supposed to be the <font
+  color=red>col</font>s column. <font color=red>verbosity</font>
+  specifies the <a href=../general.html#verbosity>verbosity level</a> of the program.
+</p></li>
+
+<li><p><a href="../../source_c/routines/get_multi_series.c">
+  double **get_multi_series</a><font color=red>(char *name,
+  unsigned long *l,unsigned long ex, unsigned int *col,
+  char *which,char colfix,unsigned int verbosity)</font><br>
+  Reads a multivariate time series
+  and returns a
+  pointer to it. The first three parameters are the same as in 
+  <font color=red>get_series</font>. <font color=red>*col</font> is the number
+  of columns to read and <font color=red>which</font> is a string which 
+  contains the <a href=../general.html#columns>columns to be read</a>, separated by commas. <font
+  color=red>colfix</font> determines whether <font
+  color=red>*col</font> can be modified within the routine.<br>
+  Example: to read the first three columns:
+  <font color=red>which=1,2,3</font> or if the columns should be permuted
+  <font color=red>which=3,2,1</font> means: x=third column, ...<br>
+  If <font color=red>which</font> contains less columns than specified in 
+  <font color=red>col</font> it is extended in such a way that columns are
+  appended that are larger than the largest given in 
+  <font color=red>which</font>.<br>
+  Example: <font color=red>col=3</font>
+  <font color=red>which=1,2</font> -&#155;<font color=red>which=1,2,3
+  </font> or <br>
+  <font color=red>which=5,1</font> -&#155;<font color=red>which=5,1,6
+  </font><br>
+  If <font color=red>which</font> contains more columns than
+  specified in <font color=red>*col</font>, then <font
+  color=red>which</font> determines the number of columns to read
+  unless the dimension was specified on the command line, explicitely.
+  <font color=red>verbosity</font>
+  specifies the <a href=../general.html#verbosity>verbosity level</a> of the program.
+</p></li>
+
+<li><p><a href="../../source_c/routines/rescale_data.c">void rescale_data</a>
+  <font color=red>
+  (double *s,unsigned long l,double *min,double *interval)</font><br>
+  This routine rescales the data
+  in the array <font color=red>s</font>, which has a length
+  <font color=red>l</font>, to the interval [0:1]. On return 
+  <font color=red>min</font> is the minimum of the original data set and
+  <font color=red>interval</font> its original interval.</p></li>
+
+<li><p><a href="../../source_c/routines/variance.c">void variance</a>
+  <font color=red>(double *s,
+  unsigned long l,double *av,double *var)</font><br> 
+  Simply calculates
+  the average <font color=red>av</font> and the variance 
+  <font color=red>var</font> of a time series <font color=red>s</font>,
+  which has length <font color=red>l</font>.
+</p></li>
+
+<li><p><a href="../../source_c/routines/make_box.c">void make_box</a>
+  <font color=red>(double *s,long **box,long *list,
+  unsigned long l,unsigned int bs,unsigned int dim,unsigned int
+  del,double eps)</font><br> 
+  This routine together with the
+  routine <a href="../../source_c/routines/find_neighbors.c">find_neighbors</a> 
+  constitute the <a href="../chaospaper/citation.html#box-assisted">
+  box-assisted search algorithm</a>. The parameters are: The time series 
+  <font color=red>s</font> of length
+  <font color=red>l</font>, a two dimensional <font
+  color=red>box</font> of dimension <font color=red>bs</font>, where
+  bs has to be a power of 2, the search <font color=red>list</font>,
+  also of length <font color=red>l</font>, the dimension <font
+  color=red>dim</font> of the 
+  embedding vectors, which are build with delay <font
+  color=red>del</font> and the size <font color=red>eps</font> of
+  the boxes.</p></li>
+
+<li><p><a href="../../source_c/routines/find_neighbors.c">
+  unsigned long find_neighbors</a><font color=red>
+  (double *s,long **box,long *list,double *x,
+  unsigned long l,unsigned int bs,unsigned int dim,
+  unsigned int del,double eps,unsigned long *flist)</font><br>
+  This routine searches for all neighbors of a vector 
+  <font color=red>x</font> within the time series <font
+  color=red>s</font>. The indexes of the neighbors found are 
+  stored in the array <font color=red>flist</font>, which has length
+  <font color=red>l</font> and the number of neighbors found is
+  returned. All other parameters have the same meaning as in the
+  routine
+  <a href="../../source_c/routines/make_box.c">make_box</a>.</p></li>
+
+<li><p><a href="../../source_c/routines/search_datafile.c">
+  char* search_datafile</a><font color=red>(int n,char
+  **names,unsinged int *col,unsigned int verbosity)</font><br>
+  This routines gets an array of strings <font color=red>names</font>
+  of size <font color=red>n</font> and scans it for a name of an existing
+  file. It returns the filename in case it found one or a NULL pointer if
+  not. If the filename is given like <i>filename,i</i> the <i>i</i> is
+  interpreted as the column and is returned in <font
+  color=red>col</font>, if <font color=red>col</font> was not a pointer
+  to NULL. <font color=red>verbosity</font> specifies the <a
+  href=../general.html#verbosity>verbosity level</a> of the program. 
+</p></li>
+
+<li><p><a href="../../source_c/routines/check_option.c">char* check_option</a>
+  <font color=red>(char **str,int n,int flag,int type)</font><br>
+  This routine looks for the flag <font color=red>flag</font> in the
+  string array <font color=red>str</font> (typically argv) which has
+  <font color=red>n</font> (typically argc) entries. The flag is
+  supposed to be of type <font color=red>type</font>. See the sources
+  for the valid types. The return string contains the parameter for
+  the flag or NULL if none was found.
+</p></li>
+
+<li><p><a href="../../source_c/routines/solvele.c">
+  void solvele</a><font color=red>(double **mat,double *vec,unsigned
+  int dim)</font><br> 
+  Solves a <font color=red>dim</font>-dimensional
+  system of linear equations given by <font
+  color=red><b>mat</b></font>*<b>x</b>=<font
+  color=red><b>vec</b></font>. It uses a Gaussian elimination
+  scheme. On return <font color=red>vec</font> contains <b>x</b>.
+</p></li>
+
+<li><p><a href="../../source_c/routines/test_outfile.c">
+  void test_outfile</a><font color=red>(char *name)</font><br>
+  This routine just checks whether the program can write to the file
+  named <font color=red>name</font>. If not the program exits.
+</p></li>
+
+<li><p><a href="../../source_c/routines/invert_matrix.c"> double 
+  **invert_matrix</a>
+  <font color=red>(double **mat,unsigned int size)</font><br> 
+  Inverts the
+  matrix <font color=red>mat</font> which is <font
+  color=red>size</font>x<font color=red>size</font>. It uses the
+  routine <a href="../../source_c/routines/solvele.c">solvele</a>.
+  The inverse matrix is returned.
+</p></li>
+
+<li><p><a href="../../source_c/routines/exclude_interval.c">
+  unsigned long exclude_interval</a><font color=red>(unsigned long
+  found,long ex0,long ex1,long *before,long *newlist)</font><br> 
+  This
+  routine is meant to be used in connection with the <a
+  href="../../source_c/routines/find_neighbors.c">find_neighbors</a>
+  routine. After having found <font color=red>found</font> neighbors
+  which are stored in <font color=red>before</font>, this new routine
+  allows to exclude an interval of time indexes 
+  limited from <font color=red>ex0</font> to <font color=red>ex1</font>
+  from this list. In other words: All neighbors having a time index in
+  the above range are removed from the list. The modified list is
+  returned in <font 
+  color=red>newlist</font> and the new number of neigbors is the
+  return value of the routine.
+</p></li>
+
+<li><p><a href="../../source_c/routines/make_multi_box.c">
+void make_multi_box</a><font color=red>(double **series,long
+**box,long *list,unsigned long length,unsigned int bs,unsigned int
+dim, unsigned int emb, unsigned int del,double eps)</font><br> 
+This
+routine is used to create the mesh for the box assisted search
+algorithm in case you have multivariate data. The parameter <font
+color=red>dim</font> determines the number of components of the
+vector. All other parameter have the same meaning as in <a
+href="../../source_c/routines/make_box.c">make_box</a>.
+</p></li>
+
+<li><p><a href="../../source_c/routines/find_multi_neighbors.c">
+  unsigned long find_multi_neighbors</a><font color=red>
+  (double *s,long **box,long *list,double **x,
+  unsigned long l,unsigned int bs,unsigned int dim,
+  unsigned int emb,unsigned int del,double eps,unsigned long
+  *flist)</font><br>
+  This routine searches for all neighbors of a multicomponent vector
+  <font color=red>x</font> within the multicomponent time series <font
+  color=red>s</font>. <font color=red>dim</font> is the number of
+  components. All other parameters have the same meaning as the ones
+  of <a href="../../source_c/routines/find_neighbors.c">
+  find_neighbors</a>.</p></li>
+
+<li><p><a href="../../source_c/routines/make_multi_index.c">unsigned
+  int **make_multi_index</a><font color=red>(unsigned int comps, unsigned
+  int emb, unsigned int del)</font><br> 
+  This routine is supposed to help with multivariate series. Given a
+  series with <font color=red>comps</font> components which are
+  additionally embedded in <font color=red>emb</font> dimensions using
+  delay <font color=red>del</font>, this routine returns a 2d array
+  with the following property: Given a number between 0 and
+  comps*emb-1, the first dimension of the returned array contains the
+  component of the multivariate series, while the second dimension
+  contains the time shift due to the embedding.
+</p></li>
+
+<li><p><a href="../../source_c/routines/check_alloc.c">void
+  check_alloc</a><font color=red>(void *array)</font><br> 
+  Just checks whether the pointer <font color=red>array</font> is
+  NULL. If so, the routines exits with an error code. The routine is
+  supposed to be used in combination with malloc from glibc.
+</p></li>
+
+<li><p><a href="../../source_c/routines/myfgets.c">void
+  myfgets</a><font color=red>(char *str,int *size,FILE *fin, unsigned
+  int verbosity)</font><br>
+  This
+  routine wraps the fgets routine of C to handle looong input
+  lines. The parameters have the same meaning as in fgets. The only
+  differences are: <font color=red>size</font> can be changed inside
+  and <font color=red>verbosity</font> handles the <a
+  href=../general.html#verbosity>verbosity level</a> for
+  the output of warnings.
+</p></li>
+
+<li><p><a href="../../source_c/routines/what_i_do.c">void
+  what_i_do</a><font color=red>(char *text,char *name)</font>: Just
+  writes a message to stderr saying what the program <font
+  color=red>name</font> does (<font color=red>text</font>).
+</p></li>
+
+<li><p><a href="../../source_c/routines/rand_arb_dist.c">double 
+  *rand_arb_dist</a><font color=red>(double *x,unsigned long nx,
+  unsigned long nc, unsigned int nb, unsigned long iseed)</font><br>
+  This routine generates random numbers, which have the same
+  distribution as the data set <font color=red>x</font>. The length of
+  <font color=red>x</font> is <font color=red>nx</font>. The number of
+  random numbers created is <font color=red>nc</font>. <font
+  color=red>nb</font> is the number of boxes with which the
+  original data is binned to define the histogram to be
+  reproduced. <font color=red>iseed</font> gives the seed for the
+  random number generator. The returned array finally contains the
+  random numbers.
+</p></li>
+
+<p><li>Some random number generator routines can be found <a
+href="rand.html">here</a></li></p>
+
+<li><p><a href="../../source_c/routines/eigen.c">void
+  eigen</a><font color=red>(double **mat,unsigned long n, double
+  *eig)</font><br> 
+  This routine calculates the eigenvectors and eigenvalues of a
+  symmetric matrix <font color=red>mat</font> having dimension <font
+  color=red>n</font>. On return <font color=red>mat</font> contains
+  the eigenvectors of <font color=red>mat</font> as columns and <font
+  color=red>eig</font> its eigenvalues. It uses the routines <font
+  color=blue>tred2</font> and  <font color=blue>tql2</font> of the
+  EISPACK package which were translated to C using the f2c program. The
+  routine requires <font color=red>mat</font> to be allocated in a
+  special way. 
+</p></li>
+
+</ul>
+</body>
+</html>

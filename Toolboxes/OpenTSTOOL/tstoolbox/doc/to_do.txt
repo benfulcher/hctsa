@@ -1,0 +1,88 @@
+			Anstehende Arbeiten am TSTOOL
+
+
+I.  Durcharbeiten der Funtkionen der Klasse signal (evtl. auch core) :
+
+	
+    Konsistente Fehlerbehandlung bei allen Funktionen :
+		Checken der Funktions-Argumente
+    	Dabei sollte gleichzeitig der Help-Kommentarteil auf den neuesten Stand
+    	gebracht werden, auch was Ausfuehrlichkeit, Terminologie und
+		Verstaendlichkeit betrifft.
+    
+	
+		Eine Funktion sollte bei einer Ausnahmesituation einen Fehler aufwerfen,
+		nicht eine Statusvariable (0 oder 1) zurueckgeben. In 5.2 kann dann sofort
+		mit try und catch gearbeitet werden, aber auch in 5.1 kann mit eval() eine
+		solches Verhalten erreicht werden.
+		
+		Auch muss sichergestellt werden, dass eine Funktion nur mit einem Signal aufgerufen
+		wird, dass die richtige Anzahl Dimensionen hat.
+	
+	
+Fehlermeldungen :
+error('Wrong type of argument(s) given');
+error(nargchk(2,2, nargin));	
+	
+Beispiel :
+
+-------------------------------------------------------------------------------------------
+
+function d = setyunit(d, u)
+
+% description/setyunit
+%
+% Set signal's y-unit 
+% 
+% d = setyunit(d, unit)
+% d = setyunit(d, string)      e.g. d = setyunit(d, 'V')
+%
+% C.Merkwirth,J.Wichard,K.Peters,F.Bauer,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
+
+error(nargchk(2,2, nargin));
+
+if isa(u, 'unit')
+	d.yunit = u;
+elseif isa(u, 'char')
+	d.yunit = unit(u);
+else
+	error('Wrong type of argument(s) given');
+end	
+	
+	
+-------------------------------------------------------------------------------------------	
+	
+	History- und Commandlines checken
+	Dokumentation (man-page Style) erstellen
+   
+
+
+II. Arbeiten an der grafischen Oberflaeche : 
+		
+		Einfuegen von Radio-Buttons etc. zur Erleichterung von Auswahlen 
+		File-Select Boxen fuer Such/Schreibpfad
+		
+		Evtl. Caching des letzten Signales (falls Size < Limit) in das GUI einbauen
+		Evtl. Verbesserung der Darstellung gezoomter Signale durch Sliders, mit denen
+		der Zoom-Ausschnitt im Vollsignal bewegt werden kann
+		Fadenkreuz mit Anzeige des Signalwertes (x und y)
+
+
+
+
+		Alle Units der Fenster auf 'characters' umstellen !!!
+		Tooltips ausprobieren
+		Zooming and Scrolling
+
+
+
+
+
+III. Dokumentation allgemein
+
+
+
+
+
+
+Christian Merkwirth, DPI Goettingen 16.Dez.1998 

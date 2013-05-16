@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Practical implementation of nonlinear time series methods: The TISEAN package</TITLE>
+<META NAME="description" CONTENT="Practical implementation of nonlinear time series methods: The TISEAN package">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html23" HREF="node1.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM
+ ALT="next" SRC="icons/next_motif.gif"></A> <a href="../indexf.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></a> <IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif">   <BR>
+<B> Next:</B> <A NAME="tex2html24" HREF="node1.html">Lead Paragraph</A>
+<BR> <P>
+<P>
+<H1 ALIGN=CENTER>Practical implementation of nonlinear time series methods: 
+<br>The TISEAN package</H1>
+<P ALIGN=CENTER><STRONG> 
+Rainer Hegger, Holger Kantz<BR>
+   <EM>Max Planck Institute for Physics of Complex Systems,<BR> N&#246;thnitzer
+     Str. 38, D-01187 Dresden</EM><BR>
+Thomas Schreiber<BR>
+   <EM>Physics Department, University of Wuppertal, D-42097 Wuppertal</EM></STRONG></P><P>
+<P>
+<H3 CLASS=ABSTRACT>Abstract:</H3>
+<P CLASS=ABSTRACT>We describe the implementation of methods of nonlinear time series analysis
+   which are based on the paradigm of deterministic chaos. A variety of
+   algorithms for data representation, prediction, noise reduction, dimension
+   and Lyapunov estimation, and nonlinearity testing are discussed with
+   particular emphasis on issues of implementation and choice of parameters.
+   Computer programs that implement the resulting strategies are publicly
+   available as the <a href="../indexf.html">TISEAN</a> 
+   software package. The use of each algorithm will
+   be illustrated with a typical application. As to the theoretical background,
+   we will essentially give pointers to the literature.
+</P><P>
+<H3>Note:</H3>
+<P>A version of this document has appeared as a journal article
+<blockquote> 
+[<font color=red>CHAOS <b>9</b>, 413-435 (1999)</font>]
+</blockquote>
+which now constitutes the correct reference
+to this work.
+Preprint <a href="http://xxx.lanl.gov/abs/chao-dyn/9810005">paper versions</a> 
+are also available.
+</P><P>
+<H3>Note:</H3>
+Extensions to the package made after version 1.0 are not documented in this
+manual in order to keep it as close as possible to the paper version.
+Only minor updates have been made to the text and the link structure since
+then. 
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html25" HREF="node2.html#SECTION00020000000000000000">Introduction</A>
+<UL>
+<LI> <A NAME="tex2html26" HREF="node3.html#SECTION00021000000000000000">Philosophy of the TISEAN implementation</A>
+<LI> <A NAME="tex2html27" HREF="node4.html#SECTION00022000000000000000">General computational issues</A>
+</UL> 
+<LI> <A NAME="tex2html28" HREF="node5.html#SECTION00030000000000000000">Phase space representation</A>
+<UL>
+<LI> <A NAME="tex2html29" HREF="node6.html#SECTION00031000000000000000">Delay coordinates</A>
+<LI> <A NAME="tex2html30" HREF="node7.html#SECTION00032000000000000000">Embedding parameters</A>
+<UL>
+<LI> <A NAME="tex2html31" HREF="node8.html#SECTION00032100000000000000">Mutual information</A>
+<LI> <A NAME="tex2html32" HREF="node9.html#SECTION00032200000000000000">False nearest neighbors</A>
+</UL> 
+<LI> <A NAME="tex2html33" HREF="node10.html#SECTION00033000000000000000">Principal components</A>
+<LI> <A NAME="tex2html34" HREF="node11.html#SECTION00034000000000000000">Poincar&#233; sections</A>
+<LI> <A NAME="tex2html35" HREF="node12.html#SECTION00035000000000000000">SVD filters</A>
+</UL> 
+<LI> <A NAME="tex2html36" HREF="node13.html#SECTION00040000000000000000">Visualization, non-stationarity</A>
+<UL>
+<LI> <A NAME="tex2html37" HREF="node14.html#SECTION00041000000000000000">Recurrence plots</A>
+<LI> <A NAME="tex2html38" HREF="node15.html#SECTION00042000000000000000">Space-time separation plot</A>
+</UL> 
+<LI> <A NAME="tex2html39" HREF="node16.html#SECTION00050000000000000000">Nonlinear prediction</A>
+<UL>
+<LI> <A NAME="tex2html40" HREF="node17.html#SECTION00051000000000000000">Model validation</A>
+<LI> <A NAME="tex2html41" HREF="node18.html#SECTION00052000000000000000">Simple nonlinear prediction</A>
+<LI> <A NAME="tex2html42" HREF="node19.html#SECTION00053000000000000000">Finding unstable periodic orbits</A>
+<LI> <A NAME="tex2html43" HREF="node20.html#SECTION00054000000000000000">Locally linear prediction</A>
+<LI> <A NAME="tex2html44" HREF="node21.html#SECTION00055000000000000000">Global function fits</A>
+</UL> 
+<LI> <A NAME="tex2html45" HREF="node22.html#SECTION00060000000000000000">Nonlinear noise reduction</A>
+<UL>
+<LI> <A NAME="tex2html46" HREF="node23.html#SECTION00061000000000000000">Simple nonlinear noise reduction</A>
+<LI> <A NAME="tex2html47" HREF="node24.html#SECTION00062000000000000000">Locally projective nonlinear noise reduction</A>
+<LI> <A NAME="tex2html48" HREF="node25.html#SECTION00063000000000000000">Nonlinear noise reduction in a data stream</A>
+</UL> 
+<LI> <A NAME="tex2html49" HREF="node26.html#SECTION00070000000000000000">Lyapunov exponents</A>
+<UL>
+<LI> <A NAME="tex2html50" HREF="node27.html#SECTION00071000000000000000">The maximal exponent</A>
+<LI> <A NAME="tex2html51" HREF="node28.html#SECTION00072000000000000000">The Lyapunov spectrum</A>
+</UL> 
+<LI> <A NAME="tex2html52" HREF="node29.html#SECTION00080000000000000000">Dimensions and entropies</A>
+<UL>
+<LI> <A NAME="tex2html53" HREF="node30.html#SECTION00081000000000000000">Correlation dimension</A>
+<UL>
+<LI> <A NAME="tex2html54" HREF="node31.html#SECTION00081100000000000000">Takens-Theiler estimator</A>
+<LI> <A NAME="tex2html55" HREF="node32.html#SECTION00081200000000000000">Gaussian kernel correlation integral</A>
+</UL> 
+<LI> <A NAME="tex2html56" HREF="node33.html#SECTION00082000000000000000">Information dimension</A>
+<UL>
+<LI> <A NAME="tex2html57" HREF="node34.html#SECTION00082100000000000000">Entropy estimates</A>
+</UL> 
+</UL> 
+<LI> <A NAME="tex2html58" HREF="node35.html#SECTION00090000000000000000">Testing for nonlinearity</A>
+<UL>
+<LI> <A NAME="tex2html59" HREF="node36.html#SECTION00091000000000000000">The concept of surrogate data</A>
+<LI> <A NAME="tex2html60" HREF="node37.html#SECTION00092000000000000000">Iterative Fourier transform method</A>
+<LI> <A NAME="tex2html61" HREF="node38.html#SECTION00093000000000000000">General constrained randomization</A>
+<LI> <A NAME="tex2html62" HREF="node39.html#SECTION00094000000000000000">Measuring weak nonlinearity</A>
+</UL> 
+<LI> <A NAME="tex2html63" HREF="node40.html#SECTION000100000000000000000">Conclusion and perspectives</A>
+<UL>
+<LI> <A NAME="tex2html64" HREF="node41.html#SECTION000101000000000000000">Important methods which are (still) missing</A>
+</UL> 
+<LI> <A NAME="tex2html65" HREF="citation.html#SECTION000120000000000000000">References</A>
+<LI> <A NAME="tex2html66" HREF="node44.html#SECTION000130000000000000000">  About this document ... </A>
+</UL>
+<HR><A NAME="tex2html23" HREF="node1.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <a href="../index.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></a> <IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif">   <BR>
+<B> Next:</B> <A NAME="tex2html24" HREF="node1.html">Lead Paragraph</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

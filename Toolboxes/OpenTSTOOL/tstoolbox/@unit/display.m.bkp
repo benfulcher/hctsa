@@ -1,0 +1,19 @@
+function display(u)
+
+disp(' ');
+disp([inputname(1), ' = '])
+disp(' ');
+disp(['Label     :   ' u.label]);
+disp(['Name      :   ' u.name]);
+disp(['Quantity  :   ' u.quantity.eng '  ' u.quantity.ger]);
+disp(['Factor    :   ' num2str(u.factor)]);
+disp(['Exponents of :   ']);
+disp(['  mass                :   ' num2str(u.exponents(1))]);
+disp(['  length              :   ' num2str(u.exponents(2))]);
+disp(['  time                :   ' num2str(u.exponents(3))]);
+disp(['  current             :   ' num2str(u.exponents(4))]);
+disp(['  temperature         :   ' num2str(u.exponents(5))]);
+disp(['  luminal intensity   :   ' num2str(u.exponents(6))]);
+disp(['  mole                :   ' num2str(u.exponents(7))]);
+disp(['  plane_angle         :   ' num2str(u.exponents(8))]);
+disp(' ');

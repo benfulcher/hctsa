@@ -1,0 +1,62 @@
+<html> 
+<head><title>Cooling schemes</title></head>
+<body bgcolor="#ffffff">
+<h3>Cooling schemes</h3>
+
+The <a href="randomize_extend.html">extendable</a> family of routines for the
+generation of annealed surrogate data can accomodate a variety of cooling
+schemes for the simulated annealing procedure. In this version,
+the only available module implements an exponential schedule.
+
+<h4>Exponential cooling</h4>
+<p>
+<font color=blue><tt>randomize_</tt><em>cost</em>
+<tt>_</tt><font color=red><tt>exp</tt></font><tt>_</tt><em>perm</em><tt> [-T#
+-a# -S# -s# -z# -C#] 
+<br>&nbsp;&nbsp;&nbsp;&nbsp;[</tt><em>general options</em><tt>] [</tt><em>cost function options</em><tt>] [</tt><em>permutation options</em><tt>] </tt><em>file</em></font>
+<blockquote>
+     <font color=blue><tt> -T </tt></font>
+   initial temperature (default: automatic melting)
+<br> <font color=blue><tt> -a </tt></font>cooling factor (default automatic:
+   try fast cooling, start over if no more improvement)
+<br> <font color=blue><tt> -S </tt></font>
+   total steps before cooling (default 20000)
+<br> <font color=blue><tt> -s </tt></font>
+   successful steps before cooling (default 2000)
+<br> <font color=blue><tt> -z </tt></font>
+   minimal successful steps (default 200)
+<br> <font color=blue><tt> -C </tt></font>
+   goal value of cost function (default zero)
+</blockquote>
+Starting from the initial temperature <font color=blue><tt>-T</tt></font>, 
+the temperature is multiplied by a factor <font color=blue><tt>-a</tt></font>
+whenever either <font color=blue><tt>-S</tt></font> steps have been tried or
+<font color=blue><tt>-s</tt></font> accepted changes have been performed.
+Cooling is finished if the cost has been brought below <font
+color=blue><tt>-C</tt></font>. Generally, considerable experimentation is
+necessary or at least strongly recommended since annealing can eat an infinite
+amount of CPU time. 
+<p>
+If the initial temperature is not given, the program starts with a fairly low
+one (whatever that means) and increases it for melting if necessary, that is
+if, initially, the number of trials exceeds 1.5 times the number of successes.
+<p>
+If no cooling factor is given, the program starts with a fairly fast scheme
+(factor 0.5). If after complete freezing (less than <font
+color=blue><tt>-z</tt></font> succeses) the goal <font
+color=blue><tt>-C</tt></font> has not been reached, the system is restarted
+with half the exponential rate (a is replaced by sqrt(a)) and a larger value of
+<font color=blue><tt>-S</tt></font>. This procedure is less than optimal but
+hoped to eventually converge.
+<p>
+<font color=red><b>Note:</b></font> if neither <font
+color=blue><tt>-a</tt></font> nor <font color=blue><tt>-C</tt></font> are
+given, the annealing will keep staring over with slower cooling rates. This may
+be necessary if good guesses are not available but of course, multiple
+surrogates will then have to be made by further separate calls.
+<p>
+
+    <a href="randomize.html">constrained randomization</a> *
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

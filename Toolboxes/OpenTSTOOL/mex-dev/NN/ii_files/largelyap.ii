@@ -1,0 +1,3 @@
+CMDLINE=CC -c -I. -I.. -I/tmp_mnt/dpi/matlab/extern/include -DMATLAB_MEX_FILE -I. -mips4 -64 -prelink -ptused -LANG:std -DPARTIAL_SEARCH -Ofast -DNDEBUG largelyap.cpp
+PWD=/export/people/tstool/OpenTSTOOL/mex-dev/NN
+----

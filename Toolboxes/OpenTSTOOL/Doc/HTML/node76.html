@@ -1,0 +1,278 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>6.24.3 Member functions</TITLE>
+<META NAME="description" CONTENT="6.24.3 Member functions">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="node75.html">
+<LINK REL="up" HREF="node73.html">
+<LINK REL="next" HREF="node77.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html1708"
+  HREF="node77.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1704"
+  HREF="node73.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1700"
+  HREF="node75.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1706"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1709"
+  HREF="node77.html">6.25 Class list</A>
+<B> Up:</B> <A NAME="tex2html1705"
+  HREF="node73.html">6.24 Class unit</A>
+<B> Previous:</B> <A NAME="tex2html1701"
+  HREF="node75.html">6.24.2 Attributes</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html1710"
+  HREF="node76.html#SECTION007243100000000000000">6.24.3.1 char</A>
+<LI><A NAME="tex2html1711"
+  HREF="node76.html#SECTION007243200000000000000">6.24.3.2 dbref</A>
+<LI><A NAME="tex2html1712"
+  HREF="node76.html#SECTION007243300000000000000">6.24.3.3 dbscale</A>
+<LI><A NAME="tex2html1713"
+  HREF="node76.html#SECTION007243400000000000000">6.24.3.4 display</A>
+<LI><A NAME="tex2html1714"
+  HREF="node76.html#SECTION007243500000000000000">6.24.3.5 double</A>
+<LI><A NAME="tex2html1715"
+  HREF="node76.html#SECTION007243600000000000000">6.24.3.6 eq</A>
+<LI><A NAME="tex2html1716"
+  HREF="node76.html#SECTION007243700000000000000">6.24.3.7 exponents</A>
+<LI><A NAME="tex2html1717"
+  HREF="node76.html#SECTION007243800000000000000">6.24.3.8 factor</A>
+<LI><A NAME="tex2html1718"
+  HREF="node76.html#SECTION007243900000000000000">6.24.3.9 label</A>
+<LI><A NAME="tex2html1719"
+  HREF="node76.html#SECTION0072431000000000000000">6.24.3.10 mpower</A>
+<LI><A NAME="tex2html1720"
+  HREF="node76.html#SECTION0072431100000000000000">6.24.3.11 mrdivide</A>
+<LI><A NAME="tex2html1721"
+  HREF="node76.html#SECTION0072431200000000000000">6.24.3.12 mtimes</A>
+<LI><A NAME="tex2html1722"
+  HREF="node76.html#SECTION0072431300000000000000">6.24.3.13 name</A>
+<LI><A NAME="tex2html1723"
+  HREF="node76.html#SECTION0072431400000000000000">6.24.3.14 quantity</A>
+<LI><A NAME="tex2html1724"
+  HREF="node76.html#SECTION0072431500000000000000">6.24.3.15 unit</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H2><A NAME="SECTION007243000000000000000">
+6.24.3 Member functions</A>
+</H2>
+
+<P>
+<A NAME="f113:FUNCTIONS"></A>
+
+<H3><A NAME="SECTION007243100000000000000"></A>
+<A NAME="f193"></A>
+<BR>
+6.24.3.1 char
+</H3>
+gives the unit's label (e.g. V for Volt) back.
+
+<H3><A NAME="SECTION007243200000000000000"></A>
+<A NAME="f194"></A>
+<BR>
+6.24.3.2 dbref
+</H3>
+returns reference value for 0 dB when calculating decibel values from data of this unit.
+
+<H3><A NAME="SECTION007243300000000000000"></A>
+<A NAME="f195"></A>
+<BR>
+6.24.3.3 dbscale
+</H3>
+returns scaling value when calculating decibel values from data of this unit.
+<TT>dpscale</TT> returns either 10 (for power or energy units (e.g. Watt)) or 20 (for all other units (e.g. Volt).
+
+<H3><A NAME="SECTION007243400000000000000"></A>
+<A NAME="f196"></A>
+<BR>
+6.24.3.4 display
+</H3>
+
+<H3><A NAME="SECTION007243500000000000000"></A>
+<A NAME="f197"></A>
+<BR>
+6.24.3.5 double
+</H3>
+gives a row vector which's first element contains the unit's factor
+and the remaining elements contain the exponents of the SI basic units.
+
+<H3><A NAME="SECTION007243600000000000000"></A>
+<A NAME="f198"></A>
+<BR>
+6.24.3.6 eq
+</H3>
+
+<H3><A NAME="SECTION007243700000000000000"></A>
+<A NAME="f199"></A>
+<BR>
+6.24.3.7 exponents
+</H3>
+returns dimension exponents of unit <TT>q</TT>.
+
+<H3><A NAME="SECTION007243800000000000000"></A>
+<A NAME="f200"></A>
+<BR>
+6.24.3.8 factor
+</H3>
+returns factor of unit <TT>q</TT>.
+
+<H3><A NAME="SECTION007243900000000000000"></A>
+<A NAME="f201"></A>
+<BR>
+6.24.3.9 label
+</H3>
+
+<H3><A NAME="SECTION0072431000000000000000"></A>
+<A NAME="f202"></A>
+<BR>
+6.24.3.10 mpower
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>mpower(u,p)</TT>
+</LI>
+</UL>
+take unit <TT>u</TT> to power <TT>p</TT>, <TT>p</TT> must be a scalar.
+
+<H3><A NAME="SECTION0072431100000000000000"></A>
+<A NAME="f203"></A>
+<BR>
+6.24.3.11 mrdivide
+</H3>
+
+<H3><A NAME="SECTION0072431200000000000000"></A>
+<A NAME="f204"></A>
+<BR>
+6.24.3.12 mtimes
+</H3>
+
+<H3><A NAME="SECTION0072431300000000000000"></A>
+<A NAME="f205"></A>
+<BR>
+6.24.3.13 name
+</H3>
+returns name of unit <TT>q</TT>.
+
+<H3><A NAME="SECTION0072431400000000000000"></A>
+<A NAME="f206"></A>
+<BR>
+6.24.3.14 quantity
+</H3>
+returns quantity name of unit <TT>q</TT>. 
+If argument which is omitted, the english quantity name will be returned.
+
+<H3><A NAME="SECTION0072431500000000000000"></A>
+<A NAME="f207"></A>
+<BR>
+6.24.3.15 unit
+</H3>
+<TT>unit</TT> class constructor
+
+<P>
+Class <TT>unit</TT> tries to modell physical units
+a physical unit is mainly can be described by the exponents of the basic SI units,
+namely mass, length, time, current, temperature, luminal_intensity, mole and
+plane_angle.
+Each unit belongs to a quantity, e.g. the unit <TT>s</TT> (second) is used 
+when measuring the quantity TIME.
+Each unit has a name, e.g. 'Ampere', 'Volt' , 'Joule', 'hour', and
+an abbreviation, called label ('A', 'V', 'J', 'h').
+Unfortunately, the correspondence between these items is not always bijectiv
+to find corresponding items, a table of units in the file <TT>units.mat</TT> is used.
+
+<P>
+A unit object can be created with different types of arguments:
+
+<P>
+
+<UL>
+<LI>by giving the label: unit('Hz') looks up the remaining data (exponents, name,
+quantity) in the table
+</LI>
+<LI><P>
+by giving the exponents
+</LI>
+</UL>
+
+<P>
+Some arithmetic can be done with units:
+
+<UL>
+<LI>units can be multiplied <TT>unit('V') * unit('A') = unit('Watt')</TT>
+</LI>
+<LI>or taken to an integer or rational power <TT>unit('m')<IMG
+ WIDTH="11" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img41.gif"
+ ALT="$ ^2$">
+</TT>
+</LI>
+</UL>
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html1708"
+  HREF="node77.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1704"
+  HREF="node73.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1700"
+  HREF="node75.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1706"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1709"
+  HREF="node77.html">6.25 Class list</A>
+<B> Up:</B> <A NAME="tex2html1705"
+  HREF="node73.html">6.24 Class unit</A>
+<B> Previous:</B> <A NAME="tex2html1701"
+  HREF="node75.html">6.24.2 Attributes</A>
+ &nbsp; <B>  <A NAME="tex2html1707"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

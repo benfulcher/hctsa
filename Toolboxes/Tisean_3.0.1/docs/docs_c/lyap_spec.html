@@ -1,0 +1,134 @@
+<html>
+<head>
+<title>
+lyap_spec
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>lyap_spec
+</font>
+</h1>
+<hr>
+This program estimates the whole spectrum of Lyapunov exponents for a
+given, possibly multivariate, time series. Whole spectrum means: If d
+components are given and the embedding
+dimension is m than m*d exponents will be determined. The method is
+based on the work of <a href="../chaospaper/citation.html#sasa">Sano and Sawada</a>.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>lyap_spec [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of points to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#,#
+<td>no. of components, embedding dimension
+<td>1,2
+</tr>
+<!--
+<tr>
+<th>-d#
+<td>delay for the delay vectors
+<td>1
+</tr>
+-->
+<tr>
+<th>-r#
+<td>minimal neighborhood size
+<td>not set
+</tr>
+<tr>
+<th>-f#
+<td>factor to increase the size of the neighborhood<br>
+if not enough neighbors were found
+<td>1.2
+</tr>
+<tr>
+<th>-k#
+<td>number of neighbors to use (this version uses exactly the number<br>
+of neighbors specified. If found more, only the # nearest will be
+used)
+<td>30
+</tr>
+<tr>
+<th>-n#
+<td>number of iterations
+<td>number of points
+</tr>
+<tr>
+<th>-I
+<td>invert the order of the time series.<br>
+Is supposed to help finding spurious exponents.
+<td>no inversion
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>'datafile'.lyaps<br>
+(or stdin.lyaps if data were read from stdin)<br>
+if no -o is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The output consists of <font color=blue>d*m+1</font> columns. The first
+one shows the actual iteration, the next <font color=blue>d*m</font>
+ones the estimates of the Lyapunov exponents in decreasing order. The
+last lines show the average forecast error(s) of the local linear
+model, the average neighborhood size used for fitting the model and
+the last one the estimated Kaplan-Yorke dimension.<br>
+Output is written every 10 seconds (real time), approximately.
+<hr>
+<h2 align=center>Remark on the delay embedding</h2>
+In older versions of this program it was possible to change the delay
+of the embedding. This option was removed for the reason that the way
+the program handled this delay was not very efficient. Instead of
+rewriting everything, we decided to completely remove this option. In
+case you want to use delays other than 1, use the program <a
+href="delay.html">delay</a> to create a multivariate time series with
+the desired delay and read this multivariate time series into <font
+color=red>lyap_spec</font>.
+
+<hr>
+View the <a href="../../source_c/lyap_spec.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

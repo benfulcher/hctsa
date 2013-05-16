@@ -1,0 +1,15 @@
+void argdel(int, long);
+long nstrings();
+char *nthstring(int, char **, long);
+void whatido(int, char **, char *, char *);
+long lopt(int, char **, char);
+long lmust(int, char **, char);
+double fmust(int, char **, char);
+long lcan(int, char **, char, long);
+double fcan(int, char **, char, double);
+long getfile(char *, char *, long);
+long readval(FILE *, double *, long);
+long readdum(FILE *);
+long readline(FILE *, double *, long);
+void putcol(char *, long);
+char *getout(int, char **, long *);

@@ -1,0 +1,186 @@
+<html>
+<head><title>General usage notes</title></head>
+<body bgcolor="#ffffff">
+<h1>General usage notes</h1>
+
+<font color=red><b>Command line:</b></font> 
+All programs are called from the command line with certain options, most with
+an argument which may or may not be seperated with a blank. Options and their
+meanings are listed in the program specific sections of the manual. Running
+each program with the option <font color=blue><tt>-h</tt></font> also displays
+a short usage note.
+
+<p>
+<font color=red><b>Usage in pipes:</b></font> Almost all programs expect one or
+more file names.  These may appear anywhere on the command line, in fact
+everything that is not a valid option is treated as a file name. Except when
+indicated otherwise, a file name <font color=blue><tt>-</tt></font> indicates
+that <font color=blue><tt>stdin</tt></font> is used for input rather than a
+file. If no file name is given at all, 
+<font color=blue><tt>-</tt></font> is assumed as a default.
+This can be convenient since
+you can use many of the routines in pipelines. 
+
+<p>
+<a name="outfile"></a>
+<font color=red><b>Output file names:</b></font> 
+The programs' output is written in most cases to <font
+color=blue><tt>stdout</tt></font> by default. This behaviour can be overridden 
+in two steps. If the option <font color=blue><tt>-o</tt></font> is specified
+with no argument, output is done to files the names of which are formed from
+the input file names by appending a specific string. This can be a fixed
+sequence of characters or it can contain a running number in cases where
+multiple output files have to be produced. 
+If the flag <font color=blue><tt>-o</tt></font> is specified with a file name
+argument, that file is used for output. Note that with multiple input files,
+the behaviour is somewhat awkward since every time the output file is opened
+for writing, the current content is destroyed. Thus it will eventually contain
+only output corresponding to the last input file.
+
+<p>
+<font color=red><b>Data file format:</b></font> One value per line is read from
+time series data files. 
+Any line that cannot be interpreted as data is taken as a <font
+color=red>comment</font> and ignored.
+
+<p>
+<a name="column"></a>
+<a name="columns"></a>
+<font color=red><b>Column selection (univariate):</b></font>
+The default is that data is read from the <font color=red>first
+column</font>, further columns are ignored. However, it is possible to read
+from <font color=red>other columns</font>. You can specify the column
+with the option <font color=blue><tt>-c</tt></font>. 
+
+<p>
+<font color=red><b>Column selection (multivariate):</b></font>
+The general convention for multivariate column selection is as follows.
+Columns can be given as a comma seperated list with the option
+<font color=blue><tt> -c#[,#]  </tt></font>. Wherever the number of columns is
+selectable, this can be done with the option <font color=blue><tt> -m#
+</tt></font> or the first number in its argument. The precedence of these
+settings are as follows:
+<ul><dt>
+  <font color=blue><tt> -m </tt></font> overrides 
+  <font color=blue><tt> -c </tt></font>
+   <dt>
+  <font color=blue><tt> -c </tt></font> overrides the default 
+    <font color=red>only</font> if <font color=red>more</font> columns are
+    specified. 
+</ul>
+
+<p>
+<a name="verbosity"></a>
+<font color=red><b>Verbosity levels:</b></font> All programs accept an option
+<font color=blue><tt>-V </tt></font> that can have an integer argument.
+With this option, the level of verbosity of the output is controlled.
+At the very least, fatal or panic messages are printed.
+All other kinds of messages have integer level values which are powers of two.
+Thus for a specific selection of messages, just add these level values and pass
+the result to the <font color=blue><tt>-V </tt></font> option.
+For example, the specific documentation of a program may say:
+<blockquote>
+Verbosity levels (add what you want):
+<p>
+   <font color=blue> 	1</font> = input/output
+<br>   <font color=blue> 	2</font> = progress report
+<br>   <font color=blue> 	4</font> = mean squared error
+<br>   <font color=blue> 	8</font> = date and time
+</blockquote>
+In that case, <font color=blue><tt>-V 10 </tt></font> (8+2) would result in
+progress reports and date and time beeing printed, but no i/o reports and mean
+squared errors.
+<p>
+Usually, <font color=blue> 	1</font> causes input/output information (files
+opened etc.) and <font color=blue>128</font> echoes the first data item read.
+This is useful for strange file formats to check if the input is read
+correctly. 
+<p>
+By the way, if you hate the version and copyright message but you
+don't want to switch off level 1, you can also compile the C programs
+with the constant OMIT_WHAT_I_DO defined, e.g. by saying
+<pre>
+     > setenv CC "cc -DOMIT_WHAT_I_DO" 
+</pre>
+(tcsh syntax)
+before running 
+<font color=blue>configure</font>. Thomas doubts that there is anyone
+except  Rainer who needs this ;-)
+
+<hr>
+Here is a list of options that occur most 
+frequently:
+<blockquote>
+<table cellspacing=0>
+<tr><th align=left>general</th>
+   <td><font color=blue><tt>-h </tt></font></td><td>
+   display short usage message</td></tr>
+<tr><td></td><td><font color=blue><tt>-V </tt></font></td><td>
+   verbosity level</td></tr>
+
+<tr><th align=left>input/output</th>
+   <td><font color=blue><tt>-l </tt></font></td><td>
+   maximal length to be processed</td></tr>
+<tr><td></td><td><font color=blue><tt>-x </tt></font></td><td>
+   number of excluded transients</td></tr>
+<tr><td></td><td><font color=blue><tt>-c </tt></font></td><td>
+   read data from column</td></tr>
+<tr><td></td><td><font color=blue><tt>-o </tt></font></td><td>
+   alternale output file name</td></tr>
+
+<tr><th align=left>embedding</th>
+   <td><font color=blue><tt>-d </tt></font></td><td>
+   delay, minimal delay</td></tr>
+<tr><td></td><td><font color=blue><tt>-D </tt></font></td><td>
+   maximal delay</td></tr>
+<tr><td></td><td><font color=blue><tt>-m </tt></font></td><td>
+   embedding dimension, minimal embedding dimension</td></tr>
+<tr><td></td><td><font color=blue><tt>-M </tt></font></td><td>
+   maximal embedding dimension</td></tr>
+<tr><td></td><td><font color=blue><tt>-q </tt></font></td><td>
+   dimension to project on</td></tr>
+
+<tr><th align=left>length scales</th>
+   <td><font color=blue><tt>-r </tt></font></td><td>
+   (minimal) length scale in physical units</td></tr>
+<tr><td></td><td><font color=blue><tt>-R </tt></font></td><td>
+   same but maximal</td></tr>
+<tr><td></td><td><font color=blue><tt>-e </tt></font></td><td>
+   (minimal) length scale if data is rescaled to [0:1]</td></tr>
+<tr><td></td><td><font color=blue><tt>-E </tt></font></td><td>
+   same but maximal</td></tr>
+<tr><td></td><td><font color=blue><tt>-v </tt></font></td><td>
+   length scale as fraction of rms variance</td></tr>
+<tr><td></td><td><font color=blue><tt>-% </tt></font></td><td>
+   length scale in percent of rms variance</td></tr>
+
+<tr><th align=left>neighbourhoods</th>
+   <td><font color=blue><tt>-k </tt></font></td><td>
+   minimal number of neighbours</td></tr>
+<tr><td></td><td><font color=blue><tt>-K </tt></font></td><td>
+   maximal number of neighbours</td></tr>
+
+<tr><th align=left>time windows</th>
+   <td><font color=blue><tt>-t </tt></font></td><td>
+   Theiler window, minimal temporal separation of neighbours</td></tr>
+<tr><td></td><td><font color=blue><tt>-T </tt></font></td><td>
+   the reverse of <font color=blue><tt>-t </tt></font>: 
+   maximal temporal separation of neighbours</td></tr>
+
+<tr><th align=left>prediction times</th>
+   <td><font color=blue><tt>-s </tt></font></td><td>
+   number of time units to follow time evolution</td></tr>
+<tr><td></td><td><font color=blue><tt>-L </tt></font></td><td>
+   time interval to predict after end of data</td></tr>
+</table>
+</blockquote>
+<hr>
+<p>
+<em>Copyright &#169; (1998-2007) Rainer Hegger, Holger Kantz, Thomas
+Schreiber</em> 
+</p>
+<p>
+<a href="../../index.html" target="_top">TISEAN home</a>
+</p>
+</body>
+</html>

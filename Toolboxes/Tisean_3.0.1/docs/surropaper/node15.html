@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Iterative multivariate surrogates</TITLE>
+<META NAME="description" CONTENT="Iterative multivariate surrogates">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html220" HREF="node16.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html218" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html214" HREF="node14.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html221" HREF="node16.html">General constrained randomisation</A>
+<B>Up:</B> <A NAME="tex2html219" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html215" HREF="node14.html">Periodicity artefacts</A>
+<BR> <P>
+<H2><A NAME="SECTION00046000000000000000">Iterative multivariate surrogates</A></H2>
+<A NAME="secmulti1">&#160;</A>
+<P>
+<P>
+A natural generalisation of the null hypothesis of a Gaussian linear stochastic
+process is that of a multivariate process of the same kind. In this case, the
+process is determined by giving the cross-spectrum in
+addition to the power spectrum of each of the channels. In Ref.&nbsp;[<A HREF="node36.html#multi">34</A>],
+it has been pointed out that phase randomised surrogates are readily produced
+by multiplying the Fourier phases of each of the channels by the same set of 
+random phases since the cross-spectrum reflects relative phases only.
+The authors of Ref.&nbsp;[<A HREF="node36.html#multi">34</A>] did not discuss the possibility to combine 
+multivariate phase randomisation with an amplitude adjustment step.
+The extension of the iterative refinement scheme introduced in
+Sec.&nbsp;<A HREF="node12.html#seciterative">4.3</A> to the multivariate case is relatively
+straightforward. Since deviations from a Gaussian distribution are very common
+and may occur due to a simple invertible rescaling due to the measurement
+process, we want to give the algorithm here.
+<P>
+Recall that the iterative scheme consists of two procedures which are applied
+in an alternating fashion until convergence to a fixed point is achieved. The
+amplitude adjustment procedure by rank ordering (<A HREF="node12.html#eqstep2">13</A>) is readily
+applied to each channel individually. However, the spectral adjustment in the
+Fourier domain has to be modified. Let us introduce a second index in order to
+denote the <I>M</I> different channels of a multivariate time series <IMG WIDTH=274 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2084" SRC="img71.gif">. The change that has to be applied
+to the ``filter'' step, Eq.(<A HREF="node12.html#eqstep1">12</A>), is that the phases
+<IMG WIDTH=32 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline2086" SRC="img72.gif"> have to be replaced by phases <IMG WIDTH=30 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline2088" SRC="img73.gif"> with the
+following properties. (We have dropped the superscript (<I>i</I>) for convenience.)
+The replacement should be minimal in the least
+squares sense, that is, it should minimise
+<BR><A NAME="eqsum">&#160;</A><IMG WIDTH=500 HEIGHT=46 ALIGN=BOTTOM ALT="equation1058" SRC="img74.gif"><BR>
+Also, the new phases must implement the same phase differences exhibited by the
+corresponding phases <IMG WIDTH=141 HEIGHT=27 ALIGN=MIDDLE ALT="tex2html_wrap_inline2092" SRC="img75.gif"> of the data:
+<BR><IMG WIDTH=500 HEIGHT=20 ALIGN=BOTTOM ALT="equation1060" SRC="img76.gif"><BR>
+The last equation can be fulfilled by setting <IMG WIDTH=119 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline2094" SRC="img77.gif">. With this, we have <IMG WIDTH=276 HEIGHT=33 ALIGN=MIDDLE ALT="tex2html_wrap_inline2096" SRC="img78.gif"> which is extremal when
+<BR><IMG WIDTH=500 HEIGHT=46 ALIGN=BOTTOM ALT="equation1062" SRC="img79.gif"><BR>
+The minimum is selected by taking <IMG WIDTH=16 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline2098" SRC="img80.gif"> in the correct quadrant.
+<P>
+<P><blockquote><A NAME="944">&#160;</A><IMG WIDTH=345 HEIGHT=388 ALIGN=BOTTOM ALT="figure1056" SRC="img69.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figbdat">&#160;</A>
+   Simultaneous surrogates for a bi-variate time series. The upper two panels
+   show simultaneous recordings of the breath rate and the instantaneous heart
+   rate of a human. The lower two panels show surrogate sequences that preserve
+   the individual distributions and power spectra as well as the
+   cross-correlation function between heart and breath rate. The most prominent
+   difference between data and surrogates is the lack of coherence in the
+   surrogate breath rate.  <BR>
+</blockquote><P>
+<P><blockquote><A NAME="946">&#160;</A><IMG WIDTH=364 HEIGHT=287 ALIGN=BOTTOM ALT="figure1057" SRC="img70.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figbx">&#160;</A>
+   Cross-correlation functions for the bi-variate data shown in
+   Fig.&nbsp;<A HREF="node15.html#figbdat">8</A> (upper panel), and a surrogate that preserves the
+   individual spectra and distributions as well as the relative Fourier phases
+   (middle). The lower panel shows the same for surrogates prepared for each
+   channel individually, that is, without explicitly preserving the
+   cross-correlation structure.<BR>
+</blockquote><P>
+
+As an example, let us generate a surrogate sequence for a simultaneous
+recording of the breath rate and the instantaneous heart rate of a
+human during sleep. The data is again taken from data set B of the
+Santa Fe Institute time series contest&nbsp;[<A HREF="node36.html#gold">31</A>]. The 1944 data
+points are an end-point matched sub-sequence of the data used as a
+multivariate example in Ref.&nbsp;[<A HREF="node36.html#anneal">26</A>]. In the latter study, which
+will be commented on in Sec.&nbsp;<A HREF="node24.html#secmulti2">6.2</A> below, the breath rate
+signal had been considered to be an input and therefore not been
+randomised. Here, we will randomise both channels under the condition
+that their individual spectra as well as their cross-correlation
+function are preserved as well as possible while matching the
+individual distributions exactly. The iterative scheme introduced
+above took 188 iterations to converge to a fixed point.  The data and
+a bi-variate surrogate is shown in Fig.&nbsp;<A HREF="node15.html#figbdat">8</A>.  In
+Fig.&nbsp;<A HREF="node15.html#figbx">9</A>, the cross-correlation functions of the data and one
+surrogate are plotted. Also, for comparison, the same for two individual
+surrogates of the two channels. The most striking
+difference between data and surrogates is that the coherence of the
+breath rate is lost. Thus, it is indeed reasonable to exclude the
+nonlinear structure in the breath dynamics from a further analysis of
+the heart rate by taking the breath rate as a given input signal.
+Such an analysis is however beyond the scope of the method discussed
+in this section. First of all, specifying the full cross-correlation
+function to a fixed signal plus the autocorrelation function
+over-specifies the problem and there is no room for randomisation. In
+Sec.&nbsp;<A HREF="node24.html#secmulti2">6.2</A> below, we will therefore revisit this
+problem. With the general constrained randomisation scheme to be
+introduced below, it will be possible to specify a limited number of
+lags of the auto- and cross-correlation functions.
+<P>
+<HR><A NAME="tex2html220" HREF="node16.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html218" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html214" HREF="node14.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html221" HREF="node16.html">General constrained randomisation</A>
+<B>Up:</B> <A NAME="tex2html219" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html215" HREF="node14.html">Periodicity artefacts</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

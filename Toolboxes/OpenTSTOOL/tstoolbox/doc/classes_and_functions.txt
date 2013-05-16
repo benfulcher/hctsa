@@ -1,0 +1,422 @@
+ ///////////////////////////////////////////////////////////////////////////////////////////////////////
+//  							Matlab's build-in data types :
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+matrix; 			// n-dimensional real or complex matrix, is used 
+					// also for scalars(1 by 1) and vectors (1 by N) or (N by 1)
+					
+Example :
+
+A = [1 2; 3 4]; 
+A * A
+v = [4 6 7 9 10];
+length(v)
+					
+					
+sparsematrix;		// almost identical to the standard Matlab matrix, only internal
+					// storage is different
+char; 				// arrays or vectors of characters, can be used to hold arbitrary strings
+
+Example :
+
+s = 'Hello World';
+s = ['Abba', 'Bubu'];
+
+structurearray; 	// a multidimensional array where each element holds a structure with
+					// one ore more fields that can be accessed via their field name
+cellarray;			// a multidimensional array where each element can hold any other type of
+					// element (general recursive container)
+
+
+c = {'Hello', [1 2 4 5]; {}, 2.348849}; // create an 2 by 2 cell array with different data types
+There are two different ways to access an element of a cell array :
+
+c(1,1) returns a 1 by 1 cell array containing a string
+c{1,1} returns the string directly
+
+To remove an element of an cell array, you have to use:
+
+c(3,3) = [];
+
+Not :
+
+c{3,3} = [];    
+
+
+// Matlab's classes are structurearrays with that have an additional (Matlab inernal) tag, the class
+// name. So a class objects is more or less a structure with an own class directory and own member
+// functions inside this directory
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//  							TSTOOL's classes :
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class list; 		// basic data structure, a list of strings (used in description for history and commandlines)
+class unit; 		// models physical units (SI) like V,Hz,s,A,N etc.
+class achse;		// models an axis
+class core; 		// holds the pure data part of a signal
+class description;	// holds all the descriptive parameters for a signal 
+class signal;		// main class, models one ore more-dimensional signals
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//  								Class interfaces :
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// class list implements the basic data structure of a list that holds strings
+// used in objects of type description for history and commandlines
+class list {
+	private:
+		
+	protected:
+		// object's data structure
+	
+		cellarray data;		% implementation as one-dimensional cell array (columnwise)	
+		long len;
+
+	public:
+		// constructors (combined in one m-file)
+		list()
+		list(string)
+
+		list(list)			// copy constructor
+		list(cellarray)
+		
+		// methods
+		append(list, list)
+		append(list, string)
+		append(list, cellarray)
+		
+		cellstr 	// convert to cell array of strings
+		char		// convert to character array
+		display
+		get
+		length
+		list
+		sort
+};
+
+
+// models physical units (SI) like V,Hz,s,A,N etc.
+// objects of this type are used in classes description and achse
+class unit
+{
+	private:
+		findlabel
+		static units.m		// create units data base and store this as .mat file (units.mat)
+	
+	protected:
+		// object's data structure
+		
+		string label;				// 'Hz', 's', 'V'
+		string name;				// 'Hertz', 'second', 'Volt'
+		string quantity.eng;		// 'frequency', 'time', 'voltage'
+		string quantity.ger  = '';	// 'Frequenz', 'Zeit', 'Spannung'
+		
+		double factor;				// 
+		row_vector exponents;		// 
+		
+		double dBScale; 			// streching factor when calculating decibel values from data : dB = 20*log10(value/dbRef) or dB = 10*log10(value/dbRef)
+		double dBRef;			 	// reference value for 0 dB
+		cellarray opt = {};			// store optional data
+
+	public:
+		// constructors (combined in one m-file)
+		unit();
+		unit(double);
+		unit(vector);
+		unit(string);
+
+		char
+		dbref
+		dbscale
+		display
+		double
+		eq							// operator ==
+		exponents
+		factor
+		label
+		mpower						// operator ^
+		mrdivide					// operator /
+		mtimes						// operator *
+		name
+		quantity		
+};
+
+// used in objects of type signal
+class achse
+{
+	private:
+
+
+	protected:
+		// object's data structure
+		string name;  						// name of this axis, somtimes equal to its quantity
+		string quantity;  					// the quantity that is denoted by this axis, e.g. Time or Displacement or Profit
+		unit unit;							// the unit that must be appended to the axis' values
+		string resolution;  			  	// 'linear' or 'logarithmic' or 'arbitrary'
+		double first = 0;  					// determines the starting value
+		double delta = 1;  					// sample step size, needed for spacing
+		row_vector values;					// used in case of arbitrary spacing, otherwise empty
+		cellarray opt = {};							// store optional data
+
+
+	public:
+		// constructors (combined in one m-file)
+		achse()
+		achse()
+		
+		// methods
+		cut
+		delta
+		display
+		eq
+		first
+		horzcat
+		label
+		name
+		quantity
+		resolution
+		samplerate
+		scale
+		setdelta
+		setfirst
+		setname
+		setunit
+		setvalues
+		spacing
+		unit
+};
+
+
+// class core holds the pure data part of a signal
+class core
+{
+	private:
+	   dims
+	   gauss
+	   realfft
+	   realifft
+	   test
+	protected:
+		// object's data structure
+		matrix data;			// the "pure" (y-)data part of a signal, one or more-dimensional, real or complex;
+								// one-dimensional data is always(!!!!) stored as column vector
+		row_vector dlens;		// number of samples for each dimension, for a one-dimensional signal, only one number is returned
+		
+		
+	public:
+		// constructors (combined in one m-file)
+		core()
+		core
+		core
+		core
+		
+		// methods
+		acf
+		amutual
+		amutual.bkp
+		compare
+		core
+		data
+		db
+		demoversion
+		diff
+		display
+		dlens
+		embed
+		embedexsg64
+		int
+		intermutual
+		isempty
+		medianfilt
+		minus
+		movav
+		ndim
+		norm1
+		norm2
+		plus
+		rang
+		rms
+		spec
+		spec2
+		spec2.bkp
+		surrogate1
+		surrogate2
+		surrogate3
+		uminus
+		vertcat
+};
+
+
+// class description holds all the descriptive parameters for a signal 
+class description
+{
+	private:
+
+
+	protected:		
+		// object's data structure
+		
+		string label; 			// may be used to freely by the user, will be continued when producing a new signal (optional)
+								// the label field of a description is used to give a signal
+								// some 'tag' which remains constant through various processing steps
+								// e.g. which topic this signal belongs to
+		string name;			// set when loaded from file, otherwise empty, will not be continued in processing (optional)
+		string type;			// 'Spectrum', 'Time-Signal', 'Matrix', 'Image' , 'Spektrogramm' etc. (optional)
+		string plothint;  		// Recommended way of plotting when displayed with view (optional)
+		list comment;
+		list history;
+		string creator;
+		string yname;
+		unit yunit;
+		list commandlines;					// store optional data
+		cellarray optparam;  	   
+
+	public:
+		// constructors (combined in one m-file)
+		description();
+		description
+		description
+		description
+		
+		display
+		
+		// methods
+		description addcommandlines
+		description addcomment
+		description addhistory
+		makescript
+		merge
+		
+		description newcomment(d, string) 	% Replace old comment with new comment			
+		description setlabel(d,
+		description setname(d,
+		description setplothint(d,
+		description settype(d, 
+		description setyname(d, string)		// Set signal's y-name
+		description setyunit(d, unit)		// Set signal's y-unit 
+		description setyunit(d, string)		// Set signal's y-unit 
+		
+		name					// Get signal's name
+		commandlines		% return
+		comment 			% return
+		creator		        % return
+		history 			% return
+		string label(d)		% return label	
+		plothint			% return
+		string type(d)		% return signal type (e.g. 'Correlation function', 'Spectrogram' etc.)
+		string yname(d)		% return name of the measured data (e.g. 'Heartbeat rate', 'Current' etc.)
+		unit yunit(d)		% return y-unit of the sampled data (e.g. Volt, Pa etc.)
+};
+
+
+// main class of TSTOOL, models one ore more-dimensional signals
+class signal : public core,  public description
+{
+	private:
+		addaxis
+		defaultparam
+		nldload
+		nldwrite
+		parseheader
+		tsndims
+		tssize
+		
+	protected:
+		// object's data structure
+	
+		cellarray xaxes;		// for every dimension of the signal there has to be one aches object
+
+	public:
+		// constructors (combined in one m-file)
+		signal()
+		signal
+		signal
+		signal
+		signal
+		
+		// methods
+		abs								//take absolut value of all data values of signals
+ if sample values are  complex, abs(s) returns the 
+ complex modulus (magnitude) of each sample
+		acf								// autocorrelation function for real scalar signals, using fft
+		amutual								// auto mutual information function for real scalar signals
+	        analyze								//Try to do a automatic analysis procedure of a time series
+		aok								//TFR (time-frequency representation) for a scalar signal s
+		boxdim								//Compute the boxcounting (capacity) dimension of a time-delay reconstructed timeseries s
+		cao								//estimate minimum embedding dimension using Cao's method
+		ccf								//cross correlation function for real scalar signals, using fft (of length len)
+		center								//center signal by removing it's mean
+		corrdim								//Compute the correlation dimension of a  time-delay reconstructed timeseries s
+		cut								//cut a part of the signal along dimension dim
+		db								//compute decibel values of signal 
+		delaytime							//compute optimal delaytime for a scalar timeseries
+		demoversion 
+		diff								//compute the nth numerical derivative along dimension 1
+		dimensions							//compute boxcounting, information and  correlation dimension of a time-delay reconstructed timeseries s
+	       	display
+		embed								//embeds signal s with embedding dimension dim  and delay delay (in samples)
+		firstmax							//give information about first local maximum of scalar signal s
+		firstmin							//give information about first local minimum of scalar signal s
+		firstzero							//give information about first zero of scalar signal s
+		firstzero.bkp							//give information about first zero crossing of scalar signal s,using linear interpolation 
+		getaxis								// get one of the current xaxes
+		gmi								//generalized mutual information function for a scalar time series
+		histo								// Histogram function using equidistantly spaced partitions
+		infodim								//compute the information dimension of a time-delay reconstructed timeseries s
+		int								//numerical integration along dimension 1
+		intspikeint							//compute the interspike intervalls for a spiked scalar timeseries,
+		intspikint
+		intspikintei
+		largelyap							//compute the largest lyapunov exponent of a time-delay reconstructed timeseries s,
+		localdensity							//
+		max								//give information about maximum of scalar signal s
+		medianfilt							// moving median filter of width len samples for a scalar time series
+		merge								//merges signal s1 and s2 into a new signal with energy ration dB
+		min								// give information about minimum of scalar signal s
+		minus								//calculate difference of signals s1 and s2
+		movav								// moving average of width len (samples) for a scalar time series
+		nearneigh							//n nearest neighbour algorithm
+		norm1
+		norm2
+		pca
+		pdf
+		plus
+		poincare
+		predict
+		predict2
+		rang
+		removeaxis
+		reverse
+		rms
+		scale
+		setaxis
+		setunit
+		shift
+		spacing
+		spec
+		spec2
+		stts
+		sttserror
+		surrogate1
+		surrogate2
+		surrogate3
+		swap
+		trend
+		view
+		write								// save signal object to disk (as Matlab data file)
+};
+
+
+
+Christian Merkwirth 5.Nov.1998

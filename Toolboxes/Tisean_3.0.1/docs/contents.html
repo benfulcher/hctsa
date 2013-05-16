@@ -1,0 +1,472 @@
+<html>
+<head><title>Nonlinear Time Series Routines</title></head>
+<body bgcolor="#ffffff">
+
+<h1 align=center><a name="top">TISEAN&nbsp;3.0.1: Table of Contents</h1>
+
+<center>
+<font size=+1>
+<a href="alphabetical.html">All programs in alphabetical order</a>
+</font>
+</center>
+<h3 align=left>Sections</h3>
+<ul>
+<li><a href="#generating">Generating time series</a></li>
+<li><a href="#linear">Linear tools</a></li>
+<li><a href="#utilities">Utilities</a></li>
+<li><a href="#visual">Stationarity</a></li>
+<li><a href="#embedding">Embedding and Poincar&eacute; sections</a></li>
+<li><a href="#prediction">Prediction</a></li>
+<li><a href="#noise">Noise reduction</a></li>
+<li><a href="#dimension">Dimension and entropy estimation</a></li>
+<li><a href="#lyapunov">Lyapunov exponents</a></li>
+<li><a href="#surrogates">Surrogate data</a></li>
+<li><a href="#spike">Spike trains</a></li>
+<li><a href="#xtisean">XTisean</a></li>
+<li><a href="#unsupported">Unsupported</a></li>
+</ul>
+
+
+<h3 align=center><a name="generating">
+Generating time series</a></h3>
+
+A few routines are provided to generate test data from simple
+equations. Since there are powerfull packages (for example <a
+href="http://keck2.umd.edu/dynamics/">Dynamics</a> by Helena Nusse and Jim
+Yorke) that can generate chaotic data,
+we have only included a minimal selection here.
+
+<p><table align=center border>
+<tr><td>Create H&eacute;non time series</td>
+    <td><a href="docs_f/henon.html">henon</a></td></tr>
+<tr><td>Create Ikeda time series</td>
+    <td><a href="docs_f/ikeda.html">ikeda</a></td></tr>
+<tr><td>Create Lorenz time series</td>
+    <td><a href="docs_f/lorenz.html">lorenz</a></td></tr>
+<tr><td>Run an autoregressive model</td>
+    <td><a href="docs_f/ar-run.html">ar-run</a></td></tr>
+<tr><td>Add noise to data</td>
+    <td><a href="docs_c/makenoise.html">makenoise</a></td></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+<h3 align=center><a name="linear">
+Linear tools</a></h3>
+
+This section contains some rather basic implementations of linear time series
+methods which are there just for convenience. If you want to embark seriously
+on linear or spectral analysis of your data, you will have to use any one of
+the statistical or mathematics packages around. Please, don't judge us by the
+level of sophistication in this section!
+
+<p><table align=center border>
+<tr><td>AR model</td>
+    <td><a href="docs_c/ar-model.html">ar-model</a>,
+        <a href="docs_f/ar-run.html">ar-run</a></td></tr>
+<tr><td>ARIMA model</td>
+<td><a href="docs_c/arima-model.html">arima-model</a></td></tr>
+<tr><td>Autocorrelation function</td>
+    <td><a href="docs_c/corr.html">corr</a></tr>
+<tr><td>Power spectrum using the maximum entropy method</td>
+    <td><a href="docs_c/mem_spec.html">mem_spec</a></td></tr>
+<tr><td>Power spectrum using FFT</td>
+    <td> <a href="docs_f/spectrum.html">spectrum</a></td></tr>
+<tr><td>Principal Component Analysis</td>
+    <td><a href="docs_c/pca.html">pca</a></td></tr>
+<tr><td>Notch filter</td>
+    <td><a href="docs_f/notch.html">notch</a></td></tr>
+<tr><td>Wiener filter</td>
+    <td><a href="docs_f/wiener.html">wiener</a></td></tr>
+<tr><td>Simple low pass filter</td>
+    <td><a href="docs_c/low121.html">low121</a></tr>
+<tr><td>Savitzky-Golay filter</td>
+    <td><a href="docs_c/sav_gol.html">sav_gol</a></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+<h3 align=center><a name="utilities">
+Utilities</a></h3>
+
+Here are some tools for the pre-processing of data which save you the truble of
+writing your own five-line Perl, awk, FORTRAN or C programs.
+
+<p><table border align=center>
+<tr><td>Choose sub-sequence or columns</td>
+    <td><a href="docs_f/choose.html">choose</a></td></tr>
+<tr><td>Normalise, rescale, mean, standard deviation</td>
+    <td><a href="docs_c/rescale.html">rescale</a>,
+        <a href="docs_f/rms.html">rms</a></td></tr> 
+<tr><td>Distribution of the data</td>
+    <td><a href="docs_c/histogram.html">histogram</a></td></tr> 
+<tr><td>Change sampling time</td>
+    <td><a href="docs_c/resample.html">resample</a></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+
+<h3 align=center><a name="visual">
+Stationarity</a></h3>
+
+This section contains two important tools for the visualization of time series
+properties and another stationarity test as proposed by <a
+href="chaospaper/citation.html#statio">Schreiber</a>. The recurrence plot
+and the space time separation plot are of great value for the detection of
+nonstationarity, selection of relevant time scales, selection of stationary
+episodes and so forth.
+<p>
+There is a short corresponding section in the 
+<a href="chaospaper/node13.html">introduction</a> paper.
+
+<p><table border align=center>
+<tr><td>Recurrence plot</td>
+    <td><a href="docs_c/recurr.html">recurr</a></td></tr>
+<tr><td>Space-time separation plot</td>
+    <td><a href="docs_f/stp.html">stp</a></td></tr>
+<tr><td>Stationarity test</td>
+    <td><a href="docs_c/nstat_z.html">nstat_z</a></td></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+
+<h3 align=center><a name="embedding">
+Embedding and Poincar&eacute; sections</a></h3>
+
+Since the concept of phase space is at the heart of all the nonlinear
+methods in this package, phase space reconstruction plays an important role.
+Although delay and other embeddings are used inside most of the other programs,
+it is important to have these techniques also for data viewing, selection of
+parameters, etc. For delay embeddings, use
+<a href="docs_c/delay.html">delay</a>. 
+<p>
+Phase space reconstruction is discussed also in the
+the <a href="chaospaper/node5.html">introduction</a> paper.
+
+<p><table border align=center>
+<tr><td>Embed using delay coordinates</td>
+    <td><a href="docs_c/delay.html">delay</a></td></tr>
+<tr><td>Mutual information of the data</td>
+    <td><a href="docs_c/mutual.html">mutual</a></tr>
+<tr><td>Poincar&eacute; section</td>
+    <td><a href="docs_c/poincare.html">poincare</a></tr>
+<tr><td>Determine the extrema of a time series</td>
+    <td><a href="docs_c/extrema.html">extrema</a></tr>
+<tr><td>Unstable periodic orbits</td>
+    <td>
+    <a href="docs_f/upo.html">upo</a>, 
+    <a href="docs_f/upoembed.html">upoembed</a></td></tr>
+<tr><td>False nearest neighbours</td>
+    <td><a href="docs_c/false_nearest.html">
+    false_nearest</a></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+
+<h3 align=center><a name="prediction">
+Prediction</a></h3>
+
+A number of phase space based prediction techniques are implemented in TISEAN. 
+They differ in the way in which the dynamics is approximated. Locally
+zeroth order models, locally first order models, radial basis functions, and
+polynomial fits are provided.
+
+<p>
+For a discussion of these methods and examples see the corresponding section of
+the <a href="chaospaper/node16.html">introduction</a> paper.
+
+<p><table border align=center>
+<tr><td>Locally zeroth order model test</td>
+    <td><a href="docs_c/lzo-test.html">lzo-test</a></td></tr>
+<tr><td>Iterate locally zeroth order model</td>
+    <td><a href="docs_c/lzo-run.html">lzo-run</a></td></tr>
+<tr><td>Locally first order model test</td>
+<td><a href="docs_c/lfo-test.html">lfo-test</td></tr>
+<tr><td>Iterate locally first order model</td>
+    <td><a href="docs_c/lfo-run.html">lfo-run</a></td></tr>
+<tr><td>Local vs. global linear prediction</td>
+    <td><a href="docs_c/lfo-ar.html">
+      lfo-ar</a></td></tr>
+<tr><td>Local vs. global mean prediction</td>
+<td><a href="docs_c/lzo-gm.html">lzo-gm</a></td></tr>
+<tr><td>Radial basis function fit</td>
+    <td><a href="docs_c/rbf.html">rbf</a></tr>
+<tr><td>Polynomial model</td>
+    <td><a href="docs_c/polynom.html">polynom</a>,
+                 <a href="docs_c/polynomp.html">polynomp</a>,     
+                 <a href="docs_c/polyback.html">polyback</a>, 
+                 <a href="docs_c/polypar.html">polypar</a></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+
+<h3 align=center><a name="noise">
+Noise reduction</a></h3>
+
+This is how the three of us got into this business. Since spectral filters are
+problematic with chaotic, broad band signals, new techniques were necessary.
+All the implementations here use phase space projections for noise reduction.
+The program
+<a href="docs_f/lazy.html">lazy</a> use locally
+constant approximations of the dynamics. 
+The routine
+<a href="docs_c/ghkss.html">ghkss</a> implements locally linear
+projections.
+Finally, for testing purposes you may want to add noise to data and compare
+the outcome of your cleaning attempts with the true signal.
+
+<p>
+The <a href="chaospaper/node22.html">introduction</a> paper has a section on
+nonlinear noise reduction, too.
+
+<p><table border align=center>
+<tr><td>Add noise to data</td>
+    <td><a href="docs_c/makenoise.html">makenoise</a></td></tr>
+<tr><td>Compare two data sets</td>
+    <td><a href="docs_f/compare.html">compare</a></td></tr>
+<tr><td>Simple nonlinear noise reduction</td>
+        <td><a href="docs_f/lazy.html">lazy</a></td></tr>
+<tr><td>Nonlinear noise reduction</td>
+    <td><a href="docs_c/ghkss.html">ghkss</a></td></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+
+<h3 align=center><a name="dimension">
+Dimension and entropy estimation</a></h3>
+
+If you are looking for a program that reads your signal and issues a number
+that says "correlation dimension", you got yourself the wrong package.  We
+think you are still better off than getting such a wrong answer. The programs
+in this section carry out the calculations necessary to detect scaling and self
+similarity in a fractal attractor. You will have to establish scaling and
+eventually, in favourable cases, extract the dimension or entropy by careful
+evaluation of the data produced by these programs.
+
+<p>
+There is an implementation of the Grassbeger-Procaccia
+correlation integral in this package that can handle multivariate
+data and mixed embeddings. A fixed mass algorithm for the information
+dimension D1 is  
+available which also 
+can handle multivariate data and mixed embeddings, 
+and a box-counting implementation of the order Q Renyi entropies for
+multifractal studies.
+<p>
+Post-processing can be performed on the output in order to obtain 
+Takens' estimator or the Gaussian kernel correlation integral, or just for
+smoothing. 
+</p>
+<p>
+You may want to consult the <a href="chaospaper/node29.html">introduction</a>
+paper 
+for initial material on dimension estimation. If you are serious, you will need
+to study some of the literature cited there as well.
+
+<p><table border align=center>
+<tr valign=top><td>Correlation dimension d2</td>
+    <td><a href="docs_c/d2.html">d2</a></td></tr>
+<tr><td>Fixed mass estimation of D1</td>
+    <td><a href="docs_f/c1.html">c1</a></td></tr>
+<tr><td>Renyi Entropies of Qth order</td>
+    <td><a href="docs_c/boxcount.html">
+       boxcount</a></td></tr>
+<tr><td>Takens estimator</td>
+    <td><a href="docs_f/c2t.html">c2t</a></td></tr>
+<tr><td>Gaussian kernel C2</td>
+    <td><a href="docs_f/c2g.html">c2g</a></td></tr>
+<tr><td>Simply smooth the output of d2</td>
+        <td><a href="docs_c/av-d2.html">av-d2</a></td></tr>
+<tr><td>Get local slopes from the correlation integral</td>
+<td><a href="docs_f/c2d.html">c2d</a></td></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+
+<h3 align=center><a name="lyapunov">
+Lyapunov exponents</a></h3>
+
+Lyapunov exponents are an important means of quantification for unstable
+systems. They are however difficult to estimate from a time series.
+Unless low dimensional, high quality data is at hand, one should not attempt to
+calculate the full spectrum. Try to compute the maximal exponent first.
+The two implementations differ slightly.
+While <a
+href="docs_c/lyap_k.html">lyap_k</a> implements the formula by
+<a href="chaospaper/citation.html#holger">Kantz</a>, 
+<a href="docs_c/lyap_r.html">lyap_r</a> uses that by 
+<a href="chaospaper/citation.html#rose">Rosenstein et al.</a> 
+which differs only in the definition of the neighbourhoods.
+We recommend to use the former version, 
+<a href="docs_c/lyap_k.html">lyap_k</a>.
+<p>
+The estimation of Lyapunov exponents is also discussed in the 
+<a href="chaospaper/node26.html">introduction</a> paper. A recent addition is a
+programm to compute finite time exponents which are not invariant but contain
+additional information. 
+
+<p><table border align=center>
+<tr><td>Maximal exponent</td>
+    <td><a href="docs_c/lyap_k.html">lyap_k</a>, 
+        <a href="docs_c/lyap_r.html">lyap_r</a></td></tr>
+<tr><td>Lyapunov spectrum</td>
+    <td><a href="docs_c/lyap_spec.html">lyap_spec</a></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+
+<h3 align=center><a name="surrogates">
+Surrogate data</a></h3>
+
+Before attempting any sophisticated nonlinear time series analysis, one should
+try to establish that nonlinearity is indeed present. The most suitable method
+for this is the approach of surrogate data. We present two schemes for the
+generation of surrogate time series, one using iterative adjustments of
+spectrum and distribution, and a very general framework for constrained
+randomization that is based on combinatorial minimization of a cost function.
+The latter approach is more like a toolbox, a starting point for your own
+ideas on suitable null hypotheses etc. A few basic discriminating statistics
+are also provided. 
+
+<p>
+There is a short overview page for <a
+href="docs_f/test.html">nonlinearity tests</a>. There is also a section
+in the <a href="chaospaper/node35.html">introduction</a> paper.
+
+<p><table border align=center>
+<tr><td>Make surrogate data</td>
+    <td><a href="docs_f/surrogates.html">surrogates</a></td></tr>
+<tr><td>Determine end-to-end mismatch</td>
+    <td><a href="docs_f/endtoend.html">endtoend</a></td></tr>
+<tr><td>General constrained randomization</td>
+    <td><a href="docs_f/randomize.html">randomize</a></td></tr>
+<tr><td>Discriminating statistics</td>
+    <td><a href="docs_f/timerev.html">timerev</a>,
+        <a href="docs_f/predict.html">predict</a></td></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+
+<h3 align=center><a name="spike">
+Spike trains</a></h3>
+
+Sequences of times of singular events (heart beats, neuronal spikes etc.),
+or sequences of intervals between such events (RR-intervals etc.) require 
+specialised techniques, even for their linear analysis. Below find a list of
+routines that may proove useful for this type of data. 
+
+<p><table border align=center>
+<tr><td>Event/intervcal conversion</td>
+    <td><a href="docs_f/intervals.html">intervals</a></td></tr>
+<tr><td>Interval/event conversion</td>
+    <td><a href="docs_f/events.html">events</a></td></tr>
+<tr><td>Autocorrelation function of event times</td>
+    <td><a href="docs_f/spikeauto.html">spikeauto</a></td></tr>
+<tr><td>Power spectrum of event times</td>
+    <td><a href="docs_f/spikespec.html">spikespec</a></td></tr>
+<tr><td>Surrogate data preserving event time autocorrelations</td>
+    <td><a href="docs_f/randomize_spike.html">randomize_spikeauto_exp_random</a></td></tr>
+<tr><td>Surrogate data preserving event time power spectrum</td>
+    <td><a href="docs_f/randomize_spike.html">randomize_spikespec_exp_event</a></td></tr>
+</table>
+<a href="#top">Top</a>
+<p>
+<hr>
+</p>
+
+<h3 align=center><a name="xtisean">
+XTisean</a></h3>
+
+This part of TISEAN contains programs which explore properties amongst
+different time series. It is still in an early state and might contain
+more programs in the future.
+<p>
+Since at least two time series are involved in these programs the usage
+of some flags is different in case that the programs deal with
+multivariate data.<br>
+The <font color=red>-m</font> or <font color=red>-M</font> refer to
+the columns to be loaded for each data set. Thus, <font color=red>-m
+2,2</font> means two colums for each data set. In combination with
+<font color=red>-c</font> this requires to specify twice as many
+columns to this flag as are given with <font color=red>-m[M]</font>.
+</p>
+
+<p><table align=center border>
+<tr><td>Linear cross-correlations</td>
+   <td><a href="docs_c/xcor.html">xcor</a></td></tr>
+<tr><td>Nonlinear cross-prediction</td>
+   <td><a href="docs_c/xzero.html">xzero</a></td></tr>
+<tr><td>Cross-correlation integral</td>
+   <td><a href="docs_f/xc2.html">xc2</a></td></tr>
+<tr><td>Cross-recurrence Plot</td>
+   <td><a href="docs_f/xrecur.html">xrecur</a></td></tr>
+</table>
+<a href="#top">Top</a>
+
+<hr>
+<p>
+<h3 align=center><a name="unsupported">Unsupported</h3>
+To avoid redundancies we decided to remove some of the programs from
+the active development part of the package. For historical reasons
+they are still there but we plan to remove them in future releases.
+<p>
+<table align=center border>
+<tr>
+<td>Fortran version of delay embedding</td>
+<td><a href="docs_f/delay.html">delay</a></td>
+</tr>
+<tr>
+<td>Add noise to data</td>
+<td><a href="docs_f/addnoise.html">addnoise</a></td>
+</tr>
+<tr>
+<td>Autocorrelation function</td>
+<td><a href="docs_f/autocor.html">autocor</a></td>
+</tr>
+<tr>
+<td>Principal component analysis</td>
+<td><a href="docs_f/pc.html">pc</a></td>
+</tr>
+<td>Simple nonlinear noise reduction</td>
+<td><a href="docs_c/nrlazy.html">nrlazy</a></td>
+</tr>
+<tr>
+<td>Nonlinear noise reduction</td>
+<td><a href="docs_f/project.html">project</a></td>
+</tr>
+<tr>
+<td>Naive implementation of the correlation dimension</td>
+<td><a href="docs_f/c2naive.html">c2naive</a></td>
+</tr>
+<tr><td>Finite size exponents</td>
+    <td><a href="docs_c/fsle.html">fsle</a></tr>
+
+</table>
+</p>
+<a href="#top">Top</a>
+</p>
+<hr>
+<em>Copyright &#169; (1998-2007) Rainer Hegger, Holger Kantz, Thomas
+Schreiber</em> 
+<p>
+<a href="../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

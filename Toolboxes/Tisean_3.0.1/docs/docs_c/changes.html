@@ -1,0 +1,637 @@
+<html>
+<head>
+<title>Bug fixes</title>
+</head>
+<body bgcolor=white>
+<a name="top"></a>
+<h1 align=center>Changes, bug fixes and new programs</h1>
+<hr>
+<ul>
+<li><a href="#tisean2.1">TISEAN_2.1 -&gt; TISEAN_3.0.x</a>
+<li><a href="#tisean2.0">TISEAN_2.0 -&gt; TISEAN_2.1</a>
+<li><a href="#tisean1.2">TISEAN_1.2 -&gt; TISEAN_2.0</a>
+<li><a href="#tisean1.0">TISEAN_1.0 -&gt; TISEAN_1.2</a>
+<li><a href="#tisean0.9">TISEAN_0.9 -&gt; TISEAN_1.0</a>
+<li><a href="#tisean0.5">TISEAN_0.5 -&gt; TISEAN_0.9</a>
+<li><a href="#tisean0.4">TISEAN_0.4 -&gt; TISEAN_0.5</a>
+<li><a href="#tisean0.3">TISEAN_0.3 -&gt; TISEAN_0.4</a>
+<li><a href="#tisean0.2">TISEAN_0.2 -&gt; TISEAN_0.3</a>
+<li><a href="#tisean0.1">TISEAN_0.1 -&gt; TISEAN_0.2</a>
+</ul>
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean2.1">TISEAN_2.1 -&gt; TISEAN_3.0.x</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li>The program <font color=blue>nstep</font> was renamed <a
+href="lfo-run.html">lfo-run</a> meaning (l)ocally (f)irst (o)rder
+run.</li>
+<li>The program <font color=blue>onestep</font> was renamed <a
+href="lfo-test.html">lfo-test</a> meaning (l)ocally (f)irst (o)rder
+test.</li>
+<li>The program <font color=blue>zeroth</font> was renamed <a
+href="lzo-test.html">lzo-test</a> meaning (l)ocally (z)eroth (o)rder
+test.</li>
+<li>The <font color=red>-f</font> option in <a
+href="mem_spec.html">mem_spec</a> was renamed to  <font
+color=red>-P</font>.  <font color=red>-f</font> now handles the
+sampling frequency (new feature).</li>
+<li>The delay option <font color=red>-d</font> was removed from the <a
+href="lyap_spec.html">lyap_spec</a> program. See the  man page for
+more information.</li>
+<li>Again <a href="lyap_spec.html">lyap_spec</a>: <font
+color=red>-r</font> sets a fixed minimal neighborhood size now. </li>
+<li><font color=blue>svd</font> was completely rewritten and renamed to
+<a href="pca.html">pca</a>.</li>
+<li><a href="histogram.html">histogram</a> is back to the roots. The
+output is now again just the relative frequency of the points. Forget
+about normalization and integration.</li>
+<li>The program <font color=blue>ll-ar</font> was renamed <a
+href="lfo-ar.html">lfo-ar</a> handles multivariate data now</li>
+<li><a href="false_nearest.html">false_nearest</a> deal with multivariate
+data now.</li>
+<li><a href="false_nearest.html">false_nearest</a>: I changed the
+default value for the escape factor. The old one was way too large to
+be useful for time continuous systems.</li> 
+<li>In <a href="low121.html">low121</a> the first and the last point
+of the series get corrected.</li>
+<li><a href="onestep.html">onestep</a> was completely rewritten. Now
+it handles multivariate data and returns individual residuals.</li>
+<li>The entropy file produced by <a href="d2.html">d2</a> contains the
+first dimension (means h(0)=H(1)) now.</li>
+</ul>
+<hr>
+<h4 align=center>Bug fixes and Cleanups</h4>
+<ul>
+<li><a href="boxcount.html">boxcount</a> did not compile with newer
+(>2.95) versions of gcc. FIXED.</li>
+<li><a href="routines.html">get_multi_series()</a> created a wrong
+first data line. FIXED.</li>
+<li><a href="ar-model.html">ar-model</a> got some code cleanups to be
+compatible with more compilers.</li>
+<li>The same holds for <a href="fsle.html">fsle</a>. Keep in mind:
+This program is still in BETA state.</li>
+<li><a href="lzo-test.html">lzo-test</a> Some minor code changes to get
+rid of some compiler warnings.</li>
+<li><a href="lyap_k.html">lyap_k</a> got a cleanup.</li>
+<li><a href="rbf.html">rbf</a> got a cleanup to be compatible with
+more compilers.</li>
+<li><a href="resamble.html">resamble</a> got a cleanup to be compatible with
+more compilers.</li>
+<li><a href="polynomp.html">polynomp</a> got a cleanup to be compatible with
+more compilers.</li>
+<li><a href="nstat_z.html">nstat_z</a> got a cleanup to be compatible with
+more compilers.</li>
+</ul>
+<hr>
+<h4 align=center>New programs</h4>
+<ul>
+<li><a href="lzo-run.html">lzo-run</a> iterates a locally zeroth order
+model.
+<li><a href="delay.html">delay</a> is back to the C branch. Got some
+more functionality.</li>
+<li>Well, you could call <a href="pca.html">pca</a> a new
+program.</li>
+<li><a href="lzo-gm.html">lzo-gm</a> Local zeroth order to global mean.</li>
+</ul>
+<hr>
+<a href="#top">top</a> of the page
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean2.0">TISEAN_2.0 -&gt; TISEAN_2.1</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li>I continued to modify programs in such a way that they are able to
+handle multivariate data. Modified in this release: <a
+href="ar-model.html">ar-model</a>, <a href="extrema.html">extrema</a>,
+<a href="nstep.html">nstep</a>, <a href="boxcount.html">boxcount</a>,
+<a href="lyap_spec.html">lyap_spec</a>, <a
+href="recurr.html">recurr</a>, <a href="makenoise.html">makenoise</a>
+and <a href="rescale.html">rescale</a>.
+</li>
+
+<li>
+To achieve consistency with the other programs I renamed some
+flags. The affected programs and flags are: <a href="d2.html">d2</a>
+flags <font color=red>-e to -r</font>, <font color=red>-E to -R</font>
+and therefore, <font color=red>-R to -E</font>, <a
+href="av-d2.html">av-d2</a> flag <font color=red>-e to -E</font>,
+<a href="histogram.html">histogram</a> flag <font color=red>-e to
+-r</font> and <a href="boxcount.html">boxcount</a> flag <font
+color=red>-e to -r</font> and <font color=red>-E to -R</font>.
+</li>
+
+<li> I gave unique <a href="../../source_c/routines/tisean_cec.h">exit
+codes</a> to all the exceptions in the routines. I'm pretty sure
+Thomas will have doubts about the usefulness of this, but who knows
+what it is good for.
+</li>
+
+<li>Again <a href="recurr.html">recurr</a>: It does no longer print
+the diagonal terms. That was really nothing than a waste of disc
+space. Furthermore, it now uses a two-dimensional box assisted search
+algorithm. Should be a bit faster, therefore.
+</li>
+
+<li><a href="makenoise.html">makenoise</a> has got a new flag <font
+color=red>-0</font> which, if set, allows to produce random numbers
+without reading any data.
+</li>
+
+<li><a href="zeroth.html">zeroth</a> was replaced by the old <a
+href="zeroth.html">mzeroth</a>. It got one new
+functionality. Depending on the Verbosity level it now prints the
+individual forecast error for each component of each reference point.
+</li>
+
+<li><a href="nstep.html">nstep</a> got a new flag <font
+color=red>-0</font>. Setting this flag causes nstep to perform a
+zeroth order fit instead of a local linear one.
+</li>
+
+<li><a href="nstat_z.html">nstat_z</a> the flag <font
+color=red>-S</font> was renamed <font color=red>-s</font> to be
+consistent with the other programs.
+</li>
+
+<li>The programs <a href="nstat_z.html">nstat_z</a>, <a
+href="zeroth.html">zeroth</a>, <a href="onestep.html">onestep</a>
+and <a href="ll-ar.html">ll-ar</a> got a new flag <a
+href="causality.html">-C</a>.
+</li>
+
+<li>The program <a href="nrlazy.html">nrlazy</a> got a new verbosity
+level. If this level is set the number of neighbors used for the
+correction is printed to the output file. If this number is 1, no
+correction was done.
+</li>
+
+</ul>
+<hr>
+<h4 align=center>Bug Fixes</h4>
+<ul>
+<li>There was a slight inconsistency in the <a
+href="xcor.html">xcor</a> man page. The page stated the output file
+contains &#60;x<sub>t</sub>*y<sub>t-d</sub>&#62;, instead it is
+&#60;x<sub>t</sub>*y<sub>t+d</sub>&#62;. REMOVED (Thanks to Mario
+again)</li>
+
+<li><a href="d2.html">d2</a> crashed when the maximal dimension was
+ONE. FIXED. (Results for 'non crashing' cases were not influenced, at
+all)</li>
+
+<li>There was a bug in <a href="mutual.html">mutual</a>, which could
+lead to negative mutual information in case that the delay time was
+long compared with the length of the time series. FIXED (Thanks to
+Eckehard) 
+</li>
+
+<li>Though stated somewhere on this page, the output of <a
+href="histogram.html">histogram</a> was not produced in such a way
+that the integration over the whole data interval gave 1. Now it
+does.
+</li>
+
+<li>I removed a lot of 'index out of range segmentation faults' in the
+programs. (Thanks to a lot of people)
+</ul>
+
+<hr>
+<h4 align=center>New programs</h4>
+<ul>
+<li> <a href="sav_gol.html">sav_gol</a>: Performes a Savitzky-Golay
+filter on, possibly multivariate, data to either clean the data or to
+get better estimates for their derivatives.</li>
+<li><font color=red>Suggestions for further (not too specific)
+programs are welcome.</font></li>
+</ul>
+<hr>
+<a href="#top">top</a> of the page.
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean1.2">TISEAN_1.2 -&gt; TISEAN_2.0</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li>
+A new routine <a href="../../source_c/routines/exclude_interval.c">
+exclude_interval</a> was added to <a
+href="routines.html">tsa.h</a>. It allows to exclude an interval of
+indexes from a list of neighbors found.</li>
+<li><a name="lyap_k"></a>
+When the parameter of <font color=red>-m</font> is larger than
+that of <font color=red>-M</font> in <a href="lyap_k.html">lyap_k</a>,
+now the <font color=red>-m</font> value is used. (Thanks to Jens
+Timmer)</li>
+<li>Furthermore, <a href="lyap_k.html">lyap_k</a> was rewritten in C.</li>
+<li>The programs <font color=blue>delay, make_ps</font> were
+removed from the supported part of the package. In case you are
+a fan of these programs, you'll find the sources and the html-files in
+the directory <font color=blue>unsupported</font>. As the
+name says, there will be no support, what so ever, for these
+programs. Maybe <font color=blue>make_ps</font> will come back in a
+later version when it is useful for more people, not only for me.
+</li>
+<li>The program <a href="histogram.html">histogram</a> was rewritten
+in C. This means the package is now C++ free.</li>
+<li>The program <a href="nrlazy.html">nrlazy</a> has an additional
+option <font color=red>-v</font> which allows to set the neighborhood
+size in units of the standard deviation of the data.</li>
+<li>The program <a href="d2.html">d2</a> is now able to handle multivariate
+data, also with mixed embeddings. Further, the default for the <font
+color=red>-N</font> is now 1000 instead of all. To get all back, set the
+value to 0. Furthermore, columns 1 and 3 in the output files are
+interchanged. The first column now contains the length scales in units
+of the data.</li>
+<li>The program <a href="av-d2.html">av-d2</a> was changed in a way
+that it is now able to handle the output of the files of the program. 
+Since the natural units
+for length scales are the default units now, the option <font
+color=red>-r</font> was replaced by <font color=red>-e</font>.</li>
+<li>Some of the messages of the programs were changed to avoid that
+they look like error messages. (Thanks to Christian
+R&ouml;denbeck)</li>
+<li>Two new routines to handle multivariate time series were added to
+<a href="routines.html">tsa.h</a>: <a
+href="../../source_c/routines/make_multi_box.c">make_multi_box</a> and
+<a href="../../source_c/routines/find_multi_neighbors.c">
+find_multi_neighbors</a>.</li>
+<li>To reduce the number of <i>segmentation faults</i> another
+routine <a
+href="../../source_c/routines/check_alloc.c">check_alloc</a> was added
+to <a href="routines.html">tsa.h</a>.</li>
+<li>A new flag <font color=red>-S</font> was added for the <a
+href="zeroth.html">zeroth</a> program.</li>
+<li>The <font color=red>-F</font> was replaced by <font
+color=red>-c</font></li>.
+<li>To make the <font color=red>-c</font> and <font
+color=red>-m</font> flags more flexible to use I changed the routine
+<a
+href="../../source_c/routines/get_multi_series.c">get_multi_series</a>
+in <a href="routines.html">tsa.h</a>.</li>
+<li>Now <a href="mutual.html">mutual</a> uses the standard norm for
+its output.</li>
+<li>A new routine <a
+href="../../source_c/routines/what_i_do.c">what_i_do</a> was added to
+<a href="routines.html">tsa.h</a>. It
+displays kind of a welcome message when the program is started.</li>
+<li>A new routine <a
+href="../../source_c/routines/myfgets.c">myfgets</a> was added to <a
+href="routines.html">tsa.h</a>. It handles loooong input lines.</li>
+<li>A new flag <font color=red>-V</font> was added for all
+programs. It allows to add an <a href=../general.html#verbosity>verbosity level</a> like in Thomas'
+programs. See the corresponding help pages for more info. According to
+this change, I had to modify the routine <font
+color=blue>get_series</font> and <font color=blue>get_series</font> in
+<a href="routines.html">tsa.h</a>.</li>
+<li><a href="lyap_spec.html">lyap_spec</a> is now able to handle
+delays other than 1.</li>
+</ul>
+<hr>
+<h4 align=center>Bug Fixes</h4>
+<ul>
+<li><a name="ll-ar"></a>
+When using the routines <a href="ll-ar.html">ll-ar</a>, <a
+href="onestep.html">onestep</a> and <a href="zeroth.html">zeroth</a>
+with the <font color=red>-s</font> flag set to a value larger than 1
+the points mapped into the interval [actual point,actual point + value
+of -s] were not excluded from the neighborhood. This caused causality
+problems especially for oversampled flow data, which could result in
+a severe underestimation of the forecast errors. FIXED (Thanks to Mario
+Ragwitz and Holger)</li>
+<li>The <font color=red>-r</font> flag in <a
+href="xzero.html">xzero</a> was buggy. When used, the result was
+usually (depending on the architecture) a <font color=blue>floating
+execption</font>. (Thanks to Mario Ragwitz)</li>
+</ul>
+<hr>
+<h4 align=center>New programs</h4>
+<ul>
+<li><a name="mzeroth"></a>
+<a href="zeroth.html">mzeroth</a>: Estimates the forecast errors for
+a multicomponent time series using a zeroth order model.</li>
+<li><a name="nstat_z"></a>
+<a href="nstat_z.html">nstat_z</a>: Takes a scalar time series,
+divides it into pieces and estimates the zeroth order cross-forecast
+errors as a test for nonstationarity.</li>
+</ul>
+<hr>
+<a href="#top">top</a> of the page.
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean1.0">TISEAN_1.0 -&gt; TISEAN_1.2</a>
+</b></font></center>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li><a name="ar-model"></a>
+   In <a href="ar-model.html">ar-model</a> now the mean is first subtracted
+   which should be less confusing.</li>
+<li>A new routine <a
+   href="../c/routines/test_outfile.c">test_outfile</a> was added to
+   <a href="routines.html">tsa.h</a> which tests whether a file for
+   writing the output into can be created or not.</li>
+<li>Another new routine <a
+   href="../c/routines/invert_matrix.c">invert_matrix</a> was added
+   to <a href="routines.html">tsa.h</a>. It inverts a square matrix
+   and is based on <a href="../c/routines/solvele.c">solvele</a>.</li>
+<li><a href="lyap_k.html">lyap_k</a> wanted to have the epsilon values
+   in units of the data, the output was in rescaled
+   units, though. Since this was a bit confusing, it was changed. Now output
+   is also in units of the data.</li>
+<li>All programs were modified such that they use the routine 
+   <a href="../c/routines/test_outfile.c">test_outfile</a>.</li>
+<li><a name="rbf"></a>
+   <a href="rbf.html">rbf</a>: The distribution of the centers and
+   the variance of the gaussians was changed to make the program more
+   effective. Now less centers should be necessary. Furthermore, the
+   program should be much faster now and thus the default is now:
+   write to stdout.</li>
+<li><a name="histogram"></a>
+   <a href="histogram.html">histogram</a>: The output was changed in
+   a way that now the integral over the second column should be 1.</li>
+</ul>
+<hr>
+<h4 align=center>Bug Fixes</h4>
+<ul>
+<li><a name="lyap_spec"></a>
+<a href="lyap_spec.html">lyap_spec</a> was expecting a value for
+the flag -I though there was no need for it. FIXED (Results were not
+influenced)</li>
+<li><a name="extrema"></a>
+<a href="extrema.html">extrema</a>: The first value was
+nonsens. FIXED. (All other values were not influenced)</li>
+<li><a name="false_nearest"></a>
+<a href="false_nearest.html">false_nearest</a>: The condition for
+the maximal allowed distance between the pairs of points was
+implemented wrongly. FIXED. (It did influence your results, but buggy
+though, it was still a stronger condition than the original one of
+Kennel et al.)</li>
+</ul>
+<hr>
+<h4 align=center>New programs</h4>
+<ul>
+<li><a name="fsle"></a>
+A program for estimating the finite size Lyapunov exponents <a
+href="fsle.html">fsle</a> was added. (BETA. I'm not completely sure
+whether this program does what it is supposed to do. So please be
+careful in using it.)</li>
+<li><a name="resample"></a>
+<a href="resample.html">resample</a>: A program for resampling a  
+time series (of a flow system, of course) with a new sampling time.</li>
+</ul>
+<hr>
+<a href="#top">top</a> of the page.
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean0.9">TISEAN_0.9 -&gt; TISEAN_1.0</a>
+</b></font></center>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li>Now each html file in the docs directory contains a description of
+what the output of the programs is.</li>
+<li>The <a href="false_nearest.html">false_nearest</a> routine didn't
+implement the second condition of the <a
+href="../chaospaper/citation.html#kennel92">Kennel et al</a> paper. Now it is
+implemented (Thanks to Wolfgang M&uuml;ller and Angelo De Santis).</li>
+<li>For each program which reads only one column you can now specify
+the number of the column in the filename separated by a comma.<br>
+Example: <i>hen,1</i> means use column <i>1</i> of file <i>hen</i><br>
+Should work in a similar way as in the Wuppertal part.
+</ul>
+<hr>
+<h4 align=center>Bug Fixes</h4>
+<ul>
+<li>The <a href="../c/routines/search_datafile.c">search_datafile</a>
+routines produced a <i>Segmentation fault</i> on some systems when no
+valid filename was given. FIXED<br>
+Additionally, if no valid filename is given at all, now stdin is read.</li>
+</ul>
+<hr>
+<h4 align=center>New programs</h4>
+<ul>
+<li>NONE
+</ul>
+<hr>
+<a href="#top">top</a> of the page.
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean0.5">TISEAN_0.5 -&gt; TISEAN_0.9</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li>The datafile has no longer to be the first parameter given in the
+command line. It can appear anywhere. Actually, everything not being a
+valid command line option will be interpreted as a possible datafile
+name. If no datafile is given at all or if <font color=Red>-</font> is
+given, stdin is read. If more than one datafile is specified, the last
+valid one (means the last that exists) is read.<br>
+A consequence is that just calling a program without given any
+parameter means now: call the program with all parameters set to their
+defaults and read from stdin. That means, to activate the help option,
+you have to give the <font color=red>-h</font> flag in any case.</li>
+<li>New option (<font color=red>-t</font>) in the 
+<a href="extrema.html">extrema</a> program.</li>
+<li>The meaning of the <font color=red>-s</font> flag in the 
+<a href="zeroth.html">zeroth</a> program has been changed slightly. Now
+giving steps larger 1 means that the program calculates all forecast errors
+from step 1 to the given step. Furthermore, the output can now be written to
+a file.</li>
+<li>The output of the <a href="mem_spec.html">mem_spec</a> was modified to
+be compatible with the output of <a href="../docs_f/spectrum.html">
+spectrum</a>.</li>
+<li>I modified the handling of the command line options. Now it is possible
+either set a space between the flag and the value (e.g. <font color=red>
+-d 3</font>) or not (e.g. <font color=red>-d3</font>). There is one flag 
+<font color=red>-o</font> which can be called with a parameter or
+without. Be careful! Placing the input file name in back of this flag
+will cause the program to interpret it as the parameter for the
+flag.</li>
+<li>I succeded in removing all <font color=red>NR</font>-stuff from
+the package.</li>
+<li>Some of the names of flags are changed to unify them with the ones
+from the Wuppertal part.</li>
+<li>New flag <font color=red>-r</font> in the program 
+<a href="makenoise.html">makenoise</a>. With it you can give the absolute
+noiselevel (or the absolute variance in case of gaussian noise). This means
+you can now produce N pure (gaussian) random numbers centered around x by<br>
+<tt><font color=red>yes x |head -N | makenoise -r something (-g) -o filename
+</font></tt></li>
+<li>Some changes in the parameters of <a href="svd.html">svd</a>.</li>
+<li>A new flag <font color=red>-V</font> for <a href="low121.html">low121</a>
+which can reduce the number of output files.</li>
+</ul>
+<hr>
+<h4 align=center>Bug Fixes</h4>
+<ul>
+<li>Due to the changes from Release 0.3 to 0.4 I introduced a bug in the 
+program <a href="rbf.html">rbf</a>. Fixed</li>
+<li>I called two flags in the <a href="poincare.html">poincare</a>
+the same. Embarrassing isn't it? FIXED.</li>
+<li>Major bug in <a href="lyap_spec.html">lyap_spec</a>. The result always
+was <tt>floating exception</tt>. Fixed (Thanks to Eckehard)</li>
+<li>Minor bug in <a href="lyap_k.html">lyap_k</a>. The statistics was
+written to stdout instead of stderr. Fixed (Thanks to Thomas)</li>
+</ul>
+<hr>
+<h4 align=center>New programs</h4>
+<ul>
+<li> The program <a href="ll-ar.html">ll-ar</a> estimates the onestep
+prediction error for a local linear ansatz as a function of the neighborhood
+size with which the function was fitted. Could give hints whether the system
+is describable by an AR-model or not.</li>
+<li>There are three new program for fitting polynomials. The main one is
+<a href="polynomp.html">polynomp</a> that fits a polynomial consisting
+of a free configurable number of terms. <a
+href="polyback.html">polyback</a> does a backward elimination and <a
+href="polypar.html">polypar</a> creates a parameter file that contains
+all possible terms of a polynomial.</li>
+<li>I started to add programs which handle either multivariate data or
+different univariate time series. The first one is <a
+href="xcor.html">xcor</a> which computes the cross
+correlations of two components.</li>
+<li><a href="xzero.html">xzero</a>: Make a zeroth order cross
+prediction of two time series.</li>
+<li><a href="boxcount.html">boxcount</a>: Estimate the Qth order
+Renyi entropy using a partitioning of the data.</li>
+<li><a href="xc2.html">xc2</a>: Compute the cross correlation sum of
+two time series.</li>
+</ul>
+<hr>
+<a href="#top">top</a> of the page.
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean0.4">TISEAN_0.4 -&gt; TISEAN_0.5</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li> Minor :-) modification of the Makefile structure.</li>
+</ul>
+<hr>
+<h4 align=center>Bug Fixes</h4>
+<hr>
+<h4 align=center>New programs</h4>
+<hr>
+<a href="#top">top</a> of the page.
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean0.3">TISEAN_0.3 -&gt; TISEAN_0.4</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li> The <a href="polynom.html">polynom</a> program is now able to
+devide the data into insample and out of sample points.</li>
+<li> The <a href="rbf.html">rbf</a> program is now able to
+devide the data into insample and out of sample points.</li>
+<li> All programs are now able to read from stdin. The only exception
+is <a href="av-d2.html">av-d2</a>, since it needs a special input format.</li>
+<li> All system calls were removed from the programs.
+Maybe that makes it easier to convert the programs to non unix operating
+systems.</li>
+<li> The program <a href="poincare.html">poincare</a> does no longer use
+the internal menu. Now it reads all parameters from the command line.</li>
+</ul>
+<hr>
+<h4 align=center>Bug Fixes</h4>
+<ul>
+<li>Bug in the <a href="makenoise.html">makenoise</a> fixed.
+The effect was that there was no default <a href=../general.html#column>column to be read</a>. Results
+were not influenced by this bug.
+(Thanks to Eckehard Olbrich)</li>
+<li>Bug in <a href="mutual.html">mutual</a> fixed. The program wanted
+the -s option to read the column, while the docs said its -c. Now it is
+-c. (Thanks to Jochen Arnhold)</li>
+</ul>
+<hr>
+<h4 align=center>New programs</h4>
+<ul>
+<li><a href="rescale.html">rescale</a>: Rescales the time series to a 
+specified interval or to average=0 and/or variance=1.</li>
+<li><a href="false_nearest.html">false_nearest</a>: The false nearest
+neighbor method</li>
+<li><a href="zeroth.html">zeroth</a>: Determine the forecast error of 
+the optimal zeroth order model</li>
+</ul>
+<hr>
+<a href="#top">top</a> of the page.
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean0.2">TISEAN_0.2 -&gt; TISEAN_0.3</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li>The output of the .stat file of the d2 program is maybe less cryptic now.
+<li>The histogram program now additionally gives the interval of the data.
+<li>Installation notes updated.
+</ul>
+<hr> 
+<h4 align=center>Bug Fixes</h4>
+<ul>
+<li>The scramble routine of d2 was doing wrong. FIXED (Thanks to
+Eckehard Olbrich)
+<li>Finally the bug in the ar-model is FIXED (Thanks to Eckehard again)
+<li>Due to a change in the make_box routine in libtsa_routines.a,
+nrlazy was doing nonsense. FIXED 
+</ul>
+<hr>
+<h4 align=center>New programs</h4>
+<ul>
+<li><a href="extrema.html">extrema</a>: Determine the extrema of a
+time series.
+<li><a href="av-d2.html">av-d2</a>: Smooth the output of the d2
+program.
+</ul>
+<hr>
+<a href="#top">top</a> of the page.
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean0.1">TISEAN_0.1 -&gt; TISEAN_0.2</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li><font color=red>make all</font> is now the default rule in the
+Makefile. That means, make will compile all programs without
+installing them. (Thanks to Wolfgang Trappe)
+<li>The comments in the C-sources are no longer // but /*...*/ instead,
+since // does not work with all C compilers. (Thanks to Volker Ahlers)
+<li>I started to create a library which contains some useful
+routines. One aim of this library is to replace the routines from the
+Numerical recipes, so that this package becomes completely independent from
+commercial software. This will last some more versions.
+</ul>
+<hr> 
+<h4 align=center>Bug Fixes</h4>
+<ul>
+<li><a href="ar-model.html">ar-model</a> ignored the -x option. FIXED
+<li>In <a href="svd.html">svd</a> the new basis of the vectors was
+wrong due to a index permutation. FIXED
+</ul>
+<hr>
+<h4 align=center>New programs</h4>
+<ul>
+<li><a href="low121.html">low121</a>: A simple time domain low pass
+filter.
+<li><a href="ghkss.html">ghkss</a>:A sophisticated noise reduction
+program. See also 
+<a href="../docs_c/project.html">project</a>. 
+</ul>
+<hr>
+<a href="#top">top</a> of the page.
+<hr>
+</body>
+</html>
+
+

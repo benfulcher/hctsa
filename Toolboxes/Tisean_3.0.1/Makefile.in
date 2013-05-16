@@ -1,0 +1,84 @@
+SHELL = /bin/sh
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+BINDIR = ${exec_prefix}/@bindir@
+CC = @CC@
+FC = @FC@
+HAVE_NR = @HAVE_NR@
+
+all:
+	@head -20 README
+	-if test -n "${FC}"; then (cd source_f && $(MAKE) $@); fi
+	-if test -n "${CC}"; then (cd source_c && $(MAKE) $@); fi
+
+install: do_install missing
+	@echo "******************************************************************"
+	@echo "the following programs have been installed in" ${BINDIR}
+	@echo "type"
+	@echo "   $$ progname -h"
+	@echo "for individual options"
+	@echo ""
+	@grep Usage install.log | sed "s/ *Usage./   /"
+	@echo "                  (written to install.log)"
+	@echo ""
+	-@if test -s missing.log; then \
+	   echo "the following programs could not be made/installed"; \
+	   sed "s/^/    /" missing.log; \
+	   echo "                  (written to missing.log)"; \
+	   echo ""; \
+         fi
+	@echo "browse index.html for documentation"
+
+do_install:
+	@rm -f install.log 
+	@test -d ${BINDIR} || (echo "${BINDIR} does not exist")
+	@test -d ${BINDIR} -a -n "${FC}" && (cd source_f && $(MAKE) install)
+	@test -d ${BINDIR} -a -n "${CC}" &&  (cd source_c && $(MAKE) install)
+
+missing:
+	@rm -f missing.log
+	-if test -n "${FC}"; then (cd source_f && $(MAKE) $@); fi
+	-if test -n "${CC}"; then (cd source_c && $(MAKE) $@); fi
+
+uninstall:
+	-if test -n "${FC}"; then (cd source_f && $(MAKE) $@); fi
+	-if test -n "${CC}"; then (cd source_c && $(MAKE) $@); fi
+
+clean:
+	-(cd source_f && $(MAKE) $@)
+	-(cd source_c && $(MAKE) $@)
+	-@rm -f install.log missing.log config.*
+	-find . \( -name "*~" -o -name "#*#" -o -name "*.o" \
+	        -o -name "lib*.a" \) -exec rm -f {} \;
+
+mproper: clean
+	-rm -f *.zip *.tar.gz *.tar.bz2 *.ZIP
+	-find . \( -name "Makefile" -o -name "stdin_*" -o -name tr \
+	        \) -exec rm -f {} \;
+
+package: zip gz bzip2
+
+zip: mproper
+	-(file=`basename $$PWD`; \
+	cd `dirname $$PWD`; \
+	rm -f $$file.zip; \
+	zip -r $$file.zip $$file; \
+	cd $$file; \
+	ls -l `dirname $$PWD`/$$file.zip )
+
+gz: mproper
+	-(file=`basename $$PWD`; \
+	cd `dirname $$PWD`; \
+	tar -vchf $$file.tar $$file; \
+	gzip -vf $$file.tar; \
+	cd $$file; \
+	ls -l `dirname $$PWD`/$$file.tar.gz )
+
+bzip2: mproper
+	-(file=`basename $$PWD`; \
+	cd `dirname $$PWD`; \
+	tar -vchf $$file.tar $$file; \
+	bzip2 -vf $$file.tar; \
+	cd $$file; \
+	ls -l `dirname $$PWD`/$$file.tar.bz2 )

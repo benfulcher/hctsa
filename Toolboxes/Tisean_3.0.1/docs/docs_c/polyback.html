@@ -1,0 +1,116 @@
+<html>
+<head>
+<title>
+polyback
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>polyback
+</font>
+</h1>
+<hr>
+This program performs a backward elimination for a given
+polynomial. This means it reads the terms of a polynomial from a
+parameter file (e.g. created by <a href="polypar.html">polypar</a>)
+and removes term by term down to a given final number of remaining
+terms. The terms are removed in such a way that the onestep forecast
+error is increases minimally.
+
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>polyback [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#
+<td>embedding dimension
+<td>2
+</tr>
+<tr>
+<th>-d#
+<td>delay
+<td>1
+</tr>
+<tr>
+<th>-n#
+<td>length for the insample error estimation
+<td>all
+</tr>
+<tr>
+<th>-s#
+<td>steps to be forecasted
+<td>1
+</tr>
+<tr>
+<th>-##
+<td>reduce down to # terms
+<td>1
+</tr>
+<tr>
+<th>-p#
+<td>name of the input parameter file
+<td>parameter.pol
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a> (for the forecast errors);<br>
+ without -o data is written to stdout
+<td>'datafile'.pbe
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+It creates a lot of new parameter files. For each term removed there
+is one file which is called <b>parameter_input_file_name.n</b>, where
+n is the number of remaining terms in the polynomial.<br>
+<b>stdout</b> or <b>datafile.pbe</b> contains the following
+information:<br>
+<b>first column:</b> number of remaining terms in the polynomial<br>
+<b>second column:</b> insample error produced by this polynomial<br>
+<b>third column:</b> out of sample error produced by this
+polynomial<br>
+<b>fourth column:</b> the term removed last from the polynomial<br>
+<hr>
+View the <a href="../../source_c/polyback.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

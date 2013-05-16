@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>2.1.1 Installation methods</TITLE>
+<META NAME="description" CONTENT="2.1.1 Installation methods">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node6.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="node4.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html266"
+  HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html262"
+  HREF="node4.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html256"
+  HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html264"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html267"
+  HREF="node6.html">2.1.2 Global installation</A>
+<B> Up:</B> <A NAME="tex2html263"
+  HREF="node4.html">2.1 Installation</A>
+<B> Previous:</B> <A NAME="tex2html257"
+  HREF="node4.html">2.1 Installation</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00311000000000000000"></A>
+<A NAME="install"></A>
+<BR>
+2.1.1 Installation methods
+</H2>
+
+<P>
+The simplest way to invoke OpenTSTOOL is to start Matlab and change to
+the <TT>OpenTSTOOL</TT> directory (using the GUI or the <TT>cd</TT>
+command). Once you have entered that directory, you should see the
+OpenTSTOOL toolbox in your Matlab <I>Start</I> menu under the item <I>  Toolboxes</I>, and you can start the graphical user interface from
+there. Note that TSTOOL is not really installed yet, so that after
+restarting Matlab you will have to enter the <TT>OpenTSTOOL</TT>
+directory again before you will be able to use the toolbox.
+
+<P>
+If you want to install OpenTSTOOL permanently, the directories from
+the toolbox must be in the Matlab path. There are several methods to
+include these directories, depending on you having full
+control over the Matlab installation or using a network wide
+installation as a normal user with reduced privileges.
+
+<P>
+
+<UL>
+<LI><I>If you have full control over the installation</I>: Enter the
+  OpenTSTOOL directory and choose the item <I>Installation</I> under
+  <I>Toolboxes</I> <!-- MATH
+ $\rightarrow$
+ -->
+<IMG
+ WIDTH="20" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="img3.gif"
+ ALT="$ \rightarrow$">
+ <I>OpenTSTool</I> in the Matlab Start
+  menu. It will install the OpenTSTool directories in the Matlab
+  search path and call the path tool. Now simply click <I>save</I> to
+  store the current path for future sessions.
+</LI>
+<LI><I>If you are working with a networked installation</I>: Enter
+  the path tool as just described in the previous paragraph, but after
+  you click on <TT>save</TT>, you will get an error which states that the
+  path could not be saved. Now, choose <TT>Yes</TT> to save the file <TT>    pathdef.m</TT> in your userpath, which you can see by calling the
+  command <TT>userpath</TT> in the Matlab shell (on UNIX this is usually
+  the directory <TT>&lt;HOMEDIR&gt;/matlab</TT> or <TT>    &lt;HOMEDIR&gt;/Documents/matlab</TT>. Create it if it does not yet
+  exist). You might have to set the environment variable <TT>    MATLAB_USE_USERPATH</TT> to 1 to make this work.
+</LI>
+<LI><I>If don't have a graphical display and are working with the
+    shell</I>: Enter the OpenTSTOOL directory, call <TT>tstoolInit</TT> and
+  then <TT>savepath</TT>.
+</LI>
+<LI>Another possibility is to create a file <TT>startup.m</TT> in your
+  userpath (usually <TT>&lt;HOMEDIR&gt;/matlab</TT> or <TT>    &lt;HOMEDIR&gt;/Documents/matlab</TT>), containing the following lines:
+<PRE>
+addpath('&lt;full path to the OpenTSTOOL-Dir&gt;');
+settspath('&lt;full path to the OpenTSTOOL-Dir&gt;');
+</PRE>
+  Again, on UNIX systems you might have to set the environment
+  variable <TT>MATLAB_USE_USERPATH</TT> to 1 to make this work.
+</LI>
+</UL>
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html266"
+  HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html262"
+  HREF="node4.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html256"
+  HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html264"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html267"
+  HREF="node6.html">2.1.2 Global installation</A>
+<B> Up:</B> <A NAME="tex2html263"
+  HREF="node4.html">2.1 Installation</A>
+<B> Previous:</B> <A NAME="tex2html257"
+  HREF="node4.html">2.1 Installation</A>
+ &nbsp; <B>  <A NAME="tex2html265"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

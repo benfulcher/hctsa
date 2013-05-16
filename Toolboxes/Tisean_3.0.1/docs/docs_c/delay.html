@@ -1,0 +1,141 @@
+<html>
+<head>
+<title>
+delay
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>delay
+</font>
+</h1>
+<hr>
+This program produces delay vectors either from a scalar or from a
+multivariate time series.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>delay [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-M#
+<td>Number of columns to be read
+<td>1
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1,...,# of columns
+</tr>
+<tr>
+<th>-m#
+<td>embedding dimension
+<td>2
+</tr>
+<tr>
+<th>-F#
+<td>The format for the embedding vector (see <a href="#exampleF">example</a>)
+<td>not set
+</tr>
+<tr>
+<th>-d#
+<td>delay of the embedding vector
+<td>1
+</tr>
+<tr>
+<th>-D#
+<td>list of individual delays (see <a href="#exampleD">example</a>)
+<td>not set
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a><br>
+<td>without file name: 'datafile'.del<br>
+(or stdin.del if stdin was read)<br>
+If no -o option is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center><a name="exampleF">Example for the <font
+color=red>-F</font> flag</a></h2>
+Suppose a two component time series, with components
+<b>x<sub>i</sub></b> and <b>y<sub>i</sub></b> is given. From this
+series a 5 dimensional delay vector, which consists of 
+3 delayed <b>x</b> and 2 delayed <b>y</b>, shall be created. This
+would give delay vectors of the form (suppose the delay is 1)<br>
+<center>
+<font size = +1>
+<b>(x<sub>i</sub>,x<sub>i-1</sub>,x<sub>i-2</sub>,y<sub>i</sub>,
+y<sub>i-1</sub>)</b>
+</font>
+</center>
+This is achieved by setting: <font color=red>-M2 -F 3,2</font>, which
+means read 2 components (<font color=red>-M 2</font>) and do the 3,2
+(<font color=red>-F 3,2</font>) embedding as shown above.
+
+<p>
+It is also possible to combine the <font color=red>-M</font> and
+<font color=red>-m</font> flags. If the value of <font
+color=red>-m</font> is an integer multiple of the <font
+color=red>-M</font> value, the program assumes a symmetric
+embedding. E.g.: <font color=red>-M3 -m9</font> is the same as
+<font color=red>-M3 -F3,3,3</font>. In case <font color=red>-m</font>
+is not a integer multiple of <font color=red>-M</font> the program
+complains and asks for <font color=red>-F</font>.
+</p>
+<font color=red>-F</font> needs a list of comma separated "partial"
+dimensions. 
+<hr>
+<h2 align=center><a name="exampleD">Example for the <font
+color=red>-D</font> flag</a></h2>
+The idea of this flag is to allow the construction of delay vectors
+with varying delays. Suppose a delay vector of the form<br>
+<center>
+<font size= +1>
+(<b>x(i)</b>,<b>x(i-d<sub>1</sub>)</b>,<b>x(i-d<sub>1</sub>-d<sub>2</sub>)</b>)
+</font>
+</center>
+This is possible with the setting: <font color=red>-m3 -Dd<sub>1</sub>,
+d<sub>2</sub></font><br>
+<font color=red>-D</font> needs a list of comma separated delays. 
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The delay vectors. Nothing else.
+<hr>
+View the <a href="../../source_c/delay.c"> C-sources</a>.
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>The Lyapunov spectrum</TITLE>
+<META NAME="description" CONTENT="The Lyapunov spectrum">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html354" HREF="node29.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html352" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html348" HREF="node27.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html355" HREF="node29.html">Dimensions and entropies</A>
+<B>Up:</B> <A NAME="tex2html353" HREF="node26.html">Lyapunov exponents</A>
+<B> Previous:</B> <A NAME="tex2html349" HREF="node27.html">The maximal exponent</A>
+<BR> <P>
+<H2><A NAME="SECTION00072000000000000000">The Lyapunov spectrum</A></H2>
+<P>
+The computation of the full Lyapunov spectrum requires considerably more effort
+than just the maximal exponent. An essential ingredient is some estimate of the
+local Jacobians, i.e. of the linearized dynamics, which rules the growth of
+infinitesimal perturbations. One either finds it from direct fits of local
+linear models of the type <IMG WIDTH=120 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline7515" SRC="img119.gif">, such that the first row
+of the Jacobian is the vector <IMG WIDTH=17 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6979" SRC="img61.gif">, and <IMG WIDTH=90 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline7519" SRC="img120.gif"> for
+<IMG WIDTH=83 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7521" SRC="img121.gif">, where <I>m</I> is the embedding dimension. The <IMG WIDTH=17 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6979" SRC="img61.gif"> is given by
+the least squares minimization <IMG WIDTH=190 HEIGHT=27 ALIGN=MIDDLE ALT="tex2html_wrap_inline7527" SRC="img122.gif">
+where <IMG WIDTH=26 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7529" SRC="img123.gif"> is the set of neighbors of <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6691" SRC="img38.gif">&nbsp;[<A HREF="citation.html#Eckmann">45</A>, <A HREF="citation.html#sano">71</A>].  Or
+one constructs a global nonlinear model and computes its local Jacobians by
+taking derivatives. In both cases, one multiplies the Jacobians one by one,
+following the trajectory, to as many different vectors <IMG WIDTH=16 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline7533" SRC="img124.gif"> in tangent space
+as one wants to compute Lyapunov exponents. Every few steps, one applies a
+Gram-Schmidt orthonormalization procedure to the set of <IMG WIDTH=16 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline7533" SRC="img124.gif">, and
+accumulates the logarithms of their rescaling factors. Their average, in the
+order of the Gram-Schmidt procedure, give the Lyapunov exponents in descending
+order. The routine <a href="../docs_c/lyap_spec.html">lyap_spec</a> uses this method, which goes back to&nbsp;[<A HREF="citation.html#sano">71</A>]
+and&nbsp;[<A HREF="citation.html#Eckmann">45</A>], employing local linear fits. Apart from the problem of
+spurious exponents, this method contains some other pitfalls: It <I>assumes</I>
+that there exist well defined Jacobians, and does not test for their
+relevance. In particular, when attractors are thin in the embedding space, some
+(or all) of the local Jacobians might be estimated very badly. Then the whole
+product can suffer from these bad estimates and the exponents are
+correspondingly wrong. Thus the global nonlinear approach can be superior, if a
+modeling has been successful, see Sec.&nbsp;<A HREF="node16.html#secpredict"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>.
+<P>
+In Table&nbsp;<A HREF="node28.html#tabLyap1"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> we show the exponents of the stroboscopic NMR
+laser data in a three dimensional embedding as a function of the neighborhood
+size.  Using global nonlinear models, we find the numbers given in the last
+two rows. More material is discussed in&nbsp;[<A HREF="citation.html#KantzSchreiber">2</A>]. The spread of
+values in the table for this rather clean data set reflects the difficulty of
+estimating Lyapunov spectra from time series, which has to be done with great
+care. In particular, when the algorithm is blindly applied to data from a
+random process, it cannot internally check for the consistency of the
+assumption of an underlying dynamical system. Therefore a Lyapunov spectrum is
+computed which now is completely meaningless.
+<P>
+<P><blockquote><A NAME="5717">&#160;</A>&nbsp;<BR>
+<TABLE COLS=6 BORDER RULES=GROUPS cellpadding=5 width=80%>
+<COL ALIGN=LEFT><COL ALIGN=CENTER><COL ALIGN=RIGHT><COL ALIGN=CENTER><COL ALIGN=CENTER><COL ALIGN=CENTER>
+<TBODY>
+<TR><TD colspan=3 VALIGN=BASELINE ALIGN=LEFT NOWRAP>
+method </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> <IMG WIDTH=13 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7463" SRC="img113.gif"> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> <IMG WIDTH=14 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7539" SRC="img126.gif"> </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> <IMG WIDTH=14 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7541" SRC="img127.gif"> </TD></TR>
+</TBODY><TBODY>
+<TR><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP colspan=2>local linear           </TD><TD VALIGN=BASELINE ALIGN=RIGHT NOWRAP> <I>k</I>=20  </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> 0.32 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -0.40 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -1.13 </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP COLSPAN=2> 
+``</TD><TD VALIGN=BASELINE ALIGN=RIGHT NOWRAP> <I>k</I>=40  </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> 0.30 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -0.51 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -1.21 </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP COLSPAN=2> 
+``</TD><TD VALIGN=BASELINE ALIGN=RIGHT NOWRAP> <I>k</I>=160 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> 0.28 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -0.68 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -1.31 </TD></TR>
+</TBODY><TBODY>
+<TR><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP COLSPAN=3>radial basis functions</TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> 0.27 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -0.64 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -1.31 </TD></TR>
+<TR><TD VALIGN=BASELINE ALIGN=LEFT NOWRAP COLSPAN=3> 
+polynomial</TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> 0.27 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -0.64 </TD><TD VALIGN=BASELINE ALIGN=CENTER NOWRAP> -1.15 </TD></TR>
+</TBODY></TABLE>
+<p>
+<STRONG>Table:</STRONG> <A NAME="tabLyap1">&#160;</A>
+    Lyapunov exponents of the NMR laser data, determined with a
+    three-dimensional embedding. The algorithms described in 
+    Sec.&nbsp;<A HREF="node27.html#seclyapmax"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> give <IMG WIDTH=104 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7549" SRC="img125.gif"> for the largest
+    exponent. </blockquote>
+
+<P>
+<P>
+The computation of the first part of the Lyapunov spectrum allows for some
+interesting cross-checks. It was conjectured&nbsp;[<A HREF="citation.html#KaplanYorke">72</A>], and is found
+to be correct in most physical situations, that the Lyapunov spectrum and the
+fractal dimension of an attractor are closely related. If the expanding and
+least contracting directions in space are continuously filled and only one
+partial dimension is fractal, then one can ask for the dimensionality of a
+(fractal) volume such that it is invariant, i.e. such that the sum of the
+corresponding Lyapunov exponents vanishes, where the last one is weighted with
+the non-integer part of the dimension:
+<BR><A NAME="eqlyapKY">&#160;</A><IMG WIDTH=500 HEIGHT=42 ALIGN=BOTTOM ALT="equation5736" SRC="img128.gif"><BR> 
+where <I>k</I> is the maximum integer such that the sum of the <I>k</I> largest exponents
+is still non-negative. <IMG WIDTH=34 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7555" SRC="img129.gif"> is conjectured to coincide with the information
+dimension.
+<P>
+The Pesin identity is valid under the same assumptions and allows to compute
+the KS-entropy:
+<BR><A NAME="eqlyapPesin">&#160;</A><IMG WIDTH=500 HEIGHT=43 ALIGN=BOTTOM ALT="equation5738" SRC="img130.gif"><BR><HR><A NAME="tex2html354" HREF="node29.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html352" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html348" HREF="node27.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html355" HREF="node29.html">Dimensions and entropies</A>
+<B>Up:</B> <A NAME="tex2html353" HREF="node26.html">Lyapunov exponents</A>
+<B> Previous:</B> <A NAME="tex2html349" HREF="node27.html">The maximal exponent</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

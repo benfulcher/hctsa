@@ -1,0 +1,418 @@
+Matlab Application Interface
+
+
+Mex erlaubt das Einbinden von eigenem C-Code in eigenstaendige
+Matlab-Befehle, die direkt im Matlab-Workspace auf Variablen
+arbeiten (ohne Umwege ueber Shell-Aufrufe oder temporaere Dateien)
+
+Der eigene Source-Code muss etwas praepariert werden, um als Mex-File
+compiliert werden zu koennen.
+
+Beispiel :
+
+/
+
+  Creates matrix of greatest common dividers
+  
+  The calling syntax is:
+
+                        [ma] = gcdmat(nin)
+                        
+        Christian Merkwirth 1.Okt.1997
+
+*/
+
+#include <math.h>
+#include "mex.h"
+
+/* Input Arguments */
+
+#define N_IN    prhs[0]
+
+/* Output Arguments */
+
+#define MA_OUT  plhs[0]
+
+#if !defined(max)
+#define max(A, B)       ((A) > (B) ? (A) : (B))
+#endif
+
+#if !defined(min)
+#define min(A, B)       ((A) < (B) ? (A) : (B))
+#endif
+
+long gcd(long i, long j)
+{
+        long  rem;
+
+        rem = i % j;
+        if (rem == 0) 
+                return j;
+        else
+                return gcd(j, rem); 
+}
+
+
+
+static void gcdmat(double* ma, unsigned long nin)
+{
+        unsigned long i,j, count;
+        
+        count = 0;
+        
+        if ( nin > 0 )
+        {
+                for (i=0; i< nin; i++)
+                        for (j=0; j<= i; j++)   
+                        {       
+                                long d = gcd(i+1,j+1);
+                                if ( d != 1)
+                                        ma[i+j*nin] = -1;
+                                else
+                                        ma[i+j*nin] = 1;
+                                ma[j+i*nin] = ma[i+j*nin];
+                        }
+        }       
+
+}
+
+/* const mxArray *prhs[] is a field of pointers to mxArray-structs  */
+void mexFunction(int nlhs, mxArray *plhs[],  int nrhs, const mxArray *prhs[] )
+{
+  double        *ma, *n;
+  unsigned long nin, cols, rows;
+  
+  /* Check for proper number of arguments */
+  
+  if (nrhs != 1) {
+    mexErrMsgTxt("gcdmat requires one input argument.");
+  } else if (nlhs > 1) {
+    mexErrMsgTxt("gdcmat requires one output argument.");
+  }
+  
+  /* Check the dimensions of n (scalar) . */
+ 
+        cols = mxGetM(N_IN);
+        rows = mxGetN(N_IN);
+ 
+  if ((!mxIsNumeric(N_IN) ) || ( mxIsComplex(N_IN) ) || ( mxIsSparse(N_IN)) || ( !mxIsDouble(N_IN))
+        || !(rows == 1 && cols == 1) )  
+  {
+    mexErrMsgTxt("nin must be integer scalar > 1");
+  }
+  
+  n = mxGetPr(N_IN);
+  
+  if ( *n < 1 )
+        mexErrMsgTxt("nin must be integer scalar > 1");
+        
+  nin = (unsigned long) *n; 
+  
+  /* Create a matrix for the return argument */
+  /* MA_OT is of type mxArray*        */
+  
+  MA_OUT = mxCreateDoubleMatrix(nin, nin, mxREAL);
+  
+  /* Assign pointers to the various parameters */
+  
+  ma = mxGetPr(MA_OUT);
+ 
+  /* Do the actual computations in a subroutine */
+  
+  gcdmat(ma, nin); 
+  
+  return;
+}
+
+
+
+
+Als Einstiegspunkt fuer Matlab muss immer folgende Routine in File vorhanden sein :
+
+void mexFunction(int nlhs, mxArray *plhs[],  int nrhs, const mxArray *prhs[] )
+
+Aus dieser lassen sich eigene Unterroutinen ohne weiteres aufrufen etc.
+
+Die Compilation erfolgt in der Matlab-Umgebung mittels des Befehls :
+>> mex -O -v    test.c 
+
+Zuerst wird dabei ein File namens mex.m aufgerufen, der selbst wieder ein ausfuehrbares
+Shell-Skript namens mex aufruft (dieses /bin/sh Skript muss im Pfad des jeweiligen Users liegen !).
+mex starten dann den systemspezifischen Compiler mit den entsprechenden Einstellungen :
+
+Als Beispiel auf einer SGI Indy R4600 IRIX 6.2 (o32)
+
+-> mexopts.sh sourced from directory (DIR = $MATLAB/bin)
+   FILE = /tmp_mnt/net/picasso/export/matlab/bin/mexopts.sh
+----------------------------------------------------------------
+->    MATLAB                = /tmp_mnt/net/picasso/export/matlab
+->    CC                    = cc
+->    CC flags:
+         CFLAGS             = -ansi -mips2
+         CDEBUGFLAGS        = -g
+         COPTIMFLAGS        = -O -DNDEBUG
+         CLIBS              = 
+         arguments          = 
+->    FC                    = f77
+->    FC flags:
+         FFLAGS             = 
+         FDEBUGFLAGS        = -g
+         FOPTIMFLAGS        = -O
+         FLIBS              = 
+         arguments          = 
+->    LD                    = ld
+->    Link flags:
+         LDFLAGS            = -shared -U -Bsymbolic -exported_symbol mexFunction -exported_symbol mexVersion
+         LDDEBUGFLAGS       = 
+         LDOPTIMFLAGS       = 
+         arguments          = 
+----------------------------------------------------------------
+
+-> cc -c  -I/tmp_mnt/net/picasso/export/matlab/extern/include -DMATLAB_MEX_FILE -ansi -mips2  -O -DNDEBUG gcdmat.c
+
+-> cc -c  -I/tmp_mnt/net/picasso/export/matlab/extern/include -DMATLAB_MEX_FILE -ansi -mips2  -O -DNDEBUG /tmp_mnt/net/picasso/export/matlab/extern/src/mexversion.c
+
+-> ld  -shared -U -Bsymbolic -exported_symbol mexFunction -exported_symbol mexVersion -o gcdmat.mexsg  gcdmat.o mexversion.o  
+
+
+
+Die systemspezifischen Optionen werden einem File names mexopts.sh entnommen. Dieser wird zuerst im momentanen
+Arbeitsverzeichnis gesucht, so dass dort eine Kopie des Originals mit eigenen Optionen stehen kann.
+
+z.B. fuer staerkere Optimierungen im Vergleich zum Original
+
+#
+# mexopts.sh   Shell script for configuring MEX-file creation script,
+#               mex.
+#
+# usage:        Do not call this file directly; it is sourced by the
+#               mex shell script.  Modify only if you don't like the
+#               defaults after running mex.  No spaces are allowed
+#               around the '=' in the variable assignment.
+#
+# Copyright (c) 1992-95 by The MathWorks, Inc.
+# $Revision: 1.1.1.1 $  $Date: 2001/01/16 11:09:28 $
+#----------------------------------------------------------------------------
+#
+    case "$Arch" in
+        Undetermined)
+#----------------------------------------------------------------------------
+# Change this line if you need to specify the location of the MATLAB
+# root directory.  The cmex script needs to know where to find utility
+# routines so that it can determine the architecture; therefore, this
+# assignment needs to be done while the architecture is still
+# undetermined.
+#----------------------------------------------------------------------------
+            MATLAB="$MATLAB"
+            ;;
+        alpha)
+#----------------------------------------------------------------------------
+            CC='cc'
+            CFLAGS='-ieee -std1'
+            CLIBS=''
+            COPTIMFLAGS='-O2 -DNDEBUG'
+            CDEBUGFLAGS='-g'
+#
+            FC='f77'
+            FFLAGS='-shared'
+            FLIBS='-lUfor -lfor -lFutil'
+            FOPTIMFLAGS='-O2'
+            FDEBUGFLAGS='-g'
+#
+            LD='ld'
+            LDFLAGS="-expect_unresolved '*' -shared -hidden -exported_symbol $ENTRYPOINT -exported_symbol mexVersion"
+            LDOPTIMFLAGS=''
+            LDDEBUGFLAGS=''
+#----------------------------------------------------------------------------
+            ;;
+        hp700)
+#----------------------------------------------------------------------------
+            CC='cc'
+            CFLAGS='+z -D_HPUX_SOURCE -Aa'
+            CLIBS=''
+            COPTIMFLAGS='-O -DNDEBUG'
+            CDEBUGFLAGS='-g'
+#
+            FC='f77'
+            FFLAGS='+z'
+            FLIBS=''
+            FOPTIMFLAGS='-O'
+            FDEBUGFLAGS='-g'
+#
+            LD='ld'
+            LDFLAGS="-b +e $ENTRYPOINT +e mexVersion"
+            LDOPTIMFLAGS=''
+            LDDEBUGFLAGS=''
+#----------------------------------------------------------------------------
+            ;;
+        ibm_rs)
+#----------------------------------------------------------------------------
+            CC='cc'
+            CFLAGS='-qlanglvl=ansi'
+            CLIBS='-lm'
+            COPTIMFLAGS='-O -DNDEBUG'
+            CDEBUGFLAGS='-g'
+#
+            FC='f77'
+            FFLAGS=''
+            FLIBS="$MATLAB/extern/lib/ibm_rs/fmex1.o -lm"
+            FOPTIMFLAGS='-O'
+            FDEBUGFLAGS='-g'
+#
+            LD='cc'
+            LDFLAGS="-bI:$MATLAB/extern/lib/ibm_rs/exp.ibm_rs -bE:$MATLAB/extern/lib/ibm_rs/$MAPFILE -bM:SRE -e $ENTRYPOINT"
+            LDOPTIMFLAGS='-s'
+            LDDEBUGFLAGS=''
+#----------------------------------------------------------------------------
+            ;;
+        lnx86)
+#----------------------------------------------------------------------------
+            CC='gcc'
+            CFLAGS=''
+            CLIBS=''
+            COPTIMFLAGS='-O -DNDEBUG'
+            CDEBUGFLAGS='-g'
+#
+# Use these flags for using f2c and gcc for Fortan MEX-Files
+#
+            FC='f2c'
+            FOPTIMFLAGS=''
+            FFLAGS=''
+            FDEBUGFLAGS='-g'
+            FLIBS=''
+#
+# Use these flags for using the Absoft F77 Fortran Compiler
+#
+        #   FC='f77'
+        #   FOPTIMFLAGS=''
+        #   FFLAGS='-f -N1 -N9 -N70'
+        #   FDEBUGFLAGS='-gg'
+        #   FLIBS='-lf77'
+#
+            LD='gcc'
+            LDFLAGS='-shared -rdynamic'
+            LDOPTIMFLAGS=''
+            LDDEBUGFLAGS=''
+#----------------------------------------------------------------------------
+            ;;
+        sgi)
+#----------------------------------------------------------------------------
+# cmerk Okt 1997   (staerkere Optimierung)
+            CC='cc'
+            CFLAGS='-ansi -mips2'
+            CLIBS='-lm'
+            COPTIMFLAGS='-O2 -DNDEBUG'				
+            CDEBUGFLAGS=''
+#           CDEBUGFLAGS='-g'
+#
+            FC='f77'
+            FFLAGS=''
+            FLIBS=''
+            FOPTIMFLAGS='-O'
+            FDEBUGFLAGS='-g'
+#
+            LD='ld'
+            LDFLAGS="-shared -U -Bsymbolic -exported_symbol $ENTRYPOINT -exported_symbol mexVersion"
+            LDOPTIMFLAGS=''
+            LDDEBUGFLAGS=''
+            ;;
+#----------------------------------------------------------------------------
+        sgi64)
+# R8000 only: The default action of mex is to generate full MIPS IV
+#             (R8000) instruction set.
+#----------------------------------------------------------------------------
+            CC='cc'
+            CFLAGS='-ansi -mips4 -64'
+            CLIBS='-lm'
+            COPTIMFLAGS='-O2 -DNDEBUG'
+			CDEBUGFLAGS=''
+#           CDEBUGFLAGS='-g'
+#
+            FC='f77'
+            FFLAGS='-mips4 -64'
+            FLIBS=''
+            FOPTIMFLAGS='-O'
+            FDEBUGFLAGS='-g'
+#
+            LD='ld'
+            LDFLAGS="-mips4 -64 -shared -U -Bsymbolic -exported_symbol $ENTRYPOINT -exported_symbol mexVersion"
+            LDOPTIMFLAGS=''
+            LDDEBUGFLAGS=''
+            ;;
+#----------------------------------------------------------------------------
+        sol2)
+#----------------------------------------------------------------------------
+            CC='cc'
+            CFLAGS=''
+            CLIBS=''
+            COPTIMFLAGS='-xcg92 -DNDEBUG'
+			CDEBUGFLAGS=''
+#           CDEBUGFLAGS='-g'
+#
+            FC='f77'
+            FFLAGS='-G'
+            FLIBS=''
+            FOPTIMFLAGS='-O'
+            FDEBUGFLAGS='-g'
+#
+            LD='ld'
+            LDFLAGS="-G -M $MATLAB/extern/lib/sol2/$MAPFILE"
+            LDOPTIMFLAGS=''
+            LDDEBUGFLAGS=''
+#----------------------------------------------------------------------------
+            ;;
+        sun4)
+#----------------------------------------------------------------------------
+# A dry run of the appropriate compiler is done in the mex script to
+# generate the correct library list. Use -v option to see what
+# libraries are actually being linked in.
+#----------------------------------------------------------------------------
+            CC='acc'
+            CFLAGS='-DMEXSUN4'
+            CLIBS="$MATLAB/extern/lib/sun4/libmex.a -lm"
+            COPTIMFLAGS='-O -DNDEBUG'
+            CDEBUGFLAGS='-g'
+#
+            FC='f77'
+            FFLAGS=''
+            FLIBS="$MATLAB/extern/lib/sun4/libmex.a -lm"
+            FOPTIMFLAGS='-O'
+            FDEBUGFLAGS='-g'
+#
+            LD='ld'
+            LDFLAGS='-d -r -u _mex_entry_pt -u _mexFunction'
+            LDOPTIMFLAGS='-x'
+            LDDEBUGFLAGS=''
+#----------------------------------------------------------------------------
+            ;;
+    esac
+#############################################################################
+#
+# Architecture independent lines:
+#
+#     Set and uncomment any lines which will apply to all architectures.
+#
+#----------------------------------------------------------------------------
+#           CC="$CC"
+#           CFLAGS="$CFLAGS"
+#           COPTIMFLAGS="$COPTIMFLAGS"
+#           CDEBUGFLAGS="$CDEBUGFLAGS"
+#           CLIBS="$CLIBS"
+#
+#           FC="$FC"
+#           FFLAGS="$FFLAGS"
+#           FOPTIMFLAGS="$FOPTIMFLAGS"
+#           FDEBUGFLAGS="$FDEBUGFLAGS"
+#           FLIBS="$FLIBS"
+#
+#           LD="$LD"
+#           LDFLAGS="$LDFLAGS"
+#           LDOPTIMFLAGS="$LDOPTIMFLAGS"
+#           LDDEBUGFLAGS="$LDDEBUGFLAGS"
+#----------------------------------------------------------------------------
+#############################################################################
+
+
+
+
+

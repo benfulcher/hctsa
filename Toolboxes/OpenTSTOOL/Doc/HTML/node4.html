@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>2.1 Installation</TITLE>
+<META NAME="description" CONTENT="2.1 Installation">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node8.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="node3.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html251"
+  HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html247"
+  HREF="node3.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html241"
+  HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html249"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html252"
+  HREF="node5.html">2.1.1 Installation methods</A>
+<B> Up:</B> <A NAME="tex2html248"
+  HREF="node3.html">2. Download and Installation</A>
+<B> Previous:</B> <A NAME="tex2html242"
+  HREF="node3.html">2. Download and Installation</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00310000000000000000">
+2.1 Installation</A>
+</H1>
+
+<P>
+<A NAME="f0:TOC2"></A>Unpack the compressed TSTOOL distribution into a
+directory, e.g <TT>C:<!-- MATH
+ $\backslash$
+ -->
+<IMG
+ WIDTH="12" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="img2.gif"
+ ALT="$ \backslash$">
+Program Files</TT> on Windows, <TT>/usr/local</TT> on
+Unix.
+
+<P>
+This can be done with an unpacking tool like <EM>Winzip</EM> if you
+are working with Windows, or <TT>gzip -dc filename.tgz | tar -xvf -</TT> if
+you are working with Unix.
+
+<P>
+After unpacking you will get a new directory named OpenTSTOOL which
+should now contain:
+
+<UL>
+<LI><TT>tstoolInit.m</TT> - script that calls <B>settspath.m</B> if necessary
+</LI>
+<LI><TT>settspath.m</TT> - script that does path settings
+</LI>
+<LI><TT>tstoolbox</TT> - the directory that contains all TSTOOL functions, compiled mex files etc.
+</LI>
+<LI><TT>mex-dev</TT> - Source code of the C++ parts of TSTOOL
+</LI>
+<LI><TT>Doc</TT> - HTML/PDF Documentation
+</LI>
+<LI><TT>info.xml, tstoolicon.gif</TT> - Files for the Matlab start menu
+</LI>
+<LI><TT>gpl.txt</TT> - Gnu General Public License
+</LI>
+</UL>
+
+<P>
+<B>Important note for Windows users</B>: If you want to use the
+pre-compiled mex-files which ship with OpenTSTOOL, you will probably
+have to install the Visual C++ 2008 run-time libraries, which can be
+downloaded from the Microsoft web site. As of the writing of this
+document, the URLs for these packages are
+
+<P>
+<TT><A NAME="tex2html1"
+  HREF="http://www.microsoft.com/downloads/details.aspx?FamilyID=9b2da534-3e03-4391-8a4d-074b9f2bc1bf">http://www.microsoft.com/downloads/details.aspx?FamilyID=9b2da534-3e03-4391-8a4d-074b9f2bc1bf</A></TT>
+<P>
+for 32bit and 
+
+<P>
+<TT><A NAME="tex2html2"
+  HREF="http://www.microsoft.com/downloads/details.aspx?familyid=bd2a6171-e2d6-4230-b809-9a8d7548c1b6">http://www.microsoft.com/downloads/details.aspx?familyid=bd2a6171-e2d6-4230-b809-9a8d7548c1b6</A></TT>
+<P>
+for 64bit. If these URLs are no longer valid, just search for
+``Microsoft Visual C++ 2008 Redistributable Package'' and ``x86'' or
+``x64'' for 32bit and 64bit, respectively.
+
+<P>
+If you do not have these run-time libraries installed, you will get
+the following error message when trying to run a mex-file: ``This
+application has failed to start because the application configuration
+is incorrect.''
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html253"
+  HREF="node5.html">2.1.1 Installation methods</A>
+<LI><A NAME="tex2html254"
+  HREF="node6.html">2.1.2 Global installation</A>
+<LI><A NAME="tex2html255"
+  HREF="node7.html">2.1.3 Deinstalling TSTOOL</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html251"
+  HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html247"
+  HREF="node3.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html241"
+  HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html249"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html252"
+  HREF="node5.html">2.1.1 Installation methods</A>
+<B> Up:</B> <A NAME="tex2html248"
+  HREF="node3.html">2. Download and Installation</A>
+<B> Previous:</B> <A NAME="tex2html242"
+  HREF="node3.html">2. Download and Installation</A>
+ &nbsp; <B>  <A NAME="tex2html250"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

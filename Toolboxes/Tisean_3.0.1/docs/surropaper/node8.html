@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Test design</TITLE>
+<META NAME="description" CONTENT="Test design">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html146" HREF="node9.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html144" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html140" HREF="node7.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html147" HREF="node9.html">Fourier based surrogates</A>
+<B>Up:</B> <A NAME="tex2html145" HREF="node5.html">Surrogate data testing</A>
+<B> Previous:</B> <A NAME="tex2html141" HREF="node7.html">The null hypothesis: model </A>
+<BR> <P>
+<H2><A NAME="SECTION00033000000000000000">Test design</A></H2>
+<P>
+Before we go into detail about the generation of surrogate samples, let us
+outline how an actual test can be carried out.  Many examples are known of
+nonlinearity measures that aren't even approximately normally distributed. It
+has therefore been advocated since the early days&nbsp;[<A HREF="node36.html#theiler1">6</A>] to use robust
+statistics rather than parametric methods for the actual statistical test. In
+other words, we discourage the common practice to represent the distribution of
+the nonlinearity measure by an error bar and deriving the significance from the
+number of ``sigmas'' the data lies outside these bounds. Such a reasoning
+implicitly assumes a Gaussian distribution.
+<P>
+Instead, we follow Theiler et al.&nbsp;[<A HREF="node36.html#theiler1">6</A>] by using a rank-order test.
+First, we select a residual probability <IMG WIDTH=10 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline1914" SRC="img7.gif"> of a false rejection,
+corresponding to a level of significance <IMG WIDTH=104 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1932" SRC="img12.gif">.  Then, for a
+one-sided test (e.g. looking for <EM>small</EM> prediction errors only), we
+generate <IMG WIDTH=90 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1934" SRC="img13.gif"> surrogate sequences. Thus, including the data itself,
+we have <IMG WIDTH=25 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1936" SRC="img14.gif"> sets. Therefore, the probability that the data by
+coincidence has the smallest, say, prediction error is exactly <IMG WIDTH=10 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline1914" SRC="img7.gif">, as
+desired.  For a two-sided test (e.g. for time asymmetry which can go both
+ways), we would generate <IMG WIDTH=90 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1940" SRC="img15.gif"> surrogates, resulting in a probability
+<IMG WIDTH=10 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline1914" SRC="img7.gif"> that the data gives <EM>either</EM> the smallest <EM>or</EM> the largest
+value.
+<P>
+For a minimal significance requirement of 95% , we thus need at least 19 or 39
+surrogate time series for one- and two-sided tests, respectively. The
+conditions for rank based tests with more samples can be easily worked out.
+Using more surrogates can increase the discrimination power.
+<P>
+<HR><A NAME="tex2html146" HREF="node9.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html144" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html140" HREF="node7.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html147" HREF="node9.html">Fourier based surrogates</A>
+<B>Up:</B> <A NAME="tex2html145" HREF="node5.html">Surrogate data testing</A>
+<B> Previous:</B> <A NAME="tex2html141" HREF="node7.html">The null hypothesis: model </A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,110 @@
+<html>
+<head>
+<title>
+av-d2
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>av-d2
+</font>
+</h1>
+<hr>
+This program takes one of the output files of the <a href="d2.html"> d2</a>, 
+<a href="../docs_f/c1.html">c1</a>, or
+<a href="../docs_f/c2naive.html">c2naive</a> programs as its input and
+smoothes the content of the file by arithmetically averaging over a given
+interval. Furthermore, it is possible to specify a range of embedding 
+dimensions to be printed. In the case of <a href="d2.html"> d2</a> output,
+the application of <font color=blue>av-d2</font> makes most sense on the local
+slopes file (extension <b>.d2</b>).
+<p>
+Suppose the input file contained values r<sub>i</sub> and d<sub>i</sub>, 
+then the output will be in two columns
+<pre>
+                  __ a
+            1    \
+   r    ,  ----   |       d
+    i      2a+1  /__ j=-a  i-j
+
+</pre>
+where a is the argument to the <font color=blue> -a</font> option. We recommend
+to experiment with the parameter <font color=blue>a</font> for optimal results.
+
+<hr>
+
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>av-d2 input-file [Options]</font><br>
+input-file has to be one of the files created by <a
+href="d2.html">d2</a>, <a href="../docs_f/c1.html">c1</a>
+or <a href="../docs_f/c2naive.html">c2naive</a>.
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-m#
+<td>minimal dimension to print
+<td>1
+</tr>
+<tr>
+<th>-M#
+<td>maximal dimension to print
+<td>whole file
+</tr>
+<tr>
+<th>-a#
+<td>smooth over an interval of 2#+1 points
+<td>1
+</tr>
+<tr>
+<th>-E
+<td>show the length scales in rescaled units [0:1]
+<td>units of the data
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>; without -o default is used <br>
+-o without a datafile means 'filename'.av
+<td>stdout
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2> The output is the
+same as the one from the <a href="d2.html">d2</a> and
+<a href="../docs_f/c2naive.html">c2naive</a> programs. The only
+difference is that the output is smoothed.
+<hr>
+Other post-processing for correlation sum data is available: 
+<a href="../docs_f/c2d.html">c2d</a> computes local slopes
+from correlation sum data (extension <b>.c2</b>) by fitting straight lines. 
+This is essentially redundant with the present program.
+<b>Takens' estimator</b> can be obtained using 
+<a href="../docs_f/c2t.html">c2t</a> while 
+<a href="../docs_f/c2g.html">c2g</a> provides <b>Gaussian kernel</b> 
+correlation
+integrals. Both act on the correlation sum data (extension <b>.c2</b>).
+<hr>
+View the <a href="../../source_c/av-d2.c"> C-sources</a>.
+<hr>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

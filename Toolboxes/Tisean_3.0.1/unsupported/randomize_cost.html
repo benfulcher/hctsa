@@ -1,0 +1,100 @@
+<html> 
+<head><title>Cost functions</title></head>
+<body bgcolor="#ffffff">
+<h3>Cost functions</h3>
+
+The <a href="randomize_extend.html">extendable</a> family of routines for the
+generation of annealed surrogate data can accomodate a variety of cost
+functions, needed to implement different constraints. In this version,
+the following modules are available.
+
+<h4>Autocorrelation function</h4>
+<p>
+<font color=blue><tt>randomize_</tt><font color=red><tt>auto</tt></font><tt>_</tt><em>cool</em><tt>_</tt><em>perm</em><tt>
+-D# [-W#] [</tt><em>general options</em><tt>] [</tt><em>cooling options</em><tt>] [</tt><em>permutation options</em><tt>] </tt><em>file</em></font>
+<blockquote>
+   <br><font color=blue><tt> -D </tt></font>number of lags for autocorrelation 
+   <br><font color=blue><tt> -W </tt></font>type of average: 
+         0=max(c), 1=|c|/lag, 2=(c/lag)**2, 3=max(c)/lag (default 0)
+</blockquote>
+The specified number of shortest lags of the autocorrelation function without
+periodic continuation is matched with the data. The cost is given by the
+maximum deviation in any lag, weighted by 1/lag.
+<p>
+<h4>Periodic autocorrelation function</h4>
+<p>
+<font color=blue><tt>randomize_</tt><font color=red><tt>autop</tt></font><tt>_</tt><em>cool</em><tt>_</tt><em>perm</em><tt>
+-D# [-W#] [</tt><em>general options</em><tt>] [</tt><em>cooling options</em><tt>] [</tt><em>permutation options</em><tt>] </tt><em>file</em></font>
+<blockquote>
+<br><font color=blue><tt> -D </tt></font>number of lags for autocorrelation 
+<br><font color=blue><tt> -W </tt></font>type of average: 
+         0=max(c), 1=|c|/lag, 2=(c/lag)**2, 3=max(c)/lag (default 0)
+</blockquote>
+The specified number of shortest lags of the periodically continued
+autocorrelation function is matched with the data. The cost is given by the
+maximum deviation in any lag, weighted by 1/lag.
+
+<p>
+<h4>Generic constraints</h4>
+<p>
+<font color=blue><tt>randomize_</tt><font color=red><tt>generic</tt></font><tt>_</tt><em>cool</em><tt>_</tt><em>perm</em><tt>
+[</tt><em>general options</em><tt>] [</tt><em>cooling options</em><tt>]
+[</tt><em>permutation options</em><tt>] </tt><em>file</em></font>
+<p>
+The generic module is provided as the easiest starting point of individual
+extensions. Virtually anything can be specified as part of the cost function
+by editing the source and <a href="randomize_extend.html">recompiling</a> 
+(recommended: rename the module).
+In the distribution, as an example the maximal deviation in either one of
+<pre>
+                         
+  &lt; x   x  &gt;,  &lt; x   x  &gt;,
+     n-1 n        n-2 n   
+                         
+     2                2        2                    
+  &lt; x   x  &gt;,  &lt; x   x  &gt;,  &lt; x   x  &gt;,  &lt; x   x   x &gt;,
+     n-1 n        n-1 n        n-2 n        n-2 n-1 n 
+                                                      
+     2   2            3        3
+  &lt; x   x  &gt;,  &lt; x   x  &gt;,  &lt; x   x  &gt;
+     n-1 n        n-1 n        n-1 n
+
+</pre>
+is minimised. After thorough annealing, this can be used to make randomly
+shuffled H&eacute;non attractors - whatever that is good for.
+
+<p>
+<h4>Spectrum of spike trains</h4>
+<p>
+<font color=blue><tt>randomize_</tt><font color=red><tt>spikespec</tt></font><tt>_</tt><em>cool</em><tt>_event
+[-F# -## -i]
+[</tt><em>general options</em><tt>] [</tt><em>cooling options</em><tt>]
+[</tt><em>permutation options</em><tt>] </tt><em>file</em></font>
+<blockquote>
+ <br><font color=blue><tt> -F </tt></font>maximal frequency (2*l / total time)
+ <br><font color=blue><tt> -# </tt></font>number of frequencies (F* total time /2)
+ <br><font color=blue><tt> -i </tt></font>expect intervals rather than times
+</blockquote>
+For an explanation of the inter-event spectrum see 
+<a href="spikespec.html">spikespec</a>. 
+S(f) is computed for <font color=blue><tt>#</tt></font> frequencies between 0 
+and <font color=blue><tt> -F </tt></font> (no binning).
+By default, a sequence of event times
+is expected. If the flag <font color=blue><tt> -i </tt></font> is set,
+the data is taken to be inter-event intervals.
+<p>
+<h4>Plans for future releases</h4>
+I am working on 
+<ul>
+<li>crosscorrelations with a reference signal 
+<li>running mean/variance for nonstationary data
+<li>Lomb periodogram for unevenly spaced data
+</ul>
+Please <a href="mailto:schreibe@theorie.physik.uni-wuppertal.de">tell me</a>
+if you have implemented any other interesting constraints.
+<p>
+
+    <a href="randomize.html"><em>constrained randomization</em></a> *
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>6.12 largelyap - Compute separation of nearby trajectories</TITLE>
+<META NAME="description" CONTENT="6.12 largelyap - Compute separation of nearby trajectories">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node50.html">
+<LINK REL="previous" HREF="node48.html">
+<LINK REL="up" HREF="node37.html">
+<LINK REL="next" HREF="node50.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html1040"
+  HREF="node50.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1036"
+  HREF="node37.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1030"
+  HREF="node48.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1038"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1041"
+  HREF="node50.html">6.13 nn_prepare - Do</A>
+<B> Up:</B> <A NAME="tex2html1037"
+  HREF="node37.html">6. Mex-Function Reference</A>
+<B> Previous:</B> <A NAME="tex2html1031"
+  HREF="node48.html">6.11 henon - Generate</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION007120000000000000000">
+6.12 <TT>largelyap</TT> - Compute separation of nearby trajectories</A>
+</H1>
+
+<P>
+<A NAME="f23:LARGELYAP"></A><TT>largelyap</TT> is an algorithm very similar to the Wolf algorithm [<A
+ HREF="node90.html#wssv">90</A>]
+, it computes the average exponential 
+growth of the distance of neighboring orbits via the prediction error. The increase of the prediction error
+vs the prediction time allows an estimation of the largest lyapunov exponent.
+
+<P>
+<B>Syntax:</B>
+
+<P>
+
+<UL>
+<LI><TT>x = largelyap(pointset, query_indices, taumax, k
+        exclude) </TT>
+</LI>
+<LI><TT>x = largelyap(atria, pointset, query_indices, taumax, k
+        exclude) </TT>
+    
+</LI>
+</UL>
+
+<P>
+<B>Input arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>atria</TT> - output of nn_prepare for pointset (optional) (cf. Section&nbsp;<A HREF="node50.html#f23:NNPREPARE">6.13</A>)
+</LI>
+<LI><TT>pointset</TT> - a <TT>N</TT> by <TT>D</TT> double matrix
+        containing the coordinates of the point set, organized as
+        <TT>N</TT> points of dimension <TT>D</TT> 
+</LI>
+<LI><TT>query_indices</TT> - query points are taken out of the
+        pointset, <TT>query_indices</TT> is a vector of length <TT>R</TT>
+        which contains the indices of the query points (indices
+        may vary from 1 to N) 
+</LI>
+<LI><TT>taumax</TT> - maximal time shift         
+</LI>
+<LI><TT>k</TT> - number of nearest neighbors to compute  
+</LI>
+<LI><TT>exclude</TT> - in case the query points are taken out of the
+        pointset, exclude specifies a range of indices which are
+        omitted from search. For example if the index of the query point
+        is 124 and exclude is set to 3, points with indices 121
+        to 127 are omitted from search. Using exclude = 0 means:
+        exclude self-matches 
+</LI>
+</UL>
+
+<P>
+<B>Output arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>x</TT> - vector of length <TT>taumax</TT>+1, <TT>x(tau)</TT> = 1/<TT>Nref</TT> * sum(log2(dist(reference point + tau, nearest neighbor + tau)/dist(reference point, 
+        nearest neighbor)))
+<BR>
+ [<A
+ HREF="node90.html#Parlitz:1998">146</A>]
+</LI>
+</UL><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html1040"
+  HREF="node50.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1036"
+  HREF="node37.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1030"
+  HREF="node48.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1038"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1041"
+  HREF="node50.html">6.13 nn_prepare - Do</A>
+<B> Up:</B> <A NAME="tex2html1037"
+  HREF="node37.html">6. Mex-Function Reference</A>
+<B> Previous:</B> <A NAME="tex2html1031"
+  HREF="node48.html">6.11 henon - Generate</A>
+ &nbsp; <B>  <A NAME="tex2html1039"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Uneven sampling</TITLE>
+<META NAME="description" CONTENT="Uneven sampling">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html327" HREF="node26.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html325" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html319" HREF="node24.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html328" HREF="node26.html">Spike trains</A>
+<B>Up:</B> <A NAME="tex2html326" HREF="node22.html">Various Examples</A>
+<B> Previous:</B> <A NAME="tex2html320" HREF="node24.html">Multivariate data</A>
+<BR> <P>
+<H2><A NAME="SECTION00063000000000000000">Uneven sampling</A></H2>
+<A NAME="secuneven">&#160;</A>
+Let us show how the constrained randomisation method can be used to test for
+nonlinearity in time series taken at time intervals of different length.
+Unevenly sampled data are quite common, examples include drill core
+data, astronomical observations or stock price notations. Most observables and
+algorithms cannot easily be generalised to this case which is particularly true
+for nonlinear time series methods. (See&nbsp;[<A HREF="node36.html#XParzen83">41</A>] for material on
+irregularly sampled time series.) Interpolating the data to equally spaced
+sampling times is not recommendable for a test for nonlinearity since one could
+not <I>a posteriori</I> distinguish between genuine structure and nonlinearity
+introduced spuriously by the interpolation process. Note that also zero padding
+is a nonlinear operation in the sense that stretches of zeroes are unlikely to
+be produced by any linear stochastic process.
+<P>
+For data that is evenly sampled except for a moderate number of gaps, surrogate
+sequences can be produced relatively straightforwardly by assuming the value
+zero during the gaps and minimising a standard cost function like
+Eq.(<A HREF="node17.html#eqcost">23</A>) while excluding the gaps from the permutations tried. The
+error made in estimating correlations would then be identical for the data and
+surrogates and could not affect the validity of the test. Of course, one would
+have to modify the nonlinearity measure to avoid the gaps. For data sampled at
+incommensurate times, such a strategy can no longer be adopted. We then need
+different means to specify the linear correlation structure.
+<P>
+Two different approaches are viable, one residing in the spectral domain and
+one in the time domain.  Consider a time series sampled at times <IMG WIDTH=28 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2310" SRC="img132.gif"> that
+need not be equally spaced. The power spectrum can then be estimated by the
+Lomb periodogram, as discussed for example in Ref.&nbsp;[<A HREF="node36.html#Press92">42</A>].
+For time series sampled at constant time intervals, the Lomb periodogram yields
+the standard squared Fourier transformation.  Except for this particular case,
+it does not have any inverse transformation, which makes it impossible to use
+the standard surrogate data algorithms mentioned in Sec.&nbsp;<A HREF="node9.html#secfourier">4</A>.  In
+Ref.&nbsp;[<A HREF="node36.html#lomb">43</A>], we used the Lomb periodogram of the data as a constraint for
+the creation of surrogates.  Unfortunately, imposing a given Lomb periodogram
+is very time consuming because at each annealing step, the <I>O</I>(<I>N</I>) spectral
+estimator has to be computed at <IMG WIDTH=43 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline2314" SRC="img133.gif"> frequencies with <IMG WIDTH=56 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2316" SRC="img134.gif">.
+Press et al.&nbsp;[<A HREF="node36.html#Press92">42</A>] give an approximation algorithm that uses the fast
+Fourier transform to compute the Lomb periodogram in <IMG WIDTH=77 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2318" SRC="img135.gif"> time rather
+than <IMG WIDTH=44 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2320" SRC="img136.gif">. The resulting code is still quite slow.
+<P>
+As a more efficient alternative to the commonly used but computationally costly
+Lomb periodogram, let us suggest to use binned autocorrelations. They are
+defined as follows. For a continuous signal <I>s</I>(<I>t</I>) (take <IMG WIDTH=48 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2324" SRC="img137.gif">,
+<IMG WIDTH=54 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2326" SRC="img138.gif"> for simplicity of notation here), the autocorrelation function is
+<IMG WIDTH=338 HEIGHT=33 ALIGN=MIDDLE ALT="tex2html_wrap_inline2328" SRC="img139.gif">. It can be
+binned to a bin size <IMG WIDTH=12 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline2330" SRC="img140.gif">, giving <IMG WIDTH=207 HEIGHT=26 ALIGN=MIDDLE ALT="tex2html_wrap_inline2332" SRC="img141.gif">. We now have to approximate all
+integrals using the available values of <IMG WIDTH=32 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2334" SRC="img142.gif">. In general, we estimate
+<BR><IMG WIDTH=500 HEIGHT=41 ALIGN=BOTTOM ALT="equation1080" SRC="img143.gif"><BR>
+Here, <IMG WIDTH=189 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2336" SRC="img144.gif"> denotes the bin ranging from <I>a</I>
+to <I>b</I> and <IMG WIDTH=52 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2342" SRC="img145.gif"> the number of its elements. We could improve this
+estimate by some interpolation of <IMG WIDTH=24 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2344" SRC="img146.gif">, as it is customary with numerical
+integration but the accuracy of the estimate is not the central issue here.
+For the binned autocorrelation, this approximation simply gives
+<BR><A NAME="eqcdelta">&#160;</A><IMG WIDTH=500 HEIGHT=43 ALIGN=BOTTOM ALT="equation1082" SRC="img147.gif"><BR>
+Here, <IMG WIDTH=243 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline2346" SRC="img148.gif">.
+Of course, empty bins lead to undefined autocorrelations.  If we have evenly
+sampled data and unit bins, <IMG WIDTH=192 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2348" SRC="img149.gif">, then the
+binned autocorrelations coincide with ordinary autocorrelations at
+<IMG WIDTH=182 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2350" SRC="img150.gif">.
+<P>
+Once we are able to specify the linear properties of a time series, we can also
+define a cost function as usual and generate surrogates that realise the binned
+autocorrelations of the data. A delicate point however is the choice of bin
+size. If we take it too small, we get bins that are almost empty. Within the
+space of permutations, there may be only a few ways then to generate precisely
+that value of <IMG WIDTH=43 HEIGHT=29 ALIGN=MIDDLE ALT="tex2html_wrap_inline2352" SRC="img151.gif">, in other words, we over-specify
+the problem. If we take the bin size too large, we might not capture important
+structure in the autocorrelation function.
+<P>
+As an application, let us construct randomised versions of part of an ice core
+data set, taken from the Greenland Ice Sheet Project Two (GISP2)&nbsp;[<A HREF="node36.html#gisp2">44</A>].
+An extensive data base resulting from the analysis of physical and chemical
+properties of Greenland ice up to a depth of 3028.8&nbsp;m has been published by the
+National Snow and Ice Data Center together with the World Data Center-A for
+Palaeoclimatology, National Geophysical Data Center, Boulder,
+Colorado&nbsp;[<A HREF="node36.html#CDROM">45</A>]. A long ice core is usually cut into equidistant slices
+and initially, all measurements are made versus depth. Considerable expertise
+then goes into the dating of each slice&nbsp;[<A HREF="node36.html#dating">46</A>]. Since the density of the
+ice, as well as the annual total deposition, changes with time, the final time
+series data are necessarily unevenly sampled. Furthermore, often a few values
+are missing from the record.  We will study a subset of the data ranging back
+10000&nbsp;years in time, corresponding to a depth of 1564&nbsp;m, and continuing until
+2000&nbsp;years before present. Figure&nbsp;<A HREF="node25.html#figicetime">14</A> shows the sampling rate
+versus time for the particular ice core considered.
+<P>
+<blockquote><A NAME="968">&#160;</A><IMG WIDTH=364 HEIGHT=195 ALIGN=BOTTOM ALT="figure1084" SRC="img152.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figicetime">&#160;</A> 
+      Sampling rate versus time for an ice core time series.<BR>
+</blockquote>
+<P>
+We use the <IMG WIDTH=20 HEIGHT=14 ALIGN=BOTTOM ALT="tex2html_wrap_inline2354" SRC="img153.gif">O time series which indicates the deviation of the
+<IMG WIDTH=26 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline2356" SRC="img154.gif"> <IMG WIDTH=58 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2358" SRC="img155.gif"> ratio from its standard value <IMG WIDTH=16 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline2360" SRC="img156.gif">:
+<IMG WIDTH=174 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2362" SRC="img157.gif">. Since the ratio of the
+condensation rates of the two isotopes depends on temperature, the isotope
+ratio can be used to derive a temperature time series. The upper trace in
+Fig.&nbsp;<A HREF="node25.html#figice">15</A> shows the recording from 10000&nbsp;years to 2000&nbsp;years before
+present, comprising 538 data points.
+<P>
+In order to generate surrogates with the same linear properties, we estimate
+autocorrelations up to a lag of <IMG WIDTH=62 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline2364" SRC="img158.gif">&nbsp;years by binning to a resolution of
+5&nbsp;y. A typical surrogate is shown as the lower trace in Fig.&nbsp;<A HREF="node25.html#figice">15</A>.  We
+have not been able to detect any nonlinear structure by comparing this
+recording with 19 surrogates, neither using time asymmetry nor prediction
+errors. It should be admitted, however, that we haven't attempted to provide
+nonlinearity measures optimised for the unevenly sampled case. For that
+purpose, also some interpolation is permissible since it is then part of the
+nonlinear statistic. Of course, in terms of geophysics, we are asking a very
+simplistic question here. We wouldn't really expect strong nonlinear signatures
+or even chaotic dynamics in such a single probe of the global climate.  All the
+interesting information -- and expected nonlinearity -- lies in the
+interrelation between various measurements and the assessment of long term
+trends we have deliberately excluded by selecting a subset of the data.
+<P>
+<blockquote><A NAME="970">&#160;</A><IMG WIDTH=365 HEIGHT=253 ALIGN=BOTTOM ALT="figure1085" SRC="img159.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figice">&#160;</A> 
+   Oxygen isotope ratio time series derived from an ice core (upper trace) and
+   a corresponding surrogate (lower trace) that has the same binned
+   autocorrelations up to a lag of 1000&nbsp;years at a resolution of
+   5&nbsp;years.</blockquote>
+<BR>
+<P><HR><A NAME="tex2html327" HREF="node26.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html325" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html319" HREF="node24.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html328" HREF="node26.html">Spike trains</A>
+<B>Up:</B> <A NAME="tex2html326" HREF="node22.html">Various Examples</A>
+<B> Previous:</B> <A NAME="tex2html320" HREF="node24.html">Multivariate data</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

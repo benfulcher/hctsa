@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>6.4 boxcount - Classical boxcounting algorithm</TITLE>
+<META NAME="description" CONTENT="6.4 boxcount - Classical boxcounting algorithm">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node42.html">
+<LINK REL="previous" HREF="node40.html">
+<LINK REL="up" HREF="node37.html">
+<LINK REL="next" HREF="node42.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html944"
+  HREF="node42.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html940"
+  HREF="node37.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html934"
+  HREF="node40.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html942"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html945"
+  HREF="node42.html">6.5 cao - Determine</A>
+<B> Up:</B> <A NAME="tex2html941"
+  HREF="node37.html">6. Mex-Function Reference</A>
+<B> Previous:</B> <A NAME="tex2html935"
+  HREF="node40.html">6.3 baker - Generate</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00740000000000000000">
+6.4 <TT>boxcount</TT> - Classical boxcounting algorithm</A>
+</H1>
+
+<P>
+<A NAME="f23:BOXCOUNT"></A>boxcount is a fast algorithm that partitions a data set of points into
+equally spaced and sized boxes. The algorithm is based on Robert Sedgewick's
+<EM>Ternary Search Trees</EM> 
+[<A
+ HREF="node90.html#Sedgewick:AlgorithmsC++">149</A>] which offer a fast and efficient way to create and search a multidimensional histogram. Empty boxes
+require no storage space, therefore the maximum number of boxes (and memory) used can not exceed the number
+of points in the data set, regardless of the data set's dimension and the number of partitions per axis.
+
+<P>
+During processing, data values are scaled to be within the range <IMG
+ WIDTH="9" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="img6.gif"
+ ALT="$ [$">
+0,1<IMG
+ WIDTH="9" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="img7.gif"
+ ALT="$ ]$">
+. All columns of the input
+matrix are scaled by the same factor, so no skewing is introduced into the point set.
+
+<P>
+<B>Syntax:</B>
+
+<P>
+
+<UL>
+<LI><TT>[a,b,c] = boxcount(point_set, partitions) </TT>
+</LI>
+</UL>
+
+<P>
+<B>Input arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>pointset</TT> - a <TT>N</TT> by <TT>D</TT> double matrix
+        containing the coordinates of the point set, organized as
+        <TT>N</TT> points of dimension <TT>D</TT>. <TT>D</TT> is limited to
+        128. 
+</LI>
+<LI><TT>partitions</TT> - number of partitions per axis, limited to 16384. For convenience, if a vector is given,
+                boxcount will iterate over all values of this vector.
+</LI>
+</UL>
+
+<P>
+<B>Output arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>a</TT> - vector of size <TT>D</TT> with: log2(sum(Number of nonempty boxes))
+</LI>
+<LI><TT>b</TT> - vector of size <TT>D</TT> with: sum(p * log2(p)) , where p is the relative frequency of points falling into a box
+</LI>
+<LI><TT>c</TT> - vector of size <TT>D</TT> with: log2(sum(p*p)), where p is the relative frequency of points falling into a box
+</LI>
+</UL>
+
+<P>
+<B>Example:</B>
+
+<P>
+<PRE> 
+p = rand(50000, 4);
+p = p - min(min(p));
+p = p ./ max(max(p));
+[a,b,c] = boxcount(p, 16)
+</PRE><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html944"
+  HREF="node42.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html940"
+  HREF="node37.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html934"
+  HREF="node40.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html942"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html945"
+  HREF="node42.html">6.5 cao - Determine</A>
+<B> Up:</B> <A NAME="tex2html941"
+  HREF="node37.html">6. Mex-Function Reference</A>
+<B> Previous:</B> <A NAME="tex2html935"
+  HREF="node40.html">6.3 baker - Generate</A>
+ &nbsp; <B>  <A NAME="tex2html943"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

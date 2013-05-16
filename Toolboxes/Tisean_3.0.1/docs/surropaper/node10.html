@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Rescaled Gaussian linear process</TITLE>
+<META NAME="description" CONTENT="Rescaled Gaussian linear process">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html172" HREF="node11.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html170" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html164" HREF="node9.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html173" HREF="node11.html">Flatness bias of AAFT </A>
+<B>Up:</B> <A NAME="tex2html171" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html165" HREF="node9.html">Fourier based surrogates</A>
+<BR> <P>
+<H2><A NAME="SECTION00041000000000000000">Rescaled Gaussian linear process</A></H2>
+<P>
+The two null hypotheses discussed so far (independent random numbers and
+Gaussian linear processes) are not what we want to test against in most
+realistic situations. In particular, the most obvious deviation from the
+Gaussian linear process is usually that the data do not follow a Gaussian
+single time probability distribution. This is quite obvious for data obtained
+by measuring intervals between events, e.g. heart beats since intervals are
+strictly positive. There is however a simple generalisation of the null
+hypothesis that explains deviations from the normal distribution by the action
+of an invertible, static measurement function: 
+<BR><A NAME="eqdistort">&#160;</A><IMG WIDTH=500 HEIGHT=46 ALIGN=BOTTOM ALT="equation1033" SRC="img23.gif"><BR> 
+We want to regard a time series from such a process as essentially linear since
+the only nonlinearity is contained in the -- in principle invertible --
+measurement function <IMG WIDTH=22 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1908" SRC="img2.gif">.
+<P>
+Let us mention right away that the restriction that <IMG WIDTH=22 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1908" SRC="img2.gif"> must be
+invertible is quite severe and often undesired. The reason why we have to
+impose it is that otherwise we couldn't give a complete specification of the
+process in terms of observables and constraints. The problem is further
+illustrated in Sec.&nbsp;<A HREF="node28.html#secrev">7.1</A> below.
+<P>
+The most common method to create surrogate data sets for this null hypothesis
+essentially attempts to invert <IMG WIDTH=22 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1908" SRC="img2.gif"> by rescaling the time series
+<IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1972" SRC="img24.gif"> to conform with a Gaussian distribution. The rescaled version is
+then phase randomised (conserving Gaussianity on average) and the result is
+rescaled to the empirical distribution of <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1972" SRC="img24.gif">. The rescaling is done by
+simple rank ordering. Suppose we want to rescale the sequence <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1972" SRC="img24.gif"> so that
+the rescaled sequence <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1978" SRC="img25.gif"> takes on the same values as some reference
+sequence <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1980" SRC="img26.gif"> (e.g. draws from a Gaussian distribution). Let <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1980" SRC="img26.gif"> be
+sorted in ascending order and <IMG WIDTH=58 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1984" SRC="img27.gif"> denote the ascending rank of
+<IMG WIDTH=14 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline1986" SRC="img28.gif">, e.g. <IMG WIDTH=89 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1988" SRC="img29.gif"> if <IMG WIDTH=14 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline1986" SRC="img28.gif"> is the 3rd smallest element of 
+<IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1972" SRC="img24.gif">. Then the rescaled sequence is given by
+<BR><A NAME="eqrank">&#160;</A><IMG WIDTH=500 HEIGHT=18 ALIGN=BOTTOM ALT="equation1035" SRC="img30.gif"><BR>
+The <EM>amplitude adjusted Fourier transform</EM> (AAFT) method has been
+originally proposed by Theiler et al.&nbsp;[<A HREF="node36.html#theiler1">6</A>]. It results in a
+correct test when <I>N</I> is large, the correlation in the data is not too strong
+and <IMG WIDTH=22 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1908" SRC="img2.gif"> is close to the identity. Otherwise, there is a certain bias
+towards a too flat spectrum, to be discussed in the following section.
+<P>
+<HR><A NAME="tex2html172" HREF="node11.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html170" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html164" HREF="node9.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html173" HREF="node11.html">Flatness bias of AAFT </A>
+<B>Up:</B> <A NAME="tex2html171" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html165" HREF="node9.html">Fourier based surrogates</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,121 @@
+<html>
+<head>
+<title>
+Lyap_k
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>lyap_k
+</font>
+</h1>
+<hr>
+The program estimates the largest Lyapunov exponent of a given scalar
+data set using the algorithm of Kantz.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>lyap_k [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to be used
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td>column to read or datafile,#
+<td>1
+</tr>
+<tr>
+<th>-M#
+<td>maximal embedding dimension to use
+<td>2
+</tr>
+<tr>
+<th>-m#
+<td>minimal embedding dimension to use
+<td>2
+</tr>
+<tr>
+<th>-d#
+<td>delay to use
+<td>1
+</tr>
+<tr>
+<th>-r#
+<td>minimal length scale to search neighbors
+<td>(data interval)/1000
+</tr>
+<tr>
+<th>-R#
+<td>maximal length scale to search neighbors
+<td>(data interval)/100
+</tr>
+<tr>
+<th>-##
+<td>number of length scales to use
+<td>5
+</tr>
+<tr>
+<th>-n#
+<td>number of reference points to use
+<td>all
+</tr>
+<tr>
+<th>-s#
+<td>number of iterations in time
+<td>50
+</tr>
+<tr>
+<th>-t#
+<td>'theiler window'
+<td>0
+</tr>
+<tr>
+<th>-o#
+<td>output file name
+<td>without file name: 'datafile'.lyap <br>
+(or stdin.lyap if the data were read from stdin)
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+For each embedding dimension and each length scale the file contains a 
+block of data consisting of 3 columns<br>
+<ol>
+<li>The number of the iteration</li>
+<li>The logarithm of the stretching factor (the slope is the Lyapunov 
+exponent if it is a straight line)</li>
+<li>The number of points for which a neighborhood with enough points was
+found</li>
+</ol>
+<hr>
+View the <a href="../c/lyap_k.cc"> C++-sources</a>.
+<hr>
+See also <a href="../../wuppertal/docs/lyapunov.html">lyapunov</a> 
+(Wuppertal package) and <a href="lyap_r.html">lyap_r</a>
+<hr>
+<a href="index.html">Dresden index</a> * <a href="../../contents.html">general index</a> * <a href="../../index.html">TISEAN home</a>
+</body>
+</html>

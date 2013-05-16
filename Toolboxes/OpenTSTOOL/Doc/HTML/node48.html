@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>6.11 henon - Generate henon time-series</TITLE>
+<META NAME="description" CONTENT="6.11 henon - Generate henon time-series">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node49.html">
+<LINK REL="previous" HREF="node47.html">
+<LINK REL="up" HREF="node37.html">
+<LINK REL="next" HREF="node49.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html1028"
+  HREF="node49.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1024"
+  HREF="node37.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1018"
+  HREF="node47.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1026"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1029"
+  HREF="node49.html">6.12 largelyap - Compute</A>
+<B> Up:</B> <A NAME="tex2html1025"
+  HREF="node37.html">6. Mex-Function Reference</A>
+<B> Previous:</B> <A NAME="tex2html1019"
+  HREF="node47.html">6.10 gendimest - Estimate</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION007110000000000000000">
+6.11 <TT>henon</TT> - Generate henon time-series</A>
+</H1>
+
+<P>
+<A NAME="f23:HENON"></A>Generate time series by iterating the henon map.
+
+<P>
+<B>Syntax:</B>
+
+<P>
+
+<UL>
+<LI><TT>x = henon(length, [a b xo yo]) </TT>
+</LI>
+</UL>
+
+<P>
+<B>Input arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>length</TT> - number of samples to generate
+</LI>
+<LI><IMG
+ WIDTH="9" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="img6.gif"
+ ALT="$ [$">
+<TT>a</TT> <TT>b</TT> <TT>xo</TT> <TT>yo</TT><IMG
+ WIDTH="9" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="img7.gif"
+ ALT="$ ]$">
+ - vector of parameters and initial conditions
+</LI>
+</UL>
+
+<P>
+<B>Output arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>x</TT> - vector of size <TT>D</TT>
+</LI>
+</UL>
+
+<P>
+<B>Example:</B>
+
+<P>
+<PRE> 
+x =  henon(500, [-1.4 0.3 0.2 0.12]);
+plot(x(:,1), x(:,2), '.');
+</PRE>
+<BR><HR>
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

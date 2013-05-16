@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>6.19 tentmap - Generate tentmap time-series</TITLE>
+<META NAME="description" CONTENT="6.19 tentmap - Generate tentmap time-series">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node57.html">
+<LINK REL="previous" HREF="node55.html">
+<LINK REL="up" HREF="node37.html">
+<LINK REL="next" HREF="node57.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html1124"
+  HREF="node57.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1120"
+  HREF="node37.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1114"
+  HREF="node55.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1122"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1125"
+  HREF="node57.html">6.20 Class signal</A>
+<B> Up:</B> <A NAME="tex2html1121"
+  HREF="node37.html">6. Mex-Function Reference</A>
+<B> Previous:</B> <A NAME="tex2html1115"
+  HREF="node55.html">6.18 takens_estimator</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION007190000000000000000">
+6.19 <TT>tentmap</TT> - Generate tentmap time-series</A>
+</H1>
+
+<P>
+<A NAME="f23:TENTMAP"></A>Generate samples of the generalized iterated tentmap.
+
+<P>
+<B>Syntax:</B>
+
+<P>
+
+<UL>
+<LI><TT>x = tentmap(length, [h e s x0]) </TT>
+</LI>
+</UL>
+
+<P>
+<B>Input arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>length</TT> - number of samples to generate
+</LI>
+<LI><TT><IMG
+ WIDTH="9" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="img6.gif"
+ ALT="$ [$">
+h e s x0<IMG
+ WIDTH="9" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="img7.gif"
+ ALT="$ ]$">
+</TT> - vector of parameters and initial conditions
+</LI>
+</UL>
+
+<P>
+<B>Output arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>x</TT> - time series
+</LI>
+</UL>
+
+<P>
+<B>Example:</B>
+
+<P>
+<PRE> 
+x = tentmap(500, [0 1 0.97 rand(1,1)]);
+plot(x)
+plot(x(1:end-1), x(2:end), '.')
+</PRE>
+
+<P>
+
+
+<P>
+<BR><HR>
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

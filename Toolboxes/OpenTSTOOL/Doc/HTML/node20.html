@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>4.4.1 nn_prepare</TITLE>
+<META NAME="description" CONTENT="4.4.1 nn_prepare">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node21.html">
+<LINK REL="previous" HREF="node19.html">
+<LINK REL="up" HREF="node19.html">
+<LINK REL="next" HREF="node21.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html451"
+  HREF="node21.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html447"
+  HREF="node19.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html441"
+  HREF="node19.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html449"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html452"
+  HREF="node21.html">4.4.2 nn_search</A>
+<B> Up:</B> <A NAME="tex2html448"
+  HREF="node19.html">4.4 Matlab mex-functions</A>
+<B> Previous:</B> <A NAME="tex2html442"
+  HREF="node19.html">4.4 Matlab mex-functions</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00541000000000000000">
+4.4.1 nn_prepare</A>
+</H2>
+
+<P>
+<A NAME="f19:PREP"></A><TT>nn_prepare</TT> does the preprocessing for a given data set <EM>pointset</EM>. The returned data structure
+<EM>atria</EM> contains preprocessing information that is necessary to use
+<TT>nn_search</TT> or <TT>range_search</TT>. 
+
+<P>
+Preprocessing and searching is divided into different mex-files to give the user the possibility to <EM>re-use</EM> the
+preprocessing data (contained in <EM>atria</EM>) when doing multiple searches on the same point set. However,
+as soon as the underlying point set is changed or modified, one has to recompute <EM>atria</EM> for the changed point set.
+
+<P>
+<B>Syntax:</B>
+
+<P>
+
+<UL>
+<LI><PRE> atria = nn_prepare(pointset)
+</PRE>
+</LI>
+<LI><PRE> atria = nn_prepare(pointset, metric)
+</PRE>
+</LI>
+<LI><PRE> atria = nn_prepare(pointset, metric, clustersize)
+</PRE>
+</LI>
+</UL>
+
+<P>
+<B>Input arguments:</B>
+
+<P>
+
+<UL>
+<LI><B>pointset</B> - a <B>N</B> by <B>D</B> double matrix containing the coordinates of the point set, 
+organized as <B>N</B> points of dimension <B>D</B>
+</LI>
+<LI><B>metric</B> - (optional) either 'euclidian' or 'maximum' (default is 'euclidian')
+</LI>
+<LI><B>clustersize</B> - (optional) threshold for clustering algorithm, defaults to 64
+</LI>
+</UL>
+
+<P>
+<BR><HR>
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

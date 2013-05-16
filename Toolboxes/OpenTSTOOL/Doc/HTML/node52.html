@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>6.15 predict</TITLE>
+<META NAME="description" CONTENT="6.15 predict">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node53.html">
+<LINK REL="previous" HREF="node51.html">
+<LINK REL="up" HREF="node37.html">
+<LINK REL="next" HREF="node53.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html1076"
+  HREF="node53.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1072"
+  HREF="node37.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1066"
+  HREF="node51.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1074"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1077"
+  HREF="node53.html">6.16 range_search</A>
+<B> Up:</B> <A NAME="tex2html1073"
+  HREF="node37.html">6. Mex-Function Reference</A>
+<B> Previous:</B> <A NAME="tex2html1067"
+  HREF="node51.html">6.14 nn_search</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION007150000000000000000">
+6.15 <TT>predict</TT></A>
+</H1>
+
+<P>
+<A NAME="f23:PREDICT"></A>State space based prediction using nearest neighbors. The algorithms computes one or more
+nearest neighbors to an initial state vector. The images of the nearest neighbors are
+used to estimate to image of the initial state vector. The next iteration uses the previously
+computed image as new initial state vector [<A
+ HREF="node90.html#McNames:1998">145</A>].
+
+<P>
+<B>Syntax:</B>
+
+<P>
+
+<UL>
+<LI><TT>x = predict(pointset, length, k, stepsize, mode) </TT>
+</LI>
+</UL>
+
+<P>
+<B>Input arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>pointset</TT> - a <TT>N</TT> by <TT>D</TT> double matrix
+        containing the coordinates of the point set, organized as
+        <TT>N</TT> points of dimension <TT>D</TT> 
+</LI>
+<LI><TT>length</TT> - number of iterations (length of prediction)
+</LI>
+<LI><TT>k</TT> - number of nearest neighbors
+</LI>
+<LI><TT>stepsize</TT> - prediction stepsize, usually one
+</LI>
+<LI><TT>mode</TT> - (optional) method to estimate image of initial state vector
+                
+<UL>
+<LI>0 - direct prediction, no weight is applied to neighbors
+</LI>
+<LI>1 - direct prediction, biquadratic weight is applied to neighbors
+</LI>
+<LI>2 - integrated prediction, no weight is applied to neighbors
+</LI>
+<LI>3 - integrated prediction, biquadratic weight is applied to neighbors
+                
+</LI>
+</UL>
+</LI>
+</UL>
+
+<P>
+<B>Output arguments:</B>
+
+<P>
+
+<UL>
+<LI><TT>x</TT> - data set as double matrix, size <TT>length</TT> by <TT>D</TT> 
+</LI>
+</UL><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html1076"
+  HREF="node53.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1072"
+  HREF="node37.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1066"
+  HREF="node51.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1074"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1077"
+  HREF="node53.html">6.16 range_search</A>
+<B> Up:</B> <A NAME="tex2html1073"
+  HREF="node37.html">6. Mex-Function Reference</A>
+<B> Previous:</B> <A NAME="tex2html1067"
+  HREF="node51.html">6.14 nn_search</A>
+ &nbsp; <B>  <A NAME="tex2html1075"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

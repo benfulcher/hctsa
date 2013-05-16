@@ -1,0 +1,27 @@
+SHELL = /bin/sh
+
+FC = @FC@
+FFLAGS = @FFLAGS@
+LDFLAGS = @LDFLAGS@
+AR = @AR@
+ARFLAGS = @ARFLAGS@
+RANLIB = @RANLIB@
+
+# list of objects to be put in libslac.a 
+   INC  = d1mach.o r1mach.o i1mach.o \
+          rand.o rgauss.o dqk15.o  \
+          rs.o tql2.o tqlrat.o tred1.o tred2.o pythag.o \
+          rffti1.o rfftf1.o rfftb1.o \
+          radf2.o radf3.o radf4.o radf5.o radfg.o \
+          radb2.o radb3.o radb4.o radb5.o radbg.o \
+	  snls1.o fdjac3.o lmpar.o rwupdt.o chkder.o \
+          qrfac.o qrsolv.o enorm.o \
+          xercnt.o xermsg.o xerhlt.o xersve.o \
+          j4save.o xgetua.o xerprn.o fdump.o
+
+../libsla.a: $(INC)
+	$(AR) $(ARFLAGS) ../libsla.a $?
+	$(RANLIB) ../libsla.a
+
+clean: 
+	-@rm -f *.o *~ #*#

@@ -1,0 +1,154 @@
+<html>
+<head><title>TISEAN: Nonlinear Time Series Analysis</title></head>
+<!-- <body bgcolor="#a0ffff"> -->
+
+
+<center><h1><font color=blue>TISEAN 3.0.1</font><br>
+Nonlinear Time Series Analysis</h1>
+
+<table><tr><td align=center><font size=5><b>
+<a href="http://www.theochem.uni-frankfurt.de/~hegger">Rainer
+Hegger</a>
+</b></font></td>
+     <td width=20 align=center>*</td>
+     <td align=center><font size=5><b>
+<a href="http://www.mpipks-dresden.mpg.de/~kantz">Holger Kantz</a>
+</b></font></td>
+     <td width=20 align=center>*</td>
+     <td align=center><font size=5><b>
+<a href="http://www.mpipks-dresden.mpg.de/~schreibe">Thomas Schreiber</a>
+</b></font></td></tr>
+</table>
+<p>
+<b><font size=5>With major contributions by <br>
+<a href="http://www.mpipks-dresden.mpg.de/~olbrich">Eckehard
+Olbrich</a>
+</font></b>
+</p>
+</center>
+<hr>
+<dl>
+<dt><font color=blue><b>TISEAN</b> is </font>
+<dd> a software project for the
+   analysis of time series with methods based on the theory of nonlinear
+   deterministic dynamical systems, or chaos theory, if you prefer. It
+   has grown out of the work of our groups during the last few years.
+<p>
+
+<dt><font color=blue><b>TISEAN</b> copyright and citation</font> 
+<dd> Starting from release 3.0.0 <b>TISEAN</b> is licensed under the
+terms of the <a href="../COPYING">GPL</a> (version 2 or later).The <font
+color=red>Copyright 
+&#169;</font> to each 
+   program is held by the person(s) named in the source code.  You may use and
+   refer to the programs as you do with any scientific publication. The correct
+   reference will be 
+   <blockquote>
+      R. Hegger, H. Kantz, and T. Schreiber, 
+      <em>Practical implementation of nonlinear time series methods: 
+      The TISEAN package</em>,
+      <A HREF="http://ojps.aip.org/journals/doc/CHAOEH-home/top.html">CHAOS</A> 
+      <b>9</b>, 413 (1999)
+   <br> Preprint available:
+   <a href="chaospaper/TiseanHTML.html">html</a> (part of this distribution),
+   <a href="http://xxx.lanl.gov/abs/chao-dyn/9810005">other</a>
+   </blockquote>
+   
+   For any of the surrogate data routines, please also give reference to
+   <blockquote>
+      T. Schreiber and A. Schmitz,
+      <em>Surrogate time series</em>,
+      Physica D <b>142</b> 346 (2000)
+   <br> Preprint available:
+   <a href="surropaper/Surrogates.html">html</a> (part of this distribution),
+   <a href="http://xxx.lanl.gov/abs/chao-dyn/9909037">other</a>
+   </blockquote>
+
+   We thank Marcus Richter, and Andreas Schmitz for their support of the
+   project. 
+<p>
+   Theoretical background material can be found in the book
+   <blockquote>
+      H. Kantz and T. Schreiber,
+      ``<a
+   href="http://www.mpipks-dresden.mpg.de/~schreibe/myrefs/book.html">Nonlinear
+   Time Series Analysis</a>'', 2nd edition,
+      Cambridge University Press, Cambridge (2004).
+   </blockquote>
+</p>
+<p> 
+
+<dt><font color=blue><b>TISEAN</b> disclaimer</font>
+<dd> This software is given <font color=red>WITHOUT ANY WARRANTY</font>;  
+   without even an implied 
+   statement of merchantability or fitness for a particular purpose. If you
+   decide to use these programs, you do so entirely <font color=red>AT YOUR OWN
+   RISK</font>.  
+<p>
+
+<dt><font color=blue><b>TISEAN</b> distribution</font> 
+<dd> is in source form (some code
+   in C, some in FORTRAN) including the full documentation. Also, executables
+   for some archtectures are available. Please consult the 
+   <a
+      href="http://www.mpipks-dresden.mpg.de/~tisean/archive_3.0.0.html">download page</a> for available formats. 
+   You are
+   very welcome to port the programs to other platforms or write interfaces to
+   other software as long as the GPL is not violated. Let us know of
+   any success! 
+<p>
+
+<dt><font color=blue><b>TISEAN</b> installation</font>
+<dd> The software can be compiled and installed using some reasonable version
+   of <font color=red>make</font>, a <font color=red>C compiler</font>, and a
+   <font color=red>FORTRAN compiler</font>. The <font color=red>gcc</font> /
+   <font color=red>g77</font> family will do fine. If you lack one of the
+   compilers, part of the package may still compile and work. It would be a
+   pity, though, for the other part.
+<p>
+
+<dt><font color=blue><b>TISEAN</b> updates</font>
+<dd> The range of programs is constantly growing and improving. 
+   For the latest version, check <a
+   href="http://www.mpipks-dresden.mpg.de/~tisean">http://www.mpipks-dresden.mpg.de/~tisean</a>. 
+   We are doing our best to remove bugs and straighten things but
+   we are also working on additional material to be included in later releases.
+   If you want to keep up-to-date about bug fixes and updates, observe
+   the announcements
+   <a href="http://www.mpipks-dresden.mpg.de/~tisean/archive_3.0.0.html#messages">
+   here</a>.
+<p>
+
+<dt><font color=blue><b>TI</b>me
+<b>SE</b>ries <b>AN</b>alysis</font>
+<dd> remains a difficult business, in particular the nonlinear kind. 
+   You may be assured that when treating the
+   programs as a black box, you are certain to get <font color=red>nonsensical
+   results</font>. Even if you know what you are doing, output produced by
+   the programs has to be interpreted very carefully and can often not be taken
+   as it is. Now that you are warned, go ahead and <font color=red>have
+   fun!</font> A good place to start is the <a
+   href="tutorial/exercises.html" target="main">tutorial</a>.
+<p>
+
+<dt><font color=blue><b>Derived and related projects:</b></font>
+<dd>From time to time people ask whether there are interfaces to
+  program A or program B. We are command line purits so we don't need
+  such interfaces. Anyway, here
+  are the projects (we know of) of other people writing such interfaces:
+<center>
+<p>
+<table border=2>
+<tr>
+<th><a href="http://tsnonlinear.uniud.it" target=_blank>RTisean</a></th>
+<td>Interface to the program package R</td>
+</tr>
+</table>
+</p>
+</center>
+</dl>
+<hr>
+<em>Copyright &#169;  (1998-2007) Rainer Hegger, Holger Kantz, Thomas Schreiber
+</em>
+</body>
+</html>

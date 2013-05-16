@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Lyapunov exponents</TITLE>
+<META NAME="description" CONTENT="Lyapunov exponents">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html334" HREF="node27.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html332" HREF="TiseanHTML.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html326" HREF="node25.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html335" HREF="node27.html">The maximal exponent</A>
+<B>Up:</B> <A NAME="tex2html333" HREF="TiseanHTML.html">Practical implementation of nonlinear </A>
+<B> Previous:</B> <A NAME="tex2html327" HREF="node25.html">Nonlinear noise reduction in </A>
+<BR> <P>
+<H1><A NAME="SECTION00070000000000000000">Lyapunov exponents</A></H1>
+<A NAME="seclyap">&#160;</A>
+Chaos arises from the exponential growth of infinitesimal perturbations,
+together with global folding mechanisms to guarantee boundedness of the
+solutions. This exponential instability is characterized by the spectrum of
+Lyapunov exponents&nbsp;[<A HREF="citation.html#EckRuelle">67</A>]. If one assumes a local decomposition of
+the phase space into directions with different stretching or contraction rates,
+then the spectrum of exponents is the proper average of these local rates over
+the whole invariant set, and thus consists of as many exponents as there are
+space directions. The most prominent problem in time series analysis is that
+the physical phase space is unknown, and that instead the spectrum is computed
+in some embedding space. Thus the number of exponents depends on the
+reconstruction, and might be larger than in the physical phase space. Such
+additional exponents are called <I>spurious</I>, and there are several
+suggestions to either avoid them&nbsp;[<A HREF="citation.html#spurious">68</A>] or to identify them. Moreover,
+it is plausible that only as many exponents can be determined from a time
+series as are entering the Kaplan Yorke formula (see below). To give a simple
+example: Consider motion of a high-dimensional system on a stable limit
+cycle. The data cannot contain any information about the stability of this
+orbit against perturbations, as long as they are exactly on the limit
+cycle. For transients, the situation can be different, but then data are not
+distributed according to an invariant measure and the numerical values are thus
+difficult to interpret. Apart from these difficulties, there is one relevant
+positive feature: Lyapunov exponents are invariant under smooth transformations
+and are thus independent of the measurement function or the embedding
+procedure. They carry a dimension of an inverse time and have to be normalized
+to the sampling interval.
+<P><BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html336" HREF="node27.html#SECTION00071000000000000000">The maximal exponent</A>
+<LI> <A NAME="tex2html337" HREF="node28.html#SECTION00072000000000000000">The Lyapunov spectrum</A>
+</UL>
+<HR><A NAME="tex2html334" HREF="node27.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html332" HREF="TiseanHTML.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html326" HREF="node25.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html335" HREF="node27.html">The maximal exponent</A>
+<B>Up:</B> <A NAME="tex2html333" HREF="TiseanHTML.html">Practical implementation of nonlinear </A>
+<B> Previous:</B> <A NAME="tex2html327" HREF="node25.html">Nonlinear noise reduction in </A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Finding unstable periodic orbits</TITLE>
+<META NAME="description" CONTENT="Finding unstable periodic orbits">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html265" HREF="node20.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html263" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html257" HREF="node18.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html266" HREF="node20.html">Locally linear prediction</A>
+<B>Up:</B> <A NAME="tex2html264" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html258" HREF="node18.html">Simple nonlinear prediction</A>
+<BR> <P>
+<H2><A NAME="SECTION00053000000000000000">Finding unstable periodic orbits</A></H2>
+<A NAME="secupo">&#160;</A>
+As an application of simple nonlinear phase space prediction, let us discuss a
+method to locate unstable periodic orbits embedded in a chaotic attractor. This
+is not the place to review the existing methods to solve this problem, some
+references include&nbsp;[<A HREF="citation.html#auerbach">47</A>, <A HREF="citation.html#biham">48</A>, <A HREF="citation.html#so">49</A>, <A HREF="citation.html#schmelcher">50</A>]. The TISEAN package
+contains a routine that implements the requirement that for a period <I>p</I> orbit
+<IMG WIDTH=119 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6947" SRC="img54.gif"> of a dynamical system like Eq.(<A HREF="node5.html#eqmap"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) acting on
+delay vectors
+<BR><A NAME="equpo">&#160;</A><IMG WIDTH=500 HEIGHT=16 ALIGN=BOTTOM ALT="equation4912" SRC="img55.gif"><BR>
+With unit delay, the <I>p</I> delay vectors contain <I>p</I> different scalar entries,
+and Eq.(<A HREF="node19.html#equpo"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) defines a root of a system of <I>p</I> nonlinear equations in
+<I>p</I> dimensions. Multidimensional root finding is not a simple problem.  The
+standard Newton method has to be augmented by special tricks in order to
+converge globally. Some such tricks, in particular means to select different
+solutions of Eq.(<A HREF="node19.html#equpo"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) are implemented in&nbsp;[<A HREF="citation.html#schmelcher">50</A>].  Similarly
+to the problems encountered in nonlinear noise reduction, solving
+Eq.(<A HREF="node19.html#equpo"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) <EM>exactly</EM> is particularly problematic since <IMG WIDTH=23 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6957" SRC="img56.gif">
+is unknown and must be estimated from the data. In Ref.&nbsp;[<A HREF="citation.html#so">49</A>], approximate
+solutions are found by performing just one iteration of the Newton method for
+each available time series point. We prefer to look for a <EM>least squares</EM>
+solution by minimizing
+<BR><A NAME="equpo2">&#160;</A><IMG WIDTH=500 HEIGHT=44 ALIGN=BOTTOM ALT="equation4916" SRC="img57.gif"><BR>
+instead. The routine <a href="../docs_f/upo.html">upo</a> uses a standard Levenberg-Marquardt algorithm to
+minimize (<A HREF="node19.html#equpo2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>). For this it is necessary that <IMG WIDTH=23 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6957" SRC="img56.gif"> is
+smooth. Therefore we cannot use the simple nonlinear predictor based on locally
+constant approximations and we have to use a smooth kernel version,
+Eq.(<A HREF="node18.html#eqpredictkernel"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>), instead. With <IMG WIDTH=149 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline6961" SRC="img58.gif">, the kernel
+bandwidth <I>h</I> determines the degree of smoothness of <IMG WIDTH=23 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6957" SRC="img56.gif">. Trying to
+start the minimization with all available time series segments will produce a
+number of false minima, depending on the value of <I>h</I>. These have to be
+distinguished from the true solutions by inspection. On the other hand, we can
+reach solutions of Eq.(<A HREF="node19.html#equpo"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) which are not closely visited in the time
+series at all, an important advantage over close return
+methods&nbsp;[<A HREF="citation.html#auerbach">47</A>].
+<P>
+<P><blockquote><A NAME="4908">&#160;</A><IMG WIDTH=345 HEIGHT=315 ALIGN=BOTTOM ALT="figure727" SRC="img53.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figupo">&#160;</A>
+   Orbits of period six, or a sub-period thereof, of the H&#233;non map,
+   determined from noisy data. The H&#233;non attractor does not have a period
+   three orbit.<BR>
+</blockquote><P>
+It should be noted that, depending on <I>h</I>, we may always find good minima of
+(<A HREF="node18.html#eqpredictkernel"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>), even if no solution of Eq.(<A HREF="node19.html#equpo"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>), or not
+even a truly deterministic dynamics exists. Thus the finding of unstable
+periodic orbits in itself is not a strong indicator of determinism.
+We may however use the cycle locations or stabilities as a discriminating
+statistics in a test for nonlinearity, see Sec.&nbsp;<A HREF="node35.html#secsurro"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>.
+While the orbits themselves are found quite easily, it is surprisingly
+difficult to obtain reliable estimates of their stability in the presence of
+noise. In <a href="../docs_f/upo.html">upo</a>, a small perturbation is iterated along the orbit and the
+unstable eigenvalue is determined by the rate of its separation from the
+periodic orbit.
+<P>
+The user of <a href="../docs_f/upo.html">upo</a> has to specify the embedding dimension, the period (which
+may also be smaller) and the kernel bandwidth. For efficiency, one may choose
+to skip trials with very similar points. Orbits are counted as distinct only
+when they differ by a specified amount. The routine finds the orbits, their
+expanding eigenvalue, and possible sub-periods. Figure&nbsp;<A HREF="node19.html#figupo"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> shows the
+determination of all period six orbits from 1000 iterates of the H&#233;non map,
+contaminated by 10% Gaussian white noise.
+<P>
+<HR><A NAME="tex2html265" HREF="node20.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html263" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html257" HREF="node18.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html266" HREF="node20.html">Locally linear prediction</A>
+<B>Up:</B> <A NAME="tex2html264" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html258" HREF="node18.html">Simple nonlinear prediction</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,29 @@
+<b><font color=red> We cannot give a clear answer!</b><br>
+</font><br>
+Study the result by<br>
+<font color=green> plot 'whatisit.dat.ll' w li,
+'whatisit.dat.ll' u 1:3 w li</font><br>
+The the first curve shows the average forcast error as a fuinction of
+the neighbourhood size, indicating that
+there is enhanced predictability by the local model, suggesting
+nonlinearity. But, as the second curve shows, 
+only a few percent of all points can be predicted this
+way, i.e., most of the points do not have sufficiently many
+neighbours for these small neighbourhood sizes. 
+When we require predictability for all points with an identical
+neigbourhood size, we see that the global linear AR-model works
+best.<br>
+<br>
+The local linear predictor will nevertheless will be better than the
+global model, since it minimizes the neighbourhood size for every data
+point. 
+<br><br>
+Notice that a clear application such as prediction can be optimized by
+an optimization of the embedding
+ parameters. It is, however, time consuming, since
+it has to be done by hand.<br>
+<br>
+
+<font color=red>
+Since the nature of the data set is yet unclear,
+we suggest to use a surrogate data test.</font><br>

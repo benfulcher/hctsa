@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>SVD filters</TITLE>
+<META NAME="description" CONTENT="SVD filters">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html190" HREF="node13.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html188" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html184" HREF="node11.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html191" HREF="node13.html">Visualizationnon-stationarity</A>
+<B>Up:</B> <A NAME="tex2html189" HREF="node5.html">Phase space representation</A>
+<B> Previous:</B> <A NAME="tex2html185" HREF="node11.html">Poincar&#233; sections</A>
+<BR> <P>
+<H2><A NAME="SECTION00035000000000000000">SVD filters</A></H2>
+<A NAME="secsvdfilter">&#160;</A>
+There are at least two reasons to apply an SVD filter to time series data:
+Either, if one is working with flow data, one can implicitly determine the
+optimal time delay, or, when deriving a stroboscopic map from synchronously
+sampled data of a periodically driven system, one might use the redundancy to
+optimize the signal to noise ratio.
+<P>
+In both applications the mathematics is the same: One constructs the
+covariance matrix of all data vectors (e.g. in an <I>m</I>-dimensional
+time delay embedding space), 
+<BR><IMG WIDTH=500 HEIGHT=17 ALIGN=BOTTOM ALT="equation4638" SRC="img41.gif"><BR>
+and computes its singular vectors. Then one projects onto the
+<I>m</I>-dimensional vectors
+corresponding to the <I>q</I> largest singular values. To work with flow data, <I>q</I>
+should be at least the correct embedding dimension, and <I>m</I> considerably 
+larger (e.g. <I>m</I>=2<I>q</I> or larger). The result is a vector valued time series, and
+in&nbsp;[<A HREF="citation.html#embed">22</A>] the relation of these components to temporal derivatives on
+the one hand and to Fourier components on the other hand were discussed. If,
+in the non-autonomous case, one wants to compress flow data to map data,
+<I>q</I>=1. In this case, the redundancy of the flow is implicitly used for noise 
+reduction of the map data. The routine <a href="../docs_c/pca.html">pca</a> can be used for both purposes.
+<P>
+<HR><A NAME="tex2html190" HREF="node13.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html188" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html184" HREF="node11.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html191" HREF="node13.html">Visualizationnon-stationarity</A>
+<B>Up:</B> <A NAME="tex2html189" HREF="node5.html">Phase space representation</A>
+<B> Previous:</B> <A NAME="tex2html185" HREF="node11.html">Poincar&#233; sections</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

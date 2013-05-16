@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Including non-stationarity</TITLE>
+<META NAME="description" CONTENT="Including non-stationarity">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html307" HREF="node24.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html305" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html299" HREF="node22.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html308" HREF="node24.html">Multivariate data</A>
+<B>Up:</B> <A NAME="tex2html306" HREF="node22.html">Various Examples</A>
+<B> Previous:</B> <A NAME="tex2html300" HREF="node22.html">Various Examples</A>
+<BR> <P>
+<H2><A NAME="SECTION00061000000000000000">Including non-stationarity</A></H2>
+<A NAME="secincluding">&#160;</A>
+<P>
+Constrained randomisation using combinatorial minimisation is a very flexible
+method since in principle arbitrary constraints can be realised. Although it
+is seldom possible to specify a formal null hypothesis for more general
+constraints, it can be quite useful to be able to incorporate into the
+surrogates any feature of the data that is understood already or that is
+uninteresting. Non-stationarity has been excluded so far by requiring the
+equations defining the null hypothesis to remain constant in time. This has a
+two-fold consequence. First, and most importantly, we must keep in mind that
+the test will have discrimination power against non-stationary signals as a
+valid alternative to the null hypothesis. Thus a rejection can be due to
+nonlinearity or non-stationarity equally well.
+<P>
+<blockquote><A NAME="964">&#160;</A><IMG WIDTH=359 HEIGHT=287 ALIGN=BOTTOM ALT="figure1079" SRC="img131.gif"><BR>
+<STRONG>Figure:</STRONG> Non-stationary financial time series (BUND Future returns, top)
+      and a surrogate (bottom) preserving the non-stationary structure
+      quantified by running window estimates of the local mean and variance
+      (middle).<A NAME="figbund">&#160;</A><BR>
+</blockquote>
+
+Second, if we do want to include non-stationarity in the null hypothesis we
+have to do so explicitly. Let us illustrate how this can be done with an
+example from finance. The time series consists of 1500 daily returns (until the
+end of 1996) of the <EM>BUND Future</EM>, a derived German financial instrument.
+The data were kindly provided by Thomas Sch&#252;rmann, WGZ-Bank D&#252;sseldorf. As
+can be seen in the upper panel of Fig.&nbsp;<A HREF="node23.html#figbund">13</A>, the sequence is
+non-stationary in the sense that the local variance and to a lesser extent also
+the local mean undergo changes on a time scale that is long compared to the
+fluctuations of the series itself. This property is known in the statistical
+literature as <EM>heteroscedasticity</EM> and modelled by the so-called
+GARCH&nbsp;[<A HREF="node36.html#garch">40</A>] and related models. Here, we want to avoid the construction
+of an explicit model from the data but rather ask the question if the data is
+compatible with the null hypothesis of a correlated linear stochastic process
+with time dependent local mean and variance. We can answer this question in a
+statistical sense by creating surrogate time series that show the same linear
+correlations and the same time dependence of the running mean and running
+variance as the data and comparing a nonlinear statistic between data and
+surrogates. The lower panel in Fig.&nbsp;<A HREF="node23.html#figbund">13</A> shows a surrogate time
+series generated using the annealing method.  The cost function was set up to
+match the autocorrelation function up to five days and the moving mean and
+variance in sliding windows of 100 days duration.  In Fig.&nbsp;<A HREF="node23.html#figbund">13</A> the
+running mean and variance are shown as points and error bars, respectively, in
+the middle trace. The deviation of these between data and surrogate has been
+minimised to such a degree that it can no longer be resolved.  A comparison of
+the time-asymmetry statistic Eq.(<A HREF="node3.html#eqskew">3</A>) for the data and 19 surrogates
+did not reveal any discrepancy, and the null hypothesis could not be rejected.
+<P>
+<HR><A NAME="tex2html307" HREF="node24.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html305" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html299" HREF="node22.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html308" HREF="node24.html">Multivariate data</A>
+<B>Up:</B> <A NAME="tex2html306" HREF="node22.html">Various Examples</A>
+<B> Previous:</B> <A NAME="tex2html300" HREF="node22.html">Various Examples</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

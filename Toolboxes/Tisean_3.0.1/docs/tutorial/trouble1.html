@@ -1,0 +1,15 @@
+You typed <br>
+<font color=green> plot '< henon -B0 -Aa -l5000 | delay' with
+dots</font><br>
+in gnuplot and see nothing? <br>
+a)  You followed the instruction too literally
+and forgot to replace <font color=green> a</font> in <font
+color=green> -Aa</font> by a real number between 0 and 2. <br>
+b) You have chosen an inappropriate value for <font color=green>
+a</font>: either outside the interval [0,2] or one for which the
+trajectory settles down on a fixed point, which you overlooked in your
+plot.<br>
+c) If you plotted something else before, you perhaps adjusted by hand
+a range for x or y outside the range of the Henon data. Use 
+<font color=green>set autoscale</font> to undo this setting.
+

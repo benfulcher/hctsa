@@ -1,0 +1,137 @@
+<html>
+<head>
+<title>
+xc2
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>xc2
+</font>
+</h1>
+<hr>
+Cross-correlation integral of two  <font
+color=Red>N</font>-dimensional data sets given in two files.
+
+Together with the (auto-)correlation integrals of each of the two
+sets, this gives an impression of their similarity or dissimilarity. 
+If the minimal number of centers <font color=Red>n</font> is small,
+the program is fast but the results suffer from large statistical
+fluctuations on the large length scales. Apart from statistical
+fluctuations, the results are invariant under the exchange of the
+sequence of the two files.
+
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>xc2 [options] file1 file2 </font>
+<p>
+Everything not being a valid option will be interpreted as a potential
+datafile name. 
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<th>-M#,#
+<td> dimension of the data sets (the same for both!),<br>
+ maximal embedding dimension
+<td> 1,2 
+</tr>
+<th>-n#
+<td> minimal number of centers
+<td> 1000
+</tr>
+<tr>
+<th>-d#
+<td> delay for the embedding (the same for both data sets)
+<td> 1
+</tr>
+<tr>
+<th>-N#
+<td> maximal number of pairs for each length scale
+<td> 1000
+</tr>
+<tr>
+<th>-##
+<td> number of length scale values
+<td> 2 per octave
+</tr>
+<tr>
+<th>-r#
+<td> minimal length scale
+<td> smallest distance of points in 2 dimensions
+</tr>
+<tr>
+<th>-R#
+<td> maximal length scale 
+<td> MAX(xmax-xmin,ymax-ymin)
+</tr>
+<tr>
+<th>-l#
+<td> maximal number of values to read (file1)
+<td> read whole file
+</tr>
+<tr>
+<th>-x#
+<td> number of lines to be skipped (file1)
+<td> 0
+</tr>
+<tr>
+<th>-L#
+<td> maximal number of values to read (file2)
+<td> read whole file
+</tr>
+<tr>
+<th>-X#
+<td> number of lines to be skipped (file2)
+<td> 0
+</tr>
+<tr>
+<th>-c#[,#]
+<td> <a href=../general.html#columns>columns to be read</a>
+<td> 1,2,...
+</tr>
+<tr>
+<th>-o#
+<td> <a href=../general.html#outfile>output file name</a>
+<td> file1_file2_xc2
+</tr>
+<tr>
+<th>-V#
+<td> <a href=../general.html#verbosity>verbosity level</a> (0 = report
+only fatal errors) 
+<td> 1
+</tr>
+<tr>
+<th>-h
+<td> show these options
+<td> none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+Output: file  <font color=Red>file1_file2_xc2</font>,<br> 
+It consists of separate blocks for 
+each embedding space starting with either m=2, ranging
+to m=M for univariate data, or starting at N and ending at NxM for
+multivariate data (adding the extra dimensions one by one).
+Inside each block the second column gives the
+fraction of pairs of points with distance smaller than the value
+reported in the first column. It has to be looked at on a log-log
+plot. For a discussion of its usefulness consult the original research
+article by H. Kantz,  Quantifying the closeness of fractal measures,
+Phys. Rev. E 49, 5091-5097 (1994).
+
+<hr>
+View the <a href="../../source_f/xc2.f">FORTRAN source</a>.
+<hr>
+See also <a href="../docs_c/d2.html">d2</a>
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<html>
+<body bgcolor=white>
+<head><center><table><tr><td align=center><b>Rainer Hegger</b></td>
+     <td width=20></td>
+     <td align=center><b>Holger Kantz</b></td>
+     <td width=20></td>
+     <td align=center><b>Thomas Schreiber</b></td></tr>
+</table>
+<title>Exercise 2 using TISEAN Nonlinear Time Series
+Routines</title></head> 
+
+<h1>Exercises using TISEAN<br>
+<font color=blue>Part II: Linear models and simple prediction</font></h1>
+
+</center>
+
+<hr>
+
+Download the data set 
+<a href="amplitude.dat"><b>amplitude.dat</b></a> to
+your local directory for use in this exercise (Press the "Shift"-key
+and the left mouse button).<br> 
+<br>
+<b> Visual analysis of data, time scales, and correlations</b><br>
+<ul>
+<li> Inspect the time series visually, e.g. by gnuplot (amount of data, obvious
+artefacts, typical time scales, qualitative behaviour on short times)<br><br>
+
+<li> Compute the autocorrelation function (<a
+href="../docs_c/corr.html">corr</a>)<br><br>
+ 
+<li> Which is a reasonable order for an AR-model?<br>
+Use <a href="../docs_c/ar-model.html">ar-model</a> to fit AR-models
+to the data.<br> 
+Study the residuals, i.e. the differences between determinsitic part
+of the AR-model and the next observations. Inside gnuplot:<br>
+<font color=green> plot [0:1000]'&#60; ar-model amplitude.dat -p10'
+u($0+10):1, '&#60; ar-model amplitude.dat -p50' u
+($0+50):1</font><br>Plot the data also in reversed order 
+(since one curve partly hides the
+other), and together with <font
+color=blue>amplitude.dat</font>. 
+ Read the description of <a
+href="../docs_c/ar-model.html">ar-model</a> to understand what you
+see in the plot, and reduce and increase
+the order of the model (controlled by the
+<font color=orange> -p</font> option) as far as your patience allows
+you to go (the computation time increases quadratically in
+<font color=orange> p</font>).<br><br>
+
+<li> Result: the residuals have pronounced spikes at certain points of the time
+series even for very large order of the model. 
+This demonstrates that the data do not stem from a linear
+stochastic process. Nonetheless, their magnitude compared to the
+amplitude of the signal is small. Hence, 
+if one wants to use a linear model,
+<font color=orange> p=10</font> is a reasonable compromise between
+model complexity and performance.<br><br>
+
+<li> Now use  <a href="../docs_c/ar-model.html">ar-model</a> to
+ produce a new time series:<br> 
+<font color=red> ar-model -s5000 amplitude.dat -p10 -o</font>,
+the output in <font color=blue>amplitude.dat.ar</font> is now, with
+the <font color=orange> -s5000</font> option, the iterated model time
+series of length 5000.
+<br><br>
+
+<li> Compare the two time series in the time domain. 
+Also, compute the histograms using the
+routine <a href="../docs_c/histogram.html">histogram</a>:<br>
+<font color=red>
+mycomputer&#62; histogram amplitude.dat -b0 </font><br>
+<font color=blue>
+Using amplitude.dat as datafile, reading column 1<br>
+Use 5000 lines.<br>
+Writing to stdout<br>
+#interval of data: [-1.463000e+01:1.727000e+01]<br>
+#average= 1.463300e-01<br>
+#standard deviation= 7.994755e+00<br>
+</font>
+The ar-data have zero mean by construction. If you wish to superimpose
+the two histograms, you thus should shift the one with respect to the
+other by the mean value of the data:<br>
+<font color=green>  
+set data style histep<br>
+plot '&#60; histogram amplitude.dat' u ($1-.146):2,'&#60; histogram
+ar.dat' </font> 
+<br>Result: The data sets are differnt: the distribution of <font
+color=blue> ar.dat</font> is closer to a Gaussian (and converges to a
+Gaussian for longer time series, try <font color=green> plot '&#60; ar-run -l100000
+amplitude.dat.ar | histogram' </font>).
+<br><br>
+<li> Compute the auto-correlation functions and the power
+spectra (by either <a href="../docs_c/mem_spec.html">mem_spec</a> or 
+<a href="../docs_f/spectrum.html">spectrum</a>) of both of them:<br>
+<font color=red> corr amplitude.dat -D500 -o<br>
+corr ar.dat -D500 -o</font><br>
+<font color=green>set data style lines</font><br>
+<font color=green> plot 'ar.dat.cor','amplitude.dat.cor'</font><br>
+<font color=red>spectrum amplitude.dat -o<br>
+spectrum ar.dat -o</font><br>
+<font color=green> set logscale y<br>
+ plot 'amplitude.dat_sp','ar.dat_sp'</font><br>
+Result: The AR-data contain the same temporal correlations, but they
+decay much faster than in <font color=blue> amplitude.dat</font>.<br>
+The spectra have to be compared with both linear and logarithmic
+y-scale. The frequency around 0.03 is dominant in both data sets, the
+harmonics of that visible in <font color=blue>amplitude.dat_sp</font>
+are suppressed in  <font color=blue>ar.dat_sp</font>. This reflects
+that the AR-model contains the relevant time scales, but has shortcomings
+in a quantitative comparison. However, these are not too dramatic when
+only viewed with second order statistics. The differences will be more
+evident in the higher order correlations and other nonlinear concepts.
+<br><br>
+
+
+<li>Repeat the exercise starting from the ar-data you generated (file
+ar.dat). You should observe that fitting an ar-model to ar-data will
+yield residuals with a gaussian distribution, and that the 
+histograms, auto-correlation
+functions and power spectra of the model data are identical to those
+of the input data, if the order of the fit (<font
+color=orange>  -p</font>) is not smaller than the order of the model by
+which the data were produced.<br><br>
+
+</ul>
+<b>Embedding and time lags</b><br>
+<ul>
+<li> Visualize both amplitude.dat and ar.dat in a delay embedding (do
+not forget to 
+reset the gnuplot, e.g., <font color=green> set nologs</font>), using 
+<a href="../docs_c/delay.html">delay </a>:<br>
+Start with <font color=orange>-d1</font> and increase it, at least up
+to 50. 
+What is optimal by a) visual impression, and what should be
+optimal when b) considering the auto-correlation function?<br>
+<b> Answers:</b><br> <font color=blue> amplitude.dat</font>: a)
+About 8, when unfolding is good but overlap is still small. 
+b) about 8: the first zero of the autocorrelation function
+would be optimal for a harmonic, periodic signal embedded in 2
+dimensions. <br>
+<font color=blue>ar.dat</font>: a) for delay 8, the shape of the blob of lines comes close to
+circular, hence indicating sufficient decorrelation of the components
+of the delay vectors. b) The auto-correlation function yields about
+the same as for <font color=blue> amplitude.dat</font>.
+</ul>
+<br>
+
+<b>Determinism and predictability</b><br>
+<ul>
+<li> compute the false nearest neighbour statistics 
+(<a href="../docs_c/false_nearest.html">false_nearest</a>):<br>
+<font color=red> false_nearest  amplitude.dat -M8 -d8 -o
+-t200 -f5 </font><br>
+Study the output, <font color=blue>amplitude.dat.fnn</font>, and
+observe the invariance of the result (namely that the embedding dimension
+3 is insufficient but 4 is o.k.) under change of the time lag. 
+<br><br>
+
+<li> Use the zeorth-order predictor 
+(<a href="../docs_c/zeroth.html">zeroth</a>)
+on amplitude.dat and on ar.dat.<br>
+<font color=red> zeroth amplitude.dat -m1,4 -d8 -o
+-s250<br>
+zeroth ar.dat -m1,4 -d8 -o
+-s250</font><br>
+<font color=green>plot
+[][0:1.5] 'amplitude.dat.zer','ar.dat.zer',.05*exp(.02*x) </font>
+</ul>
+<br>
+You should be able to verify the following observations:<br>
+For increasing prediction horizion, the prediction errors of amplitude.dat
+show two regimes: Exponential increase of the error due to chaos
+(the regime of nonlinear deterministic dynamics), slow linear
+increase due to loss of phase locking (the regime of linear
+correlations due to the rather constant period of the oscillations), 
+constant
+when the predictions lose all correlations to the actual
+values (limit of unpredictability for a large prediction horizon of more
+time steps than can be computed with this data set, 
+the relative prediction error saturates at 1. In order to
+arrive a prediction horizons larger than one half of the data set,
+you must switch off the causality window by the <font
+color=orange>-C0</font> option in <a href="../docs_c/zeroth.html">zeroth</a>). <br> 
+<br>
+No succesful prediction for ar.dat beyond the linear correlations.
+Since ar.dat is a linear stochastic data set,
+it does not contain phase space information.<br><br><br>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

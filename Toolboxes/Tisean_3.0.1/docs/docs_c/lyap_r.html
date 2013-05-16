@@ -1,0 +1,104 @@
+<html>
+<head>
+<title>
+Lyap_r
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>lyap_r
+</font>
+</h1>
+<hr>
+The program estimates the largest Lyapunov exponent of a given scalar
+data set using the algorithm of <a
+href="../chaospaper/citation.html#rose">Rosenstein et al.</a>
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>lyap_r [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to be used
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#
+<td>embedding dimension to use
+<td>2
+</tr>
+<tr>
+<th>-d#
+<td>delay to use
+<td>1
+</tr>
+<tr>
+<th>-t#
+<td>window around the reference point which should be omitted
+<td>0
+</tr>
+<tr>
+<th>-r#
+<td>minimal length scale for the neighborhood search
+<td>(data interval)/1000
+</tr>
+<tr>
+<th>-s#
+<td>number of iterations in time
+<td>50
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>'datafile'.ros<br>
+(or stdin.ros if data was read from stdin)
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages<br>
+&nbsp;&nbsp;2: add statistics for each iteration
+<td>3
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+<ul>
+<li><b>First column:</b> Number of the iteration</li>
+<li><b>Second column:</b> Logarithm of the stretching factor</li>
+</ul>
+<hr>
+View the <a href="../../source_c/lyap_r.c"> C-sources</a>.
+<hr>
+See also <a href="lyap_k.html">lyap_k</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

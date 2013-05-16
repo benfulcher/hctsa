@@ -1,0 +1,221 @@
+<html>
+<body bgcolor=white>
+<head><center><table><tr><td align=center><b>Rainer Hegger</b></td>
+     <td width=20></td>
+     <td align=center><b>Holger Kantz</b></td>
+     <td width=20></td>
+     <td align=center><b>Thomas Schreiber</b></td></tr>
+</table>
+<title>Exercise 3 using TISEAN Nonlinear Time Series
+Routines</title></head> 
+
+<h1>Exercises using TISEAN<br>
+<font color=blue>Part III: Time and length scales, structure,
+Poincare-maps, and surrogates</font></h1> 
+
+</center>
+
+<hr>
+Download and use alternatingly the data sets 
+<a href="amplitude.dat"><b>amplitude.dat</b></a>,
+<a href="arch.dat"><b>arch.dat</b></a>, 
+ and 
+<a href="whatisit.dat"</a><b>whatisit.dat</b></a><br> 
+<br>
+<b>Visual inspection</b>
+<ul>
+<li> For all data which you use for the first time:<br>
+ look at the time series (amount of data, obvious
+artefacts, typical time scales, qualitative behaviour on short times), <br>
+compute the distribution (<a href="../docs_c/histogram.html">histogram</a>),<br> 
+compute the auto-correlation function (<a href="../docs_c/corr.html"> corr</a>).
+</ul>
+<br>
+<b>Testing against non-stationarity</b>
+<ul>
+<li>Compute recurrence plots using <a href="../docs_c/recurr.html"> recurr </a>
+ (be careful with the <font color=orange> -l </font> and the  <font
+ color=orange> -r </font> option).<br>
+
+<br><li> study stationarity of <font color=blue>arch.dat</font> 
+ using the meta-recurrence
+plot  <a href="../docs_c/nstat_z.html"> nstat_z </a>. <br>
+A reasonable choice of parameters is:<br>
+<font color=red>  nstat_z arch.dat -d4 -m3 -#10 -o </font><br>
+Plot it in gnuplot using<br>
+ <font color=green> set contour  base</font><br>
+<font color=green> splot 'arch.dat.nsz' with lines </font>.
+</ul>
+Without further investigation we assume that the other two data
+sets are stationary. We will thus extract time averaged information. 
+Nonetheless, it is recommended to <b>always test against non-stationarity!</b><br>
+<br><br>
+<b>Time scales</b>
+<ul>
+<li> Recall typical times present in the auto-correlation functions,
+i.e., first zero crossing, exponential decay of an envelope.<br><br>
+<li> Study 2-dimensional delay embeddings and determine reasonable lags.<br><br>
+<li>Compute the space-time separation plots using <a
+href="../docs_f/stp.html"> stp </a>. <br>
+Notice: Here you have to supply the <font color=orange> -m </font> and
+<font color=orange> -d </font> options to specify the embedding
+space.</br>
+When you want to cover a large relative time interval (e.g., <font
+color=orange> -t500 </font>), it can be reasonable to reduce the
+resolution in time (e.g., <font color=orange> -#4 </font>).
+What is your conclusion from that about suitable Theiler-windows for each data set?
+</ul>
+<a href="ex3_answer1.html"> Answers to time scales problems</a>
+<br>
+<br>
+<br>
+<b>The Poincar&eacute; surface of section</b><br>
+Create different map-like series of <font
+color=blue>amplitude.dat</font>.
+<ul><li>Using <a href="../docs_c/poincare.html">poincare</a>, find a
+reasonable location of the surface of section by maximizing both the
+variance of the resulting data and the number of intersection points.
+Shift the location of the Poincar&eacute;-plane by <font color=orange> -a#
+</font> and flip the direction of intersection by the <font
+color=orange> -C</font> option.<br>
+Example: <font color=red>  poincare amplitude.dat -d8 
+-C1 | histogram -b0
+</font><br>
+When you have optimized the variance, store the output by use of the
+<font color=orange> -o </font> option and plot<br> 
+<font color=green>  plot '&#60; delay -d8 amplitude.dat' w
+li,'amplitude.dat.poin' u 1:(0)</font><br> 
+The latter allows you to control that the surface of section is
+meaningful (in the plot command of the Poincar&eacute;-data, one has to
+replace "0" by the number given in the <font color=orange> -a</font>
+option of <font color=blue>poincare</font>).
+<b>The number of intersections of this data set is 150</b>,
+for both directions of intersection.
+<br>
+<br>
+<li>Using <a href="../docs_c/extrema.html"> extrema </a>, the result is
+independent of any embedding space. Use <font color=orange> -z </font>
+to collect minima instead of maxima and use <font color=orange> -t#
+</font> to suppress spurious extrema due to noise on the data.<br>
+Example: <font color=red>extrema amplitude.dat -z -o
+min.dat</font><br>
+You should find 152 maxima and 151 minima (Notice that there is one
+spurious of each due to noise. It can be identified in the 2-d
+embedding space of these data and by an unusually small time interval in
+between two maxima or minima, respectively. Use the <font
+color=orange> -t#</font> option to remove them.). <br>
+<br><br>
+<li>Study 2-dimensional embeddings of all of the resulting time
+series.<br>
+Plot the resulting data as a return map: Since
+Poincar&eacute; data are map data, time lag 1 is the natural choice.<br>
+<font color=green> plot '&#60; delay max.dat','&#60; delay min.dat','&#60; delay
+amplitude.dat.poin' </font><br> 
+In this particular case, the minima are almost identical to the points
+identified by <font color=blue>poincare</font> with <font
+color=orange> -C0</font>. Reason: 
+Each sinlge revolution on the
+attractor is so close to harmonic, that the optimal lag of 8 is a kind
+of embedding of the signal and its temporal derivative. With <font
+color=orange> -C1 -a-1</font> the resulting <font
+color=blue>poincare</font>-data are almost identical to the
+maxima. For a pure sine, this should be exactly true for the optimal
+time lag. All data sets have about the same variance.
+<br><br>
+
+<li>Embed the sequences of time intervals in between intersections
+(second column of each of the output files).<br>
+<font color=green> plot '&#60; delay -c2 min.dat'</font><br>
+Result: also these form a reasonable attractor, since  these time
+intervals are also valid observables in the spirit of the embedding
+theorem. One can also use the bivariate time series of time interval
+values and intersection points as coordinates.
+<br><br>
+
+<li>Store the most suitable time series (best signal-to-noise ratio)
+for further use in <a href="ex4.html">Exercise 4</a> (our suggestion: max.dat). <br> 
+</ul>
+<br>
+<b> Surrogate data</b> <br>
+Determine the nature of the data set <font
+color=blue>whatisit.dat</font>! Does it represent low-dimensional
+chaos? 
+<ul>
+<li>Find a reasonable time lag <font color=orange> d </font>
+from the auto-correlation function <a
+href="../docs_c/corr.html">corr</a>. <br><br>
+<li>What tells the 2-dimensional delay-embedding plot?<br><br>
+<li>Compute the histogram in the gnuplot window,<br>
+<font color=green> plot '&#60; histogram whatisit.dat' w his</font><br><br>
+<li>Compare the linear and nonlinear predictability using
+ <a href="../docs_c/ll-ar.html">ll-ar</a> :<br>
+<font color=red> ll-ar whatisit.dat -d10 -m3 -i2000 -s1 -o</font><br>
+Can you interprete the result?  <a href="ex3_answer2.html">The answer</a>
+<br><br>
+<li>Create surrogates:<br>
+Create a random shuffling of the data (conserving the distribution but
+not the temporal correlations) using <a
+href="../docs_f/surrogates.html">surrogates</a>
+by<br>
+<font color=red> surrogates whatisit.dat -i0 -o shuffle.dat</font> <br>
+Check: <font color=green> plot '&#60; histogram shuffle.dat' w his,'&#60; histogram whatisit.dat' w his </font><br>
+Check furthermore: The autocorrelation function of these surrogates
+decays instantaneously (<font color=green>  
+plot '&#60; corr shuffle.dat -D500'</font>).<br>
+Create phase
+randomized surrogates (i.e. conserving the linear correlations but
+destroying the distribution) by <br>
+<font color=red> surrogates whatisit.dat -i0 -S -o phaseran.dat</font>. <br>
+(check: <font color=green>  plot '&#60; corr phaseran.dat -D500','&#60; corr
+whatisit.dat -D500'</font>
+and cross-check for the destruction of the distribution)<br>
+Compare the original data and these two surrogates by visual inspection in
+the time domain and in a 2-dimensional delay embedding.<br>
+<b>Result:</b> The data are definitely different from these two types
+of surrogates!<br><br>
+
+<li>Create optimal surrogates by <br>
+<font color=red> surrogates whatisit.dat -o optimal.dat</font>,<br>
+and check again for distribution and auto-correlation function in
+comparison to the original data:<br>
+<font color=green> plot '&#60; corr optimal.dat -D500','&#60; corr whatisit.dat -D500'</font><br>
+<font color=green>plot '&#60; histogram optimal.dat' w his,'&#60; histogram
+whatisit.dat' w his</font>.<br>
+If you do not find the curve for the first histogram, try
+<font color=green>plot '&#60; histogram optimal.dat' w his,'&#60; histogram
+whatisit.dat' u 1:($2+.001) w his</font><br><br>
+Compare the two data sets in the time domain and 
+in a two-dimensional time delay
+embedding.<br><br>
+Compare the two data sets by their predictability. (Notice that for a
+real surrogate data test you always have to create an ensemble of
+data sets, such as for a one-sided test with 5% confidence 19
+surrogates). <br>
+Use again <a href="../docs_c/ll-ar.html">ll-ar</a> to study
+both linear and nonlinear predictability with the same parameters as before:<br>
+<font color=red> ll-ar optimal.dat -d10 -m3 -i2000 -s1 -o</font>,<br>
+and compare the results:<br>
+<font color=green>
+set data style linespoints<br>
+plot 'whatisit.dat.ll', 'whatisit.dat.ll' u 1:3,'optimal.dat.ll',
+'optimal.dat.ll' u 1:3</font><br> 
+<br>
+Result: the results are in rather good agreement
+with each other. <font color=red> Thus the hypothesis that <font
+color=blue> whatisit.dat</font> is the nonlinear transformation of a
+linear stochastic process cannot be rejected.</font><br>
+<br>
+In fact, the data are nonlinearly transformed AR-data.
+The transformation reads <font color=blue>y=atan(x/80.)</font>.
+<br><br><br><br><br>
+
+
+ 
+</body>
+</html>
+
+
+
+
+
+

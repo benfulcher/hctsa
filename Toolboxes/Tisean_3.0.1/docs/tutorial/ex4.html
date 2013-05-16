@@ -1,0 +1,232 @@
+<html>
+<body bgcolor=white>
+<head><center><table><tr><td align=center><b>Rainer Hegger</b></td>
+     <td width=20></td>
+     <td align=center><b>Holger Kantz</b></td>
+     <td width=20></td>
+     <td align=center><b>Thomas Schreiber</b></td></tr>
+</table>
+<title>Exercise 4 using TISEAN Nonlinear Time Series
+Routines</title></head> 
+
+<h1>Exercises using TISEAN<br>
+<font color=blue>Part IV: Dimensions, Lyapunov exponents and 
+entropies</font></h1>
+
+</center>
+
+<hr>
+Use again the data set 
+<a href="amplitude.dat"><b>amplitude.dat</b></a>.<br> 
+<br>
+<ul>
+<li> Recall reasonable embedding parameters from the results of the
+last exercises and their Theiler-windows.<br><br>
+
+<li>Compute the correlation sums of the sets using 
+<a href="../docs_c/d2.html"> d2 </a>.<br>
+<font color=red> d2 amplitude.dat -d8 -t100 -o</font><br>
+Study carefully the output files <font color=blue>amplitude.dat.c2</font> and
+<font color=blue>amplitude.dat.d2</font>.<br> <br> 
+Can you give reasonable dimension estimates?<br>
+The best result will be obtained by fitting by eye a power law to the
+<font color=blue>amplitude.dat.c2</font>-curves:<br>
+<font color=green>
+set logscale<br>
+plot 'amplitude.dat.c2',.001*x**2.1<br>
+</font>
+Errors of the 
+<font color=blue>ampitude.dat.d2</font>-curves are
+anti-correlated! Use <a href="../docs_c/av-d2.html">av-d2</a> with
+the option <font color=orange> -a#</font> to smoothen them. Observe the
+edge effects and folding effects 
+in the m=1-curve, on larger scales also the m&#62;1-curves
+cannot show the right dimension. Anyway, although the data represent a
+chaotic flow where theory tells us that the dimension must be larger
+than 2, a value of D<sub>2</sub>&#62;2 can hardly be
+derived from these curves!<br>
+Give an estimate of the noise level.<br><br>
+
+<li>Entropies: plot the file <font color=blue>amplitude.dat.h2</font> to
+estimate the entropies (on a log-linear scale). Write dimension and entropy estimates and the
+noise level into a table (on paper). Do not forget to divide the
+h<sub>2</sub>-estimate by the time lag.<br><br>
+
+<li>Redo the computation with a smaller and a larger time lag, e.g., <font
+color=orange> -d1</font> and <font color=orange> -d24</font>. You should
+be able to confirm the values found above, but the scaling ranges
+either shrink or larger <font color=blue>m</font>-values are needed
+for convergence. For smaller lag you find more edge effects, for
+larger lags more folding effects. Entropy estimates might somehow
+profit from larger lags.<br><br> 
+
+<li> Maximal Lyapunov exponent: Use <a href="../docs_c/lyap_k.html">
+lyap_k </a> and/or <a href="../docs_c/lyap_r.html">lyap_r
+</a>, e.g.,.<br>
+<font color=red>lyap_k amplitude.dat -M6 -m3 -d8 -t100 -s500 -r.1
+-o</font><br> 
+If necessary, 
+use the option <font color=orange> -n1000</font> to keep the numerical effort
+limited. Try to understand on which time interval you expect the
+exponential increase. Admittedly, flow data are not really suited for
+such kinds of algorithms.
+<br><br>
+
+<li> Compute the Lyapunov exponent for
+the  Poincar&eacute;-map data of this flow which you produced in the
+last exercise, e.g. with the following parameters:<br>
+<font color=red> lyap_k max.dat -M5 -m2 -s25 -o</font><br>
+Recall that for map data, the optimal settings are <font
+color=orange>-d1 -t0</font> which are the defaults, and that there is
+no use to consider time horizons which are larger than the data set
+(hence, <font color=orange> -s25</font>).<br>
+The estimated exponent (slope of the straight line) 
+carries the units of 1/time and thus has to be
+divided by the average time in between two intersections of the flow
+with the Poincar&eacute; surface of section in order to be compared to the
+value obtained from the flow data. This time is computed by 
+(length of the flow data set)/(#number of intersections).
+<br><br>
+
+<li> Use the Poincar&eacute;-map data <font color=blue> max.dat</font> or 
+<font color=blue>amplitude.dat.poin</font> generated
+with  <font color=orange> -C1</font> as a data base for <a
+href="../docs_c/nstep.html">nstep</a> to create a much longer
+synthetic trajectory of length 5000:<br>
+<font color=red> nstep -k10 -L5000 max.dat -o</font><br>
+Since the data of <font color=blue> max.dat</font> form an almost
+1-dimensional graph of a map, <font color=orange> -m1,2</font>, i.e.,
+the default values, are fine. Due to the low number of data points,
+<font color=orange> -k10</font> is a reasonable number of neighbours;
+to require more would extend the neighbourhoods to outside the linear
+regime. Verify the validity of the forecasts by a
+comparison of the attractors in the
+delay embedding space. Evidently, there is some fake additional
+structure whose existence cannot be supported by the original
+data. Other choices of parameters/Poincar&eacute; data of the flow might
+yield better agreements. In any case, the data base (152 points) 
+is rather poor.<br><br>
+
+<li> Compute the correlation dimension for these numerical data.<br>
+Result: The file <font color=blue>max.dat.cast.c2</font> supports a
+dimension of D=1.2, but under consideration of what we said before
+about the fine structure, this number cannot be trusted. When
+comparing the curves to  <font color=blue>max.dat.c2</font>, the
+dimension estimates on  <font color=blue>max.dat</font> itself, there
+is some compatibility, but in this case everything is speculation. 
+<br>
+<font color=red><b>This illustrates our standard warning: One can apply the routines
+to and exctract numbers from many data sets, but whether the results
+are meaningful or not remains in the interpretation of the applicant!</b></font>
+<br><br>
+
+
+<li> Compute the maximal Lyapunov exponent for the synthetic Poicare-map data. 
+Are the results compatible with what you found for <font
+color=blue>max.dat</font> ?<br><br>
+
+<li> Can you expect more than one positive exponent in the map data?<br>
+Use <a href="../docs_c/lyap_spec.html">lyap_spec</a> to compute the
+full Lyapunov spectrum of the synthetic data. <br>
+The resulting set of exponents contains spurious ones. For their
+identification, run the algorithm with modified neighbourhood size,
+larger embedding dimension, or a different time lag. How many positive
+exponents do you find?<br>
+Our result is 0.53 for the positive and -1. for the negative
+exponent. In a 2-dimensional embedding, there are no spurious exponents!
+Enter the maximal exponent in your table, the sum of all positive as
+the estimate of the KS-entropy, and compute the Kaplan-Yorke-dimension
+from the non-spurious exponents.<br><br>
+
+<li>How good is the mutual agreement of the different methods?<br>
+
+This is our result:<br>
+
+<table><tr><td align=center><font color=darkgreen><b>data type</b></font></td>
+     <td width=20></td>
+     <td align=center><font color=darkgreen><b>dimension</b></font></td>
+     <td width=20></td>
+     <td align=center><font color=darkgreen><b>max. Lyapunov</b></font></td>
+     <td width=20></td>
+     <td align=center><font color=darkgreen><b>entropy</b></font></td>
+     <td width=20></td>
+     <td align=center><font color=darkgreen><b>noise level</b></font></td>
+</tr>
+<tr> <td align=center>flow data</td>
+     <td width=20></td>
+     <td align=center>D<sub>2</sub>=2.1&#177;0.05</td>
+     <td width=20></td>
+     <td align=center>lyap_k=0.015&#177;0.002</td>
+     <td width=20></td>
+     <td align=center>h<sub>2</sub>=0.02&#177;0.005</td>
+     <td width=20></td>
+     <td align=center> 0.5 units </td>
+</tr>
+<tr> <td align=center>map data max.dat</td>
+     <td width=20></td>
+     <td align=center>D<sub>2</sub>=1 + 1.2&#177;0.2</td>
+     <td width=20></td>
+     <td align=center>lyap_k=0.015</td>
+     <td width=20></td>
+     <td align=center>h<sub>2</sub>=0.45/32.9=0.0135</td>
+     <td width=20></td>
+     <td align=center>0.5 units </td>
+</tr>
+<tr> <td align=center>synthetic data max.dat.cast</td>
+     <td></td>
+     <td align=center>D<sub>2</sub>=1+ 1.2&#177;.1</td>
+     <td width=20></td>
+     <td align=center>lyap_k: 0.5/32.9 </td>
+     <td width=20></td>
+     <td align=center>h<sub>2</sub>=0.4/32.9 </td>
+     <td width=20></td>
+     <td align=center></td>
+</tr>
+<tr> <td align=center>synthetic data max.dat.cast</td>
+     <td></td>
+     <td align=center>D<sub>KY</sub>=1+1.5</td>
+     <td width=20></td>
+     <td align=center> lyap_spec: 0.53/32.9= 0.016 </td>
+     <td width=20></td>
+     <td align=center> </td>
+     <td width=20></td>
+     <td align=center></td>
+</tr>
+</table></font>
+<br>
+<br>
+<font color=red><b>Comments</b></font><br>
+The <b>flow data</b> are numerically generated data with additive
+noise, and in so far optimal (no drifts, no interactive noise, no
+artifacts). However, they represent only about 150 revolutioins of the
+trajectory on its attractor, and thus are rather few data. <br>The
+numerically exact Lyapunov exponent (obtained during the integration
+of the  system) is 0.0173, not so far from the time series value. <br>
+The entropy should be bounded by this exponent, but the times series
+value is also close enough. In fact, the convergence of the entropy
+estimates as a function of the embedding dimension is from above,
+i.e., higher embeddings might yield better estimates.
+However, this fact yields a mismatch of the
+entropy estimate and the maximal Lypunov exponent obtained from the
+time series data.<br>
+The dimension estimate is reasonable.<br><br>
+The <b>Poincar&eacute; map data</b> are very few, but since the Poincar&eacute; map
+is essentially one-dimensional, they contain still meaningful
+information. Nonetheless, the agreement between the results on the map
+data and the flow data is not excellent.<br><br>
+The invariant characteristics of the <b> synthetic map data</b> are in
+agreement with the Poincar&eacute; map data, but as we have seen, the
+attractor contains structure which cannot be supported by the
+observations. <br>
+The computation of the Lyapunov spectrum yields an overestimation of
+the dimension by the Kaplan-Yorke formula, and it can be suspected
+that the negative Lyapunov exponent is underestimated. 
+<br><br><br><br><br>
+</body>
+</html>
+
+
+
+
+
+

@@ -1,0 +1,387 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>6.23.3 Member functions</TITLE>
+<META NAME="description" CONTENT="6.23.3 Member functions">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="node71.html">
+<LINK REL="up" HREF="node69.html">
+<LINK REL="next" HREF="node73.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html1624"
+  HREF="node73.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1620"
+  HREF="node69.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1616"
+  HREF="node71.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1622"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1625"
+  HREF="node73.html">6.24 Class unit</A>
+<B> Up:</B> <A NAME="tex2html1621"
+  HREF="node69.html">6.23 Class achse</A>
+<B> Previous:</B> <A NAME="tex2html1617"
+  HREF="node71.html">6.23.2 Attributes</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html1626"
+  HREF="node72.html#SECTION007233100000000000000">6.23.3.1 achse</A>
+<LI><A NAME="tex2html1627"
+  HREF="node72.html#SECTION007233200000000000000">6.23.3.2 cut</A>
+<LI><A NAME="tex2html1628"
+  HREF="node72.html#SECTION007233300000000000000">6.23.3.3 delta</A>
+<LI><A NAME="tex2html1629"
+  HREF="node72.html#SECTION007233400000000000000">6.23.3.4 display</A>
+<LI><A NAME="tex2html1630"
+  HREF="node72.html#SECTION007233500000000000000">6.23.3.5 eq</A>
+<LI><A NAME="tex2html1631"
+  HREF="node72.html#SECTION007233600000000000000">6.23.3.6 first</A>
+<LI><A NAME="tex2html1632"
+  HREF="node72.html#SECTION007233700000000000000">6.23.3.7 horzcat</A>
+<LI><A NAME="tex2html1633"
+  HREF="node72.html#SECTION007233800000000000000">6.23.3.8 label</A>
+<LI><A NAME="tex2html1634"
+  HREF="node72.html#SECTION007233900000000000000">6.23.3.9 name</A>
+<LI><A NAME="tex2html1635"
+  HREF="node72.html#SECTION0072331000000000000000">6.23.3.10 quantity</A>
+<LI><A NAME="tex2html1636"
+  HREF="node72.html#SECTION0072331100000000000000">6.23.3.11 resolution</A>
+<LI><A NAME="tex2html1637"
+  HREF="node72.html#SECTION0072331200000000000000">6.23.3.12 samplerate</A>
+<LI><A NAME="tex2html1638"
+  HREF="node72.html#SECTION0072331300000000000000">6.23.3.13 scale</A>
+<LI><A NAME="tex2html1639"
+  HREF="node72.html#SECTION0072331400000000000000">6.23.3.14 setdelta</A>
+<LI><A NAME="tex2html1640"
+  HREF="node72.html#SECTION0072331500000000000000">6.23.3.15 setfirst</A>
+<LI><A NAME="tex2html1641"
+  HREF="node72.html#SECTION0072331600000000000000">6.23.3.16 setname</A>
+<LI><A NAME="tex2html1642"
+  HREF="node72.html#SECTION0072331700000000000000">6.23.3.17 setunit</A>
+<LI><A NAME="tex2html1643"
+  HREF="node72.html#SECTION0072331800000000000000">6.23.3.18 setvalues</A>
+<LI><A NAME="tex2html1644"
+  HREF="node72.html#SECTION0072331900000000000000">6.23.3.19 spacing</A>
+<LI><A NAME="tex2html1645"
+  HREF="node72.html#SECTION0072332000000000000000">6.23.3.20 unit</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H2><A NAME="SECTION007233000000000000000">
+6.23.3 Member functions</A>
+</H2>
+
+<P>
+<A NAME="f172:FUNCTIONS"></A>
+
+<H3><A NAME="SECTION007233100000000000000"></A>
+<A NAME="f173"></A>
+<BR>
+6.23.3.1 achse
+</H3>
+ achse class constructor
+
+<P>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>a = achse</TT>
+
+<P>
+creates default achse object
+</LI>
+<LI><TT>a = achse(axs)</TT>
+
+<P>
+copies achse object <TT>axs</TT> into <TT>a</TT>
+</LI>
+<LI><TT>a = achse(unt)</TT>
+
+<P>
+creates achse object using unit <TT>unt</TT>, with linear spacing, first = 0, delta = 1
+</LI>
+<LI><TT>a = achse(vec)</TT>
+
+<P>
+creates achse object with arbitrary spacing, using values in vec as spacing
+data
+</LI>
+<LI><TT>a = achse(unt, vec)</TT>
+
+<P>
+creates achse object using unit unt with arbitrary spacing,
+using values in <TT>vec</TT> as spacing data
+</LI>
+<LI><TT>a = achse(unt, first, delta)</TT>
+
+<P>
+creates achse object with linear spacing, using delta and first
+</LI>
+<LI><TT>a = achse(unt, first, delta, 'log')</TT>
+
+<P>
+creates achse object with logarithmic spacing, using <TT>delta</TT> and
+<TT>first</TT>
+</LI>
+</UL>
+
+<P>
+achse used to describe the different dimensions (axes) of a signal object.
+
+<P>
+<B>Example:</B>
+
+<UL>
+<LI><TT>a = achse(unit('Hz'), 0.01, 10, 'log')</TT>
+
+<P>
+creates a logarithmic frequency axis with values 0.01 Hz, 0.1 Hz, 1 Hz, 10 Hz
+</LI>
+<LI><TT>a = achse(label, samplerate)</TT>
+
+<P>
+has the same result as
+
+<P>
+<TT>a = achse(unit(label), 0, 1/samplerate)</TT>
+</LI>
+</UL>
+see also: delta first horzcat label name quantity resolution samplerate scale setname spacing unit
+
+<H3><A NAME="SECTION007233200000000000000"></A>
+<A NAME="f174"></A>
+<BR>
+6.23.3.2 cut
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>a = cut(a, start, stop)</TT>
+</LI>
+</UL>
+Cut a part out of achse <TT>a</TT>, beginning from index <TT>start</TT> up to 
+index <TT>stop</TT>. <TT>stop</TT> is only needed in case of arbitrary spacing.
+<TT>cut</TT> ensures the following:
+<PRE> 
+If values = spacing(achse1, N) and N &gt; n then
+      values(n:N) == spacing(cut(achse1, n), N+1-n)
+</PRE>
+See also: <TT>horzcat</TT>
+
+<H3><A NAME="SECTION007233300000000000000"></A>
+<A NAME="f175"></A>
+<BR>
+6.23.3.3 delta
+</H3>
+
+<H3><A NAME="SECTION007233400000000000000"></A>
+<A NAME="f176"></A>
+<BR>
+6.23.3.4 display
+</H3>
+
+<H3><A NAME="SECTION007233500000000000000"></A>
+<A NAME="f177"></A>
+<BR>
+6.23.3.5 eq
+</H3>
+Test if achse <TT>a</TT> and achse <TT>b</TT> are equal.<TT>first</TT> is not (!) taken into account for this test.
+
+<H3><A NAME="SECTION007233600000000000000"></A>
+<A NAME="f178"></A>
+<BR>
+6.23.3.6 first
+</H3>
+
+<H3><A NAME="SECTION007233700000000000000"></A>
+<A NAME="f179"></A>
+<BR>
+6.23.3.7 horzcat
+</H3>
+
+<H3><A NAME="SECTION007233800000000000000"></A>
+<A NAME="f180"></A>
+<BR>
+6.23.3.8 label
+</H3>
+
+<H3><A NAME="SECTION007233900000000000000"></A>
+<A NAME="f181"></A>
+<BR>
+6.23.3.9 name
+</H3>
+
+<H3><A NAME="SECTION0072331000000000000000"></A>
+<A NAME="f182"></A>
+<BR>
+6.23.3.10 quantity
+</H3>
+
+<H3><A NAME="SECTION0072331100000000000000"></A>
+<A NAME="f183"></A>
+<BR>
+6.23.3.11 resolution
+</H3>
+
+<H3><A NAME="SECTION0072331200000000000000"></A>
+<A NAME="f184"></A>
+<BR>
+6.23.3.12 samplerate
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>rate = samplerate(a)</TT>
+</LI>
+</UL>
+<TT>samplerate</TT> returns samplerate of achse object.
+
+<H3><A NAME="SECTION0072331300000000000000"></A>
+<A NAME="f185"></A>
+<BR>
+6.23.3.13 scale
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>r = scale(a,f)</TT>
+</LI>
+</UL>
+Scale achses <TT>delta</TT> by factor <TT>f</TT>.
+
+<H3><A NAME="SECTION0072331400000000000000"></A>
+<A NAME="f186"></A>
+<BR>
+6.23.3.14 setdelta
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>a = setdelta(a,f)</TT>
+</LI>
+</UL>
+<H3><A NAME="SECTION0072331500000000000000"></A>
+<A NAME="f187"></A>
+<BR>
+6.23.3.15 setfirst
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>a = setfirst(a,f)</TT>
+</LI>
+</UL>
+<H3><A NAME="SECTION0072331600000000000000"></A>
+<A NAME="f188"></A>
+<BR>
+6.23.3.16 setname
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>a = setname(a, newname)</TT>
+</LI>
+</UL>
+<H3><A NAME="SECTION0072331700000000000000"></A>
+<A NAME="f189"></A>
+<BR>
+6.23.3.17 setunit
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>a = setunit(a,u)</TT>
+</LI>
+</UL>
+<H3><A NAME="SECTION0072331800000000000000"></A>
+<A NAME="f190"></A>
+<BR>
+6.23.3.18 setvalues
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>a = setvalues(a, v)</TT>
+</LI>
+</UL>
+<H3><A NAME="SECTION0072331900000000000000"></A>
+<A NAME="f191"></A>
+<BR>
+6.23.3.19 spacing
+</H3>
+<B>Syntax:</B>
+
+<UL>
+<LI><TT>v = values(a, len)</TT>
+</LI>
+</UL>
+Returns spacing values for linear, logarithmic or arbitary spacing in case of lin. or log. spacing. <TT>len</TT> values are returned. In case of arbitary spacing, all stored values are returned.
+
+<H3><A NAME="SECTION0072332000000000000000"></A>
+<A NAME="f192"></A>
+<BR>
+6.23.3.20 unit
+</H3>
+
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html1624"
+  HREF="node73.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html1620"
+  HREF="node69.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html1616"
+  HREF="node71.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html1622"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html1625"
+  HREF="node73.html">6.24 Class unit</A>
+<B> Up:</B> <A NAME="tex2html1621"
+  HREF="node69.html">6.23 Class achse</A>
+<B> Previous:</B> <A NAME="tex2html1617"
+  HREF="node71.html">6.23.2 Attributes</A>
+ &nbsp; <B>  <A NAME="tex2html1623"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Principal components</TITLE>
+<META NAME="description" CONTENT="Principal components">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html172" HREF="node11.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html170" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html164" HREF="node9.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html173" HREF="node11.html">Poincar&#233; sections</A>
+<B>Up:</B> <A NAME="tex2html171" HREF="node5.html">Phase space representation</A>
+<B> Previous:</B> <A NAME="tex2html165" HREF="node9.html">False nearest neighbors</A>
+<BR> <P>
+<H2><A NAME="SECTION00033000000000000000">Principal components</A></H2>
+<A NAME="secsvd">&#160;</A>
+It has been shown in Ref.&nbsp;[<A HREF="citation.html#embed">22</A>] that the embedding technique can be
+generalized to a wide class of smooth transformations applied to a time delay
+embedding. In particular, if we introduce time delay coordinates <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6675" SRC="img35.gif">,
+then almost every linear transformation of sufficient rank again leads to an
+embedding. A specific choice of linear transformation is known as <EM>
+principal component analysis, singular value decomposition, empirical
+orthogonal functions, Karhunen-Lo&#233;ve decomposition</EM>, and probably a few other
+names. The technique is fairly widely used, for example to reduce multivariate
+data to a few major modes. There is a large literature, including textbooks
+like that by Jolliffe&nbsp;[<A HREF="citation.html#PC">31</A>]. In the context of nonlinear signal processing,
+the technique has been advocated among others by Broomhead and King&nbsp;[<A HREF="citation.html#svd">32</A>].
+<P>
+The idea is to introduce a new set of orthonormal basis vectors in embedding
+space such that projections onto a given number of these directions preserve
+the maximal fraction of the variance of the original vectors. In other words,
+the error in making the projection is minimized for a given number of
+directions. Solving this minimization problem&nbsp;[<A HREF="citation.html#PC">31</A>] leads to an eigenvalue
+problem. The desired <EM>principal directions</EM> can be obtained as the
+eigenvectors of the symmetric autocovariance matrix that correspond to the
+largest eigenvalues. The alternative and formally equivalent approach via the
+trajectory matrix is used in Ref.&nbsp;[<A HREF="citation.html#svd">32</A>]. The latter is numerically more
+stable but involves the singular value decomposition of an <IMG WIDTH=47 HEIGHT=20 ALIGN=MIDDLE ALT="tex2html_wrap_inline6677" SRC="img36.gif"> matrix
+for <I>N</I> data points embedded in <I>m</I> dimensions, which can easily exceed
+computational resources for time series of even moderate length&nbsp;[<A HREF="citation.html#numrec">33</A>].
+<P>
+In almost all the algorithms described below, simple time delay embeddings can
+be substituted by principal components. In the TISEAN project (routines
+<a href="../docs_c/pca.html">pca</a>, <a href="../docs_f/pc.html">pc</a>), principal components are only provided as a stand-alone
+visualization tool and for linear filtering&nbsp;[<A HREF="citation.html#Vautard">34</A>], see
+Sec.&nbsp;<A HREF="node12.html#secsvdfilter"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> below.  In any case, one first has to choose an
+initial time delay embedding and then a number of principal components to be
+kept. For the purpose of visualization, the latter is immediately restricted
+to two or at most three.  In order to take advantage of the noise averaging
+effect of the principal component scheme, it is advisable to choose a much
+shorter delay than one would for an ordinary time delay embedding, while at
+the same time increasing the embedding dimension.  Experimentation is
+recommended.  Figure&nbsp;<A HREF="node10.html#figmcg_pc"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> shows the contributions of the first two
+principal components to the magneto-cardiogram shown in Fig.&nbsp;<A HREF="node6.html#figmcgd"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>.
+<P>
+<P><blockquote><A NAME="4545">&#160;</A><IMG WIDTH=225 HEIGHT=233 ALIGN=BOTTOM ALT="figure417" SRC="img34.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figmcg_pc">&#160;</A>
+   Phase space representation of a human magneto-cardiogram using the two
+   largest principal components. An initial embedding was chosen in <I>m</I>=20
+   dimensions with a delay of <IMG WIDTH=38 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline6649" SRC="img33.gif">&nbsp;ms. The two components cover 70% of the
+   variance of the initial embedding vectors.<BR>
+</blockquote><P>
+<HR><A NAME="tex2html172" HREF="node11.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html170" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html164" HREF="node9.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html173" HREF="node11.html">Poincar&#233; sections</A>
+<B>Up:</B> <A NAME="tex2html171" HREF="node5.html">Phase space representation</A>
+<B> Previous:</B> <A NAME="tex2html165" HREF="node9.html">False nearest neighbors</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

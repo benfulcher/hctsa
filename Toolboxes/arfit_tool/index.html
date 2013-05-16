@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content=
+    "text/html; charset=iso-8859-1">
+    <meta name="KEYWORDS" lang="en-us" content=
+    "arfit, principal oscillation pattern, autoregressive model, stepwise
+    least squares, order selection, spectral decomposition,
+    eigendecomposition">
+    <meta name="DESCRIPTION" content="ARfit">
+
+    <title>ARfit: Fitting Multivariate Autoregressive Models</title>
+ 
+    <style>
+
+      body{
+        background-color: #FFFFFF;	
+        color: #333333;
+      }
+  
+      p.ref{  /* for bibliography */
+        margin-left: 4em;
+        text-indent: -2.5em
+      } 
+
+      code{
+        font-family: monospace;
+      }
+
+      p.code{
+        margin-left: 2.5em;
+	text-align: left;
+	font-family: monospace;
+      }
+
+      div.cent{
+        text-align: center
+      }
+
+      h1{
+        text-align: center; 
+      }
+     
+      h2{	
+        text-align: left;
+        margin-top: 2.5ex
+      }
+
+      a:link    {color: #006699; text-decoration: none}
+      a:active  {color: #999933; text-decoration: none}
+      a:visited {color: #006699; text-decoration: none}
+
+    </style>
+  </head>
+
+  <body>
+  <table border="0" cellspacing="0" cellpadding="0" width=550 align="center">
+  <tr><td>
+    <h1 class="cent">ARfit: A Matlab package for the estimation of parameters and
+    eigenmodes of multivariate autoregressive models</h1>
+
+    <div class="cent"><font size="-1"> 
+    [<a href=
+    "http://www.mat.univie.ac.at/~neum/software/arfit/">European&nbsp;Mirror&nbsp;Site</a>]
+    &nbsp;&nbsp; 
+    [<a href="#purpose">Purpose</a>] &nbsp;&nbsp; 
+    [<a href="#installation">Installation</a>] &nbsp;&nbsp; 
+    [<a href="#files">Module&nbsp;descriptions</a>] &nbsp;&nbsp; 
+    [<a href="#copyright">Copyright</a>] &nbsp;&nbsp; 
+    [<a href="#authors">Authors</a>] 
+    </font></div>
+
+    <h2><font size="+1"><a name="purpose">Purpose</a></font></h2>
+
+    <p>ARfit is a collection of <a href="http://www.mathworks.com/">
+    Matlab</a> modules for</p>
+    <ul>
+      <li>estimating parameters of multivariate autoregressive (AR)
+      models,</li>
+
+      <li>diagnostic checking of fitted AR models, and</li>
+
+      <li>analyzing eigenmodes of fitted AR models.</li>
+    </ul>
+
+    <p>The algorithms implemented in ARfit are described in the following
+    papers, which should be referenced if you use ARfit in
+    publications:</p> 
+
+    <p class="ref">A. Neumaier and T. Schneider, 2001: <a href=
+    "http://www.acm.org/pubs/citations/journals/toms/2001-27-1/p27-neumaier/">Estimation
+    of parameters and eigenmodes of multivariate autoregressive 
+    models</a>. <em>ACM Trans. Math. Softw.</em>, <strong>27</strong>,
+    27&#150;57.</p>
+
+    <p class="ref">T. Schneider and A. Neumaier, 2001: <a href=
+    "http://www.acm.org/pubs/citations/journals/toms/2001-27-1/p58-schneider/">Algorithm 
+    808: ARfit - A Matlab package for the estimation of parameters and
+    eigenmodes of multivariate autoregressive models</a>. <em>ACM
+    Trans. Math.  Softw.</em>, <strong>27</strong>, 58&#150;65.</p>
+
+    <p>ARfit has been successfully tested under Matlab 3 and later
+    versions, up to Matlab 7.2.</p>
+
+    <p>Last ARfit revision:&nbsp;14 July 2006</p>
+
+    <h2><font size="+1"><a name="installation">Installation</a></font></h2>
+
+    <p>The ARfit package consists of a number of Matlab modules, the
+    file <a href="CHANGES">CHANGES</a> with a history of recent
+    revisions of the programs, and the above papers.</p>
+
+    <p>To install ARfit, copy the package (available as a <a href= 
+    "arfit.zip">zip-archive</a>) into a directory that is accessible by
+    Matlab. Unpack the package using</p> 
+    <p class="code">  
+         unzip arfit.zip 
+    </p> 
+    <p>on Unix/Linux platforms or an equivalent command on other
+    platforms.</p> 
+
+    <p>Starting Matlab and invoking Matlab's online help function</p> 
+    <p class="code">   
+         help <i>filename</i>
+    </p>
+    <p>calls up detailed information on the purpose and the calling
+    syntax of the module <code><i>filename</i>.m</code>. The script
+    ardem.m demonstrates the basic features of the modules contained
+    in ARfit.</p>
+
+    <p>If you experience problems downloading ARfit in the packaged
+    form, you may want to download the ARfit files individually.</p>
+
+    <h2><font size="+1"><a name="files">Module descriptions</a></font></h2>
+
+    <dl>
+      <dt><a href="CHANGES">CHANGES</a></dt>
+      <dd>A history of recent changes to ARfit.</dd>
+
+      <dt><a href="acf.m">acf.m</a></dt>
+      <dd>Plots the sample autocorrelation function of a univariate time
+      series (using XCORR from the Matlab Signal Processing Toolbox).</dd>
+
+      <dt><a href="adjph.m">adjph.m</a>&nbsp;&nbsp;&nbsp;(auxiliary
+      routine)</dt> 
+      <dd>Multiplies a complex vector by a phase factor such that the
+      real part and the imaginary part of the vector are orthogonal
+      and the norm of the real part is greater than or equal to the
+      norm of the imaginary part. ADJPH is required by ARMODE to
+      normalize the eigenmodes of an AR model.</dd>
+
+      <dt><a href="arconf.m">arconf.m</a></dt>
+      <dd>Computes approximate confidence intervals for the AR model 
+      coefficients.</dd>
+
+      <dt><a href="ardem.m">ardem.m</a></dt>
+      <dd>Demonstrates the use of modules contained in the ARfit package.</dd>
+
+      <dt><a href="arfit.m">arfit.m</a></dt> 
+      <dd>Stepwise selection of the order of an AR model and least
+      squares estimation of AR model parameters.</dd>
+
+      <dt><a href="../papers/arfit.pdf">arfit.pdf</a></dt>
+      <dd>Published description of the algorithms.</dd>
+
+      <dt><a href="../papers/arfit_alg.pdf">arfit_alg.pdf</a></dt>
+      <dd>Published note on using ARfit.</dd>
+
+      <dt><a href="armode.m">armode.m</a></dt> 
+      <dd>Eigendecomposition of AR model. For a fitted AR model,
+      ARMODE computes eigenmodes and their associated oscillation
+      periods and damping times, as well as approximate confidence
+      intervals for the eigenmodes, periods, and damping times.</dd>
+
+      <dt><a href="arord.m">arord.m</a>&nbsp;&nbsp;&nbsp;(auxiliary
+      routine)</dt>
+      <dd>Computes approximate order selection criteria for a sequence
+      of AR models. ARORD is required by ARFIT.</dd>
+
+      <dt><a href="arqr.m">arqr.m</a>&nbsp;&nbsp;&nbsp;(auxiliary
+      routine)</dt> 
+      <dd><i>QR</i> factorization for least squares estimation of AR
+      model parameters. ARQR is required by ARFIT.</dd>
+
+      <dt><a href="arres.m">arres.m</a></dt>
+      <dd>Diagnostic checking of the residuals of a fitted
+      model. Computes the time series of residuals. The modified
+      multivariate portmanteau statistic of Li &amp; McLeod (1981) is
+      used to test the residuals for uncorrelatedness.</dd>
+
+      <dt><a href="arsim.m">arsim.m</a></dt>
+      <dd>Simulation of AR processes.</dd>
+
+      <dt><a href="tquant.m">tquant.m</a>&nbsp;&nbsp;&nbsp;(auxiliary
+      routine)</dt> 
+      <dd>Quantiles of Student's t distribution. (TQUANT is required by
+      ARCONF and ARMODE in the construction of confidence intervals.)</dd>
+    </dl>
+
+    <h2><font size="+1"><a name="copyright">Copyright</a></font></h2>
+
+    <p><a href="http://www.acm.org/pubs/copyrights.html">&#169; Copyright
+    2001</a> by the <a href="http://www.acm.org/">Association for Computing
+    Machinery, Inc.</a> This copy is posted by permission of ACM and
+    may not be redistributed.
+    
+    <h2><font size="+1"><a name="authors">Authors</a></font></h2>
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td><a href="http://www.gps.caltech.edu/~tapio/">Tapio
+        Schneider</a><br>
+         California Institute of Technology<br>
+         Mail Code 100-23<br>
+         1200 E. California Blvd.<br>
+         Pasadena, CA 91125<br>
+         </td>
+
+        <td><a href="http://www.mat.univie.ac.at/~neum">Arnold
+        Neumaier</a><br>
+         Institut f&uuml;r Mathematik<br>
+         Universit&auml;t Wien<br>
+         A-1090 Wien<br>
+	 Austria<br>
+         </td>
+      </tr>
+    </table>
+    </td></tr>
+  </table>
+  </body>
+</html>
+

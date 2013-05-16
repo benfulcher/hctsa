@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Model validation</TITLE>
+<META NAME="description" CONTENT="Model validation">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html245" HREF="node18.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html243" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html237" HREF="node16.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html246" HREF="node18.html">Simple nonlinear prediction</A>
+<B>Up:</B> <A NAME="tex2html244" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html238" HREF="node16.html">Nonlinear prediction</A>
+<BR> <P>
+<H2><A NAME="SECTION00051000000000000000">Model validation</A></H2>
+<P>
+Before entering the methods, we have to discuss how to assess the results. The
+most obvious quantity for the quantification of predictability is the average
+forecast error, i.e. the root of the mean squared (rms) deviation of the
+individual prediction from the actual future value. If it is computed on those
+values which were also used to construct the model (or to perform the
+predictions), it is called the <I>in-sample error</I>. It is always advisable
+to save some data for an out-of-sample test. If the out-of-sample error is
+considerably larger than the in-sample error, data are either non-stationary
+or one has overfitted the data, i.e. the fit extracted structure from random
+fluctuations. A model with less parameters will then serve better.  In cases
+where the data base is poor, on can apply <I>complete cross-validation</I> or
+<I>take-one-out statistics</I>, i.e. one constructs as many models as one
+performs forecasts, and in each case ignores the point one wants to predict.
+By construction, this method is realized in the local approaches, but not in
+the global ones.
+<P>
+The most significant, but least quantitative way of model validation is to
+iterate the model and to compare this synthetic time series to the
+experimental data. If they are compatible (e.g. in a delay plot), then the
+model is likely to be reasonable. Quantitatively, it is not easy to define the
+compatibility. One starts form an observed delay vector as intial condition,
+performs the first forecast, combines the forecast with all but the last
+components of the initial vector to a new delay vector, performs the next
+forecast, and so on. The resulting time series should then be compared to the
+measured data, most easily the attractor in a delay representation.
+<P><HR><A NAME="tex2html245" HREF="node18.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html243" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html237" HREF="node16.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html246" HREF="node18.html">Simple nonlinear prediction</A>
+<B>Up:</B> <A NAME="tex2html244" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html238" HREF="node16.html">Nonlinear prediction</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

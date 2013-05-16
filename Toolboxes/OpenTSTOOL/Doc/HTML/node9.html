@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>2.3 Compiling mex files</TITLE>
+<META NAME="description" CONTENT="2.3 Compiling mex files">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node11.html">
+<LINK REL="previous" HREF="node8.html">
+<LINK REL="up" HREF="node3.html">
+<LINK REL="next" HREF="node10.html">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF" text="#000000">
+<!--Navigation Panel--><font face="arial, helvetica">
+<TABLE WIDTH=100%><TR><TD ALIGN=LEFT><font face="arial, helvetica">  <A HREF=http://www.physik3.gwdg.de/tstool/index.html>TSTOOL home page</A>  | TSTOOL documentation page | <A HREF=http://www.physik3.gwdg.de/tstool/link.html>TSTOOL link page</A> <BR></TABLE><HR>
+<A NAME="tex2html312"
+  HREF="node10.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html308"
+  HREF="node3.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html302"
+  HREF="node8.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html310"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html313"
+  HREF="node10.html">2.3.1 Problems with compiling</A>
+<B> Up:</B> <A NAME="tex2html309"
+  HREF="node3.html">2. Download and Installation</A>
+<B> Previous:</B> <A NAME="tex2html303"
+  HREF="node8.html">2.2 First Steps</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00330000000000000000">
+2.3 Compiling mex files</A>
+</H1>
+
+<P>
+If you do not find appropriate pre-compiled mex files for your
+platform on our home page, you can compile them yourself. You will
+need an installed C++ compiler for doing this; the C compiler that
+ships with MATLAB (LCC) does not compile C++ code at all and will
+therefore not work.
+
+<P>
+
+<UL>
+<LI><I>GNU/Linux</I>: The free compiler suite <I>gcc</I> usually
+  comes pre-installed with most distributions. You will need at least
+  version 3.4 or newer (check with <TT>gcc -v</TT>). Run <TT>mex -setup</TT>
+  in MATLAB and choose the <TT>gccopts.sh</TT> options file for
+  compilation.
+</LI>
+<LI><I>Solaris</I>: You can also use gcc, but the C++ compiler from
+  Sun Forte Studio should also work (Version 7 or newer). For using
+  the latter, make sure the command <TT>cc</TT> runs the correct compiler
+  in the shell, call <TT>mex -setup</TT> in MATLAB and choose the
+  system's ANSI compiler.
+</LI>
+<LI><I>Mac OS X</I>: The gcc suite is available through Apple's
+  XCode Developer Tools, which can be downloaded from
+
+<P>
+<TT><A NAME="tex2html3"
+  HREF="http://developer.apple.com/TOOLS/xcode">http://developer.apple.com/TOOLS/xcode</A></TT>
+<P>
+(registration required). As for GNU/Linux, run <TT>mex -setup</TT> and
+  choose <TT>gccopts.sh</TT>.
+</LI>
+<LI><I>Windows</I>: Unfortunately, compiling mex files under Windows
+  ist more difficult to do, since each MATLAB version is pretty picky
+  about which version of which compiler it supports. If you happen to
+  have Microsoft Visual C++ Professional, this should usually be
+  detected by <TT>mex -setup</TT> and it should compile the C++ files
+  just fine. If you want to use the Express edition, which you can
+  download free of charge from Microsoft, usually only the newest
+  MATLAB version (currently 7.7) will support it directly. For older
+  MATLAB versions, you will also have to install the <I>Microsoft
+    Windows SDK for Windows Server 2008 and .NET Framework</I> and copy
+  some files in the right places. Fortunately, there's an tutorial for
+  this, which you'll find at
+
+<P>
+<TT><A NAME="tex2html4"
+  HREF="http://www.mathworks.com/matlabcentral/fileexchange/22689">http://www.mathworks.com/matlabcentral/fileexchange/22689</A></TT>
+<P>
+Alternatively, like on Unix systems, you can install the free gcc
+  compiler on Windows, which is available under the name MinGW (<I>    minimalist gcc for Windows</I>). Unfortunately, Matlab does not
+  officially support this compiler under Windows, so you cannot use it
+  by simply calling <TT>mex -setup</TT>. Instead, you can try to use the
+  free tool GnuMex to create a proper compilation batch file for
+  you. Please visit the following web sites for details and downloads:
+
+<P>
+GnuMex: <TT><A NAME="tex2html5"
+  HREF="http://gnumex.sourceforge.net">http://gnumex.sourceforge.net</A></TT>
+<P>
+MinGW: <TT><A NAME="tex2html6"
+  HREF="http://www.mingw.org">http://www.mingw.org</A></TT>
+<P>
+Note that GnuMex will currently not work on 64bit Windows systems out
+  of the box!
+</LI>
+</UL>
+
+<P>
+After you have set up the <TT>mex</TT> tool, enter the subdirectory <TT>  mex-dev</TT> and call <TT>makemex</TT>. This function will compile all the
+necessary files and copy them into the <TT>tstoolbox/mex/&lt;MEXEXT&gt;</TT>
+subdirectory.
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html314"
+  HREF="node10.html">2.3.1 Problems with compiling mex files</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html312"
+  HREF="node10.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html308"
+  HREF="node3.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html302"
+  HREF="node8.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html310"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html313"
+  HREF="node10.html">2.3.1 Problems with compiling</A>
+<B> Up:</B> <A NAME="tex2html309"
+  HREF="node3.html">2. Download and Installation</A>
+<B> Previous:</B> <A NAME="tex2html303"
+  HREF="node8.html">2.2 First Steps</A>
+ &nbsp; <B>  <A NAME="tex2html311"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+<IMG SRC=logo.jpg  ALT=TSTOOL BORDER=0>
+<BR>
+<BR><FONT SIZE=2>Copyright &#169; 1997-2009 <A HREF=http://www.physik3.gwdg.de>DPI G&ouml;ttingen</A></TABLE>
+</BODY></HTML>
+
+</ADDRESS>
+</BODY>
+</HTML>

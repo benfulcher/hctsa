@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Introduction</TITLE>
+<META NAME="description" CONTENT="Introduction">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html85" HREF="node3.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html83" HREF="TiseanHTML.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html77" HREF="node1.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html86" HREF="node3.html">Philosophy of the TISEAN </A>
+<B>Up:</B> <A NAME="tex2html84" HREF="TiseanHTML.html">Practical implementation of nonlinear </A>
+<B> Previous:</B> <A NAME="tex2html78" HREF="node1.html">Lead Paragraph</A>
+<BR> <P>
+<H1><A NAME="SECTION00020000000000000000">Introduction</A></H1>
+<P>
+Deterministic chaos as a fundamental concept is by now well established and
+described in a rich literature. The mere fact that simple deterministic systems
+generically exhibit complicated temporal behavior in the presence of
+nonlinearity has influenced thinking and intuition in many fields. However, it
+has been questioned whether the relevance of chaos for the understanding of the
+time evolving world goes beyond that of a purely philosophical paradigm.
+Accordingly, major research efforts are dedicated to two related questions.
+The first question is if chaos theory can be used to gain a better
+understanding and interpretation of observed complex dynamical behavior. The
+second is if chaos theory can give an advantage in predicting or controlling
+such time evolution. Time evolution as a system property can be measured by
+recording time series. Thus, nonlinear time series methods will be the key to
+the answers of the above questions. This paper is intended to encourage the
+explorative use of such methods by a section of the scientific community which
+is not limited to chaos theorists. A range of algorithms has been made
+available in the form of computer programs by the TISEAN
+project&nbsp;[<A HREF="citation.html#tisean">1</A>]. Since this is fairly new territory, unguided use of the
+algorithms bears considerable risk of wrong interpretation and unintelligible
+or spurious results. In the present paper, the essential ideas behind the
+algorithms are summarized and pointers to the existing literature are given.
+To avoid excessive redundancy with the text book&nbsp;[<A HREF="citation.html#KantzSchreiber">2</A>] and the
+recent review&nbsp;[<A HREF="citation.html#habil">3</A>], the derivation of the methods will be kept to a
+minimum. On the other hand, the choices that have been made in the
+implementation of the programs are discussed more thoroughly, even if this may
+seem quite technical at times. We will also point to possible alternatives to
+the TISEAN implementation.
+<P>
+Let us at this point mention a number of general references on the subject of
+nonlinear dynamics.  At an introductory level, the book by Kaplan and
+Glass&nbsp;[<A HREF="citation.html#KaplanGlass">4</A>] is aimed at an interdisciplinary audience and provides
+a good intuitive understanding of the fundamentals of dynamics.  The
+theoretical framework is thoroughly described by Ott&nbsp;[<A HREF="citation.html#Ott">5</A>], but also in
+the older books by Berg&#233; et al.&nbsp;[<A HREF="citation.html#Berge">6</A>] and by
+Schuster&nbsp;[<A HREF="citation.html#Schuster">7</A>]. More advanced material is contained in the work by
+Katok and Hasselblatt&nbsp;[<A HREF="citation.html#KatokHasselblatt">8</A>]. A collection of research
+articles compiled by Ott et al.&nbsp;[<A HREF="citation.html#coping">9</A>] covers some of the more applied
+aspects of chaos, like synchronization, control, and time series analysis.
+<P>
+Nonlinear time series analysis based on this theoretical paradigm is described
+in two recent monographs, one by Abarbanel&nbsp;[<A HREF="citation.html#abarbook">10</A>] and one by Kantz and
+Schreiber&nbsp;[<A HREF="citation.html#KantzSchreiber">2</A>]. While the former volume usually <EM>assumes</EM>
+chaoticity, the latter book puts some emphasis on practical applications to
+time series that are not manifestly found, nor simply assumed to be,
+deterministic chaotic. This is the rationale we will also adopt in the present
+paper. A number of older articles can be seen as reviews, including Grassberger
+et al.&nbsp;[<A HREF="citation.html#gss">11</A>], Abarbanel et al.&nbsp;[<A HREF="citation.html#abarbanel">12</A>], as well as Kugiumtzis et
+al.&nbsp;[<A HREF="citation.html#kugiumtzis_rev1">13</A>, <A HREF="citation.html#kugiumtzis_rev2">14</A>].  The application of nonlinear time
+series analysis to real world measurements where determinism is unlikely to be
+present in a stronger sense, is reviewed in Schreiber&nbsp;[<A HREF="citation.html#habil">3</A>].  Apart from
+these works, a number of conference proceedings volumes are devoted to chaotic
+time series, including Refs.&nbsp;[<A HREF="citation.html#Mayer-Kress">15</A>, <A HREF="citation.html#casdagli">16</A>, <A HREF="citation.html#SFI">17</A>, <A HREF="citation.html#dyndis">18</A>, <A HREF="citation.html#freital">19</A>].
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html87" HREF="node3.html#SECTION00021000000000000000">Philosophy of the TISEAN implementation</A>
+<LI> <A NAME="tex2html88" HREF="node4.html#SECTION00022000000000000000">General computational issues</A>
+</UL>
+<HR><A NAME="tex2html85" HREF="node3.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html83" HREF="TiseanHTML.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html77" HREF="node1.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html86" HREF="node3.html">Philosophy of the TISEAN </A>
+<B>Up:</B> <A NAME="tex2html84" HREF="TiseanHTML.html">Practical implementation of nonlinear </A>
+<B> Previous:</B> <A NAME="tex2html78" HREF="node1.html">Lead Paragraph</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

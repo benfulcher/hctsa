@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Spike trains</TITLE>
+<META NAME="description" CONTENT="Spike trains">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html335" HREF="node27.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html333" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html329" HREF="node25.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html336" HREF="node27.html">Questions of interpretation</A>
+<B>Up:</B> <A NAME="tex2html334" HREF="node22.html">Various Examples</A>
+<B> Previous:</B> <A NAME="tex2html330" HREF="node25.html">Uneven sampling</A>
+<BR> <P>
+<H2><A NAME="SECTION00064000000000000000">Spike trains</A></H2>
+<P>
+<P>
+A spike train is a sequence of <I>N</I> events (for example neuronal spikes, or
+heart beats) occurring at times <IMG WIDTH=28 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2310" SRC="img132.gif">. Variations in the events beyond their
+timing are ignored.  Let us first note that this very common kind of data is
+fundamentally different from the case of unevenly <EM>sampled</EM> time series
+studied in the last section in that the sampling instances <IMG WIDTH=28 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2310" SRC="img132.gif"> are not
+independent of the measured process. In fact, between these instances, the
+value of <I>s</I>(<I>t</I>) is undefined and the <IMG WIDTH=28 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2310" SRC="img132.gif"> contain all the information
+there is.
+<P>
+Very often, the discrete sequence if inter-event intervals <IMG WIDTH=101 HEIGHT=18 ALIGN=MIDDLE ALT="tex2html_wrap_inline2380" SRC="img163.gif"> is
+treated as if it were an ordinary time series. We must keep in mind, however,
+that the index <I>n</I> is not proportional to time any more. It depends on the
+nature of the process if it is more reasonable to look for correlations in time
+or in event number.  Since in the latter case we can use the standard machinery
+of regularly sampled time series, let us concentrate on the more difficult real
+time correlations.
+<P>
+<blockquote><A NAME="972">&#160;</A><IMG WIDTH=357 HEIGHT=147 ALIGN=BOTTOM ALT="figure1086" SRC="img160.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figrrseries">&#160;</A>
+   Heart rate fluctuations seen by plotting the time interval between
+   consecutive heart beats (R waves) versus the beat number. Note that the
+   spread of values is rather small due to the near-periodicity of the heart
+   beat. <BR>
+</blockquote>
+<P>
+<blockquote><A NAME="974">&#160;</A><IMG WIDTH=352 HEIGHT=253 ALIGN=BOTTOM ALT="figure1087" SRC="img162.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figrr">&#160;</A>
+   Binned autocorrelation function of an RR interval time series. Upper panel:
+   <IMG WIDTH=31 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2060" SRC="img57.gif"> and <IMG WIDTH=32 HEIGHT=29 ALIGN=MIDDLE ALT="tex2html_wrap_inline2368" SRC="img161.gif"> are practically indistinguishable. Lower:
+   Autocorrelation for a random scramble of the data. Note that most of the
+   periodicity is given by the fact that the duration of each beat had rather
+   little variation during this recording.<BR>
+</blockquote><P>
+In particular the literature on <EM>heart rate variability</EM> (HRV) contains
+interesting material on the question of spectral estimation and linear modeling
+of spike trains, here usually inter-beat (RR) interval series, see
+e.g. Ref.&nbsp;[<A HREF="node36.html#spikespec">51</A>]. For the heart beat interval sequence shown in
+Fig.&nbsp;<A HREF="node26.html#figrrseries">16</A>, spectral analysis of <IMG WIDTH=17 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline2384" SRC="img164.gif"> versus <I>n</I> may reveal
+interesting structure, but even the mean periodicity of the heart beat would be
+lost and serious aliasing effects would have to be faced.  A very convenient
+and powerful approach that uses the real time <I>t</I> rather than the event number
+<I>n</I> is to write a spike train as a sum of Dirac delta functions located at the
+spike instances:
+<BR><A NAME="eqdelta">&#160;</A><IMG WIDTH=500 HEIGHT=46 ALIGN=BOTTOM ALT="equation1088" SRC="img165.gif"><BR>
+With <IMG WIDTH=186 HEIGHT=33 ALIGN=MIDDLE ALT="tex2html_wrap_inline2392" SRC="img166.gif">, the
+periodogram spectral estimator is then simply obtained by squaring the
+(continuous) Fourier transform of <I>s</I>(<I>t</I>):
+<BR><A NAME="eqspower">&#160;</A><IMG WIDTH=500 HEIGHT=53 ALIGN=BOTTOM ALT="equation1090" SRC="img167.gif"><BR>
+Other spectral estimators can be derived by smoothing <IMG WIDTH=34 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2396" SRC="img168.gif"> or by data
+windowing. It is possible to generate surrogate spike trains that realise the
+spectral estimator Eq.(<A HREF="node26.html#eqspower">28</A>), although this is computationally very
+cumbersome. Again, we can take advantage of the relative computational ease of
+binned autocorrelations here.<A NAME="tex2html21" HREF="footnode.html#539"><IMG  ALIGN=BOTTOM ALT="gif" SRC="foot_motif.gif"></A>
+Introducing a normalisation constant <IMG WIDTH=10 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline1914" SRC="img7.gif">, we can write <IMG WIDTH=429 HEIGHT=34 ALIGN=MIDDLE ALT="tex2html_wrap_inline2400" SRC="img169.gif">.  Then again, the binned autocorrelation
+function is defined by
+<IMG WIDTH=205 HEIGHT=26 ALIGN=MIDDLE ALT="tex2html_wrap_inline2402" SRC="img170.gif">.  Now we
+carry out both integrals and thus eliminate both delta functions.  If we choose
+<IMG WIDTH=10 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline1914" SRC="img7.gif"> such that <I>C</I>(0)=1, we obtain:
+<BR><A NAME="eqcspike">&#160;</A><IMG WIDTH=500 HEIGHT=34 ALIGN=BOTTOM ALT="equation1092" SRC="img171.gif"><BR>
+Thus, all we have to do is to count all possible intervals <IMG WIDTH=41 HEIGHT=21 ALIGN=MIDDLE ALT="tex2html_wrap_inline2408" SRC="img172.gif"> in a bin.
+The upper panel in Fig.&nbsp;<A HREF="node26.html#figrr">17</A> shows the binned autocorrelation function
+with bin size <IMG WIDTH=61 HEIGHT=13 ALIGN=BOTTOM ALT="tex2html_wrap_inline2410" SRC="img173.gif">&nbsp;sec up to a lag of 6&nbsp;sec for the heart beat data
+shown in Fig.&nbsp;<A HREF="node26.html#figrrseries">16</A>. Superimposed is the corresponding curve for a
+surrogate that has been generated with the deviation from the binned
+autocorrelations of the data as a cost function.  The two curves are
+practically indistinguishable. In this particular case, most of the structure
+is given by the mean periodicity of the data. The lower trace of the same
+figure shows that even a random scramble shows very similar (but not identical)
+correlations. Information about the main periodicity is already contained in
+the distribution of inter-beat intervals which is preserved under permutation.
+<P>
+As with unevenly sampled data, the choice of binning and the maximal lag are
+somewhat delicate and not that much practical experience exists. It is
+certainly again recommendable to avoid empty bins. The possibility to limit the
+temporal range of <IMG WIDTH=41 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2412" SRC="img174.gif"> is a powerful instrument to keep
+computation time within reasonable limits.
+<P>
+<HR><A NAME="tex2html335" HREF="node27.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html333" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html329" HREF="node25.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html336" HREF="node27.html">Questions of interpretation</A>
+<B>Up:</B> <A NAME="tex2html334" HREF="node22.html">Various Examples</A>
+<B> Previous:</B> <A NAME="tex2html330" HREF="node25.html">Uneven sampling</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

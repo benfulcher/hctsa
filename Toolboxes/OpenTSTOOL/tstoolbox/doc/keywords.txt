@@ -1,0 +1,22 @@
+TSTOOL keywords :
+
+
+resolution (@achse) :
+
+'linear' : Achse mit linearer (aequidistanter) Einteilung : x(n) = first + (n-1)*delta
+'logarithmic' : logarithmische Achse (z.B. fuer Frequenzgaenge) x(n) = first * delta^(n-1)
+'arbitrary' : Achse mit beliebigen Abtastpunkten, diese muessen explizit in Feld values
+              abgelegt werden
+
+
+plothint (@description) :
+
+'graph' 		:  plain style function graph of scalar signals (1-d signal)
+'points' 		:  like 'graph', but values are not connected with lines
+'bar'     		:  bar plot e.g. for histogram (1-d signal, should be short!!)
+'multigraph'    :  (2-d signal), each column is interpreted as a single graph
+'multipoints'   :  same as 'multigraph', but values are not connected with lines
+'xyplot'		:  (2-d signal) with exact two channels (dlens(signal,2) == 2)
+'3dcurve'		:  used when signal was created by time-delay reconstruction (2-d signal, dlens(signal,2) == 3)
+'image' 		:  (2-d signal) when no interpolation between samples is desired
+'spectrogram'	:  (2-d signal) when interpolation between samples is desired

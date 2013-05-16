@@ -1,0 +1,98 @@
+<html>
+<head>
+<title>
+corr
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>corr
+</font>
+</h1>
+<hr>
+This program computes the autocorrelation of a scalar data
+set. Depending on whether the <font color=blue>-n</font> flag is set
+or not, different normalizations are applied. With <font
+color=blue>-n</font> <font color=red>not</font> set the definition is:
+<center>
+<img src="corr_eq1.gif"></img>
+</center>
+where <b>s</b> is the standard deviation of the data and <b>y</b> its
+average. Else it is
+<center>
+<img src="corr_eq2.gif"></img>
+</center>
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>corr [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-D#
+<td>number of correlations
+<td>100
+</tr>
+<tr>
+<th>-n
+<td>don't use normalization to standard deviation
+<td>not set
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a><br>
+<td>without file name: 'datafile'.cor<br>
+(or stdin.cor if stdin was read)<br>
+If no -o option is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The first two lines contain: 1. the average and 2. the standard
+deviation of the data. The following lines are the autocorrelations
+(first column: delay, second column: autocorrelation).
+<hr>
+View the <a href="../../source_c/corr.c"> C-sources</a>.
+<hr>
+See also <a href="../docs_f/autocor.html">autocor</a> 
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

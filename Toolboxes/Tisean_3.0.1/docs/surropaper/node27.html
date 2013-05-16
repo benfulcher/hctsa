@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Questions of interpretation</TITLE>
+<META NAME="description" CONTENT="Questions of interpretation">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html345" HREF="node28.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html343" HREF="Surrogates.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html337" HREF="node26.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html346" HREF="node28.html">Non-dynamic nonlinearity</A>
+<B>Up:</B> <A NAME="tex2html344" HREF="Surrogates.html">Surrogate time series</A>
+<B> Previous:</B> <A NAME="tex2html338" HREF="node26.html">Spike trains</A>
+<BR> <P>
+<H1><A NAME="SECTION00070000000000000000">Questions of interpretation</A></H1>
+<A NAME="secinterpret">&#160;</A>
+Having set up all the ingredients for a statistical hypothesis test of
+nonlinearity, we may ask what we can learn from the outcome of such a test.
+The formal answer is of course that we have, or have not, rejected a specific
+hypothesis at a given level of significance. How interesting this information
+is, however, depends on the null hypothesis we have chosen. The test is most
+meaningful if the null hypothesis is plausible enough so that we are prepared
+to believe it in the lack of evidence against it. If this is not the case, we
+may be tempted to go beyond what is justified by the test in our
+interpretation. Take as a simple example a recording of hormone concentration
+in a human. We can test for the null hypothesis of a stationary Gaussian linear
+random process by comparing the data to phase randomised Fourier surrogates.
+Without any test, we know that the hypothesis cannot be true since hormone
+concentration, unlike Gaussian variates, is strictly non-negative.  If we
+failed to reject the null hypothesis by a statistical argument, we will
+therefore go ahead and reject it anyway by common sense, and the test was
+pointless.  If we did reject the null hypothesis by finding a coarse-grained
+``dimension'' which is significantly lower in the data than in the surrogates,
+the result formally does not give any new information but we might be tempted
+to speculate on the possible interpretation of the ``nonlinearity'' detected.
+<P>
+This example is maybe too obvious, it was meant only to illustrate that the
+hypothesis we test against is often not what we would actually accept to be
+true. Other, less obvious and more common, examples include signals which are
+known (or found by inspection) to be non-stationary (which is not covered by
+most null hypotheses), or signals which are likely to be measured in a static
+nonlinear, but non-invertible way. Before we discuss these two specific caveats
+in some more detail, let us illustrate the delicacy of these questions with a
+real data example.
+<P>
+<blockquote><A NAME="977">&#160;</A><IMG WIDTH=360 HEIGHT=252 ALIGN=BOTTOM ALT="figure1094" SRC="img175.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figseizure">&#160;</A>Intracranial neuronal potential recording during
+  an epileptic seizure (upper) and a surrogate data set with the same linear
+  correlations and the same amplitude distribution (lower). The data was kindly
+  provided by K. Lehnertz and C. Elger.<BR>
+</blockquote>
+<P>
+<P><blockquote><A NAME="979">&#160;</A><IMG WIDTH=328 HEIGHT=148 ALIGN=BOTTOM ALT="figure1095" SRC="img176.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figbarcode">&#160;</A>
+   Surrogate data test for the data shown in Fig.<A HREF="node27.html#figseizure">18</A>. Since the
+   prediction error is lower for the data (longer line) than for 99 surrogates
+   (shorter lines), the null hypothesis may be rejected at the 99% level of
+   significance. The error bar indicates the mean and standard deviation of the
+   statistic computed for the surrogates.<BR>
+</blockquote><P>
+<P>
+Figure&nbsp;<A HREF="node27.html#figseizure">18</A> shows as an intra-cranial recording of the neuronal
+electric field during an epileptic seizure, together with one iteratively
+generated surrogate data set&nbsp;[<A HREF="node36.html#surrowe">30</A>] that has the same amplitude
+distribution and the same linear correlations or frequency content as the data.
+We have eliminated the end-point mismatch by truncating the series to 1875
+samples. A test was scheduled at the 99% level of significance, using
+nonlinear prediction errors (see Eq.(<A HREF="node4.html#eqerror">5</A>), <I>m</I>=3, <IMG WIDTH=37 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline2416" SRC="img177.gif">,
+<IMG WIDTH=47 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline2418" SRC="img178.gif">) as a discriminating statistics. The nonlinear correlations we
+are looking for should enhance predictability and we can thus perform a
+one-sided test for a significantly <EM>smaller</EM> error. In a test with one data
+set and 99 surrogates, the likelihood that the data would yield the smallest
+error by mere coincidence is exactly 1 in 100. Indeed, as can be seen in
+Fig.&nbsp;<A HREF="node27.html#figbarcode">19</A>, the test just rejects the null hypothesis.
+<P>
+<P><blockquote><A NAME="981">&#160;</A><IMG WIDTH=356 HEIGHT=201 ALIGN=BOTTOM ALT="figure1096" SRC="img179.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figseizdel">&#160;</A>
+   Left: Same data set as in Fig.&nbsp;<A HREF="node27.html#figseizure">18</A>, rendered in time delay
+   coordinates. Right: A surrogate data set plotted in the same way.<BR>
+</blockquote><P>
+<P>
+Unfortunately, the test itself does not give any guidance as to what kind of
+nonlinearity is present and we have to face notoriously ill-defined questions
+like what is the most <EM>natural</EM> interpretation.  Similar spike-and-wave
+dynamics as in the present example has been previously reported&nbsp;[<A HREF="node36.html#FEEG">47</A>] as
+chaotic, but these findings have been questioned&nbsp;[<A HREF="node36.html#TEEG">48</A>].
+Hern&#225;ndez and coworkers&nbsp;[<A HREF="node36.html#cuba">49</A>] have suggested a stochastic limit cycle
+as a simple way of generating spike-and-wave-like dynamics.
+<P>
+If we represent the data in time delay coordinates -- which is what we would
+usually do with chaotic systems -- the nonlinearity is reflected by the
+``hole'' in the centre (left panel in Fig.&nbsp;<A HREF="node27.html#figseizdel">20</A>). A linear
+stochastic process could equally well show oscillations, but its amplitude
+would fluctuate in a different way, as we can see in the right panel of the
+same figure for an iso-spectral surrogate. It is difficult to answer the
+question if the nonlinearity could have been generated by a static mechanism
+like the measurement process (beyond the invertible rescaling allowed by the
+null hypothesis). Deterministic chaos in a narrower sense seems
+rather unlikely if we regard the prediction errors shown in
+Fig.&nbsp;<A HREF="node27.html#figbarcode">19</A>: Although significantly lower than that of the
+surrogates, the absolute value of the nonlinear prediction error is still more
+than 50% of the rms amplitude of the data (which had been rescaled to unit
+variance). Not surprisingly, the correlation integral (not shown here) does not
+show any proper scaling region either. Thus, all we can hand back to the
+clinical researchers is a solid statistical result but the insight into what
+process <EM>is</EM> generating the oscillations is limited.
+<P>
+A recent suggestion for surrogates for the validation of <EM>unstable periodic
+orbits</EM> (UPOs) may serve as an example for the difficulty in interpreting
+results for more fancy null hypothesis. Dolan and coworkers&nbsp;[<A HREF="node36.html#witt">24</A>]
+coarse-grain amplitude adjusted data in order to extract a transfer matrix that
+can be iterated to yield typical realisations of a Markov chain.<A NAME="tex2html25" HREF="footnode.html#982"><IMG  ALIGN=BOTTOM ALT="gif" SRC="foot_motif.gif"></A>
+The rationale there is to test if the finding of a certain number of UPOs could
+be coincidental, that is, not generated by dynamical structure.  Testing
+against an order <I>D</I> Markov model removes dynamical structure beyond the
+``attractor shape'' (AS) in <I>D</I>+1 dimensions. It is not clear to us what the
+interpretation of such a test would be. In the case of a rejection, they would
+infer a dynamical nature of the UPOs found. But that would most probably mean
+that in some higher dimensional space, the dynamics could be successfully
+approximated by a Markov chain acting on a sufficiently fine mesh. This is at
+least true for finite dimensional dynamical systems. In other words, we cannot
+see what sort of dynamical structure would generate UPOs but not show its
+signature in some higher order Markov approximation.
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html347" HREF="node28.html#SECTION00071000000000000000">Non-dynamic nonlinearity</A>
+<LI> <A NAME="tex2html348" HREF="node29.html#SECTION00072000000000000000">Non-stationarity</A>
+</UL>
+<HR><A NAME="tex2html345" HREF="node28.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html343" HREF="Surrogates.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html337" HREF="node26.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html346" HREF="node28.html">Non-dynamic nonlinearity</A>
+<B>Up:</B> <A NAME="tex2html344" HREF="Surrogates.html">Surrogate time series</A>
+<B> Previous:</B> <A NAME="tex2html338" HREF="node26.html">Spike trains</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

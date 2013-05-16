@@ -1,0 +1,57 @@
+13-Jul-06     * Updated call of FZERO in TQUANT for compatibility with
+                newer Matlab versions (tested with Matlab 7.2)
+
+01-Jun-02:    * The ARfit homepage has moved to www.gps.caltech.edu/~tapio/arfit/
+
+14-Oct-00:    * Minor revision of the papers describing the algorithms.
+              * Minor changes to some modules to improve error handling and
+                warning messages.
+
+06-Sep-00:    * The ARfit homepage has moved to www.math.nyu.edu/~tapio/arfit/
+
+15-Apr-00:    * Changed call of Matlab function FZERO in TQUANT to old
+                format in order to ensure compatibility with
+                Windows/Mac versions of Matlab. [Suggested by Vico Klump.]
+
+10-Jan-00:    * The two papers describing the algorithms implemented in ARfit 
+                have been extensively revised. 
+              * Confidence intervals are now based on Student's t 
+                distribution, no longer on the chi-squared distribution. 
+                95% margins of error are returned instead of standard 
+	        errors.  
+              * The regularization in ARQR has changed.
+              * The margin of error for the period of a purely relaxatory mode 
+                with infinite period is now zero, not NaN as before.
+
+17-Dec-99:    * Renamed the demo-module from ARFIT to ARDEM.
+              * Renamed the least squares estimation module from AR to 
+                ARFIT (in order to avoid conflicts with ar.m in the system 
+                identification toolbox).
+              * Rewrote some of the help entries and annotations.
+              * Changed output of ARCONF. The approximate confidence intervals
+                are now returned as separate variables, no longer as imaginary 
+                parts of the parameter matrices. 
+              * The modification MSC of Schwarz's Bayesian Criterion for order 
+                selection is no longer supported.
+              * Changed definition of the excitation (change affects only
+                higher-order models).
+
+12-Aug-98:    * Fixed bug (in AR) that affected the computation of confidence 
+                intervals for the intercept vector. (The condition-improving
+                scaling was not undone before the matrix Uinv was returned.)
+
+02-Aug-98:    *	Fixed bug in ARSIM. (ARSIM did not simulate multivariate AR(1) 
+                processes correctly.)
+    	      * Replaced DOT(a,b) by SUM(a.*b) because DOT(a,b) is neither 
+      		part of older Matlab distributions nor part of Octave. 
+        	Only ADJPH was affected by this change, which increases the
+                portability of ARfit.
+              * Forced dot_lam in ARMODE to be a column vector in order to 
+          	ensure compatibility with Octave.
+              * Removed (from AR) calls of the function LOWER in order to 
+		ensure compatibility with Octave.
+	      * Readability of the code has been improved.
+	      * All modules have been tested under Matlab 5.
+
+06-Sep-97:    * Release of ARfit version 2.0 with accelerated
+                computation of order selection criteria. 

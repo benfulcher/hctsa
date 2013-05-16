@@ -1,0 +1,33 @@
+function [xpos, u] = firstzero(s)
+
+% signal/firstzero
+% [xpos, unit] = firstzero(s)
+%
+% give information about first zero crossing of scalar signal s,
+% using linear interpolation 
+%
+%  C.Merkwirth,J.Wichard,K.Peters,F.Bauer,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
+error(nargchk(1,1, nargin));
+
+if ndim(s) ~= 1
+	help(mfilename)
+	return
+end
+
+d = data(s);
+tmp = d(2:end) .* d(1:end-1);
+ze = find(tmp <= 0);
+if isempty(ze)
+% 	disp('no zero crossing found')
+else
+	A = getaxis(s, 1);
+	a = abs(d(ze(1)));
+	b = abs(d(ze(1)+1));
+	if (a+b) > 0
+		xpos = first(A) + (ze(1)-1 + a/(a+b) )*delta(A);
+	else
+		xpos = first(A) + (ze(1)-1)*delta(A);
+	end
+	u = unit(A);
+% 	disp(['first zero/zero crossing at x = ' num2str(xpos) ' ' label(A)]);
+end

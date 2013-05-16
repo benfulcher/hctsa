@@ -1,0 +1,247 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(source_f/readfile.f)
+
+AC_PREFIX_DEFAULT(${HOME})
+
+dnl Check for prfix directory and create it if necessary
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+
+AC_MSG_CHECKING([whether $prefix is a directory and writeable])
+mkdir -p $prefix 2>&5
+if test -d $prefix && echo "" > $prefix/test_conf_write \
+   && rm -f $prefix/test_conf_write; then
+   AC_MSG_RESULT(yes)
+else
+   AC_MSG_RESULT(no)
+   AC_MSG_WARN([
+*** $prefix must be a writeable directory for installation 
+*** either you provide that or give another one, say mydir,  by calling
+***    $ ./configure --prefix=mydir
+])
+fi
+
+dnl Checks for programs.
+
+for ccc in "$CC" cc gcc acc "cc -Aa"; do
+   if test -z "$ccc"; then 
+      continue
+   fi
+   CC=$ccc
+   AC_MSG_CHECKING([whether ($CC $CFLAGS $LDFLAGS) works])
+   ac_cpp='$CPP $CPPFLAGS'
+   ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.c 1>&5'
+   ac_link='$CC -o conftest $CFLAGS $CPPFLAGS $LDFLAGS conftest.c $LIBS 1>&5'
+   echo '#include "confdefs.h"'  > conftest.c
+   echo 'main(int argc,char **argv){return(0);}' >> conftest.c
+   if { (eval $ac_link) 2>&5; } && test -s conftest; then
+	 rm -fr conftest*
+	 AC_MSG_RESULT(yes)
+	 break
+   else
+	 rm -fr conftest*
+	 AC_MSG_RESULT(no)
+	 CC=
+   fi
+done
+
+if test -z "$CC"; then
+   AC_MSG_WARN([
+*** No valid ANSI C compiler found
+*** You will not be able to use some of the routines
+*** If you do have a C compiler called by, say, mycc -ANSI, do:
+***    $ setenv CC "mycc -ANSI"
+*** and rerun
+])
+fi
+
+if test -n "$CC" && test -z "$CFLAGS"; then
+   echo 'void f(){}' > conftest.c
+   for cflags in -O3 -O2 -O +O3 +O -xO3; do
+      AC_MSG_CHECKING([whether $CC accepts $cflags])
+      if test -z "`$CC $cflags -c conftest.c 2>&1`"; then
+         AC_MSG_RESULT(yes)
+	 CFLAGS=$cflags
+         break
+      else
+         AC_MSG_RESULT(no)
+      fi
+   done
+   if test -z "$CFLAGS"; then
+      AC_MSG_WARN([
+*** no valid optimisation flags for $CC found
+])
+   fi
+   rm -f conftest*
+fi
+
+if test -n "$CC"; then
+   AC_CHECK_LIB(m, main)
+
+dnl Checks for header files.
+   AC_HEADER_STDC
+   AC_CHECK_HEADERS(limits.h malloc.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+   AC_C_CONST
+   if test $ac_cv_c_const = no; then
+      CC="$CC -Dconst="
+   fi
+
+   AC_TYPE_SIZE_T
+
+dnl Checks for library functions.
+   AC_FUNC_MEMCMP
+fi
+
+AC_SUBST(CC)
+
+for fff in "$FC" f77 g77 "f77 +U77" "f77 -q -f -B108 -lU77"; do
+   if test -z "$fff"; then 
+      continue
+   fi
+   FC=$fff
+   AC_MSG_CHECKING([whether ($FC $FFLAGS $LDFLAGS) works])
+   cat > conftest.f << EOF
+      character*20 argv
+      call getarg(1,argv)
+      write(*,'(2hxx,a)') argv
+      end
+EOF
+   (eval $FC $FFLAGS $LDFLAGS conftest.f -o conftest) 1>&5 2>&5
+   if test -n "`(eval ./conftest TEST | grep xxTEST) 2>&5`"; then
+      rm -f conftest.f conftest
+      AC_MSG_RESULT(yes)
+      break
+   else
+      rm -f conftest.f conftest
+      AC_MSG_RESULT(no)
+      FC=
+   fi
+done
+
+if test -z "$FC"; then
+      AC_MSG_WARN([
+*** No usable Fortran compiler found
+*** You will not be able to use some of the routines
+*** If you do have a working Fortran compiler called, say, myf77 -trick, do:
+***    $ setenv FC "myf77 -trick"
+*** and rerun
+])
+fi
+
+if test -z "$CC" && test -z "$FC"; then
+   AC_MSG_ERROR([
+*** with neither working C nor Fortran compilers there wouldn't be any
+*** programs left you could compile
+])
+fi
+
+if test -n "$FC" && test -z "$FFLAGS"; then
+   echo '      end' > conftest.f
+   for fflags in -O +O; do
+      AC_MSG_CHECKING([whether $FC accepts $fflags])
+      cat > conftest.f << EOF
+      write(*,'(6hxxTEST)')
+      end
+EOF
+      (eval $FC $fflags $LDFLAGS conftest.f -o conftest) 1>&5 2>&5
+      if test -n "`(eval ./conftest | grep xxTEST) 2>&5`"; then
+   	 rm -f conftest.f conftest
+   	 AC_MSG_RESULT(yes)
+   	 FFLAGS=$fflags
+   	 break
+      else
+   	 rm -f conftest.f conftest
+   	 AC_MSG_RESULT(no)
+      fi
+   done
+   if test -z "$FFLAGS"; then
+      AC_MSG_WARN([
+*** no valid optimisation flags for $FC found
+])
+   fi
+   rm -f conftest*
+fi
+
+AC_SUBST(FC)
+AC_SUBST(FFLAGS)
+
+if test -n "$FC"; then
+   ERRUNIT=""
+   for iu in 0 1 2 3 4 6 7 8 9; do
+      AC_MSG_CHECKING([whether Fortran unit $iu is stderr])
+      rm -Rf ./config_test_dir
+      mkdir ./config_test_dir
+      cd ./config_test_dir
+      echo "      write($iu,'(1ht)')" > test.f 
+      echo "      end" >> test.f
+      (eval $FC $FFLAGS test.f -o test.out) 1>&5 2>&5
+      if test -z "`./test.out 2>&1 1>/dev/null`"; then
+         cd ..
+         rm -Rf ./config_test_dir
+         AC_MSG_RESULT(no)
+      else
+         cd ..
+         rm -Rf ./config_test_dir
+         AC_MSG_RESULT(yes)
+         ERRUNIT=$iu
+         break
+      fi
+   done
+   if test -z $ERRUNIT; then
+      ERRUNIT=0
+      AC_MSG_WARN([
+*** Couldn't determine Fortran stderr unit, assuming unit 0, fingers crossed
+])
+   fi
+   AC_SUBST(ERRUNIT)
+fi
+
+AC_CHECK_PROG(AR,ar,ar,ar)
+ARFLAGS=r
+AC_MSG_CHECKING([whether ${AR} accepts ${ARFLAGS}])
+if test -n "$CC"; then
+   echo 'void f(){}' > libtest.c
+   ${CC} -c libtest.c
+else
+   echo '      end' > libtest.f
+   ${FC} -c libtest.f
+fi
+${AR} ${ARFLAGS} libtest.a libtest.o 1>&5 2>&5
+if test -s libtest.a; then
+  AC_MSG_RESULT(yes)
+else
+  ARFLAGS=-r
+  AC_MSG_RESULT([no, using ${ARFLAGS} instead])
+fi
+rm -f libtest.*
+AC_SUBST(ARFLAGS)
+
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+
+AC_CHECK_PROGS(GP,gnuplot)
+if test -n "$GP"; then
+   AC_MSG_CHECKING(if gnuplot can read from a pipe)
+   cat > conftest.gnu <<EOF
+set out "/dev/null"
+set term dumb
+plot '< (echo "1 1"; echo "2 2")'
+EOF
+   if $GP conftest.gnu 2>&5 1>&5; then
+      rm -f conftest.gnu
+      AC_MSG_RESULT([yes
+:-)   you may try to run $GP on the following files
+      after you installed everything:])
+   find examples -name "*.gnu" -print | sed "s%\./%         %"
+      echo ""
+   else
+      rm -f conftest.gnu
+      AC_MSG_RESULT([no 
+:-(   you may not be able to run $GP on the examples
+      docs_f/docs/*.gnu without changes])
+   fi
+fi
+
+AC_OUTPUT(Makefile source_f/Makefile source_f/slatec/Makefile source_f/randomize/Makefile source_c/Makefile source_c/routines/Makefile)
