@@ -9,21 +9,21 @@ N = length(y); % length of time series
 s = signal(y); % convert to signal object for TSTOOL
 
 %% Check Inputs
-if nargin<2 || isempty(maxtau)
+if nargin < 2 || isempty(maxtau)
     maxtau = ceil(N/4);
 end
 
-if nargin<3 || isempty(nbins)
-    nbins=round(sqrt(N/10)); % this is an arbitrary choice (!!) ;-)
+if nargin < 3 || isempty(nbins)
+    nbins = round(sqrt(N/10)); % this is an arbitrary choice (!!) ;-)
 end
 
 %% Run
 ami = data(amutual(s,maxtau,nbins));
-lami=length(ami);
+lami = length(ami);
 % plot(ami)
 
 % change ami vector to a structure for output
-for i=1:maxtau+1
+for i = 1:maxtau+1
     eval(['out.ami' num2str(i) ' = ami(' num2str(i) ');']);
 end
 
@@ -31,19 +31,18 @@ end
 out.mami = mean(ami);
 out.stdami = std(ami);
 
-
 % first miniimum of mutual information across range
-dami=diff(ami);
+dami = diff(ami);
 extremai = find(dami(1:end-1).*dami(2:end)<0);
 out.pextrema = length(extremai)/(lami-1);
 if isempty(extremai)
-   out.fmmi=lami; % actually represents lag, because indexes don't but diff delays by 1
+   out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
 else
     out.fmmi = extremai(1);
 end
 
 % Look for periodicities in local maxima
-maximai = find(dami(1:end-1)>0 & dami(2:end)<0)+1;
+maximai = find(dami(1:end-1) > 0 & dami(2:end) < 0) + 1;
 dmaximai = diff(maximai);
 % is there a big peak in dmaxima?
  % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
@@ -54,9 +53,6 @@ out.pmodeperiodmax = length(find(dmaximai==mode(dmaximai)))/length(dmaximai);
 
 % hold on; plot(maximai,ami(maximai),'or'); hold off
 % keyboard
-
-
-
 
 
 end

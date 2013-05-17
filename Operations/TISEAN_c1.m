@@ -31,7 +31,7 @@ end
 
 % Min/max embedding dimension, mmm
 if nargin<3 || isempty(mmm)
-    mmm=[2 10];
+    mmm = [2 10];
 end
 
 % Time separation, tsep
@@ -63,7 +63,7 @@ disp(['Just written temporary file ' fn ' for TISEAN'])
 %% Run the TISEAN code
 % run c1 code
 tic
-[pop res] = system(['H:\bin\c1 -d' num2str(tau) ' -m' num2str(mmm(1)) ...
+[pop res] = system(['c1 -d' num2str(tau) ' -m' num2str(mmm(1)) ...
                     ' -M' num2str(mmm(2)) ' -t' num2str(tsep) ' -n' ...
                     num2str(Nref) ' -o ' fn '.c1 ' fn]);
 if isempty(res)
@@ -76,7 +76,7 @@ end
 
 % Get local slopes from c1 file output of previous call
 tic
-[pop res] = system(['H:\bin\c2d -a2 ' fn '.c1']);
+[pop res] = system(['c2d -a2 ' fn '.c1']);
 if isempty(res)
     delete(fn) % remove the temporary data file
     delete([fn '.c1']) % remove the TISEAN file write output

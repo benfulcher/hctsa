@@ -9,29 +9,29 @@ function out = WL_varchg(y, wname, level, maxnchpts, mindelay)
 %% Check Inputs
 N = length(y);
 
-if nargin<2 || isempty(wname)
+if nargin < 2 || isempty(wname)
     wname = 'db3'; % default wavelet
 end
 
-if nargin<3 || isempty(level)
+if nargin < 3 || isempty(level)
    level = 3; % level of wavelet decomposition
 end
 if strcmp(level,'max')
     level = wmaxlev(N,wname);
 end
 
-if nargin<4 || isempty(maxnchpts)
+if nargin < 4 || isempty(maxnchpts)
    maxnchpts = 5; % maximum number of change points
 end
 
-if nargin<5 || isempty(mindelay)
+if nargin < 5 || isempty(mindelay)
      mindelay = 0.01; % 1% of the time series length
 end
-if mindelay>0 && mindelay<1
-   mindelay = mindelay*N;
+if mindelay > 0 && mindelay < 1
+   mindelay = ceil(mindelay*N);
 end
 
-if wmaxlev(N,wname)<level
+if wmaxlev(N,wname) < level
     disp('Chosen level is too large for this wavelet on this signal. Sorry.');
     return
 end

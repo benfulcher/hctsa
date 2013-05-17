@@ -15,9 +15,9 @@ function out = TISEAN_nstat_z(y,nseg,embedparams)
 % Ben Fulcher 17/11/2009
 
 %% Check Inputs / Set defaults
-if nargin<3
-    embedparams={1,3};
-    disp('using default embedding using tau=1 and m=3')
+if nargin < 3
+    embedparams = {1,3};
+    disp('Using default embedding using tau=1 and m=3')
 end
 tm = benembed(y,embedparams{1},embedparams{2},2);
 
@@ -37,9 +37,9 @@ if length(y)/tm(1) < nseg*8
 end
 % disp(['H:\bin\','stp -d' num2str(tm(1)) ' -m' num2str(tm(2)) ...
 %                   ' -%' num2str(flevel) ' -t' num2str(tsteps) ' ' fn]);
-[pop,res] = system(['H:\bin\','nstat_z -#' num2str(nseg) ' -d' num2str(tm(1)) ' -m' num2str(tm(2)) ' ' fn]);
+[pop,res] = system(['nstat_z -#' num2str(nseg) ' -d' num2str(tm(1)) ' -m' num2str(tm(2)) ' ' fn]);
 delete(fn) % remove the temporary file fn
-if isempty(res), disp('Call to TISEAN failed. Exiting'); return, end
+if isempty(res), error('Call to TISEAN failed. Exiting'), end
 
 
 %% Read the input

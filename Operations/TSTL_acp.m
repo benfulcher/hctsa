@@ -23,38 +23,38 @@ elseif strcmp(tau,'ac')
     tau = CO_fzcac(y);
 end
 % time delay can't be more than 1/20th of time series length
-if tau>N/20
+if tau > N/20
     tau = floor(N/20);
 end
 
 
 % (*) past
-if nargin<3 || isempty(past)
+if nargin < 3 || isempty(past)
     past = 1;
 end
-if past>0 && past <1
+if past > 0 && past < 1
 	past = floor(past*N); % specify a proportion of the time series length
 end
 
 
 % (*) maxdelay
-if nargin<4 || isempty(maxdelay)
+if nargin < 4 || isempty(maxdelay)
     maxdelay = floor(N/4);
 end
-if maxdelay>0 && maxdelay<1
+if maxdelay > 0 && maxdelay < 1
 	maxdelay = floor(maxdelay*N); % specify a proportion of the time series length
 end
 
 % (*) maxdim
-if nargin<5 || isempty(maxdim)
+if nargin < 5 || isempty(maxdim)
     maxdim = 10;
 end
 
 % (*) nref
-if nargin<6 || isempty(nref)
+if nargin < 6 || isempty(nref)
     nref = floor(N/10); % 1/10 of the time series length (I think should be greater -- 50%)
 end
-if nref>0 && nref<1
+if nref > 0 && nref < 1
 	nref = floor(nref*N); % specify a proportion of the time series length
 end
 
@@ -64,7 +64,9 @@ catch emsg
     if strcmp(emsg.message,'Average interpoint-distance in data set B seems to be zero');
         out = NaN;
         return
-    end
+    else
+		disp(['Unexpected error in TSTL_acp: ' emsg])
+	end
 end
 
 %% Get outputs

@@ -8,7 +8,7 @@ N = length(y); % data length (number of samples)
 
 %% Check inputs
 % time delay, tau
-if nargin<2 || isempty(tau)
+if nargin < 2 || isempty(tau)
     tau = 1;
 end
 if strcmp(tau,'ac')
@@ -18,15 +18,15 @@ elseif strcmp(tau,'mi')
 end
 
 % Maximum embedding dimension
-if nargin<3 || isempty(maxm)
+if nargin < 3 || isempty(maxm)
     maxm = 10;
 end
 
 % Theiler window
-if nargin<4 || isempty(theilerwin)
+if nargin < 4 || isempty(theilerwin)
    theilerwin = 0.01; % 1% of data length
 end
-if theilerwin>0 && theilerwin <1 % specify proportion of data length
+if theilerwin > 0 && theilerwin < 1 % specify proportion of data length
     theilerwin = round(theilerwin*N);
 end
 
@@ -38,7 +38,7 @@ disp(['Just written temporary file ' fn ' for TISEAN'])
 dlmwrite(fn,y);
 
 %% Run the TISEAN code
-[~, res] = system(['H:\bin\d2 -d' num2str(tau) ' -M1,' num2str(maxm) ...
+[~, res] = system(['d2 -d' num2str(tau) ' -M1,' num2str(maxm) ...
                     ' -t' num2str(theilerwin) ' ' fn]);
 delete(fn) % remove the temporary data file
 
