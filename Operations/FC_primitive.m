@@ -10,7 +10,7 @@ function out = FC_primitive(y,fmeth,fparam)
 % 'acf': uses the autocorrelation coefficients at order given by <fparam>
 % 'lfit': fit linear to a certain window of the time series; do linear
 %           extrapolation
-% Ben Fulcher approx. Nov. 2009
+% Ben Fulcher, Nov 2009
 
 switch fmeth
     case 'mean'

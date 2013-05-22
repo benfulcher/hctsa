@@ -1,19 +1,9 @@
 function out = MD_hrv_classic(y)
-% Packages up classic HRV operations -- adapted from code emailed from Max 
-% Little on 26/1/2009. Implemented on 12/4/2010. Just the usual efficient
-% turn-around time.
-% Ben Fulcher 12/4/2010.
-
-% function [ tri, SD1, SD2] = hrv_classic(series)
-% Calculates classical HRV analysis measures from a given NN/RR time series
-% in units of seconds.
+% Packages up classic HRV operations that calculate classical HRV analysis measures from a given NN/RR time series in units of seconds.
+% Adapted from code emailed from Max Little on 26/1/2009. Implemented on 12/4/2010. Yep, a typically efficient turn-around time of over one year.
+% Ben Fulcher, 12/4/2010.
 
 % Standard defaults
-
-% Calculate simple statistics
-% mu    = mean(y); = 0
-% sigma = std(y); = 1
-
 diffy = diff(y);
 N = length(y);
 
@@ -62,7 +52,6 @@ rmssd = std(diffy); % std of differenced series
 sigma = std(y); % should be 1 for zscored time series
 out.SD1 = 1/sqrt(2) * rmssd * 1000;
 out.SD2 = sqrt(2 * sigma^2 - (1/2) * rmssd^2) * 1000;
-
 
 
 

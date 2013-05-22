@@ -1,12 +1,15 @@
 function out = DN_kssimpc(x,pinkbeanie)
-% REQUIRES RAW TIME SERIES AS INPUT: x
+% Compares the distribution of a time series to a z-scored version of it
+% Possibly a stupid idea
+% Takes in a (non-zscored) time series: x
+% Specify a statistic, pinkbeanie, to calculate
 
-[f xi] = ksdensity(x); % the smoothed empirical distribution
-[fz xiz] = ksdensity(zscore(x)); % smoothed zscored empirical distribution
+[f, xi] = ksdensity(x); % the smoothed empirical distribution
+[fz, xiz] = ksdensity(zscore(x)); % smoothed zscored empirical distribution
 
 switch pinkbeanie
     case 'numpeaks' % number of peaks
-        df = diff(f); ddf=diff(df); % original
+        df = diff(f); ddf = diff(df); % original
         sdsp = ddf(sgnchange(df));
         out1 = length(find(sdsp<-0.0002)); % 'large enough' maxima
         
@@ -23,21 +26,8 @@ switch pinkbeanie
         out1 = -sum(f.*log(f)*(xi(2)-xi(1)));
         out2 = -sum(fz.*log(fz)*(xiz(2)-xiz(1)));
         out = out2/out1; % ratio of zscored to original entropy
-        
-%% DON'T USE THE REST; LEAVE THEM HERE FOR COMPLETENESS
-%     case 'numcross' % number of times crosses a given constant value
-%         if nargin<3
-%             disp('error, specify a number')
-%             out=NaN; return
-%         end
-%         places=sgnchange(f-ange);
-%         out=length(places);
-%     case 'area'
-%         if nargin<3
-%             disp('error, specify a number')
-%             out=NaN; return
-%         end
-%         out=sum(f(f<ange).*(xi(2)-xi(1))); % integral under this portion
+    otherwise
+        error('DN_kssimpc: Invalid statistic specified')
 end
 
 

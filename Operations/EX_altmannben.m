@@ -10,6 +10,8 @@ function out = EX_altmannben(y,a,b)
 % minimum number of kicks), and returns a and b...?
 % Ben Fulcher October 2009
 
+doplot = 0; % can set to 1 to plot outputs
+
 %% Preliminaries
 N = length(y);
 y = abs(y); % extreme events defined in terms of absolute deviation from mean
@@ -26,16 +28,22 @@ kicks = zeros(N,1);
 q(1) = 1;
 
 for i = 2:N
-	if y(i) > q(i-1) % extreme event
+	if y(i) > q(i-1) % Extreme event
 		% q(i) = (1+a)*q(i-1); % increase barrier by proportion a
 		q(i) = (1+a)*y(i); % increase barrier above the new observation by a factor a
-		kicks(i) = q(i)-q(i-1); % the size of the increase
+		kicks(i) = q(i)-q(i-1); % The size of the increase
 	else
-		q(i) = (1-b)*q(i-1); % decrease barrier by proportion b
+		q(i) = (1-b)*q(i-1); % Decrease barrier by proportion b
 	end
 end
 
-% hold off; plot(y,'.-k'), hold on, plot(q,'--r'); hold off
+if doplot
+    figure('color','w')
+    hold on
+    plot(y,'.-k')
+    plot(q,'--r')
+    hold off
+end
 
 %% Output
 

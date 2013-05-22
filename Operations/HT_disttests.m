@@ -4,15 +4,15 @@ function p = HT_disttests(x,ange,mydistn,nbins)
 %% First fit the distribution
 switch mydistn
     case 'norm'
-        [a b]=normfit(x);
+        [a b] = normfit(x);
     case 'ev'
-        a=evfit(x);
+        a = evfit(x);
     case 'uni'
-        [a b]=unifit(x);
+        [a b] = unifit(x);
     case 'beta'
         % clumsily scale to the range (0,1)
-        x=(x-min(x)+0.01*std(x))/(max(x)-min(x)+0.02*std(x));
-        a=betafit(x);        % then fit
+        x = (x-min(x)+0.01*std(x))/(max(x)-min(x)+0.02*std(x));
+        a = betafit(x);        % then fit
     case 'rayleigh'
         if any(x<0),p=NaN; return
         else % valid domain to fit a Rayleigh distribution

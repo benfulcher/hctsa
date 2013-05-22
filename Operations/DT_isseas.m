@@ -1,30 +1,34 @@
 function out = DT_isseas(y)
-% tests to see if seasonal by a simple sin model fit test
+% Simple seasonality check on the input time series, y
+% The test relies on a simple sinusoidal model fit
+% Uses the 'fit' function from Matlab's Curve Fitting Toolbox
 % Input: y: time series to test
 % Output: 1 (seasonal), 0 (non-seasonal)
-% Ben Fulcher 9/7/09
+% Ben Fulcher 9/7/2009
 
 %% Foreplay
-if size(y,2)>size(y,1)
-    y=y';
+% Make sure the input time series, y, is a column vector
+if size(y,2) > size(y,1)
+    y = y';
 end
-y = zscore(y);% so that all time series are normalized to the same amplitude
-N = length(y); % length of time series
+y = benzscore(y); % input time series should be z-scored for a fair comparison
+N = length(y); % length of input time series
 r = [1:N]'; % range on which to fit
 
-%% Fit
-[cfun,gof] = fit(r,y,'sin1'); % fits form: a1*sin(b1*x+c1)
+%% Fit a sinusoidal model
+[cfun, gof] = fit(r,y,'sin1'); % fits form: a1*sin(b1*x+c1)
 
+%% Two conditions for determining whether time series contains periodicities:
 % Condition 1: fit is ok
-th_fit=0.3; % r2>th_fit
+th_fit = 0.3; % r2>th_fit
+
 % Condition 2: amplitude is not too small
-th_ampl=0.5; % a1>th_ampl
-% gof.rsquare
-% cfun.a1
-if gof.rsquare>th_fit && abs(cfun.a1>th_ampl)
-    out=1;
+th_ampl = 0.5; % a1>th_ampl
+
+if gof.rsquare > th_fit && abs(cfun.a1 > th_ampl)
+    out = 1; % test thinks the time series has strong periodicities
 else
-    out=0;
+    out = 0; % test thinks the time series doesn't have any strong periodicities
 end
 
 end

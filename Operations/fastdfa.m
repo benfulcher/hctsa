@@ -22,7 +22,7 @@
 
 function [alpha, intervals, flucts] = fastdfa(x, varargin)
 
-if size(x,1)<size(x,2);x=x';end % LINE ADDED BY B.D. FULCHER 19/1/09
+if size(x,1) < size(x,2); x = x'; end % LINE ADDED BY B.D. FULCHER 19/1/09
 
 [xpts, ypts] = fastdfa_core(x, varargin{:});
 
@@ -33,3 +33,5 @@ flucts    = datapts(:,2);
 
 coeffs    = polyfit(log10(xpts), log10(ypts), 1);
 alpha     = coeffs(1);
+
+end

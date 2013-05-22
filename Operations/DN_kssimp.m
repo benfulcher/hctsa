@@ -1,6 +1,10 @@
 function out = DN_kssimp(x,pinkbeanie,ange)
+% Calculates simple statistics about the kernel smoothed distribution of values in the time series
+% Uses the ksdensity function in Matlab's Statistics Toolbox
+% Ben Fulcher, 2009
 
-[f xi] = ksdensity(x); % the smoothed empirical distribution
+% Compute the smoothed empirical distribution of values in the time series
+[f, xi] = ksdensity(x);
 
 switch pinkbeanie
     case 'numpeaks' % number of peaks
@@ -11,22 +15,21 @@ switch pinkbeanie
     case 'max'
         out = max(f);
     case 'entropy'
-        out = -sum(f(f>0).*log(f(f>0))*(xi(2)-xi(1)));
+        out = - sum(f(f>0).*log(f(f>0))*(xi(2)-xi(1)));
     case 'numcross' % number of times crosses a given constant value
-        if nargin<3
-            disp('error, specify a number')
-            out = NaN; return
+        if nargin < 3
+            error('DN_kssimp: Specify a number')
         end
         places = sgnchange(f-ange);
         out = length(places);
     case 'area'
-        if nargin<3
-            disp('error, specify a number'), out=NaN; return
+        if nargin < 3
+            error('DN_kssimp: Specify a number')
         end
-        out=sum(f(f<ange).*(xi(2)-xi(1))); % integral under this portion
+        out = sum(f(f<ange).*(xi(2)-xi(1))); % integral under this portion
 	case 'arclength'  % path length
-		if nargin<3
-            disp('error, specify a number'), out=NaN; return
+		if nargin < 3
+            error('DN_kssimp: Specify a number')
         end
         m = mean(x);
 		fd = abs(diff(f(xi>m-ange & xi<m+ange))); % The integrand in the path length formula

@@ -1,6 +1,4 @@
 function out = EN_progranz(y,howtorand)
-% PROGRANZ
-% Ben Fulcher approx. Oct. 2009
 % Progressively randomizes the input time series, returning measures of
 % what happens as a result
 % Inputs:
@@ -12,11 +10,11 @@ function out = EN_progranz(y,howtorand)
 %             series with another random element
 %             3) 'permute' -- progressively permutes elements of the time
 %             series
+% Ben Fulcher, October 2009
 
-%% Check z-scored
-y = zscore(y);
+y = zscore(y); % Input time series should be z-scored
+N = length(y); % length of the time series
 
-N = length(y);
 nstats = 11;
 randp_max = 2; % time series has been randomized to 2 times its length
 rand_inc = 10/100; % this proportion of the time series between calculations
@@ -210,15 +208,15 @@ out.statav5hp = gethp(stats(:,10));
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,11) -0.1 stats(end,11)]);
 f = fittype('a*exp(b*x)+c','options',s);
 [c,gof] = fit(r,stats(:,11),f);
-out.swss5_1fexpa=c.a;
-out.swss5_1fexpb=c.b;
-out.swss5_1fexpc=c.c;
-out.swss5_1fexpr2=gof.rsquare;
-out.swss5_1fexpadjr2=gof.adjrsquare;
-out.swss5_1fexprmse=gof.rmse;
+out.swss5_1fexpa = c.a;
+out.swss5_1fexpb = c.b;
+out.swss5_1fexpc = c.c;
+out.swss5_1fexpr2 = gof.rsquare;
+out.swss5_1fexpadjr2 = gof.adjrsquare;
+out.swss5_1fexprmse = gof.rmse;
 
-out.swss5_1diff=abs((stats(end,11)-stats(1,11))/stats(end,11));
-out.swss5_1hp=gethp(stats(:,11));
+out.swss5_1diff = abs((stats(end,11)-stats(1,11))/stats(end,11));
+out.swss5_1hp = gethp(stats(:,11));
 
     function out = doyourcalcthing(y,y_rand)
         % Cross Correlation to original signal

@@ -1,7 +1,8 @@
 function out = EC_vratiotest(y,periods,IIDs)
-% Performs the vratio test from the Econometrics Toolbox. Assesses the null
-% hypothesis of a random walk in the time series given as y. Null
-% hypothesis rejected for some critical pValue.
+% Performs the variance ratio test.
+% Uses the vratiotest function from Matlab's Econometrics Toolbox
+% The test assesses the null hypothesis of a random walk in the time series y.
+% The null hypothesis is rejected for some critical p-value.
 % Ben Fulcher 26/2/2010
 
 % Can set step sizes for random walk, and also change the null hypothesis
@@ -13,17 +14,16 @@ if nargin < 2 || isempty(periods)
 end
 
 % e.g., could be [1,1,1,1,0,0,0,0]
-if nargin<3 || isempty(IIDs)
+if nargin < 3 || isempty(IIDs)
     IIDs = 0;
 end
 IIDs = logical(IIDs);
 
+%% Perform the test:
 [h,pValue,stat,cValue,ratio] = vratiotest(y,'period',periods,'IID',IIDs);
 
-% keyboard
-
-if length(h)>1
-   % return statistics on multiple outputs for multiple periods/IIDs
+if length(h) > 1
+   % Return statistics on multiple outputs for multiple periods/IIDs
    out.maxpValue = max(pValue);
    out.minpValue = min(pValue);
    out.meanpValue = mean(pValue);
@@ -38,9 +38,8 @@ if length(h)>1
    out.maxstat = max(stat);
    out.minstat = min(stat);
    
-   
 else
-    % summarize the single test performed
+    % Summarize the single test performed
     out.pValue = pValue;
     out.stat = stat;
     out.ratio = ratio;

@@ -1,5 +1,5 @@
-function [estimate,nbias,sigma,descriptor]=CO_information(x,y,descriptor,approach,base)
-%INFORMATION   Estimates the mutual information of two stationary signals with
+function [estimate,nbias,sigma,descriptor] = CO_information(x,y,descriptor,approach,base)
+% INFORMATION  Estimates the mutual information of two stationary signals with
 %              independent pairs of samples using various approaches.
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y) or
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y,DESCRIPTOR) or
@@ -29,9 +29,11 @@ function [estimate,nbias,sigma,descriptor]=CO_information(x,y,descriptor,approac
 %   Copyright (c) by R. Moddemeijer
 %   $Revision: 1.1 $  $Date: 2001/02/05 08:59:36 $
 
+% Some trivial details were modified by Ben Fulcher; see http://www.cs.rug.nl/~rudy/matlab/source/information.m for original code
 
 
-if nargin <1
+
+if nargin < 1
    disp('Usage: [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y)')
    disp('       [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y,DESCRIPTOR)')
    disp('       [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y,DESCRIPTOR,APPROACH)')
@@ -46,83 +48,83 @@ end
 [NRowX,NColX]=size(x);
 
 if NRowX~=1
-    x=x';
+    x = x';
     %   error('Invalid dimension of X'); % CHANGED BY BEN
-end;
+end
 
 [NRowY,NColY]=size(y);
 
 if NRowY~=1
-    y=y';
+    y = y';
 %   error('Invalid dimension of Y'); % CHANGED BY BEN
-end;
+end
 
-if NColX~=NColY
+if NColX ~= NColY
   error('Unequal length of X and Y');
-end;
+end
 
-if nargin>5
-  error('Too many arguments');
-end;
+if nargin > 5
+  error('Too many input arguments');
+end
 
-if nargin==2
+if nargin == 2
   [h,descriptor]=RY_histogram2(x,y);
-end;
+end
 
-if nargin>=3
+if nargin >= 3
   [h,descriptor]=RY_histogram2(x,y,descriptor);
-end;
+end
 
-if nargin<4
-  approach='unbiased';
-end;
+if nargin < 4
+  approach = 'unbiased';
+end
 
-if nargin<5
-  base=exp(1);
-end;
+if nargin < 5
+  base = exp(1);
+end
 
-lowerboundx=descriptor(1,1);
-upperboundx=descriptor(1,2);
-ncellx=descriptor(1,3);
-lowerboundy=descriptor(2,1);
-upperboundy=descriptor(2,2);
-ncelly=descriptor(2,3);
+lowerboundx = descriptor(1,1);
+upperboundx = descriptor(1,2);
+ncellx = descriptor(1,3);
+lowerboundy = descriptor(2,1);
+upperboundy = descriptor(2,2);
+ncelly = descriptor(2,3);
 
-estimate=0;
-sigma=0;
-count=0;
+estimate = 0;
+sigma = 0;
+count = 0;
 
 % determine row and column sums
 
-hy=sum(h);
-hx=sum(h');
+hy = sum(h);
+hx = sum(h');
 
-for nx=1:ncellx
-  for ny=1:ncelly
+for nx = 1:ncellx
+  for ny = 1:ncelly
     if h(nx,ny)~=0 
-      logf=log(h(nx,ny)/hx(nx)/hy(ny));
+      logf = log(h(nx,ny)/hx(nx)/hy(ny));
     else
-      logf=0;
-    end;
-    count=count+h(nx,ny);
-    estimate=estimate+h(nx,ny)*logf;
-    sigma=sigma+h(nx,ny)*logf^2;
-  end;
-end;
+      logf = 0;
+    end
+    count = count+h(nx,ny);
+    estimate = estimate+h(nx,ny)*logf;
+    sigma = sigma+h(nx,ny)*logf^2;
+  end
+end
 
 % biased estimate
 
-estimate=estimate/count;
-sigma   =sqrt( (sigma/count-estimate^2)/(count-1) );
-estimate=estimate+log(count);
-nbias   =(ncellx-1)*(ncelly-1)/(2*count);
+estimate = estimate/count;
+sigma    = sqrt( (sigma/count-estimate^2)/(count-1) );
+estimate = estimate+log(count);
+nbias    = (ncellx-1)*(ncelly-1)/(2*count);
 
 % conversion to unbiased estimate
 
 if approach(1)=='u'
   estimate=estimate-nbias;
   nbias=0;
-end;
+end
 
 % conversion to minimum mse estimate
 
@@ -133,7 +135,7 @@ if approach(1)=='m'
   nbias   =(1-lambda)*estimate;
   estimate = lambda*estimate;
   sigma   =lambda*sigma;
-end;
+end
 
 % base transformation
 

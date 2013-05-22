@@ -1,7 +1,7 @@
 function out = CO_acfremove(y,howtorem,p)
-% Remove points from the time series and look at how the acf changes
-% Remove a proportion p points using method howtorem
-% y needs to be a z-scored time series
+% Analyze how the autocorrelation function changes as points are removed from a time series
+% Remove a proportion p points from the full time series using a specified removal algorithm, howtorem
+% Input time series, y, should be z-scored
 % Ben Fulcher September 2009
 
 N = length(y);

@@ -6,13 +6,13 @@ function out = MF_arfit(y,pmin,pmax,selector)
 %% Check Inputs
 N = length(y); % time series length
 
-if nargin<2 || isempty(pmin)
+if nargin < 2 || isempty(pmin)
     pmin = 1;
 end
-if nargin<3 || isempty(pmax)
+if nargin < 3 || isempty(pmax)
     pmax = 10;
 end
-if nargin<4 || isempty(selector)
+if nargin < 4 || isempty(selector)
      selector = 'sbc';
      % Use Schwartz's Bayesian Criterion to choose optimum model order
 end
@@ -178,8 +178,5 @@ out.maxexctn = max(exctn);
 out.minexctn = min(exctn);
 out.meanexctn = mean(exctn);
 out.stdexctn = std(exctn);
-
-
-
 
 end

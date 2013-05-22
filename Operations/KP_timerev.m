@@ -1,5 +1,5 @@
 function res = KP_timerev(x,lag)
-% res = timerev(x,lag) calculates a time reversal asymmetry statistic.
+% Calculates a time reversal asymmetry statistic
 % x --- the time series
 % lag --- a time scale (in samples) default 1
 % Copyright (c) 1996 by D. Kaplan, All Rights Reserved

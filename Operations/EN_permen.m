@@ -1,10 +1,13 @@
 function e = EN_permen(y,ord)
+% Permutation entropy algorithm
 % Adapted from logisticPE, downloaded from an online complexity article
-% Ben Fulcher approx September 2009
+% Not coded by Ben Fulcher, but adapted September 2009
 
-
-if size(y,1)>size(y,2); y=y'; end
-N = length(y);
+% Ensure y is a column vector
+if size(y,1) > size(y,2);
+    y = y';
+end
+N = length(y); % length of the time series
 
 permlist = perms(1:ord);
 % c(1:length(permlist))=0;

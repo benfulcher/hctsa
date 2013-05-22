@@ -1,10 +1,13 @@
 function out = MF_M_mtlbfit(x,dmodel,nbins)
-% x: the (zscored) time series
+% Fits a model simple time-series model or distribution to the data
+% Uses the function fit from Matlab's Curve Fitting Toolbox
+% An output uses the function runstest from Matlab's Statistics Toolbox
+% x: the (z-scored) time series as a column vector
 % dmodel: the model name
-% fox: the output
 % nbins: for distribution fits: number of bins in the histogram
 %                                       (or, if nbins=0, uses ksdensity)
-% Ben Fulcher 2009
+% Ben Fulcher, 2009
+
 
 %% Fit the model
 % Two cases: distribution fits and fits on the data
@@ -55,25 +58,11 @@ else
 end
 
 %% Prepare the Output
-% out=struct('r2',[],'adjr2',[],'rmse',[],'resAC1',[],'resAC2',[],'resruns',[],'reslbq',[]);
-
 out.r2 = gof.rsquare; % rsquared
 out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsqured
 out.rmse = gof.rmse;  % root mean square error
 out.resAC1 = CO_autocorr(output.residuals,1); % autocorrelation of residuals at lag 1
 out.resAC2 = CO_autocorr(output.residuals,2); % autocorrelation of residuals at lag 2
 out.resruns = HT_hyptests(output.residuals,'runstest'); % runs test on residuals -- outputs p-value
-
-% NEVER HAVE ECONOMETRICS TOOLBOX LICENCE -- A BIG PAIN -- REMOVE THIS OUTPUT
-% try
-%     out.reslbq=HT_hyptests(output.residuals,'lbq'); % lbq test of randomness on residuals -- p-value
-% catch me
-%     if strcmp(me.identifier,'MATLAB:license:checkouterror')
-%         disp('No license to econometrics toolbox :( ...')
-% %         out.reslbq = []; % doesn't exist -- will have to recalculate next
-% %         time
-%         return % recalculate all again next time; have to anyway
-%     end
-% end
 
 end

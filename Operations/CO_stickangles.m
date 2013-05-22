@@ -1,10 +1,12 @@
 function out = CO_stickangles(y,method)
-% Looks at line-of-sight angles between time series points, treating each
-% as a stick protruding from a opaque baseline
-% Ben Fulcher September 2009
+% Analyzes the set of line-of-sight angles between time series points, by
+% treating each data point as a stick protruding from a opaque baseline
+% Ben Fulcher, September 2009
+
+
+doplot = 0; % can plot to see
 
 N = length(y);
-
 
 ix = cell(2,1); %indicies for positive(1) and negative(2) entries of time series vector
 n = zeros(2,1);
@@ -28,12 +30,17 @@ for j = 1:2
 end
 allangles = vertcat(angles{:});
 
-% hold off;plot(angles{1},'.k');hold on
-% plot(angles{2},'.r')
-% hold off;[yp xp]=ksdensity(angles{1});
-% [yn xn]=ksdensity(angles{2});
-% plot(xp,yp,'r');hold on;plot(xn,yn,'b');
-% hist(angles{1},50)
+if doplot
+    figure('color','w')
+    % A few options of what to plot:
+    hold off; plot(angles{1},'.k'); hold on
+    plot(angles{2},'.r')
+    hold off; [yp xp] = ksdensity(angles{1});
+    [yn xn] = ksdensity(angles{2});
+    plot(xp,yp,'r'); hold on; plot(xn,yn,'b');
+    hist(angles{1},50);
+end
+
 
 % quite interesting
 %% Basic stats?
@@ -64,7 +71,7 @@ else
 end
 
 
-%% how symmetric is the distribution of angles?
+%% How symmetric is the distribution of angles?
 % on raw outputs
 % difference between ksdensities of positive and negative portions
 if ~isempty(angles{1});
@@ -87,8 +94,8 @@ end
 
 
 %% z-score
-zangles=cell(2,1);
-zangles{1}=zscore(angles{1}); zangles{2}=zscore(angles{2}); zallangles=zscore(allangles);
+zangles = cell(2,1);
+zangles{1} = zscore(angles{1}); zangles{2} = zscore(angles{2}); zallangles = zscore(allangles);
 
 %% how stationary are the angle sets?
 % Do simple StatAvs for mean and std:
@@ -180,7 +187,7 @@ if ~isempty(zangles{1});
     out.ac1_p = CO_autocorr(zangles{1},1);
     out.ac2_p = CO_autocorr(zangles{1},2);
 else
-    out.tau_p = NaN; out.ac1_p=NaN; out.ac2_p = NaN;
+    out.tau_p = NaN; out.ac1_p = NaN; out.ac2_p = NaN;
 end
 
 if ~isempty(zangles{2});
@@ -233,7 +240,6 @@ out.kurtosis_all = kurtosis(allangles);
 %% Outliers?
 % forget about this, I think.
 
-
     function [statavmean statavstd] = sub_statav(x,n)
         % Does a n-partition statav.
         % Require 2*n points (i.e., minimum of 2 in each partition) to do a
@@ -245,7 +251,7 @@ out.kurtosis_all = kurtosis(allangles);
         end
         
         x_buff = buffer(x,floor(NN/n));
-        if size(x_buff,2)>n,x_buff = x_buff(:,1:n); end % lose last point
+        if size(x_buff,2) > n, x_buff = x_buff(:,1:n); end % lose last point
         statavmean = std(mean(x_buff))/std(x);
         statavstd = std(std(x_buff))/std(x);
     end

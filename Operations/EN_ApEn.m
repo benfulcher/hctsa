@@ -1,35 +1,31 @@
-function out = EN_ApEn(u,mnom,rth)
+function out = EN_ApEn(y,mnom,rth)
+% I can't find where I obtained this code, but Ben Fulcher didn't write it
 
 % mnom = 1;
 % rth=0.2;
-r = rth*std(u); % threshold of similarity
-N = length(u);% length of time series
+r = rth*std(y); % threshold of similarity
+N = length(y);% length of time series
 phi = zeros(2,1);% phi(1)=phi_m, phi(2)=phi_{m+1}
 
-% if matlabpool('size') == 0
-%     matlabpool open
-% else
-%     disp(['matlab pool already open. Size: ' num2str(matlabpool('size'))])
-% end
-% tic
+
 for k = 1:2
     m = mnom+k-1; % pattern length
     C = zeros(N-m+1,1);
     % Define the matrix x, containing subsequences of u
     x = zeros(N-m+1,m);
     
-    % Form vector sequences x from the time series u
-    for i=1:N-m+1
-        x(i,:) = u(i:i+m-1);
+    % Form vector sequences x from the time series y
+    for i = 1:N-m+1
+        x(i,:) = y(i:i+m-1);
     end
     
-    ax=ones(N-m+1,m);
+    ax = ones(N-m+1,m);
     for i = 1:N-m+1
-        for j=1:m
-            ax(:,j)=x(i,j);
+        for j = 1:m
+            ax(:,j) = x(i,j);
         end
         d = abs(x-ax);
-        if m > 1;% Takes maximum distance
+        if m > 1 % Takes maximum distance
             d = max(d,[],2)';
         end
         dr = (d<=r);
@@ -38,6 +34,5 @@ for k = 1:2
     phi(k) = mean(log(C));
 end
 out = phi(1)-phi(2);
-% toc
 
 end

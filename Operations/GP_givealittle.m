@@ -3,17 +3,19 @@ function out = GP_givealittle(y,covfunc,npoints)
 % equally-spaced points through the time series
 % Ben Fulcher 22/1/2010
 
-if nargin<2 || isempty(covfunc)
+if nargin < 2 || isempty(covfunc)
     disp('GP_hps: We''re using default sum of SE and noise covariance function')
     covfunc = {'covSum', {'covSEiso','covNoise'}};
 end
 
-if nargin<3 || isempty(npoints)
+if nargin < 3 || isempty(npoints)
     npoints = 20;
 end
 
+doplot = 0; % set to 1 to visualize behavior
+
 %% Get the points
-N = length(y);
+N = length(y); % length of the time series
 tt = floor(linspace(1,N,npoints))'; % time range (training)
 yt = y(tt);
 
@@ -47,7 +49,7 @@ end
 %% Evaluate over the whole space now
 % evaluate at test points based on training time/data, predicting for
 % test times/data
-if N<=2000
+if N <= 2000
     ts = (1:N)';
 else % memory constraints force us to crudely resample
     ts = round(linspace(1,N,2000))';
@@ -56,17 +58,19 @@ end
 
 
 %% For Plotting
-% xstar = linspace(min(t),max(t),1000)';
-% [mu S2] = gpr(loghyper, covfunc, t, y, ts);
-% S2p = S2 - exp(2*loghyper(3)); % remove noise from predictions
-% S2p = S2;
-% figure('color','w');
-% f = [mu+2*sqrt(S2p);flipdim(mu-2*sqrt(S2p),1)];
-% fill([ts; flipdim(ts,1)], f, [6 7 7]/8, 'EdgeColor', [7 7 6]/8); % grayscale error bars
-% hold on;
-% plot(ts,mu,'k-','LineWidth',2); % mean function
-% plot(ts,y(ts),'.-k'); % original data
-
+if doplot
+    xstar = linspace(min(t),max(t),1000)';
+    [mu S2] = gpr(loghyper, covfunc, t, y, ts);
+    S2p = S2 - exp(2*loghyper(3)); % remove noise from predictions
+    S2p = S2;
+    figure('color','w');
+    f = [mu+2*sqrt(S2p);flipdim(mu-2*sqrt(S2p),1)];
+    fill([ts; flipdim(ts,1)], f, [6 7 7]/8, 'EdgeColor', [7 7 6]/8);
+            % grayscale error bars
+    hold on;
+    plot(ts,mu,'k-','LineWidth',2); % mean function
+    plot(ts,y(ts),'.-k'); % original data
+end
 
 
 %% Outputs
@@ -106,7 +110,7 @@ end
         % t: time
         % y: data
         
-        if nargin<5 || isempty(init_loghyper)
+        if nargin < 5 || isempty(init_loghyper)
             % Use default starting values for parameters
             % How many hyperparameters
             s = feval(covfunc{:}); % string in form '2+1', ... tells how many
@@ -123,16 +127,14 @@ end
         catch emsg
             if strcmp(emsg.identifier,'MATLAB:posdef')
                 disp('Error with lack of positive definite matrix for this function');
-                loghyper=NaN; return
+                loghyper = NaN; return
             elseif strcmp(emsg.identifier,'MATLAB:nomem')
-                disp('Out of memory. Leaving');
+                error('GP_givealittle: Out of memory');
                 % return as if a fatal error -- come back to this.
-                return
             else
                 keyboard
             end
         end
-        %        hyper = exp(loghyper);
         
     end
 

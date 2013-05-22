@@ -3,27 +3,27 @@ function out=CO_embed2_dist_varytau(y,maxtau)
 % This isn't very informative!!! SCRAP!!
 % Ben Fulcher September 2009
 
-taur=1:maxtau;
+taur = 1:maxtau;
 ntaur = length(taur);
 
 if size(y,2)>size(y,1); y=y'; end
 
 stats_store = zeros(7,ntaur);
 
-for i=1:ntaur
+for i = 1:ntaur
 
-	tau=taur(i);
+	tau = taur(i);
 	
-	m=[y(1:end-tau) y(1+tau:end)];
+	m = [y(1:end-tau) y(1+tau:end)];
 	d = sum(abs(diff(m(:,1)).^2 + diff(m(:,1)).^2),2);
 
-	stats_store(1,i)=CO_autocorr(d,1);
-	stats_store(2,i)=median(d);
-	stats_store(3,i)=max(d);
-	stats_store(4,i)=iqr(d);
-	stats_store(5,i)=min(d);
-	stats_store(6,i)=mean(d);
-	stats_store(7,i)=std(d);
+	stats_store(1,i) = CO_autocorr(d,1);
+	stats_store(2,i) = median(d);
+	stats_store(3,i) = max(d);
+	stats_store(4,i) = iqr(d);
+	stats_store(5,i) = min(d);
+	stats_store(6,i) = mean(d);
+	stats_store(7,i) = std(d);
 
 end
 

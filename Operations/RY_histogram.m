@@ -1,8 +1,8 @@
-function [result,descriptor]=RY_histogram(x,descriptor)
-%HISTOGRAM Computes the frequency histogram of the row vector x.
+function [result,descriptor] = RY_histogram(x,descriptor)
+% HISTOGRAM Computes the frequency histogram of the row vector x.
 %   [RESULT,DESCRIPTOR] = HISTOGRAM(X) or
 %   [RESULT,DESCRIPTOR] = HISTOGRAM(X,DESCRIPTOR) or
-%where
+% where
 %   DESCRIPTOR = [LOWER,UPPER,NCELL]
 %
 %   RESULT    : A row vector containing the histogram
@@ -21,7 +21,7 @@ function [result,descriptor]=RY_histogram(x,descriptor)
 %   $Revision: 1.2 $  $Date: 2001/02/05 09:54:29 $
 
 
-if nargin <1
+if nargin < 1
    disp('Usage: RESULT = HISTOGRAM(X)')
    disp('       RESULT = HISTOGRAM(X,DESCRIPTOR)')
    disp('Where: DESCRIPTOR = [LOWER,UPPER,NCELL]')
@@ -30,13 +30,13 @@ end
 
 % Some initial tests on the input arguments
 
-[NRowX,NColX]=size(x);
+[NRowX, NColX] = size(x);
 
-if NRowX~=1
+if NRowX ~= 1
   error('Invalid dimension of X');
 end;
 
-if nargin>2
+if nargin > 2
   error('Too many arguments');
 end;
 

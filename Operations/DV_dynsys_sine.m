@@ -1,4 +1,4 @@
-function out=DV_dynsys_sine(y,params)
+function out = DV_dynsys_sine(y,params)
 % Drives a dynamical system: double well potential using the vector of drives
 % given in y
 % Ben Fulcher September 2009
@@ -30,15 +30,16 @@ end
 
 %% OUTPUTS!
 % features of the trajectory
-if isnan(x(end)) || abs(x(end))>1E10
+if isnan(x(end)) || abs(x(end)) > 1E10
     % trajectory blew out
+    disp('DV_dynsys_sine: Trajectory blew out!');
     out = NaN;
 %     out.mean=NaN; out.median=NaN; out.range=NaN; out.proppos=NaN; out.pcross=NaN;
 %     out.ac1=NaN; out.ac10=NaN; out.ac50=NaN; out.tau=NaN; out.finaldev=NaN; out.std=NaN;
 else
-    out.mean = mean(x);
-    out.median = median(x);
-    out.range = range(x);
+    out.mean = mean(x); % mean
+    out.median = median(x); % median
+    out.range = range(x); % range
     out.proppos = length(find(x>0))/N; % proportion positive
     out.pcross = length(find((x(1:end-1)).*(x(2:end))<0))/(N-1); % crosses middle
     out.ac1 = abs(CO_autocorr(x,1));

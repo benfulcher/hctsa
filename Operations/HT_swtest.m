@@ -250,11 +250,11 @@ elseif tail == -1
     pValue = 1 - pValue;
 end
 
-%
 % To maintain consistency with existing Statistics Toolbox hypothesis
 % tests, returning 'H = 0' implies that we 'Do not reject the null 
 % hypothesis at the significance level of alpha' and 'H = 1' implies 
 % that we 'Reject the null hypothesis at significance level of alpha.'
-%
 
 H  = (alpha >= pValue);
+
+end

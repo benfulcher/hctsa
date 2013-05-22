@@ -16,16 +16,16 @@ function h = EN_histent(y,historks,nbins,olremp)
 % Ben Fulcher August 2009
 
 
-% (1) outlier removal
-if olremp~=0
-    y = y(y>quantile(y,olremp) & y<quantile(y,1-olremp));
+% (1) Outlier removal
+if olremp ~= 0
+    y = y(y > quantile(y,olremp) & y < quantile(y,1-olremp));
     if isempty(y)
         h = NaN; return
     end
 end
 
 
-% (2) form the histogram
+% (2) Form the histogram
 if strcmp(historks,'ks') % KSDENSITY method for pdf
     if isempty(nbins)
         [px xr] = ksdensity(y,'function','pdf'); % selects optimal width
@@ -33,17 +33,15 @@ if strcmp(historks,'ks') % KSDENSITY method for pdf
         [px xr] = ksdensity(y,'width',nbins,'function','pdf'); % uses specified width
     end
 elseif strcmp(historks,'hist') % HISTOGRAM method for pdf
-    [px xr] = hist(y,nbins);
+    [px, xr] = hist(y,nbins);
     px = px/(sum(px)*(xr(2)-xr(1))); % normalize to a probability density
 else
     return % error; must specify 'ks' or 'hist'
 end
 
-
-
 % plot(xr,px)
 
-% (3) carry out the entropy sum and return it as output
+% (3) Compute the entropy sum and return it as output
 h = -sum(px.*log(eps+px))*(xr(2)-xr(1));
 
 

@@ -1,20 +1,21 @@
 function out = MF_preproc(y,model,order)
 % Carries out a variety of preprocessings to look at improvement of fit to
-% a model (AR by default).
+% a model (AR by default)
+% Uses the benpp function to do the preprocessings
+% The AR model is fitted using the function ar and pe from Matlab's System Identification Toolbox
 % Ben Fulcher 18/2/2010
-% REDUNDANT --> benpp
 
 %% Preliminaries
 N = length(y); % length of the time series
 
 %% Inputs
 % Model: the model to fit preprocessed time series to
-if nargin<2 || isempty(model)
+if nargin < 2 || isempty(model)
     model = 'ar';
 end
 
 % order: the order of model to fit
-if nargin< 3 || isempty(order)
+if nargin < 3 || isempty(order)
     order = 2;
 end
 
@@ -33,7 +34,7 @@ fields = fieldnames(yp);
 nfields = length(fields);
 % statstore = struct('fpes',{});
 
-for i=1:nfields;
+for i = 1:nfields;
     data = [];
     % for each preprocessing, fit the model
     eval(['data = yp.' fields{i} ';']); 
@@ -69,7 +70,7 @@ end
 % end
 
 % No, I'll just do in-sample rms error, for a single model no point fpeing
-for i=2:nfields
+for i = 2:nfields
     eval(['out.rmserrrat_' fields{i} ' = ' num2str(statstore.rmserr(i)/statstore.rmserr(1)) ';']);
 end
 % In fact, greater error in this case means a better detrending in some

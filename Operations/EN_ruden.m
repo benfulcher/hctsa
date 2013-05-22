@@ -1,4 +1,4 @@
-function [estimate,nbias,sigma,descriptor]=EN_ruden(x,descriptor,approach,base)
+function [estimate,nbias,sigma,descriptor] = EN_ruden(x,descriptor,approach,base)
 %ENTROPY   Estimates the entropy of stationary signals with
 %          independent samples using various approaches.
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X) or
@@ -29,8 +29,7 @@ function [estimate,nbias,sigma,descriptor]=EN_ruden(x,descriptor,approach,base)
 %   $Revision: 1.1 $  $Date: 2001/02/05 08:59:36 $
 
 
-
-if nargin <1
+if nargin < 1
    disp('Usage: [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X)')
    disp('       [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X,DESCRIPTOR)')
    disp('       [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X,DESCRIPTOR,APPROACH)')
@@ -41,31 +40,31 @@ end
 
 % Some initial tests on the input arguments
 
-[NRowX,NColX]=size(x);
+[NRowX, NColX] = size(x);
 
 if NRowX~=1
-    x=x';
+    x = x';
 %   error('Invalid dimension of X');
-end;
+end
 
-if nargin>4
+if nargin > 4
   error('Too many arguments');
-end;
+end
 
-if nargin==1
+if nargin == 1
   [h,descriptor]=RY_histogram(x);
+end
+
+if nargin >= 2
+  [h,descriptor] = RY_histogram(x,descriptor);
 end;
 
-if nargin>=2
-  [h,descriptor]=RY_histogram(x,descriptor);
+if nargin < 3
+  approach = 'unbiased';
 end;
 
-if nargin<3
-  approach='unbiased';
-end;
-
-if nargin<4
-  base=2;%exp(1);
+if nargin < 4
+  base = 2;%exp(1);
 end;
 
 lowerbound=descriptor(1);

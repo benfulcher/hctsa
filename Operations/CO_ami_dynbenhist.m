@@ -1,19 +1,23 @@
 function out = CO_ami_dynbenhist(y,meth,nbins)
-% Look at automutual information using histograms -- vary over number of
-% bins to really get a good estimate; return max AMI over bin number range,
-% or minimum or median, or....
-% Uses hist2 by Nedialko Krouchev (from MATLAB Central)
-% [[hist2 for the people by Nedialko Krouchev
-%   20 Sep 2006 (Updated 21 Sep 2006)]]
-% y should be zscored
-% some methods require extra parameter nbins
+% Analyzes the automutual information of a time series using histograms computed using CO_ami_benhist
+% The input time series, y, should be z-scored
+% The automutual information is computed using a specified number of bins, nbins
 % Ben Fulcher September 2009
 
-taur = 0:50;
-nr = length(taur);
-amis = zeros(nr,1);
+%% Set defaults:
+% Default number of bins
+if nargin < 3,
+	nbins = 10;
+end
 
-for i=1:nr;
+maxtau = 50; % maximum time lag to compute up to
+
+%% Do the calculation:
+taur = 0:1:maxtau; % define the set of time lags
+nr = length(taur); % the total number of lags to compute the AMI at
+amis = zeros(nr,1); % the automutual information as a function of time lag
+
+for i = 1:nr;
     amis(i) = CO_ami_benhist(y,taur(i),meth,nbins);
 end
 

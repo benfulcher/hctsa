@@ -1,7 +1,9 @@
 function out = MF_M_ARfits(y,p)
 % AR fit of order p
+% Uses the arcov function from Matlab's Signal Processing Toolbox
 % Ben Fulcher
 
+% Fit the AR model:
 [a e] = arcov(y,p);
 
 out.e = e; % variance
@@ -13,9 +15,9 @@ end
 %% Residual analysis
 y_est = filter([0 -a(2:end)],1,y);
 N = length(y);
-err = y-y_est;
+err = y - y_est;
 
-out.rms = sqrt(sum(err.^2)/N); % rms error
+out.rms = sqrt(sum(err.^2)/N); % RMS error
 out.mu = mean(err); % mean error
 out.std = std(err); % std of error
 out.AC1 = CO_autocorr(err,1); % autocorrelation of residuals at lag 1

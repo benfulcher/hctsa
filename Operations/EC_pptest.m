@@ -1,39 +1,36 @@
 function out = EC_pptest(y,lags,model,teststat)
-% Relies on the Econometrics toolbox 'pptest' algorithm.
-% The Phillips-Peron unit root test.
+% Performs the Phillips-Peron unit root test.
+% Uses the pptest function from Matlab's Econometrics toolbox
 % Ben Fulcher 1/3/2010
 
-
 %% Inputs
-% the number of autocovariance lags to include in the Newey-West estimator
+% The number of autocovariance lags to include in the Newey-West estimator
 % of the long-run variance, lags.
-if nargin<2 || isempty(lags)
+if nargin < 2 || isempty(lags)
     lags = 0:5; % use 5 autoregressive lags.
 end
 
 % The model variant, model. Can be 'ar': autoregressive, 'ard':
 % autoregressive with drift, or 'ts': trend stationary.
-if nargin<3 || isempty(model)
+if nargin < 3 || isempty(model)
     model = 'ar'; % autoregressive
 end
 
 % The test statistics, teststat. Can be 't1': standard t statistics; or
 % 't2': a lag-adjusted, 'unstudentized' t statistic.
-if nargin<4 || isempty(teststat)
+if nargin < 4 || isempty(teststat)
     teststat = 't1'; % standard t statistic
 end
 
 
 %% Run the test
-
 [h,pValue,stat,cValue,reg] = pptest(y,'lags',lags,'model',model,'test',teststat);
 
-% keyboard
 %% Get outputs
 nout = length(h);
 
 if nout == 1
-    % just return the outcome of this single test
+    % Fust return the results from this single test
     out.pvalue = pValue;
     out.stat = stat;
     out.coeff1 = reg.coeff(1); % could be multiple, depending on the model
@@ -43,7 +40,7 @@ if nout == 1
     out.HQC = reg.HQC;
     out.rmse = reg.RMSE;
 else
-    % return statistics on the set of outputs
+    % Return statistics on the set of outputs
     out.maxpValue = max(pValue);
     out.minpValue = min(pValue);
     out.meanpValue = mean(pValue);

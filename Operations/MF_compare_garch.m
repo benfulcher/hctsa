@@ -2,21 +2,21 @@ function out = MF_compare_garch(y,preproc,pr,qr)
 % Compares a bunch of GARCH(P,Q) models to each other, returns statistics on the
 % best ones. This one focuses on the GARCH/variance component, and therefore
 % attempts to pre-whiten and assumes a constant mean process.
-% Uses MATLAB Econometrics Toolbox
+% Uses functions from MATLAB's Econometrics Toolbox: archtest, lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
 % Ben Fulcher 26/2/2010
 
 
 %% Inputs
 
-if nargin<2 || isempty(preproc)
+if nargin < 2 || isempty(preproc)
     preproc = 'ar'; % do the preprocessing that maximizes ar(2) whiteness
 end
 
 % GARCH parameters, p & q
-if nargin<3 || isempty(pr)
+if nargin < 3 || isempty(pr)
     pr = 1:4; %GARCH(1:4,qr)
 end
-if nargin<4 || isempty(qr)
+if nargin < 4 || isempty(qr)
     qr = 1:4; % GARCH(pr,1:4);
 end
 
@@ -38,8 +38,8 @@ switch preproc
         disp(['Proprocessed according to AR(2) criterion using ' best]);
 end
 
-y = benzscore(y);
-N = length(y); % could be different to original (if choose a differencing, e.g.)
+y = benzscore(y); % make sure the time series is z-scored
+N = length(y); % could be different to original (e.g., if chose a differencing above)
 
 % Now have the preprocessed time series saved over y.
 % The original, unprocessed time series is retained in y0.
@@ -170,15 +170,15 @@ out.mean_maxlbqps = mean(maxlbqps(:));
 
 
 % 'bests' (orders)
-[a b] = find(LLFs == min(LLFs(:)),1,'first');
+[a, b] = find(LLFs == min(LLFs(:)),1,'first');
 out.bestpLLF = pr(a);
 out.bestqLLF = qr(b);
 
-[a b] = find(AICs == min(AICs(:)),1,'first');
+[a, b] = find(AICs == min(AICs(:)),1,'first');
 out.bestpAIC = pr(a);
 out.bestqAIC = qr(b);
 
-[a b] = find(BICs == min(BICs(:)),1,'first');
+[a, b] = find(BICs == min(BICs(:)),1,'first');
 out.bestpAIC = pr(a);
 out.bestqAIC = qr(b);
 

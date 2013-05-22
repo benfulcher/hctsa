@@ -11,9 +11,9 @@ function out = MF_GARCH(y,preproc,params)
 
 % Idea is that all of these stages can be pre-specified or skipped using
 % arguments to the function.
-% Also, I've no experience in fitting GARCH models...! :-P -- i.e., this
-% should ideally be redone properly by an expert.
-% Uses MATLAB Econometrics Toolbox
+% Also, I've minimal experience in actually fitting GARCH models...!
+% This function should ideally be reformed by an expert.
+% Uses functions from MATLAB's Econometrics Toolbox: archtest, lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
 % Ben Fulcher 25/2/2010
 
 %% Inputs
@@ -56,7 +56,7 @@ switch preproc
         disp(['Proprocessed according to AR(2) criterion using ' best]);
 end
 
-y = benzscore(y);
+y = benzscore(y); % z-score the time series
 N = length(y); % could be different to original (if choose a differencing, e.g.)
 
 % Now have the preprocessed time series saved over y.
@@ -302,9 +302,6 @@ out.minlbqpval_stde2 = min(lbq_pValue_stde2);
 out.maxlbqpval_stde2 = max(lbq_pValue_stde2);
 
 
-
-% keyboard
-
 % (iii) Correlation in time series: autocorrelation
 % autocorrs_y = CO_autocorr(y,1:20);
 % autocorrs_var = CO_autocorr(y.^2,1:20);
@@ -329,7 +326,6 @@ end
 out.ac1_stde2 = CO_autocorr(stde2,1);
 out.diff_ac1 = CO_autocorr(y.^2,1) - CO_autocorr(stde2,1);
 
-% keyboard
 
 %% (5) Comparison to other models
 % e.g., does the additional heteroskedastic component improve the model fit

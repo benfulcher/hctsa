@@ -1,4 +1,4 @@
-function H=mtest(x, alpha)
+function H = mtest(x, alpha)
 %   MTEST: Single sample Smirnov-Cramer-Von Mises goodness-of-fit hypothesis test.
 %   H = MTEST(X,ALPHA) performs the particular case of Smirnov-Cramer-Von Mises
 %   test to determine whether the null hypothesis of composite normality CDF is 

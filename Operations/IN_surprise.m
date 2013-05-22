@@ -3,7 +3,7 @@ function out = IN_surprise(y,annax,memory,ng,cgmeth)
 % by annax at a given memory
 % ng is number of groups to coarse-grain into
 % cgmeth is the method for coarse-graining: 'quantile' or 'updown'
-% Ben Fulcher September 2009
+% Ben Fulcher, September 2009
 
 %% Course Grain
 yth = SUB_coursegrain(y,ng,cgmeth); % a coarse-grained time series using the numbers 1:ng
@@ -18,16 +18,21 @@ rs = rs(1:min(nits,end));
 store = zeros(nits,1);
 for i = 1:length(rs)
     switch annax
-        case 'dist' % uses the distribution up to memory to inform the next point
-            % calculate probability of this given past memory
+        case 'dist'
+            % Uses the distribution up to memory to inform the next point
+            
+            % Calculate probability of this given past memory
             p = sum(yth(rs(i)-memory:rs(i)-1)==yth(rs(i)))/memory;
             store(i) = p;
-        case 'T1' % uses one-point correlations in memory to inform the next point
-            % estimate transition probabilities from data in memory
-            % find where in memory this has been observed before, and what
+            
+        case 'T1'
+            % Uses one-point correlations in memory to inform the next point
+            
+            % Estimate transition probabilities from data in memory
+            % Find where in memory this has been observed before, and what
             % preceeded it:
             memorydata = yth(rs(i)-memory:rs(i)-1);
-            % previous value observed in memory here:
+            % Previous value observed in memory here:
             inmem = find(memorydata(1:end-1)==yth(rs(i)-1));
             if isempty(inmem)
                 p = 0;
@@ -35,9 +40,12 @@ for i = 1:length(rs)
                 p = sum(memorydata(inmem+1)==yth(rs(i)))/length(inmem);
             end
             store(i) = p;
+            
         case 'T2'
+            % Uses two-point correlations in memory to inform the next point
+            
             memorydata = yth(rs(i)-memory:rs(i)-1);
-            % previous value observed in memory here:
+            % Previous value observed in memory here:
             inmem1 = find(memorydata(2:end-1)==yth(rs(i)-1)); % the 2:end makes the next line ok...?
             inmem2 = find(memorydata(inmem1)==yth(rs(i)-2));
             if isempty(inmem2)
@@ -53,8 +61,8 @@ end
 iz = find(store==0);
 store(iz) = 1; % to avoid log(0) error in next line
 store = -log(store); % transform to surprises/information gains
-store(iz) = 0; % log(0)=0
-% may be strange? maybe remove these points rather than setting to zero?
+store(iz) = 0; % so that log(0) = 0
+% May be strange? maybe remove these points rather than setting to zero?
 % plot(store)
 
 out.min = min(store); % minimum amount of information you can gain in this way

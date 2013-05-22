@@ -1,5 +1,5 @@
-function out=CO_autocorrs_nl(y,taus,mors,doabs)
-% function for computing autocorrelations of the form
+function out = CO_autocorrs_nl(y,taus,mors,doabs)
+% Computes autocorrelations of the input time series of the form
 % <x_i x_{i-\tau_1} x{i-\tau_2}...>
 % The usual two-point autocorrelations are
 % <x_i.x_{i-\tau}>
@@ -29,43 +29,45 @@ function out=CO_autocorrs_nl(y,taus,mors,doabs)
 %         the values obtained from taking doabs off (i.e., for odd lengths
 %         of taus)  
 % Note 3: It's nice to look at ely at each iteration.
+
 % -- Ben Fulcher 8/6/09 --
 
-if nargin<3
-   mors='mean';
+%% Check Inputs:
+if nargin < 3
+   mors = 'mean';
 else
    if ~strcmp(mors,'mean') && ~strmp(mors,'std')
        disp('third input to CO_autocorrs_nl should be either ''mean'' or ''std''. Using mean.');
-       mors='mean';
+       mors = 'mean';
    end
 end
-if nargin<4 % use default settings for doabs
-    if rem(length(taus),2)==1
-        doabs=1; % take abs, otherwise will be a very small number
-    else doabs=0; % not necessary to take absolute values
+if nargin < 4 % use default settings for doabs
+    if rem(length(taus),2) == 1
+        doabs = 1; % take abs, otherwise will be a very small number
+    else doabs = 0; % not necessary to take absolute values
     end
 end
 
 N = length(y);
-tmax=max(taus); % the maximum delay time
+tmax = max(taus); % the maximum delay time
 
-% compute the autocorrelation sum iteratively
+% Compute the autocorrelation sum iteratively
 ely = y(tmax+1:N);
-for i=1:length(taus)
+for i = 1:length(taus)
     ely = ely.*y(tmax-taus(i)+1:N-taus(i));
 end
 
-% write output
+% Compute output
 if strcmp(mors,'mean')
     if doabs
-        out=mean(ely);
+        out = mean(ely);
     else
-        out=mean(abs(ely));
+        out = mean(abs(ely));
     end
 elseif strcmp(mors,'std')
     if doabs
-        out=std(ely);
+        out = std(ely);
     else
-        out=std(abs(ely));
+        out = std(abs(ely));
     end
 end

@@ -1,6 +1,6 @@
 function out = MF_linmodelorders(y,orders,howtotest)
 % Compares fits from different AR model orders
-% using System Identification Toolbox
+% Using functions from Matlab's System Identification Toolbox: iddata, arxstruc, selstruc
 % Ben Fulcher 1/2/2010
 
 % INPUTS:
@@ -8,6 +8,8 @@ function out = MF_linmodelorders(y,orders,howtotest)
 % (*) orders: vector or possible model orders
 % (*) howtotest: string specifying a method to divide training and test
 %                 data : {'all','half',...}
+
+doplot = 0; % can set to 1 to plot outputs
 
 %% Check Inputs
 % (1) Time series, y
@@ -55,8 +57,6 @@ V = arxstruc(ytrain,ytest,orders);
 % Statistics on V, which contains loss functions at each order (normalized sum of
 % squared prediction errors)
 v = V(1,1:end-1); % the loss function vector over the range of orders
-% plot(v)
-% keyboard
 
 out.maxv = max(v);
 out.minv = min(v);
@@ -74,18 +74,20 @@ stdfromi = zeros(length(v),1);
 for i = 1:length(stdfromi)
     stdfromi(i) = std(v(i:end))/sqrt(length(v)-i+1);
 end
-out.minstdfromi = min(stdfromi(stdfromi>0));
+out.minstdfromi = min(stdfromi(stdfromi > 0));
 if isempty(out.minstdfromi), out.minstdfromi = NaN; end
 out.where01max = find(stdfromi<max(stdfromi)*0.1,1,'first');
 if isempty(out.where01max), out.where01max = NaN; end
-out.whereen4 = find(stdfromi<1e-4,1,'first');
+out.whereen4 = find(stdfromi < 1e-4,1,'first');
 if isempty(out.whereen4), out.whereen4 = NaN; end
 
 %% Plotting
-% plot(v);
-% plot(stdfromi,'r');
+if doplot
+    plot(v);
+    plot(stdfromi,'r');
+end
 
-%% Selstruc for 'best' order measures
+%% Use selstruc function to obtain 'best' order measures
 % Get specific 'best' measures
 [nn vmod0] = selstruc(V,0); % minimizes squared prediction errors
 out.best_n = nn;

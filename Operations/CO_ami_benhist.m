@@ -1,13 +1,14 @@
 function out = CO_ami_benhist(y,tau,meth,nbins)
-% Look at automutual information using histograms -- vary over number of
+% Analyzes the automutual information of a time series using histograms -- vary over number of
 % bins to really get a good estimate; return max AMI over bin number range,
 % or minimum or median, or....
 % Uses hist2 by Nedialko Krouchev (from MATLAB Central)
-% [[hist2 for the people by Nedialko Krouchev
-%   20 Sep 2006 (Updated 21 Sep 2006)]]
-% y should be zscored
-% some methods require extra parameter nbins
-% Ben Fulcher September 2009
+% [[hist2 for the people by Nedialko Krouchev, 20 Sep 2006 (Updated 21 Sep 2006)]]
+% Input time series, y, should be z-scored
+% Some methods, meth, require the extra parameter nbins
+% Output is the automutual information computed by this method.
+% Ben Fulcher, September 2009
+
 
 if strcmp(tau,'tau'), tau = CO_fzcac(y); end
 
@@ -48,23 +49,11 @@ pj = sum(pij,2); % other marginal
 % pi = histc(y1,b); pi = pi(1:nb); pi = pi/sum(pi); % marginal
 % pj = histc(y2,b); pj= pj(1:nb); pj = pj/sum(pj); % other marginal
 
-% keyboard;
 pii = ones(nb,1)*pi;
 pjj = pj*ones(1,nb);
 
-r = find(pij>0); % makes log(0)=0
+r = find(pij>0); % in this way, we set log(0) = 0
 ami = pij(r).*log(pij(r)./pii(r)./pjj(r));
 out = sum(ami);
-
-% probably a nicer matrix way of doing this:
-% ami=zeros(nb);
-% for i=1:nb
-%     for j=1:nb
-%         ami(i,j) = pij(i,j)*
-%     end
-% end
-% ami =  ;
-
-
 
 end

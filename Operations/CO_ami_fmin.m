@@ -1,29 +1,39 @@
 function out = CO_ami_fmin(y,meth,nbins)
-% First minimum of ami by specified method
-% if nbins = [ . . . ] is a vector -- varies over this range
-% and returns statistics on the output
+% Analyzes patterns in the automutual information of a time series over a range of time lags up to the first minimum
+% Automutual informations are calculated using a histogram method using CO_ami_benhist
+% If nbins = [ . . . ] is a vector -- varies over this range of 
 % Ben Fulcher September 2009
+
+%% Set defaults:
+% Default number of bins
+if nargin < 3,
+	nbins = 10;
+end
 
 N = length(y);
 
-% range of time-lags to consider (usually exits before max)
-taur = 0:round(N/2);
+% Range of time lags, tau, to consider
+%	(although loop usually broken before this maximum)
+taur = 0:1:round(N/2);
 ntaur = length(taur);
 
-% range of bin numbers to consider
+% Range of bin numbers to consider
 nbinr = length(nbins);
 amimins = zeros(nbinr,1);
 
-for i=1:nbinr
-    amis=zeros(ntaur,1);
-    for j=1:ntaur;
+% Calculate automutual information
+for i = 1:nbinr % vary over number of bins in histogram
+    amis = zeros(ntaur,1);
+    for j = 1:ntaur % vary over time lags, tau
         amis(j) = CO_ami_benhist(y,taur(j),meth,nbins(i));
-        if j>2 && (amis(j)-amis(j-1))*(amis(j-1)-amis(j-2))<0
+        if j > 2 && (amis(j)-amis(j-1))*(amis(j-1)-amis(j-2)) < 0
             amimins(i) = taur(j-1);
             break
         end
     end
-    if amimins(i)==0, amimins(i)=taur(end);end
+    if amimins(i)==0
+		amimins(i) = taur(end)
+	end
 end
 
 % plot(amimins,'o-k');

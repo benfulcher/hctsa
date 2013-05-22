@@ -1,7 +1,8 @@
 function out = FC_dynprimitive(y,fmeth)
-% Ben Fulcher.
-% looping over the length of data to use for prediction,
-% at each iteration, return a bunch of metrics; plot the variation:
+% Looping over the length of data to use for prediction,
+% at each iteration, return a bunch of metrics
+% Ben Fulcher, 2009
+
 stats_st = zeros(10,7);
 
 switch fmeth

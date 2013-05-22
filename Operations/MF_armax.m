@@ -1,6 +1,7 @@
 function out = MF_armax(y, orders, ptrain, steps)
-% Uses 'armax' function in MATLAB to compute an appropriate ARMAX model
-% for the time series input in y (vector)
+% Computes an appropriate ARMAX model for the input time series y
+% Uses the functions iddata, armax, aic, and predict from Matlab's System Identification Toolbox
+% y should be a column vector time series
 % Ben Fulcher 1/2/2010
 
 %% Prepare Inputs
@@ -11,16 +12,16 @@ N = length(y); % number of samples
 y = iddata(y,[],1);
 
 % orders; vector specifying the AR and MA components
-if nargin<2 || isempty(orders)
+if nargin < 2 || isempty(orders)
     orders = [3 3]; % AR3, MA3
 end
-if nargin<3 || isempty(ptrain)
+if nargin < 3 || isempty(ptrain)
     ptrain = 0.8; % train on 80% of the data 
 end
-% if nargin<4 || isempty(trainmode)
+% if nargin < 4 || isempty(trainmode)
 %     trainmode = 'first'; % trains on first ptrain proportion of the data.
 % end
-if nargin<4 || isempty(steps)
+if nargin < 4 || isempty(steps)
     steps = 1; % one-step-ahead predictions
 end
 
@@ -31,19 +32,18 @@ m = armax(y, orders);
 
 %% Statistics on model
 
-c_ar = m.a; % ar coefficients
-c_ma = m.c; % ma coefficients
+c_ar = m.a; % AR coefficients
+c_ma = m.c; % MA coefficients
 da = m.da; % must be uncertainties in AR coeffs
 dc = m.dc; % must uncertainties in MA coeffs
 
 % Make these outputs
-% output parameters
-if length(c_ar)>1
-    for i=2:length(c_ar)
+if length(c_ar) > 1
+    for i = 2:length(c_ar)
         eval(['out.AR_' num2str(i-1) ' = ' num2str(c_ar(i)) ';']);
     end
 end
-if length(c_ma)>1
+if length(c_ma) > 1
     for i = 2:length(c_ma)
         eval(['out.MA_' num2str(i-1) ' = ' num2str(c_ma(i)) ';']);
     end
@@ -108,8 +108,6 @@ fields = fieldnames(residout);
 for k=1:length(fields);
     eval(['out.' fields{k} ' = residout.' fields{k} ';']);
 end
-
-% keyboard
 
 % % Train on some proportion, ptrain, of data
 % ytrain = y(1:floor(ptrain*N));

@@ -1,19 +1,21 @@
-function out=CO_fzcac(y)
+function out = CO_fzcac(y)
+% Outputs the first zero-crossing of the autocorrelation function
+% Uses CO_autocorr to calculate autocorrelations
+% Very badly coded by Ben Fulcher, 2008
+% Quickly tweaked by Ben Fulcher, May 2013
 
-tau = 0;
-% AC1=CO_autocorr(y,1);
-AC1 = 1;
-while tau<min(400,length(y)-1);
-    tau = tau+1;
-    AC2 = CO_autocorr(y,tau);
-    if AC1*AC2<0 % zero crossing
-        out = tau;
-        return
-    else
-        AC1 = AC2;
+N = length(y); % the length of the time series
+
+maxtau = 400; % searches up to this maximum time lag
+maxtau = min(maxtau,N); % make sure no longer than the time series itself
+
+% Calculate autocorrelation at increasing lags, until you find a negative one
+for tau = 1:maxtau-1
+    if CO_autocorr(y,tau) < 0
+        out = tau; return
     end
 end
-
-out = tau;
+% If haven't left yet, set output to maxtau
+out = maxtau;
 
 end
