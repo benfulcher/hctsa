@@ -1,7 +1,7 @@
 %%% SQL_initiate_ops
 % Sets up the Operations and MasterOperations tables in the default mySQL server from scratch
 % (drops them and the related MasterPointerRelate table if they already exist)
-% Ben Fulcher 24/11/2009
+% Ben Fulcher, 24/11/2009
 
 %% Open database
 [dbc, dbname] = SQL_opendatabase; % opens dbc, the default database (named dbname)
@@ -53,10 +53,6 @@ end
 createstring = ['CREATE TABLE Operations (m_id integer not null auto_increment, OpName varchar(255), Pointer tinyint(1), ' ...
 				'Code varchar(255), Keywords varchar(255), Stochastic tinyint(1),  LastModified datetime, ' ...
 				'PRIMARY KEY (m_id))'];
-% createstring = ['CREATE TABLE Operations (m_id integer not null auto_increment, OpName varchar(255), Pointer tinyint(1), ' ...
-% 				'Code varchar(255), Keywords varchar(255), Toolboxes varchar(255), Stochastic tinyint(1), mex tinyint(1), ' ...
-% 				'Normalize tinyint(2), PercentageCalculated float, PercentageGood float, MeanCalcTime float, source varchar(255), LastModified datetime, ' ...
-% 				'PRIMARY KEY (m_id))'];
 [rs,emsg] = mysql_dbexecute(dbc, createstring);
 if isempty(emsg)
 	disp(['Created ''Operations'' table in ' dbname]);

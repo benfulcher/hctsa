@@ -1,11 +1,10 @@
-%%% SQL_writetsmeta
 function SQL_writetsmeta(dbname)
-% Writes metadata derived from reading in timeseries to the TimeSeries table in mySQL database
+% Writes the length of time series to the Length column of the TimeSeries table in the mySQL database, dbname (dbname = '' uses default set in SQL_opendatabase)
 % Ben Fulcher 24/11/09
 % Ben Fulcher 18/1/10 Added dbname argument
 % Ben Fulcher 6/12/12 removed positive only field
 
-if nargin<1
+if nargin < 1
 	dbname = ''; % use default
 end
 
@@ -29,20 +28,20 @@ for i = 1:nts
 	tsfn = qrc{i,2}; % time series filename (string)
 	tsl = qrc{i,3}; % time series length (integer/null)
 
-	% load the time series
+	% Load the time series
 	x = dlmread(tsfn);
 
-	% get information on it
+	% Get the length of the time series
 	l = length(x); % length (integer)
 
-	% update length
-	if isempty(tsl) || l~=tsl % length either not yet stored, or stored incorrectly -- update
-	    updatestring = ['UPDATE TimeSeries SET Length = ' num2str(l) ', LastModified = NOW() WHERE ts_id = ' num2str(tsid)];
-	    [rs,emsg] = mysql_dbexecute(dbc, updatestring);
+	% Update the length
+	if isempty(tsl) || l ~= tsl % length either not yet stored, or stored incorrectly -- update
+	    UpdateString = ['UPDATE TimeSeries SET Length = ' num2str(l) ', LastModified = NOW() WHERE ts_id = ' num2str(tsid)];
+	    [rs,emsg] = mysql_dbexecute(dbc, UpdateString);
 		if ~isempty(emsg)
 			disp(['Error updating length for ' tsfn]);
-			disp(emsg)
 			SQL_closedatabase(dbc)
+			error(emsg)
 		end
 	end
 	if l~=tsl, disp(['****** Length stored incorrectly for ' tsfn ' -- fixed now']); end

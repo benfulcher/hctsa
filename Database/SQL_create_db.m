@@ -1,5 +1,8 @@
 function SQL_create_db()
-	% Perform the database setup
+	% Setup the mysql database
+	% Romesh Abeysuriya, March 2013
+	% Tweaked by Ben Fulcher, May 2013
+    
 	fprintf('Let''s set up a new database\nFirst we need to know a username and password that has create database and grant privileges\n');
 	fprintf('This is probably going to be the root account\n');
 	hostname = input('Hostname of MySQL server: ','s');
@@ -11,7 +14,8 @@ function SQL_create_db()
 	        error('Please check your credentials and that the MySQL server is accessible');
 	    end
 	catch
-	    error('Could not activate the SQL connector. Did you add it to classpath.txt? Please check the documentation');
+        error(['Could not activate the SQL connector. Did you add it to classpath.txt? ' ...
+                    'Please check the documentation']);
 	end
 
 	fprintf('Connection established. Creating the database for this program\n');
@@ -20,21 +24,27 @@ function SQL_create_db()
 	local_u = input('New username: ','s');
 	local_p = input('New password (this will appear on screen!): ','s');
 
-	mysql_dbexecute(dbc,sprintf('drop database if exists %s;',dbname));
-	mysql_dbexecute(dbc,sprintf('create database %s;',dbname));
-	mysql_dbexecute(dbc,sprintf('grant all privileges on %s.* to ''%s''@''localhost'' identified by ''%s'';',dbname,local_u,local_p));
-	mysql_dbexecute(dbc,'flush privileges;');
+	mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s;',dbname));
+	mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s;',dbname));
+	mysql_dbexecute(dbc,sprintf('GRANT ALL PRIVILEGES ON %s.* TO ''%s''@''localhost'' identified by ''%s'';',dbname,local_u,local_p));
+	mysql_dbexecute(dbc,'FLUSH PRIVILEGES;');
 
 	SQL_closedatabase(dbc) % close the database
 
-	fid = fopen('Database/sql_settings.conf','w');
-	fprintf(fid,'%s,%s,%s,%s ',hostname,dbname,local_u,local_p);
+    filename = 'Database/sql_settings.conf';
+    disp(['Writing hostname (' hostname '), database name (' dbname '),' ...
+            ' username (' local_u '), and password (' local_p ') to ' filename]);
+	fid = fopen(filename,'w');
+	fprintf(fid,'%s,%s,%s,%s',hostname,dbname,local_u,local_p);
 	fclose(fid);
 
 	try
 		dbc = SQL_opendatabase;
 		SQL_closedatabase(dbc);
+        fprintf(1,['Database ' dbname ' at ' hostname ' for ' local_u ' opens and closes no problem!!']);
+        fprintf(1,['We''re good to go!! :)']);
 	catch
 		fprintf(1,'Error: Unable to open database after creation');
 	end
 
+end

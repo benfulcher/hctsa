@@ -21,7 +21,7 @@ function TSQ_brawn(tolog,toparallel,dbname,agglomerate)
 
 %% Check valid inputs / set defaults
 % (1) tolog: log to file
-if nargin<1
+if nargin < 1
 	tolog = 0; % by default, do not log to file
 end
 if tolog
@@ -34,7 +34,7 @@ else
 end
 
 % (2) Parallel Processing
-if nargin<2
+if nargin < 2
 	toparallel = 1;
 end
 if toparallel
@@ -50,11 +50,11 @@ else % use single-threaded for loops
 	end
 end
 
-if nargin<3
+if nargin < 3
 	dbname = '';
 end
 
-if nargin<4
+if nargin < 4
     agglomerate = 1; 
 end
 

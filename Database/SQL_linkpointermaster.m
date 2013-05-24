@@ -11,7 +11,8 @@ end
 [dbc,dbname] = SQL_opendatabase(dbname);
 
 %% Creates the MasterPointerRelate Table by linking metrics with their masters
-% Look through code column of operations and retrieve bits before "." -- which must be the master structure that should link
+% Look through code column of operations and retrieve bits before "."
+% These must be the master structure that should link
 selectstring = 'SELECT m_id, Code FROM Operations WHERE Pointer = 1';
 [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
 pointermids = vertcat(qrc{:,1}); % column vector

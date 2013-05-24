@@ -1,4 +1,4 @@
-function out = MF_ss_testset(y,model,order,howtosubset,samplep,steps)
+function out = MF_ss_testset(y,model,ord,howtosubset,samplep,steps)
 % Looks at robustness of test set goodness of fit over different samples in
 % the time series from fitting a model (of given order or
 % optimal: 'best'). Something of stationarity in spread of values.
@@ -16,17 +16,20 @@ N = length(y); % length of time series
 if nargin < 1 || isempty(y)
     disp('Give us a time series, ya mug'); return
 end
-% Convert y to time series object
+
+% Convert y to time series object for the System Identification Toolbox
 y = iddata(y,[],1);
 
-% (2) model, the type of model to fit
+% (2) Model, the type of model to fit
 if nargin < 2 || isempty(model)
-    model = 'ss'; % fit a state space model by default
+    model = 'ss';
+    % Fit a state space model by default
 end
     
-% (3) order of model, order
-if nargin < 3 || isempty(order)
-    order = 2; % model of order 2 by default. Not very good defaults.
+% (3) Model order, ord
+if nargin < 3 || isempty(ord)
+    ord = 2;
+    % model of order 2 by default. Not the best defaults.
 end
 
 % (4) How to choose subsets from the time series, howtosubset
@@ -36,7 +39,7 @@ end
 
 % (5) Sampling parameters, samplep
 if nargin < 5 || isempty(samplep)
-    samplep = [20,0.1]; % sample 20 times with 10%-length subsegments
+    samplep = [20, 0.1]; % sample 20 times with 10%-length subsegments
 end
 
 % (6) Predict some number of steps ahead in test sets, steps
@@ -52,19 +55,19 @@ end
 % this is messier]
 switch model
     case 'ar' % fit an ar model of specified order
-        if strcmp(order,'best')
+        if strcmp(ord,'best')
             % Use arfit software to retrieve the optimum ar order by some
             % criterion (Schwartz's Bayesian Criterion, SBC)
             [west, Aest, Cest, SBC, FPE, th] = arfit(y.y, 1, 10, 'sbc', 'zero');
-            order = length(Aest);
+            ord = length(Aest);
         end
-        m = ar(y,order);
+        m = ar(y,ord);
 %     case 'arfit' % fit ar model using the ARFIT package
     case 'ss' % fit a state space model of specified order
-        m = n4sid(y,order);
+        m = n4sid(y,ord);
     case 'arma' % fit an arma model of specified orders
         % Note: order should be a two-component vector
-        m = armax(y,order);
+        m = armax(y,ord);
 end
 
 %% Prepare to do a series of predictions

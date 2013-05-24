@@ -13,8 +13,9 @@ try
     dbconnection = java.sql.DriverManager.getConnection(dburl, uname, pword);
     errmessage = [];
 catch le
-%     le = lasterror;
     errmessage = le.message;
     disp(errmessage);
     dbconnection = [];
+end
+
 end
