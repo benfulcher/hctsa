@@ -13,5 +13,5 @@ mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s;',dbname));
 disp([dbname ' and all the data contained within it dropped']);
 mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s;',dbname));
 SQL_closedatabase(dbc) % close the database
-SQL_master_initiate;
+SQL_create_all_tables;
 disp([dbname ' was recreated. That''s all from me ///']);

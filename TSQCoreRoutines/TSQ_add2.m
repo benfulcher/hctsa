@@ -24,13 +24,13 @@ function TSQ_add2(metorts, INPfile, dbname)
 tic;
 
 % metorts
-if nargin<1 || isempty(metorts) || ~(strcmp(metorts,'mets') || strcmp(metorts, 'ts'))
+if nargin < 1 || isempty(metorts) || ~(strcmp(metorts,'mets') || strcmp(metorts, 'ts'))
 	disp(['Error setting first input argument -- should be ''ts'' or ''mets''']);
 	return
 end
 
 % inpfilename
-if nargin<2 || isempty(INPfile)
+if nargin < 2 || isempty(INPfile)
 	if strcmp(metorts,'ts')
 		INPfile = 'INP_ts.txt';
 	else
@@ -127,7 +127,7 @@ switch metorts
         Mr = strmatch('M', methin); % those lines that start with this string pattern
         nmM = length(Mr); % number of master rows
         
-        if nmM>0
+        if nmM > 0
             fprintf('Indexing MasterOperations');
             master_text = methin(Mr);
             methin(Mr) = ''; % remove master rows from methin

@@ -15,10 +15,10 @@ for i = 1:nts
     else
         UpdateString = ['UPDATE TimeSeries SET IsSynthetic = 0 WHERE ts_id = ' num2str(alltsids(i))];
     end
-	[rs,emsg] = mysql_dbexecute(dbc, UpdateString);
+	[rs, emsg] = mysql_dbexecute(dbc, UpdateString);
     if ~isempty(emsg)
         disp(['Error updating ' num2str(alltsids(i))])
     end
 end
 SQL_closedatabase(dbc)
-disp('Database closed, IsSynthetic column updated ///');
+disp('Database closed, IsSynthetic column in the TimeSeries table updated ///');

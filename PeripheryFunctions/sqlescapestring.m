@@ -20,3 +20,4 @@ function S = sqlescapestring(s)
 S = regexprep(s,'([\''\\])','\\$1'); % Replace backslashes and single quotes
 %S2 = regexprep(s,'([\''\\\_\%])','\\$1'); % Replace backslashes and single quotes
 
+end
