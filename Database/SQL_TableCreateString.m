@@ -22,18 +22,12 @@ case 'TimeSeries'
         '(ts_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ... % Unique integer identifier
         'Filename VARCHAR(255) NOT NULL, ' ... % FileName of the time series
         'Keywords VARCHAR(255), ' ... % Comma-delimited keywords assigned to the time series
-        'Length INTEGER UNSIGNED, ' ... % Length of the time series
-        'Quantity VARCHAR(255), ' ... % The quantity measured in the time series
-        'Unit VARCHAR(25), ' ... % The physical unit of the quantity measured
-        'SamplingRate VARCHAR(25), ' ... % Sampling rate of the time series
-        'Description TEXT, ' ... % More information about this specific time series
-        'SourceString VARCHAR(255), ' ... % Name of source
-        'Source_id INTEGER, '  ... % Source ID
-        'CategoryString VARCHAR(255), ' ... % Name of category
-        'Category_id INTEGER, ' ... % Category ID
-        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ... % Time stamp of when the time series was last modified/inserted
-        'FOREIGN KEY (Source_id) REFERENCES TimeSeriesSource(Source_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
-        'FOREIGN KEY (Category_id) REFERENCES TimeSeriesCategories(Category_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
+        'Length INTEGER UNSIGNED, ' ... % Length of the time series ...
+        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)']; % Time stamp of when the time series was last modified/inserted
+        % 'Quantity VARCHAR(255), ' ... % The quantity measured across time
+        % 'Unit VARCHAR(50), ' ... % The physical unit of the quantity measured
+        % 'SamplingRate VARCHAR(50), ' ... % Sampling rate of the time series
+        % 'Description TEXT, ' ... % More information about this specific time series
 
 case 'MasterOperations'
     CreateString = ['CREATE TABLE MasterOperations ' ...
@@ -73,43 +67,6 @@ case 'TimeSeriesKeywords'
         'NumOccur INTEGER, ' ... % Number of time series with this keyword
         'MeanLength INTEGER, ' ... % Mean length of time series with this keyword
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)'];
-
-case 'TimeSeriesCategories' % Hierarchical categories to assign different sources of time-series data
-    CreateString = ['CREATE TABLE TimeSeriesCategories ' ...
-        '(Category_id INTEGER AUTO_INCREMENT PRIMARY KEY, ' ...
-        'CategoryName VARCHAR(255) UNIQUE, ' ... % Name of the category
-        'Description TEXT, ' ... % Description of the category
-        'ParentString VARCHAR(255), ' ... % Temporary string to label the CategoryName
-        'Parent_id INTEGER, ' ... % Later assign proper id tags for faster indexing, joins, etc.
-        'NMembers INTEGER UNSIGNED, ' ... % Automatically fill the parent_id from the string CategoryName
-        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)'];
-
-case 'TimeSeriesDistributionCodes'
-    CreateString = ['CREATE TABLE TimeSeriesDistributionCodes ' ...
-        '(Dcode_id INTEGER PRIMARY KEY, ' ... % A unique code for each distribution type
-        'Description VARCHAR(255))']; % Short description of each distribution type
-            
-case 'TimeSeriesSource' % Table defining all the sources of time series in the database
-    CreateString = ['CREATE TABLE TimeSeriesSource ' ...
-        '(Source_id INTEGER AUTO_INCREMENT PRIMARY KEY, ' ...
-        'SourceName VARCHAR(255), ' ... % Where the time series was sourced from
-        'Link TEXT, ' ... % URL (or other) reference to time series source
-        'Description TEXT, ' ... % Description of the source
-        'ProcessingNote TEXT, ' ... % Notes on how time series from this source were processed
-        'AddedBy VARCHAR(255), ' ... % Who added this source to the database ...
-        'Dcode_id INTEGER, ' ... % Code for whether the data is safe to distribute
-        'Parent VARCHAR(255), ' ... % Parent source
-        'SourceParent_id INTEGER, ' ... % Parent source id
-        'NMembers INTEGER UNSIGNED, ' ... % Number of time series from this source
-        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ... % Add a time stamp of modifications
-        'FOREIGN KEY (Dcode_id) REFERENCES TimeSeriesDistributionCodes(Dcode_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
-
-case 'TimeSeriesSourceRelate' % Links the time series with their sources
-    CreateString = ['CREATE TABLE TimeSeriesSourceRelate ' ...
-        '(ts_id INTEGER, ' ...
-        'Source_id INTEGER, ' ...
-        'FOREIGN KEY (ts_id) REFERENCES TimeSeries(ts_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
-        'FOREIGN KEY (Source_id) REFERENCES TimeSeriesSource(Source_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
     
 case 'TsKeywordsRelate'
     CreateString = ['CREATE TABLE TsKeywordsRelate ' ...

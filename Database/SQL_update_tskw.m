@@ -2,46 +2,35 @@
 % Creates keyword associations from comma-delimited columns in the TimeSeries table
 % Ben Fulcher 24/11/09 (based on code inherited from Max Little)
 % Ben Fulcher 11/1/10 Added dbname input to specify database
+% Ben Fulcher June 2013. Rewritten to assume just adding incrementally to database -- just adds the new entries
 
 % Note that since table is empty, the autonumber columns are guaranteed to be consecutive so we can use the index to know the id (unlike in general, where deletions will change the auto_counter)
 
-% if nargin < 1
-dbname = '';
-% end
 
-%% Open database
-dbc = SQL_opendatabase(dbname); % dbc is the database
-
-
-%% First, if there is anything in the TimeSeriesKeywords Table, it gets confused
-SelectString = 'SELECT COUNT(*) FROM TimeSeriesKeywords';
-qrc = mysql_dbquery(dbc,SelectString);
-if qrc{1} > 0
-    error('There appears to be stuff already in TimeSeriesKeywords...')
-end
+%% Open default database
+dbc = SQL_opendatabase; % dbc is the database
 
 
 %% Find all unique keywords strings, split into a table of unique, separate keywords
 disp('Looking for unique keywords in the TimeSeries Table to place in table TimeSeriesKeywords');
- 
+
 SelectString = 'SELECT DISTINCT Keywords FROM TimeSeries';
 [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 
-splitkws = {};
+ukws = {};
 % k = 1;
 for i = 1:length(qrc)
     kws = regexp(qrc{i},',','split','ignorecase');
     for j = 1:length(kws)
-        if ~ismember(kws{j},splitkws) % add it to splitkws
-            splitkws{end+1} = kws{j};
+        if ~ismember(kws{j},ukws) % add it to ukws
+            ukws{end+1} = kws{j};
         end
         % k = k + 1;
     end
 end
 
-ukws = splitkws; % change of variable name for historical reasons
-K = length(ukws); % the number of unique keywords; the maximum tskw_id index
-fprintf(1,'I just found %g unique keywords\n',K)
+nkw = length(ukws); % the number of unique keywords; the maximum tskw_id index
+fprintf(1,'I just found %g unique keywords\n',nkw)
 
 % ukws = unique(splitkws); % cell of unique keyword strings
 
@@ -93,7 +82,7 @@ fprintf(1,'I just found %g unique keywords\n',K)
 
 
 % Cycle through all unique keywords and add them to the TimeSeriesKeywords table
-for k = 1:K
+for k = 1:nkw
     InsertString = sprintf('INSERT INTO TimeSeriesKeywords (Keyword) VALUES (''%s'')',ukws{k});
     [rs,emsg] = mysql_dbexecute(dbc, InsertString);
 	if isempty(rs)
@@ -111,7 +100,7 @@ tskw_ids = mysql_dbquery(dbc,SelectString);
 tskw_ids = vertcat(tskw_ids{:});
 
 % Query series table for each keyword
-for k = 1:K
+for k = 1:nkw
     InsertString = sprintf(['INSERT INTO TsKeywordsRelate (tskw_id, ts_id) SELECT %u, ts_id FROM TimeSeries ' ...
         	'WHERE (Keywords LIKE ''%s,%%'' OR Keywords LIKE ''%%,%s,%%'' OR Keywords LIKE ''%%,%s'' OR' ...
         	' Keywords = ''%s'')'],tskw_ids(k),ukws{k},ukws{k},ukws{k},ukws{k});
@@ -123,22 +112,22 @@ for k = 1:K
 end
 SelectString = 'SELECT COUNT(*) FROM TsKeywordsRelate';
 nentries = mysql_dbquery(dbc,SelectString);
-fprintf(1,'Just inserted %u keyword relations for %u Keywords into the TsKeywordsRelate table\n',nentries{1},K)
+fprintf(1,'Just inserted %u keyword relations for %u Keywords into the TsKeywordsRelate table\n',nentries{1},nkw)
 
 %% Go back and write number of occurrences to TimeSeriesKeywords Table
-for k = 1:K
+for k = 1:nkw
 	UpdateString = sprintf(['UPDATE TimeSeriesKeywords SET NumOccur = ' ...
 						'(SELECT COUNT(*) FROM TsKeywordsRelate WHERE tskw_id = %u) ' ...
     					'WHERE tskw_id = %u'],tskw_ids(k),tskw_ids(k));
 	[rs,emsg] = mysql_dbexecute(dbc, UpdateString);
 end
-fprintf(1,'Just updated the number of occurances of the %u keywords into the TsKeywordsRelate table\n',K)
+fprintf(1,'Just updated the number of occurances of the %u keywords into the TsKeywordsRelate table\n',nkw)
 
 
 %% Populate the MeanLength column in TimeSeriesKeywords
 % Mean length of time series with this keyword
 % Requires that lengths are already included as metadata in the TimeSeries table
-for k = 1:K
+for k = 1:nkw
 	UpdateString = sprintf(['UPDATE TimeSeriesKeywords SET MeanLength = ' ...
 						'(SELECT AVG(Length) FROM TimeSeries WHERE ts_id IN (' ...
 								'SELECT ts_id FROM TsKeywordsRelate WHERE tskw_id = %u)) ' ...
@@ -148,7 +137,7 @@ for k = 1:K
 		disp(['Error updating TimeSeriesKeywords with MeanLength']); keyboard
 	end
 end
-fprintf(1,'Just updated the mean length of time series for each of the %u keywords into the TsKeywordsRelate table\n',K)
+fprintf(1,'Just updated the mean length of time series for each of the %u keywords into the TsKeywordsRelate table\n',nkw)
 
 
 %% Close database

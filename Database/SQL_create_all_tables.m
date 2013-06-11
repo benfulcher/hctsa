@@ -8,15 +8,11 @@ function SQL_create_all_tables()
 TableNames = {'Operations', ...     % Operations Table
         'MasterOperations', ...     % MasterOperations Table
         'MasterPointerRelate', ...  % MasterPointerRelate Table
-        'TimeSeriesCategories', ... % TimeSeriesCategories Table
-        'TimeSeriesDistributionCodes', ...    % Time Series distribution codes Table
-        'TimeSeriesSource', ...     % TimeSeriesSource Table
         'TimeSeries', ...           % TimeSeries Table
-        'TimeSeriesSourceRelate', ... % TimeSeriesSourceRelate Table
         'OperationKeywords', ...    % OperationKeywords Table
-        'OpKeywordsRelate', ...        % mkwFileRelate Table
+        'OpKeywordsRelate', ...     % mkwFileRelate Table
         'TimeSeriesKeywords', ...   % TimeSeriesKeywords
-        'TsKeywordsRelate', ...       % TsKeywordsRelate Table
+        'TsKeywordsRelate', ...     % TsKeywordsRelate Table
         'Results'};                 % Results Table
 
 % Convert Table names to mySQL CREATE TABLE statements:
