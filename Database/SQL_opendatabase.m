@@ -1,6 +1,7 @@
 function [dbc, dbname] = SQL_opendatabase(dbname,bevocal)
 % Opens the database as dbc for use in retrieving and storing in the mySQL database
 % Ben Fulcher, 2009, adapting code provided by Max Little
+% Updated to use sql_settings.conf by Romesh Abeysuriya
 
 fid = fopen(which('sql_settings.conf'));
 d = regexp(fscanf(fid,'%s'), ',', 'split');

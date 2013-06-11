@@ -24,10 +24,10 @@ function SQL_create_db()
 	local_u = input('New username: ','s');
 	local_p = input('New password (this will appear on screen!): ','s');
 
-	mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s;',dbname));
-	mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s;',dbname));
-	mysql_dbexecute(dbc,sprintf('GRANT ALL PRIVILEGES ON %s.* TO ''%s''@''localhost'' identified by ''%s'';',dbname,local_u,local_p));
-	mysql_dbexecute(dbc,'FLUSH PRIVILEGES;');
+	mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s',dbname));
+	mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s',dbname));
+	mysql_dbexecute(dbc,sprintf('GRANT ALL PRIVILEGES ON %s.* TO ''%s''@''localhost'' identified by ''%s''',dbname,local_u,local_p));
+	mysql_dbexecute(dbc,'FLUSH PRIVILEGES');
 
 	SQL_closedatabase(dbc) % close the database
 

@@ -14,7 +14,7 @@ case 'Operations'
         'CanDistribute INTEGER UNSIGNED, ' ... % Code for whether safe to distribute
         'LicenseType INTEGER UNSIGNED, ' ... % License for the code
         'Stochastic TINYINT(1), ' ... % Boolean identifier: is it a stochastic algorithm?
-        'LastModified DATETIME, ' ... % Last modified
+        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ... % Last modified
         'PRIMARY KEY (m_id))']; % sets primary key as m_id
 
 case 'TimeSeries'
@@ -31,8 +31,7 @@ case 'TimeSeries'
         'Source_id INTEGER, '  ... % Source ID
         'CategoryString VARCHAR(255), ' ... % Name of category
         'Category_id INTEGER, ' ... % Category ID
-        'IsSynthetic TINYINT(1), ' ... % Boolean identifier of time series that are created from time-series models
-        'LastModified DATETIME, ' ... % Time stamp of when the time series was last modified
+        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ... % Time stamp of when the time series was last modified/inserted
         'FOREIGN KEY (Source_id) REFERENCES TimeSeriesSource(Source_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
         'FOREIGN KEY (Category_id) REFERENCES TimeSeriesCategories(Category_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
 
@@ -42,7 +41,7 @@ case 'MasterOperations'
         'MasterLabel VARCHAR(255), ' ... % Name given to master code file
         'MasterCode VARCHAR(255), ' ... % Code to execute
         'NPointTo INTEGER UNSIGNED, ' ... % Number of children
-        'LastModified DATETIME)']; % Time stamp of when entry was last modified
+        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)']; % Time stamp of when entry was last modified
         
 case 'MasterPointerRelate'
     CreateString = ['CREATE TABLE MasterPointerRelate ' ...
@@ -69,10 +68,11 @@ case 'OpKeywordsRelate'
         
 case 'TimeSeriesKeywords'
     CreateString = ['CREATE TABLE TimeSeriesKeywords ' ...
-        '(tskw_id INTEGER AUTO_INCREMENT PRIMARY KEY, ' ...
-        'Keyword varchar(50), ' ...
-        'NumOccur INTEGER, ' ...
-        'MeanLength INTEGER)'];
+        '(tskw_id INTEGER AUTO_INCREMENT PRIMARY KEY, ' ... % Unique identifier for each keyword
+        'Keyword varchar(50), ' ... % The keyword
+        'NumOccur INTEGER, ' ... % Number of time series with this keyword
+        'MeanLength INTEGER, ' ... % Mean length of time series with this keyword
+        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)'];
 
 case 'TimeSeriesCategories' % Hierarchical categories to assign different sources of time-series data
     CreateString = ['CREATE TABLE TimeSeriesCategories ' ...
@@ -81,7 +81,8 @@ case 'TimeSeriesCategories' % Hierarchical categories to assign different source
         'Description TEXT, ' ... % Description of the category
         'ParentString VARCHAR(255), ' ... % Temporary string to label the CategoryName
         'Parent_id INTEGER, ' ... % Later assign proper id tags for faster indexing, joins, etc.
-        'NMembers INTEGER UNSIGNED)']; % Automatically fill the parent_id from the string CategoryName
+        'NMembers INTEGER UNSIGNED, ' ... % Automatically fill the parent_id from the string CategoryName
+        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)'];
 
 case 'TimeSeriesDistributionCodes'
     CreateString = ['CREATE TABLE TimeSeriesDistributionCodes ' ...
@@ -98,7 +99,9 @@ case 'TimeSeriesSource' % Table defining all the sources of time series in the d
         'AddedBy VARCHAR(255), ' ... % Who added this source to the database ...
         'Dcode_id INTEGER, ' ... % Code for whether the data is safe to distribute
         'Parent VARCHAR(255), ' ... % Parent source
+        'SourceParent_id INTEGER, ' ... % Parent source id
         'NMembers INTEGER UNSIGNED, ' ... % Number of time series from this source
+        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ... % Add a time stamp of modifications
         'FOREIGN KEY (Dcode_id) REFERENCES TimeSeriesDistributionCodes(Dcode_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
 
 case 'TimeSeriesSourceRelate' % Links the time series with their sources
@@ -120,9 +123,9 @@ case 'Results'
         '(ts_id integer, ' ...
         'm_id INTEGER, ' ...
         'Output DOUBLE, ' ...
-        'Quality INTEGER UNSIGNED, ' ...
+        'QualityCode INTEGER UNSIGNED, ' ...
         'CalculationTime FLOAT, ' ...
-        'LastModified DATETIME, ' ...
+        'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ...
         'FOREIGN KEY (ts_id) REFERENCES TimeSeries(ts_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
         'FOREIGN KEY (m_id) REFERENCES Operations(m_id) ON DELETE CASCADE ON UPDATE CASCADE, '...
         'PRIMARY KEY(ts_id,m_id))'];

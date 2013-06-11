@@ -116,7 +116,7 @@ end
 
 %% Re-run keyword tables
 if strcmp(mort, 'ts')
-	disp(['Recalculating TimeSeriesKeywords and tskwFileRelate in ' dbname '. Please be patient.']);
+	disp(['Recalculating TimeSeriesKeywords and TsKeywordsRelate in ' dbname '. Please be patient.']);
 	SQL_update_tskw(dbname) % updates time series keywords (will be different without the deleted time series)
 else
 	disp(['Recalculating OperationKeywords and mkwFileRelate in ' dbname '. Please be patient']);

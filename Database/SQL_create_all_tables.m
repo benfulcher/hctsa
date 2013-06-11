@@ -16,7 +16,7 @@ TableNames = {'Operations', ...     % Operations Table
         'OperationKeywords', ...    % OperationKeywords Table
         'OpKeywordsRelate', ...        % mkwFileRelate Table
         'TimeSeriesKeywords', ...   % TimeSeriesKeywords
-        'TsKeywordsRelate', ...       % tskwFileRelate Table
+        'TsKeywordsRelate', ...       % TsKeywordsRelate Table
         'Results'};                 % Results Table
 
 % Convert Table names to mySQL CREATE TABLE statements:

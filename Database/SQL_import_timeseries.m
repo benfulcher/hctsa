@@ -30,6 +30,12 @@ for j = 1:nTablesToFill
     [rs,emsg] = mysql_dbexecute(dbc,ImportDataStrings{j});
     if ~isempty(rs)
         fprintf(1,'Imported data into table: %s\n',TablesToFill{j});
+        SelectString = ['SELECT * FROM ' TablesToFill{j} ' LIMIT 3'];
+        [rs,a,b,emsg] = mysql_dbquery(dbc,SelectString);
+        disp([a;rs]);
+        SelectString = ['SELECT COUNT(*) FROM ' TablesToFill{j}];
+        [nts,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+        input(['How does this look for ' TablesToFill{j} ' (' num2str(nts{1}) ' rows)'])
     else
         fprintf(1,'**** Error importing data into table: %s\n',TablesToFill{j});
         fprintf(1,'%s',emsg);
@@ -41,57 +47,115 @@ fprintf(1,'Tables in %s filled successfully\n',dbname);
 
 %% 2. Link Source_ids
 % Go through each source and copy its id to the TimeSeries Table
-SelectString = 'SELECT Source_id, SourceName FROM TimeSeriesSource';
+SelectString = 'SELECT Source_id, SourceName, Parent FROM TimeSeriesSource';
 [rs,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 Sourceids = vertcat(rs{:,1});
 SourceNames = rs(:,2);
+SourceParents = rs(:,3);
 nSources = length(SourceNames);
 fprintf(1,'We have %g sources\n',nSources);
 for j = 1:nSources
     nentries = mysql_dbquery(dbc,['SELECT COUNT(*) FROM TimeSeries WHERE SourceString = ''' esc(SourceNames{j}) '''']);
     nentries = nentries{1};
+    
+    % Update Source_ids in the TimeSeries table
     UpdateString = ['UPDATE TimeSeries SET Source_id = ' num2str(Sourceids(j)) ' WHERE SourceString = ''' esc(SourceNames{j}) ''''];
     [rs,emsg] = mysql_dbexecute(dbc,UpdateString);
     if isempty(emsg)
-        fprintf(1,'Updated %g entries in TimeSeries by assigning %s to a Source_id %g \n',nentries,SourceNames{j},Sourceids(j))
+        fprintf(1,'Updated %g entries in TimeSeries by assigning ''%s'' to a Source_id %g \n',nentries,SourceNames{j},Sourceids(j))
     else
-        fprintf(1,'Error updating entries in TimeSeries for %s\n',SourceNames{j})
+        fprintf(1,'Error updating entries in TimeSeries for ''%s''\n',SourceNames{j})
     end
-end
-fprintf(1,'******All SourceStrings in TimeSeries Table Linked Successfully*********\n')
-
-% Fill NMembers for Sources [[[NONONO INCORPORATE INTO ABOVE....]]]
-for j = 1:nSources
-    nentries = mysql_dbquery(dbc,['SELECT COUNT(*) FROM TimeSeries WHERE Source_id = ''' num2str(Sourceids(j)) '''']);
-    nentries = nentries{1};
-    UpdateString = ['UPDATE TimeSeriesSource SET NMembers = ' num2str(nentries) ' WHERE Source_id = ' num2str(Sourceids(j))];
+    
+    % Update the NMembers count in TimeSeriesSource
+    UpdateString = sprintf('UPDATE TimeSeriesSource SET NMembers = %g WHERE Source_id = %g',nentries,Sourceids(j));
     [rs,emsg] = mysql_dbexecute(dbc,UpdateString);
     if isempty(emsg)
         fprintf(1,'Updated Nmembers in TimeSeriesSource: %g for Source_id %g \n',nentries,Sourceids(j))
     else
-        fprintf(1,'Error updating Nmembers in TimeSeriesSource for %s\n',SourceNames{j})
+        fprintf(1,'Error updating Nmembers in TimeSeriesSource for ''%s''\n',SourceNames{j})
+    end
+    
+    %% Link each Source_id to its parent
+    if ~isempty(SourceParents{j})
+        % Could do this by instead searching in what's already retrieved, but I'll keep it as SQL statements for now
+        SelectString = sprintf('SELECT Source_id FROM TimeSeriesSource WHERE SourceName = ''%s''',SourceParents{j});
+        [Parentid,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+        if ~isempty(Parentid)
+            Parentid = Parentid{1};
+            if length(Parentid) > 1
+                disp(['More than one Parent match for ' SourceNames{j} '........']); keyboard
+            end
+            UpdateString = ['UPDATE TimeSeriesSource SET SourceParent_id = ' num2str(Parentid) ' WHERE Source_id = ' num2str(Sourceids(j))];
+            [rs,emsg] = mysql_dbexecute(dbc,UpdateString);
+            if isempty(emsg)
+                fprintf(1,'Assigned Parent_id to Time series source: ''%s''\n',SourceNames{j})
+            else
+                fprintf(1,'Error assigning Parent_id for Time series source: ''%s''\n',SourceNames{j})
+            end
+        else
+            fprintf(1,'***Unable to assign the parent source ''%s'' to child ''%s''',SourceParents{j},SourceNames{j})
+        end
     end
 end
+fprintf(1,'******All SourceStrings in TimeSeries Table linked to Source_ids successfully*********\n')
+
 
 %% 3. Link Category_ids
-SelectString = 'SELECT Category_id, CategoryName FROM TimeSeriesCategories';
+SelectString = 'SELECT Category_id, CategoryName, ParentString FROM TimeSeriesCategories';
 [rs,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 Categoryids = vertcat(rs{:,1});
 CategoryNames = rs(:,2);
+CategoryParents = rs(:,3);
 nCategories = length(CategoryNames);
 fprintf(1,'We have %g categories\n',nCategories);
-for j = 1:nSources
+for j = 1:nCategories
     [nentries,~,~,emsg] = mysql_dbquery(dbc,['SELECT COUNT(*) FROM TimeSeries WHERE CategoryString = ''' esc(CategoryNames{j}) '''']);
     nentries = nentries{1};
+    
+    % Update links to category_ids in TimeSeries table
     UpdateString = ['UPDATE TimeSeries SET Category_id = ' num2str(Categoryids(j)) ' WHERE CategoryString = ''' esc(CategoryNames{j}) ''''];
     [rs,emsg] = mysql_dbexecute(dbc,UpdateString);
     if isempty(emsg)
-        fprintf(1,'Updated %g entries in TimeSeries by assigning %s to a Category_id %g \n',nentries,CategoryNames{j},Categoryids(j))
+        fprintf(1,'Updated %g entries in TimeSeries by assigning ''%s'' to a Category_id %g \n',nentries,CategoryNames{j},Categoryids(j))
     else
-        fprintf(1,'Error updating entries in TimeSeries for %s\n',CategoryNames{j})
+        fprintf(1,'Error updating entries in TimeSeries for ''%s''\n',CategoryNames{j})
+    end
+
+    % Update Nmembers count in TimeSeriesCategories table
+    UpdateString = ['UPDATE TimeSeriesCategories SET NMembers = ' num2str(nentries) ' WHERE Category_id = ' num2str(Categoryids(j))];
+    [rs,emsg] = mysql_dbexecute(dbc,UpdateString);
+    if isempty(emsg)
+        fprintf(1,'Updated Nmembers in TimeSeriesCategories: %g for Category_id %g \n',nentries,Categoryids(j))
+    else
+        fprintf(1,'Error updating Nmembers in TimeSeriesCategories for ''%s''\n',CategoryNames{j})
+    end
+    
+    %% Link each Category_id to its parent
+    if ~isempty(CategoryParents{j})
+        SelectString = sprintf('SELECT Category_id FROM TimeSeriesCategories WHERE CategoryName = ''%s''',CategoryParents{j});
+        [Parentid,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+
+        if ~isempty(Parentid) % A parent match
+            Parentid = Parentid{1};
+            if length(Parentid) > 1
+                disp(['More than one Parent match for ' CategoryNames{j} '........']); keyboard
+            end
+
+            UpdateString = ['UPDATE TimeSeriesCategories SET Parent_id = ' num2str(Parentid) ' WHERE Category_id = ' num2str(Categoryids(j))];
+            [rs,emsg] = mysql_dbexecute(dbc,UpdateString);
+            if isempty(emsg)
+                fprintf(1,'Assigned Parent_id for Time series category ''%s''\n',CategoryNames{j})
+            else
+                fprintf(1,'Error assigning Parent_id for Time series category ''%s''\n',CategoryNames{j})
+            end
+        else    
+            fprintf(1,'***Unable to assign the parent category ''%s'' to child category ''%s''',CategoryParents{j},CategoryNames{j})
+        end
     end
 end
-fprintf(1,'****All CategoryStrings in TimeSeries Table Linked Successfully\n')
+fprintf(1,'****All CategoryStrings in TimeSeries table linked to Category_ids successfully\n')
+
 
 
 SQL_closedatabase(dbc) % close the connection to the database
