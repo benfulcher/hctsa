@@ -7,15 +7,14 @@ case 'Operations'
     CreateString = ['CREATE TABLE Operations ' ...
         '(m_id INTEGER NOT NULL AUTO_INCREMENT, ' ... % Unique integer identifier
         'OpName VARCHAR(255), ' ... % Unique name for the operation
-        'MasterLabel VARCHAR(255), ' ... % Label of master code
-        'Pointer TINYINT(1), ' ... % perhaps redundant given MasterLabel
         'Code VARCHAR(255), ' ... % Code to execute, or Master to retrieve from
-        'Keywords VARCHAR(255), ' ... % Comma separated keyword metadata
-        'CanDistribute INTEGER UNSIGNED, ' ... % Code for whether safe to distribute
+        'Keywords VARCHAR(255), ' ... % Comma separated keyword metadata ...
+        'MasterLabel VARCHAR(255), ' ... % Label of master code
         'LicenseType INTEGER UNSIGNED, ' ... % License for the code
         'Stochastic TINYINT(1), ' ... % Boolean identifier: is it a stochastic algorithm?
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ... % Last modified
         'PRIMARY KEY (m_id))']; % sets primary key as m_id
+        % 'Pointer TINYINT(1), ' ... % perhaps redundant given MasterLabel
 
 case 'TimeSeries'
     CreateString = ['CREATE TABLE TimeSeries ' ...
@@ -31,7 +30,7 @@ case 'TimeSeries'
 
 case 'MasterOperations'
     CreateString = ['CREATE TABLE MasterOperations ' ...
-        '(Master_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ... % Unique integer identifier
+        '(mop_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ... % Unique integer identifier
         'MasterLabel VARCHAR(255), ' ... % Name given to master code file
         'MasterCode VARCHAR(255), ' ... % Code to execute
         'NPointTo INTEGER UNSIGNED, ' ... % Number of children
@@ -39,10 +38,10 @@ case 'MasterOperations'
         
 case 'MasterPointerRelate'
     CreateString = ['CREATE TABLE MasterPointerRelate ' ...
-        '(Master_id INTEGER, ' ... % Unique integer identifier
-        'm_id INTEGER, ' ...
+        '(mop_id INTEGER, ' ... % Unique integer identifier -- master operations
+        'm_id INTEGER, ' ... % Unique integer identifier -- operations
         'FOREIGN KEY (m_id) REFERENCES Operations(m_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
-        'FOREIGN KEY (Master_id) REFERENCES MasterOperations(Master_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
+        'FOREIGN KEY (mop_id) REFERENCES MasterOperations(mop_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
         
 case 'OperationKeywords'
     CreateString = ['CREATE TABLE OperationKeywords ' ...
@@ -64,8 +63,8 @@ case 'TimeSeriesKeywords'
     CreateString = ['CREATE TABLE TimeSeriesKeywords ' ...
         '(tskw_id INTEGER AUTO_INCREMENT PRIMARY KEY, ' ... % Unique identifier for each keyword
         'Keyword varchar(50), ' ... % The keyword
-        'NumOccur INTEGER, ' ... % Number of time series with this keyword
-        'MeanLength INTEGER, ' ... % Mean length of time series with this keyword
+        'NumOccur INTEGER UNSIGNED, ' ... % Number of time series with this keyword
+        'MeanLength FLOAT, ' ... % Mean length of time series with this keyword
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)'];
     
 case 'TsKeywordsRelate'

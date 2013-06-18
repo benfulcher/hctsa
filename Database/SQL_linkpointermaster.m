@@ -1,6 +1,4 @@
-%%% SQL_linkpointermaster
 function SQL_linkpointermaster(dbname)
-
 % Ben Fulcher 18/1/10 Added dbname argument
 
 if nargin < 1
@@ -38,9 +36,9 @@ if ismember('MasterPointerRelate',qrc)
 		keyboard
 	end
 end
-createstring = ['CREATE TABLE MasterPointerRelate (Master_id integer, m_id integer, ' ...
+createstring = ['CREATE TABLE MasterPointerRelate (mop_id integer, m_id integer, ' ...
 				'FOREIGN KEY (m_id) REFERENCES Operations(m_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
-				'FOREIGN KEY (Master_id) REFERENCES MasterOperations(Master_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
+				'FOREIGN KEY (mop_id) REFERENCES MasterOperations(mop_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
 [rs,emsg] = mysql_dbexecute(dbc, createstring);
 if isempty(emsg)
 	disp(['Created MasterPointerRelate table in ' dbname]);
@@ -57,7 +55,7 @@ disp(['Writing relationships between master and pointer operations to MasterPoin
 times = zeros(numpointers,1);
 for i = 1:numpointers
 	tic
-	insertstring = ['INSERT INTO MasterPointerRelate (m_id, Master_id) SELECT ' num2str(pointermids(i)) ', Master_id FROM MasterOperations' ...
+	insertstring = ['INSERT INTO MasterPointerRelate (m_id, mop_id) SELECT ' num2str(pointermids(i)) ', mop_id FROM MasterOperations' ...
 	    	' WHERE (MasterLabel = ''' pointerrefs{i} ''')'];
 	[rs,emsg] = mysql_dbexecute(dbc, insertstring);
 	if ~isempty(emsg)

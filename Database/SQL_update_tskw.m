@@ -18,14 +18,12 @@ SelectString = 'SELECT DISTINCT Keywords FROM TimeSeries';
 [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 
 ukws = {};
-% k = 1;
 for i = 1:length(qrc)
     kws = regexp(qrc{i},',','split','ignorecase');
     for j = 1:length(kws)
         if ~ismember(kws{j},ukws) % add it to ukws
             ukws{end+1} = kws{j};
         end
-        % k = k + 1;
     end
 end
 
@@ -33,8 +31,6 @@ nkw = length(ukws); % the number of unique keywords; the maximum tskw_id index
 fprintf(1,'I just found %g unique keywords\n',nkw)
 
 % ukws = unique(splitkws); % cell of unique keyword strings
-
-
 %% Drop and recreate time series keyword tables
 % [thetables,qrf,rs,emsg] = mysql_dbquery(dbc,'SHOW TABLES');
 % % Must be done first because of foreign key constraint

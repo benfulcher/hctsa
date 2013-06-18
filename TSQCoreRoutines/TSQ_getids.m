@@ -227,7 +227,7 @@ else
 	% Extra qualifier to not include certain keywords -- this is performed seperately in the query for each keyword *to* include
 	% s{2} -- kno
 	if ~isempty(kno)
-		s{2} = ['m_id NOT IN (SELECT m_id FROM mkwFileRelate WHERE mkw_id IN ' ...
+		s{2} = ['m_id NOT IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id IN ' ...
 							'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' bencat(kno,',','''') '))) '];
 	end
 	
@@ -246,7 +246,7 @@ else
 	end
 	
 	% if ~isempty(kno)
-	% 	mnoextrastring = ['AND m_id NOT IN (SELECT m_id FROM mkwFileRelate WHERE mkw_id IN ' ...
+	% 	mnoextrastring = ['AND m_id NOT IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id IN ' ...
 	% 						'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' bencat(mno,',','''') '))) '];
 	% else
 	% 	mnoextrastring = '';
@@ -261,7 +261,7 @@ else
 		
 			if ncut==0 % Get all matches			
 				selectstring = ['SELECT m_id FROM Operations WHERE ' ...
-								'm_id IN (SELECT m_id FROM mkwFileRelate WHERE mkw_id = '  ...
+								'm_id IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id = '  ...
 								'(SELECT mkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
 			else % constrain to some number (using the LIMIT command in mySQL)
@@ -286,7 +286,7 @@ else
 					end
 				else
 					selectstring = ['SELECT m_id FROM Operations WHERE ' ...
-									'm_id IN (SELECT m_id FROM mkwFileRelate WHERE mkw_id = '  ...
+									'm_id IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id = '  ...
 									 '(SELECT mkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 									   conditions limitme];
 				end
@@ -336,7 +336,7 @@ else
 	%% Get other metrics which point to master functions which will be called anyway
 	if masterpull && ~isempty(m_ids_keep)
 		% Find implicated Master functions
-		selectstring = ['SELECT m_id FROM MasterPointerRelate WHERE Master_id IN (SELECT DISTINCT Master_id FROM MasterPointerRelate WHERE m_id IN (' bencat(m_ids_keep,',') '))'];
+		selectstring = ['SELECT m_id FROM MasterPointerRelate WHERE mop_id IN (SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' bencat(m_ids_keep,',') '))'];
 		[newmids,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
 		if isempty(emsg)
 			if ~isempty(newmids) % there are some master functions implicated

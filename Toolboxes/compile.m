@@ -1,5 +1,6 @@
 % This helper script compiles the files
 % RUN IT FROM code_sub/Toolboxes!!
+% Romesh Abeysuriya, March 2013
 function compile
 	fprintf('Now compiling the toolboxes\n')
 	try
@@ -59,3 +60,5 @@ function status = rp_failed()
     catch
           status = 1;
     end
+end
+end

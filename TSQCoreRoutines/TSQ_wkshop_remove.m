@@ -119,7 +119,7 @@ if strcmp(mort, 'ts')
 	disp(['Recalculating TimeSeriesKeywords and TsKeywordsRelate in ' dbname '. Please be patient.']);
 	SQL_update_tskw(dbname) % updates time series keywords (will be different without the deleted time series)
 else
-	disp(['Recalculating OperationKeywords and mkwFileRelate in ' dbname '. Please be patient']);
+	disp(['Recalculating OperationKeywords and OpKeywordsRelate in ' dbname '. Please be patient']);
 	SQL_update_mkw(dbname) % updates operation keywords (will be different without the deleted operations)
 	disp(['Recalculating links between masters and pointers']);
 	SQL_linkpointermaster(dbname) % update master/pointer links

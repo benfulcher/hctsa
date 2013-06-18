@@ -11,21 +11,20 @@ end
 dbc = SQL_opendatabase(dbname);
 	
 %% Fills the NPointTo column in MasterOperations
-SelectString = 'SELECT Master_id FROM MasterOperations';
+SelectString = 'SELECT mop_id FROM MasterOperations';
 [M_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
-% Master ids, M_ids
 
 if isempty(emsg)
 	M_ids = vertcat(M_ids{:}); % vector of master_ids
 else
-	error('SQL_masternpointto: Error retrieving Master_ids');
+	error('SQL_masternpointto: Error retrieving mop_ids');
 end
 
 
 for k = 1:length(M_ids)
 	UpdateString = ['UPDATE MasterOperations SET NPointTo = ' ...
-							'(SELECT COUNT(Master_id) FROM MasterPointerRelate WHERE Master_id = ' num2str(M_ids(k)) ') ' ...
-					'WHERE Master_id = ' num2str(M_ids(k))];
+							'(SELECT COUNT(mop_id) FROM MasterPointerRelate WHERE mop_id = ' num2str(M_ids(k)) ') ' ...
+					'WHERE mop_id = ' num2str(M_ids(k))];
 	[rs,emsg] = mysql_dbexecute(dbc, UpdateString);
 	if ~isempty(emsg)
 		disp(['Error with ' num2str(M_ids(k))]);

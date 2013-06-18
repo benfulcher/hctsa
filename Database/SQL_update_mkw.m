@@ -12,23 +12,23 @@ end
 dbc = SQL_opendatabase(dbname); % dbc is the database
 
 %% Drop existing tables
-% (1) mkwFileRelate
+% (1) OpKeywordsRelate
 [thetables,~,~,emsg] = mysql_dbquery(dbc,'SHOW TABLES');
-if ismember('mkwFileRelate',thetables)
+if ismember('opkeywordsrelate',thetables)
 	% alread exists -- drop and recreate
-	[rs,emsg] = mysql_dbexecute(dbc, 'DROP TABLE mkwFileRelate');
+	[rs,emsg] = mysql_dbexecute(dbc, 'DROP TABLE OpKeywordsRelate');
 	if ~isempty(rs)
-		disp('mkwFileRelate table dropped');
+		disp('OpKeywordsRelate table dropped');
 	else
         disp(emsg);
-		error('Error dropping table mkwFileRelate');
+		error('Error dropping table OpKeywordsRelate');
 	end
 else
-    disp(['No mkwFileRelate table in ' dbname]);
+    fprintf(1,'No OpKeywordsRelate table in %s',dbname);
 end
 
 % (2) Operation Keywords
-if ismember('OperationKeywords',thetables)
+if ismember('operationkeywords',thetables)
 	% alread exists -- drop then recreate
 	[rs,emsg] = mysql_dbexecute(dbc, 'DROP TABLE OperationKeywords');
 	if ~isempty(rs)
@@ -38,7 +38,7 @@ if ismember('OperationKeywords',thetables)
 		error('Error dropping OperationKeywords table');
 	end
 else
-    disp(['No OperationKeywords table in ' dbname]);
+    fprintf(1,'No OperationKeywords table in %s',dbname);
 end
 
 
@@ -64,10 +64,10 @@ ukws = unique(splitkws); % cell of unique keyword strings
 CreateString = SQL_TableCreateString('OperationKeywords');
 [rs,emsg] = mysql_dbexecute(dbc, CreateString);
 if ~isempty(rs)
-	disp('Created new table: OperationKeywords');
+    disp('Created new table: OperationKeywords');
 else
     disp(emsg)
-	error('Error creating new table: OperationKeywords')
+    error('Error creating new table: OperationKeywords')
 end
 
 % Cycle through all unique keywords and add them to the OperationKeywords table
@@ -81,20 +81,20 @@ end
 %% Associate primary keys of keywords and series
 disp('Now creating and filling the association table between operation keywords and the operations themselves');
 
-% Create mkwFileRelate Table
-CreateString =  SQL_TableCreateString('mkwFileRelate');
+% Create OpKeywordsRelate Table
+CreateString =  SQL_TableCreateString('OpKeywordsRelate');
 [rs,emsg] = mysql_dbexecute(dbc, CreateString);
 if ~isempty(rs)
-	disp('Created new table: mkwFileRelate');
+	disp('Created new table: OpKeywordsRelate');
 else
     disp(emsg)
-	error('Error creating new table: mkwFileRelate')
+	error('Error creating new table: OpKeywordsRelate')
 end
 
 % Query series table for each keyword
 for k = 1:K
     kw = char(ukws{k});
-    querystring = ['INSERT INTO mkwFileRelate (mkw_id, m_id) SELECT ' num2str(k) ', m_id FROM Operations ' ...
+    querystring = ['INSERT INTO OpKeywordsRelate (mkw_id, m_id) SELECT ' num2str(k) ', m_id FROM Operations ' ...
         	'WHERE (Keywords LIKE ''' kw ',%'' OR Keywords LIKE ''%,' kw ',%'' OR Keywords LIKE ''%,' kw ''' OR' ...
         	' Keywords = ''' kw ''')'];
     [rs,emsg] = mysql_dbexecute(dbc, querystring);
@@ -103,7 +103,7 @@ end
 
 %% Go back and write number of occurences to OperationKeywords Table
 for k = 1:K
-	countstring = ['SELECT COUNT(mkw_id) AS Countme FROM mkwFileRelate WHERE mkw_id = ' num2str(k)];
+	countstring = ['SELECT COUNT(mkw_id) AS Countme FROM OpKeywordsRelate WHERE mkw_id = ' num2str(k)];
 	[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,countstring);
 	if isempty(qrc)
 		disp(['Error evaluating COUNT']); disp([emsg]);

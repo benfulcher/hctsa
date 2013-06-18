@@ -662,8 +662,8 @@ mpoint = vertcat(minfo{:,4}); % pointer? -- [redundant if you have mlink]
 
 % Now get master info
 % (i) Which masters are implicated?
-selectstring = ['SELECT Master_id, MasterLabel, MasterCode FROM MasterOperations WHERE Master_id IN ' ...
-				'(SELECT DISTINCT Master_id FROM MasterPointerRelate WHERE m_id IN (' m_ids_keep_string '))'];
+selectstring = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WHERE mop_id IN ' ...
+				'(SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' m_ids_keep_string '))'];
 [masterinfo,~,~,emsg] = mysql_dbquery(dbc,selectstring);
 if ~isempty(emsg)
     disp('Error retrieving Master information'); keyboard
@@ -681,7 +681,7 @@ else
 end
 
 % (ii) Get master link information
-selectstring = ['SELECT Master_id FROM (SELECT m_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')) AS T1 ' ...
+selectstring = ['SELECT mop_id FROM (SELECT m_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')) AS T1 ' ...
 					'LEFT JOIN MasterPointerRelate ON T1.m_id = MasterPointerRelate.m_id'];
 [masterlink,~,~,emsg] = mysql_dbquery(dbc,selectstring);
 empties = find(cellfun(@isempty,masterlink));
@@ -698,7 +698,7 @@ for i=1:nM % number of master metrics
 	rch{i} = find(mlink==Mmid(i));
 end
 for i=1:nM
-	mlink(rch{i}) = i; % rename with index rather than the Master_id
+	mlink(rch{i}) = i; % rename with index rather than the mop_id
 end
 
 % Close database

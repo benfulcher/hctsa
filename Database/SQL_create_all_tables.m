@@ -10,7 +10,7 @@ TableNames = {'Operations', ...     % Operations Table
         'MasterPointerRelate', ...  % MasterPointerRelate Table
         'TimeSeries', ...           % TimeSeries Table
         'OperationKeywords', ...    % OperationKeywords Table
-        'OpKeywordsRelate', ...     % mkwFileRelate Table
+        'OpKeywordsRelate', ...     % OpKeywordsRelate Table
         'TimeSeriesKeywords', ...   % TimeSeriesKeywords
         'TsKeywordsRelate', ...     % TsKeywordsRelate Table
         'Results'};                 % Results Table

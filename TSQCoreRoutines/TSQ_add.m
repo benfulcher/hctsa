@@ -18,14 +18,14 @@ function TSQ_add(metorts, INPfile, dbname)
 %% Check Inputs, Set defaults
 
 % metorts
-if nargin<1 || isempty(metorts) || ~(strcmp(metorts,'mets') || strcmp(metorts, 'ts'))
+if nargin < 1 || isempty(metorts) || ~(strcmp(metorts,'mets') || strcmp(metorts, 'ts'))
 	disp(['Error setting first input argument -- should be ''ts'' or ''mets''']);
 	return
 end
 disp(['Using ' metorts]);
 
 % inpfilename
-if nargin<2 || isempty(INPfile)
+if nargin < 2 || isempty(INPfile)
 	if strcmp(metorts,'ts')
 		INPfile = 'INP_ts.txt';
 	else
