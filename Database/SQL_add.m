@@ -11,6 +11,8 @@ function SQL_add(importwhat, INPfile, dbname, bevocal)
 % Romesh Jan 2013
 % Ben Fulcher June 2013 -- reformulated the whole format so that only a single thing is uploaded at a time (ts, ops, mops), and follows a uniform and more transparent structure with as much overlap in syntax as possible. Added bevocal input
 
+% can you see me??
+
 %% CHECK INPUTS:
 % SHOULD BE TS, MOP, or OP -- or can iterate through each possibility
 % Nice to make code that inports a given type of thing into a given table
