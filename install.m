@@ -1,18 +1,19 @@
-fprintf(1,'This script will set up the Highly comparative time-series analysis code package')
+fprintf(1,'This script will set up the Highly comparative time-series analysis code package from scratch\n')
 fprintf(1,['In the following order, we will' ...
                 '\n- Add the paths' ...
                 '\n- Set up the database' ...
-                '\n- Compile the toolboxes' ...
                 '\n- Add the operations' ...
-                '\n- Test if all is correct'])
+                '\n- Compile the toolboxes' ...
+                '\n- Test that things are working'])
 
 % 1. Add the paths:
 fprintf(1,'Adding the paths...')
 try
 	startup
-	fprintf('done\n')
-catch
-	fprintf(1,'Error adding the paths\n')
+	fprintf('done.\n')
+catch emsg
+	fprintf(1,'error.\n')
+    fprintf(1,'%s\n',emsg)
 end
 
 
@@ -26,12 +27,12 @@ SQL_create_all_tables;
 
 % 3. Populate the database with operations
 fprintf(1,'Populating the database with operations (please be patient)...\n')
-fprintf(1,'Adding Master operations...'); moptic = tic;
+fprintf(1,'Adding Master operations...\n'); moptic = tic;
 SQL_add('mops','Database/INP_mops.txt','',1)
-fprintf(1,'added in %s.',benrighttime(moptic))
-fprintf(1,'Adding all operations...'); optic = tic;
-SQL_add('ops','Database/INP_ops.txt','',0)
-fprintf(1,'added in %s.',benrighttime(optic))
+fprintf(1,'Master operations added in %s\n.',benrighttime(toc(moptic)))
+fprintf(1,'Adding all operations...\n'); optic = tic;
+SQL_add('ops','Database/INP_ops.txt','',1)
+fprintf(1,'Operations added in %s\n.',benrighttime(toc(optic)))
 
 % Attempt to compile the executables in Toolboxes:
 fprintf(1,'Attempting to compile the binary executables needed for evaluating some operations.\n')

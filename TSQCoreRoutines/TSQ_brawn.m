@@ -49,7 +49,7 @@ end
 
 % Write back results when finished?
 if nargin < 4
-    agglomerate = 1; % yes, by default
+    agglomerate = 1; % yes, agglomerate by default
 end
 
 %% Read in information from local files
@@ -60,7 +60,7 @@ load TS_loc_ct.mat TS_loc_ct
 fprintf(fid,' TS_loc_ct, '); % calculation times
 load TS_loc_q.mat TS_loc_q
 fprintf(fid,' TS_loc_q,'); % quality codes
-load TS_loc_guides.mat ts_ids_keep tsf tskw tsl m_ids_keep mcode mlab mkw mpoint mlink Mmid Mmlab Mmcode
+load TS_loc_guides.mat ts_ids_keep tsf tskw tsl m_ids_keep mcode mlab mkw mlink Mmid Mmlab Mmcode
 fprintf(fid,'TS_loc_guides. All loaded.\n'); % guides
 
 %% Definitions
@@ -84,6 +84,8 @@ end
 
 times = zeros(nts,1); % stores the time taken for each time series to have its metrics calculated (for determining time remaining)
 lst = 0; % last saved time
+bevocal = 0; % print every piece of code evaluated (nice for error checking)
+
 for i = 1:nts
 	bigtimer = tic;
 
@@ -134,7 +136,7 @@ for i = 1:nts
         % index sliced variables to minimize the communication overhead in the parallel processing
         partsfi  = tsf{i}; parmcode = mcode(tcal); parmlab = mlab(tcal); parmlink = mlink(tcal);
 
-		fprintf(1,'Calculating %s (ts_id = %u, N = %u) [%u / %u]\n'],partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
+		fprintf(1,'Calculating %s (ts_id = %u, N = %u) [%u / %u]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
 		if tolog
 			fprintf(fid,'Calculating %u (/%u) operations\n',ncal,nm);
 		end
@@ -159,7 +161,6 @@ for i = 1:nts
             MctsPAR = zeros(nMtocalc,1);
 			
 			% Evaluate the master functions
-            bevocal = 0; % print every piece of code evaluated
 			if toparallel
 	            parfor j = 1:nMtocalc
 					jj = Mitocalc(j); % the index of the master array to evaluate
@@ -363,7 +364,9 @@ if tolog, fclose(fid); end % close the .log file
 
 if agglomerate
     fprintf(1,'Calculation done: Calling TSQ_agglomerate to store back results\n')
-    TSQ_agglomerate(0,dbname) % 0 -- don't bother with a log file
+    log = 0; % don't bother with a log file
+    onlyempty = 0; % only write back to NULL entries in the database
+    TSQ_agglomerate(log,onlyempty,dbname)
 else
     fprintf(1,'Calculation complete: you can now run TSQ_agglomerate to store results to a mySQL database\n')
 end

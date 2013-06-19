@@ -43,25 +43,24 @@ function TSQ_prepared(ts_ids_keep, m_ids_keep, tolog, forcalc, dbname, brawninpu
 %% OUTPUTS (to file):
 % 1) TS_loc.mat, which contains the matrix TS_loc: the portion of the storage file that
 % 				   matches the supplied constaints.
-% 2) TS_guide_ts.mat, which contains information about the time series in TS_loc:
-%				 (i) tsf: filenames of the files containing the time series data (cell of strings)
-%				 (ii) tsl: the length of each time series (vector)
-%				 (iii) tskw: the keywords of each time series (cell of string cells)
-%				 (iv) tsprep: the type of detrending required (vector of integer labels) [[NOW REDUNDANT]]
-%				 (v) tsmap: the mapping of the time series in the portion TS_loc to STORE_data (integer vector)
-%				 (vi) nts: the number of time series (scalar integer)
-% 3) TS_guide_met.mat, which contains information about the metrics in TS_loc:
-% 				 (i) mf: the matlab code to call for each metric (cell of strings)
+% 2) TS_loc_guides.mat, which contains information about the time series in TS_loc:
+%				 () tsf: filenames of the files containing the time series data (cell of strings)
+%				 () tsl: the length of each time series (vector)
+%				 () tskw: the keywords of each time series (cell of string cells)
+%				 () tsprep: the type of detrending required (vector of integer labels) [[NOW REDUNDANT]]
+%				 () tsmap: the mapping of the time series in the portion TS_loc to STORE_data (integer vector)
+%				 () nts: the number of time series (scalar integer)
+% 				 () mf: the matlab code to call for each metric (cell of strings)
 % 				 			(or the relevant part of a master structure output if a pointer)
-% 				 (ii) mlab: labels of the metrics; different to their calling function (cell of strings)
-% 				 (iii) mpostp: post-processings specific to each metric (vector of integer labels)
-% 				 (iv) mkw: keywords for each metric (cell of string cells)
-% 				 (v) mtyp: the type of metric: i.e., single (S), or pointer (P)
-% 				 (vi) mmap: mapping from the metrics in TS_loc to their position in STORE_data (integer vector)
-% 				 (vii) nm: the number of metrics (scalar integer)
-% 				 (viii) mMf: the matlab code to call (cell of strings)
-% 				 (ix) mMl: master metric labels, for pointers to point to (cell of strings)
-% 				 (x) nmM: the number of master metrics (scalar integer)
+% 				 () mlab: labels of the metrics; different to their calling function (cell of strings)
+% 				 () mpostp: post-processings specific to each metric (vector of integer labels)
+% 				 () mkw: keywords for each metric (cell of string cells)
+% 				 () mtyp: the type of metric: i.e., single (S), or pointer (P)
+% 				 () mmap: mapping from the metrics in TS_loc to their position in STORE_data (integer vector)
+% 				 () nm: the number of metrics (scalar integer)
+% 				 () mMf: the matlab code to call (cell of strings)
+% 				 () mMl: master metric labels, for pointers to point to (cell of strings)
+% 				 () nmM: the number of master metrics (scalar integer)
 
 
 %%% FOREPLAY
@@ -119,23 +118,25 @@ fprintf(1,'We have %u time series and %u operations to retrieve from %s\n',nts,n
 fprintf(1,'Filling and saving to local matricies TS_loc, TS_loc_ct, TS_loc_q from Results table in %s\n',dbname);
 
 if ~isempty(forcalc)
-	fprintf(1,'Retrieving elements to calculate from the database. Please be patient... I''m timing.\n');
+	fprintf(1,'Retrieving elements to calculate from the database. Please be patient... I''m timing...');
 	tic
 	% Just retrieve bits that need to be calculated
 	% May be faster to break it up and do each ts_id seperately... (this way the amount of data in each transfer is limited)
 	SelectString = ['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ')' ...
 						' AND m_id IN (' m_ids_keep_string ' ) AND QualityCode IS NULL'];
-	if forcalc
+	if forcalc > 0
 		SelectString = [SelectString, ' LIMIT ' num2str(forcalc)];
 	end
     
 	[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 	if ~isempty(emsg)
-		disp('Error retrieving outputs from database...???'); keyboard
+		fprintf(1,'Error retrieving outputs from database...???\n');
+        fprintf(1,'%s\n',emsg)
+        keyboard
 	else
 		ngot = size(qrc,1);
 		if ngot == 0
-			disp('NOTHING TO RETRIEVE?!!');
+			fprintf(1,'Nothing to retrieve?!!\n');
 			SQL_closedatabase(dbc)
 			return
 		else
@@ -214,11 +215,9 @@ if ~isempty(forcalc)
 	
 	fprintf(1,'Filtering complete in %s\n',benrighttime(toc));	
 	
-else % retrieve everything in the range given (not just empty bits)
-	% choose whether to do by rows or columns
-	% dorows = 1;
-	% if dorows
-	
+else
+    % retrieve everything in the range given (not just empty bits)
+	% choose whether to do by rows or columns	
 	
 	%% Strategy: fill the matrices one row at a time
 	% Opening and closing individual connections helps to avoid a massive java heap space error... Hopefully...
@@ -228,13 +227,13 @@ else % retrieve everything in the range given (not just empty bits)
     % end
 	for i = 1:nts
 		tic
-		SelectString = ['SELECT m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i)) ...
-							' AND m_id IN (' m_ids_keep_string ' )'];
-        % if ~doinone, dbc = SQL_opendatabase(dbname,0); end % Open SQL connection silently
+		SelectString = sprintf(['SELECT m_id, Output, CalculationTime, QualityCode FROM Results WHERE ' ...
+                            		'ts_id = %u AND m_id IN (%s)'],ts_ids_keep(i),m_ids_keep_string);
 		[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
-        % if ~doinone, SQL_closedatabase(dbc); end % close connection
+
 		if ~isempty(emsg)
-			fprintf(1,'Error retrieving outputs from the Results table at ts_id = %u...\n',ts_ids_keep(i)); keyboard
+			fprintf(1,'Error retrieving outputs from the Results table in %s at ts_id = %u...\n',dbname,ts_ids_keep(i));
+            keyboard
 		end
 	
         if isempty(qrc)

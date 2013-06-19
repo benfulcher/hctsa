@@ -1,4 +1,4 @@
-function TSQ_agglomerate(tolog,dbname)
+function TSQ_agglomerate(tolog,onlyempty,dbname)
 % agglomerates the TS_loc file in the current directory
 % into the database
 % Needs files TS_loc, TS_guide_ts, TS_guide_mets in current directory
@@ -11,79 +11,85 @@ function TSQ_agglomerate(tolog,dbname)
 
 
 %% Check Inputs
-if nargin<1 || isempty(tolog)
+if nargin < 1 || isempty(tolog)
 	tolog = 0;
 end
-if nargin<2
+if nargin < 2
+	dbname = '';
+end
+if nargin < 3
 	dbname = '';
 end
 
 %% Open MySQL Database
-dbc = SQL_opendatabase(dbname);
+[dbc,dbname] = SQL_opendatabase(dbname);
 
 %% Load files
 % Load in necessary files for both reading and writing
 % For reading: LOCAL FILES
+fprintf(1,'Loading local files...');
 
-disp('Loading TS_loc');
 load TS_loc.mat TS_loc
+fprintf(1,' TS_loc');
 
-disp('Loading TS_loc_q');
-load TS_loc_q.mat TS_loc_q
-
-disp('Loading TS_loc_ct');
 load TS_loc_ct.mat TS_loc_ct
+fprintf(1,', TS_loc_ct');
 
-% All of this probably unnecessary:
-disp('Loading TS_loc_guides');
-load TS_loc_guides.mat ts_ids_keep tsf tskw tsl m_ids_keep mcode mlab mkw mpoint mlink Mmid Mmlab Mmcode
+load TS_loc_q.mat TS_loc_q
+fprintf(1,', TS_loc_q');
+
+load TS_loc_guides.mat ts_ids_keep tsf tskw tsl m_ids_keep mcode ...
+            mlab mkw mpoint mlink Mmid Mmlab Mmcode % maybe don't need to load all of these...?
+fprintf(1,', TS_loc_guides. All loaded.\n');
+
 
 %% Preliminary definitions
-nts = length(tsf);
-nm = length(mlab);
-
-%% Check that labels are still good, i.e., index structure is maintained...
-% First check that tsf obtained from the database is the same as the tsf in the guide
-% This should always be the case, given the autonumbering system used in the mySQL database
-% Actually, some may have been deleted in the meantime
-disp(['Checking time series still match up']);
+nts = length(ts_ids_keep); % number of time series
+nm = length(m_ids_keep); % number of operations
 ts_ids_keep_string = bencat(ts_ids_keep,',');
-SelectString = ['SELECT FileName FROM TimeSeries WHERE ts_id IN (' ts_ids_keep_string ')'];
-[tsf_check,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-matches = strcmp(tsf,tsf_check);
-tsgoodi = find(matches);
-ntsgood = length(tsgoodi);
-if ntsgood<nts
-	disp(['There are ' num2str(nts-ntsgood) ' time series that no longer match the database']);
-end
-
-% Check that mlab still matches up with database
-disp(['Checking that metrics still match up']);
 m_ids_keep_string = bencat(m_ids_keep,',');
-SelectString = ['SELECT OpName FROM Operations WHERE m_id IN (' m_ids_keep_string ')'];
-[mlab_check,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-matches = strcmp(mlab,mlab_check);
-mgoodi = find(matches);
-nmgood = length(mgoodi);
-if nmgood<nm
-	disp(['There are ' num2str(nm-nmgood) ' metrics that no longer match the database']);
+
+%% Check that nothing has been deleted in the meantime...
+
+% time series
+% fprintf(1,'Checking that retrieved time series ids still exist in the database %s...\n',dbname);
+SelectString = sprintf('SELECT COUNT(ts_id) FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string);
+nts_db = mysql_dbquery(dbc,SelectString);
+nts_db = nts_db{1};
+
+% operations
+% fprintf(1,'Checking that retrieved operations ids still exist in the database %s...\n',dbname);
+SelectString = sprintf('SELECT COUNT(m_id) FROM Operations WHERE m_id IN (%s)',m_ids_keep_string);
+nop_db = mysql_dbquery(dbc,SelectString);
+nop_db = nop_db{1};
+
+if nm == nopmatches && nts == ntsmatches
+    fprintf(1,'All local time series and operation ids still exist in %s. This is good.\n',dbname)
+else
+    if nts_db < nts
+        fprintf(1,'There are %u time series that no longer match the database',(nts-nts_db));
+    end
+
+    if nop_db < nm
+    	fprintf(1,'There are %u operations that no longer match the database',(nm-nmgood));
+    end
+    
+    error(['It could be really dangerous to try writing back to a changed database. ' ...
+                'You should start a TSQ_prepared from scratch.'])
 end
 
-if nm==nmgood && nts==ntsgood
-    disp('All local time series and metrics match up with the storage file indicies. This is a good thing')
-else
-    if nm<nmgood
-        disp('SAVE ONLY THE GOOD OPERATIONS?')
-		% i.e. use TS_loc(:,mgoodi) 
-    end
-    if nts<ntsgood
-        disp('SAVE ONLY THE GOOD TIME SERIES?')
-		% i.e. use TS_loc(tsgoodi,:)
-    end
-	disp('Nope, I can''t take this right now. I''m leaving!');
-	return
-    input('Control-C now or forever hold your peace...')
-end
+% if nm < nmgood
+%         disp('SAVE ONLY THE GOOD OPERATIONS?')
+% % i.e. use TS_loc(:,mgoodi) 
+%     end
+%     if nts<ntsgood
+%         disp('SAVE ONLY THE GOOD TIME SERIES?')
+% % i.e. use TS_loc(tsgoodi,:)
+%     end
+% disp('Nope, I can''t take this right now. I''m leaving!');
+% return
+% input('Control-C now or forever hold your peace...')
+% end
 
 
 % %% Check no specials in any matricies
@@ -101,35 +107,28 @@ end
 
 %% Find the elements that are empty in storage but full in the local file
 % Parts of calculated subsection that are empty in storage
-disp(['Retrieving empty bits of storage in the given range... Be patient... We''re timing it, if that helps...']);
+fprintf(1,'Retrieving empty bits of storage in the given range... Be patient... We''re timing it, if that helps...');
 tic
 SelectString = ['SELECT ts_id, m_id, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ')' ...
 					' AND m_id IN (' m_ids_keep_string ' ) AND (QualityCode IS NULL OR QualityCode = 1)'];
-[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
+[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
-	disp(['Error selecting empty elements from the database']);
-	disp(emsg); keyboard
+    fprintf(1,'\n'); error(['Error selecting empty elements from ' dbname]);
 elseif isempty(qrc)
-	disp(['No empty elements in this range in the database anymore! There''s a surprise!! Exiting.']); return
+	error('No empty elements in this range in the database anymore! Someone else has completely filled the database?! This is really unexpected!')
 else
-	disp(['Retrieved!! Took ' benrighttime(toc)]);
+	fprintf(1,' Retrieved in %s\n',benrighttime(toc));
 end
 
 ts_id_empties = vertcat(qrc{:,1}); % ts_ids (in m_id pairs) of empty database elements in this ts_id/m_id range
 m_id_empties = vertcat(qrc{:,2}); % m_ids (in ts_id pairs) of empty database elements in this ts_id/m_id range
-nempties = length(ts_id_empties);
+nempties = length(ts_id_empties); % (= length(m_id_empties))
 
 qualities = qrc(:,3); % empties (null) and 1s (fatal errors)
 qualities(cellfun(@isempty,qualities)) = {NaN}; % turn NULLs in NaNs
-qualities = vertcat(qualities{:});
+qualities = vertcat(qualities{:}); % turn cells into a vector
 
-% % Convert empty entries to NaNs
-% nothings = find(cellfun(@isempty,qualities)); % nothings: where empty entries
-% if ~isempty(nothings)
-% 	qualitites(nothings) = {NaN};
-% end
-
-disp(['There are ' num2str(nempties) ' entries in the database in this range that await filling... Let''s do it...!']);
+fprintf(1,'There are %u entries in the database %s (i.e., either NULL or previous errors) that will be written to...',nempties,dbname);
 
 times = zeros(nempties,1);
 updatecounter = 0;
