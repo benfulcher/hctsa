@@ -358,7 +358,7 @@ if ~strcmp(importwhat,'mops')
     
     % Fill new relationships
     if bevocal
-        fprintf(1,'Writing the new keyword relationships to the %s table in %s\n',thereltable,dbname)
+        fprintf(1,'Writing new keyword relationships to the %s table in %s\n',thereltable,dbname)
     end
     for i = 1:length(kws) % each new time series
         for j = 1:length(kwsplit{i}) % each keyword in the timeseries

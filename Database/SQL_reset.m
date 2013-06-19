@@ -14,4 +14,4 @@ disp([dbname ' and all the data contained within it dropped']);
 mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s;',dbname));
 SQL_closedatabase(dbc) % close the database
 SQL_create_all_tables;
-disp([dbname ' was recreated. That''s all from me ///']);
+fprintf(1,'%s was recreated. That''s all from me ///\n',dbname);
