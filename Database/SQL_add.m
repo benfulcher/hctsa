@@ -76,11 +76,11 @@ switch importwhat
 case 'ts' % Read the time series input file:
     if bevocal
         fprintf(1,'Need to format %s (Time Series input file) as: Filename Keywords\n',INPfile)
-        fprintf(1,'Assuming a single header line\n')
+        fprintf(1,'Assuming no header line\n')
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
-	datain = textscan(fid,'%s %s','CommentStyle','%','HeaderLines',1,'CollectOutput',1);    
+	datain = textscan(fid,'%s %s','CommentStyle','%','CollectOutput',1); % 'HeaderLines',1,
 case 'ops' % Read the operations input file:
     if bevocal
         fprintf(1,'Need to format %s (Operations input file) as: OperationName OperationCode OperationKeywords\n',INPfile)
@@ -105,7 +105,7 @@ fclose(fid);
 datain = datain{1}; % collect one big matrix of cells
 nits = size(datain,1); % number of items in the input file
 
-if nits == 0, error(['Input file ' INPfile ' seems to me to be empty??']), end
+if nits == 0, error(['Input file ' INPfile ' seems to be empty??']), end
 
 if bevocal
     fprintf(1,'Found %u %s in %s, I think. Take a look:\n',nits,thewhat,INPfile)
@@ -166,7 +166,7 @@ case 'ts' % Prepare toadd cell for time series
             if size(x,2) > size(x,1); % a row vector
                 if size(x,1)==1
                     % Get permission once
-                    if resave = 0
+                    if resave == 0
                         fprintf(1,['Looks like some time series files (%s) are row vectors instead of column vectors.' ...
                                         'Can I resave over them?\n'],which(timeseries(j).Filename))
                         reply = input('''y'' for yes (will remember this answer for other time series), or any other key to quit','s');
@@ -323,8 +323,9 @@ if ~strcmp(importwhat,'mops')
     if bevocal, fprintf(1,'I found %u unique keywords in the %s in %s\n',nkw,thewhat,INPfile); end
 
     % How many overlap with existing keywords??
-    allkws = mysql_dbquery(sprintf('SELECT Keyword FROM %s',thektable));
-    isnew = ~ismember(ukws,allkws);
+    allkws = mysql_dbquery(dbc,sprintf('SELECT Keyword FROM %s',thektable));
+    isnew = cellfun(@(x)~isempty(x),regexp(kws,allkws,'ignorecase')); % IGNORE CASE DIFFERENCES
+    % isnew = ~ismember(ukws,allkws);
     if sum(isnew) > 0
         if bevocal
             fprintf(1,['So it turns out that %u keywords are completely new and will be added ' ...

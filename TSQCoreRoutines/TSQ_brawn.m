@@ -83,8 +83,7 @@ end
 
 
 times = zeros(nts,1); % stores the time taken for each time series to have its metrics calculated (for determining time remaining)
-lst1 = 0; % last saved time 1
-lst2 = 0; % last saved time 2
+lst = 0; % last saved time
 for i = 1:nts
 	bigtimer = tic;
 
@@ -200,11 +199,11 @@ for i = 1:nts
             Moutput(Mitocalc) = MoutputPAR;
             Mcts(Mitocalc) = MctsPAR;
 			
-			fprintf(1,'Master operations evaluated.\n');
+			fprintf(fid,'Master operations evaluated.\n');
 		else
 			% No master metrics need to be calculed.
-			Moutput={}; Mcts={}; % This initiaition is necessary for the next parfor loop
-			fprintf(1,'No master operations.\n');
+			Moutput = {}; Mcts = {}; % This initiaition is necessary for the next parfor loop
+			fprintf(fid,'No master operations.\n');
 		end
 
 
@@ -219,8 +218,7 @@ for i = 1:nts
 							ffi(j) = NaN;
 		                    cti(j) = Mcts(parmlink(j));
 						else % (normal -- retrieve required element from master structure)
-							thedot = strfind(parmcode{j},'.');
-							thest = parmcode{j}(thedot+1:end);
+                            [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
 		                    ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
 							qqi(j) = 0; % good, real-valued output
 		                    cti(j) = Mcts(parmlink(j));
@@ -238,7 +236,6 @@ for i = 1:nts
 						ffi(j) = pareval(x,y,parmcode{j});
 						qqi(j) = 0;
 						cti(j) = toc(operationtimer);
-						% if isinf(ffi(j)), ffi(j)=NaN; end % real Inf stored as if real NaN...
 		            catch
 		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
 						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
@@ -255,8 +252,7 @@ for i = 1:nts
 							ffi(j) = NaN;
 		                    cti(j) = Mcts(parmlink(j));
 						else % (normal -- retrieve required element from master structure)
-							thedot = strfind(parmcode{j},'.');
-							thest = parmcode{j}(thedot+1:end);
+                            [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
 		                    ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
 							qqi(j) = 0; % good, real-valued output
 		                    cti(j) = Mcts(parmlink(j));
@@ -273,7 +269,6 @@ for i = 1:nts
 						ffi(j) = pareval(x,y,parmcode{j});
 						qqi(j) = 0;
 						cti(j) = toc(operationtimer);
-						% if isinf(ffi(j)), ffi(j)=NaN; end % real Inf stored as if real NaN...
 		            catch
 		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
 						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
@@ -282,152 +277,95 @@ for i = 1:nts
 	        end
 		end
         
-		%% Treat error coding -- qqi
-		% (*) Errorless calculation: q=0, output=real number (default)
-		% (*) Fatal error: q=1, output = 0; (this is done already in the code above)
-		% (*) Real NaN: q=2, output = 0;
+		%% Error coding -- qqi
+
+		% (*) Errorless calculation: q = 0, output = <real number>
+		% (*) Fatal error: q = 1, output = 0; (this is done already in the code above)
+
+		% (*) output = NaN: q = 2, output = 0
 		RR = isnan(ffi); % NaN
-		if ~isempty(RR)
-			qqi(RR) = 2;
-			ffi(RR) = 0;
+		if any(RR)
+			qqi(RR) = 2; ffi(RR) = 0;
 		end
-		% (*) Real Inf: q=3, output = 0;
-		RR = (isinf(ffi) & ffi>0); % Inf
-		if ~isempty(RR)
-			qqi(RR) = 3;
-			ffi(RR) = 0;
+
+		% (*) output = Inf: q = 3, output = 0
+		RR = (isinf(ffi) & ffi > 0); % Inf
+		if any(RR)
+			qqi(RR) = 3; ffi(RR) = 0;
 		end
-		% (*) Real -Inf: q=4, output=0;
-		RR = (isinf(ffi) & ffi<0);
-		if ~isempty(RR)
-			qqi(RR) = 4;
-			ffi(RR) = 0;
+		
+        % (*) output = -Inf: q = 4, output = 0
+		RR = (isinf(ffi) & ffi < 0);
+		if any(RR)
+			qqi(RR) = 4; ffi(RR) = 0;
 		end
-		% (*) Complex Number: q=5
-		RR = imag(ffi)~=0;
-		if ~isempty(RR)
-			qqi(RR) = 5;
-			ffi(RR) = 0;
+        
+		% (*) output is a complex number: q = 5, output = 0
+		RR = (imag(ffi)~=0);
+		if any(RR)
+			qqi(RR) = 5; ffi(RR) = 0;
 		end
 
 		
-		% Store this time series information back to global structures
-		
-        TS_loc(i,tcal) = ffi; % store new ones in TS_loc
+		% Store the calculated information back to local matrices
+        TS_loc(i,tcal) = ffi; % store outputs in TS_loc
 		TS_loc_ct(i,tcal) = cti; % store calculation times in TS_loc_ct
 		TS_loc_q(i,tcal) = qqi; % store quality labels in TS_loc_q
 		% Note that the calculation time for pointers is the total calculation time for the full master structure.		
 
-
-		% Set time for this data set, for run-timing purposes
-		times(i) = toc(bigtimer);
-		
-		% LOG
+        % Calculate statistics for writing to file/screen
 		ngood = sum(qqi==0); % the number of calculated metrics that returned real outputs without errors
-		nerror = sum(qqi==1);
-		nother = sum(qqi>1);
-
-
-		% Summary
-		fprintf(fid,'%s\n','****************************************************************');
-	    fprintf(fid,'%s\n',['; ; ; : : : : ; ; ; ;    ' datestr(now) '     ; ; ; ; : : : ; ; ;']);
-	    fprintf(fid,'%s\n',['oOoOoOoOoOo  ' partsfi ' (' num2str(tsl(i)) ')  oOoOoOoOoOoOo']);
-	    fprintf(fid,'%s\n',[num2str(ngood) ' real-valued outputs...' num2str(nerror) ' errors;  ' ...
-	     					num2str(nother) ' other outputs stored. [ ' num2str(ncal) ' / ' num2str(nm) ' ]']);
-		fprintf(fid,'%s\n',['Calculation for this data set took ' benrighttime(times(i))]);
-	    fprintf(fid,'%s\n',['    - - - - - - - -  ' num2str(i) '  /  ' num2str(nts) '   - - - - - - - -']);
-		fprintf(fid,'%s\n',['    - - - - - - - -  ' benrighttime(((nts-i)*mean(times(1:i)))) ' remaining - - - - - - - - -']);
-	    fprintf(fid,'%s\n\n','****************************************************************');
-		
-    else % nothing to calculate (empty tcal)
-		% Timer/updater;
-	    times(i) = toc(bigtimer);
-	
-
-		disp('****************************************************************')
-	    disp(['; ; ; : : : : ; ; ; ;    ' datestr(now) '     ; ; ; ; : : : ; ; ;'])
-	    disp(['oOoOoOoOoOo  ' tsf{i} ' (' num2str(tsl(i)) ')  oOoOoOoOoOoOo'])
-		disp(['0O0O0O0O0O0 nothing calculated! All ' num2str(nm) ' already complete!!  0O0O0O0O0O0'])
-	    disp(['    - - - - - - - -  ' num2str(i) '  /  ' num2str(nts) '   - - - - - - - -'])
-		disp(['    - - - - - - - -  ' benrighttime(((nts-i)*mean(times(1:i)))) ' remaining - - - - - - - - -'])
-	    disp('****************************************************************')
-	
-		if tolog
-			fprintf(fid,'%s\n','****************************************************************');
-		    fprintf(fid,'%s\n',['; ; ; : : : : ; ; ; ;    ' datestr(now) '     ; ; ; ; : : : ; ; ;']);
-		    fprintf(fid,'%s\n',['oOoOoOoOoOo  ' tsf{i} ' (' num2str(tsl(i)) ')  oOoOoOoOoOoOo']);
-			fprintf(fid,'%s\n',['0O0O0O0O0O0 nothing calculated! All ' num2str(nm) ' already complete!!  0O0O0O0O0O0']);
-		    fprintf(fid,'%s\n',['    - - - - - - - -  ' num2str(i) '  /  ' num2str(nts) '   - - - - - - - -']);
-			fprintf(fid,'%s\n',['    - - - - - - - -  ' benrighttime(((nts-i)*mean(times(1:i)))) ' remaining - - - - - - - - -']);
-		    fprintf(fid,'%s\n\n\n\n','****************************************************************');
-		end 
+		nerror = sum(qqi==1); % number of fatal errors encountered
+		nother = sum(qqi>1); % number of other special outputs
     end
+    
+    times(i) = toc(bigtimer); % the time taken to calculate (or not, if ncal = 0) operations for this time series
 
+    % Print information about this time series calculation
+	fprintf(fid,'****************************************************************\n')
+    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
+    fprintf(fid,'oOoOoOoOoOo  %s (%u)  oOoOoOoOoOoOo\n',tsf{i},tsl(i));
+    if ncal > 0 % Some amount of calculation was performed
+	    fprintf(fid,'%u real-valued outputs, %u errors, %u other outputs stored. [%u / %u]\n',...
+	     					ngood,nerror,nother,ncal,nm);
+		fprintf(fid,'Calculation for this data set took %s.\n',benrighttime(times(i)));
+    else
+    	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0',nm);
+    end
+    fprintf(fid,'    - - - - - - - -  %u / %u   - - - - - - - -\n',i,nts);
+	fprintf(fid,'    - - - - - - - -  %s remaining - - - - - - - - -\n',benrighttime(((nts-i)*mean(times(1:i)))));
+    fprintf(fid,'****************************************************************\n');
 
 
  	% save TS_loc to file every 10 minutes
-    if sum(times(1:i))-lst1>60*10;
-		save('TS_loc.mat','TS_loc','-v7.3')
-		save('TS_loc_ct.mat','TS_loc_ct','-v7.3')
-		save('TS_loc_q.mat','TS_loc_q','-v7.3')
-        lst1=sum(times(1:i)); % the last saved time (1)
+    if sum(times(1:i))-lst > 60*10; % it's been more than 10 mins since last save
+        fprintf(fid,'Not finished calculations yet, but saving progress so far to file...\n')
+		save('TS_loc.mat','TS_loc','-v7.3');        fprintf(fid,'TS_loc.mat')
+		save('TS_loc_ct.mat','TS_loc_ct','-v7.3');  fprintf(fid,', TS_loc_ct.mat')
+		save('TS_loc_q.mat','TS_loc_q','-v7.3');    fprintf(fid,', TS_loc_q.mat. All saved.\n')
+        lst = sum(times(1:i)); % the last saved time (1)
     end
-    
-    if sum(times(1:i))-lst2>6*3600; % every six hours save backups -- in case files become corrupt -- can retrieve
-		disp('Saving Backup...');
-		timenow = datestr(now,30);
-
-        save(['TS_loc_' timenow '.mat'],'TS_loc','-v7.3');
-		save(['TS_loc_ct_' timenow '.mat'],'TS_loc_ct','-v7.3');
-		save(['TS_loc_q_' timenow '.mat'],'TS_loc_q','-v7.3');
-		disp(['******* saved TS_loc_' timenow '.mat (' benrighttime(lst2) ') **********'])
-        disp(['******* saved TS_loc_ct_' timenow '.mat (' benrighttime(lst2) ') **********'])
-        disp(['******* saved TS_loc_q_' timenow '.mat (' benrighttime(lst2) ') **********'])
-
-		if tolog
-			fprintf(fid,'%s\n',['******* saved TS_loc_' timenow '.mat (' benrighttime(lst2) ') **********']);
-	        fprintf(fid,'%s\n',['******* saved TS_loc_ct_' timenow '.mat (' benrighttime(lst2) ') **********']);
-	        fprintf(fid,'%s\n',['******* saved TS_loc_q_' timenow '.mat (' benrighttime(lst2) ') **********']);
-		end
-
-        lst2 = sum(times(1:i)); % the last saved time (2)
-    end
-    
-end
-% if toparallel
-% 	matlabpool close
-% end
-
-%%% Aftermath
-disp(['! ! ! !! !! !! !! ! ! ! !  DONE AT  ' datestr(now) '     ! ! ! ! !! !! !! ! ! !'])
-disp(['The calculation took ' benrighttime(sum(times))])
-
-if tolog
-	fprintf(fid,'%s\n',['Calculations took ' benrighttime(sum(times)) ' in total']);
-	fprintf(fid,'%s\n',['You''ve been a great audience. Goodnight.']);
-	fclose(fid);
+        
 end
 
-% save the local files for subsequent integration into the storage system
-save('TS_loc.mat','TS_loc','-v7.3');        disp('saved TS_loc')
-save('TS_loc_ct.mat','TS_loc_ct','-v7.3');  disp('saved TS_loc_ct')
-save('TS_loc_q.mat','TS_loc_q','-v7.3');    disp('saved TS_loc_q')
+%%% Finished calculating!! Aftermath:
+fprintf(fid,'!! !! !! !! !! !! !!  Calculation completed at %s !! !! !! !! !! !!\n',datestr(now))
+fprintf(fid,'Calculations took a total of %s.\n',benrighttime(sum(times)))
+
+% Aave the local files for subsequent integration into the storage system
+fprintf(1,'Saving all results to local .mat files:')
+save('TS_loc.mat','TS_loc','-v7.3');        fprintf(fid,' TS_loc.mat')
+save('TS_loc_ct.mat','TS_loc_ct','-v7.3');  fprintf(fid, ', TS_loc_ct.mat')
+save('TS_loc_q.mat','TS_loc_q','-v7.3');    fprintf(fid,', TS_loc_q.mat. All saved.\n')
+
+if tolog, fclose(fid); end % close the .log file
+
 
 if agglomerate
-    disp('Calculation done: Calling TSQ_agglomerate to store back results')
-    % Save outputs back to database dbc
-    TSQ_agglomerate(0,dbname) % 0 -- don't both with a log file
+    fprintf(1,'Calculation done: Calling TSQ_agglomerate to store back results\n')
+    TSQ_agglomerate(0,dbname) % 0 -- don't bother with a log file
 else
-    disp(['Calculation done: you''ve told me not to but you should call '...
-            'TSQ_agglomerate to store back results'])
+    fprintf(1,'Calculation complete: you can now run TSQ_agglomerate to store results to a mySQL database\n')
 end
-
-% Update percentage calculated statistics in TimeSeries, TimeSeriesKeywords, Operations, and OperationKeywords tables
-% reply = input(['Update percentage calculated, mean calculation time statistics? [''y'' for yes, ''t'' for just time series]'], 's');
-% if strcmp(reply,'y')
-% 	SQL_fillfromresults(ts_ids_keep,m_ids_keep,[1,1,1],[1,1,1,1],dbname) % Updates percentagecalc, percentagegood, meancalctime
-% elseif strcmp(reply,'t')
-% 	SQL_fillfromresults(ts_ids_keep,[],[1,1,1],[1,1,0,0],dbname) % Updates percentagecalc, percentagegood, meancalctime
-% end
 
 end
