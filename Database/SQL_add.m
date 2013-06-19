@@ -146,10 +146,10 @@ if bevocal
 end
 esc = @sqlescapestring; % inline function to add escape strings to format mySQL queries
 
-% Construct a more intuitive structure array for the time series or operations
+% Construct a more intuitive structure array for the time series / operations / master operations
 % Fill a cell, toadd, containing mySQL INSERT commands for each item in the input file:
 if bevocal
-    fprintf(1,'Preparing mySQL INSERT statements to add %u %s to the database %s',nits,thewhat,dbname);
+    fprintf(1,'Preparing mySQL INSERT statements to add %u %s to the database %s\n',nits,thewhat,dbname);
 end
 toadd = cell(nits,1);
 resave = 0; % need user permission to save over existing time series
@@ -278,7 +278,7 @@ fprintf(1,' Done!\n')
 if ~strcmp(importwhat,'mops')
     resultstic = tic;
     if bevocal
-        fprintf(1,'Updating the Results Table in %s (this could take a while, PLEASE BE PATIENT!) ...',dbname)
+        fprintf(1,'Updating the Results Table in %s (this could take a while, please be patient!)...',dbname)
     end
     switch importwhat
     case 'ts'
@@ -289,9 +289,11 @@ if ~strcmp(importwhat,'mops')
                                 ' CROSS JOIN Operations o ON o.m_id > %u'],maxid));
     end
     if ~isempty(emsg),
-        fprintf(1,'error. This is seriously not good.',dbname); keyboard
+        fprintf(1,' error. This is really not good.\n');
+        fprintf(1,'%s\n',emsg);
+        keyboard
     else
-        if bevocal, fprintf(1,'initialized in %s!!\n',benrighttime(toc(resultstic))); end
+        if bevocal, fprintf(1,' initialized in %s!!\n',benrighttime(toc(resultstic))); end
     end
 end
 
@@ -324,8 +326,12 @@ if ~strcmp(importwhat,'mops')
 
     % How many overlap with existing keywords??
     allkws = mysql_dbquery(dbc,sprintf('SELECT Keyword FROM %s',thektable));
-    isnew = cellfun(@(x)~isempty(x),regexp(kws,allkws,'ignorecase')); % IGNORE CASE DIFFERENCES
-    % isnew = ~ismember(ukws,allkws);
+    if ~isempty(allkws) % the table may be empty, in which case all keywords will be new
+        isnew = cellfun(@(x)~isempty(x),regexp(ukws,allkws,'ignorecase')); % ignore case for keywords
+    else
+        isnew = ones(nkw,1); % all are new
+    end
+    
     if sum(isnew) > 0
         if bevocal
             fprintf(1,['So it turns out that %u keywords are completely new and will be added ' ...
@@ -398,13 +404,16 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
     % Delete the linking table and recreate it from scratch is easiest
     if bevocal, fprintf(1,'Filling MasterPointerRelate...'); end
     mysql_dbexecute(dbc,'DELETE FROM MasterPointerRelate');
-    InsertString = ['INSERT INTO MasterPointerRelate select m.mop_id,o.m_id FROM MasterOperations' ...
+    InsertString = ['INSERT INTO MasterPointerRelate select m.mop_id,o.m_id FROM MasterOperations ' ...
                             'm JOIN Operations o ON m.MasterLabel = o.MasterLabel'];
-    [rs,emsg] = mysql_dbexecute(dbc,InsertString);
+    [~,emsg] = mysql_dbexecute(dbc,InsertString);
     if isempty(emsg)
         if bevocal, fprintf(' done\n'); end
     else
-        if bevocal, fprintf(' error joining the MasterOperations and Operations tables'); end
+        if bevocal
+            fprintf(1,' shit. Error joining the MasterOperations and Operations tables:\n');
+            fprintf(1,'%s\n',emsg)
+        end
     end
     
     % if strcmp(importwhat,'ops')
