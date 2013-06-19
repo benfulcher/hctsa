@@ -32,11 +32,11 @@ end
 % 1) ts_id (unique integer identified from TimeSeries)
 % 2) m_id (unique integer identified from Operations)
 % 3) Output (double)
-% 4) Quality (positive integer)
+% 4) QualityCode (positive integer)
 % 5) CalculationTime (float)
 % 6) LastModified (datetime)
 % [[could add a Machine label for machine calculated on]]
-createstring = ['CREATE TABLE Results (ts_id integer, m_id integer, Output double, Quality integer unsigned, CalculationTime float, LastModified datetime, ' ...
+createstring = ['CREATE TABLE Results (ts_id integer, m_id integer, Output double, QualityCode integer unsigned, CalculationTime float, LastModified datetime, ' ...
 				'FOREIGN KEY (ts_id) REFERENCES TimeSeries (ts_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
 				'FOREIGN KEY (m_id) REFERENCES Operations (m_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
 [rs,emsg] = mysql_dbexecute(dbc, createstring);
@@ -69,14 +69,14 @@ end
 disp(['DONE!! Successfully!! Really?! Wow!! I bet that took ages. In fact it only took ' benrighttime(toc)]);
 
 %% -- MATLAB WAY (one-at-a-time)
-% selectstring = ['SELECT ts_id from TimeSeries'];
-% [all_ts_ids,qrf,rs,emsg] = mysql_dbquery(dbc, selectstring);
+% SelectString = ['SELECT ts_id from TimeSeries'];
+% [all_ts_ids,qrf,rs,emsg] = mysql_dbquery(dbc, SelectString);
 % all_ts_ids = vertcat(all_ts_ids{:});
 % nts = length(all_ts_ids);
 % % all ts_ids in TimeSeries are in the column vector all_ts_ids (ascending integers)
 % 
-% selectstring = ['SELECT m_id from Operations'];
-% [all_m_ids,qrf,rs,emsg] = mysql_dbquery(dbc, selectstring);
+% SelectString = ['SELECT m_id from Operations'];
+% [all_m_ids,qrf,rs,emsg] = mysql_dbquery(dbc, SelectString);
 % all_m_ids = vertcat(all_m_ids{:});
 % nm = length(all_m_ids);
 % % all m_ids in Operations are in all_m_ids (ascending integers)

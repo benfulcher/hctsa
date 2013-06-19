@@ -90,8 +90,8 @@ if strcmp(metorts, 'ts')
 	ts_ids = zeros(nts_add,1);
     
 	for i=1:nts_add
-		selectstring = ['SELECT Keywords FROM TimeSeries WHERE Filename = ''' tsf{i} ''''];
-		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc, selectstring);
+		SelectString = ['SELECT Keywords FROM TimeSeries WHERE Filename = ''' tsf{i} ''''];
+		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc, SelectString);
 
 		if isempty(qrc) && isempty(emsg) % no matches -- this is in INP_ts.txt but not in the mySQL database
 			% disp('ABOUT TO INSERT A NEW ONE -- I KNOW FOR A FACT YOU DON''T WANT THIS!!')
@@ -108,8 +108,8 @@ if strcmp(metorts, 'ts')
 			else
 				%% Add new entries in Results Table
 				% Get the ts_id of the new TimeSeries
-				selectstring = ['SELECT ts_id from TimeSeries WHERE Filename = ''' tsf{i} ''''];
-				[theid,qrf,rs,emsg] = mysql_dbquery(dbc, selectstring);
+				SelectString = ['SELECT ts_id from TimeSeries WHERE Filename = ''' tsf{i} ''''];
+				[theid,qrf,rs,emsg] = mysql_dbquery(dbc, SelectString);
 				theid = theid{1};
                 ts_ids(i) = theid;
 				
@@ -267,8 +267,8 @@ else
 			if isempty(emsg)
 				%% Add new entries to Results Table
 				% Get the m_id of the new TimeSeries
-				selectstring = ['SELECT m_id from Operations WHERE OpName = ''' opname ''''];
-				[theid,qrf,rs,emsg] = mysql_dbquery(dbc, selectstring);
+				SelectString = ['SELECT m_id from Operations WHERE OpName = ''' opname ''''];
+				[theid,qrf,rs,emsg] = mysql_dbquery(dbc, SelectString);
 				theid = theid{1};
 				insertstring = ['INSERT INTO Results (ts_id, m_id) SELECT ts_id, ' num2str(theid) ' FROM TimeSeries'];
 			    [rs,emsg] = mysql_dbexecute(dbc, insertstring);

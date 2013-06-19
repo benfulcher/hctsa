@@ -48,8 +48,8 @@ nm = length(mlab);
 % Actually, some may have been deleted in the meantime
 disp(['Checking time series still match up']);
 ts_ids_keep_string = bencat(ts_ids_keep,',');
-selectstring = ['SELECT FileName FROM TimeSeries WHERE ts_id IN (' ts_ids_keep_string ')'];
-[tsf_check,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+SelectString = ['SELECT FileName FROM TimeSeries WHERE ts_id IN (' ts_ids_keep_string ')'];
+[tsf_check,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 matches = strcmp(tsf,tsf_check);
 tsgoodi = find(matches);
 ntsgood = length(tsgoodi);
@@ -60,8 +60,8 @@ end
 % Check that mlab still matches up with database
 disp(['Checking that metrics still match up']);
 m_ids_keep_string = bencat(m_ids_keep,',');
-selectstring = ['SELECT OpName FROM Operations WHERE m_id IN (' m_ids_keep_string ')'];
-[mlab_check,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+SelectString = ['SELECT OpName FROM Operations WHERE m_id IN (' m_ids_keep_string ')'];
+[mlab_check,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 matches = strcmp(mlab,mlab_check);
 mgoodi = find(matches);
 nmgood = length(mgoodi);
@@ -103,9 +103,9 @@ end
 % Parts of calculated subsection that are empty in storage
 disp(['Retrieving empty bits of storage in the given range... Be patient... We''re timing it, if that helps...']);
 tic
-selectstring = ['SELECT ts_id, m_id, Quality FROM Results WHERE ts_id IN (' ts_ids_keep_string ')' ...
-					' AND m_id IN (' m_ids_keep_string ' ) AND (Quality IS NULL OR Quality = 1)'];
-[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+SelectString = ['SELECT ts_id, m_id, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ')' ...
+					' AND m_id IN (' m_ids_keep_string ' ) AND (QualityCode IS NULL OR QualityCode = 1)'];
+[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
 	disp(['Error selecting empty elements from the database']);
 	disp(emsg); keyboard
@@ -155,7 +155,7 @@ for i = 1:nempties
 
 		updatestring = ['UPDATE Results SET ' ...
 							'Output = ' num2str(TS_loc(ind_i,ind_j),'%19.17g') ', ' ...
-							'Quality = ' num2str(TS_loc_q(ind_i,ind_j)) ', ' ...
+							'QualityCode = ' num2str(TS_loc_q(ind_i,ind_j)) ', ' ...
 							'CalculationTime = ' string_ct ', ' ...
 							'LastModified = NOW() ' ...
 							'WHERE ts_id = ' num2str(ts_ids_keep(ind_i)) ' AND m_id = ' num2str(m_ids_keep(ind_j))];
@@ -189,9 +189,9 @@ end
 % TS_loc_ct_check = zeros(nts,nm);
 % times = zeros(nts,1);
 % for i=1:nts
-% 	selectstring = ['SELECT Output, Quality, CalculationTime FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i)) ...
+% 	SelectString = ['SELECT Output, QualityCode, CalculationTime FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i)) ...
 % 						' AND m_id IN (' m_ids_keep_string ' )'];
-% 	[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+% 	[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 % 	if ~isempty(emsg)
 % 		disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
 % 	end
@@ -279,7 +279,7 @@ end
 % 
 % 			updatestring = ['UPDATE Results SET ' ...
 % 								'Output = ' num2str(TS_loc(i,j),'%19.17g') ', ' ...
-% 								'Quality = ' num2str(TS_loc_q(i,j)) ', ' ...
+% 								'QualityCode = ' num2str(TS_loc_q(i,j)) ', ' ...
 % 								'CalculationTime = ' string_ct ', ' ...
 % 								'LastModified = NOW() ' ...
 % 								'WHERE ts_id = ' num2str(ts_ids_keep(i)) ' AND m_id = ' num2str(m_ids_keep(j))];

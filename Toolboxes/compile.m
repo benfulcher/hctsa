@@ -4,7 +4,9 @@
 function compile
 	fprintf('Now compiling the toolboxes\n')
 	try
+        cd fastdfa
 		mex fastdfa_core.c
+        cd ../
 	catch
 		error('An error occurred while compiling. Get ''mex fastdfa_core.c'' to work, and then re-run compile.m');
 	end
@@ -17,7 +19,7 @@ function compile
 	mex nearest.c
 	mex shannon.c
 	cd ../gpml
-	mex solve_chol.c -largeArrayDims -lmwlapack % This one won't compile!
+    % mex solve_chol.c -largeArrayDims -lmwlapack % !!!! This one won't compile!
 	mex sq_dist.c
 	cd ../
 

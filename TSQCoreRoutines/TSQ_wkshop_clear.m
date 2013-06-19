@@ -52,8 +52,8 @@ end
 
 %% Check what to clear
 if strcmp(mort,'ts')
-	selectstring = ['SELECT Filename FROM TimeSeries WHERE ts_id IN (' bencat(vin,',') ')'];
-	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+	SelectString = ['SELECT Filename FROM TimeSeries WHERE ts_id IN (' bencat(vin,',') ')'];
+	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 	if ~isempty(emsg)
 		SQL_closedatabase(dbc) % close connection to database
 		error(['Error retrieving selected time series indices (ts_ids) from the TimeSeries table of ' dbname]);
@@ -61,8 +61,8 @@ if strcmp(mort,'ts')
 	input(['About to clear all data from ' num2str(length(vin)) ' time series stored in the Results table of ' ...
 	  			dbname ' [press any key to show them]']);
 else
-	selectstring = ['SELECT OpName FROM Operations WHERE m_id IN (' bencat(vin,',') ')'];
-	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+	SelectString = ['SELECT OpName FROM Operations WHERE m_id IN (' bencat(vin,',') ')'];
+	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 	if ~isempty(emsg)
 		SQL_closedatabase(dbc) % close connection to database
 		error(['Error retrieving selected operation indices (m_ids) from the Operations table of ' dbname]);
@@ -81,25 +81,25 @@ end
    
 %% Do the clearing
 disp('IT''S HAMMER TIME!!! Do not interrupt me when I''m in this mood...');
-disp(['Clearing Output, Quality, CalculationTime, and LastModified columns of the Results Table of ' dbname]);
+disp(['Clearing Output, QualityCode, CalculationTime, and LastModified columns of the Results Table of ' dbname]);
 
 if strcmp(mort,'ts')
-	updatestring = ['UPDATE Results SET Output = NULL, Quality = NULL, CalculationTime = NULL, LastModified = NOW() WHERE ts_id IN (' bencat(vin,',') ')'];
+	updatestring = ['UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL, LastModified = NOW() WHERE ts_id IN (' bencat(vin,',') ')'];
 else
-	updatestring = ['UPDATE Results SET Output = NULL, Quality = NULL, CalculationTime = NULL, LastModified = NOW() WHERE m_id IN (' bencat(vin,',') ')'];
+	updatestring = ['UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL, LastModified = NOW() WHERE m_id IN (' bencat(vin,',') ')'];
 end
 [rs,emsg] = mysql_dbexecute(dbc, updatestring);
 if isempty(emsg)
 	if strcmp(mort,'ts')
 		% get number of metrics to work out how many entries were cleared
-		selectstring = 'SELECT COUNT(m_id) as nm FROM Operations';
-		[nm,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+		SelectString = 'SELECT COUNT(m_id) as nm FROM Operations';
+		[nm,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 		nm = nm{1};		
 		disp(['Clearing Successful! I''ve just cleared ' num2str(length(vin)) ' x ' num2str(nm) ' = ' num2str(nm*length(vin)) ' entries']);
 	else
 		% get number of time series to work out how many entries were cleared
-		selectstring = 'SELECT COUNT(ts_id) as nts FROM TimeSeries';
-		[nts,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+		SelectString = 'SELECT COUNT(ts_id) as nts FROM TimeSeries';
+		[nts,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 		nts = nts{1};
 		disp(['Clearing Successful! I''ve just cleared ' num2str(length(vin)) ' x ' num2str(nts) ' = ' num2str(nts*length(vin)) ' entries']);
 	end

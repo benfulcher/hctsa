@@ -21,7 +21,7 @@ function TSQ_prepared(ts_ids_keep, m_ids_keep, tolog, forcalc, dbname, brawninpu
 % 				to TSQ_prepared
 % 12/1/2010: tried to make so only retrieve bits required for calculation if forcalc flag is enabled. If forcalc = [],
 % 				 will retrieve everything. If zero will retrieve all empty entries. Otherwise will retrieve up to that
-% 				 number of entries. (at this stage, Quality=NULL; eventually could add fatal error ones)
+% 				 number of entries. (at this stage, QualityCode=NULL; eventually could add fatal error ones)
 % 12/5/2010: added doinone -- database will either make many connections (suitable for small no. of rows), or do it in one
 % 			 big connection (strain on java heap space for large
 % 			 retrievals)
@@ -66,61 +66,24 @@ function TSQ_prepared(ts_ids_keep, m_ids_keep, tolog, forcalc, dbname, brawninpu
 
 %%% FOREPLAY
 %% Check inputs -- set defaults
-if nargin<2;
-	disp('You must provide at least 2 inputs! And no, I''m not asking nicely!!');
-	return
+if nargin < 2;
+	error('You must provide at least two inputs!');
 end
-if nargin<3 || isempty(tolog)
-	disp('Not logging TSQ_prepared');
+if nargin < 3 || isempty(tolog)
 	tolog = 0;  % no log created
 end
-if nargin<4
+if nargin < 4
 	forcalc = []; % retrieve full sets of things, not just the empty entries in the database
 end
-if nargin<5
-	dbname = []; % Use default
+if nargin < 5
+	dbname = []; % Use default database
 end
-if nargin<6 || isempty(brawninputs)
-	brawninputs = [1 1]; % log and parallelize -- only relevant if forcalc isn't empty
+if nargin < 6 || isempty(brawninputs)
+	brawninputs = [1, 1]; % log and parallelize -- only relevant if forcalc isn't empty
 end
-if nargin<7 || isempty(doinone)
+if nargin < 7 || isempty(doinone)
 	doinone = 0; % make seperate connections so as not to overwhelm java heap space
 end
-
-% if nargin<7 || isempty(masterpull)
-% 	masterpull = 1;
-% 	disp(['Pulling in pointers by default']);
-% end
-
-% if isempty(lenr)
-% 	lenr=[200,30000];
-% 	disp(['Setting default length constraints: ' num2str(lenr(1)) '--' num2str(lenr(2))])
-% end
-
-% chind=0; % changed index system boolean.
-%          % If stays 0 throughout, no need to resave or save backup
-%          % If 1, have added a time series or metric and will need to
-%          % resave the storage files
-
-
-% dbc = SQL_opendatabase(dbname); % Open SQL connection
-
-% length constraint in words
-% ss_tsl = ['TimeSeries.Length BETWEEN ' num2str(lenr(1)) ' AND ' num2str(lenr(2))];
-
-%% DISPLAY WHAT'S BEEN CHOSEN
-% selectstring = ['SELECT FileName FROM TimeSeries WHERE ts_id IN (' ...
-% 					bencat(ts_ids_keep) ')'];
-% [ts_filenames,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
-% ts_filenames
-% 
-% 
-% selectstring = ['SELECT OpName FROM Operations WHERE m_id IN (' ...
-% 					bencat(m_ids_keep) ')'];
-% [m_names,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
-% m_names
-% 
-% keyboard
 
 %% METHOD 1: Get entries of results table for local MATLAB matrix (1 row/column at a time)
 % we have ts_ids_keep and m_ids_keep
@@ -128,6 +91,9 @@ end
 % Could do one big query and then reform to a matrix, but I'll do it row-by-row
 % In fact this is faster for some reason than doing a big query (method 2)
 
+% make sure ts_ids_keep and m_ids_keep are column vectors
+if size(ts_ids_keep,2) > size(ts_ids_keep,1), ts_ids_keep = ts_ids_keep'; end
+if size(m_ids_keep,2) > size(m_ids_keep,1), m_ids_keep = m_ids_keep'; end
 ts_ids_keep = sort(ts_ids_keep,'ascend'); % sorted by ascending id
 m_ids_keep = sort(m_ids_keep,'ascend'); % sorted by ascending id
 ts_ids_keep_string = bencat(ts_ids_keep,',');
@@ -135,45 +101,45 @@ m_ids_keep_string = bencat(m_ids_keep,',');
 nts = length(ts_ids_keep);
 nm = length(m_ids_keep);
 
-% Tell me about it
-disp(['We have ' num2str(nts) ' time series and ' num2str(nm) ' operations to retrieve']);
-
-if nts==0 || nm==0
-	disp('Nothing to do! Enough of this.');
+if nts == 0 || nm == 0
+	fprintf(1,'Oops. It seems there''s nothing to do! Either no time series or no operations\n');
 	return
 end
 
-disp('Filling local matricies TS_loc, TS_loc_ct, TS_loc_q from Results table in database');
-
+% Intialize matrices
 TS_loc = zeros(nts,nm); % outputs
 TS_loc_ct = zeros(nts,nm); % calculation times
 TS_loc_q = zeros(nts,nm); % output quality label
 
+% Open database connection
+[dbc,dbname] = SQL_opendatabase(dbname);
+
+% Tell me about it
+fprintf(1,'We have %u time series and %u operations to retrieve from %s\n',nts,nm,dbname);
+fprintf(1,'Filling and saving to local matricies TS_loc, TS_loc_ct, TS_loc_q from Results table in %s\n',dbname);
+
 if ~isempty(forcalc)
-	disp('Retrieving elements to calculate from the database. Please be patient... I''m timing.');
+	fprintf(1,'Retrieving elements to calculate from the database. Please be patient... I''m timing.\n');
 	tic
 	% Just retrieve bits that need to be calculated
 	% May be faster to break it up and do each ts_id seperately... (this way the amount of data in each transfer is limited)
-	if forcalc==0
-		selectstring = ['SELECT ts_id, m_id, Output, CalculationTime, Quality FROM Results WHERE ts_id IN (' ts_ids_keep_string ')' ...
-							' AND m_id IN (' m_ids_keep_string ' ) AND Quality IS NULL'];
-	else
-		selectstring = ['SELECT ts_id, m_id, Output, CalculationTime, Quality FROM Results WHERE ts_id IN (' ts_ids_keep_string ')' ...
-							' AND m_id IN (' m_ids_keep_string ' ) AND Quality IS NULL LIMIT ' num2str(forcalc)];
+	SelectString = ['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ')' ...
+						' AND m_id IN (' m_ids_keep_string ' ) AND QualityCode IS NULL'];
+	if forcalc
+		SelectString = [SelectString, ' LIMIT ' num2str(forcalc)];
 	end
-	dbc = SQL_opendatabase(dbname,0); % Open SQL connection silently
-	[qrc,~,~,emsg] = mysql_dbquery(dbc,selectstring);
-	SQL_closedatabase(dbc); % close connections
+    
+	[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 	if ~isempty(emsg)
-		disp('Error retrieving outputs from database -- Exiting'); keyboard
+		disp('Error retrieving outputs from database...???'); keyboard
 	else
 		ngot = size(qrc,1);
-		if ngot==0
+		if ngot == 0
 			disp('NOTHING TO RETRIEVE?!!');
 			SQL_closedatabase(dbc)
 			return
 		else
-			disp(['Retrieved ' num2str(ngot) ' elements!!! Took ' benrighttime(toc)]);
+			fprintf(1,'Retrieved %u elements from %s!!! Took %s\n',ngot,dbname,benrighttime(toc));
 		end
 	end
 	
@@ -189,11 +155,11 @@ if ~isempty(forcalc)
 	
 	% augment Gid_pairs into indicies
 	Gindex_ts = Gts_ids;
-	for i=1:nts
+	for i = 1:nts
 		Gindex_ts(Gts_ids == ts_ids_keep(i)) = i; % switch from the ts_id to the index
 	end
 	Gindex_m = Gm_ids;
-	for i=1:nm
+	for i = 1:nm
 		Gindex_m(Gm_ids == m_ids_keep(i)) = i; % switch from the m_id to the index
 	end
 	% Gindex_pairs = [Gindex_ts,Gindex_m]
@@ -201,25 +167,25 @@ if ~isempty(forcalc)
 	% We have the index pairs, we now must just write these into the matricies
 	% First, initiate matricies with Infs (means bogus -- unattained)
 	
-	disp('Filling indicies...');
+	fprintf(1,'Filling local files TS_loc, TS_loc_ct, and TS_loc_q...');
 	tic
-	TS_loc(:)=Inf; TS_loc_ct(:)=Inf; TS_loc_q = Inf;
-	for i=1:ngot
+	TS_loc(:) = Inf; TS_loc_ct(:) = Inf; TS_loc_q = Inf;
+	for i = 1:ngot
 		TS_loc(Gindex_ts(i),Gindex_m(i)) = Goutput(i);
 		TS_loc_ct(Gindex_ts(i),Gindex_m(i)) = Gcalctime(i);
 		TS_loc_q(Gindex_ts(i),Gindex_m(i)) = Gquality(i);
 	end
-	disp(['Local stores filled. Took ' benrighttime(toc)]);
+	fprintf(1,'filled. Took %s\n',benrighttime(toc));
 	
 	
 	% ()()() Filter down TS_loc_ and ts_ids_keep, m_ids_keep ()()()
-	disp('Filtering unused time series and operations');
+	fprintf(1,'Filtering unused time series and operations\n');
 	tic
 	% Time Series
 	Utsids = unique(Gindex_ts); % rows with things to calculate in them (will be rows of Infs in TS_loc_)
 	nUtsids = length(Utsids);
 	if nUtsids < nts
-		disp(['Cutting down from ' num2str(nts) ' to ' num2str(nUtsids) ' time series with calculation potential']);
+		fprintf(1,'Cutting down from %u to %u time series with calculation potential\n',nts,nUtsids);
 		ts_ids_keep = ts_ids_keep(Utsids);
 		TS_loc = TS_loc(Utsids,:);
 		TS_loc_ct = TS_loc_ct(Utsids,:);
@@ -230,7 +196,7 @@ if ~isempty(forcalc)
 	Umids = unique(Gindex_m); % rows with things to calculate in them (will be rows of Infs in TS_loc_)
 	nUmids = length(Umids);
 	if nUmids < nm
-		disp(['Cutting down from ' num2str(nm) ' to ' num2str(nUmids) ' operations with calculation potential']);
+		fprintf(1,'Cutting down from %u to %u operations with calculation potential\n',nm,nUmids);
 		m_ids_keep = m_ids_keep(Umids);
 		TS_loc = TS_loc(:,Umids);
 		TS_loc_ct = TS_loc_ct(:,Umids);
@@ -246,9 +212,7 @@ if ~isempty(forcalc)
 		nm = length(m_ids_keep);
 	end
 	
-	disp(['Filtering complete: took ' benrighttime(toc)]);
-	
-	% keyboard
+	fprintf(1,'Filtering complete in %s\n',benrighttime(toc));	
 	
 else % retrieve everything in the range given (not just empty bits)
 	% choose whether to do by rows or columns
@@ -256,27 +220,30 @@ else % retrieve everything in the range given (not just empty bits)
 	% if dorows
 	
 	
-	% Fill a row at a time
+	%% Strategy: fill the matrices one row at a time
 	% Opening and closing individual connections helps to avoid a massive java heap space error... Hopefully...
 	times = zeros(nts,1);
-	if doinone
-		dbc = SQL_opendatabase(dbname);
-	end
-	for i=1:nts
+    % if doinone
+        % dbc = SQL_opendatabase(dbname);
+    % end
+	for i = 1:nts
 		tic
-		selectstring = ['SELECT m_id, Output, CalculationTime, Quality FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i)) ...
+		SelectString = ['SELECT m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i)) ...
 							' AND m_id IN (' m_ids_keep_string ' )'];
-		if ~doinone, dbc = SQL_opendatabase(dbname,0); end % Open SQL connection silently
-		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
-		if ~doinone, SQL_closedatabase(dbc); end % close connection
+        % if ~doinone, dbc = SQL_opendatabase(dbname,0); end % Open SQL connection silently
+		[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+        % if ~doinone, SQL_closedatabase(dbc); end % close connection
 		if ~isempty(emsg)
-			disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
+			fprintf(1,'Error retrieving outputs from the Results table at ts_id = %u...\n',ts_ids_keep(i)); keyboard
 		end
 	
+        if isempty(qrc)
+            error(['No entries found in the Results table in ' dbname ...
+                    '... Have you specified the right set of time series and operations???'])
+        end
+        
 		% Convert empty entries to NaNs
 		qrc(cellfun(@isempty,qrc)) = {NaN};
-		% empties = find(cellfun(@isempty,qrc));
-		% if ~isempty(empties), qrc(empties) = {NaN}; end
 	
 		% give sensible names
 		Gm_id = horzcat(qrc{:,1});
@@ -286,11 +253,11 @@ else % retrieve everything in the range given (not just empty bits)
 	
 		% make sure m_ids are in ascending order to match
 		% (should be, if table is ordered properly...)
-		[S_m_ids ix] = sort(Gm_id);
+		[S_m_ids, ix] = sort(Gm_id);
 	
 		% Check matches
 		if ~all(S_m_ids' - m_ids_keep == 0)
-			disp(['Problem with ' num2str(ts_ids_keep(i))]);
+			fprintf(1,'Problem with %u\n',ts_ids_keep(i));
 			keyboard
 		end
 	
@@ -303,23 +270,23 @@ else % retrieve everything in the range given (not just empty bits)
 		TS_loc_q(i,:) = Gquality;
 
 		times(i) = toc;
-		if mod(i,floor(nts/10))==0
-			disp(['Approximately ' benrighttime(mean(times(1:i))*(nts-i)) ' remaining!']);
+		if mod(i,floor(nts/10)) == 0
+			fprintf(1,'Approximately %s remaining!\n',benrighttime(mean(times(1:i))*(nts-i)));
 		end
 	end
-	if doinone
-		SQL_closedatabase(dbc);
-	end
+    % if doinone
+        % SQL_closedatabase(dbc);
+    % end
 
-	disp(['Took ' benrighttime(sum(times)) ' altogether']);
+	fprintf(1,'Done. Took %s altogether.\n',benrighttime(sum(times)));
 
 	% else % fill a column at a time
 	% 	times = zeros(nm,1);
 	% 	for i=1:nm
 	% 		tic
-	% 		selectstring = ['SELECT Output, CalculationTime, Quality FROM Results WHERE ts_id IN (' ts_ids_keep_string ' ) ' ...
+	% 		SelectString = ['SELECT Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ' ) ' ...
 	% 						'AND m_id = ' num2str(m_ids_keep(i))];
-	% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+	% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 	% 		if ~isempty(emsg)
 	% 			disp(['Error retrieving outputs from STORE at ' num2str(m_ids_keep(i)) ' -- Exiting']); keyboard
 	% 		end
@@ -365,9 +332,9 @@ end
 % 	times = zeros(nts,1);
 % 	for i=1:nts
 % 		tic
-% 		selectstring = ['SELECT m_id, Output, CalculationTime, Quality FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i)) ...
+% 		SelectString = ['SELECT m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i)) ...
 % 							' AND m_id IN (' m_ids_keep_string ' ) AND Output IS NULL'];
-% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 % 		if ~isempty(emsg)
 % 			disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
 % 		end
@@ -421,9 +388,9 @@ end
 % 	times = zeros(nm,1);
 % 	for i=1:nm
 % 		tic
-% 		selectstring = ['SELECT Output, CalculationTime, Quality FROM Results WHERE ts_id IN (' ts_ids_keep_string ' ) ' ...
+% 		SelectString = ['SELECT Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ' ) ' ...
 % 						'AND m_id = ' num2str(m_ids_keep(i))];
-% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 % 		if ~isempty(emsg)
 % 			disp(['Error retrieving outputs from STORE at ' num2str(m_ids_keep(i)) ' -- Exiting']); keyboard
 % 		end
@@ -468,9 +435,9 @@ end
 % 
 % % Retieve all data in one go from database
 % disp(['Retrieving data from database...']); tic
-% selectstring = ['SELECT ts_id, m_id, Output, CalculationTime, Quality FROM Results WHERE ts_id IN (' ts_ids_keep_string ') ' ...
+% SelectString = ['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ') ' ...
 % 					'AND m_id IN (' m_ids_keep_string ' )'];
-% [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+% [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 % if ~isempty(emsg)
 % 	disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
 % else
@@ -519,8 +486,8 @@ end
 % 
 % % Retieve all data in one go from database
 % disp(['Retrieving data from database...']); tic
-% selectstring = ['SELECT ts_id, m_id, Output, CalculationTime, Quality FROM Results WHERE ts_id IN (' ts_ids_keep_string ')'];
-% [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+% SelectString = ['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ')'];
+% [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 % if ~isempty(emsg)
 % 	disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
 % else
@@ -568,8 +535,8 @@ end
 % 	times = zeros(nts,1);
 % 	for i=1:nts
 % 		tic
-% 		selectstring = ['SELECT m_id, Output, CalculationTime, Quality FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i))];
-% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+% 		SelectString = ['SELECT m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i))];
+% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 % 		if ~isempty(emsg)
 % 			disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
 % 		end
@@ -607,9 +574,9 @@ end
 % 	times = zeros(nm,1);
 % 	for i=1:nm
 % 		tic
-% 		selectstring = ['SELECT Output, CalculationTime, Quality FROM Results WHERE m_id = ' num2str(m_ids_keep(i)) ...
+% 		SelectString = ['SELECT Output, CalculationTime, QualityCode FROM Results WHERE m_id = ' num2str(m_ids_keep(i)) ...
 % 							' AND ts_id IN (' ts_ids_keep_string ' )'];
-% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 % 		if ~isempty(emsg)
 % 			disp(['Error retrieving outputs from STORE at ' num2str(m_ids_keep(i)) ' -- Exiting']); keyboard
 % 		end
@@ -636,35 +603,35 @@ end
 
 %% Fill out guides
 % First check that haven't been filtered to nothing
-if nts==0 || nm==0
-	disp('Enough of this, we''ve filtered ourself out of existence. That''d be right. I''m leaving.');
+if nts == 0 || nm == 0
+	fprintf(1,'After filtering, there is nothing left to do! Enough of this then...');
 	SQL_closedatabase(dbc)
 	return
 end
 
-% Open SQL connection
-dbc = SQL_opendatabase(dbname,0);
+% Open a database connection
+% dbc = SQL_opendatabase(dbname,0);
 
 % Retrieve Time Series Metadata
-selectstring = ['SELECT FileName, Keywords, Length FROM TimeSeries WHERE ts_id IN (' ts_ids_keep_string ')'];
-[tsinfo,~,~,emsg] = mysql_dbquery(dbc,selectstring);
+SelectString = sprintf('SELECT FileName, Keywords, Length FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string);
+[tsinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 tsf = tsinfo(:,1); % timeseries filenames
 tskw = tsinfo(:,2); % timeseries keywords
 tsl = vertcat(tsinfo{:,3}); % timeseries lengths
 
 % Retrieve Operations Metadata
-selectstring = ['SELECT Code, OpName, Keywords, Pointer FROM Operations WHERE m_id IN (' m_ids_keep_string ')'];
-[minfo,~,~,emsg] = mysql_dbquery(dbc,selectstring);
+SelectString = sprintf('SELECT Code, OpName, Keywords FROM Operations WHERE m_id IN (%s)',m_ids_keep_string);
+[minfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 mcode = minfo(:,1); % metric filenames
 mlab = minfo(:,2); % metric labels
 mkw = minfo(:,3); % metric keywords
-mpoint = vertcat(minfo{:,4}); % pointer? -- [redundant if you have mlink]
+% mpoint = vertcat(minfo{:,4}); % pointer? -- [redundant if you have mlink]
 
 % Now get master info
 % (i) Which masters are implicated?
-selectstring = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WHERE mop_id IN ' ...
+SelectString = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WHERE mop_id IN ' ...
 				'(SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' m_ids_keep_string '))'];
-[masterinfo,~,~,emsg] = mysql_dbquery(dbc,selectstring);
+[masterinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
     disp('Error retrieving Master information'); keyboard
 else
@@ -681,28 +648,23 @@ else
 end
 
 % (ii) Get master link information
-selectstring = ['SELECT mop_id FROM (SELECT m_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')) AS T1 ' ...
+SelectString = ['SELECT mop_id FROM (SELECT m_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')) AS T1 ' ...
 					'LEFT JOIN MasterPointerRelate ON T1.m_id = MasterPointerRelate.m_id'];
-[masterlink,~,~,emsg] = mysql_dbquery(dbc,selectstring);
+[masterlink,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 empties = find(cellfun(@isempty,masterlink));
 if ~isempty(empties), masterlink(empties) = {0}; end
-% for j=1:length(empties)
-% 	masterlink{empties(j)} = 0; % means not a pointer
-% end
 mlink = vertcat(masterlink{:});
 
 % (iii) renumber mlink to refer to elements of Mm rather than the indicies in Master index system
-nM = length(Mmid);
+nM = length(Mmid); % number of master metrics
 rch = cell(nM,1);
-for i=1:nM % number of master metrics
+for i = 1:nM
 	rch{i} = find(mlink==Mmid(i));
-end
-for i=1:nM
-	mlink(rch{i}) = i; % rename with index rather than the mop_id
+    mlink(rch{i}) = i; % rename with index rather than the mop_id
 end
 
-% Close database
-SQL_closedatabase(dbc) % close connections
+% Close database connection
+SQL_closedatabase(dbc)
 
 %% Write output as files
 % rows and columsn in TS_loc can be mapped back to STORE through tsmap and mmap
@@ -710,27 +672,28 @@ SQL_closedatabase(dbc) % close connections
 
 % This bit could be at the top, but actually I never use it.
 if tolog
-	fn = ['TS_prepared_' datestr(now,30) '.log'];
+	fn = sprintf('TS_prepared_%s.log',datestr(now,30)); % filename
 	flog = fopen(fn,'w','n');
-	disp(['Logging progress to ' fn]);
-	fprintf(flog,'%s\n','Welcome! This is your friendly TS_prepared log');
-	fprintf(flog,'%s\n',['Subsetting and checking performed at ' datestr(now)]);
+	fprintf(1,'Logging progress to %s\n',fn);
+	fprintf(flog,'Welcome! This is your friendly TSQ_prepared log.\n');
+	fprintf(flog,'Subsetting and checking performed at %s\n',datestr(now));
 end
 
+fprintf(1,'Saving local versions of the data...:\n');
 save('TS_loc.mat','TS_loc','-v7.3')
-disp('Local version of the data: TS_loc saved');
+fprintf(1,'TS_loc (data)')
 if tolog, fprintf(flog, '%s\n', 'Local version of the data: TS_loc saved'); end
 
 save('TS_loc_ct.mat','TS_loc_ct','-v7.3')
-disp('Local version of the calc times: TS_loc_ct saved');
+fprintf(1,', TS_loc_ct (calculation times)')
 if tolog, fprintf(flog, '%s\n', 'Local version of TS_loc_ct saved'); end
 	
 save('TS_loc_q.mat','TS_loc_q','-v7.3')
-disp('Local version of the output quality labels: TS_loc_q saved');
+fprintf(1,', TS_loc_q (quality codes)')
 if tolog, fprintf(flog, '%s\n', 'Local version of TS_loc_q saved'); end
 
-save('TS_loc_guides.mat','m_ids_keep','ts_ids_keep','tsf','tskw','tsl','mcode','mlab','mkw','mpoint','mlink','Mmid','Mmlab','Mmcode','-v7.3');
-disp('Local version of guides saved!');
+save('TS_loc_guides.mat','m_ids_keep','ts_ids_keep','tsf','tskw','tsl','mcode','mlab','mkw','mlink','Mmid','Mmlab','Mmcode','-v7.3');
+fprintf(1,', TS_loc_guides (information guides).\nAll saved.\n')
 if tolog, fprintf(flog, '%s\n', 'Local version of guides saved'); end
 
 if tolog, fclose(flog); end
@@ -738,12 +701,11 @@ if tolog, fclose(flog); end
 %% Clean Up
 % Write how many entries are to be calculated
 tocalculate = sum(isnan(TS_loc_q(:)) | TS_loc_q(:)==1);
-disp(['There are ' num2str(tocalculate) ' entries (= ' num2str(round(tocalculate/nm/nts*10000)/100) ' %) to calculate in TS_loc']);
-
+fprintf(1,'There are %u entries (= %5.2f%%) to calculate in TS_loc (%ux%u)\n',tocalculate,tocalculate/nm/nts*100,nts,nm);
 
 % reply = input(['Shall I move on to TSQ_brawn now to calculate and then write back? [yes, ''n'' to stop]'],'s');
 if ~isempty(forcalc)
-	disp(['Moving on to TSQ_brawn now to calculate and then write back. No, this is not an option, this is an order.']);
+	fprintf(1,'Automatically moving on to TSQ_brawn now to calculate the missing entries and then write them back to the database\n');
 	TSQ_brawn(brawninputs(1),brawninputs(2),dbname);
 end
 

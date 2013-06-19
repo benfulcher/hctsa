@@ -25,13 +25,17 @@ SQL_create_db;
 SQL_create_all_tables;
 
 % 3. Populate the database with operations
-fprintf(1,'Populating the database with operations...\n')
-% TSQ_add2('mets','Database/INP_mets.txt')
+fprintf(1,'Populating the database with operations (please be patient)...\n')
+fprintf(1,'Adding Master operations...'); moptic = tic;
 SQL_add('mops','Database/INP_mops.txt','',0)
+fprintf(1,'added in %s.',benrighttime(moptic))
+fprintf(1,'Adding all operations...'); optic = tic;
 SQL_add('ops','Database/INP_ops.txt','',0)
+fprintf(1,'added in %s.',benrighttime(optic))
 
 % Attempt to compile the executables in Toolboxes:
 fprintf(1,'Attempting to compile the binary executables needed for evaluating some operations.\n')
+fprintf(1,'Please make sure that mex is set up with the right compilers for this system.\n')
 fprintf(1,'Note that errors here are not the end of the world, but mean that some operations may fail to execute correctly...\n')
 cd Toolboxes
 compile

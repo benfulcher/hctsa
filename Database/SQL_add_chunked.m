@@ -23,7 +23,7 @@ function SQL_add_chunked(dbc,insertstring,dataset,isduplicate,append)
                 query = sprintf('%s %s,',query,dataset{j});
             end
         end
-        [rs,emsg] = mysql_dbexecute(dbc,[query(1:end-1) ' ' append]);
+        [~,emsg] = mysql_dbexecute(dbc,[query(1:end-1) ' ' append]);
         if ~isempty(emsg)
             fprintf('Error in SQL_add_chunked...?!')
             keyboard

@@ -84,7 +84,7 @@ case 'ts' % Read the time series input file:
 case 'ops' % Read the operations input file:
     if bevocal
         fprintf(1,'Need to format %s (Operations input file) as: OperationName OperationCode OperationKeywords\n',INPfile)
-        fprintf(1,'Assuming a single header line\n')
+        fprintf(1,'Assuming no header lines\n')
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
@@ -92,7 +92,7 @@ case 'ops' % Read the operations input file:
 case 'mops' % Read the master operations input file:
     if bevocal
         fprintf(1,'Need to format %s (Master Operations input file) as: MasterCode MasterLabel\n',INPfile)
-        fprintf(1,'Assuming no header line\n')
+        fprintf(1,'Assuming no header lines\n')
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
@@ -162,9 +162,11 @@ case 'ts' % Prepare toadd cell for time series
         try
             x = dlmread(timeseries(j).Filename);
             timeseries(j).Length = length(x);
-        catch
-            fprintf(1,'Could not read in the time series data for %s from file -- length set as NaN\n',timeseries(j).Filename)
-            timeseries(j).Length = NaN;
+        catch emsg
+            fprintf(1,'\n')
+            error(['Could not find/read the data file for ' timeseries(j).Filename '. Check that it''s in Matlab''s path'])
+            % fprintf(1,'Could not read in the time series data for %s from file -- length set as NaN\n',timeseries(j).Filename)
+            % timeseries(j).Length = NaN;
         end
 
         if timeseries(j).Length > 0 % able to read the time series, import the length too
@@ -215,22 +217,24 @@ end
 if bevocal, fprintf(1,'done.\n'); end
 
 % Tell the user about duplicates
-if bevocal
-    if all(isduplicate)
-        fprintf(1,'All %u %s already exist in %s---no new %s to add! We''re done.\n',nits,thewhat,dbname,thewhat);
-        return;
-    elseif sum(isduplicate) > 0
-        fprintf(1,'So I found %u duplicate %s already in the database %s...?!\n',sum(isduplicate),thewhat,dbname)
-        fprintf(1,'So there are %u new %s to add to %s...\n',sum(~isduplicate),thewhat,dbname)
+
+if all(isduplicate)
+    fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',nits,thewhat,INPfile,dbname,thewhat);
+    return
+elseif sum(isduplicate) > 0
+    if bevocal
+        fprintf(1,'I found %u duplicate %s already in the database %s...?!\n',sum(isduplicate),thewhat,dbname)
+        fprintf(1,'There are %u new %s to add to %s...\n',sum(~isduplicate),thewhat,dbname)
     end
 end
 
 % Select the maximum id already in the table
 maxid = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,thetable));
 maxid = maxid{1}; % the maximum id -- the new items will have ids greater than this
+if isempty(maxid), maxid = 0; end
 
 % Assemble and execute the INSERT queries
-if bevocal, fprintf('Adding %u new %s to %s...',sum(~isduplicate),thewhat,thetable); end
+fprintf('Adding %u new %s to the %s table in %s...',sum(~isduplicate),thewhat,thetable,dbname)
 switch importwhat
 case 'ts' % Add time series to the TimeSeries table
     SQL_add_chunked(dbc,'INSERT INTO TimeSeries (FileName, Keywords, Length) VALUES',toadd,isduplicate);
@@ -239,8 +243,7 @@ case 'ops' % Add operations to the Operations table
 case 'mops'
     SQL_add_chunked(dbc,'INSERT INTO MasterOperations (MasterLabel, MasterCode) VALUES',toadd,isduplicate);
 end
-
-if bevocal, fprintf(1,'Done!\n%u %s added to the %s table in %s\n',sum(~isduplicate),thewhat,thetable,dbname); end
+fprintf(1,' Done!\n')
 
 % Add new entries to the Results table where the TIMESERIES (ts_id) doesn't already exist
 if ~strcmp(importwhat,'mops')
@@ -250,19 +253,23 @@ if ~strcmp(importwhat,'mops')
     end
     switch importwhat
     case 'ts'
-        mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
-                                ' CROSS JOIN Operations o WHERE t.ts_id > %u'],maxid));
+        [rs,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
+                                ' CROSS JOIN Operations o ON t.ts_id > %u'],maxid));
     case 'ops'
-        mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
-                                ' CROSS JOIN Operations o WHERE o.m_id > %u'],maxid));
+        [rs,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
+                                ' CROSS JOIN Operations o ON o.m_id > %u'],maxid));
     end
-    if bevocal, fprintf(1,'initialized in %s!! ZOMG!!!\n',benrighttime(toc(resultstic))); end
+    if ~isempty(emsg),
+        fprintf(1,'error. This is seriously not good.',dbname); keyboard
+    else
+        if bevocal, fprintf(1,'initialized in %s!!\n',benrighttime(toc(resultstic))); end
+    end
 end
 
 if ~strcmp(importwhat,'mops')
     % Update the keywords table
     if bevocal
-        fprintf(1,'Updating the %s table...\n',thektable)
+        fprintf(1,'Updating the %s table in %s...\n',thektable,dbname)
     end
 
     % First find unique keywords from new time series by splitting against commas
@@ -307,8 +314,10 @@ if ~strcmp(importwhat,'mops')
             fprintf(1,'Just added %u new keywords to the %s table in %s\n',nkw,thektable,dbname)
         end
     else
-        fprintf(1,['So it turns out that all new keywords already exist in ' ...
+        if bevocal
+            fprintf(1,['So it turns out that all new keywords already exist in ' ...
                         'the %s table in %s -- there are no new keywords to add\n'],sum(isnew),thektable,dbname)
+        end
     end
     
     % Fill new relationships
@@ -376,7 +385,6 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.m_id FROM MasterOperations m JOIN ' ...
     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE m.mop_id > %u',maxid];
     % end
-    
     
     M_ids = mysql_dbquery(dbc,'SELECT mop_id FROM MasterOperations');
 	M_ids = vertcat(M_ids{:}); % vector of master_ids    

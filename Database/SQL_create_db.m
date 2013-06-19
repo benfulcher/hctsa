@@ -44,7 +44,7 @@ function SQL_create_db()
 	try
 		dbc = SQL_opendatabase;
 		SQL_closedatabase(dbc);
-        fprintf(1,'Database %s at %s for %s opens and closes no problem!!\n'],dbname,hostname,local_u);
+        fprintf(1,'Database %s at %s for %s opens and closes no problem!!\n',dbname,hostname,local_u);
         fprintf(1,'We''re good to go!! :)\n');
 	catch
 		fprintf(1,'Error: Unable to open database %s after creation :(\n',dbname);

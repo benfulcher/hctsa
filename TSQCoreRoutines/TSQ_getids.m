@@ -130,7 +130,7 @@ if strcmp(morts,'ts')
 
 			% Now do the rest of the query at once: do the keyword matches and length constraints		
 			if ncut == 0 % Get all keyword matches
-				selectstring = ['SELECT ts_id FROM TimeSeries WHERE ' ...
+				SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
 								'ts_id IN (SELECT ts_id FROM TsKeywordsRelate WHERE tskw_id = '  ...
 								'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
@@ -147,12 +147,12 @@ if strcmp(morts,'ts')
                 end
                 
 				if isempty(kyes{i})
-					selectstring = ['SELECT ts_id FROM TimeSeries WHERE ' ...
+					SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
 									conditions(6:end) limitme];
 
                 else		
 					% constrain by PercentageCalculated
-					selectstring = ['SELECT ts_id FROM TimeSeries WHERE ' ...
+					SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
 									'ts_id IN (SELECT ts_id FROM TsKeywordsRelate WHERE tskw_id = '  ...
 									'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword = ''' kyes{i} ''')) ' ...
 									conditions limitme];
@@ -160,7 +160,7 @@ if strcmp(morts,'ts')
 			end
 
 			% execute the select statement
-			[ts_ids,~,~,emsg] = mysql_dbquery(dbc,selectstring);
+			[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 			if isempty(ts_ids) && isempty(emsg)
 				disp(['No time series matching constraints for ' kyes{i}]);
 			elseif ~isempty(emsg)
@@ -190,11 +190,11 @@ if strcmp(morts,'ts')
 	
 	else % just use the other constraints
 		% if isempty(kno)
-			selectstring = ['SELECT ts_id FROM TimeSeries WHERE ' conditions(6:end)];
+			SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' conditions(6:end)];
 		% else
-		% 	selectstring = ['SELECT ts_id FROM TimeSeries WHERE ' ss_tsl ' ' knoextrastring];
+		% 	SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ss_tsl ' ' knoextrastring];
 		% end
-		[ts_ids,~,~,emsg] = mysql_dbquery(dbc,selectstring);
+		[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
 			disp('Database call failed'); disp(emsg), keyboard
 		else
@@ -260,7 +260,7 @@ else
 			% Now do the rest of the query at once: do the keyword matches and length constraints
 		
 			if ncut==0 % Get all matches			
-				selectstring = ['SELECT m_id FROM Operations WHERE ' ...
+				SelectString = ['SELECT m_id FROM Operations WHERE ' ...
 								'm_id IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id = '  ...
 								'(SELECT mkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
@@ -279,13 +279,13 @@ else
                 
 				if isempty(kyes{i}) % empty keyword -- just constrain by number
 					if isempty(conditions)
-						selectstring = ['SELECT m_id FROM Operations' limitme];
+						SelectString = ['SELECT m_id FROM Operations' limitme];
 					else
-						selectstring = ['SELECT m_id FROM Operations WHERE ' conditions(6:end) ...
+						SelectString = ['SELECT m_id FROM Operations WHERE ' conditions(6:end) ...
 											limitme];
 					end
 				else
-					selectstring = ['SELECT m_id FROM Operations WHERE ' ...
+					SelectString = ['SELECT m_id FROM Operations WHERE ' ...
 									'm_id IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id = '  ...
 									 '(SELECT mkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 									   conditions limitme];
@@ -293,7 +293,7 @@ else
 			end
 		
 			% Execute the query
-			[m_ids,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+			[m_ids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 		
 			if ~isempty(emsg)
 				disp(['Error finding ' kyes{i}]);
@@ -320,11 +320,11 @@ else
 	
 	else % just use the length/kno constraint
 		if isempty(conditions)
-			selectstring = ['SELECT m_id FROM Operations']; % include all operations -- exclude nothing
+			SelectString = ['SELECT m_id FROM Operations']; % include all operations -- exclude nothing
 		else
-			selectstring = ['SELECT m_id FROM Operations WHERE ' conditions(6:end)]; % (remove "AND ")
+			SelectString = ['SELECT m_id FROM Operations WHERE ' conditions(6:end)]; % (remove "AND ")
 		end
-		[m_ids,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+		[m_ids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
 			disp('Database call failed'); disp(emsg); keyboard
 		else
@@ -336,8 +336,8 @@ else
 	%% Get other metrics which point to master functions which will be called anyway
 	if masterpull && ~isempty(m_ids_keep)
 		% Find implicated Master functions
-		selectstring = ['SELECT m_id FROM MasterPointerRelate WHERE mop_id IN (SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' bencat(m_ids_keep,',') '))'];
-		[newmids,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+		SelectString = ['SELECT m_id FROM MasterPointerRelate WHERE mop_id IN (SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' bencat(m_ids_keep,',') '))'];
+		[newmids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 		if isempty(emsg)
 			if ~isempty(newmids) % there are some master functions implicated
 				newmids = vertcat(newmids{:});

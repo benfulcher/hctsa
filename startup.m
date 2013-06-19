@@ -3,4 +3,5 @@ addfcn('Database');
 addfcn('Operations');
 addfcn('PeripheryFunctions');
 addfcn('Toolboxes');
+addfcn('TimeSeries');
 addfcn('TSQCoreRoutines');

@@ -15,7 +15,7 @@ if nargin < 1 || isempty(dbname)
 	dbname = default_dbname; % set default database
 end
 if nargin < 2 || isempty(bevocal)
-	bevocal = 0; % display the mySQL database used to the prompt
+	bevocal = 0; % by default, do not display the mySQL database used to the prompt
 end
 
 if bevocal

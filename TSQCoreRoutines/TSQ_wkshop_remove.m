@@ -49,13 +49,13 @@ end
 
 %% Check what the ones are to remove
 if strcmp(mort,'ts')
-	selectstring = ['SELECT ts_id, Filename FROM TimeSeries WHERE ts_id IN (' bencat(vin,',') ')'];
-	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+	SelectString = ['SELECT ts_id, Filename FROM TimeSeries WHERE ts_id IN (' bencat(vin,',') ')'];
+	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 	input(['About to remove all trace of ' num2str(length(vin)) ' time series ' ...
 				'from ' dbname ' [let''s see ''em]']);
 else
-	selectstring = ['SELECT m_id, OpName FROM Operations WHERE m_id IN (' bencat(vin,',') ')'];
-	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+	SelectString = ['SELECT m_id, OpName FROM Operations WHERE m_id IN (' bencat(vin,',') ')'];
+	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 	input(['About to remove all trace of ' num2str(length(vin)) ' operations ' ...
 				'from ' dbname ' [let''s see ''em]']);
 end

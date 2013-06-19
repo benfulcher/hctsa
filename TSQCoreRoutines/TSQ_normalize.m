@@ -97,7 +97,7 @@ end
 F(~isfinite(F)) = NaN; % convert all nonfinite values to NaNs for consistency
 % need to incorporate knowledge of bad entries in TS_loc_q and filter these
 % out:
-notgood = (TS_loc_q>0); % Quality>0 means some special value (NaN, Inf, error, ...)
+notgood = (TS_loc_q>0); % QualityCode>0 means some special value (NaN, Inf, error, ...)
 F(TS_loc_q>0) = NaN;
 disp(['There were ' num2str(sum(notgood(:))) ' special values in TS_loc_q'])
 % now all bad values are NaNs, we can get on with filtering them out

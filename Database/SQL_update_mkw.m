@@ -45,8 +45,8 @@ end
 %% Find all unique keywords strings, split into a table of unique, separate keywords
 disp('Looking for unique keywords -- to place in new table OperationKeywords');
  
-selectstring = 'SELECT DISTINCT Keywords FROM Operations';
-[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+SelectString = 'SELECT DISTINCT Keywords FROM Operations';
+[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 
 splitkws = {};
 k = 1;

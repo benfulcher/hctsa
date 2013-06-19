@@ -11,8 +11,8 @@ end
 %% Creates the MasterPointerRelate Table by linking metrics with their masters
 % Look through code column of operations and retrieve bits before "."
 % These must be the master structure that should link
-selectstring = 'SELECT m_id, Code FROM Operations WHERE Pointer = 1';
-[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+SelectString = 'SELECT m_id, Code FROM Operations WHERE Pointer = 1';
+[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 pointermids = vertcat(qrc{:,1}); % column vector
 pointercodes = qrc(:,2); % column cell of strings
 numpointers = length(pointercodes); % number of pointer metrics that need a link

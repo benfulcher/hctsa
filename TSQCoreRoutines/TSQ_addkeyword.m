@@ -34,8 +34,8 @@ id_string = bencat(ids,',');
 
 if strcmp(morts,'ts') % Time Series
 	% Get the ts_ids, Keywords from TimeSeries Table
-	selectstring = ['SELECT ts_id, FileName, Keywords FROM TimeSeries WHERE ts_id IN (' id_string ')'];
-	[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,selectstring);
+	SelectString = ['SELECT ts_id, FileName, Keywords FROM TimeSeries WHERE ts_id IN (' id_string ')'];
+	[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 	if ~isempty(emsg)
 		disp('Error selecting from TimeSeries');
 		disp(emsg)
@@ -104,9 +104,9 @@ if strcmp(morts,'ts') % Time Series
 else % Operations
 
 	% Get the ts_ids, Keywords from TimeSeries Table
-	selectstring = ['SELECT m_id, OpName, Keywords FROM Operations WHERE m_id IN (' id_string ')'];
+	SelectString = ['SELECT m_id, OpName, Keywords FROM Operations WHERE m_id IN (' id_string ')'];
 	% makes absolutely certain that ids given match up with keywords obtained
-	[qrc,~,~,emsg] = mysql_dbquery(dbc,selectstring);
+	[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 	if ~isempty(emsg)
 		disp('Error selecting from Operations');
 		disp(emsg)
