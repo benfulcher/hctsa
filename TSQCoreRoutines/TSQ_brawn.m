@@ -20,88 +20,64 @@ function TSQ_brawn(tolog,toparallel,dbname,agglomerate)
 %%% FOREPLAY
 
 %% Check valid inputs / set defaults
-% (1) tolog: log to file
+% Log to file
 if nargin < 1
 	tolog = 0; % by default, do not log to file
 end
 if tolog
-	disp('<TS_brawn>: Logging progess to file');
-	fn = ['TS_brawn_' datestr(now,30) '.log'];
+	fn = sprintf('TS_brawn_%s.log',datestr(now,30));
 	fid = fopen(fn,'w','n');
-	disp(['Log file created: ' fn]);
+	fprintf(1,'Calculation details will be logged to %s\n',fn);
 else
-	disp('<TS_brawn>: By your command: NOT LOGGING PROGRESS TO FILE?!?!');
+    fid = 1; % write output to screen rather than .log file
 end
 
-% (2) Parallel Processing
+% Parallel processing
 if nargin < 2
-	toparallel = 1;
+	toparallel = 0;
 end
 if toparallel
-	disp('Using parallel processing');
-	if tolog
-		fprintf(fid, '%s\n', 'Using parallel processing');
-	end
+	fprintf(fid,'Computation will be performed across multiple cores using Matlab''s Parallel Computing Toolbox\n')
 else % use single-threaded for loops
-	disp('Using single-threaded for loops without any parallel processing on your advice');
-	disp('JUST TO REPEAT: WE''RE NOT USING PARALLELIZATION!!!!!');
-	if tolog
-		fprintf(fid, '%s\n', 'Using single-threaded for loops without any parallel processing');
-	end
+	fprintf(fid,'Computations will be performed serially without parallelization\n')
 end
 
+% mySQL database
 if nargin < 3
-	dbname = '';
+	dbname = ''; % use default database by default
 end
 
+% Write back results when finished?
 if nargin < 4
-    agglomerate = 1; 
+    agglomerate = 1; % yes, by default
 end
-
-%% Update path
-% assume path is up to date
-% TSQ_updatepath % provides path information for all data, metrics, functions, etc.
-% addpath('H:\MATLAB\Time_Series_Resources\TSQ_routines\Core');
 
 %% Read in information from local files
-disp('TS_brawn >> Reading in data and guides from file...');
-% (As prepared by TS_prepared2.m)
-
-% load the relevent subsegment of the storage: TS_loc
+fprintf(fid,'Reading in data and guides from file...');
 load TS_loc.mat TS_loc
-disp('TS_loc loaded');
-
-% load the relevent subsegment of the complete STORE_cts matrix (calculation times)
+fprintf(fid,' TS_loc, '); % data
 load TS_loc_ct.mat TS_loc_ct
-disp('TS_loc_ct loaded');
-
-% load the quality information of time series: TS_loc_q
+fprintf(fid,' TS_loc_ct, '); % calculation times
 load TS_loc_q.mat TS_loc_q
-disp('TS_loc_q loaded');
-
-% load the relevant information about the time series
-load TS_loc_guides.mat ts_ids_keep tsf tskw tsl m_ids_keep mcode mlab mkw mpoint mlink Mmid Mmlab Mmcode  % tsf tsl tskw tsprep tsmap nts
-disp('TS_loc_guides loaded');
+fprintf(fid,' TS_loc_q,'); % quality codes
+load TS_loc_guides.mat ts_ids_keep tsf tskw tsl m_ids_keep mcode mlab mkw mpoint mlink Mmid Mmlab Mmcode
+fprintf(fid,'TS_loc_guides. All loaded.\n'); % guides
 
 %% Definitions
 nts = length(ts_ids_keep); % number of time series
 nm = length(m_ids_keep); % number of metrics
 nMm = length(Mmlab); % number of master functions
 
-%%% THE BRAWN %%%
-disp(['Calculation has begun using ' num2str(nts) ' datasets and ' num2str(nm) ' metrics']);
-disp(datestr(now));
-if tolog
-    fprintf(fid,'%s\n',['*** TS_brawn run on ' datestr(now) ' using ' num2str(nts) ' time series and ' num2str(nm) ' metrics']);
-end
+%%% Let's get going
+fprintf(fid,'Calculation has begun on %s using %u datasets and %u operations\n',datestr(now),nts,nm);
 
 %% Open parallel processing worker pool
 if toparallel
 	if matlabpool('size')==0
 		matlabpool open;
-		disp(['MATLAB parallel processing pool opened with ' num2str(matlabpool('size')) ' and ready to go']);
+		fprintf(fid,'MATLAB parallel processing pool opened with %u and ready to go',matlabpool('size'))
 	else
-		disp(['MATLAB parallel processing pool already open. Size: ' num2str(matlabpool('size'))])
+		fprintf(fid,'MATLAB parallel processing pool already open. Size: %u\n',matlabpool('size'))
 	end
 end
 
@@ -113,13 +89,14 @@ for i = 1:nts
 	bigtimer = tic;
 
 	qq = TS_loc_q(i,:); % the calculation states of any existing results for the current time series, a line of TS_loc_q
-					   	 % NaN indicates a value never before calculated, 1 indicates fatal error before -- try again this time
-    tcal = find(isnan(qq) | qq == 1); % indicies of time series awaiting calculation
-
-    if ~isempty(tcal); % some to calculate
-        ffi = zeros(length(tcal),1); % output of metrics
-		qqi = zeros(length(tcal),1); % label of quality of outputs
-		cti = ones(length(tcal),1)*NaN; % calculation times
+					   	% NaN indicates a value never before calculated, 1 indicates fatal error before -- try again this time
+    tcal = (isnan(qq) | qq == 1); % time series awaiting calculation
+    ncal = sum(tcal); % number of time series to calculate
+    
+    if ncal > 0 % some to calculate
+        ffi = zeros(ncal,1); % output of metrics
+		qqi = zeros(ncal,1); % label of quality of outputs
+		cti = ones(ncal,1)*NaN; % calculation times
         x = dlmread(tsf{i}); % this is the raw time series from the file
         
 		% write to log
@@ -136,93 +113,58 @@ for i = 1:nts
 		%% Basic checking on x
 		% univariate and Nx1
 		if size(x,2)~=1
-			if size(x,1)==1; % we just need to transpose
-				disp(['***** THIS TIME SERIES!!!: ' tsf{i} ' -- IS A 1xN VECTOR. I''D PREFER A Nx1 VECTOR, TO BE HONEST...']);
-				disp('I''ll transpose it for you just this once.... but you should try running TS_prep_dimfid.m on your data files');
-				if tolog, fprintf(fid,'%s\n',['*** ERROR: a 1xN vector... Transposed.']); end
-				x=x';
+			if size(x,1)==1
+				fprintf(1,'***** The time series %s is a row vector. Not sure how it snuck through the gates, but I need a column vector...\n',tsf{i});
+				fprintf(1,'I''ll transpose it for you for now....\n');
+				if tolog, fprintf(fid,'*** %s a 1xN vector... Transposed.',tsf{i}); end
+				x = x';
 			else
-				disp('******************************************************************************************');
-				disp(['MASSIVE ERROR WITH THIS TIME SERIES!!!: ' tsf{i} ' -- IT IS NOT an Nx1 VECTOR. SKIPPING!!']);
-				disp('******************************************************************************************');
-				if tolog, fprintf(fid,'%s\n',['*** MASSIVE ERROR: A MULTIVARIATE(?) TIME SERIES... SKIPPING...']); end
-				continue % the entries in TS_loc and STORE_data will remain NaNs
+				fprintf(1,'******************************************************************************************\n')
+				fprintf(1,'MASSIVE ERROR WITH THIS TIME SERIES!!!: %s -- is it multivariate or something weird???. Skipping it!!\n', tsf{i});
+				fprintf(1,'******************************************************************************************\n');
+				if tolog, fprintf(fid,'*** MASSIVE ERROR: A MULTIVARIATE(?) TIME SERIES... SKIPPING...\n'); end
+				continue % skip to the next time series; the entries for this time series in TS_loc etc. will remain NaNs
             end
 		end
 
         %% Pre-Processing
-		% AS IT STANDS, PRE-PROCESSING IS NOW ALL JUST Z-SCORING
-        % y = zscore(x); % remove the mean and normalize the variance using
-                         % the Statistics Toolbox
-		y = (x-mean(x))/std(x); % zscoring without the statistics toolbox
-		if tolog, fprintf(fid,'%s\n','STANDARD PREPROCESSING: Z-SCORING'); end
+		% Keep a z-scored version of the time series as y
+		y = (x-mean(x))/std(x); % z-scoring without using a Statistics Toolbox license (the zscore function)
 
-		% So we now have the raw time series x and the zscored time series y. The metrics take these as inputs.
+		% So we now have the raw time series x and the z-scored time series y. Operations take these as inputs.
         % index sliced variables to minimize the communication overhead in the parallel processing
         partsfi  = tsf{i}; parmcode = mcode(tcal); parmlab = mlab(tcal); parmlink = mlink(tcal);
 
-		disp(['Calculating ' partsfi ' (ts_id = ' num2str(ts_ids_keep(i)) ', N = ' num2str(tsl(i)) ') [' num2str(length(tcal)) ' / ' num2str(nm) ']'])
+		fprintf(1,'Calculating %s (ts_id = %u, N = %u) [%u / %u]\n'],partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
 		if tolog
-			fprintf(fid,'%s\n',['Calculating ' num2str(length(tcal)) ' (/' num2str(nm) ') operations']);
+			fprintf(fid,'Calculating %u (/%u) operations\n',ncal,nm);
 		end
-		
 		
 		%% Evaluate master functions in parallel
 		% Because of parallelization, we have to evaluate all the master functions *first*
 		% Check through the metrics to determine which master functions are relevant for this run
 		ip = find(parmlink > 0); % a range of tcal -- that point to a master function
 		if ~isempty(ip) % there are some pointers
-			
-			% masterpool = cell(length(ip),2);
-			% for j=1:length(ip) % loops over all pointer metrics
-			% 	tmpi = strfind(parmcode{ip(j)},'.');
-			% 	masterpool{j,1} = parmcode{ip(j)}(1:tmpi-1); % removes the structure field label; the master label
-			% 	masterpool{j,2} = char(mMf(strmatch(masterpool{j,1},mMl,'exact'))); % the code to call
-			%             end
-			%             
-			%             [meismasterl a b] = unique(masterpool(:,1)); % these are the master labels to point to later
-			%             meismasterf = masterpool(a,2); % these are the master functions that need to be evaluated
-            
-			%             if any(arrayfun(@(x)strcmp(x,''),masterpool(:,2)))
-			%                 char(masterpool(arrayfun(@(x)strcmp(x,''),masterpool(:,2)),1))
-			%                 disp('INP_mets master files have not been formatted correctly. Exiting');
-			% keyboard; return
-			%             end
-			%             if length(a)~=length(unique(masterpool(:,2)))
-			%                 % this is an error -- there is something wrong with how the
-			%                 % INP_mets file has been prepared
-			%                 [meismasterl a1 b1] = unique(masterpool(:,1)); % these are the master labels to point to later
-			%                 [meismasterf a2 b2] = unique(masterpool(:,2)); % these are the master functions that need to be evaluated
-			%                 char(masterpool(setxor(a1,a2),:)) % there are the problem ones; ideally a1 and and a2 are identical
-			%                 disp('INP_mets master files have not been formatted correctly. Exiting');
-			% keyboard; return
-			%             end
-            
-			
-
 			% For each implicated master function -- put the structure in this element
 			
-			% Ouput structures stored in Moutput -- unused master functions left with empty elements that should not be referred to
-			Moutput = cell(nMm,1);
-			% Calculation times for the master structures stored in Mcts
-			Mcts = zeros(nMm,1);
+			Moutput = cell(nMm,1); % Ouput structures
+			Mcts = zeros(nMm,1); % Calculation times for the master structures
 			
-			% Mitocalc are the indicies of masters (Mmlab/Mmcode) that need to be called (i.e., they'll be called later)
-			Mitocalc = unique(parmlink(parmlink>0));
+			Mitocalc = unique(parmlink(parmlink > 0)); % indicies of masters (Mmlab/Mmcode) that need to be called (i.e., they'll be called later)
 			nMtocalc = length(Mitocalc); % number of implicated master functions
 
-			disp(['Master metrics are being evaluated first: all ' num2str(nMtocalc) ' of them...']);
-			if tolog, fprintf(fid,'%s\n',['Evaluating ' num2str(nMtocalc) ' master metrics']); end % to log
+			fprintf(fid,'Evaluating %u master operations first...\n',nMtocalc);
 			
 		    % store in temporary variables then map back
             MoutputPAR = cell(nMtocalc,1);
             MctsPAR = zeros(nMtocalc,1);
 			
-			
 			% Evaluate the master functions
+            bevocal = 0; % print every piece of code evaluated
 			if toparallel
 	            parfor j = 1:nMtocalc
 					jj = Mitocalc(j); % the index of the master array to evaluate
+					if bevocal, fprintf(fid,'%s\n',Mmcode{jj}); end % display for error checking
 					try
 						mastertimer = tic;
 						% disp(Mmcode{jj}) % FOR DEBUGGING -- SHOW CODE BEFORE EVALUATING TO DETERMINE PROBLEMS
@@ -231,15 +173,15 @@ for i = 1:nts
 						% structure with components to be called below by pointer metrics.
 						MctsPAR(j) = toc(mastertimer);
                     catch emsg
-						disp(['  ** ** ERROR EVALUATING MASTER FILE: ' Mmlab{jj}]);
-                        disp(emsg.message)
+						fprintf(fid,'**** ERROR EVALUATING MASTER FILE: %s (%s)\n',Mmlab{jj},Mmcode{jj});
+                        fprintf(fid,'%s\n',emsg.message)
 						% masterdat{j} didn't evaluate properly -- remains an empty cell entry.
 					end
                 end
 			else % just a single-thread for loop
 	            for j = 1:nMtocalc
 					jj = Mitocalc(j); % the index of the master array to evaluate
-					disp(Mmcode{jj}); % for error checking
+					if bevocal, fprintf(fid,'%s\n',Mmcode{jj}); end % for error checking
 					try
 						mastertimer = tic;
 						MoutputPAR{j} = pareval(x,y,Mmcode{jj});
@@ -247,34 +189,29 @@ for i = 1:nts
 						% structure with components to be called below by pointer metrics.
 						MctsPAR(j) = toc(mastertimer);
                     catch emsg
-						disp(['  ** ** ERROR EVALUATING MASTER FILE: ' Mmlab{jj}]);
-						disp(emsg.message)
+						fprintf(fid,'**** ERROR EVALUATING MASTER FILE: %s (%s)\n',Mmlab{jj},Mmcode{jj});
+                        fprintf(fid,'%s\n',emsg.message)
                         % masterdat{j} didn't evaluate properly -- remains an empty cell entry.
 					end
                 end
 			end
 			
 			% map back from PAR versions to real versions
-			% keyboard
             Moutput(Mitocalc) = MoutputPAR;
             Mcts(Mitocalc) = MctsPAR;
 			
-			
-			disp('Master metrics evaluated.');
+			fprintf(1,'Master operations evaluated.\n');
 		else
-			% no master metrics need to be calculed.
+			% No master metrics need to be calculed.
 			Moutput={}; Mcts={}; % This initiaition is necessary for the next parfor loop
+			fprintf(1,'No master operations.\n');
 		end
 
 
 		%% GO GO GO!!!
 		if toparallel
-	        parfor j = 1:length(tcal)
-				if parmlink(j)>0 % pointer to a master function
-					% tmpi=strfind(parmcode{j},'.');
-					% theml=parmcode{j}(1:tmpi-1); % this is the master label
-					% thest=parmcode{j}(tmpi+1:end); % this is the structure element to retrieve
-					% linky=strmatch(theml,meismasterl,'exact'); % find the master structure to link to
+	        parfor j = 1:ncal
+				if parmlink(j) > 0 % pointer to a master function
 					try
 						% retrive from master structure:
 						if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
@@ -285,38 +222,32 @@ for i = 1:nts
 							thedot = strfind(parmcode{j},'.');
 							thest = parmcode{j}(thedot+1:end);
 		                    ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
-							qqi(j) = 0; % good output
+							qqi(j) = 0; % good, real-valued output
 		                    cti(j) = Mcts(parmlink(j));
-							% if isinf(ffi(j)), ffi(j) = NaN; end % real Inf stored as if a real NaN...
 						end
                     catch emsg
-						disp(['Error evaluating link to Master structure ' Mmlab{parmlink(j)} ' by ' parmcode{j}]);
-% 						disp(emsg.message)
+						fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
+                        fprintf(fid,'%s\n',emsg.message)
                         ffi(j) = 0;
 						qqi(j) = 1; % fatal error code
 					end
-				else % A regular metric
-% 					disp(parmcode{j}); % for error checking
+				else % A regular, single-output operation
+                    if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
 		            try
-						metrictimer = tic;
+						operationtimer = tic;
 						ffi(j) = pareval(x,y,parmcode{j});
 						qqi(j) = 0;
-						cti(j) = toc(metrictimer);
+						cti(j) = toc(operationtimer);
 						% if isinf(ffi(j)), ffi(j)=NaN; end % real Inf stored as if real NaN...
 		            catch
-		                disp(['Fatal error ' partsfi ' || ' parmcode{j} '; stored as NaN']);
-						ffi(j) = 0;
-						qqi(j) = 1; % fatal error code
+		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
+						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
 		            end
 				end
 	        end
 		else
-	        for j = 1:length(tcal)
-				if parmlink(j)>0 % pointer to a master function
-					% tmpi=strfind(parmcode{j},'.');
-					% theml=parmcode{j}(1:tmpi-1); % this is the master label
-					% thest=parmcode{j}(tmpi+1:end); % this is the structure element to retrieve
-					% linky=strmatch(theml,meismasterl,'exact'); % find the master structure to link to
+	        for j = 1:ncal
+				if parmlink(j) > 0 % pointer to a master function
 					try
 						% retrive from master structure:
 						if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
@@ -327,27 +258,25 @@ for i = 1:nts
 							thedot = strfind(parmcode{j},'.');
 							thest = parmcode{j}(thedot+1:end);
 		                    ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
-							qqi(j) = 0; % good output
+							qqi(j) = 0; % good, real-valued output
 		                    cti(j) = Mcts(parmlink(j));
-							% if isinf(ffi(j)), ffi(j) = NaN; end % real Inf stored as if a real NaN...
 						end
 	                catch
-						disp(['Error evaluating link to Master structure ' Mmlab{parmlink(j)} ' by ' parmcode{j}]);
-						ffi(j) = 0;
-						qqi(j) = 1; % fatal error code
+						fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
+                        fprintf(fid,'%s\n',emsg.message)
+						ffi(j) = 0; qqi(j) = 1; % Fatal error code: 1
 					end
-				else % A regular metric
-					disp(parmcode{j}); % for error checking
+				else % A regular, single-output operation
+                    if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
 		            try
-						metrictimer = tic;
+						operationtimer = tic;
 						ffi(j) = pareval(x,y,parmcode{j});
 						qqi(j) = 0;
-						cti(j) = toc(metrictimer);
+						cti(j) = toc(operationtimer);
 						% if isinf(ffi(j)), ffi(j)=NaN; end % real Inf stored as if real NaN...
 		            catch
-		                disp(['Fatal error ' partsfi ' || ' parmcode{j}]);
-						ffi(j) = 0;
-						qqi(j) = 1; % fatal error code
+		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
+						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
 		            end
 				end
 	        end
@@ -398,52 +327,17 @@ for i = 1:nts
 		nerror = sum(qqi==1);
 		nother = sum(qqi>1);
 
-	    disp('****************************************************************')
-	    disp(['; ; ; : : : : ; ; ; ;    ' datestr(now) '     ; ; ; ; : : : ; ; ;'])
-	    disp(['; ; ; : : : : ; ; ; ; ; ;   ts_id: ' num2str(ts_ids_keep(i)) '     ; ; ; ; : ; ; ; ; ; ; ;'])
-	    disp(['oOoOoOoOoOo  ' partsfi ' (' num2str(tsl(i)) ')  oOoOoOoOoOoOo'])
-	    disp([num2str(ngood) ' good outputs... ' num2str(nerror) ' errors;  ' ...
-	     		num2str(nother) ' other ouputs stored. [ ' num2str(length(tcal)) ' / ' num2str(nm) ' ]']);
-		disp(['Calculation for this data set took ' benrighttime(times(i))])
-	    disp(['    - - - - - - - - - - -  ' num2str(i) '  /  ' num2str(nts) '   - - - - - - - - - - -'])
-		disp(['    - - - - - - - -  ' benrighttime(((nts-i)*mean(times(1:i)))) ' remaining - - - - - - - - -'])
-	    fprintf('%s\n\n\n','****************************************************************')
-		
-		% File log
-		if tolog
-			% Summary
-			fprintf(fid,'%s\n','****************************************************************');
-		    fprintf(fid,'%s\n',['; ; ; : : : : ; ; ; ;    ' datestr(now) '     ; ; ; ; : : : ; ; ;']);
-		    fprintf(fid,'%s\n',['oOoOoOoOoOo  ' partsfi ' (' num2str(tsl(i)) ')  oOoOoOoOoOoOo']);
-		    fprintf(fid,'%s\n',[num2str(ngood) ' real outputs...' num2str(nerror) ' errors;  ' ...
-		     					num2str(nother) ' other outputs stored. [ ' num2str(length(tcal)) ' / ' num2str(nm) ' ]']);
-			fprintf(fid,'%s\n',['Calculation for this data set took ' benrighttime(times(i))]);
-		    fprintf(fid,'%s\n',['    - - - - - - - -  ' num2str(i) '  /  ' num2str(nts) '   - - - - - - - -']);
-			fprintf(fid,'%s\n',['    - - - - - - - -  ' benrighttime(((nts-i)*mean(times(1:i)))) ' remaining - - - - - - - - -']);
-		    fprintf(fid,'%s\n\n','****************************************************************');
-			
-			% NaNs
-			% rz = find(isnan(ffi));
-			% if ~isempty(rz)
-			% 	fprintf(fid,'%s\n',['(**)' num2str(length(rz)) ' NaNs / ' num2str(length(tcal)) ' calculated:']);
-			% 	for k=1:length(rz)
-			% 		fprintf(fid,'%s\n',parmlab{rz(k)});
-			% 	end
-			% else
-			% 	fprintf(fid,'%s\n',['(**) no NaNs ( 0 NaNs /' num2str(length(tcal)) ' calculated)']);
-			% end
-			% % Infs
-			% rz = find(isinf(ffi));
-			% if ~isempty(rz)
-			% 	fprintf(fid,'%s\n',['(**)' num2str(length(rz)) ' Infs / ' num2str(length(tcal)) ' calculated:']);
-			% 	for k=1:length(rz)
-			% 		fprintf(fid,'%s\n',parmlab{rz(k)});
-			% 	end
-			% else
-			% 	fprintf(fid,'%s\n',['(**) no Infs calculated ( 0 /' num2str(length(tcal)) ')']);
-			% end
-			fprintf(fid,'%s\n\n\n\n','****************************************************************');
-		end
+
+		% Summary
+		fprintf(fid,'%s\n','****************************************************************');
+	    fprintf(fid,'%s\n',['; ; ; : : : : ; ; ; ;    ' datestr(now) '     ; ; ; ; : : : ; ; ;']);
+	    fprintf(fid,'%s\n',['oOoOoOoOoOo  ' partsfi ' (' num2str(tsl(i)) ')  oOoOoOoOoOoOo']);
+	    fprintf(fid,'%s\n',[num2str(ngood) ' real-valued outputs...' num2str(nerror) ' errors;  ' ...
+	     					num2str(nother) ' other outputs stored. [ ' num2str(ncal) ' / ' num2str(nm) ' ]']);
+		fprintf(fid,'%s\n',['Calculation for this data set took ' benrighttime(times(i))]);
+	    fprintf(fid,'%s\n',['    - - - - - - - -  ' num2str(i) '  /  ' num2str(nts) '   - - - - - - - -']);
+		fprintf(fid,'%s\n',['    - - - - - - - -  ' benrighttime(((nts-i)*mean(times(1:i)))) ' remaining - - - - - - - - -']);
+	    fprintf(fid,'%s\n\n','****************************************************************');
 		
     else % nothing to calculate (empty tcal)
 		% Timer/updater;

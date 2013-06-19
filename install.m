@@ -27,7 +27,7 @@ SQL_create_all_tables;
 % 3. Populate the database with operations
 fprintf(1,'Populating the database with operations (please be patient)...\n')
 fprintf(1,'Adding Master operations...'); moptic = tic;
-SQL_add('mops','Database/INP_mops.txt','',0)
+SQL_add('mops','Database/INP_mops.txt','',1)
 fprintf(1,'added in %s.',benrighttime(moptic))
 fprintf(1,'Adding all operations...'); optic = tic;
 SQL_add('ops','Database/INP_ops.txt','',0)
@@ -40,3 +40,7 @@ fprintf(1,'Note that errors here are not the end of the world, but mean that som
 cd Toolboxes
 compile
 cd ../
+fprintf(1,'Oh my goodness, everything compiled fine. The database, %s, is ready for time series to be added using SQL_add...!\n',dbname)
+
+% Attempt to add a time series
+% SQL_add('ts','INP_ts.txt')

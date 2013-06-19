@@ -152,6 +152,7 @@ if bevocal
     fprintf(1,'Preparing mySQL INSERT statements to add %u %s to the database %s',nits,thewhat,dbname);
 end
 toadd = cell(nits,1);
+resave = 0; % need user permission to save over existing time series
 switch importwhat
 case 'ts' % Prepare toadd cell for time series
     for j = 1:nits
@@ -162,6 +163,34 @@ case 'ts' % Prepare toadd cell for time series
         try
             x = dlmread(timeseries(j).Filename);
             timeseries(j).Length = length(x);
+            if size(x,2) > size(x,1); % a row vector
+                if size(x,1)==1
+                    % Get permission once
+                    if resave = 0
+                        fprintf(1,['Looks like some time series files (%s) are row vectors instead of column vectors.' ...
+                                        'Can I resave over them?\n'],which(timeseries(j).Filename))
+                        reply = input('''y'' for yes (will remember this answer for other time series), or any other key to quit','s');
+                        if strcmp(reply,'y')
+                            resave = 1;
+                        else
+                            fprintf(1,'Exiting. You''ll have to reformat some of the time series in %s.\n',INPfile)
+                            return
+                        end
+                    end
+                    x = x';
+                    dlmwrite(which(timeseries(j).Filename),x);
+                    fprintf(1,'%s is a row vector -- has been transposed and resaved as %s as a column vector\n',timeseries(j).Filename,which(timeseries(j).Filename))
+                else
+                    fprintf(1,'%s is not a row or column vector -- not sure how to read this as a time series...!\n',which(timeseries(j).Filename))
+                    fprintf(1,'Maybe check and reformat the time series in %s...? Exiting.\n',INPfile)
+                    return
+                end
+            end
+            if any(isnan(x)) || any(~isfinite(x))
+                fprintf(1,'Did you know that the time series %s contains special values (e.g., NaN or Inf)...?\n',which(timeseries(j).Filename))
+                fprintf(1,'I''m not quite sure what to do with this... Please reformat.\n')
+                exit
+            end
         catch emsg
             fprintf(1,'\n')
             error(['Could not find/read the data file for ' timeseries(j).Filename '. Check that it''s in Matlab''s path'])
