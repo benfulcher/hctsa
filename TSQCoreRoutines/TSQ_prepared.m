@@ -1,4 +1,4 @@
-function TSQ_prepared(ts_ids_keep, m_ids_keep, tolog, forcalc, dbname, brawninputs, doinone)
+function TSQ_prepared(ts_ids_keep, m_ids_keep, tolog, getwhat, dbname, brawninputs, doinone)
 
 % This function prepares files for subsequent calculation/visualization methods.
 % It takes as input a set of constraints on the time series and metrics to include
@@ -72,13 +72,13 @@ if nargin < 3 || isempty(tolog)
 	tolog = 0;  % no log created
 end
 if nargin < 4
-	forcalc = []; % retrieve full sets of things, not just the empty entries in the database
+	getwhat = 'all'; % retrieve full sets of things, not just the empty entries in the database
 end
 if nargin < 5
 	dbname = []; % Use default database
 end
 if nargin < 6 || isempty(brawninputs)
-	brawninputs = [1, 1]; % log and parallelize -- only relevant if forcalc isn't empty
+	brawninputs = [1, 1]; % log and parallelize -- only relevant if getwhat isn't empty
 end
 if nargin < 7 || isempty(doinone)
 	doinone = 0; % make seperate connections so as not to overwhelm java heap space
@@ -117,17 +117,15 @@ TS_loc_q = zeros(nts,nm); % output quality label
 fprintf(1,'We have %u time series and %u operations to retrieve from %s\n',nts,nm,dbname);
 fprintf(1,'Filling and saving to local matricies TS_loc, TS_loc_ct, TS_loc_q from Results table in %s\n',dbname);
 
-if ~isempty(forcalc)
-	fprintf(1,'Retrieving elements to calculate from the database. Please be patient... I''m timing...');
-	tic
-	% Just retrieve bits that need to be calculated
+% bundlesize = 5; % retrieve this many time series per database query
+
+switch getwhat
+case 'null'
+    % retrieve what hasn't been retrieved before (NULLs in the database)
 	% May be faster to break it up and do each ts_id seperately... (this way the amount of data in each transfer is limited)
 	SelectString = ['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ')' ...
 						' AND m_id IN (' m_ids_keep_string ' ) AND QualityCode IS NULL'];
-	if forcalc > 0
-		SelectString = [SelectString, ' LIMIT ' num2str(forcalc)];
-	end
-    
+    fprintf(1,'Retrieving NULL elements from the database. Please be patient... I''m timing...'); tic
 	[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 	if ~isempty(emsg)
 		fprintf(1,'Error retrieving outputs from database...???\n');
@@ -137,13 +135,12 @@ if ~isempty(forcalc)
 		ngot = size(qrc,1);
 		if ngot == 0
 			fprintf(1,'Nothing to retrieve?!!\n');
-			SQL_closedatabase(dbc)
-			return
+			SQL_closedatabase(dbc); return
 		else
 			fprintf(1,'Retrieved %u elements from %s!!! Took %s\n',ngot,dbname,benrighttime(toc));
 		end
 	end
-	
+    
 	% Turn empty entries into NaNs.
 	qrc(cellfun(@isempty,qrc)) = {NaN};
 	
@@ -153,7 +150,7 @@ if ~isempty(forcalc)
 	Goutput = horzcat(qrc{:,3});
 	Gcalctime = horzcat(qrc{:,4});
 	Gquality = horzcat(qrc{:,5});
-	
+    
 	% augment Gid_pairs into indicies
 	Gindex_ts = Gts_ids;
 	for i = 1:nts
@@ -213,18 +210,18 @@ if ~isempty(forcalc)
 		nm = length(m_ids_keep);
 	end
 	
-	fprintf(1,'Filtering complete in %s\n',benrighttime(toc));	
-	
-else
+	fprintf(1,'Filtering complete in %s\n',benrighttime(toc));
+    % Check that haven't filtered down to nothing
+    if nts == 0 || nm == 0
+    	fprintf(1,'After filtering, there is nothing left! Exiting...\n');
+    	SQL_closedatabase(dbc)
+    	return
+    end
+    
+case 'all'
     % retrieve everything in the range given (not just empty bits)
-	% choose whether to do by rows or columns	
-	
-	%% Strategy: fill the matrices one row at a time
-	% Opening and closing individual connections helps to avoid a massive java heap space error... Hopefully...
+    % One row at a time
 	times = zeros(nts,1);
-    % if doinone
-        % dbc = SQL_opendatabase(dbname);
-    % end
 	for i = 1:nts
 		tic
 		SelectString = sprintf(['SELECT m_id, Output, CalculationTime, QualityCode FROM Results WHERE ' ...
@@ -245,372 +242,50 @@ else
 		qrc(cellfun(@isempty,qrc)) = {NaN};
 	
 		% give sensible names
-		Gm_id = horzcat(qrc{:,1});
-		Goutput = horzcat(qrc{:,2});
-		Gcalctime = horzcat(qrc{:,3});
-		Gquality = horzcat(qrc{:,4});
+            % Gm_id = horzcat(qrc{:,1});
+            % Goutput = horzcat(qrc{:,2});
+            % Gcalctime = horzcat(qrc{:,3});
+            % Gquality = horzcat(qrc{:,4});
 	
-		% make sure m_ids are in ascending order to match
-		% (should be, if table is ordered properly...)
-		[S_m_ids, ix] = sort(Gm_id);
-	
-		% Check matches
-		if ~all(S_m_ids' - m_ids_keep == 0)
-			fprintf(1,'Problem with %u\n',ts_ids_keep(i));
-			keyboard
-		end
-	
-		Goutput = Goutput(ix);
-		Gcalctime = Gcalctime(ix);
-		Gquality = Gquality(ix);
+            % % (should be, if table is ordered properly...)
+            % [S_m_ids, ix] = sort(Gm_id);
+            %     
+            % % Check matches
+            % if ~all(S_m_ids' - m_ids_keep == 0)
+            %     fprintf(1,'Problem with %u\n',ts_ids_keep(i));
+            %     keyboard
+            % end
+            % Goutput = Goutput(ix);
+            % Gcalctime = Gcalctime(ix);
+            % Gquality = Gquality(ix);
 
-		TS_loc(i,:) = Goutput;
-		TS_loc_ct(i,:) = Gcalctime;
-		TS_loc_q(i,:) = Gquality;
+            % TS_loc(i,:) = Goutput;
+            % TS_loc_ct(i,:) = Gcalctime;
+            % TS_loc_q(i,:) = Gquality;
+            
+		% Check m_ids match
+        if ~all((horzcat(qrc{:,1}) - m_ids_keep)==0)
+            error('m_ids retrieved from database do not match the input')
+        end
+        TS_loc(i,:) = horzcat(qrc{:,2});
+        TS_loc_ct(i,:) = horzcat(qrc{:,3});
+        TS_loc_q(i,:) = horzcat(qrc{:,4});
 
 		times(i) = toc;
 		if mod(i,floor(nts/10)) == 0
 			fprintf(1,'Approximately %s remaining!\n',benrighttime(mean(times(1:i))*(nts-i)));
 		end
 	end
-    % if doinone
-        % SQL_closedatabase(dbc);
-    % end
 
 	fprintf(1,'Done. Took %s altogether.\n',benrighttime(sum(times)));
-
-	% else % fill a column at a time
-	% 	times = zeros(nm,1);
-	% 	for i=1:nm
-	% 		tic
-	% 		SelectString = ['SELECT Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ' ) ' ...
-	% 						'AND m_id = ' num2str(m_ids_keep(i))];
-	% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-	% 		if ~isempty(emsg)
-	% 			disp(['Error retrieving outputs from STORE at ' num2str(m_ids_keep(i)) ' -- Exiting']); keyboard
-	% 		end
-	% 	
-	% 		% Convert empty entries to NaNs
-	% 		qrc(cellfun(@isempty,qrc)) = {NaN};
-	% 		% empties = find(cellfun(@isempty,qrc));
-	% 		% if ~isempty(empties)
-	% 		% 	qrc(empties) = {NaN};
-	% 		% end
-	% 
-	% 		TS_loc(:,i) = vertcat(qrc{:,1});
-	% 		TS_loc_ct(:,i) = vertcat(qrc{:,2});
-	% 		TS_loc_q(:,i) = vertcat(qrc{:,3});
-	% 
-	% 		times(i) = toc;
-	% 
-	% 		if mod(i,floor(nm/10))==0
-	% 			disp(['Approximately ' benrighttime(mean(times(1:i))*(nm-i)) ' remaining!']);
-	% 		end
-	% 	end
+    
 end
 
-
-%% METHOD 1B: GET NON-NULL ENTRIES A ROW/COLUMN AT A TIME...
-% % We have ts_ids_keep and m_ids_keep to put in a matrix with rows (time series) and columns (metrics)
-% % Could do one big query and then reform to a matrix, but I'll do it row-by-row
-% % In fact this is faster for some reason than doing a big query (method 2)
-% disp('Filling local matricies TS_loc, TS_loc_ct, TS_loc_q from Results table in database');
-% ts_ids_keep = sort(ts_ids_keep,'ascend'); % make sure in ascending order
-% m_ids_keep = sort(m_ids_keep,'ascend'); % make sure in ascending order
-% ts_ids_keep_string = bencat(ts_ids_keep,',');
-% m_ids_keep_string = bencat(m_ids_keep,',');
-% 
-% TS_loc = zeros(nts,nm); % outputs
-% TS_loc_ct = zeros(nts,nm); % calculation times
-% TS_loc_q = zeros(nts,nm); % output quality label
-% 
-% % choose whether to do by rows or columns
-% dorows = 1;
-% 
-% if dorows
-% 	times = zeros(nts,1);
-% 	for i=1:nts
-% 		tic
-% 		SelectString = ['SELECT m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i)) ...
-% 							' AND m_id IN (' m_ids_keep_string ' ) AND Output IS NULL'];
-% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-% 		if ~isempty(emsg)
-% 			disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
-% 		end
-% 		
-% 		if ~isempty(qrc)
-% 			% Convert empty entries to NaNs
-% 			empties = find(cellfun(@isempty,qrc));
-% 			if ~isempty(empties), qrc(empties) = {NaN}; end
-% 		
-% 			% give sensible names
-% 			Gm_id = horzcat(qrc{:,1});
-% 			Goutput = horzcat(qrc{:,2});
-% 			Gcalctime = horzcat(qrc{:,3});
-% 			Gquality = horzcat(qrc{:,4});
-% 		
-% 			% make sure m_ids are in ascending order to match
-% 			% (should be, if table is ordered properly...)
-% 			[S_m_ids ix] = sort(Gm_id);
-% 			Goutput = Goutput(ix);
-% 			Gcalctime = Gcalctime(ix);
-% 			Gquality = Gquality(ix);
-% 		
-% 			% Put into required spots; since only retrieved a subset
-% 			mapper = zeros(length(S_m_ids),1); % maps from sorted m_ids from query (S_m_ids) to entries in local store
-% 			for j=1:length(S_m_ids)
-% 				mapper(j) = find(m_ids_keep == S_m_ids(j),1,'first');
-% 			end
-% 		
-% 			% fill entries :: put nonzero bits in
-% 			% (***) Using this method, the quality will be artificially zero for all non-null outputs
-% 			% (***) Using this method, the calculation time will be artificially zero for all non-null outputs
-% 			% (***) Using this method, fatal errors stored with output 0 will not be retrieved and subsequently recalculated
-% 			% (***) Using this method, real outputs, properly-calculated output will be artificially zero.
-% 			TS_loc(i,mapper) = Goutput;
-% 			TS_loc_ct(i,mapper) = Gcalctime;
-% 			TS_loc_q(i,mapper) = Gquality;
-% 		% else
-% 		% 	disp(['No entries need retrieving for ' num2str(ts_ids_keep(i))]);
-% 		end
-% 
-% 		times(i) = toc;
-% 	
-% 		if mod(i,floor(nts/10))==0
-% 			disp(['Approximately ' benrighttime(mean(times(1:i))*(nts-i)) ' remaining!']);
-% 		end
-% 	end
-% 
-% 	disp(['Took ' benrighttime(sum(times)) ' altogether']);
-% 	
-% else % fill a column at a time
-% 	times = zeros(nm,1);
-% 	for i=1:nm
-% 		tic
-% 		SelectString = ['SELECT Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ' ) ' ...
-% 						'AND m_id = ' num2str(m_ids_keep(i))];
-% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-% 		if ~isempty(emsg)
-% 			disp(['Error retrieving outputs from STORE at ' num2str(m_ids_keep(i)) ' -- Exiting']); keyboard
-% 		end
-% 		
-% 		% Convert empty entries to NaNs
-% 		empties = find(cellfun(@isempty,qrc));
-% 		if ~isempty(empties)
-% 			qrc(empties) = {NaN};
-% 		end
-% 	
-% 		TS_loc(:,i) = vertcat(qrc{:,1});
-% 		TS_loc_ct(:,i) = vertcat(qrc{:,2});
-% 		TS_loc_q(:,i) = vertcat(qrc{:,3});
-% 
-% 		times(i) = toc;
-% 	
-% 		if mod(i,floor(nm/10))==0
-% 			disp(['Approximately ' benrighttime(mean(times(1:i))*(nm-i)) ' remaining!']);
-% 		end
-% 	end
-% 	
-% 	
-% end
-
-
-
-%% METHOD 2: Get entries of results table for local MATLAB matrix
-% % we have ts_ids_keep and m_ids_keep
-% % To put in a matrix with rows (time series) and columns (metrics)
-% % Could do one big query and then reform to a matrix, but I'll do it row-by-row
-% disp('Filling local matricies TS_loc, TS_loc_ct, TS_loc_q');
-% nts = length(ts_ids_keep); % number of time series
-% disp([num2str(nts) ' timeseries']);
-% nm = length(m_ids_keep); % number of metrics
-% disp([num2str(nm) ' operations']);
-% ts_ids_keep_string = bencat(ts_ids_keep,',');
-% m_ids_keep_string = bencat(m_ids_keep,',');
-% 
-% TS_loc = zeros(nts,nm); % outputs
-% TS_loc_ct = zeros(nts,nm); % calculation times
-% TS_loc_q = zeros(nts,nm); % output quality label
-% 
-% % Retieve all data in one go from database
-% disp(['Retrieving data from database...']); tic
-% SelectString = ['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ') ' ...
-% 					'AND m_id IN (' m_ids_keep_string ' )'];
-% [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-% if ~isempty(emsg)
-% 	disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
-% else
-% 	disp(['Data retrieved! In ' benrighttime(toc)]);
-% end
-% 
-% 
-% % Convert mysql NULLs to MATLAB NaNs
-% empties = find(cellfun(@isempty,qrc));
-% qrc(empties) = {NaN};
-% Gts_id = qrc{:,1};
-% Gm_id = qrc{:,2};
-% Goutput = qrc{:,3};
-% Gcalctime = qrc{:,4};
-% Gquality = qrc{:,5};
-% 
-% for i=1:nts
-% 	i1 = find(Gts_id==ts_ids_keep(i)); % this time series
-% 	[Gm_id_S i2] = sort(Gm_id(i1)); % operations for this time series, sorted
-% 	if any(Gm_id_S'-m_ids_keep) % check matches m_ids_keep
-% 		disp(['Error']);
-% 	end
-% 	i3 = i1(i2);
-% 	
-% 	TS_loc(i,:) = horzcat(Goutput(i3));
-% 	TS_loc_ct(i,:) = horzcat(Gcalctime(i3));
-% 	TS_loc_q(i,:) = horzcat(Gquality(i3));
-% 	disp([num2str(i) ' -- this took ' benrighttime(toc)]);
-% end
-
-
-%% METHOD 3: Get all and then filter
-% % we have ts_ids_keep and m_ids_keep
-% % To put in a matrix with rows (time series) and columns (metrics)
-% disp('Filling local matricies TS_loc, TS_loc_ct, TS_loc_q');
-% nts = length(ts_ids_keep); % number of time series
-% disp([num2str(nts) ' timeseries']);
-% nm = length(m_ids_keep); % number of metrics
-% disp([num2str(nm) ' operations']);
-% ts_ids_keep_string = bencat(ts_ids_keep,',');
-% m_ids_keep_string = bencat(m_ids_keep,',');
-% 
-% TS_loc = zeros(nts,nm); % outputs
-% TS_loc_ct = zeros(nts,nm); % calculation times
-% TS_loc_q = zeros(nts,nm); % output quality label
-% 
-% % Retieve all data in one go from database
-% disp(['Retrieving data from database...']); tic
-% SelectString = ['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ')'];
-% [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-% if ~isempty(emsg)
-% 	disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
-% else
-% 	disp(['Data retrieved! In ' benrighttime(toc)]);
-% end
-% 
-% % Convert mysql NULLs to MATLAB NaNs
-% empties = find(cellfun(@isempty,qrc));
-% qrc(empties) = {NaN};
-% 
-% % map to meaningful names
-% Gts_id = qrc{:,1};
-% Gm_id = qrc{:,2};
-% Goutput = qrc{:,3};
-% Gcalctime = qrc{:,4};
-% Gquality = qrc{:,5};
-% 
-% % filter m_ids manually
-% rkeep = find(ismember(m_ids_keep,Gm_id));
-% Gts_id = Gts_id(rkeep);
-% Gm_id = Gm_id(rkeep);
-% Goutput = Goutput(rkeep);
-% Gcalctime = Gcalctime(rkeep);
-% Gquality = Gquality(rkeep);
-% 
-% 
-% for i=1:nts
-% 	i1 = find(Gts_id==ts_ids_keep(i)); % this time series
-% 	[Gm_id_S i2] = sort(Gm_id(i1)); % operations for this time series, sorted
-% 	if any(Gm_id_S'-m_ids_keep) % check matches m_ids_keep
-% 		disp(['Error']);
-% 	end
-% 	i3 = i1(i2);
-% 	
-% 	TS_loc(i,:) = horzcat(Goutput(i3));
-% 	TS_loc_ct(i,:) = horzcat(Gcalctime(i3));
-% 	TS_loc_q(i,:) = horzcat(Gquality(i3));
-% 	disp([num2str(i) ' -- this took ' benrighttime(toc)]);
-% end
-
-
-%% METHOD 4: row-by-row, but filter metrics in MATLAB
-% dorows=1;
-% if dorows
-% 	times = zeros(nts,1);
-% 	for i=1:nts
-% 		tic
-% 		SelectString = ['SELECT m_id, Output, CalculationTime, QualityCode FROM Results WHERE ts_id = ' num2str(ts_ids_keep(i))];
-% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-% 		if ~isempty(emsg)
-% 			disp(['Error retrieving outputs from STORE at ' num2str(ts_ids_keep(i)) ' -- Exiting']); keyboard
-% 		end
-% 
-% 		% Convert empty entries to NaNs
-% 		empties = find(cellfun(@isempty,qrc));
-% 		if ~isempty(empties)
-% 			qrc(empties) = {NaN};
-% 		end
-% 		
-% 		% map to meaningful names
-% 		Gm_id = qrc{:,1};
-% 		Goutput = qrc{:,2};
-% 		Gcalctime = qrc{:,3};
-% 		Gquality = qrc{:,4};
-% 		
-% 		% filter m_ids manually
-% 		okeep = ismember(Gm_id,m_ids_keep);
-% 		Goutput = Goutput(okeep);
-% 		Gcalctime = Gcalctime(okeep);
-% 		Gquality = Gquality(okeep);
-% 	
-% 		TS_loc(i,:) = horzcat(Goutput);
-% 		TS_loc_ct(i,:) = horzcat(Gcalctime);
-% 		TS_loc_q(i,:) = horzcat(Gquality);
-% 
-% 		times(i) = toc;
-% 	
-% 		if mod(i,floor(nts/10))==0
-% 			disp(['Approximately ' benrighttime(mean(times(1:i))*(nts-i)) ' remaining!']);
-% 		end
-% 	end
-% 
-% else % fill a column at a time
-% 	times = zeros(nm,1);
-% 	for i=1:nm
-% 		tic
-% 		SelectString = ['SELECT Output, CalculationTime, QualityCode FROM Results WHERE m_id = ' num2str(m_ids_keep(i)) ...
-% 							' AND ts_id IN (' ts_ids_keep_string ' )'];
-% 		[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-% 		if ~isempty(emsg)
-% 			disp(['Error retrieving outputs from STORE at ' num2str(m_ids_keep(i)) ' -- Exiting']); keyboard
-% 		end
-% 		
-% 		% Convert empty entries to NaNs
-% 		empties = find(cellfun(@isempty,qrc));
-% 		if ~isempty(empties)
-% 			qrc(empties) = {NaN};
-% 		end
-% 	
-% 		TS_loc(:,i) = vertcat(qrc{:,1});
-% 		TS_loc_ct(:,i) = vertcat(qrc{:,2});
-% 		TS_loc_q(:,i) = vertcat(qrc{:,3});
-% 
-% 		times(i) = toc;
-% 	
-% 		if mod(i,floor(nm/10))==0
-% 			disp(['Approximately ' benrighttime(mean(times(1:i))*(nm-i)) ' remaining!']);
-% 		end
-% 	end
-% 	
-% 	
-% end
-
-%% Fill out guides
-% First check that haven't been filtered to nothing
-if nts == 0 || nm == 0
-	fprintf(1,'After filtering, there is nothing left to do! Enough of this then...');
-	SQL_closedatabase(dbc)
-	return
-end
 
 % Open a database connection
 % dbc = SQL_opendatabase(dbname,0);
 
+%% Fill out guides
 % Retrieve Time Series Metadata
 SelectString = sprintf('SELECT FileName, Keywords, Length FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string);
 [tsinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);

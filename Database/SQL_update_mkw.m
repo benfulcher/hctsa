@@ -9,12 +9,12 @@ if nargin < 1
 end
 
 %% Open database
-dbc = SQL_opendatabase(dbname); % dbc is the database
+[dbc,dbname] = SQL_opendatabase(dbname); % dbc is the database
 
 %% Drop existing tables
 % (1) OpKeywordsRelate
 [thetables,~,~,emsg] = mysql_dbquery(dbc,'SHOW TABLES');
-if ismember('opkeywordsrelate',thetables)
+if any(~isempty(regexp('opkeywordsrelate',thetables,'ignorecase')))
 	% alread exists -- drop and recreate
 	[rs,emsg] = mysql_dbexecute(dbc, 'DROP TABLE OpKeywordsRelate');
 	if ~isempty(rs)
@@ -24,11 +24,11 @@ if ismember('opkeywordsrelate',thetables)
 		error('Error dropping table OpKeywordsRelate');
 	end
 else
-    fprintf(1,'No OpKeywordsRelate table in %s',dbname);
+    fprintf(1,'No OpKeywordsRelate table in %s\n',dbname);
 end
 
 % (2) Operation Keywords
-if ismember('operationkeywords',thetables)
+if any(~isempty(regexp('OperationKeywords',thetables,'ignorecase')))
 	% alread exists -- drop then recreate
 	[rs,emsg] = mysql_dbexecute(dbc, 'DROP TABLE OperationKeywords');
 	if ~isempty(rs)
@@ -38,9 +38,8 @@ if ismember('operationkeywords',thetables)
 		error('Error dropping OperationKeywords table');
 	end
 else
-    fprintf(1,'No OperationKeywords table in %s',dbname);
+    fprintf(1,'No OperationKeywords table in %s\n',dbname);
 end
-
 
 %% Find all unique keywords strings, split into a table of unique, separate keywords
 disp('Looking for unique keywords -- to place in new table OperationKeywords');
@@ -58,7 +57,6 @@ for i = 1:length(qrc)
     end
 end
 ukws = unique(splitkws); % cell of unique keyword strings
-
 
 % Create OperationKeywords Table
 CreateString = SQL_TableCreateString('OperationKeywords');

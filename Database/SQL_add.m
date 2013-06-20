@@ -51,17 +51,20 @@ switch importwhat
     case 'ts'
         thewhat = 'time series';
         theid = 'ts_id';
+        thekid = 'tskw_id';
         thetable = 'TimeSeries';
         thektable = 'TimeSeriesKeywords';
         thereltable = 'TsKeywordsRelate';
+        thename = 'Filename';
         
     case 'ops'
         thewhat = 'operations';
         theid = 'm_id';
+        thekid = 'mkw_id';
         thetable = 'Operations';
         thektable = 'OperationKeywords';
         thereltable = 'OpKeywordsRelate';
-        
+        thename = 'OpName';
     case 'mops'
         thewhat = 'master operations';
         theid = 'mop_id';
@@ -144,6 +147,7 @@ if bevocal
         return
     end
 end
+fprintf(1,'%s read.\n',INPfile)
 esc = @sqlescapestring; % inline function to add escape strings to format mySQL queries
 
 % Construct a more intuitive structure array for the time series / operations / master operations
@@ -299,9 +303,7 @@ end
 
 if ~strcmp(importwhat,'mops')
     % Update the keywords table
-    if bevocal
-        fprintf(1,'Updating the %s table in %s...\n',thektable,dbname)
-    end
+    fprintf(1,'Updating the %s table in %s...',thektable,dbname)
 
     % First find unique keywords from new time series by splitting against commas
     switch importwhat
@@ -322,7 +324,7 @@ if ~strcmp(importwhat,'mops')
         end
     end
     nkw = length(ukws); % the number of unique keywords in the new set of time series
-    if bevocal, fprintf(1,'I found %u unique keywords in the %s in %s\n',nkw,thewhat,INPfile); end
+    if bevocal, fprintf(1,'\nI found %u unique keywords in the %s in %s...',nkw,thewhat,INPfile); end
 
     % How many overlap with existing keywords??
     allkws = mysql_dbquery(dbc,sprintf('SELECT Keyword FROM %s',thektable));
@@ -334,86 +336,122 @@ if ~strcmp(importwhat,'mops')
     
     if sum(isnew) > 0
         if bevocal
-            fprintf(1,['So it turns out that %u keywords are completely new and will be added ' ...
-                        'to the %s table in %s\n'],sum(isnew),thektable,dbname)
+            fprintf(1,['\nIt turns out that %u keywords are completely new and will be added ' ...
+                        'to the %s table in %s'],sum(isnew),thektable,dbname)
         end
         % Add the new keywords to the Keywords table
-        for k = 1:nkw
-            if isnew(k) % don't insert duplicates
-                [rs,emsg] = mysql_dbexecute(dbc,sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES (''%s'',0)',thektable,ukws{k}));
-            	if ~isempty(emsg)
-            		fprintf(1,'Error inserting %s into %s\n',ukws{k},thektable); keyboard
-            	end
-            end
+        insertstring = sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES',thektable);
+        toadd = cell(sum(isnew),1);
+        fisnew = find(isnew); % indicies of new keywords
+        for k = 1:sum(isnew);
+            toadd{k} = sprintf('(''%s'',0)',ukws{fisnew(k)});
         end
-        if bevocal
-            fprintf(1,'Just added %u new keywords to the %s table in %s\n',nkw,thektable,dbname)
-        end
+        SQL_add_chunked(dbc,insertstring,toadd);
+        fprintf(1,' added %u new keywords\n',nkw)
     else
         if bevocal
-            fprintf(1,['So it turns out that all new keywords already exist in ' ...
+            fprintf(1,['\nIt turns out that all new keywords already exist in ' ...
                         'the %s table in %s -- there are no new keywords to add\n'],sum(isnew),thektable,dbname)
         end
     end
     
     % Fill new relationships
-    if bevocal
-        fprintf(1,'Writing new keyword relationships to the %s table in %s\n',thereltable,dbname)
+    fprintf(1,'Writing new keyword relationships to the %s table in %s...',thereltable,dbname)
+    % Try doing it from scratch
+
+    % allkws, allids
+    switch importwhat
+    case 'ts'
+        allnames = bencat({timeseries.FileName},',','''');
+    case 'ops'
+        allnames = bencat({operation.Name},',','''');
     end
-    for i = 1:length(kws) % each new time series
-        for j = 1:length(kwsplit{i}) % each keyword in the timeseries
-            % thetskw_id = tskw_ids(strmatch(kwsplit{i}{j},ukws,'exact')); % match the tskwid
-            switch importwhat
-            case 'ts'
-                InsertString = sprintf(['INSERT INTO TsKeywordsRelate (tskw_id, ts_id) SELECT ' ...
-                    'tskw_id, ts_id FROM TimeSeriesKeywords, TimeSeries ' ...
-                    'WHERE TimeSeriesKeywords.Keyword = ''%s'' AND TimeSeries.Filename = ''%s'''], ...
-                            	kwsplit{i}{j},timeseries(i).Filename);
-                [rs,emsg1] = mysql_dbexecute(dbc, InsertString);
-                % Increment Nmatches in TimeSeriesKeywords
-                UpdateString = sprintf(['UPDATE TimeSeriesKeywords SET NumOccur = NumOccur + 1 ' ...
-                                'WHERE Keyword = ''%s'''],kwsplit{i}{j});
-                [rs,emsg2] = mysql_dbexecute(dbc, UpdateString);
-            	if ~isempty(emsg1) || ~isempty(emsg2)
-            		fprintf(1,'Error inserting %s,%s to TsKeywordsRelate and updating keyword count in TimeSeriesKeywords\n',...
-            		                kwsplit{i}{j},timeseries(i).Filename);
-                    keyboard
-            	end
-            case 'ops'
-                InsertString = sprintf(['INSERT INTO OpKeywordsRelate (mkw_id, m_id) SELECT ' ...
-                    'mkw_id, m_id FROM OperationKeywords, Operations ' ...
-                    'WHERE OperationKeywords.Keyword = ''%s'' AND Operations.OpName = ''%s'''], ...
-                            	kwsplit{i}{j},esc(operation(i).Name));
-                [rs,emsg1] = mysql_dbexecute(dbc, InsertString);
-                % Increment Nmatches in TimeSeriesKeywords
-                UpdateString = sprintf(['UPDATE OperationKeywords SET NumOccur = NumOccur + 1 ' ...
-                                'WHERE Keyword = ''%s'''],kwsplit{i}{j});
-                [rs,emsg2] = mysql_dbexecute(dbc, UpdateString);
-            	if ~isempty(emsg1) || ~isempty(emsg2)
-            		fprintf(1,'Error inserting %s,%s to OpKeywordsRelate and updating keyword count in OperationKeywords\n',...
-            		            kwsplit{i}{j},operation(i).Name);
-                    keyboard
-            	end
-            end
+    ourids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE %s IN (%s)',theid,thetable,thename,allnames));
+    ourids = vertcat(ourids{:}); % ids matching FileNames/OpNames
+    ourkids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Keyword IN (%s)',thekid,thektable,bencat(ukws,',','''')));
+    ourkids = vertcat(ourkids{:}); % ids matching FileNames/OpNames
+    nkwrels = sum(cellfun(@(x)length(x),kwsplit)); % number of keyword relationships in the input file
+    addcell = cell(nkwrels,1);
+    ii = 1;
+    for i = 1:nits
+        for j = 1:length(kwsplit{i})
+            addcell{ii} = sprintf('(%u,%u)',ourids(i),ourkids(strcmp(kwsplit{i}{j},ukws)));
+            ii = ii+1;
         end
     end
+    SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',thereltable,theid,thekid),addcell); % add them all in chunks
+    
+    % REALLY SLOW:
+    % for i = 1:length(kws) % each time series or operation
+    %     for j = 1:length(kwsplit{i}) % each keyword assinged to the time series or operation
+    %         switch importwhat
+    %         case 'ts'
+    %             InsertString = sprintf(['INSERT INTO TsKeywordsRelate (tskw_id, ts_id) SELECT ' ...
+    %                 'tskw_id, ts_id FROM TimeSeriesKeywords, TimeSeries ' ...
+    %                 'WHERE TimeSeriesKeywords.Keyword = ''%s'' AND TimeSeries.Filename = ''%s'''], ...
+    %                             kwsplit{i}{j},timeseries(i).Filename);
+    %             [~,emsg] = mysql_dbexecute(dbc, InsertString);
+    %             if ~isempty(emsg)
+    %                 fprintf(1,'\nError inserting %s,%s to TsKeywordsRelate\n',...
+    %                                 kwsplit{i}{j},timeseries(i).Filename); keyboard
+    %             end
+    %         case 'ops'
+    %             InsertString = sprintf(['INSERT INTO OpKeywordsRelate (mkw_id, m_id) SELECT ' ...
+    %                 'mkw_id, m_id FROM OperationKeywords, Operations ' ...
+    %                 'WHERE OperationKeywords.Keyword = ''%s'' AND Operations.OpName = ''%s'''], ...
+    %                             kwsplit{i}{j},esc(operation(i).Name));
+    %             [~,emsg] = mysql_dbexecute(dbc, InsertString);
+    %             if ~isempty(emsg)
+    %                 fprintf(1,'\nError inserting %s,%s to OpKeywordsRelate\n',...
+    %                             kwsplit{i}{j},operation(i).Name); keyboard
+    %             end
+    %         end
+    %     end
+    % end
+    
+    % Increment Nmatches in the keywords table
+    fprintf(1,' done.\nNow the match counts...')
+    % Redo them from scratch should be easier actually
+    for k = 1:nkw % keywords implicated in this import
+        SelectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
+        themkw = mysql_dbquery(dbc,SelectString);
+        UpdateString = sprintf('UPDATE %s SET NumOccur = (SELECT COUNT(*) FROM %s WHERE %s = %u) WHERE %s = %u', ...
+                                    thektable,thereltable,thekid,themkw{1},thekid,themkw{1});
+        [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+        if ~isempty(emsg)
+            fprintf(1,'\n Error updating keyword count in %s',thektable)
+            keyboard
+        end
+    end
+    % for k = 1:nkw % for each unique keyword in the keyword table...
+    %     % nnkw = sum(cellfun(@(x)ismember(ukws{k},x),kwsplit));
+    %     Selectmkwid = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
+    %     SelectCount = sprintf(['SELECT COUNT(*) FROM %s WHERE %s = %s ' ...
+    %                             'AND %s > %u'],thereltable,thekid,Selectmkwid,theid,maxid);
+    %     UpdateString = sprintf(['UPDATE %s SET NumOccur = NumOccur + (%s) ' ...
+    %                             'WHERE Keyword = ''%s'''],thektable,SelectCount,ukws{k});
+    %     [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+    %     if ~isempty(emsg)
+    %         keyboard
+    %         fprintf(1,'\n Error updating keyword count in %s',thektable)
+    %     end
+    % end
+    fprintf(1,'done\n')
 end
 
 % Update master/operation links
 if ismember(importwhat,{'mops','ops'}) % there may be new links
     % Delete the linking table and recreate it from scratch is easiest
-    if bevocal, fprintf(1,'Filling MasterPointerRelate...'); end
+    fprintf(1,'Filling MasterPointerRelate...');
     mysql_dbexecute(dbc,'DELETE FROM MasterPointerRelate');
     InsertString = ['INSERT INTO MasterPointerRelate select m.mop_id,o.m_id FROM MasterOperations ' ...
                             'm JOIN Operations o ON m.MasterLabel = o.MasterLabel'];
     [~,emsg] = mysql_dbexecute(dbc,InsertString);
     if isempty(emsg)
-        if bevocal, fprintf(' done\n'); end
+        fprintf(' done\n');
     else
-        if bevocal
-            fprintf(1,' shit. Error joining the MasterOperations and Operations tables:\n');
-            fprintf(1,'%s\n',emsg)
-        end
+        fprintf(1,' shit. Error joining the MasterOperations and Operations tables:\n');
+        fprintf(1,'%s\n',emsg); keyboard
     end
     
     % if strcmp(importwhat,'ops')
@@ -432,8 +470,8 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
 							'(SELECT COUNT(mop_id) FROM MasterPointerRelate WHERE mop_id = %u)' ...
         					'WHERE mop_id = %u'],M_ids(k),M_ids(k));
     	[rs,emsg] = mysql_dbexecute(dbc, UpdateString);
-    	if ~isempty(emsg) && bevocal
-    		fprintf(1,'Error counting NPointTo operations for mop_id = %u',M_ids(k));
+    	if ~isempty(emsg)
+    		fprintf(1,'Error counting NPointTo operations for mop_id = %u\n',M_ids(k)); keyboard
     	end
     end
 end
