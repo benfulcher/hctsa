@@ -479,6 +479,6 @@ end
 %% Close database
 SQL_closedatabase(dbc)
 
-fprintf('All tasks completed reading %s for %s into %s. It took %s\n',INPfile,thewhat,dbname,benrighttime(toc(ticker)));
+fprintf('All tasks completed reading %s for %s into %s in %s.\n',INPfile,thewhat,dbname,benrighttime(toc(ticker)));
 
 end

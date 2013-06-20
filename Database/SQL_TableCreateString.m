@@ -86,7 +86,6 @@ case 'Results'
         'FOREIGN KEY (m_id) REFERENCES Operations(m_id) ON DELETE CASCADE ON UPDATE CASCADE, '...
         'PRIMARY KEY(ts_id,m_id))'];
 
-
 otherwise
     error(['Unknown table ' whattable]) 
 end

@@ -160,7 +160,6 @@ case 'null'
 	for i = 1:nm
 		Gindex_m(Gm_ids == m_ids_keep(i)) = i; % switch from the m_id to the index
 	end
-	% Gindex_pairs = [Gindex_ts,Gindex_m]
 	
 	% We have the index pairs, we now must just write these into the matricies
 	% First, initiate matricies with Infs (means bogus -- unattained)
