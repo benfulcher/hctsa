@@ -246,7 +246,7 @@ else
         Mmlab = masterinfo(:,2);
         Mmcode = masterinfo(:,3);
     else
-        % no error, but no master functions implicated in this subset
+        % No master functions implicated in this subset
         Mmid = [];
         Mmlab = {};
         Mmcode = {};
@@ -265,7 +265,9 @@ mlink = vertcat(masterlink{:});
 nM = length(Mmid); % number of master metrics
 rch = cell(nM,1);
 for i = 1:nM
-	rch{i} = find(mlink==Mmid(i));
+    rch{i} = (mlink==Mmid(i));
+end
+for i = 1:nM
     mlink(rch{i}) = i; % rename with index rather than the mop_id
 end
 

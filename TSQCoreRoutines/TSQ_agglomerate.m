@@ -1,4 +1,4 @@
-function TSQ_agglomerate(tolog,onlyempty,dbname)
+function TSQ_agglomerate(tolog,getwhat,dbname)
 % agglomerates the TS_loc file in the current directory
 % into the database
 % Needs files TS_loc, TS_guide_ts, TS_guide_mets in current directory
@@ -15,7 +15,7 @@ if nargin < 1 || isempty(tolog)
 	tolog = 0;
 end
 if nargin < 2
-	dbname = '';
+	getwhat = 'null_error';
 end
 if nargin < 3
 	dbname = '';
@@ -24,24 +24,14 @@ end
 %% Open MySQL Database
 [dbc,dbname] = SQL_opendatabase(dbname);
 
-%% Load files
-% Load in necessary files for both reading and writing
-% For reading: LOCAL FILES
+%% Load local files
 fprintf(1,'Loading local files...');
-
-load TS_loc.mat TS_loc
-fprintf(1,' TS_loc');
-
-load TS_loc_ct.mat TS_loc_ct
-fprintf(1,', TS_loc_ct');
-
-load TS_loc_q.mat TS_loc_q
-fprintf(1,', TS_loc_q');
-
+load TS_loc.mat TS_loc; fprintf(1,' TS_loc');
+load TS_loc_ct.mat TS_loc_ct; fprintf(1,', TS_loc_ct');
+load TS_loc_q.mat TS_loc_q; fprintf(1,', TS_loc_q');
 load TS_loc_guides.mat ts_ids_keep tsf tskw tsl m_ids_keep mcode ...
-            mlab mkw mpoint mlink Mmid Mmlab Mmcode % maybe don't need to load all of these...?
+            mlab mkw mlink Mmid Mmlab Mmcode % mpoint % maybe don't need to load all of these...?
 fprintf(1,', TS_loc_guides. All loaded.\n');
-
 
 %% Preliminary definitions
 nts = length(ts_ids_keep); % number of time series
@@ -57,13 +47,13 @@ SelectString = sprintf('SELECT COUNT(ts_id) FROM TimeSeries WHERE ts_id IN (%s)'
 nts_db = mysql_dbquery(dbc,SelectString);
 nts_db = nts_db{1};
 
-% operations
+% Operations
 % fprintf(1,'Checking that retrieved operations ids still exist in the database %s...\n',dbname);
 SelectString = sprintf('SELECT COUNT(m_id) FROM Operations WHERE m_id IN (%s)',m_ids_keep_string);
 nop_db = mysql_dbquery(dbc,SelectString);
 nop_db = nop_db{1};
 
-if nm == nopmatches && nts == ntsmatches
+if (nm == nop_db) && (nts == nts_db)
     fprintf(1,'All local time series and operation ids still exist in %s. This is good.\n',dbname)
 else
     if nts_db < nts
@@ -107,15 +97,16 @@ end
 
 %% Find the elements that are empty in storage but full in the local file
 % Parts of calculated subsection that are empty in storage
-fprintf(1,'Retrieving empty bits of storage in the given range... Be patient... We''re timing it, if that helps...');
+fprintf(1,'Retrieving empty bits of storage in the given range...');
 tic
 SelectString = ['SELECT ts_id, m_id, QualityCode FROM Results WHERE ts_id IN (' ts_ids_keep_string ')' ...
-					' AND m_id IN (' m_ids_keep_string ' ) AND (QualityCode IS NULL OR QualityCode = 1)'];
+					' AND m_id IN (' m_ids_keep_string ') AND (QualityCode IS NULL OR QualityCode = 1)'];
 [qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
     fprintf(1,'\n'); error(['Error selecting empty elements from ' dbname]);
 elseif isempty(qrc)
-	error('No empty elements in this range in the database anymore! Someone else has completely filled the database?! This is really unexpected!')
+    fprintf(1,'\nNo empty elements in this range in the database anymore!\n');
+    return
 else
 	fprintf(1,' Retrieved in %s\n',benrighttime(toc));
 end
@@ -128,7 +119,8 @@ qualities = qrc(:,3); % empties (null) and 1s (fatal errors)
 qualities(cellfun(@isempty,qualities)) = {NaN}; % turn NULLs in NaNs
 qualities = vertcat(qualities{:}); % turn cells into a vector
 
-fprintf(1,'There are %u entries in the database %s (i.e., either NULL or previous errors) that will be written to...',nempties,dbname);
+fprintf(1,['There are %u entries in %s.Results (either NULL or previous errors) ' ...
+            'that will be written to...\n'],nempties,dbname);
 
 times = zeros(nempties,1);
 updatecounter = 0;
@@ -152,17 +144,16 @@ for i = 1:nempties
 			string_ct = num2str(TS_loc_ct(ind_i,ind_j));
 		end
 
-		updatestring = ['UPDATE Results SET ' ...
-							'Output = ' num2str(TS_loc(ind_i,ind_j),'%19.17g') ', ' ...
-							'QualityCode = ' num2str(TS_loc_q(ind_i,ind_j)) ', ' ...
-							'CalculationTime = ' string_ct ', ' ...
-							'LastModified = NOW() ' ...
-							'WHERE ts_id = ' num2str(ts_ids_keep(ind_i)) ' AND m_id = ' num2str(m_ids_keep(ind_j))];
+		UpdateString = sprintf(['UPDATE Results SET Output = %19.17g, QualityCode = %u, CalculationTime = %s ' ...
+        							'WHERE ts_id = %u AND m_id = %u'],TS_loc(ind_i,ind_j),TS_loc_q(ind_i,ind_j), ...
+                							string_ct,ts_ids_keep(ind_i),m_ids_keep(ind_j));
 
-	    [rs,emsg] = mysql_dbexecute(dbc, updatestring);
+	    [~,emsg] = mysql_dbexecute(dbc, UpdateString);
 
 		if ~isempty(emsg)
-			disp(['Error Storing!! OH FUCK!!']); keyboard
+			fprintf(1,'Error storing to %s for (ts_id,m_id) = (%u,%u)!!', ...
+            			dbname,ts_ids_keep(ind_i),m_ids_keep(ind_j));
+            keyboard
 		end		
 	end
 
@@ -173,9 +164,9 @@ for i = 1:nempties
 	end
 end
 
-disp(['Well that seemed to go ok -- we wrote ' num2str(updatecounter) ' new entries / ' num2str(ntsgood*nmgood) ' to the database']);
+fprintf(1,'Well that seemed to go ok -- we wrote %u new entries (/ %u) to the Results table in %s',updatecounter,nts*nm,dbname);
 if nempties > updatecounter % some were not written
-	disp([num2str(nempties-updatecounter) ' entries were not written (recurring fatal errors) and remain awaiting calculation in the database']);
+	fprintf(1,'%u entries were not written (recurring fatal errors) and remain awaiting calculation in the database',(nempties-updatecounter));
 end
 
 

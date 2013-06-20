@@ -102,28 +102,24 @@ for i = 1:nts
         
 		% write to log
 		whichtsf = which(tsf{i});
-		if tolog
-			fprintf(fid,'\n\n%s\n','=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=');
-		    fprintf(fid,'%s\n',['; ; ; : : : : ; ; ; ;    ' datestr(now) '     ; ; ; ; : : : ; ; ;']);
-			fprintf(fid,'%s\n',['Loaded ' whichtsf '  (' num2str(tsl(i)) ' samples)']);
-		    fprintf(fid,'%s\n',['    - - - - - - - -  ' num2str(i) '  /  ' num2str(nts) '   - - - - - - - -']);
-			fprintf(fid,'%s\n',['    - - - - - - ' benrighttime(((nts-i)*mean(times(1:i)))) ' remaining - - - - - - -']);
-		    fprintf(fid,'%s\n\n','=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=');
-		end
+		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
+	    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now));
+		fprintf(fid,'Loaded %s  (%u samples)\n',whichtsf,tsl(i));
+	    fprintf(fid,'    - - - - - - - -  %u  /  %u   - - - - - - - -\n',i,nts);
+		fprintf(fid,'    - - - - - - %s remaining - - - - - - -\n',benrighttime(((nts-i)*mean(times(1:i)))));
+	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n');
 
 		%% Basic checking on x
 		% univariate and Nx1
 		if size(x,2)~=1
 			if size(x,1)==1
-				fprintf(1,'***** The time series %s is a row vector. Not sure how it snuck through the gates, but I need a column vector...\n',tsf{i});
-				fprintf(1,'I''ll transpose it for you for now....\n');
-				if tolog, fprintf(fid,'*** %s a 1xN vector... Transposed.',tsf{i}); end
+				fprintf(fid,'***** The time series %s is a row vector. Not sure how it snuck through the gates, but I need a column vector...\n',tsf{i});
+				fprintf(fid,'I''ll transpose it for you for now....\n');
 				x = x';
 			else
-				fprintf(1,'******************************************************************************************\n')
-				fprintf(1,'MASSIVE ERROR WITH THIS TIME SERIES!!!: %s -- is it multivariate or something weird???. Skipping it!!\n', tsf{i});
-				fprintf(1,'******************************************************************************************\n');
-				if tolog, fprintf(fid,'*** MASSIVE ERROR: A MULTIVARIATE(?) TIME SERIES... SKIPPING...\n'); end
+				fprintf(fid,'******************************************************************************************\n')
+				fprintf(fid,'MASSIVE ERROR WITH THIS TIME SERIES!!!: %s -- is it multivariate or something weird???. Skipping it!!\n', tsf{i});
+				fprintf(fid,'******************************************************************************************\n');
 				continue % skip to the next time series; the entries for this time series in TS_loc etc. will remain NaNs
             end
 		end
@@ -136,10 +132,7 @@ for i = 1:nts
         % index sliced variables to minimize the communication overhead in the parallel processing
         partsfi  = tsf{i}; parmcode = mcode(tcal); parmlab = mlab(tcal); parmlink = mlink(tcal);
 
-		fprintf(1,'Calculating %s (ts_id = %u, N = %u) [%u / %u]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
-		if tolog
-			fprintf(fid,'Calculating %u (/%u) operations\n',ncal,nm);
-		end
+		fprintf(fid,'Calculating %s (ts_id = %u, N = %u) [%u / %u]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
 		
 		%% Evaluate master functions in parallel
 		% Because of parallelization, we have to evaluate all the master functions *first*
@@ -278,7 +271,7 @@ for i = 1:nts
 	        end
 		end
         
-		%% Error coding -- qqi
+		%% Coding errors
 
 		% (*) Errorless calculation: q = 0, output = <real number>
 		% (*) Fatal error: q = 1, output = 0; (this is done already in the code above)
@@ -307,7 +300,6 @@ for i = 1:nts
 			qqi(RR) = 5; ffi(RR) = 0;
 		end
 
-		
 		% Store the calculated information back to local matrices
         TS_loc(i,tcal) = ffi; % store outputs in TS_loc
 		TS_loc_ct(i,tcal) = cti; % store calculation times in TS_loc_ct
@@ -322,6 +314,7 @@ for i = 1:nts
     
     times(i) = toc(bigtimer); % the time taken to calculate (or not, if ncal = 0) operations for this time series
 
+
     % Print information about this time series calculation
 	fprintf(fid,'****************************************************************\n')
     fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
@@ -331,7 +324,7 @@ for i = 1:nts
 	     					ngood,nerror,nother,ncal,nm);
 		fprintf(fid,'Calculation for this data set took %s.\n',benrighttime(times(i)));
     else
-    	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0',nm);
+    	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',nm);
     end
     fprintf(fid,'    - - - - - - - -  %u / %u   - - - - - - - -\n',i,nts);
 	fprintf(fid,'    - - - - - - - -  %s remaining - - - - - - - - -\n',benrighttime(((nts-i)*mean(times(1:i)))));
@@ -346,7 +339,6 @@ for i = 1:nts
 		save('TS_loc_q.mat','TS_loc_q','-v7.3');    fprintf(fid,', TS_loc_q.mat. All saved.\n')
         lst = sum(times(1:i)); % the last saved time (1)
     end
-        
 end
 
 %%% Finished calculating!! Aftermath:
