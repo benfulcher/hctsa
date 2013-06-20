@@ -362,7 +362,7 @@ if ~strcmp(importwhat,'mops')
     % allkws, allids
     switch importwhat
     case 'ts'
-        allnames = bencat({timeseries.FileName},',','''');
+        allnames = bencat({timeseries.Filename},',','''');
     case 'ops'
         allnames = bencat({operation.Name},',','''');
     end
