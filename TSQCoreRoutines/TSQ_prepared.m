@@ -153,8 +153,7 @@ for i = 1:nits
         keyboard
     end
     if size(qrc) == 0
-        fprintf(1,'No data to retrieve for ts_id = (%s)?!!\n',bencat(ts_ids_now,','));
-        keyboard
+        fprintf(1,'No data to retrieve for ts_id = (%s)\n',bencat(ts_ids_now,','));
     end
     
 	% Convert empty entries to NaNs
@@ -183,73 +182,39 @@ for i = 1:nits
 	end
 end
 fprintf(1,'Local files filled from %s in %u iterations. Took %s altogether.\n',dbname,nits,benrighttime(sum(times)));
-% % segment outputs; give them sensible names
-% Gts_ids = vertcat(qrc{:,1});
-% Gm_ids = vertcat(qrc{:,2});
-% Goutput = horzcat(qrc{:,3});
-% Gcalctime = horzcat(qrc{:,4});
-% Gquality = horzcat(qrc{:,5});
-%     
-% % augment Gid_pairs into indicies
-% Gindex_ts = Gts_ids;
-% for i = 1:nts
-%     Gindex_ts(Gts_ids == ts_ids_keep(i)) = i; % switch from the ts_id to the index
-% end
-% Gindex_m = Gm_ids;
-% for i = 1:nm
-%     Gindex_m(Gm_ids == m_ids_keep(i)) = i; % switch from the m_id to the index
-% end
-
-% We have the index pairs, we now must just write these into the matricies
-% First, initiate matricies with Infs (means bogus -- unattained)
-% fprintf(1,'Filling local files TS_loc, TS_loc_ct, and TS_loc_q...');
-% tic
-% TS_loc(:) = Inf; TS_loc_ct(:) = Inf; TS_loc_q = Inf;
-% for i = 1:ngot
-%     TS_loc(Gindex_ts(i),Gindex_m(i)) = Goutput(i);
-%     TS_loc_ct(Gindex_ts(i),Gindex_m(i)) = Gcalctime(i);
-%     TS_loc_q(Gindex_ts(i),Gindex_m(i)) = Gquality(i);
-% end
-% fprintf(1,'filled. Took %s\n',benrighttime(toc));
 	
-if strcmp(getwhat,'null')
-	% ()()() Filter down TS_loc_ and ts_ids_keep, m_ids_keep ()()()
-	fprintf(1,'Filtering unused time series and operations\n');
-	tic
-    
-    % We only want to keep rows and columns with NaNs in them...
-    keepme = isnan(TS_loc);
+if ismember(getwhat,{'null','error'})    
+    % We only want to keep rows and columns with (e.g., NaNs) in them...
+    switch getwhat
+    case 'null'
+        keepme = isnan(TS_loc); % NULLs in database
+    	fprintf(1,'Filtering so that data only contains rows/columns containing at least one NULL entry\n');
+    case 'error'
+        keepme = (TS_loc_q == 1); % error codes in database
+    	fprintf(1,'Filtering so that data only contains rows/columns containing at least one error entry\n');
+    end
     
 	% Time Series
-    keepi = (sum(TS_loc,2) > 0); % there is at least one entry to calculate in this row
-	if sum(keepi) < nts
-		fprintf(1,'Cutting down from %u to %u time series with calculation potential\n',nts,sum(keepi));
-		ts_ids_keep = ts_ids_keep(keepi); % update ts_ids_keep
+    keepi = (sum(keepme,2) > 0); % there is at least one entry to calculate in this row
+    if sum(keepi)==0
+    	fprintf(1,'After filtering, there are no time series remaining! Exiting...\n'); return
+	elseif sum(keepi) < nts
+		fprintf(1,'Cutting down from %u to %u time series\n',nts,sum(keepi));
+		ts_ids_keep = ts_ids_keep(keepi); nts = length(ts_ids_keep);
+		ts_ids_keep_string = bencat(ts_ids_keep,',');
 		TS_loc = TS_loc(keepi,:); TS_loc_ct = TS_loc_ct(keepi,:); TS_loc_q = TS_loc_q(keepi,:); % update local data stores
 	end
 	
 	% Operations
-    keepi = (sum(TS_loc,1) > 0); % there is at least one entry to calculate in this column
-	if sum(keepi) < nm
-		fprintf(1,'Cutting down from %u to %u operations with calculation potential\n',nm,nUmids);
-		m_ids_keep = m_ids_keep(keepi);
-		TS_loc = TS_loc(:,keepi); TS_loc_ct = TS_loc_ct(:,keepi); TS_loc_q = TS_loc_q(:,keepi);
-	end
-	
-	if nUtsids < nts || nUmids < nm % there has been cutting done. Update things.
-		ts_ids_keep_string = bencat(ts_ids_keep,',');
+    keepi = (sum(keepme,1) > 0); % there is at least one entry to calculate in this column
+	if sum(keepi) == 0
+    	fprintf(1,'After filtering, there are no operations remaining! Exiting...\n'); return
+    elseif sum(keepi) < nm
+		fprintf(1,'Cutting down from %u to %u operations\n',nm,sum(keepi));
+		m_ids_keep = m_ids_keep(keepi); nm = length(m_ids_keep);
 		m_ids_keep_string = bencat(m_ids_keep,',');
-		nts = length(ts_ids_keep);
-        nm = length(m_ids_keep);
-	end
-	
-	fprintf(1,'Filtering complete in %s\n',benrighttime(toc));
-    % Check that haven't filtered down to nothing
-    if (nts == 0) || (nm == 0)
-    	fprintf(1,'After filtering, there is nothing left! Exiting...\n');
-    	SQL_closedatabase(dbc)
-    	return
-    end
+		TS_loc = TS_loc(:,keepi); TS_loc_ct = TS_loc_ct(:,keepi); TS_loc_q = TS_loc_q(:,keepi);
+	end    
 end
 
 %% Fill out guides
@@ -266,7 +231,7 @@ SelectString = sprintf('SELECT Code, OpName, Keywords FROM Operations WHERE m_id
 mcode = minfo(:,1); % operation filenames
 mlab = minfo(:,2); % operation labels
 mkw = minfo(:,3); % operation keywords
-% mpoint = vertcat(minfo{:,4}); % pointer? -- [redundant if you have mlink]
+% mpoint = vertcat(minfo{:,4}); % pointer? -- [redundant if you have mlink (retrieved later)]
 
 % Now get master info
 % (i) Which masters are implicated?
@@ -320,8 +285,7 @@ fprintf(1,', TS_loc_q (quality codes)')
 save('TS_loc_guides.mat','m_ids_keep','ts_ids_keep','tsf','tskw','tsl','mcode','mlab','mkw','mlink','Mmid','Mmlab','Mmcode','-v7.3');
 fprintf(1,', TS_loc_guides (information guides).\n')
 
-%% Clean Up
-% Write how many entries are to be calculated
+% Display how many entries need to be calculated
 tocalculate = sum(isnan(TS_loc_q(:)) | TS_loc_q(:)==1);
 fprintf(1,'There are %u entries (= %5.2f%%) to calculate in TS_loc (%ux%u)\n',tocalculate,tocalculate/nm/nts*100,nts,nm);
 
