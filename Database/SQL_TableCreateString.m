@@ -64,7 +64,6 @@ case 'TimeSeriesKeywords'
         '(tskw_id INTEGER AUTO_INCREMENT PRIMARY KEY, ' ... % Unique identifier for each keyword
         'Keyword varchar(50), ' ... % The keyword
         'NumOccur INTEGER UNSIGNED, ' ... % Number of time series with this keyword
-        'MeanLength FLOAT, ' ... % Mean length of time series with this keyword
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)'];
     
 case 'TsKeywordsRelate'

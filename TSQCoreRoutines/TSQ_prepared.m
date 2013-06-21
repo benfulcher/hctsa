@@ -188,10 +188,10 @@ if ismember(getwhat,{'null','error'})
     switch getwhat
     case 'null'
         keepme = isnan(TS_loc); % NULLs in database
-    	fprintf(1,'Filtering so that data only contains rows/columns containing at least one NULL entry\n');
+    	fprintf(1,'Filtering so that local files contain rows/columns containing at least one NULL entry\n');
     case 'error'
         keepme = (TS_loc_q == 1); % error codes in database
-    	fprintf(1,'Filtering so that data only contains rows/columns containing at least one error entry\n');
+    	fprintf(1,'Filtering so that local files contain rows/columns containing at least one error entry\n');
     end
     
 	% Time Series

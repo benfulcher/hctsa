@@ -100,15 +100,6 @@ for i = 1:nts
 		cti = ones(ncal,1)*NaN; % calculation times
         x = dlmread(tsf{i}); % this is the raw time series from the file
         
-		% write to log
-		whichtsf = which(tsf{i});
-		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
-	    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now));
-		fprintf(fid,'Loaded %s  (%u samples)\n',whichtsf,tsl(i));
-	    fprintf(fid,'    - - - - - - - -  %u  /  %u   - - - - - - - -\n',i,nts);
-		fprintf(fid,'    - - - - - - %s remaining - - - - - - -\n',benrighttime(((nts-i)*mean(times(1:i)))));
-	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n');
-
 		%% Basic checking on x
 		% univariate and Nx1
 		if size(x,2)~=1
@@ -132,8 +123,15 @@ for i = 1:nts
         % index sliced variables to minimize the communication overhead in the parallel processing
         partsfi  = tsf{i}; parmcode = mcode(tcal); parmlab = mlab(tcal); parmlink = mlink(tcal);
 
-		fprintf(fid,'Calculating %s (ts_id = %u, N = %u) [%u / %u]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
-		
+		% Display information
+		whichtsf = which(tsf{i});
+		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
+	    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now));
+	    fprintf(fid,'- - - - - - - -  Loaded time series %u / %u - - - - - - - -\n',i,nts);
+		fprintf(fid,'(%s)\n\n',whichtsf);
+		fprintf(fid,'Preparing to calculate %s (ts_id = %u, N = %u samples) [computing %u / %u operations]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
+	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
+
 		%% Evaluate master functions in parallel
 		% Because of parallelization, we have to evaluate all the master functions *first*
 		% Check through the metrics to determine which master functions are relevant for this run
@@ -197,7 +195,6 @@ for i = 1:nts
 		else
 			% No master metrics need to be calculed.
 			Moutput = {}; Mcts = {}; % This initiaition is necessary for the next parfor loop
-			fprintf(fid,'No master operations.\n');
 		end
 
 
@@ -315,21 +312,24 @@ for i = 1:nts
     times(i) = toc(bigtimer); % the time taken to calculate (or not, if ncal = 0) operations for this time series
 
 
-    % Print information about this time series calculation
-	fprintf(fid,'****************************************************************\n')
+    % Calculation complete: print information about this time series calculation
+	fprintf(fid,'********************************************************************\n')
     fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
-    fprintf(fid,'oOoOoOoOoOo  %s (%u)  oOoOoOoOoOoOo\n',tsf{i},tsl(i));
+    fprintf(fid,'oOoOoOo Calculation complete for %s (N = %u samples)  oOoOoOoOo\n',tsf{i},tsl(i));
     if ncal > 0 % Some amount of calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u other outputs stored. [%u / %u]\n',...
 	     					ngood,nerror,nother,ncal,nm);
-		fprintf(fid,'Calculation for this data set took %s.\n',benrighttime(times(i)));
+		fprintf(fid,'Calculations for this time series took %s.\n',benrighttime(times(i)));
     else
     	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',nm);
     end
-    fprintf(fid,'    - - - - - - - -  %u / %u   - - - - - - - -\n',i,nts);
-	fprintf(fid,'    - - - - - - - -  %s remaining - - - - - - - - -\n',benrighttime(((nts-i)*mean(times(1:i)))));
-    fprintf(fid,'****************************************************************\n');
-
+    if i < nts
+        fprintf(fid,'- - - - - - - -  %u time series remaining - - - - - - - -\n',nts-i);
+    	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n',benrighttime(((nts-i)*mean(times(1:i)))));
+    else % the final time series
+        fprintf(fid,'- - - - - - - -  All time series calculated! - - - - - - - -\n',nts-i);
+    end
+    fprintf(fid,'********************************************************************\n');
 
  	% save TS_loc to file every 10 minutes
     if sum(times(1:i))-lst > 60*10; % it's been more than 10 mins since last save
@@ -356,9 +356,9 @@ if tolog, fclose(fid); end % close the .log file
 
 if agglomerate
     fprintf(1,'Calculation done: Calling TSQ_agglomerate to store back results\n')
+    writewhat = 'null'; % only write back to NULL entries in the database
     log = 0; % don't bother with a log file
-    onlyempty = 0; % only write back to NULL entries in the database
-    TSQ_agglomerate(log,onlyempty,dbname)
+    TSQ_agglomerate(writewhat,dbname,log)
 else
     fprintf(1,'Calculation complete: you can now run TSQ_agglomerate to store results to a mySQL database\n')
 end
