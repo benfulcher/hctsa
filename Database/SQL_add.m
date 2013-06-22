@@ -183,21 +183,25 @@ case 'ts' % Prepare toadd cell for time series
                     end
                     x = x';
                     dlmwrite(which(timeseries(j).Filename),x);
-                    fprintf(1,'%s is a row vector -- has been transposed and resaved as %s as a column vector\n',timeseries(j).Filename,which(timeseries(j).Filename))
+                    fprintf(1,['%s is a row vector -- has been transposed and resaved as ''%s'' ' ...
+                                    'as a column vector\n'],timeseries(j).Filename,which(timeseries(j).Filename))
                 else
-                    fprintf(1,'%s is not a row or column vector -- not sure how to read this as a time series...!\n',which(timeseries(j).Filename))
+                    fprintf(1,['%s is not a row or column vector -- not sure how to ' ...
+                                'read this as a time series...!\n'],which(timeseries(j).Filename))
                     fprintf(1,'Maybe check and reformat the time series in %s...? Exiting.\n',INPfile)
                     return
                 end
             end
             if any(isnan(x)) || any(~isfinite(x))
-                fprintf(1,'Did you know that the time series %s contains special values (e.g., NaN or Inf)...?\n',which(timeseries(j).Filename))
+                fprintf(1,['Did you know that the time series %s contains special values' ...
+                            ' (e.g., NaN or Inf)...?\n'],which(timeseries(j).Filename))
                 fprintf(1,'I''m not quite sure what to do with this... Please reformat.\n')
                 exit
             end
         catch emsg
             fprintf(1,'\n')
-            error(['Could not find/read the data file for ' timeseries(j).Filename '. Check that it''s in Matlab''s path'])
+            error(sprintf(['Could not find/read the data file for ''%s''.' ...
+                                'Check that it''s in Matlab''s path.'],timeseries(j).Filename))
             % fprintf(1,'Could not read in the time series data for %s from file -- length set as NaN\n',timeseries(j).Filename)
             % timeseries(j).Length = NaN;
         end

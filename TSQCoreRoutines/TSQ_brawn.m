@@ -197,7 +197,6 @@ for i = 1:nts
 			Moutput = {}; Mcts = {}; % This initiaition is necessary for the next parfor loop
 		end
 
-
 		%% GO GO GO!!!
 		if toparallel
 	        parfor j = 1:ncal
@@ -225,8 +224,8 @@ for i = 1:nts
 		            try
 						operationtimer = tic;
 						ffi(j) = pareval(x,y,parmcode{j});
-						qqi(j) = 0;
 						cti(j) = toc(operationtimer);
+						qqi(j) = 0;
 		            catch
 		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
 						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
@@ -258,8 +257,8 @@ for i = 1:nts
 		            try
 						operationtimer = tic;
 						ffi(j) = pareval(x,y,parmcode{j});
-						qqi(j) = 0;
 						cti(j) = toc(operationtimer);
+						qqi(j) = 0;
 		            catch
 		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
 						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
