@@ -1,4 +1,5 @@
 function out = CO_autocorr(y,tau)
+% Computes the autocorrelation of an input time series, y, at a time-lag tau
 % INPUTS:
 % y a scalar time series column vector
 % If tau is a scalar, returns autocorrelation for y at that lag

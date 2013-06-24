@@ -3,15 +3,13 @@ function out = CO_stickangles(y,method)
 % treating each data point as a stick protruding from a opaque baseline
 % Ben Fulcher, September 2009
 
-
-doplot = 0; % can plot to see
-
+doplot = 0; % can plot output
 N = length(y);
 
 ix = cell(2,1); %indicies for positive(1) and negative(2) entries of time series vector
+ix{1} = find(y >= 0); % bias here -- 'look up' if on 'ground'
+ix{2} = find(y < 0);
 n = zeros(2,1);
-ix{1} = find(y>=0); % bias here -- 'look up' if on 'ground'
-ix{2} = find(y<0);
 n(1) = length(ix{1})-1; % minus one because the last point has no next one to compare to
 n(2) = length(ix{2})-1; % minus one for same reason
 
@@ -22,8 +20,7 @@ angles{2} = zeros(n(2),1); % negatives (below axis)
 % first positive time points: store in angles_p
 for j = 1:2
     for i = 1:n(j)
-        % find the next time series point with the same sign as the current
-        % one:
+        % find the next time series point with the same sign as the current one:
         angles{j}(i) = (y(ix{j}(i+1))-y(ix{j}(i)))/(ix{j}(i+1)-ix{j}(i));
     end
     angles{j} = atan(angles{j});
@@ -57,11 +54,9 @@ out.std = std(allangles);
 out.mean = mean(allangles);
 out.median = median(allangles);
 
-
-
 %% Difference between positive and negative angles
 % Return difference in densities
-ksx=linspace(min(allangles),max(allangles),200);
+ksx = linspace(min(allangles),max(allangles),200);
 if ~isempty(angles{1}) && ~isempty(angles{2})
     ksy1 = ksdensity(angles{1},ksx); % spans the range of full extent (of both positive and negative angles)
     ksy2 = ksdensity(angles{2},ksx); % spans the range of full extent (of both positive and negative angles)
@@ -162,22 +157,22 @@ end
 % All angles:
 
 % StatAv2
-[statav_m statav_s] = sub_statav(zallangles,2);
+[statav_m, statav_s] = sub_statav(zallangles,2);
 out.statav2_all_m = statav_m;
 out.statav2_all_s = statav_s;
 
 % StatAv3
-[statav_m statav_s] = sub_statav(zallangles,3);
+[statav_m, statav_s] = sub_statav(zallangles,3);
 out.statav3_all_m = statav_m;
 out.statav3_all_s = statav_s;
 
 % StatAv4
-[statav_m statav_s] = sub_statav(zallangles,4);
+[statav_m, statav_s] = sub_statav(zallangles,4);
 out.statav4_all_m = statav_m;
 out.statav4_all_s = statav_s;
 
 % StatAv5
-[statav_m statav_s] = sub_statav(zallangles,5);
+[statav_m, statav_s] = sub_statav(zallangles,5);
 out.statav5_all_m = statav_m;
 out.statav5_all_s = statav_s;
 
@@ -240,21 +235,21 @@ out.kurtosis_all = kurtosis(allangles);
 %% Outliers?
 % forget about this, I think.
 
-    function [statavmean statavstd] = sub_statav(x,n)
-        % Does a n-partition statav.
-        % Require 2*n points (i.e., minimum of 2 in each partition) to do a
-        % statav that even has a chance of being meaningful.
-        NN = length(x);
-        if NN<2*n % not long enough
-            statavmean = NaN; statavstd = NaN;
-            return
-        end
-        
-        x_buff = buffer(x,floor(NN/n));
-        if size(x_buff,2) > n, x_buff = x_buff(:,1:n); end % lose last point
-        statavmean = std(mean(x_buff))/std(x);
-        statavstd = std(std(x_buff))/std(x);
+function [statavmean, statavstd] = sub_statav(x,n)
+    % Does a n-partition statav.
+    % Require 2*n points (i.e., minimum of 2 in each partition) to do a
+    % statav that even has a chance of being meaningful.
+    NN = length(x);
+    if NN<2*n % not long enough
+        statavmean = NaN; statavstd = NaN;
+        return
     end
+    
+    x_buff = buffer(x,floor(NN/n));
+    if size(x_buff,2) > n, x_buff = x_buff(:,1:n); end % lose last point
+    statavmean = std(mean(x_buff))/std(x);
+    statavstd = std(std(x_buff))/std(x);
+end
 
 
 end

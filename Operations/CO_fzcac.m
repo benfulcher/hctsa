@@ -2,7 +2,7 @@ function out = CO_fzcac(y)
 % Outputs the first zero-crossing of the autocorrelation function
 % Uses CO_autocorr to calculate autocorrelations
 % Very badly coded by Ben Fulcher, 2008
-% Quickly tweaked by Ben Fulcher, May 2013
+% Briefly tweaked by Ben Fulcher, May 2013
 
 N = length(y); % the length of the time series
 

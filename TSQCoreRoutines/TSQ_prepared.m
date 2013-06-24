@@ -69,6 +69,11 @@ if nargin < 2;
 end
 if nargin < 3
 	getwhat = 'all'; % retrieve full sets of things, not just the empty entries in the database
+    fprintf(1,'Retrieving all elements in the range, by default\n')
+end
+getwhatcanbe = {'null','all','error'};
+if ~ischar(getwhat) || ~ismember(getwhat,getwhatcanbe)
+    error(sprintf('Your third input to TSQ_prepared must specify what to retrieve, one of the following: %s',bencat(getwhatcanbe)))
 end
 if nargin < 4
 	dbname = []; % Use default database
