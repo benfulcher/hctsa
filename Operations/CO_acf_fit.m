@@ -21,12 +21,12 @@ switch whfn
 
 		% Statistics on Extrema		
 		% Get the extrema
-		rextrema = [0; find(diff(acf(1:end-1)).*diff(acf(2:end))<0)] + 1;
+		rextrema = [0; find(diff(acf(1:end-1)).*diff(acf(2:end)) < 0)] + 1;
 		extrema = acf(rextrema);
 % 		hold off;plot(r,acf); hold on; plot(r(rextrema),extrema,'or');
 		
 		% Timmers calculated difference between absolute values of first two extrema of the acf:
-		if length(extrema)>1;
+		if length(extrema) > 1;
 			out.diff_ext12 = abs(extrema(2)-extrema(1));
 			out.diff_ext12_tau = r(rextrema(2)) - r(rextrema(1));
 		else out.diff_ext12 = NaN; out.diff_ext12_tau = NaN;

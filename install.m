@@ -21,6 +21,8 @@ end
 fprintf(1,'Setting up the database now--NB: you need to have root access to a mySQL server to do this\n')
 % Walks the user through creating the database from a root account and sets up a user account and password
 SQL_create_db;
+fprintf(1,['Note that if you ever want to change the database access settings, you should alter the sql_settings.conf file' ...
+                ', or run SQL_create_db\n'])
 
 % Create all tables in the database
 SQL_create_all_tables;

@@ -373,7 +373,7 @@ if ~strcmp(importwhat,'mops')
             toadd{k} = sprintf('(''%s'',0)',ukws{fisnew(k)});
         end
         SQL_add_chunked(dbc,insertstring,toadd);
-        fprintf(1,' added %u new keywords\n',nkw)
+        fprintf(1,' added %u new keywords!\n',nkw)
     else
         if bevocal
             fprintf(1,['\nIt turns out that all new keywords already exist in ' ...
