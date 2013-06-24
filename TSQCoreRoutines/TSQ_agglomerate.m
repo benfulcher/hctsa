@@ -140,15 +140,25 @@ for i = 1:ndbel
 		% (ii) either the database entry is NULL or we didn't get an error (prevents writing errors over errors)
     end
 	
-    % I can't see any way around running lots of single UPDATE commands (for each entry)
-	UpdateString = sprintf(['UPDATE Results SET Output = %19.17g, QualityCode = %u, CalculationTime = %f ' ...
-    							'WHERE ts_id = %u AND m_id = %u'],TS_loc_ij,TS_loc_q_ij, ...
-            							TS_loc_ct_ij,ts_id_db(i),m_id_db(i));
-    [~,emsg] = mysql_dbexecute(dbc, UpdateString);
-	if ~isempty(emsg)
-		fprintf(1,'Error storing (ts_id,m_id) = (%u,%u) to %s??!!', ...
-            			ts_ids_keep(loci(i,1)),m_ids_keep(loci(i,2)),dbname);
-        keyboard
+    if updated(i)
+        
+        if isnan(TS_loc_ct_ij),
+            TS_loc_ct_string = 'NULL';
+        else
+            TS_loc_ct_string = sprintf('%f',TS_loc_ct_ij);
+        end
+            
+        % I can't see any way around running lots of single UPDATE commands (for each entry)
+    	UpdateString = sprintf(['UPDATE Results SET Output = %19.17g, QualityCode = %u, CalculationTime = %s ' ...
+        							'WHERE ts_id = %u AND m_id = %u'],TS_loc_ij,TS_loc_q_ij, ...
+            							TS_loc_ct_string,ts_id_db(i),m_id_db(i));
+        [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+        if ~isempty(emsg)
+        	fprintf(1,'\nError storing (ts_id,m_id) = (%u,%u) to %s??!!', ...
+                			ts_ids_keep(loci(i,1)),m_ids_keep(loci(i,2)),dbname);
+            fprintf(1,'%s\n',emsg);
+            keyboard
+        end
     end
 
 	times(i) = toc;

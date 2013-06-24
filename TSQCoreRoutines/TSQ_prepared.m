@@ -76,7 +76,7 @@ if ~ischar(getwhat) || ~ismember(getwhat,getwhatcanbe)
     error(sprintf('Your third input to TSQ_prepared must specify what to retrieve, one of the following: %s',bencat(getwhatcanbe)))
 end
 if nargin < 4
-	dbname = []; % Use default database
+	dbname = ''; % Use default database
 end
 if nargin < 5 || isempty(brawninputs)
 	brawninputs = [1, 1]; % log and parallelize -- only relevant if getwhat isn't empty

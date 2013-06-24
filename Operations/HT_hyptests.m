@@ -4,26 +4,26 @@ function p = HT_hyptests(x,ange)
 
 switch ange
     case 'signtest' % Statistics Toolbox
-        [p ~] = signtest(x);
+        [p, ~] = signtest(x);
         % for some reason this one has p-value as the first output
         
     case 'runstest' % Statistics Toolbox
-        [~ p] = runstest(x);
+        [~, p] = runstest(x);
 
     case 'vartest' % Statistics Toolbox
-        [~ p] = vartest(x,1); % normal distribution of variance 1
+        [~, p] = vartest(x,1); % normal distribution of variance 1
         
     case 'ztest' % Statistics Toolbox
-        [~ p] = ztest(x,0,1);
+        [~, p] = ztest(x,0,1);
         
     case 'signrank' % Statistics Toolbox
-        [p ~] = signrank(x);
+        [p, ~] = signrank(x);
         
     case 'jb' % Statistics Toolbox
-        [~ p] = jbtest(x);
+        [~, p] = jbtest(x);
         
     case 'lbq' % Econometrics Toolbox
-        [~ p] = lbqtest(x);
+        [~, p] = lbqtest(x);
 end
 
 end
