@@ -21,7 +21,8 @@ case 'TimeSeries'
         '(ts_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ... % Unique integer identifier
         'Filename VARCHAR(255) NOT NULL, ' ... % FileName of the time series
         'Keywords VARCHAR(255), ' ... % Comma-delimited keywords assigned to the time series
-        'Length INTEGER UNSIGNED, ' ... % Length of the time series ...
+        'Length INTEGER UNSIGNED, ' ... % Length of the time series
+        'Data MEDIUMTEXT, ' ... % Add data into database :-O
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)']; % Time stamp of when the time series was last modified/inserted
         % 'Quantity VARCHAR(255), ' ... % The quantity measured across time
         % 'Unit VARCHAR(50), ' ... % The physical unit of the quantity measured

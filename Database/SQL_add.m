@@ -37,7 +37,7 @@ end
 
 % bevocal
 if nargin < 4
-    bevocal = 1;
+    bevocal = 1; % gives lots and lots of user feedback
 end
 
 if bevocal, fprintf(1,'Using input file %s',INPfile); end
@@ -56,7 +56,7 @@ switch importwhat
         thektable = 'TimeSeriesKeywords';
         thereltable = 'TsKeywordsRelate';
         thename = 'Filename';
-        
+        maxL = 40000; % the longest time series length for the database
     case 'ops'
         thewhat = 'operations';
         theid = 'm_id';
@@ -157,6 +157,7 @@ if bevocal
 end
 toadd = cell(nits,1);
 resave = 0; % need user permission to save over existing time series
+if bevocal; figure('color','w','WindowStyle','docked'); end
 switch importwhat
 case 'ts' % Prepare toadd cell for time series
     for j = 1:nits
@@ -167,49 +168,70 @@ case 'ts' % Prepare toadd cell for time series
         try
             x = dlmread(timeseries(j).Filename);
             timeseries(j).Length = length(x);
-            if size(x,2) > size(x,1); % a row vector
-                if size(x,1)==1
-                    % Get permission once
-                    if resave == 0
-                        fprintf(1,['Looks like some time series files (%s) are row vectors instead of column vectors.' ...
-                                        'Can I resave over them?\n'],which(timeseries(j).Filename))
-                        reply = input('''y'' for yes (will remember this answer for other time series), or any other key to quit','s');
-                        if strcmp(reply,'y')
-                            resave = 1;
-                        else
-                            fprintf(1,'Exiting. You''ll have to reformat some of the time series in %s.\n',INPfile)
-                            return
-                        end
-                    end
-                    x = x';
-                    dlmwrite(which(timeseries(j).Filename),x);
-                    fprintf(1,['%s is a row vector -- has been transposed and resaved as ''%s'' ' ...
-                                    'as a column vector\n'],timeseries(j).Filename,which(timeseries(j).Filename))
-                else
-                    fprintf(1,['%s is not a row or column vector -- not sure how to ' ...
-                                'read this as a time series...!\n'],which(timeseries(j).Filename))
-                    fprintf(1,'Maybe check and reformat the time series in %s...? Exiting.\n',INPfile)
-                    return
-                end
-            end
+            % if size(x,2) > size(x,1); % a row vector
+            %     if size(x,1)==1
+            %         % Get permission once
+            %         if resave == 0
+            %             fprintf(1,['Looks like some time series files (%s) are row vectors instead of column vectors.' ...
+            %                             'Can I resave over them?\n'],which(timeseries(j).Filename))
+            %             reply = input('''y'' for yes (will remember this answer for other time series), or any other key to quit','s');
+            %             if strcmp(reply,'y')
+            %                 resave = 1;
+            %             else
+            %                 fprintf(1,'Exiting. You''ll have to reformat some of the time series in %s.\n',INPfile)
+            %                 return
+            %             end
+            %         end
+            %         x = x';
+            %         dlmwrite(which(timeseries(j).Filename),x);
+            %         fprintf(1,['%s is a row vector -- has been transposed and resaved as ''%s'' ' ...
+            %                         'as a column vector\n'],timeseries(j).Filename,which(timeseries(j).Filename))
+            %     else
+            %         fprintf(1,['%s is not a row or column vector -- not sure how to ' ...
+            %                     'read this as a time series...!\n'],which(timeseries(j).Filename))
+            %         fprintf(1,'Maybe check and reformat the time series in %s...? Exiting.\n',INPfile)
+            %         return
+            %     end
+            % end
+            
             if any(isnan(x)) || any(~isfinite(x))
                 fprintf(1,['Did you know that the time series %s contains special values' ...
                             ' (e.g., NaN or Inf)...?\n'],which(timeseries(j).Filename))
                 fprintf(1,'I''m not quite sure what to do with this... Please reformat.\n')
-                exit
+                return
             end
-        catch emsg
-            fprintf(1,'\n')
-            error(sprintf(['Could not find/read the data file for ''%s''.' ...
-                                'Check that it''s in Matlab''s path.'],timeseries(j).Filename))
-            % fprintf(1,'Could not read in the time series data for %s from file -- length set as NaN\n',timeseries(j).Filename)
-            % timeseries(j).Length = NaN;
-        end
+            
+            if length(x) > maxL % this time series is too long -- exit
+                fprintf(['%s contains %u samples, this framework can efficiently ' ...
+                                'deal with time series up to %u samples\n'],timeseries(j).Filename,timeseries(j).Length,maxL)
+                fprintf(1,'Safest not to do anything now -- perhaps you can remove this time series from the input file?'); return
+            end
+            % Read in the time series from file as strings using textscan
+            fid = fopen(timeseries(j).Filename); tstext = textscan(fid,'%s'); fclose(fid);
+            % Turn into one long comma-delimited string
+            tstext = tstext{1}; % cell of time series values as strings
+            xtext = ''; % make a comma-delimited text version of the time series as xtext
+            for k = 1:length(tstext)
+                xtext = [xtext,',',tstext{k}];
+            end
+            xtext = xtext(2:end);
+            timeseries(j).Data = xtext;
 
-        if timeseries(j).Length > 0 % able to read the time series, import the length too
-            toadd{j} = sprintf('(''%s'',''%s'',%u)',esc(timeseries(j).Filename),esc(timeseries(j).Keywords),timeseries(j).Length);
-        else % unable to read the time series from file -- don't import the length (keep as null)
-            toadd{j} = sprintf('(''%s'',''%s'',NULL)',esc(timeseries(j).Filename),esc(timeseries(j).Keywords));
+        catch emsg
+            fprintf(1,'%s\n',emsg)
+            error(sprintf(['Could not read the data file for ''%s''.' ...
+                                    'Check that it''s in Matlab''s path.'],timeseries(j).Filename))
+        end
+        toadd{j} = sprintf('(''%s'',''%s'',%u,''%s'')',esc(timeseries(j).Filename),esc(timeseries(j).Keywords),timeseries(j).Length,timeseries(j).Data);
+        
+        if bevocal % plot the time series
+            nsubplots = min(nits,5);
+            subplot(nsubplots,1,mod(j-1,nsubplots)+1);
+            plot(x,'-k'); xlim([1,length(x)]);
+            titletext = sprintf('[%u/%u] %s (%u), keywords = %s --- read',j,nits,timeseries(j).Filename,timeseries(j).Length,timeseries(j).Keywords);
+            title(titletext,'interpreter','none');
+            fprintf(1,titletext)
+            pause(0.2); % wait 0.2 seconds
         end
     end
     
@@ -274,7 +296,7 @@ if isempty(maxid), maxid = 0; end
 fprintf('Adding %u new %s to the %s table in %s...',sum(~isduplicate),thewhat,thetable,dbname)
 switch importwhat
 case 'ts' % Add time series to the TimeSeries table
-    SQL_add_chunked(dbc,'INSERT INTO TimeSeries (FileName, Keywords, Length) VALUES',toadd,isduplicate);
+    SQL_add_chunked(dbc,'INSERT INTO TimeSeries (FileName, Keywords, Length, Data) VALUES',toadd,isduplicate);
 case 'ops' % Add operations to the Operations table
     SQL_add_chunked(dbc,'INSERT INTO Operations (OpName, Code, MasterLabel, Keywords) VALUES',toadd,isduplicate);        
 case 'mops'
