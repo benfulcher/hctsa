@@ -1,5 +1,5 @@
-function [MN, xedges, yedges] = hist2(x, y, xedges, yedges)
-% function MN = hist2(x, y, xedges, yedges)
+function [MN, xedges, yedges] = hist2_NK(x, y, xedges, yedges)
+% function MN = hist2_NK(x, y, xedges, yedges)
 %
 % 2D histogram: Extract the number of joint events - (x,y) data value pairs 
 % that fall in each bin of the grid defined by xedges and yedges.
@@ -20,7 +20,7 @@ function [MN, xedges, yedges] = hist2(x, y, xedges, yedges)
 % N.B. It is always a better idea to use the
 %      HISTC mex (a much faster compiled C code) if you have it
 %      Then just replace the histc with HISTC in all calls
-%      contained in the hist2() .m function
+%      contained in the hist2_NK() .m function
 %
 % (c) Nedialko Krouchev 2006, Universite de Montreal, GRSNC
 

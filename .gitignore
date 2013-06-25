@@ -1,6 +1,23 @@
+# OS generated files #
+######################
 .DS_Store
-.DS_STORE
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Database-retrieved files:
 TS_loc.mat
 TS_loc_ct.mat
 TS_loc_guides.mat
 TS_loc_q.mat
+
+# Database configuration
+/Database/sql_settings.conf
+
+# mexed files
+*.mexw32
+*.mexw64

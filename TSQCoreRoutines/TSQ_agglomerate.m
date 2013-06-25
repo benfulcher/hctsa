@@ -142,7 +142,7 @@ for i = 1:ndbel
 	
     if updated(i)
         
-        if isnan(TS_loc_ct_ij),
+        if isnan(TS_loc_ct_ij) % happens when there is an error in the code
             TS_loc_ct_string = 'NULL';
         else
             TS_loc_ct_string = sprintf('%f',TS_loc_ct_ij);
