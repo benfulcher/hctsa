@@ -13,10 +13,10 @@ if size(y,2) > size(y,1)
 end
 y = benzscore(y); % input time series should be z-scored for a fair comparison
 N = length(y); % length of input time series
-r = [1:N]'; % range on which to fit
+r = (1:N)'; % range over which to fit
 
 %% Fit a sinusoidal model
-[cfun, gof] = fit(r,y,'sin1'); % fits form: a1*sin(b1*x+c1)
+[cfun, gof] = fit(r,y,'sin1'); % fits the following form: a1*sin(b1*x+c1)
 
 %% Two conditions for determining whether time series contains periodicities:
 % Condition 1: fit is ok

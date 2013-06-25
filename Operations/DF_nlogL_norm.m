@@ -4,6 +4,6 @@ function nlogL = DF_nlogL_norm(y)
 % Ben Fulcher 2009
 
 [muhat, sigmahat] = normfit(y);
-nlogL = normlike([muhat sigmahat],y);
+nlogL = normlike([muhat, sigmahat],y);
 
 end

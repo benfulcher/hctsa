@@ -3,43 +3,43 @@ function mi = benmi(v1,v2,r1,r2,nbins)
 % histogram, bin-counting method
 % Ben Fulcher 25/6/2010
 
-% Set defaults:
+%% Set defaults:
 % by default, take a range equal to the range of the vectors
-if nargin<3 || isempty(r1), r1 = 'range'; end
-if nargin<4 || isempty(r2), r2 = 'range'; end
+if nargin < 3 || isempty(r1), r1 = 'range'; end
+if nargin < 4 || isempty(r2), r2 = 'range'; end
 % use 10 bins for the histograms (=100 bins in 2d)
-if nargin<5 || isempty(nbins), nbins = 10; end
+if nargin < 5 || isempty(nbins), nbins = 10; end
 
 
 N = length(v1);
 
-if size(v1,2)>size(v1,1), v1=v1'; end
-if size(v2,2)>size(v2,1), v2=v2'; end
+if size(v1,2) > size(v1,1), v1 = v1'; end
+if size(v2,2) > size(v2,1), v2 = v2'; end
 
 % CREATE HISTOGRAMS
 % in x
 edgesi = givemeedges(r1,v1,nbins);
-[ni bini] = histc(v1, edgesi);
+[ni, bini] = histc(v1, edgesi);
 
 % in y
 edgesj = givemeedges(r2,v2,nbins);
-[nj binj] = histc(v2, edgesj);
+[nj, binj] = histc(v2, edgesj);
 
 % CREATE JOINT HISTOGRAM
 % we have the edges in each dimension: edgesi, and edgesj
-hist2 = zeros(nbins);
+histxy = zeros(nbins);
 for i2 = 1:nbins
     for j2 = 1:nbins
-        hist2(i2,j2) = sum(bini==i2 & binj==j2);
+        histxy(i2,j2) = sum(bini==i2 & binj==j2);
     end
 end
 
 % normalize counts to probabilities
 p_i = ni(1:nbins)/N;
 p_j = nj(1:nbins)/N;
-p_ij = hist2/N;
+p_ij = histxy/N;
 p_ixp_j = p_i*p_j';
-summe = (p_ixp_j>0 & p_ij>0);
+summe = (p_ixp_j > 0 & p_ij > 0);
 
 % do a matrix-sum mutual information calcualtion
 if any(summe(:)==1)

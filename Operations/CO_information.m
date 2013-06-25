@@ -45,7 +45,7 @@ end
 
 % Some initial tests on the input arguments
 
-[NRowX,NColX]=size(x);
+[NRowX,NColX] = size(x);
 
 if NRowX~=1
     x = x';

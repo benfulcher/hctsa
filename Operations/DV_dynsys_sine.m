@@ -3,6 +3,8 @@ function out = DV_dynsys_sine(y,params)
 % given in y
 % Ben Fulcher September 2009
 
+doplot = 0; % plot outputs
+
 N = length(y);
 
 alpha = params(1);
@@ -21,18 +23,18 @@ for i = 2:N
 end
 
 % PLOT:
-% figure('color','w');
-% subplot(3,1,1); plot(y,'k'); title('time series -> drive')
-% subplot(3,1,2); plot(x,'k'); title('simulated particle position')
-% subplot(3,1,3); box('on'); hold on;
-% plot(min(x):0.1:max(x),V(min(x):0.1:max(x)),'k')
-% plot(x,V(x),'.r')
+figure('color','w');
+subplot(3,1,1); plot(y,'k'); title('Time series -> drive')
+subplot(3,1,2); plot(x,'k'); title('Simulated particle position')
+subplot(3,1,3); box('on'); hold on;
+plot(min(x):0.1:max(x),V(min(x):0.1:max(x)),'k')
+plot(x,V(x),'.r')
 
 %% OUTPUTS!
 % features of the trajectory
 if isnan(x(end)) || abs(x(end)) > 1E10
     % trajectory blew out
-    disp('DV_dynsys_sine: Trajectory blew out!');
+    fprintf(1,'DV_dynsys_sine: Trajectory blew out!\n');
     out = NaN;
 %     out.mean=NaN; out.median=NaN; out.range=NaN; out.proppos=NaN; out.pcross=NaN;
 %     out.ac1=NaN; out.ac10=NaN; out.ac50=NaN; out.tau=NaN; out.finaldev=NaN; out.std=NaN;

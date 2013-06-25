@@ -23,7 +23,6 @@ yn = y(1:end-2*tau);
 yn1 = y(1+tau:end-tau); % yn1, tau steps ahead
 yn2 = y(1+2*tau:end); % yn2, 2*tau steps ahead
 
-
 % The expression used in TSTOOL tc3:
 out.raw = mean(yn.*yn1.*yn2)/abs(mean(yn.*yn1))^(3/2);
 
