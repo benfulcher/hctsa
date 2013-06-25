@@ -1,7 +1,7 @@
 function SQL_create_db()
-	% Setup the mysql database
+	% Setup the mySQL database
 	% Romesh Abeysuriya, March 2013
-	% Tweaked by Ben Fulcher, May-June 2013
+	% Tweaked a little by Ben Fulcher, May--June, 2013
     
 	fprintf(1,'Let''s set up a new database\nFirst we need to know a username and password that has CREATE DATABASE and GRANT privileges\n');
 	fprintf(1,'This is probably going to be the root account\n');

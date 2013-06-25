@@ -23,12 +23,14 @@ for i = 2:N
 end
 
 % PLOT:
-figure('color','w');
-subplot(3,1,1); plot(y,'k'); title('Time series -> drive')
-subplot(3,1,2); plot(x,'k'); title('Simulated particle position')
-subplot(3,1,3); box('on'); hold on;
-plot(min(x):0.1:max(x),V(min(x):0.1:max(x)),'k')
-plot(x,V(x),'.r')
+if doplot
+    figure('color','w');
+    subplot(3,1,1); plot(y,'k'); title('Time series -> drive')
+    subplot(3,1,2); plot(x,'k'); title('Simulated particle position')
+    subplot(3,1,3); box('on'); hold on;
+    plot(min(x):0.1:max(x),V(min(x):0.1:max(x)),'k')
+    plot(x,V(x),'.r')
+end
 
 %% OUTPUTS!
 % features of the trajectory

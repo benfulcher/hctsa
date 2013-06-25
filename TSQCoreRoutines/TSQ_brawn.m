@@ -84,7 +84,7 @@ end
 
 times = zeros(nts,1); % stores the time taken for each time series to have its metrics calculated (for determining time remaining)
 lst = 0; % last saved time
-bevocal = 0; % print every piece of code evaluated (nice for error checking)
+bevocal = 1; % print every piece of code evaluated (nice for error checking)
 
 for i = 1:nts
 	bigtimer = tic;
@@ -147,43 +147,18 @@ for i = 1:nts
 
 			fprintf(fid,'Evaluating %u master operations first...\n',nMtocalc);
 			
-		    % store in temporary variables then map back
+		    % Store in temporary variables for parfor loop then map back
             MoutputPAR = cell(nMtocalc,1);
             MctsPAR = zeros(nMtocalc,1);
 			
 			% Evaluate the master functions
 			if toparallel
 	            parfor j = 1:nMtocalc
-					jj = Mitocalc(j); % the index of the master array to evaluate
-					if bevocal, fprintf(fid,'%s\n',Mmcode{jj}); end % display for error checking
-					try
-						mastertimer = tic;
-						% disp(Mmcode{jj}) % FOR DEBUGGING -- SHOW CODE BEFORE EVALUATING TO DETERMINE PROBLEMS
-						MoutputPAR{j} = pareval(x,y,Mmcode{jj});
-						% for not-applicable/'real NaN', outputs a NaN, otherwise should output a
-						% structure with components to be called below by pointer metrics.
-						MctsPAR(j) = toc(mastertimer);
-                    catch emsg
-						fprintf(fid,'**** ERROR EVALUATING MASTER FILE: %s (%s)\n',Mmlab{jj},Mmcode{jj});
-                        fprintf(fid,'%s\n',emsg.message)
-						% masterdat{j} didn't evaluate properly -- remains an empty cell entry.
-					end
+                    [MoutputPAR{j}, MctsPAR(j)] = TSQ_brawn_masterloop(x,y,Mitocalc(j),Mmcode,fid,bevocal);
                 end
-			else % just a single-thread for loop
-	            for j = 1:nMtocalc
-					jj = Mitocalc(j); % the index of the master array to evaluate
-					if bevocal, fprintf(fid,'%s\n',Mmcode{jj}); end % for error checking
-					try
-						mastertimer = tic;
-						MoutputPAR{j} = pareval(x,y,Mmcode{jj});
-						% for not-applicable/'real NaN', outputs a NaN, otherwise should output a
-						% structure with components to be called below by pointer metrics.
-						MctsPAR(j) = toc(mastertimer);
-                    catch emsg
-						fprintf(fid,'**** ERROR EVALUATING MASTER FILE: %s (%s)\n',Mmlab{jj},Mmcode{jj});
-                        fprintf(fid,'%s\n',emsg.message)
-                        % masterdat{j} didn't evaluate properly -- remains an empty cell entry.
-					end
+            else
+                for j = 1:nMtocalc
+                    [MoutputPAR{j}, MctsPAR(j)] = TSQ_brawn_masterloop(x,y,Mitocalc(j),Mmcode,fid,bevocal);
                 end
 			end
 			
@@ -200,74 +175,58 @@ for i = 1:nts
 		%% GO GO GO!!!
 		if toparallel
 	        parfor j = 1:ncal
-				if parmlink(j) > 0 % pointer to a master function
-					try
-						% retrive from master structure:
-						if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
-							% All master function outputs are to be set to real NaNs (unsuitable)
-							ffi(j) = NaN;
-		                    cti(j) = Mcts(parmlink(j));
-						else % (normal -- retrieve required element from master structure)
-                            [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
-		                    ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
-							qqi(j) = 0; % good, real-valued output
-		                    cti(j) = Mcts(parmlink(j));
-						end
-                    catch emsg
-						fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
-                        fprintf(fid,'%s\n',emsg.message)
-                        ffi(j) = 0;
-						qqi(j) = 1; % fatal error code
-					end
-				else % A regular, single-output operation
-                    if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
-		            try
-						operationtimer = tic;
-						ffi(j) = pareval(x,y,parmcode{j});
-						cti(j) = toc(operationtimer);
-						qqi(j) = 0;
-		            catch
-		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
-						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
-		            end
-				end
-	        end
+                [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
+                                                    Mcts,Mmlab,parmcode{j},fid,bevocal);
+            end
+            % TSQ_brawn_oploop(x, y, moplink, Moutput, Mcts, Mmlab, parmcodej, partsfi, fid, bevocal)
 		else
-	        for j = 1:ncal
-				if parmlink(j) > 0 % pointer to a master function
-					try
-						% retrive from master structure:
-						if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
-							% All master function outputs are to be set to real NaNs (unsuitable)
-							ffi(j) = NaN;
-		                    cti(j) = Mcts(parmlink(j));
-						else % (normal -- retrieve required element from master structure)
-                            [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
-		                    ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
-							qqi(j) = 0; % good, real-valued output
-		                    cti(j) = Mcts(parmlink(j));
-						end
-	                catch
-						fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
-                        fprintf(fid,'%s\n',emsg.message)
-						ffi(j) = 0; qqi(j) = 1; % Fatal error code: 1
-					end
-				else % A regular, single-output operation
-                    if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
-		            try
-						operationtimer = tic;
-						ffi(j) = pareval(x,y,parmcode{j});
-						cti(j) = toc(operationtimer);
-						qqi(j) = 0;
-		            catch
-		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
-						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
-		            end
-				end
-	        end
+            for j = 1:ncal
+                try
+                    [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
+                                                    Mcts,Mmlab,parmcode{j},fid,bevocal);
+                    % [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
+                    %                                 Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
+                    % When all operations have masters, we can make this nicer, more like ^
+                catch emsg
+                    fprintf(1,'%s\n',emsg.message)
+                    keyboard
+                end
+            end
+                %             for j = 1:ncal
+                % if parmlink(j) > 0 % pointer to a master function
+                %     try
+                %         % retrive from master structure:
+                %         if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
+                %             % All master function outputs are to be set to real NaNs (unsuitable)
+                %             ffi(j) = NaN;
+                %                             cti(j) = Mcts(parmlink(j));
+                %         else % (normal -- retrieve required element from master structure)
+                %                             [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
+                %                             ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
+                %             qqi(j) = 0; % good, real-valued output
+                %                             cti(j) = Mcts(parmlink(j));
+                %         end
+                %                     catch emsg
+                %         fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
+                %                         fprintf(fid,'%s\n',emsg.message)
+                %         ffi(j) = 0; qqi(j) = 1; % Fatal error code: 1
+                %     end
+                % else % A regular, single-output operation
+                %                     if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
+                %                     try
+                %         operationtimer = tic;
+                %         ffi(j) = pareval(x,y,parmcode{j});
+                %         cti(j) = toc(operationtimer);
+                %         qqi(j) = 0;
+                %                     catch
+                %                         fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
+                %         ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
+                %                     end
+                % end
+                %             end
 		end
         
-		%% Coding errors
+		%% Coding special values:
 
 		% (*) Errorless calculation: q = 0, output = <real number>
 		% (*) Fatal error: q = 1, output = 0; (this is done already in the code above)
@@ -352,12 +311,10 @@ save('TS_loc_q.mat','TS_loc_q','-v7.3');    fprintf(fid,', TS_loc_q.mat. All sav
 
 if tolog, fclose(fid); end % close the .log file
 
-
 if agglomerate
-    fprintf(1,'Calculation done: Calling TSQ_agglomerate to store back results\n')
+    fprintf(1,'\n\nCalculation done: Calling TSQ_agglomerate to store back results\n')
     writewhat = 'null'; % only write back to NULL entries in the database
-    log = 0; % don't bother with a log file
-    TSQ_agglomerate(writewhat,dbname,log)
+    TSQ_agglomerate(writewhat,dbname,tolog)
 else
     fprintf(1,'Calculation complete: you can now run TSQ_agglomerate to store results to a mySQL database\n')
 end
