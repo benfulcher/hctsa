@@ -175,71 +175,47 @@ for i = 1:nts
 		%% GO GO GO!!!
 		if toparallel
 	        parfor j = 1:ncal
-				if parmlink(j) > 0 % pointer to a master function
-					try
-						% retrive from master structure:
-						if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
-							% All master function outputs are to be set to real NaNs (unsuitable)
-							ffi(j) = NaN;
-		                    cti(j) = Mcts(parmlink(j));
-						else % (normal -- retrieve required element from master structure)
-                            [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
-		                    ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
-							qqi(j) = 0; % good, real-valued output
-		                    cti(j) = Mcts(parmlink(j));
-						end
-                    catch emsg
-						fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
-                        fprintf(fid,'%s\n',emsg.message)
-                        ffi(j) = 0;
-						qqi(j) = 1; % fatal error code
-					end
-				else % A regular, single-output operation
-                    if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
-		            try
-						operationtimer = tic;
-						ffi(j) = pareval(x,y,parmcode{j});
-						cti(j) = toc(operationtimer);
-						qqi(j) = 0;
-		            catch
-		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
-						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
-		            end
-				end
-	        end
+                [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
+                                                    Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
+            end
+            % TSQ_brawn_oploop(x, y, moplink, Moutput, Mcts, Mmlab, parmcodej, partsfi, fid, bevocal)
 		else
-	        for j = 1:ncal
-				if parmlink(j) > 0 % pointer to a master function
-					try
-						% retrive from master structure:
-						if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
-							% All master function outputs are to be set to real NaNs (unsuitable)
-							ffi(j) = NaN;
-		                    cti(j) = Mcts(parmlink(j));
-						else % (normal -- retrieve required element from master structure)
-                            [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
-		                    ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
-							qqi(j) = 0; % good, real-valued output
-		                    cti(j) = Mcts(parmlink(j));
-						end
-	                catch emsg
-						fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
-                        fprintf(fid,'%s\n',emsg.message)
-						ffi(j) = 0; qqi(j) = 1; % Fatal error code: 1
-					end
-				else % A regular, single-output operation
-                    if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
-		            try
-						operationtimer = tic;
-						ffi(j) = pareval(x,y,parmcode{j});
-						cti(j) = toc(operationtimer);
-						qqi(j) = 0;
-		            catch
-		                fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
-						ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
-		            end
-				end
-	        end
+            for j = 1:ncal
+                [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
+                                                    Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
+            end
+                %             for j = 1:ncal
+                % if parmlink(j) > 0 % pointer to a master function
+                %     try
+                %         % retrive from master structure:
+                %         if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
+                %             % All master function outputs are to be set to real NaNs (unsuitable)
+                %             ffi(j) = NaN;
+                %                             cti(j) = Mcts(parmlink(j));
+                %         else % (normal -- retrieve required element from master structure)
+                %                             [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
+                %                             ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
+                %             qqi(j) = 0; % good, real-valued output
+                %                             cti(j) = Mcts(parmlink(j));
+                %         end
+                %                     catch emsg
+                %         fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
+                %                         fprintf(fid,'%s\n',emsg.message)
+                %         ffi(j) = 0; qqi(j) = 1; % Fatal error code: 1
+                %     end
+                % else % A regular, single-output operation
+                %                     if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
+                %                     try
+                %         operationtimer = tic;
+                %         ffi(j) = pareval(x,y,parmcode{j});
+                %         cti(j) = toc(operationtimer);
+                %         qqi(j) = 0;
+                %                     catch
+                %                         fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
+                %         ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
+                %                     end
+                % end
+                %             end
 		end
         
 		%% Coding errors
