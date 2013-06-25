@@ -18,95 +18,89 @@ function TSQ_wkshop_clear(mort,vin,dbname,dolog)
 
 
 %% Introduction, check inputs
-disp(['Welcome to >> TSQ_wkshop_clear << My name''s Walter Angus Alexander and I''ll be your' ...
-	  ' internal monalogue for the next little while.']);
-disp('I hope you enjoy your stay.');
+fprintf(1,['Welcome to ''TSQ_wkshop_clear''. My name''s Walter Angus Alexander and I''ll be your ' ...
+                  'internal monalogue for the next little while.\n']);
 
 % First input must be 'ts' or 'mets'
-if nargin<1 || ~ismember(mort,{'ts','mets'})
+if nargin < 1 || ~ismember(mort,{'ts','mets'})
 	error('First input must be either ''ts'' or ''mets''.')
 end
 
 % Must specify a set of time series
-if nargin<2 || min(size(vin))~=1
-	disp('Error with second input. Exiting.');
+if nargin < 2 || min(size(vin))~=1
+	fprintf(1,'Error with second input. Exiting.\n');
 	return
 end
 
 % Use default database if none specified
-if nargin<3, dbname = []; disp('Using default database'); end
+if nargin < 3, dbname = []; disp('Using default database'); end
 % Open connection to database
-[dbc,dbname] = SQL_opendatabase(dbname);
+[dbc, dbname] = SQL_opendatabase(dbname);
 
 % write a .log file of the clearing process by default
-if nargin<4 || isempty(dolog)
-	dolog = 1;
+if nargin < 4 || isempty(dolog)
+	dolog = 0;
+end
+
+switch mort
+    case 'ts'
+        thewhat = 'time series';
+        theid = 'ts_id';
+        thetable = 'TimeSeries';
+        thename = 'Filename';
+    case 'ops'
+        thewhat = 'operations';
+        theid = 'm_id';
+        thetable = 'Operations';
+        thename = 'OpName';
 end
 
 % Print a quick bit of user information
-if strcmp(mort,'ts')
-	disp(['Clearing ' num2str(length(vin)) ' time series from ' dbname]);
-elseif strcmp(mort,'mets')
-	disp(['Clearing ' num2str(length(vin)) ' operations from ' dbname]);
-end
+fprintf(1,'Clearing %u %s from %s',length(vin),thewhat,dbname);
 
 %% Check what to clear
-if strcmp(mort,'ts')
-	SelectString = ['SELECT Filename FROM TimeSeries WHERE ts_id IN (' bencat(vin,',') ')'];
-	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-	if ~isempty(emsg)
-		SQL_closedatabase(dbc) % close connection to database
-		error(['Error retrieving selected time series indices (ts_ids) from the TimeSeries table of ' dbname]);
-	end
-	input(['About to clear all data from ' num2str(length(vin)) ' time series stored in the Results table of ' ...
-	  			dbname ' [press any key to show them]']);
-else
-	SelectString = ['SELECT OpName FROM Operations WHERE m_id IN (' bencat(vin,',') ')'];
-	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-	if ~isempty(emsg)
-		SQL_closedatabase(dbc) % close connection to database
-		error(['Error retrieving selected operation indices (m_ids) from the Operations table of ' dbname]);
-	end
-	input(['About to clear all data from ' num2str(length(vin)) ' operations stored in the Results table of ' ...
-				dbname '[press any key to show them]']);
+SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)',thename,thetable,theid,bencat(vin,','));
+[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
+
+if ~isempty(emsg)
+	error(sprintf('Error retrieving selected %s indices (%s) from the %s table of %s',thewhat,theid,thetable,dbname))
 end
-char(todump)
+input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
+  			dbname ' [press any key to show them]'],length(vin),thewhat));
+
+for i = 1:length(todump), fprintf(1,'%s\n',todump{i}); end
 reply = input('Does this look right? Check carefully -- clearing data cannot be undone? Type ''y'' to continue...','s');
 if ~strcmp(reply,'y')
-	disp('Better to be safe than sorry. Check again and come back later.');
-	SQL_closedatabase(dbc) % close connection to database
+	fprintf(1,'Better to be safe than sorry. Check again and come back later.\n');
 	return
 end
 
    
 %% Do the clearing
-disp('IT''S HAMMER TIME!!! Do not interrupt me when I''m in this mood...');
-disp(['Clearing Output, QualityCode, CalculationTime, and LastModified columns of the Results Table of ' dbname]);
+fprintf(1,'Clearing Output, QualityCode, CalculationTime, and LastModified columns of the Results Table of %s\n',dbname)
 
-if strcmp(mort,'ts')
-	updatestring = ['UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL, LastModified = NOW() WHERE ts_id IN (' bencat(vin,',') ')'];
-else
-	updatestring = ['UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL, LastModified = NOW() WHERE m_id IN (' bencat(vin,',') ')'];
-end
-[rs,emsg] = mysql_dbexecute(dbc, updatestring);
+UpdateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,bencat(vin,','));
+[rs,emsg] = mysql_dbexecute(dbc, UpdateString);
+
 if isempty(emsg)
 	if strcmp(mort,'ts')
-		% get number of metrics to work out how many entries were cleared
+		% get number of operations to work out how many entries were cleared
 		SelectString = 'SELECT COUNT(m_id) as nm FROM Operations';
-		[nm,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-		nm = nm{1};		
-		disp(['Clearing Successful! I''ve just cleared ' num2str(length(vin)) ' x ' num2str(nm) ' = ' num2str(nm*length(vin)) ' entries']);
+		nm = mysql_dbquery(dbc,SelectString); nm = nm{1};		
+		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),nm,nm*length(vin),dbname);
 	else
 		% get number of time series to work out how many entries were cleared
 		SelectString = 'SELECT COUNT(ts_id) as nts FROM TimeSeries';
-		[nts,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
-		nts = nts{1};
-		disp(['Clearing Successful! I''ve just cleared ' num2str(length(vin)) ' x ' num2str(nts) ' = ' num2str(nts*length(vin)) ' entries']);
+		nts = mysql_dbquery(dbc,SelectString); nts = nts{1};
+		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),nts,nts*length(vin),dbname);
 	end
 else
-	disp(['Oh shit. Error clearing database... You should troubleshoot this...']); keyboard
+	fprintf(1,'Oh shit. Error clearing database... You should troubleshoot this...\n'); keyboard
 end
 
+
+%% Close connection to the mySQL database
+SQL_closedatabase(dbc) % database closed
 
 %% Write a log file of information
 if dolog
@@ -125,15 +119,6 @@ if dolog
 	disp('Logged and done and dusted!!');
 end
 
-% %% Recalculate percentage calculated stats
-% reply = input('Recalculate percentage calculated stats? [''y'' for yes]','s');
-% if strcmp(reply,'y')
-% 	SQL_fillpercentagecalc;
-% end
-
-%% Close connection to the mySQL
-SQL_closedatabase(dbc) % database closed
-
-disp('Glad to of been of service to you. Good day.');
+fprintf(1,'Glad to of been of service to you. Good day.\n');
 
 end
