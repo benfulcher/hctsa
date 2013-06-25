@@ -164,7 +164,7 @@ for i = 1:ndbel
 	times(i) = toc;
 	if mod(i,floor(ndbel/5))==0
 		fprintf(1,['Approximately %s remaining! -- So far %u entries'  ...
-			' (/ %u possible) have been writtedn to %s...\n'],benrighttime(mean(times(1:i))*(ndbel-i)),sum(updated),i,dbname);
+			' (/ %u possible) have been written to %s...\n'],benrighttime(mean(times(1:i))*(ndbel-i)),sum(updated),i,dbname);
 	end
 end
 

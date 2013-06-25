@@ -24,7 +24,7 @@ end
 
 if doplot
     figure('color','w'); hold on;
-    plot(-100:0.1:100,F(-100:0.1:100),'k') % plot the potential
+    plot(-100:0.1:100, F(-100:0.1:100), 'k') % plot the potential
     V = @(x) x.^4/4 - alpha^2*x.^2/2;
     plot(x,V(x),'or')
     plot(x)
