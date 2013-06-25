@@ -175,14 +175,22 @@ for i = 1:nts
 		%% GO GO GO!!!
 		if toparallel
 	        parfor j = 1:ncal
-                [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
-                                                    Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
+                [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
+                                                    Mcts,Mmlab,parmcode{j},fid,bevocal);
             end
             % TSQ_brawn_oploop(x, y, moplink, Moutput, Mcts, Mmlab, parmcodej, partsfi, fid, bevocal)
 		else
             for j = 1:ncal
-                [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
-                                                    Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
+                try
+                    [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
+                                                    Mcts,Mmlab,parmcode{j},fid,bevocal);
+                    % [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
+                    %                                 Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
+                    % When all operations have masters, we can make this nicer, more like ^
+                catch emsg
+                    fprintf(1,'%s\n',emsg.message)
+                    keyboard
+                end
             end
                 %             for j = 1:ncal
                 % if parmlink(j) > 0 % pointer to a master function
@@ -218,7 +226,7 @@ for i = 1:nts
                 %             end
 		end
         
-		%% Coding errors
+		%% Coding special values:
 
 		% (*) Errorless calculation: q = 0, output = <real number>
 		% (*) Fatal error: q = 1, output = 0; (this is done already in the code above)

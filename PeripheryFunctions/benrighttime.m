@@ -6,13 +6,13 @@ function timestring = benrighttime(tsec)
 % Ben Fulcher, 2009
 
 if tsec < 1E-3
-    timestring = '< 1 millisecond';
+    timestring = '< 1 ms';
 elseif tsec < 1 % less than a second, display in integer number of milliseconds
-    timestring = sprintf('%.0f milliseconds',tsec*1000);
+    timestring = sprintf('%.0f ms',tsec*1000);
 elseif tsec <= 60 % less than a minute, display in seconds
-	timestring = sprintf('%.1f seconds',tsec);
+	timestring = sprintf('%.1f s',tsec);
 elseif tsec <= 60*60 % less than an hour, display in minutes
-    timestring = sprintf('%.1f minutes',tsec/60);
+    timestring = sprintf('%.1f mins',tsec/60);
 elseif tsec <= 60*24*60 % less than a day, display in hours
 	timestring = sprintf('%.1f hours',tsec/60/60);
 % elseif tsec<=60*24*7*60 % less than a week, display in days

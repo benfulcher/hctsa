@@ -7,7 +7,7 @@ function [masteroutput, mastertime] = TSQ_brawn_masterloop(x, y, mindex, Mmcode,
 		masteroutput = pareval(x,y,Mmcode{mindex});
 		mastertime = toc(mastertimer);
         if bevocal
-            fprintf(1,' evaluated.\n')
+            fprintf(1,' evaluated (%s).\n',benrighttime(mastertime))
         end
 		% for not-applicable/'real NaN', masteroutput is a NaN, otherwise a
 		% structure with components to be called below by pointer operations.
