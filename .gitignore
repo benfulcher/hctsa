@@ -16,7 +16,7 @@ TS_loc_guides.mat
 TS_loc_q.mat
 
 # Database configuration
-/Database/sql_settings.conf
+sql_settings.conf
 
 # mexed files
 *.mexw32
