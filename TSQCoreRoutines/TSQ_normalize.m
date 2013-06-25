@@ -296,7 +296,7 @@ m_ids_keepn = m_ids_keep(kc_tot);
 mcoden = mcode(kc_tot);
 mlabn = mlab(kc_tot);
 mkwn = mkw(kc_tot);
-mpointn = mpoint(kc_tot);
+% mpointn = mpoint(kc_tot);
 mlinkn = mlink(kc_tot);
 
 
@@ -346,7 +346,7 @@ if any(nancol) % there are columns that are all NaNs
     mcoden = mcoden(kc);
     mlabn = mlabn(kc);
     mkwn = mkwn(kc);
-    mpointn = mpointn(kc);
+    % mpointn = mpointn(kc);
     mlinkn = mlinkn(kc);
 end
 
@@ -375,7 +375,7 @@ if ~isempty(kc) && length(kc) < size(F,2)
     mcoden = mcoden(kc);
     mlabn = mlabn(kc);
     mkwn = mkwn(kc);
-    mpointn = mpointn(kc);
+    % mpointn = mpointn(kc);
     mlinkn = mlinkn(kc);
     F = F(:,kc);
     TS_loc_q = TS_loc_q(:,kc);
@@ -394,7 +394,7 @@ save('TS_loc_q_N.mat','TS_loc_q_N')
 % contains all the clustered time series and metric information, respectively.
 % Note that the clustering is only done on 'good' metrics and so nmcl<=nm
 disp('Saving guides: ''TS_loc_guides_N.mat''');
-save('TS_loc_guides_N.mat','m_ids_keepn','ts_ids_keepn','tsfn','tskwn','tsln','mcoden','mlabn','mkwn','mpointn','mlinkn','Mmid','Mmlab','Mmcode','-v7.3');
+save('TS_loc_guides_N.mat','m_ids_keepn','ts_ids_keepn','tsfn','tskwn','tsln','mcoden','mlabn','mkwn','mlinkn','Mmid','Mmlab','Mmcode','-v7.3');
 
 disp('Done and dusted!');
 

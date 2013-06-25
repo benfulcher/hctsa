@@ -23,7 +23,7 @@ function TSQ_cluster(cmethr, cparamsr, cmethc, cparamsc, subs) % ,actuallycluste
 
 %% Check input arguments
 
-if nargin<1 || isempty(cmethr)
+if nargin < 1 || isempty(cmethr)
     cmethr = 'linkage';
 %     cparams = {'euclidean','single',0}; % {dmth,lmth,showdend}
 %   these defaults are set within the method itself
@@ -31,25 +31,25 @@ end
 
 % clustering settings for rows
 % (can specify the string 'none' for no clustering)
-if nargin<2
+if nargin < 2
     cparamsr = {'euclidean','average',0,[],0}; % can change last 0 to 1 to save clustering info
 end
 
 % use same method as for rows
-if nargin<3 || isempty(cmethc)
+if nargin < 3 || isempty(cmethc)
     disp(['Clustering in the same way as for the columns: using ' cmethr])
     cmethc = cmethr;
     cparamsc = cparamsr; % just specify the first one, and this will do the same
 end
 
 % clustering settings for columns
-if nargin<3 || isempty(cparamsc)
+if nargin < 4 || isempty(cparamsc)
     cparamsc = {'corr','average',0,[],0}; % can change last 0 to 1 to save clustering info
 %     cparamsc = cparamsr; % just specify the first one, and this will do the same
 end
 
 % subsets -- only cluster a subset of the full data matrix
-if nargin<5
+if nargin < 5
     disp('No subsets, clustering the full object');
     subs = [];
 end
@@ -69,32 +69,32 @@ end
 
 if ~isempty(subs)
     if length(subs)~=3
-        disp('the subset should specify ''norm'' or ''cl'' and the subset. Exiting.')
+        fprintf(1,'The subset should specify ''norm'' or ''cl'' and the subset. Exiting.\n')
         return
     elseif ~ismember(subs{1},{'norm','cl'})
-        disp('The first component of subset should be either ''norm'' or ''cl''. Exiting')
+        fprintf(1,'The first component of subset should be either ''norm'' or ''cl''. Exiting\n')
         return
     end
 end
 
 %% Read in information from local files
-disp('Reading in local files...');
+fprintf(1,'Reading in local files...')
 
 if isempty(subs) || strcmp(subs{1},'norm')
-    disp('Loading TS_loc_N, and associated guides...')
+    fprintf(1,' TS_loc_N, ...')
     load TS_loc_N.mat TS_loc_N % this is the normalized local data file -- we cluster on the normalized values
     F = TS_loc_N;
     clear TS_loc_N
     
-    load TS_loc_guides_N.mat m_ids_keepn ts_ids_keepn tsfn tskwn tsln mcoden mlabn mkwn mpointn mlinkn Mmid Mmlab Mmcode
+    load TS_loc_guides_N.mat m_ids_keepn ts_ids_keepn tsfn tskwn tsln mcoden mlabn mkwn mlinkn Mmid Mmlab Mmcode
     % change names to clustered versions with superscript 'cl'
-    % m_ids_keep, ts_ids_keep, tsf, tskw, tsl, mcode, mlab, mkw, mpoint, mlink, Mmid, Mmlab, Mmcode
+    % m_ids_keep, ts_ids_keep, tsf, tskw, tsl, mcode, mlab, mkw, mlink, Mmid, Mmlab, Mmcode
 
     % () time series ()
     ts_ids_keepcl = ts_ids_keepn; tsfcl = tsfn; tskwcl = tskwn; tslcl = tsln;
 
     % () metrics ()
-	m_ids_keepcl = m_ids_keepn; mcodecl = mcoden; mlabcl = mlabn; mkwcl = mkwn; mpointcl = mpointn; mlinkcl = mlinkn;
+	m_ids_keepcl = m_ids_keepn; mcodecl = mcoden; mlabcl = mlabn; mkwcl = mkwn; mlinkcl = mlinkn; % mpointcl = mpointn;
 else % subset of the clustered matrix
     load TS_loc_cl.mat TS_loc_cl
     load TS_loc_guides_cl.mat % this is the relevant information about the time series and operations
@@ -108,7 +108,7 @@ end
 %% Implement subset behaviour
 if ~isempty(subs)
 %     if strcmp(subs{1},'norm') % SUBSET OF TS_loc_N
-        disp('We are now implementing subset behaviour, and I don''t care who know it!!')
+        disp('We are now implementing subset behaviour')
         % subs is in the form {[rowrange],[columnrange]}; a cell of two vectors
         
         if ~isempty(subs{2}); % row subset
@@ -122,27 +122,8 @@ if ~isempty(subs)
             r = subs{3};
             disp(['Subsetting columns/metrics: from ' num2str(length(mkwcl)) ' to ' num2str(length(r))]);
             F = F(:,r);
-            m_ids_keepcl = m_ids_keepcl(r); mcodecl = mcodecl(r); mlabcl=mlabcl(r); mkwcl=mkwcl(r); mpointcl = mpointcl(r); mlinkcl = mlinkcl(r);
+            m_ids_keepcl = m_ids_keepcl(r); mcodecl = mcodecl(r); mlabcl=mlabcl(r); mkwcl=mkwcl(r); mlinkcl = mlinkcl(r); % mpointcl = mpointcl(r); 
         end
-%         
-%     else % SUBSET OF ALREADY-CLUSTERED MATRIX TS_loc_cl
-% 
-%         if ~isempty(subs{2}) % row subset
-%             r=subs{2};
-%             F=F(r,:);
-%             tsfcl=tsfcl(r); tslcl=tslcl(r); tskwcl=tskwcl(r); tsprepcl=tsprepcl(r);
-%             tsmapcl=tsmapcl(r); ntscl=length(r);
-%         end
-% 
-%         if ~isempty(subs{3}) % column subset
-%             r=subs{3};
-%             F=F(:,r);
-%             mfcl=mfcl(r); mlabcl=mlabcl(r); mpostpcl=mpostpcl(r); mkwcl=mkwcl(r);
-%             mtypcl=mtypcl(r); mmapcl=mmapcl(r); nmcl=length(r);
-%         end
-% 
-% 
-%     end
 else
     disp('Preparing to cluster the full (TS_loc_N) matrix')
 end
@@ -196,7 +177,7 @@ ts_ids_keepcl = ts_ids_keepcl(ordr); tsfcl=tsfcl(ordr); tskwcl=tskwcl(ordr); tsl
 
 % Reorder column guides
 m_ids_keepcl = m_ids_keepcl(ordc); mcodecl = mcodecl(ordc); mlabcl=mlabcl(ordc); mkwcl=mkwcl(ordc);
-mpointcl = mpointcl(ordc); mlinkcl = mlinkcl(ordc);
+mlinkcl = mlinkcl(ordc); % mpointcl = mpointcl(ordc); 
 
 
 
@@ -209,7 +190,7 @@ save('TS_loc_cl.mat','TS_loc_cl')
 % and metric information, respectively.
 % Note that the clustering is only done on 'good' metrics and so nmcl<=nm
 disp('Saving guides: ''TS_loc_guides_cl.mat''...');
-save('TS_loc_guides_cl.mat','m_ids_keepcl','ts_ids_keepcl','tsfcl','tskwcl','tslcl','mcodecl','mlabcl','mkwcl','mpointcl','mlinkcl','Mmid','Mmlab','Mmcode','-v7.3');
+save('TS_loc_guides_cl.mat','m_ids_keepcl','ts_ids_keepcl','tsfcl','tskwcl','tslcl','mcodecl','mlabcl','mkwcl','mlinkcl','Mmid','Mmlab','Mmcode','-v7.3');
 
 
 if length(cparamsr)>=5 && cparamsr{5}==1
