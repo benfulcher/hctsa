@@ -157,10 +157,10 @@ if bevocal
 end
 toadd = cell(nits,1);
 resave = 0; % need user permission to save over existing time series
-if bevocal; figure('color','w','WindowStyle','docked'); end
 switch importwhat
 case 'ts' % Prepare toadd cell for time series
-    for j = 1:nits
+    if bevocal; figure('color','w','WindowStyle','docked'); end
+        for j = 1:nits
         timeseries(j).Filename = datain{j,1};
         timeseries(j).Keywords = regexprep(datain{j,2},'\"',''); % Take out inverted commas from keywords lists
 
