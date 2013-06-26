@@ -1,33 +1,35 @@
+addfcn = @(x) addpath(fullfile(pwd,x));
 % addfcn = @(x) addpath(genpath(fullfile(pwd,x)));
-addpath('Database');
-addpath('Operations');
-addpath('PeripheryFunctions');
-addpath('TimeSeries');
-addpath('TSQCoreRoutines');
+
+addfcn('Database');
+addfcn('Operations');
+addfcn('PeripheryFunctions');
+addfcn('TimeSeries');
+addfcn('TSQCoreRoutines');
 
 %% Now add all Toolboxes:
 
 % Kaplan's routines:
-addpath('Toolboxes/Kaplan');
+addfcn('Toolboxes/Kaplan');
 
 % CRP Toolbox by Marwan, version 5.13, Release 26
-addpath('Toolboxes/crptool');
+addfcn('Toolboxes/crptool');
 
 % TSTOOL
-addpath('Toolboxes/OpenTSTOOL');
+addfcn('Toolboxes/OpenTSTOOL');
 settspath('Toolboxes/OpenTSTOOL'); % this routine adds the necessary paths for OpenTSTOOL
 
 % Gaussian Processes
-addpath('Toolboxes/gpml');
+addfcn('Toolboxes/gpml');
 
 % arfit Toolbox
-addpath('Toolboxes/arfit_tool');
+addfcn('Toolboxes/arfit_tool');
 
 % Michael Small's utilities
-addpath('Toolboxes/MSmall_utilities');
+addfcn('Toolboxes/MSmall_utilities');
 
 % Zoubin Gharamani's hmm toolbox
-addpath('Toolboxes/hmm');
+addfcn('Toolboxes/hmm');
 
 % Max Little's steps/bumps toolbox
-addpath('Toolboxes/steps_bumps_toolkit');
+addfcn('Toolboxes/steps_bumps_toolkit');
