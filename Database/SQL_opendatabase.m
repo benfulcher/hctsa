@@ -3,7 +3,13 @@ function [dbc, dbname] = SQL_opendatabase(dbname,bevocal)
 % Ben Fulcher, 2009, adapting code provided by Max Little
 % Updated to use sql_settings.conf by Romesh Abeysuriya
 
-fid = fopen(which('sql_settings.conf'));
+theconfigfile = which('sql_settings.conf');
+if isempty(theconfigfile)
+    % no sql_settings.conf found
+    error('No sql_settings.conf file found. Please create sql_settings.conf file using SQL_create_db.')
+else
+    fid = fopen(theconfigfile);
+end
 d = regexp(fscanf(fid,'%s'), ',', 'split');
 hostname = d{1};
 default_dbname = d{2};
@@ -19,7 +25,7 @@ if nargin < 2 || isempty(bevocal)
 end
 
 if bevocal
-	disp(['Using database ' dbname]);
+	fprintf(1,'Using database %s\n',dbname)
 end
 
 %% Open database as dbc
@@ -29,6 +35,6 @@ if isempty(dbc)
 	error('Failed to load SQL database');
 end
 
-mysql_dbexecute(dbc, ['USE ' dbname]);
+mysql_dbexecute(dbc,['USE ' dbname]);
 
 end

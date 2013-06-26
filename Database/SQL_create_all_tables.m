@@ -6,6 +6,7 @@ function SQL_create_all_tables()
 
 % Specify the names of tables to create (should be valid names in SQL_TableCreateString)
 TableNames = {'Operations', ...     % Operations Table
+        'OperationCode', ...        % OperationCode Table
         'MasterOperations', ...     % MasterOperations Table
         'MasterPointerRelate', ...  % MasterPointerRelate Table
         'TimeSeries', ...           % TimeSeries Table
@@ -25,13 +26,13 @@ fprintf(1,'Creating tables in %s\n',dbname);
 for j = 1:length(CreateString)
     [rs,emsg] = mysql_dbexecute(dbc,CreateString{j});
     if ~isempty(rs)
-        fprintf(1,'Created table: %s\n',TableNames{j});
+        fprintf(1,'%s, ',TableNames{j});
     else
         fprintf(1,'**** Error creating table: %s\n',TableNames{j});
         fprintf(1,'%s',emsg);
     end
 end
-fprintf(1,'Tables created in %s\n',dbname);
+fprintf(1,'\nTables created in %s\n',dbname);
 
 SQL_closedatabase(dbc) % close the connection to the database
 
