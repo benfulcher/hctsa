@@ -48,7 +48,7 @@ if iscell(trimopt) % still using the cell input of previous TSQ_normalize
     trimopt = trimopt{1};
 end
 
-if nargin < 3,
+if nargin < 3
     subs = {}; % don't subset
 end
 
@@ -71,7 +71,7 @@ if ~isempty(subs)
     if isempty(kr0),
         kr0 = 1:size(F,1);
     else
-        fprintf(1,'Filtered down time series by given subset; from %u to %u.',...
+        fprintf(1,'Filtered down time series by given subset; from %u to %u.\n',...
                     size(F,1),length(kr0))
         F = F(kr0,:);
         TS_loc_q = TS_loc_q(kr0,:);
@@ -81,7 +81,7 @@ if ~isempty(subs)
     if isempty(kc0),
         kc0 = 1:size(F,2);
     else
-        fprintf(1,'Filtered down operations by given subset; from %u to %u',...
+        fprintf(1,'Filtered down operations by given subset; from %u to %u.\n',...
             size(F,2),length(kc0))
         F = F(:,kc0);
         TS_loc_q = TS_loc_q(:,kc0);
@@ -97,15 +97,15 @@ end
 F(~isfinite(F)) = NaN; % convert all nonfinite values to NaNs for consistency
 % need to incorporate knowledge of bad entries in TS_loc_q and filter these
 % out:
-notgood = (TS_loc_q > 0); % QualityCode>0 means some special value (NaN, Inf, error, ...)
-F(TS_loc_q>0) = NaN;
+notgood = (TS_loc_q > 0); % QualityCode > 0 means some special value (NaN, Inf, error, ...)
+F(TS_loc_q > 0) = NaN;
 fprintf(1,'There were %u special values in TS_loc_q\n',sum(notgood(:)))
 % now all bad values are NaNs, we can get on with filtering them out
 
 
 % (i) Filter based on proportion of bad entries. If either threshold is 1,
 % the resulting matrix is guaranteed to be free from bad values entirely.
-[badr badc] = find(isnan(F));
+[badr, badc] = find(isnan(F));
 thresh_r = trimopt(1); thresh_c = trimopt(2);
 if thresh_r > 0 % if 1, then even the worst are included
     [badr, ~, rj] = unique(badr); % neat code, but really slow to do this
@@ -117,26 +117,26 @@ if thresh_r > 0 % if 1, then even the worst are included
     end
     badrp = badrp/size(F,2);
 %     keyboard % stop to plot ksdensity(badrp); check which time series are throwing you off...   
-    xkr1 = badr(badrp>=1-thresh_r); % don't keep rows (1) if fewer good values than thresh_r
+    xkr1 = badr(badrp >= 1 - thresh_r); % don't keep rows (1) if fewer good values than thresh_r
     kr1 = setxor(1:size(F,1),xkr1);
 
     if ~isempty(kr1)
         if ~isempty(xkr1)
-            disp(['Removed time series with fewer than ' num2str(thresh_r*100) '% good values;'...
-                    ' from ' num2str(size(F,1)) ' to ' num2str(length(kr1))])
-            disp(['Lost ' bencat(tsf(xkr1),',')]) % what did we lose?
+            fprintf(1,'Removed time series with fewer than %4.2f%% good values:'...
+                        ' from %u to %u\n',thresh_r*100,size(F,1),length(kr1))
+            fprintf(1,'Lost %s\n',bencat(tsf(xkr1),',')) % display filtered timse series to screen
         else
-            disp(['All ' num2str(size(F,1)) ' time series had greater than ' num2str(thresh_r*100) '% good values;'...
-                    ' keeping them all.'])
+            fprintf(1,'All %u time series had greater than %4.2f%% good values. Keeping them all.\n', ...
+                            size(F,1),thresh_r*100)
         end
         F = F(kr1,:); % ********************* KR1 ***********************
         TS_loc_q = TS_loc_q(kr1,:);
     else
-        disp(['No time series had more than ' num2str(thresh_r*100) '% good values. Exiting.'])
+        fprintf(1,'No time series had more than %4.2f%% good values. Exiting.\n',thresh_r*100)
         return
     end
 else
-    disp('No filtering of time series based on proportion of bad values')
+    fprintf(1,'No filtering of time series based on proportion of bad values\n')
     kr1 = (1:size(F,1));
 end
 
