@@ -29,7 +29,7 @@ function compile
 
 	fprintf('------\nNow installing the CRPTool\n');
 	fprintf('At the prompts\n-Remove existing toolbox\n-Create folder if asked\n-DO NOT add to the path\n-DO NOT delete the installation file\n-----\n');
-	
+
 	plugininstall_x86_64('./CRPTool');
 	if rp_failed()
 		fprintf(1,'rp_plugin failed, trying a different version...\n')
@@ -44,7 +44,7 @@ function compile
 		return
 	end
 	if rp_failed()
-		fprintf(1,'None of the rp_plugins worked. So you will be unable to use this metric\n')
+		fprintf(1,'None of the rp_plugins worked. So you will be unable to use this operation\n')
 	end
 
 function status = rp_failed()

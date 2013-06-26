@@ -107,7 +107,7 @@ switch ange
         
     case 'lillie' % LILLIEFORS TEST
         % Temporarily suspend low/high tabulated p-value warnings that often occur with this hypothesis test
-        warning('off','stats:lillietest:OutOfRangePLow','stats:lillietest:OutOfRangePHigh');
+        warning('off','stats:lillietest:OutOfRangePLow'); warning('off','stats:lillietest:OutOfRangePHigh');
         if any(ismember({'norm','ev'},mydistn))
             [h, p] = lillietest(x,0.05,mydistn);
         elseif strcmp('exp',mydistn)
@@ -120,7 +120,7 @@ switch ange
            p = NaN;
            fprintf(1,'***RETURNED AN UNEXPECTED NAN FOR LILLIEFORS TEST\n')
         end
-        warning('on','stats:lillietest:OutOfRangePLow','stats:lillietest:OutOfRangePHigh');
+        warning('on','stats:lillietest:OutOfRangePLow'); warning('on','stats:lillietest:OutOfRangePHigh');
 end
 
 end

@@ -12,10 +12,10 @@ function y_embed = benembed(y,tau,m,sig)
 % a matrix of width m containing the vectors in the new embedding space...
 % Ben Fulcher October 2009
 
-% N=length(y);
+bevocal = 0; % display information about embedding
 
 %% (1) Time-delay, tau
-if nargin<2 || isempty(tau)
+if nargin < 2 || isempty(tau)
     tau = 1; % default time delay is 1
     sstau = 'to default of 1';
 else
@@ -23,48 +23,48 @@ else
         switch tau
             case 'mi' % first minimum of mutual information function
                 tau = CO_fmmi(y);
-                sstau = ['by first minimum of mutual information to tau = ' num2str(tau)];
+                sstau = sprintf('by first minimum of mutual information to tau = %u');
             case 'ac' % first zero-crossing of ACF
                 tau = CO_fzcac(y);
-                sstau = ['by first zero crossing of autocorrelation function to tau = ' num2str(tau)];
+                sstau = sprintf('by first zero crossing of autocorrelation function to tau = %u',tau);
             otherwise
-                disp('Invalid time-delay method. Exiting.')
+                fprintf(1,'Invalid time-delay method. Exiting.\n')
                 return
         end
     else
-        sstau = ['by user to ' num2str(tau)];
+        sstau = sprintf('by user to %u',tau);
     end
 end
 % we now have an integer time delay tau
 % explanation stored in string sstau for printing later
 
 %% (2) Set embedding dimension, m
-if nargin<3 || isempty(m) % set to default value
+if nargin < 3 || isempty(m) % set to default value
     m = 2; % embed in 2-dimensional space by default! Probably not a great default!
-    ssm = ['to (strange) default of ' num2str(m)];
+    ssm = sprintf('to (strange) default of %u',m);
 else % use a routine to inform m
-    if ~iscell(m), m={m}; end
+    if ~iscell(m), m = {m}; end
     if ischar(m{1})
         switch m{1}
             case 'fnnsmall'
                 % uses Michael Small's fnn code
-                if length(m)==1
+                if length(m) == 1
                     th = 0.01;
                 else
                     th = m{2};
                 end
                 m = MS_unfolding(y,th,1:10,tau);
-                ssm = ['by Michael Small''s FNN code with threshold ' num2str(th) ' to m = ' num2str(m)];
+                ssm = sprintf('by Michael Small''s FNN code with threshold %f to m = %u',th,m);
             case 'fnnmar'
                 % uses Marwin's fnn code in CRPToolbox
                 % should specify threshold for proportion of fnn
                 % default is 0.1
                 % e.g., {'fnnmar',0.2} would use a threshold of 0.2
                 % uses time delay determined above
-                if length(m)==1 % set default threshold 0.1
-                    th=0.1;
+                if length(m) == 1 % set default threshold 0.1
+                    th = 0.1;
                 else
-                    th=m{2};
+                    th = m{2};
                 end
                 try
                     m = NL_fnnmar(y,10,2,tau,th);
@@ -73,7 +73,7 @@ else % use a routine to inform m
                     y_embed = NaN;
                     return
                 end
-                ssm = ['by Marwan''s CRPToolbox FNN code with threshold ' num2str(th) ' to m = ' num2str(m)];
+                ssm = sprintf('by Marwan''s CRPToolbox FNN code with threshold %f to m = %u',th,m);
             case 'cao'
                 % Uses TSTOOL code for cao method to determine optimal
                 % embedding dimension
@@ -98,21 +98,21 @@ else % use a routine to inform m
                 return
         end
     else
-        m=m{1};
+        m = m{1};
         ssm = ['by user to ' num2str(m)];
     end
 end
 % we now have an integral embedding dimension, m
 
 %% Now do the embedding
-if nargin<4, sig=0; end % don't return a signal object, return a matrix
+if nargin < 4, sig = 0; end % don't return a signal object, return a matrix
 
-if sig==2 % just return the 
+if sig == 2 % just return the 
     y_embed = [tau,m]; return
 end
 
 % Use the TSTOOL embed function.
-if size(y,2) > size(y,1), y=y'; end
+if size(y,2) > size(y,1), y = y'; end
 try
     y_embed = embed(signal(y),m,tau);
 catch me
@@ -126,8 +126,10 @@ if ~sig
    % this is faster than my implementation, which is commented out below
 end
 
-disp(['[[benembed]] time series embedded using time delay tau set ' sstau]);
-disp(['[[benembed]] and embedding dimension m set ' ssm]);
+if bevocal
+    fprintf(1,'Time series embedded using time delay, tau = %s and embedding dimension m = %s',sstau,ssm);
+end
+
 
 % if sig
 %     y_embed = embed(signal(y),m,tau);

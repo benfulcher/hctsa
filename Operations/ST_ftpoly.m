@@ -3,7 +3,7 @@ function out = ST_ftpoly(y,n)
 % the fit.
 % Ben Fulcher
 
-t = (1:length(y)); % Get a range for the time axis for time series y
+t = (1:length(y))'; % Get a range for the time axis for time series y
 
 % Supress the (valid!) warning from stupidly fitting a polynomial to a time series...
 warning('off','MATLAB:polyfit:RepeatedPointsOrRescale');

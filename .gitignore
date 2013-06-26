@@ -29,3 +29,5 @@ sql_settings.conf
 # mexed files
 *.mexw32
 *.mexw64
+*.mexmaci64
+plugininstall_*.m

@@ -36,22 +36,4 @@ catch emsg
     optime = NaN; % don't worry about calculation time for errors
 end
     
-% else % A single-output operation
-%     
-%     if bevocal, fprintf(fid,'Evaluating %s...',parmcodej); end % for error checking
-%     
-%     try
-%         operationtimer = tic;
-%         opoutput = pareval(x,y,parmcodej); % evaluate the operation
-%         opquality = 0; % no evaluation error, quality = 0
-%         optime = toc(operationtimer);
-%         if bevocal, fprintf(fid,' evaluated in %s.\n',benrighttime(optime)); end % for error checking
-%     catch
-%         fprintf(fid,' error.\n',parmcodej);
-%         opoutput = 0;
-%         opquality = 1; % fatal error, QualityCode = 1
-%         optime = NaN; % don't worry about calculation time
-%     end
-% end
-
 end
