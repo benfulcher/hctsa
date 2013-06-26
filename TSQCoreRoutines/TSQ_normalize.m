@@ -99,7 +99,7 @@ F(~isfinite(F)) = NaN; % convert all nonfinite values to NaNs for consistency
 % out:
 notgood = (TS_loc_q > 0); % QualityCode>0 means some special value (NaN, Inf, error, ...)
 F(TS_loc_q>0) = NaN;
-fprintf(1,'There were %u special values in TS_loc_q',sum(notgood(:)))
+fprintf(1,'There were %u special values in TS_loc_q\n',sum(notgood(:)))
 % now all bad values are NaNs, we can get on with filtering them out
 
 
@@ -381,9 +381,9 @@ end
 fprintf(1,'%u bad entries (%4.2f%%) in the data matrix\n',sum(isnan(F(:))),sum(isnan(F(:)))/length(F(:))*100)
 
 %% Done -- save output to file
-fprintf(1,'Saving the trimmed, normalized data as ''TS_loc_N'' (%u x %u)\n',size(F,1),size(F,2))
+fprintf(1,'Saving the trimmed, normalized data to local files: ')
 TS_loc_N = F;
-save('TS_loc_N.mat','TS_loc_N'); fprintf(1,'TS_loc_N');
+save('TS_loc_N.mat','TS_loc_N'); fprintf(1,'TS_loc_N (%ux%u)',size(F,1),size(F,2))
 % Save qualities in normalized matrix TS_loc_q_N
 TS_loc_q_N = TS_loc_q; clear TS_loc_q;
 save('TS_loc_q_N.mat','TS_loc_q_N'); fprintf(1,', TS_loc_q_N');
