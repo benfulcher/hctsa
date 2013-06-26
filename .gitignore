@@ -12,7 +12,7 @@ Thumbs.db
 # Database-retrieved files:
 TS_loc.mat
 TS_loc_N.mat
-TS_loc_cl
+TS_loc_cl.mat
 
 TS_loc_guides.mat
 TS_loc_guides_N.mat
@@ -20,7 +20,6 @@ TS_loc_guides_cl.mat
 
 TS_loc_q.mat
 TS_loc_q_N.mat
-TS_loc_q_cl.mat
 
 TS_loc_ct.mat
 

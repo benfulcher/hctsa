@@ -149,7 +149,7 @@ if thresh_c > 0
     badcp = zeros(length(badc),1); % stores the number of bad entries
     for i = 1:length(badc), badcp(i) = length(find(cj==i)); end
     badcp = badcp/size(F,1);
-    xkc1 = badc(badcp>=1-thresh_c); % don't keep columns if fewer good values than thresh_c
+    xkc1 = badc(badcp >= 1-thresh_c); % don't keep columns if fewer good values than thresh_c
     kc1 = setxor(1:size(F,2),xkc1); % keep columns (1)
     
     if ~isempty(kc1)
@@ -158,7 +158,7 @@ if thresh_c > 0
             fprintf(1,'Lost %s\n',bencat(mlab(xkc1),','))
         else
             fprintf(1,['All operations had greater than %5.2f%% good values; ' ...
-                'keeping them all :-)'],thresh_c*100)
+                    'keeping them all :-)'],thresh_c*100)
         end
 
         F = F(:,kc1); % *********************** kc1 *********************
@@ -182,10 +182,12 @@ kc2 = find(crap_met==0); % kept column (2)
 % kc2 = find(rangeF>eps); % (NaN or positive)
 
 if ~isempty(kc2)
-    fprintf(1,'Filtered down operations with near-constant outputs: from %u to %u' ...
-             ,size(F,2),length(kc2))
-    F = F(:,kc2); % ********************* KC2 **********************
-    TS_loc_q = TS_loc_q(:,kc2);
+    if length(kc2) < size(F,2)
+        fprintf(1,'Filtered down operations with near-constant outputs: from %u to %u',...
+                         size(F,2),length(kc2))
+        F = F(:,kc2); % ********************* KC2 **********************
+        TS_loc_q = TS_loc_q(:,kc2);
+    end
 else
     error('All operations give constant outputs?!')
 end
@@ -193,17 +195,20 @@ end
 % (ii) Remove time series with constant feature vectors
 crap_ts = zeros(size(F,1),1);
 for j = 1:size(F,1)
-    crap_ts(j) = (range(F(j,~isnan(F(j,:))))<eps);
+    crap_ts(j) = (range(F(j,~isnan(F(j,:)))) < eps);
 end
-kr2 = find(crap_ts==0); % kept column (2)
+kr2 = find(crap_ts == 0); % kept column (2)
 % rangeF = range(F');
 % kr2 = find(rangeF~=0); % (NaN or positive)
 
+
 if ~isempty(kr2)
-    fprintf(1,'Filtered out time series with constant feature vectors: from %u to %u',...
-                        size(F,1),length(kr2))
-    F = F(kr2,:); % ********************* KR2 **********************
-    TS_loc_q = TS_loc_q(kr2,:);
+    if (length(kr2) < size(F,1))
+        fprintf(1,'Filtered out time series with constant feature vectors: from %u to %u\n',...
+                            size(F,1),length(kr2))
+        F = F(kr2,:); % ********************* KR2 **********************
+        TS_loc_q = TS_loc_q(kr2,:);
+    end
 else
     error('All time series have constant feature vectors?!')
 end
@@ -298,30 +303,27 @@ mlinkn = mlink(kc_tot);
 % Can't change masters -- in an ideal world, you would check to see if any masters are never pointed to (i.e., not in mlink)
 % and recalibrate the indexing, but I'm not going to bother.
 
-% mfn=mf(kc_tot); mlabn=mlab(kc_tot); mpostpn=mpostp(kc_tot); mtypn=mtyp(kc_tot);
-% mkwn=mkw(kc_tot); mmapn=mmap(kc_tot);
 
 % m_ids_keep, ts_ids_keep, tsf, tskw, tsl, mcode, mlab, mkw, mpoint, mlink, Mmid, Mmlab, Mmcode
-disp(['We now have ' num2str(ntsn) ' time series and ' num2str(nmn) ' metrics in play'])
-disp([num2str(sum(isnan(F(:)))) ' bad entries (' num2str(sum(isnan(F(:)))/length(F(:))*100) '%) in the data matrix'])
+fprintf(1,'We now have %u time series and %u operations in play\n',ntsn,nmn)
+fprintf(1,'%u bad entries (%4.2f%%) in the data matrix\n',sum(isnan(F(:))),sum(isnan(F(:)))/length(F(:))*100)
 
 %% NORMALIZE THE LITTLE SHIT
 
 if ismember(normopt,{'nothing','none'})
-    disp('NO NORMALIZING ON MY WATCH!')
+    fprintf(1,'NO NORMALIZING ON MY WATCH!\n')
 else
     if isempty(trainset)
         % no training subset
-        disp(['Normalizing a ' num2str(ntsn) 'x' num2str(nmn) ' object. Your patience is greatly appreciated...'])
+        fprintf(1,'Normalizing a %u x %u object. Your patience is greatly appreciated...\n',ntsn,nmn)
         F = SUB_normalizematrix(F,normopt);
-        disp(['Normalized: ' num2str(sum(isnan(F(:)))) ' bad entries in the data matrix'])
     else
         % retrieve a subset
         disp(['Normalizing a ' num2str(ntsn) 'x' num2str(nmn) ' object using ' num2str(length(trainset)) ...
             ' to train the transformation! Your patience is greatly appreciated...'])
         F = SUB_normalizematrix(F,normopt,trainset);
-        disp(['Normalized: ' num2str(sum(isnan(F(:)))) ' bad entries in the data matrix'])
     end
+    fprintf(1,'Normalized: the data matrix contains %u special-valued elements\n',sum(isnan(F(:))))
 end
 
 %% Remove bad entries
@@ -336,7 +338,7 @@ if any(nancol) % there are columns that are all NaNs
     kc = find(nancol==0);
     F = F(:,kc);
     TS_loc_q = TS_loc_q(:,kc);
-    disp(['We just removed ' num2str(sum(nancol)) ' all-NaN columns from after normalization']);
+    fprintf(1,'We just removed %u all-NaN columns from after normalization\n',sum(nancol));
     m_ids_keepn = m_ids_keepn(kc);
     mcoden = mcoden(kc);
     mlabn = mlabn(kc);
@@ -364,8 +366,8 @@ end
 % check again for constant columns after normalization
 kc = find(range(F)~=0); % (NaN or positive)
 if ~isempty(kc) && length(kc) < size(F,2)
-    disp(['Post-normalization filtering of operations with constant outputs: from ' num2str(size(F,2)) ...
-            ' to ' num2str(length(kc))])
+    fprintf(1,'Post-normalization filtering of operations with constant outputs: from %u to %u', ...
+                        size(F,2),length(kc))
     m_ids_keepn = m_ids_keepn(kc);
     mcoden = mcoden(kc);
     mlabn = mlabn(kc);
@@ -376,21 +378,19 @@ if ~isempty(kc) && length(kc) < size(F,2)
     TS_loc_q = TS_loc_q(:,kc);
 end
 
-disp([num2str(sum(isnan(F(:)))) ' bad entries (' num2str(sum(isnan(F(:)))/length(F(:))*100) '%) in the data matrix'])
+fprintf(1,'%u bad entries (%4.2f%%) in the data matrix\n',sum(isnan(F(:))),sum(isnan(F(:)))/length(F(:))*100)
 
 %% Done -- save output to file
-disp(['Saving the trimmed, normalized data as ''TS_loc_N'' (' num2str(size(F,1)) 'x' num2str(size(F,2)) ')'])
+fprintf(1,'Saving the trimmed, normalized data as ''TS_loc_N'' (%u x %u)\n',size(F,1),size(F,2))
 TS_loc_N = F;
-save('TS_loc_N.mat','TS_loc_N')
+save('TS_loc_N.mat','TS_loc_N'); fprintf(1,'TS_loc_N');
 % Save qualities in normalized matrix TS_loc_q_N
 TS_loc_q_N = TS_loc_q; clear TS_loc_q;
-save('TS_loc_q_N.mat','TS_loc_q_N')
+save('TS_loc_q_N.mat','TS_loc_q_N'); fprintf(1,', TS_loc_q_N');
 
 % contains all the clustered time series and metric information, respectively.
 % Note that the clustering is only done on 'good' metrics and so nmcl<=nm
-disp('Saving guides: ''TS_loc_guides_N.mat''');
 save('TS_loc_guides_N.mat','m_ids_keepn','ts_ids_keepn','tsfn','tskwn','tsln','mcoden','mlabn','mkwn','mlinkn','Mmid','Mmlab','Mmcode','-v7.3');
-
-disp('Done and dusted!');
+fprintf(1,', TS_loc_guides_N. All saved!\n');
 
 end
