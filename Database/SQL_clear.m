@@ -18,8 +18,7 @@ function TSQ_wkshop_clear(mort,vin,dbname,dolog)
 
 
 %% Introduction, check inputs
-fprintf(1,['Welcome to ''TSQ_wkshop_clear''. My name''s Walter Angus Alexander and I''ll be your ' ...
-                  'internal monalogue for the next little while.\n']);
+fprintf(1,'Welcome to ''SQL_clear''\n');
 
 % First input must be 'ts' or 'mets'
 if nargin < 1 || ~ismember(mort,{'ts','mets'})

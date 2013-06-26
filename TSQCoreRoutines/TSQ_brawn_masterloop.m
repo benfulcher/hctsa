@@ -7,7 +7,13 @@ end
 
 try
 	mastertimer = tic;
-	masteroutput = pareval(x,y,Mcode);
+    if bevocal
+        % any output text is printed to screen
+    	masteroutput = pareval(x,y,Mcode,1);
+    else
+        % output text stored in T (could log this if you really want to)
+        [masteroutput, T] = pareval(x,y,Mcode,0);
+    end
 	mastertime = toc(mastertimer);
     if bevocal
         fprintf(1,' evaluated (%s).\n',benrighttime(mastertime))
@@ -18,7 +24,7 @@ catch emsg
     if bevocal
         fprintf(1,' error.\n')
     end
-	fprintf(fid,'---Error evaluating master operation: %s\n',Mcode);
+	fprintf(fid,'---Error evaluating %s\n',Mcode);
     fprintf(fid,'%s\n',emsg.message)
     masteroutput = {}; % keep empty output
     mastertime = 0; % set zero calculation time

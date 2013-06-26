@@ -30,4 +30,7 @@ sql_settings.conf
 *.mexw32
 *.mexw64
 *.mexmaci64
+
+# Random shit
 plugininstall_*.m
+error.log

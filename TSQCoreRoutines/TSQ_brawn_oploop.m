@@ -1,4 +1,4 @@
-function [opoutput, opquality, optime] = TSQ_brawn_oploop(x, y, moplink, Moutput, Mct, Mmlab, parmcodej, fid, bevocal)
+function [opoutput, opquality, optime] = TSQ_brawn_oploop(x, y, moplink, Moutput, Mct, Mmlab, parmcodej, fid)
 
 % make links to the master
 Moutput = Moutput{moplink};
@@ -23,7 +23,7 @@ try
         end
 	else % Retrieve required element from master structure
         [~, thest] = strtok(parmcodej,'.'); thest = thest(2:end); % the field after the '.'
-        opoutput = parevalM(Moutput,['themasterdat.' thest]);
+        opoutput = parevalM(Moutput,['themasterdat.', thest]);
 		opquality = 0; % no evaluation error, quality = 0
         optime = Mct;
 	end
@@ -35,5 +35,5 @@ catch emsg
 	opquality = 1; % fatal error QualityCode -- something of a different error, though...
     optime = NaN; % don't worry about calculation time for errors
 end
-    
+
 end

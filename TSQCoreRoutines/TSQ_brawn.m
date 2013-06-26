@@ -84,7 +84,7 @@ end
 
 times = zeros(nts,1); % stores the time taken for each time series to have its metrics calculated (for determining time remaining)
 lst = 0; % last saved time
-bevocal = 1; % print every piece of code evaluated (nice for error checking)
+bevocal = 0; % print every piece of code evaluated (nice for error checking)
 
 for i = 1:nts
 	bigtimer = tic;
@@ -128,7 +128,9 @@ for i = 1:nts
 		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 	    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
 	    fprintf(fid,'- - - - - - - -  Loaded time series %u / %u - - - - - - - -\n',i,nts)
-		fprintf(fid,'(%s)\n\n',whichtsf)
+		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+		fprintf(fid,'%s\n',whichtsf)
+		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'Preparing to calculate %s (ts_id = %u, N = %u samples) [computing %u / %u operations]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
 	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 
@@ -170,13 +172,17 @@ for i = 1:nts
 		if toparallel
 	        parfor j = 1:ncal
                 [ffi(j), qqi(j), cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
-                                                    Mcts,Mmlab,parmcode{j},fid,bevocal);
+                                                    Mcts,Mmlab,parmcode{j},fid);
             end
             % TSQ_brawn_oploop(x, y, moplink, Moutput, Mcts, Mmlab, parmcodej, partsfi, fid, bevocal)
 		else
             for j = 1:ncal
-                [ffi(j), qqi(j), cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
-                                                Mcts,Mmlab,parmcode{j},fid,bevocal);
+                try
+                    [ffi(j), qqi(j), cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
+                                                Mcts,Mmlab,parmcode{j},fid);
+                catch
+                    keyboard
+                end
                 % [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
                 %                                 Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
                 % When all operations have masters, we can make this nicer, more like ^
