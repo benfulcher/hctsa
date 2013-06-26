@@ -1,4 +1,4 @@
-function [rlvm, frvals, frvecs, trnsfrmd, mn, dv] = pca(data, mode, maxpercent, sil)
+function [rlvm, frvals, frvecs, trnsfrmd, mn, dv] = TSTL_pca(data, mode, maxpercent, sil)
 
 %   [rlvm, frvals, frvecs, trnsfrmd, mn, dv] = pca(data, mode, maxpercent, silent)
 %

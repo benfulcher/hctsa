@@ -1,4 +1,4 @@
-function TSQ_brawn(tolog,toparallel,dbname,agglomerate)
+function TSQ_brawn(tolog,toparallel,bevocal)
 % This is a routine to fill in the blank parts of TS_loc, as prepared by TSQ_prepared
 % It reads in the output files produced by TS_prepared and then goes through and systematically
 % calculates the missing bits (in parallel over the metrics for each time series)
@@ -17,8 +17,6 @@ function TSQ_brawn(tolog,toparallel,dbname,agglomerate)
 % 12/4/2011 ~ Ben Fulcher ~ added agglomerate argument -- can specify 0 to
 %                               stop autoagglomeration
 
-%%% FOREPLAY
-
 %% Check valid inputs / set defaults
 % Log to file
 if nargin < 1
@@ -32,7 +30,7 @@ else
     fid = 1; % write output to screen rather than .log file
 end
 
-% Parallel processing
+% Use Matlab's Parallel Computing toolbox?
 if nargin < 2
 	toparallel = 0;
 end
@@ -42,15 +40,12 @@ else % use single-threaded for loops
 	fprintf(fid,'Computations will be performed serially without parallelization\n')
 end
 
-% mySQL database
+% be vocal?
 if nargin < 3
-	dbname = ''; % use default database by default
+    bevocal = 1; % write back lots of information to screen
+    % prints every piece of code evaluated (nice for error checking)
 end
 
-% Write back results when finished?
-if nargin < 4
-    agglomerate = 1; % yes, agglomerate by default
-end
 
 %% Read in information from local files
 fprintf(fid,'Reading in data and guides from file...');
@@ -81,10 +76,8 @@ if toparallel
 	end
 end
 
-
 times = zeros(nts,1); % stores the time taken for each time series to have its metrics calculated (for determining time remaining)
 lst = 0; % last saved time
-bevocal = 0; % print every piece of code evaluated (nice for error checking)
 
 for i = 1:nts
 	bigtimer = tic;
@@ -128,11 +121,11 @@ for i = 1:nts
 		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 	    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
 	    fprintf(fid,'- - - - - - - -  Loaded time series %u / %u - - - - - - - -\n',i,nts)
-		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'%s\n',whichtsf)
-		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'Preparing to calculate %s (ts_id = %u, N = %u samples) [computing %u / %u operations]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
-	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
 
 		%% Evaluate master functions in parallel
 		% Because of parallelization, we have to evaluate all the master functions *first*
@@ -166,7 +159,7 @@ for i = 1:nts
         Moutput(Mitocalc) = Moutput_tmp;
         Mcts(Mitocalc) = Mcts_tmp;
 		
-		fprintf(fid,'%u master operations evaluated///\n\n',nMtocalc);
+		fprintf(fid,'%u master operations evaluated ///\n\n',nMtocalc);
 
 		%% Now assign all the results to the right operations
 		if toparallel
@@ -273,13 +266,13 @@ for i = 1:nts
     if ncal > 0 % Some amount of calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u other outputs stored. [%u / %u]\n',...
 	     					ngood,nerror,nother,ncal,nm);
-		fprintf(fid,'Calculations for this time series took %s.\n',benrighttime(times(i)));
+		fprintf(fid,'Calculations for this time series took %s.\n',benrighttime(times(i),1));
     else
     	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',nm);
     end
     if i < nts
         fprintf(fid,'- - - - - - - -  %u time series remaining - - - - - - - -\n',nts-i);
-    	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n',benrighttime(((nts-i)*mean(times(1:i)))));
+    	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n',benrighttime(((nts-i)*mean(times(1:i))),1));
     else % the final time series
         fprintf(fid,'- - - - - - - -  All time series calculated! - - - - - - - -\n',nts-i);
     end
@@ -297,7 +290,7 @@ end
 
 %%% Finished calculating!! Aftermath:
 fprintf(fid,'!! !! !! !! !! !! !!  Calculation completed at %s !! !! !! !! !! !!\n',datestr(now))
-fprintf(fid,'Calculations took a total of %s.\n',benrighttime(sum(times)))
+fprintf(fid,'Calculations took a total of %s.\n',benrighttime(sum(times),1))
 
 % Aave the local files for subsequent integration into the storage system
 fprintf(1,'Saving all results to local .mat files:')
@@ -307,12 +300,12 @@ save('TS_loc_q.mat','TS_loc_q','-v7.3');    fprintf(fid,', TS_loc_q.mat. All sav
 
 if tolog, fclose(fid); end % close the .log file
 
-if agglomerate
-    fprintf(1,'\n\nCalculation done: Calling TSQ_agglomerate to store back results\n')
-    writewhat = 'null'; % only write back to NULL entries in the database
-    TSQ_agglomerate(writewhat,dbname,tolog)
-else
-    fprintf(1,'Calculation complete: you can now run TSQ_agglomerate to store results to a mySQL database\n')
-end
+% if agglomerate
+%     fprintf(1,'\n\nCalculation done: Calling TSQ_agglomerate to store back results\n')
+%     writewhat = 'null'; % only write back to NULL entries in the database
+%     TSQ_agglomerate(writewhat,dbname,tolog)
+% else
+fprintf(1,'Calculation complete: you can now run TSQ_agglomerate to store results to a mySQL database\n')
+% end
 
 end

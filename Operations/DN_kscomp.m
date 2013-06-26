@@ -23,40 +23,35 @@ switch thedist
         a = betafit(x); ftry = betapdf(xtry,a(1),a(2));
     case 'rayleigh'
         if any(x < 0)
-            disp('DN_kscomp: The data is not positive, but Rayleigh is a positive-only distribution')
-            out = NaN;
-            return
+            % fprintf(1,'The data is not positive, but Rayleigh is a positive-only distribution\n')
+            out = NaN; return
         else % valid domain to fit a Rayleigh distribution
             a = raylfit(x); ftry = raylpdf(xtry,a);
         end
     case 'exp'
         if any(x < 0),
-            disp('DN_kscomp: The data is not positive, but exponential is a positive-only distribution')
-            out = NaN;
-            return
+            % fprintf(1,'The data is not positive, but Exponential is a positive-only distribution\n')
+            out = NaN; return
         else a = expfit(x); ftry = exppdf(xtry,a);
         end
     case 'gamma'
         if any(x < 0),
-            disp('DN_kscomp: The data is not positive, but gamma is a positive-only distribution')
-            out = NaN;
-            return
+            % fprintf(1,'The data is not positive, but Gamma is a positive-only distribution\n')
+            out = NaN; return
         else a = gamfit(x); ftry = gampdf(xtry,a(1),a(2));
         end
     case 'gp'
         error('Generalized Pareto distribution fits are too difficult');
     case 'logn'
         if any(x < 0)
-            disp('DN_kscomp: The data is not positive, but log-normal is a positive-only distribution')
-            out = NaN;
-            return
+            % disp('DN_kscomp: The data is not positive, but log-normal is a positive-only distribution')
+            out = NaN; return
         else a = lognfit(x); ftry = lognpdf(xtry,a(1),a(2));
         end
     case 'wbl'
         if any(x < 0)
-            disp('DN_kscomp: The data is not positive, but Weibull is a positive-only distribution')
-            out = NaN;
-            return
+            % disp('DN_kscomp: The data is not positive, but Weibull is a positive-only distribution')
+            out = NaN; return
         else a = wblfit(x); ftry = wblpdf(xtry,a(1),a(2));
         end
 end

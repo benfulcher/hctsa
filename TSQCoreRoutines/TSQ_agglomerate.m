@@ -1,4 +1,4 @@
-function TSQ_agglomerate(writewhat,dbname,tolog)
+function TSQ_agglomerate(writewhat,tolog,dbname)
 % agglomerates the TS_loc file in the current directory
 % into the database
 % Needs files TS_loc, TS_guide_ts, TS_guide_mets in current directory
@@ -18,11 +18,11 @@ end
 if ~ismember(writewhat,{'null','nullerror'})
     error(['Unknown specifier ''' writewhat ''''])
 end
-if nargin < 2
-	dbname = '';
-end
-if nargin < 3 || isempty(tolog)
+if nargin < 2 || isempty(tolog)
 	tolog = 0;
+end
+if nargin < 3
+	dbname = '';
 end
 
 %% Open a mySQL database connection
@@ -163,7 +163,7 @@ for i = 1:ndbel
 
 	times(i) = toc;
 	if mod(i,floor(ndbel/5))==0
-		fprintf(1,['Approximately %s remaining! -- So far %u entries'  ...
+		fprintf(1,['Approximately %s remaining! -- so far %u entries'  ...
 			' (/ %u possible) have been written to %s...\n'],benrighttime(mean(times(1:i))*(ndbel-i)),sum(updated),i,dbname);
 	end
 end

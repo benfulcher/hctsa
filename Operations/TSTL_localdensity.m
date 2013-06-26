@@ -6,17 +6,17 @@ function out = TSTL_localdensity(y,NNR,past,embedparams)
 % Ben Fulcher November 2009
 
 %% Check inputs
-if nargin<2 || isempty(NNR)
+if nargin < 2 || isempty(NNR)
     NNR = 3; % 3 nearest neighbours
 end
 
-if nargin<3 || isempty(past)
+if nargin < 3 || isempty(past)
     past = 40;
 end
 
-if nargin<4 || isempty(embedparams)
+if nargin < 4 || isempty(embedparams)
     embedparams = {'ac','cao'};
-    disp('using default embedding using autocorrelation and cao')
+    fprintf(1,'Using default embedding using autocorrelation and cao\n')
 end
 
 %% Embed the signal
@@ -28,14 +28,13 @@ if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
 end
 
 %% Run the code
-try
-    rs = localdensity(s,NNR,past);
-catch me
-    if strcmp(me.message,'Fast nearest neighbour searcher : To many neighbors for each query point are requested')
-        out = NaN;
-        return
-    end
-end
+% try
+rs = localdensity(s,NNR,past);
+% catch emsg
+%     if strcmp(emsg.message,'Fast nearest neighbour searcher : To many neighbors for each query point are requested')
+%         out = NaN; return
+%     end
+% end
 %% Convert output to data
 locden = data(rs);
 if all(locden==0)

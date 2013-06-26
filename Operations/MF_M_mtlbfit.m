@@ -19,9 +19,9 @@ if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
         error('!! You must specify a bin count !!')
     end
     if nbins == 0; % use ksdensity instead of a histogram
-        [dny dnx] = ksdensity(x);
+        [dny, dnx] = ksdensity(x);
     else
-        [dny dnx] = hist(x,nbins);
+        [dny, dnx] = hist(x,nbins);
     end
     if size(dnx,2) > size(dnx,1); dnx = dnx'; dny = dny'; end % must be column vectors
     
@@ -32,11 +32,10 @@ if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
                 || strcmp(emsg.message,'Inf computed by model function.') ...
                 || strcmp(emsg.message,'Power functions cannot be fit to non-positive xdata.') ...
                 || strcmp(emsg.identifier,'curvefit:fit:nanComputed')
-            disp(['The model ' dmodel ' failed for this data -- returning NaNs for all fitting outputs']);
-            out = NaN;
-            return
+            fprintf(1,'The model, %s, failed for this data -- returning NaNs for all fitting outputs\n',dmodel);
+            out = NaN; return
         else
-            error(['MF_M_mtlbfit: Unexpected error fitting ' dmodel ' to the data distribution'])
+            error(sprintf('MF_M_mtlbfit(x,%s,%u): Unexpected error fitting %s to the data distribution',dmodel,nbins,dmodel))
         end
 	end
 elseif any(strcmp(TSmods,dmodel)); % valid TIME SERIES model name

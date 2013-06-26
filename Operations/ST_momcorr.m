@@ -6,31 +6,29 @@ function out = ST_momcorr(x,wl,olap,mom1,mom2,transf)
 N = length(x); % number of samples in the input signal
 
 % sliding window length (samples)
-if nargin<2
+if nargin < 2
     wl = 0.02;
 end
-if wl<1
+if wl < 1
     wl = ceil(N*wl);
 end
 
 % sliding window overlap length
-if nargin<3 || isempty(olap)
+if nargin < 3 || isempty(olap)
     olap = 1/5;
 end
-if olap<1 % specify a fraction OF THE WINDOW LENGTH
+if olap < 1 % specify a fraction OF THE WINDOW LENGTH
     olap = floor(wl*olap);
 end
 
-
-
-if nargin<4
+if nargin < 4
     mom1 = 'mean';
 end
-if nargin<5
+if nargin < 5
     mom2 = 'std';
 end
 
-if nargin<6
+if nargin < 6
     transf = 'none';
 end
 
@@ -51,7 +49,7 @@ x_buff = buffer(x,wl,olap);
 Nw = (N/(wl-olap)); % number of windows
 
 if size(x_buff,2)>Nw
-    disp(['should have ' num2str(Nw) ' columns but we have ' num2str(size(x_buff,2)) ' removing last one'])
+    % fprintf(1,'Should have %u columns but we have %u: removing last one',Nw,size(x_buff,2))
     x_buff = x_buff(:,1:end-1);
 end % lose last point
 
@@ -74,23 +72,18 @@ out.mi = benmi(M1,M2,[0,1],[0,1],floor(sqrt(N)));
 % plot(M1,M2,'.k');
 
 
-
-    function moms = calcmemoments(x_buff,momtype)
-        switch momtype
-            case 'mean'
-                moms = mean(x_buff);
-            case 'std'
-                moms = std(x_buff);
-            case 'median'
-                moms = median(x_buff);
-            case 'iqr'
-                moms = iqr(x_buff);
-        end        
-    end
-
-
-
-
+function moms = calcmemoments(x_buff,momtype)
+    switch momtype
+        case 'mean'
+            moms = mean(x_buff);
+        case 'std'
+            moms = std(x_buff);
+        case 'median'
+            moms = median(x_buff);
+        case 'iqr'
+            moms = iqr(x_buff);
+    end        
+end
 
 
 end
