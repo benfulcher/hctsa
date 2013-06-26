@@ -119,7 +119,8 @@ TS_loc_q = ones(nts,nm)*Inf; % output quality label
 fprintf(1,'We have %u time series and %u operations to retrieve from %s\n',nts,nm,dbname);
 fprintf(1,'Filling and saving to local matricies TS_loc, TS_loc_ct, TS_loc_q from Results table in %s\n',dbname);
 
-bundlesize = 5; % retrieve information about this many time series per database query
+bundlesize = min(nts,5); % retrieve information about this many time series per database query:
+                         % either 5 at a time, or if less, however many time series there are
 
 switch getwhat
 case 'null'

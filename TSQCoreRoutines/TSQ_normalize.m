@@ -32,14 +32,14 @@ function TSQ_normalize(normopt,trimopt,subs,trainset)
 % this elsewhere (e.g., TSQ_preprocess), added TS_loc_q_N
 
 %% Argument Checking, Preliminaries
-if nargin<1 || isempty(normopt)
-    disp('Using the default, scaled quantile-based sigmoidal transform -- ''scaledSQzscore''')
+if nargin < 1 || isempty(normopt)
+    fprintf(1,'Using the default, scaled quantile-based sigmoidal transform -- ''scaledSQzscore''\n')
 %     normopt = 'scaledsigmoid';
     normopt = 'scaledSQzscore';
 end
 
-if nargin<2 || isempty(trimopt)
-    disp('Removing less than 90%-good time series and less than 100%-good metrics');
+if nargin < 2 || isempty(trimopt)
+    fprintf(1,'Removing less than 90%%-good time series and less than 100%%-good metrics\n');
     trimopt = [0.90 1]; % (default): remove less than 90%-good time series, & then less than 
                         % 100%-good metrics.
                         % [[Don't do any covariance filtering]]
@@ -48,21 +48,21 @@ if iscell(trimopt) % still using the cell input of previous TSQ_normalize
     trimopt = trimopt{1};
 end
 
-if nargin<3,
+if nargin < 3,
     subs = {}; % don't subset
 end
 
-if nargin<4
+if nargin < 4
     trainset = []; % normalize on the full set
 end
 
 %% Read in information from local files
 % (As prepared by TS_prepare.m)
-disp('Reading in local files...');
+fprintf(1,'Reading in local files...');
 load TS_loc.mat TS_loc % the local data matrix retrieved from the database
-F = TS_loc; clear TS_loc
-load TS_loc_q.mat TS_loc_q % quality labels for F
-load TS_loc_guides.mat
+F = TS_loc; clear TS_loc; fprintf(1,' TS_loc');
+load TS_loc_q.mat TS_loc_q; fprintf(1,', TS_loc_q'); % quality labels for F
+load TS_loc_guides.mat; fprintf(1,', TS_loc_guides.\n');
 % m_ids_keep, ts_ids_keep, tsf, tskw, tsl, mcode, mlab, mkw, mpoint, mlink, Mmid, Mmlab, Mmcode
 
 %% (0) SUBSET USING GIVEN INDICIES
@@ -71,8 +71,8 @@ if ~isempty(subs)
     if isempty(kr0),
         kr0 = 1:size(F,1);
     else
-        disp(['Filtered down time series by given subset; from ' num2str(size(F,1)) ...
-            ' to ' num2str(length(kr0))])
+        fprintf(1,'Filtered down time series by given subset; from %u to %u.',...
+                    size(F,1),length(kr0))
         F = F(kr0,:);
         TS_loc_q = TS_loc_q(kr0,:);
     end
@@ -81,8 +81,8 @@ if ~isempty(subs)
     if isempty(kc0),
         kc0 = 1:size(F,2);
     else
-        disp(['Filtered down operations by given subset; from ' num2str(size(F,2)) ...
-            ' to ' num2str(length(kc0))])
+        fprintf(1,'Filtered down operations by given subset; from %u to %u',...
+            size(F,2),length(kc0))
         F = F(:,kc0);
         TS_loc_q = TS_loc_q(:,kc0);
     end
@@ -97,9 +97,9 @@ end
 F(~isfinite(F)) = NaN; % convert all nonfinite values to NaNs for consistency
 % need to incorporate knowledge of bad entries in TS_loc_q and filter these
 % out:
-notgood = (TS_loc_q>0); % QualityCode>0 means some special value (NaN, Inf, error, ...)
+notgood = (TS_loc_q > 0); % QualityCode>0 means some special value (NaN, Inf, error, ...)
 F(TS_loc_q>0) = NaN;
-disp(['There were ' num2str(sum(notgood(:))) ' special values in TS_loc_q'])
+fprintf(1,'There were %u special values in TS_loc_q',sum(notgood(:)))
 % now all bad values are NaNs, we can get on with filtering them out
 
 
@@ -107,8 +107,7 @@ disp(['There were ' num2str(sum(notgood(:))) ' special values in TS_loc_q'])
 % the resulting matrix is guaranteed to be free from bad values entirely.
 [badr badc] = find(isnan(F));
 thresh_r = trimopt(1); thresh_c = trimopt(2);
-if thresh_r>0 % if 1, then even the worst are included
-    
+if thresh_r > 0 % if 1, then even the worst are included
     [badr, ~, rj] = unique(badr); % neat code, but really slow to do this
 %     unique... Loop instead
     % (ii) remove rows with more than a proportion thresh_r bad values
@@ -141,9 +140,9 @@ else
     kr1 = (1:size(F,1));
 end
 
-if thresh_c>0
-    if thresh_r>0 && ~isempty(kr1) % did row filtering and removed some
-        [~,badc]=find(isnan(F)); % have to recalculate indicies
+if thresh_c > 0
+    if thresh_r > 0 && ~isempty(kr1) % did row filtering and removed some
+        [~, badc] = find(isnan(F)); % have to recalculate indicies
     end
     [badc, ~, cj] = unique(badc);
     % (iii) Remove metrics that are more than thresh_c bad
@@ -155,27 +154,25 @@ if thresh_c>0
     
     if ~isempty(kc1)
         if ~isempty(xkc1)
-            disp(['Removed metrics with fewer than ' num2str(thresh_c*100) '% good values; '...
-                'from ' num2str(size(F,2)) ' to ' num2str(length(kc1))])
-            disp(['Lost ' bencat(mlab(xkc1),',')])
+            fprintf(1,'Removed operations with fewer than %5.2f%% good values: from %u to %u\n',thresh_c*100,size(F,2),length(kc1))
+            fprintf(1,'Lost %s\n',bencat(mlab(xkc1),','))
         else
-            disp(['All metrics had greater than ' num2str(thresh_c*100) '% good values; ' ...
-                'keeping them all :-)'])
+            fprintf(1,['All operations had greater than %5.2f%% good values; ' ...
+                'keeping them all :-)'],thresh_c*100)
         end
 
         F = F(:,kc1); % *********************** kc1 *********************
         TS_loc_q = TS_loc_q(:,kc1);
         
     else
-        disp(['No metrics had fewer than ' num2str(thresh_c*100) '% good values. Exiting.'])
-        return
+        error(sprintf('No operations had fewer than %u%% good values.',num2str(thresh_c*100)))
     end
 else
-    disp('No filtering of metrics based on proportion of bad values')
+    % fprintf(1,'No filtering of operations based on proportion of bad values\n')
     kc1 = (1:size(F,2));
 end
 
-% (ii) Remove features that are all the same
+% (ii) Remove operations that are constant across the time series dataset
 crap_met = zeros(size(F,2),1);
 for j = 1:size(F,2)
     crap_met(j) = (range(F(~isnan(F(:,j)),j))<eps);
@@ -185,13 +182,12 @@ kc2 = find(crap_met==0); % kept column (2)
 % kc2 = find(rangeF>eps); % (NaN or positive)
 
 if ~isempty(kc2)
-    disp(['Filtered down operations with near-constant outputs: from ' num2str(size(F,2)) ...
-            ' to ' num2str(length(kc2))])
+    fprintf(1,'Filtered down operations with near-constant outputs: from %u to %u' ...
+             ,size(F,2),length(kc2))
     F = F(:,kc2); % ********************* KC2 **********************
     TS_loc_q = TS_loc_q(:,kc2);
 else
-    disp('All operations give constant outputs?! Exiting.')
-    return
+    error('All operations give constant outputs?!')
 end
 
 % (ii) Remove time series with constant feature vectors
@@ -204,13 +200,12 @@ kr2 = find(crap_ts==0); % kept column (2)
 % kr2 = find(rangeF~=0); % (NaN or positive)
 
 if ~isempty(kr2)
-    disp(['Filtered out time series with constant feature vectors: from ' num2str(size(F,1)) ...
-            ' to ' num2str(length(kr2))])
+    fprintf(1,'Filtered out time series with constant feature vectors: from %u to %u',...
+                        size(F,1),length(kr2))
     F = F(kr2,:); % ********************* KR2 **********************
     TS_loc_q = TS_loc_q(kr2,:);
 else
-    disp('All time series have constant feature vectors?! Exiting.')
-    return
+    error('All time series have constant feature vectors?!')
 end
 
 % % (iii) Trim based on high covariances

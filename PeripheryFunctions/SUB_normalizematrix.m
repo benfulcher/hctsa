@@ -5,12 +5,12 @@ function F = SUB_normalizematrix(F,normopt,itrain)
 % Ben Fulcher 12/9/2011 -- Added itrain input: obtain the trainsformation
 % on this subset, apply it to all the data.
 
-if nargin<2 || isempty(normopt)
-    disp('We''re normalizing using sigmoid transform by default');
+if nargin < 2 || isempty(normopt)
+    fprintf(1,'We''re normalizing using sigmoid transform by default\n')
     normopt = 'sigmoid';
 end
 
-if nargin<3
+if nargin < 3
     itrain = [];
 end
 
@@ -21,7 +21,7 @@ if isempty(itrain)
 else
     FT = F(itrain,:); % train the transformation on the specified subset
     if ~strcmp(normopt,'scaledSQzscore')
-        error('TRAINING SPECIFIER ONLY WORKS FOR ''scaledSQzscore'', you know?');
+        error('TRAINING SPECIFIER ONLY WORKS FOR ''scaledSQzscore''...');
     end
 end
 

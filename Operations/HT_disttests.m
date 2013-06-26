@@ -14,21 +14,21 @@ switch mydistn
         x = (x-min(x)+0.01*std(x))/(max(x)-min(x)+0.02*std(x));
         a = betafit(x);        % then fit
     case 'rayleigh'
-        if any(x<0),p = NaN; return
+        if any(x < 0), p = NaN; return
         else % valid domain to fit a Rayleigh distribution
             a = raylfit(x);
         end
     case 'exp'
-        if any(x<0),p = NaN; return
+        if any(x < 0), p = NaN; return
         else a = expfit(x);
         end
     case 'gamma'
-        if any(x<0), p = NaN; return
+        if any(x < 0), p = NaN; return
         else a = gamfit(x);
         end
     case 'gp'
         disp('forget about gp fits. Too difficult.');
-%         if any(x<0),p = NaN; return
+%         if any(x < 0),p = NaN; return
 %         else a=gpfit(x);
 %         end
     case 'logn'
@@ -105,7 +105,8 @@ switch ange
         [h, p] = kstest(x,mycdf);
         
     case 'lillie' % LILLIEFORS TEST
-        warning('off','stats:lillietest:OutOfRangePLow');
+        % Temporarily suspend low/high tabulated p-value warnings that often occur with this hypothesis test
+        warning('off','stats:lillietest:OutOfRangePLow','stats:lillietest:OutOfRangePHigh');
         if any(ismember({'norm','ev'},mydistn))
             [h, p] = lillietest(x,0.05,mydistn);
         elseif strcmp('exp',mydistn)
@@ -118,7 +119,7 @@ switch ange
            p = NaN;
            fprintf(1,'***RETURNED AN UNEXPECTED NAN FOR LILLIEFORS TEST\n')
         end
-        warning('on','stats:lillietest:OutOfRangePLow');
+        warning('on','stats:lillietest:OutOfRangePLow','stats:lillietest:OutOfRangePHigh');
 end
 
 end

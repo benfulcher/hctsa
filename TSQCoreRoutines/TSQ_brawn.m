@@ -166,7 +166,7 @@ for i = 1:nts
             Moutput(Mitocalc) = MoutputPAR;
             Mcts(Mitocalc) = MctsPAR;
 			
-			fprintf(fid,'Master operations evaluated.\n');
+			fprintf(fid,'%u master operations evaluated///\n\n',nMtocalc);
 		else
 			% No master metrics need to be calculed.
 			Moutput = {}; Mcts = {}; % This initiaition is necessary for the next parfor loop
@@ -184,9 +184,9 @@ for i = 1:nts
                 try
                     [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
                                                     Mcts,Mmlab,parmcode{j},fid,bevocal);
-                    % [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
-                    %                                 Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
-                    % When all operations have masters, we can make this nicer, more like ^
+                % [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
+                %                                 Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
+                % When all operations have masters, we can make this nicer, more like ^
                 catch emsg
                     fprintf(1,'%s\n',emsg.message)
                     keyboard
