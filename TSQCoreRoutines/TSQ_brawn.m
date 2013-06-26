@@ -125,108 +125,98 @@ for i = 1:nts
 
 		% Display information
 		whichtsf = which(tsf{i});
-		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
-	    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now));
-	    fprintf(fid,'- - - - - - - -  Loaded time series %u / %u - - - - - - - -\n',i,nts);
-		fprintf(fid,'(%s)\n\n',whichtsf);
+		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+	    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
+	    fprintf(fid,'- - - - - - - -  Loaded time series %u / %u - - - - - - - -\n',i,nts)
+		fprintf(fid,'(%s)\n\n',whichtsf)
 		fprintf(fid,'Preparing to calculate %s (ts_id = %u, N = %u samples) [computing %u / %u operations]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
-	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
+	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 
 		%% Evaluate master functions in parallel
 		% Because of parallelization, we have to evaluate all the master functions *first*
 		% Check through the metrics to determine which master functions are relevant for this run
-		ip = find(parmlink > 0); % a range of tcal -- that point to a master function
-		if ~isempty(ip) % there are some pointers
-			% For each implicated master function -- put the structure in this element
-			
-			Moutput = cell(nMm,1); % Ouput structures
-			Mcts = zeros(nMm,1); % Calculation times for the master structures
-			
-			Mitocalc = unique(parmlink(parmlink > 0)); % indicies of masters (Mmlab/Mmcode) that need to be called (i.e., they'll be called later)
-			nMtocalc = length(Mitocalc); % number of implicated master functions
 
-			fprintf(fid,'Evaluating %u master operations first...\n',nMtocalc);
-			
-		    % Store in temporary variables for parfor loop then map back
-            MoutputPAR = cell(nMtocalc,1);
-            MctsPAR = zeros(nMtocalc,1);
-			
-			% Evaluate the master functions
-			if toparallel
-	            parfor j = 1:nMtocalc
-                    [MoutputPAR{j}, MctsPAR(j)] = TSQ_brawn_masterloop(x,y,Mitocalc(j),Mmcode,fid,bevocal);
-                end
-            else
-                for j = 1:nMtocalc
-                    [MoutputPAR{j}, MctsPAR(j)] = TSQ_brawn_masterloop(x,y,Mitocalc(j),Mmcode,fid,bevocal);
-                end
-			end
-			
-			% map back from PAR versions to real versions
-            Moutput(Mitocalc) = MoutputPAR;
-            Mcts(Mitocalc) = MctsPAR;
-			
-			fprintf(fid,'%u master operations evaluated///\n\n',nMtocalc);
-		else
-			% No master metrics need to be calculed.
-			Moutput = {}; Mcts = {}; % This initiaition is necessary for the next parfor loop
+		% For each implicated master operation -- put the structure in this element
+		Moutput = cell(nMm,1); % Ouput structures
+		Mcts = zeros(nMm,1); % Calculation times for the master structures
+		
+		Mitocalc = unique(parmlink(parmlink > 0)); % indicies of masters (Mmlab/Mmcode) that need to be called
+		nMtocalc = length(Mitocalc); % number of master operations to calculate
+
+		fprintf(fid,'Evaluating %u master operations...\n',nMtocalc);
+		
+	    % Store in temporary variables for parfor loop then map back later
+        Moutput_tmp = cell(nMtocalc,1);
+        Mcts_tmp = zeros(nMtocalc,1);
+		
+		% Evaluate all the master operations
+		if toparallel
+            parfor j = 1:nMtocalc
+                [Moutput_tmp{j}, Mcts_tmp(j)] = TSQ_brawn_masterloop(x,y,Mmcode{Mitocalc(j)},fid,bevocal);
+            end
+        else
+            for j = 1:nMtocalc
+                [Moutput_tmp{j}, Mcts_tmp(j)] = TSQ_brawn_masterloop(x,y,Mmcode{Mitocalc(j)},fid,bevocal);
+            end
 		end
+		
+		% map back from temporary versions to the real versions
+        Moutput(Mitocalc) = Moutput_tmp;
+        Mcts(Mitocalc) = Mcts_tmp;
+		
+		fprintf(fid,'%u master operations evaluated///\n\n',nMtocalc);
 
-		%% GO GO GO!!!
+		%% Now assign all the results to the right operations
 		if toparallel
 	        parfor j = 1:ncal
-                [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
+                [ffi(j), qqi(j), cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
                                                     Mcts,Mmlab,parmcode{j},fid,bevocal);
             end
             % TSQ_brawn_oploop(x, y, moplink, Moutput, Mcts, Mmlab, parmcodej, partsfi, fid, bevocal)
 		else
             for j = 1:ncal
-                try
-                    [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
-                                                    Mcts,Mmlab,parmcode{j},fid,bevocal);
+                [ffi(j), qqi(j), cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
+                                                Mcts,Mmlab,parmcode{j},fid,bevocal);
                 % [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
                 %                                 Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);
                 % When all operations have masters, we can make this nicer, more like ^
-                catch emsg
-                    fprintf(1,'%s\n',emsg.message)
-                    keyboard
-                end
             end
-                %             for j = 1:ncal
-                % if parmlink(j) > 0 % pointer to a master function
-                %     try
-                %         % retrive from master structure:
-                %         if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
-                %             % All master function outputs are to be set to real NaNs (unsuitable)
-                %             ffi(j) = NaN;
-                %                             cti(j) = Mcts(parmlink(j));
-                %         else % (normal -- retrieve required element from master structure)
-                %                             [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
-                %                             ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
-                %             qqi(j) = 0; % good, real-valued output
-                %                             cti(j) = Mcts(parmlink(j));
-                %         end
-                %                     catch emsg
-                %         fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
-                %                         fprintf(fid,'%s\n',emsg.message)
-                %         ffi(j) = 0; qqi(j) = 1; % Fatal error code: 1
-                %     end
-                % else % A regular, single-output operation
-                %                     if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
-                %                     try
-                %         operationtimer = tic;
-                %         ffi(j) = pareval(x,y,parmcode{j});
-                %         cti(j) = toc(operationtimer);
-                %         qqi(j) = 0;
-                %                     catch
-                %                         fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
-                %         ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
-                %                     end
-                % end
-                %             end
-		end
+        end
+        %             for j = 1:ncal
+        % if parmlink(j) > 0 % pointer to a master function
+        %     try
+        %         % retrive from master structure:
+        %         if ~isstruct(Moutput{parmlink(j)}) && isnan(Moutput{parmlink(j)});
+        %             % All master function outputs are to be set to real NaNs (unsuitable)
+        %             ffi(j) = NaN;
+        %                             cti(j) = Mcts(parmlink(j));
+        %         else % (normal -- retrieve required element from master structure)
+        %                             [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
+        %                             ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
+        %             qqi(j) = 0; % good, real-valued output
+        %                             cti(j) = Mcts(parmlink(j));
+        %         end
+        %                     catch emsg
+        %         fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{parmlink(j)},parmcode{j});
+        %                         fprintf(fid,'%s\n',emsg.message)
+        %         ffi(j) = 0; qqi(j) = 1; % Fatal error code: 1
+        %     end
+        % else % A regular, single-output operation
+        %                     if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
+        %                     try
+        %         operationtimer = tic;
+        %         ffi(j) = pareval(x,y,parmcode{j});
+        %         cti(j) = toc(operationtimer);
+        %         qqi(j) = 0;
+        %                     catch
+        %                         fprintf(fid,'Fatal error %s || %s\n',partsfi,parmcode{j});
+        %         ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
+        %                     end
+        % end
+        %             end
         
-		%% Coding special values:
+        
+		%% Code special values:
 
 		% (*) Errorless calculation: q = 0, output = <real number>
 		% (*) Fatal error: q = 1, output = 0; (this is done already in the code above)
@@ -262,9 +252,9 @@ for i = 1:nts
 		% Note that the calculation time for pointers is the total calculation time for the full master structure.		
 
         % Calculate statistics for writing to file/screen
-		ngood = sum(qqi==0); % the number of calculated metrics that returned real outputs without errors
-		nerror = sum(qqi==1); % number of fatal errors encountered
-		nother = sum(qqi>1); % number of other special outputs
+		ngood = sum(qqi == 0); % the number of calculated metrics that returned real outputs without errors
+		nerror = sum(qqi == 1); % number of fatal errors encountered
+		nother = sum(qqi > 1); % number of other special outputs
     end
     
     times(i) = toc(bigtimer); % the time taken to calculate (or not, if ncal = 0) operations for this time series

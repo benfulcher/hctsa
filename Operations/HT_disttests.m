@@ -65,8 +65,9 @@ switch ange
             case 'wbl'
                 mycdf = {@wblcdf,a(1),a(2)};
         end
+        warning('off','stats:chi2gof:LowCounts') % temporarily disable this warning
         [h, p] = chi2gof(x,'cdf',mycdf,'nbins',nbins);
-        
+        warning('on','stats:chi2gof:LowCounts') % temporarily disable this warning
         
     case 'ks' % KOLMOGOROV-SMIRNOV TEST
         x1 = sort(unique(round(x*1E6)/1E6)); % unique values to 6 places

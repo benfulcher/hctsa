@@ -36,7 +36,7 @@ function SQL_create_db()
 
     filename = 'Database/sql_settings.conf';
     fprintf(1,['Writing hostname (%s), database name (%s), username (%s), and ' ...
-                'password (%s) to %s'],hostname,dbname,local_u,local_p,filename);
+                'password (%s) to %s\n'],hostname,dbname,local_u,local_p,filename);
 	fid = fopen(filename,'w');
 	fprintf(fid,'%s,%s,%s,%s',hostname,dbname,local_u,local_p);
 	fclose(fid);

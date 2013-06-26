@@ -23,13 +23,21 @@ CreateString = arrayfun(@(x)SQL_TableCreateString(TableNames{x}),1:length(TableN
 [dbc, dbname] = SQL_opendatabase; % opens dbc, the default database (named dbname)
 
 fprintf(1,'Creating tables in %s\n',dbname);
+nperline = 5;
 for j = 1:length(CreateString)
     [rs,emsg] = mysql_dbexecute(dbc,CreateString{j});
     if ~isempty(rs)
-        fprintf(1,'%s, ',TableNames{j});
+        if j==length(CreateString)
+            fprintf(1,'%s.',TableNames{j})
+        else
+            fprintf(1,'%s, ',TableNames{j})
+        end
     else
         fprintf(1,'**** Error creating table: %s\n',TableNames{j});
         fprintf(1,'%s',emsg);
+    end
+    if mod(j,nperline)==0 && j < length(CreateString)
+        fprintf(1,'\n'); % make new line to avoid cramping on display
     end
 end
 fprintf(1,'\nTables created in %s\n',dbname);
