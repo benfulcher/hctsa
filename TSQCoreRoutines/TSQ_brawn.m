@@ -174,6 +174,7 @@ for i = 1:nts
                     [ffi(j), qqi(j), cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
                                                 Mcts,Mmlab,parmcode{j},fid);
                 catch
+                    fprintf(1,'Error retrieving element %s from %s\n',parmcode{j},Mmlab{parmlink(j)})
                     keyboard
                 end
                 % [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
