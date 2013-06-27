@@ -32,7 +32,8 @@ if nargin < 2 || min(size(vin))~=1
 end
 
 % Use default database if none specified
-if nargin < 3, dbname = []; disp('Using default database'); end
+if nargin < 3, dbname = ''; fprintf(1,'Using default database\n'); end
+
 % Open connection to database
 [dbc, dbname] = SQL_opendatabase(dbname);
 
@@ -57,15 +58,15 @@ end
 % Print a quick bit of user information
 fprintf(1,'Clearing %u %s from %s',length(vin),thewhat,dbname);
 
-%% Check what to clear
+% Check what to clear
 SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)',thename,thetable,theid,bencat(vin,','));
-[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
+[todump,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 
 if ~isempty(emsg)
 	error(sprintf('Error retrieving selected %s indices (%s) from the %s table of %s',thewhat,theid,thetable,dbname))
 end
-input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
-  			dbname ' [press any key to show them]'],length(vin),thewhat));
+reply = input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
+      			dbname ' [press any key to show them]'],length(vin),thewhat),'s');
 
 for i = 1:length(todump), fprintf(1,'%s\n',todump{i}); end
 reply = input('Does this look right? Check carefully -- clearing data cannot be undone? Type ''y'' to continue...','s');
@@ -79,7 +80,7 @@ end
 fprintf(1,'Clearing Output, QualityCode, CalculationTime, and LastModified columns of the Results Table of %s\n',dbname)
 
 UpdateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,bencat(vin,','));
-[rs,emsg] = mysql_dbexecute(dbc, UpdateString);
+[~,emsg] = mysql_dbexecute(dbc, UpdateString);
 
 if isempty(emsg)
 	if strcmp(mort,'ts')
