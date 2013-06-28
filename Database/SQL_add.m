@@ -228,7 +228,7 @@ case 'ts' % Prepare toadd cell for time series
             nsubplots = min(nits,5);
             subplot(nsubplots,1,mod(j-1,nsubplots)+1);
             plot(x,'-k'); xlim([1,length(x)]);
-            titletext = sprintf('[%u/%u] %s (%u), keywords = %s --- read',j,nits,timeseries(j).Filename,timeseries(j).Length,timeseries(j).Keywords);
+            titletext = sprintf('[%u/%u] %s (%u), keywords = %s --- read\n',j,nits,timeseries(j).Filename,timeseries(j).Length,timeseries(j).Keywords);
             title(titletext,'interpreter','none');
             fprintf(1,titletext)
             pause(0.2); % wait 0.2 seconds

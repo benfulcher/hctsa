@@ -122,8 +122,8 @@ if thresh_r > 0 % if 1, then even the worst are included
 
     if ~isempty(kr1)
         if ~isempty(xkr1)
-            fprintf(1,'Removed time series with fewer than %4.2f%% good values:'...
-                        ' from %u to %u\n',thresh_r*100,size(F,1),length(kr1))
+            fprintf(1,['Removed time series with fewer than %4.2f%% good values:'...
+                            ' from %u to %u\n'],thresh_r*100,size(F,1),length(kr1))
             fprintf(1,'Lost %s\n',bencat(tsf(xkr1),',')) % display filtered timse series to screen
         else
             fprintf(1,'All %u time series had greater than %4.2f%% good values. Keeping them all.\n', ...
