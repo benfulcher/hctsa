@@ -257,7 +257,7 @@ case 'ops' % Prepare toadd cell for operations
         
     end
 end
-if bevocal, fprintf(1,'done.\n'); end
+if bevocal, fprintf(1,'\nDone.\n'); end
 
 
 % Check for duplicates

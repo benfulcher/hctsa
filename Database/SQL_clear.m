@@ -18,7 +18,7 @@ function TSQ_wkshop_clear(mort,vin,dbname,dolog)
 
 
 %% Introduction, check inputs
-fprintf(1,'Welcome to ''SQL_clear''\n');
+% fprintf(1,'Welcome to ''SQL_clear''\n');
 
 % First input must be 'ts' or 'mets'
 if nargin < 1 || ~ismember(mort,{'ts','mets'})
@@ -56,7 +56,7 @@ switch mort
 end
 
 % Print a quick bit of user information
-fprintf(1,'Clearing %u %s from %s',length(vin),thewhat,dbname);
+fprintf(1,'Clearing %u %s from %s\n',length(vin),thewhat,dbname);
 
 % Check what to clear
 SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)',thename,thetable,theid,bencat(vin,','));
