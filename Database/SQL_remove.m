@@ -1,4 +1,4 @@
-function TSQ_wkshop_remove(mort,vin,dbname,dolog)
+function SQL_remove(mort,vin,dbname,dolog)
 % Completely removes/deletes a given set of operations or time series from the database
 % The entries in the TimeSeries or Operations table is removed, and all associated entries in the
 % Results table are deleted as well.
@@ -9,7 +9,7 @@ function TSQ_wkshop_remove(mort,vin,dbname,dolog)
 
 % 2/12/2009 Ben Fulcher. Rehauled to use mySQL database system.
 % 1/12/2012 Ben Fulcher. A few tweaks.
-
+error('don''t use this code')
 
 %% Introduction
 disp(['Welcome to >> TSQ_wkshop_remove << My name''s Walter Angus Alexander and I''ll be your' ...
