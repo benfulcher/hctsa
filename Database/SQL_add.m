@@ -406,35 +406,7 @@ if ~strcmp(importwhat,'mops')
         end
     end
     SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',thereltable,theid,thekid),addcell); % add them all in chunks
-    
-    % REALLY SLOW:
-    % for i = 1:length(kws) % each time series or operation
-    %     for j = 1:length(kwsplit{i}) % each keyword assinged to the time series or operation
-    %         switch importwhat
-    %         case 'ts'
-    %             InsertString = sprintf(['INSERT INTO TsKeywordsRelate (tskw_id, ts_id) SELECT ' ...
-    %                 'tskw_id, ts_id FROM TimeSeriesKeywords, TimeSeries ' ...
-    %                 'WHERE TimeSeriesKeywords.Keyword = ''%s'' AND TimeSeries.Filename = ''%s'''], ...
-    %                             kwsplit{i}{j},timeseries(i).Filename);
-    %             [~,emsg] = mysql_dbexecute(dbc, InsertString);
-    %             if ~isempty(emsg)
-    %                 fprintf(1,'\nError inserting %s,%s to TsKeywordsRelate\n',...
-    %                                 kwsplit{i}{j},timeseries(i).Filename); keyboard
-    %             end
-    %         case 'ops'
-    %             InsertString = sprintf(['INSERT INTO OpKeywordsRelate (mkw_id, m_id) SELECT ' ...
-    %                 'mkw_id, m_id FROM OperationKeywords, Operations ' ...
-    %                 'WHERE OperationKeywords.Keyword = ''%s'' AND Operations.OpName = ''%s'''], ...
-    %                             kwsplit{i}{j},esc(operation(i).Name));
-    %             [~,emsg] = mysql_dbexecute(dbc, InsertString);
-    %             if ~isempty(emsg)
-    %                 fprintf(1,'\nError inserting %s,%s to OpKeywordsRelate\n',...
-    %                             kwsplit{i}{j},operation(i).Name); keyboard
-    %             end
-    %         end
-    %     end
-    % end
-    
+        
     % Increment Nmatches in the keywords table
     fprintf(1,' done.\nNow the match counts...')
     % Redo them from scratch should be easier actually
