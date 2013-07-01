@@ -68,12 +68,19 @@ fprintf(fid,'Calculation has begun on %s using %u datasets and %u operations\n',
 
 %% Open parallel processing worker pool
 if toparallel
-	if matlabpool('size')==0
-		matlabpool open;
-		fprintf(fid,'MATLAB parallel processing pool opened with %u and ready to go',matlabpool('size'))
-	else
-		fprintf(fid,'MATLAB parallel processing pool already open. Size: %u\n',matlabpool('size'))
-	end
+    % first check that the user can use the Parallel Computing Toolbox:
+    heyo = which('matlabpool');
+    if isempty(heyo)
+        fprintf(1,'Parallel Computing Toolbox not found -- cannot perform computations across multiple cores\n')
+        toparallel = 0;
+    else
+        if matlabpool('size')==0
+        	matlabpool open;
+        	fprintf(fid,'MATLAB parallel processing pool opened with %u and ready to go',matlabpool('size'))
+        else
+        	fprintf(fid,'MATLAB parallel processing pool already open. Size: %u\n',matlabpool('size'))
+        end
+    end
 end
 
 times = zeros(nts,1); % stores the time taken for each time series to have its metrics calculated (for determining time remaining)
@@ -95,8 +102,8 @@ for i = 1:nts
         
 		%% Basic checking on x
 		% univariate and Nx1
-		if size(x,2)~=1
-			if size(x,1)==1
+		if size(x,2) ~= 1
+			if size(x,1) == 1
 				fprintf(fid,'***** The time series %s is a row vector. Not sure how it snuck through the gates, but I need a column vector...\n',tsf{i});
 				fprintf(fid,'I''ll transpose it for you for now....\n');
 				x = x';
@@ -109,8 +116,8 @@ for i = 1:nts
 		end
 
         %% Pre-Processing
-		% Keep a z-scored version of the time series as y
-		y = (x-mean(x))/std(x); % z-scoring without using a Statistics Toolbox license (the zscore function)
+		% y is a z-scored transformation of the time series
+		y = (x-mean(x))/std(x); % z-scoring without using a Statistics Toolbox license (i.e., the zscore function)
 
 		% So we now have the raw time series x and the z-scored time series y. Operations take these as inputs.
         % index sliced variables to minimize the communication overhead in the parallel processing

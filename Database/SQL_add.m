@@ -323,7 +323,7 @@ if ~strcmp(importwhat,'mops')
         fprintf(1,'%s\n',emsg);
         keyboard
     else
-        if bevocal, fprintf(1,' initialized in %s!!\n',benrighttime(toc(resultstic))); end
+        if bevocal, fprintf(1,' initialized in %s!\n',benrighttime(toc(resultstic))); end
     end
 end
 
