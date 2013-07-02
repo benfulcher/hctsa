@@ -13,7 +13,7 @@ catch me
         out = NaN; return
     end
 end
-    
+
 n = length(co_fft);
 co_ben = zeros(n,1);
 for i = 1:n

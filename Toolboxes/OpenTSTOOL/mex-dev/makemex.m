@@ -4,7 +4,7 @@ function makemex(TSTOOLpath)
 % Invoked by : makemex(TSTOOLpath)
 % or:          makemex
 
-if nargin==0
+if nargin == 0
     if which('units.mat')
         TSTOOLpath = fileparts(which('units.mat'));
     elseif exist(fullfile(pwd,'../tstoolbox','units.mat'))==2
@@ -22,7 +22,7 @@ end
 
 olddir = pwd;
 
-if exist('mexext')==5
+if exist('mexext') == 5
     suffix = ['.' mexext];
     system = computer;
 elseif isunix
@@ -90,7 +90,7 @@ try
 	cd NN
 
 	files = {'corrsum', 'corrsum2', 'crosscorrsum', 'fnearneigh', ...
-	'largelyap', 'predict',  'predict2', 'cao', ...
+	'largelyap', 'TSTOOLpredict',  'predict2', 'cao', ... % BF changed this -- predict is a Matlab built-in
 	'takens_estimator', 'return_time', 'nn_prepare', ...
 	'nn_search', 'range_search', 'crossprediction', ...
 	'emb_nn_search'};	
