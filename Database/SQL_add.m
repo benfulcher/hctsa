@@ -218,7 +218,7 @@ case 'ts' % Prepare toadd cell for time series
             timeseries(j).Data = xtext;
 
         catch emsg
-            fprintf(1,'%s\n',emsg)
+            fprintf(1,'%s\n',emsg.message)
             error(sprintf(['Could not read the data file for ''%s''.' ...
                                     'Check that it''s in Matlab''s path.'],timeseries(j).Filename))
         end
