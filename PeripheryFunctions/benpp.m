@@ -154,11 +154,10 @@ switch choosebest
         else
             best = 'nothing';
         end
-%         keyboard
 
     case 'ac' % picks the *lowest* tau-step autocorrelated result
         acs = zeros(nfields,1);
-        for i=1:nfields
+        for i = 1:nfields
             data = [];
             eval(['data = yp.' fields{i} ';']);
             data = benzscore(data); % unnecessary for AC
@@ -172,7 +171,6 @@ switch choosebest
             best = 'nothing';
         end
 end
-
 
     function yboxcox = SUB_boxcox(x,lambda)
         yboxcox = (x.^lambda-1)/lambda;

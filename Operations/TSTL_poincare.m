@@ -61,11 +61,10 @@ try
 catch me
     if strcmp(me.message,'No section points found') ...
             || strcmp(me.identifier,'MATLAB:badsubscript')
-        disp('Error in TSTL_poincare -- no section points found');
+        fprintf(1,'No section points found to run TSTL_poincare\n');
         out = NaN; return
     else
-        disp('UNKNOWN ERROR')
-        keyboard
+        error(me.message)
     end
 end
 
@@ -120,7 +119,6 @@ out.meands = mean(ds);
 out.maxds = max(ds);
 out.minds = min(ds);
 out.iqrds = iqr(ds);
-% keyboard
 
 
 

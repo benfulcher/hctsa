@@ -222,9 +222,6 @@ out.benmmind2_goodness = mminfulcherd2.goodness;
 out.benmmind2_stabledim = mminfulcherd2.stabled;
 out.benmmind2_linrmserr = mminfulcherd2.linrmserr;
 
-
-% keyboard
-
 % Fulcher reshaped (frs) -- only for large enough m (as determined by
 % criteria above):
 d2dat_M_frs = d2dat_M(mminfulcherd2.ri1:end,:);
@@ -257,8 +254,6 @@ out.d2_dimstd = scd2.dimstd;
 % hold on;
 % semilogx(d2dat_v,d2dat_M_frs,'o-k')
 % hold off;
-
-% keyboard
 
 % semilogx(c2tdat{1}(:,1),c2tdat{1}(:,2));
 
@@ -371,8 +366,6 @@ end
 out.flatsh2min_goodness = flatsh2min.goodness;
 out.flatsh2min_stabled = flatsh2min.stabled;
 out.flatsh2min_linrmserr = flatsh2min.linrmserr;
-% keyboard
-
 
 
 % can look for local slopes using
@@ -534,7 +527,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         
     end
 
-    function [thevector thematrix] = SUB_celltomat(thecell,thecolumn)
+    function [thevector, thematrix] = SUB_celltomat(thecell,thecolumn)
         % converts cell to matrix, where each (specified) column in cell
         % becomes a column in the new matrix
 %         thecelltest = thecell;
@@ -543,12 +536,12 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         nn = length(thecell);
         mini = min(thecell{1}(:,1));
         maxi = max(thecell{1}(:,1));
-        for ii=2:nn
-            mini=max([mini min(thecell{ii}(:,1))]);
-            maxi=min([maxi max(thecell{ii}(:,1))]);
+        for ii = 2:nn
+            mini = max([mini min(thecell{ii}(:,1))]);
+            maxi = min([maxi max(thecell{ii}(:,1))]);
         end
-        for ii=1:nn % rescales each dimension so all share common scale
-            thecell{ii} = thecell{ii}(thecell{ii}(:,1)>=mini & thecell{ii}(:,1)<=maxi,:);
+        for ii = 1:nn % rescales each dimension so all share common scale
+            thecell{ii} = thecell{ii}(thecell{ii}(:,1) >= mini & thecell{ii}(:,1) <= maxi,:);
         end
         
         
@@ -567,11 +560,10 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         end
         
         thematrix = zeros(nn,ee); % across the rows for dimensions; across columns for lengths/epsilons
-        for ii=1:nn
+        for ii = 1:nn
             try thematrix(ii,:) = thecell{ii}(:,thecolumn);
             catch
                 return
-                %keyboard
             end
         end
         

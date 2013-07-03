@@ -70,7 +70,7 @@ if ismember('fmmi',teststat)
         end
     end
     if any(isnan(fmmisurr))
-        keyboard
+        RA_keyboard
     end
     
     % FMMI should be higher for signal than surrogates
@@ -156,7 +156,7 @@ end
 function somestats = SDgivemestats(statx,statsurr,leftrightboth)
     nsurrs = length(statsurr);
     if any(isnan(statsurr))
-        keyboard
+        RA_keyboard
     end
 %         leftrightboth = {'left','right','both'}
     % have a distribution of some statistic with samples statsurr
@@ -206,7 +206,7 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
     end
 
     % rank statistic
-    [~,ix] = sort([statx;statsurr]);
+    [~, ix] = sort([statx;statsurr]);
     xfitshere = find(ix==1)-1;
     if strcmp(leftrightboth,'right') % x statistic smaller than distribution
         xfitshere = nsurrs + 1 - xfitshere; % how far from highest ranked value
@@ -228,7 +228,6 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
 %     plot(statsurr,ones(nsurrs,1),'.k');
 %     hold on;
 %     plot(statx*ones(2,1),[0,2],'r')
-%     keyboard
 end
 
 

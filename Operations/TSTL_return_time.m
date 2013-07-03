@@ -68,7 +68,6 @@ catch emsg
     end
 end
 % view(rs)
-% keyboard
 
 lavery = data(rs);
 NN = length(lavery);

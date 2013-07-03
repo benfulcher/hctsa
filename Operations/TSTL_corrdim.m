@@ -37,13 +37,11 @@ end
 rs = data(corrdim(s,nbins));
 % Contains ldr as rows for embedding dimensions 1:m as columns;
 % plot(rs);
-% keyboard
 
 %% Output Statistics
 % Note: these aren't very well motivated.
 m = size(rs,2); % number of embedding dimensions
 ldr = size(rs,1); % I don't really know what this means; = 17
-% keyboard
 for i = 2:m
     eval(['out.meand' num2str(i) ' = mean(rs(:,' num2str(i) '));'])
     eval(['out.mediand' num2str(i) ' = median(rs(:,' num2str(i) '));'])

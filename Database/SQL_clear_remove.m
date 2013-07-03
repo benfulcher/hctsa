@@ -145,7 +145,7 @@ else
     		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),nts,nts*length(vin),dbname);
     	end
     else
-    	fprintf(1,'Error clearing results from %s... This is pretty bad news....\n',dbname); keyboard
+    	fprintf(1,'Error clearing results from %s... This is pretty bad news....\n%s',dbname,emsg); keyboard
     end
 end
 

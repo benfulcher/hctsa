@@ -140,7 +140,6 @@ end
 %     plot(log(taur),log(F),'o-k');
 %     title(out.alpha)
     
-%     keyboard
     
     %% WE NEED SOME SORT OF AUTOMATIC DETECTION OF GRADIENT CHANGES/NUMBER
     %% OF PIECEWISE LINEAR PIECES

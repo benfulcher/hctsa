@@ -2,7 +2,7 @@ function out = SID_Exponential_Smoothing(x,ntrain,alpha)
 % Wrapped up, code adapted from original code by Siddharth Arora
 % x is the input signal (uniformly sampled time series data as a column
 %                           vector)
-% This version `_1' takes a small training set with which to optimize alpha,
+% This version takes a small training set with which to optimize alpha,
 % and applies that across the whole time series. This is a choice. Could
 % take a number of training sets and average a best alpha, etc.
 % Ben Fulcher 19/2/2010
@@ -10,30 +10,29 @@ function out = SID_Exponential_Smoothing(x,ntrain,alpha)
 N = length(x); % the length of the time series
 
 % (*) ntrain -- either the number or proportion of training points
-if nargin<2 || isempty(ntrain)
+if nargin < 2 || isempty(ntrain)
     ntrain = min(100,N); % hopefully the time series is longer than 100 samples
 end
-if ntrain>0 && ntrain<1 % given training set length as proportion
+if ntrain > 0 && ntrain < 1 % given training set length as proportion
                             % of the time series length
     ntrain = floor(N*ntrain);
 end
-if ntrain>1000; % maximum training set size
-    disp('Exceeded maximum training set size of 1000 -- reducing to this');
+if ntrain > 1000; % maximum training set size
+    fprintf(1,'Training set size exceeded maximum of 1000 samples -- reducing to this.\n');
     ntrain = 1000;
 end
-if ntrain<100; % minimum training set size
-    disp('Below minimum training set size of 100 -- increasing to this.');
+if ntrain < 100; % minimum training set size
+    fprintf(1,'Training set size below minimum of 100 -- increasing to this.\n');
     ntrain = 100;
 end
 
-if N<ntrain
-    disp('Time Series too short')
-    out = NaN;
-    return
+if N < ntrain
+    fprintf(1,'Time Series too short for exponential smoothing\n')
+    out = NaN; return
 end
 
 % (*) alpha, the smoothing parameter
-if nargin<3 || isempty(alpha)
+if nargin < 3 || isempty(alpha)
     alpha = 'best';
 end
 
@@ -42,12 +41,8 @@ end
 % Using: S(t+1) = A.X(t+1) + (1-A).S(t) where S(1) = X(1)
 % Finding optimum parameter A [0,1] using RMSE
 
-% Load data
-% x = load('data.txt');
-
 % n1 = length(x);
 % count = 1;
-
 
 if strcmp(alpha,'best')
     %% (*) Optimize alpha (*)
@@ -68,7 +63,7 @@ if strcmp(alpha,'best')
         rmses = zeros(nalpha,1);
 
 
-        for k=1:nalpha;
+        for k = 1:nalpha;
             a = alphar(k);
 
             % Loop for rolling window
@@ -119,7 +114,7 @@ if strcmp(alpha,'best')
         alphar = linspace(0.1,0.9,5);
         rmses = zeros(4,1);
         
-        for k=1:length(alphar)
+        for k = 1:length(alphar)
             a = alphar(k);
             
             xf = SUB_fit_exp_smooth(xtrain,a);
@@ -132,7 +127,7 @@ if strcmp(alpha,'best')
         end
         
         % fit quadratic to set alpha
-        [sort_rmses ix] = sort(rmses);
+        [sort_rmses, ix] = sort(rmses);
         rkeep = ix(1:3); % fit on 3 points closest to minimum
         p = polyfit(alphar(rkeep)',rmses(rkeep),2);
         aar = 0:0.005:1;
@@ -144,12 +139,10 @@ if strcmp(alpha,'best')
         out.alphamin_1 = alphamin;
         out.p1_1 = abs(p(1)); % concavity
         out.cup_1 = sign(p(1));
-%         keyboard
         
-        
-        if p(1)<0 % concave down -- it's looking at a maximum
+        if p(1) < 0 % concave down -- it's looking at a maximum
             % weird case
-            if y(1)<y(end);
+            if y(1) < y(end);
                 alphamin = 0.01;
             else
                 alphamin = 1;
@@ -159,13 +152,13 @@ if strcmp(alpha,'best')
         
             % Search again around this
             alphar = linspace(alphamin-0.1,alphamin+0.1,5);
-            if any(alphar<=0)
+            if any(alphar <= 0)
                 alphar = linspace(0.01,max(alphamin,0)+0.1,5);
-            elseif any(alphar>=1)
+            elseif any(alphar >= 1)
                 alphar = linspace(min(alphamin,1)-0.1,1,5);
             end
 
-            for k=1:length(alphar)
+            for k = 1:length(alphar)
                 a = alphar(k);
 
                 xf = SUB_fit_exp_smooth(xtrain,a);
@@ -184,17 +177,16 @@ if strcmp(alpha,'best')
 %             plot(aar,y,':k'); hold on;
 %             plot(alphar,rmses,'or'); hold off
             
-            if p(1)<0
+            if p(1) < 0
                 alphamin = alphar(rmses==min(rmses));
                 % This is quite bad -- the first step didn't find a local
                 % minimum...
             else % minimum of quadratic fit
                 alphamin = -p(2)/(2*p(1));
-                if alphamin>1, alphamin=1; end
-                if alphamin<=0, alphamin = 0.01; end
+                if alphamin > 1, alphamin = 1; end
+                if alphamin <= 0, alphamin = 0.01; end
             end
             
-%             keyboard
         end
     end
 
@@ -203,9 +195,7 @@ if strcmp(alpha,'best')
 end
 
 if isnan(alpha)
-    disp('alpha is NaN -- this is a joke. I''m leaving')
-    out = NaN;
-    return
+    error('What?! alpha is a NaN?!')
 end
 
 %% (2) Fit to the whole time series

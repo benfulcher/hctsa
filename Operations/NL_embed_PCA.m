@@ -38,8 +38,6 @@ out.top2 = sum(perc(1:2)); % variance explained in top two eigendirections
 out.nto80 = find(csperc>0.8,1,'first'); % number of eigenvalues you need to reconstruct 80%
 out.nto90 = find(csperc>0.9,1,'first'); % number of eigenvalues you need to reconstruct 90%
 
-% keyboard
-
 out.fb01 = find(perc < 0.1,1,'first'); % when perc goes below 0.1 for the first time
 if isempty(out.fb01), out.fb01 = length(perc) + 1; end % could make it NaN...
 

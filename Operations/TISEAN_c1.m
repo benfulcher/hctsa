@@ -100,13 +100,11 @@ delete([fn '.c1']) % remove the TISEAN file write output
 % c1dat = SUB_readTISEANout(s,'#m=',2);
 % fclose(fid); % close the file
 
-% keyboard
-
 s = textscan(res,'%[^\n]');
-s=s{1};
+s = s{1};
 if isempty(s)
-    disp(['Error reading TISEAN output file ' fn '.c1'])
-    return;
+    fprintf(1,'Error reading TISEAN output file %s.c1\n',fn)
+    return
 end
 c1dat = SUB_readTISEANout(s,'#m=',2);
 
@@ -173,12 +171,8 @@ out.bestscrd = c1sc(wherelongestscr,4);
 out.longestscr = max(c1sc(:,6)); % (a log difference)
 
 
-% keyboard
-
-
 % s = textscan(res,'%[^\n]'); s=s{1};
 % wi = strmatch('Mass',s);
-% keyboard
 % s = s(wi(1):end);
 % me = textscan(char(s)','%s %n %[^=]%1c %n %[^=]%1c %n \n');
 %  Mass   0.000114630435: k= 1, N= 4999
@@ -306,7 +300,6 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
 %         hold on;
 %         plot(stptr(a):endptr(b),mean(v(stptr(a):endptr(b)))*ones(endptr(b)-stptr(a)+1),'--r');
 %         hold off;
-%         keyboard
     end
 
 

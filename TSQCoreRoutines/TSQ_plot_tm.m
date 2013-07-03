@@ -5,7 +5,7 @@ function TSQ_plot_tm(kwgs,gi,metorts,labelm,labelx,customorder,norcl,F,customcma
 % 1) kwgs -- keyword groups in which to differentially colour the
 %               correlation matrix
 % 2) gi -- the indicies of kwgs in the clustered label system (from SUB_autolabelQ, e.g.)
-% 3) metorts -- whether the keywords are of time series or metrics
+% 3) metorts -- whether the keywords are of time series or operations
 % 4) labelm -- method with which to show labels on the plot: 
 % 				* 'simple' (default) -- just shows the filenames/metric names
 % 				* 'ckey' -- clusters the keywords
@@ -31,17 +31,17 @@ function TSQ_plot_tm(kwgs,gi,metorts,labelm,labelx,customorder,norcl,F,customcma
 % Ben Fulcher 25/6/2010 -- added F input
 
 %% OUTPUT
-% Gives a colormap plot of time series (rows) and metrics (columns) (as clustered by TS_cluster)
+% Gives a colormap plot of time series (rows) and operations (columns)
 
 %% Fill in default values if labelx unspecified; check for valid inputs
 % Display as the normalized or clustered data
 % Colouring of groups?
 % What sorts of axes labels are appropriate
-if nargin<1; kwgs={}; end % no groups
-if nargin<2; gi=[]; end % automatically get indicies if necessary
-if nargin<3 || isempty(metorts); metorts = 'ts'; end % default to time series
-if nargin<4 || isempty(labelm), labelm = 'simple'; end % simple labeling
-if nargin<5 || isempty(labelx) % set labelx
+if nargin < 1; kwgs = {}; end % no groups
+if nargin < 2; gi = []; end % automatically get indicies if necessary
+if nargin < 3 || isempty(metorts); metorts = 'ts'; end % default to time series
+if nargin < 4 || isempty(labelm), labelm = 'simple'; end % simple labeling
+if nargin < 5 || isempty(labelx) % set labelx
 	switch labelm
 		case 'simple'
 			labelx = 1; % show every label
@@ -49,32 +49,34 @@ if nargin<5 || isempty(labelx) % set labelx
 			% doesn't require any additional inputs
 		case 'skey'
 			if strcmp(metorts,'timseries'), labelx={{'periodic','noise'},0};
-			else labelx={{'entropy'},0};
+			else labelx = {{'entropy'},0};
 			end
 			disp('You should really specify inputs for ''skey''');
 		otherwise
 			disp('No labels'), labelm = 'none';
 	end
 end
-if nargin<6 || isempty(customorder)
+if nargin < 6 || isempty(customorder)
 	customorder={[],[]};
 end
-if nargin<7 || isempty(norcl)
+if nargin < 7 || isempty(norcl)
     norcl = 'cl'; % by default visualize the clustered matrix
 end
-if nargin<8
+if nargin < 8
    F = []; % load from TS_loc_N or TS_loc_cl
 end
-if nargin<9,
+if nargin < 9,
     customcmap = 'redyellowblue';
 end
-if ~ismember(metorts,{'mets','ts'});
-    disp('Choose either ''mets'' or ''ts''');
+if ~ismember(metorts,{'ops','ts'});
+    disp('Choose either ''ops'' or ''ts''');
 end
-if ischar(kwgs),kwgs={kwgs}; end
+if ischar(kwgs)
+    kwgs={kwgs};
+end
 
 %% Read in the clustered data
-disp('Reading in data and guides from file...');
+fprintf(1,'Reading data and guides from file...\n');
 
 if isstruct(norcl)
     % can specify all of this in the norcl argument
@@ -100,12 +102,11 @@ elseif strcmp(norcl,'norm')
 end
 
 
-if strcmp(metorts,'mets')
-    F = F'; % make metrics the rows
+if strcmp(metorts,'ops')
+    F = F'; % make operations the rows
 end
 
-[nts,nm] = size(F); % label in this way -- by default think of ts as rows
-disp('p.s. I bloody love you babes')
+[nts, nm] = size(F); % label in this way -- by default think of ts as rows
 
 %% Reorder according to customorder
 if ~isempty(customorder{1}) % reorder rows
@@ -123,7 +124,7 @@ end
 
 %% Plot the object in a new figure
 figure('color','w'); box('on');
-title(['Data matrix of size ' num2str(nts) ' x ' num2str(nm)])
+title(sprintf('Data matrix of size %u x %u',nts,nm))
 ng = 6; % number of gradations in each set of colourmap
 nkwgs = size(kwgs,1); % number of keyword groups
 
@@ -137,7 +138,7 @@ if nkwgs>0
     Ng = length(gi);
     
     % if a unlabelled proportion -- add this
-    if sum(cellfun(@length,gi))<nts
+    if sum(cellfun(@length,gi)) < nts
         % we need to add an unlabelled class
         gi0 = gi;
         gi = cell(Ng+1,1);
@@ -168,7 +169,7 @@ if nkwgs>0
 end
 Ng = length(gi);
 % set the colormap
-if Ng<=1,
+if Ng <= 1,
     if strcmp(customcmap,'redyellowblue');
         customcmap = bengetcmap('redyellowblue',ng,0);
     else
@@ -177,58 +178,58 @@ if Ng<=1,
     colormap(customcmap)
 else
     cmap = colormap(bengetcmap('blues',ng,0,1));
-    if Ng>=2
+    if Ng >= 2
         cmap = [cmap;bengetcmap('greens',ng,0,1)];
     end
-    if Ng>=3
+    if Ng >= 3
         cmap = [cmap;bengetcmap('oranges',ng,0,1)];
     end
-    if Ng>=4
+    if Ng >= 4
         cmap = [cmap;bengetcmap('purples',ng,0,1)];
     end
-    if Ng>=5
+    if Ng >= 5
         cmap = [cmap;bengetcmap('reds',ng,0,1)];
     end
-    if Ng>=6
+    if Ng >= 6
         cmap = [cmap;pink(ng)];
     end
-    if Ng>=7
+    if Ng >= 7
         cmap = [cmap;gray(ng)];
     end
-    if Ng>=8
+    if Ng >= 8
         cmap = [cmap;bengetcmap('yelloworangered',ng,0,1)];
     end
-    if Ng>=9
+    if Ng >= 9
         cmap = [cmap;bengetcmap('purplebluegreen',ng,0,1)];
     end
-    if Ng>=10
+    if Ng >= 10
         cmap = [cmap;bengetcmap('yellowgreenblue',ng,0,1)];
     end
-    if Ng>=11
+    if Ng >= 11
         cmap = [cmap;bengetcmap('purpleblue',ng,0,1)];
     end
-    if Ng>=12
+    if Ng >= 12
         cmap = [cmap;bengetcmap('purplered',ng,0,1)];
     end
-    if Ng>=13
+    if Ng >= 13
         cmap = [cmap;bengetcmap('redpurple',ng,0,1)];
     end
-    if Ng>=14
+    if Ng >= 14
         cmap = [cmap;bengetcmap('orangered',ng,0,1)];
     end
-    if Ng>=15
+    if Ng >= 15
         cmap = [cmap;bengetcmap('yelloworangebrown',ng,0,1)];
     end
-    if Ng>=16
+    if Ng >= 16
         cmap = [cmap;bengetcmap('greenblue',ng,0,1)];
     end
-    if Ng>=17
+    if Ng >= 17
         cmap = [cmap;bengetcmap('bluepurple',ng,0,1)];
     end
-    if Ng>=18
+    if Ng >= 18
         cmap = [cmap;bengetcmap('bluegreen',ng,0,1)];
     end
-    if Ng>=19
+    if Ng >= 19
         disp('Unable to colour groups -- too many');
         cmap = bengetcmap('spectral',ng);
     end
@@ -260,8 +261,8 @@ end
 % end
 
 
-% Now reinvert F for metrics, so that time series are again on the rows
-if strcmp(metorts,'mets'); F=F'; end
+% Now reinvert F for operations, so that time series are again on the rows
+if strcmp(metorts,'ops'); F = F'; end
 
 % have to surround by zeros for an accurate pcolor:
 pcolor([F zeros(size(F,1),1); zeros(1,size(F,2)+1)]);
@@ -272,14 +273,14 @@ shading flat
 
 % time series
 if ~strcmp(labelm,'none')
-    axlabs = labsim(tsf,labelx);
+    axlabs = BF_label_space(tsf,labelx);
     writeaxes(axlabs,'y')
 end
     
-% metrics
-if nm<1000 % otherwise don't bother
+% operations
+if nm < 1000 % otherwise don't bother
     if ~strcmp(labelm,'none')
-        axlabs = labsim(mlab,labelx);
+        axlabs = BF_label_space(mlab,labelx);
         writeaxes(axlabs,'x')
     end
 end

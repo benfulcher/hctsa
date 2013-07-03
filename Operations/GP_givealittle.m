@@ -132,7 +132,7 @@ end
                 error('GP_givealittle: Out of memory');
                 % return as if a fatal error -- come back to this.
             else
-                keyboard
+                error('Error fitting Gaussian Process to data')
             end
         end
         

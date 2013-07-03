@@ -46,16 +46,14 @@ if isempty(res), error('Call to TISEAN failed. Exiting'), end
 s = textscan(res,'%[^\n]'); s=s{1};
 wi = strmatch('Writing to stdout',s);
 if isempty(wi)
-    disp('TISEAN routine didn''t return what I expected...');
-    out = NaN;
-    return
+    error('TISEAN routine nstata_z didn''t return what I expected...');
 end
 s = s(wi+1:end);
 
 xperr = zeros(nseg); % cross prediction error from using segment i to forecast segment j
 
-for i=1:nseg
-    for j=1:nseg
+for i = 1:nseg
+    for j = 1:nseg
         tmp = textscan(s{(i-1)*nseg+j},'%n%n%n');
         xperr(i,j) = tmp{3};
     end
@@ -63,7 +61,6 @@ end
 
 % pcolor(xperr)
 
-% keyboard
 
 %% Output statistics
 % diagonal elements are using a segment to predict itself -- ought to be

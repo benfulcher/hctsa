@@ -21,7 +21,7 @@ for k = 1:chunksize:length(dataset)
     
     [~,emsg] = mysql_dbexecute(dbc,query); % evaluate this chunk
     if ~isempty(emsg)
-        fprintf(1,'Error in SQL_add_chunked...\n')
+        fprintf(1,'Error in SQL_add_chunked...\n%s\n',emsg)
         keyboard
     end
 end

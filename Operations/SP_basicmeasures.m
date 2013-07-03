@@ -59,7 +59,6 @@ switch psdmeth
         S = fft(y,NFFT)/Ny; % Fourier Transform
         S = 2*abs(S(1:NFFT/2+1)); % single-sided amplitudes
         % convert to power spectrum later if necessary
-%         keyboard
     case 'burg'
     % pburg is the function; requires use of an AR model to estimate
     % there are heaps of others; maybe investigate the impact of these

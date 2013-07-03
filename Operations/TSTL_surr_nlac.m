@@ -58,9 +58,8 @@ end
 tc3_y = tc3dat(1);
 tc3_surr = tc3dat(2:end);
 
-[n x] = hist(tc3_surr,50);
+[n, x] = hist(tc3_surr,50);
 % hold off; plot(x,n); hold on; plot(tc3_y,max(n),'or'); hold off;
-% keyboard
     
 %% Get some outputs
 % these are completely made up by me

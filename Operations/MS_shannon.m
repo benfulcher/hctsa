@@ -33,16 +33,15 @@ if length(bin)==1 && length(depth)>1
     out.medent = median(ents);
     out.meanent = mean(ents);
     out.stdent = std(ents);
-%     keyboard
 end
 
 %% (*) Statistics over different bin numbers
-if length(bin)>1 && length(depth)==1
+if length(bin) > 1 && length(depth) == 1
     % range over depths specified in the vector
     % return statistics on results
     nbins = length(bin);
     ents = zeros(nbins,1);
-    for i=1:nbins
+    for i = 1:nbins
         ents(i) = shannon(y,bin(i),depth);
     end
     ents = ents/depth; % should scale with depth: normalize by this:
@@ -54,7 +53,7 @@ if length(bin)>1 && length(depth)==1
 end
 
 %% (*) statistics over both bins and depths
-if length(bin)>1 && length(depth)>1
+if length(bin) > 1 && length(depth) > 1
     nbins = length(bin);
     ndepths = length(depth);
     

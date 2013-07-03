@@ -52,7 +52,6 @@ out.pmodeperiodmax = length(find(dmaximai==mode(dmaximai)))/length(dmaximai);
 
 
 % hold on; plot(maximai,ami(maximai),'or'); hold off
-% keyboard
 
 
 end

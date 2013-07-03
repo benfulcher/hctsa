@@ -174,7 +174,6 @@ else % RETURN STATISTICS ON CURVES
 
 
 
-
     % When magnitude of gradient decreases by some factor
     % (+1s because of differencing)
     mm2 = abs(m2(1:end-1))./abs(m2(2:end));
@@ -209,16 +208,9 @@ else % RETURN STATISTICS ON CURVES
 	end
 
 
-
-
-
-
 end
 
-% keyboard
-
 % plot(boxdimo);
-% keyboard
 
     function yep = SUB_first(x,ab,th,maxdim)
         % for input vector x, returns first index that it exceeds (ab='above') or

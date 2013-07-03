@@ -8,8 +8,8 @@ function out = TSTL_acf(y)
 % first 50 autocorrelations
 try
     co_fft = data(acf(signal(y),100));
-catch me
-    if strcmp(me.message,'Matrix dimensions must agree.')
+catch emsg
+    if strcmp(emsg.message,'Matrix dimensions must agree.')
         out = NaN; return
     end
 end
@@ -19,8 +19,7 @@ co_ben = zeros(n,1);
 for i = 1:n
     co_ben(i) = CO_autocorr(y,i-1);
 end
-% keyboard
 
-out = norm(co_ben-co_fft);
+out = norm(co_ben - co_fft);
 
 end

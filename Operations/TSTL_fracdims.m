@@ -90,12 +90,10 @@ catch me
     end
 end
 % view(rs);
-% keyboard
 
 Dq = data(rs);
 q = spacing(rs);
 % plot(q,dq);
-% keyboard
 
 %% Get output stats
 out.rangeDq = range(Dq);
@@ -119,7 +117,7 @@ out.linfit_rmsqres = sqrt(mean(res.^2));
 % fit exponential
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[range(Dq) -0.5 min(Dq)]);
 f = fittype('a*exp(b*x)+c','options',s);
-[c,gof] = fit(q',Dq,f);
+[c, gof] = fit(q',Dq,f);
 out.expfit_a = c.a;
 out.expfit_b = c.b;
 out.expfit_c = c.c;

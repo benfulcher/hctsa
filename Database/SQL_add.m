@@ -320,8 +320,7 @@ if ~strcmp(importwhat,'mops')
     end
     if ~isempty(emsg),
         fprintf(1,' error. This is really not good.\n');
-        fprintf(1,'%s\n',emsg);
-        keyboard
+        RA_keyboard
     else
         if bevocal, fprintf(1,' initialized in %s!\n',benrighttime(toc(resultstic))); end
     end
@@ -418,7 +417,7 @@ if ~strcmp(importwhat,'mops')
         [~,emsg] = mysql_dbexecute(dbc, UpdateString);
         if ~isempty(emsg)
             fprintf(1,'\n Error updating keyword count in %s',thektable)
-            keyboard
+            RA_keyboard
         end
     end
     % for k = 1:nkw % for each unique keyword in the keyword table...
@@ -430,7 +429,7 @@ if ~strcmp(importwhat,'mops')
     %                             'WHERE Keyword = ''%s'''],thektable,SelectCount,ukws{k});
     %     [~,emsg] = mysql_dbexecute(dbc, UpdateString);
     %     if ~isempty(emsg)
-    %         keyboard
+    %         RA_keyboard
     %         fprintf(1,'\n Error updating keyword count in %s',thektable)
     %     end
     % end
@@ -469,7 +468,9 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
         					'WHERE mop_id = %u'],M_ids(k),M_ids(k));
     	[rs,emsg] = mysql_dbexecute(dbc, UpdateString);
     	if ~isempty(emsg)
-    		fprintf(1,'Error counting NPointTo operations for mop_id = %u\n',M_ids(k)); keyboard
+    		fprintf(1,'Error counting NPointTo operations for mop_id = %u\n',M_ids(k));
+            fprintf(1,'%s\n',emsg)
+            keyboard
     	end
     end
 end

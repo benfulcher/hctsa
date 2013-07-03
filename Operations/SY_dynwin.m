@@ -45,7 +45,6 @@ for i = 1:length(nsegr)
 
 % plot(qs,'o-');
 % input('what do you think?')
-% keyboard
 
 fs(i,1:nfeat) = std(qs);
 %     fs(i,nfeat+1:2*nfeat)=std(qs);

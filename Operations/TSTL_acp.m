@@ -109,6 +109,5 @@ for i = 1:maxdim
 end
 
 % plot(macpf)
-% keyboard
 
 end

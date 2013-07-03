@@ -3,30 +3,30 @@ function out = GP_predict(y,covfunc,ntrain,ntest,npreds,pmode)
 % hyperparameters and predict the next data point
 % Ben Fulcher 20/1/2010
 
-
+doplot = 0;
 %% Preliminaries
 % length of the time series
 N = length(y);
 
 %% Check Inputs
-if nargin<2 || isempty(covfunc),
-    disp('GP_hps: We''re using default sum of SE and noise covariance function')
+if nargin < 2 || isempty(covfunc),
+    fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n')
     covfunc = {'covSum', {'covSEiso','covNoise'}};
 end
 
-if nargin<3 || isempty(ntrain)
+if nargin < 3 || isempty(ntrain)
     ntrain = 20; % 20 previous data points to predict the next
 end
 
-if nargin<4 || isempty(ntest)
+if nargin < 4 || isempty(ntest)
     ntest = 5; % test on 5 data points into the future
 end
 
-if nargin<5 || isempty(npreds) % number of predictions
+if nargin < 5 || isempty(npreds) % number of predictions
     npreds = 10; % do it 10 times (equally-spaced) through the time series
 end
 
-if nargin<6 || isempty(pmode)
+if nargin < 6 || isempty(pmode)
     pmode = 'frombefore'; % predicts from previous ntrain datapoints
     % can also be 'randomgap' -- fills in random gaps in the middle of a string of
     % data
@@ -119,22 +119,24 @@ for i = 1:npreds
     stderrs(:,i) = 2*sqrt(S2); % ~errors on those predictions
     yss(:,i) = ys;
     
-%     % Plot
-%     if strcmp(pmode,'frombefore')
-%         plot(tt,yt,'.-k');
-%         hold on;
-%         plot(ts,ys,'.-b');
-%         errorbar(ts,mu,2*sqrt(S2),'m');
-%         hold off;
-%     else
-%         plot(tt,yt,'ok');
-%         hold on;
-%         plot(ts,ys,'ob');
-%         errorbar(ts,mu,2*sqrt(S2),'m');
-%         hold off;
-%     end
-%     keyboard
-    
+    % Plot
+    if doplot
+        if strcmp(pmode,'frombefore')
+            plot(tt,yt,'.-k');
+            hold on;
+            plot(ts,ys,'.-b');
+            errorbar(ts,mu,2*sqrt(S2),'m');
+            hold off;
+        else
+            plot(tt,yt,'ok');
+            hold on;
+            plot(ts,ys,'ob');
+            errorbar(ts,mu,2*sqrt(S2),'m');
+            hold off;
+        end
+        keyboard
+    end
+
 %     for j=1:ntest
 %         % set up structure output
 %         err = abs(mu(j)-ys(j))/sqrt(S2(j)); % in units of std at this point
@@ -146,7 +148,6 @@ end
 % Ok, we're done.
 
 %% Return statistics on how well it did
-% keyboard
 %% (1) PREDICTION ERROR MEASURES
 allstderrs = abs(mus-yss)./stderrs; % differences between predictions and actual
                               % in units of standard error (95% confidence
@@ -212,7 +213,7 @@ out.stdmlik = std(mlikelihoods);
         % t: time
         % y: data
         
-        if nargin<5 || isempty(init_loghyper)
+        if nargin < 5 || isempty(init_loghyper)
             % Use default starting values for parameters
             % How many hyperparameters
             s = feval(covfunc{:}); % string in form '2+1', ... tells how many
@@ -229,13 +230,12 @@ out.stdmlik = std(mlikelihoods);
         catch emsg
             if strcmp(emsg.identifier,'MATLAB:posdef')
                 disp('Error with lack of positive definite matrix for this function');
-                loghyper=NaN; return
+                loghyper = NaN; return
             elseif strcmp(emsg.identifier,'MATLAB:nomem')
-                disp('Out of memory. Leaving');
+                error('Out of memory fitting this Gaussian Process');
                 % return as if a fatal error -- come back to this.
-                return
             else
-                keyboard
+                error(['Error fitting Gaussian Process: ' emsg.message])
             end
         end
         %        hyper = exp(loghyper);

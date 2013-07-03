@@ -81,8 +81,10 @@ fprintf(1,'I just found %g unique keywords\n',nkw)
 for k = 1:nkw
     InsertString = sprintf('INSERT INTO TimeSeriesKeywords (Keyword) VALUES (''%s'')',ukws{k});
     [rs,emsg] = mysql_dbexecute(dbc, InsertString);
-	if isempty(rs)
-		fprintf(1,'Error inserting %s\n',ukws{k}); keyboard
+	if ~isempty(emsg)
+		fprintf(1,'Error inserting %s\n',ukws{k});
+        fprintf(1,'%s\n',emsg)
+        keyboard
 	end
 end
 fprintf(1,'Just filled TimeSeriesKeywords Table with unique keywords\n')
@@ -103,6 +105,7 @@ for k = 1:nkw
     [rs,emsg] = mysql_dbexecute(dbc, InsertString);
 	if ~isempty(emsg)
 		fprintf(1,'Error inserting %s\n',ukws{k});
+        fprintf(1,'%s\n',emsg)
         keyboard
 	end
 end
@@ -130,7 +133,8 @@ for k = 1:nkw
     					'WHERE tskw_id = %u'],tskw_ids(k),tskw_ids(k));
 	[rs,emsg] = mysql_dbexecute(dbc, UpdateString);						
 	if ~isempty(emsg)
-		disp(['Error updating TimeSeriesKeywords with MeanLength']); keyboard
+		fprintf(1,'Error updating TimeSeriesKeywords with MeanLength\n%s\n',emsg);
+        keyboard
 	end
 end
 fprintf(1,'Just updated the mean length of time series for each of the %u keywords into the TsKeywordsRelate table\n',nkw)

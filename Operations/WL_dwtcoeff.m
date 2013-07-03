@@ -58,9 +58,8 @@ end
 % ylabel('Level');
 
 %% Get statistics on coefficients
-for k=1:level
-    
-    if k<=maxlevelallowed
+for k = 1:level
+    if k <= maxlevelallowed
         d = detcoef(c,l,k); % detail coefficients at level k
 
         % maximum coefficient at this level
@@ -103,7 +102,5 @@ end
 %% Extract Approximation Coefficients from wavelet decomposition structure
 
 % CA = appcoef(C,L,wname,level);
-
-% keyboard
 
 end

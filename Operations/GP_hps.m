@@ -3,44 +3,46 @@ function out = GP_hps(y,covfunc,squishorsquash,maxN,methds)
 % hyperparameters given a postulated covariance function
 % Ben Fulcher 19/1/2010
 
+doplot = 0; % plot basic outputs
 
 %% Preliminaries
 % length of the time series
 N = length(y);
 
 %% Check Inputs
-if nargin<2 || isempty(covfunc),
-    disp('GP_hps: We''re using default sum of SE and noise covariance function')
+if nargin < 2 || isempty(covfunc),
+    fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n')
     covfunc = {'covSum', {'covSEiso','covNoise'}};
 end
 
-if nargin<3 || isempty(squishorsquash)
+if nargin < 3 || isempty(squishorsquash)
     squishorsquash = 1;
 end
 
-if nargin<4 || isempty(maxN)
+if nargin < 4 || isempty(maxN)
     maxN = 500; % maximum length time series we do this for -- 
                  % resample longer time series
     % maxN = 0 --> include the whole thing
 end
-if maxN>0 && maxN<1
-    maxN = ceil(N*maxN); % specify a proportion of the time series length, N
+if maxN > 0 && maxN < 1
+    % specify a proportion of the time series length, N
+    maxN = ceil(N*maxN);
 end
 
-if nargin<5 || isempty(methds)
+if nargin < 5 || isempty(methds)
     methds = 'resample';
 end
 
 %% Downsample long time series
-if maxN>0 && N>maxN
+if maxN > 0 && N > maxN
     switch methds
         case 'resample' % resamples the whole time series down
             f = maxN/N;
             y = resample(y,ceil(f*10000), 10000);
-            if length(y)>maxN
+            if length(y) > maxN
                 y = y(1:maxN);
             end
-            disp(['Resampled from ' num2str(N) ' down to ' num2str(length(y)) ' (' num2str(maxN) ')']);
+            fprintf(1,'Resampled the time series from a length %u down to %u (%u)\n',N,length(y),maxN);
             N = length(y); % update time series length (should be maxN)
             t = SUB_settimeindex(N,squishorsquash); % set time index
 
@@ -79,9 +81,7 @@ if maxN>0 && N>maxN
             t = t(ii);
             y = y(ii);
         otherwise
-            disp('Invalid sampling method. Exiting.')
-            out = NaN;
-            return
+            error('Invalid sampling method.')
     end
 else
     t = SUB_settimeindex(N,squishorsquash); % set time index
@@ -98,7 +98,6 @@ s = feval(covfunc{:}); % string in form '2+1', ... tells how many
                         % hyperparameters for each contribution to the
                         % covariance function
 nhps = eval(s);
-
 
 % (2) Intialize hyperparameters before optimization
 covfunc1 = covfunc{1};
@@ -120,38 +119,38 @@ try
 catch emsg
     if strcmp(emsg.identifier,'MATLAB:posdef')
         disp('Error with lack of positive definite matrix for this function');
-        out = NaN; return
+        out = NaN; return % return NaN -- the data is not suited to GP fitting
     elseif strcmp(emsg.identifier,'MATLAB:nomem')
-        disp('Out of memory. Leaving');
-        % return as if a fatal error -- come back to this.
-        return
+        error('Not enough memory to fit a Gaussian Process to this data');
     else
-        disp('unknown error keyboard')
-        keyboard
+        error(sprintf('Error fitting Gaussian Process to data, %s\n',emsg.message))
     end
 end
 hyper = exp(loghyper);
 
 for i = 1:nhps
-    % set up structure output
-    eval(['out.h' num2str(i) ' = hyper(' num2str(i) ');']);
-    eval(['out.logh' num2str(i) ' = loghyper(' num2str(i) ');']);
+    % Set up structure output
+    eval(sprintf('out.h%u = hyper(%u);',i,i));
+    eval(sprintf('out.logh%u = loghyper(%u);',i,i));
+    % eval(['out.h' num2str(i) ' = hyper(' num2str(i) ');']);
+    % eval(['out.logh' num2str(i) ' = loghyper(' num2str(i) ');']);
 end
 
 
 %% For Plotting
-% xstar = t;
-% % xstar = linspace(min(t),max(t),1000)';
-% [mu S2] = gpr(loghyper, covfunc, t, y, xstar);
-% % S2p = S2 - exp(2*loghyper(3)); % remove noise from predictions
-% S2p = S2;
-% figure('color','w');
-% f = [mu+2*sqrt(S2p);flipdim(mu-2*sqrt(S2p),1)];
-% fill([xstar; flipdim(xstar,1)], f, [6 7 7]/8, 'EdgeColor', [7 7 6]/8); % grayscale error bars
-% hold on;
-% plot(xstar,mu,'k-','LineWidth',2); % mean function
-% plot(t,y,'.-k'); % original data
-
+if doplot
+    xstar = t;
+    % xstar = linspace(min(t),max(t),1000)';
+    [mu S2] = gpr(loghyper, covfunc, t, y, xstar);
+    % S2p = S2 - exp(2*loghyper(3)); % remove noise from predictions
+    S2p = S2;
+    figure('color','w');
+    f = [mu+2*sqrt(S2p); flipdim(mu-2*sqrt(S2p),1)];
+    fill([xstar; flipdim(xstar,1)], f, [6 7 7]/8, 'EdgeColor', [7 7 6]/8); % grayscale error bars
+    hold on;
+    plot(xstar,mu,'k-','LineWidth',2); % mean function
+    plot(t,y,'.-k'); % original data
+end
 
 %% Other statistics???
 
@@ -159,7 +158,7 @@ end
 out.mlikelihood = - gpr(loghyper, covfunc, t, y);
 
 % Mean error from mean function
-[mu S2] = gpr(loghyper, covfunc, t, y, t); % evaluate at datapoints
+[mu, S2] = gpr(loghyper, covfunc, t, y, t); % evaluate at datapoints
 out.rmserr = mean(sqrt((y-mu).^2));
 % Better to look at mean distance away in units of std
 out.mabserr_std = mean(abs((y-mu)./sqrt(S2)));
@@ -168,23 +167,19 @@ out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
                             % fitting)
 out.std_S_data = std(sqrt(S2)); % should vary a fair bit
 
-if std(mu)<0.01; % hasn't fit the time series well at all -- too constant
-    disp('Error converging on the time series');
+if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
+    fprintf(1,'This time series is not suited to Gaussian Process fitting\n');
     out = NaN; return
 end
                             
                             
 % Statistics on variance
 xstar = linspace(min(t),max(t),1000)'; % crude, I know, but it's nearly 5pm
-[mu S2] = gpr(loghyper, covfunc, t, y, xstar); % evaluate at datapoints
+[mu, S2] = gpr(loghyper, covfunc, t, y, xstar); % evaluate at datapoints
 S = sqrt(S2);
 out.maxS = max(S); % maximum variance
 out.minS = min(S); % minimum variance
 out.meanS = mean(S); % mean variance
-
-
-
-
 
 
     function t = SUB_settimeindex(N,squishorsquash)
@@ -198,7 +193,6 @@ out.meanS = mean(S); % mean variance
             t = linspace(0,1,N)';
         end
     end
-
 
 
 end
