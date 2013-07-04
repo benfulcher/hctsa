@@ -127,7 +127,6 @@ for i=1:npred
 %     e = pe(m, ytest); % prediction errors -- exactly the same as returning 
 %                       % residuals of 1-step-ahead prediction model
 
-%     keyboard
 
     % plot the two:
 %     plot(y,yp);
@@ -189,10 +188,6 @@ out.stdrats_mean = mean(stdrats);
 out.stdrats_median = median(stdrats);
 out.stdrats_std = std(stdrats);
 out.stdrats_iqr = iqr(stdrats);
-
-% keyboard
-
-
 
 
 end

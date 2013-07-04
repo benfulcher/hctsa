@@ -69,7 +69,6 @@ switch method
         else p = 10;
         end
         steppedy = ckfilter(y, K, M, p);
-%         keyboard
         
     case 'l1pwc'
         % Based around code originally written by 

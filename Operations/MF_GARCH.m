@@ -185,7 +185,6 @@ if all(isnan(innovations))
     out = NaN; return
 end
 
-% keyboard
 %% (4) Return statistics on fit
 
 % (i) Return coefficients, and their standard errors as seperate statistics

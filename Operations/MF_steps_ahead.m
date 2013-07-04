@@ -145,6 +145,4 @@ out.maxdiffrms = max(diff(mf.rmserrs));
 out.stddiffrms = std(diff(mf.rmserrs));
 out.ndown = sum(diff(mf.rmserrs)<0);
 
-% keyboard
-
 end

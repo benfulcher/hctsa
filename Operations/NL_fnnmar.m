@@ -67,7 +67,6 @@ if isempty(th) % output summary statistics
     % drops = dnn(intersect(1:end,gr))./nn(intersect(1:end-1,gr));
     out.mdrop = mean(dnn);
     out.pdrop = -sum(sign(dnn))/(maxm-1);
-    % keyboard
     
     % fnn
     for i = 2:maxm

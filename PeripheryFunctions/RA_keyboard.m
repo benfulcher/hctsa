@@ -1,10 +1,10 @@
 function RA_keyboard
+% Romesh Abeysuriya's replacement of Matlab's 'keyboard' command
 % Keyboard debug caller 
 % Provides more information including the stack trace than simply using 
 % 'keyboard'
-% Use kdb() directly instead of keyboard()
+% Use RA_keyboard() directly instead of keyboard()
 % Note this function will not work if it is the last line in the program
-%
 % By Romesh Abeysuriya 15-11-12
     
 [stack_trace] = dbstack;

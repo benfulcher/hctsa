@@ -59,7 +59,6 @@ if isempty(dc)
 else
     out.maxdc = max(dc);
 end
-% keyboard
 
 
 % Fit statistics
@@ -71,8 +70,6 @@ out.fpe = m.EstimationInfo.FPE; % Final prediction error of model
 out.lastimprovement = m.EstimationInfo.LastImprovement; % Last improvement made in interation
 out.aic = aic(m); % ~ log(fpe)
 
-
-% keyboard
 
 %% Prediction
 
@@ -94,11 +91,7 @@ yp = predict(mp, ytest, steps, 'init', 'e'); % across whole dataset
 % plot the two:
 % plot(y,yp);
 
-% keyboard
-
 mresiduals = ytest.y-yp.y;
-
-% keyboard
 
 % 1) Get statistics on residuals
 residout = MF_residanal(mresiduals);
@@ -120,7 +113,6 @@ end
 % plot(yp.y,'b');
 % hold on;
 % plot(ytest.y,'r');
-% keyboard
 
 %% This is the way to do it:
 % % Select the first half of the data for estimation
@@ -138,7 +130,6 @@ end
 % e = randn(N,1);
 % % yp = filter(c_ma,c_ar,e);
 % yp = predict(m,iddata([],e,1),1);
-% keyboard
 % 
 % marma = armax(y,[3,2]);
 % compare(y,marma,2)

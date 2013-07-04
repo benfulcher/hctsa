@@ -111,7 +111,6 @@ switch model
             sbcs(i) = min(SBC);
         end
         % Return statistics
-%         keyboard
         out.orders_mode = mode(orders);
         out.orders_mean = mean(orders);
         out.orders_std = std(orders);

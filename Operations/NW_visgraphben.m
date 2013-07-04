@@ -185,7 +185,6 @@ out.minnbinmaxent = binr(find(h==max(h),1,'first'));
 out.meanent = mean(h);
 diffh = diff(h);
 out.meanchent = mean(diffh(diffh~=0));
-% keyboard
 
 out.kac1 = CO_autocorr(k,1);
 out.kac2 = CO_autocorr(k,2);

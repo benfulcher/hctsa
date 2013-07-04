@@ -116,7 +116,6 @@ out.rec2 = rqa(10); % recurrence time of the 2nd type
 % % Can't be bothered, actually...!
 % % x = rpl*(1-sqrt((1:4)/5));
 % % bins = zeros(5,1);
-% % keyboard
 % % bins(1) = length(find());
 
 

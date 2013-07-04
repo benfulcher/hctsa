@@ -18,9 +18,6 @@ for i = 1:length(lambdar)
     rmserrpsegs(i) = outi.rmsoffpstep;
 end
 
-% keyboard
-
-
 % rmserrs gets under ** for first time
 out.rmserrsu05 = lambdar(find(rmserrs<0.5, 1, 'first'));
 if isempty(out.rmserrsu05), out.rmserru05 = NaN; end
