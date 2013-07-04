@@ -37,7 +37,7 @@ end
 
 % use same method as for rows
 if nargin < 3 || isempty(cmethc)
-    disp(['Clustering in the same way as for the columns: using ' cmethr])
+    fprintf(1,'Clustering in the same way as for the columns: using %s\n',cmethr)
     cmethc = cmethr;
     cparamsc = cparamsr; % just specify the first one, and this will do the same
 end
@@ -50,38 +50,25 @@ end
 
 % subsets -- only cluster a subset of the full data matrix
 if nargin < 5
-    disp('No subsets, clustering the full object');
+    fprintf(1,'No subsets, clustering the full object\n')
     subs = [];
 end
 
-% if nargin<6 || isempty(savelinkage)
-%     savelinkage = 0;
-%     disp('not saving linkage information to file, sorry...');
-% end
-
-% % whether to actually do any clustering (may want to just move a subset of
-% % TS_loc_N to TS_loc_cl by specifying a subset and setting this flag to 0)
-% if nargin<5 || isempty(actuallycluster)
-%     actuallycluster = 1;
-% end
-% ** can do this with 'none' options in the individual clustering inputs
-% now **
-
 if ~isempty(subs)
-    if length(subs)~=3
-        fprintf(1,'The subset should specify ''norm'' or ''cl'' and the subset. Exiting.\n')
-        return
+    if length(subs) ~= 3
+        error('The subset should specify ''norm'' or ''cl'' and the subset.')
     elseif ~ismember(subs{1},{'norm','cl'})
-        fprintf(1,'The first component of subset should be either ''norm'' or ''cl''. Exiting\n')
-        return
+        error('The first component of subset should be either ''norm'' or ''cl''.')
     end
 end
 
 %% Read in information from local files
-fprintf(1,'Reading in local files...')
+fprintf(1,'Loading in local files...')
 
 if isempty(subs) || strcmp(subs{1},'norm')
     fprintf(1,' TS_loc_N, ...')
+    wn = which('TS_loc_N'); % check it exists
+    if isempty(wn); fprintf(1,'\n'), error('TS_loc_N not found -- please run TSQ_normalize'); end
     load TS_loc_N.mat TS_loc_N % this is the normalized local data file -- we cluster on the normalized values
     F = TS_loc_N;
     clear TS_loc_N
@@ -101,6 +88,7 @@ else % subset of the clustered matrix
     F = TS_loc_cl;
     clear TS_loc_cl
 end
+fprintf(1,' loaded.\n')
 
 % now all variables are by the 'cl' superscript names
 % the data is in F

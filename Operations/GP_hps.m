@@ -123,7 +123,7 @@ catch emsg
     elseif strcmp(emsg.identifier,'MATLAB:nomem')
         error('Not enough memory to fit a Gaussian Process to this data');
     else
-        error(sprintf('Error fitting Gaussian Process to data, %s\n',emsg.message))
+        error('Error fitting Gaussian Process to data, %s\n',emsg.message)
     end
 end
 hyper = exp(loghyper);

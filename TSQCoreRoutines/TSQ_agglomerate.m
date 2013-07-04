@@ -87,7 +87,7 @@ end
 tic
 [qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
-    fprintf(1,'\n'); error(sprintf('Error selecting %s elements from %s',writewhat,dbname));
+    fprintf(1,'\n'); error('Error selecting %s elements from %s',writewhat,dbname);
 elseif isempty(qrc)
     fprintf(1,'\nNo %s elements in this range in the database anymore!\n',writewhat);
     return

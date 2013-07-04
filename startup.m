@@ -7,7 +7,7 @@ addfcn('Operations');
 addfcn('PeripheryFunctions');
 addfcn('TimeSeries');
 addfcn('TSQCoreRoutines');
-fprintf(1,' core directories added...\n')
+fprintf(1,' Core directories added.\n')
 
 %% Now add all Toolboxes:
 fprintf(1,'Adding external time-series toolboxes...')

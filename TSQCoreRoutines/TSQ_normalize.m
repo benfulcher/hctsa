@@ -39,14 +39,15 @@ if nargin < 1 || isempty(normopt)
 end
 
 if nargin < 2 || isempty(trimopt)
-    fprintf(1,'Removing less than 90%%-good time series and less than 100%%-good metrics\n');
-    trimopt = [0.90 1]; % (default): remove less than 90%-good time series, & then less than 
+    trimopt = [0.90, 1]; % (default): remove less than 90%-good time series, & then less than 
                         % 100%-good metrics.
                         % [[Don't do any covariance filtering]]
 end
 if iscell(trimopt) % still using the cell input of previous TSQ_normalize
     trimopt = trimopt{1};
 end
+fprintf(1,['Removing time series with more than %.2f%% special-valued outputs, ' ...
+            'and operations with more than %.2f%%-special-valued outputs\n'],trimopt(1),trimopt(2));
 
 if nargin < 3
     subs = {}; % don't subset
@@ -113,10 +114,9 @@ if thresh_r > 0 % if 1, then even the worst are included
     % (ii) remove rows with more than a proportion thresh_r bad values
     badrp = zeros(length(badr),1); % stores the number of bad entries
     for i = 1:length(badr)
-        badrp(i)=length(find(rj==i));
+        badrp(i) = length(find(rj==i));
     end
     badrp = badrp/size(F,2);
-%     keyboard % stop to plot ksdensity(badrp); check which time series are throwing you off...   
     xkr1 = badr(badrp >= 1 - thresh_r); % don't keep rows (1) if fewer good values than thresh_r
     kr1 = setxor(1:size(F,1),xkr1);
 
@@ -124,7 +124,8 @@ if thresh_r > 0 % if 1, then even the worst are included
         if ~isempty(xkr1)
             fprintf(1,['Removed time series with fewer than %4.2f%% good values:'...
                             ' from %u to %u\n'],thresh_r*100,size(F,1),length(kr1))
-            fprintf(1,'Lost %s\n',bencat(tsf(xkr1),',')) % display filtered timse series to screen
+            % display filtered times series to screen:
+            fprintf(1,'Lost %u operations: %s\n',size(F,1)-length(kr1),bencat(tsf(xkr1),','))
         else
             fprintf(1,'All %u time series had greater than %4.2f%% good values. Keeping them all.\n', ...
                             size(F,1),thresh_r*100)
@@ -132,11 +133,10 @@ if thresh_r > 0 % if 1, then even the worst are included
         F = F(kr1,:); % ********************* KR1 ***********************
         TS_loc_q = TS_loc_q(kr1,:);
     else
-        fprintf(1,'No time series had more than %4.2f%% good values. Exiting.\n',thresh_r*100)
-        return
+        error(1,'No time series had more than %4.2f%% good values.',thresh_r*100)
     end
 else
-    fprintf(1,'No filtering of time series based on proportion of bad values\n')
+    fprintf(1,'No filtering of time series based on proportion of bad values.\n')
     kr1 = (1:size(F,1));
 end
 
@@ -165,7 +165,7 @@ if thresh_c > 0
         TS_loc_q = TS_loc_q(:,kc1);
         
     else
-        error(sprintf('No operations had fewer than %u%% good values.',num2str(thresh_c*100)))
+        error('No operations had fewer than %u%% good values.',thresh_c*100)
     end
 else
     % fprintf(1,'No filtering of operations based on proportion of bad values\n')
@@ -173,23 +173,26 @@ else
 end
 
 % (ii) Remove operations that are constant across the time series dataset
-crap_met = zeros(size(F,2),1);
-for j = 1:size(F,2)
-    crap_met(j) = (range(F(~isnan(F(:,j)),j))<eps);
-end
-kc2 = find(crap_met==0); % kept column (2)
-% rangeF = range(F);
-% kc2 = find(rangeF>eps); % (NaN or positive)
+if size(F,1) > 1 % otherwise just a single time series remains and all will be constant!
+    crap_op = zeros(size(F,2),1);
+    for j = 1:size(F,2)
+        crap_op(j) = (range(F(~isnan(F(:,j)),j)) < eps);
+    end
+    kc2 = find(crap_op==0); % kept column (2)
 
-if ~isempty(kc2)
-    if length(kc2) < size(F,2)
-        fprintf(1,'Filtered down operations with near-constant outputs: from %u to %u',...
-                         size(F,2),length(kc2))
-        F = F(:,kc2); % ********************* KC2 **********************
-        TS_loc_q = TS_loc_q(:,kc2);
+    if ~isempty(kc2)
+        if length(kc2) < size(F,2)
+            fprintf(1,'Filtered down operations with near-constant outputs: from %u to %u',...
+                             size(F,2),length(kc2))
+            F = F(:,kc2); % ********************* KC2 **********************
+            TS_loc_q = TS_loc_q(:,kc2);
+        end
+    else
+        error('All %u operations produced constant outputs on the %u time series?!',length(kc2),size(F,1))
     end
 else
-    error('All operations give constant outputs?!')
+    % just one time series remains: keep all operations
+    kc2 = ones(1,size(F,2));
 end
 
 % (ii) Remove time series with constant feature vectors
@@ -198,9 +201,6 @@ for j = 1:size(F,1)
     crap_ts(j) = (range(F(j,~isnan(F(j,:)))) < eps);
 end
 kr2 = find(crap_ts == 0); % kept column (2)
-% rangeF = range(F');
-% kr2 = find(rangeF~=0); % (NaN or positive)
-
 
 if ~isempty(kr2)
     if (length(kr2) < size(F,1))
@@ -334,11 +334,13 @@ nancol = zeros(size(F,2),1); %column of all NaNs
 for i = 1:size(F,2)
     nancol(i) = all(isnan(F(:,i)));
 end
-if any(nancol) % there are columns that are all NaNs
+if all(nancol) % all columns are NaNs
+    error('After normalization, all columns were bad-values... :(');
+elseif any(nancol) % there are columns that are all NaNs
     kc = find(nancol==0);
     F = F(:,kc);
     TS_loc_q = TS_loc_q(:,kc);
-    fprintf(1,'We just removed %u all-NaN columns from after normalization\n',sum(nancol));
+    fprintf(1,'We just removed (%u/%u) all-NaN columns from after normalization\n',sum(nancol),length(nancol));
     m_ids_keepn = m_ids_keepn(kc);
     mcoden = mcoden(kc);
     mlabn = mlabn(kc);
@@ -347,24 +349,11 @@ if any(nancol) % there are columns that are all NaNs
     mlinkn = mlinkn(kc);
 end
 
-% [~, badc] = find(isnan(F));
-% if ~isempty(badc)
-%     badc = unique(badc);
-%     kc = setxor(1:size(F,2),badc);
-%     F = F(:,kc);
-%     disp(['We just removed ' num2str(length(badc)) ' bad columns']);
-%     m_ids_keepn = m_ids_keepn(kc);
-%     mcoden = mcoden(kc);
-%     mlabn = mlabn(kc);
-%     mkwn = mkwn(kc);
-%     mpointn = mpointn(kc);
-%     mlinkn = mlinkn(kc);
-% end
 
 
 %% Now, make sure the columns are still good
 % check again for constant columns after normalization
-kc = find(range(F)~=0); % (NaN or positive)
+kc = find(range(F) ~= 0); % (NaN or positive)
 if ~isempty(kc) && length(kc) < size(F,2)
     fprintf(1,'Post-normalization filtering of operations with constant outputs: from %u to %u', ...
                         size(F,2),length(kc))
@@ -378,12 +367,12 @@ if ~isempty(kc) && length(kc) < size(F,2)
     TS_loc_q = TS_loc_q(:,kc);
 end
 
-fprintf(1,'%u bad entries (%4.2f%%) in the data matrix\n',sum(isnan(F(:))),sum(isnan(F(:)))/length(F(:))*100)
+fprintf(1,'%u bad entries (%4.2f%%) in the (%ux%u) data matrix\n',sum(isnan(F(:))),sum(isnan(F(:)))/length(F(:))*100,size(F,1),size(F,2))
 
 %% Done -- save output to file
 fprintf(1,'Saving the trimmed, normalized data to local files: ')
 TS_loc_N = F;
-save('TS_loc_N.mat','TS_loc_N'); fprintf(1,'TS_loc_N (%ux%u)',size(F,1),size(F,2))
+save('TS_loc_N.mat','TS_loc_N'); fprintf(1,'TS_loc_N')
 % Save qualities in normalized matrix TS_loc_q_N
 TS_loc_q_N = TS_loc_q; clear TS_loc_q;
 save('TS_loc_q_N.mat','TS_loc_q_N'); fprintf(1,', TS_loc_q_N');

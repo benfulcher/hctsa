@@ -219,8 +219,8 @@ case 'ts' % Prepare toadd cell for time series
 
         catch emsg
             fprintf(1,'%s\n',emsg.message)
-            error(sprintf(['Could not read the data file for ''%s''.' ...
-                                    'Check that it''s in Matlab''s path.'],timeseries(j).Filename))
+            error(['Could not read the data file for ''%s''.' ...
+                                    'Check that it''s in Matlab''s path.'],timeseries(j).Filename)
         end
         toadd{j} = sprintf('(''%s'',''%s'',%u,''%s'')',esc(timeseries(j).Filename),esc(timeseries(j).Keywords),timeseries(j).Length,timeseries(j).Data);
         
@@ -257,7 +257,7 @@ case 'ops' % Prepare toadd cell for operations
         
     end
 end
-if bevocal, fprintf(1,'\nDone.\n'); end
+if bevocal, fprintf(1,'\ndone.\n'); end
 
 
 % Check for duplicates
@@ -282,7 +282,7 @@ if all(isduplicate)
     return
 elseif sum(isduplicate) > 0
     if bevocal
-        fprintf(1,'I found %u duplicate %s already in the database %s...?!\n',sum(isduplicate),thewhat,dbname)
+        fprintf(1,'I found %u duplicate %s already in the database %s!\n',sum(isduplicate),thewhat,dbname)
         fprintf(1,'There are %u new %s to add to %s...\n',sum(~isduplicate),thewhat,dbname)
     end
 end
@@ -302,9 +302,9 @@ case 'ops' % Add operations to the Operations table
 case 'mops'
     SQL_add_chunked(dbc,'INSERT INTO MasterOperations (MasterLabel, MasterCode) VALUES',toadd,isduplicate);
 end
-fprintf(1,' Done!\n')
+fprintf(1,' done.\n')
 
-% Add new entries to the Results table where the TIMESERIES (ts_id) doesn't already exist
+% Add new entries to the Results table
 if ~strcmp(importwhat,'mops')
     resultstic = tic;
     if bevocal
@@ -312,10 +312,10 @@ if ~strcmp(importwhat,'mops')
     end
     switch importwhat
     case 'ts'
-        [rs,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
+        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
                                 ' CROSS JOIN Operations o ON t.ts_id > %u'],maxid));
     case 'ops'
-        [rs,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
+        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
                                 ' CROSS JOIN Operations o ON o.m_id > %u'],maxid));
     end
     if ~isempty(emsg),
@@ -349,12 +349,13 @@ if ~strcmp(importwhat,'mops')
         end
     end
     nkw = length(ukws); % the number of unique keywords in the new set of time series
-    if bevocal, fprintf(1,'\nI found %u unique keywords in the %s in %s...',nkw,thewhat,INPfile); end
+    if bevocal, fprintf(1,'\nI found %u unique keywords in the %u new %s in %s...',nkw,sum(~isduplicate),thewhat,INPfile); end
 
     % How many overlap with existing keywords??
     allkws = mysql_dbquery(dbc,sprintf('SELECT Keyword FROM %s',thektable));
     if ~isempty(allkws) % the table may be empty, in which case all keywords will be new
-        isnew = cellfun(@(x)~isempty(x),regexp(ukws,allkws,'ignorecase')); % ignore case for keywords
+        isnew = ~ismember(ukws,allkws);
+        % cellfun(@(x)~isempty(x),regexp(ukws,allkws,'ignorecase')); % ignore case for keywords
     else
         isnew = ones(nkw,1); % all are new
     end
@@ -362,7 +363,7 @@ if ~strcmp(importwhat,'mops')
     if sum(isnew) > 0
         if bevocal
             fprintf(1,['\nIt turns out that %u keywords are completely new and will be added ' ...
-                        'to the %s table in %s'],sum(isnew),thektable,dbname)
+                        'to the %s table in %s...'],sum(isnew),thektable,dbname)
         end
         % Add the new keywords to the Keywords table
         insertstring = sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES',thektable);
@@ -372,7 +373,7 @@ if ~strcmp(importwhat,'mops')
             toadd{k} = sprintf('(''%s'',0)',ukws{fisnew(k)});
         end
         SQL_add_chunked(dbc,insertstring,toadd);
-        fprintf(1,' added %u new keywords!\n',nkw)
+        fprintf(1,' added %u new keywords!\n',sum(isnew))
     else
         if bevocal
             fprintf(1,['\nIt turns out that all new keywords already exist in ' ...
@@ -387,21 +388,19 @@ if ~strcmp(importwhat,'mops')
     % allkws, allids
     switch importwhat
     case 'ts'
-        allnames = bencat({timeseries.Filename},',','''');
+        allnames = bencat({timeseries(~isduplicate).Filename},',','''');
     case 'ops'
-        allnames = bencat({operation.Name},',','''');
+        allnames = bencat({operation(~isduplicate).Name},',','''');
     end
     ourids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE %s IN (%s)',theid,thetable,thename,allnames));
     ourids = vertcat(ourids{:}); % ids matching FileNames/OpNames
     ourkids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Keyword IN (%s)',thekid,thektable,bencat(ukws,',','''')));
     ourkids = vertcat(ourkids{:}); % ids matching FileNames/OpNames
     nkwrels = sum(cellfun(@(x)length(x),kwsplit)); % number of keyword relationships in the input file
-    addcell = cell(nkwrels,1);
-    ii = 1;
-    for i = 1:nits
+    addcell = {};
+    for i = 1:length(kwsplit)
         for j = 1:length(kwsplit{i})
-            addcell{ii} = sprintf('(%u,%u)',ourids(i),ourkids(strcmp(kwsplit{i}{j},ukws)));
-            ii = ii+1;
+            addcell{end+1} = sprintf('(%u,%u)',ourids(i),ourkids(strcmp(kwsplit{i}{j},ukws)));
         end
     end
     SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',thereltable,theid,thekid),addcell); % add them all in chunks
@@ -433,7 +432,7 @@ if ~strcmp(importwhat,'mops')
     %         fprintf(1,'\n Error updating keyword count in %s',thektable)
     %     end
     % end
-    fprintf(1,'done\n')
+    fprintf(1,' done.\n')
 end
 
 % Update master/operation links
@@ -445,7 +444,7 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
                             'm JOIN Operations o ON m.MasterLabel = o.MasterLabel'];
     [~,emsg] = mysql_dbexecute(dbc,InsertString);
     if isempty(emsg)
-        fprintf(' done\n');
+        fprintf(' done.\n');
     else
         fprintf(1,' shit. Error joining the MasterOperations and Operations tables:\n');
         fprintf(1,'%s\n',emsg); keyboard
@@ -478,6 +477,6 @@ end
 %% Close database
 SQL_closedatabase(dbc)
 
-fprintf('All tasks completed reading %s for %s into %s in %s.\n',INPfile,thewhat,dbname,benrighttime(toc(ticker)));
+fprintf('All tasks completed reading %s for adding %u %s into %s in %s.\n',INPfile,sum(~isduplicate),thewhat,dbname,benrighttime(toc(ticker)));
 
 end

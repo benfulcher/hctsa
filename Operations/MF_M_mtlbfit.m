@@ -35,7 +35,7 @@ if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
             fprintf(1,'The model, %s, failed for this data -- returning NaNs for all fitting outputs\n',dmodel);
             out = NaN; return
         else
-            error(sprintf('MF_M_mtlbfit(x,%s,%u): Unexpected error fitting %s to the data distribution',dmodel,nbins,dmodel))
+            error('MF_M_mtlbfit(x,%s,%u): Unexpected error fitting %s to the data distribution',dmodel,nbins,dmodel)
         end
 	end
 elseif any(strcmp(TSmods,dmodel)); % valid TIME SERIES model name

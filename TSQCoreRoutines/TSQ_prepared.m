@@ -1,14 +1,8 @@
 function TSQ_prepared(ts_ids_keep, m_ids_keep, getwhat, dbname, brawninputs, doinone)
-
 % This function prepares files for subsequent calculation/visualization methods.
 % It takes as input a set of constraints on the time series and metrics to include
-% and output the relevant subsection of the time series-metric table (taken from 
-% STORE_DAT) as TS_loc and also a matlab file containints the time series labels, lengths,
-% keywords, and preprocessings (this is TS_guide_ts.mat)
-% and the same for metric function names, labels, post-processings, and master/pointer labels
-% which is stored as TS_guide_met.mat
-% It also initializes the STORE_data matrix with missing values along rows and columns corresponding
-% to new time series/metrics being added for the first time to the store
+% and output the relevant subsection of the data matrix as TS_loc and also a Matlab 
+% file containing the time series and oepration metadata
 % 
 % HISTORY:
 % 29/10/2009: added changed functionality; only saves STORE backup if index system has changed.
@@ -23,43 +17,12 @@ function TSQ_prepared(ts_ids_keep, m_ids_keep, getwhat, dbname, brawninputs, doi
 % 				 will retrieve everything. If zero will retrieve all empty entries. Otherwise will retrieve up to that
 % 				 number of entries. (at this stage, QualityCode=NULL; eventually could add fatal error ones)
 % 12/5/2010: added doinone -- database will either make many connections (suitable for small no. of rows), or do it in one
-% 			 big connection (strain on java heap space for large
-% 			 retrievals)
-
-%% INPUTS:
-% 1) lenr: contrain included time series by length [minimum_length maximum_length] (1x2 vector)
-% 2) kyesc: constrain included time series by keyword -- nx2 cell
-% 			(i) keyword
-% 			(ii) how many of that keyword (0==all available)
-% 3) kno: keywords NOT to include (cell of strings)
-% 4) myesc: metrics to include (nx2 cell)
-% 			(i) keyword
-% 			(ii) how many of that keyword (0==all available)
-% 5) mno: metrics not to include (cell of strings)
-% 7) masterpull [opt]: default 1 -- stops
-% doinone -- can specify to 1 to retrieve all on a single database connection
+% 			 big connection (strain on java heap space for large retrievals)
 
 %% OUTPUTS (to file):
-% 1) TS_loc.mat, which contains the matrix TS_loc: the portion of the storage file that
-% 				   matches the supplied constaints.
-% 2) TS_loc_guides.mat, which contains information about the time series in TS_loc:
-%				 () tsf: filenames of the files containing the time series data (cell of strings)
-%				 () tsl: the length of each time series (vector)
-%				 () tskw: the keywords of each time series (cell of string cells)
-%				 () tsprep: the type of detrending required (vector of integer labels) [[NOW REDUNDANT]]
-%				 () tsmap: the mapping of the time series in the portion TS_loc to STORE_data (integer vector)
-%				 () nts: the number of time series (scalar integer)
-% 				 () mf: the matlab code to call for each metric (cell of strings)
-% 				 			(or the relevant part of a master structure output if a pointer)
-% 				 () mlab: labels of the metrics; different to their calling function (cell of strings)
-% 				 () mpostp: post-processings specific to each metric (vector of integer labels)
-% 				 () mkw: keywords for each metric (cell of string cells)
-% 				 () mtyp: the type of metric: i.e., single (S), or pointer (P)
-% 				 () mmap: mapping from the metrics in TS_loc to their position in STORE_data (integer vector)
-% 				 () nm: the number of metrics (scalar integer)
-% 				 () mMf: the matlab code to call (cell of strings)
-% 				 () mMl: master metric labels, for pointers to point to (cell of strings)
-% 				 () nmM: the number of master metrics (scalar integer)
+% () TS_loc.mat, which contains the matrix TS_loc: the portion of the storage file that
+% () TS_loc_guides.mat, which contains information about the time series in TS_loc:
+
 
 
 %%% FOREPLAY
@@ -73,7 +36,7 @@ if nargin < 3
 end
 getwhatcanbe = {'null','all','error'};
 if ~ischar(getwhat) || ~ismember(getwhat,getwhatcanbe)
-    error(sprintf('Your third input to TSQ_prepared must specify what to retrieve, one of the following: %s',bencat(getwhatcanbe)))
+    error('Your third input to TSQ_prepared must specify what to retrieve, one of the following: %s',bencat(getwhatcanbe))
 end
 if nargin < 4
 	dbname = ''; % Use default database
@@ -94,34 +57,60 @@ end
 % make sure ts_ids_keep and m_ids_keep are column vectors
 if size(ts_ids_keep,2) > size(ts_ids_keep,1), ts_ids_keep = ts_ids_keep'; end
 if size(m_ids_keep,2) > size(m_ids_keep,1), m_ids_keep = m_ids_keep'; end
-ts_ids_keep = sort(ts_ids_keep,'ascend'); % sorted by ascending id
-m_ids_keep = sort(m_ids_keep,'ascend'); % sorted by ascending id
+% sort ids ascending
+ts_ids_keep = sort(ts_ids_keep,'ascend');
+m_ids_keep = sort(m_ids_keep,'ascend');
+% write a comma-delimited string of ids
 ts_ids_keep_string = bencat(ts_ids_keep,',');
 m_ids_keep_string = bencat(m_ids_keep,',');
+% count the number of time series and operations
 nts = length(ts_ids_keep);
-nm = length(m_ids_keep);
+nops = length(m_ids_keep);
 
-if nts == 0 || nm == 0
-	fprintf(1,'Oops. It seems there''s nothing to do! Either no time series or no operations\n');
-	return
+if nts == 0
+	error('Oops. There''s nothing to do! No time series to retrieve!\n');
+elseif nops == 0
+	error('Oops. There''s nothing to do! No operations to retrieve!\n');
 end
+
+% Open database connection
+[dbc, dbname] = SQL_opendatabase(dbname);
+
+% First check the time series and operations
+mids_db = mysql_dbquery(dbc,sprintf('SELECT m_id FROM Operations WHERE m_id IN (%s)',m_ids_keep_string));
+mids_db = vertcat(mids_db{:});
+tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string));
+tsids_db = vertcat(tsids_db{:});
+if length(tsids_db) < nts % actually there are fewer time series in the database
+    fprintf(1,'%u specified time series do not exist in %s, retrieving the remaining %u\n',nts-length(tsids_db),dbname,length(tsids_db))
+    ts_ids_keep = tsids_db; ts_ids_keep_string = bencat(ts_ids_keep,',');
+end
+if length(mids_db) < nops % actually there are fewer operations in the database
+    fprintf(1,'%u specified operations do not exist in %s, retrieving the remaining %u\n',nops-length(mids_db),dbname,length(mids_db))
+    m_ids_keep = mids_db; m_ids_keep_string = bencat(m_ids_keep,',');
+end
+
+if nts == 0
+	error('No time series to retrieve!\n');
+elseif nops == 0
+	error('No operations to retrieve!\n');
+end
+
+% Tell me about it
+fprintf(1,'We have %u time series and %u operations to retrieve from %s.\n',nts,nops,dbname);
+fprintf(1,'Filling and saving to local matricies TS_loc, TS_loc_ct, TS_loc_q from Results table in %s.\n',dbname);
 
 % Intialize matrices
 % Start as Infs to distinguish unwritten entries after database pull
-TS_loc = ones(nts,nm)*Inf; % outputs
-TS_loc_ct = ones(nts,nm)*Inf; % calculation times
-TS_loc_q = ones(nts,nm)*Inf; % output quality label
+TS_loc = ones(nts,nops)*Inf; % outputs
+TS_loc_ct = ones(nts,nops)*Inf; % calculation times
+TS_loc_q = ones(nts,nops)*Inf; % output quality label
 
-% Open database connection
-[dbc,dbname] = SQL_opendatabase(dbname);
-
-% Tell me about it
-fprintf(1,'We have %u time series and %u operations to retrieve from %s\n',nts,nm,dbname);
-fprintf(1,'Filling and saving to local matricies TS_loc, TS_loc_ct, TS_loc_q from Results table in %s\n',dbname);
-
+% Set bundlesize for retrieving
 bundlesize = min(nts,5); % retrieve information about this many time series per database query:
                          % either 5 at a time, or if less, however many time series there are
 
+% Provide user information to screen
 switch getwhat
 case 'null'
     fprintf(1,'Retrieving NULL elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
@@ -130,6 +119,7 @@ case 'all'
 case 'error'
     fprintf(1,'Retrieving error elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
 end
+
 
 bundles = (1:bundlesize:length(ts_ids_keep));
 nits = length(bundles); % number of iterations of the loop
@@ -167,9 +157,9 @@ for i = 1:nits
     
     % Fill rows of local matrix
     if strcmp(getwhat,'all') % easy in this case
-        TS_loc(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nm);
-        TS_loc_ct(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nm);
-        TS_loc_q(ii,:) = reshape(vertcat(qrc{:,5}),length(ii),nm);
+        TS_loc(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nops);
+        TS_loc_ct(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
+        TS_loc_q(ii,:) = reshape(vertcat(qrc{:,5}),length(ii),nops);
     else
         % we need to match retrieved indicies with local indicies
         ix = arrayfun(@(x)find(ts_ids_now==x,1),vertcat(qrc{:,1}));
@@ -215,9 +205,9 @@ if ismember(getwhat,{'null','error'})
     keepi = (sum(keepme,1) > 0); % there is at least one entry to calculate in this column
 	if sum(keepi) == 0
     	fprintf(1,'After filtering, there are no operations remaining! Exiting...\n'); return
-    elseif sum(keepi) < nm
-		fprintf(1,'Cutting down from %u to %u operations\n',nm,sum(keepi));
-		m_ids_keep = m_ids_keep(keepi); nm = length(m_ids_keep);
+    elseif sum(keepi) < nops
+		fprintf(1,'Cutting down from %u to %u operations\n',nops,sum(keepi));
+		m_ids_keep = m_ids_keep(keepi); nops = length(m_ids_keep);
 		m_ids_keep_string = bencat(m_ids_keep,',');
 		TS_loc = TS_loc(:,keepi); TS_loc_ct = TS_loc_ct(:,keepi); TS_loc_q = TS_loc_q(:,keepi);
 	end    
@@ -295,7 +285,7 @@ fprintf(1,', TS_loc_guides (information guides).\n')
 
 % Display how many entries need to be calculated
 tocalculate = sum(isnan(TS_loc_q(:)) | TS_loc_q(:)==1);
-fprintf(1,'There are %u entries (= %5.2f%%) to calculate in TS_loc (%ux%u)\n',tocalculate,tocalculate/nm/nts*100,nts,nm);
+fprintf(1,'There are %u entries (= %5.2f%%) to calculate in TS_loc (%ux%u)\n',tocalculate,tocalculate/nops/nts*100,nts,nops);
 
 % reply = input(['Shall I move on to TSQ_brawn now to calculate and then write back? [yes, ''n'' to stop]'],'s');
 % if ~isempty(forcalc)

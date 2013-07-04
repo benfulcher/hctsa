@@ -56,15 +56,15 @@ fprintf(fid,' TS_loc_ct, '); % calculation times
 load TS_loc_q.mat TS_loc_q
 fprintf(fid,' TS_loc_q,'); % quality codes
 load TS_loc_guides.mat ts_ids_keep tsf tskw tsl m_ids_keep mcode mlab mkw mlink Mmid Mmlab Mmcode
-fprintf(fid,'TS_loc_guides. All loaded.\n'); % guides
+fprintf(fid,' TS_loc_guides. All loaded.\n'); % guides
 
 %% Definitions
 nts = length(ts_ids_keep); % number of time series
-nm = length(m_ids_keep); % number of metrics
+nops = length(m_ids_keep); % number of operations
 nMm = length(Mmlab); % number of master functions
 
 %%% Let's get going
-fprintf(fid,'Calculation has begun on %s using %u datasets and %u operations\n',datestr(now),nts,nm);
+fprintf(fid,'Calculation has begun on %s using %u datasets and %u operations\n',datestr(now),nts,nops);
 
 %% Open parallel processing worker pool
 if toparallel
@@ -131,7 +131,7 @@ for i = 1:nts
 		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'%s\n',whichtsf)
 		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
-		fprintf(fid,'Preparing to calculate %s (ts_id = %u, N = %u samples) [computing %u / %u operations]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nm)
+		fprintf(fid,'Preparing to calculate %s (ts_id = %u, N = %u samples) [computing %u / %u operations]\n',partsfi,ts_ids_keep(i),tsl(i),ncal,nops)
 	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
 
 		%% Evaluate master functions in parallel
@@ -273,10 +273,10 @@ for i = 1:nts
     fprintf(fid,'oOoOoOo Calculation complete for %s (N = %u samples)  oOoOoOoOo\n',tsf{i},tsl(i));
     if ncal > 0 % Some amount of calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u other outputs stored. [%u / %u]\n',...
-	     					ngood,nerror,nother,ncal,nm);
+	     					ngood,nerror,nother,ncal,nops);
 		fprintf(fid,'Calculations for this time series took %s.\n',benrighttime(times(i),1));
     else
-    	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',nm);
+    	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',nops);
     end
     if i < nts
         fprintf(fid,'- - - - - - - -  %u time series remaining - - - - - - - -\n',nts-i);

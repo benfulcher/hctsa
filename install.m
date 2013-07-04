@@ -46,4 +46,4 @@ cd ../
 fprintf(1,'Oh my goodness, everything compiled fine. The database, %s, is ready for time series to be added using SQL_add...!\n',dbname)
 
 % Attempt to add a time series
-% SQL_add('ts','INP_ts.txt')
+% SQL_add('ts','INP_test_ts.txt')

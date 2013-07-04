@@ -12,18 +12,18 @@ function [yp best] = benpp(y,choosebest,order,beatthis,dospectral)
 % NOTE: yp is NOT zscored -- needs to be zscored after, if necessary.
 
 %% Inputs
-if nargin<2
+if nargin < 2
     choosebest = ''; % just return all the time series in structure yp.
 end
-if nargin<3 || isempty(order);
+if nargin < 3 || isempty(order);
    order = 2; % extra parameter for some choosebest settings.
 end
-if nargin<4 || isempty(beatthis)
-    beatthis=0; % it has to beat doing nothing by this percentage. i.e., here it 
+if nargin < 4 || isempty(beatthis)
+    beatthis = 0; % it has to beat doing nothing by this percentage. i.e., here it 
                 % just has to beat doing nothing. Increasing will increase the
                 % probablility of doing nothing.
 end
-if nargin<5 || isempty(dospectral)
+if nargin < 5 || isempty(dospectral)
     dospectral = 1; % I did this because it's often worse to do a spectral
                     % method when another would do better. i.e., the remove
                     % around a peak can just overpower the structure in the
@@ -79,17 +79,16 @@ yp.rmgd = XX;
 
 %% Positive-only transformations
 % log, log returns, sqrt, box-cox
-if all(y>0)
-    % log, log returns
-    yp.log = log(y);
-    yp.logret = diff(log(y));
+if all(y > 0)
+    yp.log = log(y); % log
+    yp.logret = diff(log(y)); % log returns
     % Box-Cox
     yp.boxcox02 = SUB_boxcox(y,0.2);
     yp.boxcox05 = SUB_boxcox(y,0.5);
     yp.boxcox2 = SUB_boxcox(y,2);
     yp.boxcox20 = SUB_boxcox(y,20);
 end
-if all(y>=0)
+if all(y >= 0)
     yp.sqrt = sqrt(y);
 end
 
