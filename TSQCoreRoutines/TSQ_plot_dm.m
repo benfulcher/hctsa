@@ -190,7 +190,7 @@ else
 end
 
 % have to surround by zeros for an accurate pcolor:
-pcolor([F zeros(size(F,1),1); zeros(1,size(F,2)+1)]);
+pcolor([F, zeros(size(F,1),1); zeros(1,size(F,2)+1)]);
 shading flat
 
 %%% Format the plot
@@ -199,6 +199,7 @@ set(gca,'YTick',1 + (0.5:1:size(F,1)),'YTickLabel',tsf); % time series
 if nops < 1000 % otherwise don't bother
     set(gca,'XTick',1 + (0.5:1:size(F,2)),'XTickLabel',mlab);
 end
+title(sprintf('Data matrix (%ux%u)',size(F,1),size(F,2)))
 set(gca,'FontSize',8) % set font size
 
 end

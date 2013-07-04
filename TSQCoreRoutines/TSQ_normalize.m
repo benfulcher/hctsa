@@ -306,7 +306,7 @@ mlinkn = mlink(kc_tot);
 
 % m_ids_keep, ts_ids_keep, tsf, tskw, tsl, mcode, mlab, mkw, mpoint, mlink, Mmid, Mmlab, Mmcode
 fprintf(1,'We now have %u time series and %u operations in play\n',ntsn,nmn)
-fprintf(1,'%u bad entries (%4.2f%%) in the data matrix\n',sum(isnan(F(:))),sum(isnan(F(:)))/length(F(:))*100)
+fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix\n',sum(isnan(F(:))),sum(isnan(F(:)))/length(F(:))*100,size(F,1),size(F,2))
 
 %% NORMALIZE THE LITTLE SHIT
 
@@ -367,7 +367,7 @@ if ~isempty(kc) && length(kc) < size(F,2)
     TS_loc_q = TS_loc_q(:,kc);
 end
 
-fprintf(1,'%u bad entries (%4.2f%%) in the (%ux%u) data matrix\n',sum(isnan(F(:))),sum(isnan(F(:)))/length(F(:))*100,size(F,1),size(F,2))
+fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix\n',sum(isnan(F(:))),sum(isnan(F(:)))/length(F(:))*100,size(F,1),size(F,2))
 
 %% Done -- save output to file
 fprintf(1,'Saving the trimmed, normalized data to local files: ')

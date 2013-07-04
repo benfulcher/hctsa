@@ -67,7 +67,7 @@ fprintf(1,'Loading in local files...')
 
 if isempty(subs) || strcmp(subs{1},'norm')
     fprintf(1,' TS_loc_N, ...')
-    wn = which('TS_loc_N'); % check it exists
+    wn = which('TS_loc_N.mat'); % check it exists
     if isempty(wn); fprintf(1,'\n'), error('TS_loc_N not found -- please run TSQ_normalize'); end
     load TS_loc_N.mat TS_loc_N % this is the normalized local data file -- we cluster on the normalized values
     F = TS_loc_N;
