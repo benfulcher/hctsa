@@ -1,21 +1,13 @@
-function out = OL_bentest(y,p,n)
-% remove pth percent of highest and lowest outliers (i.e., 2*p percent
-% removed altogether);
-% returns the ratio of the mean (n==1) or std (n==2) before and after doing
-% this
-% Ben Fulcher
+function out = OL_bentest(y,p)
+% remove pth percent of highest and lowest outliers from the z-scored 
+% input time series,y (i.e., 2*p percent removed from the time series in total)
+% Returns the ratio of the mean and std before and after doing this
+% Ben Fulcher, 2009
 
-switch n
-    case 1
-        % look at mean (assume z-scored)
-        out = mean(y(y>prctile(y,p) & y<prctile(y,100-p)));
-    case 2
-        % look at std
-        out = std(y(y>prctile(y,p) & y<prctile(y,100-p)))/std(y); % [std(y) should be 1]
-    otherwise
-        disp('error in OL_bentest')
-        return
-end
+% mean of the middle (100-2*p)% of the data
+out.mean = mean(y(y > prctile(y,p) & y < prctile(y,100-p)));
 
+% std of the middle (100-2*p)% ofthe data
+out.std = std(y(y > prctile(y,p) & y < prctile(y,100-p)))/std(y); % [std(y) should be 1]
 
 end

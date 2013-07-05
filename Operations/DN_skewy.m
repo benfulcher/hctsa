@@ -5,13 +5,13 @@ function out = DN_skewy(y,wh)
 
 switch wh
     case 'pearson'
-        out = (3 * mean(y)-median(y))./std(y);
+        out = (3*mean(y)-median(y))./std(y);
     case 'bowley'
         qs = quantile(y,[0.25, 0.5, 0.75]);
         out = (qs(3)+qs(1) - 2*qs(2))./(qs(3)-qs(1));
         % Quartile skewness coefficient
     otherwise
-        error(['DN_skewy: unknown method ' wh])
+        error('DN_skewy: unknown method %s',wh)
 end
 
 

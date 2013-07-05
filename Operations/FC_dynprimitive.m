@@ -1,15 +1,15 @@
 function out = FC_dynprimitive(y,fmeth)
-% Looping over the length of data to use for prediction,
-% at each iteration, return a bunch of metrics
+% Looping over the length of data to use for prediction using
+% FC_primitive, returns a bunch of statistics at each iteration
 % Ben Fulcher, 2009
 
 stats_st = zeros(10,7);
 
 switch fmeth
     case 'mean'
-        ngr = [1:10]';
+        ngr = (1:10)';
     case 'median'
-        ngr = [1:2:19]';
+        ngr = (1:2:19)';
 end
 
 for i = 1:length(ngr)
@@ -45,7 +45,7 @@ out.rmserr_chn = mean(diff(stats_st(:,1)))/(range(stats_st(:,1)));
 out.rmserr_meansgndiff = mean(sign(diff(stats_st(:,1))));
 
 % (ii) is there a peak?
-if out.rmserr_chn<1; % on the whole decreasing, as expected
+if out.rmserr_chn < 1; % on the whole decreasing, as expected
     wigv = max(stats_st(:,1));
     wig = find(stats_st(:,1)==wigv,1,'first');
     if wig~=1 && stats_st(wig-1,1)>wigv
@@ -84,7 +84,7 @@ out.sws_stdn = std(stats_st(:,3))/range(stats_st(:,3));
 % fit exponential decay
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[range(stats_st(:,3)) -0.5 min(stats_st(:,3))]);
 f = fittype('a*exp(b*x)+c','options',s);
-[c,gof] = fit(ngr,stats_st(:,3),f);
+[c, gof] = fit(ngr,stats_st(:,3),f);
 out.sws_fexp_a = c.a;
 out.sws_fexp_b = c.b; % this is important
 out.sws_fexp_c = c.c;

@@ -966,12 +966,9 @@ TSTL_takens_estimator(y,-1,0.05,0.05,{'mi',3})	TSTL_takens_estimator_n1_005_005_
 TSTL_takens_estimator(y,-1,0.05,0.05,{'mi','cao'})	TSTL_takens_estimator_n1_005_005_mi_cao
 TSTL_takens_estimator(y,-1,0.05,0.05,{'mi','fnnmar'})	TSTL_takens_estimator_n1_005_005_mi_fnnmar
 TSTL_takens_estimator(y,-1,0.1,0.05,{1,10})	TSTL_takens_estimator_n1_01_005_1_10
-OL_bentest(y,2,1)	OLbm2
-OL_bentest(y,5,1)	OLbm5
-OL_bentest(y,10,1)	OLbm10
-OL_bentest(y,2,2)	OLbs2
-OL_bentest(y,5,2)	OLbs5
-OL_bentest(y,10,2)	OLbs10
+OL_bentest(y,2)  OLbt_2
+OL_bentest(y,5)  OLbt_5
+OL_bentest(y,10)  OLbt_10
 ST_ftpoly(x,1)	pf1
 ST_ftpoly(x,2)	pf2
 ST_ftpoly(x,3)	pf3

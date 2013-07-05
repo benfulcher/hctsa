@@ -56,7 +56,7 @@ switch importwhat
         thektable = 'TimeSeriesKeywords';
         thereltable = 'TsKeywordsRelate';
         thename = 'Filename';
-        maxL = 40000; % the longest time series length for the database
+        maxL = 50000; % the longest time series length accepted in the database
     case 'ops'
         thewhat = 'operations';
         theid = 'm_id';
@@ -69,7 +69,6 @@ switch importwhat
         thewhat = 'master operations';
         theid = 'mop_id';
         thetable = 'MasterOperations';
-        
 end
 
 
@@ -83,7 +82,7 @@ case 'ts' % Read the time series input file:
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
-	datain = textscan(fid,'%s %s','CommentStyle','%','CollectOutput',1); % 'HeaderLines',1,
+	datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1); % 'HeaderLines',1,
 case 'ops' % Read the operations input file:
     if bevocal
         fprintf(1,'Need to format %s (Operations input file) as: OperationName OperationCode OperationKeywords\n',INPfile)
@@ -91,7 +90,7 @@ case 'ops' % Read the operations input file:
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
-    datain = textscan(fid,'%s %s %s','CommentStyle','%','CollectOutput',1);    
+    datain = textscan(fid,'%s %s %s','CommentStyle','#','CollectOutput',1);    
 case 'mops' % Read the master operations input file:
     if bevocal
         fprintf(1,'Need to format %s (Master Operations input file) as: MasterCode MasterLabel\n',INPfile)
@@ -99,7 +98,7 @@ case 'mops' % Read the master operations input file:
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
-    datain = textscan(fid,'%s %s','CommentStyle','%','CollectOutput',1);
+    datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
 end
 fclose(fid);
 

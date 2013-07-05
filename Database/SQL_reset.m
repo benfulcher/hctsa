@@ -14,4 +14,7 @@ disp([dbname ' and all the data contained within it dropped']);
 mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s;',dbname));
 SQL_closedatabase(dbc) % close the database
 SQL_create_all_tables;
-% fprintf(1,'%s was recreated. That''s all from me ///\n',dbname);
+
+% Add operations
+SQL_add('mops','Database/INP_mops.txt','',0)
+SQL_add('ops','Database/INP_ops.txt','',0)

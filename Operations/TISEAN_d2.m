@@ -24,47 +24,42 @@ end
 
 % Theiler window
 if nargin < 4 || isempty(theilerwin)
-   theilerwin = 0.01; % 1% of data length
+   theilerwin = 0.01; % Set a Theiler window of 1%% of the data length
 end
 if theilerwin > 0 && theilerwin < 1 % specify proportion of data length
     theilerwin = round(theilerwin*N);
 end
 
 %% Write the file
-tnow = datestr(now, 'yyyymmdd_HHMMSS_FFF');
+tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
 % to the millisecond (only get double-write error for same function called in same millisecond
-fn = ['tisean_temp_d2_' tnow '.dat'];
-disp(['Just written temporary file ' fn ' for TISEAN'])
+fn = sprintf('tisean_temp_d2_%s.dat',tnow); % filename
 dlmwrite(fn,y);
+fprintf(1,'Just wrote the input time series (N = %u) to the temporary file %s for TISEAN\n',length(y),fn)
 
 %% Run the TISEAN code
-[~, res] = system(['d2 -d' num2str(tau) ' -M1,' num2str(maxm) ...
-                    ' -t' num2str(theilerwin) ' ' fn]);
-delete(fn) % remove the temporary data file
+[~, res] = system(sprintf(['d2 -d%u -M1,%u -t%u %s'],tau,maxm,theilerwin,fn));
+% [~, res] = system(['d2 -d' num2str(tau) ' -M1,' num2str(maxm) ...
+%                     ' -t' num2str(theilerwin) ' ' fn]);
+delete(fn) % remove the temporary time-series data file
+%  * extension .stat: This file shows the current status of the estimate.
+delete([fn '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
 
-if isempty(res)
-    disp('Call to TISEAN failed. Exiting');
-    delete([fn '.c2']) % delete this file
-    delete([fn '.d2']) % delete this file
-    delete([fn '.h2']) % delete this file
-    return
+if isempty(res) % error calling the function
+    delete([fn '.c2']); delete([fn '.d2']); delete([fn '.h2']);
+    error('Call to TISEAN function ''d2'' failed')
 end
 
 % this creates files in the local directory:
 %  * extension .c2: This file contains the correlation sums for all treated length scales and embedding dimensions.
 %  * extension .d2: This file contains the local slopes of the logarithm of the correlation sum, the correlation dimension.
 %  * extension .h2: This file contains the correlation entropies.
-%  * extension .stat: This file shows the current status of the estimate.
 
 %% Retreve output from file
-% -------- STAT -----------
-% could use something in here I guess for error checking or something, but
-% let's just not.
-delete([fn '.stat']);
 
 % % (1) --------- C2 -----------
 % fid_c2 = fopen([fn '.c2']);
-% s=textscan(fid_c2,'%[^\n]');
+% s = textscan(fid_c2,'%[^\n]');
 % if isempty(s)
 %     disp(['Error reading TISEAN output file ' fn '.c2'])
 %     fclose(fid_c2); % close the file
@@ -73,8 +68,8 @@ delete([fn '.stat']);
 %     delete([fn '.h2']) % delete this file
 %     return;
 % end
-% s=s{1};
-% w=zeros(maxm+1,1);
+% s = s{1};
+% w = zeros(maxm+1,1);
 % c2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
 % fclose(fid_c2); % close the file
 % 
@@ -84,29 +79,21 @@ delete([fn '.stat']);
 
 % ------- GAUSSIAN KERNEL CORRELATION INTEGRAL -----------
 % Now implement Gaussian Kernel Correlation integral
-[~, res] = system(['H:\bin\c2g ' fn '.c2']);
-% output is in res
-s = textscan(res,'%[^\n]'); s=s{1};
+[~, res] = system(sprintf('c2g %s.c2',fn));
+% output is in res -- check it
+s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('writing to stdout',s);
 s = s(wi+1:end);
-if isempty(s) % tisean has no output for us
-    disp('TISEAN has no output for us')
-    out = NaN;
-    delete([fn '.c2']) % delete this file
-    delete([fn '.d2']) % delete this file
-    delete([fn '.h2']) % delete this file
-    return
+if isempty(s) % TISEAN did produce valid output
+    fprintf(1,'%s\n',res)
+    delete([fn,'.c2']); delete([fn,'.d2']); delete([fn,'.h2']) % just in case these files were generated...
+    error('TISEAN d2 produced invalid output')
 end
 try
     c2gdat = SUB_readTISEANout(s,maxm,'#m=',3);
 catch
-    disp('I suspect there are some INFS and NANs in the TISEAN output...')
-    disp('I don''t know what else to do but exit')
-    out = NaN;
-    delete([fn '.c2']) % delete this file
-    delete([fn '.d2']) % delete this file
-    delete([fn '.h2']) % delete this file
-    return
+    delete([fn '.c2']); delete([fn '.d2']); delete([fn '.h2'])
+    error('There are probably some Inf and NAN values in the TISEAN output files...?')
 end
     
 % c2gdat contains r (1), the Gaussian kernel correlation integral (2), and its
@@ -116,12 +103,13 @@ end
 % ----- TAKENS MAXIMUM LIKELIHOOD ESTIMATOR FROM CORRELATION SUMS ----
 % The integral is computed from the discrete values of C(r) by assuming an
 % exact power law between the available points.
-[~, res] = system(['H:\bin\c2t ' fn '.c2']);
+[~, res] = system(sprintf('c2t %s.c2',fn));
 % output is in res
-s = textscan(res,'%[^\n]'); s=s{1};
+s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('writing to stdout',s);
 s = s(wi+1:end);
 c2tdat = SUB_readTISEANout(s,maxm,'#m=',2);
+delete([fn '.c2']);
 
 % c2tdat contains upper length scale r (1), and the takens estimator (2)
 % The integral is computed from the discrete values of C(r) by assuming an
@@ -130,12 +118,12 @@ c2tdat = SUB_readTISEANout(s,maxm,'#m=',2);
 
 % (2) --------- D2 ------------
 fid_d2 = fopen([fn '.d2']);
-s=textscan(fid_d2,'%[^\n]');
-s=s{1};
+s = textscan(fid_d2,'%[^\n]');
+s = s{1};
 % FEED THIS INTO SUBROUTINE
 d2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
 fclose(fid_d2); % close the file
-
+delete([fn '.d2']); % delete the file
 
 % d2dat now contains the local slopes of the logarithm of correlation sums
 % (second column) as a function of the length scale epsilon (first column) for
@@ -145,26 +133,20 @@ fclose(fid_d2); % close the file
 % (3) -------------- H2 -------------
 
 fid_h2 = fopen([fn '.h2']);
-s=textscan(fid_d2,'%[^\n]');
-s=s{1};
+s = textscan(fid_d2,'%[^\n]');
+s = s{1};
 % FEED THIS INTO SUBROUTINE
 h2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
 fclose(fid_h2); % close the file
-
+delete([fn '.h2']); % delete the file
 
 % h2dat now contains the correlation entropies (second column)
-
-delete([fn '.c2']) % delete this file
-delete([fn '.d2']) % delete this file
-delete([fn '.h2']) % delete this file
-
-
 
 %% Obtain useful from all this data
 
 % (1) TAKENS ESTIMATOR
 % correlation dimension at upper length scale of eup
-% (for z-scored time series, std=1...; in units of this)
+% (for z-scored time series, std = 1...; in units of this)
 % Kantz & Shreiber recommend taking at half the std of the signal
 takens05 = SUB_takens(c2tdat,0.5);
 out.takens05_mean = mean(takens05);
@@ -183,26 +165,20 @@ out.takens05mmin_stabled = mmintakens05.stabled;
 out.takens05mmin_linrmserr = mmintakens05.linrmserr;
 
 
-
 % (2) D2, local slopes of correlation integral
 % semilogx(d2dat{1}(:,1),d2dat{1}(:,2))
 
 % (2i) Estimate dimensions using Ben's method
 % convert cell to matrix, taking second column in each case:
 if all(cellfun(@isempty,d2dat))
-    disp('No data...')
-    out = NaN;
-    return
-else
-    [d2dat_v d2dat_M] = SUB_celltomat(d2dat,2);
+    error('No data...')
 end
+[d2dat_v, d2dat_M] = SUB_celltomat(d2dat,2);
 
 try
     benfindd2 = findscalingr_ind(d2dat_M);
 catch
-    disp('Error finding scaling range')
-    out = NaN;
-    return
+    error('Error finding scaling range')
 end
 
 % rows: increasing embedding m
@@ -265,7 +241,7 @@ out.d2_dimstd = scd2.dimstd;
 
 % (2i) Estimate dimensions using Ben's method
 % convert cell to matrix, taking second column in each case:
-[d2gdat_v d2gdat_M] = SUB_celltomat(c2gdat,3);
+[d2gdat_v, d2gdat_M] = SUB_celltomat(c2gdat,3);
 
 try
     benfindd2g = findscalingr_ind(d2gdat_M);
@@ -308,7 +284,7 @@ if isempty(scd2g.ri2)
 else
     out.d2g_logmaxscr = log(d2gdat_v(scd2g.ri2));
 end
-if any(isempty([scd2g.ri1,scd2g.ri2]))
+if any(isempty([scd2g.ri1, scd2g.ri2]))
     out.d2g_logscr = NaN;
 else
     out.d2g_logscr = out.d2g_logmaxscr-out.d2g_logminscr;
@@ -380,13 +356,13 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         % blocker the string distinguishing sections of output
         % nc number of columns in string
         
-%         w=zeros(maxm+1,1);
+%         w = zeros(maxm+1,1);
 %         if nargin<3 % use default blocker
-%             for ii=1:maxm
+%             for ii = 1:maxm
 %                 w(ii)=strmatch(['#dim= ' num2str(ii)],s,'exact');
 %             end
 %         else
-%            for ii=1:maxm
+%            for ii = 1:maxm
 %                 try
 %                     w(ii) = strmatch([blocker num2str(ii)],s,'exact');
 %                 catch
@@ -401,10 +377,10 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         w(end+1) = length(s)+1; % as if there were another marker at the entry after the last data row
         
         dimdat = cell(maxm,1); % stores data for each embedding dimension
-        for ii=1:maxm
+        for ii = 1:maxm
             ss = s(w(ii)+1:w(ii+1)-1);
             nn = zeros(length(ss),nc);
-            for jj=1:length(ss)
+            for jj = 1:length(ss)
                 if nc==2
                     tmp = textscan(ss{jj},'%n%n');
                 elseif nc==3
@@ -426,7 +402,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         % maximum
         mmax = length(dat);
         takensp = zeros(mmax,1);
-        for ii=1:mmax
+        for ii = 1:mmax
             theindex = find(dat{ii}(:,1)>eup,1,'first');
             if ~isempty(theindex)
                 takensp(ii) = dat{ii}(theindex,2);
@@ -445,28 +421,28 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         % end point must be in last half of data
         
         l = size(x,2);
-        gamma=0.002; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+        gamma = 0.002; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
         % for a consistent regularizer, need to data in [0,1] so weights
         % are consistent...
 %         x=(x-min(x(:)))./(max(x(:))-min(x(:)));
         stptr = 1:floor(l/2)-1; % must be in the first half
         endptr = ceil(l/2)+1:l; % must be in second half
         mybad = zeros(length(stptr),length(endptr));
-        for i=1:length(stptr)
-            for j=1:length(endptr)
+        for i = 1:length(stptr)
+            for j = 1:length(endptr)
                 % mean in this range -- mean (across range) of mean of
                 % points (at each point)
                 mm = mean(mean(x(:,stptr(i):endptr(j)))); % middle value for this range: exponent estimate
                 nock = endptr(j)-stptr(i)+1; % extent of scaling range
                 spreads = zeros(nock,1); % mean square deviation from mm at each point
-                for k=1:nock
+                for k = 1:nock
                     spreads(k) = mean((x(:,stptr(i)+k-1)-mm).^2);
                 end
                 
                 mybad(i,j) = mean(spreads)-gamma*nock; % want to still maximize length(x)    
             end
         end
-        [a b] = find(mybad == min(min(mybad)),1,'first'); % this defines the 'best' scaling range
+        [a, b] = find(mybad == min(min(mybad)),1,'first'); % this defines the 'best' scaling range
         ri1 = stptr(a); % minimum index of scaling range
         ri2 = endptr(b); % maximum index of scaling range
         out.ri1 = ri1;
@@ -495,18 +471,18 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         
         l = size(x,2); % number of distance/scaling points per dimension
         ndim = size(x,1); % number of dimensions
-        gamma=1E-3; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+        gamma = 1E-3; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
 
         stptr = 1:floor(l/2)-1; % must be in the first half
         endptr = ceil(l/2)+1:l; % must be in second half
         results = zeros(ndim,4); %stpt, endpt, goodness, dim
         
-        for c=1:ndim
+        for c = 1:ndim
             mybad = zeros(length(stptr),length(endptr));
             v = x(c,:); % the vector of data for length scales
             vnorm = (v-min(v))./(max(v)-min(v)); % normalize regardless of range
-            for i=1:length(stptr)
-                for j=1:length(endptr)
+            for i = 1:length(stptr)
+                for j = 1:length(endptr)
                     mybad(i,j) = std(vnorm(stptr(i):endptr(j)))-gamma*(endptr(j)-stptr(i)+1);
                 end
             end
@@ -541,7 +517,11 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             maxi = min([maxi max(thecell{ii}(:,1))]);
         end
         for ii = 1:nn % rescales each dimension so all share common scale
+<<<<<<< Updated upstream
             thecell{ii} = thecell{ii}(thecell{ii}(:,1) >= mini & thecell{ii}(:,1) <= maxi,:);
+=======
+            thecell{ii} = thecell{ii}(thecell{ii}(:,1)>=mini & thecell{ii}(:,1)<=maxi,:);
+>>>>>>> Stashed changes
         end
         
         
@@ -553,8 +533,8 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             % there's a bug in TISEAN where sometimes there are repeated 'x'
             % values -- check for this
             theproblems = find(goodones==0);
-            for ii=1:length(theproblems)
-                [b m n] = unique(thecell{theproblems(ii)}(:,1));
+            for ii = 1:length(theproblems)
+                [b, m, n] = unique(thecell{theproblems(ii)}(:,1));
                 thecell{theproblems(ii)} = thecell{theproblems(ii)}(m,:);
             end
         end
@@ -564,13 +544,17 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             try thematrix(ii,:) = thecell{ii}(:,thecolumn);
             catch
                 return
+<<<<<<< Updated upstream
+=======
+                % keyboard
+>>>>>>> Stashed changes
             end
         end
         
     end
 
     function out = SUB_findmmin(ds)
-        % estimated dimensions for d=1, ... , m
+        % estimated dimensions for d = 1, ... , m
         % estimates when they stabilize to a limiting value
         
         % algorithm leaves out starting at the start, progressively,
@@ -582,7 +566,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         ds = (ds-min(ds))./(max(ds)-min(ds)); % rescale data to [0,1] so weights are consistent
         stptr = 1:l-1; % need at least two points
         mybad = zeros(length(stptr),1);
-        for ii=1:length(stptr)
+        for ii = 1:length(stptr)
                 % mean in this range -- mean (across range) of mean of
                 % points (at each point)
                 mybad(ii) = std(ds(stptr(ii):end))-gamma*(l-stptr(ii)+1);
@@ -610,24 +594,24 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         dx = log10(x(2))-log10(x(1));
 %         dx = x(2) - x(1);
         ndim = size(Y,1); % number of embeding dimensions
-        gamma=2E-3; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+        gamma = 2E-3; % regularizer, chosen 'empirically' (i.e., ad hoc)
         l = size(Y,2)-1; % number of distance/scaling points per dimension
         stptr = 1:floor(l/2)-1; % must be in the first half
         endptr = ceil(l/2)+1:l; % must be in second half
         results = zeros(ndim,4); %stpt, endpt, goodness, dim
         
-        for c=1:ndim
+        for c = 1:ndim
             % () find best scaling region in which to estimate gradient
             
             mybad = zeros(length(stptr),length(endptr));
             v = diff(Y(c,:)).*dx; % make transformation to vector of local gradients
             vnorm = (v-min(v))./(max(v)-min(v)); % normalize regardless of range
-            for i=1:length(stptr)
-                for j=1:length(endptr)
+            for i = 1:length(stptr)
+                for j = 1:length(endptr)
                     mybad(i,j) = std(vnorm(stptr(i):endptr(j)))-gamma*(endptr(j)-stptr(i)+1);
                 end
             end
-            [a b] = find(mybad == min(mybad(:)),1,'first'); % this defines the 'best' scaling range
+            [a, b] = find(mybad == min(mybad(:)),1,'first'); % this defines the 'best' scaling range
             results(c,1) = stptr(a);
             results(c,2) = endptr(b);
             results(c,3) = min(mybad(:));
@@ -659,13 +643,13 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         endptr = ceil(l/2)+1:l-5; % must be in second half
         results = zeros(ndim,2); % h2, goodness
         
-        for c=1:ndim
+        for c = 1:ndim
             % regions that deviate least from zero
             mybad = zeros(length(stptr),length(endptr));
             v = diff(Y(c,:)).*dx; % make transformation to vector of local gradients
             vnorm = abs(v)./max(abs(v));
-            for i=1:length(stptr)
-                for j=1:length(endptr)
+            for i = 1:length(stptr)
+                for j = 1:length(endptr)
                     mybad(i,j) = abs(mean(vnorm(stptr(i):endptr(j)))) ... % deviations from zero in middle region
                                  - abs(mean(vnorm(1:stptr(i)))) ... % minus deviations from outside regions
                                  - abs(mean((vnorm(endptr(j):end))));
@@ -674,7 +658,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %                                         regions
                 end
             end
-            [a b] = find(mybad == min(mybad(:)),1,'first'); % this defines the 'best' scaling range
+            [a, b] = find(mybad == min(mybad(:)),1,'first'); % this defines the 'best' scaling range
             
             % best range for being near-flat: ri1--ri2
             ri1 = stptr(a);
