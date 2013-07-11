@@ -1,4 +1,4 @@
-function [result,descriptor] = RY_histogram(x,descriptor)
+function [result,descriptor] = RM_histogram(x,descriptor)
 % HISTOGRAM Computes the frequency histogram of the row vector x.
 %   [RESULT,DESCRIPTOR] = HISTOGRAM(X) or
 %   [RESULT,DESCRIPTOR] = HISTOGRAM(X,DESCRIPTOR) or

@@ -1,4 +1,4 @@
-function out = DN_olmi(y,howth)
+function out = DN_olmi(y,howth,inc)
 % Outlier mean interval
 % Computes a curve as a function of the threshold (in std of the signal)
 % Input time series, y, should be z-scored
@@ -6,23 +6,28 @@ function out = DN_olmi(y,howth)
 % Would also be a good idea to compare the output between, say p, n, and
 % abs -- could give an idea as to asymmetries/nonstationarities
 
-%% Check Inputs
-if nargin < 2
-    howth = 'abs';
-    disp('Analyzing absolute value deviations in the time series by default')
-end
-
 doplot = 0; % plot some outputs
-y = zscore(y); % check z-scored
-N = length(y);
-inc = 0.01;
 
+%% Check Inputs
 % If time series is all the same value -- ridiculous! ++BF 21/3/2010
-if all(y==y(1)) % the whole time series is just a single value
-    disp('This function is not suitable to time series that are a single value')
-    out = NaN;
-    return
+if all(y == y(1)) % the whole time series is just a single value
+    fprintf(1,'The time series is a constant!\n')
+    out = NaN; return % this method is not suitable for such time series: return a NaN
 end
+% Check z-scored time series
+if (abs(mean(y)) > eps) || (abs(std(y)-1) > eps)
+    warning('The input time series should be z-scored for EN_progranz')
+end
+N = length(y); % length of the time series
+
+if nargin < 2 || isempty(howth)
+    howth = 'abs'; % Analyze absolute value deviations in the time series by default
+end
+
+if nargin < 3 
+    inc = 0.01; % increment through z-scored time-series values
+end
+
 
 switch howth
     case 'abs' % analyze absolute value deviations
@@ -30,13 +35,13 @@ switch howth
         tot = N;
     case 'p' % analyze only positive deviations
         thr = (0:inc:max(y));
-        tot = sum(y>=0); % length(find(y>=0));
+        tot = sum(y >= 0); % length(find(y>=0));
     case 'n' % analyze only negative deviations
         thr = (0:inc:max(-y));
         tot = length(find(y <= 0));
 % case 'c' % compare positive, negative, abs
 otherwise
-    error('DN_olmi: Error with input: must be either ''abs'', ''p'', or ''n''.')
+    error('Must select either ''abs'', ''p'', or ''n''.')
 end
 
 if isempty(thr)
@@ -54,11 +59,11 @@ for i = 1:length(thr)
     % of the time serie exceeding the threshold, th
     
     if strcmp(howth,'abs')% look at absolute value deviations
-        r = find(abs(y)>=th);
+        r = find(abs(y) >= th);
     elseif strcmp(howth,'n')% look at only positive deviations
-        r = find(y<=-th);
+        r = find(y <= -th);
     elseif strcmp(howth,'p')% look at only negative deviations
-        r = find(y>=th);
+        r = find(y >= th);
     end
     
     Dt_exc = diff(r); % Delta t (interval) time series; exceeding threshold
@@ -88,7 +93,7 @@ end
 % Trim off where the statistic power is lacking: less than 2% of data
 % included
 trimthr = 2; % percent
-mj = find(msDt(:,3)>trimthr,1,'last');
+mj = find(msDt(:,3) > trimthr,1,'last');
 if ~isempty(mj)
     msDt = msDt(1:mj,:);
     thr = thr(1:mj);
@@ -109,11 +114,11 @@ end
 %% Fit an Exponential to the mean as a function of the threshold
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[0.1 2.5 1]);
 f = fittype('a*exp(b*x)+c','options',s);
-emsg = [];
+emsg = '';
 try
     [c, gof] = fit(thr',msDt(:,1),f);
 catch emsg
-    disp(['DN_olmi: error fitting exponential growth to means:' emsg]);
+    fprintf(1,'DN_olmi: error fitting exponential growth to means: %s\n',emsg);
 end
 
 if isempty(emsg)
@@ -135,7 +140,7 @@ end
 %% Fit an exponential to N: the valid proportion left in calculation
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[120 -1 -16]);
 f = fittype('a*exp(b*x)+c','options',s);
-[c,gof] = fit(thr',msDt(:,3),f);
+[c, gof] = fit(thr',msDt(:,3),f);
 
 out.nfexpa = c.a;
 out.nfexpb = c.b;
@@ -147,7 +152,7 @@ out.nfexprmse = gof.rmse;
 %% Fit an linaer to N: the valid proportion left in calculation
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-40,100]);
 f = fittype('a*x+b','options',s);
-[c,gof] = fit(thr',msDt(:,3),f);
+[c, gof] = fit(thr',msDt(:,3),f);
 
 out.nfla = c.a;
 out.nflb = c.b;
@@ -177,8 +182,9 @@ emsg = [];
 try
     [c, gof] = fit(thr',msDt(:,6),f);
 catch emsg
-    disp(['DN_olmi: error fitting exponential growth to std:' emsg]);
+    fprintf(1,'Error fitting exponential growth to std: %s\n',emsg)
 end
+
 if isempty(emsg)
     out.stdrfexpa = c.a;
     out.stdrfexpb = c.b;
@@ -198,7 +204,7 @@ end
 %% Fit linear to errors in range
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[40,4]);
 f = fittype('a*x +b','options',s);
-[c,gof] = fit(thr',msDt(:,6),f);
+[c, gof] = fit(thr',msDt(:,6),f);
 
 out.stdrfla = c.a;
 out.stdrflb = c.b;

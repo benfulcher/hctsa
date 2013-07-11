@@ -12,8 +12,6 @@ function out = EN_progranz(y,howtorand)
 %             series
 % Ben Fulcher, October 2009
 
-
-
 if (abs(mean(y)) > eps) || (abs(std(y)-1) > eps)
     warning('The input time series should be z-scored for EN_progranz')
 end

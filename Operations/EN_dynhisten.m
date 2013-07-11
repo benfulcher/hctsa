@@ -2,20 +2,26 @@ function out = EN_dynhisten(y,ksorhist)
 % Ranges over bin size and returns statistics on the output
 % Ben Fulcher, 2009
 
+doplot = 0; % plot outputs
+
+if nargin < 2
+    ksorhist = 'hist'; % use histogram by default
+end
+
 switch ksorhist
     case 'ks'
-        widthr = 0.01:0.01:1;
+        widthr = (0.01:0.01:1);
         hs = zeros(length(widthr),1);
         for i = 1:length(widthr)
             width = widthr(i);
             [px, xr] = ksdensity(y,'width',width,'function','pdf');
             hs(i) = -sum(px.*log(eps+px))*(xr(2)-xr(1));
         end
-
-%         plot(widthr,hs);
-
+        if doplot
+            plot(widthr,hs);
+        end
     case 'hist'
-        binsizer = 2:50;
+        binsizer = (2:50); % range of binsizes
         hs = zeros(length(binsizer),1);
         for i = 1:length(binsizer)
             nbins = binsizer(i);
@@ -23,16 +29,18 @@ switch ksorhist
             px = px/(sum(px)*(xr(2)-xr(1)));  
             hs(i) = -sum(px.*log(eps+px))*(xr(2)-xr(1));
         end
-%         plot(binsizer,hs)
-        
+        if doplot
+            plot(binsizer,hs);
+        end
+otherwise
+    error('Unknown distribution method: %s',ksorhist)
 end
 
-% Output measures
+% Summary statistics
 out.ch = hs(end)-hs(1);
 out.pch = (hs(end)-hs(1))/abs(hs(1));
 out.mean = mean(hs);
 out.std = std(hs);
-
 
 % Fit Exponential decay to absolute ACF using nonlinear least squares:
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[2, -0.5]);

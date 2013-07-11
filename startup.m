@@ -36,6 +36,10 @@ addfcn('Toolboxes/MSmall_utilities');
 fprintf(1,', HMM')
 addfcn('Toolboxes/hmm');
 
+% Rudy Moddemeijer's code
+fprintf(1,', Rudy Moddemeijer')
+addfcn('Toolboxes/Rudy_Moddemeijer');
+
 % Max Little's steps/bumps toolbox
 fprintf(1,', steps_bumps')
 addfcn('Toolboxes/steps_bumps_toolkit');

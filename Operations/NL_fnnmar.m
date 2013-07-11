@@ -71,16 +71,16 @@ if isempty(th) % output summary statistics
 
     % first time NN error goes below a set of thresholds
     out.m005 = find(nn < 0.05,1,'first');
-    if isempty(out.m005), out.m005 = maxm+1; end
+    if isempty(out.m005), out.m005 = maxm + 1; end
     
     out.m01 = find(nn < 0.1,1,'first');
-    if isempty(out.m01), out.m01 = maxm+1; end
+    if isempty(out.m01), out.m01 = maxm + 1; end
     
     out.m02 = find(nn < 0.2,1,'first');
-    if isempty(out.m02), out.m02 = maxm+1; end
+    if isempty(out.m02), out.m02 = maxm + 1; end
     
     out.m05 = find(nn < 0.5,1,'first');
-    if isempty(out.m05), out.m05 = maxm+1; end
+    if isempty(out.m05), out.m05 = maxm + 1; end
 
 
 else % just want a scalar of embedding dimension as output

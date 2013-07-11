@@ -26,23 +26,23 @@ end
 
 
 % (2) Form the histogram
-if strcmp(historks,'ks') % KSDENSITY method for pdf
+switch historks
+case 'ks' % Use ksdensity to calculate pdf
     if isempty(nbins)
-        [px xr] = ksdensity(y,'function','pdf'); % selects optimal width
+        [px, xr] = ksdensity(y,'function','pdf'); % selects optimal width
     else
-        [px xr] = ksdensity(y,'width',nbins,'function','pdf'); % uses specified width
+        [px, xr] = ksdensity(y,'width',nbins,'function','pdf'); % uses specified width
     end
-elseif strcmp(historks,'hist') % HISTOGRAM method for pdf
+case 'hist' % Use histogram to calculate pdf
     [px, xr] = hist(y,nbins);
     px = px/(sum(px)*(xr(2)-xr(1))); % normalize to a probability density
-else
-    return % error; must specify 'ks' or 'hist'
+otherwise
+    error('Unknown distribution method -- specify ''ks'' or ''hist''') % error; must specify 'ks' or 'hist'
 end
 
 % plot(xr,px)
 
 % (3) Compute the entropy sum and return it as output
 h = -sum(px.*log(eps+px))*(xr(2)-xr(1));
-
 
 end

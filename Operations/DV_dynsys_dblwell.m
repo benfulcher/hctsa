@@ -6,7 +6,7 @@ function out = DV_dynsys_dblwell(y,params)
 
 doplot = 0; % plot results
 
-N = length(y);
+N = length(y); % length of the time series
 
 alpha = params(1);
 kappa = params(2);
@@ -28,25 +28,21 @@ if doplot
     V = @(x) x.^4/4 - alpha^2*x.^2/2;
     plot(x,V(x),'or')
     plot(x)
-    hold off
 end
 
 %% Output features of the trajectory
 if isnan(x(end)) || abs(x(end)) > 1E10
-    error('Error simulating time series forcing a double-well potential')
-    % out = NaN;
-    % out.mean = NaN; out.median = NaN; out.range = NaN; out.proppos = NaN; out.pcross = NaN;
-    % out.pcrossup = NaN; out.pcrossdown = NaN; out.ac1 = NaN; out.ac10 = NaN; out.ac50 = NaN;
-    % out.tau = NaN; out.finaldev = NaN; out.std = NaN;
+    fprintf(1,'Trajectory blew out!\n');
+    out = NaN; % not suitable for this time series
 else
     out.mean = mean(x);
     out.median = median(x);
     out.range = range(x);
-    out.proppos = length(find(x>0))/N; % proportion positive
-    out.pcross = length(find((x(1:end-1)).*(x(2:end))<0))/(N-1);
+    out.proppos = sum(x>0)/N; % proportion positive
+    out.pcross = sum((x(1:end-1)).*(x(2:end)) < 0)/(N-1);
     % crosses middle
-    out.pcrossup = length(find((x(1:end-1)-alpha).*(x(2:end)-alpha)<0))/(N-1); % crosses upper well middle
-    out.pcrossdown = sum((x(1:end-1)+alpha).*(x(2:end)+alpha)<0)/(N-1);
+    out.pcrossup = sum((x(1:end-1)-alpha).*(x(2:end)-alpha) < 0)/(N-1); % crosses upper well middle
+    out.pcrossdown = sum((x(1:end-1)+alpha).*(x(2:end)+alpha) < 0)/(N-1);
     % crosses lower well middle
     
     out.ac1 = abs(CO_autocorr(x,1)); % magnitude of autocorrelation at lag 1

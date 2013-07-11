@@ -33,7 +33,7 @@ if nargin < 7
 				% is for consistency with already-implemented precedent)
 end
 
-N = length(y); % length
+N = length(y); % length of the time series
 
 % perform scaling over a range of tau, up to a fifth the length
 % of the time series
@@ -45,11 +45,11 @@ if loginc
 else
 	taur = 5:taustep:floor(N/4); % maybe increased??
 end
-ntau = length(taur);
+ntau = length(taur); % analyze the time series across this many timescales
 
-if ntau<8
+if ntau < 8 % fewer than 8 points
     % ++BF 19/3/2010 (ntau<4); ++BF 28/6/2010 (ntau<8)
-    disp('Time Series is too short for good DFA');
+    fprintf(1,'This time Series is too short to analyze using DFA\n');
     out = NaN; return
 end
 
@@ -220,7 +220,7 @@ if length(r1)<8 || all(isnan(logFF(r1)))
     out.r1_ssr = NaN;
     out.r1_resac1 = NaN;
 else
-    [linfit stats] = robustfit(logtt(r1),logFF(r1));
+    [linfit, stats] = robustfit(logtt(r1),logFF(r1));
 
     out.r1_linfitint = linfit(1); % linear fit intercept
     out.r1_alpha = linfit(2); % linear fit gradient
@@ -232,7 +232,7 @@ else
 end
     
 % R2
-if length(r2)<8 || all(isnan(logFF(r2)))
+if length(r2) < 8 || all(isnan(logFF(r2)))
     out.r2_linfitint = NaN;
     out.r2_alpha = NaN;
     out.r2_stats_coeffcorr = NaN;
@@ -241,7 +241,7 @@ if length(r2)<8 || all(isnan(logFF(r2)))
     out.r2_ssr = NaN;
     out.r2_resac1 = NaN;
 else
-    [linfit stats] = robustfit(logtt(r2),logFF(r2));
+    [linfit, stats] = robustfit(logtt(r2),logFF(r2));
 
     out.r2_linfitint = linfit(1); % linear fit intercept
     out.r2_alpha = linfit(2); % linear fit gradient

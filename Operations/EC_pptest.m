@@ -7,7 +7,7 @@ function out = EC_pptest(y,lags,model,teststat)
 % The number of autocovariance lags to include in the Newey-West estimator
 % of the long-run variance, lags.
 if nargin < 2 || isempty(lags)
-    lags = 0:5; % use 5 autoregressive lags.
+    lags = (0:5); % use 5 autoregressive lags.
 end
 
 % The model variant, model. Can be 'ar': autoregressive, 'ard':
@@ -24,7 +24,7 @@ end
 
 
 %% Run the test
-[h,pValue,stat,cValue,reg] = pptest(y,'lags',lags,'model',model,'test',teststat);
+[h, pValue, stat, cValue, reg] = pptest(y,'lags',lags,'model',model,'test',teststat);
 
 %% Get outputs
 nout = length(h);

@@ -20,7 +20,7 @@ end
 IIDs = logical(IIDs);
 
 %% Perform the test:
-[h,pValue,stat,cValue,ratio] = vratiotest(y,'period',periods,'IID',IIDs);
+[h, pValue, stat, cValue, ratio] = vratiotest(y,'period',periods,'IID',IIDs);
 
 if length(h) > 1
    % Return statistics on multiple outputs for multiple periods/IIDs

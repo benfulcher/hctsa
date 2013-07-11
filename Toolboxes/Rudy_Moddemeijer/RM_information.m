@@ -1,4 +1,4 @@
-function [estimate,nbias,sigma,descriptor] = CO_information(x,y,descriptor,approach,base)
+function [estimate,nbias,sigma,descriptor] = RM_information(x,y,descriptor,approach,base)
 % INFORMATION  Estimates the mutual information of two stationary signals with
 %              independent pairs of samples using various approaches.
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y) or
@@ -31,8 +31,6 @@ function [estimate,nbias,sigma,descriptor] = CO_information(x,y,descriptor,appro
 
 % Some trivial details were modified by Ben Fulcher; see http://www.cs.rug.nl/~rudy/matlab/source/information.m for original code
 
-
-
 if nargin < 1
    disp('Usage: [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y)')
    disp('       [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y,DESCRIPTOR)')
@@ -45,7 +43,7 @@ end
 
 % Some initial tests on the input arguments
 
-[NRowX,NColX] = size(x);
+[NRowX, NColX] = size(x);
 
 if NRowX~=1
     x = x';
@@ -68,11 +66,11 @@ if nargin > 5
 end
 
 if nargin == 2
-  [h,descriptor]=RY_histogram2(x,y);
+  [h,descriptor] = RM_histogram2(x,y);
 end
 
 if nargin >= 3
-  [h,descriptor]=RY_histogram2(x,y,descriptor);
+  [h,descriptor]=RM_histogram2(x,y,descriptor);
 end
 
 if nargin < 4
