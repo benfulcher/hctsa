@@ -1,9 +1,8 @@
 function out = SY_dynwin(y)
-% METRIC FOR STATIONARITY AS A FUNCTION OF A FEW PARAMETERS (WINDOW SIZE,
-% WINDOW OVERLAP)
+% Operation to estimate stationarity as a function of a few parameters (window size,
+% window overlap)
 % Ben Fulcher August 2009
-% Ben Fulcher 8/10/2010 fixed an error -- didn't take std of fs before
-% doing output... cleared all existing entries for this operation.
+% Ben Fulcher 8/10/2010 fixed an error -- didn't take std of ops before
 
 nsegr = (2:1:10);
 nmov = 1;
@@ -21,26 +20,26 @@ for i = 1:length(nsegr)
     qs = zeros(nsteps,nfeat);
 
     for j = 1:nsteps
-            ysub = y((j-1)*inc+1:(j-1)*inc+wlen);
-            taul = CO_fzcac(ysub);
+        ysub = y((j-1)*inc+1:(j-1)*inc+wlen);
+        taul = CO_fzcac(ysub);
 %             ysubrsl=resample(ysub,1,taul); % resample at tau
 %             ysubrsg=resample(ysub,1,taug); % resample
-            
-            qs(j,1) = mean(ysub); % mean
-            qs(j,2) = std(ysub); % standard deviation
-            qs(j,3) = skewness(ysub); % skewness
-            qs(j,4) = kurtosis(ysub); % kurtosis
+        
+        qs(j,1) = mean(ysub); % mean
+        qs(j,2) = std(ysub); % standard deviation
+        qs(j,3) = skewness(ysub); % skewness
+        qs(j,4) = kurtosis(ysub); % kurtosis
 %             qs(j,5)=EN_ApEn(ysubrsg,1,0.15); % ApEn_taug
 %             qs(j,6)=EN_sampenc(ysubrsg,1,0.15); % SampEn_taug
 %             qs(j,7)=EN_ApEn(ysubrsl,taul,0.15); % ApEn_taul
 %             qs(j,8)=EN_sampenc(ysubrsl,taul,0.15); % SampEn_taul
-            qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1
-            qs(j,6) = EN_sampenc(ysub,1,0.2); % SampEn_1
-            qs(j,7) = CO_autocorr(ysub,1); % AC1
-            qs(j,8) = CO_autocorr(ysub,2); % AC2
-            qs(j,9) = CO_autocorr(ysub,taug); % AC_glob_tau
-            qs(j,10) = CO_autocorr(ysub,taul); % AC_loc_tau
-            qs(j,11) = taul;
+        qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1
+        qs(j,6) = EN_sampenc(ysub,1,0.2); % SampEn_1
+        qs(j,7) = CO_autocorr(ysub,1); % AC1
+        qs(j,8) = CO_autocorr(ysub,2); % AC2
+        qs(j,9) = CO_autocorr(ysub,taug); % AC_glob_tau
+        qs(j,10) = CO_autocorr(ysub,taul); % AC_loc_tau
+        qs(j,11) = taul;
     end
 
 % plot(qs,'o-');

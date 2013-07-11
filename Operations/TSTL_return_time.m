@@ -76,7 +76,7 @@ NN = length(lavery);
 %% Quantify structure in output
 out.max = max(lavery);
 out.std = std(lavery);
-out.pzeros = sum(lavery==0)/NN;
+out.pzeros = sum(lavery == 0)/NN;
 out.pg05 = sum(lavery>max(lavery)*0.5)/NN;
 out.iqr = iqr(lavery);
 
@@ -115,7 +115,7 @@ end
 % plot(cglav,'k'), keyboard
 out.hcgdist = -sum(cglav(cglav>0).*log(cglav(cglav>0)));
 out.rangecgdist = range(cglav);
-out.pzeroscgdist = sum(cglav==0)/nbins;
+out.pzeroscgdist = sum(cglav == 0)/nbins;
 
 
 %% Get distribution of distribution of return times

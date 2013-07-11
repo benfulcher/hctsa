@@ -42,7 +42,7 @@ for i=1:(n-1)
       lastrun(j)=run(j);
    end
 end
-if M==1;
+if M == 1;
     N=n*(n-1)/2;
     p(1)=A(1)/N;
     e(1)=-log(p(1));

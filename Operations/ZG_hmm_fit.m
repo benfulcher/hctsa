@@ -64,7 +64,7 @@ out.stdP = std(P(:));
 out.LLtrainpersample = max(LL)/Ntrain; % loglikelihood per sample
 out.nit = length(LL); % number of iterations
 
-if Ntrain==N
+if Ntrain == N
     % no testing -- leave now
     disp('no testing requested')
     return

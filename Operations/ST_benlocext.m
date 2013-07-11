@@ -30,7 +30,7 @@ end
 %% Buffer the time series
 y_buff = buffer(y,wl); % no overlap
 % each *column* is a window of samples
-if y_buff(end)==0
+if y_buff(end) == 0
     y_buff = y_buff(:,1:end-1); % remove last window if zero-padded
 end
 nw = size(y_buff,2); % number of windows

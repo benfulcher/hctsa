@@ -190,7 +190,7 @@ else % RETURN STATISTICS ON CURVES
 	    out.fmm20_1 = SUB_first(mm1,'above',20,maxdim-2)+1;
 	    out.fmm40_1 = SUB_first(mm1,'above',40,maxdim-2)+1;
 	    % where is maximum (+1s because of differencing
-	    out.fmmmax_1 = find(mm1==max(mm1),1,'first')+1;
+	    out.fmmmax_1 = find(mm1 == max(mm1),1,'first')+1;
 	end
 
 
@@ -204,7 +204,7 @@ else % RETURN STATISTICS ON CURVES
 	    out.fmm20_2 = SUB_first(mm2,'above',20,maxdim-2)+1;
 	    out.fmm40_2 = SUB_first(mm2,'above',40,maxdim-2)+1;
 	    % where is maximum (+1s because of differencing)
-	    out.fmmmax_2 = find(mm2==max(mm2),1,'first')+1;
+	    out.fmmmax_2 = find(mm2 == max(mm2),1,'first')+1;
 	end
 
 

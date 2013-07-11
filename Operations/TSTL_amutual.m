@@ -48,7 +48,7 @@ dmaximai = diff(maximai);
  % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pmaxima = length(dmaximai)/floor(lami/2);
 out.modeperiodmax = mode(dmaximai);
-out.pmodeperiodmax = length(find(dmaximai==mode(dmaximai)))/length(dmaximai);
+out.pmodeperiodmax = length(find(dmaximai == mode(dmaximai)))/length(dmaximai);
 
 
 % hold on; plot(maximai,ami(maximai),'or'); hold off

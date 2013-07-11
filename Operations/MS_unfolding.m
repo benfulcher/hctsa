@@ -68,8 +68,8 @@ for d=de,
     d1=rms(X(:,2:nx)'-X(:,ind+1)');
 
     %exclude any coincident points
-    d1(d0==0)=[];
-    d0(d0==0)=[];
+    d1(d0 == 0)=[];
+    d0(d0 == 0)=[];
     
     %calculate the proportion fnn
     prop=sum((d1./d0)>dsp)/length(d0);

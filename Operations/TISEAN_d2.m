@@ -332,7 +332,7 @@ out.slopesh2_linrmserr = findch_h2.linrmserr;
 flattens = SUB_doesflatten(h2dat_v, h2dat_M);
 out.h2meangoodness = mean(flattens(:,1)); % how close to having intermediate 'flat' regions
 out.h2bestgoodness = min(flattens(:,1)); % best you can do
-out.h2besth2 = flattens(find(flattens(:,1)==min(flattens(:,1)),1,'first'),2);
+out.h2besth2 = flattens(find(flattens(:,1) == min(flattens(:,1)),1,'first'),2);
 out.meanh2 = mean(flattens(:,2));
 out.medianh2 = median(flattens(:,2));
 flatsh2min = SUB_findmmin(flattens(:,2));
@@ -383,9 +383,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             ss = s(w(ii)+1:w(ii+1)-1);
             nn = zeros(length(ss),nc);
             for jj = 1:length(ss)
-                if nc==2
+                if nc == 2
                     tmp = textscan(ss{jj},'%n%n');
-                elseif nc==3
+                elseif nc == 3
                     tmp = textscan(ss{jj},'%n%n%n');
                 end
                 nn(jj,:) = horzcat(tmp{:});
@@ -526,11 +526,11 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         thevector = thecell{1}(:,1);
         ee = length(thevector);
         
-        goodones = cellfun(@(x)length(x),thecell)==ee;
+        goodones = cellfun(@(x)length(x),thecell) == ee;
         if ~all(goodones)
             % there's a bug in TISEAN where sometimes there are repeated 'x'
             % values -- check for this
-            theproblems = find(goodones==0);
+            theproblems = find(goodones == 0);
             for ii = 1:length(theproblems)
                 [b, m, n] = unique(thecell{theproblems(ii)}(:,1));
                 thecell{theproblems(ii)} = thecell{theproblems(ii)}(m,:);

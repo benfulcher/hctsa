@@ -46,11 +46,11 @@ end
 if doplot
     subplot(5,1,1:2); title('signal')
     plot(y);
-    subplot(5,1,3);title('means');
+    subplot(5,1,3); title('means');
     plot(means)
-    subplot(5,1,4);title('medians');
+    subplot(5,1,4); title('medians');
     plot(medians)
-    subplot(5,1,5);title('maxs');
+    subplot(5,1,5); title('maxs');
     plot(maxs);
 end
 
@@ -91,14 +91,14 @@ r = corrcoef(maxs,medians);
 out.corrcoef_max_medians = r(1,2);
 
 
-    function meisgorilla = SUB_slosr(xx)
-        maxlevel = length(xx);
-        slosr = zeros(maxlevel-2,1);
-        for i = 2:maxlevel-1
-            slosr(i-1) = sum(xx(1:i-1))/sum(xx(i+1:end));
-        end
-        absm1 = abs(slosr-1); % how close to 1 (the same sum on either side) each is
-        meisgorilla = find(absm1 == min(absm1),1,'first') + 1;
+function meisgorilla = SUB_slosr(xx)
+    maxlevel = length(xx);
+    slosr = zeros(maxlevel-2,1);
+    for i = 2:maxlevel-1
+        slosr(i-1) = sum(xx(1:i-1))/sum(xx(i+1:end));
     end
+    absm1 = abs(slosr-1); % how close to 1 (the same sum on either side) each is
+    meisgorilla = find(absm1 == min(absm1),1,'first') + 1;
+end
     
 end

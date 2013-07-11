@@ -1,9 +1,11 @@
 function out = ST_momcorr(x,wl,olap,mom1,mom2,transf)
-% finds correlations between moments of the signal (x) [transformed according
-% to transf], in windows (of length wl). x should be zscored
+% Finds correlations between moments of the signal (x) [transformed according
+% to transf], in windows (of length wl). x should be z-scored.
+% Idea of Nick Jones.
 % Ben Fulcher 5 July 2010
 
 N = length(x); % number of samples in the input signal
+
 
 % sliding window length (samples)
 if nargin < 2

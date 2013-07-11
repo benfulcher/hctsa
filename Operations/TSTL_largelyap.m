@@ -4,7 +4,7 @@ function out = TSTL_largelyap(y,Nref,maxtstep,past,NNR,embedparams)
 % series s, using formula (1.5) in Parlitz Nonlinear Time Series Analysis
 % book.
 % Inputs:
-% Nref: number of randomly-chosen reference points (-1==all)
+% Nref: number of randomly-chosen reference points (-1 == all)
 % maxtstep: maximum prediction length (samples)
 % past: exclude -- Theiler window idea
 % NNR: number of nearest neighbours [opt]
@@ -90,7 +90,7 @@ t = spacing(rs);
 
 %% Get output stats
 
-if all(p==0)
+if all(p == 0)
     out=NaN; return
 end
 

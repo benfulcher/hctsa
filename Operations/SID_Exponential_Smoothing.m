@@ -1,32 +1,38 @@
 function out = SID_Exponential_Smoothing(x,ntrain,alpha)
-% Wrapped up, code adapted from original code by Siddharth Arora
+% Wrapped up, code adapted from original code contributed 
+% by Siddharth Arora: Siddharth.Arora@sbs.ox.ac.uk
 % x is the input signal (uniformly sampled time series data as a column
 %                           vector)
-% This version takes a small training set with which to optimize alpha,
+% This new version of the code takes a small training set with which to optimize alpha,
 % and applies that across the whole time series. This is a choice. Could
-% take a number of training sets and average a best alpha, etc.
+% take a number of training sets and average to some optimal alpha, for example
 % Ben Fulcher 19/2/2010
 
 N = length(x); % the length of the time series
 
 % (*) ntrain -- either the number or proportion of training points
 if nargin < 2 || isempty(ntrain)
-    ntrain = min(100,N); % hopefully the time series is longer than 100 samples
+    ntrain = min(100,N); % if the time series is shorter than 100 samples(!)
 end
 if ntrain > 0 && ntrain < 1 % given training set length as proportion
                             % of the time series length
     ntrain = floor(N*ntrain);
 end
-if ntrain > 1000; % maximum training set size
+
+% Check training set sizes:
+mintrain = 100; % minimum training set size
+maxtrain = 1000; % maximum training set size
+
+if ntrain > maxtrain; % larger than maximum training set size
     fprintf(1,'Training set size exceeded maximum of 1000 samples -- reducing to this.\n');
     ntrain = 1000;
 end
-if ntrain < 100; % minimum training set size
+if ntrain < mintrain; % smaller than minimum training set size
     fprintf(1,'Training set size below minimum of 100 -- increasing to this.\n');
     ntrain = 100;
 end
 
-if N < ntrain
+if N < ntrain % time series shorter than the size of the training set
     fprintf(1,'Time Series too short for exponential smoothing\n')
     out = NaN; return
 end
@@ -58,10 +64,9 @@ if strcmp(alpha,'best')
     
     if bruteforce
         % set a range of alpha and find minimum
-        alphar = 0.1:0.1:1; % the exponential smoothing parameter
+        alphar = (0.1:0.1:1); % the exponential smoothing parameter
         nalpha = length(alphar);
         rmses = zeros(nalpha,1);
-
 
         for k = 1:nalpha;
             a = alphar(k);
@@ -73,7 +78,6 @@ if strcmp(alpha,'best')
             fore = xf(3:end);
             orig = xtrain(3:end);
             rmses(j) = sqrt(mean((fore - orig).^2)); % compute rmse
-            
 %             rmses(k) = rmse(fore,orig);
 %             rmse_n(k,2) = a;
 
@@ -90,7 +94,7 @@ if strcmp(alpha,'best')
                 d_rmse_n = diff(rmse_n(k-ntimes:k,1));
                 if all(d_rmse_n>0)
                     % increased <ntimes> times in a row
-                    disp('breaking')
+                    % disp('breaking')
                     break
                 end
             end
@@ -98,7 +102,7 @@ if strcmp(alpha,'best')
             % Find the value of smoothing parameter that minimizes
             % in-sample 1-step ahead prediction error
             minrmse = min(rmses);
-            alpha_optimum = alphar(rmses==minrmse);
+            alpha_optimum = alphar(rmses == minrmse);
             
             % Produce some preliminary outputs
             out.train_minrmse = minrmse;
@@ -123,14 +127,13 @@ if strcmp(alpha,'best')
             fore = xf(3:end);
             orig = xtrain(3:end);
             rmses(k) = sqrt(mean((fore - orig).^2)); % compute rmse
-            
         end
         
         % fit quadratic to set alpha
         [sort_rmses, ix] = sort(rmses);
         rkeep = ix(1:3); % fit on 3 points closest to minimum
         p = polyfit(alphar(rkeep)',rmses(rkeep),2);
-        aar = 0:0.005:1;
+        aar = (0:0.005:1);
         y = polyval(p,aar);
 %         plot(aar,y,':k'); hold on;
 %         plot(alphar,rmses,'or');
@@ -148,8 +151,6 @@ if strcmp(alpha,'best')
                 alphamin = 1;
             end
         else
-            
-        
             % Search again around this
             alphar = linspace(alphamin-0.1,alphamin+0.1,5);
             if any(alphar <= 0)
@@ -178,7 +179,7 @@ if strcmp(alpha,'best')
 %             plot(alphar,rmses,'or'); hold off
             
             if p(1) < 0
-                alphamin = alphar(rmses==min(rmses));
+                alphamin = alphar(rmses == min(rmses));
                 % This is quite bad -- the first step didn't find a local
                 % minimum...
             else % minimum of quadratic fit
@@ -195,7 +196,7 @@ if strcmp(alpha,'best')
 end
 
 if isnan(alpha)
-    error('What?! alpha is a NaN?!')
+    error('Alpha is a NaN?!')
 end
 
 %% (2) Fit to the whole time series
@@ -208,18 +209,6 @@ end
 
 %Plot original time series and smoothed data using optimum values
 y = SUB_fit_exp_smooth(x,alpha);
-% for i=2:N-1
-%         %s(1) = mean(x(1:i-1));
-%         s(1) = x(1);
-%         % Loop to smooth data within the window size
-%         for j = 2:i
-%             s(j) = a*x(j) + (1-a)*s(j-1);
-%         end
-%         
-%         % S(t) = Xf(t) is forecasted value for X(t+1)
-%         y(i+1,1) = s(i);
-%         clear s;
-% end
 
 yp = y(3:N); % predicted
 xp = x(3:N); % original
@@ -234,8 +223,8 @@ residout = MF_residanal(e);
 
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
-for k = 1:length(fields);
-    eval(['out.' fields{k} ' = residout.' fields{k} ';']);
+for k = 1:length(fields)
+    eval(sprintf('out.%s = residout.%s;',fields{k},fields{k}));
 end
 
 % t=1:length(yp);
@@ -247,24 +236,24 @@ end
 % ylabel('Amplitude');
 
 
-    function xf = SUB_fit_exp_smooth(x,a)
-            % Iterate over rolling window
-            ntrain = length(x);
-            xf = zeros(ntrain,1);
-            
-            for ii=2:ntrain-1
-                s = zeros(ntrain,1);
-                s(1) = mean(x(1:ii-1));
-                
-                % Loop to smooth data within the window size
-                for jj = 2:ii
-                    s(jj) = a*x(jj) + (1-a)*s(jj-1);
-                end
-                
-                % S(t) = Xf(t) is forecasted value for X(t+1)
-                xf(ii+1,1) = s(ii);
-            end
+function xf = SUB_fit_exp_smooth(x,a)
+    % Iterate over rolling window
+    ntrain = length(x);
+    xf = zeros(ntrain,1);
+
+    for ii = 2:ntrain-1
+        s = zeros(ntrain,1);
+        s(1) = mean(x(1:ii-1));
+    
+        % Loop to smooth data within the window size
+        for jj = 2:ii
+            s(jj) = a*x(jj) + (1-a)*s(jj-1);
+        end
+    
+        % S(t) = Xf(t) is forecasted value for X(t+1)
+        xf(ii+1,1) = s(ii);
     end
+end
 
 
 end

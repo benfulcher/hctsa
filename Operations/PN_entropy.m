@@ -1,5 +1,5 @@
 function h = PN_entropy(vec1)
-%=========================================================
+% == == == == == == == == == == == == == == == == == == == == == == == == == == == ===
 %
 %This is a prog in the MutualInfo 0.9 package written by 
 % Hanchuan Peng.
@@ -11,7 +11,7 @@ function h = PN_entropy(vec1)
 %
 %Last modification: April/19/2002
 %
-%========================================================
+% == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
 %
 % h = entropy(vec1)
 % calculate the entropy of a variable vec1

@@ -33,9 +33,9 @@ switch preproc
         % of an AR2 model to the processed time series.
         % has to beat doing nothing by 5% (error)
         % No spectral methods allowed...
-        [ypp best] = benpp(y,'ar',2,0.05,0);
-        eval(['y = ypp.' best ';']);
-        disp(['Proprocessed according to AR(2) criterion using ' best]);
+        [ypp, best] = benpp(y,'ar',2,0.05,0);
+        eval(sprintf('y = ypp.%s;',best));
+        fprintf(1,'Proprocessed the time series according to AR(2) criterion using %s\n',best);
 end
 
 y = benzscore(y); % make sure the time series is z-scored
@@ -90,16 +90,16 @@ maxarchps = zeros(np,nq); % maximum p-value over 20 lags from Engle's ARCH test 
 meanlbqps = zeros(np,nq); % mean lbq p-value over 20 lags from Q-test on squared standardized innovations
 maxlbqps = zeros(np,nq); % maximum p-value over 20 lags from Q-test on squared standardized innovations
 
-for i=1:np
+for i = 1:np
     p = pr(i); % garch order
-    for j=1:nq
+    for j = 1:nq
        q = qr(j); % arch order
        
        % (i) specify a zero-mean, Gaussian innovation GARCH(P,Q) model.
        spec = garchset('P',p,'Q',q,'C',NaN);
        
        % (ii) fit the model
-       [coeff,errors,LLF,innovations,sigmas,summary] = garchfit(spec,y);
+       [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
        
        % (iii) store derived statistics on the fitted model
        LLFs(i,j) = LLF;

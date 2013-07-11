@@ -147,7 +147,7 @@ pbox = boxcounts/NN;
 
 out.maxpbox10 = max(pbox(:));
 out.minpbox10 = min(pbox(:));
-out.zerospbox10 = sum(pbox(:)==0);
+out.zerospbox10 = sum(pbox(:) == 0);
 out.meanpbox10 = mean(pbox(:));
 out.rangepbox10 = range(pbox(:));
 out.hboxcounts10 = -sum(pbox(pbox>0).*log(pbox(pbox>0)));
@@ -157,7 +157,7 @@ boxcounts = subcountboxes(x,y,5);% 5 partitions per axis
 pbox = boxcounts/NN;
 out.maxpbox5 = max(pbox(:));
 out.minpbox5 = min(pbox(:));
-out.zerospbox5 = sum(pbox(:)==0);
+out.zerospbox5 = sum(pbox(:) == 0);
 out.meanpbox5 = mean(pbox(:));
 out.rangepbox5 = range(pbox(:));
 out.hboxcounts5 = -sum(pbox(pbox>0).*log(pbox(pbox>0)));

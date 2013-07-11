@@ -14,5 +14,4 @@ switch wh
         error('DN_skewy: unknown method %s',wh)
 end
 
-
 end

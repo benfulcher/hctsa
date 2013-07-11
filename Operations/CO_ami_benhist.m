@@ -10,7 +10,22 @@ function out = CO_ami_benhist(y,tau,meth,nbins)
 % Ben Fulcher, September 2009
 
 
+%% INPUTS
+
+% time-lag, tau
+if nargin < 2 || isempty(tau)
+    tau = 1;  % time-lag of 1
+end
 if strcmp(tau,'tau'), tau = CO_fzcac(y); end
+
+if nargin < 3 || isempty(meth)
+    meth = 'std1'; % default
+end
+
+if nargin < 4
+    nbins = 10;
+end
+
 
 % 1) Form the temporally-delayed vectors y1 and y2
 y1 = y(1:end-tau);
@@ -37,6 +52,8 @@ switch meth
     case 'quantiles' % use quantiles with ~equal number in each bin
         b = quantile(y,linspace(0,1,nbins+1));
         b(1) = b(1) - 0.1; b(end) = b(end) + 0.1;
+    otherwise
+        error('Unknown method %s',meth)
 end
 nb = length(b) - 1; % number of bins (-1 since b defines edges)
 
@@ -52,7 +69,7 @@ pj = sum(pij,2); % other marginal
 pii = ones(nb,1)*pi;
 pjj = pj*ones(1,nb);
 
-r = find(pij>0); % in this way, we set log(0) = 0
+r = (pij > 0); % defining the range in this way, we set log(0) = 0
 ami = pij(r).*log(pij(r)./pii(r)./pjj(r));
 out = sum(ami);
 

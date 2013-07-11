@@ -77,20 +77,20 @@ r = (1:N)'; % the x-range over which to fit
 
 % 1) Polynomial detrend
 % starts with 'poly' and ends with integer from 1--9
-if length(detrndmeth)==5 && strcmp(detrndmeth(1:4),'poly') && ~isempty(str2double(detrndmeth(5)))
+if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'poly') && ~isempty(str2double(detrndmeth(5)))
     [cfun,gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
     y_d = y-y_fit;
 
 
 % 2) Seasonal detrend
-elseif length(detrndmeth)==4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4),'9')
+elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4),'9')
     [cfun,gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
     y_d = y-y_fit;
 
 % 3) Spline detrend
-elseif length(detrndmeth)==8 && strcmp(detrndmeth(1:6),'spline') && ~isempty(str2double(detrndmeth(7))) && ~isempty(str2double(detrndmeth(8)))
+elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6),'spline') && ~isempty(str2double(detrndmeth(7))) && ~isempty(str2double(detrndmeth(8)))
     nknots = str2double(detrndmeth(7));
     intp = str2double(detrndmeth(8));
     try
@@ -103,7 +103,7 @@ elseif length(detrndmeth)==8 && strcmp(detrndmeth(1:6),'spline') && ~isempty(str
     y_d = y-y_spl';
     
 % 4) Differencing
-elseif length(detrndmeth)==5 && strcmp(detrndmeth(1:4),'diff') && ~isempty(str2double(detrndmeth(5)))
+elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'diff') && ~isempty(str2double(detrndmeth(5)))
     ndiffs = str2double(detrndmeth(5));
     y_d = diff(y,ndiffs); % difference the series n times
 
@@ -149,7 +149,7 @@ else
 end
 
 %% quick error checks
-if all(y_d==0)
+if all(y_d == 0)
     out = NaN; return
 end
 

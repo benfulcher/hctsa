@@ -13,6 +13,7 @@ end
 if nargin < 3 || isempty(amax)
     amax = 5; % maximum 'scale'
 end
+maxlevel = wmaxlev(N,wname); % maximum level for this time-series length
 if strcmp(amax,'max') % set to maximum for this wavelet
     amax = wmaxlev(N,wname);
 end
@@ -21,11 +22,10 @@ if nargin < 4 || isempty(delta)
     delta = 1; % the sampling period
 end
 
-if wmaxlev(N,wname) < amax
-    disp('Chosen level is too large for this wavelet on this signal');
-%     out = NaN; return
-    amax = wmaxlev(N,wname);
-    disp(['Changing to new maximum level: ' num2str(amax)]);
+if maxlevel < amax
+    fprintf(1,'Chosen level (%u) is too large for this wavelet on this signal...',amax);
+    amax = maxlevel;
+    fprintf(1,' changed to maximum level computed with wmaxlev: %u\n',amax);
 end
 
 %% Do your thing.
@@ -49,7 +49,7 @@ f = scal2frq(a, wname, delta);
 per = 1./f; 
 
 % Decompose the time series at level specified as maximum
-[c,l] = wavedec(y, amax, wname);
+[c, l] = wavedec(y, amax, wname);
 
 % Estimate standard deviation of detail coefficients.
 stdc = wnoisest(c,l,scales);
@@ -57,7 +57,7 @@ stdc = wnoisest(c,l,scales);
 % plot(stdc) % plot them
 
 % Compute identified period.
-[x,jmax] = max(stdc); % highest energy level (level with highest energy coefficients)
+[~, jmax] = max(stdc); % level with highest energy coefficients
 
 out.lmax = jmax; % level with highest energy coefficients
 out.period = per(jmax); % output dominant period

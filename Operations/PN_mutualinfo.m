@@ -1,5 +1,5 @@
 function h = PN_mutualinfo(vec1,vec2)
-%=========================================================
+% == == == == == == == == == == == == == == == == == == == == == == == == == == == ===
 %
 %This is a prog in the MutualInfo 0.9 package written by 
 % Hanchuan Peng.
@@ -11,7 +11,7 @@ function h = PN_mutualinfo(vec1,vec2)
 %
 %Last modification: April/19/2002
 %
-%========================================================
+% == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
 %
 % h = mutualinfo(vec1,vec2)
 % calculate the mutual information of two vectors

@@ -3,8 +3,8 @@ function out = SY_StatAv(y,n,whattype)
 % Ben Fulcher:: minor edits 22/9/2010
 % Better to use the 'buffer' function
 
-% whattype=='seg' => do it by number of subsegments, n = number of subsegments
-% whattype=='len' => do it by segment length, n = segment length
+% whattype == 'seg' => do it by number of subsegments, n = number of subsegments
+% whattype == 'len' => do it by segment length, n = segment length
 
 if nargin < 2
     n = 5; % use 5 segments

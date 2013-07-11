@@ -133,7 +133,7 @@ switch choosebest
         
         for i=1:nfields; % each preprocessing performed
             data = [];
-            eval(['data = yp.' fields{i} ';']);
+            eval(sprintf('data = yp.%s;',fields{i}));
             data = benzscore(data);
             
             % (i) fit the model
@@ -230,7 +230,7 @@ end
         N = length(y);
         ydt = zeros(N,1);
         bits = round(linspace(0,N,nbits+1));
-        for k=1:nbits
+        for k = 1:nbits
             r = bits(k)+1 : bits(k+1); % range defined by adjacent 'bits'
             x = (1:length(r))'; % faux x-range
             ybit = y(r); % y-range

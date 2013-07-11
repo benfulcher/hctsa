@@ -7,7 +7,7 @@ N = length(y);
 a = zeros(N-1,1);
 for i = 0:N-1
     a(i+1) = CO_autocorr(y,i);
-    if i > 1 && a(i-1)-a(i) > 0 && a(i)-a(i+1) < 0; % minimum
+    if (i > 1) && (a(i-1)-a(i) > 0) && (a(i)-a(i+1) < 0); % minimum
         out = i-1;
         return
     end

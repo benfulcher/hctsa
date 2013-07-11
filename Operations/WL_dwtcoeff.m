@@ -24,10 +24,10 @@ end
 %   (*) Wavelet decomposition vector c
 %   (*) Bookkeeping vector l
 
-if maxlevelallowed<level
-    [c,l] = wavedec(y, maxlevelallowed, wname);
+if maxlevelallowed < level
+    [c, l] = wavedec(y, maxlevelallowed, wname);
 else
-    [c,l] = wavedec(y, level, wname);
+    [c, l] = wavedec(y, level, wname);
 end
 
 %% Expand DWT coefficients for visualization
@@ -61,32 +61,27 @@ end
 for k = 1:level
     if k <= maxlevelallowed
         d = detcoef(c,l,k); % detail coefficients at level k
-
         % maximum coefficient at this level
         maxd = max(d);
-        eval(['out.maxd_l' num2str(k) ' = maxd;']);
+        eval(sprintf('out.maxd_l%u = maxd;',k));
         % minimum coefficient at this level
         mind = min(d);
-        eval(['out.mind_l' num2str(k) ' = mind;']);
+        eval(sprintf('out.mind_l%u = mind;',k));
         % std coefficients at this level
         stdd = std(d);
-        eval(['out.stdd_l' num2str(k) ' = stdd;']);
+        eval(sprintf('out.stdd_l%u = stdd;',k));
         % 1-D noise coefficient estimate
         stddd = wnoisest(c,l,k);
-        eval(['out.stddd_l' num2str(k) ' = stddd;']);
-        
+        eval(sprintf('out.stddd_l%u = stddd;',k));
     else
-        eval(['out.maxd_l' num2str(k) ' = NaN;']);
-        eval(['out.mind_l' num2str(k) ' = NaN;']);
-        eval(['out.stdd_l' num2str(k) ' = NaN;']);
-        eval(['out.stddd_l' num2str(k) ' = NaN;']);
+        eval(sprintf('out.maxd_l%u = NaN;',k));
+        eval(sprintf('out.mind_l%u = NaN;',k));
+        eval(sprintf('out.stdd_l%u = NaN;',k));
+        eval(sprintf('out.stddd_l%u = NaN;',k));
     end
 end
 
-% return
-% %%
-% 
-% 
+
 % %% Compress Signal
 % % Set approximation coefficients to zero
 % % nc = wthcoef('a',c,l);

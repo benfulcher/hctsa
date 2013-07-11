@@ -47,7 +47,7 @@ for i = 1:length(rs)
             % Uses the distribution up to memory to inform the next point
             
             % Calculate probability of this given past memory
-            p = sum(yth(rs(i)-memory:rs(i)-1)==yth(rs(i)))/memory;
+            p = sum(yth(rs(i)-memory:rs(i)-1) == yth(rs(i)))/memory;
             store(i) = p;
             
         case 'T1'
@@ -58,11 +58,11 @@ for i = 1:length(rs)
             % preceeded it:
             memorydata = yth(rs(i)-memory:rs(i)-1);
             % Previous value observed in memory here:
-            inmem = find(memorydata(1:end-1)==yth(rs(i)-1));
+            inmem = find(memorydata(1:end-1) == yth(rs(i)-1));
             if isempty(inmem)
                 p = 0;
             else
-                p = sum(memorydata(inmem+1)==yth(rs(i)))/length(inmem);
+                p = sum(memorydata(inmem+1) == yth(rs(i)))/length(inmem);
             end
             store(i) = p;
             
@@ -71,19 +71,19 @@ for i = 1:length(rs)
             
             memorydata = yth(rs(i)-memory:rs(i)-1);
             % Previous value observed in memory here:
-            inmem1 = find(memorydata(2:end-1)==yth(rs(i)-1)); % the 2:end makes the next line ok...?
-            inmem2 = find(memorydata(inmem1)==yth(rs(i)-2));
+            inmem1 = find(memorydata(2:end-1) == yth(rs(i)-1)); % the 2:end makes the next line ok...?
+            inmem2 = find(memorydata(inmem1) == yth(rs(i)-2));
             if isempty(inmem2)
                 p = 0;
             else
-                p = length(find(memorydata(inmem2+2)==yth(rs(i))))/length(inmem2);
+                p = length(find(memorydata(inmem2+2) == yth(rs(i))))/length(inmem2);
             end
             store(i) = p;
     end
 end
 
 % information gained from next observation is log(1/p) = -log(p)
-iz = find(store==0);
+iz = find(store == 0);
 store(iz) = 1; % to avoid log(0) error in next line
 store = -log(store); % transform to surprises/information gains
 store(iz) = 0; % so that log(0) = 0

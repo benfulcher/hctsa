@@ -145,7 +145,7 @@ switch params
         garchpnam = {'R','M','P','Q'};
         s = '';
         for i=1:length(garchpval)
-            if ~garchpval(i)==0 % this should be a component to specify in 
+            if ~garchpval(i) == 0 % this should be a component to specify in 
                 s = [s '''' garchpnam{i} ''', ' num2str(garchpval(i)) ', '];
             end
         end

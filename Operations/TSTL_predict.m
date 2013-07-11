@@ -90,22 +90,22 @@ y_pred1 = y_pred(:,1); % for this embedding dimension (?)
 % hold off; plot(y,'k'), hold on; plot(y_pred1,'m'), hold off;
 
 % keyboard
-=======
+= == ====
 % hold off; plot(y,'k'), hold on; plot(y_pred1,'m'), hold off;
 >>>>>>> External Changes
 
 <<<<<<< Local Changes
 % view(rs);
-=======
+= == ====
 % keyboard
-=======
+= == ====
 % hold off; plot(y,'k'), hold on; plot(y_pred1,'m'), hold off;
 >>>>>>> External Changes
 
 <<<<<<< Local Changes
 % view(rs);
 >>>>>>> External Changes
-=======
+= == ====
 % keyboard
 
 % view(rs);
@@ -128,9 +128,9 @@ out.pred1rangec = abs(range(y_pred1)/range(y)-1);
 % plot(lags,xcf);
 
 out.maxabsxcf = max(abs(xcf)); % maximum of cross-correlation function; where it occurs
-out.maxabsxcflag = lags(find(abs(xcf)==out.maxabsxcf,1,'first'));
+out.maxabsxcflag = lags(find(abs(xcf) == out.maxabsxcf,1,'first'));
 out.maxxcf = max(xcf); % maximum positive cross-correlation
-out.maxxcflag = lags(find(xcf==out.maxxcf,1,'first'));
+out.maxxcflag = lags(find(xcf == out.maxxcf,1,'first'));
 out.meanxcf = mean(xcf);
 out.minxcf = min(xcf);
 out.stdxcf = std(xcf);
@@ -156,7 +156,7 @@ if out.maxxcflag>0
     y_lagged = y(out.maxxcflag:end);
     Nlag = length(y_lagged);
     y_pred1_lagged = y_pred1(1:Nlag);
-elseif out.maxxcflag==0
+elseif out.maxxcflag == 0
     y_lagged = y;
     y_pred1_lagged = y;
     Nlag = length(y);

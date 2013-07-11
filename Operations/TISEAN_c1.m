@@ -222,9 +222,9 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
             ss = s(w(ii)+1:w(ii+1)-1);
             nn = zeros(length(ss),nc);
             for jj = 1:length(ss)
-                if nc==2
+                if nc == 2
                     tmp = textscan(ss{jj},'%n%n');
-                elseif nc==3
+                elseif nc == 3
                     tmp = textscan(ss{jj},'%n%n%n');
                 end
                 nn(jj,:) = horzcat(tmp{:});

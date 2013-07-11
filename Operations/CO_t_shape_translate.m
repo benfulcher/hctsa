@@ -25,9 +25,11 @@ end
 N = length(y); % the length of the time series
 
 % y must be a column vector, transpose it if it's a row vector
-if size(y,2) > size(y,1), y = y'; end
+if size(y,2) > size(y,1)
+    y = y';
+end
 
-ty = [[1:N]',y]; % has time in the first column
+ty = [(1:N)',y]; % has increasing integers as time in the first column
 
 switch howtomove
     case 'pts' % Place shapes on each timepoint (excluding a range at start and end)
@@ -49,23 +51,23 @@ switch howtomove
                 
                 histnp = zeros(2*w+1,1); % maximum possible hits in circle
                 for i = 1:2*w+1
-                    histnp(i) = sum(np==i); % length(find(np==i));
+                    histnp(i) = sum(np == i); % length(find(np == i));
                 end
                 
                 [out.npatmode out.mode] = max(histnp);
                 out.npatmode = out.npatmode/NN;
                 
-                if 2*w+1 >= 1; out.ones = histnp(1)/NN; end
-                if 2*w+1 >= 2; out.twos = histnp(2)/NN; end
-                if 2*w+1 >= 3; out.threes = histnp(3)/NN; end
-                if 2*w+1 >= 4; out.fours = histnp(4)/NN; end
-                if 2*w+1 >= 5; out.fives = histnp(5)/NN; end
-                if 2*w+1 >= 6; out.sixes = histnp(6)/NN; end
-                if 2*w+1 >= 7; out.sevens = histnp(7)/NN; end
-                if 2*w+1 >= 8; out.eights = histnp(8)/NN; end
-                if 2*w+1 >= 9; out.nines = histnp(9)/NN; end
-                if 2*w+1 >= 10; out.tens = histnp(10)/NN; end
-                if 2*w+1 >= 11; out.elevens = histnp(11)/NN; end
+                if 2*w + 1 >= 1; out.ones = histnp(1)/NN; end
+                if 2*w + 1 >= 2; out.twos = histnp(2)/NN; end
+                if 2*w + 1 >= 3; out.threes = histnp(3)/NN; end
+                if 2*w + 1 >= 4; out.fours = histnp(4)/NN; end
+                if 2*w + 1 >= 5; out.fives = histnp(5)/NN; end
+                if 2*w + 1 >= 6; out.sixes = histnp(6)/NN; end
+                if 2*w + 1 >= 7; out.sevens = histnp(7)/NN; end
+                if 2*w + 1 >= 8; out.eights = histnp(8)/NN; end
+                if 2*w + 1 >= 9; out.nines = histnp(9)/NN; end
+                if 2*w + 1 >= 10; out.tens = histnp(10)/NN; end
+                if 2*w + 1 >= 11; out.elevens = histnp(11)/NN; end
                 
                 % stationarity in 2,3,4 segments
                 % This would be much nicer if I'd have remembered to use
@@ -90,7 +92,7 @@ switch howtomove
             error('CO_t_shape_translate: Invalid shape!')
         end
     otherwise
-        error(['CO_t_shape_translate: Invalid setting for ''howtomove'' input'])
+        error('CO_t_shape_translate: Invalid setting for ''howtomove'' input')
 end
 
 % plot(np)

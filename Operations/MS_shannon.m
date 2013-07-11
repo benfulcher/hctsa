@@ -11,14 +11,14 @@ if nargin < 3 || isempty(depth)
 end
 
 %% (*)
-if length(bin)==1 && length(depth)==1
+if length(bin) == 1 && length(depth) == 1
     % run the code, just return a number
     out = shannon(y,bin,depth)/depth;
 end
 
 %% (*) Statistics over depths (constant number of bins)
 % Somewhat strange behaviour -- very variable
-if length(bin)==1 && length(depth)>1
+if length(bin) == 1 && length(depth)>1
     % range over depths specified in the vector
     % return statistics on results
     ndepths = length(depth);

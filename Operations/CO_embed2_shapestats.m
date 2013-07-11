@@ -67,7 +67,7 @@ counts = counts - 1; % ignore self-counts
 
 % No meaningful output if never got a count with any other point!
 % (radius, r, is probably too small)
-if all(counts==0)
+if all(counts == 0)
     out = NaN; return
 end
 
@@ -83,9 +83,9 @@ out.iqr = iqr(counts);
 out.iqronrange = out.iqr/range(counts);
 
 % Distribution
-x = 0:max(counts);
+x = (0:max(counts));
 n = hist(counts,x); n=n/sum(n);
-[out.mode_val mix] = max(n);
+[out.mode_val, mix] = max(n);
 out.mode = x(mix);
 
 % Poisson fit to distribution

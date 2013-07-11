@@ -7,7 +7,7 @@ function out = CO_fzcac(y)
 N = length(y); % the length of the time series
 
 maxtau = 400; % searches up to this maximum time lag
-maxtau = min(maxtau,N); % make sure no longer than the time series itself
+maxtau = min(maxtau,N); % searched up to the length of the time series if this is less than maxtau
 
 % Calculate autocorrelation at increasing lags, until you find a negative one
 for tau = 1:maxtau-1

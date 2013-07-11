@@ -31,7 +31,7 @@ for i = 1:nbinr % vary over number of bins in histogram
             break
         end
     end
-    if amimins(i)==0
+    if amimins(i) == 0
 		amimins(i) = taur(end)
 	end
 end
@@ -54,7 +54,7 @@ out.nunique = length(unique(amimins));
 out.modef = out.modef/nbinr;
 % hist = zeros(length(u),1);
 % for i=1:length(u)
-%     hist(i) = length(find(n==u(i)));
+%     hist(i) = length(find(n == u(i)));
 % end
 % out.mode = u(find(hist == max(hist),1,'first'));
 

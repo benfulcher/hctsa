@@ -10,7 +10,6 @@ function out = SP_basicmeasures(y,psdmeth,wmeth,nf,cepstrum,dopower)
 % Ben Fulcher 22//9/2010 -- added dopower option
 % dopower uses power spectrum rather than amplitudes
 
-
 if nargin < 5, cepstrum = 0; end
 if nargin < 6 || isempty(dopower),
     disp('We''re looking at amplitude spectrum -- not power spectrum...')
@@ -46,10 +45,10 @@ switch psdmeth
         
         if isempty(nf)
             % (2) Estimate the spectrum
-            [S w] = periodogram(y,window);
+            [S, w] = periodogram(y,window);
         else
             w = linspace(0,pi,nf);
-            [S w] = periodogram(y,window,w);
+            [S, w] = periodogram(y,window,w);
         end
     case 'fft'
         Fs = 1; % sampling frequency
@@ -69,10 +68,9 @@ switch psdmeth
 %         f = fft(
 end
 
-if ~any(isfinite(S))
-    % return NaNs for all outputs...
-    out = NaN;
-    return
+if ~any(isfinite(S)) % no finite values in the power spectrum
+    % This time series must be really weird -- return NaN (unsuitable operation)...
+    out = NaN; return
 end
 
 % Look at power spectrum rather than amplitudes
@@ -80,12 +78,12 @@ if dopower
     S = S.^2;
 end
 
-if size(S,1)>size(S,2); S=S';w=w'; end
+if size(S,1) > size(S,2); S=S';w=w'; end
 N = length(S); % = length(w)
 % plot(w,S); % plot the spectrum
 logS = log(S);
 logw = log(w);
-dw = w(2)-w(1);
+dw = w(2) - w(1);
 % Normalize to 1: necessary if input not z-scored
 % S=S/(sum(S)*dw);
 
@@ -96,7 +94,7 @@ out.logstd = std(logS);
 out.mean = mean(S);
 out.meanlog = log(out.mean);
 out.logmean = mean(logS);
-[out.maxS i_maxS] = max(S);
+[out.maxS, i_maxS] = max(S);
 out.maxSlog = log(out.maxS);
 out.maxw = w(i_maxS);
 out.median = median(S);
@@ -130,74 +128,71 @@ csS = cumsum(S);
 % plot(w,csS);
 
 % Measures of central location
-out.centroid = w(find(csS>csS(end)/2,1,'first')); % where area under curve is same above
+out.centroid = w(find(csS > csS(end)/2,1,'first')); % where area under curve is same above
                                             % and below this frequency
 
 % Shape of cumulative sum curve
 % 1) Quantiles
 % where is csS at fraction p of its maximum?
-out.q1=w(find(csS>0.01*csS(end),1,'first'));
-out.q1mel=w2mel(out.q1);
-out.q5=w(find(csS>0.05*csS(end),1,'first'));
-out.q5mel=w2mel(out.q5);
-out.q10=w(find(csS>0.10*csS(end),1,'first'));
-out.q10mel=w2mel(out.q10);
-out.q25=w(find(csS>0.25*csS(end),1,'first'));
-out.q25mel=w2mel(out.q25);
-out.q50=w(find(csS>0.50*csS(end),1,'first')); % centroid
-out.q50mel=w2mel(out.q50);
-out.q75=w(find(csS>0.75*csS(end),1,'first'));
-out.q75mel=w2mel(out.q75);
-out.q90=w(find(csS>0.90*csS(end),1,'first'));
-out.q90mel=w2mel(out.q90);
-out.q95=w(find(csS>0.95*csS(end),1,'first'));
-out.q95mel=w2mel(out.q95);
-out.q99=w(find(csS>0.99*csS(end),1,'first'));
-out.q99mel=w2mel(out.q99);
+out.q1 = w(find(csS > 0.01*csS(end),1,'first'));
+out.q1mel = w2mel(out.q1);
+out.q5 = w(find(csS > 0.05*csS(end),1,'first'));
+out.q5mel = w2mel(out.q5);
+out.q10 = w(find(csS > 0.10*csS(end),1,'first'));
+out.q10mel = w2mel(out.q10);
+out.q25 = w(find(csS > 0.25*csS(end),1,'first'));
+out.q25mel = w2mel(out.q25);
+out.q50 = w(find(csS > 0.50*csS(end),1,'first')); % centroid
+out.q50mel = w2mel(out.q50);
+out.q75 = w(find(csS > 0.75*csS(end),1,'first'));
+out.q75mel = w2mel(out.q75);
+out.q90 = w(find(csS > 0.90*csS(end),1,'first'));
+out.q90mel = w2mel(out.q90);
+out.q95 = w(find(csS > 0.95*csS(end),1,'first'));
+out.q95mel = w2mel(out.q95);
+out.q99 = w(find(csS > 0.99*csS(end),1,'first'));
+out.q99mel = w2mel(out.q99);
 
 % width of saturation measures
-out.w1_99=out.q99-out.q1;
-out.w1_99mel=w2mel(out.w1_99);
-out.w5_95=out.q95-out.q5;
-out.w5_95mel=w2mel(out.w5_95);
-out.w10_90=out.q90-out.q10;% from 10% to 90%:
-out.w10_90mel=w2mel(out.w10_90);
-out.w25_75=out.q75-out.q25;
-out.w25_75mel=w2mel(out.w25_75);
+out.w1_99 = out.q99-out.q1;
+out.w1_99mel = w2mel(out.w1_99);
+out.w5_95 = out.q95-out.q5;
+out.w5_95mel = w2mel(out.w5_95);
+out.w10_90 = out.q90-out.q10;% from 10% to 90%:
+out.w10_90mel = w2mel(out.w10_90);
+out.w25_75 = out.q75-out.q25;
+out.w25_75mel = w2mel(out.w25_75);
 
-% 2) Moments
-out.mom3=DN_moments(S,3);
-out.mom4=DN_moments(S,4);
-out.mom5=DN_moments(S,5);
-out.mom6=DN_moments(S,6);
-out.mom7=DN_moments(S,7);
-out.mom8=DN_moments(S,8);
-out.mom9=DN_moments(S,9);
+% 2) Moments of the power spectrum
+% take moments from 3--9
+for i = 3:9
+    themom = DN_moments(S,i);
+    eval(sprintf('out.mom%u = themom;'));
+end
 
 % fit some functions to this cumulative sum:
 % (i) quadratic
-[c gof] = fit(w',csS','poly2');
-out.fpoly2csS_p1=c.p1;
-out.fpoly2csS_p2=c.p2;
-out.fpoly2csS_p3=c.p3;
-out.fpoly2_sse=gof.sse;
-out.fpoly2_r2=gof.rsquare;
-out.fpoly2_adjr2=gof.adjrsquare;
-out.fpoly2_rmse=gof.rmse;
-
+[c, gof] = fit(w',csS','poly2');
+out.fpoly2csS_p1 = c.p1;
+out.fpoly2csS_p2 = c.p2;
+out.fpoly2csS_p3 = c.p3;
+out.fpoly2_sse = gof.sse;
+out.fpoly2_r2 = gof.rsquare;
+out.fpoly2_adjr2 = gof.adjrsquare;
+out.fpoly2_rmse = gof.rmse;
 
 % (ii) fit polysat ~x^2/(b+x^2) (has zero derivative at zero, though)
 % s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1]);
 % f = fittype('a*x^2/(b+x^2)','problem','a','independent','x','options',s); % set 'a' from maximum
 % [c,gof] = fit(w,csS,f,'problem',csS(end)); % the saturation value
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[csS(end) 100]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[csS(end), 100]);
 f = fittype('a*x^2/(b+x^2)','independent','x','options',s); % set 'a' from maximum
-[c,gof] = fit(w',csS',f);
-out.fpolysat_a=c.a;
-out.fpolysat_b=c.b; % this is important
-out.fpolysat_r2=gof.rsquare; % this is more important!
-out.fpolysat_adjr2=gof.adjrsquare;
-out.fpolysat_rmse=gof.rmse;
+[c, gof] = fit(w',csS',f);
+out.fpolysat_a = c.a;
+out.fpolysat_b = c.b; % this is important
+out.fpolysat_r2 = gof.rsquare; % this is more important!
+out.fpolysat_adjr2 = gof.adjrsquare;
+out.fpolysat_rmse = gof.rmse;
 
 
 
@@ -224,7 +219,6 @@ out.fpolysat_rmse=gof.rmse;
 Hshann = S.*log(1./S); % Shannon function
 out.spect_shann_ent = sum(Hshann);
 out.spect_shann_ent_norm = sum(Hshann)/length(S);
-
 
 % "Spectral Flatness Measure" which is given in dB
 % as 10 log_10(gm/am) where gm is the geometric mean and am is the arithmetic
@@ -290,7 +284,7 @@ out.linfitloglog_all_sea2 = stats.se(2);
 % POWER SPECTRUM....
 % 2 bands
 split = buffer(S,floor(N/2));
-if size(split,2)>2, split = split(:,1:2); end
+if size(split,2) > 2, split = split(:,1:2); end
 out.area_2_1 = sum(split(:,1))*dw;
 out.logarea_2_1 = sum(log(split(:,1)))*dw;
 out.area_2_2 = sum(split(:,2))*dw;
@@ -300,8 +294,8 @@ out.statav2_m = std(mean(split))/std(S);
 out.statav2_s = std(std(split))/std(S);
 
 % 3 bands
-split=buffer(S,floor(N/3));
-if size(split,2)>3, split = split(:,1:3); end
+split = buffer(S,floor(N/3));
+if size(split,2) > 3, split = split(:,1:3); end
 out.area_3_1 = sum(split(:,1))*dw;
 out.logarea_3_1 = sum(log(split(:,1)))*dw;
 out.area_3_2 = sum(split(:,2))*dw;
@@ -314,7 +308,7 @@ out.statav3_s = std(std(split))/std(S);
 
 % 4 bands
 split = buffer(S,floor(N/4));
-if size(split,2)>4, split = split(:,1:4); end
+if size(split,2) > 4, split = split(:,1:4); end
 out.area_4_1 = sum(split(:,1))*dw;
 out.logarea_4_1 = sum(log(split(:,1)))*dw;
 out.area_4_2 = sum(split(:,2))*dw;
@@ -329,7 +323,7 @@ out.statav4_s = std(std(split))/std(S);
 
 % 5 bands
 split = buffer(S,floor(N/5));
-if size(split,2)>5, split = split(:,1:5); end
+if size(split,2) > 5, split = split(:,1:5); end
 out.area_5_1 = sum(split(:,1))*dw;
 out.logarea_5_1 = sum(log(split(:,1)))*dw;
 out.area_5_2 = sum(split(:,2))*dw;
@@ -346,16 +340,16 @@ out.statav5_s = std(std(split))/std(S);
 
 % How many crossings
 % Give a horizontal line and count the # crossings with the power spectrum
-out.ncross01 = length(find(sgnchange(S-0.1)));
-out.ncross02 = length(find(sgnchange(S-0.2)));
-out.ncross05 = length(find(sgnchange(S-0.5)));
-out.ncross1 = length(find(sgnchange(S-1)));
-out.ncross2 = length(find(sgnchange(S-2)));
-out.ncross5 = length(find(sgnchange(S-5)));
-out.ncross10 = length(find(sgnchange(S-10)));
-out.ncross20 = length(find(sgnchange(S-20)));
+out.ncross01 = length(sgnchange(S-0.1));
+out.ncross02 = length(sgnchange(S-0.2));
+out.ncross05 = length(sgnchange(S-0.5));
+out.ncross1 = length(sgnchange(S-1));
+out.ncross2 = length(sgnchange(S-2));
+out.ncross5 = length(sgnchange(S-5));
+out.ncross10 = length(sgnchange(S-10));
+out.ncross20 = length(sgnchange(S-20));
 
-function mel=w2mel(w)
+function mel = w2mel(w) % convert to mel
     mel = 1127*log(w/(1400*pi)+1);
 end
 

@@ -22,7 +22,7 @@ if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
 end
 
 nfeat = 9; % the number of features calculated at each point
-if length(ng)==1 && length(tau)>1 % vary tau
+if length(ng) == 1 && length(tau)>1 % vary tau
     if ng < 2; return; end % need more than 2 groups
     taur = tau; % the tau range
     store = zeros(length(taur),nfeat);
@@ -35,7 +35,7 @@ if length(ng)==1 && length(tau)>1 % vary tau
     end
 
     
-elseif length(tau)==1 && length(ng)>1 % vary ng
+elseif length(tau) == 1 && length(ng)>1 % vary ng
     if min(ng)<2; return; end % need more than 2 groups, always
     ngr = ng; % the ng range (ng is an input vector)
     store=zeros(length(ngr),nfeat);
@@ -113,7 +113,7 @@ elseif length(tau)==1 && length(ng)>1 % vary ng
     
     % return approximately when starts to rise; where means before and
     % after a moving dividing point are most different
-    if all(store(:,4)==store(1,4)); % all the same
+    if all(store(:,4) == store(1,4)); % all the same
         out.symd_risept = NaN;
     else
         mba = zeros(length(ngr),2); % means before and after
@@ -125,7 +125,7 @@ elseif length(tau)==1 && length(ng)>1 % vary ng
             sba(i,2) = std(store(i+1:end,4))/sqrt(length(ngr)-i+1);
         end
         tstats = abs((mba(:,1)-mba(:,2))./sqrt(sba(:,1).^2 + sba(:,2).^2));
-        out.symd_risept = find(tstats==max(tstats),1,'first');
+        out.symd_risept = find(tstats == max(tstats),1,'first');
     end
     
     % 5) trace of covariance matrix
@@ -211,7 +211,7 @@ end
         for li=1:ng
             yth(y>th(li) & y<=th(li+1))=li;
         end
-        if any(yth==0), yth=[]; return; end % error -- they should all be assigned to a group
+        if any(yth == 0), yth=[]; return; end % error -- they should all be assigned to a group
         
     end
 
@@ -223,13 +223,13 @@ end
         % 1) Calculate the one-time transition matrix
         T=zeros(ng);
         for j=1:ng
-            ri=find(yth==j);
+            ri=find(yth == j);
             if isempty(ri) % yth is never j
                 T(j,:)=0;
             else
-                if ri(end)==N; ri=ri(1:end-1); end % looking at next element; remove last point
+                if ri(end) == N; ri=ri(1:end-1); end % looking at next element; remove last point
                 for k=1:ng
-                    T(j,k)=length(find(yth(ri+1)==k)); % the next element is of this class
+                    T(j,k)=length(find(yth(ri+1) == k)); % the next element is of this class
                 end
             end
         end

@@ -53,7 +53,7 @@ if ismember('ami1',teststat)
     somestats = SDgivemestats(AMIx,AMIsurr,'right');
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(['out.ami_' fnames{i} ' = somestats.' fnames{i} ';']);
+        eval(sprintf('out.ami_%s = somestats.%s;',fnames{i},fnames{i}));
     end
 end
 
@@ -77,7 +77,7 @@ if ismember('fmmi',teststat)
     somestats = SDgivemestats(fmmix,fmmisurr,'right');
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(['out.fmmi_' fnames{i} ' = somestats.' fnames{i} ';']);
+        eval(sprintf('out.fmmi_%s = somestats.%s;',fnames{i},fnames{i}));
     end
 end
 
@@ -92,7 +92,7 @@ if ismember('o3',teststat) % third order statistic in Schreiber, Schmitz (Physic
     somestats = SDgivemestats(o3x,o3surr,'both');
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(['out.o3_' fnames{i} ' = somestats.' fnames{i} ';']);
+        eval(sprintf('out.o3_%s = somestats.%s;',fnames{i},fnames{i}));
     end
 end
 
@@ -109,12 +109,12 @@ if ismember('tc3',teststat) % TC3 statistic -- another time-reversal asymmetry m
     somestats = SDgivemestats(tc3x,tc3surr,'both');
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(['out.tc3_' fnames{i} ' = somestats.' fnames{i} ';']);
+        eval(sprintf('out.tc3_%s = somestats.%s;',fnames{i},fnames{i}));
     end
 end
 
 if ismember('nlpe',teststat) % locally constant phase space prediction error
-    disp('NLPE CAN BE TIME CONSUMING, YOU KNOW?')
+    fprintf(1,'''nlpe'' can be very time consuming\n')
     de = 3; tau = 1; % embedding parameters: fixed like a dummy!
     tmp = MS_nlpe(x,de,tau);
     nlpex = tmp.msqerr;
@@ -127,12 +127,12 @@ if ismember('nlpe',teststat) % locally constant phase space prediction error
     somestats = SDgivemestats(nlpex,nlpesurr,'right'); % NLPE should be higher than surrogates
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(['out.nlpe_' fnames{i} ' = somestats.' fnames{i} ';']);
+        eval(sprintf('out.nlpe_%s = somestats.%s;',fnames{i},fnames{i}));
     end
 end
 
 if ismember('fnn',teststat)
-    disp('YOU KNOW FNN TAKES AGES, RIGHT??~~')
+    fprintf(1,'fnn takes forever...\n')
     % false nearest neighbours at d=2;
     tmp = MS_fnn(x,2,1,5,1);
     fnnx = tmp.pfnn_2;
@@ -145,7 +145,7 @@ if ismember('fnn',teststat)
     somestats = SDgivemestats(fnnx,fnnsurr,'right'); % FNN(2) should be higher than surrogates?
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(['out.fnn_' fnames{i} ' = somestats.' fnames{i} ';']);
+        eval(sprintf('out.fnn_%s = somestats.%s;',fnames{i},fnames{i}));
     end
 end
 
@@ -171,27 +171,27 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
     somestats.zscore = zscore; % z-statistic
 
     % fit a kernel distribution to zscored distribution:
-    if std(statsurr)==0
+    if std(statsurr) == 0
         % all surrogates have same value of this statistic
         % cannot do a meaningful zscore -- do it raw
-        [f,xi] = ksdensity(statsurr);
+        [f, xi] = ksdensity(statsurr);
         % find where the statx value would be:
-        if statx<min(xi) || statx>max(xi)
+        if statx < min(xi) || statx > max(xi)
             somestats.f = 0; % out of range -- assume p=0 here
         else
-            [~,minhere] = min(abs(statx-xi));
+            [~, minhere] = min(abs(statx-xi));
             somestats.f = f(minhere); % return probability density where the point is
         end    
     else
         zscstatsurr = (statsurr-mean(statsurr))/std(statsurr);
         zscstatx = (statx-mean(statsurr))/std(statsurr);
-        [f,xi] = ksdensity(zscstatsurr);
+        [f, xi] = ksdensity(zscstatsurr);
 
         % find where the statx value would be:
-        if zscstatx<min(xi) || zscstatx>max(xi)
+        if zscstatx < min(xi) || zscstatx > max(xi)
             somestats.f = 0; % out of range -- assume p=0 here
         else
-            [~,minhere] = min(abs(zscstatx-xi));
+            [~, minhere] = min(abs(zscstatx-xi));
             somestats.f = f(minhere); % return probability density where the point is
         end
     end
@@ -199,15 +199,15 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
     % what fraction of the range is the sample in?
     medsurr = median(statsurr);
     iqrsurr = iqr(statsurr);
-    if iqrsurr==0
+    if iqrsurr == 0
         somestats.mediqr = NaN;
     else
         somestats.mediqr = abs(statx-medsurr)/iqrsurr;
     end
 
     % rank statistic
-    [~, ix] = sort([statx;statsurr]);
-    xfitshere = find(ix==1)-1;
+    [~, ix] = sort([statx; statsurr]);
+    xfitshere = find(ix == 1)-1;
     if strcmp(leftrightboth,'right') % x statistic smaller than distribution
         xfitshere = nsurrs + 1 - xfitshere; % how far from highest ranked value
     elseif strcmp(leftrightboth,'both')

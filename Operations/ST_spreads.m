@@ -1,6 +1,7 @@
 function out = ST_spreads(y,meth)
 % time series 'y'
 % spread method 'meth'
+% Ben Fulcher, 2008
 
 switch meth
 	case 'std' % standard deviation
@@ -11,10 +12,8 @@ switch meth
 		out = mad(y,0);
     case 'mead' % median absolute deviation
         out = mad(y,1);
-%     case 'RMSSD'
-%         % a simple statistical HRV measure
     otherwise
-        error('Invalid spread measure specified')
+        error('Unknown spread measure ''%s''',meth)
 end
 
 end

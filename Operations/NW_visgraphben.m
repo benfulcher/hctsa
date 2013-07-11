@@ -77,7 +77,7 @@ k = sum(A); % the degree distribution
 k = full(k);
 
 out.modek = mode(k); % mode of degree distribution
-out.propmode = sum(k==mode(k))/sum(k);
+out.propmode = sum(k == mode(k))/sum(k);
 out.meank = mean(k); % mean number of links per node
 out.mediank = median(k); % median number of links per node
 out.stdk = std(k); % std of k
@@ -179,7 +179,7 @@ for i = 1:length(binr);
     h(i) = - sum(n(n>0).*log(n(n>0)));
 end
 out.maxent = max(h);
-out.minnbinmaxent = binr(find(h==max(h),1,'first'));
+out.minnbinmaxent = binr(find(h == max(h),1,'first'));
 out.meanent = mean(h);
 diffh = diff(h);
 out.meanchent = mean(diffh(diffh~=0));

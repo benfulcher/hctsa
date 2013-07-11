@@ -93,8 +93,8 @@ for t=tau
     d1=rms(X(:,(kth+1):nx)'-X(:,ind+1)');
 
     %exclude any coincident points
-    d1(d0==0)=[];
-    d0(d0==0)=[];
+    d1(d0 == 0)=[];
+    d0(d0 == 0)=[];
     
     %calculate the proportion fnn
     ifnn=sum((d1./d0)>th)/length(d0);

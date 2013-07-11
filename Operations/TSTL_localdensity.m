@@ -38,7 +38,7 @@ rs = localdensity(s,NNR,past);
 % end
 %% Convert output to data
 locden = data(rs);
-if all(locden==0)
+if all(locden == 0)
     out = NaN; return
 end
 % locden is a vector of length equal to the number of points in the

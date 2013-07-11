@@ -36,6 +36,10 @@ addfcn('Toolboxes/MSmall_utilities');
 fprintf(1,', HMM')
 addfcn('Toolboxes/hmm');
 
+% Code from Matlab Central
+fprintf(1,', Matlab Central code')
+addfcn('Toolboxes/MatlabCentral');
+
 % Rudy Moddemeijer's code
 fprintf(1,', Rudy Moddemeijer')
 addfcn('Toolboxes/Rudy_Moddemeijer');

@@ -3,9 +3,13 @@ function out = SY_slidwin(y,windowstat,acrosswindowstat,nseg,nmov)
 % set of statistics calculated in each window.
 % Ben Fulcher
 
+if nargin < 2 || isempty(windowstat)
+    windowstat = 'mean'; % do a sliding window mean
+end
+
 wlen = floor(length(y)/nseg); % size of window
 inc = floor(wlen/nmov); % increment to move at each step
-if inc == 0; inc = 1; end
+if inc == 0; inc = 1; end % increment rounded down to zero, prop it up
 
 nsteps = (floor((length(y)-wlen)/inc)+1);
 qs = zeros(nsteps,1);
@@ -47,6 +51,8 @@ switch windowstat
         for i = 1:nsteps
             qs(i) = CO_autocorr(y((i-1)*inc+1:(i-1)*inc+wlen),1);
         end
+    otherwise
+        error('Unknown statistic ''%s''',windowstat)
 end
 
 %         plot(round(wlen/2):inc:(nsteps-1)*inc+round(wlen/2),qs,'r');
@@ -57,6 +63,8 @@ switch acrosswindowstat
         out = EN_ApEn(qs,1,0.2); % ApEn of the sliding window measures
     case 'ent'
         out = DN_kssimp(qs,'entropy'); % distributional entropy
+    otherwise
+        error('Unknown statistic: ''%s''',acrosswindowstat)
 end
 
 end

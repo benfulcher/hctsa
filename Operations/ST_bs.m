@@ -30,7 +30,7 @@ switch whatstat
         % ratio of times cross 1 to -1
         c1sig=length(sgnchange(x-1)); % num times cross 1
         c2sig=length(sgnchange(x+1)); % num times cross -1
-        if c2sig==0
+        if c2sig == 0
             out=NaN;
         else
             out=c1sig/c2sig;
@@ -44,7 +44,7 @@ switch whatstat
         y=detrend(x);
         ych=y(1:end-1).*y(2:end);
         h2=length(find(ych<0)); % of detrended series
-        if h1==0;
+        if h1 == 0;
             out=NaN;
         else
             out=h2/h1;

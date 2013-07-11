@@ -1,4 +1,4 @@
-function y=normalize(x)
+function y = normalize(x)
 %NORMALIZE   Normalizes data series.
 %   Y=NORMALIZE(X) normalizes the matrix X to zero-mean and
 %   standard deviation one (Y=(X-mean(X))/std(X)).
@@ -29,7 +29,7 @@ function y=normalize(x)
 
 
 error(nargchk(1,1,nargin));
-if nargout>1, error('Too many output arguments'), end
+if nargout > 1, error('Too many output arguments'), end
 if min(size(x))==1
     y=(x-mean(x))/std(x);
 else

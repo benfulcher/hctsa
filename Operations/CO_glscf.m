@@ -1,6 +1,8 @@
 function glscf = CO_glscf(y,alpha,beta,tau)
-% Calculates the generalized self-correlation function of a time series, as introduced by Duarte Queiros and Moyano in Physica A, Vol. 383, pp. 10--15 (2007)
-% The paper is titled "Yet on statistical properties of traded volume: Correlation and mutual information at different value magnitudes"
+% Calculates the generalized self-correlation function of a time series, as 
+% introduced by Duarte Queiros and Moyano in Physica A, Vol. 383, pp. 10--15 (2007)
+% The paper is titled "Yet on statistical properties of traded volume: 
+% Correlation and mutual information at different value magnitudes"
 % This function considers magnitude correlations
 % Inputs alpha, beta are real and nonzero
 % When alpha = beta estimates how values of the same order of magnitude are related in time

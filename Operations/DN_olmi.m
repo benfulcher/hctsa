@@ -15,7 +15,7 @@ if all(y == y(1)) % the whole time series is just a single value
     out = NaN; return % this method is not suitable for such time series: return a NaN
 end
 % Check z-scored time series
-if (abs(mean(y)) > eps) || (abs(std(y)-1) > eps)
+if ~BF_iszscored(y)
     warning('The input time series should be z-scored for EN_progranz')
 end
 N = length(y); % length of the time series
@@ -45,9 +45,8 @@ otherwise
 end
 
 if isempty(thr)
-    error('I suspect that this is a highly peculiar time series!!!')
+    error('I suspect that this is a highly peculiar time series?!!!')
 end
-
 
 msDt = zeros(length(thr),6); % mean, std, proportion_of_time_series_included, 
                              % median of index relative to middle, mean,

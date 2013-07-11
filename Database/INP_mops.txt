@@ -839,32 +839,35 @@ EN_TSentropy(y,5.5)	TSent_55
 DF_mlefits(x,1)  DF_mle_gaussfit
 DF_mlefits(y,2,1)  DF_mle_geofit
 DF_nlogL_norm(y)	nlogL_norm
-DN_kssimp(x,'numpeaks')	DN_kssimpnumpeaks
-DN_kssimp(x,'entropy')	ksentraw
-DN_kssimp(y,'entropy')	ksent
-DN_kssimp(x,'max')	kspeakmaxraw
-DN_kssimp(y,'max')	kspeakmax
-DN_kssimp(x,'numcross',0.05)	kssimpcross005
-DN_kssimp(x,'numcross',0.1)	kssimpcross01
-DN_kssimp(x,'numcross',0.2)	kssimpcross02
-DN_kssimp(x,'numcross',0.3)	kssimpcross03
-DN_kssimp(x,'numcross',0.4)	kssimpcross04
-DN_kssimp(x,'numcross',0.5)	kssimpcross05
-DN_kssimp(x,'area',0.05)	kssimparea005
-DN_kssimp(x,'area',0.1)	kssimparea01
-DN_kssimp(x,'area',0.2)	kssimparea02
-DN_kssimp(x,'area',0.3)	kssimparea03
-DN_kssimp(x,'area',0.4)	kssimparea04
-DN_kssimp(x,'area',0.5)	kssimparea05
-DN_kssimp(x,'arclength',0.1)	kssimparcl01
-DN_kssimp(x,'arclength',0.5)	kssimparcl05
-DN_kssimp(x,'arclength',1)	kssimparcl1
-DN_kssimp(x,'arclength',2)	kssimparcl2
-DN_kssimp(x,'asym')	kssimpasym
-DN_kssimp(x,'plsym')	kssimpplsym
-DN_kssimpc(x,'numpeaks')	kscnumpeaks
-DN_kssimpc(x,'max')	kscmax
-DN_kssimpc(x,'entropy')	kscent
+DN_kssimp(x,'numcross',[0.05,0.1,0.2,0.3,0.4,0.5],'area',[0.05,0.1,0.2,0.3,0.4,0.5],'arclength',[0.1,0.5,1,2])	DN_kssimpraw
+DN_kssimp(y)	DN_kssimpzscore
+# DN_kssimp(x,'numpeaks')	DN_kssimpnumpeaks
+# DN_kssimp(x,'entropy')	ksentraw
+# DN_kssimp(y,'entropy')	ksent
+# DN_kssimp(x,'max')	kspeakmaxraw
+# DN_kssimp(y,'max')	kspeakmax
+# DN_kssimp(x,'asym')	kssimpasym
+# DN_kssimp(x,'plsym')	kssimpplsym
+# DN_kssimp(x,'numcross',0.05)  kssimpcross005
+# DN_kssimp(x,'numcross',0.1)  kssimpcross01
+# DN_kssimp(x,'numcross',0.2)  kssimpcross02
+# DN_kssimp(x,'numcross',0.3)  kssimpcross03
+# DN_kssimp(x,'numcross',0.4)  kssimpcross04
+# DN_kssimp(x,'numcross',0.5)  kssimpcross05
+# DN_kssimp(x,'area',0.05)  kssimparea005
+# DN_kssimp(x,'area',0.1)  kssimparea01
+# DN_kssimp(x,'area',0.2)  kssimparea02
+# DN_kssimp(x,'area',0.3)  kssimparea03
+# DN_kssimp(x,'area',0.4)  kssimparea04
+# DN_kssimp(x,'area',0.5)  kssimparea05
+# DN_kssimp(x,'arclength',0.1)  kssimparcl01
+# DN_kssimp(x,'arclength',0.5)  kssimparcl05
+# DN_kssimp(x,'arclength',1)  kssimparcl1
+# DN_kssimp(x,'arclength',2)  kssimparcl2
+DN_kssimpc(x) DN_kssimpcx
+# DN_kssimpc(x,'numpeaks')  kscnumpeaks
+# DN_kssimpc(x,'max')  kscmax
+# DN_kssimpc(x,'entropy')  kscent
 RN_gauss(y)	randomno1
 RN_gauss(y)	randomno2
 RN_gauss(y)	randomno3

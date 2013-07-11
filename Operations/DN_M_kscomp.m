@@ -1,14 +1,14 @@
-function out = DN_M_kscomp(x,pinkbeanie)
+function out = DN_M_kscomp(x,whatdbn)
 % Performs certain simple statistics on the difference between the 
 % empirical distribution from data x, the standard distribution specified
-% by pinkbeanie, and the statistic specified by ange
+% by whatdbn, and the statistic specified by ange
 % Ben Fulcher 2009
 
 %% PREPROCESSING
-% fit the standard distribution
+% fit the distribution whatdbn
 % xtry=linspace(-40,40,400);
 xstep = std(x)/100; % set a step size
-switch pinkbeanie
+switch whatdbn
     case 'norm'
         [a, b] = normfit(x);
 		peaky = normpdf(a,a,b); thresh=peaky/100; % stop when gets to 1/100 of peak value
@@ -41,7 +41,7 @@ switch pinkbeanie
         while ange > thresh, xf(2) = xf(2)+xstep; ange = betapdf(xf(2),a(1),a(2)); end
     case 'rayleigh'
         if any(x < 0),
-            disp('DN_M_kscomp: The data is not positive, but Rayleigh is a positive-only distribution')
+            fprintf(1,'The data is not positive, but Rayleigh is a positive-only distribution\n')
             out = NaN;
             return
         else % fit a Rayleigh distribution to the positive-only data
@@ -53,9 +53,8 @@ switch pinkbeanie
         end
     case 'exp'
         if any(x < 0)
-            disp('DN_M_kscomp: The data contains negative values, but Exponential is a positive-only distribution')
-            out = NaN;
-            return
+            fprintf(1,'The data contains negative values, but Exponential is a positive-only distribution\n')
+            out = NaN; return
         else a = expfit(x);
 			peaky = exppdf(0,a); thresh = peaky/100;
 			xf(1) = 0;
@@ -64,9 +63,8 @@ switch pinkbeanie
         end
     case 'gamma'
         if any(x < 0)
-            disp('DN_M_kscomp: The data contains negative values, but Gamma is a positive-only distribution')
-            out = NaN;
-            return
+            fprintf(1,'The data contains negative values, but Gamma is a positive-only distribution\n')
+            out = NaN; return
         else a = gamfit(x);
 			if a(1) < 1
 				thresh = gampdf(0,a(1),a(2))/100;
@@ -77,13 +75,10 @@ switch pinkbeanie
 			xf(2) = a(1)*a(2); ange = 10;
             while ange > thresh, xf(2) = xf(2)+xstep; ange = gampdf(xf(2),a(1),a(2)); end
         end
-    case 'gp'
-        error('Generalized Pareto distribution fits are too difficult');
     case 'logn'
         if any(x <= 0)
-            disp('DN_M_kscomp: The data is not positive, but Log-Normal is a positive-only distribution')
-            out = NaN;
-            return
+            fprintf(1,'The data is not positive, but Log-Normal is a positive-only distribution\n')
+            out = NaN; return
         else
 			a = lognfit(x);
 			peaky = lognpdf(exp(a(1)-a(2)^2),a(1),a(2)); thresh = peaky/100;
@@ -93,9 +88,8 @@ switch pinkbeanie
         end
     case 'wbl'
         if any(x <= 0)
-            disp('DN_M_kscomp: The data is not positive, but Weibull is a positive-only distribution')
-            out = NaN;
-            return
+            fprintf(1,'The data is not positive, but Weibull is a positive-only distribution\n')
+            out = NaN; return
         else
 			a = wblfit(x);
 			if a(2) <= 1;
@@ -108,6 +102,8 @@ switch pinkbeanie
 			xf(2) = 0; ange = 10;
             while ange > thresh, xf(2) = xf(2)+xstep; ange = wblpdf(xf(2),a(1),a(2)); end
         end
+    otherwise
+        error('Unknown distribution %s',whatdbn)
 end
 % xtmafit=[floor(xtmafit(1)*10)/10 ceil(xtmafit(end)*10)/10];
 
@@ -129,7 +125,7 @@ x2 = max([xf(2), xi(end)]);
 %% Inefficient, but easier to just rerun both over the same range
 xi = linspace(x1,x2,1000);
 f = ksdensity(x,xi); % the smoothed empirical distribution
-switch pinkbeanie
+switch whatdbn
     case 'norm'
         ffit = normpdf(xi,a,b);
     case 'ev'

@@ -47,7 +47,7 @@ out.rmserr_meansgndiff = mean(sign(diff(stats_st(:,1))));
 % (ii) is there a peak?
 if out.rmserr_chn < 1; % on the whole decreasing, as expected
     wigv = max(stats_st(:,1));
-    wig = find(stats_st(:,1)==wigv,1,'first');
+    wig = find(stats_st(:,1) == wigv,1,'first');
     if wig~=1 && stats_st(wig-1,1)>wigv
         wig = NaN; % maximum is not a local maximum; previous value exceeds it
     elseif wig~=length(ngr) && stats_st(wig+1,1)>wigv
@@ -55,7 +55,7 @@ if out.rmserr_chn < 1; % on the whole decreasing, as expected
     end
 else
     wigv = min(stats_st(:,1));
-    wig = find(stats_st(:,1)==wigv,1,'first');
+    wig = find(stats_st(:,1) == wigv,1,'first');
     
     if wig~=1 && stats_st(wig-1,1)<wigv
         wig = NaN; % maximum is not a local maximum; previous value exceeds it

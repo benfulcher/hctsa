@@ -41,7 +41,6 @@ end
 if nargin < 2 || isempty(trimopt)
     trimopt = [0.90, 1]; % (default): remove less than 90%-good time series, & then less than 
                         % 100%-good metrics.
-                        % [[Don't do any covariance filtering]]
 end
 if iscell(trimopt) % still using the cell input of previous TSQ_normalize
     trimopt = trimopt{1};

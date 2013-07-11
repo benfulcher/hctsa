@@ -106,7 +106,7 @@ else % on the scale!
 end
 
 % iqrs from mode
-imode = find(ksf==max(ksf),1,'first');
+imode = find(ksf == max(ksf),1,'first');
 out.ksiqrsfrommode = abs(ksx(imode)-tc3_y)/iqr(tc3_surr);
 
 end

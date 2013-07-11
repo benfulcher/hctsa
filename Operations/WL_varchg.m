@@ -31,9 +31,8 @@ if mindelay > 0 && mindelay < 1
    mindelay = ceil(mindelay*N);
 end
 
-if wmaxlev(N,wname) < level
-    disp('Chosen level is too large for this wavelet on this signal. Sorry.');
-    return
+if wmaxlev(N, wname) < level
+    error('Chosen level, %u, is too large for this wavelet on this signal. Sorry.', level);
 end
 
 % The aim of this example is to recover the

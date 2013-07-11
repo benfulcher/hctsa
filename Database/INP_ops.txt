@@ -840,32 +840,75 @@ DF_mle_gaussfit.mean	DF_mle_gaussfit_mu	distribution,location,fit,raw,locdep
 DF_mle_gaussfit.std	DF_mle_gaussfit_std	distribution,spread,fit,raw,spreaddep
 DF_mle_geofit	DF_mle_geofit	distribution,fit
 nlogL_norm	nlogL_norm	distribution,gof,lengthdep
-DN_kssimpnumpeaks	DN_kssimpnumpeaks	distribution,ksdensity,numpeaks,raw,spreaddep
-ksentraw	ksentraw	distribution,ksdensity,entropy,raw,spreaddep
-ksent	ksent	distribution,ksdensity,entropy
-kspeakmaxraw	kspeakmaxraw	distribution,ksdensity,peakmax,raw,spreaddep
-kspeakmax	kspeakmax	distribution,ksdensity,peakmax
-kssimpcross005	kssimpcross005	distribution,ksdensity,crossconst,raw,spreaddep
-kssimpcross01	kssimpcross01	distribution,ksdensity,crossconst,raw,spreaddep
-kssimpcross02	kssimpcross02	distribution,ksdensity,crossconst,raw,spreaddep
-kssimpcross03	kssimpcross03	distribution,ksdensity,crossconst,raw,spreaddep
-kssimpcross04	kssimpcross04	distribution,ksdensity,crossconst,raw,spreaddep
-kssimpcross05	kssimpcross05	distribution,ksdensity,crossconst,raw,spreaddep
-kssimparea005	kssimparea005	distribution,ksdensity,areaconst,raw,spreaddep
-kssimparea01	kssimparea01	distribution,ksdensity,areaconst,raw,spreaddep
-kssimparea02	kssimparea02	distribution,ksdensity,areaconst,raw,spreaddep
-kssimparea03	kssimparea03	distribution,ksdensity,areaconst,raw,spreaddep
-kssimparea04	kssimparea04	distribution,ksdensity,areaconst,raw,spreaddep
-kssimparea05	kssimparea05	distribution,ksdensity,areaconst,raw,spreaddep
-kssimparcl01	kssimparcl01	distribution,ksdensity,arclength,raw,spreaddep
-kssimparcl05	kssimparcl05	distribution,ksdensity,arclength,raw,spreaddep
-kssimparcl1	kssimparcl1	distribution,ksdensity,arclength,raw,spreaddep
-kssimparcl2	kssimparcl2	distribution,ksdensity,arclength,raw,spreaddep
-kssimpasym	kssimpasym	distribution,ksdensity,area,symmetry,raw
-kssimpplsym	kssimpplsym	distribution,ksdensity,arclength,symmetry,raw
-kscnumpeaks	kscnumpeaks	distribution,ksdensity,compare,numpeaks,raw,spreaddep
-kscmax	kscmax	distribution,ksdensity,compare,max,raw,spreaddep
-kscent	kscent	distribution,ksdensity,compare,entropy,raw,spreaddep
+# DN_kssimp(x)  DN_kssimpraw
+# DN_kssimp(y)  DN_kssimpzscore
+DN_kssimpraw.npeaks	DN_kssimpnumpeaks	distribution,ksdensity,numpeaks,raw,spreaddep
+DN_kssimpraw.entropy	DN_ksentraw	distribution,ksdensity,entropy,raw,spreaddep
+DN_kssimpzscore.entropy	DN_ksent	distribution,ksdensity,entropy
+# ksentraw	ksentraw	distribution,ksdensity,entropy,raw,spreaddep
+# ksent  ksent  distribution,ksdensity,entropy
+# kspeakmaxraw  kspeakmaxraw  distribution,ksdensity,peakmax,raw,spreaddep
+# kspeakmax  kspeakmax  distribution,ksdensity,peakmax
+DN_kssimpraw.max  DN_kspeakmaxraw  distribution,ksdensity,peakmax,raw,spreaddep
+DN_kssimpzscore.max  DN_kspeakmax  distribution,ksdensity,peakmax
+# kssimpasym  kssimpasym  distribution,ksdensity,area,symmetry,raw
+# kssimpplsym  kssimpplsym  distribution,ksdensity,arclength,symmetry,raw
+DN_kssimpraw.asym  DN_kssimpasym  distribution,ksdensity,area,symmetry,raw
+DN_kssimpraw.plsym  DN_kssimpplsym  distribution,ksdensity,arclength,symmetry,raw
+# DN_kssimp(x,'numcross',0.05)  kssimpcross005
+# DN_kssimp(x,'numcross',0.1)  kssimpcross01
+# DN_kssimp(x,'numcross',0.2)  kssimpcross02
+# DN_kssimp(x,'numcross',0.3)  kssimpcross03
+# DN_kssimp(x,'numcross',0.4)  kssimpcross04
+# DN_kssimp(x,'numcross',0.5)  kssimpcross05
+# DN_kssimp(x,'area',0.05)  kssimparea005
+# DN_kssimp(x,'area',0.1)  kssimparea01
+# DN_kssimp(x,'area',0.2)  kssimparea02
+# DN_kssimp(x,'area',0.3)  kssimparea03
+# DN_kssimp(x,'area',0.4)  kssimparea04
+# DN_kssimp(x,'area',0.5)  kssimparea05
+# DN_kssimp(x,'arclength',0.1)  kssimparcl01
+# DN_kssimp(x,'arclength',0.5)  kssimparcl05
+# DN_kssimp(x,'arclength',1)  kssimparcl1
+# DN_kssimp(x,'arclength',2)  kssimparcl2
+DN_kssimpraw.numcross_005  DN_kssimp_ncross005  distribution,ksdensity,crossconst,raw,spreaddep
+DN_kssimpraw.numcross_010  DN_kssimp_ncross01  distribution,ksdensity,crossconst,raw,spreaddep
+DN_kssimpraw.numcross_020  DN_kssimp_ncross02  distribution,ksdensity,crossconst,raw,spreaddep
+DN_kssimpraw.numcross_030  DN_kssimp_ncross03  distribution,ksdensity,crossconst,raw,spreaddep
+DN_kssimpraw.numcross_040  DN_kssimp_ncross04  distribution,ksdensity,crossconst,raw,spreaddep
+DN_kssimpraw.numcross_050  DN_kssimp_ncross05  distribution,ksdensity,crossconst,raw,spreaddep
+DN_kssimpraw.area_005  DN_kssimp_area005  distribution,ksdensity,areaconst,raw,spreaddep
+DN_kssimpraw.area_010  DN_kssimp_area01  distribution,ksdensity,areaconst,raw,spreaddep
+DN_kssimpraw.area_020  DN_kssimp_area02  distribution,ksdensity,areaconst,raw,spreaddep
+DN_kssimpraw.area_030  DN_kssimp_area03  distribution,ksdensity,areaconst,raw,spreaddep
+DN_kssimpraw.area_040  DN_kssimp_area04  distribution,ksdensity,areaconst,raw,spreaddep
+DN_kssimpraw.area_050  DN_kssimp_area05  distribution,ksdensity,areaconst,raw,spreaddep
+DN_kssimpraw.arclength_010  DN_kssimp_arcl01  distribution,ksdensity,arclength,raw,spreaddep
+DN_kssimpraw.arclength_050  DN_kssimp_arcl05  distribution,ksdensity,arclength,raw,spreaddep
+DN_kssimpraw.arclength_100  DN_kssimp_arcl1  distribution,ksdensity,arclength,raw,spreaddep
+DN_kssimpraw.arclength_200  DN_kssimp_arcl2  distribution,ksdensity,arclength,raw,spreaddep
+# kssimpcross005  kssimpcross005  distribution,ksdensity,crossconst,raw,spreaddep
+# kssimpcross01  kssimpcross01  distribution,ksdensity,crossconst,raw,spreaddep
+# kssimpcross02  kssimpcross02  distribution,ksdensity,crossconst,raw,spreaddep
+# kssimpcross03  kssimpcross03  distribution,ksdensity,crossconst,raw,spreaddep
+# kssimpcross04  kssimpcross04  distribution,ksdensity,crossconst,raw,spreaddep
+# kssimpcross05  kssimpcross05  distribution,ksdensity,crossconst,raw,spreaddep
+# kssimparea005  kssimparea005  distribution,ksdensity,areaconst,raw,spreaddep
+# kssimparea01  kssimparea01  distribution,ksdensity,areaconst,raw,spreaddep
+# kssimparea02  kssimparea02  distribution,ksdensity,areaconst,raw,spreaddep
+# kssimparea03  kssimparea03  distribution,ksdensity,areaconst,raw,spreaddep
+# kssimparea04  kssimparea04  distribution,ksdensity,areaconst,raw,spreaddep
+# kssimparea05  kssimparea05  distribution,ksdensity,areaconst,raw,spreaddep
+# kssimparcl01  kssimparcl01  distribution,ksdensity,arclength,raw,spreaddep
+# kssimparcl05  kssimparcl05  distribution,ksdensity,arclength,raw,spreaddep
+# kssimparcl1  kssimparcl1  distribution,ksdensity,arclength,raw,spreaddep
+# kssimparcl2  kssimparcl2  distribution,ksdensity,arclength,raw,spreaddep
+DN_kssimpcx.numpeaks  kscnumpeaks  distribution,ksdensity,compare,numpeaks,raw,spreaddep
+DN_kssimpcx.max  kscmax  distribution,ksdensity,compare,max,raw,spreaddep
+DN_kssimpcx.entropy  kscent  distribution,ksdensity,compare,entropy,raw,spreaddep
+# kscnumpeaks  kscnumpeaks  distribution,ksdensity,compare,numpeaks,raw,spreaddep
+# kscmax  kscmax  distribution,ksdensity,compare,max,raw,spreaddep
+# kscent  kscent  distribution,ksdensity,compare,entropy,raw,spreaddep
 randomno1	randomno1	silly,stochastic,randomnumber
 randomno2	randomno2	silly,stochastic,randomnumber
 randomno3	randomno3	silly,stochastic,randomnumber
@@ -1710,13 +1753,13 @@ MASTER_CO_basicrecurf_tau.incircle_2	CO_basicrecurf_tau_incircle_2	correlation
 MASTER_CO_basicrecurf_tau.incircle_3	CO_basicrecurf_tau_incircle_3	correlation
 MASTER_CO_basicrecurf_tau.medianincircle	CO_basicrecurf_tau_medianincircle	correlation
 MASTER_CO_basicrecurf_tau.stdincircle	CO_basicrecurf_tau_stdincircle	correlation
-MASTER_pdlagwang07.i	PD_wang07_th0	periodicity,spline
-MASTER_pdlagwang07.ii	PD_wang07_th0.01	periodicity,spline
-MASTER_pdlagwang07.iii	PD_wang07_th0.1	periodicity,spline
-MASTER_pdlagwang07.iv	PD_wang07_th0.2	periodicity,spline
-MASTER_pdlagwang07.v	PD_wang07_th1_sqrtN	periodicity,spline
-MASTER_pdlagwang07.vi	PD_wang07_th5_sqrtN	periodicity,spline
-MASTER_pdlagwang07.vii	PD_wang07_th10_sqrtN	periodicity,spline
+MASTER_pdlagwang07.th1	PD_wang07_th0	periodicity,spline
+MASTER_pdlagwang07.th2	PD_wang07_th0.01	periodicity,spline
+MASTER_pdlagwang07.th3	PD_wang07_th0.1	periodicity,spline
+MASTER_pdlagwang07.th4	PD_wang07_th0.2	periodicity,spline
+MASTER_pdlagwang07.th5	PD_wang07_th1_sqrtN	periodicity,spline
+MASTER_pdlagwang07.th6	PD_wang07_th5_sqrtN	periodicity,spline
+MASTER_pdlagwang07.th7	PD_wang07_th10_sqrtN	periodicity,spline
 MASTER_DV_dynsys_dblwell_1_02_01.mean	DV_dynsys_dblwell_1_02_01_mean	dynsys,dblwell
 MASTER_DV_dynsys_dblwell_1_02_01.median	DV_dynsys_dblwell_1_02_01_median	dynsys,dblwell
 MASTER_DV_dynsys_dblwell_1_02_01.range	DV_dynsys_dblwell_1_02_01_range	dynsys,dblwell

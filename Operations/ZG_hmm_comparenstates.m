@@ -18,13 +18,13 @@ function out = ZG_hmm_comparenstates(y,trainp,nstater)
 N = length(y); % number of samples in time series
 
 if nargin < 2 || isempty(trainp)
-    disp('training on 60% of the data by default')
+    fprintf(1,'Training the model on 60% of the data by default\n')
     trainp = 0.6; % train on 60% of the data
 end
 
 if nargin < 3 || isempty(nstater)
-    disp('Using 2--4 states by default')
-    nstater = 2:4; % use 2:4 states
+    fprintf(1,'Using 2--4 states by default\n')
+    nstater = (2:4); % use 2:4 states
 end
 
 
@@ -32,7 +32,7 @@ end
 % divide up dataset into training (ytrain) and test (ytest) portions
 Ntrain = floor(trainp*N);
 ytrain = y(1:Ntrain);
-if Ntrain<N
+if Ntrain < N
     ytest = y(Ntrain+1:end);
     Ntest = length(ytest);
 end
@@ -45,7 +45,7 @@ for j = 1:Nstate
     nstates = nstater(j);
     % train HMM with <nstates> states for 30 cycles of EM (or until
     % convergence); default termination tolerance
-    [Mu,Cov,P,Pi,LL] = hmm(ytrain,Ntrain,nstates,30);
+    [Mu, Cov, P, Pi, LL] = hmm(ytrain,Ntrain,nstates,30);
     
     LLtrains(j) = LL(end)/Ntrain;
     
@@ -53,7 +53,6 @@ for j = 1:Nstate
     lik = hmm_cl(ytest,Ntest,nstates,Mu,Cov,P,Pi);
 
     LLtests(j) = lik/Ntest;
-
 end
 
 %% Output some statistics
@@ -66,9 +65,8 @@ out.chLLtrain = LLtrains(end)-LLtrains(1);
 out.chLLtest = LLtests(end)-LLtests(1);
 out.meandiffLLtt = mean(abs(LLtests-LLtrains));
 
-
-for i = 1:Nstate-1
-    eval(['out.LLtestdiff' num2str(i) ' = ' num2str(LLtests(i+1)-LLtests(i)) ';']);
+for i = 1 : Nstate-1
+    eval(sprintf('out.LLtestdiff%u = LLtests(%u) - LLtests(%u);',i,i+1,i));
 end
 
 

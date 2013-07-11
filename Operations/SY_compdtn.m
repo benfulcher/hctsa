@@ -33,7 +33,7 @@ switch eachorpar
         out.stddiv = std(divs);
         
     case 'each'
-        if nseg==2 % output is just an integer: only two distributions to compare
+        if nseg == 2 % output is just an integer: only two distributions to compare
             out = sum(abs(dns(:,1)-dns(:,2)));
         else % need to compare a number of different distributions against each other
             diffmat = zeros(nseg); % store pairwise differences

@@ -21,7 +21,7 @@ r1 = cell(3,1); % stores ranges as vectors
 out1 = zeros(3,1); % stores probabilities as doubles
 
 for i = 1:3
-	r1{i} = find(yt==i);
+	r1{i} = find(yt == i);
 	out1(i) = length(r1{i})/N;
 end
 
@@ -35,7 +35,7 @@ out.h = -sum(out1(out1>0).*log(out1(out1>0))); % entropy of this result
 %% 2
 % Make sure ranges are valid for looking at the next one
 for i = 1:3
-	if (~isempty(r1{i}) && r1{i}(end)==N)
+	if (~isempty(r1{i}) && r1{i}(end) == N)
         r1{i} = r1{i}(1:end-1);
     end
 end
@@ -44,7 +44,7 @@ r2 = cell(3,3);
 out2 = zeros(3,3);
 for i = 1:3
 	for j = 1:3
-		r2{i,j} = r1{i}(yt(r1{i}+1)==j);
+		r2{i,j} = r1{i}(yt(r1{i}+1) == j);
 		out2(i,j) = length(r2{i,j})/(N-1);
 	end
 end
@@ -62,7 +62,7 @@ out.hh = -sum(out2(out2>0).*log(out2(out2>0)))/2; % entropy of this result
 % Make sure ranges are valid for looking at the next one
 for i=1:3
 	for j=1:3
-		if ~isempty(r2{i,j}) && r2{i,j}(end)==N-1; r2{i,j}=r2{i,j}(1:end-1); end
+		if ~isempty(r2{i,j}) && r2{i,j}(end) == N-1; r2{i,j}=r2{i,j}(1:end-1); end
 	end
 end
 
@@ -71,7 +71,7 @@ r3 = cell(3,3,3); out3 = zeros(3,3,3);
 for i = 1:3
 	for j = 1:3
 		for k = 1:3
-			r3{i,j,k} = r2{i,j}(yt(r2{i,j}+2)==k);
+			r3{i,j,k} = r2{i,j}(yt(r2{i,j}+2) == k);
 			out3(i,j,k) = length(r3{i,j,k})/(N-2);
 		end
 	end
@@ -97,7 +97,7 @@ out.hhh = -sum(out3(out3>0).*log(out3(out3>0)))/3; % entropy of this result
 for i = 1:3
 	for j = 1:3
 		for k = 1:3
-			if (~isempty(r3{i,j,k}) && r3{i,j,k}(end)==N-2)
+			if (~isempty(r3{i,j,k}) && r3{i,j,k}(end) == N-2)
                 r3{i,j,k}=r3{i,j,k}(1:end-1);
             end
 		end
@@ -110,7 +110,7 @@ for i=1:3
 	for j=1:3
 		for k=1:3
 			for l=1:3
-				r4{i,j,k,l} = r3{i,j,k}(yt(r3{i,j,k}+3)==l);
+				r4{i,j,k,l} = r3{i,j,k}(yt(r3{i,j,k}+3) == l);
 				out4(i,j,k,l) = length(r4{i,j,k,l})/(N-3);
 			end
 		end
@@ -162,49 +162,49 @@ out.hhhh = -sum(out4(out4>0).*log(out4(out4>0)))/4; % entropy of this result
 
 % %% 4
 % % Make sure ranges are valid for looking at the next one
-% if ~isempty(r111) && r111(end)==N-2; r111=r111(2:end-2); end
-% if ~isempty(r112) && r112(end)==N-2; r112=r112(2:end-2); end
-% if ~isempty(r121) && r121(end)==N-2; r121=r121(2:end-2); end
-% if ~isempty(r122) && r122(end)==N-2; r122=r122(2:end-2); end
-% if ~isempty(r211) && r211(end)==N-2; r211=r211(2:end-2); end
-% if ~isempty(r212) && r212(end)==N-2; r212=r212(2:end-2); end
-% if ~isempty(r221) && r221(end)==N-2; r221=r221(2:end-2); end
-% if ~isempty(r222) && r222(end)==N-2; r222=r222(2:end-2); end
+% if ~isempty(r111) && r111(end) == N-2; r111=r111(2:end-2); end
+% if ~isempty(r112) && r112(end) == N-2; r112=r112(2:end-2); end
+% if ~isempty(r121) && r121(end) == N-2; r121=r121(2:end-2); end
+% if ~isempty(r122) && r122(end) == N-2; r122=r122(2:end-2); end
+% if ~isempty(r211) && r211(end) == N-2; r211=r211(2:end-2); end
+% if ~isempty(r212) && r212(end) == N-2; r212=r212(2:end-2); end
+% if ~isempty(r221) && r221(end) == N-2; r221=r221(2:end-2); end
+% if ~isempty(r222) && r222(end) == N-2; r222=r222(2:end-2); end
 % 
 % 
 % 
 % % 1111
-% r1111 = r111(yt(r111+3)==1);
+% r1111 = r111(yt(r111+3) == 1);
 % % 1112
-% r1112 = r111(yt(r111+3)==2);
+% r1112 = r111(yt(r111+3) == 2);
 % % 1121
-% r1121 = r112(yt(r112+3)==1);
+% r1121 = r112(yt(r112+3) == 1);
 % % 1122
-% r1122 = r112(yt(r112+3)==2);
+% r1122 = r112(yt(r112+3) == 2);
 % % 1211
-% r1211 = r121(yt(r121+3)==1);
+% r1211 = r121(yt(r121+3) == 1);
 % % 1212
-% r1212 = r121(yt(r121+3)==2);
+% r1212 = r121(yt(r121+3) == 2);
 % % 1221
-% r1221 = r122(yt(r122+3)==1);
+% r1221 = r122(yt(r122+3) == 1);
 % % 1222
-% r1222 = r122(yt(r122+3)==2);
+% r1222 = r122(yt(r122+3) == 2);
 % % 2111
-% r2111 = r211(yt(r211+3)==1);
+% r2111 = r211(yt(r211+3) == 1);
 % % 2112
-% r2112 = r211(yt(r211+3)==2);
+% r2112 = r211(yt(r211+3) == 2);
 % % 2121
-% r2121 = r212(yt(r212+3)==1);
+% r2121 = r212(yt(r212+3) == 1);
 % % 2122
-% r2122 = r212(yt(r212+3)==2);
+% r2122 = r212(yt(r212+3) == 2);
 % % 2211
-% r2211 = r221(yt(r221+3)==1);
+% r2211 = r221(yt(r221+3) == 1);
 % % 2212
-% r2212 = r221(yt(r221+3)==2);
+% r2212 = r221(yt(r221+3) == 2);
 % % 2221
-% r2221 = r222(yt(r222+3)==1);
+% r2221 = r222(yt(r222+3) == 1);
 % % 2222
-% r2222 = r222(yt(r222+3)==2);
+% r2222 = r222(yt(r222+3) == 2);
 % 
 % 
 % % ----- Record these -----

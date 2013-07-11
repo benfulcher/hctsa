@@ -49,7 +49,7 @@ end
 
 % global minimum, aic
 out.aic_min = min(aics(:));
-[pi_opt qi_opt] = find(aics==min(aics(:)));
+[pi_opt qi_opt] = find(aics == min(aics(:)));
 out.p_aic_opt = pr(pi_opt);
 out.q_aic_opt = qr(qi_opt);
 

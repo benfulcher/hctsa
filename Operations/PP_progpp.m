@@ -1,7 +1,7 @@
-function out=PP_progpp(y,detrndmeth)
+function out = PP_progpp(y,detrndmeth)
 % Inputs: y: the time series
 %         detrndmeth: the detrending method(s)
-% Coding begun on 10/7/09 by Ben Fulcher
+% Ben Fulcher, 10/7/09
 
 %% FOREPLAY
 N = length(y); % length of time series
@@ -9,13 +9,13 @@ N = length(y); % length of time series
 %% Determine the number of times the processing will be progressively performed
 % this information is stored in nr
 switch detrndmeth
-    case 'spline', nr = 1:20;
-    case 'diff', nr = 1:5;
+    case 'spline', nr = (1:20);
+    case 'diff', nr = (1:5);
     case 'medianf', nr = round(linspace(1,N/25,25));
     case 'rav', nr = round(linspace(1,N/25,25));
-    case 'resampleup', nr = 1:20;
-    case 'resampledown', nr = 1:20;
-	otherwise, return
+    case 'resampleup', nr = (1:20);
+    case 'resampledown', nr = (1:20);
+	otherwise, error('Unknown detrending method ''%s''',detrndmeth);
 end
 
 %% Do the progessive processing with running statistical evaluation
@@ -40,8 +40,6 @@ for q = 1:length(nr)
             y_d = resample(y,n,1);
         case 'resampledown' % downsample
             y_d = resample(y,1,n);
-        otherwise
-            disp('Invalid detrending method'); return
     end
     outmat(q,:) = doyourcalcthing(y,y_d);
 end
@@ -51,8 +49,8 @@ end
 %% DETERMINE THE STATISTICS ON EACH TEST
 % four statistics on each test
 
-stats=zeros(10,4);
-for t=1:10;
+stats = zeros(10,4);
+for t = 1:10;
     if any(~isfinite(stats(t,:))),
         disp('hello')
     end
@@ -162,7 +160,7 @@ out.normdiff_exp=stats(10,4);
         f(7)=OL_bentest(y_d,5,1);
         
         % Cross Correlation to original signal
-        if length(y)==length(y_d)
+        if length(y) == length(y_d)
             xc = xcorr(y,y_d,1,'coeff');
             f(8) = xc(1);
             f(9) = xc(3);
@@ -225,7 +223,7 @@ out.normdiff_exp=stats(10,4);
         
         % (4) is it exponential?
         
-        if g(1)>0 % increasing, fit saturating exponential
+        if g(1) > 0 % increasing, fit saturating exponential
             stpt = [-f(end), -0.1, f(end)];
         else % decreasing, fit decaying exponential
             stpt = [f(end), -0.1, f(end)];
@@ -234,7 +232,7 @@ out.normdiff_exp=stats(10,4);
         fopt = fitoptions('Method','NonlinearLeastSquares','StartPoint',stpt);
         ftyp = fittype('a*exp(b*x)+c','options',fopt);
         try 
-            [c,gof] = fit((1:length(f))',f,ftyp);
+            [c, gof] = fit((1:length(f))',f,ftyp);
             if gof.rsquare>0.9
                 g(4) = c.b; % return the decay coefficient
             else

@@ -73,7 +73,7 @@ switch wstyle
             end
         end
     otherwise
-        error('Invalid method for simulating walker on the time series')
+        error('Unknown method ''%s'' for simulating walker on the time series', wstyle)
 end
 
 %% % PLOT WALKER AND ORIGINAL TIME SERIES TOGETHER:

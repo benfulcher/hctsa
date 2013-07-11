@@ -17,7 +17,7 @@ function [MN, xedges, yedges] = hist2_NK(x, y, xedges, yedges)
 %# ====================================================================
 %
 %      Please, see the notes to histc too.
-% N.B. It is always a better idea to use the
+%      N.B. It is always a better idea to use the
 %      HISTC mex (a much faster compiled C code) if you have it
 %      Then just replace the histc with HISTC in all calls
 %      contained in the hist2_NK() .m function
@@ -25,12 +25,10 @@ function [MN, xedges, yedges] = hist2_NK(x, y, xedges, yedges)
 % (c) Nedialko Krouchev 2006, Universite de Montreal, GRSNC
 
 if nargin ~= 4
-    disp('The four input arguments are required!');
-    return;
+    error('The four input arguments are required!');
 end
 if any(size(x) ~= size(y))
-    disp('The size of the two first input vectors should be same!');
-    return;
+    error('The size of the two first input vectors should be same!');
 end
 
 [xn, xbin] = histc(x,xedges);
@@ -73,6 +71,5 @@ xyBin = (xbin-1)*ynbin + ybin;
 
 %# ====================================================================
 
-MN = histc(xyBin,xyBinEdges);
-MN = reshape( MN, ynbin, xnbin );
-
+MN = histc(xyBin, xyBinEdges);
+MN = reshape(MN, ynbin, xnbin);

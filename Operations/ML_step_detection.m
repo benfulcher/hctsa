@@ -27,7 +27,7 @@ switch method
         
         % Put in chpts form: a vector specifying indicies of starts of
         % constant runs.
-        if length(steps)==2
+        if length(steps) == 2
             chpts = 1;
         else
             chpts = [1;steps(2:end-1)+1];

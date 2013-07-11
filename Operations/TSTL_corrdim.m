@@ -18,8 +18,8 @@ end
 if nargin < 3 || isempty(embedparams)
     embedparams = {'ac','cao'};
 else
-    if length(embedparams)~=2
-        error('Embedding parameters incorrectly formatted -- should be {tau,m}')
+    if length(embedparams) ~= 2
+        error('Embedding parameters should be formatted like {tau,m}')
     end
 end
 
@@ -28,7 +28,7 @@ end
 s = benembed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-    error('Time-series embedding failed')
+    error('Time-series embedding to signal class for TSTOOL failed')
 end
 
 %% Run
