@@ -114,7 +114,7 @@ if isnumeric(varargin{1})     	% read commandline input
    X=double(varargin{1});
    Nx = size(X,2); Ny = size(X,1);
 
-   if nargin<3 ,Dmax1=1; Dmax2=1;
+   if nargin < 3 ,Dmax1=1; Dmax2=1;
    else
      if isnumeric(varargin{2}), Dmax1=double(varargin{2});
      else Dmax1=1;

@@ -5,19 +5,19 @@ function out = WL_scal2frq(y, wname, amax, delta)
 %% Check Inputs
 N = length(y); % length of time series
 
-if nargin<2 || isempty(wname)
+if nargin < 2 || isempty(wname)
     disp('Wavelet not specified -- using the default db3 wavelet')
     wname = 'db3';
 end
 
-if nargin<3 || isempty(amax)
+if nargin < 3 || isempty(amax)
     amax = 5; % maximum 'scale'
 end
 if strcmp(amax,'max') % set to maximum for this wavelet
     amax = wmaxlev(N,wname);
 end
 
-if nargin<4 || isempty(delta)
+if nargin < 4 || isempty(delta)
     delta = 1; % the sampling period
 end
 

@@ -37,7 +37,7 @@ y = y - min(y); % adjust so that minimum of y is at zero (no real reason other t
 %% Calculate the visibility graph
 switch meth
 	case 'norm'
-		for i = 1:N-1
+		for i = 1 : N-1
 			% compute all subsequent gradients
 			deltay = y(i+1:end) - ones(N-i,1)*y(i); % vector of deltay's
 			deltat = (1:N-i)'; % time from current reference i

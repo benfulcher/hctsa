@@ -98,8 +98,8 @@ out.poissfit_absdiff = sum(abs(poiss_n-n));
 out.poissfit_sqdiff = sum((poiss_n-n).^2);
 
 % Entropy in 10-bin histogram
-[n x] = hist(counts,10); n=n/(sum(n)*(x(2)-x(1)));
-out.hist10_ent = sum(n(n>0).*log(n(n>0)));
+[n, x] = hist(counts,10); n = n/(sum(n)*(x(2)-x(1)));
+out.hist10_ent = sum(n(n>0).*log(n(n > 0)));
 
 % plot(x,poisspdf(x,l),'g'); hold on;
 % plot(x,n,'k'); hold off

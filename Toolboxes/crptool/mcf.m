@@ -100,10 +100,10 @@ if size(x,1)<size(x,2)
   x=x';
 end
 
-if nargin<=3
+if nargin < =3
   T=round(.02*size(y,1));
 end
-if nargin<=2  | isempty(w)
+if nargin < =2  | isempty(w)
   w=round(.1*size(y,1));w=5;
 end
 

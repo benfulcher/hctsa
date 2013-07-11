@@ -19,7 +19,6 @@ if nargin < 3 || isempty(order)
     order = 2;
 end
 
-
 %% Do a range of preprocessings
 yp = benpp(y,'');
 % returns a structure, yp, with a range of time series in it, each a different
@@ -37,10 +36,10 @@ nfields = length(fields);
 for i = 1:nfields;
     data = [];
     % for each preprocessing, fit the model
-    eval(['data = yp.' fields{i} ';']); 
+    eval(sprintf('data = yp.%s;',fields{i})); 
     % data is the current preprocessed data
 
-    switch model
+    switch model % SO MANY OPTIONS!
         case 'ar'
             % (0)
             data = benzscore(data);
@@ -55,7 +54,6 @@ for i = 1:nfields;
             statstore.mabserr(i) = mean(abs(e));
             statstore.ac1(i) = CO_autocorr(e,1);
     end
-    
 end
 
 %% Return statistics on statistics
@@ -71,7 +69,7 @@ end
 
 % No, I'll just do in-sample rms error, for a single model no point fpeing
 for i = 2:nfields
-    eval(['out.rmserrrat_' fields{i} ' = ' num2str(statstore.rmserr(i)/statstore.rmserr(1)) ';']);
+    eval(sprintf('out.rmserrrat_%s = %f;',fields{i}),statstore.rmserr(i)/statstore.rmserr(1));
 end
 % In fact, greater error in this case means a better detrending in some
 % sense -- it's remobed more of the 'obvious' linear structure (assuming

@@ -11,8 +11,8 @@ function out = SP_basicmeasures(y,psdmeth,wmeth,nf,cepstrum,dopower)
 % dopower uses power spectrum rather than amplitudes
 
 
-if nargin<5, cepstrum = 0; end
-if nargin<6 || isempty(dopower),
+if nargin < 5, cepstrum = 0; end
+if nargin < 6 || isempty(dopower),
     disp('We''re looking at amplitude spectrum -- not power spectrum...')
     dopower = 0;
 end

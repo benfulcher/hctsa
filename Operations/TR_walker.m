@@ -1,9 +1,14 @@
 function out = TR_walker(y,wstyle,wparam)
-% Idea of making an artificial walker follow the time series in some way;
-% and compare the motion of the walker to the actual observed time series
+% This function uses the idea of simulating an artificial walker that 
+% somehow moves in response to the time series.
+% Outputs compare the motion of the walker to the actual observed time series
+% wstyle determines how the walker's trajectory is defined in relation to the
+%        time series
+% wparam sets the parameters for the run
 % Ben Fulcher August 2009
 
-N = length(y);
+N = length(y); % the length of the input time series, y
+
 
 %% (1) Walk
 w = zeros(N,1); % the walker's trajectory
@@ -67,6 +72,8 @@ switch wstyle
                 w(i) = w_mom;
             end
         end
+    otherwise
+        error('Invalid method for simulating walker on the time series')
 end
 
 %% % PLOT WALKER AND ORIGINAL TIME SERIES TOGETHER:
@@ -103,23 +110,23 @@ out.w_ac2 = CO_autocorr(w,2);
 out.w_tau = CO_fzcac(w);
 out.w_min = min(w);
 out.w_max = max(w);
-out.w_propzcross = length(find(w(1:end-1).*w(2:end)<0))/(N-1);
+out.w_propzcross = sum(w(1:end-1).*w(2:end) < 0)/(N-1);
 % fraction of time series length that walker crosses time series
 
 % (ii) Differences between the walk at signal
 out.sw_meanabsdiff = mean(abs(y-w));
-out.sw_taudiff = CO_fzcac(y)-CO_fzcac(w);
+out.sw_taudiff = CO_fzcac(y) - CO_fzcac(w);
 out.sw_stdrat = std(w)/std(y);
 out.sw_ac1rat = out.w_ac1/CO_autocorr(y,1);
 out.sw_minrat = min(w)/min(y);
 out.sw_maxrat = max(w)/max(y);
-out.sw_propcross = length(find((w(1:end-1)-y(1:end-1)).*(w(2:end)-y(2:end))<0))/(N-1);
+out.sw_propcross = sum((w(1:end-1)-y(1:end-1)).*(w(2:end)-y(2:end)) < 0)/(N-1);
 % fraction of time series length that walker crosses time series
 
 % test from same distribution: Ansari-Bradley test
 % (this may not be valid given the dependence of w on y, and the
 % properties of the null hypothesis itself... But this is the name of the game!)
-[h,pval,stats] = ansaribradley(w,y);
+[h, pval, stats] = ansaribradley(w,y);
 out.sw_ansarib_pval = pval; % p-value from the test
 % out.sw_ansarib_W = stats.W; % W (test statistic)
 % out.sw_ansarib_Wstar = stats.Wstar; % Approximate normal statistic
@@ -131,9 +138,9 @@ out.sw_distdiff = sum(abs(dy-dw));
 
 % (iii) Looking at residuals
 res = w-y;
-[h pval] = runstest(res);
+[h, pval] = runstest(res); % runs test
 out.res_runstest = pval;
-out.res_swss5_1 = SY_slidwin(res,'std','std',5,1);
-out.res_ac1 = CO_autocorr(res,1);
+out.res_swss5_1 = SY_slidwin(res,'std','std',5,1); % sliding window stationarity
+out.res_ac1 = CO_autocorr(res,1); % auto correlation at lag-1
 
 end

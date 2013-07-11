@@ -3,11 +3,11 @@ function out = bencat(s,x,surr)
 % s is the list of strings to be catinated
 % surrounds each string in optional string surr
 
-if nargin<2, x= ', '; % default delimiter is a comma
+if nargin < 2, x= ', '; % default delimiter is a comma
 else x=[x ' '];
 end
 
-if nargin<3 || isempty(surr)
+if nargin < 3 || isempty(surr)
     sumstr=[];
     if iscellstr(s)
         for i=1:length(s), sumstr=[sumstr s{i} x]; end

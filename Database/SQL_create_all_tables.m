@@ -27,7 +27,7 @@ nperline = 5;
 for j = 1:length(CreateString)
     [rs,emsg] = mysql_dbexecute(dbc,CreateString{j});
     if ~isempty(rs)
-        if j==length(CreateString)
+        if j == length(CreateString)
             fprintf(1,'%s.',TableNames{j})
         else
             fprintf(1,'%s, ',TableNames{j})
@@ -36,7 +36,7 @@ for j = 1:length(CreateString)
         fprintf(1,'**** Error creating table: %s\n',TableNames{j});
         fprintf(1,'%s',emsg);
     end
-    if mod(j,nperline)==0 && j < length(CreateString)
+    if mod(j,nperline) == 0 && j < length(CreateString)
         fprintf(1,'\n'); % make new line to avoid cramping on display
     end
 end

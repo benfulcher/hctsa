@@ -9,7 +9,7 @@ s = signal(y); % convert to signal object for TSTOOL
 
 %% Check Inputs
 maxtau0 = maxtau;
-if nargin<2 || isempty(maxtau)
+if nargin < 2 || isempty(maxtau)
     maxtau = ceil(N/4);
 else
     maxtau = min(maxtau,ceil(N/2)); % if given a number, don't go above N/2

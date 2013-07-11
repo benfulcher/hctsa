@@ -8,7 +8,7 @@ function out = TSTL_surr_nlac(y, tau, nsurr, surrmethod, surrfn)
 
 %% Check inputs, set defaults
 % 1) time delay, TAU
-if nargin<2 || isempty(tau)
+if nargin < 2 || isempty(tau)
     tau = 1;
 end
 if strcmp(tau,'ac')
@@ -19,12 +19,12 @@ end
 
 
 % 2) number of surrogate data sets to generate, NSURR
-if nargin<3 || isempty(nsurr)
+if nargin < 3 || isempty(nsurr)
     nsurr = 50;
 end
 
 % 3) surrogate data method, SURRMETHOD
-if nargin<4 || isempty(surrmethod)
+if nargin < 4 || isempty(surrmethod)
     disp('you should set the surrogate method.');
     disp('just this once I''ll do it for you -- surrogate1');
     surrmethod = 1;
@@ -34,7 +34,7 @@ end
 % surrmethod = 3: permutes samples randomly
 
 % 4) surrogate function, SURRFN
-if nargin<5 || isempty(surrfn)
+if nargin < 5 || isempty(surrfn)
     disp('Using tc3 by default');
     surrfn = 'tc3';
 end

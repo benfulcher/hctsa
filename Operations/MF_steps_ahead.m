@@ -12,19 +12,19 @@ N = length(y);
 y = iddata(y,[],1); % Convert y to time series object
 
 % model, a string specifying the model type to fit
-if nargin<2 || isempty(model)
+if nargin < 2 || isempty(model)
     model = 'ar'; % use an AR model as default
 end
 
 % order, an extra parameter specific to the model choice specifying
 % additional parameters, typically an integer or set of integers indicating
 % the 'order' of the model.
-if nargin<3 || isempty(order)
+if nargin < 3 || isempty(order)
     order = 2; % hopefully this is meaningful!
 end
 
 % maxsteps, maximum number of steps ahead for prediction
-if nargin<4 || isempty(maxsteps)
+if nargin < 4 || isempty(maxsteps)
     maxsteps = 6; % compare up to 5 steps ahead by default
 end
 

@@ -22,13 +22,13 @@ function out = SC_benfa(x,q,wtf,taustep,k,lag,loginc)
 % we're trying to fit...: locinc = 1;
 
 % 1) Compute integrated sequence
-if nargin<6 || isempty(lag)
+if nargin < 6 || isempty(lag)
     y = cumsum(x);
 else % specified a lag
     y = cumsum(x(1:lag:end));
     % better may be to downsample rather than this simple decimation
 end
-if nargin<7
+if nargin < 7
 	loginc = 0; % use linear spacing (this shouldn't really be default, but this 
 				% is for consistency with already-implemented precedent)
 end

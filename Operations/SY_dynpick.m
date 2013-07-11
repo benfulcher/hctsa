@@ -4,7 +4,6 @@ function out = SY_dynpick(y,l)
 % Kind of a bootstrap sort of idea
 % Ben Fulcher August 2009
 
-% nseg=5;
 
 % if strcmp(meth,'tau')
 %     seglr=[1 2 5 10]*taug;
@@ -14,6 +13,8 @@ function out = SY_dynpick(y,l)
 %     return
 % end
 
+doplot = 0;
+
 if strcmp(l,'ac2')
     taug = CO_fzcac(y); % tau (global)
     l = 2*taug;
@@ -22,8 +23,11 @@ elseif strcmp(l,'ac5')
     l = 5*taug;
 end
 
-if l>length(y)*0.9 % not suitable -- too short
-	out = NaN;
+N = length(y); % the length of the time series
+
+if l > N*0.9 % not suitable -- too short
+	fprintf(1,'This time series (N = %u) is too short for SY_dynpick using l = %u\n',N,l)
+    out = NaN; % NaN means not suitable
     return
 end
 
@@ -32,16 +36,12 @@ end
 nfeat = 9; % number of features
 nseg = 100; % number of segments
 fs = zeros(nseg,nfeat);
-
-% for i=1:length(seglr)
-%     l=seglr(i); % the length of each time series subsegment
 qs = zeros(nseg,nfeat);
-% ists = zeros(nseg,1);
 
 for j = 1:nseg
     % pick a range
     % in this implementation, ranges CAN overlap
-    ist = randint(1,1,[1,length(y)-1-l]); % random start point (not exceeding the endpoint)
+    ist = randint(1,1,[1, N-1-l]); % random start point (not exceeding the endpoint)
     ifh = ist+l-1; % finish index
     rs = ist:ifh; % sample range (from starting to finishing index)
     ysub = y(rs); % subsection
@@ -57,19 +57,19 @@ for j = 1:nseg
     qs(j,7) = CO_autocorr(ysub,1); % AC1
     qs(j,8) = CO_autocorr(ysub,2); % AC2
     qs(j,9) = taul;
-%     ists(j) = ist;
 end
     
-% qs
-% figure('color','w');
-% subplot(2,1,1); hold on; plot(y,'k'); plot(ists,y(ists),'.r'); title('time series')
-% subplot(2,1,2); plot(qs(:,1),'b'); title('local means')
-% input('what do you think?')
+if doplot
+    figure('color','w');
+    subplot(2,1,1); hold on; plot(y,'k'); plot(ists,y(ists),'.r'); title('time series')
+    subplot(2,1,2); plot(qs(:,1),'b'); title('local means')
+    input('what do you think?')
+end
 
 % Can think of this as a big bootstrapped distribution of the timeseries at
 % a scale given by the length l
-fs(1:nfeat) = mean(qs);
-fs(nfeat+1:nfeat*2) = std(qs);
+fs(1:nfeat) = mean(qs); % the mean value of the feature across subsegments of the time series
+fs(nfeat+1:nfeat*2) = std(qs); % the spread of the feature across subsegments of the time series
     
 %     fs(i,nfeat+1:2*nfeat)=std(qs);
 
@@ -107,35 +107,5 @@ out.stdsampen1_02 = fs(15);
 out.stdac1 = fs(16);
 out.stdac2 = fs(17);
 out.stdtaul = fs(18);
-
-% out.stdactaul = fs(19);
-% out.stdtaul = fs(20);
-
-
-% out.meanmean = fs(1);
-% out.meanstd = fs(2);
-% out.meanskew = fs(3);
-% out.meankurt = fs(4);
-% out.meanapen1_02 = fs(5);
-% out.meansampen1_02 = fs(6);
-% out.meanac1 = fs(7);
-% out.meanac2 = fs(8);
-% out.meanactaug = fs(9);
-% out.meanactaul = fs(10);
-% out.meantaul = fs(11);
-% 
-% 
-% out.stdmean = fs(12);
-% out.stdstd = fs(13);
-% out.stdskew = fs(14);
-% out.stdkurt = fs(15);
-% out.stdapen1_02 = fs(16);
-% out.stdsampen1_02 = fs(17);
-% out.stdac1 = fs(18);
-% out.stdac2 = fs(19);
-% out.stdactaug = fs(20);
-% out.stdactaul = fs(21);
-% out.stdtaul = fs(22);
-
 
 end

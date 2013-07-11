@@ -8,17 +8,17 @@ N = length(y);
 
 
 % 1) Nref
-if nargin<2 || isempty(Nref) 
+if nargin < 2 || isempty(Nref) 
     Nref = -1; % use all points
 end
 
 % 2) Maximum search radius (as proportion of attractor size)
-if nargin<3 || isempty(rad)
+if nargin < 3 || isempty(rad)
     rad = 0.05;
 end
 
 % 3) Theiler window
-if nargin<4 || isempty(past)
+if nargin < 4 || isempty(past)
     past = 1; % just exclude current point
 end
 if past>0 && past<1
@@ -26,7 +26,7 @@ if past>0 && past<1
 end
 
 % 4) Embedding parameters
-if nargin<5 || isempty(embedparams)
+if nargin < 5 || isempty(embedparams)
     embedparams={'ac','cao'};
     disp('using default embedding using autocorrelation and cao')
 else

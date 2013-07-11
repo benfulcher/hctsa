@@ -121,13 +121,13 @@ end
 
 if size(x,2)>1, error('The dimension of x must be one.'); end
 
-if nargin<5 | isempty(oi)
+if nargin < 5 | isempty(oi)
   oi=1000;
 end
-if nargin<4 | isempty(ii)
+if nargin < 4 | isempty(ii)
   ii=100;
 end
-if nargin<3 | isempty(w)
+if nargin < 3 | isempty(w)
   w=round(.1*size(y,1));w=5;
 end
 

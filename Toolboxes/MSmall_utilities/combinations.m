@@ -16,7 +16,7 @@ function Z=combinations(a,b);
 %3/3/2005
 %ensmall@polyu.edu.hk
 
-if nargin<2
+if nargin < 2
 	[a,b]=size(a);
 end;
 

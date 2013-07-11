@@ -9,16 +9,16 @@ function out = SD_surrogatetest(x,surrmeth,nsurrs,extrap,teststat)
 
 %% CHECK INPUTS
 
-if nargin<2 || isempty(surrmeth)
+if nargin < 2 || isempty(surrmeth)
     surrmeth = 'RP'; % Randomize phases
 end
-if nargin<3 || isempty(nsurrs)
+if nargin < 3 || isempty(nsurrs)
     nsurrs = 99; % create 99 surrogates for a 0.01 significance level 1-sided test
 end
-if nargin<4 || isempty(nsurrs)
+if nargin < 4 || isempty(nsurrs)
     extrap = [];
 end
-if nargin<5 || isempty(teststat)
+if nargin < 5 || isempty(teststat)
     teststat = 'AMI'; % automutual information
 end
 

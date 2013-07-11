@@ -3,10 +3,10 @@ function out = MS_shannon(y,bin,depth)
 % http://small.eie.polyu.edu.hk/matlab/
 % a number 'depth' symbols from a 'bin'-symbol alphabet size
 
-if nargin<2 || isempty(bin)
+if nargin < 2 || isempty(bin)
     bin = 2; % two bins to discretize the time series, y
 end
-if nargin<3 || isempty(depth)
+if nargin < 3 || isempty(depth)
     depth = 3; % three-long strings
 end
 

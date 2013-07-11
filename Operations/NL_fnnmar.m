@@ -8,8 +8,7 @@ function out = NL_fnnmar(y,maxm,r,taum,th)
 % Ben Fulcher October 2009
 
 %% Preliminaries
-
-N = length(y);
+N = length(y); % length of the input time series
 
 % 1) maxm: the maximum embedding dimension
 if nargin < 2 || isempty(maxm)
@@ -31,15 +30,14 @@ if ischar(taum)
     elseif strcmp(taum,'ac')
         tau = CO_fzcac(y); % time-delay
     else
-        disp('Invalid time delay method. Exiting.')
-        return
-    end
-    % Don't want to be too large
-    if tau > N/10;
-        tau = floor(N/10);
+        error('Invalid time-delay method %s.',taum)
     end
 else % give a numeric answer
     tau = taum;
+end
+% Don't want tau to be too large
+if tau > N/10;
+    tau = floor(N/10);
 end
 
 % 4) Just output a scalar embedding dimension rather than statistics on the
@@ -49,12 +47,10 @@ if nargin < 5
 end
 
 % HERE'S WHERE THE ACTION HAPPENS:
-nn = fnn(y,maxm,tau,r,'silent'); % run Marwan's CRPToolbox code
+nn = fnn(y,maxm,tau,r,'silent'); % run Marwan's CRPToolbox false nearest neighbors code
 
 if isnan(nn);
-    % error message conveniently displayed to command line! Return fatal
-    % error...
-    return;
+    error('Error running Marwan''s CRPToolbox function fnn')
 end
 % plot(1:maxm,nn)
     
@@ -70,18 +66,10 @@ if isempty(th) % output summary statistics
     
     % fnn
     for i = 2:maxm
-        eval(['out.fnn' num2str(i) ' = nn(' num2str(i) ');']);
+        eval(sprintf('out.fnn%u = nn(%u);',i,i));
     end
-%     out.fnn2 = nn(2);
-%     out.fnn3 = nn(3);
-%     out.fnn4 = nn(4);
-%     out.fnn5 = nn(5);
-%     out.fnn6 = nn(6);
-%     out.fnn7 = nn(7);
-%     out.fnn8 = nn(8);
-%     out.fnn9 = nn(9);
-%     out.fnn10 = nn(10);
-    
+
+    % first time NN error goes below a set of thresholds
     out.m005 = find(nn < 0.05,1,'first');
     if isempty(out.m005), out.m005 = maxm+1; end
     
@@ -97,7 +85,9 @@ if isempty(th) % output summary statistics
 
 else % just want a scalar of embedding dimension as output
     out = find(nn < th,1,'first');
-    if isempty(out), out = maxm + 1; end
+    if isempty(out)
+        out = maxm + 1;
+    end
 end
 
 

@@ -13,7 +13,7 @@ N = length(y);
 
 %% Check Inputs
 % Number of nearest neighbours, NNR
-if nargin<2 || isempty(NNR)
+if nargin < 2 || isempty(NNR)
     NNR = 5;
 end
 if NNR>0 && NNR<1 % specify a proportion of time series length
@@ -21,7 +21,7 @@ if NNR>0 && NNR<1 % specify a proportion of time series length
 end
 
 % Maximum return time, maxT
-if nargin<3 || isempty(maxT)
+if nargin < 3 || isempty(maxT)
     maxT = 0.1;
 end
 if maxT>0 && maxT<=1 % specify a proportion
@@ -29,7 +29,7 @@ if maxT>0 && maxT<=1 % specify a proportion
 end
 
 % Theiler window, past
-if nargin<4 || isempty(past) 
+if nargin < 4 || isempty(past) 
     past = 10;
 end
 if past>0 && past<1 % specify a proportion
@@ -37,12 +37,12 @@ if past>0 && past<1 % specify a proportion
 end
 
 % Number of reference points
-if nargin<5 || isempty(Nref)
+if nargin < 5 || isempty(Nref)
     Nref = -1; % use all available points
 end
 
 % embed parameters
-if nargin<6 || isempty(embedparams)
+if nargin < 6 || isempty(embedparams)
     embedparams={'ac','cao'};
     disp('using default embedding using autocorrelation and cao')
 end

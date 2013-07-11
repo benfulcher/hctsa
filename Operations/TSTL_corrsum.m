@@ -19,45 +19,45 @@ function out = TSTL_corrsum(y,Nref,r,thwin,nbins,embedparams,dotwo)
 N = length(y); % length of time series
 
 % (1) Number of reference points, Nref
-if nargin<2 || isempty(Nref)
+if nargin < 2 || isempty(Nref)
     Nref = 500; % 500 points
 end
-if Nref<1 && Nref>0
+if Nref < 1 && Nref > 0
     Nref = round(N*Nref); % specify a proportion of time series length
 end
-if Nref>=N
+if Nref >= N
     Nref = -1; % Number of reference points capped at time series length
 end
 
 % (2) Maximum relative search radius, r
-if nargin<3 || isempty(r)
+if nargin < 3 || isempty(r)
     r = 0.05; % 5% of attractor radius
 end
 
 % (3) Remove spurious correlations of adjacent points, thwin
-if nargin<4 || isempty(thwin)
+if nargin < 4 || isempty(thwin)
     thwin = 10; % default window length
 end
 
 % (4) Number of bins, nbins
-if nargin<5 || isempty(nbins)
+if nargin < 5 || isempty(nbins)
     nbins = 20; % defulat number of bins
 end
 
 % (5) Set embedding parameters to defaults
-if nargin<6 || isempty(embedparams)
-    embedparams={'ac','cao'};
+if nargin < 6 || isempty(embedparams)
+    embedparams = {'ac','cao'};
 else
     if length(embedparams)~=2
         disp('given embedding parameters incorrectly formatted -- need {tau,m}')
     end
 end
 
-if nargin<7 || isempty(dotwo)
+if nargin < 7 || isempty(dotwo)
     dotwo = 1; % use corrsum rather than corrsum2
 end
 
-if Nref==-1 && dotwo==2
+if Nref == -1 && dotwo == 2
     % we need a *number* of pairs for corrsum2, round down from 50% of time series
     % length
     Nref = floor(N*0.5);
@@ -68,23 +68,20 @@ end
 s = benembed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-    disp('Embedding failed')
-    out = NaN;
-    return
-elseif length(data(s))<thwin
-    disp('Embedded time series too short to do a correlation sum')
-    out = NaN;
-    return
+    error('Embedding failed')
+elseif length(data(s)) < thwin
+    fprintf(1,'Embedded time series (N = %u, m = %u, tau = %u) too short to do a correlation sum\n',N,embedparams{1},embedparams{2})
+    out = NaN; return
 end
 
 %% Run
-me=[]; % error catch
-if dotwo==1 % use corrsum
+me = []; % error catch
+if dotwo == 1 % use corrsum
     try
         rs = corrsum(s,Nref,r,thwin,nbins);
     catch me % DEAL WITH ERROR MESSAGE BELOW
     end
-elseif dotwo==2 % use corrsum2
+elseif dotwo == 2 % use corrsum2
     try
         rs = corrsum2(s,Nref,r,thwin,nbins);
     catch me
@@ -115,7 +112,7 @@ lnCr = data(rs);
 %% remove any Infs in lnCr
 rgood = find(isfinite(lnCr));
 if isempty(rgood)
-    out=NaN; return
+    out = NaN; return
 end
 lnCr = lnCr(rgood);
 lnr = lnr(rgood);
@@ -133,10 +130,10 @@ out.meanlnCr = mean(lnCr);
 % fit linear to log-log plot (full range)
 enoughpoints=1;
 try
-    [a stats] = robustfit(lnr,lnCr);
+    [a, stats] = robustfit(lnr,lnCr);
 catch me
     if strcmp(me.message,'Not enough points to perform robust estimation.')
-        enoughpoints=0;
+        enoughpoints = 0;
     end
 end
 

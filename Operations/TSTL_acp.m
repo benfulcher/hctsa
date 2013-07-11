@@ -12,11 +12,21 @@ function out = TSTL_acp(y,tau,past,maxdelay,maxdim,nref)
 % indication of the shape
 % Ben Fulcher October 2009
 
-s = signal(y);
+try
+    s = signal(y);
+catch
+    error('Error running ''signal'' on the input time series -- have you installed TSTOOL?')
+end
+if ~strcmp(class(s),'signal')
+    error('Error making a signal class of the input time series')
+end
 N = length(y);
 
 %% Check inputs
 % (*) tau
+if nargin < 2
+    tau = 'ac'; % use first zero-crossing of autocorrelation function as default
+end
 if strcmp(tau,'mi')
     tau = CO_fmmi(y);
 elseif strcmp(tau,'ac')
@@ -58,16 +68,7 @@ if nref > 0 && nref < 1
 	nref = floor(nref*N); % specify a proportion of the time series length
 end
 
-try
-    acpf = data(acp(s,tau,past,maxdelay,maxdim,nref));
-catch emsg
-    if strcmp(emsg.message,'Average interpoint-distance in data set B seems to be zero');
-        out = NaN;
-        return
-    else
-		disp(['Unexpected error in TSTL_acp: ' emsg])
-	end
-end
+acpf = data(acp(s,tau,past,maxdelay,maxdim,nref));
 
 %% Get outputs
 % Now, the documentation is pretty vague, in fact does not mention at all
@@ -77,11 +78,9 @@ end
 % (size(acpf,1) = maxdelay+1)...
 % I propose a returning some measures here
 
-
 macpf = mean(acpf); % mean vector of length maxdim
 sacpf = std(acpf); % std vector of length maxdim
 iqracpf = iqr(acpf); % iqr vector of length maxdim
-
 
 % How does the mean crossprediction function decay with m?
 dmacpf = diff(macpf);
@@ -92,20 +91,20 @@ out.propdecmacpf = length(find(dmacpf<0))/length(dmacpf);
 for i = 1:maxdim-1
     % give proportion drop at each increase in m
     drophere = abs(macpf(i)/macpf(i+1)-1);
-    eval(['out.macpfdrop_' num2str(i) ' = drophere;']);
+    eval(sprintf('out.macpfdrop_%u = drophere;',i));
 end
 
 % output statistics on the acp at each dimension
 for i = 1:maxdim
     % mean acp at each dimension
-    eval(['out.macpf_' num2str(i) ' = macpf(' num2str(i) ');']);
+    eval(sprintf('out.macpf_%u = macpf(%u);',i,i));
     % std of acp at each dimension
-    eval(['out.sacpf_' num2str(i) ' = sacpf(' num2str(i) ');']);
+    eval(sprintf('out.sacpf_%u = sacpf(%u);',i,i));
     % iqr of acp at each dimension
-    eval(['out.iqracpf_' num2str(i) ' = iqracpf(' num2str(i) ');']);
+    eval(sprintf('out.iqracpf_%u = iqracpf(%u);',i,i));
     % AC1 of acp at each dimension
     ac1 = abs(CO_autocorr(acpf(:,i),1));
-    eval(['out.ac1_acpf_' num2str(i) ' = ac1;']);
+    eval(sprintf('out.ac1_acpf_%u = ac1;',i));
 end
 
 % plot(macpf)

@@ -45,9 +45,13 @@ delete(fn) % remove the temporary time-series data file
 %  * extension .stat: This file shows the current status of the estimate.
 delete([fn '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
 
-if isempty(res) % error calling the function
-    delete([fn '.c2']); delete([fn '.d2']); delete([fn '.h2']);
-    error('Call to TISEAN function ''d2'' failed')
+if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
+    delete([fn '.c2']); delete([fn '.d2']); delete([fn '.h2']); % (this is probably not necessary)
+    if isempty(res)
+        error('Call to TISEAN function ''d2'' failed.')
+    else
+        error('Call to TISEAN function ''d2'' failed: %s',res)
+    end
 end
 
 % this creates files in the local directory:
@@ -85,9 +89,8 @@ s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('writing to stdout',s);
 s = s(wi+1:end);
 if isempty(s) % TISEAN did produce valid output
-    fprintf(1,'%s\n',res)
     delete([fn,'.c2']); delete([fn,'.d2']); delete([fn,'.h2']) % just in case these files were generated...
-    error('TISEAN d2 produced invalid output')
+    error('TISEAN d2 produced invalid output: %s',res)
 end
 try
     c2gdat = SUB_readTISEANout(s,maxm,'#m=',3);
@@ -98,7 +101,6 @@ end
     
 % c2gdat contains r (1), the Gaussian kernel correlation integral (2), and its
 % logarithmic derivative with respect to r (3)
-
 
 % ----- TAKENS MAXIMUM LIKELIHOOD ESTIMATOR FROM CORRELATION SUMS ----
 % The integral is computed from the discrete values of C(r) by assuming an
@@ -357,7 +359,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         % nc number of columns in string
         
 %         w = zeros(maxm+1,1);
-%         if nargin<3 % use default blocker
+%         if nargin < 3 % use default blocker
 %             for ii = 1:maxm
 %                 w(ii)=strmatch(['#dim= ' num2str(ii)],s,'exact');
 %             end
@@ -517,11 +519,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             maxi = min([maxi max(thecell{ii}(:,1))]);
         end
         for ii = 1:nn % rescales each dimension so all share common scale
-<<<<<<< Updated upstream
             thecell{ii} = thecell{ii}(thecell{ii}(:,1) >= mini & thecell{ii}(:,1) <= maxi,:);
-=======
-            thecell{ii} = thecell{ii}(thecell{ii}(:,1)>=mini & thecell{ii}(:,1)<=maxi,:);
->>>>>>> Stashed changes
         end
         
         
@@ -544,10 +542,6 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             try thematrix(ii,:) = thecell{ii}(:,thecolumn);
             catch
                 return
-<<<<<<< Updated upstream
-=======
-                % keyboard
->>>>>>> Stashed changes
             end
         end
         

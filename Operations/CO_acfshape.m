@@ -76,10 +76,11 @@ out.actau = CO_autocorr(acf,CO_fzcac(acf));
 if Nac > 3; % Need at least four points to fit exponential
     
     %% Fit exponential decay to absolute ACF:
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.5]);
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.5]);
     f = fittype('a*exp(b*x)','options',s);
     b = 1;
-    try [c,gof] = fit((1:Nac)',abs(acf),f);
+    try
+        [c, gof] = fit((1:Nac)',abs(acf),f);
     catch
         b = 0;
     end

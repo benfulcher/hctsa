@@ -10,7 +10,7 @@ function out = DN_M_kscomp(x,pinkbeanie)
 xstep = std(x)/100; % set a step size
 switch pinkbeanie
     case 'norm'
-        [a b] = normfit(x);
+        [a, b] = normfit(x);
 		peaky = normpdf(a,a,b); thresh=peaky/100; % stop when gets to 1/100 of peak value
 		xf(1) = mean(x); ange = 10;
         while ange > thresh, xf(1) = xf(1)-xstep; ange = normpdf(xf(1),a,b); end

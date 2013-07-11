@@ -1,5 +1,5 @@
 function out = MF_arfit(y,pmin,pmax,selector)
-% Uses MATLAB code from ARfit
+% Uses MATLAB code from ARfit to fit an AR model and return statistics about it.
 % http://www.gps.caltech.edu/~tapio/arfit/
 % Adapted by Ben Fulcher 28/1/2010
 
@@ -17,6 +17,11 @@ if nargin < 4 || isempty(selector)
      % Use Schwartz's Bayesian Criterion to choose optimum model order
 end
 
+% Check the ARfit toolbox is installed and in the Matlab path
+myarfit = which('arfit');
+if isempty(myarfit)
+    error('Cannot find the function ''arfit''. Have you installed the ARFIT toolbox?')
+end
 
 %% (I) Fit AR model
 % Run the code with no intercept vector (all input data should be
@@ -25,9 +30,8 @@ end
 
 
 % (0) First, some definitions
-ps = pmin:pmax;
+ps = (pmin:pmax);
 popt = length(Aest);
-
 
 % (1) Intercept west
 % west = 0 -- as specified
@@ -38,23 +42,16 @@ popt = length(Aest);
 % somewhat problematic since will depend on order fitted. We can try
 % returning the first 6, and 0s if don't exist
 out.A1 = Aest(1);
-if popt>=2, out.A2 = Aest(2);
-else out.A2 = 0; % it's as if the next order coefficient were zero
-end
-if popt>=3, out.A3 = Aest(3);
-else out.A3 = 0; % it's as if the higher order coefficients are all zero
-end
-if popt>=4, out.A4 = Aest(4);
-else out.A4 = 0; % it's as if the higher order coefficients are all zero
-end
-if popt>=5, out.A5 = Aest(5);
-else out.A5 = 0; % it's as if the higher order coefficients are all zero
-end
-if popt>=6, out.A6 = Aest(6);
-else out.A6 = 0; % it's as if the higher order coefficients are all zero
+for i = 2:6
+    if popt >= i
+        eval(sprintf('out.A%u = Aest(%u);',i,i))
+    else
+        % it's as if the higher order coefficients are all zero
+        eval(sprintf('out.A%u = 0;',i,i))
+    end
 end
 
-% (ii) Summaries of coefficients
+% (ii) Summary statistics on the coefficients
 out.maxA = max(Aest);
 out.minA = min(Aest);
 out.meanA = mean(Aest);
@@ -68,12 +65,11 @@ out.sumsqA = sum(Aest.^2);
 % magnitude.
 out.C = Cest;
 
-
 % (4) Schwartz's Bayesian Criterion, SBC
 % There will be a value for each model order from pmin:pmax
 % (i) Return all
 for i = 1:length(ps)
-    eval(['out.sbc_' num2str(ps(i)) ' = SBC(' num2str(i) ');']);
+    eval(sprintf('out.sbc_%u = SBC(%u);',ps(i),i));
 end
 
 % (ii) Return minimum
@@ -82,22 +78,22 @@ out.popt_sbc = find(SBC == min(SBC),1,'first');
 
 % (iii) How convincing is the minimum?
 % adjacent values
-if out.popt_sbc>1 && out.popt_sbc<length(SBC);
+if out.popt_sbc > 1 && out.popt_sbc < length(SBC);
     meanaround = mean(abs([SBC(out.popt_sbc-1),SBC(out.popt_sbc+1)]));
 elseif out.popt_sbc == 1
     meanaround = abs(SBC(out.popt_sbc+1)); % just the next value
 elseif out.popt_sbc == length(SBC) % really an else
     meanaround = abs(SBC(out.popt_sbc-1)); % just the previous value
 else
-    disp('ERRORR!'); return
+    error('Weird error!');
 end
 out.aroundmin_sbc = abs(min(SBC))/meanaround;
 
 
 % (5) Aikake's Final Prediction Error (FPE)
 % (i) Return all
-for i=1:length(ps)
-    eval(['out.fpe_' num2str(ps(i)) ' = FPE(' num2str(i) ');']);
+for i = 1:length(ps)
+    eval(sprintf('out.fpe_%u = FPE(%u);',ps(i),i));
 end
 % (ii) Return minimum
 out.minfpe = min(FPE);
@@ -105,17 +101,16 @@ out.popt_fpe = find(FPE == min(FPE),1,'first');
 
 % (iii) How convincing is the minimum?
 % adjacent values
-if out.popt_fpe>1 && out.popt_fpe<length(FPE);
+if out.popt_fpe > 1 && out.popt_fpe < length(FPE);
     meanaround = mean(abs([FPE(out.popt_fpe-1),FPE(out.popt_fpe+1)]));
 elseif out.popt_fpe == 1
     meanaround = abs(FPE(out.popt_fpe+1)); % just the next value
 elseif out.popt_fpe == length(FPE) % really an else
     meanaround = abs(FPE(out.popt_fpe-1));
 else
-    disp('ERRRRORRRR'); return
+    error('Weird error!!');
 end
 out.aroundmin_fpe = abs(min(FPE))/meanaround;
-
 
 
 %% (II) Test Residuals
@@ -129,7 +124,7 @@ out.res_siglev = siglev;
 % (2) Correlation test of residuals
 % error margins are within 1.96/sqrt(N);
 out.res_ac1 = CO_autocorr(res,1);
-out.res_ac1_norm = CO_autocorr(res,1)/sqrt(N); % normalized by sqrt(N)
+out.res_ac1_norm = CO_autocorr(res,1)/sqrt(N); % normalize by sqrt(N)
 
 % Calculate correlations up to 20, return how many exceed significance threshold
 acf = CO_autocorr(res,1:20);

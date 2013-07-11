@@ -836,9 +836,8 @@ EN_TSentropy(y,4)	TSent_4
 EN_TSentropy(y,4.5)	TSent_45
 EN_TSentropy(y,5)	TSent_5
 EN_TSentropy(y,5.5)	TSent_55
-DF_mlefits(x,1,1)	gfit_mu
-DF_mlefits(x,1,2)	gfit_std
-DF_mlefits(y,2,1)	geofit
+DF_mlefits(x,1)  DF_mle_gaussfit
+DF_mlefits(y,2,1)  DF_mle_geofit
 DF_nlogL_norm(y)	nlogL_norm
 DN_kssimp(x,'numpeaks')	DN_kssimpnumpeaks
 DN_kssimp(x,'entropy')	ksentraw

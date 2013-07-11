@@ -26,7 +26,7 @@ function h = PN_entropy(vec1)
 %
 
 %% BEN -- REMOVED THIS ERROR CHECKING, I'D PREFER THE ERROR
-% if nargin<1,
+% if nargin < 1,
 % 
 %   disp('Usage: h = entropy(vec1).');
 %   h = -1;

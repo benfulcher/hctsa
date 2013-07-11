@@ -9,7 +9,7 @@ function out = ML_step_detection(y,method,params)
 
 N = length(y);
 
-if nargin<2 || isempty(method)
+if nargin < 2 || isempty(method)
     disp('Using the Kalafut-Visscher method by default')
     method = 'kv';
 end
@@ -50,7 +50,7 @@ switch method
         %  x - Step-filtered output signal
         
         % Set defaults, params should be [K,M,p]
-        if nargin<3
+        if nargin < 3
             params = [];
         end
         if length(params)>=1, K = params(1);
@@ -100,7 +100,7 @@ switch method
         %              solution x = mean(y).
         
         % Set defaults, params should be [lambda]
-        if nargin<3
+        if nargin < 3
             params = [];
         end
         if length(params)>=1, lambda = params(1);

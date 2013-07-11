@@ -17,12 +17,12 @@ N = length(y); % length of time series
 s = signal(y); % convert to signal object for TSTOOL
 
 % (1) Maximum dimension, maxdim
-if nargin<2 || isempty(maxdim)
+if nargin < 2 || isempty(maxdim)
     maxdim=10; % default maxdim is 10
 end
 
 % (2) Time delay, tau
-if nargin<3 || isempty(tau)
+if nargin < 3 || isempty(tau)
     tau='ac'; % choose from first zero crossing of ACF
 end
 if ischar(tau) % determine by some other method
@@ -35,19 +35,19 @@ if ischar(tau) % determine by some other method
 end
 
 % (3) Number of nearest neighbours, NNR
-if nargin<4 || isempty(NNR)
+if nargin < 4 || isempty(NNR)
     NNR = 3; % default to three nearest neighbours
 end
 
 % (4) Number of reference points, Nref
-if nargin<5 || isempty(Nref)
+if nargin < 5 || isempty(Nref)
     Nref = -1; % default: use all points
 end
 if Nref<1 && Nref>0 % specify a fraction of data size
     Nref = round(N*Nref);
 end
 
-if nargin<6
+if nargin < 6
     justanum=[];
 end
 

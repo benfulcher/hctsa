@@ -69,7 +69,7 @@ elseif doremove == 1
     dowhating = 'removing';
     dowhat = remove;
 else
-    error('Third input must be (0==clear), or (1==remove)')
+    error('Third input must be (0 == clear), or (1 == remove)')
 end
 
 % Check what to clear

@@ -14,36 +14,47 @@ function out = TISEAN_nstat_z(y,nseg,embedparams)
 
 % Ben Fulcher 17/11/2009
 
+if nargin < 1
+    error('Input a time series')
+end
+
+if nargin < 2
+    nseg = 5; % divide the data into 5 segments by default
+end
+
 %% Check Inputs / Set defaults
 if nargin < 3
     embedparams = {1,3};
-    disp('Using default embedding using tau=1 and m=3')
+    fprintf(1,'Using default embedding using tau = 1 and m = 3\n')
 end
 tm = benembed(y,embedparams{1},embedparams{2},2);
 
 %% Write the file
-tnow = datestr(now, 'yyyymmdd_HHMMSS_FFF');
+tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
 % to the millisecond (only get double-write error for same function called in same millisecond
-fn = ['tisean_temp_nstat_z_' tnow '.dat'];
+fn = sprintf('tisean_temp_nstat_z_%s.dat',tnow);
 dlmwrite(fn,y);
-disp(['Just written temporary file ' fn ' for TISEAN'])
+fprintf(1,'Just written temporary file %s for TISEAN\n',fn)
 
 %% Do the calculation
-if length(y)/tm(1) < nseg*8
+N = length(y); % length of the time series
+if N/tm(1) < nseg*8 % heuristic
     % it may be more tm(1) itself rather than compared to nseg...?
-    disp('time delay too large for time series length');
+    fprintf(1,'Time delay tau = %u too large for time series length, N = %u\n with %u segments',tm(1),N,nseg);
     delete(fn) % remove the temporary file fn
     out = NaN; return
 end
+
 % disp(['H:\bin\','stp -d' num2str(tm(1)) ' -m' num2str(tm(2)) ...
 %                   ' -%' num2str(flevel) ' -t' num2str(tsteps) ' ' fn]);
-[pop,res] = system(['nstat_z -#' num2str(nseg) ' -d' num2str(tm(1)) ' -m' num2str(tm(2)) ' ' fn]);
+[~, res] = system(sprintf('nstat_z -#%u -d%u -m%u %s',nseg,tm(1),tm(2),fn));
+% [~, res] = system(sprintf('nstat_z -#' num2str(nseg) ' -d' num2str(tm(1)) ' -m' num2str(tm(2)) ' ' fn]);
 delete(fn) % remove the temporary file fn
 if isempty(res), error('Call to TISEAN failed. Exiting'), end
 
 
 %% Read the input
-s = textscan(res,'%[^\n]'); s=s{1};
+s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('Writing to stdout',s);
 if isempty(wi)
     error('TISEAN routine nstata_z didn''t return what I expected...');
@@ -127,7 +138,6 @@ out.rangeeig = range(eigs); % range of real parts of eigenvalues
 out.stdeig = std(eigs);
 out.mineig = min(eigs);
 out.maxeig = max(eigs);
-
 
 
 end

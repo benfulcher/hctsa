@@ -4,10 +4,10 @@ function out = MS_complexity(x,n,preproc)
 % http://small.eie.polyu.edu.hk/matlab/
 % Ben Fulcher 19/2/2010
 
-if nargin<2 || isempty(n)
+if nargin < 2 || isempty(n)
     n=2;
 end
-if nargin<3
+if nargin < 3
     preproc = [];
 end
 

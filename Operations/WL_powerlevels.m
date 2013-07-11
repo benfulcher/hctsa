@@ -2,24 +2,25 @@ function out = WL_powerlevels(y, wname, maxlevel)
 % Compares the detail coefficients at each level
 % Ben Fulcher 23/1/2010
 
+doplot = 0; % can plot outputs
+
 %% Check Inputs
 N = length(y);
 
-if nargin<2 || isempty(wname)
+if nargin < 2 || isempty(wname)
     wname = 'db3'; % default wavelet
 end
-if nargin<3 || isempty(maxlevel)
+if nargin < 3 || isempty(maxlevel)
    maxlevel = 20; % maximum wavelet decomposition level
 end
 if strcmp(maxlevel,'max')
     maxlevel = wmaxlev(N,wname);
 end
 
-if wmaxlev(N,wname) < maxlevel
-    disp('Chosen level is too large for this wavelet on this signal');
+if wmaxlev(N, wname) < maxlevel
+    fprintf(1,'Chosen wavelet level is too large for the %s wavelet for this signal of length N = %u\n',wname,N);
     maxlevel = wmaxlev(N,wname);
-    disp(['Using ' num2str(maxlevel) ' instead'])
-%     out = NaN; return
+    fprintf(1,'Using a wavelet level of %u instead.\n',maxlevel)
 end
 
 
@@ -28,10 +29,10 @@ means = zeros(maxlevel,1); % mean detail coefficient magnitude at each level
 medians = zeros(maxlevel,1); % median detail coefficient magnitude at each level
 maxs = zeros(maxlevel,1); % max detail coefficient magnitude at each level
 
-for k=1:maxlevel
+for k = 1:maxlevel
     level = k;
     
-    [c,l] = wavedec(y,level,wname);
+    [c, l] = wavedec(y,level,wname);
     % Reconstruct detail at this level
     det = wrcoef('d',c,l,wname,level);
     
@@ -42,15 +43,16 @@ end
 
 %% Plot the bad boy
 
-% subplot(5,1,1:2); title('signal')
-% plot(y);
-% subplot(5,1,3);title('means');
-% plot(means)
-% subplot(5,1,4);title('medians');
-% plot(medians)
-% subplot(5,1,5);title('maxs');
-% plot(maxs);
-% keyboard
+if doplot
+    subplot(5,1,1:2); title('signal')
+    plot(y);
+    subplot(5,1,3);title('means');
+    plot(means)
+    subplot(5,1,4);title('medians');
+    plot(medians)
+    subplot(5,1,5);title('maxs');
+    plot(maxs);
+end
 
 %% Return statistics on detail coefficients
 % Sort
@@ -69,9 +71,9 @@ out.std_median = std(medians);
 out.std_max = std(maxs);
 
 % At what level is the maximum
-out.wheremax_mean = find(means==means_s(1));
-out.wheremax_median = find(medians==medians_s(1));
-out.wheremax_max = find(maxs==maxs_s(1));
+out.wheremax_mean = find(means == means_s(1));
+out.wheremax_median = find(medians == medians_s(1));
+out.wheremax_max = find(maxs == maxs_s(1));
 
 % Size of maximum (relative to next maximum)
 out.max1on2_mean = means_s(1)/means_s(2);
@@ -92,10 +94,11 @@ out.corrcoef_max_medians = r(1,2);
     function meisgorilla = SUB_slosr(xx)
         maxlevel = length(xx);
         slosr = zeros(maxlevel-2,1);
-        for i=2:maxlevel-1
+        for i = 2:maxlevel-1
             slosr(i-1) = sum(xx(1:i-1))/sum(xx(i+1:end));
         end
         absm1 = abs(slosr-1); % how close to 1 (the same sum on either side) each is
-        meisgorilla = find(absm1==min(absm1),1,'first')+1;
+        meisgorilla = find(absm1 == min(absm1),1,'first') + 1;
     end
+    
 end

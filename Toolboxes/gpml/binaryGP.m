@@ -69,7 +69,7 @@ function [out1, out2, out3, out4, alpha, sW, L] = binaryGP(hyper, approx, covfun
 %
 % Copyright (c) 2007 Carl Edward Rasmussen and Hannes Nickisch, 2007-06-25.
 
-if nargin<6 || nargin>7
+if nargin < 6 || nargin>7
   disp('Usage: [nlZ, dnlZ  ] = binaryGP(hyper,approx,covfunc,lik,x,y);')
   disp('   or: [p,mu,s2,nlZ] = binaryGP(hyper,approx,covfunc,lik,x,y,xstar);')
   return

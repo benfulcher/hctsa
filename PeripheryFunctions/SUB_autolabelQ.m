@@ -22,11 +22,11 @@ function gi = SUB_autolabelQ(kwgs,metorts,norcl,kworlab,subset)
 % to label (in that index system)
 
 %% (0) Check inputs
-if nargin<1 || isempty(kwgs), disp('you must specify labels'); return; end
-if nargin<2 || isempty(metorts), disp('Assuming time series'); metorts = 'ts'; end
-if nargin<3 || isempty(norcl), disp('Assuming you want to retrieve from clustered index system'); norcl = 'cl'; end
-if nargin<4 || isempty(kworlab), kworlab = 'kw'; end % look up keywords by default
-if nargin<5, subset = []; end % don't subset by default
+if nargin < 1 || isempty(kwgs), disp('you must specify labels'); return; end
+if nargin < 2 || isempty(metorts), disp('Assuming time series'); metorts = 'ts'; end
+if nargin < 3 || isempty(norcl), disp('Assuming you want to retrieve from clustered index system'); norcl = 'cl'; end
+if nargin < 4 || isempty(kworlab), kworlab = 'kw'; end % look up keywords by default
+if nargin < 5, subset = []; end % don't subset by default
 
 if ~ismember(metorts,{'mets','ts'})
     disp('SUB_autolabel: Specify ''mets'' or ''ts''. Exiting.'), return

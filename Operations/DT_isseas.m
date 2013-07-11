@@ -11,7 +11,6 @@ function out = DT_isseas(y)
 if size(y,2) > size(y,1)
     y = y';
 end
-y = benzscore(y); % input time series should be z-scored for a fair comparison
 N = length(y); % length of input time series
 r = (1:N)'; % range over which to fit
 

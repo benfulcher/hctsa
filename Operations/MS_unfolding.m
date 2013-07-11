@@ -20,15 +20,15 @@ function [d,nfnn] = MS_unfolding(y,th,de,tau)
 %ensmall@polyu.edu.hk
 %
 
-if nargin<2,
+if nargin < 2,
   th=0.01;
 %   disp(['th = ',num2str(th)]);
 end
-if nargin<3,
+if nargin < 3,
   de=1:10;
 %   disp(['de = ',int2str(de(1)),':',int2str(de(end))]);
 end
-if nargin<4,
+if nargin < 4,
     tau = 1;
 %   tau=firstzero(y);
 %   disp(['tau = ',int2str(tau)]);

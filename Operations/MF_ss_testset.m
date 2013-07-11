@@ -14,7 +14,7 @@ N = length(y); % length of time series
 
 % (1) y: column vector time series
 if nargin < 1 || isempty(y)
-    disp('Give us a time series, ya mug'); return
+    error('No input time series provided');
 end
 
 % Convert y to time series object for the System Identification Toolbox
@@ -58,11 +58,14 @@ switch model
         if strcmp(ord,'best')
             % Use arfit software to retrieve the optimum ar order by some
             % criterion (Schwartz's Bayesian Criterion, SBC)
-            [west, Aest, Cest, SBC, FPE, th] = arfit(y.y, 1, 10, 'sbc', 'zero');
+            try
+                [west, Aest, Cest, SBC, FPE, th] = arfit(y.y, 1, 10, 'sbc', 'zero');
+            catch
+                error('Error running ''arfit'' -- have you installed the ARFIT toolbox?')
+            end
             ord = length(Aest);
         end
         m = ar(y,ord);
-%     case 'arfit' % fit ar model using the ARFIT package
     case 'ss' % fit a state space model of specified order
         m = n4sid(y,ord);
     case 'arma' % fit an arma model of specified orders
@@ -92,6 +95,7 @@ switch howtosubset
         spts = randi(N-l+1,npred,1); % npred starting points
         r(:,1) = spts;
         r(:,2) = spts+l-1;
+        
     case 'uniform'
         if length(samplep)==1 % size will depend on number of unique subsegments
             spts = round(linspace(0,N,npred+1)); % npred+1 boundaries = npred portions
@@ -110,17 +114,17 @@ switch howtosubset
 end
 
 % quick check that ranges are valid
-if any(r(:,1)>=r(:,2))
-    disp('invalid settings'); return
+if any(r(:,1) >= r(:,2))
+    error('Invalid settings');
 end
 
 %% Do the series of predictions
-for i=1:npred
+for i = 1:npred
     % retrieve the test set
 
     ytest = y(r(i,1):r(i,2));
     
-    % Compute step-ahead predictions
+    % Compute step-ahead predictions using System Identification Toolbox:
     yp = predict(m, ytest, steps); % across test set using model, m,
                                    % fitted to entire data set
 

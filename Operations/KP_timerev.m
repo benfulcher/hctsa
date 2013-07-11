@@ -13,6 +13,6 @@ a = foo(:,1);
 b = foo(:,2);
 c = foo(:,3);
 
-res = mean( a.*a.*b - b.*c.*c);
+res = mean(a.*a.*b - b.*c.*c);
 
 end

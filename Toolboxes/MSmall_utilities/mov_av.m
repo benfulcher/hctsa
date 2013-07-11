@@ -9,7 +9,7 @@ function x=mov_av(y,k);
 %3/3/2005
 %ensmall@polyu.edu.hk
 
-if nargin<2
+if nargin < 2
 	k=5;
 end;
 

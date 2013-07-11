@@ -14,34 +14,34 @@ N = length(y); % length of time series
 %% Inputs
 
 % (1) y: column vector time series
-if nargin<1 || isempty(y)
+if nargin < 1 || isempty(y)
     disp('Give us a time series, ya mug'); return
 end
 % Convert y to time series object
 y = iddata(y,[],1);
 
 % (2) model, the type of model to fit
-if nargin<2 || isempty(model)
+if nargin < 2 || isempty(model)
     model = 'ss'; % fit a state space model by default
 end
     
 % (3) order of model, order
-if nargin<3 || isempty(order)
+if nargin < 3 || isempty(order)
     order = 2; % model of order 2 by default. Not very good defaults.
 end
 
 % (4) How to choose subsets from the time series, howtosubset
-if nargin<4 || isempty(howtosubset)
+if nargin < 4 || isempty(howtosubset)
     howtosubset = 'rand'; % takes segments randomly from time series
 end
 
 % (5) Sampling parameters, samplep
-if nargin<5 || isempty(samplep)
+if nargin < 5 || isempty(samplep)
     samplep = [20,0.1]; % sample 20 times with 10%-length subsegments
 end
 
 % % (6) Predict some number of steps ahead in test sets, steps
-% if nargin<6 || isempty(steps)
+% if nargin < 6 || isempty(steps)
 %     steps = 2; % default: predict 2 steps ahead in test set
 % end
 

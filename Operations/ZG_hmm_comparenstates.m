@@ -17,12 +17,12 @@ function out = ZG_hmm_comparenstates(y,trainp,nstater)
 %% Check Inputs
 N = length(y); % number of samples in time series
 
-if nargin<2 || isempty(trainp)
+if nargin < 2 || isempty(trainp)
     disp('training on 60% of the data by default')
     trainp = 0.6; % train on 60% of the data
 end
 
-if nargin<3 || isempty(nstater)
+if nargin < 3 || isempty(nstater)
     disp('Using 2--4 states by default')
     nstater = 2:4; % use 2:4 states
 end

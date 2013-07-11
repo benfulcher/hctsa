@@ -16,7 +16,7 @@ N = length(y); % length of time series
 s = signal(y);
 
 % (1) Maximum delay, maxdelay
-if nargin<2 || isempty(maxdelay)
+if nargin < 2 || isempty(maxdelay)
     maxdelay = 0.2; % 1/5 the length of the time series
 end
 if maxdelay<1 && maxdelay>0

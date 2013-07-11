@@ -2,13 +2,13 @@ function cmapout = bengetcmap(whichcmap,ng,cellout,flipmeout)
 % Ben Fulcher 5/11/2010
 % http://colorbrewer2.org/
 
-if nargin<2 || isempty(ng)
+if nargin < 2 || isempty(ng)
     ng = 6;
 end
-if nargin<3 || isempty(cellout)
+if nargin < 3 || isempty(cellout)
     cellout = 0; % output as matrix for colourmap instead
 end
-if nargin<4 || isempty(flipmeout)
+if nargin < 4 || isempty(flipmeout)
     flipmeout = 0; % flips order of output
 end
 

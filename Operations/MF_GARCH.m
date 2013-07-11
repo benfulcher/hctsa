@@ -29,7 +29,7 @@ if nargin < 2 || isempty(preproc)
 end
 
 % % Preestimation settings: preest
-% if nargin<3 || isempty(preest)
+% if nargin < 3 || isempty(preest)
 %     preest = 'yep'; % do pre-estimation
 % end
 

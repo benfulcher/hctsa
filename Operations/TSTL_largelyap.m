@@ -24,7 +24,7 @@ if Nref<1 && Nref>0
 end
 
 % (2) maxtstep: maximum prediction length
-if nargin<3 || isempty(maxtstep)
+if nargin < 3 || isempty(maxtstep)
     maxtstep = 0.1; % 10% length of time series
 end
 if maxtstep<1 && maxtstep>0
@@ -38,7 +38,7 @@ if maxtstep>0.5*N;
 end
 
 % (3) past/theiler window
-if nargin<4 || isempty(past)
+if nargin < 4 || isempty(past)
     past = 40;
 end
 if past<1 && past>0
@@ -46,12 +46,12 @@ if past<1 && past>0
 end
 
 % (4) Number of neighest neighbours
-if nargin<5 || isempty(NNR)
+if nargin < 5 || isempty(NNR)
     NNR=3;
 end
 
 % (5) Embedding parameters, embedparams
-if nargin<6 || isempty(embedparams)
+if nargin < 6 || isempty(embedparams)
     embedparams={'ac','cao'};
     disp('using default embedding using autocorrelation and cao')
 else

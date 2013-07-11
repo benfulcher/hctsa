@@ -1,5 +1,5 @@
 function out = DN_quant(y,p)
-% Calculates the quantile, pure and simple
+% Outputs the quantile of the set of values in y
 % Uses the quantile function from Matlab's Statistics Toolbox
 % Ben Fulcher 5/8/09
 

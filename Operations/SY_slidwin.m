@@ -5,7 +5,7 @@ function out = SY_slidwin(y,windowstat,acrosswindowstat,nseg,nmov)
 
 wlen = floor(length(y)/nseg); % size of window
 inc = floor(wlen/nmov); % increment to move at each step
-if inc==0; inc = 1; end
+if inc == 0; inc = 1; end
 
 nsteps = (floor((length(y)-wlen)/inc)+1);
 qs = zeros(nsteps,1);
@@ -57,10 +57,6 @@ switch acrosswindowstat
         out = EN_ApEn(qs,1,0.2); % ApEn of the sliding window measures
     case 'ent'
         out = DN_kssimp(qs,'entropy'); % distributional entropy
-%     case 'lbq' % lbq test for randomness
-        % NEVER HAVE ECONOMETRICS TOOLBOX -- REMOVE THIS
-%         [h p] = lbqtest(y);
-%         out=p;
 end
 
 end

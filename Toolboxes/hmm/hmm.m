@@ -22,10 +22,10 @@ function [Mu,Cov,P,Pi,LL]=hmm(X,T,K,cyc,tol)
 p=length(X(1,:));
 N=length(X(:,1));
 
-if nargin<5   tol=0.0001; end;
-if nargin<4   cyc=100; end;
-if nargin<3   K=2; end;
-if nargin<2   T=N; end;
+if nargin < 5   tol=0.0001; end;
+if nargin < 4   cyc=100; end;
+if nargin < 3   K=2; end;
+if nargin < 2   T=N; end;
 
 if (rem(N,T)~=0)
   disp('Error: Data matrix length must be multiple of sequence length T');

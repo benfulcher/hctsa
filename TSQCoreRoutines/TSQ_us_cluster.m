@@ -14,22 +14,22 @@ function [ackwgs,acgi,Fcl] = TSQ_us_cluster(norcl,cmeth,cparams,metorts)
 % 1) norcl: can be the data matrix, or a string:
 %                  'norm' -- loads TS_loc_N,
 %                  'cl'   -- loads TS_loc_cl,
-if nargin<1,
+if nargin < 1,
     norcl = ''; % not necessary
 end
 
 % 2) cmeth: a string specifying the clustering method to use
-if nargin<2 || isempty(cmeth),
+if nargin < 2 || isempty(cmeth),
     cmeth = 'linkage';
 end
 
 % 3) cparams: specify the parameters for the clustering method
-if nargin<3, cparams = {}; end % defaults specified within each method
+if nargin < 3, cparams = {}; end % defaults specified within each method
 
 
 % 4) metorts: whether to do for metrics ('mets') or time series ('ts')
 %             only meaningful when norcl is a string.
-if nargin<4 || isempty(metorts), metorts = 'ts'; end
+if nargin < 4 || isempty(metorts), metorts = 'ts'; end
 
 
 %% Get the data

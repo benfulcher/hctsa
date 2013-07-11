@@ -836,9 +836,9 @@ TSent_4	TSent_4	entropy,TSent
 TSent_45	TSent_45	entropy,TSent
 TSent_5	TSent_5	entropy,TSent
 TSent_55	TSent_55	entropy,TSent
-gfit_mu	gfit_mu	distribution,location,fit,raw,locdep
-gfit_std	gfit_std	distribution,spread,fit,raw,spreaddep
-geofit	geofit	distribution,fit
+DF_mle_gaussfit.mean	DF_mle_gaussfit_mu	distribution,location,fit,raw,locdep
+DF_mle_gaussfit.std	DF_mle_gaussfit_std	distribution,spread,fit,raw,spreaddep
+DF_mle_geofit	DF_mle_geofit	distribution,fit
 nlogL_norm	nlogL_norm	distribution,gof,lengthdep
 DN_kssimpnumpeaks	DN_kssimpnumpeaks	distribution,ksdensity,numpeaks,raw,spreaddep
 ksentraw	ksentraw	distribution,ksdensity,entropy,raw,spreaddep

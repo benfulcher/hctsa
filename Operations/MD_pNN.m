@@ -16,10 +16,8 @@ N = length(x); % length of the time series
 Dx = abs(diffx) * 1000; % assume milliseconds as for RR intervals
 pnns = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 for i = 1:length(pnns)
-    gaga = sum(Dx > pnns(i))/(N-1);
-    eval(['out.pnn' num2str(pnns(i)) ' =  gaga;'])
+    thispnn = sum(Dx > pnns(i)) / (N-1);
+    eval(sprintf('out.pnn%u =  thispnn;', pnns(i)))
 end
-
-
 
 end

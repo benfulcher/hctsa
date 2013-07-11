@@ -6,17 +6,17 @@ function out = TSTL_acf(y)
 % Ben Fulcher October 2009
 
 % first 50 autocorrelations
-try
-    co_fft = data(acf(signal(y),100));
-catch emsg
-    if strcmp(emsg.message,'Matrix dimensions must agree.')
-        out = NaN; return
-    end
-end
+% try
+co_fft = data(acf(signal(y),100));
+% catch emsg
+%     if strcmp(emsg.message,'Matrix dimensions must agree.')
+%         out = NaN; return
+%     end
+% end
 
-n = length(co_fft);
-co_ben = zeros(n,1);
-for i = 1:n
+nlags = length(co_fft);
+co_ben = zeros(nlags,1);
+for i = 1:nlags
     co_ben(i) = CO_autocorr(y,i-1);
 end
 

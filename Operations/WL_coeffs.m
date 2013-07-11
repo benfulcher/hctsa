@@ -4,10 +4,10 @@ function out = WL_coeffs(y, wname, level)
 %% Check Inputs
 N = length(y);
 
-if nargin<2 || isempty(wname)
+if nargin < 2 || isempty(wname)
     wname = 'db3'; % default wavelet
 end
-if nargin<3 || isempty(level)
+if nargin < 3 || isempty(level)
    level = 3; % level of wavelet decomposition
 end
 if strcmp(level,'max')

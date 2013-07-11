@@ -9,7 +9,7 @@ function z=nnn(x,n);
 %3/3/2005
 %ensmall@polyu.edu.hk
 
-if nargin<2
+if nargin < 2
   n=floor(sqrt(length(x(1,:))));
 end;
 

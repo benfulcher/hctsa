@@ -48,7 +48,7 @@ function varargout = binaryLaplaceGP(hyper, covfunc, lik, varargin)
 %
 % Copyright (c) 2004, 2005, 2006, 2007 by Carl Edward Rasmussen, 2007-02-19.
 
-if nargin<5 || nargin>6
+if nargin < 5 || nargin>6
   disp('Usage: [nlZ, dnlZ     ] = binaryLaplaceGP(hyper, covfunc, lik, x, y);')
   disp('   or: [p, mu, s2, nlZ] = binaryLaplaceGP(hyper, covfunc, lik, x, y, xstar);')
   return

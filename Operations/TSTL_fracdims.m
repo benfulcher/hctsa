@@ -20,19 +20,19 @@ function out = TSTL_fracdims(y,kmin,kmax,Nref,gstart,gend,past,steps,embedparams
 N = length(y); % length of time series
 
 % (1) Minimum number of neighbours, kmin
-if nargin<2 || isempty(kmin)
+if nargin < 2 || isempty(kmin)
     kmin = 3; % default
     disp(['Using default ,minimum number of neighbours, kmin = ' num2str(kmin)])
 end
 
 % (2) Maximum number of neighbours, kmax
-if nargin<3 || isempty(kmax)
+if nargin < 3 || isempty(kmax)
     kmax = 10; % default
     disp(['Using default maximum number of neighbours, kmax = ' num2str(kmax)])
 end
 
 % (3) Number of randomly-chosen reference points, Nref
-if nargin<4 || isempty(Nref)
+if nargin < 4 || isempty(Nref)
     Nref = 0.2; % default:  20% of the time series length
     disp(['Using default number of reference points: Nref = ' num2str(Nref)])
 end
@@ -41,30 +41,30 @@ if Nref<1 && Nref>0
 end
 
 % (4) moment starting value, gstart
-if nargin<5 || isempty(gstart)
+if nargin < 5 || isempty(gstart)
     gstart = 1; % default
     disp(['Using default moment starting value, gstart = ' num2str(gstart)])
 end
 
 % (5) moment ending value, gend
-if nargin<6 || isempty(gend)
+if nargin < 6 || isempty(gend)
     gend = 10; % default
     disp(['Using default moment ending value, gend = ' num2str(gend)])
 end
 
 % (6) past
-if nargin<7 || isempty(past)
+if nargin < 7 || isempty(past)
     past = 10; % default
     disp(['Using default past correlation exclusion window value, past = ' num2str(past)])
 end
 
 % (7) steps
-if nargin<8 || isempty(steps)
+if nargin < 8 || isempty(steps)
     steps = 32;
 end
 
 % (8) Embedding parameters
-if nargin<9 || isempty(embedparams)
+if nargin < 9 || isempty(embedparams)
     embedparams = {'ac','cao'};
     disp('using default embedding parameters of autocorrelation for tau and cao method for m')
 end

@@ -24,15 +24,15 @@ else
 	error('First input must be either ''ts'' or ''mets''');
 end
 
-if nargin<2 || min(size(vin))~=1
+if nargin < 2 || min(size(vin))~=1
 	error('Error with second input. Exiting.');
 end
 
-if nargin<3
+if nargin < 3
 	dbname = ''; % use default database by default
 end
 
-if nargin<4 || isempty(dolog)
+if nargin < 4 || isempty(dolog)
 	dolog = 1; % logs to file by default
 end
 

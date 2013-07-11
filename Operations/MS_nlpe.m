@@ -6,13 +6,13 @@ function out = MS_nlpe(y,de,tau)
 
 % Do my own inputs
 % Embedding dimension
-if nargin<2 || isempty(de)
+if nargin < 2 || isempty(de)
     de=3;
 end
 
 
 % Time-delay, tau
-if nargin<3 || isempty(tau)
+if nargin < 3 || isempty(tau)
     tau=1;
 end
 if strcmp(tau,'ac')

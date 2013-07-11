@@ -4,10 +4,10 @@ function out = WL_dwtcoeff(y,wname,level)
 %% Check Inputs
 N = length(y); % length of signal
 
-if nargin<2 || isempty(wname)
+if nargin < 2 || isempty(wname)
     wname = 'db3'; % Daubechies wavelet filter
 end
-if nargin<3 || isempty(level)
+if nargin < 3 || isempty(level)
     level = 3; % level of wavelet decomposition
 end
 if strcmp(level,'max')

@@ -7,5 +7,4 @@ yd = diff(y,n); % the coarsest way of taking a derivative, sure... Could be impr
               % in future
 out = std(yd);
 
-
 end

@@ -5,8 +5,8 @@ function rms=compare(y,n,m);
 %3/3/2005
 %ensmall@polyu.edu.hk
 
-if nargin<3
-	if nargin<2
+if nargin < 3
+	if nargin < 2
 		n=1; m=60;
 	else
 		m=n; n=1;

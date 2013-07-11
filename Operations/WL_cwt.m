@@ -4,11 +4,11 @@ function out = WL_cwt(y, wname, maxscale)
 
 N= length(y); % length of the time series
 
-if nargin<2 || isempty(wname)
+if nargin < 2 || isempty(wname)
     disp('Using default wavelet db3')
     wname = 'db3';
 end
-if nargin<3 || isempty(maxscale)
+if nargin < 3 || isempty(maxscale)
     disp('Using default maxscale of 32')
     maxscale = 32;
 end

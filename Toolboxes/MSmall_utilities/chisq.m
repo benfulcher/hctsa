@@ -28,7 +28,7 @@ function [chsq,prob,nu]=chisq(b1,b2,nu);
 %3/3/2005
 %ensmall@polyu.edu.hk
 
-if nargin<3,
+if nargin < 3,
    nu=[];
 end;
 

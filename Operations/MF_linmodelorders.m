@@ -19,7 +19,7 @@ N = length(y);
 y = iddata(y,[],1);
 
 % (2) model orders
-if nargin<2 || isempty(orders)
+if nargin < 2 || isempty(orders)
     orders = (1:10)';
 end
 if size(orders,1)==1
@@ -29,7 +29,7 @@ end
 % (3) howtotest -- either all (trains and tests on the whole time series);
 % or a proportion of the time series to train on; will test on the
 % remaining portion.
-if nargin<3 || isempty(howtotest)
+if nargin < 3 || isempty(howtotest)
     howtotest = 'all';
 end
 

@@ -35,7 +35,7 @@ out.std = std(hs);
 
 
 % Fit Exponential decay to absolute ACF using nonlinear least squares:
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[2 -0.5]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[2, -0.5]);
 f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(binsizer',hs,f);
 

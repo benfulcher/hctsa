@@ -65,7 +65,7 @@ if doplot
     S2p = S2;
     figure('color','w');
     f = [mu+2*sqrt(S2p);flipdim(mu-2*sqrt(S2p),1)];
-    fill([ts; flipdim(ts,1)], f, [6 7 7]/8, 'EdgeColor', [7 7 6]/8);
+    fill([ts; flipdim(ts,1)], f, [6, 7, 7]/8, 'EdgeColor', [7, 7, 6]/8);
             % grayscale error bars
     hold on;
     plot(ts,mu,'k-','LineWidth',2); % mean function

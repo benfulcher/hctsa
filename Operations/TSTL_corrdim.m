@@ -10,16 +10,16 @@ function out = TSTL_corrdim(y,nbins,embedparams)
 N = length(y); % length of time series
 
 % (1) Maxmum number of partitions per axis, nbins
-if nargin<2 || isempty(nbins)
+if nargin < 2 || isempty(nbins)
     nbins = 100; % default number of bins per axis is 100
 end
 
 % (2) Set embedding parameters to defaults
-if nargin<3 || isempty(embedparams)
+if nargin < 3 || isempty(embedparams)
     embedparams = {'ac','cao'};
 else
     if length(embedparams)~=2
-        disp('given embedding parameters incorrectly formatted -- need {tau,m}')
+        error('Embedding parameters incorrectly formatted -- should be {tau,m}')
     end
 end
 
@@ -28,8 +28,7 @@ end
 s = benembed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-	out = NaN; % set all outputs to NaN
-    return
+    error('Time-series embedding failed')
 end
 
 %% Run
@@ -39,20 +38,27 @@ rs = data(corrdim(s,nbins));
 % plot(rs);
 
 %% Output Statistics
-% Note: these aren't very well motivated.
+% Note: these aren't particularly well motivated.
 m = size(rs,2); % number of embedding dimensions
 ldr = size(rs,1); % I don't really know what this means; = 17
 for i = 2:m
-    eval(['out.meand' num2str(i) ' = mean(rs(:,' num2str(i) '));'])
-    eval(['out.mediand' num2str(i) ' = median(rs(:,' num2str(i) '));'])
-    eval(['out.mind' num2str(i) ' = min(rs(:,' num2str(i) '));'])
+    meani = mean(rs(:,i));
+    eval(sprintf('out.meand%u = meani;',i))
+    mediani = median(rs(:,i));
+    eval(sprintf('out.mediand%u = mediani;',i))
+    mini = min(rs(:,i));
+    eval(sprintf('out.mind%u = mini;',i))
 end
 
 for i = 2:ldr
-    eval(['out.meanr' num2str(i) ' = mean(rs(' num2str(i) ',:));'])
-    eval(['out.medianr' num2str(i) ' = median(rs(' num2str(i) ',:));'])
-    eval(['out.minr' num2str(i) ' = min(rs(' num2str(i) ',:));'])
-    eval(['out.meanchr' num2str(i) ' = mean(diff(rs(' num2str(i) ',:)));'])
+    meani = mean(rs(i,:));
+    eval(sprintf('out.meanr%u = meani;',i))
+    mediani = median(rs(i,:));
+    eval(sprintf('out.medianr%u = mediani;',i))
+    mini = min(rs(i,:));
+    eval(sprintf('out.minr%u = mini;',i))
+    meanchi = mean(diff(rs(i,:)));
+    eval(sprintf('out.meanchr%u = meanchi;',i))
 end
 
 out.stdmean = std(mean(rs));

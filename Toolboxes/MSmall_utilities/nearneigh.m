@@ -18,11 +18,11 @@ function [d,i]=nearneigh(X,tau,blocksize)
 %3/3/2005
 %ensmall@polyu.edu.hk
   
-if nargin<2,
+if nargin < 2,
   tau=0;
 end;
 
-if nargin<3,
+if nargin < 3,
   blocksize=100; %do blocksize points at a time  --- a compromise
 		 %between matlabs matrix/memory intensive approach
 		 %and CPU ways

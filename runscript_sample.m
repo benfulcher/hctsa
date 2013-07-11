@@ -1,9 +1,9 @@
 %% Parameters for run:
 parallelize = 0; % set to 1 to parallelize computations over available CPUs using Matlab's Parellel Computing Toolbox?
 dolog = 0; % set to 1 to log results to a .log file? (usually not necessary)
-tslrange = [100,30000]; % set limits on the length of time series to be calculated
+tslrange = [100, 30000]; % set limits on the length of time series to be calculated
 tsidmin = 1; % calculate from this ts_id...
-tsidmax = 2; % to this ts_id
+tsidmax = 5; % to this ts_id
 writewhat = 'null'; % retrieve and write back NULL entries in the database
 
 %% Settings for run -- how many time series / operations to retrieve at each iteration
@@ -18,7 +18,7 @@ tsidr = ((tsidmin-1):tsidmax); % calculate across the given range of ts_ids one 
 
 % retrieve a vector of m_ids to calculate subject to additional conditions
 % here we remove operations with labels 'shit', 'tisean', 'kalafutvisscher', and 'waveletTB'
-mids = TSQ_getids('mets',1,{},{'shit','tisean','kalafutvisscher','waveletTB'},[]);
+mids = TSQ_getids('mets',1,{},{'shit','tisean','kalafutvisscher','waveletTB','locdep','spreaddep'},[]);
 
 % range of m_ids retrieved at each iteration:
 midr = [min(mids),max(mids)];

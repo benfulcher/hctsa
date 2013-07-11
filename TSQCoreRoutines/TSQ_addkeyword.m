@@ -14,15 +14,15 @@ else
 	return
 end
 
-if nargin<4
+if nargin < 4
 	dbname = '';
 end
 
-if nargin<5 || isempty(updateall)
+if nargin < 5 || isempty(updateall)
 	updateall = 1; % by default go and update time series keywords tables, etc.
 end
 
-if nargin<6 || isempty(tostart)
+if nargin < 6 || isempty(tostart)
     tostart = 0; % add keyword to end
 end
 

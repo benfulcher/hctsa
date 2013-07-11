@@ -15,11 +15,11 @@ function out = TSTL_poincare(y,ref,embedparams)
 %% Foreplay
 N = length(y);
 
-if nargin<2 || isempty(ref)
+if nargin < 2 || isempty(ref)
     ref = 'max'; % reference point is the first maximum of the time series
 end
 
-if nargin<3 || isempty(embedparams)
+if nargin < 3 || isempty(embedparams)
     embedparams = {'mi',3};
     disp('using default embedding using mutual information and 3')
 end

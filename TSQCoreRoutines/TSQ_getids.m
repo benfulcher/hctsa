@@ -32,45 +32,47 @@ function ids = TSQ_getids(morts,lenr,kyesc,kno,pcalcr,idr,howtolimit,dbname)
 
 %%% FOREPLAY
 %% Check inputs -- set defaults
-% if nargin<5; disp('You must provide 5 inputs! And no, I''m not asking nicely!!'); return; end
+% if nargin < 5; disp('You must provide 5 inputs! And no, I''m not asking nicely!!'); return; end
 
 if strcmp(morts,'ts')
 	if isempty(lenr)
-		lenr = [200 20000];
-		disp(['Setting default length constraints: ' num2str(lenr(1)) '--' num2str(lenr(2))])
+		lenr = [200, 20000];
+		fprintf(1,'Setting default length constraints: %u--%u\n',lenr(1),lenr(2))
 	end
 elseif strcmp(morts,'mets')
 	masterpull = lenr;
 	if isempty(masterpull)
-		masterpull = 1;
-		disp('Pulling in pointers by default');
+		masterpull = 1; % retrieves other outputs of all master functions implicated in the range
+		fprintf(1,'Pulling in all pointers by default');
 	end
 else
 	disp('First input must be either ''ts'' or ''mets''. I''m outraged. Exiting.');
     return
 end
 
-if nargin<4
+if nargin < 4
     kno = {};
 end
 
-if nargin<5
+if nargin < 5
 	pcalcr = [];
 end
-if nargin<6
+if nargin < 6
 	idr = [];
 end
-if nargin<7 || isempty(howtolimit)
+if nargin < 7 || isempty(howtolimit)
     howtolimit = 'pcmax';
 end
-if nargin<8
+if nargin < 8
 	dbname = '';
 end
 
 % seperate into keywords to include: kyes
 % and the number of that keyword to include: kyesn
-if ~isempty(kyesc), kyes=kyesc(:,1); kyesn=vertcat(kyesc{:,2});
-else kyes={}; kyesn=[];
+if ~isempty(kyesc)
+    kyes = kyesc(:,1); kyesn = vertcat(kyesc{:,2});
+else
+    kyes = {}; kyesn = [];
 end
 
 
@@ -82,7 +84,7 @@ end
 % 	fprintf(flog,'%s\n',['Subsetting and checking performed at ' datestr(now)]);
 % end
 
-%% Open MySQL Database
+%% Open connection to mySQL database
 dbc = SQL_opendatabase(dbname);
 
 %%% TIME SERIES
@@ -90,12 +92,12 @@ if strcmp(morts,'ts')
 
 	%% Filter time series by keyword
 	% keywords as a cell: kyes; and how many of each to include: kyesn
-	s={'','','',''};
+	s = {'','','',''};
 	
 	% Extra qualifier to only look in a certain range
 	% s{1} -- IDR
 	if ~isempty(idr)
-		s{1} = ['ts_id BETWEEN ' num2str(idr(1)) ' AND ' num2str(idr(2))];
+		s{1} = sprintf('ts_id BETWEEN %u AND %u',idr(1),idr(2));
 	end
 
 	% Extra qualifier to not include certain keywords -- this is performed seperately in the query for each keyword *to* include
@@ -108,15 +110,15 @@ if strcmp(morts,'ts')
 	% Extra qualifier pcalcr to have PercentageCalculated only in a certain range
 	% s{3} -- pcalcr
 	if ~isempty(pcalcr)
-		s{3} = ['PercentageCalculated BETWEEN ' num2str(pcalcr(1)) ' AND ' num2str(pcalcr(2))];
+		s{3} = sprintf('PercentageCalculated BETWEEN %f AND %f',pcalcr(1),pcalcr(2));
 	end
 	
 	% length constraint in words
-	s{4} = ['TimeSeries.Length BETWEEN ' num2str(lenr(1)) ' AND ' num2str(lenr(2))];
+	s{4} = sprintf('TimeSeries.Length BETWEEN %u AND %u',lenr(1));
 	
 	% Combine these results into part of a mySQL query string
-	conditions='';
-	for j=1:length(s)
+	conditions = '';
+	for j = 1:length(s)
 		if ~isempty(s{j})
 			conditions = [conditions ' AND ' s{j}];
 		end
@@ -125,7 +127,7 @@ if strcmp(morts,'ts')
 	%% kyes, keywords to include
 	if ~isempty(kyes)
 		C_tskwyes = cell(length(kyes),1);
-		for i=1:length(kyes)
+		for i = 1:length(kyes)
 			ncut = kyesn(i);
 
 			% Now do the rest of the query at once: do the keyword matches and length constraints		
@@ -172,9 +174,9 @@ if strcmp(morts,'ts')
 				ngot = length(C_tskwyes{i});
 			
 				if isempty(kyes{i})
-					disp(['Found ' num2str(ngot) ' time series selected by ' howtolimit]);
+					fprintf(1,'Found %u time series selected by %s\n',ngot,howtolimit);
 				else
-					disp(['Found ' num2str(ngot) ' time series with keyword ''' kyes{i} '''']);
+					fprintf(1,'Found %u time series with keyword ''%s''\n',ngot,kyes{i});
 				end
 			end
 		end
@@ -185,7 +187,7 @@ if strcmp(morts,'ts')
 		ts_ids_keep = unique(ts_ids_keep);
 		lafter = length(ts_ids_keep);
 		if lafter<lbefore
-			disp(['We''ve lost ' num2str(lbefore-lafter) ' time series to keyword overlap...']);
+			fprintf(1,'We''ve lost %u time series to keyword overlap...\n',lbefore-lafter);
 		end
 	
 	else % just use the other constraints
@@ -196,7 +198,7 @@ if strcmp(morts,'ts')
 		% end
 		[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
-			disp('Database call failed'); disp(emsg), keyboard
+			fprintf(1,'Database call failed\n'); disp(emsg), keyboard
 		else
 			ts_ids_keep = unique(vertcat(ts_ids{:}));
 		end
@@ -204,19 +206,18 @@ if strcmp(morts,'ts')
 
 	% We now have ts_ids_keep -- the keyword and length-constrained time series
 	nts = length(ts_ids_keep); % number of time series
-	if nts==0
-		disp('No Time Series found.');
-		ids=[];
+	if nts == 0
+		fprintf(1,'No Time Series found.\n');
+		ids = [];
 	else
-		disp(['Time Series Filtered: ' num2str(nts)]);
+		fprintf(1,'Time Series Filtered: %u\n',nts);
 		ids = ts_ids_keep;
 	end
 	
 else
-
 	%%% Operations
 
-	s={'','',''};
+	s = {'','',''};
 	
 	% Extra qualifier to only look in a certain range
 	% s{1} -- IDR
@@ -296,16 +297,15 @@ else
 			[m_ids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 		
 			if ~isempty(emsg)
-				disp(['Error finding ' kyes{i}]);
-				disp(emsg); keyboard
+				fprintf(1,'Error finding %s\n',kyes{i}); disp(emsg); keyboard
 			end
 			C_kyes{i} = vertcat(m_ids{:});
 		
 			ngot = length(C_kyes{i});
 			if isempty(kyes{i})
-				disp(['Found ' num2str(ngot) ' operations chosen by ' howtolimit]);
+				fprintf(1,'Found %u operations chosen by %s\n',ngot,howtolimit);
 			else
-				disp(['Found ' num2str(ngot) ' operations with keyword ''' kyes{i} '''']);
+				fprintf(1,'Found %u operations with keyword ''%s''\n',ngot,kyes{i});
 			end
 		end
 	
@@ -314,19 +314,19 @@ else
 		lbefore = length(m_ids_keep);
 		m_ids_keep = unique(m_ids_keep);
 		lafter = length(m_ids_keep);
-		if lafter<lbefore
-			disp(['We lost ' num2str(lbefore-lafter) ' to overlapping keywords!']);
+		if lafter < lbefore
+			fprintf(1,'We lost %u  to overlapping keywords!\n',lbefore-lafter);
 		end
 	
 	else % just use the length/kno constraint
 		if isempty(conditions)
-			SelectString = ['SELECT m_id FROM Operations']; % include all operations -- exclude nothing
+			SelectString = 'SELECT m_id FROM Operations'; % include all operations -- exclude nothing
 		else
 			SelectString = ['SELECT m_id FROM Operations WHERE ' conditions(6:end)]; % (remove "AND ")
 		end
-		[m_ids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
+		[m_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
-			disp('Database call failed'); disp(emsg); keyboard
+			fprintf(1,'Database call failed\n'); disp(emsg); keyboard
 		else
 			m_ids_keep = unique(vertcat(m_ids{:}));
 		end
@@ -337,29 +337,27 @@ else
 	if masterpull && ~isempty(m_ids_keep)
 		% Find implicated Master functions
 		SelectString = ['SELECT m_id FROM MasterPointerRelate WHERE mop_id IN (SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' bencat(m_ids_keep,',') '))'];
-		[newmids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
+		[newmids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if isempty(emsg)
 			if ~isempty(newmids) % there are some master functions implicated
 				newmids = vertcat(newmids{:});
 				nm = length(m_ids_keep); % number of metrics
 				m_ids_keep = union(m_ids_keep,newmids); % include the new ones
-				if length(m_ids_keep)>nm
-					disp(['We''ve included ' num2str(length(m_ids_keep)-nm) ' additional metrics by invoking Master function pulling, if you''ll excuse my French']);
-				else
-					disp('No extras from Master function pulling, I''m afraid');
+				if length(m_ids_keep) > nm
+					fprintf(1,'%u additional operations were included as implicated by existing master functions\n',length(m_ids_keep)-nm);
 				end
 			end
 		else % an error
-			disp('Error retrieving the operations from implicated master functions'); disp(emsg); keyboard
+			fprintf(1,'Error retrieving the operations from implicated master functions\n'); disp(emsg); keyboard
 		end
 	end
 
 	nm = length(m_ids_keep); % number of metrics
-	if nm ==0
-		disp('No matching operations found. Exiting.');
+	if nm == 0
+		fprintf(1,'No matching operations found.\n');
 		ids = [];
 	else
-		disp(['Operations filtered: ' num2str(nm)]);
+		fprintf(1,'Operations filtered: %u\n',nm);
 		ids = m_ids_keep;
 	end
 end

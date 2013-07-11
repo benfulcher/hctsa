@@ -49,9 +49,8 @@ out.std = std(amimins);
 out.iqr = iqr(amimins);
 
 % Unique values, mode
-% [u m n] = unique(amimins);
 out.nunique = length(unique(amimins));
-[out.mode out.modef] = mode(amimins);
+[out.mode, out.modef] = mode(amimins);
 out.modef = out.modef/nbinr;
 % hist = zeros(length(u),1);
 % for i=1:length(u)

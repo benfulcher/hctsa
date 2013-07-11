@@ -40,7 +40,7 @@ function varargout = binaryEPGP(hyper, covfunc, varargin)
 %
 % Copyright (c) 2004, 2005, 2006, 2007 Carl Edward Rasmussen, 2007-02-19.
 
-if nargin<4 || nargin>5
+if nargin < 4 || nargin>5
   disp('Usage: [nlZ, dnlZ     ] = binaryEPGP(hyper, covfunc, x, y);')
   disp('   or: [p, mu, s2, nlZ] = binaryEPGP(hyper, covfunc, x, y, xstar);')
   return
