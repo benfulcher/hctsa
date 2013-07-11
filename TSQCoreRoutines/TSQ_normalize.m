@@ -46,7 +46,7 @@ if iscell(trimopt) % still using the cell input of previous TSQ_normalize
     trimopt = trimopt{1};
 end
 fprintf(1,['Removing time series with more than %.2f%% special-valued outputs, ' ...
-            'and operations with more than %.2f%%-special-valued outputs\n'],trimopt(1),trimopt(2));
+            'and operations with more than %.2f%%-special-valued outputs\n'],trimopt(1)*100,trimopt(2)*100);
 
 if nargin < 3
     subs = {}; % don't subset
@@ -132,7 +132,7 @@ if thresh_r > 0 % if 1, then even the worst are included
         F = F(kr1,:); % ********************* KR1 ***********************
         TS_loc_q = TS_loc_q(kr1,:);
     else
-        error(1,'No time series had more than %4.2f%% good values.',thresh_r*100)
+        error('No time series had more than %4.2f%% good values.',thresh_r*100)
     end
 else
     fprintf(1,'No filtering of time series based on proportion of bad values.\n')
