@@ -40,7 +40,7 @@ if nargin < 4
     bevocal = 1; % gives lots and lots of user feedback
 end
 
-if bevocal, fprintf(1,'Using input file %s',INPfile); end
+if bevocal, fprintf(1,'Using input file %s\n',INPfile); end
 ticker = tic;
 
 %% Open Database

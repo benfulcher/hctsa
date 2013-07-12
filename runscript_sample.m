@@ -21,7 +21,7 @@ tsidr = ((tsidmin-1):tsidmax); % calculate across the given range of ts_ids one 
 mids = TSQ_getids('mets',1,{},{'shit','tisean','kalafutvisscher','waveletTB','locdep','spreaddep'},[]);
 
 % range of m_ids retrieved at each iteration:
-midr = [min(mids),max(mids)];
+midr = [min(mids), max(mids)];
 
 %% Now start calculating
 % Provide a quick message:
