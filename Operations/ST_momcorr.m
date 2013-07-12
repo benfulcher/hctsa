@@ -4,8 +4,9 @@ function out = ST_momcorr(x,wl,olap,mom1,mom2,transf)
 % Idea of Nick Jones.
 % Ben Fulcher 5 July 2010
 
-N = length(x); % number of samples in the input signal
+doplot = 0; % plot outputs
 
+N = length(x); % number of samples in the input signal
 
 % sliding window length (samples)
 if nargin < 2
@@ -42,6 +43,10 @@ switch transf
         x = x.^2;
     case 'sqrt'
         x = sqrt(abs(x));
+    case 'none'
+        x = x;
+    otherwise
+        error('Unknown tranformation ''%s''',transf)
 end
 
 % ok, quit stuffing around
@@ -54,7 +59,6 @@ if size(x_buff,2)>Nw
     % fprintf(1,'Should have %u columns but we have %u: removing last one',Nw,size(x_buff,2))
     x_buff = x_buff(:,1:end-1);
 end % lose last point
-
 
 % ok, now we have the sliding window ('buffered') signal, x_buff
 % first calculate the first moment in all the windows (each column is a
@@ -70,9 +74,10 @@ out.density = range(M1)*range(M2)/N; % density of points in M1--M2 space
 out.mi = benmi(M1,M2,[0,1],[0,1],floor(sqrt(N)));
 % this is a poor choice of bin number -- M1 and M2 are not length N
 
-% figure('color','w');
-% plot(M1,M2,'.k');
-
+if doplot
+    figure('color','w');
+    plot(M1,M2,'.k');
+end
 
 function moms = calcmemoments(x_buff,momtype)
     switch momtype
@@ -84,6 +89,8 @@ function moms = calcmemoments(x_buff,momtype)
             moms = median(x_buff);
         case 'iqr'
             moms = iqr(x_buff);
+        otherwise
+            error('Unknown statistic ''%s''',momtype)
     end        
 end
 

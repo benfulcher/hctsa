@@ -5,13 +5,12 @@ function out = DN_pleft(y,th)
 % Uses the quantile function from Matlab's Statistics Toolbox
 % Ben Fulcher, 2009
 
-
 mu = mean(y);
 sig = std(y);
 
 p = quantile(abs(y-mu),1-th);
+
 % A proportion, th, of the data lie further than p from the mean
 out = p/sig;
-
 
 end
