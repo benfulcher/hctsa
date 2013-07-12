@@ -1,8 +1,8 @@
-function p = HT_hyptests(x,ange)
+function p = HT_hyptests(x,thetest)
 % Returns the p-value from one of a set of standard statistical hypothesis tests
 % Ben Fulcher
 
-switch ange
+switch thetest
     case 'signtest' % Statistics Toolbox
         [p, ~] = signtest(x);
         % for some reason this one has p-value as the first output

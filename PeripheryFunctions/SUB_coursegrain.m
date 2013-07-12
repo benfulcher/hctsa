@@ -15,6 +15,7 @@ N = length(y); % length of the input sequence
 switch howtocg
 case 'updown'
    y = diff(y);
+   N = N - 1; % the time series is one value shorter than the input because of differencing
    howtocg = 'quantile'; % successive differences and then quantiles
 
 case {'embed2quadrants','embed2octants'}
@@ -70,7 +71,7 @@ switch howtocg
 		yth(o5r) = 5; yth(o6r) = 6; yth(o7r) = 7; yth(o8r) = 8;
 end
 
-if any(yth==0)
+if any(yth == 0)
     error('All values in the sequence were not assigned to a group')
 end 
 
