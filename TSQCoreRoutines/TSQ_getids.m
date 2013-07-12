@@ -114,7 +114,7 @@ if strcmp(morts,'ts')
 	end
 	
 	% length constraint in words
-	s{4} = sprintf('TimeSeries.Length BETWEEN %u AND %u',lenr(1));
+	s{4} = sprintf('TimeSeries.Length BETWEEN %u AND %u',lenr(1),lenr(2));
 	
 	% Combine these results into part of a mySQL query string
 	conditions = '';
@@ -192,13 +192,13 @@ if strcmp(morts,'ts')
 	
 	else % just use the other constraints
 		% if isempty(kno)
-			SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' conditions(6:end)];
+		SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' conditions(6:end)];
 		% else
 		% 	SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ss_tsl ' ' knoextrastring];
 		% end
 		[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
-			fprintf(1,'Database call failed\n'); disp(emsg), keyboard
+			fprintf(1,'Database call failed\n%s\n',SelectString); disp(emsg); keyboard
 		else
 			ts_ids_keep = unique(vertcat(ts_ids{:}));
 		end
@@ -326,7 +326,7 @@ else
 		end
 		[m_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
-			fprintf(1,'Database call failed\n'); disp(emsg); keyboard
+			fprintf(1,'Database call failed\n%s\n',SelectString); disp(emsg); keyboard
 		else
 			m_ids_keep = unique(vertcat(m_ids{:}));
 		end

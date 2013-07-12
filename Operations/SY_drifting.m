@@ -1,6 +1,5 @@
 function out = SY_drifting(y,howl,l)
-
-%> From a MATLAB forum:
+% A function inspired by this bit of advice from a MATLAB forum:
 %> http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
 %> It seems to me that you are looking for a measure for a drifting mean.
 %> If so, this is what I would try:
