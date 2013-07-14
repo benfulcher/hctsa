@@ -13,19 +13,19 @@ function out = TSTL_delaytime(y,maxdelay,past)
 
 %% Preliminaries
 N = length(y); % length of time series
-s = signal(y);
+s = signal(y); % convert to a signal for TSTOOL
 
 % (1) Maximum delay, maxdelay
 if nargin < 2 || isempty(maxdelay)
     maxdelay = 0.2; % 1/5 the length of the time series
 end
-if maxdelay<1 && maxdelay>0
+if maxdelay < 1 && maxdelay > 0
     maxdelay = round(N*maxdelay); % specify a proportion of time series length
 end
 
-if maxdelay<10,
-    maxdelay=10;
-    disp('<TSTL_delaytime>: setting maxdelay to its minimum: delaytime = 10')
+if maxdelay < 10,
+    maxdelay = 10;
+    fprintf(1,'Maxdelay set to its minimum: delaytime = 10')
     % necessary for output statistics
 end
 
@@ -34,7 +34,7 @@ tau = data(delaytime(s,maxdelay,past));
 % plot(tau);
 
 %% Output Statistics
-% always tends to start low and then rise to some (noisy) value
+% tau tends to start low and then rise to some (noisy) value
 out.tau1 = tau(1);
 out.tau2 = tau(2);
 out.tau3 = tau(3);
@@ -44,7 +44,6 @@ out.meantau = mean(tau);
 out.stdtau = std(tau);
 out.mintau = min(tau);
 out.maxtau = max(tau);
-
 
 
 end

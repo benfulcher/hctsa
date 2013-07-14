@@ -145,7 +145,6 @@ if enoughpoints
     out.robfit_sea1 = stats.se(1);
     out.robfit_sea2 = stats.se(2);
 
-
     fit_lnCr = a(2)*lnr+a(1);
     % hold on;plot(lnr,fit_lnCr,'r');hold off
     res = lnCr-fit_lnCr';
@@ -168,25 +167,5 @@ end
 
 % now non-robust linear fit
 % [p S] = polyfit(lnr',lnCr,1);
-
-
-%     function out = SUB_allNaNs
-%         % return real NaNs
-%         out.robfit_a1 = NaN;
-%         out.robfit_a2 = NaN;
-%         out.robfit_sigrat = NaN;
-%         out.robfit_s = NaN;
-%         out.robfit_sea1 = NaN;
-%         out.robfit_sea2 = NaN;
-%         out.robfitresmeanabs = NaN;
-%         out.robfitresmeansq = NaN;
-%         out.robfitresac1 = NaN;
-%         out.minlnr = NaN;
-%         out.maxlnr = NaN;
-%         out.minlnCr = NaN;
-%         out.maxlnCr = NaN;
-%         out.rangelnCr = NaN;
-%         out.meanlnCr = NaN; 
-%     end
 
 end

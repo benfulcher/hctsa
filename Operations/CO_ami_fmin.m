@@ -54,7 +54,7 @@ out.nunique = length(unique(amimins));
 out.modef = out.modef/nbinr;
 % hist = zeros(length(u),1);
 % for i=1:length(u)
-%     hist(i) = length(find(n == u(i)));
+%     hist(i) = sum(n == u(i));
 % end
 % out.mode = u(find(hist == max(hist),1,'first'));
 
@@ -65,10 +65,10 @@ out.conv4 = mean(amimins(end-4:end));
 % local maxima above 1*std from mean
 % inspired by curious result of periodic maxima for periodic signal with
 % bin size... ('quantiles', [2:80])
-loc_extr = intersect(find(diff(amimins(1:end-1))>0),sgnchange(diff(amimins(1:end-1))))+1;
-big_loc_extr = intersect(find(amimins>out.mean+out.std),loc_extr);
+loc_extr = intersect(find(diff(amimins(1:end-1)) > 0),sgnchange(diff(amimins(1:end-1))))+1;
+big_loc_extr = intersect(find(amimins > out.mean+out.std),loc_extr);
 out.nlocmax = length(big_loc_extr);
-if out.nlocmax>2
+if out.nlocmax > 2
     out.maxp = std(diff(big_loc_extr));
 else
     out.maxp = NaN;

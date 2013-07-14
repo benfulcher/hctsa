@@ -86,7 +86,7 @@ iqracpf = iqr(acpf); % iqr vector of length maxdim
 dmacpf = diff(macpf);
 out.mmacpfdiff = mean(abs(dmacpf));
 out.stdmacpfdiff = std(abs(dmacpf));
-out.propdecmacpf = length(find(dmacpf<0))/length(dmacpf);
+out.propdecmacpf = sum(dmacpf < 0)/length(dmacpf);
 
 for i = 1:maxdim-1
     % give proportion drop at each increase in m

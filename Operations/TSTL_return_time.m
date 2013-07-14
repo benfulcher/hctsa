@@ -9,31 +9,33 @@ function out = TSTL_return_time(y,NNR,maxT,past,Nref,embedparams)
 % embedparams: to feed into benembed
 % Ben Fulcher 12/11/2009
 
-N = length(y);
+N = length(y); % length of the input time series
 
 %% Check Inputs
 % Number of nearest neighbours, NNR
 if nargin < 2 || isempty(NNR)
     NNR = 5;
 end
-if NNR>0 && NNR<1 % specify a proportion of time series length
-    NNR = floor(NNR*N);
+if NNR > 0 && NNR < 1 % specify a proportion of time series length
+    NNR = floor(NNR*N); if NNR == 0, NNR = 1; end
 end
 
 % Maximum return time, maxT
 if nargin < 3 || isempty(maxT)
     maxT = 0.1;
 end
-if maxT>0 && maxT<=1 % specify a proportion
+if maxT > 0 && maxT <= 1 % specify a proportion
     maxT = floor(N*maxT);
+    if maxT = 0, maxT = 1; end
 end
 
 % Theiler window, past
 if nargin < 4 || isempty(past) 
     past = 10;
 end
-if past>0 && past<1 % specify a proportion
+if past > 0 && past < 1 % specify a proportion
     past = floor(N*past);
+    if past == 0, past = 1; end
 end
 
 % Number of reference points
@@ -43,8 +45,8 @@ end
 
 % embed parameters
 if nargin < 6 || isempty(embedparams)
-    embedparams={'ac','cao'};
-    disp('using default embedding using autocorrelation and cao')
+    embedparams = {'ac','cao'};
+    fprintf(1,'Using default embedding using autocorrelation and cao\n')
 end
 
 
@@ -52,40 +54,36 @@ end
 s = benembed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-    out = NaN;
-    return
+    out = NaN; return
 end
-% s = signal(y);
 
 %% Run the code
 try
     rs = return_time(s, NNR, maxT, past, Nref);
 catch emsg
     if strcmp(emsg.message,'Index exceeds matrix dimensions.')
-        disp('Error evaluating return_time');
-        out = NaN;
-        return
+        fprintf(1,'Error evaluating return_time\n');
+        out = NaN; return
     end
 end
-% view(rs)
 
-lavery = data(rs);
-NN = length(lavery);
-% plot(lavery),keyboard
+Trett = data(rs);
+NN = length(Trett);
+% plot(Trett),keyboard
 
 %% Quantify structure in output
-out.max = max(lavery);
-out.std = std(lavery);
-out.pzeros = sum(lavery == 0)/NN;
-out.pg05 = sum(lavery>max(lavery)*0.5)/NN;
-out.iqr = iqr(lavery);
+out.max = max(Trett);
+out.std = std(Trett);
+out.pzeros = sum(Trett == 0)/NN;
+out.pg05 = sum(Trett>max(Trett)*0.5)/NN;
+out.iqr = iqr(Trett);
 
 % recurrent peaks:
-icross05 = find((lavery(1:end-1)-0.5*max(lavery)).*(lavery(2:end)-0.5*max(lavery))<0);
-if ~isempty(icross05) && length(icross05)>2
+icross05 = find((Trett(1:end-1)-0.5*max(Trett)).*(Trett(2:end)-0.5*max(Trett)) < 0);
+if ~isempty(icross05) && length(icross05) > 2
     difficross05 = diff(icross05);
-    difficross05 = difficross05(difficross05>0.4*max(difficross05)); % remove small entries, crossing peaks
-%     plot(difficross05); keyboard
+    difficross05 = difficross05(difficross05 > 0.4*max(difficross05)); % remove small entries, crossing peaks
+    
     out.meanpeaksep = mean(difficross05)/NN;
     out.maxpeaksep = max(difficross05)/NN;
     out.minpeaksep = min(difficross05)/NN;
@@ -99,18 +97,18 @@ else
     out.stdpeaksep = NaN;
 end
 
-out.statrtys = std(lavery(1:floor(end/2)))/std(lavery(floor(end/2)+1:end));
-out.statrtym = mean(lavery(1:floor(end/2)))/mean(lavery(floor(end/2)+1:end));
+out.statrtys = std(Trett(1:floor(end/2)))/std(Trett(floor(end/2)+1:end));
+out.statrtym = mean(Trett(1:floor(end/2)))/mean(Trett(floor(end/2)+1:end));
 
-out.hhist = -sum(lavery(lavery>0).*log(lavery(lavery>0)));
+out.hhist = -sum(Trett(Trett>0).*log(Trett(Trett>0)));
 
 
 %% course-grain a bit, to 20 bins
 nbins = 20;
 cglav = zeros(nbins,1);
 inds = round(linspace(0,NN,21));
-for i=1:nbins
-    cglav(i) = sum(lavery(inds(i)+1:inds(i+1)));
+for i = 1:nbins
+    cglav(i) = sum(Trett(inds(i)+1:inds(i+1)));
 end
 % plot(cglav,'k'), keyboard
 out.hcgdist = -sum(cglav(cglav>0).*log(cglav(cglav>0)));
@@ -119,11 +117,11 @@ out.pzeroscgdist = sum(cglav == 0)/nbins;
 
 
 %% Get distribution of distribution of return times
-[maria xout] = hist(lavery,30);
-maria = maria/sum(maria);
-% plot(xout,maria,'o-k'), keyboard
-out.maxhisthist = max(maria);
-out.phisthistmin = maria(1);
-out.hhisthist = -sum(maria(maria>0).*log(maria(maria>0)));
+[nhist, xout] = hist(Trett,30);
+nhist = nhist/sum(nhist);
+% plot(xout,nhist,'o-k'), keyboard
+out.maxhisthist = max(nhist);
+out.phisthistmin = nhist(1);
+out.hhisthist = -sum(nhist(nhist > 0).*log(nhist(nhist > 0)));
 
 end

@@ -29,7 +29,7 @@ if size(y,2) > size(y,1)
     y = y';
 end
 
-ty = [(1:N)',y]; % has increasing integers as time in the first column
+ty = [(1:N)', y]; % has increasing integers as time in the first column
 
 switch howtomove
     case 'pts' % Place shapes on each timepoint (excluding a range at start and end)
@@ -44,17 +44,17 @@ switch howtomove
                 for i = 1:NN
                     win = ty(rnge(i)-w:rnge(i)+w,:); % create window
                     difwin = win - ones(2*w+1,1)*ty(rnge(i),:);
-                    np(i) = length(find(sum(difwin.^2,2) <= r^2)); % number of points enclosed in shape
+                    np(i) = sum(sum(difwin.^2,2) <= r^2); % number of points enclosed in shape
                 end
                 out.max = max(np);
                 out.std = std(np);
                 
                 histnp = zeros(2*w+1,1); % maximum possible hits in circle
                 for i = 1:2*w+1
-                    histnp(i) = sum(np == i); % length(find(np == i));
+                    histnp(i) = sum(np == i);
                 end
                 
-                [out.npatmode out.mode] = max(histnp);
+                [out.npatmode, out.mode] = max(histnp);
                 out.npatmode = out.npatmode/NN;
                 
                 if 2*w + 1 >= 1; out.ones = histnp(1)/NN; end
@@ -89,10 +89,10 @@ switch howtomove
                 out.statav4_s = std([std(np(div4(1):div4(2))), std(np(div4(2)+1:div4(3))), ...
                                   std(np(div4(3)+1:div4(4))), std(np(div4(4)+1:div4(5)))])/std(np);
         otherwise
-            error('CO_t_shape_translate: Invalid shape!')
+            error('Unknwon shape ''%s''',shape)
         end
     otherwise
-        error('CO_t_shape_translate: Invalid setting for ''howtomove'' input')
+        error('Unknwon setting for ''howtomove'' input: ''%s''',howtomove)
 end
 
 % plot(np)

@@ -9,30 +9,32 @@ switch binarymeth
     case 'mean' % 1 if above mean, zero otherwise
         y = (sign(y)+1)/2;
     case 'iqr' % 1 if inside interquartile range, 0 otherwise
-        iqr = quantile(y,[0.25 0.75]);
-        iniqr = find(y>iqr(1) & y<=iqr(2));
+        iqr = quantile(y,[0.25, 0.75]);
+        iniqr = find(y > iqr(1) & y <= iqr(2));
         y = zeros(length(y),1);
         y(iniqr) = 1;
+    otherwise
+        error('Unknown method ''%s''', binarymeth);
 end
 
 N = length(y); % length of signal - 1 (difference operation)
 
 pup = sum(y == 1)/N;
 pdown = 1 - pup;
-p = [pup pdown];
+p = [pup, pdown];
 
 out.pup = pup;
 out.pupstat2 = sum(y(floor(end/2)+1:end) == 1)/sum(y(1:floor(end/2)) == 1);
 
 % Shannon entropy
-out.h = - sum(p(p>0).*log(p(p>0)));
+out.h = - sum(p(p > 0).*log(p(p > 0)));
 
 % longest consecutive string of ones / zeros (normalized by length)
 difffy = diff(find([1;y;1]));
-stretch0 = difffy(difffy~=1)-1;
+stretch0 = difffy(difffy ~= 1)-1;
 
 difffy = diff(find([0;y;0] == 0));
-stretch1 = difffy(difffy~=1)-1;
+stretch1 = difffy(difffy ~= 1)-1;
 
 % pstretches
 % number of different stretches as proportion of time series
@@ -63,17 +65,14 @@ end
 out.meanstretchrat = out.meanstretch1/out.meanstretch0;
 out.stdstretchrat = out.stdstretch1/out.stdstretch0;
 
-a=length(find(stretch1 == 1)); b = length(find(stretch1 == 2));
-if b>0, out.rat21stretch1=a/b;
+a = sum(stretch1 == 1); b = sum(stretch1 == 2);
+if b > 0, out.rat21stretch1 = a/b;
 else out.rat21stretch1 = NaN; 
 end
 
-a=length(find(stretch0 == 1)); b = length(find(stretch0 == 2));
-if b>0, out.rat21stretch0 = a/b;
+a = sum(stretch0 == 1); b = sum(stretch0 == 2);
+if b > 0, out.rat21stretch0 = a/b;
 else out.rat21stretch0 = NaN; 
 end
-
-% out.rat21stretch0=length(find(stretch0 == 1))/length(find(stretch0 == 2));
-
 
 end

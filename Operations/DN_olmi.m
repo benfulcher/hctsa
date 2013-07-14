@@ -35,13 +35,12 @@ switch howth
         tot = N;
     case 'p' % analyze only positive deviations
         thr = (0:inc:max(y));
-        tot = sum(y >= 0); % length(find(y>=0));
+        tot = sum(y >= 0);
     case 'n' % analyze only negative deviations
         thr = (0:inc:max(-y));
-        tot = length(find(y <= 0));
-% case 'c' % compare positive, negative, abs
+        tot = sum(y <= 0);
 otherwise
-    error('Must select either ''abs'', ''p'', or ''n''.')
+    error('Error thresholding with ''%s''. Must select either ''abs'', ''p'', or ''n''.',howth)
 end
 
 if isempty(thr)
@@ -66,7 +65,6 @@ for i = 1:length(thr)
     end
     
     Dt_exc = diff(r); % Delta t (interval) time series; exceeding threshold
-    
        
     msDt(i,1) = mean(Dt_exc); % the mean value of this sequence
     msDt(i,2) = std(Dt_exc)/sqrt(length(r)); % error on the mean

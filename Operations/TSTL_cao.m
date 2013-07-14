@@ -18,12 +18,12 @@ s = signal(y); % convert to signal object for TSTOOL
 
 % (1) Maximum dimension, maxdim
 if nargin < 2 || isempty(maxdim)
-    maxdim=10; % default maxdim is 10
+    maxdim = 10; % default maxdim is 10
 end
 
 % (2) Time delay, tau
 if nargin < 3 || isempty(tau)
-    tau='ac'; % choose from first zero crossing of ACF
+    tau = 'ac'; % choose from first zero crossing of ACF
 end
 if ischar(tau) % determine by some other method
     switch tau
@@ -31,6 +31,8 @@ if ischar(tau) % determine by some other method
             tau = CO_fmmi(y);
         case 'ac'
             tau = CO_fzcac(y);
+        otherwise
+            error('Unknown time-delay method ''%s''',tau);
     end
 end
 
@@ -43,12 +45,12 @@ end
 if nargin < 5 || isempty(Nref)
     Nref = -1; % default: use all points
 end
-if Nref<1 && Nref>0 % specify a fraction of data size
+if Nref < 1 && Nref > 0 % specify a fraction of data size
     Nref = round(N*Nref);
 end
 
 if nargin < 6
-    justanum=[];
+    justanum = [];
 end
 
 %% Run
@@ -57,20 +59,17 @@ catch err
     % time series is too short for these embedding parameters; set all outputs to NaNs...
 	if strcmp(err.message,'time series to short for chosen embedding parameters')
         if ~isempty(justanum) % just return a number for embedding dimension
-            disp('TSTL_cao: Time series too short for chosen embedding parameters. Returning m=10');
+            fprintf(1,'TSTL_cao: Time series too short for chosen embedding parameters. Using m = 10.\n');
             out = 10;
         else
-            disp('TSTL_cao: Time series too short for chosen embedding parameters. Returning NaNs.');
+            fprintf(1,'TSTL_cao: Time series too short for chosen embedding parameters. Returning NaNs.\n');
             out = NaN;
         end
         return
     elseif strcmp(err.identifier,'MATLAB:unassignedOutputs')
-        disp('Cao didn''t return a thing?! Don''t know why... returning...')
-        return
+        error('TSTOOL''s ''cao'' function returned no output.')
     else
-        beep
-        disp('Don''t know what exactly went wrong with call to CAO?!');
-        return
+        error('Something weird happend with TSTOOL''s cao routine');
     end
 end
 caoo1 = data(caoo1);
@@ -83,9 +82,9 @@ if ~isempty(justanum) % JUST RETURN A NUMBER FOR EMBEDDING DIMENSION
             % when caoo1 passes above a threshold
             % second element of array is the threshold; default is 10
             if length(justanum)<2
-               th=0.8;
+               th = 0.8;
             else
-                th=justanum{2};
+                th = justanum{2};
             end
             out = SUB_first(caoo1,'above',th,maxdim);
         case 'mthresh'
@@ -104,7 +103,7 @@ if ~isempty(justanum) % JUST RETURN A NUMBER FOR EMBEDDING DIMENSION
             m1 = diff(caoo1); % first differences
             mm1 = abs(m1(1:end-1))./abs(m1(2:end));
             if length(justanum)<2
-                th=10;
+                th = 10;
             else
                 th = justanum{2};
             end
@@ -115,9 +114,9 @@ else % RETURN STATISTICS ON CURVES
     %% Give output
     % plot(caoo1,'.-b'); hold on; plot(caoo2,'.-k'); hold off
     % (1) the raw values of each vector
-    for i=1:maxdim
-        eval(['out.caoo1_' num2str(i) ' = caoo1(' num2str(i) ');'])
-        eval(['out.caoo2_' num2str(i) ' = caoo2(' num2str(i) ');'])
+    for i = 1:maxdim
+        eval(sprintf('out.caoo1_%u = caoo1(%u);',i,i))
+        eval(sprintf('out.caoo2_%u = caoo2(%u);',i,i))
     end
     
     % statistics on each vector
@@ -213,14 +212,14 @@ end
 % plot(boxdimo);
 
     function yep = SUB_first(x,ab,th,maxdim)
-        % for input vector x, returns first index that it exceeds (ab='above') or
+        % for input vector x, returns first index that it exceeds (ab = 'above') or
         % goes under ('below') the threshold th
         if strcmp(ab,'above')
-            yep = find(x>th,1,'first');
+            yep = find(x > th,1,'first');
         elseif strcmp(ab,'below')
-            yep = find(x<th,1,'first');
+            yep = find(x < th,1,'first');
         end
-        if isempty(yep), yep=maxdim+1; end 
+        if isempty(yep), yep = maxdim + 1; end 
         
     end
 

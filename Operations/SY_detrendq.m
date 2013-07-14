@@ -3,6 +3,6 @@ function out = SY_detrendq(x)
 % as a function of its original standard deviation
 % Ben Fulcher, 2009
 
-out = std(detrend(x))/std(x);
+out = std(detrend(x)) / std(x);
     
 end

@@ -24,7 +24,7 @@ lami = length(ami);
 
 % change ami vector to a structure for output
 for i = 1:maxtau+1
-    eval(['out.ami' num2str(i) ' = ami(' num2str(i) ');']);
+    eval(sprintf('out.ami%u = ami(%u);',i,i));
 end
 
 % mean mutual information over this lag range
@@ -48,7 +48,7 @@ dmaximai = diff(maximai);
  % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pmaxima = length(dmaximai)/floor(lami/2);
 out.modeperiodmax = mode(dmaximai);
-out.pmodeperiodmax = length(find(dmaximai == mode(dmaximai)))/length(dmaximai);
+out.pmodeperiodmax = sum(dmaximai == mode(dmaximai))/length(dmaximai);
 
 
 % hold on; plot(maximai,ami(maximai),'or'); hold off

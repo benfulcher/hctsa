@@ -113,7 +113,7 @@ if thresh_r > 0 % if 1, then even the worst are included
     % (ii) remove rows with more than a proportion thresh_r bad values
     badrp = zeros(length(badr),1); % stores the number of bad entries
     for i = 1:length(badr)
-        badrp(i) = length(find(rj==i));
+        badrp(i) = sum(rj==i);
     end
     badrp = badrp/size(F,2);
     xkr1 = badr(badrp >= 1 - thresh_r); % don't keep rows (1) if fewer good values than thresh_r

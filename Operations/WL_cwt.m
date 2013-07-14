@@ -2,6 +2,8 @@ function out = WL_cwt(y, wname, maxscale)
 % Uses Wavelet, Statistics Toolboxes in MATLAB
 % Ben Fulcher 26/1/2010
 
+doplot = 0; % plot outputs
+
 N = length(y); % length of the time series
 
 if nargin < 2 || isempty(wname)
@@ -22,11 +24,12 @@ SC = 100*S./sum(S(:)); % scaled power
 % These SC values (percentage of energy in each coefficient) are what are
 % displayed in a scalogram (c.f., wscalogram function)
 
-% subplot(3,1,1)
-% plot(y);
-% subplot(3,1,2:3);
-% pcolor(SC); shading interp;
-% keyboard
+if doplot
+    subplot(3,1,1)
+    plot(y);
+    subplot(3,1,2:3);
+    pcolor(SC); shading interp;
+end
 
 %% Get statistics from CWT
 Nentries = size(coeffs,1)*size(coeffs,2); % number of entries in coeffs matrix

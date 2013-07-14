@@ -12,13 +12,13 @@ doplot = 0; % plot results for debugging
 
 %% Check inputs, set defaults:
 if nargin < 2 || isempty(tau)
-	disp(['CO_embed2_shapestats: using tau as first zero crossing ' ...
-			'of the autocorrelation function'])
+	fprintf(1,'CO_embed2_shapestats: using tau as first zero crossing ' ...
+			'of the autocorrelation function\n')
     tau = 'tau';
 end
 if nargin < 3 || isempty(shape)
 	shape = 'circle';
-	disp('CO_embed2_shapestats: using a circle');
+	fprintf(1,'CO_embed2_shapestats: using a circle\n');
 end
 if nargin < 4 || isempty(r)
 	
@@ -45,7 +45,6 @@ if doplot % plot the recurrence space:
 	plot(m(:,1),m(:,2),'.');
 end
 
-
 %% Start the analysis
 
 counts = zeros(N,1); % stores the counts for points within circle
@@ -60,14 +59,17 @@ switch shape
 			m_c = m - ones(N,1)*m(i,:); % points wrt current point i
 			m_c_d = sum(m_c.^2,2); % Euclidean distances from point i
 			
-		    counts(i) = length(find(m_c_d <= r^2)); % number of points enclosed in a circle of radius r
+		    counts(i) = sum(m_c_d <= r^2); % number of points enclosed in a circle of radius r
 		end
+    otherwise
+        error('Unknown shape ''%s''', shape)
 end
 counts = counts - 1; % ignore self-counts
 
 % No meaningful output if never got a count with any other point!
 % (radius, r, is probably too small)
 if all(counts == 0)
+    fprintf(1,'No counts detected!\n');
     out = NaN; return
 end
 
@@ -84,7 +86,7 @@ out.iqronrange = out.iqr/range(counts);
 
 % Distribution
 x = (0:max(counts));
-n = hist(counts,x); n=n/sum(n);
+n = hist(counts,x); n = n/sum(n);
 [out.mode_val, mix] = max(n);
 out.mode = x(mix);
 

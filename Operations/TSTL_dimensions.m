@@ -15,16 +15,16 @@ N = length(y); % length of time series
 % (1) Maximum number of bins, nbins
 if nargin < 2 || isempty(nbins)
     nbins = 50; % 50 points
-    disp('using default of 50 bins per axis');
+    fprintf(1,'Using a default of 50 bins per axis\n');
 end
 
 % (2) Set embedding parameters to defaults
 if nargin < 3 || isempty(embedparams)
     embedparams = {'ac','cao'};
-    disp('using default embedding using autocorrelation and cao')
+    fprintf(1,'Using default time-delay embedding parameters: autocorrelation and cao')
 else
-    if length(embedparams)~=2
-        disp('given embedding parameters incorrectly formatted -- need {tau,m}')
+    if length(embedparams) ~= 2
+        error('Embedding parameters are incorrectly formatted -- need {tau,m}')
     end
 end
 
@@ -33,8 +33,7 @@ end
 s = benembed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-    out = NaN;
-    return
+    error('Time-delay embedding for TSTOOL failed')
 end
 
 if size(data(s),2) < 3 % embedded with dimension<3
@@ -42,14 +41,14 @@ if size(data(s),2) < 3 % embedded with dimension<3
     mopt = size(data(s),2);
     % embed with dimension m=3
     s = benembed(y,embedparams{1},3,1);
-    disp('reembedded with embedding dimension 3')
+    fprintf(1,'Re-embedded with embedding dimension 3\n')
 else
 	mopt = size(data(s),2);
 end
 
 %% Run
 
-[bc,in,co] = dimensions(s,nbins);
+[bc, in, co] = dimensions(s,nbins);
 
 % we now have the scaling of the boxcounting dimension, D0, the information
 % dimension D1, and the correlation dimension D2.
@@ -478,7 +477,7 @@ out.co_mbestfit = bestm_co.mbestfit;
 	                mybad(i,j) = lfitbadness(logr(stptr(i):endptr(j)),logN(stptr(i):endptr(j))');
 	            end
 	        end
-	        [a b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+	        [a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
 
 			% Do the optimum fit again
 			x = logr(stptr(a):endptr(b));
@@ -503,11 +502,11 @@ out.co_mbestfit = bestm_co.mbestfit;
 		
 		
         function badness = lfitbadness(x,y)
-            gamma=0.02; % CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+            gamma = 0.02; % CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
             p = polyfit(x,y,1);
-            pfit = p(1)*x+p(2);
-            res = pfit-y;
-            badness = mean(abs(res))-gamma*length(x); % want to still maximize length(x)
+            pfit = p(1)*x + p(2);
+            res = pfit - y;
+            badness = mean(abs(res)) - gamma*length(x); % want to still maximize length(x)
 
         end
 

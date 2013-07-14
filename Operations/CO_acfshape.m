@@ -1,12 +1,11 @@
 function out = CO_acfshape(y)
-% This function that analyzes the shape of the autocorrelation function
-% Ben Fulcher
-
+% This function analyzes the shape of the autocorrelation function
+% Ben Fulcher 2009
 
 % Only look up to when two consecutive values are under the threshold for
 % significance:
 
-N = length(y);
+N = length(y); % length of the time series
 th = 2/sqrt(N);
 acf = zeros(N,1);
 
@@ -14,7 +13,7 @@ acf = zeros(N,1);
 % time series (hopefully it's cropped by then)
 for i = 1:N
     acf(i) = CO_autocorr(y,i-1); % *** NOTE THIS! *** acf vector indicies are not lags
-    if i>2 && abs(acf(i))<th && abs(acf(i-1))<th
+    if i > 2 && abs(acf(i)) < th && abs(acf(i-1)) < th
        acf = acf(1:i-2);
        break
     end
@@ -29,18 +28,18 @@ dacf = diff(acf);
 ddacf = diff(dacf);
 extrr = sgnchange(dacf);
 sdsp = ddacf(extrr);
-maxr = extrr(sdsp<0);
-minr = extrr(sdsp>0);
+maxr = extrr(sdsp < 0);
+minr = extrr(sdsp > 0);
 nmaxr = length(maxr);
 nminr = length(minr);
 
 % Number of local minima
-out.nminima = length(find(sdsp>0));
-out.meanminima = mean(sdsp(sdsp>0));
+out.nminima = sum(sdsp > 0);
+out.meanminima = mean(sdsp(sdsp > 0));
 
 % Proportion of local maxima
-out.nmaxima = length(find(sdsp<0));
-out.meanmaxima = abs(mean(sdsp(sdsp<0))); % must be negative: make it positive
+out.nmaxima = sum(sdsp < 0);
+out.meanmaxima = abs(mean(sdsp(sdsp < 0))); % must be negative: make it positive
 
 % Proportion of extrema
 out.nextrema = length(sdsp);
@@ -73,7 +72,7 @@ out.ac3 = CO_autocorr(acf,3);
 out.actau = CO_autocorr(acf,CO_fzcac(acf));
 
 
-if Nac > 3; % Need at least four points to fit exponential
+if Nac > 3 % Need at least four points to fit exponential
     
     %% Fit exponential decay to absolute ACF:
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.5]);
@@ -108,7 +107,7 @@ if Nac > 3; % Need at least four points to fit exponential
     f = fittype('a*x+b','options',s);
 %     plot(maxr,acf(maxr),'ok');
     b = 1;
-    try [c,gof] = fit(maxr,acf(maxr),f);
+    try [c, gof] = fit(maxr,acf(maxr),f);
     catch
         b = 0;
     end

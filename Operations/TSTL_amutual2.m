@@ -22,16 +22,16 @@ ami = data(amutual2(s,maxtau));
 % (c.f., TSTL_amutual -- similar routine here)
 
 % output the raw values
-for i=1:maxtau0
-    if i<=maxtau
-        eval(['out.ami' num2str(i) ' = ami(' num2str(i) ');']);
+for i = 1:maxtau0
+    if i <= maxtau
+        eval(sprintf('out.ami%u = ami(%u);',i,i));
     else
-        eval(['out.ami' num2str(i) ' = NaN;']);
+        eval(sprintf('out.ami%u = NaN;',i));
     end
 end
 
 % output statistics
-lami=length(ami);
+lami = length(ami);
 
 % mean mutual information over this lag range
 out.mami = mean(ami);
@@ -39,23 +39,23 @@ out.stdami = std(ami);
 
 
 % first miniimum of mutual information across range
-dami=diff(ami);
+dami = diff(ami);
 extremai = find(dami(1:end-1).*dami(2:end)<0);
 out.pextrema = length(extremai)/(lami-1);
 if isempty(extremai)
-   out.fmmi=lami; % actually represents lag, because indexes don't but diff delays by 1
+   out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
 else
     out.fmmi = extremai(1);
 end
 
 % Look for periodicities in local maxima
-maximai = find(dami(1:end-1)>0 & dami(2:end)<0)+1;
+maximai = find(dami(1:end-1) > 0 & dami(2:end) < 0)+1;
 dmaximai = diff(maximai);
 % is there a big peak in dmaxima?
  % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pmaxima = length(dmaximai)/floor(lami/2);
 out.modeperiodmax = mode(dmaximai);
-out.pmodeperiodmax = length(find(dmaximai == mode(dmaximai)))/length(dmaximai);
+out.pmodeperiodmax = sum(dmaximai == mode(dmaximai))/length(dmaximai);
 
 % Same for local minima
 % Look for periodicities in local maxima
@@ -65,7 +65,7 @@ dminimai = diff(minimai);
  % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pminima = length(dminimai)/floor(lami/2);
 out.modeperiodmin = mode(dminimai);
-out.pmodeperiodmin = length(find(dminimai == mode(dminimai)))/length(dminimai);
+out.pmodeperiodmin = sum(dminimai == mode(dminimai))/length(dminimai);
 
 % number of crossings at mean/median level, percentiles
 out.pcrossmean = length(sgnchange(ami-mean(ami)))/(lami-1);

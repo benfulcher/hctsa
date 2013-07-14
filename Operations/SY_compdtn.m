@@ -1,30 +1,48 @@
 function out = SY_compdtn(y,nseg,eachorpar)
-% compares the distribution in n consecutive partitions of the signal,
+% Compares the distribution of values in nseg consecutive partitions of the signal,
 % returning the sum of differences of the kernel smoothed distributions
-% eachorbet is either 'each': compares each subdistribution to each other
+% eachorpar is either 'each': compares each subdistribution to each other
 % subdistribtuion; or 'par': compares each subdistribtuion to the parent
 % (full signal) distribution
 % Ben Fulcher August 2009
 
-N = length(y);
+% Check inputs:
+if nargin < 2 || isempty(nseg)
+    nseg = 5;
+end
+if nargin < 3 || isempty(eachorpar)
+    eachorpar = 'par';
+end
+
+npoints = 200; % number of points to compute the distribution across
+
+N = length(y); % number of samples in the time series
 lseg = floor(N/nseg);
-% z=zeros(lseg,1);
-dns = zeros(200,nseg);
-r = linspace(min(y),max(y),200); % make range of ksdensity uniform across all subsegments
+dns = zeros(npoints,nseg);
+r = linspace(min(y),max(y),npoints); % make range of ksdensity uniform across all subsegments
+
+% Compute the kernel-smoothed distribution in all nseg segments of the time series
 for i = 1:nseg
     dns(:,i) = ksdensity(y((i-1)*lseg+1:i*lseg),r,'function','pdf');
 end
-% plot(dns)
-% disp('done')
+if doplot
+    figure('color','w')
+    plot(dns,'k')
+end
 
+% Compare the local distributions
 switch eachorpar
     case 'par'
+        % Compares each subdistribtuion to the parent (full signal) distribution
         pardn = ksdensity(y,r,'function','pdf');
         divs = zeros(nseg,1);
-        for i = 1:nseg;
+        for i = 1:nseg
             divs(i) = sum(abs(dns(:,i)-pardn')); % each is just divergence to parent
         end
-%         hold on;plot(pardn,'r','LineWidth',2);hold off
+        if doplot
+            hold on; plot(pardn,'r','LineWidth',2); hold off
+        end
+        
         % return same statistics as for the 'each' case
         out.meandiv = mean(divs);
         out.mediandiv = median(divs);
@@ -33,30 +51,36 @@ switch eachorpar
         out.stddiv = std(divs);
         
     case 'each'
+        % Compares each subdistribtuion to the parent (full signal) distribution
         if nseg == 2 % output is just an integer: only two distributions to compare
             out = sum(abs(dns(:,1)-dns(:,2)));
-        else % need to compare a number of different distributions against each other
-            diffmat = zeros(nseg); % store pairwise differences
-            for i = 1:nseg
-                for j = 1:nseg
-                    if j>i
-                        diffmat(i,j) = sum(abs(dns(:,i)-dns(:,j))); % store sum of absolute differences
-                    end
+            return
+        end
+        % nseg > 2: need to compare a number of different distributions against each other
+        diffmat = zeros(nseg); % store pairwise differences
+        for i = 1:nseg
+            for j = 1:nseg
+                if j > i
+                    diffmat(i,j) = sum(abs(dns(:,i)-dns(:,j))); % store sum of absolute differences
                 end
             end
-            
-            divs = diffmat(diffmat>0); % a vector of all divergences
-            if isempty(divs);
-                disp('What!? No divergences?! Returning NaNs...');
-                out = NaN; return
-            end
-            out.meandiv = mean(divs);
-            out.mediandiv = median(divs);
-            out.mindiv = min(divs);
-            out.maxdiv = max(divs);
-            out.stddiv = std(divs);
         end
         
+        divs = diffmat(diffmat > 0); % a set of non-zero divergences in all pairs of segments of the time series
+        if isempty(divs);
+            fprintf(1,'That''s strange -- no divergences??! This must be a strange time series.\n');
+            out = NaN; return
+        end
+        
+        % Return basic statistics on differences in distributions in different segments of the time series
+        out.meandiv = mean(divs);
+        out.mediandiv = median(divs);
+        out.mindiv = min(divs);
+        out.maxdiv = max(divs);
+        out.stddiv = std(divs);
+        
+    otherwise
+        error('Unknown method ''%s'', should be ''each'' or ''par''',eachorpar);
 end
 
 end

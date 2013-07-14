@@ -1,4 +1,5 @@
 function out = ST_mm(y,s)
+% Returns the maximum or minimum of the time series
 % Ben Fulcher, 2008
 
 switch s

@@ -12,21 +12,21 @@ function out = TSTL_poincare(y,ref,embedparams)
 % Ben Fulcher November 2009
 
 
-%% Foreplay
-N = length(y);
+%% Check inputs
+N = length(y); % length of the time series
 
 if nargin < 2 || isempty(ref)
     ref = 'max'; % reference point is the first maximum of the time series
 end
 
 if nargin < 3 || isempty(embedparams)
-    embedparams = {'mi',3};
-    disp('using default embedding using mutual information and 3')
+    embedparams = {'mi', 3};
+    fprintf(1,'Using default embedding settings: minimum of the automutual information for tau and m = 3')
 end
 
 if embedparams{2}~=3
     embedparams{2} = 3;
-    disp('embedding in 3-dimensional space. Didn''t you know?')
+    fprintf(1,'Three-dimensional embedding')
 end
 
 % set ref
@@ -40,19 +40,20 @@ if ischar(ref)
             % first local minimum
             dydt = diff(y);
             ref = find(dydt(1:end-1)<=0 & dydt(2:end)>0,1,'first')+1;
+        otherwise
+            error('Unknown reference setting ''%s''',ref);
     end
 end
 
 if isempty(ref), out = NaN; return; end % ridiculous
-if ref<2, ref = 2; end % gives an error, uses previous value in algorithm
+if ref < 2, ref = 2; end % gives an error, uses previous value in algorithm
 
 %% Do your magic, TSTOOL!:
 % time-delay embed the signal:
 s = benembed(y,embedparams{1},3,1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-    out = NaN;
-    return
+    error('Embedding failed');
 end
 
 % run TSTOOL code:
@@ -150,7 +151,7 @@ out.minpbox10 = min(pbox(:));
 out.zerospbox10 = sum(pbox(:) == 0);
 out.meanpbox10 = mean(pbox(:));
 out.rangepbox10 = range(pbox(:));
-out.hboxcounts10 = -sum(pbox(pbox>0).*log(pbox(pbox>0)));
+out.hboxcounts10 = -sum(pbox(pbox > 0).*log(pbox(pbox > 0)));
 out.tracepbox10 = sum(diag(pbox)); % trace
 
 boxcounts = subcountboxes(x,y,5);% 5 partitions per axis
@@ -177,10 +178,10 @@ out.tracepbox5 = sum(diag(pbox));
         ybox(end) = ybox(end)+1;
         
         for i = 1:nbox % x
-            rx = find(x>=xbox(i) & x<xbox(i+1)); % these x are in range
+            rx = (x >= xbox(i) & x < xbox(i+1)); % these x are in range
             for j = 1:nbox % y
                 % only need to look at those ys for which the xs are in range
-                boxcounts(i,j) = sum(y(rx)>=ybox(j) & y(rx)<ybox(j+1));
+                boxcounts(i,j) = sum(y(rx) >= ybox(j) & y(rx) < ybox(j+1));
             end
         end     
     end

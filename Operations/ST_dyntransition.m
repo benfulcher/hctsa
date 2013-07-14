@@ -1,4 +1,4 @@
-function out=ST_dyntransition(y,ng,tau)
+function out = ST_dyntransition(y,ng,tau)
 % Calculates the transition probabilities and measures of how they change
 % as the number of groups; the lag time changes. Discretization is done by
 % quantile separation.
@@ -13,11 +13,12 @@ function out=ST_dyntransition(y,ng,tau)
 %           for dparam
 % Ben Fulcher August 2009
 
+N = length(y);
 
 if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
     tau = CO_fzcac(y);
-    if tau>length(y)/50; % for highly-correlated signals
-        tau = floor(length(y)/50); 
+    if tau > N/50; % for highly-correlated signals
+        tau = floor(N/50);
     end
 end
 
@@ -29,22 +30,22 @@ if length(ng) == 1 && length(tau)>1 % vary tau
     
     for i = 1:length(taur)
         tau = taur(i);
-        if tau>1; y = resample(y,1,tau); end % resample
+        if tau > 1; y = resample(y,1,tau); end % resample
         yth = loc_discretize(y,ng); % threshold
         store(i,:) = getmeasures(yth);
     end
 
     
-elseif length(tau) == 1 && length(ng)>1 % vary ng
-    if min(ng)<2; return; end % need more than 2 groups, always
+elseif length(tau) == 1 && length(ng) > 1 % vary ng
+    if min(ng) < 2; error('Need more than 2 groups'); end % need more than 2 groups, always
     ngr = ng; % the ng range (ng is an input vector)
-    store=zeros(length(ngr),nfeat);
-    if tau>1; y=resample(y,1,tau); end % resample
+    store = zeros(length(ngr),nfeat);
+    if tau>1; y = resample(y,1,tau); end % resample
     
     for i = 1:length(ngr)
-        ng=ngr(i);
-        yth=loc_discretize(y,ng); % thresholded data: yth
-        store(i,:)=loc_getmeasures(yth,ng);
+        ng = ngr(i);
+        yth = loc_discretize(y,ng); % thresholded data: yth
+        store(i,:) = loc_getmeasures(yth,ng);
     end
     
     
@@ -54,7 +55,7 @@ elseif length(tau) == 1 && length(ng)>1 % vary ng
     % decay to zero
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c,gof] = fit(ngr,store(:,1),f);
+    [c, gof] = fit(ngr,store(:,1),f);
     out.meandiagfexp_a = c.a;
     out.meandiagfexp_b = c.b;
     out.meandiagfexp_r2 = gof.rsquare;
@@ -65,7 +66,7 @@ elseif length(tau) == 1 && length(ng)>1 % vary ng
     % decay to zero
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c,gof] = fit(ngr,store(:,2),f);
+    [c, gof] = fit(ngr,store(:,2),f);
     out.maxdiagfexp_a = c.a;
     out.maxdiagfexp_b = c.b;
     out.maxdiagfexp_r2 = gof.rsquare;
@@ -90,15 +91,15 @@ elseif length(tau) == 1 && length(ng)>1 % vary ng
     
     r1 = find(store(:,3)>store(1,3)/5);
     if length(r1)>2
-        [~,gof] = fit(ngr(r1),store(r1,3),f);
+        [~, gof] = fit(ngr(r1),store(r1,3),f);
         out.trflin5_adjr2 = gof.adjrsquare;
     else
         out.trflin5_adjr2 = NaN;
     end
     
     r2 = find(store(:,3)>store(1,3)/10);
-    if length(r2)>2
-        [~,gof] = fit(ngr(r2),store(r2,3),f);
+    if length(r2) > 2
+        [~, gof] = fit(ngr(r2),store(r2,3),f);
         out.trflin10adjr2 = gof.adjrsquare;
     else
         out.trflin10adjr2 = NaN;
@@ -131,13 +132,13 @@ elseif length(tau) == 1 && length(ng)>1 % vary ng
     % 5) trace of covariance matrix
     % check jump:
     out.trcov_jump = store(2,5)-store(1,5);
-    if store(2,5)>store(1,5); r1 = 2:length(ngr); % jump
+    if store(2,5) > store(1,5); r1 = 2:length(ngr); % jump
     else r1 = 1:length(ngr);
     end
     % fit exponential decay to range without possible first jump
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.5]);
     f = fittype('a*exp(b*x)','options',s);
-    [c,gof] = fit(ngr(r1),store(r1,5),f);
+    [c, gof] = fit(ngr(r1),store(r1,5),f);
     out.trcovfexp_a = c.a;
     out.trcovfexp_b = c.b;
     out.trcovfexp_r2 = gof.rsquare;
@@ -148,7 +149,7 @@ elseif length(tau) == 1 && length(ng)>1 % vary ng
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c,gof] = fit(ngr,store(:,6),f);
+    [c, gof] = fit(ngr,store(:,6),f);
     out.stdeigfexp_a = c.a;
     out.stdeigfexp_b = c.b;
     out.stdeigfexp_r2 = gof.rsquare;
@@ -159,7 +160,7 @@ elseif length(tau) == 1 && length(ng)>1 % vary ng
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c,gof] = fit(ngr,store(:,7),f);
+    [c, gof] = fit(ngr,store(:,7),f);
     out.maxeig_fexpa = c.a;
     out.maxeig_fexpb = c.b;
     out.maxeig_fexpr2 = gof.rsquare;
@@ -181,20 +182,19 @@ elseif length(tau) == 1 && length(ng)>1 % vary ng
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c,gof] = fit(ngr,store(:,9),f);
+    [c, gof] = fit(ngr,store(:,9),f);
     out.meaneigfexp_a = c.a;
     out.meaneigfexp_b = c.b;
     out.meaneigfexp_r2 = gof.rsquare;
     out.meaneigfexp_adjr2 = gof.adjrsquare;
     out.meaneigfexp_rmse = gof.rmse;
     
-    
 end
 
 %% %% %% NOW! Output features %% %% %%
 % figure('color','w');
 
-% out=store;
+% out = store;
 
 
 %% Subfunctions
@@ -202,70 +202,73 @@ end
 
 
 
-    function yth=loc_discretize(y,ng)
+    function yth = loc_discretize(y,ng)
         % 1) discretize the time series into a number of groups np
-        th=quantile(y,linspace(0,1,ng+1)); % thresholds for dividing the time series values
-        th(1)=th(1)-1; % this ensures the first point is included
+        th = quantile(y,linspace(0,1,ng+1)); % thresholds for dividing the time series values
+        th(1) = th(1)-1; % this ensures the first point is included
         % turn the time series into a set of numbers from 1:ng
-        yth=zeros(length(y),1);
-        for li=1:ng
-            yth(y>th(li) & y<=th(li+1))=li;
+        yth = zeros(length(y),1);
+        for li = 1:ng
+            yth(y>th(li) & y<=th(li+1)) = li;
         end
-        if any(yth == 0), yth=[]; return; end % error -- they should all be assigned to a group
+        if any(yth == 0) % error -- they should all be assigned to a group
+            error('Some values were not assigned to a group')
+            % yth = []; return;
+        end
         
     end
 
-    function out=loc_getmeasures(yth,ng)
+    function out = loc_getmeasures(yth,ng)
         % returns a bunch of metrics on the transition matrix
-        N=length(yth);
-%         ng=max(yth);
+        N = length(yth);
+%         ng = max(yth);
         
         % 1) Calculate the one-time transition matrix
-        T=zeros(ng);
-        for j=1:ng
-            ri=find(yth == j);
+        T = zeros(ng);
+        for j = 1:ng
+            ri = find(yth == j);
             if isempty(ri) % yth is never j
-                T(j,:)=0;
+                T(j,:) = 0;
             else
-                if ri(end) == N; ri=ri(1:end-1); end % looking at next element; remove last point
-                for k=1:ng
-                    T(j,k)=length(find(yth(ri+1) == k)); % the next element is of this class
+                if ri(end) == N; ri = ri(1:end-1); end % looking at next element; remove last point
+                for k = 1:ng
+                    T(j,k) = sum(yth(ri+1) == k); % the next element is of this class
                 end
             end
         end
-        T=T/(N-1); % N-1 is appropriate because it's a 1-time transition matrix
+        T = T/(N-1); % N-1 is appropriate because it's a 1-time transition matrix
         
         % 2) return some quantities on the transition matrix, T
         %   (i) diagonal elements
-        out(1)=mean(diag(T)); % mean of diagonal elements
-        out(2)=max(diag(T)); % max of diagonal elements
-        out(3)=sum(diag(T)); % sum of diagonal elements (trace)
-%         out(4)=std(diag(T)); % std of diagonal elements
+        out(1) = mean(diag(T)); % mean of diagonal elements
+        out(2) = max(diag(T)); % max of diagonal elements
+        out(3) = sum(diag(T)); % sum of diagonal elements (trace)
+%         out(4) = std(diag(T)); % std of diagonal elements
 
         %  (ii) measures of symmetry:
-        out(4)=sum(sum(abs((T-T')))); % sum of differences of individual elements
-%         out(5)=sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower 
+        out(4) = sum(sum(abs((T-T')))); % sum of differences of individual elements
+%         out(5) = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower 
                                                           % triangular parts of T
 
         % (iii) measures from covariance matrix:
-        out(5)=sum(diag(cov(T))); % trace of covariance matrix
-%         out(6)=max(max(cov(T))); % maximum value in the covariance matrix
-%         out(7)=min(min(cov(T))); % minimum value in the covariance matrix
+        out(5) = sum(diag(cov(T))); % trace of covariance matrix
+%         out(6) = max(max(cov(T))); % maximum value in the covariance matrix
+%         out(7) = min(min(cov(T))); % minimum value in the covariance matrix
 
         % (iv) measures from eigenvalues of T
-        eigT=eig(T);
-        out(6)=std(eigT); % std of eigenvalues
-        out(7)=max(real(eigT)); % maximum eigenvalue
-        out(8)=min(real(eigT)); % minimum eigenvalue
-        out(9)=mean(real(eigT)); % mean eigenvalue
-%         out(14)=max(imag(eigT)); % maximum imaginary part of eigenavlues
+        eigT = eig(T);
+        out(6) = std(eigT); % std of eigenvalues
+        out(7) = max(real(eigT)); % maximum eigenvalue
+        out(8) = min(real(eigT)); % minimum eigenvalue
+        out(9) = mean(real(eigT)); % mean eigenvalue
+%         out(14) = max(imag(eigT)); % maximum imaginary part of eigenavlues
 
         % % (vi) measures from eigenvalues of covariance matrix:
-%         eigcovT=eig(cov(T));
-%         out(10)=max(eigcovT); % max eigenvalue of covariance matrix
-% %         out(16)=min(eigcovT); % min eigenvalue of covariance matrix
-%         out(11)=std(eigcovT); % std of eigenvalues of covariance matrix
-%         out(12)=mean(eigcovT); % mean eigenvalue of covariance matrix
+%         eigcovT = eig(cov(T));
+%         out(10) = max(eigcovT); % max eigenvalue of covariance matrix
+% %         out(16) = min(eigcovT); % min eigenvalue of covariance matrix
+%         out(11) = std(eigcovT); % std of eigenvalues of covariance matrix
+%         out(12) = mean(eigcovT); % mean eigenvalue of covariance matrix
         
     end
 

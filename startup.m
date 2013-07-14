@@ -11,7 +11,6 @@ fprintf(1,' Core directories added.\n')
 
 %% Now add all Toolboxes:
 fprintf(1,'Adding external time-series toolboxes...')
-
 % Kaplan's routines:
 fprintf(1,' Kaplan')
 addfcn('Toolboxes/Kaplan');
@@ -43,6 +42,10 @@ addfcn('Toolboxes/MatlabCentral');
 % Rudy Moddemeijer's code
 fprintf(1,', Rudy Moddemeijer')
 addfcn('Toolboxes/Rudy_Moddemeijer');
+
+% Bill Davidson's hurst exponent code
+fprintf(1,'Bill Davidson\n');
+addfcn('Toolboxes/BillDavidson');
 
 % Max Little's steps/bumps toolbox
 fprintf(1,', steps_bumps')

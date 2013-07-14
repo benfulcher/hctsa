@@ -27,7 +27,7 @@ end
 % divide up dataset into training (ytrain) and test (ytest) portions
 Ntrain = floor(trainp*N);
 ytrain = y(1:Ntrain);
-if Ntrain<N
+if Ntrain < N
     ytest = y(Ntrain+1:end);
     Ntest = length(ytest);
 end
@@ -35,17 +35,17 @@ end
 
 % train HMM with <nstates> states for 30 cycles of EM (or until
 % convergence); default termination tolerance
-[Mu,Cov,P,Pi,LL] = hmm(ytrain,Ntrain,nstates,30);
+[Mu, Cov, P, Pi, LL] = hmm(ytrain,Ntrain,nstates,30);
 
 %% Output statistics on the training
 
 % mean vector, Mu
 Musort = sort(Mu,'ascend');
 for i = 1:length(Mu)
-    eval(['out.Mu_' num2str(i) ' = Musort(' num2str(i) ');']);
+    eval(sprintf('out.Mu_%u = Musort(%u);',i,i));
 end
 out.meanMu = mean(Mu);
-out.rangeMu = max(Mu)-min(Mu);
+out.rangeMu = max(Mu) - min(Mu);
 % out.maxMu = max(Mu);
 % out.minMu = min(Mu);
 
@@ -66,15 +66,13 @@ out.nit = length(LL); % number of iterations
 
 if Ntrain == N
     % no testing -- leave now
-    disp('no testing requested')
-    return
+    error('No HMM testing?!')
 end
 
 %% Calculate log likelihood for the test data
 lik = hmm_cl(ytest,Ntest,nstates,Mu,Cov,P,Pi);
 
 out.LLtestpersample = lik/Ntest;
-
 
 out.LLdifference = out.LLtestpersample - out.LLtrainpersample;
 
