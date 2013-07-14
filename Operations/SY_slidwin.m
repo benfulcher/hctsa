@@ -9,7 +9,6 @@ end
 
 wlen = floor(length(y)/nseg); % size of window
 inc = floor(wlen/nmov); % increment to move at each step
-if inc == 0; inc = 1; end % increment rounded down to zero, prop it up
 
 nsteps = (floor((length(y)-wlen)/inc)+1);
 qs = zeros(nsteps,1);

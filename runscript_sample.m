@@ -3,7 +3,9 @@ parallelize = 0; % set to 1 to parallelize computations over available CPUs usin
 dolog = 0; % set to 1 to log results to a .log file? (usually not necessary)
 tslrange = [100, 30000]; % set limits on the length of time series to be calculated
 tsidmin = 1; % calculate from this ts_id...
-tsidmax = 5; % to this ts_id
+tsidmax = 1; % to this ts_id
+midmin = 1; % minimum m_id
+midmax = 200; % maximum m_id
 writewhat = 'null'; % retrieve and write back NULL entries in the database
 
 %% Settings for run -- how many time series / operations to retrieve at each iteration
@@ -18,7 +20,7 @@ tsidr = ((tsidmin-1):tsidmax); % calculate across the given range of ts_ids one 
 
 % retrieve a vector of m_ids to calculate subject to additional conditions
 % here we remove operations with labels 'shit', 'tisean', 'kalafutvisscher', and 'waveletTB'
-mids = TSQ_getids('mets',1,{},{'shit','tisean','kalafutvisscher','waveletTB','locdep','spreaddep'},[]);
+mids = TSQ_getids('mets',1,{},{'shit','tisean','kalafutvisscher','waveletTB','locdep','spreaddep'},[],[midmin,midmax]);
 
 % range of m_ids retrieved at each iteration:
 midr = [min(mids), max(mids)];
