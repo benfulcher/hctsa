@@ -8,7 +8,7 @@ function out = TSTL_largelyap(y,Nref,maxtstep,past,NNR,embedparams)
 % maxtstep: maximum prediction length (samples)
 % past: exclude -- Theiler window idea
 % NNR: number of nearest neighbours [opt]
-% embedparams: input to benembed, how to time-delay-embed the time series
+% embedparams: input to BF_embed, how to time-delay-embed the time series
 % Ben Fulcher November 2009
 
 %% Preliminaries
@@ -43,6 +43,7 @@ if nargin < 4 || isempty(past)
 end
 if past < 1 && past > 0
     past = floor(past*N);
+    if past == 0, past = 1; end
 end
 
 % (4) Number of neighest neighbours
@@ -56,25 +57,24 @@ if nargin < 6 || isempty(embedparams)
     disp('using default embedding using autocorrelation and cao')
 else
     if length(embedparams) ~= 2
-        disp('given embedding parameters incorrectly formatted -- need {tau,m}')
+        error('Embedding parameters formatted incorrectly -- should be {tau,m}')
     end
 end
 
 
 %% Embed the signal
 % convert to embedded signal object for TSTOOL
-s = benembed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-    out = NaN;
-    return
+    error('Embedding failed');
 end
 
 %% Run
 try
     rs = largelyap(s,Nref,maxtstep,past,NNR);
 catch
-   disp('error evaluating largelyap')
+   disp('Error evaluating the TSTOOL method ''largelyap''')
    out = NaN;
    return
 end
@@ -95,28 +95,41 @@ if all(p == 0)
 end
 
 % p at lags up to 5
-out.p1 = p(1);
-out.p2 = p(2);
-out.p3 = p(3);
-out.p4 = p(4);
-out.p5 = p(5);
+for i = 1:5
+    % evaluate p(1), p(2), ..., p(5) for the output structure
+    eval('out.p%u = p(%u);',i,i);
+end
 out.maxp = max(p);
-% number/proportion of crossings at 90%, 80% of maximum
-out.ncross09max = sum((p(1:end-1)-0.9*max(p)).*(p(2:end)-0.9*max(p)) < 0);
-out.ncross08max = sum((p(1:end-1)-0.8*max(p)).*(p(2:end)-0.8*max(p)) < 0);
-out.pcross09max = sum((p(1:end-1)-0.9*max(p)).*(p(2:end)-0.9*max(p)) < 0)/(length(p)-1);
-out.pcross08max = sum((p(1:end-1)-0.8*max(p)).*(p(2:end)-0.8*max(p)) < 0)/(length(p)-1);
 
-% time taken to get to n% maximum
-out.to095max = find(p > 0.95*max(p),1,'first')-1;
+% number/proportion of crossings at 80% and 90% of maximum
+ncrossx = @(x) sum((p(1:end-1)-x*max(p)).*(p(2:end)-x*max(p)) < 0);
+
+out.ncross09maxold = sum((p(1:end-1)-0.9*max(p)).*(p(2:end)-0.9*max(p)) < 0);
+
+out.ncross08max = ncrossx(0.8);
+out.pcross08max = ncrossx(0.8)/(length(p)-1);
+
+out.ncross09max = ncrossx(0.9);
+out.pcross09max = ncrossx(0.9)/(length(p)-1);
+% out.pcross08max = sum((p(1:end-1)-0.8*max(p)).*(p(2:end)-0.8*max(p)) < 0)/(length(p)-1);
+% out.pcross09max = sum((p(1:end-1)-0.9*max(p)).*(p(2:end)-0.9*max(p)) < 0)/(length(p)-1);
+
+% Time taken to get to n% maximum
+ttomaxx = @(x) find(p > x*max(p),1,'first')-1;
+out.to095max = ttomaxx(0.95);
+% out.to095max = find(p > 0.95*max(p),1,'first')-1;
 if isempty(out.to095max), out.to095max = NaN; end
-out.to09max = find(p > 0.9*max(p),1,'first')-1;
+out.to09max = ttomaxx(0.9);
+% out.to09max = find(p > 0.9*max(p),1,'first')-1;
 if isempty(out.to09max), out.to09max = NaN; end
-out.to08max = find(p > 0.8*max(p),1,'first')-1;
+out.to08max = ttomaxx(0.8);
+% out.to08max = find(p > 0.8*max(p),1,'first')-1;
 if isempty(out.to08max), out.to08max = NaN; end
-out.to07max = find(p > 0.7*max(p),1,'first')-1;
+out.to07max = ttomaxx(0.7);
+% out.to07max = find(p > 0.7*max(p),1,'first')-1;
 if isempty(out.to07max), out.to07max = NaN; end
-out.to05max = find(p > 0.5*max(p),1,'first')-1;
+out.to05max = ttomaxx(0.5);
+% out.to05max = find(p > 0.5*max(p),1,'first')-1;
 if isempty(out.to05max), out.to05max = NaN; end
 
 
@@ -158,7 +171,7 @@ else
             mybad(i,j) = lfitbadness(t_scal(stptr(i):endptr(j)),p_scal(stptr(i):endptr(j))');
         end
     end
-    [a b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+    [a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
     
     % Do the optimum fit again
     t_opt = t_scal(stptr(a):endptr(b));
@@ -232,13 +245,11 @@ else
     out.expfit_rmse = NaN;
 end
 
-
 % hold on; plot(t,c.a*(1-exp(c.b*t)),':r');hold off
-
 
     function badness = lfitbadness(x,y,gamma)
         if nargin < 3,
-            gamma = 0.006; % CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+            gamma = 0.006; % regularization parameter, gamma, chosen empirically, kind of ad hoc
         end
         pp = polyfit(x,y,1);
         pfit = pp(1)*x+pp(2);

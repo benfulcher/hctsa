@@ -51,9 +51,9 @@ switch preproc
         % of an AR2 model to the processed time series.
         % has to beat doing nothing by 5% (error)
         % No spectral methods allowed...
-        [ypp best] = benpp(y,'ar',2,0.05,0);
-        eval(['y = ypp.' best ';']);
-        disp(['Proprocessed according to AR(2) criterion using ' best]);
+        [ypp, best] = benpp(y,'ar',2,0.05,0);
+        eval(sprintf('y = ypp.%s;',best));
+        fprintf(1,'Proprocessed according to AR(2) criterion using %s\n',best);
 end
 
 y = benzscore(y); % z-score the time series
@@ -88,11 +88,11 @@ N = length(y); % could be different to original (if choose a differencing, e.g.)
 % (iii) Correlation in time series: autocorrelation
 % autocorrs_y = CO_autocorr(y,1:20);
 % autocorrs_var = CO_autocorr(y.^2,1:20);
-[ACF_y,Lags_acf_y,bounds_acf_y] = autocorr(y,20,[],[]);
-[ACF_var_y,Lags_acf_var_y,bounds_acf_var_y] = autocorr(y.^2,20,[],[]);
+[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y,20,[],[]);
+[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2,20,[],[]);
 
 % (iv) Partial autocorrelation function: PACF
-[PACF_y,Lags_pacf_y,bounds_pacf_y] = parcorr(y,20,[],[]);
+[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y,20,[],[]);
 
 
 %% (3) Create an appropriate GARCH model
@@ -128,7 +128,7 @@ switch params
         M = Lags_pacf_y(find(abs(PACF_y) < bounds_pacf_y(1),1,'first'))-1;
         % first time partial autocorrelation drops below signifance level
         if isempty(M), M = Lags_pacf_y(end)+1; end
-        if M>3, M=3; end % don't want to calculate massive mean models
+        if M > 3, M = 3; end % don't want to calculate massive mean models
         % (**) M=0 implies that no MA component is required.
         
         
@@ -152,7 +152,7 @@ switch params
         s = s(1:end-2); % remove the Oxford comma.
         % This string, s, should now specify an argument to garchset
         
-        eval(['spec = garchset(' s ');']);
+        eval(sprintf('spec = garchset(%s);',s);
         
         
     otherwise
@@ -160,10 +160,9 @@ switch params
         % e.g., 'R, 2, M, 1, P, 1, Q, 1' will fit an ARMA(2,1) to mean
         % process and a GARCH(1,1) to the variance process
         try
-            eval(['spec = garchset(' params ');']);
+            eval(sprintf('spec = garchset(%s);',params);
         catch emsg
-           disp('Error in formatting input parameters specifying GARCH model. Exiting.')
-           return
+           error('Error formatting input parameters specifying GARCH model.')
         end
     
 end
@@ -174,15 +173,13 @@ spec = garchset(spec,'C', NaN); % fix C=0 -- zero-mean process
 
 % Fit the model
 try
-    [coeff,errors,LLF,innovations,sigmas,summary] = garchfit(spec,y);
+    [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
 catch emsg
-    disp('GARCH FIT FAILED BIG TIME');
-    out = NaN; return
+    error('GARCH fit failed');
 end
 
 if all(isnan(innovations))
-    disp('GARCH FIT FAILED');
-    out = NaN; return
+    error('GARCH fit failed');
 end
 
 %% (4) Return statistics on fit
@@ -195,16 +192,16 @@ end
 %   --AR--
 if isfield(coeff,'AR')
     for i = 1:length(coeff.AR)
-        eval(['out.AR_' num2str(i) ' = coeff.AR(' num2str(i) ');']);
-        eval(['out.ARerr_' num2str(i) ' = errors.AR(' num2str(i) ');']);
+        eval(sprintf('out.AR_%u = coeff.AR(%u);',i,i));
+        eval(sprintf('out.ARerr_%u = errors.AR(%u);',i,i));
     end 
 end
 
 %  --MA--
 if isfield(coeff,'MA')
     for i = 1:length(coeff.MA)
-        eval(['out.MA_' num2str(i) ' = coeff.MA(' num2str(i) ');']);
-        eval(['out.MAerr_' num2str(i) ' = errors.MA(' num2str(i) ');']);
+        eval(sprintf('out.MA_%u = coeff.MA(%u);',i,i));
+        eval(sprintf('out.MAerr_%u = errors.MA(%u);',i,i));
     end 
 end
 
@@ -217,22 +214,21 @@ end
 % -- GARCH --
 if isfield(coeff,'GARCH')
     for i = 1:length(coeff.GARCH)
-        eval(['out.GARCH_' num2str(i) ' = coeff.GARCH(' num2str(i) ');']);
-        eval(['out.GARCHerr_' num2str(i) ' = errors.GARCH(' num2str(i) ');']);
+        eval(sprintf('out.GARCH_%u = coeff.GARCH(%u);',i,i));
+        eval(sprintf('out.GARCHerr_%u = errors.GARCH(%u);',i,i));
     end
 end
 
 % -- ARCH --
 if isfield(coeff,'ARCH')
     for i = 1:length(coeff.ARCH)
-        eval(['out.ARCH_' num2str(i) ' = coeff.ARCH(' num2str(i) ');']);
-        eval(['out.ARCHerr_' num2str(i) ' = errors.ARCH(' num2str(i) ');']);
+        eval(sprintf('out.ARCH_%u = coeff.ARCH(%u);',i,i));
+        eval(sprintf('out.ARCHerr_%u = errors.ARCH(%u);',i,i));
     end
 end
 
 
 % More statistics given from the fit
-
 out.LLF = LLF; % log-likelihood function
 
 out.summaryexitflag = summary.exitFlag; % whether the fit worked ok.
@@ -317,10 +313,9 @@ residout = MF_residanal(stde);
 
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
-for k=1:length(fields);
-    eval(['out.stde_' fields{k} ' = residout.' fields{k} ';']);
+for k = 1:length(fields);
+    eval(sprintf('out.stde_%s = residout.%s;',fields{k},fields{k}));
 end
-
 
 out.ac1_stde2 = CO_autocorr(stde2,1);
 out.diff_ac1 = CO_autocorr(y.^2,1) - CO_autocorr(stde2,1);

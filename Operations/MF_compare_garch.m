@@ -7,7 +7,6 @@ function out = MF_compare_garch(y,preproc,pr,qr)
 
 
 %% Inputs
-
 if nargin < 2 || isempty(preproc)
     preproc = 'ar'; % do the preprocessing that maximizes ar(2) whiteness
 end
@@ -19,7 +18,6 @@ end
 if nargin < 4 || isempty(qr)
     qr = 1:4; % GARCH(pr,1:4);
 end
-
 
 %% (1) Data preprocessing
 y0 = y; % the original, unprocessed time series
@@ -36,6 +34,8 @@ switch preproc
         [ypp, best] = benpp(y,'ar',2,0.05,0);
         eval(sprintf('y = ypp.%s;',best));
         fprintf(1,'Proprocessed the time series according to AR(2) criterion using %s\n',best);
+    otherwise
+        error('Unknwon preprocessing setting ''%s''',preproc);
 end
 
 y = benzscore(y); % make sure the time series is z-scored
@@ -70,11 +70,11 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % (iii) Correlation in time series: autocorrelation
 % autocorrs_y = CO_autocorr(y,1:20);
 % autocorrs_var = CO_autocorr(y.^2,1:20);
-[ACF_y,Lags_acf_y,bounds_acf_y] = autocorr(y,20,[],[]);
-[ACF_var_y,Lags_acf_var_y,bounds_acf_var_y] = autocorr(y.^2,20,[],[]);
+[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y,20,[],[]);
+[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2,20,[],[]);
 
 % (iv) Partial autocorrelation function: PACF
-[PACF_y,Lags_pacf_y,bounds_pacf_y] = parcorr(y,20,[],[]);
+[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y,20,[],[]);
 
 
 %% (3) Create an appropriate GARCH model

@@ -12,7 +12,7 @@
 % chosen lambda values are close to each other.
 %
 % Usage:
-% [x, E, s] = l1pwcar1(y, lambda, a, display, stoptol, maxiter)
+% [x, E, s] = ML_l1pwcar1(y, lambda, a, display, stoptol, maxiter)
 %
 % Input arguments:
 % - y          Original signal to denoise, size N x 1.
@@ -42,7 +42,7 @@
 % This code is released under the terms of GNU General Public License as
 % published by the Free Software Foundation; version 2 or later.
 
-function [x, E, s] = l1pwcar1(y, lambda, a, display, stoptol, maxiter)
+function [x, E, s] = ML_l1pwcar1(y, lambda, a, display, stoptol, maxiter)
 
 error(nargchk(3,6,nargin));
 
@@ -63,5 +63,5 @@ y1 = y(2:N);
 y0 = y(1:N-1);
 yd = y1-a*y0;
 
-[mu, E, s] = l1pwc(yd, lambda, display, stoptol, maxiter);
+[mu, E, s] = ML_l1pwc(yd, lambda, display, stoptol, maxiter);
 x = mu/(1-a);

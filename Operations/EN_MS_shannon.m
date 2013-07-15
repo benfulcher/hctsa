@@ -1,7 +1,7 @@
 function out = MS_shannon(y,bin,depth)
-% Wrapped up from Michael Small's code, available at 
+% Wrapped up from Michael Small's code 'shannon.m', available at
 % http://small.eie.polyu.edu.hk/matlab/
-% a number 'depth' symbols from a 'bin'-symbol alphabet size
+% Uses a number 'depth' symbols from a 'bin'-symbol alphabet size
 
 if nargin < 2 || isempty(bin)
     bin = 2; % two bins to discretize the time series, y
@@ -12,18 +12,18 @@ end
 
 %% (*)
 if length(bin) == 1 && length(depth) == 1
-    % run the code, just return a number
+    % Run the code, just return a number
     out = shannon(y,bin,depth)/depth;
 end
 
-%% (*) Statistics over depths (constant number of bins)
+%% (*) Return statistics over depths (constant number of bins)
 % Somewhat strange behaviour -- very variable
-if length(bin) == 1 && length(depth)>1
+if length(bin) == 1 && length(depth) > 1
     % range over depths specified in the vector
     % return statistics on results
     ndepths = length(depth);
     ents = zeros(ndepths,1);
-    for i=1:ndepths
+    for i = 1:ndepths
         ents(i) = shannon(y,bin,depth(i));
     end
     % should scale with depth: normalize by this:
@@ -58,8 +58,8 @@ if length(bin) > 1 && length(depth) > 1
     ndepths = length(depth);
     
     ents = zeros(nbins,ndepths);
-    for i=1:nbins
-        for j=1:ndepths
+    for i = 1:nbins
+        for j = 1:ndepths
             ents(i,j) = shannon(y,bin(i),depth(j))/depth(j);
         end
     end
@@ -69,25 +69,3 @@ end
 
 
 end
-
-
-% function ent=shannon(z,bin,depth)
-%
-% calculate the approximate shannon entropy of a time series using a bin
-% bin encoding and depth symbol symbol sequences. The entropy is
-% given by 
-%    sum P log P
-% where P is the probability of any given symbol sequence occuring, 
-% and the summation is over all symbol sequences (of depth symbols
-% from a bin symbol alphabet).
-%
-% The binining is a uniform population binning.
-%
-% defualts:
-% bin = 2
-% depth = 3
-%
-% implementation is shannon.c
-%
-% Michael Small
-% 8/10/04

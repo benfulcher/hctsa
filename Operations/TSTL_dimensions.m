@@ -4,7 +4,7 @@ function out = TSTL_dimensions(y,nbins,embedparams)
 % series embedded using embedparams.
 % y: column vector of time series data
 % nbins: maximum number of partitions per axis.
-% embedparams: embedding parameters to feed benembed.m for embedding the
+% embedparams: embedding parameters to feed BF_embed.m for embedding the
 % signal in the form {tau,m}
 
 % Ben Fulcher November 2009
@@ -30,7 +30,7 @@ end
 
 %% Embed the signal
 % convert to embedded signal object for TSTOOL
-s = benembed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Time-delay embedding for TSTOOL failed')
@@ -40,7 +40,7 @@ if size(data(s),2) < 3 % embedded with dimension<3
     % note the 'true' predicted embedding dimension
     mopt = size(data(s),2);
     % embed with dimension m=3
-    s = benembed(y,embedparams{1},3,1);
+    s = BF_embed(y,embedparams{1},3,1);
     fprintf(1,'Re-embedded with embedding dimension 3\n')
 else
 	mopt = size(data(s),2);
@@ -502,7 +502,7 @@ out.co_mbestfit = bestm_co.mbestfit;
 		
 		
         function badness = lfitbadness(x,y)
-            gamma = 0.02; % CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+            gamma = 0.02; % reguralization parameter gamma selected empirically, could be tweaked in future work
             p = polyfit(x,y,1);
             pfit = p(1)*x + p(2);
             res = pfit - y;

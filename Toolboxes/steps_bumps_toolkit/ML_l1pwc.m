@@ -10,7 +10,7 @@
 % ensuring that the chosen lambda values are close to each other.
 %
 % Usage:
-% [x, E, s] = l1pwc(y, lambda, display, stoptol, maxiter)
+% [x, E, s] = ML_l1pwc(y, lambda, display, stoptol, maxiter)
 %
 % Input arguments:
 % - y          Original signal to denoise, size N x 1.
@@ -43,7 +43,7 @@
 % This code is released under the terms of GNU General Public License as
 % published by the Free Software Foundation; version 2 or later.
 
-function [x, E, s, lambdamax] = l1pwc(y, lambda, display, stoptol, maxiter)
+function [x, E, s, lambdamax] = ML_l1pwc(y, lambda, display, stoptol, maxiter)
 
 error(nargchk(2,5,nargin));
 if (nargin < 3)

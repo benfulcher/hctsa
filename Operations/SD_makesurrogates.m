@@ -3,8 +3,8 @@ function out = SD_makesurrogates(x,surrmethod,nsurrs,extrap)
 % Method described relatively clearly in Guarin Lopez et al. (arXiv, 2010)
 % Used bits of aaft code that references (and presumably was obtained from)
 % D. Kugiumtzis,
-% “Surrogate data test for nonlinearity including monotonic
-% transformations,” Phys. Rev. E, vol. 62, no. 1, 2000.
+% Ã¬Surrogate data test for nonlinearity including monotonic
+% transformations,Ã® Phys. Rev. E, vol. 62, no. 1, 2000.
 
 % x should be input time series; surrogates should be made
 % based on this.
@@ -12,7 +12,7 @@ function out = SD_makesurrogates(x,surrmethod,nsurrs,extrap)
 
 % INPUTS
 % number of surrogates to generate
-if nargin<3 || isempty(nsurrs)
+if nargin < 3 || isempty(nsurrs)
     nsurrs = 1; % just create a single surrogate
 end
 
@@ -32,12 +32,12 @@ switch surrmethod
         % Surrogates maintain linear correlations in the data, but any
         % nonlinear structure is destroyed by the phase randomization
         
-        disp(['Constructing ' num2str(nsurrs) ' surrogates using the Random Phase Method'])
-        disp(['Linear correlations are maintained but nonlinear structure will be destroyed ' ...
-                'by the phase randomization'])
+        fprintf(1,'Constructing %u surrogates using the Random Phase Method\n',nsurrs)
+        fprintf(1,'Linear correlations are maintained but nonlinear structure will be destroyed ' ...
+                'by the phase randomization\n')
         
         % lost a datapoint if odd
-        if rem(N,2)==0
+        if rem(N,2) == 0
           n2 = N/2;
         else
           n2 = (N-1)/2;
@@ -61,7 +61,7 @@ switch surrmethod
             
             
             % zNew is like z, but with randomized phases:
-            zNew = [zMag(1:n2+1)' flipud(zMag(2:n2))']' .* exp(newPhase .* 1i);
+            zNew = [zMag(1:n2+1)', flipud(zMag(2:n2))']' .* exp(newPhase .* 1i);
             
             % Transform back into the time domain
             xNew = real(ifft(zNew,N));
@@ -69,17 +69,17 @@ switch surrmethod
         end
         
     case 'AAFT'
-        disp(['Constructing ' num2str(nsurrs) ' surrogates using the Amplitude Adjusted Fourier '...
-            'Transform (AAFT) Method'])
-        disp(['Linear correlations are maintained but nonlinear structure will be destroyed ' ...
-                'by the phase randomization. Amplitude Distribution is approximately maintained'])
+        fprintf(1,'Constructing %u surrogates using the Amplitude Adjusted Fourier '...
+            'Transform (AAFT) Method\n',nsurrs)
+        fprintf(1,'Linear correlations are maintained but nonlinear structure will be destroyed ' ...
+                'by the phase randomization. Amplitude Distribution is approximately maintained\n')
         
         % Sort and rank order the data
-        [xSorted,ix] = sort(x);
-        [~,xRO] = sort(ix); % rank ordered permutation
+        [xSorted, ix] = sort(x);
+        [~, xRO] = sort(ix); % rank ordered permutation
         
         % lost a datapoint if odd
-        if rem(N,2)==0
+        if rem(N,2) == 0
           n2 = N/2;
         else
           n2 = (N-1)/2;
@@ -108,35 +108,35 @@ switch surrmethod
             
             
             % zNew is like z, but with randomized phases:
-            zNew = [zMag(1:n2+1)' flipud(zMag(2:n2))']' .* exp(newPhase .* 1i);
+            zNew = [zMag(1:n2+1)', flipud(zMag(2:n2))']' .* exp(newPhase .* 1i);
             
             % Transform back into the time domain
             % phase-randomized version of random noise rank-ordered as x
             yRP = real(ifft(zNew,N));
             
             % --------- rank order x with respect to yRP
-           [~,ixyRP] = sort(yRP);
-           [~,yRO] = sort(ixyRP);
+           [~, ixyRP] = sort(yRP);
+           [~, yRO] = sort(ixyRP);
            out(:,surri) = xSorted(yRO);
         end        
         
     case 'TFT'
-        disp(['Constructing ' num2str(nsurrs) ' surrogates using the Truncated Fourier '...
-            'Transform (TFT) Method'])
-        disp(['Low Frequency phases are preserved, and high frequency phases will be ' ...
-                'randomized. A way of dealing with non-stationarity.'])
+        fprintf(1,'Constructing %u surrogates using the Truncated Fourier '...
+            'Transform (TFT) Method.\n',nsurrs)
+        fprintf(1,'Low Frequency phases are preserved, and high frequency phases will be ' ...
+                'randomized. A way of dealing with non-stationarity.\n')
         if isempty(extrap)
-            disp('you haven''t specified a cut-off frequency!! Setting N/8')
+            fprintf(1,'You haven''t specified a cut-off frequency!! Setting N/8\n')
             fc = round(N/8);
         else
             fc = extrap; % extra input is the frequency cut-off
-            if fc<1
+            if fc < 1
                 fc = N*fc;
             end
         end
             
         % lost a datapoint if odd
-        if rem(N,2)==0
+        if rem(N,2) == 0
           n2 = N/2;
         else
           n2 = (N-1)/2;
@@ -168,11 +168,11 @@ switch surrmethod
             out(:,surri) = xNew;
         end
     otherwise
-        error('Invalid surrogate specifier')
+        error('Unknown surrogate generation method ''%s''',surrmethod)
 end
 
-% farewell message
-disp(['I just made ' num2str(nsurrs) surrmethod ' surrogates in just ' benrighttime(toc)])
+% Cute farewell message
+fprintf(1,'Generated %u %s surrogates in %s.\n',nsurrs,surrmethod,benrighttime(toc,1))
 
 
 end

@@ -1,4 +1,4 @@
-function [x,y] = MS_embed(z,v,w)
+function [x, y] = MS_embed(z,v,w)
 
 % [x,y] or x= embed(z,lags) or embed(z,dim,lag)
 % embed z using given lags or dim and lag
@@ -13,35 +13,35 @@ function [x,y] = MS_embed(z,v,w)
 %  lag = 1
 %  lags = [0 1 2]; or [-1 lags] when two outputs and no negative lags
 %
-%Michael Small
-%3/3/2005
-%ensmall@polyu.edu.hk
+% Michael Small
+% 3/3/2005
+% ensmall@polyu.edu.hk
+% (minor changes Ben Fulcher)
 
-
-if nargin==3
-  v= 0:w:w*(v-1);
-end;
+if nargin == 3
+  v = (0:w:w*(v-1));
+end
 if nargin==1
-  v= [0 1 2];
+  v = [0, 1, 2];
 end
-if nargout==2 & min(v)>=0
-  v= [-1 v];
+if nargout == 2 && min(v) >= 0
+  v = [-1, v];
 end
-lags= sort(v);
+lags = sort(v);
 
 dim = length(lags);
 
-[c,n] = size(z);
+[c, n] = size(z);
 if c ~= 1
   z = z';
-  [c,n] = size(z);
+  [c, n] = size(z);
 end
 if c ~= 1
   error('Embed needs a vector as first arg.');
 end
 
 if n < lags(dim)
-  disp('Vector is too small to be embedded with the given lags'); % ++BF changed from error
+  fprintf(1,'Vector is too small to be embedded with the given lags'); % ++BF changed from error
   x = NaN;
 end
 
@@ -57,8 +57,8 @@ for i=1:dim
 end
 
 if nargout==2
-  id= find(v<0);
-  y= x(id,:);
-  id= find(v>=0);
-  x= x(id,:);
-end;
+  y = x(v<0,:);
+  x = x(v>=0,:);
+end
+
+end

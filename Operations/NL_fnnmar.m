@@ -70,16 +70,17 @@ if isempty(th) % output summary statistics
     end
 
     % first time NN error goes below a set of thresholds
-    out.m005 = find(nn < 0.05,1,'first');
+    firstunderfn = @(x) find(nn < x,1,'first');
+    out.m005 = firstunderfn(0.05);
     if isempty(out.m005), out.m005 = maxm + 1; end
     
-    out.m01 = find(nn < 0.1,1,'first');
+    out.m01 = firstunderfn(0.1);
     if isempty(out.m01), out.m01 = maxm + 1; end
     
-    out.m02 = find(nn < 0.2,1,'first');
+    out.m02 = firstunderfn(0.2);
     if isempty(out.m02), out.m02 = maxm + 1; end
     
-    out.m05 = find(nn < 0.5,1,'first');
+    out.m05 = firstunderfn(0.5);
     if isempty(out.m05), out.m05 = maxm + 1; end
 
 

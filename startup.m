@@ -12,8 +12,8 @@ fprintf(1,' Core directories added.\n')
 %% Now add all Toolboxes:
 fprintf(1,'Adding external time-series toolboxes...')
 % Kaplan's routines:
-fprintf(1,' Kaplan')
-addfcn('Toolboxes/Kaplan');
+fprintf(1,' Danny Kaplan')
+addfcn('Toolboxes/Danny_Kaplan');
 
 % CRP Toolbox by Marwan, version 5.13, Release 26
 fprintf(1,', crptool')
@@ -29,23 +29,23 @@ addfcn('Toolboxes/arfit_tool');
 
 % Michael Small's utilities
 fprintf(1,', Michael Small')
-addfcn('Toolboxes/MSmall_utilities');
+addfcn('Toolboxes/Michael_Small');
 
 % Zoubin Gharamani's hmm toolbox
 fprintf(1,', HMM')
-addfcn('Toolboxes/hmm');
+addfcn('Toolboxes/ZG_hmm');
 
 % Code from Matlab Central
-fprintf(1,', Matlab Central code')
+fprintf(1,', Matlab Central code,\n')
 addfcn('Toolboxes/MatlabCentral');
 
 % Rudy Moddemeijer's code
-fprintf(1,', Rudy Moddemeijer')
+fprintf(1,'Rudy Moddemeijer')
 addfcn('Toolboxes/Rudy_Moddemeijer');
 
 % Bill Davidson's hurst exponent code
-fprintf(1,'Bill Davidson\n');
-addfcn('Toolboxes/BillDavidson');
+fprintf(1,', Bill Davidson');
+addfcn('Toolboxes/Bill_Davidson');
 
 % Max Little's steps/bumps toolbox
 fprintf(1,', steps_bumps')

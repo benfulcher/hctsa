@@ -13,7 +13,7 @@ if nargin < 3
     whattype = 'seg'; % divide into n segments by default
 end
 
-N = length(y);
+N = length(y); % time-series length
 
 switch whattype
 case 'seg'
@@ -33,7 +33,7 @@ case 'len'
             M(j) = mean(y((j-1)*n+1:j*n));
         end
     else
-        fprintf(1,'time series (N = %u) is too short for this StatAv(%s,%u)\n',N,whattype,n)
+        fprintf(1,'This time series (N = %u) is too short for StatAv(%s,%u)\n',N,whattype,n)
         out = NaN; return
     end
 otherwise

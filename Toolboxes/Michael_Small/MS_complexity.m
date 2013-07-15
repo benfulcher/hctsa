@@ -1,11 +1,11 @@
 function out = MS_complexity(x,n,preproc)
 % Wrapper code around Michael Small's original 'complexity.m' code. Uses
-% the mex file complexitybs.
+% the mex file MS_complexitybs.
 % http://small.eie.polyu.edu.hk/matlab/
 % Ben Fulcher 19/2/2010
 
 if nargin < 2 || isempty(n)
-    n=2;
+    n = 2;
 end
 if nargin < 3
     preproc = [];
@@ -24,28 +24,28 @@ end
 % symbol sequences in x, divided by the expected number of distinct 
 % symbols for a noise sequence.
 %
-% Algorithm is implemented in complexitybs.c
+% Algorithm is implemented in MS_complexitybs.c
 %
 % M. Small
 % ensmall@polyu.edu.hk
 % 7/10/04
 
-if length(n)>1
+if length(n) > 1
    for ni = 1:length(n),
         cmp(ni) = complexity(x,n(ni));
    end
 else
     %do the binning, with equi-probably bins
-    x=x(:);
-    nx=length(x);
-    [xn,xi]=sort(x);
-%     y=zeros(nx,1);
+    x = x(:);
+    nx = length(x);
+    [xn, xi] = sort(x);
+%     y = zeros(nx,1);
     y = 1:nx;
     y = floor(y.*(n/(nx+1)));
     x(xi) = y;
 
-    %compute complexity with complexitybs
-    cmp = complexitybs(x+eps);
+    % compute complexity with MS_complexitybs
+    cmp = MS_complexitybs(x+eps);
 end
 
 %______________________________________________________________

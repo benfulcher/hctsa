@@ -20,7 +20,7 @@
 % Machine Dynamics", in 2010 IEEE International Conference on Acoustics,
 % Speech and Signal Processing, 2010, ICASSP 2010 Proceedings.
 
-function lambdamax = l1pwclmax(y)
+function lambdamax = ML_l1pwclmax(y)
 
 error(nargchk(1,1,nargin));
 y = y(:);

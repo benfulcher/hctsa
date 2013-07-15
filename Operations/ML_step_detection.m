@@ -10,7 +10,7 @@ function out = ML_step_detection(y,method,params)
 N = length(y);
 
 if nargin < 2 || isempty(method)
-    disp('Using the Kalafut-Visscher method by default')
+    fprintf(1,'Using Kalafut-Visscher step detection by default\n')
     method = 'kv';
 end
 
@@ -103,16 +103,18 @@ switch method
         if nargin < 3
             params = [];
         end
-        if length(params)>=1, lambda = params(1);
-        else lambda = 10; % higher lambda --> less steps
+        if length(params) >= 1
+            lambda = params(1);
+        else
+            lambda = 10; % higher lambda --> less steps
         end
-        if lambda<1 % specify as a proportion of lambdamax
-            lambda = l1pwclmax(y)*lambda;
+        if lambda < 1 % specify as a proportion of lambdamax
+            lambda = ML_l1pwclmax(y)*lambda;
         end
         
         
         % Run the code
-        [steppedy, E, s, lambdamax] = l1pwc(y, lambda, 0); % use defaults for stoptol and maxiter
+        [steppedy, E, s, lambdamax] = ML_l1pwc(y, lambda, 0); % use defaults for stoptol and maxiter
         
         % round to this precision to remove numberical flucuations of order
         % less than 1e-4
@@ -131,6 +133,8 @@ switch method
         else
             chpts = 1; % no changes
         end
+    otherwise
+        error('Unknown step detection method');
 end
 
 
@@ -149,9 +153,9 @@ out.rmsoff = std(y) - std(y-steppedy);
 % reduces variance per step
 out.rmsoffpstep = (out.rmsoff)/(length(chpts));
 % ratio of number of steps in first half of time series to second half
-sum1 = (sum(chpts<N/2)-1);
-sum2 = sum(chpts>=N/2);
-if sum2>0 && sum1>0
+sum1 = (sum(chpts < N/2)-1);
+sum2 = sum(chpts >= N/2);
+if sum2 > 0 && sum1 > 0
     if sum2 > sum1,
         out.ratn12 = sum1/sum2;
     else
@@ -163,7 +167,7 @@ end
 out.diffn12 = abs(sum1-sum2)/length(chpts);
 
 % proportion of really short steps
-out.pshort_3 = sum(chints<=3)/N;
+out.pshort_3 = sum(chints <= 3)/N;
 % mean interval between steps
 out.meanstepint = mean(chints)/N;
 % mean interval greater than 3 samples, per sample

@@ -15,7 +15,8 @@ switch detrndmeth
     case 'rav', nr = round(linspace(1,N/25,25));
     case 'resampleup', nr = (1:20);
     case 'resampledown', nr = (1:20);
-	otherwise, error('Unknown detrending method ''%s''',detrndmeth);
+    otherwise
+        error('Unknown detrending method ''%s''',detrndmeth);
 end
 
 %% Do the progessive processing with running statistical evaluation
@@ -43,7 +44,7 @@ for q = 1:length(nr)
     end
     outmat(q,:) = doyourcalcthing(y,y_d);
 end
-% out1=outmat;
+% out1 = outmat;
 
 
 %% DETERMINE THE STATISTICS ON EACH TEST
@@ -52,7 +53,7 @@ end
 stats = zeros(10,4);
 for t = 1:10;
     if any(~isfinite(stats(t,:))),
-        disp('hello')
+        fprintf(1,'This is a bad statistic\n')
     end
     stats(t,:) = doyourtestthing(outmat(:,t)); 
 end
@@ -71,56 +72,57 @@ out.swms5_2_lin = stats(2,3);
 out.swms5_2_exp = stats(2,4);
 
 % 3) Sliding Window std
-out.swss5_2_trend=stats(3,1);
-out.swss5_2_jump=stats(3,2);
-out.swss5_2_lin=stats(3,3);
-out.swss5_2_exp=stats(3,4);
+out.swss5_2_trend = stats(3,1);
+out.swss5_2_jump = stats(3,2);
+out.swss5_2_lin = stats(3,3);
+out.swss5_2_exp = stats(3,4);
 
 % 4) Gaussian kernel density fit, rmse
-out.gauss1_kd_trend=stats(4,1);
-out.gauss1_kd_jump=stats(4,2);
-out.gauss1_kd_lin=stats(4,3);
-out.gauss1_kd_exp=stats(4,4);
+out.gauss1_kd_trend = stats(4,1);
+out.gauss1_kd_jump = stats(4,2);
+out.gauss1_kd_lin = stats(4,3);
+out.gauss1_kd_exp = stats(4,4);
 
 % 5) Gaussian 10-bin histogram fit, rmse
-out.gauss1_h10_trend=stats(5,1);
-out.gauss1_h10_jump=stats(5,2);
-out.gauss1_h10_lin=stats(5,3);
-out.gauss1_h10_exp=stats(5,4);
+out.gauss1_h10_trend = stats(5,1);
+out.gauss1_h10_jump = stats(5,2);
+out.gauss1_h10_lin = stats(5,3);
+out.gauss1_h10_exp = stats(5,4);
 
 % 6) Compare normal fit
-out.norm_kscomp_trend=stats(6,1);
-out.norm_kscomp_jump=stats(6,2);
-out.norm_kscomp_lin=stats(6,3);
-out.norm_kscomp_exp=stats(6,4);
+out.norm_kscomp_trend = stats(6,1);
+out.norm_kscomp_jump = stats(6,2);
+out.norm_kscomp_lin = stats(6,3);
+out.norm_kscomp_exp = stats(6,4);
 
 % 7) Outliers: ben test
-out.ol_trend=stats(7,1);
-out.ol_jump=stats(7,2);
-out.ol_lin=stats(7,3);
-out.ol_exp=stats(7,4);
+out.ol_trend = stats(7,1);
+out.ol_jump = stats(7,2);
+out.ol_lin = stats(7,3);
+out.ol_exp = stats(7,4);
 
 % 8) Cross correlation to original signal (-1)
-out.xcn1_trend=stats(8,1);
-out.xcn1_jump=stats(8,2);
-out.xcn1_lin=stats(8,3);
-out.xcn1_exp=stats(8,4);
+out.xcn1_trend = stats(8,1);
+out.xcn1_jump = stats(8,2);
+out.xcn1_lin = stats(8,3);
+out.xcn1_exp = stats(8,4);
 
 % 9) Cross correlation to original signal (+1)
-out.xc1_trend=stats(9,1);
-out.xc1_jump=stats(9,2);
-out.xc1_lin=stats(9,3);
-out.xc1_exp=stats(9,4);
+out.xc1_trend = stats(9,1);
+out.xc1_jump = stats(9,2);
+out.xc1_lin = stats(9,3);
+out.xc1_exp = stats(9,4);
 
 % 10) Norm of differences to original and processed signals
-out.normdiff_trend=stats(10,1);
-out.normdiff_jump=stats(10,2);
-out.normdiff_lin=stats(10,3);
-out.normdiff_exp=stats(10,4);
+out.normdiff_trend = stats(10,1);
+out.normdiff_jump = stats(10,2);
+out.normdiff_lin = stats(10,3);
+out.normdiff_exp = stats(10,4);
 
 
-    function f = doyourcalcthing(y,y_d)        %% TESTS
-        y = zscore(y); y_d = zscore(y_d);
+    %% TESTS
+    function f = doyourcalcthing(y,y_d)
+        y = benzscore(y); y_d = benzscore(y_d);
         f = zeros(10,1); % vector of features to output
         % 1) Stationarity
         % (a) StatAv
@@ -137,7 +139,7 @@ out.normdiff_exp=stats(10,4);
         if ~isstruct(me1) && isnan(me1)
             f(4) = NaN;
         else
-            f(4)=me1.rmse;
+            f(4) = me1.rmse;
         end
         
         %   (b) histogram 10 bins
@@ -157,7 +159,7 @@ out.normdiff_exp=stats(10,4);
         end
         
         % 3) Outliers
-        f(7)=OL_bentest(y_d,5,1);
+        f(7) = OL_bentest(y_d,5,1);
         
         % Cross Correlation to original signal
         if length(y) == length(y_d)
@@ -201,7 +203,7 @@ out.normdiff_exp=stats(10,4);
 
         % t-statistic at this point
         tstat = abs((mbfatd(ind,1)-mbfatd(ind,2))/sqrt(mbfatd(ind,3)^2+mbfatd(ind,4)^2));
-        if tstat > 15;%2 && ind<length(f)-2 && mbfatd(ind-1)<mbfatd(ind) && mbfatd(ind+1)<mbfatd(ind)
+        if tstat > 15; %2 && ind < length(f)-2 && mbfatd(ind-1) < mbfatd(ind) && mbfatd(ind+1) < mbfatd(ind)
             g(2) = ind;
         else g(2) = NaN;
         end
@@ -233,7 +235,7 @@ out.normdiff_exp=stats(10,4);
         ftyp = fittype('a*exp(b*x)+c','options',fopt);
         try 
             [c, gof] = fit((1:length(f))',f,ftyp);
-            if gof.rsquare>0.9
+            if gof.rsquare > 0.9
                 g(4) = c.b; % return the decay coefficient
             else
                 g(4) = NaN;

@@ -1,4 +1,4 @@
-% cmp = complexitybs(x,n);
+% cmp = MS_complexitybs(x,n);
 %
 % calculate the Lempel-Ziv complexity of the n-symbol stream x. 
 %
@@ -8,7 +8,7 @@
 % symbol sequences in x, divided by the expected number of distinct 
 % symbols for a noise sequence.
 %
-% Algorithm is implemented in complexitybs.c
+% Algorithm is implemented in MS_complexitybs.c
 %
 % M. Small
 % ensmall@polyu.edu.hk

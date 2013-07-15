@@ -10,7 +10,7 @@ function out = TISEAN_nstat_z(y,nseg,embedparams)
 % Inputs:
 % y: the column of time series data
 % nseg: number of subsegments to divide the data into
-% embedparams: embedding parameters in usual format for benembed
+% embedparams: embedding parameters in usual format for BF_embed
 
 % Ben Fulcher 17/11/2009
 
@@ -27,7 +27,7 @@ if nargin < 3
     embedparams = {1,3};
     fprintf(1,'Using default embedding using tau = 1 and m = 3\n')
 end
-tm = benembed(y,embedparams{1},embedparams{2},2);
+tm = BF_embed(y,embedparams{1},embedparams{2},2);
 
 %% Write the file
 tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');

@@ -48,18 +48,21 @@ out.medianSC = median(SC(:));
 out.maxSC = max(SC(:));
 out.maxonmedSC = max(SC(:))/median(SC(:));
 
-% proportion of coeffs matrix over ___ maximum (thresholded)
-out.pover99 = sum(SC(SC > 0.99*max(SC(:))))/Nentries;
-out.pover98 = sum(SC(SC > 0.98*max(SC(:))))/Nentries;
-out.pover95 = sum(SC(SC > 0.95*max(SC(:))))/Nentries;
-out.pover90 = sum(SC(SC > 0.90*max(SC(:))))/Nentries;
-out.pover80 = sum(SC(SC > 0.80*max(SC(:))))/Nentries;
+% Proportion of coeffs matrix over ___ maximum (thresholded)
+poverfn = @(x) sum(SC(SC > x*max(SC(:))))/Nentries;
+out.pover99 = poverfn(0.99);
+out.pover98 = poverfn(0.88);
+out.pover95 = poverfn(0.95);
+out.pover90 = poverfn(0.90);
+out.pover80 = poverfn(0.80);
 
 % Distribution of scaled power
 % Fit using Statistics Toolbox
 
-% figure('color','w');
-% ksdensity(SC(:));
+if doplot
+    figure('color','w');
+    ksdensity(SC(:));
+end
     
 out.exp_muhat = expfit(SC(:));
 gamma_phat = gamfit(SC(:));
@@ -72,7 +75,6 @@ SC_a = SC./sum(SC(:));
 % compute entropy
 SC_a = SC_a(:);
 out.SC_h = -sum(SC_a.*log(SC_a));
-
 
 %% Weird 2-D entropy idea -- first discretize
 % (i) Discretize the space into nboxes boxes along the time axis
@@ -101,7 +103,7 @@ SSC = sum(SC);
 out.max_ssc = max(SSC);
 out.min_ssc = min(SSC);
 out.maxonmed_ssc = max(SSC)/median(SSC);
-out.pcross_maxssc50 = length(sgnchange(SSC-0.5*max(SSC)))/N;
+out.pcross_maxssc50 = length(sgnchange(SSC-0.5*max(SSC)))/(N-1);
 out.std_ssc = std(SSC);
 
 %% Stationarity

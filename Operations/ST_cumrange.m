@@ -1,8 +1,9 @@
 function out = ST_cumrange(y)
 % Time series must be at least 50 points long
-% Ben Fulcher approx. September 2009.
+% Ben Fulcher, September 2009
 
-N = length(y);
+doplot = 0; % plot outputs
+N = length(y); % length of the time series
 cums = zeros(N,1);
 
 for i = 1:N
@@ -10,30 +11,37 @@ for i = 1:N
 end
 % cums=cums/range(y);
 
-% plot(cums)
+if doplot, figure('color','w'); plot(cums); end
 
 fullr = range(y);
 
-out.totnuq = length(unique(cums));
+lunique = @(x) length(unique(x)); % use this alot -- how many unique entries
+
+out.totnuq = lunique(cums);
 
 % how many of the unique extrema are in first <proportion> of time series
-out.nuqp1 = length(unique(cums(1:floor(N*0.01))))/out.totnuq;
-out.nuqp10 = length(unique(cums(1:floor(N*0.1))))/out.totnuq;
-out.nuqp20 = length(unique(cums(1:floor(N*0.2))))/out.totnuq;
-out.nuqp50 = length(unique(cums(1:floor(N*0.5))))/out.totnuq;
+cumtox = @(x) lunique(cums(1:floor(N*x)))/out.totnuq;
+out.nuqp1 = cumtox(0.01);
+out.nuqp10 = cumtox(0.1);
+out.nuqp20 = cumtox(0.2);
+out.nuqp50 = cumtox(0.5);
+% out.nuqp1 = lunique(cums(1:floor(N*0.01)))/out.totnuq;
+% out.nuqp10 = lunique(cums(1:floor(N*0.1)))/out.totnuq;
+% out.nuqp20 = lunique(cums(1:floor(N*0.2)))/out.totnuq;
+% out.nuqp50 = lunique(cums(1:floor(N*0.5)))/out.totnuq;
 
 % how many unique extrema are in first <length> of time series
-out.nuql10 = length(unique(cums(1:10)))/out.totnuq;
-out.nuql50 = length(unique(cums(1:50)))/out.totnuq;
+out.nuql10 = lunique(cums(1:10))/out.totnuq;
+out.nuql50 = lunique(cums(1:50))/out.totnuq;
 
 if N > 100
-    out.nuql100 = length(unique(cums(1:100)))/out.totnuq;
+    out.nuql100 = lunique(cums(1:100))/out.totnuq;
 else
     out.nuql100 = NaN;
 end
     
 if N > 1000
-    out.nuql1000 = length(unique(cums(1:1000)))/out.totnuq;
+    out.nuql1000 = lunique(cums(1:1000))/out.totnuq;
 else
     out.nuql1000 = NaN;
 end

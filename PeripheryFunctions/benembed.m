@@ -1,5 +1,6 @@
-function y_embed = benembed(y,tau,m,sig)
+function y_embed = BF_embed(y,tau,m,sig)
 % Embeds the time series y into an m dimensional space at a time delay tau
+% Uses the TSTOOL code 'embed'
 % INPUTS:
 % y: univariate scalar time series
 % tau: time-delay. Can be a string, 'ac', 'mi', ...
@@ -13,6 +14,7 @@ function y_embed = benembed(y,tau,m,sig)
 % Ben Fulcher October 2009
 
 bevocal = 0; % display information about embedding
+N = length(y); % length of the input time series, y
 
 %% (1) Time-delay, tau
 if nargin < 2 || isempty(tau)
@@ -28,8 +30,7 @@ else
                 tau = CO_fzcac(y);
                 sstau = sprintf('by first zero crossing of autocorrelation function to tau = %u',tau);
             otherwise
-                fprintf(1,'Invalid time-delay method. Exiting.\n')
-                return
+                error('Invalid time-delay method ''%s''.',tau)
         end
     else
         sstau = sprintf('by user to %u',tau);
@@ -99,7 +100,7 @@ else % use a routine to inform m
         end
     else
         m = m{1};
-        ssm = ['by user to ' num2str(m)];
+        ssm = sprintf('by user to %u',m);
     end
 end
 % we now have an integral embedding dimension, m
@@ -108,16 +109,22 @@ end
 if nargin < 4, sig = 0; end % don't return a signal object, return a matrix
 
 if sig == 2 % just return the 
-    y_embed = [tau,m]; return
+    y_embed = [tau, m]; return
 end
 
 % Use the TSTOOL embed function.
-if size(y,2) > size(y,1), y = y'; end
+if size(y,2) > size(y,1) % make sure it's a column vector
+    y = y';
+end
 try
     y_embed = embed(signal(y),m,tau);
 catch me
     if strcmp(me.message,'time series to short for chosen embedding parameters')
-       y_embed = NaN; return 
+        fprintf(1,'Time series (N = %u) too short to embed\n',N);
+        y_embed = NaN; return
+    else
+        % could always try optimizing my own routine (below) so TSTOOL is not required for this step...
+        error('Embedding time series using TSTOOL function ''embed'' failed')
     end
 end
 

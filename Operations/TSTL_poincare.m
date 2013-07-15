@@ -4,7 +4,7 @@ function out = TSTL_poincare(y,ref,embedparams)
 % ref: can be an absolute number (2 takes the second point in the (embedded)
 % time series) or a string like 'max' or 'min' that takes the first
 % maximum, ... in the (scalar) time series, ...
-% embedparams: the usual thing to give benembed for the time-delay
+% embedparams: the usual thing to give BF_embed for the time-delay
 % embedding. The second argument is 3 -- i.e., we embed in a 3 dimensional
 % space so that the Poincare section is 2-dimensional
 % Another thing that could be cool is to look for variation in the plots
@@ -50,7 +50,7 @@ if ref < 2, ref = 2; end % gives an error, uses previous value in algorithm
 
 %% Do your magic, TSTOOL!:
 % time-delay embed the signal:
-s = benembed(y,embedparams{1},3,1);
+s = BF_embed(y,embedparams{1},3,1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding failed');

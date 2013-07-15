@@ -1,8 +1,8 @@
-function p = HT_disttests(x,ange,mydistn,nbins)
+function p = HT_disttests(x,thetest,thedistn,nbins)
 % Ben Fulcher
 
 %% First fit the distribution
-switch mydistn
+switch thedistn
     case 'norm'
         [a, b] = normfit(x);
     case 'ev'
@@ -11,7 +11,7 @@ switch mydistn
         [a, b] = unifit(x);
     case 'beta'
         % clumsily scale to the range (0,1)
-        x = (x-min(x)+0.01*std(x))/(max(x)-min(x)+0.02*std(x));
+        x = (x - min(x) + 0.01*std(x)) / (max(x) - min(x) + 0.02*std(x));
         a = betafit(x);        % then fit
     case 'rayleigh'
         if any(x < 0), p = NaN; return
@@ -26,11 +26,6 @@ switch mydistn
         if any(x < 0), p = NaN; return
         else a = gamfit(x);
         end
-    case 'gp'
-        disp('forget about gp fits. Too difficult.');
-%         if any(x < 0),p = NaN; return
-%         else a=gpfit(x);
-%         end
     case 'logn'
         if any(x<=0),p = NaN; return
         else a = lognfit(x);
@@ -39,11 +34,13 @@ switch mydistn
         if any(x<=0),p = NaN; return
         else a = wblfit(x);
         end
+    otherwise
+        error('Unknown distibution ''%s''',thedistn);
 end
 
-switch ange
+switch thetest
     case 'chi2gof' % PERFORM A CHI2 GOODNESS OF FIT TEST
-        switch mydistn
+        switch thedistn
             case 'norm'
                 mycdf = {@normcdf,a,b};
             case 'ev'
@@ -76,7 +73,7 @@ switch ange
         if size(x1,1) < size(x1,2);
             x1 = x1';
         end
-        switch mydistn
+        switch thedistn
             case 'norm'
                 mycdf = [x1, normcdf(x1,a,b)];
             case 'ev'
@@ -91,36 +88,32 @@ switch ange
                 mycdf = [x1, expcdf(x1,a)];
             case 'gamma'
                 mycdf = [x1, gamcdf(x1,a(1),a(2))];
-%             case 'gp'
-%                 mycdf = [x1, gpcdf(x1,a(1),a(2))];
             case 'logn'
                 mycdf = [x1, logncdf(x1,a(1),a(2))];
             case 'wbl'
                 mycdf = [x1, wblcdf(x1,a(1),a(2))];
         end
-%         rnondec = find(diff(mycdf(:,2))<=0);
-%         if ~isempty(rnondec) % cdf is not strictly decreasing
-%             mycdf(rnondec,:) = []; % remove these entries
-%         end
         
         [h, p] = kstest(x,mycdf);
         
     case 'lillie' % LILLIEFORS TEST
         % Temporarily suspend low/high tabulated p-value warnings that often occur with this hypothesis test
         warning('off','stats:lillietest:OutOfRangePLow'); warning('off','stats:lillietest:OutOfRangePHigh');
-        if any(ismember({'norm','ev'},mydistn))
-            [h, p] = lillietest(x,0.05,mydistn);
-        elseif strcmp('exp',mydistn)
+        if any(ismember({'norm','ev'},thedistn))
+            [h, p] = lillietest(x,0.05,thedistn);
+        elseif strcmp('exp',thedistn)
             if any(x < 0)
                 p = NaN; return
             else
-                [h, p] = lillietest(x,0.05,mydistn);
+                [h, p] = lillietest(x,0.05,thedistn);
             end
         else
            p = NaN;
            fprintf(1,'***RETURNED AN UNEXPECTED NAN FOR LILLIEFORS TEST\n')
         end
         warning('on','stats:lillietest:OutOfRangePLow'); warning('on','stats:lillietest:OutOfRangePHigh');
+    otherwise
+        error('Unknown test ''%s''',thetest);
 end
 
 end

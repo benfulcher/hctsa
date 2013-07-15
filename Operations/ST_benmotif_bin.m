@@ -3,7 +3,7 @@ function out = ST_benmotif_bin(y,bint)
 % Input time series y
 % Binary transformation bint = 'diff' (changes), 'mean' (location about
 % mean)
-% Ben Fulcher 2009
+% Clumsly, laboriously manually-written code by Ben Fulcher 2009
 
 if nargin < 2
     bint = 'diff'; % use changes in the time series as the basis for the transformation
@@ -22,7 +22,7 @@ switch bint
         error('Unknown binary transformation setting ''%s''',bint)
 end
 
-N = length(yb);
+N = length(yb); % length of the new, symbolized sequence
 
 %% 1)
 % 0
@@ -68,7 +68,6 @@ if ~isempty(r00) && r00(end) == N-1; r00 = r00(1:end-1); end
 if ~isempty(r01) && r01(end) == N-1; r01 = r01(1:end-1); end
 if ~isempty(r10) && r10(end) == N-1; r10 = r10(1:end-1); end
 if ~isempty(r11) && r11(end) == N-1; r11 = r11(1:end-1); end
-
 
 % 000
 r000 = r00(yb(r00+2) == 0);

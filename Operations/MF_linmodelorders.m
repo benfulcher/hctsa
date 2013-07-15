@@ -13,8 +13,7 @@ doplot = 0; % can set to 1 to plot outputs
 
 %% Check Inputs
 % (1) Time series, y
-% length of time series, N
-N = length(y);
+N = length(y); % length of time series, N
 % Convert y to time series object
 y = iddata(y,[],1);
 
@@ -32,7 +31,6 @@ end
 if nargin < 3 || isempty(howtotest)
     howtotest = 'all';
 end
-
 
 %% Run
 % Get normalized prediction errors, V, from training to test set for each

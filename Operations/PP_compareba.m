@@ -1,4 +1,4 @@
-function out=PP_compareba(y,detrndmeth)
+function out = PP_compareba(y,detrndmeth)
 % Inputs: y: the time series
 %         detrndmeth: the detrending method(s)
 % Coding begun on 9/7/09 by Ben Fulcher
@@ -78,7 +78,7 @@ r = (1:N)'; % the x-range over which to fit
 % 1) Polynomial detrend
 % starts with 'poly' and ends with integer from 1--9
 if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'poly') && ~isempty(str2double(detrndmeth(5)))
-    [cfun,gof] = fit(r,y,detrndmeth);
+    [cfun, gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
     y_d = y-y_fit;
 
@@ -145,7 +145,7 @@ elseif strcmp(detrndmeth,'boxcox')
         return
     end
 else
-    disp('Invalid detrending method'); return
+    error('Invalid detrending method')
 end
 
 %% quick error checks
@@ -247,7 +247,5 @@ out.olbt_m2 = OL_bentest(y_d,2,1)/OL_bentest(y,2,1);
 out.olbt_m5 = OL_bentest(y_d,5,1)/OL_bentest(y,5,1);
 out.olbt_s2 = OL_bentest(y_d,2,2)/OL_bentest(y,2,2);
 out.olbt_s5 = OL_bentest(y_d,5,2)/OL_bentest(y,5,2);
-
-
 
 end

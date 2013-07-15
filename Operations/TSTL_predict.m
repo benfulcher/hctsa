@@ -15,7 +15,7 @@ function out = TSTL_predict(y, plen, NNR, stepsize, pmode, embedparams)
 %                    mean of the images of the neighbours
 %          (iv) 3 -- output vectors are calculated using local flow and the
 %                    weighted mean of the images of the neighbours
-% embedparams: as usual to feed into benembed, except that now you can set
+% embedparams: as usual to feed into BF_embed, except that now you can set
 %              to zero to not embed.
 % It's a bit rubbish in that the output is not directly correlated to the
 % input...?
@@ -54,11 +54,11 @@ end
 
 
 %% Embed the scalar time series by time-delay method
-% embedpn = benembed(y,embedparams{1},embedparams{2},2);
+% embedpn = BF_embed(y,embedparams{1},embedparams{2},2);
 % delay = embedpn(1);
 % dim = embedpn(2);
 if iscell(embedparams)
-    s = benembed(y,embedparams{1},embedparams{2},1); % last in
+    s = BF_embed(y,embedparams{1},embedparams{2},1); % last in
 elseif embedparams == 0
     s = signal(y);
 end

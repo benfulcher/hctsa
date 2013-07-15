@@ -25,8 +25,7 @@ end
 
 % 3) surrogate data method, SURRMETHOD
 if nargin < 4 || isempty(surrmethod)
-    disp('you should set the surrogate method.');
-    disp('just this once I''ll do it for you -- surrogate1');
+    fprintf(1,'Surrogate method set to default: ''surrogate1''.\n');
     surrmethod = 1;
 end
 % surrmethod = 1: randomizes phases of fourier spectrum
@@ -35,7 +34,7 @@ end
 
 % 4) surrogate function, SURRFN
 if nargin < 5 || isempty(surrfn)
-    disp('Using tc3 by default');
+    fprintf(1,'surrogate function set to default value: ''tc3''.\n');
     surrfn = 'tc3';
 end
 
@@ -48,11 +47,13 @@ switch surrfn
         rs = tc3(s, tau, nsurr, surrmethod);
     case 'trev'
         rs = trev(s, tau, nsurr, surrmethod);
+    otherwise
+        error('Unknown surrogate function ''%s''',surrfn)
 end
 
 tc3dat = data(rs);
 if all(isnan(tc3dat))
-    disp('Failed horribly');
+    error('TSTOOL: ''%s'' failed',surrfn);
     out = NaN; return
 end
 tc3_y = tc3dat(1);
@@ -88,9 +89,9 @@ out.meansurr = muhat;
 % ksx = linspace(min(tc3_surr),max(tc3_surr),200); % don't know how to pick
 % extremeties this way...
 % ksf = ksdensity(tc3_surr,ksx,'function','pdf');
-[ksf ksx] = ksdensity(tc3_surr,'function','pdf');
+[ksf, ksx] = ksdensity(tc3_surr,'function','pdf');
 % hold on;plot(ksx,ksf,'r')
-ksdx = ksx(2)-ksx(1);
+ksdx = ksx(2) - ksx(1);
 ihit = find(ksx>tc3_y,1,'first');
 
 if isempty(ihit) %% off the scale!

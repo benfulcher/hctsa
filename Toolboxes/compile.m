@@ -11,18 +11,24 @@ function compile
 		error('An error occurred while compiling. Get ''mex fastdfa_core.c'' to work, and then re-run compile.m');
 	end
 
+    % TSTOOL
 	cd OpenTSTOOL/mex-dev
 	makemex
 	cd ../../
-	cd MSmall_utilities
-	mex complexitybs.c
-	mex nearest.c
-	mex shannon.c
+
+    % MICHAEL SMALL
+	cd Michael_Small
+	mex MS_complexitybs.c % compile Michael Small's complexitybs C code
+	mex MS_nearest.c % compile Michael Small's nearest C code
+	mex MS_shannon.c % compile Michael Small's shannon C code
+
+    % Gaussian Process code, gpml
 	cd ../gpml
-    % mex solve_chol.c -largeArrayDims -lmwlapack % !!!! This one won't compile!
 	mex sq_dist.c
+    % mex solve_chol.c -largeArrayDims -lmwlapack % !!!! This one won't compile!
 	cd ../
 
+    % Max Little's Steps Bumps Toolkit
 	cd steps_bumps_toolkit
 	mex kvsteps_core.cpp
 	cd ../
@@ -54,11 +60,13 @@ function status = rp_failed()
 	    plugin_name = 'rp_plugin.exe';
 	else
 	    plugin_name = 'rp_plugin';
-	    if isunix, fileattrib([plugin_path,filesep,plugin_name], '+x'), end
+	    if isunix
+            fileattrib([plugin_path,filesep,plugin_name], '+x')
+        end
 	end
 
     try
-          [status plugin_version] = system([plugin_path,filesep,plugin_name,' -V']);
+          [status, plugin_version] = system([plugin_path,filesep,plugin_name,' -V']);
     catch
           status = 1;
     end

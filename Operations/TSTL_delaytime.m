@@ -9,11 +9,15 @@ function out = TSTL_delaytime(y,maxdelay,past)
 % really have no idea what's going on with this algorithm!!
 % I know it's a stochastic algorithm, so it must rely on some random
 % sampling of the input time series... I'll just return some statistics
-% Ben Fulcher November 2009
+% Ben Fulcher, November 2009
 
 %% Preliminaries
 N = length(y); % length of time series
-s = signal(y); % convert to a signal for TSTOOL
+try
+    s = signal(y); % convert to a signal for TSTOOL
+catch
+    error('Error converting time series to signal class using TSTOOL function ''signal''')
+end
 
 % (1) Maximum delay, maxdelay
 if nargin < 2 || isempty(maxdelay)
@@ -25,7 +29,7 @@ end
 
 if maxdelay < 10,
     maxdelay = 10;
-    fprintf(1,'Maxdelay set to its minimum: delaytime = 10')
+    fprintf(1,'Maxdelay set to its minimum: delaytime = 10\n')
     % necessary for output statistics
 end
 

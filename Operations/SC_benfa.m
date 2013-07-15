@@ -49,7 +49,7 @@ ntau = length(taur); % analyze the time series across this many timescales
 
 if ntau < 8 % fewer than 8 points
     % ++BF 19/3/2010 (ntau<4); ++BF 28/6/2010 (ntau<8)
-    fprintf(1,'This time Series is too short to analyze using DFA\n');
+    fprintf(1,'This time series (N = %u) is too short to analyze using this DFA\n',N);
     out = NaN; return
 end
 
@@ -115,6 +115,8 @@ for i = 1:ntau
                 y_buff(:,j) = y_buff(:,j) - polyval(p,tt);
             end
             y_dt = range(y_buff);
+        otherwise
+            error('Unknown fluctuation analysis method ''%s''',wtf);
     end
     
     F(i) = (mean(y_dt.^q)).^(1/q);
@@ -125,7 +127,7 @@ end
     
     
 %     Linear fit the log-log plot: all
-    [linfit stats] = robustfit(log(taur),log(F));
+    [linfit, stats] = robustfit(log(taur),log(F));
     
     out.linfitint = linfit(1); % linear fit of loglog-- intercept
     out.alpha = linfit(2); % linear fit of loglog -- gradient
@@ -211,7 +213,7 @@ out.ratsplitminerr = min(sserr)/out.ssr;
 % now we do the fitting
 
 % R1
-if length(r1)<8 || all(isnan(logFF(r1)))
+if length(r1) < 8 || all(isnan(logFF(r1)))
     out.r1_linfitint = NaN;
     out.r1_alpha = NaN;
     out.r1_stats_coeffcorr = NaN;

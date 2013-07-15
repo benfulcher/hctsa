@@ -24,7 +24,7 @@ end
 
 % ARMA(p,q): q range, qr
 if nargin < 3 || isempty(qr)
-    qr = 1:5;
+    qr = (1:5);
 end
 
 
@@ -55,7 +55,6 @@ out.q_aic_opt = qr(qi_opt);
 
 out.std_all_aics = std(aics(:)); % no idea why.
 out.mean_all_aics = mean(aics(:)); % no idea why.
-
 
 out.meanstd_aicsp = mean(std(aics));
 out.meanstd_aicsq = mean(std(aics'));

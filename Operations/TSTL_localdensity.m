@@ -20,7 +20,7 @@ if nargin < 4 || isempty(embedparams)
 end
 
 %% Embed the signal
-s = benembed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding failed.')

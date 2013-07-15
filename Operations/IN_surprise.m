@@ -79,6 +79,8 @@ for i = 1:length(rs)
                 p = sum(memorydata(inmem2+2) == yth(rs(i)))/length(inmem2);
             end
             store(i) = p;
+        otherwise
+            error('Unknwon method ''%s''',whatinf);
     end
 end
 

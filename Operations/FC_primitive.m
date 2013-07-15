@@ -24,6 +24,7 @@ switch fmeth
         for i = 1:length(evalr)
             res(i) = mean(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction-value
         end
+        
     case 'median'
         if strcmp(fparam,'ac')
             lp = CO_fzcac(y); % make it tau
@@ -63,6 +64,9 @@ switch fmeth
             p = polyfit((1:lp)',y(evalr(i)-lp:evalr(i)-1),1);
             res(i) = polyval(p,lp+1) - y(evalr(i)); % prediction - value
         end
+        
+    otherwise
+        error('Unknown forecasting method ''%s''',fmeth);
 end
 
 % out=res;

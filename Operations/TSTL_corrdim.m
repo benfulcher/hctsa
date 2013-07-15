@@ -25,7 +25,7 @@ end
 
 %% Embed the signal
 % convert to embedded signal object for TSTOOL
-s = benembed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Time-series embedding to signal class for TSTOOL failed')

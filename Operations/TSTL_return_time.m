@@ -6,7 +6,7 @@ function out = TSTL_return_time(y,NNR,maxT,past,Nref,embedparams)
 % maxT: maximum return time to consider
 % past: Theiler window
 % Nref: number of reference indicies
-% embedparams: to feed into benembed
+% embedparams: to feed into BF_embed
 % Ben Fulcher 12/11/2009
 
 N = length(y); % length of the input time series
@@ -51,7 +51,7 @@ end
 
 
 %% Embed the signal
-s = benembed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     out = NaN; return

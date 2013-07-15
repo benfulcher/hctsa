@@ -8,7 +8,7 @@ function out = TSTL_corrsum(y,Nref,r,thwin,nbins,embedparams,dotwo)
 % thwin: number of samples to exclude before and after each reference index
 % (~ Theiler window)
 % nbins: number of partitioned bins
-% embedparams: embedding parameters to feed benembed.m for embedding the
+% embedparams: embedding parameters to feed BF_embed.m for embedding the
 % signal in the form {tau,m}
 % dotwo: if this is set to 2, will use corrsum2 instead of corrsum, in which
 % case n specifies the number of pairs per bin. Default is 1, i.e., to use
@@ -65,7 +65,7 @@ end
 
 %% Embed the signal
 % convert to embedded signal object for TSTOOL
-s = benembed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding failed')
