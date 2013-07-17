@@ -9,8 +9,8 @@ function out = MF_residanal(e)
 
 
 % (0) Preliminaries
-if size(e,2)>size(e,1)
-    e = e';
+if size(e,2) > size(e,1)
+    e = e'; % make sure residuals are a column vector
 end
 ee = iddata(e,[],1);
 N = length(e);
@@ -23,10 +23,10 @@ out.stde = std(e);
 out.mms = abs(mean(e))+abs(std(e));
 out.maxonmean = max(e)/abs(mean(e));
 
-if std(e)==0
+if std(e) == 0
     e = zeros(length(e),1);
 else
-    e = benzscore(e);
+    e = BF_zscore(e);
 end
 
 %% (**) Trends in residuals (**)
@@ -41,7 +41,7 @@ gS = g.Spectrumdata(:);
 
 % Normalize them
 % this is like normalizing the residuals to unit variance
-gS = gS/(sum(gS)*(gf(2)-gf(1)));
+gS = gS / (sum(gS)*(gf(2)-gf(1)));
 
 % now look at proportion of power in fifths
 b = round(linspace(0,length(gf),6));
@@ -75,17 +75,16 @@ out.ac3n = abs(acs(3))*sqrtN; % units of sqrtN from zero
 % Median normalized distance from zero
 out.acmnd0 = median(abs(acs))*sqrtN;
 out.acsnd0 = std(abs(acs))*sqrtN;
-out.propbth = sum(abs(acs)<2.6/sqrtN)/maxlag;
+out.propbth = sum(abs(acs) < 2.6/sqrtN)/maxlag;
 
 % First time to get below the significance threshold
-out.ftbth = find(abs(acs)<2.6/sqrt(N),1,'first');
+out.ftbth = find(abs(acs) < 2.6/sqrt(N),1,'first');
 if isempty(out.ftbth)
     out.ftbth = maxlag+1;
 end
 
 % Durbin-Watson test statistic
-out.dwts = sum((e(2:end)-e(1:end-1)).^2)/sum(e.^2);
-
+out.dwts = sum((e(2:end)-e(1:end-1)).^2) / sum(e.^2);
 
 
 %% (**) Linear structure in residuals (**)
@@ -101,11 +100,15 @@ try
 catch emsg
 end
 
-if ~isempty(emsg) && (strcmp(emsg.message,'Time series too short.') || strcmp(emsg.message,'Matrix must be positive definite.'))
-    out.popt = NaN; % optimum order
-    out.minsbc = NaN; % best sbc
-    out.minfpe = NaN; % best fpe
-    out.sbc1 = NaN;
+if ~isempty(emsg)
+    if (strcmp(emsg.message,'Time series too short.') || strcmp(emsg.message,'Matrix must be positive definite.'))
+        out.popt = NaN; % optimum order
+        out.minsbc = NaN; % best sbc
+        out.minfpe = NaN; % best fpe
+        out.sbc1 = NaN;
+    else
+        error('Unknown error fitting AR model to residuals using ARFIT package');
+    end
 else
     out.popt = length(Aest); % optimum order
     out.minsbc = min(SBC); % best sbc
@@ -115,7 +118,7 @@ end
 
 
 %% (**) Distribution tests (**)
-[~,p,ksstat] = kstest(e);
+[~, p, ksstat] = kstest(e);
 out.normksstat = ksstat;
 out.normp = p;
 

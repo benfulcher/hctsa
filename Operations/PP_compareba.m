@@ -1,7 +1,7 @@
 function out = PP_compareba(y,detrndmeth)
 % Inputs: y: the time series
 %         detrndmeth: the detrending method(s)
-% Coding begun on 9/7/09 by Ben Fulcher
+% Ben Fulcher, 9/7/09
 
 %% List of valid detrndmeth:
 % If multiple methods, should be in a cell of strings; the methods will be
@@ -85,7 +85,7 @@ if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'poly') && ~isempty(str2dou
 
 % 2) Seasonal detrend
 elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4),'9')
-    [cfun,gof] = fit(r,y,detrndmeth);
+    [cfun, gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
     y_d = y-y_fit;
 
@@ -100,7 +100,7 @@ elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6),'spline') && ~isempty(s
 		return
 	end
 	y_spl = fnval(spline,1:N); % evaluate at the 1:N time intervals
-    y_d = y-y_spl';
+    y_d = y - y_spl';
     
 % 4) Differencing
 elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'diff') && ~isempty(str2double(detrndmeth(5)))
@@ -108,44 +108,42 @@ elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'diff') && ~isempty(str
     y_d = diff(y,ndiffs); % difference the series n times
 
 % 5) Median Filter
-elseif length(detrndmeth)>7 && strcmp(detrndmeth(1:7),'medianf') && ~isempty(str2double(detrndmeth(8:end)))
+elseif length(detrndmeth) > 7 && strcmp(detrndmeth(1:7),'medianf') && ~isempty(str2double(detrndmeth(8:end)))
     n = str2double(detrndmeth(8:end)); % order of filtering
     y_d = medfilt1(y,n);
 
 % 6) Running Average
-elseif length(detrndmeth)>3 && strcmp(detrndmeth(1:3),'rav') && ~isempty(str2double(detrndmeth(4:end)))
+elseif length(detrndmeth) > 3 && strcmp(detrndmeth(1:3),'rav') && ~isempty(str2double(detrndmeth(4:end)))
     n = str2double(detrndmeth(4:end)); % the window size
     y_d = filter(ones(1,n)/n,1,y);
 
 % 7) Resample
-elseif length(detrndmeth)>9 && strcmp(detrndmeth(1:9),'resample_')
+elseif length(detrndmeth) > 9 && strcmp(detrndmeth(1:9),'resample_')
     % check a valid structure
     ss = textscan(detrndmeth,'%s%n%n','delimiter','_');
-    if ~isempty(ss{2}), p=ss{2};
+    if ~isempty(ss{2}), p = ss{2};
     else return
     end
-    if ~isempty(ss{3}), q=ss{3};
+    if ~isempty(ss{3}), q = ss{3};
     else return
     end
     y_d = resample(y,p,q);
 
 % 8) Log Returns
 elseif strcmp(detrndmeth,'logr')
-    if all(y>0), y_d=diff(log(y));
+    if all(y > 0), y_d = diff(log(y));
     else
-        out = NaN; % return all NaNs
-        return
+        out = NaN; return % return all NaNs
     end
 
 % 9) Box-Cox Transformation
 elseif strcmp(detrndmeth,'boxcox')
-    if all(y>0), y_d=boxcox(y);
+    if all(y > 0), y_d = boxcox(y);
     else
-        out = NaN; % return all NaNs
-        return
+        out = NaN; return % return all NaNs
     end
 else
-    error('Invalid detrending method')
+    error('Invalid detrending method ''%s''',detrendmeth)
 end
 
 %% quick error checks
@@ -156,32 +154,32 @@ end
 %% TESTS ON THE ORIGINAL AND PROCESSED SIGNALS
 % z-score both (these metrics will need it, and not done before-hand
 % because of positive-only data, etc.
-y = zscore(y); y_d = zscore(y_d);
+y = BF_zscore(y); y_d = BF_zscore(y_d);
 
 % 1) Stationarity
 
 % (a) StatAv
-out.statav2 = SY_StatAv(y_d,2,'seg')/SY_StatAv(y,2,'seg');
-out.statav4 = SY_StatAv(y_d,4,'seg')/SY_StatAv(y,4,'seg');
-out.statav6 = SY_StatAv(y_d,6,'seg')/SY_StatAv(y,6,'seg');
-out.statav8 = SY_StatAv(y_d,8,'seg')/SY_StatAv(y,8,'seg');
-out.statav10 = SY_StatAv(y_d,10,'seg')/SY_StatAv(y,10,'seg');
+out.statav2 = SY_StatAv(y_d,2,'seg') / SY_StatAv(y,2,'seg');
+out.statav4 = SY_StatAv(y_d,4,'seg') / SY_StatAv(y,4,'seg');
+out.statav6 = SY_StatAv(y_d,6,'seg') / SY_StatAv(y,6,'seg');
+out.statav8 = SY_StatAv(y_d,8,'seg') / SY_StatAv(y,8,'seg');
+out.statav10 = SY_StatAv(y_d,10,'seg') / SY_StatAv(y,10,'seg');
 
 % (b) Sliding window mean
-out.swms2_1 = SY_slidwin(y_d,'mean','std',2,1)/SY_slidwin(y,'mean','std',2,1);
-out.swms2_2 = SY_slidwin(y_d,'mean','std',2,2)/SY_slidwin(y,'mean','std',2,2);
-out.swms5_1 = SY_slidwin(y_d,'mean','std',5,1)/SY_slidwin(y,'mean','std',5,1);
-out.swms5_2 = SY_slidwin(y_d,'mean','std',5,2)/SY_slidwin(y,'mean','std',5,2);
-out.swms10_1 = SY_slidwin(y_d,'mean','std',10,1)/SY_slidwin(y,'mean','std',10,1);
-out.swms10_1 = SY_slidwin(y_d,'mean','std',10,2)/SY_slidwin(y,'mean','std',10,2);
+out.swms2_1 = SY_slidwin(y_d,'mean','std',2,1) / SY_slidwin(y,'mean','std',2,1);
+out.swms2_2 = SY_slidwin(y_d,'mean','std',2,2) / SY_slidwin(y,'mean','std',2,2);
+out.swms5_1 = SY_slidwin(y_d,'mean','std',5,1) / SY_slidwin(y,'mean','std',5,1);
+out.swms5_2 = SY_slidwin(y_d,'mean','std',5,2) / SY_slidwin(y,'mean','std',5,2);
+out.swms10_1 = SY_slidwin(y_d,'mean','std',10,1) / SY_slidwin(y,'mean','std',10,1);
+out.swms10_1 = SY_slidwin(y_d,'mean','std',10,2) / SY_slidwin(y,'mean','std',10,2);
 
 % (c) Sliding window std
-out.swss2_1 = SY_slidwin(y_d,'std','std',2,1)/SY_slidwin(y,'std','std',2,1);
-out.swss2_2 = SY_slidwin(y_d,'std','std',2,2)/SY_slidwin(y,'std','std',2,2);
-out.swss5_1 = SY_slidwin(y_d,'std','std',5,1)/SY_slidwin(y,'std','std',5,1);
-out.swss5_2 = SY_slidwin(y_d,'std','std',5,2)/SY_slidwin(y,'std','std',5,2);
-out.swss10_1 = SY_slidwin(y_d,'std','std',10,1)/SY_slidwin(y,'std','std',10,1);
-out.swss10_2 = SY_slidwin(y_d,'std','std',10,2)/SY_slidwin(y,'std','std',10,2);
+out.swss2_1 = SY_slidwin(y_d,'std','std',2,1) / SY_slidwin(y,'std','std',2,1);
+out.swss2_2 = SY_slidwin(y_d,'std','std',2,2) / SY_slidwin(y,'std','std',2,2);
+out.swss5_1 = SY_slidwin(y_d,'std','std',5,1) / SY_slidwin(y,'std','std',5,1);
+out.swss5_2 = SY_slidwin(y_d,'std','std',5,2) / SY_slidwin(y,'std','std',5,2);
+out.swss10_1 = SY_slidwin(y_d,'std','std',10,1) / SY_slidwin(y,'std','std',10,1);
+out.swss10_2 = SY_slidwin(y_d,'std','std',10,2) / SY_slidwin(y,'std','std',10,2);
 
 % 2) Gaussianity
 % (a) kernel density fit
@@ -238,14 +236,14 @@ out.kscn_olapint = me1.olapint/me2.olapint;
 out.kscn_relent = me1.relent/me2.relent;
 
 % (d) p-values from gof tests
-out.htdt_chi2n = HT_disttests(y_d,'chi2gof','norm',10)/HT_disttests(y,'chi2gof','norm',10); % chi2
-out.htdt_ksn = HT_disttests(y_d,'ks','norm')/HT_disttests(y,'ks','norm'); % Kolmogorov-Smirnov
-out.htdt_llfn = HT_disttests(y_d,'lillie','norm')/HT_disttests(y,'ks','norm');
+out.htdt_chi2n = HT_disttests(y_d,'chi2gof','norm',10) / HT_disttests(y,'chi2gof','norm',10); % chi2
+out.htdt_ksn = HT_disttests(y_d,'ks','norm') / HT_disttests(y,'ks','norm'); % Kolmogorov-Smirnov
+out.htdt_llfn = HT_disttests(y_d,'lillie','norm') / HT_disttests(y,'ks','norm');
 
 % 3) Outliers
-out.olbt_m2 = OL_bentest(y_d,2,1)/OL_bentest(y,2,1);
-out.olbt_m5 = OL_bentest(y_d,5,1)/OL_bentest(y,5,1);
-out.olbt_s2 = OL_bentest(y_d,2,2)/OL_bentest(y,2,2);
-out.olbt_s5 = OL_bentest(y_d,5,2)/OL_bentest(y,5,2);
+out.olbt_m2 = OL_bentest(y_d,2,1) / OL_bentest(y,2,1);
+out.olbt_m5 = OL_bentest(y_d,5,1) / OL_bentest(y,5,1);
+out.olbt_s2 = OL_bentest(y_d,2,2) / OL_bentest(y,2,2);
+out.olbt_s5 = OL_bentest(y_d,5,2) / OL_bentest(y,5,2);
 
 end

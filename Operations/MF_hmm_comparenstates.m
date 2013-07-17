@@ -1,4 +1,4 @@
-function out = ZG_hmm_comparenstates(y,trainp,nstater)
+function out = MF_hmm_comparenstates(y,trainp,nstater)
 % Uses Zoubin Gharamani's implementation of HMMs for real-valued Gaussian
 % observations:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software.html
@@ -18,7 +18,7 @@ function out = ZG_hmm_comparenstates(y,trainp,nstater)
 N = length(y); % number of samples in time series
 
 if nargin < 2 || isempty(trainp)
-    fprintf(1,'Training the model on 60% of the data by default\n')
+    fprintf(1,'Training the model on 60%% of the data by default\n')
     trainp = 0.6; % train on 60% of the data
 end
 
@@ -45,12 +45,12 @@ for j = 1:Nstate
     nstates = nstater(j);
     % train HMM with <nstates> states for 30 cycles of EM (or until
     % convergence); default termination tolerance
-    [Mu, Cov, P, Pi, LL] = hmm(ytrain,Ntrain,nstates,30);
+    [Mu, Cov, P, Pi, LL] = ZG_hmm(ytrain,Ntrain,nstates,30);
     
     LLtrains(j) = LL(end)/Ntrain;
     
     %% Calculate log likelihood for the test data
-    lik = hmm_cl(ytest,Ntest,nstates,Mu,Cov,P,Pi);
+    lik = ZG_hmm_cl(ytest,Ntest,nstates,Mu,Cov,P,Pi);
 
     LLtests(j) = lik/Ntest;
 end

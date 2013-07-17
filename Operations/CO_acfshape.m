@@ -26,7 +26,7 @@ out.Nac = length(acf); % the distance the acf lasts until significance is 'drown
 % Count peaks
 dacf = diff(acf);
 ddacf = diff(dacf);
-extrr = sgnchange(dacf);
+extrr = BF_sgnchange(dacf,1);
 sdsp = ddacf(extrr);
 maxr = extrr(sdsp < 0);
 minr = extrr(sdsp > 0);

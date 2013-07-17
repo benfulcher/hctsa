@@ -14,7 +14,7 @@ end
 if strcmp(tau,'ac')
     tau = CO_fzcac(y);
 elseif strcmp(tau,'mi')
-    tau = CO_fmmi(y);
+    tau = CO_firstmin(y,'mi');
 end
 
 

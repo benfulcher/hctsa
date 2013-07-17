@@ -12,13 +12,13 @@ doplot = 0; % plot results for debugging
 
 %% Check inputs, set defaults:
 if nargin < 2 || isempty(tau)
-	fprintf(1,'CO_embed2_shapestats: using tau as first zero crossing ' ...
-			'of the autocorrelation function\n')
+	fprintf(1,'Using tau as first zero crossing ' ...
+			'of the autocorrelation function.\n')
     tau = 'tau';
 end
 if nargin < 3 || isempty(shape)
 	shape = 'circle';
-	fprintf(1,'CO_embed2_shapestats: using a circle\n');
+	fprintf(1,'Using a circle.\n');
 end
 if nargin < 4 || isempty(r)
 	

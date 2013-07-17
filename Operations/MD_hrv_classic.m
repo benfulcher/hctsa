@@ -1,6 +1,9 @@
 function out = MD_hrv_classic(y)
-% Packages up classic HRV operations that calculate classical HRV analysis measures from a given NN/RR time series in units of seconds.
-% Adapted from code emailed from Max Little on 26/1/2009. Implemented on 12/4/2010. Yep, a typically efficient turn-around time of over one year.
+% Packages up classic HRV operations that calculate classical HRV 
+% analysis measures from a given NN/RR time series in units of seconds.
+% Adapted from code emailed from Max Little on 26/1/2009. 
+% Implemented on 12/4/2010. 
+% (Yep, a typically efficient turn-around time of over one year)
 % Ben Fulcher, 12/4/2010.
 
 % Standard defaults

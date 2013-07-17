@@ -52,12 +52,16 @@ out.rangeden = range(locden);
 out.stdden = std(locden);
 out.meanden = mean(locden);
 out.medianden = median(locden);
-out.ac1den = CO_autocorr(locden,1);
-out.ac2den = CO_autocorr(locden,2);
-out.ac3den = CO_autocorr(locden,3);
-out.ac4den = CO_autocorr(locden,4);
-out.ac5den = CO_autocorr(locden,5);
-out.tauacden = CO_fmac(locden);
-out.taumiden = CO_fmmi(locden);
+
+F_acden = @(x) CO_autocorr(locden,x); % autocorrelation of locden
+out.ac1den = F_acden(1);
+out.ac2den = F_acden(2);
+out.ac3den = F_acden(3);
+out.ac4den = F_acden(4);
+out.ac5den = F_acden(5);
+
+% Estimates of correlation length:
+out.tauacden = CO_fzcac(locden,'ac'); % first zero-crossing of autocorrelation function
+out.taumiden = CO_firstmin(locden,'mi'); % first minimum of automutual information function
 
 end

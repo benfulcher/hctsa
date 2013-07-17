@@ -30,7 +30,7 @@ function compile
 
     % Max Little's Steps Bumps Toolkit
 	cd steps_bumps_toolkit
-	mex kvsteps_core.cpp
+	mex ML_kvsteps_core.cpp
 	cd ../
 
 	fprintf('------\nNow installing the CRPTool\n');

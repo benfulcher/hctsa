@@ -40,8 +40,7 @@ for k = 1:maxorder
     try
         m = n4sid(y,k);
     catch emsg
-        error(['Model fitting failed for k = ' num2str(k)])
-        % out = NaN; return
+        error('Model fitting failed for k = %u',k)
     end
     
     lossfns(k) = m.EstimationInfo.LossFcn;
@@ -66,11 +65,11 @@ out.aic2 = aics(2);
 out.fpe2 = fpes(2);
 out.lossfn2 = lossfns(2);
 
-% curve change summaries
+% Curve change summary statistics
 out.meandiffaic = mean(diff(aics));
 out.maxdiffaic = max(diff(aics));
 out.mindiffaic = min(diff(aics));
-out.ndownaic = sum(diff(aics)<0);
+out.ndownaic = sum(diff(aics) < 0);
 
 
 end

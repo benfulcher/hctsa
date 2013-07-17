@@ -104,7 +104,7 @@ if strcmp(morts,'ts')
 	% s{2} -- kno
 	if ~isempty(kno)
 		s{2} = ['ts_id NOT IN (SELECT ts_id FROM TsKeywordsRelate WHERE tskw_id IN ' ...
-							'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword IN (' bencat(kno,',','''') '))) '];
+							'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword IN (' BF_cat(kno,',','''') '))) '];
 	end
 	
 	% Extra qualifier pcalcr to have PercentageCalculated only in a certain range
@@ -229,7 +229,7 @@ else
 	% s{2} -- kno
 	if ~isempty(kno)
 		s{2} = ['m_id NOT IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id IN ' ...
-							'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' bencat(kno,',','''') '))) '];
+							'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(kno,',','''') '))) '];
 	end
 	
 	% Extra qualifier pcalcr to have PercentageCalculated only in a certain range
@@ -248,7 +248,7 @@ else
 	
 	% if ~isempty(kno)
 	% 	mnoextrastring = ['AND m_id NOT IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id IN ' ...
-	% 						'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' bencat(mno,',','''') '))) '];
+	% 						'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(mno,',','''') '))) '];
 	% else
 	% 	mnoextrastring = '';
 	% end
@@ -336,7 +336,7 @@ else
 	%% Get other metrics which point to master functions which will be called anyway
 	if masterpull && ~isempty(m_ids_keep)
 		% Find implicated Master functions
-		SelectString = ['SELECT m_id FROM MasterPointerRelate WHERE mop_id IN (SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' bencat(m_ids_keep,',') '))'];
+		SelectString = ['SELECT m_id FROM MasterPointerRelate WHERE mop_id IN (SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' BF_cat(m_ids_keep,',') '))'];
 		[newmids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if isempty(emsg)
 			if ~isempty(newmids) % there are some master functions implicated

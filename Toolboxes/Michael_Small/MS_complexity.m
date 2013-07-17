@@ -12,7 +12,7 @@ if nargin < 3
 end
 
 if strcmp(preproc,'diff')
-    x = benzscore(diff(x));
+    x = BF_zscore(diff(x));
 end
 
 %_______________________________________________________________

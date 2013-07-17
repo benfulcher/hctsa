@@ -11,12 +11,14 @@ function out = CO_ami_benhist(y,tau,meth,nbins)
 
 
 %% INPUTS
-
-% time-lag, tau
+% Time-lag, tau
 if nargin < 2 || isempty(tau)
     tau = 1;  % time-lag of 1
 end
-if strcmp(tau,'tau'), tau = CO_fzcac(y); end
+if strcmp(tau,'tau')
+    tau = CO_fzcac(y);
+    fprintf(1,'tau = %u set to fist zero-crossing of ACF\n',tau);
+end
 
 if nargin < 3 || isempty(meth)
     meth = 'std1'; % default
@@ -27,7 +29,7 @@ if nargin < 4
 end
 
 
-% 1) Form the temporally-delayed vectors y1 and y2
+% 1) Form the time-delay vectors y1 and y2
 y1 = y(1:end-tau);
 y2 = y(1+tau:end);
 

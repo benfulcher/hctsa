@@ -172,7 +172,7 @@ switch surrmethod
 end
 
 % Cute farewell message
-fprintf(1,'Generated %u %s surrogates in %s.\n',nsurrs,surrmethod,benrighttime(toc,1))
+fprintf(1,'Generated %u %s surrogates in %s.\n',nsurrs,surrmethod,BF_thetime(toc,1))
 
 
 end

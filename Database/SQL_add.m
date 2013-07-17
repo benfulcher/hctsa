@@ -321,7 +321,7 @@ if ~strcmp(importwhat,'mops')
         fprintf(1,' error. This is really not good.\n');
         RA_keyboard
     else
-        if bevocal, fprintf(1,' initialized in %s!\n',benrighttime(toc(resultstic))); end
+        if bevocal, fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultstic))); end
     end
 end
 
@@ -387,13 +387,13 @@ if ~strcmp(importwhat,'mops')
     % allkws, allids
     switch importwhat
     case 'ts'
-        allnames = bencat({timeseries(~isduplicate).Filename},',','''');
+        allnames = BF_cat({timeseries(~isduplicate).Filename},',','''');
     case 'ops'
-        allnames = bencat({operation(~isduplicate).Name},',','''');
+        allnames = BF_cat({operation(~isduplicate).Name},',','''');
     end
     ourids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE %s IN (%s)',theid,thetable,thename,allnames));
     ourids = vertcat(ourids{:}); % ids matching FileNames/OpNames
-    ourkids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Keyword IN (%s)',thekid,thektable,bencat(ukws,',','''')));
+    ourkids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Keyword IN (%s)',thekid,thektable,BF_cat(ukws,',','''')));
     ourkids = vertcat(ourkids{:}); % ids matching FileNames/OpNames
     nkwrels = sum(cellfun(@(x)length(x),kwsplit)); % number of keyword relationships in the input file
     addcell = {};
@@ -476,6 +476,6 @@ end
 %% Close database
 SQL_closedatabase(dbc)
 
-fprintf('All tasks completed reading %s for adding %u %s into %s in %s.\n',INPfile,sum(~isduplicate),thewhat,dbname,benrighttime(toc(ticker)));
+fprintf('All tasks completed reading %s for adding %u %s into %s in %s.\n',INPfile,sum(~isduplicate),thewhat,dbname,BF_thetime(toc(ticker)));
 
 end

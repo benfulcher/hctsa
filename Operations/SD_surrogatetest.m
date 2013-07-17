@@ -60,7 +60,7 @@ end
 if ismember('fmmi',teststat)
     % look at first minimum of mutual information of surrogates compared to
     % that of signal itself
-    fmmix = CO_fmmi(x);
+    fmmix = CO_firstmin(x,'mi');
     fmmisurr = zeros(nsurrs,1);
     for i = 1:nsurrs
         try
@@ -166,7 +166,7 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
 
     % ASSUME GAUSSIAN DISTRIBUTION:
     % so can use 1/2-sided z-statistic
-    [~,p,~,zscore] = ztest(statx,mean(statsurr),std(statsurr),0.05,leftrightboth);
+    [~, p, ~, zscore] = ztest(statx,mean(statsurr),std(statsurr),0.05,leftrightboth);
     somestats.p = p; % pvalue
     somestats.zscore = zscore; % z-statistic
 

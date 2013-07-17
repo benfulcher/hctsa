@@ -4,8 +4,17 @@ function out = CO_acfremove(y,howtorem,p)
 % Input time series, y, should be z-scored
 % Ben Fulcher, September 2009
 
-N = length(y);
+%% Preliminaries
+N = length(y); % time-series length
 doplot = 0; % plot output
+
+%% Check inputs
+if nargin < 2 || isempty(howtorem)
+    howtorem = 'absfar'; % default
+end
+if nargin < 3 || isempty(p)
+    p = 0.1; % 10%
+end
 
 switch howtorem
     case 'absclose' % remove a proportion p of points closest to the mean
@@ -18,7 +27,10 @@ switch howtorem
         [~, is] = sort(y,'descend');
     case 'random'
         is = randperm(N);
+    otherwise
+        error('Unknwon method ''%s''',howtorem);
 end
+
 rkeep = sort(is(1:round(N*(1-p))),'ascend');
 y_trim = y(rkeep);
 

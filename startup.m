@@ -31,7 +31,7 @@ addfcn('Toolboxes/arfit_tool');
 fprintf(1,', Michael Small')
 addfcn('Toolboxes/Michael_Small');
 
-% Zoubin Gharamani's hmm toolbox
+% Zoubin Gharamani's hmm toolbox, ZG_hmm
 fprintf(1,', HMM')
 addfcn('Toolboxes/ZG_hmm');
 

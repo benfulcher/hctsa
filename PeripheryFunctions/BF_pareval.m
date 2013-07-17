@@ -1,4 +1,4 @@
-function [out, T] = pareval(x,y,s,bevocal)
+function [out, T] = BF_pareval(x,y,s,bevocal)
 % x and y are possible elements of the string s to be evaluated
 % Stores any text output as T
 

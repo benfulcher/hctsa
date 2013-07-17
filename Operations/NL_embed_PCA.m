@@ -1,6 +1,7 @@
 function out = NL_embed_PCA(y,tau,m)
-% Suggestion by Siddarth Arora to embed and look at PCA reduction
-% Bioinformatics toolbox (pca code)
+% Suggestion by (Siddharth Arora <arora@maths.ox.ac.uk>) to embed
+% the time series and look at PCA reduction
+% pca code uses the Bioinformatics Toolbox
 % Ben Fulcher 25/2/2010
 
 if nargin < 2 || isempty(tau)
@@ -16,6 +17,7 @@ y_embed = BF_embed(y,tau,m,0);
 
 if isnan(y_embed);
     % embedding parameters are unsuitable (likely that tau is too long...)
+    fprintf(1,'Embedding parameters are not suitable for this time series\n');
     out = NaN; return
 end
 

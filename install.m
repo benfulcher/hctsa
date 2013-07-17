@@ -30,10 +30,10 @@ SQL_create_all_tables;
 fprintf(1,'Populating the database with operations (please be patient)...\n')
 fprintf(1,'Adding Master operations...\n'); moptic = tic;
 SQL_add('mops','Database/INP_mops.txt','',0)
-fprintf(1,'Master operations added in %s.\n',benrighttime(toc(moptic)))
+fprintf(1,'Master operations added in %s.\n',BF_thetime(toc(moptic)))
 fprintf(1,'Adding all operations...\n'); optic = tic;
 SQL_add('ops','Database/INP_ops.txt','',0)
-fprintf(1,'Operations added in %s.\n',benrighttime(toc(optic)))
+fprintf(1,'Operations added in %s.\n',BF_thetime(toc(optic)))
 
 % Attempt to compile the executables in Toolboxes:
 fprintf(1,'Attempting to compile the binary executables needed for evaluating some operations.\n')

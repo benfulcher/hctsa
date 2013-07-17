@@ -18,7 +18,7 @@ end
 disp(['Loading all entries from TimeSeries database... Please be patient...']); tic
 [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,'SELECT ts_id, FileName, Length from TimeSeries WHERE Length IS NULL');
 nts = size(qrc,1);
-disp(['Full timeseries information retrieved from ' dbname ' in ' benrighttime(toc)]);
+disp(['Full timeseries information retrieved from ' dbname ' in ' BF_thetime(toc)]);
 
 % fill the length column of the timeseries table		
 % for each time series, load the file, find the length, and write to length column of this time series
@@ -48,7 +48,7 @@ for i = 1:nts
 	disp([num2str(i) ' -------  ' tsfn]);
 end
 disp(['Loaded and stored lengths in the database ' dbname ' for ' num2str(nts) ' time series!' ...
- 				'\n Only took ' benrighttime(toc) ' too :)']);
+ 				'\n Only took ' BF_thetime(toc) ' too :)']);
 
 %% Close database
 SQL_closedatabase(dbc)

@@ -1,4 +1,4 @@
-function out = ZG_hmm_fit(y,trainp,nstates)
+function out = MF_hmm(y,trainp,nstates)
 % Uses Zoubin Gharamani's implementation of HMMs for real-valued Gaussian
 % observations:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software.html
@@ -14,18 +14,22 @@ function out = ZG_hmm_fit(y,trainp,nstates)
 N = length(y); % number of samples in time series
 
 if nargin < 2 || isempty(trainp)
-    disp('training on 80% of the data by default')
+    fprintf(1,'Training on 80%% of the data by default\n')
     trainp = 0.8; % train on 80% of the data
 end
 
 if nargin < 3 || isempty(nstates)
-    disp('Using 3 states by default')
+    fprintf(1,'Using 3 states by default\n')
     nstates = 3; % use 3 states
 end
 
 %% Train the HMM
 % divide up dataset into training (ytrain) and test (ytest) portions
 Ntrain = floor(trainp*N);
+if Ntrain == N
+    error('No data for test set for HMM fitting?!')
+end
+
 ytrain = y(1:Ntrain);
 if Ntrain < N
     ytest = y(Ntrain+1:end);
@@ -35,7 +39,7 @@ end
 
 % train HMM with <nstates> states for 30 cycles of EM (or until
 % convergence); default termination tolerance
-[Mu, Cov, P, Pi, LL] = hmm(ytrain,Ntrain,nstates,30);
+[Mu, Cov, P, Pi, LL] = ZG_hmm(ytrain,Ntrain,nstates,30);
 
 %% Output statistics on the training
 
@@ -64,13 +68,8 @@ out.stdP = std(P(:));
 out.LLtrainpersample = max(LL)/Ntrain; % loglikelihood per sample
 out.nit = length(LL); % number of iterations
 
-if Ntrain == N
-    % no testing -- leave now
-    error('No HMM testing?!')
-end
-
 %% Calculate log likelihood for the test data
-lik = hmm_cl(ytest,Ntest,nstates,Mu,Cov,P,Pi);
+lik = ZG_hmm_cl(ytest,Ntest,nstates,Mu,Cov,P,Pi);
 
 out.LLtestpersample = lik/Ntest;
 

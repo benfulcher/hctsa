@@ -1,5 +1,5 @@
 function out = WL_dwtcoeff(y,wname,level)
-% Ben Fulcher January 2010
+% Ben Fulcher, January 2010
 
 %% Check Inputs
 N = length(y); % length of signal
@@ -16,7 +16,7 @@ end
 
 maxlevelallowed = wmaxlev(N,wname);
 if maxlevelallowed < level
-    disp('Chosen level is too large for this wavelet on this signal. Will be returning some NaNs, methinks...');
+    fprintf(1,'Chosen level is too large for this wavelet on this signal...');
 end
 
 %% Perform Wavelet Decomposition

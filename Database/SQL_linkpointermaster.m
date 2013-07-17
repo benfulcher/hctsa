@@ -66,7 +66,7 @@ for i = 1:numpointers
 	
 	times(i) = toc;
 	if mod(i,floor(numpointers/10))==0
-		disp(['Approximately ' benrighttime(mean(times(1:i))*(numpointers-i)) ' remaining!']);
+		disp(['Approximately ' BF_thetime(mean(times(1:i))*(numpointers-i)) ' remaining!']);
 	end
 end
 end

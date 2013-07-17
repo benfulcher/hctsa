@@ -53,6 +53,6 @@ else
     out.std = std(x);
 end
 
-% xth = SUB_coursegrain(x,2);
+% xth = BF_coarsegrain(x,2);
 
 end

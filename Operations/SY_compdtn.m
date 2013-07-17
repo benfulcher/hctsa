@@ -6,6 +6,9 @@ function out = SY_compdtn(y,nseg,eachorpar)
 % (full signal) distribution
 % Ben Fulcher August 2009
 
+% plot outputs
+doplot = 0;
+
 % Check inputs:
 if nargin < 2 || isempty(nseg)
     nseg = 5;
@@ -68,7 +71,7 @@ switch eachorpar
         
         divs = diffmat(diffmat > 0); % a set of non-zero divergences in all pairs of segments of the time series
         if isempty(divs);
-            fprintf(1,'That''s strange -- no divergences??! This must be a strange time series.\n');
+            fprintf(1,'That''s strange -- no changes in distribution??! This must be a strange time series.\n');
             out = NaN; return
         end
         

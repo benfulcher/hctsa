@@ -33,7 +33,7 @@ end
 %% Build the state-space model
 % use the whole time series -- prediction comes later...
 % m = n4sid(y,'best'); % chooses the best model order among orders 1:10
-m = n4sid(y,ord); % fits a model of given order
+m = n4sid(y,ord); % fits a state-space model of given order
 
 if strcmp(ord,'best')
     % also return the best order as an output statistic
@@ -53,13 +53,13 @@ m_np = length(m.ParameterVector); % number of parameters fitted
 % output parameters
 allm_as = m_as(:);
 for i = 1:length(allm_as)
-    eval(['out.A_' num2str(i) ' = ' num2str(allm_as(i)) ';']);
+    eval(sprintf('out.A_%u = allm_as(%u);',i,i));
 end
 for i = 1:length(m_ks)
-    eval(['out.k_' num2str(i) ' = ' num2str(m_ks(i)) ';']);
+    eval(sprintf('out.k_%u = m_ks(%u);',i,i));
 end
 for i = 1:length(m_cs)
-    eval(['out.c_' num2str(i) ' = ' num2str(m_cs(i)) ';']);
+    eval(sprintf('out.c_%u = m_cs(%u);',i,i));
 end
 out.x0mod = sqrt(sum(m_x0.^2));
 out.np = m_np;
@@ -86,9 +86,10 @@ ytest = y(floor(ptrain*N):end); % overlap
 
 % Train the model on just this portion
 % mp = armax(ytrain, orders);
-try mp = n4sid(ytrain, ord);
+try
+    mp = n4sid(ytrain, ord);
 catch emsg
-    error(['MF_sissm: Couldn''t fit the model to this time series: ' emsg])
+    error('Couldn''t fit the model to this time series: %s',emsg.message)
     % out = NaN; return
 end
 
@@ -108,7 +109,7 @@ residout = MF_residanal(mresiduals);
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
-    eval(['out.' fields{k} ' = residout.' fields{k} ';']);
+    eval(sprintf('out.%s = residout.%s;',fields{k},fields{k}));
 end
 
 out.ac1diff = abs(CO_autocorr(y.y,1))-abs(CO_autocorr(mresiduals,1));

@@ -13,7 +13,7 @@ y = iddata(y,[],1);
 
 % orders; vector specifying the AR and MA components
 if nargin < 2 || isempty(orders)
-    orders = [3 3]; % AR3, MA3
+    orders = [3, 3]; % AR3, MA3
 end
 if nargin < 3 || isempty(ptrain)
     ptrain = 0.8; % train on 80% of the data 

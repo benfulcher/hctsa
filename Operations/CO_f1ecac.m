@@ -7,13 +7,13 @@ a(1) = RM_information(y,y); % very weird -- why is this not 1?? Or use autocor?
 
 for i = 2:length(y)-1
     a(i) = CO_autocorr(y,i);
-    if (a(i-1)-oone)*(a(i)-oone)<0
+    if (a(i-1)-oone)*(a(i)-oone) < 0
         out = i;
         return
     end
 end
 
-% if no minimum in entire spectrum
+% If no minimum in entire spectrum return the maximum value
 out = length(y);
 
 end

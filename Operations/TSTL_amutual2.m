@@ -68,10 +68,10 @@ out.modeperiodmin = mode(dminimai);
 out.pmodeperiodmin = sum(dminimai == mode(dminimai))/length(dminimai);
 
 % number of crossings at mean/median level, percentiles
-out.pcrossmean = length(sgnchange(ami-mean(ami)))/(lami-1);
-out.pcrossmedian = length(sgnchange(ami-median(ami)))/(lami-1);
-out.pcrossq10 = length(sgnchange(ami-quantile(ami,0.1)))/(lami-1);
-out.pcrossq90 = length(sgnchange(ami-quantile(ami,0.9)))/(lami-1);
+out.pcrossmean = sum(BF_sgnchange(ami-mean(ami)))/(lami-1);
+out.pcrossmedian = sum(BF_sgnchange(ami-median(ami)))/(lami-1);
+out.pcrossq10 = sum(BF_sgnchange(ami-quantile(ami,0.1)))/(lami-1);
+out.pcrossq90 = sum(BF_sgnchange(ami-quantile(ami,0.9)))/(lami-1);
 
 % ac1
 out.amiac1 = CO_autocorr(ami,1);

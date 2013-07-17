@@ -173,7 +173,7 @@ out.xcmerr1 = xc(end); % this is the cross-correlation at lag 1
 out.xcmerrn1 = xc(1); % this is the cross-correlation at lag -1
 
 %% Fit exponential to std in range
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[5 1 15]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[5, 1, 15]);
 f = fittype('a*exp(b*x)+c','options',s);
 emsg = [];
 try

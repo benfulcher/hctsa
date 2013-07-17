@@ -1,4 +1,4 @@
-function out = RP_crpsimp(y,m,tau,eps,dist)
+function out = RP_crpsimp(y,m,tau,eps,dist,tw)
 % My attempt to do a bunch of recurrence plot measures using the CRP
 % Toolbox by Marwan, Version 5.13, Release 26
 % y should be z-scored
@@ -13,38 +13,52 @@ function out = RP_crpsimp(y,m,tau,eps,dist)
 % Only taking the first 2000 samples I think is best, the downsampling
 % could produce some spurious recurrences... I'll do that for now...
 
-% take first 2000 points...
-if length(y) > 2000;
-    y = y(1:2000);
-    fprintf(1,'Analyzing the first 2000 points of the input time series\n')
+N = length(y); % length of the input time series
+
+
+maxN = 2000; % really time consuming if input time series is longer than this threshold...
+if length(y) > maxN
+    y = y(1:maxN);
+    N = maxN;
+    fprintf(1,'Analyzing just the first %u points of the input time series\n', maxN)
 end
-N = length(y);
 
 %% 1) Set parameters
-
 % Set time-delay, tau
-if strcmp(tau,'ac')
-    tau = CO_fzcac(y);
-elseif strcmp(tau,'mi') || isempty(tau)
-    tau = CO_fmmi(y);
+if nargin < 3 || isempty(tau)
+    tau = 'mi'; %use first minimum of the automutual information function
+end
+if ischar(tau)
+    switch tau
+    case 'ac'
+        tau = CO_fzcac(y);
+    case 'mi'
+        tau = CO_firstmin(y,'mi');
+    otherwise
+        error('Unknown tau setting: ''%s''',tau);
+    end
 end
 if tau > N/10
-    tau = floor(N/10);
+    tau = max(1,floor(N/10));
 end
 
-% Set embedding dimension, m
+% Set embedding dimension, m -- maybe use false nearest neighbours
+if nargin < 2 || isempty(m)
+    m = 3; % use an embedding dimension of 3 by default
+end
 if strcmp(m,'fnn')
     % first time fnn goes below 0.1 (up to maximum of 10)
     m = NL_fnnmar(y,10,2,tau,0.1);
 end
 
 % Set the neighbourhood size, eps
-if isempty(eps)
+if nargin < 4 || isempty(eps)
     eps = 1;
 end
 
+
 % Set the distance metric, dist
-if isempty(dist)
+if nargin < 5 || isempty(dist)
     dist = 'euclidean';
 else
     dists = {'maxnorm','euclidean','minnorm','nrmnorm','rr','fan',...
@@ -55,7 +69,9 @@ else
 end
 
 % Set the Theiler Window, tw
-tw = 1;
+if nargin < 6 || isempty(tw)
+    tw = 1;
+end
 
 % Set the minimum length of diagonal/vertical structure, lmin and vmin
 lmin = 2;
@@ -90,7 +106,6 @@ out.rec2 = rqa(10); % recurrence time of the 2nd type
 
 % out.recur_rate_xy = rqad.RRp;
 % out.recur_rate_xny = 
-
 
 
 % Not sure how these scale with sample size...

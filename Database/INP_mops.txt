@@ -132,7 +132,7 @@ CO_autocorr(y,39)	AC_39
 CO_autocorr(y,40)	AC_40
 CO_fzcac(y)	fzcac
 CO_f1ecac(y)	f1ecac
-CO_fmac(y)	fmac
+CO_firstmin(y,'ac')	firstmin_ACF
 CO_autocorrs_nl(y,[1,2])	AC_nl_12
 CO_autocorrs_nl(y,[1,2,3])	AC_nl_123
 CO_autocorrs_nl(y,[1,2,3,4])	AC_nl_1234
@@ -199,7 +199,7 @@ RM_information(y(1:end-7),y(8:end))	AMI_7
 RM_information(y(1:end-8),y(9:end))	AMI_8
 RM_information(y(1:end-9),y(10:end))	AMI_9
 RM_information(y(1:end-10),y(11:end))	AMI_10
-CO_fmmi(y)	fmmi
+CO_firstmin(y,'mi')	fmmi
 CO_fzcmi(y)	fzcmi
 CO_ami_benhist(y,1,'std1',2)	CO_ami_benhist_1_std1_2
 CO_ami_benhist(y,1,'std1',4)	CO_ami_benhist_1_std1_4
@@ -1433,9 +1433,9 @@ EC_kpsstest(y,0)	MASTER_EC_kpsstest_0
 EC_kpsstest(y,1)	MASTER_EC_kpsstest_1
 EC_kpsstest(y,2)	MASTER_EC_kpsstest_2
 EC_kpsstest(y,0:10)	MASTER_EC_kpsstest_0_10
-ZG_hmm_fit(y,0.7,3)	MASTER_ZG_hmm_fit_07_3
-ZG_hmm_fit(y,0.8,2)	MASTER_ZG_hmm_fit_08_2
-ZG_hmm_comparenstates(y,0.6,2:4)	MASTER_ZG_hmm_comparenstates_06_24
+MF_hmm(y,0.7,3)	MASTER_MF_hmm_07_3
+MF_hmm(y,0.8,2)	MASTER_MF_hmm_08_2
+MF_hmm_comparenstates(y,0.6,2:4)	MASTER_MF_hmm_comparenstates_06_24
 MD_hrv_classic(y)	MASTER_MD_hrv_classic
 ML_step_detection(y,'kv')	MASTER_ML_step_detection_kv
 ML_step_detection(y,'l1pwc',10)	MASTER_ML_step_detection_l1pwc_10

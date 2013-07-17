@@ -3,9 +3,8 @@ function out = MF_steps_ahead(y,model,order,maxsteps)
 % predictions and looks at the variation
 % Ben Fulcher 17/2/2010
 
-
 %% Preliminaries
-N = length(y);
+N = length(y); % length of the input time series
 
 %% Inputs
 % y, column vector of equally-spaced time series measurements
@@ -48,6 +47,8 @@ switch model
         m = armax(ytrain,order);
     case 'ss'
         m = n4sid(ytrain,order);
+    otherwise
+        error('Unknown model ''%s''',model);
 end
 
 
@@ -71,7 +72,7 @@ sm2.rmserrs = zeros(maxsteps,1);
 sm2.mabserrs = zeros(maxsteps,1);
 sm2.ac1s = zeros(maxsteps,1);
 
-for i=1:maxsteps
+for i = 1:maxsteps
     % (1) *** Model m ***
     yp = predict(m, ytest, steps(i)); % across test set
 
@@ -130,10 +131,15 @@ sminf.ac1 = CO_autocorr(sminf.res,1);
 
 for i = 1:maxsteps
     % all relative to best dumb
-    eval(['out.rmserr_' num2str(i) ' = ' num2str(mf.rmserrs(i)/min([sm1.rmserrs(i) sm2.rmserrs(i) sminf.rmserr])) ';']);
-    eval(['out.mabserr_' num2str(i) ' = ' num2str(mf.mabserrs(i)/min([sm1.mabserrs(i) sm2.mabserrs(i) sminf.mabserr])) ';']);
+    mirms = mf.rmserrs(i)/min([sm1.rmserrs(i), sm2.rmserrs(i), sminf.rmserr]); % rms error
+    miabs = mf.mabserrs(i)/min([sm1.mabserrs(i), sm2.mabserrs(i), sminf.mabserr]); % absolute error
+
+    eval(sprintf('out.rmserr_%u = mirms;',i));
+    eval(sprintf('out.mabserr_%u = miabs;',i));
+    
     % raw ac1 values -- ratios don't really make sense
-    eval(['out.ac1_' num2str(i) ' = ' num2str(abs(mf.ac1s(i))) ';']);
+    makeitso = abs(mf.ac1s(i));
+    eval(sprintf('out.ac1_%u = makeitso;',i));
 end
 
 out.meandiffrmsabs = abs(mean(mf.rmserrs-mf.mabserrs));

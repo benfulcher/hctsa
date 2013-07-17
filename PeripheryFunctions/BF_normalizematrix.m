@@ -1,4 +1,4 @@
-function F = SUB_normalizematrix(F,normopt,itrain)
+function F = BF_normalizemat(F,normopt,itrain)
 % NaNs are ignored -- only real data is used for the normalization
 % (assume NaNs are a minority of the data)
 % Ben Fulcher 28/1/2011 -- Added this NaN capability 

@@ -484,7 +484,7 @@ switch cmeth
             fn = whatwithfile;
             tic
             load(fn,'R'); % load custom distance ('links' not needed)
-            disp(['loaded R from ' fn ' took ' benrighttime(toc)])
+            disp(['loaded R from ' fn ' took ' BF_thetime(toc)])
         elseif (whatwithfile == 2) % load from TS_guide_clinks
             if strcmp(metorts,'ts')
                 fn = 'TS_guide_clinksr.mat';

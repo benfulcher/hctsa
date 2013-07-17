@@ -5,18 +5,18 @@ function out = DN_kssimpc(x,whatfeature)
 % Specify a statistic, whatfeature, to compare
 
 [f, xi] = ksdensity(x); % the smoothed empirical distribution
-[fz, xiz] = ksdensity(benzscore(x)); % smoothed z-scored empirical distribution
+[fz, xiz] = ksdensity(BF_zscore(x)); % smoothed z-scored empirical distribution
 
 % 1. numpeaks
 
 df = diff(f);
 ddf = diff(df); % original
-sdsp = ddf(sgnchange(df));
+sdsp = ddf(BF_sgnchange(df));
 out1 = sum(sdsp < -0.0002); % 'large enough' maxima
 
 df = diff(fz);
 ddf = diff(df); % zscored
-sdsp = ddf(sgnchange(df));
+sdsp = ddf(BF_sgnchange(df));
 out2 = sum(sdsp < -0.0002); % 'large enough' maxima
 
 out.numpeaks = out2/out1; % shouldn't be meaningful

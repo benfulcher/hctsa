@@ -122,7 +122,7 @@ out.normdiff_exp = stats(10,4);
 
     %% TESTS
     function f = doyourcalcthing(y,y_d)
-        y = benzscore(y); y_d = benzscore(y_d);
+        y = BF_zscore(y); y_d = BF_zscore(y_d);
         f = zeros(10,1); % vector of features to output
         % 1) Stationarity
         % (a) StatAv
@@ -198,8 +198,8 @@ out.normdiff_exp = stats(10,4);
             mbfatd(j,4) = std(f(j:end))/sqrt(length(j:length(f)));
         end
 
-        % pick the maximum difference
-        [c ind] = max(abs(mbfatd(:,1)-mbfatd(:,2)));
+        % Pick the maximum difference
+        [c, ind] = max(abs(mbfatd(:,1)-mbfatd(:,2)));
 
         % t-statistic at this point
         tstat = abs((mbfatd(ind,1)-mbfatd(ind,2))/sqrt(mbfatd(ind,3)^2+mbfatd(ind,4)^2));

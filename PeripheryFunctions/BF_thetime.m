@@ -1,4 +1,4 @@
-function timestring = benrighttime(tsec,formatlong)
+function timestring = BF_thetime(tsec,formatlong)
 % Converts the input, tsec, a duration of time in seconds, into an appropriate 
 % string for output (i.e., converts to minutes or hours or days as appropriate)
 % output is something like '25.5 minutes' or '3.2 days' -- always displays to one decimal

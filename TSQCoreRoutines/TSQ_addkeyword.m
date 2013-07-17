@@ -30,7 +30,7 @@ end
 %% Open MySQL Database
 dbc = SQL_opendatabase(dbname);
 
-id_string = bencat(ids,',');
+id_string = BF_cat(ids,',');
 
 if strcmp(morts,'ts') % Time Series
 	% Get the ts_ids, Keywords from TimeSeries Table
@@ -88,7 +88,7 @@ if strcmp(morts,'ts') % Time Series
 		
 		times(i) = toc;
 		if mod(i,floor(nget/5))==0
-			disp(['Approximately ' benrighttime(mean(times(1:i))*(nget-i)) ' remaining!']);
+			disp(['Approximately ' BF_thetime(mean(times(1:i))*(nget-i)) ' remaining!']);
 		end
 	end
 	
@@ -98,7 +98,7 @@ if strcmp(morts,'ts') % Time Series
 		SQL_update_tskw(dbname);
 	
 		% Updating PercentageCalculated ONLY for keywords (should be quick)
-		SQL_fillfromresults(tsids,[],[1 1 1],[0 1 0 0],dbname);
+		SQL_fillfromresults(tsids,[],[1, 1, 1],[0, 1, 0, 0],dbname);
 	end
 	
 else % Operations
@@ -149,7 +149,7 @@ else % Operations
 		
 		times(i) = toc;
 		if mod(i,floor(nget/5))==0
-			disp(['Approximately ' benrighttime(mean(times(1:i))*(nget-i)) ' remaining!']);
+			disp(['Approximately ' BF_thetime(mean(times(1:i))*(nget-i)) ' remaining!']);
 		end
 	end
 	

@@ -28,7 +28,7 @@ end
 if ischar(tau) % determine by some other method
     switch tau
         case 'mi'
-            tau = CO_fmmi(y);
+            tau = CO_firstmin(y,'mi');
         case 'ac'
             tau = CO_fzcac(y);
         otherwise

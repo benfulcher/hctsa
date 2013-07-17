@@ -81,7 +81,7 @@ if maxN > 0 && N > maxN
             t = t(ii);
             y = y(ii);
         otherwise
-            error('Invalid sampling method.')
+            error('Invalid sampling method ''%s''.',methds)
     end
 else
     t = SUB_settimeindex(N,squishorsquash); % set time index
@@ -89,7 +89,7 @@ end
 
 % Make sure that y is indeed zscored
 % y = (y-mean(y))./std(y); % zscore -- but without the statistics toolbox!
-y = benzscore(y);
+y = BF_zscore(y);
 
 %% Learn the hyperparameters
 
@@ -146,7 +146,7 @@ if doplot
     S2p = S2;
     figure('color','w');
     f = [mu+2*sqrt(S2p); flipdim(mu-2*sqrt(S2p),1)];
-    fill([xstar; flipdim(xstar,1)], f, [6 7 7]/8, 'EdgeColor', [7 7 6]/8); % grayscale error bars
+    fill([xstar; flipdim(xstar,1)], f, [6, 7, 7]/8, 'EdgeColor', [7, 7, 6]/8); % grayscale error bars
     hold on;
     plot(xstar,mu,'k-','LineWidth',2); % mean function
     plot(t,y,'.-k'); % original data
@@ -181,7 +181,6 @@ out.maxS = max(S); % maximum variance
 out.minS = min(S); % minimum variance
 out.meanS = mean(S); % mean variance
 
-
     function t = SUB_settimeindex(N,squishorsquash)
         %% Set time index
         % Difficult for processes on different time scales -- to squash them all
@@ -193,6 +192,5 @@ out.meanS = mean(S); % mean variance
             t = linspace(0,1,N)';
         end
     end
-
 
 end

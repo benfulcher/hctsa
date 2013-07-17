@@ -66,7 +66,7 @@ else
 	disp(['Results table successfully initialized into ' dbname]);
 end
 
-disp(['DONE!! Successfully!! Really?! Wow!! I bet that took ages. In fact it only took ' benrighttime(toc)]);
+disp(['DONE!! Successfully!! Really?! Wow!! I bet that took ages. In fact it only took ' BF_thetime(toc)]);
 
 %% -- MATLAB WAY (one-at-a-time)
 % SelectString = ['SELECT ts_id from TimeSeries'];
@@ -87,7 +87,7 @@ disp(['DONE!! Successfully!! Really?! Wow!! I bet that took ages. In fact it onl
 % 		insertstring = ['INSERT INTO Results (ts_id, m_id) VALUES (' num2str(i) ',' num2str(j) ')'];
 % 	    mysql_dbexecute(dbc, insertstring);
 % 	end
-% 	disp([num2str(i) ' || ' benrighttime(toc*(nts-i))]);
+% 	disp([num2str(i) ' || ' BF_thetime(toc*(nts-i))]);
 % end
 
 %% Close database

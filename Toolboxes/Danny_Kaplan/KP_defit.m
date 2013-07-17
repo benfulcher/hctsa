@@ -1,4 +1,4 @@
-function [a,b] = defit(delta,epsilon,maxdelta)
+function [a, b] = KP_defit(delta,epsilon,maxdelta)
 % [a,b] = defit(delta,epsilon,maxdelta)
 % linear fitting routine for delta-epsilon
 % delta   -- distances between pre-images: output by delta-epsilon
@@ -11,12 +11,12 @@ if nargin < 3
 end
 
 % get rid of points whose pre-images are too far apart.
-foo = find( delta < maxdelta);
+foo = (delta < maxdelta);
 delta = delta(foo);
 epsilon = epsilon(foo);
 
 % Sort the pairs into ascending order on delta
-[x,i] = sort(delta);
+[x, i] = sort(delta);
 y = epsilon(i);
 
 s = length(x);
@@ -27,3 +27,5 @@ sxy = sum( x.*y);
 del = s*sxx - sx*sx;
 a = (sxx*sy - sx*sxy)/del;
 b = (s*sxy - sx*sy)/del;
+
+end

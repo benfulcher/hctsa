@@ -225,10 +225,11 @@ else
     out.skewness_n = NaN; out.kurtosis_n = NaN;
 end
 
-out.q1_all = quantile(zallangles,0.01);
-out.q10_all = quantile(zallangles,0.1);
-out.q90_all = quantile(zallangles,0.9);
-out.q99_all = quantile(zallangles,0.99);
+F_quantz = @(x) quantile(zallangles,x);
+out.q1_all = F_quantz(0.01);
+out.q10_all = F_quantz(0.1);
+out.q90_all = F_quantz(0.9);
+out.q99_all = F_quantz(0.99);
 out.skewness_all = skewness(allangles);
 out.kurtosis_all = kurtosis(allangles);
 
@@ -240,7 +241,7 @@ function [statavmean, statavstd] = sub_statav(x,n)
     % Require 2*n points (i.e., minimum of 2 in each partition) to do a
     % statav that even has a chance of being meaningful.
     NN = length(x);
-    if NN<2*n % not long enough
+    if NN < 2*n % not long enough
         statavmean = NaN; statavstd = NaN;
         return
     end

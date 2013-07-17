@@ -24,7 +24,7 @@ else
     if ischar(tau) % use a routine to inform tau
         switch tau
             case 'mi' % first minimum of mutual information function
-                tau = CO_fmmi(y);
+                tau = CO_firstmin(y,'mi');
                 sstau = sprintf('by first minimum of mutual information to tau = %u');
             case 'ac' % first zero-crossing of ACF
                 tau = CO_fzcac(y);

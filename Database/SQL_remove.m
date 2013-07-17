@@ -49,12 +49,12 @@ end
 
 %% Check what the ones are to remove
 if strcmp(mort,'ts')
-	SelectString = ['SELECT ts_id, Filename FROM TimeSeries WHERE ts_id IN (' bencat(vin,',') ')'];
+	SelectString = ['SELECT ts_id, Filename FROM TimeSeries WHERE ts_id IN (' BF_cat(vin,',') ')'];
 	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 	input(['About to remove all trace of ' num2str(length(vin)) ' time series ' ...
 				'from ' dbname ' [let''s see ''em]']);
 else
-	SelectString = ['SELECT m_id, OpName FROM Operations WHERE m_id IN (' bencat(vin,',') ')'];
+	SelectString = ['SELECT m_id, OpName FROM Operations WHERE m_id IN (' BF_cat(vin,',') ')'];
 	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 	input(['About to remove all trace of ' num2str(length(vin)) ' operations ' ...
 				'from ' dbname ' [let''s see ''em]']);
@@ -78,9 +78,9 @@ reply = input('What do you think? Carry on? Control C now or you''re in for it..
 disp('IT''S HAMMER TIME!!!');
 
 if strcmp(mort,'ts')
-	deletestring = ['DELETE FROM TimeSeries WHERE ts_id IN (' bencat(vin,',') ')'];
+	deletestring = ['DELETE FROM TimeSeries WHERE ts_id IN (' BF_cat(vin,',') ')'];
 else
-	deletestring = ['DELETE FROM Operations WHERE m_id IN (' bencat(vin,',') ')'];
+	deletestring = ['DELETE FROM Operations WHERE m_id IN (' BF_cat(vin,',') ')'];
 end
 [rs,emsg] = mysql_dbexecute(dbc, deletestring);
 if ~ isempty(emsg)

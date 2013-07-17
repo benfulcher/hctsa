@@ -14,7 +14,7 @@ end
 if strcmp(tau,'ac')
     tau = CO_fzcac(y);
 elseif strcmp(tau,'mi')
-    tau = CO_fmmi(y);
+    tau = CO_firstmin(y,'mi');
 end
 
 % Maximum embedding dimension
@@ -488,7 +488,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
                     mybad(i,j) = std(vnorm(stptr(i):endptr(j)))-gamma*(endptr(j)-stptr(i)+1);
                 end
             end
-            [a b] = find(mybad == min(mybad(:)),1,'first'); % this defines the 'best' scaling range
+            [a, b] = find(mybad == min(mybad(:)),1,'first'); % this defines the 'best' scaling range
             results(c,1) = stptr(a);
             results(c,2) = endptr(b);
             results(c,3) = min(mybad(:));

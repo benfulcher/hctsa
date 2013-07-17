@@ -169,7 +169,7 @@ out.ac4hp = gethp(stats(:,7));
 
 % 8) shen (Shannon entropy)
 % I think this is all rubbish
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -1 0.4]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -1, 0.4]);
 f = fittype('a*exp(b*x)+c','options',s);
 [c, gof] = fit(r,stats(:,8),f);
 out.shenfexpa = c.a;

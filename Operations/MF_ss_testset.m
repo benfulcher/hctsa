@@ -71,6 +71,8 @@ switch model
     case 'arma' % fit an arma model of specified orders
         % Note: order should be a two-component vector
         m = armax(y,ord);
+    otherwise
+        error('Unknown model ''%s''', model);
 end
 
 %% Prepare to do a series of predictions
@@ -87,7 +89,7 @@ stdrats = zeros(npred,1);
 r = zeros(npred,2);
 switch howtosubset
     case 'rand'
-        if samplep(2)<1 % specified a fraction of time series
+        if samplep(2) < 1 % specified a fraction of time series
             l = floor(N*samplep(2));
         else % specified an absolute interval
             l = samplep(2);
@@ -111,9 +113,11 @@ switch howtosubset
             r(:,1) = spts;
             r(:,2) = spts+l-1;
         end
+    otherwise
+        error('Unknown subset method ''%s''',howtosubset);
 end
 
-% quick check that ranges are valid
+% Quickly check that ranges are valid
 if any(r(:,1) >= r(:,2))
     error('Invalid settings');
 end

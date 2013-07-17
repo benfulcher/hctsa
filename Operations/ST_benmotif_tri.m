@@ -10,9 +10,9 @@ end
 
 switch trit
 	case 'quantile'
-		yt = SUB_coursegrain(y,3,'quantile');
+		yt = BF_coarsegrain(y,3,'quantile');
 	case 'diffquant'
-		yt = SUB_coursegrain(diff(y),3,'quantile');
+		yt = BF_coarsegrain(diff(y),3,'quantile');
     otherwise
         error('Unknown coarse-graining method ''%s''');
 end

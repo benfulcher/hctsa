@@ -53,7 +53,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     
     % 1) mean of diagonal elements of the transition matrix: shows an exponential
     % decay to zero
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
     [c, gof] = fit(ngr,store(:,1),f);
     out.meandiagfexp_a = c.a;
@@ -64,7 +64,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     
     % 2) maximum of diagonal elements of the transition matrix: shows an exponential
     % decay to zero
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
     [c, gof] = fit(ngr,store(:,2),f);
     out.maxdiagfexp_a = c.a;
@@ -75,7 +75,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     
     % 3) trace of T
     % fit exponential
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
     [c,gof] = fit(ngr,store(:,3),f);
     out.trfexp_a = c.a;
@@ -136,7 +136,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     else r1 = 1:length(ngr);
     end
     % fit exponential decay to range without possible first jump
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.5]);
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.5]);
     f = fittype('a*exp(b*x)','options',s);
     [c, gof] = fit(ngr(r1),store(r1,5),f);
     out.trcovfexp_a = c.a;
@@ -147,7 +147,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     
     % 6) Standard deviation of eigenvalues of T
     % Fit an exponential decay
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
     [c, gof] = fit(ngr,store(:,6),f);
     out.stdeigfexp_a = c.a;
@@ -158,7 +158,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     
     % 7) maximum (real) eigenvalue of T
     % Fit an exponential decay
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
     [c, gof] = fit(ngr,store(:,7),f);
     out.maxeig_fexpa = c.a;
@@ -169,7 +169,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     
     % 8) minimum (real) eigenvalue of T
     % Fit an exponential decay
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
     [c,gof] = fit(ngr,store(:,8),f);
     out.mineigfexp_a = c.a;
@@ -180,7 +180,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     
     % 9) mean real eigenvalue of T
     % Fit an exponential decay
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 -0.2]);
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
     [c, gof] = fit(ngr,store(:,9),f);
     out.meaneigfexp_a = c.a;

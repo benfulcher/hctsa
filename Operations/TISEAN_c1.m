@@ -25,7 +25,7 @@ end
 if strcmp(tau,'ac')
     tau = CO_fzcac(y);
 elseif strcmp(tau,'mi')
-    tau = CO_fmmi(y);
+    tau = CO_firstmin(y,'mi');
 end
 
 % Min/max embedding dimension, mmm
@@ -72,7 +72,7 @@ if isempty(res)
     delete([fn '.c1']) % remove the TISEAN file write output
     disp('Call to TISEAN failed. Exiting'); return,
 else
-    fprintf(1,'TISEAN routine c1 took %s\n',benrighttime(toc,1))
+    fprintf(1,'TISEAN routine c1 took %s\n',BF_thetime(toc,1))
 end
 
 % Get local slopes from c1 file output of previous call
@@ -84,7 +84,7 @@ if isempty(res)
     disp('Call to TISEAN failed. Exiting'); return
 end
 
-fprintf(1,'TISEAN routine c2d on c1 output took %s\n',benrighttime(toc,1))
+fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc,1))
 delete(fn) % remove the temporary data file
 delete([fn '.c1']) % remove the TISEAN file write output
 

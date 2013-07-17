@@ -73,7 +73,7 @@ else
 end
 
 % Check what to clear
-SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)',thename,thetable,theid,bencat(vin,','));
+SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)',thename,thetable,theid,BF_cat(vin,','));
 [todump,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 
 if ~isempty(emsg)
@@ -93,7 +93,7 @@ if doremove
     % Before delete them, first get keyword information, and information about masters (for operations)
     %<><>><><><><><><>
     
-	DeleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',thetable,theid,bencat(vin,','));
+	DeleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',thetable,theid,BF_cat(vin,','));
     [~,emsg] = mysql_dbexecute(dbc, DeleteString);
     if isempty(emsg)
         fprintf(1,'%u %s removed from %s in %s\n',length(todump),thewhat,thetable,dbname)
@@ -129,7 +129,7 @@ else
     %% Do the clearing
     fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s\n',dbname)
 
-    UpdateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,bencat(vin,','));
+    UpdateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(vin,','));
     [~,emsg] = mysql_dbexecute(dbc, UpdateString);
 
     if isempty(emsg)

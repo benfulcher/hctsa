@@ -3,7 +3,7 @@ function out = ST_cumul(y,wing,lorp,n)
 % obtained from the full time series
 % Ben Fulcher, September 2009
 
-N = length(y);
+N = length(y); % length of the time series
 
 % Determine subset range to use: r
 switch lorp

@@ -8,6 +8,6 @@ function out = OL_bentest(y,p)
 out.mean = mean(y(y > prctile(y,p) & y < prctile(y,100-p)));
 
 % std of the middle (100-2*p)% ofthe data
-out.std = std(y(y > prctile(y,p) & y < prctile(y,100-p)))/std(y); % [std(y) should be 1]
+out.std = std(y(y > prctile(y,p) & y < prctile(y,100-p))) / std(y); % [although std(y) should be 1]
 
 end

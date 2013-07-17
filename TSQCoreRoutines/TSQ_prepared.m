@@ -36,7 +36,7 @@ if nargin < 3
 end
 getwhatcanbe = {'null','all','error'};
 if ~ischar(getwhat) || ~ismember(getwhat,getwhatcanbe)
-    error('Your third input to TSQ_prepared must specify what to retrieve, one of the following: %s',bencat(getwhatcanbe))
+    error('Your third input to TSQ_prepared must specify what to retrieve, one of the following: %s',BF_cat(getwhatcanbe))
 end
 if nargin < 4
 	dbname = ''; % Use default database
@@ -61,8 +61,8 @@ if size(m_ids_keep,2) > size(m_ids_keep,1), m_ids_keep = m_ids_keep'; end
 ts_ids_keep = sort(ts_ids_keep,'ascend');
 m_ids_keep = sort(m_ids_keep,'ascend');
 % write a comma-delimited string of ids
-ts_ids_keep_string = bencat(ts_ids_keep,',');
-m_ids_keep_string = bencat(m_ids_keep,',');
+ts_ids_keep_string = BF_cat(ts_ids_keep,',');
+m_ids_keep_string = BF_cat(m_ids_keep,',');
 % count the number of time series and operations
 nts = length(ts_ids_keep);
 nops = length(m_ids_keep);
@@ -83,11 +83,11 @@ tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id I
 tsids_db = vertcat(tsids_db{:});
 if length(tsids_db) < nts % actually there are fewer time series in the database
     fprintf(1,'%u specified time series do not exist in %s, retrieving the remaining %u\n',nts-length(tsids_db),dbname,length(tsids_db))
-    ts_ids_keep = tsids_db; ts_ids_keep_string = bencat(ts_ids_keep,',');
+    ts_ids_keep = tsids_db; ts_ids_keep_string = BF_cat(ts_ids_keep,',');
 end
 if length(mids_db) < nops % actually there are fewer operations in the database
     fprintf(1,'%u specified operations do not exist in %s, retrieving the remaining %u\n',nops-length(mids_db),dbname,length(mids_db))
-    m_ids_keep = mids_db; m_ids_keep_string = bencat(m_ids_keep,',');
+    m_ids_keep = mids_db; m_ids_keep_string = BF_cat(m_ids_keep,',');
 end
 
 if nts == 0
@@ -131,7 +131,7 @@ for i = 1:nits
     ii = (bundles(i):1:min(bundles(i)+bundlesize-1,length(ts_ids_keep))); % indicies for this iteration
     ts_ids_now = ts_ids_keep(ii); % a range of ts_ids to retrieve in this iteration
     basestring = sprintf(['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ' ...
-                    	'ts_id IN (%s) AND m_id IN (%s)'],bencat(ts_ids_now,','),m_ids_keep_string);
+                    	'ts_id IN (%s) AND m_id IN (%s)'],BF_cat(ts_ids_now,','),m_ids_keep_string);
     switch getwhat
     case 'null'
     	SelectString = [basestring, ' AND QualityCode IS NULL'];
@@ -149,7 +149,7 @@ for i = 1:nits
         keyboard
     end
     if size(qrc) == 0
-        fprintf(1,'No data to retrieve for ts_id = (%s)\n',bencat(ts_ids_now,','));
+        fprintf(1,'No data to retrieve for ts_id = (%s)\n',BF_cat(ts_ids_now,','));
     end
     
 	% Convert empty entries to NaNs
@@ -174,10 +174,10 @@ for i = 1:nits
     % Note time taken for this iteration
 	times(i) = toc(ittic);
 	if mod(i,floor(nits/10)) == 0 % tell the user 10 times
-		fprintf(1,'Approximately %s remaining...\n',benrighttime(mean(times(1:i))*(nts-i)));
+		fprintf(1,'Approximately %s remaining...\n',BF_thetime(mean(times(1:i))*(nts-i)));
 	end
 end
-fprintf(1,'Local files filled from %s in %u iterations. Took %s altogether.\n',dbname,nits,benrighttime(sum(times)));
+fprintf(1,'Local files filled from %s in %u iterations. Took %s altogether.\n',dbname,nits,BF_thetime(sum(times)));
 	
 if ismember(getwhat,{'null','error'})    
     % We only want to keep rows and columns with (e.g., NaNs) in them...
@@ -197,7 +197,7 @@ if ismember(getwhat,{'null','error'})
 	elseif sum(keepi) < nts
 		fprintf(1,'Cutting down from %u to %u time series\n',nts,sum(keepi));
 		ts_ids_keep = ts_ids_keep(keepi); nts = length(ts_ids_keep);
-		ts_ids_keep_string = bencat(ts_ids_keep,',');
+		ts_ids_keep_string = BF_cat(ts_ids_keep,',');
 		TS_loc = TS_loc(keepi,:); TS_loc_ct = TS_loc_ct(keepi,:); TS_loc_q = TS_loc_q(keepi,:); % update local data stores
 	end
 	
@@ -208,7 +208,7 @@ if ismember(getwhat,{'null','error'})
     elseif sum(keepi) < nops
 		fprintf(1,'Cutting down from %u to %u operations\n',nops,sum(keepi));
 		m_ids_keep = m_ids_keep(keepi); nops = length(m_ids_keep);
-		m_ids_keep_string = bencat(m_ids_keep,',');
+		m_ids_keep_string = BF_cat(m_ids_keep,',');
 		TS_loc = TS_loc(:,keepi); TS_loc_ct = TS_loc_ct(:,keepi); TS_loc_q = TS_loc_q(:,keepi);
 	end    
 end

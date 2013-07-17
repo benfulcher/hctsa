@@ -103,7 +103,7 @@ out.meanspana = mean(spanareas);
 
 % Outliers
 % area of max span of all points; versus area of max span of 50% of points closest to origin
-d = sqrt(m(:,1).^2+m(:,2).^2);
+d = sqrt(m(:,1).^2 + m(:,2).^2);
 [d_sort ix] = sort(d,'ascend');
 
 out.areas_all = range(m(:,1))*range(m(:,2));

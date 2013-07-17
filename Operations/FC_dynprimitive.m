@@ -3,14 +3,16 @@ function out = FC_dynprimitive(y,fmeth)
 % FC_primitive, returns a bunch of statistics at each iteration
 % Ben Fulcher, 2009
 
-stats_st = zeros(10,7);
-
 switch fmeth
     case 'mean'
         ngr = (1:10)';
     case 'median'
         ngr = (1:2:19)';
+    otherwise
+        error('Unknown prediction method ''%s''',fmeth);
 end
+
+stats_st = zeros(length(ngr),6);
 
 for i = 1:length(ngr)
     switch fmeth
@@ -20,17 +22,12 @@ for i = 1:length(ngr)
             outtmp = FC_primitive(y,'median',ngr(i));
             % median needs more tweaking
     end
-%     stats_st(i,1)=outtmp.meanerr;
     stats_st(i,1) = outtmp.rmserr;
-%     stats_st(i,2)=outtmp.meanabserr;
     stats_st(i,2) = outtmp.stderr;
     stats_st(i,3) = outtmp.sws;
     stats_st(i,4) = outtmp.swm;
-%     stats_st(i,7)=outtmp.gofnadjr2;
     stats_st(i,5) = outtmp.ac1;
     stats_st(i,6) = outtmp.ac2;
-%     stats_st(i,9)=outtmp.taures;
-%     stats_st(i,10)=outtmp.tauresrat;
 end
 
 % plot(stats_st)
@@ -48,18 +45,18 @@ out.rmserr_meansgndiff = mean(sign(diff(stats_st(:,1))));
 if out.rmserr_chn < 1; % on the whole decreasing, as expected
     wigv = max(stats_st(:,1));
     wig = find(stats_st(:,1) == wigv,1,'first');
-    if wig~=1 && stats_st(wig-1,1)>wigv
+    if wig ~= 1 && stats_st(wig-1,1) > wigv
         wig = NaN; % maximum is not a local maximum; previous value exceeds it
-    elseif wig~=length(ngr) && stats_st(wig+1,1)>wigv
+    elseif wig ~= length(ngr) && stats_st(wig+1,1) > wigv
         wig = NaN; % maximum is not a local maximum; the next value exceeds it
     end
 else
     wigv = min(stats_st(:,1));
     wig = find(stats_st(:,1) == wigv,1,'first');
     
-    if wig~=1 && stats_st(wig-1,1)<wigv
+    if wig ~= 1 && stats_st(wig-1,1) < wigv
         wig = NaN; % maximum is not a local maximum; previous value exceeds it
-    elseif wig~=length(ngr) && stats_st(wig+1,1)<wigv
+    elseif wig ~= length(ngr) && stats_st(wig+1,1) < wigv
         wig = NaN; % maximum is not a local maximum; the next value exceeds it
     end
 end
@@ -82,7 +79,7 @@ out.sws_meansgndiff = mean(sign(diff(stats_st(:,3))));
 out.sws_stdn = std(stats_st(:,3))/range(stats_st(:,3));
 
 % fit exponential decay
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[range(stats_st(:,3)) -0.5 min(stats_st(:,3))]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[range(stats_st(:,3)), -0.5 min(stats_st(:,3))]);
 f = fittype('a*exp(b*x)+c','options',s);
 [c, gof] = fit(ngr,stats_st(:,3),f);
 out.sws_fexp_a = c.a;

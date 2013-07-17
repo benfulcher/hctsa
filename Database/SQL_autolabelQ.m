@@ -1,8 +1,8 @@
-function gi = SUB_autolabelQ(kwgs,metorts,norcl,kworlab,subset)
+function gi = SQL_autolabelQ(kwgs,metorts,norcl,kworlab,subset)
 % INPUTS:
 % (*) The keyword groups, a cell of strings: kwgs
-% (*) Whether keywords are for metrics or time series: metorts='mets' or 'ts'
-% (*) Whether to retrive from normal or clustered store: norcl='orig', 'norm', or 'cl'
+% (*) Whether keywords are for metrics or time series: metorts = 'mets' or 'ts'
+% (*) Whether to retrive from normal or clustered store: norcl = 'orig', 'norm', or 'cl'
 % (*) [opt] kworlab: can specify 'lab' for the actual specific names
 
 % OUTPUTS:
@@ -10,7 +10,7 @@ function gi = SUB_autolabelQ(kwgs,metorts,norcl,kworlab,subset)
 
 % Ben Fulcher August 2009
 %       New options: can specify kwgs with numbers: e.g.,
-%       kwgs={'space',100;'',200;'medical',0;...} [0 means all]
+%       kwgs = {'space',100;'',200;'medical',0;...} [0 means all]
 %       [blank '' label means anything: selected at random from all time series]
 % ------------------------------------------------------------------------
 % Ben Fulcher 24/3/2010 -- changed to SUB_autolabelQ from SUB_autolabel2 to
@@ -22,22 +22,22 @@ function gi = SUB_autolabelQ(kwgs,metorts,norcl,kworlab,subset)
 % to label (in that index system)
 
 %% (0) Check inputs
-if nargin < 1 || isempty(kwgs), disp('you must specify labels'); return; end
-if nargin < 2 || isempty(metorts), disp('Assuming time series'); metorts = 'ts'; end
-if nargin < 3 || isempty(norcl), disp('Assuming you want to retrieve from clustered index system'); norcl = 'cl'; end
+if nargin < 1 || isempty(kwgs), error('You must specify labels'); end
+if nargin < 2 || isempty(metorts), fprintf(1,'Assuming time series\n'); metorts = 'ts'; end
+if nargin < 3 || isempty(norcl), fprintf(1,'Assuming you want to retrieve from clustered data\n'); norcl = 'cl'; end
 if nargin < 4 || isempty(kworlab), kworlab = 'kw'; end % look up keywords by default
 if nargin < 5, subset = []; end % don't subset by default
 
 if ~ismember(metorts,{'mets','ts'})
-    disp('SUB_autolabel: Specify ''mets'' or ''ts''. Exiting.'), return
+    error('Specified ''%s'', must be ''mets'' or ''ts''.',metorts)
 end
 if ~isstruct(norcl) && ~ismember(norcl,{'orig','norm','cl'})
-    disp('SUB_autolabel: Specify ''orig'', ''norm'', or ''cl''. Exiting.'), return
+    error('Specified ''%s'', must be ''orig'', ''norm'', or ''cl''.',norcl)
 end
 if ~ismember(kworlab,{'kw','lab'})
-    disp('SUB_autolabel: Specify ''kw'' or ''lab''. Exiting.'), return
+    error('Specified ''%s'', must be ''kw'' or ''lab''.',kworlab)
 end
-if ischar(kwgs); kwgs={kwgs,0}; end
+if ischar(kwgs); kwgs = {kwgs,0}; end
 
 
 %% (1) The keywords are loaded from guides and stored in kws
@@ -145,7 +145,7 @@ if ~all(cellfun(@ischar,kwgs(:))) % have specified numbers of each
     kwnums = horzcat(kwgs{:,2}); % just the number of each part
     kwgs = kwgs(:,1)'; % just the keyword parts, a cell of strings
 else
-    kwnums=zeros(length(kwgs),1); % include all of each keyword
+    kwnums = zeros(length(kwgs),1); % include all of each keyword
 end
 Ng = length(kwgs); % number of groups
 % ndata = length(kws); % number of time series/operations
@@ -155,16 +155,16 @@ if strcmp(kworlab,'kw') % look for groups of keywords
 %     wally = zeros(ndata,1);
     % ; corresponding to the keywords in kwgs
 %     disp('Automatic labeling from the guide initiated.')
-    for jo=1:Ng
+    for jo = 1:Ng
         if ~isempty(kwgs{jo}) % collect time series with this keyword
-%             for i=1:ndata, wally(i)=any(ismember(kws{i},kwgs{jo})); end
+%             for i = 1:ndata, wally(i) = any(ismember(kws{i},kwgs{jo})); end
             wally = cellfun(@(x)any(ismember(kwgs{jo},x)),kws);
             gi{jo} = find(wally);
             if isempty(gi{jo})
-                disp(['Problem with group ' kwgs{jo} ': no matches found.']);
+                fprintf(1,'No matches found for group %s.\n',kwgs{jo});
 %                 return
             end
-            if kwnums(jo)~=0 && kwnums(jo)<length(gi{jo}) % take a random subset
+            if kwnums(jo)~=0 && kwnums(jo) < length(gi{jo}) % take a random subset
                 rperm = randperm(length(gi{jo}));
                 gi{jo} = gi{jo}(rperm(1:kwnums(jo)));
             end
@@ -174,7 +174,7 @@ if strcmp(kworlab,'kw') % look for groups of keywords
             kwgs{jo} = 'OTHERS';
             gi{jo} = [];
             notkwgs = kwgs(setxor(1:Ng,jo));
-            for i=1:length(kws)
+            for i = 1:length(kws)
                 if all(~ismember(notkwgs,kws{rperm(i)}))
                     gi{jo} = [gi{jo}; rperm(i)];
                     if length(gi{jo})==kwnums(jo)
@@ -184,16 +184,16 @@ if strcmp(kworlab,'kw') % look for groups of keywords
             end
         end
     end
-    disp('Autolabelling complete. Now that wasn''t so bad, was it?!');
+    fprintf(1,'Autolabelling complete.\n');
     
 
 else % find the indicies of specific labels (no ability for numbers of each;
       % -- there should be only one
-    gi=zeros(Ng,1);
-    for jo=1:Ng
+    gi = zeros(Ng,1);
+    for jo = 1:Ng
         gi(jo) = strmatch(kwgs{jo},kws,'exact');
         if isempty(gi(jo))
-            disp(['Problem with ' kwgs{jo} ': no matches found.']);
+            fprintf(1,'Error -- no matches found for ''%s''.\n',kwgs{jo});
 %             return
         end
     end

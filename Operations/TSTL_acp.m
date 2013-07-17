@@ -20,7 +20,7 @@ end
 if ~strcmp(class(s),'signal')
     error('Error making a signal class of the input time series')
 end
-N = length(y);
+N = length(y); % length of the time series
 
 %% Check inputs
 % (*) tau
@@ -28,7 +28,7 @@ if nargin < 2
     tau = 'ac'; % use first zero-crossing of autocorrelation function as default
 end
 if strcmp(tau,'mi')
-    tau = CO_fmmi(y);
+    tau = CO_firstmin(y,'mi');
 elseif strcmp(tau,'ac')
     tau = CO_fzcac(y);
 end

@@ -177,7 +177,7 @@ out.peaksepx = xi(i2)-xi(i1);
 out.olapint = sum(f.*ffit*(xi(2)-xi(1)))*std(x);
 
 % RELENT: returns the relative entropy of the two distributions
-r = find(ffit~=0);
+r = (ffit ~= 0);
 out.relent = sum(f(r).*log(f(r)./ffit(r))*(xi(2)-xi(1)));
 
 

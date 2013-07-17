@@ -4,15 +4,6 @@ function out = SY_dynpick(y,l)
 % Kind of a bootstrap sort of idea
 % Ben Fulcher August 2009
 
-
-% if strcmp(meth,'tau')
-%     seglr=[1 2 5 10]*taug;
-% elseif strcmp(meth,'abs');
-%     seglr=[10 20 50 100];
-% else
-%     return
-% end
-
 doplot = 0;
 
 if strcmp(l,'ac2')
@@ -81,7 +72,7 @@ fs(nfeat+1:nfeat*2) = std(qs); % the spread of the feature across subsegments of
 %     case 'ent'
 %         out=DN_kssimp(qs,'entropy'); % distributional entropy
 %     case 'lbq' % lbq test for randomness
-%         [h p] = lbqtest(y);
+%         [h, p] = lbqtest(y);
 %         out=p;
 % end
 % end

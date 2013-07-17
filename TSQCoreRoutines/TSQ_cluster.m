@@ -123,7 +123,7 @@ end
 if ~(ischar(cmethc) && ismember(cmethr,{'none','nothing'})) % can specify 'none' to do no clustering
     disp('clustering rows...'); tic
     [~, acgir] = TSQ_us_cluster(F,cmethr,cparamsr,'ts');
-    disp(['row clustering took ' benrighttime(toc)])
+    disp(['row clustering took ' BF_thetime(toc)])
 else
     acgir = {};
 end
@@ -132,7 +132,7 @@ end
 if ~(ischar(cmethc) && ismember(cmethc,{'none','nothing'})) && size(F,2)>1 % can specify 'none' to do no clustering
     disp('clustering columns...'); tic
     [~, acgic] = TSQ_us_cluster(F',cmethc,cparamsc,'mets');
-    disp(['column clustering took ' benrighttime(toc)])
+    disp(['column clustering took ' BF_thetime(toc)])
 else
     acgic = {};
 end

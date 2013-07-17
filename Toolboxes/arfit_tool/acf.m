@@ -1,4 +1,4 @@
-function []=acf(x, k, caption)
+function [] = acf(x, k, caption)
 %ACF	Plot of sample autocorrelation function.
 %
 %  ACF(x) plots the sample autocorrelation function of the univariate
@@ -24,12 +24,12 @@ function []=acf(x, k, caption)
     error('ACF requires XCORR from the Signal Processing Toolbox.')
   end   
 
-  [m,n]	  = size(x);
+  [m, n]	  = size(x);
   if (min(m,n) > 1) error('Time series must be univariate.'); end
   n 	  = max(m,n);
 
-  if (nargin < 3) caption='ACF'; end
-  if (nargin < 2) k=25; end
+  if (nargin < 3) caption = 'ACF'; end
+  if (nargin < 2) k = 25; end
   if (nargin < 1) error('Usage: ACF(vector).'); end
 
   % Compute autocorrelation sequence with XCORR from the Signal 

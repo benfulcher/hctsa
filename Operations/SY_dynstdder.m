@@ -20,7 +20,7 @@ if doplot
 end
 
 % fit exponential growth/decay
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1 0.5*sign(ms(end)-ms(1))]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, 0.5*sign(ms(end)-ms(1))]);
 f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit((1:maxd)',ms,f);
 out.fexp_a = c.a;

@@ -1,25 +1,29 @@
-function out = SP_basicmeasures(y,psdmeth,wmeth,nf,cepstrum,dopower)
+function out = SP_basicmeasures(y,psdmeth,wmeth,nf,dologabs,dopower)
 % Ben Fulcher August 2009
 % y is the signal
 % psdmeth is the method of obtaining the spectrum from the signal
 % wmeth is the window to use
 % nf is a number of frequency components to include; otherwise (if
 % empty, it's approx length(y))
-% cepstrum is a boolean: takes log amplitude of the signal before
+% dologabs is a boolean: takes log amplitude of the signal before
 % transforming to the frequency domain.
 % Ben Fulcher 22//9/2010 -- added dopower option
 % dopower uses power spectrum rather than amplitudes
 
-if nargin < 5, cepstrum = 0; end
+% Check inputs, set defaults:
+if size(y,2) > size(y,1); y = y'; end % time series must be a column vector
+if nargin < 2, psdmeth = 'fft'; end
+if nargin < 3, wmeth = 'none'; end
+if nargin < 4, nf = []; end
+if nargin < 5, dologabs = 0; end
 if nargin < 6 || isempty(dopower),
-    disp('We''re looking at amplitude spectrum -- not power spectrum...')
-    dopower = 0;
+    fprintf(1,'We''re looking at power spectrum by default...\n')
+    dopower = 1;
 end
 
-if cepstrum % a boolean
+if dologabs % a boolean
     y = log(abs(y));
-    % THIS ISN'T A CEPSTRUM--this is the spectrum of logarithmic absolute
-    % deviations!
+    % This analyzes is the spectrum of logarithmic absolute deviations
 end
 Ny = length(y);
 % S=periodogram(y,hamming(N));
@@ -40,7 +44,9 @@ switch psdmeth
                 window = bartlett(Ny);
             case 'boxcar'
                 window = boxcar(Ny);
-                % there are others, but I doubt I'll use any of them
+            otherwise
+                % There are other options, but these aren't implemented here
+                error('Unknown window ''%s''',wmeth);
         end
         
         if isempty(nf)
@@ -66,10 +72,13 @@ switch psdmeth
 %     case 'tstool' % in principle could use their fft, but it's the same
 %     name as the built in one! forget it...
 %         f = fft(
+    otherwise
+        error('Unknwon power spectral density method ''%s''',psdmeth);
 end
 
 if ~any(isfinite(S)) % no finite values in the power spectrum
     % This time series must be really weird -- return NaN (unsuitable operation)...
+    fprintf(1,'This is a weird time series\n');
     out = NaN; return
 end
 
@@ -78,7 +87,7 @@ if dopower
     S = S.^2;
 end
 
-if size(S,1) > size(S,2); S=S';w=w'; end
+if size(S,1) > size(S,2); S = S'; w = w'; end
 N = length(S); % = length(w)
 % plot(w,S); % plot the spectrum
 logS = log(S);
@@ -167,7 +176,7 @@ out.w25_75mel = w2mel(out.w25_75);
 % take moments from 3--9
 for i = 3:9
     themom = DN_moments(S,i);
-    eval(sprintf('out.mom%u = themom;'));
+    eval(sprintf('out.mom%u = themom;',i));
 end
 
 % fit some functions to this cumulative sum:
@@ -233,9 +242,12 @@ out.ylogareatopeak = sum(logS(1:i_maxS))*dw; % (semilogy)
 % out.logareatopeak=sum(logS(1:i_maxS).*diff(logw(1:i_maxS+1)));
 
 
-%% fit linear to log-log plot
+%% robust linear fits to log-log plots
 % (1): full range
-[a stats] = robustfit(log(w),log(S));
+
+warning('off','stats:robustfit:RankDeficient') % suppress these warnings
+
+[a, stats] = robustfit(log(w),log(S));
 out.linfitloglog_all_a1 = a(1); % robust intercept
 out.linfitloglog_all_a2 = a(2); % robust gradient
 out.linfitloglog_all_sigrat = stats.ols_s/stats.robust_s;
@@ -244,7 +256,7 @@ out.linfitloglog_all_sea1 = stats.se(1); % standard error of coefficient 1 estim
 out.linfitloglog_all_sea2 = stats.se(2); % standard error of coefficient 2 estimate
 
 % (2): first half (low frequency)
-[a stats] = robustfit(log(w(1:round(N/2))),log(S(1:round(N/2))));
+[a, stats] = robustfit(log(w(1:round(N/2))),log(S(1:round(N/2))));
 out.linfitloglog_lf_a1 = a(1); % robust intercept
 out.linfitloglog_lf_a2 = a(2); % robust gradient
 out.linfitloglog_lf_sigrat = stats.ols_s/stats.robust_s;
@@ -253,7 +265,7 @@ out.linfitloglog_lf_sea1 = stats.se(1);
 out.linfitloglog_lf_sea2 = stats.se(2);
 
 % (3): second half (high frequency)
-[a stats] = robustfit(log(w(round(N/2):end)),log(S(round(N/2):end)));
+[a, stats] = robustfit(log(w(round(N/2):end)),log(S(round(N/2):end)));
 out.linfitloglog_hf_a1 = a(1); % robust intercept
 out.linfitloglog_hf_a2 = a(2); % robust gradient
 out.linfitloglog_hf_sigrat = stats.ols_s/stats.robust_s;
@@ -262,7 +274,7 @@ out.linfitloglog_hf_sea1 = stats.se(1);
 out.linfitloglog_hf_sea2 = stats.se(2);
 
 % (4): middle half (mid-frequencies)
-[a stats] = robustfit(log(w(round(N/4):round(N*3/4))),log(S(round(N/4):round(N*3/4))));
+[a, stats] = robustfit(log(w(round(N/4):round(N*3/4))),log(S(round(N/4):round(N*3/4))));
 out.linfitloglog_mf_a1 = a(1); % robust intercept
 out.linfitloglog_mf_a2 = a(2); % robust gradient
 out.linfitloglog_mf_sigrat = stats.ols_s/stats.robust_s;
@@ -271,13 +283,16 @@ out.linfitloglog_mf_sea1 = stats.se(1);
 out.linfitloglog_mf_sea2 = stats.se(2);
 
 % fit linear to semilog plot (full range)
-[a stats] = robustfit(w,log(S));
+[a, stats] = robustfit(w,log(S));
 out.linfitloglog_all_a1 = a(1); % robust intercpet
 out.linfitloglog_all_a2 = a(2); % robust gradient
 out.linfitloglog_all_sigrat = stats.ols_s/stats.robust_s;
 out.linfitloglog_all_s = stats.s;
 out.linfitloglog_all_sea1 = stats.se(1);
 out.linfitloglog_all_sea2 = stats.se(2);
+
+warning('on','stats:robustfit:RankDeficient') % turn these warnings back on
+
 
 %% Power in bands
 % *** DO THIS BY BUFFER COMMAND: AND WHILE AT IT LOOK AT STATIONARITY OF
@@ -340,14 +355,16 @@ out.statav5_s = std(std(split))/std(S);
 
 % How many crossings
 % Give a horizontal line and count the # crossings with the power spectrum
-out.ncross01 = length(sgnchange(S-0.1));
-out.ncross02 = length(sgnchange(S-0.2));
-out.ncross05 = length(sgnchange(S-0.5));
-out.ncross1 = length(sgnchange(S-1));
-out.ncross2 = length(sgnchange(S-2));
-out.ncross5 = length(sgnchange(S-5));
-out.ncross10 = length(sgnchange(S-10));
-out.ncross20 = length(sgnchange(S-20));
+ncrossfn = @(x) sum(BF_sgnchange(S - x));
+
+out.ncross01 = ncrossfn(0.1);
+out.ncross02 = ncrossfn(0.2);
+out.ncross05 = ncrossfn(0.5);
+out.ncross1 = ncrossfn(1);
+out.ncross2 = ncrossfn(2);
+out.ncross5 = ncrossfn(5);
+out.ncross10 = ncrossfn(10);
+out.ncross20 = ncrossfn(20);
 
 function mel = w2mel(w) % convert to mel
     mel = 1127*log(w/(1400*pi)+1);

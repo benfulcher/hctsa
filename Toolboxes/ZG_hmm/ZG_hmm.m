@@ -17,10 +17,10 @@
 % Iterates until a proportional change < tol in the log likelihood 
 % or cyc steps of Baum-Welch
 
-function [Mu,Cov,P,Pi,LL] = hmm(X,T,K,cyc,tol)
+function [Mu, Cov, P, Pi, LL] = ZG_hmm(X,T,K,cyc,tol)
 
-p=length(X(1,:));
-N=length(X(:,1));
+p = length(X(1,:));
+N = length(X(:,1));
 
 if nargin < 5   tol=0.0001; end;
 if nargin < 4   cyc=100; end;
@@ -30,7 +30,7 @@ if nargin < 2   T=N; end;
 if (rem(N,T)~=0)
   error(' Data matrix length must be multiple of sequence length T');
 end
-N=N/T;
+N = N/T;
 
 Cov=diag(diag(cov(X)));
 
@@ -40,7 +40,7 @@ Pi=rand(1,K);
 Pi=Pi/sum(Pi);
 
 P=rand(K);
-P=rdiv(P,rsum(P));
+P=ZG_rdiv(P,ZG_rsum(P));
 
 LL=[];
 lik=0;
@@ -89,7 +89,7 @@ for cycle=1:cyc
     end;
     
     gamma=(alpha.*beta); 
-    gamma=rdiv(gamma,rsum(gamma));
+    gamma=ZG_rdiv(gamma,ZG_rsum(gamma));
     gammasum=sum(gamma);
     
     xi=zeros(T-1,K*K);
@@ -109,12 +109,12 @@ for cycle=1:cyc
   % outputs
   Mu=zeros(K,p);
   Mu=Gamma'*X;
-  Mu=rdiv(Mu,Gammasum');
+  Mu=ZG_rdiv(Mu,Gammasum');
   
   % transition matrix 
-  sxi=rsum(Xi')';
+  sxi=ZG_rsum(Xi')';
   sxi=reshape(sxi,K,K);
-  P=rdiv(sxi,rsum(sxi));
+  P=ZG_rdiv(sxi,ZG_rsum(sxi));
   
   % priors
   Pi=zeros(1,K);
@@ -127,7 +127,7 @@ for cycle=1:cyc
   Cov=zeros(p,p);
   for l=1:K
     d=(X-ones(T*N,1)*Mu(l,:));
-    Cov=Cov+rprod(d,Gamma(:,l))'*d;
+    Cov=Cov+ZG_rprod(d,Gamma(:,l))'*d;
   end;
   Cov=Cov/(sum(Gammasum));
   

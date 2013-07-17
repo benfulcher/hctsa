@@ -1,4 +1,4 @@
-function [yp best] = benpp(y,choosebest,order,beatthis,dospectral)
+function [yp, best] = BF_preproc(y,choosebest,order,beatthis,dospectral)
 % Returns a bunch of time series in the structure yp that have been
 % preprocessed in a number of different ways.
 % If second argument is specified, will choose amongst the preprocessings
@@ -9,7 +9,7 @@ function [yp best] = benpp(y,choosebest,order,beatthis,dospectral)
 % I think a good way of 'normalizing' over autocorrelation should also be
 % incorporated, but it's not obvious how, other than some downsampling...
 
-% NOTE: yp is NOT zscored -- needs to be zscored after, if necessary.
+% NOTE: yp is NOT z-scored -- needs to be z-scored after, if necessary.
 
 %% Inputs
 if nargin < 2
@@ -33,7 +33,6 @@ if nargin < 5 || isempty(dospectral)
 end
 
 %% Preliminaries
-
 yp.nothing = y; % this *has* to be the first element of yp
 
 %% 1) Differencing
@@ -131,10 +130,10 @@ switch choosebest
 %         order = 2; % should be set from inputs/defaults
         rmserrs = zeros(nfields,1);
         
-        for i=1:nfields; % each preprocessing performed
+        for i = 1:nfields; % each preprocessing performed
             data = [];
             eval(sprintf('data = yp.%s;',fields{i}));
-            data = benzscore(data);
+            data = BF_zscore(data);
             
             % (i) fit the model
             m = ar(data,order);
@@ -148,7 +147,7 @@ switch choosebest
 
         % Now choose the one with the *most* error (!) -- i.e., the AR
         % model finds it hardest to fit
-        if any(rmserrs>rmserrs(1)*(1+beatthis));
+        if any(rmserrs > rmserrs(1)*(1+beatthis));
             best = fields{rmserrs == max(rmserrs)};
         else
             best = 'nothing';
@@ -159,7 +158,7 @@ switch choosebest
         for i = 1:nfields
             data = [];
             eval(['data = yp.' fields{i} ';']);
-            data = benzscore(data); % unnecessary for AC
+            data = BF_zscore(data); % unnecessary for AC
             acs(i) = CO_autocorr(data,order);
         end
         
@@ -169,6 +168,8 @@ switch choosebest
         else
             best = 'nothing';
         end
+    otherwise
+        error('Unknown method ''%s''',choosebest);
 end
 
     function yboxcox = SUB_boxcox(x,lambda)
@@ -195,14 +196,16 @@ end
             case 'lf'
                 cullr = 1:floor(length(Fy1)*n);
             case 'biggest'
-                cullr = find(abs(Fy1)>quantile(abs(Fy1),n));
+                cullr = find(abs(Fy1) > quantile(abs(Fy1),n));
+            otherwise
+                error('Unknown method ''%s''', method);
         end
             
         meanrest = mean(abs(Fy1(setxor(1:end,cullr))));
 %         meanrest = 0;
         FyF = Fy;
-        FyF(cullr)=meanrest;
-        FyF(end-cullr+2)=meanrest;
+        FyF(cullr) = meanrest;
+        FyF(end-cullr+2) = meanrest;
 
         
         % PLOT
@@ -214,11 +217,11 @@ end
             
         %% Inverse Fourier Transform
         ydt = ifft(FyF,NFFT);
-        ydt = benzscore(ydt(1:Ny)); % crop to desired length
+        ydt = BF_zscore(ydt(1:Ny)); % crop to desired length
 
         % CRUDE REMOVAL OF EDGE EFFECTS
-        lose=min(5,floor(0.01*length(ydt))); % don't want to lose more than 1% of time series
-        ydt=ydt(1+lose:end-lose);
+        lose = min(5,floor(0.01*length(ydt))); % don't want to lose more than 1% of time series
+        ydt = ydt(1+lose:end-lose);
         
         % PLOT
 %         plot(zscore(ydt),'b'); hold on; plot(y,'r'); hold off;
@@ -237,7 +240,7 @@ end
             p = polyfit(x,ybit,order);
             ydt(r) = ybit-polyval(p,x);
         end
-        ydt = benzscore(ydt);
+        ydt = BF_zscore(ydt);
 %         plot(y,'b'); hold on; plot(ydt,'r');
 %         input('here we are')
     end

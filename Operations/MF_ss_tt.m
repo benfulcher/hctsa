@@ -37,7 +37,7 @@ end
 
 % (5) Sampling parameters, samplep
 if nargin < 5 || isempty(samplep)
-    samplep = [20,0.1]; % sample 20 times with 10%-length subsegments
+    samplep = [20, 0.1]; % sample 20 times with 10%-length subsegments
 end
 
 % % (6) Predict some number of steps ahead in test sets, steps
@@ -53,7 +53,7 @@ r = zeros(npred,2); % ranges
 
 switch howtosubset
     case 'rand'
-        if samplep(2)<1 % specified a fraction of time series
+        if samplep(2) < 1 % specified a fraction of time series
             l = floor(N*samplep(2));
         else % specified an absolute interval
             l = samplep(2);
@@ -67,7 +67,7 @@ switch howtosubset
             r(:,1) = spts(1:npred)+1;
             r(:,2) = spts(2:end);
         else
-            if samplep(2)<1 % specified a fraction of time series
+            if samplep(2) < 1 % specified a fraction of time series
                 l = floor(N*samplep(2));
             else % specified an absolute interval
                 l = samplep(2);
@@ -76,6 +76,8 @@ switch howtosubset
             r(:,1) = spts;
             r(:,2) = spts+l-1;
         end
+    otherwise
+        error('Unknown subset method ''%s''',howtosubset);
 end
 
 %% Fit the model to each training set
@@ -93,7 +95,7 @@ switch model
         orders = zeros(npred,1);
         sbcs = zeros(npred,1);
         yy = y.y;
-        for i=1:npred
+        for $1 $2 $3:npred
             % Use arfit software to retrieve the optimum AR(p) order by
             % Schwartz's Bayesian Criterion, SBC (or BIC); in the range
             % p = 1-10
@@ -102,9 +104,8 @@ switch model
                 [west, Aest, Cest, SBC] = arfit(yy(r(i,1):r(i,2)), 1, 10, 'sbc', 'zero');
             catch emsg
                 if strcmp(emsg.message,'Time series too short.')
-                   disp('Time Series is too short for ARFIT');
-                   out = NaN;
-                   return
+                   fprintf(1,'Time Series is too short for ARFIT\n');
+                   out = NaN; return
                 end
             end
             orders(i) = length(Aest);
@@ -129,7 +130,7 @@ switch model
         % Return statistics on parameters and goodness of fit
         fpes = zeros(npred,1);
         as = zeros(npred,order+1);
-        for i=1:npred
+        for i = 1:npred
             % fit the ar model
             m = ar(y(r(i,1):r(i,2)),order);
             % get parameters and goodness of fit
@@ -145,11 +146,11 @@ switch model
         out.fpe_range = range(fpes);
         
         % Statistics on fitted AR parameters
-        for i=1:order % first column will be ones
-            eval(['out.a_' num2str(i) '_std = ' num2str(std(as(:,i+1))) ';']);
-            eval(['out.a_' num2str(i) '_mean = ' num2str(mean(as(:,i+1))) ';']);
-            eval(['out.a_' num2str(i) '_max = ' num2str(max(as(:,i+1))) ';']);
-            eval(['out.a_' num2str(i) '_min = ' num2str(min(as(:,i+1))) ';']);
+        for i = 1:order % first column will be ones
+            eval(sprintf('out.a_%u_std = std(as(:,%u+1));',i,i));
+            eval(sprintf('out.a_%u_mean = mean(as(:,%u+1));',i,i));
+            eval(sprintf('out.a_%u_max = max(as(:,%u+1));',i,i));
+            eval(sprintf('out.a_%u_min = min(as(:,%u+1));',i,i));
         end
     case 'ss'
         %% Fit state space models of specified order
@@ -161,8 +162,7 @@ switch model
             catch
                 % Some range of the time series is invalid for fitting the
                 % model to.
-                disp('Model fitting failed')
-                out = NaN; return
+                error('Couldn''t fit this state space model')
             end
             fpes(i) = m.EstimationInfo.FPE;
         end
@@ -182,12 +182,11 @@ switch model
         ps = zeros(npred,order(1)+1);
         qs = zeros(npred,order(2)+1);
         
-        for i=1:npred
+        for i = 1:npred
             try
                 m = armax(y(r(i,1):r(i,2)),order);
             catch emsg
-                disp('just couldn''t fit this model')
-                out = NaN; return
+                error('Couldn''t fit this ARMA model')
             end
             fpes(i) = m.EstimationInfo.FPE;
             ps(i,:) = m.a;
@@ -202,21 +201,22 @@ switch model
         out.fpe_range = range(fpes);
         
         % Statistics on fitted AR parameters, p
-        for i=1:order % first column will be ones
-            eval(['out.p_' num2str(i) '_std = ' num2str(std(ps(:,i+1))) ';']);
-            eval(['out.p_' num2str(i) '_mean = ' num2str(mean(ps(:,i+1))) ';']);
-            eval(['out.p_' num2str(i) '_max = ' num2str(max(ps(:,i+1))) ';']);
-            eval(['out.p_' num2str(i) '_min = ' num2str(min(ps(:,i+1))) ';']);
+        for i = 1:order % first column will be ones
+            eval(sprintf('out.p_%u_std = std(ps(:,%u+1));',i,i));
+            eval(sprintf('out.p_%u_mean = mean(ps(:,%u+1));',i,i));
+            eval(sprintf('out.p_%u_max = max(ps(:,%u+1));',i,i));
+            eval(sprintf('out.p_%u_min = min(ps(:,%u+1));',i,i));
         end
         
         % Statistics on fitted MA parameters, q
-        for i=1:order % first column will be ones
-            eval(['out.q_' num2str(i) '_std = ' num2str(std(qs(:,i+1))) ';']);
-            eval(['out.q_' num2str(i) '_mean = ' num2str(mean(qs(:,i+1))) ';']);
-            eval(['out.q_' num2str(i) '_max = ' num2str(max(qs(:,i+1))) ';']);
-            eval(['out.q_' num2str(i) '_min = ' num2str(min(qs(:,i+1))) ';']);
+        for i = 1:order % first column will be ones
+            eval(sprintf('out.q_%u_std = std(qs(:,%u+1));',i,i));
+            eval(sprintf('out.q_%u_mean = mean(qs(:,%u+1));',i,i));
+            eval(sprintf('out.q_%u_max = max(qs(:,%u+1));',i,i));
+            eval(sprintf('out.q_%u_min = min(qs(:,%u+1));',i,i));
         end
-
+    otherwise
+        error('Unknown model ''%s''',model);
 end
 
 

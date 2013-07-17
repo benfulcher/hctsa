@@ -20,8 +20,8 @@ switch whatstat
         out = sum(dx(1:end-1) < 0 & dx(2:end) > 0)/(N-1);
     case 'pmcross'
         % ratio of times cross 1 to -1
-        c1sig = length(sgnchange(x-1)); % num times cross 1
-        c2sig = length(sgnchange(x+1)); % num times cross -1
+        c1sig = sum(BF_sgnchange(x-1)); % num times cross 1
+        c2sig = sum(BF_sgnchange(x+1)); % num times cross -1
         if c2sig == 0
             out = NaN;
         else

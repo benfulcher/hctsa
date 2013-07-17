@@ -1,6 +1,6 @@
-function cmapout = bengetcmap(whichcmap,ng,cellout,flipmeout)
+function cmapout = BF_getcmap(whichcmap,ng,cellout,flipmeout)
+% Returns a nice colormap from http://colorbrewer2.org/
 % Ben Fulcher 5/11/2010
-% http://colorbrewer2.org/
 
 if nargin < 2 || isempty(ng)
     ng = 6;
@@ -54,11 +54,11 @@ end
 
 
 % since most maps need at least 3 colours...
-% if ng<3, ng = 3; end
+% if ng < 3, ng = 3; end
 
 switch whichcmap
     case 'blues'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [222, 235, 247;
@@ -111,7 +111,7 @@ switch whichcmap
                     8, 48, 107];
         end
     case 'greens'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [229, 245, 224;
@@ -164,7 +164,7 @@ switch whichcmap
                     0, 68, 27];
         end
     case 'oranges'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [254, 230, 206;
@@ -217,7 +217,7 @@ switch whichcmap
                     127, 39, 4];
         end
     case 'purples'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [239, 237, 245;
@@ -270,7 +270,7 @@ switch whichcmap
                     63, 0, 125];
         end
     case 'reds'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [254, 224, 210;
@@ -323,7 +323,7 @@ switch whichcmap
                     103, 0, 13];
         end
     case 'bluegreen'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [229, 245, 249;
@@ -376,7 +376,7 @@ switch whichcmap
                     0, 68, 27];
         end
     case 'bluepurple'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [224, 236, 244;
@@ -429,7 +429,7 @@ switch whichcmap
                     77, 0, 75];
         end
     case 'greenblue'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [224, 243, 219;
@@ -482,7 +482,7 @@ switch whichcmap
                     8, 64, 129];
         end
     case 'orangered'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [254, 232, 200;
@@ -535,7 +535,7 @@ switch whichcmap
                     127, 0, 0];
         end
     case 'purpleblue'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [236, 231, 242;
@@ -588,7 +588,7 @@ switch whichcmap
                     2, 56, 88];
         end
     case 'purplebluegreen'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [236, 226, 240;
@@ -641,7 +641,7 @@ switch whichcmap
                     1, 70, 54];
         end
     case 'purplered'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [231, 225, 239;
@@ -694,7 +694,7 @@ switch whichcmap
                     103, 0, 31];
         end
     case 'redpurple'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [253, 224, 221;
@@ -747,7 +747,7 @@ switch whichcmap
                     73, 0, 106];
         end
     case 'yellowgreen'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [247, 252, 185;
@@ -800,7 +800,7 @@ switch whichcmap
                     0, 69, 41];
         end
     case 'yellowgreenblue'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [237, 248, 177;
@@ -853,7 +853,7 @@ switch whichcmap
                     8, 29, 88];
         end
     case 'yelloworangebrown'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [255, 247, 188;
@@ -906,7 +906,7 @@ switch whichcmap
                     102, 37, 6];
         end
     case 'yelloworangered'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [255, 237, 160;
@@ -959,7 +959,7 @@ switch whichcmap
                     128, 0, 38];
         end
     case 'browngreen'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         switch ng
             case 3
                 cmapout = [216,179,101;
@@ -1035,7 +1035,7 @@ switch whichcmap
                             0, 60, 48];
         end
     case 'pinkgreen'
-        if ng>11, ng=11; end
+        if ng > 11, ng = 11; end
         switch ng
             case 3
                 cmapout = [233, 163, 201;
@@ -1111,7 +1111,7 @@ switch whichcmap
                             39, 100, 25];
         end
     case 'purplegreen'
-        if ng>11, ng=11; end
+        if ng > 11, ng = 11; end
         switch ng
             case 3
                 cmapout = [175, 141, 195;
@@ -1187,7 +1187,7 @@ switch whichcmap
                             0, 68, 27];
         end
     case 'purpleorange'
-        if ng>11, ng=11; end
+        if ng > 11, ng = 11; end
         switch ng
             case 3
                 cmapout = [241, 163, 64;
@@ -1263,7 +1263,7 @@ switch whichcmap
                             45, 0, 75];
         end
     case 'redblue'
-        if ng>11, ng=11; end
+        if ng > 11, ng = 11; end
         switch ng
             case 3
                 cmapout = [239, 138, 98;
@@ -1339,7 +1339,7 @@ switch whichcmap
                     5, 48, 97];
         end
     case 'redgray'
-        if ng>11, ng=11; end
+        if ng > 11, ng = 11; end
         switch ng
             case 3
                 cmapout = [239, 138, 98;
@@ -1415,7 +1415,7 @@ switch whichcmap
                     26, 26, 26];
         end
     case 'redyellowblue'
-        if ng>11, ng=11; end
+        if ng > 11, ng = 11; end
         switch ng
             case 3
                 cmapout = [252, 141, 89;
@@ -1491,7 +1491,7 @@ switch whichcmap
                     49, 54, 149];
         end
     case 'redyellowgreen'
-        if ng>11, ng=11; end
+        if ng > 11, ng = 11; end
         switch ng
             case 3
                 cmapout = [252, 141, 89;
@@ -1567,7 +1567,7 @@ switch whichcmap
                     0, 104, 55];
         end
     case 'spectral'
-        if ng>11, ng=11; end
+        if ng > 11, ng = 11; end
         switch ng
             case 3
                 cmapout = [252, 141, 89;
@@ -1643,7 +1643,7 @@ switch whichcmap
                     94, 79, 162];
         end
     case 'accent'
-        if ng>8, ng=8; end
+        if ng > 8, ng = 8; end
         cmapout = [127, 201, 127;
             190, 174, 212;
             253, 192, 134;
@@ -1654,7 +1654,7 @@ switch whichcmap
             102, 102, 102]; % 8 class
         cmapout = cmapout(1:ng,:);
     case 'dark2'
-        if ng>8, ng=8; end
+        if ng > 8, ng = 8; end
         cmapout = [27, 158, 119;
             217, 95, 2;
             117, 112, 179;
@@ -1665,7 +1665,7 @@ switch whichcmap
             102, 102, 102]; % 8 class
         cmapout = cmapout(1:ng,:);
     case 'paired'
-        if ng>11, ng=11; end
+        if ng > 11, ng = 11; end
         cmapout = [166, 206, 227;
             31, 120, 180;
             178, 223, 138;
@@ -1679,7 +1679,7 @@ switch whichcmap
             255, 255, 153]; % 11 class
         cmapout = cmapout(1:ng,:);
     case 'pastel1'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         cmapout = [251, 180, 174;
             179, 205, 227;
             204, 235, 197;
@@ -1691,7 +1691,7 @@ switch whichcmap
             242, 242, 242]; % 9 class
         cmapout = cmapout(1:ng,:);
     case 'pastel2'
-        if ng>8, ng=8; end
+        if ng > 8, ng = 8; end
         cmapout = [179, 226, 205;
             253, 205, 172;
             203, 213, 232;
@@ -1702,7 +1702,7 @@ switch whichcmap
             204, 204, 204]; % 8 class
         cmapout = cmapout(1:ng,:);
     case 'set1'
-        if ng>9, ng=9; end
+        if ng > 9, ng = 9; end
         cmapout = [228, 26, 28;
             55, 126, 184;
             77, 175, 74;
@@ -1714,7 +1714,7 @@ switch whichcmap
             153, 153, 153]; % 9 class
         cmapout = cmapout(1:ng,:);
     case 'set2'
-        if ng>8, ng=8; end
+        if ng > 8, ng = 8; end
         cmapout = [102, 194, 165;
             252, 141, 98;
             141, 160, 203;
@@ -1725,7 +1725,7 @@ switch whichcmap
             179, 179, 179]; % 8 class
         cmapout = cmapout(1:ng,:);
     case 'set3'
-        if ng>12, ng=12; end
+        if ng > 12, ng = 12; end
         cmapout = [141, 211, 199;
             255, 255, 179;
             190, 186, 218;
@@ -1740,17 +1740,17 @@ switch whichcmap
             255, 237, 111]; % 12 class
         cmapout = cmapout(1:ng,:);
     case 'ben'
-        if ng>10, ng=10; end
-        cmapout = 255*[1 0.4 0.4; % red
-                    0.4 0.4 1; % blue
-                    [1 0.7 0.4]*0.95; % a bit darker orange
-                    0.1 0.5 0.5; % green
-                    [0.9 0.7 1]*0.95; % a bit darker pink
-                    0.5 0.1 0.1;
-                    0.5 0.5 0.5;
-                    0 0.7 0;
-                    0 0 0;
-                    1 1 0];
+        if ng > 10, ng = 10; end
+        cmapout = 255*[1, 0.4, 0.4; % red
+                        0.4, 0.4, 1; % blue
+                        [1, 0.7, 0.4]*0.95; % a bit darker orange
+                        0.1, 0.5, 0.5; % green
+                        [0.9, 0.7, 1]*0.95; % a bit darker pink
+                        0.5, 0.1, 0.1;
+                        0.5, 0.5, 0.5;
+                        0, 0.7, 0;
+                        0, 0, 0;
+                        1, 1, 0];
         cmapout = cmapout(1:ng,:);
 end
 
@@ -1763,28 +1763,6 @@ end
 if cellout
     cmapout = mat2cell(cmapout,ones(size(cmapout,1),1));
 end
-
-% switch ng
-%     case 3
-%         cmapout = [
-%     case 4
-%         cmapout = [
-%     case 5
-%         cmapout = [
-%     case 6
-%         cmapout = [
-%     case 7
-%         cmapout = [
-%     case 8
-%         cmapout = [
-%     case 9
-%         cmapout = [
-%     case 10
-%         cmapout = [
-%     case 11
-%         cmapout = [ 
-% end
-
 
 
 end

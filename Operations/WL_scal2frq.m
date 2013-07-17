@@ -33,7 +33,7 @@ end
 % x(t) = 5*sin(5t) + 3*sin(2t) + 2*sin(t), the scal2frq function translates
 % the scales corresponding to the maximum values of the CWT coefficients
 % to pseudo-frequencies ([0.796 0.318 0.159]), which are near to the true
-% frequencies ([5 2 1] / (2*pi) =~ [0.796 0.318 0.159]).
+% frequencies ([5, 2, 1] / (2*pi) =~ [0.796 0.318 0.159]).
 
 % delta = 0.1;
 % wname = 'coif3';

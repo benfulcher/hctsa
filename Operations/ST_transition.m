@@ -14,7 +14,7 @@ function out = ST_transition(y,discmeth,ng,tau)
 
 % Check inputs:
 if ng < 2
-    error('Too few groups')
+    error('Too few groups for discretization')
 end
 
 if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
@@ -26,7 +26,7 @@ if tau > 1; % calculate transition matrix at non-unity lag
     y = resample(y,1,tau);
 end
 
-N = length(y); % length of the time series
+N = length(y); % time-series length
 
 
 %% (((1))) Discretize the time series

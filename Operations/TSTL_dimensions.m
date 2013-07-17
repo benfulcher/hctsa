@@ -36,10 +36,10 @@ if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Time-delay embedding for TSTOOL failed')
 end
 
-if size(data(s),2) < 3 % embedded with dimension<3
+if size(data(s),2) < 3 % embedded with dimension < 3
     % note the 'true' predicted embedding dimension
     mopt = size(data(s),2);
-    % embed with dimension m=3
+    % embed with dimension m = 3
     s = BF_embed(y,embedparams{1},3,1);
     fprintf(1,'Re-embedded with embedding dimension 3\n')
 else
@@ -182,7 +182,7 @@ out.co_lfitmeansqdevmax = outmch_co.lfitmeansqdevmax;
 % ... and how good is the fit over this range?
 
 
-% Box counting dimension, m=1
+% Box counting dimension, m = 1
 outscr_bc_m1 = SUB_scr(bc_logr,bc_logN(:,1));
 out.scr_bc_m1_minbad = outscr_bc_m1.minbad;
 out.scr_bc_m1_logrmin = outscr_bc_m1.logrmin;
@@ -194,7 +194,7 @@ out.scr_bc_m1_meansqres = outscr_bc_m1.meansqres;
 out.scr_bc_m1_scaling_exp = outscr_bc_m1.scaling_exp;
 out.scr_bc_m1_scaling_int = outscr_bc_m1.scaling_int;
 out.scr_bc_m1_minbad = outscr_bc_m1.minbad;
-% Box counting dimension m=2
+% Box counting dimension m = 2
 outscr_bc_m2 = SUB_scr(bc_logr,bc_logN(:,2));
 out.scr_bc_m2_minbad = outscr_bc_m2.minbad;
 out.scr_bc_m2_logrmin = outscr_bc_m2.logrmin;
@@ -206,7 +206,7 @@ out.scr_bc_m2_meansqres = outscr_bc_m2.meansqres;
 out.scr_bc_m2_scaling_exp = outscr_bc_m2.scaling_exp;
 out.scr_bc_m2_scaling_int = outscr_bc_m2.scaling_int;
 out.scr_bc_m2_minbad = outscr_bc_m2.minbad;
-% Box counting dimension m=3
+% Box counting dimension m = 3
 outscr_bc_m3 = SUB_scr(bc_logr,bc_logN(:,3));
 out.scr_bc_m3_minbad = outscr_bc_m3.minbad;
 out.scr_bc_m3_logrmin = outscr_bc_m3.logrmin;
@@ -218,7 +218,7 @@ out.scr_bc_m3_meansqres = outscr_bc_m3.meansqres;
 out.scr_bc_m3_scaling_exp = outscr_bc_m3.scaling_exp;
 out.scr_bc_m3_scaling_int = outscr_bc_m3.scaling_int;
 out.scr_bc_m3_minbad = outscr_bc_m3.minbad;
-% Box counting dimension m=chosen/given
+% Box counting dimension m = chosen/given
 outscr_bc_mopt = SUB_scr(bc_logr,bc_logN(:,mopt));
 out.scr_bc_mopt_minbad = outscr_bc_mopt.minbad;
 out.scr_bc_mopt_logrmin = outscr_bc_mopt.logrmin;
@@ -232,7 +232,7 @@ out.scr_bc_mopt_scaling_int = outscr_bc_mopt.scaling_int;
 out.scr_bc_mopt_minbad = outscr_bc_mopt.minbad;
 
 
-% Information dimension, m=1
+% Information dimension, m = 1
 outscr_in_m1 = SUB_scr(in_logr,in_logl(:,1));
 out.scr_in_m1_minbad = outscr_in_m1.minbad;
 out.scr_in_m1_logrmin = outscr_in_m1.logrmin;
@@ -244,7 +244,7 @@ out.scr_in_m1_meansqres = outscr_in_m1.meansqres;
 out.scr_in_m1_scaling_exp = outscr_in_m1.scaling_exp;
 out.scr_in_m1_scaling_int = outscr_in_m1.scaling_int;
 out.scr_in_m1_minbad = outscr_in_m1.minbad;
-% Information dimension m=2
+% Information dimension m = 2
 outscr_in_m2 = SUB_scr(in_logr,in_logl(:,2));
 out.scr_in_m2_minbad = outscr_in_m2.minbad;
 out.scr_in_m2_logrmin = outscr_in_m2.logrmin;
@@ -256,7 +256,7 @@ out.scr_in_m2_meansqres = outscr_in_m2.meansqres;
 out.scr_in_m2_scaling_exp = outscr_in_m2.scaling_exp;
 out.scr_in_m2_scaling_int = outscr_in_m2.scaling_int;
 out.scr_in_m2_minbad = outscr_in_m2.minbad;
-% Information dimension m=3
+% Information dimension m = 3
 outscr_in_m3 = SUB_scr(in_logr,in_logl(:,3));
 out.scr_in_m3_minbad = outscr_in_m3.minbad;
 out.scr_in_m3_logrmin = outscr_in_m3.logrmin;
@@ -268,7 +268,7 @@ out.scr_in_m3_meansqres = outscr_in_m3.meansqres;
 out.scr_in_m3_scaling_exp = outscr_in_m3.scaling_exp;
 out.scr_in_m3_scaling_int = outscr_in_m3.scaling_int;
 out.scr_in_m3_minbad = outscr_in_m3.minbad;
-% Information dimension m=chosen/given
+% Information dimension m = chosen/given
 outscr_in_mopt = SUB_scr(in_logr,in_logl(:,mopt));
 out.scr_in_mopt_minbad = outscr_in_mopt.minbad;
 out.scr_in_mopt_logrmin = outscr_in_mopt.logrmin;
@@ -283,7 +283,7 @@ out.scr_in_mopt_minbad = outscr_in_mopt.minbad;
 
 
 
-% coformation dimension, m=1
+% coformation dimension, m = 1
 outscr_co_m1 = SUB_scr(co_logr,co_logC(:,1));
 out.scr_co_m1_minbad = outscr_co_m1.minbad;
 out.scr_co_m1_logrmin = outscr_co_m1.logrmin;
@@ -295,7 +295,7 @@ out.scr_co_m1_meansqres = outscr_co_m1.meansqres;
 out.scr_co_m1_scaling_exp = outscr_co_m1.scaling_exp;
 out.scr_co_m1_scaling_int = outscr_co_m1.scaling_int;
 out.scr_co_m1_minbad = outscr_co_m1.minbad;
-% coformation dimension m=2
+% coformation dimension m = 2
 outscr_co_m2 = SUB_scr(co_logr,co_logC(:,2));
 out.scr_co_m2_minbad = outscr_co_m2.minbad;
 out.scr_co_m2_logrmin = outscr_co_m2.logrmin;
@@ -307,7 +307,7 @@ out.scr_co_m2_meansqres = outscr_co_m2.meansqres;
 out.scr_co_m2_scaling_exp = outscr_co_m2.scaling_exp;
 out.scr_co_m2_scaling_int = outscr_co_m2.scaling_int;
 out.scr_co_m2_minbad = outscr_co_m2.minbad;
-% coformation dimension m=3
+% coformation dimension m = 3
 outscr_co_m3 = SUB_scr(co_logr,co_logC(:,3));
 out.scr_co_m3_minbad = outscr_co_m3.minbad;
 out.scr_co_m3_logrmin = outscr_co_m3.logrmin;
@@ -319,7 +319,7 @@ out.scr_co_m3_meansqres = outscr_co_m3.meansqres;
 out.scr_co_m3_scaling_exp = outscr_co_m3.scaling_exp;
 out.scr_co_m3_scaling_int = outscr_co_m3.scaling_int;
 out.scr_co_m3_minbad = outscr_co_m3.minbad;
-% coformation dimension m=chosen/given
+% coformation dimension m = chosen/given
 outscr_co_mopt = SUB_scr(co_logr,co_logC(:,mopt));
 out.scr_co_mopt_minbad = outscr_co_mopt.minbad;
 out.scr_co_mopt_logrmin = outscr_co_mopt.logrmin;
@@ -362,19 +362,19 @@ out.co_mbestfit = bestm_co.mbestfit;
         % determining the embedding parameters), we have that m is at least
         % 3 here so that we can do statistics on at least these ones...
         
-        % (i) on average the raw means at each m up to m=3
+        % (i) on average the raw means at each m up to m = 3
         subout.meanm1 = mean(logN(:,1));
         subout.meanm2 = mean(logN(:,2));
         subout.meanm3 = mean(logN(:,3));
         subout.meanmmax = mean(logN(:,end));
         
-        % (ii) raw minimum at each m up to m=3
+        % (ii) raw minimum at each m up to m = 3
         subout.minm1 = min(logN(:,1));
         subout.minm2 = min(logN(:,2));
         subout.minm3 = min(logN(:,3));
         subout.minmmax = min(logN(:,end));
         
-        % (iii) range at each m up to m=3
+        % (iii) range at each m up to m = 3
         subout.range1 = range(logN(:,1));
         subout.range2 = range(logN(:,2));
         subout.range3 = range(logN(:,3));
@@ -391,7 +391,7 @@ out.co_mbestfit = bestm_co.mbestfit;
         [subout.lfitmmax subout.lfitbmax subout.lfitmeansqdevmax] = subsublinfit(logr,logN(:,end)');
         
         
-        function [m b meansqdev] = subsublinfit(x,y)
+        function [m, b, meansqdev] = subsublinfit(x,y)
             p1 = polyfit(x,y,1);
             pfit = p1(1)*x + p1(2);
             res = y-pfit;
@@ -413,12 +413,12 @@ out.co_mbestfit = bestm_co.mbestfit;
         stptr = 1:floor(l/2)-1; % must be in the first half (not necessarily, but for here)
         endptr = ceil(l/2)+1:l; % must be in second half (not necessarily, but for here)
         mybad = zeros(length(stptr),length(endptr));
-        for i=1:length(stptr)
-            for j=1:length(endptr)
+        for i = 1:length(stptr)
+            for j = 1:length(endptr)
                 mybad(i,j) = lfitbadness(logr(stptr(i):endptr(j)),logN(stptr(i):endptr(j))');
             end
         end
-        [a b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+        [a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
 %         plot(logr,logN,'o-b'); hold on; plot(logr(stptr(a):endptr(b)),logN(stptr(a):endptr(b)),'o-r');
 %         hold off
 %         disp(['keep from ' num2str(stptr(a)) ' to ' num2str(endptr(b))])
@@ -441,18 +441,15 @@ out.co_mbestfit = bestm_co.mbestfit;
         subout.scaling_exp = p(1);
 		subout.scaling_int = p(2);
 		subout.minbad = min(min(mybad));
-
         
         function badness = lfitbadness(x,y)
-            gamma = 0.02; % CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+            gamma = 0.02; % reguralization parameter gamma selected empirically, could be tweaked in future work
             p = polyfit(x,y,1);
             pfit = p(1)*x+p(2);
             res = pfit-y;
-            badness = mean(abs(res))-gamma*length(x); % want to still maximize length(x)
+            badness = mean(abs(res)) - gamma*length(x); % want to still maximize length(x)
             
         end
-        
-        
     end
 
     function subout = SUB_bestm(logr,logNN)
@@ -465,15 +462,15 @@ out.co_mbestfit = bestm_co.mbestfit;
 
 		store_scalingexps = zeros(size(logNN,2),1);
 		store_meansqres = zeros(size(logNN,2),1);
-		for k=1:size(logNN,2);
+		for k = 1:size(logNN,2);
 			logN = logNN(:,k); % take this element
 			
 	        l = length(logr);
 	        stptr = 1:floor(l/2)-1; % must be in the first half (not necessarily, but for here)
 	        endptr = ceil(l/2)+1:l; % must be in second half (not necessarily, but for here)
 	        mybad = zeros(length(stptr),length(endptr));
-	        for i=1:length(stptr)
-	            for j=1:length(endptr)
+	        for i = 1:length(stptr)
+	            for j = 1:length(endptr)
 	                mybad(i,j) = lfitbadness(logr(stptr(i):endptr(j)),logN(stptr(i):endptr(j))');
 	            end
 	        end
@@ -499,7 +496,6 @@ out.co_mbestfit = bestm_co.mbestfit;
 		subout.meanscalingexp = mean(store_scalingexps);
 		subout.maxscalingexp = max(store_scalingexps);
 		subout.mbestfit = find(store_meansqres == min(store_meansqres),1,'first');
-		
 		
         function badness = lfitbadness(x,y)
             gamma = 0.02; % reguralization parameter gamma selected empirically, could be tweaked in future work

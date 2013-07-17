@@ -22,7 +22,7 @@ switch lorf
         wl = CO_fzcac(y);
 end
 
-if wl>N || wl<=1
+if wl > N || wl <= 1
     % ++BF 19/3/2010: this is not suitable if window length longer than ts
     out = NaN; return
 end

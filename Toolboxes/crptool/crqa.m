@@ -1,4 +1,4 @@
-function xout=crqa(varargin)
+function xout = crqa(varargin)
 %CRQA   Computes and plots the CRQA measures.
 %    Y=CRQA(X [,Y] [,param1,param2,...]) 
 %    Recurrence quantification analysis of the cross recurrence

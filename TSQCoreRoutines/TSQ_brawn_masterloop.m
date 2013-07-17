@@ -9,14 +9,14 @@ try
 	mastertimer = tic;
     if bevocal
         % any output text is printed to screen
-    	masteroutput = pareval(x,y,Mcode,1);
+    	masteroutput = BF_pareval(x,y,Mcode,1);
     else
         % output text stored in T (could log this if you really want to)
-        [masteroutput, T] = pareval(x,y,Mcode,0);
+        [masteroutput, T] = BF_pareval(x,y,Mcode,0);
     end
 	mastertime = toc(mastertimer);
     if bevocal
-        fprintf(1,' evaluated (%s).\n',benrighttime(mastertime))
+        fprintf(1,' evaluated (%s).\n',BF_thetime(mastertime))
     end
 	% for not-applicable/'real NaN', masteroutput is a NaN, otherwise a
 	% structure with components to be called below by pointer operations.

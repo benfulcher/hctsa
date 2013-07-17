@@ -2,7 +2,7 @@
 % wrapper of the C version.
 %
 % Usage:
-% [y, steps] = kvsteps(x)
+% [y, steps] = ML_kvsteps(x)
 %
 % Inputs
 %    x      - Input signal
@@ -20,7 +20,7 @@
 % machines using physically-based, high-throughput time series analysis"
 % Max A. Little et al., 2010, arXiv:1004.1234v1 [q-bio.QM]
 
-function [y steps] = kvsteps(x)
+function [y, steps] = ML_kvsteps(x)
 
 error(nargchk(1,1,nargin));
 
@@ -28,7 +28,7 @@ error(nargchk(1,1,nargin));
 N = length(x);
 
 % Call MEX implementation of KV-algorithm for speed
-steps = kvsteps_core(x);
+steps = ML_kvsteps_core(x);
 steps(steps == 0) = [];
 steps = [1; steps];
 

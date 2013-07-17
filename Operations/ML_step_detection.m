@@ -23,7 +23,7 @@ switch method
         % 716-723.
         
         % (1) Do the step detection
-        [steppedy steps] = kvsteps(y);
+        [steppedy steps] = ML_kvsteps(y);
         
         % Put in chpts form: a vector specifying indicies of starts of
         % constant runs.
@@ -68,7 +68,7 @@ switch method
         if length(params)>=3, p = params(3);
         else p = 10;
         end
-        steppedy = ckfilter(y, K, M, p);
+        steppedy = ML_ckfilter(y, K, M, p);
         
     case 'l1pwc'
         % Based around code originally written by 

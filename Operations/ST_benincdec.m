@@ -1,7 +1,7 @@
 function out = ST_benincdec(y,binarymeth)
 % returns stats on the consecutive (increase/decrease properties) (or other 
 % binary transformation) of the time series y.
-% Ben Fulcher
+% Ben Fulcher, 2009
 
 switch binarymeth
     case 'diff' % 1 if 

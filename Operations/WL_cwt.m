@@ -103,7 +103,7 @@ SSC = sum(SC);
 out.max_ssc = max(SSC);
 out.min_ssc = min(SSC);
 out.maxonmed_ssc = max(SSC)/median(SSC);
-out.pcross_maxssc50 = length(sgnchange(SSC-0.5*max(SSC)))/(N-1);
+out.pcross_maxssc50 = sum(BF_sgnchange(SSC-0.5*max(SSC))) / (N-1);
 out.std_ssc = std(SSC);
 
 %% Stationarity

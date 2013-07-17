@@ -124,7 +124,7 @@ if thresh_r > 0 % if 1, then even the worst are included
             fprintf(1,['Removed time series with fewer than %4.2f%% good values:'...
                             ' from %u to %u\n'],thresh_r*100,size(F,1),length(kr1))
             % display filtered times series to screen:
-            fprintf(1,'Lost %u time series: %s\n',size(F,1)-length(kr1),bencat(tsf(xkr1),','))
+            fprintf(1,'Lost %u time series: %s\n',size(F,1)-length(kr1),BF_cat(tsf(xkr1),','))
         else
             fprintf(1,'All %u time series had greater than %4.2f%% good values. Keeping them all.\n', ...
                             size(F,1),thresh_r*100)
@@ -154,7 +154,7 @@ if thresh_c > 0
     if ~isempty(kc1)
         if ~isempty(xkc1)
             fprintf(1,'Removed operations with fewer than %5.2f%% good values: from %u to %u\n',thresh_c*100,size(F,2),length(kc1))
-            fprintf(1,'Lost %u operations: %s\n',size(F,2)-length(kc1),bencat(mlab(xkc1),','))
+            fprintf(1,'Lost %u operations: %s\n',size(F,2)-length(kc1),BF_cat(mlab(xkc1),','))
         else
             fprintf(1,['All operations had greater than %5.2f%% good values; ' ...
                     'keeping them all :-)'],thresh_c*100)
@@ -315,12 +315,12 @@ else
     if isempty(trainset)
         % no training subset
         fprintf(1,'Normalizing a %u x %u object. Your patience is greatly appreciated...\n',ntsn,nmn)
-        F = SUB_normalizematrix(F,normopt);
+        F = BF_normalizemat(F,normopt);
     else
         % retrieve a subset
         disp(['Normalizing a ' num2str(ntsn) 'x' num2str(nmn) ' object using ' num2str(length(trainset)) ...
             ' to train the transformation! Your patience is greatly appreciated...'])
-        F = SUB_normalizematrix(F,normopt,trainset);
+        F = BF_normalizemat(F,normopt,trainset);
     end
     fprintf(1,'Normalized: the data matrix contains %u special-valued elements\n',sum(isnan(F(:))))
 end

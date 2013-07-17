@@ -1,7 +1,7 @@
 function out = MF_preproc(y,model,order)
 % Carries out a variety of preprocessings to look at improvement of fit to
 % a model (AR by default)
-% Uses the benpp function to do the preprocessings
+% Uses the BF_preproc function to do the preprocessings
 % The AR model is fitted using the function ar and pe from Matlab's System Identification Toolbox
 % Ben Fulcher 18/2/2010
 
@@ -20,7 +20,7 @@ if nargin < 3 || isempty(order)
 end
 
 %% Do a range of preprocessings
-yp = benpp(y,'');
+yp = BF_preproc(y,'');
 % returns a structure, yp, with a range of time series in it, each a different
 % transformation of the original, y.
 
@@ -39,10 +39,10 @@ for i = 1:nfields;
     eval(sprintf('data = yp.%s;',fields{i})); 
     % data is the current preprocessed data
 
-    switch model % SO MANY OPTIONS!
+    switch model % SO MANY OPTIONS! ;-)
         case 'ar'
             % (0)
-            data = benzscore(data);
+            data = BF_zscore(data);
             % (i) fit the model
             m = ar(data,order);
             % (ii) get statistics on fit
@@ -53,6 +53,8 @@ for i = 1:nfields;
             statstore.rmserr(i) = sqrt(mean(e.^2));
             statstore.mabserr(i) = mean(abs(e));
             statstore.ac1(i) = CO_autocorr(e,1);
+        otherwise
+            error('Unknown model ''%s''',model);
     end
 end
 
@@ -69,7 +71,8 @@ end
 
 % No, I'll just do in-sample rms error, for a single model no point fpeing
 for i = 2:nfields
-    eval(sprintf('out.rmserrrat_%s = %f;',fields{i}),statstore.rmserr(i)/statstore.rmserr(1));
+    wow = statstore.rmserr(i)/statstore.rmserr(1);
+    eval(sprintf('out.rmserrrat_%s = wow;',fields{i}));
 end
 % In fact, greater error in this case means a better detrending in some
 % sense -- it's remobed more of the 'obvious' linear structure (assuming
@@ -123,7 +126,7 @@ end
 %             
 %         %% Inverse Fourier Transform
 %         ydt = ifft(FyF,NFFT);
-%         ydt = benzscore(ydt(1:Ny)); % crop to desired length
+%         ydt = BF_zscore(ydt(1:Ny)); % crop to desired length
 % 
 %         
 %         % PLOT
@@ -143,7 +146,7 @@ end
 %             p = polyfit(x,ybit,order);
 %             ydt(r) = ybit-polyval(p,x);
 %         end
-%         ydt = benzscore(ydt);
+%         ydt = BF_zscore(ydt);
 % %         plot(y,'b'); hold on; plot(ydt,'r');
 % %         input('here we are')
 %     end

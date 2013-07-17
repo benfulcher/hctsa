@@ -23,7 +23,7 @@ try
         end
 	else % Retrieve required element from master structure
         [~, thest] = strtok(parmcodej,'.'); thest = thest(2:end); % the field after the '.'
-        opoutput = parevalM(Moutput,['themasterdat.', thest]);
+        opoutput = BF_parevalM(Moutput,['themasterdat.', thest]);
 		opquality = 0; % no evaluation error, quality = 0
         optime = Mct;
 	end

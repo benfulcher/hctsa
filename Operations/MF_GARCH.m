@@ -51,12 +51,12 @@ switch preproc
         % of an AR2 model to the processed time series.
         % has to beat doing nothing by 5% (error)
         % No spectral methods allowed...
-        [ypp, best] = benpp(y,'ar',2,0.05,0);
+        [ypp, best] = BF_preproc(y,'ar',2,0.05,0);
         eval(sprintf('y = ypp.%s;',best));
         fprintf(1,'Proprocessed according to AR(2) criterion using %s\n',best);
 end
 
-y = benzscore(y); % z-score the time series
+y = BF_zscore(y); % z-score the time series
 N = length(y); % could be different to original (if choose a differencing, e.g.)
 
 % Now have the preprocessed time series saved over y.
@@ -141,19 +141,18 @@ switch params
         
         
         % make an appropriate string
-        garchpval = [R M P Q]; % 4-component vector of model orders
+        garchpval = [R, M, P, Q]; % 4-component vector of model orders
         garchpnam = {'R','M','P','Q'};
         s = '';
-        for i=1:length(garchpval)
+        for i = 1:length(garchpval)
             if ~garchpval(i) == 0 % this should be a component to specify in 
-                s = [s '''' garchpnam{i} ''', ' num2str(garchpval(i)) ', '];
+                s = sprintf('%s''%s'', %u, ',s,garchpnam{i},garchpval(i));
             end
         end
         s = s(1:end-2); % remove the Oxford comma.
         % This string, s, should now specify an argument to garchset
         
         eval(sprintf('spec = garchset(%s);',s);
-        
         
     otherwise
         % Specify the GARCH model as a string in the input

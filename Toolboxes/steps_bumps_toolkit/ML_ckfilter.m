@@ -10,7 +10,7 @@
 % weights to the filter prediction error.
 %
 % Usage:
-%  x = ckfilter(y, K, M, p)
+%  x = ML_ckfilter(y, K, M, p)
 %
 % Inputs
 %  y - Input signal
@@ -30,7 +30,7 @@
 % machines using physically-based, high-throughput time series analysis"
 % Max A. Little et al., 2010, arXiv:1004.1234v1 [q-bio.QM]
 
-function x = ckfilter(y, K, M, p)
+function x = ML_ckfilter(y, K, M, p)
 
 error(nargchk(4,4,nargin));
 y = y(:);

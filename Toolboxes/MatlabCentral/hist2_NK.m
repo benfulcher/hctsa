@@ -4,17 +4,17 @@ function [MN, xedges, yedges] = hist2_NK(x, y, xedges, yedges)
 % 2D histogram: Extract the number of joint events - (x,y) data value pairs 
 % that fall in each bin of the grid defined by xedges and yedges.
 %
-%# ====================================================================
-%# Uses:
-%#    [N,BIN] = histc(X,EDGES)
-%# which returns
-%#   1) N is a LENGTH(EDGES) vector, N(k) will count the value X(i) if EDGES(k) <= X(i) < EDGES(k+1).  The
-%#    last bin will count any values of X that match EDGES(end).
-%#   2) an index matrix BIN.
-%#    If X is a vector, N(K) = SUM(BIN==K).
-%#    BIN is zero for out of range values.
-%#    If X is an m-by-n matrix, then, for j=1:n, N(K,j) = SUM(BIN(:,j)==K); end
-%# ====================================================================
+% ====================================================================
+% Uses:
+%    [N,BIN] = histc(X,EDGES)
+% which returns
+%   1) N is a LENGTH(EDGES) vector, N(k) will count the value X(i) if EDGES(k) <= X(i) < EDGES(k+1).  The
+%    last bin will count any values of X that match EDGES(end).
+%   2) an index matrix BIN.
+%    If X is a vector, N(K) = SUM(BIN==K).
+%    BIN is zero for out of range values.
+%    If X is an m-by-n matrix, then, for j=1:n, N(K,j) = SUM(BIN(:,j)==K); end
+% ====================================================================
 %
 %      Please, see the notes to histc too.
 %      N.B. It is always a better idea to use the
@@ -37,7 +37,7 @@ end
 xnbin = length(xedges);
 ynbin = length(yedges);
 
-%xbin, ybin are zero for out of range values
+% xbin, ybin are zero for out of range values
 kkL = find( x<xedges(1) ); kkR = find( x>xedges(xnbin) );
 if ~isempty( kkL ),
 xbin = xbin + 1; xnbin = xnbin + 1;
@@ -59,17 +59,17 @@ ybin( kkR ) = ynbin;
 
 xyBinEdges = 1:xnbin*ynbin;
 
-%# ====================================================================
-%# A more Elegant end-spiel:
-%#
-%# If x  belongs to jBin=xbin(x), and y  belongs to iBin=ybin(y),
-%# Then (x,y) pairs belong "columnwise" to:
-%#       ijBin = (jBin-1)*ynbin + iBin
+% ====================================================================
+% A more Elegant end-spiel:
+%
+% If x  belongs to jBin=xbin(x), and y  belongs to iBin=ybin(y),
+% Then (x,y) pairs belong "columnwise" to:
+%       ijBin = (jBin-1)*ynbin + iBin
 
 xyBin = (xbin-1)*ynbin + ybin;
 
 
-%# ====================================================================
+% ====================================================================
 
 MN = histc(xyBin, xyBinEdges);
 MN = reshape(MN, ynbin, xnbin);

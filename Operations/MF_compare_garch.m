@@ -13,10 +13,10 @@ end
 
 % GARCH parameters, p & q
 if nargin < 3 || isempty(pr)
-    pr = 1:4; %GARCH(1:4,qr)
+    pr = (1:4); % i.e., GARCH(1:4,qr)
 end
 if nargin < 4 || isempty(qr)
-    qr = 1:4; % GARCH(pr,1:4);
+    qr = (1:4); % i.e., GARCH(pr,1:4);
 end
 
 %% (1) Data preprocessing
@@ -31,14 +31,14 @@ switch preproc
         % of an AR2 model to the processed time series.
         % has to beat doing nothing by 5% (error)
         % No spectral methods allowed...
-        [ypp, best] = benpp(y,'ar',2,0.05,0);
+        [ypp, best] = BF_preproc(y,'ar',2,0.05,0);
         eval(sprintf('y = ypp.%s;',best));
         fprintf(1,'Proprocessed the time series according to AR(2) criterion using %s\n',best);
     otherwise
         error('Unknwon preprocessing setting ''%s''',preproc);
 end
 
-y = benzscore(y); % make sure the time series is z-scored
+y = BF_zscore(y); % make sure the time series is z-scored
 N = length(y); % could be different to original (e.g., if chose a differencing above)
 
 % Now have the preprocessed time series saved over y.

@@ -26,11 +26,11 @@ if nargin < 4 || isempty(taum)
 end
 if ischar(taum)
     if strcmp(taum,'mi')
-        tau = CO_fmmi(y); % time-delay
+        tau = CO_firstmin(y,'mi'); % time-delay
     elseif strcmp(taum,'ac')
         tau = CO_fzcac(y); % time-delay
     else
-        error('Invalid time-delay method %s.',taum)
+        error('Invalid time-delay method ''%s''.',taum)
     end
 else % give a numeric answer
     tau = taum;
@@ -50,7 +50,7 @@ end
 nn = fnn(y,maxm,tau,r,'silent'); % run Marwan's CRPToolbox false nearest neighbors code
 
 if isnan(nn);
-    error('Error running Marwan''s CRPToolbox function fnn')
+    error('Error running Marwan''s CRPToolbox function ''fnn''')
 end
 % plot(1:maxm,nn)
     

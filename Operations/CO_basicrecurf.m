@@ -6,6 +6,8 @@ function out = CO_basicrecurf(y,tau)
 % Returns basic measures of structure in this two-dimensional recurrence space
 % Ben Fulcher September 2009
 
+doplot = 0;
+
 if strcmp(tau,'tau')
 	% Make tau the first zero crossing of the autocorrelation function
     tau = CO_fzcac(y);
@@ -15,7 +17,6 @@ xt = y(1:end-tau); % part of the time series
 xtp = y(1+tau:end); % time-lagged time series
 N = length(y) - tau; % Length of each time series subsegment
 
-% plot(xt,xtp,'.k');
 
 % Points in a thick bottom-left -- top-right diagonal
 out.updiag01 = sum(abs(xtp-xt) < 0.1)/N;
@@ -71,8 +72,12 @@ out.stdincircle = std([out.incircle_01, out.incircle_02, out.incircle_05 ...
                         out.incircle_1, out.incircle_2, out.incircle_3]);
 
 
-% r = find(xtp.^2+xt.^2<0.2);
-% plot(xt(r),xtp(r),'.g')
-
+if doplot
+    figure('color','w');
+    plot(xt,xtp,'.k');
+    hold on
+    r = (xtp.^2+xt.^2 < 0.2);
+    plot(xt(r),xtp(r),'.g')
+end
 
 end

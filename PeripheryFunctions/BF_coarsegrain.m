@@ -1,4 +1,4 @@
-function yth = SUB_coursegrain(y,ng,howtocg)
+function yth = BF_coarsegrain(y,ng,howtocg)
 % coarse-grains the continuous time series to a discrete alphabet
 % by a given method. Yes, I know I misspelt 'course grain'.
 % ng specifies the size of the alphabet for 'quantile' and 'updown'
@@ -38,6 +38,8 @@ case {'embed2quadrants','embed2octants'}
 	q2r = upr(m1(upr) < 0); % points in quadrant 2
 	q3r = downr(m1(downr) < 0); % points in quadrant 3
 	q4r = downr(m1(downr) >= 0); % points in quadrant 4
+otherwise
+    error('Unknwon coarse-graining method ''%s''',howtocg);
 end
 
 

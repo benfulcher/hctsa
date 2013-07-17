@@ -124,24 +124,24 @@ Ng = length(gi);
 % set the colormap
 if Ng <= 1
     if strcmp(customcmap,'redyellowblue');
-        customcmap = bengetcmap('redyellowblue',ng,0);
+        customcmap = BF_getcmap('redyellowblue',ng,0);
     else
         customcmap = gray(ng);
     end
     colormap(customcmap)
 else
-    cmap = colormap(bengetcmap('blues',ng,0,1));
+    cmap = colormap(BF_getcmap('blues',ng,0,1));
     if Ng >= 2
-        cmap = [cmap; bengetcmap('greens',ng,0,1)];
+        cmap = [cmap; BF_getcmap('greens',ng,0,1)];
     end
     if Ng >= 3
-        cmap = [cmap; bengetcmap('oranges',ng,0,1)];
+        cmap = [cmap; BF_getcmap('oranges',ng,0,1)];
     end
     if Ng >= 4
-        cmap = [cmap; bengetcmap('purples',ng,0,1)];
+        cmap = [cmap; BF_getcmap('purples',ng,0,1)];
     end
     if Ng >= 5
-        cmap = [cmap; bengetcmap('reds',ng,0,1)];
+        cmap = [cmap; BF_getcmap('reds',ng,0,1)];
     end
     if Ng >= 6
         cmap = [cmap;pink(ng)];
@@ -150,41 +150,41 @@ else
         cmap = [cmap;gray(ng)];
     end
     if Ng >= 8
-        cmap = [cmap; bengetcmap('yelloworangered',ng,0,1)];
+        cmap = [cmap; BF_getcmap('yelloworangered',ng,0,1)];
     end
     if Ng >= 9
-        cmap = [cmap; bengetcmap('purplebluegreen',ng,0,1)];
+        cmap = [cmap; BF_getcmap('purplebluegreen',ng,0,1)];
     end
     if Ng >= 10
-        cmap = [cmap; bengetcmap('yellowgreenblue',ng,0,1)];
+        cmap = [cmap; BF_getcmap('yellowgreenblue',ng,0,1)];
     end
     if Ng >= 11
-        cmap = [cmap; bengetcmap('purpleblue',ng,0,1)];
+        cmap = [cmap; BF_getcmap('purpleblue',ng,0,1)];
     end
     if Ng >= 12
-        cmap = [cmap; bengetcmap('purplered',ng,0,1)];
+        cmap = [cmap; BF_getcmap('purplered',ng,0,1)];
     end
     if Ng >= 13
-        cmap = [cmap; bengetcmap('redpurple',ng,0,1)];
+        cmap = [cmap; BF_getcmap('redpurple',ng,0,1)];
     end
     if Ng >= 14
-        cmap = [cmap; bengetcmap('orangered',ng,0,1)];
+        cmap = [cmap; BF_getcmap('orangered',ng,0,1)];
     end
     if Ng >= 15
-        cmap = [cmap; bengetcmap('yelloworangebrown',ng,0,1)];
+        cmap = [cmap; BF_getcmap('yelloworangebrown',ng,0,1)];
     end
     if Ng >= 16
-        cmap = [cmap; bengetcmap('greenblue',ng,0,1)];
+        cmap = [cmap; BF_getcmap('greenblue',ng,0,1)];
     end
     if Ng >= 17
-        cmap = [cmap; bengetcmap('bluepurple',ng,0,1)];
+        cmap = [cmap; BF_getcmap('bluepurple',ng,0,1)];
     end
     if Ng >= 18
-        cmap = [cmap; bengetcmap('bluegreen',ng,0,1)];
+        cmap = [cmap; BF_getcmap('bluegreen',ng,0,1)];
     end
     if Ng >= 19
         fprintf(1,'Too many data groups to colour them correctly\n');
-        cmap = bengetcmap('spectral',ng);
+        cmap = BF_getcmap('spectral',ng);
     end
     colormap(cmap)
 end

@@ -42,6 +42,8 @@ if ischar(howtotest)
     if strcmp(howtotest,'all')
         ytrain = y;
         ytest = y;
+    else
+        error('Unknown testing set specifier ''%s''',howtotest);
     end
 else % use first <proportion> to train, rest to test
     co = floor(N*howtotest); % cutoff
@@ -87,14 +89,14 @@ end
 
 %% Use selstruc function to obtain 'best' order measures
 % Get specific 'best' measures
-[nn vmod0] = selstruc(V,0); % minimizes squared prediction errors
+[nn, vmod0] = selstruc(V,0); % minimizes squared prediction errors
 out.best_n = nn;
 
-[nn vmodaic] = selstruc(V,'aic'); % minimize Akaike's Information Criterion (AIC)
+[nn, vmodaic] = selstruc(V,'aic'); % minimize Akaike's Information Criterion (AIC)
 out.aic_n = nn; % optimum model order minimizing AIC in the range given
 out.bestaic = vmodaic(nn == min(nn));
 
-[nn vmodmdl] = selstruc(V,'mdl'); % minimize Rissanen's Minimum Description Length (MDL)
+[nn, vmodmdl] = selstruc(V,'mdl'); % minimize Rissanen's Minimum Description Length (MDL)
 out.mdl_n = nn; % optimal model order minimizing MDL in the range given
 out.bestmdl = vmodmdl(nn == min(nn));
 

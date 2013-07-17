@@ -65,7 +65,7 @@ out.conv4 = mean(amimins(end-4:end));
 % local maxima above 1*std from mean
 % inspired by curious result of periodic maxima for periodic signal with
 % bin size... ('quantiles', [2:80])
-loc_extr = intersect(find(diff(amimins(1:end-1)) > 0),sgnchange(diff(amimins(1:end-1))))+1;
+loc_extr = intersect(find(diff(amimins(1:end-1)) > 0), BF_sgnchange(diff(amimins(1:end-1)),1)) + 1;
 big_loc_extr = intersect(find(amimins > out.mean+out.std),loc_extr);
 out.nlocmax = length(big_loc_extr);
 if out.nlocmax > 2

@@ -40,8 +40,8 @@ fprintf(1,', TS_loc_guides. All loaded.\n');
 %% Preliminary definitions
 nts = length(ts_ids_keep); % number of time series
 nm = length(m_ids_keep); % number of operations
-ts_ids_keep_string = bencat(ts_ids_keep,',');
-m_ids_keep_string = bencat(m_ids_keep,',');
+ts_ids_keep_string = BF_cat(ts_ids_keep,',');
+m_ids_keep_string = BF_cat(m_ids_keep,',');
 
 %% Check that nothing has been deleted in the meantime...
 % time series
@@ -92,7 +92,7 @@ elseif isempty(qrc)
     fprintf(1,'\nNo %s elements in this range in the database anymore!\n',writewhat);
     return
 else
-	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),benrighttime(toc));
+	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_thetime(toc));
 end
 
 ts_id_db = vertcat(qrc{:,1}); % ts_ids (in m_id pairs) of empty database elements in this ts_id/m_id range
@@ -164,7 +164,7 @@ for i = 1:ndbel
 	times(i) = toc;
 	if mod(i,floor(ndbel/5))==0
 		fprintf(1,['Approximately %s remaining! -- so far %u entries'  ...
-			' (/ %u possible) have been written to %s...\n'],benrighttime(mean(times(1:i))*(ndbel-i)),sum(updated),i,dbname);
+			' (/ %u possible) have been written to %s...\n'],BF_thetime(mean(times(1:i))*(ndbel-i)),sum(updated),i,dbname);
 	end
 end
 

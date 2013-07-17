@@ -5,7 +5,7 @@ function out = MF_M_mtlbfit(x,dmodel,nbins)
 % x: the (z-scored) time series as a column vector
 % dmodel: the model name
 % nbins: for distribution fits: number of bins in the histogram
-%                                       (or, if nbins=0, uses ksdensity)
+%                                       (or, if nbins = 0, uses ksdensity)
 % Ben Fulcher, 2009
 
 
@@ -15,8 +15,8 @@ Distmods = {'gauss1','gauss2','exp1','power1'}; % valid distribution models
 TSmods = {'sin1','sin2','sin3','fourier1','fourier2','fourier3'}; % valid time series models
 
 if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
-    if nargin < 3; % haven't specified nbin
-        error('!! You must specify a bin count !!')
+    if nargin < 3 || isempty(nbins); % haven't specified nbins
+        nbin = 10; % use 10 bins by default
     end
     if nbins == 0; % use ksdensity instead of a histogram
         [dny, dnx] = ksdensity(x);
@@ -39,21 +39,22 @@ if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
         end
 	end
 elseif any(strcmp(TSmods,dmodel)); % valid TIME SERIES model name
-    if size(x,2)>size(x,1); x = x'; end % x must be a column vector
-    t = (1:length(x))'; % Assume equal sampling of the univariate time series
+    if size(x,2) > size(x,1)
+        x = x';
+    end % x must be a column vector
+    t = (1:length(x))'; % Time variable for equal sampling of the univariate time series
     try
         [cfun, gof, output] = fit(t,x,dmodel); % fit the model
 	catch emsg % this model can't even be fitted OR license problem
         if strcmp(emsg.message,'NaN computed by model function.') || strcmp(emsg.message,'Inf computed by model function.')
-            disp(['The model ' dmodel ' failed for this data -- returning NaNs for all fitting outputs']);
-            out = NaN;
-            return
+            fprintf(1,'The model %s failed for this data -- returning NaNs for all fitting outputs\n',dmodel);
+            out = NaN; return
         else
-            error(['MF_M_mtlbfit: Unexpected error fitting ' dmodel ' to the time series'])
+            error('MF_M_mtlbfit(x,%s,%u): Unexpected error fitting ''%s'' to the time series',dmoel,nbins,dmodel)
         end
 	end
 else
-    error('Invalid distribution or time-series model specified');
+    error('Invalid distribution or time-series model ''%s'' specified',dmodel);
 end
 
 %% Prepare the Output

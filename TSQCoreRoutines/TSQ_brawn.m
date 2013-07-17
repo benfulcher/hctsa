@@ -199,7 +199,7 @@ for i = 1:nts
         %                             cti(j) = Mcts(parmlink(j));
         %         else % (normal -- retrieve required element from master structure)
         %                             [~,thest] = strtok(parmcode{j},'.'); thest = thest(2:end); % remove the '.'
-        %                             ffi(j) = parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
+        %                             ffi(j) = BF_parevalM(Moutput{parmlink(j)},['themasterdat.' thest]);
         %             qqi(j) = 0; % good, real-valued output
         %                             cti(j) = Mcts(parmlink(j));
         %         end
@@ -212,7 +212,7 @@ for i = 1:nts
         %                     if bevocal, fprintf(fid,'%s\n',parmcode{j}); end % for error checking
         %                     try
         %         operationtimer = tic;
-        %         ffi(j) = pareval(x,y,parmcode{j});
+        %         ffi(j) = BF_pareval(x,y,parmcode{j});
         %         cti(j) = toc(operationtimer);
         %         qqi(j) = 0;
         %                     catch
@@ -274,13 +274,13 @@ for i = 1:nts
     if ncal > 0 % Some amount of calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u other outputs stored. [%u / %u]\n',...
 	     					ngood,nerror,nother,ncal,nops);
-		fprintf(fid,'Calculations for this time series took %s.\n',benrighttime(times(i),1));
+		fprintf(fid,'Calculations for this time series took %s.\n',BF_thetime(times(i),1));
     else
     	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',nops);
     end
     if i < nts
         fprintf(fid,'- - - - - - - -  %u time series remaining - - - - - - - -\n',nts-i);
-    	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n',benrighttime(((nts-i)*mean(times(1:i))),1));
+    	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n',BF_thetime(((nts-i)*mean(times(1:i))),1));
     else % the final time series
         fprintf(fid,'- - - - - - - -  All time series calculated! - - - - - - - -\n',nts-i);
     end
@@ -298,7 +298,7 @@ end
 
 %%% Finished calculating!! Aftermath:
 fprintf(fid,'!! !! !! !! !! !! !!  Calculation completed at %s !! !! !! !! !! !!\n',datestr(now))
-fprintf(fid,'Calculations took a total of %s.\n',benrighttime(sum(times),1))
+fprintf(fid,'Calculations took a total of %s.\n',BF_thetime(sum(times),1))
 
 % Aave the local files for subsequent integration into the storage system
 fprintf(1,'Saving all results to local .mat files:')

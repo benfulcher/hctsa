@@ -79,7 +79,7 @@ end
 %% % PLOT WALKER AND ORIGINAL TIME SERIES TOGETHER:
 % lw = 1;
 % figure('color','w'); hold on;
-% c = bengetcmap('set1',3,1);
+% c = BF_getcmap('set1',3,1);
 % plot(y,'.-k','LineWidth',lw); % original time series
 % plot(w,'.-','color',c{1},'LineWidth',lw); % walker
 % plot([1,length(w)],ones(2,1)*mean(w),'color',c{2},'LineWidth',2); % mean

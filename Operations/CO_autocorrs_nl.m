@@ -1,4 +1,3 @@
-function out = CO_autocorrs_nl(y,taus,mors,doabs)
 % Computes autocorrelations of the input time series of the form
 % <x_i x_{i-\tau_1} x{i-\tau_2}...>
 % The usual two-point autocorrelations are
@@ -7,7 +6,6 @@ function out = CO_autocorrs_nl(y,taus,mors,doabs)
 % series so that the means can be approximated as the sample means and the
 % standard deviations approximated as the sample standard deviations and so
 % the zscored time series can simply be used straight up.
-
 % Inputs:
 % y  -- should be the z-scored time series (Nx1 vector)
 % taus -- should be a vector of the time delays as above (mx1 vector)
@@ -29,26 +27,27 @@ function out = CO_autocorrs_nl(y,taus,mors,doabs)
 %         the values obtained from taking doabs off (i.e., for odd lengths
 %         of taus)  
 % Note 3: It's nice to look at ely at each iteration.
-
 % -- Ben Fulcher 8/6/09 --
 
+function out = CO_autocorrs_nl(y,taus,mors,doabs)
+
 %% Check Inputs:
-if nargin < 3
+if nargin < 3 || isempty(mors)
    mors = 'mean';
 else
-   if ~strcmp(mors,'mean') && ~strmp(mors,'std')
-       disp('third input to CO_autocorrs_nl should be either ''mean'' or ''std''. Using mean.');
-       mors = 'mean';
+   if ~ismember(mors,{'mean','std'})
+       error('Third input was ''%s'', should be either ''mean'' or ''std''.',mors);
    end
 end
-if nargin < 4 % use default settings for doabs
+if nargin < 4 || isempty(doabs) % use default settings for doabs
     if rem(length(taus),2) == 1
         doabs = 1; % take abs, otherwise will be a very small number
-    else doabs = 0; % not necessary to take absolute values
+    else
+        doabs = 0; % not necessary to take absolute values
     end
 end
 
-N = length(y);
+N = length(y); % time-series length
 tmax = max(taus); % the maximum delay time
 
 % Compute the autocorrelation sum iteratively
@@ -58,16 +57,19 @@ for i = 1:length(taus)
 end
 
 % Compute output
-if strcmp(mors,'mean')
+switch mors
+case 'mean'
     if doabs
         out = mean(ely);
     else
         out = mean(abs(ely));
     end
-elseif strcmp(mors,'std')
+case 'std'
     if doabs
         out = std(ely);
     else
         out = std(abs(ely));
     end
+end
+
 end
