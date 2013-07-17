@@ -1,6 +1,6 @@
-function out = OL_bentest(y,p)
-% remove pth percent of highest and lowest outliers from the z-scored 
-% input time series,y (i.e., 2*p percent removed from the time series in total)
+function out = DN_outliertest(y,p)
+% Removes the pth percent of highest and lowest outliers from the z-scored 
+% input time series, y (i.e., 2*p percent removed from the time series in total)
 % Returns the ratio of the mean and std before and after doing this
 % Ben Fulcher, 2009
 

@@ -241,9 +241,9 @@ out.htdt_ksn = HT_disttests(y_d,'ks','norm') / HT_disttests(y,'ks','norm'); % Ko
 out.htdt_llfn = HT_disttests(y_d,'lillie','norm') / HT_disttests(y,'ks','norm');
 
 % 3) Outliers
-out.olbt_m2 = OL_bentest(y_d,2,1) / OL_bentest(y,2,1);
-out.olbt_m5 = OL_bentest(y_d,5,1) / OL_bentest(y,5,1);
-out.olbt_s2 = OL_bentest(y_d,2,2) / OL_bentest(y,2,2);
-out.olbt_s5 = OL_bentest(y_d,5,2) / OL_bentest(y,5,2);
+out.olbt_m2 = DN_outliertest(y_d,2,1) / DN_outliertest(y,2,1);
+out.olbt_m5 = DN_outliertest(y_d,5,1) / DN_outliertest(y,5,1);
+out.olbt_s2 = DN_outliertest(y_d,2,2) / DN_outliertest(y,2,2);
+out.olbt_s5 = DN_outliertest(y_d,5,2) / DN_outliertest(y,5,2);
 
 end

@@ -1,26 +1,41 @@
-function out = NW_visgraphben(y,meth)
-% Constructs a visibility graph from the time series (c.f., Lacasa 2008, PNAS)
+function out = NW_visgraph(y,meth)
+% Constructs a visibility graph from the time series
+
+% "From time series to complex networks: The visibility graph"
+% Lacasa, Lucas and Luque, Bartolo and Ballesteros, Fernando and Luque, Jordi and Nu\~no, Juan Carlos
+% P. Natl. Acad. Sci. USA. 105(13) 4972 (2008)
+% Hopefully this implementation is accurate
+
+% "Horizontal visibility graphs: Exact results for random time series"
+% Luque, B. and Lacasa, L. and Ballesteros, F. and Luque, J.
+% Phys. Rev. E. 80(4) 046103 (2009)
+
 % Returns various statistics on the graph.
 % INPUTS:
 % y: the time series (a column vector)
 % meth: the method for constructing:
 % 			(a) 'norm': the normal visibility definition
-% 			(b) 'horiz': uses only horizonatal lines to link nodes/datums (Luque et al. PRE 2009)
+% 			(b) 'horiz': uses only horizonatal lines to link nodes/datums
 % Ben Fulcher October 2009
 % Ben Fulcher 5/6/2010 -- changed some sparse/full settings
 
-%% Preliminaries
-N = length(y); % length of time series
+%% Preliminaries, check inputs
+N = length(y); % time-series length
+
+if size(y,2) > size(y,1), y = y'; end % make sure a column vector
+if nargin < 2
+    % compute the horizontal visibility graph by default
+    meth = 'horiz';
+end
 
 maxL = 6000;
 if N > maxL % too long
     % ++BF changed on 8/3/2010 to reduce down to first maxL samples. In future,
     % could alter to take different subsets, or set a maximum distance range
     % allowed to make a link (using sparse), etc.
-	fprintf(1,'Time series (%u > %u) is too long for visibility graph... Analyzing the first %u samples',N,maxL,maxL);
+	warning(sprintf('Time series (%u > %u) is too long for visibility graph... Analyzing the first %u samples',N,maxL,maxL));
     y = y(1:maxL);
     N = length(y); % new time-series length
-% 	return	
 end
 % if N > 4000 % needs too much memory -- need to use (slower to index) sparse representation
 % %     A = sparse(N,N); % sparse is very slow for matricies that end up having
@@ -32,12 +47,15 @@ end
 % % end
 
 A = zeros(N); % adjacency matrix
-y = y - min(y); % adjust so that minimum of y is at zero (no real reason other than aesthetics ;-))
+y = y - min(y); % adjust so that minimum of y is at zero
+yr = flipud(y); % reversed order
 
 %% Calculate the visibility graph
 switch meth
 	case 'norm'
-		for i = 1 : N-1
+        % normal visibility graph
+        % **** I'm not so confident about this implementation
+		for i = 1:N-1
 			% compute all subsequent gradients
 			deltay = y(i+1:end) - ones(N-i,1)*y(i); % vector of deltay's
 			deltat = (1:N-i)'; % time from current reference i
@@ -53,17 +71,25 @@ switch meth
 			% Store this information in the adjacency matrix, A
 			A(i,i+1:end) = links';
 		end
+        
 	case 'horiz'
-		for i = 1:N-1
-			% find first blocker and stop
-			stophere = find(y(i+1:end) > y(i),1,'first');
-			links = zeros(N-i,1);
-			links(1:stophere) = 1;
-			% so we have 'links' which are the time series points following it in the series
-			% that are visible from it (1 means the following point, and should always be included)
-			% Store this information in the adjacency matrix, A
-			A(i,i+1:end) = links';
+        % horizontal visibility graph
+		for i = 1:N
+			% Look forward to first blocker, then stop
+            if i < N
+    			nahead = find(y(i+1:end) > y(i),1,'first');
+                A(i,i+nahead) = 1;
+            end
+            
+            % Look back to the first hit, then stop
+            if i > 1
+    			nback = find(yr(N-i+2:end) > yr(N-i+1),1,'first');
+                A(i-nback,i) = 1;
+            end
 		end
+        
+    otherwise
+        error('Unknown visibility graph method ''%s''',meth);
 end
 
 % symmetrize A crudely: (works since lower triangle is zeros)

@@ -1,4 +1,4 @@
-function out = SID_Exponential_Smoothing(x,ntrain,alpha)
+function out = MF_expsmoothing(x,ntrain,alpha)
 % Wrapped up, code adapted from original code contributed 
 % by Siddharth Arora: Siddharth.Arora@sbs.ox.ac.uk
 % x is the input signal (uniformly sampled time series data as a column
@@ -8,6 +8,7 @@ function out = SID_Exponential_Smoothing(x,ntrain,alpha)
 % take a number of training sets and average to some optimal alpha, for example
 % Ben Fulcher 19/2/2010
 
+doplot = 0; % plot outputs
 N = length(x); % the length of the time series
 
 % (*) ntrain -- either the number or proportion of training points
@@ -229,12 +230,13 @@ end
 
 % t=1:length(yp);
 
-% figure('color','w');
-% plot(t,x(3:N),'b',t,y(3:N),'k');
-% legend('Obs', 'Fit');
-% xlabel('Time');
-% ylabel('Amplitude');
-
+if doplot
+    figure('color','w');
+    plot(t,x(3:N),'b',t,y(3:N),'k');
+    legend('Obs', 'Fit');
+    xlabel('Time');
+    ylabel('Amplitude');
+end
 
 function xf = SUB_fit_exp_smooth(x,a)
     % Iterate over rolling window

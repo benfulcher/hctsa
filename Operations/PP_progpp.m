@@ -159,7 +159,7 @@ out.normdiff_exp = stats(10,4);
         end
         
         % 3) Outliers
-        f(7) = OL_bentest(y_d,5,1);
+        f(7) = DN_outliertest(y_d,5,1);
         
         % Cross Correlation to original signal
         if length(y) == length(y_d)
