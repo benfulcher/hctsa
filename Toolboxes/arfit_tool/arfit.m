@@ -2,17 +2,24 @@ function [w, A, C, sbc, fpe, th]=arfit(v, pmin, pmax, selector, no_const)
 %ARFIT	Stepwise least squares estimation of multivariate AR model.
 %
 %  [w,A,C,SBC,FPE,th]=ARFIT(v,pmin,pmax) produces estimates of the
-%  parameters of a multivariate AR model of order p,
+%  parameters of an m-variate AR model of order p,
 %
 %      v(k,:)' = w' + A1*v(k-1,:)' +...+ Ap*v(k-p,:)' + noise(C),
 %
-%  where p lies between pmin and pmax and is chosen as the optimizer
-%  of Schwarz's Bayesian Criterion. The input matrix v must contain
-%  the time series data, with columns of v representing variables
-%  and rows of v representing observations.  ARFIT returns least
-%  squares estimates of the intercept vector w, of the coefficient
-%  matrices A1,...,Ap (as A=[A1 ... Ap]), and of the noise covariance
-%  matrix C.
+%  where w is the (m x 1) intercept vector, A1, ..., Ap are (m x m)
+%  coefficient matrices, and C is a (m x m) noise covariance
+%  matrix. The estimated order p lies between pmin and pmax and is
+%  chosen as the optimizer of Schwarz's Bayesian Criterion. 
+% 
+%  The input matrix v must contain the time series data, with
+%  columns v(:,l) representing m variables l=1,...,m and rows
+%  v(k,:) representing n observations at different (equally
+%  spaced) times k=1,..,n. Optionally, v can have a third
+%  dimension, in which case the matrices v(:,:, itr) represent  
+%  the realizations (e.g., measurement trials) itr=1,...,ntr of the
+%  time series. ARFIT returns least squares estimates of the
+%  intercept vector w, of the coefficient matrices A1,...,Ap (as
+%  A=[A1 ... Ap]), and of the noise covariance matrix C.
 %
 %  As order selection criteria, ARFIT computes approximations to
 %  Schwarz's Bayesian Criterion and to the logarithm of Akaike's Final
@@ -39,18 +46,22 @@ function [w, A, C, sbc, fpe, th]=arfit(v, pmin, pmax, selector, no_const)
 %  is fitted to the time series data. That is, the intercept vector w
 %  is taken to be zero, which amounts to assuming that the AR(p)
 %  process has zero mean.
-
+%
 %  Modified 14-Oct-00
+%           24-Oct-10 Tim Mullen (added support for multiple realizatons)
+%
 %  Authors: Tapio Schneider
 %           tapio@gps.caltech.edu
 %
 %           Arnold Neumaier
 %           neum@cma.univie.ac.at
 
-  % n: number of observations; m: dimension of state vectors
-  [n,m]   = size(v);     
+  % n:   number of time steps (per realization)
+  % m:   number of variables (dimension of state vectors) 
+  % ntr: number of realizations (trials)
+  [n,m,ntr]   = size(v);     
 
-  if (pmin ~= round(pmin) || pmax ~= round(pmax))
+  if (pmin ~= round(pmin) | pmax ~= round(pmax))
     error('Order must be integer.');
   end
   if (pmax < pmin)
@@ -77,7 +88,7 @@ function [w, A, C, sbc, fpe, th]=arfit(v, pmin, pmax, selector, no_const)
     end
   end
 
-  ne  	= n-pmax;               % number of block equations of size m
+  ne  	= ntr*(n-pmax);         % number of block equations of size m
   npmax	= m*pmax+mcor;          % maximum number of parameter vectors of length m
 
   if (ne <= npmax)
@@ -154,4 +165,4 @@ function [w, A, C, sbc, fpe, th]=arfit(v, pmin, pmax, selector, no_const)
   th     = [dof zeros(1,size(Uinv,2)-1); Uinv];
 
 
-end
+

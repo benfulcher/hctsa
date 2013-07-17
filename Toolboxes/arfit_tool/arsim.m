@@ -1,4 +1,4 @@
-function [v]=arsim(w,A,C,n,ndisc)
+function [v]=arsim(w,A,C,n_ntr,ndisc)
 %ARSIM	Simulation of AR process.	
 %
 %  v=ARSIM(w,A,C,n) simulates n time steps of the AR(p) process
@@ -15,14 +15,24 @@ function [v]=arsim(w,A,C,n,ndisc)
 %  calculated from the parameters A and w.) To avoid spin-up effects,
 %  the first 10^3 time steps are discarded. Alternatively,
 %  ARSIM(w,A,C,n,ndisc) discards the first ndisc time steps.
-
+%
+%  ARSIM(w,A,C,[n, ntr]) generates ntr realizations (trials) of
+%  length n of the AR(p) process, which are output as the matrices
+%  v(:,:,itr) with itr=1,...,ntr. 
+  
 %  Modified 13-Oct-00
 %  Author: Tapio Schneider
 %          tapio@gps.caltech.edu
 
   m       = size(C,1);                  % dimension of state vectors 
   p       = size(A,2)/m;                % order of process
-
+  n       = n_ntr(1);                   % number of time steps
+  if size(n_ntr) == 1
+    ntr   = 1;
+  else
+    ntr   = n_ntr(2);
+  end
+  
   if (p ~= round(p)) 
     error('Bad arguments.'); 
   end
@@ -51,12 +61,14 @@ function [v]=arsim(w,A,C,n,ndisc)
     error('Covariance matrix not positive definite.')
   end
     
-  % Get ndisc+n independent Gaussian pseudo-random vectors with 
-  % covariance matrix C=R'*R
-  randvec = randn([ndisc+n,m])*R;
+  % Get ntr realizations of ndisc+n independent Gaussian
+  % pseudo-random vectors with covariance matrix C=R'*R
+  for itr=1:ntr
+    randvec(:, :, itr) = randn([ndisc+n,m])*R;
+  end
 
   % Add intercept vector to random vectors
-  randvec = randvec + ones(ndisc+n,1)*w;
+  randvec = randvec + repmat(w, [ndisc+n, 1, ntr]);
   
   % Get transpose of system matrix A (use transpose in simulation because 
   % we want to obtain the states as row vectors)
@@ -78,34 +90,38 @@ function [v]=arsim(w,A,C,n,ndisc)
     %  The optimal forecast of the next state given the p previous
     %  states is stored in the vector x. The vector x is initialized
     %  with the process mean.
-    x    = ones(p,1)*mval;
+    x    = repmat(mval, [p, 1]);
   else
     %  Process has zero mean
     x    = zeros(p,m); 
   end
   
   % Initialize state vectors
-  u      = [x; zeros(ndisc+n,m)];
+  u      = repmat([x; zeros(ndisc+n,m)], [1, 1, ntr]);
   
-  % Simulate n+ndisc observations. In order to be able to make use of
-  % Matlab's vectorization capabilities, the cases p=1 and p>1 must be
-  % treated separately.
+  % Simulate ntr realizations of n+ndisc time steps. In order to be
+  % able to make use of Matlab's vectorization capabilities, the
+  % cases p=1 and p>1 must be treated separately.
   if p==1
-    for k=2:ndisc+n+1; 
-      x(1,:) = u(k-1,:)*AT;
-      u(k,:) = x + randvec(k-1,:);
+    for itr=1:ntr
+      for k=2:ndisc+n+1; 
+        x(1,:) = u(k-1,:,itr)*AT;
+        u(k,:,itr) = x + randvec(k-1,:,itr);
+      end
     end
   else
-    for k=p+1:ndisc+n+p; 
-      for j=1:p;
-	x(j,:) = u(k-j,:)*AT((j-1)*m+1:j*m,:);
+    for itr=1:ntr
+      for k=p+1:ndisc+n+p; 
+        for j=1:p;
+          x(j,:) = u(k-j,:,itr)*AT((j-1)*m+1:j*m,:);
+        end
+        u(k,:,itr) = sum(x)+randvec(k-p,:,itr);
       end
-      u(k,:) = sum(x)+randvec(k-p,:);
     end
   end
   
   % return only the last n simulated state vectors
-  v = u(ndisc+p+1:ndisc+n+p,:); 
+  v = u(ndisc+p+1:ndisc+n+p,:,:); 
 
 
 

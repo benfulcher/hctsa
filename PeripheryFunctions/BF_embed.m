@@ -82,15 +82,14 @@ else % use a routine to inform m
                 % time delay determined by above method
                 % 3 nearest neighbours
                 % 20% of time series length as reference points
-                if length(m)==1;
+                if length(m) == 1
                     th = 10;
                 end
                 try
                     m = TSTL_cao(y,10,tau,3,0.2,{'mmthresh',th});
                 catch
-                    disp('cao failed')
-                    y_embed = NaN;
-                    return
+                    fprintf(1,'Call to TSTOOL function ''cao'' failed')
+                    y_embed = NaN; return
                 end
                 ssm = sprintf('by TSTOOL function ''cao'' using ''mmthresh'' with threshold %f to m = %u',th,m);
             otherwise
@@ -105,10 +104,13 @@ end
 % we now have an integral embedding dimension, m
 
 %% Now do the embedding
-if nargin < 4, sig = 0; end % don't return a signal object, return a matrix
+if nargin < 4
+    sig = 0; % don't return a signal object, return a matrix
+end
 
-if sig == 2 % just return the 
-    y_embed = [tau, m]; return
+if sig == 2 % just return the embedding parameters
+    y_embed = [tau, m];
+    return
 end
 
 % Use the TSTOOL embed function.
@@ -129,7 +131,7 @@ end
 
 if ~sig
    y_embed = data(y_embed);
-   % this is faster than my implementation, which is commented out below
+   % this is actually faster than my implementation, which is commented out below
 end
 
 if bevocal

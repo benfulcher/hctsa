@@ -1,6 +1,7 @@
 %ARDEM	Demonstrates modules of the ARfit package.
 
 %   Revised: 30-Dec-99 Tapio Schneider 
+%            01-Dec-10 (added example with multiple realizations)
 
 format short
 format compact
@@ -25,7 +26,7 @@ clc
 %  matrix C. The kth row v(k,:) of the 2-column matrix v represents an
 %  observation of the process at instant k. The intercept vector w is
 %  included to allow for a nonzero mean of the AR(p) process.
-
+%
 pause   	% Press any key to continue.
 
 clc
@@ -52,11 +53,22 @@ C = [ 1.00  0.50;   0.50  1.50 ];
 
 A = [ A1 A2 ];
 
-%  We use the module ARSIM to simulate 200 observations of this AR
-%  process:
+%  We use the module ARSIM to simulate observations (time steps) of
+%  this AR process. ARSIM and other modules in the ARfit collection
+%  allow multiple realizations (trials) of the time series to be
+%  simulated and used in estimation procedures. Let us simulate
+%  ntr realizations with n observations each:
+%
+n   = 200;
+ntr = 5;
+v   = arsim(w, A, C, [n, ntr]);
 
-v = arsim(w, A, C, 200);
-
+%  The matrix v now contains the simulated time series. Each 2D
+%  submatrix v(:,:,itr) contains a realization of the time series,
+%  with the row index labeling observations (time steps) and the
+%  column index labeling variables. The third index itr=1,...,ntr
+%  labels the realizations.
+%
 pause   	% Press any key to continue.
 
 clc
@@ -67,7 +79,7 @@ clc
 %  including the model order. Assuming that the correct model order
 %  lies between 1 and 5, we use the module ARFIT to determine the
 %  optimum model order using Schwarz's Bayesian Criterion (SBC):
-
+%
 pmin = 1;
 pmax = 5;
 [west, Aest, Cest, SBC, FPE, th] = arfit(v, pmin, pmax);
@@ -110,7 +122,7 @@ disp(FPE)
 %  the order selection criteria are approximations in that in
 %  evaluating an order selection criterion for a model of order p <
 %  pmax, the first pmax-p observations of the time series are ignored.
-
+%
 pause   	% Press any key to continue.
 
 clc
@@ -121,20 +133,22 @@ clc
  
 [siglev,res] = arres(west,Aest,v);
 
-%  returns the time series of residuals res as well as the
+%  returns the time series of residuals res(:,:,itr) for each
+%  realization itr=1,...,ntr of the original time series and the
 %  significance level siglev with which a modified Li-McLeod
-%  portmanteau test rejects the null hypothesis that the residuals are
-%  uncorrelated. A model passes this test if, say, siglev > 0.05.  In
-%  our example, the significance level of the modified Li-McLeod
-%  portmanteau statistic is
-
+%  portmanteau test rejects the null hypothesis that the residuals
+%  (using all available realizations) are uncorrelated. A model
+%  passes this test if, say, siglev > 0.05.  In our example, the
+%  significance level of the modified Li-McLeod portmanteau
+%  statistic is 
+ 
 disp(siglev); 
 
 %  (If siglev is persistently smaller than about 0.05, even over
-%  several runs of this demo, then there is most likely a problem with
-%  the random number generator that ARSIM used in the simulation of
-%  v.)
-
+%  several runs of this demo, and if the number of realizations ntr
+%  is not very large, then there is most likely a problem with the
+%  random number generator that ARSIM used in the simulation of v.)
+%
 pause   	% Press any key to continue.
 
 clc
@@ -143,9 +157,10 @@ if exist('xcorr')    % If the Signal Processing Toolbox is installed, plot
                      % autocorrelation function of residuals ...
 
 %  Using ACF, one can also plot the autocorrelation function of, say, 
-%  the first component of the time series of residuals:
+%  the first component of the first realization of the time series
+%  of residuals: 
 
-acf(res(:,1));
+acf(res(:,1,1));
 
 %  95% of the autocorrelations for lag > 0 should lie between the
 %  dashdotted confidence limits for the autocorrelations of an IID
@@ -155,7 +170,7 @@ acf(res(:,1));
 %  condition for model adequacy, further diagnostic tests should, in
 %  practice, be performed. However, we shall go on to the estimation
 %  of confidence intervals.
-
+%
 pause   	% Press any key to continue.
 end
 
@@ -231,7 +246,7 @@ disp(Strue(3:4,:))
 
 %  (Note that the estimated modes can be a permutation of the `true'
 %  modes. The sign of the modes is also ambiguous.)
-
+%
 pause   	% Press any key to continue.
 
 echo off

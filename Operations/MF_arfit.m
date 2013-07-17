@@ -18,9 +18,8 @@ if nargin < 4 || isempty(selector)
 end
 
 % Check the ARfit toolbox is installed and in the Matlab path
-myarfit = which('arfit');
-if isempty(myarfit)
-    error('Cannot find the function ''arfit''. Have you installed the ARFIT toolbox?')
+if ~exist('arfit')
+    error('Cannot find the function ''arfit''. Have you installed the ARfit toolbox?')
 end
 
 %% (I) Fit AR model

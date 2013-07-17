@@ -9,6 +9,7 @@ function t=tquant(n, p)
 %  Modified 13-Jul-06
 %  Author: Tapio Schneider
 %          tapio@gps.caltech.edu
+%  Nir Krakauer, 19-Mar-11: modified call to fzero to work in Octave
 
 %  References:  
 %  L. Devroye, 1986: "Non-Uniform Random Variate Generation", Springer
@@ -40,20 +41,13 @@ function t=tquant(n, p)
     % positive t-values (cf. M. Abramowitz and I. A. Stegun [1964,
     % Chapter 26])
     b0  = [0, 1];
-    f   = inline('1 - betainc(b, n/2, .5)/2 - p', 'b', 'n', 'p'); 
-    opt = optimset('Display', 'off'); 
-    b   = fzero(f, b0, opt, n, p); 
-    % old calling sequence (on Windows/Mac with older Matlab versions):
-    %b   = fzero(f, b0, eps, 0, n, p); 
-    
+    f   = @(b) 1 - betainc(b, n/2, .5)/2 - p; 
+    b   = fzero(f, b0);    
     t   = sqrt(n/b-n);
   else
     % negative t-values
     b0  = [0, 1];
-    f   = inline('betainc(b, n/2, .5)/2 - p', 'b', 'n', 'p'); 
-    %opt = optimset('Display', 'off'); % does not work on Windows/Mac
-    %b   = fzero(f, b0, opt, n, p); 
-    % old calling sequence (for Windows/Mac compatibility):
-    b   = fzero(f, b0, eps, 0, n, p);  
+    f   = @(b) betainc(b, n/2, .5)/2 - p; 
+    b   = fzero(f, b0); 
     t   = -sqrt(n/b-n);
   end

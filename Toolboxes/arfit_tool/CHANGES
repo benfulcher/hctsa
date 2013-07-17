@@ -1,3 +1,12 @@
+04-May-13     * Minor changes in documentation of ARFIT
+21-Mar-11     * Changed call to FZERO in TQUANT to be compatible with
+                Octave. [Suggested by Nir Krakauer.] 
+
+01-Dec-10     * Added support for multiple realizations (with
+	        contributions by Tim Mullen) 
+	      * ARRES now returns the actual residuals of the AR
+	        model, not centered residuals as before
+
 13-Jul-06     * Updated call of FZERO in TQUANT for compatibility with
                 newer Matlab versions (tested with Matlab 7.2)
 

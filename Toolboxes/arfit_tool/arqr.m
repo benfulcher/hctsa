@@ -14,34 +14,42 @@ function [R, scale]=arqr(v, p, mcor)
 %  See also ARFIT.
 
 %  Modified 29-Dec-99
+%           24-Oct-10 Tim Mullen (added support for multiple realizatons)
+%
 %  Author: Tapio Schneider
 %          tapio@gps.caltech.edu
 
-  % n: number of time steps; m: dimension of state vectors
-  [n,m] = size(v);     
+  % n:   number of time steps (per realization)
+  % m:   number of variables (dimension of state vectors) 
+  % ntr: number of realizations (trials)
+  [n,m,ntr] = size(v);     
 
-  ne    = n-p;                  % number of block equations of size m
+  ne    = ntr*(n-p);            % number of block equations of size m
   np    = m*p+mcor;             % number of parameter vectors of size m
 
   % If the intercept vector w is to be fitted, least squares (LS)
   % estimation proceeds by solving the normal equations for the linear
   % regression model
   %
-  %                  v(k,:)' = Aaug*u(k,:)' + noise(C)
+  %                  v(k,:)' = Aaug*u(k,:)' + noise(C)        (1)
   %
   % with Aaug=[w A] and `predictors' 
   %
-  %              u(k,:) = [1 v(k-1,:) ...  v(k-p,:)]. 
+  %              u(k,:) = [1 v(k-1,:) ...  v(k-p,:)].         (2a) 
   %
   % If the process mean is taken to be zero, the augmented coefficient
   % matrix is Aaug=A, and the regression model
   %
-  %                u(k,:) = [v(k-1,:) ...  v(k-p,:)]
+  %                u(k,:) = [v(k-1,:) ...  v(k-p,:)]          (2b)
   %
   % is fitted. 
   % The number np is the dimension of the `predictors' u(k). 
-
-  % Assemble the data matrix K (of which a QR factorization will be computed)
+  %
+  % If multiple realizations are given (ntr > 1), they are appended
+  % as additional ntr-1 blocks of rows in the normal equations (1), and
+  % the 'predictors' (2) correspondingly acquire additional row blocks.
+  
+  % Initialize the data matrix K (of which a QR factorization will be computed)
   K = zeros(ne,np+m);                 % initialize K
   if (mcor == 1)
     % first column of K consists of ones for estimation of intercept vector w
@@ -49,11 +57,14 @@ function [R, scale]=arqr(v, p, mcor)
   end
   
   % Assemble `predictors' u in K 
-  for j=1:p
-    K(:, mcor+m*(j-1)+1:mcor+m*j) = [v(p-j+1:n-j, :)];
+  for itr=1:ntr
+    for j=1:p
+      K((n-p)*(itr-1) + 1 : (n-p)*itr, mcor+m*(j-1)+1 : mcor+m*j) = ...
+          squeeze(v(p-j+1:n-j, :, itr));
+    end
+    % Add `observations' v (left hand side of regression model) to K
+    K((n-p)*(itr-1) + 1 : (n-p)*itr, np+1 : np+m) = squeeze(v(p+1:n, :, itr));
   end
-  % Add `observations' v (left hand side of regression model) to K
-  K(:,np+1:np+m) = [v(p+1:n, :)];
   
   % Compute regularized QR factorization of K: The regularization
   % parameter delta is chosen according to Higham's (1996) Theorem
