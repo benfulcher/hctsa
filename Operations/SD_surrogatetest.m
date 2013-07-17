@@ -38,14 +38,14 @@ z = SD_makesurrogates(x,surrmeth,nsurrs,extrap);
 if ismember('ami1',teststat)
     % look at AMI(1) of surrogates compared to that of signal itself
     % This statistic is used by Nakamura et al. (2006), PRE
-    % could use CO_ami_benhist or TSTL, but I'll use benmi
+    % could use CO_ami_benhist or TSTL, but I'll use BF_mi
     % Apparently there are upper and lower bounds on the number of bins to
     % use: [1+log_2(N)], [sqrt(N)]
     nbins = ceil(1+log2(N)); %round(mean([1+log2(N),sqrt(N)]));
-    AMIx = benmi(x(1:end-1),x(2:end),'quantile','quantile',nbins);
+    AMIx = BF_mi(x(1:end-1),x(2:end),'quantile','quantile',nbins);
     AMIsurr = zeros(nsurrs,1);
     for i = 1:nsurrs
-        AMIsurr(i) = benmi(z(1:end-1,i),z(2:end,i),'quantile','quantile',nbins);
+        AMIsurr(i) = BF_mi(z(1:end-1,i),z(2:end,i),'quantile','quantile',nbins);
     end
     % so we have a value AMIx, and a distribution for the surrogates
     % AMIsurr -- we must compare and return something meaningful
@@ -64,7 +64,7 @@ if ismember('fmmi',teststat)
     fmmisurr = zeros(nsurrs,1);
     for i = 1:nsurrs
         try
-            fmmisurr(i) = CO_fmmi(z(i,:));
+            fmmisurr(i) = CO_firstmin(z(i,:),'mi');
         catch
             out = NaN; return
         end

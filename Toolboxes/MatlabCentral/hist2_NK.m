@@ -73,3 +73,4 @@ xyBin = (xbin-1)*ynbin + ybin;
 
 MN = histc(xyBin, xyBinEdges);
 MN = reshape(MN, ynbin, xnbin);
+end

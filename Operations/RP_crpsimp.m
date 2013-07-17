@@ -13,11 +13,10 @@ function out = RP_crpsimp(y,m,tau,eps,dist,tw)
 % Only taking the first 2000 samples I think is best, the downsampling
 % could produce some spurious recurrences... I'll do that for now...
 
-N = length(y); % length of the input time series
-
+N = length(y); % time-series length
 
 maxN = 2000; % really time consuming if input time series is longer than this threshold...
-if length(y) > maxN
+if N > maxN
     y = y(1:maxN);
     N = maxN;
     fprintf(1,'Analyzing just the first %u points of the input time series\n', maxN)
@@ -48,7 +47,7 @@ if nargin < 2 || isempty(m)
 end
 if strcmp(m,'fnn')
     % first time fnn goes below 0.1 (up to maximum of 10)
-    m = NL_fnnmar(y,10,2,tau,0.1);
+    m = NL_crptool_fnn(y,10,2,tau,0.1);
 end
 
 % Set the neighbourhood size, eps

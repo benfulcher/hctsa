@@ -1,0 +1,4 @@
+This directory contains files required to perform false nearest neighbors calculations
+on time series.
+See the following for information on downloading the full toolbox:
+http://tocsy.pik-potsdam.de/CRPtoolbox/

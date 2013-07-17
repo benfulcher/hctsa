@@ -3,12 +3,14 @@ function out = GP_predict(y,covfunc,ntrain,ntest,npreds,pmode)
 % hyperparameters and predict the next data point
 % Ben Fulcher 20/1/2010
 
-doplot = 0;
 %% Preliminaries
-% length of the time series
-N = length(y);
+doplot = 0; % plot outputs
+N = length(y); % time-series length
 
 %% Check Inputs
+if size(y,2) > size(y,1)
+    y = y'; % ensure a column vector input
+end
 if nargin < 2 || isempty(covfunc),
     fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n')
     covfunc = {'covSum', {'covSEiso','covNoise'}};
@@ -50,7 +52,8 @@ loghypers = zeros(nhps,npreds); % loghyperparameters
 
 for i = 1:npreds
     %% (0) Set up test and training sets
-    if strcmp(pmode,'frombefore')
+    switch pmode
+    case 'frombefore'
         tt = (1:ntrain)'; % times (make from 1)
         rt = spns(i):spns(i)+ntrain-1; % training range
         yt = y(rt); % training data
@@ -59,7 +62,7 @@ for i = 1:npreds
         rs = spns(i)+ntrain : spns(i)+ntrain + ntest-1; % test range
         ys = y(rs); % test data
         
-    elseif strcmp(pmode,'randomgap')
+    case 'randomgap'
         t = (1:ntrain+ntest)';
         r = randperm(ntrain+ntest);
         yy = y(spns(i):spns(i)+ntrain+ntest-1);
@@ -72,12 +75,12 @@ for i = 1:npreds
         ts = t(rs);
         ys = yy(rs);
         
-    elseif strcmp(pmode,'beforeafter')
+    case 'beforeafter'
         t = (1:ntrain*2+ntest)';
         r = ntrain+1:ntrain+1 + ntest-1;
         yy = y(spns(i):spns(i)+2*ntrain+ntest-1);
         
-        rt = [1:ntrain ntrain+ntest+1:ntrain*2+ntest];
+        rt = [1:ntrain, ntrain+ntest+1:ntrain*2+ntest];
         tt = t(rt);
         yt = yy(rt);
         
@@ -85,7 +88,8 @@ for i = 1:npreds
         ts = t(rs);
         ys = yy(rs);
         
-        
+    otherwise
+        error('Unknown prediction mode ''%s''',pmode);
     end
     
     % Process to normalize scales
@@ -94,10 +98,10 @@ for i = 1:npreds
     
     %% (1) Learn hyperparameters from training set (t)
     
-    loghyper = SUB_learnhyper(covfunc,-50,tt,yt);
+    loghyper = GP_learnhyper(covfunc,-50,tt,yt);
     
     if isnan(loghyper)
-        disp('Couldn''t learn hyperparameters');
+        fprintf(1,'Unable to learn hyperparameters for this time series\n');
         out = NaN; return
     end
     
@@ -106,13 +110,12 @@ for i = 1:npreds
     % Get marginal likelihood for this model with hyperparameters optimized
     % over training data
     mlikelihoods(i) = - gpr(loghyper, covfunc, tt, yt);
-
     
     %% (2) Evaluate at test set (s)
     
     % evaluate at test points based on training time/data, predicting for
     % test times/data
-    [mu S2] = gpr(loghyper, covfunc, tt, yt, ts);
+    [mu, S2] = gpr(loghyper, covfunc, tt, yt, ts);
     
     % Compare to actual test data --> store in row of errs
     mus(:,i) = mu; % ~predicted values for time series points
@@ -134,7 +137,6 @@ for i = 1:npreds
             errorbar(ts,mu,2*sqrt(S2),'m');
             hold off;
         end
-        keyboard
     end
 
 %     for j=1:ntest
@@ -191,9 +193,9 @@ out.minerrbar = min(stderrs(:)); % minimum error bar length
 % mean and std for each hyperparameter
 for i=1:nhps
     o1 = mean(loghypers(i,:));
-    eval(['out.meanlogh' num2str(i) ' = o1;']);
+    eval(sprintf('out.meanlogh%u = o1;',i));
     o2 = std(loghypers(i,:));
-    eval(['out.stdlogh' num2str(i) ' = o2;']);
+    eval(sprintf('out.stdlogh%u = o2;',i));
 end
 
 %% (3) Marginal likelihood measures
@@ -205,74 +207,5 @@ out.maxmlik = max(mlikelihoods);
 out.minmlik = min(mlikelihoods);
 out.stdmlik = std(mlikelihoods);
 
-%% Subfunctions
-
-    function loghyper = SUB_learnhyper(covfunc,nfevals,t,y,init_loghyper)
-        % nfevals--  negative: specifies maximum number of allowed
-        % function evaluations
-        % t: time
-        % y: data
-        
-        if nargin < 5 || isempty(init_loghyper)
-            % Use default starting values for parameters
-            % How many hyperparameters
-            s = feval(covfunc{:}); % string in form '2+1', ... tells how many
-            % hyperparameters for each contribution to the
-            % covariance function
-            nhps = eval(s);
-            init_loghyper = ones(nhps,1)*-1; % Initialize all log hyperparameters at -1
-        end
-%         init_loghyper(1) = log(mean(diff(t)));
-        
-        % Perform the optimization
-        try
-            loghyper = minimize(init_loghyper, 'gpr', nfevals, covfunc, t, y);
-        catch emsg
-            if strcmp(emsg.identifier,'MATLAB:posdef')
-                disp('Error with lack of positive definite matrix for this function');
-                loghyper = NaN; return
-            elseif strcmp(emsg.identifier,'MATLAB:nomem')
-                error('Out of memory fitting this Gaussian Process');
-                % return as if a fatal error -- come back to this.
-            else
-                error(['Error fitting Gaussian Process: ' emsg.message])
-            end
-        end
-        %        hyper = exp(loghyper);
-        
-    end
-
-%     function loghyper = SUB_learnhyper(covfunc,nfevals,t,y)
-%         % nfevals--  negative: specifies maximum number of allowed
-%         % function evaluations
-%         % t: time
-%         % y: data
-% 
-%        % How many hyperparameters
-%        s = feval(covfunc{:}); % string in form '2+1', ... tells how many
-%        % hyperparameters for each contribution to the
-%        % covariance function
-%        nhps = eval(s);
-%        init_loghyper = ones(nhps,1)*-1; % Initialize all log hyperparameters at -1
-%        
-%        % Perform the optimization
-%        try
-%            loghyper = minimize(init_loghyper, 'gpr', nfevals, covfunc, t, y);
-%        catch emsg
-%            if strcmp(emsg.identifier,'MATLAB:posdef')
-%                disp('Error with lack of positive definite matrix for this function');
-%                loghyper=NaN; return
-%            elseif strcmp(emsg.identifier,'MATLAB:nomem')
-%                disp('Out of memory. Leaving');
-%                % return as if a fatal error -- come back to this.
-%                return
-%            else
-%               keyboard 
-%            end
-%        end
-% %        hyper = exp(loghyper); 
-%         
-%     end
-    
 
 end

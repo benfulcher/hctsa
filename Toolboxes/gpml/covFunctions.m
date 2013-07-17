@@ -2,94 +2,109 @@
 % different kinds of covariance functions: simple and composite:
 %
 % simple covariance functions:
+%   covConst      - covariance for constant functions
+%   covLIN        - linear covariance function
+%   covLINard     - linear covariance function with ARD
+%   covLINone     - linear covariance function with bias
+%   covMaterniso  - Matern covariance function with nu=1/2, 3/2 or 5/2
+%   covNNone      - neural network covariance function
+%   covNoise      - independent covariance function (i.e. white noise)
+%   covPeriodic   - smooth periodic covariance function (1d) with unit period
+%   covPoly       - polynomial covariance function
+%   covPPiso      - piecewise polynomial covariance function (compact support)
+%   covRQard      - rational quadratic covariance function with ARD
+%   covRQiso      - isotropic rational quadratic covariance function
+%   covSEard      - squared exponential covariance function with ARD
+%   covSEiso      - isotropic squared exponential covariance function
+%   covSEisoU     - as above but without latent scale
 %
-%   covConst.m      - covariance for constant functions
-%   covLINard.m     - linear covariance function with ard
-%   covLINone.m     - linear covariance function
-%   covMatern3iso.m - Matern covariance function with nu=3/2
-%   covMatern5iso.m - Matern covariance function with nu=5/2
-%   covNNone.m      - neural network covariance function
-%   covNoise.m      - independent covariance function (ie white noise)
-%   covPeriodic.m   - covariance for smooth periodic function with unit period
-%   covRQard.m      - rational quadratic covariance function with ard 
-%   covRQiso.m      - isotropic rational quadratic covariance function
-%   covSEard.m      - squared exponential covariance function with ard
-%   covSEiso.m      - isotropic squared exponential covariance function
-% 
-% composite covariance functions (see explanation at the bottom):
+% composite (meta) covariance functions (see explanation at the bottom):
+%   covScale      - scaled version of a covariance function
+%   covProd       - products of covariance functions
+%   covSum        - sums of covariance functions
+%   covADD        - additive covariance function
+%   covMask       - mask some dimensions of the data
 %
-%   covProd         - products of covariance functions
-%   covSum          - sums of covariance functions
+% special purpose (wrapper) covariance functions
+%   covFITC       - to be used in conjunction with infFITC for large scale 
+%                   regression problems; any covariance can be wrapped by
+%                   covFITC such that the FITC approximation is applicable
 %
-% Naming convention: all covariance functions start with "cov". A trailing
+% Naming convention: all covariance functions are named "cov/cov*.m". A trailing
 % "iso" means isotropic, "ard" means Automatic Relevance Determination, and
 % "one" means that the distance measure is parameterized by a single parameter.
 %
 % The covariance functions are written according to a special convention where
 % the exact behaviour depends on the number of input and output arguments
 % passed to the function. If you want to add new covariance functions, you 
-% should follow this convention if you want them to work with the functions
-% gpr, binaryEPGP and binaryLaplaceGP. There are four different ways of calling
-% the covariance functions:
+% should follow this convention if you want them to work with the function gp.
+% There are four different ways of calling the covariance functions:
 %
-% 1) With no input arguments:
+% 1) With no (or one) input argument(s):
 %
-%    p = covNAME
+%    s = cov
 %
-% The covariance function returns a string telling how many hyperparameters it
+% The covariance function returns a string s telling how many hyperparameters it
 % expects, using the convention that "D" is the dimension of the input space.
 % For example, calling "covRQard" returns the string '(D+2)'.
 %
 % 2) With two input arguments:
 %
-%    K = covNAME(logtheta, x) 
+%    K = cov(hyp, x) equivalent to K = cov(hyp, x, [])
 %
-% The function computes and returns the covariance matrix where logtheta are
-% the log og the hyperparameters and x is an n by D matrix of cases, where
+% The function computes and returns the covariance matrix where hyp are
+% the hyperparameters and x is an n by D matrix of cases, where
 % D is the dimension of the input space. The returned covariance matrix is of
 % size n by n.
 %
-% 3) With three input arguments and two output arguments:
+% 3) With three input arguments:
 %
-%    [v, B] = covNAME(loghyper, x, z)
+%    Ks  = cov(hyp, x, xs)
+%    kss = cov(hyp, xs, 'diag')
 %
-% The function computes test set covariances; v is a vector of self covariances
-% for the test cases in z (of length nn) and B is a (n by nn) matrix of cross
-% covariances between training cases x and test cases z.
+% The function computes test set covariances; kss is a vector of self covariances
+% for the test cases in xs (of length ns) and Ks is an (n by ns) matrix of cross
+% covariances between training cases x and test cases xs.
 %
-% 4) With three input arguments and a single output:
+% 4) With four input arguments:
 %
-%     D = covNAME(logtheta, x, z)
+%     dKi   = cov(hyp, x, [], i)
+%     dKsi  = cov(hyp, x, xs, i)
+%     dkssi = cov(hyp, xs, 'diag', i)
 %
-% The function computes and returns the n by n matrix of partial derivatives
-% of the training set covariance matrix with respect to logtheta(z), ie with
-% respect to the log of hyperparameter number z.
+% The function computes and returns the partial derivatives of the
+% covariance matrices with respect to hyp(i), i.e. with
+% respect to the hyperparameter number i.
 %
-% The functions may retain a local copy of the covariance matrix for computing
-% derivatives, which is cleared as the last derivative is returned.
-%
-% About the specification of simple and composite covariance functions to be
-% used by the Gaussian process functions gpr, binaryEPGP and binaryLaplaceGP:
 % Covariance functions can be specified in two ways: either as a string
 % containing the name of the covariance function or using a cell array. For
 % example:
 %
-%   covfunc = 'covRQard';
-%   covfunc = {'covRQard'};
+%   cov = 'covRQard';
+%   cov = {'covRQard'};
+%   cov = {@covRQard};
 %
-% are both supported. Only the second form using the cell array can be used
+% are supported. Only the second and third form using the cell array can be used
 % for specifying composite covariance functions, made up of several
 % contributions. For example:
 %
-%   covfunc = {'covSum',{'covRQiso','covSEard','covNoise'}};
+%        cov = {'covScale', {'covRQiso'}};
+%        cov = {'covSum', {'covRQiso','covSEard','covNoise'}};
+%        cov = {'covProd',{'covRQiso','covSEard','covNoise'}};
+%        cov = {'covMask',{mask,'covSEiso'}}
+%   q=1; cov = {'covPPiso',q};
+%   d=3; cov = {'covPoly',d};
+%        cov = {'covADD',{[1,2],'covSEiso'}};
+%        cov = {@covFITC, {@covSEiso}, u};  where u are the inducing inputs
 %
 % specifies a covariance function which is the sum of three contributions. To 
 % find out how many hyperparameters this covariance function requires, we do:
 %
-%   feval(covfunc{:})
+%   feval(cov{:})
 % 
-% which returns the string '3+(D+1)+1' (ie the 'covRQiso' contribution uses
+% which returns the string '3+(D+1)+1' (i.e. the 'covRQiso' contribution uses
 % 3 parameters, the 'covSEard' uses D+1 and 'covNoise' a single parameter).
 %
-% (C) copyright 2006, Carl Edward Rasmussen, 2006-04-07.
-
+% See also doc/usageCov.m.
+%
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-01-21

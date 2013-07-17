@@ -6,10 +6,12 @@ function out = GP_hps(y,covfunc,squishorsquash,maxN,methds)
 doplot = 0; % plot basic outputs
 
 %% Preliminaries
-% length of the time series
-N = length(y);
+N = length(y); % time-series length
 
 %% Check Inputs
+if size(y,2) > size(y,1);
+    y = y'; % ensure a column vector input
+end
 if nargin < 2 || isempty(covfunc),
     fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n')
     covfunc = {'covSum', {'covSEiso','covNoise'}};
@@ -34,7 +36,7 @@ if nargin < 5 || isempty(methds)
 end
 
 %% Downsample long time series
-if maxN > 0 && N > maxN
+if (maxN > 0) && (N > maxN)
     switch methds
         case 'resample' % resamples the whole time series down
             f = maxN/N;

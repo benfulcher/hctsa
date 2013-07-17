@@ -25,9 +25,11 @@ function [alpha, intervals, flucts] = fastdfa(x, varargin)
 [xpts, ypts] = fastdfa_core(x, varargin{:});
 
 % Sort the intervals, and produce a log-log straight line fit
-datapts   = sortrows([xpts ypts],1);
+datapts   = sortrows([xpts, ypts],1);
 intervals = datapts(:,1);
 flucts    = datapts(:,2);
 
 coeffs    = polyfit(log10(xpts), log10(ypts), 1);
 alpha     = coeffs(1);
+
+end

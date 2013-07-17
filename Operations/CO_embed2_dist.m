@@ -11,10 +11,12 @@ if nargin < 2 || isempty(tau)
     tau = 'tau';
 end
 
+N = length(y); % time-series length
+
 if strcmp(tau,'tau'),
     tau = CO_fzcac(y);
-    if tau > length(y)/10
-        tau = floor(length(y)/10);
+    if tau > N/10
+        tau = floor(N/10);
     end
 end
 
@@ -25,7 +27,6 @@ end
 
 m = [y(1:end-tau), y(1+tau:end)];
 % m2 = y(1+tau:end);
-N = size(m,1);
 
 % plot(m(:,1),m(:,2),'.');
 

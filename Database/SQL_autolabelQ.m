@@ -116,7 +116,7 @@ end
 % dbc = SQL_opendatabase(dbname);
 % 
 % % Get matching ids from the database for each keyword
-% % Use TSQ_getids
+% % Use SQL_getids
 % Ng = size(kwgs,1);
 % gi = cell(Ng,1); % stores the indicies (in the clustering index system) in a vector
 % 
@@ -125,7 +125,7 @@ end
 % % i.e., do it all in MATLAB. This was originally done, but now the keywords
 % % are comma-delimited rather than cells of cells.
 % for i = 1:Ng
-%     allmatchingids = TSQ_getids(metorts,[],kwgs(i,:),{},[],[],dbname);
+%     allmatchingids = SQL_getids(metorts,[],kwgs(i,:),{},[],[],dbname);
 %     gi{i} = arrayfun(@(x)find(idsO==x),intersect(allmatchingids, idsO));
 %     if isempty(gi{i})
 %         disp(['Nothing found for ' kwgs{i,1} ' :-(']);
@@ -149,7 +149,7 @@ else
 end
 Ng = length(kwgs); % number of groups
 % ndata = length(kws); % number of time series/operations
-kws = SUB_cell2cellcell(kws);
+kws = BF_cell2cellcell(kws);
 
 if strcmp(kworlab,'kw') % look for groups of keywords
 %     wally = zeros(ndata,1);

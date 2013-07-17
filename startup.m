@@ -2,11 +2,12 @@ addfcn = @(x) addpath(fullfile(pwd,x));
 % addfcn = @(x) addpath(genpath(fullfile(pwd,x)));
 
 fprintf(1,'Adding paths for the highly comparative time-series analysis package...')
-addfcn('Database');
-addfcn('Operations');
-addfcn('PeripheryFunctions');
-addfcn('TimeSeries');
-addfcn('TSQCoreRoutines');
+addfcn('Database'); % code for setting up and communicating with the mySQL database
+addfcn('Calculation'); % code for calculating results
+addfcn('PlottingAnalysis'); % code for analysing and plotting results
+addfcn('Operations'); % core code files for performing operations
+addfcn('PeripheryFunctions'); % periphery functions used in the code toolbox
+addfcn('TimeSeries'); % time series data files for analysis
 fprintf(1,' Core directories added.\n')
 
 %% Now add all Toolboxes:
@@ -15,16 +16,17 @@ fprintf(1,'Adding external time-series toolboxes...')
 fprintf(1,' Danny Kaplan')
 addfcn('Toolboxes/Danny_Kaplan');
 
-% CRP Toolbox by Marwan, version 5.13, Release 26
-fprintf(1,', crptool')
-addfcn('Toolboxes/crptool');
+% Code by Marwan, from CRP Toolbox version 5.17  (R28.16)
+fprintf(1,', Marwan')
+addfcn('Toolboxes/Marwan_crptool');
 
-% Gaussian Processes
-fprintf(1,', gpml')
+% Gaussian Process Toolbox, gpml, by Carl Edward Rasmussen & Hannes Nickisch:
+fprintf(1,', Gaussian Process Code')
 addfcn('Toolboxes/gpml');
+GP_startup % add nested directories
 
-% arfit Toolbox
-fprintf(1,', arfit')
+% ARFIT Toolbox
+fprintf(1,', arfit tool')
 addfcn('Toolboxes/arfit_tool');
 
 % Michael Small's utilities
@@ -32,15 +34,15 @@ fprintf(1,', Michael Small')
 addfcn('Toolboxes/Michael_Small');
 
 % Zoubin Gharamani's hmm toolbox, ZG_hmm
-fprintf(1,', HMM')
+fprintf(1,', HMM\n')
 addfcn('Toolboxes/ZG_hmm');
 
 % Code from Matlab Central
-fprintf(1,', Matlab Central code,\n')
+fprintf(1,'Matlab Central code')
 addfcn('Toolboxes/MatlabCentral');
 
 % Rudy Moddemeijer's code
-fprintf(1,'Rudy Moddemeijer')
+fprintf(1,', Rudy Moddemeijer')
 addfcn('Toolboxes/Rudy_Moddemeijer');
 
 % Bill Davidson's hurst exponent code

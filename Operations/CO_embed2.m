@@ -82,13 +82,13 @@ for i = 1:5
 end
 
 % Mean euclidean distance in each segment
-eucdm = cellfun(@(x)mean(sqrt(x(:,1).^2+x(:,2).^2)),buffer_m);
+eucdm = cellfun(@(x)mean(sqrt(x(:,1).^2 + x(:,2).^2)),buffer_m);
 out.eucdm1 = eucdm(1); out.eucdm2 = eucdm(2); out.eucdm3 = eucdm(3);
 out.eucdm4 = eucdm(4); out.eucdm5 = eucdm(5);
 out.std_eucdm = std(eucdm); out.mean_eucdm = mean(eucdm);
 
 % Standard deviation of Euclidean distances in each segment
-eucds = cellfun(@(x)std(sqrt(x(:,1).^2+x(:,2).^2)),buffer_m);
+eucds = cellfun(@(x)std(sqrt(x(:,1).^2 + x(:,2).^2)),buffer_m);
 out.eucds1 = eucds(1); out.eucds2 = eucds(2); out.eucds3 = eucds(3);
 out.eucds4 = eucds(4); out.eucds5 = eucds(5);
 out.std_eucds = std(eucds); out.mean_eucds = mean(eucds);
@@ -104,7 +104,7 @@ out.meanspana = mean(spanareas);
 % Outliers
 % area of max span of all points; versus area of max span of 50% of points closest to origin
 d = sqrt(m(:,1).^2 + m(:,2).^2);
-[d_sort ix] = sort(d,'ascend');
+[d_sort, ix] = sort(d,'ascend');
 
 out.areas_all = range(m(:,1))*range(m(:,2));
 r50 = ix(1:round(end/2)); % 50% of point closest to origin

@@ -1,0 +1,893 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+  <meta name="author" content="Carl E. Rasmussen and Hannes Nickisch">
+  <meta name="description" content="User documentation of the Gaussian process for machine learning 3.2">
+  <title>Documentation for GPML Matlab Code</title>
+  <link type="text/css" rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Documentation for GPML Matlab Code version 3.2</h1>
+
+<h2>What?</h2>
+
+<p>The code provided here originally demonstrated the main algorithms
+from Rasmussen and Williams: <a
+ href="http://gaussianprocess.org/gpml/">Gaussian Processes for
+Machine Learning</a>. It has since grown to allow more likelihood
+functions, further inference methods and a flexible framework for
+specifying GPs.
+Other GP packages can be found <a
+ href="http://www.gaussianprocess.org/#code">here</a>.</p>
+
+<p>The code is written by Carl Edward Rasmussen and Hannes Nickisch; it runs on
+both <a href="http://www.octave.org">Octave</a> 3.2.x
+and <a href="http://www.mathworks.com/products/matlab/">Matlab</a>&reg; 7.x and later. 
+The code is based on <a href="http://gaussianprocess.org/gpml/code/matlab/release/oldcode.html">previous versions</a> 
+written by Carl Edward Rasmussen and Chris Williams.</p>
+
+<h2>Download, Install and Documentation</h2>
+
+<p>All the code including demonstrations and html documentation can be
+downloaded in a <a
+ href="http://gaussianprocess.org/gpml/code/matlab/release/gpml-matlab-v3.2-2013-01-15.tar.gz">tar</a>
+or <a
+ href="http://gaussianprocess.org/gpml/code/matlab/release/gpml-matlab-v3.2-2013-01-15.zip">zip</a>
+archive file.</p>
+
+<p>Minor changes and incremental bugfixes to the current version are
+documented in the <a href="changelog">changelog</a>, changes from
+previous versions are documented
+in <a href="../README">README</a>. </p>
+
+<p>Please read the <a href="../Copyright">copyright</a> notice.</p>
+
+<p>After unpacking the tar or zip file you will find 6 subdirectories:
+cov, doc, inf, lik, mean and util. It is not necessary to install
+anything to get started, just run the <a
+href="../startup.m"><tt>startup</tt></a> script to set your path.</p>
+
+<p>Details about the directory contents and on how to compile mex
+files can be found in the <a href="../README">README</a>. The getting
+started guide is the remainder of the html file you are currently
+reading (also available at <a href="http://gaussianprocess.org/gpml/code/matlab/doc">http://gaussianprocess.org/gpml/code/matlab/doc</a>). A Developer's Guide containing technical documentation is
+found in <a href="manual.pdf"><tt>manual.pdf</tt></a>, but for the casual user,
+the guide is below.</p>
+
+<h2>Theory</h2>
+
+<p>Gaussian Processes (GPs) can conveniently be used for Bayesian
+supervised learning, such as regression and classification. In its
+simplest form, GP inference can be implemented in a few lines of
+code. However, in practice, things typically get a little more
+complicated: you might want to use complicated covariance functions
+and mean functions, learn good values for hyperparameters, use
+non-Gaussian likelihood functions (rendering exact inference
+intractable), use approximate inference algorithms, or combinations of
+many or all of the above. This is what the GPML software package
+does.</p>
+
+<p>Before going straight to the examples, just a brief note about the
+organization of the package. There are four types of objects which you
+need to know about:</p>
+
+<dl>
+<dt><strong>Gaussian Process</strong>
+<dd>A Gaussian Process is fully specified by a mean function and a covariance
+  function. These functions are specified separately, and consist of a
+  specification of a functional form as well as a set of parameters
+  called <em>hyperparameters</em>, see below.
+  <dl>
+  <dt><strong>Mean functions</strong>
+  <dd>Several mean functions are available, all start with the four
+    letters <tt>mean</tt> and reside in the <a
+    href="../mean">mean directory</a>. An overview is provided by the <a
+    href="../meanFunctions.m"><tt>meanFunctions</tt></a> help function (type
+    <tt>help meanFunctions</tt> to get help), and an example is the
+    <a href="../mean/meanLinear.m"><tt>meanLinear</tt></a> function.
+    <dt><strong>Covariance functions</strong>
+  <dd>There are many covariance functions available, all start with
+    the three letters <tt>cov</tt> and reside in
+    the <a href="../cov">cov directory</a>. An overview is provided by
+    the <a href="../covFunctions.m"><tt>covFunctions</tt></a> help function
+    (type <tt>help covFunctions</tt> to get help), and an example is
+    the <a href="../cov/covSEard.m"><tt>covSEard</tt></a> "Squared Exponential
+    with Automatic Relevance Determination" covariance function.
+  </dl>
+  For both mean functions and covariance functions, two types exist:
+  simple and composite. Whereas simple types are specified by the
+  function name (or function pointer),
+  composite functions join together several components using cell
+  arrays. Composite functions can be composed of other composite
+  functions, allowing for very flexible and interesting
+  structures. <br> Examples are given below and in the 
+  <a href="usageMean.m"><tt>usageMean</tt></a> and <a href="usageCov.m">usageCov</a> functions.
+<dt><strong>Hyperparameters</strong>
+<dd>GPs are typically specified using mean and covariance functions
+ which have free parameters called <em>hyperparameters</em>. Also
+ likelihood functions may have such parameters. These are encoded in
+ a struct with the fields <tt>mean</tt>, <tt>cov</tt> and
+ <tt>lik</tt> (some of which may be empty). When specifying
+  hyperparameters, it is important that the number of elements in each
+  of these struct fields, precisely match the number of parameters expected
+  by the mean function, the covariance function and the likelihood
+  functions respectively (otherwise an error will result). Hyperparameters whose
+ natural domain is positive are represented by their logarithms.
+<dt><strong>Likelihood Functions</strong>
+<dd>The <a href="../likFunctions.m">likelihood function</a> specifies
+  the probability of the observations given the latent function, i.e. the GP (and the
+  hyperparameters). All likelihood functions begin with the three
+  letters <tt>lik</tt> and reside in the <a href="../lik"><tt>lik</tt>
+  directory</a>. An overview is provided by the <a
+  href="../likFunctions.m"><tt>likFunctions</tt></a> help function (type <tt>help
+  likFunctions</tt> to get help). Some examples are 
+  <a href="../lik/likGauss.m"><tt>likGauss</tt></a> the Gaussian likelihood for regression, 
+  <a href="../lik/likPoisson.m"><tt>likPoisson</tt></a> the Poisson likelihood for count data, and
+  <a href="../lik/likLogistic.m"><tt>likLogistic</tt></a> the logistic 
+  function used in classification (a.k.a. logistic regression).
+  As for the mean and covariance functions there is also a composite likelihood
+  <a href="lik/likMix.m"><tt>likMix</tt></a> that can be used to generate
+  mixtures of other likelihood functions.
+  <br>
+  Examples are given below and in the <a href="usageLik.m"><tt>usageLik</tt></a> function.
+<dt><strong>Inference Methods</strong>
+<dd>The <a href="../infMethods.m">inference methods</a> specify how
+  to compute with the model, i.e. how to infer the (approximate)
+  posterior process, how to find hyperparameters, evaluate the log
+  marginal likelihood and how to make predictions. Inference methods
+  all begin with the three letters <tt>inf</tt> and reside in the <a
+  href="../inf">inf directory</a>. An overview is provided by the <a
+  href="../infMethods.m"><tt>infMethods</tt></a> help file (type <tt>help
+  infMethods</tt> to get help). Some examples are
+  <a href="../inf/infExact.m"><tt>infExact</tt></a> for exact inference 
+  (regression with Gaussian likelihood), <a href="../inf/infFITC.m"><tt>infFITC</tt></a> 
+  for large scale Gaussian regression,   <a href="../inf/infEP.m"><tt>infEP</tt></a> for the Expectation Propagation
+  algorithm, or <a href="../inf/infFITC_Laplace.m"><tt>infFITC_Laplace</tt></a> for large scale Laplace's approximation. Further usage examples are provided for both 
+  <a href="usageRegression.m">regression</a> and 
+  <a href="usageClassification.m">classification</a>.
+  However, not all combinations of likelihood function and inference method
+  are possible (e.g. you cannot do exact inference with a Laplace likelihood).
+  An exhaustive compatibility matrix between likelihoods (rows) and 
+  inference methods (columns) is given in the table below:
+</dl>
+
+<table cellpadding=3 border="1" align="center">
+<tr>
+<td align="right">Inference</td>
+<td align="center" rowspan="2">GPML name</td>
+<td align="center">Exact<br><a href="../inf/infExact.m">infExact</a></td>
+<td align="center">EP<br><a href="../inf/infEP.m">infEP</a></td>
+<td align="center">Laplace<br><a href="../inf/infLaplace.m">infLaplace</a></td>
+<td align="center" rowspan="2">Variational Bayes<br><a href="../inf/infVB.m">infVB</a></td>
+<td align="center" rowspan="2">Sampling<br><a href="../inf/infMCMC.m">infMCMC</a></td>
+<td align="center" rowspan="2">LOO<br><a href="../inf/infLOO.m">infLOO</a></td>
+<td rowspan="2">type, output domain<br>&nbsp;</td>
+<td rowspan="2">alternate names<br>&nbsp;</td>
+</tr>
+<td align="left">Likelihood</td>
+<td align="center">FITC<br><a href="../inf/infFITC.m">infFITC</a></td>
+<td align="center">FITC-EP<br><a href="../inf/infFITC_EP.m">infFITC_EP</a></td>
+<td align="center">FITC-Laplace<br><a href="../inf/infFITC_Laplace.m">infFITC_Laplace</a></td>
+</tr>
+
+<tr><td align="left">Gaussian</td>
+<td align="left"><a href="../lik/likGauss.m">likGauss</a></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="left">regression, IR</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr><td align="left">Sech-squared</td>
+<td align="left"><a href="../lik/likSech2.m">likSech2</a></td>
+<td align="center">&nbsp;</td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="left">regression, IR</td>
+<td>&nbsp;</td></tr>
+
+<tr><td align="left">Laplacian</td>
+<td align="left"><a href="../lik/likLaplace.m">likLaplace</a></td>
+<td align="center">&nbsp;</td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center">&nbsp;</td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="left">regression, IR</td>
+<td>double exponential</td></tr>
+
+<tr><td align="left">Student's t</td>
+<td align="left"><a href="../lik/likT.m">likT</a></td>
+<td align="center">&nbsp;</td>
+<td align="center">&nbsp;</td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="left">regression, IR</td>
+<td>&nbsp;</td></tr>
+
+<tr><td align="left">Mixture</td>
+<td align="left"><a href="../lik/likMix.m">likMix</a></td>
+<td align="center">&nbsp;</td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center">&nbsp;</td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="left">classification, &plusmn;1 and regression, IR</td>
+<td>mixing meta likelihood</td>
+</tr>
+
+<tr><td align="left">Uniform</td>
+<td align="left"><a href="../lik/likUni.m">likUni</a></td>
+<td align="center">&nbsp;</td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="left">classification, &plusmn;1</td>
+<td>label noise</td>
+</tr>
+
+<tr><td align="left">Error function</td>
+<td align="left"><a href="../lik/likErf.m">likErf</a></td>
+<td align="center">&nbsp;</td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="left">classification, &plusmn;1</td>
+<td>probit regression</td>
+</tr>
+
+<tr><td align="left">Logistic function</td>
+<td align="left"><a href="../lik/likLogistic.m">likLogistic</a></td>
+<td align="center">&nbsp;</td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="left">classification, &plusmn;1</td>
+ <td>logistic regression<br>logit regression</td>
+</tr>
+
+<tr><td align="left">Poisson</td>
+<td align="left"><a href="../lik/Poisson.m">likPoisson</a></td>
+<td align="center">&nbsp;</td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+<td align="center">&nbsp;</td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+ <td align="left">count data, IN</td>
+ <td>Poisson regression</td>
+</tr>
+
+</table>
+
+<p>All of the objects described above are written in a modular way, so
+you can add functionality if you feel constrained despite the
+considerable flexibility provided. Details about how to do this are provided
+in the <a href="manual.pdf">developer documentation</a>.</p>
+
+<p> Inference by MCMC sampling is the only inference method that cannot be
+used as a black box. Also gradient-based marginal likelihood optimisation
+is not possible with MCMC. Please see <a href="usageSampling.m">usageSampling</a>
+for a toy example illustrating the usage of the implemented samplers.
+</p>
+
+<h2>Practice</h2>
+
+<p>Using the GPML package is simple. There is only one single function to
+call: <a href="../gp.m">gp</a>, it does posterior inference, learns
+hyperparameters, computes the marginal likelihood and makes
+predictions. Generally, the gp function takes the following arguments:
+a hyperparameter struct, an inference method, a mean function, a
+covariance function, a likelihood function, training inputs, training
+targets, and possibly test cases. The exact computations done by the
+function is controlled by the number of input and output arguments in
+the call. Here is part of the help message for the <a
+href="../gp.m">gp</a> function (follow the link to see the whole thing):</p>
+
+<pre>
+  function [varargout] = gp(hyp, inf, mean, cov, lik, x, y, xs, ys)
+
+  [ ... snip ...]
+
+  Two modes are possible: training or prediction: if no test cases are
+  supplied, then the negative log marginal likelihood and its partial
+  derivatives wrt the hyperparameters is computed; this mode is used to fit the
+  hyperparameters. If test cases are given, then the test set predictive
+  probabilities are returned. Usage:
+
+    training: [nlZ dnlZ          ] = gp(hyp, inf, mean, cov, lik, x, y);
+  prediction: [ymu ys2 fmu fs2   ] = gp(hyp, inf, mean, cov, lik, x, y, xs);
+          or: [ymu ys2 fmu fs2 lp] = gp(hyp, inf, mean, cov, lik, x, y, xs, ys);
+
+  [ .. snip ...]
+</pre>
+
+<p>Here <tt>x</tt> and <tt>y</tt> are training inputs and outputs, and
+<tt>xs</tt> and <tt>ys</tt> are test set inputs and outputs,  
+<tt>nlZ</tt> is the negative log marginal likelihood and
+<tt>dnlZ</tt> its partial derivatives wrt the hyperparameters (which
+are used for training the hyperparameters). The prediction outputs are
+<tt>ymu</tt> and <tt>ys2</tt> for test output mean and covariance, and
+<tt>fmu</tt> and <tt>fs2</tt> are the equivalent quenteties for the
+corresponding latent variables. Finally, <tt>lp</tt> are the test
+output log probabilities.</p>
+
+<p>Instead of exhaustively explaining all the possibilities, we
+will give two illustrative examples to give you the idea; one for
+regression and one for classification. You can either follow the
+example here on this page, or using the two scripts <a
+ href="demoRegression.m">demoRegression</a> and <a
+ href="demoClassification.m">demoClassification</a> (using the
+scripts, you still need to follow the explanation on this page).
+
+<h3>Regression</h3>
+
+<p>You can either follow the example here on this page, or use the script <a
+href="demoRegression.m">demoRegression</a>.</p>
+
+<p>This is a simple example, where we first generate <tt>n=20</tt>
+data points from a GP, where the inputs are scalar (so that it is easy
+to plot what is going on). We then use various other GPs to make
+inferences about the underlying function.</p>
+
+<p>First, generate some data from a Gaussian process (it is not essential to
+understand the details of this):</p>
+
+<pre>
+  clear all, close all
+ 
+  meanfunc = {@meanSum, {@meanLinear, @meanConst}}; hyp.mean = [0.5; 1];
+  covfunc = {@covMaterniso, 3}; ell = 1/4; sf = 1; hyp.cov = log([ell; sf]);
+  likfunc = @likGauss; sn = 0.1; hyp.lik = log(sn);
+ 
+  n = 20;
+  x = gpml_randn(0.3, n, 1);
+  K = feval(covfunc{:}, hyp.cov, x);
+  mu = feval(meanfunc{:}, hyp.mean, x);
+  y = chol(K)'*gpml_randn(0.15, n, 1) + mu + exp(hyp.lik)*gpml_randn(0.2, n, 1);
+
+  plot(x, y, '+')
+</pre>
+
+<p>Above, we first specify the mean function <tt>meanfunc</tt>,
+covariance function <tt>covfunc</tt> of a GP and a likelihood
+function, <tt>likfunc</tt>. The corresponding hyperparameters are
+specified in the <tt>hyp</tt> structure:</p>
+
+<p>The <b>mean function</b> is composite, adding (using <tt>meanSum</tt>
+function) a linear (<tt>meanLinear</tt>) and a constant
+(<tt>meanConst</tt>) to get an affine function. Note, how the
+different components are composed using cell arrays. The hyperparameters
+for the mean are given in <tt>hyp.mean</tt> and consists of a single
+(because the input will one dimensional, i.e. <tt>D=1</tt>) slope (set
+to 0.5) and an off-set (set to 1). The number and the order of these
+hyperparameters conform to the mean function specification. You can
+find out how many hyperparameters a mean (or covariance or likelihood
+function) expects by calling it without arguments, such as
+<tt>feval(@meanfunc{:})</tt>. For more information on mean functions
+see <a href="../meanFunctions.m">meanFunctions</a> and the directory
+<a href="../mean">mean/</a>.</p>
+
+<p>The <b>covariance function</b> is of the <a
+ href="../cov/covMaterniso.m">Mat&eacute;rn form</a> with isotropic
+distance measure <a href="../cov/covMaterniso.m">covMaterniso</a>. This covariance function is
+ also composite, as it takes a constant (related to the smoothness of
+ the GP), which in this case is set to 3. The covariance
+ function takes two
+hyperparameters, a characteristic length-scale <tt>ell</tt> and the
+standard deviation of the signal <tt>sf</tt>. Note, that these
+positive parameters are represented in <tt>hyp.cov</tt> using their
+logarithms. For more
+information on covariance functions see <a
+ href="../covFunctions.m">covFunctions</a> and <a
+ href="../cov">cov/</a>.</p>
+
+<p>Finally, the <b>likelihood function</b> is specified to be
+Gaussian. The standard deviation of the noise <tt>sn</tt> is set to
+0.1. Again, the representation in the <tt>hyp.lik</tt> is given in
+terms of its logarithm. For more information about likelihood
+functions, see <a href="../likFunctions.m">likFunctions</a> and <a
+ href="../lik">lik/</a>.</p>
+
+<p>Then, we generate a dataset with <tt>n=20</tt> examples. The inputs
+<tt>x</tt> are drawn from a unit Gaussian (using the
+<tt>gpml_randn</tt> utility, which generates unit Gaussian pseudo
+random numbers with a specified seed). We then evaluate the covariance
+matrix <tt>K</tt> and the mean vector <tt>m</tt> by calling the
+corresponding functions with the hyperparameters and the input
+locations <tt>x</tt>. Finally, the targets <tt>y</tt> are computed by
+drawing randomly from a Gaussian with the desired covariance and mean
+and adding Gaussian noise with standard deviation
+<tt>exp(hyp.lik)</tt>. The above code is a bit special because we
+explicitly call the mean and covariance functions (in order to
+generate samples from a GP); ordinarily, we would only directly call
+the <a href="../gp.m">gp</a> function.</p>
+
+<center><img src="f1.gif" alt="f1.gif"></center><br>
+
+<p>Let's ask the model to compute the (joint) negative log probability
+(density) <tt>nlml</tt> (also called marginal likelihood or evidence)
+and to generalize from the training data to other (test) inputs
+<tt>z</tt>:</p>
+
+<pre>
+  nlml = gp(hyp, @infExact, meanfunc, covfunc, likfunc, x, y)
+
+  z = linspace(-1.9, 1.9, 101)';
+  [m s2] = gp(hyp, @infExact, meanfunc, covfunc, likfunc, x, y, z);
+
+  f = [m+2*sqrt(s2); flipdim(m-2*sqrt(s2),1)]; 
+  fill([z; flipdim(z,1)], f, [7 7 7]/8)
+  hold on; plot(z, m); plot(x, y, '+')
+</pre>
+
+<p>The <tt>gp</tt> function is called with a struct of hyperparameters
+<tt>hyp</tt>, and inference method, in this case <a
+ href="../inf/infExact.m">@infExact</a> for exact inference and the
+mean, covariance and likelihood functions, as well as the inputs and
+outputs of the training data. With no test inputs, <tt>gp</tt> returns
+the negative log probability of the training data, in this example
+<tt>nlml=11.97</tt>.</p>
+
+<p>To compute the predictions at test locations we add the test inputs
+<tt>z</tt> as a final argument, and <tt>gp</tt> returns the mean
+<tt>m</tt> variance <tt>s2</tt> at the test location. The program is
+using algorithm 2.1 from the <a
+href="http://gaussianprocess.org/gpml/">GPML book</a>. Plotting the
+mean function plus/minus two standard deviations (corresponding to a
+95% confidence interval):</p>
+
+<center><img src="f2.gif" alt="f2.gif"></center><br>
+
+<p>Typically, we would not a priori know the values of the
+hyperparameters <tt>hyp</tt>, let alone the form of the mean,
+covariance or likelihood functions. So, let's pretend we didn't know
+any of this. We assume a particular structure and learn suitable
+hyperparameters:</p>
+
+<pre>
+  covfunc = @covSEiso; hyp2.cov = [0; 0]; hyp2.lik = log(0.1);
+
+  hyp2 = minimize(hyp2, @gp, -100, @infExact, [], covfunc, likfunc, x, y);
+  exp(hyp2.lik)
+  nlml2 = gp(hyp2, @infExact, [], covfunc, likfunc, x, y)
+
+  [m s2] = gp(hyp2, @infExact, [], covfunc, likfunc, x, y, z);
+  f = [m+2*sqrt(s2); flipdim(m-2*sqrt(s2),1)];
+  fill([z; flipdim(z,1)], f, [7 7 7]/8)
+  hold on; plot(z, m); plot(x, y, '+')
+</pre>
+
+<p>First, we guess that a <a href="../cov/covSEiso.m">squared
+exponential</a> covariance function <tt>covSEiso</tt> may be suitable.
+This covariance function takes two hyperparameters: a characteristic
+length-scale and a signal standard deviation (magnitude). These
+hyperparameters are non-negative and represented by their logarithms;
+thus, initializing <tt>hyp2.cov</tt> to zero, correspond to unit
+characteristic length-scale and unit signal standard deviation. 
+The likelihood hyperparameter in <tt>hyp2.lik</tt> is also
+initialized. We assume that the mean function is zero, so we simply
+ignore it (and when in the following we call <a href="../gp.m">gp</a>,
+we give an empty argument for the mean function).</p>
+
+<p>In the following line, we optimize over the hyperparameters, by
+minimizing the negative log marginal likelihood w.r.t. the
+hyperparameters. The third parameter in the call to <a
+ href="../util/minimize.m">minimize</a> limits the number of function
+evaluations to a maximum of 100. The inferred noise standard deviation is
+<tt>exp(hyp2.lik)=0.15</tt>, somewhat larger than the one used to
+generate the data (0.1). The final negative log marginal likelihood is
+<tt>nlml2=14.13</tt>, showing that the joint probability (density) of
+the training data is about <tt>exp(14.13-11.97)=8.7</tt> times smaller
+than for the setup actually generating the data. Finally, we plot the
+predictive distribution.</p>
+
+<center><img src="f3.gif"  alt="f3.gif"></center><br>
+
+<p>This plot shows clearly, that the model is indeed quite different from
+the generating process. This is due to the different specifications of
+both the mean and covariance functions. Below we'll try to do a better
+job, by allowing more flexibility in the specification.</p>
+
+<p>Note that the confidence interval in this plot is the confidence for
+the distribution of the (noisy) <em>data</em>. If instead you want the
+confidence region for the underlying <em>function</em>, you should
+use the 3rd and 4th output arguments from <a href="../gp.m">gp</a> as
+these refer to the latent process, rather than the data points.</p>
+
+<pre>
+  hyp.cov = [0; 0]; hyp.mean = [0; 0]; hyp.lik = log(0.1);
+  hyp = minimize(hyp, @gp, -100, @infExact, meanfunc, covfunc, likfunc, x, y);
+  [m s2] = gp(hyp, @infExact, meanfunc, covfunc, likfunc, x, y, z);
+ 
+  f = [m+2*sqrt(s2); flipdim(m-2*sqrt(s2),1)];
+  fill([z; flipdim(z,1)], f, [7 7 7]/8)
+  hold on; plot(z, m); plot(x, y, '+');
+</pre>
+
+<p>Here, we have changed the specification by adding the affine mean
+function. All the hyperparameters are learnt by optimizing the
+marginal likelihood.</p>
+
+<center><img src="f4.gif" alt="f4.gif"></center><br>
+
+<p>This shows that a much better fit is achieved when allowing a mean
+function (although the covariance function is still different from
+that of the generating process).</p>
+
+<h4>Large scale regression</h4>
+
+<p>In case the number of training inputs <tt>x</tt> exceeds a few 
+thousands, exact inference using
+<a href="../inf/infExact.m">infExact.m</a> 
+takes too long. We offer the FITC approximation based on a low-rank
+plus diagonal approximation to the exact covariance to deal with these
+cases. The general idea is to use inducing points <tt>u</tt> and to
+base the computations on cross-covariances between training, test and
+inducing points only.
+</p>
+
+<p>
+Using the FITC approximation 
+is very simple, we just have to wrap the covariance function
+<tt>covfunc</tt> into <a href="../cov/covFITC.m">covFITC.m</a>
+and call <a href="../gp.m">gp.m</a> with the inference method
+<a href="../inf/infFITC.m">infFITC.m</a> as demonstrated by
+the following lines of code.
+</p>
+
+<pre>
+  nu = fix(n/2); u = linspace(-1.3,1.3,nu)';
+  covfuncF = {@covFITC, {covfunc}, u};
+  [mF s2F] = gp(hyp, @infFITC, meanfunc, covfuncF, likfunc, x, y, z);
+</pre>
+
+<p>
+We define equispaced inducing points <tt>u</tt> that are shown in the
+figure as black circles. Note that the predictive variance is overestimated
+outside the support of the inducing inputs.
+In a multivariate example where densely sampled inducing inputs are infeasible,
+one can simply use a random subset of the training points. 
+</p>
+
+<pre>
+  nu = fix(n/2); iu = randperm(n); iu = iu(1:nu); u = x(iu,:);
+</pre>
+
+<center><img src="f5.gif" alt="f5.gif"></center><br>
+
+<h4>Exercises for the reader</h4>
+
+<dl>
+<dt><strong>Inference Methods</strong>
+<dd>Try using Expectation Propagation instead of exact inference in
+  the above, by exchanging <tt>@infExact</tt> with <tt>@infEP</tt>. You
+  get exactly identical results, why?
+<dt><strong>Mean or Covariance</strong>
+<dd>Try training a GP where the affine
+part of the function is captured by the <em>covariance function</em>
+instead of the <em>mean function</em>. That is, use a GP with no
+explicit mean function, but further additive contributions to the
+covariance. How would you expect the marginal likelihood to compare to
+the previous case?
+</dl>
+
+
+<h3>Classification</h3>
+
+<p>You can either follow the example here on this page, or use the script <a
+href="demoClassification.m">demoClassification</a>.</p>
+
+<p>The difference between regression and classification isn't of
+fundamental nature. We can use a Gaussian process latent function in
+essentially the same way, it is just that the Gaussian likelihood
+function often used for regression is inappropriate for
+classification. And since exact inference is only possible for
+Gaussian likelihood, we also need an alternative, approximate,
+inference method.</p>
+
+<p>Here, we will demonstrate binary classification, using two partially
+overlapping Gaussian sources of data in two dimensions. First we
+generate the data:</p>
+
+<pre>
+  clear all, close all
+ 
+  n1 = 80; n2 = 40;                   % number of data points from each class
+  S1 = eye(2); S2 = [1 0.95; 0.95 1];           % the two covariance matrices
+  m1 = [0.75; 0]; m2 = [-0.75; 0];                            % the two means
+ 
+  x1 = bsxfun(@plus, chol(S1)'*gpml_randn(0.2, 2, n1), m1);
+  x2 = bsxfun(@plus, chol(S2)'*gpml_randn(0.3, 2, n2), m2);
+ 
+  x = [x1 x2]'; y = [-ones(1,n1) ones(1,n2)]';
+  plot(x1(1,:), x1(2,:), 'b+'); hold on;
+  plot(x2(1,:), x2(2,:), 'r+');
+</pre>
+
+<p>120 data points are generated from two Gaussians with different
+means and covariances. One Gaussian is isotropic and contains 2/3 of the data (blue), the
+other is highly correlated and contains 1/3 of the points (red). Note,
+that the labels for the targets are &plusmn;1 (and <b>not</b> 0/1).</p>
+
+<p>In the plot, we superimpose the data points with the posterior
+equi-probability contour lines for the probability of class two given
+complete information about the generating mechanism</p>
+
+<pre>
+  [t1 t2] = meshgrid(-4:0.1:4,-4:0.1:4);
+  t = [t1(:) t2(:)]; n = length(t);                 % these are the test inputs
+  tmm = bsxfun(@minus, t, m1');
+  p1 = n1*exp(-sum(tmm*inv(S1).*tmm/2,2))/sqrt(det(S1));
+  tmm = bsxfun(@minus, t, m2');
+  p2 = n2*exp(-sum(tmm*inv(S2).*tmm/2,2))/sqrt(det(S2));
+  contour(t1, t2, reshape(p2./(p1+p2), size(t1)), [0.1:0.1:0.9]);
+</pre>
+
+<center><img src="f6.gif" alt="f6.gif"></center><br>
+
+<p>We specify a Gaussian process model as follows: a constant mean
+function, with initial parameter set to 0, a squared exponential with
+automatic relevance determination (ARD) covariance function <a
+ href="../cov/covSEard.m">covSEard</a>. This covariance function has
+one characteristic length-scale parameter for each dimension of the
+input space, and a signal magnitude parameter, for a total of 3
+parameters (as the input dimension is <tt>D=2</tt>). ARD with separate
+length-scales for each input dimension is a very powerful tool to
+learn which inputs are important for predictions: if length-scales are
+short, inputs are very important, and when they grow very long
+(compared to the spread of the data), the corresponding inputs will be
+largely ignored. Both length-scales and the signal magnitude are
+initialized to 1 (and represented in the log space). Finally, the
+likelihood function <a href="../lik/likErf.m">likErf</a> has the shape
+of the error-function (or cumulative Gaussian), which doesn't take any
+hyperparameters (so <tt>hyp.lik</tt> does not exist).</p>
+
+<pre>
+  meanfunc = @meanConst; hyp.mean = 0;
+  covfunc = @covSEard; ell = 1.0; sf = 1.0; hyp.cov = log([ell ell sf]);
+  likfunc = @likErf;
+
+  hyp = minimize(hyp, @gp, -40, @infEP, meanfunc, covfunc, likfunc, x, y);
+  [a b c d lp] = gp(hyp, @infEP, meanfunc, covfunc, likfunc, x, y, t, ones(n, 1));
+
+  plot(x1(1,:), x1(2,:), 'b+'); hold on; plot(x2(1,:), x2(2,:), 'r+')
+  contour(t1, t2, reshape(exp(lp), size(t1)), [0.1:0.1:0.9]);
+</pre>
+
+<p>We train the hyperparameters using <a href="../util/minimize.m">minimize</a>,
+ to minimize the negative log
+ marginal likelihood. We allow for <tt>40</tt> function evaluations,
+ and specify that inference should be done with the Expectation
+ Propagation (EP) inference method <a href="../inf/infEP.m">@infEP</a>,
+ and pass the usual parameters. Training is done using algorithm 3.5
+ and 5.2 from the <a href="http://gaussianprocess.org/gpml/">gpml
+ book</a>.  When computing test probabilities, we call <tt>gp</tt>
+ with additional test inputs, and as the last argument a vector of
+ targets for which the log probabilities <tt>lp</tt> should be
+ computed. The fist four output arguments of the function are mean and
+ variance for the targets and corresponding latent variables
+ respectively. The test set predictions are computed using algorithm
+ 3.6 from the <a href="http://gaussianprocess.org/gpml/">GPML
+ book</a>. The contour plot for the predictive distribution is
+ shown below. Note, that the predictive probability is fairly close to the
+ probabilities of the generating process in regions of high data
+ density. Note also, that as you move away from the data, the
+ probability approaches 1/3, the overall class probability.</p>
+
+<center><img src="f7.gif" alt="f7.gif"></center><br>
+
+<p>Examining the two ARD characteristic length-scale parameters after
+learning, you will find that they are fairly similar, reflecting the
+fact that for this data set, both inputs important.</p>
+
+<h4>Large scale classification</h4>
+
+<p>In case the number of training inputs <tt>x</tt> exceeds a few 
+hundreds, approximate inference using
+<a href="../inf/infLaplace.m">infLaplace.m</a>, <a href="../inf/infEP.m">infEP.m</a>
+and <a href="../inf/infVB.m">infVB.m</a> 
+takes too long. As in regression, we offer the FITC approximation based on a low-rank
+plus diagonal approximation to the exact covariance to deal with these
+cases. The general idea is to use inducing points <tt>u</tt> and to
+base the computations on cross-covariances between training, test and
+inducing points only.
+</p>
+
+<p>
+Using the FITC approximation 
+is very simple, we just have to wrap the covariance function
+<tt>covfunc</tt> into <a href="../cov/covFITC.m">covFITC.m</a>
+and call <a href="../gp.m">gp.m</a> with the inference methods
+<a href="../inf/infFITC_Laplace.m">infFITC_Laplace.m</a> and
+<a href="../inf/infFITC_EP.m">infFITC_EP.m</a>
+as demonstrated by the following lines of code.
+</p>
+
+<pre>
+  [u1,u2] = meshgrid(linspace(-2,2,5)); u = [u1(:),u2(:)]; clear u1; clear u2
+  nu = size(u,1);
+  covfuncF = {@covFITC, {covfunc}, u};
+  inffunc = @infFITC_EP;                       % also @infFITC_Laplace is possible
+  hyp = minimize(hyp, @gp, -40, inffunc, meanfunc, covfuncF, likfunc, x, y);
+  [a b c d lp] = gp(hyp, inffunc, meanfunc, covfuncF, likfunc, x, y, t, ones(n,1));
+</pre>
+
+<p>
+We define equispaced inducing points <tt>u</tt> that are shown in the
+figure as black circles. Alternatively, a random subset of the training
+points can be used as inducing points.
+</p>
+
+<center><img src="f8.gif" alt="f8.gif"></center><br>
+
+<h4>Exercise for the reader</h4>
+
+<dl>
+<dt><strong>Inference Methods</strong>
+<dd>Use the Laplace
+Approximation for inference <tt>@infLaplace</tt> (or <tt>@infFITC_Laplace</tt>
+in the large scale example), and compare the
+approximate marginal likelihood for the two methods. Which
+approximation is best?
+<dt><strong>Covariance Function</strong>
+<dd>Try using the squared exponential with isotropic distance measure
+<tt>covSEiso</tt> instead of ARD distance measure <tt>covSEard</tt>. Which
+is best?
+</dl>
+
+<h2>Acknowledgements</h2>
+
+<p>Innumerable colleagues have helped to improve this software. Some
+of these are: John Cunningham, M&aacute;t&eacute; Lengyel, Joris Mooij, 
+Iain Murray, David Duvenaud, James Lloyd, Andrew McHutchon, Rowan McAllister, Daniel Marthaler and Chris Williams. Especially Ed Snelson helped to improve the code and to include sparse approximations.</p>
+
+<hr>
+Last modified: January 15th 2013
+</body>
+</html>

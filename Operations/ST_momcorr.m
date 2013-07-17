@@ -71,7 +71,7 @@ R = corrcoef(M1,M2);
 out.R = R(2,1); % correlation coefficient
 out.absR = abs(R(2,1)); % absolute value of correlation coefficient
 out.density = range(M1)*range(M2)/N; % density of points in M1--M2 space
-out.mi = benmi(M1,M2,[0,1],[0,1],floor(sqrt(N)));
+out.mi = BF_mi(M1,M2,[0,1],[0,1],floor(sqrt(N)));
 % this is a poor choice of bin number -- M1 and M2 are not length N
 
 if doplot

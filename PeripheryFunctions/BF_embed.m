@@ -68,13 +68,13 @@ else % use a routine to inform m
                     th = m{2};
                 end
                 try
-                    m = NL_fnnmar(y,10,2,tau,th);
+                    m = NL_crptool_fnn(y,10,2,tau,th);
                 catch
-                    disp('Error with FNN code')
+                    fprintf(1,'Error with FNN code')
                     y_embed = NaN;
                     return
                 end
-                ssm = sprintf('by Marwan''s CRPToolbox FNN code with threshold %f to m = %u',th,m);
+                ssm = sprintf('by N. Marwan''s CRPtoolbox ''fnn'' code with threshold %f to m = %u',th,m);
             case 'cao'
                 % Uses TSTOOL code for cao method to determine optimal
                 % embedding dimension
@@ -92,11 +92,10 @@ else % use a routine to inform m
                     y_embed = NaN;
                     return
                 end
-                ssm = ['by TSTOOL method ''cao'' using ''mmthresh'' with threshold ' num2str(th) ' to m = ' num2str(m)];
+                ssm = sprintf('by TSTOOL function ''cao'' using ''mmthresh'' with threshold %f to m = %u',th,m);
             otherwise
-                disp('embedding dimension incorrectly specified. Exiting.')
-                y_embed = NaN;
-                return
+                fprintf(1,'embedding dimension, m, incorrectly specified. Exiting.')
+                y_embed = NaN; return
         end
     else
         m = m{1};

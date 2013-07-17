@@ -3,8 +3,16 @@ function out = GP_givealittle(y,covfunc,npoints)
 % equally-spaced points through the time series
 % Ben Fulcher 22/1/2010
 
+doplot = 0; % set to 1 to visualize behavior
+
+% Check inputs
+
+if size(y,2) > size(y,1);
+    y = y'; % make sure a column vector
+end
+
 if nargin < 2 || isempty(covfunc)
-    disp('GP_hps: We''re using default sum of SE and noise covariance function')
+    fprintf(1,'Using default sum of SE and noise covariance function\n')
     covfunc = {'covSum', {'covSEiso','covNoise'}};
 end
 
@@ -12,10 +20,8 @@ if nargin < 3 || isempty(npoints)
     npoints = 20;
 end
 
-doplot = 0; % set to 1 to visualize behavior
-
 %% Get the points
-N = length(y); % length of the time series
+N = length(y); % time-series length
 tt = floor(linspace(1,N,npoints))'; % time range (training)
 yt = y(tt);
 
@@ -39,8 +45,11 @@ else
     init_loghp = ones(nhps,1)*-1;
 end
 
-loghyper = SUB_learnhyper(covfunc,-50,tt,yt,init_loghp);
-
+try
+    loghyper = GP_learnhyper(covfunc,-50,tt,yt,init_loghp);
+catch emsg
+    error('Error learning hyperparameters for time series')
+end
 if isnan(loghyper)
     out = NaN;
     return
@@ -54,17 +63,22 @@ if N <= 2000
 else % memory constraints force us to crudely resample
     ts = round(linspace(1,N,2000))';
 end
-[mu S2] = gpr(loghyper, covfunc, tt, yt, ts);
+try
+    [mu, S2] = gpr(loghyper, covfunc, tt, yt, ts);
+catch emsg
+    keyboard
+    error('Error running Gaussian Process regression on time series: %s',emsg.message);
+end
 
 
 %% For Plotting
 if doplot
     xstar = linspace(min(t),max(t),1000)';
-    [mu S2] = gpr(loghyper, covfunc, t, y, ts);
+    [mu, S2] = gpr(loghyper, covfunc, t, y, ts);
     S2p = S2 - exp(2*loghyper(3)); % remove noise from predictions
     S2p = S2;
     figure('color','w');
-    f = [mu+2*sqrt(S2p);flipdim(mu-2*sqrt(S2p),1)];
+    f = [mu+2*sqrt(S2p); flipdim(mu-2*sqrt(S2p),1)];
     fill([ts; flipdim(ts,1)], f, [6, 7, 7]/8, 'EdgeColor', [7, 7, 6]/8);
             % grayscale error bars
     hold on;
@@ -92,7 +106,7 @@ end
 % Loghyperparameters
 for i = 1:nhps
     % set up structure output
-    eval(['out.logh' num2str(i) ' = loghyper(' num2str(i) ');']);
+    eval(sprintf('out.logh%u = loghyper(%u);',i,i));
 end
 
 if strcmp(covfunc1,'covSum') && strcmp(covfunc2{1},'covSEiso') && strcmp(covfunc2{2},'covNoise')
@@ -104,39 +118,39 @@ end
 
 %% Subfunctions
 
-    function loghyper = SUB_learnhyper(covfunc,nfevals,t,y,init_loghyper)
-        % nfevals--  negative: specifies maximum number of allowed
-        % function evaluations
-        % t: time
-        % y: data
-        
-        if nargin < 5 || isempty(init_loghyper)
-            % Use default starting values for parameters
-            % How many hyperparameters
-            s = feval(covfunc{:}); % string in form '2+1', ... tells how many
-            % hyperparameters for each contribution to the
-            % covariance function
-            nhps = eval(s);
-            init_loghyper = ones(nhps,1)*-1; % Initialize all log hyperparameters at -1
-        end
-%         init_loghyper(1) = log(mean(diff(t)));
-        
-        % Perform the optimization
-        try
-            loghyper = minimize(init_loghyper, 'gpr', nfevals, covfunc, t, y);
-        catch emsg
-            if strcmp(emsg.identifier,'MATLAB:posdef')
-                disp('Error with lack of positive definite matrix for this function');
-                loghyper = NaN; return
-            elseif strcmp(emsg.identifier,'MATLAB:nomem')
-                error('GP_givealittle: Out of memory');
-                % return as if a fatal error -- come back to this.
-            else
-                error('Error fitting Gaussian Process to data')
-            end
-        end
-        
-    end
+%     function loghyper = GP_learnhyper(covfunc,nfevals,t,y,init_loghyper)
+%         % nfevals--  negative: specifies maximum number of allowed
+%         % function evaluations
+%         % t: time
+%         % y: data
+%         
+%         if nargin < 5 || isempty(init_loghyper)
+%             % Use default starting values for parameters
+%             % How many hyperparameters
+%             s = feval(covfunc{:}); % string in form '2+1', ... tells how many
+%             % hyperparameters for each contribution to the
+%             % covariance function
+%             nhps = eval(s);
+%             init_loghyper = ones(nhps,1)*-1; % Initialize all log hyperparameters at -1
+%         end
+% %         init_loghyper(1) = log(mean(diff(t)));
+%         
+%         % Perform the optimization
+%         try
+%             loghyper = minimize(init_loghyper, 'gpr', nfevals, covfunc, t, y);
+%         catch emsg
+%             if strcmp(emsg.identifier,'MATLAB:posdef')
+%                 fprintf(1,'Error: lack of positive definite matrix for this function');
+%                 loghyper = NaN; return
+%             elseif strcmp(emsg.identifier,'MATLAB:nomem')
+%                 error('Out of memory');
+%                 % return as if a fatal error -- come back to this.
+%             else
+%                 error('Error fitting Gaussian Process to data')
+%             end
+%         end
+%         
+%     end
 
 
 end

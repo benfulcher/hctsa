@@ -1,0 +1,375 @@
+<html>
+<title>MATLAB interface for L-BFGS-B</title>
+<body bgcolor="#FFFFFF">
+
+<center>
+<br>
+<table align="center" border=0 width=460 cellspacing=0
+cellpadding=0>
+<tr><td valign=top>
+
+<center><h2>A MATLAB interface for L-BFGS-B</h2>
+by Peter Carbonetto<br>
+Dept. of Computer Science<br>
+University of British Columbia
+</center>
+
+<p>L-BFGS-B is a collection of Fortran 77 routines for solving
+large-scale nonlinear optimization problems with bound constraints on
+the variables. One of the key features of the nonlinear solver is that
+knowledge of the Hessian is not required; the solver computes search
+directions by keeping track of a quadratic model of the objective
+function with a limited-memory BFGS (Broyden-Fletcher-Goldfarb-Shanno)
+approximation to the Hessian.<a href="#footnote1"><sup>1</sup></a> The
+algorithm was developed by Ciyou Zhu, Richard Byrd and Jorge
+Nocedal. For more information, go to the <a
+href="http://www.ece.northwestern.edu/~nocedal/lbfgsb.html">original
+distribution site</a> for the L-BFGS-B software package.</p>
+
+<p>I've designed an interface to the L-BFGS-B solver so that it can be
+called like any other function in MATLAB.<a
+href="#footnote2"><sup>2</sup></a> See the text below for more
+information on <a href="#install">installing</a> and <a
+href="#tutorial">calling</a> it in MATLAB. Along the way, I've also
+developed a C++ class that encapsulates all the &quot;messy&quot;
+details in executing the L-BFGS-B code. See below for <a
+href="#cpp">instructions</a> on how to use this class for your own C++
+code.</p>
+
+<p>If you have any questions, praise, or comments, or would like to
+report a bug, do not hesitate to contact the <a
+href="index.html">author</a>. I've tested this software in MATLAB
+version 7.2 on both the Mac OS X and Linux operating systems.</p>
+
+<table align="center" border=1 bordercolor="#000000" width=460 
+cellspacing=0 cellpadding=6>
+<tr><td align=center><font face="sans" size=2>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.5/ca/"><img vspace=4 alt="Creative Commons License" style="border-width:0" src="http://creativecommons.org/images/public/somerights20.png"/></a><br/>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.5/ca/">Creative Commons Attribution-Noncommercial-Share Alike 2.5 Canada License</a>. 
+
+Please cite the source as Peter Carbonetto, Department of Computer Science,
+University of British Columbia.  
+</font></td></tr></table>
+
+<a name="install"><h4>Installation</h4>
+
+<p>These installation instructions assume you have a UNIX-based
+operating system, such as Mac OS X or Linux. It is surely possible to
+install this software on Windows, I'm just not sure how. These
+instructions also assume you have GNU <a
+href="http://www.gnu.org/software/make/">make</a> installed.</p>
+
+<p><b>Download the source.</b> First, download and unpack the <a
+href="lbfgsb-for-matlab.tar.gz">tar archive</a>. It contains some
+MATLAB files (ending in .m), some C++ source and header files (ending
+in .h and .cpp), a single Fortran 77 source file solver.f containing
+the L-BFGS-B routines, and a Makefile. I've included a version of the
+Fortran routines that is more recent than what is available for
+download at the <a
+href="http://www.ece.northwestern.edu/~nocedal/lbfgsb.html">distribution
+site</a> at Northwestern University.</p>
+
+<p>What we will do is create a MEX file, which is basically a file
+that contains a routine that can be called from MATLAB as if it were a
+built-it function. To learn about MEX files, I refer you to <a
+href="http://www.mathworks.com/support/tech-notes/1600/1605.html">this
+document</a> at the MathWorks website.</p>
+
+<p><b>Install the C++ and Fortran 77 compilers.</b> In order to build
+the MEX file, you will need both a C++ compiler and a Fortran 77
+compiler. Unfortunately, you can't just use any compiler. You have to
+use the precise one supported by MATLAB. For instance, if you are
+running Mac OS X 7.2 on a Linux operating system, you will need to
+install the <a href="http://www.gnu.org/software/gcc">GNU compiler
+collection</a> (GCC) version 3.4.4. Even if you already have a
+compiler installed on Linux, it may be the wrong version, and if you
+use the wrong version things could go horribly wrong! It is important
+that you use the correct version of the compiler, otherwise you will
+encounter linking errors. Refer to <a
+href="http://www.mathworks.com/support/tech-notes/1600/1601.html">this
+document</a> to find out which compiler is supported by your version
+of MATLAB.
+
+<p><b>Configure MATLAB.</b> Next, you need to set up and configure
+MATLAB to build MEX Files. This is explained quite nicely in <a
+href="http://www.mathworks.com/support/tech-notes/1600/1605.html">this
+MathWorks support document</a>.</p>
+
+<p><b>Modify the Makefile.</b> You are almost ready to build the MEX
+file. But before you do so, you need to edit the Makefile to coincide
+with your system setup. At the top of the file are several variables
+you may need to modify. The variable <code>MEX</code> is the
+executable called to build the MEX file. The variables
+<code>CXX</code> and <code>F77</code> must be the names of your C++
+and Fortran 77 compilers. <code>MEXSUFFIX</code> is the MEX file
+extension specific to your platform. (For instance, the extension for
+Linux is <code>mexglx</code>.) The variable <code>MATLAB_HOME</code>
+must be the base directory of your MATLAB installation. Finally,
+<code>CFLAGS</code> and <code>FFLAGS</code> are options passed to the
+C++ and Fortran compilers, respectively. Often these flags coincide
+with your MEX options file (see <a
+href="http://www.mathworks.com/support/tech-notes/1600/1605.html">here</a>
+for more information on the options file). But often the settings in
+the MEX option file are incorrect, and so the options must be set
+manually. MATLAB requires some special compilation flags for various
+reasons, one being that it requires position-independent code. These
+instructions are vague (I apologize), and this step may require a bit
+of trial and error until before you get it right.</p>
+
+<p>On my laptop running Mac OS X 10.3.9 with MATLAB 7.2, my settings
+for the Makefile are</p>
+
+<p><code><pre>  MEX         = mex
+  MEXSUFFIX   = mexmac
+  MATLAB_HOME = /Applications/MATLAB72
+  CXX         = g++
+  F77         = g77 
+  CFLAGS      = -O3 -fPIC -fno-common -fexceptions \
+                -no-cpp-precomp 
+  FFLAGS      = -O3 -x f77-cpp-input -fPIC -fno-common</pre></code></p>
+
+<p>On my Linux machine, I set the variables in the Makefile like so:</p> 
+
+<p><code><pre>  MEX         = mex
+  MEXSUFFIX   = mexglx
+  MATLAB_HOME = /cs/local/generic/lib/pkg/matlab-7.2
+  CXX         = g++-3.4.5
+  F77         = g77-3.4.5
+  CFLAGS      = -O3 -fPIC -pthread 
+  FFLAGS      = -O3 -fPIC -fexceptions</pre></code></p>
+
+<p>It may be helpful to look at the GCC documentation in order to
+understand what these various compiler flags mean.</p>
+
+<p><b>Build the MEX file.</b> If you are in the directory containing all 
+the source files, typing 
+<code>make</code> in the command prompt will first compile the Fortran
+and C++ source files into object code (.o files). After that, the make
+program calls the MEX script, which in turn links all the object files
+together into a single MEX file. If you didn't get any errors, then
+you are ready to try out the bound-constrained solver in MATLAB. Note
+that even if you didn't get any errors, there's still a possibility
+that you didn't link the MEX file properly, in which case executing
+the MEX file will cause MATLAB to crash. But there's only one way to
+find out: the hard way.</p>
+
+<a name="tutorial"><h4>A brief tutorial</h4>
+
+<p>I've written a short script <code>examplehs038.m</code> which
+demonstrates how to call <code>lbfgsb</code> for solving a small
+optimization problem, the Hock &amp; Schittkowski test problem
+no. 38.<a href="#footnote3"><sup>3</sup></a> The optimization problem
+has four variables. They are bounded from below by -10 and bounded
+from above by +10. We've set the starting point to <nobr>(-3, -1, -3,
+-1)</nobr>. We've written two MATLAB functions for computing the
+objective function and the gradient of the objective function at a
+given point. These functions can be found in the files
+<code>computeObjectiveHS038.m</code> and
+<code>computeGradientHS038.m</code>. If you run the script, the solver
+should very quickly progress toward the point <nobr>(1, 1, 1,
+1)</nobr>. The objective is 0 at this point.</p>
+
+<p>The basic MATLAB function call is</p>
+
+<p><code><pre>  lbfgsb(x0,lb,ub,objfunc,gradfunc)</pre></code></p>
+
+<p>The first input argument <code>x0</code> declares the starting
+point for the solver. The second and third input arguments define the
+lower and upper bounds on the variables, respectively. If an entry of
+<code>lb</code> is set to <code>-Inf</code>, then this is equivalent
+to no lower bound for that entry (the same applies to upper bounds,
+except that it must be <code>+Inf</code> instead). The next two input
+arguments must be the names of MATLAB routines (M-files). The first
+routine must calculate the objective function at the current
+point. The output must be a scalar representing the objective
+evaluated at the current point. The second function must compute the
+gradient of the objective at the current point. The input is the same
+as <code>objfunc</code>, but it must return as many outputs as there
+are inputs. For a complete guide on using the MATLAB interface, type
+<code>help lbfgsb</code> in the MATLAB prompt.</p>
+
+<p>The script <code>exampleldaimages.m</code> is a more complicated
+example. It uses the L-BFGS-B solver to compute some statistics of a
+posterior distribution for a text analysis model called latent
+Dirichlet allication (LDA). The model is used to estimate the topics
+for a collection of documents. The optimization problem is to compute
+an approximation to the posterior, since it is not possible to compute
+the posterior exactly. In this case, the optimization problem
+corresponds to minimizing the distance between the true posterior
+distribution and an approximate distribution. For more information,
+see the paper of Blei, Ng and Jordan (2003).<a
+href="#footnote4"><sup>4</sup></a>  In order to run this
+example, you will need to install the <a
+href="http://research.microsoft.com/~minka/software/lightspeed/">lightspeed
+toolbox</a> for MATLAB developed by Tom Minka at Microsoft
+Research.</p>
+
+<p>The script starts by generating a bunch of canonical images that
+represent topics; if a pixel is white then a word at that position is
+more likely to appear in that topic. Note that the order of the pixels
+in the image is unimportant, since LDA is a &quot;bag of words&quot;
+model. In another figure we show a small sample of the data generated
+from the topics. Each image represents a document, and the pixels in
+the image depict the word proportions in that document.<a
+href="#footnote5"><sup>5</sup></a></p>
+
+<p>Next, the script runs the L-BFGS-B solver to find a local minimum
+to the variational objective. Buried in the M-file
+<code>mflda.m</code> is the call to the solver:
+
+<p><code><pre>
+  [xi gamma Phi] = lbfgsb({xi gamma Phi},...
+      {repmat(lb,W,K)  repmat(lb,K,D)  repmat(lb,K,M)},...
+      {repmat(inf,W,K) repmat(inf,K,D) repmat(inf,K,M)},...
+      'computeObjectiveMFLDA','computeGradientMFLDA',...
+      {nu eta L w lnZconst},'callbackMFLDA',...
+      'm',m_lbfgs,'factr',1e-12,'pgtol',...
+      tolerance,'maxiter',maxiter);</pre></code></p>
+
+<p>This example will give us the opportunity to demonstrate some of
+the more complicated aspects of the our MATLAB interface. The first
+input to <code>lbfgsb</code> sets the initial iterate of the
+optimization algorithm. Notice that we've passed a cell array with
+entries that are matrices. Indeed, it is possible to pass either a
+matrix or a cell array. Whatever structure is passed, the other input
+arguments (and outputs) must also abide by this structure. The lower
+and upper bounds on variables are also cell arrays. All the upper
+bounds are set to infinity, which means that the variables are only
+bounded from below.</p>
+
+<p>It is instructive to examine the callback routines. They look like:
+
+<p><code><pre>  f = computeObjectiveMFLDA(xi,gamma,Phi,auxdata)
+
+  [dxi, dgamma, dPhi] = ...
+      computeGradientMFLDA(xi,gamma,Phi,auxdata)</pre></code></p>
+</p>
+
+<p>Notice that each entry to the cell array is its own input argument
+to the callback routines. The same applies for the output arguments of
+the gradient callback function.</p>
+
+<p>The sixth input argument is a cell array that contains auxiliary
+data. This data will be passed to the MATLAB functions that evaluate
+the objective and gradient. The seventh input argument specifies a
+callback routine that is called exactly once for every iteration. This
+callback routine is most useful for examining the progress of the
+solver. The remaining input arguments are label/value pairs that
+override some of the default settings of L-BFGS-B.</p>
+
+<p>After converging to a solution, we display topic samples drawn from
+the variational approximation. A good solution should come close to
+recovering the true topics from which the data was generated (although
+they might not be in the same order).</p>
+
+<p>Don't be surprised if it takes many iterations before the
+optimization algorithm converges on a local minimum. (In repeated
+trials, I found it as many as two thousand iterations to converge to a
+stationary point of the objective.) This particular problem
+demonstrates the limitations of limited-memory quasi-Newton
+approximations to the Hessian; the low storage requirements can come
+at the cost of slow convergence to the solution.</p>
+
+<a name="cpp"><h4>The C++ interface</h4>
+
+<p>One of the nice byproducts of writing a MATLAB interface for
+L-BFGS-B is that I've ended up with a neat little C++ class that
+encapsulates the nuts and bolts of executing the solver. A brief
+description of the Program class can be found in the header file
+<code>program.h</code>.</p>
+
+<p>Program is an abstract class, which means that its impossible to
+instantiate a Program object. This is because the class has member
+functions that aren't yet implemented. These are called pure virtual
+functions. In order to use the Program class, one needs to define
+another class that inherits the Program class and that implements the
+pure virtual functions. In fact, the class MatlabProgram (in
+<code>matlabprogram.h</code>) is an example of such a class.</p>
+
+<p>The new child class must declare and implement these two
+functions:</p>
+
+<p><pre><code>  virtual double computeObjective (int n, double* x);
+  virtual void computeGradient (int n, double* x, double* g); </pre></code></p>
+
+<p>See the header file for a detailed description of these
+functions. The only remaining detail is calling the Program
+constructor. After that, it is just a matter of declaring a new object
+of type MyProgram then calling the function runSolver.</p>
+
+<a name="contents"><h4>Contents of the tar archive</h4>
+
+<p><code>solver.f</code><br> Fortran 77 source for the L-BFGS-B solver
+routines.</p>
+
+<p><code>program.h<br>program.cpp</code><br> Header and source file
+for the C++ interface.</p>
+
+<p><code>array.h <br> arrayofmatrices.h <br> matlabexception.h <br>
+matlabmatrix.h<br> matlabprogram.h <br> matlabscalar.h <br>
+matlabstring.h <br> arrayofmatrices.cpp <br> matlabexception.cpp <br>
+matlabmatrix.cpp <br> matlabprogram.cpp <br> matlabscalar.cpp <br>
+matlabstring.cpp <br> lbfgsb.cpp </code><br> Header and source files
+for the MATLAB interface.</p>
+
+<p><code>lbfgsb.m</code><br> Usage instructions for the MEX file.</p>
+
+<p><code>examplehs038.m</code><br> MATLAB script for solving the
+H&amp;S test example no. 38.</p>
+
+<p><code>computeObjectiveHS038.m <br> computeGradientHS038.m <br>
+genericcallback.m </code><br> MATLAB functions used by the script
+<code>examplehs038.m</code>.</p>
+
+<p><code>exampleldaimages.m</code><br> MATLAB script that generates
+synthetic documents and topics, then computes a mean field variational
+approximation to the posterior distribution of the latent Dirichlet
+allocation model, then displays the result.</p>
+
+<p><code>mflda.m</code><br> This function computes a mean field
+variational approximation to the posterior distribution of the latent
+Dirichlet allocation model by minimizing the distance between the
+variational distribution and the true distribution. It uses the
+L-BFGS-B to minimize the objective function subject to the bound
+constraints. The objective function also acts as a lower bound on the
+logarithm of the denominator that appears from the application of
+Bayes' rule.<a href="#footnote4"><sup>4</sup></a>
+
+<p><code>callbackMFLDA.m <br> computeObjectiveMFLDA.m <br>
+computeGradientMFLDA.m <br> computelnZ.m <br> computelnZconst.m <br>
+computem.m <br> dirichletrnd.m <br> gammarnd.m <br>
+createsyntheticdata.m <br> mfldainit.m </code><br> Some functions used
+by <code>exampleldaimages.m</code> and <code>mflda.m</code>.</p>
+
+<h4>Footnotes</h4>
+
+<p><a name="footnote1"><sup>1</sup></a> Ciyou Zhu, Richard H. Byrd,
+Peihuang Lu and Jorge Nocedal (1997). Algorithm 778: L-BFGS-B: Fortran
+subroutines for large-scale bound-constrained optimization. <em>ACM
+Transactions on Mathematical Software,</em> Vol. 23, No. 4.,
+pp. 550-560.</p>
+
+<p><a name="footnote2"><sup>1</sup></a> <a
+href="http://www.cs.toronto.edu/~liam/software.shtml">Another MATLAB
+interface</a> for the L-BFGS-B routines has been developed by Liam
+Stewart at the University of Toronto.</p>
+
+<p><a name="footnote3"><sup>3</sup></a> Willi Hock and Klaus
+Schittkowski (1981). <em>Test Examples for Nonlinear Programming
+Codes.</em> Lecture Notes in Economics and Mathematical Systems,
+Vol. 187, Springer-Verlag.</p>
+
+<p><a name="footnote4"><sup>4</sup></a> David M. Blei, Andrew Y. Ng,
+Michael I. Jordan (2003). Latent Dirichlet allocation.  <em>Journal of
+Machine Learning Research</em>, Vol. 3, pp. 993-1022.</p>
+
+<p><a name="footnote5"><sup>5</sup></a> Tom L. Griffiths and Mark
+Steyvers (2004). Finding scientific topics. <em>Proceedings of the
+National Academy of Sciences,</em> Vol. 101, pp. 5228-5235.</p>
+
+</td></tr>
+
+<tr>
+<td align=right><br><font color="#666666" size=2>March 3, 2007</font></tr>
+</table>
+</body>
+</html>
