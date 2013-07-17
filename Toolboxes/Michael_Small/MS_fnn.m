@@ -7,7 +7,7 @@ function out = MS_fnn(y,de,tau,th,kth,justbest,bestp)
 
 % embedding dimension(s), de
 if nargin < 2 || isempty(de)
-  de = (1:10);
+    de = (1:10);
 end
 
 % Time delay, tau
@@ -22,12 +22,12 @@ end
 
 % A distance threshold for neighbours
 if nargin < 4
-  th = 5;
+    th = 5;
 end
 
 % Distance to next points
 if nargin < 5
-  kth = 1;
+    kth = 1;
 end
 
 % (Actually better to use MS_unfolding now -- does a near-identical thing
@@ -38,8 +38,6 @@ end
 if nargin < 7 || isempty(bestp)
     bestp = 0.05; % first time under 5% of neighest neighbours
 end
-
-
 
 
 %% ______________MICHAEL_SMALL'S____CODE__________________
@@ -114,42 +112,36 @@ p = p';
 
 if justbest
     % We just want a scalar to choose the embedding with
-    out = de(find(p < bestp,1,'first'));
-    if isempty(out), out = de(end)+1; end
+    out = firstunderf(bestp);
     return
 else
     % Output all of them
     for i = 1:length(de)
-        eval(sprintf('out.pfnn_%u = %f;',de(i)),p(i));
+        eval(sprintf('out.pfnn_%u = %f;',de(i),p(i)));
     end
 
     % Output mean
     out.meanpfnn = mean(p);
     % Standard deviation
     out.stdpfnn = std(p);
+        
+    %% Find de for the first time p goes under x%
+    out.firstunder02 = firstunderf(0.2); % 20%
+    out.firstunder01 = firstunderf(0.1); % 10%
+    out.firstunder005 = firstunderf(0.05); % 5%
+    out.firstunder002 = firstunderf(0.02); % 2%
+    out.firstunder001 = firstunderf(0.01); % 1%
 
-    %% Find when de reaches under x%
-    
-    firstunderf = @(x) de(find(p < x,1,'first'));
-    
-    % 20%
-    out.firstunder02 = firstunderf(0.2);
-    if isempty(out.firstunder02), out.firstunder02 = de(end)+1; end
-    % 10%
-    out.firstunder01 = firstunderf(0.1);
-    if isempty(out.firstunder01), out.firstunder01 = de(end)+1; end
-    % 5%
-    out.firstunder005 = firstunderf(0.05);
-    if isempty(out.firstunder005), out.firstunder005 = de(end)+1; end
-    % 2%
-    out.firstunder002 = firstunderf(0.02);
-    if isempty(out.firstunder002), out.firstunder002 = de(end)+1; end
-    % 1%
-    out.firstunder001 = firstunderf(0.01);
-    if isempty(out.firstunder001), out.firstunder001 = de(end)+1; end
-
-
-    % Maximum step-wise change
+    % Maximum step-wise change across p
     out.max1stepchange = max(abs(diff(p)));
+end
+
+function firsti = firstunderf(x)
+    %% Find de for the first time p goes under x%
+    firsti = de(find(p < x,1,'first'));
+    if isempty(firsti)
+        firsti = de(end) + 1;
+    end
+end
 
 end

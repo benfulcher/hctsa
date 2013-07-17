@@ -166,7 +166,7 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
 
     % ASSUME GAUSSIAN DISTRIBUTION:
     % so can use 1/2-sided z-statistic
-    [~, p, ~, zscore] = ztest(statx,mean(statsurr),std(statsurr),0.05,leftrightboth);
+    [~, p, ~, zscore] = ztest(statx, mean(statsurr), std(statsurr), 0.05, leftrightboth);
     somestats.p = p; % pvalue
     somestats.zscore = zscore; % z-statistic
 
@@ -188,7 +188,7 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
         [f, xi] = ksdensity(zscstatsurr);
 
         % find where the statx value would be:
-        if zscstatx < min(xi) || zscstatx > max(xi)
+        if (zscstatx < min(xi)) || (zscstatx > max(xi))
             somestats.f = 0; % out of range -- assume p=0 here
         else
             [~, minhere] = min(abs(zscstatx-xi));
@@ -207,7 +207,7 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
 
     % rank statistic
     [~, ix] = sort([statx; statsurr]);
-    xfitshere = find(ix == 1)-1;
+    xfitshere = find(ix == 1) - 1;
     if strcmp(leftrightboth,'right') % x statistic smaller than distribution
         xfitshere = nsurrs + 1 - xfitshere; % how far from highest ranked value
     elseif strcmp(leftrightboth,'both')

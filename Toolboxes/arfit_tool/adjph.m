@@ -1,5 +1,5 @@
-function ox=adjph(x)
-%ADJPH	Normalization of columns of a complex matrix.
+function ox = adjph(x)
+% ADJPH	Normalization of columns of a complex matrix.
 %
 %  Given a complex matrix X, OX=ADJPH(X) returns the complex matrix OX
 %  that is obtained from X by multiplying column vectors of X with

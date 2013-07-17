@@ -36,8 +36,6 @@ g = spa(e); % smoothed power spectrum
 % p = etfe(e); % periodogram
 gf = g.frequency;
 gS = g.Spectrumdata(:);
-% pf = p.frequency;
-% pS = p.Spectrumdata(:);
 
 % Normalize them
 % this is like normalizing the residuals to unit variance
@@ -61,7 +59,7 @@ out.p5_5 = sum(gS(b(5)+1:b(6)))*(gf(2)-gf(1));
 % normal (within a constant).
 maxlag = 25;
 
-acs = CO_autocorr(e,1:maxlag);
+acs = CO_autocorr(e,1:maxlag); % autocorrelations
 sqrtN = sqrt(N);
 
 % output first three acfs
@@ -78,7 +76,7 @@ out.acsnd0 = std(abs(acs))*sqrtN;
 out.propbth = sum(abs(acs) < 2.6/sqrtN)/maxlag;
 
 % First time to get below the significance threshold
-out.ftbth = find(abs(acs) < 2.6/sqrt(N),1,'first');
+out.ftbth = find(abs(acs) < 2.6/sqrtN,1,'first');
 if isempty(out.ftbth)
     out.ftbth = maxlag+1;
 end

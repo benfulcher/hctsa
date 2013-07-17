@@ -44,42 +44,42 @@ function compile
 	mex ML_kvsteps_core.cpp
     fprintf(1,' done.\n');
     
-    fprintf('------\nNow installing the CRPTool\n');
-    fprintf('At the prompts\n-Remove existing toolbox\n-Create folder if asked\n-DO NOT add to the path\n-DO NOT delete the installation file\n-----\n');
-
-    plugininstall_x86_64('./CRPTool');
-    if rp_failed()
-        fprintf(1,'rp_plugin failed, trying a different version...\n')
-        plugininstall_i686('./CRPTool');
-    else 
-        return
-    end
-    if rp_failed()
-        fprintf(1,'rp_plugin failed, trying a different version...\n')
-        plugininstall_ia64('./CRPTool');
-    else 
-        return
-    end
-    if rp_failed()
-        fprintf(1,'None of the rp_plugins worked. So you will be unable to use this operation\n')
-    end
-
-function status = rp_failed()
-    plugin_path = fileparts(which('rp_plugin'));
-
-    if ispc
-        plugin_name = 'rp_plugin.exe';
-    else
-        plugin_name = 'rp_plugin';
-        if isunix
-            fileattrib([plugin_path,filesep,plugin_name], '+x')
-        end
-    end
-
-    try
-          [status, plugin_version] = system([plugin_path,filesep,plugin_name,' -V']);
-    catch
-          status = 1;
-    end
-end
+%     fprintf('------\nNow installing the CRPTool\n');
+%     fprintf('At the prompts\n-Remove existing toolbox\n-Create folder if asked\n-DO NOT add to the path\n-DO NOT delete the installation file\n-----\n');
+% 
+%     plugininstall_x86_64('./CRPTool');
+%     if rp_failed()
+%         fprintf(1,'rp_plugin failed, trying a different version...\n')
+%         plugininstall_i686('./CRPTool');
+%     else 
+%         return
+%     end
+%     if rp_failed()
+%         fprintf(1,'rp_plugin failed, trying a different version...\n')
+%         plugininstall_ia64('./CRPTool');
+%     else 
+%         return
+%     end
+%     if rp_failed()
+%         fprintf(1,'None of the rp_plugins worked. So you will be unable to use this operation\n')
+%     end
+% 
+% function status = rp_failed()
+%     plugin_path = fileparts(which('rp_plugin'));
+% 
+%     if ispc
+%         plugin_name = 'rp_plugin.exe';
+%     else
+%         plugin_name = 'rp_plugin';
+%         if isunix
+%             fileattrib([plugin_path, filesep, plugin_name], '+x')
+%         end
+%     end
+% 
+%     try
+%           [status, plugin_version] = system([plugin_path,filesep,plugin_name,' -V']);
+%     catch
+%           status = 1;
+%     end
+% end
 end

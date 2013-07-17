@@ -5,7 +5,7 @@ function out = NL_crptool_fnn(y,maxm,r,taum,th)
 % of the mutual information
 % ** If th is set, then just outputs a scalar, the first time the number of
 % false neighbours goes under this value
-% Ben Fulcher October 2009
+% Ben Fulcher, October 2009
 
 %% Preliminaries
 doplot = 1; % plot outputs

@@ -1,5 +1,5 @@
-function t=tquant(n, p)
-%TQUANT  Quantiles of Student's t distribution
+function t = tquant(n, p)
+% TQUANT  Quantiles of Student's t distribution
 %
 %  TQUANT(n, p) is the p-quantile of a t distributed random variable
 %  with n degrees of freedom; that is, TQUANT(n, p) is the value below

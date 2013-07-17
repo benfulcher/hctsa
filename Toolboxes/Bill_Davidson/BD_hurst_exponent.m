@@ -31,11 +31,11 @@
 % Bill Davidson
 % 21 Oct 2003
 
-function [hurst] = ST_hurst_exponent(data0)   % data set
+function hurst = ST_hurst_exponent(data0)   % data set
 
-data=data0;         % make a local copy
+data = data0;         % make a local copy
 
-[M,npoints] = size(data0);
+[M, npoints] = size(data0);
 
 yvals=zeros(1,npoints);
 xvals=zeros(1,npoints);

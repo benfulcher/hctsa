@@ -78,7 +78,7 @@ out.popt_sbc = find(SBC == min(SBC),1,'first');
 % (iii) How convincing is the minimum?
 % adjacent values
 if out.popt_sbc > 1 && out.popt_sbc < length(SBC);
-    meanaround = mean(abs([SBC(out.popt_sbc-1),SBC(out.popt_sbc+1)]));
+    meanaround = mean(abs([SBC(out.popt_sbc-1), SBC(out.popt_sbc+1)]));
 elseif out.popt_sbc == 1
     meanaround = abs(SBC(out.popt_sbc+1)); % just the next value
 elseif out.popt_sbc == length(SBC) % really an else
@@ -87,7 +87,6 @@ else
     error('Weird error!');
 end
 out.aroundmin_sbc = abs(min(SBC))/meanaround;
-
 
 % (5) Aikake's Final Prediction Error (FPE)
 % (i) Return all

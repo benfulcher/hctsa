@@ -55,7 +55,7 @@ switch meth
         b = quantile(y,linspace(0,1,nbins+1));
         b(1) = b(1) - 0.1; b(end) = b(end) + 0.1;
     otherwise
-        error('Unknown method %s',meth)
+        error('Unknown method ''%s''',meth)
 end
 nb = length(b) - 1; % number of bins (-1 since b defines edges)
 
