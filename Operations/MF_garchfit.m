@@ -1,4 +1,4 @@
-function out = MF_garch(y,preproc,params)
+function out = MF_garchfit(y,preproc,params)
 % Tries to simulate a GARCH model fitting procedure:
 % (1) Preprocessing: preprocesses the time series in an appropriate way to
 %       remove strong trends (optional)

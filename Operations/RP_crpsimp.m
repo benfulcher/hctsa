@@ -1,6 +1,7 @@
 function out = RP_crpsimp(y,m,tau,eps,dist,tw)
 % My attempt to do a bunch of recurrence plot measures using the CRP
 % Toolbox by Marwan, Version 5.13, Release 26
+% This function isn't actually used -- quite buggy software
 % y should be z-scored
 % Ben Fulcher, October 2009
 

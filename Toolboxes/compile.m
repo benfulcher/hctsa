@@ -10,7 +10,7 @@ fprintf('(I hope %s is the Toolbox directory or we have a problem)\n', tooldir)
 % Max Little's fastdfa code
 fprintf(1,'fastdfa...');
 try
-    cd([tooldir, 'fastdfa']);
+    cd([tooldir, 'Max_Little/fastdfa']);
 	mex fastdfa_core.c
     fprintf(1,' done.\n');
 catch

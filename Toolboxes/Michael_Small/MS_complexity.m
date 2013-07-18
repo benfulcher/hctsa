@@ -1,21 +1,4 @@
-function out = MS_complexity(x,n,preproc)
-% Wrapper code around Michael Small's original 'complexity.m' code. Uses
-% the mex file MS_complexitybs.
-% http://small.eie.polyu.edu.hk/matlab/
-% Ben Fulcher 19/2/2010
-
-if nargin < 2 || isempty(n)
-    n = 2;
-end
-if nargin < 3
-    preproc = [];
-end
-
-if strcmp(preproc,'diff')
-    x = BF_zscore(diff(x));
-end
-
-%_______________________________________________________________
+function cmp=MS_complexity(x,n);
 % cmp = complexity(x,n);
 %
 % calculate the Lempel-Ziv complexity of the n-bit encoding of x. 
@@ -24,32 +7,47 @@ end
 % symbol sequences in x, divided by the expected number of distinct 
 % symbols for a noise sequence.
 %
-% Algorithm is implemented in MS_complexitybs.c
+% Algorithm is implemented in complexitybs.c
 %
 % M. Small
 % ensmall@polyu.edu.hk
 % 7/10/04
 
-if length(n) > 1
-   for ni = 1:length(n),
-        cmp(ni) = complexity(x,n(ni));
-   end
-else
-    %do the binning, with equi-probably bins
-    x = x(:);
-    nx = length(x);
-    [xn, xi] = sort(x);
-%     y = zeros(nx,1);
-    y = 1:nx;
-    y = floor(y.*(n/(nx+1)));
-    x(xi) = y;
+if nargin<2,
+    n=2;
+end;
 
-    % compute complexity with MS_complexitybs
-    cmp = MS_complexitybs(x+eps);
-end
+if length(n)>1,
+   for ni=1:length(n),
+        cmp(ni)=MS_complexity(x,n(ni)); 
+   end;    
+else,
+    
+    if 1,
+        %do the binning, with equi-probably bins
+        x=x(:);
+        nx=length(x);
+        [xn,xi]=sort(x+eps*randn(size(x))); %introduce randomness for ties
+        y=zeros(nx,1);
+        y=1:nx;
+        y=floor(y.*(n/(nx+1)));
+        x(xi)=y;
+    else,
+        %do binning with equal width bins
+        x=x(:);
+        nx=length(x);
+        minx=min(x);
+        maxx=max(x);
+        stepx=(maxx-minx)/n;
+        y=zeros(nx,1);
+        while minx<maxx,
+            minx=minx+stepx;
+            y=y+double(x<minx);
+        end;
+        x=floor(y);
+    end;
+    
+    %compute complexity with complexitybs
+    cmp=MS_complexitybs(x);
 
-%______________________________________________________________
-% Ok, so we have cmp, the complexity
-out = cmp;
-
-end
+end;

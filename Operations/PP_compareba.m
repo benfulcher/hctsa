@@ -22,7 +22,7 @@ function out = PP_compareba(y,detrndmeth)
 
 % 2) Sines
 %   (a) fit a sine series of a given order
-% Fits a form like: a1*sin(b1*x+c1)+a2*sin(b2*x+c2)+...
+% Fits a form like: a1*sin(b1*x+c1) + a2*sin(b2*x+c2) + ...
 % Additional number determines how many terms to include in the series:
 %   'sin1', 'sin2', 'sin3', 'sin4', 'sin5', 'sin6', 'sin7', 'sin8'
 %   (b) fit only if a strong trend (i.e., if the amplitudes are above a
@@ -66,9 +66,8 @@ function out = PP_compareba(y,detrndmeth)
 % Only valid for positive only data; otherwise returns a NaN
 
 %% FOREPLAY
-N = length(y); % length of time series
-% y=zscore(y); % No -- apply transformation to *raw* data
-r = (1:N)'; % the x-range over which to fit
+N = length(y); % time-series length
+r = (1:N)'; % the t-range over which to fit
 
 %% PREPROCESSINGS:
 % DETRENDINGS:

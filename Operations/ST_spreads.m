@@ -3,6 +3,10 @@ function out = ST_spreads(y,meth)
 % spread method 'meth'
 % Ben Fulcher, 2008
 
+if nargin < 2 || isempty(meth)
+    meth = 'std'; % return std by default
+end
+
 switch meth
 	case 'std' % standard deviation
 		out = std(y);

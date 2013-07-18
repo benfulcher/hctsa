@@ -11,10 +11,10 @@ N = length(y); % data length (number of samples)
 % last (few) points in this case...
 freakystat = mod(N,256);
 if freakystat <= 6
-    fprintf(1,'YOU''RE NOT GOING TO BELIEVE THIS BUT TISEAN HAS A PROBLEM FREEZING WITH THIS LENGTH TIME SERIES!\n')
-    fprintf(1,'I''M IGNORING THE LAST %u POINTS OF THIS TIME SERIES...\n',freakystat+1)
+    fprintf(1,'You''re not going to believe this but TISEAN has a problem freezing with this length time series!\n')
+    fprintf(1,'I''m ignoring the last %u points of this time series...\n',freakystat+1)
     y = y(1:end-(freakystat+1));
-    N = length(y);
+    N = length(y); % new time-series length
 end
 
 %% Check inputs
@@ -70,9 +70,9 @@ tic
 if isempty(res)
     delete(fn) % remove the temporary data file
     delete([fn '.c1']) % remove the TISEAN file write output
-    disp('Call to TISEAN failed. Exiting'); return,
+    error('Call to TISEAN method ''c1'' failed');
 else
-    fprintf(1,'TISEAN routine c1 took %s\n',BF_thetime(toc,1))
+    fprintf(1,'TISEAN function ''c1'' took %s\n',BF_thetime(toc,1))
 end
 
 % Get local slopes from c1 file output of previous call
@@ -81,7 +81,7 @@ tic
 if isempty(res)
     delete(fn) % remove the temporary data file
     delete([fn '.c1']) % remove the TISEAN file write output
-    disp('Call to TISEAN failed. Exiting'); return
+    error('Call to TISEAN function ''c1'' failed');
 end
 
 fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc,1))
@@ -269,7 +269,7 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
         % end point must be in last half of data
         
         l = length(x); % number of distance/scaling points per dimension
-        gamma = 0.005; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+        gamma = 0.005; % regularization parameter, chosen empirically
 
         stptr = 1:floor(l/4)-1; % must be in the first quarter
         endptr = ceil(l/4)+1:l; % must be in second three quarters

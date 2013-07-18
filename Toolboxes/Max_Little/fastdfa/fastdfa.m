@@ -5,7 +5,7 @@
 % [alpha, intervals, flucts] = fastdfa(x)
 % [alpha, intervals, flucts] = fastdfa(x, intervals)
 % Inputs
-%    x          - input signal: must be a COLUMN! vector
+%    x          - input signal: must be a column vector
 % Optional inputs
 %    intervals  - List of sample interval widths at each scale
 %                 (If not specified, then a binary subdivision is constructed)
@@ -22,12 +22,10 @@
 
 function [alpha, intervals, flucts] = fastdfa(x, varargin)
 
-if size(x,1) < size(x,2); x = x'; end % LINE ADDED BY B.D. FULCHER 19/1/09
-
 [xpts, ypts] = fastdfa_core(x, varargin{:});
 
 % Sort the intervals, and produce a log-log straight line fit
-datapts   = sortrows([xpts ypts],1);
+datapts   = sortrows([xpts, ypts],1);
 intervals = datapts(:,1);
 flucts    = datapts(:,2);
 

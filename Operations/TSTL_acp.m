@@ -15,7 +15,7 @@ function out = TSTL_acp(y,tau,past,maxdelay,maxdim,nref)
 try
     s = signal(y);
 catch
-    error('Error running ''signal'' on the input time series -- have you installed TSTOOL?')
+    error('Error running ''signal'' on the input time series -- has TSTOOL been installed?')
 end
 if ~strcmp(class(s),'signal')
     error('Error making a signal class of the input time series')

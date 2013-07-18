@@ -5,8 +5,12 @@ function out = SY_stdnthder(y,n)
 % from http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
 % Ben Fulcher, 2010
 
-yd = diff(y,n); % the crudest way of taking a derivative, sure... Could be improved
-                % in future
+if nargin < 2 || isempty(n)
+    n = 2;
+end
+
+yd = diff(y,n); % crude method of taking a derivative that could be improved
+                % upon in future
 out = std(yd);
 
 end

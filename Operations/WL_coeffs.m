@@ -15,7 +15,7 @@ if strcmp(level,'max')
 end
 
 if wmaxlev(N,wname) < level
-    disp('Chosen level is too large for this wavelet on this signal');
+    fprintf(1,'Chosen level is too large for this wavelet on this signal\n');
     out = NaN; return
 end
 
@@ -46,10 +46,11 @@ out.wb25m = findmythreshold(0.25);
 out.wb10m = findmythreshold(0.10);
 out.wb1m = findmythreshold(0.01);
 
-    function i = findmythreshold(x)
+    function propt = findmythreshold(x)
         % where drops below proportion x of maximum
-        i = find(det_s < x*max(det_s),1,'first')/N;
-        if isempty(i), i = NaN; end
+        propt = find(det_s < x*max(det_s),1,'first') / N;
+                % (as a proportion of time-series length)
+        if isempty(i), propt = NaN; end
     end
 
 end

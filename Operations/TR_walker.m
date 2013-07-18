@@ -2,16 +2,38 @@ function out = TR_walker(y,wstyle,wparam)
 % This function uses the idea of simulating an artificial walker that 
 % somehow moves in response to the time series.
 % Outputs compare the motion of the walker to the actual observed time series
-% wstyle determines how the walker's trajectory is defined in relation to the
+% 'wstyle' determines how the walker's trajectory is defined in relation to the
 %        time series
-% wparam sets the parameters for the run
-% Ben Fulcher August 2009
+% 'wparam' is a vector that sets the parameters for the run
+% Ben Fulcher, August 2009
 
+%% Preliminaries
+doplot = 0; % plot outputs to figure
 N = length(y); % the length of the input time series, y
 
+%% Check inputs
+if nargin < 2 || isempty(wstyle)
+    wstyle = 'prop'; % default
+end
+
+if nargin < 3 || isempty(wparam)
+    % Set default parameter for this type of walker dynamics
+    switch wstyle
+    case 'prop'
+        wparam = 0.5;
+    case 'biasprop'
+        wparam = [0.1, 0.2];
+    case 'momentum'
+        wparam = 2;
+    case 'runningvar'
+        wparam = [1.5, 50];
+    end
+end
 
 %% (1) Walk
-w = zeros(N,1); % the walker's trajectory
+
+w = zeros(N,1); % the walker's trajectory, w
+
 switch wstyle
     case 'prop'
         % walker starts at zero and narrows the gap between its position
@@ -21,8 +43,9 @@ switch wstyle
         
         w(1) = 0; % start at zero
         for i = 2:N
-            w(i) = w(i-1)+p*(y(i-1)-w(i-1));
+            w(i) = w(i-1) + p*(y(i-1)-w(i-1));
         end
+        
     case 'biasprop'
         % walker is biased in one or the other direction (i.e., prefers to
         % go up, or down). Requires a vector of inputs: [p_up, p_down]
@@ -31,11 +54,12 @@ switch wstyle
         w(1) = 0;
         for i = 2:N
             if y(i) > y(i-1) % time series increases
-                w(i) = w(i-1)+pup*(y(i-1)-w(i-1));
+                w(i) = w(i-1) + pup*(y(i-1)-w(i-1));
             else
-                w(i) = w(i-1)+pdown*(y(i-1)-w(i-1));
+                w(i) = w(i-1) + pdown*(y(i-1)-w(i-1));
             end
         end
+        
     case 'momentum'
         % walker moves as if it had inertia from the previous time step,
         % i.e., it 'wants' to move the same amount; the time series acts as
@@ -46,13 +70,12 @@ switch wstyle
         w(1) = y(1);
         w(2) = y(2);
         for i = 3:N
-            w_inert = w(i-1)+(w(i-1)-w(i-2));
+            w_inert = w(i-1) + (w(i-1)-w(i-2));
 %             w(i)=w_inert+(y(i-1)-w(i-1))/m; % dissipative term
-            w(i) = w_inert+(y(i)-w_inert)/m; % dissipative term
+            w(i) = w_inert + (y(i)-w_inert)/m; % dissipative term
             % equation of motion (s-s_0=ut+F/m*t^2)
             % where the 'force' F is the change in the original time series
             % at that point
-            
         end
         
     case 'runningvar'
@@ -77,28 +100,29 @@ switch wstyle
 end
 
 %% % PLOT WALKER AND ORIGINAL TIME SERIES TOGETHER:
-% lw = 1;
-% figure('color','w'); hold on;
-% c = BF_getcmap('set1',3,1);
-% plot(y,'.-k','LineWidth',lw); % original time series
-% plot(w,'.-','color',c{1},'LineWidth',lw); % walker
-% plot([1,length(w)],ones(2,1)*mean(w),'color',c{2},'LineWidth',2); % mean
-% % running variance:
-% stds = ones(N,2)*NaN;
-% for i = wl+1:N
-%     stds(i,1) = std(y(i-wl:i));
-%     stds(i,2) = std(w(i-wl:i));
-% end
-% % plot(stds(:,1),':r'); % this is the time series
-% plot(stds(:,1)./stds(:,2),'color',c{3},'LineWidth',lw); % this is the adjustment factor
-% % means = zeros(N,1);
-% % for i = 1:N
-% %     means(i) = mean(w(1:i));
-% % end
-% % plot(means,'g')
-% % plot(y-w,'m'); % residual
-% legend('y','walker','mean: walker','localvariancefactor','accumulative walker mean')
-
+if doplot
+    lw = 1;
+    figure('color','w'); hold on;
+    c = BF_getcmap('set1',3,1);
+    plot(y,'.-k','LineWidth',lw); % original time series
+    plot(w,'.-','color',c{1},'LineWidth',lw); % walker
+    plot([1,length(w)],ones(2,1)*mean(w),'color',c{2},'LineWidth',2); % mean
+    % running variance:
+    stds = ones(N,2)*NaN;
+    for i = wl+1:N
+        stds(i,1) = std(y(i-wl:i));
+        stds(i,2) = std(w(i-wl:i));
+    end
+    % plot(stds(:,1),':r'); % this is the time series
+    plot(stds(:,1)./stds(:,2),'color',c{3},'LineWidth',lw); % this is the adjustment factor
+    % means = zeros(N,1);
+    % for i = 1:N
+    %     means(i) = mean(w(1:i));
+    % end
+    % plot(means,'g')
+    % plot(y-w,'m'); % residual
+    legend('y','walker','mean: walker','localvariancefactor','accumulative walker mean')
+end
 
 %% (2) Statistics on walk
 % (i) The walk itself
@@ -110,7 +134,7 @@ out.w_ac2 = CO_autocorr(w,2);
 out.w_tau = CO_fzcac(w);
 out.w_min = min(w);
 out.w_max = max(w);
-out.w_propzcross = sum(w(1:end-1).*w(2:end) < 0)/(N-1);
+out.w_propzcross = sum(w(1:end-1).*w(2:end) < 0) / (N-1);
 % fraction of time series length that walker crosses time series
 
 % (ii) Differences between the walk at signal
@@ -136,8 +160,8 @@ r = linspace(min(min(y),min(w)),max(max(y),max(w)),200); % make range of ksdensi
 dy = ksdensity(y,r); dw = ksdensity(w,r); % the kernel-smoothed distributions
 out.sw_distdiff = sum(abs(dy-dw));
 
-% (iii) Looking at residuals
-res = w-y;
+% (iii) Looking at residuals between time series and walker
+res = w - y;
 [h, pval] = runstest(res); % runs test
 out.res_runstest = pval;
 out.res_swss5_1 = SY_slidwin(res,'std','std',5,1); % sliding window stationarity

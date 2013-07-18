@@ -423,7 +423,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         % end point must be in last half of data
         
         l = size(x,2);
-        gamma = 0.002; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+        gamma = 0.002; % regularization parameter selected empirically
         % for a consistent regularizer, need to data in [0,1] so weights
         % are consistent...
 %         x=(x-min(x(:)))./(max(x(:))-min(x(:)));
@@ -470,10 +470,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         % starting point must be in first half of data
         % end point must be in last half of data
         
-        
-        l = size(x,2); % number of distance/scaling points per dimension
-        ndim = size(x,1); % number of dimensions
-        gamma = 1E-3; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+        l = size(x,2);      % number of distance/scaling points per dimension
+        ndim = size(x,1);   % number of dimensions
+        gamma = 1E-3;       % regularization parameter selected 'empirically'
 
         stptr = 1:floor(l/2)-1; % must be in the first half
         endptr = ceil(l/2)+1:l; % must be in second half
@@ -494,7 +493,6 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             results(c,3) = min(mybad(:));
             results(c,4) = mean(v(stptr(a):endptr(b)));
             
-%             
 %             hold off;
 %             plot(1:l,v,'o-k');
 %             hold on;
@@ -521,7 +519,6 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         for ii = 1:nn % rescales each dimension so all share common scale
             thecell{ii} = thecell{ii}(thecell{ii}(:,1) >= mini & thecell{ii}(:,1) <= maxi,:);
         end
-        
         
         thevector = thecell{1}(:,1);
         ee = length(thevector);
@@ -658,8 +655,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             ri1 = stptr(a);
             ri2 = endptr(b);
             
-            % goodness function: is this range close to zero compared to
-            % rest?
+            % goodness function: is this range close to zero compared to rest?
             results(c,1) = min(mybad(:)); % goodness
 %             if results(c,1)<-1 % good enough
             results(c,2) = mean(Y(c,ri1:ri2)); % only relevant if goodness is small enough

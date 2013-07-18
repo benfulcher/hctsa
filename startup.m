@@ -50,8 +50,13 @@ fprintf(1,', Bill Davidson');
 addfcn('Toolboxes/Bill_Davidson');
 
 % Max Little's steps/bumps toolbox
-fprintf(1,', steps_bumps')
-addfcn('Toolboxes/steps_bumps_toolkit');
+fprintf(1,', steps_bumps toolkit')
+addfcn('Toolboxes/Max_Little/steps_bumps_toolkit');
+
+% Max Little's fastdfa code
+fprintf(1,', fastdfa')
+addfcn('Toolboxes/Max_Little/fastdfa');
+
 
 % TSTOOL
 fprintf(1,', TSTOOL')

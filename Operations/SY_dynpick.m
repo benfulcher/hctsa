@@ -4,7 +4,11 @@ function out = SY_dynpick(y,l)
 % Kind of a bootstrap sort of idea
 % Ben Fulcher August 2009
 
-doplot = 0;
+doplot = 0; % set to 1 to plot outputs to figure
+if nargin < 2 || isempty(l)
+    l = 100; % by default use 100 samples
+end
+
 
 if strcmp(l,'ac2')
     taug = CO_fzcac(y); % tau (global)
@@ -16,8 +20,8 @@ end
 
 N = length(y); % the length of the time series
 
-if l > N*0.9 % not suitable -- too short
-	fprintf(1,'This time series (N = %u) is too short for SY_dynpick using l = %u\n',N,l)
+if l > 0.9*N % not suitable -- too short
+	fprintf(1,'This time series (N = %u) is too short to use l = %u\n',N,l)
     out = NaN; % NaN means not suitable
     return
 end
