@@ -1380,10 +1380,10 @@ WL_fBM(y)	WL_fBM
 WL_dwtcoeff(y,'db3',5)	WL_dwtcoeff_db3_5
 WL_dwtcoeff(y,'sym2',5)	WL_dwtcoeff_sym2_5
 MF_arfit(y,1,8,'sbc')	MF_arfit_1_8_sbc
-MS_fnn(y,1:10,'mi',5,1)	MS_fnn_1_10_mi_5_1
-MS_nlpe(y,2,'mi')	MS_nlpe_2_mi
-MS_nlpe(y,3,'ac')	MS_nlpe_3_ac
-MS_nlpe(y,'fnn','mi')	MS_nlpe_fnn_mi
+NL_MS_fnn(y,1:10,'mi',5,1)	NL_MS_fnn_1_10_mi_5_1
+NL_nlpe(y,2,'mi')	NL_nlpe_2_mi
+NL_nlpe(y,3,'ac')	NL_nlpe_3_ac
+NL_nlpe(y,'fnn','mi')	NL_nlpe_fnn_mi
 MS_shannon(y,2:10,2)	MS_shannon_2t10_2
 MS_shannon(y,2:10,3)	MS_shannon_2t10_3
 MS_shannon(y,2:10,4)	MS_shannon_2t10_4

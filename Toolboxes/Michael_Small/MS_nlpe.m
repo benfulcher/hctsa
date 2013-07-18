@@ -1,40 +1,6 @@
-function out = MS_nlpe(y,de,tau)
-% Wrapped up version of Michael Small's code, 'nlpe':
-% http://small.eie.polyu.edu.hk/matlab/
-% Ben Fulcher 19/2/2010
-
-
-% Do my own inputs
-% Embedding dimension
-if nargin < 2 || isempty(de)
-    de=3;
-end
-
-
-% Time-delay, tau
-if nargin < 3 || isempty(tau)
-    tau=1;
-end
-if strcmp(tau,'ac')
-    tau = CO_fzcac(y);
-end
-if strcmp(tau,'mi')
-    tau = CO_firstmin(y,'mi');
-end
-
-% Do false nearest neighbours if needed
-if strcmp(de,'fnn')
-    de = MS_fnn(y,1:10,tau,5,1,1,0.05);
-end
-
-% normalized
-% y=y-mean(y(:));
-% y=y/std(y(:));
-
-
 % _____________________________________________________________
-%function e=nlpe(y,de,tau);
-%function e=nlpe(y,v);
+function e = MS_nlpe(y,de,tau);
+% function e = MS_nlpe(y,v);
 %
 %compute the normalised "drop-one-out" constant interpolation nonlinear
 %prediction error for embedding dimension de and lag tau or for embedding
@@ -44,7 +10,7 @@ end
 %3/3/2005
 %ensmall@polyu.edu.hk
 %
-
+% Edited to work with HCTS package, Ben Fulcher, 2010
 
 if min(size(y)) > 1
     x = y;
@@ -52,9 +18,9 @@ if min(size(y)) > 1
     x = x(:,1:(end-1));
 elseif max(size(de))>1,
     v = de(de > 0);
-    [x, y] = MS_embed(y,v-1); % changed from embed to MS_embed ++BF
+    [x, y] = MS_embed(y,v-1);
 else
-    [x, y] = MS_embed(y,[-1 0:tau:((de-1)*tau)]); % changed from embed to MS_embed ++BF
+    [x, y] = MS_embed(y,[-1, 0:tau:((de-1)*tau)]);
 end
 
 if isempty(x)
@@ -62,7 +28,6 @@ if isempty(x)
 end
 
 [de, n] = size(x);
-
 
 % ++BF: this bit can cause memory pains for large time series
 % Let's do this dirty cheat
@@ -96,24 +61,4 @@ warning('on','MATLAB:divideByZero')
 e = y(near)-y;
 % e = mean(e.^2);
 % _________________________________________________________ %
-
-% Now back to my code:
-
-%% Get outputs
-out.msqerr = mean(e.^2);
-% out.rmserr = sqrt(mean(e.^2));
-% out.mabserr = mean(abs(e));
-% out.meanres = mean(e);
-
-% Use MF_residanal on the residuals
-% 1) Get statistics on residuals
-residout = MF_residanal(e);
-
-% convert these to local outputs in quick loop
-fields = fieldnames(residout);
-for k = 1:length(fields);
-    eval(sprintf('out.%s = residout.%s;',fields{k},fields{k}));
-end
-
-
 end

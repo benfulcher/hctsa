@@ -1,16 +1,16 @@
 function out = SD_surrogatetest(x,surrmeth,nsurrs,extrap,teststat)
-% Ben Fulcher 28/1/2011
 % Looks at test statistic of surrogates compared to that of the given time
 % series
 % first four inputs are inputs to SD_makesurrogates, teststatistic it the
 % teststatistic to compare -- can specify many in a cell, will return
 % outputs for each teststat specified. Better this way because creating
 % surrogates is the expensive step.
+% Ben Fulcher 28/1/2011
+
 
 %% CHECK INPUTS
-
 if nargin < 2 || isempty(surrmeth)
-    surrmeth = 'RP'; % Randomize phases
+    surrmeth = 'RP'; % randomize phases
 end
 if nargin < 3 || isempty(nsurrs)
     nsurrs = 99; % create 99 surrogates for a 0.01 significance level 1-sided test
@@ -26,7 +26,7 @@ if ischar(teststat)
     teststat = {teststat};
 end
 
-N = length(x);
+N = length(x); % time-series length
 
 %% OK NOW DO SHIT
 
@@ -116,12 +116,13 @@ end
 if ismember('nlpe',teststat) % locally constant phase space prediction error
     fprintf(1,'''nlpe'' can be very time consuming\n')
     de = 3; tau = 1; % embedding parameters: fixed like a dummy!
-    tmp = MS_nlpe(x,de,tau);
+    tmp = NL_nlpe(x,de,tau);
     nlpex = tmp.msqerr;
     nlpesurr = zeros(nsurrs,1);
     for i = 1:nsurrs
-        tmp = MS_nlpe(z(:,i),de,tau);
-        nlpesurr(i) = tmp.msqerr;
+        res = MS_nlpe(z(:,i),de,tau);
+        msqerr = sum(res.^2);
+        nlpesurr(i) = msqerr;
     end
     
     somestats = SDgivemestats(nlpex,nlpesurr,'right'); % NLPE should be higher than surrogates
@@ -134,11 +135,11 @@ end
 if ismember('fnn',teststat)
     fprintf(1,'fnn takes forever...\n')
     % false nearest neighbours at d=2;
-    tmp = MS_fnn(x,2,1,5,1);
+    tmp = NL_MS_fnn(x,2,1,5,1);
     fnnx = tmp.pfnn_2;
     fnnsurr = zeros(nsurrs,1);
     for i = 1:nsurrs
-        tmp = MS_fnn(z(:,i),2,1,5,1);
+        tmp = NL_MS_fnn(z(:,i),2,1,5,1);
         fnnsurr(i) = tmp.pfnn_2;
     end
     
@@ -148,9 +149,6 @@ if ismember('fnn',teststat)
         eval(sprintf('out.fnn_%s = somestats.%s;',fnames{i},fnames{i}));
     end
 end
-
-
-
 
 
 function somestats = SDgivemestats(statx,statsurr,leftrightboth)
