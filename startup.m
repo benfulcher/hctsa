@@ -54,8 +54,8 @@ fprintf(1,', steps_bumps toolkit')
 addfcn('Toolboxes/Max_Little/steps_bumps_toolkit');
 
 % Max Little's fastdfa code
-fprintf(1,', fastdfa')
-addfcn('Toolboxes/Max_Little/fastdfa');
+fprintf(1,', ML_fastdfa')
+addfcn('Toolboxes/Max_Little/ML_fastdfa');
 
 
 % TSTOOL

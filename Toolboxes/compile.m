@@ -11,10 +11,10 @@ fprintf('(I hope %s is the Toolbox directory or we have a problem)\n', tooldir)
 fprintf(1,'fastdfa...');
 try
     cd([tooldir, 'Max_Little/fastdfa']);
-	mex fastdfa_core.c
+	mex ML_fastdfa_core.c
     fprintf(1,' done.\n');
 catch
-	error('\nAn error occurred while compiling. Get ''mex fastdfa_core.c'' to work, and then re-run compile.m');
+	error('\nAn error occurred while compiling. Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile.m');
 end
 
 % MICHAEL SMALL

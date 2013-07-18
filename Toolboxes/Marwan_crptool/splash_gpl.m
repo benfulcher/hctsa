@@ -1,7 +1,6 @@
 function splash_gpl(filename)
 % SPLASH_GPL   Splashs up the Gnu General Public License
 %    Used by CRP Toolbox
-
 % Copyright (c) 2008-2009
 % Norbert Marwan, Potsdam Institute for Climate Impact Research, Germany
 % http://www.pik-potsdam.de

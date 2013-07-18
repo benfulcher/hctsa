@@ -608,9 +608,9 @@ swac1ent5_10	swac1ent5_10	stationarity,slidingwin
 swac1ent10_1	swac1ent10_1	stationarity,slidingwin
 swac1ent10_2	swac1ent10_2	stationarity,slidingwin
 swac1ent10_10	swac1ent10_10	stationarity,slidingwin
-detr	detr	stationarity,raw
-dfa	dfa	dfa,maxdfa,mex
-ST_hurst_BillDavidson	ST_hurst_BillDavidson	hurstexp,constant,shit
+linear_trend_strength	linear_trend_strength	stationarity,raw
+DFA_exponent	DFA_exponent	dfa,scaling,mex
+ST_hurst_BillDavidson	ST_hurst_BillDavidson	hurstexp,scaling,shit
 stdnthder_1	stdnthder_1	entropy
 stdnthder_2	stdnthder_2	entropy
 stdnthder_3	stdnthder_3	entropy
@@ -762,7 +762,7 @@ ST_cumul_AC1_randcg20	ST_cumul_AC1_randcg20	stationarity,stochastic
 ST_cumul_AC1_randcg50	ST_cumul_AC1_randcg50	stationarity,stochastic
 ST_cumul_AC1_randcg100	ST_cumul_AC1_randcg100	stationarity,stochastic
 ST_cumul_AC1_randcg500	ST_cumul_AC1_randcg500	stationarity,stochastic
-shent	shent	entropy,shannon
+EN_shannon	EN_shannon	entropy,shannon
 shpdfent	shpdfent	entropy,shannonpdf
 logenent	logenent	entropy,logenergy
 threshent01	threshent01	entropy,threshold
@@ -777,7 +777,7 @@ sureent05	sureent05	entropy,sure
 sureent1	sureent1	entropy,sure
 sureent15	sureent15	entropy,sure
 sureent2	sureent2	entropy,sure
-rudent	rudent	entropy
+RM_entropy	RM_entropy	entropy
 EN_histen_ks_001_0	EN_histen_ks_001_0	entropy
 EN_histen_ks_005_0	EN_histen_ks_005_0	entropy
 EN_histen_ks_01_0	EN_histen_ks_01_0	entropy

@@ -608,8 +608,8 @@ SY_slidwin(y,'AC1','ent',5,10)	swac1ent5_10
 SY_slidwin(y,'AC1','ent',10,1)	swac1ent10_1
 SY_slidwin(y,'AC1','ent',10,2)	swac1ent10_2
 SY_slidwin(y,'AC1','ent',10,10)	swac1ent10_10
-SY_detrendq(x)	detr
-fastdfa(y)	dfa
+SY_detrendq(x)	linear_trend_strength
+ML_fastdfa(y)	DFA_exponent
 ST_hurst_exponent(y)	ST_hurst_BillDavidson
 SY_stdnthder(y,1)	stdnthder_1
 SY_stdnthder(y,2)	stdnthder_2
@@ -762,7 +762,7 @@ ST_cumul(y,'AC1','randcg',20)	ST_cumul_AC1_randcg20
 ST_cumul(y,'AC1','randcg',50)	ST_cumul_AC1_randcg50
 ST_cumul(y,'AC1','randcg',100)	ST_cumul_AC1_randcg100
 ST_cumul(y,'AC1','randcg',500)	ST_cumul_AC1_randcg500
-EN_entropies(y,'shannon')	shent
+EN_entropies(y,'shannon')	EN_shannon
 EN_pdfent(y)	shpdfent
 EN_entropies(y,'logenergy')	logenent
 EN_entropies(y,'threshold',0.1)	threshent01
@@ -777,7 +777,7 @@ EN_entropies(y,'sure',0.5)	sureent05
 EN_entropies(y,'sure',1)	sureent1
 EN_entropies(y,'sure',1.5)	sureent15
 EN_entropies(y,'sure',2)	sureent2
-EN_ruden(y)	rudent
+EN_RM_entropy(y)	RM_entropy
 EN_histent(y,'ks',0.01,0)	EN_histen_ks_001_0
 EN_histent(y,'ks',0.05,0)	EN_histen_ks_005_0
 EN_histent(y,'ks',0.1,0)	EN_histen_ks_01_0

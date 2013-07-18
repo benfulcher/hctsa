@@ -2,8 +2,8 @@
 % obtain an estimate for the scaling exponent.
 %
 % Useage:
-% [alpha, intervals, flucts] = fastdfa(x)
-% [alpha, intervals, flucts] = fastdfa(x, intervals)
+% [alpha, intervals, flucts] = ML_fastdfa(x)
+% [alpha, intervals, flucts] = ML_fastdfa(x, intervals)
 % Inputs
 %    x          - input signal: must be a COLUMN! vector
 % Optional inputs
@@ -21,12 +21,12 @@
 % in Proceedings of ICASSP 2006, IEEE Publishers: Toulouse, France.
 
 function out = SC_fastdfa(y)
-% Matlab wrapper for Max Little's fastdfa code
+% Matlab wrapper for Max Little's ML_fastdfa code
 
 if size(y,1) < size(y,2);
     y = y'; % ensure input time series is a column vector
 end
 
-out = fastdfa(y);
+out = ML_fastdfa(y);
 
 end

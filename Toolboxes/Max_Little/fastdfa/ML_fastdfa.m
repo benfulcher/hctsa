@@ -20,9 +20,9 @@
 % Nonlinear, biophysically-informed speech pathology detection
 % in Proceedings of ICASSP 2006, IEEE Publishers: Toulouse, France.
 
-function [alpha, intervals, flucts] = fastdfa(x, varargin)
+function [alpha, intervals, flucts] = ML_fastdfa(x, varargin)
 
-[xpts, ypts] = fastdfa_core(x, varargin{:});
+[xpts, ypts] = ML_fastdfa_core(x, varargin{:});
 
 % Sort the intervals, and produce a log-log straight line fit
 datapts   = sortrows([xpts, ypts],1);

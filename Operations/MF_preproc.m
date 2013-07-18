@@ -78,12 +78,8 @@ end
 % sense -- it's remobed more of the 'obvious' linear structure (assuming
 % that's the aim).
 
-
-
 % could also return statistics on other things like prediction error, but
 % not alot of point, I think.
-
-
 
 
 % 

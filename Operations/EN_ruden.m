@@ -1,4 +1,4 @@
-function out = EN_ruden(x)
+function out = EN_RM_entropy(x)
 % Wrapper for Rudy Moddemeijer's entropy code
 % See RM_entropy.m for details, or the following website for code
 % and documentation:
