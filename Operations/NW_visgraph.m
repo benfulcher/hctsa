@@ -118,7 +118,7 @@ out.olu90 = (mean(k(k>=quantile(k,0.95)))-mean(k))/std(k); % top 5% of points ar
 
 %% Fit distributions to degree distribution
 % % (1) Gauss1: Gaussian fit to degree distribution
-dgaussout = MF_M_mtlbfit(k,'gauss1',range(k)); % range(k)-bin single gaussian fit
+dgaussout = DN_simplefit(k,'gauss1',range(k)); % range(k)-bin single gaussian fit
 if ~isstruct(dgaussout) && isnan(dgaussout)
     out.dgaussk_r2 = NaN;
     out.dgaussk_adjr2 = NaN;
@@ -136,7 +136,7 @@ else
 end
 
 % % (2) Exponential1: Exponential fit to degree distribution
-dexpout = MF_M_mtlbfit(k,'exp1',range(k)); % range(k)-bin single exponential fit
+dexpout = DN_simplefit(k,'exp1',range(k)); % range(k)-bin single exponential fit
 if ~isstruct(dexpout) && isnan(dexpout)
     out.dexpk_r2 = NaN;
     out.dexpk_adjr2 = NaN;
@@ -154,7 +154,7 @@ else
 end
 
 % % (3) Power1: Power-law fit to degree distribution
-dpowerout = MF_M_mtlbfit(k,'power1',range(k)); % range(k)-bin single power law fit
+dpowerout = DN_simplefit(k,'power1',range(k)); % range(k)-bin single power law fit
 if ~isstruct(dpowerout) && isnan(dpowerout)
 	out.dpowerk_r2 = NaN;
 	out.dpowerk_adjr2 = NaN;

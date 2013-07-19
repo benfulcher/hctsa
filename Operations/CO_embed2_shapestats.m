@@ -1,32 +1,43 @@
+% CO_embed2_shapestats
+% 
+% Takes a shape and places it on each point in the two-dimensional time-delay
+% embedding space sequentially. This function counts the points inside this shape
+% as a function of time, and returns statistics on this extracted time series.
+% 
+% INPUTS:
+% y, the input time-series as a (z-scored) column vector
+% tau, the time-delay
+% shape, has to be 'circle' for now...
+% r, the radius of the circle
+% 
+% Outputs are of the constructed time series of the number of nearby points, and
+% include the autocorrelation, maximum, median, mode, a Poisson fit to the
+% distribution, histogram entropy, and stationarity over fifths of the time
+% series.
+
 function out = CO_embed2_shapestats(y,tau,shape,r)
-% Takes a shape around with the points and counts the points inside it
-% This becomes a time series that can be analyzed... (there's a temporal verison as well, that
-% does this for the time series plotted as a function of time...): CO_t_shape_translate
-% The input time series, y, should be a z-scored column vector
-% Implements using circles of radius r
-% Ben Fulcher September 2009
-% Ben Fulcher 19/3/2010 -- fixed error in choosing tau too high for highly
-%                           autocorrelated signals using option 'tau'
+% Ben Fulcher, September 2009
 
 doplot = 0; % plot results for debugging
 
 %% Check inputs, set defaults:
 if nargin < 2 || isempty(tau)
-	fprintf(1,'Using tau as first zero crossing ' ...
-			'of the autocorrelation function.\n')
+	fprintf(1,['Setting tau as the first zero crossing ' ...
+    			'of the autocorrelation function.\n'])
     tau = 'tau';
 end
 if nargin < 3 || isempty(shape)
-	shape = 'circle';
+	shape = 'circle'; % use a circle by default
 	fprintf(1,'Using a circle.\n');
 end
 if nargin < 4 || isempty(r)
-	
+	r = 1; % default radius of 1
 end
 
 % Can set time lag equal to first zero crossing of the autocorrelation function with the 'tau' input
 if strcmp(tau,'tau'),
     tau = CO_fzcac(y);
+    % Cannot set the time delay greater than 10% the length of the time series
     if tau > length(y)/10
         tau = floor(length(y)/10);
     end

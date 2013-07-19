@@ -1,8 +1,19 @@
+% CO_ami_fmin
+% 
+% Finds the first minimum of the automutual information by various different
+% estimation methods, and sees how this varies over different coarse-grainings
+% of the time series.
+% The function returns a set of statistics on the set of first minimums of the
+% automutual information function obtained over a range of the number of bins
+% used in the histogram estimation, when specifying 'nbins' as a vector
+% Outputs include the minimum, maximum, range, number of unique values, and the
+% position and periodicity of peaks in the set of automutual information
+% minimums.
+% We calculate these statistics for different methods of
+% estimating the mutual information, 'meth', using the function CO_ami_benhist.
+
 function out = CO_ami_fmin(y,meth,nbins)
-% Analyzes patterns in the automutual information of a time series over a range of time lags up to the first minimum
-% Automutual informations are calculated using a histogram method using CO_ami_benhist
-% If nbins = [ . . . ] is a vector -- varies over this range of 
-% Ben Fulcher September 2009
+% Ben Fulcher, September 2009
 
 %% Set defaults:
 % Default number of bins
@@ -10,11 +21,12 @@ if nargin < 3,
 	nbins = 10;
 end
 
-N = length(y);
+doplot = 0;
+N = length(y); % time-series length
 
 % Range of time lags, tau, to consider
 %	(although loop usually broken before this maximum)
-taur = 0:1:round(N/2);
+taur = (0:1:round(N/2));
 ntaur = length(taur);
 
 % Range of bin numbers to consider
@@ -26,7 +38,7 @@ for i = 1:nbinr % vary over number of bins in histogram
     amis = zeros(ntaur,1);
     for j = 1:ntaur % vary over time lags, tau
         amis(j) = CO_ami_benhist(y,taur(j),meth,nbins(i));
-        if j > 2 && (amis(j)-amis(j-1))*(amis(j-1)-amis(j-2)) < 0
+        if (j > 2) && ((amis(j)-amis(j-1))*(amis(j-1)-amis(j-2)) < 0)
             amimins(i) = taur(j-1);
             break
         end
@@ -36,7 +48,10 @@ for i = 1:nbinr % vary over number of bins in histogram
 	end
 end
 
-% plot(amimins,'o-k');
+if doplot
+    figure('color','w');
+    plot(amimins,'o-k');
+end
 
 % Things to look for in the variation
 % 1) Basic statistics

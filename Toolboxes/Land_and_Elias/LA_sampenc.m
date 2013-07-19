@@ -1,15 +1,3 @@
-function out = EN_sampenc2(y,M,r,preprocess)
-
-% Ben Fulcher 11/09
-% Added out statistics and optional preprocessing input
-
-if nargin > 3 % specified a preprocessing for y
-    if strcmp(preprocess,'diff1')
-        % this produces 'control entropy'
-        y = zscore(diff(y));
-    end
-end
-
 % function [e,A,B]=sampenc(y,M,r);
 %
 % Input
@@ -23,6 +11,28 @@ end
 % e sample entropy estimates for m=0,1,...,M-1
 % A number of matches for m=1,...,M
 % B number of matches for m=1,...,M excluding last point
+
+function [e, p, A, B] = LA_sampenc(y,M,r,justM);
+% Modified very slightly from original code sampenc.m from 
+% http://www.physionet.org/physiotools/sampen/matlab/1.1/sampenc.m
+% (similar verison also here:)
+% http://people.ece.cornell.edu/land/PROJECTS/Complexity/sampenc.m
+% Added input checking, and altered a few minor things, including 
+% how the outputs are presented.
+% Also added input 'justM', to give e just for the given M, and not for
+% all other m up to it
+% Ben Fulcher, 2010
+
+% Check inputs
+if nargin < 2 || isempty(M)
+    M = 1;
+end
+if nargin < 3 || isempty(r)
+    r = 0.1;
+end
+if nargin < 4 || isempty(justM)
+    justM = 0;
+end
 
 N = length(y);
 lastrun = zeros(1,N);
@@ -54,23 +64,24 @@ for i = 1:(N-1)
    end
 end
 
+% Calculate for m = 1
 NN = N*(N-1)/2;
 p(1) = A(1)/NN;
 e(1) = -log(p(1));
 
+% Calculate for m > 1, up to M
 for m = 2:M
    p(m) = A(m)/B(m-1);
    e(m) = -log(p(m));
 end
 
+% output vector p for m = 1, ..., M
+% output vector e for m = 1, ..., M
 
-%% Give outputs
-for i = 1:M
-    eval(['out.p' num2str(i) ' = p(' num2str(i) ');']);
-    eval(['out.sampen' num2str(i) ' = e(' num2str(i) ');']);
+if justM
+    % just output the entropy and probability at the maximum m
+    e = e(end);
+    p = p(end); % (just in case)
 end
-
-out.meanchsampen = mean(diff(e));
-out.meanchp = mean(diff(p));
 
 end

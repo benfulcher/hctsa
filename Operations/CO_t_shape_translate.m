@@ -1,15 +1,27 @@
-function out = CO_t_shape_translate(y,shape,d,howtomove)
-% given a time series, a shape and '~size' d, and a method of moving the shape
-% around, returns statistics on how many data points reside inside this
-% shape as it is moved around the time series.
-% This may be more powerful in an embedding space, but here we do it just
-% in the temporal domain (_t_).
-% Could also do with a soft boundary, some decaying force function V(r),
-% perhaps truncated...?
-% Could also do with other shapes -- thick parabolas, squares, ellipses, etc.
-% The input time series, y, must be a column vector
-% Ben Fulcher, September 2009
+% CO_t_shape_translate
+% 
+% Returns statistics on the number of data points that reside inside a given
+% geometric shape that is moved around the time series. Inputs specify a shape
+% and its size, and a method for moving this shape through the time domain.
+% 
+% This is usually more informative in an embedding space (CO_embed2_...), but
+% here we do it just in the temporal domain (_t_).
+% 
+% In the future, could perform a similar analysis with a soft boundary, some
+% decaying force function V(r), or perhaps truncated...?
+%
+% INPUTS:
+% 
+% y, the input time series
+% shape, the shape to move about the time-domain ('circle')
+% d, a parameter specifying the size of the shape (e.g., d = 2)
+% howtomove, a method specifying how to move the shape about, e.g., 'pts'
+%               places the shape on each point in the time series
+% 
+% 
 
+function out = CO_t_shape_translate(y,shape,d,howtomove)
+% Ben Fulcher, September 2009
 
 %% Check inputs:
 if nargin < 2 || isempty(shape)

@@ -1,5 +1,36 @@
+% HT_disttests
+% 
+% Fits a distribution to the data and then performs an appropriate hypothesis
+% test to quantify the difference between the two distributions. We fit
+% Gaussian, Extreme Value, Uniform, Beta, Rayleigh, Exponential, Gamma,
+% Log-Normal, and Weibull distributions, using code described for
+% DN_M_kscomp.
+% 
+% INPUTS:
+% x, the input time series
+% thetest, the hypothesis test to perform:
+%           (i) 'chi2gof': chi^2 goodness of fit test
+%           (ii) 'ks': Kolmogorov-Smirnov test
+%           (iii) 'lillie': Lilliefors test
+% 
+% thedistn, the distribution to fit:
+%           (i) 'norm' (Normal)
+%           (ii) 'ev' (Extreme value)
+%           (iii) 'uni' (Uniform)
+%           (iv) 'beta' (Beta)
+%           (v) 'rayleigh' (Rayleigh)
+%           (vi) 'exp' (Exponential)
+%           (vii) 'gamma' (Gamma)
+%           (viii) 'logn' (Log-normal)
+%           (ix) 'wbl' (Weibull)
+% 
+% nbins, the number of bins to use for the chi2 goodness of fit test
+% 
+% All of these functions for hypothesis testing are implemented in MATLAB's
+% Statistics Toolbox.
+
 function p = HT_disttests(x,thetest,thedistn,nbins)
-% Ben Fulcher
+% Ben Fulcher, 2009
 
 %% First fit the distribution
 switch thedistn

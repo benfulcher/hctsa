@@ -1,12 +1,21 @@
+% CO_acfshape
+% 
+% Outputs a set of statistics summarizing how the autocorrelation function
+% changes with the time lag, tau.
+% Outputs include the number of peaks, and autocorrelation in the
+% autocorrelation function itself.
+
 function out = CO_acfshape(y)
-% This function analyzes the shape of the autocorrelation function
-% Ben Fulcher 2009
+% Ben Fulcher, 2009
+
+doplot = 0; % plot outputs from this function
+N = length(y); % length of the time series
 
 % Only look up to when two consecutive values are under the threshold for
 % significance:
+th = 2/sqrt(N); % significance threshold, th
 
-N = length(y); % length of the time series
-th = 2/sqrt(N);
+% Initialize autocorrelation function
 acf = zeros(N,1);
 
 % Calculate the autocorrelation function, up to a maximum lag, length of
@@ -105,7 +114,11 @@ if Nac > 3 % Need at least four points to fit exponential
     %% fit linear to local maxima
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-0.1 1]);
     f = fittype('a*x+b','options',s);
-%     plot(maxr,acf(maxr),'ok');
+    if doplot
+        figure('color','w');
+        plot(maxr,acf(maxr),'ok');
+    end
+    
     b = 1;
     try [c, gof] = fit(maxr,acf(maxr),f);
     catch

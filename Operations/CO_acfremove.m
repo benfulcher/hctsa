@@ -1,7 +1,19 @@
+% CO_acfremove.m
+% 
+% Analyze how some time-series properties function changes as points are removed
+% from a time series
+% A proportion, p, of points are removed from the time series according to some
+% rule, and a set of statistics are computed before and after the change.
+% Points are removed according to the following rules:
+% (i) 'absclose': those that are the closest to the mean,
+% (ii) 'absfar': those that are the furthest from the mean,
+% (iii) 'min': the lowest values,
+% (iv) 'max': the highest values,
+% (v) 'random': at random.
+% Output statistics include the change in autocorrelation, time scales, mean,
+% spread, and skewness.
+
 function out = CO_acfremove(y,howtorem,p)
-% Analyze how the autocorrelation function changes as points are removed from a time series
-% Remove a proportion p points from the full time series using a specified removal algorithm, howtorem
-% Input time series, y, should be z-scored
 % Ben Fulcher, September 2009
 
 %% Preliminaries
@@ -54,8 +66,7 @@ if doplot
     plot(acf_y_trim,':r');
 end
 
-
-%% Compute outputs
+%% Compute output statistics
 out.fzcacrat = CO_fzcac(y_trim)/CO_fzcac(y);
 out.ac2rat = acf_y_trim(2)/acf_y(2); % includes the sign
 out.ac2diff = abs(acf_y_trim(2)-acf_y(2));
@@ -70,6 +81,8 @@ out.kurtosisrat = kurtosis(y_trim)/kurtosis(y); % Statistics Toolbox
 
 
 function acf = SUB_acf(x,n)
+    % computes autocorrelation of the input sequence, x, up to a maximum time
+    % lag, n
     acf = zeros(n,1);
     for i = 1:n
         acf(i) = CO_autocorr(x,i-1);

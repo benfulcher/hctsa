@@ -1,11 +1,18 @@
-function out = CO_embed2_angle_varytau(y,maxtau)
-% Analyzes how the properties of the time series in two-dimensional embedding space change as tau is varied
+% CO_embed2_angle_varytau
+% 
+% Investigates how the autocorrelation of angles between successive points in
+% the two-dimensional time-series embedding change as tau varies from
+% tau = 1, 2, ..., maxtau.
+% 
 % INPUTS:
 % y---a column vector time series
 % maxtau---the maximum time lag
-% Ben Fulcher September 2009
 
-taur = 1:1:maxtau;
+function out = CO_embed2_angle_varytau(y,maxtau)
+% Ben Fulcher, September 2009
+
+doplot = 0;
+taur = (1:1:maxtau);
 ntaur = length(taur);
 
 % Ensure y is a column vector
@@ -18,7 +25,7 @@ stats_store = zeros(3,ntaur);
 for i = 1:ntaur
 	tau = taur(i);
 	
-	m = [y(1:end-tau) y(1+tau:end)];
+	m = [y(1:end-tau), y(1+tau:end)];
 
 	theta = diff(m(:,2))./diff(m(:,1));
 	theta = atan(theta); % measured as deviation from the horizontal
@@ -28,7 +35,9 @@ for i = 1:ntaur
 	stats_store(3,i) = CO_autocorr(theta,3);
 end
 
-% plot(stats_store');
+if doplot
+    plot(stats_store');
+end
 
 % Lots of outputs statistics:
 out.ac1_thetaac1 = CO_autocorr(stats_store(1,:),1);

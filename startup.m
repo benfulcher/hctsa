@@ -49,13 +49,21 @@ addfcn('Toolboxes/Rudy_Moddemeijer');
 fprintf(1,', Bill Davidson');
 addfcn('Toolboxes/Bill_Davidson');
 
+% Land and Elias (code from http://people.ece.cornell.edu/land/PROJECTS/Complexity/)
+fprintf(1,', Land and Elias');
+addfcn('Toolboxes/Land_and_Elias');
+
+% TS Research
+fprintf(1,', TS_Research\n')
+addfcn('Toolboxes/TS_Research');
+
 % Max Little's steps/bumps toolbox
 fprintf(1,', steps_bumps toolkit')
 addfcn('Toolboxes/Max_Little/steps_bumps_toolkit');
 
 % Max Little's fastdfa code
-fprintf(1,', ML_fastdfa')
-addfcn('Toolboxes/Max_Little/ML_fastdfa');
+fprintf(1,', fastdfa')
+addfcn('Toolboxes/Max_Little/fastdfa');
 
 
 % TSTOOL

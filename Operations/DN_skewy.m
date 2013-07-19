@@ -1,9 +1,17 @@
-function out = DN_skewy(y,wh)
-% Estimates custom skewness measures: either 'pearson' or 'bowley' for the input time series, y
-% The 'bowley' method uses the quantile function from Matlab's Statistics Toolbox
+% DN_skewy
+% 
+% Estimates custom skewness measures, the Pearson and Bowley skewnesses.
+% 
+% INPUTS:
+% y, the input time series
+% whichskew, the skewness measure to calculate, either 'pearson' or 'bowley'
+% 
+% The Bowley skewness uses the quantile function from Matlab's Statistics Toolbox
+
+function out = DN_skewy(y,whichskew)
 % Ben Fulcher, 2009
 
-switch wh
+switch whichskew
     case 'pearson'
         out = (3*mean(y)-median(y))./std(y);
     case 'bowley'
@@ -11,7 +19,7 @@ switch wh
         out = (qs(3)+qs(1) - 2*qs(2))./(qs(3)-qs(1));
         % Quartile skewness coefficient
     otherwise
-        error('DN_skewy: unknown method %s',wh)
+        error('Unknown skewness type ''%s''',whichskew)
 end
 
 end

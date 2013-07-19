@@ -1,17 +1,42 @@
+% EN_progranz
+% 
+% Progressively randomizes the input time series according to some randomization
+% scheme, and returns measures of how the properties of the time series change
+% with this process.
+% 
+% We implement three different randomization schemes:
+% (i) statdist, which substitutes a time series data point with a random
+% point in the original time series at each iteration,
+% (ii) dyndist, which overwrites a random element of the time series with another random
+% element at each iteration, and
+% (iii) permute, which randomly permutes two elements of the time series at each iteration.
+% 
+% The procedure is repeated 2N times, where N is the length of the time series.
+% 
+% INPUTS:
+% y: the (zscored) time series
+% howtorand:
+%      1) 'statdist' -- substitutes a random element of the time
+%                       series with one from the original time series distribution
+%      2) 'dyndist' -- overwrites a random element of the time
+%                       series with another random element
+%      3) 'permute' -- progressively permutes elements of the time
+%                       series
+% Outputs of this function summarize how the properties change as one of these
+% randomization procedures is iterated, including the cross correlation with the
+% original time series, the autocorrelation of the randomized time series, its
+% entropy, and stationarity.
+% 
+% These statistics are calculated every N/10 iterations, and thus 20 times
+% throughout the process in total.
+% 
+% Most statistics measure how these properties decay with randomization, by
+% fitting a function f(x) = Aexp(Bx).
+
 function out = EN_progranz(y,howtorand)
-% Progressively randomizes the input time series, returning measures of
-% what happens as a result
-% Inputs:
-%        y: the (zscored) time series
-%        howtorand:
-%             1) 'statdist' -- substitutes a random element of the time
-%        series with one from the original time series distribution
-%             2) 'dyndist' -- overwrites a random element of the time
-%             series with another random element
-%             3) 'permute' -- progressively permutes elements of the time
-%             series
 % Ben Fulcher, October 2009
 
+% Check inputs:
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored for EN_progranz')
 end
@@ -53,6 +78,8 @@ for i = 1:N*randp_max
             randis = randi(N,[2, 1]);
             y_rand(randis(1)) = y_rand(randis(2));
             y_rand(randis(2)) = y_rand(randis(1));
+        otherwise
+            error('Unknown randomization method ''%s''',howtorand);
     end
     
     if ismember(i,calc_pts)
@@ -240,8 +267,8 @@ out.swss5_1hp = gethp(stats(:,11));
         ac4 = CO_autocorr(y_rand,4);
         
         % Entropies
-        shen = EN_entropies(y_rand,'shannon');
-        sampen = EN_sampenc(y_rand,2,0.2);
+        shen = EN_wentropy(y_rand,'shannon');
+        sampen = LA_sampenc(y_rand,2,0.2,1);
         
         % Stationarity
         statav5 = SY_StatAv(y_rand,5,'seg');

@@ -1,9 +1,22 @@
-function out = MF_arma_orders(y,pr,qr)
-% Given ranges of AR order p and MA order q fits ARMA models and looks at
-% the goodness of fit for all combinations. Returns statistics on
-% appropriateness of the combinations of models
+% MF_ARMA_orders
+% 
+% Given a set of AR orders, p, and a set of MA orders, q, this operation fits
+% ARMA(p,q) models to the time series and evaluates the goodness of fit from all
+% combinations (p,q).
+% 
 % Uses functions iddata, armax, and aic from Matlab's System Identification toolbox
-% Ben Fulcher 17/2/2010
+% 
+% INPUTS:
+% y, the input time series
+% pr, a vector specifying the range of AR model orders to analyze
+% qr, a vector specifying the range of MA model orders to analyze
+% 
+% Outputs are statistics on the appropriateness of different types of models,
+% including the goodness of fit from the best model, and the optimal orders of
+% fitted ARMA(p,q) models.
+
+function out = MF_ARMA_orders(y,pr,qr)
+% Ben Fulcher, 17/2/2010
 
 % ** Future improvements **
 % (1) May want to quantify where a particular order starts to stand out, i.e.,
@@ -19,7 +32,7 @@ y = iddata(y,[],1);
 
 % ARMA(p,q): p range, pr
 if nargin < 2 || isempty(pr)
-   pr = 1:10;
+   pr = (1:10);
 end
 
 % ARMA(p,q): q range, qr

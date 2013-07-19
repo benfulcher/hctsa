@@ -1,7 +1,23 @@
-function out = GP_givealittle(y,covfunc,npoints)
-% Uses a Gaussian process to predict the time series in between
-% equally-spaced points through the time series
-% Ben Fulcher 22/1/2010
+% MF_GP_FitAcross
+% 
+% Trains a Gaussian Process model on equally-spaced points throughout the time
+% series and uses the model to predict its intermediate values.
+% 
+% Uses GP fitting code from the gpml toolbox, which is available here:
+% http://gaussianprocess.org/gpml/code.
+% 
+% INPUTS:
+% y, the input time series
+% covfunc, the covariance function (structured in the standard way for the gpml toolbox)
+% npoints, the number of points through the time series to fit the GP model to
+% 
+% Outputs summarize the error and fitted hyperparameters.
+% 
+% In future could do a better job of the sampling of points -- perhaps to take
+% into account the autocorrelation of the time series
+
+function out = MF_GP_FitAcross(y,covfunc,npoints)
+% Ben Fulcher, 22/1/2010
 
 doplot = 0; % set to 1 to visualize behavior
 
@@ -36,7 +52,7 @@ nhps = eval(s);
 
 covfunc1 = covfunc{1};
 covfunc2 = covfunc{2};
-if strcmp(covfunc1,'covSum') && strcmp(covfunc2{1},'covSEiso') && strcmp(covfunc2{2},'covNoise')
+if (strcmp(covfunc1,'covSum')) && (strcmp(covfunc2{1},'covSEiso')) && (strcmp(covfunc2{2},'covNoise'))
     init_loghp = ones(3,1)*-1;
     % length parameter is in the ballpark of the difference between time
     % elements

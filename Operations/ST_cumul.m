@@ -30,15 +30,15 @@ switch wing
     case 'median'
         out = median(y(r)); %/median(y); % if median is very small;; could be very noisy
     case 'iqr'
-        out = abs(1-iqr(y(r))/iqr(y));
+        out = abs(1-iqr(y(r)) / iqr(y));
     case 'skewness'
-        out = abs(1-skewness(y(r))/skewness(y)); % how far from true
+        out = abs(1-skewness(y(r)) / skewness(y)); % how far from true
     case 'kurtosis'
-        out = abs(1-kurtosis(y(r))/kurtosis(y)); % how far from true
+        out = abs(1-kurtosis(y(r)) / kurtosis(y)); % how far from true
     case 'AC1'
-        out = abs(1-CO_autocorr(y(r),1)/CO_autocorr(y,1)); % how far from true
+        out = abs(1-CO_autocorr(y(r),1) / CO_autocorr(y,1)); % how far from true
     case 'SampEn1_01' % computationally expensive to calculate this full one each time...
-        out = EN_sampenc(y(r),1,0.1)/EN_sampenc(y,1,0.1);
+        out = LA_sampenc(y(r),1,0.1,1) / LA_sampenc(y,1,0.1,1);
     otherwise
         error('Unknwon statistic ''%s''',wing);
 end

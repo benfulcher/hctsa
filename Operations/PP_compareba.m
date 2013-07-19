@@ -182,8 +182,8 @@ out.swss10_2 = SY_slidwin(y_d,'std','std',10,2) / SY_slidwin(y,'std','std',10,2)
 
 % 2) Gaussianity
 % (a) kernel density fit
-me1 = MF_M_mtlbfit(y_d,'gauss1',0); % kernel density fit to 1-peak gaussian
-me2 = MF_M_mtlbfit(y,'gauss1',0); % kernel density fit to 1-peak gaussian
+me1 = DN_simplefit(y_d,'gauss1',0); % kernel density fit to 1-peak gaussian
+me2 = DN_simplefit(y,'gauss1',0); % kernel density fit to 1-peak gaussian
 if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
    % fitting gaussian failed -- returns a NaN rather than a structure
     out.gauss1_kd_r2 = NaN;
@@ -204,8 +204,8 @@ else
 end
 
 %   (b) histogram 10 bins
-me1 = MF_M_mtlbfit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
-me2 = MF_M_mtlbfit(y,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
+me1 = DN_simplefit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
+me2 = DN_simplefit(y,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
 if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
     out.gauss1_h10_r2 = NaN;
     out.gauss1_h10_adjr2 = NaN;
@@ -225,8 +225,8 @@ else
 end
 
 % (c) compare distribution to fitted normal distribution
-me1 = DN_M_kscomp(y_d,'norm');
-me2 = DN_M_kscomp(y,'norm');
+me1 = DN_kscompare(y_d,'norm');
+me2 = DN_kscompare(y,'norm');
 
 out.kscn_adiff = me1.adiff/me2.adiff;
 out.kscn_peaksepy = me1.peaksepy/me2.peaksepy;

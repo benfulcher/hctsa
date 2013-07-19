@@ -1,10 +1,34 @@
-function out = DN_olmi(y,howth,inc)
-% Outlier mean interval
-% Computes a curve as a function of the threshold (in std of the signal)
-% Input time series, y, should be z-scored
-% Ben Fulcherm June 2009
-% Would also be a good idea to compare the output between, say p, n, and
-% abs -- could give an idea as to asymmetries/nonstationarities
+% DN_outlier_mint
+% 
+% Measures a range of different statistics about the time series as more and
+% more outliers are included in the calculation according to a specified rule:
+% 
+% (i) 'abs': outliers are furthest from the mean,
+% (ii) 'p': outliers are the greatest positive deviations from the mean, or
+% (iii) 'n': outliers are the greatest negative deviations from the mean.
+% 
+% The threshold for including time-series data points in the analysis increases from
+% zero to the maximum deviation, in increments of 0.01*sigma (by default), where sigma is
+% the standard deviation of the time series.
+% At each threshold, the mean, standard error, proportion of time series points included, median, and
+% standard deviation are calculated, and outputs from the algorithm measure how
+% these statistical quantities change as more extreme points are included in the
+% calculation.
+% 
+% Most of the outputs measure either exponential, i.e., f(x) =
+% Aexp(Bx)+C, or linear, i.e., f(x) = Ax + B, fits to the sequence of
+% statistics obtained in this way.
+% 
+% INPUTS:
+% y, the input time series (ideally z-scored)
+% howth, the method of how to determine outliers: 'abs', 'p', or 'n' (see above for descriptions)
+% inc, the increment to move through (fraction of std if input time series is z-scored)
+% 
+% [future: could compare differences in outputs obtained with 'p', 'n', and
+%               'abs' -- could give an idea as to asymmetries/nonstationarities??]
+
+function out = DN_outlier_mint(y,howth,inc)
+% Ben Fulcher, June 2009
 
 doplot = 0; % plot some outputs
 
@@ -16,7 +40,7 @@ if all(y == y(1)) % the whole time series is just a single value
 end
 % Check z-scored time series
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored for EN_progranz')
+    warning('The input time series should be z-scored')
 end
 N = length(y); % length of the time series
 
@@ -29,16 +53,21 @@ if nargin < 3
 end
 
 
+% Initialize thresholds
 switch howth
+    
     case 'abs' % analyze absolute value deviations
         thr = (0:inc:max(abs(y)));
         tot = N;
+        
     case 'p' % analyze only positive deviations
         thr = (0:inc:max(y));
         tot = sum(y >= 0);
+        
     case 'n' % analyze only negative deviations
         thr = (0:inc:max(-y));
         tot = sum(y <= 0);
+        
 otherwise
     error('Error thresholding with ''%s''. Must select either ''abs'', ''p'', or ''n''.',howth)
 end
@@ -98,8 +127,8 @@ end
 
 %% Plot output
 if doplot
-    figure('color','w')
-    plot(thr,msDt(:,1),'.-k'); hold on
+    figure('color','w'); hold on
+    plot(thr,msDt(:,1),'.-k');
     plot(thr,msDt(:,2),'.-b');
     plot(thr,msDt(:,3),'.-g');
     plot(thr,msDt(:,4)*100,'.-m');
@@ -107,7 +136,7 @@ if doplot
     plot(thr,msDt(:,6),'.-c'); hold off
 end
 
-%%% OUTPUTS!!!
+%%% Generate outputs:
 %% Fit an Exponential to the mean as a function of the threshold
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[0.1 2.5 1]);
 f = fittype('a*exp(b*x)+c','options',s);
@@ -115,7 +144,7 @@ emsg = '';
 try
     [c, gof] = fit(thr',msDt(:,1),f);
 catch emsg
-    fprintf(1,'DN_olmi: error fitting exponential growth to means: %s\n',emsg);
+    fprintf(1,'DN_outlier_mint: error fitting exponential growth to means: %s\n',emsg);
 end
 
 if isempty(emsg)
@@ -135,7 +164,7 @@ else
 end
 
 %% Fit an exponential to N: the valid proportion left in calculation
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[120 -1 -16]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[120, -1, -16]);
 f = fittype('a*exp(b*x)+c','options',s);
 [c, gof] = fit(thr',msDt(:,3),f);
 
@@ -147,7 +176,7 @@ out.nfexpadjr2 = gof.adjrsquare;
 out.nfexprmse = gof.rmse;
 
 %% Fit an linaer to N: the valid proportion left in calculation
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-40,100]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-40, 100]);
 f = fittype('a*x+b','options',s);
 [c, gof] = fit(thr',msDt(:,3),f);
 
@@ -199,7 +228,7 @@ else
 end
 
 %% Fit linear to errors in range
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[40,4]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[40, 4]);
 f = fittype('a*x +b','options',s);
 [c, gof] = fit(thr',msDt(:,6),f);
 
@@ -210,6 +239,7 @@ out.stdrfladjr2 = gof.adjrsquare;
 out.stdrflrmse = gof.rmse;
 
 if doplot
+    figure('color','w')
     errorbar(thr,msDt(:,1),msDt(:,2),'k');
 end
 

@@ -1,7 +1,25 @@
+% CO_ami_noise
+% 
+% Analyzes changes in the automutual information function with the addition of
+% noise to the input time series.
+% Adds Gaussian-distributed noise to the time series with increasing standard
+% deviation, eta, across the range eta = 0, 0.1, ..., 2, and measures the
+% mutual information at each point using histograms with
+% nbins bins (implemented using CO_ami_benhist).
+% 
+% The output is a set of statistics on the resulting set of automutual
+% information estimates, including a fit to an exponential decay, since the
+% automutual information decreases with the added white noise.
+% 
+% Can calculate these statistics for time delays 'tau', and for a number 'nbins'
+% bins.
+% 
+% This algorithm is quite different, but was based on the idea of 'noise
+% titration' presented in: "Titration of chaos with added noise", Chi-Sang Poon
+% and Mauricio Barahona P. Natl. Acad. Sci. USA, 98(13) 7107 (2001)
+
 function out = CO_ami_noise(y,tau,meth,nbins)
-% Analyzes changes in the automutual information function with the addition of noise to the input time series
-% The input time series, y, should be z-scored
-% Ben Fulcher September 2009
+% Ben Fulcher, September 2009
 
 %% Check inputs
 if nargin < 2

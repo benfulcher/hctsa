@@ -1,7 +1,35 @@
+% MF_arfit
+% 
+% Fit an AR model to the time series then returns statistics about it.
+% 
+% Uses various functions implemented in the ARfit package, which is
+% freely-available at http://www.gps.caltech.edu/~tapio/arfit/
+% 
+% cf. "Estimation of parameters and eigenmodes of multivariate autoregressive
+%       models", A. Neumaier and T. Schneider, ACM Trans. Math. Softw. 27, 27 (2001)
+% 
+% cf. "Algorithm 808: ARFIT---a Matlab package for the estimation of parameters
+%      and eigenmodes of multivariate autoregressive models",
+% T. Schneider and A. Neumaier, ACM Trans. Math. Softw. 27, 58 (2001)
+% 
+% Autoregressive (AR) models are fitted with orders p = pmin, pmin + 1, ..., pmax.
+% 
+% The optimal model order is selected using Schwartz's Bayesian
+% Criterion (SBC).
+% 
+% INPUTS:
+% y, the input time series
+% pmin, the minimum AR model order to fit
+% pmax, the maximum AR model order to fit
+% selector, crierion to select optimal time-series model order (e.g., 'sbc', cf.
+%           ARFIT package documentation)
+% 
+% Outputs include the model coefficients obtained, the SBCs at
+% each model order, various tests on residuals, and statistics from an
+
+% eigendecomposition of the time series using the estimated AR model.
 function out = MF_arfit(y,pmin,pmax,selector)
-% Uses MATLAB code from ARfit to fit an AR model and return statistics about it.
-% http://www.gps.caltech.edu/~tapio/arfit/
-% Adapted by Ben Fulcher 28/1/2010
+% Ben Fulcher, 28/1/2010
 
 %% Check Inputs
 N = length(y); % time series length

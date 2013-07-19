@@ -1,63 +1,80 @@
-function out = FC_primitive(y,fmeth,fparam)
-% Primitive forecasting
-% **fmeth**
-% 'mean': uses the mean of previous values to predict the next
-%   <fparam> specifies the length of previous window with which to make
-%   predictions; if 'ac' then uses tau
-% 'median': uses median of previous values to predict the next
-%   <fparam> specifies the length of the previous window with which to
-%   make predictions
-% 'acf': uses the autocorrelation coefficients at order given by <fparam>
-% 'lfit': fit linear to a certain window of the time series; do linear
-%           extrapolation
+% FC_LocalSimple
+% 
+% Does local forecasting using very simple predictors using the past $l$ values
+% of the time series to predict its next value.
+% 
+% Three prediction methods are implemented:
+% (i) 'mean': local mean prediction using the past ltrain time-series values,
+% (ii) 'median': local median prediction using the past ltrain time-series values, and
+% (iii) 'lfit': local linear prediction using the past ltrain time-series values.
+% 
+% INPUTS:
+% y, the input time series
+% fmeth, the forecasting method
+% ltrain, the number of time-series values to use to forecast the next value
+% 
+% Outputs are the mean error, stationarity of residuals, Gaussianity of
+% residuals, and their autocorrelation structure.
+
+function out = FC_LocalSimple(y,fmeth,ltrain)
 % Ben Fulcher, Nov 2009
+
+% Check inputs
+if nargin < 2 || isempty(fmeth)
+    fmeth = 'mean';
+end
+if nargin < 2 || isempty(ltrain)
+    ltrain = 3;
+end
+
+N = length(y); % time-series length
 
 switch fmeth
     case 'mean'
-        if strcmp(fparam,'ac')
+        if strcmp(ltrain,'ac')
             lp = CO_fzcac(y); % make it tau
         else
-            lp = fparam; % the length of the subsegment preceeding to use to predict the subsequent value
+            lp = ltrain; % the length of the subsegment preceeding to use to predict the subsequent value
         end
-        evalr = lp+1:length(y); % range over which to evaluate the forecast
+        evalr = lp+1:N; % range over which to evaluate the forecast
         res = zeros(length(evalr),1); % residuals
         for i = 1:length(evalr)
             res(i) = mean(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction-value
         end
         
     case 'median'
-        if strcmp(fparam,'ac')
+        if strcmp(ltrain,'ac')
             lp = CO_fzcac(y); % make it tau
         else
-            lp = fparam; % the length of the subsegment preceeding to use to predict the subsequent value
+            lp = ltrain; % the length of the subsegment preceeding to use to predict the subsequent value
         end
-        evalr = lp+1:length(y); % range over which to evaluate the forecast
+        evalr = lp+1:N; % range over which to evaluate the forecast
         res = zeros(length(evalr),1); % residuals
         for i = 1:length(evalr)
             res(i) = median(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction-value
         end
 
 %     case 'acf' % autocorrelation function
-%         acl=fparam; % autocorrelation 'length'
+%         acl=ltrain; % autocorrelation 'length'
 %         acc=zeros(acl,1); % autocorrelation coefficients
 %         for i=1:acl, acc(i)=CO_autocorr(y,i); end
 %         % normalize to a sum of 1 (so that operating on three mean values
 %         % of the time series, also returns the mean value as output)
 %         acc=acc/sum(acc);
 %         
-%         evalr=acl+1:length(y); % range over which to evaluate the forecast
+%         evalr=acl+1:N; % range over which to evaluate the forecast
 %         res=zeros(length(evalr),1); % residuals
 %         for i=1:length(evalr)
 %             res(i)=sum(acc.*(y(evalr(i)-acl:evalr(i)-1))) - y(evalr(i)); % prediction-value
 %         end
 
     case 'lfit'
-        if strcmp(fparam,'ac')
+        if strcmp(ltrain,'ac')
             lp = CO_fzcac(y); % make it tau
         else
-            lp = fparam; % the length of the subsegment preceeding to use to predict the subsequent value
+            lp = ltrain; % the length of the subsegment preceeding to use to predict the subsequent value
         end
-        evalr = lp+1:length(y); % range over which to evaluate the forecast
+        evalr = lp+1:N; % range over which to evaluate the forecast
         res = zeros(length(evalr),1); % residuals
         for i = 1:length(evalr)
             % fit linear
@@ -88,7 +105,7 @@ out.swm = SY_slidwin(res,'mean','std',5,1);
 % normality:
 % out.chi2n=HT_disttests(res,'chi2gof','norm',10); % chi2
 % out.ksn=HT_disttests(res,'ks','norm'); % Kolmogorov-Smirnov
-tmp = MF_M_mtlbfit(y,'gauss1',0);
+tmp = DN_simplefit(y,'gauss1',0);
 if ~isstruct(tmp) && isnan(tmp) % fitting failed
     out.gofnadjr2 = NaN;
 else

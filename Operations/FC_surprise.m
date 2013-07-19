@@ -1,8 +1,50 @@
-function out = IN_surprise(y,whatinf,memory,ng,cgmeth,nits)
-% How surprised you are at this data point given the information recorded
-% by whatinf (the information recorded) at a given memory in the past
-% ng is number of groups to coarse-grain into
-% cgmeth is the method for coarse-graining: 'quantile' or 'updown'
+% FC_surprise
+% 
+% How surprised you might be by the next recorded data points given the data recorded
+% in recent memory.
+% 
+% Coarse-grains the time series, turning it into a sequence of symbols of a
+% given alphabet size, ng, and quantifies measures of surprise of a
+% process with local memory of the past memory values of the symbolic string.
+% 
+% We then consider a memory length, memory, of the time series, and
+% use the data in the proceeding memory samples to inform our expectations of
+% the following sample.
+% 
+% The 'information gained', log(1/p), at each sample using expectations
+% calculated from the previous memory samples, is estimated.
+% 
+% INPUTS:
+% y, the input time series
+% 
+% whatinf, the type of information to store in memory:
+%           (i) 'dist': the values of the time series in the previous memory
+%                       samples,
+%           (ii) 'T1': the one-point transition probabilities in the previous
+%                       memory samples, and
+%           (iii) 'T2': the two-point transition probabilities in the previous
+%                       memory samples.
+%                       
+% memory, the memory length (either number of samples, or a proportion of the
+%           time-series length, if between 0 and 1)
+%           
+% ng, the number of groups to coarse-grain the time series into
+% 
+% cgmeth, the coarse-graining, or symbolization method:
+%          (i) 'quantile': an equiprobable alphabet by the value of each
+%                          time-series datapoint,
+%          (ii) 'updown': an equiprobable alphabet by the value of incremental
+%                         changes in the time-series values, and
+%          (iii) 'embed2quadrants': by the quadrant each data point resides in
+%                          in a two-dimensional embedding space.
+% 
+% nits, the number of iterations to repeat the procedure for.
+% 
+% Outputs of this operation are summaries of this series of information gains,
+% including the minimum, maximum, mean, median, lower and upper quartiles, and
+% standard deviation.
+
+function out = FC_surprise(y,whatinf,memory,ng,cgmeth,nits)
 % Ben Fulcher, September 2009
 
 %% Check inputs and set defaults
@@ -13,7 +55,7 @@ end
 if nargin < 3 || isempty(memory)
     memory = 0.2; % set it as 20% of the time-series length
 end
-if memory > 0 && memory < 1 % specify memory as a proportion of the time-series length
+if (memory > 0) && (memory < 1) % specify memory as a proportion of the time-series length
     memory = round(memory*length(y));
 end
 % ng -- number of groups for the time-series coarse-graining/symbolization

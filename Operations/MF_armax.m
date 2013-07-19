@@ -1,12 +1,37 @@
-function out = MF_armax(y, orders, ptrain, steps)
-% Computes an appropriate ARMAX model for the input time series y
-% Uses the functions iddata, armax, aic, and predict from Matlab's System Identification Toolbox
-% y should be a column vector time series
+% MF_armax
+% 
+% Fits an ARMA(p,q) model to the time series and returns various statistics on
+% the result.
+% 
+% Uses the functions iddata, armax, aic, and predict from Matlab's System
+% Identification Toolbox
+% 
+% INPUTS:
+% 
+% y, the input time series
+% 
+% orders, a two-vector for p and q, the AR and MA components of the model,
+%           respectively,
+% 
+% ptrain, the proportion of data to train the model on (the remainder is used
+%           for testing),
+% 
+% nsteps, number of steps to predict into the future for testing the model.
+% 
+% 
+% Outputs include the fitted AR and MA coefficients, the goodness of fit in the
+% training data, and statistics on the residuals from using the fitted model to
+% predict the testing data.
+
+function out = MF_armax(y, orders, ptrain, nsteps)
 % Ben Fulcher 1/2/2010
 
 %% Prepare Inputs
 
 % (1) y, the time series as a column vector
+if size(y,2) > size(y,1)
+   y = y'; % ensure a column vector 
+end
 N = length(y); % number of samples
 % Convert y to time series object
 y = iddata(y,[],1);
@@ -21,8 +46,8 @@ end
 % if nargin < 4 || isempty(trainmode)
 %     trainmode = 'first'; % trains on first ptrain proportion of the data.
 % end
-if nargin < 4 || isempty(steps)
-    steps = 1; % one-step-ahead predictions
+if nargin < 4 || isempty(nsteps)
+    nsteps = 1; % one-step-ahead predictions
 end
 
 %% Fit the model
@@ -84,9 +109,9 @@ ytest = y(floor(ptrain*N):end); % overlap
 mp = armax(ytrain, orders);
 
 % Compute step-ahead predictions
-% steps = 2; % predicts this many steps ahead
+% nsteps = 2; % predicts this many steps ahead
 % Maybe look at trends across different prediction horizons...
-yp = predict(mp, ytest, steps, 'init', 'e'); % across whole dataset
+yp = predict(mp, ytest, nsteps, 'init', 'e'); % across whole dataset
 
 % plot the two:
 % plot(y,yp);

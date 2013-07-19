@@ -1,7 +1,7 @@
 function out = MF_ss_compare_orders(y,maxorder)
 % fits a state space model to the time series over a range of orders
 % looks at fit statistics change as a function of the model order
-% c.f., MF_linmodelorders -- does a similar thing for AR models
+% c.f., MF_compareAR -- does a similar thing for AR models
 % Uses the functions iddata, n4sid, and aic from Matlab's System Identification Toolbox
 % Ben Fulcher 12/2/2010
 

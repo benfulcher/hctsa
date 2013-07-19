@@ -1,12 +1,22 @@
-function out = CO_basicrecurf(y,tau)
-% Analyzes the recurrence plot of y(i) against y(i-tau)
+% CO_basicrecurf
+% 
+% Obtains a set of measures of point density in a plot of y_i against
+% y_{i-tau}.
+% These statistics are calculated for tau = 1 and for tau equal to the first
+% zero-crossing of the autocorrelation function. Outputs include the number of
+% points near the diagonal, and similarly, the number of points that are close
+% to certain geometric shapes in the y_{i-tau}, y_{tau} plot, including
+% parabolas, rings, and circles.
+% 
 % INPUTS:
 % y is the z-scored time series
-% tau is the time lag (can be 'tau' to set the time lag the first zero crossing of the autocorrelation function)
-% Returns basic measures of structure in this two-dimensional recurrence space
+% tau is the time lag (can be set to 'tau' to set the time lag the first zero
+%                       crossing of the autocorrelation function)
+
+function out = CO_basicrecurf(y,tau)
 % Ben Fulcher September 2009
 
-doplot = 0;
+doplot = 0; % plot outputs to a figure
 
 if strcmp(tau,'tau')
 	% Make tau the first zero crossing of the autocorrelation function
@@ -70,7 +80,6 @@ out.medianincircle = median([out.incircle_01, out.incircle_02, out.incircle_05 .
                             out.incircle_1, out.incircle_2, out.incircle_3]);
 out.stdincircle = std([out.incircle_01, out.incircle_02, out.incircle_05 ...
                         out.incircle_1, out.incircle_2, out.incircle_3]);
-
 
 if doplot
     figure('color','w');

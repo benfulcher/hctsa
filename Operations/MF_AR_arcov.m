@@ -1,7 +1,19 @@
-function out = MF_M_ARfits(y,p)
-% AR fit of order p
-% Uses the arcov function from Matlab's Signal Processing Toolbox
-% Ben Fulcher
+% MF_AR_arcov
+% 
+% Fits an AR model of a given order, p, using arcov code from MATLAB's Signal
+% Processing Toolbox.
+% 
+% INPUTS:
+% y, the input time series
+% p, the AR model order
+% 
+% Outputs include the parameters of the fitted model, the variance estimate of a
+% white noise input to the AR model, the root-mean-square (RMS) error of a
+% reconstructed time series, and the autocorrelation of residuals.
+% 
+
+function out = MF_AR_arcov(y,p)
+% Ben Fulcher, 2009
 
 N = length(y); % Length of input time series
 
@@ -16,7 +28,7 @@ out.e = e; % variance
 
 % Output fitted parameters up to order, p (+1)
 for i = 1:p+1
-	eval(sprintf('out.a%u = a(%u);',i,i);
+	eval(sprintf('out.a%u = a(%u);',i,i));
 end
 
 %% Residual analysis

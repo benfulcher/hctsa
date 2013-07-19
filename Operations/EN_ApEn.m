@@ -1,8 +1,23 @@
-function out = EN_ApEn(y,mnom,rth)
-% I can't find where I obtained this code, but Ben Fulcher didn't write it
+% EN_ApEn
+% 
+% Estimates the Approximate Entropy of the time series, ApEn(m,r).
+% 
+% cf. "Approximate entropy as a measure of system complexity"
+% Pincus, S. M., P. Natl. Acad. Sci. USA, 88(6) 2297 (1991)
+%
 
-% mnom = 1;
-% rth=0.2;
+function out = EN_ApEn(y,mnom,rth)
+% Ben Fulcher does not know where he found this code, but he didn't write it
+
+% Check inputs, set defaults:
+if nargin < 2 || isempty(mnom)
+    mnom = 1; % m = 1 (default)
+end
+
+if nargin < 3 || isempty(rth)
+    rth = 0.2; % r = 0.2 (default)
+end
+
 r = rth*std(y); % threshold of similarity
 N = length(y);% length of time series
 phi = zeros(2,1);% phi(1)=phi_m, phi(2)=phi_{m+1}

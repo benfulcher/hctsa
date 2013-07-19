@@ -1,10 +1,17 @@
-function out = DF_mlefits(y,fitwhat)
-% Uses the mle function from Matlab's Statistics Toolbox to fit distributions to the time series, y
+% DF_mlefits
+% 
+% Fits either a Gaussian, Uniform, or Geometric distribution to the data using
+% maximum likelihood estimation via the MATLAB function mle
+% from the Statistics Toolbox.
+% 
 % INPUTS:
-% fitwhat specifies which fit to do
-% outwhat specifies which component of the output to take
-% Ben Fulcher 2009
-% Ben Fulcher 2013 -- turned into a master operation with sensible inputs
+% y, the time series
+% fitwhat, the type of fit to do: 'gaussian', 'uniform', or 'geometric'.
+% 
+% Outputs are parameters from the fit.
+
+function out = DF_mlefits(y,fitwhat)
+% Ben Fulcher, 2009
 
 if nargin < 2
     fitwhat = 'gaussian'; % fit a Gaussian by default
@@ -24,20 +31,5 @@ case 'geometric'
 otherwise
     error('Invalid fit specifier, ''%s''',fitwhat)
 end
-
-% OLD VERSION:
-% switch fitwhat
-%     case 1 % Gaussian Fit
-%         outwhat = 1: mean of gaussian fit
-%         outwhat = 2: std of gaussian fit
-%     case 2
-%         phat = mle(y,'distribution','uniform');
-%         out = phat(outwhat); % outwhat = (1 = a), (2 = b)
-%     case 3
-%         phat = mle(y,'distribution','geometric');
-%         out = phat(outwhat);
-%     otherwise
-%         error('DF_mlefits: Invalid fit specified')
-% end
 
 end

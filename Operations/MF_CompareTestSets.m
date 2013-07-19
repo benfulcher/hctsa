@@ -1,11 +1,43 @@
-function out = MF_ss_testset(y,model,ord,howtosubset,samplep,steps)
+% MF_CompareTestSets
+% 
 % Looks at robustness of test set goodness of fit over different samples in
-% the time series from fitting a model (of given order or
-% optimal: 'best'). Something of stationarity in spread of values.
-% Something of suitability of model in level of values.
-% Uses function iddata and predict from Matlab's System Identification Toolbox
-% Also uses either ar, n4sid, or armax from Matlab's System Identification Toolbox to fit the models, depending on the model specified as the input, model
-% Ben Fulcher 12/2/2010
+% the time series from fitting a given time-series model.
+% 
+% Similar to MF_ss_tt, except fits the model on the full time
+% series and compares how well it predicts time series in different local
+% time-series segments.
+% 
+% Says something of stationarity in spread of values, and something of the
+% suitability of model in level of values.
+% 
+% Uses function iddata and predict from Matlab's System Identification Toolbox,
+% as well as either ar, n4sid, or armax from Matlab's System Identification
+% Toolbox to fit the models, depending on the specified model to fit to the data.
+% 
+% INPUTS:
+% y, the input time series
+% 
+% model, the type of time-series model to fit:
+%           (i) 'ar', fits an AR model
+%           (ii) 'ss', first a state-space model
+%           (iii) 'arma', first an ARMA model
+%
+% ord, the order of the specified model to fit
+%
+% howtosubset, how to select random subsets of the time series to fit:
+%           (i) 'rand', select at random
+%           (ii) 'uniform', uniformly distributed segments throughout the time
+%                   series
+%                   
+% samplep, a two-vector specifying the sampling parameters
+%           e.g., [20, 0.1] repeats 20 times for segments 10% the length of the
+%                           time series
+% 
+% steps, the number of steps ahead to do the predictions.
+% 
+
+function out = MF_CompareTestSets(y,model,ord,howtosubset,samplep,steps)
+% Ben Fulcher, 12/2/2010
 
 %% Preliminaries
 N = length(y); % length of time series

@@ -1,9 +1,25 @@
+% ML_l1pwc_sweep_lambda
+% 
+% Gives information about discrete steps in the signal across a range of
+% regularization parameters lambda, using the function l1pwc from Max Little's
+% step detection toolkit.
+% 
+% cf.,
+% "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
+% Machine Dynamics", Max A. Little, and Nick S. Jones, Proc. ICASSP (2010)
+% 
+% INPUTS:
+% y, the input time series
+% lambdar, a vector specifying the lambda parameterss to use
+% 
+% At each iteration, the ML_step_detection code was run with a given
+% lambda, and the number of segments, and reduction in root mean square error
+% from removing the piecewise constants was recorded. Outputs summarize how the
+% these quantities vary with lambda.
+% 
+
 function out = ML_l1pwc_sweep_lambda(y,lambdar)
-% ML sweep lambda steps
-% Input signal y, and a lambda range lambdar (vector)
-% Returns statistics on the fit across this range...
-% Uses Max Little's step detection code
-% Ben Fulcher 13/4/2010
+% Ben Fulcher, 13/4/2010
 
 Llambdar = length(lambdar);
 nsegs = zeros(Llambdar,1);

@@ -1,13 +1,52 @@
-function out = ML_step_detection(y,method,params)
-% Gives information on any discrete steps in the signal, using Max Little's
-% toolkit on step detection.
+% ML_step_detection
+% 
+% Gives information about discrete steps in the signal, using the function
+% l1pwc from Max A. Little's step detection toolkit.
+% 
+% cf.,
+% "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
+% Machine Dynamics", Max A. Little, and Nick S. Jones, Proc. ICASSP (2010)
+% 
 % "Steps and bumps: precision extraction of discrete states of molecular
 % machines using physically-based, high-throughput time series analysis"
 % Max A. Little et al., 2010, arXiv:1004.1234v1 [q-bio.QM]
-% Available at: http://www.eng.ox.ac.uk/samp/members/max/software/
-% Packaged up here by Ben Fulcher 12/4/2010
+% 
+% Software available at: http://www.maxlittle.net/software/index.php
+% 
+% 
+% INPUTS:
+% y, the input time series
+% 
+% method, the step-detection method:
+%           (i) 'kv': Kalafut-Visscher
+%                 cf. The algorithm described in:
+%                 Kalafut, Visscher, "An objective, model-independent method for
+%                 detection of non-uniform steps in noisy signals", Comp. Phys.
+%                 Comm., 179(2008), 716-723.
+%           (ii) 'ck': Chung-Kennedy
+%                 S.H. Chung, R.A. Kennedy (1991), "Forward-backward non-linear
+%                 filtering technique for extracting small biological signals
+%                 from noise", J. Neurosci. Methods. 40(1):71-86.
+%           (iii) 'l1pwc': L1 method
+%                 This code is based on code originally written by Kim et al.:
+%                 "l_1 Trend Filtering", S.-J. Kim et al., SIAM Review 51, 339
+%                 (2009).
+% 
+% params, the parameters for the given method used:
+%           (i) 'kv': (no parameters required)
+%           (ii) 'ck': params = [K,M,p]
+%           (iii) 'l1pwc': params = lambda
+% 
+% The function returns statistics on the output of the step-detection method,
+% including the intervals between change points, the proportion of constant
+% segments, the reduction in variance from removing the piece-wise constants,
+% and stationarity in the occurrence of change points.
+% 
 
-N = length(y);
+function out = ML_step_detection(y,method,params)
+% Ben Fulcher, 12/4/2010
+
+N = length(y); % time-series length
 
 if nargin < 2 || isempty(method)
     fprintf(1,'Using Kalafut-Visscher step detection by default\n')
@@ -17,20 +56,16 @@ end
 switch method
     case 'kv'
         %% Kalafut-Visscher
-        % Based on the algorithm described in:
-        % Kalafut, Visscher, "An objective, model-independent method for detection
-        % of non-uniform steps in noisy signals", Comp. Phys. Comm., 179(2008),
-        % 716-723.
         
         % (1) Do the step detection
-        [steppedy steps] = ML_kvsteps(y);
+        [steppedy, steps] = ML_kvsteps(y);
         
         % Put in chpts form: a vector specifying indicies of starts of
         % constant runs.
         if length(steps) == 2
             chpts = 1;
         else
-            chpts = [1;steps(2:end-1)+1];
+            chpts = [1; steps(2:end-1)+1];
         end
         
     case 'ck'
@@ -53,20 +88,26 @@ switch method
         if nargin < 3
             params = [];
         end
-        if length(params)>=1, K = params(1);
-        else K = 1/20; % 1/20th of time series length
+        if length(params) >= 1
+            K = params(1);
+        else
+            K = 1/20; % 1/20th of time series length
         end
-        if K<1
+        if K < 1
             K = floor(N*K);
         end
-        if length(params)>=2, M = params(2);
-        else M = 1/10; % 1/10th the time series length
+        if length(params) >= 2
+            M = params(2);
+        else
+            M = 1/10; % 1/10th the time series length
         end
-        if M<1
+        if M < 1
             M = floor(N*M);
         end
-        if length(params)>=3, p = params(3);
-        else p = 10;
+        if length(params) >= 3
+            p = params(3);
+        else
+            p = 10;
         end
         steppedy = ML_ckfilter(y, K, M, p);
         
@@ -134,7 +175,7 @@ switch method
             chpts = 1; % no changes
         end
     otherwise
-        error('Unknown step detection method');
+        error('Unknown step detection method ''%s''',method);
 end
 
 
@@ -155,8 +196,8 @@ out.rmsoffpstep = (out.rmsoff)/(length(chpts));
 % ratio of number of steps in first half of time series to second half
 sum1 = (sum(chpts < N/2)-1);
 sum2 = sum(chpts >= N/2);
-if sum2 > 0 && sum1 > 0
-    if sum2 > sum1,
+if (sum2 > 0) && (sum1 > 0)
+    if sum2 > sum1
         out.ratn12 = sum1/sum2;
     else
         out.ratn12 = sum2/sum1;

@@ -1,19 +1,54 @@
-function out = EX_altmannben(y,a,b)
-% Measure inspired by the moving threshold model for extreme events in
+% EX_MovingThreshold
+% 
+% A measure based on a moving threshold model for extreme events. Inspired by an
+% idea contained in the following paper:
+% "Reactions to extreme events: Moving threshold model"
 % Altmann et al., Physica A 364, 435--444 (2006)
-% For a (z-scored) input time series, y, simulates a hypothetical barrier, q, that
-% is kicked away from the time series if a time series value becomes more 
-% extreme than the barrier, but otherwise decays toward the time series.
-% 0 < b < 1
-% (*) could make a variant metric that optimized a and b to minimize the
+% 
+% This algorithm is based on this idea: it uses the occurrence of extreme events
+% to modify a hypothetical 'barrier' that classes new points as 'extreme' or not.
+% The barrier begins at sigma, and if the absolute value of the next data point
+% is greater than the barrier, the barrier is increased by a proportion 'a',
+% otherwise the position of the barrier is decreased by a proportion 'b'.
+% 
+% INPUTS:
+% y, the input (z-scored) time series
+% a, the barrier jump parameter (in extreme event)
+% b, the barrier decay proportion (in absence of extreme event)
+% 
+% Outputs are the mean, spread, maximum, and minimum of the time series for the
+% barrier, the mean of the difference between the barrier and the time series
+% values, and statistics on the occurrence of 'kicks' (times at which the
+% threshold is modified), and by how much the threshold changes on average.
+% 
+% In future could make a variant metric that optimized a and b to minimize the
 % quantity meanqover/pkick (hugged the shape as close as possible with the
 % minimum number of kicks), and returns a and b...?
+
+function out = EX_MovingThreshold(y,a,b)
 % Ben Fulcher, October 2009
 
 doplot = 0; % can set to 1 to plot outputs
 
+% Check inputs:
+% Check z-scored
+if ~BF_iszscored(y)
+    warning('The input time series should be z-scored')
+end
+
+if nargin < 2 || isempty(a)
+    a = 1; % set default
+end
+
+if nargin < 2 || isempty(b)
+    b = 0.1; % set default
+end
+if (b < 0) || (b > 1)
+    error('The decay proportion, b, should be between 0 and 1');
+end
+
 %% Preliminaries
-N = length(y);
+N = length(y); % time-series length
 y = abs(y); % extreme events defined in terms of absolute deviation from mean
 q = zeros(N,1); % the barrier
 kicks = zeros(N,1);
@@ -25,7 +60,7 @@ kicks = zeros(N,1);
 % The barrier will get smarter about the distribution
 % but will decay to simulate 'forgetfulness' in the original model(!)
 
-q(1) = 1;
+q(1) = 1; % begin at sigma
 
 for i = 2:N
 	if y(i) > q(i-1) % Extreme event -- time series value more extreme than the barrier

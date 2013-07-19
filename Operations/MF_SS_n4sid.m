@@ -1,12 +1,33 @@
-function out = MF_sissm(y,ord,ptrain,steps)
-% fits a state-space model using methods in system identification toolbox
-% of MATLAB
-% First fits model to the whole time series; then trains it on the first
+% MF_SS_n4sid
+% 
+% Fits a state space model of given order to the time series using the n4sid
+% function in MATLAB's System Identification Toolbox.
+% 
+% First fits the model to the whole time series, then trains it on the first
 % portion and tries to predict the rest.
+% 
+% In the second portion of this code, the state space model is fitted to the
+% first p*N samples of the time series, where p is a given proportion and N is
+% the length of the time series.
+% 
+% This model is then used to predict the latter portion of the time
+% series (i.e., the subsequent (1-p)*N samples).
+% 
 % Uses the functions iddata, n4sid, aic, and predict from Matlab's System Identification Toolbox
-% Ben Fulcher 1/2/2010
+% 
+% INPUTS:
+% y, the input time series
+% ord, the order of state-space model to implement (can also be the string 'best')
+% ptrain, the proportion of the time series to use for training
+% steps, the number of steps ahead to predict
+% 
+% Outputs are parameters from the model fitted to the entire time series, and
+% goodness of fit and residual analysis from n4sid prediction.
 
-%% Inputs
+function out = MF_SS_n4sid(y,ord,ptrain,steps)
+% Ben Fulcher, 1/2/2010
+
+%% Check inputs:
 
 % (1) y: the time series as a column vector
 % Convert y to time series object

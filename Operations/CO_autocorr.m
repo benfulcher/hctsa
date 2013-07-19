@@ -1,11 +1,12 @@
-function out = CO_autocorr(y,tau)
-% Computes the autocorrelation of an input time series, y, at a time-lag tau
+% CO_autocorr
+% 
+% Computes the autocorrelation of an input time series, y, at a time-lag, tau
 % INPUTS:
-% y a scalar time series column vector
+% y is a scalar time series column vector
 % If tau is a scalar, returns autocorrelation for y at that lag
 % If tau is a vector, returns autocorrelations for y at that set of lags
-% Added vector functionality for tau. Ben Fulcher 12/11/2009
 
+function out = CO_autocorr(y,tau)
 
 N = length(y); % length of the time sries
 

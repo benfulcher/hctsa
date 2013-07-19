@@ -12,7 +12,7 @@ for i = 2:N-3
         a(i) = RM_information(y(1:end-i),y(1+i:end));
     catch emsg
         % Some crazy thing happened
-        fprintf(1,'Can you believe that RY_information is error-prone?? Well it is.')
+        fprintf(1,'Can you believe that RY_information is error-prone?? Well it is.\n')
         error(emsg.message);
     end
     if a(i-1)*a(i) < 0

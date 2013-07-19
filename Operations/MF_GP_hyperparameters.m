@@ -1,7 +1,32 @@
-function out = GP_hps(y,covfunc,squishorsquash,maxN,methds)
-% Use Rasmussun GP code (from gaussianprocess.org) to optimize
-% hyperparameters given a postulated covariance function
-% Ben Fulcher 19/1/2010
+% MF_GP_hyperparameters
+% 
+% Fits a Gaussian Process model to a portion of the time series and returns the
+% fitted hyperparameters, as well as statistics describing the goodness of fit
+% of the model.
+% 
+% Uses GP fitting code from the gpml toolbox, which is available here:
+% http://gaussianprocess.org/gpml/code.
+% 
+% The code can accomodate a range of covariance functions, e.g.:
+% (i) a sum of squared exponential and noise terms, and
+% (ii) a sum of squared exponential, periodic, and noise terms.
+% 
+% The model is fitted to <> samples from the time series, which are
+% chosen by:
+% (i) resampling the time series down to this many data points,
+% (ii) taking the first 200 samples from the time series, or
+% (iii) taking random samples from the time series.
+% 
+% INPUTS:
+% y, the input time series
+% covfunc, the covariance function, in the standard form fo the gmpl package
+% squishorsquash, whether to squash onto the unit interval, or spread across 1:N
+% maxN, the maximum length of time series to consider -- greater than this
+%               length, time series are resampled down to maxN
+% methds, specifies the method of how to resample time series longer than maxN
+
+function out = MF_GP_hyperparameters(y,covfunc,squishorsquash,maxN,methds)
+% Ben Fulcher, 19/1/2010
 
 doplot = 0; % plot basic outputs
 
@@ -12,6 +37,11 @@ N = length(y); % time-series length
 if size(y,2) > size(y,1);
     y = y'; % ensure a column vector input
 end
+% Make sure that y is indeed zscored
+if ~BF_iszscored(y)
+    warning('The input time series is not, but should be z-scored')
+end
+
 if nargin < 2 || isempty(covfunc),
     fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n')
     covfunc = {'covSum', {'covSEiso','covNoise'}};
@@ -26,7 +56,7 @@ if nargin < 4 || isempty(maxN)
                  % resample longer time series
     % maxN = 0 --> include the whole thing
 end
-if maxN > 0 && maxN < 1
+if (maxN > 0) && (maxN < 1)
     % specify a proportion of the time series length, N
     maxN = ceil(N*maxN);
 end
@@ -89,10 +119,6 @@ else
     t = SUB_settimeindex(N,squishorsquash); % set time index
 end
 
-% Make sure that y is indeed zscored
-% y = (y-mean(y))./std(y); % zscore -- but without the statistics toolbox!
-y = BF_zscore(y);
-
 %% Learn the hyperparameters
 
 % (1) Determine the number of hyperparameters, nhps
@@ -130,6 +156,7 @@ catch emsg
 end
 hyper = exp(loghyper);
 
+% Output the hyperparameters and log-hyperparameters
 for i = 1:nhps
     % Set up structure output
     eval(sprintf('out.h%u = hyper(%u);',i,i));
@@ -146,6 +173,7 @@ if doplot
     [mu S2] = gpr(loghyper, covfunc, t, y, xstar);
     % S2p = S2 - exp(2*loghyper(3)); % remove noise from predictions
     S2p = S2;
+    
     figure('color','w');
     f = [mu+2*sqrt(S2p); flipdim(mu-2*sqrt(S2p),1)];
     fill([xstar; flipdim(xstar,1)], f, [6, 7, 7]/8, 'EdgeColor', [7, 7, 6]/8); % grayscale error bars
@@ -161,6 +189,12 @@ out.mlikelihood = - gpr(loghyper, covfunc, t, y);
 
 % Mean error from mean function
 [mu, S2] = gpr(loghyper, covfunc, t, y, t); % evaluate at datapoints
+
+if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
+    fprintf(1,'This time series is not suited to Gaussian Process fitting\n');
+    out = NaN; return
+end
+
 out.rmserr = mean(sqrt((y-mu).^2));
 % Better to look at mean distance away in units of std
 out.mabserr_std = mean(abs((y-mu)./sqrt(S2)));
@@ -168,11 +202,6 @@ out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
                             % (if not close to one, means a problem with
                             % fitting)
 out.std_S_data = std(sqrt(S2)); % should vary a fair bit
-
-if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
-    fprintf(1,'This time series is not suited to Gaussian Process fitting\n');
-    out = NaN; return
-end
                             
                             
 % Statistics on variance

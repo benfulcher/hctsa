@@ -4,7 +4,7 @@ function out = MF_ss_tt(y,model,order,howtosubset,samplep)
 % parameters obtained (including in-sample goodness of fit statistics) --
 % some indication of stationarity. Look at values of goodness of fit --
 % some indication of model suitability.
-% n.b., This code inherits strongly from this MF_ss_testset
+% n.b., This code inherits strongly from this MF_CompareTestSets
 % Ben Fulcher 12/2/2010
 
 

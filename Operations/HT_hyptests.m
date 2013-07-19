@@ -1,6 +1,24 @@
+% HT_hyptests
+% 
+% Outputs the p-value from a statistical hypothesis test applied to the
+% time series.
+% 
+% Tests are implemented as functions in MATLAB's Statistics Toolbox.
+% (except Ljung-Box Q-test, which uses the Econometrics Toolbox)
+% 
+% INPUTS,
+% x, the input time series
+% thetest, the hypothesis test to perform:
+%           (i) sign test ('signtest'),
+%           (ii) runs test ('runstest'),
+%           (iii) variance test ('vartest'),
+%           (iv) Z-test ('ztest'),
+%           (v) Wilcoxon signed rank test for a zero median ('signrank'),
+%           (vi) Jarque-Bera test of composite normality ('jbtest').
+%           (vii) Ljung-Box Q-test for residual autocorrelation ('lbq')
+
 function p = HT_hyptests(x,thetest)
-% Returns the p-value from one of a set of standard statistical hypothesis tests
-% Ben Fulcher
+% Ben Fulcher, 2009
 
 switch thetest
     case 'signtest' % Statistics Toolbox
@@ -19,11 +37,14 @@ switch thetest
     case 'signrank' % Statistics Toolbox
         [p, ~] = signrank(x);
         
-    case 'jb' % Statistics Toolbox
+    case 'jbtest' % Statistics Toolbox
         [~, p] = jbtest(x);
         
     case 'lbq' % Econometrics Toolbox
         [~, p] = lbqtest(x);
+        
+    otherwise
+        error('Unknown hypothesis test ''%s''',thetest);
 end
 
 end

@@ -1,19 +1,28 @@
-function out = MF_linmodelorders(y,orders,howtotest)
-% Compares fits from different AR model orders
-% Using functions from Matlab's System Identification Toolbox: iddata, arxstruc, selstruc
-% Ben Fulcher 1/2/2010
-
+% MF_compareAR
+% 
+% Compares fits of AR models of various orders to the input time series.
+% 
+% Uses functions from Matlab's System Identification Toolbox: iddata, arxstruc, selstruc
+% 
 % INPUTS:
-% (*) y: vector of equally-spaced time series data
-% (*) orders: vector or possible model orders
-% (*) howtotest: string specifying a method to divide training and test
-%                 data : {'all','half',...}
+% y, vector of equally-spaced time series data
+% orders, a vector of possible model orders
+% howtotest, specify a fraction, or provide a string 'all' to train and test on
+%            all the data
+% 
+% Outputs are statistics on the loss at each model order, which are obtained by
+% applying the model trained on the training data to the testing data.
+% 
+
+function out = MF_compareAR(y,orders,howtotest)
+% Ben Fulcher, 1/2/2010
 
 doplot = 0; % can set to 1 to plot outputs
 
 %% Check Inputs
 % (1) Time series, y
 N = length(y); % length of time series, N
+
 % Convert y to time series object
 y = iddata(y,[],1);
 
@@ -22,7 +31,7 @@ if nargin < 2 || isempty(orders)
     orders = (1:10)';
 end
 if size(orders,1) == 1
-   orders = orders';
+   orders = orders'; % make sure a column vector
 end
 
 % (3) howtotest -- either all (trains and tests on the whole time series);
@@ -36,7 +45,7 @@ end
 % Get normalized prediction errors, V, from training to test set for each
 % model order
 % This could be done for model residuals using code in, say,
-% MF_ss_compare_orders, or MF_sissm...
+% MF_ss_compare_orders, or MF_SS_n4sid...
 
 if ischar(howtotest)
     if strcmp(howtotest,'all')

@@ -1,7 +1,38 @@
-function out = GP_predict(y,covfunc,ntrain,ntest,npreds,pmode)
-% Use Rasmussun GP code (from gaussianprocess.org) to optimize
-% hyperparameters and predict the next data point
-% Ben Fulcher 20/1/2010
+% MF_GP_LocalPrediction
+% 
+% Fits a given Gaussian Process model to a section of the time series and uses
+% it to predict to the subsequent datapoint.
+% 
+% % Uses GP fitting code from the gpml toolbox, which is available here:
+% http://gaussianprocess.org/gpml/code.
+% 
+% INPUTS:
+% y, the input time series
+% 
+% covfunc, covariance function in the standard form for the gpml package.
+%           E.g., covfunc = {'covSum', {'covSEiso','covNoise'}} combines squared 
+%           exponential and noise terms
+%           
+% ntrain, the number of training samples (for each iteration)
+% 
+% ntest, the number of testing samples (for each interation)
+% 
+% npreds, the number of predictions to make
+% 
+% pmode, the prediction mode:
+%       (i) 'beforeafter': predicts the preceding time series values by training
+%                           on the following values,
+%       (ii) 'frombefore': predicts the following values of the time series by
+%                    training on preceding values, and
+%       (iii) 'randomgap': predicts random values within a segment of time
+%                    series by training on the other values in that segment.
+% 
+% 
+% Outputs are summaries of the quality of predictions made, the mean and
+% spread of obtained hyperparameter values, and marginal likelihoods.
+
+function out = MF_GP_LocalPrediction(y,covfunc,ntrain,ntest,npreds,pmode)
+% Ben Fulcher, 20/1/2010
 
 %% Preliminaries
 doplot = 0; % plot outputs
@@ -40,7 +71,6 @@ if ismember(pmode,{'frombefore','randomgap'})
 elseif strcmp(pmode,'beforeafter')
     spns = floor(linspace(1,N-(ntest+ntrain*2),npreds)); % starting positions
 end
-
 
 mus = zeros(ntest,npreds); % predicted values
 stderrs = zeros(ntest,npreds); % standard errors on predictions
@@ -191,7 +221,7 @@ out.minerrbar = min(stderrs(:)); % minimum error bar length
 
 %% (2) HYPERPARAMETER MEASURES
 % mean and std for each hyperparameter
-for i=1:nhps
+for i = 1:nhps
     o1 = mean(loghypers(i,:));
     eval(sprintf('out.meanlogh%u = o1;',i));
     o2 = std(loghypers(i,:));

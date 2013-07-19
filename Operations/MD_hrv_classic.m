@@ -1,14 +1,39 @@
+% MD_hrv_classic
+% 
+% Packages up a bunch of classic heart rate variability (HRV) statistics and
+% applies them to the input time series.
+% 
+% Assumes an NN/RR time series in units of seconds.
+% 
+% INPUTS:
+% y, the input time series.
+% 
+% Includes:
+%  (i) pNNx
+%  cf. "The pNNx files: re-examining a widely used heart rate variability
+%           measure", J.E. Mietus et al., Heart 88(4) 378 (2002)
+% 
+%  (ii) Power spectral density ratios in different frequency ranges
+%   cf. "Heart rate variability: Standards of measurement, physiological
+%       interpretation, and clinical use",
+%       M. Malik et al., Eur. Heart J. 17(3) 354 (1996)
+% 
+%  (iii) Triangular histogram index, and
+%  
+%  (iv) Poincare plot measures
+%  cf. "Do existing measures of Poincare plot geometry reflect nonlinear
+%       features of heart rate variability?"
+%       M. Brennan, et al., IEEE T. Bio.-Med. Eng. 48(11) 1342 (2001)
+%  
+% Code is heavily derived from that provided by Max A. Little:
+% http://www.maxlittle.net/
+% 
 function out = MD_hrv_classic(y)
-% Packages up classic HRV operations that calculate classical HRV 
-% analysis measures from a given NN/RR time series in units of seconds.
-% Adapted from code emailed from Max Little on 26/1/2009. 
-% Implemented on 12/4/2010. 
-% (Yep, a typically efficient turn-around time of over one year)
 % Ben Fulcher, 12/4/2010.
 
 % Standard defaults
 diffy = diff(y);
-N = length(y);
+N = length(y); % time-series length
 
 %% Calculate pNNx percentage
 % pNNx: recommendation as per Mietus et. al. 2002, "The pNNx files: ...", Heart

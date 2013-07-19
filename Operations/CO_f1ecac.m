@@ -1,19 +1,27 @@
-function out = CO_f1ecac(y)
-% Calculates the 1/e correlation length of the time series using RM_information
-% Ben Fulcher 2008
-  
-oone = 1/exp(1);
-a(1) = RM_information(y,y); % very weird -- why is this not 1?? Or use autocor?
+% CO_f1ecac
+% 
+% Finds where autocorrelation function first crosses 1/e, the 1/e correlation
+% length
+% 
+% INPUTS:
+% y, the input time series
 
-for i = 2:length(y)-1
+function out = CO_f1ecac(y)
+% Ben Fulcher, 2008
+  
+N = length(y); % time-series length
+oone = 1/exp(1);
+
+for i = 1:N-1
     a(i) = CO_autocorr(y,i);
-    if (a(i-1)-oone)*(a(i)-oone) < 0
+    if (i > 1) && ((a(i-1)-oone)*(a(i)-oone) < 0)
+        % Crossed the 1/e line
         out = i;
         return
     end
 end
 
 % If no minimum in entire spectrum return the maximum value
-out = length(y);
+out = N;
 
 end

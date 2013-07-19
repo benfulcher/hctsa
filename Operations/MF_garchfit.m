@@ -1,29 +1,55 @@
-function out = MF_garchfit(y,preproc,params)
-% Tries to simulate a GARCH model fitting procedure:
-% (1) Preprocessing: preprocesses the time series in an appropriate way to
-%       remove strong trends (optional)
-% (2) Pre-estimation: looks at correlation properties in the time series
-%       (to motivate an appropriate GARCH model)
-% (3) Fitting: fits a GARCH model, returning goodness of fit statistics and
-%               parameters from the fitted model.
-% (4) Post-estimation: returns statistics on residuals and standardized
-%                       residuals
-
-% Idea is that all of these stages can be pre-specified or skipped using
+% MF_GARCHfit
+% 
+% Simulates a procedure for fitting Generalized Autoregressive Conditional
+% Heteroskedasticity (GARCH) models to a time series, namely:
+% 
+% (1) Preprocessing the data to remove strong trends,
+% (2) Pre-estimation to calculate initial correlation properties of the time
+%       series and motivate a GARCH model,
+% (3) Fitting a GARCH model, returning goodness of fit statistics and parameters
+%           of the fitted model, and
+% (4) Post-estimation, involves calculating statistics on residuals and
+%           standardized residuals.
+% 
+% The idea is that all of these stages can be pre-specified or skipped using
 % arguments to the function.
-% Also, I've minimal experience in actually fitting GARCH models...!
-% This function should ideally be reformed by an expert.
-% Uses functions from MATLAB's Econometrics Toolbox: archtest, lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
-% Ben Fulcher 25/2/2010
+% 
+% Uses functions from MATLAB's Econometrics Toolbox: archtest, lbqtest,
+% autocorr, parcorr, garchset, garchfit, garchcount, aicbic
+% 
+% All methods implemented are from MATLAB's Econometrics Toolbox, including
+% Engle's ARCH test (archtest), the Ljung-Box Q-test (lbqtest), estimating the
+% partial autocorrelation function (parcorr), as well as specifying (garchset)
+% and fitting (garchfit) the GARCH model to the time series.
+% 
+% As part of this code, a very basic automatic pre-processing routine,
+% MF_preproc, is implemented, that applies a range of pre-processings and
+% returns the preprocessing of the time series that shows the worst fit to an
+% AR(2) model.
+% 
+% In the case that no simple transformations of the time series are
+% significantly more stationary/less trivially correlated than the original time
+% series (by more than 5%), the original time series is simply used without
+% transformation.
+% 
+% Where r and m are the autoregressive and moving average orders of the model,
+% respectively, and p and q control the conditional variance parameters.
+% 
+% INPUTS:
+% y, the input time series
+% preproc, the preprocessing to apply, can be 'ar' or 'none'
+% params, the parameters of the GARCH model to fit, can be:
+%           (i) 'default', fits the default model
+%           (ii) 'auto', automated routine to select parameters for this time series
+%           (iii) e.g., params = '''R'',2,''M'',1,''P'',2,''Q'',1', sets r = 2, m = 1, p = 2, q = 1
+% 
+% In future this function should be reformed by an expert in GARCH model fitting.
+
+function out = MF_GARCHfit(y,preproc,params)
+% Ben Fulcher, 25/2/2010
 
 %% Inputs
 
-% Preprocessing settings: preproc:
-%       (i) 'nothing' does nothing -- just takes in the raw time series
-%       (ii) 'auto' [default] (returns the best)
-%       (iii) 'diff' (differencing)
-%       (iv) 'logreturns' (only for positive-only data)
-%       (v) 'pwpoly' (fits piecewise polynomials to remove low-f trends)
 if nargin < 2 || isempty(preproc)
     preproc = 'ar'; % do the preprocessing that maximizes stationarity/whitening
 end

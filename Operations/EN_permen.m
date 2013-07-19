@@ -1,30 +1,27 @@
-function permen = EN_permen(y,ord)
-% Permutation entropy algorithm
-% Adapted from logisticPE, downloaded from an online complexity article:
+% EN_permen
+% 
+% Computes the permutation entropy of order, ord, of a time series.
+% 
+% "Permutation Entropy: A Natural Complexity Measure for Time Series"
+% C. Bandt and B. Pompe, Phys. Rev. Lett. 88(17) 174102 (2002)
+% 
+% Code is adapted from logisticPE.m code obtained from
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/
-% Code adapted by Ben Fulcher, but adapted September 2009
+% http://people.ece.cornell.edu/land/PROJECTS/Complexity/logisticPE.m
+% 
+% INPUTS:
+% y, a time series
+% ord, the order of permutation entropy
+
+function permen = EN_permen(y,ord)
+% Code adapted by Ben Fulcher, 2009
 
 % Ensure y is a column vector
 if size(y,1) > size(y,2);
     y = y';
 end
-% length of the time series, N
-N = length(y);
 
-permlist = perms(1:ord);
-% c(1:length(permlist))=0;
-c = zeros(size(permlist,1),1);
-
-for j = 1:N-ord
-    [a, iv] = sort(y(j:j+ord-1));
-    for jj = 1:length(permlist)
-        if (abs(permlist(jj,:)-iv)) == 0
-            c(jj) = c(jj) + 1 ;
-        end
-    end
-end
-
-p = max(1/N,c/(N-ord));
-permen = -sum(p .* log(p))/(ord-1);
+% Use the Bruce Land and Damian Elias code to calculate the permutation entropy:
+permen = LA_permen(y);
 
 end

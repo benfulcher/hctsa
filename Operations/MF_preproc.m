@@ -1,3 +1,23 @@
+% MF_preproc
+% 
+% Performs a range of transformations to the time series and then fits an
+% autoregressive, AR, model and returns the in-sample root-mean-square (RMS)
+% prediction errors for each transformed time series as a ratio of the RMS
+% prediction error of the original time series.
+% 
+% Transformations performed include:
+% (i) incremental differencing,
+% (ii) filtering of the power spectral density function,
+% (iii) removal of piece-wise polynomial trends, and
+% (iv) rank mapping the values of the time series to a Gaussian distribution.
+% 
+% INPUTS:
+% y, the input time series
+% model, the time-series model to fit to the transformed time series (for now
+%           'ar' is the only option)
+% order, the order of the AR model to fit to the data
+% 
+
 function out = MF_preproc(y,model,order)
 % Carries out a variety of preprocessings to look at improvement of fit to
 % a model (AR by default)

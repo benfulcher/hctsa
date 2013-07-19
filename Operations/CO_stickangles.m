@@ -1,6 +1,22 @@
-function out = CO_stickangles(y,method)
-% Analyzes the set of line-of-sight angles between time series points, by
-% treating each data point as a stick protruding from a opaque baseline
+% CO_stickangles
+% 
+% Analyzes line-of-sight angles between time-series points where each
+% time-series value is treated as a stick protruding from an opaque baseline
+% level. Statistics are returned on the raw time series, where sticks protrude
+% from the zero-level, and the z-scored time series, where sticks
+% protrude from the mean level of the time series.
+% 
+% INPUTS:
+% y, the input time series
+% 
+% Outputs are returned on the obtained sequence of angles, theta, reflecting the
+% maximum deviation a stick can rotate before hitting a stick representing
+% another time point. Statistics include the mean and spread of theta,
+% the different between positive and negative angles, measures of symmetry of
+% the angles, stationarity, autocorrelation, and measures of the distribution of
+% these stick angles.
+
+function out = CO_stickangles(y)
 % Ben Fulcher, September 2009
 
 doplot = 0; % can plot output

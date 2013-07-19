@@ -1,7 +1,20 @@
-function out = FC_dynprimitive(y,fmeth)
-% Looping over the length of data to use for prediction using
-% FC_primitive, returns a bunch of statistics at each iteration
+% FC_LoopLocalSimple
+% 
+% Analyzes the outputs of FC_LocalSimple for a range of local window lengths, l.
+% Loops over the length of the data to use for FC_LocalSimple prediction
+% 
+% Outputs are statistics including whether the mean square error increases or
+% decreases, testing for peaks, variability, autocorrelation, stationarity, and
+% a fit of exponential decay, f(x) = A*exp(Bx) + C, to the variation.
+
+function out = FC_LoopLocalSimple(y,fmeth)
 % Ben Fulcher, 2009
+
+doplot = 0;
+
+if nargin < 2 || isempty(fmeth)
+    fmeth = 'mean'; % do mean prediction by default
+end
 
 switch fmeth
     case 'mean'
@@ -17,9 +30,9 @@ stats_st = zeros(length(ngr),6);
 for i = 1:length(ngr)
     switch fmeth
         case 'mean'
-            outtmp = FC_primitive(y,'mean',ngr(i));
+            outtmp = FC_LocalSimple(y,'mean',ngr(i));
         case 'median'
-            outtmp = FC_primitive(y,'median',ngr(i));
+            outtmp = FC_LocalSimple(y,'median',ngr(i));
             % median needs more tweaking
     end
     stats_st(i,1) = outtmp.rmserr;
@@ -30,9 +43,10 @@ for i = 1:length(ngr)
     stats_st(i,6) = outtmp.ac2;
 end
 
-% plot(stats_st)
-% out=stats_st;
-
+if doplot
+    figure('color','w')
+    plot(stats_st)
+end
 
 % Get statistics from the shapes of the curves
 

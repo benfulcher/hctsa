@@ -1,31 +1,56 @@
-function out = MF_compare_garch(y,preproc,pr,qr)
-% Compares a bunch of GARCH(P,Q) models to each other, returns statistics on the
-% best ones. This one focuses on the GARCH/variance component, and therefore
+% MF_GARCHcompare
+% 
+% This code fits a set of GARCH(p,q) models to the time series and
+% returns statistics on the goodness of fits across a range of p and
+% q parameters.
+% 
+% Uses the following functions from MATLAB's Econometrics Toolbox: archtest,
+% lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
+% 
+% INPUTS:
+% y, the input time series
+% preproc, a preprocessing to apply:
+%           (i) 'none': no preprocessing is performed
+%           (ii) 'ar': performs a preprocessing that maximizes AR(2) whiteness,
+%           
+% pr, a vector of model orders, p, to compare
+% 
+% qr, a vector of model orders, q, to compare
+% 
+% Compares all combinations of p and q and output statistics are on the models
+% with the best fit.
+% 
+% This operation focuses on the GARCH/variance component, and therefore
 % attempts to pre-whiten and assumes a constant mean process.
-% Uses functions from MATLAB's Econometrics Toolbox: archtest, lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
-% Ben Fulcher 26/2/2010
+% 
+% Outputs include log-likelihoods, Bayesian Information  Criteria (BIC),
+% Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
+% Ljung-Box Q-test, and estimates of optimal model orders.
 
+function out = MF_GARCHcompare(y,preproc,pr,qr)
+% Ben Fulcher 26/2/2010
 
 %% Inputs
 if nargin < 2 || isempty(preproc)
-    preproc = 'ar'; % do the preprocessing that maximizes ar(2) whiteness
+    preproc = 'none';
 end
 
 % GARCH parameters, p & q
 if nargin < 3 || isempty(pr)
-    pr = (1:4); % i.e., GARCH(1:4,qr)
+    pr = (1:3); % i.e., GARCH(1:4,qr)
 end
 if nargin < 4 || isempty(qr)
-    qr = (1:4); % i.e., GARCH(pr,1:4);
+    qr = (1:3); % i.e., GARCH(pr,1:4);
 end
 
 %% (1) Data preprocessing
 y0 = y; % the original, unprocessed time series
 
 switch preproc
-    case 'nothing'
+    case {'nothing','none'}
         % do nothing.
     case 'ar'
+        % do the preprocessing that maximizes ar(2) whiteness
         % apply a number of standard preprocessings and return them in the
         % structure ypp. Also chooses the best preprocessing based on the worst fit
         % of an AR2 model to the processed time series.

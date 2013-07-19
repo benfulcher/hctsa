@@ -48,7 +48,7 @@ for j = 1:nseg
     qs(j,3) = skewness(ysub); % skewness
     qs(j,4) = kurtosis(ysub); % kurtosis
     qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1
-    qs(j,6) = EN_sampenc(ysub,1,0.2); % SampEn_1
+    qs(j,6) = LA_sampenc(ysub,1,0.2,1); % SampEn_1
     qs(j,7) = CO_autocorr(ysub,1); % AC1
     qs(j,8) = CO_autocorr(ysub,2); % AC2
     qs(j,9) = taul;
@@ -58,7 +58,7 @@ if doplot
     figure('color','w');
     subplot(2,1,1); hold on; plot(y,'k'); plot(ists,y(ists),'.r'); title('time series')
     subplot(2,1,2); plot(qs(:,1),'b'); title('local means')
-    input('what do you think?')
+    input('What do you think?')
 end
 
 % Can think of this as a big bootstrapped distribution of the timeseries at

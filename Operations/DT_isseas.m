@@ -1,12 +1,19 @@
-function out = DT_isseas(y)
-% Simple seasonality check on the input time series, y
-% The test relies on a simple sinusoidal model fit
-% Uses the 'fit' function from Matlab's Curve Fitting Toolbox
-% Input: y: time series to test
-% Output: 1 (seasonal), 0 (non-seasonal)
-% Ben Fulcher 9/7/2009
+% DT_isseas
+% 
+% A simple test of seasonality by fitting a 'sin1' model to the time series
+% using fit function from the Curve Fitting Toolbox. The output is binary: 1 if
+% the goodness of fit, R^2, exceeds 0.3 and the amplitude of the fitted periodic
+% component exceeds 0.5, and 0 otherwise.
+% 
+% INPUTS:
+% y, the input time series
+% 
+% OUTPUT: 1 (seasonal), 0 (non-seasonal)
 
-%% Foreplay
+function out = DT_isseas(y)
+% Ben Fulcher, 9/7/2009
+
+%% Preliminaries
 % Make sure the input time series, y, is a column vector
 if size(y,2) > size(y,1)
     y = y';

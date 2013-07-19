@@ -1,9 +1,20 @@
+% CO_embed2
+% 
+% Embeds the z-scored time series in a two-dimensional time-delay
+% embedding space with a given time-delay, tau, and outputs a set of
+% statistics about the structure in this space, including angular 
+% distribution, etc.
+% 
+% INPUTS:
+% y, the column-vector time series
+% tau, the time-delay (can be 'tau' for first zero-crossing of ACF)
+% 
+% Outputs include the distribution of angles between successive points in the
+% space, stationarity of this angular distribution, euclidean distances from the
+% origin, and statistics on outliers.
+
 function out = CO_embed2(y,tau)
-% Analyzes angular distributions and other such statistics in a two-dimensional recurrence plot at a time delay tau
-% The input time series, y, should be a z-scored column vector
-% Ben Fulcher September 2009
-% Ben Fulcher 19/3/2010 -- corrected error in choosing tau too large with
-%                           'tau'
+% Ben Fulcher, September 2009
 
 doplot = 0; % can set to 1 to plot some outputs
 
@@ -22,7 +33,7 @@ end
 
 % Ensure that y is a column vector
 if size(y,2) > size(y,1);
-  y = y';
+    y = y';
 end
 
 % Construct the two-dimensional recurrence space
@@ -30,7 +41,8 @@ m = [y(1:end-tau), y(1+tau:end)];
 N = size(m,1); % number of points in the recurrence space
 
 if doplot
-  figure('color','w'); plot(m(:,1),m(:,2),'.');
+    figure('color','w');
+    plot(m(:,1),m(:,2),'.');
 end
 
 % 1) Distribution of angles time series; angles between successive points in
@@ -78,7 +90,7 @@ out.stdb4 = std(n(:,4));
 afifth = floor(N/5);
 buffer_m = cell(5,1); % stores a fifth of the time series (embedding vector) in each entry
 for i = 1:5
-	buffer_m{i} = m(afifth*(i-1)+1:afifth*i,:);
+    buffer_m{i} = m(afifth*(i-1)+1:afifth*i,:);
 end
 
 % Mean euclidean distance in each segment

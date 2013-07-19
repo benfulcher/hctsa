@@ -1,17 +1,34 @@
-function out = DN_M_kscomp(x,whatdbn)
-% Performs certain simple statistics on the difference between the 
-% empirical distribution from data x, the standard distribution specified
-% by whatdbn, and the statistic specified by ange
-% Ben Fulcher 2009
+% DN_kscompare
+% 
+% Returns simple statistics on the discrepancy between the
+% kernel-smoothed distribution of the time-series values, and the distribution
+% fitted to it by some model: Gaussian (using normfifit from MATLAB's
+% Statistics Toolbox), Extreme Value (evfifit), Uniform (unififit), Beta
+% (betafifit), Rayleigh (raylfifit), Exponential (expfifit), Gamma (gamfit),
+% LogNormal (lognfifit), and Weibull (wblfifit).
+% 
+% INPUTS:
+% x, the input time series
+% whatdbn, the type of distribution to fit to the data:
+%           'norm' (normal), 'ev' (extreme value), 'uni' (uniform),
+%           'beta' (Beta), 'rayleigh' (Rayleigh), 'exp' (exponential),
+%           'gamma' (Gamma), 'logn' (Log-Normal), 'wbl' (Weibull).
+% 
+% Outputs include the absolute area between the two distributions, the peak
+% separation, overlap integral, and relative entropy.
+
+function out = DN_kscompare(x,whatdbn)
+% Ben Fulcher, 2009
 
 %% PREPROCESSING
 % fit the distribution whatdbn
 % xtry=linspace(-40,40,400);
 xstep = std(x)/100; % set a step size
+
 switch whatdbn
     case 'norm'
         [a, b] = normfit(x);
-		peaky = normpdf(a,a,b); thresh=peaky/100; % stop when gets to 1/100 of peak value
+		peaky = normpdf(a,a,b); thresh = peaky/100; % stop when gets to 1/100 of peak value
 		xf(1) = mean(x); ange = 10;
         while ange > thresh, xf(1) = xf(1)-xstep; ange = normpdf(xf(1),a,b); end
 		xf(2) = mean(x); ange = 10;

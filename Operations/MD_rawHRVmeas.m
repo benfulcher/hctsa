@@ -1,9 +1,23 @@
-function out = MD_rawHRVmeas(x)
-% Ben Fulcher 24/2/2011 -- want to do this on raw RR intervals; probably will not make much sense for other time series
-% Note that pNNx is done in MD_pNN.m
-% This code is very much derived from Max Little's hrv_classic.m code
+% MD_rawHRVmeas
+% 
+% Evaluates the triangular histogram index and Poincare plot measures to a time series
+% assumed to measure sequences of consecutive RR intervals measured in
+% milliseconds. Doesn't make much sense for other time series
+% 
+% cf. "Do existing measures of Poincare plot geometry reflect nonlinear
+%      features of heart rate variability?"
+%      M. Brennan, et al., IEEE T. Bio.-Med. Eng. 48(11) 1342 (2001)
+% 
+% Note that pNNx is not done here, but in MD_pNN.m
+% 
+% This code is heavily derived from Max Little's hrv_classic.m code
+% Max Little: http://www.maxlittle.net/
+% 
 
-N = length(x);
+function out = MD_rawHRVmeas(x)
+% Ben Fulcher 24/2/2011 -- want to do this on raw RR intervals
+
+N = length(x); % time-series length
 
 % Triangular histogram index
 out.tri10 = N/max(hist(x,10));

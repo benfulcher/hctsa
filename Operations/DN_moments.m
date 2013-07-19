@@ -1,7 +1,14 @@
-function out = DN_moments(y,n)
-% Returns moments of the distribution of values in the input time series, y
-% Uses the moment function in Matlab's Statistics Toolbox
+% DN_moments
+% 
+% Output is the moment of the distribution of the input time series.
 % Normalizes by the standard deviation
+% Uses the moment function in Matlab's Statistics Toolbox
+% 
+% INPUTS:
+% y, the input time series
+% n, the moment to calculate (a scalar)
+
+function out = DN_moments(y,n)
 % Ben Fulcher, 2009
 
 out = moment(y,n)/std(y);

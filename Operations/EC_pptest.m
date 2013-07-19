@@ -1,7 +1,26 @@
+% EC_pptest
+% 
+% Performs the Phillips-Peron unit root test for a time series via the code
+% pptest from MATLAB's Econometrics Toolbox.
+% 
+% INPUTS:
+% y, the input time series
+% lags, a vector of lags
+% model, a specified model:
+%               'ar': autoregressive
+%               'ard': autoregressive with drift, or
+%               'ts': trend stationary,
+%               (see Matlab documentation for information)
+% teststat, the test statistic:
+%               't1': the standard t-statistic, or
+%               't2' a lag-adjusted, 'unStudentized' t statistic.
+%               (see Matlab documentation for information)
+%               
+% Outputs are statistics on the p-values and lags obtained from the set of tests, as
+% well as measures of the regression statistics.
+
 function out = EC_pptest(y,lags,model,teststat)
-% Performs the Phillips-Peron unit root test.
-% Uses the pptest function from Matlab's Econometrics toolbox
-% Ben Fulcher 1/3/2010
+% Ben Fulcher, 1/3/2010
 
 %% Inputs
 % The number of autocovariance lags to include in the Newey-West estimator
@@ -30,7 +49,7 @@ end
 nout = length(h);
 
 if nout == 1
-    % Fust return the results from this single test
+    % Just return the results from this single test
     out.pvalue = pValue;
     out.stat = stat;
     out.coeff1 = reg.coeff(1); % could be multiple, depending on the model
@@ -39,6 +58,7 @@ if nout == 1
     out.BIC = reg.BIC;
     out.HQC = reg.HQC;
     out.rmse = reg.RMSE;
+    
 else
     % Return statistics on the set of outputs
     out.maxpValue = max(pValue);

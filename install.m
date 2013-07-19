@@ -40,7 +40,7 @@ fprintf(1,'Attempting to compile the binary executables needed for evaluating so
 fprintf(1,'Please make sure that mex is set up with the right compilers for this system.\n')
 fprintf(1,'Note that errors here are not the end of the world, but mean that some operations may fail to execute correctly...\n')
 cd Toolboxes
-compile
+compile_mex
 cd ../
 fprintf(1,'Oh my goodness, everything compiled fine. The database, %s, is ready for time series to be added using SQL_add...!\n',dbname)
 

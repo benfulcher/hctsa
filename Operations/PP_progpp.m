@@ -134,7 +134,7 @@ out.normdiff_exp = stats(10,4);
         
         % 2) Gaussianity
         %   (a) kernel density estimation method
-        me1 = MF_M_mtlbfit(y_d,'gauss1',0); % kernel density fit to 1-peak gaussian
+        me1 = DN_simplefit(y_d,'gauss1',0); % kernel density fit to 1-peak gaussian
         
         if ~isstruct(me1) && isnan(me1)
             f(4) = NaN;
@@ -143,7 +143,7 @@ out.normdiff_exp = stats(10,4);
         end
         
         %   (b) histogram 10 bins
-        me1 = MF_M_mtlbfit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
+        me1 = DN_simplefit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
         if ~isstruct(me1) && isnan(me1)
             f(5) = NaN;
         else
@@ -151,7 +151,7 @@ out.normdiff_exp = stats(10,4);
         end
         
         %   (c) compare distribution to fitted normal distribution
-        me1 = DN_M_kscomp(y_d,'norm');
+        me1 = DN_kscompare(y_d,'norm');
         if ~isstruct(me1) && isnan(me1)
             f(6) = NaN;
         else

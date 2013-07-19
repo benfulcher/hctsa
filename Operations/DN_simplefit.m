@@ -1,13 +1,37 @@
-function out = MF_M_mtlbfit(x,dmodel,nbins)
-% Fits a model simple time-series model or distribution to the data
-% Uses the function fit from Matlab's Curve Fitting Toolbox
-% An output uses the function runstest from Matlab's Statistics Toolbox
-% x: the (z-scored) time series as a column vector
-% dmodel: the model name
-% nbins: for distribution fits: number of bins in the histogram
-%                                       (or, if nbins = 0, uses ksdensity)
-% Ben Fulcher, 2009
+% DN_simplefit
+% 
+% Fits different distributions or simple time-series models to the time series
+% using 'fit' function from Matlab's Curve Fitting Toolbox.
+% 
+% The distribution of time-series values is estimated using either a
+% kernel-smoothed density via the MATLAB function ksdensity with the default
+% width parameter, or by a histogram with a specified number of bins, nbins.
+% 
+% INPUTS:
+% x, the input time series
+% 
+% dmodel, the model to fit:
+%       (I) distribution models:
+%           (i) 'gauss1'
+%           (ii) 'gauss2'
+%           (iii) 'exp1'
+%           (iv) 'power1'
+%       (II) simple time-series models:
+%           (i) 'sin1'
+%           (ii) 'sin2'
+%           (iii) 'sin3'
+%           (iv) 'fourier1'
+%           (v) 'fourier2'
+%           (vi) 'fourier3'
+% 
+% nbins, the number of bins for a histogram-estimate of the distribution of
+%       time-series values. If nbins = 0, uses ksdensity instead of histogram.
+% 
+% Outputs are the goodness of fifit, R^2, rootmean square error, the
+% autocorrelation of the residuals, and a runs test on the residuals.
 
+function out = DN_simplefit(x,dmodel,nbins)
+% Ben Fulcher, 2009
 
 %% Fit the model
 % Two cases: distribution fits and fits on the data
@@ -35,7 +59,7 @@ if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
             fprintf(1,'The model, %s, failed for this data -- returning NaNs for all fitting outputs\n',dmodel);
             out = NaN; return
         else
-            error('MF_M_mtlbfit(x,%s,%u): Unexpected error fitting %s to the data distribution',dmodel,nbins,dmodel)
+            error('DN_simplefit(x,%s,%u): Unexpected error fitting %s to the data distribution',dmodel,nbins,dmodel)
         end
 	end
 elseif any(strcmp(TSmods,dmodel)); % valid TIME SERIES model name
@@ -50,7 +74,7 @@ elseif any(strcmp(TSmods,dmodel)); % valid TIME SERIES model name
             fprintf(1,'The model %s failed for this data -- returning NaNs for all fitting outputs\n',dmodel);
             out = NaN; return
         else
-            error('MF_M_mtlbfit(x,%s,%u): Unexpected error fitting ''%s'' to the time series',dmoel,nbins,dmodel)
+            error('DN_simplefit(x,%s,%u): Unexpected error fitting ''%s'' to the time series',dmoel,nbins,dmodel)
         end
 	end
 else

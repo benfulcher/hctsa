@@ -1,3 +1,7 @@
+% DN_kssimpc
+% 
+% 
+
 function out = DN_kssimpc(x,whatfeature)
 % Compares the distribution of a time series to a z-scored version of it
 % Possibly a stupid idea

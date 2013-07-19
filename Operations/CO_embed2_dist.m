@@ -1,14 +1,23 @@
+% CO_embed2_dist
+% 
+% Returns statistics on the sequence of successive Euclidean distances between
+% points in a two-dimensional time-delay embedding space with a given
+% time-delay, tau.
+% 
+% Outputs include the autocorrelation of distances, the mean distance, the
+% spread of distances, and statistics from an exponential fit to the
+% distribution of distances.
+% 
+% INPUTS:
+% y, a z-scored column vector representing the input time series
+% tau, the time delay.
+
 function out = CO_embed2_dist(y,tau)
-% Analyzes distributions of distances in a two-dimensional
-% recurrence plot at a time delay tau
-% y should be a z-scored column vector representing the input time series
-% Ben Fulcher September 2009
-% Ben Fulcher 19/3/2010 -- fixed error in choosing tau too large
+% Ben Fulcher, September 2009
 
 %% Check inputs:
 if nargin < 2 || isempty(tau)
-	% the correlation length: tau = first minimum of autocorrelation function
-    tau = 'tau';
+    tau = 'tau'; % set to the first minimum of autocorrelation function
 end
 
 N = length(y); % time-series length
@@ -46,7 +55,6 @@ out.d_iqr = iqr(d); % Interquartile range of distances
 out.d_max = max(d); % Maximum distance
 out.d_min = min(d); % Minimum distance
 out.d_cv = mean(d)/std(d); % coefficient of variation of distances
-
 
 % Empirical distance distribution often fits Exponential distribution quite well
 % Fit to all values (often some extreme outliers, but oh well)
