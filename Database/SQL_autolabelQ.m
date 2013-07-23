@@ -122,7 +122,7 @@ end
 % 
 % % This is one option: get all matching IDS, and find intersection. Another
 % % option is to look through the obtained keywords from the local guide -- 
-% % i.e., do it all in MATLAB. This was originally done, but now the keywords
+% % i.e., do it all in Matlab. This was originally done, but now the keywords
 % % are comma-delimited rather than cells of cells.
 % for i = 1:Ng
 %     allmatchingids = SQL_getids(metorts,[],kwgs(i,:),{},[],[],dbname);
@@ -140,7 +140,7 @@ end
 % Search in SQL query for intersection
 
 %% Option 3
-% Convert to cell and to it all within MATLAB
+% Convert to cell and to it all within Matlab
 if ~all(cellfun(@ischar,kwgs(:))) % have specified numbers of each
     kwnums = horzcat(kwgs{:,2}); % just the number of each part
     kwgs = kwgs(:,1)'; % just the keyword parts, a cell of strings

@@ -4,7 +4,7 @@
 % to binning the data.
 % 
 % Uses hist2.m function (renamed hist2_NK.m here) by Nedialko Krouchev, obtained
-% from MATLAB Central,
+% from Matlab Central,
 % http://www.mathworks.com/matlabcentral/fileexchange/12346-hist2-for-the-people
 % [[hist2 for the people by Nedialko Krouchev, 20 Sep 2006 (Updated 21 Sep 2006)]]
 % 

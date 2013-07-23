@@ -1,17 +1,31 @@
-function out = PD_wang07(y)
-% Implements the periodicity extraction measure proposed in Wang (2007).
-% IEEE International Conference on Data Mining DOI 10.1109/ICDM.2007.103
-% Code by Ben Fulcher 9/7/09
-% I think that the threshold being 0.01 is questionable
-% So I've implemented for 0,0.01,0.1,0.2 and [1,5,10]/sqrt(N)
-% Thus output is for each of the following thresholds:
-% (0 0.01 0.1 0.2 1/sqrt(N) 5/sqrt(N) 10/sqrt(N))
+% PD_Wang07
+% 
+% Implements my idea of the periodicity extraction measure proposed in:
+% 
+% "Structure-based Statistical Features and Multivariate Time Series Clustering"
+% Wang, X. and Wirth, A. and Wang, L.
+% Seventh IEEE International Conference on Data Mining, 351--360 (2007)
+% DOI: 10.1109/ICDM.2007.103
+%
+% This function detrends the time series using a single-knot cubic regression
+% spline, and then computes autocorrelations up to one third of the length of
+% the time series. The frequency is the first peak in the autocorrelation
+% function satisfying a set of conditions.
+% 
+% INPUTS,
+% y, the input time series.
+% 
+% The single threshold of 0.01 was considered in the original paper, this code
+% uses a range of thresholds: 0, 0.01, 0.1, 0.2, 1\sqrt{N}, 5\sqrt{N}, and
+% 10\sqrt{N}, where N is the length of the time series.
+% 
 
-% Inputs:
-% y is the (univariate) time series vector
-% Check the time series is zscored
+function out = PD_Wang07(y)
+% Ben Fulcher, 9/7/09
+
+% Check the time series is z-scored:
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored for EN_progranz')
+    warning('The input time series should be z-scored')
 end
 
 %% Foreplay

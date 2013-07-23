@@ -27,7 +27,7 @@ if nargin < 4 || isempty(taum)
 end
 if ischar(taum)
     if strcmp(taum,'mi')
-        tau = CO_firstmin(y,'mi'); % time-delay
+        tau = CO_FirstMin(y,'mi'); % time-delay
     elseif strcmp(taum,'ac')
         tau = CO_fzcac(y); % time-delay
     else

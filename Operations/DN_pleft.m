@@ -10,6 +10,7 @@
 % y, the input time series
 % th, the proportion of data further than p from the mean
 %           (output p, normalized by standard deviation)
+% 
 
 function out = DN_pleft(y,th)
 % Ben Fulcher, 2009

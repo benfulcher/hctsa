@@ -25,6 +25,7 @@
 % 
 % OUPUT:
 % p - probability of obtaining a sequence of consecutive ones/zeros
+% 
 
 function p = MD_polvar(x, d, D)
 % Ben Fulcher, April 2010

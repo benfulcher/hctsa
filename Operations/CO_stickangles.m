@@ -1,4 +1,4 @@
-% CO_stickangles
+% CO_StickAngles
 % 
 % Analyzes line-of-sight angles between time-series points where each
 % time-series value is treated as a stick protruding from an opaque baseline
@@ -15,8 +15,9 @@
 % the different between positive and negative angles, measures of symmetry of
 % the angles, stationarity, autocorrelation, and measures of the distribution of
 % these stick angles.
+% 
 
-function out = CO_stickangles(y)
+function out = CO_StickAngles(y)
 % Ben Fulcher, September 2009
 
 doplot = 0; % can plot output
@@ -25,6 +26,7 @@ N = length(y);
 ix = cell(2,1); %indicies for positive(1) and negative(2) entries of time series vector
 ix{1} = find(y >= 0); % bias here -- 'look up' if on 'ground'
 ix{2} = find(y < 0);
+
 n = zeros(2,1);
 n(1) = length(ix{1})-1; % minus one because the last point has no next one to compare to
 n(2) = length(ix{2})-1; % minus one for same reason
@@ -33,7 +35,7 @@ angles = cell(2,1); % stores the angles
 angles{1} = zeros(n(1),1); % positives (above axis)
 angles{2} = zeros(n(2),1); % negatives (below axis)
 
-% first positive time points: store in angles_p
+% First positive time points: store in angles_p
 for j = 1:2
     for i = 1:n(j)
         % find the next time series point with the same sign as the current one:
@@ -47,9 +49,9 @@ if doplot
     figure('color','w')
     % A few options of what to plot:
     hold off; plot(angles{1},'.k'); hold on
-    plot(angles{2},'.r')
-    hold off; [yp xp] = ksdensity(angles{1});
-    [yn xn] = ksdensity(angles{2});
+    plot(angles{2},'.r'); hold off;
+    [yp, xp] = ksdensity(angles{1});
+    [yn, xn] = ksdensity(angles{2});
     plot(xp,yp,'r'); hold on; plot(xn,yn,'b');
     hist(angles{1},50);
 end

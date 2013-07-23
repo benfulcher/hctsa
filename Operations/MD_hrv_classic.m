@@ -28,6 +28,7 @@
 % Code is heavily derived from that provided by Max A. Little:
 % http://www.maxlittle.net/
 % 
+
 function out = MD_hrv_classic(y)
 % Ben Fulcher, 12/4/2010.
 
@@ -39,13 +40,18 @@ N = length(y); % time-series length
 % pNNx: recommendation as per Mietus et. al. 2002, "The pNNx files: ...", Heart
 % strange to do this for a z-scored time series...
 % pnntime = 20;
-Dy = abs(diffy) * 1000;
+
+Dy = abs(diffy) * 1000; 
+
+% Anonymous function to do the PNNx calcualtion:
+PNNxfn = @(x) sum(Dy > x)/(N-1);
+
 % exceed  = sum(Dy > pnntime);
-out.pnn5  = sum(Dy > 5)/(N-1); % proportion of difference magnitudes greater than 0.005*sigma
-out.pnn10 = sum(Dy > 10)/(N-1);
-out.pnn20 = sum(Dy > 20)/(N-1);
-out.pnn30 = sum(Dy > 30)/(N-1);
-out.pnn40 = sum(Dy > 40)/(N-1);
+out.pnn5  = PNNxfn(5); %sum(Dy > 5)/(N-1); % proportion of difference magnitudes greater than 0.005*sigma
+out.pnn10 = PNNxfn(10); %sum(Dy > 10)/(N-1);
+out.pnn20 = PNNxfn(20); %sum(Dy > 20)/(N-1);
+out.pnn30 = PNNxfn(30); %sum(Dy > 30)/(N-1);
+out.pnn40 = PNNxfn(40); %sum(Dy > 40)/(N-1);
 
 % Calculate PSD
 % [Pxx, F] = psd(series,1024,1,hanning(1024),512);
@@ -80,7 +86,6 @@ rmssd = std(diffy); % std of differenced series
 sigma = std(y); % should be 1 for zscored time series
 out.SD1 = 1/sqrt(2) * rmssd * 1000;
 out.SD2 = sqrt(2 * sigma^2 - (1/2) * rmssd^2) * 1000;
-
 
 
 end

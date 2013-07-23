@@ -1,8 +1,31 @@
+% NL_embed_PCA
+% 
+% Reconstructs the time series as a time-delay embedding, and performs Principal
+% Components Analysis on the result using princomp code from
+% Matlab's Bioinformatics Toolbox.
+% 
+% This technique is known as singular spectrum analysis
+% 
+% "Extracting qualitative dynamics from experimental data"
+% D. S. Broomhead and G. P. King, Physica D 20(2-3) 217 (1986)
+% 
+% INPUTS:
+% y, the input time series
+% 
+% tau, the time-delay, can be an integer or 'ac', or 'mi' for first
+%               zero-crossing of the autocorrelation function or first minimum
+%               of the automutual information, respectively
+%               
+% m, the embedding dimension
+% 
+% Outputs are various statistics summarizing the obtained eigenvalue distribution.
+% 
+% The suggestion to implement this idea was provided by Siddarth Arora.
+% (Siddharth Arora, <arora@maths.ox.ac.uk>)
+% 
+
 function out = NL_embed_PCA(y,tau,m)
-% Suggestion by (Siddharth Arora <arora@maths.ox.ac.uk>) to embed
-% the time series and look at PCA reduction
-% pca code uses the Bioinformatics Toolbox
-% Ben Fulcher 25/2/2010
+% Ben Fulcher, 25/2/2010
 
 if nargin < 2 || isempty(tau)
     tau = 'ac'; % embed by first zero-crossing of autocorrelation function

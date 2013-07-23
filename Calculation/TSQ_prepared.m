@@ -48,7 +48,7 @@ if nargin < 6 || isempty(doinone)
 	doinone = 0; % make seperate connections so as not to overwhelm java heap space
 end
 
-%% METHOD 1: Get entries of results table for local MATLAB matrix (1 row/column at a time)
+%% METHOD 1: Get entries of results table for local Matlab matrix (1 row/column at a time)
 % we have ts_ids_keep and m_ids_keep
 % To put in a matrix with rows (time series) and columns (metrics)
 % Could do one big query and then reform to a matrix, but I'll do it row-by-row

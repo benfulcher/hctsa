@@ -2,7 +2,7 @@
 % 
 % Returns simple statistics on the discrepancy between the
 % kernel-smoothed distribution of the time-series values, and the distribution
-% fitted to it by some model: Gaussian (using normfifit from MATLAB's
+% fitted to it by some model: Gaussian (using normfifit from Matlab's
 % Statistics Toolbox), Extreme Value (evfifit), Uniform (unififit), Beta
 % (betafifit), Rayleigh (raylfifit), Exponential (expfifit), Gamma (gamfit),
 % LogNormal (lognfifit), and Weibull (wblfifit).

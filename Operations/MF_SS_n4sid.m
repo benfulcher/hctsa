@@ -1,7 +1,7 @@
 % MF_SS_n4sid
 % 
 % Fits a state space model of given order to the time series using the n4sid
-% function in MATLAB's System Identification Toolbox.
+% function in Matlab's System Identification Toolbox.
 % 
 % First fits the model to the whole time series, then trains it on the first
 % portion and tries to predict the rest.
@@ -125,7 +125,7 @@ yp = predict(mp, ytest, steps, 'init', 'e'); % across whole ytest dataset
 mresiduals = ytest.y-yp.y;
 
 % 1) Get statistics on residuals
-residout = MF_residanal(mresiduals);
+residout = MF_ResidualAnalysis(mresiduals);
 
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);

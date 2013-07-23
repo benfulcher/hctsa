@@ -1,6 +1,6 @@
 % MF_AR_arcov
 % 
-% Fits an AR model of a given order, p, using arcov code from MATLAB's Signal
+% Fits an AR model of a given order, p, using arcov code from Matlab's Signal
 % Processing Toolbox.
 % 
 % INPUTS:

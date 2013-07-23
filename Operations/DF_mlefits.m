@@ -1,7 +1,7 @@
 % DF_mlefits
 % 
 % Fits either a Gaussian, Uniform, or Geometric distribution to the data using
-% maximum likelihood estimation via the MATLAB function mle
+% maximum likelihood estimation via the Matlab function mle
 % from the Statistics Toolbox.
 % 
 % INPUTS:

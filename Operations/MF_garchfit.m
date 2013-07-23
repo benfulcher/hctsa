@@ -14,16 +14,16 @@
 % The idea is that all of these stages can be pre-specified or skipped using
 % arguments to the function.
 % 
-% Uses functions from MATLAB's Econometrics Toolbox: archtest, lbqtest,
+% Uses functions from Matlab's Econometrics Toolbox: archtest, lbqtest,
 % autocorr, parcorr, garchset, garchfit, garchcount, aicbic
 % 
-% All methods implemented are from MATLAB's Econometrics Toolbox, including
+% All methods implemented are from Matlab's Econometrics Toolbox, including
 % Engle's ARCH test (archtest), the Ljung-Box Q-test (lbqtest), estimating the
 % partial autocorrelation function (parcorr), as well as specifying (garchset)
 % and fitting (garchfit) the GARCH model to the time series.
 % 
 % As part of this code, a very basic automatic pre-processing routine,
-% MF_preproc, is implemented, that applies a range of pre-processings and
+% PP_ModelFit, is implemented, that applies a range of pre-processings and
 % returns the preprocessing of the time series that shows the worst fit to an
 % AR(2) model.
 % 
@@ -332,9 +332,9 @@ out.maxlbqpval_stde2 = max(lbq_pValue_stde2);
 % [PACF,Lags_pacf,bounds_pacf] = parcorr(e,20,[],[]);
 
 
-% Use MF_residanal on the standardized innovations
+% Use MF_ResidualAnalysis on the standardized innovations
 % 1) Get statistics on standardized innovations
-residout = MF_residanal(stde);
+residout = MF_ResidualAnalysis(stde);
 
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);

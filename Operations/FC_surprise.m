@@ -1,4 +1,4 @@
-% FC_surprise
+% FC_Surprise
 % 
 % How surprised you might be by the next recorded data points given the data recorded
 % in recent memory.
@@ -44,7 +44,7 @@
 % including the minimum, maximum, mean, median, lower and upper quartiles, and
 % standard deviation.
 
-function out = FC_surprise(y,whatinf,memory,ng,cgmeth,nits)
+function out = FC_Surprise(y,whatinf,memory,ng,cgmeth,nits)
 % Ben Fulcher, September 2009
 
 %% Check inputs and set defaults

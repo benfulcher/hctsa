@@ -4,6 +4,7 @@
 % nbin-bin encoding and depth-symbol sequences.
 % Uniform population binning is used, and the implementation uses Michael Small's code
 % MS_shannon.m (renamed from the original, simply shannon.m)
+% 
 % cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
 % Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
 % Vol. 52 (2005)

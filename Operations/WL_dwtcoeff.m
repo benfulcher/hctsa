@@ -1,7 +1,25 @@
+% WL_dwtcoeff
+% 
+% Decomposes the time series using a given wavelet and outputs statistics on the
+% coefficients obtained up to a maximum level level.
+% 
+% INPUTS:
+% 
+% y, the input time series
+% 
+% wname, the mother wavelet, e.g., 'db3', 'sym2' (see Wavelet Toolbox
+%           Documentation)
+%           
+% level, the level of wavelet decomposition (can be set to 'max' for the maximum
+%               level determined by wmaxlev)
+% 
+% 
+
 function out = WL_dwtcoeff(y,wname,level)
 % Ben Fulcher, January 2010
 
 %% Check Inputs
+doplot = 0; % plot results to figures
 N = length(y); % length of signal
 
 if nargin < 2 || isempty(wname)
@@ -16,7 +34,7 @@ end
 
 maxlevelallowed = wmaxlev(N,wname);
 if maxlevelallowed < level
-    fprintf(1,'Chosen level is too large for this wavelet on this signal...');
+    fprintf(1,'Chosen level is too large for this wavelet on this signal...\n');
 end
 
 %% Perform Wavelet Decomposition
@@ -48,14 +66,17 @@ end
 % cfd = wcodemat(cfd,nbcol,'row');
 
 %% Do the plotting
-% colormap(pink(nbcol));
-% image(cfd);
-% tics = 1:level;
-% labs = int2str((1:level)');
-% set(gca,'YTicklabelMode','manual','Ydir','normal', 'Box','On','Ytick',tics,'YTickLabel',labs);
-% title('Discrete Wavelet Transform, Absolute Coefficients.');
-% xlabel('Time (or Space)')
-% ylabel('Level');
+if doplot
+    figure('color','w'); box('on');
+    colormap(pink(nbcol));
+    image(cfd);
+    tics = 1:level;
+    labs = int2str((1:level)');
+    set(gca,'YTicklabelMode','manual','Ydir','normal', 'Box','On','Ytick',tics,'YTickLabel',labs);
+    title('Discrete Wavelet Transform, Absolute Coefficients.');
+    xlabel('Time (or Space)')
+    ylabel('Level');
+end
 
 %% Get statistics on coefficients
 for k = 1:level

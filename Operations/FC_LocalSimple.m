@@ -99,13 +99,13 @@ out.meanabserr = mean(abs(res));
 out.stderr = std(res);
 
 % stationarity:
-out.sws = SY_slidwin(res,'std','std',5,1);
-out.swm = SY_slidwin(res,'mean','std',5,1);
+out.sws = SY_SlidingWindow(res,'std','std',5,1);
+out.swm = SY_SlidingWindow(res,'mean','std',5,1);
 
 % normality:
-% out.chi2n=HT_disttests(res,'chi2gof','norm',10); % chi2
-% out.ksn=HT_disttests(res,'ks','norm'); % Kolmogorov-Smirnov
-tmp = DN_simplefit(y,'gauss1',0);
+% out.chi2n=HT_DistributionTest(res,'chi2gof','norm',10); % chi2
+% out.ksn=HT_DistributionTest(res,'ks','norm'); % Kolmogorov-Smirnov
+tmp = DN_SimpleFit(y,'gauss1',0);
 if ~isstruct(tmp) && isnan(tmp) % fitting failed
     out.gofnadjr2 = NaN;
 else

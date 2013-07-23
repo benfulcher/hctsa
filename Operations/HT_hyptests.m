@@ -3,7 +3,7 @@
 % Outputs the p-value from a statistical hypothesis test applied to the
 % time series.
 % 
-% Tests are implemented as functions in MATLAB's Statistics Toolbox.
+% Tests are implemented as functions in Matlab's Statistics Toolbox.
 % (except Ljung-Box Q-test, which uses the Econometrics Toolbox)
 % 
 % INPUTS,

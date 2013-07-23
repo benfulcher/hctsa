@@ -1,14 +1,27 @@
-function out = TSTL_delaytime(y,maxdelay,past)
-% Uses TSTOOL code delaytime
-% y: column vector of time series data
-% maxdelay: maximum value of the delay to consider (can also specify a
+% TSTL_delaytime
+% 
+% Uses the TSTOOL code delaytime, that computes an optimal delay time using the
+% method of Parlitz and Wichard (this method is specified in the TSTOOL
+% documentation but without reference).
+% 
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% 
+% INPUTS:
+% y, column vector of time series data
+% 
+% maxdelay, maximum value of the delay to consider (can also specify a
 %           proportion of time series length)
-% past: the TSTOOL documentation describes this parameter as "?", which is
+%           
+% past, the TSTOOL documentation describes this parameter as "?", which is
 %       relatively uninformative.
-% Uses the method of "Parlitz and Wichard", which is unreferenced. So I
-% really have no idea what's going on with this algorithm!!
-% I know it's a stochastic algorithm, so it must rely on some random
-% sampling of the input time series... I'll just return some statistics
+% 
+% 
+% It's a stochastic algorithm, so it must rely on some random sampling of the
+% input time series... A bit of a strange one, but I'll return some statistics
+% and see what they do.
+% 
+
+function out = TSTL_delaytime(y,maxdelay,past)
 % Ben Fulcher, November 2009
 
 %% Preliminaries
@@ -30,7 +43,6 @@ end
 if maxdelay < 10,
     maxdelay = 10;
     fprintf(1,'Maxdelay set to its minimum: delaytime = 10\n')
-    % necessary for output statistics
 end
 
 %% Run

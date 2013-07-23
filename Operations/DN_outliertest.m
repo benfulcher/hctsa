@@ -1,8 +1,21 @@
-function out = DN_outliertest(y,p)
-% Removes the pth percent of highest and lowest outliers from the z-scored 
-% input time series, y (i.e., 2*p percent removed from the time series in total)
-% Returns the ratio of the mean and std before and after doing this
+% DN_OutlierTest
+% 
+% Removes the p% of highest and lowest values in the time series (i.e., 2*p%
+% removed from the time series in total) and returns the ratio of either the
+% mean or the standard deviation of the time series, before and after this
+% transformation.
+% 
+% INPUTS:
+% y, the input time series
+% p, the percentage of values to remove beyond upper and lower percentiles
+% 
+
+function out = DN_OutlierTest(y,p)
 % Ben Fulcher, 2009
+
+if nargin < 2
+    p = 2; % by default, remove 2% of values from upper and lower percentiles
+end
 
 % mean of the middle (100-2*p)% of the data
 out.mean = mean(y(y > prctile(y,p) & y < prctile(y,100-p)));

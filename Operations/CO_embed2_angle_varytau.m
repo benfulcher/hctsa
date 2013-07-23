@@ -5,8 +5,9 @@
 % tau = 1, 2, ..., maxtau.
 % 
 % INPUTS:
-% y---a column vector time series
-% maxtau---the maximum time lag
+% y, a column vector time series
+% maxtau, the maximum time lag to consider
+% 
 
 function out = CO_embed2_angle_varytau(y,maxtau)
 % Ben Fulcher, September 2009

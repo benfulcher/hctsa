@@ -2,12 +2,18 @@
 % 
 % Computes the autocorrelation of an input time series, y, at a time-lag, tau
 % INPUTS:
-% y is a scalar time series column vector
-% If tau is a scalar, returns autocorrelation for y at that lag
-% If tau is a vector, returns autocorrelations for y at that set of lags
+% y, a scalar time series column vector
+% tau: the time-delay. If tau is a scalar, returns autocorrelation for y at that
+%       lag. If tau is a vector, returns autocorrelations for y at that set of
+%       lags.
+% 
 
 function out = CO_autocorr(y,tau)
 
+% Check inputs:
+if nargin < 2 || isempty(tau)
+    tau = 1;
+end
 N = length(y); % length of the time sries
 
 if length(tau) == 1

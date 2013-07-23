@@ -26,8 +26,9 @@
 % 
 % Outputs include the model coefficients obtained, the SBCs at
 % each model order, various tests on residuals, and statistics from an
-
 % eigendecomposition of the time series using the estimated AR model.
+% 
+
 function out = MF_arfit(y,pmin,pmax,selector)
 % Ben Fulcher, 28/1/2010
 

@@ -24,7 +24,7 @@ else
     if ischar(tau) % use a routine to inform tau
         switch tau
             case 'mi' % first minimum of mutual information function
-                tau = CO_firstmin(y,'mi');
+                tau = CO_FirstMin(y,'mi');
                 sstau = sprintf('by first minimum of mutual information to tau = %u');
             case 'ac' % first zero-crossing of ACF
                 tau = CO_fzcac(y);
@@ -86,7 +86,7 @@ else % use a routine to inform m
                     th = 10;
                 end
                 try
-                    m = TSTL_cao(y,10,tau,3,0.2,{'mmthresh',th});
+                    m = NL_CaosMethod(y,10,tau,3,0.2,{'mmthresh',th});
                 catch
                     fprintf(1,'Call to TSTOOL function ''cao'' failed')
                     y_embed = NaN; return

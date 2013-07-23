@@ -62,7 +62,7 @@ else
 end
 
 try
-    loghyper = GP_learnhyper(covfunc,-50,tt,yt,init_loghp);
+    loghyper = GP_LearnHyperp(covfunc,-50,tt,yt,init_loghp);
 catch emsg
     error('Error learning hyperparameters for time series')
 end
@@ -134,7 +134,7 @@ end
 
 %% Subfunctions
 
-%     function loghyper = GP_learnhyper(covfunc,nfevals,t,y,init_loghyper)
+%     function loghyper = GP_LearnHyperp(covfunc,nfevals,t,y,init_loghyper)
 %         % nfevals--  negative: specifies maximum number of allowed
 %         % function evaluations
 %         % t: time

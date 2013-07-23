@@ -4,7 +4,7 @@
 % returns statistics on the goodness of fits across a range of p and
 % q parameters.
 % 
-% Uses the following functions from MATLAB's Econometrics Toolbox: archtest,
+% Uses the following functions from Matlab's Econometrics Toolbox: archtest,
 % lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
 % 
 % INPUTS:

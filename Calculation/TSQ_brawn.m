@@ -76,9 +76,9 @@ if toparallel
     else
         if matlabpool('size')==0
         	matlabpool open;
-        	fprintf(fid,'MATLAB parallel processing pool opened with %u and ready to go',matlabpool('size'))
+        	fprintf(fid,'Matlab parallel processing pool opened with %u and ready to go',matlabpool('size'))
         else
-        	fprintf(fid,'MATLAB parallel processing pool already open. Size: %u\n',matlabpool('size'))
+        	fprintf(fid,'Matlab parallel processing pool already open. Size: %u\n',matlabpool('size'))
         end
     end
 end

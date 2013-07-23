@@ -9,9 +9,10 @@
 % parabolas, rings, and circles.
 % 
 % INPUTS:
-% y is the z-scored time series
+% y, the input time series
 % tau is the time lag (can be set to 'tau' to set the time lag the first zero
 %                       crossing of the autocorrelation function)
+% 
 
 function out = CO_basicrecurf(y,tau)
 % Ben Fulcher September 2009
@@ -26,7 +27,6 @@ end
 xt = y(1:end-tau); % part of the time series
 xtp = y(1+tau:end); % time-lagged time series
 N = length(y) - tau; % Length of each time series subsegment
-
 
 % Points in a thick bottom-left -- top-right diagonal
 out.updiag01 = sum(abs(xtp-xt) < 0.1)/N;

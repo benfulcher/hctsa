@@ -1,3 +1,8 @@
+% RP_crpsimp
+% 
+% REDUNDANT
+% 
+
 function out = RP_crpsimp(y,m,tau,eps,dist,tw)
 % My attempt to do a bunch of recurrence plot measures using the CRP
 % Toolbox by Marwan, Version 5.13, Release 26
@@ -33,7 +38,7 @@ if ischar(tau)
     case 'ac'
         tau = CO_fzcac(y);
     case 'mi'
-        tau = CO_firstmin(y,'mi');
+        tau = CO_FirstMin(y,'mi');
     otherwise
         error('Unknown tau setting: ''%s''',tau);
     end

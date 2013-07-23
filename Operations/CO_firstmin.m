@@ -1,4 +1,4 @@
-% CO_firstmin
+% CO_FirstMin
 % 
 % Returns the time at which the first minimum in a given correlation function
 % occurs.
@@ -15,7 +15,7 @@
 % Uses Rudy Moddemeijer's RM_information.m code that may or may not be great...
 % 
 
-function out = CO_firstmin(y,minwhat)
+function out = CO_FirstMin(y,minwhat)
 % Ben Fulcher, 2008
 
 

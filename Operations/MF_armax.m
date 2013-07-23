@@ -22,12 +22,12 @@
 % Outputs include the fitted AR and MA coefficients, the goodness of fit in the
 % training data, and statistics on the residuals from using the fitted model to
 % predict the testing data.
+% 
 
 function out = MF_armax(y, orders, ptrain, nsteps)
-% Ben Fulcher 1/2/2010
+% Ben Fulcher, 1/2/2010
 
 %% Prepare Inputs
-
 % (1) y, the time series as a column vector
 if size(y,2) > size(y,1)
    y = y'; % ensure a column vector 
@@ -51,7 +51,12 @@ if nargin < 4 || isempty(nsteps)
 end
 
 %% Fit the model
-% Uses the system identification toolbox function armax
+% Uses the System Identification Toolbox function armax
+
+% Check function exists:
+if ~exist('armax')
+    error('System Identification Toolbox not installed')
+end
 
 m = armax(y, orders);
 
@@ -65,12 +70,12 @@ dc = m.dc; % must uncertainties in MA coeffs
 % Make these outputs
 if length(c_ar) > 1
     for i = 2:length(c_ar)
-        eval(['out.AR_' num2str(i-1) ' = ' num2str(c_ar(i)) ';']);
+        eval(sprintf('out.AR_%u = c_ar(%u);',i-1,i));
     end
 end
 if length(c_ma) > 1
     for i = 2:length(c_ma)
-        eval(['out.MA_' num2str(i-1) ' = ' num2str(c_ma(i)) ';']);
+        eval(sprintf('out.MA_%u = c_ma(%u);',i-1,i));
     end
 end
 
@@ -95,7 +100,6 @@ out.fpe = m.EstimationInfo.FPE; % Final prediction error of model
 out.lastimprovement = m.EstimationInfo.LastImprovement; % Last improvement made in interation
 out.aic = aic(m); % ~ log(fpe)
 
-
 %% Prediction
 
 % Select first portion of data for estimation
@@ -116,15 +120,15 @@ yp = predict(mp, ytest, nsteps, 'init', 'e'); % across whole dataset
 % plot the two:
 % plot(y,yp);
 
-mresiduals = ytest.y-yp.y;
+mresiduals = ytest.y - yp.y;
 
 % 1) Get statistics on residuals
-residout = MF_residanal(mresiduals);
+residout = MF_ResidualAnalysis(mresiduals);
 
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
-for k=1:length(fields);
-    eval(['out.' fields{k} ' = residout.' fields{k} ';']);
+for k = 1:length(fields);
+    eval(sprintf('out.%s = residout.%s;',fields{k},fields{k}));
 end
 
 % % Train on some proportion, ptrain, of data

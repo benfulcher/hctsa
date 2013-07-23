@@ -1,29 +1,49 @@
-function out = ST_dyntransition(y,ng,tau)
-% Calculates the transition probabilities and measures of how they change
-% as the number of groups; the lag time changes. Discretization is done by
-% quantile separation.
-% INPUTS: ng: number of groups in the course-graining (scalar for constant,
-%         vector for range to look across)
-%         tau: the lag; transition matricies corresponding to this lag. We
-%         can either downsample the time series at this lag and then do the
-%         discretization as normal, or do the discretization and then just
-%         look at this dicrete lag. Here we do the former. (scalar for
-%         constant tau, vector for range to vary across)
-% OUTPUTS: a structure containing the probabilities, size as appropriate
-%           for dparam
-% Ben Fulcher August 2009
+% ST_dyntransition
+% 
+% Calculates the transition probabilities and measures how they change as the
+% size of the alphabet increases.
+% 
+% Discretization is done by quantile separation.
+% 
+% INPUTS:
+% 
+% y, the input time series
+% 
+% ng, the number of groups in the coarse-graining (scalar for constant, or a
+%       vector of ng to compare across this range)
+% 
+% tau: the time-delay; transition matricies corresponding to this time-delay. We
+%      can either downsample the time series at this lag and then do the
+%      discretization as normal, or do the discretization and then just
+%      look at this dicrete lag. Here we do the former. (scalar for
+%      constant tau, vector for range to vary across)
+% 
+% Outputs include the decay rate of the sum, mean, and maximum of diagonal
+% elements of the transition matrices, changes in symmetry, and the eigenvalues
+% of the transition matrix.
+% 
 
-N = length(y);
+function out = ST_dyntransition(y,ng,tau)
+% Ben Fulcher, August 2009
+
+if nargin < 2 || isempty(ng)
+    ng = (2:10); % compare across alphabet sizes from 2 to 10
+end
+if nargin < 3 || isempty(tau)
+    tau = 1; % use a time-lag of 1
+end
+
+N = length(y); % time-series length
 
 if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
     tau = CO_fzcac(y);
-    if tau > N/50; % for highly-correlated signals
+    if tau > N/50 % for highly-correlated signals
         tau = floor(N/50);
     end
 end
 
 nfeat = 9; % the number of features calculated at each point
-if length(ng) == 1 && length(tau)>1 % vary tau
+if (length(ng) == 1) && (length(tau) > 1) % vary tau
     if ng < 2; return; end % need more than 2 groups
     taur = tau; % the tau range
     store = zeros(length(taur),nfeat);
@@ -31,20 +51,21 @@ if length(ng) == 1 && length(tau)>1 % vary tau
     for i = 1:length(taur)
         tau = taur(i);
         if tau > 1; y = resample(y,1,tau); end % resample
-        yth = loc_discretize(y,ng); % threshold
+        yth = SUB_discretize(y,ng); % threshold
         store(i,:) = getmeasures(yth);
     end
 
+    error('This kind of doesn''t work yet')
     
-elseif length(tau) == 1 && length(ng) > 1 % vary ng
+elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     if min(ng) < 2; error('Need more than 2 groups'); end % need more than 2 groups, always
     ngr = ng; % the ng range (ng is an input vector)
     store = zeros(length(ngr),nfeat);
-    if tau>1; y = resample(y,1,tau); end % resample
+    if tau > 1; y = resample(y,1,tau); end % resample
     
     for i = 1:length(ngr)
         ng = ngr(i);
-        yth = loc_discretize(y,ng); % thresholded data: yth
+        yth = SUB_discretize(y,ng); % thresholded data: yth
         store(i,:) = loc_getmeasures(yth,ng);
     end
     
@@ -77,7 +98,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     % fit exponential
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c,gof] = fit(ngr,store(:,3),f);
+    [c, gof] = fit(ngr,store(:,3),f);
     out.trfexp_a = c.a;
     out.trfexp_b = c.b;
     out.trfexp_r2 = gof.rsquare;
@@ -90,7 +111,7 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     f = fittype('a*x+b','options',s);
     
     r1 = find(store(:,3)>store(1,3)/5);
-    if length(r1)>2
+    if length(r1) > 2
         [~, gof] = fit(ngr(r1),store(r1,3),f);
         out.trflin5_adjr2 = gof.adjrsquare;
     else
@@ -191,18 +212,9 @@ elseif length(tau) == 1 && length(ng) > 1 % vary ng
     
 end
 
-%% %% %% NOW! Output features %% %% %%
-% figure('color','w');
-
-% out = store;
-
-
 %% Subfunctions
 
-
-
-
-    function yth = loc_discretize(y,ng)
+    function yth = SUB_discretize(y,ng)
         % 1) discretize the time series into a number of groups np
         th = quantile(y,linspace(0,1,ng+1)); % thresholds for dividing the time series values
         th(1) = th(1)-1; % this ensures the first point is included

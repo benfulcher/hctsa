@@ -10,6 +10,7 @@
 % 
 % Uses code written by D. Tolstonogov and obtained from
 % http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m.
+%
 
 function out = EN_TSentropy(x, q)
 % Wrapper for TS_entropy

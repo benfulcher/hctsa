@@ -3,7 +3,7 @@ function [yp, best] = BF_preproc(y,choosebest,order,beatthis,dospectral)
 % preprocessed in a number of different ways.
 % If second argument is specified, will choose amongst the preprocessings
 % for the 'best' one according to the given criterion.
-% Based on (really improvement/development of) MF_preproc.
+% Based on (really improvement/development of) PP_ModelFit.
 % Ben Fulcher 25/2/2010
 
 % I think a good way of 'normalizing' over autocorrelation should also be

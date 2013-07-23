@@ -3,7 +3,7 @@
 % Looks at robustness of test set goodness of fit over different samples in
 % the time series from fitting a given time-series model.
 % 
-% Similar to MF_ss_tt, except fits the model on the full time
+% Similar to MF_FitSubsegments, except fits the model on the full time
 % series and compares how well it predicts time series in different local
 % time-series segments.
 % 
@@ -184,7 +184,7 @@ for i = 1:npred
     
     
 %     % 1) Get statistics on residuals
-%     residout = MF_residanal(mresiduals);
+%     residout = MF_ResidualAnalysis(mresiduals);
 % 
 %     % convert these to local outputs in quick loop
 %     fields = fieldnames(residout);

@@ -1,28 +1,39 @@
-function out = TSTL_predict(y, plen, NNR, stepsize, pmode, embedparams)
-% Uses TSTOOL code 'predict', which does local constant iterative
-% prediction for scalar data using fast nearest neighbour searching. There
-% are four modes available for the prediction output
+% TSTL_predict
+% 
+% Uses TSTOOL code 'predict', which does local constant iterative prediction for
+% scalar data using fast nearest neighbour searching. There are four modes
+% available for the prediction output.
+% 
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% 
 % INPUTS:
-% y: scalar column vector time series
-% plen: prediction length in samples or as proportion of time series length
-% NNR: number of nearest neighbours
-% stepsize: number of samples to step for each prediction
-% pmode: prediction mode, several options:--
-%           (i) 0 -- output vectors are means of images of nearest neighbours
-%          (ii) 1 -- output vectors are distance-weighted means of images
+% 
+% y, scalar column vector time series
+% 
+% plen, prediction length in samples or as proportion of time series length NNR,
+% 
+% NNR, number of nearest neighbours
+% 
+% stepsize, number of samples to step for each prediction
+% 
+% pmode, prediction mode, four options:
+%           (i) 0: output vectors are means of images of nearest neighbours
+%           (ii) 1: output vectors are distance-weighted means of images
 %                     nearest neighbours
-%         (iii) 2 -- output vectors are calculated using local flow and the
+%           (iii) 2: output vectors are calculated using local flow and the
 %                    mean of the images of the neighbours
-%          (iv) 3 -- output vectors are calculated using local flow and the
+%           (iv) 3: output vectors are calculated using local flow and the
 %                    weighted mean of the images of the neighbours
-% embedparams: as usual to feed into BF_embed, except that now you can set
+% embedparams, as usual to feed into BF_embed, except that now you can set
 %              to zero to not embed.
-% It's a bit rubbish in that the output is not directly correlated to the
-% input...?
-% adapted by Ben Fulcher November 2009
+% 
+
+function out = TSTL_predict(y, plen, NNR, stepsize, pmode, embedparams)
+% Ben Fulcher, November 2009
 
 %% Foreplay
-N = length(y);
+doplot = 0; % plot outputs to figure (e.g., for debugging)
+N = length(y); % time-series length
 
 % (*) Prediction length, plen (the length of the output time series)
 if nargin < 2 || isempty(plen)
@@ -49,7 +60,7 @@ end
 % (*) embedparams
 if nargin < 6 || isempty(embedparams)
     embedparams = {'ac','cao'};
-    disp('using default embedding using autocorrelation and cao')
+    fprintf(1,'Using default embedding using autocorrelation for tau and Cao''s method for m\n')
 end
 
 
@@ -69,7 +80,7 @@ end
 
 Ns = length(data(s));
 if Ns < 50
-    keyboard
+    error('This is a very short time series! :(');
 end
 y = y(1:Ns); % for statistical purposes...
 if plen > 0 && plen <= 1
@@ -80,36 +91,18 @@ end
 try
     rs = predict(s, plen, NNR, stepsize, pmode);
 catch
-    error('TSTL_predict didn''t run correctly')
+    error('TSTOOL''s predict function didn''t run correctly')
 end
 
 y_pred = data(rs);
 y_pred1 = y_pred(:,1); % for this embedding dimension (?)
-<<<<<<< Local Changes
-<<<<<<< Local Changes
-% hold off; plot(y,'k'), hold on; plot(y_pred1,'m'), hold off;
 
-% keyboard
-= == ====
-% hold off; plot(y,'k'), hold on; plot(y_pred1,'m'), hold off;
->>>>>>> External Changes
+if doplot
+    figure('color','w'); box('on'); view(rs);
 
-<<<<<<< Local Changes
-% view(rs);
-= == ====
-% keyboard
-= == ====
-% hold off; plot(y,'k'), hold on; plot(y_pred1,'m'), hold off;
->>>>>>> External Changes
-
-<<<<<<< Local Changes
-% view(rs);
->>>>>>> External Changes
-= == ====
-% keyboard
-
-% view(rs);
->>>>>>> External Changes
+    figure('color','w'); box('on');
+    hold off; plot(y,'k'), hold on; plot(y_pred1,'m'), hold off;
+end
 
 %% Compare the output to the properties of the true time series
 
@@ -175,11 +168,12 @@ out.ac1bestres = CO_autocorr(res,1); % autocorrelation of residuals
 
 % now look at fraction of points that are within a threshold of each
 % other...
-out.fracres005 = sum(abs(res)<0.05)/Nlag;
-out.fracres01 = sum(abs(res)<0.1)/Nlag;
-out.fracres02 = sum(abs(res)<0.2)/Nlag;
-out.fracres03 = sum(abs(res)<0.3)/Nlag;
-out.fracres05 = sum(abs(res)<0.5)/Nlag;
+fracresfn = @(x) sum(abs(res) < x)/Nlag
+out.fracres005 = fracresfn(0.05); %sum(abs(res)<0.05)/Nlag;
+out.fracres01 = fracresfn(0.1); %sum(abs(res)<0.1)/Nlag;
+out.fracres02 = fracresfn(0.2); %sum(abs(res)<0.2)/Nlag;
+out.fracres03 = fracresfn(0.3); %sum(abs(res)<0.3)/Nlag;
+out.fracres05 = fracresfn(0.5); %sum(abs(res)<0.5)/Nlag;
 
 % now look at fraction of points within a circle of (time-measurement) radius
 % near a real point in the time series

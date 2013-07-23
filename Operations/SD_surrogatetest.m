@@ -1,12 +1,58 @@
-function out = SD_surrogatetest(x,surrmeth,nsurrs,extrap,teststat)
-% Looks at test statistic of surrogates compared to that of the given time
-% series
-% first four inputs are inputs to SD_makesurrogates, teststatistic it the
-% teststatistic to compare -- can specify many in a cell, will return
-% outputs for each teststat specified. Better this way because creating
-% surrogates is the expensive step.
-% Ben Fulcher 28/1/2011
+% SD_surrogatetest
+% 
+% Analyzes the test statistics obtained from surrogate time series compared to
+% those measured from the given time series.
+% 
+% This code was based on information found in:
+% "Surrogate data test for nonlinearity including nonmonotonic transforms"
+% D. Kugiumtzis Phys. Rev. E 62(1) R25 (2000)
+% 
+% The generation of surrogates is done by the periphery function,
+% SD_MakeSurrogates
+% 
+% 
+% INPUTS:
+% x, the input time series
+% 
+% surrmeth, the method for generating surrogate time series:
+%       (i) 'RP': random phase surrogates that maintain linear correlations in
+%                 the data but destroy any nonlinear structure through phase
+%                 randomization
+%       (ii) 'AAFT': the amplitude-adjusted Fourier transform method maintains
+%                    linear correlations but destroys nonlinear structure
+%                    through phase randomization, yet preserves the approximate
+%                    amplitude distribution,
+%       (iii) 'TFT': preserves low-frequency phases but randomizes high-frequency phases (as a way of dealing
+%                    with non-stationarity, cf.:
+%               "A new surrogate data method for nonstationary time series",
+%                   D. L. Guarin Lopez et al., arXiv 1008.1804 (2010)
+% 
+% nsurrs, the number of surrogates to compute (default is 99 for a 0.01
+%         significance level 1-sided test)
+% 
+% extrap, extra parameter, the cut-off frequency for 'TFT'
+% 
+% teststat, the test statistic to evalute on all surrogates and the original
+%           time series. Can specify multiple options in a cell and will return
+%           output for each specified test statistic:
+%           (i) 'ami': the automutual information at lag 1, cf.
+%                 "Testing for nonlinearity in irregular fluctuations with
+%                 long-term trends" T. Nakamura and M. Small and Y. Hirata,
+%                 Phys. Rev. E 74(2) 026205 (2006)
+%           (ii) 'fmmi': the first minimum of the automutual information
+%                       function
+%           (iii) 'o3': a third-order statistic used in: "Surrogate time
+%                 series", T. Schreiber and A. Schmitz, Physica D 142(3-4) 346
+%                 (2000)
+%           (iv) 'tc3': a time-reversal asymmetry measure. Outputs of the
+%                 function include a z-test between the two distributions, and
+%                 some comparative rank-based statistics.
+% 
 
+function out = SD_surrogatetest(x,surrmeth,nsurrs,extrap,teststat)
+% Ben Fulcher, 28/1/2011
+
+doplot = 0; % plot outputs to a figure
 
 %% CHECK INPUTS
 if nargin < 2 || isempty(surrmeth)
@@ -15,7 +61,7 @@ end
 if nargin < 3 || isempty(nsurrs)
     nsurrs = 99; % create 99 surrogates for a 0.01 significance level 1-sided test
 end
-if nargin < 4 || isempty(nsurrs)
+if nargin < 4
     extrap = [];
 end
 if nargin < 5 || isempty(teststat)
@@ -31,7 +77,7 @@ N = length(x); % time-series length
 %% OK NOW DO SHIT
 
 % 1) make surrogates
-z = SD_makesurrogates(x,surrmeth,nsurrs,extrap);
+z = SD_MakeSurrogates(x,surrmeth,nsurrs,extrap);
 % z is matrix where each column is a surrogate time series
 
 % 2) evaluate test statistic on each surrogate
@@ -60,11 +106,11 @@ end
 if ismember('fmmi',teststat)
     % look at first minimum of mutual information of surrogates compared to
     % that of signal itself
-    fmmix = CO_firstmin(x,'mi');
+    fmmix = CO_FirstMin(x,'mi');
     fmmisurr = zeros(nsurrs,1);
     for i = 1:nsurrs
         try
-            fmmisurr(i) = CO_firstmin(z(i,:),'mi');
+            fmmisurr(i) = CO_FirstMin(z(i,:),'mi');
         catch
             out = NaN; return
         end
@@ -194,7 +240,7 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
         end
     end
     
-    % what fraction of the range is the sample in?
+    % What fraction of the range is the sample in?
     medsurr = median(statsurr);
     iqrsurr = iqr(statsurr);
     if iqrsurr == 0
@@ -222,10 +268,12 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
     end
 
     % DO PLOTTING:
-%     figure('color','w')
-%     plot(statsurr,ones(nsurrs,1),'.k');
-%     hold on;
-%     plot(statx*ones(2,1),[0,2],'r')
+    if doplot
+        figure('color','w')
+        plot(statsurr,ones(nsurrs,1),'.k');
+        hold on;
+        plot(statx*ones(2,1),[0,2],'r')
+    end
 end
 
 

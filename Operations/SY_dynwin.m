@@ -1,11 +1,38 @@
-function out = SY_dynwin(y)
-% Operation to estimate stationarity as a function of a few parameters (window size,
-% window overlap)
-% Ben Fulcher August 2009
-% Ben Fulcher 8/10/2010 fixed an error -- didn't take std of ops before
+% SY_DynWin
+% 
+% Analyzes how stationarity estimates depend on the number of segments used to
+% segment up the time series.
+% 
+% Specifically, variation in a range of local measures are implemented: mean,
+% standard deviation, skewness, kurtosis, ApEn(1,0.2), SampEn(1,0.2), AC(1),
+% AC(2), and the first zero-crossing of the autocorrelation function.
+% 
+% The standard deviation of local estimates of these quantities across the time
+% series are calculated as an estimate of the stationarity in this quantity as a
+% function of the number of splits, n_{seg}, of the time series.
+% 
+% INPUTS:
+% 
+% y, the input time series
+% 
+% maxnseg, the maximum number of segments to consider. Will sweep from 2
+%           segments to maxnseg.
+% 
+% 
+% Outputs of the operation are the standard deviation of this set of
+% 'stationarity' estimates across these window sizes.
+% 
 
-nsegr = (2:1:10);
-nmov = 1;
+function out = SY_DynWin(y,maxnseg)
+% Ben Fulcher, August 2009
+
+if nargin < 2 || isempty(maxnseg)
+    maxnseg = 10;
+end
+
+nsegr = (2:1:maxnseg); % range of nseg to sweep across
+nmov = 1; % controls window overlap
+
 nfeat = 11; % number of features
 fs = zeros(length(nsegr),nfeat);
 taug = CO_fzcac(y); % global tau

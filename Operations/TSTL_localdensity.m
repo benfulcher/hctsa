@@ -1,9 +1,30 @@
+% TSTL_localdensity
+% 
+% Uses TSTOOL code localdensity, which is very poorly documented in the TSTOOL
+% documentation, but we can assume it returns local density estimates in the
+% time-delay embedding space.
+% 
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% 
+% INPUTS:
+% 
+% y, the time series as a column vector
+% 
+% NNR, number of nearest neighbours to compute
+% 
+% past, number of time-correlated points to discard (samples)
+% 
+% embedparams, the embedding parameters, inputs to BF_embed as {tau,m}, where
+%               tau and m can be characters specifying a given automatic method
+%               of determining tau and/or m (see BF_embed).
+% 
+% Outputs are various statistics on the local density estimates at each point in
+% the time-delay embedding, including the minimum and maximum values, the range,
+% the standard deviation, mean, median, and autocorrelation.
+% 
+
 function out = TSTL_localdensity(y,NNR,past,embedparams)
-% Uses TSTOOL code localdensity
-% y: column vector time series
-% NNR: number of nearest neighbours to compute
-% past: number of time-correlated points to discard (samples)
-% Ben Fulcher November 2009
+% Ben Fulcher, November 2009
 
 %% Check inputs
 if nargin < 2 || isempty(NNR)
@@ -62,6 +83,6 @@ out.ac5den = F_acden(5);
 
 % Estimates of correlation length:
 out.tauacden = CO_fzcac(locden,'ac'); % first zero-crossing of autocorrelation function
-out.taumiden = CO_firstmin(locden,'mi'); % first minimum of automutual information function
+out.taumiden = CO_FirstMin(locden,'mi'); % first minimum of automutual information function
 
 end

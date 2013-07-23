@@ -1,4 +1,4 @@
-% MF_compareAR
+% MF_CompareAR
 % 
 % Compares fits of AR models of various orders to the input time series.
 % 
@@ -14,7 +14,7 @@
 % applying the model trained on the training data to the testing data.
 % 
 
-function out = MF_compareAR(y,orders,howtotest)
+function out = MF_CompareAR(y,orders,howtotest)
 % Ben Fulcher, 1/2/2010
 
 doplot = 0; % can set to 1 to plot outputs
@@ -45,7 +45,7 @@ end
 % Get normalized prediction errors, V, from training to test set for each
 % model order
 % This could be done for model residuals using code in, say,
-% MF_ss_compare_orders, or MF_SS_n4sid...
+% MF_StateSpaceCompOrder, or MF_SS_n4sid...
 
 if ischar(howtotest)
     if strcmp(howtotest,'all')

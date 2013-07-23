@@ -65,7 +65,7 @@ switch model
         if strcmp(order,'best') % fit 'best' AR model; by sbc
             % Use arfit software to retrieve the optimum ar order by some
             % criterion (Schwartz's Bayesian Criterion, SBC)
-            % Uses MATLAB code from ARfit
+            % Uses Matlab code from ARfit
             % http://www.gps.caltech.edu/~tapio/arfit/
             [west, Aest, Cest, SBC, FPE, th] = arfit(ytrain.y, 1, 10, 'sbc', 'zero');
             order = length(Aest); 

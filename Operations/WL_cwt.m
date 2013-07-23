@@ -1,8 +1,26 @@
+% WL_cwt
+% 
+% Applies a continuous wavelet transform to the time series using the function
+% cwt from Matlab's Wavelet Toolbox.
+% 
+% INPUTS:
+% y, the input time series
+% 
+% wname, the wavelet name, e.g., 'db3' (Daubechies wavelet), 'sym2' (Symlet),
+%                           etc. (see Wavelet Toolbox Documentation for all
+%                           options)
+% 
+% maxscale, the maximum scale of wavelet analysis.
+% 
+% 
+% Outputs from this function are statistics on the coefficients, entropy, and
+% results of coefficients summed across scales.
+% 
+    
 function out = WL_cwt(y, wname, maxscale)
-% Uses Wavelet, Statistics Toolboxes in MATLAB
-% Ben Fulcher 26/1/2010
+% Ben Fulcher, 26/1/2010
 
-doplot = 0; % plot outputs
+doplot = 0; % plot outputs to figures
 
 N = length(y); % length of the time series
 
@@ -25,6 +43,7 @@ SC = 100*S./sum(S(:)); % scaled power
 % displayed in a scalogram (c.f., wscalogram function)
 
 if doplot
+    figure('color','w'); box('on');
     subplot(3,1,1)
     plot(y);
     subplot(3,1,2:3);

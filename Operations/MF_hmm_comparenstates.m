@@ -1,18 +1,32 @@
-function out = MF_hmm_comparenstates(y,trainp,nstater)
-% Uses Zoubin Gharamani's implementation of HMMs for real-valued Gaussian
-% observations:
+% MF_hmm_CompareNStates
+% 
+% Fits HMMs with different numbers of states, and compares the resulting
+% test-set likelihoods.
+% 
+% The code relies on Zoubin Gharamani's implementation of HMMs for real-valued
+% Gassian-distributed observations, including the hmm and hmm_cl routines (
+% renamed ZG_hmm and ZG_hmm_cl here).
+% Implementation of HMMs for real-valued Gaussian observations:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software.html
 % or, specifically:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software/hmm.tar.gz
+% 
+% INPUTS:
+% 
+% y, the input time series
+% 
+% trainp, the initial proportion of the time series to train the model on
+% 
+% nstater, the vector of state numbers to compare. E.g., (2:4) compares a number
+%               of states 2, 3, and 4.
+% 
+% Outputs are statistics on how the log likelihood of the test data changes with
+% the number of states n_{states}$. We implement the code for p_{train} = 0.6$
+% as n_{states}$ varies across the range n_{states} = 2, 3, 4$.
+% 
 
-% I've wrapped it up to work and give a structure as output for
-% implementation in the time series database...
-
-% This routine fits hmms with a different number of states and compares the
-% test-set likelihoods.
-
-% Ben Fulcher 9/4/2010
-
+function out = MF_hmm_CompareNStates(y,trainp,nstater)
+% Ben Fulcher, 9/4/2010
 
 %% Check Inputs
 N = length(y); % number of samples in time series
@@ -21,6 +35,7 @@ if nargin < 2 || isempty(trainp)
     fprintf(1,'Training the model on 60%% of the data by default\n')
     trainp = 0.6; % train on 60% of the data
 end
+Ntrain = floor(trainp*N); % number of initial samples to train the model on
 
 if nargin < 3 || isempty(nstater)
     fprintf(1,'Using 2--4 states by default\n')
@@ -30,7 +45,6 @@ end
 
 %% Train the HMM
 % divide up dataset into training (ytrain) and test (ytest) portions
-Ntrain = floor(trainp*N);
 ytrain = y(1:Ntrain);
 if Ntrain < N
     ytest = y(Ntrain+1:end);
@@ -56,7 +70,6 @@ for j = 1:Nstate
 end
 
 %% Output some statistics
-
 out.meanLLtrain = mean(LLtrains);
 out.meanLLtest = mean(LLtests);
 out.maxLLtrain = max(LLtrains);
@@ -65,7 +78,7 @@ out.chLLtrain = LLtrains(end)-LLtrains(1);
 out.chLLtest = LLtests(end)-LLtests(1);
 out.meandiffLLtt = mean(abs(LLtests-LLtrains));
 
-for i = 1 : Nstate-1
+for i = 1:Nstate-1
     eval(sprintf('out.LLtestdiff%u = LLtests(%u) - LLtests(%u);',i,i+1,i));
 end
 

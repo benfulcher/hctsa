@@ -1,6 +1,6 @@
 function [ackwgs,acgi,Fcl] = TSQ_us_cluster(norcl,cmeth,cparams,metorts)
 %%% Spider Unsupervised Clustering
-% Uses the Spider package for machine learning in MATLAB
+% Uses the Spider package for machine learning in Matlab
 % Ben Fulcher 10/4/2010
 % inputs a data matrix and clustering options, outputs a new ordering of
 % the indicies of this data matrix. Can do this on the full data matrix, or

@@ -1,12 +1,34 @@
+% WL_scal2frq
+% 
+% Estimates frequency components in a periodic time series using functions from
+% Matlab's Wavelet Toolbox, including the scal2frq function.
+% 
+% INPUTS:
+% y, the input time series
+% 
+% wname, the name of the mother wavelet to analyze the data with: e.g., 'db3',
+%           'sym2', cf. Wavelet Toolbox Documentation for details
+% 
+% amax, the maximum scale / level (can be 'max' to set according to wmaxlev)
+% 
+% delta, the sampling period
+% 
+% Outputs are the level with the highest energy coefficients, the dominant
+% period, and the dominant pseudo-frequency.
+% 
+% Adapted from example in Matlab Wavelet Toolbox documentation. It's kind of a
+% weird idea to apply the method to generic time series.
+% 
+
 function out = WL_scal2frq(y, wname, amax, delta)
-% Ben Fulcher 26/1/2010. Adapted from example in MATLAB wavelet toolbox
-% It's a bit stupid really.
+% Ben Fulcher, 26/1/2010.
 
 %% Check Inputs
-N = length(y); % length of time series
+doplot = 0; % plot outputs to figure
+N = length(y); % length of the time series
 
 if nargin < 2 || isempty(wname)
-    disp('Wavelet not specified -- using the default db3 wavelet')
+    fprintf(1,'Wavelet not specified -- using the default db3 wavelet\n')
     wname = 'db3';
 end
 
@@ -54,7 +76,10 @@ per = 1./f;
 % Estimate standard deviation of detail coefficients.
 stdc = wnoisest(c,l,scales);
 
-% plot(stdc) % plot them
+if doplot
+    figure('color','w'); box('on');
+    plot(stdc) % plot them
+end
 
 % Compute identified period.
 [~, jmax] = max(stdc); % level with highest energy coefficients

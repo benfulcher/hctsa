@@ -1,10 +1,10 @@
-% DN_simplefit
+% DN_SimpleFit
 % 
 % Fits different distributions or simple time-series models to the time series
 % using 'fit' function from Matlab's Curve Fitting Toolbox.
 % 
 % The distribution of time-series values is estimated using either a
-% kernel-smoothed density via the MATLAB function ksdensity with the default
+% kernel-smoothed density via the Matlab function ksdensity with the default
 % width parameter, or by a histogram with a specified number of bins, nbins.
 % 
 % INPUTS:
@@ -29,8 +29,9 @@
 % 
 % Outputs are the goodness of fifit, R^2, rootmean square error, the
 % autocorrelation of the residuals, and a runs test on the residuals.
+% 
 
-function out = DN_simplefit(x,dmodel,nbins)
+function out = DN_SimpleFit(x,dmodel,nbins)
 % Ben Fulcher, 2009
 
 %% Fit the model
@@ -59,7 +60,7 @@ if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
             fprintf(1,'The model, %s, failed for this data -- returning NaNs for all fitting outputs\n',dmodel);
             out = NaN; return
         else
-            error('DN_simplefit(x,%s,%u): Unexpected error fitting %s to the data distribution',dmodel,nbins,dmodel)
+            error('DN_SimpleFit(x,%s,%u): Unexpected error fitting %s to the data distribution',dmodel,nbins,dmodel)
         end
 	end
 elseif any(strcmp(TSmods,dmodel)); % valid TIME SERIES model name
@@ -74,7 +75,7 @@ elseif any(strcmp(TSmods,dmodel)); % valid TIME SERIES model name
             fprintf(1,'The model %s failed for this data -- returning NaNs for all fitting outputs\n',dmodel);
             out = NaN; return
         else
-            error('DN_simplefit(x,%s,%u): Unexpected error fitting ''%s'' to the time series',dmoel,nbins,dmodel)
+            error('DN_SimpleFit(x,%s,%u): Unexpected error fitting ''%s'' to the time series',dmoel,nbins,dmodel)
         end
 	end
 else

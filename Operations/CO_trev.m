@@ -29,7 +29,7 @@ if strcmp(tau,'ac')
     tau = CO_fzcac(y);
     % tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau,'mi')
-    tau = CO_firstmin(y,'mi');
+    tau = CO_FirstMin(y,'mi');
     % tau is the first minimum of the automutual information function
 end
 

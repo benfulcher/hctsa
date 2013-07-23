@@ -1,22 +1,36 @@
-function out = SD_makesurrogates(x,surrmethod,nsurrs,extrap)
-% Ben Fulcher 27/1/2011
+% SD_MakeSurrogates
+% 
+% Generates surrogate time series given a method (surrogates), number of
+% surrogates (nsurrs), and any extra parameters (extrap)
+% 
 % Method described relatively clearly in Guarin Lopez et al. (arXiv, 2010)
 % Used bits of aaft code that references (and presumably was obtained from)
-% D. Kugiumtzis,
-% ìSurrogate data test for nonlinearity including monotonic
-% transformations,î Phys. Rev. E, vol. 62, no. 1, 2000.
+% "ìSurrogate data test for nonlinearity including monotonic
+% transformations", D. Kugiumtzis, Phys. Rev. E, vol. 62, no. 1, 2000.
+% 
+% INPUTS:
+% x, the input time series
+% 
+% surrmethod, the method for generating surrogates:
+%             (i) 'RP' -- random phase surrogates
+%             (ii) 'AAFT' -- amplitude adjusted Fourier transform
+%             (iii) 'TFT' -- truncated Fourier transform
+% 
+% nsurrs, the number of surrogates to generate
+% 
+% extrap, extra parameters required by the selected surrogate generation method
+% 
 
-% x should be input time series; surrogates should be made
-% based on this.
-% surrmethod will be used
+function out = SD_MakeSurrogates(x,surrmethod,nsurrs,extrap)
+% Ben Fulcher, 27/1/2011
 
-% INPUTS
+% INPUTS:
 % number of surrogates to generate
 if nargin < 3 || isempty(nsurrs)
     nsurrs = 1; % just create a single surrogate
 end
 
-% any extra parameters (some methods require)
+% Any extra parameters (some methods require)
 if nargin < 4
     extrap = [];
 end
@@ -24,7 +38,7 @@ end
 
 N = length(x); % length of the time series
 out = zeros(N,nsurrs); % each column is a new surrogate
-tic
+tic % time it
 
 switch surrmethod
     case 'RP'
@@ -167,6 +181,7 @@ switch surrmethod
             xNew = real(ifft(zNew,N));
             out(:,surri) = xNew;
         end
+        
     otherwise
         error('Unknown surrogate generation method ''%s''',surrmethod)
 end

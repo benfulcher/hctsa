@@ -1,4 +1,4 @@
-% EN_permen
+% EN_PermEn
 % 
 % Computes the permutation entropy of order, ord, of a time series.
 % 
@@ -12,9 +12,10 @@
 % INPUTS:
 % y, a time series
 % ord, the order of permutation entropy
+% 
 
-function permen = EN_permen(y,ord)
-% Code adapted by Ben Fulcher, 2009
+function permen = EN_PermEn(y,ord)
+% Ben Fulcher, 2009
 
 % Ensure y is a column vector
 if size(y,1) > size(y,2);

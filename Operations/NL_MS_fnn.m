@@ -1,11 +1,43 @@
+% NL_MS_fnn
+% 
+% Determines the number of false nearest neighbors for the embedded time series
+% using Michael Small's false nearest neighbor code, fnn (renamed MS_fnn here)
+% 
+% cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
+% Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
+% Vol. 52 (2005)
+% Code available at http://small.eie.polyu.edu.hk/matlab/
+% 
+% False nearest neighbors are judged using a ratio of the distances between the
+% next k points and the neighboring points of a given datapoint.
+% 
+% INPUTS:
+% y, the input time series
+% de, the embedding dimensions to compare across (a vector)
+% tau, the time-delay (can be 'ac' or 'mi' to be the first zero-crossing of ACF,
+%                       or first minimum of AMI, respectively)
+% th, the distance threshold for neighbours
+% kth, the the distance to next points
+% [opt] justbest, can be set to 1 to just return the best embedding dimension, m_{best}
+% [opt] bestp, if justbest = 1, can set bestp as the proportion of false nearest
+%                   neighbours at which the optimal embedding dimension is
+%                   selected.
+% 
+% This function returns statistics on the proportion of false nearest neighbors
+% as a function of the embedding dimension m = m_{min}, m_{min}+1, ..., m_{max}
+% for a given time lag tau, and distance threshold for neighbors, d_{th}.
+% 
+% Outputs include the proportion of false nearest neighbors at each m, the mean
+% and spread, and the smallest m at which the proportion of false nearest
+% neighbors drops below each of a set of fixed thresholds.
+% 
+
 function out = NL_MS_fnn(y,de,tau,th,kth,justbest,bestp)
-% Wrapper for Michael Small's False Nearest Neighbour Code:
-% http://small.eie.polyu.edu.hk/matlab/
-% Ben Fulcher 19/2/2010
+% Ben Fulcher, 19/2/2010
 
-%% INPUTS
+%% CHECK INPUTS:
 
-% embedding dimension(s), de
+% Embedding dimension(s), de
 if nargin < 2 || isempty(de)
     de = (1:10);
 end
@@ -17,7 +49,7 @@ end
 if strcmp(tau,'ac')
     tau = CO_fzcac(y); % first zero-crossing of autocorrelation function
 elseif strcmp(tau,'mi')
-    tau = CO_firstmin(y,'mi'); % first minimum of automutual information function
+    tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
 end
 
 % A distance threshold for neighbours

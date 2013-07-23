@@ -1,4 +1,4 @@
-function out = MF_hmm(y,trainp,nstates)
+function out = MF_hmm_fit(y,trainp,nstates)
 % Uses Zoubin Gharamani's implementation of HMMs for real-valued Gaussian
 % observations:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software.html

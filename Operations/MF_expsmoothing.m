@@ -1,12 +1,32 @@
-function out = MF_expsmoothing(x,ntrain,alpha)
-% Wrapped up, code adapted from original code contributed 
-% by Siddharth Arora: Siddharth.Arora@sbs.ox.ac.uk
-% x is the input signal (uniformly sampled time series data as a column
-%                           vector)
-% This new version of the code takes a small training set with which to optimize alpha,
-% and applies that across the whole time series. This is a choice. Could
-% take a number of training sets and average to some optimal alpha, for example
-% Ben Fulcher 19/2/2010
+% MF_ExpSmoothing
+% 
+% Fits an exponential smoothing model to the time series using a training set to
+% fit the optimal smoothing parameter, alpha, and then applies the result to the
+% try to predict the rest of the time series.
+% 
+% cf. "The Analysis of Time Series", C. Chatfield, CRC Press LLC (2004)
+% 
+% Code is adapted from original code provided by Siddharth Arora:
+% Siddharth.Arora@sbs.ox.ac.uk
+% 
+% INPUTS:
+% x, the input time series
+% 
+% ntrain, the number of samples to use for training (can be a proportion of the
+%           time-series length)
+%           
+% alpha, the exponential smoothing parameter
+% 
+% Outputs include the fitted alpha, and statistics on the residuals from the
+% prediction phase.
+% 
+% Future alteration could take a number of training sets and average to some
+% optimal alpha, for example, rather than just fitting it in an initial portion
+% of the time series.
+% 
+
+function out = MF_ExpSmoothing(x,ntrain,alpha)
+% Ben Fulcher, 19/2/2010
 
 doplot = 0; % plot outputs
 N = length(x); % the length of the time series
@@ -15,14 +35,14 @@ N = length(x); % the length of the time series
 if nargin < 2 || isempty(ntrain)
     ntrain = min(100,N); % if the time series is shorter than 100 samples(!)
 end
-if ntrain > 0 && ntrain < 1 % given training set length as proportion
+if (ntrain > 0) && (ntrain < 1) % given training set length as proportion
                             % of the time series length
     ntrain = floor(N*ntrain);
 end
 
 % Check training set sizes:
-mintrain = 100; % minimum training set size
-maxtrain = 1000; % maximum training set size
+mintrain = 100; % Minimum training set size
+maxtrain = 1000; % Maximum training set size
 
 if ntrain > maxtrain; % larger than maximum training set size
     fprintf(1,'Training set size exceeded maximum of 1000 samples -- reducing to this.\n');
@@ -218,9 +238,9 @@ e = yp-xp; % residuals
 % out.insamplermse = in_sample_error;
 
 
-% Use MF_residanal on the residuals
+% Use MF_ResidualAnalysis on the residuals
 % 1) Get statistics on residuals
-residout = MF_residanal(e);
+residout = MF_ResidualAnalysis(e);
 
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
@@ -231,7 +251,7 @@ end
 % t=1:length(yp);
 
 if doplot
-    figure('color','w');
+    figure('color','w'); box('on')
     plot(t,x(3:N),'b',t,y(3:N),'k');
     legend('Obs', 'Fit');
     xlabel('Time');
