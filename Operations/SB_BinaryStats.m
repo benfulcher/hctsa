@@ -1,4 +1,4 @@
-% ST_binarydyn
+% SB_BinaryStats
 % 
 % Returns statistics on a binary symbolization of the time series (to a symbolic
 % string of 0s and 1s).
@@ -20,7 +20,7 @@
 % strings of 0s or 1s.
 % 
 
-function out = ST_binarydyn(y,binarymeth)
+function out = SB_BinaryStats(y,binarymeth)
 % Ben Fulcher, 2009
 
 switch binarymeth

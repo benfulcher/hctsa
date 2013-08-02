@@ -1,4 +1,4 @@
-% DN_quanp
+% DN_Withinp
 % 
 % Measures the proportion of the time-series data points that lie within
 % p standard deviations of its mean.
@@ -6,8 +6,9 @@
 % INPUTS:
 % x, the input time series
 % p, the number (proportion) of standard deviations.
+% 
 
-function out = DN_quanp(x,p)
+function out = DN_Withinp(x,p)
 % Ben Fulcher, 2009
 
 if nargin < 2 || isempty(p)

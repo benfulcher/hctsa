@@ -1,4 +1,4 @@
-% ST_dyntransition
+% SB_TransitionpAlphabet
 % 
 % Calculates the transition probabilities and measures how they change as the
 % size of the alphabet increases.
@@ -23,7 +23,7 @@
 % of the transition matrix.
 % 
 
-function out = ST_dyntransition(y,ng,tau)
+function out = SB_TransitionpAlphabet(y,ng,tau)
 % Ben Fulcher, August 2009
 
 if nargin < 2 || isempty(ng)

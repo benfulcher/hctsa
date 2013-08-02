@@ -1,4 +1,4 @@
-% SD_surrogatetest
+% SD_SurrogateTest
 % 
 % Analyzes the test statistics obtained from surrogate time series compared to
 % those measured from the given time series.
@@ -49,7 +49,7 @@
 %                 some comparative rank-based statistics.
 % 
 
-function out = SD_surrogatetest(x,surrmeth,nsurrs,extrap,teststat)
+function out = SD_SurrogateTest(x,surrmeth,nsurrs,extrap,teststat)
 % Ben Fulcher, 28/1/2011
 
 doplot = 0; % plot outputs to a figure

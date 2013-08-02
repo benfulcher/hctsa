@@ -31,7 +31,7 @@
 % Bill Davidson
 % 21 Oct 2003
 
-function hurst = ST_hurst_exponent(data0)   % data set
+function hurst = BD_hurst_exponent(data0)   % data set
 
 data = data0;         % make a local copy
 

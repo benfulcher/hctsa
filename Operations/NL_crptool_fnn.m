@@ -1,10 +1,20 @@
+% NL_crptool_fnn
+% 
+% Uses N. Marwan's code from the CRP Toolbox
+% http://tocsy.pik-potsdam.de/CRPtoolbox/
+% 
+% INPUTS:
+% y, the input time series
+% maxm, the maximum embedding dimension to consider
+% r, the threshold; neighbourhood criterion
+% taum, the method of determining the time delay, 'corr' for first zero-crossing
+%       of autocorrelation function, or 'mi' for the first minimum of the mutual
+%       information
+% 
+% th [opt], returns the first time the number of false nearest neighbours drops
+%           under this threshold
+
 function out = NL_crptool_fnn(y,maxm,r,taum,th)
-% Uses Marwan's code from the CRP Toolbox
-% taum is the method of determining the time delay, 'corr' for first
-% zero-crossing of autocorrelation function, or 'mi' for the first minimum
-% of the mutual information
-% ** If th is set, then just outputs a scalar, the first time the number of
-% false neighbours goes under this value
 % Ben Fulcher, October 2009
 
 %% Preliminaries
@@ -16,7 +26,7 @@ if nargin < 2 || isempty(maxm)
     maxm = 10; % default maximum embedding dimension
 end
 
-% 2) r, the neubourhood criterion
+% 2) r, the neighbourhood criterion
 if nargin < 3 || isempty(r)
     r = 2; % neighbourhood criterion
 end
@@ -47,7 +57,10 @@ if nargin < 5
     th = []; % default is to return statistics
 end
 
-% HERE'S WHERE THE ACTION HAPPENS:
+% Here's where the action happens:
+if ~exist('crptool_fnn')
+    error('Error -- the CRP Toolbox functions for calculating nearest neighbours can not be found');
+end
 nn = crptool_fnn(y,maxm,tau,r,'silent'); % run Marwan's CRPToolbox false nearest neighbors code
 
 if isnan(nn);

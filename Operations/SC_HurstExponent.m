@@ -1,4 +1,4 @@
-% ST_hurst_exponent
+% SC_HurstExponent
 % 
 % Calculate the Hurst exponent of the input time series, y
 % 
@@ -10,7 +10,7 @@
 % Code was obtained from http://www.mathworks.com/matlabcentral/fileexchange/9842
 % 
 
-function out = ST_hurst_exponent(y)
+function out = SC_HurstExponent(y)
 % Ben Fulcher, 2009
 
 out = BD_hurst_exponent(y);

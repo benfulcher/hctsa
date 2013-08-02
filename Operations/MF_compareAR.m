@@ -45,7 +45,7 @@ end
 % Get normalized prediction errors, V, from training to test set for each
 % model order
 % This could be done for model residuals using code in, say,
-% MF_StateSpaceCompOrder, or MF_SS_n4sid...
+% MF_StateSpaceCompOrder, or MF_StateSpace_n4sid...
 
 if ischar(howtotest)
     if strcmp(howtotest,'all')

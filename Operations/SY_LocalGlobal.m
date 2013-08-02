@@ -1,4 +1,4 @@
-% ST_cumul
+% SY_LocalGlobal
 % 
 % Compares statistics measured in a local region of the time series to that
 % measured of the full time series.
@@ -23,7 +23,7 @@
 % statistics of these local regions to the full time series.
 % 
 
-function out = ST_cumul(y,lorp,n)
+function out = SY_LocalGlobal(y,lorp,n)
 % Ben Fulcher, September 2009
 
 % Check z-scored time series

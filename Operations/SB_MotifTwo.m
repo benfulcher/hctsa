@@ -1,4 +1,4 @@
-% ST_Motif_Two
+% SB_MotifTwo
 % 
 % Looks at local motifs in a binary symbolization of the time series, which is
 % performed by:
@@ -18,7 +18,7 @@
 % and 4, and their entropies.
 % 
 
-function out = ST_Motif_Two(y,bint)
+function out = SB_MotifTwo(y,bint)
 % Laboriously manually-written code by Ben Fulcher, 2009
 
 if nargin < 2 || isempty(bint)

@@ -8,6 +8,10 @@
 % "ìSurrogate data test for nonlinearity including monotonic
 % transformations", D. Kugiumtzis, Phys. Rev. E, vol. 62, no. 1, 2000.
 % 
+% Note that many other surrogate data methods exist that could later be
+% implemented, cf. references in "Improvements to surrogate data methods for
+% nonstationary time series", J. H. Lucio et al., Phys. Rev. E 85, 056202 (2012)
+% 
 % INPUTS:
 % x, the input time series
 % 

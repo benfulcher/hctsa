@@ -1,4 +1,4 @@
-% HT_hyptests
+% HT_HypothesisTests
 % 
 % Outputs the p-value from a statistical hypothesis test applied to the
 % time series.
@@ -8,6 +8,7 @@
 % 
 % INPUTS,
 % x, the input time series
+% 
 % thetest, the hypothesis test to perform:
 %           (i) sign test ('signtest'),
 %           (ii) runs test ('runstest'),
@@ -16,8 +17,12 @@
 %           (v) Wilcoxon signed rank test for a zero median ('signrank'),
 %           (vi) Jarque-Bera test of composite normality ('jbtest').
 %           (vii) Ljung-Box Q-test for residual autocorrelation ('lbq')
+%           
+% OUTPUT:
+% the p-value from the statistical test
+% 
 
-function p = HT_hyptests(x,thetest)
+function p = HT_HypothesisTests(x,thetest)
 % Ben Fulcher, 2009
 
 switch thetest

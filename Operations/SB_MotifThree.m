@@ -1,8 +1,7 @@
-% ST_Motif_Three
+% SB_MotifThree
 % 
-% As for ST_Motif_Two described above, but using an alphabet of three letters,
-% i.e., looks for motifs in a course-graining of the time series to an alphabet
-% of three letters
+% As for SB_MotifTwo, but using an alphabet of three letters, i.e., looks for
+% motifs in a course-graining of the time series to an alphabet of three letters
 % 
 % INPUTS:
 % y, time series to analyze
@@ -14,7 +13,7 @@
 % 
 
 function out = ST_Motif_Three(y,trit)
-% Laboriously manually-written code, Ben Fulcher, 2009
+% Laboriously mSB_MotifThreen code, Ben Fulcher, 2009
 
 if nargin < 2 || isempty(trit)
     trit = 'quantile';
