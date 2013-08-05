@@ -1,4 +1,4 @@
-function [p]=fnn(y,de,tau,th,kth);
+function [p]=MS_fnn(y,de,tau,th,kth);
   
 %function [nfnn]=fnn(y,de,tau,th,kth)
 %

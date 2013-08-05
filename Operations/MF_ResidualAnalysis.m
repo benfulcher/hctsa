@@ -65,7 +65,7 @@ out.p5_5 = sum(gS(b(5)+1:b(6)))*(gf(2)-gf(1));
 % normal (within a constant).
 maxlag = 25;
 
-acs = CO_autocorr(e,1:maxlag); % autocorrelations
+acs = CO_AutoCorr(e,1:maxlag); % autocorrelations
 sqrtN = sqrt(N);
 
 % output first three acfs
@@ -100,7 +100,7 @@ out.dwts = sum((e(2:end)-e(1:end-1)).^2) / sum(e.^2);
 % fit zero-mean ar process to residuals
 emsg = [];
 try
-    [west, Aest, Cest, SBC, FPE, th] = arfit(e, 1, 10, 'sbc', 'zero');
+    [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(e, 1, 10, 'sbc', 'zero');
 catch emsg
 end
 

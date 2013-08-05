@@ -86,8 +86,8 @@ end
 out.r2 = gof.rsquare; % rsquared
 out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsqured
 out.rmse = gof.rmse;  % root mean square error
-out.resAC1 = CO_autocorr(output.residuals,1); % autocorrelation of residuals at lag 1
-out.resAC2 = CO_autocorr(output.residuals,2); % autocorrelation of residuals at lag 2
+out.resAC1 = CO_AutoCorr(output.residuals,1); % autocorrelation of residuals at lag 1
+out.resAC2 = CO_AutoCorr(output.residuals,2); % autocorrelation of residuals at lag 2
 out.resruns = HT_HypothesisTests(output.residuals,'runstest'); % runs test on residuals -- outputs p-value
 
 end

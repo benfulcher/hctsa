@@ -178,7 +178,7 @@ if enoughpoints
     res = lnCr-fit_lnCr';
     out.robfitresmeanabs = mean(abs(res));
     out.robfitresmeansq = mean(res.^2);
-    out.robfitresac1 = CO_autocorr(res,1);
+    out.robfitresac1 = CO_AutoCorr(res,1);
 else
     out.robfit_a1 = NaN;
     out.robfit_a2 = NaN;

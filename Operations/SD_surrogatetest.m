@@ -84,7 +84,7 @@ z = SD_MakeSurrogates(x,surrmeth,nsurrs,extrap);
 if ismember('ami1',teststat)
     % look at AMI(1) of surrogates compared to that of signal itself
     % This statistic is used by Nakamura et al. (2006), PRE
-    % could use CO_ami_benhist or TSTL, but I'll use BF_mi
+    % could use CO_HistogramAMI or TSTL, but I'll use BF_mi
     % Apparently there are upper and lower bounds on the number of bins to
     % use: [1+log_2(N)], [sqrt(N)]
     nbins = ceil(1+log2(N)); %round(mean([1+log2(N),sqrt(N)]));

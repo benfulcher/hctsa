@@ -9,7 +9,8 @@ function entr = TS_entropy(x, q)
 %   http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m
 %   D. Tolstonogov
 %   Copyright (c) by Trade Smart Research
-%   08/04/2004 
+%   08/04/2004
+%   
 
 [NRow, NCol] = size(x);
 

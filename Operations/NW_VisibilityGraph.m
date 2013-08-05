@@ -228,9 +228,9 @@ out.meanent = mean(h);
 diffh = diff(h);
 out.meanchent = mean(diffh(diffh~=0));
 
-out.kac1 = CO_autocorr(k,1);
-out.kac2 = CO_autocorr(k,2);
-out.kac3 = CO_autocorr(k,3);
+out.kac1 = CO_AutoCorr(k,1);
+out.kac2 = CO_AutoCorr(k,2);
+out.kac3 = CO_AutoCorr(k,3);
 out.ktau = CO_fzcac(k);
 
 end

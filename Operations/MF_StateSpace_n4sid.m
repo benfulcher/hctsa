@@ -138,6 +138,6 @@ for k = 1:length(fields);
     eval(sprintf('out.%s = residout.%s;',fields{k},fields{k}));
 end
 
-out.ac1diff = abs(CO_autocorr(y.y,1))-abs(CO_autocorr(mresiduals,1));
+out.ac1diff = abs(CO_AutoCorr(y.y,1))-abs(CO_AutoCorr(mresiduals,1));
 
 end

@@ -74,7 +74,7 @@ out.stdden = std(locden);
 out.meanden = mean(locden);
 out.medianden = median(locden);
 
-F_acden = @(x) CO_autocorr(locden,x); % autocorrelation of locden
+F_acden = @(x) CO_AutoCorr(locden,x); % autocorrelation of locden
 out.ac1den = F_acden(1);
 out.ac2den = F_acden(2);
 out.ac3den = F_acden(3);

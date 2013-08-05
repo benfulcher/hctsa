@@ -173,8 +173,8 @@ end
 out.w_mean = mean(w);
 out.w_median = median(w);
 out.w_std = std(w);
-out.w_ac1 = CO_autocorr(w,1);
-out.w_ac2 = CO_autocorr(w,2);
+out.w_ac1 = CO_AutoCorr(w,1);
+out.w_ac2 = CO_AutoCorr(w,2);
 out.w_tau = CO_fzcac(w);
 out.w_min = min(w);
 out.w_max = max(w);
@@ -185,7 +185,7 @@ out.w_propzcross = sum(w(1:end-1).*w(2:end) < 0) / (N-1);
 out.sw_meanabsdiff = mean(abs(y-w));
 out.sw_taudiff = CO_fzcac(y) - CO_fzcac(w);
 out.sw_stdrat = std(w)/std(y);
-out.sw_ac1rat = out.w_ac1/CO_autocorr(y,1);
+out.sw_ac1rat = out.w_ac1/CO_AutoCorr(y,1);
 out.sw_minrat = min(w)/min(y);
 out.sw_maxrat = max(w)/max(y);
 out.sw_propcross = sum((w(1:end-1)-y(1:end-1)).*(w(2:end)-y(2:end)) < 0)/(N-1);
@@ -209,6 +209,6 @@ res = w - y;
 [h, pval] = runstest(res); % runs test
 out.res_runstest = pval;
 out.res_swss5_1 = SY_SlidingWindow(res,'std','std',5,1); % sliding window stationarity
-out.res_ac1 = CO_autocorr(res,1); % auto correlation at lag-1
+out.res_ac1 = CO_AutoCorr(res,1); % auto correlation at lag-1
 
 end

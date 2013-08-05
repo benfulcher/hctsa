@@ -1,7 +1,7 @@
 % CO_fzcac
 % 
 % Returns the first zero-crossing of the autocorrelation function.
-% Uses CO_autocorr to calculate autocorrelations.
+% Uses CO_AutoCorr to calculate autocorrelations.
 % 
 % INPUTS:
 % y, the input time series
@@ -21,7 +21,7 @@ end
 
 % Calculate autocorrelation at increasing lags, until you find a negative one
 for tau = 1:maxtau-1
-    if CO_autocorr(y,tau) < 0
+    if CO_AutoCorr(y,tau) < 0
         out = tau; return
     end
 end

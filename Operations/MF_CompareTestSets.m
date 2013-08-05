@@ -91,7 +91,7 @@ switch model
             % Use arfit software to retrieve the optimum ar order by some
             % criterion (Schwartz's Bayesian Criterion, SBC)
             try
-                [west, Aest, Cest, SBC, FPE, th] = arfit(y.y, 1, 10, 'sbc', 'zero');
+                [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(y.y, 1, 10, 'sbc', 'zero');
             catch
                 error('Error running ''arfit'' -- have you installed the ARFIT toolbox?')
             end
@@ -176,7 +176,7 @@ for i = 1:npred
     
     rmserrs(i) = sqrt(mean(mres.^2));
     mabserrs(i) = mean(abs(mres));
-    ac1s(i) = CO_autocorr(mres,1);
+    ac1s(i) = CO_AutoCorr(mres,1);
     
     % Get statistics on output time series
     meandiffs(i) = abs(mean(yp.y) - mean(ytest.y));

@@ -13,7 +13,7 @@ N = length(y); % time-series length
 oone = 1/exp(1);
 
 for i = 1:N-1
-    a(i) = CO_autocorr(y,i);
+    a(i) = CO_AutoCorr(y,i);
     if (i > 1) && ((a(i-1)-oone)*(a(i)-oone) < 0)
         % Crossed the 1/e line
         out = i;

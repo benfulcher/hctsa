@@ -228,7 +228,7 @@ end
     out.se1 = stats.se(1); % standard error in intercept
     out.se2 = stats.se(2); % standard error in mean
     out.ssr = mean(stats.resid.^2); % mean squares residual
-    out.resac1 = CO_autocorr(stats.resid,1);
+    out.resac1 = CO_AutoCorr(stats.resid,1);
     
     % PLOT THIS?:
     if doplot
@@ -249,7 +249,7 @@ end
 %     out.ft_se1 = stats.se(1); % standard error in intercept
 %     out.ft_se2 = stats.se(2); % standard error in mean
 %     out.ft_ssr = mean(stats.resid.^2); % mean squares residual
-%     out.ft_resac1 = CO_autocorr(stats.resid,1);
+%     out.ft_resac1 = CO_AutoCorr(stats.resid,1);
 %     
 %     % Last third
 %     [linfit stats] = robustfit(log(taur(floor(end*2/3):end)),log(F(floor(end*2/3):end)));
@@ -260,7 +260,7 @@ end
 %     out.lt_se1 = stats.se(1); % standard error in intercept
 %     out.lt_se2 = stats.se(2); % standard error in mean
 %     out.lt_ssr = mean(stats.resid.^2); % mean squares residual
-%     out.lt_resac1 = CO_autocorr(stats.resid,1);
+%     out.lt_resac1 = CO_AutoCorr(stats.resid,1);
 
 
 %% Try assuming two components
@@ -324,7 +324,7 @@ else
     out.r1_se1 = stats.se(1); % standard error in intercept
     out.r1_se2 = stats.se(2); % standard error in mean
     out.r1_ssr = mean(stats.resid.^2); % mean squares residual
-    out.r1_resac1 = CO_autocorr(stats.resid,1);
+    out.r1_resac1 = CO_AutoCorr(stats.resid,1);
 end
     
 % R2
@@ -345,7 +345,7 @@ else
     out.r2_se1 = stats.se(1); % standard error in intercept
     out.r2_se2 = stats.se(2); % standard error in mean
     out.r2_ssr = mean(stats.resid.^2); % mean squares residual
-    out.r2_resac1 = CO_autocorr(stats.resid,1);
+    out.r2_resac1 = CO_AutoCorr(stats.resid,1);
 end
 
 if isnan(out.r1_alpha) || isnan(out.r2_alpha)

@@ -123,7 +123,7 @@ for i = 1:maxdim
     % iqr of acp at each dimension
     eval(sprintf('out.iqracpf_%u = iqracpf(%u);',i,i));
     % AC1 of acp at each dimension
-    ac1 = abs(CO_autocorr(acpf(:,i),1));
+    ac1 = abs(CO_AutoCorr(acpf(:,i),1));
     eval(sprintf('out.ac1_acpf_%u = ac1;',i));
 end
 

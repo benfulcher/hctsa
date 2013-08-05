@@ -1,7 +1,3 @@
-function [d, nfnn] = MS_unfolding(y,th,de,tau)
-% From http://small.eie.polyu.edu.hk/matlab/
-% Very minor, mainly cosmetic changes made by Ben Fulcher 19/2/2010
-
 % function [de,nfnn]=unfolding(y,th,de,tau)
 % 
 % estimate the minimum unfolding dimension by calculating when the
@@ -20,15 +16,19 @@ function [d, nfnn] = MS_unfolding(y,th,de,tau)
 % ensmall@polyu.edu.hk
 %
 
+function [d, nfnn] = MS_unfolding(y,th,de,tau)
+% From http://small.eie.polyu.edu.hk/matlab/
+% Very minor, mainly cosmetic changes made by Ben Fulcher 19/2/2010
+
 % Set defaults:
-if nargin < 2
+if nargin < 2 || isempty(th)
   th = 0.01;
 end
-if nargin < 3
+if nargin < 3 || isempty(de)
   de = (1:10);
 %   disp(['de = ',int2str(de(1)),':',int2str(de(end))]);
 end
-if nargin < 4
+if nargin < 4 || isempty(tau)
     tau = 1;
 end
 

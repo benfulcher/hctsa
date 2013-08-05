@@ -267,14 +267,14 @@ out.swss5_1hp = gethp(stats(:,11));
         d1 = norm(y-y_rand) / length(y);
         
         % Autocorrelation
-        ac1 = CO_autocorr(y_rand,1);
-        ac2 = CO_autocorr(y_rand,2);
-        ac3 = CO_autocorr(y_rand,3);
-        ac4 = CO_autocorr(y_rand,4);
+        ac1 = CO_AutoCorr(y_rand,1);
+        ac2 = CO_AutoCorr(y_rand,2);
+        ac3 = CO_AutoCorr(y_rand,3);
+        ac4 = CO_AutoCorr(y_rand,4);
         
         % Entropies
         shen = EN_wentropy(y_rand,'shannon');
-        sampen = LA_sampenc(y_rand,2,0.2,1);
+        sampen = PN_sampenc(y_rand,2,0.2,1);
         
         % Stationarity
         statav5 = SY_StatAv(y_rand,5,'seg');

@@ -67,8 +67,8 @@ out.median = median(y(r)); %/median(y); % if median is very small;; could be ver
 out.iqr = abs(1-iqr(y(r)) / iqr(y));
 out.skewness = abs(1-skewness(y(r)) / skewness(y)); % how far from true
 out.kurtosis = abs(1-kurtosis(y(r)) / kurtosis(y)); % how far from true
-out.ac1 = abs(1-CO_autocorr(y(r),1) / CO_autocorr(y,1)); % how far from true
-out.sampen101 = LA_sampenc(y(r),1,0.1,1) / LA_sampenc(y,1,0.1,1);
+out.ac1 = abs(1-CO_AutoCorr(y(r),1) / CO_AutoCorr(y,1)); % how far from true
+out.sampen101 = PN_sampenc(y(r),1,0.1,1) / PN_sampenc(y,1,0.1,1);
 
 
 % switch wing
@@ -85,9 +85,9 @@ out.sampen101 = LA_sampenc(y(r),1,0.1,1) / LA_sampenc(y,1,0.1,1);
 %     case 'kurtosis'
 %         out = abs(1-kurtosis(y(r)) / kurtosis(y)); % how far from true
 %     case 'AC1'
-%         out = abs(1-CO_autocorr(y(r),1) / CO_autocorr(y,1)); % how far from true
+%         out = abs(1-CO_AutoCorr(y(r),1) / CO_AutoCorr(y,1)); % how far from true
 %     case 'SampEn1_01' % computationally expensive to calculate this full one each time...
-%         out = LA_sampenc(y(r),1,0.1,1) / LA_sampenc(y,1,0.1,1);
+%         out = PN_sampenc(y(r),1,0.1,1) / PN_sampenc(y,1,0.1,1);
 %     otherwise
 %         error('Unknwon statistic ''%s''',wing);
 % end

@@ -13,6 +13,7 @@
 % beta, the parameter beta
 % maxtau [opt], a maximum time delay to search up to (default is the time-series
 %                length)
+% 
 
 function out = CO_fzcglscf(y,alpha,beta,maxtau)
 % Ben Fulcher, 2009

@@ -197,23 +197,23 @@ out.statav5_all_s = statav_s;
 %% correlations?
 if ~isempty(zangles{1});
     out.tau_p = CO_fzcac(zangles{1});
-    out.ac1_p = CO_autocorr(zangles{1},1);
-    out.ac2_p = CO_autocorr(zangles{1},2);
+    out.ac1_p = CO_AutoCorr(zangles{1},1);
+    out.ac2_p = CO_AutoCorr(zangles{1},2);
 else
     out.tau_p = NaN; out.ac1_p = NaN; out.ac2_p = NaN;
 end
 
 if ~isempty(zangles{2});
     out.tau_n = CO_fzcac(zangles{2});
-    out.ac1_n = CO_autocorr(zangles{2},1);
-    out.ac2_n = CO_autocorr(zangles{2},2);
+    out.ac1_n = CO_AutoCorr(zangles{2},1);
+    out.ac2_n = CO_AutoCorr(zangles{2},2);
 else
     out.tau_n=NaN; out.ac1_n = NaN; out.ac2_n = NaN;
 end
 
 out.tau_all = CO_fzcac(zallangles);
-out.ac1_all = CO_autocorr(zallangles,1);
-out.ac2_all = CO_autocorr(zallangles,2);
+out.ac1_all = CO_AutoCorr(zallangles,1);
+out.ac2_all = CO_AutoCorr(zallangles,2);
 
 %% What does the distribution look like?
 % Some quantiles and moments

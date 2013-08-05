@@ -11,7 +11,7 @@
 % INPUTS:
 % y, the input time series
 % 
-% meth, the method for estimating mutual information (input to CO_ami_benhist)
+% meth, the method for estimating mutual information (input to CO_HistogramAMI)
 % 
 % nbins, the number of bins for the AMI estimation to compare over (can be a
 %           scalar or vector)
@@ -46,7 +46,7 @@ amimins = zeros(nbinr,1);
 for i = 1:nbinr % vary over number of bins in histogram
     amis = zeros(ntaur,1);
     for j = 1:ntaur % vary over time lags, tau
-        amis(j) = CO_ami_benhist(y,taur(j),meth,nbins(i));
+        amis(j) = CO_HistogramAMI(y,taur(j),meth,nbins(i));
         if (j > 2) && ((amis(j)-amis(j-1))*(amis(j-1)-amis(j-2)) < 0)
             amimins(i) = taur(j-1);
             break

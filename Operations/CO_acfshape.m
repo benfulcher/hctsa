@@ -21,7 +21,7 @@ acf = zeros(N,1);
 % Calculate the autocorrelation function, up to a maximum lag, length of
 % time series (hopefully it's cropped by then)
 for i = 1:N
-    acf(i) = CO_autocorr(y,i-1); % *** NOTE THIS! *** acf vector indicies are not lags
+    acf(i) = CO_AutoCorr(y,i-1); % *** NOTE THIS! *** acf vector indicies are not lags
     if i > 2 && abs(acf(i)) < th && abs(acf(i-1)) < th
        acf = acf(1:i-2);
        break
@@ -61,24 +61,24 @@ out.meanabsacf = mean(abs(acf));
 % Correlations between extrema
 if nmaxr > 4 % need at least 5 points to do this
     out.maximaspread = std(diff(maxr)); % spread of inter-maxima intervals
-    out.ac1maxima = CO_autocorr(acf(maxr),1);
+    out.ac1maxima = CO_AutoCorr(acf(maxr),1);
 else % less than 5 points, return NaNs:
     out.maximaspread = NaN;
     out.ac1maxima = NaN;
 end
 if nminr > 4 % need at least 5 points to do this
     out.minimaspread = std(diff(minr)); % spread of inter-minima intervals
-    out.ac1minima = CO_autocorr(acf(minr),1);
+    out.ac1minima = CO_AutoCorr(acf(minr),1);
 else % less than 5 points, return NaNs:
     out.minimaspread = NaN;
     out.ac1minima = NaN;
 end
 
 % Autocorrelation of the ACF
-out.ac1 = CO_autocorr(acf,1);
-out.ac2 = CO_autocorr(acf,2);
-out.ac3 = CO_autocorr(acf,3);
-out.actau = CO_autocorr(acf,CO_fzcac(acf));
+out.ac1 = CO_AutoCorr(acf,1);
+out.ac2 = CO_AutoCorr(acf,2);
+out.ac3 = CO_AutoCorr(acf,3);
+out.actau = CO_AutoCorr(acf,CO_fzcac(acf));
 
 
 if Nac > 3 % Need at least four points to fit exponential

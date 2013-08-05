@@ -95,7 +95,7 @@ function acf = SUB_acf(x,n)
     % lag, n
     acf = zeros(n,1);
     for i = 1:n
-        acf(i) = CO_autocorr(x,i-1);
+        acf(i) = CO_AutoCorr(x,i-1);
     end
 end
 

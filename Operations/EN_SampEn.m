@@ -40,7 +40,7 @@ if ~isempty(preprocess)
 end
 
 
-[e, p, ~, ~] = LA_sampenc(y,M,r);
+[e, p, ~, ~] = PN_sampenc(y,M,r);
 
 
 %% Give outputs

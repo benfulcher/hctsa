@@ -57,7 +57,7 @@ switch fmeth
 %     case 'acf' % autocorrelation function
 %         acl=ltrain; % autocorrelation 'length'
 %         acc=zeros(acl,1); % autocorrelation coefficients
-%         for i=1:acl, acc(i)=CO_autocorr(y,i); end
+%         for i=1:acl, acc(i)=CO_AutoCorr(y,i); end
 %         % normalize to a sum of 1 (so that operating on three mean values
 %         % of the time series, also returns the mean value as output)
 %         acc=acc/sum(acc);
@@ -113,8 +113,8 @@ else
 end
 
 % autocorrelation structure:
-out.ac1 = CO_autocorr(res,1);
-out.ac2 = CO_autocorr(res,2);
+out.ac1 = CO_AutoCorr(res,1);
+out.ac2 = CO_AutoCorr(res,2);
 out.taures = CO_fzcac(res);
 out.tauresrat = CO_fzcac(res)/CO_fzcac(y);
 

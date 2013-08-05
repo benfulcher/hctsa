@@ -11,10 +11,13 @@
 % INPUTS:
 % 
 % y, time series
-% tau, time lag
+% tau, time lag (can be 'ac' or 'mi' to set as the first zero-crossing of the
+%       autocorrelation function, or the first minimum of the automutual
+%       information function, respectively)
 % 
-% Outputs are the raw trev expression, its magnitude, the numerator and its magnitude, and
-% the denominator.
+% Outputs are the raw trev expression, its magnitude, the numerator and its
+% magnitude, and the denominator.
+% 
 
 function out = CO_trev(y,tau)
 % Ben Fulcher, 15/11/2009

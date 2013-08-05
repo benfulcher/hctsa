@@ -1,7 +1,7 @@
 % This helper script compiles the files
 % RUN IT FROM Toolboxes!!
 % Romesh Abeysuriya, March 2013
-% function compile
+% Modified by Ben Fulcher, 2013
 
 tooldir = [pwd,'/'];
 fprintf('Now compiling the toolboxes...\n')

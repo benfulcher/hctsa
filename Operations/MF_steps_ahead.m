@@ -67,14 +67,17 @@ switch model
             % criterion (Schwartz's Bayesian Criterion, SBC)
             % Uses Matlab code from ARfit
             % http://www.gps.caltech.edu/~tapio/arfit/
-            [west, Aest, Cest, SBC, FPE, th] = arfit(ytrain.y, 1, 10, 'sbc', 'zero');
+            [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(ytrain.y, 1, 10, 'sbc', 'zero');
             order = length(Aest); 
         end
         m = ar(ytrain,order);
+        
     case 'arma'
         m = armax(ytrain,order);
+        
     case 'ss'
         m = n4sid(ytrain,order);
+        
     otherwise
         error('Unknown model ''%s''',model);
 end
@@ -110,7 +113,7 @@ for i = 1:maxsteps
     
     mf.rmserrs(i) = sqrt(mean(mres.^2));
     mf.mabserrs(i) = mean(abs(mres));
-    mf.ac1s(i) = CO_autocorr(mres,1);
+    mf.ac1s(i) = CO_AutoCorr(mres,1);
     
     % (2) *** Sliding mean 1 ***
     % A sliding mean of length 1
@@ -120,7 +123,7 @@ for i = 1:maxsteps
     
     sm1.rmserrs(i) = sqrt(mean(mres.^2));
     sm1.mabserrs(i) = mean(abs(mres));
-    sm1.ac1s(i) = CO_autocorr(mres,1);
+    sm1.ac1s(i) = CO_AutoCorr(mres,1);
     
     % (3) *** Sliding mean 2 ***
     % A sliding mean of length 2
@@ -137,7 +140,7 @@ for i = 1:maxsteps
     
     sm2.rmserrs(i) = sqrt(mean(mres.^2));
     sm2.mabserrs(i) = mean(abs(mres));
-    sm2.ac1s(i) = CO_autocorr(mres,1);
+    sm2.ac1s(i) = CO_AutoCorr(mres,1);
 end
 
 % % (3) SMINF
@@ -145,7 +148,7 @@ end
 sminf.res = yy - mean(yy);
 sminf.rmserr = sqrt(mean(sminf.res.^2));
 sminf.mabserr = mean(abs(sminf.res));
-sminf.ac1 = CO_autocorr(sminf.res,1);
+sminf.ac1 = CO_AutoCorr(sminf.res,1);
 
 
 %% Get some output statistics

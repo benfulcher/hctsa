@@ -77,7 +77,7 @@ for i = 1:nfields
             e = pe(m,data);
             statstore.rmserr(i) = sqrt(mean(e.^2));
             statstore.mabserr(i) = mean(abs(e));
-            statstore.ac1(i) = CO_autocorr(e,1);
+            statstore.ac1(i) = CO_AutoCorr(e,1);
             
         otherwise
             error('Unknown model ''%s''',model);

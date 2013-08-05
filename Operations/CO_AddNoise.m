@@ -5,7 +5,7 @@
 % Adds Gaussian-distributed noise to the time series with increasing standard
 % deviation, eta, across the range eta = 0, 0.1, ..., 2, and measures the
 % mutual information at each point using histograms with
-% nbins bins (implemented using CO_ami_benhist).
+% nbins bins (implemented using CO_HistogramAMI).
 % 
 % The output is a set of statistics on the resulting set of automutual
 % information estimates, including a fit to an exponential decay, since the
@@ -24,10 +24,10 @@ function out = CO_AddNoise(y,tau,meth,nbins)
 
 %% Check inputs
 if nargin < 2
-    tau = []; % set default in CO_ami_benhist
+    tau = []; % set default in CO_HistogramAMI
 end
 if nargin < 3
-    meth = ''; % set default in CO_ami_benhist
+    meth = ''; % set default in CO_HistogramAMI
 end
 if nargin < 4
     nbins = [];
@@ -40,7 +40,7 @@ amis = zeros(nr,1);
 noise = randn(size(y));
 
 for i = 1:nr
-    amis(i) = CO_ami_benhist(y+noiser(i)*noise,tau,meth,nbins);
+    amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,meth,nbins);
 end
 
 % plot(noiser,amis,'.-k');
@@ -48,8 +48,8 @@ end
 
 out.pdec = sum(diff(amis) < 0)/(nr-1);
 out.meanch = mean(diff(amis));
-out.ac1 = CO_autocorr(amis,1);
-out.ac2 = CO_autocorr(amis,2);
+out.ac1 = CO_AutoCorr(amis,1);
+out.ac2 = CO_AutoCorr(amis,2);
 
 % Fit exponential decay to output
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[amis(1) -1]);

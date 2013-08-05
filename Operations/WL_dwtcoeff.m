@@ -1,7 +1,7 @@
 % WL_dwtcoeff
 % 
 % Decomposes the time series using a given wavelet and outputs statistics on the
-% coefficients obtained up to a maximum level level.
+% coefficients obtained up to a maximum level, level.
 % 
 % INPUTS:
 % 
@@ -13,14 +13,13 @@
 % level, the level of wavelet decomposition (can be set to 'max' for the maximum
 %               level determined by wmaxlev)
 % 
-% 
 
 function out = WL_dwtcoeff(y,wname,level)
 % Ben Fulcher, January 2010
 
 %% Check Inputs
-doplot = 0; % plot results to figures
-N = length(y); % length of signal
+doplot = 0; % Plot results to figures
+N = length(y); % Length of the time series
 
 if nargin < 2 || isempty(wname)
     wname = 'db3'; % Daubechies wavelet filter
@@ -39,8 +38,8 @@ end
 
 %% Perform Wavelet Decomposition
 % Computes the following:
-%   (*) Wavelet decomposition vector c
-%   (*) Bookkeeping vector l
+%   (*) Wavelet decomposition vector, c
+%   (*) Bookkeeping vector, l
 
 if maxlevelallowed < level
     [c, l] = wavedec(y, maxlevelallowed, wname);

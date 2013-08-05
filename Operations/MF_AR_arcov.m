@@ -38,7 +38,7 @@ err = y - y_est; % residuals
 out.rms = sqrt(sum(err.^2)/N); % RMS error
 out.mu = mean(err); % mean error
 out.std = std(err); % std of error
-out.AC1 = CO_autocorr(err,1); % autocorrelation of residuals at lag 1
-out.AC2 = CO_autocorr(err,2); % autocorrelation of residuals at lag 2
+out.AC1 = CO_AutoCorr(err,1); % autocorrelation of residuals at lag 1
+out.AC2 = CO_AutoCorr(err,2); % autocorrelation of residuals at lag 2
 
 end

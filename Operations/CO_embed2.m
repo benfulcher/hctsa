@@ -12,6 +12,7 @@
 % Outputs include the distribution of angles between successive points in the
 % space, stationarity of this angular distribution, euclidean distances from the
 % origin, and statistics on outliers.
+% 
 
 function out = CO_embed2(y,tau)
 % Ben Fulcher, September 2009
@@ -53,9 +54,9 @@ theta = atan(theta); % measured as deviation from the horizontal
 
 
 if doplot, ksdensity(theta); end % can plot distribution of angles
-out.theta_ac1 = CO_autocorr(theta,1);
-out.theta_ac2 = CO_autocorr(theta,2);
-out.theta_ac3 = CO_autocorr(theta,3);
+out.theta_ac1 = CO_AutoCorr(theta,1);
+out.theta_ac2 = CO_AutoCorr(theta,2);
+out.theta_ac3 = CO_AutoCorr(theta,3);
 
 out.theta_mean = mean(theta);
 out.theta_std = std(theta);

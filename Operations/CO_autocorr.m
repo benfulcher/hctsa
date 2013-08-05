@@ -1,14 +1,17 @@
-% CO_autocorr
+% CO_AutoCorr
 % 
 % Computes the autocorrelation of an input time series, y, at a time-lag, tau
+% 
 % INPUTS:
 % y, a scalar time series column vector
 % tau: the time-delay. If tau is a scalar, returns autocorrelation for y at that
 %       lag. If tau is a vector, returns autocorrelations for y at that set of
 %       lags.
+%       
+% Output is the autocorrelation at the given time-lag
 % 
 
-function out = CO_autocorr(y,tau)
+function out = CO_AutoCorr(y,tau)
 
 % Check inputs:
 if nargin < 2 || isempty(tau)

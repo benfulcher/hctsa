@@ -19,6 +19,7 @@
 % "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
 % Machine Dynamics", in 2010 IEEE International Conference on Acoustics,
 % Speech and Signal Processing, 2010, ICASSP 2010 Proceedings.
+% 
 
 function lambdamax = ML_l1pwclmax(y)
 

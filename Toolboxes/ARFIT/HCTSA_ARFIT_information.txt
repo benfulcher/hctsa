@@ -1,0 +1,17 @@
+NOTE FOR HCTSA package:
+Only those functions from the ARFit package used in HCTSA functions are included here. The full, original code package for performing autoregressive model fitting and analysis for time series can be obtained here: http://www.clidyn.ethz.ch/arfit/index.html
+
+
+ARfit: Multivariate Autoregressive Model Fitting
+Purpose
+ARfit is a collection of Matlab modules for estimating parameters of multivariate autoregressive (AR) models, diagnostic checking of fitted AR models, and analyzing eigenmodes of fitted AR models.
+
+The algorithms implemented in ARfit are described in the following papers, which should be referenced if you use ARfit in publications:
+
+A. Neumaier and T. Schneider, 2001: Estimation of parameters and eigenmodes of multivariate autoregressive models. ACM Trans. Math. Softw., 27, 27-57.
+
+T. Schneider and A. Neumaier, 2001: Algorithm 808: ARfit - A Matlab package for the estimation of parameters and eigenmodes of multivariate autoregressive models. ACM Trans. Math. Softw., 27, 58-65.
+
+ARfit includes support for multiple realizations (trials) of time series and can estimate parameters of multivariate AR models taking all available realizations into account.
+
+Last ARfit revision: 1 December 2010

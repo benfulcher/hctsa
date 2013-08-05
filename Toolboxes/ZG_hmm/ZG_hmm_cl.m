@@ -15,6 +15,7 @@
 %
 % If 0 or 1 output arguments requested, lik is returned. If 2 output
 % arguments requested, [lik likv] is returned.
+% 
 
 function [lik,likv] = ZG_hmm_cl(X,T,K,Mu,Cov,P,Pi)
 

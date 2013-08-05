@@ -30,8 +30,8 @@ case 'mi'
     % automutual information implemented as RM_information
     corrfn = @(x) RM_information(y(1:end-x), y(1+x:end));
 case 'ac'
-    % autocorrelation implemented as CO_autocorr
-    corrfn = @(x) CO_autocorr(y,x);
+    % autocorrelation implemented as CO_AutoCorr
+    corrfn = @(x) CO_AutoCorr(y,x);
 otherwise
     error('Unknown correlation function ''%s''',minwhat);
 end

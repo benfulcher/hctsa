@@ -26,8 +26,8 @@ addfcn('Toolboxes/gpml');
 GP_startup % add nested directories
 
 % ARFIT Toolbox
-fprintf(1,', arfit tool')
-addfcn('Toolboxes/arfit_tool');
+fprintf(1,', ARfit toolbox')
+addfcn('Toolboxes/ARFIT');
 
 % Michael Small's utilities
 fprintf(1,', Michael Small')
@@ -57,6 +57,10 @@ addfcn('Toolboxes/Land_and_Elias');
 fprintf(1,', TS_Research\n')
 addfcn('Toolboxes/TS_Research');
 
+% Physionet
+fprintf(1,', Physionet\n');
+addfcn('Toolboxes/Physionet');
+
 % Max Little's steps/bumps toolbox
 fprintf(1,', steps_bumps toolkit')
 addfcn('Toolboxes/Max_Little/steps_bumps_toolkit');
@@ -64,7 +68,6 @@ addfcn('Toolboxes/Max_Little/steps_bumps_toolkit');
 % Max Little's fastdfa code
 fprintf(1,', fastdfa')
 addfcn('Toolboxes/Max_Little/fastdfa');
-
 
 % TSTOOL
 fprintf(1,', TSTOOL')

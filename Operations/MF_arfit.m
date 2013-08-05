@@ -10,7 +10,7 @@
 % 
 % cf. "Algorithm 808: ARFIT---a Matlab package for the estimation of parameters
 %      and eigenmodes of multivariate autoregressive models",
-% T. Schneider and A. Neumaier, ACM Trans. Math. Softw. 27, 58 (2001)
+%      T. Schneider and A. Neumaier, ACM Trans. Math. Softw. 27, 58 (2001)
 % 
 % Autoregressive (AR) models are fitted with orders p = pmin, pmin + 1, ..., pmax.
 % 
@@ -24,9 +24,9 @@
 % selector, crierion to select optimal time-series model order (e.g., 'sbc', cf.
 %           ARFIT package documentation)
 % 
-% Outputs include the model coefficients obtained, the SBCs at
-% each model order, various tests on residuals, and statistics from an
-% eigendecomposition of the time series using the estimated AR model.
+% Outputs include the model coefficients obtained, the SBCs at each model order,
+% various tests on residuals, and statistics from an eigendecomposition of the
+% time series using the estimated AR model.
 % 
 
 function out = MF_arfit(y,pmin,pmax,selector)
@@ -143,24 +143,24 @@ out.aroundmin_fpe = abs(min(FPE))/meanaround;
 %% (II) Test Residuals
 
 % Run code from ARfit package:
-[siglev, res] = arres(west,Aest,y);
+[siglev, res] = ARFIT_arres(west,Aest,y);
 
 % (1) Significance Level
 out.res_siglev = siglev;
 
 % (2) Correlation test of residuals
 % error margins are within 1.96/sqrt(N);
-out.res_ac1 = CO_autocorr(res,1);
-out.res_ac1_norm = CO_autocorr(res,1)/sqrt(N); % normalize by sqrt(N)
+out.res_ac1 = CO_AutoCorr(res,1);
+out.res_ac1_norm = CO_AutoCorr(res,1)/sqrt(N); % normalize by sqrt(N)
 
 % Calculate correlations up to 20, return how many exceed significance threshold
-acf = CO_autocorr(res,1:20);
+acf = CO_AutoCorr(res,1:20);
 out.pcorr_res = sum(abs(acf)>1.96/sqrt(N))/20;
 
 %% (III) Confidence Intervals
 
 % Run code from ARfit package:
-Aerr = arconf(Aest, Cest, th);
+Aerr = ARFIT_arconf(Aest, Cest, th);
 
 % Return mean/min/max error margins
 out.aerr_min = min(Aerr);
@@ -170,7 +170,7 @@ out.aerr_mean = mean(Aerr);
 %% (III) Eigendecomposition
 
 % Run code from the ARfit package
-[S, Serr, per, tau, exctn] = armode(Aest, Cest, th);
+[S, Serr, per, tau, exctn] = ARFIT_armode(Aest, Cest, th);
 
 % S: eigenmodes
 % Serr: +/- margins of error (95% confidence intervals)

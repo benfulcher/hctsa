@@ -112,8 +112,8 @@ N = length(y); % could be different to original (if choose a differencing, e.g.)
 
 
 % (iii) Correlation in time series: autocorrelation
-% autocorrs_y = CO_autocorr(y,1:20);
-% autocorrs_var = CO_autocorr(y.^2,1:20);
+% autocorrs_y = CO_AutoCorr(y,1:20);
+% autocorrs_var = CO_AutoCorr(y.^2,1:20);
 [ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y,20,[],[]);
 [ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2,20,[],[]);
 
@@ -323,8 +323,8 @@ out.maxlbqpval_stde2 = max(lbq_pValue_stde2);
 
 
 % (iii) Correlation in time series: autocorrelation
-% autocorrs_y = CO_autocorr(y,1:20);
-% autocorrs_var = CO_autocorr(y.^2,1:20);
+% autocorrs_y = CO_AutoCorr(y,1:20);
+% autocorrs_var = CO_AutoCorr(y.^2,1:20);
 % [ACF_y,Lags_acf_y,bounds_acf_y] = autocorr(e,20,[],[]);
 % [ACF_var,Lags_acf_var,bounds_acf_var] = autocorr(e.^2,20,[],[]);
 
@@ -342,8 +342,8 @@ for k = 1:length(fields);
     eval(sprintf('out.stde_%s = residout.%s;',fields{k},fields{k}));
 end
 
-out.ac1_stde2 = CO_autocorr(stde2,1);
-out.diff_ac1 = CO_autocorr(y.^2,1) - CO_autocorr(stde2,1);
+out.ac1_stde2 = CO_AutoCorr(stde2,1);
+out.diff_ac1 = CO_AutoCorr(y.^2,1) - CO_AutoCorr(stde2,1);
 
 
 %% (5) Comparison to other models

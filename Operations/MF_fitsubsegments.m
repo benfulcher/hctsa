@@ -137,7 +137,7 @@ switch model
             % p = 1-10
             % Enforce zero mean level. This could be relaxed.
             try
-                [west, Aest, Cest, SBC] = arfit(yy(r(i,1):r(i,2)), 1, 10, 'sbc', 'zero');
+                [west, Aest, Cest, SBC] = ARFIT_arfit(yy(r(i,1):r(i,2)), 1, 10, 'sbc', 'zero');
             catch emsg
                 if strcmp(emsg.message,'Time series too short.')
                    fprintf(1,'Time Series is too short for ARFIT\n');

@@ -74,9 +74,9 @@ for j = 1:nseg
     qs(j,3) = skewness(ysub); % skewness
     qs(j,4) = kurtosis(ysub); % kurtosis
     qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1
-    qs(j,6) = LA_sampenc(ysub,1,0.2,1); % SampEn_1
-    qs(j,7) = CO_autocorr(ysub,1); % AC1
-    qs(j,8) = CO_autocorr(ysub,2); % AC2
+    qs(j,6) = PN_sampenc(ysub,1,0.2,1); % SampEn_1
+    qs(j,7) = CO_AutoCorr(ysub,1); % AC1
+    qs(j,8) = CO_AutoCorr(ysub,2); % AC2
     qs(j,9) = taul;
 end
     
