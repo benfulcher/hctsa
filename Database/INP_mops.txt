@@ -978,7 +978,7 @@ KP_quickde(y,2,2)	Kaplandeterminism_2_2
 KP_quickde(y,3,2)	Kaplandeterminism_3_2
 KP_quickde(y,4,2)	Kaplandeterminism_4_2
 KP_quickde(y,5,2)	Kaplandeterminism_5_2
-CO_acfdiff(y)	CO_acfdiff_err
+CO_AutoCorrMethod(y)	CO_AutoCorrMethod_err
 NL_TakensEstimator(y,-1,0.05,0.05,{1,8})	NL_TakensEstimator_n1_005_005_1_8
 NL_TakensEstimator(y,-1,0.05,0.05,{1,3})	NL_TakensEstimator_n1_005_005_1_3
 NL_TakensEstimator(y,-1,0.05,0.05,{'ac',8})	NL_TakensEstimator_n1_005_005_ac_8
@@ -1078,7 +1078,7 @@ ST_TransitionMatrix(y,'quantile',4,'ac')	ST_TransitionMatrix_4ac
 ST_TransitionMatrix(y,'quantile',5,'ac')	ST_TransitionMatrix_5ac
 SB_TransitionpAlphabet(y,2:40,1)	SB_TransitionpAlphabet_40_1
 SB_TransitionpAlphabet(y,2:20,'ac')	SB_TransitionpAlphabet_20_ac
-CO_acfshape(y)	CO_acfshape
+CO_AutoCorrShape(y)	CO_AutoCorrShape
 CO_ReccurrenceBasic(y,1)	CO_ReccurrenceBasic_1
 CO_ReccurrenceBasic(y,'tau')	CO_ReccurrenceBasic_tau
 PD_Wang07(y)	PD_Wang07

@@ -33,11 +33,12 @@
 %              exceeded before reaching duality gap tolerance, size L x 1.
 %
 % (c) Max Little, 2010. Based around code originally written by 
-% S.J. Kim, K. Koh, S. Boyd and D. Gorinevsky. If you use this code for
-% your research, please cite:
-% "Steps and bumps: precision extraction of discrete states of molecular
-% machines using physically-based, high-throughput time series analysis"
-% Max A. Little et al., 2010, arXiv:1004.1234v1 [q-bio.QM]
+% S.J. Kim, K. Koh, S. Boyd and D. Gorinevsky.
+% If you use this code for your research, please cite:
+% M.A. Little, B.C. Steel, F. Bai, Y. Sowa, T. Bilyard, D.M. Mueller,
+% R.M. Berry, N.S. Jones (2011)
+% Steps and bumps: precision extraction of discrete states of molecular machines
+% Biophysical Journal, 101(2):477-485
 %
 % This code is released under the terms of GNU General Public License as
 % published by the Free Software Foundation; version 2 or later.

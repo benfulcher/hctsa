@@ -1,11 +1,15 @@
-% CO_acfshape
+% CO_AutoCorrShape
 % 
 % Outputs a set of statistics summarizing how the autocorrelation function
 % changes with the time lag, tau.
 % Outputs include the number of peaks, and autocorrelation in the
 % autocorrelation function itself.
+% 
+% INPUTS:
+% y, the input time series
+% 
 
-function out = CO_acfshape(y)
+function out = CO_AutoCorrShape(y)
 % Ben Fulcher, 2009
 
 doplot = 0; % plot outputs from this function

@@ -26,9 +26,10 @@
 % technique for extracting small biological signals from noise",
 % J. Neurosci. Methods. 40(1):71-86.
 % If you use this code for your research, please cite:
-% "Steps and bumps: precision extraction of discrete states of molecular
-% machines using physically-based, high-throughput time series analysis"
-% Max A. Little et al., 2010, arXiv:1004.1234v1 [q-bio.QM]
+% M.A. Little, B.C. Steel, F. Bai, Y. Sowa, T. Bilyard, D.M. Mueller,
+% R.M. Berry, N.S. Jones (2011)
+% Steps and bumps: precision extraction of discrete states of molecular machines
+% Biophysical Journal, 101(2):477-485
 % 
 
 function x = ML_ckfilter(y, K, M, p)

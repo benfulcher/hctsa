@@ -7,12 +7,11 @@
 % "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
 % Machine Dynamics", Max A. Little, and Nick S. Jones, Proc. ICASSP (2010)
 % 
-% "Steps and bumps: precision extraction of discrete states of molecular
-% machines using physically-based, high-throughput time series analysis"
-% Max A. Little et al., 2010, arXiv:1004.1234v1 [q-bio.QM]
+% "Steps and bumps: precision extraction of discrete states of molecular machines"
+% M. A. Little, B. C. Steel, F. Bai, Y. Sowa, T. Bilyard, D. M. Mueller,
+% R. M. Berry, N. S. Jones. Biophysical Journal, 101(2):477-485 (2011)
 % 
 % Software available at: http://www.maxlittle.net/software/index.php
-% 
 % 
 % INPUTS:
 % y, the input time series
@@ -154,7 +153,6 @@ switch method
         if lambda < 1 % specify as a proportion of lambdamax
             lambda = ML_l1pwclmax(y)*lambda;
         end
-        
         
         % Run the code
         [steppedy, E, s, lambdamax] = ML_l1pwc(y, lambda, 0); % use defaults for stoptol and maxiter

@@ -16,9 +16,10 @@
 % of non-uniform steps in noisy signals", Comp. Phys. Comm., 179(2008),
 % 716-723.
 % If you use this code for your research, please cite:
-% "Steps and bumps: precision extraction of discrete states of molecular
-% machines using physically-based, high-throughput time series analysis"
-% Max A. Little et al., 2010, arXiv:1004.1234v1 [q-bio.QM]
+% M.A. Little, B.C. Steel, F. Bai, Y. Sowa, T. Bilyard, D.M. Mueller,
+% R.M. Berry, N.S. Jones (2011)
+% Steps and bumps: precision extraction of discrete states of molecular machines
+% Biophysical Journal, 101(2):477-485
 % 
 
 function [y, steps] = ML_kvsteps(x)
