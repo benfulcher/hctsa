@@ -1,8 +1,17 @@
-function yth = BF_coarsegrain(y,ng,howtocg)
-% coarse-grains the continuous time series to a discrete alphabet
-% by a given method. Yes, I know I misspelt 'course grain'.
-% ng specifies the size of the alphabet for 'quantile' and 'updown'
-% ng gives the timedelay for the embedding subroutines
+% SB_coarsegrain
+% 
+% Coarse-grains the continuous time series to a discrete alphabet
+% by a given method.
+% 
+% INPUTS:
+% howtocg, the method of coarse-graining
+% 
+% ng, either specifies the size of the alphabet for 'quantile' and 'updown'
+%       or sets the timedelay for the embedding subroutines
+% 
+% 
+
+function yth = SB_coarsegrain(y,howtocg,ng)
 % Ben Fulcher, September 2009
 
 % Quantile puts an equal number into each bin
@@ -12,6 +21,11 @@ end
 
 N = length(y); % length of the input sequence
 
+if ~ismember(howtocg,{'updown','quantile','embed2quadrants','embed2octants'})
+    error('Unknown coarse-graining method ''%s''',howtocg);
+end
+
+% Some coarse-graining/symbolization methods require initial processing:
 switch howtocg
 case 'updown'
    y = diff(y);
@@ -22,7 +36,7 @@ case {'embed2quadrants','embed2octants'}
 	% Construct the embedding
 
 	if strcmp(ng,'tau')
-        tau = CO_fzcac(y); % first zero-crossing of the autocorrelation function
+        tau = CO_FirstZero(y,'ac'); % first zero-crossing of the autocorrelation function
     else
         tau = ng;
 	end
@@ -38,8 +52,6 @@ case {'embed2quadrants','embed2octants'}
 	q2r = upr(m1(upr) < 0); % points in quadrant 2
 	q3r = downr(m1(downr) < 0); % points in quadrant 3
 	q4r = downr(m1(downr) >= 0); % points in quadrant 4
-otherwise
-    error('Unknwon coarse-graining method ''%s''',howtocg);
 end
 
 

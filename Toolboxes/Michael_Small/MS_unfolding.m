@@ -34,7 +34,7 @@ end
 
 % Other options for tau ++BF
 if strcmp(tau,'ac')
-    tau = CO_fzcac(y); % first zero-crossing of autocorrelation function
+    tau = CO_FirstZero(y,'ac'); % first zero-crossing of autocorrelation function
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
 end

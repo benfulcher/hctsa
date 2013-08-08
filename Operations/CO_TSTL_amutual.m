@@ -1,4 +1,4 @@
-% CO_TSTOOL_amutual
+% CO_TSTL_amutual
 % 
 % Uses amutual code from TSTOOL, which uses a
 % histogram method with n bins to estimate the mutual information of a
@@ -6,7 +6,6 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %
-%  
 % INPUTS:
 % 
 % y, the time series
@@ -21,8 +20,10 @@
 % maxima.
 % 
 
-function out = CO_TSTOOL_amutual(y,maxtau,nbins)
+function out = CO_TSTL_amutual(y,maxtau,nbins)
 % Ben Fulcher, October 2009
+
+doplot = 0; % toggle plotting of outputs
 
 %% Preliminaries
 N = length(y); % length of time series
@@ -40,7 +41,10 @@ end
 %% Run
 ami = data(amutual(s,maxtau,nbins));
 lami = length(ami);
-% plot(ami)
+if doplot
+    figure('color','w'); box('on');
+    plot(ami,'-ok');
+end
 
 % change ami vector to a structure for output
 for i = 1:maxtau+1
@@ -65,13 +69,16 @@ end
 maximai = find(dami(1:end-1) > 0 & dami(2:end) < 0) + 1;
 dmaximai = diff(maximai);
 % is there a big peak in dmaxima?
- % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
+% (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pmaxima = length(dmaximai)/floor(lami/2);
 out.modeperiodmax = mode(dmaximai);
 out.pmodeperiodmax = sum(dmaximai == mode(dmaximai))/length(dmaximai);
 
-
-% hold on; plot(maximai,ami(maximai),'or'); hold off
+if doplot
+    hold on;
+    plot(maximai,ami(maximai),'or');
+    hold off
+end
 
 
 end

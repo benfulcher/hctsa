@@ -1,4 +1,4 @@
-% NL_FractalDimensions
+% NL_TSTL_FractalDimensions
 % 
 % Computes the fractal dimension spectrum, D(q), using moments of
 % neighbor distances for time-delay embedded time series using the
@@ -32,7 +32,7 @@
 % and an exponential fit of the form D(q) = Aexp(Bq) + C.
 % 
 
-function out = NL_FractalDimensions(y,kmin,kmax,Nref,gstart,gend,past,steps,embedparams)
+function out = NL_TSTL_FractalDimensions(y,kmin,kmax,Nref,gstart,gend,past,steps,embedparams)
 % Ben Fulcher, November 2009
 
 %% Preliminaries
@@ -53,7 +53,7 @@ end
 % (3) Number of randomly-chosen reference points, Nref
 if nargin < 4 || isempty(Nref)
     Nref = 0.2; % default:  20% of the time series length
-    fprintf(1,'Using default number of reference points: Nref = %f\n',Nref))
+    fprintf(1,'Using default number of reference points: Nref = %f\n',Nref)
 end
 if (Nref > 0) && (Nref < 1)
     Nref = round(N*Nref); % specify a proportion of time series length

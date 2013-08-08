@@ -2,6 +2,9 @@
 % 
 % Returns the length of the time series.
 % 
+% INPUT:
+% y, the time series vector
+% 
 
 function out = ST_Length(y)
 % Ben Fulcher, 2008

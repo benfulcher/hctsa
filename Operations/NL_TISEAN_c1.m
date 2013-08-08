@@ -61,7 +61,7 @@ if nargin < 2 || isempty(tau)
     tau = 1;
 end
 if strcmp(tau,'ac')
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
@@ -88,27 +88,33 @@ if (Nref > 0) && (Nref <= 1)
 end
 Nrefmin = 100;
 Nrefmax = 2000;
-if Nref > Nrefmax, Nref = Nrefmax; end % for time reasons, don't use more than 2000 reference points
-if (Nref < Nrefmin) && (N > Nrefmin), Nref = Nrefmin; end % can't have less than 100 reference points
+
+if Nref > Nrefmax
+    Nref = Nrefmax;
+end % for time reasons, don't use more than 2000 reference points
+
+if (Nref < Nrefmin) && (N > Nrefmin)
+    Nref = Nrefmin;
+end % can't have less than 100 reference points
+
 
 %% Write the data file
-
 tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
 % to the millisecond (only get double-write error for same function called in same millisecond
 fn = sprintf('tisean_temp_c1_%s.dat',tnow);
 dlmwrite(fn,y);
-fprintf(1,'Just written temporary data file %s for TISEAN',fn)
+fprintf(1,'Just written temporary data file %s for TISEAN\n',fn)
 
 %% Run the TISEAN code
 % run c1 code
 tic
 [~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',tau,mmm(1),mmm(2),tsep,Nref,fn,fn));
+delete(fn) % remove the temporary data file
 % [~, res] = system(['c1 -d' num2str(tau) ' -m' num2str(mmm(1)) ...
 %                     ' -M' num2str(mmm(2)) ' -t' num2str(tsep) ' -n' ...
 %                     num2str(Nref) ' -o ' fn '.c1 ' fn]);
 if isempty(res)
-    delete(fn) % remove the temporary data file
-    delete([fn '.c1']) % remove the TISEAN file write output
+    if exist([fn '.c1']), delete([fn '.c1']); end % remove the TISEAN file write output
     error('Call to TISEAN method ''c1'' failed');
 else
     fprintf(1,'TISEAN function ''c1'' took %s\n',BF_thetime(toc,1))
@@ -117,15 +123,18 @@ end
 % Get local slopes from c1 file output of previous call
 tic
 [~, res] = system(sprintf('c2d -a2 %s.c1',fn));
-if isempty(res)
-    delete(fn) % remove the temporary data file
-    delete([fn '.c1']) % remove the TISEAN file write output
-    error('Call to TISEAN function ''c1'' failed');
+
+if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
+    if exist([fn '.c1']), delete([fn '.c1']); end % remove the TISEAN file write output
+    if isempty(res)
+        error('Call to TISEAN function ''c1'' failed');
+    else
+        error('Call to TISEAN function ''c1'' failed: %s',res)
+    end
 end
 
 fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc,1))
-delete(fn) % remove the temporary data file
-delete([fn '.c1']) % remove the TISEAN file write output
+if exist([fn '.c1']), delete([fn '.c1']); end % remove the TISEAN file write output
 
 %% Get the output
 % 1) C1 (don't worry about this anymore, just the local slopes
@@ -146,6 +155,9 @@ if isempty(s)
     error('Error reading TISEAN output file %s.c1',fn)
 end
 c1dat = SUB_readTISEANout(s,'#m=',2);
+if isempty(c1dat)
+    error('Error reading TISEAN output file %s.c1: %s',fn,s{1})
+end
 
 % issues: x-values differ for each dimension
 % spline interpolate for a consistent range

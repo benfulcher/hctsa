@@ -157,11 +157,11 @@ y = BF_zscore(y); y_d = BF_zscore(y_d);
 % 1) Stationarity
 
 % (a) StatAv
-out.statav2 = SY_StatAv(y_d,2,'seg') / SY_StatAv(y,2,'seg');
-out.statav4 = SY_StatAv(y_d,4,'seg') / SY_StatAv(y,4,'seg');
-out.statav6 = SY_StatAv(y_d,6,'seg') / SY_StatAv(y,6,'seg');
-out.statav8 = SY_StatAv(y_d,8,'seg') / SY_StatAv(y,8,'seg');
-out.statav10 = SY_StatAv(y_d,10,'seg') / SY_StatAv(y,10,'seg');
+out.statav2 = SY_StatAv(y_d,'seg',2) / SY_StatAv(y,'seg',2);
+out.statav4 = SY_StatAv(y_d,'seg',4) / SY_StatAv(y,'seg',4);
+out.statav6 = SY_StatAv(y_d,'seg',6) / SY_StatAv(y,'seg',6);
+out.statav8 = SY_StatAv(y_d,'seg',8) / SY_StatAv(y,'seg',8);
+out.statav10 = SY_StatAv(y_d,'seg',10) / SY_StatAv(y,'seg',10);
 
 % (b) Sliding window mean
 out.swms2_1 = SY_SlidingWindow(y_d,'mean','std',2,1) / SY_SlidingWindow(y,'mean','std',2,1);

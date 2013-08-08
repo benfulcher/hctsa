@@ -36,7 +36,7 @@ if nargin < 2 || isempty(tau)
     tau = 1;
 end
 if strcmp(tau,'ac')
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end

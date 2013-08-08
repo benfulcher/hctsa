@@ -77,7 +77,7 @@ if doplot
 end
 
 %% Compute output statistics
-out.fzcacrat = CO_fzcac(y_trim)/CO_fzcac(y);
+out.fzcacrat = CO_FirstZero(y_trim,'ac')/CO_FirstZero(y,'ac');
 out.ac2rat = acf_y_trim(2)/acf_y(2); % includes the sign
 out.ac2diff = abs(acf_y_trim(2)-acf_y(2));
 out.ac3rat = acf_y_trim(3)/acf_y(3); % includes the sign

@@ -21,9 +21,10 @@
 % values, and statistics on the occurrence of 'kicks' (times at which the
 % threshold is modified), and by how much the threshold changes on average.
 % 
-% In future could make a variant metric that optimized a and b to minimize the
+% In future could make a variant operation that optimizes a and b to minimize the
 % quantity meanqover/pkick (hugged the shape as close as possible with the
 % minimum number of kicks), and returns a and b...?
+% 
 
 function out = EX_MovingThreshold(y,a,b)
 % Ben Fulcher, October 2009
@@ -73,14 +74,14 @@ for i = 2:N
 end
 
 if doplot
-    figure('color','w')
+    figure('color','w'); box('on')
     hold on
     plot(y,'.-k')
     plot(q,'--r')
     hold off
 end
 
-%% Output
+%% Outputs
 
 % Basic statistics on the barrier dynamics, q
 out.meanq = mean(q);

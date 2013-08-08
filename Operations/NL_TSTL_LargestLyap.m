@@ -1,4 +1,4 @@
-% NL_LargestLyap
+% NL_TSTL_LargestLyap
 % 
 % Computes the largest Lyapunov exponent of a time-delay reconstructed time
 % series using the TSTOOL code 'largelyap'.
@@ -32,7 +32,7 @@
 % best possible linear fit.
 % 
 
-function out = NL_LargestLyap(y,Nref,maxtstep,past,NNR,embedparams)
+function out = NL_TSTL_LargestLyap(y,Nref,maxtstep,past,NNR,embedparams)
 % Ben Fulcher, November 2009
 
 %% Preliminaries

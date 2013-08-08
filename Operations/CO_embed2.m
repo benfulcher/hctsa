@@ -1,4 +1,4 @@
-% CO_embed2
+% CO_Embed2
 % 
 % Embeds the z-scored time series in a two-dimensional time-delay
 % embedding space with a given time-delay, tau, and outputs a set of
@@ -14,7 +14,7 @@
 % origin, and statistics on outliers.
 % 
 
-function out = CO_embed2(y,tau)
+function out = CO_Embed2(y,tau)
 % Ben Fulcher, September 2009
 
 doplot = 0; % can set to 1 to plot some outputs
@@ -26,7 +26,7 @@ end
 
 % Set tau to the first zero-crossing of the autocorrelation function, with the 'tau' input
 if strcmp(tau,'tau'),
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
     if tau > length(y)/10
         tau = floor(length(y)/10);
     end

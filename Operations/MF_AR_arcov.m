@@ -21,7 +21,7 @@ if nargin < 2 || isempty(p)
     p = 2; % Fit AR(2) model by default
 end
 
-% Fit an AR model:
+% Fit an AR model using Matlab's Signal Processing Toolbox:
 [a, e] = arcov(y,p);
 
 out.e = e; % variance

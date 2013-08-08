@@ -26,6 +26,7 @@
 % Outputs include log-likelihoods, Bayesian Information  Criteria (BIC),
 % Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
 % Ljung-Box Q-test, and estimates of optimal model orders.
+% 
 
 function out = MF_GARCHcompare(y,preproc,pr,qr)
 % Ben Fulcher 26/2/2010

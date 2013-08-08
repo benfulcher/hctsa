@@ -82,7 +82,7 @@ end
 out.ac1 = CO_AutoCorr(acf,1);
 out.ac2 = CO_AutoCorr(acf,2);
 out.ac3 = CO_AutoCorr(acf,3);
-out.actau = CO_AutoCorr(acf,CO_fzcac(acf));
+out.actau = CO_AutoCorr(acf,CO_FirstZero(acf,'ac'));
 
 
 if Nac > 3 % Need at least four points to fit exponential
@@ -149,8 +149,8 @@ else
     out.fexpabsacf_rmse = NaN;
     out.fexpabsacf_varres = NaN;
     out.flinlmxacf_a = NaN;
-    out.flinlmxacf_b = NaN; % this is an important statistic
-    out.flinlmxacf_r2 = NaN; % this is a more important statistic!
+    out.flinlmxacf_b = NaN;
+    out.flinlmxacf_r2 = NaN;
     out.flinlmxacf_adjr2 = NaN;
     out.flinlmxacf_rmse = NaN;
 end

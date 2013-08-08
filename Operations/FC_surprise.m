@@ -43,6 +43,7 @@
 % Outputs of this operation are summaries of this series of information gains,
 % including the minimum, maximum, mean, median, lower and upper quartiles, and
 % standard deviation.
+% 
 
 function out = FC_Surprise(y,whatinf,memory,ng,cgmeth,nits)
 % Ben Fulcher, September 2009
@@ -74,7 +75,7 @@ if nargin < 6 || isempty(nits)
 end
 
 %% Course Grain
-yth = BF_coarsegrain(y,ng,cgmeth); % a coarse-grained time series using the numbers 1:ng
+yth = SB_coarsegrain(y,cgmeth,ng); % a coarse-grained time series using the numbers 1:ng
 
 N = length(yth); % will be the same as y, for 'quantile', and 'updown'
 
@@ -121,6 +122,7 @@ for i = 1:length(rs)
                 p = sum(memorydata(inmem2+2) == yth(rs(i)))/length(inmem2);
             end
             store(i) = p;
+            
         otherwise
             error('Unknwon method ''%s''',whatinf);
     end

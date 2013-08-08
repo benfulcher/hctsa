@@ -133,7 +133,7 @@ out.pred1_ac1 = CO_AutoCorr(y_pred1,1); % autocorrelation at lag one of predicti
 out.pred1ac1diff = abs(out.pred1_ac1 - CO_AutoCorr(y,1)); % difference in autocorrelations of prediction and original
 out.pred1_ac2 = CO_AutoCorr(y_pred1,2); % autocorrelation at lag one of prediction
 out.pred1ac2diff = abs(out.pred1_ac2 - CO_AutoCorr(y,2)); % difference in autocorrelations of prediction and original
-out.pred_tau_comp = CO_fzcac(y_pred1)/CO_fzcac(y); % difference in first zero crossing of autocorrelation function
+out.pred_tau_comp = CO_FirstZero(y_pred1,'ac')/CO_FirstZero(y,'ac'); % difference in first zero crossing of autocorrelation function
 
 % autocorrelation structure
 acs_y = CO_AutoCorr(y,1:10);

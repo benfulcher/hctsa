@@ -131,7 +131,7 @@ switch model
         orders = zeros(npred,1);
         sbcs = zeros(npred,1);
         yy = y.y;
-        for $1 $2 $3:npred
+        for i = 1:npred
             % Use arfit software to retrieve the optimum AR(p) order by
             % Schwartz's Bayesian Criterion, SBC (or BIC); in the range
             % p = 1-10

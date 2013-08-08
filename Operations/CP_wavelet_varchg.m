@@ -55,13 +55,10 @@ if wmaxlev(N, wname) < level
     error('Chosen level, %u, is too large for this wavelet on this signal. Sorry.', level);
 end
 
-% The aim of this example is to recover the
-% change points in signal y.
-% In addition, this example illustrates how the GUI
-% tools propose change point locations for interval
-% dependent de-noising thresholds.
-% 1. Recover a noisy signal by suppressing an
-% approximation.
+% The aim of this example is to recover the change points in signal y.
+% In addition, this example illustrates how the GUI tools propose change point
+% locations for interval dependent de-noising thresholds.
+% 1. Recover a noisy signal by suppressing an approximation.
 
 %% Perform a single-level wavelet decomposition 
 [c, l] = wavedec(y,level,wname);
@@ -73,7 +70,7 @@ det = wrcoef('d',c,l,wname,level);
 % % in order to remove almost all the signal.
 x = sort(abs(det));
 v2p100 = x(fix(length(x)*0.98));
-det(abs(det)>v2p100) = mean(det);
+det(abs(det) > v2p100) = mean(det);
 
 % keyboard
 

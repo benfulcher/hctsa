@@ -32,10 +32,10 @@ end
 if ischar(l)
     switch l
     case 'ac2'
-        taug = CO_fzcac(y); % tau (global)
+        taug = CO_FirstZero(y,'ac'); % tau (global)
         l = 2*taug;
     case 'ac5'
-        taug = CO_fzcac(y); % tau (global)
+        taug = CO_FirstZero(y,'ac'); % tau (global)
         l = 5*taug;
     otherwise
         error('Unknown specifier ''%s''',l);
@@ -62,12 +62,13 @@ qs = zeros(nseg,nfeat);
 for j = 1:nseg
     % pick a range
     % in this implementation, ranges CAN overlap
-    ist = randint(1,1,[1, N-1-l]); % random start point (not exceeding the endpoint)
+    % ist = randint(1,1,[1, N-1-l]); % random start point (not exceeding the endpoint)
+    ist = randi(N-1-l,1); % random start point (not exceeding the endpoint)
     ifh = ist+l-1; % finish index
     rs = ist:ifh; % sample range (from starting to finishing index)
     ysub = y(rs); % subsection
 
-    taul = CO_fzcac(ysub);
+    taul = CO_FirstZero(ysub,'ac');
     
     qs(j,1) = mean(ysub); % mean
     qs(j,2) = std(ysub); % standard deviation

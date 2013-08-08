@@ -9,10 +9,11 @@
 %           or 'mi' for automutual information
 % 
 % Note that selecting 'ac' is unusual operation: standard operations are the
-% first zero-crossing of the autocorrelation (as in CO_fzcac), or the first
+% first zero-crossing of the autocorrelation (as in CO_FirstZero), or the first
 % minimum of the mutual information function ('mi').
 %
-% Uses Rudy Moddemeijer's RM_information.m code that may or may not be great...
+% The 'mi' option uses Rudy Moddemeijer's RM_information.m code that may or may
+% not be great...
 % 
 
 function out = CO_FirstMin(y,minwhat)

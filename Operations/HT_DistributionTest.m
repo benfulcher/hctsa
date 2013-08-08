@@ -59,11 +59,11 @@ switch thedistn
         else a = gamfit(x);
         end
     case 'logn'
-        if any(x<=0),p = NaN; return
+        if any(x<=0), p = NaN; return
         else a = lognfit(x);
         end
     case 'wbl'
-        if any(x<=0),p = NaN; return
+        if any(x<=0), p = NaN; return
         else a = wblfit(x);
         end
     otherwise

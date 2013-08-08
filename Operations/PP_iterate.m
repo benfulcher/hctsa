@@ -143,7 +143,7 @@ out.normdiff_exp = stats(10,4);
         f = zeros(10,1); % vector of features to output
         % 1) Stationarity
         % (a) StatAv
-        f(1) = SY_StatAv(y_d,5,'seg');
+        f(1) = SY_StatAv(y_d,'seg',5);
         % (b) Sliding window mean
         f(2) = SY_SlidingWindow(y_d,'mean','std',5,2);
         % (c) Sliding window std

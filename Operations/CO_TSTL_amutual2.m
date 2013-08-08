@@ -1,4 +1,4 @@
-% CO_TSTOOL_amutual2
+% CO_TSTL_amutual2
 % 
 % Uses amutual2 code from TSTOOL up to a maximum time-delay maxtau.
 % 
@@ -8,10 +8,10 @@
 % maxtau, maximal lag
 % 
 % Statistics are returned on the output of amutual2 over this range, as for
-% CO_TSTOOL_amutual.
+% CO_TSTL_amutual.
 % 
 
-function out = CO_TSTOOL_amutual2(y,maxtau)
+function out = CO_TSTL_amutual2(y,maxtau)
 % Ben Fulcher, 2009
 
 %% Preliminaries
@@ -30,7 +30,7 @@ end
 ami = data(amutual2(s,maxtau));
 
 %% Give output
-% (c.f., CO_TSTOOL_amutual -- similar routine here)
+% (c.f., CO_TSTL_amutual -- similar routine here)
 
 % output the raw values
 for i = 1:maxtau0

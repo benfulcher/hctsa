@@ -82,7 +82,7 @@ out.ac4den = F_acden(4);
 out.ac5den = F_acden(5);
 
 % Estimates of correlation length:
-out.tauacden = CO_fzcac(locden,'ac'); % first zero-crossing of autocorrelation function
+out.tauacden = CO_FirstZero(locden,'ac'); % first zero-crossing of autocorrelation function
 out.taumiden = CO_FirstMin(locden,'mi'); % first minimum of automutual information function
 
 end

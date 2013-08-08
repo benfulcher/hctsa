@@ -7,22 +7,23 @@
 % x, the input time series
 % <can also produce additional outputs with the following optional settings>
 % [opt] 'numcross': number of times the distribution crosses the given threshold
-%           e.g., usage: DN_FitKernelSmooth(x,'numcross',[0.5,0.7]) for thresholds of 0.5 and 0.7
+%           e.g., usage: DN_FitKernelSmooth(x,'numcross',[0.5,0.7]) for
+%                        thresholds of 0.5 and 0.7
 % [opt] 'area': area under where the distribution crosses the given thresholds.
 %               Usage as for 'numcross' above
-% [opt] 'arclength': arclength between where the distribution passes given thresholds.
-%                   Usage as above.
+% [opt] 'arclength': arclength between where the distribution passes given
+%       thresholds. Usage as above.
 % 
 % EXAMPLE USAGE:                  
 % DN_FitKernelSmooth(x,'numcross',[0.05,0.1],'area',[0.1,0.2,0.4],'arclength',[0.5,1,2])
 % returns all the basic outputs, plus those for numcross, area, and arclength
 % for the thresholds given
-%   
-% Outputs are set of statistics summarizing the obtained distribution,
-% including the number of peaks, the distributional entropy, the number of times
-% the curve crosses fifixed probability thresholds, the area under the curve for
-% fifixed probability thresholds, the arc length, and the symmetry of
-% probability density above and below the mean.
+% 
+% Outputs are set of statistics summarizing the obtained distribution, including
+% the number of peaks, the distributional entropy, the number of times the curve
+% crosses fifixed probability thresholds, the area under the curve for fifixed
+% probability thresholds, the arc length, and the symmetry of probability
+% density above and below the mean.
 % 
 
 function out = DN_FitKernelSmooth(x,varargin)

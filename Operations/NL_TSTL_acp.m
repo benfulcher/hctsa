@@ -50,7 +50,7 @@ end
 if strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 elseif strcmp(tau,'ac')
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
 end
 % time delay can't be more than 1/20th of time series length
 if tau > N/20

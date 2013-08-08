@@ -1,9 +1,13 @@
-function permen = LA_permen(y)
+% LA_permen
+% 
 % Originally logisticPE.m
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/logisticPE.m
 % Bruce Land and Damian Elias
-% Modified a little by Ben Fulcher
+% Modified ever so slightly by Ben Fulcher
+%
+
+function permen = LA_permen(y,ord)
 
 N = length(y); % time-series length, N
 

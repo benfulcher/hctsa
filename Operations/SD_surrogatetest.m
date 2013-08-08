@@ -162,7 +162,7 @@ end
 if ismember('nlpe',teststat) % locally constant phase space prediction error
     fprintf(1,'''nlpe'' can be very time consuming\n')
     de = 3; tau = 1; % embedding parameters: fixed like a dummy!
-    tmp = NL_nlpe(x,de,tau);
+    tmp = NL_MS_nlpe(x,de,tau);
     nlpex = tmp.msqerr;
     nlpesurr = zeros(nsurrs,1);
     for i = 1:nsurrs

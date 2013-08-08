@@ -32,7 +32,7 @@ N = length(y); % time-series length
 switch fmeth
     case 'mean'
         if strcmp(ltrain,'ac')
-            lp = CO_fzcac(y); % make it tau
+            lp = CO_FirstZero(y,'ac'); % make it tau
         else
             lp = ltrain; % the length of the subsegment preceeding to use to predict the subsequent value
         end
@@ -44,7 +44,7 @@ switch fmeth
         
     case 'median'
         if strcmp(ltrain,'ac')
-            lp = CO_fzcac(y); % make it tau
+            lp = CO_FirstZero(y,'ac'); % make it tau
         else
             lp = ltrain; % the length of the subsegment preceeding to use to predict the subsequent value
         end
@@ -70,7 +70,7 @@ switch fmeth
 
     case 'lfit'
         if strcmp(ltrain,'ac')
-            lp = CO_fzcac(y); % make it tau
+            lp = CO_FirstZero(y,'ac'); % make it tau
         else
             lp = ltrain; % the length of the subsegment preceeding to use to predict the subsequent value
         end
@@ -115,7 +115,7 @@ end
 % autocorrelation structure:
 out.ac1 = CO_AutoCorr(res,1);
 out.ac2 = CO_AutoCorr(res,2);
-out.taures = CO_fzcac(res);
-out.tauresrat = CO_fzcac(res)/CO_fzcac(y);
+out.taures = CO_FirstZero(res,'ac');
+out.tauresrat = CO_FirstZero(res,'ac')/CO_FirstZero(y,'ac');
 
 end

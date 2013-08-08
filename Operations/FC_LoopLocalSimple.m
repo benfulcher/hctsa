@@ -3,9 +3,18 @@
 % Analyzes the outputs of FC_LocalSimple for a range of local window lengths, l.
 % Loops over the length of the data to use for FC_LocalSimple prediction
 % 
+% INPUTS:
+% 
+% y, the input time series
+% 
+% fmeth, the prediction method:
+%            (i) 'mean', local mean prediction
+%            (ii) 'median', local median prediction
+% 
 % Outputs are statistics including whether the mean square error increases or
 % decreases, testing for peaks, variability, autocorrelation, stationarity, and
 % a fit of exponential decay, f(x) = A*exp(Bx) + C, to the variation.
+% 
 
 function out = FC_LoopLocalSimple(y,fmeth)
 % Ben Fulcher, 2009
@@ -19,8 +28,10 @@ end
 switch fmeth
     case 'mean'
         ngr = (1:10)';
+        
     case 'median'
         ngr = (1:2:19)';
+        
     otherwise
         error('Unknown prediction method ''%s''',fmeth);
 end
@@ -45,7 +56,7 @@ end
 
 if doplot
     figure('color','w')
-    plot(stats_st)
+    plot(stats_st,'k')
 end
 
 % Get statistics from the shapes of the curves

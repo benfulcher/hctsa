@@ -1,7 +1,8 @@
 % MD_pNN
 % 
-% Applies pNNx measures to time series assumed to represent sequences of consecutive RR intervals measured in
-% milliseconds.
+% Applies pNNx measures to time series assumed to represent sequences of
+% consecutive RR intervals measured in milliseconds.
+% 
 % cf. "The pNNx files: re-examining a widely used heart rate variability
 %           measure", J.E. Mietus et al., Heart 88(4) 378 (2002)
 % 
@@ -15,6 +16,7 @@
 % 
 % Code is heavily derived from that provided by Max A. Little:
 % http://www.maxlittle.net/
+%
 
 function out = MD_pNN(x)
 % Ben Fulcher 24/2/2011

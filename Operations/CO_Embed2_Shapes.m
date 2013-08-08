@@ -1,4 +1,4 @@
-% CO_ReccurrenceShapes
+% CO_Embed2_Shapes
 % 
 % Takes a shape and places it on each point in the two-dimensional time-delay
 % embedding space sequentially. This function counts the points inside this shape
@@ -16,7 +16,7 @@
 % series.
 % 
 
-function out = CO_ReccurrenceShapes(y,tau,shape,r)
+function out = CO_Embed2_Shapes(y,tau,shape,r)
 % Ben Fulcher, September 2009
 
 doplot = 0; % plot results for debugging
@@ -37,7 +37,7 @@ end
 
 % Can set time lag equal to first zero crossing of the autocorrelation function with the 'tau' input
 if strcmp(tau,'tau'),
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
     % Cannot set the time delay greater than 10% the length of the time series
     if tau > length(y)/10
         tau = floor(length(y)/10);
@@ -73,6 +73,7 @@ switch shape
 			
 		    counts(i) = sum(m_c_d <= r^2); % number of points enclosed in a circle of radius r
 		end
+        
     otherwise
         error('Unknown shape ''%s''', shape)
 end
@@ -89,7 +90,7 @@ end
 out.ac1 = CO_AutoCorr(counts,1);
 out.ac2 = CO_AutoCorr(counts,2);
 out.ac3 = CO_AutoCorr(counts,3);
-out.tau = CO_fzcac(counts);
+out.tau = CO_FirstZero(counts,'ac');
 out.max = max(counts);
 out.std = std(counts);
 out.median = median(counts);

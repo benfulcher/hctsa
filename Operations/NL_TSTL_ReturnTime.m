@@ -1,4 +1,4 @@
-% NL_ReturnTime
+% NL_TSTL_ReturnTime
 % 
 % Computes a histogram of return times, the time taken for the time series to
 % return to a similar location in phase space for a given reference point using
@@ -21,7 +21,7 @@
 % peaks, spread, proportion of zeros, and the distributional entropy.
 % 
 
-function out = NL_ReturnTime(y,NNR,maxT,past,Nref,embedparams)
+function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedparams)
 % Ben Fulcher, 12/11/2009
 
 doplot = 0; % plot outputs to figures
@@ -40,7 +40,7 @@ end
 if nargin < 3 || isempty(maxT)
     maxT = 0.1;
 end
-if (maxT > 0) && maxT (<= 1) % specify a proportion
+if (maxT > 0) && (maxT <= 1) % specify a proportion
     maxT = floor(N*maxT);
     if maxT = 0, maxT = 1; end
 end

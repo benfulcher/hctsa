@@ -1,4 +1,4 @@
-% NL_PoincareSection
+% NL_TSTL_PoincareSection
 % 
 % Obtains a Poincare section of the time-delay embedded time series, producing a
 % set of vector points projected orthogonal to the tangential vector at the
@@ -27,7 +27,7 @@
 % ref changes... (not done here)
 % 
 
-function out = NL_PoincareSection(y,ref,embedparams)
+function out = NL_TSTL_PoincareSection(y,ref,embedparams)
 % Ben Fulcher, November 2009
 
 %% Check inputs
@@ -80,7 +80,7 @@ try
 catch me
     if strcmp(me.message,'No section points found') ...
             || strcmp(me.identifier,'MATLAB:badsubscript')
-        fprintf(1,'No section points found to run NL_PoincareSection\n');
+        fprintf(1,'No section points found to run NL_TSTL_PoincareSection\n');
         out = NaN; return
     else
         error(me.message)
@@ -107,7 +107,7 @@ out.iqrx = iqr(x);
 out.meanx = mean(x);
 out.ac1x = CO_AutoCorr(x,1);
 out.ac2x = CO_AutoCorr(x,2);
-out.tauacx = CO_fzcac(x);
+out.tauacx = CO_FirstZero(x,'ac');
 
 out.maxy = max(y);
 out.miny = min(y);
@@ -116,7 +116,7 @@ out.iqry = iqr(y);
 out.meany = mean(y);
 out.ac1y = CO_AutoCorr(y,1);
 out.ac2y = CO_AutoCorr(y,2);
-out.tauacy = CO_fzcac(y);
+out.tauacy = CO_FirstZero(y,'ac');
 
 out.boxarea = range(x)*range(y);
 
@@ -156,7 +156,7 @@ out.iqrD = iqr(D);
 out.meanD = mean(D);
 out.ac1D = CO_AutoCorr(D,1);
 out.ac2D = CO_AutoCorr(D,2);
-out.tauacD = CO_fzcac(D);
+out.tauacD = CO_FirstZero(D,'ac');
 
 
 % entropy of boxed distribution

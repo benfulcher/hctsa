@@ -35,7 +35,7 @@ nmov = 1; % controls window overlap
 
 nfeat = 11; % number of features
 fs = zeros(length(nsegr),nfeat);
-taug = CO_fzcac(y); % global tau
+taug = CO_FirstZero(y,'ac'); % global tau
 
 for i = 1:length(nsegr)
     nseg = nsegr(i);
@@ -49,7 +49,7 @@ for i = 1:length(nsegr)
     
     for j = 1:nsteps
         ysub = y((j-1)*inc+1:(j-1)*inc+wlen);
-        taul = CO_fzcac(ysub);
+        taul = CO_FirstZero(ysub,'ac');
         
         % qs.mean(j) = mean(ysub); % mean
         % qs.std(j) = std(ysub); % standard deviation

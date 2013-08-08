@@ -41,7 +41,8 @@
 % params, the parameters of the GARCH model to fit, can be:
 %           (i) 'default', fits the default model
 %           (ii) 'auto', automated routine to select parameters for this time series
-%           (iii) e.g., params = '''R'',2,''M'',1,''P'',2,''Q'',1', sets r = 2, m = 1, p = 2, q = 1
+%           (iii) e.g., params = '''R'',2,''M'',1,''P'',2,''Q'',1', sets r = 2,
+%                                   m = 1, p = 2, q = 1
 % 
 % In future this function should be reformed by an expert in GARCH model fitting.
 
@@ -49,7 +50,6 @@ function out = MF_GARCHfit(y,preproc,params)
 % Ben Fulcher, 25/2/2010
 
 %% Inputs
-
 if nargin < 2 || isempty(preproc)
     preproc = 'ar'; % do the preprocessing that maximizes stationarity/whitening
 end

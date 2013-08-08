@@ -1,4 +1,4 @@
-% GP_LearnHyperp
+% MF_GP_LearnHyperp
 % 
 % Function used by main Gaussian Process model fitting operations that learns
 % Gaussian Process hyperparameters for the time series
@@ -11,8 +11,8 @@
 % init_loghyper, inital values for hyperparameters
 % 
 
-function loghyper = GP_LearnHyperp(covfunc,nfevals,t,y,init_loghyper)
-% Ben Fulcher
+function loghyper = MF_GP_LearnHyperp(covfunc,nfevals,t,y,init_loghyper)
+% Ben Fulcher, 2010
     
 if nargin < 5 || isempty(init_loghyper)
     % Use default starting values for parameters
@@ -20,7 +20,7 @@ if nargin < 5 || isempty(init_loghyper)
     s = feval(covfunc{:}); % string in form '2+1', ... tells how many
     % hyperparameters for each contribution to the covariance function
     nhps = eval(s);
-    init_loghyper = ones(nhps,1)*-1; % Initialize all log hyperparameters at -1
+    init_loghyper = -1*ones(nhps,1); % Initialize all log hyperparameters at -1
 end
 %         init_loghyper(1) = log(mean(diff(t)));
     
@@ -28,12 +28,13 @@ end
 try
     loghyper = minimize(init_loghyper, 'gpr', nfevals, covfunc, t, y);
 catch emsg
-    if strcmp(emsg.identifier,'MATLAB:posdef')
+    switch emsg.identifier
+    case 'MATLAB:posdef'
         fprintf(1,'Error: lack of positive definite matrix for this function');
         loghyper = NaN; return
-    elseif strcmp(emsg.identifier,'MATLAB:nomem')
+    case 'MATLAB:nomem'
         error('Out of memory');
-    else
+    otherwise
         error('Error fitting Gaussian Process to data')
     end
 end

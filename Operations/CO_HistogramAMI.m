@@ -16,8 +16,9 @@
 % 
 % meth, the method of computing automutual information:
 %           (i) 'even': evenly-spaced bins through the range of the time series,
-%           (ii) 'std1', 'std2': bins that extend only up to a multiple of the standard deviation from the
-%                               mean of the time series to exclude outliers, or
+%           (ii) 'std1', 'std2': bins that extend only up to a multiple of the
+%                                standard deviation from the mean of the time
+%                                series to exclude outliers,
 %           (iii) 'quantiles': equiprobable bins chosen using quantiles.
 % 
 % nbins, the number of bins, required by some methods, meth (see above)
@@ -34,7 +35,7 @@ if nargin < 2 || isempty(tau)
     tau = 1;  % time-lag of 1
 end
 if strcmp(tau,'tau')
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
     fprintf(1,'tau = %u set to fist zero-crossing of ACF\n',tau);
 end
 

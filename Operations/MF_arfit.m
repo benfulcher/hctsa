@@ -14,8 +14,7 @@
 % 
 % Autoregressive (AR) models are fitted with orders p = pmin, pmin + 1, ..., pmax.
 % 
-% The optimal model order is selected using Schwartz's Bayesian
-% Criterion (SBC).
+% The optimal model order is selected using Schwartz's Bayesian Criterion (SBC).
 % 
 % INPUTS:
 % y, the input time series
@@ -33,6 +32,9 @@ function out = MF_arfit(y,pmin,pmax,selector)
 % Ben Fulcher, 28/1/2010
 
 %% Check Inputs
+if size(y,2) > size(y,1)
+    y = y'; % needs to be a column vector
+end
 N = length(y); % time series length
 
 if nargin < 2 || isempty(pmin)
@@ -47,14 +49,14 @@ if nargin < 4 || isempty(selector)
 end
 
 % Check the ARfit toolbox is installed and in the Matlab path
-if ~exist('arfit')
+if ~exist('ARFIT_arfit')
     error('Cannot find the function ''arfit''. Have you installed the ARfit toolbox?')
 end
 
 %% (I) Fit AR model
 % Run the code with no intercept vector (all input data should be
 % zero-mean, z-scored)
-[west, Aest, Cest, SBC, FPE, th] = arfit(y, pmin, pmax, selector, 'zero');
+[west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(y, pmin, pmax, selector, 'zero');
 
 
 % (0) First, some definitions

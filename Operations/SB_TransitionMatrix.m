@@ -1,4 +1,4 @@
-% ST_TransitionMatrix
+% SB_TransitionMatrix
 % 
 % Calculates the transition probabilities between different states of the time
 % series given a method to symbolize or coarse-grain the time series.
@@ -11,7 +11,7 @@
 % y, the input time series
 %
 % discmeth, the method of discretization (currently 'quantile' is the only
-%           option; could incorporate BF_coarsegrain for more options in future)
+%           option; could incorporate SB_coarsegrain for more options in future)
 %
 % ng: number of groups in the course-graining
 %
@@ -26,7 +26,7 @@
 % transition matrix.
 % 
 
-function out = ST_TransitionMatrix(y,discmeth,ng,tau)
+function out = SB_TransitionMatrix(y,discmeth,ng,tau)
 % Ben Fulcher, August 2009
 
 % Check inputs:
@@ -43,7 +43,7 @@ if nargin < 4 || isempty(tau)
     tau = 1;
 end
 if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
 end
 
 if tau > 1; % calculate transition matrix at non-unity lag

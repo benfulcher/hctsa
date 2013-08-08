@@ -1,4 +1,4 @@
-% ST_HistogramMode
+% DN_HistogramMode
 % 
 % Measures the mode of the time series using histograms a given numbers
 % of bins.
@@ -10,7 +10,7 @@
 % nbins, the number of bins to use in the histogram.
 % 
 
-function out = ST_HistogramMode(y,nbins)
+function out = DN_HistogramMode(y,nbins)
 % Ben Fulcher, October 2009
 
 [dny, dnx] = hist(y,nbins);

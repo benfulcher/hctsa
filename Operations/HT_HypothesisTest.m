@@ -1,4 +1,4 @@
-% HT_HypothesisTests
+% HT_HypothesisTest
 % 
 % Outputs the p-value from a statistical hypothesis test applied to the
 % time series.
@@ -22,7 +22,7 @@
 % the p-value from the statistical test
 % 
 
-function p = HT_HypothesisTests(x,thetest)
+function p = HT_HypothesisTest(x,thetest)
 % Ben Fulcher, 2009
 
 switch thetest
@@ -43,8 +43,11 @@ switch thetest
         [p, ~] = signrank(x);
         
     case 'jbtest' % Statistics Toolbox
+        warning('off','stats:jbtest:PTooBig'); % suspend this warning
+        warning('off','stats:jbtest:PTooSmall'); % suspend this warning
         [~, p] = jbtest(x);
-        
+        warning('on','stats:jbtest:PTooBig'); % resume this warning
+        warning('on','stats:jbtest:PTooSmall'); % resume this warning
     case 'lbq' % Econometrics Toolbox
         [~, p] = lbqtest(x);
         

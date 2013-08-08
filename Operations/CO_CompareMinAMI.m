@@ -63,7 +63,7 @@ if doplot
 end
 
 % Things to look for in the variation
-% 1) Basic statistics
+% Basic statistics
 out.min = min(amimins);
 out.max = max(amimins);
 out.range = range(amimins);

@@ -1,4 +1,4 @@
-% CO_ReccurrenceDist
+% CO_Embed2_Dist
 % 
 % Returns statistics on the sequence of successive Euclidean distances between
 % points in a two-dimensional time-delay embedding space with a given
@@ -11,10 +11,10 @@
 % INPUTS:
 % y, a z-scored column vector representing the input time series
 % tau, the time delay.
+% 
 
-function out = CO_ReccurrenceDist(y,tau)
+function out = CO_Embed2_Dist(y,tau)
 % Ben Fulcher, September 2009
-
 
 doplot = 0; % plot results
 
@@ -26,7 +26,7 @@ end
 N = length(y); % time-series length
 
 if strcmp(tau,'tau'),
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
     if tau > N/10
         tau = floor(N/10);
     end

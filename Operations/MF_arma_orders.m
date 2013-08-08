@@ -14,19 +14,19 @@
 % Outputs are statistics on the appropriateness of different types of models,
 % including the goodness of fit from the best model, and the optimal orders of
 % fitted ARMA(p,q) models.
-
-function out = MF_ARMA_orders(y,pr,qr)
-% Ben Fulcher, 17/2/2010
-
+% 
 % ** Future improvements **
 % (1) May want to quantify where a particular order starts to stand out, i.e.,
 % may be quite sensitive to wanting p > 2, but may be quite indiscriminate
 % when it comes to the MA order.
 % (2) May want to do some prediction and get more statistics on quality of
 % model rather than just in-sample FPE/AIC...
+% 
+
+function out = MF_ARMA_orders(y,pr,qr)
+% Ben Fulcher, 17/2/2010
 
 %% Check Inputs
-
 % Convert y to time series object
 y = iddata(y,[],1);
 
@@ -62,7 +62,7 @@ end
 
 % global minimum, aic
 out.aic_min = min(aics(:));
-[pi_opt qi_opt] = find(aics == min(aics(:)));
+[pi_opt, qi_opt] = find(aics == min(aics(:)),1,'first');
 out.p_aic_opt = pr(pi_opt);
 out.q_aic_opt = qr(qi_opt);
 

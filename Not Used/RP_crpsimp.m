@@ -36,7 +36,7 @@ end
 if ischar(tau)
     switch tau
     case 'ac'
-        tau = CO_fzcac(y);
+        tau = CO_FirstZero(y,'ac');
     case 'mi'
         tau = CO_FirstMin(y,'mi');
     otherwise

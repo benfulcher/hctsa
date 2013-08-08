@@ -19,6 +19,8 @@
 function out = NL_BoxCorrDim(y,nbins,embedparams)
 % Ben Fulcher, November 2009
 
+doplot = 0; % plot outputs to a figure
+
 %% Preliminaries
 N = length(y); % length of time series
 
@@ -45,10 +47,12 @@ if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
 end
 
 %% Run
-
 rs = data(corrdim(s,nbins));
 % Contains ldr as rows for embedding dimensions 1:m as columns;
-% plot(rs);
+if doplot
+    figure('color','w'); box('on');
+    plot(rs,'k');
+end
 
 %% Output Statistics
 % Note: these aren't particularly well motivated.
@@ -81,29 +85,6 @@ rsstretch = rs(:);
 out.medianstretch = median(rsstretch);
 out.minstretch = min(rsstretch);
 out.iqrstretch = iqr(rsstretch);
-
-	% used to be necessary when master function NaN was not yet implemented...
-    % function out = SUB_allNaNs(m,ldr)
-    %     
-    %     for j=2:m
-    %         eval(['out.meand' num2str(j) ' = NaN;'])
-    %         eval(['out.mediand' num2str(j) ' = NaN;'])
-    %         eval(['out.mind' num2str(j) ' = NaN;'])
-    %     end
-    %     
-    %     for j=2:ldr
-    %         eval(['out.meanr' num2str(i) ' = NaN;'])
-    %         eval(['out.medianr' num2str(i) ' = NaN;'])
-    %         eval(['out.minr' num2str(i) ' = NaN;'])
-    %         eval(['out.meanchr' num2str(i) ' = NaN;'])
-    %     end
-    %     
-    %     out.stdmean = NaN;
-    %     out.stdmedian = NaN;
-    %     out.medianstretch = NaN;
-    %     out.minstretch = NaN;
-    %     out.iqrstretch = NaN;
-    % end
 
 
 end

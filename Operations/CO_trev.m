@@ -29,7 +29,7 @@ end
 
 % Can set the time lag, tau, to be 'ac' or 'mi'
 if strcmp(tau,'ac')
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
     % tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');

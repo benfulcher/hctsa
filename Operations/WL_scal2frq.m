@@ -50,7 +50,7 @@ if maxlevel < amax
     fprintf(1,' changed to maximum level computed with wmaxlev: %u\n',amax);
 end
 
-%% Do your thing.
+%% Do your thing:
 % This example demonstrates that, starting from the periodic function
 % x(t) = 5*sin(5t) + 3*sin(2t) + 2*sin(t), the scal2frq function translates
 % the scales corresponding to the maximum values of the CWT coefficients
@@ -87,7 +87,5 @@ end
 out.lmax = jmax; % level with highest energy coefficients
 out.period = per(jmax); % output dominant period
 out.pf = f(jmax); % output dominant pseudo-frequency
-
-
       
 end

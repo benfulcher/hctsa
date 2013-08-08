@@ -1,4 +1,4 @@
-% NL_LZcomplexity
+% NL_MS_LZcomplexity
 % 
 % Calculates the Lempel-Ziv complexity of a n-bit encoding of the time
 % series using Michael Small's complexity code (renamed MS_complexity here),
@@ -22,8 +22,9 @@
 % The function has a single output: the normalized Lempel-Ziv complexity: i.e.,
 % the number of distinct symbol sequences in the time series divided by the
 % expected number of distinct symbols for a noise sequence.
+% 
 
-function out = NL_LZcomplexity(y,n,preproc)
+function out = NL_MS_LZcomplexity(y,n,preproc)
 % Ben Fulcher, 19/2/2010
 
 if nargin < 2 || isempty(n)

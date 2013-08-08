@@ -4,7 +4,7 @@
 % geometric shape that is moved around the time series. Inputs specify a shape
 % and its size, and a method for moving this shape through the time domain.
 % 
-% This is usually more informative in an embedding space (CO_embed2_...), but
+% This is usually more informative in an embedding space (CO_Embed2_...), but
 % here we do it just in the temporal domain (_t_).
 % 
 % In the future, could perform a similar analysis with a soft boundary, some

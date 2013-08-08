@@ -4,24 +4,17 @@
 % scheme, and returns measures of how the properties of the time series change
 % with this process.
 % 
-% We implement three different randomization schemes:
-% (i) statdist, which substitutes a time series data point with a random
-% point in the original time series at each iteration,
-% (ii) dyndist, which overwrites a random element of the time series with another random
-% element at each iteration, and
-% (iii) permute, which randomly permutes two elements of the time series at each iteration.
-% 
 % The procedure is repeated 2N times, where N is the length of the time series.
 % 
 % INPUTS:
 % y, the input (z-scored) time series
-% howtorand:
-%      (i) 'statdist' -- substitutes a random element of the time
-%                       series with one from the original time series distribution
+% howtorand, specifies the randomization scheme for each iteration:
+%      (i) 'statdist' -- substitutes a random element of the time series with
+%                           one from the original time-series distribution
 %      (ii) 'dyndist' -- overwrites a random element of the time
 %                       series with another random element
-%      (iii) 'permute' -- progressively permutes elements of the time
-%                       series
+%      (iii) 'permute' -- permutes pairs of elements of the time
+%                       series randomly
 % 
 % Outputs of this function summarize how the properties change as one of these
 % randomization procedures is iterated, including the cross correlation with the
@@ -277,7 +270,7 @@ out.swss5_1hp = gethp(stats(:,11));
         sampen = PN_sampenc(y_rand,2,0.2,1);
         
         % Stationarity
-        statav5 = SY_StatAv(y_rand,5,'seg');
+        statav5 = SY_StatAv(y_rand,'seg',5);
         swss5_1 = SY_SlidingWindow(y_rand,'std','std',5,1);
         
         out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, shen, sampen, statav5, swss5_1];

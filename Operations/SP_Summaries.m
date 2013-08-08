@@ -140,12 +140,12 @@ out.ac1 = CO_AutoCorr(S,1);
 out.ac2 = CO_AutoCorr(S,1);
 out.ac3 = CO_AutoCorr(S,1);
 out.ac4 = CO_AutoCorr(S,1);
-out.tau = CO_fzcac(S);
+out.tau = CO_FirstZero(S,'ac');
 out.logac1 = CO_AutoCorr(logS,1);
 out.logac2 = CO_AutoCorr(logS,1);
 out.logac3 = CO_AutoCorr(logS,1);
 out.logac4 = CO_AutoCorr(logS,1);
-out.logtau = CO_fzcac(logS);
+out.logtau = CO_FirstZero(logS,'ac');
 out.logmaxonlogmean1e = out.maxSlog/mean(logS(logS<out.maxSlog/exp(1)));
 out.maxwidth = w(i_maxS+find(logS(i_maxS+1:end)<out.maxSlog/exp(1),1,'first'))-...
                 w(find(logS(1:i_maxS)<out.maxSlog/exp(1),1,'last'));

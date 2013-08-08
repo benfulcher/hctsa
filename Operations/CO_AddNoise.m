@@ -22,6 +22,8 @@
 function out = CO_AddNoise(y,tau,meth,nbins)
 % Ben Fulcher, September 2009
 
+doplot = 0;
+
 %% Check inputs
 if nargin < 2
     tau = []; % set default in CO_HistogramAMI
@@ -43,9 +45,6 @@ for i = 1:nr
     amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,meth,nbins);
 end
 
-% plot(noiser,amis,'.-k');
-% out = amis;
-
 out.pdec = sum(diff(amis) < 0)/(nr-1);
 out.meanch = mean(diff(amis));
 out.ac1 = CO_AutoCorr(amis,1);
@@ -57,12 +56,15 @@ f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(noiser',amis,f);
 
 % plot
-% cc = BF_getcmap('set1',2,1);
-% % figure('color','w');
-% hold on; box('on')
-% plot(noiser,c.a*exp(c.b*noiser),'color',cc{2},'linewidth',2)
-% plot(noiser,amis,'.-','color',cc{1})
-% xlabel('\eta'); ylabel('AMI_1')
+if doplot
+    figure('color','w'); box('on');
+    cc = BF_getcmap('set1',2,1);
+    % figure('color','w');
+    hold on; box('on')
+    plot(noiser,c.a*exp(c.b*noiser),'color',cc{2},'linewidth',2)
+    plot(noiser,amis,'.-','color',cc{1})
+    xlabel('\eta'); ylabel('AMI_1')
+end
 
 out.fitexpa = c.a;
 out.fitexpb = c.b;

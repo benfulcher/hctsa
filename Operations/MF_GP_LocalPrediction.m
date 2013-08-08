@@ -128,7 +128,7 @@ for i = 1:npreds
     
     %% (1) Learn hyperparameters from training set (t)
     
-    loghyper = GP_LearnHyperp(covfunc,-50,tt,yt);
+    loghyper = MF_GP_LearnHyperp(covfunc,-50,tt,yt);
     
     if isnan(loghyper)
         fprintf(1,'Unable to learn hyperparameters for this time series\n');

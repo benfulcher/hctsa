@@ -4,6 +4,7 @@
 % 
 % INPUTS:
 % y, the input time series
+% 
 % whichskew, the skewness measure to calculate, either 'pearson' or 'bowley'
 % 
 % The Bowley skewness uses the quantile function from Matlab's Statistics Toolbox

@@ -1,4 +1,4 @@
-% CO_ReccurrenceBasic
+% CO_Embed2_Basic
 % 
 % Obtains a set of measures of point density in a plot of y_i against y_{i-tau}.
 %
@@ -13,14 +13,14 @@
 % y_{tau} plot, including parabolas, rings, and circles.
 % 
 
-function out = CO_ReccurrenceBasic(y,tau)
+function out = CO_Embed2_Basic(y,tau)
 % Ben Fulcher, September 2009
 
 doplot = 0; % plot outputs to a figure
 
 if strcmp(tau,'tau')
 	% Make tau the first zero crossing of the autocorrelation function
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
 end
 
 xt = y(1:end-tau); % part of the time series

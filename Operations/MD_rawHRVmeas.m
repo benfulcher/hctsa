@@ -1,7 +1,7 @@
 % MD_rawHRVmeas
 % 
-% Evaluates the triangular histogram index and Poincare plot measures to a time series
-% assumed to measure sequences of consecutive RR intervals measured in
+% Evaluates the triangular histogram index and Poincare plot measures to a time
+% series assumed to measure sequences of consecutive RR intervals measured in
 % milliseconds. Doesn't make much sense for other time series
 % 
 % cf. "Do existing measures of Poincare plot geometry reflect nonlinear

@@ -1,4 +1,4 @@
-% CO_BinaryStretch
+% SB_BinaryStretch
 % 
 % Measures the longest stretch of consecutive zeros or ones in a symbolized time
 % series as a proportion of the time-series length.
@@ -9,14 +9,22 @@
 % It doesn't actually measure this correctly, due to an error in the code, but
 % it's still kind of an interesting operation...?!
 % 
+% INPUTS:
+% x, the input time series
+% stretchwhat, (i) 'lseq1', measures something related to consecutive 1s
+%              (ii) 'lseq0', measures something related to consecutive 0s
+% 
 
-function out = CO_BinaryStretch(x,stretchwhat)
+function out = SB_BinaryStretch(x,stretchwhat)
 % Ben Fulcher, 2009
+
+if nargin < 2 || isempty(stretchwhat)
+    stretchwhat = 'lseq1'; % by default
+end
 
 N = length(x); % length of the time series
 x(x > 0) = 1;
 x(x <= 0) = 0;
-
 
 switch stretchwhat
     case 'lseq1'

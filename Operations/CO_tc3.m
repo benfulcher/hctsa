@@ -9,8 +9,9 @@
 % y, input time series
 % tau, time lag
 % 
-% See documentation of the TSTOOL package (http://www.physik3.gwdg.de/tstool/) for further details about this
-% function.
+% See documentation of the TSTOOL package (http://www.physik3.gwdg.de/tstool/)
+% for further details about this function.
+%
 
 function out = CO_tc3(y,tau)
 % Ben Fulcher, 15/11/2009
@@ -22,7 +23,7 @@ end
 
 % Can set the time lag, tau, to be 'ac' or 'mi'
 if strcmp(tau,'ac')
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
     % tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');

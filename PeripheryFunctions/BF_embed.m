@@ -27,7 +27,7 @@ else
                 tau = CO_FirstMin(y,'mi');
                 sstau = sprintf('by first minimum of mutual information to tau = %u');
             case 'ac' % first zero-crossing of ACF
-                tau = CO_fzcac(y);
+                tau = CO_FirstZero(y,'ac');
                 sstau = sprintf('by first zero crossing of autocorrelation function to tau = %u',tau);
             otherwise
                 error('Invalid time-delay method ''%s''.',tau)

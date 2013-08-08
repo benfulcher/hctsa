@@ -140,7 +140,6 @@ else
     out.rangeoffdiag = range(offdiag);
 end
 
-
 % Comparing columns/rows
 out.stdmean = std(mean(xperr));
 out.rangemean = range(mean(xperr));
@@ -150,7 +149,6 @@ out.rangerange = range(range(xperr));
 out.stdrange = std(range(xperr));
 out.rangestd = range(std(xperr));
 out.stdstd = std(std(xperr));
-
 
 % Eigenvalues
 eigs = eig(xperr);

@@ -92,7 +92,7 @@ function [w, A, C, sbc, fpe, th]=ARFIT_arfit(v, pmin, pmax, selector, no_const)
   npmax	= m*pmax+mcor;          % maximum number of parameter vectors of length m
 
   if (ne <= npmax)
-    error('Time series too short.')
+    error('Time series (N = %u) too short.',size(v,1))
   end
 
   % compute QR factorization for model of order pmax

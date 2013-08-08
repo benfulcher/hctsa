@@ -1,4 +1,4 @@
-% CO_ReccurrenceAngleTau
+% CO_Embed2_AngleTau
 % 
 % Investigates how the autocorrelation of angles between successive points in
 % the two-dimensional time-series embedding change as tau varies from
@@ -9,7 +9,7 @@
 % maxtau, the maximum time lag to consider
 % 
 
-function out = CO_ReccurrenceAngleTau(y,maxtau)
+function out = CO_Embed2_AngleTau(y,maxtau)
 % Ben Fulcher, September 2009
 
 doplot = 0;

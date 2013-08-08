@@ -10,7 +10,8 @@
 % 
 % INPUTS:
 % y, the input time series
-% lambdar, a vector specifying the lambda parameterss to use
+% 
+% lambdar, a vector specifying the lambda parameters to use
 % 
 % At each iteration, the CP_ML_StepDetect code was run with a given
 % lambda, and the number of segments, and reduction in root mean square error
@@ -37,22 +38,17 @@ end
 % (*) Use rmsunderx subfunction to analyze when RMS errors drop under a set of
 % thresholds, *x*, for the first time:
 out.rmserrsu05 = lambdar(rmsunderx(0.5));
-% if isempty(out.rmserrsu05), out.rmserru05 = NaN; end
 out.rmserrsu02 = lambdar(rmsunderx(0.2));
-% if isempty(out.rmserrsu02), out.rmserru02 = NaN; end
 out.rmserrsu01 = lambdar(rmsunderx(0.1));
-% if isempty(out.rmserrsu01), out.rmserru01 = NaN; end
 
 % (*) Use the nsegsunderx subfunction to analyze when nseg drops under a set of
 % thresholds, *x*, for the first time:
 % nsegunderx = @(x) find(nsegs < x, 1, 'first');
 
 out.nsegsu005 = lambdar(nsegunderx(0.05));
-% if isempty(out.nsegsu005), out.nsegsu005 = NaN; end
 out.nsegsu001 = lambdar(nsegunderx(0.01));
-% if isempty(out.nsegsu001), out.nsegsu001 = NaN; end
 
-% correlation between #segments, rmserrs
+% Correlation between #segments, rmserrs
 R = corrcoef(nsegs,rmserrs);
 out.corrsegerr = R(2,1);
 

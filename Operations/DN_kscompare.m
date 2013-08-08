@@ -16,6 +16,7 @@
 % 
 % Outputs include the absolute area between the two distributions, the peak
 % separation, overlap integral, and relative entropy.
+% 
 
 function out = DN_kscompare(x,whatdbn)
 % Ben Fulcher, 2009

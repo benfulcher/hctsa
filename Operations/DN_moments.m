@@ -2,7 +2,7 @@
 % 
 % Output is the moment of the distribution of the input time series.
 % Normalizes by the standard deviation
-% Uses the moment function in Matlab's Statistics Toolbox
+% Uses the moment function from Matlab's Statistics Toolbox
 % 
 % INPUTS:
 % y, the input time series
@@ -12,6 +12,6 @@
 function out = DN_Moments(y,n)
 % Ben Fulcher, 2009
 
-out = moment(y,n)/std(y);
+out = moment(y,n) / std(y); % normalized
 
 end

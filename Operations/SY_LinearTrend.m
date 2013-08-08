@@ -4,8 +4,11 @@
 % and returns the ratio of standard deviations before and after the linear
 % detrending.
 % 
-% If a strong linear trend is present in the time series, this
-% operation should output a low value.
+% If a strong linear trend is present in the time series, this  operation should
+% output a low value.
+% 
+% INPUT:
+% x, the input time series
 % 
 
 function out = SY_LinearTrend(x)

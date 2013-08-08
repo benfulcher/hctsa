@@ -22,11 +22,11 @@ function out = SY_StatAv(y,whattype,n)
 % Ben Fulcher, 2009
 % Might be nicer to use the 'buffer' function for this...?
 
-if nargin < 2
+if nargin < 2 || isempty(whattype)
     whattype = 'seg'; % divide into n segments by default
 end
 
-if nargin < 3
+if nargin < 3 || isempty(n)
     n = 5; % use 5 segments
 end
 

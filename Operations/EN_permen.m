@@ -17,12 +17,16 @@
 function permen = EN_PermEn(y,ord)
 % Ben Fulcher, 2009
 
+if nargin < 2 || isempty(ord)
+    ord = 2; % order 2
+end
+
 % Ensure y is a column vector
 if size(y,1) > size(y,2);
     y = y';
 end
 
 % Use the Bruce Land and Damian Elias code to calculate the permutation entropy:
-permen = LA_permen(y);
+permen = LA_permen(y,ord);
 
 end

@@ -24,6 +24,7 @@
 % maxN, the maximum length of time series to consider -- greater than this
 %               length, time series are resampled down to maxN
 % methds, specifies the method of how to resample time series longer than maxN
+% 
 
 function out = MF_GP_hyperparameters(y,covfunc,squishorsquash,maxN,methds)
 % Ben Fulcher, 19/1/2010

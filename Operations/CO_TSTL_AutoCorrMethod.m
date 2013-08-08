@@ -1,4 +1,4 @@
-% CO_AutoCorrMethod
+% CO_TSTL_AutoCorrMethod
 % 
 % Estimates the autocorrelation function using a fast Fourier Transform method
 % implemented in TSTOOL and returns the mean square discrepancy between the
@@ -17,7 +17,7 @@
 %         up to this value
 % 
 
-function out = CO_AutoCorrMethod(y,maxlag)
+function out = CO_TSTL_AutoCorrMethod(y,maxlag)
 % Ben Fulcher, October 2009
 
 if nargin < 2 || isempty(maxlag)

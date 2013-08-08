@@ -181,8 +181,12 @@ for i = 1:nts
                     [ffi(j), qqi(j), cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput,...
                                                 Mcts,Mmlab,parmcode{j},fid);
                 catch
-                    fprintf(1,'Error retrieving element %s from %s\n',parmcode{j},Mmlab{parmlink(j)})
-                    keyboard
+                    if parmlink(j)==0
+                        error('The operations database is corrupt: there is no link from ''%s'' to a master code',parmcode{j});
+                    else
+                        fprintf(1,'Error retrieving element %s from %s\n',parmcode{j},Mmlab{parmlink(j)})
+                        RA_keyboard
+                    end
                 end
                 % [ffi(j),qqi(j),cti(j)] = TSQ_brawn_oploop(x, y, parmlink(j), Moutput{parmlink(j)},...
                 %                                 Mcts(parmlink(j)),Mmlab{parmlink(j)},fid,bevocal);

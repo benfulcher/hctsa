@@ -16,17 +16,23 @@
 %                 time series, the first zero-crossing of the autocorrelation
 %                 function.
 %                   
-% n, the window length, given the setting of lorf above.
+% n, somehow specifies the window length given the setting of lorf above.
 % 
 
 function out = ST_LocalExtrema(y,lorf,n)
 % Ben Fulcher, August 2008
 
-% lorf='l';n=100;
-% y: the time series
-% lorf: either 'l': length of window, 'n': number of windows
-% , or 'tau': the autocorrelation length.
-% n: the relevant number from lorf
+if nargin < 2 || isempty(lorf)
+    lorf = 'l';
+end
+if nargin < 3 || isempty(n)
+    switch lorf
+       case 'l'
+           n = 100; % 100-sample windows
+       case 'n'
+           n = 5; % 5 windows
+    end
+end
 
 doplot = 0; % plot outputs to a figure
 
@@ -40,13 +46,14 @@ switch lorf
         wl = floor(N/n); % number of windows
     case 'tau'
         % this may not be a good idea!
-        wl = CO_fzcac(y);
+        wl = CO_FirstZero(y,'ac');
     otherwise
         error('Unknown method ''%s''',lorf);
 end
 
 if (wl > N) || (wl <= 1)
     % ++BF 19/3/2010: this is not suitable if window length longer than ts
+    fprintf(1,'The window length is longer than the time-series length!\n');
     out = NaN; return
 end
 

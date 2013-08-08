@@ -56,7 +56,7 @@ if nargin < 2 || isempty(tau)
     tau = 1;
 end
 if strcmp(tau,'ac')
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
@@ -87,10 +87,14 @@ fprintf(1,'Just wrote the input time series (N = %u) to the temporary file %s fo
 %                     ' -t' num2str(theilerwin) ' ' fn]);
 delete(fn) % remove the temporary time-series data file
 %  * extension .stat: This file shows the current status of the estimate.
-delete([fn '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
+if exist([fn '.stat'])
+    delete([fn '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
+end
 
 if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
-    delete([fn '.c2']); delete([fn '.d2']); delete([fn '.h2']); % (this is probably not necessary)
+    if exist([fn '.c2']), delete([fn '.c2']); end
+    if exist([fn '.d2']), delete([fn '.d2']); end
+    if exist([fn '.h2']), delete([fn '.h2']); end
     if isempty(res)
         error('Call to TISEAN function ''d2'' failed.')
     else

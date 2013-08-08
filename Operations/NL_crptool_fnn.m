@@ -39,7 +39,7 @@ if ischar(taum)
     if strcmp(taum,'mi')
         tau = CO_FirstMin(y,'mi'); % time-delay
     elseif strcmp(taum,'ac')
-        tau = CO_fzcac(y); % time-delay
+        tau = CO_FirstZero(y,'ac'); % time-delay
     else
         error('Invalid time-delay method ''%s''.',taum)
     end

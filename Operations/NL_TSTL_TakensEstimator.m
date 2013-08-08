@@ -1,4 +1,4 @@
-% NL_TakensEstimator
+% NL_TSTL_TakensEstimator
 % 
 % Implements the Taken's estimator for correlation dimension using the
 % TSTOOL code takens_estimator.
@@ -19,7 +19,7 @@
 % dimension, d2.
 % 
 
-function out = NL_TakensEstimator(y, Nref, rad, past, embedparams)
+function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedparams)
 % Ben Fulcher, 14/11/2009
 
 %% Check inputs

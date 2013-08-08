@@ -1,6 +1,6 @@
-% PD_Wang07
+% PD_PeriodicityWang
 % 
-% Implements my idea of the periodicity extraction measure proposed in:
+% Implements an idea based on the periodicity extraction measure proposed in:
 % 
 % "Structure-based Statistical Features and Multivariate Time Series Clustering"
 % Wang, X. and Wirth, A. and Wang, L.
@@ -20,8 +20,10 @@
 % 10\sqrt{N}, where N is the length of the time series.
 % 
 
-function out = PD_Wang07(y)
+function out = PD_PeriodicityWang(y)
 % Ben Fulcher, 9/7/09
+
+doplot = 0; % plot outputs to figure
 
 % Check the time series is z-scored:
 if ~BF_iszscored(y)
@@ -44,8 +46,10 @@ nths = length(ths); % the number of thresholds
 spline = spap2(2,4,1:N,y); % just a single middle knot with cubic interpolants
 y_spl = fnval(spline,1:N); % evaluated at the 1:N time intervals
 y = y - y_spl';
-% plot(y_or,'k'); hold on; plot(y,'r'); hold off
-% input('is this ok, mdear?')
+if doplot
+    figure('color','w'); box('on');
+    plot(y_or,'k'); hold on; plot(y,'r'); hold off
+end
 
 %% 2. Compute autocorrelations up to 1/3 the length of the time series.
 acmax = ceil(N/3); % compute autocorrelations up to this lag
@@ -53,7 +57,11 @@ acf = zeros(acmax,1); % the autocorrelation function
 for i = 1:acmax % i is the \tau, the AC lag
     acf(i) = mean(y(1:N-i).*y(i+1:N));
 end
-% plot(acf)
+if doplot
+    figure('color','w'); box('on');
+    plot(acf,'k')
+    title('Autocorrelation')
+end
 
 %% 3. Frequency is the first peak satisfying the following conditions:
 % (a) a trough before it

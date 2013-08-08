@@ -1,4 +1,4 @@
-% NL_nlpe
+% NL_MS_nlpe
 % 
 % Computes the normalized 'drop-one-out' constant interpolation nonlinear
 % prediction error for a time-delay embedded time series using Michael Small's
@@ -23,7 +23,7 @@
 % set of measures on the correlation, Gaussianity, etc. of the residuals.
 % 
 
-function out = NL_nlpe(y,de,tau)
+function out = NL_MS_nlpe(y,de,tau)
 % Ben Fulcher, 19/2/2010
 
 % Do my own inputs
@@ -37,7 +37,7 @@ if nargin < 3 || isempty(tau)
     tau = 1;
 end
 if strcmp(tau,'ac')
-    tau = CO_fzcac(y);
+    tau = CO_FirstZero(y,'ac');
 end
 if strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');

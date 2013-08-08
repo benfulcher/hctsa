@@ -41,7 +41,7 @@ function [Aerr, werr]=ARFIT_arconf(A, C, w, th)
   % number of degrees of freedom for residual covariance matrix
   dof 	 = th(1,1);               
   % quantile of t distribution for given confidence coefficient and dof
-  t      = tquant(dof, .5+ccoeff/2);
+  t      = ARFIT_tquant(dof, .5+ccoeff/2);
   
   % Get matrix Uinv that appears in the covariance matrix of the least squares
   % estimator
