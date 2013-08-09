@@ -33,7 +33,7 @@ fprintf(1,' done.\n');
 
 % Max Little's Steps Bumps Toolkit
 fprintf(1,'Steps and bumps toolkit, Max Little...');
-cd([tooldir,'steps_bumps_toolkit'])
+cd([tooldir,'Max_Little/steps_bumps_toolkit'])
 mex ML_kvsteps_core.cpp
 fprintf(1,' done.\n');
 

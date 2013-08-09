@@ -1,12 +1,44 @@
-function timestring = BF_thetime(tsec,formatlong)
-% Converts the input, tsec, a duration of time in seconds, into an appropriate 
+% BF_thetime
+% 
+% Converts the input, tsec, a duration of time in seconds, into an appropriate
 % string for output (i.e., converts to minutes or hours or days as appropriate)
-% output is something like '25.5 minutes' or '3.2 days' -- always displays to one decimal
-% place
+% output is something like '25.5 minutes' or '3.2 days' -- always displays to
+% one decimal place.
+% 
+% INPUTS:
+% tsec, the duration in seconds
+% formatlong, (i) 0: display short units (like 's' instead of 'seconds')
+%                    [default]
+%             (ii) 1: display long units (like 'seconds' instead of 's')
+% 
+% OUTPUT:
+% timestring, an interpretable text version of the input time.
+% 
+% This code is useful for displaying user feedback on tic/toc statements.
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
+
+function timestring = BF_thetime(tsec,formatlong)
 % Ben Fulcher, 2009
 
 if nargin < 2 || isempty(formatlong)
-    formatlong = 0; % use a longer format for the unit
+    formatlong = 0; % set to 1 to use a longer format for the unit
 end
 
 if tsec < 1E-3

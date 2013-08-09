@@ -98,11 +98,11 @@ action='';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% check the input
 
 error(nargchk(0,99,nargin));
-if nargout>2, error('Too many output arguments'), end
+if nargout > 2, error('Too many output arguments'), end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% splash the GPL
 
-splash_gpl('crp');
+% splash_gpl('crp'); %% ++BF Not necessary for calling this function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% error control
 try 

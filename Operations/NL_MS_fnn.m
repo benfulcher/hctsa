@@ -20,8 +20,7 @@
 % kth, the the distance to next points
 % [opt] justbest, can be set to 1 to just return the best embedding dimension, m_{best}
 % [opt] bestp, if justbest = 1, can set bestp as the proportion of false nearest
-%                   neighbours at which the optimal embedding dimension is
-%                   selected.
+%              neighbours at which the optimal embedding dimension is selected.
 % 
 % This function returns statistics on the proportion of false nearest neighbors
 % as a function of the embedding dimension m = m_{min}, m_{min}+1, ..., m_{max}
@@ -31,12 +30,33 @@
 % and spread, and the smallest m at which the proportion of false nearest
 % neighbors drops below each of a set of fixed thresholds.
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = NL_MS_fnn(y,de,tau,th,kth,justbest,bestp)
 % Ben Fulcher, 19/2/2010
 
 %% CHECK INPUTS:
-
 % Embedding dimension(s), de
 if nargin < 2 || isempty(de)
     de = (1:10);
@@ -71,7 +91,7 @@ if nargin < 7 || isempty(bestp)
     bestp = 0.05; % first time under 5% of neighest neighbours
 end
 
-% Run Michael Small's false nearest neighbour code:
+% Run Michael Small's false nearest neighbour code, MS_fnn:
 p = MS_fnn(y,de,tau,th,kth);
 
 %% Now make output

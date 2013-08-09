@@ -27,6 +27,28 @@
 % Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
 % Ljung-Box Q-test, and estimates of optimal model orders.
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = MF_GARCHcompare(y,preproc,pr,qr)
 % Ben Fulcher 26/2/2010
@@ -44,12 +66,24 @@ if nargin < 4 || isempty(qr)
     qr = (1:3); % i.e., GARCH(pr,1:4);
 end
 
+%% Check that an Econometrics license exists:
+a = license('test','Econometrics_Toolbox');
+if a==0
+    error('This function requires the Econometrics Toolbox');
+end
+% Try to check out a license:
+[lic_free,~] = license('checkout','Econometrics_Toolbox');
+if lic_free == 0
+    error('Could not obtain a license for the Econometrics Toolbox');
+end
+
 %% (1) Data preprocessing
 y0 = y; % the original, unprocessed time series
 
 switch preproc
     case {'nothing','none'}
         % do nothing.
+        
     case 'ar'
         % do the preprocessing that maximizes ar(2) whiteness
         % apply a number of standard preprocessings and return them in the
@@ -57,15 +91,18 @@ switch preproc
         % of an AR2 model to the processed time series.
         % has to beat doing nothing by 5% (error)
         % No spectral methods allowed...
-        [ypp, best] = BF_preproc(y,'ar',2,0.05,0);
+        [ypp, best] = PP_PreProcess(y,'ar',2,0.05,0);
         eval(sprintf('y = ypp.%s;',best));
         fprintf(1,'Proprocessed the time series according to AR(2) criterion using %s\n',best);
+        
     otherwise
         error('Unknwon preprocessing setting ''%s''',preproc);
 end
 
+%% Preliminaries
 y = BF_zscore(y); % make sure the time series is z-scored
 N = length(y); % could be different to original (e.g., if chose a differencing above)
+
 
 % Now have the preprocessed time series saved over y.
 % The original, unprocessed time series is retained in y0.

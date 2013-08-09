@@ -281,7 +281,7 @@ switch cmeth
 %                         case 'mi'
 %                             cc = mean(F(acgi{j},:)); % the cluster centre, cc
 %                             for k = 1:gil(j)
-%                                 dd(k) = -BF_mi(F(acgi{j}(k),:),cc,'quantile','quantile',10); % with 10 bins
+%                                 dd(k) = -BF_MutualInformation(F(acgi{j}(k),:),cc,'quantile','quantile',10); % with 10 bins
 %                             end
 %                         otherwise
 %                             disp('strange distance metric!!..........')

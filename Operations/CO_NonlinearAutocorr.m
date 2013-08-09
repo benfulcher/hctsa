@@ -24,10 +24,33 @@
 % Note: for odd numbers of regressions (i.e., even number length
 %         taus vectors) the result will be near zero due to fluctuations
 %         below the mean; even for highly-correlated signals. (doabs)
-% Note: doabs is really a different metric that can't be compared with
-%         the values obtained from taking doabs off (i.e., for odd lengths
+% Note: doabs = 1 is really a different operation that can't be compared with
+%         the values obtained from taking doabs = 0 (i.e., for odd lengths
 %         of taus)
 % Note: It can be helpful to look at nlac at each iteration.
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = CO_NonlinearAutocorr(y,taus,doabs)
 % Ben Fulcher, 8/6/09

@@ -1,12 +1,12 @@
 # Generated automatically from Makefile.in by configure.
 SHELL = /bin/sh
 
-prefix = /home/fulcher
+prefix = /Users/ben
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 
-FC = 
-FFLAGS = 
+FC = gfortran
+FFLAGS = -O
 INSTALL = /usr/bin/install -c
 LDFLAGS = 
 

@@ -28,6 +28,28 @@
 %               (iii) 'sq': takes the square of every data point
 %               (iv) 'none': does no transformation
 %           
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = ST_MomentCorr(x,wl,olap,mom1,mom2,transf)
 % Ben Fulcher, 5 July 2010
@@ -92,14 +114,15 @@ end % lose last point
 % first calculate the first moment in all the windows (each column is a
 % 'window' of the signal
 
-M1 = calcmemoments(x_buff,mom1);
-M2 = calcmemoments(x_buff,mom2);
+M1 = SUB_calcmemoments(x_buff,mom1);
+M2 = SUB_calcmemoments(x_buff,mom2);
 
 R = corrcoef(M1,M2);
 out.R = R(2,1); % correlation coefficient
 out.absR = abs(R(2,1)); % absolute value of correlation coefficient
 out.density = range(M1)*range(M2)/N; % density of points in M1--M2 space
-out.mi = BF_mi(M1,M2,[0,1],[0,1],floor(sqrt(N)));
+out.mi = BF_MutualInformation(M1,M2,'range','range',floor(sqrt(N)));
+% out.mi = BF_MutualInformation(M1,M2,[0,1],[0,1],floor(sqrt(N)));
 % this is a poor choice of bin number -- M1 and M2 are not length N
 
 if doplot
@@ -107,7 +130,7 @@ if doplot
     plot(M1,M2,'.k');
 end
 
-function moms = calcmemoments(x_buff,momtype)
+function moms = SUB_calcmemoments(x_buff,momtype)
     switch momtype
         case 'mean'
             moms = mean(x_buff);

@@ -1,8 +1,8 @@
 % NL_TSTL_FractalDimensions
 % 
-% Computes the fractal dimension spectrum, D(q), using moments of
-% neighbor distances for time-delay embedded time series using the
-% TSTOOL code fracdims.
+% Computes the fractal dimension spectrum, D(q), using moments of neighbor
+% distances for time-delay embedded time series by referencing the code,
+% fracdims, from the TSTOOL package.
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
@@ -31,6 +31,28 @@
 % Outputs include basic statistics of D(q) and q, statistics from a linear fit,
 % and an exponential fit of the form D(q) = Aexp(Bq) + C.
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = NL_TSTL_FractalDimensions(y,kmin,kmax,Nref,gstart,gend,past,steps,embedparams)
 % Ben Fulcher, November 2009
@@ -97,8 +119,10 @@ if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding failed')
 end
 
-
-%% Run
+%% Run the TSTOOL code, fracdims:
+if ~exist('fracdims')
+    error('Cannot find the code ''fracdims'' from the TSTOOL package. Is it installed and in the Matlab path?');
+end
 try
     rs = fracdims(s,kmin,kmax,Nref,gstart,gend,past,steps);
 catch me
@@ -108,7 +132,6 @@ catch me
         error('Unknown error');
     end
 end
-
 
 Dq = data(rs);
 q = spacing(rs);

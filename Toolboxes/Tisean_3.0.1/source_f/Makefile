@@ -1,19 +1,19 @@
 # Generated automatically from Makefile.in by configure.
 SHELL = /bin/sh
 
-prefix = /home/fulcher
+prefix = /Users/ben
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 
-FC = 
-FFLAGS = 
+FC = gfortran
+FFLAGS = -O
 LDFLAGS = 
 AR = ar
 ARFLAGS = r
 RANLIB = ranlib
 INSTALL = /usr/bin/install -c
 LOADLIBES = libtsa.a libsla.a
-ERRUNIT = 
+ERRUNIT = 0
 
 # list of executables we want to produce
    BINS = c1 c2naive xc2 \

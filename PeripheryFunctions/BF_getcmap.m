@@ -1,6 +1,41 @@
+% BF_getcmap
+% 
+% Returns a nice set of colors to make a nice colormap using the color schemes
+% from http://colorbrewer2.org/
+% The online tool, colorbrewer2, is copyright Cynthia Brewer, Mark Harrower and
+% The Pennsylvania State University
+% 
+% INPUTS:
+% whichcmap, the name of a colormap (see long list below)
+% ng, the number of colors to return from that color scheme (some maps can
+%           support larger numbers of colors, and the minimum is usually 3)
+% cellout, (i) 1: returns a cell of colors, where each component is an rgb
+%                 3-vector
+%          (ii) 0: returns a ng x 3 matrix for use in the Matlab colormap
+%                  function, for example
+% flipmeout, (i) 1: inverts the ordering of the colors.
+%            (ii) 0: doesn't invert the ordering of the colors. 
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
+
 function cmapout = BF_getcmap(whichcmap,ng,cellout,flipmeout)
-% Returns a nice colormap from http://colorbrewer2.org/
-% Ben Fulcher 5/11/2010
+% Ben Fulcher, 5/11/2010
 
 if nargin < 2 || isempty(ng)
     ng = 6;
@@ -12,46 +47,49 @@ if nargin < 4 || isempty(flipmeout)
     flipmeout = 0; % flips order of output
 end
 
-% choices for whichcmap:
+% Choices for whichcmap:
+% 
 % SEQUENTIAL MONOHUE:
-% blues
-% greens
-% oranges
-% purples
-% reds
+% 'blues'
+% 'greens'
+% 'oranges'
+% 'purples'
+% 'reds'
+% 
 % SEQUENTIAL MULTIHUE:
-% bluegreen
-% bluepurple
-% greenblue
-% orangered
-% purpleblue
-% purplebluegreen
-% purplered
-% redpurple
-% yellowgreen
-% yellowgreenblue
-% yelloworangebrown
-% yelloworangered
+% 'bluegreen'
+% 'bluepurple'
+% 'greenblue'
+% 'orangered'
+% 'purpleblue'
+% 'purplebluegreen'
+% 'purplered'
+% 'redpurple'
+% 'yellowgreen'
+% 'yellowgreenblue'
+% 'yelloworangebrown'
+% 'yelloworangered'
+% 
 % DIVERGENT:
-% spectral
-% redyellowgreen
-% redyellowblue
-% redgray
-% redblue
-% purpleorange
-% purplegreen
-% pinkgreen
-% browngreen
+% 'spectral'
+% 'redyellowgreen'
+% 'redyellowblue'
+% 'redgray'
+% 'redblue'
+% 'purpleorange'
+% 'purplegreen'
+% 'pinkgreen'
+% 'browngreen'
+% 
 % QUALITATIVE:
-% accent
-% dark2
-% paired
-% pastel1
-% pastel2
-% set1
-% set2
-% set3
-
+% 'accent'
+% 'dark2'
+% 'paired'
+% 'pastel1'
+% 'pastel2'
+% 'set1'
+% 'set2'
+% 'set3'
 
 % since most maps need at least 3 colours...
 % if ng < 3, ng = 3; end

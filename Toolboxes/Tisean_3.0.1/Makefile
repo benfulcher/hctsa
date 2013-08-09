@@ -1,11 +1,11 @@
 # Generated automatically from Makefile.in by configure.
 SHELL = /bin/sh
 
-prefix = /home/fulcher
+prefix = /Users/ben
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 CC = cc
-FC = 
+FC = gfortran
 HAVE_NR = @HAVE_NR@
 
 all:

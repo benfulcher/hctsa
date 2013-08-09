@@ -1,17 +1,49 @@
-function y_embed = BF_embed(y,tau,m,sig)
-% Embeds the time series y into an m dimensional space at a time delay tau
+% BF_embed
+% 
+% Returns a time-delay embedding of the input time series into an m dimensional
+% space at a time delay tau.
+% 
 % Uses the TSTOOL code 'embed'
+% 
+% % TSTOOL: http://www.physik3.gwdg.de/tstool/
+% 
 % INPUTS:
-% y: univariate scalar time series
-% tau: time-delay. Can be a string, 'ac', 'mi', ...
-% m: embedding dimension. Must be a cell specifying method and parameters,
-% e.g., {'fnn',0.1} does fnn method using a threshold of 0.1...
-% sig [opt]: if 1, uses TSTOOL to embed and returns a signal object.
+% y, univariate scalar time series
+% tau, time-delay. Can be a string, 'ac', 'mi', ...
+% m, the embedding dimension. Must be a cell specifying method and parameters,
+%    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1...
+% sig [opt], if 1, uses TSTOOL to embed and returns a signal object.
 %           (default = 0, i.e., not to do this and instead return matrix).
 %           If 2, returns a vector of [tau m] rather than any explicit embedding
+% 
 % OUTPUT:
 % a matrix of width m containing the vectors in the new embedding space...
-% Ben Fulcher October 2009
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
+
+function y_embed = BF_embed(y,tau,m,sig)
+% Ben Fulcher, October 2009
 
 bevocal = 0; % display information about embedding
 N = length(y); % length of the input time series, y

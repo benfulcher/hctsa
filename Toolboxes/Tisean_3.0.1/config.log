@@ -1,0 +1,30 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:532: checking whether /Users/ben is a directory and writeable
+configure:553: checking whether (cc  ) works
+conftest.c:2:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main(int argc,char **argv){return(0);}
+^~~~
+1 warning generated.
+configure:584: checking whether cc accepts -O3
+configure:603: checking for main in -lm
+configure:647: checking how to run the C preprocessor
+configure:727: checking for ANSI C header files
+configure:834: checking for limits.h
+configure:834: checking for malloc.h
+configure:872: checking for working const
+configure:951: checking for size_t
+configure:985: checking for 8-bit clean memcmp
+configure:1030: checking whether (gfortran  ) works
+configure:1070: checking whether gfortran accepts -O
+configure:1101: checking whether Fortran unit 0 is stderr
+configure:1132: checking for ar
+configure:1161: checking whether ar accepts r
+ar: creating archive libtest.a
+configure:1210: checking for a BSD compatible install
+configure:1263: checking whether make sets ${MAKE}
+configure:1292: checking for ranlib
+configure:1325: checking for gnuplot
+configure:1356: checking if gnuplot can read from a pipe
+./configure: line 1361: gnuplot: command not found

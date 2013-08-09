@@ -60,13 +60,41 @@
 % Output statistics include comparisons of stationarity and distributional
 % measures between the original and transformed time series.
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = PP_Compare(y,detrndmeth)
 % Ben Fulcher, 9/7/09
 
+%% Check inputs, set default
+if nargin < 2 || isempty(detrndmeth)
+    detrndmeth = 'medianf'; % median filter by default
+end
+
 %% FOREPLAY
 N = length(y); % time-series length
 r = (1:N)'; % the t-range over which to fit
+
 
 %% PREPROCESSINGS:
 % DETRENDINGS:
@@ -191,7 +219,6 @@ if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
     out.gauss1_kd_resAC1 = NaN;
     out.gauss1_kd_resAC2 = NaN;
     out.gauss1_kd_resruns = NaN;
-    % out.gauss1_kd_reslbq=me1.reslbq/me2.reslbq;
 else
     out.gauss1_kd_r2 = me1.r2/me2.r2;
     out.gauss1_kd_adjr2 = me1.adjr2/me2.adjr2;
@@ -199,7 +226,6 @@ else
     out.gauss1_kd_resAC1 = me1.resAC1/me2.resAC1;
     out.gauss1_kd_resAC2 = me1.resAC2/me2.resAC2;
     out.gauss1_kd_resruns = me1.resruns/me2.resruns;
-    % out.gauss1_kd_reslbq=me1.reslbq/me2.reslbq;
 end
 
 %   (b) histogram 10 bins
@@ -224,8 +250,8 @@ else
 end
 
 % (c) compare distribution to fitted normal distribution
-me1 = DN_kscompare(y_d,'norm');
-me2 = DN_kscompare(y,'norm');
+me1 = DN_CompareKSFit(y_d,'norm');
+me2 = DN_CompareKSFit(y,'norm');
 
 out.kscn_adiff = me1.adiff/me2.adiff;
 out.kscn_peaksepy = me1.peaksepy/me2.peaksepy;
@@ -239,9 +265,9 @@ out.htdt_ksn = HT_DistributionTest(y_d,'ks','norm') / HT_DistributionTest(y,'ks'
 out.htdt_llfn = HT_DistributionTest(y_d,'lillie','norm') / HT_DistributionTest(y,'ks','norm');
 
 % 3) Outliers
-out.olbt_m2 = DN_OutlierTest(y_d,2,1) / DN_OutlierTest(y,2,1);
-out.olbt_m5 = DN_OutlierTest(y_d,5,1) / DN_OutlierTest(y,5,1);
-out.olbt_s2 = DN_OutlierTest(y_d,2,2) / DN_OutlierTest(y,2,2);
-out.olbt_s5 = DN_OutlierTest(y_d,5,2) / DN_OutlierTest(y,5,2);
+out.olbt_m2 = DN_OutlierTest(y_d,2,'mean') / DN_OutlierTest(y,2,'mean');
+out.olbt_m5 = DN_OutlierTest(y_d,5,'mean') / DN_OutlierTest(y,5,'mean');
+out.olbt_s2 = DN_OutlierTest(y_d,2,'std') / DN_OutlierTest(y,2,'std');
+out.olbt_s5 = DN_OutlierTest(y_d,5,'std') / DN_OutlierTest(y,5,'std');
 
 end

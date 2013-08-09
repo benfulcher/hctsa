@@ -1,7 +1,34 @@
+% BF_cat
+% 
+% Converts a cell of strings (or vector of numbers) into a single, concatonated
+% string listing each string in the cell.
+% 
+% INPUTS:
+% s, the cell of strings to be concatinated
+% d, the delimiter (a comma by default)
+% surr, an optional string to surround each element of s (empty by default, but
+%       can be handy for surrounding each string by inverted commas, for
+%       example)
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
+
 function out = BF_cat(s,d,surr)
-% d is the delimiter
-% s is the list of strings to be catinated
-% surrounds each string in optional string surr
 
 if nargin < 2
     d = ', '; % default delimiter is a comma

@@ -45,6 +45,29 @@
 %                                   m = 1, p = 2, q = 1
 % 
 % In future this function should be reformed by an expert in GARCH model fitting.
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = MF_GARCHfit(y,preproc,params)
 % Ben Fulcher, 25/2/2010
@@ -65,19 +88,31 @@ if nargin < 3 || isempty(params)
 end
 
 
+%% Check that an Econometrics license exists:
+a = license('test','Econometrics_Toolbox');
+if a==0
+    error('This function requires the Econometrics Toolbox');
+end
+% Try to check out a license:
+[lic_free,~] = license('checkout','Econometrics_Toolbox');
+if lic_free == 0
+    error('Could not obtain a license for the Econometrics Toolbox');
+end
+
 %% (1) Data preprocessing
 y0 = y; % the original, unprocessed time series
 
 switch preproc
     case 'nothing'
         % do nothing.
+        
     case 'ar'
         % apply a number of standard preprocessings and return them in the
         % structure ypp. Also chooses the best preprocessing based on the worst fit
         % of an AR2 model to the processed time series.
         % has to beat doing nothing by 5% (error)
         % No spectral methods allowed...
-        [ypp, best] = BF_preproc(y,'ar',2,0.05,0);
+        [ypp, best] = PP_PreProcess(y,'ar',2,0.05,0);
         eval(sprintf('y = ypp.%s;',best));
         fprintf(1,'Proprocessed according to AR(2) criterion using %s\n',best);
 end
@@ -178,14 +213,14 @@ switch params
         s = s(1:end-2); % remove the Oxford comma.
         % This string, s, should now specify an argument to garchset
         
-        eval(sprintf('spec = garchset(%s);',s);
+        eval(sprintf('spec = garchset(%s);',s));
         
     otherwise
         % Specify the GARCH model as a string in the input
         % e.g., 'R, 2, M, 1, P, 1, Q, 1' will fit an ARMA(2,1) to mean
         % process and a GARCH(1,1) to the variance process
         try
-            eval(sprintf('spec = garchset(%s);',params);
+            eval(sprintf('spec = garchset(%s);',params));
         catch emsg
            error('Error formatting input parameters specifying GARCH model.')
         end

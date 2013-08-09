@@ -28,7 +28,7 @@ if nargin < 3   K=2; end;
 if nargin < 2   T=N; end;
 
 if (rem(N,T)~=0)
-  error(' Data matrix length must be multiple of sequence length T');
+  error('Data matrix length must be multiple of sequence length T');
 end
 N = N/T;
 
@@ -142,7 +142,7 @@ for cycle=1:cyc
   elseif (lik<oldlik) 
     fprintf('violation');
   elseif ((lik-likbase)<(1 + tol)*(oldlik-likbase) || ~isfinite(lik))
-    fprintf('\n');
+    % fprintf('\n'); % ++BF commented out fprintf
     break;
   end;
 %   fprintf('\n'); % ++BF commented out fprintf

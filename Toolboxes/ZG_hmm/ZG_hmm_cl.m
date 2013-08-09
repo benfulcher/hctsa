@@ -24,8 +24,7 @@ N = length(X(:,1));
 tiny = exp(-700);
 
 if (rem(N,T) ~= 0)
-  disp('Error: Data matrix length must be multiple of sequence length T');
-  return;
+  error('Data matrix length must be multiple of sequence length T');
 end;
 N = N/T;
 

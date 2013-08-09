@@ -1,20 +1,15 @@
 % NL_CaosMethod
 % 
-% Implements TSTOOL code cao, with maximum embedding dimension maxdim, time
-% delay tau, number of nearest neighbors NNR, and number of reference points
-% Nref.
-% 
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
-% The TSTOOL code determines the minimum embedding dimension for a time series using
+% References TSTOOL code cao, to determine the minimum embedding dimension for a time series using
 % Cao's method:
 % 
 % "Practical method for determining the minimum embedding dimension of a scalar time series"
 % L. Cao, Physica D 110(1-2) 43 (1997)
 % 
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% 
 % It computes the quantities E and E* for a range of embedding dimensions
 % m = 1, ..., m_{max}.
-% 
 % 
 % INPUTS:
 % 
@@ -44,11 +39,34 @@
 % Outputs are statistics on the result, including when the output quantity first
 % passes a given threshold, and the m at which it levels off.
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = NL_CaosMethod(y,maxdim,tau,NNR,Nref,justanum)
 % Ben Fulcher, October 2009
 
 %% Preliminaries
+doplot = 0; % plot outputs to figure
 N = length(y); % length of time series
 s = signal(y); % convert to signal object for TSTOOL
 
@@ -156,7 +174,11 @@ if ~isempty(justanum) % JUST OUTPUT A SINGLE NUMBER, AN ESTIMATE FOR THE EMBEDDI
 else % RETURN STATISTICS ON CURVES
     
     %% Give output
-    % plot(caoo1,'.-b'); hold on; plot(caoo2,'.-k'); hold off
+    if doplot
+        figure('color','w'); box('on');
+        plot(caoo1,'.-b'); hold on; plot(caoo2,'.-k'); hold off
+    end
+    
     % (1) the raw values of each vector
     for i = 1:maxdim
         eval(sprintf('out.caoo1_%u = caoo1(%u);',i,i))
@@ -253,7 +275,10 @@ else % RETURN STATISTICS ON CURVES
 
 end
 
-% plot(boxdimo);
+if doplot
+    figure('color','w'); box('on');
+    plot(boxdimo,'k');
+end
 
     function yep = SUB_first(x,ab,th,maxdim)
         % for input vector x, returns first index that it exceeds (ab = 'above') or

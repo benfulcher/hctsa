@@ -1,0 +1,120 @@
+/bin/sh: c1: command not found
+/bin/sh: c2naive: command not found
+/bin/sh: xc2: command not found
+/bin/sh: c2d: command not found
+/bin/sh: c2g: command not found
+/bin/sh: c2t: command not found
+/bin/sh: pc: command not found
+/bin/sh: predict: command not found
+/bin/sh: stp: command not found
+/bin/sh: lazy: command not found
+/bin/sh: project: command not found
+/bin/sh: addnoise: command not found
+Version: ImageMagick 6.2.9 09/24/06 Q16 http://www.imagemagick.org
+Copyright: Copyright (C) 1999-2006 ImageMagick Studio LLC
+
+Usage: compare [options ...] image reconstruct difference
+
+Where options include:
+  -authenticate value  decrypt image with this password
+  -channel type        apply option to select image channels
+  -colorspace type     alternate image colorspace
+  -compress type       type of pixel compression when writing the image
+  -debug events        display copious debugging information
+  -define format:option
+                       define one or more image format options
+  -density geometry    horizontal and vertical density of the image
+  -depth value         image depth
+  -extract geometry    extract area from image
+  -format "string"     output formatted image characteristics
+  -fuzz distance       colors within this distance are considered equal
+  -help                print program options
+  -identify            identify the format and characteristics of the image
+  -interlace type      type of image interlacing scheme
+  -limit type value    pixel cache resource limit
+  -log format          format of debugging information
+  -metric type         measure differences between images with this metric
+  -monitor             monitor progress
+  -profile filename    add, delete, or apply an image profile
+  -quality value       JPEG/MIFF/PNG compression level
+  -quiet               suppress all error or warning messages
+  -quantize colorspace reduce colors in this colorspace
+  -regard-warnings     pay attention to warning messages
+  -sampling-factor geometry
+                       horizontal and vertical sampling factor
+  -set attribute value set an image attribute
+  -size geometry       width and height of image
+  -transparent-color color
+                       transparent color
+  -type type           image type
+  -verbose             print detailed information about the image
+  -version             print version information
+  -virtual-pixel method
+                       virtual pixel access method
+/bin/sh: upo: command not found
+/bin/sh: upoembed: command not found
+/bin/sh: cluster: command not found
+/bin/sh: choose: command not found
+/bin/sh: rms: command not found
+/bin/sh: notch: command not found
+/bin/sh: autocor: command not found
+/bin/sh: spectrum: command not found
+/bin/sh: wiener1: command not found
+/bin/sh: wiener2: command not found
+/bin/sh: surrogates: command not found
+/bin/sh: endtoend: command not found
+/bin/sh: timerev: command not found
+/bin/sh: events: command not found
+/bin/sh: intervals: command not found
+/bin/sh: spikespec: command not found
+/bin/sh: spikeauto: command not found
+/bin/sh: henon: command not found
+/bin/sh: ikeda: command not found
+/bin/sh: lorenz: command not found
+/bin/sh: ar-run: command not found
+/bin/sh: xrecur: command not found
+/bin/sh: randomize_auto_exp_random: command not found
+/bin/sh: randomize_autop_exp_random: command not found
+/bin/sh: randomize_spikeauto_exp_random: command not found
+/bin/sh: randomize_spikespec_exp_event: command not found
+/bin/sh: randomize_uneven_exp_random: command not found
+/bin/sh: poincare: command not found
+/bin/sh: extrema: command not found
+/bin/sh: rescale: command not found
+/bin/sh: recurr: command not found
+/bin/sh: corr: command not found
+/bin/sh: mutual: command not found
+/bin/sh: false_nearest: command not found
+/bin/sh: lyap_r: command not found
+/bin/sh: lyap_k: command not found
+/bin/sh: lyap_spec: command not found
+/bin/sh: d2: command not found
+/bin/sh: av-d2: command not found
+/bin/sh: makenoise: command not found
+/bin/sh: nrlazy: command not found
+/bin/sh: low121: command not found
+/bin/sh: lzo-test: command not found
+/bin/sh: lfo-run: command not found
+/bin/sh: lfo-test: command not found
+/bin/sh: rbf: command not found
+/bin/sh: polynom: command not found
+/bin/sh: polyback: command not found
+/bin/sh: polynomp: command not found
+/bin/sh: polypar: command not found
+/bin/sh: ar-model: command not found
+/bin/sh: mem_spec: command not found
+/bin/sh: pca: command not found
+/bin/sh: ghkss: command not found
+/bin/sh: lfo-ar: command not found
+/bin/sh: xzero: command not found
+/bin/sh: xcor: command not found
+/bin/sh: boxcount: command not found
+/bin/sh: fsle: command not found
+/bin/sh: resample: command not found
+/bin/sh: histogram: command not found
+/bin/sh: nstat_z: command not found
+/bin/sh: sav_gol: command not found
+/bin/sh: delay: command not found
+/bin/sh: lzo-gm: command not found
+/bin/sh: arima-model: command not found
+/bin/sh: lzo-run: command not found

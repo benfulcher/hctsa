@@ -1,10 +1,50 @@
-function [yp, best] = BF_preproc(y,choosebest,order,beatthis,dospectral)
+% PP_PreProcess
+% 
 % Returns a bunch of time series in the structure yp that have been
 % preprocessed in a number of different ways.
+% 
+% INPUTS:
+% y, the input time series
+% choosebest: (i) '' (empty): the function returns a structure, yp, of all
+%                   preprocessings [default]
+%             (ii) 'ar': returns the pre-processing with the worst fit to an AR
+%                        model of specified order
+%             (iii) 'ac': returns the least autocorrelated pre-processing
+% order [opt], extra parameter for above
+% beatthis, can specify the preprocessed version has to be some percentage
+%           better than the unprocessed input
+% dospectral, whether to include spectral processing
+% 
+% 
 % If second argument is specified, will choose amongst the preprocessings
 % for the 'best' one according to the given criterion.
 % Based on (really improvement/development of) PP_ModelFit.
-% Ben Fulcher 25/2/2010
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
+
+function [yp, best] = PP_PreProcess(y,choosebest,order,beatthis,dospectral)
+% Ben Fulcher, 25/2/2010
 
 % I think a good way of 'normalizing' over autocorrelation should also be
 % incorporated, but it's not obvious how, other than some downsampling...

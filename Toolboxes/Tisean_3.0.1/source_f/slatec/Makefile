@@ -1,8 +1,8 @@
 # Generated automatically from Makefile.in by configure.
 SHELL = /bin/sh
 
-FC = 
-FFLAGS = 
+FC = gfortran
+FFLAGS = -O
 LDFLAGS = 
 AR = ar
 ARFLAGS = r

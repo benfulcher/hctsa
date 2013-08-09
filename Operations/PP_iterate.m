@@ -16,6 +16,28 @@
 %           (v) 'resampleup' progressively upsamples the time series,
 %           (vi) 'resampledown' progressively downsamples the time series.
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = PP_Iterate(y,detrndmeth)
 % Ben Fulcher, 10/7/09
@@ -47,15 +69,20 @@ for q = 1:length(nr)
             spline = spap2(nknots,intp,[1:N]',y); % just a single middle knot with cubic interpolants
             y_spl = fnval(spline,1:N); % evaluate at the 1:N time intervals
             y_d = y - y_spl';
+            
         case 'diff' % Differencing
             ndiffs = n; % progressively difference
             y_d = diff(y,ndiffs);
+            
         case 'medianf' % Median Filter; n is the order of filtering
             y_d = medfilt1(y,n);
+            
         case 'rav' % Running Average; n is the window size
             y_d = filter(ones(1,n)/n,1,y);
+            
         case 'resampleup' % upsample
             y_d = resample(y,n,1);
+            
         case 'resampledown' % downsample
             y_d = resample(y,1,n);
     end
@@ -168,7 +195,7 @@ out.normdiff_exp = stats(10,4);
         end
         
         %   (c) compare distribution to fitted normal distribution
-        me1 = DN_kscompare(y_d,'norm');
+        me1 = DN_CompareKSFit(y_d,'norm');
         if ~isstruct(me1) && isnan(me1)
             f(6) = NaN;
         else
@@ -176,7 +203,7 @@ out.normdiff_exp = stats(10,4);
         end
         
         % 3) Outliers
-        f(7) = DN_OutlierTest(y_d,5,1);
+        f(7) = DN_OutlierTest(y_d,5,'mean');
         
         % Cross Correlation to original signal
         if length(y) == length(y_d)

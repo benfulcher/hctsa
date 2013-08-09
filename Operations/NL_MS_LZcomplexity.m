@@ -1,12 +1,12 @@
 % NL_MS_LZcomplexity
 % 
 % Calculates the Lempel-Ziv complexity of a n-bit encoding of the time
-% series using Michael Small's complexity code (renamed MS_complexity here),
+% series using Michael Small's code: 'complexity' (renamed MS_complexity here).
 % 
 % cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
 % Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
 % Vol. 52 (2005)
-% Code available at http://small.eie.polyu.edu.hk/matlab/
+% Code is available at http://small.eie.polyu.edu.hk/matlab/
 % 
 % The code is a wrapper for Michael Small's original code and uses the
 % associated mex file compiled from complexitybs.c (renamed MS_complexitybs.c
@@ -23,6 +23,28 @@
 % the number of distinct symbol sequences in the time series divided by the
 % expected number of distinct symbols for a noise sequence.
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = NL_MS_LZcomplexity(y,n,preproc)
 % Ben Fulcher, 19/2/2010
@@ -46,42 +68,5 @@ end
 
 % Run Michael Small's (mexed) code for calcaulting the Lempel-Ziv complexity:
 out = MS_complexity(y,n);
-
-% %_______________________________________________________________
-% % cmp = complexity(x,n);
-% %
-% % calculate the Lempel-Ziv complexity of the n-bit encoding of x. 
-% %
-% % cmp is the normalised complexity, that is the number of distinct
-% % symbol sequences in x, divided by the expected number of distinct 
-% % symbols for a noise sequence.
-% %
-% % Algorithm is implemented in MS_complexitybs.c
-% %
-% % M. Small
-% % ensmall@polyu.edu.hk
-% % 7/10/04
-% 
-% if length(n) > 1
-%    for ni = 1:length(n),
-%         cmp(ni) = MS_complexitybs(y,n(ni));
-%    end
-% else
-%     %do the binning, with equi-probably bins
-%     y = y(:);
-%     nx = length(y);
-%     [xn, xi] = sort(y);
-% %     y = zeros(nx,1);
-%     y = 1:nx;
-%     y = floor(y.*(n/(nx+1)));
-%     y(xi) = y;
-% 
-%     % compute complexity with MS_complexitybs
-%     cmp = MS_complexitybs(y+eps);
-% end
-% 
-% %______________________________________________________________
-% % Ok, so we have cmp, the complexity
-% out = cmp;
 
 end

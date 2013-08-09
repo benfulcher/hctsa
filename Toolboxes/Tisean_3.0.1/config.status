@@ -2,7 +2,7 @@
 # Generated automatically by configure.
 # Run this file to recreate the current configuration.
 # This directory was configured as follows,
-# on host OCSWTS:
+# on host dyn1204-173.wlan.ic.ac.uk:
 #
 # ./configure 
 #
@@ -39,12 +39,12 @@ s%@SHELL@%/bin/sh%g
 s%@CFLAGS@%-O3%g
 s%@CPPFLAGS@%%g
 s%@CXXFLAGS@%%g
-s%@FFLAGS@%%g
+s%@FFLAGS@%-O%g
 s%@DEFS@% -DHAVE_LIBM=1 -DSTDC_HEADERS=1 -DHAVE_LIMITS_H=1 -DHAVE_MALLOC_H=1 %g
 s%@LDFLAGS@%%g
 s%@LIBS@%-lm %g
 s%@exec_prefix@%${prefix}%g
-s%@prefix@%/home/fulcher%g
+s%@prefix@%/Users/ben%g
 s%@program_transform_name@%s,x,x,%g
 s%@bindir@%bin%g
 s%@sbindir@%${exec_prefix}/sbin%g
@@ -61,8 +61,8 @@ s%@mandir@%${prefix}/man%g
 s%@CPP@%cc -E%g
 s%@LIBOBJS@%%g
 s%@CC@%cc%g
-s%@FC@%%g
-s%@ERRUNIT@%%g
+s%@FC@%gfortran%g
+s%@ERRUNIT@%0%g
 s%@AR@%ar%g
 s%@ARFLAGS@%r%g
 s%@INSTALL_PROGRAM@%${INSTALL}%g

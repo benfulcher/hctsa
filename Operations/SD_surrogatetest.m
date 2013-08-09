@@ -48,6 +48,28 @@
 %                 function include a z-test between the two distributions, and
 %                 some comparative rank-based statistics.
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = SD_SurrogateTest(x,surrmeth,nsurrs,extrap,teststat)
 % Ben Fulcher, 28/1/2011
@@ -84,14 +106,14 @@ z = SD_MakeSurrogates(x,surrmeth,nsurrs,extrap);
 if ismember('ami1',teststat)
     % look at AMI(1) of surrogates compared to that of signal itself
     % This statistic is used by Nakamura et al. (2006), PRE
-    % could use CO_HistogramAMI or TSTL, but I'll use BF_mi
+    % could use CO_HistogramAMI or TSTL, but I'll use BF_MutualInformation
     % Apparently there are upper and lower bounds on the number of bins to
     % use: [1+log_2(N)], [sqrt(N)]
     nbins = ceil(1+log2(N)); %round(mean([1+log2(N),sqrt(N)]));
-    AMIx = BF_mi(x(1:end-1),x(2:end),'quantile','quantile',nbins);
+    AMIx = BF_MutualInformation(x(1:end-1),x(2:end),'quantile','quantile',nbins);
     AMIsurr = zeros(nsurrs,1);
     for i = 1:nsurrs
-        AMIsurr(i) = BF_mi(z(1:end-1,i),z(2:end,i),'quantile','quantile',nbins);
+        AMIsurr(i) = BF_MutualInformation(z(1:end-1,i),z(2:end,i),'quantile','quantile',nbins);
     end
     % so we have a value AMIx, and a distribution for the surrogates
     % AMIsurr -- we must compare and return something meaningful

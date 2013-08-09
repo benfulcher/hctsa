@@ -9,6 +9,28 @@
 % e, should be raw residuals as prediction minus data (e = yp - y) as a column
 %       vector. Will take absolute values / even powers of e as necessary.
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = MF_ResidualAnalysis(e)
 % Ben Fulcher 10/2/2010
@@ -55,7 +77,6 @@ out.p3_5 = sum(gS(b(3)+1:b(4)))*(gf(2)-gf(1));
 out.p4_5 = sum(gS(b(4)+1:b(5)))*(gf(2)-gf(1));
 out.p5_5 = sum(gS(b(5)+1:b(6)))*(gf(2)-gf(1));
 
-
 %% (**) Autocorrelations in residuals (**)
 % See if there are any linear correlations in residuals.
 % Also see if any of these are abnormally large (i.e., may be remnant
@@ -89,7 +110,6 @@ end
 
 % Durbin-Watson test statistic
 out.dwts = sum((e(2:end)-e(1:end-1)).^2) / sum(e.^2);
-
 
 %% (**) Linear structure in residuals (**)
 % Fit a linear model and see if it picks up any structure.

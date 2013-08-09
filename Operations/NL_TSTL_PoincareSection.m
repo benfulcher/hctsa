@@ -26,9 +26,33 @@
 % Another thing that could be cool to do is to analyze variation in the plots as
 % ref changes... (not done here)
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = NL_TSTL_PoincareSection(y,ref,embedparams)
 % Ben Fulcher, November 2009
+
+doplot = 0; % plot outputs to a figure
 
 %% Check inputs
 N = length(y); % length of the time series
@@ -54,10 +78,12 @@ if ischar(ref)
             % first local maximum
             dydt = diff(y);
             ref = find(dydt(1:end-1)>=0 & dydt(2:end)<0,1,'first')+1;
+            
         case 'min'
             % first local minimum
             dydt = diff(y);
             ref = find(dydt(1:end-1)<=0 & dydt(2:end)>0,1,'first')+1;
+            
         otherwise
             error('Unknown reference setting ''%s''',ref);
     end
@@ -74,7 +100,7 @@ if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding failed');
 end
 
-% run TSTOOL code:
+% Run external TSTOOL code, poincare:
 try
     rs = poincare(s,ref);
 catch me
@@ -93,7 +119,10 @@ NN = length(v);
 % labeling poincare surface plane x-y
 x = (v(:,1));
 y = (v(:,2)); 
-% plot(x,y,'.k'); axis equal
+if doplot
+    figure('color','w'); box('on');
+    plot(x,y,'.k'); axis equal
+end
 
 %% Get statistics out
 
@@ -120,8 +149,6 @@ out.tauacy = CO_FirstZero(y,'ac');
 
 out.boxarea = range(x)*range(y);
 
-
-
 % statistics on distance between adjacent points, ds
 vdiff = v(2:end,:)-v(1:end-1,:);
 ds = sqrt(vdiff(:,1).^2 + vdiff(:,2).^2);
@@ -138,8 +165,6 @@ out.meands = mean(ds);
 out.maxds = max(ds);
 out.minds = min(ds);
 out.iqrds = iqr(ds);
-
-
 
 % now normalize both axes and look for structure in the cloud of points
 % don't normalize for standard deviation -- this probably reveals some
@@ -158,8 +183,7 @@ out.ac1D = CO_AutoCorr(D,1);
 out.ac2D = CO_AutoCorr(D,2);
 out.tauacD = CO_FirstZero(D,'ac');
 
-
-% entropy of boxed distribution
+% Entropy of boxed distribution
 boxcounts = subcountboxes(x,y,10);% 10 partitions per axis
 pbox = boxcounts/NN;
 

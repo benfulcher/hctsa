@@ -6,7 +6,7 @@
 % Tests are implemented as functions in Matlab's Statistics Toolbox.
 % (except Ljung-Box Q-test, which uses the Econometrics Toolbox)
 % 
-% INPUTS,
+% INPUTS:
 % x, the input time series
 % 
 % thetest, the hypothesis test to perform:
@@ -21,6 +21,28 @@
 % OUTPUT:
 % the p-value from the statistical test
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function p = HT_HypothesisTest(x,thetest)
 % Ben Fulcher, 2009
@@ -48,7 +70,21 @@ switch thetest
         [~, p] = jbtest(x);
         warning('on','stats:jbtest:PTooBig'); % resume this warning
         warning('on','stats:jbtest:PTooSmall'); % resume this warning
+        
     case 'lbq' % Econometrics Toolbox
+        
+        %% Check that an Econometrics license exists:
+        a = license('test','Econometrics_Toolbox');
+        if a==0
+            error('This function requires the Econometrics Toolbox');
+        end
+        % Try to check out a license:
+        [lic_free,~] = license('checkout','Econometrics_Toolbox');
+        if lic_free == 0
+            error('Could not obtain a license for the Econometrics Toolbox');
+        end
+        
+        % Perform the test
         [~, p] = lbqtest(x);
         
     otherwise

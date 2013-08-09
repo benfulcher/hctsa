@@ -7,21 +7,23 @@
 % (ii) 'p': outliers are the greatest positive deviations from the mean, or
 % (iii) 'n': outliers are the greatest negative deviations from the mean.
 % 
-% The threshold for including time-series data points in the analysis increases from
-% zero to the maximum deviation, in increments of 0.01*sigma (by default), where sigma is
-% the standard deviation of the time series.
+% The threshold for including time-series data points in the analysis increases
+% from zero to the maximum deviation, in increments of 0.01*sigma (by default),
+% where sigma is the standard deviation of the time series.
 % 
-% At each threshold, the mean, standard error, proportion of time series points included, median, and
-% standard deviation are calculated, and outputs from the algorithm measure how
-% these statistical quantities change as more extreme points are included in the
-% calculation.
+% At each threshold, the mean, standard error, proportion of time series points
+% included, median, and standard deviation are calculated, and outputs from the
+% algorithm measure how these statistical quantities change as more extreme
+% points are included in the calculation.
 % 
 % INPUTS:
 % y, the input time series (ideally z-scored)
 % 
-% howth, the method of how to determine outliers: 'abs', 'p', or 'n' (see above for descriptions)
+% howth, the method of how to determine outliers: 'abs', 'p', or 'n' (see above
+%           for descriptions)
 % 
-% inc, the increment to move through (fraction of std if input time series is z-scored)
+% inc, the increment to move through (fraction of std if input time series is
+%       z-scored)
 % 
 % Most of the outputs measure either exponential, i.e., f(x) = Aexp(Bx)+C, or
 % linear, i.e., f(x) = Ax + B, fits to the sequence of statistics obtained in
@@ -30,6 +32,28 @@
 % [future: could compare differences in outputs obtained with 'p', 'n', and
 %               'abs' -- could give an idea as to asymmetries/nonstationarities??]
 %               
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = DN_OutlierInclude(y,howth,inc)
 % Ben Fulcher, June 2009

@@ -3,18 +3,44 @@
 % Does local forecasting using very simple predictors using the past $l$ values
 % of the time series to predict its next value.
 % 
-% Three prediction methods are implemented:
-% (i) 'mean': local mean prediction using the past ltrain time-series values,
-% (ii) 'median': local median prediction using the past ltrain time-series values, and
-% (iii) 'lfit': local linear prediction using the past ltrain time-series values.
-% 
 % INPUTS:
 % y, the input time series
-% fmeth, the forecasting method
+% 
+% fmeth, the forecasting method:
+%          (i) 'mean': local mean prediction using the past ltrain time-series
+%                       values,
+%          (ii) 'median': local median prediction using the past ltrain
+%                         time-series values
+%          (iii) 'lfit': local linear prediction using the past ltrain
+%                         time-series values.
+% 
 % ltrain, the number of time-series values to use to forecast the next value
 % 
 % Outputs are the mean error, stationarity of residuals, Gaussianity of
 % residuals, and their autocorrelation structure.
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = FC_LocalSimple(y,fmeth,ltrain)
 % Ben Fulcher, Nov 2009
@@ -77,8 +103,10 @@ switch fmeth
         evalr = lp+1:N; % range over which to evaluate the forecast
         res = zeros(length(evalr),1); % residuals
         for i = 1:length(evalr)
-            % fit linear
+            % Fit linear
+            warning('off','MATLAB:polyfit:PolyNotUnique'); % Disable (potentially important ;)) warning
             p = polyfit((1:lp)',y(evalr(i)-lp:evalr(i)-1),1);
+            warning('on','MATLAB:polyfit:PolyNotUnique'); % Re-enable warning
             res(i) = polyval(p,lp+1) - y(evalr(i)); % prediction - value
         end
         

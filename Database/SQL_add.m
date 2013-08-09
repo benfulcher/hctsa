@@ -147,7 +147,7 @@ if bevocal
     end
 end
 fprintf(1,'%s read.\n',INPfile)
-esc = @sqlescapestring; % inline function to add escape strings to format mySQL queries
+esc = @RA_sqlescapestring; % inline function to add escape strings to format mySQL queries
 
 % Construct a more intuitive structure array for the time series / operations / master operations
 % Fill a cell, toadd, containing mySQL INSERT commands for each item in the input file:

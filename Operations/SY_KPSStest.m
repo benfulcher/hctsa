@@ -19,6 +19,28 @@
 % lags, can be either a scalar (returns basic test statistic and p-value), or
 %                   vector (returns statistics on changes across these time lags)
 % 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+% 
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program.  If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
 
 function out = SY_KPSStest(y,lags)
 % Ben Fulcher, 26/2/2010
@@ -28,10 +50,18 @@ if nargin < 2 || isempty(lags)
     lags = 0;
 end
 
-%% (1) Perform the test(s)
-if ~exist('kpsstest')
-    error('Could not find ''kpsstest'' -- this function requires the Econometrics Toolbox');
+%% Check that an Econometrics license exists:
+a = license('test','Econometrics_Toolbox');
+if a==0
+    error('This function requires the Econometrics Toolbox');
 end
+% Try to check out a license:
+[lic_free,~] = license('checkout','Econometrics_Toolbox');
+if lic_free == 0
+    error('Could not obtain a license for the Econometrics Toolbox');
+end
+
+%% (1) Perform the test(s)
 [h, pValue, stat, cValue] = kpsstest(y,'lags',lags);
 
 
