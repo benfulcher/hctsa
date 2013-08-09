@@ -45,12 +45,8 @@
 function out = PD_PeriodicityWang(y)
 % Ben Fulcher, 9/7/09
 
-%% Check that an Curve Fitting Toolbox license exists (needed for spline fitting with spap2):
-a = license('test','curve_fitting_toolbox');
-if a == 0, error('This function requires the Curve Fitting Toolbox'); end
-% Try to check out a license:
-[lic_free,~] = license('checkout','curve_fitting_toolbox');
-if lic_free == 0, error('Could not obtain a license for the Curve Fitting Toolbox'); end
+%% Check that a Curve-Fitting Toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox')
 
 %% Preliminaries:
 doplot = 0; % plot outputs to figure
@@ -102,8 +98,8 @@ end
 diffac = diff(acf); % differenced time series
 sgndiffac = sign(diffac); % sign of differenced time series
 bath = diff(sgndiffac); % differenced, signed, differenced time series
-troughs = find(bath == 2)+1; % finds troughs
-peaks = find(bath == -2)+1; % finds peaks
+troughs = find(bath == 2) + 1; % finds troughs
+peaks = find(bath == -2) + 1; % finds peaks
 npeaks = length(peaks);
 
 thefreqs = zeros(nths,1);

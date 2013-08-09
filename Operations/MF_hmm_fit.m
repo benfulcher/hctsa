@@ -39,6 +39,11 @@
 function out = MF_hmm_fit(y,trainp,nstates)
 % Ben Fulcher 9/4/2010
 
+% Check required function files exist:
+if ~exist('ZG_hmm_cl') || ~exist('ZG_hmm')
+    error('Could not find the required hmm fitting functions (Zoubin Gharamani''s code)');
+end
+
 %% Check Inputs
 N = length(y); % number of samples in time series
 

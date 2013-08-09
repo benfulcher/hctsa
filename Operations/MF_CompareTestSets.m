@@ -61,11 +61,13 @@
 function out = MF_CompareTestSets(y,model,ord,howtosubset,samplep,steps)
 % Ben Fulcher, 12/2/2010
 
+%% Check that a System Identification Toolbox license is available:
+BF_CheckToolbox('identification_toolbox')
+
 %% Preliminaries
 N = length(y); % length of time series
 
-%% Inputs
-
+%% Check inputs, set defaults
 % (1) y: column vector time series
 if nargin < 1 || isempty(y)
     error('No input time series provided');

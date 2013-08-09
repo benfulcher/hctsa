@@ -69,7 +69,7 @@ end
 
 %% Do a range of preprocessings
 yp = PP_PreProcess(y,'');
-% returns a structure, yp, with a range of time series in it, each a different
+% Returns a structure, yp, with a range of time series in it, each a different
 % transformation of the original, y.
 %% ____________________FIT MODEL TO ALL:_______________________ %%
 
@@ -85,14 +85,13 @@ for i = 1:nfields
 
     switch model % SO MANY OPTIONS! ;-)
         case 'ar'
-            % (0)
+            %% Check that a System Identification Toolbox license is available:
+            BF_CheckToolbox('identification_toolbox')
+            
             data = BF_zscore(data); % zscore the data from this preprocessing
-            if ~exist('ar')
-                error('Can''t fit the AR model -- is the System Identification Toolbox installed??');
-            end
-            % (i) fit the model
-            m = ar(data,order);
-            % (ii) get statistics on fit
+            m = ar(data,order); % fit the model
+            
+            % Get statistics on fit
             %     () FPE
             statstore.fpe(i) = m.EstimationInfo.FPE;
             %     () in-sample prediction error

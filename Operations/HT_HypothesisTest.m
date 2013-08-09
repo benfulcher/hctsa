@@ -73,16 +73,8 @@ switch thetest
         
     case 'lbq' % Econometrics Toolbox
         
-        %% Check that an Econometrics license exists:
-        a = license('test','Econometrics_Toolbox');
-        if a == 0
-            error('This function requires the Econometrics Toolbox');
-        end
-        % Try to check out a license:
-        [lic_free,~] = license('checkout','Econometrics_Toolbox');
-        if lic_free == 0
-            error('Could not obtain a license for the Econometrics Toolbox');
-        end
+        %% Check that an Econometrics Toolbox license is available:
+        BF_CheckToolbox('econometrics_toolbox')
         
         % Perform the test
         [~, p] = lbqtest(x);

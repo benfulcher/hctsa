@@ -50,20 +50,11 @@ if nargin < 2 || isempty(lags)
     lags = 0;
 end
 
-%% Check that an Econometrics license exists:
-a = license('test','Econometrics_Toolbox');
-if a==0
-    error('This function requires the Econometrics Toolbox');
-end
-% Try to check out a license:
-[lic_free,~] = license('checkout','Econometrics_Toolbox');
-if lic_free == 0
-    error('Could not obtain a license for the Econometrics Toolbox');
-end
+%% Check that an Econometrics license is available:
+BF_CheckToolbox('econometrics_toolbox')
 
 %% (1) Perform the test(s)
 [h, pValue, stat, cValue] = kpsstest(y,'lags',lags);
-
 
 %% (2) Return statistics on outputs of test(s)
 if length(lags) > 1

@@ -186,6 +186,10 @@ switch model
     case 'ar'
         %% Fit AR model of specified order
         % Return statistics on parameters and goodness of fit
+        
+        %% Check that a System Identification Toolbox license is available to run the 'ar' function:
+        BF_CheckToolbox('identification_toolbox')
+        
         fpes = zeros(npred,1);
         as = zeros(npred,order+1);
         for i = 1:npred
@@ -210,6 +214,7 @@ switch model
             eval(sprintf('out.a_%u_max = max(as(:,%u+1));',i,i));
             eval(sprintf('out.a_%u_min = min(as(:,%u+1));',i,i));
         end
+        
     case 'ss'
         %% Fit state space models of specified order
         % Return statistics on goodness of fit

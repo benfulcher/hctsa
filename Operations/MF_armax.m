@@ -49,6 +49,9 @@
 function out = MF_armax(y, orders, ptrain, nsteps)
 % Ben Fulcher, 1/2/2010
 
+%% Check that a System Identification Toolbox license is available:
+BF_CheckToolbox('identification_toolbox')
+
 %% Prepare Inputs
 % (1) y, the time series as a column vector
 if size(y,2) > size(y,1)

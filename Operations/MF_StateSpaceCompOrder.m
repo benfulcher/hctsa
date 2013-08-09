@@ -38,6 +38,9 @@
 function out = MF_StateSpaceCompOrder(y,maxorder)
 % Ben Fulcher, 12/2/2010
 
+%% Check that a System Identification Toolbox license is available:
+BF_CheckToolbox('identification_toolbox')
+
 % Maximum model order, maxorder (compare models from order 1 up to
 %           this)
 if nargin < 2 || isempty(maxorder)

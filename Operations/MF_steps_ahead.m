@@ -54,6 +54,9 @@
 function out = MF_steps_ahead(y,model,order,maxsteps)
 % Ben Fulcher, 17/2/2010
 
+%% Check that a System Identification Toolbox license is available:
+BF_CheckToolbox('identification_toolbox')
+
 %% Preliminaries
 N = length(y); % length of the input time series
 

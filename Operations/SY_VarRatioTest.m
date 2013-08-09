@@ -44,11 +44,8 @@ function out = SY_VarRatioTest(y,periods,IIDs)
 % Can set step sizes for random walk, and also change the null hypothesis
 % to include non IID random walk increments
 
-%% First check that an Econometrics Toolbox license exists and check it out:
-a = license('test','Econometrics_Toolbox');
-if a == 0, error('This function requires the Econometrics Toolbox'); end
-[lic_free,~] = license('checkout','Econometrics_Toolbox');
-if lic_free == 0, error('Could not obtain a license for the Econometrics Toolbox'); end
+%% Check that an Econometrics Toolbox license is available:
+BF_CheckToolbox('econometrics_toolbox')
 
 % periods, e.g., could be [2,4,6,8,2,4,6,8]
 if nargin < 2 || isempty(periods)

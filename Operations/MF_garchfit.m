@@ -72,16 +72,8 @@
 function out = MF_GARCHfit(y,preproc,params)
 % Ben Fulcher, 25/2/2010
 
-%% Check license for Matlab's Econometrics Toolbox:
-a = license('test','Econometrics_Toolbox');
-if a == 0
-    error('This function requires the Econometrics Toolbox');
-end
-% Try to check out a license:
-[lic_free,~] = license('checkout','Econometrics_Toolbox');
-if lic_free == 0
-    error('Could not obtain a license for the Econometrics Toolbox');
-end
+%% Check that an Econometrics Toolbox license is available:
+BF_CheckToolbox('econometrics_toolbox')
 
 %% Preliminaries
 bevocal = 0; % whether to display commentary on the fitting process

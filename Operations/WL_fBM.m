@@ -36,16 +36,8 @@ function out = WL_fBM(y)
 % Relies on the Wavelet Toolbox function, wfbmesti
 % Ben Fulcher 23/1/2010
 
-%% Check that a Wavelet Toolbox license exists:
-a = license('test','wavelet_toolbox');
-if a == 0
-    error('This function requires Matlab''s Wavelet Toolbox');
-end
-% Try to check out a license:
-[lic_free,~] = license('checkout','wavelet_toolbox');
-if lic_free == 0
-    error('Could not obtain a license for Matlab''s Wavelet Toolbox');
-end
+%% Check that a Wavelet Toolbox license is available:
+BF_CheckToolbox('wavelet_toolbox')
 
 % Parameter estimation of fractional Brownian motion
 hest = wfbmesti(y);

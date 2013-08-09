@@ -50,15 +50,14 @@
 function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)
 % Ben Fulcher, 1/2/2010
 
-%% Check Inputs:
+%% Check that a System Identification Toolbox license is available:
+BF_CheckToolbox('identification_toolbox')
 
+%% Check Inputs:
 % (1) y: the time series as a column vector
 % Convert y to time series object
 N = length(y); % length of time series, N
 
-if ~exist('iddata')
-    error('''iddata'' not found, you''ll need the System Identification Toolbox to run this code');
-end
 y = iddata(y,[],1);
 
 % (2) Order, the order of the state space model to fit. Can specify a positive

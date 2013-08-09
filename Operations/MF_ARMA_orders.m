@@ -48,6 +48,9 @@
 function out = MF_ARMA_orders(y,pr,qr)
 % Ben Fulcher, 17/2/2010
 
+%% Check that a System Identification Toolbox license is available:
+BF_CheckToolbox('identification_toolbox')
+
 %% Check Inputs
 % Convert y to time series object
 y = iddata(y,[],1);

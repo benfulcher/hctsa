@@ -53,6 +53,9 @@
 function out = MF_GARCHcompare(y,preproc,pr,qr)
 % Ben Fulcher 26/2/2010
 
+%% Check that an Econometrics Toolbox license is available:
+BF_CheckToolbox('econometrics_toolbox')
+
 %% Inputs
 if nargin < 2 || isempty(preproc)
     preproc = 'none';
@@ -64,17 +67,6 @@ if nargin < 3 || isempty(pr)
 end
 if nargin < 4 || isempty(qr)
     qr = (1:3); % i.e., GARCH(pr,1:4);
-end
-
-%% Check that an Econometrics license exists:
-a = license('test','Econometrics_Toolbox');
-if a == 0
-    error('This function requires the Econometrics Toolbox');
-end
-% Try to check out a license:
-[lic_free,~] = license('checkout','Econometrics_Toolbox');
-if lic_free == 0
-    error('Could not obtain a license for the Econometrics Toolbox');
 end
 
 %% (1) Data preprocessing

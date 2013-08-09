@@ -40,12 +40,15 @@
 function out = MF_CompareAR(y,orders,howtotest)
 % Ben Fulcher, 1/2/2010
 
+% Preliminaries
 doplot = 0; % can set to 1 to plot outputs
+N = length(y); % length of time series, N
+
+%% Check that a System Identification Toolbox license is available:
+BF_CheckToolbox('identification_toolbox')
 
 %% Check Inputs
 % (1) Time series, y
-N = length(y); % length of time series, N
-
 % Convert y to time series object
 y = iddata(y,[],1);
 
