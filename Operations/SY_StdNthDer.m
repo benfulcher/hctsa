@@ -1,16 +1,23 @@
-% EN_TSentropy
+% SY_StdNthDer
 % 
-% Estimates the Tsallis entropy of a signal using a parameter q that
-% measures the non-extensivity of the system; q = 1 recovers the Shannon
-% entropy.
+% Estimates the standard deviation of the nth derivative of the time series.
+% 
+% Based on an idea by Vladimir Vassilevsky, a DSP and Mixed Signal Design
+% Consultant in a Matlab forum, who stated that You can measure the standard
+% deviation of the nth derivative, if you like".
+% 
+% cf. http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
+% 
+% The derivative is estimated very simply by simply taking successive increments
+% of the time series; the process is repeated to obtain higher order
+% derivatives.
 % 
 % INPUTS:
-% x, the time series
-% q, the non-extensivity parameter
 % 
-% Uses code written by D. Tolstonogov and obtained from
-% http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m.
-%
+% y, time series to analyze
+% 
+% n, the order of derivative to analyze
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,14 +41,15 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_TSentropy(x, q)
-% Wrapper for TS_entropy
-% Ben Fulcher 2009
+function out = SY_StdNthDer(y,n)
+% Ben Fulcher, 2010
 
-if nargin < 2
-    q = 1; % Shannon entropy by default
+if nargin < 2 || isempty(n)
+    n = 2;
 end
 
-out = TS_entropy(x,q);
+yd = diff(y,n); % crude method of taking a derivative that could be improved
+                % upon in future
+out = std(yd);
 
 end

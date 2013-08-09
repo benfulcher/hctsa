@@ -11,7 +11,7 @@
 % y, the input time series
 %
 % discmeth, the method of discretization (currently 'quantile' is the only
-%           option; could incorporate SB_coarsegrain for more options in future)
+%           option; could incorporate SB_CoarseGrain for more options in future)
 %
 % ng: number of groups in the course-graining
 %

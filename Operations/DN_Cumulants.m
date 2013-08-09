@@ -1,16 +1,18 @@
-% EN_TSentropy
+% DN_Cumulants
 % 
-% Estimates the Tsallis entropy of a signal using a parameter q that
-% measures the non-extensivity of the system; q = 1 recovers the Shannon
-% entropy.
+% Very simple function that uses the skewness and kurtosis functions in 
+% Matlab's Statistics Toolbox to calculate these higher order moments of input time series, y
 % 
 % INPUTS:
-% x, the time series
-% q, the non-extensivity parameter
 % 
-% Uses code written by D. Tolstonogov and obtained from
-% http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m.
-%
+% y, the input time series
+% 
+% whatcum, the type of higher order moment:
+%           (i) 'skew1', skewness
+%           (ii) 'skew2', skewness correcting for bias
+%           (iii) 'kurt1', kurtosis
+%           (iv) 'kurt2', kurtosis correcting for bias
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,14 +36,28 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_TSentropy(x, q)
-% Wrapper for TS_entropy
-% Ben Fulcher 2009
+function out = DN_Cumulants(y,whatcum)
+% Ben Fulcher, 2008
 
-if nargin < 2
-    q = 1; % Shannon entropy by default
+if nargin < 2 || isempty(whatcum)
+    whatcum = 'skew1'; % do skewness by default
 end
 
-out = TS_entropy(x,q);
+switch whatcum
+case 'skew1' % skewness
+	out = skewness(y);
+    
+case 'skew2' % corrects for bias
+    out = skewness(y,0);
+    
+case 'kurt1' % kurtosis
+	out = kurtosis(y);
+    
+case 'kurt2' % corrects for bias
+    out = kurtosis(y,0);        
+    
+otherwise
+    error('Unknown cumulant ''%s'' specified: should be ''skew1'', ''skew2'', ''kurt1'', or ''kur2''',whatcum)
+end
 
 end

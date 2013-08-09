@@ -43,10 +43,10 @@ end
 
 switch trit
 	case 'quantile'
-		yt = SB_coarsegrain(y,'quantile',3);
+		yt = SB_CoarseGrain(y,'quantile',3);
         
 	case 'diffquant'
-		yt = SB_coarsegrain(diff(y),'quantile',3);
+		yt = SB_CoarseGrain(diff(y),'quantile',3);
         
     otherwise
         error('Unknown coarse-graining method ''%s''');

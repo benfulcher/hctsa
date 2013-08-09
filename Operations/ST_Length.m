@@ -1,16 +1,10 @@
-% EN_TSentropy
+% ST_Length
 % 
-% Estimates the Tsallis entropy of a signal using a parameter q that
-% measures the non-extensivity of the system; q = 1 recovers the Shannon
-% entropy.
+% Returns the length of the time series.
 % 
-% INPUTS:
-% x, the time series
-% q, the non-extensivity parameter
+% INPUT:
+% y, the time series vector
 % 
-% Uses code written by D. Tolstonogov and obtained from
-% http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m.
-%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,14 +28,9 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_TSentropy(x, q)
-% Wrapper for TS_entropy
-% Ben Fulcher 2009
+function out = ST_Length(y)
+% Ben Fulcher, 2008
 
-if nargin < 2
-    q = 1; % Shannon entropy by default
-end
-
-out = TS_entropy(x,q);
+out = length(y); % the number of samples in the input vector, y
 
 end

@@ -1,16 +1,13 @@
-% EN_TSentropy
+% DN_Moments
 % 
-% Estimates the Tsallis entropy of a signal using a parameter q that
-% measures the non-extensivity of the system; q = 1 recovers the Shannon
-% entropy.
+% Output is the moment of the distribution of the input time series.
+% Normalizes by the standard deviation
+% Uses the moment function from Matlab's Statistics Toolbox
 % 
 % INPUTS:
-% x, the time series
-% q, the non-extensivity parameter
+% y, the input time series
+% n, the moment to calculate (a scalar)
 % 
-% Uses code written by D. Tolstonogov and obtained from
-% http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m.
-%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,14 +31,9 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_TSentropy(x, q)
-% Wrapper for TS_entropy
-% Ben Fulcher 2009
+function out = DN_Moments(y,n)
+% Ben Fulcher, 2009
 
-if nargin < 2
-    q = 1; % Shannon entropy by default
-end
-
-out = TS_entropy(x,q);
+out = moment(y,n) / std(y); % normalized
 
 end

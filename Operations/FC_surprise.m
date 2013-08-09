@@ -97,7 +97,7 @@ if nargin < 6 || isempty(nits)
 end
 
 %% Course Grain
-yth = SB_coarsegrain(y,cgmeth,ng); % a coarse-grained time series using the numbers 1:ng
+yth = SB_CoarseGrain(y,cgmeth,ng); % a coarse-grained time series using the numbers 1:ng
 
 N = length(yth); % will be the same as y, for 'quantile', and 'updown'
 

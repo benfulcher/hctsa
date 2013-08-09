@@ -1,16 +1,15 @@
-% EN_TSentropy
+% CO_AutoCorr
 % 
-% Estimates the Tsallis entropy of a signal using a parameter q that
-% measures the non-extensivity of the system; q = 1 recovers the Shannon
-% entropy.
+% Computes the autocorrelation of an input time series, y, at a time-lag, tau
 % 
 % INPUTS:
-% x, the time series
-% q, the non-extensivity parameter
+% y, a scalar time series column vector
+% tau, the time-delay. If tau is a scalar, returns autocorrelation for y at that
+%       lag. If tau is a vector, returns autocorrelations for y at that set of
+%       lags.
+%       
+% Output is the autocorrelation at the given time-lag
 % 
-% Uses code written by D. Tolstonogov and obtained from
-% http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m.
-%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,14 +33,23 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_TSentropy(x, q)
-% Wrapper for TS_entropy
-% Ben Fulcher 2009
+function out = CO_AutoCorr(y,tau)
 
-if nargin < 2
-    q = 1; % Shannon entropy by default
+% Check inputs:
+if nargin < 2 || isempty(tau)
+    tau = 1;
 end
+N = length(y); % length of the time sries
 
-out = TS_entropy(x,q);
+if length(tau) == 1 % output a single value at the given time-lag
+    out = sum((y(1:N-tau) - mean(y(1:N-tau))).*(y(tau+1:N) ...
+	            - mean(y(tau+1:N))))/N/std(y(1:N-tau))/std(y(tau+1:N));
+else % output values over a range of time-lags
+    out = zeros(length(tau),1);
+    for i = 1:length(tau)
+        out(i) = sum((y(1:N-tau(i)) - mean(y(1:N-tau(i)))).*(y(tau(i)+1:N) ...
+			        - mean(y(tau(i)+1:N))))/N/std(y(1:N-tau(i)))/std(y(tau(i)+1:N));
+    end
+end
 
 end

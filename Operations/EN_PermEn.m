@@ -1,16 +1,18 @@
-% EN_TSentropy
+% EN_PermEn
 % 
-% Estimates the Tsallis entropy of a signal using a parameter q that
-% measures the non-extensivity of the system; q = 1 recovers the Shannon
-% entropy.
+% Computes the permutation entropy of order, ord, of a time series.
+% 
+% "Permutation Entropy: A Natural Complexity Measure for Time Series"
+% C. Bandt and B. Pompe, Phys. Rev. Lett. 88(17) 174102 (2002)
+% 
+% Code is adapted from logisticPE.m code obtained from
+% http://people.ece.cornell.edu/land/PROJECTS/Complexity/
+% http://people.ece.cornell.edu/land/PROJECTS/Complexity/logisticPE.m
 % 
 % INPUTS:
-% x, the time series
-% q, the non-extensivity parameter
+% y, a time series
+% ord, the order of permutation entropy
 % 
-% Uses code written by D. Tolstonogov and obtained from
-% http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m.
-%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,14 +36,19 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_TSentropy(x, q)
-% Wrapper for TS_entropy
-% Ben Fulcher 2009
+function out = EN_PermEn(y,ord)
+% Ben Fulcher, 2009
 
-if nargin < 2
-    q = 1; % Shannon entropy by default
+if nargin < 2 || isempty(ord)
+    ord = 2; % order 2
 end
 
-out = TS_entropy(x,q);
+% Ensure y is a column vector
+if size(y,1) > size(y,2);
+    y = y';
+end
+
+% Use the Bruce Land and Damian Elias code to calculate the permutation entropy:
+out = LA_permen(y,ord);
 
 end
