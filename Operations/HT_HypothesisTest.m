@@ -75,7 +75,7 @@ switch thetest
         
         %% Check that an Econometrics license exists:
         a = license('test','Econometrics_Toolbox');
-        if a==0
+        if a == 0
             error('This function requires the Econometrics Toolbox');
         end
         % Try to check out a license:

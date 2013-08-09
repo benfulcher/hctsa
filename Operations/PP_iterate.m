@@ -64,6 +64,14 @@ for q = 1:length(nr)
     n = nr(q);
     switch detrndmeth
         case 'spline' % Spline detrend
+            
+            %% Check that an Curve Fitting Toolbox license exists (needed for spline fitting with spap2):
+            a = license('test','curve_fitting_toolbox');
+            if a == 0, error('This function requires the Curve Fitting Toolbox'); end
+            % Try to check out a license:
+            [lic_free,~] = license('checkout','curve_fitting_toolbox');
+            if lic_free == 0, error('Could not obtain a license for the Curve Fitting Toolbox'); end
+            
             nknots = n; % progressively make more knots
             intp = 4; % cubic interpolants
             spline = spap2(nknots,intp,[1:N]',y); % just a single middle knot with cubic interpolants

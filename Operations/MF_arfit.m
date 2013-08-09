@@ -72,7 +72,7 @@ end
 
 % Check the ARfit toolbox is installed and in the Matlab path
 if ~exist('ARFIT_arfit')
-    error('Cannot find the function ''arfit''. Have you installed the ARfit toolbox?')
+    error('Cannot find the function ''ARFIT_arfit''. There''s a problem with the ARfit toolbox.')
 end
 
 %% (I) Fit AR model
@@ -80,14 +80,12 @@ end
 % zero-mean, z-scored)
 [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(y, pmin, pmax, selector, 'zero');
 
-
 % (0) First, some definitions
 ps = (pmin:pmax);
 popt = length(Aest);
 
 % (1) Intercept west
 % west = 0 -- as specified
-
 
 % (2) Coefficients Aest
 % (i) Return the raw coefficients
@@ -130,7 +128,7 @@ out.popt_sbc = find(SBC == min(SBC),1,'first');
 
 % (iii) How convincing is the minimum?
 % adjacent values
-if out.popt_sbc > 1 && out.popt_sbc < length(SBC);
+if (out.popt_sbc > 1) && (out.popt_sbc < length(SBC));
     meanaround = mean(abs([SBC(out.popt_sbc-1), SBC(out.popt_sbc+1)]));
 elseif out.popt_sbc == 1
     meanaround = abs(SBC(out.popt_sbc+1)); % just the next value

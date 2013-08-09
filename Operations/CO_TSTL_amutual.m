@@ -51,6 +51,11 @@ doplot = 0; % toggle plotting of outputs
 N = length(y); % length of time series
 s = signal(y); % convert to signal object for TSTOOL
 
+%% Existence checks
+if ~exist('amutual')
+    error('''amutual'' not found -- ensure the TSTOOL package is installed correctly??\n');
+end
+
 %% Check Inputs
 if nargin < 2 || isempty(maxtau)
     maxtau = ceil(N/4);
@@ -63,12 +68,14 @@ end
 %% Run
 ami = data(amutual(s,maxtau,nbins));
 lami = length(ami);
+
+% Plot results
 if doplot
     figure('color','w'); box('on');
     plot(ami,'-ok');
 end
 
-% change ami vector to a structure for output
+% Change automutual information vector to a structure for output
 for i = 1:maxtau+1
     eval(sprintf('out.ami%u = ami(%u);',i,i));
 end

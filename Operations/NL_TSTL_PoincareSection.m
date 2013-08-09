@@ -184,7 +184,7 @@ out.ac2D = CO_AutoCorr(D,2);
 out.tauacD = CO_FirstZero(D,'ac');
 
 % Entropy of boxed distribution
-boxcounts = subcountboxes(x,y,10);% 10 partitions per axis
+boxcounts = subcountboxes(x,y,10); % 10 partitions per axis
 pbox = boxcounts/NN;
 
 

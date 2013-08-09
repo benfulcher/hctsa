@@ -174,7 +174,7 @@ void mexFunction(int nlhs, mxArray  *plhs[], int nrhs, const mxArray  *prhs[])
 			const double b = a * minimum;
 
 #ifdef VERBOSE			
-			mexPrintf("Number of partitions per axis   : %d\n", partitions);
+            // mexPrintf("Number of partitions per axis   : %d\n", partitions);
 #endif
 			// Tree fuellen
 			for (long index=0; index < N; index++) {

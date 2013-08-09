@@ -72,11 +72,13 @@ case 'len'
             M(j) = mean(y((j-1)*n+1:j*n));
         end
     else
-        fprintf(1,'This time series (N = %u) is too short for StatAv(%s,%u)\n',N,whattype,n)
+        fprintf(1,'This time series (N = %u) is too short for StatAv(%s,''%u'')\n',N,whattype,n)
         out = NaN; return
     end
+    
 otherwise
     error('Error evaluating StatAv of type ''%s'', please select either ''seg'' or ''len''',whattype)
+    
 end
 
 s = std(y); % should be 1 (for a z-scored time-series input)

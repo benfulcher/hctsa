@@ -3,6 +3,8 @@
 % Applies a given transformation to the time series, and returns statistics on
 % how various time-series properties change as a result.
 % 
+% Inputs are coded clunkily.
+% 
 % INPUTS:
 % y, the input time series
 % detrndmeth, the method to use for detrending:
@@ -44,10 +46,10 @@
 %                  the running average.
 %      (vii) 'resample': resamples the data by a given ratio using the resample
 %                        function in Matlab.
-%                       Of form 'resample_<p>_<q>', where the ratio p/q is the
-%                       new sampling rate e.g., 'resample_1_2' will downsample
-%                       the signal by one half e.g., resample_10_1' will
-%                       resample the signal to 10 times its original length
+%                        Of form 'resample_<p>_<q>', where the ratio p/q is the
+%                        new sampling rate e.g., 'resample_1_2' will downsample
+%                        the signal by one half e.g., resample_10_1' will
+%                        resample the signal to 10 times its original length
 %      (viii) 'logr': takes log returns of the data. Only valid for positive
 %                       data, else returns a NaN.
 %      (ix) 'boxcox': makes a Box-Cox transformation of the data. Only valid for
@@ -95,7 +97,6 @@ end
 N = length(y); % time-series length
 r = (1:N)'; % the t-range over which to fit
 
-
 %% PREPROCESSINGS:
 % DETRENDINGS:
 % Do the detrending; converting from y (raw) to y_d (detrended) by
@@ -108,7 +109,6 @@ if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'poly') && ~isempty(str2dou
     y_fit = feval(cfun,r);
     y_d = y-y_fit;
 
-
 % 2) Seasonal detrend
 elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4),'9')
     [cfun, gof] = fit(r,y,detrndmeth);
@@ -119,15 +119,18 @@ elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2
 elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6),'spline') && ~isempty(str2double(detrndmeth(7))) && ~isempty(str2double(detrndmeth(8)))
     nknots = str2double(detrndmeth(7));
     intp = str2double(detrndmeth(8));
-    try
-		spline = spap2(nknots,intp,r,y); % just a single middle knot with cubic interpolants
-    catch me
-		disp(me.message)
-		return
-	end
+    
+    %% Check that an Curve Fitting license exists:
+    a = license('test','curve_fitting_toolbox');
+    if a == 0, error('This function requires the Curve Fitting Toolbox'); end
+    % Try to check out a license:
+    [lic_free,~] = license('checkout','curve_fitting_toolbox');
+    if lic_free == 0, error('Could not obtain a license for the Curve Fitting Toolbox'); end
+
+	spline = spap2(nknots,intp,r,y); % just a single middle knot with cubic interpolants
 	y_spl = fnval(spline,1:N); % evaluate at the 1:N time intervals
     y_d = y - y_spl';
-    
+
 % 4) Differencing
 elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'diff') && ~isempty(str2double(detrndmeth(5)))
     ndiffs = str2double(detrndmeth(5));

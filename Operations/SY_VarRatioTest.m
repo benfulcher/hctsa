@@ -44,27 +44,22 @@ function out = SY_VarRatioTest(y,periods,IIDs)
 % Can set step sizes for random walk, and also change the null hypothesis
 % to include non IID random walk increments
 
-% e.g., could be [2,4,6,8,2,4,6,8]
+%% First check that an Econometrics Toolbox license exists and check it out:
+a = license('test','Econometrics_Toolbox');
+if a == 0, error('This function requires the Econometrics Toolbox'); end
+[lic_free,~] = license('checkout','Econometrics_Toolbox');
+if lic_free == 0, error('Could not obtain a license for the Econometrics Toolbox'); end
+
+% periods, e.g., could be [2,4,6,8,2,4,6,8]
 if nargin < 2 || isempty(periods)
     periods = 2;
 end
 
-% e.g., could be [1,1,1,1,0,0,0,0]
+% IIDs, e.g., could be [1,1,1,1,0,0,0,0]
 if nargin < 3 || isempty(IIDs)
     IIDs = 0;
 end
 IIDs = logical(IIDs);
-
-%% Check that an Econometrics license exists:
-a = license('test','Econometrics_Toolbox');
-if a == 0
-    error('This function requires the Econometrics Toolbox');
-end
-% Attempt to check out a license:
-[lic_free,~] = license('checkout','Econometrics_Toolbox');
-if lic_free == 0
-    error('Could not obtain a license for the Econometrics Toolbox');
-end
 
 %% Perform the test:
 [h, pValue, stat, cValue, ratio] = vratiotest(y,'period',periods,'IID',IIDs);

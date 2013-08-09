@@ -50,6 +50,8 @@
 function out = SD_MakeSurrogates(x,surrmethod,nsurrs,extrap)
 % Ben Fulcher, 27/1/2011
 
+bevocal = 0; % Display text information/commentary to screen
+
 % INPUTS:
 % number of surrogates to generate
 if nargin < 3 || isempty(nsurrs)
@@ -72,9 +74,11 @@ switch surrmethod
         % Surrogates maintain linear correlations in the data, but any
         % nonlinear structure is destroyed by the phase randomization
         
-        fprintf(1,'Constructing %u surrogates using the Random Phase Method\n',nsurrs)
-        fprintf(1,['Linear correlations are maintained but nonlinear structure will be ' ...
-                    'destroyed by the phase randomization\n'])
+        if bevocal
+            fprintf(1,'Constructing %u surrogates using the Random Phase Method\n',nsurrs)
+            fprintf(1,['Linear correlations are maintained but nonlinear structure will be ' ...
+                        'destroyed by the phase randomization\n'])
+        end
         
         % lost a datapoint if odd
         if rem(N,2) == 0
@@ -109,10 +113,12 @@ switch surrmethod
         end
         
     case 'AAFT'
-        fprintf(1,['Constructing %u surrogates using the Amplitude Adjusted Fourier '...
+        if bevocal
+            fprintf(1,['Constructing %u surrogates using the Amplitude Adjusted Fourier '...
                     'Transform (AAFT) Method\n'],nsurrs)
-        fprintf(1,['Linear correlations are maintained but nonlinear structure will be destroyed ' ...
+            fprintf(1,['Linear correlations are maintained but nonlinear structure will be destroyed ' ...
                     'by the phase randomization. Amplitude Distribution is approximately maintained\n'])
+        end
         
         % Sort and rank order the data
         [xSorted, ix] = sort(x);
@@ -161,10 +167,12 @@ switch surrmethod
         end        
         
     case 'TFT'
-        fprintf(1,['Constructing %u surrogates using the Truncated Fourier '...
+        if bevocal
+            fprintf(1,['Constructing %u surrogates using the Truncated Fourier '...
                 'Transform (TFT) Method.\n'],nsurrs)
-        fprintf(1,['Low Frequency phases are preserved, and high frequency phases will be ' ...
+            fprintf(1,['Low Frequency phases are preserved, and high frequency phases will be ' ...
                     'randomized. A way of dealing with non-stationarity.\n'])
+        end
         if isempty(extrap)
             fprintf(1,'You haven''t specified a cut-off frequency!! Setting N/8\n')
             fc = round(N/8);
@@ -213,7 +221,9 @@ switch surrmethod
 end
 
 % Cute farewell message
-fprintf(1,'Generated %u %s surrogates in %s.\n',nsurrs,surrmethod,BF_thetime(toc,1))
+if bevocal
+    fprintf(1,'Generated %u %s surrogates in %s.\n',nsurrs,surrmethod,BF_thetime(toc,1))
+end
 
 
 end

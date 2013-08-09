@@ -23,7 +23,6 @@ points = data(cin);
 % Transformation auf Rangzahlenfolge
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 points = points - min(points);
 points = 1+floor(points / (max(points)/(partitionen-epsilon)));

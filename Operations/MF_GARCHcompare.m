@@ -68,7 +68,7 @@ end
 
 %% Check that an Econometrics license exists:
 a = license('test','Econometrics_Toolbox');
-if a==0
+if a == 0
     error('This function requires the Econometrics Toolbox');
 end
 % Try to check out a license:
@@ -159,7 +159,7 @@ for i = 1:np
        q = qr(j); % arch order
        
        % (i) specify a zero-mean, Gaussian innovation GARCH(P,Q) model.
-       spec = garchset('P',p,'Q',q,'C',NaN);
+       spec = garchset('P',p,'Q',q,'C',NaN,'Display','off');
        
        % (ii) fit the model
        [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);

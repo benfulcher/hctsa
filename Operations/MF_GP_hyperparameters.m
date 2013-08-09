@@ -51,9 +51,9 @@
 function out = MF_GP_hyperparameters(y,covfunc,squishorsquash,maxN,methds)
 % Ben Fulcher, 19/1/2010
 
-doplot = 0; % plot basic outputs
-
 %% Preliminaries
+doplot = 0; % plot basic outputs
+bevocal = 0; % display commentary to command line
 N = length(y); % time-series length
 
 %% Check Inputs
@@ -97,7 +97,9 @@ if (maxN > 0) && (N > maxN)
             if length(y) > maxN
                 y = y(1:maxN);
             end
-            fprintf(1,'Resampled the time series from a length %u down to %u (%u)\n',N,length(y),maxN);
+            if bevocal
+                fprintf(1,'Resampled the time series from a length %u down to %u (%u)\n',N,length(y),maxN);
+            end
             N = length(y); % update time series length (should be maxN)
             t = SUB_settimeindex(N,squishorsquash); % set time index
 

@@ -72,31 +72,28 @@
 function out = MF_GARCHfit(y,preproc,params)
 % Ben Fulcher, 25/2/2010
 
-%% Inputs
-if nargin < 2 || isempty(preproc)
-    preproc = 'ar'; % do the preprocessing that maximizes stationarity/whitening
-end
-
-% % Preestimation settings: preest
-% if nargin < 3 || isempty(preest)
-%     preest = 'yep'; % do pre-estimation
-% end
-
-% Model fitting
-if nargin < 3 || isempty(params)
-    params = 'default'; % fit the default GARCH model
-end
-
-
-%% Check that an Econometrics license exists:
+%% Check license for Matlab's Econometrics Toolbox:
 a = license('test','Econometrics_Toolbox');
-if a==0
+if a == 0
     error('This function requires the Econometrics Toolbox');
 end
 % Try to check out a license:
 [lic_free,~] = license('checkout','Econometrics_Toolbox');
 if lic_free == 0
     error('Could not obtain a license for the Econometrics Toolbox');
+end
+
+%% Preliminaries
+bevocal = 0; % whether to display commentary on the fitting process
+
+%% Inputs
+if nargin < 2 || isempty(preproc)
+    preproc = 'ar'; % do the preprocessing that maximizes stationarity/whitening
+end
+
+% Model fitting
+if nargin < 3 || isempty(params)
+    params = 'default'; % fit the default GARCH model
 end
 
 %% (1) Data preprocessing
@@ -114,7 +111,9 @@ switch preproc
         % No spectral methods allowed...
         [ypp, best] = PP_PreProcess(y,'ar',2,0.05,0);
         eval(sprintf('y = ypp.%s;',best));
-        fprintf(1,'Proprocessed according to AR(2) criterion using %s\n',best);
+        if bevocal
+            fprintf(1,'Proprocessed according to AR(2) criterion using %s\n',best);
+        end
 end
 
 y = BF_zscore(y); % z-score the time series
@@ -136,13 +135,13 @@ N = length(y); % could be different to original (if choose a differencing, e.g.)
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,1:20,0.1);
+[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,'lags',1:20,'alpha',0.1);
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1);
+[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,'lags',1:20,'alpha',0.1);
 % [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1,[]);
 
 
@@ -181,7 +180,7 @@ switch params
         R = Lags_acf_y(find(abs(ACF_y) < bounds_acf_y(1),1,'first'))-1;
         % first time autocorrelation drops below significance level.
         if isempty(R), R = length(ACF_y)+1; end
-        if R>4, R = 4; end
+        if R > 4, R = 4; end
         % (**) R=0 implies that no AR component is required.
         
         
@@ -227,7 +226,7 @@ switch params
     
 end
 
-spec = garchset(spec,'C', NaN); % fix C=0 -- zero-mean process
+spec = garchset(spec,'C', NaN,'Display','off'); % fix C=0 -- zero-mean process
 % In fact this gives quite different results, even when you C ends up being
 % very close to zero...? Strangely not for the ARMA, but for the GARCH...
 
@@ -321,13 +320,13 @@ stde2 = stde.^2;
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde,1:20,0.1);
+[Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde,'lags',1:20,'alpha',0.1);
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2,1:20,0.1,[]);
+[lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2,'lags',1:20,'alpha',0.1);
 
 
 % Ok, so now we've corrected for GARCH effects, how does this 'improve' the

@@ -44,7 +44,7 @@ function out = WL_cwt(y, wname, maxscale)
 
 %% Check that a Wavelet Toolbox license exists:
 a = license('test','wavelet_toolbox');
-if a==0
+if a == 0
     error('This function requires Matlab''s Wavelet Toolbox');
 end
 % Try to check out a license:

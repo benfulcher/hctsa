@@ -194,7 +194,7 @@ void mexFunction(int nlhs, mxArray  *plhs[], int nrhs, const mxArray  *prhs[])
 	for (long r=0; r < R; r++) { 		// we have R different partition sizes
           const long partitions = (long) partitionsizes[r];
 		
-		mexPrintf("Number of partitions per axis   : %d\n", partitions);
+        // mexPrintf("Number of partitions per axis   : %d\n", partitions); // +BF commented out
 		
 		double* marginal_histogram = new double[partitions];
 			

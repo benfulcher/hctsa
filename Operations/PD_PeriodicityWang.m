@@ -45,6 +45,14 @@
 function out = PD_PeriodicityWang(y)
 % Ben Fulcher, 9/7/09
 
+%% Check that an Curve Fitting Toolbox license exists (needed for spline fitting with spap2):
+a = license('test','curve_fitting_toolbox');
+if a == 0, error('This function requires the Curve Fitting Toolbox'); end
+% Try to check out a license:
+[lic_free,~] = license('checkout','curve_fitting_toolbox');
+if lic_free == 0, error('Could not obtain a license for the Curve Fitting Toolbox'); end
+
+%% Preliminaries:
 doplot = 0; % plot outputs to figure
 
 % Check the time series is z-scored:
