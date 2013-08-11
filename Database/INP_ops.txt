@@ -1,4 +1,4 @@
-ST_length	ST_length	misc,raw,lengthdep
+ST_length	length	misc,raw,lengthdep
 DN_burstiness	burstiness	burstiness,raw,locdep
 DN_max	maximum	distribution
 DN_min	miminmum	misc
