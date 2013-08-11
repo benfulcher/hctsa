@@ -315,12 +315,12 @@ else
     if isempty(trainset)
         % no training subset
         fprintf(1,'Normalizing a %u x %u object. Your patience is greatly appreciated...\n',ntsn,nmn)
-        F = BF_normalizemat(F,normopt);
+        F = BF_NormalizeMatrix(F,normopt);
     else
         % retrieve a subset
         disp(['Normalizing a ' num2str(ntsn) 'x' num2str(nmn) ' object using ' num2str(length(trainset)) ...
             ' to train the transformation! Your patience is greatly appreciated...'])
-        F = BF_normalizemat(F,normopt,trainset);
+        F = BF_NormalizeMatrix(F,normopt,trainset);
     end
     fprintf(1,'Normalized: the data matrix contains %u special-valued elements\n',sum(isnan(F(:))))
 end

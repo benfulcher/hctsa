@@ -72,7 +72,6 @@ switch thetest
         warning('on','stats:jbtest:PTooSmall'); % resume this warning
         
     case 'lbq' % Econometrics Toolbox
-        
         %% Check that an Econometrics Toolbox license is available:
         BF_CheckToolbox('econometrics_toolbox')
         
