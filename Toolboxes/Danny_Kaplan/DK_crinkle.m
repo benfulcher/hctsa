@@ -1,4 +1,4 @@
-function out = KP_crinkle(x)
+function out = DK_crinkle(x)
 % Calculates the "crinkle statistic" on a vector x
 % 	<(x_{t-1}-2*x_t+x_{t+1})^4> / < ( x_t^2 ) >^2
 %	as proposed by James Theiler

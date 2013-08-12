@@ -92,9 +92,9 @@ class list {
 		list(cellarray)
 		
 		// methods
-		append(list, list)
-		append(list, string)
-		append(list, cellarray)
+		TSTL_append(list, list)
+		TSTL_append(list, string)
+		TSTL_append(list, cellarray)
 		
 		cellstr 	// convert to cell array of strings
 		char		// convert to character array

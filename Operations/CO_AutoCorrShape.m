@@ -34,6 +34,9 @@
 function out = CO_AutoCorrShape(y)
 % Ben Fulcher, 2009
 
+% Check a curve-fitting toolbox license is available
+BF_CheckToolbox('curve_fitting_toolbox');
+
 doplot = 0; % plot outputs from this function
 N = length(y); % length of the time series
 
@@ -48,7 +51,7 @@ acf = zeros(N,1);
 % time series (hopefully it's cropped by then)
 for i = 1:N
     acf(i) = CO_AutoCorr(y,i-1); % *** NOTE THIS! *** acf vector indicies are not lags
-    if i > 2 && abs(acf(i)) < th && abs(acf(i-1)) < th
+    if (i > 2) && (abs(acf(i)) < th) && (abs(acf(i-1)) < th)
        acf = acf(1:i-2);
        break
     end

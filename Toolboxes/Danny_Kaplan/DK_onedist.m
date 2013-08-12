@@ -1,4 +1,4 @@
-function res = KP_onedist(z,pt)
+function res = DK_onedist(z,pt)
 % ONEDIST(z,pt) calculates the distance between point pt and each
 % row in matrix z
 % Copyright (c) 1996 by D. Kaplan, All Rights Reserved

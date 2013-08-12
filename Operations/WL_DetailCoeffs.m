@@ -43,7 +43,7 @@ function out = WL_DetailCoeffs(y, wname, maxlevel)
 % Ben Fulcher 23/1/2010
 
 %% Check that a Wavelet Toolbox license is available:
-BF_CheckToolbox('wavelet_toolbox')
+BF_CheckToolbox('wavelet_toolbox');
 
 doplot = 0; % plot outputs to figure
 

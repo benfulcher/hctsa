@@ -45,13 +45,13 @@
 function out = SY_KPSStest(y,lags)
 % Ben Fulcher, 26/2/2010
 
+%% Check that an Econometrics license is available:
+BF_CheckToolbox('econometrics_toolbox')
+
 % Check inputs
 if nargin < 2 || isempty(lags)
     lags = 0;
 end
-
-%% Check that an Econometrics license is available:
-BF_CheckToolbox('econometrics_toolbox')
 
 %% (1) Perform the test(s)
 [h, pValue, stat, cValue] = kpsstest(y,'lags',lags);

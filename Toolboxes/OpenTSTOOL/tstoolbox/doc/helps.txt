@@ -191,8 +191,8 @@
 %  
  
 %     help core/core.m 
-%   list2 = append(list, string); 
-%   list2 = append(list, list); 
+%   list2 = TSTL_append(list, string); 
+%   list2 = TSTL_append(list, list); 
 %  
  
 %     help list/append.m 

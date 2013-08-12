@@ -57,6 +57,9 @@
 function out = NL_TSTL_LargestLyap(y,Nref,maxtstep,past,NNR,embedparams)
 % Ben Fulcher, November 2009
 
+% Check a curve-fitting toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox');
+
 doplot = 0; % whether to plot outputs to a figure
 
 %% Preliminaries

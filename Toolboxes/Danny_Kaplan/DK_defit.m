@@ -1,4 +1,4 @@
-function [a, b] = KP_defit(delta,epsilon,maxdelta)
+function [a, b] = DK_defit(delta,epsilon,maxdelta)
 % [a,b] = defit(delta,epsilon,maxdelta)
 % linear fitting routine for delta-epsilon
 % delta   -- distances between pre-images: output by delta-epsilon

@@ -53,7 +53,10 @@
 function out = EN_Randomize(y,howtorand)
 % Ben Fulcher, October 2009
 
-% Check inputs:
+% Check a curve-fitting toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox');
+
+%% Check inputs:
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored for EN_Randomize')
 end
@@ -76,7 +79,7 @@ stats = zeros(ncalcs,nstats); % record a stat at each randomization increment
 
 y_rand = y; % this vector will be randomized
 
-stats(1,:) = doyourcalcthing(y,y_rand); % initial condition: apply on itself
+stats(1,:) = SUB_doyourcalcthing(y,y_rand); % initial condition: apply on itself
 
 for i = 1:N*randp_max
     switch howtorand
@@ -104,7 +107,7 @@ for i = 1:N*randp_max
     end
     
     if ismember(i,calc_pts)
-        stats(calc_pts == i,:) = doyourcalcthing(y,y_rand);
+        stats(calc_pts == i,:) = SUB_doyourcalcthing(y,y_rand);
         % disp([num2str(i) ' out of ' num2str(N*randp_max)])
     end
     
@@ -128,7 +131,7 @@ out.xcn1fexpadjr2 = gof.adjrsquare;
 out.xcn1fexprmse = gof.rmse;
 
 out.xcn1diff = abs((stats(end,1)-stats(1,1))/stats(end,1));
-out.xcn1hp = gethp(stats(:,1));
+out.xcn1hp = SUB_gethp(stats(:,1));
 
 % 2) xc1: cross correlation at lag 1
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,2) -0.1]);
@@ -142,7 +145,7 @@ out.xc1fexpadjr2 = gof.adjrsquare;
 out.xc1fexprmse = gof.rmse;
 
 out.xc1diff = abs((stats(end,2)-stats(1,2))/stats(end,2));
-out.xc1hp = gethp(stats(:,2));
+out.xc1hp = SUB_gethp(stats(:,2));
 
 % 3) d1: norm of differences between original and randomized time series
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,3) -0.2 stats(end,3)]);
@@ -156,7 +159,7 @@ out.d1fexpadjr2 = gof.adjrsquare;
 out.d1fexprmse = gof.rmse;
 
 out.d1diff = abs((stats(end,3)-stats(1,3))/stats(end,3));
-out.d1hp = gethp(stats(:,3));
+out.d1hp = SUB_gethp(stats(:,3));
 
 % 4) ac1
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,4) -0.2]);
@@ -170,7 +173,7 @@ out.ac1fexpadjr2 = gof.adjrsquare;
 out.ac1fexprmse = gof.rmse;
 
 out.ac1diff = abs((stats(end,4)-stats(1,4))/stats(end,4));
-out.ac1hp = gethp(stats(:,4));
+out.ac1hp = SUB_gethp(stats(:,4));
 
 
 % 5) ac2
@@ -185,7 +188,7 @@ out.ac2fexpadjr2 = gof.adjrsquare;
 out.ac2fexprmse = gof.rmse;
 
 out.ac2diff = abs((stats(end,5)-stats(1,5))/stats(end,5));
-out.ac2hp = gethp(stats(:,5));
+out.ac2hp = SUB_gethp(stats(:,5));
 
 % 6) ac3
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,6) -0.2]);
@@ -199,7 +202,7 @@ out.ac3fexpadjr2 = gof.adjrsquare;
 out.ac3fexprmse = gof.rmse;
 
 out.ac3diff = abs((stats(end,6)-stats(1,6))/stats(end,6));
-out.ac3hp = gethp(stats(:,6));
+out.ac3hp = SUB_gethp(stats(:,6));
 
 % 7) ac4
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,7) -0.4]);
@@ -213,7 +216,7 @@ out.ac4fexpadjr2 = gof.adjrsquare;
 out.ac4fexprmse = gof.rmse;
 
 out.ac4diff = abs((stats(end,7)-stats(1,7))/stats(end,7));
-out.ac4hp = gethp(stats(:,7));
+out.ac4hp = SUB_gethp(stats(:,7));
 
 % 8) shen (Shannon entropy)
 % I think this is all rubbish
@@ -228,7 +231,7 @@ out.shenfexpadjr2 = gof.adjrsquare;
 out.shenfexprmse = gof.rmse;
 
 out.shendiff = abs((stats(end,8)-stats(1,8))/stats(end,8));
-out.shenhp = gethp(stats(:,8));
+out.shenhp = SUB_gethp(stats(:,8));
 
 % 9) sampen (Sample Entropy)
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,9) -0.2 stats(end,9)]);
@@ -242,7 +245,7 @@ out.sampen2_02fexpadjr2 = gof.adjrsquare;
 out.sampen2_02fexprmse = gof.rmse;
 
 out.sampen2_02diff = abs((stats(end,9)-stats(1,9))/stats(end,9));
-out.sampen2_02hp = gethp(stats(:,9));
+out.sampen2_02hp = SUB_gethp(stats(:,9));
 
 % 10) statav5
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,10) -0.1 stats(end,10)]);
@@ -256,7 +259,7 @@ out.statav5fexpadjr2 = gof.adjrsquare;
 out.statav5fexprmse = gof.rmse;
 
 out.statav5diff = abs((stats(end,10)-stats(1,10))/stats(end,10));
-out.statav5hp = gethp(stats(:,10));
+out.statav5hp = SUB_gethp(stats(:,10));
 
 % 11) swss5_1
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,11) -0.1 stats(end,11)]);
@@ -270,9 +273,9 @@ out.swss5_1fexpadjr2 = gof.adjrsquare;
 out.swss5_1fexprmse = gof.rmse;
 
 out.swss5_1diff = abs((stats(end,11)-stats(1,11))/stats(end,11));
-out.swss5_1hp = gethp(stats(:,11));
+out.swss5_1hp = SUB_gethp(stats(:,11));
 
-    function out = doyourcalcthing(y,y_rand)
+    function out = SUB_doyourcalcthing(y,y_rand)
         % Cross Correlation to original signal
         xc = xcorr(y,y_rand,1,'coeff');
         xcn1 = xc(1);
@@ -298,7 +301,7 @@ out.swss5_1hp = gethp(stats(:,11));
         out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, shen, sampen, statav5, swss5_1];
     end
 
-	function thehp = gethp(v)
+	function thehp = SUB_gethp(v)
 		if v(end) > v(1)
 			thehp = find(v > 0.5*(v(end)+v(1)),1,'first');
 		else

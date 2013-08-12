@@ -5,11 +5,11 @@ function e = MS_nlpe(y,de,tau);
 %prediction error for embedding dimension de and lag tau or for embedding
 %strategy v (v>0)
 %
-%Michael Small
-%3/3/2005
-%ensmall@polyu.edu.hk
+% Michael Small
+% 3/3/2005
+% ensmall@polyu.edu.hk
 %
-% Edited to work with HCTS package, Ben Fulcher, 2010
+% Minor edits for HCTS package, Ben Fulcher, 2010
 
 if min(size(y)) > 1
     x = y;
@@ -28,26 +28,11 @@ end
 
 [de, n] = size(x);
 
-% ++BF: this bit can cause memory pains for large time series
-% Let's do this dirty cheat
-maxn = 3000;
-if n > maxn
-    x = x(:,1:maxn);
-    y = y(1:maxn);
-    n = maxn;
-    fprintf(1,'Michael Small''s ''nlpe'' is only being evaluated on the first %u samples...\n',maxn);
-end
-if n < 20
-    fprintf(1,'Time series (N = %u) is too short\n',length(y))
-    out = NaN;
-    return
-end
-
 % dd=sparse(n,n);
 dd = zeros(n,n);
 for i = 1:de %loop on de and compute the distance.^2
     dd = dd + (ones(n,1)*x(i,:)-x(i,:)'*ones(1,n)).^2;
-end;
+end
 % dd is the distance .^2 with inf on the diag
 % speye = sparse(1:n,1:n,1);
 warning('off','MATLAB:divideByZero')

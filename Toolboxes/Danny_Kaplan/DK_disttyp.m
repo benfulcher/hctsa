@@ -1,4 +1,4 @@
-function d = KP_disttyp(z,percs)
+function d = DK_disttyp(z,percs)
 % d = disttyp(z,percs)
 % Calculates typical distances between pre-images
 % z - embedded data
@@ -18,7 +18,7 @@ dists = zeros(ntargs*Npts,1);
 count=0;
 
 for j=1:ntargs
-  dists((count+1):(count+Npts)) = KP_onedist(z,z(j,:));
+  dists((count+1):(count+Npts)) = DK_onedist(z,z(j,:));
   count = count+Npts;
 end
 

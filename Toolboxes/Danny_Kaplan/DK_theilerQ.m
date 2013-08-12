@@ -1,4 +1,4 @@
-function Q = KP_theilerQ(x)
+function Q = DK_theilerQ(x)
 % theilerQ calculates Q=<(x_t + x_{t+1})^3> normalized by <x^2>^{3/2}
 % on a vector x
 % Copyright (c) 1996 by D. Kaplan, All Rights Reserved

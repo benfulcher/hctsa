@@ -31,12 +31,19 @@ function BF_CheckToolbox(thetoolbox)
 switch thetoolbox
 case 'identification_toolbox'
     thename = 'Matlab''s System Identification Toolbox';
+    
 case 'econometrics_toolbox'
     thename = 'Matlab''s Econometrics Toolbox';
+    
 case 'curve_fitting_toolbox'
     thename = 'Matlab''s Curve Fitting Toolbox';
+    
 case 'wavelet_toolbox'
     thename = 'Matlab''s Wavelet Toolbox';
+    
+case 'signal_toolbox'
+    thename = 'Matlab''s Signal Processing Toolbox';
+    
 otherwise
     fprintf(1,'Unknown toolbox ''%s''\n',thetoolbox);
 end
@@ -44,7 +51,7 @@ end
 % Now do the checks:
 % 1. Check the toolbox exists in the current Matlab environment:
 a = license('test',thetoolbox);
-if a == 0,
+if a == 0
     error('This function requires %s',thename);
 end
     

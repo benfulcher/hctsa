@@ -1,9 +1,9 @@
-function l = append(l, argument)
+function l = TSTL_append(l, argument)
 
 %tstoolbox/@list/append
 %   Syntax:
-%     * list = append(list, string)
-%     * list = append(list, list)
+%     * list = TSTL_append(list, string)
+%     * list = TSTL_append(list, list)
 %
 %   Add string(s) to existing list.
 %
@@ -18,7 +18,7 @@ elseif isa(argument, 'list')
 	l.len = l.len + argument.len;
 	l.data = [l.data; argument.data];
 elseif iscellstr(argument)
-	l = append(l, list(argument));
+	l = TSTL_append(l, list(argument));
 else
 	error('Wrong type of argument(s) given');
 end

@@ -45,6 +45,9 @@
 function out = SY_StdNthDerChange(y,maxd)
 % Ben Fulcher, 2009
 
+%% Check that a Curve-Fitting Toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox')
+
 doplot = 0; % plot outputs
 
 if nargin < 2 || isempty(maxd)
@@ -61,7 +64,7 @@ if doplot
     plot(ms,'o-k')
 end
 
-% Fit exponential growth/decay
+% Fit exponential growth/decay using the Curve-Fitting Toolbox
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, 0.5*sign(ms(end)-ms(1))]);
 f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit((1:maxd)',ms,f);
@@ -70,6 +73,5 @@ out.fexp_b = c.b; % this is important
 out.fexp_r2 = gof.rsquare; % this is more important!
 out.fexp_adjr2 = gof.adjrsquare;
 out.fexp_rmse = gof.rmse;
-
 
 end

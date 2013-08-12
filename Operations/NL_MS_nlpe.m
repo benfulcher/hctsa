@@ -45,10 +45,12 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_MS_nlpe(y,de,tau)
+function out = NL_MS_nlpe(y,de,tau,maxN)
 % Ben Fulcher, 19/2/2010
 
-% Do my own inputs
+N = length(y); % time-series length
+
+%% Check inputs, set defaults:
 % Embedding dimension:
 if nargin < 2 || isempty(de)
     de = 3;
@@ -65,17 +67,37 @@ if strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
 
-% Do false nearest neighbours if needed
+if nargin < 4 || isempty(maxN)
+    maxN = 3000; % the maximum time-series length, due to memory constraints
+end
+
+% nlpe can cause memory pains for long time series
+% Let's do this dirty cheat
+if N > maxN
+    % x = x(:,1:maxn);
+    % Crop the time series to the first maxN samples:
+    y = y(1:maxN);
+    N = maxN;
+    fprintf(1,'Michael Small''s ''nlpe'' is only being evaluated on the first %u time-series samples...\n',maxN);
+end
+if N < 20 % Short time series cause problems:
+    fprintf(1,'Time series (N = %u) is too short\n',length(y))
+    out = NaN; return
+end
+
+% Do false nearest neighbours to compute an appropriate embedding dimension, if needed
 if strcmp(de,'fnn')
-    de = NL_MS_fnn(y,1:10,tau,5,1,1,0.05);
+    de = NL_MS_fnn(y,1:10,tau,5,1,1,0.05,maxN);
 end
 
 % normalize??
 % y=y-mean(y(:));
 % y=y/std(y(:));
 
+
 % Run Michael Small's nonlinear prediction error code:
 res = MS_nlpe(y,de,tau); % residuals
+
 
 %% Get outputs
 out.msqerr = mean(res.^2);
@@ -92,6 +114,5 @@ fields = fieldnames(residstats);
 for k = 1:length(fields);
     eval(sprintf('out.%s = residstats.%s;',fields{k},fields{k}));
 end
-
 
 end

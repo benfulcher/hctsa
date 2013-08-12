@@ -15,11 +15,11 @@ error(nargchk(2,2,nargin));
 
 d = d1; 	% copy all fields from first description;
 d.history = list('{');
-d.history = append(d.history, d1.history);
-d.history = append(d.history, '}');
-d.history = append(d.history, '{');
-d.history = append(d.history, d2.history);
-d.history = append(d.history, '}');
+d.history = TSTL_append(d.history, d1.history);
+d.history = TSTL_append(d.history, '}');
+d.history = TSTL_append(d.history, '{');
+d.history = TSTL_append(d.history, d2.history);
+d.history = TSTL_append(d.history, '}');
 
 
 

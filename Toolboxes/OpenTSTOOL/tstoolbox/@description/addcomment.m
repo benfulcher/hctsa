@@ -7,6 +7,6 @@ function d = addcomment(d, text)
 
 error(nargchk(1,2,nargin));
 
-d.comment = append(d.comment, text);
+d.comment = TSTL_append(d.comment, text);
 
 end

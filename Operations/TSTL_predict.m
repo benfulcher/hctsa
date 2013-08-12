@@ -167,7 +167,7 @@ out.acs1_10_sumabsdiffpred1 = sum(abs(acs_y - acs_y_pred1));
 out.pred1rmsres = sqrt(mean((y-y_pred1).^2));
 
 % align at best positive cross-correlation and then look at residuals
-if out.maxxcflag>0
+if out.maxxcflag > 0
     y_lagged = y(out.maxxcflag:end);
     Nlag = length(y_lagged);
     y_pred1_lagged = y_pred1(1:Nlag);

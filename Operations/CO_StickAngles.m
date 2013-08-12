@@ -42,6 +42,10 @@
 function out = CO_StickAngles(y)
 % Ben Fulcher, September 2009
 
+%% Check that a Signal Processing Toolbox license is available:
+% buffer function used for StatAv calculation...
+BF_CheckToolbox('signal_toolbox');
+
 doplot = 0; % can plot output
 N = length(y);
 
@@ -110,7 +114,7 @@ end
 % on raw outputs
 % difference between ksdensities of positive and negative portions
 if ~isempty(angles{1});
-    maxdev=max(abs(angles{1}));
+    maxdev = max(abs(angles{1}));
     ksy1 = ksdensity(angles{1},linspace(-maxdev,maxdev,201));
     out.symks_p = sum(abs(ksy1(1:100)-fliplr(ksy1(102:end))));
     out.ratmean_p = mean(angles{1}(angles{1}>0))/mean(angles{1}(angles{1}<0));
@@ -140,22 +144,22 @@ zangles{1} = zscore(angles{1}); zangles{2} = zscore(angles{2}); zallangles = zsc
 % There are positive angles
 if ~isempty(zangles{1});
     % StatAv2
-    [statav_m statav_s] = sub_statav(zangles{1},2);
+    [statav_m, statav_s] = SUB_statav(zangles{1},2);
     out.statav2_p_m = statav_m;
     out.statav2_p_s = statav_s;
     
     % StatAv3
-    [statav_m statav_s] = sub_statav(zangles{1},3);
+    [statav_m, statav_s] = SUB_statav(zangles{1},3);
     out.statav3_p_m = statav_m;
     out.statav3_p_s = statav_s;
     
     % StatAv 4
-    [statav_m statav_s] = sub_statav(zangles{1},4);
+    [statav_m, statav_s] = SUB_statav(zangles{1},4);
     out.statav4_p_m = statav_m;
     out.statav4_p_s = statav_s;
     
     % StatAv 5
-    [statav_m statav_s] = sub_statav(zangles{1},5);
+    [statav_m, statav_s] = SUB_statav(zangles{1},5);
     out.statav5_p_m = statav_m;
     out.statav5_p_s = statav_s;
     
@@ -169,22 +173,22 @@ end
 % There are negative angles
 if ~isempty(zangles{2});
     % StatAv2
-    [statav_m statav_s] = sub_statav(zangles{2},2);
+    [statav_m, statav_s] = SUB_statav(zangles{2},2);
     out.statav2_n_m = statav_m;
     out.statav2_n_s = statav_s;
     
     % StatAv3
-    [statav_m statav_s] = sub_statav(zangles{2},3);
+    [statav_m, statav_s] = SUB_statav(zangles{2},3);
     out.statav3_n_m = statav_m;
     out.statav3_n_s = statav_s;
     
     % StatAv4
-    [statav_m statav_s] = sub_statav(zangles{2},4);
+    [statav_m, statav_s] = SUB_statav(zangles{2},4);
     out.statav4_n_m = statav_m;
     out.statav4_n_s = statav_s;
     
     % StatAv5
-    [statav_m statav_s] = sub_statav(zangles{2},5);
+    [statav_m, statav_s] = SUB_statav(zangles{2},5);
     out.statav5_n_m = statav_m;
     out.statav5_n_s = statav_s;
 else
@@ -197,22 +201,22 @@ end
 % All angles:
 
 % StatAv2
-[statav_m, statav_s] = sub_statav(zallangles,2);
+[statav_m, statav_s] = SUB_statav(zallangles,2);
 out.statav2_all_m = statav_m;
 out.statav2_all_s = statav_s;
 
 % StatAv3
-[statav_m, statav_s] = sub_statav(zallangles,3);
+[statav_m, statav_s] = SUB_statav(zallangles,3);
 out.statav3_all_m = statav_m;
 out.statav3_all_s = statav_s;
 
 % StatAv4
-[statav_m, statav_s] = sub_statav(zallangles,4);
+[statav_m, statav_s] = SUB_statav(zallangles,4);
 out.statav4_all_m = statav_m;
 out.statav4_all_s = statav_s;
 
 % StatAv5
-[statav_m, statav_s] = sub_statav(zallangles,5);
+[statav_m, statav_s] = SUB_statav(zallangles,5);
 out.statav5_all_m = statav_m;
 out.statav5_all_s = statav_s;
 
@@ -276,7 +280,7 @@ out.kurtosis_all = kurtosis(allangles);
 %% Outliers?
 % forget about this, I think.
 
-function [statavmean, statavstd] = sub_statav(x,n)
+function [statavmean, statavstd] = SUB_statav(x,n)
     % Does a n-partition statav.
     % Require 2*n points (i.e., minimum of 2 in each partition) to do a
     % statav that even has a chance of being meaningful.

@@ -1,3 +1,5 @@
+% BD_hurst_exponent
+% 
 % The Hurst exponent
 %--------------------------------------------------------------------------
 % The first 20 lines of code are a small test driver.
@@ -6,7 +8,7 @@
 %
 % Bill Davidson, quellen@yahoo.com
 % 13 Nov 2005
-
+% 
 % function []=hurst_exponent()
 % disp('testing Hurst calculation');
 % 
@@ -17,8 +19,8 @@
 % hurst=estimate_hurst_exponent(data);
 % 
 % [s,err]=sprintf('Hurst exponent = %.2f',hurst);disp(s);
-
 %--------------------------------------------------------------------------
+%
 % This function does dispersional analysis on a data series, then does a 
 % Matlab polyfit to a log-log plot to estimate the Hurst exponent of the 
 % series.
@@ -37,36 +39,36 @@ data = data0;         % make a local copy
 
 [M, npoints] = size(data0);
 
-yvals=zeros(1,npoints);
-xvals=zeros(1,npoints);
-data2=zeros(1,npoints);
+yvals = zeros(1,npoints);
+xvals = zeros(1,npoints);
+data2 = zeros(1,npoints);
 
-index=0;
-binsize=1;
+index = 0;
+binsize = 1;
 
-while npoints>4
+while npoints > 4
     
-    y=std(data);
-    index=index+1;
-    xvals(index)=binsize;
-    yvals(index)=binsize*y;
+    y = std(data);
+    index = index+1;
+    xvals(index) = binsize;
+    yvals(index) = binsize*y;
     
-    npoints=fix(npoints/2);
-    binsize=binsize*2;
-    for ipoints=1:npoints % average adjacent points in pairs
-        data2(ipoints)=(data(2*ipoints)+data((2*ipoints)-1))*0.5;
+    npoints = fix(npoints/2);
+    binsize = binsize*2;
+    for ipoints = 1:npoints % average adjacent points in pairs
+        data2(ipoints) = (data(2*ipoints)+data((2*ipoints)-1))*0.5;
     end
-    data=data2(1:npoints);
+    data = data2(1:npoints);
     
 end % while
 
-xvals=xvals(1:index);
-yvals=yvals(1:index);
+xvals = xvals(1:index);
+yvals = yvals(1:index);
 
-logx=log(xvals);
-logy=log(yvals);
+logx = log(xvals);
+logy = log(yvals);
 
-p2=polyfit(logx,logy,1);
-hurst=p2(1); % Hurst exponent is the slope of the linear fit of log-log plot
+p2 = polyfit(logx,logy,1);
+hurst = p2(1); % Hurst exponent is the slope of the linear fit of log-log plot
 
-return;
+end

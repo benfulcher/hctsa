@@ -1,16 +1,24 @@
+% TS_entropy
+% 
+% TS_entropy estimates the entropy of signals:
+% OUTPUT:
+% entr      : The entropy estimate
+% INPUTS:
+% q           : input parameter, q >= 1;
+% x           : The time series to be analyzed
+% q           : Tsallis non-extensive parameter value, q >= 1;
+%               if q == 1 then Tsallis' entropy concides with Shannon's
+% http://www.TSResearchGroup.com
+% http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m
+% 
+% D. Tolstonogov
+% Copyright (c) by Trade Smart Research
+% 08/04/2004
+% 
+% Minor changes made by Ben D. Fulcher, 2010
+% 
+
 function entr = TS_entropy(x, q)
-%   TS_entropy estimates the entropy of signals
-%   entr      : The entropy estimate
-%   q           : input parameter, q >=1; 
-%   x           : The time series to be analyzed
-%   q           : Tsallis non-extensive parameter value, q >= 1;
-%                 if q == 1 then Tsallis' entropy concides with Shannon's
-%   http://www.TSResearchGroup.com
-%   http://download.tsresearchgroup.com/all/tsmatlablink/TSentropy.m
-%   D. Tolstonogov
-%   Copyright (c) by Trade Smart Research
-%   08/04/2004
-%   
 
 [NRow, NCol] = size(x);
 

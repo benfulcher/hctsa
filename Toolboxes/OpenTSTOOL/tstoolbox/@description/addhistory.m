@@ -15,4 +15,4 @@ else
 	text = [datestr(now) ' : ' text];
 end
 
-d.history = append(d.history, text);
+d.history = TSTL_append(d.history, text);

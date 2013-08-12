@@ -119,6 +119,7 @@ switch howtosubset
         spts = randi(N-l+1,npred,1); % npred starting points
         r(:,1) = spts;
         r(:,2) = spts+l-1;
+        
     case 'uniform'
         if length(samplep) == 1 % size will depend on number of unique subsegments
             spts = round(linspace(0,N,npred+1)); % npred+1 boundaries = npred portions
@@ -134,6 +135,7 @@ switch howtosubset
             r(:,1) = spts;
             r(:,2) = spts+l-1;
         end
+        
     otherwise
         error('Unknown subset method ''%s''',howtosubset);
 end

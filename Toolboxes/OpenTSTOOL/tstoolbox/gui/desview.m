@@ -19,24 +19,24 @@ end
 [path,nam,ext,ver] = fileparts(filename);
 lt = list;
 
-lt = append(lt, [num2str(ndim(s)) '-dimensional signal ' filename]);
-lt = append(lt, ['Dlens : ' num2str(dlens(s))]);
+lt = TSTL_append(lt, [num2str(ndim(s)) '-dimensional signal ' filename]);
+lt = TSTL_append(lt, ['Dlens : ' num2str(dlens(s))]);
 
 for n=1:ndim(s)
 	a = getaxis(s, n);
 	if ~isempty(label(a)) & ~isempty(name(a))
-		lt = append(lt, ['X-Axis ' num2str(n)  ' : ' label(a) ' | ' name(a)  ]); 
+		lt = TSTL_append(lt, ['X-Axis ' num2str(n)  ' : ' label(a) ' | ' name(a)  ]); 
 	end
 end
 
 if ~isempty(name(s))
-lt = append(lt,['Name : ' name(s)]);
+lt = TSTL_append(lt,['Name : ' name(s)]);
 end
-lt = append(lt,['Type : ' type(s)]);
+lt = TSTL_append(lt,['Type : ' type(s)]);
 
 if ~isempty(label(yunit(s))) & ~isempty(yname(s))
-	lt = append(lt,['Attributes of data values : ']);
-	lt = append(lt,[label(yunit(s)) ' | '  yname(s)]);
+	lt = TSTL_append(lt,['Attributes of data values : ']);
+	lt = TSTL_append(lt,[label(yunit(s)) ' | '  yname(s)]);
 end
 
 txt = cellstr(lt);

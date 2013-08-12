@@ -51,7 +51,9 @@ function [yp, best] = PP_PreProcess(y,choosebest,order,beatthis,dospectral)
 
 % NOTE: yp is NOT z-scored -- needs to be z-scored after, if necessary.
 
-%% Inputs
+doplot = 0; % plot outputs to figures
+
+%% Check inputs, set defaults
 if nargin < 2
     choosebest = ''; % just return all the time series in structure yp.
 end
@@ -167,7 +169,10 @@ nfields = length(fields);
 
 switch choosebest
     case 'ar' % picks the *worst* fit to an AR(p) model
-%         order = 2; % should be set from inputs/defaults
+        %% Check that a System Identification Toolbox license is available:
+        BF_CheckToolbox('identification_toolbox')
+        
+        % order = 2; % should be set from inputs/defaults
         rmserrs = zeros(nfields,1);
         
         for i = 1:nfields; % each preprocessing performed
@@ -208,6 +213,7 @@ switch choosebest
         else
             best = 'nothing';
         end
+        
     otherwise
         error('Unknown method ''%s''',choosebest);
 end
@@ -235,8 +241,10 @@ end
         switch method
             case 'lf'
                 cullr = 1:floor(length(Fy1)*n);
+                
             case 'biggest'
                 cullr = find(abs(Fy1) > quantile(abs(Fy1),n));
+                
             otherwise
                 error('Unknown method ''%s''', method);
         end
@@ -249,11 +257,13 @@ end
 
         
         % PLOT
-%         plot(abs(Fy)),hold on; plot(abs(FyF),'--r'); hold off
-%         input('Here''s the filtered one...')
-%         plot(abs(FyF),'k');
-%         input('Again on it''s own...')
-
+        if doplot
+            figure('color','w'); box('on');
+            plot(abs(Fy)),hold on; plot(abs(FyF),'--r'); hold off
+            input('Here''s the filtered one...')
+            plot(abs(FyF),'k');
+            % input('Again on it''s own...')
+        end
             
         %% Inverse Fourier Transform
         ydt = ifft(FyF,NFFT);
@@ -264,9 +274,11 @@ end
         ydt = ydt(1+lose:end-lose);
         
         % PLOT
-%         plot(zscore(ydt),'b'); hold on; plot(y,'r'); hold off;
-%         input(['Mean difference is ' num2str(mean(y-ydt))])
-    
+        if doplot
+            figure('color','w'); box('on');
+            plot(zscore(ydt),'b'); hold on; plot(y,'r'); hold off;
+            % input(['Mean difference is ' num2str(mean(y-ydt))])
+        end
     end
 
     function ydt = SUB_rempt(y,order,nbits)
@@ -281,8 +293,11 @@ end
             ydt(r) = ybit-polyval(p,x);
         end
         ydt = BF_zscore(ydt);
-%         plot(y,'b'); hold on; plot(ydt,'r');
-%         input('here we are')
+        if doplot
+            figure('color','w'); box('on');
+            plot(y,'b'); hold on; plot(ydt,'r');
+            % input('here we are')
+        end
     end
 
 

@@ -62,6 +62,9 @@
 function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs,dopower)
 % Ben Fulcher, August 2009
 
+%% Check that a Curve-Fitting Toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox')
+
 % Check inputs, set defaults:
 if size(y,2) > size(y,1); y = y'; end % time series must be a column vector
 if nargin < 2 || isempty(psdmeth), psdmeth = 'fft'; end

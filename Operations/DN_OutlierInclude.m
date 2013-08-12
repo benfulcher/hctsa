@@ -58,6 +58,9 @@
 function out = DN_OutlierInclude(y,howth,inc)
 % Ben Fulcher, June 2009
 
+% Check a Curve Fitting toolbox license is available
+BF_CheckToolbox('curve_fitting_toolbox');
+
 doplot = 0; % plot some outputs
 
 %% Check Inputs
@@ -83,7 +86,6 @@ end
 
 % Initialize thresholds
 switch howth
-    
     case 'abs' % analyze absolute value deviations
         thr = (0:inc:max(abs(y)));
         tot = N;

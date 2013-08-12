@@ -56,6 +56,9 @@
 function out = DN_SimpleFit(x,dmodel,nbins)
 % Ben Fulcher, 2009
 
+% Check a curve-fitting toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox');
+
 %% Fit the model
 % Two cases: distribution fits and fits on the data
 Distmods = {'gauss1','gauss2','exp1','power1'}; % valid distribution models

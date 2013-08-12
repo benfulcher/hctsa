@@ -42,6 +42,9 @@
 function out = PP_Iterate(y,detrndmeth)
 % Ben Fulcher, 10/7/09
 
+%% Check that a Curve-Fitting Toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox')
+
 %% FOREPLAY
 N = length(y); % length of time series
 
@@ -64,9 +67,6 @@ for q = 1:length(nr)
     n = nr(q);
     switch detrndmeth
         case 'spline' % Spline detrend
-            %% Check that a Curve-Fitting Toolbox license is available:
-            BF_CheckToolbox('curve_fitting_toolbox')
-            
             nknots = n; % progressively make more knots
             intp = 4; % cubic interpolants
             spline = spap2(nknots,intp,[1:N]',y); % just a single middle knot with cubic interpolants

@@ -48,6 +48,9 @@
 function out = SB_TransitionpAlphabet(y,ng,tau)
 % Ben Fulcher, August 2009
 
+%% Check that a Curve-Fitting Toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox')
+
 if nargin < 2 || isempty(ng)
     ng = (2:10); % compare across alphabet sizes from 2 to 10
 end
@@ -77,7 +80,7 @@ if (length(ng) == 1) && (length(tau) > 1) % vary tau
         store(i,:) = getmeasures(yth);
     end
 
-    error('This kind of doesn''t work yet')
+    error('This setting kind of doesn''t work yet. Sorry.')
     
 elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     if min(ng) < 2; error('Need more than 2 groups'); end % need more than 2 groups, always

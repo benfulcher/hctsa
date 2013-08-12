@@ -10,7 +10,7 @@ if fid ~= -1
 	while 1
 		line = fgetl(fid);
 		if ~isstr(line), break, end
-			l = append(l, line);
+			l = TSTL_append(l, line);
 		end
 	fclose(fid);
 end

@@ -36,6 +36,9 @@
 function out = DT_IsSeasonal(y)
 % Ben Fulcher, 9/7/2009
 
+% Check a curve-fitting toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox');
+
 %% Preliminaries
 % Make sure the input time series, y, is a column vector
 if size(y,2) > size(y,1)
@@ -44,7 +47,7 @@ end
 N = length(y); % length of input time series
 r = (1:N)'; % range over which to fit
 
-%% Fit a sinusoidal model
+%% Fit a sinusoidal model using the Curve-Fitting Toolbox
 [cfun, gof] = fit(r,y,'sin1'); % fits the following form: a1*sin(b1*x+c1)
 
 %% Two conditions for determining whether time series contains periodicities:

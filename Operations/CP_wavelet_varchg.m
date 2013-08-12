@@ -48,6 +48,9 @@
 function out = CP_wavelet_varchg(y, wname, level, maxnchpts, mindelay)
 % Ben Fulcher, 23/1/2010
 
+% Check that a Wavelet Toolbox license is available:
+BF_CheckToolbox('wavelet_toolbox');
+
 %% Check Inputs
 N = length(y); % time-series length
 

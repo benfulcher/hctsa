@@ -1,4 +1,4 @@
-function y = KP_lagembed(x,M,lag)
+function y = DK_lagembed(x,M,lag)
 % lagEmbed(x,dim,lag) constructs an embedding of a time series on a vector
 % lagEmbed(x,dim) makes an m-dimensional embedding with lag 1
 % lagEmbed(x,dim,lag) uses the specified lag

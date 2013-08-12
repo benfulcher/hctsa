@@ -13,15 +13,14 @@ function d = commandlines(d, commandname, varargin)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-
 commandline = commandname;
 
-for i=1:nargin-2
+for i = 1:nargin-2
 	commandline = [commandline ', ' tostring(varargin{i})];
 end
 
 commandline = [commandline ');'];
-d.commandlines = append(d.commandlines, commandline);
+d.commandlines = TSTL_append(d.commandlines, commandline);
 
 function out = tostring(in)
 switch class(in)

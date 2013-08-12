@@ -57,6 +57,9 @@
 function out = NL_TSTL_FractalDimensions(y,kmin,kmax,Nref,gstart,gend,past,steps,embedparams)
 % Ben Fulcher, November 2009
 
+% Check a curve-fitting toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox');
+
 %% Preliminaries
 N = length(y); % length of time series
 

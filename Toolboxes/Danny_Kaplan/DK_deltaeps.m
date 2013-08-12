@@ -1,4 +1,4 @@
-function [delta,epsilon] = KP_deltaeps(z, images, lockout)
+function [delta,epsilon] = DK_deltaeps(z, images, lockout)
 % [delta,epsilon] = deltaeps(z, images)
 % Delta-epsilon method
 % z      -- embedded data as from getimage()
@@ -22,7 +22,7 @@ count=0;
 
 for i = 1:npts
   % find the nearest neighbors
-  [inds,dists] = KP_findneib(z, z(i,:), k+10);
+  [inds,dists] = DK_findneib(z, z(i,:), k+10);
   % eliminate the ones closer in time than the lockout
   foo = find( abs(inds - i) > lockout );
   inds = inds(foo);

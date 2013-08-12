@@ -41,6 +41,9 @@
 function out = FC_LoopLocalSimple(y,fmeth)
 % Ben Fulcher, 2009
 
+% Check a curve-fitting toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox');
+
 doplot = 0; % plot outputs to a figure
 
 if nargin < 2 || isempty(fmeth)

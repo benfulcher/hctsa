@@ -105,12 +105,20 @@ r = (1:N)'; % the t-range over which to fit
 % 1) Polynomial detrend
 % starts with 'poly' and ends with integer from 1--9
 if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'poly') && ~isempty(str2double(detrndmeth(5)))
+    
+    % Check a curve-fitting toolbox license is available:
+    BF_CheckToolbox('curve_fitting_toolbox');
+    
     [cfun, gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
     y_d = y-y_fit;
 
 % 2) Seasonal detrend
 elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4),'9')
+
+    % Check a curve-fitting toolbox license is available:
+    BF_CheckToolbox('curve_fitting_toolbox');
+    
     [cfun, gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
     y_d = y-y_fit;

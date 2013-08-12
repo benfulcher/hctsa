@@ -35,6 +35,8 @@
 function out = MF_ResidualAnalysis(e)
 % Ben Fulcher 10/2/2010
 
+%% Check that a System Identification Toolbox license is available (for spa):
+BF_CheckToolbox('identification_toolbox')
 
 % (0) Preliminaries
 if size(e,2) > size(e,1)

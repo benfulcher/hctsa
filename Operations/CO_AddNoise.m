@@ -44,6 +44,9 @@
 function out = CO_AddNoise(y,tau,meth,nbins)
 % Ben Fulcher, September 2009
 
+% Check a curve-fitting toolbox license is available:
+BF_CheckToolbox('curve_fitting_toolbox');
+
 doplot = 0; % plot outputs to figure
 
 %% Check inputs
@@ -72,7 +75,7 @@ out.meanch = mean(diff(amis));
 out.ac1 = CO_AutoCorr(amis,1);
 out.ac2 = CO_AutoCorr(amis,2);
 
-% Fit exponential decay to output
+% Fit exponential decay to output using Curve Fitting Toolbox
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[amis(1) -1]);
 f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(noiser',amis,f);

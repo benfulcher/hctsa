@@ -919,10 +919,10 @@ RN_Gaussian_7	random_number_7		silly,stochastic,randomnumber
 RN_Gaussian_8	random_number_8		silly,stochastic,randomnumber
 RN_Gaussian_9	random_number_9		silly,stochastic,randomnumber
 RN_Gaussian_10	random_number_10	silly,stochastic,randomnumber
-KP_timerev_1	KP_timerev_1	trevasym,nonlinearity
-KP_timerev_2	KP_timerev_2	trevasym,nonlinearity
-KP_timerev_3	KP_timerev_3	trevasym,nonlinearity
-KP_timerev_4	KP_timerev_4	trevasym,nonlinearity
+DK_timerev_1	DK_timerev_1	trevasym,nonlinearity
+DK_timerev_2	DK_timerev_2	trevasym,nonlinearity
+DK_timerev_3	DK_timerev_3	trevasym,nonlinearity
+DK_timerev_4	DK_timerev_4	trevasym,nonlinearity
 HT_HypothesisTest_signtest		signtest	hypothesistest,signtest
 HT_HypothesisTest_runstest		runstest	hypothesistest,randomness,runstest
 HT_HypothesisTest_runstestraw	runstestraw	hypothesistest,randomness,runstest,raw
@@ -1025,8 +1025,8 @@ ST_FitPolynomial_7	ST_FitPolynomial_7	trend,raw,spreaddep
 ST_FitPolynomial_8	ST_FitPolynomial_8	trend,raw,spreaddep
 ST_FitPolynomial_9	ST_FitPolynomial_9	trend,raw,spreaddep
 ST_FitPolynomial_10	ST_FitPolynomial_10	trend,raw,spreaddep
-KP_crinkle_statistic	KP_crinkle_statistic	misc
-KP_TheilerQ	KP_TheilerQ	misc
+DK_crinkle_statistic	DK_crinkle_statistic	misc
+DK_TheilerQ	DK_TheilerQ	misc
 CP_wavelet_varchg_db3_2_10_001	CP_wavelet_varchg_db3_2_10_001	wavelet,waveletTB,varchg
 CP_wavelet_varchg_db3_3_10_001	CP_wavelet_varchg_db3_3_10_001	wavelet,waveletTB,varchg
 CP_wavelet_varchg_db3_4_10_001	CP_wavelet_varchg_db3_4_10_001	wavelet,waveletTB,varchg
