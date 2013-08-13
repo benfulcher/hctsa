@@ -29,7 +29,8 @@ function [estimate,nbias,sigma,descriptor] = RM_information(x,y,descriptor,appro
 %   Copyright (c) by R. Moddemeijer
 %   $Revision: 1.1 $  $Date: 2001/02/05 08:59:36 $
 
-% Some trivial details were modified by Ben Fulcher; see http://www.cs.rug.nl/~rudy/matlab/source/information.m for original code
+% Some trivial details were modified by Ben Fulcher; see
+% http://www.cs.rug.nl/~rudy/matlab/source/information.m for original code
 
 if nargin < 1
    disp('Usage: [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y)')
