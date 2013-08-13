@@ -1,22 +1,27 @@
-function [d,i] = MS_nearneigh(X,tau,blocksize)
-  
-%function [d,i] = MS_nearneigh(X,tau,blocksize)
-%
-%calculate the nearest (RMS) neighbour of each embedded point
-%represented as columns of X.
-%tau points either side of each point are excluded (default tau=0);
-% i is the index of the nearest neighbours and d are the distances.
-%
-%nearest neighbours are calculated in a blockwise way in an effort
-%to speed up the calculation. This fails horribly, it is quicker to 
-%use a simple for loop.
-%
-%blocksize is the number of points to do at once.
+% function [d,i] = MS_nearneigh(X,tau,blocksize)
+% 
+% calculate the nearest (RMS) neighbour of each embedded point
+% represented as columns of X.
+% tau points either side of each point are excluded (default tau=0);
+%  i is the index of the nearest neighbours and d are the distances.
+% 
+% nearest neighbours are calculated in a blockwise way in an effort
+% to speed up the calculation. This fails horribly, it is quicker to 
+% use a simple for loop.
+% 
+% blocksize is the number of points to do at once.
 %  
 %
-%Michael Small
-%3/3/2005
-%ensmall@polyu.edu.hk
+% Michael Small
+% michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
+% 3/3/2005
+% For further details, please see M. Small. Applied Nonlinear Time Series
+% Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
+% Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
+% references therein.
+% (minor cosmetic changes made by Ben Fulcher, 2010)
+
+function [d,i] = MS_nearneigh(X,tau,blocksize)
   
 if nargin < 2
     tau = 0;

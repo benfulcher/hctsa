@@ -10,6 +10,10 @@
 %
 % Algorithm is implemented in MS_complexitybs.c
 %
-% M. Small
-% ensmall@polyu.edu.hk
+% Michael Small
+% michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
 % 24/9/03
+% For further details, please see M. Small. Applied Nonlinear Time Series
+% Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
+% Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
+% references therein.

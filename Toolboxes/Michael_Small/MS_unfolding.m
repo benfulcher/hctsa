@@ -1,4 +1,4 @@
-% function [de,nfnn]=unfolding(y,th,de,tau)
+% function [de,nfnn] = MS_unfolding(y,th,de,tau)
 % 
 % estimate the minimum unfolding dimension by calculating when the
 % proportion of false nearest neighbours if first below th.
@@ -12,13 +12,15 @@
 % distance of the next points and these points is greater  
 %
 % Michael Small
+% michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
 % 3/3/2005
-% ensmall@polyu.edu.hk
-%
+% For further details, please see M. Small. Applied Nonlinear Time Series
+% Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
+% Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
+% references therein.
+% (Minor changes by Ben Fulcher, 2010)
 
 function [d, nfnn] = MS_unfolding(y,th,de,tau)
-% From http://small.eie.polyu.edu.hk/matlab/
-% Very minor, mainly cosmetic changes made by Ben Fulcher 19/2/2010
 
 % Set defaults:
 if nargin < 2 || isempty(th)

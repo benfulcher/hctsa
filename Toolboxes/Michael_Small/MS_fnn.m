@@ -1,15 +1,13 @@
-function [p]=MS_fnn(y,de,tau,th,kth);
-  
-%function [nfnn]=fnn(y,de,tau,th,kth)
+% function nfnn = MS_fnn(y,de,tau,th,kth)
 %
-%determine the number of false nearest neighbours for the time
-%series y embedded in dimension de with lag tau. 
-%
-%for each pair of values (de,tau) the data y is embeded and the
-%nearest neighbour to each point (excluding the immediate
-%neighbourhood of n points) is determined. If the ratio of the
-%distance of the next (kth) points and these points is greater than
-%th then they are counted as false nearest neighbours.
+% determine the number of false nearest neighbours for the time
+% series y embedded in dimension de with lag tau. 
+% 
+% for each pair of values (de,tau) the data y is embeded and the
+% nearest neighbour to each point (excluding the immediate
+% neighbourhood of n points) is determined. If the ratio of the
+% distance of the next (kth) points and these points is greater than
+% th then they are counted as false nearest neighbours.
 %
 % default:
 % th=5
@@ -18,9 +16,16 @@ function [p]=MS_fnn(y,de,tau,th,kth);
 % p(i,j) is the proportion of false nearest neighbours for de(i)
 % and tau(j).
 %
-%Michael Small
-%3/3/2005
-%ensmall@polyu.edu.hk
+% Michael Small
+% michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
+% 3/3/2005
+% For further details, please see M. Small. Applied Nonlinear Time Series
+% Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
+% Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
+% references therein.
+% (minor cosmetic changes made by Ben Fulcher, 2010)
+
+function p = MS_fnn(y,de,tau,th,kth);
 
 if nargin<5,
   kth=1;

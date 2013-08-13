@@ -1,4 +1,4 @@
-% function ent=shannon(z,bin,depth)
+% function ent = MS_shannon(z,bin,depth)
 %
 % calculate the approximate shannon entropy of a time series using a bin
 % bin encoding and depth symbol symbol sequences. The entropy is
@@ -17,4 +17,9 @@
 % implementation is shannon.c
 %
 % Michael Small
+% michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
 % 8/10/04
+% For further details, please see M. Small. Applied Nonlinear Time Series
+% Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
+% Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
+% references therein.

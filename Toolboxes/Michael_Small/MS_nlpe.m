@@ -1,15 +1,19 @@
-function e = MS_nlpe(y,de,tau);
 % function e = MS_nlpe(y,v);
 %
-%compute the normalised "drop-one-out" constant interpolation nonlinear
-%prediction error for embedding dimension de and lag tau or for embedding
-%strategy v (v>0)
+% Compute the normalised "drop-one-out" constant interpolation nonlinear
+% prediction error for embedding dimension de and lag tau or for embedding
+% strategy v (v>0)
 %
 % Michael Small
+% michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
 % 3/3/2005
-% ensmall@polyu.edu.hk
-%
-% Minor edits for HCTS package, Ben Fulcher, 2010
+% For further details, please see M. Small. Applied Nonlinear Time Series
+% Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
+% Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
+% references therein.
+% (Minor edits by Ben Fulcher, 2010)
+
+function e = MS_nlpe(y,de,tau);
 
 if min(size(y)) > 1
     x = y;

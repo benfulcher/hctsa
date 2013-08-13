@@ -1,12 +1,17 @@
-function tau=MS_firstzero(y);
-  
-%function tau=firstzero(y);
+% function tau = MS_firstzero(y);
 %
-%find the first zero of the autocorrelation function of y.
+% Find the first zero of the autocorrelation function of y.
 %
-%Michael Small
-%3/3/2005
-%ensmall@polyu.edu.hk
+% Michael Small
+% michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
+% 3/3/2005
+% For further details, please see M. Small. Applied Nonlinear Time Series
+% Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
+% Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
+% references therein.
+% (minor cosmetic changes by Ben Fulcher, 2010)
+
+function tau = MS_firstzero(y);
   
 len=50;  
 [r,t]=acorr(y,len);

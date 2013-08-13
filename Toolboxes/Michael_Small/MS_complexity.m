@@ -1,5 +1,4 @@
-function cmp=MS_complexity(x,n);
-% cmp = complexity(x,n);
+% cmp = MS_complexity(x,n);
 %
 % calculate the Lempel-Ziv complexity of the n-bit encoding of x. 
 %
@@ -9,9 +8,16 @@ function cmp=MS_complexity(x,n);
 %
 % Algorithm is implemented in complexitybs.c
 %
-% M. Small
-% ensmall@polyu.edu.hk
+% Michael Small
+% michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
 % 7/10/04
+% For further details, please see M. Small. Applied Nonlinear Time Series
+% Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
+% Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
+% references therein.
+% (minor cosmetic changes by Ben Fulcher, 2010)
+
+function cmp = MS_complexity(x,n);
 
 if nargin<2,
     n=2;
@@ -19,7 +25,7 @@ end;
 
 if length(n)>1,
    for ni=1:length(n),
-        cmp(ni)=MS_complexity(x,n(ni)); 
+        cmp(ni) = MS_complexity(x,n(ni)); 
    end;    
 else,
     
