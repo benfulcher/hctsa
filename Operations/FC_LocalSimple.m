@@ -1,6 +1,6 @@
 % FC_LocalSimple
 % 
-% Does local forecasting using very simple predictors using the past $l$ values
+% Does local forecasting using very simple predictors using the past l values
 % of the time series to predict its next value.
 % 
 % INPUTS:

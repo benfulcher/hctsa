@@ -1,6 +1,5 @@
-function [estimate,nbias,sigma,descriptor] = RM_entropy(x,descriptor,approach,base)
-%ENTROPY   Estimates the entropy of stationary signals with
-%          independent samples using various approaches.
+% RM_entropy   Estimates the entropy of stationary signals with
+%               independent samples using various approaches.
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X) or
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X,DESCRIPTOR) or
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X,DESCRIPTOR,APPROACH) or
@@ -23,11 +22,13 @@ function [estimate,nbias,sigma,descriptor] = RM_entropy(x,descriptor,approach,ba
 %   BASE        : The base of the logarithm; default e
 %
 %   See also: http://www.cs.rug.nl/~rudy/matlab/
-
+%
 %   R. Moddemeijer 
 %   Copyright (c) by R. Moddemeijer
 %   $Revision: 1.1 $  $Date: 2001/02/05 08:59:36 $
+%   
 
+function [estimate,nbias,sigma,descriptor] = RM_entropy(x,descriptor,approach,base)
 
 if nargin < 1
    disp('Usage: [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X)')

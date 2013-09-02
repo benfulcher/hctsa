@@ -1,4 +1,4 @@
-function TSQ_addkeyword(morts,ids,kwadd,dbname,updateall,tostart)
+function SQL_addkeyword(morts,ids,kwadd,dbname,updateall,tostart)
 %%% TSQ_addkeyword
 % Takes in a keyword and adds them to the ids given
 % Ben Fulcher 13/1/2010

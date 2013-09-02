@@ -610,7 +610,7 @@ end
 
 
 % Also output the clustered input matrix
-if nargout>2
+if nargout > 2
 	if iscell(acgi)
 		Fcl = F(vertcat(acgi{:}),:);
 	else

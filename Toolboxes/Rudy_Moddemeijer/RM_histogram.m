@@ -1,5 +1,4 @@
-function [result,descriptor] = RM_histogram(x,descriptor)
-% HISTOGRAM Computes the frequency histogram of the row vector x.
+% RM_histogram Computes the frequency histogram of the row vector x.
 %   [RESULT,DESCRIPTOR] = HISTOGRAM(X) or
 %   [RESULT,DESCRIPTOR] = HISTOGRAM(X,DESCRIPTOR) or
 % where
@@ -15,11 +14,12 @@ function [result,descriptor] = RM_histogram(x,descriptor)
 %     NCELL   : The number of cells of the histogram
 %
 %   See also: http://www.cs.rug.nl/~rudy/matlab/
-
+%
 %   R. Moddemeijer 
 %   Copyright (c) by R. Moddemeijer
 %   $Revision: 1.2 $  $Date: 2001/02/05 09:54:29 $
 
+function [result,descriptor] = RM_histogram(x,descriptor)
 
 if nargin < 1
    disp('Usage: RESULT = HISTOGRAM(X)')

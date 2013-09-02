@@ -3,19 +3,19 @@ function SQL_create_db()
 	% Romesh Abeysuriya, March 2013
 	% Tweaked a little by Ben Fulcher, May--June, 2013
     
-	fprintf(1,'Let''s set up a new database\nFirst we need to know a username and password that has CREATE DATABASE and GRANT privileges\n');
-	fprintf(1,'This is probably going to be the root account\n');
+	fprintf(1,'Let''s set up a new database\nWe first require a username and password that has CREATE DATABASE and GRANT privileges\n');
+	fprintf(1,'(This is probably going to be the root account)\n');
 	hostname = input('Hostname of mySQL server (e.g., ''localhost''): ','s');
-	admin_user = input('Username: ','s');
-	admin_password = input('Password (WARNING: this will appear on screen!): ','s');
+	admin_user = input('Administrator username: ','s');
+	admin_password = input('Administrator password (WARNING: this will appear on screen!): ','s');
 	try
-	    dbc = mysql_dbopen(hostname,'',admin_user,admin_password);
-	    if isempty(dbc)
-	        error('Please check your credentials and that the mySQL server is accessible');
+	    [dbc, emsg] = mysql_dbopen(hostname,'',admin_user,admin_password);
+	    if ~isempty(emsg)
+	        error('Please check your username/password and that the mySQL server is accessible');
 	    end
 	catch
-        error(['Could not activate the SQL java connector. This must be added to Matlab''s classpath.txt. ' ...
-                    'Please check the documentation.']);
+        error(['Could not activate the mySQL java connector. This must be added to Matlab''s ''javext'' directory and ' ...
+                    ' the location added to Matlab''s ''classpath.txt'' file.\nCheck the documentation for details.']);
 	end
 
 	fprintf(1,'Connection established. Creating a mySQL database for performing highly comparative time-series analysis\n');

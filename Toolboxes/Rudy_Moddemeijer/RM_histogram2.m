@@ -1,5 +1,4 @@
-function [result,descriptor]=RY_histogram2(x,y,descriptor)
-%HISTOGRAM2 Computes the two dimensional frequency histogram of two
+% RM_histogram2 Computes the two dimensional frequency histogram of two
 %           row vectors x and y.
 %   [RESULT,DESCRIPTOR] = HISTOGRAM2(X,Y) or
 %   [RESULT,DESCRIPTOR] = HISTOGRAM2(X,Y,DESCRIPTOR) or
@@ -17,10 +16,12 @@ function [result,descriptor]=RY_histogram2(x,y,descriptor)
 %     NCELL?     : The number of cells of the ? dimension of the histogram
 %
 %   See also: http://www.cs.rug.nl/~rudy/matlab/
-
+%
 %   R. Moddemeijer 
 %   Copyright (c) by R. Moddemeijer
 %   $Revision: 1.2 $  $Date: 2001/02/05 09:54:29 $
+
+function [result, descriptor] = RY_histogram2(x,y,descriptor)
 
 if nargin <1
    disp('Usage: RESULT = HISTOGRAM2(X,Y)')

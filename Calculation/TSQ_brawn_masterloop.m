@@ -22,7 +22,7 @@ try
 	% structure with components to be called below by pointer operations.
 catch emsg
     if bevocal
-        fprintf(1,' error (%s).\n',BF_thetime(mastertime))
+        fprintf(1,' error.\n') % ,BF_thetime(mastertime)
     end
 	fprintf(fid,'---Error evaluating %s\n',Mcode);
     fprintf(fid,'%s\n',emsg.message)

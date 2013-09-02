@@ -25,7 +25,7 @@ CreateString = arrayfun(@(x)SQL_TableCreateString(TableNames{x}),1:length(TableN
 fprintf(1,'Creating tables in %s\n',dbname);
 nperline = 5;
 for j = 1:length(CreateString)
-    [rs,emsg] = mysql_dbexecute(dbc,CreateString{j});
+    [rs, emsg] = mysql_dbexecute(dbc,CreateString{j});
     if ~isempty(rs)
         if j == length(CreateString)
             fprintf(1,'%s.',TableNames{j})

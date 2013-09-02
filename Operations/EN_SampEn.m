@@ -1,4 +1,4 @@
-% EN_sampen
+% EN_SampEn
 % 
 % Estimates the Sample Entropy of the time series, SampEn(m,r), by referencing
 % code from PhysioNet.

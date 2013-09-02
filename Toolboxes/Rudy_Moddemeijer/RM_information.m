@@ -1,5 +1,4 @@
-function [estimate,nbias,sigma,descriptor] = RM_information(x,y,descriptor,approach,base)
-% INFORMATION  Estimates the mutual information of two stationary signals with
+% RM_information  Estimates the mutual information of two stationary signals with
 %              independent pairs of samples using various approaches.
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y) or
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y,DESCRIPTOR) or
@@ -24,13 +23,15 @@ function [estimate,nbias,sigma,descriptor] = RM_information(x,y,descriptor,appro
 %   BASE         : The base of the logarithm; default e
 %
 %   See also: http://www.cs.rug.nl/~rudy/matlab/
-
+%
 %   R. Moddemeijer 
 %   Copyright (c) by R. Moddemeijer
 %   $Revision: 1.1 $  $Date: 2001/02/05 08:59:36 $
-
-% Some trivial details were modified by Ben Fulcher; see
+%
+% Some minor details were modified by Ben Fulcher; see
 % http://www.cs.rug.nl/~rudy/matlab/source/information.m for original code
+
+function [estimate,nbias,sigma,descriptor] = RM_information(x,y,descriptor,approach,base)
 
 if nargin < 1
    disp('Usage: [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = INFORMATION(X,Y)')
