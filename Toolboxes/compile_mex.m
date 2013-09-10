@@ -5,7 +5,7 @@
 
 tooldir = [pwd,'/'];
 fprintf('Now compiling the toolboxes...\n')
-fprintf('(I hope %s is the ''Toolbox'' directory or we have a problem)\n', tooldir)
+fprintf('(I hope %s is the ''Toolboxes'' directory or we have a problem)\n', tooldir)
 
 % Max Little's fastdfa code
 fprintf(1,'fastdfa...');

@@ -58,7 +58,7 @@ end
 % 2. Check to see if there's an available license for this toolbox:
 [lic_free,~] = license('checkout',thetoolbox); % Attempt to check out a license
 if lic_free == 0
-    error('Could not obtain a license for %s');
+    error('Could not obtain a license for %s',thename);
 end
 
 end 

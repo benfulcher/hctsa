@@ -156,7 +156,6 @@ if doplot
 end
 
 % Contains ln(r) in rows and values are ln(C(r));
-% keyboard
 
 %% remove any Infs in lnCr
 rgood = (isfinite(lnCr));

@@ -17,7 +17,7 @@ function [E1, E2] = cao(s, maxdim, tau, NNR, Nref)
 %   deterministic and random data.
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
- 
+
 error(nargchk(5,5, nargin));
 
 if (ndim(s) > 1) | (~isreal(data(s)))
@@ -29,7 +29,7 @@ e = embed(s, maxdim+2, tau);
 L = dlens(e, 1);
 
 ref = randref(2, L-2, Nref);
-[E, Estar] = cao(data(e), ref, NNR);
+[E, Estar] = cao(data(e), ref, NNR); % calls the mex vesion of cao
 
 c = core(E(2:end)./E(1:end-1));
 E1 = signal(c, s);      % special constructor calling syntax for working routines
@@ -52,3 +52,5 @@ E2 = addhistory(E2, 'E2 : Minimum embedding dimension estimation using Cao''s me
 E2 = addcommandlines(E2, 's = cao(s', maxdim, tau, NNR, Nref); 
 E2 = setlabel(E2, 'Minimum embedding dimension using Cao''s method');
 E2 = setyname(E2, 'E2(d)');
+
+end

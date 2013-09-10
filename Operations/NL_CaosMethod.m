@@ -107,9 +107,9 @@ if nargin < 6
     justanum = [];
 end
 
-%% Run
+%% Run:
 try
-    [caoo1 caoo2] = cao(s,maxdim,tau,NNR,Nref);
+    [caoo1, caoo2] = cao(s,maxdim,tau,NNR,Nref);
 catch err
     % time series is too short for these embedding parameters; set all outputs to NaNs...
 	if strcmp(err.message,'time series to short for chosen embedding parameters')

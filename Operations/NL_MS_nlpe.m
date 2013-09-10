@@ -87,7 +87,7 @@ end
 
 % Do false nearest neighbours to compute an appropriate embedding dimension, if needed
 if strcmp(de,'fnn')
-    de = NL_MS_fnn(y,1:10,tau,5,1,1,0.05,maxN);
+    de = NL_MS_fnn(y,1:10,tau,5,1,1,0.05);
 end
 
 % normalize??
