@@ -5,7 +5,7 @@
 
 tooldir = [pwd,'/'];
 fprintf('Now compiling the toolboxes...\n')
-fprintf('(I hope %s is the Toolbox directory or we have a problem)\n', tooldir)
+fprintf('(I hope %s is the ''Toolbox'' directory or we have a problem)\n', tooldir)
 
 % Max Little's fastdfa code
 fprintf(1,'fastdfa...');
@@ -17,33 +17,35 @@ catch
 	error('\nAn error occurred while compiling. Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile.m');
 end
 
-% MICHAEL SMALL
-fprintf(1,'Michael Small''s code...');
-cd([tooldir,'Michael_Small'])
-mex MS_complexitybs.c % compile Michael Small's complexitybs C code
-mex MS_nearest.c % compile Michael Small's nearest C code
-mex MS_shannon.c % compile Michael Small's shannon C code
-fprintf(1,' done.\n');
-
-% Gaussian Process code, gpml
-fprintf(1,'Gaussian Process Toolbox, Carl Edward Rasmussen & Hannes Nickisch...');
-cd([tooldir,'gpml/util'])
-make
-fprintf(1,' done.\n');
-
 % Max Little's Steps Bumps Toolkit
-fprintf(1,'Steps and bumps toolkit, Max Little...');
+fprintf(1,'Max Little''s ''Steps and bumps'' toolkit...');
 cd([tooldir,'Max_Little/steps_bumps_toolkit'])
 mex ML_kvsteps_core.cpp
 fprintf(1,' done.\n');
 
-% TSTOOL
+% Michael Small's code
+fprintf(1,'Michael Small''s code...');
+cd([tooldir,'Michael_Small'])
+mex MS_complexitybs.c % compile Michael Small's complexitybs C code
+mex MS_nearest.c      % compile Michael Small's nearest C code
+mex MS_shannon.c      % compile Michael Small's shannon C code
+fprintf(1,' done.\n');
+
+% Gaussian Process code, gpml
+fprintf(1,'Gaussian Process Toolbox, Carl Edward Rasmussen and Hannes Nickisch...');
+cd([tooldir,'gpml/util'])
+make
+fprintf(1,' done.\n');
+
+% TSTOOL routines (such a mess)
 fprintf(1,'TSTOOL...');
 cd([tooldir,'OpenTSTOOL/mex-dev'])
 makemex
 fprintf(1,' done.\n');
 
-    
+% Return to base directory
+cd(tooldir);
+
 %     fprintf('------\nNow installing the CRPTool\n');
 %     fprintf('At the prompts\n-Remove existing toolbox\n-Create folder if asked\n-DO NOT add to the path\n-DO NOT delete the installation file\n-----\n');
 % 

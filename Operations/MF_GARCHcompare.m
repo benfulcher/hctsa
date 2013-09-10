@@ -85,7 +85,7 @@ switch preproc
         % No spectral methods allowed...
         [ypp, best] = PP_PreProcess(y,'ar',2,0.05,0);
         eval(sprintf('y = ypp.%s;',best));
-        fprintf(1,'Proprocessed the time series according to AR(2) criterion using %s\n',best);
+        fprintf(1,'Preprocessed the time series according to AR(2) criterion using %s\n',best);
         
     otherwise
         error('Unknwon preprocessing setting ''%s''',preproc);

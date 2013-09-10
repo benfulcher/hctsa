@@ -46,7 +46,7 @@ if nargin < 2 || isempty(maxlag)
     maxlag = 50; % compare across the first maxlag autocorrelations
 end
 
-% First maxlag autocorrelations
+% Calculate autocorrelations across lags 1:maxlag using TSTOOL
 co_fft = data(acf(signal(y),maxlag*2));
 
 nlags = length(co_fft);

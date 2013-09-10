@@ -56,9 +56,11 @@ if ischar(l)
     case 'ac2'
         taug = CO_FirstZero(y,'ac'); % tau (global)
         l = 2*taug;
+        
     case 'ac5'
         taug = CO_FirstZero(y,'ac'); % tau (global)
         l = 5*taug;
+        
     otherwise
         error('Unknown specifier ''%s''',l);
     end

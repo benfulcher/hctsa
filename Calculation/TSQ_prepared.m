@@ -20,10 +20,10 @@ function TSQ_prepared(ts_ids_keep, m_ids_keep, getwhat, dbname, brawninputs, doi
 % 			 big connection (strain on java heap space for large retrievals)
 
 %% OUTPUTS (to file):
-% () TS_loc.mat, which contains the matrix TS_loc: the portion of the storage file that
-% () TS_loc_guides.mat, which contains information about the time series in TS_loc:
-
-
+% (*) TS_loc.mat, which contains the data
+% (*) TS_loc_ct.mat, which contains the calculation times
+% (*) TS_loc_q.mat, which contains the quality codes
+% (*) TS_loc_guides.mat, which contains information about the time series in TS_loc
 
 %%% FOREPLAY
 %% Check inputs -- set defaults
@@ -67,33 +67,39 @@ m_ids_keep_string = BF_cat(m_ids_keep,',');
 nts = length(ts_ids_keep);
 nops = length(m_ids_keep);
 
-if nts == 0
+if (nts == 0)
 	error('Oops. There''s nothing to do! No time series to retrieve!\n');
-elseif nops == 0
+elseif (nops == 0)
 	error('Oops. There''s nothing to do! No operations to retrieve!\n');
 end
 
 % Open database connection
 [dbc, dbname] = SQL_opendatabase(dbname);
 
-% First check the time series and operations
+% First refine the set of time series and operations to those that actually exist in the database
 mids_db = mysql_dbquery(dbc,sprintf('SELECT m_id FROM Operations WHERE m_id IN (%s)',m_ids_keep_string));
 mids_db = vertcat(mids_db{:});
 tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string));
 tsids_db = vertcat(tsids_db{:});
 if length(tsids_db) < nts % actually there are fewer time series in the database
-    fprintf(1,'%u specified time series do not exist in %s, retrieving the remaining %u\n',nts-length(tsids_db),dbname,length(tsids_db))
-    ts_ids_keep = tsids_db; ts_ids_keep_string = BF_cat(ts_ids_keep,',');
+    if (length(tsids_db) == 0) % now there are no time series to retrieve
+        error('None of the %u specified time series exist in ''%s''',nts-length(tsids_db),dbname)
+    end
+    fprintf(1,['%u specified time series do not exist in ''%s'', retrieving' ...
+                    ' the remaining %u\n'],nts-length(tsids_db),dbname,length(tsids_db))
+    ts_ids_keep = tsids_db;
+    ts_ids_keep_string = BF_cat(ts_ids_keep,',');
+    nts = length(ts_ids_keep);
 end
 if length(mids_db) < nops % actually there are fewer operations in the database
-    fprintf(1,'%u specified operations do not exist in %s, retrieving the remaining %u\n',nops-length(mids_db),dbname,length(mids_db))
-    m_ids_keep = mids_db; m_ids_keep_string = BF_cat(m_ids_keep,',');
-end
-
-if nts == 0
-	error('No time series to retrieve!\n');
-elseif nops == 0
-	error('No operations to retrieve!\n');
+    if (length(mids_db) == 0) % now there are no operations to retrieve
+        error('None of the %u specified operations exist in ''%s''',nops-length(mids_db),dbname)
+    end
+    fprintf(1,['%u specified operations do not exist in ''%s'', retrieving' ...
+                    ' the remaining %u\n'],nops-length(mids_db),dbname,length(mids_db))
+    m_ids_keep = mids_db;
+    m_ids_keep_string = BF_cat(m_ids_keep,',');
+    nops = length(m_ids_keep);
 end
 
 % Tell me about it
@@ -112,10 +118,10 @@ bundlesize = min(nts,5); % retrieve information about this many time series per 
 
 % Provide user information to screen
 switch getwhat
-case 'null'
-    fprintf(1,'Retrieving NULL elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
 case 'all' 
     fprintf(1,'Retrieving all elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
+case 'null'
+    fprintf(1,'Retrieving NULL elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
 case 'error'
     fprintf(1,'Retrieving error elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
 end
@@ -124,7 +130,8 @@ end
 bundles = (1:bundlesize:length(ts_ids_keep));
 nits = length(bundles); % number of iterations of the loop
 times = zeros(nits,1); % record time for each iteration
-% First select the data
+
+% First select the data:
 for i = 1:nits
     ittic = tic; % start timing the iteration
 
@@ -133,14 +140,15 @@ for i = 1:nits
     basestring = sprintf(['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ' ...
                     	'ts_id IN (%s) AND m_id IN (%s)'],BF_cat(ts_ids_now,','),m_ids_keep_string);
     switch getwhat
+    case 'all'
+        SelectString = basestring;
     case 'null'
     	SelectString = [basestring, ' AND QualityCode IS NULL'];
     case 'error'
     	SelectString = [basestring, ' AND QualityCode = 1'];
-    case 'all'
-        SelectString = basestring;
     end
-	[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString); % retrieve the bundlesize from the database
+    
+	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % retrieve the bundlesize from the database
     
     % Check results look ok:
     if ~isempty(emsg)
@@ -148,7 +156,8 @@ for i = 1:nits
         fprintf(1,'%s\n',emsg)
         keyboard
     end
-    if size(qrc) == 0
+    
+    if (size(qrc) == 0)
         fprintf(1,'No data to retrieve for ts_id = (%s)\n',BF_cat(ts_ids_now,','));
     end
     
@@ -161,9 +170,9 @@ for i = 1:nits
         TS_loc_ct(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
         TS_loc_q(ii,:) = reshape(vertcat(qrc{:,5}),length(ii),nops);
     else
-        % we need to match retrieved indicies with local indicies
-        ix = arrayfun(@(x)find(ts_ids_now==x,1),vertcat(qrc{:,1}));
-        iy = arrayfun(@(x)find(m_ids_keep==x,1),vertcat(qrc{:,2}));
+        % We need to match retrieved indicies to the local indicies
+        ix = arrayfun(@(x)find(ts_ids_now == x,1),vertcat(qrc{:,1}));
+        iy = arrayfun(@(x)find(m_ids_keep == x,1),vertcat(qrc{:,2}));
         for k = 1:length(ix) % fill it one entry at a time
             TS_loc(ix(k),iy(k)) = qrc{k,3};
             TS_loc_ct(ix(k),iy(k)) = qrc{k,4};
@@ -190,9 +199,9 @@ if ismember(getwhat,{'null','error'})
     	fprintf(1,'Filtering so that local files contain rows/columns containing at least one error entry\n');
     end
     
-	% Time Series
+	% Time series
     keepi = (sum(keepme,2) > 0); % there is at least one entry to calculate in this row
-    if sum(keepi)==0
+    if sum(keepi) == 0
     	fprintf(1,'After filtering, there are no time series remaining! Exiting...\n'); return
 	elseif sum(keepi) < nts
 		fprintf(1,'Cutting down from %u to %u time series\n',nts,sum(keepi));

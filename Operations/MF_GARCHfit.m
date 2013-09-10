@@ -93,10 +93,10 @@ y0 = y; % the original, unprocessed time series
 
 switch preproc
     case 'nothing'
-        % do nothing.
+        % Do nothing.
         
     case 'ar'
-        % apply a number of standard preprocessings and return them in the
+        % Apply a number of standard preprocessings and return them in the
         % structure ypp. Also chooses the best preprocessing based on the worst fit
         % of an AR2 model to the processed time series.
         % has to beat doing nothing by 5% (error)
@@ -104,7 +104,7 @@ switch preproc
         [ypp, best] = PP_PreProcess(y,'ar',2,0.05,0);
         eval(sprintf('y = ypp.%s;',best));
         if bevocal
-            fprintf(1,'Proprocessed according to AR(2) criterion using %s\n',best);
+            fprintf(1,'Preprocessed according to AR(2) criterion using %s\n',best);
         end
 end
 

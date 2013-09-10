@@ -1,4 +1,4 @@
-%tstoolbox/mex/predict
+%tstoolbox/mex/TSTOOLpredict
 % BF -- chenced to TSTOOLpredict because a Matlab built-in is now predict
 %   State space based prediction using nearest neighbors. The algorithms
 %   computes one or more nearest neighbors to an initial state vector. The

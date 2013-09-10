@@ -17,9 +17,21 @@ function SQL_create_db()
         error(['Could not activate the mySQL java connector. This must be added to Matlab''s ''javext'' directory and ' ...
                     ' the location added to Matlab''s ''classpath.txt'' file.\nCheck the documentation for details.']);
 	end
-
-	fprintf(1,'Connection established. Creating a mySQL database for performing highly comparative time-series analysis\n');
-    fprintf(1,'Now you need to choose a name for the database. Do not include special characters.\n')
+    fprintf(1,'Connection to %s established\n',hostname);
+    
+    
+    % Check it really is an account with create and grant privileges:
+    % Kind of a simple one that assumes that you need "GRANT ALL PRIVILEGES"
+    % Perhaps not fool-proof, so leave as a warning for now
+	[a,~,~,emsg] = mysql_dbquery(dbc,'SHOW GRANTS');
+    if iscell(a), a = a{1}; end % take first entry
+    if ~strncmp(a,'GRANT ALL PRIVILEGES',20); % check first entry starts with "GRANT ALL PRIVILEGES"
+        warning(1,'It doesn''t look like %s has administrative privileges on %s\n', admin_user, hostname);
+    end
+    
+    % Set up a new non-admin user account for the database
+	fprintf(1,'Now creating a mySQL database for highly comparative time-series analysis\n');
+    fprintf(1,'Please choose a name for the database (do not include special characters).\n')
     fprintf(1,'NB: be careful, this command will replace the named database if it exists on %s.\n',hostname)
 	dbname = input('Enter a name for the new database [default: hctsa]','s');
     if isempty(dbname), dbname = 'hctsa'; end

@@ -117,7 +117,7 @@ for i = 1:nts
 
         %% Pre-Processing
 		% y is a z-scored transformation of the time series
-		y = (x-mean(x))/std(x); % z-scoring without using a Statistics Toolbox license (i.e., the zscore function)
+		y = BF_zscore(x); % z-score without using a Statistics Toolbox license (i.e., the 'zscore' function)
 
 		% So we now have the raw time series x and the z-scored time series y. Operations take these as inputs.
         % index sliced variables to minimize the communication overhead in the parallel processing

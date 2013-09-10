@@ -85,7 +85,7 @@ case 'ts' % Read the time series input file:
 	datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1); % 'HeaderLines',1,
 case 'ops' % Read the operations input file:
     if bevocal
-        fprintf(1,'Need to format %s (Operations input file) as: OperationName OperationCode OperationKeywords\n',INPfile)
+        fprintf(1,'Need to format %s (Operations input file) as: OperationCode OperationName OperationKeywords\n',INPfile)
         fprintf(1,'Assuming no header lines\n')
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
@@ -140,7 +140,8 @@ if bevocal
         end
     end
     fprintf(1,'How does it look? Make sure the time series and everything match up to their headings\n')
-    reply = input('If we go on, we will attempt to read all timeseries from file and add all data to the database. Continue...? [y]','s');
+    reply = input(['If we go on, we will attempt to read all timeseries from file and add all ' ...
+                    'data to the database. Type ''y'' to continue...'],'s');
     if ~strcmp(reply,'y')
         fprintf(1,'I didn''t think so. Come back later...\n')
         return
@@ -152,7 +153,7 @@ esc = @RA_sqlescapestring; % inline function to add escape strings to format myS
 % Construct a more intuitive structure array for the time series / operations / master operations
 % Fill a cell, toadd, containing mySQL INSERT commands for each item in the input file:
 if bevocal
-    fprintf(1,'Preparing mySQL INSERT statements to add %u %s to the database %s\n',nits,thewhat,dbname);
+    fprintf(1,'Preparing mySQL INSERT statements to add %u %s to the database %s...',nits,thewhat,dbname);
 end
 toadd = cell(nits,1);
 resave = 0; % need user permission to save over existing time series
@@ -194,14 +195,14 @@ case 'ts' % Prepare toadd cell for time series
             % end
             
             if any(isnan(x)) || any(~isfinite(x))
-                fprintf(1,['Did you know that the time series %s contains special values' ...
+                fprintf(1,['\nDid you know that the time series %s contains special values' ...
                             ' (e.g., NaN or Inf)...?\n'],which(timeseries(j).Filename))
                 fprintf(1,'I''m not quite sure what to do with this... Please reformat.\n')
                 return
             end
             
             if length(x) > maxL % this time series is too long -- exit
-                fprintf(['%s contains %u samples, this framework can efficiently ' ...
+                fprintf(['\n%s contains %u samples, this framework can efficiently ' ...
                                 'deal with time series up to %u samples\n'],timeseries(j).Filename,timeseries(j).Length,maxL)
                 fprintf(1,'Safest not to do anything now -- perhaps you can remove this time series from the input file?'); return
             end
@@ -218,7 +219,7 @@ case 'ts' % Prepare toadd cell for time series
 
         catch emsg
             fprintf(1,'%s\n',emsg.message)
-            error(['Could not read the data file for ''%s''.' ...
+            error(['\nCould not read the data file for ''%s''.' ...
                                     'Check that it''s in Matlab''s path.'],timeseries(j).Filename)
         end
         toadd{j} = sprintf('(''%s'',''%s'',%u,''%s'')',esc(timeseries(j).Filename),esc(timeseries(j).Keywords),timeseries(j).Length,timeseries(j).Data);
@@ -253,10 +254,10 @@ case 'ops' % Prepare toadd cell for operations
             operation(j).MasterLabel = strtok(operation(j).Code,'.');
             toadd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).MasterLabel),esc(operation(j).Keywords));
         end
-        
     end
+    
 end
-if bevocal, fprintf(1,'\ndone.\n'); end
+if bevocal, fprintf(1,' done.\n'); end
 
 
 % Check for duplicates

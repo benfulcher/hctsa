@@ -1,4 +1,4 @@
-function rs = predict(s, len, nnr, step, mode)
+function rs = TSTOOLpredict(s, len, nnr, step, mode)
      
 %tstoolbox/@signal/predict
 %   Syntax:

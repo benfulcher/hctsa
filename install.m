@@ -41,8 +41,9 @@ fprintf(1,'Please make sure that mex is set up with the right compilers for this
 fprintf(1,'Note that errors here are not the end of the world, but mean that some operations may fail to execute correctly...\n')
 cd Toolboxes
 compile_mex
-cd ../
-fprintf(1,'Oh my goodness, everything compiled fine. The database, %s, is ready for time series to be added using SQL_add...!\n',dbname)
+cd('../');
+fprintf(1,'Kind of amazing, but it seems like everything compiled ok!\n')
+fprintf(1,'Ready to add time series to the database using SQL_add...!\n');
 
 % Attempt to add a time series
 % SQL_add('ts','INP_test_ts.txt')
