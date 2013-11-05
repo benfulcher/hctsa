@@ -20,28 +20,56 @@ end
 % Max Little's Steps Bumps Toolkit
 fprintf(1,'Max Little''s ''Steps and bumps'' toolkit...');
 cd([tooldir,'Max_Little/steps_bumps_toolkit'])
-mex ML_kvsteps_core.cpp
-fprintf(1,' done.\n');
+anyerrors = 0;
+try
+    mex ML_kvsteps_core.cpp
+catch
+    fprintf(1,'ERROR: Max Little''s ''Steps and bumps'' toolkit failed to compile correctly\n');
+end
+if ~anyerrors, fprintf(1,' done.\n'); end
 
 % Michael Small's code
 fprintf(1,'Michael Small''s code...');
 cd([tooldir,'Michael_Small'])
-mex MS_complexitybs.c % compile Michael Small's complexitybs C code
-mex MS_nearest.c      % compile Michael Small's nearest C code
-mex MS_shannon.c      % compile Michael Small's shannon C code
-fprintf(1,' done.\n');
+anyerrors = 0;
+try
+    mex MS_complexitybs.c % compile Michael Small's complexitybs C code
+catch
+    fprintf(1,'ERROR: Michael Small''s ''complexitybs'' C code failed to compile correctly\n');
+end
+try
+    mex MS_nearest.c      % compile Michael Small's nearest C code
+catch
+    fprintf(1,'ERROR: Michael Small''s ''nearest'' C code failed to compile correctly\n');
+end
+try
+    mex MS_shannon.c      % compile Michael Small's shannon C code
+catch
+    fprintf(1,'ERROR: Michael Small''s ''shannon'' C code failed to compile correctly\n');
+end
+if ~anyerrors, fprintf(1,' done.\n'); end
 
 % Gaussian Process code, gpml
 fprintf(1,'Gaussian Process Toolbox, Carl Edward Rasmussen and Hannes Nickisch...');
 cd([tooldir,'gpml/util'])
-make
-fprintf(1,' done.\n');
+anyerrors = 0;
+try
+    make
+catch
+    fprintf(1,'ERROR: Gaussian Process Toolbox failed to compile correctly\n');
+end
+if ~anyerrors, fprintf(1,' done.\n'); end
 
 % TSTOOL routines (such a mess)
 fprintf(1,'TSTOOL...');
 cd([tooldir,'OpenTSTOOL/mex-dev'])
-makemex
-fprintf(1,' done.\n');
+anyerrors = 0;
+try
+    makemex
+catch
+    fprintf(1,'ERROR: TSTOOL failed to compile correctly (not a huge surprise)\n');
+end
+if ~anyerrors, fprintf(1,' done.\n'); end
 
 % Return to base directory
 cd(tooldir);
