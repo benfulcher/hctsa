@@ -10,7 +10,10 @@ if isempty(theconfigfile)
 else
     fid = fopen(theconfigfile);
 end
-d = regexp(fscanf(fid,'%s'), ',', 'split');
+s = textscan(fid,'%s%s%s%s','Delimiter',',','CommentStyle','%','CollectOutput',1); % 'HeaderLines',1,
+d = s{1};
+% d = regexp(s,',','split');
+% d = regexp(fscanf(fid,'%s'), ',', 'split');
 hostname = d{1};
 default_dbname = d{2};
 username = d{3};
@@ -26,6 +29,8 @@ end
 
 if bevocal
 	fprintf(1,'Using database %s\n',dbname)
+    fprintf(1,['Connecting to host ''%s'', database ''%s'', using username' ...
+            ' ''%s'' and password ''%s''\n'],hostname,dbname,username,password)
 end
 
 %% Open database as dbc

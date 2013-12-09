@@ -42,6 +42,6 @@ for i = 1:length(tsidr)-1 % loop over blocks of time series (tsidr)
 	% to calculate it, then runs TSQ_agglomerate to write results back to database
 
 	TSQ_prepared(tsids,mids,writewhat); % Collect the null entries in the database
-    TSQ_brawn; % computes the operations and time series retrieved
+    TSQ_brawn(dolog,parallelize); % computes the operations and time series retrieved
     TSQ_agglomerate(writewhat,dolog); % stores the results back to the database
 end

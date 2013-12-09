@@ -74,4 +74,4 @@ fprintf(1,', TSTOOL')
 addfcn('Toolboxes/OpenTSTOOL');
 settspath('Toolboxes/OpenTSTOOL'); % this routine adds the necessary paths for OpenTSTOOL
 
-fprintf(1,'. Done.\n')
+fprintf(1,'.\nDone.\n')

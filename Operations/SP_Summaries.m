@@ -186,7 +186,7 @@ out.centroid = w(find(csS > csS(end)/2,1,'first')); % where area under curve is 
 
 % Shape of cumulative sum curve
 % 1) Quantiles
-% where is csS at fraction p of its maximum?
+% At what frequency is csS a fraction p of its maximum?
 out.q1 = w(find(csS > 0.01*csS(end),1,'first'));
 out.q1mel = w2mel(out.q1);
 out.q5 = w(find(csS > 0.05*csS(end),1,'first'));

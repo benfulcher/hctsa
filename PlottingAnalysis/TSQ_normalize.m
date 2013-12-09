@@ -46,7 +46,7 @@ if iscell(trimopt) % still using the cell input of previous TSQ_normalize
     trimopt = trimopt{1};
 end
 fprintf(1,['Removing time series with more than %.2f%% special-valued outputs, ' ...
-            'and operations with more than %.2f%%-special-valued outputs\n'],trimopt(1)*100,trimopt(2)*100);
+            'and operations with more than %.2f%% special-valued outputs\n'],(1-trimopt(1))*100,(1-trimopt(2))*100);
 
 if nargin < 3
     subs = {}; % don't subset
@@ -181,7 +181,7 @@ if size(F,1) > 1 % otherwise just a single time series remains and all will be c
 
     if ~isempty(kc2)
         if length(kc2) < size(F,2)
-            fprintf(1,'Filtered down operations with near-constant outputs: from %u to %u',...
+            fprintf(1,'Filtered down operations with near-constant outputs: from %u to %u.\n',...
                              size(F,2),length(kc2))
             F = F(:,kc2); % ********************* KC2 **********************
             TS_loc_q = TS_loc_q(:,kc2);
@@ -354,8 +354,8 @@ end
 % check again for constant columns after normalization
 kc = find(range(F) ~= 0); % (NaN or positive)
 if ~isempty(kc) && length(kc) < size(F,2)
-    fprintf(1,'Post-normalization filtering of operations with constant outputs: from %u to %u', ...
-                        size(F,2),length(kc))
+    fprintf(1,'Post-normalization filtering of %u operations with constant outputs: from %u to %u\n', ...
+                        size(F,2)-length(kc),size(F,2),length(kc))
     m_ids_keepn = m_ids_keepn(kc);
     mcoden = mcoden(kc);
     mlabn = mlabn(kc);

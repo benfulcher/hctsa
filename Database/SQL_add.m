@@ -130,7 +130,7 @@ if bevocal
         end
     end
     if nits > 3
-        fprintf(1,'..................(%u).....................\n',nits-3)
+        fprintf(1,'..................(%u).....................\n',max(nits-6,0))
         for i = max(nits-2,4):nits
             switch importwhat
             case 'ts', fprint_ts(i);
@@ -228,9 +228,9 @@ case 'ts' % Prepare toadd cell for time series
             nsubplots = min(nits,5);
             subplot(nsubplots,1,mod(j-1,nsubplots)+1);
             plot(x,'-k'); xlim([1,length(x)]);
-            titletext = sprintf('\n[%u/%u] %s (%u), keywords = %s --- read',j,nits,timeseries(j).Filename,timeseries(j).Length,timeseries(j).Keywords);
+            titletext = sprintf('\n[%u/%u] %s (%u), keywords = %s',j,nits,timeseries(j).Filename,timeseries(j).Length,timeseries(j).Keywords);
             title(titletext,'interpreter','none');
-            fprintf(1,titletext)
+            fprintf(1,[titletext,' --- loaded successfully.'])
             pause(0.2); % wait 0.2 seconds
         end
     end
@@ -313,10 +313,10 @@ if ~strcmp(importwhat,'mops')
     switch importwhat
     case 'ts'
         [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
-                                ' CROSS JOIN Operations o ON t.ts_id > %u'],maxid));
+                                ' CROSS JOIN Operations o ON t.ts_id > %u ORDER BY t.ts_id, o.m_id'],maxid));
     case 'ops'
         [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
-                                ' CROSS JOIN Operations o ON o.m_id > %u'],maxid));
+                                ' CROSS JOIN Operations o ON o.m_id > %u ORDER BY t.ts_id, o.m_id'],maxid));
     end
     if ~isempty(emsg),
         fprintf(1,' error. This is really not good.\n');

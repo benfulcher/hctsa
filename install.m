@@ -12,8 +12,7 @@ try
 	startup
 	fprintf('done.\n')
 catch emsg
-	fprintf(1,'error.\n')
-    fprintf(1,'%s\n',emsg)
+	fprintf(1,'error.\n%s\n',emsg)
 end
 
 % 2. Set up the database:
