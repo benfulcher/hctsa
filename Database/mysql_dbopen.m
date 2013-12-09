@@ -16,7 +16,7 @@ try
 catch le
     errmsg = le.message;
     dbconnection = [];
-    error('Error with java database connector');
+    error('Error with java database connector: %s',errmsg);
     % actually return an error
 end
 
