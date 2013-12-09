@@ -9,10 +9,12 @@ case 'Operations'
         'OpName VARCHAR(255), ' ... % Unique name for the operation
         'Code VARCHAR(255), ' ... % Code to execute, or Master to retrieve from
         'Keywords VARCHAR(255), ' ... % Comma separated keyword metadata ...
-        'MasterLabel VARCHAR(255), ' ... % Label of master code
+        'MasterLabel VARCHAR(255), ' ... % Label of master code ...
+        'mop_id INTEGER, ' ... % m_op id
         'Stochastic TINYINT(1), ' ... % Boolean identifier: is it a stochastic algorithm?
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ... % Last modified
-        'PRIMARY KEY (m_id))']; % sets primary key as m_id
+        'PRIMARY KEY (m_id), ' ...  % sets primary key as m_id
+        'FOREIGN KEY (mop_id) REFERENCES MasterOperations(mop_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
         % 'Pointer TINYINT(1), ' ... % perhaps redundant given MasterLabel
 
 case 'OperationCode'

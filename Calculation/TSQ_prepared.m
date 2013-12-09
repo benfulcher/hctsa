@@ -259,8 +259,9 @@ else
 end
 
 % (ii) Get master link information
-SelectString = ['SELECT mop_id FROM (SELECT m_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')) AS T1 ' ...
-					'LEFT JOIN MasterPointerRelate ON T1.m_id = MasterPointerRelate.m_id'];
+SelectString = ['SELECT mop_id FROM FROM Operations WHERE m_id IN (' m_ids_keep_string ')'];
+% SelectString = ['SELECT mop_id FROM (SELECT m_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')) AS T1 ' ...
+%                     'LEFT JOIN MasterPointerRelate ON T1.m_id = MasterPointerRelate.m_id'];
 [masterlink,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 empties = find(cellfun(@isempty,masterlink));
 if ~isempty(empties), masterlink(empties) = {0}; end

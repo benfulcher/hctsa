@@ -5,10 +5,9 @@ function SQL_create_all_tables()
 % Ben Fulcher, now uses SQL_TableCreateString, May 2013
 
 % Specify the names of tables to create (should be valid names in SQL_TableCreateString)
-TableNames = {'Operations', ...     % Operations Table
+TableNames = {'MasterOperations', ...     % MasterOperations Table
         'OperationCode', ...        % OperationCode Table
-        'MasterOperations', ...     % MasterOperations Table
-        'MasterPointerRelate', ...  % MasterPointerRelate Table
+        'Operations', ...     % Operations Table
         'TimeSeries', ...           % TimeSeries Table
         'OperationKeywords', ...    % OperationKeywords Table
         'OpKeywordsRelate', ...     % OpKeywordsRelate Table
@@ -16,13 +15,15 @@ TableNames = {'Operations', ...     % Operations Table
         'TsKeywordsRelate', ...     % TsKeywordsRelate Table
         'Results'};                 % Results Table
 
+        % NOW DEFUNCT:
+        % 'MasterPointerRelate', ...  % MasterPointerRelate Table
+        
 % Convert Table names to mySQL CREATE TABLE statements:
 CreateString = arrayfun(@(x)SQL_TableCreateString(TableNames{x}),1:length(TableNames),'UniformOutput',0);
-
 %% Write all of this to the database:
 [dbc, dbname] = SQL_opendatabase; % opens dbc, the default database (named dbname)
 
-fprintf(1,'Creating tables in %s\n',dbname);
+fprintf(1,'Creating tables in %s:\n',dbname);
 nperline = 5;
 for j = 1:length(CreateString)
     [rs, emsg] = mysql_dbexecute(dbc,CreateString{j});
