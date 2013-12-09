@@ -241,7 +241,7 @@ mkw = minfo(:,3); % operation keywords
 % Now get master info
 % (i) Which masters are implicated?
 SelectString = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WHERE mop_id IN ' ...
-				'(SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' m_ids_keep_string '))'];
+				'(SELECT DISTINCT mop_id FROM Operations WHERE m_id IN (' m_ids_keep_string '))'];
 [masterinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
     fprintf(1,'Error retrieving Master information...\n'); keyboard
@@ -259,7 +259,7 @@ else
 end
 
 % (ii) Get master link information
-SelectString = ['SELECT mop_id FROM FROM Operations WHERE m_id IN (' m_ids_keep_string ')'];
+SelectString = ['SELECT DISTINCT mop_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')'];
 % SelectString = ['SELECT mop_id FROM (SELECT m_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')) AS T1 ' ...
 %                     'LEFT JOIN MasterPointerRelate ON T1.m_id = MasterPointerRelate.m_id'];
 [masterlink,~,~,emsg] = mysql_dbquery(dbc,SelectString);
