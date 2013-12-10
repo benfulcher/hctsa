@@ -32,7 +32,7 @@ if nargin < 2;
 end
 if nargin < 3
 	getwhat = 'all'; % retrieve full sets of things, not just the empty entries in the database
-    fprintf(1,'Retrieving all elements in the range, by default\n')
+    fprintf(1,'Retrieving ALL elements from the database in the specified ranges by default.\n')
 end
 getwhatcanbe = {'null','all','error'};
 if ~ischar(getwhat) || ~ismember(getwhat,getwhatcanbe)
@@ -104,7 +104,7 @@ end
 
 % Tell me about it
 fprintf(1,'We have %u time series and %u operations to retrieve from %s.\n',nts,nops,dbname);
-fprintf(1,'Filling and saving to local Matlab file HCTSA_loc.mat from Results table in %s.\n',dbname);
+fprintf(1,'Filling and saving to local Matlab file HCTSA_loc.mat from the Results table of %s.\n',dbname);
 
 %% Intialize matrices
 
@@ -256,12 +256,13 @@ end
 SQL_closedatabase(dbc)
 
 % Save to HCTSA_loc.mat
-fprintf(1,'Saving local versions of the data...:\n');
+fprintf(1,'Saving local versions of the data...');
 save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries','Operations','MasterOperations','-v7.3');
+fprintf(1,' Done.\n');
 
 % Display how many entries need to be calculated
 tocalculate = sum(isnan(TS_Quality(:)) | TS_Quality(:)==1);
-fprintf(1,'There are %u entries (=%4.2f%%) to calculate in the retrieved data matrix (%ux%u)\n', ...
+fprintf(1,'There are %u entries (=%4.2f%%) to calculate in the data matrix (%ux%u).\n', ...
                                     tocalculate,tocalculate/nops/nts*100,nts,nops);
 
 end
