@@ -92,8 +92,9 @@ for i = 1:nts
 		qqi = zeros(ncal,1); % Quality of output from each operation
 		cti = ones(ncal,1)*NaN; % Calculation time for each operation
         
-        % Read in the time series from file
-        x = dlmread(TimeSeries(i).FileName);
+        % Collect the time-series data
+        x = TimeSeries(i).Data;
+        % x = dlmread(TimeSeries(i).FileName);
         
 		%% Basic checking on x
 		% univariate and Nx1
@@ -205,39 +206,6 @@ for i = 1:nts
                 end
             end
         end
-        %             for j = 1:ncal
-        % if par_OperationMasterID(j) > 0 % pointer to a master function
-        %     try
-        %         % retrive from master structure:
-        %         if ~isstruct(MasterOutput{par_OperationMasterID(j)}) && isnan(MasterOutput{par_OperationMasterID(j)});
-        %             % All master function outputs are to be set to real NaNs (unsuitable)
-        %             ffi(j) = NaN;
-        %                             cti(j) = MasterCalcTime(par_OperationMasterID(j));
-        %         else % (normal -- retrieve required element from master structure)
-        %                             [~,thest] = strtok(par_OperationMasterLabel{j},'.'); thest = thest(2:end); % remove the '.'
-        %                             ffi(j) = BF_parevalM(MasterOutput{par_OperationMasterID(j)},['themasterdat.' thest]);
-        %             qqi(j) = 0; % good, real-valued output
-        %                             cti(j) = MasterCalcTime(par_OperationMasterID(j));
-        %         end
-        %                     catch emsg
-        %         fprintf(fid,'Error evaluating link to Master structure %s by %s\n',Mmlab{par_OperationMasterID(j)},par_OperationMasterLabel{j});
-        %                         fprintf(fid,'%s\n',emsg.message)
-        %         ffi(j) = 0; qqi(j) = 1; % Fatal error code: 1
-        %     end
-        % else % A regular, single-output operation
-        %                     if bevocal, fprintf(fid,'%s\n',par_OperationMasterLabel{j}); end % for error checking
-        %                     try
-        %         operationtimer = tic;
-        %         ffi(j) = BF_pareval(x,y,par_OperationMasterLabel{j});
-        %         cti(j) = toc(operationtimer);
-        %         qqi(j) = 0;
-        %                     catch
-        %                         fprintf(fid,'Fatal error %s || %s\n',par_TimeSeriesFileName,par_OperationMasterLabel{j});
-        %         ffi(j) = 0; qqi(j) = 1; % fatal error code = 1
-        %                     end
-        % end
-        %             end
-        
         
 		%% Code special values:
 

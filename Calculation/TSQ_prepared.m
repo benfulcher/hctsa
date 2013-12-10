@@ -186,7 +186,7 @@ for i = 1:nits
 		fprintf(1,'Approximately %s remaining...\n',BF_thetime(mean(times(1:i))*(nts-i)));
 	end
 end
-fprintf(1,'Local files filled from %s in %u iterations. Took %s altogether.\n',dbname,nits,BF_thetime(sum(times)));
+fprintf(1,'Local files filled from %s in %u iteration(s). Took %s altogether.\n',dbname,nits,BF_thetime(sum(times)));
 	
 if ismember(getwhat,{'null','error'})    
     % We only want to keep rows and columns with (e.g., NaNs) in them...
@@ -222,14 +222,18 @@ if ismember(getwhat,{'null','error'})
 	end    
 end
 
-%% Fill metadata
+%% Fill Metadata
 
 % 1. Retrieve Time Series Metadata
-SelectString = sprintf('SELECT FileName, Keywords, Length FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string);
+SelectString = sprintf('SELECT FileName, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string);
 [tsinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 % Convert to a structure array, TimeSeries, containing metadata for all time series
 tsinfo = [num2cell(ts_ids_keep),tsinfo];
-TimeSeries = cell2struct(tsinfo',{'ID','FileName','Keywords','Length'});
+% Define inline functions to convert time-series data text to a vector of floats:
+ScanCommas = @(x) textscan(x,'%f','Delimiter',',');
+TakeFirstCell = @(x) x{1};
+tsinfo(:,end) = cellfun(@(x) TakeFirstCell(ScanCommas(x)),tsinfo(:,end),'UniformOutput',0); % Do the conversion
+TimeSeries = cell2struct(tsinfo',{'ID','FileName','Keywords','Length','Data'}); % Convert to structure array
 
 % 2. Retrieve Operation Metadata
 SelectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE m_id IN (%s)',m_ids_keep_string);
@@ -257,7 +261,7 @@ save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries','Opera
 
 % Display how many entries need to be calculated
 tocalculate = sum(isnan(TS_Quality(:)) | TS_Quality(:)==1);
-fprintf(1,'There are %u entries (= %5.2f%%) to calculate in the retrieved data matrix (%ux%u)\n', ...
+fprintf(1,'There are %u entries (=%4.2f%%) to calculate in the retrieved data matrix (%ux%u)\n', ...
                                     tocalculate,tocalculate/nops/nts*100,nts,nops);
 
 end
