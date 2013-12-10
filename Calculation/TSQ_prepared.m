@@ -54,16 +54,16 @@ end
 % Could do one big query and then reform to a matrix, but I'll do it row-by-row
 % In fact this is faster for some reason than doing a big query (method 2)
 
-% make sure ts_ids_keep and m_ids_keep are column vectors
+% Make sure ts_ids_keep and m_ids_keep are column vectors
 if size(ts_ids_keep,2) > size(ts_ids_keep,1), ts_ids_keep = ts_ids_keep'; end
 if size(m_ids_keep,2) > size(m_ids_keep,1), m_ids_keep = m_ids_keep'; end
-% sort ids ascending
+% Sort ids ascending
 ts_ids_keep = sort(ts_ids_keep,'ascend');
 m_ids_keep = sort(m_ids_keep,'ascend');
-% write a comma-delimited string of ids
+% Write a comma-delimited string of ids
 ts_ids_keep_string = BF_cat(ts_ids_keep,',');
 m_ids_keep_string = BF_cat(m_ids_keep,',');
-% count the number of time series and operations
+% Count the number of time series and operations
 nts = length(ts_ids_keep);
 nops = length(m_ids_keep);
 
@@ -125,7 +125,6 @@ case 'null'
 case 'error'
     fprintf(1,'Retrieving error elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
 end
-
 
 bundles = (1:bundlesize:length(ts_ids_keep));
 nits = length(bundles); % number of iterations of the loop
@@ -195,7 +194,7 @@ if ismember(getwhat,{'null','error'})
         keepme = isnan(TS_loc); % NULLs in database
     	fprintf(1,'Filtering so that local files contain rows/columns containing at least one NULL entry\n');
     case 'error'
-        keepme = (TS_loc_q == 1); % error codes in database
+        keepme = (TS_loc_q == 1); % Error codes in database
     	fprintf(1,'Filtering so that local files contain rows/columns containing at least one error entry\n');
     end
     
