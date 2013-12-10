@@ -160,7 +160,7 @@ resave = 0; % need user permission to save over existing time series
 switch importwhat
 case 'ts' % Prepare toadd cell for time series
     if bevocal; figure('color','w','WindowStyle','docked'); end
-        for j = 1:nits
+    for j = 1:nits
         timeseries(j).Filename = datain{j,1};
         timeseries(j).Keywords = regexprep(datain{j,2},'\"',''); % Take out inverted commas from keywords lists
 
@@ -220,7 +220,7 @@ case 'ts' % Prepare toadd cell for time series
         catch emsg
             fprintf(1,'%s\n',emsg.message)
             error(['\nCould not read the data file for ''%s''.' ...
-                                    'Check that it''s in Matlab''s path.'],timeseries(j).Filename)
+                                'Check that it''s in Matlab''s path.'],timeseries(j).Filename)
         end
         toadd{j} = sprintf('(''%s'',''%s'',%u,''%s'')',esc(timeseries(j).Filename),esc(timeseries(j).Keywords),timeseries(j).Length,timeseries(j).Data);
         

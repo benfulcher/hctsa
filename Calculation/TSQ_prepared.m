@@ -1,7 +1,7 @@
 function TSQ_prepared(ts_ids_keep, m_ids_keep, getwhat, dbname, brawninputs, doinone)
 % This function prepares files for subsequent calculation/visualization methods.
 % It takes as input a set of constraints on the time series and metrics to include
-% and output the relevant subsection of the data matrix as TS_loc and also a Matlab 
+% and output the relevant subsection of the data matrix as HCTSA_loc and also a Matlab 
 % file containing the time series and oepration metadata
 % 
 % HISTORY:
@@ -19,11 +19,11 @@ function TSQ_prepared(ts_ids_keep, m_ids_keep, getwhat, dbname, brawninputs, doi
 % 12/5/2010: added doinone -- database will either make many connections (suitable for small no. of rows), or do it in one
 % 			 big connection (strain on java heap space for large retrievals)
 
-%% OUTPUTS (to file):
-% (*) TS_loc.mat, which contains the data
-% (*) TS_loc_ct.mat, which contains the calculation times
-% (*) TS_loc_q.mat, which contains the quality codes
-% (*) TS_loc_guides.mat, which contains information about the time series in TS_loc
+%% OUTPUT to file HCTSA_loc.mat contains
+% (*) TS_DataMat, contains the data
+% (*) TS_CalcTime, contains the calculation times
+% (*) TS_Quality.mat, contains the quality codes
+% (*) TS_Info.mat, which contains information about the time series and operations in HCTSA_loc
 
 %%% FOREPLAY
 %% Check inputs -- set defaults
@@ -104,19 +104,20 @@ end
 
 % Tell me about it
 fprintf(1,'We have %u time series and %u operations to retrieve from %s.\n',nts,nops,dbname);
-fprintf(1,'Filling and saving to local matricies TS_loc, TS_loc_ct, TS_loc_q from Results table in %s.\n',dbname);
+fprintf(1,'Filling and saving to local Matlab file HCTSA_loc.mat from Results table in %s.\n',dbname);
 
-% Intialize matrices
+%% Intialize matrices
+
 % Start as Infs to distinguish unwritten entries after database pull
-TS_loc = ones(nts,nops)*Inf; % outputs
-TS_loc_ct = ones(nts,nops)*Inf; % calculation times
-TS_loc_q = ones(nts,nops)*Inf; % output quality label
+TS_DataMat = ones(nts,nops)*Inf; % outputs
+TS_CalcTime = ones(nts,nops)*Inf; % calculation times
+TS_Quality = ones(nts,nops)*Inf; % output quality label
 
 % Set bundlesize for retrieving
 bundlesize = min(nts,5); % retrieve information about this many time series per database query:
                          % either 5 at a time, or if less, however many time series there are
 
-% Provide user information to screen
+%% Provide user information
 switch getwhat
 case 'all' 
     fprintf(1,'Retrieving all elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
@@ -165,17 +166,17 @@ for i = 1:nits
     
     % Fill rows of local matrix
     if strcmp(getwhat,'all') % easy in this case
-        TS_loc(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nops);
-        TS_loc_ct(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
-        TS_loc_q(ii,:) = reshape(vertcat(qrc{:,5}),length(ii),nops);
+        TS_DataMat(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nops);
+        TS_CalcTime(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
+        TS_Quality(ii,:) = reshape(vertcat(qrc{:,5}),length(ii),nops);
     else
         % We need to match retrieved indicies to the local indicies
         ix = arrayfun(@(x)find(ts_ids_now == x,1),vertcat(qrc{:,1}));
         iy = arrayfun(@(x)find(m_ids_keep == x,1),vertcat(qrc{:,2}));
         for k = 1:length(ix) % fill it one entry at a time
-            TS_loc(ix(k),iy(k)) = qrc{k,3};
-            TS_loc_ct(ix(k),iy(k)) = qrc{k,4};
-            TS_loc_q(ix(k),iy(k)) = qrc{k,4};
+            TS_DataMat(ix(k),iy(k)) = qrc{k,3};
+            TS_CalcTime(ix(k),iy(k)) = qrc{k,4};
+            TS_Quality(ix(k),iy(k)) = qrc{k,4};
         end
     end
     
@@ -191,10 +192,10 @@ if ismember(getwhat,{'null','error'})
     % We only want to keep rows and columns with (e.g., NaNs) in them...
     switch getwhat
     case 'null'
-        keepme = isnan(TS_loc); % NULLs in database
+        keepme = isnan(TS_DataMat); % NULLs in database
     	fprintf(1,'Filtering so that local files contain rows/columns containing at least one NULL entry\n');
     case 'error'
-        keepme = (TS_loc_q == 1); % Error codes in database
+        keepme = (TS_Quality == 1); % Error codes in database
     	fprintf(1,'Filtering so that local files contain rows/columns containing at least one error entry\n');
     end
     
@@ -206,7 +207,7 @@ if ismember(getwhat,{'null','error'})
 		fprintf(1,'Cutting down from %u to %u time series\n',nts,sum(keepi));
 		ts_ids_keep = ts_ids_keep(keepi); nts = length(ts_ids_keep);
 		ts_ids_keep_string = BF_cat(ts_ids_keep,',');
-		TS_loc = TS_loc(keepi,:); TS_loc_ct = TS_loc_ct(keepi,:); TS_loc_q = TS_loc_q(keepi,:); % update local data stores
+		TS_DataMat = TS_DataMat(keepi,:); TS_CalcTime = TS_CalcTime(keepi,:); TS_Quality = TS_Quality(keepi,:); % update local data stores
 	end
 	
 	% Operations
@@ -217,89 +218,46 @@ if ismember(getwhat,{'null','error'})
 		fprintf(1,'Cutting down from %u to %u operations\n',nops,sum(keepi));
 		m_ids_keep = m_ids_keep(keepi); nops = length(m_ids_keep);
 		m_ids_keep_string = BF_cat(m_ids_keep,',');
-		TS_loc = TS_loc(:,keepi); TS_loc_ct = TS_loc_ct(:,keepi); TS_loc_q = TS_loc_q(:,keepi);
+		TS_DataMat = TS_DataMat(:,keepi); TS_CalcTime = TS_CalcTime(:,keepi); TS_Quality = TS_Quality(:,keepi);
 	end    
 end
 
-%% Fill out guides
-% Retrieve Time Series Metadata
+%% Fill metadata
+
+% 1. Retrieve Time Series Metadata
 SelectString = sprintf('SELECT FileName, Keywords, Length FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string);
 [tsinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
-tsf = tsinfo(:,1); % timeseries filenames
-tskw = tsinfo(:,2); % timeseries keywords
-tsl = vertcat(tsinfo{:,3}); % timeseries lengths
+% Convert to a structure array, TimeSeries, containing metadata for all time series
+tsinfo = [num2cell(ts_ids_keep),tsinfo];
+TimeSeries = cell2struct(tsinfo',{'ID','FileName','Keywords','Length'});
 
-% Retrieve Operations Metadata
-SelectString = sprintf('SELECT Code, OpName, Keywords FROM Operations WHERE m_id IN (%s)',m_ids_keep_string);
-[minfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
-mcode = minfo(:,1); % operation filenames
-mlab = minfo(:,2); % operation labels
-mkw = minfo(:,3); % operation keywords
-% mpoint = vertcat(minfo{:,4}); % pointer? -- [redundant if you have mlink (retrieved later)]
+% 2. Retrieve Operation Metadata
+SelectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE m_id IN (%s)',m_ids_keep_string);
+[opinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+opinfo = [num2cell(m_ids_keep), opinfo]; % add m_ids
+Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
 
-% Now get master info
+% 3. Retrieve Master Operation Metadata
 % (i) Which masters are implicated?
 SelectString = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WHERE mop_id IN ' ...
-				'(SELECT DISTINCT mop_id FROM Operations WHERE m_id IN (' m_ids_keep_string '))'];
+        				'(' BF_cat(unique([Operations.MasterID]),',') ')'];
 [masterinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
     fprintf(1,'Error retrieving Master information...\n'); keyboard
 else
-    if ~isempty(masterinfo) % there are masters in out midst
-        Mmid = vertcat(masterinfo{:,1});
-        Mmlab = masterinfo(:,2);
-        Mmcode = masterinfo(:,3);
-    else
-        % No master functions implicated in this subset
-        Mmid = [];
-        Mmlab = {};
-        Mmcode = {};
-    end
-end
-
-% (ii) Get master link information
-SelectString = ['SELECT DISTINCT mop_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')'];
-% SelectString = ['SELECT mop_id FROM (SELECT m_id FROM Operations WHERE m_id IN (' m_ids_keep_string ')) AS T1 ' ...
-%                     'LEFT JOIN MasterPointerRelate ON T1.m_id = MasterPointerRelate.m_id'];
-[masterlink,~,~,emsg] = mysql_dbquery(dbc,SelectString);
-empties = find(cellfun(@isempty,masterlink));
-if ~isempty(empties), masterlink(empties) = {0}; end
-mlink = vertcat(masterlink{:});
-
-% (iii) renumber mlink to refer to elements of Mm rather than the indicies in Master index system
-nM = length(Mmid); % number of master metrics
-rch = cell(nM,1);
-for i = 1:nM
-    rch{i} = (mlink==Mmid(i));
-end
-for i = 1:nM
-    mlink(rch{i}) = i; % rename with index rather than the mop_id
+    MasterOperations = cell2struct(masterinfo',{'ID','Label','Code'});
 end
 
 % Close database connection
 SQL_closedatabase(dbc)
 
+% Save to HCTSA_loc.mat
 fprintf(1,'Saving local versions of the data...:\n');
-save('TS_loc.mat','TS_loc','-v7.3')
-fprintf(1,'TS_loc (data)')
-
-save('TS_loc_ct.mat','TS_loc_ct','-v7.3')
-fprintf(1,', TS_loc_ct (calculation times)')
-	
-save('TS_loc_q.mat','TS_loc_q','-v7.3')
-fprintf(1,', TS_loc_q (quality codes)')
-
-save('TS_loc_guides.mat','m_ids_keep','ts_ids_keep','tsf','tskw','tsl','mcode','mlab','mkw','mlink','Mmid','Mmlab','Mmcode','-v7.3');
-fprintf(1,', TS_loc_guides (information guides).\n')
+save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries','Operations','MasterOperations','-v7.3');
 
 % Display how many entries need to be calculated
-tocalculate = sum(isnan(TS_loc_q(:)) | TS_loc_q(:)==1);
-fprintf(1,'There are %u entries (= %5.2f%%) to calculate in TS_loc (%ux%u)\n',tocalculate,tocalculate/nops/nts*100,nts,nops);
-
-% reply = input(['Shall I move on to TSQ_brawn now to calculate and then write back? [yes, ''n'' to stop]'],'s');
-% if ~isempty(forcalc)
-%     fprintf(1,'Automatically moving on to TSQ_brawn now to calculate the missing entries and then write them back to the database\n');
-%     TSQ_brawn(brawninputs(1),brawninputs(2),dbname);
-% end
+tocalculate = sum(isnan(TS_Quality(:)) | TS_Quality(:)==1);
+fprintf(1,'There are %u entries (= %5.2f%%) to calculate in the retrieved data matrix (%ux%u)\n', ...
+                                    tocalculate,tocalculate/nops/nts*100,nts,nops);
 
 end

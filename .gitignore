@@ -10,6 +10,8 @@ ehthumbs.db
 Thumbs.db
 
 # Database-retrieved files:
+HCTSA_loc.mat
+
 TS_loc.mat
 TS_loc_N.mat
 TS_loc_cl.mat
