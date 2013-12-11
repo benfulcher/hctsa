@@ -1,71 +1,71 @@
-function TSQ_prepared(ts_ids_keep, m_ids_keep, getwhat, dbname, brawninputs, doinone)
-% This function prepares files for subsequent calculation/visualization methods.
-% It takes as input a set of constraints on the time series and metrics to include
-% and output the relevant subsection of the data matrix as HCTSA_loc and also a Matlab 
-% file containing the time series and oepration metadata
+% TSQ_prepared
 % 
-% HISTORY:
-% 29/10/2009: added changed functionality; only saves STORE backup if index system has changed.
-% 12/11/2009: added logging functionality; logs to the local directory a summary of what's been done.
-% 9/1/2010: added trimming functionality; trim to some number based on more than just random (and do this within mySQL syntax)
-% 10/1/2010: add masterpull option; by default pulls all other metrics which masters call and adds to 
-% 				the operation list (for calculation purposes this is sensible)
-% 11/1/2010: delegates the subsetting role to SQL_getids -- should call this either in argument (e.g., 
-% 				TSQ_prepared(SQL_getids('ts',...),SQL_getids('mets',...))) or call them first and call these vectors
-% 				to TSQ_prepared
-% 12/1/2010: tried to make so only retrieve bits required for calculation if forcalc flag is enabled. If forcalc = [],
-% 				 will retrieve everything. If zero will retrieve all empty entries. Otherwise will retrieve up to that
-% 				 number of entries. (at this stage, QualityCode=NULL; eventually could add fatal error ones)
-% 12/5/2010: added doinone -- database will either make many connections (suitable for small no. of rows), or do it in one
-% 			 big connection (strain on java heap space for large retrievals)
-
-%% OUTPUT to file HCTSA_loc.mat contains
+% This function retreives data from the mySQL database for subsequent analysis
+% in Matlab. It takes as input a set of constraints on the time series and
+% operations to include, and outputs the relevant subsection of the data matrix
+% and associated metadata in HCTSA_loc
+% 
+% ---OUTPUT to the file HCTSA_loc.mat contains
 % (*) TS_DataMat, contains the data
 % (*) TS_CalcTime, contains the calculation times
-% (*) TS_Quality.mat, contains the quality codes
-% (*) TS_Info.mat, which contains information about the time series and operations in HCTSA_loc
+% (*) TS_Quality, contains the quality codes
+% (*) TimeSeries, contains metadata about the time series, and the time-series data
+% (*) Operations, contains metadata about the operations
+% (*) MasterOperations, contains metadata about the implicatedmaster operations
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
 
-%%% FOREPLAY
+function TSQ_prepared(ts_ids, m_ids, RetrieveWhat, brawninputs, doinone)
 %% Check inputs -- set defaults
-if nargin < 2;
+if nargin < 2
 	error('You must provide at least two inputs!');
 end
 if nargin < 3
-	getwhat = 'all'; % retrieve full sets of things, not just the empty entries in the database
+	RetrieveWhat = 'all'; % retrieve full sets of things, not just the empty entries in the database
     fprintf(1,'Retrieving ALL elements from the database in the specified ranges by default.\n')
 end
-getwhatcanbe = {'null','all','error'};
-if ~ischar(getwhat) || ~ismember(getwhat,getwhatcanbe)
-    error('Your third input to TSQ_prepared must specify what to retrieve, one of the following: %s',BF_cat(getwhatcanbe))
+RetrieveWhatcanbe = {'null','all','error'};
+if ~ischar(RetrieveWhat) || ~ismember(RetrieveWhat,RetrieveWhatcanbe)
+    error('The rhird input to TSQ_prepared must specify what to retrieve, one of the following: %s',BF_cat(RetrieveWhatcanbe))
 end
-if nargin < 4
-	dbname = ''; % Use default database
+if nargin < 4 || isempty(brawninputs)
+	brawninputs = [1, 1]; % log and parallelize -- only relevant if RetrieveWhat isn't empty
 end
-if nargin < 5 || isempty(brawninputs)
-	brawninputs = [1, 1]; % log and parallelize -- only relevant if getwhat isn't empty
-end
-if nargin < 6 || isempty(doinone)
+if nargin < 5 || isempty(doinone)
 	doinone = 0; % make seperate connections so as not to overwhelm java heap space
 end
 
 %% METHOD 1: Get entries of results table for local Matlab matrix (1 row/column at a time)
-% we have ts_ids_keep and m_ids_keep
+% we have ts_ids and m_ids
 % To put in a matrix with rows (time series) and columns (metrics)
 % Could do one big query and then reform to a matrix, but I'll do it row-by-row
 % In fact this is faster for some reason than doing a big query (method 2)
 
-% Make sure ts_ids_keep and m_ids_keep are column vectors
-if size(ts_ids_keep,2) > size(ts_ids_keep,1), ts_ids_keep = ts_ids_keep'; end
-if size(m_ids_keep,2) > size(m_ids_keep,1), m_ids_keep = m_ids_keep'; end
+% Make sure ts_ids and m_ids are column vectors
+if size(ts_ids,2) > size(ts_ids,1), ts_ids = ts_ids'; end
+if size(m_ids,2) > size(m_ids,1), m_ids = m_ids'; end
 % Sort ids ascending
-ts_ids_keep = sort(ts_ids_keep,'ascend');
-m_ids_keep = sort(m_ids_keep,'ascend');
+ts_ids = sort(ts_ids,'ascend');
+m_ids = sort(m_ids,'ascend');
 % Write a comma-delimited string of ids
-ts_ids_keep_string = BF_cat(ts_ids_keep,',');
-m_ids_keep_string = BF_cat(m_ids_keep,',');
+ts_ids_string = BF_cat(ts_ids,',');
+m_ids_string = BF_cat(m_ids,',');
 % Count the number of time series and operations
-nts = length(ts_ids_keep);
-nops = length(m_ids_keep);
+nts = length(ts_ids); nops = length(m_ids);
 
 if (nts == 0)
 	error('Oops. There''s nothing to do! No time series to retrieve!\n');
@@ -74,12 +74,12 @@ elseif (nops == 0)
 end
 
 % Open database connection
-[dbc, dbname] = SQL_opendatabase(dbname);
+[dbc, dbname] = SQL_opendatabase;
 
 % First refine the set of time series and operations to those that actually exist in the database
-mids_db = mysql_dbquery(dbc,sprintf('SELECT m_id FROM Operations WHERE m_id IN (%s)',m_ids_keep_string));
+mids_db = mysql_dbquery(dbc,sprintf('SELECT m_id FROM Operations WHERE m_id IN (%s)',m_ids_string));
 mids_db = vertcat(mids_db{:});
-tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string));
+tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string));
 tsids_db = vertcat(tsids_db{:});
 if length(tsids_db) < nts % actually there are fewer time series in the database
     if (length(tsids_db) == 0) % now there are no time series to retrieve
@@ -87,9 +87,9 @@ if length(tsids_db) < nts % actually there are fewer time series in the database
     end
     fprintf(1,['%u specified time series do not exist in ''%s'', retrieving' ...
                     ' the remaining %u\n'],nts-length(tsids_db),dbname,length(tsids_db))
-    ts_ids_keep = tsids_db;
-    ts_ids_keep_string = BF_cat(ts_ids_keep,',');
-    nts = length(ts_ids_keep);
+    ts_ids = tsids_db;
+    ts_ids_string = BF_cat(ts_ids,',');
+    nts = length(ts_ids);
 end
 if length(mids_db) < nops % actually there are fewer operations in the database
     if (length(mids_db) == 0) % now there are no operations to retrieve
@@ -97,9 +97,9 @@ if length(mids_db) < nops % actually there are fewer operations in the database
     end
     fprintf(1,['%u specified operations do not exist in ''%s'', retrieving' ...
                     ' the remaining %u\n'],nops-length(mids_db),dbname,length(mids_db))
-    m_ids_keep = mids_db;
-    m_ids_keep_string = BF_cat(m_ids_keep,',');
-    nops = length(m_ids_keep);
+    m_ids = mids_db;
+    m_ids_string = BF_cat(m_ids,',');
+    nops = length(m_ids);
 end
 
 % Tell me about it
@@ -118,7 +118,7 @@ bundlesize = min(nts,5); % retrieve information about this many time series per 
                          % either 5 at a time, or if less, however many time series there are
 
 %% Provide user information
-switch getwhat
+switch RetrieveWhat
 case 'all' 
     fprintf(1,'Retrieving all elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
 case 'null'
@@ -127,7 +127,7 @@ case 'error'
     fprintf(1,'Retrieving error elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
 end
 
-bundles = (1:bundlesize:length(ts_ids_keep));
+bundles = (1:bundlesize:length(ts_ids));
 nits = length(bundles); % number of iterations of the loop
 times = zeros(nits,1); % record time for each iteration
 
@@ -135,11 +135,11 @@ times = zeros(nits,1); % record time for each iteration
 for i = 1:nits
     ittic = tic; % start timing the iteration
 
-    ii = (bundles(i):1:min(bundles(i)+bundlesize-1,length(ts_ids_keep))); % indicies for this iteration
-    ts_ids_now = ts_ids_keep(ii); % a range of ts_ids to retrieve in this iteration
+    ii = (bundles(i):1:min(bundles(i)+bundlesize-1,length(ts_ids))); % indicies for this iteration
+    ts_ids_now = ts_ids(ii); % a range of ts_ids to retrieve in this iteration
     basestring = sprintf(['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ' ...
-                    	'ts_id IN (%s) AND m_id IN (%s)'],BF_cat(ts_ids_now,','),m_ids_keep_string);
-    switch getwhat
+                    	'ts_id IN (%s) AND m_id IN (%s)'],BF_cat(ts_ids_now,','),m_ids_string);
+    switch RetrieveWhat
     case 'all'
         SelectString = basestring;
     case 'null'
@@ -165,14 +165,14 @@ for i = 1:nits
 	qrc(cellfun(@isempty,qrc)) = {NaN};
     
     % Fill rows of local matrix
-    if strcmp(getwhat,'all') % easy in this case
+    if strcmp(RetrieveWhat,'all') % easy in this case
         TS_DataMat(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nops);
         TS_CalcTime(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
         TS_Quality(ii,:) = reshape(vertcat(qrc{:,5}),length(ii),nops);
     else
         % We need to match retrieved indicies to the local indicies
         ix = arrayfun(@(x)find(ts_ids_now == x,1),vertcat(qrc{:,1}));
-        iy = arrayfun(@(x)find(m_ids_keep == x,1),vertcat(qrc{:,2}));
+        iy = arrayfun(@(x)find(m_ids == x,1),vertcat(qrc{:,2}));
         for k = 1:length(ix) % fill it one entry at a time
             TS_DataMat(ix(k),iy(k)) = qrc{k,3};
             TS_CalcTime(ix(k),iy(k)) = qrc{k,4};
@@ -188,9 +188,9 @@ for i = 1:nits
 end
 fprintf(1,'Local files filled from %s in %u iteration(s). Took %s altogether.\n',dbname,nits,BF_thetime(sum(times)));
 	
-if ismember(getwhat,{'null','error'})    
+if ismember(RetrieveWhat,{'null','error'})    
     % We only want to keep rows and columns with (e.g., NaNs) in them...
-    switch getwhat
+    switch RetrieveWhat
     case 'null'
         keepme = isnan(TS_DataMat); % NULLs in database
     	fprintf(1,'Filtering so that local files contain rows/columns containing at least one NULL entry\n');
@@ -205,8 +205,8 @@ if ismember(getwhat,{'null','error'})
     	fprintf(1,'After filtering, there are no time series remaining! Exiting...\n'); return
 	elseif sum(keepi) < nts
 		fprintf(1,'Cutting down from %u to %u time series\n',nts,sum(keepi));
-		ts_ids_keep = ts_ids_keep(keepi); nts = length(ts_ids_keep);
-		ts_ids_keep_string = BF_cat(ts_ids_keep,',');
+		ts_ids = ts_ids(keepi); nts = length(ts_ids);
+		ts_ids_string = BF_cat(ts_ids,',');
 		TS_DataMat = TS_DataMat(keepi,:); TS_CalcTime = TS_CalcTime(keepi,:); TS_Quality = TS_Quality(keepi,:); % update local data stores
 	end
 	
@@ -216,8 +216,8 @@ if ismember(getwhat,{'null','error'})
     	fprintf(1,'After filtering, there are no operations remaining! Exiting...\n'); return
     elseif sum(keepi) < nops
 		fprintf(1,'Cutting down from %u to %u operations\n',nops,sum(keepi));
-		m_ids_keep = m_ids_keep(keepi); nops = length(m_ids_keep);
-		m_ids_keep_string = BF_cat(m_ids_keep,',');
+		m_ids = m_ids(keepi); nops = length(m_ids);
+		m_ids_string = BF_cat(m_ids,',');
 		TS_DataMat = TS_DataMat(:,keepi); TS_CalcTime = TS_CalcTime(:,keepi); TS_Quality = TS_Quality(:,keepi);
 	end    
 end
@@ -225,10 +225,10 @@ end
 %% Fill Metadata
 
 % 1. Retrieve Time Series Metadata
-SelectString = sprintf('SELECT FileName, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_keep_string);
+SelectString = sprintf('SELECT FileName, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
 [tsinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 % Convert to a structure array, TimeSeries, containing metadata for all time series
-tsinfo = [num2cell(ts_ids_keep),tsinfo];
+tsinfo = [num2cell(ts_ids),tsinfo];
 % Define inline functions to convert time-series data text to a vector of floats:
 ScanCommas = @(x) textscan(x,'%f','Delimiter',',');
 TakeFirstCell = @(x) x{1};
@@ -236,9 +236,9 @@ tsinfo(:,end) = cellfun(@(x) TakeFirstCell(ScanCommas(x)),tsinfo(:,end),'Uniform
 TimeSeries = cell2struct(tsinfo',{'ID','FileName','Keywords','Length','Data'}); % Convert to structure array
 
 % 2. Retrieve Operation Metadata
-SelectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE m_id IN (%s)',m_ids_keep_string);
+SelectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE m_id IN (%s)',m_ids_string);
 [opinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
-opinfo = [num2cell(m_ids_keep), opinfo]; % add m_ids
+opinfo = [num2cell(m_ids), opinfo]; % add m_ids
 Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
 
 % 3. Retrieve Master Operation Metadata

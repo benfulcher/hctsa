@@ -1,24 +1,37 @@
-function TSQ_agglomerate(writewhat,tolog,dbname)
-% Uploads data in the HCTSA_loc file in the current directory into the mySQL database
-% Needs files HCTSA_loc.mat in current directory
-% 12/1/2010 ~Ben Fulcher~ Complete rewrite -- checks what parts of the storage are unwritten, and writes
-% 			only to that section. So it doesn't matter if calculated bits are inconsistent, or if some 
-% 			bits have subsequently been calculated by other machines in parallel -- it will only write to
-% 			empty parts of the storage which have been calculated here. This makes it quicker (only retrieves part
-% 			of storage that is empty)
-% 			Also added default logging to file
+% TSQ_agglomerate
+% 
+% Uploads data in the HCTSA_loc file in the current directory back into the
+% mySQL database. Should be done to store the result new computations done by
+% TSQ_brawn.
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
 
+function TSQ_agglomerate(WriteWhat,LogToFile,dbname)
 
 %% Check Inputs
 if nargin < 1
-	writewhat = 'null'; % 'nullerror'
+	WriteWhat = 'null'; % 'nullerror'
     % find all nulls in the database and write over them if there are values in local files
 end
-if ~ismember(writewhat,{'null','nullerror'})
-    error('Unknown specifier ''%s''',writewhat)
+if ~ismember(WriteWhat,{'null','nullerror'})
+    error('Unknown specifier ''%s''',WriteWhat)
 end
-if nargin < 2 || isempty(tolog)
-	tolog = 0;
+if nargin < 2 || isempty(LogToFile)
+	LogToFile = 0;
 end
 if nargin < 3
 	dbname = '';
@@ -30,13 +43,13 @@ end
 %% Load local files
 %% Read in information from local files
 fid = 1; % haha no more logging option...
-fprintf(fid,'Reading in data and guides from file...');
+fprintf(fid,'Loading data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat')
-fprintf(fid,' All done.\n');
+fprintf(fid,' Done.\n');
 
 %% Preliminary definitions
-nts = length(TimeSeries); % number of time series
-nm = length(Operations); % number of operations
+nts = length(TimeSeries); % Number of time series
+nm = length(Operations); % Number of operations
 ts_ids_string = BF_cat([TimeSeries.ID],',');
 m_ids_string = BF_cat([Operations.ID],',');
 
@@ -68,9 +81,9 @@ end
 
 %% Find the elements that are empty in storage (and hopefully full in the local file)
 % Parts of calculated subsection that are empty in storage
-fprintf(1,'Retrieving %s elements from the Results table in %s...',writewhat,dbname);
+fprintf(1,'Retrieving %s elements from the Results table in %s...',WriteWhat,dbname);
 
-switch writewhat
+switch WriteWhat
 case 'null'
     % collect nulls in the database
     SelectString = sprintf(['SELECT ts_id, m_id FROM Results WHERE ts_id IN (%s)' ...
@@ -81,12 +94,13 @@ case 'nullerror'
     					' AND m_id IN (%s) AND (QualityCode IS NULL OR QualityCode = 1)'], ...
         					ts_ids_string,m_ids_string);
 end
+
 tic
 [qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
-    fprintf(1,'\n'); error('Error selecting %s elements from %s',writewhat,dbname);
+    fprintf(1,'\n'); error('Error selecting %s elements from %s',WriteWhat,dbname);
 elseif isempty(qrc)
-    fprintf(1,'\nNo %s elements in this range in the database anymore!\n',writewhat);
+    fprintf(1,'\nNo %s elements in this range in the database anymore!\n',WriteWhat);
     return
 else
 	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_thetime(toc));
@@ -96,7 +110,7 @@ ts_id_db = vertcat(qrc{:,1}); % ts_ids (in m_id pairs) of empty database element
 m_id_db = vertcat(qrc{:,2}); % m_ids (in ts_id pairs) of empty database elements in this ts_id/m_id range
 ndbel = length(ts_id_db); % number of database elements to (maybe) write back to
 
-switch writewhat
+switch WriteWhat
 case 'null'
     fprintf(1,['There are %u NULL entries in Results.\nWill now write calculated elements of TS_DataMat ' ...
                     'into these elements of %s...\n'],ndbel,dbname);
@@ -124,7 +138,7 @@ for i = 1:ndbel
     TS_Quality_ij = TS_Quality(loci(i,1),loci(i,2));
     TS_CalcTime_ij = TS_CalcTime(loci(i,1),loci(i,2));
     
-    switch writewhat
+    switch WriteWhat
     case 'null'
         if isfinite(TS_DataMat_ij)
             updated(i) = 1; % there is a value in TS_DataMat -- write it back to the NULL entry in the database
@@ -171,7 +185,7 @@ if any(~updated) % some were not written
 end
 SQL_closedatabase(dbc) % close database connection
 
-% if tolog
+% if LogToFile
 %     fprintf(1,'Logging to file...\n');
 %     fn = ['TS_agglomerate_' datestr(now,30) '.log'];
 %     fid = fopen(fn,'w','n');

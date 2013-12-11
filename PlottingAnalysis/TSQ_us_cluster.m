@@ -1,14 +1,29 @@
-function [ackwgs,acgi,Fcl] = TSQ_us_cluster(norcl,cmeth,cparams,metorts)
-%%% Spider Unsupervised Clustering
-% Uses the Spider package for machine learning in Matlab
-% Ben Fulcher 10/4/2010
-% inputs a data matrix and clustering options, outputs a new ordering of
+% TSQ_us_cluster
+% 
+% Inputs a data matrix and clustering options, outputs a new ordering of
 % the indicies of this data matrix. Can do this on the full data matrix, or
 % input a section and reorder it. The possiblities are literally endless.
 % The output from this can also be fed to other algorithms -- to plot
 % clusters in different ways, etc.
-% Ben Fulcher 17/6/2010 added savetofile option for linkage clustering
+% Unsupervised Clustering
+% Some settings use the Spider package for machine learning in Matlab
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
 
+function [ackwgs, acgi, TS_DataMat_cl] = TSQ_us_cluster(norcl,ClusterMethod,ClusterParams,metorts)
 
 %% Check Inputs
 % 1) norcl: can be the data matrix, or a string:
@@ -18,13 +33,13 @@ if nargin < 1,
     norcl = ''; % not necessary
 end
 
-% 2) cmeth: a string specifying the clustering method to use
-if nargin < 2 || isempty(cmeth),
-    cmeth = 'linkage';
+% 2) ClusterMethod: a string specifying the clustering method to use
+if nargin < 2 || isempty(ClusterMethod),
+    ClusterMethod = 'linkage';
 end
 
-% 3) cparams: specify the parameters for the clustering method
-if nargin < 3, cparams = {}; end % defaults specified within each method
+% 3) ClusterParams: specify the parameters for the clustering method
+if nargin < 3, ClusterParams = {}; end % defaults specified within each method
 
 
 % 4) metorts: whether to do for metrics ('mets') or time series ('ts')
@@ -33,31 +48,24 @@ if nargin < 4 || isempty(metorts), metorts = 'ts'; end
 
 
 %% Get the data
-if strcmp(norcl,'cl')
-    load TS_loc_cl.mat TS_loc_cl
-    if strcmp(metorts,'ts')
-        F = TS_loc_cl; % time series are rows (feature vectors)
-    else
-        F = TS_loc_cl'; % metrics are rows (feature vectors)
-    end
-    clear TS_loc_cl
-elseif strcmp(norcl,'norm')
-    load TS_loc_N.mat TS_loc_N
-    if strcmp(metorts,'ts')
-        F = TS_loc_N; % time series are rows (feature vectors)
-    else
-        F = TS_loc_N'; % metrics are rows (feature vectors)
-    end
-    clear TS_loc_N
-else
-    F = norcl; % input a matrix to be clustered -- call it F.
-    clear norcl
+switch norcl
+case 'cl'
+    fprintf(1,'Loading HCTSA_cl.mat...');
+    load('HCTSA_cl.mat','TS_DataMat')
+    fprintf(1,' Loaded.\n');
+case 'norm'
+    fprintf(1,'Loading HCTSA_N.mat...');
+    load('HCTSA_N.mat','TS_DataMat')
+    fprintf(1,' Loaded.\n');
+otherwise % Input is a matrix to be clustered -- call it TS_DataMat.
+    TS_DataMat = norcl;
 end
+% Transpose for operations:
+if strcmp(metorts,'mets'), TS_DataMat = TS_DataMat'; end
 
 
 %% Do the unsupervised clustering
-
-switch cmeth
+switch ClusterMethod
 	case 'linkage'
 % 		disp('Using inbuilt matlab linkage clustering');
         % parameter is a cell:
@@ -65,15 +73,15 @@ switch cmeth
         % Better to make this a structure in future...
         %% Check inputs
         % ** dmth
-        if length(cparams)>=1 && ~isempty(cparams{1})
-            dmth = cparams{1};
+        if length(ClusterParams)>=1 && ~isempty(ClusterParams{1})
+            dmth = ClusterParams{1};
         else
             dmth = 'euclidean';
         end
         
         % ** lmth
-        if length(cparams)>=2 && ~isempty(cparams{2})
-            lmth = cparams{2};
+        if length(ClusterParams)>=2 && ~isempty(ClusterParams{2})
+            lmth = ClusterParams{2};
         else
             lmth = 'average';
         end
@@ -81,8 +89,8 @@ switch cmeth
         disp(['Using ' lmth ' linkage clustering on ' dmth ' distances']);
         
         % ** showdend
-        if length(cparams)>=3 && ~isempty(cparams{3})
-            showdend = cparams{3};
+        if length(ClusterParams)>=3 && ~isempty(ClusterParams{3})
+            showdend = ClusterParams{3};
         else
             showdend = 0;
         end
@@ -95,8 +103,8 @@ switch cmeth
         % obtained using inconsistent criterion). Another way is to just
         % specify a number of clusters and use the distance criterion
         % (i.e., just snips the dendrogram off at some threshold)...
-        if length(cparams)>=4 && ~isempty(cparams{4})
-            clustth = cparams{4}; % method (string), max # clusters (integer)
+        if length(ClusterParams)>=4 && ~isempty(ClusterParams{4})
+            clustth = ClusterParams{4}; % method (string), max # clusters (integer)
             % e.g., {'cutoff',10} % will get (max) 10 clusters using cutoff method
             % e.g., {'maxnclust',10} will get 10 clusters using distance criterion
         else
@@ -112,8 +120,8 @@ switch cmeth
         % if 1, saves to file; if 2, loads from file, if zero, doesn't do
         % either -- (outputs only to function outputs).
         % can also specify a filename to load from as savetofile
-        if length(cparams)>=5 && ~isempty(cparams{5})
-            savetofile = cparams{5};
+        if length(ClusterParams)>=5 && ~isempty(ClusterParams{5})
+            savetofile = ClusterParams{5};
         else
             savetofile = 0; % don't save output of linkage clustering to file
         end
@@ -138,21 +146,21 @@ switch cmeth
         else
             % pairwise distances
             if strcmp(dmth,'abscorr') % custom distance function
-                if any(isnan(F(:)));
+                if any(isnan(TS_DataMat(:)));
                     disp('NaNs in input matrix -- distance calculations are going to be SLOW...')
-                    R = benpdist(F,'corr',1);
+                    R = benpdist(TS_DataMat,'corr',1);
                 else % all good values -- can do this using pdist which is very fast
-                    R = pdist(F,'corr');
+                    R = pdist(TS_DataMat,'corr');
                 end
                 R = 1-abs(1-R);
                 R(R<0) = 0;% sometimes get numerical error
                 disp(['abscorr transformation :: R between ' num2str(min(R)) ' (0) - ' num2str(max(R)) ' (1)'])
             else
-                if any(isnan(F(:))) % NaNs: need to do this the slow way:
+                if any(isnan(TS_DataMat(:))) % NaNs: need to do this the slow way:
                     disp('NaNs in input matrix -- distance calculations are going to be SLOW...')
-                    R = benpdist(F,dmth,1);
+                    R = benpdist(TS_DataMat,dmth,1);
                 else
-                    R = pdist(F,dmth);
+                    R = pdist(TS_DataMat,dmth);
                 end
             end
             % links
@@ -301,45 +309,44 @@ switch cmeth
         else % don't do agglomerative clustering, just return the dendrogram ordering
             figure('color','w');
             if ~showdend, set(gcf,'Visible','off'); end % suppress figure output
-            if size(F,1)<1000
+            if size(TS_DataMat,1) < 1000 % small enough to try optimalleaforder
                 try
 %                     ord = bensoptimalleaforder(links,R); % NEW!
                     ord = optimalleaforder(links,R); % NEW!
                     [~,~,ord] = dendrogram(links,0,'r',ord);
-                    disp('used optimalleaforder')
+                    fprintf(1,'Used optimalleaforder!\n')
                 catch
                     beep
-                    disp('no optimalleaforder for me :(')
+                    fprintf(1,'optimalleaforder was not used :(\n')
                     [~,~,ord] = dendrogram(links,0);
                 end
             else
-                disp('too big for optimalleaforder')
+                fprintf(1,'Too big for optimalleaforder\n')
                 [~,~,ord] = dendrogram(links,0);
             end
             ackwgs = {[lmth '_' dmth '_linkage']};
             acgi = ord; % outputs one cluster with an ordering given by the linkage clustering
             if ~showdend, close; end
-            % F = F(ordr,:);
         end
         
         
     case 'kmeans_spider'
         %% Check the inputs
         disp('Using the spider package''s kmeans clustering')
-        % cparams specifies {k,distancemeasure,maxiterations}
+        % ClusterParams specifies {k,distancemeasure,maxiterations}
         % ** k
-        if ~isempty(cparams) && ~iscell(cparams), cparams = {cparams}; end
+        if ~isempty(ClusterParams) && ~iscell(ClusterParams), ClusterParams = {ClusterParams}; end
         
-        if length(cparams)>=1
-            k = cparams{1};
+        if length(ClusterParams)>=1
+            k = ClusterParams{1};
         else
             k = 2;
             disp('forming 2 clusters using kmeans')
         end
 
         % ** distance measure
-        if length(cparams)>=2
-            distancemeasure = cparams{2};
+        if length(ClusterParams)>=2
+            distancemeasure = ClusterParams{2};
         else
             distancemeasure = 'euclid';
             disp('using euclidean distance for kmeans')
@@ -347,8 +354,8 @@ switch cmeth
         
         % ** maxiterations
         % maximum number of iterations of training
-        if length(cparams)>=3
-            maxiterations = cparams{3};
+        if length(ClusterParams)>=3
+            maxiterations = ClusterParams{3};
         else
             maxiterations = 1000;
         end
@@ -360,14 +367,14 @@ switch cmeth
         a.child = distance(distancemeasure); % set the distance measure
         a.max_loops = maxiterations;
         
-        [r,a] = train(a,data(F)); % do the clustering
+        [r,a] = train(a,data(TS_DataMat)); % do the clustering
 
         % get clusters
 %         [rubbish ord_1] = sort(r.X);
         
         % secondary: order by distance to cluster centre
         cc = a.mu;
-%         ord = 1:size(F,1);
+%         ord = 1:size(TS_DataMat,1);
         ackwgs = cell(k,1);
         acgi = cell(k,1);
         
@@ -378,7 +385,7 @@ switch cmeth
             % in this subrange, order by distance to cluster centre
             dd = zeros(length(ii),1);
             for j=1:length(ii)
-                dd(j) = calc(distance(distancemeasure),data(F(ii(j),:)),data(cc(i,:)));
+                dd(j) = calc(distance(distancemeasure),data(TS_DataMat(ii(j),:)),data(cc(i,:)));
                 % evaluates the distance between each point and its
                 % assigned cluster centre -- stores in vector dd
             end
@@ -389,20 +396,20 @@ switch cmeth
 	case 'kmeans_matlab'
         %% Check the inputs
         disp('Using matlab''s statistics toolbox kmeans clustering')
-        % cparams specifies {k,distancemeasure,nrep,starts}
+        % ClusterParams specifies {k,distancemeasure,nrep,starts}
         % ** k
-        if ~isempty(cparams) && ~iscell(cparams), cparams = {cparams}; end
+        if ~isempty(ClusterParams) && ~iscell(ClusterParams), ClusterParams = {ClusterParams}; end
 
-        if length(cparams)>=1
-            k = cparams{1};
+        if length(ClusterParams)>=1
+            k = ClusterParams{1};
         else
             k = 2;
             disp('forming 2 clusters using kmeans')
         end
 
         % ** distance measure
-        if length(cparams)>=2
-            distancemeasure = cparams{2};
+        if length(ClusterParams)>=2
+            distancemeasure = ClusterParams{2};
             if strcmp(distancemeasure,'Euclidean')
                 distancemeasure = 'sqEuclidean';
             end
@@ -413,23 +420,23 @@ switch cmeth
 
         % ** nrep
         % number of replicates
-        if length(cparams)>=3
-            nrep = cparams{3};
+        if length(ClusterParams)>=3
+            nrep = ClusterParams{3};
         else
             nrep = 1;
         end
 		
 		% ** starts
 		% how to initialize the algorithm
-		if length(cparams)>=4
-			starts = cparams{4};
+		if length(ClusterParams)>=4
+			starts = ClusterParams{4};
 		else
 			starts = 'sample'; % samples from the data matrix
         end
 
         
         %% Specify the model
-        [idx,~,~,D] = kmeans(F, k, 'dist',distancemeasure, 'replicates',nrep,...
+        [idx,~,~,D] = kmeans(TS_DataMat, k, 'dist',distancemeasure, 'replicates',nrep,...
         							'start',starts, 'emptyaction','singleton', 'display','off');
 
         ackwgs = cell(k,1); % keywords
@@ -445,36 +452,36 @@ switch cmeth
     case 'kmedoids'
         %% Check the inputs
         disp('Using Ben''s cute little implementation of kmedoids')
-        % cparams specifies k, distancemeasure, nrep
+        % ClusterParams specifies k, distancemeasure, nrep
         % ** k
-        if isfield(cparams,'k')
-            k = cparams.k;
+        if isfield(ClusterParams,'k')
+            k = ClusterParams.k;
         else
             k = 2;
             disp('Forming 2 clusters using kmediods')
         end
-        if isfield(cparams,'dmth')
-            dmth = cparams.dmth;
+        if isfield(ClusterParams,'dmth')
+            dmth = ClusterParams.dmth;
         else
             dmth = 'Euclidean';
         end
-        if isfield(cparams,'maxIter')
-            maxIter = cparams.maxIter;
+        if isfield(ClusterParams,'maxIter')
+            maxIter = ClusterParams.maxIter;
         else
             maxIter = 50;
         end
-        if isfield(cparams,'nrep')
-            nrep = cparams.nrep;
+        if isfield(ClusterParams,'nrep')
+            nrep = ClusterParams.nrep;
         else
             nrep = 20;
         end
-        if isfield(cparams,'file')
-            whatwithfile = cparams.file; % filename to retrieve, or integer to specify
+        if isfield(ClusterParams,'file')
+            whatwithfile = ClusterParams.file; % filename to retrieve, or integer to specify
         else
             whatwithfile = 0; % calculate distance matrix now, don't save to file
         end
-        if isfield(cparams,'errmeas')
-            errmeas = cparams.errmeas;
+        if isfield(ClusterParams,'errmeas')
+            errmeas = ClusterParams.errmeas;
         else
             errmeas = 'sum';
         end
@@ -497,12 +504,12 @@ switch cmeth
         else
             % calculate pairwise distances
             if strcmp(dmth,'abscorr') % special distance function
-                R = pdist(F,'correlation');
+                R = pdist(TS_DataMat,'correlation');
                 R = 1-abs(1-R);
                 R(R<0) = 0;% sometimes get numerical error
                 disp(['R between ' num2str(min(R)) ' (0) - ' num2str(max(R)) ' (1)'])
             else
-                R = pdist(F,dmth);
+                R = pdist(TS_DataMat,dmth);
             end
         end
 
@@ -525,19 +532,19 @@ switch cmeth
         % use Gaussian Mixture modeling from the Statistics Toolbox
         % Ben Fulcher 6/7/2010
         
-        if ~isempty(cparams) && ~iscell(cparams), cparams = {cparams}; end
+        if ~isempty(ClusterParams) && ~iscell(ClusterParams), ClusterParams = {ClusterParams}; end
 
-        if length(cparams)>=1
-            k = cparams{1};
+        if length(ClusterParams)>=1
+            k = ClusterParams{1};
         else
             k = 2;
             disp('forming 2 clusters using a mixture of Gaussians')
         end
         
         options = statset('Display','final');
-        gm = gmdistribution.fit(F, k, 'Options', options);
+        gm = gmdistribution.fit(TS_DataMat, k, 'Options', options);
         % now assign clusters
-        idx = cluster(gm,F);
+        idx = cluster(gm,TS_DataMat);
         
 %         for i=1:k
 %             ackwgs{i} = ['KMEANS_C' num2str(i)];
@@ -548,7 +555,7 @@ switch cmeth
 %         end
         ackwgs = cell(k,1); % keywords
 		acgi = cell(k,1); % indicies
-        P = posterior(gm,F); % posterior under each mixture component
+        P = posterior(gm,TS_DataMat); % posterior under each mixture component
         for i = 1:k
             ackwgs{i} = ['GMM_C' num2str(i)];
             acgi{i} = find(idx==i);
@@ -570,17 +577,17 @@ switch cmeth
         %% Spectral Clustering: check the inputs
         disp('Using the spider package''s spectral clustering')
         % doesn't work so well on large numbers of features
-        % cparams specifies {k,sigma}
+        % ClusterParams specifies {k,sigma}
         % ** k, number of clusters
-        if length(cparams)>=1
-            k = cparams{1};
+        if length(ClusterParams)>=1
+            k = ClusterParams{1};
         else
             k = 2; % 2 clusters
         end
         
         % ** sigma, scale of exponential
-        if length(cparams)>=2
-            sigma = cparams{2};
+        if length(ClusterParams)>=2
+            sigma = ClusterParams{2};
         else
             sigma = 0.05;
         end
@@ -590,7 +597,7 @@ switch cmeth
         a.k = k;
         a.sigma = sigma;
         
-        d = data(F);
+        d = data(TS_DataMat);
         d.Y = []; % unsupervised
         
         [r,a] = train(a,d); % do the clustering
@@ -604,7 +611,7 @@ switch cmeth
             acgi{i} = find(r.X==i); % unordered within each cluster
         end
 	otherwise
-		disp([cmeth ' -- an invalid clustering option'])
+		disp([ClusterMethod ' -- an invalid clustering option'])
 		return
 end
 
@@ -612,9 +619,9 @@ end
 % Also output the clustered input matrix
 if nargout > 2
 	if iscell(acgi)
-		Fcl = F(vertcat(acgi{:}),:);
+		TS_DataMat_cl = TS_DataMat(vertcat(acgi{:}),:);
 	else
-		Fcl = F(acgi,:);
+		TS_DataMat_cl = TS_DataMat(acgi,:);
 	end
 end
 

@@ -1,36 +1,37 @@
 % TSQ_normalize
 % 
-% Updated version of TS_normalize: Ben Fulcher August 2009
-% Reads in from HCTSA_loc, writes to HCTSA_loc_N
-% These will be different to HCTSA_loc because this is a trimmed
-% and normalized version.
-% There are options for how to normalize (normopt);
-% and also how to trim bad entries (trimopt).
-% [opt] subs: only normalize and trim a subset of TS_loc. This can be used,
-% for example, to analyze just a subset of the full space, which can
-% subsequently be clustered and further subsetted using TS_cluster2...
-% For example, can choose a subset using SUB_autolabel2 to get only sound
-% time series. Then can try and distinguish 'animalsounds' from amongst the
-% other sound data using TS_prune4
-% subs in the form {[rowrange],[columnrange]} (to keep, from TS_loc).
-% Ben Fulcher August 2009
-% Ben Fulcher 9/12/2009 -- Updated for new mySQL setup
-% Ben Fulcher 12/9/2011 -- added trainset input -- indices of training
-%                           indicies (will only derive normalization
-%                           transformation on these indices)
+% Reads in data from HCTSA_loc.mat, writes a trimmed, normalized version to
+% HCTSA_loc_N.mat
+% The normalization is all about a rescaling to the [0,1] interval for
+% visualization and clustering.
+% 
+% --INPUTS:
+% normopt: string specifying how to normalize the data
+% trimopt: vector specifying thresholds for which rows and columns to trim. If
+%          set one of the trimopts{1} to 1, will have no bad values in your matrix.
+% subs [opt]: only normalize and trim a subset of the data matrix. This can be used,
+%             for example, to analyze just a subset of the full space, which can
+%             subsequently be clustered and further subsetted using TS_cluster2...
+%             For example, can choose a subset using SUB_autolabel2 to get only sound
+%             time series.
+%             subs in the form {[rowrange],[columnrange]} (rows and columns to
+%             keep, from HCTSA_loc).
 %
-% Reads in local TS_loc data, and saves the `normalized' version as TS_loc_N
-% The normalization is all about a rescaling to the [0,1] interval for visualization and clustering
-% Normalization rules are imported from the metric file, as saved in TS_guide_met.mat
-%
-% If set one of the trimopts{1} to 1, will have no bad values in your
-% matrix.
-%
-% Ben Fulcher 26/1/2011 -- Added incorporation of TS_loc_q to determination
-% of bad entries, rather than simply values missing in the matrix.
-% Ben Fulcher 28/1/2011 -- Removed filtering by high covariance -- can do
-% this elsewhere (e.g., TSQ_preprocess), added TS_loc_q_N
-%
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
 
 function TSQ_normalize(normopt,trimopt,subs,trainset)
 
@@ -61,7 +62,7 @@ end
 
 %% Read in information from local files
 % (As prepared by TS_prepare.m)
-fprintf(1,'Reading in local files...');
+fprintf(1,'Reading data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat','TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations')
 fprintf(1,' Loaded.\n');
 
@@ -312,7 +313,7 @@ end
 
 %% Remove bad entries
 % these can be created by feature vectors that are constant after e.g., the
-% sigmoid transform -- a bit of a weird thing to do if pre-filtering by 
+% sigmoid transform -- a bit of a weird thing to do if pre-filtering by
 % percentage...
 nancol = zeros(size(TS_DataMat,2),1); %column of all NaNs
 for i = 1:size(TS_DataMat,2)

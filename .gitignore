@@ -12,6 +12,7 @@ Thumbs.db
 # Database-retrieved files:
 HCTSA_loc.mat
 HCTSA_N.mat
+HCTSA_cl.mat
 
 TS_loc.mat
 TS_loc_N.mat

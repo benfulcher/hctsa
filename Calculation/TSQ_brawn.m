@@ -1,22 +1,36 @@
+% TSQ_brawn
+% 
+% This function fills in the missing elements of TS_DataMat, from HCTSA_loc.mat
+% (retrieved from the database using TSQ_prepared) The function systematically
+% calculates these missing elements (in parallel over operations for each time
+% series if specified)
+% 
+%---INPUTS:
+% tolog:      if 1 (0 by default) writes to a log file.
+% toparallel: if 1, attempts to use the Parallel Computing Toolbox to run
+%             computations in parallel over multiple cores.
+% bevocal:    if 1, gives additional user feedback.
+% 
+%---OUTPUTS:
+% Writes over HCTSA_loc.mat
+%
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
+
 function TSQ_brawn(tolog,toparallel,bevocal)
-% This is a routine to fill in the blank parts of TS_DataMat, as prepared by TSQ_prepared
-% It reads in the output files produced by TS_prepared and then goes through and systematically
-% calculates the missing bits (in parallel over the metrics for each time series)
-
-%% INPUT (function argument):
-% (()) tolog: if 1 (0 by default) writes to a log file
-%% INPUTS (files):
-% The output of TSQ_prepared: HCTSA_loc.mat
-%% OUTPUTS (to file):
-
-% 12/11/2000 ~ Ben Fulcher ~ Added tolog to functionality
-% 13/11/2009 ~ Ben Fulcher ~ Added noparallel to functionality, mainly for testing purposes
-% 							, but could also be for single-core machines
-% 30/11/2009 ~ Ben Fulcher ~ Completely rehauled for mySQL usage
-% 11/1/2010 ~ Ben Fulcher ~ Quickly added dbc argument -- TSQ_agglomerate writes back to this after calculation
-% 12/4/2011 ~ Ben Fulcher ~ added agglomerate argument -- can specify 0 to
-%                               stop autoagglomeration
-
 %% Check valid inputs / set defaults
 % Log to file
 if nargin < 1
@@ -47,9 +61,9 @@ if nargin < 3
 end
 
 %% Read in information from local files
-fprintf(fid,'Reading in data and guides from file...');
+fprintf(fid,'Reading in data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat')
-fprintf(fid,' All done.\n');
+fprintf(fid,' Done.\n');
 
 %% Definitions
 nts = length(TimeSeries); % number of time series

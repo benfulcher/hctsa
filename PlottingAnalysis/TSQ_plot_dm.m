@@ -1,25 +1,41 @@
-function TSQ_plot_dm(norcl,kwgs,gi,F,customorder,customcmap)
-% Plot the data matrix (time series versus operations) table
-% Ben Fulcher 9/12/2009 -- updated for mySQL system
-% Ben Fulcher 31/3/2010 -- added norcl option
-% Ben Fulcher 24/6/2010 -- cleaned up the axis labels fiasco, fixed error
-%                           in which customordering didn't change this when
-%                           it should. Redid the colormap handling of
-%                           multiple groups.
-% Ben Fulcher 25/6/2010 -- added F input
+% TSQ_plot_dm
+% 
+% Plot the data matrix.
+% 
+%---INPUTS:
+% norcl: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
+%         data in HCTSA_cl.mat (default)
+% kwgs:  specify keyword groups to color different keywords differently in the
+%         data matrix [opt].
+% 
+%---OUTPUT:
+% Produces a colormap plot of the data matrix with time series as rows and
+%   operations as columns.
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
 
-%% OUTPUT
-% Gives a colormap plot of time series (rows) and operations (columns)
+function TSQ_plot_dm(norcl,kwgs,gi,TS_DataMat,CustomOrder,CustomColorMap)
 
-%% Fill in default values if labelx unspecified; check for valid inputs
-% Display as the normalized or clustered data
-% What sorts of axes labels are appropriate
+% Visualize normalized or clustered matrix (clustered by default)
 if nargin < 1 || isempty(norcl)
-    norcl = 'cl'; % by default visualize the clustered matrix
+    norcl = 'cl';
 end
-if nargin < 2; kwgs = {}; end % no groups
-
 % Differential colouring of keyword groups?
+if nargin < 2; kwgs = {}; end % no groups
 if ischar(kwgs)
     kwgs = {kwgs};
 end
@@ -27,61 +43,57 @@ if nargin < 3
     gi = []; % automatically get indicies if necessary
 end 
 if nargin < 4
-   F = []; % load from TS_loc_N or TS_loc_cl
+   TS_DataMat = []; % load from TS_loc_N or TS_loc_cl
 end
-if nargin < 5 || isempty(customorder)
-	customorder = {[],[]};
+if nargin < 5 || isempty(CustomOrder)
+	CustomOrder = {[],[]};
 end
 if nargin < 6
-    customcmap = 'redyellowblue';
+    CustomColorMap = 'redyellowblue';
 end
 
 %% Read in the data
 if isstruct(norcl)
     % can specify all of this in the norcl argument
-    tsf = norcl.tsf;
-    mlab = norcl.mlab;
-    F = norcl.F;
+    TimeSeriesFileNames = norcl.TimeSeriesFileNames;
+    OperationNames = norcl.OperationNames;
+    TS_DataMat = norcl.F;
 else
-    fprintf(1,'Reading data and guides from file...\n');
     if strcmp(norcl,'cl')
-        if isempty(F)
-            a = which('TS_loc_cl.mat'); % first check it exists
-            if isempty(a), error('TS_loc_cl not found: run TSQ_cluster'); end
-            load TS_loc_cl.mat TS_loc_cl
-            F = TS_loc_cl; clear TS_loc_cl
-        end
-        load TS_loc_guides_cl.mat tsfcl mlabcl
-        tsf = tsfcl; clear tsfcl
-        mlab = mlabcl; clear mlabcl
+        TheFile = 'HCTSA_cl.mat'; TheRoutine = 'TSQ_cluster';
     elseif strcmp(norcl,'norm')
-        if isempty(F)
-            a = which('TS_loc_N.mat');
-            if isempty(a), error('TS_loc_N not found: run TSQ_normalize'); end
-            load TS_loc_N.mat TS_loc_N
-            F = TS_loc_N; clear TS_loc_N
-        end
-        load TS_loc_guides_N.mat tsfn mlabn
-        tsf = tsfn; clear tsfn
-        mlab = mlabn; clear mlabn
+        TheFile = 'HCTSA_N.mat'; TheRoutine = 'TSQ_normalize';
     else
         error('Unknown specifier %s, please specify ''norm'' or ''cl''',norcl)
     end
+    
+    fprintf(1,'Reading data from %s...',TheFile);
+    
+    if isempty(TS_DataMat)
+        a = which(TheFile); % first check it exists
+        if isempty(a), error('\n%s not found. You should probably run %s...',TheFile,TheRoutine); end
+        load(TheFile,'TS_DataMat')
+        fprintf(1,' Done.\n');
+    end
+    load(TheFile,'TimeSeries','Operations')
 end
+TimeSeriesFileNames = {TimeSeries.FileName}; clear TimeSeries; % Just extract filenames
+OperationNames = {Operations.Name}; clear Operations; % Just extract operation names
 
-[nts, nops] = size(F); % label in this way -- ts as rows
 
-%% Reorder according to customorder
-if ~isempty(customorder{1}) % reorder rows
+[nts, nops] = size(TS_DataMat); % label in this way -- ts as rows
+
+%% Reorder according to CustomOrder
+if ~isempty(CustomOrder{1}) % reorder rows
 	fprintf(1,'Reordering time series according to custom order specified\n');
-	F = F(customorder{1},:);
-    tsf = tsf(customorder{1});
+	TS_DataMat = TS_DataMat(CustomOrder{1},:);
+    TimeSeriesFileNames = TimeSeriesFileNames(CustomOrder{1});
 end
 
-if ~isempty(customorder{2}) % reorder columns
+if ~isempty(CustomOrder{2}) % reorder columns
 	fprintf(1,'Reordering operations according to custom order specified\n');
-	F = F(:,customorder{2});
-    mlab = mlab(customorder{2});
+	TS_DataMat = TS_DataMat(:,CustomOrder{2});
+    OperationNames = OperationNames(CustomOrder{2});
 end
 
 
@@ -112,23 +124,23 @@ if nkwgs > 0
         Ng = Ng + 1;
     end
     
-    %% Change range of F to make use of new colormap appropriately
+    %% Change range of TS_DataMat to make use of new colormap appropriately
     ff = 0.9999999;
     squashme = @(x)ff*(x - min(x(:)))/(max(x(:))-min(x(:)));
-    F = squashme(F);
+    TS_DataMat = squashme(TS_DataMat);
     for jo = 1:Ng
-        F(gi{jo},:) = squashme(F(gi{jo},:)) + jo - 1;
+        TS_DataMat(gi{jo},:) = squashme(TS_DataMat(gi{jo},:)) + jo - 1;
     end
 end
 Ng = length(gi);
 % set the colormap
 if Ng <= 1
-    if strcmp(customcmap,'redyellowblue');
-        customcmap = BF_getcmap('redyellowblue',ng,0);
+    if strcmp(CustomColorMap,'redyellowblue');
+        CustomColorMap = BF_getcmap('redyellowblue',ng,0);
     else
-        customcmap = gray(ng);
+        CustomColorMap = gray(ng);
     end
-    colormap(customcmap)
+    colormap(CustomColorMap)
 else
     cmap = colormap(BF_getcmap('blues',ng,0,1));
     if Ng >= 2
@@ -189,17 +201,17 @@ else
     colormap(cmap)
 end
 
-% have to surround by zeros for an accurate pcolor:
-pcolor([F, zeros(size(F,1),1); zeros(1,size(F,2)+1)]);
+% Surround by zeros for an accurate pcolor:
+pcolor([TS_DataMat, zeros(size(TS_DataMat,1),1); zeros(1,size(TS_DataMat,2)+1)]);
 shading flat
 
 %%% Format the plot
 % Axis labels:
-set(gca,'YTick',1 + (0.5:1:size(F,1)),'YTickLabel',tsf); % time series
+set(gca,'YTick',1 + (0.5:1:size(TS_DataMat,1)),'YTickLabel',TimeSeriesFileNames); % time series
 if nops < 1000 % otherwise don't bother
-    set(gca,'XTick',1 + (0.5:1:size(F,2)),'XTickLabel',mlab);
+    set(gca,'XTick',1 + (0.5:1:size(TS_DataMat,2)),'XTickLabel',OperationNames);
 end
-title(sprintf('Data matrix (%ux%u)',size(F,1),size(F,2)))
+title(sprintf('Data matrix (%ux%u)',size(TS_DataMat,1),size(TS_DataMat,2)))
 set(gca,'FontSize',8) % set font size
 
 end
