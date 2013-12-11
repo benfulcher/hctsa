@@ -1,22 +1,42 @@
-function SQL_add(importwhat, INPfile, dbname, bevocal)
+% SQL_add
+% 
 % Adds a time series or operation to the database with the specified columns, collabs, of the table given
-% INPUTS: importwhat -- 'mops', 'ops', or 'ts' -- write to which of these?
-% 		  inpfilename -- the filename of the tab-delimited textfile to be read in [default = INP_ts.txt or INP_ops.txt]
-% The input file should be formatted with tabs (\t) as delimiters between the entries, and in the order specified below
-% the column labels of the TimeSeries or Operations table in the database are in this order:
-% 			 'FileName', 'Keywords', 'Quantity', 'Unit', 'SamplingRate' for TimeSeries
-% 			 'Pointer'(M,S,P),'Code','OpName','Keywords' for Operations (with keywords only for children)
+% INPUTS: importwhat -- 'mops', 'ops', or 'ts'
+%         INPfile -- the filename of the tab-delimited textfile to be read in
+%                       [default = INP_ts.txt or INP_ops.txt or INP_mops.txt]
+% The input file should be formatted with whitespace as a delimiter between the
+% entries to import
+%
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% HISTORY:
 % Ben Fulcher 3/12/2009
 % Ben Fulcher 12/1/2010: added dbname option
 % Romesh Jan 2013
-% Ben Fulcher June 2013 -- reformulated the whole format so that only a single thing is uploaded at a time (ts, ops, mops), and follows a uniform and more transparent structure with as much overlap in syntax as possible. Added bevocal input
+% Ben Fulcher June 2013 -- reformulated the whole format so that only a single
+% thing is uploaded at a time (ts, ops, mops), and follows a uniform and more
+% transparent structure with as much overlap in syntax as possible. Added
+% bevocal input
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
 
+function SQL_add(importwhat, INPfile, dbname, bevocal)
 %% CHECK INPUTS:
-% SHOULD BE TS, MOP, or OP -- or can iterate through each possibility
-% Nice to make code that inports a given type of thing into a given table
-% importwhat = 'ts'; INPfile = 'INP_ts.txt'; dbname = '';
 
 % importwhat
+% SHOULD BE TS, MOP, or OP -- or can iterate through each possibility
 if nargin < 1 || isempty(importwhat) || ~ismember(importwhat,{'ops','ts','mops'})
     error('Error setting first input argument -- should be ''ts'' for TimeSeries or ''ops'' for Operations');
 end

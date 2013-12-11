@@ -1,94 +1,93 @@
-function ids = SQL_getids(morts,lenr,kyesc,kno,pcalcr,idr,howtolimit,dbname)
-
-% This function takes as input a set of constraints on the time series and metrics to include
-% and output the relevant ts_ids / m_ids
-
-% HISTORY:
-% 11/1/2010: Ben Fulcher ~ Imported from TSQ_prepared and rehauled for this purpose
-% 10/4/2010: Ben Fulcher -- added howtolimit as new input
-
-%% INPUTS:
-% 1) morts: specifies 'mets' for metrics or 'ts' for time series
-% 2) lenr (ts): contrain included time series by length [minimum_length maximum_length] (1x2 vector)
-% 2) lenr (mets): takes roll of masterpull: whether (1) or not (0) to pull
-%                   in other master-linked operations
-% 3) kyesc: constrain included time series by keyword -- nx2 cell
-% 			(i) keyword
-% 			(ii) how many of that keyword (0==all available)
-% 4) kno: keywords NOT to include (cell of strings)
-% 5) pcalcr: range of percentagecalc to consider (empty = all, default)
-% 6) idr: range of possible ids to restrict the search to (empty = don't
-%                       restrict -- default)
-% 7) howtolimit: can select one of:
-%                   'rand' (limit cases by random)
-%                   'pcmax' (limit cases by maximum percentage calculated)
-%                   'pcmin' (limit cases by minimum percentage calculated)
-% 8) dbc: can specify database; otherwise opens the default specified in
+% SQL_getids
+% 
+% Takes as input a set of constraints on the time series and operations to
+% include then runs the appropriate mySQL commands and outputs the relevant
+% ts_ids / m_ids
+% 
+%---INPUTS:
+% TsorOps: specifies 'ops' for metrics or 'ts' for time series
+% LengthRange (ts): contrain included time series by length [minimum_length maximum_length] (1x2 vector)
+% LengthRange (mets): takes roll of masterpull: whether (1) or not (0) to pull
+%                in other master-linked operations
+% KeywordInclude: constrain included time series by keyword -- nx2 cell
+% 		(i) keyword
+% 		(ii) how many of that keyword (0==all available)
+% KeywordRemove: keywords NOT to include (cell of strings)
+% idr: range of possible ids to restrict the search to (empty = don't
+%                    restrict -- default)
+% howtolimit: can select one of:
+%                'rand' (limit cases by random)
+%                'pcmax' (limit cases by maximum percentage calculated)
+%                'pcmin' (limit cases by minimum percentage calculated)
+% dbc: can specify database; otherwise opens the default specified in
 %         SQL_opendatabase
-
-%% OUTPUTS
+% 
+%---OUTPUTS
 % ids: a vector or either ts_ids or m_ids that match the input constraints
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
 
-
+function ids = SQL_getids(TsorOps,LengthRange,KeywordInclude,KeywordRemove,idr,howtolimit,dbname)
 %%% FOREPLAY
 %% Check inputs -- set defaults
 % if nargin < 5; disp('You must provide 5 inputs! And no, I''m not asking nicely!!'); return; end
 
-if strcmp(morts,'ts')
-	if isempty(lenr)
-		lenr = [200, 20000];
-		fprintf(1,'Setting default length constraints: %u--%u\n',lenr(1),lenr(2))
+if strcmp(TsorOps,'ts')
+	if isempty(LengthRange)
+		LengthRange = [200, 20000];
+		fprintf(1,'Setting default length constraints: %u--%u\n',LengthRange(1),LengthRange(2))
 	end
-elseif strcmp(morts,'mets')
-	masterpull = lenr;
+elseif strcmp(TsorOps,'ops')
+	masterpull = LengthRange;
 	if isempty(masterpull)
 		masterpull = 1; % retrieves other outputs of all master functions implicated in the range
-		fprintf(1,'Pulling in all pointers by default');
+		fprintf(1,'Pulling in all pointers by default\n');
 	end
 else
-	disp('First input must be either ''ts'' or ''mets''. I''m outraged. Exiting.');
-    return
+	error('First input must be either ''ts'' or ''ops''.');
 end
 
 if nargin < 4
-    kno = {};
+    KeywordRemove = {};
 end
 
 if nargin < 5
-	pcalcr = [];
-end
-if nargin < 6
 	idr = [];
 end
-if nargin < 7 || isempty(howtolimit)
+if nargin < 6 || isempty(howtolimit)
     howtolimit = 'pcmax';
 end
-if nargin < 8
-	dbname = '';
+if nargin < 7
+	dbname = ''; % Use default database by default
 end
 
 % seperate into keywords to include: kyes
 % and the number of that keyword to include: kyesn
-if ~isempty(kyesc)
-    kyes = kyesc(:,1); kyesn = vertcat(kyesc{:,2});
+if ~isempty(KeywordInclude)
+    kyes = KeywordInclude(:,1); kyesn = vertcat(KeywordInclude{:,2});
 else
     kyes = {}; kyesn = [];
 end
-
-
-% if tolog
-% 	fn = ['TSQ_prepared_' datestr(now,30) '.log'];
-% 	flog = fopen(fn,'w','n');
-% 	disp(['Logging progress to ' fn]);
-% 	fprintf(flog,'%s\n',['Welcome! This is your friendly TSQ_prepared log']);
-% 	fprintf(flog,'%s\n',['Subsetting and checking performed at ' datestr(now)]);
-% end
 
 %% Open connection to mySQL database
 dbc = SQL_opendatabase(dbname);
 
 %%% TIME SERIES
-if strcmp(morts,'ts')
+if strcmp(TsorOps,'ts')
 
 	%% Filter time series by keyword
 	% keywords as a cell: kyes; and how many of each to include: kyesn
@@ -101,20 +100,20 @@ if strcmp(morts,'ts')
 	end
 
 	% Extra qualifier to not include certain keywords -- this is performed seperately in the query for each keyword *to* include
-	% s{2} -- kno
-	if ~isempty(kno)
+	% s{2} -- KeywordRemove
+	if ~isempty(KeywordRemove)
 		s{2} = ['ts_id NOT IN (SELECT ts_id FROM TsKeywordsRelate WHERE tskw_id IN ' ...
-							'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword IN (' BF_cat(kno,',','''') '))) '];
+							'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword IN (' BF_cat(KeywordRemove,',','''') '))) '];
 	end
 	
-	% Extra qualifier pcalcr to have PercentageCalculated only in a certain range
-	% s{3} -- pcalcr
-	if ~isempty(pcalcr)
-		s{3} = sprintf('PercentageCalculated BETWEEN %f AND %f',pcalcr(1),pcalcr(2));
-	end
+    % % Extra qualifier pcalcr to have PercentageCalculated only in a certain range
+    % % s{3} -- pcalcr
+    % if ~isempty(pcalcr)
+    %     s{3} = sprintf('PercentageCalculated BETWEEN %f AND %f',pcalcr(1),pcalcr(2));
+    % end
 	
-	% length constraint in words
-	s{4} = sprintf('TimeSeries.Length BETWEEN %u AND %u',lenr(1),lenr(2));
+	% Length constraint in words
+	s{3} = sprintf('TimeSeries.Length BETWEEN %u AND %u',LengthRange(1),LengthRange(2));
 	
 	% Combine these results into part of a mySQL query string
 	conditions = '';
@@ -139,11 +138,11 @@ if strcmp(morts,'ts')
 			else % constrain to some number (using the LIMIT command in mySQL)
                 switch howtolimit
                     case 'pcmax'
-                        limitme = [' ORDER BY PercentageCalculated DESC LIMIT ' num2str(ncut)];
+                        limitme = sprintf(' ORDER BY PercentageCalculated DESC LIMIT %u',ncut);
                     case 'pcmin'
-                        limitme = [' ORDER BY PercentageCalculated LIMIT ' num2str(ncut)];
+                        limitme = sprintf(' ORDER BY PercentageCalculated LIMIT %u',ncut);
                     case 'rand'
-                        limitme = [' ORDER BY RAND() LIMIT ' num2str(ncut)];
+                        limitme = sprintf(' ORDER BY RAND() LIMIT %u',ncut);
                         % I know this is a slow implementation -- probably better
                         % to create the random numbers here to constrain
                 end
@@ -164,9 +163,9 @@ if strcmp(morts,'ts')
 			% execute the select statement
 			[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 			if isempty(ts_ids) && isempty(emsg)
-				disp(['No time series matching constraints for ' kyes{i}]);
+				fprintf(1,'No time series matched the given constraints for the keyword ''%s''\n',kyes{i});
 			elseif ~isempty(emsg)
-				disp(['Error retrieving time series for ' kyes{i}]);
+				fprintf(1,'Error retrieving time series for %s\n',kyes{i});
 				disp(emsg)
 				keyboard
 			else
@@ -191,10 +190,10 @@ if strcmp(morts,'ts')
 		end
 	
 	else % just use the other constraints
-		% if isempty(kno)
+		% if isempty(KeywordRemove)
 		SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' conditions(6:end)];
 		% else
-		% 	SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ss_tsl ' ' knoextrastring];
+		% 	SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ss_tsl ' ' KeywordRemoveextrastring];
 		% end
 		[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
@@ -226,17 +225,17 @@ else
 	end
 
 	% Extra qualifier to not include certain keywords -- this is performed seperately in the query for each keyword *to* include
-	% s{2} -- kno
-	if ~isempty(kno)
+	% s{2} -- KeywordRemove
+	if ~isempty(KeywordRemove)
 		s{2} = ['m_id NOT IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id IN ' ...
-							'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(kno,',','''') '))) '];
+							'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(KeywordRemove,',','''') '))) '];
 	end
 	
-	% Extra qualifier pcalcr to have PercentageCalculated only in a certain range
-	% s{3} -- pcalcr
-	if ~isempty(pcalcr)
-		s{3} = ['PercentageCalculated BETWEEN ' num2str(pcalcr(1)) ' AND ' num2str(pcalcr(2))];
-	end
+    % % Extra qualifier pcalcr to have PercentageCalculated only in a certain range
+    % % s{3} -- pcalcr
+    % if ~isempty(pcalcr)
+    %     s{3} = ['PercentageCalculated BETWEEN ' num2str(pcalcr(1)) ' AND ' num2str(pcalcr(2))];
+    % end
 	
 	% Combine these results into part of a mySQL query string
 	conditions='';
@@ -246,7 +245,7 @@ else
 		end
 	end
 	
-	% if ~isempty(kno)
+	% if ~isempty(KeywordRemove)
 	% 	mnoextrastring = ['AND m_id NOT IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id IN ' ...
 	% 						'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(mno,',','''') '))) '];
 	% else
@@ -318,7 +317,7 @@ else
 			fprintf(1,'We lost %u  to overlapping keywords!\n',lbefore-lafter);
 		end
 	
-	else % just use the length/kno constraint
+	else % just use the length/KeywordRemove constraint
 		if isempty(conditions)
 			SelectString = 'SELECT m_id FROM Operations'; % include all operations -- exclude nothing
 		else
