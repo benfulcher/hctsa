@@ -1,12 +1,15 @@
 % TSQ_us_cluster
 % 
-% Inputs a data matrix and clustering options, outputs a new ordering of
-% the indicies of this data matrix. Can do this on the full data matrix, or
-% input a section and reorder it. The possiblities are literally endless.
-% The output from this can also be fed to other algorithms -- to plot
-% clusters in different ways, etc.
-% Unsupervised Clustering
-% Some settings use the Spider package for machine learning in Matlab
+% Perform unsupervised clustering on a matrix using a given method.
+% 
+% Loads a data matrix and clustering options and outputs a clustering of the
+% indicies of this data matrix.
+% 
+% The output from this can be fed to other algorithms -- to plot clusters
+% in different ways, etc.
+% 
+% Some settings use the Spider package for machine learning in Matlab.
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -23,7 +26,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [ackwgs, acgi, TS_DataMat_cl] = TSQ_us_cluster(norcl,ClusterMethod,ClusterParams,metorts)
+function [ackwgs, acgi, TS_DataMat_cl] = TSQ_us_cluster(norcl,ClusterMethod,ClusterParams,TSorOps)
 
 %% Check Inputs
 % 1) norcl: can be the data matrix, or a string:
@@ -42,10 +45,9 @@ end
 if nargin < 3, ClusterParams = {}; end % defaults specified within each method
 
 
-% 4) metorts: whether to do for metrics ('mets') or time series ('ts')
+% 4) TSorOps: whether to do for metrics ('ops') or time series ('ts')
 %             only meaningful when norcl is a string.
-if nargin < 4 || isempty(metorts), metorts = 'ts'; end
-
+if nargin < 4 || isempty(TSorOps), TSorOps = 'ts'; end
 
 %% Get the data
 switch norcl
@@ -60,33 +62,32 @@ case 'norm'
 otherwise % Input is a matrix to be clustered -- call it TS_DataMat.
     TS_DataMat = norcl;
 end
-% Transpose for operations:
-if strcmp(metorts,'mets'), TS_DataMat = TS_DataMat'; end
-
+% Transpose the matrix is using operations:
+if strcmp(TSorOps,'ops'), TS_DataMat = TS_DataMat'; end
 
 %% Do the unsupervised clustering
 switch ClusterMethod
 	case 'linkage'
 % 		disp('Using inbuilt matlab linkage clustering');
         % parameter is a cell:
-        % {dmth, lmth, showdend, clustth, savetofile, customR}
+        % {DistanceMetric, LinkageMethod, showdend, clustth, savetofile, customR}
         % Better to make this a structure in future...
         %% Check inputs
-        % ** dmth
+        % ** DistanceMetric
         if length(ClusterParams)>=1 && ~isempty(ClusterParams{1})
-            dmth = ClusterParams{1};
+            DistanceMetric = ClusterParams{1};
         else
-            dmth = 'euclidean';
+            DistanceMetric = 'euclidean';
         end
         
-        % ** lmth
+        % ** LinkageMethod
         if length(ClusterParams)>=2 && ~isempty(ClusterParams{2})
-            lmth = ClusterParams{2};
+            LinkageMethod = ClusterParams{2};
         else
-            lmth = 'average';
+            LinkageMethod = 'average';
         end
         
-        disp(['Using ' lmth ' linkage clustering on ' dmth ' distances']);
+        fprintf(1,'Using %s linkage clustering on %s distances',LinkageMethod,DistanceMetric);
         
         % ** showdend
         if length(ClusterParams)>=3 && ~isempty(ClusterParams{3})
@@ -95,7 +96,7 @@ switch ClusterMethod
             showdend = 0;
         end
         if showdend == 0
-            disp('suppressing dendrogram output')
+            fprintf(1,'Suppressing dendrogram output\n')
         end
         
         % ** clustthresh -- many ways of doing this -- current way searches
@@ -134,52 +135,52 @@ switch ClusterMethod
             links = savetofile.links;
             clear savetofile
         elseif ischar(savetofile) % specify a filename containing R and links
-            fn = savetofile;
-            load(fn,'R','links'); % load custom distance and linkage information
-        elseif savetofile==2 % this means to load from file
-            if strcmp(metorts,'ts')
-                fn = 'TS_guide_clinksr.mat';
+            FileName = savetofile;
+            load(FileName,'R','links'); % load custom distance and linkage information
+        elseif (savetofile == 2) % this means to load from file
+            if strcmp(TSorOps,'ts')
+                FileName = 'TS_guide_clinksr.mat';
             else
-                fn = 'TS_guide_clinksc.mat';
+                FileName = 'TS_guide_clinksc.mat';
             end
-            load(fn,'R','links');
+            load(FileName,'R','links');
         else
             % pairwise distances
-            if strcmp(dmth,'abscorr') % custom distance function
+            if strcmp(DistanceMetric,'abscorr') % custom distance function
                 if any(isnan(TS_DataMat(:)));
-                    disp('NaNs in input matrix -- distance calculations are going to be SLOW...')
+                    fprintf(1,'NaNs found in the input matrix. Distance calculations will probably be SLOW...\n')
                     R = benpdist(TS_DataMat,'corr',1);
                 else % all good values -- can do this using pdist which is very fast
                     R = pdist(TS_DataMat,'corr');
                 end
                 R = 1-abs(1-R);
                 R(R<0) = 0;% sometimes get numerical error
-                disp(['abscorr transformation :: R between ' num2str(min(R)) ' (0) - ' num2str(max(R)) ' (1)'])
+                fprintf(1,'abscorr transformation :: R between %f (0) -- %f (1)',min(R),max(R))
             else
                 if any(isnan(TS_DataMat(:))) % NaNs: need to do this the slow way:
                     disp('NaNs in input matrix -- distance calculations are going to be SLOW...')
-                    R = benpdist(TS_DataMat,dmth,1);
+                    R = benpdist(TS_DataMat,DistanceMetric,1);
                 else
-                    R = pdist(TS_DataMat,dmth);
+                    R = pdist(TS_DataMat,DistanceMetric);
                 end
             end
             % links
-            links = linkage(R,lmth);
+            links = linkage(R,LinkageMethod);
 
             % Display cophentic correlation (goodness of linkage)
             cpc = cophenet(links,R);
-            disp(['Cophenetic correlation is ' num2str(cpc)])
+            fprintf(1,'FYI, cophenetic correlation is %f\n',cpc)
 
             % Save to file
-            if savetofile==1
-                disp('Saving R and links to file');
-                if strcmp(metorts,'ts')
-                    fn = 'TS_guide_clinksr.mat';
+            if (savetofile == 1)
+                if strcmp(TSorOps,'ts')
+                    FileName = 'TS_guide_clinksr.mat';
                 else
-                    fn = 'TS_guide_clinksc.mat';
+                    FileName = 'TS_guide_clinksc.mat';
                 end
-                disp(['Saving the linkage information as ''' fn ''''])
-                save(fn,'R','links','-v7.3')
+                fprintf(1,'Saving the linkage information as ''%s''...',FileName)
+                save(FileName,'R','links','-v7.3')
+                fprintf(1,' Done.\n');
                 if nargout<1
                     return % don't bother doing the rest if all we wanted was this
                 end
@@ -324,7 +325,7 @@ switch ClusterMethod
                 fprintf(1,'Too big for optimalleaforder\n')
                 [~,~,ord] = dendrogram(links,0);
             end
-            ackwgs = {[lmth '_' dmth '_linkage']};
+            ackwgs = {[LinkageMethod '_' DistanceMetric '_linkage']};
             acgi = ord; % outputs one cluster with an ordering given by the linkage clustering
             if ~showdend, close; end
         end
@@ -461,9 +462,9 @@ switch ClusterMethod
             disp('Forming 2 clusters using kmediods')
         end
         if isfield(ClusterParams,'dmth')
-            dmth = ClusterParams.dmth;
+            DistanceMetric = ClusterParams.dmth;
         else
-            dmth = 'Euclidean';
+            DistanceMetric = 'Euclidean';
         end
         if isfield(ClusterParams,'maxIter')
             maxIter = ClusterParams.maxIter;
@@ -488,28 +489,28 @@ switch ClusterMethod
         
         % retrieve distances if necessary
         if ischar(whatwithfile) % load from custom filename
-            fn = whatwithfile;
+            FileName = whatwithfile;
             tic
-            load(fn,'R'); % load custom distance ('links' not needed)
-            disp(['loaded R from ' fn ' took ' BF_thetime(toc)])
+            load(FileName,'R'); % load custom distance ('links' not needed)
+            disp(['loaded R from ' FileName ' took ' BF_thetime(toc)])
         elseif (whatwithfile == 2) % load from TS_guide_clinks
-            if strcmp(metorts,'ts')
-                fn = 'TS_guide_clinksr.mat';
+            if strcmp(TSorOps,'ts')
+                FileName = 'TS_guide_clinksr.mat';
             else
-                fn = 'TS_guide_clinksc.mat';
+                FileName = 'TS_guide_clinksc.mat';
             end
-            load(fn,'R'); % don't need 'links'
+            load(FileName,'R'); % don't need 'links'
         elseif ndims(whatwithfile)==2 && length(whatwithfile)>1 % you've supplied R in file field!
             R = whatwithfile; clear whatwithfile
         else
             % calculate pairwise distances
-            if strcmp(dmth,'abscorr') % special distance function
+            if strcmp(DistanceMetric,'abscorr') % special distance function
                 R = pdist(TS_DataMat,'correlation');
                 R = 1-abs(1-R);
                 R(R<0) = 0;% sometimes get numerical error
                 disp(['R between ' num2str(min(R)) ' (0) - ' num2str(max(R)) ' (1)'])
             else
-                R = pdist(TS_DataMat,dmth);
+                R = pdist(TS_DataMat,DistanceMetric);
             end
         end
 
@@ -624,7 +625,6 @@ if nargout > 2
 		TS_DataMat_cl = TS_DataMat(acgi,:);
 	end
 end
-
 
 
 end
