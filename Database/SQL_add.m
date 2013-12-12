@@ -1,11 +1,15 @@
 % SQL_add
 % 
-% Adds a time series or operation to the database with the specified columns, collabs, of the table given
-% INPUTS: importwhat -- 'mops', 'ops', or 'ts'
-%         INPfile -- the filename of the tab-delimited textfile to be read in
-%                       [default = INP_ts.txt or INP_ops.txt or INP_mops.txt]
-% The input file should be formatted with whitespace as a delimiter between the
-% entries to import
+% Adds a set of time series, operations, or master operations to the mySQL
+% database.
+% 
+%---INPUTS:
+% ImportWhat: 'mops' (for master operations), 'ops' (for operations), or 'ts'
+%             (for time series)
+% INPfile:    the filename of the tab-delimited textfile to be read in [default
+%             = INP_ts.txt or INP_ops.txt or INP_mops.txt]
+%             The input file should be formatted with whitespace as a delimiter
+%             between the entries to import.
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -32,18 +36,18 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_add(importwhat, INPfile, dbname, bevocal)
+function SQL_add(ImportWhat, INPfile, dbname, bevocal)
 %% CHECK INPUTS:
 
-% importwhat
+% ImportWhat
 % SHOULD BE TS, MOP, or OP -- or can iterate through each possibility
-if nargin < 1 || isempty(importwhat) || ~ismember(importwhat,{'ops','ts','mops'})
+if nargin < 1 || isempty(ImportWhat) || ~ismember(ImportWhat,{'ops','ts','mops'})
     error('Error setting first input argument -- should be ''ts'' for TimeSeries or ''ops'' for Operations');
 end
 
 % inpfilename
 if nargin < 2 || isempty(INPfile)
-    if strcmp(importwhat,'ts')
+    if strcmp(ImportWhat,'ts')
         INPfile = 'INP_ts.txt';
     else
         INPfile = 'INP_ops.txt';
@@ -67,7 +71,7 @@ ticker = tic;
 [dbc, dbname] = SQL_opendatabase(dbname);
 
 % Define strings to unify the different strands of code for time series / operations
-switch importwhat
+switch ImportWhat
     case 'ts'
         thewhat = 'time series';
         theid = 'ts_id';
@@ -94,7 +98,10 @@ end
 
 %% 1. Open, read the input file
 fid = fopen(INPfile);
-switch importwhat
+if (fid==-1)
+    error('Could not load the specified input file ''%s''',INPfile)
+end
+switch ImportWhat
 case 'ts' % Read the time series input file:
     if bevocal
         fprintf(1,'Need to format %s (Time Series input file) as: Filename Keywords\n',INPfile)
@@ -102,7 +109,7 @@ case 'ts' % Read the time series input file:
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
-	datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1); % 'HeaderLines',1,
+	datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
 case 'ops' % Read the operations input file:
     if bevocal
         fprintf(1,'Need to format %s (Operations input file) as: OperationCode OperationName OperationKeywords\n',INPfile)
@@ -131,7 +138,7 @@ if nits == 0, error(['Input file ' INPfile ' seems to be empty??']), end
 
 if bevocal
     fprintf(1,'Found %u %s in %s, I think. Take a look:\n',nits,thewhat,INPfile)
-    switch importwhat
+    switch ImportWhat
     case 'ts'
         fprintf(1,'%s\t%s\n','Filename','Keywords')
         fprint_ts = @(x) fprintf('%s\t%s\n',datain{x,1},datain{x,2});
@@ -143,7 +150,7 @@ if bevocal
         fprint_mops = @(x) fprintf('%s\t%s\n',datain{x,1},datain{x,2});
     end
     for i = 1:min(3,nits)
-        switch importwhat
+        switch ImportWhat
         case 'ts', fprint_ts(i);
         case 'ops', fprint_ops(i);
         case 'mops', fprint_mops(i);
@@ -152,7 +159,7 @@ if bevocal
     if nits > 3
         fprintf(1,'..................(%u).....................\n',max(nits-6,0))
         for i = max(nits-2,4):nits
-            switch importwhat
+            switch ImportWhat
             case 'ts', fprint_ts(i);
             case 'ops', fprint_ops(i);
             case 'mops', fprint_mops(i);
@@ -177,7 +184,7 @@ if bevocal
 end
 toadd = cell(nits,1);
 resave = 0; % need user permission to save over existing time series
-switch importwhat
+switch ImportWhat
 case 'ts' % Prepare toadd cell for time series
     if bevocal; figure('color','w','WindowStyle','docked'); end
     for j = 1:nits
@@ -250,17 +257,19 @@ case 'ts' % Prepare toadd cell for time series
             plot(x,'-k'); xlim([1,length(x)]);
             titletext = sprintf('\n[%u/%u] %s (%u), keywords = %s',j,nits,timeseries(j).Filename,timeseries(j).Length,timeseries(j).Keywords);
             title(titletext,'interpreter','none');
-            fprintf(1,[titletext,' --- loaded successfully.'])
-            pause(0.2); % wait 0.2 seconds
+            fprintf(1,'%s --- loaded successfully.',titletext)
+            pause(0.01); % wait 0.01 second to show the plotted time series
         end
     end
-    
+    if bevocal, fprintf(1,'\n Time-series data loaded.\n'); end
+
 case 'mops' % Prepare toadd cell for master operations
     for j = 1:nits
         master(j).MasterCode = datain{j,1};
         master(j).MasterLabel = datain{j,2};
         toadd{j} = sprintf('(''%s'', ''%s'')',esc(master(j).MasterLabel),esc(master(j).MasterCode));
     end
+    if bevocal, fprintf(1,' Done.\n'); end
     
 case 'ops' % Prepare toadd cell for operations        
     for j = 1:nits
@@ -275,14 +284,15 @@ case 'ops' % Prepare toadd cell for operations
             toadd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).MasterLabel),esc(operation(j).Keywords));
         end
     end
+    if bevocal, fprintf(1,' Done.\n'); end
     
 end
-if bevocal, fprintf(1,' done.\n'); end
+
 
 
 % Check for duplicates
 if bevocal, fprintf(1,'Checking for duplicates already in the database... '); end
-switch importwhat
+switch ImportWhat
 case 'ts'
     ExistingFilenames = mysql_dbquery(dbc,sprintf('SELECT FileName FROM TimeSeries'));
     isduplicate = ismember({timeseries.Filename},ExistingFilenames); % isduplicate = 1 if the item already exists
@@ -314,7 +324,7 @@ if isempty(maxid), maxid = 0; end
 
 % Assemble and execute the INSERT queries
 fprintf('Adding %u new %s to the %s table in %s...',sum(~isduplicate),thewhat,thetable,dbname)
-switch importwhat
+switch ImportWhat
 case 'ts' % Add time series to the TimeSeries table
     SQL_add_chunked(dbc,'INSERT INTO TimeSeries (FileName, Keywords, Length, Data) VALUES',toadd,isduplicate);
 case 'ops' % Add operations to the Operations table
@@ -325,18 +335,18 @@ end
 fprintf(1,' done.\n')
 
 % Add new entries to the Results table
-if ~strcmp(importwhat,'mops')
+if ~strcmp(ImportWhat,'mops')
     resultstic = tic;
     if bevocal
         fprintf(1,'Updating the Results Table in %s (this could take a while, please be patient!)...',dbname)
     end
-    switch importwhat
+    switch ImportWhat
     case 'ts'
-        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id FROM TimeSeries t' ...
-                                ' CROSS JOIN Operations o ON t.ts_id > %u ORDER BY t.ts_id, o.op_id'],maxid));
+        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id ' ...
+                    'FROM TimeSeries t CROSS JOIN Operations o ON t.ts_id > %u ORDER BY t.ts_id, o.op_id'],maxid));
     case 'ops'
-        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id FROM TimeSeries t' ...
-                                ' CROSS JOIN Operations o ON o.op_id > %u ORDER BY t.ts_id, o.op_id'],maxid));
+        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id ' ...
+                    'FROM TimeSeries t CROSS JOIN Operations o ON o.op_id > %u ORDER BY t.ts_id, o.op_id'],maxid));
     end
     if ~isempty(emsg),
         fprintf(1,' error. This is really not good.\n');
@@ -346,12 +356,12 @@ if ~strcmp(importwhat,'mops')
     end
 end
 
-if ~strcmp(importwhat,'mops')
+if ~strcmp(ImportWhat,'mops')
     % Update the keywords table
     fprintf(1,'Updating the %s table in %s...',thektable,dbname)
 
     % First find unique keywords from new time series by splitting against commas
-    switch importwhat
+    switch ImportWhat
     case 'ts'
         kws = {timeseries(~isduplicate).Keywords};
     case 'ops'
@@ -406,7 +416,7 @@ if ~strcmp(importwhat,'mops')
     % Try doing it from scratch
 
     % allkws, allids
-    switch importwhat
+    switch ImportWhat
     case 'ts'
         allnames = BF_cat({timeseries(~isduplicate).Filename},',','''');
     case 'ops'
@@ -427,7 +437,7 @@ if ~strcmp(importwhat,'mops')
         
     % Increment Nmatches in the keywords table
     fprintf(1,' done.\nNow the match counts...')
-    % Redo them from scratch should be easier actually
+    % Redo them from scratch should be easier actually...?
     for k = 1:nkw % keywords implicated in this import
         SelectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
         theopkw = mysql_dbquery(dbc,SelectString);
@@ -455,8 +465,8 @@ if ~strcmp(importwhat,'mops')
     fprintf(1,' done.\n')
 end
 
-% Update master/operation links
-if ismember(importwhat,{'mops','ops'}) % there may be new links
+% Update links between operations and master operations
+if ismember(ImportWhat,{'mops','ops'}) % there may be new links
     % Add mop_ids to Operations table
     fprintf(1,'Updating master links...'); tic
     UpdateString = ['UPDATE Operations AS o SET mop_id = (SELECT mop_id FROM MasterOperations AS m ' ...
@@ -474,11 +484,11 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
     if isempty(emsg)
         fprintf(' done.\n');
     else
-        fprintf(1,' Oops! Error joining the MasterOperations and Operations tables:\n');
-        fprintf(1,'%s\n',emsg); keyboard
+        fprintf(1,'\nOops! Error joining the MasterOperations and Operations tables:\n%s\n',emsg);
+        keyboard
     end
     
-    %     % if strcmp(importwhat,'ops')
+    %     % if strcmp(ImportWhat,'ops')
     %     %     % operations were imported -- match their MasterLabels with elements of the MasterOperations table using mySQL JOIN
     %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
     %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.op_id > %u',maxid];
@@ -525,7 +535,7 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
     %         fprintf(1,'%s\n',emsg); keyboard
     %     end
     %     
-    %     % if strcmp(importwhat,'ops')
+    %     % if strcmp(ImportWhat,'ops')
     %     %     % operations were imported -- match their MasterLabels with elements of the MasterOperations table using mySQL JOIN
     %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
     %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.op_id > %u',maxid];
@@ -552,6 +562,7 @@ end
 %% Close database
 SQL_closedatabase(dbc)
 
-fprintf('All tasks completed reading %s for adding %u %s into %s in %s.\n',INPfile,sum(~isduplicate),thewhat,dbname,BF_thetime(toc(ticker)));
+fprintf('All tasks completed reading %s for adding %u %s into %s in %s.\n', ...
+                INPfile,sum(~isduplicate),thewhat,dbname,BF_thetime(toc(ticker)));
 
 end
