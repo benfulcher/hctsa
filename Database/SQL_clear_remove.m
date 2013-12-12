@@ -1,3 +1,24 @@
+% SQL_clear_remove
+% 
+% Either removes or clears results from the database for a given
+% set of ts_ids or op_ids
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
+
 function SQL_clear_remove(tsorop,vin,doremove,dbname,dolog)
 % Clear the results of a particular metric or time series from the store -- i.e., convert
 % results back to NULL
@@ -9,7 +30,7 @@ function SQL_clear_remove(tsorop,vin,doremove,dbname,dolog)
 % operations that have non-deterministic outputs)
 
 % INPUTS: tsorop -- either 'ts' or 'mets' for whether to eliminate either a time series of a metric, respectively
-% 		  vin -- a vector of the ts_ids or m_ids in the database to remove
+% 		  vin -- a vector of the ts_ids or op_ids in the database to remove
 % 		  dbname -- can specify a custom database else will use default database in SQL_opendatabase
 % 		  dolog -- generate a .log file describing what was done (does this by default)
 % 2/12/2009 Ben Fulcher. Rehauled to use mySQL database system.
@@ -31,7 +52,7 @@ case 'ts'
     thename = 'Filename';
 case 'ops'
     thewhat = 'operations';
-    theid = 'm_id';
+    theid = 'op_id';
     thetable = 'Operations';
     thename = 'OpName';
 otherwise
@@ -120,7 +141,7 @@ if doremove
     %     SQL_update_tskw(dbname) % updates time series keywords (will be different without the deleted time series)
     % else
     %     disp(['Recalculating OperationKeywords and OpKeywordsRelate in ' dbname '. Please be patient']);
-    %     SQL_update_mkw(dbname) % updates operation keywords (will be different without the deleted operations)
+    %     SQL_update_opkw(dbname) % updates operation keywords (will be different without the deleted operations)
     %     % disp(['Recalculating links between masters and pointers']);
     %     % SQL_linkpointermaster(dbname) % update master/pointer links
     %     % SQL_masternpointto(dbname) % counts master/pointer links for MasterOperations table
@@ -135,7 +156,7 @@ else
     if isempty(emsg)
     	if strcmp(tsorop,'ts')
     		% Get number of operations to work out how many entries were cleared
-    		SelectString = 'SELECT COUNT(m_id) as nm FROM Operations';
+    		SelectString = 'SELECT COUNT(op_id) as nm FROM Operations';
     		nm = mysql_dbquery(dbc,SelectString); nm = nm{1};		
     		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),nm,nm*length(vin),dbname);
     	else

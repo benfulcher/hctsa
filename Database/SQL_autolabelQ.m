@@ -76,27 +76,27 @@ else
         switch norcl
             case 'orig'
                 if strcmp(kworlab,'kw')
-                    load TS_loc_guides.mat mkw m_ids_keep
-                    kws = mkw; idsO = m_ids_keep;
+                    load TS_loc_guides.mat opkw op_ids_keep
+                    kws = opkw; idsO = op_ids_keep;
                 else
-                    load TS_loc_guides.mat mlab m_ids_keep
-                    kws = mlab; idsO = m_ids_keep;
+                    load TS_loc_guides.mat mlab op_ids_keep
+                    kws = mlab; idsO = op_ids_keep;
                 end
             case 'norm'
                 if strcmp(kworlab,'kw')
-                    load TS_loc_guides_N.mat mkwn m_ids_keepn
-                    kws = mkwn; idsO = m_ids_keepn;
+                    load TS_loc_guides_N.mat opkwn op_ids_keepn
+                    kws = opkwn; idsO = op_ids_keepn;
                 else
-                    load TS_loc_guides_N.mat mlabn m_ids_keepn
-                    kws = mlabn; idsO = m_ids_keepn;
+                    load TS_loc_guides_N.mat mlabn op_ids_keepn
+                    kws = mlabn; idsO = op_ids_keepn;
                 end
             case 'cl'
                 if strcmp(kworlab,'kw')
-                    load TS_loc_guides_cl.mat mkwcl m_ids_keepcl
-                    kws = mkwcl; idsO = m_ids_keepcl;
+                    load TS_loc_guides_cl.mat opkwcl op_ids_keepcl
+                    kws = opkwcl; idsO = op_ids_keepcl;
                 else
-                    load TS_loc_guides_cl.mat mlabcl m_ids_keepcl
-                    kws = mlabcl; idsO = m_ids_keepcl;
+                    load TS_loc_guides_cl.mat mlabcl op_ids_keepcl
+                    kws = mlabcl; idsO = op_ids_keepcl;
                 end
         end
     end

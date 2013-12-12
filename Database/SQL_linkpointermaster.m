@@ -11,7 +11,7 @@ end
 %% Creates the MasterPointerRelate Table by linking metrics with their masters
 % Look through code column of operations and retrieve bits before "."
 % These must be the master structure that should link
-SelectString = 'SELECT m_id, Code FROM Operations WHERE Pointer = 1';
+SelectString = 'SELECT op_id, Code FROM Operations WHERE Pointer = 1';
 [qrc,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 pointermids = vertcat(qrc{:,1}); % column vector
 pointercodes = qrc(:,2); % column cell of strings
@@ -36,8 +36,8 @@ if ismember('MasterPointerRelate',qrc)
 		keyboard
 	end
 end
-createstring = ['CREATE TABLE MasterPointerRelate (mop_id integer, m_id integer, ' ...
-				'FOREIGN KEY (m_id) REFERENCES Operations(m_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
+createstring = ['CREATE TABLE MasterPointerRelate (mop_id integer, op_id integer, ' ...
+				'FOREIGN KEY (op_id) REFERENCES Operations(op_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
 				'FOREIGN KEY (mop_id) REFERENCES MasterOperations(mop_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
 [rs,emsg] = mysql_dbexecute(dbc, createstring);
 if isempty(emsg)
@@ -55,7 +55,7 @@ disp(['Writing relationships between master and pointer operations to MasterPoin
 times = zeros(numpointers,1);
 for i = 1:numpointers
 	tic
-	insertstring = ['INSERT INTO MasterPointerRelate (m_id, mop_id) SELECT ' num2str(pointermids(i)) ', mop_id FROM MasterOperations' ...
+	insertstring = ['INSERT INTO MasterPointerRelate (op_id, mop_id) SELECT ' num2str(pointermids(i)) ', mop_id FROM MasterOperations' ...
 	    	' WHERE (MasterLabel = ''' pointerrefs{i} ''')'];
 	[rs,emsg] = mysql_dbexecute(dbc, insertstring);
 	if ~isempty(emsg)

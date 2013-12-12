@@ -2,7 +2,7 @@
 % 
 % Takes as input a set of constraints on the time series and operations to
 % include then runs the appropriate mySQL commands and outputs the relevant
-% ts_ids / m_ids
+% ts_ids / op_ids
 % 
 %---INPUTS:
 % TsorOps: specifies 'ops' for metrics or 'ts' for time series
@@ -23,7 +23,7 @@
 %         SQL_opendatabase
 % 
 %---OUTPUTS
-% ids: a vector or either ts_ids or m_ids that match the input constraints
+% ids: a vector or either ts_ids or op_ids that match the input constraints
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -221,14 +221,14 @@ else
 	% Extra qualifier to only look in a certain range
 	% s{1} -- IDR
 	if ~isempty(idr)
-		s{1} = ['m_id BETWEEN ' num2str(idr(1)) ' AND ' num2str(idr(2))];
+		s{1} = ['op_id BETWEEN ' num2str(idr(1)) ' AND ' num2str(idr(2))];
 	end
 
 	% Extra qualifier to not include certain keywords -- this is performed seperately in the query for each keyword *to* include
 	% s{2} -- KeywordRemove
 	if ~isempty(KeywordRemove)
-		s{2} = ['m_id NOT IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id IN ' ...
-							'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(KeywordRemove,',','''') '))) '];
+		s{2} = ['op_id NOT IN (SELECT op_id FROM OpKeywordsRelate WHERE opkw_id IN ' ...
+							'(SELECT opkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(KeywordRemove,',','''') '))) '];
 	end
 	
     % % Extra qualifier pcalcr to have PercentageCalculated only in a certain range
@@ -246,8 +246,8 @@ else
 	end
 	
 	% if ~isempty(KeywordRemove)
-	% 	mnoextrastring = ['AND m_id NOT IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id IN ' ...
-	% 						'(SELECT mkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(mno,',','''') '))) '];
+	% 	mnoextrastring = ['AND op_id NOT IN (SELECT op_id FROM OpKeywordsRelate WHERE opkw_id IN ' ...
+	% 						'(SELECT opkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(mno,',','''') '))) '];
 	% else
 	% 	mnoextrastring = '';
 	% end
@@ -260,9 +260,9 @@ else
 			% Now do the rest of the query at once: do the keyword matches and length constraints
 		
 			if ncut==0 % Get all matches			
-				SelectString = ['SELECT m_id FROM Operations WHERE ' ...
-								'm_id IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id = '  ...
-								'(SELECT mkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
+				SelectString = ['SELECT op_id FROM Operations WHERE ' ...
+								'op_id IN (SELECT op_id FROM OpKeywordsRelate WHERE opkw_id = '  ...
+								'(SELECT opkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
 			else % constrain to some number (using the LIMIT command in mySQL)
                 switch howtolimit
@@ -279,26 +279,26 @@ else
                 
 				if isempty(kyes{i}) % empty keyword -- just constrain by number
 					if isempty(conditions)
-						SelectString = ['SELECT m_id FROM Operations' limitme];
+						SelectString = ['SELECT op_id FROM Operations' limitme];
 					else
-						SelectString = ['SELECT m_id FROM Operations WHERE ' conditions(6:end) ...
+						SelectString = ['SELECT op_id FROM Operations WHERE ' conditions(6:end) ...
 											limitme];
 					end
 				else
-					SelectString = ['SELECT m_id FROM Operations WHERE ' ...
-									'm_id IN (SELECT m_id FROM OpKeywordsRelate WHERE mkw_id = '  ...
-									 '(SELECT mkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
+					SelectString = ['SELECT op_id FROM Operations WHERE ' ...
+									'op_id IN (SELECT op_id FROM OpKeywordsRelate WHERE opkw_id = '  ...
+									 '(SELECT opkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 									   conditions limitme];
 				end
 			end
 		
 			% Execute the query
-			[m_ids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
+			[op_ids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 		
 			if ~isempty(emsg)
 				fprintf(1,'Error finding %s\n',kyes{i}); disp(emsg); keyboard
 			end
-			C_kyes{i} = vertcat(m_ids{:});
+			C_kyes{i} = vertcat(op_ids{:});
 		
 			ngot = length(C_kyes{i});
 			if isempty(kyes{i})
@@ -309,41 +309,41 @@ else
 		end
 	
 		% Agglomerate all the bits
-		m_ids_keep = vertcat(C_kyes{:});
-		lbefore = length(m_ids_keep);
-		m_ids_keep = unique(m_ids_keep);
-		lafter = length(m_ids_keep);
+		op_ids_keep = vertcat(C_kyes{:});
+		lbefore = length(op_ids_keep);
+		op_ids_keep = unique(op_ids_keep);
+		lafter = length(op_ids_keep);
 		if lafter < lbefore
 			fprintf(1,'We lost %u  to overlapping keywords!\n',lbefore-lafter);
 		end
 	
 	else % just use the length/KeywordRemove constraint
 		if isempty(conditions)
-			SelectString = 'SELECT m_id FROM Operations'; % include all operations -- exclude nothing
+			SelectString = 'SELECT op_id FROM Operations'; % include all operations -- exclude nothing
 		else
-			SelectString = ['SELECT m_id FROM Operations WHERE ' conditions(6:end)]; % (remove "AND ")
+			SelectString = ['SELECT op_id FROM Operations WHERE ' conditions(6:end)]; % (remove "AND ")
 		end
-		[m_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+		[op_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
 			fprintf(1,'Database call failed\n%s\n',SelectString); disp(emsg); keyboard
 		else
-			m_ids_keep = unique(vertcat(m_ids{:}));
+			op_ids_keep = unique(vertcat(op_ids{:}));
 		end
 	end
 
 
 	%% Get other metrics which point to master functions which will be called anyway
-	if masterpull && ~isempty(m_ids_keep)
+	if masterpull && ~isempty(op_ids_keep)
 		% Find implicated Master functions
-		SelectString = ['SELECT m_id FROM MasterPointerRelate WHERE mop_id IN (SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE m_id IN (' BF_cat(m_ids_keep,',') '))'];
+		SelectString = ['SELECT op_id FROM MasterPointerRelate WHERE mop_id IN (SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE op_id IN (' BF_cat(op_ids_keep,',') '))'];
 		[newmids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if isempty(emsg)
 			if ~isempty(newmids) % there are some master functions implicated
 				newmids = vertcat(newmids{:});
-				nm = length(m_ids_keep); % number of metrics
-				m_ids_keep = union(m_ids_keep,newmids); % include the new ones
-				if length(m_ids_keep) > nm
-					fprintf(1,'%u additional operations were included as implicated by existing master functions\n',length(m_ids_keep)-nm);
+				nm = length(op_ids_keep); % number of metrics
+				op_ids_keep = union(op_ids_keep,newmids); % include the new ones
+				if length(op_ids_keep) > nm
+					fprintf(1,'%u additional operations were included as implicated by existing master functions\n',length(op_ids_keep)-nm);
 				end
 			end
 		else % an error
@@ -351,13 +351,13 @@ else
 		end
 	end
 
-	nm = length(m_ids_keep); % number of metrics
+	nm = length(op_ids_keep); % number of metrics
 	if nm == 0
 		fprintf(1,'No matching operations found.\n');
 		ids = [];
 	else
 		fprintf(1,'Operations filtered: %u\n',nm);
-		ids = m_ids_keep;
+		ids = op_ids_keep;
 	end
 end
 

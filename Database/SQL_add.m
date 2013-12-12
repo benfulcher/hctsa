@@ -79,8 +79,8 @@ switch importwhat
         maxL = 50000; % the longest time series length accepted in the database
     case 'ops'
         thewhat = 'operations';
-        theid = 'm_id';
-        thekid = 'mkw_id';
+        theid = 'op_id';
+        thekid = 'opkw_id';
         thetable = 'Operations';
         thektable = 'OperationKeywords';
         thereltable = 'OpKeywordsRelate';
@@ -332,11 +332,11 @@ if ~strcmp(importwhat,'mops')
     end
     switch importwhat
     case 'ts'
-        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
-                                ' CROSS JOIN Operations o ON t.ts_id > %u ORDER BY t.ts_id, o.m_id'],maxid));
+        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id FROM TimeSeries t' ...
+                                ' CROSS JOIN Operations o ON t.ts_id > %u ORDER BY t.ts_id, o.op_id'],maxid));
     case 'ops'
-        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,m_id) SELECT t.ts_id,o.m_id FROM TimeSeries t' ...
-                                ' CROSS JOIN Operations o ON o.m_id > %u ORDER BY t.ts_id, o.m_id'],maxid));
+        [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id FROM TimeSeries t' ...
+                                ' CROSS JOIN Operations o ON o.op_id > %u ORDER BY t.ts_id, o.op_id'],maxid));
     end
     if ~isempty(emsg),
         fprintf(1,' error. This is really not good.\n');
@@ -430,9 +430,9 @@ if ~strcmp(importwhat,'mops')
     % Redo them from scratch should be easier actually
     for k = 1:nkw % keywords implicated in this import
         SelectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
-        themkw = mysql_dbquery(dbc,SelectString);
+        theopkw = mysql_dbquery(dbc,SelectString);
         UpdateString = sprintf('UPDATE %s SET NumOccur = (SELECT COUNT(*) FROM %s WHERE %s = %u) WHERE %s = %u', ...
-                                    thektable,thereltable,thekid,themkw{1},thekid,themkw{1});
+                                    thektable,thereltable,thekid,theopkw{1},thekid,theopkw{1});
         [~,emsg] = mysql_dbexecute(dbc, UpdateString);
         if ~isempty(emsg)
             fprintf(1,'\n Error updating keyword count in %s',thektable)
@@ -441,9 +441,9 @@ if ~strcmp(importwhat,'mops')
     end
     % for k = 1:nkw % for each unique keyword in the keyword table...
     %     % nnkw = sum(cellfun(@(x)ismember(ukws{k},x),kwsplit));
-    %     Selectmkwid = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
+    %     Selectopkwid = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
     %     SelectCount = sprintf(['SELECT COUNT(*) FROM %s WHERE %s = %s ' ...
-    %                             'AND %s > %u'],thereltable,thekid,Selectmkwid,theid,maxid);
+    %                             'AND %s > %u'],thereltable,thekid,Selectopkwid,theid,maxid);
     %     UpdateString = sprintf(['UPDATE %s SET NumOccur = NumOccur + (%s) ' ...
     %                             'WHERE Keyword = ''%s'''],thektable,SelectCount,ukws{k});
     %     [~,emsg] = mysql_dbexecute(dbc, UpdateString);
@@ -467,7 +467,7 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
     % Delete the linking table and recreate it from scratch is easiest
     % fprintf(1,'Filling MasterPointerRelate...');
     % mysql_dbexecute(dbc,'DELETE FROM MasterPointerRelate');
-    % InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.m_id FROM MasterOperations ' ...
+    % InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations ' ...
     %                         'm JOIN Operations o ON m.MasterLabel = o.MasterLabel'];
     % [~,emsg] = mysql_dbexecute(dbc,InsertString);
 
@@ -480,10 +480,10 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
     
     %     % if strcmp(importwhat,'ops')
     %     %     % operations were imported -- match their MasterLabels with elements of the MasterOperations table using mySQL JOIN
-    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.m_id FROM MasterOperations m JOIN ' ...
-    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.m_id > %u',maxid];
+    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
+    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.op_id > %u',maxid];
     %     % else
-    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.m_id FROM MasterOperations m JOIN ' ...
+    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
     %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE m.mop_id > %u',maxid];
     %     % end
     %     
@@ -515,7 +515,7 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
     %     % Delete the linking table and recreate it from scratch is easiest
     %     fprintf(1,'Filling MasterPointerRelate...');
     %     mysql_dbexecute(dbc,'DELETE FROM MasterPointerRelate');
-    %     InsertString = ['INSERT INTO MasterPointerRelate select m.mop_id,o.m_id FROM MasterOperations ' ...
+    %     InsertString = ['INSERT INTO MasterPointerRelate select m.mop_id,o.op_id FROM MasterOperations ' ...
     %                             'm JOIN Operations o ON m.MasterLabel = o.MasterLabel'];
     %     [~,emsg] = mysql_dbexecute(dbc,InsertString);
     %     if isempty(emsg)
@@ -527,10 +527,10 @@ if ismember(importwhat,{'mops','ops'}) % there may be new links
     %     
     %     % if strcmp(importwhat,'ops')
     %     %     % operations were imported -- match their MasterLabels with elements of the MasterOperations table using mySQL JOIN
-    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.m_id FROM MasterOperations m JOIN ' ...
-    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.m_id > %u',maxid];
+    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
+    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.op_id > %u',maxid];
     %     % else
-    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.m_id FROM MasterOperations m JOIN ' ...
+    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
     %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE m.mop_id > %u',maxid];
     %     % end
     %     

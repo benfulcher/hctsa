@@ -104,7 +104,7 @@ if strcmp(morts,'ts') % Time Series
 else % Operations
 
 	% Get the ts_ids, Keywords from TimeSeries Table
-	SelectString = ['SELECT m_id, OpName, Keywords FROM Operations WHERE m_id IN (' id_string ')'];
+	SelectString = ['SELECT op_id, OpName, Keywords FROM Operations WHERE op_id IN (' id_string ')'];
 	% makes absolutely certain that ids given match up with keywords obtained
 	[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 	if ~isempty(emsg)
@@ -139,7 +139,7 @@ else % Operations
 		updatestring = ['UPDATE Operations SET ' ...
 							'Keywords = ''' keywords{i} ''', ' ...
 							'LastModified = NOW() ' ...
-							'WHERE m_id = ' num2str(mids(i))];
+							'WHERE op_id = ' num2str(mids(i))];
 	    [~,emsg] = mysql_dbexecute(dbc, updatestring);
 		if ~isempty(emsg)
 			disp('Error writing new keywords to TimeSeries');
@@ -155,8 +155,8 @@ else % Operations
 	
 	% Redo keywords
 	if updateall
-		disp('Updating Operation Keywords -- create new relation tble mkwRelate');
-		SQL_update_mkw(dbname);
+		disp('Updating Operation Keywords -- create new relation tble opkwRelate');
+		SQL_update_opkw(dbname);
 	
 		% Updating PercentageCalculated, etc. ONLY for keywords (should be quick)
 		SQL_fillfromresults([],mids,[1 1 1],[0 0 0 1],dbname);

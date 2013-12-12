@@ -51,7 +51,7 @@ fprintf(fid,' Done.\n');
 nts = length(TimeSeries); % Number of time series
 nm = length(Operations); % Number of operations
 ts_ids_string = BF_cat([TimeSeries.ID],',');
-m_ids_string = BF_cat([Operations.ID],',');
+op_ids_string = BF_cat([Operations.ID],',');
 
 %% Check that nothing has been deleted in the meantime...
 % time series
@@ -60,7 +60,7 @@ nts_db = mysql_dbquery(dbc,SelectString);
 nts_db = nts_db{1};
 
 % Operations
-SelectString = sprintf('SELECT COUNT(m_id) FROM Operations WHERE m_id IN (%s)',m_ids_string);
+SelectString = sprintf('SELECT COUNT(op_id) FROM Operations WHERE op_id IN (%s)',op_ids_string);
 nop_db = mysql_dbquery(dbc,SelectString);
 nop_db = nop_db{1};
 
@@ -86,13 +86,13 @@ fprintf(1,'Retrieving %s elements from the Results table in %s...',WriteWhat,dbn
 switch WriteWhat
 case 'null'
     % collect nulls in the database
-    SelectString = sprintf(['SELECT ts_id, m_id FROM Results WHERE ts_id IN (%s)' ...
-    					' AND m_id IN (%s) AND QualityCode IS NULL'],ts_ids_string,m_ids_string);
+    SelectString = sprintf(['SELECT ts_id, op_id FROM Results WHERE ts_id IN (%s)' ...
+    					' AND op_id IN (%s) AND QualityCode IS NULL'],ts_ids_string,op_ids_string);
 case 'nullerror'
     % collect all NULLS and previous errors
-    SelectString = sprintf(['SELECT ts_id, m_id, QualityCode FROM Results WHERE ts_id IN (%s)' ...
-    					' AND m_id IN (%s) AND (QualityCode IS NULL OR QualityCode = 1)'], ...
-        					ts_ids_string,m_ids_string);
+    SelectString = sprintf(['SELECT ts_id, op_id, QualityCode FROM Results WHERE ts_id IN (%s)' ...
+    					' AND op_id IN (%s) AND (QualityCode IS NULL OR QualityCode = 1)'], ...
+        					ts_ids_string,op_ids_string);
 end
 
 tic
@@ -106,8 +106,8 @@ else
 	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_thetime(toc));
 end
 
-ts_id_db = vertcat(qrc{:,1}); % ts_ids (in m_id pairs) of empty database elements in this ts_id/m_id range
-m_id_db = vertcat(qrc{:,2}); % m_ids (in ts_id pairs) of empty database elements in this ts_id/m_id range
+ts_id_db = vertcat(qrc{:,1}); % ts_ids (in op_id pairs) of empty database elements in this ts_id/op_id range
+op_id_db = vertcat(qrc{:,2}); % op_ids (in ts_id pairs) of empty database elements in this ts_id/op_id range
 ndbel = length(ts_id_db); % number of database elements to (maybe) write back to
 
 switch WriteWhat
@@ -128,7 +128,7 @@ end
 times = zeros(ndbel,1); % time each iteration
 loci = zeros(ndbel,2);
 loci(:,1) = arrayfun(@(x)find([TimeSeries.ID] == x,1),ts_id_db); % indices of rows in local file for each entry in the database
-loci(:,2) = arrayfun(@(x)find([Operations.ID] == x,1),m_id_db); % indicies of columns in local file for each entry in the database
+loci(:,2) = arrayfun(@(x)find([Operations.ID] == x,1),op_id_db); % indicies of columns in local file for each entry in the database
 updated = zeros(ndbel,1); % label when an iteration writes successfully to the database
 for i = 1:ndbel
 	tic
@@ -161,11 +161,11 @@ for i = 1:ndbel
             
         % I can't see any way around running lots of single UPDATE commands (for each entry)
     	UpdateString = sprintf(['UPDATE Results SET Output = %19.17g, QualityCode = %u, CalculationTime = %s ' ...
-        							'WHERE ts_id = %u AND m_id = %u'],TS_DataMat_ij,TS_Quality_ij, ...
-            							TS_CalcTime_string,ts_id_db(i),m_id_db(i));
+        							'WHERE ts_id = %u AND op_id = %u'],TS_DataMat_ij,TS_Quality_ij, ...
+            							TS_CalcTime_string,ts_id_db(i),op_id_db(i));
         [~,emsg] = mysql_dbexecute(dbc, UpdateString);
         if ~isempty(emsg)
-        	fprintf(1,'\nError storing (ts_id,m_id) = (%u,%u) to %s??!!', ...
+        	fprintf(1,'\nError storing (ts_id,op_id) = (%u,%u) to %s??!!', ...
                 			[TimeSeries(loci(i,1)).ID],[Operations(loci(i,2)).ID],dbname);
             fprintf(1,'%s\n',emsg);
             keyboard

@@ -29,7 +29,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_prepared(ts_ids, m_ids, RetrieveWhat, brawninputs, doinone)
+function TSQ_prepared(ts_ids, op_ids, RetrieveWhat, brawninputs, doinone)
 %% Check inputs -- set defaults
 if nargin < 2
 	error('You must provide at least two inputs!');
@@ -50,22 +50,22 @@ if nargin < 5 || isempty(doinone)
 end
 
 %% METHOD 1: Get entries of results table for local Matlab matrix (1 row/column at a time)
-% we have ts_ids and m_ids
+% we have ts_ids and op_ids
 % To put in a matrix with rows (time series) and columns (metrics)
 % Could do one big query and then reform to a matrix, but I'll do it row-by-row
 % In fact this is faster for some reason than doing a big query (method 2)
 
-% Make sure ts_ids and m_ids are column vectors
+% Make sure ts_ids and op_ids are column vectors
 if size(ts_ids,2) > size(ts_ids,1), ts_ids = ts_ids'; end
-if size(m_ids,2) > size(m_ids,1), m_ids = m_ids'; end
+if size(op_ids,2) > size(op_ids,1), op_ids = op_ids'; end
 % Sort ids ascending
 ts_ids = sort(ts_ids,'ascend');
-m_ids = sort(m_ids,'ascend');
+op_ids = sort(op_ids,'ascend');
 % Write a comma-delimited string of ids
 ts_ids_string = BF_cat(ts_ids,',');
-m_ids_string = BF_cat(m_ids,',');
+op_ids_string = BF_cat(op_ids,',');
 % Count the number of time series and operations
-nts = length(ts_ids); nops = length(m_ids);
+nts = length(ts_ids); nops = length(op_ids);
 
 if (nts == 0)
 	error('Oops. There''s nothing to do! No time series to retrieve!\n');
@@ -77,8 +77,8 @@ end
 [dbc, dbname] = SQL_opendatabase;
 
 % First refine the set of time series and operations to those that actually exist in the database
-mids_db = mysql_dbquery(dbc,sprintf('SELECT m_id FROM Operations WHERE m_id IN (%s)',m_ids_string));
-mids_db = vertcat(mids_db{:});
+opids_db = mysql_dbquery(dbc,sprintf('SELECT op_id FROM Operations WHERE op_id IN (%s)',op_ids_string));
+opids_db = vertcat(opids_db{:});
 tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string));
 tsids_db = vertcat(tsids_db{:});
 if length(tsids_db) < nts % actually there are fewer time series in the database
@@ -91,15 +91,15 @@ if length(tsids_db) < nts % actually there are fewer time series in the database
     ts_ids_string = BF_cat(ts_ids,',');
     nts = length(ts_ids);
 end
-if length(mids_db) < nops % actually there are fewer operations in the database
-    if (length(mids_db) == 0) % now there are no operations to retrieve
-        error('None of the %u specified operations exist in ''%s''',nops-length(mids_db),dbname)
+if length(opids_db) < nops % actually there are fewer operations in the database
+    if (length(opids_db) == 0) % now there are no operations to retrieve
+        error('None of the %u specified operations exist in ''%s''',nops-length(opids_db),dbname)
     end
     fprintf(1,['%u specified operations do not exist in ''%s'', retrieving' ...
-                    ' the remaining %u\n'],nops-length(mids_db),dbname,length(mids_db))
-    m_ids = mids_db;
-    m_ids_string = BF_cat(m_ids,',');
-    nops = length(m_ids);
+                    ' the remaining %u\n'],nops-length(opids_db),dbname,length(opids_db))
+    op_ids = opids_db;
+    op_ids_string = BF_cat(op_ids,',');
+    nops = length(op_ids);
 end
 
 % Tell me about it
@@ -137,8 +137,8 @@ for i = 1:nits
 
     ii = (bundles(i):1:min(bundles(i)+bundlesize-1,length(ts_ids))); % indicies for this iteration
     ts_ids_now = ts_ids(ii); % a range of ts_ids to retrieve in this iteration
-    basestring = sprintf(['SELECT ts_id, m_id, Output, CalculationTime, QualityCode FROM Results WHERE ' ...
-                    	'ts_id IN (%s) AND m_id IN (%s)'],BF_cat(ts_ids_now,','),m_ids_string);
+    basestring = sprintf(['SELECT ts_id, op_id, Output, CalculationTime, QualityCode FROM Results WHERE ' ...
+                    	'ts_id IN (%s) AND op_id IN (%s)'],BF_cat(ts_ids_now,','),op_ids_string);
     switch RetrieveWhat
     case 'all'
         SelectString = basestring;
@@ -172,7 +172,7 @@ for i = 1:nits
     else
         % We need to match retrieved indicies to the local indicies
         ix = arrayfun(@(x)find(ts_ids_now == x,1),vertcat(qrc{:,1}));
-        iy = arrayfun(@(x)find(m_ids == x,1),vertcat(qrc{:,2}));
+        iy = arrayfun(@(x)find(op_ids == x,1),vertcat(qrc{:,2}));
         for k = 1:length(ix) % fill it one entry at a time
             TS_DataMat(ix(k),iy(k)) = qrc{k,3};
             TS_CalcTime(ix(k),iy(k)) = qrc{k,4};
@@ -216,8 +216,8 @@ if ismember(RetrieveWhat,{'null','error'})
     	fprintf(1,'After filtering, there are no operations remaining! Exiting...\n'); return
     elseif sum(keepi) < nops
 		fprintf(1,'Cutting down from %u to %u operations\n',nops,sum(keepi));
-		m_ids = m_ids(keepi); nops = length(m_ids);
-		m_ids_string = BF_cat(m_ids,',');
+		op_ids = op_ids(keepi); nops = length(op_ids);
+		op_ids_string = BF_cat(op_ids,',');
 		TS_DataMat = TS_DataMat(:,keepi); TS_CalcTime = TS_CalcTime(:,keepi); TS_Quality = TS_Quality(:,keepi);
 	end    
 end
@@ -236,9 +236,9 @@ tsinfo(:,end) = cellfun(@(x) TakeFirstCell(ScanCommas(x)),tsinfo(:,end),'Uniform
 TimeSeries = cell2struct(tsinfo',{'ID','FileName','Keywords','Length','Data'}); % Convert to structure array
 
 % 2. Retrieve Operation Metadata
-SelectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE m_id IN (%s)',m_ids_string);
+SelectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
 [opinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
-opinfo = [num2cell(m_ids), opinfo]; % add m_ids
+opinfo = [num2cell(op_ids), opinfo]; % add op_ids
 Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
 
 % 3. Retrieve Master Operation Metadata

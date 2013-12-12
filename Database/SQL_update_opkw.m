@@ -1,8 +1,28 @@
-function SQL_update_mkw(dbname)
-% Recreates the keywords tables and their links to metrics
+% SQL_update_opkw
+% 
+% Recreates the keywords tables and their links to operations
 % To be run when operations are either added or removed
+% 
 % Ben Fulcher 24/11/09 (based on code inherited from Max Little)
 % Ben Fulcher 11/1/10 turned into a function; added dbname input
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
+
+function SQL_update_opkw(dbname)
 
 if nargin < 1
 	dbname = ''; % opens default specified in SQL_opendatabase
@@ -69,7 +89,7 @@ else
 end
 
 % Cycle through all unique keywords and add them to the OperationKeywords table
-K = length(ukws); % the number of unique keywords; the maximum mkw_id index
+K = length(ukws); % the number of unique keywords; the maximum opkw_id index
 for k = 1:K
     InsertString = ['INSERT INTO OperationKeywords (Keyword) VALUES (''' ukws{k} ''')'];
     mysql_dbexecute(dbc, InsertString);
@@ -92,7 +112,7 @@ end
 % Query series table for each keyword
 for k = 1:K
     kw = char(ukws{k});
-    querystring = ['INSERT INTO OpKeywordsRelate (mkw_id, m_id) SELECT ' num2str(k) ', m_id FROM Operations ' ...
+    querystring = ['INSERT INTO OpKeywordsRelate (opkw_id, op_id) SELECT ' num2str(k) ', op_id FROM Operations ' ...
         	'WHERE (Keywords LIKE ''' kw ',%'' OR Keywords LIKE ''%,' kw ',%'' OR Keywords LIKE ''%,' kw ''' OR' ...
         	' Keywords = ''' kw ''')'];
     [rs,emsg] = mysql_dbexecute(dbc, querystring);
@@ -101,14 +121,14 @@ end
 
 %% Go back and write number of occurences to OperationKeywords Table
 for k = 1:K
-	countstring = ['SELECT COUNT(mkw_id) AS Countme FROM OpKeywordsRelate WHERE mkw_id = ' num2str(k)];
+	countstring = ['SELECT COUNT(opkw_id) AS Countme FROM OpKeywordsRelate WHERE opkw_id = ' num2str(k)];
 	[qrc,qrf,rs,emsg] = mysql_dbquery(dbc,countstring);
 	if isempty(qrc)
 		disp(['Error evaluating COUNT']); disp([emsg]);
 	end
 	
 	% write how many there are back
-	updatestring = ['UPDATE OperationKeywords SET NumOccur = ' num2str(qrc{1}) ' WHERE mkw_id = ' num2str(k)];
+	updatestring = ['UPDATE OperationKeywords SET NumOccur = ' num2str(qrc{1}) ' WHERE opkw_id = ' num2str(k)];
 	[rs,emsg] = mysql_dbexecute(dbc, updatestring);
 end
 

@@ -4,7 +4,7 @@ function SQL_remove(mort,vin,dbname,dolog)
 % Results table are deleted as well.
 
 % INPUTS: mort -- either 'ts' or 'mets' for whether to eliminate either a time series of a metric, respectively
-% 		  vin -- a vector of the ts_id or m_id in STORE_GUIDE/STORE_DAT to remove
+% 		  vin -- a vector of the ts_id or op_id in STORE_GUIDE/STORE_DAT to remove
 % [OLD: Used to be able to use TS_sub_cntoi(tsormet,thelabs) to get the indicies of particular names of metrics/time series]
 
 % 2/12/2009 Ben Fulcher. Rehauled to use mySQL database system.
@@ -54,7 +54,7 @@ if strcmp(mort,'ts')
 	input(['About to remove all trace of ' num2str(length(vin)) ' time series ' ...
 				'from ' dbname ' [let''s see ''em]']);
 else
-	SelectString = ['SELECT m_id, OpName FROM Operations WHERE m_id IN (' BF_cat(vin,',') ')'];
+	SelectString = ['SELECT op_id, OpName FROM Operations WHERE op_id IN (' BF_cat(vin,',') ')'];
 	[todump,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
 	input(['About to remove all trace of ' num2str(length(vin)) ' operations ' ...
 				'from ' dbname ' [let''s see ''em]']);
@@ -80,7 +80,7 @@ disp('IT''S HAMMER TIME!!!');
 if strcmp(mort,'ts')
 	deletestring = ['DELETE FROM TimeSeries WHERE ts_id IN (' BF_cat(vin,',') ')'];
 else
-	deletestring = ['DELETE FROM Operations WHERE m_id IN (' BF_cat(vin,',') ')'];
+	deletestring = ['DELETE FROM Operations WHERE op_id IN (' BF_cat(vin,',') ')'];
 end
 [rs,emsg] = mysql_dbexecute(dbc, deletestring);
 if ~ isempty(emsg)
@@ -120,7 +120,7 @@ if strcmp(mort, 'ts')
 	SQL_update_tskw(dbname) % updates time series keywords (will be different without the deleted time series)
 else
 	disp(['Recalculating OperationKeywords and OpKeywordsRelate in ' dbname '. Please be patient']);
-	SQL_update_mkw(dbname) % updates operation keywords (will be different without the deleted operations)
+	SQL_update_opkw(dbname) % updates operation keywords (will be different without the deleted operations)
 	disp(['Recalculating links between masters and pointers']);
 	SQL_linkpointermaster(dbname) % update master/pointer links
 	SQL_masternpointto(dbname) % counts master/pointer links for MasterOperations table
