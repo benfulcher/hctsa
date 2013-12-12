@@ -331,11 +331,10 @@ else
 		end
 	end
 
-
 	%% Get other metrics which point to master functions which will be called anyway
 	if masterpull && ~isempty(op_ids_keep)
-		% Find implicated Master functions
-		SelectString = ['SELECT op_id FROM MasterPointerRelate WHERE mop_id IN (SELECT DISTINCT mop_id FROM MasterPointerRelate WHERE op_id IN (' BF_cat(op_ids_keep,',') '))'];
+		% Find implicated Master functions (a super inefficient way of doing it:)
+		SelectString = ['SELECT op_id FROM Operations WHERE mop_id IN (SELECT DISTINCT mop_id FROM Operations WHERE op_id IN (' BF_cat(op_ids_keep,',') '))'];
 		[newmids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 		if isempty(emsg)
 			if ~isempty(newmids) % there are some master functions implicated
@@ -347,7 +346,7 @@ else
 				end
 			end
 		else % an error
-			fprintf(1,'Error retrieving the operations from implicated master functions\n'); disp(emsg); keyboard
+			fprintf(1,'Error retrieving the operations from implicated master functions\n%s',emsg); keyboard
 		end
 	end
 
