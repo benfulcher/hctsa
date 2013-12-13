@@ -5,7 +5,10 @@
 % operations to include, and outputs the relevant subsection of the data matrix
 % and associated metadata in HCTSA_loc
 % 
-% ---OUTPUT to the file HCTSA_loc.mat contains
+% ---OUTPUT
+% (*) DidWrite [opt] is 1 if Writes new file HCTSA_loc.mat
+% 
+% --- Other outputs are to the file HCTSA_loc.mat contains
 % (*) TS_DataMat, contains the data
 % (*) TS_CalcTime, contains the calculation times
 % (*) TS_Quality, contains the quality codes
@@ -29,7 +32,11 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_prepared(ts_ids, op_ids, RetrieveWhat, brawninputs, doinone)
+function DidWrite = TSQ_prepared(ts_ids, op_ids, RetrieveWhat, brawninputs, doinone)
+    
+% Until it actually writes, DidWrite = 0
+DidWrite = 0;
+
 %% Check inputs -- set defaults
 if nargin < 2
 	error('You must provide at least two inputs!');
@@ -259,6 +266,7 @@ SQL_closedatabase(dbc)
 fprintf(1,'Saving local versions of the data...');
 save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries','Operations','MasterOperations','-v7.3');
 fprintf(1,' Done.\n');
+DidWrite = 1;
 
 % Display how many entries need to be calculated
 tocalculate = sum(isnan(TS_Quality(:)) | TS_Quality(:)==1);

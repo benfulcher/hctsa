@@ -25,9 +25,8 @@ try
     dburl = sprintf('jdbc:mysql://%s/%s', serverhost, dbname);
     dbconnection = java.sql.DriverManager.getConnection(dburl, uname, pword);
 catch le
-    errmsg = le.message;
-    fprintf(1,['Error connecting to the database ''%s'' at ''%s'' -- perhaps an incorrect username (''%s'') ' ...
-                        'and password (''%s'') combination?\n'], dbname, serverhost, uname, pword);
+    fprintf(1,'Error connecting to the database ''%s'' at ''%s'':\n%s\n',dbname,serverhost,le.message);
+    fprintf(1,['Perhaps an incorrect username (''%s'') and password (''%s'') combination?\n'], uname, pword);
     dbconnection = [];
     % Not really a Matlab 'error' -- just print the suspected problem to screen
 end

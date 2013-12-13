@@ -50,7 +50,11 @@ for i = 1:length(tsidr) % Loop over single time series
 	% (ii) Using TSQ_brawn to calculate missing entries
 	% (iii) Running TSQ_agglomerate to write results back into the database
 
-	TSQ_prepared(tsidr(i),opids,WriteWhat); % Collect the null entries in the database
-    TSQ_brawn(DoLog,parallelize); % computes the operations and time series retrieved
-    TSQ_agglomerate(WriteWhat,DoLog); % stores the results back to the database
+	DidWrite = TSQ_prepared(tsidr(i),opids,WriteWhat); % Collect the null entries in the database
+    if DidWrite % Only calculate if TSQ_prepared found time series to retrieve:
+        TSQ_brawn(DoLog,parallelize); % computes the operations and time series retrieved
+        TSQ_agglomerate(WriteWhat,DoLog); % stores the results back to the database
+    else
+        fprintf(1,'No time series retrieved for ts_id = %u\n',tsidr(i));
+    end
 end
