@@ -209,7 +209,8 @@ if ismember(RetrieveWhat,{'null','error'})
 	% Time series
     keepi = (sum(keepme,2) > 0); % there is at least one entry to calculate in this row
     if sum(keepi) == 0
-    	fprintf(1,'After filtering, there are no time series remaining! Exiting...\n'); return
+    	fprintf(1,'After filtering, there are no time series remaining! Exiting...\n');
+        SQL_closedatabase; return % Close the database connection, then exit
 	elseif sum(keepi) < nts
 		fprintf(1,'Cutting down from %u to %u time series\n',nts,sum(keepi));
 		ts_ids = ts_ids(keepi); nts = length(ts_ids);
@@ -220,7 +221,8 @@ if ismember(RetrieveWhat,{'null','error'})
 	% Operations
     keepi = (sum(keepme,1) > 0); % there is at least one entry to calculate in this column
 	if sum(keepi) == 0
-    	fprintf(1,'After filtering, there are no operations remaining! Exiting...\n'); return
+    	fprintf(1,'After filtering, there are no operations remaining! Exiting...\n');
+        SQL_closedatabase; return % Close the database connection, then exit
     elseif sum(keepi) < nops
 		fprintf(1,'Cutting down from %u to %u operations\n',nops,sum(keepi));
 		op_ids = op_ids(keepi); nops = length(op_ids);
