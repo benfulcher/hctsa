@@ -101,7 +101,7 @@ if ~isempty(emsg)
     fprintf(1,'\n'); error('Error selecting %s elements from %s',WriteWhat,dbname);
 elseif isempty(qrc)
     fprintf(1,'\nNo %s elements in this range in the database anymore!\n',WriteWhat);
-    return
+    SQL_closedatabase(dbc); return
 else
 	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_thetime(toc));
 end
@@ -112,8 +112,8 @@ ndbel = length(ts_id_db); % number of database elements to (maybe) write back to
 
 switch WriteWhat
 case 'null'
-    fprintf(1,['There are %u NULL entries in Results.\nWill now write calculated elements of TS_DataMat ' ...
-                    'into these elements of %s...\n'],ndbel,dbname);
+    fprintf(1,['There are %u NULL entries in Results.\nWill now write calculated ' ...
+                    'elements of TS_DataMat into these elements of %s...\n'],ndbel,dbname);
 case 'nullerror'
     q_db = qrc(:,3); % empties (NULL) and fatal error (1)
     q_db(cellfun(@isempty,q_db)) = {0}; % turn NULLs to 0s
@@ -121,7 +121,8 @@ case 'nullerror'
     % so now nulls in database are labeled 0, and previous errors are labeled 1
     fprintf(1,['There are %u entries in Results (either NULL or previous errors) ' ...
                     'that are being written to %s...\n'],ndbel,dbname);
-    fprintf(1,'Note that previous results stored as errors in the database will not be overwritten with newer errors\n')
+    fprintf(1,['Note that previous results stored as errors in the database will ' ...
+                                'not be overwritten with newer errors\n'])
     fprintf(1,'However, NULLS will be written over with any result from the local files\n')
 end
 
@@ -161,27 +162,29 @@ for i = 1:ndbel
             
         % I can't see any way around running lots of single UPDATE commands (for each entry)
     	UpdateString = sprintf(['UPDATE Results SET Output = %19.17g, QualityCode = %u, CalculationTime = %s ' ...
-        							'WHERE ts_id = %u AND op_id = %u'],TS_DataMat_ij,TS_Quality_ij, ...
-            							TS_CalcTime_string,ts_id_db(i),op_id_db(i));
+							'WHERE ts_id = %u AND op_id = %u'],TS_DataMat_ij,TS_Quality_ij, ...
+							TS_CalcTime_string,ts_id_db(i),op_id_db(i));
         [~,emsg] = mysql_dbexecute(dbc, UpdateString);
         if ~isempty(emsg)
-        	fprintf(1,'\nError storing (ts_id,op_id) = (%u,%u) to %s??!!', ...
-                			[TimeSeries(loci(i,1)).ID],[Operations(loci(i,2)).ID],dbname);
-            fprintf(1,'%s\n',emsg);
-            keyboard
+            SQL_closedatabase(dbc) % close the database connection first...
+        	error('Error storing (ts_id,op_id) = (%u,%u) to %s??!!\n%s\n', ...
+                			[TimeSeries(loci(i,1)).ID],[Operations(loci(i,2)).ID],dbname,emsg);
         end
     end
 
 	times(i) = toc;
 	if mod(i,floor(ndbel/5))==0
-		fprintf(1,['Approximately %s remaining! -- so far %u entries'  ...
-			' (/ %u possible) have been written to %s...\n'],BF_thetime(mean(times(1:i))*(ndbel-i)),sum(updated),i,dbname);
+		fprintf(1,['Approximately %s remaining! -- so far %u entries (/ %u possible) have been'  ...
+			' written to %s...\n'],BF_thetime(mean(times(1:i))*(ndbel-i)),sum(updated),i,dbname);
 	end
 end
 
-fprintf(1,'Well that seemed to go ok -- we wrote %u new calculation results (/ %u) to the Results table in %s\n',sum(updated),ndbel,dbname);
+fprintf(1,['Well that seemed to go ok -- we wrote %u new calculation results ' ...
+                '(/ %u) to the Results table in %s\n'],sum(updated),ndbel,dbname);
+fprintf(1,'Writing to the database took at total of %s\n',BF_thetime(sum(times)));
 if any(~updated) % some were not written
-	fprintf(1,'%u entries were not written (recurring fatal errors) and remain awaiting calculation in the database\n',sum(~updated));
+    fprintf(1,['%u entries were not written (recurring fatal errors) and remain ' ...
+                            'awaiting calculation in the database\n'],sum(~updated));
 end
 SQL_closedatabase(dbc) % close database connection
 

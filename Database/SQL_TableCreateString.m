@@ -66,13 +66,6 @@ case 'MasterOperations'
         'NPointTo INTEGER UNSIGNED, ' ... % Number of children
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)']; % Time stamp of when entry was last modified
         
-% case 'MasterPointerRelate'
-%     CreateString = ['CREATE TABLE MasterPointerRelate ' ...
-%         '(mop_id INTEGER, ' ... % Unique integer identifier -- master operations
-%         'op_id INTEGER, ' ... % Unique integer identifier -- operations
-%         'FOREIGN KEY (op_id) REFERENCES Operations(op_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
-%         'FOREIGN KEY (mop_id) REFERENCES MasterOperations(mop_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
-        
 case 'OperationKeywords'
     CreateString = ['CREATE TABLE OperationKeywords ' ...
         '(opkw_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ...

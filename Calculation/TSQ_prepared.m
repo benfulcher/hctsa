@@ -47,7 +47,7 @@ if nargin < 3
 end
 RetrieveWhatcanbe = {'null','all','error'};
 if ~ischar(RetrieveWhat) || ~ismember(RetrieveWhat,RetrieveWhatcanbe)
-    error('The rhird input to TSQ_prepared must specify what to retrieve, one of the following: %s',BF_cat(RetrieveWhatcanbe))
+    error('The third input to TSQ_prepared must specify what to retrieve, one of the following: %s',BF_cat(RetrieveWhatcanbe))
 end
 if nargin < 4 || isempty(brawninputs)
 	brawninputs = [1, 1]; % log and parallelize -- only relevant if RetrieveWhat isn't empty
@@ -88,8 +88,9 @@ opids_db = mysql_dbquery(dbc,sprintf('SELECT op_id FROM Operations WHERE op_id I
 opids_db = vertcat(opids_db{:});
 tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string));
 tsids_db = vertcat(tsids_db{:});
-if length(tsids_db) < nts % actually there are fewer time series in the database
-    if (length(tsids_db) == 0) % now there are no time series to retrieve
+if length(tsids_db) < nts % Actually there are fewer time series in the database
+    if (length(tsids_db) == 0) % Now there are no time series to retrieve
+        SQL_closedatabase(dbc); % Close the database connection first
         error('None of the %u specified time series exist in ''%s''',nts-length(tsids_db),dbname)
     end
     fprintf(1,['%u specified time series do not exist in ''%s'', retrieving' ...
@@ -155,7 +156,7 @@ for i = 1:nits
     	SelectString = [basestring, ' AND QualityCode = 1'];
     end
     
-	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % retrieve the bundlesize from the database
+	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % Retrieve the bundlesize from the database
     
     % Check results look ok:
     if ~isempty(emsg)
@@ -165,7 +166,7 @@ for i = 1:nits
     end
     
     if (size(qrc) == 0)
-        fprintf(1,'No data to retrieve for ts_id = (%s)\n',BF_cat(ts_ids_now,','));
+        fprintf(1,'No data to retrieve for ts_id = %s\n',BF_cat(ts_ids_now,','));
     end
     
 	% Convert empty entries to NaNs
@@ -210,7 +211,7 @@ if ismember(RetrieveWhat,{'null','error'})
     keepi = (sum(keepme,2) > 0); % there is at least one entry to calculate in this row
     if sum(keepi) == 0
     	fprintf(1,'After filtering, there are no time series remaining! Exiting...\n');
-        SQL_closedatabase; return % Close the database connection, then exit
+        SQL_closedatabase(dbc); return % Close the database connection, then exit
 	elseif sum(keepi) < nts
 		fprintf(1,'Cutting down from %u to %u time series\n',nts,sum(keepi));
 		ts_ids = ts_ids(keepi); nts = length(ts_ids);
@@ -222,7 +223,7 @@ if ismember(RetrieveWhat,{'null','error'})
     keepi = (sum(keepme,1) > 0); % there is at least one entry to calculate in this column
 	if sum(keepi) == 0
     	fprintf(1,'After filtering, there are no operations remaining! Exiting...\n');
-        SQL_closedatabase; return % Close the database connection, then exit
+        SQL_closedatabase(dbc); return % Close the database connection, then exit
     elseif sum(keepi) < nops
 		fprintf(1,'Cutting down from %u to %u operations\n',nops,sum(keepi));
 		op_ids = op_ids(keepi); nops = length(op_ids);
