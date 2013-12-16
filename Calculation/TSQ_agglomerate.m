@@ -89,9 +89,14 @@ case 'null'
     SelectString = sprintf(['SELECT ts_id, op_id FROM Results WHERE ts_id IN (%s)' ...
     					' AND op_id IN (%s) AND QualityCode IS NULL'],ts_ids_string,op_ids_string);
 case 'nullerror'
-    % collect all NULLS and previous errors
+    % Collect all NULLS and previous errors
     SelectString = sprintf(['SELECT ts_id, op_id, QualityCode FROM Results WHERE ts_id IN (%s)' ...
     					' AND op_id IN (%s) AND (QualityCode IS NULL OR QualityCode = 1)'], ...
+        					ts_ids_string,op_ids_string);
+case 'error'
+    % Collect all previous errors (assume done a TSQ_prepared using 'error' input)
+    SelectString = sprintf(['SELECT ts_id, op_id FROM Results WHERE ts_id IN (%s)' ...
+    					' AND op_id IN (%s) AND QualityCode = 1'], ...
         					ts_ids_string,op_ids_string);
 end
 
@@ -108,12 +113,17 @@ end
 
 ts_id_db = vertcat(qrc{:,1}); % ts_ids (in op_id pairs) of empty database elements in this ts_id/op_id range
 op_id_db = vertcat(qrc{:,2}); % op_ids (in ts_id pairs) of empty database elements in this ts_id/op_id range
-ndbel = length(ts_id_db); % number of database elements to (maybe) write back to
+ndbel = length(ts_id_db);     % Number of database elements to attempt to write back to
 
 switch WriteWhat
 case 'null'
     fprintf(1,['There are %u NULL entries in Results.\nWill now write calculated ' ...
                     'elements of TS_DataMat into these elements of %s...\n'],ndbel,dbname);
+case 'error'
+    fprintf(1,['There are %u entries in Results (all previous errors) ' ...
+                    'that are being written to %s...\n'],ndbel,dbname);
+    fprintf(1,['Previous results stored as errors in the database WILL NOT' ...
+                                    'be overwritten with newer errors\n'])
 case 'nullerror'
     q_db = qrc(:,3); % empties (NULL) and fatal error (1)
     q_db(cellfun(@isempty,q_db)) = {0}; % turn NULLs to 0s
@@ -121,38 +131,42 @@ case 'nullerror'
     % so now nulls in database are labeled 0, and previous errors are labeled 1
     fprintf(1,['There are %u entries in Results (either NULL or previous errors) ' ...
                     'that are being written to %s...\n'],ndbel,dbname);
-    fprintf(1,['Note that previous results stored as errors in the database will ' ...
-                                'not be overwritten with newer errors\n'])
+    fprintf(1,['Note that previous results stored as errors in the database WILL NOT ' ...
+                                'be overwritten with newer errors\n'])
     fprintf(1,'However, NULLS will be written over with any result from the local files\n')
 end
 
-times = zeros(ndbel,1); % time each iteration
-loci = zeros(ndbel,2);
-loci(:,1) = arrayfun(@(x)find([TimeSeries.ID] == x,1),ts_id_db); % indices of rows in local file for each entry in the database
-loci(:,2) = arrayfun(@(x)find([Operations.ID] == x,1),op_id_db); % indicies of columns in local file for each entry in the database
-updated = zeros(ndbel,1); % label when an iteration writes successfully to the database
+IterationTimes = zeros(ndbel,1); % Time each iteration
+LocalIndex = zeros(ndbel,2);
+LocalIndex(:,1) = arrayfun(@(x)find([TimeSeries.ID] == x,1),ts_id_db); % Indices of rows in local file for each entry in the database
+LocalIndex(:,2) = arrayfun(@(x)find([Operations.ID] == x,1),op_id_db); % Indicies of columns in local file for each entry in the database
+UpdateMe = zeros(ndbel,1); % Label iterations that should be written to the database
 for i = 1:ndbel
 	tic
     
     % retrieve the elements
-    TS_DataMat_ij = TS_DataMat(loci(i,1),loci(i,2));
-    TS_Quality_ij = TS_Quality(loci(i,1),loci(i,2));
-    TS_CalcTime_ij = TS_CalcTime(loci(i,1),loci(i,2));
+    TS_DataMat_ij = TS_DataMat(LocalIndex(i,1),LocalIndex(i,2));
+    TS_Quality_ij = TS_Quality(LocalIndex(i,1),LocalIndex(i,2));
+    TS_CalcTime_ij = TS_CalcTime(LocalIndex(i,1),LocalIndex(i,2));
     
     switch WriteWhat
     case 'null'
         if isfinite(TS_DataMat_ij)
-            updated(i) = 1; % there is a value in TS_DataMat -- write it back to the NULL entry in the database
+            UpdateMe(i) = 1; % There is a value in TS_DataMat -- write it back to the NULL entry in the database
+        end
+    case 'error'
+        if isfinite(TS_DataMat_ij) && TS_Quality_ij~=1
+            UpdateMe(i) = 1; % There is a now a non-error value in TS_DataMat previously returned an error (in the database)
         end
     case 'nullerror'
         if isfinite(TS_DataMat_ij) && (q_db(i)==0 || TS_Quality_ij~=1)
-            updated(i) = 1;
+            UpdateMe(i) = 1; % there is a value in TS_DataMat -- write it to the entry in the database
         end
 		% (i) Has been calculated and a value stored in TS_DataMat (isfinite()), and 
-		% (ii) either the database entry is NULL or we didn't get an error (prevents writing errors over errors)
+		% (ii) Either the database entry is NULL or we didn't get an error (prevents writing errors over errors)
     end
 	
-    if updated(i)
+    if UpdateMe(i)
         
         if isnan(TS_CalcTime_ij) % happens when there is an error in the code
             TS_CalcTime_string = 'NULL';
@@ -168,23 +182,23 @@ for i = 1:ndbel
         if ~isempty(emsg)
             SQL_closedatabase(dbc) % close the database connection first...
         	error('Error storing (ts_id,op_id) = (%u,%u) to %s??!!\n%s\n', ...
-                			[TimeSeries(loci(i,1)).ID],[Operations(loci(i,2)).ID],dbname,emsg);
+                			[TimeSeries(LocalIndex(i,1)).ID],[Operations(LocalIndex(i,2)).ID],dbname,emsg);
         end
     end
 
-	times(i) = toc;
+	IterationTimes(i) = toc;
 	if mod(i,floor(ndbel/5))==0
 		fprintf(1,['Approximately %s remaining! -- so far %u entries (/ %u possible) have been'  ...
-			' written to %s...\n'],BF_thetime(mean(times(1:i))*(ndbel-i)),sum(updated),i,dbname);
+			' written to %s...\n'],BF_thetime(mean(IterationTimes(1:i))*(ndbel-i)),sum(UpdateMe),i,dbname);
 	end
 end
 
 fprintf(1,['Well that seemed to go ok -- we wrote %u new calculation results ' ...
-                '(/ %u) to the Results table in %s\n'],sum(updated),ndbel,dbname);
-fprintf(1,'Writing to the database took at total of %s\n',BF_thetime(sum(times)));
-if any(~updated) % some were not written
-    fprintf(1,['%u entries were not written (recurring fatal errors) and remain ' ...
-                            'awaiting calculation in the database\n'],sum(~updated));
+                '(/ %u) to the Results table in %s\n'],sum(UpdateMe),ndbel,dbname);
+fprintf(1,'Writing to the database took at total of %s\n',BF_thetime(sum(IterationTimes)));
+if any(~UpdateMe) % Some were not written to the database
+    fprintf(1,['%u entries were not written and remain ' ...
+                            'awaiting calculation in the database\n'],sum(~UpdateMe));
 end
 SQL_closedatabase(dbc) % close database connection
 
