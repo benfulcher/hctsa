@@ -5,7 +5,10 @@
 
 tooldir = [pwd,'/'];
 fprintf('Now compiling the toolboxes...\n')
-fprintf('(I hope %s is the ''Toolboxes'' directory or we have a problem)\n', tooldir)
+if isempty(regexp(tooldir,'Toolboxes'))
+    error('This function must be run in the ''Toolboxes'' directory of the HCTSA package...')
+end
+% fprintf('(I hope %s is the ''Toolboxes'' directory or we have a problem)\n', tooldir)
 
 % Max Little's fastdfa code
 fprintf(1,'fastdfa...');
@@ -70,6 +73,14 @@ catch
     fprintf(1,'ERROR: TSTOOL failed to compile correctly (not a huge surprise)\n');
 end
 if ~anyerrors, fprintf(1,' done.\n'); end
+
+% TISEAN
+% fprintf(1,'Attempting to install TISEAN...!\n');
+% cd([tooldir,'Tisean_3.0.1'])
+% system('./configure')
+% system('make')
+% system('make install')
+
 
 % Return to base directory
 cd(tooldir);

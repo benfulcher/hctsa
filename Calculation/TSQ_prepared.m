@@ -117,84 +117,96 @@ fprintf(1,'Filling and saving to local Matlab file HCTSA_loc.mat from the Result
 %% Intialize matrices
 
 % Start as Infs to distinguish unwritten entries after database pull
-TS_DataMat = ones(nts,nops)*Inf; % outputs
-TS_CalcTime = ones(nts,nops)*Inf; % calculation times
-TS_Quality = ones(nts,nops)*Inf; % output quality label
+TS_DataMat = ones(nts,nops)*Inf;  % Outputs
+TS_CalcTime = ones(nts,nops)*Inf; % Calculation times
+TS_Quality = ones(nts,nops)*Inf;  % Quality labels
 
-% Set bundlesize for retrieving
-bundlesize = min(nts,5); % retrieve information about this many time series per database query:
+% Set BundleSize for retrieving
+BundleSize = min(nts,5); % Retrieve information about this many time series per database query:
                          % either 5 at a time, or if less, however many time series there are
 
 %% Provide user information
 switch RetrieveWhat
 case 'all' 
-    fprintf(1,'Retrieving all elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
+    fprintf(1,['Retrieving all elements from the database (in groups of %u time series ' ...
+                'per database query). Please be patient...\n'],BundleSize);
 case 'null'
-    fprintf(1,'Retrieving NULL elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
+    fprintf(1,['Retrieving NULL elements from the database (in groups of %u time series ' ...
+                'per database query). Please be patient...\n'],BundleSize);
 case 'error'
-    fprintf(1,'Retrieving error elements from the database (in groups of %u time series, FYI). Please be patient...\n',bundlesize);
+    fprintf(1,['Retrieving error elements from the database (in groups of %u time series ' ...
+                'per database query). Please be patient...\n'],BundleSize);
 end
 
-bundles = (1:bundlesize:length(ts_ids));
-nits = length(bundles); % number of iterations of the loop
-times = zeros(nits,1); % record time for each iteration
+Bundles = (1:BundleSize:length(ts_ids));
+NumIterations = length(Bundles); % Number of iterations of the loop
+IterationTimes = zeros(NumIterations,1); % Record the time taken for each iteration
+DidRetrieve = zeros(NumIterations,1); % Keep track of whether data was retrieved at each iteration
 
 % First select the data:
-for i = 1:nits
-    ittic = tic; % start timing the iteration
+for i = 1:NumIterations
+    IterationTimer = tic; % Time this iteration using IterationTimer
 
-    ii = (bundles(i):1:min(bundles(i)+bundlesize-1,length(ts_ids))); % indicies for this iteration
+    ii = (Bundles(i):1:min(Bundles(i)+BundleSize-1,length(ts_ids))); % indicies for this iteration
     ts_ids_now = ts_ids(ii); % a range of ts_ids to retrieve in this iteration
-    basestring = sprintf(['SELECT ts_id, op_id, Output, CalculationTime, QualityCode FROM Results WHERE ' ...
+    BaseString = sprintf(['SELECT ts_id, op_id, Output, CalculationTime, QualityCode FROM Results WHERE ' ...
                     	'ts_id IN (%s) AND op_id IN (%s)'],BF_cat(ts_ids_now,','),op_ids_string);
     switch RetrieveWhat
     case 'all'
-        SelectString = basestring;
+        SelectString = BaseString;
     case 'null'
-    	SelectString = [basestring, ' AND QualityCode IS NULL'];
+    	SelectString = sprintf('%s AND QualityCode IS NULL',BaseString);
     case 'error'
-    	SelectString = [basestring, ' AND QualityCode = 1'];
+    	SelectString = sprintf('%s AND QualityCode = 1',BaseString);
     end
     
-	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % Retrieve the bundlesize from the database
+	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % Retrieve the BundleSize from the database
     
     % Check results look ok:
     if ~isempty(emsg)
-        fprintf(1,'Error retrieving outputs from %s???\n',dbname);
-        fprintf(1,'%s\n',emsg)
-        keyboard
+        error(1,'Error retrieving outputs from %s!!! :(\n%s',dbname,emsg);
     end
     
-    if (size(qrc) == 0)
+    if (size(qrc) == 0) % There are no entries in Results that match the requested conditions
         fprintf(1,'No data to retrieve for ts_id = %s\n',BF_cat(ts_ids_now,','));
-    end
+        % Leave local files TS_DataMat, TS_CalcTime, and TS_Quality as Inf
+        
+    else % Entries need to be written to local matrices
+        % Set DidRetrieve = 1 for this iteration
+        DidRetrieve(i) = 1;
+        
+    	% Convert empty entries to NaNs
+    	qrc(cellfun(@isempty,qrc)) = {NaN};
     
-	% Convert empty entries to NaNs
-	qrc(cellfun(@isempty,qrc)) = {NaN};
-    
-    % Fill rows of local matrix
-    if strcmp(RetrieveWhat,'all') % easy in this case
-        TS_DataMat(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nops);
-        TS_CalcTime(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
-        TS_Quality(ii,:) = reshape(vertcat(qrc{:,5}),length(ii),nops);
-    else
-        % We need to match retrieved indicies to the local indicies
-        ix = arrayfun(@(x)find(ts_ids_now == x,1),vertcat(qrc{:,1}));
-        iy = arrayfun(@(x)find(op_ids == x,1),vertcat(qrc{:,2}));
-        for k = 1:length(ix) % fill it one entry at a time
-            TS_DataMat(ix(k),iy(k)) = qrc{k,3};
-            TS_CalcTime(ix(k),iy(k)) = qrc{k,4};
-            TS_Quality(ix(k),iy(k)) = qrc{k,4};
+        % Fill rows of local matrix
+        if strcmp(RetrieveWhat,'all') % easy in this case
+            TS_DataMat(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nops);
+            TS_CalcTime(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
+            TS_Quality(ii,:) = reshape(vertcat(qrc{:,5}),length(ii),nops);
+        else
+            % We need to match retrieved indicies to the local indicies
+            ix = arrayfun(@(x)find(ts_ids_now == x,1),vertcat(qrc{:,1}));
+            iy = arrayfun(@(x)find(op_ids == x,1),vertcat(qrc{:,2}));
+            for k = 1:length(ix) % fill it one entry at a time
+                TS_DataMat(ix(k),iy(k)) = qrc{k,3};
+                TS_CalcTime(ix(k),iy(k)) = qrc{k,4};
+                TS_Quality(ix(k),iy(k)) = qrc{k,4};
+            end
         end
     end
     
     % Note time taken for this iteration
-	times(i) = toc(ittic);
-	if mod(i,floor(nits/10)) == 0 % tell the user 10 times
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(mean(times(1:i))*(nts-i)));
+	IterationTimes(i) = toc(IterationTimer);
+	if mod(i,floor(NumIterations/10)) == 0 % Tell us the time remaining 10 times
+		fprintf(1,'Approximately %s remaining...\n',BF_thetime(mean(IterationTimes(1:i))*(nts-i)));
 	end
 end
-fprintf(1,'Local files filled from %s in %u iteration(s). Took %s altogether.\n',dbname,nits,BF_thetime(sum(times)));
+if any(DidRetrieve)
+    fprintf(1,'Retrieved data from %s over %u iteration(s) in %s.\n',dbname,NumIterations,BF_thetime(sum(IterationTimes)));
+else
+    fprintf(1,'Over %u iteration(s), no data was retrieved from %s.\nNot writing any data to file.\n',NumIterations,dbname);
+    SQL_closedatabase(dbc); return
+end
 	
 if ismember(RetrieveWhat,{'null','error'})    
     % We only want to keep rows and columns with (e.g., NaNs) in them...
