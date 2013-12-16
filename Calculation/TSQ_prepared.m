@@ -190,7 +190,7 @@ for i = 1:NumIterations
             for k = 1:length(ix) % fill it one entry at a time
                 TS_DataMat(ix(k),iy(k)) = qrc{k,3};
                 TS_CalcTime(ix(k),iy(k)) = qrc{k,4};
-                TS_Quality(ix(k),iy(k)) = qrc{k,4};
+                TS_Quality(ix(k),iy(k)) = qrc{k,5};
             end
         end
     end
@@ -216,7 +216,7 @@ if ismember(RetrieveWhat,{'null','error'})
     	fprintf(1,'Filtering so that local files contain rows/columns containing at least one NULL entry\n');
     case 'error'
         keepme = (TS_Quality == 1); % Error codes in database
-    	fprintf(1,'Filtering so that local files contain rows/columns containing at least one error entry\n');
+    	fprintf(1,'Filtering so that local files contain rows/columns containing at least one entry that was an error in the database\n');
     end
     
 	% Time series
