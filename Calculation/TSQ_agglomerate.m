@@ -27,7 +27,7 @@ if nargin < 1
 	WriteWhat = 'null'; % 'nullerror'
     % find all nulls in the database and write over them if there are values in local files
 end
-if ~ismember(WriteWhat,{'null','nullerror'})
+if ~ismember(WriteWhat,{'null','error','nullerror'})
     error('Unknown specifier ''%s''',WriteWhat)
 end
 if nargin < 2 || isempty(LogToFile)
