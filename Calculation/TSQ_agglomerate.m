@@ -122,7 +122,7 @@ case 'null'
 case 'error'
     fprintf(1,['There are %u entries in Results (all previous errors) ' ...
                     'that are being written to %s...\n'],ndbel,dbname);
-    fprintf(1,['Previous results stored as errors in the database WILL NOT' ...
+    fprintf(1,['Previous results stored as errors in the database WILL NOT ' ...
                                     'be overwritten with newer errors\n'])
 case 'nullerror'
     q_db = qrc(:,3); % empties (NULL) and fatal error (1)
@@ -197,8 +197,8 @@ fprintf(1,['Well that seemed to go ok -- we wrote %u new calculation results ' .
                 '(/ %u) to the Results table in %s\n'],sum(UpdateMe),ndbel,dbname);
 fprintf(1,'Writing to the database took at total of %s\n',BF_thetime(sum(IterationTimes)));
 if any(~UpdateMe) % Some were not written to the database
-    fprintf(1,['%u entries were not written and remain ' ...
-                            'awaiting calculation in the database\n'],sum(~UpdateMe));
+    fprintf(1,['%u entries were not written (old errors) and remain ' ...
+                            'awaiting calculation in the database.\n'],sum(~UpdateMe));
 end
 SQL_closedatabase(dbc) % close database connection
 

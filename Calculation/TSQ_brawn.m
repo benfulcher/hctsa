@@ -268,7 +268,7 @@ for i = 1:nts
     % Calculation complete: print information about this time series calculation
 	fprintf(fid,'********************************************************************\n')
     fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
-    fprintf(fid,'oOoOoOo Calculation complete for %s (ts_id = %u, N = %u)  oOoOoOoOo\n',TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length);
+    fprintf(fid,'oOoOo Calculation complete for %s (ts_id = %u, N = %u)  oOoOo\n',TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length);
     if ncal > 0 % Some amount of calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u other outputs stored. [%u / %u]\n',...
 	     					ngood,nerror,nother,ncal,nops);

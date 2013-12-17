@@ -34,7 +34,7 @@
 
 function DidWrite = TSQ_prepared(ts_ids, op_ids, RetrieveWhat, brawninputs, doinone)
     
-% Until it actually writes, DidWrite = 0
+% Until it actually writes, set DidWrite = 0
 DidWrite = 0;
 
 %% Check inputs -- set defaults
@@ -88,10 +88,10 @@ opids_db = mysql_dbquery(dbc,sprintf('SELECT op_id FROM Operations WHERE op_id I
 opids_db = vertcat(opids_db{:});
 tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string));
 tsids_db = vertcat(tsids_db{:});
-if length(tsids_db) < nts % Actually there are fewer time series in the database
+if length(tsids_db) < nts % Actually there are fewer time series in the database than requested
     if (length(tsids_db) == 0) % Now there are no time series to retrieve
-        SQL_closedatabase(dbc); % Close the database connection first
-        error('None of the %u specified time series exist in ''%s''',nts-length(tsids_db),dbname)
+        fprintf(1,'None of the %u specified time series exist in ''%s''\n',nts,dbname)
+        SQL_closedatabase(dbc); return % Close the database connection before returning
     end
     fprintf(1,['%u specified time series do not exist in ''%s'', retrieving' ...
                     ' the remaining %u\n'],nts-length(tsids_db),dbname,length(tsids_db))
@@ -101,7 +101,8 @@ if length(tsids_db) < nts % Actually there are fewer time series in the database
 end
 if length(opids_db) < nops % actually there are fewer operations in the database
     if (length(opids_db) == 0) % now there are no operations to retrieve
-        error('None of the %u specified operations exist in ''%s''',nops-length(opids_db),dbname)
+        fprintf(1,'None of the %u specified operations exist in ''%s''\n',nops,dbname)
+        SQL_closedatabase(dbc); return % Close the database connection before returning
     end
     fprintf(1,['%u specified operations do not exist in ''%s'', retrieving' ...
                     ' the remaining %u\n'],nops-length(opids_db),dbname,length(opids_db))
@@ -160,11 +161,11 @@ for i = 1:NumIterations
     	SelectString = sprintf('%s AND QualityCode = 1',BaseString);
     end
     
-	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % Retrieve the BundleSize from the database
+	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % Retrieve this bundle of data from the database
     
     % Check results look ok:
     if ~isempty(emsg)
-        error(1,'Error retrieving outputs from %s!!! :(\n%s',dbname,emsg);
+        error('Error retrieving outputs from %s!!! :(\n%s',dbname,emsg);
     end
     
     if (size(qrc) == 0) % There are no entries in Results that match the requested conditions
