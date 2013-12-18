@@ -118,7 +118,7 @@ if length(tsids_db) < nts % Actually there are fewer time series in the database
     end
     fprintf(1,['%u specified time series do not exist in ''%s'', retrieving' ...
                     ' the remaining %u\n'],nts-length(tsids_db),dbname,length(tsids_db))
-    ts_ids = tsids_db;
+    ts_ids = tsids_db; % Will always be sorted in ascending order
     ts_ids_string = BF_cat(ts_ids,',');
     nts = length(ts_ids);
 end
@@ -129,7 +129,7 @@ if length(opids_db) < nops % actually there are fewer operations in the database
     end
     fprintf(1,['%u specified operations do not exist in ''%s'', retrieving' ...
                     ' the remaining %u\n'],nops-length(opids_db),dbname,length(opids_db))
-    op_ids = opids_db;
+    op_ids = opids_db; % Will always be sorted in ascending order
     op_ids_string = BF_cat(op_ids,',');
     nops = length(op_ids);
 end
@@ -155,50 +155,51 @@ case 'quality'
     TS_Quality = ones(nts,nops)*Inf;  % Quality labels
 end
 
-% Set BundleSize for retrieving
-BundleSize = min(nts,1); % Retrieve data for this many time series per database query
-                         % either 2 at a time, or if less, however many time series there are
 
 %% Display information
 switch RetrieveWhatEntries
 case 'all' 
-    fprintf(1,['Retrieving all elements from the database (in groups of %u time series ' ...
-                'per database query). Please be patient...\n'],BundleSize);
+    fprintf(1,['Retrieving all elements from the database (one time series ' ...
+                'per database query). Please be patient...\n']);
 case 'null'
-    fprintf(1,['Retrieving NULL elements from the database (in groups of %u time series ' ...
-                'per database query). Please be patient...\n'],BundleSize);
+    fprintf(1,['Retrieving NULL elements from the database (one time series ' ...
+                'per database query). Please be patient...\n']);
 case 'error'
-    fprintf(1,['Retrieving error elements from the database (in groups of %u time series ' ...
-                'per database query). Please be patient...\n'],BundleSize);
+    fprintf(1,['Retrieving error elements from the database (one time series ' ...
+                'per database query). Please be patient...\n']);
 end
 
-Bundles = (1:BundleSize:length(ts_ids)); % Bundles of time series for each iteration
-NumIterations = length(Bundles);         % Number of iterations of the loop
-IterationTimes = zeros(NumIterations,1); % Record the time taken for each iteration
-DidRetrieve = zeros(NumIterations,1);    % Keep track of whether data was retrieved at each iteration
+IterationTimes = zeros(nts,1); % Record the time taken for each iteration
+DidRetrieve = zeros(nts,1);    % Keep track of whether data was retrieved at each iteration
 
 % First select the data:
-for i = 1:NumIterations
+for i = 1:nts
     
     IterationTimer = tic; % Time each iteration using IterationTimer
 
-    ii = (Bundles(i):1:min(Bundles(i)+BundleSize-1,length(ts_ids))); % Indicies for this iteration
-    ts_ids_now = ts_ids(ii); % Range of ts_ids retrieved in this iteration
+    ts_id_now = ts_ids(i); % Range of ts_ids retrieved in this iteration
     
     % Start piecing together the mySQL SELECT command:
     switch RetrieveWhatData
     case 'all'
-        SelectWhat = 'SELECT ts_id, op_id, Output, QualityCode, CalculationTime FROM Results';
+        SelectWhat = 'SELECT op_id, Output, QualityCode, CalculationTime FROM Results';
     case 'nocalctime' % Do not retrieve calculation time results
-        SelectWhat = 'SELECT ts_id, op_id, Output, QualityCode FROM Results';
+        SelectWhat = 'SELECT op_id, Output, QualityCode FROM Results';
     case 'outputs'
-        SelectWhat = 'SELECT ts_id, op_id, Output FROM Results';
+        SelectWhat = 'SELECT op_id, Output FROM Results';
     case 'quality'
-        SelectWhat = 'SELECT ts_id, op_id, QualityCode FROM Results';
+        SelectWhat = 'SELECT op_id, QualityCode FROM Results';
     end
     
-    BaseString = sprintf('%s WHERE ts_id IN (%s) AND op_id IN (%s)',SelectWhat, ...
-                                            BF_cat(ts_ids_now,','),op_ids_string);
+    BaseString = sprintf('%s WHERE ts_id = %u AND op_id IN (%s)',SelectWhat, ...
+                                            ts_id_now,op_ids_string);
+    
+    % We could do a (kind of blind) retrieval, i.e., without retrieving op_ids safely
+    % as long as for a given ts_id, the op_ids are in ascending order in the Results table.
+    % This will be the case if time series and operations are added
+    % using SQL_add because of the SORT BY specifier in SQL_add commands.
+    % Otherwise op_ids should also be retrieved here, and used to sort
+    % the other columns (i.e., outputs, quality codes, calculation times)
     
     switch RetrieveWhatEntries
     case 'all'
@@ -211,7 +212,7 @@ for i = 1:NumIterations
     
     % Do the retrieval
     % DatabaseTimer = tic;
-	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % Retrieve this bundle of data from the database
+	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % Retrieve data for this time series from the database
     % fprintf(1,'Database query for %u time series took %s\n',BundleSize,BF_thetime(toc(DatabaseTimer)));
     
     if ~isempty(emsg)
@@ -220,8 +221,8 @@ for i = 1:NumIterations
     
     % Check results look ok:
     if (size(qrc) == 0) % There are no entries in Results that match the requested conditions
-        fprintf(1,'No data to retrieve for ts_id = %s\n',BF_cat(ts_ids_now,','));
-        % Leave local files TS_DataMat, TS_Quality (and TS_CalcTime) as Inf
+        fprintf(1,'No data to retrieve for ts_id = %u\n',ts_id_now);
+        % Leave local files (e.g., TS_DataMat, TS_Quality, TS_CalcTime as Inf)
         
     else
         % Entries need to be written to local matrices
@@ -233,43 +234,40 @@ for i = 1:NumIterations
     
         % Put results from database into rows of local matrix
         if strcmp(RetrieveWhatEntries,'all') % easy in this case
+            % Assumes data is ordered by the op_id_string provided
+            % This will be the case if all time series and operations
+            % were added using SQL_add.
+            % Otherwise we'll have nonsense happening...
             switch RetrieveWhatData
             case 'all'
-                TS_DataMat(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nops);
-                TS_Quality(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
-                TS_CalcTime(ii,:) = reshape(vertcat(qrc{:,5}),length(ii),nops);
+                TS_DataMat(i,:) = vertcat(qrc{:,2});
+                TS_Quality(i,:) = vertcat(qrc{:,3});
+                TS_CalcTime(i,:) = vertcat(qrc{:,4});
             case 'nocalctime'
-                TS_DataMat(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nops);
-                TS_Quality(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
+                TS_DataMat(i,:) = vertcat(qrc{:,2});
+                TS_Quality(i,:) = vertcat(qrc{:,3});
             case 'outputs'
-                TS_DataMat(ii,:) = reshape(vertcat(qrc{:,3}),length(ii),nops);
+                TS_DataMat(i,:) = vertcat(qrc{:,2});
             case 'quality'
-                TS_Quality(ii,:) = reshape(vertcat(qrc{:,4}),length(ii),nops);
+                TS_Quality(i,:) = vertcat(qrc{:,2});
             end
         else
-            % We need to match retrieved indicies to the local indicies
-            ix = arrayfun(@(x)find(ts_ids_now == x,1),vertcat(qrc{:,1}));
-            iy = arrayfun(@(x)find(op_ids == x,1),vertcat(qrc{:,2}));
+            % We retrieved a subset of the input op_ids
+            % We have to match retrieved op_ids to local indicies
+            iy = arrayfun(@(x)find(op_ids == x,1),vertcat(qrc{:,1}));
+            % Now fill the corresponding entries in the local matrices:
             switch RetrieveWhatData
             case 'all'
-                for k = 1:length(ix) % fill it one entry at a time
-                    TS_DataMat(ix(k),iy(k)) = qrc{k,3};
-                    TS_Quality(ix(k),iy(k)) = qrc{k,4};
-                    TS_CalcTime(ix(k),iy(k)) = qrc{k,5};
-                end
+                TS_DataMat(i,iy) = vertcat(qrc{:,2});
+                TS_Quality(i,iy) = vertcat(qrc{:,3});
+                TS_CalcTime(i,iy) = vertcat(qrc{:,4});
             case 'nocalctime'
-                for k = 1:length(ix) % fill it one entry at a time
-                    TS_DataMat(ix(k),iy(k)) = qrc{k,3};
-                    TS_Quality(ix(k),iy(k)) = qrc{k,4};
-                end
+                TS_DataMat(i,iy) = vertcat(qrc{:,2});
+                TS_Quality(i,iy) = vertcat(qrc{:,3});
             case 'outputs'
-                for k = 1:length(ix) % fill it one entry at a time
-                    TS_DataMat(ix(k),iy(k)) = qrc{k,3};
-                end
+                TS_DataMat(i,iy) = vertcat(qrc{:,2});
             case 'quality'
-                for k = 1:length(ix) % fill it one entry at a time
-                    TS_Quality(ix(k),iy(k)) = qrc{k,4};
-                end
+                TS_Quality(i,iy) = vertcat(qrc{:,2});
             end
         end
     end
@@ -278,18 +276,18 @@ for i = 1:NumIterations
 	IterationTimes(i) = toc(IterationTimer);
     if (i==1) % Give an initial indication of time after the first iteration
         fprintf(1,['Based on the first retrieval, this is taking ' ...
-                'approximately %s per time series...\n'],BF_thetime(IterationTimes(1)/BundleSize));
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(IterationTimes(1)*(NumIterations-1)));
-    elseif (mod(i,floor(NumIterations/10))==0) % Tell us the time remaining 10 times across the total retrieval
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(mean(IterationTimes(1:i))*(NumIterations-i)));
+                'approximately %s per time series...\n'],BF_thetime(IterationTimes(1)));
+		fprintf(1,'Approximately %s remaining...\n',BF_thetime(IterationTimes(1)*(nts-1)));
+    elseif (mod(i,floor(nts/10))==0) % Tell us the time remaining 10 times across the total retrieval
+		fprintf(1,'Approximately %s remaining...\n',BF_thetime(mean(IterationTimes(1:i))*(nts-i)));
 	end
 end
 
 % Finished retrieving from the database!
 if any(DidRetrieve)
-    fprintf(1,'Retrieved data from %s in %u iterations in %s.\n',dbname,NumIterations,BF_thetime(sum(IterationTimes)));
+    fprintf(1,'Retrieved data from %s in %u iterations in %s.\n',dbname,nts,BF_thetime(sum(IterationTimes)));
 else
-    fprintf(1,'Over %u iterations, no data was retrieved from %s.\nNot writing any data to file.\n',NumIterations,dbname);
+    fprintf(1,'Over %u iterations, no data was retrieved from %s.\nNot writing any data to file.\n',nts,dbname);
     SQL_closedatabase(dbc); return
 end
 	
@@ -390,7 +388,7 @@ SQL_closedatabase(dbc)
 
 % Save to HCTSA_loc.mat
 fprintf(1,'Saving local versions of the data...');
-save('HCTSA_loc.mat','TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations','-v7.3');
+save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','-v7.3');
 switch RetrieveWhatData
 case 'all'
     % Add outputs, quality labels, and calculation times
@@ -409,9 +407,13 @@ end
 fprintf(1,' Done.\n');
 DidWrite = 1;
 
-% Display how many entries need to be calculated
-tocalculate = sum(isnan(TS_Quality(:)) | TS_Quality(:)==1);
-fprintf(1,'There are %u entries (=%4.2f%%) to calculate in the data matrix (%ux%u).\n', ...
-                                    tocalculate,tocalculate/nops/nts*100,nts,nops);
+% If retrieved quality labels, display how many entries need to be calculated
+if strcmp(RetrieveWhatData,'outputs')
+    fprintf(1,'You have the outputs, but you don''t know which are good or not without the quality labels...\n');
+else
+    tocalculate = sum(isnan(TS_Quality(:)) | TS_Quality(:)==1);
+    fprintf(1,'There are %u entries (=%4.2f%%) to calculate in the data matrix (%ux%u).\n', ...
+                                        tocalculate,tocalculate/nops/nts*100,nts,nops);
+end
 
 end
