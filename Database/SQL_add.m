@@ -445,8 +445,7 @@ if ~strcmp(ImportWhat,'mops')
                                     thektable,thereltable,thekid,theopkw{1},thekid,theopkw{1});
         [~,emsg] = mysql_dbexecute(dbc, UpdateString);
         if ~isempty(emsg)
-            fprintf(1,'\n Error updating keyword count in %s',thektable)
-            RA_keyboard
+            error('\n Error updating keyword count in %s\n%s',thektable,emsg)
         end
     end
     % for k = 1:nkw % for each unique keyword in the keyword table...
@@ -468,7 +467,7 @@ end
 % Update links between operations and master operations
 if ismember(ImportWhat,{'mops','ops'}) % there may be new links
     % Add mop_ids to Operations table
-    fprintf(1,'Updating master links...'); tic
+    fprintf(1,'Evaulating links between operations and master operations...'); tic
     UpdateString = ['UPDATE Operations AS o SET mop_id = (SELECT mop_id FROM MasterOperations AS m ' ...
                         'WHERE m.MasterLabel = o.MasterLabel) WHERE mop_id IS NULL'];
     [~,emsg] = mysql_dbexecute(dbc,UpdateString);
@@ -484,8 +483,7 @@ if ismember(ImportWhat,{'mops','ops'}) % there may be new links
     if isempty(emsg)
         fprintf(' done.\n');
     else
-        fprintf(1,'\nOops! Error joining the MasterOperations and Operations tables:\n%s\n',emsg);
-        keyboard
+        error('\nOops! Error finding links between Operations and MasterOperations:\n%s\n',emsg);
     end
     
     %     % if strcmp(ImportWhat,'ops')
@@ -502,8 +500,7 @@ if ismember(ImportWhat,{'mops','ops'}) % there may be new links
                     '(SELECT COUNT(o.mop_id) FROM Operations AS o WHERE m.mop_id = o.mop_id)']);
     [~,emsg] = mysql_dbexecute(dbc, UpdateString);
     if ~isempty(emsg)
-        fprintf(1,'Error counting NPointTo operations for mop_id = %u\n%s\n',M_ids(k),emsg);
-        keyboard
+        error('Error counting NPointTo operations for mop_id = %u\n%s\n',M_ids(k),emsg);
     end
     
     % M_ids = mysql_dbquery(dbc,'SELECT mop_id FROM MasterOperations');
@@ -520,43 +517,6 @@ if ismember(ImportWhat,{'mops','ops'}) % there may be new links
     %     end
     % end
 
-
-    %%% OLD STUFF:
-    %     % Delete the linking table and recreate it from scratch is easiest
-    %     fprintf(1,'Filling MasterPointerRelate...');
-    %     mysql_dbexecute(dbc,'DELETE FROM MasterPointerRelate');
-    %     InsertString = ['INSERT INTO MasterPointerRelate select m.mop_id,o.op_id FROM MasterOperations ' ...
-    %                             'm JOIN Operations o ON m.MasterLabel = o.MasterLabel'];
-    %     [~,emsg] = mysql_dbexecute(dbc,InsertString);
-    %     if isempty(emsg)
-    %         fprintf(' done.\n');
-    %     else
-    %         fprintf(1,' shit. Error joining the MasterOperations and Operations tables:\n');
-    %         fprintf(1,'%s\n',emsg); keyboard
-    %     end
-    %     
-    %     % if strcmp(ImportWhat,'ops')
-    %     %     % operations were imported -- match their MasterLabels with elements of the MasterOperations table using mySQL JOIN
-    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
-    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.op_id > %u',maxid];
-    %     % else
-    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
-    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE m.mop_id > %u',maxid];
-    %     % end
-    %     
-    %     M_ids = mysql_dbquery(dbc,'SELECT mop_id FROM MasterOperations');
-    % M_ids = vertcat(M_ids{:}); % vector of master_ids    
-    %     for k = 1:length(M_ids)
-    %         UpdateString = sprintf(['UPDATE MasterOperations SET NPointTo = ' ...
-    %                         '(SELECT COUNT(mop_id) FROM MasterPointerRelate WHERE mop_id = %u)' ...
-    %                             'WHERE mop_id = %u'],M_ids(k),M_ids(k));
-    %         [rs,emsg] = mysql_dbexecute(dbc, UpdateString);
-    %         if ~isempty(emsg)
-    %             fprintf(1,'Error counting NPointTo operations for mop_id = %u\n',M_ids(k));
-    %             fprintf(1,'%s\n',emsg)
-    %             keyboard
-    %         end
-    %     end
 end
 
 %% Close database
