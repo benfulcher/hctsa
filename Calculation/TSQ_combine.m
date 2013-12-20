@@ -41,7 +41,7 @@ end
 HCTSA_locs = {HCTSA_loc_1, HCTSA_loc_2};
 
 % Check paths point to valid files
-FullPath = cell(2,1);
+% FullPath = cell(2,1);
 for i = 1:2
     path = exist(HCTSA_locs{i});
     if (path==0)
@@ -55,7 +55,7 @@ end
 fprintf(1,'Loading data...');
 LoadedData = cell(2,1);
 for i = 1:2
-    LoadedData{i} = load(FullPath{i});
+    LoadedData{i} = load(HCTSA_locs{i});
 end
 fprintf(1,' Loaded.\n');
 
