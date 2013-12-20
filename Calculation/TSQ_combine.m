@@ -40,13 +40,14 @@ end
 % Combine the local files
 HCTSA_locs = {HCTSA_loc_1, HCTSA_loc_2};
 
+% Check paths point to valid files
 FullPath = cell(2,1);
 for i = 1:2
-    path = which(HCTSA_locs{i});
-    if isempty(path)
-        error('Could not find %s',HCTSA_loc_1);
-    else
-        FullPath{i} = path;
+    path = exist(HCTSA_locs{i});
+    if (path==0)
+        error('Could not find %s',HCTSA_locs{i});
+    % else
+    %     FullPath{i} = path;
     end
 end
 
@@ -92,8 +93,7 @@ Operations = LoadedData{1}.Operations(keepopi_1);
 fprintf(1,'Keeping the %u overlapping operations.\n',length(allopids));
 
 % 3. MasterOperations
-% Take intersection, like operations -- those that are not in both
-% won't be used in the final one
+% Take intersection, like operations -- those that are in both
 [allmopids,keepmopi_1] = intersect(vertcat(LoadedData{1}.MasterOperations.ID),vertcat(LoadedData{2}.MasterOperations.ID));
 MasterOperations = LoadedData{1}.MasterOperations(keepmopi_1);
 
