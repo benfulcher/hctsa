@@ -153,17 +153,19 @@ switch ClusterMethod
             if strcmp(DistanceMetric,'abscorr') % custom distance function
                 if any(isnan(TS_DataMat(:)));
                     fprintf(1,'NaNs found in the input matrix. Distance calculations will probably be SLOW...\n')
-                    R = benpdist(TS_DataMat,'corr',1);
+                    % Use BF_pdist to calculate distances even when NaNs are present
+                    R = BF_pdist(TS_DataMat,'corr',1);
                 else % all good values -- can do this using pdist which is very fast
                     R = pdist(TS_DataMat,'corr');
                 end
-                R = 1-abs(1-R);
-                R(R<0) = 0;% sometimes get numerical error
+                R = 1 - abs(1-R);
+                R(R<0) = 0; % Sometimes get numerical error putting entries slightly under 0... (dirty fix but ok)
                 fprintf(1,'abscorr transformation :: R between %f (0) -- %f (1)',min(R),max(R))
             else
                 if any(isnan(TS_DataMat(:))) % NaNs: need to do this the slow way:
-                    disp('NaNs in input matrix -- distance calculations are going to be SLOW...')
-                    R = benpdist(TS_DataMat,DistanceMetric,1);
+                    fprintf(1,'NaNs found in the input matrix. Distance calculations will probably be SLOW...\n')
+                    % Use BF_pdist to calculate distances even when NaNs are present
+                    R = BF_pdist(TS_DataMat,DistanceMetric,1);
                 else
                     R = pdist(TS_DataMat,DistanceMetric);
                 end
@@ -173,7 +175,7 @@ switch ClusterMethod
 
             % Display cophentic correlation (goodness of linkage)
             cpc = cophenet(links,R);
-            fprintf(1,'FYI, cophenetic correlation is %f\n',cpc)
+            fprintf(1,'FYI, the cophenetic correlation is %f.\n',cpc)
 
             % Save to file
             if (savetofile == 1)
@@ -185,7 +187,7 @@ switch ClusterMethod
                 fprintf(1,'Saving the linkage information as ''%s''...',FileName)
                 save(FileName,'R','links','-v7.3')
                 fprintf(1,' Done.\n');
-                if nargout<1
+                if nargout < 1
                     return % don't bother doing the rest if all we wanted was this
                 end
             end
