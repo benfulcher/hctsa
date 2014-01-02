@@ -50,25 +50,29 @@ if nargin < 3, ClusterParams = {}; end % defaults specified within each method
 if nargin < 4 || isempty(TSorOps), TSorOps = 'ts'; end
 
 %% Get the data
-switch norcl
-case 'cl'
-    fprintf(1,'Loading HCTSA_cl.mat...');
-    load('HCTSA_cl.mat','TS_DataMat')
-    fprintf(1,' Loaded.\n');
-case 'norm'
-    fprintf(1,'Loading HCTSA_N.mat...');
-    load('HCTSA_N.mat','TS_DataMat')
-    fprintf(1,' Loaded.\n');
-otherwise % Input is a matrix to be clustered -- call it TS_DataMat.
+if ischar(norcl)
+    switch norcl
+    case 'cl'
+        fprintf(1,'Loading HCTSA_cl.mat...');
+        load('HCTSA_cl.mat','TS_DataMat')
+        fprintf(1,' Loaded.\n');
+    case 'norm'
+        fprintf(1,'Loading HCTSA_N.mat...');
+        load('HCTSA_N.mat','TS_DataMat')
+        fprintf(1,' Loaded.\n');
+    end
+else % Input is a matrix to be clustered -- call it TS_DataMat.
     TS_DataMat = norcl;
 end
 % Transpose the matrix is using operations:
-if strcmp(TSorOps,'ops'), TS_DataMat = TS_DataMat'; end
+if strcmp(TSorOps,'ops')
+    TS_DataMat = TS_DataMat';
+end
 
 %% Do the unsupervised clustering
 switch ClusterMethod
 	case 'linkage'
-% 		disp('Using inbuilt matlab linkage clustering');
+% 		fprintf(1,'Using inbuilt matlab linkage clustering\n');
         % parameter is a cell:
         % {DistanceMetric, LinkageMethod, showdend, clustth, savetofile, customR}
         % Better to make this a structure in future...

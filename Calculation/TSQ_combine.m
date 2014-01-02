@@ -1,4 +1,4 @@
-% TSQ_join
+% TSQ_combine
 % 
 % This function joins two HCTSA_loc.mat files.
 % Any data matrices are combined, and the guides are updated to reflect the
@@ -29,13 +29,11 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_join(HCTSA_loc_1,HCTSA_loc_2)
+function TSQ_combine(HCTSA_loc_1,HCTSA_loc_2)
 
 if nargin < 2
     error('Must provide paths for two HCTSA_loc files')
 end
-
-% Check the two local files:
 
 % Combine the local files
 HCTSA_locs = {HCTSA_loc_1, HCTSA_loc_2};
