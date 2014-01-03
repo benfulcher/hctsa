@@ -25,7 +25,7 @@ function R = BF_pdist(F,DistMetric,ToVector,opts)
 
 if nargin < 2 || isempty(DistMetric)
     DistMetric = 'euclidean';
-    fprintf(1,'Using the Euclidean distance metric')
+    fprintf(1,'Using the Euclidean distance metric\n')
 end
 if nargin < 3 || isempty(ToVector)
     ToVector = 0;
@@ -56,11 +56,14 @@ if strcmp(DistMetric,'mi')
         nbins = 10;
     end
     fprintf(1,'Using a histogram with %u bins\n',nbins)
-    mis = zeros(n1);
-    times = zeros(n1,1);
+
     goodies = ~isnan(F); % now we can deal with NaNs into design matrix
+
+    mis = zeros(n1);
+    % times = zeros(n1,1);
+    timer = tic; % Way faster to not store the time taken for every iteration
     for i = 1:n1
-        tic
+        % tic
         goodi = goodies(i,:);
         for j = i:n1
             goodj = goodies(j,:);
@@ -68,49 +71,57 @@ if strcmp(DistMetric,'mi')
             mis(i,j) = benmi(F(i,goodboth),F(j,goodboth),'quantile','quantile',nbins); % by quantile with nbins
             mis(j,i) = mis(i,j);
         end
-        times(i) = toc;
+        % times(i) = toc;
         if (mod(i,floor(n1/50)) == 0)
-            fprintf(1,'Less than %s remaining! We''re at %u / %u\n', ...
-                        BF_thetime(mean(times(1:i))*(n1-i)),i,n1)
+            fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
+                        BF_thetime(toc(timer)/i*(n1-i)),i,n1)
 %             save(fn,'mis','m_ids_keep','-v7.3');
 %             disp('saved')
         end
     end
+    clear timer % stop timing
     R = mis; clear mis; % not really an R but ok.
 else
     % First use in-built pdist, which is fast
+    fprintf(1,'First computing pairwise distances using pdist...');
     if strcmp(DistMetric,'abscorr')
         R = pdist(F,'corr');
     else
         R = pdist(F,DistMetric);
     end
     R = squareform(R); % Make a matrix
+    fprintf(1,' Done.\n');
     
     % Now go through and fill in any NaNs
     [nani, nanj] = find(isnan(R));
     if ~isempty(nani) % there are NaNs in R
         ij = (nanj>=nani); % only keep diagonal or upper diagonal entries
-        nani = nani(ij); nanj = nanj(ij);
+        nani = nani(ij);
+        nanj = nanj(ij);
         goodies = ~isnan(F);
-
-        times = zeros(length(nani),1);
+        
+        fprintf(1,'Recalculating distances individually for %u NaN entries in the distance matrix...\n',length(nani));
+        
+        % Storing individual times for large numbers of calculations can be inefficient
+        % times = zeros(length(nani),1); 
+        timer = tic;
         for i = 1:length(nani)
-            tic
-            ii = nani(i); jj = nanj(i);
+            ii = nani(i);
+            jj = nanj(i);
             goodi = goodies(ii,:);
             goodj = goodies(jj,:);
             goodboth = (goodi & goodj);
-            R(ii,jj) = dij(F(ii,goodboth),F(jj,goodboth));
-    %         R(ii,jj) = sqrt(sum((F(ii,goodboth)-F(jj,goodboth)).^2)); % Euclidean
+            R(ii,jj) = dij(F(ii,goodboth),F(jj,goodboth)); % calculate the distance
             R(jj,ii) = R(ii,jj); % add the symmetrized entry
-            times(i) = toc;
+            % times(i) = toc;
             
-            % Give update on time remaining...
-            if (mod(i,floor(length(nani)/10))==0)
-                fprintf(1,'Less than %s remaining! We''re at %u / %u\n', ...
-                        BF_thetime(mean(times(1:i))*(length(nani)-i)),i,length(nani))
+            % Give update on time remaining after 10 iterations, then 10 more times...
+            if (i==10) || (mod(i,floor(length(nani)/10))==0)
+                fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
+                        BF_thetime(toc(timer)/i*(length(nani)-i)),i,length(nani))
             end
         end
+        clear timer % stop the timer
     end
 end
 

@@ -64,12 +64,18 @@ if nargin < 5
 end
 
 if ~isempty(SubSet)
-    if length(SubSet) ~= 3
+    if (length(SubSet) ~= 3)
         error('The subset should specify ''norm'' or ''cl'' and the subset.')
     elseif ~ismember(SubSet{1},{'norm','cl'})
         error('The first component of subset should be either ''norm'' or ''cl''.')
     end
 end
+
+% Save information about clustering settings so can run the same back again if needed later:
+CodeToCluster = 'TSQ_cluster(ClusterMethRow, ClusterParamsRow, ClusterMethCol, ClusterParamsCol, SubSet)';
+ClusteringInfo = struct('ClusterMethRow',ClusterMethRow,'ClusterParamsRow', ...
+                    ClusterParamsRow,'ClusterMethCol',ClusterMethCol,'ClusterParamsCol',ClusterParamsCol ...
+                    'Subset',SubSet,'CodeToCluster',CodeToCluster);
 
 %% Read in information from local files
 if isempty(SubSet) || strcmp(SubSet{1},'norm')
@@ -82,7 +88,7 @@ if isempty(wn);
     error('%s not found.',TheFile);
 end
 fprintf(1,'Loading data from %s...',TheFile)
-load('HCTSA_N.mat','TS_DataMat','TimeSeries','Operations','MasterOperations')
+load('HCTSA_N.mat','TS_DataMat','TimeSeries','Operations','MasterOperations','NormalizationInfo')
 fprintf(1,' Done.\n')
 
 % now all variables are by the 'cl' superscript names
@@ -158,11 +164,15 @@ TimeSeries = TimeSeries(ordr);
 % Reorder operation metadata
 Operations = Operations(ordc);
 
+
 %% Save Output to file
-% TS_loc_cl -- this is the clustered table with time series as rows and metrics as columns
+
+% Save information about the clustering to the file
+% You can run CodeToCluster after loading all the clustering info using an eval statement...?
 fprintf(1,'Saving the clustered data as ''HCTSA_cl''...')
-save('HCTSA_cl.mat','TS_DataMat','TimeSeries','Operations','MasterOperations')
+save('HCTSA_cl.mat','TS_DataMat','TimeSeries','Operations','MasterOperations','NormalizationInfo','ClusteringInfo')
 fprintf(1,' Done.\n');
+
 
 if length(ClusterParamsRow)>=5 && ClusterParamsRow{5}==1
     % reload the linkage saved from above and reorder it as per the new one

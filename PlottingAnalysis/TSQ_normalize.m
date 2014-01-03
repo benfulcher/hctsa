@@ -102,14 +102,14 @@ TS_DataMat(TS_Quality > 0) = NaN;
 fprintf(1,'There are %u special values in the data matrix.\n',sum(TS_Quality(:) > 0))
 % Now all bad values are NaNs, and we can get on with the job of filtering them out
 
-% (i) Filter based on proportion of bad entries. If either threshold is 1,
+% (*) Filter based on proportion of bad entries. If either threshold is 1,
 % the resulting matrix is guaranteed to be free from bad values entirely.
 [badr, badc] = find(isnan(TS_DataMat));
 thresh_r = FilterOptions(1); thresh_c = FilterOptions(2);
 if thresh_r > 0 % if 1, then even the worst are included
     [badr, ~, rj] = unique(badr); % neat code, but really slow to do this
 %     unique... Loop instead
-    % (ii) remove rows with more than a proportion thresh_r bad values
+    % (ii) Remove rows with more than a proportion thresh_r bad values
     badrp = zeros(length(badr),1); % stores the number of bad entries
     for i = 1:length(badr)
         badrp(i) = sum(rj==i);
@@ -170,7 +170,7 @@ else
     kc1 = (1:size(TS_DataMat,2));
 end
 
-% (ii) Remove operations that are constant across the time series dataset
+% (*) Remove operations that are constant across the time series dataset
 if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all will be constant!
     crap_op = zeros(size(TS_DataMat,2),1);
     for j = 1:size(TS_DataMat,2)
@@ -193,7 +193,7 @@ else
     kc2 = ones(1,size(TS_DataMat,2));
 end
 
-% (ii) Remove time series with constant feature vectors
+% (*) Remove time series with constant feature vectors
 crap_ts = zeros(size(TS_DataMat,1),1);
 for j = 1:size(TS_DataMat,1)
     crap_ts(j) = (range(TS_DataMat(j,~isnan(TS_DataMat(j,:)))) < eps);
@@ -272,17 +272,19 @@ end
 
 
 
-%% Update the labels and stores
+%% Update the labels post-filtering
 % Time series
 kr_tot = kr0(kr1(kr2)); % The full set of indices remaining after all the filtering
 TimeSeries = TimeSeries(kr_tot); % Filter time series
 if ~isempty(trainset)
-    trainset = intersect(trainset,kr_tot); % re-adjust training indices, too
+    % Re-adjust training indices too, if relevant
+    trainset = intersect(trainset,kr_tot);
 end
 
 % Operations
 kc_tot = kc0(kc1(kc2)); % The full set of indices remaining after all the filtering
 Operations = Operations(kc_tot); % Filter operations
+
 
 % In an ideal world, you would check to see if any master operations are no longer pointed to
 % and recalibrate the indexing, but I'm not going to bother.
@@ -291,7 +293,8 @@ fprintf(1,'We now have %u time series and %u operations in play\n',length(TimeSe
 fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix\n',sum(isnan(TS_DataMat(:))), ...
                 sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
 
-%% NORMALIZE THE LITTLE SHIT
+
+%% NORMALIZE THE LITTLE BASTARD
 
 if ismember(NormFunction,{'nothing','none'})
     fprintf(1,'NO NORMALIZING ON MY WATCH!\n')

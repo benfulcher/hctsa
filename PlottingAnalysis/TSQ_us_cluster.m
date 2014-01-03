@@ -149,7 +149,7 @@ switch ClusterMethod
             end
             load(FileName,'R','links');
         else
-            % pairwise distances
+            % Pairwise distances
             if strcmp(DistanceMetric,'abscorr') % custom distance function
                 if any(isnan(TS_DataMat(:)));
                     fprintf(1,'NaNs found in the input matrix. Distance calculations will probably be SLOW...\n')
