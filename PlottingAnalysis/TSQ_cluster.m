@@ -60,8 +60,7 @@ end
 
 % Subsets -- only cluster a subset of the full data matrix
 if nargin < 5
-    fprintf(1,'No subsets, clustering the full object\n')
-    SubSet = [];
+    SubSet = []; % cluster the full input matrix by default
 end
 
 if ~isempty(SubSet)

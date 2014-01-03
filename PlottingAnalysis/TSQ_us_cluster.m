@@ -91,7 +91,7 @@ switch ClusterMethod
             LinkageMethod = 'average';
         end
         
-        fprintf(1,'Using %s linkage clustering on %s distances',LinkageMethod,DistanceMetric);
+        fprintf(1,'Using %s linkage clustering on %s distances\n',LinkageMethod,DistanceMetric);
         
         % ** showdend
         if length(ClusterParams)>=3 && ~isempty(ClusterParams{3})

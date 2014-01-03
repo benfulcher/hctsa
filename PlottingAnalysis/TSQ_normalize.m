@@ -6,9 +6,11 @@
 % visualization and clustering.
 % 
 % --INPUTS:
-% normopt: string specifying how to normalize the data
-% trimopt: vector specifying thresholds for which rows and columns to trim. If
-%          set one of the trimopts{1} to 1, will have no bad values in your matrix.
+% NormFunction: string specifying how to normalize the data
+% FilterOptions: vector specifying thresholds for the minimum proportion of bad
+%                values tolerated in a given row or column, in the form of a 2-vector:
+%                [row proportion, column proportion] If one of the FilterOptions
+%                is set to 1, will have no bad values in your matrix.
 % subs [opt]: only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
 %             subsequently be clustered and further subsetted using TS_cluster2...
@@ -33,24 +35,20 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_normalize(normopt,trimopt,subs,trainset)
+function TSQ_normalize(NormFunction,FilterOptions,subs,trainset)
 
-%% Argument Checking, Preliminaries
-if nargin < 1 || isempty(normopt)
-    fprintf(1,'Using the default, scaled quantile-based sigmoidal transform -- ''scaledSQzscore''\n')
-%     normopt = 'scaledsigmoid';
-    normopt = 'scaledSQzscore';
+%% Check Inputs
+if nargin < 1 || isempty(NormFunction)
+    fprintf(1,'Using the default, scaled quantile-based sigmoidal transform: ''scaledSQzscore''\n')
+    NormFunction = 'scaledSQzscore';
 end
 
-if nargin < 2 || isempty(trimopt)
-    trimopt = [0.90, 1]; % (default): remove less than 90%-good time series, & then less than 
+if nargin < 2 || isempty(FilterOptions)
+    FilterOptions = [0.90, 1]; % (default): remove less than 90%-good time series, & then less than 
                         % 100%-good metrics.
 end
-if iscell(trimopt) % still using the cell input of previous TSQ_normalize
-    trimopt = trimopt{1};
-end
 fprintf(1,['Removing time series with more than %.2f%% special-valued outputs, ' ...
-            'and operations with more than %.2f%% special-valued outputs\n'],(1-trimopt(1))*100,(1-trimopt(2))*100);
+            'and operations with more than %.2f%% special-valued outputs\n'],(1-FilterOptions(1))*100,(1-FilterOptions(2))*100);
 
 if nargin < 3
     subs = {}; % Empty by default: don't subset
@@ -107,7 +105,7 @@ fprintf(1,'There are %u special values in the data matrix.\n',sum(TS_Quality(:) 
 % (i) Filter based on proportion of bad entries. If either threshold is 1,
 % the resulting matrix is guaranteed to be free from bad values entirely.
 [badr, badc] = find(isnan(TS_DataMat));
-thresh_r = trimopt(1); thresh_c = trimopt(2);
+thresh_r = FilterOptions(1); thresh_c = FilterOptions(2);
 if thresh_r > 0 % if 1, then even the worst are included
     [badr, ~, rj] = unique(badr); % neat code, but really slow to do this
 %     unique... Loop instead
@@ -214,8 +212,8 @@ else
 end
 
 % % (iii) Trim based on high covariances
-% cov_thresh_r = trimopt{2}(1);
-% cov_thresh_c = trimopt{2}(2);
+% cov_thresh_r = FilterOptions{2}(1);
+% cov_thresh_c = FilterOptions{2}(2);
 % if cov_thresh_r>0
 %     F_c=corrcoef(F'); % I *think* this transpose is appropriate
 %     [xi xj]=find(abs(F_c)>cov_thresh_r);
@@ -295,18 +293,18 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix\n',sum(isnan(TS_Dat
 
 %% NORMALIZE THE LITTLE SHIT
 
-if ismember(normopt,{'nothing','none'})
+if ismember(NormFunction,{'nothing','none'})
     fprintf(1,'NO NORMALIZING ON MY WATCH!\n')
 else
     if isempty(trainset)
         % no training subset
         fprintf(1,'Normalizing a %u x %u object. Your patience is greatly appreciated...\n',length(TimeSeries),length(Operations))
-        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normopt);
+        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,NormFunction);
     else
         % retrieve a subset
         fprintf(1,['Normalizing a %u x %u object using %u training time series to train the transformation!' ...
                 ' Your patience is greatly appreciated...\n'],length(TimeSeries),length(Operations),length(trainset))
-        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normopt,trainset);
+        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,NormFunction,trainset);
     end
     fprintf(1,'Normalized: the data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))))
 end
@@ -343,9 +341,15 @@ end
 fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_DataMat(:))), ...
                     sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
 
+% Make a structure with statistics on normalization:
+% Save the CodeToRun, so you can check the settings used to run the normalization
+% At the moment, only saves the first two arguments
+CodeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',NormFunction,FilterOptions(1),FilterOptions(2));
+NormalizationInfo = struct('NormFunction',NormFunction,'FilterOptions',FilterOptions,'CodeToRun',CodeToRun);
+
 %% Done -- save results to file
 fprintf(1,'Saving the trimmed, normalized data to local files... ')
-save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations');
+save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations','NormalizationInfo');
 fprintf(1,' Done.\n')
 
 end
