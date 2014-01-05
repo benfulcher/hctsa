@@ -5,21 +5,23 @@
 % ts_ids / op_ids
 % 
 %---INPUTS:
-% TsorOps: specifies 'ops' for metrics or 'ts' for time series
-% LengthRange (ts): contrain included time series by length [minimum_length maximum_length] (1x2 vector)
-% LengthRange (mets): takes roll of masterpull: whether (1) or not (0) to pull
+%--TsorOps: specifies 'ops' for metrics or 'ts' for time series
+%--LengthRange (ts): contrain included time series by length [minimum_length maximum_length] (1x2 vector)
+%--LengthRange (ops): takes roll of MasterPull: whether (1) or not (0) to pull
 %                in other master-linked operations
-% KeywordInclude: constrain included time series by keyword -- nx2 cell
+%--KeywordInclude: constrain included time series by keyword -- nx2 cell
 % 		(i) keyword
 % 		(ii) how many of that keyword (0==all available)
-% KeywordRemove: keywords NOT to include (cell of strings)
-% idr: range of possible ids to restrict the search to (empty = don't
+%--KeywordRemove: keywords NOT to include (cell of strings)
+%--idr: range of possible ids to restrict the search to (empty = don't
 %                    restrict -- default)
-% howtolimit: can select one of:
+% [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[not any more
+%--howtolimit: can select one of:
 %                'rand' (limit cases by random)
 %                'pcmax' (limit cases by maximum percentage calculated)
 %                'pcmin' (limit cases by minimum percentage calculated)
-% dbc: can specify database; otherwise opens the default specified in
+% ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+%--dbname: can specify database; otherwise opens the default specified in
 %         SQL_opendatabase
 % 
 %---OUTPUTS
@@ -41,24 +43,29 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function ids = SQL_getids(TsorOps,LengthRange,KeywordInclude,KeywordRemove,idr,howtolimit,dbname)
+function ids = SQL_getids(TsorOps,LengthRange,KeywordInclude,KeywordRemove,idr,dbname)
 %%% FOREPLAY
 %% Check inputs -- set defaults
 % if nargin < 5; disp('You must provide 5 inputs! And no, I''m not asking nicely!!'); return; end
 
-if strcmp(TsorOps,'ts')
-	if isempty(LengthRange)
-		LengthRange = [200, 20000];
-		fprintf(1,'Setting default length constraints: %u--%u\n',LengthRange(1),LengthRange(2))
-	end
-elseif strcmp(TsorOps,'ops')
-	masterpull = LengthRange;
-	if isempty(masterpull)
-		masterpull = 1; % retrieves other outputs of all master functions implicated in the range
+% if strcmp(TsorOps,'ts')
+    % empty LengthRange means no length contraint, which is a fine default now...
+%     
+    % if isempty(LengthRange)
+        % LengthRange = [200, 20000];
+        % fprintf(1,'Setting default length constraints: %u--%u\n',LengthRange(1),LengthRange(2))
+    % end
+
+if ~ismember(TsorOps,{'ts','ops'})
+	error('First input must be either ''ts'' or ''ops''.');
+end
+
+if strcmp(TsorOps,'ops')
+	MasterPull = LengthRange;
+	if isempty(MasterPull)
+		MasterPull = 1; % retrieves other outputs of all master functions implicated in the range
 		fprintf(1,'Pulling in all pointers by default\n');
 	end
-else
-	error('First input must be either ''ts'' or ''ops''.');
 end
 
 if nargin < 4
@@ -68,10 +75,7 @@ end
 if nargin < 5
 	idr = [];
 end
-if nargin < 6 || isempty(howtolimit)
-    howtolimit = 'pcmax';
-end
-if nargin < 7
+if nargin < 6
 	dbname = ''; % Use default database by default
 end
 
@@ -113,7 +117,11 @@ if strcmp(TsorOps,'ts')
     % end
 	
 	% Length constraint in words
-	s{3} = sprintf('TimeSeries.Length BETWEEN %u AND %u',LengthRange(1),LengthRange(2));
+    if isempty(LengthRange)
+        s{3} = '';
+    else
+    	s{3} = sprintf('TimeSeries.Length BETWEEN %u AND %u',LengthRange(1),LengthRange(2));
+    end
 	
 	% Combine these results into part of a mySQL query string
 	conditions = '';
@@ -136,16 +144,16 @@ if strcmp(TsorOps,'ts')
 								'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
 			else % constrain to some number (using the LIMIT command in mySQL)
-                switch howtolimit
-                    case 'pcmax'
-                        limitme = sprintf(' ORDER BY PercentageCalculated DESC LIMIT %u',ncut);
-                    case 'pcmin'
-                        limitme = sprintf(' ORDER BY PercentageCalculated LIMIT %u',ncut);
-                    case 'rand'
-                        limitme = sprintf(' ORDER BY RAND() LIMIT %u',ncut);
+                % switch howtolimit
+                %     case 'pcmax'
+                %         limitme = sprintf(' ORDER BY PercentageCalculated DESC LIMIT %u',ncut);
+                %     case 'pcmin'
+                %         limitme = sprintf(' ORDER BY PercentageCalculated LIMIT %u',ncut);
+                %     case 'rand'
+                limitme = sprintf(' ORDER BY RAND() LIMIT %u',ncut);
                         % I know this is a slow implementation -- probably better
                         % to create the random numbers here to constrain
-                end
+                % end
                 
 				if isempty(kyes{i})
 					SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
@@ -173,7 +181,7 @@ if strcmp(TsorOps,'ts')
 				ngot = length(C_tskwyes{i});
 			
 				if isempty(kyes{i})
-					fprintf(1,'Found %u time series selected by %s\n',ngot,howtolimit);
+					fprintf(1,'Found %u time series selected at random\n',ngot);
 				else
 					fprintf(1,'Found %u time series with keyword ''%s''\n',ngot,kyes{i});
 				end
@@ -265,16 +273,16 @@ else
 								'(SELECT opkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
 			else % constrain to some number (using the LIMIT command in mySQL)
-                switch howtolimit
-                    case 'pcmax'
-                        limitme = [' ORDER BY PercentageCalculated DESC LIMIT ' num2str(ncut)];
-                    case 'pcmin'
-                        limitme = [' ORDER BY PercentageCalculated LIMIT ' num2str(ncut)];
-                    case 'rand'
-                        limitme = [' ORDER BY RAND() LIMIT ' num2str(ncut)];
+                % switch howtolimit
+                    % case 'pcmax'
+                        % limitme = [' ORDER BY PercentageCalculated DESC LIMIT ' num2str(ncut)];
+                    % case 'pcmin'
+                        % limitme = [' ORDER BY PercentageCalculated LIMIT ' num2str(ncut)];
+                    % case 'rand'
+                limitme = [' ORDER BY RAND() LIMIT ' num2str(ncut)];
                         % I know this is a slow implementation -- probably better
                         % to create the random numbers here to constrain
-                end
+                % end
                 
                 
 				if isempty(kyes{i}) % empty keyword -- just constrain by number
@@ -302,7 +310,7 @@ else
 		
 			ngot = length(C_kyes{i});
 			if isempty(kyes{i})
-				fprintf(1,'Found %u operations chosen by %s\n',ngot,howtolimit);
+				fprintf(1,'Found %u operations chosen at random\n',ngot);
 			else
 				fprintf(1,'Found %u operations with keyword ''%s''\n',ngot,kyes{i});
 			end
@@ -332,7 +340,7 @@ else
 	end
 
 	%% Get other metrics which point to master functions which will be called anyway
-	if masterpull && ~isempty(op_ids_keep)
+	if MasterPull && ~isempty(op_ids_keep)
 		% Find implicated Master functions (a super inefficient way of doing it:)
 		SelectString = ['SELECT op_id FROM Operations WHERE mop_id IN (SELECT DISTINCT mop_id FROM Operations WHERE op_id IN (' BF_cat(op_ids_keep,',') '))'];
 		[newmids,~,~,emsg] = mysql_dbquery(dbc,SelectString);

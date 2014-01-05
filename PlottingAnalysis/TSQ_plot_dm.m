@@ -71,7 +71,9 @@ else
     
     if isempty(TS_DataMat)
         a = which(TheFile); % first check it exists
-        if isempty(a), error('\n%s not found. You should probably run %s...',TheFile,TheRoutine); end
+        if isempty(a)
+            error('\n%s not found. You should probably run %s...',TheFile,TheRoutine);
+        end
         load(TheFile,'TS_DataMat')
         fprintf(1,' Done.\n');
     end

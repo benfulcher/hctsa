@@ -1,9 +1,7 @@
 % BF_pdist
 % 
 % Same as pdist but then goes through and fills in NaNs with indiviually
-% calculated values based on an overlapping range of good values.
-% 
-% Ben Fulcher, 31/1/2011
+% calculated values using an overlapping range of good values.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -84,13 +82,14 @@ if strcmp(DistMetric,'mi')
 else
     % First use in-built pdist, which is fast
     fprintf(1,'First computing pairwise distances using pdist...');
+    tic
     if strcmp(DistMetric,'abscorr')
         R = pdist(F,'corr');
     else
         R = pdist(F,DistMetric);
     end
     R = squareform(R); % Make a matrix
-    fprintf(1,' Done.\n');
+    fprintf(1,' Done in %s.\n',BF_thetime(toc));
     
     % Now go through and fill in any NaNs
     [nani, nanj] = find(isnan(R));
@@ -115,8 +114,9 @@ else
             R(jj,ii) = R(ii,jj); % add the symmetrized entry
             % times(i) = toc;
             
-            % Give update on time remaining after 10 iterations, then 10 more times...
-            if (i==10) || (mod(i,floor(length(nani)/10))==0)
+            % Give update on time remaining after 10 iterations (if more than 100 total iterations)
+            % and then 10 more times...
+            if (i==10 && length(nani) > 100) || (mod(i,floor(length(nani)/10))==0)
                 fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
                         BF_thetime(toc(timer)/i*(length(nani)-i)),i,length(nani))
             end

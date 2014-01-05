@@ -285,7 +285,7 @@ end
 
 % Finished retrieving from the database!
 if any(DidRetrieve)
-    fprintf(1,'Retrieved data from %s in %u iterations in %s.\n',dbname,nts,BF_thetime(sum(IterationTimes)));
+    fprintf(1,'Retrieved data from %s over %u iterations in %s.\n',dbname,nts,BF_thetime(sum(IterationTimes)));
 else
     fprintf(1,'Over %u iterations, no data was retrieved from %s.\nNot writing any data to file.\n',nts,dbname);
     SQL_closedatabase(dbc); return
@@ -387,7 +387,7 @@ end
 SQL_closedatabase(dbc)
 
 % Save to HCTSA_loc.mat
-fprintf(1,'Saving local versions of the data...');
+fprintf(1,'Saving local versions of the data to HCTSA_loc.mat...');
 save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','-v7.3');
 switch RetrieveWhatData
 case 'all'

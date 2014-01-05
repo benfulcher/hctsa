@@ -1,10 +1,11 @@
-% TSQ_AutoLabelGroups
+% TSQ_LabelGroups
 % 
 % You provide a set of keyword options to store a grouping of time series in the
 % store.
 % 
-% Requires a very specific structure: {'Keyword_1',NumberToRetrive;'Keyword2',NumberToRetrive,...}
-% Can use '0' to retrieve all of a given class.
+% Requires a very specific structure:
+% {'Keyword_1',NumberToRetrive;'Keyword2',NumberToRetrive,...}
+% Use '0' to retrieve all of a given class.
 % Can also use an empty label, '', to select anything at random from all time series.
 % 
 % Example usage:
@@ -37,20 +38,20 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function GroupIndices = TSQ_AutoLabelGroups(KeywordGroups,TsorOps,WhatData,SaveBack)
+function GroupIndices = TSQ_LabelGroups(KeywordGroups,TsorOps,WhatData,SaveBack)
 
 %% Check inputs
 if nargin < 1 || isempty(KeywordGroups)
     error('You must specify labels');
 end
 if ischar(KeywordGroups);
-    fprintf(1,'Grouping all items with ''%s''\n',KeywordGroups);
+    fprintf(1,'Grouping all items with ''%s''.\n',KeywordGroups);
     KeywordGroups = {KeywordGroups,0};
 end
 
 if nargin < 2 || isempty(TsorOps)
     TsorOps = 'ts';
-    fprintf(1,'Grouping time series\n');
+    fprintf(1,'Grouping time series.\n');
 end
 if ~ismember(TsorOps,{'ops','ts'})
     error('Specify either ''ops'' or ''ts''.')
@@ -58,7 +59,7 @@ end
 
 if nargin < 3 || isempty(WhatData)
     WhatData = 'cl';
-    fprintf(1,'Retrieving from HCTSA_cl by default\n');
+    fprintf(1,'Retrieving from HCTSA_cl by default.\n');
 end
 if ~isstruct(WhatData) && ~ismember(WhatData,{'orig','norm','cl'})
     error('Specify ''orig'', ''norm'', or ''cl''.')
@@ -102,7 +103,7 @@ end
 NumGroups = length(KeywordGroups); % The number of groups
 Keywords = SUB_cell2cellcell(Keywords);
 
-tic
+timer = tic;
 for jo = 1:NumGroups
     if ~isempty(KeywordGroups{jo}) % Collect time series with this keyword
         GroupIndices{jo} = find(cellfun(@(x)any(ismember(KeywordGroups{jo},x)),Keywords));
@@ -129,7 +130,14 @@ for jo = 1:NumGroups
         end
     end
 end
-fprintf(1,'Group labeling complete in %s.\n',BF_thetime(toc));
+fprintf(1,'Group labeling complete in %s.\n',BF_thetime(toc(timer)));
+clear timer % stop timing
+
+% More feedback
+fprintf(1,'We found:\n');
+for i = 1:NumGroups
+    fprintf(1,'%s -- %u matches\n',KeywordGroups{i},length(GroupIndices{i}));
+end
 
 % Save the grouping back to file?
 % Eventually would be nice to add a group index to each element, e.g., as [TimeSeries.Group]
@@ -140,8 +148,31 @@ if SaveBack
     % Elements = whos('-file',TheFile);
     % if ismember({Elements.name},'GroupIndices')
     if ~all(cellfun(@isempty,GroupIndices))
-        save(TheFile,'GroupIndices','-append')
-        fprintf(1,'Saved ''GroupIndices'' to %s\n',TheFile);
+        fprintf(1,'Saving group labels and information back to %s...',TheFile);
+        
+        % First append/overwrite group names
+        GroupNames = KeywordGroups;
+        
+        % Then overwrite labels
+        TheGroups = BF_ToGroup(GroupIndices,length(TimeSeries))';
+        % Now we need to make the cells
+        TheGroupsCell = cell(size(TheGroups));
+        % Cannot find an in-built for this... :-/
+        for i = 1:length(TheGroups), TheGroupsCell{i} = TheGroups(i); end
+        
+        % First remove Group field if it exists
+        if isfield(TimeSeries,'Group')
+            TimeSeries = rmfield(TimeSeries,'Group');
+        end
+
+        % Then append the new group information:
+        TimeSeries = cell2struct([struct2cell(TimeSeries);TheGroupsCell], ...
+                                    {'ID','FileName','Keywords','Length','Data','Group'});
+
+        % Save everything back to file:
+        save(TheFile,'TimeSeries','-append')
+        save(TheFile,'GroupNames','-append')
+        fprintf(1,' Saved.\n');
     end
 end
 

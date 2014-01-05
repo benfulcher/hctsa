@@ -1,6 +1,7 @@
 % TSQ_plot_lowdim
 %
-% Plots a lower-dimensional representation of the data (e.g., using PCA).
+% Calculates then plots a lower-dimensional feature-based representation of the
+% data (e.g., using PCA).
 % 
 % [Previously TSQ_dimred]
 % 
@@ -30,12 +31,12 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_lowdim(TheData,TsorOps,kwgs,gi,DimRedMethod,classmeth,showks,annotatep)
-%% First Check inputs
+function TSQ_plot_lowdim(TheData,TsorOps,classmeth,showks,annotatep)
 
+%% Check inputs:
 if nargin < 1 || isempty(TheData)
     TheData = 'norm';
-    fprintf(1,'Getting data from HCTSA_loc_N\n'); 
+    fprintf(1,'Getting data from HCTSA_N\n'); 
 end
 
 if nargin < 2 || isempty(TsorOps)
@@ -46,64 +47,73 @@ if ~any(ismember(TsorOps,{'ops','ts'}));
     error('Specify either operations (''ops'') or time series (''ts'').');
 end
 
-% Specify a keyword labeling of the data, kwgs:
-if nargin < 3
-    kwgs = {};
-    fprintf(1,'No assignment of the data? Ok up to you...\n');
-end
+% % Specify a keyword labeling of the data, kwgs:
+% if nargin < 3
+%     kwgs = {};
+%     fprintf(1,'No assignment of the data? Ok up to you...\n');
+% end
+% 
+% % Specify group indices, gi:
+% if nargin < 4
+%     gi = [];
+%     fprintf(1,'Will obtain group indices from file\n');
+% end
 
-% Specify group indices, gi:
-if nargin < 4
-    gi = [];
-    fprintf(1,'Will obtain from indices TS_loc_cl\n');
-end
+% if nargin < 5 || isempty(DimRedMethod)
+%     DimRedMethod = 'pca';
+%     fprintf(1,'Using PCA\n');
+% end
 
-if nargin < 5 || isempty(DimRedMethod)
-    DimRedMethod = 'pca';
-    fprintf(1,'Using PCA\n');
-end
-
-if nargin < 6 || isempty(classmeth)
+if nargin < 3 || isempty(classmeth)
     classmeth = 'linclass';
     fprintf(1,'No discriminant\n'); 
 end
 
-if nargin < 7 || isempty(showks)
+if nargin < 4 || isempty(showks)
     showks = 1;
 end
 
-if nargin < 8 || isempty(annotatep)
+if nargin < 5 || isempty(annotatep)
     annotatep = struct('n',10);
 end
 if ~isstruct(annotatep)
     annotatep = struct('n',annotatep);
 end
 
-%%
+%% Load the data and group labeling from file
 if strcmp(TheData,'cl') || strcmp(TheData,'norm') 
     % Retrive data from local files
     switch TheData
     case 'cl'
-        TheDataFile = 'HCTSA_loc_cl.mat';
+        TheDataFile = 'HCTSA_cl.mat';
     case 'norm'
-        TheDataFile = 'HCTSA_loc_N.mat';
+        TheDataFile = 'HCTSA_N.mat';
     end
+    fprintf(1,'Loading data and grouping information from %s...',TheDataFile);
     load(TheDataFile,'TS_DataMat');
     if strcmp(TsorOps,'ts')
         load(TheDataFile,'Operations')
         DimensionLabels = {Operations.Name}; clear Operations % We just need their names
         if isstruct(annotatep) || length(annotatep) > 1 || annotatep > 0
             load(TheDataFile,'TimeSeries')
-            DataLabels = {TimeSeries.Filename};
+            DataLabels = {TimeSeries.FileName};
             data_ids = [TimeSeries.ID];
+            TimeSeriesData = {TimeSeries.Data};
+            if isfield(TimeSeries,'Group')
+                load(TheDataFile,'GroupNames')
+                DataGroups = [TimeSeries.Group];
+            else
+                error('No groups assigned -- Use TSQ_LabelGroups.')
+            end
             clear('TimeSeries'); % we no longer need you
         end
     else
         load(TheDataFile,'TimeSeries')
-        DimensionLabels = {TimeSeries.Filename}; clear TimeSeries
+        DimensionLabels = {TimeSeries.FileName}; clear TimeSeries
     end
+    fprintf(1,' Loaded.\n');
 else
-    % Provided the data yourself
+    % The user provided data yourself
     TS_DataMat = TheData;
     if isfield(annotatep,'olab')
         DimensionLabels = annotatep.olab;
@@ -112,112 +122,76 @@ else
     end
 end
 
-if strcmp(TsorOps,'ops') % take the inverse for operations
+if strcmp(TsorOps,'ops')
+    % Take the transpose of the input data matrix for operations
     TS_DataMat = TS_DataMat';
 end
 
 
-% (II) Sort out the labeling of groups
-if isempty(kwgs) % no grouping of data
-	kwgs = {'all data'};
-	gi = {1:size(TS_DataMat,1)};
-elseif ischar(kwgs)
-    kwgs = {kwgs};
-end
-
-if isempty(gi)
-    gi = SUB_autolabelQ(kwgs,TsorOps,TheData);
-end
-CheckEmpty = cellfun(@isempty,gi);
-if any(CheckEmpty)
-    error('No keywords found for: %s . Exiting.',kwgs{find(CheckEmpty,1)})
-end
-
-if (size(kwgs,2) == 2) && (size(kwgs,1) > 1); % specified subsets of each keyword
-   kwgs = kwgs(:,1);
-end
-NumGroups = length(gi); % Number of groups
+GroupIndices = BF_ToGroup(DataGroups)
+% if isempty(gi)
+%     gi = SUB_autolabelQ(kwgs,TsorOps,TheData);
+% end
+% CheckEmpty = cellfun(@isempty,gi);
+% if any(CheckEmpty)
+%     error('No keywords found for: %s . Exiting.',kwgs{find(CheckEmpty,1)})
+% end
+% if (size(kwgs,2) == 2) && (size(kwgs,1) > 1); % specified subsets of each keyword
+%    kwgs = kwgs(:,1);
+% end
+NumGroups = length(GroupIndices); % Number of groups
 
 %% Do the dimensionality reduction
-switch DimRedMethod
-    case 'pca'
-        % Matlab build-in PCA
-        % Sort it so that when choose different set of keywords the output is consistent
-        % There's a strange thing in princomp that can give different scores when the
-        % input rows are in a different order. The geometry is the same, but they're reflected
-        % relative to different orderings
 
-        [pc,score,latent] = princomp(TS_DataMat);
-        perc = round(latent/sum(latent)*1000)/10; % percentage of variance explained (1 d.p.)
+% Matlab build-in PCA
+% Sort it so that when choose different set of keywords the output is consistent
+% There's a strange thing in princomp that can give different scores when the
+% input rows are in a different order. The geometry is the same, but they're reflected
+% relative to different orderings
+fprintf(1,'Calculating principal components of the %u x %u data matrix...', ...
+                    size(TS_DataMat,1),size(TS_DataMat,2));
+[pc,score,latent] = princomp(TS_DataMat);
+fprintf(1,' Done.\n');
+PercVar = round(latent/sum(latent)*1000)/10; % Percentage of variance explained (1 d.p.)
 
-    case 'nmf'
-        % Non-negative matrix factorization
-        fprintf(1,'Running non-negative matrix factorization\n');
-        % Set parameters
-        a = nmf;
-        a.N = 2; % reduce to 2 basis functions
-        a.maxIteration = 500; % maximum number of iterations per cycle
-        a.nrofrestarts = 1; % number of restarts to overcome local minima
-        a.eps = 1e-3; % convergence epsilon
-        
-        % Run the algorithm
-        [r, n] = train(a,data(TS_DataMat));	  % reduce 10 elements to 2 components
-
-    otherwise
-        error('Unknown dimensionality reduction method ''%s''',DimRedMethod)
-end
-
-switch DimRedMethod
-    case 'pca'
-        % Work out the main contributions to each principle component
-        featlabel = cell(2,2); % Feature label :: proportion of total [columns are PCs)
-        tolabel = cell(2,1);
-        ngcontr = min(length(DimensionLabels),2);  % the 2 greatest contributions to the first principle component
-        for i = 1:2
-            [s1, ix1] = sort(abs(pc(:,i)),'descend');
-            featlabel{i,1} = DimensionLabels(ix1(1:ngcontr));
-            featlabel{i,2} = round(abs(s1(1:ngcontr)/sum(abs(s1)))*100)/100;
-            for j = 1:ngcontr
-                tolabel{i} = sprintf('%s%s (%f), ',tolabel{i},featlabel{i,1}{j},featlabel{i,2}(j));;
-            end
-            tolabel{i} = tolabel{i}(1:end-2);
-        end
-        
-    case 'nmf'
-        featlabel = cell(2,2); % feature label
-        tolabel = cell(2,1);
-        ngcontr = min(length(DimensionLabels),2);  % The 2 greatest contributions to the new basis
-        for i = 1:2
-            [s1, ix1] = sort(abs(n.W(:,i)),'descend');
-            featlabel{i,1} = DimensionLabels(ix1(1:ngcontr));
-            featlabel{i,2} = round(abs(s1(1:ngcontr)/sum(abs(s1)))*100)/100;
-            for j = 1:ngcontr
-                tolabel{i} = [tolabel{i} featlabel{i,1}{j} ' (' num2str(featlabel{i,2}(j)) '), '];
-            end
-            tolabel{i} = tolabel{i}(1:end-2);
-        end
+% Work out the main contributions to each principle component
+featlabel = cell(2,2); % Feature label :: proportion of total [columns are PCs)
+tolabel = cell(2,1);
+ngcontr = min(length(DimensionLabels),2);  % the 2 greatest contributions to the first principle component
+for i = 1:2
+    [s1, ix1] = sort(abs(pc(:,i)),'descend');
+    featlabel{i,1} = DimensionLabels(ix1(1:ngcontr));
+    featlabel{i,2} = round(abs(s1(1:ngcontr)/sum(abs(s1)))*100)/100;
+    for j = 1:ngcontr
+        tolabel{i} = sprintf('%s%s (%f), ',tolabel{i},featlabel{i,1}{j},featlabel{i,2}(j));;
+    end
+    tolabel{i} = tolabel{i}(1:end-2);
 end
 
 % Move all 2d plotting to TSQ_plot_2d
-extras.TS_DataMat = score;
-switch DimRedMethod
-    case 'pca'
-        NameString = 'PC';
-    case 'nmf'
-        NameString = 'NMF';
-%         title(['Mean reconstruction error: ' num2str(meanreconstructionerror)]);
-end
+% extras.TS_DataMat = score;
+
+NameString = 'PC';
 for i = 1:2
-    extras.labels{i} = sprintf('%s%u (%f%%) : %s',NameString,i,perc(i),tolabel{i}));
+    DataInfo.labels{i} = sprintf('%s%u (%f%%) : %s',NameString,i,PercVar(i),tolabel{i});
 end
 
-if ischar(TheData)
-    TSQ_plot_2d(kwgs,gi,[1,2],TheData,{},annotatep,showks,classmeth,extras);
-else
-    % Hopefully tsf is specified
-    extras.tsf = annotatep.tsf;
-    TSQ_plot_2d(kwgs,gi,[1,2],'none',{},annotatep,showks,classmeth,extras);
-end
+% function TSQ_plot_2d(Features,DataInfo,TrainTest,annotatep,keepksdensities,lossmeth,extras)
+
+DataInfo.GroupNames = GroupNames;
+DataInfo.GroupIndices = GroupIndices;
+DataInfo.DataLabels = DataLabels;
+DataInfo.TimeSeriesData = TimeSeriesData;
+
+keyboard
+TSQ_plot_2d(score(:,1:2),DataInfo,{},annotatep,showks,classmeth);
+
+% if ischar(TheData)
+% else
+%     % Hopefully tsf is specified
+%     extras.tsf = annotatep.tsf;
+%     TSQ_plot_2d(score(:,1:2),DataInfo,{},annotatep,showks,classmeth,extras);
+% end
 
 
 % % set up sc => first 2 principal components grouped
@@ -428,8 +402,8 @@ end
 % %% Labelling
 % switch DimRedMethod
 %     case 'pca'
-%         xlabel(['PC1 (' num2str(perc(1)) '%) : ' tolabel{1}],'interpreter','none')
-%         ylabel(['PC2 (' num2str(perc(2)) '%) : ' tolabel{2}],'interpreter','none')
+%         xlabel(['PC1 (' num2str(PercVar(1)) '%) : ' tolabel{1}],'interpreter','none')
+%         ylabel(['PC2 (' num2str(PercVar(2)) '%) : ' tolabel{2}],'interpreter','none')
 %         title('');
 %     case 'nmf'
 %         xlabel(['NMF1: ' tolabel{1}],'interpreter','none')

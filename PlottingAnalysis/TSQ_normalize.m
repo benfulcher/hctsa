@@ -44,11 +44,12 @@ if nargin < 1 || isempty(NormFunction)
 end
 
 if nargin < 2 || isempty(FilterOptions)
-    FilterOptions = [0.90, 1]; % (default): remove less than 90%-good time series, & then less than 
+    FilterOptions = [0.80, 1]; % (default): remove less than 90%-good time series, & then less than 
                         % 100%-good metrics.
 end
-fprintf(1,['Removing time series with more than %.2f%% special-valued outputs, ' ...
-            'and operations with more than %.2f%% special-valued outputs\n'],(1-FilterOptions(1))*100,(1-FilterOptions(2))*100);
+fprintf(1,['Removing time series with more than %.2f%% special-valued outputs\n' ...
+            'Removing operations with more than %.2f%% special-valued outputs\n'], ...
+            (1-FilterOptions(1))*100,(1-FilterOptions(2))*100);
 
 if nargin < 3
     subs = {}; % Empty by default: don't subset
@@ -297,19 +298,19 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix\n',sum(isnan(TS_Dat
 %% NORMALIZE THE LITTLE BASTARD
 
 if ismember(NormFunction,{'nothing','none'})
-    fprintf(1,'NO NORMALIZING ON MY WATCH!\n')
+    fprintf(1,'You specified ''%s'', so NO ACTUAL NORMALIZING IS BEING DONE!!!\n',NormFunction)
 else
     if isempty(trainset)
         % no training subset
-        fprintf(1,'Normalizing a %u x %u object. Your patience is greatly appreciated...\n',length(TimeSeries),length(Operations))
+        fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',length(TimeSeries),length(Operations))
         TS_DataMat = BF_NormalizeMatrix(TS_DataMat,NormFunction);
     else
         % retrieve a subset
         fprintf(1,['Normalizing a %u x %u object using %u training time series to train the transformation!' ...
-                ' Your patience is greatly appreciated...\n'],length(TimeSeries),length(Operations),length(trainset))
+                ' Please be patient...\n'],length(TimeSeries),length(Operations),length(trainset))
         TS_DataMat = BF_NormalizeMatrix(TS_DataMat,NormFunction,trainset);
     end
-    fprintf(1,'Normalized: the data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))))
+    fprintf(1,'Normalized! The data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))))
 end
 
 %% Remove bad entries
@@ -327,7 +328,7 @@ elseif any(nancol) % there are columns that are all NaNs
     TS_DataMat = TS_DataMat(:,kc);
     TS_Quality = TS_Quality(:,kc);
     Operations = Operations(kc);
-    fprintf(1,'We just removed (%u/%u) all-NaN columns from after normalization.\n',sum(nancol),length(nancol));
+    fprintf(1,'We just removed %u all-NaN columns from after normalization.\n',sum(nancol));
 end
 
 %% Now, make sure the columns are still good
@@ -351,7 +352,7 @@ CodeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',NormFunction,FilterOptions(1
 NormalizationInfo = struct('NormFunction',NormFunction,'FilterOptions',FilterOptions,'CodeToRun',CodeToRun);
 
 %% Done -- save results to file
-fprintf(1,'Saving the trimmed, normalized data to local files... ')
+fprintf(1,'Saving the trimmed, normalized data to local files...')
 save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations','NormalizationInfo');
 fprintf(1,' Done.\n')
 

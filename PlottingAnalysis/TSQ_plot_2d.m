@@ -1,7 +1,7 @@
 % TSQ_plot_2d
 % 
 % Plots the dataset in a two-dimensional space
-% e.g., that of two chosen operations given in two-component vector mr
+% e.g., that of two chosen operations, or two principal components
 % 
 %-------HISTORY
 % Borrows from TSQ_pca plotting routines
@@ -33,7 +33,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_2d(Features,DataInfo,TrainTest,annotatep,keepksdensities,lossmeth,extras)
+function TSQ_plot_2d(Features,DataInfo,TrainTest,annotatep,keepksdensities,lossmeth)
 % mr,norcl,TrainTest,annotatep,keepksdensities,lossmeth,extras)
 
 % Features should be a Nx2 vector of where to plot each of the N data objects in the two-dimensional space
@@ -44,129 +44,140 @@ end
 % DataInfo should be a structure array with all the information about the data (same length as Features)
 % Group should be a field in this structure array
 
-% Fill gi (group indicies) if necessary
-if nargin < 2
-    gi = {};
-end
+% % Fill gi (group indicies) if necessary
+% if nargin < 2
+%     gi = {};
+% end
 
-% mr: metric range -- a 2-component vector specifying metric numbers in cl
-% system
-% Time series are scattered in this space, as organized in given groups
-if nargin < 3 || isempty(mr)
-	fprintf(1,'You probably tell me what to plot next time...');
-	mr = [1,2];
-end
-if length(mr)~=2
-	error('Must be a two-dimensional space.');
-end
+% % mr: metric range -- a 2-component vector specifying metric numbers in cl
+% % system
+% % Time series are scattered in this space, as organized in given groups
+% if nargin < 3 || isempty(mr)
+%     fprintf(1,'You probably tell me what to plot next time...');
+%     mr = [1,2];
+% end
+% if length(mr)~=2
+%     error('Must be a two-dimensional space.');
+% end
 
-if nargin < 4 || isempty(norcl)
-    norcl = 'cl'; % retrieve data from TS_loc_cl, guides from TS_loc_guides_cl
-end
+% if nargin < 4 || isempty(norcl)
+%     norcl = 'cl'; % retrieve data from TS_loc_cl, guides from TS_loc_guides_cl
+% end
 
-if nargin < 5 || isempty(TrainTest)
+if nargin < 3 || isempty(TrainTest)
     TrainTest = {};
 end
 
-if nargin < 6 || isempty(annotatep)
+if nargin < 4 || isempty(annotatep)
     annotatep = struct('n',0);
 end
 
-if nargin < 7 || isempty(keepksdensities)
+if nargin < 5 || isempty(keepksdensities)
     keepksdensities = 1;
 end
 
-if nargin < 8 || isempty(lossmeth)
+if nargin < 6 || isempty(lossmeth)
     lossmeth = 'linclass';
 end
 
-if nargin < 9
-    extras = [];
-elseif ~isempty(extras) && ~isstruct(extras)
-    F = extras;
-    extras = struct('F',F);
-end
+% if nargin < 7
+%     extras = [];
+% elseif ~isempty(extras) && ~isstruct(extras)
+%     F = extras;
+%     extras = struct('F',F);
+% end
 
 %% Label groups
-if isempty(gi)
-    if strcmp(norcl,'cl') || strcmp(norcl,'norm')
-        gi = SUB_autolabelQ(kwgs,'ts',norcl,'kw');
-    else
-        error('Grouping indicies must be provided')
-    end
-end
-checkempty = cellfun(@isempty,gi);
-if any(checkempty)
-    error('No keywords found for ''%s''.',kwgs{find(checkempty,1)})
-end
-NumGroups = length(gi);
+% if isempty(gi)
+%     if strcmp(norcl,'cl') || strcmp(norcl,'norm')
+%         gi = SUB_autolabelQ(kwgs,'ts',norcl,'kw');
+%     else
+%         error('Grouping indicies must be provided')
+%     end
+% end
+% checkempty = cellfun(@isempty,gi);
+% if any(checkempty)
+%     error('No keywords found for ''%s''.',kwgs{find(checkempty,1)})
+% end
+% NumGroups = length(gi);
 
-if isfield(extras,'MakeFigure')
-    MakeFigure = extras.MakeFigure; % Can choose not to make a new figure
-else
-    MakeFigure = 1; % default is to plot on a brand new figure('color','w')
-end
+% if isfield(extras,'MakeFigure')
+%     MakeFigure = extras.MakeFigure; % Can choose not to make a new figure
+% else
+MakeFigure = 1; % default is to plot on a brand new figure('color','w')
+% end
 
 %% Load data
-if strcmp(norcl,'cl')
-    if isempty(extras)
-        % get data matrix
-        load TS_loc_cl.mat TS_loc_cl
-        F = TS_loc_cl;
-        clear TS_loc_cl;
-        % Get operation labels
-        load TS_loc_guides_cl mlabcl mkwcl
-        labels = mlabcl; clear mlabcl
-        keywords = mkwcl; clear mkwcl
-    else
-        F = extras.F;
-        labels = extras.labels;
-        if isfield(extras,'keywords')
-            keywords = extras.keywords;
-        else
-            keywords = cell(size(F,2),1);
-        end
-    end
-    
-    if isstruct(annotatep) || annotatep > 0
-        load TS_loc_guides_cl DataLabelscl
-        DataLabels = DataLabelscl; clear DataLabelscl
-    end
-elseif strcmp(norcl,'norm')
-    % get data matrix
-    if isempty(extras)
-        load TS_loc_N.mat TS_loc_N
-        F = TS_loc_N;
-        clear TS_loc_N;
-        % get operation labels
-        load TS_loc_guides_N mlabn mkwn
-        labels = mlabn; clear mlabn
-        keywords = mkwn; clear mkwn
-    else
-        F = extras.F;
-        labels = extras.labels;
-        if isfield(extras,'keywords')
-            keywords = extras.keywords;
-        else
-            keywords = cell(size(F,2),1);
-        end
-    end
-    
-    if isstruct(annotatep) || annotatep>0
-        load TS_loc_guides_N DataLabelsn
-        DataLabels = DataLabelsn; clear DataLabelsn
-    end
-else
-    if isempty(extras)
-        labels = cell(size(F,2),1);
-        keywords = cell(size(F,2),1);
-    else
-        F = extras.F;
-        labels = extras.labels;
-        keywords = cell(size(F,2),1);
-        DataLabels = extras.DataLabels;
-    end
+% Data is not loaded, nowit must be provided
+
+labels = DataInfo.labels; % Feature labels
+if isstruct(annotatep) || annotatep > 0
+    DataLabels = DataInfo.DataLabels; % We need data labels
 end
+GroupNames = DataInfo.GroupNames;
+GroupIndices = DataInfo.GroupIndices;
+TimeSeriesData = DataInfo.TimeSeriesData;
+NumGroups = length(GroupNames);
+
+% if strcmp(norcl,'cl')
+%     if isempty(extras)
+%         % get data matrix
+%         load TS_loc_cl.mat TS_loc_cl
+%         F = TS_loc_cl;
+%         clear TS_loc_cl;
+%         % Get operation labels
+%         load TS_loc_guides_cl mlabcl mkwcl
+%         labels = mlabcl; clear mlabcl
+%         keywords = mkwcl; clear mkwcl
+%     else
+%         F = extras.F;
+%         labels = extras.labels;
+%         if isfield(extras,'keywords')
+%             keywords = extras.keywords;
+%         else
+%             keywords = cell(size(F,2),1);
+%         end
+%     end
+%     
+%     if isstruct(annotatep) || annotatep > 0
+%         load TS_loc_guides_cl DataLabelscl
+%         DataLabels = DataLabelscl; clear DataLabelscl
+%     end
+% elseif strcmp(norcl,'norm')
+%     % get data matrix
+%     if isempty(extras)
+%         load TS_loc_N.mat TS_loc_N
+%         F = TS_loc_N;
+%         clear TS_loc_N;
+%         % get operation labels
+%         load TS_loc_guides_N mlabn mkwn
+%         labels = mlabn; clear mlabn
+%         keywords = mkwn; clear mkwn
+%     else
+%         F = extras.F;
+%         labels = extras.labels;
+%         if isfield(extras,'keywords')
+%             keywords = extras.keywords;
+%         else
+%             keywords = cell(size(F,2),1);
+%         end
+%     end
+%     
+%     if isstruct(annotatep) || annotatep>0
+%         load TS_loc_guides_N DataLabelsn
+%         DataLabels = DataLabelsn; clear DataLabelsn
+%     end
+% else
+%     if isempty(extras)
+%         labels = cell(size(F,2),1);
+%         keywords = cell(size(F,2),1);
+%     else
+%         F = extras.F;
+%         labels = extras.labels;
+%         keywords = cell(size(F,2),1);
+%         DataLabels = extras.DataLabels;
+%     end
+% end
 
 % %% SUBSET
 % only use a subset of the full matrix
@@ -176,64 +187,64 @@ if (length(TrainTest)==1 || ~iscell(TrainTest))
     else
         rss = TrainTest;
     end
-    fprintf(1,'Subset rows from %u to %u.\n',size(F,1),length(rss))
-    F = F(rss,:);
-    % gi refers to indicies of the full matrix, we want to convert to subset
+    fprintf(1,'Subset rows from %u to %u.\n',size(Features,1),length(rss))
+    Features = Features(rss,:);
+    % GroupIndices refers to indicies of the full matrix, we want to convert to subset
     % matrix
     % for each subset index, label with it's group number
     grpnum = zeros(length(rss),1);
     for i = 1:length(rss)
-        grpnum(i) = find(cellfun(@(x)ismember(rss(i),x),gi));
+        grpnum(i) = find(cellfun(@(x)ismember(rss(i),x),GroupIndices));
     end
-    % now we make a new gi
+    % now we make a new GroupIndices
     ugrpnum = unique(grpnum);
-    gi = cell(length(ugrpnum),1);
-    for i = 1:length(gi)
-        gi{i} = find(grpnum==ugrpnum(i));
+    GroupIndices = cell(length(ugrpnum),1);
+    for i = 1:length(GroupIndices)
+        GroupIndices{i} = find(grpnum==ugrpnum(i));
     end
     TrainTest = []; % make empty so don't plot TrainTest groups later
 end
 
 % Subset data: F now only has two columns
-F = F(:,mr);
+% F = F(:,mr);
 
 
 % Get losses
 loss = zeros(3,2); % loss1, loss2, lossboth (mean,std)
-gig = givemegroup(gi); % one of my functions to convert gi to group form
+gig = BF_ToGroup(GroupIndices); % one of my functions to convert GroupIndices to group form
 switch lossmeth
     case 'linclass'
         kfold = 10;
         nrepeats = 5;
         try
-            lf1 = TSQ_cfnerr('classify','linear',F(:,1),gig,[],{'kfold',kfold,nrepeats});
+            lf1 = TSQ_cfnerr('classify','linear',Features(:,1),gig,[],{'kfold',kfold,nrepeats});
             loss(1,:) = [mean(lf1), std(lf1)];
-            lf2 = TSQ_cfnerr('classify','linear',F(:,2),gig,[],{'kfold',kfold,nrepeats});
+            lf2 = TSQ_cfnerr('classify','linear',Features(:,2),gig,[],{'kfold',kfold,nrepeats});
             loss(2,:) = [mean(lf2), std(lf2)];
-            lf3 = TSQ_cfnerr('classify','linear',F(:,1:2),gig,[],{'kfold',kfold,nrepeats});
+            lf3 = TSQ_cfnerr('classify','linear',Features(:,1:2),gig,[],{'kfold',kfold,nrepeats});
             loss(3,:) = [mean(lf3), std(lf3)];
         catch emsg
-            fprintf(1,'%s\n',emsg);
+            fprintf(1,'%s\n',emsg.message);
         end
 
     case {'knn','knn_matlab'}
         k = 3;
         nrepeats = 10;
         try
-            lf1 = TSQ_cfnerr('knn',k,F(:,1),gig,[],{'kfold',10,nrepeats});
+            lf1 = TSQ_cfnerr('knn',k,Features(:,1),gig,[],{'kfold',10,nrepeats});
             loss(1,:) = [mean(lf1),std(lf1)];
-            lf2 = TSQ_cfnerr('knn',k,F(:,2),gig,[],{'kfold',10,nrepeats});
+            lf2 = TSQ_cfnerr('knn',k,Features(:,2),gig,[],{'kfold',10,nrepeats});
             loss(2,:) = [mean(lf2),std(lf2)];
-            lf3 = TSQ_cfnerr('knn',k,F(:,1:2),gig,[],{'kfold',10,nrepeats});
+            lf3 = TSQ_cfnerr('knn',k,Features(:,1:2),gig,[],{'kfold',10,nrepeats});
             loss(3,:) = [mean(lf3),std(lf3)];
         catch emsg
             fprintf(1,'%s\n',emsg);
         end
         
     case 'svm'
-        loss(1) = TSQ_givemeloss(kwgs,gi,{'svm',{{'linear'}}},{'cv',{10,1}},'class_loss',F(:,1));
-        loss(2) = TSQ_givemeloss(kwgs,gi,{'svm',{{'linear'}}},{'cv',{10,1}},'class_loss',F(:,2));
-        loss(3) = TSQ_givemeloss(kwgs,gi,{'svm',{{'linear'}}},{'cv',{10,1}},'class_loss',F(:,1:2));
+        loss(1) = TSQ_givemeloss(GroupNames,GroupIndices,{'svm',{{'linear'}}},{'cv',{10,1}},'class_loss',Features(:,1));
+        loss(2) = TSQ_givemeloss(GroupNames,GroupIndices,{'svm',{{'linear'}}},{'cv',{10,1}},'class_loss',Features(:,2));
+        loss(3) = TSQ_givemeloss(GroupNames,GroupIndices,{'svm',{{'linear'}}},{'cv',{10,1}},'class_loss',Features(:,1:2));
 end
 
 %%% Plot
@@ -244,18 +255,18 @@ end
 % set colors
 if isstruct(annotatep) && isfield(annotatep,'cmap')
     if ischar(annotatep.cmap)
-        c = BF_cmap(annotatep.cmap,NumGroups,1);
+        c = BF_getcmap(annotatep.cmap,NumGroups,1);
     else
         c = annotatep.cmap; % specify the cell itself
     end
 else
     if NumGroups < 10
-        c = BF_cmap('set1',NumGroups,1);
+        c = BF_getcmap('set1',NumGroups,1);
     elseif NumGroups <= 12
-        c = BF_cmap('set3',NumGroups,1);
+        c = BF_getcmap('set3',NumGroups,1);
     elseif NumGroups<=22
-        c1 = BF_cmap('set1',NumGroups,1);
-        c2 = BF_cmap('set3',NumGroups,1);
+        c1 = BF_getcmap('set1',NumGroups,1);
+        c2 = BF_getcmap('set3',NumGroups,1);
         c = [c1; c2];
     elseif NumGroups <= 50
         c = mat2cell(jet(NumGroups),ones(NumGroups,1));
@@ -272,7 +283,7 @@ if keepksdensities
     subplot(4,4,1:3); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:NumGroups
-        fr = plot_ks(F(gi{i},1),c{i},0);
+        fr = plot_ks(Features(GroupIndices{i},1),c{i},0);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -282,7 +293,7 @@ if keepksdensities
     subplot(4,4,[8,12,16]); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:NumGroups
-        fr = plot_ks(F(gi{i},2),c{i},1);
+        fr = plot_ks(Features(GroupIndices{i},2),c{i},1);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -308,18 +319,18 @@ end
 
 if isempty(TrainTest)
     for i = 1:NumGroups
-        plot(F(gi{i},1),F(gi{i},2),'.','color',c{i},'MarkerSize',TheMarkerSize)
+        plot(Features(GroupIndices{i},1),Features(GroupIndices{i},2),'.','color',c{i},'MarkerSize',TheMarkerSize)
     end
 else % Plot training and test data differently
     for j = 1:length(TrainTest)
         for i = 1:NumGroups
             if (j==1)
                 % Training data
-                plot(F(intersect(gi{i},TrainTest{j}),1),F(intersect(gi{i},TrainTest{j}),2),...
+                plot(Features(intersect(GroupIndices{i},TrainTest{j}),1),Features(intersect(GroupIndices{i},TrainTest{j}),2),...
                         'ok','MarkerFaceColor',c{i},'MarkerSize',TheMarkerSize)
             else
                 % Test data
-                plot(F(intersect(gi{i},TrainTest{j}),1),F(intersect(gi{i},TrainTest{j}),2),...
+                plot(Features(intersect(GroupIndices{i},TrainTest{j}),1),Features(intersect(GroupIndices{i},TrainTest{j}),2),...
                         'sk','MarkerFaceColor',c{i},'MarkerSize',TheMarkerSize)
             end
         end
@@ -339,10 +350,10 @@ if (NumGroups == 2) && strcmp(lossmeth,'linclass');
     modeorder = 'linear'; % or 'quadratic'
     
     xlim = get(gca,'XLim'); ylim=get(gca,'YLim');
-    group = givemegroup(gi);
+    group = BF_ToGroup(GroupIndices);
     [X, Y] = meshgrid(linspace(xlim(1),xlim(2),200),linspace(ylim(1),ylim(2),200));
     X = X(:); Y = Y(:);
-    [~,~,~,~,coeff] = classify([X Y],F(:,1:2), group, modeorder);
+    [~,~,~,~,coeff] = classify([X Y],Features(:,1:2), group, modeorder);
     
     hold on;
     K = coeff(1,2).const; L = coeff(1,2).linear;
@@ -366,7 +377,7 @@ title(sprintf('Combined misclassification rate (%s) = %f +/- %f %%',lossmeth, ..
 
 LabelText = cell(2,1);
 for i = 1:2
-    LabelText{i} = sprintf('%s [%s] (%f +/- %f %%)'],labels{mr(i)},keywords{mr(i)}, ...
+    LabelText{i} = sprintf('%s [%s] (%f +/- %f %%)',labels{i}, ...
                             round(loss(i,1)*100),round(loss(i,2)*100));
 end
 xlabel(LabelText{1},'interpreter','none')
@@ -376,13 +387,13 @@ ylabel(LabelText{2},'interpreter','none')
 if isempty(TrainTest)
     legs = cell(NumGroups,1);
     for i = 1:NumGroups
-        legs{i} = sprintf('%s (%u)',kwgs{i},length(gi{i}));
+        legs{i} = sprintf('%s (%u)',GroupNames{i},length(GroupIndices{i}));
     end
 else
     legs = cell(NumGroups*2,1);
     for i = 1:NumGroups
-        legs{i} = sprintf('%s train (%u)',kwgs{i},length(intersect(gi{i},TrainTest{1})));
-        legs{NumGroups+i} = sprintf('%s test (%u)',kwgs{i},length(intersect(gi{i},TrainTest{2})));
+        legs{i} = sprintf('%s train (%u)',GroupNames{i},length(intersect(GroupIndices{i},TrainTest{1})));
+        legs{NumGroups+i} = sprintf('%s test (%u)',GroupNames{i},length(intersect(GroupIndices{i},TrainTest{2})));
     end
 end
 legend(legs);
@@ -426,20 +437,20 @@ PlotCircle = 1; % magenta circle around annotated points
 % produce xy points
 xy = cell(NumGroups,1);
 for i = 1:NumGroups
-    xy{i} = [F(gi{i},1),F(gi{i},2)];
+    xy{i} = [Features(GroupIndices{i},1),Features(GroupIndices{i},2)];
 end
 
 if ~UserInput % points to annotate are randomly picked
     if NumAnnotations == length(DataLabels) % annotate all
         fprintf(1,'Annotate all\n')
         for j = 1:NumAnnotations
-            TheGroup = find(cellfun(@(x)ismember(j,x),gi));
+            TheGroup = find(cellfun(@(x)ismember(j,x),GroupIndices));
             AlreadyPicked(j,1) = TheGroup;
-            AlreadyPicked(j,2) = find(gi{TheGroup}==j);
+            AlreadyPicked(j,2) = find(GroupIndices{TheGroup}==j);
         end
     else
         AlreadyPicked(:,1) = round(linspace(1,NumGroups,NumAnnotations));
-        randperms = cellfun(@(x)randperm(length(x)),gi,'UniformOutput',0);
+        randperms = cellfun(@(x)randperm(length(x)),GroupIndices,'UniformOutput',0);
         counters = ones(NumGroups,1);
         for j=1:NumAnnotations
             AlreadyPicked(j,2) = randperms{AlreadyPicked(j,1)}(counters(AlreadyPicked(j,1))); % random element of the group
@@ -466,8 +477,9 @@ for j = 1:NumAnnotations
     end
     
     PlotPoint = xy{TheGroup}(itsme,:);
-    fn = DataLabels{gi{TheGroup}(itsme)}; % filename of timeseries to plot
-    ts = dlmread(fn);
+    % fn = DataLabels{GroupIndices{TheGroup}(itsme)}; % filename of timeseries to plot
+    % ts = dlmread(fn);
+    ts = TimeSeriesData{GroupIndices{TheGroup}(itsme)}; % filename of timeseries to plot
     if ~isempty(maxL)
         ts = ts(1:min(maxL,end));
     end
@@ -482,7 +494,7 @@ for j = 1:NumAnnotations
         text(PlotPoint(1),PlotPoint(2)-0.01*pheight,fn,'interpreter','none','FontSize',8);
     case 'tsid'
         % Annotate text with ts_id:
-        text(PlotPoint(1),PlotPoint(2)-0.01*pheight,num2str(ts_ids_keep(gi{TheGroup}(itsme))),'interpreter','none','FontSize',8);
+        text(PlotPoint(1),PlotPoint(2)-0.01*pheight,num2str(ts_ids_keep(GroupIndices{TheGroup}(itsme))),'interpreter','none','FontSize',8);
     end
     
     % Adjust if annotation goes off axis x-limits
