@@ -130,6 +130,7 @@ end
 
 % Now, save the results
 % First check that HCTSA_loc.mat doesn't exist
+fprintf(1,'A %u x %u matrix\n',size(TS_DataMat,1),size(TS_DataMat,2));
 HereSheIs = which('HCTSA_loc.mat');
 if isempty(HereSheIs)
     fn = 'HCTSA_loc.mat';

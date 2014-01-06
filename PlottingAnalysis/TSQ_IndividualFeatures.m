@@ -106,8 +106,11 @@ end
 % Randomize the data matrix to check null
 if randomize % shuffle elements of the data matrix
     fprintf(1,'Randomly permuting the group information as a null comparison...\n');
-    Rperm = randperm(size(TS_DataMat,1)); % this is an output
-    TS_DataMat = TS_DataMat(Rperm,:);
+    Rperm = randperm(length(TimeSeries)); % this is an output
+    TsGroups = [TimeSeries.Group];
+    TimeSeries.Group = TsGroups(Rperm);
+    % Rperm = randperm(size(TS_DataMat,1)); % this is an output
+    % TS_DataMat = TS_DataMat(Rperm,:);
 end
 
 %% Run the algorithm
@@ -130,8 +133,8 @@ switch ClassMethod
             cps{i} = cvpartition(gig,'kfold',cvalid{2}); % ?-fold stratified cross-validation;
         end
         
-        fprintf(1,['DOING CROSS VALIDATION WITH %u REPEATS USING ' ...
-                        '%u-fold CV'],nrepeats,cvalid{2});
+        fprintf(1,['Doing cross validation with %u repeats using ' ...
+                        '%u-fold cross validation'],nrepeats,cvalid{2});
         
         fn_classify = @(XT,yT,Xt,yt) sum(yt~=classify(Xt,XT,yT,'linear'))/length(yt);
         times = zeros(size(TS_DataMat,2),1); % time each run:
@@ -157,8 +160,8 @@ switch ClassMethod
             end
             times(i) = toc;
             if mod(i,floor(size(TS_DataMat,2)/4))==0
-                disp(['Less than ' benrighttime(mean(times(1:i))*(size(TS_DataMat,2)-i)) ...
-                    ' remaining! We''re at ' num2str(i) ' / ' num2str(size(TS_DataMat,2))])
+                fprintf(1,'Less than %s remaining! We''re at %u / %u\n', ...
+                                BF_thetime(mean(times(1:i))*(size(TS_DataMat,2)-i)),i,size(TS_DataMat,2))
             end
         end
         [teststat, ifeat] = sort(teststat,'ascend');
@@ -169,7 +172,7 @@ switch ClassMethod
         fprintf(1,['Comparing the performance of %u operations using ' ...
                 'in-sample linear classification WITHOUT cross validation...\n'],length(Operations))
         timer = tic;
-        teststat = zeros(size(TS_DataMat,2),1); % in-sample classification rates
+        teststat = zeros(size(TS_DataMat,2),1); % in-sample misclassification rates
         for i = 1:size(TS_DataMat,2)
             try
                 [~,err] = classify(TS_DataMat(:,i),TS_DataMat(:,i),gig,'linear'); % in-sample errors

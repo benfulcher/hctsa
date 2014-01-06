@@ -166,10 +166,15 @@ if SaveBack
         if isfield(TimeSeries,'Group')
             TimeSeries = rmfield(TimeSeries,'Group');
         end
+        
+        % Add fields to the TimeSeries structure array
+        NewFieldNames = fieldnames(TimeSeries);
+        % Add two new fields:
+        NewFieldNames{length(NewFieldNames)+1} = 'Group';
 
         % Then append the new group information:
-        TimeSeries = cell2struct([struct2cell(TimeSeries);TheGroupsCell], ...
-                                    {'ID','FileName','Keywords','Length','Data','Group'});
+        TimeSeries = cell2struct([struct2cell(TimeSeries);TheGroupsCell],NewFieldNames);
+        % {'ID','FileName','Keywords','Length','Data','Group'}
 
         % Save everything back to file:
         save(TheFile,'TimeSeries','-append')
