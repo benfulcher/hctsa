@@ -108,7 +108,11 @@ if randomize % shuffle elements of the data matrix
     fprintf(1,'Randomly permuting the group information as a null comparison...\n');
     Rperm = randperm(length(TimeSeries)); % this is an output
     TsGroups = [TimeSeries.Group];
-    TimeSeries.Group = TsGroups(Rperm);
+    % This ([TimeSeries.Group] = TsGroups(Rperm);) doesn't work, so I have to be really inefficient:
+    for i = 1:length(TimeSeries)
+        TimeSeries(i).Group = TsGroups(Rperm(i)); % Rewrite with random permutation
+    end
+    % Another (equivalent) option to avoid this loop is to permute the data matrix...
     % Rperm = randperm(size(TS_DataMat,1)); % this is an output
     % TS_DataMat = TS_DataMat(Rperm,:);
 end
