@@ -128,7 +128,7 @@ if strcmp(TsorOps,'ops')
 end
 
 
-GroupIndices = BF_ToGroup(DataGroups)
+GroupIndices = BF_ToGroup(DataGroups);
 % if isempty(gi)
 %     gi = SUB_autolabelQ(kwgs,TsorOps,TheData);
 % end
@@ -183,7 +183,6 @@ DataInfo.GroupIndices = GroupIndices;
 DataInfo.DataLabels = DataLabels;
 DataInfo.TimeSeriesData = TimeSeriesData;
 
-keyboard
 TSQ_plot_2d(score(:,1:2),DataInfo,{},annotatep,showks,classmeth);
 
 % if ischar(TheData)

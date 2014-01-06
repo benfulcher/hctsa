@@ -28,20 +28,23 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_dm(norcl,kwgs,gi,TS_DataMat,CustomOrder,CustomColorMap)
+function TSQ_plot_dm(norcl,ColorGroups,TS_DataMat,CustomOrder,CustomColorMap)
 
 % Visualize normalized or clustered matrix (clustered by default)
 if nargin < 1 || isempty(norcl)
     norcl = 'cl';
 end
-% Differential colouring of keyword groups?
-if nargin < 2; kwgs = {}; end % no groups
-if ischar(kwgs)
-    kwgs = {kwgs};
+if nargin < 2 || isempty(ColorGroups)
+    ColorGroups = 0; % don't color groups
 end
-if nargin < 3
-    gi = []; % automatically get indicies if necessary
-end 
+% Differential colouring of keyword groups?
+% if nargin < 2; kwgs = {}; end % no groups
+% if ischar(kwgs)
+%     kwgs = {kwgs};
+% end
+% if nargin < 3
+%     gi = []; % automatically get indicies if necessary
+% end 
 if nargin < 4
    TS_DataMat = []; % load from TS_loc_N or TS_loc_cl
 end
@@ -70,7 +73,7 @@ else
     fprintf(1,'Reading data from %s...',TheFile);
     
     if isempty(TS_DataMat)
-        a = which(TheFile); % first check it exists
+        a = which(TheFile); % First check it exists
         if isempty(a)
             error('\n%s not found. You should probably run %s...',TheFile,TheRoutine);
         end
@@ -78,6 +81,10 @@ else
         fprintf(1,' Done.\n');
     end
     load(TheFile,'TimeSeries','Operations')
+end
+if ColorGroups
+    load(TheFile,'GroupNames')
+    TimeSeriesGroups = [TimeSeries.Group];
 end
 TimeSeriesFileNames = {TimeSeries.FileName}; clear TimeSeries; % Just extract filenames
 OperationNames = {Operations.Name}; clear Operations; % Just extract operation names
@@ -98,22 +105,19 @@ if ~isempty(CustomOrder{2}) % reorder columns
     OperationNames = OperationNames(CustomOrder{2});
 end
 
-
 %% Plot the object in a new figure
 figure('color','w'); box('on');
 title(sprintf('Data matrix of size %u x %u',nts,nops))
 ng = 6; % number of gradations in each set of colourmap
-nkwgs = size(kwgs,1); % number of keyword groups
 
-if nkwgs > 0
-    fprintf(1,'Dividing data into %u groups\n',nkwgs);
-
-    if isempty(gi)
-        gi = SUB_autolabelQ(kwgs,metorts,norcl);
-    end
-    Ng = length(gi);
+if ColorGroups
+    Ng = length(GroupNames); % number of keyword groups
     
-    % add a group for unlabelled data items if they exist
+    fprintf(1,'Coloring data according to %u groups\n',Ng);
+    
+    gi = BF_ToGroup(TimeSeriesGroups);
+    
+    % Add a group for unlabelled data items if they exist
     if sum(cellfun(@length,gi)) < nts
         % we need to add an unlabelled class
         gi0 = gi;

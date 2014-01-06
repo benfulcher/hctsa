@@ -398,7 +398,7 @@ else
 end
 legend(legs);
 
-%% ANNOTATE
+%% Annotate time-series data
 % set parameters
 if isfield(annotatep,'maxL')
     maxL = annotatep.maxL;

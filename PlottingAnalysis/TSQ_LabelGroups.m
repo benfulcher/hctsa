@@ -83,6 +83,7 @@ else
         case 'cl'
             TheFile = 'HCTSA_cl.mat';
     end
+    fprintf(1,'Loaded data from %s...',TheFile);
     if strcmp(TsorOps,'ts') % Time series
         load(TheFile,'TimeSeries')
         Keywords = {TimeSeries.Keywords};
@@ -92,6 +93,7 @@ else
         Keywords = {Operations.Keywords};
         IDs = [Operations.ID];
     end
+    fprintf(1,' Loaded.\n');
 end
 
 if ~all(cellfun(@ischar,KeywordGroups(:))) % Have specified numbers of each
