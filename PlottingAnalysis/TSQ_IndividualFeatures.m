@@ -85,18 +85,23 @@ else
 end
 
 %% Load the data
-% if specified a string: 'norm' or 'cl' will retrieve
-% otherwise inputted the data matrix as TS_DataMat and given manual groupings in 
-% kwgs and in gi
-switch WhatData
-case 'norm'
-    TheDataFile = 'HCTSA_N.mat';
-case 'cl'
-    TheDataFile = 'HCTSA_cl.mat';
+if ischar(WhatData)
+    switch WhatData
+    case 'norm'
+        TheDataFile = 'HCTSA_N.mat';
+    case 'cl'
+        TheDataFile = 'HCTSA_cl.mat';
+    end
+    fprintf(1,'Loading data from %s...',TheDataFile);
+    load(TheDataFile,'TS_DataMat','Operations','TimeSeries');
+    fprintf(1,' Loaded.\n');
+elseif isstruct(WhatData)
+    % Already loaded and given here as a structure
+    TS_DataMat = WhatData.TS_DataMat;
+    Operations = WhatData.Operations;
+    TimeSeries = WhatData.TimeSeries;
+    fprintf(1,'Data provided, adapted successfully.\n');
 end
-fprintf(1,'Loading data from %s...',TheDataFile);
-load(TheDataFile,'TS_DataMat','Operations','TimeSeries');
-fprintf(1,' Loaded.\n');
 
 % Randomize the data matrix to check null
 if randomize % shuffle elements of the data matrix

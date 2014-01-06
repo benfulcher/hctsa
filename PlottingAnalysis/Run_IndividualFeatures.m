@@ -39,7 +39,6 @@ norcl = 'norm';
 % Whether to save a record of selected features to file
 SaveToFile = 0;
 
-
 % Load information from file
 load('HCTSA_N.mat','TimeSeries','Operations');
 
