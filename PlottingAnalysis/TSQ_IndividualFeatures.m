@@ -118,7 +118,7 @@ if randomize % shuffle elements of the data matrix
 end
 
 %% Run the algorithm
-gig = [TimeSeries.Group]; % Use group form
+TimeSeriesGroup = [TimeSeries.Group]; % Use group form
 switch ClassMethod
     case 'linclasscv' % quantify linear classification for each
         teststat = zeros(size(TS_DataMat,2),1); % cross-validation classification rates
@@ -127,14 +127,14 @@ switch ClassMethod
         if isempty(cvalid) % set default cross-validation
             cvalid = {'kfold',10,1}; % 10-fold CV with no repeats
         end
-%         cp = cvpartition(gig,'kfold',cvalid{2}); % ?-fold stratified cross-validation
-%         cp = cvpartition(gig,'k',10); % 10-fold stratified cross-validation
+%         cp = cvpartition(TimeSeriesGroup,'kfold',cvalid{2}); % ?-fold stratified cross-validation
+%         cp = cvpartition(TimeSeriesGroup,'k',10); % 10-fold stratified cross-validation
 
         nrepeats = cvalid{3}; % make this many different 10-fold partitions of the data
                               % ensures they're the same for all operations
         cps = cell(nrepeats,1);
         for i = 1:nrepeats;
-            cps{i} = cvpartition(gig,'kfold',cvalid{2}); % ?-fold stratified cross-validation;
+            cps{i} = cvpartition(TimeSeriesGroup,'kfold',cvalid{2}); % ?-fold stratified cross-validation;
         end
         
         fprintf(1,['Doing cross validation with %u repeats using ' ...
@@ -145,18 +145,18 @@ switch ClassMethod
         for i = 1:size(TS_DataMat,2)
             tic
             try
-%                 errs = TSQ_cfnerr('classify','linear',TS_DataMat(:,i),gig,[],cvalid);
+%                 errs = TSQ_cfnerr('classify','linear',TS_DataMat(:,i),TimeSeriesGroup,[],cvalid);
                 te = cell(nrepeats,1);
                 for j = 1:nrepeats
                     % use partition cps{j}
-                    te{j} = crossval(fn_classify,TS_DataMat(:,i),gig,'partition',cps{j});
-%                     errs = TSQ_cfnerr('classify','linear',TS_DataMat(:,i),gig,[],cp,cvalid{3});
+                    te{j} = crossval(fn_classify,TS_DataMat(:,i),TimeSeriesGroup,'partition',cps{j});
+%                     errs = TSQ_cfnerr('classify','linear',TS_DataMat(:,i),TimeSeriesGroup,[],cp,cvalid{3});
                 end
                 errs = vertcat(te{:}); % agglomerate across repeats
                 teststat(i) = mean(errs);
                 testspread(i) = std(errs);
-%                 teststat(i) = crossval('mcr',TS_DataMat(:,i),gig,'predfun',classf,'partition',cp);
-%                 mcrs = crossval(F_linclass,TS_DataMat(:,i),gig,'partition',cp);
+%                 teststat(i) = crossval('mcr',TS_DataMat(:,i),TimeSeriesGroup,'predfun',classf,'partition',cp);
+%                 mcrs = crossval(F_linclass,TS_DataMat(:,i),TimeSeriesGroup,'partition',cp);
 %                 This code with 'mcr' is the same as mean(mcrs)
             catch emsg
                 disp(emsg)
@@ -173,29 +173,33 @@ switch ClassMethod
         teststat = teststat*100; % convert to percentages
         
     case 'linclass'
-        fprintf(1,['Comparing the performance of %u operations using ' ...
-                'in-sample linear classification WITHOUT cross validation...\n'],length(Operations))
+        fprintf(1,'Comparing %u operations using in-sample linear classification...',length(Operations))
         timer = tic;
         teststat = zeros(size(TS_DataMat,2),1); % in-sample misclassification rates
         for i = 1:size(TS_DataMat,2)
             try
-                [~,err] = classify(TS_DataMat(:,i),TS_DataMat(:,i),gig,'linear'); % in-sample errors
+                [~,err] = classify(TS_DataMat(:,i),TS_DataMat(:,i),TimeSeriesGroup,'linear'); % in-sample errors
                 teststat(i) = err;
             catch
                 teststat(i) = NaN;
             end
         end
-        fprintf(1,'Done. Took %s.\n',BF_thetime(toc(timer)));
-        [teststat,ifeat] = sort(teststat,'ascend');
-        teststat = teststat*100;
-        testspread = [];
+        fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
         
+        [teststat,ifeat] = sort(teststat,'ascend');
+        teststat = teststat*100; % Convert to percentages
+        testspread = []; % no spread because no cross-validation/repeats
+        
+        % Give mean and that expected from random classifier (maybe a little overfitting)
+        fprintf(1,'Mean across %u operations = %4.2f; (Random guessing for %u equiprobable classes = %4.2f)\n', ...
+                length(Operations),mean(teststat),length(unique(TimeSeriesGroup)),100/length(unique(TimeSeriesGroup)));
+
     case {'knn','knn_matlab'}
         k = 3;
         fprintf(1,'IN-SAMPLE BEN KNN(%u)\n',k)
         teststat = zeros(size(TS_DataMat,2),1); % in-sample classification rates
         for i = 1:size(TS_DataMat,2) % for each feature individually
-            [~,err] = benknn(TS_DataMat(:,i),TS_DataMat(:,i),3,gig,gig); % classifies in-sample
+            [~,err] = benknn(TS_DataMat(:,i),TS_DataMat(:,i),3,TimeSeriesGroup,TimeSeriesGroup); % classifies in-sample
             teststat(i) = err;
         end
         [teststat,ifeat] = sort(teststat,'ascend');
@@ -211,74 +215,32 @@ switch ClassMethod
             cvalid = {'kfold',10,1}; % 10-fold CV with no repeats
         end
         
-%         cp = cvpartition(gig,'kfold',nfolds); % statified k-fold crossvalidation
-        disp([num2str(cvalid{1}) ' ' cvalid{1} ' cross validation BEN KNN(' num2str(k) ')'])
+%         cp = cvpartition(TimeSeriesGroup,'kfold',nfolds); % statified k-fold crossvalidation
+        fprintf(1,'%s cross validation BEN KNN(%u)\n',cvalid{1},k)
         for i = 1:size(TS_DataMat,2) % for each feature individually
-            err = TSQ_cfnerr('knn',k,TS_DataMat(:,i),gig,[],cvalid);
+            err = TSQ_cfnerr('knn',k,TS_DataMat(:,i),TimeSeriesGroup,[],cvalid);
             teststat(i) = mean(err);
             testspread(i) = std(err);
-%             errs = zeros(nfolds,1);
-%             for j = 1:nfolds
-%                 itrain = find(training(cp,j)); % indicies for training
-%                 itest = find(test(cp,j)); % indicies for testing
-%                 [~,errs(j)] = benknn(TS_DataMat(itrain,i),TS_DataMat(itest,i),k,gig(itrain),gig(itest)); % classifies test data
-%             end
-%             teststat(i) = mean(errs);
         end
         [teststat,ifeat] = sort(teststat,'ascend');
         testspread = testspread(ifeat)*100; % sort, convert to percentages
         teststat = teststat*100; % convert to percentages
         
-    case {'knn_spider','svm'}
-        % define the spider model
-        if strcmp(ClassMethod,'knn')
-            a = SPIDER_getmemodel('knn',3); % define a knn(3) model
-            disp('using knn(3)')
-        else
-            a = SPIDER_getmemodel('svm',{{'linear'}}); % define a svm (linear) model
-            disp('using svm(linear)')
-        end
-        
-        % initialize the variables
-%         ifeat = zeros(nbest,1); % stores indicies of features chosen at each stage
-%         teststat = cell(nbest,1); % cross-validation classification rates for all features at each stage
-        
-        % calculate losses across all features (in combination with those
-        %                                   already chosen)
-        teststat = zeros(size(TS_DataMat,2),1); % in-sample classification rates
-
-        for i = 1:size(TS_DataMat,2)        
-            dtrain = makeitdata(TS_DataMat(:,i),gi);
-            try
-                [~,a] = train(a,dtrain); % train classification model on training data
-                lossme = loss(test(a,dtrain),'class_loss'); % get in-sample loss
-                teststat(i) = lossme.Y;
-            catch
-                teststat(i) = NaN;
-            end
-        end
-        [teststat,ifeat] = sort(teststat,'ascend');
-        teststat = teststat*100;
-        
     otherwise
         fprintf(1,'Hello!\n')
-        [ifeat,teststat] = rankfeatures(TS_DataMat',gig,'criterion',ClassMethod);
-        [teststat,ix] = sort(teststat,'descend');
+        [ifeat, teststat] = rankfeatures(TS_DataMat',TimeSeriesGroup,'criterion',ClassMethod);
+        [teststat, ix] = sort(teststat,'descend');
         ifeat = ifeat(ix);
         testspread = [];
 end
-    
-% Print the top 25
-topn = min(25,length(Operations));
+
+% Display information the top n operations
+topn = min(10,length(Operations));
 for i = 1:topn
     fprintf(1,['[%u] {%u} %s -- %s :: %4.2f%%\n'],ifeat(i),Operations(ifeat(i)).ID, ...
                     Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,teststat(i));
 end
 
-
-
-%-----------------------This function no longer plots outputs-----------------
-% BF, 2014-01-06
 
 %% Plot outputs
 if plotopts.histogram
@@ -330,8 +292,8 @@ end
 % %         end
 % % 
 % %     %     % get cross-validation classification rate
-% %     %     cp = cvpartition(gig,'k',10); % 10-fold stratified cross-validation
-% %     %     cvMCR = crossval('mcr',TS_DataMat(:,ifeat(i)),gig,'predfun',classf,'partition',cp);
+% %     %     cp = cvpartition(TimeSeriesGroup,'k',10); % 10-fold stratified cross-validation
+% %     %     cvMCR = crossval('mcr',TS_DataMat(:,ifeat(i)),TimeSeriesGroup,'predfun',classf,'partition',cp);
 % % 
 % %         title(['[' num2str(m_ids(ifeat(i))) ']' mlab{ifeat(i)} ' [' mkw{ifeat(i)} '] -- ' ClassMethod ' = ' num2str(teststat(i))],'interpreter','none')
 % %         set(gca,'YTick',[])
