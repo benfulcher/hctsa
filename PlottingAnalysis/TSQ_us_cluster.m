@@ -108,7 +108,7 @@ switch ClusterMethod
         % obtained using inconsistent criterion). Another way is to just
         % specify a number of clusters and use the distance criterion
         % (i.e., just snips the dendrogram off at some threshold)...
-        if length(ClusterParams)>=4 && ~isempty(ClusterParams{4})
+        if length(ClusterParams) >= 4 && ~isempty(ClusterParams{4})
             clustth = ClusterParams{4}; % method (string), max # clusters (integer)
             % e.g., {'cutoff',10} % will get (max) 10 clusters using cutoff method
             % e.g., {'maxnclust',10} will get 10 clusters using distance criterion

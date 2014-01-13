@@ -59,7 +59,7 @@ fprintf(1,['Looks like you used %4.2f shuffles of the data in your randomized ve
 
 %% Calculate p-values for shuffled permutations
 pvals = zeros(M,1);
-fprintf(1,'Calculating p-values...\n')
+fprintf(1,'Calculating p-values...')
 
 timer = tic;
 switch TheTestStatistic
@@ -68,36 +68,29 @@ switch TheTestStatistic
             for i = 1:M
                 % pvals(i) = sum(teststat(i) > teststatR(:))/(length(teststatR(:))); % random classifies better
                 pvals(i) = sum(teststat(i) > teststatR(:))/(M*K); % random classifies better
-                if (mod(i,floor(M/3))==0)
-                    fprintf(1,'Less than %s remaining! We''re at %u / %u\n',BF_thetime(toc(timer)/M*(M-i)),i,M)
-                end
+                % if (mod(i,floor(M/3))==0)
+                %     fprintf(1,'Less than %s remaining! We''re at %u / %u\n',BF_thetime(toc(timer)/M*(M-i)),i,M)
+                % end
             end
         else
             for i = 1:M
                 pvals(i) = sum(teststat(i)>teststatR(:,i))/K; % random classifies better
-                if (mod(i,floor(M/3))==0)
-                    fprintf(1,'Less than %s remaining! We''re at %u / %u\n',BF_thetime(toc(timer)/M*(M-i)),i,M)
-                end
             end
         end
+
     case {'tstat','corrcoef'}
         if dopool
             teststatRcln = teststatR(:);
             for i = 1:M
                 pvals(i) = sum(abs(teststat(i))<abs(teststatRcln))/(M*K); % random has more extreme t-statistic
-                if (mod(i,floor(M/3))==0)
-                    fprintf(1,'Less than %s remaining! We''re at %u / %u\n',BF_thetime(toc(timer)/M*(M-i)),i,M)
-                end
             end
         else
             for i = 1:M
                 pvals(i) = sum(abs(teststat(i)) < abs(teststatR(:,i)))/K; % random has more extreme t-statistic
-                if (mod(i,floor(M/3))==0)
-                    fprintf(1,'Less than %s remaining! We''re at %u / %u\n',BF_thetime(toc(timer)/M*(M-i)),i,M)
-                end
             end
         end
 end
+fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)))
 
 %% How many are significant?
 % Fill structure NSig
@@ -176,7 +169,7 @@ if doplot
 %             x = linspace(-Maxmax,Maxmax,nbins+1);
         case 'corrcoef'
             mmm = max(abs(teststat));
-            if mmm>0.7
+            if mmm > 0.7
                 mmm = 1; % span histograms from -1,1
             end
             x = linspace(-mmm,mmm,nbins+1);

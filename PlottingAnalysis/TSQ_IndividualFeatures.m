@@ -7,9 +7,9 @@
 %-ClassMeth: the classification method to use. The following are possible options:
 %            'linclasscv', 'linclass', 'linclasscv', 'knn', 'knncv'
 %
-%
 %--HISTORY
-%% uses BioInformatics toolbox functions
+% Previously TSQ_ML_rankfeatures
+% uses BioInformatics toolbox functions
 % Ben Fulcher 13/9/2010
 % Ben Fulcher 28/9/2010 added subset input
 % Ben Fulcher 18/3/2011 changed reverse to cvalid -- specify cross-validation
@@ -178,7 +178,8 @@ switch ClassMethod
         teststat = zeros(size(TS_DataMat,2),1); % in-sample misclassification rates
         for i = 1:size(TS_DataMat,2)
             try
-                [~,err] = classify(TS_DataMat(:,i),TS_DataMat(:,i),TimeSeriesGroup,'linear'); % in-sample errors
+                % In-sample misclassification rates: training set = test set
+                [~, err] = classify(TS_DataMat(:,i),TS_DataMat(:,i),TimeSeriesGroup,'linear');
                 teststat(i) = err;
             catch
                 teststat(i) = NaN;
@@ -186,7 +187,7 @@ switch ClassMethod
         end
         fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
         
-        [teststat,ifeat] = sort(teststat,'ascend');
+        [teststat, ifeat] = sort(teststat,'ascend');
         teststat = teststat*100; % Convert to percentages
         testspread = []; % no spread because no cross-validation/repeats
         

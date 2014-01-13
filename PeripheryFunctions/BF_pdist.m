@@ -127,7 +127,7 @@ end
 
 if strcmp(DistMetric,'abscorr')
     % Transformation from correlation to absolute correlation distance:
-    R = 1 - abs(1-R); 
+    R = 1 - abs(1-R);
 end
 
 
