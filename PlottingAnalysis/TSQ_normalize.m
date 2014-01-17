@@ -122,9 +122,9 @@ if thresh_r > 0 % if 1, then even the worst are included
     if ~isempty(kr1)
         if ~isempty(xkr1)
             fprintf(1,['Removed time series with fewer than %4.2f%% good values:'...
-                            ' from %u to %u\n'],thresh_r*100,size(TS_DataMat,1),length(kr1))
+                            ' from %u to %u.\n'],thresh_r*100,size(TS_DataMat,1),length(kr1))
             % display filtered times series to screen:
-            fprintf(1,'Lost %u time series: %s\n',size(TS_DataMat,1)-length(kr1),BF_cat({TimeSeries(xkr1).FileName},','))
+            fprintf(1,'Lost %u time series: %s.\n',size(TS_DataMat,1)-length(kr1),BF_cat({TimeSeries(xkr1).FileName},','))
         else
             fprintf(1,'All %u time series had greater than %4.2f%% good values. Keeping them all.\n', ...
                             size(TS_DataMat,1),thresh_r*100)
@@ -154,7 +154,7 @@ if thresh_c > 0
     if ~isempty(kc1)
         if ~isempty(xkc1)
             fprintf(1,'Removed operations with fewer than %5.2f%% good values: from %u to %u.\n',thresh_c*100,size(TS_DataMat,2),length(kc1))
-            fprintf(1,'Lost %u operations: %s\n',size(TS_DataMat,2)-length(kc1),BF_cat({Operations(xkc1).Name},','))
+            fprintf(1,'Lost %u operations: %s.\n',size(TS_DataMat,2)-length(kc1),BF_cat({Operations(xkc1).Name},','))
         else
             fprintf(1,['All operations had greater than %5.2f%% good values; ' ...
                     'keeping them all :-)'],thresh_c*100)
@@ -203,7 +203,7 @@ kr2 = find(crap_ts == 0); % kept column (2)
 
 if ~isempty(kr2)
     if (length(kr2) < size(TS_DataMat,1))
-        fprintf(1,'Removed time series with constant feature vectors (weird!): from %u to %u\n',...
+        fprintf(1,'Removed time series with constant feature vectors (weird!): from %u to %u.\n',...
                             size(TS_DataMat,1),length(kr2))
         TS_DataMat = TS_DataMat(kr2,:); % ********************* KR2 **********************
         TS_Quality = TS_Quality(kr2,:);
@@ -290,8 +290,8 @@ Operations = Operations(kc_tot); % Filter operations
 % In an ideal world, you would check to see if any master operations are no longer pointed to
 % and recalibrate the indexing, but I'm not going to bother.
 
-fprintf(1,'We now have %u time series and %u operations in play\n',length(TimeSeries),length(Operations))
-fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix\n',sum(isnan(TS_DataMat(:))), ...
+fprintf(1,'We now have %u time series and %u operations in play.\n',length(TimeSeries),length(Operations))
+fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_DataMat(:))), ...
                 sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
 
 

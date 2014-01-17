@@ -89,8 +89,7 @@ end
 TimeSeriesFileNames = {TimeSeries.FileName}; clear TimeSeries; % Just extract filenames
 OperationNames = {Operations.Name}; clear Operations; % Just extract operation names
 
-
-[nts, nops] = size(TS_DataMat); % label in this way -- ts as rows
+[nts, nops] = size(TS_DataMat);
 
 %% Reorder according to CustomOrder
 if ~isempty(CustomOrder{1}) % reorder rows
@@ -111,9 +110,9 @@ title(sprintf('Data matrix of size %u x %u',nts,nops))
 ng = 6; % number of gradations in each set of colourmap
 
 if ColorGroups
-    Ng = length(GroupNames); % number of keyword groups
+    NumGroups = length(GroupNames); % number of keyword groups
     
-    fprintf(1,'Coloring data according to %u groups\n',Ng);
+    fprintf(1,'Coloring data according to %u groups\n',NumGroups);
     
     gi = BF_ToGroup(TimeSeriesGroups);
     
@@ -121,26 +120,27 @@ if ColorGroups
     if sum(cellfun(@length,gi)) < nts
         % we need to add an unlabelled class
         gi0 = gi;
-        gi = cell(Ng+1,1);
-        for i = 1:Ng
+        gi = cell(NumGroups+1,1);
+        for i = 1:NumGroups
             gi{i} = gi0{i};
         end
         clear gi0;
         gi{end} = setxor(1:nts,cell2mat(gi));
-        Ng = Ng + 1;
+        NumGroups = NumGroups + 1;
     end
     
     %% Change range of TS_DataMat to make use of new colormap appropriately
     ff = 0.9999999;
     squashme = @(x)ff*(x - min(x(:)))/(max(x(:))-min(x(:)));
     TS_DataMat = squashme(TS_DataMat);
-    for jo = 1:Ng
+    for jo = 1:NumGroups
         TS_DataMat(gi{jo},:) = squashme(TS_DataMat(gi{jo},:)) + jo - 1;
     end
 end
-Ng = length(gi);
-% set the colormap
-if Ng <= 1
+NumGroups = length(gi);
+
+%% set the colormap
+if NumGroups <= 1
     if strcmp(CustomColorMap,'redyellowblue');
         CustomColorMap = BF_getcmap('redyellowblue',ng,0);
     else
@@ -149,58 +149,58 @@ if Ng <= 1
     colormap(CustomColorMap)
 else
     cmap = colormap(BF_getcmap('blues',ng,0,1));
-    if Ng >= 2
+    if NumGroups >= 2
         cmap = [cmap; BF_getcmap('greens',ng,0,1)];
     end
-    if Ng >= 3
+    if NumGroups >= 3
         cmap = [cmap; BF_getcmap('oranges',ng,0,1)];
     end
-    if Ng >= 4
+    if NumGroups >= 4
         cmap = [cmap; BF_getcmap('purples',ng,0,1)];
     end
-    if Ng >= 5
+    if NumGroups >= 5
         cmap = [cmap; BF_getcmap('reds',ng,0,1)];
     end
-    if Ng >= 6
+    if NumGroups >= 6
         cmap = [cmap;pink(ng)];
     end
-    if Ng >= 7
+    if NumGroups >= 7
         cmap = [cmap;gray(ng)];
     end
-    if Ng >= 8
+    if NumGroups >= 8
         cmap = [cmap; BF_getcmap('yelloworangered',ng,0,1)];
     end
-    if Ng >= 9
+    if NumGroups >= 9
         cmap = [cmap; BF_getcmap('purplebluegreen',ng,0,1)];
     end
-    if Ng >= 10
+    if NumGroups >= 10
         cmap = [cmap; BF_getcmap('yellowgreenblue',ng,0,1)];
     end
-    if Ng >= 11
+    if NumGroups >= 11
         cmap = [cmap; BF_getcmap('purpleblue',ng,0,1)];
     end
-    if Ng >= 12
+    if NumGroups >= 12
         cmap = [cmap; BF_getcmap('purplered',ng,0,1)];
     end
-    if Ng >= 13
+    if NumGroups >= 13
         cmap = [cmap; BF_getcmap('redpurple',ng,0,1)];
     end
-    if Ng >= 14
+    if NumGroups >= 14
         cmap = [cmap; BF_getcmap('orangered',ng,0,1)];
     end
-    if Ng >= 15
+    if NumGroups >= 15
         cmap = [cmap; BF_getcmap('yelloworangebrown',ng,0,1)];
     end
-    if Ng >= 16
+    if NumGroups >= 16
         cmap = [cmap; BF_getcmap('greenblue',ng,0,1)];
     end
-    if Ng >= 17
+    if NumGroups >= 17
         cmap = [cmap; BF_getcmap('bluepurple',ng,0,1)];
     end
-    if Ng >= 18
+    if NumGroups >= 18
         cmap = [cmap; BF_getcmap('bluegreen',ng,0,1)];
     end
-    if Ng >= 19
+    if NumGroups >= 19
         fprintf(1,'Too many data groups to colour them correctly\n');
         cmap = BF_getcmap('spectral',ng);
     end

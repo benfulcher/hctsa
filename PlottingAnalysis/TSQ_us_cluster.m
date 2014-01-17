@@ -5,11 +5,6 @@
 % Loads a data matrix and clustering options and outputs a clustering of the
 % indicies of this data matrix.
 % 
-% The output from this can be fed to other algorithms -- to plot clusters
-% in different ways, etc.
-% 
-% Some settings use the Spider package for machine learning in Matlab.
-% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -159,7 +154,7 @@ switch ClusterMethod
                     R = pdist(TS_DataMat,'corr');
                 end
                 R = 1 - abs(1-R);
-                R(R<0) = 0; % Sometimes get numerical error putting entries slightly under 0... (dirty fix but ok)
+                R(R < 0) = 0; % Sometimes get numerical error putting entries slightly under 0... (dirty fix but ok)
                 fprintf(1,'abscorr transformation :: R between %f (0) -- %f (1)',min(R),max(R))
             else
                 if any(isnan(TS_DataMat(:))) % NaNs: need to do this the slow way:
@@ -170,6 +165,7 @@ switch ClusterMethod
                     R = pdist(TS_DataMat,DistanceMetric);
                 end
             end
+            
             % links
             links = linkage(R,LinkageMethod);
 
@@ -237,9 +233,9 @@ switch ClusterMethod
                 % just do distance-based clustering
                 T = cluster(links,'maxclust',clusterN);
                 nclusters = max(T);
-                disp(['Distance-based clustering with ' num2str(nclusters) ' clusters'])
+                fprintf(1,'Distance-based clustering with %u clusters\n',nclusters)
             else
-                disp('Invalid clustering method'); return
+                error('Invalid clustering method ''%s''',clusterM);
             end
             
             acgi = cell(nclusters,1);
@@ -249,67 +245,18 @@ switch ClusterMethod
             for j = 1:nclusters
                 ackwgs{j} = ['AGG_C' num2str(j)];
                 acgi{j} = find(T==j);
-                gil(j) = length(acgi{j});
                 % reorder in terms to put members closest to 'cluster
                 % centre' (chosen by *mean* of group's feature vectors) first
-                if gil(j) > 1 % more than one member
-                    % MAY BE BETTER TO JUST MINIMIZE DISTANCES TO OTHER
-                    % POINTS:
-                    % we have our distance matrix R
-                    % reorder by sum of distances to other points in the
-                    % cluster
+                if length(acgi{j}) > 1 % more than one member
+                    % Cluster center has minimum mean distance to other points:
                     [~,ix] = sort(sum(R(acgi{j},acgi{j})),'ascend');
                     acgi{j} = acgi{j}(ix);
-                    
-                    % OLD METHOD: FIND CLOSEST TO CLUSTER CENTRE
-%                     % go through all members of cluster and look at distances to
-%                     % centre -- centre means something different depending
-%                     % on your distance measure
-%                     dd = zeros(gil(j),1);
-%                     switch dmth
-%                         case 'euclidean'
-%                             % mean centre and euclidean distances from it
-%                             cc = mean(F(acgi{j},:)); % the cluster centre, cc
-%                             for k = 1:gil(j)
-%                                 dd(k) = sqrt(sum((F(acgi{j}(k),:)-cc).^2)); % euclidean distances
-%                             end
-%                         case 'abscorr'
-%                             % complicated: first distinguish positive from
-%                             % negatively-correlated parts
-%                             cctmp = F(acgi{j}(1),:); % temporary centre: pick the first element (random)
-%                             signs = zeros(gil(j));
-%                             for k = 1:gil(j)
-%                                 R = corrcoef(F(acgi{j}(k),:),cctmp);
-%                                 signs(k) = sign(R(2,1));
-%                             end
-%                             pc = find(signs==1);
-%                             Fp = F(acgi{j}(pc),:); % positively correlated to a test vector
-%                             Fn = F(acgi{j}(setxor(pc,1:gil(j))),:); % all others
-%                             cc = mean([Fp;1-Fn]); % the cluster centre, cc -- negative-correlation-adjusted
-%                             
-%                             % now we have an appropriate cluster centre,
-%                             % get 1-abs(correlation) distances
-%                             for k = 1:gil(j)
-%                                 R = corrcoef(F(acgi{j}(k),:),cc);
-%                                 dd(k) = 1-abs(R(2,1));
-%                             end
-%                         case 'mi'
-%                             cc = mean(F(acgi{j},:)); % the cluster centre, cc
-%                             for k = 1:gil(j)
-%                                 dd(k) = -BF_MutualInformation(F(acgi{j}(k),:),cc,'quantile','quantile',10); % with 10 bins
-%                             end
-%                         otherwise
-%                             disp('strange distance metric!!..........')
-%                             keyboard
-%                     end
-%                     % reorder to have closest to centre first
-%                     [sdd,ix] = sort(dd,'ascend');
-%                     acgi{j} = acgi{j}(ix);
                 end
             end
             
             % reorder by decreasing cluster size
-            [~,ix] = sort(gil,'descend');
+            ClusterSize = cellfun(@length,acgi);
+            [~,ix] = sort(ClusterSize,'descend');
             ackwgs = ackwgs(ix);
             acgi = acgi(ix);
             
@@ -496,9 +443,10 @@ switch ClusterMethod
         % retrieve distances if necessary
         if ischar(whatwithfile) % load from custom filename
             FileName = whatwithfile;
-            tic
+            LoadTimer = tic;
             load(FileName,'R'); % load custom distance ('links' not needed)
-            disp(['loaded R from ' FileName ' took ' BF_thetime(toc)])
+            fprintf(1,'Loaded R from %s in %s\n',FileName,BF_thetime(toc(LoadTimer)));
+            clear LoadTimer
         elseif (whatwithfile == 2) % load from TS_guide_clinks
             if strcmp(TSorOps,'ts')
                 FileName = 'TS_guide_clinksr.mat';
@@ -509,12 +457,12 @@ switch ClusterMethod
         elseif ndims(whatwithfile)==2 && length(whatwithfile)>1 % you've supplied R in file field!
             R = whatwithfile; clear whatwithfile
         else
-            % calculate pairwise distances
+            % Pairwise distances not provided: calculate them now
             if strcmp(DistanceMetric,'abscorr') % special distance function
                 R = pdist(TS_DataMat,'correlation');
                 R = 1-abs(1-R);
                 R(R<0) = 0;% sometimes get numerical error
-                disp(['R between ' num2str(min(R)) ' (0) - ' num2str(max(R)) ' (1)'])
+                fprintf(1,'R between %4.2f (0) - %4.2f (1)',min(R),max(R))
             else
                 R = pdist(TS_DataMat,DistanceMetric);
             end
@@ -524,6 +472,7 @@ switch ClusterMethod
         if size(R,1)==1
             R = squareform(R); % we want a full matrix for benkmedoids
         end
+        
         [~,~,errs,acgi] = benkmedoids(R,k,maxIter,nrep,errmeas);
         disp(['k-Medoids successful, with ' num2str(sum(errs)) ' ''error'''])
         % output acgi is already ordered by sum of distances to cluster

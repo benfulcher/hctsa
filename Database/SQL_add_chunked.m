@@ -27,7 +27,7 @@ if nargin < 4 || isempty(isduplicate)
 end
 
 if nargin < 5 || isempty(chunksize)
-    chunksize = 250; % run this many queries at a time
+    chunksize = 100; % run this many queries at a time
     % This parameter can be tweaked depend on the value of max_allowed_packet
     % on the mySQL server.
 end
