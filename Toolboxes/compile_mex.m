@@ -4,7 +4,7 @@
 % Modified by Ben Fulcher, 2013
 
 tooldir = [pwd,'/'];
-fprintf('Now compiling the toolboxes...\n')
+fprintf('Compiling mex functions for the HCTSA package...\n')
 if isempty(regexp(tooldir,'Toolboxes'))
     error('This function must be run in the ''Toolboxes'' directory of the HCTSA package...')
 end

@@ -112,14 +112,16 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,1:20,0.1);
+[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,'lags',1:20,'alpha',0.1);
+% [Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,1:20,0.1); % depricated syntax
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1);
-% [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1,[]);
+[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,'lags',1:20,'alpha',0.1);
+% [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1); % depricated syntax
+% [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1,[]); % depricated syntax
 
 
 % (iii) Correlation in time series: autocorrelation
@@ -175,7 +177,7 @@ for i = 1:np
        
        % (i) Engle's ARCH test
        %       look at autoregressive lags 1:20
-       [Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde,1:20,0.1);
+       [Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde,'lags',1:20,'alpha',0.1);
        
        meanarchps(i,j) = mean(Engle_pValue_stde);
        maxarchps(i,j) = max(Engle_pValue_stde);
@@ -184,7 +186,7 @@ for i = 1:np
        %       look at autocorrelation at lags 1:20
        %       use the 10% significance level
        %       departure from randomness hypothesis test
-       [lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2,1:20,0.1,[]);
+       [lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2,'lags',1:20,'alpha',0.1);
        
        meanlbqps(i,j) = mean(lbq_pValue_stde2);
        maxlbqps(i,j) = max(lbq_pValue_stde2);
