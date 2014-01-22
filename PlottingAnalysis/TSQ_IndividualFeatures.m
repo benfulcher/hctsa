@@ -203,7 +203,7 @@ case 'kfold'
         end
     end
 
-    teststat = teststat*100; % convert to percentages
+    teststat = MeanClassificationRate*100; % Convert to percentages
 
     % [teststat, ifeat] = sort(MeanClassificationRate,'descend');
     % teststat = teststat*100; % convert to percentages
