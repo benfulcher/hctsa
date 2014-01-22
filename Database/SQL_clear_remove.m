@@ -1,7 +1,7 @@
 % SQL_clear_remove
 % 
 % Either removes or clears results from the database for a given
-% set of ts_ids or op_ids
+% set of ts_ids or op_ids.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>
@@ -81,20 +81,27 @@ if nargin < 5 || isempty(dolog)
 end
 
 % Provide some user feedback
-if doremove == 0
-    reply = input(sprintf('Clearing data for %u %s from %s\n',length(vin),thewhat,dbname),'s');
+if (doremove == 0) % clear data
+    reply = input(sprintf(['Preparing to clear data for %u %s from %s.' ...
+                                'Press any key to continue...\n'], ...
+                                    length(vin),thewhat,dbname),'s');
     dowhating = 'clearing';
     dowhat = 'clear';
+    
 elseif doremove == 1
-    reply = input(sprintf('REMOVING %u %s from %s -- SURE THIS IS OK?!\n',length(vin),thewhat,dbname),'s');
+    reply = input(sprintf(['Preparing to REMOVE %u %s from %s -- DRASTIC STUFF! ' ...
+                                'I HOPE THIS IS OK?! [press any key to continue]\n'], ...
+                                length(vin),thewhat,dbname),'s');
     dowhating = 'removing';
     dowhat = remove;
+    
 else
-    error('Third input must be (0 == clear), or (1 == remove)')
+    error('Third input must be (0 to clear), or (1 to remove)')
 end
 
 % Check what to clear
-SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)',thename,thetable,theid,BF_cat(vin,','));
+SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
+                                thename,thetable,theid,BF_cat(vin,','));
 [todump,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 
 if ~isempty(emsg)
@@ -103,7 +110,11 @@ end
 reply = input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
       			dbname ' [press any key to show them]'],length(vin),thewhat),'s');
 
-for i = 1:length(todump), fprintf(1,'%s\n',todump{i}); end
+% List all items to screen
+for i = 1:length(todump)
+    fprintf(1,'%s\n',todump{i});
+end
+
 reply = input('Does this look right? Check carefully -- clearing data cannot be undone? Type ''y'' to continue...','s');
 if ~strcmp(reply,'y')
 	fprintf(1,'Better to be safe than sorry. Check again and come back later.\n');
@@ -148,7 +159,8 @@ if doremove
     % end
 else
     %% Do the clearing
-    fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s\n',dbname)
+    fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s...\n',dbname)
+    fprintf(1,'Patience...\n');
 
     UpdateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(vin,','));
     [~,emsg] = mysql_dbexecute(dbc, UpdateString);
@@ -191,6 +203,6 @@ if dolog
 	fprintf(1,'Logged and done and dusted!!\n');
 end
 
-fprintf(1,'Glad to of been of service to you.\n');
+fprintf(1,'Glad to have been of service to you.\n');
 
 end

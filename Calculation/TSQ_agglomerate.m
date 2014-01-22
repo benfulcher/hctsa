@@ -194,8 +194,8 @@ for i = 1:ndbel
 end
 
 fprintf(1,['Well that seemed to go ok -- we wrote %u new calculation results ' ...
-                '(/ %u) to the Results table in %s\n'],sum(UpdateMe),ndbel,dbname);
-fprintf(1,'Writing to the database took at total of %s\n',BF_thetime(sum(IterationTimes)));
+                '(/ %u) to the Results table in %s.\n'],sum(UpdateMe),ndbel,dbname);
+fprintf(1,'Writing to the database took at total of %s.\n',BF_thetime(sum(IterationTimes)));
 if any(~UpdateMe) % Some were not written to the database
     fprintf(1,['%u entries were not written (old errors) and remain ' ...
                             'awaiting calculation in the database.\n'],sum(~UpdateMe));

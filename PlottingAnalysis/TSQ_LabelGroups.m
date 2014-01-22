@@ -40,7 +40,9 @@
 
 function GroupIndices = TSQ_LabelGroups(KeywordGroups,TsorOps,WhatData,SaveBack)
 
+% --------------------------------------------------------------------------
 %% Check inputs
+% --------------------------------------------------------------------------
 if nargin < 1 || isempty(KeywordGroups)
     error('You must specify labels');
 end
@@ -58,18 +60,20 @@ if ~ismember(TsorOps,{'ops','ts'})
 end
 
 if nargin < 3 || isempty(WhatData)
-    WhatData = 'cl';
-    fprintf(1,'Retrieving from HCTSA_cl by default.\n');
+    WhatData = 'norm';
+    fprintf(1,'Retrieving from HCTSA_N by default.\n');
 end
 if ~isstruct(WhatData) && ~ismember(WhatData,{'orig','norm','cl'})
-    error('Specify ''orig'', ''norm'', or ''cl''.')
+    error('When specifying data, we need ''orig'', ''norm'', or ''cl''.')
 end
 
 if nargin < 4 || isempty(SaveBack)
     SaveBack = 1; % Saves the grouping back to the HCTSA_*.loc file
 end
 
+% --------------------------------------------------------------------------
 %% Load data from file
+% --------------------------------------------------------------------------
 if isstruct(WhatData)
     % Can make WhatData a structure...? Some old functionality...//
     Keywords = WhatData.Keywords;
@@ -95,6 +99,11 @@ else
     end
     fprintf(1,' Loaded.\n');
 end
+
+
+% --------------------------------------------------------------------------
+%% Label groups from keywords
+% --------------------------------------------------------------------------
 
 if ~all(cellfun(@ischar,KeywordGroups(:))) % Have specified numbers of each
     KeywordNumbers = horzcat(KeywordGroups{:,2}); % Just the number of each part

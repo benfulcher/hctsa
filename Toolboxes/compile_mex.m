@@ -17,7 +17,8 @@ try
 	mex ML_fastdfa_core.c
     fprintf(1,' done.\n');
 catch
-	error('\nAn error occurred while compiling. Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile.m');
+    fprintf(1,'\n');
+	error('An error occurred while compiling. Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile.m');
 end
 
 % Max Little's Steps Bumps Toolkit

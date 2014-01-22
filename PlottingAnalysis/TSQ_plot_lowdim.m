@@ -103,6 +103,7 @@ if strcmp(TheData,'cl') || strcmp(TheData,'norm')
                 load(TheDataFile,'GroupNames')
                 DataGroups = [TimeSeries.Group];
             else
+                fprintf(1,'\n');
                 error('No groups assigned -- Use TSQ_LabelGroups.')
             end
             clear('TimeSeries'); % we no longer need you

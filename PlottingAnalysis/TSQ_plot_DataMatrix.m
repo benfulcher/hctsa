@@ -37,25 +37,19 @@ end
 if nargin < 2 || isempty(ColorGroups)
     ColorGroups = 0; % don't color groups
 end
-% Differential colouring of keyword groups?
-% if nargin < 2; kwgs = {}; end % no groups
-% if ischar(kwgs)
-%     kwgs = {kwgs};
-% end
-% if nargin < 3
-%     gi = []; % automatically get indicies if necessary
-% end 
-if nargin < 4
+if nargin < 3
    TS_DataMat = []; % load from TS_loc_N or TS_loc_cl
 end
-if nargin < 5 || isempty(CustomOrder)
+if nargin < 4 || isempty(CustomOrder)
 	CustomOrder = {[],[]};
 end
-if nargin < 6
+if nargin < 5
     CustomColorMap = 'redyellowblue';
 end
 
+% --------------------------------------------------------------------------
 %% Read in the data
+% --------------------------------------------------------------------------
 if isstruct(norcl)
     % can specify all of this in the norcl argument
     TimeSeriesFileNames = norcl.TimeSeriesFileNames;
@@ -104,17 +98,17 @@ if ~isempty(CustomOrder{2}) % reorder columns
     OperationNames = OperationNames(CustomOrder{2});
 end
 
-%% Plot the object in a new figure
+% --------------------------------------------------------------------------
+%% Plot the data matrix in a new figure
+% --------------------------------------------------------------------------
 figure('color','w'); box('on');
 title(sprintf('Data matrix of size %u x %u',nts,nops))
 ng = 6; % number of gradations in each set of colourmap
 
-if ColorGroups
-    NumGroups = length(GroupNames); % number of keyword groups
-    
-    fprintf(1,'Coloring data according to %u groups\n',NumGroups);
-    
+if ColorGroups    
     gi = BF_ToGroup(TimeSeriesGroups);
+    
+    NumGroups = length(gi);
     
     % Add a group for unlabelled data items if they exist
     if sum(cellfun(@length,gi)) < nts
@@ -129,6 +123,8 @@ if ColorGroups
         NumGroups = NumGroups + 1;
     end
     
+    fprintf(1,'Coloring data according to %u groups\n',NumGroups);
+    
     %% Change range of TS_DataMat to make use of new colormap appropriately
     ff = 0.9999999;
     squashme = @(x)ff*(x - min(x(:)))/(max(x(:))-min(x(:)));
@@ -136,10 +132,13 @@ if ColorGroups
     for jo = 1:NumGroups
         TS_DataMat(gi{jo},:) = squashme(TS_DataMat(gi{jo},:)) + jo - 1;
     end
+else
+    NumGroups = 0;
 end
-NumGroups = length(gi);
 
-%% set the colormap
+% --------------------------------------------------------------------------
+%% Set the colormap
+% --------------------------------------------------------------------------
 if NumGroups <= 1
     if strcmp(CustomColorMap,'redyellowblue');
         CustomColorMap = BF_getcmap('redyellowblue',ng,0);
@@ -211,7 +210,9 @@ end
 pcolor([TS_DataMat, zeros(size(TS_DataMat,1),1); zeros(1,size(TS_DataMat,2)+1)]);
 shading flat
 
-%%% Format the plot
+% --------------------------------------------------------------------------
+%% Format the plot
+% --------------------------------------------------------------------------
 % Axis labels:
 set(gca,'YTick',1 + (0.5:1:size(TS_DataMat,1)),'YTickLabel',TimeSeriesFileNames); % time series
 if nops < 1000 % otherwise don't bother

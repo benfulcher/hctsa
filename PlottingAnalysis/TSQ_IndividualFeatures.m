@@ -12,7 +12,7 @@
 % uses BioInformatics toolbox functions
 % Ben Fulcher 13/9/2010
 % Ben Fulcher 28/9/2010 added subset input
-% Ben Fulcher 18/3/2011 changed reverse to cvalid -- specify cross-validation
+% Ben Fulcher 18/3/2011 changed reverse to CrossVal -- specify cross-validation
 % options as in TSQ_cfnerr: e.g, {'kfold',10,2}; 'ttest' (default) -- Absolute
 % value two-sample t-test with pooled variance estimate. 'entropy' -- Relative
 % entropy, also known as Kullback-Leibler distance or divergence.
@@ -41,9 +41,11 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [ifeat, teststat, testspread] = TSQ_IndividualFeatures(WhatData,ClassMethod,cvalid,randomize,plotoutputs)
+function [ifeat, teststat, testspread] = TSQ_IndividualFeatures(WhatData,ClassMethod,CrossVal,randomize,plotoutputs)
 
-%% Check inputs
+% --------------------------------------------------------------------------
+%%                          Check inputs
+% --------------------------------------------------------------------------
 
 if nargin < 1 || isempty(WhatData)
     WhatData = 'norm';
@@ -53,7 +55,7 @@ if nargin < 2 || isempty(ClassMethod)
     fprintf(1,'Using ''%s'' by default\n', ClassMethod);
 end
 if nargin < 3
-    cvalid = [];
+    CrossVal = {'kfold',10,1};
 end
 if nargin < 4
     randomize = 0;
@@ -62,7 +64,9 @@ if nargin < 5
     plotoutputs = 5; % number of figures outputs by default
 end
 
-% set plotting options in a structure: plotopts
+% --------------------------------------------------------------------------
+% Place plotting options in a structure: plotopts
+% --------------------------------------------------------------------------
 if ~isstruct(plotoutputs)
     if plotoutputs > 0 % plot all outputs
         plotopts.histogram = 1;
@@ -84,7 +88,9 @@ else
     end
 end
 
-%% Load the data
+% --------------------------------------------------------------------------
+%%                          Load the data
+% --------------------------------------------------------------------------
 if ischar(WhatData)
     switch WhatData
     case 'norm'
@@ -103,7 +109,10 @@ elseif isstruct(WhatData)
     fprintf(1,'Data provided, adapted successfully.\n');
 end
 
-% Randomize the data matrix to check null
+
+% --------------------------------------------------------------------------
+%               Randomize the data matrix to check null
+% --------------------------------------------------------------------------
 if randomize % shuffle elements of the data matrix
     fprintf(1,'Randomly permuting the group information as a null comparison...\n');
     Rperm = randperm(length(TimeSeries)); % this is an output
@@ -117,144 +126,171 @@ if randomize % shuffle elements of the data matrix
     % TS_DataMat = TS_DataMat(Rperm,:);
 end
 
-%% Run the algorithm
-TimeSeriesGroup = [TimeSeries.Group]; % Use group form
+
+% --------------------------------------------------------------------------
+%% Define the train/test classification rate functions
+% --------------------------------------------------------------------------
 switch ClassMethod
-    case 'linclasscv' % quantify linear classification for each
-        teststat = zeros(size(TS_DataMat,2),1); % cross-validation classification rates
-        testspread = zeros(size(TS_DataMat,2),1); % standard deviation in cross-validation classification rates
-        
-        if isempty(cvalid) % set default cross-validation
-            cvalid = {'kfold',10,1}; % 10-fold CV with no repeats
-        end
-%         cp = cvpartition(TimeSeriesGroup,'kfold',cvalid{2}); % ?-fold stratified cross-validation
-%         cp = cvpartition(TimeSeriesGroup,'k',10); % 10-fold stratified cross-validation
-
-        nrepeats = cvalid{3}; % make this many different 10-fold partitions of the data
-                              % ensures they're the same for all operations
-        cps = cell(nrepeats,1);
-        for i = 1:nrepeats;
-            cps{i} = cvpartition(TimeSeriesGroup,'kfold',cvalid{2}); % ?-fold stratified cross-validation;
-        end
-        
-        fprintf(1,['Doing cross validation with %u repeats using ' ...
-                        '%u-fold cross validation'],nrepeats,cvalid{2});
-        
-        fn_classify = @(XT,yT,Xt,yt) sum(yt~=classify(Xt,XT,yT,'linear'))/length(yt);
-        times = zeros(size(TS_DataMat,2),1); % time each run:
-        for i = 1:size(TS_DataMat,2)
-            tic
-            try
-%                 errs = TSQ_cfnerr('classify','linear',TS_DataMat(:,i),TimeSeriesGroup,[],cvalid);
-                te = cell(nrepeats,1);
-                for j = 1:nrepeats
-                    % use partition cps{j}
-                    te{j} = crossval(fn_classify,TS_DataMat(:,i),TimeSeriesGroup,'partition',cps{j});
-%                     errs = TSQ_cfnerr('classify','linear',TS_DataMat(:,i),TimeSeriesGroup,[],cp,cvalid{3});
-                end
-                errs = vertcat(te{:}); % agglomerate across repeats
-                teststat(i) = mean(errs);
-                testspread(i) = std(errs);
-%                 teststat(i) = crossval('mcr',TS_DataMat(:,i),TimeSeriesGroup,'predfun',classf,'partition',cp);
-%                 mcrs = crossval(F_linclass,TS_DataMat(:,i),TimeSeriesGroup,'partition',cp);
-%                 This code with 'mcr' is the same as mean(mcrs)
-            catch emsg
-                disp(emsg)
-                teststat(i) = NaN;
-            end
-            times(i) = toc;
-            if mod(i,floor(size(TS_DataMat,2)/4))==0
-                fprintf(1,'Less than %s remaining! We''re at %u / %u\n', ...
-                                BF_thetime(mean(times(1:i))*(size(TS_DataMat,2)-i)),i,size(TS_DataMat,2))
-            end
-        end
-        [teststat, ifeat] = sort(teststat,'ascend');
-        testspread = testspread(ifeat)*100; % sort, convert to percentages
-        teststat = teststat*100; % convert to percentages
-        
-    case 'linclass'
-        fprintf(1,'Comparing %u operations using in-sample linear classification...',length(Operations))
-        timer = tic;
-        teststat = zeros(size(TS_DataMat,2),1); % in-sample misclassification rates
-        for i = 1:size(TS_DataMat,2)
-            try
-                % In-sample misclassification rates: training set = test set
-                [~, err] = classify(TS_DataMat(:,i),TS_DataMat(:,i),TimeSeriesGroup,'linear');
-                teststat(i) = err;
-            catch
-                teststat(i) = NaN;
-            end
-        end
-        fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
-        
-        [teststat, ifeat] = sort(teststat,'ascend');
-        teststat = teststat*100; % Convert to percentages
-        testspread = []; % no spread because no cross-validation/repeats
-        
-        % Give mean and that expected from random classifier (maybe a little overfitting)
-        fprintf(1,'Mean across %u operations = %4.2f; (Random guessing for %u equiprobable classes = %4.2f)\n', ...
-                length(Operations),mean(teststat),length(unique(TimeSeriesGroup)),100/length(unique(TimeSeriesGroup)));
-
-    case {'knn','knn_matlab'}
-        k = 3;
-        fprintf(1,'IN-SAMPLE BEN KNN(%u)\n',k)
-        teststat = zeros(size(TS_DataMat,2),1); % in-sample classification rates
-        for i = 1:size(TS_DataMat,2) % for each feature individually
-            [~,err] = benknn(TS_DataMat(:,i),TS_DataMat(:,i),3,TimeSeriesGroup,TimeSeriesGroup); % classifies in-sample
-            teststat(i) = err;
-        end
-        [teststat,ifeat] = sort(teststat,'ascend');
-        teststat = teststat*100;
-        testspread = [];
-        
-    case 'knncv'
-        teststat = zeros(size(TS_DataMat,2),1); % classification rates
-        testspread = zeros(size(TS_DataMat,2),1); % standard deviation in cross-validation classification rates
-        
-        k = 3; % number of nearest neighbors
-        if isempty(cvalid) % set default cross-validation
-            cvalid = {'kfold',10,1}; % 10-fold CV with no repeats
-        end
-        
-%         cp = cvpartition(TimeSeriesGroup,'kfold',nfolds); % statified k-fold crossvalidation
-        fprintf(1,'%s cross validation BEN KNN(%u)\n',cvalid{1},k)
-        for i = 1:size(TS_DataMat,2) % for each feature individually
-            err = TSQ_cfnerr('knn',k,TS_DataMat(:,i),TimeSeriesGroup,[],cvalid);
-            teststat(i) = mean(err);
-            testspread(i) = std(err);
-        end
-        [teststat,ifeat] = sort(teststat,'ascend');
-        testspread = testspread(ifeat)*100; % sort, convert to percentages
-        teststat = teststat*100; % convert to percentages
-        
-    otherwise
-        fprintf(1,'Hello!\n')
-        [ifeat, teststat] = rankfeatures(TS_DataMat',TimeSeriesGroup,'criterion',ClassMethod);
-        [teststat, ix] = sort(teststat,'descend');
-        ifeat = ifeat(ix);
-        testspread = [];
+case {'linear','linclass'}
+    fn_classify = @(XTrain,yTrain,Xtest,ytest) ...
+                    sum(ytest == classify(Xtest,XTrain,yTrain,'linear'))/length(ytest);
+case 'diaglinear'
+    fn_classify = @(XTrain,yTrain,Xtest,ytest) ...
+                    sum(ytest == classify(Xtest,XTrain,yTrain,'diaglinear'))/length(ytest);
+case {'svm','svmlinear'}
+    fn_classify = @(XTrain,yTrain,Xtest,ytest) ...
+                                sum(ytest == svmclassify(svmtrain(XTrain,yTrain, ...
+                                    'Kernel_Function','linear'),Xtest))/length(ytest);
+otherwise
+    error('Unknown classification method ''%s''',ClassMethod)
 end
 
-% Display information the top n operations
+% --------------------------------------------------------------------------
+%% Cross-validation data partition functions
+% --------------------------------------------------------------------------
+
+TimeSeriesGroup = [TimeSeries.Group]'; % Use group form
+
+switch CrossVal{1}
+case 'kfold'
+    Nfolds = CrossVal{2};
+    nrepeats = CrossVal{3}; % make this many different 10-fold partitions of the data
+                          % ensures they're the same for all operations
+
+    fprintf(1,['Doing cross validation with %u repeats using ' ...
+                  '%u-fold cross validation...\n'],nrepeats,Nfolds);
+
+    % ?-fold stratified cross-validation;
+    fn_partition = @(TheLabels) cvpartition(TheLabels,'kfold',Nfolds);
+
+    % Determine partitions ahead of time first, so you do the same set of partitions
+    % at each iteration (for consistency):
+    Partitions = cell(nrepeats,1);
+    for i = 1:nrepeats;
+        Partitions{i} = fn_partition(TimeSeriesGroup); 
+    end
+    
+case 'leaveout'
+    fn_partition = @(TheLabels) cvpartition(TheLabels,'leaveout');
+    fprintf(1,['Doing leave-one-out cross validation using %u shuffles' ...
+                ' to compute the null distribution\n'],nrepeats_rf);
+    fprintf(1,'Doing leave-one-out cross validation.\n');
+end
+
+
+
+% --------------------------------------------------------------------------
+%%                     Loop over all features
+% --------------------------------------------------------------------------
+
+switch CrossVal{1}
+case 'kfold'
+    MeanClassificationRate = zeros(size(TS_DataMat,2),1);
+    timer = tic;
+    for i = 1:size(TS_DataMat,2)
+        TestRate = zeros(nrepeats,1);
+        for j = 1:nrepeats
+            TestRate(j) = mean(crossval(fn_classify,TS_DataMat(:,i), ...
+                                        TimeSeriesGroup, ...
+                                        'partition',Partitions{j}));
+            % Mean across k folds
+        end
+        MeanClassificationRate(i) = mean(TestRate); % Mean of means (across all repartitions) 
+        
+        if (mod(i,floor(size(TS_DataMat,2)/4))==0)
+            fprintf(1,'Less than %s remaining! We''re at %u / %u\n', ...
+                        BF_thetime(toc(timer)/i*(size(TS_DataMat,2)-i)),i,size(TS_DataMat,2))
+        end
+    end
+
+    teststat = teststat*100; % convert to percentages
+
+    % [teststat, ifeat] = sort(MeanClassificationRate,'descend');
+    % teststat = teststat*100; % convert to percentages
+    % testspread = testspread(ifeat)*100; % sort, convert to percentages
+        
+case 'none'
+    fprintf(1,'Comparing %u operations using in-sample linear classification...',length(Operations))
+    
+    timer = tic;
+    teststat = zeros(size(TS_DataMat,2),1); % in-sample misclassification rates
+    for i = 1:size(TS_DataMat,2)
+        try
+            % Use the same data for training and testing:
+            teststat(i) = fn_classify(TS_DataMat(:,i),TimeSeriesGroup,TS_DataMat(:,i),TimeSeriesGroup);
+        catch
+            teststat(i) = NaN;
+        end
+    end
+    fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
+    
+    % [teststat, ifeat] = sort(teststat,'descend');
+    teststat = teststat*100; % Convert to percentages
+    % testspread = []; % no spread because no cross-validation/repeats
+    
+    % Give mean and that expected from random classifier (maybe a little overfitting)
+    fprintf(1,'Mean across %u operations = %4.2f; (Random guessing for %u equiprobable classes = %4.2f)\n', ...
+            length(Operations),mean(teststat),length(unique(TimeSeriesGroup)),100/length(unique(TimeSeriesGroup)));
+
+%     case {'knn','knn_matlab'}
+%         k = 3;
+%         fprintf(1,'IN-SAMPLE BEN KNN(%u)\n',k)
+%         teststat = zeros(size(TS_DataMat,2),1); % in-sample classification rates
+%         for i = 1:size(TS_DataMat,2) % for each feature individually
+%             [~,err] = benknn(TS_DataMat(:,i),TS_DataMat(:,i),3,TimeSeriesGroup,TimeSeriesGroup); % classifies in-sample
+%             teststat(i) = err;
+%         end
+%         [teststat,ifeat] = sort(teststat,'ascend');
+%         teststat = teststat*100;
+%         testspread = [];
+%         
+%     case 'knncv'
+%         teststat = zeros(size(TS_DataMat,2),1); % classification rates
+%         testspread = zeros(size(TS_DataMat,2),1); % standard deviation in cross-validation classification rates
+%         
+%         k = 3; % number of nearest neighbors
+%         if isempty(CrossVal) % set default cross-validation
+%             CrossVal = {'kfold',10,1}; % 10-fold CV with no repeats
+%         end
+%         
+% %         cp = cvpartition(TimeSeriesGroup,'kfold',nfolds); % statified k-fold crossvalidation
+%         fprintf(1,'%s cross validation BEN KNN(%u)\n',CrossVal{1},k)
+%         for i = 1:size(TS_DataMat,2) % for each feature individually
+%             err = TSQ_cfnerr('knn',k,TS_DataMat(:,i),TimeSeriesGroup,[],CrossVal);
+%             teststat(i) = mean(err);
+%             testspread(i) = std(err);
+%         end
+%         [teststat,ifeat] = sort(teststat,'ascend');
+%         testspread = testspread(ifeat)*100; % sort, convert to percentages
+%         teststat = teststat*100; % convert to percentages
+    %     
+    % otherwise
+    %     fprintf(1,'Hello!\n')
+    %     [ifeat, teststat] = rankfeatures(TS_DataMat',TimeSeriesGroup,'criterion',ClassMethod);
+    %     [teststat, ix] = sort(teststat,'descend');
+    %     ifeat = ifeat(ix);
+    %     testspread = [];
+end
+
+% --------------------------------------------------------------------------
+%%          Display information the top n operations
+% --------------------------------------------------------------------------
+[teststat_sort, ifeat] = sort(teststat,'descend');
+
 topn = min(10,length(Operations));
 for i = 1:topn
     fprintf(1,['[%u] {%u} %s -- %s :: %4.2f%%\n'],ifeat(i),Operations(ifeat(i)).ID, ...
-                    Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,teststat(i));
+                    Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,teststat_sort(i));
 end
 
 
-%% Plot outputs
+% --------------------------------------------------------------------------
+%%                          Plot outputs
+% --------------------------------------------------------------------------
 if plotopts.histogram
     % 1) a figure to show the distribution of test statistics across all
     % features:
-    % ksdensity
-%     figure('color','w'); box('on'); hold on
-%     [f,xi] = ksdensity(teststat);
-%     plot(xi,f,'b');
-%     plot(teststat(1),0,'or');
-%     xlabel('individual classification errors')
-%     ylabel('probability density')
-    % histogram
+
     figure('color','w');
     hist(teststat,10);
     h = findobj(gca,'Type','patch');
