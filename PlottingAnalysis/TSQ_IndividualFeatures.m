@@ -56,6 +56,7 @@ if nargin < 2 || isempty(ClassMethod)
 end
 if nargin < 3
     CrossVal = {'kfold',10,1};
+    % CrossVal = {'leaveout'};
 end
 if nargin < 4
     randomize = 0;
@@ -111,7 +112,7 @@ end
 
 
 % --------------------------------------------------------------------------
-%               Randomize the data matrix to check null
+%      Randomize the rows of the data matrix for a null distribution
 % --------------------------------------------------------------------------
 if randomize % shuffle elements of the data matrix
     fprintf(1,'Randomly permuting the group information as a null comparison...\n');
@@ -132,15 +133,18 @@ end
 % --------------------------------------------------------------------------
 switch ClassMethod
 case {'linear','linclass'}
+    fprintf(1,'A linear classifier\n');
     fn_classify = @(XTrain,yTrain,Xtest,ytest) ...
                     sum(ytest == classify(Xtest,XTrain,yTrain,'linear'))/length(ytest);
 case 'diaglinear'
+    fprintf(1,'A Naive Bayes classifier\n');
     fn_classify = @(XTrain,yTrain,Xtest,ytest) ...
                     sum(ytest == classify(Xtest,XTrain,yTrain,'diaglinear'))/length(ytest);
 case {'svm','svmlinear'}
+    fprintf(1,'A linear support vector machine\n');
     fn_classify = @(XTrain,yTrain,Xtest,ytest) ...
-                                sum(ytest == svmclassify(svmtrain(XTrain,yTrain, ...
-                                    'Kernel_Function','linear'),Xtest))/length(ytest);
+                    sum(ytest == svmclassify(svmtrain(XTrain,yTrain, ...
+                                'Kernel_Function','linear'),Xtest))/length(ytest);
 otherwise
     error('Unknown classification method ''%s''',ClassMethod)
 end
@@ -172,11 +176,8 @@ case 'kfold'
     
 case 'leaveout'
     fn_partition = @(TheLabels) cvpartition(TheLabels,'leaveout');
-    fprintf(1,['Doing leave-one-out cross validation using %u shuffles' ...
-                ' to compute the null distribution\n'],nrepeats_rf);
-    fprintf(1,'Doing leave-one-out cross validation.\n');
+    fprintf(1,'Doing leave-one-out cross validation\n');
 end
-
 
 
 % --------------------------------------------------------------------------
@@ -205,12 +206,26 @@ case 'kfold'
 
     teststat = MeanClassificationRate*100; % Convert to percentages
 
-    % [teststat, ifeat] = sort(MeanClassificationRate,'descend');
-    % teststat = teststat*100; % convert to percentages
-    % testspread = testspread(ifeat)*100; % sort, convert to percentages
+case 'leaveout'
+    MeanClassificationRate = zeros(size(TS_DataMat,2),1);
+    timer = tic;
+    for i = 1:size(TS_DataMat,2)
+        try
+            MeanClassificationRate(i) = mean(crossval(fn_classify,TS_DataMat(:,i), ...
+                                TimeSeriesGroup,'partition',fn_partition(TimeSeriesGroup)));
+        catch
+            MeanClassificationRate(i) = NaN;
+        end
         
-case 'none'
-    fprintf(1,'Comparing %u operations using in-sample linear classification...',length(Operations))
+        if (mod(i,floor(size(TS_DataMat,2)/4))==0)
+            fprintf(1,'Less than %s remaining! We''re at %u / %u\n', ...
+                        BF_thetime(toc(timer)/i*(size(TS_DataMat,2)-i)),i,size(TS_DataMat,2))
+        end
+    end
+    teststat = MeanClassificationRate*100; % Convert to percentages
+    
+case 'none' % in-sample
+    fprintf(1,'Comparing %u operations using in-sample classification...',length(Operations))
     
     timer = tic;
     teststat = zeros(size(TS_DataMat,2),1); % in-sample misclassification rates

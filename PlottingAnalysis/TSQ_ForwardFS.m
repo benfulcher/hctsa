@@ -1,34 +1,21 @@
+% --------------------------------------------------------------------------
 % TSQ_ForwardFS
+% --------------------------------------------------------------------------
 % 
 % Performs greedy forward feature selection for a given classification of the
 % data. After selecting the features (using specified training indices), then
 % applies the learned classification rule to the training and test sets to get
 % training and test classification errors.
 % 
-% Typical usage uses 'linclass' or 'linclasscv' for the criterion.
+% Typical usage uses 'linear' for the criterion (linear classification rates).
 % 
 %--OUTPUTS:
-%-ifeat: indices of features selected
-%-teststatout: test statistics for all operations.
+%-ifeat: indices of features selected.
+%-TestStat: test statistics for all operations.
+%-TrainErr: training errors for selected features.
+%-TestErr: test errors for selected features.
+%-TestClass: classificaiton of the test data.
 %
-%-------HISTORY----------
-% uses BioInformatics toolbox functions
-% Finds the best combination of 2 features for the classification task
-% Ben Fulcher 23/9/2010
-% Ben Fulcher 14/10/2010: added subset
-% Ben Fulcher 20/10/2010: added nbest (return this many best features)
-% 
-% Some options:
-% 'ttest' (default) -- Absolute value two-sample t-test with pooled variance
-%                      estimate.
-% 'entropy' -- Relative entropy, also known as Kullback-Leibler distance or
-%              divergence.
-% 'bhattacharyya' -- Minimum attainable classification error or Chernoff bound.
-% 'roc' -- Area between the empirical receiver operating characteristic (ROC)
-%          curve and the random classifier slope.
-% 'wilcoxon' -- Absolute value of the u-statistic of a two-sample unpaired
-%               Wilcoxon test, also known as Mann-Whitney.
-% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -45,10 +32,12 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [ifeat, teststat, TrainErr, TestErr, TestClass] = TSQ_ForwardFS(WhatData, ...
-                            iTrain,criterion,randomize,plotoutput,NumFeatSelect,howzero,knn)
+function [ifeat, TestStat, TrainErr, TestErr, TestClass] = TSQ_ForwardFS(WhatData, ...
+                        iTrain,criterion,CrossVal,NumFeatSelect,plotoutput,howzero)
 
-%% Inputs
+% --------------------------------------------------------------------------
+%% Check inputs:
+% --------------------------------------------------------------------------
 if nargin < 1 || isempty(WhatData)
     error('You must provide data or specify a data source!');
 end
@@ -58,20 +47,21 @@ if nargin < 2 || isempty(iTrain)
 end
 
 if nargin < 3 || isempty(criterion)
-    criterion = 'roc';
-    fprintf(1,'Default: Using roc criterion\n');
+    criterion = 'linclass';
+    fprintf(1,'Default: Using in-sample linear classification rate\n');
 end
 
-if nargin < 4 || isempty(randomize)
-    randomize = 0;
+if nargin < 4 || isempty(CrossVal)
+    CrossVal = 'none';
+    fprintf(1,'Default: No cross-validation inside the training data\n');
 end
 
-if nargin < 5 || isempty(plotoutput)
-    plotoutput = 1;
-end
-
-if nargin < 6 || isempty(NumFeatSelect)
+if nargin < 5 || isempty(NumFeatSelect)
     NumFeatSelect = 2; % Stop after two features are selected
+end
+
+if nargin < 6 || isempty(plotoutput)
+    plotoutput = 1;
 end
 
 if nargin < 7 || isempty(howzero)
@@ -80,11 +70,9 @@ if nargin < 7 || isempty(howzero)
     howzero = 'rand'; % 'rand' (chooses ops at random) ,'NaN' (makes NaNs)
 end
 
-if nargin < 8
-    knn = 1; % knn(1) by default
-end
-
+% --------------------------------------------------------------------------
 %% Load the data
+% --------------------------------------------------------------------------
 % If specified a string: 'norm' or 'cl' will retrieve
 % Otherwise must be a structure with fields 'TimeSeries', 'Operations' and
 % 'TS_DataMat'
@@ -106,263 +94,198 @@ elseif isstruct(WhatData)
     fprintf(1,'Data provided, adapted successfully.\n');
 end
 
-% Set testing indices
+% --------------------------------------------------------------------------
+%% Set testing indices
+% --------------------------------------------------------------------------
+% Check whether training indices are logicals
+if islogical(iTrain) && length(iTrain)==length(TimeSeries)
+    iTrain = find(iTrain); % Convert to indices
+end
 % Train on iTrain, test on the rest
 iTest = setxor((1:length(TimeSeries)),iTrain);
-fprintf(1,'We have %u / %u training data items (= %4.1f%%)\n',length(iTrain), ...
-                    length(TimeSeries),length(iTrain)/length(TimeSeries)*100);
-fprintf(1,'We have %u / %u testing data items (= %4.1f%%)\n',length(iTest), ...
-                    length(TimeSeries),length(iTest)/length(TimeSeries)*100);
+fprintf(1,['We have %u / %u (= %3.1f%%) for training and %u / %u (= %3.1f%%) for ' ...
+            'testing.\n'],length(iTrain), length(TimeSeries), ...
+            length(iTrain)/length(TimeSeries)*100,length(iTest), ...
+                length(TimeSeries),length(iTest)/length(TimeSeries)*100);
 
-% Use random numbers instead of the actual values in the data matrix
-if randomize
-    fprintf(1,'Using random numbers instead of the actual information in the data matrix\n');
-    TS_DataMat = randn(size(TS_DataMat));
-end
-
-%% Run the algorithm
-TimeSeriesGroups = [TimeSeries.Group]'; % one of my functions to convert gi to group form
-
-FS_timer = tic; % start a timer
-
-fprintf(1,'Performing feature selection using ''%s''...\n',criterion);
+% --------------------------------------------------------------------------
+%% Set up the classification function
+% --------------------------------------------------------------------------
+% We get (*) Classify_fn (takes test labels as input): gives the mean classification rate across partitions
+%        (*) Classify_fn_label (doesn't take test labels as input): gives labels assigned to test set.
 
 switch criterion
-    case {'linclasscv','linclass'}
-% if strcmp(criterion,'linclasscv') || strcmp(criterion,'linclass') % quantify linear classification for each
-% F_linclass = @(XT,yT,Xt,yt) sum(yt~=classify(Xt,XT,yT,'linear'))/length(yt);
-        classf = @(XTRAIN,ytrain,XTEST)(classify(XTEST,XTRAIN,ytrain,'linear'));
-        if strcmp(criterion,'linclasscv')
-            % 10-fold stratified cross-validation WITHIN THE TRAINING DATA
-            DataPartitions = cvpartition(TimeSeriesGroups(iTrain),'k',10);
-        end
+case {'linear','linclass'}
+    fprintf(1,'A linear classifier\n');
+    Classify_fn_label = @(XTrain,yTrain,Xtest)(classify(Xtest,XTrain,yTrain,'linear'));
+    Classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
+                    sum(ytest ~= classify(Xtest,XTrain,yTrain,'linear'))/length(ytest);
+case 'diaglinear' % Naive Bayes
+    fprintf(1,'A Naive Bayes classifier\n');
+    Classify_fn_label = @(XTrain,yTrain,Xtest)(classify(Xtest,XTrain,yTrain,'diaglinear'));
+    Classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
+                    sum(ytest ~= classify(Xtest,XTrain,yTrain,'diaglinear'))/length(ytest);
+case {'svm','svmlinear'}
+    fprintf(1,'A linear support vector machine\n');
+    Classify_fn_label = @(XTrain,yTrain,Xtest) ...
+                    svmclassify(svmtrain(XTrain,yTrain, ...
+                                'Kernel_Function','linear'),Xtest);
+    Classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
+                    sum(ytest ~= svmclassify(svmtrain(XTrain,yTrain, ...
+                                'Kernel_Function','linear'),Xtest))/length(ytest);
+otherwise
+    error('Unknown classification method ''%s''',criterion)
+end
 
-        ifeat = zeros(NumFeatSelect,1); % stores indicies of features chosen at each stage
-        teststat = cell(NumFeatSelect,1); % cross-validation classification rates for all features at each stage
-        for j = 1:NumFeatSelect
-            % Find the feature that works best in combination with those already chosen:
-            teststat{j} = zeros(length(Operations),1);
-            for i = 1:length(Operations)
-                try
-                    if strcmp(criterion,'linclass')
-                        % in-sample errors
-                        [~,err] = classify(TS_DataMat(iTrain,[ifeat(1:j-1);i]),TS_DataMat(iTrain,[ifeat(1:j-1);i]), ...
-                                                TimeSeriesGroups(iTrain),'linear');
-                        teststat{j}(i) = err;
-                    else
-            %             mcrs = crossval(TS_DataMat_linclass,TS_DataMat(:,i),TimeSeriesGroups,'partition',DataPartitions);
-                        teststat{j}(i) = crossval('mcr',TS_DataMat(iTrain,[ifeat(1:j-1);i]),TimeSeriesGroups(iTrain), ...
-                                                    'predfun',classf,'partition',DataPartitions);
-                        % This code with 'mcr' is the same as mean(mcrs)
-                    end
-                catch emsg
-                    teststat{j}(i) = NaN;
-    %                 disp(emsg.identifier)
-        %             figure('color','w');hold on
-        %             plot_ks(TS_DataMat(gi{1},i),[1,0,0],0) % plot the first group
-        %             plot_ks(TS_DataMat(gi{2},i),[0,0,1],0) % plot the second group
-        %             title(Operations(i).Name);
-        %             keyboard
-                end
-            end
-            if all(isnan(teststat{j}))
-                ifeat(j) = NaN;
-                fprintf(1,'Error selecting feature at iteration %u\n',j)
-                keyboard
+
+% --------------------------------------------------------------------------
+%% Set up the data partitions for cross-validation
+% --------------------------------------------------------------------------
+
+% Define groups as a column vector:
+TimeSeriesGroups = [TimeSeries.Group]';
+
+switch CrossVal
+case 'kfold'
+    fprintf(1,'Using 10-fold stratified cross-validation within the training data\n');
+    DataPartitions = cvpartition(TimeSeriesGroups(iTrain),'k',10);
+case 'leaveout'
+    fprintf(1,'Using leave-one-out cross-validation within the training data\n');
+    DataPartitions = cvpartition(TimeSeriesGroups(iTrain),'leaveout');
+    fprintf(1,'(Using %u different test sets)\n',DataPartitions.NumTestSets);
+case 'none'
+    fprintf(1,'No cross-validation performed within the training set\n');
+    DataPartitions = [];
+otherwise
+    error('Unknown cross validation setting ''%s''',CrossVal)
+end
+
+% --------------------------------------------------------------------------
+% --------------------------------------------------------------------------
+%% Do the feature selection
+% --------------------------------------------------------------------------
+% --------------------------------------------------------------------------
+
+fprintf(1,['Performing greedy forward feature selection ' ...
+                        'using ''%s'' on the training data...\n'],criterion);
+
+% Initialize variables:
+ifeat = zeros(NumFeatSelect,1); % Stores indicies of features chosen at each stage
+TestStat = zeros(NumFeatSelect,length(Operations)); % Test statistic (classification rate) for all features at each stage
+TrainErr = zeros(NumFeatSelect,1); % Training error at each iteration
+
+FS_timer = tic; % start a timer
+for j = 1:NumFeatSelect
+    % Find the feature that works best in combination with those already chosen:
+    for i = 1:length(Operations)
+        try
+            if isempty(DataPartitions)
+                % No cross-validation
+                % Compute in-sample training errors and hope we're not overfitting ;-)
+                TestStat(j,i) = Classify_fn(TS_DataMat(iTrain,[ifeat(1:j-1);i]),TimeSeriesGroups(iTrain), ...
+                                        TS_DataMat(iTrain,[ifeat(1:j-1);i]),TimeSeriesGroups(iTrain));
             else
-                tops = find(teststat{j}==min(teststat{j}));
-                if length(tops) > 1 % more than one 'equal best': pick from best at random
-                    fprintf(1,['Selecting a feature at random from the %u' ...
-                        ' operations with %4.1f%% error\n'],length(tops),min(teststat{j})*100)
-                    rp = randperm(length(tops));
-                    ifeat(j) = tops(rp(1));
-                else
-                    ifeat(j) = tops; % only one best
-                end
-                fprintf(1,'Feature %u: %s (%4.2f%%)\n',j,Operations(ifeat(j)).Name,min(teststat{j})*100)
+                % Take mean over cross-validation data partitions specified above:
+                TestStat(j,i) = mean(crossval(Classify_fn,TS_DataMat(iTrain,[ifeat(1:j-1);i]), ...
+                                    TimeSeriesGroups(iTrain),'partition',DataPartitions));
             end
-            
-            if strcmp(howzero,'NaN') && (j < NumFeatSelect) && (j > 1) && (min(teststat{j})==0)
-                % stop because already at zero error
-                % set ifeat for more features to NaN
-                fprintf(1,'Already at perfect classification -- stopping here.\n')
-                ifeat(j+1:NumFeatSelect) = NaN;
-                for k = j+1:NumFeatSelect
-                    teststat{k} = ones(length(Operations),1)*NaN;
-                end
-                break
-            elseif strcmp(howzero,'NaN') && (j > 1) && min(teststat{j})==min(teststat{j-1})
-                % Stop because no improvement from adding this feature
-                % Set ifeat for this many features to NaN
-                fprintf(1,'No improvement!! -- stopping one feature before here.\n')
-                ifeat(j:NumFeatSelect) = NaN; % remove this one
-                for k = j:NumFeatSelect
-                    teststat{k} = ones(length(Operations),1)*NaN; % Forget about them
-                end
-                break
-            end
+        catch emsg
+            TestStat(j,i) = NaN;
+            fprintf(1,'Error at iteration %u (with feature %u): %s\n',j,i,emsg.identifier)
         end
-        
-%     case 'svm_matlab'
-%         disp('BioInf Matlab toolbox svm')
-%         
-%         ifeat = zeros(NumFeatSelect,1); % stores indicies of features chosen at each stage
-%         teststat = cell(NumFeatSelect,1); % cross-validation classification rates for all features at each stage
-%         for j = 1:NumFeatSelect
-%             teststat{j} = zeros(length(Operations),1);
-%             for i = 1:length(Operations)
-%                 % train linear SVM model
-%                 svmStruct = svmtrain(TS_DataMat(:,[ifeat(1:j-1);i]),TimeSeriesGroups,'Kernel_Function','linear');
-%                 % classify the same data with the SVM trained on the data
-%                 predictedclasses = svmclassify(svmStruct,TS_DataMat(:,[ifeat(1:j-1);i]));
-%                 teststat{j}(i) = 1 - sum(predictedclasses==TimeSeriesGroups)/length(TimeSeriesGroups);
-%             end
-%             ifeat(j) = find(teststat{j}==min(teststat{j}),1);
-%             fprintf(1,'Feature %u = %s (%4.1f%%)\n',j,Operations(ifeat(j)).Name,min(teststat{j})*100)
-%         end
-%         SVMStruct = svmtrain(TS_DataMatsub(itrain,:),TimeSeriesGroups(itrain),'Kernel_Function','linear');
-%         
-%     case {'knn_matlab','knn'}
-% %         disp('BEN KNN(1). This will always give zero error cos it''s knn(1) in-sample!')
-% %         disp('KNN(1)')
-% %         k = 1;
-%         
-%         disp(['KNN(' num2str(knn) ')'])
-%         clear opts; opts.distance = 'Euclidean'; opts.traintrain = 1;
-%         ifeat = zeros(NumFeatSelect,1); % stores indicies of features chosen at each stage
-%         teststat = cell(NumFeatSelect,1); % cross-validation classification rates for all features at each stage
-%         for j = 1:NumFeatSelect
-%             teststat{j} = zeros(size(TS_DataMat,2),1);
-%             for i = 1:size(TS_DataMat,2)
-%                 [~,err] = benknn(TS_DataMat(:,[ifeat(1:j-1);i]),TS_DataMat(:,[ifeat(1:j-1);i]),knn,TimeSeriesGroups,TimeSeriesGroups,opts); % classifies in-sample
-%                 teststat{j}(i) = err;
-%             end
-%             tops = find(teststat{j}==min(teststat{j}));
-%             if length(tops) > 1 % more than one 'equal best': pick from best at random
-%                 disp(['Picking a feature at random from the ' num2str(length(tops)) ...
-%                     ' operations with ' num2str(min(teststat{j})*100) '% error'])
-%                 rp = randperm(length(tops));
-%                 ifeat(j) = tops(rp(1));
-%             else
-%                 ifeat(j) = tops; % only one best
-%             end
-%             disp(['feature ' num2str(j) ' = ' Operations(ifeat(j)).Name ' (' num2str(min(teststat{j})*100) ' %)'])
-%         end
-%         
-%     case 'knncv'
-%         % uses matlab KNN(3) with 5-fold cross-validation
-%         disp(['KNN(' num2str(knn) ')'])
-%         kfolds = 5;
-%         knn = 1;
-%         DataPartitions = cvpartition(TimeSeriesGroups,'kfold',kfolds); % specify statified k-fold crossvalidation
-%         ifeat = zeros(NumFeatSelect,1); % stores indicies of features chosen at each stage
-%         teststat = cell(NumFeatSelect,1); % cross-validation classification rates for all features at each stage
-%         for j = 1:NumFeatSelect
-%             teststat{j} = zeros(size(TS_DataMat,2),1);
-%             for i = 1:size(TS_DataMat,2)
-%                 errs = zeros(kfolds,1);
-%                 for k = 1:kfolds
-%                     itrain = training(DataPartitions,k); % indicies for training
-%                     itest = test(DataPartitions,k); % indicies for testing
-%                     [~,errs(k)] = benknn(TS_DataMat(itrain,[ifeat(1:j-1);i]),TS_DataMat(itest,[ifeat(1:j-1);i]),knn,TimeSeriesGroups(itrain),TimeSeriesGroups(itest)); % classifies in-sample
-%                 end
-%                 teststat{j}(i) = mean(errs); % return mean over the cross-validation folds
-%             end
-%             ifeat(j) = find(teststat{j}==min(teststat{j}),1);
-%             disp(['feature ' num2str(j) ' = ' Operations(ifeat(j)).Name ' (' num2str(min(teststat{j})*100) ' %)'])
-%         end
-%         
-%     case {'knn_spider','svm'}
-%         % define the spider model
-%         if strcmp(criterion,'knn')
-%             a = SPIDER_getmemodel('knn',3); % define a knn(3) model
-%         else
-%             a = SPIDER_getmemodel('svm',{{'linear'}}); % define a svm (linear) model
-%         end
-%         
-%         % initialize the variables
-%         ifeat = zeros(NumFeatSelect,1); % stores indicies of features chosen at each stage
-%         teststat = cell(NumFeatSelect,1); % cross-validation classification rates for all features at each stage
-%         
-%         % calculate losses across all features (in combination with those
-%         %                                   already chosen)
-%         for j = 1:NumFeatSelect
-%             % Find the feature that works best in combination with those already chosen:
-%             teststat{j} = zeros(size(TS_DataMat,2),1);
-%             for i = 1:size(TS_DataMat,2)        
-%                 dtrain = makeitdata(TS_DataMat(:,[ifeat(1:j-1);i]),gi);
-%                 try
-%                     [~,a] = train(a,dtrain); % train classification model on training data
-%                     lossme = loss(test(a,dtrain),'class_loss'); % get in-sample loss
-%                     teststat{j}(i) = lossme.Y;
-%                 catch
-%                     teststat{j}(i) = NaN;
-%                 end
-%             end
-%             ifeat(j) = find(teststat{j}==min(teststat{j}),1);
-%             disp(['feature ' num2str(j) ' = ' Operations(ifeat(j)).Name ' (' num2str(min(teststat{j})*100) ' %)'])
-%         end
-%         
-%     otherwise
-%         fprintf(1,'Using ''rankfeatures'', which is not a custom classification method\n')
-%         [ifeat,teststat] = rankfeatures(TS_DataMat',TimeSeriesGroups,'criterion',criterion);
-%         [teststat,ix] = sort(teststat,'descend');
-%         ifeat = ifeat(ix);
+    end
+    
+    % --------------------------------------------------------------------------
+    % Add the best feature to the list
+    % --------------------------------------------------------------------------            
+    if all(isnan(TestStat(j,:)))
+        ifeat(j) = NaN;
+        TrainErr(j) = NaN;
+        error('Error selecting feature at iteration %u\n',j)
+    else
+        TopOps = find(TestStat(j,:)==min(TestStat(j,:)));
+        if length(TopOps) > 1 % More than one 'equal best': pick from best at random
+            fprintf(1,['Selecting a feature at random from the %u' ...
+                ' operations with %4.1f%% error\n'],length(TopOps),min(TestStat(j,:))*100)
+            rp = randperm(length(TopOps));
+            ifeat(j) = TopOps(rp(1));
+        else
+            ifeat(j) = TopOps; % Only one best
+        end
+        TrainErr(j) = min(TestStat(j,:))*100;
+        fprintf(1,'Feature %u: %s (%4.2f%% training error)\n',j,Operations(ifeat(j)).Name,TrainErr(j))
+    end
+    
+    % --------------------------------------------------------------------------
+    % Evaluate the termination criteria
+    % --------------------------------------------------------------------------
+    if strcmp(howzero,'NaN') && (j < NumFeatSelect) && (j > 1) && (min(TestStat(j,:))==0)
+        % Stop because already at zero error
+        % Set ifeat for more features to NaN
+        fprintf(1,'Already at perfect classification -- stopping here.\n')
+        ifeat(j+1:NumFeatSelect) = NaN;
+        for k = j+1:NumFeatSelect
+            TestStat(k,:) = NaN; %ones(length(Operations),1)*NaN;
+        end
+        break
+    elseif strcmp(howzero,'NaN') && (j > 1) && min(TestStat(j,:))==min(TestStat(j-1,:))
+        % Stop because no improvement from adding this feature
+        % Set ifeat for this many features to NaN
+        fprintf(1,'No improvement!! -- stopping one feature before here.\n')
+        ifeat(j:NumFeatSelect) = NaN; % Remove this one
+        for k = j:NumFeatSelect
+            % Forget about them:
+            TestStat(k,:) = NaN; % ones(length(Operations),1)*NaN; 
+        end
+        break
+    end
 end
 
 % Finished selecting features!
-fprintf(1,'Feature selection to %u features complete! Took %s.\n',NumFeatSelect,BF_thetime(toc(FS_timer)))
+fprintf(1,'Feature selection to %u features completed in %s.\n',NumFeatSelect,BF_thetime(toc(FS_timer)))
 clear FS_timer;
-% Now we have teststat and ifeat
-
-% Format teststat for output
-if iscell(teststat)
-    teststat = cellfun(@(x)min(x),teststat);
-end
 
 
-%% Now classify the test set using the selected features
+% --------------------------------------------------------------------------
+% --------------------------------------------------------------------------
+%% Classify the test set using the selected features
+% --------------------------------------------------------------------------
+% --------------------------------------------------------------------------
 fprintf(1,'Classifying the test data using the %u selected features...\n',NumFeatSelect);
-switch criterion
-    case {'linclass','linclasscv'}
-        % Get classification rule from training sets and then apply to test sets
-        trainerr = zeros(length(ifeat),1);
-        testerr = zeros(length(ifeat),1);
-        testclass = zeros(length(ifeat),length(iTest));
-        for i = 1:length(ifeat)
-            % Get the classification rule from the training data
-            try
-                [class,err,~,~,coeff] = classify(TS_DataMat(iTest,ifeat(1:i)),TS_DataMat(iTrain,ifeat(1:i)), ...
-                                                TimeSeriesGroups(iTrain),'linear');
-            
-                TrainErr(i) = err*100;
-                TestErr(i) = (1 - sum(class==TimeSeriesGroups(iTest))/length(iTest))*100;
-                TestClass(i,:) = class; % The test classification
-                %(class==gigte); % was this object correctly classified by this feature?
-            catch
-                fprintf(1,'Error classifying train and test data at %u\n',i);
-                TrainErr(i) = NaN;
-                TestErr(i) = NaN;
-                TestClass(i,:) = NaN;
-            end
-% %             threshold(i) = -K/L;
-            
-            fprintf(1,'Train/Test error (%u features): %4.1f%% / %4.1f%%\n', ...
-                                        i,round(TrainErr(i)),round(TestErr(i)))
-        end
 
+
+% Get classification rule from training sets and then apply to test sets
+TestErr = zeros(NumFeatSelect,1);
+TestCfn = zeros(NumFeatSelect,length(iTest));
+for i = 1:NumFeatSelect
+    % Get the classification rule from the training data
+    try
+        % Evaluate the classifier trained on all the training data on the test data:
+        TestClass = Classify_fn_label(TS_DataMat(iTrain,ifeat(1:i)),TimeSeriesGroups(iTrain), ...
+                                TS_DataMat(iTest,ifeat(1:i)));
+        TestErr(i) = mean(TestClass~=TimeSeriesGroups(iTest))*100;
+        TestCfn(i,:) = TestClass; % The test classification
+    catch
+        fprintf(1,'Error classifying train and test data at %u\n',i);
+        TrainErr(i) = NaN;
+        TestErr(i) = NaN;
+        TestClass(i,:) = NaN;
+    end
+    
+    fprintf(1,'Train/Test error rates (%u features): %3.1f%% / %3.1f%%\n', ...
+                                i,round(TrainErr(i)),round(TestErr(i)))
 end
 
 % % print the top 25
 % for i = 1:25
-%     disp([Operations(ifeat(i)).Name ' -- ' Operaitons(ifeat(i)).Keywords ' :: ' num2str(teststat(i))]);
+%     disp([Operations(ifeat(i)).Name ' -- ' Operaitons(ifeat(i)).Keywords ' :: ' num2str(TestStat(i))]);
 % end
 
 % if plotoutput
 %     % plot distributions:
 %     figure('color','w'); box('on'); hold on;
-%     [f,xi] = ksdensity(teststat);
-%     [f2,xi2] = ksdensity(teststat2);
+%     [f,xi] = ksdensity(TestStat);
+%     [f2,xi2] = ksdensity(TestStat2);
 %     plot(xi,f,'b');
 %     plot(xi2,f2,'r');
 %     xlabel('error')

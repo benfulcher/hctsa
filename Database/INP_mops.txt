@@ -888,16 +888,16 @@ DN_Compare_zscore(x) DN_Compare_zscorex
 # DN_Compare_zscore(x,'numpeaks')  kscnumpeaks
 # DN_Compare_zscore(x,'max')  kscmax
 # DN_Compare_zscore(x,'entropy')  kscent
-RN_Gaussian(y)	RN_Gaussian_1
-RN_Gaussian(y)	RN_Gaussian_2
-RN_Gaussian(y)	RN_Gaussian_3
-RN_Gaussian(y)	RN_Gaussian_4
-RN_Gaussian(y)	RN_Gaussian_5
-RN_Gaussian(y)	RN_Gaussian_6
-RN_Gaussian(y)	RN_Gaussian_7
-RN_Gaussian(y)	RN_Gaussian_8
-RN_Gaussian(y)	RN_Gaussian_9
-RN_Gaussian(y)	RN_Gaussian_10
+# RN_Gaussian(y)	RN_Gaussian_1
+# RN_Gaussian(y)	RN_Gaussian_2
+# RN_Gaussian(y)	RN_Gaussian_3
+# RN_Gaussian(y)	RN_Gaussian_4
+# RN_Gaussian(y)	RN_Gaussian_5
+# RN_Gaussian(y)	RN_Gaussian_6
+# RN_Gaussian(y)	RN_Gaussian_7
+# RN_Gaussian(y)	RN_Gaussian_8
+# RN_Gaussian(y)	RN_Gaussian_9
+# RN_Gaussian(y)	RN_Gaussian_10
 DK_timerev(y,1)	DK_timerev_1
 DK_timerev(y,2)	DK_timerev_2
 DK_timerev(y,3)	DK_timerev_3

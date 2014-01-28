@@ -1,4 +1,6 @@
+% --------------------------------------------------------------------------
 % TSQ_normalize
+% --------------------------------------------------------------------------
 % 
 % Reads in data from HCTSA_loc.mat, writes a trimmed, normalized version to
 % HCTSA_loc_N.mat
@@ -6,12 +8,12 @@
 % visualization and clustering.
 % 
 % --INPUTS:
-% NormFunction: string specifying how to normalize the data
-% FilterOptions: vector specifying thresholds for the minimum proportion of bad
+%-NormFunction: string specifying how to normalize the data
+%-FilterOptions: vector specifying thresholds for the minimum proportion of bad
 %                values tolerated in a given row or column, in the form of a 2-vector:
 %                [row proportion, column proportion] If one of the FilterOptions
 %                is set to 1, will have no bad values in your matrix.
-% subs [opt]: only normalize and trim a subset of the data matrix. This can be used,
+%-subs [opt]: only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
 %             subsequently be clustered and further subsetted using TS_cluster2...
 %             For example, can choose a subset using SUB_autolabel2 to get only sound
@@ -37,7 +39,9 @@
 
 function TSQ_normalize(NormFunction,FilterOptions,subs,trainset)
 
+% --------------------------------------------------------------------------
 %% Check Inputs
+% --------------------------------------------------------------------------
 if nargin < 1 || isempty(NormFunction)
     fprintf(1,'Using the default, scaled quantile-based sigmoidal transform: ''scaledSQzscore''\n')
     NormFunction = 'scaledSQzscore';
@@ -59,8 +63,9 @@ if nargin < 4
     trainset = []; % Empty by default: normalize on the full set
 end
 
-%% Read in information from local files
-% (As prepared by TS_prepare.m)
+% --------------------------------------------------------------------------
+%% Read data from local files
+% --------------------------------------------------------------------------
 fprintf(1,'Reading data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat','TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations')
 fprintf(1,' Loaded.\n');
@@ -94,7 +99,10 @@ else
     kc0 = 1:size(TS_DataMat,2);
 end
 
-%% (1) TRIM THE BASTARD
+
+% --------------------------------------------------------------------------
+%% Trim down bad rows/columns
+% --------------------------------------------------------------------------
 
 % (i) NaNs in TS_loc mean values uncalculated in the matrix.
 TS_DataMat(~isfinite(TS_DataMat)) = NaN; % Convert all nonfinite values to NaNs for consistency
@@ -171,7 +179,10 @@ else
     kc1 = (1:size(TS_DataMat,2));
 end
 
-% (*) Remove operations that are constant across the time series dataset
+% --------------------------------------------------------------------------
+%% Filter out operations that are constant across the time-series dataset
+%% And time series with constant feature vectors
+% --------------------------------------------------------------------------
 if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all will be constant!
     crap_op = zeros(size(TS_DataMat,2),1);
     for j = 1:size(TS_DataMat,2)
@@ -273,7 +284,9 @@ end
 
 
 
-%% Update the labels post-filtering
+% --------------------------------------------------------------------------
+%% Update the labels after filtering
+% --------------------------------------------------------------------------
 % Time series
 kr_tot = kr0(kr1(kr2)); % The full set of indices remaining after all the filtering
 TimeSeries = TimeSeries(kr_tot); % Filter time series
@@ -295,7 +308,9 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_Da
                 sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
 
 
-%% NORMALIZE THE LITTLE BASTARD
+% --------------------------------------------------------------------------
+%% Actually apply the normalizing transformation
+% --------------------------------------------------------------------------
 
 if ismember(NormFunction,{'nothing','none'})
     fprintf(1,'You specified ''%s'', so NO ACTUAL NORMALIZING IS BEING DONE!!!\n',NormFunction)
@@ -313,10 +328,13 @@ else
     fprintf(1,'Normalized! The data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))))
 end
 
+% --------------------------------------------------------------------------
 %% Remove bad entries
-% these can be created by feature vectors that are constant after e.g., the
-% sigmoid transform -- a bit of a weird thing to do if pre-filtering by
-% percentage...
+% --------------------------------------------------------------------------
+% Bad entries after normalizing can be due to feature vectors that are
+% constant after e.g., the sigmoid transform -- a bit of a weird thing to do if
+% pre-filtering by percentage...
+
 nancol = zeros(size(TS_DataMat,2),1); %column of all NaNs
 for i = 1:size(TS_DataMat,2)
     nancol(i) = all(isnan(TS_DataMat(:,i)));
@@ -331,7 +349,10 @@ elseif any(nancol) % there are columns that are all NaNs
     fprintf(1,'We just removed %u all-NaN columns from after normalization.\n',sum(nancol));
 end
 
-%% Now, make sure the columns are still good
+
+% --------------------------------------------------------------------------
+%% Make sure the operations are still good
+% --------------------------------------------------------------------------
 % check again for constant columns after normalization
 kc = find(range(TS_DataMat) ~= 0); % (NaN or positive)
 if ~isempty(kc) && length(kc) < size(TS_DataMat,2)
@@ -345,13 +366,18 @@ end
 fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_DataMat(:))), ...
                     sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
 
+
+% --------------------------------------------------------------------------
+%% Save results to file
+% --------------------------------------------------------------------------
+
 % Make a structure with statistics on normalization:
 % Save the CodeToRun, so you can check the settings used to run the normalization
 % At the moment, only saves the first two arguments
 CodeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',NormFunction,FilterOptions(1),FilterOptions(2));
 NormalizationInfo = struct('NormFunction',NormFunction,'FilterOptions',FilterOptions,'CodeToRun',CodeToRun);
 
-%% Done -- save results to file
+
 fprintf(1,'Saving the trimmed, normalized data to local files...')
 save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations','NormalizationInfo');
 fprintf(1,' Done.\n')

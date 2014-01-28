@@ -909,16 +909,16 @@ DN_Compare_zscorex.entropy  kscent  distribution,ksdensity,compare,entropy,raw,s
 # kscnumpeaks  kscnumpeaks  distribution,ksdensity,compare,numpeaks,raw,spreaddep
 # kscmax  kscmax  distribution,ksdensity,compare,max,raw,spreaddep
 # kscent  kscent  distribution,ksdensity,compare,entropy,raw,spreaddep
-RN_Gaussian_1	random_number_1		silly,stochastic,randomnumber
-RN_Gaussian_2	random_number_2		silly,stochastic,randomnumber
-RN_Gaussian_3	random_number_3		silly,stochastic,randomnumber
-RN_Gaussian_4	random_number_4		silly,stochastic,randomnumber
-RN_Gaussian_5	random_number_5		silly,stochastic,randomnumber
-RN_Gaussian_6	random_number_6		silly,stochastic,randomnumber
-RN_Gaussian_7	random_number_7		silly,stochastic,randomnumber
-RN_Gaussian_8	random_number_8		silly,stochastic,randomnumber
-RN_Gaussian_9	random_number_9		silly,stochastic,randomnumber
-RN_Gaussian_10	random_number_10	silly,stochastic,randomnumber
+# RN_Gaussian_1	random_number_1		silly,stochastic,randomnumber
+# RN_Gaussian_2	random_number_2		silly,stochastic,randomnumber
+# RN_Gaussian_3	random_number_3		silly,stochastic,randomnumber
+# RN_Gaussian_4	random_number_4		silly,stochastic,randomnumber
+# RN_Gaussian_5	random_number_5		silly,stochastic,randomnumber
+# RN_Gaussian_6	random_number_6		silly,stochastic,randomnumber
+# RN_Gaussian_7	random_number_7		silly,stochastic,randomnumber
+# RN_Gaussian_8	random_number_8		silly,stochastic,randomnumber
+# RN_Gaussian_9	random_number_9		silly,stochastic,randomnumber
+# RN_Gaussian_10	random_number_10	silly,stochastic,randomnumber
 DK_timerev_1	DK_timerev_1	trevasym,nonlinearity
 DK_timerev_2	DK_timerev_2	trevasym,nonlinearity
 DK_timerev_3	DK_timerev_3	trevasym,nonlinearity
