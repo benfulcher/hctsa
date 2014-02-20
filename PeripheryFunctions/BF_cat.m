@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % BF_cat
+% ------------------------------------------------------------------------------
 % 
 % Converts a cell of strings (or vector of numbers) into a single, concatonated
 % string listing each string in the cell.
 % 
-% INPUTS:
+%---INPUTS:
 % s, the cell of strings to be concatinated
 % d, the delimiter (a comma by default)
 % surr, an optional string to surround each element of s (empty by default, but

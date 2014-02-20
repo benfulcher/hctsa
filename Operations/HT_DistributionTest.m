@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % HT_DistributionTest
+% ------------------------------------------------------------------------------
 % 
 % Fits a distribution to the data and then performs an appropriate hypothesis
 % test to quantify the difference between the two distributions. We fit
@@ -6,7 +8,7 @@
 % Log-Normal, and Weibull distributions, using code described for
 % DN_M_kscomp.
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % thetest, the hypothesis test to perform:
 %           (i) 'chi2gof': chi^2 goodness of fit test

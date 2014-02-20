@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_TSTL_amutual
+% ------------------------------------------------------------------------------
 % 
 % Uses amutual code from TSTOOL, which uses a
 % histogram method with n bins to estimate the mutual information of a
@@ -6,7 +8,7 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %
-% INPUTS:
+%---INPUTS:
 % 
 % y, the time series
 % 
@@ -14,7 +16,7 @@
 % 
 % nbins, the number of bins for histogram calculation
 % 
-% A number of statistics of the function over the range of tau are returned,
+%---OUTPUTS: A number of statistics of the function over the range of tau,
 % including the mean mutual information, its standard deviation, first minimum,
 % proportion of extrema, and measures of periodicity in the positions of local
 % maxima.

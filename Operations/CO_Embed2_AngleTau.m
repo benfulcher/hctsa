@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_Embed2_AngleTau
+% ------------------------------------------------------------------------------
 % 
 % Investigates how the autocorrelation of angles between successive points in
 % the two-dimensional time-series embedding change as tau varies from

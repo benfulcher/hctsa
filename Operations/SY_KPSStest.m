@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_KPSStest
+% ------------------------------------------------------------------------------
 % 
 % Performs the KPSS stationarity test, of Kwiatkowski, Phillips, Schmidt, and Shin,
 % "Testing the null hypothesis of stationarity against the alternative of a
@@ -14,7 +16,7 @@
 % of change in p-values and test statistics will be outputted if the input is a
 % vector of time lags.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % lags, can be either a scalar (returns basic test statistic and p-value), or
 %                   vector (returns statistics on changes across these time lags)

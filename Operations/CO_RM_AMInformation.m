@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_RM_AMInformation
+% ------------------------------------------------------------------------------
 % 
 % Wrapper for Rudy Moddemeijer's information code to calculate automutual
 % information.

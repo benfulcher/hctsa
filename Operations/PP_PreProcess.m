@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % PP_PreProcess
+% ------------------------------------------------------------------------------
 % 
 % Returns a bunch of time series in the structure yp that have been
 % preprocessed in a number of different ways.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % choosebest: (i) '' (empty): the function returns a structure, yp, of all
 %                   preprocessings [default]

@@ -1,13 +1,17 @@
+% ------------------------------------------------------------------------------
+% ClosestPoint_ginput
+% ------------------------------------------------------------------------------
 % Returns the closest InputPoint to the one given
 % Ben Fulcher 20/10/2010
 %
-%--INPUTS:
+%---INPUTS:
 % xy can be a cell, each component of which is a different group plotted,
 %                       contains a Nx2 vector of co-ordinates
 % InputPoint is the output of a ginput
 % 
-%--OUTPUT:
-% PlotMe, the 
+%---OUTPUT:
+% PlotMe, the closest point.
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

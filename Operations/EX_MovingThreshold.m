@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % EX_MovingThreshold
+% ------------------------------------------------------------------------------
 % 
 % A measure based on a moving threshold model for extreme events. Inspired by an
 % idea contained in the following paper:
@@ -11,12 +13,12 @@
 % is greater than the barrier, the barrier is increased by a proportion 'a',
 % otherwise the position of the barrier is decreased by a proportion 'b'.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input (z-scored) time series
 % a, the barrier jump parameter (in extreme event)
 % b, the barrier decay proportion (in absence of extreme event)
 % 
-% Outputs are the mean, spread, maximum, and minimum of the time series for the
+%---OUTPUTS: the mean, spread, maximum, and minimum of the time series for the
 % barrier, the mean of the difference between the barrier and the time series
 % values, and statistics on the occurrence of 'kicks' (times at which the
 % threshold is modified), and by how much the threshold changes on average.

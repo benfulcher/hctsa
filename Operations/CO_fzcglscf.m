@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_fzcglscf
+% ------------------------------------------------------------------------------
 % 
 % Returns the first zero-crossing of the generalized self-correlation function
 % introduced in Duarte Queiros and Moyano in Physica A, Vol. 383, pp. 10--15

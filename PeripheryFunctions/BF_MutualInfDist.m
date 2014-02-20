@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % BF_MutualInfDist
+% ------------------------------------------------------------------------------
 % 
 % Converts a matrix of mutual informations (mis) into a distance matrix (D) by whatever
 % method you select.
 % See Dawy et al. (2005) for discussion of 'CL' and 'CR'
 % 
-% INPUTS:
+%---INPUTS:
 % v1, the first input vector
 % v2, the second input vector
 % r1, the bin-partitioning method for the first input vector, v1
@@ -14,7 +16,7 @@
 % NB: r1 and r2 can also be two-component vectors, that specify a custom range
 %     for binning
 % 
-% OUTPUT:
+%---OUTPUT:
 % mi, the mutual information computed between v1 and v2
 % 
 % ------------------------------------------------------------------------------

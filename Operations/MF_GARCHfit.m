@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_GARCHfit
+% ------------------------------------------------------------------------------
 % 
 % Simulates a procedure for fitting Generalized Autoregressive Conditional
 % Heteroskedasticity (GARCH) models to a time series, namely:

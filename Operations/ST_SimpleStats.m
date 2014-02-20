@@ -1,8 +1,10 @@
+% ------------------------------------------------------------------------------
 % ST_SimpleStats
+% ------------------------------------------------------------------------------
 % 
 % Returns a basic statistic about the input time series, depending on the input whatstat
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % 
 % whatstat, the statistic to return:

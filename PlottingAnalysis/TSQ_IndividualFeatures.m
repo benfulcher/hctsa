@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSQ_IndividualFeatures
+% ------------------------------------------------------------------------------
 % 
 % Searches for individual features that help distinguish a known classification
 % of the time series

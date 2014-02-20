@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_SlidingWindow
+% ------------------------------------------------------------------------------
 % 
 % This function is based on sliding a window along the time series, measuring
 % some quantity in each window, and outputting some summary of this set of local
@@ -7,7 +9,7 @@
 % Another way of saying it: calculate 'windowstat' in each window, and computes
 % 'acrosswindowstat' for the set of statistics calculated in each window.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 

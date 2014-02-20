@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % DN_RemovePoints
+% ------------------------------------------------------------------------------
 % 
 % Analyze how some time-series properties function changes as points are removed
 % from a time series.

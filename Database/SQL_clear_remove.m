@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SQL_clear_remove
+% ------------------------------------------------------------------------------
 % 
 % Either removes or clears results from the database for a given
 % set of ts_ids or op_ids.

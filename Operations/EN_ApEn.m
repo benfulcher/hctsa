@@ -1,13 +1,15 @@
+% ------------------------------------------------------------------------------
 % EN_ApEn
+% ------------------------------------------------------------------------------
 % 
 % Estimates the Approximate Entropy of the time series, ApEn(m,r).
 % 
 % cf. S. M. Pincus, "Approximate entropy as a measure of system complexity",
 % P. Natl. Acad. Sci. USA, 88(6) 2297 (1991)
 %
-% For more information: http://physionet.org/physiotools/ApEn/
+% For more information, cf. http://physionet.org/physiotools/ApEn/
 % 
-% INPUTS:
+%--INPUTS:
 % y, the input time series
 % mnom, the embedding dimension
 % rth, the threshold for judging closeness/similarity

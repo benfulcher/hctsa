@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % DN_Compare_zscore
+% ------------------------------------------------------------------------------
 % 
 % Compares the distribution of a time series to a z-scored version of it
 % 
-% INPUTS:
+%---INPUT:
 % x, a (not z-scored) time series
 % 
-% Outputs are ratios of features between the original and z-scored time series,
+%---OUTPUTS: ratios of features between the original and z-scored time series,
 % including the number of peaks, the maximum, and the distributional entropy.
 % 
 % ------------------------------------------------------------------------------

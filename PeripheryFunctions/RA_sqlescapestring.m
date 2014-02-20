@@ -1,12 +1,14 @@
+% ------------------------------------------------------------------------------
 % RA_sqlescapestring
+% ------------------------------------------------------------------------------
 % 
 % Converts an input string into one that won't interfere with MySQL queries by
 % making the required conversions.
 % 
-% INPUT:
+%---INPUT:
 % s, the input string
 % 
-% OUTPUT:
+%---OUTPUT:
 % S, the output string
 % 
 % ------------------------------------------------------------------------------

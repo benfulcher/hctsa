@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SD_MakeSurrogates
+% ------------------------------------------------------------------------------
 % 
 % Generates surrogate time series given a method (surrogates), number of
 % surrogates (nsurrs), and any extra parameters (extrap)
@@ -12,7 +14,7 @@
 % implemented, cf. references in "Improvements to surrogate data methods for
 % nonstationary time series", J. H. Lucio et al., Phys. Rev. E 85, 056202 (2012)
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % 
 % surrmethod, the method for generating surrogates:

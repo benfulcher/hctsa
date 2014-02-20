@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % PD_PeriodicityWang
+% ------------------------------------------------------------------------------
 % 
 % Implements an idea based on the periodicity extraction measure proposed in:
 % 
@@ -12,7 +14,7 @@
 % the time series. The frequency is the first peak in the autocorrelation
 % function satisfying a set of conditions.
 % 
-% INPUTS,
+% INPUTS:
 % y, the input time series.
 % 
 % The single threshold of 0.01 was considered in the original paper, this code

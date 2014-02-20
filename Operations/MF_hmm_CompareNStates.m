@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_hmm_CompareNStates
+% ------------------------------------------------------------------------------
 % 
 % Fits HMMs with different numbers of states, and compares the resulting
 % test-set likelihoods.
@@ -11,7 +13,7 @@
 % or, specifically:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software/hmm.tar.gz
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -20,7 +22,7 @@
 % nstater, the vector of state numbers to compare. E.g., (2:4) compares a number
 %               of states 2, 3, and 4.
 % 
-% Outputs are statistics on how the log likelihood of the test data changes with
+%---OUTPUTS: statistics on how the log likelihood of the test data changes with
 % the number of states n_{states}$. We implement the code for p_{train} = 0.6$
 % as n_{states}$ varies across the range n_{states} = 2, 3, 4$.
 % 

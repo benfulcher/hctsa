@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % EN_DistributionEntropy
+% ------------------------------------------------------------------------------
 % 
 % Estimates of entropy from the static distribution of the time series. The
 % distribution is estimated either using a histogram with nbins bins, or as a
@@ -9,7 +11,7 @@
 % most extreme positive and negative deviations from the mean as an initial
 % pre-processing.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % historks: 'hist' for histogram, or 'ks' for ksdensity
 % nbins: (*) (for 'hist'): an integer, uses a histogram with that many bins (for 'hist')

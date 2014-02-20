@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSQ_MHT_pvalue
+% ------------------------------------------------------------------------------
 % 
 % Returns p-values given a distribution of test stastics and an appropriate null
 % distribution

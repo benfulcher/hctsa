@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_StateSpace_n4sid
+% ------------------------------------------------------------------------------
 % 
 % Fits a state space model of given order to the time series using the n4sid
 % function in Matlab's System Identification Toolbox.
@@ -15,13 +17,13 @@
 % 
 % Uses the functions iddata, n4sid, aic, and predict from Matlab's System Identification Toolbox
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % ord, the order of state-space model to implement (can also be the string 'best')
 % ptrain, the proportion of the time series to use for training
 % steps, the number of steps ahead to predict
 % 
-% Outputs are parameters from the model fitted to the entire time series, and
+%---OUTPUTS: parameters from the model fitted to the entire time series, and
 % goodness of fit and residual analysis from n4sid prediction.
 % 
 % ------------------------------------------------------------------------------

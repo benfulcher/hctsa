@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % SY_LocalGlobal
+% ------------------------------------------------------------------------------
 % 
 % Compares statistics measured in a local region of the time series to that
 % measured of the full time series.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the time series to analyze
 % 
 % lorp, the local subset of time series to study:
@@ -14,8 +16,8 @@
 % 
 % n, the parameter for the method specified above
 % 
-% Statistics are outputted in a structure: the mean, standard deviation, median,
-% interquartile range, skewness, kurtosis, AC(1), and SampEn(1,0.1).
+%---OUTPUTS: the mean, standard deviation, median, interquartile range,
+% skewness, kurtosis, AC(1), and SampEn(1,0.1).
 % 
 % This is not the most reliable or systematic operation because only a single
 % sample is taken from the time series and compared to the full time series.

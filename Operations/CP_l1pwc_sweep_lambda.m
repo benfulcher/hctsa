@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CP_l1pwc_sweep_lambda
+% ------------------------------------------------------------------------------
 % 
 % Gives information about discrete steps in the signal across a range of
 % regularization parameters lambda, using the function l1pwc from Max Little's
@@ -8,11 +10,12 @@
 % "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
 % Machine Dynamics", Max A. Little, and Nick S. Jones, Proc. ICASSP (2010)
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % lambdar, a vector specifying the lambda parameters to use
 % 
+%---OUTPUTS:
 % At each iteration, the CP_ML_StepDetect code was run with a given
 % lambda, and the number of segments, and reduction in root mean square error
 % from removing the piecewise constants was recorded. Outputs summarize how the

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_LinearTrend
+% ------------------------------------------------------------------------------
 % 
 % Linearly detrends the time series using the Matlab algorithm detrend,
 % and returns the ratio of standard deviations before and after the linear
@@ -7,7 +9,7 @@
 % If a strong linear trend is present in the time series, this  operation should
 % output a low value.
 % 
-% INPUT:
+%---INPUT:
 % x, the input time series
 % 
 % ------------------------------------------------------------------------------

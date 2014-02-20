@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TSTL_FractalDimensions
+% ------------------------------------------------------------------------------
 % 
 % Computes the fractal dimension spectrum, D(q), using moments of neighbor
 % distances for time-delay embedded time series by referencing the code,
@@ -6,7 +8,7 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, column vector of time series data
 % 
@@ -28,7 +30,7 @@
 % embedparams, how to embed the time series using a time-delay reconstruction
 % 
 % 
-% Outputs include basic statistics of D(q) and q, statistics from a linear fit,
+%---OUTPUTS: include basic statistics of D(q) and q, statistics from a linear fit,
 % and an exponential fit of the form D(q) = Aexp(Bq) + C.
 % 
 % ------------------------------------------------------------------------------

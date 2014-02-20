@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_steps_ahead
+% ------------------------------------------------------------------------------
 % 
 % Given a model, characterizes the variation in goodness of model predictions
 % across a range of prediction lengths, l, which is made to vary from
@@ -12,7 +14,7 @@
 % The model is fitted on the full time series and then used to predict the same
 % data.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % model, the time-series model to fit: 'ar', 'arma', or 'ss'
@@ -21,7 +23,7 @@
 % 
 % maxsteps, the maximum number of steps ahead to predict
 % 
-% Outputs include the errors, for prediction lengths l = 1, 2, ..., maxsteps,
+%---OUTPUTS: include the errors, for prediction lengths l = 1, 2, ..., maxsteps,
 % returned for each model relative to the best performance from basic null
 % predictors, including sliding 1- and 2-sample mean predictors and simply
 % predicting each point as the mean of the full time series. Additional outputs

@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % SB_BinaryStats
+% ------------------------------------------------------------------------------
 % 
 % Returns statistics on a binary symbolization of the time series (to a symbolic
 % string of 0s and 1s).
 % 
 % Provides information about the coarse-grained behavior of the time series
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % binarymeth, the symbolization rule:
@@ -15,7 +17,7 @@
 %          (iii) 'iqr': by whether the time series is within the interquartile range
 %                      (1), or not (0).
 % 
-% Outputs include the Shannon entropy of the string, the longest stretches of 0s
+%---OUTPUTS: include the Shannon entropy of the string, the longest stretches of 0s
 % or 1s, the mean length of consecutive 0s or 1s, and the spread of consecutive
 % strings of 0s or 1s.
 % 

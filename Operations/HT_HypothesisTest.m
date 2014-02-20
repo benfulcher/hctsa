@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % HT_HypothesisTest
+% ------------------------------------------------------------------------------
 % 
 % Outputs the p-value from a statistical hypothesis test applied to the
 % time series.
@@ -6,7 +8,7 @@
 % Tests are implemented as functions in Matlab's Statistics Toolbox.
 % (except Ljung-Box Q-test, which uses the Econometrics Toolbox)
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % 
 % thetest, the hypothesis test to perform:
@@ -18,7 +20,7 @@
 %           (vi) Jarque-Bera test of composite normality ('jbtest').
 %           (vii) Ljung-Box Q-test for residual autocorrelation ('lbq')
 %           
-% OUTPUT:
+%---OUTPUT:
 % the p-value from the statistical test
 % 
 % ------------------------------------------------------------------------------

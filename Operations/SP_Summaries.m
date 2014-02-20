@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SP_Summaries
+% ------------------------------------------------------------------------------
 % 
 % Returns a set of measures summarizing an estimate of the Fourier transform of
 % the signal.
@@ -7,7 +9,7 @@
 % Matlab's Signal Processing Toolbox, or a fast fourier transform, implemented
 % using Matlab's fft code.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % psdmeth, the method of obtaining the spectrum from the signal:
@@ -30,7 +32,7 @@
 % dopower, analyzes the power spectrum rather than amplitudes of a Fourier
 %          transform
 % 
-% Outputs are statistics summarizing various properties of the spectrum,
+%---OUTPUTS: statistics summarizing various properties of the spectrum,
 % including its maximum, minimum, spread, correlation, centroid, area in certain
 % (normalized) frequency bands, moments of the spectrum, Shannon spectral
 % entropy, a spectral flatness measure, power-law fits, and the number of

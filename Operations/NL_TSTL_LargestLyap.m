@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TSTL_LargestLyap
+% ------------------------------------------------------------------------------
 % 
 % Computes the largest Lyapunov exponent of a time-delay reconstructed time
 % series using the TSTOOL code 'largelyap'.
@@ -10,7 +12,7 @@
 % "Determining Lyapunov exponents from a time series", A. Wolf et al., Physica D
 % 16(3) 285 (1985)
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the time series to analyze
 % 
@@ -26,7 +28,7 @@
 %               the form {tau,m}, where string specifiers can indicate standard
 %               methods of determining tau or m.
 % 
-% Outputs are a range of statistics on the outputs from this function, including
+%---OUTPUTS: a range of statistics on the outputs from this function, including
 % a penalized linear regression to the scaling range in an attempt to fit to as
 % much of the range of scales as possible while simultaneously achieving the
 % best possible linear fit.

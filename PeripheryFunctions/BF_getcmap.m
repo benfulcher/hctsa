@@ -1,11 +1,14 @@
+% ------------------------------------------------------------------------------
 % BF_getcmap
+% ------------------------------------------------------------------------------
 % 
 % Returns a nice set of colors to make a nice colormap using the color schemes
 % from http://colorbrewer2.org/
+% 
 % The online tool, colorbrewer2, is copyright Cynthia Brewer, Mark Harrower and
 % The Pennsylvania State University
 % 
-% INPUTS:
+%---INPUTS:
 % whichcmap, the name of a colormap (see long list below)
 % ng, the number of colors to return from that color scheme (some maps can
 %           support larger numbers of colors, and the minimum is usually 3)

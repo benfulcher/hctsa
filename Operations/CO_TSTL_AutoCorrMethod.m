@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_TSTL_AutoCorrMethod
+% ------------------------------------------------------------------------------
 % 
 % Estimates the autocorrelation function using a fast Fourier Transform method
 % implemented in TSTOOL and returns the mean square discrepancy between the
@@ -11,7 +13,7 @@
 % computed by the two methods may somehow be informative of something about the
 % time series...
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % maxlag, the maximum time lag to compute up to -- will compare autocorrelations
 %         up to this value

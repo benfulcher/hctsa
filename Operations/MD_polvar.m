@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MD_polvar
+% ------------------------------------------------------------------------------
 % 
 % Calculates the POLVARd measure for a time series.
 % The first mention may be in Wessel et al., PRE (2000), called Plvar
@@ -18,12 +20,12 @@
 % is heavily derived from that provided by Max A. Little, January 2009.
 % cf. http://www.maxlittle.net/
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % d, the symbolic coding (amplitude) difference,
 % D, the word length (classically words of length 6).
 % 
-% OUPUT:
+%---OUPUT:
 % p - probability of obtaining a sequence of consecutive ones/zeros
 % 
 % ------------------------------------------------------------------------------

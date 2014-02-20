@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_embed_PCA
+% ------------------------------------------------------------------------------
 % 
 % Reconstructs the time series as a time-delay embedding, and performs Principal
 % Components Analysis on the result using princomp code from
@@ -9,7 +11,7 @@
 % "Extracting qualitative dynamics from experimental data"
 % D. S. Broomhead and G. P. King, Physica D 20(2-3) 217 (1986)
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % tau, the time-delay, can be an integer or 'ac', or 'mi' for first
@@ -18,7 +20,7 @@
 %               
 % m, the embedding dimension
 % 
-% Outputs are various statistics summarizing the obtained eigenvalue distribution.
+% OUTPUTS: Various statistics summarizing the obtained eigenvalue distribution.
 % 
 % The suggestion to implement this idea was provided by Siddarth Arora.
 % (Siddharth Arora, <arora@maths.ox.ac.uk>)

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % EN_MS_shannon
+% ------------------------------------------------------------------------------
 % 
 % Calculates the approximate Shannon entropy of a time series using an
 % nbin-bin encoding and depth-symbol sequences.

@@ -1,13 +1,15 @@
+% ------------------------------------------------------------------------------
 % BF_cell2cellcell
+% ------------------------------------------------------------------------------
 % 
 % Inputs a cell with some delimiter, and outputs a cell of cells using this
 % delimiter.
 % 
-% INPUTS:
+%---INPUTS:
 % cellin, the cell
 % delimiter, the delimiter
 % 
-% OUTPUT:
+%---OUTPUT:
 % cellcell, the cell of cells, using this delimiter
 % 
 % Used for some tasks involving mySQL.

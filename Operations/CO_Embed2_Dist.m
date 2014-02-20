@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_Embed2_Dist
+% ------------------------------------------------------------------------------
 % 
 % Returns statistics on the sequence of successive Euclidean distances between
 % points in a two-dimensional time-delay embedding space with a given

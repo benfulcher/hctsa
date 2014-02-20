@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % RA_keyboard
+% ------------------------------------------------------------------------------
 % 
 % Romesh Abeysuriya's replacement of Matlab's 'keyboard' command
 % Keyboard debug caller 

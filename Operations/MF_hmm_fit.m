@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_hmm_fit
+% ------------------------------------------------------------------------------
 % 
 % Uses Zoubin Gharamani's implementation of HMMs for real-valued Gaussian
 % observations:
@@ -8,7 +10,7 @@
 % 
 % Uses ZG_hmm (renamed from hmm) and ZG_hmm_cl (renamed from hmm_cl)
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % trainp, the proportion of data to train on, 0 < trainp < 1
 % nstates, the number of states in the HMM

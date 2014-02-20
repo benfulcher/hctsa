@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_arfit
+% ------------------------------------------------------------------------------
 % 
 % Fit an AR model to the time series then returns statistics about it.
 % 
@@ -16,14 +18,14 @@
 % 
 % The optimal model order is selected using Schwartz's Bayesian Criterion (SBC).
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % pmin, the minimum AR model order to fit
 % pmax, the maximum AR model order to fit
 % selector, crierion to select optimal time-series model order (e.g., 'sbc', cf.
 %           ARFIT package documentation)
 % 
-% Outputs include the model coefficients obtained, the SBCs at each model order,
+%---OUTPUTS: include the model coefficients obtained, the SBCs at each model order,
 % various tests on residuals, and statistics from an eigendecomposition of the
 % time series using the estimated AR model.
 % 

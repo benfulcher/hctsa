@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % EN_wentropy
+% ------------------------------------------------------------------------------
 % 
 % Uses the wentropy function from Matlab's Wavelet toolbox to
 % estimate the entropy of the input time series.
 % 
-% INPUTS:
+%--INPUTS:
 % y, the input time series
 % whaten, the entropy type:
 %               'shannon',

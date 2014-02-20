@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % DN_pleft
+% ------------------------------------------------------------------------------
 % 
 % Measures the maximum distance from the mean at which a given fixed proportion,
 % p, of the time-series data points are further.
@@ -6,7 +8,7 @@
 % (could generalize to separate positive and negative deviations in future)
 % Uses the quantile function from Matlab's Statistics Toolbox
 %
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % th, the proportion of data further than p from the mean
 %           (output p, normalized by standard deviation)

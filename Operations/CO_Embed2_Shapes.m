@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_Embed2_Shapes
+% ------------------------------------------------------------------------------
 % 
 % Takes a shape and places it on each point in the two-dimensional time-delay
 % embedding space sequentially. This function counts the points inside this shape

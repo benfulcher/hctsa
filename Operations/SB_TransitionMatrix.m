@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SB_TransitionMatrix
+% ------------------------------------------------------------------------------
 % 
 % Calculates the transition probabilities between different states of the time
 % series given a method to symbolize or coarse-grain the time series.
@@ -7,7 +9,7 @@
 % equiprobable alphabet of ng letters. The transition probabilities are
 % calculated at a lag tau.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 %
 % discmeth, the method of discretization (currently 'quantile' is the only
@@ -21,7 +23,7 @@
 %      look at this dicrete lag. Here we do the former. Can also set tau to 'ac'
 %      to set tau to the first zero-crossing of the autocorrelation function.
 % 
-% Outputs include the transition probabilities themselves, as well as the trace
+%---OUTPUTS: include the transition probabilities themselves, as well as the trace
 % of the transition matrix, measures of asymmetry, and eigenvalues of the
 % transition matrix.
 % 

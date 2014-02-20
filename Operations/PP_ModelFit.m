@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % PP_ModelFit
+% ------------------------------------------------------------------------------
 % 
 % Carries out a variety of preprocessings to look at improvement of fit to
 % an AR model.
@@ -19,7 +21,7 @@
 % (iii) removal of piece-wise polynomial trends, and
 % (iv) rank mapping the values of the time series to a Gaussian distribution.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % model, the time-series model to fit to the transformed time series (currently

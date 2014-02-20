@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % SB_MotifTwo
+% ------------------------------------------------------------------------------
 % 
 % Looks at local motifs in a binary symbolization of the time series, which is
 % performed by:
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % bint, the binary transformation method:
@@ -14,7 +16,7 @@
 %       (iii) 'median': time-series values above the median are given 1, and
 %       those below the median 0.
 % 
-% Outputs are probabilities of words in the binary alphabet of lengths 1, 2, 3,
+%---OUTPUTS: Probabilities of words in the binary alphabet of lengths 1, 2, 3,
 % and 4, and their entropies.
 % 
 % ------------------------------------------------------------------------------

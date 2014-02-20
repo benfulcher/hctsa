@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % SB_CoarseGrain
+% ------------------------------------------------------------------------------
 % 
 % Coarse-grains the continuous time series to a discrete alphabet
 % by a given method.
 % 
-% INPUTS:
+%---INPUTS:
 % howtocg, the method of coarse-graining
 % 
 % ng, either specifies the size of the alphabet for 'quantile' and 'updown'

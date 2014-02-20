@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % NL_crptool_fnn
+% ------------------------------------------------------------------------------
 % 
 % Computes and analyzes the false-nearest neighbours statistic.
 % 
 % Computation is done by referencing N. Marwan's code from the CRP Toolbox:
 % http://tocsy.pik-potsdam.de/CRPtoolbox/
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % maxm, the maximum embedding dimension to consider
 % r, the threshold; neighbourhood criterion

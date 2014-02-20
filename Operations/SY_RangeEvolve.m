@@ -1,12 +1,15 @@
+% ------------------------------------------------------------------------------
 % SY_RangeEvolve
+% ------------------------------------------------------------------------------
 % 
 % Measures of the range of the time series as a function of time,
 % i.e., range(x_{1:i}) for i = 1, 2, ..., N, where N is the length of the time
 % series.
 % 
-% INPUT: y, the time series
+%---INPUT:
+% y, the time series
 % 
-% Outputs are based on the dynamics of how new extreme events occur with time.
+%---OUTPUTS: based on the dynamics of how new extreme events occur with time.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

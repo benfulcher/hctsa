@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TSTL_PoincareSection
+% ------------------------------------------------------------------------------
 % 
 % Obtains a Poincare section of the time-delay embedded time series, producing a
 % set of vector points projected orthogonal to the tangential vector at the
@@ -7,7 +9,7 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % ref: the reference point. Can be an absolute number (2 takes the second point
@@ -19,7 +21,7 @@
 %               dimensional space so that the Poincare section is 2-dimensional.
 % 
 % 
-% Outputs include statistics on the x- and y- components of these vectors on the
+%---OUTPUTS: include statistics on the x- and y- components of these vectors on the
 % Poincare surface, on distances between adjacent points, distances from the
 % mean position, and the entropy of the vector cloud.
 % 

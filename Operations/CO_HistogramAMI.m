@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_HistogramAMI
+% ------------------------------------------------------------------------------
 % 
 % Calculates the automutual information using histograms, using a given approach
 % to binning the data.

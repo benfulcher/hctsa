@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_MS_fnn
+% ------------------------------------------------------------------------------
 % 
 % Determines the number of false nearest neighbors for the embedded time series
 % using Michael Small's false nearest neighbor code, fnn (renamed MS_fnn here)
@@ -11,7 +13,7 @@
 % False nearest neighbors are judged using a ratio of the distances between the
 % next k points and the neighboring points of a given datapoint.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % de, the embedding dimensions to compare across (a vector)
 % tau, the time-delay (can be 'ac' or 'mi' to be the first zero-crossing of ACF,
@@ -26,7 +28,7 @@
 % as a function of the embedding dimension m = m_{min}, m_{min}+1, ..., m_{max}
 % for a given time lag tau, and distance threshold for neighbors, d_{th}.
 % 
-% Outputs include the proportion of false nearest neighbors at each m, the mean
+%---OUTPUTS: include the proportion of false nearest neighbors at each m, the mean
 % and spread, and the smallest m at which the proportion of false nearest
 % neighbors drops below each of a set of fixed thresholds.
 % 

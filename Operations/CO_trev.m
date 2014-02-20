@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_trev
+% ------------------------------------------------------------------------------
 % 
 % Calculates the trev function, a normalized nonlinear autocorrelation,
 % mentioned in the documentation of the TSTOOL nonlinear time-series analysis
@@ -8,14 +10,15 @@
 % analysis, cf. "Surrogate time series", T. Schreiber and A. Schmitz, Physica D,
 % 142(3-4) 346 (2000)
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, time series
+% 
 % tau, time lag (can be 'ac' or 'mi' to set as the first zero-crossing of the
 %       autocorrelation function, or the first minimum of the automutual
 %       information function, respectively)
 % 
-% Outputs are the raw trev expression, its magnitude, the numerator and its
+%---OUTPUTS: the raw trev expression, its magnitude, the numerator and its
 % magnitude, and the denominator.
 % 
 % ------------------------------------------------------------------------------

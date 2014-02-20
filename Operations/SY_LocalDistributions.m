@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % SY_LocalDistributions
+% ------------------------------------------------------------------------------
 % 
 % Compares the distribution in consecutive partitions of the signal,
 % returning the sum of differences between each kernel-smoothed distributions
 % (using the Matlab function ksdensity).
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -22,8 +24,8 @@
 % each segment to that in every other segment, and par compares each
 % distribution to the so-called 'parent' distribution, that of the full signal.
 % 
-% Outputs from the operation are measures of the sum of absolute deviations
-% between distributions across the different pairwise comparisons.
+%---OUTPUTS: measures of the sum of absolute deviations between distributions
+% across the different pairwise comparisons.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

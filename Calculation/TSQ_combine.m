@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSQ_combine
+% ------------------------------------------------------------------------------
 % 
 % This function joins two HCTSA_loc.mat files.
 % Any data matrices are combined, and the guides are updated to reflect the
@@ -133,22 +135,23 @@ end
 fprintf(1,'A %u x %u matrix\n',size(TS_DataMat,1),size(TS_DataMat,2));
 HereSheIs = which('HCTSA_loc.mat');
 if isempty(HereSheIs)
-    fn = 'HCTSA_loc.mat';
-        fprintf(1,['----------Saving to %s----------\n'],fn)
+    FileName = 'HCTSA_loc.mat';
+        fprintf(1,['----------Saving to %s----------\n'],FileName)
 else
-    fn = 'HCTSA_loc_combined.mat';
+    FileName = 'HCTSA_loc_combined.mat';
     fprintf(1,['----------Saving to %s----------\nYou''ll have to rename to HCTSA_loc.mat for' ...
-    ' normal analysis routines like TSQ_normalize to work...\n'],fn);
+    ' normal analysis routines like TSQ_normalize to work...\n'],FileName);
 end
 
 % Save
-save(fn,'TimeSeries','Operations','MasterOperations','-v7.3');
-if GotData, save(fn,'TS_DataMat','-append'); end % add data matrix
-if GotQuality, save(fn,'TS_Quality','-append'); end % add quality labels
-if GotCalcTimes, save(fn,'TS_CalcTime','-append'); end % add calculation times
+save(FileName,'TimeSeries','Operations','MasterOperations','-v7.3');
+if GotData, save(FileName,'TS_DataMat','-append'); end % add data matrix
+if GotQuality, save(FileName,'TS_Quality','-append'); end % add quality labels
+if GotCalcTimes, save(FileName,'TS_CalcTime','-append'); end % add calculation times
 
 fprintf(1,['Saved new Matlab file containing combined versions of %s ' ...
-                    'and %s to %s\n'],HCTSA_locs{1},HCTSA_locs{2},fn);
-fprintf(1,'%s contains %u time series and %u operations\n',fn,length(TimeSeries),length(Operations));
+                    'and %s to %s\n'],HCTSA_locs{1},HCTSA_locs{2},FileName);
+fprintf(1,'%s contains %u time series and %u operations\n',FileName, ...
+                                length(TimeSeries),length(Operations));
     
 end

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TSTL_TakensEstimator
+% ------------------------------------------------------------------------------
 % 
 % Implements the Taken's estimator for correlation dimension using the
 % TSTOOL code takens_estimator.
@@ -8,15 +10,14 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % Nref, the number of reference points (can be -1 to use all points)
 % rad, the maximum search radius (as a proportion of the attractor size)
 % past, the Theiler window
 % embedparams, the embedding parameters for BF_embed, in the form {tau,m}
 % 
-% The output of this operation is simply the Taken's estimator of the correlation
-% dimension, d2.
+%---OUTPUT: the Taken's estimator of the correlation dimension, d2.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

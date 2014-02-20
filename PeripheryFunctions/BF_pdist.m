@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % BF_pdist
+% ------------------------------------------------------------------------------
 % 
 % Same as pdist but then goes through and fills in NaNs with indiviually
 % calculated values using an overlapping range of good values.
@@ -21,6 +23,9 @@
 
 function R = BF_pdist(F,DistMetric,ToVector,opts)
 
+% ------------------------------------------------------------------------------
+% Check Inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(DistMetric)
     DistMetric = 'euclidean';
     fprintf(1,'Using the Euclidean distance metric\n')

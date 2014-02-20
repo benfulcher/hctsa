@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % SQL_TableCreateString
+% ------------------------------------------------------------------------------
 % 
 % Determines the appropriate mySQL CREATE TABLE statement to use to create a given
 % table, identified by the input string, WhatTable
 % 
-% Ben Fulcher, May 2013
+% Ben Fulcher, May 2013.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSQ_plot_timeseries
+% ------------------------------------------------------------------------------
 % 
 % Plots the time series read from a local file, in a specified format.
 % 
@@ -32,9 +34,9 @@
 
 function TSQ_plot_timeseries(WhatData,WhatTimeSeries,NumPerGroup,maxL,titleme,opts)
 
-
+% ------------------------------------------------------------------------------
 %% Check Inputs
-
+% ------------------------------------------------------------------------------
 % F -- get guide from 'norm' or 'cl'
 if nargin < 1 || isempty(WhatData)
     WhatData = 'cl';
@@ -91,8 +93,9 @@ else
     lw = 1; % do a normal subplotted figure
 end
 
-
-% Load data
+% ------------------------------------------------------------------------------
+%% Load data
+% ------------------------------------------------------------------------------
 if isstruct(WhatData)
     % Provide it all yourself
     TimeSeries = WhatData.TimeSeries;
@@ -106,8 +109,9 @@ else
 end
 
 
-
-% Get group indices:
+% ------------------------------------------------------------------------------
+%% Get group indices:
+% ------------------------------------------------------------------------------
 if isempty(WhatTimeSeries)
     % Use default groups
     GroupIndices = BF_ToGroup([TimeSeries.Group]);
@@ -132,8 +136,10 @@ else % Provided a custom range as a vector
 end
 NumGroups = length(GroupIndices);
 
+% ------------------------------------------------------------------------------
 %% Do the plotting
-% want NumPerGroup from each time series group
+% ------------------------------------------------------------------------------
+% Want NumPerGroup from each time series group
 iplot = zeros(NumGroups*NumPerGroup,1);
 classes = zeros(NumGroups*NumPerGroup,1);
 nhere = zeros(NumGroups,1);
@@ -240,10 +246,7 @@ if freeform
 			text(0.01,yr(i)+0.9*inc,thetit,'interpreter','none','FontSize',8)
 	    end
 	end
-	xlim([0,1]) % don't let the axes annoyingly slip out
-
-	% set(gca,'FontSize',8)
-	% set(gcf,'Position',[100,100,800,800]);
+	xlim([0,1]) % Don't let the axes annoyingly slip out
 	
 else
 	for i = 1:Nplot
@@ -268,7 +271,7 @@ else
 	        end
 	%         set(gca,'Xtick',[],'FontSize',8) % don't put ticks on any time series
 	    else
-	        % specified a maximum length of time series to plot: maxL
+	        % Specified a maximum length of time series to plot: maxL
 	        if N <= maxL
 	            plot(x,'-','color',c{classes(i)});
 	            Ls(i) = N;
@@ -292,7 +295,7 @@ else
 	end
 	
 	
-	% set all xlims so that they have the same x-axis limits
+	% Set all xlims so that they have the same x-axis limits
 	for i = 1:Nplot
 	    subplot(Nplot,1,i); set(gca,'xlim',[1,max(Ls)])
 	end

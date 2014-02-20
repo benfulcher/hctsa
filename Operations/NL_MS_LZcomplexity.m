@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_MS_LZcomplexity
+% ------------------------------------------------------------------------------
 % 
 % Calculates the Lempel-Ziv complexity of a n-bit encoding of the time
 % series using Michael Small's code: 'complexity' (renamed MS_complexity here).
@@ -12,16 +14,16 @@
 % associated mex file compiled from complexitybs.c (renamed MS_complexitybs.c
 % here).
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % n, the (integer) number of bits to encode the data into
 % preproc [opt], first apply a given preprocessing to the time series. For now,
 %               just 'diff' is implemented, which zscores incremental
 %               differences and then applies the complexity method.
 % 
-% The function has a single output: the normalized Lempel-Ziv complexity: i.e.,
-% the number of distinct symbol sequences in the time series divided by the
-% expected number of distinct symbols for a noise sequence.
+%---OUTPUT: the normalized Lempel-Ziv complexity: i.e., the number of distinct
+%           symbol sequences in the time series divided by the expected number
+%           of distinct symbols for a noise sequence.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

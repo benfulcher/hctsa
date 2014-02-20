@@ -1,8 +1,10 @@
+% ------------------------------------------------------------------------------
 % DN_Mean
+% ------------------------------------------------------------------------------
 % 
 % Measures a given type of 'mean', or measure of location of the time series.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 

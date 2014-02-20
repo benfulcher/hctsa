@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % PP_Compare
+% ------------------------------------------------------------------------------
 % 
-% Applies a given transformation to the time series, and returns statistics on
-% how various time-series properties change as a result.
+% Applies a given pre-processing transformation to the time series, and returns
+% statistics on how various time-series properties change as a result.
 % 
-% Inputs are coded clunkily.
+% Inputs are structured in a clunky way, unfortunately...
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % detrndmeth, the method to use for detrending:
 %      (i) 'poly': polynomial detrendings, both linear and quadratic. Can
@@ -59,8 +61,8 @@
 % strings; the methods will be executed in order, e.g., {'poly1','sin1'} does a
 % linear polynomial then a simple one-frequency seasonal detrend (in that order)
 % 
-% Output statistics include comparisons of stationarity and distributional
-% measures between the original and transformed time series.
+%---OUTPUTS: include comparisons of stationarity and distributional measures
+% between the original and transformed time series.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

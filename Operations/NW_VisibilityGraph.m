@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NW_VisibilityGraph
+% ------------------------------------------------------------------------------
 % 
 % Constructs a visibility graph of the time series and returns various
 % statistics on the properties of the resulting network.
@@ -14,7 +16,7 @@
 % The normal visibility graph may not be implemented correctly, we focused only
 % on the horizontal visibility graph.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the time series (a column vector)
 % 
 % meth, the method for constructing:
@@ -27,7 +29,7 @@
 %               samples.
 % 
 % 
-% Outputs are statistics on the degree distribution, including the mode, mean,
+%---OUTPUTS: statistics on the degree distribution, including the mode, mean,
 % spread, histogram entropy, and fits to gaussian, exponential, and powerlaw
 % distributions.
 % 

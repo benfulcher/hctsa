@@ -1,14 +1,16 @@
+% ------------------------------------------------------------------------------
 % DN_Fit_mle
+% ------------------------------------------------------------------------------
 % 
 % Fits either a Gaussian, Uniform, or Geometric distribution to the data using
 % maximum likelihood estimation via the Matlab function mle
 % from the Statistics Toolbox.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the time series
 % fitwhat, the type of fit to do: 'gaussian', 'uniform', or 'geometric'.
 % 
-% Outputs are parameters from the fit.
+%---OUTPUTS: parameters from the fit.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

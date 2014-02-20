@@ -1,13 +1,15 @@
+% ------------------------------------------------------------------------------
 % MF_AR_arcov
+% ------------------------------------------------------------------------------
 % 
 % Fits an AR model of a given order, p, using arcov code from Matlab's Signal
 % Processing Toolbox.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % p, the AR model order
 % 
-% Outputs include the parameters of the fitted model, the variance estimate of a
+%---OUTPUTS: include the parameters of the fitted model, the variance estimate of a
 % white noise input to the AR model, the root-mean-square (RMS) error of a
 % reconstructed time series, and the autocorrelation of residuals.
 % 

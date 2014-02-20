@@ -1,4 +1,6 @@
-% TSQ_plot_dm
+% ------------------------------------------------------------------------------
+% TSQ_plot_DataMatrix
+% ------------------------------------------------------------------------------
 % 
 % Plot the data matrix.
 % 
@@ -28,9 +30,11 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_dm(norcl,ColorGroups,TS_DataMat,CustomOrder,CustomColorMap)
+function TSQ_plot_DataMatrix(norcl,ColorGroups,TS_DataMat,CustomOrder,CustomColorMap)
 
-% Visualize normalized or clustered matrix (clustered by default)
+% ------------------------------------------------------------------------------
+%% Check Inputs:
+% ------------------------------------------------------------------------------
 if nargin < 1 || isempty(norcl)
     norcl = 'cl';
 end

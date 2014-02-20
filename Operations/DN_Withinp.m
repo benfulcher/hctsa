@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % DN_Withinp
+% ------------------------------------------------------------------------------
 % 
 % Measures the proportion of the time-series data points that lie within
 % p standard deviations of its mean.
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % p, the number (proportion) of standard deviations.
 % 

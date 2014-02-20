@@ -1,4 +1,6 @@
+% --------------------------------------------------------------------------
 % TSQ_prepared
+% --------------------------------------------------------------------------
 % 
 % This function retreives data from the mySQL database for subsequent analysis
 % in Matlab. It takes as input a set of constraints on the time series and
@@ -50,10 +52,12 @@
 
 function DidWrite = TSQ_prepared(ts_ids, op_ids, RetrieveWhatEntries, RetrieveWhatData)
     
-% Until it actually writes, set DidWrite = 0
+% Until it actually writes something, set the function output, DidWrite = 0
 DidWrite = 0;
 
+% --------------------------------------------------------------------------
 %% Check inputs and set defaults
+% --------------------------------------------------------------------------
 if nargin < 2
 	error('You must provide at least two inputs!');
 end
@@ -79,7 +83,9 @@ if ~ischar(RetrieveWhatData) || ~ismember(RetrieveWhatData,RetrieveWhatDataCanBe
                 'one of the following: %s'],BF_cat(RetrieveWhatEntriesCanBe))
 end
 
+% --------------------------------------------------------------------------
 %% Get going
+% --------------------------------------------------------------------------
 % Retrieve from the database over many iterations, retrieving data from a given
 % number of time series at each iteration
 % Could do one big query and then reform to a matrix, but I'll do it row-by-row
@@ -138,7 +144,9 @@ end
 fprintf(1,'We have %u time series and %u operations to retrieve from %s.\n',nts,nops,dbname);
 fprintf(1,'Filling and saving to local Matlab file HCTSA_loc.mat from the Results table of %s.\n',dbname);
 
+% --------------------------------------------------------------------------
 %% Intialize matrices
+% --------------------------------------------------------------------------
 
 % Start as Infs to distinguish unwritten entries after database pull
 switch RetrieveWhatData
@@ -156,7 +164,9 @@ case 'quality'
 end
 
 
+% --------------------------------------------------------------------------
 %% Display information
+% --------------------------------------------------------------------------
 switch RetrieveWhatEntries
 case 'all' 
     fprintf(1,['Retrieving all elements from the database (one time series ' ...
@@ -172,7 +182,9 @@ end
 IterationTimes = zeros(nts,1); % Record the time taken for each iteration
 DidRetrieve = zeros(nts,1);    % Keep track of whether data was retrieved at each iteration
 
-% First select the data:
+% --------------------------------------------------------------------------
+% First retrieve the data:
+% --------------------------------------------------------------------------
 for i = 1:nts
     
     IterationTimer = tic; % Time each iteration using IterationTimer
@@ -283,7 +295,9 @@ for i = 1:nts
 	end
 end
 
-% Finished retrieving from the database!
+% --------------------------------------------------------------------------
+%% Finished retrieving from the database!
+% --------------------------------------------------------------------------
 if any(DidRetrieve)
     fprintf(1,'Retrieved data from %s over %u iterations in %s.\n',dbname,nts,BF_thetime(sum(IterationTimes)));
 else

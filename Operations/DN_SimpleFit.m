@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % DN_SimpleFit
+% ------------------------------------------------------------------------------
 % 
 % Fits different distributions or simple time-series models to the time series
 % using 'fit' function from Matlab's Curve Fitting Toolbox.
@@ -7,7 +9,7 @@
 % kernel-smoothed density via the Matlab function ksdensity with the default
 % width parameter, or by a histogram with a specified number of bins, nbins.
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % 
 % dmodel, the model to fit:
@@ -27,7 +29,8 @@
 % nbins, the number of bins for a histogram-estimate of the distribution of
 %       time-series values. If nbins = 0, uses ksdensity instead of histogram.
 % 
-% Outputs are the goodness of fifit, R^2, rootmean square error, the
+% 
+%---OUTPUTS: the goodness of fifit, R^2, rootmean square error, the
 % autocorrelation of the residuals, and a runs test on the residuals.
 % 
 % ------------------------------------------------------------------------------

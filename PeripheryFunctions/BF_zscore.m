@@ -1,11 +1,14 @@
+% ------------------------------------------------------------------------------
 % BF_zscore
+% ------------------------------------------------------------------------------
 % 
 % Applies a z-score to the input without using a Statistics Toolbox licence.
 % 
-% INPUT:
-% x, the input time series (or any vector)
-% OUTPUT:
-% z, the z-scored transformation of the input
+%---INPUT:
+% x, the input time series (or any vector).
+% 
+%---OUTPUT:
+% z, the z-scored transformation of the input.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

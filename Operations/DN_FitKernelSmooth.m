@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % DN_FitKernelSmooth
+% ------------------------------------------------------------------------------
 % 
 % Fits a kernel-smoothed distribution to the data using the ksdensity function
 % from Matlab's Statistics Toolbox and returns a set of simple statistics.
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % <can also produce additional outputs with the following optional settings>
 % [opt] 'numcross': number of times the distribution crosses the given threshold
@@ -14,12 +16,12 @@
 % [opt] 'arclength': arclength between where the distribution passes given
 %       thresholds. Usage as above.
 % 
-% EXAMPLE USAGE:                  
+%---EXAMPLE USAGE:                  
 % DN_FitKernelSmooth(x,'numcross',[0.05,0.1],'area',[0.1,0.2,0.4],'arclength',[0.5,1,2])
 % returns all the basic outputs, plus those for numcross, area, and arclength
 % for the thresholds given
 % 
-% Outputs are set of statistics summarizing the obtained distribution, including
+%---OUTPUTS: a set of statistics summarizing the obtained distribution, including
 % the number of peaks, the distributional entropy, the number of times the curve
 % crosses fifixed probability thresholds, the area under the curve for fifixed
 % probability thresholds, the arc length, and the symmetry of probability

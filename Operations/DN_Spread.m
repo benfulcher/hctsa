@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % DN_Spread
+% ------------------------------------------------------------------------------
 % 
 % Returns the spread of the raw time series, as the standard deviation,
 % inter-quartile range, mean absolute deviation, or median absolute deviation.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % thespread, the spead measure:

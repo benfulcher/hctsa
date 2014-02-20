@@ -1,17 +1,19 @@
+% ------------------------------------------------------------------------------
 % NL_CaosMethod
+% ------------------------------------------------------------------------------
 % 
-% References TSTOOL code cao, to determine the minimum embedding dimension for a time series using
-% Cao's method:
+% References TSTOOL code cao, to determine the minimum embedding dimension for a
+% time series using Cao's method:
 % 
-% "Practical method for determining the minimum embedding dimension of a scalar time series"
-% L. Cao, Physica D 110(1-2) 43 (1997)
+% "Practical method for determining the minimum embedding dimension of a scalar
+% time series", L. Cao, Physica D 110(1-2) 43 (1997)
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
 % It computes the quantities E and E* for a range of embedding dimensions
 % m = 1, ..., m_{max}.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, time series as a column vector
 % 
@@ -36,7 +38,7 @@
 %                                   level-off point
 %   
 % 
-% Outputs are statistics on the result, including when the output quantity first
+%---OUTPUTS: statistics on the result, including when the output quantity first
 % passes a given threshold, and the m at which it levels off.
 % 
 % ------------------------------------------------------------------------------
@@ -65,7 +67,9 @@
 function out = NL_CaosMethod(y,maxdim,tau,NNR,Nref,justanum)
 % Ben Fulcher, October 2009
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 doplot = 0; % plot outputs to figure
 N = length(y); % length of time series
 s = signal(y); % convert to signal object for TSTOOL
@@ -107,7 +111,9 @@ if nargin < 6
     justanum = [];
 end
 
+% ------------------------------------------------------------------------------
 %% Run:
+% ------------------------------------------------------------------------------
 try
     [caoo1, caoo2] = cao(s,maxdim,tau,NNR,Nref);
 catch err

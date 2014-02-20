@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % DN_nlogL_norm
+% ------------------------------------------------------------------------------
 % 
 % Fits a Gaussian distribution to the data using the normfit function in
 % Matlab's Statistics Toolbox and returns the negative log likelihood of the
 % data coming from a Gaussian distribution using the normlike function.
 % 
-% INPUT:
+%---INPUT:
 % y, the time series.
 % 
 % ------------------------------------------------------------------------------

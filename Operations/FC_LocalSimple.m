@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % FC_LocalSimple
+% ------------------------------------------------------------------------------
 % 
 % Does local forecasting using very simple predictors using the past l values
 % of the time series to predict its next value.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % fmeth, the forecasting method:
@@ -16,7 +18,7 @@
 % 
 % ltrain, the number of time-series values to use to forecast the next value
 % 
-% Outputs are the mean error, stationarity of residuals, Gaussianity of
+%---OUTPUTS: the mean error, stationarity of residuals, Gaussianity of
 % residuals, and their autocorrelation structure.
 % 
 % ------------------------------------------------------------------------------

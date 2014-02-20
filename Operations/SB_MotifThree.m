@@ -1,15 +1,17 @@
+% ------------------------------------------------------------------------------
 % SB_MotifThree
+% ------------------------------------------------------------------------------
 % 
 % As for SB_MotifTwo, but using an alphabet of three letters, i.e., looks for
 % motifs in a course-graining of the time series to an alphabet of three letters
 % 
-% INPUTS:
+%---INPUTS:
 % y, time series to analyze
 % trit, the coarse-graining method to use:
 %       (i) 'quantile': equiprobable alphabet by time-series value
 %       (ii) 'diffquant': equiprobably alphabet by time-series increments
 % 
-% Statistics are returned on words of length 1, 2, 3, and 4.
+%---OUTPUTS: Statistics on words of length 1, 2, 3, and 4.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,14 +1,17 @@
+% ------------------------------------------------------------------------------
 % CO_TSTL_amutual2
+% ------------------------------------------------------------------------------
 % 
 % Uses amutual2 code from TSTOOL to compute the mutual information up to a given
 % maximum time-delay.
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
+%---INPUTS:
 % y, column vector of time series data
 % maxtau, maximal lag
 % 
-% Statistics are returned on the output of amutual2 over this range, as for
+%---OUTPUTS: Statistics on the output of amutual2 over this range, as for
 % CO_TSTL_amutual.
 % 
 % ------------------------------------------------------------------------------

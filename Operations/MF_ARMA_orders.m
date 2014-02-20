@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_ARMA_orders
+% ------------------------------------------------------------------------------
 % 
 % Given a set of AR orders, p, and a set of MA orders, q, this operation fits
 % ARMA(p,q) models to the time series and evaluates the goodness of fit from all
@@ -6,12 +8,12 @@
 % 
 % Uses functions iddata, armax, and aic from Matlab's System Identification toolbox
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % pr, a vector specifying the range of AR model orders to analyze
 % qr, a vector specifying the range of MA model orders to analyze
 % 
-% Outputs are statistics on the appropriateness of different types of models,
+%---OUTPUTS: statistics on the appropriateness of different types of models,
 % including the goodness of fit from the best model, and the optimal orders of
 % fitted ARMA(p,q) models.
 % 

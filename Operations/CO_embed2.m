@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_Embed2
+% ------------------------------------------------------------------------------
 % 
 % Embeds the z-scored time series in a two-dimensional time-delay
 % embedding space with a given time-delay, tau, and outputs a set of

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TSTL_GPCorrSum
+% ------------------------------------------------------------------------------
 % 
 % Uses TSTOOL code corrsum (or corrsum2) to compute scaling of the correlation sum for a
 % time-delay reconstructed time series by the Grassberger-Proccacia algorithm
@@ -9,7 +11,7 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % y, column vector of time-series data
 % 
 % Nref, number of (randomly-chosen) reference points (-1: use all points,
@@ -30,9 +32,9 @@
 %           to use corrsum.
 % 
 % 
-% Outputs of this function are basic statistics on the outputs of corrsum,
-% including iteratively re-weighted least squares linear fits to log-log plots
-% using the robustfit function in Matlab's Statistics Toolbox.
+%---OUTPUTS: basic statistics on the outputs of corrsum, including iteratively
+% re-weighted least squares linear fits to log-log plots using the robustfit
+% function in Matlab's Statistics Toolbox.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % sample_runscript
+% ------------------------------------------------------------------------------
 % 
 % Sample runscript for selecting a set of operations and time series to loop
 % over when running highly comparative computations.

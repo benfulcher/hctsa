@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % WL_dwtcoeff
+% ------------------------------------------------------------------------------
 % 
 % Decomposes the time series using a given wavelet and outputs statistics on the
 % coefficients obtained up to a maximum level, level.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 

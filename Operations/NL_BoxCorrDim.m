@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % NL_BoxCorrDim
+% ------------------------------------------------------------------------------
 % 
 % References TSTOOL code, corrdim, to estimate the correlation dimension of a
 % time-delay embedded time series using a box-counting approach.
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % y, column vector of time series data
 % 
 % nbins, maximum number of partitions per axis
@@ -13,7 +15,7 @@
 % embedparams [opt], embedding parameters as {tau,m} in 2-entry cell for a
 %                   time-delay, tau, and embedding dimension, m. As inputs to BF_embed.
 % 
-% Output statistics are simple summaries of the outputs from this algorithm.
+%---OUTPUTS: Simple summaries of the outputs from corrdim.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

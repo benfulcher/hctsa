@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TSTL_dimensions
+% ------------------------------------------------------------------------------
 % 
 % Computes the box counting, information, and correlation dimension of a
 % time-delay embedded time series using the TSTOOL code 'dimensions'.

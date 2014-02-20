@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % MF_ResidualAnalysis
+% ------------------------------------------------------------------------------
 % 
 % Given an input residual time series residuals e, this function exports a
 % structure with fields corresponding to structural tests on the residuals.
 % These are motivated by a general expectation of model residuals to be
 % uncorrelated.
 %
-% INPUT:
+%---INPUT:
 % e, should be raw residuals as prediction minus data (e = yp - y) as a column
 %       vector. Will take absolute values / even powers of e as necessary.
 % 
@@ -35,17 +37,22 @@
 function out = MF_ResidualAnalysis(e)
 % Ben Fulcher 10/2/2010
 
-%% Check that a System Identification Toolbox license is available (for spa):
+% ------------------------------------------------------------------------------
+%% Preliminaries
+% ------------------------------------------------------------------------------
+
+% Check that a System Identification Toolbox license is available (for spa):
 BF_CheckToolbox('identification_toolbox')
 
-% (0) Preliminaries
 if size(e,2) > size(e,1)
     e = e'; % make sure residuals are a column vector
 end
 ee = iddata(e,[],1);
 N = length(e);
 
-%% (**) Basic statiatics on residuals, then zscore (**)
+% ------------------------------------------------------------------------------
+%% Basic statiatics on residuals, then zscore
+% ------------------------------------------------------------------------------
 out.meane = mean(e);
 out.meanabs = mean(abs(e));
 out.rmse = sqrt(mean(e.^2));
@@ -59,7 +66,9 @@ else
     e = BF_zscore(e);
 end
 
-%% (**) Trends in residuals (**)
+% ------------------------------------------------------------------------------
+%% Analyze trends in residuals
+% ------------------------------------------------------------------------------
 % Look for any low-frequency trends -- extract summaries from power
 % spectrum.
 g = spa(e); % smoothed power spectrum
@@ -91,7 +100,7 @@ maxlag = 25;
 acs = CO_AutoCorr(e,1:maxlag); % autocorrelations
 sqrtN = sqrt(N);
 
-% output first three acfs
+% Output first three acfs
 out.ac1 = acs(1);
 out.ac2 = acs(2);
 out.ac3 = acs(3);

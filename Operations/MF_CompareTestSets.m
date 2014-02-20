@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_CompareTestSets
+% ------------------------------------------------------------------------------
 % 
 % Looks at robustness of test set goodness of fit over different samples in
 % the time series from fitting a given time-series model.
@@ -14,7 +16,7 @@
 % as well as either ar, n4sid, or armax from Matlab's System Identification
 % Toolbox to fit the models, depending on the specified model to fit to the data.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % model, the type of time-series model to fit:

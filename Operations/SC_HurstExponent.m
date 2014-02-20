@@ -1,9 +1,10 @@
+% ------------------------------------------------------------------------------
 % SC_HurstExponent
-% 
+% ------------------------------------------------------------------------------
 % Calculate the Hurst exponent of the input time series, y
 % 
-% Code by Bill Davidson (quellen@yahoo.com) that estimates the Hurst Exponent of an input time
-% series.
+% Code by Bill Davidson (quellen@yahoo.com) that estimates the Hurst Exponent of
+% an input time series.
 % 
 % Original code: hurst_exponent.m (renamed: BD_hurst_exponent.m).
 % 

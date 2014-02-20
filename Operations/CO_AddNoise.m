@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_AddNoise
+% ------------------------------------------------------------------------------
 % 
 % Analyzes changes in the automutual information function with the addition of
 % noise to the input time series.

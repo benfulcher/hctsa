@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_tc3
+% ------------------------------------------------------------------------------
 %
 % Computes the tc3 function, a normalized nonlinear autocorrelation, at a
 % given time-delay, tau.

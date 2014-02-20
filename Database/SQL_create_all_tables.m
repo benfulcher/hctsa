@@ -1,10 +1,13 @@
+% ------------------------------------------------------------------------------
 % SQL_create_all_tables
+% ------------------------------------------------------------------------------
 % 
 % Create all the tables in the database
 % 
-% Uses SQL_tablecreatestring to retrieve the appropriate mySQL CREATE TABLE statements
+% Uses SQL_tablecreatestring to retrieve the appropriate mySQL CREATE TABLE
+% statements.
 % 
-% HISTORY:
+%---HISTORY:
 % Romesh Abeysuriya, March 2013
 % Ben Fulcher, now uses SQL_TableCreateString, May 2013
 % 

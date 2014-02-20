@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CP_ML_StepDetect
+% ------------------------------------------------------------------------------
 % 
 % Gives information about discrete steps in the signal, using the function
 % l1pwc from Max A. Little's step detection toolkit.
@@ -13,7 +15,7 @@
 % 
 % Software available at: http://www.maxlittle.net/software/index.php
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % method, the step-detection method:
@@ -38,7 +40,7 @@
 %           (ii) 'ck': params = [K,M,p]
 %           (iii) 'l1pwc': params = lambda
 % 
-% The function returns statistics on the output of the step-detection method,
+%---OUTPUTS: statistics on the output of the step-detection method,
 % including the intervals between change points, the proportion of constant
 % segments, the reduction in variance from removing the piece-wise constants,
 % and stationarity in the occurrence of change points.
@@ -206,16 +208,16 @@ end
 %           steppedy -- an (Nx1) vector specifying the new stepped time
 %                       series
 
-% intervals -- of change
+% Intervals -- of change
 chints = diff([chpts; N]);
 
-% number of constant segments per sample
+% Number of constant segments per sample
 out.nsegments = length(chpts)/N; % will be 1 if there are no changes
-% how much reduces variance
+% How much reduces variance
 out.rmsoff = std(y) - std(y-steppedy);
-% reduces variance per step
+% Reduces variance per step
 out.rmsoffpstep = (out.rmsoff)/(length(chpts));
-% ratio of number of steps in first half of time series to second half
+% Ratio of number of steps in first half of time series to second half
 sum1 = (sum(chpts < N/2)-1);
 sum2 = sum(chpts >= N/2);
 if (sum2 > 0) && (sum1 > 0)
@@ -229,19 +231,19 @@ else
 end
 out.diffn12 = abs(sum1-sum2)/length(chpts);
 
-% proportion of really short steps
+% Proportion of really short steps:
 out.pshort_3 = sum(chints <= 3)/N;
-% mean interval between steps
+% Mean interval between steps:
 out.meanstepint = mean(chints)/N;
-% mean interval greater than 3 samples, per sample
+% Mean interval greater than 3 samples, per sample:
 out.meanstepintgt3 = mean(chints(chints>3))/N;
-% mean error on step interval distribution
+% Mean error on step interval distribution:
 out.meanerrstepint = std(chints)/sqrt(length(chints));
-% maximum step interval
+% Maximum step interval:
 out.maxstepint = max(chints)/N;
-% minimum step interval
+% Minimum step interval:
 out.minstepint = min(chints)/N;
-% median step interval
+% Median step interval:
 out.medianstepint = median(chints)/N;
 
 

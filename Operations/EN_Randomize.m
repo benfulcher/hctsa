@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % EN_Randomize
+% ------------------------------------------------------------------------------
 % 
 % Progressively randomizes the input time series according to some randomization
 % scheme, and returns measures of how the properties of the time series change
@@ -6,7 +8,7 @@
 % 
 % The procedure is repeated 2N times, where N is the length of the time series.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input (z-scored) time series
 % howtorand, specifies the randomization scheme for each iteration:
 %      (i) 'statdist' -- substitutes a random element of the time series with
@@ -16,7 +18,7 @@
 %      (iii) 'permute' -- permutes pairs of elements of the time
 %                       series randomly
 % 
-% Outputs of this function summarize how the properties change as one of these
+%---OUTPUTS: summarize how the properties change as one of these
 % randomization procedures is iterated, including the cross correlation with the
 % original time series, the autocorrelation of the randomized time series, its
 % entropy, and stationarity.

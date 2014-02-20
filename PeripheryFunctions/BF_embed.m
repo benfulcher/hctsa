@@ -1,13 +1,15 @@
+% ------------------------------------------------------------------------------
 % BF_embed
+% ------------------------------------------------------------------------------
 % 
 % Returns a time-delay embedding of the input time series into an m dimensional
 % space at a time delay tau.
 % 
 % Uses the TSTOOL code 'embed'
 % 
-% % TSTOOL: http://www.physik3.gwdg.de/tstool/
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % y, univariate scalar time series
 % tau, time-delay. Can be a string, 'ac', 'mi', ...
 % m, the embedding dimension. Must be a cell specifying method and parameters,
@@ -16,8 +18,8 @@
 %           (default = 0, i.e., not to do this and instead return matrix).
 %           If 2, returns a vector of [tau m] rather than any explicit embedding
 % 
-% OUTPUT:
-% a matrix of width m containing the vectors in the new embedding space...
+%---OUTPUT:
+% A matrix of width m containing the vectors in the new embedding space...
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

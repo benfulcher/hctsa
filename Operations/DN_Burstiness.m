@@ -1,12 +1,17 @@
+% ------------------------------------------------------------------------------
 % DN_Burstiness
+% ------------------------------------------------------------------------------
 % 
 % Returns the 'burstiness' statistic from:
 % 
 % Goh and Barabasi, 'Burstiness and memory in complex systems' Europhys. Lett.
 % 81, 48002 (2008)
 % 
-% INPUTS:
+%---INPUT:
 % y, the input time series
+% 
+%---OUTPUT:
+% The burstiness statistic, B.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

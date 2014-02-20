@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TISEAN_c1
+% ------------------------------------------------------------------------------
 % 
 % Implements the c1 and c2d routines from the TISEAN nonlinear time-series
 % analysis package that compute curves for the fixed mass computation of the
@@ -14,7 +16,7 @@
 % in Matlab, and require that TISEAN is installed and compiled, and able to be
 % executed in the command line.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the time series to analyze
 % 
@@ -32,10 +34,9 @@
 %       proportion of the time-series length)
 % 
 % 
-% Outputs optimal scaling ranges and dimension estimates for a time delay,
-% tau, embedding dimensions, m, ranging from m_{min} to
-% m_{max}, a time separation, tsep, and a number of reference
-% points, Nref.
+%---OUTPUTS: optimal scaling ranges and dimension estimates for a time delay,
+% tau, embedding dimensions, m, ranging from m_{min} to m_{max}, a time
+% separation, tsep, and a number of reference points, Nref.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % DN_CompareKSFit
+% ------------------------------------------------------------------------------
 % 
 % Returns simple statistics on the discrepancy between the
 % kernel-smoothed distribution of the time-series values, and the distribution
@@ -7,14 +9,14 @@
 % (betafifit), Rayleigh (raylfifit), Exponential (expfifit), Gamma (gamfit),
 % LogNormal (lognfifit), and Weibull (wblfifit).
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % whatdbn, the type of distribution to fit to the data:
 %           'norm' (normal), 'ev' (extreme value), 'uni' (uniform),
 %           'beta' (Beta), 'rayleigh' (Rayleigh), 'exp' (exponential),
 %           'gamma' (Gamma), 'logn' (Log-Normal), 'wbl' (Weibull).
 % 
-% Outputs include the absolute area between the two distributions, the peak
+%---OUTPUTS: include the absolute area between the two distributions, the peak
 % separation, overlap integral, and relative entropy.
 % 
 % ------------------------------------------------------------------------------

@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % DN_TrimmedMean
+% ------------------------------------------------------------------------------
 % 
 % Outputs the mean of the trimmed time series using the Matlab function
 % trimmean.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % n, the percent of highest and lowest values in y to exclude from the mean
 %     calculation

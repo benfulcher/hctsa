@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSTL_delaytime
+% ------------------------------------------------------------------------------
 % 
 % Uses the TSTOOL code delaytime, that computes an optimal delay time using the
 % method of Parlitz and Wichard (this method is specified in the TSTOOL
@@ -6,7 +8,7 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % y, column vector of time series data
 % 
 % maxdelay, maximum value of the delay to consider (can also specify a

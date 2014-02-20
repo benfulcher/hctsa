@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % ST_LocalExtrema
+% ------------------------------------------------------------------------------
 % 
 % Finds maximums and minimums within given segments of the time series and
 % analyses the results. Outputs quantify how local maximums and minimums vary
 % across the time series.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % lorf, whether to use:

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSQ_plot_lowdim
+% ------------------------------------------------------------------------------
 %
 % Calculates then plots a lower-dimensional feature-based representation of the
 % data (e.g., using PCA).

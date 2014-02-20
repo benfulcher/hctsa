@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % MD_hrv_classic
+% ------------------------------------------------------------------------------
 % 
 % Packages up a bunch of classic heart rate variability (HRV) statistics and
 % applies them to the input time series.
 % 
 % Assumes an NN/RR time series in units of seconds.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series.
 % 
 % Includes:

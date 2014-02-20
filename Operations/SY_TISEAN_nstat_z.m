@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_TISEAN_nstat_z
+% ------------------------------------------------------------------------------
 % 
 % Uses the nstat_z routine from the TISEAN package for nonlinear time-series
 % analysis to calculate cross-forecast errors of zeroth-order models for the
@@ -19,7 +21,7 @@
 % in Matlab, and require that TISEAN is installed and compiled, and able to be
 % executed in the command line.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -31,7 +33,7 @@
 %               {1,3} has a time-delay of 1 and embedding dimension of 3.
 % 
 % 
-% Outputs include the trace of the cross-prediction error matrix, the mean,
+%---OUTPUTS: include the trace of the cross-prediction error matrix, the mean,
 % minimum, and maximum cross-prediction error, the minimum off-diagonal
 % cross-prediction error, and eigenvalues of the cross-prediction error matrix.
 % 

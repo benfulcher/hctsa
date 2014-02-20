@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % FC_Surprise
+% ------------------------------------------------------------------------------
 % 
 % How surprised you might be by the next recorded data points given the data recorded
 % in recent memory.
@@ -14,7 +16,7 @@
 % The 'information gained', log(1/p), at each sample using expectations
 % calculated from the previous memory samples, is estimated.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % whatinf, the type of information to store in memory:
@@ -40,9 +42,9 @@
 % 
 % nits, the number of iterations to repeat the procedure for.
 % 
-% Outputs of this operation are summaries of this series of information gains,
-% including the minimum, maximum, mean, median, lower and upper quartiles, and
-% standard deviation.
+%---OUTPUTS: summaries of this series of information gains, including the
+%            minimum, maximum, mean, median, lower and upper quartiles, and
+%            standard deviation.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

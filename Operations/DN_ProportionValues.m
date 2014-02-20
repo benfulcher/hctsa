@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % DN_ProportionValues
+% ------------------------------------------------------------------------------
 % 
 % Returns statistics on the values of the raw time series: the proportion
 % of zeros in the raw time series, the proportion of positive values, and the
 % proportion of values greater than or equal to zero.
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % 
 % propwhat, the proportion of a given type of value in the time series:

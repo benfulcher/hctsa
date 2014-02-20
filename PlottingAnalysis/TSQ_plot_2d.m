@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSQ_plot_2d
+% ------------------------------------------------------------------------------
 % 
 % Plots the dataset in a two-dimensional space
 % e.g., that of two chosen operations, or two principal components

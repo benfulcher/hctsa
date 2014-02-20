@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % BF_ToGroup
+% ------------------------------------------------------------------------------
 %
 % Converts to Matlab's group form (a vector of group labels) from my
 % GroupIndices form (which has indicies for each group as a cell).

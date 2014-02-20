@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TSTL_acp
+% ------------------------------------------------------------------------------
 % 
 % Implements the TSTOOL routine acp using a time lag, tau, a Theiler window,
 % past, maximum delay, maxdelay, maximum embedding dimension, maxdim, and number
@@ -9,7 +11,7 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %
-% INPUTS:
+%---INPUTS:
 % 
 % y, time series
 % 
@@ -24,7 +26,7 @@
 % 
 % Nref, number of reference points
 % 
-% Outputs are statistics summarizing the output of the routine.
+%---OUTPUTS: statistics summarizing the output of the routine.
 % 
 % May in future want to also make outputs normalized by first value; so get
 % metrics on both absolute values at each dimension but also some

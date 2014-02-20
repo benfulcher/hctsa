@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_DynWin
+% ------------------------------------------------------------------------------
 % 
 % Analyzes how stationarity estimates depend on the number of segments used to
 % segment up the time series.
@@ -11,7 +13,7 @@
 % series are calculated as an estimate of the stationarity in this quantity as a
 % function of the number of splits, n_{seg}, of the time series.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -19,8 +21,8 @@
 %           segments to maxnseg.
 % 
 % 
-% Outputs of the operation are the standard deviation of this set of
-% 'stationarity' estimates across these window sizes.
+%---OUTPUTS: the standard deviation of this set of 'stationarity' estimates
+% across these window sizes.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

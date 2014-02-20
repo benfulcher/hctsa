@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SC_FluctAnal
+% ------------------------------------------------------------------------------
 % 
 % Implements fluctuation analysis by a variety of methods.
 % 
@@ -11,9 +13,7 @@
 % differences in how fluctuations, F, are quantified in time-series segments.
 % Many alternatives are implemented in this function.
 % 
-% function out = SC_FluctAnal(x,q,wtf,taustep,k,lag,loginc)
-% 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % q, the parameter in the fluctuation function q = 2 (usual) gives RMS fluctuations.
@@ -62,7 +62,7 @@
 % 
 % loginc, whether to use logarithmic increments in tau (it should be logarithmic).
 % 
-% Outputs include statistics of fitting a linear function to a plot of log(F) as
+%---OUTPUTS: include statistics of fitting a linear function to a plot of log(F) as
 % a function of log(tau), and for fitting two straight lines to the same data,
 % choosing the split point at tau = tau_{split} as that which minimizes the
 % combined fitting errors.

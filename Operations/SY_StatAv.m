@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_StatAv
+% ------------------------------------------------------------------------------
 % 
 % The StatAv measure is a simple mean-stationarity metric that divides
 % the time series into non-overlapping subsegments, calculates the mean in each
@@ -7,7 +9,7 @@
 % "Heart rate control in normal and aborted-SIDS infants", S. M. Pincus et al.
 % Am J. Physiol. Regul. Integr. Comp. Physiol. 264(3) R638 (1993)
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 

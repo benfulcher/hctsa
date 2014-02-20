@@ -1,8 +1,10 @@
+% ------------------------------------------------------------------------------
 % DN_MinMax
+% ------------------------------------------------------------------------------
 % 
 % Returns the maximum and minimum values of the input time series.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 

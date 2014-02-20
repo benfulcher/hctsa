@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % SB_TransitionpAlphabet
+% ------------------------------------------------------------------------------
 % 
 % Calculates the transition probabilities and measures how they change as the
 % size of the alphabet increases.
 % 
 % Discretization is done by quantile separation.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -18,7 +20,7 @@
 %      look at this dicrete lag. Here we do the former. (scalar for
 %      constant tau, vector for range to vary across)
 % 
-% Outputs include the decay rate of the sum, mean, and maximum of diagonal
+%---OUTPUTS: include the decay rate of the sum, mean, and maximum of diagonal
 % elements of the transition matrices, changes in symmetry, and the eigenvalues
 % of the transition matrix.
 % 

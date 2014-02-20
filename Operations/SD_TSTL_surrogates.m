@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SD_TSTL_surrogates
+% ------------------------------------------------------------------------------
 % 
 % Generates surrogate time series and tests them against the original time
 % series according to some test statistics: T_{C3}, using the
@@ -6,7 +8,7 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -23,8 +25,8 @@
 % surrfn, the surrogate statistic to evaluate on all surrogates, either 'tc3' or
 %           'trev'
 % 
-% Outputs from the operation include the Gaussianity of the test statistics, a
-% z-test, and various tests based on fitted kernel densities.
+%---OUTPUTS: include the Gaussianity of the test statistics, a z-test, and
+% various tests based on fitted kernel densities.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

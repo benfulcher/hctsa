@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_StdNthDer
+% ------------------------------------------------------------------------------
 % 
 % Estimates the standard deviation of the nth derivative of the time series.
 % 
@@ -12,7 +14,7 @@
 % of the time series; the process is repeated to obtain higher order
 % derivatives.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, time series to analyze
 % 

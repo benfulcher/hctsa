@@ -1,13 +1,15 @@
+% ------------------------------------------------------------------------------
 % BF_iszscored
+% ------------------------------------------------------------------------------
 % 
 % Checks whether the input time series is (eps-close to being) z-scored.
 % Used for displaying warning messages for functions that require z-scored
 % inputs.
 % 
-% INPUT:
+%---INPUT:
 % x, the input time series (or any vector)
 % 
-% OUTPUT:
+%---OUTPUT:
 % iszscored, a logical with the verdict.
 % 
 % ------------------------------------------------------------------------------

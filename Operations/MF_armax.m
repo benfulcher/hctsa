@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_armax
+% ------------------------------------------------------------------------------
 % 
 % Fits an ARMA(p,q) model to the time series and returns various statistics on
 % the result.
@@ -6,7 +8,7 @@
 % Uses the functions iddata, armax, aic, and predict from Matlab's System
 % Identification Toolbox
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -19,9 +21,9 @@
 % nsteps, number of steps to predict into the future for testing the model.
 % 
 % 
-% Outputs include the fitted AR and MA coefficients, the goodness of fit in the
-% training data, and statistics on the residuals from using the fitted model to
-% predict the testing data.
+%---OUTPUTS: include the fitted AR and MA coefficients, the goodness of fit in
+% the training data, and statistics on the residuals from using the fitted model
+% to predict the testing data.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

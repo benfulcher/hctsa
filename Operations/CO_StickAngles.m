@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_StickAngles
+% ------------------------------------------------------------------------------
 % 
 % Analyzes line-of-sight angles between time-series points where each
 % time-series value is treated as a stick protruding from an opaque baseline

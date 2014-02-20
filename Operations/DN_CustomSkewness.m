@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % DN_CustomSkewness
+% ------------------------------------------------------------------------------
 % 
 % Estimates custom skewness measures, the Pearson and Bowley skewnesses.
 % 
@@ -7,7 +9,8 @@
 % 
 % whichskew, the skewness measure to calculate, either 'pearson' or 'bowley'
 % 
-% The Bowley skewness uses the quantile function from Matlab's Statistics Toolbox
+% The Bowley skewness uses the quantile function from Matlab's Statistics
+% Toolbox.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

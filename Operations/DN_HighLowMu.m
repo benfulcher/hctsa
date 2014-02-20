@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % DN_HighLowMu
+% ------------------------------------------------------------------------------
 % 
 % Calculates a statistic related to the mean of the time series data that
 % is above the (global) time-series mean compared to the mean of the data that
 % is below the global time-series mean.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % ------------------------------------------------------------------------------

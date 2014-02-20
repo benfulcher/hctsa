@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % EN_RM_entropy
+% ------------------------------------------------------------------------------
 % 
 % Measures the entropy of the time series using a function by Rudy Moddemeijer
 % 
@@ -7,7 +9,7 @@
 % 
 % The above website has code and documentation for the function.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % ------------------------------------------------------------------------------

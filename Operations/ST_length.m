@@ -1,10 +1,14 @@
+% ------------------------------------------------------------------------------
 % ST_Length
+% ------------------------------------------------------------------------------
 % 
-% Returns the length of the time series.
+% Measures the length of the input time series vector.
 % 
-% INPUT:
+%---INPUT:
 % y, the time series vector
 % 
+%---OUTPUT: the length of the time series
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

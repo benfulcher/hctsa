@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_GP_hyperparameters
+% ------------------------------------------------------------------------------
 % 
 % Fits a Gaussian Process model to a portion of the time series and returns the
 % fitted hyperparameters, as well as statistics describing the goodness of fit

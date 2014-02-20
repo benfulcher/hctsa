@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % WL_cwt
+% ------------------------------------------------------------------------------
 % 
 % Applies a continuous wavelet transform to the time series using the function
 % cwt from Matlab's Wavelet Toolbox.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % wname, the wavelet name, e.g., 'db3' (Daubechies wavelet), 'sym2' (Symlet),
@@ -13,8 +15,8 @@
 % maxscale, the maximum scale of wavelet analysis.
 % 
 % 
-% Outputs from this function are statistics on the coefficients, entropy, and
-% results of coefficients summed across scales.
+%---OUTPUTS: statistics on the coefficients, entropy, and results of
+% coefficients summed across scales.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

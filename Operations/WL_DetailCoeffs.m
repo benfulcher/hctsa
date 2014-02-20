@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % WL_DetailCoeffs
+% ------------------------------------------------------------------------------
 % 
 % Compares the detail coefficients obtained at each level of the wavelet
 % decomposition from 1 to the maximum possible level for the wavelet given the
 % length of the input time series (computed using wmaxlev from
 % Matlab's Wavelet Toolbox).
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % wname, the name of the mother wavelet to analyze the data with: e.g., 'db3',
@@ -14,7 +16,7 @@
 % maxlevel, the maximum wavelet decomposition level (can also set to 'max' to be
 %               that determined by wmaxlev)
 % 
-% Outputs are a set of statistics on the detail coefficients.
+%---OUTPUTS: A set of statistics on the detail coefficients.
 %       
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

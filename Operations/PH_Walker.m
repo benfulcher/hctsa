@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % PH_Walker
+% ------------------------------------------------------------------------------
 % 
 % This operation simulates a hypothetical particle (or 'walker'), that moves in
 % the time domain in response to values of the time series at each point.
@@ -6,7 +8,7 @@
 % Outputs from this operation are summaries of the walker's motion, and
 % comparisons of it to the original time series.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -37,7 +39,7 @@
 % 
 % wparam, the parameters for the specified walkerrule, explained above.
 % 
-% Outputs include the mean, spread, maximum, minimum, and autocorrelation of the
+%---OUTPUTS: include the mean, spread, maximum, minimum, and autocorrelation of the
 % walker's trajectory, the number of crossings between the walker and the
 % original time series, the ratio or difference of some basic summary statistics
 % between the original time series and the walker, an Ansari-Bradley test

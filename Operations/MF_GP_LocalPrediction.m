@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_GP_LocalPrediction
+% ------------------------------------------------------------------------------
 % 
 % Fits a given Gaussian Process model to a section of the time series and uses
 % it to predict to the subsequent datapoint.
@@ -6,7 +8,7 @@
 % % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % covfunc, covariance function in the standard form for the gpml package.
@@ -28,7 +30,7 @@
 %                    series by training on the other values in that segment.
 % 
 % 
-% Outputs are summaries of the quality of predictions made, the mean and
+%---OUTPUTS: summaries of the quality of predictions made, the mean and
 % spread of obtained hyperparameter values, and marginal likelihoods.
 % 
 % ------------------------------------------------------------------------------

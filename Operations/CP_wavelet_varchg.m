@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % CP_wavelet_varchg
+% ------------------------------------------------------------------------------
 % 
 % Finds variance change points using functions from Matlab's Wavelet Toolbox,
 % including the primary function wvarchg, which estimates the change points in
 % the time series.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -20,7 +22,8 @@
 %           ensures that change points are separated by at least 2% of the
 %           time-series length)
 % 
-% The output from this function is the optimal number of change points.
+% 
+%---OUTPUT: the optimal number of change points.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

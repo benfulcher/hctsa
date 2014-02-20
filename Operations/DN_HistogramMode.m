@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % DN_HistogramMode
+% ------------------------------------------------------------------------------
 % 
 % Measures the mode of the time series using histograms a given numbers
 % of bins.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series.
 % 

@@ -1,4 +1,6 @@
+% --------------------------------------------------------------------------
 % TSQ_LabelGroups
+% --------------------------------------------------------------------------
 % 
 % You provide a set of keyword options to store a grouping of time series in the
 % store.
@@ -150,14 +152,11 @@ for i = 1:NumGroups
     fprintf(1,'%s -- %u matches\n',KeywordGroups{i},length(GroupIndices{i}));
 end
 
-% Save the grouping back to file?
-% Eventually would be nice to add a group index to each element, e.g., as [TimeSeries.Group]
-% But now we'll just save GroupIndices
+% --------------------------------------------------------------------------
+%% Save back to file?
+% --------------------------------------------------------------------------
 if SaveBack
-    % Actually, you don't need to check variables, you can just append
-    % Elements = who(matfile(TheFile));
-    % Elements = whos('-file',TheFile);
-    % if ismember({Elements.name},'GroupIndices')
+    % You don't need to check variables, you can just append back to the input file:
     if ~all(cellfun(@isempty,GroupIndices))
         fprintf(1,'Saving group labels and information back to %s...',TheFile);
         

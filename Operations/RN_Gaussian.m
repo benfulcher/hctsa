@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % RN_Gaussian
+% ------------------------------------------------------------------------------
 % 
 % Returns a random number drawn from a normal distribution.
 % 
@@ -8,7 +10,7 @@
 % This operation was sometimes used as a control, as a kind of 'null operation'
 % with which to compare to the performance of other operations that use
 % informative properties of the time-series data, but is otherwise useless for
-% any real analysis.
+% any real analysis. It is NOT included in the set of default operations.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

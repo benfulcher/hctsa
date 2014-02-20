@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % BF_CheckToolbox
+% ------------------------------------------------------------------------------
 % 
 % Checks for the given Matlab Toolbox license and produces an appropriate error
 % message if there's a problem.
 % 
-% INPUT:
+%---INPUT:
 % thetoolbox, the string identifying the toolbox (in format of license command
 %               in Matlab)
 % 

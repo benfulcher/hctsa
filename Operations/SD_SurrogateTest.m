@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SD_SurrogateTest
+% ------------------------------------------------------------------------------
 % 
 % Analyzes the test statistics obtained from surrogate time series compared to
 % those measured from the given time series.
@@ -11,7 +13,7 @@
 % SD_MakeSurrogates
 % 
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % 
 % surrmeth, the method for generating surrogate time series:

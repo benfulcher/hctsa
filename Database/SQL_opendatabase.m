@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SQL_opendatabase
+% ------------------------------------------------------------------------------
 % 
 % Opens the database as dbc for use in retrieving and storing in the mySQL
 % database

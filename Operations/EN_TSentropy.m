@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % EN_TSentropy
+% ------------------------------------------------------------------------------
 % 
 % Estimates the Tsallis entropy of a signal using a parameter q that
 % measures the non-extensivity of the system; q = 1 recovers the Shannon
 % entropy.
 % 
-% INPUTS:
+%---INPUTS:
 % x, the time series
 % q, the non-extensivity parameter
 % 

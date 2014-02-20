@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % PP_Iterate
+% ------------------------------------------------------------------------------
 % 
 % Iteratively applies a transformation to the time series and measures how
 % various properties of the time series change as the transformation is
 % iteratively applied to it.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 

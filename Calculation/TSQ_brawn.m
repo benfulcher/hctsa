@@ -1,4 +1,6 @@
+% --------------------------------------------------------------------------
 % TSQ_brawn
+% --------------------------------------------------------------------------
 % 
 % This function fills in the missing elements of TS_DataMat, from HCTSA_loc.mat
 % (retrieved from the database using TSQ_prepared) The function systematically
@@ -31,7 +33,11 @@
 % ------------------------------------------------------------------------------
 
 function TSQ_brawn(tolog,toparallel,bevocal)
-%% Check valid inputs / set defaults
+    
+% --------------------------------------------------------------------------
+%% Check inputs and set defaults
+% --------------------------------------------------------------------------
+
 % Log to file
 if nargin < 1
 	tolog = 0; % by default, do not log to file
@@ -54,46 +60,55 @@ else % use single-threaded for loops
 	fprintf(fid,'Computations will be performed serially without parallelization\n')
 end
 
-% be vocal?
+% Be vocal?
 if nargin < 3
     bevocal = 1; % write back lots of information to screen
     % prints every piece of code evaluated (nice for error checking)
 end
 
-%% Read in information from local files
+
+% --------------------------------------------------------------------------
+%% Load information from local files
+% --------------------------------------------------------------------------
 fprintf(fid,'Reading in data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat')
 fprintf(fid,' Done.\n');
 
-%% Definitions
-nts = length(TimeSeries); % number of time series
-nops = length(Operations); % number of operations
-nMm = length(MasterOperations); % number of master functions
+% Definitions
+NumTimeSeries = length(TimeSeries); % number of time series
+NumOps = length(Operations); % number of operations
 
-%%% Let's get going
-fprintf(fid,'Calculation has begun on %s using %u datasets and %u operations\n',datestr(now),nts,nops);
+fprintf(fid,['Calculation has begun on %s using %u datasets ' ...
+                            'and %u operations\n'],datestr(now),NumTimeSeries,NumOps);
 
 %% Open parallel processing worker pool
 if toparallel
     % first check that the user can use the Parallel Computing Toolbox:
     heyo = which('matlabpool');
     if isempty(heyo)
-        fprintf(1,'Parallel Computing Toolbox not found -- cannot perform computations across multiple cores\n')
+        fprintf(1,['Parallel Computing Toolbox not found -- ' ...
+                        'cannot perform computations across multiple cores\n'])
         toparallel = 0;
     else
         if (matlabpool('size') == 0)
         	matlabpool open;
-        	fprintf(fid,'Matlab parallel processing pool opened with %u and ready to go',matlabpool('size'))
+            fprintf(fid,['Matlab parallel processing pool opened with %u ' ...
+                                    'and ready to go'],matlabpool('size'))
         else
-        	fprintf(fid,'Matlab parallel processing pool already open. Size: %u\n',matlabpool('size'))
+            fprintf(fid,['Matlab parallel processing pool already open. ' ...
+                                        'Size: %u\n'],matlabpool('size'))
         end
     end
 end
 
-times = zeros(nts,1); % stores the time taken for each time series to have its metrics calculated (for determining time remaining)
-lst = 0; % Last saved time
+% times stores the time taken for each time series to have its metrics calculated (for determining time remaining)
+times = zeros(NumTimeSeries,1); 
+LastSavedTime = 0; % Last saved time
 
-for i = 1:nts
+% --------------------------------------------------------------------------
+%% Computation
+% --------------------------------------------------------------------------
+for i = 1:NumTimeSeries
 	bigtimer = tic;
 
 	qq = TS_Quality(i,:); % The calculation states of any existing results for the current time series, a line of TS_Quality
@@ -106,12 +121,13 @@ for i = 1:nts
 		qqi = zeros(ncal,1); % Quality of output from each operation
 		cti = ones(ncal,1)*NaN; % Calculation time for each operation
         
-        % Collect the time-series data
+        % Load the time-series data as x
         x = TimeSeries(i).Data;
-        % x = dlmread(TimeSeries(i).FileName);
         
+        % --------------------------------------------------------------------------
 		%% Basic checking on x
-		% univariate and Nx1
+        % --------------------------------------------------------------------------
+		% Univariate and [N x 1]
 		if size(x,2) ~= 1
 			if size(x,1) == 1
                 fprintf(fid,['***** The time series %s is a row vector. Not sure how it snuck through the cracks, but I ' ...
@@ -127,25 +143,33 @@ for i = 1:nts
             end
 		end
 
+        % --------------------------------------------------------------------------
         %% Pre-Processing
+        % --------------------------------------------------------------------------
 		% y is a z-scored transformation of the time series
-		y = BF_zscore(x); % z-score without using a Statistics Toolbox license (i.e., the 'zscore' function)
+        % z-score without using a Statistics Toolbox license (i.e., the 'zscore' function):
+		y = BF_zscore(x);
 
-		% So we now have the raw time series x and the z-scored time series y. Operations take these as inputs.
+		% So we now have the raw time series x and the z-scored time series y.
+		% Operations take these as inputs.
 
-		% Display information
+        % --------------------------------------------------------------------------
+		%% Display information
+        % --------------------------------------------------------------------------
 		WhichTimeSeries = which(TimeSeries(i).FileName);
 		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 	    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
-	    fprintf(fid,'- - - - - - - -  Loaded time series %u / %u - - - - - - - -\n',i,nts)
+	    fprintf(fid,'- - - - - - - -  Loaded time series %u / %u - - - - - - - -\n',i,NumTimeSeries)
 		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'%s\n',WhichTimeSeries)
 		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'Preparing to calculate %s (ts_id = %u, N = %u samples) [computing %u / %u operations]\n', ...
-                            		TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length,ncal,nops)
+                            		TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length,ncal,NumOps)
 	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
 
+        % --------------------------------------------------------------------------
 		%% Evaluate master functions in parallel
+        % --------------------------------------------------------------------------
 		% Because of parallelization, we have to evaluate all the master functions *first*
 		% Check through the metrics to determine which master functions are relevant for this run
 
@@ -170,11 +194,13 @@ for i = 1:nts
 		% Evaluate all the master operations
 		if toparallel
             parfor jj = 1:nMtocalc % PARFOR Loop
-                [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj},fid,bevocal);
+                [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
+                                TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj},fid,bevocal);
             end
         else
             for jj = 1:nMtocalc % Normal FOR Loop
-                [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj},fid,bevocal);
+                [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
+                                TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj},fid,bevocal);
             end
 		end
 		
@@ -191,23 +217,23 @@ for i = 1:nts
         par_MasterOperationsLabel = {MasterOperations.Label}; % Master labels
         par_OperationCodeString = {Operations(tcal).CodeString}; % Code string for each operation to calculate (i.e., in tcal)
         
-		%% Now assign all the results to the corresponding operations
+        % --------------------------------------------------------------------------
+		%% Assign all the results to the corresponding operations
+        % --------------------------------------------------------------------------
 		if toparallel
 	        parfor jj = 1:ncal
-                                            % TSQ_brawn_oploop(MasterOutput,MasterCalcTime,MasterLabel,OperationCode,fid)
                 [ffi(jj), qqi(jj), cti(jj)] = TSQ_brawn_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
-                                                               MasterCalcTime(par_OperationMasterInd(jj)), ...
-                                                               par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
-                                                               par_OperationCodeString{jj},fid);
+                                                           MasterCalcTime(par_OperationMasterInd(jj)), ...
+                                                           par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
+                                                           par_OperationCodeString{jj},fid);
             end
-            % TSQ_brawn_oploop(x, y, moplink, MasterOutput, MasterCalcTime, Mmlab, par_OperationMasterLabelj, par_TimeSeriesFileName, fid, bevocal)
 		else
             for jj = 1:ncal
                 try
                     [ffi(jj), qqi(jj), cti(jj)] = TSQ_brawn_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
-                                                                   MasterCalcTime(par_OperationMasterInd(jj)), ...
-                                                                   par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
-                                                                   par_OperationCodeString{jj},fid);
+                                                               MasterCalcTime(par_OperationMasterInd(jj)), ...
+                                                               par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
+                                                               par_OperationCodeString{jj},fid);
                 catch
                     if (MasterOperations(par_OperationMasterInd(jj)).ID == 0)
                         error('The operations database is corrupt: there is no link from ''%s'' to a master code', ...
@@ -221,8 +247,9 @@ for i = 1:nts
             end
         end
         
+        % --------------------------------------------------------------------------
 		%% Code special values:
-
+        % --------------------------------------------------------------------------
 		% (*) Errorless calculation: q = 0, output = <real number>
 		% (*) Fatal error: q = 1, output = 0; (this is done already in the code above)
 
@@ -265,54 +292,58 @@ for i = 1:nts
     times(i) = toc(bigtimer); % the time taken to calculate (or not, if ncal = 0) operations for this time series
 
 
-    % Calculation complete: print information about this time series calculation
+    % --------------------------------------------------------------------------
+    %% Calculation complete: print information about this time series calculation
+    % --------------------------------------------------------------------------
 	fprintf(fid,'********************************************************************\n')
     fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
-    fprintf(fid,'oOoOo Calculation complete for %s (ts_id = %u, N = %u)  oOoOo\n',TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length);
+    fprintf(fid,'oOoOo Calculation complete for %s (ts_id = %u, N = %u)  oOoOo\n', ...
+                            TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length);
     if ncal > 0 % Some amount of calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u other outputs stored. [%u / %u]\n',...
-	     					ngood,nerror,nother,ncal,nops);
+	     					ngood,nerror,nother,ncal,NumOps);
 		fprintf(fid,'Calculations for this time series took %s.\n',BF_thetime(times(i),1));
     else
-    	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',nops);
+    	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',NumOps);
     end
-    if i < nts
-        fprintf(fid,'- - - - - - - -  %u time series remaining - - - - - - - -\n',nts-i);
-    	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n',BF_thetime(((nts-i)*mean(times(1:i))),1));
+    if i < NumTimeSeries
+        fprintf(fid,'- - - - - - - -  %u time series remaining - - - - - - - -\n',NumTimeSeries-i);
+    	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n', ...
+                                        	BF_thetime(((NumTimeSeries-i)*mean(times(1:i))),1));
     else % the final time series
-        fprintf(fid,'- - - - - - - -  All time series calculated! - - - - - - - -\n',nts-i);
+        fprintf(fid,'- - - - - - - -  All time series calculated! - - - - - - - -\n',NumTimeSeries-i);
     end
     fprintf(fid,'********************************************************************\n');
 
- 	% Save to HCTSA_loc every 10 minutes
-    if sum(times(1:i))-lst > 60*10; % it's been more than 10 mins since last save
+    % --------------------------------------------------------------------------
+ 	% Save to HCTSA_loc every 10 minutes just in case
+    % --------------------------------------------------------------------------
+    if sum(times(1:i))-LastSavedTime > 60*10; % it's been more than 10 mins since last save
         fprintf(fid,'Not finished calculations yet, but saving progress so far to file...')
-        save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries','Operations','MasterOperations','-v7.3')
+        save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries',
+                                    'Operations','MasterOperations','-v7.3')
         fprintf(fid,' All saved.\n')
-        % save('TS_DataMat.mat','TS_loc','-v7.3');        fprintf(fid,'TS_DataMat.mat')
-        % save('TS_CalcTime.mat','TS_CalcTime','-v7.3');  fprintf(fid,', TS_CalcTime.mat')
-        % save('TS_Quality.mat','TS_Quality','-v7.3');    fprintf(fid,', TS_Quality.mat. All saved.\n')
-        lst = sum(times(1:i)); % the last saved time (1)
+        LastSavedTime = sum(times(1:i)); % the last saved time (1)
     end
 end
 
-%%% Finished calculating!! Aftermath:
+
+% --------------------------------------------------------------------------
+% --------------------------------------------------------------------------
+%% Finished calculating!!
+% --------------------------------------------------------------------------
+% --------------------------------------------------------------------------
 fprintf(fid,'!! !! !! !! !! !! !!  Calculation completed at %s !! !! !! !! !! !!\n',datestr(now))
 fprintf(fid,'Calculations took a total of %s.\n',BF_thetime(sum(times),1))
 
 % Aave the local files for subsequent integration into the storage system
 fprintf(1,'Saving all results to HCTSA_loc.mat...')
-save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries','Operations','MasterOperations','-v7.3')
+save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries',
+                                'Operations','MasterOperations','-v7.3')
 fprintf(fid,' All saved.\n')
 
 if tolog, fclose(fid); end % close the .log file
 
-% if agglomerate
-%     fprintf(1,'\n\nCalculation done: Calling TSQ_agglomerate to store back results\n')
-%     writewhat = 'null'; % only write back to NULL entries in the database
-%     TSQ_agglomerate(writewhat,dbname,tolog)
-% else
 fprintf(1,'Calculation complete: you can now run TSQ_agglomerate to store results to a mySQL database\n')
-% end
 
 end

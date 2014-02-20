@@ -1,14 +1,16 @@
+% ------------------------------------------------------------------------------
 % BF_label_space
+% ------------------------------------------------------------------------------
 % 
 % Returns a cell that only keeps every 'skip' objects from the input string, and
 % makes all other entries empty.
 % Useful for labeling plots with too many elements to be legible otherwise.
 % 
-% INPUTS:
+%---INPUTS:
 % k, the input cell of strings
 % skip, the increment at which string labels will be kept
 % 
-% OUTPUT:
+%---OUTPUT:
 % labels, the transformed labels
 % 
 % ------------------------------------------------------------------------------

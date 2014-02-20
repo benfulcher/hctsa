@@ -1,7 +1,9 @@
+% ------------------------------------------------------------------------------
 % DN_Quantile
+% ------------------------------------------------------------------------------
 % 
-% Calculates the quantile value at a specified proportion p using
-% the Statistics Toolbox function, quantile.
+% Calculates the quantile value at a specified proportion p using the Statistics
+% Toolbox function, quantile.
 % 
 % INPUTS:
 % y, the input time series

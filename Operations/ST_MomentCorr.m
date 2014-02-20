@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % ST_MomentCorr
+% ------------------------------------------------------------------------------
 % 
 % Calculates correlations between simple statistics summarizing the distribution
 % of values in local windows of the signal.
 % 
 % Idea to implement this operation was of Nick S. Jones.
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % 
 % wl, the sliding window length (can be a fraction to specify a proportion of

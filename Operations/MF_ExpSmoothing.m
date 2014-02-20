@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_ExpSmoothing
+% ------------------------------------------------------------------------------
 % 
 % Fits an exponential smoothing model to the time series using a training set to
 % fit the optimal smoothing parameter, alpha, and then applies the result to the
@@ -9,7 +11,7 @@
 % Code is adapted from original code provided by Siddharth Arora:
 % Siddharth.Arora@sbs.ox.ac.uk
 % 
-% INPUTS:
+%---INPUTS:
 % x, the input time series
 % 
 % ntrain, the number of samples to use for training (can be a proportion of the
@@ -17,7 +19,7 @@
 %           
 % alpha, the exponential smoothing parameter
 % 
-% Outputs include the fitted alpha, and statistics on the residuals from the
+%---OUTPUTS: include the fitted alpha, and statistics on the residuals from the
 % prediction phase.
 % 
 % Future alteration could take a number of training sets and average to some

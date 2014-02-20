@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSQ_brawn_oploop
+% ------------------------------------------------------------------------------
 % 
 % Function that links operations to outputs of corresponding master operations,
 % including the assignment of error codes.

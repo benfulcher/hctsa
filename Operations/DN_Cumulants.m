@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % DN_Cumulants
+% ------------------------------------------------------------------------------
 % 
 % Very simple function that uses the skewness and kurtosis functions in 
 % Matlab's Statistics Toolbox to calculate these higher order moments of input time series, y
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 

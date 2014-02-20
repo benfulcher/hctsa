@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % EN_SampEn
+% ------------------------------------------------------------------------------
 % 
 % Estimates the Sample Entropy of the time series, SampEn(m,r), by referencing
 % code from PhysioNet.
@@ -18,7 +20,7 @@
 % "Control Entropy: A complexity measure for nonstationary signals"
 % E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % M, the embedding dimension
 % r, the threshold

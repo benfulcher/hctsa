@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSTL_predict
+% ------------------------------------------------------------------------------
 % 
 % References TSTOOL code 'predict', which does local constant iterative
 % prediction for scalar data using fast nearest neighbour searching. There are
@@ -6,7 +8,7 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, scalar column vector time series
 % 

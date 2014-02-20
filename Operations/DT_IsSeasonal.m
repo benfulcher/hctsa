@@ -1,14 +1,16 @@
+% ------------------------------------------------------------------------------
 % DT_IsSeasonal
+% ------------------------------------------------------------------------------
 % 
 % A simple test of seasonality by fitting a 'sin1' model to the time series
 % using fit function from the Curve Fitting Toolbox. The output is binary: 1 if
 % the goodness of fit, R^2, exceeds 0.3 and the amplitude of the fitted periodic
 % component exceeds 0.5, and 0 otherwise.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
-% OUTPUT: 1 (seasonal), 0 (non-seasonal)
+%---OUTPUT: Binary: 1 (= seasonal), 0 (= non-seasonal)
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

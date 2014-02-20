@@ -1,19 +1,21 @@
+% ------------------------------------------------------------------------------
 % BF_NormalizeMatrix
+% ------------------------------------------------------------------------------
 % 
 % Normalizes all columns of an input matrix.
 % 
-% INPUTS:
+%---INPUTS:
 % F, the input matrix
 % normopt, the normalization method to use (see body of the code for options)
 % itrain, learn the normalization parameters just on these indices, then apply
 %         it on the full dataset (required for training/testing procedures where
 %         the testing data has to remain unseen).
 % 
-% OUTPUT:
+%---OUTPUT:
 % F, the normalized matrix
 % 
 % Note that NaNs are ignored -- only real data is used for the normalization
-% (assume NaNs are a minority of the data)
+% (assume NaNs are a minority of the data).
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

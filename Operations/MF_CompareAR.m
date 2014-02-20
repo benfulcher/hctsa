@@ -1,17 +1,19 @@
+% ------------------------------------------------------------------------------
 % MF_CompareAR
+% ------------------------------------------------------------------------------
 % 
 % Compares fits of AR models of various orders to the input time series.
 % 
 % Uses functions from Matlab's System Identification Toolbox: iddata, arxstruc,
 % and selstruc
 % 
-% INPUTS:
+%---INPUTS:
 % y, vector of equally-spaced time series data
 % orders, a vector of possible model orders
 % howtotest, specify a fraction, or provide a string 'all' to train and test on
 %            all the data
 % 
-% Outputs are statistics on the loss at each model order, which are obtained by
+%---OUTPUTS: statistics on the loss at each model order, which are obtained by
 % applying the model trained on the training data to the testing data.
 % 
 % ------------------------------------------------------------------------------

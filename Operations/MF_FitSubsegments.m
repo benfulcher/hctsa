@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_FitSubsegments
+% ------------------------------------------------------------------------------
 % 
 % Looks at the robustness of fitted parameters from a model applied to different
 % segments of the time series.
@@ -10,7 +12,7 @@
 % 
 % N.B., this code inherits strongly from this MF_CompareTestSets
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series.
 % 
 % model, the model to fit in each segments of the time series:
@@ -38,7 +40,7 @@
 %           the time-series length. e.g., [20,0.1] takes 20 segments of 10% the
 %           time-series length.
 % 
-% Outputs depend on the model, as described above.
+%---OUTPUTS: depend on the model, as described above.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

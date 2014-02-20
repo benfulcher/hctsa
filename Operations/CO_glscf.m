@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_glscf
+% ------------------------------------------------------------------------------
 % 
 % Calculates the generalized linear self-correlation function of a time series.
 % This function was introduced in Queiros and Moyano in Physica A, Vol. 383, pp.

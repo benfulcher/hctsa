@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_FirstMin
+% ------------------------------------------------------------------------------
 % 
 % Returns the time at which the first minimum in a given correlation function
 % occurs.

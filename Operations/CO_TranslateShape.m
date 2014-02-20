@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_TranslateShape
+% ------------------------------------------------------------------------------
 % 
 % Returns statistics on the number of data points that reside inside a given
 % geometric shape that is moved around the time series. Inputs specify a shape

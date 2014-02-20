@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % ST_FitPolynomial
+% ------------------------------------------------------------------------------
 % 
 % Fits a polynomial of order k to the time series, and returns the mean
 % square error of the fit.
@@ -6,6 +8,12 @@
 % Usually kind of a stupid thing to do with a time series, but it's sometimes
 % somehow informative for time series with large trends.
 % 
+%---INPUTS:
+% y, the input time series.
+% k, the order of the polynomial to fit to y.
+% 
+%---OUTPUT: RMS error of the fit.
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

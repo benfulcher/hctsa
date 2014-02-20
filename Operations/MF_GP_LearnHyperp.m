@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_GP_LearnHyperp
+% ------------------------------------------------------------------------------
 % 
 % Function used by main Gaussian Process model fitting operations that learns
 % Gaussian Process hyperparameters for the time series.
@@ -7,7 +9,7 @@
 % CLASSIFICATION Toolbox version 3.2, which is avilable at:
 % http://gaussianprocess.org/gpml/code
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % covfunc,       the covariance function, formated as gpml likes it
 % nfevals,       the number of function evaluations

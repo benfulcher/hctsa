@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_MS_nlpe
+% ------------------------------------------------------------------------------
 % 
 % Computes the normalized 'drop-one-out' constant interpolation nonlinear
 % prediction error for a time-delay embedded time series using Michael Small's
@@ -10,7 +12,7 @@
 % 
 % Michael Small's Matlab code is available at http://small.eie.polyu.edu.hk/matlab/
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % de, the embedding dimension (can be an integer, or 'fnn' to select as the
 %       point where the proportion of false nearest neighbors falls below 5%
@@ -19,7 +21,7 @@
 %       of the ACF or 'mi' to be the first minimum of the automutual information
 %       function)
 % 
-% Outputs include measures of the meanerror of the nonlinear predictor, and a
+%---OUTPUTS: include measures of the meanerror of the nonlinear predictor, and a
 % set of measures on the correlation, Gaussianity, etc. of the residuals.
 % 
 % ------------------------------------------------------------------------------

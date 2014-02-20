@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SQL_getids
+% ------------------------------------------------------------------------------
 % 
 % Takes as input a set of constraints on the time series and operations to
 % include then runs the appropriate mySQL commands and outputs the relevant

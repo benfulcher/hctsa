@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % PH_ForcePotential
+% ------------------------------------------------------------------------------
 % 
 % Couples the values of the time series to a given dynamical system. The input
 % time series forces a particle in the given potential well.
@@ -10,7 +12,7 @@
 % 
 % (ii) Sinusoidal potential with V(x) = -cos(x/alpha), or F(x) = sin(x/alpha)/alpha
 %
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % whatpot, the potential function to simulate:
@@ -30,7 +32,7 @@
 %               * kappa is the coefficient of friction,
 %               * deltat sets the time step for the simulation.
 % 
-% Outputs are statistics summarizing the trajectory of the simulated particle,
+%---OUTPUTS: statistics summarizing the trajectory of the simulated particle,
 % including its mean, the range, proportion positive, proportion of times it
 % crosses zero, its autocorrelation, final position, and standard deviation.
 % 

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_StateSpaceCompOrder
+% ------------------------------------------------------------------------------
 % 
 % Fits state space models using n4sid (from Matlab's System Identification
 % Toolbox) of orders 1, 2, ..., maxorder and returns statistics on how the
@@ -8,7 +10,7 @@
 % Uses the functions iddata, n4sid, and aic from Matlab's System Identification
 % Toolbox
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % maxorder, the maximum model order to consider.
 % 

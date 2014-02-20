@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_SpreadRandomLocal
+% ------------------------------------------------------------------------------
 % 
 % Implements a bootstrap-based stationarity measure: nseg time-series segments
 % of length l are selected at random from the time series and in each
@@ -6,7 +8,7 @@
 % kurtosis, ApEn(1,0.2), SampEn(1,0.2), AC(1), AC(2), and the first
 % zero-crossing of the autocorrelation function.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % l, the length of local time-series segments to analyze as a positive integer.
@@ -16,7 +18,7 @@
 % 
 % nseg, the number of randomly-selected local segments to analyze
 % 
-% Outputs are the mean and also the standard deviation of this set of 100 local
+%---OUTPUTS: the mean and also the standard deviation of this set of 100 local
 % estimates.
 % 
 % ------------------------------------------------------------------------------

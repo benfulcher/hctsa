@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_GP_FitAcross
+% ------------------------------------------------------------------------------
 % 
 % Trains a Gaussian Process model on equally-spaced points throughout the time
 % series and uses the model to predict its intermediate values.
@@ -6,12 +8,12 @@
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % covfunc, the covariance function (structured in the standard way for the gpml toolbox)
 % npoints, the number of points through the time series to fit the GP model to
 % 
-% Outputs summarize the error and fitted hyperparameters.
+%---OUTPUTS: summarize the error and fitted hyperparameters.
 % 
 % In future could do a better job of the sampling of points -- perhaps to take
 % into account the autocorrelation of the time series.

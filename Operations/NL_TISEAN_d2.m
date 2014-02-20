@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TISEAN_d2
+% ------------------------------------------------------------------------------
 % 
 % Implements the d2 routine from the popular TISEAN package for
 % nonlinear time-series analysis:
@@ -17,7 +19,7 @@
 % the correlation entropy of a given time series, y. Our code uses the outputs
 % from this algorithm to return a set of informative features about the results.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, input time series
 % 

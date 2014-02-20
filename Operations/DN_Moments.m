@@ -1,10 +1,12 @@
+% ------------------------------------------------------------------------------
 % DN_Moments
+% ------------------------------------------------------------------------------
 % 
 % Output is the moment of the distribution of the input time series.
 % Normalizes by the standard deviation
 % Uses the moment function from Matlab's Statistics Toolbox
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % n, the moment to calculate (a scalar)
 % 

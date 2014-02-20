@@ -1,8 +1,10 @@
+% ------------------------------------------------------------------------------
 % DN_cv
+% ------------------------------------------------------------------------------
 % 
-% Calculates the coefficient of variation, sigma^k / mu^k, of order k
+% Calculates the coefficient of variation, sigma^k / mu^k, of order k.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % x, the input time series
 % 

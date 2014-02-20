@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_DriftingMean
+% ------------------------------------------------------------------------------
 % 
 % This function implements an idea found in the Matlab Central forum:
 % http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
@@ -19,7 +21,7 @@
 % variance in each segment and compares the maximum and minimum mean to the mean
 % variance.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % howl, (i) 'fix': fixed-length segments (of length l)

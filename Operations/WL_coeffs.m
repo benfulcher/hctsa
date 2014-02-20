@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % WL_coeffs
+% ------------------------------------------------------------------------------
 % 
 % Performs a wavelet decomposition of the time series using a given wavelet at a
 % given level and returns a set of statistics on the coefficients obtained.
 % 
 % Uses Matlab's Wavelet Toolbox.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % wname, the wavelet name, e.g., 'db3' (see Wavelet Toolbox Documentation for

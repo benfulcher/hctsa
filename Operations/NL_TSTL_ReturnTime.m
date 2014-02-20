@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % NL_TSTL_ReturnTime
+% ------------------------------------------------------------------------------
 % 
 % Computes a histogram of return times, the time taken for the time series to
 % return to a similar location in phase space for a given reference point using
@@ -8,7 +10,7 @@
 % 
 % Strong peaks in the histogram are indicative of periodicities in the data.
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, scalar time series as a column vector
 % NNR, number of nearest neighbours
@@ -17,7 +19,7 @@
 % Nref, number of reference indicies
 % embedparams, to feed into BF_embed
 % 
-% Outputs include basic measures from the histogram, including the occurrence of
+%---OUTPUTS: include basic measures from the histogram, including the occurrence of
 % peaks, spread, proportion of zeros, and the distributional entropy.
 % 
 % ------------------------------------------------------------------------------

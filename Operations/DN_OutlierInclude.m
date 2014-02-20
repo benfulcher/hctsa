@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % DN_OutlierInclude
+% ------------------------------------------------------------------------------
 % 
 % Measures a range of different statistics about the time series as more and
 % more outliers are included in the calculation according to a specified rule:
@@ -16,7 +18,7 @@
 % algorithm measure how these statistical quantities change as more extreme
 % points are included in the calculation.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series (ideally z-scored)
 % 
 % howth, the method of how to determine outliers: 'abs', 'p', or 'n' (see above
@@ -58,12 +60,18 @@
 function out = DN_OutlierInclude(y,howth,inc)
 % Ben Fulcher, June 2009
 
+% ------------------------------------------------------------------------------
+%% Preliminaries
+% ------------------------------------------------------------------------------
+
 % Check a Curve Fitting toolbox license is available
 BF_CheckToolbox('curve_fitting_toolbox');
 
-doplot = 0; % plot some outputs
+doplot = 0; % Plot some outputs
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 % If time series is all the same value -- ridiculous! ++BF 21/3/2010
 if all(y == y(1)) % the whole time series is just a single value
     fprintf(1,'The time series is a constant!\n')
@@ -84,7 +92,9 @@ if nargin < 3
 end
 
 
-% Initialize thresholds
+% ------------------------------------------------------------------------------
+%% Initialize thresholds
+% ------------------------------------------------------------------------------
 switch howth
     case 'abs' % analyze absolute value deviations
         thr = (0:inc:max(abs(y)));
@@ -137,7 +147,9 @@ for i = 1:length(thr)
     
 end
 
+% ------------------------------------------------------------------------------
 %% Trim
+% ------------------------------------------------------------------------------
 % Trim off where the number of events is only one; hence the differenced
 % series returns NaN
 fbi = find(isnan(msDt(:,1)),1,'first'); % first bad index
@@ -166,7 +178,9 @@ if doplot
     plot(thr,msDt(:,6),'.-c'); hold off
 end
 
+% ------------------------------------------------------------------------------
 %%% Generate outputs:
+% ------------------------------------------------------------------------------
 %% Fit an Exponential to the mean as a function of the threshold
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[0.1 2.5 1]);
 f = fittype('a*exp(b*x)+c','options',s);

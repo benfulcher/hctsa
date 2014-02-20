@@ -1,8 +1,10 @@
+% ------------------------------------------------------------------------------
 % BF_sgnchange
+% ------------------------------------------------------------------------------
 % 
 % Returns where the input vector, y, changes sign.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input vector
 % dofind, (i) 0: returns a logical vector with 1s where the input changes sign
 %         (ii) 1: returns a vector of indicies of where the input vector changes

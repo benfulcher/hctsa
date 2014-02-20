@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % SY_PPtest
+% ------------------------------------------------------------------------------
 % 
 % Performs the Phillips-Peron unit root test for a time series via the code
 % pptest from Matlab's Econometrics Toolbox.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % lags, a vector of lags
@@ -19,7 +21,7 @@
 %               't2' a lag-adjusted, 'unStudentized' t statistic.
 %               (see Matlab documentation for information)
 %               
-% Outputs are statistics on the p-values and lags obtained from the set of tests, as
+%---OUTPUTS: statistics on the p-values and lags obtained from the set of tests, as
 % well as measures of the regression statistics.
 % 
 % ------------------------------------------------------------------------------

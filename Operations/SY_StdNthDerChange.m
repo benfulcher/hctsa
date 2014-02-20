@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % SY_StdNthDerChange
+% ------------------------------------------------------------------------------
 % 
 % This operation returns statistics on how the output of SY_StdNthDer changes
 % with the order of the derivative of the signal.
@@ -8,7 +10,7 @@
 % Vladimir Vassilevsky, DSP and Mixed Signal Design Consultant from
 % http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % maxd, the maximum derivative to take.

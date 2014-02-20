@@ -1,7 +1,16 @@
+% ------------------------------------------------------------------------------
+% startup.m
+% ------------------------------------------------------------------------------
+% Add all paths required for the highly comparative time-series analysis package
+
+% We use this function a bit:
 addfcn = @(x) addpath(fullfile(pwd,x));
-% addfcn = @(x) addpath(genpath(fullfile(pwd,x)));
 
 fprintf(1,'Adding paths for the highly comparative time-series analysis package...')
+
+% ------------------------------------------------------------------------------
+%% First add all the basic paths:
+% ------------------------------------------------------------------------------
 addfcn('Database'); % code for setting up and communicating with the mySQL database
 addfcn('Calculation'); % code for calculating results
 addfcn('PlottingAnalysis'); % code for analysing and plotting results
@@ -10,7 +19,9 @@ addfcn('PeripheryFunctions'); % periphery functions used in the code toolbox
 addfcn('TimeSeries'); % time series data files for analysis
 fprintf(1,' Core directories added.\n')
 
-%% Now add all Toolboxes:
+% ------------------------------------------------------------------------------
+%% Now add all the external code packages and periphery toolboxes:
+% ------------------------------------------------------------------------------
 fprintf(1,'Adding external time-series toolboxes...')
 % Kaplan's routines:
 fprintf(1,' Danny Kaplan')
@@ -74,4 +85,6 @@ fprintf(1,', TSTOOL')
 addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL')); % this routine adds the necessary paths for OpenTSTOOL
 
+
+%% Finished:
 fprintf(1,'.\nDone.\n')

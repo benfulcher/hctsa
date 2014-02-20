@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_AutoCorrShape
+% ------------------------------------------------------------------------------
 % 
 % Outputs a set of statistics summarizing how the autocorrelation function
 % changes with the time lag, tau.

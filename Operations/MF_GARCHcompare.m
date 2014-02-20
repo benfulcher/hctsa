@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % MF_GARCHcompare
+% ------------------------------------------------------------------------------
 % 
 % This code fits a set of GARCH(p,q) models to the time series and
 % returns statistics on the goodness of fits across a range of p and
@@ -7,7 +9,7 @@
 % Uses the following functions from Matlab's Econometrics Toolbox: archtest,
 % lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % preproc, a preprocessing to apply:
 %           (i) 'none': no preprocessing is performed
@@ -23,7 +25,7 @@
 % This operation focuses on the GARCH/variance component, and therefore
 % attempts to pre-whiten and assumes a constant mean process.
 % 
-% Outputs include log-likelihoods, Bayesian Information  Criteria (BIC),
+%---OUTPUTS: include log-likelihoods, Bayesian Information  Criteria (BIC),
 % Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
 % Ljung-Box Q-test, and estimates of optimal model orders.
 % 

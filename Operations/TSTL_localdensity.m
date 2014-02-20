@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % TSTL_localdensity
+% ------------------------------------------------------------------------------
 % 
 % Uses TSTOOL code localdensity, which is very poorly documented in the TSTOOL
 % documentation, but we can assume it returns local density estimates in the
@@ -6,7 +8,7 @@
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the time series as a column vector
 % 
@@ -18,7 +20,7 @@
 %               tau and m can be characters specifying a given automatic method
 %               of determining tau and/or m (see BF_embed).
 % 
-% Outputs are various statistics on the local density estimates at each point in
+%---OUTPUTS: various statistics on the local density estimates at each point in
 % the time-delay embedding, including the minimum and maximum values, the range,
 % the standard deviation, mean, median, and autocorrelation.
 % 

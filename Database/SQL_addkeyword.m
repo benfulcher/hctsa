@@ -1,9 +1,39 @@
-function SQL_addkeyword(morts,ids,kwadd,dbname,updateall,tostart)
-%%% TSQ_addkeyword
+% ------------------------------------------------------------------------------
+% SQL_addkeyword
+% ------------------------------------------------------------------------------
 % Takes in a keyword and adds them to the ids given
+% 
+%---HISTORY:
 % Ben Fulcher 13/1/2010
 % Ben Fulcher 12/5/2010 added updateall option
 % Ben Fulcher 7/10/2010 added tostart option
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% HISTORY:
+% Ben Fulcher 3/12/2009
+% Ben Fulcher 12/1/2010: added dbname option
+% Romesh Jan 2013
+% Ben Fulcher June 2013 -- reformulated the whole format so that only a single
+% thing is uploaded at a time (ts, ops, mops), and follows a uniform and more
+% transparent structure with as much overlap in syntax as possible. Added
+% bevocal input
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
+
+function SQL_addkeyword(morts,ids,kwadd,dbname,updateall,tostart)
 
 if strcmp(morts,'ts')
 	disp('Time Series');

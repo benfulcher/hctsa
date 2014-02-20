@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % CO_CompareMinAMI
+% ------------------------------------------------------------------------------
 % 
 % Finds the first minimum of the automutual information by various different
 % estimation methods, and sees how this varies over different coarse-grainings

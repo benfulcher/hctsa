@@ -1,9 +1,11 @@
+% ------------------------------------------------------------------------------
 % WL_scal2frq
+% ------------------------------------------------------------------------------
 % 
 % Estimates frequency components in a periodic time series using functions from
 % Matlab's Wavelet Toolbox, including the scal2frq function.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % wname, the name of the mother wavelet to analyze the data with: e.g., 'db3',
@@ -13,7 +15,7 @@
 % 
 % delta, the sampling period
 % 
-% Outputs are the level with the highest energy coefficients, the dominant
+%---OUTPUTS: the level with the highest energy coefficients, the dominant
 % period, and the dominant pseudo-frequency.
 % 
 % Adapted from example in Matlab Wavelet Toolbox documentation. It's kind of a

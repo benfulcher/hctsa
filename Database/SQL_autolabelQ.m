@@ -1,13 +1,16 @@
-function gi = SQL_autolabelQ(kwgs,metorts,norcl,kworlab,subset)
-% INPUTS:
+% ------------------------------------------------------------------------------
+% SQL_autolabelQ
+% ------------------------------------------------------------------------------
+%---INPUTS:
 % (*) The keyword groups, a cell of strings: kwgs
 % (*) Whether keywords are for metrics or time series: metorts = 'mets' or 'ts'
 % (*) Whether to retrive from normal or clustered store: norcl = 'orig', 'norm', or 'cl'
 % (*) [opt] kworlab: can specify 'lab' for the actual specific names
-
-% OUTPUTS:
+%
+%---OUTPUTS:
 % (*) gi: the indicies corresponding to each keyword in kwgs
-
+%
+%--HISTORY:
 % Ben Fulcher August 2009
 %       New options: can specify kwgs with numbers: e.g.,
 %       kwgs = {'space',100;'',200;'medical',0;...} [0 means all]
@@ -20,8 +23,36 @@ function gi = SQL_autolabelQ(kwgs,metorts,norcl,kworlab,subset)
 %
 % Ben Fulcher 30/9/2010 -- added subset option to specify a custom subset
 % to label (in that index system)
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% HISTORY:
+% Ben Fulcher 3/12/2009
+% Ben Fulcher 12/1/2010: added dbname option
+% Romesh Jan 2013
+% Ben Fulcher June 2013 -- reformulated the whole format so that only a single
+% thing is uploaded at a time (ts, ops, mops), and follows a uniform and more
+% transparent structure with as much overlap in syntax as possible. Added
+% bevocal input
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
+function gi = SQL_autolabelQ(kwgs,metorts,norcl,kworlab,subset)
 
-%% (0) Check inputs
+% ------------------------------------------------------------------------------
+%% Check inputs:
+% ------------------------------------------------------------------------------
 if nargin < 1 || isempty(kwgs), error('You must specify labels'); end
 if nargin < 2 || isempty(metorts), fprintf(1,'Assuming time series\n'); metorts = 'ts'; end
 if nargin < 3 || isempty(norcl), fprintf(1,'Assuming you want to retrieve from clustered data\n'); norcl = 'cl'; end
@@ -39,8 +70,9 @@ if ~ismember(kworlab,{'kw','lab'})
 end
 if ischar(kwgs); kwgs = {kwgs,0}; end
 
-
-%% (1) The keywords are loaded from guides and stored in kws
+% ------------------------------------------------------------------------------
+%% Load the keywords from guides and stored in kws
+% ------------------------------------------------------------------------------
 if isstruct(norcl)
     kws = norcl.kws;
     idsO = norcl.idsO;

@@ -1,4 +1,6 @@
+% ------------------------------------------------------------------------------
 % Run_IndividualFeatures
+% ------------------------------------------------------------------------------
 % 
 % Script that uses TSQ_IndividualFeatures to search for individual features that
 % help distinguish a known classification of the time series, and compares to a
