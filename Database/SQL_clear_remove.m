@@ -2,9 +2,35 @@
 % SQL_clear_remove
 % ------------------------------------------------------------------------------
 % 
-% Either removes or clears results from the database for a given
-% set of ts_ids or op_ids.
+% Either clears results or removes entirely a given set of ts_ids
+% or op_ids from the database.
+%
+% *** Clear ***:
+% The results of a particular operation or time series in the Results Table  are
+% converted back to NULL. Clears *all* results from a given set of operations,
+% or a given set of time series.
+% This should be done whenever a time series data file is changed (or new
+% results will be imcomparable to existing) or whenever a piece of code is
+% altered (or its new results will be incomarable to existing results) or if
+% some problem occurs.
+% Note that it's better practice to clear results from all pointers to a master
+% operation when the master operation is changed (especially when the master
+% code is stochastic)
 % 
+% *** Remove ***
+% Removes COMPLETELY the selected ts_ids or op_ids from the Database.
+% 
+%
+%---INPUTS:
+% tsorop -- either 'ts' or 'mets' for whether to eliminate either a time series of a metric, respectively
+% vin -- a vector of the ts_ids or op_ids in the database to remove
+% dbname -- can specify a custom database else will use default database in SQL_opendatabase
+% dolog -- generate a .log file describing what was done (does this by default)
+% 
+%---HISTORY:
+% 2/12/2009 Ben Fulcher. Rehauled to use mySQL database system.
+% 1/12/2012 Ben Fulcher. Minor changes.
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>
 % <http://www.benfulcher.com>
@@ -22,25 +48,10 @@
 % ------------------------------------------------------------------------------
 
 function SQL_clear_remove(tsorop,vin,doremove,dbname,dolog)
-% Clear the results of a particular metric or time series from the store -- i.e., convert
-% results back to NULL
-% Clears *all* results from a given set of operations, or a given set of time series
-% This should be done whenever a time series data file is changed (or new results will be imcomparable to existing)
-% or whenever a piece of code is altered (or its new results will be incomarable to existing results)
-% or if some problem happens.
-% Note that it's better practice to remove all pointers to a master when the master is changed (especially for
-% operations that have non-deterministic outputs)
 
-% INPUTS: tsorop -- either 'ts' or 'mets' for whether to eliminate either a time series of a metric, respectively
-% 		  vin -- a vector of the ts_ids or op_ids in the database to remove
-% 		  dbname -- can specify a custom database else will use default database in SQL_opendatabase
-% 		  dolog -- generate a .log file describing what was done (does this by default)
-% 2/12/2009 Ben Fulcher. Rehauled to use mySQL database system.
-% 1/12/2012 Ben Fulcher. Minor changes.
-
-
-%% Introduction, check inputs
-% fprintf(1,'Welcome to ''SQL_clear''\n');
+% ------------------------------------------------------------------------------
+%% Preliminaries and input checking
+% ------------------------------------------------------------------------------
 
 if nargin < 1
 	error('You must provide inputs')
@@ -82,7 +93,9 @@ if nargin < 5 || isempty(dolog)
 	dolog = 0;
 end
 
-% Provide some user feedback
+% ------------------------------------------------------------------------------
+%% Provide some user feedback
+% ------------------------------------------------------------------------------
 if (doremove == 0) % clear data
     reply = input(sprintf(['Preparing to clear data for %u %s from %s.' ...
                                 'Press any key to continue...\n'], ...
@@ -101,27 +114,40 @@ else
     error('Third input must be (0 to clear), or (1 to remove)')
 end
 
-% Check what to clear
+% ------------------------------------------------------------------------------
+%% Check what to clear/remove
+% ------------------------------------------------------------------------------
 SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
                                 thename,thetable,theid,BF_cat(vin,','));
 [todump,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 
 if ~isempty(emsg)
-	error('Error retrieving selected %s indices (%s) from the %s table of %s',thewhat,theid,thetable,dbname)
+	error('Error retrieving selected %s indices (%s) from the %s table of %s', ...
+                                    	thewhat,theid,thetable,dbname)
 end
 reply = input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
       			dbname ' [press any key to show them]'],length(vin),thewhat),'s');
 
-% List all items to screen
+% ------------------------------------------------------------------------------
+%% List all items to screen
+% ------------------------------------------------------------------------------
 for i = 1:length(todump)
     fprintf(1,'%s\n',todump{i});
 end
 
-reply = input('Does this look right? Check carefully -- clearing data cannot be undone? Type ''y'' to continue...','s');
+reply = input(['Does this look right? Check carefully -- clearing data cannot ' ...
+                            'be undone? Type ''y'' to continue...'],'s');
 if ~strcmp(reply,'y')
 	fprintf(1,'Better to be safe than sorry. Check again and come back later.\n');
 	return
 end
+
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 
 if doremove
     % Before delete them, first get keyword information, and information about masters (for operations)
@@ -184,10 +210,14 @@ else
     end
 end
 
+% ------------------------------------------------------------------------------
 %% Close connection to the mySQL database
+% ------------------------------------------------------------------------------
 SQL_closedatabase(dbc) % database closed
 
+% ------------------------------------------------------------------------------
 %% Write a log file of information
+% ------------------------------------------------------------------------------
 if dolog
     fn = 'SQL_clear.log'; % log filename
 	fprintf(1,'Writing log file to ''%s''\n',fn)
