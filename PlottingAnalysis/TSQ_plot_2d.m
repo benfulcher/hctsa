@@ -46,26 +46,6 @@ end
 % DataInfo should be a structure array with all the information about the data (same length as Features)
 % Group should be a field in this structure array
 
-% % Fill gi (group indicies) if necessary
-% if nargin < 2
-%     gi = {};
-% end
-
-% % mr: metric range -- a 2-component vector specifying metric numbers in cl
-% % system
-% % Time series are scattered in this space, as organized in given groups
-% if nargin < 3 || isempty(mr)
-%     fprintf(1,'You probably tell me what to plot next time...');
-%     mr = [1,2];
-% end
-% if length(mr)~=2
-%     error('Must be a two-dimensional space.');
-% end
-
-% if nargin < 4 || isempty(norcl)
-%     norcl = 'cl'; % retrieve data from TS_loc_cl, guides from TS_loc_guides_cl
-% end
-
 if nargin < 3 || isempty(TrainTest)
     TrainTest = {};
 end
@@ -82,35 +62,12 @@ if nargin < 6 || isempty(lossmeth)
     lossmeth = 'linclass';
 end
 
-% if nargin < 7
-%     extras = [];
-% elseif ~isempty(extras) && ~isstruct(extras)
-%     F = extras;
-%     extras = struct('F',F);
-% end
-
-%% Label groups
-% if isempty(gi)
-%     if strcmp(norcl,'cl') || strcmp(norcl,'norm')
-%         gi = SUB_autolabelQ(kwgs,'ts',norcl,'kw');
-%     else
-%         error('Grouping indicies must be provided')
-%     end
-% end
-% checkempty = cellfun(@isempty,gi);
-% if any(checkempty)
-%     error('No keywords found for ''%s''.',kwgs{find(checkempty,1)})
-% end
-% NumGroups = length(gi);
-
-% if isfield(extras,'MakeFigure')
-%     MakeFigure = extras.MakeFigure; % Can choose not to make a new figure
-% else
 MakeFigure = 1; % default is to plot on a brand new figure('color','w')
-% end
 
+% ------------------------------------------------------------------------------
 %% Load data
-% Data is not loaded, nowit must be provided
+% ------------------------------------------------------------------------------
+% Data is not loaded, now it must be provided
 
 labels = DataInfo.labels; % Feature labels
 if isstruct(annotatep) || annotatep > 0
@@ -121,68 +78,10 @@ GroupIndices = DataInfo.GroupIndices;
 TimeSeriesData = DataInfo.TimeSeriesData;
 NumGroups = length(GroupNames);
 
-% if strcmp(norcl,'cl')
-%     if isempty(extras)
-%         % get data matrix
-%         load TS_loc_cl.mat TS_loc_cl
-%         F = TS_loc_cl;
-%         clear TS_loc_cl;
-%         % Get operation labels
-%         load TS_loc_guides_cl mlabcl mkwcl
-%         labels = mlabcl; clear mlabcl
-%         keywords = mkwcl; clear mkwcl
-%     else
-%         F = extras.F;
-%         labels = extras.labels;
-%         if isfield(extras,'keywords')
-%             keywords = extras.keywords;
-%         else
-%             keywords = cell(size(F,2),1);
-%         end
-%     end
-%     
-%     if isstruct(annotatep) || annotatep > 0
-%         load TS_loc_guides_cl DataLabelscl
-%         DataLabels = DataLabelscl; clear DataLabelscl
-%     end
-% elseif strcmp(norcl,'norm')
-%     % get data matrix
-%     if isempty(extras)
-%         load TS_loc_N.mat TS_loc_N
-%         F = TS_loc_N;
-%         clear TS_loc_N;
-%         % get operation labels
-%         load TS_loc_guides_N mlabn mkwn
-%         labels = mlabn; clear mlabn
-%         keywords = mkwn; clear mkwn
-%     else
-%         F = extras.F;
-%         labels = extras.labels;
-%         if isfield(extras,'keywords')
-%             keywords = extras.keywords;
-%         else
-%             keywords = cell(size(F,2),1);
-%         end
-%     end
-%     
-%     if isstruct(annotatep) || annotatep>0
-%         load TS_loc_guides_N DataLabelsn
-%         DataLabels = DataLabelsn; clear DataLabelsn
-%     end
-% else
-%     if isempty(extras)
-%         labels = cell(size(F,2),1);
-%         keywords = cell(size(F,2),1);
-%     else
-%         F = extras.F;
-%         labels = extras.labels;
-%         keywords = cell(size(F,2),1);
-%         DataLabels = extras.DataLabels;
-%     end
-% end
-
-% %% SUBSET
-% only use a subset of the full matrix
+% ------------------------------------------------------------------------------
+%% SUBSET
+% ------------------------------------------------------------------------------
+% Only use a subset of the full matrix
 if (length(TrainTest)==1 || ~iscell(TrainTest))
     if iscell(TrainTest)
         rss = TrainTest{1}; % row subset
@@ -207,11 +106,9 @@ if (length(TrainTest)==1 || ~iscell(TrainTest))
     TrainTest = []; % make empty so don't plot TrainTest groups later
 end
 
-% Subset data: F now only has two columns
-% F = F(:,mr);
-
-
+% ------------------------------------------------------------------------------
 % Get losses
+% ------------------------------------------------------------------------------
 loss = zeros(3,2); % loss1, loss2, lossboth (mean,std)
 gig = BF_ToGroup(GroupIndices); % one of my functions to convert GroupIndices to group form
 switch lossmeth
@@ -280,7 +177,9 @@ if (NumGroups == 1)
     c = {'k'}; % Just use black...
 end
 
+% ------------------------------------------------------------------------------
 %% Plot distributions
+% ------------------------------------------------------------------------------
 if keepksdensities
     subplot(4,4,1:3); hold on; box('on')
     maxx = 0; minn = 100;
@@ -303,7 +202,9 @@ if keepksdensities
     set(gca,'xlim',[minn,maxx]);
 end
 
+% ------------------------------------------------------------------------------
 %% Set up a 2D plot
+% ------------------------------------------------------------------------------
 if keepksdensities
     subplot(4,4,[5:7,9:11,13:15]); box('on');
 end
@@ -346,8 +247,9 @@ end
 %                     'MarkerSize',10,'LineWidth',2);
 % end
 
-
+% ------------------------------------------------------------------------------
 %% Plot a classify boundary??
+% ------------------------------------------------------------------------------
 if (NumGroups == 2) && strcmp(lossmeth,'linclass');
     modeorder = 'linear'; % or 'quadratic'
     
@@ -373,7 +275,9 @@ if (NumGroups == 2) && strcmp(lossmeth,'linclass');
 %     ylabel('')
 end
 
+% ------------------------------------------------------------------------------
 %% Axis labelling
+% ------------------------------------------------------------------------------
 title(sprintf('Combined misclassification rate (%s) = %f +/- %f %%',lossmeth, ...
                     round(loss(3,1)*100),round(loss(3,2)*100)),'interpreter','none');
 
@@ -400,8 +304,10 @@ else
 end
 legend(legs);
 
+% ------------------------------------------------------------------------------
 %% Annotate time-series data
-% set parameters
+% ------------------------------------------------------------------------------
+% Set parameters
 if isfield(annotatep,'maxL')
     maxL = annotatep.maxL;
 else

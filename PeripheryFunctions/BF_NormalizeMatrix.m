@@ -17,6 +17,10 @@
 % Note that NaNs are ignored -- only real data is used for the normalization
 % (assume NaNs are a minority of the data).
 % 
+%---HISTORY:
+% Ben Fulcher 28/1/2011 -- Added this NaN capability 
+% Ben Fulcher 12/9/2011 -- Added itrain input: obtain the transformation
+%                           on this subset, apply it to all the data.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -41,9 +45,10 @@
 % ------------------------------------------------------------------------------
     
 function F = BF_NormalizeMatrix(F,normopt,itrain)
-% Ben Fulcher 28/1/2011 -- Added this NaN capability 
-% Ben Fulcher 12/9/2011 -- Added itrain input: obtain the trainsformation
-% on this subset, apply it to all the data.
+
+% ------------------------------------------------------------------------------
+%% Check Inputs
+% ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(normopt)
     fprintf(1,'We''re normalizing using sigmoid transform by default\n')
@@ -65,13 +70,17 @@ else
     end
 end
 
+% ------------------------------------------------------------------------------
+% Normalize according to the specified normalizing transformation
+% ------------------------------------------------------------------------------
+
 switch normopt
     case 'maxmin'
-        % linear rescaling to the unit interval
+        % Linear rescaling to the unit interval
         for i = 1:N2 % cycle through the metrics
             rr = ~isnan(F(:,i));
             kk = F(rr,i);
-            if (max(kk)==min(kk)) % rescaling will blow up
+            if (max(kk)==min(kk)) % Rescaling will blow it up
                 F(rr,i) = NaN;
             else
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
@@ -79,8 +88,8 @@ switch normopt
         end
         
     case 'scaledSQzscore'
-        % scaled sigmoided quantile zscore
-        % problem is that if iqr=0, we're kind of fucked
+        % A scaled sigmoided quantile zscore
+        % Problem is that if iqr=0, we're kind of screwed
         for i = 1:N2
             rr = ~isnan(F(:,i));
             rt = ~isnan(FT(:,i));
@@ -88,17 +97,17 @@ switch normopt
             if iqr(FF)==0
                 F(:,i) = NaN;
             else
-                % sigmoid transformation (gets median and iqr only
+                % Sigmoid transformation (gets median and iqr only
                 % from training data FT):
                 F1 = (F(rr,i)-median(FF))/(iqr(FF)/1.35);
                 kk = 1./(1+exp(-F1));
-                % rescale to unit interval:
+                % Rescale to unit interval:
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
         
     case 'scaledsigmoid'
-        % a sigmoid transform, then a rescaling to the unit interval
+        % A standard sigmoid transform, then a rescaling to the unit interval
         for i = 1:N2 % cycle through the metrics
             rr = ~isnan(F(:,i));
             FF = F(rr,i);
@@ -111,7 +120,7 @@ switch normopt
         end
         
     case 'scaledsigmoid5q'
-        % first caps at 5th and 95th quantile, then does scaled sigmoid
+        % First caps at 5th and 95th quantile, then does scaled sigmoid
         for i = 1:N2 % cycle through the metrics
             rr = ~isnan(F(:,i));
             FF = F(rr,i);

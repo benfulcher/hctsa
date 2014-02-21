@@ -44,7 +44,7 @@ end
 % ------------------------------------------------------------------------------
 reply = '';
 while isempty(reply)
-    reply = input('Do you need help setting up a mySQL database? [y/n]')
+    reply = input('Do you need help setting up a mySQL database? [y/n]');
     if ~ismember(reply,{'y','n'}), reply = ''; end
 end
 if strcmp(reply,'y') % set up mySQL database
