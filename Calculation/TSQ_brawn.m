@@ -338,7 +338,7 @@ fprintf(fid,'Calculations took a total of %s.\n',BF_thetime(sum(times),1))
 
 % Aave the local files for subsequent integration into the storage system
 fprintf(1,'Saving all results to HCTSA_loc.mat...')
-save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries',
+save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
                                 'Operations','MasterOperations','-v7.3')
 fprintf(fid,' All saved.\n')
 
