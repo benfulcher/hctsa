@@ -13,11 +13,7 @@
 %             The input file should be formatted with whitespace as a delimiter
 %             between the entries to import.
 %
-% ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
-% <http://www.benfulcher.com>
-% 
-% HISTORY:
+%%---HISTORY:
 % Ben Fulcher 3/12/2009
 % Ben Fulcher 12/1/2010: added dbname option
 % Romesh Jan 2013
@@ -25,6 +21,10 @@
 % thing is uploaded at a time (ts, ops, mops), and follows a uniform and more
 % transparent structure with as much overlap in syntax as possible. Added
 % bevocal input
+% 
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
@@ -39,7 +39,10 @@
 % ------------------------------------------------------------------------------
 
 function SQL_add(ImportWhat, INPfile, dbname, bevocal)
+
+% ------------------------------------------------------------------------------
 %% CHECK INPUTS:
+% ------------------------------------------------------------------------------
 
 % ImportWhat
 % SHOULD BE TS, MOP, or OP -- or can iterate through each possibility
@@ -47,7 +50,7 @@ if nargin < 1 || isempty(ImportWhat) || ~ismember(ImportWhat,{'ops','ts','mops'}
     error('Error setting first input argument -- should be ''ts'' for TimeSeries or ''ops'' for Operations');
 end
 
-% inpfilename
+% INPfile
 if nargin < 2 || isempty(INPfile)
     if strcmp(ImportWhat,'ts')
         INPfile = 'INP_ts.txt';
@@ -69,10 +72,15 @@ end
 if bevocal, fprintf(1,'Using input file %s\n',INPfile); end
 ticker = tic;
 
+% ------------------------------------------------------------------------------
 %% Open Database
+% ------------------------------------------------------------------------------
 [dbc, dbname] = SQL_opendatabase(dbname);
 
-% Define strings to unify the different strands of code for time series / operations
+% ------------------------------------------------------------------------------
+% Define strings to unify the different strands of code for time series /
+% operations
+% ------------------------------------------------------------------------------
 switch ImportWhat
     case 'ts'
         thewhat = 'time series';
@@ -98,7 +106,9 @@ switch ImportWhat
 end
 
 
-%% 1. Open, read the input file
+% ------------------------------------------------------------------------------
+%% Open and read the input file
+% ------------------------------------------------------------------------------
 fid = fopen(INPfile);
 if (fid==-1)
     error('Could not load the specified input file ''%s''',INPfile)
@@ -106,7 +116,8 @@ end
 switch ImportWhat
 case 'ts' % Read the time series input file:
     if bevocal
-        fprintf(1,'Need to format %s (Time Series input file) as: Filename Keywords\n',INPfile)
+        fprintf(1,['Need to format %s (Time Series input file) as: Filename ' ...
+                                                            'Keywords\n'],INPfile)
         fprintf(1,'Assuming no header line\n')
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
@@ -114,7 +125,8 @@ case 'ts' % Read the time series input file:
 	datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
 case 'ops' % Read the operations input file:
     if bevocal
-        fprintf(1,'Need to format %s (Operations input file) as: OperationCode OperationName OperationKeywords\n',INPfile)
+        fprintf(1,['Need to format %s (Operations input file) as: OperationCode ' ...
+                                        'OperationName OperationKeywords\n'],INPfile)
         fprintf(1,'Assuming no header lines\n')
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
@@ -131,8 +143,9 @@ case 'mops' % Read the master operations input file:
 end
 fclose(fid);
 
-
+% ------------------------------------------------------------------------------
 % Show the user what's been imported:
+% ------------------------------------------------------------------------------
 datain = datain{1}; % collect one big matrix of cells
 nits = size(datain,1); % number of items in the input file
 
@@ -168,8 +181,10 @@ if bevocal
             end
         end
     end
-    fprintf(1,'How does it look? Make sure the time series and everything match up to their headings\n')
-    reply = input(['If we go on, we will attempt to read all timeseries from file and add all ' ...
+    fprintf(1,['How does it look? Make sure the time series and everything ' ...
+                                            'match up to their headings\n'])
+    reply = input(['If we go on, we will attempt to read all timeseries ' ...
+                    'from file and add all ' ...
                     'data to the database. Type ''y'' to continue...'],'s');
     if ~strcmp(reply,'y')
         fprintf(1,'I didn''t think so. Come back later...\n')
@@ -177,10 +192,14 @@ if bevocal
     end
 end
 fprintf(1,'%s read.\n',INPfile)
-esc = @RA_sqlescapestring; % inline function to add escape strings to format mySQL queries
 
-% Construct a more intuitive structure array for the time series / operations / master operations
-% Fill a cell, toadd, containing mySQL INSERT commands for each item in the input file:
+esc = @RA_sqlescapestring; % Inline function to add escape strings to format mySQL queries
+
+% ------------------------------------------------------------------------------
+% Construct a more intuitive structure array for the time series / operations /
+% master operations Fill a cell, toadd, containing mySQL INSERT commands for
+% each item in the input file.
+% ------------------------------------------------------------------------------
 if bevocal
     fprintf(1,'Preparing mySQL INSERT statements to add %u %s to the database %s...',nits,thewhat,dbname);
 end
@@ -290,9 +309,9 @@ case 'ops' % Prepare toadd cell for operations
     
 end
 
-
-
+% ------------------------------------------------------------------------------
 % Check for duplicates
+% ------------------------------------------------------------------------------
 if bevocal, fprintf(1,'Checking for duplicates already in the database... '); end
 switch ImportWhat
 case 'ts'
@@ -308,35 +327,47 @@ end
 if bevocal, fprintf(1,'done.\n'); end
 
 % Tell the user about duplicates
-
 if all(isduplicate)
     fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',nits,thewhat,INPfile,dbname,thewhat);
     return
 elseif sum(isduplicate) > 0
     if bevocal
         fprintf(1,'I found %u duplicate %s already in the database %s!\n',sum(isduplicate),thewhat,dbname)
-        fprintf(1,'There are %u new %s to add to %s...\n',sum(~isduplicate),thewhat,dbname)
+        fprintf(1,'There are %u new %s to add to %s.\n',sum(~isduplicate),thewhat,dbname)
     end
 end
 
+% ------------------------------------------------------------------------------
 % Select the maximum id already in the table
+% ------------------------------------------------------------------------------
 maxid = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,thetable));
 maxid = maxid{1}; % the maximum id -- the new items will have ids greater than this
 if isempty(maxid), maxid = 0; end
 
+% ------------------------------------------------------------------------------
 % Assemble and execute the INSERT queries
+% ------------------------------------------------------------------------------
 fprintf('Adding %u new %s to the %s table in %s...',sum(~isduplicate),thewhat,thetable,dbname)
 switch ImportWhat
-case 'ts' % Add time series to the TimeSeries table
-    SQL_add_chunked(dbc,'INSERT INTO TimeSeries (FileName, Keywords, Length, Data) VALUES',toadd,isduplicate);
-case 'ops' % Add operations to the Operations table
-    SQL_add_chunked(dbc,'INSERT INTO Operations (OpName, Code, MasterLabel, Keywords) VALUES',toadd,isduplicate);        
-case 'mops'
-    SQL_add_chunked(dbc,'INSERT INTO MasterOperations (MasterLabel, MasterCode) VALUES',toadd,isduplicate);
+case 'ts' % Add time series to the TimeSeries table just 5 at a time
+          % (so as not to exceed the max_allowed_packet when transmitting the 
+          % time-series data) Appropriate chunk size will depend on the length of
+          % time series in general
+
+    SQL_add_chunked(dbc,['INSERT INTO TimeSeries (FileName, Keywords, Length, ' ...
+                                    'Data) VALUES'],toadd,isduplicate,5);
+case 'ops' % Add operations to the Operations table 500 at a time
+    SQL_add_chunked(dbc,['INSERT INTO Operations (OpName, Code, MasterLabel, ' ...
+                                    'Keywords) VALUES'],toadd,isduplicate,500);        
+case 'mops' % Add master operations to the MasterOperations table 500 at a time
+    SQL_add_chunked(dbc,['INSERT INTO MasterOperations (MasterLabel, ' ...
+                                'MasterCode) VALUES'],toadd,isduplicate,500);
 end
 fprintf(1,' done.\n')
 
+% ------------------------------------------------------------------------------
 % Add new entries to the Results table
+% ------------------------------------------------------------------------------
 if ~strcmp(ImportWhat,'mops')
     resultstic = tic;
     if bevocal
@@ -359,7 +390,9 @@ if ~strcmp(ImportWhat,'mops')
 end
 
 if ~strcmp(ImportWhat,'mops')
+    % ------------------------------------------------------------------------------
     % Update the keywords table
+    % ------------------------------------------------------------------------------
     fprintf(1,'Updating the %s table in %s...',thektable,dbname)
 
     % First find unique keywords from new time series by splitting against commas
@@ -370,7 +403,7 @@ if ~strcmp(ImportWhat,'mops')
         kws = {operation(~isduplicate).Keywords};
     end
     
-    kwsplit = cell(length(kws),1); % split into each individual keyword
+    kwsplit = cell(length(kws),1); % Split into each individual keyword
     ukws = {};
     for i = 1:length(kws)
         kwsplit{i} = regexp(kws{i},',','split','ignorecase');
@@ -380,16 +413,16 @@ if ~strcmp(ImportWhat,'mops')
             end
         end
     end
-    nkw = length(ukws); % the number of unique keywords in the new set of time series
+    nkw = length(ukws); % The number of unique keywords in the new set of time series
     if bevocal, fprintf(1,'\nI found %u unique keywords in the %u new %s in %s...',nkw,sum(~isduplicate),thewhat,INPfile); end
 
-    % How many overlap with existing keywords??
+    % How many overlap with existing keywords??:
     allkws = mysql_dbquery(dbc,sprintf('SELECT Keyword FROM %s',thektable));
     if ~isempty(allkws) % the table may be empty, in which case all keywords will be new
         isnew = ~ismember(ukws,allkws);
         % cellfun(@(x)~isempty(x),regexp(ukws,allkws,'ignorecase')); % ignore case for keywords
     else
-        isnew = ones(nkw,1); % all are new
+        isnew = ones(nkw,1); % All are new
     end
     
     if sum(isnew) > 0
@@ -400,7 +433,7 @@ if ~strcmp(ImportWhat,'mops')
         % Add the new keywords to the Keywords table
         insertstring = sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES',thektable);
         toadd = cell(sum(isnew),1);
-        fisnew = find(isnew); % indicies of new keywords
+        fisnew = find(isnew); % Indicies of new keywords
         for k = 1:sum(isnew);
             toadd{k} = sprintf('(''%s'',0)',ukws{fisnew(k)});
         end
@@ -413,20 +446,24 @@ if ~strcmp(ImportWhat,'mops')
         end
     end
     
-    % Fill new relationships
-    fprintf(1,'Writing new keyword relationships to the %s table in %s...',thereltable,dbname)
-    % Try doing it from scratch
+    % ------------------------------------------------------------------------------
+    % Fill new keyword relationships
+    % ------------------------------------------------------------------------------
+    fprintf(1,'Writing new keyword relationships to the %s table in %s...', ...
+                                            thereltable,dbname)
 
-    % allkws, allids
+    % Try doing it from scratch...:
     switch ImportWhat
     case 'ts'
         allnames = BF_cat({timeseries(~isduplicate).Filename},',','''');
     case 'ops'
         allnames = BF_cat({operation(~isduplicate).Name},',','''');
     end
-    ourids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE %s IN (%s)',theid,thetable,thename,allnames));
+    ourids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE %s IN (%s)',theid, ...
+                                                        thetable,thename,allnames));
     ourids = vertcat(ourids{:}); % ids matching FileNames/OpNames
-    ourkids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Keyword IN (%s)',thekid,thektable,BF_cat(ukws,',','''')));
+    ourkids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Keyword IN (%s)', ...
+                                            thekid,thektable,BF_cat(ukws,',','''')));
     ourkids = vertcat(ourkids{:}); % ids matching FileNames/OpNames
     nkwrels = sum(cellfun(@(x)length(x),kwsplit)); % number of keyword relationships in the input file
     addcell = {};
@@ -466,7 +503,9 @@ if ~strcmp(ImportWhat,'mops')
     fprintf(1,' done.\n')
 end
 
+% ------------------------------------------------------------------------------
 % Update links between operations and master operations
+% ------------------------------------------------------------------------------
 if ismember(ImportWhat,{'mops','ops'}) % there may be new links
     % Add mop_ids to Operations table
     fprintf(1,'Evaulating links between operations and master operations...'); tic
@@ -521,10 +560,16 @@ if ismember(ImportWhat,{'mops','ops'}) % there may be new links
 
 end
 
+% ------------------------------------------------------------------------------
 %% Close database
+% ------------------------------------------------------------------------------
 SQL_closedatabase(dbc)
 
+% ------------------------------------------------------------------------------
+% Tell the user all about it
+% ------------------------------------------------------------------------------
 fprintf('All tasks completed reading %s for adding %u %s into %s in %s.\n', ...
                 INPfile,sum(~isduplicate),thewhat,dbname,BF_thetime(toc(ticker)));
+
 
 end

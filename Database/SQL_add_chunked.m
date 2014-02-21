@@ -42,19 +42,27 @@ if nargin < 5 || isempty(chunksize)
     % on the mySQL server.
 end
 
+% ------------------------------------------------------------------------------
+% Start adding chunks to the database
+% ------------------------------------------------------------------------------
 for k = 1:chunksize:length(dataset)
     query = insertstring; % Start with the insert statement
-    for j = k:min(k+chunksize-1,length(dataset)) % Don't duplicate
+    for j = k:min(k+chunksize-1,length(dataset)) % Don't repeat statements
         if ~isduplicate(j)
             query = sprintf('%s %s,',query,dataset{j}); % Add values in parentheses in dataset{j}
         end
     end
-    query = query(1:end-1); % Remove the final comma
     
-    [~, emsg] = mysql_dbexecute(dbc,query); % Evaluate this chunk
-    if ~isempty(emsg)
-        fprintf(1,'Error in SQL_add_chunked...\n%s\n',emsg)
-        keyboard
+    if (length(query) > length(insertstring))
+        % There's something to be added, i.e., not all isduplicate in this chunk:
+    
+        query = query(1:end-1); % Remove the final comma
+    
+        [~, emsg] = mysql_dbexecute(dbc,query); % Evaluate this chunk
+        if ~isempty(emsg)
+            fprintf(1,'Error in SQL_add_chunked for chunk %u with chunk size %u...\n%s\n',k,chunksize,emsg)
+            keyboard
+        end
     end
 end
 

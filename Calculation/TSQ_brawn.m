@@ -320,7 +320,7 @@ for i = 1:NumTimeSeries
     % --------------------------------------------------------------------------
     if sum(times(1:i))-LastSavedTime > 60*10; % it's been more than 10 mins since last save
         fprintf(fid,'Not finished calculations yet, but saving progress so far to file...')
-        save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries',
+        save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
                                     'Operations','MasterOperations','-v7.3')
         fprintf(fid,' All saved.\n')
         LastSavedTime = sum(times(1:i)); % the last saved time (1)
