@@ -40,10 +40,14 @@
 %           (ii) 'ck': params = [K,M,p]
 %           (iii) 'l1pwc': params = lambda
 % 
-%---OUTPUTS: statistics on the output of the step-detection method,
-% including the intervals between change points, the proportion of constant
-% segments, the reduction in variance from removing the piece-wise constants,
-% and stationarity in the occurrence of change points.
+%---OUTPUTS:
+% Statistics on the output of the step-detection method, including the intervals
+% between change points, the proportion of constant segments, the reduction in
+% variance from removing the piece-wise constants, and stationarity in the
+% occurrence of change points.
+% 
+%---HISTORY:
+% Ben Fulcher, 12/4/2010
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -69,8 +73,10 @@
 % ------------------------------------------------------------------------------
 
 function out = CP_ML_StepDetect(y,method,params)
-% Ben Fulcher, 12/4/2010
 
+% ------------------------------------------------------------------------------
+% Preliminaries, check inputs:
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length
 
 if nargin < 2 || isempty(method)
@@ -78,9 +84,15 @@ if nargin < 2 || isempty(method)
     method = 'kv';
 end
 
+% ------------------------------------------------------------------------------
+% Do the step detection:
+% ------------------------------------------------------------------------------
+
 switch method
     case 'kv'
+        % ------------------------------------------------------------------------------
         %% Kalafut-Visscher
+        % ------------------------------------------------------------------------------
         
         % (1) Do the step detection
         [steppedy, steps] = ML_kvsteps(y);
@@ -94,7 +106,9 @@ switch method
         end
         
     case 'ck'
+        % ------------------------------------------------------------------------------
         %% Chung-Kennedy
+        % ------------------------------------------------------------------------------
         % The algorithm is described in:
         % S.H. Chung, R.A. Kennedy (1991), "Forward-backward non-linear filtering
         % technique for extracting small biological signals from noise",
@@ -137,6 +151,7 @@ switch method
         steppedy = ML_ckfilter(y, K, M, p);
         
     case 'l1pwc'
+        % ------------------------------------------------------------------------------
         % Based around code originally written by 
         % S.J. Kim, K. Koh, S. Boyd and D. Gorinevsky. If you use this code for
         % your research, please cite:
@@ -144,6 +159,7 @@ switch method
         % "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
         % Machine Dynamics", in 2010 IEEE International Conference on Acoustics,
         % Speech and Signal Processing, 2010, ICASSP 2010 Proceedings.
+        % ------------------------------------------------------------------------------
         
         % Input arguments:
         % - y          Original signal to denoise, size N x 1.
@@ -202,8 +218,9 @@ switch method
         error('Unknown step detection method ''%s''',method);
 end
 
-
-% Common outputs
+% ------------------------------------------------------------------------------
+% Outputs common to all step detection methods:
+% ------------------------------------------------------------------------------
 % requires: chpts -- a vector of indicies for changes in the time series
 %           steppedy -- an (Nx1) vector specifying the new stepped time
 %                       series

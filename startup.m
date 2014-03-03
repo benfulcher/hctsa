@@ -86,5 +86,8 @@ addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL')); % this routine adds the necessary paths for OpenTSTOOL
 
 
+% ------------------------------------------------------------------------------
 %% Finished:
+% ------------------------------------------------------------------------------
+clear addfcn % clear the add function
 fprintf(1,'.\nDone.\n')

@@ -21,6 +21,11 @@
 % from removing the piecewise constants was recorded. Outputs summarize how the
 % these quantities vary with lambda.
 % 
+%---HISTORY:
+% Ben Fulcher, 2010-04-13
+% Ben Fulcher, 2014-02-24. Fixed a problem with no matches giving an error
+% instead of a NaN.
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -45,7 +50,6 @@
 % ------------------------------------------------------------------------------
 
 function out = CP_l1pwc_sweep_lambda(y,lambdar)
-% Ben Fulcher, 13/4/2010
 
 Llambdar = length(lambdar);
 nsegs = zeros(Llambdar,1);
@@ -54,26 +58,39 @@ rmserrpsegs = zeros(Llambdar,1);
 
 for i = 1:length(lambdar)
     lambda = lambdar(i);
+    % Run the (stochastic) step detection algorithm:
     outi = CP_ML_StepDetect(y,'l1pwc',lambda);
     nsegs(i) = outi.nsegments;
     rmserrs(i) = outi.rmsoff;
     rmserrpsegs(i) = outi.rmsoffpstep;
 end
 
+% ------------------------------------------------------------------------------
+% Define the FirstUnder function:
+% ------------------------------------------------------------------------------
+% Often finding the first time a certain vector (x) drops under a given
+% threshold (y). This function does it:
+
+FirstUnder = @(x,y) find(x < y, 1, 'first');
+
+% ------------------------------------------------------------------------------
 % (*) Use rmsunderx subfunction to analyze when RMS errors drop under a set of
 % thresholds, *x*, for the first time:
-out.rmserrsu05 = lambdar(rmsunderx(0.5));
-out.rmserrsu02 = lambdar(rmsunderx(0.2));
-out.rmserrsu01 = lambdar(rmsunderx(0.1));
+% ------------------------------------------------------------------------------
+out.rmserrsu05 = NaNIfEmpty(lambdar(FirstUnder(rmserrs,0.5)));
+out.rmserrsu02 = NaNIfEmpty(lambdar(FirstUnder(rmserrs,0.2)));
+out.rmserrsu01 = NaNIfEmpty(lambdar(FirstUnder(rmserrs,0.1)));
 
+% ------------------------------------------------------------------------------
 % (*) Use the nsegsunderx subfunction to analyze when nseg drops under a set of
 % thresholds, *x*, for the first time:
 % nsegunderx = @(x) find(nsegs < x, 1, 'first');
+% ------------------------------------------------------------------------------
+out.nsegsu005 = NaNIfEmpty(lambdar(FirstUnder(nsegs,0.05)));
+out.nsegsu001 = NaNIfEmpty(lambdar(FirstUnder(nsegs,0.01)));
 
-out.nsegsu005 = lambdar(nsegunderx(0.05));
-out.nsegsu001 = lambdar(nsegunderx(0.01));
 
-% Correlation between #segments, rmserrs
+% Calculate the correlation between the number of segments and rmserrs
 R = corrcoef(nsegs,rmserrs);
 out.corrsegerr = R(2,1);
 
@@ -82,15 +99,16 @@ indbest = find(rmserrpsegs == max(rmserrpsegs),1,'first'); % where the maximum o
 out.bestrmserrpseg = rmserrpsegs(indbest);
 out.bestlambda = lambdar(indbest);
 
-function thefirst = rmsunderx(x)
-    % rmserrs gets under ** for first time
-    thefirst = find(rmserrs < x, 1, 'first');
-    if isempty(thefirst), thefirst = NaN; end
-end
-
-function thefirst = nsegunderx(x)
-    thefirst = find(nsegs < x, 1, 'first');
-    if isempty(thefirst), thefirst = NaN; end
+% ------------------------------------------------------------------------------
+% Subfunctions
+% ------------------------------------------------------------------------------
+function N = NaNIfEmpty(x)
+    % Returns a NaN if x is empty, otherwise returns x.
+    if isempty(x)
+        N = NaN;
+    else
+        N = x;
+    end
 end
 
 end

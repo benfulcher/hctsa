@@ -1,7 +1,9 @@
 % ------------------------------------------------------------------------------
 % BF_GiveMeField
 % ------------------------------------------------------------------------------
+% 
 % Returns a specified field (WhatField) of an input structure (InStruct).
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

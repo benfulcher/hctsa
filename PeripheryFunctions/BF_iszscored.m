@@ -35,7 +35,8 @@
 
 function iszscored = BF_iszscored(x)
 
-Threshold = 100*eps; % Give it a bit of numerical lee-way... Down in the 2e-14 region.
+% Give it a bit of numerical lee-way... Down in the 2e-14 region:
+Threshold = 100*eps;
 
 iszscored = ((abs(mean(x)) < Threshold) && (abs(std(x)-1) < Threshold));
 

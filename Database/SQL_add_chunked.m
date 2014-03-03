@@ -6,9 +6,11 @@
 % 
 %---INPUTS:
 % 
-% insertstring is the insert portion of the query
+% dbc, the database connection
 % 
-% dataset is a cell array of formatted strings like {'(''abc'',1)'}
+% insertstring, the insert portion of the query
+% 
+% dataset, a cell array of formatted strings like {'(''abc'',1)'}
 % 
 % 
 % ------------------------------------------------------------------------------

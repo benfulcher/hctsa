@@ -6,6 +6,7 @@
 % performed by:
 % 
 %---INPUTS:
+%
 % y, the input time series
 % 
 % bint, the binary transformation method:
@@ -16,8 +17,9 @@
 %       (iii) 'median': time-series values above the median are given 1, and
 %       those below the median 0.
 % 
-%---OUTPUTS: Probabilities of words in the binary alphabet of lengths 1, 2, 3,
-% and 4, and their entropies.
+%---OUTPUTS:
+% Probabilities of words in the binary alphabet of lengths 1, 2, 3, and 4, and
+% their entropies.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -46,27 +48,34 @@ function out = SB_MotifTwo(y,bint)
 % Laboriously manually-written code by Ben Fulcher, 2009
 
 if nargin < 2 || isempty(bint)
-    bint = 'diff'; % use changes in the time series as the basis for the transformation
+    % Use changes in the time series as the basis for the transformation
+    bint = 'diff';
 end
 
 % Binary difference signs
 switch bint
 	case 'diff'
-		yb = ((sign(diff(y)))+1)/2; % binary signal, 1 for stepwise increases, 0 for stepwise decreases
+        % Binary signal: 1 for stepwise increases, 0 for stepwise decreases
+		yb = ((sign(diff(y)))+1)/2;
         
 	case 'mean'
-		yb = (sign(y)+1)/2; % 1 for above mean, 0 for below mean
+        % Binary signal: 1 for above mean, 0 for below mean
+		yb = (sign(y)+1)/2;
         
 	case 'median'
-		yb = (sign(y-median(y))+1)/2; % 1 for above median, 0 for below median
+        % Binary signal: 1 for above median, 0 for below median
+		yb = (sign(y-median(y))+1)/2;
         
     otherwise
         error('Unknown binary transformation setting ''%s''',bint)
 end
 
-N = length(yb); % length of the new, symbolized sequence
+% Define the length of the new, symbolized sequence: N
+N = length(yb);
 
-%% 1)
+% ------------------------------------------------------------------------------
+%% Find single occurences of a symbol
+% ------------------------------------------------------------------------------
 % 0
 r0 = find(yb == 0);
 % 1

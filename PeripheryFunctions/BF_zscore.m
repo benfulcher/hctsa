@@ -30,6 +30,9 @@
 
 function z = BF_zscore(x)
 
-z = (x-mean(x)) / std(x);
+% By default, do it twice to reduce the numerical error:
+
+z = (x - mean(x)) / std(x);
+z = (z - mean(z)) / std(z);
 
 end

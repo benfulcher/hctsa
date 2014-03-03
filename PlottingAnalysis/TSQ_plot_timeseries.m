@@ -4,8 +4,19 @@
 % 
 % Plots the time series read from a local file, in a specified format.
 % 
-%----HISTORY----
-%%% TSQ_plot_examples
+%---INPUTS:
+% WhatData, The data to get information from: can be a structure, or 'norm' or
+%           'cl' to load from HCTSA_N or HCTSA_cl
+% WhatTimeSeries, Can provide indices to plot that subset, a keyword to plot
+%                   matches to the keyword, 'all' to plot all, or an empty vector
+%                   to plot default groups in TimeSeries.Group
+% NumPerGroup, If plotting groups, plots this many examples per group
+% maxL, the maximum number of samples of each time series to plot
+% titleme, shows time-series labels on the plot.
+% opts, additional plotting options as a structure.
+% 
+%----HISTORY:
+% Previously called 'TSQ_plot_examples'
 % Plots examples from time series matching kwgs; can specify gi if you want
 % -- the indicies in cl that match
 % Based on TSQ_plot_timeseries, which plotted all time series in a way to
@@ -39,7 +50,7 @@ function TSQ_plot_timeseries(WhatData,WhatTimeSeries,NumPerGroup,maxL,titleme,op
 % ------------------------------------------------------------------------------
 % F -- get guide from 'norm' or 'cl'
 if nargin < 1 || isempty(WhatData)
-    WhatData = 'cl';
+    WhatData = 'norm';
 end
 
 % Can specify a reduced set of time series by keyword
@@ -48,21 +59,28 @@ if nargin < 2
 end
 
 if nargin < 3 || isempty(NumPerGroup)
-    NumPerGroup = 5; % plot 5 time series per group
+    % Default: plot 5 time series per group
+    NumPerGroup = 5;
 end
 
 if nargin < 4
-    maxL = []; % maximum length of time series to display (otherwise crops)
-                 % if empty, displays all of all time series
+    % Maximum length of time series to display (otherwise crops)
+    % If empty, displays all of all time series
+    maxL = [];
 end
 
 if nargin < 5 || isempty(titleme)
-    titleme = 1; % show any time series labels -- allows more to be fit into plot
+    % Show time series labels -- allows more to be fit into plot
+    titleme = 1;
 end
 
 if nargin < 6
 	opts = [];
 end
+
+% ------------------------------------------------------------------------------
+% Evaluate any custom plotting options specified in the structure opts
+% ------------------------------------------------------------------------------
 
 if isstruct(opts) && isfield(opts,'howtofilter')
     howtofilter = opts.howtofilter;
@@ -74,19 +92,19 @@ if isstruct(opts) && isfield(opts,'gic')
 else
     gic = [];
 end
-% specify the colormap to use
+% Specify the colormap to use
 if isstruct(opts) && isfield(opts,'cmap')
     cmap = opts.cmap;
 else
     cmap = 'set1';
 end
-% specify whether to make a free-form plot
+% Specify whether to make a free-form plot
 if isstruct(opts) && isfield(opts,'freeform')
     freeform = opts.freeform;
 else
     freeform = 0; % do a normal subplotted figure
 end
-% specify line width for plotting
+% Specify line width for plotting
 if isstruct(opts) && isfield(opts,'LineWidth')
     lw = opts.LineWidth;
 else
@@ -117,7 +135,7 @@ if isempty(WhatTimeSeries)
     GroupIndices = BF_ToGroup([TimeSeries.Group]);
     fprintf(1,'Plotting from %u groups of time series from file\n',length(GroupIndices));
 elseif strcmp(WhatTimeSeries,'all')
-    % plot all time series
+    % Plot all time series
     GroupIndices = {1:length(TimeSeries)};
 elseif ischar(WhatTimeSeries)
     % Just plot this group

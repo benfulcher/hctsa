@@ -38,7 +38,7 @@ function out = DN_Compare_zscore(x)
 [f, xi] = ksdensity(x); % the smoothed empirical distribution
 [fz, xiz] = ksdensity(BF_zscore(x)); % smoothed z-scored empirical distribution
 
-% 1. numpeaks
+% 1. Number of peaks: numpeaks
 
 df = diff(f);
 ddf = diff(df); % original
@@ -50,17 +50,17 @@ ddf = diff(df); % zscored
 sdsp = ddf(BF_sgnchange(df));
 out2 = sum(sdsp < -0.0002); % 'large enough' maxima
 
-out.numpeaks = out2/out1; % shouldn't be meaningful
+out.numpeaks = out2/out1; % This shouldn't be meaningful
 
-% 2. Max
+% 2. Maximum
 out1 = max(f);
 out2 = max(fz);
-out.max = out2/out1; % ratio of zscored to original maximum
+out.max = out2/out1; % Ratio of zscored to original maximum
 
 % 3. Entropy
 out1 = -sum(f.*log(f)*(xi(2)-xi(1)));
 out2 = -sum(fz.*log(fz)*(xiz(2)-xiz(1)));
-out.entropy = out2/out1; % ratio of z-scored to original entropy
+out.entropy = out2/out1; % Ratio of z-scored to original entropy
 
 
 end

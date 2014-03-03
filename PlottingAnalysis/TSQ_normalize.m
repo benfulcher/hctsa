@@ -7,12 +7,13 @@
 % The normalization is all about a rescaling to the [0,1] interval for
 % visualization and clustering.
 % 
-% --INPUTS:
+%---INPUTS:
 %-NormFunction: string specifying how to normalize the data
 %-FilterOptions: vector specifying thresholds for the minimum proportion of bad
 %                values tolerated in a given row or column, in the form of a 2-vector:
 %                [row proportion, column proportion] If one of the FilterOptions
 %                is set to 1, will have no bad values in your matrix.
+%-FileName_HCTSA_loc: can specify a custom file name to import. Default is HCTSA_loc.mat.
 %-subs [opt]: only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
 %             subsequently be clustered and further subsetted using TS_cluster2...
@@ -37,7 +38,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_normalize(NormFunction,FilterOptions,subs,trainset)
+function TSQ_normalize(NormFunction,FilterOptions,FileName_HCTSA_loc,subs,trainset)
 
 % --------------------------------------------------------------------------
 %% Check Inputs
@@ -55,19 +56,27 @@ fprintf(1,['Removing time series with more than %.2f%% special-valued outputs\n'
             'Removing operations with more than %.2f%% special-valued outputs\n'], ...
             (1-FilterOptions(1))*100,(1-FilterOptions(2))*100);
 
-if nargin < 3
-    subs = {}; % Empty by default: don't subset
+% By default, we'll be working with files called HCTSA_loc.mat, as obtained from
+% TSQ_prepared...
+if nargin < 3 || isempty(FileName_HCTSA_loc)
+    FileName_HCTSA_loc = 'HCTSA_loc.mat';
 end
 
 if nargin < 4
-    trainset = []; % Empty by default: normalize on the full set
+    % Empty by default, i.e., don't subset:
+    subs = {};
+end
+
+if nargin < 5
+    % Empty by default: get normalization parameters using the full set
+    trainset = [];
 end
 
 % --------------------------------------------------------------------------
 %% Read data from local files
 % --------------------------------------------------------------------------
-fprintf(1,'Reading data from HCTSA_loc.mat...');
-load('HCTSA_loc.mat','TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations')
+fprintf(1,'Reading data from %s...',FileName_HCTSA_loc);
+load(FileName_HCTSA_loc,'TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations')
 fprintf(1,' Loaded.\n');
 
 % In this script, each of these pieces of data (from the database) will be trimmed and normalized

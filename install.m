@@ -1,7 +1,8 @@
 % ------------------------------------------------------------------------------
 % install.m
 % ------------------------------------------------------------------------------
-% Installs the highly comparative time-series analysis code package
+% 
+% Installs the highly comparative time-series analysis code package from scratch.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -20,13 +21,13 @@
 % ------------------------------------------------------------------------------
 
 fprintf(1,['This script will set up the Highly Comparative Time-Series ' ...
-                                'Analysis code package from scratch\n'])
+                                'Analysis code package from scratch!\n'])
 fprintf(1,['In the following order, we will' ...
-                '\n- Add the paths' ...
-                '\n- Set up the database' ...
-                '\n- Add the operations' ...
-                '\n- Compile the toolboxes' ...
-                '\n- Test that things are working'])
+                '\n- Add the paths,' ...
+                '\n- Set up the database,' ...
+                '\n- Add the operations,' ...
+                '\n- Compile the toolboxes,' ...
+                '\n- Test that things are working.'])
 
 % ------------------------------------------------------------------------------
 %% 1. Add the paths:
@@ -47,11 +48,14 @@ while isempty(reply)
     reply = input('Do you need help setting up a mySQL database? [y/n]');
     if ~ismember(reply,{'y','n'}), reply = ''; end
 end
-if strcmp(reply,'y') % set up mySQL database
-    fprintf(1,'Setting up the database now--NB: you need to have root access to a mySQL server to do this\n')
-    % Walks the user through creating the database from a root account and sets up a user account and password
+if strcmp(reply,'y') % Set up mySQL database
+    fprintf(1,['Setting up the database now--NB: you need to have root access' ...
+                            ' to a mySQL server to do this\n'])
+    % Walks the user through creating the database from a root account and sets
+    % up a user account and password
     SQL_create_db;
-    fprintf(1,['Note that if you ever want to change the database access settings, you should alter the sql_settings.conf file' ...
+    fprintf(1,['Note that if you ever want to change the database access ' ...
+                    'settings, you should alter the sql_settings.conf file' ...
                     ', or run SQL_create_db\n'])
 end
 
@@ -74,14 +78,18 @@ fprintf(1,'Operations added in %s.\n',BF_thetime(toc(optic)))
 % ------------------------------------------------------------------------------
 %% 5. Attempt to compile the executables in Toolboxes:
 % ------------------------------------------------------------------------------
-fprintf(1,'Attempting to compile the binary executables needed for evaluating some operations.\n')
-fprintf(1,'Please make sure that mex is set up with the right compilers for this system.\n')
-fprintf(1,'Note that errors here are not the end of the world, but mean that some operations may fail to execute correctly...\n')
+fprintf(1,['Attempting to compile the binary executables needed for evaluating ' ...
+                                                        'some operations.\n'])
+fprintf(1,['Please make sure that mex is set up with the right compilers for' ...
+                                                            ' this system.\n'])
+fprintf(1,['Note that errors here are not the end of the world, but mean that ' ...
+                        'some operations may fail to execute correctly...\n'])
 cd Toolboxes
 compile_mex
 cd('../');
 fprintf(1,'Kind of amazing, but it seems like everything compiled ok!\n')
-fprintf(1,'Ready to add time series to the database using SQL_add...!\n');
+fprintf(1,['Ready when you are to add time series to the database using ' ...
+                                                        'SQL_add...!\n']);
 
 % Attempt to add a time series
 % SQL_add('ts','INP_test_ts.txt')

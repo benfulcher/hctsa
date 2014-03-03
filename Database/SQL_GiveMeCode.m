@@ -28,7 +28,7 @@
 % ------------------------------------------------------------------------------
 
 function TheCode = SQL_GiveMeCode(Theop_id);
-   
+
 % Open connection to database
 [dbc, dbname] = SQL_opendatabase;
 

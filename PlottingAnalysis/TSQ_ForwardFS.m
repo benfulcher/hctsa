@@ -191,6 +191,7 @@ for j = 1:NumFeatSelect
             end
         catch emsg
             TestStat(j,i) = NaN;
+            % keyboard
             fprintf(1,'Error at iteration %u (with feature %u): %s\n',j,i,emsg.identifier)
         end
     end

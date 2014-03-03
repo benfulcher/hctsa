@@ -40,28 +40,12 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function GroupIndices = TSQ_LabelGroups(KeywordGroups,TsorOps,WhatData,SaveBack)
+function GroupIndices = TSQ_LabelGroups(WhatData,KeywordGroups,TsorOps,SaveBack)
 
-% --------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 %% Check inputs
-% --------------------------------------------------------------------------
-if nargin < 1 || isempty(KeywordGroups)
-    error('You must specify labels');
-end
-if ischar(KeywordGroups);
-    fprintf(1,'Grouping all items with ''%s''.\n',KeywordGroups);
-    KeywordGroups = {KeywordGroups,0};
-end
-
-if nargin < 2 || isempty(TsorOps)
-    TsorOps = 'ts';
-    fprintf(1,'Grouping time series.\n');
-end
-if ~ismember(TsorOps,{'ops','ts'})
-    error('Specify either ''ops'' or ''ts''.')
-end
-
-if nargin < 3 || isempty(WhatData)
+% ------------------------------------------------------------------------------
+if nargin < 1 || isempty(WhatData)
     WhatData = 'norm';
     fprintf(1,'Retrieving from HCTSA_N by default.\n');
 end
@@ -69,13 +53,30 @@ if ~isstruct(WhatData) && ~ismember(WhatData,{'orig','norm','cl'})
     error('When specifying data, we need ''orig'', ''norm'', or ''cl''.')
 end
 
+if nargin < 2
+    KeywordGroups = '';
+    % Try to assign by unique keywords later
+end
+if ~isempty(KeywordGroups) && ischar(KeywordGroups);
+    fprintf(1,'Grouping all items with ''%s''.\n',KeywordGroups);
+    KeywordGroups = {KeywordGroups,0};
+end
+
+if nargin < 3 || isempty(TsorOps)
+    TsorOps = 'ts';
+    fprintf(1,'Grouping time series.\n');
+end
+if ~ismember(TsorOps,{'ops','ts'})
+    error('Specify either ''ops'' or ''ts''.')
+end
+
 if nargin < 4 || isempty(SaveBack)
     SaveBack = 1; % Saves the grouping back to the HCTSA_*.loc file
 end
 
-% --------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 %% Load data from file
-% --------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 if isstruct(WhatData)
     % Can make WhatData a structure...? Some old functionality...//
     Keywords = WhatData.Keywords;
@@ -102,10 +103,29 @@ else
     fprintf(1,' Loaded.\n');
 end
 
+% ------------------------------------------------------------------------------
+% Set default keywords?
+% ------------------------------------------------------------------------------
+if isempty(KeywordGroups)
+    fprintf(1,'No keywords assigned for labeling. Attempting to use unique keywords from data...?\n');
+    UKeywords = unique(Keywords);
+    NumUniqueKeywords = length(UKeywords);
+    fprintf(1,'Shall I use the following %u keywords?: %s\n',NumUniqueKeywords,BF_cat(UKeywords,',',''''));
+    reply = input('[y] for ''yes''','s');
+    if strcmp(reply,'y')
+        KeywordGroups = cell(NumUniqueKeywords,2);
+        for i = 1:NumUniqueKeywords
+            KeywordGroups{i,1} = UKeywords{i};
+            KeywordGroups{i,2} = 0;
+        end
+    else
+        fprintf(1,'Ok then, thanks anyway\n'); return
+    end
+end
 
-% --------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 %% Label groups from keywords
-% --------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 
 if ~all(cellfun(@ischar,KeywordGroups(:))) % Have specified numbers of each
     KeywordNumbers = horzcat(KeywordGroups{:,2}); % Just the number of each part
@@ -152,9 +172,9 @@ for i = 1:NumGroups
     fprintf(1,'%s -- %u matches\n',KeywordGroups{i},length(GroupIndices{i}));
 end
 
-% --------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 %% Save back to file?
-% --------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 if SaveBack
     % You don't need to check variables, you can just append back to the input file:
     if ~all(cellfun(@isempty,GroupIndices))

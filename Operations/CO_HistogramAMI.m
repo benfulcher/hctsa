@@ -10,7 +10,7 @@
 % http://www.mathworks.com/matlabcentral/fileexchange/12346-hist2-for-the-people
 % [[hist2 for the people by Nedialko Krouchev, 20 Sep 2006 (Updated 21 Sep 2006)]]
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, the input time series
 % 
@@ -25,7 +25,10 @@
 % 
 % nbins, the number of bins, required by some methods, meth (see above)
 % 
-% Output is the automutual information calculated in this way.
+%---OUTPUT: the automutual information calculated in this way.
+%
+%---HISTORY:
+% Ben Fulcher, September 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -51,9 +54,10 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_HistogramAMI(y,tau,meth,nbins)
-% Ben Fulcher, September 2009
 
+% ------------------------------------------------------------------------------
 %% INPUTS:
+% ------------------------------------------------------------------------------
 % Time-lag, tau
 if nargin < 2 || isempty(tau)
     tau = 1;  % time-lag of 1
@@ -78,7 +82,9 @@ y2 = y(1+tau:end);
 % Number of options:
 % remove outliers first?, number of bins, range of bins, bin sizes
 
+% ------------------------------------------------------------------------------
 %% Bins by standard deviation (=1)
+% ------------------------------------------------------------------------------
 
 % same for both -- assume same distribution (true for stationary processes,
 % or small lags)
@@ -119,7 +125,7 @@ pj = sum(pij,2); % other marginal
 pii = ones(nb,1)*pi;
 pjj = pj*ones(1,nb);
 
-r = (pij > 0); % defining the range in this way, we set log(0) = 0
+r = (pij > 0); % Defining the range in this way, we set log(0) = 0
 ami = pij(r).*log(pij(r)./pii(r)./pjj(r));
 out = sum(ami);
 

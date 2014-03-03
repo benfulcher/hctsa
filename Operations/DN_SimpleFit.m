@@ -33,6 +33,10 @@
 %---OUTPUTS: the goodness of fifit, R^2, rootmean square error, the
 % autocorrelation of the residuals, and a runs test on the residuals.
 % 
+% 
+%---HISTORY:
+% Ben Fulcher, 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -57,12 +61,17 @@
 % ------------------------------------------------------------------------------
 
 function out = DN_SimpleFit(x,dmodel,nbins)
-% Ben Fulcher, 2009
+
+% ------------------------------------------------------------------------------
+% Preliminaries
+% ------------------------------------------------------------------------------
 
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
 
+% ------------------------------------------------------------------------------
 %% Fit the model
+% ------------------------------------------------------------------------------
 % Two cases: distribution fits and fits on the data
 Distmods = {'gauss1','gauss2','exp1','power1'}; % valid distribution models
 TSmods = {'sin1','sin2','sin3','fourier1','fourier2','fourier3'}; % valid time series models
@@ -92,7 +101,8 @@ if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
             error('DN_SimpleFit(x,''%s'',%u): Error fitting %s to the data distribution\n%s',dmodel,nbins,dmodel,emsg.message)
         end
 	end
-elseif any(strcmp(TSmods,dmodel)); % valid TIME SERIES model name
+    
+elseif any(strcmp(TSmods,dmodel)); % Valid time-series model name
     if size(x,2) > size(x,1)
         x = x';
     end % x must be a column vector
@@ -111,7 +121,9 @@ else
     error('Invalid distribution or time-series model ''%s'' specified',dmodel);
 end
 
-%% Prepare the Output
+% ------------------------------------------------------------------------------
+%% Compute the outputs into a structure
+% ------------------------------------------------------------------------------
 out.r2 = gof.rsquare; % rsquared
 out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsqured
 out.rmse = gof.rmse;  % root mean square error

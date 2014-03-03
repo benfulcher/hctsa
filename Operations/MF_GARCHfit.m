@@ -37,7 +37,7 @@
 % Where r and m are the autoregressive and moving average orders of the model,
 % respectively, and p and q control the conditional variance parameters.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % preproc, the preprocessing to apply, can be 'ar' or 'none'
 % params, the parameters of the GARCH model to fit, can be:
@@ -46,7 +46,11 @@
 %           (iii) e.g., params = '''R'',2,''M'',1,''P'',2,''Q'',1', sets r = 2,
 %                                   m = 1, p = 2, q = 1
 % 
-% In future this function should be reformed by an expert in GARCH model fitting.
+% 
+% ***In future this code should be revised by an expert in GARCH model fitting.***
+% 
+%---HISTORY:
+% Ben Fulcher, 25/2/2010
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -72,30 +76,39 @@
 % ------------------------------------------------------------------------------
 
 function out = MF_GARCHfit(y,preproc,params)
-% Ben Fulcher, 25/2/2010
 
-%% Check that an Econometrics Toolbox license is available:
+% ------------------------------------------------------------------------------
+%% Preliminaries
+% ------------------------------------------------------------------------------
+
+bevocal = 0; % Whether to display commentary on the fitting process
+
+% Check that an Econometrics Toolbox license is available:
 BF_CheckToolbox('econometrics_toolbox')
 
-%% Preliminaries
-bevocal = 0; % whether to display commentary on the fitting process
-
-%% Inputs
+% ------------------------------------------------------------------------------
+%% Check inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(preproc)
-    preproc = 'ar'; % do the preprocessing that maximizes stationarity/whitening
+    % Do an autoregressive preprocessing that maximizes stationarity/whitening
+    preproc = 'ar';
 end
 
-% Model fitting
+% Fit what type of GARCH model?
 if nargin < 3 || isempty(params)
-    params = 'default'; % fit the default GARCH model
+    % Fit the default GARCH model
+    params = 'default';
 end
 
+% ------------------------------------------------------------------------------
 %% (1) Data preprocessing
-y0 = y; % the original, unprocessed time series
+% ------------------------------------------------------------------------------
+% Save the original, unprocessed time series
+y0 = y;
 
 switch preproc
     case 'nothing'
-        % Do nothing.
+        % Don't do any pre-processing
         
     case 'ar'
         % Apply a number of standard preprocessings and return them in the
@@ -111,14 +124,20 @@ switch preproc
 end
 
 y = BF_zscore(y); % z-score the time series
-N = length(y); % could be different to original (if choose a differencing, e.g.)
+
+% Length of the time series, y
+% Note that this could be different to the original, y0 (if choose a differencing, e.g.)
+N = length(y);
 
 % Now have the preprocessed time series saved over y.
 % The original, unprocessed time series is retained in y0.
 % (Note that y=y0 is possible; when all preprocessings are found to be
 %   worse at the given criterion).
 
+
+% ------------------------------------------------------------------------------
 %% (2) Data pre-estimation
+% ------------------------------------------------------------------------------
 % Aim is to return some statistics indicating the suitability of this class
 % of modeling.
 % Will use the statistics to motivate a GARCH model in the next
@@ -235,7 +254,9 @@ if all(isnan(innovations))
     error('GARCH fit failed');
 end
 
+% ------------------------------------------------------------------------------
 %% (4) Return statistics on fit
+% ------------------------------------------------------------------------------
 
 % (i) Return coefficients, and their standard errors as seperate statistics
 % ___Mean_Process___

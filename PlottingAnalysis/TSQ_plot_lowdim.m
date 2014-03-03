@@ -7,7 +7,7 @@
 % 
 % [Previously TSQ_dimred]
 % 
-%-----History:
+%----HISTORY:
 % Ben Fulcher 31/3/2010 -- new classmeth option to specify classification
 %                           method -- i.e., built in linear/quadratic; or
 %                           svm-based method, etc.
@@ -16,7 +16,7 @@
 % Ben Fulcher 13/7/2010 -- removed justus option!! Trying to clean up an
 %                           inconsistency in labeling. Added TheData input
 % Ben Fulcher 29/10/2010 -- added annotatep: can annotate time series
-%-----
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -35,7 +35,9 @@
 
 function TSQ_plot_lowdim(TheData,TsorOps,classmeth,showks,annotatep)
 
+% ------------------------------------------------------------------------------
 %% Check inputs:
+% ------------------------------------------------------------------------------
 if nargin < 1 || isempty(TheData)
     TheData = 'norm';
     fprintf(1,'Getting data from HCTSA_N\n'); 
@@ -82,7 +84,9 @@ if ~isstruct(annotatep)
     annotatep = struct('n',annotatep);
 end
 
+% ------------------------------------------------------------------------------
 %% Load the data and group labeling from file
+% ------------------------------------------------------------------------------
 if strcmp(TheData,'cl') || strcmp(TheData,'norm') 
     % Retrive data from local files
     switch TheData
@@ -144,9 +148,11 @@ GroupIndices = BF_ToGroup(DataGroups);
 % end
 NumGroups = length(GroupIndices); % Number of groups
 
+% ------------------------------------------------------------------------------
 %% Do the dimensionality reduction
+% ------------------------------------------------------------------------------
 
-% Matlab build-in PCA
+% Matlab's build-in PCA
 % Sort it so that when choose different set of keywords the output is consistent
 % There's a strange thing in princomp that can give different scores when the
 % input rows are in a different order. The geometry is the same, but they're reflected
@@ -170,6 +176,10 @@ for i = 1:2
     end
     tolabel{i} = tolabel{i}(1:end-2);
 end
+
+% ------------------------------------------------------------------------------
+% Plot this two-dimensional representation of the data
+% ------------------------------------------------------------------------------
 
 % Move all 2d plotting to TSQ_plot_2d
 % extras.TS_DataMat = score;

@@ -61,7 +61,8 @@ function out = SY_LocalGlobal(y,lorp,n)
 
 % Check input time series is z-scored:
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored')
+    warning('The input time series should be z-scored (mean=%g and std-1=%g)', ...
+                                                mean(y),std(y)-1)
 end
 
 % Set default l
@@ -79,22 +80,27 @@ if nargin < 3 || isempty(n)
     end
 end
 
-N = length(y); % length of the time series
+N = length(y); % Length of the time series
 
 % ------------------------------------------------------------------------------
 % Determine subset range to use: r
 % ------------------------------------------------------------------------------
 switch lorp
     case 'l'
-        r = (1:min(n,N)); % takes first n points of time series
+        % Takes first n points of time series:
+        r = (1:min(n,N));
     case 'p'
-    	r = (1:round(N*n)); % takes initial proportion n of time series
+        % Takes initial proportion n of time series
+    	r = (1:round(N*n));
     case 'unicg'
-        r = round(linspace(1,N,n)); % takes n uniformly distributed points in time series
+        % Takes n uniformly distributed points in time series:
+        r = round(linspace(1,N,n));
     case 'randcg'
-        r = randi(N,n,1); % takes n random points in time series; there could be repeats
-        % This is quite unrobust, as it's taking just a single sample from
-        % a test with a (possibly) large variance
+        % Takes n random points in time series; there could be repeats:
+        r = randi(N,n,1);
+        % This is not veru robust, as it's taking just a single stochastic
+        % sample with a (possibly) large variance
+
     otherwise
         error('Unknown specifier, ''%s''',lorp);
 end
@@ -102,8 +108,8 @@ end
 % ------------------------------------------------------------------------------
 % Compare statistics of this subset to those obtained from the full time series
 % ------------------------------------------------------------------------------
-out.mean = abs(mean(y(r))); %/mean(y); % Y SHOULD BE Z-SCORED;;
-out.std = std(y(r)); %/std(y); % Y SHOULD BE Z-SCORED;;
+out.mean = abs(mean(y(r))); %/mean(y); % ** INPUT Y MUST BE Z-SCORED;
+out.std = std(y(r)); %/std(y); % ** INPUT Y MUST BE Z-SCORED
 out.median = median(y(r)); %/median(y); % if median is very small;; could be very noisy
 out.iqr = abs(1-iqr(y(r)) / iqr(y));
 out.skewness = abs(1-skewness(y(r)) / skewness(y)); % how far from true
