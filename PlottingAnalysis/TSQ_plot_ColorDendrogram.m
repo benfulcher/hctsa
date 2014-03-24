@@ -1,0 +1,209 @@
+% TSQ_plot_ColorDendrogram
+% 
+% Creates a dendrogram for distance matrix d with colours at each leaf
+% 
+%---INPUTS:
+% d is the (NxN) pairwise distance matrix (e.g., computed using pdist, then squareform)
+% The Nx1 vector groups gives the index each node belongs to
+% The Gx1 cell GroupLabels gives the name of each group (for each of G groups)
+% LinkMethod specifies the linkage method ('complete' by default)
+% horiz can plot everything horizontally. Don't think this works yet...
+% 
+%---OUTPUT:
+% Generates a formatted and color-labeled dendrogram of your data
+% 
+%---HISTORY:
+% Ben Fulcher 2010, based on code by Dann Fenn
+%
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+% 
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% 
+% This work is licensed under the Creative Commons
+% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
+% California, 94041, USA.
+% ------------------------------------------------------------------------------
+
+function TSQ_plot_ColorDendrogram(d,groups,GroupLabels,LinkMethod,horiz)
+
+% ------------------------------------------------------------------------------
+% Check inputs:
+% ------------------------------------------------------------------------------
+if nargin < 4 || isempty(LinkMethod) % linkage method
+    LinkMethod = 'complete'; % use average clustering by default
+end
+if nargin < 5 || isempty(horiz)
+    horiz = 0; % display horizontally? not really supported yet
+end
+
+% Set up orientation: theorient
+if horiz
+    theorient = 'left';
+else
+    theorient = 'top';
+end
+
+% Can specify distance matrix as a string: norcl, and will retrieve and
+% calculate distances as appropriate...
+if ischar(d)
+    dmth = 'euclidean';
+    newmaxd = 5;
+    
+    if strcmp(d,'cl')
+        load TS_loc_cl
+        F = TS_loc_cl; clear TS_loc_cl
+    elseif strcmp(d,'norm')
+        load TS_loc_N
+        F = TS_loc_N; clear TS_loc_N
+    end
+    
+    % calculate pairwise distances
+    d = benpdist(F,dmth);
+    % rescale to range of <newmaxd>
+    d = newmaxd * d/max(d);
+end
+
+% Each cell element are indices of that group
+if iscell(groups)
+    groups = BF_ToGroup(groups);
+end
+
+% ------------------------------------------------------------------------------
+% Do the linkage:
+% ------------------------------------------------------------------------------
+Z = linkage(d,LinkMethod);
+
+% ------------------------------------------------------------------------------
+% Assign labels
+% ------------------------------------------------------------------------------
+NumNodes = length(groups); % The number of objects/nodes
+NodeLabels = cell(NumNodes,1);
+for i=1:NumNodes; NodeLabels{i} = ''; end; % Don't actually label the nodes...
+
+% ------------------------------------------------------------------------------
+%% Plot the dendrogram
+% ------------------------------------------------------------------------------
+figure('color','w'); hold on;
+if length(groups)>1000
+    [H,~,perm] = dendrogram(Z,0,'orientation','top','labels',NodeLabels);
+else % Try optimal leaf order
+    fprintf('Trying to run optimal leaf order for %u nodes',length(groups))
+    order = optimalleaforder(Z,d);
+    [H,~,perm] = dendrogram(Z,0,'r',order,'orientation',theorient,'labels',NodeLabels);
+end
+
+% Change the line width of the dendrogram
+set(H,'LineWidth',0.0001,'Color','k');
+set(gca,'FontSize',12);
+NumGroups = length(GroupLabels); % number of groups
+
+% ------------------------------------------------------------------------------
+% Set up colors
+% ------------------------------------------------------------------------------
+ng = 6; % use 6 partitions for each color
+cmap = colormap(BF_getcamp('blues',ng,0,1));
+if NumGroups >= 2
+    cmap = [cmap;BF_getcamp('greens',ng,0,1)];
+end
+if NumGroups >= 3
+    cmap = [cmap;BF_getcamp('oranges',ng,0,1)];
+end
+if NumGroups >= 4
+    cmap = [cmap;BF_getcamp('purples',ng,0,1)];
+end
+if NumGroups >= 5
+    cmap = [cmap;BF_getcamp('reds',ng,0,1)];
+end
+if NumGroups >= 6
+    cmap = [cmap;pink(ng)];
+end
+if NumGroups >= 7
+    cmap = [cmap;gray(ng)];
+end
+if NumGroups >= 8
+    cmap = [cmap;BF_getcamp('yelloworangered',ng,0,1)];
+end
+if NumGroups >= 9
+    cmap = [cmap;BF_getcamp('purplebluegreen',ng,0,1)];
+end
+if NumGroups >= 10
+    cmap = [cmap;BF_getcamp('yellowgreenblue',ng,0,1)];
+end
+if NumGroups >= 11
+    error('Too many groups (>10), I can''t handle this!!')
+end
+colors = cmap;
+
+% ------------------------------------------------------------------------------
+% Plot little colored bars to label groups on the dendrogram
+% ------------------------------------------------------------------------------
+barheight = 0.4;
+ugroups = unique(groups);
+for u = 1:length(ugroups)
+    idx = find(groups==ugroups(u));
+    for i = 1:length(idx)
+%         h = line([find(perm==idx(i)),find(perm==idx(i))],[-0.02,-0.01],...
+%                 'LineWidth',1,'Color',colors(u,:));
+%         if i==1, l = [l;h]; end
+%         rectangle('Position',[find(perm==idx(i))-0.5,-0.01,1,barheight],.
+%         ..
+%                 'FaceColor',colors(u,:),'EdgeColor',colors(u,:),'LineWidt
+%                 h',0.0001);
+        for j = 1:ng
+            try
+                if horiz
+                    rectangle('Position',[-barheight+(j-1)*barheight/ng,find(perm==idx(i))-0.5,barheight/ng,1],...
+                        'FaceColor',colors(ng*(u-1)+j,:),'EdgeColor',colors(ng*(u-1)+j,:),'LineWidth',0.0001);
+                else
+                    rectangle('Position',[find(perm==idx(i))-0.5,-barheight+(j-1)*barheight/ng,1,barheight/ng],...
+                        'FaceColor',colors(ng*(u-1)+j,:),'EdgeColor',colors(ng*(u-1)+j,:),'LineWidth',0.0001);
+                end
+            catch emsg
+                keyboard
+            end
+        end
+%         rectangle('Position',[find(perm==idx(i))-0.5,0,1,barheight/6],...
+%                 'FaceColor',colors(6*(u-1)+1,:),'EdgeColor',colors(6*(u-1)+1,:),'LineWidth',0.0001);
+%         rectangle('Position',[find(perm==idx(i))-0.5,barheight/6,1,barheight/6],...
+%             'FaceColor',colors(6*(u-1)+2,:),'EdgeColor',colors(6*(u-1)+2,:),'LineWidth',0.0001);
+%         rectangle('Position',[find(perm==idx(i))-0.5,2*barheight/6,1,barheight/6],...
+%             'FaceColor',colors(6*(u-1)+3,:),'EdgeColor',colors(6*(u-1)+3,:),'LineWidth',0.0001);
+%         rectangle('Position',[find(perm==idx(i))-0.5,3*barheight/6,1,barheight/6],...
+%             'FaceColor',colors(6*(u-1)+4,:),'EdgeColor',colors(6*(u-1)+4,:),'LineWidth',0.0001);
+%         rectangle('Position',[find(perm==idx(i))-0.5,4*barheight/6,1,barheight/6],...
+%             'FaceColor',colors(6*(u-1)+5,:),'EdgeColor',colors(6*(u-1)+5,:),'LineWidth',0.0001);
+%         rectangle('Position',[find(perm==idx(i))-0.5,4*barheight/6,1,barheight/6],...
+%             'FaceColor',colors(6*(u-1)+5,:),'EdgeColor',colors(6*(u-1)+5,:),'LineWidth',0.0001);
+%         rectangle('Position',[find(perm==idx(i))-0.5,5*barheight/6,1,barheight/6],...
+%             'FaceColor',colors(6*(u-1)+6,:),'EdgeColor',colors(6*(u-1)+6,:),'LineWidth',0.0001);
+
+    end
+end
+
+ylim([-barheight-0.04 max(Z(:,3)) + 0.001]);
+% set(gca,'FontSize',16,'YLim',[-0.041,0.552],'Position',[0.09 0.11 0.65 0.815]);
+ylabel('d','FontSize',20);
+hold off;
+
+% ------------------------------------------------------------------------------
+%% Write legend, do labeling...
+% ------------------------------------------------------------------------------
+% legend(GroupLabels)
+colors = colors(2:ng:end,:);
+y = 0.9;    % vertical height of first colour bar
+x = 0.76;   % left corner of each colour bar
+w = 0.05;   % width of colour bar
+d = 0.045;  % vertical separation between colour bars
+for i = 1:length(GroupLabels)
+    annotation(gcf,'line',[x x+w],[y-(i-1)*d y-(i-1)*d],'LineWidth',10,'Color',colors(i,:));
+    annotation(gcf,'textbox',[x+w+0.005 y-(i-1)*d-0.01 0.1782 0.03361],'String',GroupLabels(i),...
+        'FontSize',16,'FitBoxToText','off','LineStyle','none');
+end;
+set(gcf,'color','w');

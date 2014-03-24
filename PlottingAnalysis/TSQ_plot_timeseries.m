@@ -17,10 +17,6 @@
 % 
 %----HISTORY:
 % Previously called 'TSQ_plot_examples'
-% Plots examples from time series matching kwgs; can specify gi if you want
-% -- the indicies in cl that match
-% Based on TSQ_plot_timeseries, which plotted all time series in a way to
-% match TSQ_plot_tm output. This is a generalization.
 % Ben Fulcher 9/4/2010
 % Ben Fulcher 13/5/2010 added F option (a matrix, 'norm', or 'cl')
 % Ben Fulcher 24/6/2010 added option to show examples from each class in
@@ -32,7 +28,7 @@
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 

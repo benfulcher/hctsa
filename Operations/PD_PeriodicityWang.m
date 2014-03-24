@@ -14,19 +14,22 @@
 % the time series. The frequency is the first peak in the autocorrelation
 % function satisfying a set of conditions.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series.
 % 
 % The single threshold of 0.01 was considered in the original paper, this code
 % uses a range of thresholds: 0, 0.01, 0.1, 0.2, 1\sqrt{N}, 5\sqrt{N}, and
 % 10\sqrt{N}, where N is the length of the time series.
 % 
+%---HISTORY:
+% Ben Fulcher, 9/7/09
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
@@ -45,25 +48,31 @@
 % ------------------------------------------------------------------------------
 
 function out = PD_PeriodicityWang(y)
-% Ben Fulcher, 9/7/09
 
-%% Check that a Curve-Fitting Toolbox license is available:
-BF_CheckToolbox('curve_fitting_toolbox')
-
+% ------------------------------------------------------------------------------
 %% Preliminaries:
+% ------------------------------------------------------------------------------
 doplot = 0; % plot outputs to figure
 
-% Check the time series is z-scored:
+% Check that a Curve-Fitting Toolbox license is available:
+% (for the splines)
+BF_CheckToolbox('curve_fitting_toolbox')
+
+% Check that the time series is z-scored:
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored')
 end
 
+% ------------------------------------------------------------------------------
 %% Foreplay
+% ------------------------------------------------------------------------------
 N = length(y); % length of the time series
 ths = [0, 0.01, 0.1, 0.2, 1/sqrt(N), 5/sqrt(N), 10/sqrt(N)]; % the thresholds with which to count a peak
 nths = length(ths); % the number of thresholds
 
+% ------------------------------------------------------------------------------
 %% 1: Detrend using a regression spline with 3 knots
+% ------------------------------------------------------------------------------
 % I'm not quite sure how to do this, but I'm doing it like this:
 % y_or=y; % the original series
 % r=linspace(1,N,3);% range for spline (3 knots)

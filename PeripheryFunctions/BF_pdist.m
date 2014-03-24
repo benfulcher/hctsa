@@ -10,7 +10,7 @@
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
@@ -63,8 +63,7 @@ if strcmp(DistMetric,'mi')
     goodies = ~isnan(F); % now we can deal with NaNs into design matrix
 
     mis = zeros(n1);
-    % times = zeros(n1,1);
-    timer = tic; % Way faster to not store the time taken for every iteration
+    mitimer = tic; % Way faster to not store the time taken for every iteration
     for i = 1:n1
         % tic
         goodi = goodies(i,:);
@@ -74,15 +73,14 @@ if strcmp(DistMetric,'mi')
             mis(i,j) = benmi(F(i,goodboth),F(j,goodboth),'quantile','quantile',nbins); % by quantile with nbins
             mis(j,i) = mis(i,j);
         end
-        % times(i) = toc;
         if (mod(i,floor(n1/50)) == 0)
             fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
-                        BF_thetime(toc(timer)/i*(n1-i)),i,n1)
+                        BF_thetime(toc(mitimer)/i*(n1-i)),i,n1)
 %             save(fn,'mis','m_ids_keep','-v7.3');
 %             disp('saved')
         end
     end
-    clear timer % stop timing
+    clear mitimer % stop timing
     R = mis; clear mis; % not really an R but ok.
 else
     % First use in-built pdist, which is fast

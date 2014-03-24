@@ -19,7 +19,7 @@
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
@@ -56,9 +56,9 @@ end
 % --------------------------------------------------------------------------
 if isstruct(norcl)
     % can specify all of this in the norcl argument
-    TimeSeriesFileNames = norcl.TimeSeriesFileNames;
-    OperationNames = norcl.OperationNames;
-    TS_DataMat = norcl.F;
+    TimeSeries = norcl.TimeSeries;
+    Operations = norcl.Operations;
+    TS_DataMat = norcl.TS_DataMat;
 else
     if strcmp(norcl,'cl')
         TheFile = 'HCTSA_cl.mat'; TheRoutine = 'TSQ_cluster';
@@ -80,10 +80,12 @@ else
     end
     load(TheFile,'TimeSeries','Operations')
 end
+
 if ColorGroups
-    load(TheFile,'GroupNames')
     TimeSeriesGroups = [TimeSeries.Group];
 end
+
+
 TimeSeriesFileNames = {TimeSeries.FileName}; clear TimeSeries; % Just extract filenames
 OperationNames = {Operations.Name}; clear Operations; % Just extract operation names
 

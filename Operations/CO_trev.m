@@ -21,12 +21,14 @@
 %---OUTPUTS: the raw trev expression, its magnitude, the numerator and its
 % magnitude, and the denominator.
 % 
+%---HISTORY:
+% Ben Fulcher, 15/11/2009
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
@@ -45,14 +47,17 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_trev(y,tau)
-% Ben Fulcher, 15/11/2009
 
+% ------------------------------------------------------------------------------
 %% Set defaults:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
     tau = 'ac';
 end
 
+% ------------------------------------------------------------------------------
 % Can set the time lag, tau, to be 'ac' or 'mi'
+% ------------------------------------------------------------------------------
 if strcmp(tau,'ac')
     tau = CO_FirstZero(y,'ac');
     % tau is first zero crossing of the autocorrelation function
@@ -61,10 +66,15 @@ elseif strcmp(tau,'mi')
     % tau is the first minimum of the automutual information function
 end
 
+% ------------------------------------------------------------------------------
+% Compute trev quantities
+% ------------------------------------------------------------------------------
+
 yn = y(1:end-tau);
 yn1 = y(1+tau:end); % yn, tau steps ahead
 
-% The expression used in TSTOOL
+
+% The trev expression used in TSTOOL:
 out.raw = mean((yn1-yn).^3)/(mean((yn1-yn).^2))^(3/2);
 
 % The magnitude

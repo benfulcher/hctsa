@@ -19,6 +19,9 @@
 % flipmeout, (i) 1: inverts the ordering of the colors.
 %            (ii) 0: doesn't invert the ordering of the colors. 
 % 
+%---HISTORY:
+% Ben Fulcher, 5/11/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,7 +41,6 @@
 % ------------------------------------------------------------------------------
 
 function cmapout = BF_getcmap(whichcmap,ng,cellout,flipmeout)
-% Ben Fulcher, 5/11/2010
 
 if nargin < 2 || isempty(ng)
     ng = 6;

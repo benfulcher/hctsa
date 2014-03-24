@@ -39,7 +39,7 @@
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
@@ -183,7 +183,7 @@ IterationTimes = zeros(nts,1); % Record the time taken for each iteration
 DidRetrieve = zeros(nts,1);    % Keep track of whether data was retrieved at each iteration
 
 % --------------------------------------------------------------------------
-% First retrieve the data:
+%% First retrieve the data:
 % --------------------------------------------------------------------------
 for i = 1:nts
     
@@ -367,7 +367,9 @@ if ismember(RetrieveWhatEntries,{'null','error'})
 	end    
 end
 
+% ------------------------------------------------------------------------------
 %% Fill Metadata
+% ------------------------------------------------------------------------------
 
 % 1. Retrieve Time Series Metadata
 SelectString = sprintf('SELECT FileName, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
@@ -400,7 +402,9 @@ end
 % Close database connection
 SQL_closedatabase(dbc)
 
+% ------------------------------------------------------------------------------
 % Save to HCTSA_loc.mat
+% ------------------------------------------------------------------------------
 fprintf(1,'Saving local versions of the data to HCTSA_loc.mat...');
 save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','-v7.3');
 switch RetrieveWhatData
@@ -421,7 +425,9 @@ end
 fprintf(1,' Done.\n');
 DidWrite = 1;
 
+% ------------------------------------------------------------------------------
 % If retrieved quality labels, display how many entries need to be calculated
+% ------------------------------------------------------------------------------
 if strcmp(RetrieveWhatData,'outputs')
     fprintf(1,'You have the outputs, but you don''t know which are good or not without the quality labels...\n');
 else

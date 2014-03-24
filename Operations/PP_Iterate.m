@@ -17,13 +17,16 @@
 %           (iv) 'rav' applies a running mean filter,
 %           (v) 'resampleup' progressively upsamples the time series,
 %           (vi) 'resampledown' progressively downsamples the time series.
+%
+%---HISTORY:
+% Ben Fulcher, 10/7/09
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
@@ -42,16 +45,21 @@
 % ------------------------------------------------------------------------------
 
 function out = PP_Iterate(y,detrndmeth)
-% Ben Fulcher, 10/7/09
 
+% ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox')
 
+% ------------------------------------------------------------------------------
 %% FOREPLAY
-N = length(y); % length of time series
+% ------------------------------------------------------------------------------
+N = length(y); % Length of the input time series
 
+% ------------------------------------------------------------------------------
 %% Determine the number of times the processing will be progressively performed
-% this information is stored in nr
+% ------------------------------------------------------------------------------
+% This information is stored in nr.
 switch detrndmeth
     case 'spline', nr = (1:20);
     case 'diff', nr = (1:5);
@@ -63,7 +71,9 @@ switch detrndmeth
         error('Unknown detrending method ''%s''',detrndmeth);
 end
 
+% ------------------------------------------------------------------------------
 %% Do the progessive processing with running statistical evaluation
+% ------------------------------------------------------------------------------
 outmat = zeros(length(nr),10);
 for q = 1:length(nr)
     n = nr(q);
@@ -95,9 +105,9 @@ for q = 1:length(nr)
 end
 % out1 = outmat;
 
-
-%% DETERMINE THE STATISTICS ON EACH TEST
-% four statistics on each test
+% ------------------------------------------------------------------------------
+%% Calculate four statistics from each test
+% ------------------------------------------------------------------------------
 
 stats = zeros(10,4);
 for t = 1:10;
@@ -107,7 +117,9 @@ for t = 1:10;
     stats(t,:) = doyourtestthing(outmat(:,t)); 
 end
 
+% ------------------------------------------------------------------------------
 %% WRITE OUTPUT
+% ------------------------------------------------------------------------------
 % 1) StatAv_5
 out.statav5_trend = stats(1,1);
 out.statav5_jump = stats(1,2);
@@ -168,8 +180,9 @@ out.normdiff_jump = stats(10,2);
 out.normdiff_lin = stats(10,3);
 out.normdiff_exp = stats(10,4);
 
-
+    % ------------------------------------------------------------------------------
     %% TESTS
+    % ------------------------------------------------------------------------------
     function f = doyourcalcthing(y,y_d)
         y = BF_zscore(y); y_d = BF_zscore(y_d);
         f = zeros(10,1); % vector of features to output

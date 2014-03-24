@@ -27,12 +27,15 @@
 %---OUTPUTS: measures of the sum of absolute deviations between distributions
 % across the different pairwise comparisons.
 % 
+%---HISTORY:
+% Ben Fulcher, August 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
@@ -51,12 +54,13 @@
 % ------------------------------------------------------------------------------
 
 function out = SY_LocalDistributions(y,nseg,eachorpar,npoints)
-% Ben Fulcher, August 2009
 
-% plot outputs
+% Plot outputs?
 doplot = 0;
 
+% ------------------------------------------------------------------------------
 % Check inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(nseg) % number of segments
     nseg = 5;
 end
@@ -68,13 +72,17 @@ if nargin < 4 || isempty(npoints)
     npoints = 200; % 200 by default
 end
 
-N = length(y); % number of samples in the time series
-
+% ------------------------------------------------------------------------------
+% Preliminaries
+% ------------------------------------------------------------------------------
+N = length(y); % Length of the time series (number of samples)
 lseg = floor(N/nseg);
 dns = zeros(npoints,nseg);
-r = linspace(min(y),max(y),npoints); % make range of ksdensity uniform across all subsegments
+r = linspace(min(y),max(y),npoints); % Make range of ksdensity uniform across all subsegments
 
+% ------------------------------------------------------------------------------
 % Compute the kernel-smoothed distribution in all nseg segments of the time series
+% ------------------------------------------------------------------------------
 for i = 1:nseg
     dns(:,i) = ksdensity(y((i-1)*lseg+1:i*lseg),r,'function','pdf');
 end
@@ -84,7 +92,9 @@ if doplot
     plot(dns,'k')
 end
 
+% ------------------------------------------------------------------------------
 % Compare the local distributions
+% ------------------------------------------------------------------------------
 switch eachorpar
     case 'par'
         % Compares each subdistribtuion to the parent (full signal) distribution

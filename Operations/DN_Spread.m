@@ -8,18 +8,20 @@
 %---INPUTS:
 % y, the input time series
 % 
-% thespread, the spead measure:
+% SpreadMeasure, the spead measure:
 %               (i) 'std': standard deviation
 %               (ii) 'iqr': interquartile range
 %               (iii) 'mad': mean absolute deviation
 %               (iv) 'mead': median absolute deviation
 % 
+%---HISTORY:
+% Ben Fulcher, 2008
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
@@ -37,28 +39,38 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_Spread(y,thespread)
-% Ben Fulcher, 2008
+function out = DN_Spread(y,SpreadMeasure)
 
-if nargin < 2 || isempty(thespread)
-    thespread = 'std'; % return std by default
+% ------------------------------------------------------------------------------
+% Check Inputs
+% ------------------------------------------------------------------------------
+if nargin < 2 || isempty(SpreadMeasure)
+    SpreadMeasure = 'std'; % return std by default
 end
 
-switch thespread
-	case 'std' % standard deviation
+
+% ------------------------------------------------------------------------------
+% Evaluate the spread measure
+% ------------------------------------------------------------------------------
+switch SpreadMeasure
+	case 'std'
+        % Standard deviation
 		out = std(y);
         
-	case 'iqr' % interquartile range
+	case 'iqr'
+        % Interquartile range
 		out = iqr(y);
         
-	case 'mad' % mean absolute deviation
+	case 'mad'
+        % Mean absolute deviation
 		out = mad(y,0);
         
-    case 'mead' % median absolute deviation;
+    case 'mead'
+        % Median absolute deviation
         out = mad(y,1);
         
     otherwise
-        error('Unknown spread measure ''%s''',thespread)
+        error('Unknown spread measure ''%s''',SpreadMeasure)
 end
 
 end

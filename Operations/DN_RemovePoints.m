@@ -24,12 +24,15 @@
 % 
 % Note that this is a similar idea to that implemented in DN_OutlierInclude.
 % 
+%---HISTORY:
+% Ben Fulcher, September 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
@@ -48,13 +51,16 @@
 % ------------------------------------------------------------------------------
 
 function out = DN_RemovePoints(y,howtorem,p)
-% Ben Fulcher, September 2009
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length
-doplot = 0; % plot output
+DoPlot = 0; % plot output
 
+% ------------------------------------------------------------------------------
 %% Check inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(howtorem)
     howtorem = 'absfar'; % default
 end
@@ -80,7 +86,7 @@ end
 rkeep = sort(is(1:round(N*(1-p))),'ascend');
 y_trim = y(rkeep);
 
-if doplot
+if DoPlot
     figure('color','w')
     hold off
     plot(y,'ok');
@@ -93,14 +99,16 @@ end
 acf_y = SUB_acf(y,8);
 acf_y_trim = SUB_acf(y_trim,8);
 
-if doplot
+if DoPlot
     figure('color','w')
     hold off;
     plot(acf_y,':b'); hold on;
     plot(acf_y_trim,':r');
 end
 
+% ------------------------------------------------------------------------------
 %% Compute output statistics
+% ------------------------------------------------------------------------------
 out.fzcacrat = CO_FirstZero(y_trim,'ac')/CO_FirstZero(y,'ac');
 out.ac2rat = acf_y_trim(2)/acf_y(2); % includes the sign
 out.ac2diff = abs(acf_y_trim(2)-acf_y(2));

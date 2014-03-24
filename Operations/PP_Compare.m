@@ -64,12 +64,15 @@
 %---OUTPUTS: include comparisons of stationarity and distributional measures
 % between the original and transformed time series.
 % 
+%---HISTORY:
+% Ben Fulcher, 9/7/09
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones., "Highly comparative time-series
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
@@ -88,18 +91,23 @@
 % ------------------------------------------------------------------------------
 
 function out = PP_Compare(y,detrndmeth)
-% Ben Fulcher, 9/7/09
 
+% ------------------------------------------------------------------------------
 %% Check inputs, set default
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(detrndmeth)
     detrndmeth = 'medianf'; % median filter by default
 end
 
+% ------------------------------------------------------------------------------
 %% FOREPLAY
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length
 r = (1:N)'; % the t-range over which to fit
 
-%% PREPROCESSINGS:
+% ------------------------------------------------------------------------------
+%% APPLY PREPROCESSINGS
+% ------------------------------------------------------------------------------
 % DETRENDINGS:
 % Do the detrending; converting from y (raw) to y_d (detrended) by
 % subtracting some fit y_fit
@@ -186,7 +194,9 @@ if all(y_d == 0)
     out = NaN; return
 end
 
+% ------------------------------------------------------------------------------
 %% TESTS ON THE ORIGINAL AND PROCESSED SIGNALS
+% ------------------------------------------------------------------------------
 % z-score both (these metrics will need it, and not done before-hand
 % because of positive-only data, etc.
 y = BF_zscore(y); y_d = BF_zscore(y_d);
