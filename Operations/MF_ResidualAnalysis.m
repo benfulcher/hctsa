@@ -2,7 +2,7 @@
 % MF_ResidualAnalysis
 % ------------------------------------------------------------------------------
 % 
-% Given an input residual time series residuals e, this function exports a
+% Given an input residual time series residuals, e, this function exports a
 % structure with fields corresponding to structural tests on the residuals.
 % These are motivated by a general expectation of model residuals to be
 % uncorrelated.
@@ -10,6 +10,9 @@
 %---INPUT:
 % e, should be raw residuals as prediction minus data (e = yp - y) as a column
 %       vector. Will take absolute values / even powers of e as necessary.
+% 
+%---HISTORY:
+% Ben Fulcher, 10/2/2010
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -35,7 +38,6 @@
 % ------------------------------------------------------------------------------
 
 function out = MF_ResidualAnalysis(e)
-% Ben Fulcher 10/2/2010
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -67,7 +69,7 @@ else
 end
 
 % ------------------------------------------------------------------------------
-%% Analyze trends in residuals
+%% Identify any low-frequency trends in residuals
 % ------------------------------------------------------------------------------
 % Look for any low-frequency trends -- extract summaries from power
 % spectrum.
@@ -80,7 +82,7 @@ gS = g.Spectrumdata(:);
 % this is like normalizing the residuals to unit variance
 gS = gS / (sum(gS)*(gf(2)-gf(1)));
 
-% now look at proportion of power in fifths
+% Look at proportion of power in fifths
 b = round(linspace(0,length(gf),6));
 out.p1_5 = sum(gS(b(1)+1:b(2)))*(gf(2)-gf(1));
 out.p2_5 = sum(gS(b(2)+1:b(3)))*(gf(2)-gf(1));
@@ -88,7 +90,9 @@ out.p3_5 = sum(gS(b(3)+1:b(4)))*(gf(2)-gf(1));
 out.p4_5 = sum(gS(b(4)+1:b(5)))*(gf(2)-gf(1));
 out.p5_5 = sum(gS(b(5)+1:b(6)))*(gf(2)-gf(1));
 
-%% (**) Autocorrelations in residuals (**)
+% ------------------------------------------------------------------------------
+%% Analyze autocorrelation in residuals
+% ------------------------------------------------------------------------------
 % See if there are any linear correlations in residuals.
 % Also see if any of these are abnormally large (i.e., may be remnant
 % autocorrelation at some level, or may be a characteristic shape in this
@@ -122,37 +126,39 @@ end
 % Durbin-Watson test statistic
 out.dwts = sum((e(2:end)-e(1:end-1)).^2) / sum(e.^2);
 
-%% (**) Linear structure in residuals (**)
+% ------------------------------------------------------------------------------
+%% Linear structure in residuals
+% ------------------------------------------------------------------------------
 % Fit a linear model and see if it picks up any structure.
 % There's also a suggestion in 'resid' documentation to fit an arx model to
 % the output of resid -- looks for correlations between inputs and
 % outputs, perhaps?
 
-% fit zero-mean ar process to residuals
-emsg = [];
+% Fit a zero-mean AR process to residuals using the ARFIT package:
+emsg = '';
 try
     [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(e, 1, 10, 'sbc', 'zero');
 catch emsg
 end
 
 if ~isempty(emsg)
-    if (strcmp(emsg.message,'Time series too short.') || strcmp(emsg.message,'Matrix must be positive definite.'))
-        out.popt = NaN; % optimum order
-        out.minsbc = NaN; % best sbc
-        out.minfpe = NaN; % best fpe
-        out.sbc1 = NaN;
-    else
-        error('Unknown error fitting AR model to residuals using ARFIT package');
-    end
+    % (strcmp(emsg.message,'Time series too short.') || strcmp(emsg.message,'Matrix must be positive definite.'))
+    warning('Error fitting AR model to residuals using ARFIT package: %s\n',emsg.message)
+    out.popt = NaN; % Optimum order
+    out.minsbc = NaN; % Best sbc
+    out.minfpe = NaN; % Best fpe
+    out.sbc1 = NaN; % SBC(1)
 else
-    out.popt = length(Aest); % optimum order
-    out.minsbc = min(SBC); % best sbc
-    out.minfpe = min(FPE); % best fpe
+    out.popt = length(Aest); % Optimum order
+    out.minsbc = min(SBC); % Best sbc
+    out.minfpe = min(FPE); % Best fpe
     out.sbc1 = SBC(1);
 end
 
 
-%% (**) Distribution tests (**)
+% ------------------------------------------------------------------------------
+%% Distribution tests
+% ------------------------------------------------------------------------------
 [~, p, ksstat] = kstest(e);
 out.normksstat = ksstat;
 out.normp = p;

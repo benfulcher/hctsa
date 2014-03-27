@@ -57,15 +57,16 @@ if ischar(d)
     newmaxd = 5;
     
     if strcmp(d,'cl')
-        load TS_loc_cl
-        F = TS_loc_cl; clear TS_loc_cl
+        TheFile = 'HCTSA_cl.mat';
     elseif strcmp(d,'norm')
-        load TS_loc_N
-        F = TS_loc_N; clear TS_loc_N
+        TheFile = 'HCTSA_N.mat';
     end
     
-    % calculate pairwise distances
-    d = benpdist(F,dmth);
+    load(TheFile,'TS_DataMat');
+    F = TS_DataMat; clear TS_DataMat
+    
+    % Calculate pairwise distances
+    d = BF_pdist(F,dmth);
     % rescale to range of <newmaxd>
     d = newmaxd * d/max(d);
 end

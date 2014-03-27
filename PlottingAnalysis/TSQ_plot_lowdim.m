@@ -5,9 +5,8 @@
 % Calculates then plots a lower-dimensional feature-based representation of the
 % data (e.g., using PCA).
 % 
-% [Previously TSQ_dimred]
-% 
 %----HISTORY:
+% [Previously called TSQ_dimred]
 % Ben Fulcher 31/3/2010 -- new classmeth option to specify classification
 %                           method -- i.e., built in linear/quadratic; or
 %                           svm-based method, etc.

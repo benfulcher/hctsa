@@ -8,7 +8,7 @@
 % 
 % The quantity is often used as a nonlinearity statistic in surrogate data
 % analysis, cf. "Surrogate time series", T. Schreiber and A. Schmitz, Physica D,
-% 142(3-4) 346 (2000)
+% 142(3-4) 346 (2000).
 % 
 %---INPUTS:
 % 

@@ -3,16 +3,15 @@
 % ------------------------------------------------------------------------------
 % 
 % Returns p-values given a distribution of test stastics and an appropriate null
-% distribution
+% distribution. cf. algorithm 18.3, etc. in Hastie's statistical learning text book
 % 
 %---INPUTS:
 %--teststat: the distribution of test statistics from a real labeling of the data
 %--teststatR: the distribution of test statistics from shuffling the labels
 %             assigned to the data
 % 
-% Based on original code named TSQ_MHT.
-% 
-% cf. algorithm 18.3, etc. in Hastie's text book
+%---HISTORY:
+%--Based on previous code named TSQ_MHT.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -32,6 +31,10 @@
 
 function NSig = TSQ_MHT_pvalue(teststat,teststatR,TheTestStatistic,doplot)
 
+
+% ------------------------------------------------------------------------------
+% Check Inputs
+% ------------------------------------------------------------------------------
 if nargin < 3
     TheTestStatistic = 'linclass';
     fprintf(1,'Linear misclassification statistics by default\n');
@@ -40,10 +43,10 @@ if nargin < 4
     doplot = 1; % plot figures showing results
 end
 
-% test at what type-I error, alpha
+% Test at what type-I error, alpha
 alpha = 0.05;
 
-% set the false discovery rate
+% Set the false discovery rate
 fdr = 0.01;
 
 dopool = 1;
@@ -59,7 +62,9 @@ K = length(teststatR)/length(teststat); % number of repeats/shuffles in the rand
 fprintf(1,['Looks like you used %4.2f shuffles of the data in your randomized version... ' ...
                     'Nice work...\n'],K);
 
+% ------------------------------------------------------------------------------
 %% Calculate p-values for shuffled permutations
+% ------------------------------------------------------------------------------
 pvals = zeros(M,1);
 fprintf(1,'Calculating p-values...')
 

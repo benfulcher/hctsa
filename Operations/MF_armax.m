@@ -25,6 +25,8 @@
 % the training data, and statistics on the residuals from using the fitted model
 % to predict the testing data.
 % 
+%---HISTORY:
+% Ben Fulcher, 1/2/2010
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -49,12 +51,15 @@
 % ------------------------------------------------------------------------------
 
 function out = MF_armax(y, orders, ptrain, nsteps)
-% Ben Fulcher, 1/2/2010
 
+% ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('identification_toolbox')
 
+% ------------------------------------------------------------------------------
 %% Prepare Inputs
+% ------------------------------------------------------------------------------
 % (1) y, the time series as a column vector
 if size(y,2) > size(y,1)
    y = y'; % ensure a column vector 
@@ -87,7 +92,9 @@ end
 
 m = armax(y, orders);
 
+% ------------------------------------------------------------------------------
 %% Statistics on model
+% ------------------------------------------------------------------------------
 
 c_ar = m.a; % AR coefficients
 c_ma = m.c; % MA coefficients
@@ -117,8 +124,10 @@ else
     out.maxdc = max(dc);
 end
 
-
+% ------------------------------------------------------------------------------
 % Fit statistics
+% ------------------------------------------------------------------------------
+
 out.noisevar = m.NoiseVariance; % covariance matrix of noise source
 % covmat = m.CovarianceMatrix; % covariance matrix for parameter vector
 % parameters = m.ParameterVector; % parameter vector for model: initial values, I'd say...
@@ -127,7 +136,9 @@ out.fpe = m.EstimationInfo.FPE; % Final prediction error of model
 out.lastimprovement = m.EstimationInfo.LastImprovement; % Last improvement made in interation
 out.aic = aic(m); % ~ log(fpe)
 
+% ------------------------------------------------------------------------------
 %% Prediction
+% ------------------------------------------------------------------------------
 
 % Select first portion of data for estimation
 % This could be any portion, actually... Maybe could look at robustness of
@@ -149,10 +160,12 @@ yp = predict(mp, ytest, nsteps, 'init', 'e'); % across whole dataset
 
 mresiduals = ytest.y - yp.y;
 
-% 1) Get statistics on residuals
+% ------------------------------------------------------------------------------
+% Get statistics on residuals
+% ------------------------------------------------------------------------------
 residout = MF_ResidualAnalysis(mresiduals);
 
-% convert these to local outputs in quick loop
+% Convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
     eval(sprintf('out.%s = residout.%s;',fields{k},fields{k}));

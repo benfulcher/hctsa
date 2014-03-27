@@ -77,8 +77,8 @@ load('HCTSA_loc.mat')
 fprintf(fid,' Done.\n');
 
 % Definitions
-NumTimeSeries = length(TimeSeries); % number of time series
-NumOps = length(Operations); % number of operations
+NumTimeSeries = length(TimeSeries); % Number of time series
+NumOps = length(Operations); % Number of operations
 
 fprintf(fid,['Calculation has begun on %s using %u datasets ' ...
                             'and %u operations\n'],datestr(now),NumTimeSeries,NumOps);
@@ -110,7 +110,6 @@ end
 % calculated (for determining time remaining)
 times = zeros(NumTimeSeries,1); 
 LastSavedTime = 0; % Last saved time
-
 
 % --------------------------------------------------------------------------
 %% Computation
@@ -199,17 +198,18 @@ for i = 1:NumTimeSeries
         MasterCalcTime_tmp = zeros(nMtocalc,1);
 		
 		% Evaluate all the master operations
+        TimeSeries_i_ID = TimeSeries(i).ID; % Make a PARFOR-friendly version of the ID
 		if toparallel
             parfor jj = 1:nMtocalc % PARFOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
                                 TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj}, ...
-                                                        fid,bevocal,TimeSeries(i).ID);
+                                                        fid,bevocal,TimeSeries_i_ID);
             end
         else
             for jj = 1:nMtocalc % Normal FOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
                                 TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj}, ...
-                                                        fid,bevocal,TimeSeries(i).ID);
+                                                        fid,bevocal,TimeSeries_i_ID);
             end
 		end
 		

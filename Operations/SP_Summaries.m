@@ -38,6 +38,8 @@
 % entropy, a spectral flatness measure, power-law fits, and the number of
 % crossings of the spectrum at various amplitude thresholds.
 % 
+%---HISTORY:
+% Ben Fulcher, August 2009
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -62,26 +64,32 @@
 % ------------------------------------------------------------------------------
 
 function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs,dopower)
-% Ben Fulcher, August 2009
 
+% ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox')
 
+% ------------------------------------------------------------------------------
 % Check inputs, set defaults:
-if size(y,2) > size(y,1); y = y'; end % time series must be a column vector
-if nargin < 2 || isempty(psdmeth), psdmeth = 'fft'; end
-if nargin < 3 || isempty(wmeth), wmeth = 'none'; end % no window by default
+% ------------------------------------------------------------------------------
+if size(y,2) > size(y,1); y = y'; end % Time series must be a column vector
+if nargin < 2 || isempty(psdmeth), psdmeth = 'fft'; end % fft by default
+if nargin < 3 || isempty(wmeth), wmeth = 'none'; end % No window by default
 if nargin < 4, nf = []; end
 if nargin < 5 || isempty(dologabs), dologabs = 0; end
-if nargin < 6 || isempty(dopower), dopower = 1; end
+if nargin < 6 || isempty(dopower), dopower = 1; end % power spectrum by default
 
 if dologabs % a boolean
+    % Analyze the spectrum of logarithmic absolute deviations
     y = log(abs(y));
-    % This analyzes is the spectrum of logarithmic absolute deviations
 end
 
-Ny = length(y); % time-series length
+Ny = length(y); % Time-series length
 
+% ------------------------------------------------------------------------------
+% Compute the Fourier Transform
+% ------------------------------------------------------------------------------
 switch psdmeth
     case 'periodogram'
         % (1) set the window
@@ -110,6 +118,7 @@ switch psdmeth
         end
         
     case 'fft'
+        % Fast Fourier Transform
         Fs = 1; % sampling frequency
         NFFT = 2^nextpow2(Ny);
         f = Fs/2*linspace(0,1,NFFT/2+1); % frequency
@@ -128,7 +137,7 @@ if ~any(isfinite(S)) % no finite values in the power spectrum
     out = NaN; return
 end
 
-% Look at power spectrum rather than amplitudes
+% Analyze the power spectrum rather than amplitudes
 if dopower
     S = S.^2;
 end
@@ -142,7 +151,9 @@ dw = w(2) - w(1);
 % Normalize to 1: necessary if input not z-scored
 % S=S/(sum(S)*dw);
 
-% Simple measures
+% ------------------------------------------------------------------------------
+% Simple measures of the power spectrum
+% ------------------------------------------------------------------------------
 out.std = std(S);
 out.stdlog = log(out.std);
 out.logstd = std(logS);
@@ -186,7 +197,9 @@ csS = cumsum(S);
 out.centroid = w(find(csS > csS(end)/2,1,'first')); % where area under curve is same above
                                             % and below this frequency
 
+% ------------------------------------------------------------------------------
 % Shape of cumulative sum curve
+% ------------------------------------------------------------------------------
 % 1) Quantiles
 % At what frequency is csS a fraction p of its maximum?
 out.q1 = w(find(csS > 0.01*csS(end),1,'first'));
@@ -208,7 +221,7 @@ out.q95mel = w2mel(out.q95);
 out.q99 = w(find(csS > 0.99*csS(end),1,'first'));
 out.q99mel = w2mel(out.q99);
 
-% width of saturation measures
+% Width of saturation measures
 out.w1_99 = out.q99-out.q1;
 out.w1_99mel = w2mel(out.w1_99);
 out.w5_95 = out.q95-out.q5;
@@ -219,14 +232,16 @@ out.w25_75 = out.q75-out.q25;
 out.w25_75mel = w2mel(out.w25_75);
 
 % 2) Moments of the power spectrum
-% take moments from 3--9
+% Take moments from 3--9
 for i = 3:9
     themom = DN_Moments(S,i);
     eval(sprintf('out.mom%u = themom;',i));
 end
 
-% fit some functions to this cumulative sum:
-% (i) quadratic
+% ------------------------------------------------------------------------------
+% Fit some functions to this cumulative sum:
+% ------------------------------------------------------------------------------
+% (i) Quadratic
 [c, gof] = fit(w',csS','poly2');
 out.fpoly2csS_p1 = c.p1;
 out.fpoly2csS_p2 = c.p2;
@@ -250,7 +265,6 @@ out.fpolysat_adjr2 = gof.adjrsquare;
 out.fpolysat_rmse = gof.rmse;
 
 
-
 % KP on http://www.dsprelated.com/showmessage/108326/1.php
 % If zscored, power spectrum should already be normalized
 % sum(P(f))(dw)=1  (where P(f) is the power spectrum)
@@ -270,29 +284,39 @@ out.fpolysat_rmse = gof.rmse;
 % 3) Wavelet spectral entropy:
 % E=sum(Hi)/log(Ni) (where Ni is the number of subbands)
 
+% ------------------------------------------------------------------------------
 % Shannon spectral entropy
+% ------------------------------------------------------------------------------
 Hshann = S.*log(1./S); % Shannon function
 out.spect_shann_ent = sum(Hshann);
 out.spect_shann_ent_norm = sum(Hshann)/length(S);
 
-% "Spectral Flatness Measure" which is given in dB
-% as 10 log_10(gm/am) where gm is the geometric mean and am is the arithmetic
-% mean of the power spectrum.
+% ------------------------------------------------------------------------------
+% "Spectral Flatness Measure"
+% ------------------------------------------------------------------------------
+% which is given in dB as 10 log_10(gm/am) where gm is the geometric mean and am
+% is the arithmetic mean of the power spectrum.
 out.sfm = 10*log10(geomean(S)/mean(S));
 
 
+% ------------------------------------------------------------------------------
 % Areas under power spectrum
+% ------------------------------------------------------------------------------
 % Area up to peak: (may be more appropriate in squared log units?)
 out.areatopeak = sum(S(1:i_maxS))*dw;
 out.ylogareatopeak = sum(logS(1:i_maxS))*dw; % (semilogy)
 % out.logareatopeak=sum(logS(1:i_maxS).*diff(logw(1:i_maxS+1)));
 
 
-%% robust linear fits to log-log plots
-% (1): full range
+% ------------------------------------------------------------------------------
+%% Robust (e.g., iteratively re-weighted least squares) linear fits to log-log
+%   plots
+% ------------------------------------------------------------------------------
 
-warning('off','stats:robustfit:RankDeficient') % suppress these warnings
+% Suppress rank deficient warnings for this section:
+warning('off','stats:robustfit:RankDeficient') 
 
+% (1): Across full range
 [a, stats] = robustfit(log(w),log(S));
 out.linfitloglog_all_a1 = a(1); % robust intercept
 out.linfitloglog_all_a2 = a(2); % robust gradient
@@ -301,7 +325,7 @@ out.linfitloglog_all_s = stats.s; % esimate on sigma
 out.linfitloglog_all_sea1 = stats.se(1); % standard error of coefficient 1 estimate
 out.linfitloglog_all_sea2 = stats.se(2); % standard error of coefficient 2 estimate
 
-% (2): first half (low frequency)
+% (2): First half (low frequency)
 [a, stats] = robustfit(log(w(1:round(N/2))),log(S(1:round(N/2))));
 out.linfitloglog_lf_a1 = a(1); % robust intercept
 out.linfitloglog_lf_a2 = a(2); % robust gradient
@@ -310,7 +334,7 @@ out.linfitloglog_lf_s = stats.s;
 out.linfitloglog_lf_sea1 = stats.se(1);
 out.linfitloglog_lf_sea2 = stats.se(2);
 
-% (3): second half (high frequency)
+% (3): Second half (high frequency)
 [a, stats] = robustfit(log(w(round(N/2):end)),log(S(round(N/2):end)));
 out.linfitloglog_hf_a1 = a(1); % robust intercept
 out.linfitloglog_hf_a2 = a(2); % robust gradient
@@ -319,7 +343,7 @@ out.linfitloglog_hf_s = stats.s;
 out.linfitloglog_hf_sea1 = stats.se(1);
 out.linfitloglog_hf_sea2 = stats.se(2);
 
-% (4): middle half (mid-frequencies)
+% (4): Middle half (mid-frequencies)
 [a, stats] = robustfit(log(w(round(N/4):round(N*3/4))),log(S(round(N/4):round(N*3/4))));
 out.linfitloglog_mf_a1 = a(1); % robust intercept
 out.linfitloglog_mf_a2 = a(2); % robust gradient
@@ -328,7 +352,7 @@ out.linfitloglog_mf_s = stats.s;
 out.linfitloglog_mf_sea1 = stats.se(1);
 out.linfitloglog_mf_sea2 = stats.se(2);
 
-% fit linear to semilog plot (full range)
+% (5) Fit linear to semilog plot (across full range)
 [a, stats] = robustfit(w,log(S));
 out.linfitloglog_all_a1 = a(1); % robust intercpet
 out.linfitloglog_all_a2 = a(2); % robust gradient
@@ -337,12 +361,15 @@ out.linfitloglog_all_s = stats.s;
 out.linfitloglog_all_sea1 = stats.se(1);
 out.linfitloglog_all_sea2 = stats.se(2);
 
-warning('on','stats:robustfit:RankDeficient') % turn these warnings back on
+% Turn the rank-deficient warnings back on
+warning('on','stats:robustfit:RankDeficient')
 
-
-%% Power in bands
+% ------------------------------------------------------------------------------
+%% Power in specific frequency bands
+% ------------------------------------------------------------------------------
 % *** DO THIS BY BUFFER COMMAND: AND WHILE AT IT LOOK AT STATIONARITY OF
 % POWER SPECTRUM....
+
 % 2 bands
 split = buffer(S,floor(N/2));
 if size(split,2) > 2, split = split(:,1:2); end
@@ -399,8 +426,10 @@ out.rawstatav5_m = std(mean(split));
 out.statav5_m = std(mean(split))/std(S);
 out.statav5_s = std(std(split))/std(S);
 
-% How many crossings
-% Give a horizontal line and count the # crossings with the power spectrum
+% ------------------------------------------------------------------------------
+% Count crossings:
+% Get a horizontal line and count the number of crossings with the power spectrum
+% ------------------------------------------------------------------------------
 ncrossfn = @(x) sum(BF_sgnchange(S - x));
 
 out.ncross01 = ncrossfn(0.1);
@@ -412,7 +441,7 @@ out.ncross5 = ncrossfn(5);
 out.ncross10 = ncrossfn(10);
 out.ncross20 = ncrossfn(20);
 
-function mel = w2mel(w) % convert to mel
+function mel = w2mel(w) % convert to mel spectrum
     mel = 1127*log(w/(1400*pi)+1);
 end
 

@@ -24,7 +24,9 @@
 
 function TSQ_agglomerate(WriteWhat,LogToFile,dbname)
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 if nargin < 1
 	WriteWhat = 'null'; % 'nullerror'
     % find all nulls in the database and write over them if there are values in local files
@@ -39,24 +41,32 @@ if nargin < 3
 	dbname = '';
 end
 
+% ------------------------------------------------------------------------------
 %% Open a mySQL database connection
+% ------------------------------------------------------------------------------
 [dbc, dbname] = SQL_opendatabase(dbname);
 
+% ------------------------------------------------------------------------------
 %% Load local files
+% ------------------------------------------------------------------------------
 %% Read in information from local files
 fid = 1; % haha no more logging option...
 fprintf(fid,'Loading data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat')
 fprintf(fid,' Done.\n');
 
+% ------------------------------------------------------------------------------
 %% Preliminary definitions
+% ------------------------------------------------------------------------------
 nts = length(TimeSeries); % Number of time series
 nm = length(Operations); % Number of operations
 ts_ids_string = BF_cat([TimeSeries.ID],',');
 op_ids_string = BF_cat([Operations.ID],',');
 
-%% Check that nothing has been deleted in the meantime...
-% time series
+% ------------------------------------------------------------------------------
+%% Check that nothing has been deleted since the data was loaded...
+% ------------------------------------------------------------------------------
+% Time series
 SelectString = sprintf('SELECT COUNT(ts_id) FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
 nts_db = mysql_dbquery(dbc,SelectString);
 nts_db = nts_db{1};
@@ -80,8 +90,10 @@ else
                 'You should start a TSQ_prepared from scratch.'])
 end
 
-
-%% Find the elements that are empty in storage (and hopefully full in the local file)
+% ------------------------------------------------------------------------------
+%% Find the elements that are empty in the database
+%       (and hopefully full in the local file)
+% ------------------------------------------------------------------------------
 % Parts of calculated subsection that are empty in storage
 fprintf(1,'Retrieving %s elements from the Results table in %s...',WriteWhat,dbname);
 

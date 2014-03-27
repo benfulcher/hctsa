@@ -43,7 +43,9 @@ end
 
 [n1, n2] = size(F); % We're computing for rows (operations are rows)
 
+% ------------------------------------------------------------------------------
 % Define the distance function
+% ------------------------------------------------------------------------------
 switch DistMetric
     case {'Euclidean','euclidean'}
         dij = @(v1,v2) sqrt(sum((v1-v2).^2))/length(v1)*n2; % if less entries, don't bias

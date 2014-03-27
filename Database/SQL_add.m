@@ -1,4 +1,4 @@
-% ------------------------------------------------------------------------------
+%% ------------------------------------------------------------------------------
 % SQL_add
 % ------------------------------------------------------------------------------
 % 
@@ -110,9 +110,11 @@ end
 %% Open and read the input file
 % ------------------------------------------------------------------------------
 fid = fopen(INPfile);
+
 if (fid==-1)
     error('Could not load the specified input file ''%s''',INPfile)
 end
+
 switch ImportWhat
 case 'ts' % Read the time series input file:
     if bevocal
@@ -123,6 +125,7 @@ case 'ts' % Read the time series input file:
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
 	datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
+    
 case 'ops' % Read the operations input file:
     if bevocal
         fprintf(1,['Need to format %s (Operations input file) as: OperationCode ' ...
@@ -132,6 +135,7 @@ case 'ops' % Read the operations input file:
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
     datain = textscan(fid,'%s %s %s','CommentStyle','#','CollectOutput',1);    
+    
 case 'mops' % Read the master operations input file:
     if bevocal
         fprintf(1,'Need to format %s (Master Operations input file) as: MasterCode MasterLabel\n',INPfile)
@@ -141,13 +145,14 @@ case 'mops' % Read the master operations input file:
     end
     datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
 end
+
 fclose(fid);
 
 % ------------------------------------------------------------------------------
 % Show the user what's been imported:
 % ------------------------------------------------------------------------------
-datain = datain{1}; % collect one big matrix of cells
-nits = size(datain,1); % number of items in the input file
+datain = datain{1}; % Collect one big matrix of cells
+nits = size(datain,1); % Number of items in the input file
 
 if nits == 0, error(['Input file ' INPfile ' seems to be empty??']), end
 
@@ -164,6 +169,7 @@ if bevocal
         fprintf(1,'%s\t%s\n','Master Code','Master Label')
         fprint_mops = @(x) fprintf('%s\t%s\n',datain{x,1},datain{x,2});
     end
+    
     for i = 1:min(3,nits)
         switch ImportWhat
         case 'ts', fprint_ts(i);
@@ -171,6 +177,7 @@ if bevocal
         case 'mops', fprint_mops(i);
         end
     end
+    
     if nits > 3
         fprintf(1,'..................(%u).....................\n',max(nits-6,0))
         for i = max(nits-2,4):nits
@@ -181,16 +188,20 @@ if bevocal
             end
         end
     end
+    
     fprintf(1,['How does it look? Make sure the time series and everything ' ...
                                             'match up to their headings\n'])
+
     reply = input(['If we go on, we will attempt to read all timeseries ' ...
                     'from file and add all ' ...
                     'data to the database. Type ''y'' to continue...'],'s');
+    
     if ~strcmp(reply,'y')
         fprintf(1,'I didn''t think so. Come back later...\n')
         return
     end
 end
+
 fprintf(1,'%s read.\n',INPfile)
 
 esc = @RA_sqlescapestring; % Inline function to add escape strings to format mySQL queries
@@ -310,7 +321,7 @@ case 'ops' % Prepare toadd cell for operations
 end
 
 % ------------------------------------------------------------------------------
-% Check for duplicates
+%% Check for duplicates
 % ------------------------------------------------------------------------------
 if bevocal, fprintf(1,'Checking for duplicates already in the database... '); end
 switch ImportWhat
@@ -338,14 +349,14 @@ elseif sum(isduplicate) > 0
 end
 
 % ------------------------------------------------------------------------------
-% Select the maximum id already in the table
+%% Select the maximum id already in the table
 % ------------------------------------------------------------------------------
 maxid = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,thetable));
 maxid = maxid{1}; % the maximum id -- the new items will have ids greater than this
 if isempty(maxid), maxid = 0; end
 
 % ------------------------------------------------------------------------------
-% Assemble and execute the INSERT queries
+%% Assemble and execute the INSERT queries
 % ------------------------------------------------------------------------------
 fprintf('Adding %u new %s to the %s table in %s...',sum(~isduplicate),thewhat,thetable,dbname)
 switch ImportWhat
@@ -447,7 +458,7 @@ if ~strcmp(ImportWhat,'mops')
     end
     
     % ------------------------------------------------------------------------------
-    % Fill new keyword relationships
+    %% Fill new keyword relationships
     % ------------------------------------------------------------------------------
     fprintf(1,'Writing new keyword relationships to the %s table in %s...', ...
                                             thereltable,dbname)
@@ -504,7 +515,7 @@ if ~strcmp(ImportWhat,'mops')
 end
 
 % ------------------------------------------------------------------------------
-% Update links between operations and master operations
+%% Update links between operations and master operations
 % ------------------------------------------------------------------------------
 if ismember(ImportWhat,{'mops','ops'}) % there may be new links
     % Add mop_ids to Operations table
@@ -513,7 +524,7 @@ if ismember(ImportWhat,{'mops','ops'}) % there may be new links
                         'WHERE m.MasterLabel = o.MasterLabel) WHERE mop_id IS NULL'];
     [~,emsg] = mysql_dbexecute(dbc,UpdateString);
     
-    %% ALTERNATIVE: FILL A LINKING TABLE AS A JOIN ON MasterLabel:
+    %----ALTERNATIVE: FILL A LINKING TABLE AS A JOIN ON MasterLabel:
     % Delete the linking table and recreate it from scratch is easiest
     % fprintf(1,'Filling MasterPointerRelate...');
     % mysql_dbexecute(dbc,'DELETE FROM MasterPointerRelate');
@@ -569,7 +580,7 @@ SQL_closedatabase(dbc)
 % Tell the user all about it
 % ------------------------------------------------------------------------------
 fprintf('All tasks completed reading %s for adding %u %s into %s in %s.\n', ...
-                INPfile,sum(~isduplicate),thewhat,dbname,BF_thetime(toc(ticker)));
+            INPfile,sum(~isduplicate),thewhat,dbname,BF_thetime(toc(ticker)));
 
 
 end
