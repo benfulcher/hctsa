@@ -36,6 +36,9 @@
 % re-weighted least squares linear fits to log-log plots using the robustfit
 % function in Matlab's Statistics Toolbox.
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -60,9 +63,10 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedparams,dotwo)
-% Ben Fulcher, November 2009
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 doplot = 0; % whether to plot outputs to figure
 N = length(y); % length of time series
 
@@ -111,18 +115,23 @@ if (Nref == -1) && (dotwo == 2)
     Nref = floor(N*0.5);
 end
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
-% convert to embedded signal object for TSTOOL
+% ------------------------------------------------------------------------------
+% Convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-    error('Embedding failed')
+    error('Embedding of the %u-sample time series failed',N)
 elseif length(data(s)) < thwin
-    fprintf(1,'Embedded time series (N = %u, m = %u, tau = %u) too short to do a correlation sum\n',N,embedparams{1},embedparams{2})
+    fprintf(1,['Embedded time series (N = %u, m = %u, tau = %u) too short' ...
+                'to do a correlation sum\n'],N,embedparams{1},embedparams{2})
     out = NaN; return
 end
 
+% ------------------------------------------------------------------------------
 %% Run
+% ------------------------------------------------------------------------------
 me = []; % error catch
 if dotwo == 1 % use corrsum
     try
@@ -136,17 +145,20 @@ elseif dotwo == 2 % use corrsum2
     end
 end
 
-if ~isempty(me) && strcmp(me.message,'Maximal search radius must be greater than starting radius')
-    fprintf(1,'Max search radius less than starting radius. Returning NaNs.\n')
-    out = NaN; return
-elseif ~isempty(me) && strcmp(me.message,'Cannot find an interpoint distance greater zero, maybe ill-conditioned data set given')
-    fprintf(1,'Cannot find an interpoint distance greater than zero. Returning NaNs.\n')
-    out = NaN; return
-elseif ~isempty(me) && strcmp(me.message,'Reference indices out of range')
-    fprintf(1,'Reference indicies out of range. Returning NaNs.\n')
-    out = NaN; return
-else
-    error('Unknown error %s', me.message);
+if ~isempty(me) 
+    switch me.message
+    case 'Maximal search radius must be greater than starting radius'
+        fprintf(1,'Max search radius less than starting radius. Returning NaNs.\n')
+        out = NaN; return
+    case 'Cannot find an interpoint distance greater zero, maybe ill-conditioned data set given'
+        fprintf(1,'Cannot find an interpoint distance greater than zero. Returning NaNs.\n')
+        out = NaN; return
+    case 'Reference indices out of range'
+        fprintf(1,'Reference indicies out of range. Returning NaNs.\n')
+        out = NaN; return
+    otherwise
+        error('Unknown error %s', me.message);
+    end
 end
 
 lnr = spacing(rs);
@@ -159,7 +171,9 @@ end
 
 % Contains ln(r) in rows and values are ln(C(r));
 
-%% remove any Infs in lnCr
+% ------------------------------------------------------------------------------
+%% Remove any Infs in lnCr
+% ------------------------------------------------------------------------------
 rgood = (isfinite(lnCr));
 if ~any(rgood)
     fprintf(1,'No good outputs obtained from corrsum\n');
@@ -168,8 +182,10 @@ end
 lnCr = lnCr(rgood);
 lnr = lnr(rgood);
 
+% ------------------------------------------------------------------------------
 %% Output Statistics
-% basic
+% ------------------------------------------------------------------------------
+% Basic statistics:
 out.minlnr = min(lnr);
 out.maxlnr = max(lnr);
 out.minlnCr = min(lnCr);
@@ -178,7 +194,7 @@ out.rangelnCr = range(lnCr);
 out.meanlnCr = mean(lnCr);
 
 
-% fit linear to log-log plot (full range)
+% Fit linear to log-log plot (full range)
 enoughpoints = 1;
 try
     [a, stats] = robustfit(lnr,lnCr);
@@ -197,8 +213,9 @@ if enoughpoints
     out.robfit_sea2 = stats.se(2);
 
     fit_lnCr = a(2)*lnr+a(1);
-    % hold on;plot(lnr,fit_lnCr,'r');hold off
+    if doplot,hold on;plot(lnr,fit_lnCr,'r');hold off;end
     res = lnCr-fit_lnCr';
+    
     out.robfitresmeanabs = mean(abs(res));
     out.robfitresmeansq = mean(res.^2);
     out.robfitresac1 = CO_AutoCorr(res,1);

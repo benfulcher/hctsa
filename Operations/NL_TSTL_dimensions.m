@@ -4,10 +4,12 @@
 % 
 % Computes the box counting, information, and correlation dimension of a
 % time-delay embedded time series using the TSTOOL code 'dimensions'.
+% This function contains extensive code for estimating the best scaling range to
+% estimate the dimension using a penalized regression procedure.
 % 
 % TSTOOL, http://www.physik3.gwdg.de/tstool/
 % 
-% INPUTS:
+%---INPUTS:
 % 
 % y, column vector of time series data
 % 
@@ -17,12 +19,13 @@
 %              signal in the form {tau,m}
 % 
 % 
-% This function contains extensive code for estimating the best scaling range to
-% estimate the dimension using a penalized regression procedure, and produce a
-% range of statistics about how each dimension estimate changes with m, the
-% scaling range in r, and the embedding dimension at which the best fit is
-% obtained.
+%---OUTPUTS:
+% A range of statistics are returned about how each dimension estimate changes
+% with m, the scaling range in r, and the embedding dimension at which the best
+% fit is obtained.
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -47,9 +50,10 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_dimensions(y,nbins,embedparams)
-% Ben Fulcher, November 2009
 
-%% Preliminaries
+% ------------------------------------------------------------------------------
+%% Preliminaries, check inputs
+% ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
 % (1) Maximum number of bins, nbins
@@ -68,8 +72,10 @@ else
     end
 end
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
-% convert to embedded signal object for TSTOOL
+% ------------------------------------------------------------------------------
+% Convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
@@ -86,14 +92,25 @@ else
 	mopt = size(data(s),2);
 end
 
-%% Run
+% ------------------------------------------------------------------------------
+%% Run the TSTOOL function:
+% ------------------------------------------------------------------------------
 
-[bc, in, co] = dimensions(s,nbins);
+if ~exist('dimensions')
+    error('Cannot find the code ''dimensions'' from the TSTOOL package. Is it installed and in the Matlab path?');
+end
+try
+    [bc, in, co] = dimensions(s,nbins);
+catch me
+    error('Error running TSTOOL code dimensions: %s',me.message);
+end
 
 % we now have the scaling of the boxcounting dimension, D0, the information
 % dimension D1, and the correlation dimension D2.
 
+% ------------------------------------------------------------------------------
 %% Convert output to vectors
+% ------------------------------------------------------------------------------
 % calculations for each dimension up to the maximum:
 % Seems to be in units of log_2 -- log2, so actually doesn't span a very wide
 % range of length scales... -- although I think the maximum length is at 1,
@@ -126,8 +143,12 @@ co_logClogr = co_logC./(ones(size(co_logC,2),1)*co_logr)'; % look for this to be
 % input('CO')
 
 
-% we now have to look for scaling regimes in each of these dimensions
+% *** We now have to look for scaling regimes in each of these dimensions
+
+
+% ------------------------------------------------------------------------------
 %% Basic statistics on curves
+% ------------------------------------------------------------------------------
 
 %% How do curves change with m?
 % Box counting dimension
@@ -218,7 +239,9 @@ out.co_lfitmeansqdev3 = outmch_co.lfitmeansqdev3;
 out.co_lfitmeansqdevmax = outmch_co.lfitmeansqdevmax;
 
 
+% ------------------------------------------------------------------------------
 %% What is the scaling range in r?
+% ------------------------------------------------------------------------------
 % ... and how good is the fit over this range?
 
 

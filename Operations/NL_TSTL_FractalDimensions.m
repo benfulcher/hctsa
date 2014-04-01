@@ -33,6 +33,9 @@
 %---OUTPUTS: include basic statistics of D(q) and q, statistics from a linear fit,
 % and an exponential fit of the form D(q) = Aexp(Bq) + C.
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -57,14 +60,21 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_FractalDimensions(y,kmin,kmax,Nref,gstart,gend,past,steps,embedparams)
-% Ben Fulcher, November 2009
 
+% ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox');
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
-N = length(y); % length of time series
+% ------------------------------------------------------------------------------
+N = length(y); % Length of time series
+doplot = 0; % Don't plot results by default
 
+% ------------------------------------------------------------------------------
+%% Check inputs
+% ------------------------------------------------------------------------------
 % (1) Minimum number of neighbours, kmin
 if nargin < 2 || isempty(kmin)
     kmin = 3; % default
@@ -116,37 +126,47 @@ if nargin < 9 || isempty(embedparams)
 end
 
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
-% convert scalar time series y to embedded signal object s for TSTOOL
+% ------------------------------------------------------------------------------
+% Convert the scalar time series, y, to embedded signal object s for TSTOOL
 s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-    error('Embedding failed')
+    error('Embedding of the %u-sample time series failed',N)
 end
 
+% ------------------------------------------------------------------------------
 %% Run the TSTOOL code, fracdims:
+% ------------------------------------------------------------------------------
 if ~exist('fracdims')
-    error('Cannot find the code ''fracdims'' from the TSTOOL package. Is it installed and in the Matlab path?');
+    error(['Cannot find the code ''fracdims'' from the TSTOOL package. ' ...
+            'Is it installed and in the Matlab path?']);
 end
 try
     rs = fracdims(s,kmin,kmax,Nref,gstart,gend,past,steps);
 catch me
-    if strcmp(me.message,'Fast nearest neighbour searcher : To many neighbors for each query point are requested')
+    if strcmp(me.message,['Fast nearest neighbour searcher : ' ...
+            'To many neighbors for each query point are requested'])
         out = NaN; return
     else
-        error('Unknown error');
+        error('Error occurred calling fracdims: %s',me.message);
     end
 end
 
 Dq = data(rs);
 q = spacing(rs);
+
+% Plot the results in a figure:
 if doplot
     figure('color','w'); box('on');
     subplot(2,1,1); view(rs);
     subplot(2,1,2); plot(q,dq);
 end
 
-%% Get output stats
+% ------------------------------------------------------------------------------
+%% Get output statistics
+% ------------------------------------------------------------------------------
 out.rangeDq = range(Dq);
 out.minDq = min(Dq);
 out.maxDq = max(Dq);
@@ -157,7 +177,7 @@ out.maxq = max(q);
 out.rangeq = range(q);
 out.meanq = mean(q);
 
-% fit linear
+% Fit linear
 p = polyfit(q,Dq',1);
 p_fit = q*p(1) + p(2);
 res = p_fit - Dq';
@@ -165,14 +185,14 @@ out.linfit_a = p(1);
 out.linfit_b = p(2);
 out.linfit_rmsqres = sqrt(mean(res.^2));
 
-% fit exponential
+% Fit exponential
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[range(Dq) -0.5 min(Dq)]);
 f = fittype('a*exp(b*x)+c','options',s);
 [c, gof] = fit(q',Dq,f);
 out.expfit_a = c.a;
 out.expfit_b = c.b;
 out.expfit_c = c.c;
-out.expfit_r2 = gof.rsquare; % this is more important!
+out.expfit_r2 = gof.rsquare; % I think that this one is the most important!
 out.expfit_adjr2 = gof.adjrsquare;
 out.expfit_rmse = gof.rmse;
 
