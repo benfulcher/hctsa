@@ -57,10 +57,10 @@ for j = 1:length(CreateString)
         end
     else
         fprintf(1,'**** Error creating table: %s\n',TableNames{j});
-        fprintf(1,'%s',emsg);
+        % fprintf(1,'%s',emsg);
     end
     if (mod(j,nperline) == 0) && (j < length(CreateString))
-        fprintf(1,'\n'); % make new line to avoid cramping on display
+        fprintf(1,'\n'); % Make new line to avoid cramping on display
     end
 end
 fprintf(1,'\nTables created in %s\n',dbname);

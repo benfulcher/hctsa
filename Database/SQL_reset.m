@@ -11,8 +11,8 @@ fprintf(1,'Omg be careful, we''re destroying everything\n');
 mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s;',dbname));
 fprintf(1,'%s and all the data contained within it dropped\n',dbname);
 mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s;',dbname));
-SQL_closedatabase(dbc) % close the database
-SQL_create_all_tables;
+SQL_closedatabase(dbc) % Close the database
+SQL_create_all_tables; % Create all basic tables required by the database
 
 % Add operations
 SQL_add('mops','Database/INP_mops.txt','',0)

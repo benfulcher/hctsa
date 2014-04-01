@@ -87,7 +87,7 @@ fprintf(1,['Note that errors here are not the end of the world, but mean that ' 
 cd Toolboxes
 compile_mex
 cd('../');
-fprintf(1,'Kind of amazing, but it seems like everything compiled ok!\n')
+fprintf(1,'Hope everything compiled ok?!\n')
 fprintf(1,['Ready when you are to add time series to the database using ' ...
                                                         'SQL_add...!\n']);
 
