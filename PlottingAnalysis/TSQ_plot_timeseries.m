@@ -17,9 +17,9 @@
 % 
 %----HISTORY:
 % Previously called 'TSQ_plot_examples'
-% Ben Fulcher 9/4/2010
-% Ben Fulcher 13/5/2010 added F option (a matrix, 'norm', or 'cl')
-% Ben Fulcher 24/6/2010 added option to show examples from each class in
+% Ben Fulcher, 9/4/2010
+% Ben Fulcher, 13/5/2010 added F option (a matrix, 'norm', or 'cl')
+% Ben Fulcher, 24/6/2010 added option to show examples from each class in
 %                       kwgs, rather than all from the first class. In this
 %                       case, <NumPerGroup> means per class.
 %

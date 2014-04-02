@@ -2,7 +2,7 @@
 % SQL_create_db
 % ------------------------------------------------------------------------------
 % 
-% Setup the mySQL database.
+% Set up the mySQL database.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Romesh Abeysuriya
@@ -21,7 +21,8 @@
 % ------------------------------------------------------------------------------
 
 function SQL_create_db()  
-	fprintf(1,'Let''s set up a new database\nWe first require a username and password that has CREATE DATABASE and GRANT privileges\n');
+    fprintf(1,['Let''s set up a new database\nWe first require a username and ' ...
+                'password that has CREATE DATABASE and GRANT privileges\n']);
 	fprintf(1,'(This is probably going to be the root account)\n');
 	hostname = input('Hostname of mySQL server (e.g., ''localhost''): ','s');
 	admin_user = input('Administrator username: ','s');
@@ -32,8 +33,11 @@ function SQL_create_db()
 	        error('Please check your username/password and that the mySQL server is accessible');
 	    end
 	catch
-        error(['Could not activate the mySQL java connector. This must be added to Matlab''s ''javext'' directory and ' ...
-                    ' the location added to Matlab''s ''classpath.txt'' file.\nCheck the documentation for details.']);
+        error('SQL_create_db:nojconn', ...
+                    ['Could not activate the mySQL java connector. This must be added to ' ...
+                    'Matlab''s ''javext'' directory and ' ...
+                    ' the location added to Matlab''s ''classpath.txt'' ' ...
+                    'file.\nCheck the documentation for details.']);
 	end
     fprintf(1,'Connection to %s established\n',hostname);
     

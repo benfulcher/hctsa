@@ -8,8 +8,8 @@
 % statements.
 % 
 %---HISTORY:
-% Romesh Abeysuriya, March 2013
 % Ben Fulcher, now uses SQL_TableCreateString, May 2013
+% Romesh Abeysuriya, March 2013
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Romesh Abeysuriya
@@ -42,7 +42,10 @@ TableNames = {'MasterOperations', ...     % MasterOperations Table
           
 % Convert Table names to mySQL CREATE TABLE statements:
 CreateString = arrayfun(@(x)SQL_TableCreateString(TableNames{x}),1:length(TableNames),'UniformOutput',0);
+
+% ------------------------------------------------------------------------------
 %% Write all of this to the database:
+% ------------------------------------------------------------------------------
 [dbc, dbname] = SQL_opendatabase; % opens dbc, the default database (named dbname)
 
 fprintf(1,'Creating tables in %s:\n',dbname);

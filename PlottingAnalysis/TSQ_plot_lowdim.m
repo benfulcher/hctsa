@@ -35,7 +35,7 @@
 function TSQ_plot_lowdim(TheData,TsorOps,classmeth,showks,annotatep)
 
 % ------------------------------------------------------------------------------
-%% Check inputs:
+%% Check Inputs:
 % ------------------------------------------------------------------------------
 if nargin < 1 || isempty(TheData)
     TheData = 'norm';

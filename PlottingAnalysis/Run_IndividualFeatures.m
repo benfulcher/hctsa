@@ -22,7 +22,9 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
 %% Set Parameters
+% ------------------------------------------------------------------------------
 
 % ClassMethod: the classification method to use. The following are possible options:
 %            'linclasscv', 'linclass', 'linclasscv', 'knn', 'knncv'

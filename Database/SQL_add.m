@@ -14,14 +14,13 @@
 %             between the entries to import.
 %
 %%---HISTORY:
-% Ben Fulcher 3/12/2009
-% Ben Fulcher 12/1/2010: added dbname option
-% Romesh Jan 2013
-% Ben Fulcher June 2013 -- reformulated the whole format so that only a single
+% Ben Fulcher, June 2013 -- reformulated the whole format so that only a single
 % thing is uploaded at a time (ts, ops, mops), and follows a uniform and more
 % transparent structure with as much overlap in syntax as possible. Added
 % bevocal input
-% 
+% Romesh Abeysuriya, Jan 2013
+% Ben Fulcher, 12/1/2010: added dbname option
+% Ben Fulcher, 3/12/2009
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -577,7 +576,7 @@ end
 SQL_closedatabase(dbc)
 
 % ------------------------------------------------------------------------------
-% Tell the user all about it
+%% Tell the user all about it
 % ------------------------------------------------------------------------------
 fprintf('All tasks completed reading %s for adding %u %s into %s in %s.\n', ...
             INPfile,sum(~isduplicate),thewhat,dbname,BF_thetime(toc(ticker)));

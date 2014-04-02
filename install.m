@@ -45,8 +45,8 @@ end
 % ------------------------------------------------------------------------------
 reply = '';
 while isempty(reply)
-    reply = input('Do you need help setting up a mySQL database? [y/n]');
-    if ~ismember(reply,{'y','n'}), reply = ''; end
+    reply = input('Do you need help setting up a mySQL database? [y/n]','s');
+    if ~ismember(reply,{'y','n'}), reply = ''; fprintf(1,'Unknown reply.\n'); end
 end
 if strcmp(reply,'y') % Set up mySQL database
     fprintf(1,['Setting up the database now--NB: you need to have root access' ...

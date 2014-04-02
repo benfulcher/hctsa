@@ -5,7 +5,7 @@
 % Reads in normalized data from HCTSA_N.mat, clusters the data matrix by
 % reordering rows and columns, then saves the result as HCTSA_cl.mat
 % 
-% --INPUTS:
+%---INPUTS:
 % ClusterMethRow: specifies the clustering method for rows/time series (default is 'linkage')
 % ClusterParamsRow: specifies a cell of parameters specifying the clustering parameters,
 %           including the distance metric, etc. (default is euclidean distances
