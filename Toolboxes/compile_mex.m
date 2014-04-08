@@ -1,10 +1,11 @@
-% This helper script compiles the mex files required for all operations
+% This script compiles the mex files required for all operations
 % implemented in the HCTSA package.
 % It must be run in the Toolboxes directory.
 % 
 %---HISTORY:
 % Romesh Abeysuriya, March 2013
 % Modified by Ben Fulcher, 2013
+% Tweaks by Dror Cohen, 2014-04-08
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -22,16 +23,33 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+
+% ------------------------------------------------------------------------------
+% Check we're in the correct folder
+% ------------------------------------------------------------------------------
+
 CurrentDir = pwd;
-WeHere = regexp(CurrentDir,'/','split');
+
+% Path split using platform-dependent separator
+if isunix
+    WeHere = regexp(CurrentDir,'/','split');
+else
+    WeHere = regexp(CurrentDir,'\','split');
+end
+
 if ~strcmp(WeHere{end},'Toolboxes')
     error('This code must be run in the ''Toolboxes'' directory of the HCTSA package...')
 end
 
+% Sweet. Toolbox path is:
+ToolDir = [CurrentDir '/'];
+
+% ------------------------------------------------------------------------------
 % Max Little's fastdfa code
+% ------------------------------------------------------------------------------
 fprintf(1,'fastdfa...');
 try
-    cd([tooldir, 'Max_Little/fastdfa']);
+    cd([ToolDir, 'Max_Little/fastdfa']);
 	mex ML_fastdfa_core.c
     fprintf(1,' done.\n');
 catch
@@ -39,9 +57,11 @@ catch
 	error('An error occurred while compiling. Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile.m');
 end
 
+% ------------------------------------------------------------------------------
 % Max Little's Steps Bumps Toolkit
+% ------------------------------------------------------------------------------
 fprintf(1,'Max Little''s ''Steps and bumps'' toolkit...');
-cd([tooldir,'Max_Little/steps_bumps_toolkit'])
+cd([ToolDir,'Max_Little/steps_bumps_toolkit'])
 anyerrors = 0;
 try
     mex ML_kvsteps_core.cpp
@@ -50,9 +70,11 @@ catch
 end
 if ~anyerrors, fprintf(1,' done.\n'); end
 
+% ------------------------------------------------------------------------------
 % Michael Small's code
+% ------------------------------------------------------------------------------
 fprintf(1,'Michael Small''s code...');
-cd([tooldir,'Michael_Small'])
+cd([ToolDir,'Michael_Small'])
 anyerrors = 0;
 try
     mex MS_complexitybs.c % compile Michael Small's complexitybs C code
@@ -71,9 +93,11 @@ catch
 end
 if ~anyerrors, fprintf(1,' done.\n'); end
 
+% ------------------------------------------------------------------------------
 % Gaussian Process code, gpml
+% ------------------------------------------------------------------------------
 fprintf(1,'Gaussian Process Toolbox, Carl Edward Rasmussen and Hannes Nickisch...');
-cd([tooldir,'gpml/util'])
+cd([ToolDir,'gpml/util'])
 anyerrors = 0;
 try
     make
@@ -82,9 +106,11 @@ catch
 end
 if ~anyerrors, fprintf(1,' done.\n'); end
 
+% ------------------------------------------------------------------------------
 % TSTOOL routines (such a mess)
+% ------------------------------------------------------------------------------
 fprintf(1,'TSTOOL...');
-cd([tooldir,'OpenTSTOOL/mex-dev'])
+cd([ToolDir,'OpenTSTOOL/mex-dev'])
 anyerrors = 0;
 try
     makemex
@@ -93,16 +119,19 @@ catch
 end
 if ~anyerrors, fprintf(1,' done.\n'); end
 
+% ------------------------------------------------------------------------------
 % TISEAN
+% ------------------------------------------------------------------------------
 % fprintf(1,'Attempting to install TISEAN...!\n');
-% cd([tooldir,'Tisean_3.0.1'])
+% cd([ToolDir,'Tisean_3.0.1'])
 % system('./configure')
 % system('make')
 % system('make install')
-
+fprintf(1,['NB: To use TISEAN routines, you need to install them on your system using ''./configure''' ...
+                    ' ''make'' and ''make install'' commands...\n']);
 
 % Return to base directory
-cd(tooldir);
+cd(ToolDir);
 
 %     fprintf('------\nNow installing the CRPTool\n');
 %     fprintf('At the prompts\n-Remove existing toolbox\n-Create folder if asked\n-DO NOT add to the path\n-DO NOT delete the installation file\n-----\n');

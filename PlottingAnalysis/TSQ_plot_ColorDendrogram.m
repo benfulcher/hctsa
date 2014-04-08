@@ -109,18 +109,18 @@ NumGroups = length(GroupLabels); % number of groups
 % Set up colors
 % ------------------------------------------------------------------------------
 ng = 6; % use 6 partitions for each color
-cmap = colormap(BF_getcamp('blues',ng,0,1));
+cmap = colormap(BF_getcmap('blues',ng,0,1));
 if NumGroups >= 2
-    cmap = [cmap;BF_getcamp('greens',ng,0,1)];
+    cmap = [cmap;BF_getcmap('greens',ng,0,1)];
 end
 if NumGroups >= 3
-    cmap = [cmap;BF_getcamp('oranges',ng,0,1)];
+    cmap = [cmap;BF_getcmap('oranges',ng,0,1)];
 end
 if NumGroups >= 4
-    cmap = [cmap;BF_getcamp('purples',ng,0,1)];
+    cmap = [cmap;BF_getcmap('purples',ng,0,1)];
 end
 if NumGroups >= 5
-    cmap = [cmap;BF_getcamp('reds',ng,0,1)];
+    cmap = [cmap;BF_getcmap('reds',ng,0,1)];
 end
 if NumGroups >= 6
     cmap = [cmap;pink(ng)];
@@ -129,13 +129,13 @@ if NumGroups >= 7
     cmap = [cmap;gray(ng)];
 end
 if NumGroups >= 8
-    cmap = [cmap;BF_getcamp('yelloworangered',ng,0,1)];
+    cmap = [cmap;BF_getcmap('yelloworangered',ng,0,1)];
 end
 if NumGroups >= 9
-    cmap = [cmap;BF_getcamp('purplebluegreen',ng,0,1)];
+    cmap = [cmap;BF_getcmap('purplebluegreen',ng,0,1)];
 end
 if NumGroups >= 10
-    cmap = [cmap;BF_getcamp('yellowgreenblue',ng,0,1)];
+    cmap = [cmap;BF_getcmap('yellowgreenblue',ng,0,1)];
 end
 if NumGroups >= 11
     error('Too many groups (>10), I can''t handle this!!')
