@@ -130,7 +130,7 @@ fprintf(1,'Clustering the full %u x %u data matrix.\n',length(TimeSeries),length
 % Cluster rows
 if ~(ischar(ClusterMethCol) && ismember(ClusterMethRow,{'none','nothing'})) % can specify 'none' to do no clustering
     fprintf(1,'Clustering rows...\n'); tic
-    [~, acgir] = TSQ_us_cluster(TS_DataMat,ClusterMethRow,ClusterParamsRow,'ts');
+    [~, acgir] = TSQ_us_cluster(TS_DataMat,ClusterMethRow,ClusterParamsRow);
     fprintf(1,'Row clustering took %s.\n',BF_thetime(toc))
 else
     acgir = {};
@@ -139,7 +139,7 @@ end
 % Cluster columns
 if ~(ischar(ClusterMethCol) && ismember(ClusterMethCol,{'none','nothing'})) && size(TS_DataMat,2)>1 % can specify 'none' to do no clustering
     fprintf(1,'Clustering columns...\n'); tic
-    [~, acgic] = TSQ_us_cluster(TS_DataMat',ClusterMethCol,ClusterParamsCol,'mets');
+    [~, acgic] = TSQ_us_cluster(TS_DataMat',ClusterMethCol,ClusterParamsCol);
     fprintf(1,'Column clustering took %s.\n',BF_thetime(toc))
 else
     acgic = {};

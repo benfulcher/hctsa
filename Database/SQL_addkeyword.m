@@ -102,7 +102,7 @@ if strcmp(morts,'ts') % Time Series
     end
 	times = zeros(nget,1);
 	% do it individually
-	for i=1:nget
+	for i = 1:nget
 		tic
 
 		updatestring = ['UPDATE TimeSeries SET ' ...

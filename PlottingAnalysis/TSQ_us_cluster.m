@@ -23,7 +23,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [ackwgs, acgi, TS_DataMat_cl] = TSQ_us_cluster(norcl,ClusterMethod,ClusterParams,TSorOps)
+function [ackwgs, acgi, TS_DataMat_cl] = TSQ_us_cluster(norcl,ClusterMethod,ClusterParams)
 
 %% Check Inputs
 % 1) norcl: can be the data matrix, or a string:
@@ -41,12 +41,9 @@ end
 % 3) ClusterParams: specify the parameters for the clustering method
 if nargin < 3, ClusterParams = {}; end % defaults specified within each method
 
-
-% 4) TSorOps: whether to do for metrics ('ops') or time series ('ts')
-%             only meaningful when norcl is a string.
-if nargin < 4 || isempty(TSorOps), TSorOps = 'ts'; end
-
+% ------------------------------------------------------------------------------
 %% Get the data
+% ------------------------------------------------------------------------------
 if ischar(norcl)
     switch norcl
     case 'cl'
@@ -61,12 +58,10 @@ if ischar(norcl)
 else % Input is a matrix to be clustered -- call it TS_DataMat.
     TS_DataMat = norcl;
 end
-% Transpose the matrix is using operations:
-if strcmp(TSorOps,'ops')
-    TS_DataMat = TS_DataMat';
-end
 
+% ------------------------------------------------------------------------------
 %% Do the unsupervised clustering
+% ------------------------------------------------------------------------------
 switch ClusterMethod
 	case 'linkage'
 % 		fprintf(1,'Using inbuilt matlab linkage clustering\n');
@@ -192,7 +187,9 @@ switch ClusterMethod
         end
 
         
+        % ------------------------------------------------------------------------------
         %% Cluster
+        % ------------------------------------------------------------------------------
         % extracts a discrete clustering from the hierarchy obtained above
 		if ~isempty(clustth) % do this clustering
             if strcmp(clusterM,'cutoffN')
@@ -256,13 +253,13 @@ switch ClusterMethod
                 end
             end
             
-            % reorder by decreasing cluster size
+            % Reorder by decreasing cluster size
             ClusterSize = cellfun(@length,acgi);
             [~,ix] = sort(ClusterSize,'descend');
             ackwgs = ackwgs(ix);
             acgi = acgi(ix);
             
-        else % don't do agglomerative clustering, just return the dendrogram ordering
+        else % Don't do agglomerative clustering, just return the dendrogram ordering
             figure('color','w');
             if ~showdend, set(gcf,'Visible','off'); end % suppress figure output
             if size(TS_DataMat,1) < 1000 % small enough to try optimalleaforder

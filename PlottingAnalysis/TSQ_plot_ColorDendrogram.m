@@ -42,19 +42,21 @@ end
 if nargin < 5 || isempty(horiz)
     horiz = 0; % display horizontally? not really supported yet
 end
+if horiz==1
+    warning('horizontal displays not really supported yet, sorry... :(')
+end
 
-% Set up orientation: theorient
+% Set up orientation: Orientation
 if horiz
-    theorient = 'left';
+    Orientation = 'left';
 else
-    theorient = 'top';
+    Orientation = 'top';
 end
 
 % Can specify distance matrix as a string: norcl, and will retrieve and
 % calculate distances as appropriate...
 if ischar(d)
     dmth = 'euclidean';
-    newmaxd = 5;
     
     if strcmp(d,'cl')
         TheFile = 'HCTSA_cl.mat';
@@ -67,9 +69,11 @@ if ischar(d)
     
     % Calculate pairwise distances
     d = BF_pdist(F,dmth);
-    % rescale to range of <newmaxd>
-    d = newmaxd * d/max(d);
 end
+
+% Rescale distances to a maximum of 5, helps visualization
+newmaxd = 5;
+d = newmaxd * d / max(d);
 
 % Each cell element are indices of that group
 if iscell(groups)
@@ -93,17 +97,19 @@ for i=1:NumNodes; NodeLabels{i} = ''; end; % Don't actually label the nodes...
 % ------------------------------------------------------------------------------
 figure('color','w'); hold on;
 if length(groups)>1000
-    [H,~,perm] = dendrogram(Z,0,'orientation','top','labels',NodeLabels);
+    [H,~,perm] = dendrogram(Z,0,'Orientation',Orientation,'Labels',NodeLabels);
 else % Try optimal leaf order
-    fprintf('Trying to run optimal leaf order for %u nodes',length(groups))
+    fprintf('Running optimal leaf order for %u nodes...',length(groups))
     order = optimalleaforder(Z,d);
-    [H,~,perm] = dendrogram(Z,0,'r',order,'orientation',theorient,'labels',NodeLabels);
+    [H,~,perm] = dendrogram(Z,0,'Reorder',order,'Orientation',Orientation,'Labels',NodeLabels);
+    fprintf(1,' Done.\n');
 end
 
 % Change the line width of the dendrogram
-set(H,'LineWidth',0.0001,'Color','k');
+set(H,'LineWidth',0.0002,'Color','k');
 set(gca,'FontSize',12);
 NumGroups = length(GroupLabels); % number of groups
+
 
 % ------------------------------------------------------------------------------
 % Set up colors
@@ -189,7 +195,6 @@ for u = 1:length(ugroups)
 end
 
 ylim([-barheight-0.04 max(Z(:,3)) + 0.001]);
-% set(gca,'FontSize',16,'YLim',[-0.041,0.552],'Position',[0.09 0.11 0.65 0.815]);
 ylabel('d','FontSize',20);
 hold off;
 

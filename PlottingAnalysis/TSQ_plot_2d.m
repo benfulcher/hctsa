@@ -109,23 +109,22 @@ end
 % ------------------------------------------------------------------------------
 % Get losses
 % ------------------------------------------------------------------------------
-loss = zeros(3,2); % loss1, loss2, lossboth (mean,std)
+loss = zeros(3,1); % loss1, loss2, lossboth
 gig = BF_ToGroup(GroupIndices); % one of my functions to convert GroupIndices to group form
 switch lossmeth
     case 'linclass'
         kfold = 10;
         nrepeats = 5;
+        Classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
+                        sum(ytest == classify(Xtest,XTrain,yTrain,'linear'))/length(ytest);
         try
-            lf1 = TSQ_cfnerr('classify','linear',Features(:,1),gig,[],{'kfold',kfold,nrepeats});
-            loss(1,:) = [mean(lf1), std(lf1)];
-            lf2 = TSQ_cfnerr('classify','linear',Features(:,2),gig,[],{'kfold',kfold,nrepeats});
-            loss(2,:) = [mean(lf2), std(lf2)];
-            lf3 = TSQ_cfnerr('classify','linear',Features(:,1:2),gig,[],{'kfold',kfold,nrepeats});
-            loss(3,:) = [mean(lf3), std(lf3)];
+            loss(1) = mean(Classify_fn(Features(:,1),gig,Features(:,1),gig));
+            loss(2) = mean(Classify_fn(Features(:,2),gig,Features(:,2),gig));
+            loss(3) = mean(Classify_fn(Features(:,1:2),gig,Features(:,1:2),gig));
         catch emsg
             fprintf(1,'%s\n',emsg.message);
         end
-
+        fprintf(1,'Linear in-sample classification rates computed\n');
     case {'knn','knn_matlab'}
         k = 3;
         nrepeats = 10;
@@ -139,14 +138,11 @@ switch lossmeth
         catch emsg
             fprintf(1,'%s\n',emsg);
         end
-        
-    case 'svm'
-        loss(1) = TSQ_givemeloss(GroupNames,GroupIndices,{'svm',{{'linear'}}},{'cv',{10,1}},'class_loss',Features(:,1));
-        loss(2) = TSQ_givemeloss(GroupNames,GroupIndices,{'svm',{{'linear'}}},{'cv',{10,1}},'class_loss',Features(:,2));
-        loss(3) = TSQ_givemeloss(GroupNames,GroupIndices,{'svm',{{'linear'}}},{'cv',{10,1}},'class_loss',Features(:,1:2));
 end
 
+% ------------------------------------------------------------------------------
 %%% Plot
+% ------------------------------------------------------------------------------
 if MakeFigure % can set extras.MakeFigure = 0 to plot within a given setting
     figure('color','w'); box('on'); % white figure
 end
@@ -278,13 +274,13 @@ end
 % ------------------------------------------------------------------------------
 %% Axis labelling
 % ------------------------------------------------------------------------------
-title(sprintf('Combined misclassification rate (%s) = %f +/- %f %%',lossmeth, ...
-                    round(loss(3,1)*100),round(loss(3,2)*100)),'interpreter','none');
+title(sprintf('Combined misclassification rate (%s) = %.2f%%',lossmeth, ...
+                    round(loss(3,1)*100)),'interpreter','none');
 
 LabelText = cell(2,1);
 for i = 1:2
-    LabelText{i} = sprintf('%s [%s] (%f +/- %f %%)',labels{i}, ...
-                            round(loss(i,1)*100),round(loss(i,2)*100));
+    LabelText{i} = sprintf('%s (%.2f %%)',labels{i}, ...
+                            round(loss(i,1)*100)); %,round(loss(i,2)*100));
 end
 xlabel(LabelText{1},'interpreter','none')
 ylabel(LabelText{2},'interpreter','none')
@@ -307,6 +303,10 @@ legend(legs);
 % ------------------------------------------------------------------------------
 %% Annotate time-series data
 % ------------------------------------------------------------------------------
+if isempty(TimeSeriesData)
+    % Only attempt to annotate if time-series data is provided
+    return
+end
 % Set parameters
 if isfield(annotatep,'maxL')
     maxL = annotatep.maxL;
@@ -360,7 +360,7 @@ if ~UserInput % points to annotate are randomly picked
         AlreadyPicked(:,1) = round(linspace(1,NumGroups,NumAnnotations));
         randperms = cellfun(@(x)randperm(length(x)),GroupIndices,'UniformOutput',0);
         counters = ones(NumGroups,1);
-        for j=1:NumAnnotations
+        for j = 1:NumAnnotations
             AlreadyPicked(j,2) = randperms{AlreadyPicked(j,1)}(counters(AlreadyPicked(j,1))); % random element of the group
             counters(AlreadyPicked(j,1)) = counters(AlreadyPicked(j,1))+1;
         end

@@ -37,7 +37,6 @@ case 'Operations'
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ... % Last modified
         'PRIMARY KEY (op_id), ' ...  % sets primary key as op_id
         'FOREIGN KEY (mop_id) REFERENCES MasterOperations(mop_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
-        % 'Pointer TINYINT(1), ' ... % perhaps redundant given MasterLabel
 
 case 'OperationCode'
     CreateString = ['CREATE TABLE OperationCode ' ...
@@ -112,6 +111,7 @@ case 'Results'
 
 otherwise
     error('Unknown table ''%s''',WhatTable)
+    
 end
 
 end

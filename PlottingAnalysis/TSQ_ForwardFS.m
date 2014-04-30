@@ -9,12 +9,12 @@
 % 
 % Typical usage uses 'linear' for the criterion (linear classification rates).
 % 
-%--OUTPUTS:
-%-ifeat: indices of features selected.
-%-TestStat: test statistics for all operations.
-%-TrainErr: training errors for selected features.
-%-TestErr: test errors for selected features.
-%-TestClass: classificaiton of the test data.
+%---OUTPUTS:
+% ifeat: indices of features selected.
+% TestStat: test statistics for all operations.
+% TrainErr: training errors for selected features.
+% TestErr: test errors for selected features.
+% TestClass: classificaiton of the test data.
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

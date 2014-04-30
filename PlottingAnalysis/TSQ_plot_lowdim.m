@@ -120,11 +120,32 @@ if strcmp(TheData,'cl') || strcmp(TheData,'norm')
     fprintf(1,' Loaded.\n');
 else
     % The user provided data yourself
-    TS_DataMat = TheData;
-    if isfield(annotatep,'olab')
-        DimensionLabels = annotatep.olab;
+    if ~isfield(TheData,'DataMat')
+        error('No field ''DataMat'' provided in the data input')
+    elseif ~isfield(TheData,'Groups')
+        error('No field ''Groups'' provided in the data input')
+    end
+    TS_DataMat = TheData.DataMat;
+    DataGroups = TheData.Groups;
+    if isfield(TheData,'DimLabels')
+        DimensionLabels = TheData.DimLabels;
     else
         DimensionLabels = {};
+    end
+    if isfield(TheData,'GroupNames')
+        GroupNames = TheData.GroupNames;
+    else
+        GroupNames = {};
+    end
+    if isfield(TheData,'DataLabels')
+        DataLabels = TheData.DataLabels;
+    else
+        DataLabels = {};
+    end
+    if isfield(TheData,'TimeSeriesData')
+        TimeSeriesData = TheData.TimeSeriesData;
+    else
+        TimeSeriesData = {};
     end
 end
 
