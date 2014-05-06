@@ -39,10 +39,10 @@ if nargin < 1 || isempty(norcl)
     norcl = 'cl';
 end
 if nargin < 2 || isempty(ColorGroups)
-    ColorGroups = 0; % don't color groups
+    ColorGroups = 0; % Don't color groups
 end
 if nargin < 3
-   TS_DataMat = []; % load from TS_loc_N or TS_loc_cl
+   TS_DataMat = []; % Load data from HCTSA_N or HCTSA_cl
 end
 if nargin < 4 || isempty(CustomOrder)
 	CustomOrder = {[],[]};

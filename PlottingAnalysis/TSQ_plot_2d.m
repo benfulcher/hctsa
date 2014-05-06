@@ -3,7 +3,7 @@
 % ------------------------------------------------------------------------------
 % 
 % Plots the dataset in a two-dimensional space
-% e.g., that of two chosen operations, or two principal components
+% e.g., that of two chosen operations, or two principal components.
 % 
 %-------HISTORY
 % Borrows from TSQ_pca plotting routines
@@ -36,7 +36,6 @@
 % ------------------------------------------------------------------------------
 
 function TSQ_plot_2d(Features,DataInfo,TrainTest,annotatep,keepksdensities,lossmeth)
-% mr,norcl,TrainTest,annotatep,keepksdensities,lossmeth,extras)
 
 % Features should be a Nx2 vector of where to plot each of the N data objects in the two-dimensional space
 if nargin < 1
@@ -79,7 +78,7 @@ TimeSeriesData = DataInfo.TimeSeriesData;
 NumGroups = length(GroupNames);
 
 % ------------------------------------------------------------------------------
-%% SUBSET
+%% Subset
 % ------------------------------------------------------------------------------
 % Only use a subset of the full matrix
 if (length(TrainTest)==1 || ~iscell(TrainTest))
@@ -107,10 +106,10 @@ if (length(TrainTest)==1 || ~iscell(TrainTest))
 end
 
 % ------------------------------------------------------------------------------
-% Get losses
+% Compute classification rates
 % ------------------------------------------------------------------------------
 loss = zeros(3,1); % loss1, loss2, lossboth
-gig = BF_ToGroup(GroupIndices); % one of my functions to convert GroupIndices to group form
+gig = BF_ToGroup(GroupIndices); % Convert GroupIndices to group form
 switch lossmeth
     case 'linclass'
         kfold = 10;
@@ -141,13 +140,13 @@ switch lossmeth
 end
 
 % ------------------------------------------------------------------------------
-%%% Plot
+%% Plot
 % ------------------------------------------------------------------------------
 if MakeFigure % can set extras.MakeFigure = 0 to plot within a given setting
     figure('color','w'); box('on'); % white figure
 end
 
-% set colors
+% Set colors
 if isstruct(annotatep) && isfield(annotatep,'cmap')
     if ischar(annotatep.cmap)
         c = BF_getcmap(annotatep.cmap,NumGroups,1);
@@ -244,7 +243,7 @@ end
 % end
 
 % ------------------------------------------------------------------------------
-%% Plot a classify boundary??
+%% Plot a classify boundary?
 % ------------------------------------------------------------------------------
 if (NumGroups == 2) && strcmp(lossmeth,'linclass');
     modeorder = 'linear'; % or 'quadratic'
@@ -272,7 +271,7 @@ if (NumGroups == 2) && strcmp(lossmeth,'linclass');
 end
 
 % ------------------------------------------------------------------------------
-%% Axis labelling
+%% Label Axes
 % ------------------------------------------------------------------------------
 title(sprintf('Combined misclassification rate (%s) = %.2f%%',lossmeth, ...
                     round(loss(3,1)*100)),'interpreter','none');

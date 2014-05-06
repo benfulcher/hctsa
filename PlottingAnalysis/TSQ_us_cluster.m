@@ -7,6 +7,8 @@
 % Loads a data matrix and clustering options and outputs a clustering of the
 % indicies of this data matrix.
 % 
+% Quite alot of unnecessary baggage lives in this code. Apologies for that.
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -27,8 +29,8 @@ function [ackwgs, acgi, TS_DataMat_cl] = TSQ_us_cluster(norcl,ClusterMethod,Clus
 
 %% Check Inputs
 % 1) norcl: can be the data matrix, or a string:
-%                  'norm' -- loads TS_loc_N,
-%                  'cl'   -- loads TS_loc_cl,
+%                  'norm' -- loads HCTSA_N,
+%                  'cl'   -- loads HCTSA_cl,
 if nargin < 1,
     norcl = ''; % not necessary
 end

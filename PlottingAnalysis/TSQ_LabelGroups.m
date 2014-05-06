@@ -2,27 +2,29 @@
 % TSQ_LabelGroups
 % --------------------------------------------------------------------------
 % 
-% You provide a set of keyword options to store a grouping of time series in the
-% store.
+% You provide a set of keyword options to store a specific grouping of time series.
+% Useful when doing a classification task -- can store your classifications
+% in the local structure arrays.
 % 
-% Requires a very specific structure:
-% {'Keyword_1',NumberToRetrive;'Keyword2',NumberToRetrive,...}
-% Use '0' to retrieve all of a given class.
-% Can also use an empty label, '', to select anything at random from all time series.
+% Requires a very specific (and unfortunately ~unintuitive) structure:
+%  {'Keyword_1',NumberToRetrive;'Keyword2',NumberToRetrive,...}
+%  Use '0' to retrieve all of a given class.
+%  Can also use an empty label, '', to select anything at random from all time series.
 % 
 % Example usage:
 % KeywordGroups = {'space',100;'',200;'medical',0;...};
 % 
 %---INPUTS:
-%--KeywordGroups: The keyword groups, a cell of strings: 
-%--TsorOps: Whether grouping is for operations ('ops') or time series ('ts')
-%--WhatData: Where to retrive from (and write back to): 'orig', 'norm', or 'cl'
-%--SaveBack: Can set to 0 to stop saving the grouping back to the input file.
+% KeywordGroups: The keyword groups, a cell of strings: 
+% TsorOps: Whether grouping is for operations ('ops') or time series ('ts')
+% WhatData: Where to retrive from (and write back to): 'orig', 'norm', or 'cl'
+% SaveBack: Can set to 0 to stop saving the grouping back to the input file.
 %
 %---OUTPUTS:
-%-- GroupIndices: the indicies corresponding to each keyword in KeywordGroups
+% GroupIndices: the indicies corresponding to each keyword in KeywordGroups
 % 
-% [[Previously named 'SUB_autolabelQ']]
+%---HISTORY:
+% Previously named 'SUB_autolabelQ'
 % 
 % --------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

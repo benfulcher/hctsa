@@ -12,14 +12,14 @@
 % WhatMethod, the method of computing the autocorrelation: 'Fourier',
 %             'TimeDomainStat', or 'TimeDomain'.
 %       
-%---OUTPUT is the autocorrelation at the given time-lag.
+%---OUTPUT: the autocorrelation at the given time-lag.
 %
 %---HISTORY:
 % Ben Fulcher, 2014-03-24. Added multiple definitions for computing the
-% autocorrelation Computing mean/std across the full time series makes a
-% significant difference for short time series, but can produce values outside
-% [-1,+1]. The filtering-based method used by Matlab's autocorr, is probably the
-% best for short time series, and is now implemented here.
+%       autocorrelation Computing mean/std across the full time series makes a
+%       significant difference for short time series, but can produce values
+%       outside [-1,+1]. The filtering-based method used by Matlab's autocorr,
+%       is probably the best for short time series, and is now implemented here.
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -14,6 +14,8 @@
 %---OUTPUTS: Statistics on the output of amutual2 over this range, as for
 % CO_TSTL_amutual.
 % 
+%---HISTORY:
+% Ben Fulcher, 2009
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,7 +40,6 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_TSTL_amutual2(y,maxtau)
-% Ben Fulcher, 2009
 
 %% Preliminaries
 N = length(y); % length of time series

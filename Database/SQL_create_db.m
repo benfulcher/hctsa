@@ -2,7 +2,7 @@
 % SQL_create_db
 % ------------------------------------------------------------------------------
 % 
-% Set up the mySQL database.
+% Set up the mySQL database for use with highly comparative time-series analysis
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Romesh Abeysuriya

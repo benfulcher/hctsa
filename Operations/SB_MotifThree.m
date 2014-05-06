@@ -11,7 +11,11 @@
 %       (i) 'quantile': equiprobable alphabet by time-series value
 %       (ii) 'diffquant': equiprobably alphabet by time-series increments
 % 
-%---OUTPUTS: Statistics on words of length 1, 2, 3, and 4.
+%---OUTPUTS:
+% Statistics on words of length 1, 2, 3, and 4.
+% 
+%---HISTORY:
+% This code was laboriously written by Ben Fulcher, 2009.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -36,8 +40,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = ST_Motif_Three(y,trit)
-% Laboriously mSB_MotifThreen code, Ben Fulcher, 2009
+function out = ST_MotifThree(y,trit)
 
 if nargin < 2 || isempty(trit)
     trit = 'quantile';
@@ -57,9 +60,11 @@ end
 % yt = y;
 N = length(yt); % Length of the symbolized sequence derived from the time series
 
-% so we have a vector yt with entries \in {1,2,3}
+% So we have a vector yt with entries \in {1,2,3}
 
-%% 1
+% ------------------------------------------------------------------------------
+%% Words of length 1
+% ------------------------------------------------------------------------------
 r1 = cell(3,1); % stores ranges as vectors
 out1 = zeros(3,1); % stores probabilities as doubles
 
@@ -75,7 +80,9 @@ out.b = out1(2); % proportion of b
 out.c = out1(3); % proportion of c
 out.h = -sum(out1(out1 > 0).*log(out1(out1 > 0))); % entropy of this result
 
-%% 2
+% ------------------------------------------------------------------------------
+%% Words of length 2
+% ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
 for i = 1:3
 	if (~isempty(r1{i})) && (r1{i}(end) == N)
@@ -92,7 +99,6 @@ for i = 1:3
 	end
 end
 
-
 % ------ Record these -------
 out.aa = out2(1,1); out.ab = out2(1,2); out.ac = out2(1,3);
 out.ba = out2(2,1); out.bb = out2(2,2); out.bc = out2(2,3);
@@ -100,8 +106,9 @@ out.ca = out2(3,1); out.cb = out2(3,2); out.cc = out2(3,3);
 
 out.hh = -sum(out2(out2 > 0).*log(out2(out2 > 0)))/2; % entropy of this result
 
-
-%% 3
+% ------------------------------------------------------------------------------
+%% Words of length 3
+% ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
 for i = 1:3
 	for j = 1:3
@@ -135,7 +142,9 @@ out.cca = out3(3,3,1); out.ccb = out3(3,3,2); out.ccc = out3(3,3,3);
 
 out.hhh = -sum(out3(out3 > 0).*log(out3(out3 > 0)))/3; % entropy of this result
 
-%% 4
+% ------------------------------------------------------------------------------
+%% Words of length 4
+% ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
 for i = 1:3
 	for j = 1:3

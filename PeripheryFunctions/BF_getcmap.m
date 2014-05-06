@@ -1795,6 +1795,8 @@ switch whichcmap
                         0, 0, 0;
                         1, 1, 0];
         cmapout = cmapout(1:ng,:);
+    otherwise
+        error('Unknown color map specified: ''%s''',whichcmap);
 end
 
 if flipmeout

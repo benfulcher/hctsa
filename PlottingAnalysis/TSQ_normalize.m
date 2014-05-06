@@ -8,13 +8,16 @@
 % visualization and clustering.
 % 
 %---INPUTS:
-%-NormFunction: string specifying how to normalize the data
-%-FilterOptions: vector specifying thresholds for the minimum proportion of bad
+% NormFunction: String specifying how to normalize the data.
+% 
+% FilterOptions: Vector specifying thresholds for the minimum proportion of bad
 %                values tolerated in a given row or column, in the form of a 2-vector:
 %                [row proportion, column proportion] If one of the FilterOptions
 %                is set to 1, will have no bad values in your matrix.
-%-FileName_HCTSA_loc: can specify a custom file name to import. Default is HCTSA_loc.mat.
-%-subs [opt]: only normalize and trim a subset of the data matrix. This can be used,
+%                
+% FileName_HCTSA_loc: Custom filename to import. Default is HCTSA_loc.mat.
+% 
+% subs [opt]: Only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
 %             subsequently be clustered and further subsetted using TS_cluster2...
 %             For example, can choose a subset using SUB_autolabel2 to get only sound
@@ -113,7 +116,7 @@ end
 %% Trim down bad rows/columns
 % --------------------------------------------------------------------------
 
-% (i) NaNs in TS_loc mean values uncalculated in the matrix.
+% (i) NaNs in TS_DataMat mean values uncalculated in the matrix.
 TS_DataMat(~isfinite(TS_DataMat)) = NaN; % Convert all nonfinite values to NaNs for consistency
 % Need to also incorporate knowledge of bad entries in TS_Quality and filter these out:
 TS_DataMat(TS_Quality > 0) = NaN;

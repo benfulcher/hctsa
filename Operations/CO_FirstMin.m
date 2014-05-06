@@ -5,9 +5,9 @@
 % Returns the time at which the first minimum in a given correlation function
 % occurs.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
-% minwhat, the type of correlation to minimize: either 'ac' for autocorrelation,
+% MinWhat, the type of correlation to minimize: either 'ac' for autocorrelation,
 %           or 'mi' for automutual information
 % 
 % Note that selecting 'ac' is unusual operation: standard operations are the
@@ -16,6 +16,9 @@
 %
 % The 'mi' option uses Rudy Moddemeijer's RM_information.m code that may or may
 % not be great...
+% 
+%---HISTORY
+% Ben Fulcher, 2008
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -40,28 +43,34 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_FirstMin(y,minwhat)
-% Ben Fulcher, 2008
+function out = CO_FirstMin(y,MinWhat)
 
-if nargin < 2 || isempty(minwhat)
-    minwhat = 'mi'; % mutual information
+if nargin < 2 || isempty(MinWhat)
+    MinWhat = 'mi'; % mutual information
 end
 
-N = length(y); % time-series length
+N = length(y); % Time-series length
 
-switch minwhat
+% ------------------------------------------------------------------------------
+% Define the autocorrelation function
+% ------------------------------------------------------------------------------
+switch MinWhat
 case 'mi'
-    % automutual information implemented as RM_information
+    % Automutual information implemented as RM_information
     corrfn = @(x) RM_information(y(1:end-x), y(1+x:end));
-case 'ac'
-    % autocorrelation implemented as CO_AutoCorr
+case {'ac','corr'}
+    % Autocorrelation implemented as CO_AutoCorr
     corrfn = @(x) CO_AutoCorr(y,x);
 otherwise
-    error('Unknown correlation function ''%s''',minwhat);
+    error('Unknown correlation type specified: ''%s''',MinWhat);
 end
 
-% Go through lags until find a minimum
-a = zeros(N-1,1); % preallocate space for the autocorrelation function
+% ------------------------------------------------------------------------------
+% Search for a minimum
+% ------------------------------------------------------------------------------
+% (Go incrementally through lags until a minimum is found)
+
+a = zeros(N-1,1); % preallocate autocorrelation vector
 for i = 0:N-1
     a(i+1) = corrfn(i); % calculate the auto-correlation at this lag
             
@@ -71,8 +80,7 @@ for i = 0:N-1
     end
 end
 
-% If there is no minimum in the automutual information
-out = N;
+% If no minimum is found:
+out = N; % maximum output is time-series length (could also set this as NaN)
 
 end
-
