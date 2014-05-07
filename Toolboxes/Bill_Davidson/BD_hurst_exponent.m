@@ -37,7 +37,8 @@ function hurst = BD_hurst_exponent(data0)   % data set
 
 data = data0;         % make a local copy
 
-[M, npoints] = size(data0);
+[npoints, M] = size(data0); % ++DrorC NEEDS A TRANSPOSE FOR COLUMN VECTOR DATA
+% [M, npoints] = size(data0); % ORIGINAL BILL DAVIDSON CODE
 
 yvals = zeros(1,npoints);
 xvals = zeros(1,npoints);

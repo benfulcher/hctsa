@@ -2,8 +2,8 @@
 % FC_Surprise
 % ------------------------------------------------------------------------------
 % 
-% How surprised you might be by the next recorded data points given the data recorded
-% in recent memory.
+% How surprised you might be by the next recorded data points given the data
+% recorded in recent memory.
 % 
 % Coarse-grains the time series, turning it into a sequence of symbols of a
 % given alphabet size, ng, and quantifies measures of surprise of a
@@ -46,6 +46,9 @@
 %            minimum, maximum, mean, median, lower and upper quartiles, and
 %            standard deviation.
 % 
+%---HISTORY:
+% Ben Fulcher, September 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -70,7 +73,6 @@
 % ------------------------------------------------------------------------------
 
 function out = FC_Surprise(y,whatinf,memory,ng,cgmeth,nits)
-% Ben Fulcher, September 2009
 
 %% Check inputs and set defaults
 if nargin < 2 || isempty(whatinf)
@@ -98,12 +100,14 @@ if nargin < 6 || isempty(nits)
     % could also imagine doing it exhaustively...?!
 end
 
+% ------------------------------------------------------------------------------
 %% Course Grain
+% ------------------------------------------------------------------------------
 yth = SB_CoarseGrain(y,cgmeth,ng); % a coarse-grained time series using the numbers 1:ng
 
 N = length(yth); % will be the same as y, for 'quantile', and 'updown'
 
-%% get prior information
+%% Get prior information
 rs = randperm(N-memory) + memory;
 rs = rs(1:min(nits,end));
 
@@ -148,20 +152,21 @@ for i = 1:length(rs)
             store(i) = p;
             
         otherwise
-            error('Unknwon method ''%s''',whatinf);
+            error('Unknown method ''%s''',whatinf);
     end
 end
 
-% information gained from next observation is log(1/p) = -log(p)
+% Information gained from next observation is log(1/p) = -log(p)
 iz = (store == 0);
+
 store(iz) = 1; % to avoid log(0) error in next line
 store = -log(store); % transform to surprises/information gains
 store(iz) = 0; % so that log(0) = 0
 % May be strange? maybe remove these points rather than setting to zero?
 % plot(store)
 
-out.min = min(store); % minimum amount of information you can gain in this way
-out.max = max(store); % maximum amount of information you can gain in this way
+out.min = min(store); % Minimum amount of information you can gain in this way
+out.max = max(store); % Maximum amount of information you can gain in this way
 out.mean = mean(store); % mean
 out.median = median(store); % median
 out.lq = quantile(store,0.25); % lower quartile

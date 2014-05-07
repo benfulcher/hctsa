@@ -19,6 +19,9 @@
 % 
 %---OUTPUT: the Taken's estimator of the correlation dimension, d2.
 % 
+%---HISTORY:
+% Ben Fulcher, 14/11/2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -43,9 +46,10 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedparams)
-% Ben Fulcher, 14/11/2009
 
+% ------------------------------------------------------------------------------
 %% Check inputs
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length
 
 % 1) Nref
@@ -76,17 +80,20 @@ else
     end
 end
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
-% convert to embedded signal object for TSTOOL
+% ------------------------------------------------------------------------------
+% Convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedparams{1},embedparams{2},1);
 
-if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
-    error('Embedding failed')
-    % out = NaN; return
+if ~strcmp(class(s),'signal') && isnan(s); % Embedding failed
+    fprintf('Embedding failed.\n')
+    out = NaN; return % assume an error with large time-lag or dimension
 end
 
-
+% ------------------------------------------------------------------------------
 %% Run the TSTOOL Taken's estimation code
+% ------------------------------------------------------------------------------
 D2 = takens_estimator(s, Nref, rad, past);
 
 out = D2;

@@ -7,13 +7,16 @@
 % statistics about the structure in this space, including angular 
 % distribution, etc.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the column-vector time series
 % tau, the time-delay (can be 'tau' for first zero-crossing of ACF)
 % 
-% Outputs include the distribution of angles between successive points in the
+%---OUTPUTS: include the distribution of angles between successive points in the
 % space, stationarity of this angular distribution, euclidean distances from the
 % origin, and statistics on outliers.
+% 
+%---HISTORY:
+% Ben Fulcher, September 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -39,7 +42,6 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_Embed2(y,tau)
-% Ben Fulcher, September 2009
 
 doplot = 0; % can set to 1 to plot some outputs
 

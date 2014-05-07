@@ -2,7 +2,8 @@
 % RA_keyboard
 % ------------------------------------------------------------------------------
 % 
-% Romesh Abeysuriya's replacement of Matlab's 'keyboard' command
+% Romesh Abeysuriya's replacement of Matlab's 'keyboard' command.
+% 
 % Keyboard debug caller 
 % Provides more information including the stack trace than simply using 
 % 'keyboard'

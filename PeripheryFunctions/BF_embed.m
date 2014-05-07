@@ -21,6 +21,9 @@
 %---OUTPUT:
 % A matrix of width m containing the vectors in the new embedding space...
 % 
+%---HISTORY:
+% Ben Fulcher, October 2009
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -45,12 +48,13 @@
 % ------------------------------------------------------------------------------
 
 function y_embed = BF_embed(y,tau,m,sig)
-% Ben Fulcher, October 2009
 
 bevocal = 0; % display information about embedding
 N = length(y); % length of the input time series, y
 
+% ------------------------------------------------------------------------------
 %% (1) Time-delay, tau
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
     tau = 1; % default time delay is 1
     sstau = 'to default of 1';
@@ -73,7 +77,9 @@ end
 % we now have an integer time delay tau
 % explanation stored in string sstau for printing later
 
-%% (2) Set embedding dimension, m
+% ------------------------------------------------------------------------------
+%% Determine the embedding dimension, m
+% ------------------------------------------------------------------------------
 if nargin < 3 || isempty(m) % set to default value
     m = 2; % embed in 2-dimensional space by default! Probably not a great default!
     ssm = sprintf('to (strange) default of %u',m);
@@ -90,6 +96,7 @@ else % use a routine to inform m
                 end
                 m = MS_unfolding(y,th,1:10,tau);
                 ssm = sprintf('by Michael Small''s FNN code with threshold %f to m = %u',th,m);
+                
             case 'fnnmar'
                 % uses Marwin's fnn code in CRPToolbox
                 % should specify threshold for proportion of fnn
@@ -109,6 +116,7 @@ else % use a routine to inform m
                     return
                 end
                 ssm = sprintf('by N. Marwan''s CRPtoolbox ''fnn'' code with threshold %f to m = %u',th,m);
+                
             case 'cao'
                 % Uses TSTOOL code for cao method to determine optimal
                 % embedding dimension
@@ -127,8 +135,7 @@ else % use a routine to inform m
                 end
                 ssm = sprintf('by TSTOOL function ''cao'' using ''mmthresh'' with threshold %f to m = %u',th,m);
             otherwise
-                fprintf(1,'embedding dimension, m, incorrectly specified. Exiting.')
-                y_embed = NaN; return
+                error('Embedding dimension, m, incorrectly specified.')
         end
     else
         m = m{1};
@@ -137,12 +144,14 @@ else % use a routine to inform m
 end
 % we now have an integral embedding dimension, m
 
-%% Now do the embedding
+% ------------------------------------------------------------------------------
+%% Do the embedding
+% ------------------------------------------------------------------------------
 if nargin < 4
-    sig = 0; % don't return a signal object, return a matrix
+    sig = 0; % Don't return a signal object, return a matrix
 end
 
-if sig == 2 % just return the embedding parameters
+if sig == 2 % Just return the embedding parameters
     y_embed = [tau, m];
     return
 end
@@ -154,11 +163,11 @@ end
 try
     y_embed = embed(signal(y),m,tau);
 catch me
-    if strcmp(me.message,'time series to short for chosen embedding parameters')
+    if strcmp(me.message,'Time series to short for chosen embedding parameters')
         fprintf(1,'Time series (N = %u) too short to embed\n',N);
         y_embed = NaN; return
     else
-        % could always try optimizing my own routine (below) so TSTOOL is not required for this step...
+        % Could always try optimizing my own routine (below) so TSTOOL is not required for this step...
         error('Embedding time series using TSTOOL function ''embed'' failed')
     end
 end
@@ -169,7 +178,8 @@ if ~sig
 end
 
 if bevocal
-    fprintf(1,'Time series embedded using time delay, tau = %s and embedding dimension m = %s',sstau,ssm);
+    fprintf(1,['Time series embedded successfully: time delay tau = %s, ' ...
+                        'embedding dimension m = %s'],sstau,ssm);
 end
 
 

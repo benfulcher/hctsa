@@ -5,7 +5,7 @@
 % Plot the data matrix.
 % 
 %---INPUTS:
-% norcl: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
+% WhatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
 %         data in HCTSA_cl.mat (default)
 % kwgs:  specify keyword groups to color different keywords differently in the
 %         data matrix [opt].
@@ -30,68 +30,66 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_DataMatrix(norcl,ColorGroups,TS_DataMat,CustomOrder,CustomColorMap)
+function TSQ_plot_DataMatrix(WhatData,ColorGroups,CustomOrder,CustomColorMap)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
 % ------------------------------------------------------------------------------
-if nargin < 1 || isempty(norcl)
-    norcl = 'cl';
+% What data to plot:
+if nargin < 1 || isempty(WhatData)
+    WhatData = 'cl'; % Load data from HCTSA_cl by default
 end
+% Color groups of time series differently:
 if nargin < 2 || isempty(ColorGroups)
-    ColorGroups = 0; % Don't color groups
+    ColorGroups = 0; % Don't color groups by default
 end
-if nargin < 3
-   TS_DataMat = []; % Load data from HCTSA_N or HCTSA_cl
-end
-if nargin < 4 || isempty(CustomOrder)
+if nargin < 3 || isempty(CustomOrder)
 	CustomOrder = {[],[]};
 end
-if nargin < 5
+if nargin < 4
     CustomColorMap = 'redyellowblue';
 end
 
 % --------------------------------------------------------------------------
 %% Read in the data
 % --------------------------------------------------------------------------
-if isstruct(norcl)
-    % can specify all of this in the norcl argument
-    TimeSeries = norcl.TimeSeries;
-    Operations = norcl.Operations;
-    TS_DataMat = norcl.TS_DataMat;
+if isstruct(WhatData)
+    % can specify all of this in the WhatData argument
+    TimeSeries = WhatData.TimeSeries;
+    Operations = WhatData.Operations;
+    TS_DataMat = WhatData.TS_DataMat;
 else
-    if strcmp(norcl,'cl')
+    if strcmp(WhatData,'cl')
         TheFile = 'HCTSA_cl.mat'; TheRoutine = 'TSQ_cluster';
-    elseif strcmp(norcl,'norm')
+    elseif strcmp(WhatData,'norm')
         TheFile = 'HCTSA_N.mat'; TheRoutine = 'TSQ_normalize';
-    else
-        error('Unknown specifier %s, please specify ''norm'' or ''cl''',norcl)
-    end
-    
-    fprintf(1,'Reading data from %s...',TheFile);
-    
-    if isempty(TS_DataMat)
+    elseif ischar(WhatData) % Specify a filename
         a = which(TheFile); % First check it exists
         if isempty(a)
             error('\n%s not found. You should probably run %s...',TheFile,TheRoutine);
         end
-        load(TheFile,'TS_DataMat')
-        fprintf(1,' Done.\n');
+    else
+        error(['Unknown specifier ''%s'', please input the data structure, ' ...
+                        '\t\nor specify ''norm'', ''cl'', or a FileName'],WhatData)
     end
-    load(TheFile,'TimeSeries','Operations')
+    fprintf(1,'Reading data from %s...',TheFile);
+    load(TheFile,'TimeSeries','Operations','TS_DataMat')
+    fprintf(1,' Done.\n');
 end
 
 if ColorGroups
     TimeSeriesGroups = [TimeSeries.Group];
+    fprintf(1,'Coloring groups of time series...\n');
 end
-
 
 TimeSeriesFileNames = {TimeSeries.FileName}; clear TimeSeries; % Just extract filenames
 OperationNames = {Operations.Name}; clear Operations; % Just extract operation names
 
-[nts, nops] = size(TS_DataMat);
+[nts, nops] = size(TS_DataMat); % size of the data matrix
 
+% ------------------------------------------------------------------------------
 %% Reorder according to CustomOrder
+% ------------------------------------------------------------------------------
 if ~isempty(CustomOrder{1}) % reorder rows
 	fprintf(1,'Reordering time series according to custom order specified\n');
 	TS_DataMat = TS_DataMat(CustomOrder{1},:);
@@ -118,20 +116,20 @@ if ColorGroups
     
     % Add a group for unlabelled data items if they exist
     if sum(cellfun(@length,gi)) < nts
-        % we need to add an unlabelled class
+        % Add an unlabelled class
         gi0 = gi;
         gi = cell(NumGroups+1,1);
         for i = 1:NumGroups
             gi{i} = gi0{i};
         end
         clear gi0;
-        gi{end} = setxor(1:nts,cell2mat(gi));
+        gi{end} = setxor(1:nts,vertcat(gi{:}));
         NumGroups = NumGroups + 1;
     end
     
     fprintf(1,'Coloring data according to %u groups\n',NumGroups);
     
-    %% Change range of TS_DataMat to make use of new colormap appropriately
+    % Change range of TS_DataMat to make use of new colormap appropriately
     ff = 0.9999999;
     squashme = @(x)ff*(x - min(x(:)))/(max(x(:))-min(x(:)));
     TS_DataMat = squashme(TS_DataMat);
@@ -167,10 +165,10 @@ else
         cmap = [cmap; BF_getcmap('reds',ng,0,1)];
     end
     if NumGroups >= 6
-        cmap = [cmap;pink(ng)];
+        cmap = [cmap; pink(ng)];
     end
     if NumGroups >= 7
-        cmap = [cmap;gray(ng)];
+        cmap = [cmap; gray(ng)];
     end
     if NumGroups >= 8
         cmap = [cmap; BF_getcmap('yelloworangered',ng,0,1)];
@@ -212,7 +210,10 @@ else
     colormap(cmap)
 end
 
-% Surround by zeros for an accurate pcolor:
+% ------------------------------------------------------------------------------
+%% Plot the data matrix
+% ------------------------------------------------------------------------------
+% Surround by zeros for an accurate and inclusive pcolor:
 pcolor([TS_DataMat, zeros(size(TS_DataMat,1),1); zeros(1,size(TS_DataMat,2)+1)]);
 shading flat
 
