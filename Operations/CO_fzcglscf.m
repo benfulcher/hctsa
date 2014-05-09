@@ -9,12 +9,15 @@
 % Uses CO_glscf to calculate the generalized self-correlations.
 % Keeps calculating until the function finds a minimum, and returns this lag.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % alpha, the parameter alpha
 % beta, the parameter beta
 % maxtau [opt], a maximum time delay to search up to (default is the time-series
 %                length)
+% 
+%---HISTORY:
+% Ben Fulcher, 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -40,7 +43,6 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_fzcglscf(y,alpha,beta,maxtau)
-% Ben Fulcher, 2009
 
 N = length(y); % the length of the time series
 

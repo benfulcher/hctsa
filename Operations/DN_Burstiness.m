@@ -13,6 +13,9 @@
 %---OUTPUT:
 % The burstiness statistic, B.
 % 
+%---HISTORY:
+% Ben Fulcher, 2008
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -37,7 +40,6 @@
 % ------------------------------------------------------------------------------
 
 function B = DN_Burstiness(y)
-% Ben Fulcher, 2008
 
 % Burstiness statistic, B:
 B = (std(y) - mean(y))/(std(y) + mean(y));

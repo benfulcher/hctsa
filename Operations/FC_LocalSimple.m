@@ -21,6 +21,9 @@
 %---OUTPUTS: the mean error, stationarity of residuals, Gaussianity of
 % residuals, and their autocorrelation structure.
 % 
+%---HISTORY:
+% Ben Fulcher, Nov 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -45,17 +48,24 @@
 % ------------------------------------------------------------------------------
 
 function out = FC_LocalSimple(y,fmeth,ltrain)
-% Ben Fulcher, Nov 2009
 
+% ------------------------------------------------------------------------------
 % Check inputs
+% ------------------------------------------------------------------------------
+% Forecasting method, fmeth
 if nargin < 2 || isempty(fmeth)
     fmeth = 'mean';
 end
+% Number of samples to train with, ltrain
 if nargin < 2 || isempty(ltrain)
     ltrain = 3;
 end
 
-N = length(y); % time-series length
+N = length(y); % Time-series length
+
+% ------------------------------------------------------------------------------
+% Do the local prediction
+% ------------------------------------------------------------------------------
 
 switch fmeth
     case 'mean'
@@ -120,19 +130,23 @@ end
 % plot(res);
 % measures on the errors time series:
 
-% mean error:
+% ------------------------------------------------------------------------------
+% Output statistics
+% ------------------------------------------------------------------------------
+
+% Mean error:
 out.meanerr = mean(res);
 out.rmserr = sqrt(mean(res.^2));
 out.meanabserr = mean(abs(res));
 
-% standard deviation of errors:
+% Standard deviation of errors:
 out.stderr = std(res);
 
-% stationarity:
+% Stationarity:
 out.sws = SY_SlidingWindow(res,'std','std',5,1);
 out.swm = SY_SlidingWindow(res,'mean','std',5,1);
 
-% normality:
+% Normality:
 % out.chi2n=HT_DistributionTest(res,'chi2gof','norm',10); % chi2
 % out.ksn=HT_DistributionTest(res,'ks','norm'); % Kolmogorov-Smirnov
 tmp = DN_SimpleFit(y,'gauss1',0);
@@ -142,7 +156,7 @@ else
     out.gofnadjr2 = tmp.adjr2; % degrees of freedom-adjusted rsqured
 end
 
-% autocorrelation structure:
+% Autocorrelation structure:
 out.ac1 = CO_AutoCorr(res,1);
 out.ac2 = CO_AutoCorr(res,2);
 out.taures = CO_FirstZero(res,'ac');

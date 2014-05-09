@@ -23,6 +23,7 @@
 % 
 %---HISTORY:
 % Ben Fulcher, 15/11/2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -72,7 +73,6 @@ end
 
 yn = y(1:end-tau);
 yn1 = y(1+tau:end); % yn, tau steps ahead
-
 
 % The trev expression used in TSTOOL:
 out.raw = mean((yn1-yn).^3)/(mean((yn1-yn).^2))^(3/2);

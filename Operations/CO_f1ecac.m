@@ -5,8 +5,11 @@
 % Finds where autocorrelation function first crosses 1/e, the 1/e correlation
 % length
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
+% 
+%---HISTORY:
+% Ben Fulcher, 2008
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -32,10 +35,9 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_f1ecac(y)
-% Ben Fulcher, 2008
   
 N = length(y); % time-series length
-oone = 1/exp(1);
+oone = 1/exp(1); % 1/e
 
 for i = 1:N-1
     a(i) = CO_AutoCorr(y,i);

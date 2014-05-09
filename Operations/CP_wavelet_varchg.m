@@ -23,8 +23,12 @@
 %           time-series length)
 % 
 % 
-%---OUTPUT: the optimal number of change points.
+%---OUTPUT: 
+% The optimal number of change points.
 % 
+%---HISTORY:
+% Ben Fulcher, 23/1/2010
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -49,12 +53,13 @@
 % ------------------------------------------------------------------------------
 
 function out = CP_wavelet_varchg(y, wname, level, maxnchpts, mindelay)
-% Ben Fulcher, 23/1/2010
 
 % Check that a Wavelet Toolbox license is available:
 BF_CheckToolbox('wavelet_toolbox');
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length
 
 if nargin < 2 || isempty(wname)
@@ -86,23 +91,28 @@ end
 % The aim of this example is to recover the change points in signal y.
 % In addition, this example illustrates how the GUI tools propose change point
 % locations for interval dependent de-noising thresholds.
-% 1. Recover a noisy signal by suppressing an approximation.
 
-%% Perform a single-level wavelet decomposition 
+% ------------------------------------------------------------------------------
+% 1. Recover a noisy signal by suppressing an approximation.
+% ------------------------------------------------------------------------------
+
+% Perform a single-level wavelet decomposition :
 [c, l] = wavedec(y,level,wname);
 
 % Reconstruct detail at the same level.
 det = wrcoef('d',c,l,wname,level);
 
-% % 2. Replace 2% of the greatest (absolute) values by the mean
+% ------------------------------------------------------------------------------
+% 2. Replace 2% of the greatest (absolute) values by the mean
+% ------------------------------------------------------------------------------
 % % in order to remove almost all the signal.
 x = sort(abs(det));
 v2p100 = x(fix(length(x)*0.98));
 det(abs(det) > v2p100) = mean(det);
 
-% keyboard
-
-% 3. Use wvarchg for estimating the change points
+% ------------------------------------------------------------------------------
+% 3. Use wvarchg to estimate the change points
+% ------------------------------------------------------------------------------
 try
     [~, kopt, ~] = wvarchg(det, maxnchpts, mindelay);
 catch emsg
@@ -111,7 +121,7 @@ catch emsg
     end
 end
 
-% return the number of change points
+% Return the number of change points found
 out = kopt;
 
 end

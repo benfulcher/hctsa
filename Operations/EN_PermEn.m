@@ -3,6 +3,7 @@
 % ------------------------------------------------------------------------------
 % 
 % Computes the permutation entropy of order, ord, of a time series.
+% This is wrapper code for a Land and Elias implementation.
 % 
 % "Permutation Entropy: A Natural Complexity Measure for Time Series"
 % C. Bandt and B. Pompe, Phys. Rev. Lett. 88(17) 174102 (2002)
@@ -11,9 +12,15 @@
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/logisticPE.m
 % 
-% INPUTS:
+%---INPUTS:
 % y, a time series
 % ord, the order of permutation entropy
+% 
+%---OUTPUT:
+% out is the permutation entropy, using Land and Elias code
+% 
+%---HISTORY:
+% Ben Fulcher, 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -39,13 +46,12 @@
 % ------------------------------------------------------------------------------
 
 function out = EN_PermEn(y,ord)
-% Ben Fulcher, 2009
 
 if nargin < 2 || isempty(ord)
     ord = 2; % order 2
 end
 
-% Ensure y is a column vector
+% Ensure y is a ROW vector
 if size(y,1) > size(y,2);
     y = y';
 end

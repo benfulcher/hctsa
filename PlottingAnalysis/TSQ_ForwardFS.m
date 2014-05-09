@@ -7,7 +7,14 @@
 % applies the learned classification rule to the training and test sets to get
 % training and test classification errors.
 % 
-% Typical usage uses 'linear' for the criterion (linear classification rates).
+% Typical usage uses 'linear' for the criterion (linear classification rates),
+% or 'diaglinear' when there are highly correlated features in the data matrix.
+% 
+% NOTE: This function requires a training portion to be specified. If there
+%       is no obvious training portion of your data, this should be specified
+%       at random (e.g., stratified to represent groups in your data) and
+%       repeated to get an estimate of the out-of-sample classification that is 
+%       not dependent on the particular data partition.
 % 
 %---OUTPUTS:
 % ifeat: indices of features selected.
@@ -33,7 +40,7 @@
 % ------------------------------------------------------------------------------
 
 function [ifeat, TestStat, TrainErr, TestErr, TestClass] = TSQ_ForwardFS(WhatData, ...
-                        iTrain,criterion,CrossVal,NumFeatSelect,plotoutput,howzero)
+                        iTrain,criterion,CrossVal,NumFeatSelect,howzero)
 
 % --------------------------------------------------------------------------
 %% Check inputs:
@@ -60,14 +67,12 @@ if nargin < 5 || isempty(NumFeatSelect)
     NumFeatSelect = 2; % Stop after two features are selected
 end
 
-if nargin < 6 || isempty(plotoutput)
-    plotoutput = 1;
-end
-
-if nargin < 7 || isempty(howzero)
+if nargin < 6 || isempty(howzero)
     % How to deal with operations not improving or hitting zero training
     % error...?
-    howzero = 'rand'; % 'rand' (chooses ops at random) ,'NaN' (makes NaNs)
+    % (*) 'rand' (chooses ops at random)
+    % (*) 'NaN' (makes NaNs)
+    howzero = 'rand';
 end
 
 % --------------------------------------------------------------------------
@@ -91,7 +96,7 @@ elseif isstruct(WhatData)
     TS_DataMat = WhatData.TS_DataMat;
     Operations = WhatData.Operations;
     TimeSeries = WhatData.TimeSeries;
-    fprintf(1,'Data provided, adapted successfully.\n');
+    fprintf(1,'Provided data adapted successfully.\n');
 end
 
 % --------------------------------------------------------------------------
@@ -246,7 +251,6 @@ end
 fprintf(1,'Feature selection to %u features completed in %s.\n',NumFeatSelect,BF_thetime(toc(FS_timer)))
 clear FS_timer;
 
-
 % --------------------------------------------------------------------------
 % --------------------------------------------------------------------------
 %% Classify the test set using the selected features
@@ -280,20 +284,6 @@ end
 % % print the top 25
 % for i = 1:25
 %     disp([Operations(ifeat(i)).Name ' -- ' Operaitons(ifeat(i)).Keywords ' :: ' num2str(TestStat(i))]);
-% end
-
-% if plotoutput
-%     % plot distributions:
-%     figure('color','w'); box('on'); hold on;
-%     [f,xi] = ksdensity(TestStat);
-%     [f2,xi2] = ksdensity(TestStat2);
-%     plot(xi,f,'b');
-%     plot(xi2,f2,'r');
-%     xlabel('error')
-%     legend('individual features','other features with feature 1')
-% 
-%     % 2d scatter plot
-%     TSQ_plot_2d(kwgs,gi,ifeat,norcl);
 % end
 
 

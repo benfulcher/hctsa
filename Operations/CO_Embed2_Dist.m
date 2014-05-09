@@ -10,9 +10,12 @@
 % spread of distances, and statistics from an exponential fit to the
 % distribution of distances.
 % 
-% INPUTS:
+%---INPUTS:
 % y, a z-scored column vector representing the input time series
 % tau, the time delay.
+% 
+%---HISTORY:
+% Ben Fulcher, September 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -38,11 +41,12 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_Embed2_Dist(y,tau)
-% Ben Fulcher, September 2009
 
-doplot = 0; % plot results
+DoPlot = 0; % whether to plot results
 
+% ------------------------------------------------------------------------------
 %% Check inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
     tau = 'tau'; % set to the first minimum of autocorrelation function
 end
@@ -66,7 +70,7 @@ m = [y(1:end-tau), y(1+tau:end)];
 
 
 % Plot some outputs
-if doplot
+if DoPlot
     figure('color','w'); box('on');
     plot(m(:,1),m(:,2),'.');
 end

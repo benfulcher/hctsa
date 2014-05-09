@@ -10,6 +10,9 @@
 % 
 % k, the order of coefficient of variation (k = 1 is usual)
 % 
+%---HISTORY:
+% Ben Fulcher, 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,16 +37,18 @@
 % ------------------------------------------------------------------------------
 
 function out = DN_cv(x,k)
-% Ben Fulcher, 2009
 
 % Check inputs
 if nargin < 2 || isempty(k)
     k = 1; % Do standard CV by default
 end
+
 if (rem(k,1) ~= 0) || (k < 0)
     warning('k should probably be a positive integer');
     % Carry on with just this warning, though
 end
+
+% Compute the coefficient of variation (of order k) of the data
 
 out = (std(x))^k / (mean(x))^k;
 

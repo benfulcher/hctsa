@@ -100,9 +100,14 @@ if length(groups)>1000
     [H,~,perm] = dendrogram(Z,0,'Orientation',Orientation,'Labels',NodeLabels);
 else % Try optimal leaf order
     fprintf('Running optimal leaf order for %u nodes...',length(groups))
-    order = optimalleaforder(Z,d);
-    [H,~,perm] = dendrogram(Z,0,'Reorder',order,'Orientation',Orientation,'Labels',NodeLabels);
-    fprintf(1,' Done.\n');
+    try
+        order = optimalleaforder(Z,d);
+        [H,~,perm] = dendrogram(Z,0,'Reorder',order,'Orientation',Orientation,'Labels',NodeLabels);
+        fprintf(1,' Done.\n');
+    catch
+        [H,~,perm] = dendrogram(Z,0,'Orientation',Orientation,'Labels',NodeLabels);
+        fprintf(1,' Failed.\n');
+    end
 end
 
 % Change the line width of the dendrogram

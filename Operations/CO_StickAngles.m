@@ -8,15 +8,18 @@
 % from the zero-level, and the z-scored time series, where sticks
 % protrude from the mean level of the time series.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
-% Outputs are returned on the obtained sequence of angles, theta, reflecting the
+%---OUTPUTS: are returned on the obtained sequence of angles, theta, reflecting the
 % maximum deviation a stick can rotate before hitting a stick representing
 % another time point. Statistics include the mean and spread of theta,
 % the different between positive and negative angles, measures of symmetry of
 % the angles, stationarity, autocorrelation, and measures of the distribution of
 % these stick angles.
+% 
+%---HISTORY:
+% Ben Fulcher, September 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -42,13 +45,14 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_StickAngles(y)
-% Ben Fulcher, September 2009
 
+% ------------------------------------------------------------------------------
 %% Check that a Signal Processing Toolbox license is available:
+% ------------------------------------------------------------------------------
 % buffer function used for StatAv calculation...
 BF_CheckToolbox('signal_toolbox');
 
-doplot = 0; % can plot output
+doplot = 0; % whether to plot output
 N = length(y);
 
 ix = cell(2,1); %indicies for positive(1) and negative(2) entries of time series vector
@@ -86,7 +90,9 @@ end
 
 
 % quite interesting
+% ------------------------------------------------------------------------------
 %% Basic stats?
+% ------------------------------------------------------------------------------
 % on raw values
 out.std_p = std(angles{1});
 out.mean_p = mean(angles{1});
@@ -100,7 +106,9 @@ out.std = std(allangles);
 out.mean = mean(allangles);
 out.median = median(allangles);
 
+% ------------------------------------------------------------------------------
 %% Difference between positive and negative angles
+% ------------------------------------------------------------------------------
 % Return difference in densities
 ksx = linspace(min(allangles),max(allangles),200);
 if ~isempty(angles{1}) && ~isempty(angles{2})
@@ -111,8 +119,9 @@ else
     out.pnsumabsdiff = NaN;
 end
 
-
+% ------------------------------------------------------------------------------
 %% How symmetric is the distribution of angles?
+% ------------------------------------------------------------------------------
 % on raw outputs
 % difference between ksdensities of positive and negative portions
 if ~isempty(angles{1});
@@ -138,7 +147,9 @@ end
 zangles = cell(2,1);
 zangles{1} = zscore(angles{1}); zangles{2} = zscore(angles{2}); zallangles = zscore(allangles);
 
-%% how stationary are the angle sets?
+% ------------------------------------------------------------------------------
+%% How stationary are the angle sets?
+% ------------------------------------------------------------------------------
 % Do simple StatAvs for mean and std:
 % ap_buff_2 = buffer(angles{1},floor(n(1)/2));
 % if size(ap_buff_2,2)>2,ap_buff_2 = ap_buff_2(:,1:2);end % lose last point
@@ -243,7 +254,9 @@ out.tau_all = CO_FirstZero(zallangles,'ac');
 out.ac1_all = CO_AutoCorr(zallangles,1);
 out.ac2_all = CO_AutoCorr(zallangles,2);
 
+% ------------------------------------------------------------------------------
 %% What does the distribution look like?
+% ------------------------------------------------------------------------------
 % Some quantiles and moments
 if ~isempty(zangles{1});
     out.q1_p = quantile(zangles{1},0.01);

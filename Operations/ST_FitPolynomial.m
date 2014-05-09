@@ -12,8 +12,11 @@
 % y, the input time series.
 % k, the order of the polynomial to fit to y.
 % 
-%---OUTPUT: RMS error of the fit.
+%---OUTPUT:
+% RMS error of the fit.
 %
+%---HISTORY:
+% Ben Fulcher, 2009
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,11 +41,17 @@
 % ------------------------------------------------------------------------------
 
 function out = ST_FitPolynomial(y,k)
-% Ben Fulcher, 2009
 
-N = length(y); % the length of the time series (number of samples)
+if nargin < 2 || isempty(k)
+    k = 1; % Linear by default
+end
+
+N = length(y); % Length of the time series (number of samples)
 t = (1:N)'; % Get a range for the time axis for time series y
 
+% ------------------------------------------------------------------------------
+% Fit a polynomial to the time series
+% ------------------------------------------------------------------------------
 % Supress the (valid!) warning from stupidly fitting a polynomial to a time series...
 warning('off','MATLAB:polyfit:RepeatedPointsOrRescale');
 cf = polyfit(t,y,k);
@@ -51,6 +60,10 @@ warning('on','MATLAB:polyfit:RepeatedPointsOrRescale');
 f = polyval(cf,t);
 out = sum((y-f).^2)/N; % mean RMS ERROR OF FIT
 
+
+% ------------------------------------------------------------------------------
+% Plot
+% ------------------------------------------------------------------------------
 % % n=10;
 % errs=zeros(n,1);
 % x=1:length(y);

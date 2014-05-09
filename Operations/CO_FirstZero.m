@@ -14,6 +14,9 @@
 % crosses the axis, rather than the first integer lag at which it has already
 % crossed (what is currently implemented)
 % 
+%---HISTORY:
+% Ben Fulcher, 2008
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,7 +41,6 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_FirstZero(y,corrfn,maxtau)
-% Ben Fulcher, 2008
 
 N = length(y); % the length of the time series
 

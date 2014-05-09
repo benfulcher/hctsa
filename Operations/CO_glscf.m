@@ -8,15 +8,18 @@
 % Correlation and mutual information at different value magnitudes"
 % 
 % The function considers magnitude correlations:
-% INPUTS:
+%---INPUTS:
 % y, the input time series
-% Parameters alpha, beta are real and nonzero
+% alpha and beta are real and nonzero parameters
 % tau is the time-delay (can also be 'tau' to set to first zero-crossing of the ACF)
 % 
 % When alpha = beta estimates how values of the same order of magnitude are
 % related in time
 % When alpha ~= beta, estimates correlations between different magnitudes of the
 % time series.
+% 
+%---HISTORY:
+% Ben Fulcher, September 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -42,9 +45,10 @@
 % ------------------------------------------------------------------------------
 
 function glscf = CO_glscf(y,alpha,beta,tau)
-% Ben Fulcher, September 2009
 
-%% Defaults
+% ------------------------------------------------------------------------------
+%% Check inputs and set defaults
+% ------------------------------------------------------------------------------
 if nargin < 4 || isempty(tau)
     tau = 'tau';
 end

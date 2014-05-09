@@ -26,6 +26,9 @@
 % r, the threshold
 % preprocess [opt], (i) 'diff1', incremental difference preprocessing.
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -50,7 +53,6 @@
 % ------------------------------------------------------------------------------
 
 function out = EN_SampEn(y,M,r,preprocess)
-% Ben Fulcher, November 2009
 
 if nargin < 4
     preprocess = ''; % don't apply preprocessing
@@ -67,10 +69,14 @@ if ~isempty(preprocess)
     end
 end
 
+% ------------------------------------------------------------------------------
 % Use the physionet code to calculate the Sample Entropy using these parameters:
+% ------------------------------------------------------------------------------
 [e, p, ~, ~] = PN_sampenc(y,M,r);
 
-%% Give outputs
+% ------------------------------------------------------------------------------
+% Compute outputs from the code
+% ------------------------------------------------------------------------------
 for i = 1:M
     eval(sprintf('out.p%u = p(%u);',i,i));
     eval(sprintf('out.sampen%u = e(%u);',i,i));

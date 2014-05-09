@@ -5,11 +5,11 @@
 % Searches for individual features that help distinguish a known classification
 % of the time series
 %
-%--INPUTS
-%-ClassMeth: the classification method to use. The following are possible options:
+%---INPUTS
+% ClassMeth: the classification method to use. The following are possible options:
 %            'linclasscv', 'linclass', 'linclasscv', 'knn', 'knncv'
 %
-%--HISTORY
+%---HISTORY
 % Previously TSQ_ML_rankfeatures
 % uses BioInformatics toolbox functions
 % Ben Fulcher 13/9/2010
@@ -296,8 +296,8 @@ end
 
 topn = min(10,length(Operations));
 for i = 1:topn
-    fprintf(1,['[%u] {%u} %s -- %s :: %4.2f%%\n'],ifeat(i),Operations(ifeat(i)).ID, ...
-                    Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,teststat_sort(i));
+    fprintf(1,'[%u] {%u} %s -- %s :: %4.2f%%\n',ifeat(i),Operations(ifeat(i)).ID, ...
+            Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,teststat_sort(i));
 end
 
 
@@ -313,57 +313,139 @@ if plotopts.histogram
     h = findobj(gca,'Type','patch');
     set(h,'FaceColor','w','EdgeColor','k')
     % bar(xout,n)
-    xlabel('individual classifiction error')
-    ylabel('frequency')
+    xlabel('Individual classification error')
+    ylabel('Frequency')
 end
-% 
-% if plotopts.nfigs > 0
-%     ntoplot = 5; % subplots per figure
-%     howmanyrepeats = plotopts.nfigs; % number of plots to produce
-%     
-%     % classfun = @(XT,yT,Xt,yt) (sum(~strcmp(yt,classify(Xt,XT,yT,'linear'))));
-%     % cvMCR = crossval('mcr',X,y,'predfun',fun);
-%     labels.op_ids = m_ids;
-%     labels.mlab = mlab;
-%     labels.mkw = mkw;
-%     for k = 1:howmanyrepeats
-%         if k*ntoplot>length(ifeat)
-%             break % we've exceeded number of features
+
+if plotopts.nfigs > 0
+    ntoplot = 5; % subplots per figure
+    howmanyrepeats = plotopts.nfigs; % number of plots to produce
+
+    labels.op_ids = m_ids;
+    labels.mlab = mlab;
+    labels.mkw = mkw;
+    for k = 1:howmanyrepeats
+        if k*ntoplot > length(ifeat)
+            break % We've exceeded number of features
+        end
+        r = ((k-1)*ntoplot+1:k*ntoplot);
+        feathere = ifeat(r);
+        labels.teststat = teststat(r);
+        
+        % Go through and plot
+        figure('color','w');
+        for Opi = 1:TopHowMany
+            BestHere = ix(Opi);
+            if strcmp(My_Region,'all')
+                Region_ind = TheRegions(BestHere);
+                Op_ind = TheOperations(BestHere);
+            else
+                Region_ind = My_Region;
+                Op_ind = BestHere;
+            end
+
+            % Define the values of the full feature vector:
+            FullFV = TS_DataMat(([TimeSeries.RegionID] == Region_ind),Op_ind);
+    
+            fprintf(1,['Best classification rate was %4.2f%% for ' ...
+                            'feature %s in region %u\n'],ClassificationRates(Region_ind,Op_ind), ...
+                            Operations(Op_ind).Name,Region_ind);
+            fprintf(1,'Has a p-value of %5.5f\n',pvalue_pooled(Region_ind,Op_ind));
+
+            subplot(TopHowMany,1,Opi)
+            box('on');
+
+            switch ks_or_hist
+            case 'ks'
+                hold on
+                for i = 1:2
+                    TheFeatureVectorClassi = TS_DataMat(([TimeSeries.Group]==i) &  ...
+                                        ([TimeSeries.RegionID] == Region_ind),Op_ind);
+                    [f, x] = ksdensity(TheFeatureVectorClassi);
+                    plot(x,f,'color',MarkerColors{i},'LineWidth',2);
+                    % Add dots:
+                    r = (arrayfun(@(m)find(x >= m,1,'first'),TheFeatureVectorClassi));
+                    plot(x(r),f(r),'o','MarkerFaceColor',MarkerColors{i},'MarkerEdgeColor',MarkerColors{i})
+                end
+                legend('Control','','Schiz','')
+            case 'hist'
+                nbins = 10;
+                TheFeatureVectorClass1 = TS_DataMat(([TimeSeries.Group]==1) &  ...
+                                        ([TimeSeries.RegionID] == Region_ind),Op_ind);
+                TheFeatureVectorClass2 = TS_DataMat(([TimeSeries.Group]==2) &  ...
+                                        ([TimeSeries.RegionID] == Region_ind),Op_ind);
+
+                x = linspace(min(FullFV),max(FullFV),nbins+1);
+                x = x(1:end-1)+(x(2)-x(1))/2; % centre bins
+                N1 = hist(TheFeatureVectorClass1(~isnan(TheFeatureVectorClass1)),x);
+                N2 = hist(TheFeatureVectorClass2(~isnan(TheFeatureVectorClass2)),x);
+                histwidth = x(2)-x(1);
+                if histwidth > 0
+                    plotbar = @(z,N,c) rectangle('Position',[z,0,histwidth/2,N],'FaceColor',c);
+                    for k = 1:length(x);
+                        if N1(k)>0
+                            plotbar(x(k)-histwidth/2,N1(k),MarkerColors{1});
+                        end
+                        if N2(k)>0
+                            plotbar(x(k),N2(k),MarkerColors{2});
+                        end
+                    end
+                    colormap(vertcat(MarkerColors{:}));
+                    legend('Control','Schiz')
+                end
+            end
+    
+            % Set xlim:
+            if min(FullFV) < max(FullFV)
+                xlim([min(FullFV),max(FullFV)])
+            end
+
+
+            xlabel(sprintf('Cluster of %u centered at %s', ...
+                    length(opid_cl{ismember(cellfun(@(x)x(1),opid_cl),[Operations(Op_ind).ID])}), ...
+                                    Operations(Op_ind).Name),'interpreter','none')
+            ylabel('Probability density')
+            title(sprintf(['%4.2f%% classification (p = %5.5f) in region %u\n'], ...
+                                    ClassificationRates(Region_ind,Op_ind), ...
+                                    pvalue_pooled(Region_ind,Op_ind),Region_ind), ...
+                                    'interpreter','none');
+            set(gcf,'Position',[987,98,290,1047])
+        end
+        
+        
+        
+        
+        
+        % TSQ_plot_kss(kwgs,gi,TS_DataMat,feathere,labels,k==1);
+        % plot kernel smoothed distributions
+    end
+end
+%     figure('color','w')
+%     for i = 1:ntoplot
+%         subplot(ntoplot,1,i); hold on; box('on')
+%         i = ntoplot+i; % plot also the next best
+%         for j=1:Ng
+%             plot_ks(TS_DataMat(gi{j},ifeat(i)),c{j},0) % plot the jth group
 %         end
-%         r = ((k-1)*ntoplot+1:k*ntoplot);
-%         feathere = ifeat(r);
-%         labels.teststat = teststat(r);
-%         TSQ_plot_kss(kwgs,gi,TS_DataMat,feathere,labels,k==1);
-%         % plot kernel smoothed distributions
-%     end
 % 
-% %     figure('color','w')
-% %     for i = 1:ntoplot
-% %         subplot(ntoplot,1,i); hold on; box('on')
-% %         i = ntoplot+i; % plot also the next best
-% %         for j=1:Ng
-% %             plot_ks(TS_DataMat(gi{j},ifeat(i)),c{j},0) % plot the jth group
-% %         end
-% % 
-% %     %     % get cross-validation classification rate
-% %     %     cp = cvpartition(TimeSeriesGroup,'k',10); % 10-fold stratified cross-validation
-% %     %     cvMCR = crossval('mcr',TS_DataMat(:,ifeat(i)),TimeSeriesGroup,'predfun',classf,'partition',cp);
-% % 
-% %         title(['[' num2str(m_ids(ifeat(i))) ']' mlab{ifeat(i)} ' [' mkw{ifeat(i)} '] -- ' ClassMethod ' = ' num2str(teststat(i))],'interpreter','none')
-% %         set(gca,'YTick',[])
-% %     %     if i < i+ ntoplot
-% %     %         set(gca,'XTick',[]);
-% %     %     end
-% %         if i == ntoplot + 1
-% %             leglabs = cell(Ng*2,1);
-% %             for j = 1:Ng
-% %                 leglabs{2*(j-1)+1} = [kwgs{j} ' (' num2str(length(gi{j})) ')'];
-% %                 leglabs{2*(j-1)+2} = '';
-% %             end
-% %             legend(leglabs)
-% %         end
-% %     end
-% end
+%     %     % get cross-validation classification rate
+%     %     cp = cvpartition(TimeSeriesGroup,'k',10); % 10-fold stratified cross-validation
+%     %     cvMCR = crossval('mcr',TS_DataMat(:,ifeat(i)),TimeSeriesGroup,'predfun',classf,'partition',cp);
+% 
+%         title(['[' num2str(m_ids(ifeat(i))) ']' mlab{ifeat(i)} ' [' mkw{ifeat(i)} '] -- ' ClassMethod ' = ' num2str(teststat(i))],'interpreter','none')
+%         set(gca,'YTick',[])
+%     %     if i < i+ ntoplot
+%     %         set(gca,'XTick',[]);
+%     %     end
+%         if i == ntoplot + 1
+%             leglabs = cell(Ng*2,1);
+%             for j = 1:Ng
+%                 leglabs{2*(j-1)+1} = [kwgs{j} ' (' num2str(length(gi{j})) ')'];
+%                 leglabs{2*(j-1)+2} = '';
+%             end
+%             legend(leglabs)
+%         end
+%     end
 
 % function plot_ks(v,c,swap)
 %     % vector v is the vector of a given group

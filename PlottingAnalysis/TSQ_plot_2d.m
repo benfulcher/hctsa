@@ -5,7 +5,7 @@
 % Plots the dataset in a two-dimensional space
 % e.g., that of two chosen operations, or two principal components.
 % 
-%-------HISTORY
+%---HISTORY
 % Borrows from TSQ_pca plotting routines
 % Ben Fulcher 24/3/2010
 % Ben Fulcher 28/4/2010: added F input
@@ -17,7 +17,6 @@
 % Ben Fulcher 20/10/2010: also added keepksdensities option
 % Ben Fulcher 27/10/2010: added lossmeth option (choose how to calculate
 %                           loss)
-%-------
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -159,9 +158,8 @@ else
     elseif NumGroups <= 12
         c = BF_getcmap('set3',NumGroups,1);
     elseif NumGroups<=22
-        c1 = BF_getcmap('set1',NumGroups,1);
-        c2 = BF_getcmap('set3',NumGroups,1);
-        c = [c1; c2];
+        c = [BF_getcmap('set1',NumGroups,1); ...
+                    BF_getcmap('set3',NumGroups,1)];
     elseif NumGroups <= 50
         c = mat2cell(jet(NumGroups),ones(NumGroups,1));
     else

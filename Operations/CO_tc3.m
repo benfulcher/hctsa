@@ -7,13 +7,16 @@
 % Outputs are the raw tc3 expression, its magnitude, the numerator and its magnitude, and
 % the denominator.
 % 
-% INPUTS:
+%---INPUTS:
 % y, input time series
 % tau, time lag
 % 
 % See documentation of the TSTOOL package (http://www.physik3.gwdg.de/tstool/)
 % for further details about this function.
 %
+%---HISTORY:
+% Ben Fulcher, 15/11/2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,13 +41,17 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_tc3(y,tau)
-% Ben Fulcher, 15/11/2009
 
+% ------------------------------------------------------------------------------
 %% Set defaults:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
     tau = 'ac';
 end
 
+% ------------------------------------------------------------------------------
+% Set the time lag as a measure of the time-series correlation length
+% ------------------------------------------------------------------------------
 % Can set the time lag, tau, to be 'ac' or 'mi'
 if strcmp(tau,'ac')
     tau = CO_FirstZero(y,'ac');
@@ -53,6 +60,10 @@ elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
     % tau is the first minimum of the automutual information function
 end
+
+% ------------------------------------------------------------------------------
+% Compute tc3 statistic
+% ------------------------------------------------------------------------------
 
 yn = y(1:end-2*tau);
 yn1 = y(1+tau:end-tau); % yn1, tau steps ahead

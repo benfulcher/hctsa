@@ -12,7 +12,7 @@
 % standard deviations approximated as the sample standard deviations and so
 % the z-scored time series can simply be used straight-up.
 % 
-% % INPUTS:
+%---INPUTS:
 % y  -- should be the z-scored time series (Nx1 vector)
 % taus -- should be a vector of the time delays as above (mx1 vector)
 %   e.g., [2] computes <x_i x_{i-2}>
@@ -30,6 +30,9 @@
 %         the values obtained from taking doabs = 0 (i.e., for odd lengths
 %         of taus)
 % Note: It can be helpful to look at nlac at each iteration.
+% 
+%---HISTORY
+% Ben Fulcher, 8/6/09
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -55,7 +58,6 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_NonlinearAutocorr(y,taus,doabs)
-% Ben Fulcher, 8/6/09
 
 %% Check Inputs:
 if nargin < 3 || isempty(doabs) % use default settings for doabs

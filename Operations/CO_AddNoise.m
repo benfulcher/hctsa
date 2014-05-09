@@ -20,6 +20,9 @@
 % titration' presented in: "Titration of chaos with added noise", Chi-Sang Poon
 % and Mauricio Barahona P. Natl. Acad. Sci. USA, 98(13) 7107 (2001)
 % 
+%---HISTORY:
+% Ben Fulcher, September 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -44,14 +47,18 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_AddNoise(y,tau,meth,nbins)
-% Ben Fulcher, September 2009
 
+% ------------------------------------------------------------------------------
+% Preliminary checks
+% ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
 
-doplot = 0; % plot outputs to figure
+DoPlot = 0; % plot outputs to figure
 
+% ------------------------------------------------------------------------------
 %% Check inputs
+% ------------------------------------------------------------------------------
 if nargin < 2
     tau = []; % set default in CO_HistogramAMI
 end
@@ -62,12 +69,17 @@ if nargin < 4
     nbins = [];
 end
 
+% ------------------------------------------------------------------------------
 % Preliminaries
+% ------------------------------------------------------------------------------
 noiser = (0:0.1:2); % across this noise range
 nr = length(noiser);
 amis = zeros(nr,1);
 noise = randn(size(y));
 
+% ------------------------------------------------------------------------------
+% Compute the automutual information across a range of noise levels
+% ------------------------------------------------------------------------------
 for i = 1:nr
     amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,meth,nbins);
 end
@@ -77,13 +89,22 @@ out.meanch = mean(diff(amis));
 out.ac1 = CO_AutoCorr(amis,1);
 out.ac2 = CO_AutoCorr(amis,2);
 
+% ------------------------------------------------------------------------------
 % Fit exponential decay to output using Curve Fitting Toolbox
+% ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[amis(1) -1]);
 f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(noiser',amis,f);
 
-% Plot output
-if doplot
+% Output statistics on fit to an exponential decay
+out.fitexpa = c.a;
+out.fitexpb = c.b;
+out.fitexpr2 = gof.rsquare;
+out.fitexpadjr2 = gof.adjrsquare;
+out.fitexprmse = gof.rmse;
+
+% Plot output:
+if DoPlot
     figure('color','w'); box('on');
     cc = BF_getcmap('set1',2,1);
     % figure('color','w');
@@ -93,20 +114,18 @@ if doplot
     xlabel('\eta'); ylabel('AMI_1')
 end
 
-out.fitexpa = c.a;
-out.fitexpb = c.b;
-out.fitexpr2 = gof.rsquare;
-out.fitexpadjr2 = gof.adjrsquare;
-out.fitexprmse = gof.rmse;
-
+% ------------------------------------------------------------------------------
 % Fit linear function to output
+% ------------------------------------------------------------------------------
 p = polyfit(noiser',amis,1);
 out.fitlina = p(1);
 out.fitlinb = p(2);
 linfit = polyval(p,noiser);
 out.mse = mean((linfit' - amis).^2);
 
+% ------------------------------------------------------------------------------
 % Number of times the AMI function crosses its mean
+% ------------------------------------------------------------------------------
 out.pcrossmean = sum(BF_sgnchange(amis-mean(amis)))/(nr-1);
 
 end

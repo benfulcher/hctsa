@@ -6,10 +6,13 @@
 % the two-dimensional time-series embedding change as tau varies from
 % tau = 1, 2, ..., maxtau.
 % 
-% INPUTS:
+%---INPUTS:
 % y, a column vector time series
 % maxtau, the maximum time lag to consider
 % 
+%---HISTORY:
+% Ben Fulcher, September 2009
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,9 +37,8 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_Embed2_AngleTau(y,maxtau)
-% Ben Fulcher, September 2009
 
-doplot = 0;
+DoPlot = 0;
 taur = (1:1:maxtau);
 ntaur = length(taur);
 
@@ -60,12 +62,14 @@ for i = 1:ntaur
 	stats_store(3,i) = CO_AutoCorr(theta,3);
 end
 
-if doplot
+if DoPlot
     figure('color','w'); box('on');
     plot(stats_store');
 end
 
-% Lots of outputs statistics:
+% ------------------------------------------------------------------------------
+% Compute lots of outputs statistics:
+% ------------------------------------------------------------------------------
 out.ac1_thetaac1 = CO_AutoCorr(stats_store(1,:),1);
 out.ac1_thetaac2 = CO_AutoCorr(stats_store(2,:),1);
 out.ac1_thetaac3 = CO_AutoCorr(stats_store(3,:),1);

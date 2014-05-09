@@ -15,7 +15,7 @@
 %                [row proportion, column proportion] If one of the FilterOptions
 %                is set to 1, will have no bad values in your matrix.
 %                
-% FileName_HCTSA_loc: Custom filename to import. Default is HCTSA_loc.mat.
+% FileName_HCTSA_loc: Custom filename to import. Default is 'HCTSA_loc.mat'.
 % 
 % subs [opt]: Only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
@@ -52,14 +52,15 @@ if nargin < 1 || isempty(NormFunction)
 end
 
 if nargin < 2 || isempty(FilterOptions)
-    FilterOptions = [0.80, 1]; % (default): remove less than 90%-good time series, & then less than 
-                        % 100%-good metrics.
+    FilterOptions = [0.80, 1];
+    % By default remove less than 90%-good-valued time series, & then less than 
+    % 100%-good-valued operations.
 end
 fprintf(1,['Removing time series with more than %.2f%% special-valued outputs\n' ...
             'Removing operations with more than %.2f%% special-valued outputs\n'], ...
             (1-FilterOptions(1))*100,(1-FilterOptions(2))*100);
 
-% By default, we'll be working with files called HCTSA_loc.mat, as obtained from
+% By default, work with a file called HCTSA_loc.mat, as obtained from
 % TSQ_prepared...
 if nargin < 3 || isempty(FileName_HCTSA_loc)
     FileName_HCTSA_loc = 'HCTSA_loc.mat';
@@ -294,8 +295,6 @@ end
 %     kc3 = (1:size(F,2));
 % end
 
-
-
 % --------------------------------------------------------------------------
 %% Update the labels after filtering
 % --------------------------------------------------------------------------
@@ -315,9 +314,10 @@ Operations = Operations(kc_tot); % Filter operations
 % In an ideal world, you would check to see if any master operations are no longer pointed to
 % and recalibrate the indexing, but I'm not going to bother.
 
-fprintf(1,'We now have %u time series and %u operations in play.\n',length(TimeSeries),length(Operations))
+fprintf(1,'We now have %u time series and %u operations in play.\n', ...
+                                length(TimeSeries),length(Operations))
 fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_DataMat(:))), ...
-                sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
+            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
 
 
 % --------------------------------------------------------------------------
@@ -372,11 +372,12 @@ if ~isempty(kc) && length(kc) < size(TS_DataMat,2)
     TS_Quality = TS_Quality(:,kc);
     Operations = Operations(kc);
     fprintf(1,'Post-normalization filtering of %u operations with constant outputs: from %u to %u.\n', ...
-                        size(TS_DataMat,2)-length(kc),size(TS_DataMat,2),length(kc))
+                    size(TS_DataMat,2)-length(kc),size(TS_DataMat,2),length(kc))
 end
 
-fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_DataMat(:))), ...
-                    sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
+fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n', ...
+            sum(isnan(TS_DataMat(:))),sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100, ...
+            size(TS_DataMat,1),size(TS_DataMat,2))
 
 
 % --------------------------------------------------------------------------
@@ -386,12 +387,15 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_Da
 % Make a structure with statistics on normalization:
 % Save the CodeToRun, so you can check the settings used to run the normalization
 % At the moment, only saves the first two arguments
-CodeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',NormFunction,FilterOptions(1),FilterOptions(2));
-NormalizationInfo = struct('NormFunction',NormFunction,'FilterOptions',FilterOptions,'CodeToRun',CodeToRun);
+CodeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',NormFunction, ...
+                                        FilterOptions(1),FilterOptions(2));
+NormalizationInfo = struct('NormFunction',NormFunction,'FilterOptions', ...
+                                    FilterOptions,'CodeToRun',CodeToRun);
 
 
 fprintf(1,'Saving the trimmed, normalized data to local files...')
-save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations','NormalizationInfo');
+save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations', ...
+                                    'MasterOperations','NormalizationInfo');
 fprintf(1,' Done.\n')
 
 end

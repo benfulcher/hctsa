@@ -16,10 +16,13 @@
 % 
 % nbins, the number of bins for histogram calculation
 % 
-%---OUTPUTS: A number of statistics of the function over the range of tau,
-% including the mean mutual information, its standard deviation, first minimum,
-% proportion of extrema, and measures of periodicity in the positions of local
-% maxima.
+%---OUTPUTS:
+% A number of statistics of the function over the range of tau, including the
+% mean mutual information, its standard deviation, first minimum, proportion of
+% extrema, and measures of periodicity in the positions of local maxima.
+% 
+%---HISTORY:
+% Ben Fulcher, October 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -45,7 +48,6 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_TSTL_amutual(y,maxtau,nbins)
-% Ben Fulcher, October 2009
 
 doplot = 0; % toggle plotting of outputs
 
