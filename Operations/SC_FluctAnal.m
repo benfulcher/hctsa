@@ -75,6 +75,9 @@
 % All results are obtained with both linearly, and logarithmically-spaced time
 % scales tau.
 % 
+%---HISTORY:
+% Ben Fulcher, September 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -99,7 +102,6 @@
 % ------------------------------------------------------------------------------
 
 function out = SC_FluctAnal(x,q,wtf,taustep,k,lag,loginc)
-% Ben Fulcher, September 2009
 
 if nargin < 2 || isempty(q)
     q = 2; % RMS fluctuations

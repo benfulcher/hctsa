@@ -11,7 +11,6 @@
 %
 %---HISTORY
 % Previously TSQ_ML_rankfeatures
-% uses BioInformatics toolbox functions
 % Ben Fulcher 13/9/2010
 % Ben Fulcher 28/9/2010 added subset input
 % Ben Fulcher 18/3/2011 changed reverse to CrossVal -- specify cross-validation

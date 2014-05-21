@@ -57,7 +57,6 @@ switch trit
         error('Unknown coarse-graining method ''%s''');
 end
 
-% yt = y;
 N = length(yt); % Length of the symbolized sequence derived from the time series
 
 % So we have a vector yt with entries \in {1,2,3}
@@ -73,12 +72,12 @@ for i = 1:3
 	out1(i) = length(r1{i})/N;
 end
 
-
 % ------ Record these -------
 out.a = out1(1); % proportion of a
 out.b = out1(2); % proportion of b
 out.c = out1(3); % proportion of c
 out.h = -sum(out1(out1 > 0).*log(out1(out1 > 0))); % entropy of this result
+
 
 % ------------------------------------------------------------------------------
 %% Words of length 2

@@ -217,6 +217,20 @@ end
 pcolor([TS_DataMat, zeros(size(TS_DataMat,1),1); zeros(1,size(TS_DataMat,2)+1)]);
 shading flat
 
+% ------------------------------------------------------------------------------
+% Superimpose green/yellow rectangles over NaN values
+% ------------------------------------------------------------------------------
+if any(isnan(TS_DataMat(:)))
+    Green = BF_getcmap('greens',5,1);
+    [theNaNs_i,theNaNs_j] = find(isnan(TS_DataMat));
+    fprintf(1,['Superimposing green/yellow rectangles over all %u NaNs in ' ...
+                                'the data matrix\n'],length(theNaNs_i));
+    for i = 1:length(theNaNs_i)
+        rectangle('Position',[theNaNs_j(i),theNaNs_i(i),1,1],'FaceColor',Green{end}, ...
+                        'EdgeColor','y')
+    end
+end
+
 % --------------------------------------------------------------------------
 %% Format the plot
 % --------------------------------------------------------------------------

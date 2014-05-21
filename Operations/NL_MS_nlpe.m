@@ -24,6 +24,9 @@
 %---OUTPUTS: include measures of the meanerror of the nonlinear predictor, and a
 % set of measures on the correlation, Gaussianity, etc. of the residuals.
 % 
+%---HISTORY:
+% Ben Fulcher, 19/2/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -48,11 +51,16 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_MS_nlpe(y,de,tau,maxN)
-% Ben Fulcher, 19/2/2010
+
+if ~BF_iszscored(y)
+    warning('The input time series should be z-scored')
+end
 
 N = length(y); % time-series length
 
+% ------------------------------------------------------------------------------
 %% Check inputs, set defaults:
+% ------------------------------------------------------------------------------
 % Embedding dimension:
 if nargin < 2 || isempty(de)
     de = 3;
@@ -92,16 +100,13 @@ if strcmp(de,'fnn')
     de = NL_MS_fnn(y,1:10,tau,5,1,1,0.05);
 end
 
-% normalize??
-% y=y-mean(y(:));
-% y=y/std(y(:));
-
-
 % Run Michael Small's nonlinear prediction error code:
 res = MS_nlpe(y,de,tau); % residuals
 
 
-%% Get outputs
+% ------------------------------------------------------------------------------
+%% Compute outputs
+% ------------------------------------------------------------------------------
 out.msqerr = mean(res.^2);
 % out.rmserr = sqrt(mean(e.^2));
 % out.mabserr = mean(abs(e));
@@ -111,7 +116,7 @@ out.msqerr = mean(res.^2);
 % 1) Get statistics on residuals
 residstats = MF_ResidualAnalysis(res);
 
-% convert these to local outputs in quick loop
+% Convert output of residual analysis to local outputs in quick loop
 fields = fieldnames(residstats);
 for k = 1:length(fields);
     eval(sprintf('out.%s = residstats.%s;',fields{k},fields{k}));
