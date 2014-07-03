@@ -15,6 +15,8 @@
 % trainp, the proportion of data to train on, 0 < trainp < 1
 % nstates, the number of states in the HMM
 % 
+%---HISTORY:
+% Ben Fulcher 9/4/2010
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -39,14 +41,15 @@
 % ------------------------------------------------------------------------------
 
 function out = MF_hmm_fit(y,trainp,nstates)
-% Ben Fulcher 9/4/2010
 
 % Check required function files exist:
 if ~exist('ZG_hmm_cl') || ~exist('ZG_hmm')
     error('Could not find the required hmm fitting functions (Zoubin Gharamani''s code)');
 end
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 N = length(y); % number of samples in time series
 
 if nargin < 2 || isempty(trainp)
@@ -59,8 +62,10 @@ if nargin < 3 || isempty(nstates)
     nstates = 3; % use 3 states
 end
 
+% ------------------------------------------------------------------------------
 %% Train the HMM
-% divide up dataset into training (ytrain) and test (ytest) portions
+% ------------------------------------------------------------------------------
+% Divide up dataset into training (ytrain) and test (ytest) portions
 Ntrain = floor(trainp*N);
 if Ntrain == N
     error('No data for test set for HMM fitting?!')
@@ -72,16 +77,19 @@ if Ntrain < N
     Ntest = length(ytest);
 end
 
-% train HMM with <nstates> states for 30 cycles of EM (or until
+% Train HMM with <nstates> states for 30 cycles of EM (or until
 % convergence); default termination tolerance
 [Mu, Cov, P, Pi, LL] = ZG_hmm(ytrain,Ntrain,nstates,30);
 
+% ------------------------------------------------------------------------------
 %% Output statistics on the training
+% ------------------------------------------------------------------------------
 
 % Mean vector, Mu
 Musort = sort(Mu,'ascend');
 for i = 1:length(Mu)
-    eval(sprintf('out.Mu_%u = Musort(%u);',i,i));
+    out.(['Mu_',num2str(i)]) = Musort(i); % use dynamic field referencing
+    % eval(sprintf('out.Mu_%u = Musort(%u);',i,i));
 end
 out.meanMu = mean(Mu);
 out.rangeMu = max(Mu) - min(Mu);
@@ -91,7 +99,7 @@ out.minMu = min(Mu);
 % Covariance Cov
 out.Cov = Cov;
 
-% transition matrix
+% Transition matrix
 out.Pmeandiag = mean(diag(P));
 out.stdmeanP = std(mean(P));
 out.maxP = max(P(:));

@@ -77,29 +77,39 @@ if ~exist('ARFIT_arfit')
     error('Cannot find the function ''ARFIT_arfit''. There''s a problem with the ARfit toolbox.')
 end
 
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 %% (I) Fit AR model
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 % Run the code with no intercept vector (all input data should be
 % zero-mean, z-scored)
 [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(y, pmin, pmax, selector, 'zero');
 
-% (0) First, some definitions
+% First, some definitions
 ps = (pmin:pmax);
 popt = length(Aest);
 
+% ------------------------------------------------------------------------------
 % (1) Intercept west
+% ------------------------------------------------------------------------------
 % west = 0 -- as specified
 
+% ------------------------------------------------------------------------------
 % (2) Coefficients Aest
+% ------------------------------------------------------------------------------
 % (i) Return the raw coefficients
 % somewhat problematic since will depend on order fitted. We can try
 % returning the first 6, and 0s if don't exist
 out.A1 = Aest(1);
 for i = 2:6
     if popt >= i
-        eval(sprintf('out.A%u = Aest(%u);',i,i))
+        out.(['A',num2str(i)]) = Aest(i); % dynamic field referencing
+        % eval(sprintf('out.A%u = Aest(%u);',i,i))
     else
         % it's as if the higher order coefficients are all zero
-        eval(sprintf('out.A%u = 0;',i,i))
+        out.(['A',num2str(i)]) = 0; % dynamic field referencing
+        % eval(sprintf('out.A%u = 0;',i,i))
     end
 end
 
@@ -112,16 +122,21 @@ out.sumA = sum(Aest);
 out.rmsA = sqrt(sum(Aest.^2));
 out.sumsqA = sum(Aest.^2);
 
+% ------------------------------------------------------------------------------
 % (3) Noise covariance matrix, Cest
+% ------------------------------------------------------------------------------
 % In our case of a univariate time series, just a scalar for the noise
 % magnitude.
 out.C = Cest;
 
+% ------------------------------------------------------------------------------
 % (4) Schwartz's Bayesian Criterion, SBC
+% ------------------------------------------------------------------------------
 % There will be a value for each model order from pmin:pmax
 % (i) Return all
 for i = 1:length(ps)
-    eval(sprintf('out.sbc_%u = SBC(%u);',ps(i),i));
+    out.(['sbc_',num2str(ps(i))]) = SBC(i);
+    % eval(sprintf('out.sbc_%u = SBC(%u);',ps(i),i));
 end
 
 % (ii) Return minimum
@@ -141,10 +156,13 @@ else
 end
 out.aroundmin_sbc = abs(min(SBC))/meanaround;
 
+% ------------------------------------------------------------------------------
 % (5) Aikake's Final Prediction Error (FPE)
+% ------------------------------------------------------------------------------
 % (i) Return all
 for i = 1:length(ps)
-    eval(sprintf('out.fpe_%u = FPE(%u);',ps(i),i));
+    out.(['fpe_',num2str(ps(i))]) = FPE(i); % dynamic field referencing
+    % eval(sprintf('out.fpe_%u = FPE(%u);',ps(i),i));
 end
 % (ii) Return minimum
 out.minfpe = min(FPE);

@@ -18,6 +18,9 @@
 %---OUTPUT:
 % mi, the mutual information computed between v1 and v2
 % 
+%---HISTORY:
+% Ben Fulcher, 25/6/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -37,9 +40,10 @@
 % ------------------------------------------------------------------------------
 
 function mi = BF_MutualInformation(v1,v2,r1,r2,nbins)
-% Ben Fulcher, 25/6/2010
 
+% ------------------------------------------------------------------------------
 %% Check inputs and set defaults:
+% ------------------------------------------------------------------------------
 % by default, take a range equal to the range of the vectors
 if nargin < 3 || isempty(r1), r1 = 'range'; end
 if nargin < 4 || isempty(r2), r2 = 'range'; end

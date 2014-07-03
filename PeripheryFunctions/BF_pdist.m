@@ -53,6 +53,9 @@ switch DistMetric
         dij = @(v1,v2) subdc(v1,v2);
 end
 
+% ------------------------------------------------------------------------------
+% Compute pairwise distances
+% ------------------------------------------------------------------------------
 if strcmp(DistMetric,'mi')
     % Mutual information distances: can't make use of the inbuilt pdist function
     if ~isempty(opts)
@@ -72,19 +75,20 @@ if strcmp(DistMetric,'mi')
         for j = i:n1
             goodj = goodies(j,:);
             goodboth = (goodi & goodj);
-            mis(i,j) = benmi(F(i,goodboth),F(j,goodboth),'quantile','quantile',nbins); % by quantile with nbins
+            mis(i,j) = BF_MutualInformation(F(i,goodboth),F(j,goodboth),'quantile','quantile',nbins); % by quantile with nbins
             mis(j,i) = mis(i,j);
         end
         if (mod(i,floor(n1/50)) == 0)
             fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
                         BF_thetime(toc(mitimer)/i*(n1-i)),i,n1)
-%             save(fn,'mis','m_ids_keep','-v7.3');
-%             disp('saved')
         end
     end
     clear mitimer % stop timing
     R = mis; clear mis; % not really an R but ok.
 else
+    % ------------------------------------------------------------------------------
+    % Linear correlations
+    % ------------------------------------------------------------------------------
     % First use in-built pdist, which is fast
     fprintf(1,'First computing pairwise distances using pdist...');
     tic
@@ -99,36 +103,36 @@ else
     % Now go through and fill in any NaNs
     [nani, nanj] = find(isnan(R));
     if ~isempty(nani) % there are NaNs in R
-        ij = (nanj>=nani); % only keep diagonal or upper diagonal entries
+        ij = (nanj >= nani); % only keep diagonal or upper diagonal entries
         nani = nani(ij);
         nanj = nanj(ij);
-        goodies = ~isnan(F);
+        NotNaN = ~isnan(F);
         
-        fprintf(1,'Recalculating distances individually for %u NaN entries in the distance matrix...\n',length(nani));
-        
-        % Storing individual times for large numbers of calculations can be inefficient
-        % times = zeros(length(nani),1); 
-        timer = tic;
+        fprintf(1,['Recalculating distances individually for %u NaN ' ...
+                            'entries in the distance matrix...\n'],length(nani));
+        NaNtimer = tic; % time it
         for i = 1:length(nani)
             ii = nani(i);
             jj = nanj(i);
-            goodi = goodies(ii,:);
-            goodj = goodies(jj,:);
-            goodboth = (goodi & goodj);
-            R(ii,jj) = dij(F(ii,goodboth),F(jj,goodboth)); % calculate the distance
-            R(jj,ii) = R(ii,jj); % add the symmetrized entry
-            % times(i) = toc;
+            goodboth = (NotNaN(ii,:) & NotNaN(jj,:));
+            if any(goodboth)
+                R(ii,jj) = dij(F(ii,goodboth),F(jj,goodboth)); % Calculate the distance
+            else
+                R(ii,jj) = NaN; % No good, overlapping set of values -- keep as NaN.
+            end
+            R(jj,ii) = R(ii,jj); % Add the symmetrized entry
             
-            % Give update on time remaining after 10 iterations (if more than 100 total iterations)
-            % and then 10 more times...
-            if (i==10 && length(nani) > 100) || (mod(i,floor(length(nani)/10))==0)
+            % Give update on time remaining after 1000 iterations (if more than 10000 total iterations)
+            % and then 5 more times...
+            if (i==1000 && length(nani) > 10000) || (mod(i,floor(length(nani)/5))==0)
                 fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
-                        BF_thetime(toc(timer)/i*(length(nani)-i)),i,length(nani))
+                        BF_thetime(toc(NaNtimer)/i*(length(nani)-i)),i,length(nani))
             end
         end
-        clear timer % stop the timer
+        clear NaNtimer % stop the timer
     end
 end
+
 
 if strcmp(DistMetric,'abscorr')
     % Transformation from correlation to absolute correlation distance:
@@ -144,11 +148,15 @@ if ToVector
     end
 end
 
-    function d = subdc(v1,v2)
-        rc = corrcoef(v1,v2);
-        if isnan(rc), d = 2; % return maximum distance--for this subset, constant values
-        else d = 1-rc(2,1); % return the (raw) correlation coefficient
-        end
+% ------------------------------------------------------------------------------
+function d = subdc(v1,v2)
+    rc = corrcoef(v1,v2);
+    if isnan(rc)
+        d = 2; % return maximum distance--for this subset, constant values
+    else
+        d = 1 - rc(2,1); % Return the (raw) correlation coefficient
     end
+end
+% ------------------------------------------------------------------------------
 
 end

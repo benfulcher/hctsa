@@ -14,6 +14,9 @@
 %               (i) 'mean' -- returns the mean of the middle portion of the data
 %               (ii) 'std' -- returns the std of the middle portion of the data
 % 
+%---HISTORY:
+% Ben Fulcher, 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,7 +41,6 @@
 % ------------------------------------------------------------------------------
 
 function out = DN_OutlierTest(y,p,justme)
-% Ben Fulcher, 2009
 
 if nargin < 2 || isempty(p)
     p = 2; % by default, remove 2% of values from upper and lower percentiles

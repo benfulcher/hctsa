@@ -78,8 +78,11 @@ end
 % Compute outputs from the code
 % ------------------------------------------------------------------------------
 for i = 1:M
-    eval(sprintf('out.p%u = p(%u);',i,i));
-    eval(sprintf('out.sampen%u = e(%u);',i,i));
+    % Much nicer to use dynamic field referencing
+    out.(['p',num2str(i)]) = p(i);
+    out.(['sampen' num2str(i)]) = e(i);
+    % eval(sprintf('out.p%u = p(%u);',i,i));
+    % eval(sprintf('out.sampen%u = e(%u);',i,i));
 end
 
 out.meanchsampen = mean(diff(e));

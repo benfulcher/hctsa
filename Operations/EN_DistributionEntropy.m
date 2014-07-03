@@ -13,7 +13,7 @@
 % 
 %---INPUTS:
 % y, the input time series
-% historks: 'hist' for histogram, or 'ks' for ksdensity
+% HistorKS: 'hist' for histogram, or 'ks' for ksdensity
 % nbins: (*) (for 'hist'): an integer, uses a histogram with that many bins (for 'hist')
 %        (*) (for 'ks'): a positive real number, for the width parameter for ksdensity
 %                        (can also be empty for default width parameter, optimum for Gaussian)
@@ -21,6 +21,9 @@
 %               (e.g., if olremp = 0.01; keeps only the middle 98% of data; 0 keeps all data.
 %               This parameter ought to be less than 0.5, which keeps none of the data)
 %
+%---HISTORY:
+% Ben Fulcher, August 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -44,14 +47,15 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_DistributionEntropy(y,historks,nbins,olremp)
-% Ben Fulcher, August 2009
+function out = EN_DistributionEntropy(y,HistorKS,nbins,olremp)
 
-doplot = 0; % plot outputs to figure
+DoPlot = 0; % plot outputs to figure
 
+% ------------------------------------------------------------------------------
 %% Check inputs
-if nargin < 2 || isempty(historks)
-    historks = 'hist'; % use histogram by default
+% ------------------------------------------------------------------------------
+if nargin < 2 || isempty(HistorKS)
+    HistorKS = 'hist'; % use histogram by default
 end
 if nargin < 3 % (can be empty for default width for ksdensity)
     nbins = 10; % use 10 bins
@@ -60,7 +64,9 @@ if nargin < 4
     olremp = 0;
 end
 
+% ------------------------------------------------------------------------------
 % (1) Remove outliers?
+% ------------------------------------------------------------------------------
 if olremp ~= 0
     y = y(y >= quantile(y,olremp) & y <= quantile(y,1-olremp));
     if isempty(y)
@@ -71,9 +77,10 @@ if olremp ~= 0
     end
 end
 
-
+% ------------------------------------------------------------------------------
 % (2) Form the histogram
-switch historks
+% ------------------------------------------------------------------------------
+switch HistorKS
 case 'hist' % Use histogram to calculate pdf
     [px, xr] = hist(y,nbins);
     px = px/(sum(px)*(xr(2)-xr(1))); % normalize to a probability density
@@ -89,12 +96,16 @@ otherwise
     error('Unknown distribution method -- specify ''ks'' or ''hist''') % error; must specify 'ks' or 'hist'
 end
 
-if doplot
+if DoPlot
     figure('color','w'); box('on');
     plot(xr,px,'k')
 end
 
+% ------------------------------------------------------------------------------
 % (3) Compute the entropy sum and return it as output
-out = -sum(px.*log(eps+px))*(xr(2)-xr(1));
+% ------------------------------------------------------------------------------
+% out = -sum(px.*log(eps+px))*(xr(2)-xr(1));
+% Changed to make 0*log0=0 ++Ben Fulcher, 2014-06-04:
+out = -sum(px.*log(px(px>0)))*(xr(2)-xr(1));
 
 end

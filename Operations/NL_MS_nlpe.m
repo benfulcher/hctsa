@@ -72,23 +72,24 @@ if nargin < 3 || isempty(tau)
 end
 if strcmp(tau,'ac')
     tau = CO_FirstZero(y,'ac');
-end
-if strcmp(tau,'mi')
+elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
 
 if nargin < 4 || isempty(maxN)
-    maxN = 3000; % the maximum time-series length, due to memory constraints
+    % Set a maximum time-series length to analyze, due to memory constraints
+    % with longer time series
+    maxN = 5000;
 end
 
 % nlpe can cause memory pains for long time series
 % Let's do this dirty cheat
 if N > maxN
-    % x = x(:,1:maxn);
     % Crop the time series to the first maxN samples:
     y = y(1:maxN);
+    fprintf(1,['Michael Small''s ''nlpe'' code is only being evaluated ' ...
+                    'on the first %u (/%u) time-series samples...\n'],maxN,N);
     N = maxN;
-    fprintf(1,'Michael Small''s ''nlpe'' is only being evaluated on the first %u time-series samples...\n',maxN);
 end
 if N < 20 % Short time series cause problems:
     fprintf(1,'Time series (N = %u) is too short\n',length(y))

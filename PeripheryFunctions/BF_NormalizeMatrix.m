@@ -21,6 +21,7 @@
 % Ben Fulcher 28/1/2011 -- Added this NaN capability 
 % Ben Fulcher 12/9/2011 -- Added itrain input: obtain the transformation
 %                           on this subset, apply it to all the data.
+% Ben Fulcher, 2014-06-26 -- Added a mixed sigmoid approach
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -77,7 +78,7 @@ end
 switch normopt
     case 'maxmin'
         % Linear rescaling to the unit interval
-        for i = 1:N2 % cycle through the metrics
+        for i = 1:N2 % cycle through the operations
             rr = ~isnan(F(:,i));
             kk = F(rr,i);
             if (max(kk)==min(kk)) % Rescaling will blow it up
@@ -86,6 +87,36 @@ switch normopt
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
+    case 'MixedSigmoid'
+        % Ben Fulcher, 2014-06-26
+        % Runs a normal sigmoid if iqr=0; a scaled sigmoid otherwise
+        % Computes statistics on non-nans
+        
+        % Rescale to unit interval:
+        UnityRescale = @(x) (x-min(x(~isnan(x))))/(max(x(~isnan(x)))-min(x(~isnan(x))));
+        % Outlier-adjusted sigmoid:
+        SQ_Sig = @(x) UnityRescale(1./(1 + exp(-(x-median(x(~isnan(x))))/(iqr(x(~isnan(x))/1.35)))));
+        SQ_Sig_noiqr = @(x) UnityRescale(1./(1 + exp(-(x-mean(x(~isnan(x))))/std(x(~isnan(x))))));
+        
+        F_norm = zeros(size(F));
+        
+        for i = 1:N2 % cycle through columns
+            if max(F(:,i))==min(F(:,i))
+                % A constant column is set to 0:
+                F_norm(:,i) = 0;
+            elseif all(isnan(F(:,i)))
+                % Everything a NaN, kept at NaN:
+                F_norm(:,i) = NaN;
+            elseif iqr(F(~isnan(F(:,i)),i))==0
+                % iqr of data is zero: perform a normal sigmoidal transformation:
+                F_norm(:,i) = SQ_Sig_noiqr(F(:,i));
+            else
+                % Perform an outlier-robust version of the sigmoid:
+                F_norm(:,i) = SQ_Sig(F(:,i));
+            end
+        end
+        
+        F = F_norm; % set F_norm to F to output
         
     case 'scaledSQzscore'
         % A scaled sigmoided quantile zscore

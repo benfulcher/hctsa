@@ -42,6 +42,8 @@
 % 
 %---OUTPUTS: depend on the model, as described above.
 % 
+%---HISTORY: Ben Fulcher, 12/2/2010
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -66,12 +68,15 @@
 % ------------------------------------------------------------------------------
 
 function out = MF_FitSubsegments(y,model,order,howtosubset,samplep)
-% Ben Fulcher, 12/2/2010
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
-%% Inputs
+% ------------------------------------------------------------------------------
+%% Check Inputs
+% ------------------------------------------------------------------------------
 
 % (1) y: column vector time series
 if nargin < 1 || isempty(y)
@@ -105,8 +110,9 @@ end
 %     steps = 2; % default: predict 2 steps ahead in test set
 % end
 
-
+% ------------------------------------------------------------------------------
 %% Set the ranges beforehand
+% ------------------------------------------------------------------------------
 % Number of samples to take, npred
 npred = samplep(1);
 r = zeros(npred,2); % ranges
@@ -142,7 +148,9 @@ switch howtosubset
         error('Unknown subset method ''%s''',howtosubset);
 end
 
+% ------------------------------------------------------------------------------
 %% Fit the model to each training set
+% ------------------------------------------------------------------------------
 % model will be stored as a model object, m
 % model is fitted using the entire dataset as the training set
 % test sets will be smaller chunks of this.
@@ -213,10 +221,15 @@ switch model
         
         % Statistics on fitted AR parameters
         for i = 1:order % first column will be ones
-            eval(sprintf('out.a_%u_std = std(as(:,%u+1));',i,i));
-            eval(sprintf('out.a_%u_mean = mean(as(:,%u+1));',i,i));
-            eval(sprintf('out.a_%u_max = max(as(:,%u+1));',i,i));
-            eval(sprintf('out.a_%u_min = min(as(:,%u+1));',i,i));
+            % Dynamic field referencing:
+            out.(['a_',num2str(i),'_std']) = std(as(:,i+1));
+            out.(['a_',num2str(i),'_mean']) = mean(as(:,i+1));
+            out.(['a_',num2str(i),'_max']) = max(as(:,i+1));
+            out.(['a_',num2str(i),'_min']) = min(as(:,i+1));
+            % eval(sprintf('out.a_%u_std = std(as(:,%u+1));',i,i));
+            % eval(sprintf('out.a_%u_mean = mean(as(:,%u+1));',i,i));
+            % eval(sprintf('out.a_%u_max = max(as(:,%u+1));',i,i));
+            % eval(sprintf('out.a_%u_min = min(as(:,%u+1));',i,i));
         end
         
     case 'ss'
@@ -269,18 +282,26 @@ switch model
         
         % Statistics on fitted AR parameters, p
         for i = 1:order % first column will be ones
-            eval(sprintf('out.p_%u_std = std(ps(:,%u+1));',i,i));
-            eval(sprintf('out.p_%u_mean = mean(ps(:,%u+1));',i,i));
-            eval(sprintf('out.p_%u_max = max(ps(:,%u+1));',i,i));
-            eval(sprintf('out.p_%u_min = min(ps(:,%u+1));',i,i));
+            out.(['p_',num2str(i),'_std']) = std(ps(:,i+1));
+            out.(['p_',num2str(i),'_mean']) = mean(ps(:,i+1));
+            out.(['p_',num2str(i),'_max']) = max(ps(:,i+1));
+            out.(['p_',num2str(i),'_min']) = min(ps(:,i+1));
+            % eval(sprintf('out.p_%u_std = std(ps(:,%u+1));',i,i));
+            % eval(sprintf('out.p_%u_mean = mean(ps(:,%u+1));',i,i));
+            % eval(sprintf('out.p_%u_max = max(ps(:,%u+1));',i,i));
+            % eval(sprintf('out.p_%u_min = min(ps(:,%u+1));',i,i));
         end
         
         % Statistics on fitted MA parameters, q
         for i = 1:order % first column will be ones
-            eval(sprintf('out.q_%u_std = std(qs(:,%u+1));',i,i));
-            eval(sprintf('out.q_%u_mean = mean(qs(:,%u+1));',i,i));
-            eval(sprintf('out.q_%u_max = max(qs(:,%u+1));',i,i));
-            eval(sprintf('out.q_%u_min = min(qs(:,%u+1));',i,i));
+            out.(['q_',num2str(i),'_std']) = std(qs(:,i+1));
+            out.(['q_',num2str(i),'_mean']) = mean(qs(:,i+1));
+            out.(['q_',num2str(i),'_max']) = max(qs(:,i+1));
+            out.(['q_',num2str(i),'_min']) = min(qs(:,i+1));
+            % eval(sprintf('out.q_%u_std = std(qs(:,%u+1));',i,i));
+            % eval(sprintf('out.q_%u_mean = mean(qs(:,%u+1));',i,i));
+            % eval(sprintf('out.q_%u_max = max(qs(:,%u+1));',i,i));
+            % eval(sprintf('out.q_%u_min = min(qs(:,%u+1));',i,i));
         end
     otherwise
         error('Unknown model ''%s''',model);

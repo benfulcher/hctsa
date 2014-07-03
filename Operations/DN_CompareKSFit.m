@@ -19,6 +19,9 @@
 %---OUTPUTS: include the absolute area between the two distributions, the peak
 % separation, overlap integral, and relative entropy.
 % 
+%---HISTORY:
+% Ben Fulcher, 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -43,10 +46,12 @@
 % ------------------------------------------------------------------------------
 
 function out = DN_CompareKSFit(x,whatdbn)
-% Ben Fulcher, 2009
 
+% ------------------------------------------------------------------------------
 %% PREPROCESSING
-% fit the distribution whatdbn
+% ------------------------------------------------------------------------------
+
+% Fit the distribution 'whatdbn' to the input data, x.
 % xtry=linspace(-40,40,400);
 xstep = std(x)/100; % set a step size
 
@@ -158,7 +163,7 @@ switch whatdbn
 end
 % xtmafit=[floor(xtmafit(1)*10)/10 ceil(xtmafit(end)*10)/10];
 
-% determine smoothed empirical distribution
+% Determine smoothed empirical distribution
 [f, xi] = ksdensity(x);
 xi = xi(f > 1E-6); % only keep values greater than 1E-6
 if isempty(xi)
@@ -169,11 +174,14 @@ end
 
 xi = [floor(xi(1)*10)/10, ceil(xi(end)*10)/10];
 
-% find appropriate range [x1 x2] that incorporates the full range of both
+% Find appropriate range [x1 x2] that incorporates the full range of both
 x1 = min([xf(1), xi(1)]);
 x2 = max([xf(2), xi(end)]);
 
-%% Inefficient, but easier to just rerun both over the same range
+% ------------------------------------------------------------------------------
+%% Rerun both over the same range
+% ------------------------------------------------------------------------------
+% (Inefficient, but easier to do it this way)
 xi = linspace(x1,x2,1000);
 f = ksdensity(x,xi); % the smoothed empirical distribution
 switch whatdbn
@@ -206,8 +214,9 @@ end
 
 % now the two cover the same range in x
 
+% ------------------------------------------------------------------------------
 %% Outputs:
-% out=struct('adiff',[],'peaksepy',[],'peaksepx',[],'olapint',[],'relent',[])
+% ------------------------------------------------------------------------------
 
 % ADIFF: returns absolute area between the curves
 out.adiff = sum(abs(f-ffit)*(xi(2)-xi(1)));

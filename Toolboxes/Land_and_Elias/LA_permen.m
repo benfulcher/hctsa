@@ -6,7 +6,6 @@
 % Original code by Bruce Land and Damian Elias
 %
 % Modified slightly by Ben Fulcher, 2009
-%
 
 function permen = LA_permen(y,ord)
 

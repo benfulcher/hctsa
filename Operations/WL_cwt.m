@@ -18,6 +18,9 @@
 %---OUTPUTS: statistics on the coefficients, entropy, and results of
 % coefficients summed across scales.
 % 
+%---HISTORY:
+% Ben Fulcher, 26/1/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -42,12 +45,14 @@
 % ------------------------------------------------------------------------------
 
 function out = WL_cwt(y, wname, maxscale)
-% Ben Fulcher, 26/1/2010
 
-%% Check that a Wavelet Toolbox license is available:
+% ------------------------------------------------------------------------------
+% Check that a Wavelet Toolbox license is available:
 BF_CheckToolbox('wavelet_toolbox')
 
-% Check inputs:
+% ------------------------------------------------------------------------------
+%% Check inputs:
+% ------------------------------------------------------------------------------
 doplot = 0; % plot outputs to figures
 N = length(y); % length of the time series
 
@@ -77,7 +82,9 @@ if doplot
     pcolor(SC); shading interp;
 end
 
+% ------------------------------------------------------------------------------
 %% Get statistics from CWT
+% ------------------------------------------------------------------------------
 Nentries = size(coeffs,1)*size(coeffs,2); % number of entries in coeffs matrix
 
 % 1) Coefficients, coeffs
@@ -115,14 +122,18 @@ gamma_phat = gamfit(SC(:));
 out.gam1 = gamma_phat(1);
 out.gam2 = gamma_phat(2);
 
+% ------------------------------------------------------------------------------
 %% 2D entropy
+% ------------------------------------------------------------------------------
 % turn into probabilities
 SC_a = SC./sum(SC(:));
 % compute entropy
 SC_a = SC_a(:);
 out.SC_h = -sum(SC_a.*log(SC_a));
 
+% ------------------------------------------------------------------------------
 %% Weird 2-D entropy idea -- first discretize
+% ------------------------------------------------------------------------------
 % (i) Discretize the space into nboxes boxes along the time axis
 % Many choices, let's discretize into maximum energy
 % (could also do average, or proportion inside box with more energy than
@@ -136,15 +147,17 @@ for i = 1:maxscale
    end
 end
 
-% turn into probabilities
+% Turn into probabilities
 dd_SC = dd_SC./sum(dd_SC(:));
 
-% compute entropy
+% Compute entropy
 dd_SCO = dd_SC(:);
 out.dd_SC_h = -sum(dd_SCO.*log(dd_SCO));
 
 
+% ------------------------------------------------------------------------------
 %% Sum across scales
+% ------------------------------------------------------------------------------
 SSC = sum(SC);
 out.max_ssc = max(SSC);
 out.min_ssc = min(SSC);
@@ -152,7 +165,9 @@ out.maxonmed_ssc = max(SSC)/median(SSC);
 out.pcross_maxssc50 = sum(BF_sgnchange(SSC-0.5*max(SSC))) / (N-1);
 out.std_ssc = std(SSC);
 
+% ------------------------------------------------------------------------------
 %% Stationarity
+% ------------------------------------------------------------------------------
 % 2-way
 SC_1 = SC(:,1:floor(N/2)); % collapse across scales, first half
 SC_2 = SC(:,floor(N/2)+1:end); % collapse across scales, second half

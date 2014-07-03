@@ -22,6 +22,9 @@
 % for the 'best' one according to the given criterion.
 % Based on (really improvement/development of) PP_ModelFit.
 % 
+%---HISTORY:
+% Ben Fulcher, 25/2/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -46,7 +49,6 @@
 % ------------------------------------------------------------------------------
 
 function [yp, best] = PP_PreProcess(y,choosebest,order,beatthis,dospectral)
-% Ben Fulcher, 25/2/2010
 
 % I think a good way of 'normalizing' over autocorrelation should also be
 % incorporated, but it's not obvious how, other than some downsampling...
@@ -55,7 +57,9 @@ function [yp, best] = PP_PreProcess(y,choosebest,order,beatthis,dospectral)
 
 doplot = 0; % plot outputs to figures
 
+% ------------------------------------------------------------------------------
 %% Check inputs, set defaults
+% ------------------------------------------------------------------------------
 if nargin < 2
     choosebest = ''; % just return all the time series in structure yp.
 end
@@ -76,7 +80,9 @@ if nargin < 5 || isempty(dospectral)
                     % penalty.
 end
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 yp.nothing = y; % this *has* to be the first element of yp
 
 %% 1) Differencing
@@ -109,7 +115,9 @@ yp.p2_40 = SUB_rempt(y,2,40);
 %% Wavelet decomposition
 % Maybe later - don't want to worry about toolboxes so much.
 
+% ------------------------------------------------------------------------------
 %% Rank map onto Gaussian distribution
+% ------------------------------------------------------------------------------
 x = sort(randn(N,1),'ascend'); % create the Normal distribution using random numbers
 % could use mapping through linspace, but then a choice of the most
 % extreme... I think it's statistically better to do this...? It makes it a
@@ -120,7 +128,9 @@ XX(ix) = x; % the new mapped time series has entries in same rank ordering as y
             % but according to the new distribution defined by x.
 yp.rmgd = XX;
 
+% ------------------------------------------------------------------------------
 %% Positive-only transformations
+% ------------------------------------------------------------------------------
 % log, log returns, sqrt, box-cox
 if all(y > 0)
     yp.log = log(y); % log
@@ -136,7 +146,7 @@ if all(y >= 0)
 end
 
 
-%% -------------------------------------------------------------- %%
+%% --------------------------------------------------------------
 % Choose 'best' preprocessing according to some specified criterion, if
 % 'choosebest' is specified
 %  --------------------------------------------------------------
@@ -204,7 +214,8 @@ switch choosebest
         acs = zeros(nfields,1);
         for i = 1:nfields
             data = [];
-            eval(['data = yp.' fields{i} ';']);
+            data = yp.(fields{i}); % dynamic field referencing
+            % eval(['data = yp.' fields{i} ';']);
             data = BF_zscore(data); % unnecessary for AC
             acs(i) = CO_AutoCorr(data,order);
         end

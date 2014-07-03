@@ -13,7 +13,7 @@
 % Generates a formatted and color-labeled dendrogram of your data
 % 
 %---HISTORY:
-% Ben Fulcher 2010, based on code by Dann Fenn
+% Ben Fulcher 2010, based on code by Dr. Dan Fenn.
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -31,7 +31,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_ColorDendrogram(d,groups,GroupLabels,LinkMethod,horiz)
+function TSQ_plot_ColorDendrogram(d,NodeGroups,GroupLabels,LinkMethod,horiz)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -43,7 +43,7 @@ if nargin < 5 || isempty(horiz)
     horiz = 0; % display horizontally? not really supported yet
 end
 if horiz==1
-    warning('horizontal displays not really supported yet, sorry... :(')
+    warning('Horizontal displays not really supported yet, sorry... :(')
 end
 
 % Set up orientation: Orientation
@@ -67,39 +67,54 @@ if ischar(d)
     load(TheFile,'TS_DataMat');
     F = TS_DataMat; clear TS_DataMat
     
-    % Calculate pairwise distances
+    % Calculate pairwise distances between objects in the input matrix
     d = BF_pdist(F,dmth);
 end
 
-% Rescale distances to a maximum of 5, helps visualization
+% Rescale distances to a new maximum, which helps visualization
 newmaxd = 5;
 d = newmaxd * d / max(d);
 
-% Each cell element are indices of that group
-if iscell(groups)
-    groups = BF_ToGroup(groups);
+% Each cell element are indices of that group; turn it into a vector containing
+% group labels
+if iscell(NodeGroups)
+    NodeGroups = BF_ToGroup(NodeGroups);
 end
 
+% Define the number of objects/nodes:
+NumNodes = length(NodeGroups);
+
+% The number of groups:
+NumGroups = length(GroupLabels);
+
 % ------------------------------------------------------------------------------
-% Do the linkage:
+% Do the linkage clustering:
 % ------------------------------------------------------------------------------
+% Our intention is to do the clustering on the distances, but for linkage to 
+% do this, it requires d be in the form of a row-vector, as pdist produces
+% First check this:
+if size(d,1)==size(d,2)
+    d = squareform(d); % convert back to vector
+end
 Z = linkage(d,LinkMethod);
 
 % ------------------------------------------------------------------------------
 % Assign labels
 % ------------------------------------------------------------------------------
-NumNodes = length(groups); % The number of objects/nodes
 NodeLabels = cell(NumNodes,1);
-for i=1:NumNodes; NodeLabels{i} = ''; end; % Don't actually label the nodes...
+% Don't actually label the nodes...""
+for i = 1:NumNodes
+    NodeLabels{i} = '';
+end
 
 % ------------------------------------------------------------------------------
 %% Plot the dendrogram
 % ------------------------------------------------------------------------------
 figure('color','w'); hold on;
-if length(groups)>1000
+if NumNodes > 1000
     [H,~,perm] = dendrogram(Z,0,'Orientation',Orientation,'Labels',NodeLabels);
 else % Try optimal leaf order
-    fprintf('Running optimal leaf order for %u nodes...',length(groups))
+    fprintf('Running optimal leaf order for %u nodes...',length(NodeGroups))
     try
         order = optimalleaforder(Z,d);
         [H,~,perm] = dendrogram(Z,0,'Reorder',order,'Orientation',Orientation,'Labels',NodeLabels);
@@ -113,7 +128,6 @@ end
 % Change the line width of the dendrogram
 set(H,'LineWidth',0.0002,'Color','k');
 set(gca,'FontSize',12);
-NumGroups = length(GroupLabels); % number of groups
 
 
 % ------------------------------------------------------------------------------
@@ -157,9 +171,9 @@ colors = cmap;
 % Plot little colored bars to label groups on the dendrogram
 % ------------------------------------------------------------------------------
 barheight = 0.4;
-ugroups = unique(groups);
-for u = 1:length(ugroups)
-    idx = find(groups==ugroups(u));
+UNodeGroups = unique(NodeGroups);
+for u = 1:length(UNodeGroups)
+    idx = find(NodeGroups==UNodeGroups(u));
     for i = 1:length(idx)
 %         h = line([find(perm==idx(i)),find(perm==idx(i))],[-0.02,-0.01],...
 %                 'LineWidth',1,'Color',colors(u,:));

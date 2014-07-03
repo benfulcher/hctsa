@@ -18,6 +18,9 @@
 % In future could do a better job of the sampling of points -- perhaps to take
 % into account the autocorrelation of the time series.
 % 
+%---HISTORY:
+% Ben Fulcher, 22/1/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -42,12 +45,12 @@
 % ------------------------------------------------------------------------------
 
 function out = MF_GP_FitAcross(y,covfunc,npoints)
-% Ben Fulcher, 22/1/2010
 
 doplot = 0; % set to 1 to visualize behavior
 
-% Check inputs
-
+% ------------------------------------------------------------------------------
+%% Check inputs
+% ------------------------------------------------------------------------------
 if size(y,2) > size(y,1);
     y = y'; % make sure a column vector
 end
@@ -61,19 +64,21 @@ if nargin < 3 || isempty(npoints)
     npoints = 20;
 end
 
+
 %% Get the points
 N = length(y); % time-series length
 tt = floor(linspace(1,N,npoints))'; % time range (training)
 yt = y(tt);
 
+% ------------------------------------------------------------------------------
 %% Optimize the GP parameters for the chosen covariance function
+% ------------------------------------------------------------------------------
 
 % Determine the number of hyperparameters, nhps
 s = feval(covfunc{:}); % string in form '2+1', ... tells how many
 % hyperparameters for each contribution to the
 % covariance function
 nhps = eval(s);
-
 
 covfunc1 = covfunc{1};
 covfunc2 = covfunc{2};
@@ -96,8 +101,10 @@ if isnan(loghyper)
     return
 end
 
+% ------------------------------------------------------------------------------
 %% Evaluate over the whole space now
-% evaluate at test points based on training time/data, predicting for
+% ------------------------------------------------------------------------------
+% Evaluate at test points based on training time/data, predicting for
 % test times/data
 if N <= 2000
     ts = (1:N)';
@@ -128,7 +135,9 @@ if doplot
 end
 
 
-%% Outputs
+% ------------------------------------------------------------------------------
+%% Output statistics
+% ------------------------------------------------------------------------------
 S = sqrt(S2); % standard deviation function, S
 % rms error from mean function, mu
 out.rmserr = mean(sqrt((y(ts)-mu).^2));
@@ -146,8 +155,8 @@ end
 
 % Loghyperparameters
 for i = 1:nhps
-    % set up structure output
-    eval(sprintf('out.logh%u = loghyper(%u);',i,i));
+    out.(['logh',num2str(i)]) = loghyper(i); % dynamic field referencing
+    % eval(sprintf('out.logh%u = loghyper(%u);',i,i));
 end
 
 if strcmp(covfunc1,'covSum') && strcmp(covfunc2{1},'covSEiso') && strcmp(covfunc2{2},'covNoise')
