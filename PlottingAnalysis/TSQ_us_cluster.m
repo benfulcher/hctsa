@@ -27,7 +27,9 @@
 
 function [ackwgs, acgi, TS_DataMat_cl] = TSQ_us_cluster(norcl,ClusterMethod,ClusterParams)
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 % 1) norcl: can be the data matrix, or a string:
 %                  'norm' -- loads HCTSA_N,
 %                  'cl'   -- loads HCTSA_cl,
@@ -35,13 +37,15 @@ if nargin < 1,
     norcl = ''; % not necessary
 end
 
-% 2) ClusterMethod: a string specifying the clustering method to use
+% 2) ClusterMethod: a string specifying the type of clustering method to use
 if nargin < 2 || isempty(ClusterMethod),
     ClusterMethod = 'linkage';
 end
 
 % 3) ClusterParams: specify the parameters for the clustering method
-if nargin < 3, ClusterParams = {}; end % defaults specified within each method
+if nargin < 3
+    ClusterParams = {}; % Defaults are specified within each method
+end
 
 % ------------------------------------------------------------------------------
 %% Get the data
@@ -194,7 +198,8 @@ switch ClusterMethod
         % ------------------------------------------------------------------------------
         % extracts a discrete clustering from the hierarchy obtained above
 		if ~isempty(clustth) % do this clustering
-            if strcmp(clusterM,'cutoffN')
+            switch clusterM
+            case 'cutoffN'
                 % specify number of clusters by inconsistent measure
                 depth = 2; % depth down hierarchy to look
                 criterion = 'inconsistent';
@@ -221,7 +226,8 @@ switch ClusterMethod
                 % we've reached our cluster threshold! (or the end of cr)
                 % acgi contains indices for members of each cluster
                 disp(['Clustering at cutoff ' num2str(c) ' with ' num2str(nclusters) ' clusters'])
-            elseif strcmp(clusterM,'cutoff')
+                
+            case 'cutoff'
                 % just do cutoff clustering
                 % for this method clusterN is the cutoff value, rather than
                 % the actual number of clusters.
@@ -230,13 +236,14 @@ switch ClusterMethod
                 criterion = 'inconsistent';
                 T = cluster(links,'cutoff',clusterN,'depth',depth,'criterion',criterion);
                 nclusters = max(T);
-            elseif strcmp(clusterM,'maxnclust')
+                
+            case 'maxnclust'
                 % just do distance-based clustering
                 T = cluster(links,'maxclust',clusterN);
                 nclusters = max(T);
                 fprintf(1,'Distance-based clustering with %u clusters\n',nclusters)
-            else
-                error('Invalid clustering method ''%s''',clusterM);
+            otherwise
+                error('Unknown clustering method ''%s''',clusterM);
             end
             
             acgi = cell(nclusters,1);
@@ -342,7 +349,7 @@ switch ClusterMethod
         
     case 'kmedoids'
         %% Check the inputs
-        disp('Using Ben''s cute little implementation of kmedoids')
+        disp('Using Ben''s implementation of kmedoids')
         % ClusterParams specifies k, distancemeasure, nrep
         % ** k
         if isfield(ClusterParams,'k')

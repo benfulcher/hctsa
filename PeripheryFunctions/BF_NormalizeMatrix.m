@@ -120,7 +120,7 @@ switch normopt
         
     case 'scaledSQzscore'
         % A scaled sigmoided quantile zscore
-        % Problem is that if iqr=0, we're kind of screwed
+        % Problem is that if iqr=0, this is not defined
         for i = 1:N2
             rr = ~isnan(F(:,i));
             rt = ~isnan(FT(:,i));

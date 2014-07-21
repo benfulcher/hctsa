@@ -120,15 +120,18 @@ if (Nref < Nrefmin) && (N > Nrefmin)
     Nref = Nrefmin;
 end % can't have less than 100 reference points
 
-
+% ------------------------------------------------------------------------------
 %% Write the data file
+% ------------------------------------------------------------------------------
 tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
 % to the millisecond (only get double-write error for same function called in same millisecond
 fn = sprintf('tisean_temp_c1_%s.dat',tnow);
 dlmwrite(fn,y);
 fprintf(1,'Just written temporary data file %s for TISEAN\n',fn)
 
+% ------------------------------------------------------------------------------
 %% Run the TISEAN code
+% ------------------------------------------------------------------------------
 % run c1 code
 tic
 [~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',tau,mmm(1),mmm(2),tsep,Nref,fn,fn));
@@ -159,7 +162,9 @@ end
 fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc,1))
 if exist([fn '.c1']), delete([fn '.c1']); end % remove the TISEAN file write output
 
+% ------------------------------------------------------------------------------
 %% Get the output
+% ------------------------------------------------------------------------------
 % 1) C1 (don't worry about this anymore, just the local slopes
 
 % fid = fopen([fn '.c1']);

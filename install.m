@@ -55,31 +55,38 @@ if strcmp(reply,'y') % Set up mySQL database
     fprintf(1,['Setting up the database now--NB: you need to have root access' ...
                             ' to a mySQL server to do this\n'])
     % Walks the user through creating the database from a root account and sets
-    % up a user account and password
+    % up a user account and password:
     SQL_create_db;
-    fprintf(1,['Note that if you ever want to change the database access ' ...
-                    'settings, you should alter the sql_settings.conf file' ...
-                    ', or run SQL_create_db\n'])
 end
+fprintf(1,['Note that the database access ' ...
+            'settings are stored in ''sql_settings.conf''\n'])
 
 % ------------------------------------------------------------------------------
-%% 3. Create all tables in the database
+%% 3. Create all (empty) tables in the database
 % ------------------------------------------------------------------------------
 SQL_create_all_tables;
 
 % ------------------------------------------------------------------------------
-%% 4. Populate the database with operations
+%% 4. Populate the new tables with operations
 % ------------------------------------------------------------------------------
 fprintf(1,'Populating the database with operations (please be patient)...\n')
-fprintf(1,'Adding Master operations...\n'); moptic = tic;
+
+fprintf(1,'Adding Master operations...\n');
+mop_timer = tic;
 SQL_add('mops','Database/INP_mops.txt','',0)
-fprintf(1,'Master operations added in %s.\n',BF_thetime(toc(moptic)))
-fprintf(1,'Adding all operations...\n'); optic = tic;
+fprintf(1,'Master operations added in %s.\n',BF_thetime(toc(mop_timer)))
+clear mop_timer
+
+fprintf(1,'Adding all operations...\n');
+op_timer = tic;
 SQL_add('ops','Database/INP_ops.txt','',0)
-fprintf(1,'Operations added in %s.\n',BF_thetime(toc(optic)))
+% fprintf(1,'Adding a reduced set of operations...\n'); op_timer = tic;
+% SQL_add('ops','Database/INP_ops_reduced.txt','',0)
+fprintf(1,'Operations added in %s.\n',BF_thetime(toc(op_timer)))
+clear op_timer
 
 % ------------------------------------------------------------------------------
-%% 5. Attempt to compile the executables in Toolboxes:
+%% 5. Attempt to compile the executables required by the periphery Toolboxes:
 % ------------------------------------------------------------------------------
 fprintf(1,['Attempting to compile the binary executables needed for evaluating ' ...
                                                         'some operations.\n'])
@@ -92,7 +99,7 @@ compile_mex
 cd('../');
 fprintf(1,'Hope everything compiled ok?!\n')
 fprintf(1,['Ready when you are to add time series to the database using ' ...
-                                                        'SQL_add...!\n']);
+                            'SQL_add(''ts'',''<timeSeries_inputFile.txt>'')...!\n']);
 
 % Attempt to add a time series
 % SQL_add('ts','INP_test_ts.txt')

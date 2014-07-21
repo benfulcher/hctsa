@@ -122,6 +122,11 @@ for i = 1:NumTimeSeries
     tcal = (isnan(qq) | qq == 1); % Operations awaiting calculation
     ncal = sum(tcal); % Number of operations to evaluate
     
+    % Check that all operations have a master ID attached:
+    if length([Operations(tcal).MasterID]) < ncal
+        % Error in the database structure; some 
+    end
+    
     if ncal > 0 % some to calculate
         ffi = zeros(ncal,1); % Output of each operation
 		qqi = zeros(ncal,1); % Quality of output from each operation
@@ -169,12 +174,12 @@ for i = 1:NumTimeSeries
 		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'%s\n',WhichTimeSeries)
 		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
-		fprintf(fid,'Preparing to calculate %s (ts_id = %u, N = %u samples) [computing %u / %u operations]\n', ...
+		fprintf(fid,'Preparing to calculate %s\nts_id = %u, N = %u samples\nComputing %u / %u operations.\n', ...
                             		TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length,ncal,NumOps)
 	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
 
         % --------------------------------------------------------------------------
-		%% Evaluate master functions in parallel
+		%% Evaluate all master operation functions (maybe in parallel)
         % --------------------------------------------------------------------------
 		% Because of parallelization, we have to evaluate all the master functions *first*
 		% Check through the metrics to determine which master functions are relevant for this run
@@ -199,6 +204,7 @@ for i = 1:NumTimeSeries
 		
 		% Evaluate all the master operations
         TimeSeries_i_ID = TimeSeries(i).ID; % Make a PARFOR-friendly version of the ID
+        master_timer = tic;
 		if toparallel
             parfor jj = 1:nMtocalc % PARFOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
@@ -217,12 +223,13 @@ for i = 1:NumTimeSeries
         MasterOutput(Master_ind_calc) = MasterOutput_tmp;
         MasterCalcTime(Master_ind_calc) = MasterCalcTime_tmp;
 		
-		fprintf(fid,'%u master operations evaluated ///\n\n',nMtocalc);
+		fprintf(fid,'%u master operations evaluated in %s ///\n\n',nMtocalc,BF_thetime(toc(master_timer)));
+        clear master_timer
+        
         
         % Set sliced version of matching indicies across the range tcal
         % Indices of MasterOperations corresponding to each Operation (i.e., each index of tcal)
-        par_OperationMasterInd = arrayfun(@(x)find(x==[MasterOperations.ID],1),[Operations(tcal).MasterID]);
-        
+        par_OperationMasterInd = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations(tcal).MasterID]);
         par_MasterOperationsLabel = {MasterOperations.Label}; % Master labels
         par_OperationCodeString = {Operations(tcal).CodeString}; % Code string for each operation to calculate (i.e., in tcal)
         
@@ -244,6 +251,8 @@ for i = 1:NumTimeSeries
                                                        par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
                                                        par_OperationCodeString{jj},fid);
                 catch
+                    fprintf(1,'---Error with %s\n',par_OperationCodeString{jj});
+                    keyboard
                     if (MasterOperations(par_OperationMasterInd(jj)).ID == 0)
                         error(['The operations database is corrupt: there is no link ' ...
                                         'from ''%s'' to a master code'], ...
@@ -296,7 +305,6 @@ for i = 1:NumTimeSeries
 		% NB: the calculation time assigned for individual operations is the total calculation
 		% time taken to evaluate the master code.
 
-
         % Calculate statistics for writing to file/screen
         % The number of calculated operations that returned real outputs without errors, ngood:
 		ngood = sum(qqi == 0);
@@ -307,8 +315,7 @@ for i = 1:NumTimeSeries
     end
     
     % The time taken to calculate (or not, if ncal = 0) all operations for this time series:
-    times(i) = toc(bigtimer);
-
+    times(i) = toc(bigtimer); clear bigtimer
 
     % --------------------------------------------------------------------------
     %% Calculation complete: display information about this time series calculation

@@ -108,7 +108,7 @@ elseif doremove == 1
                                 'I HOPE THIS IS OK?! [press any key to continue]\n'], ...
                                 length(vin),thewhat,dbname),'s');
     dowhating = 'removing';
-    dowhat = remove;
+    dowhat = 'remove';
     
 else
     error('Third input must be (0 to clear), or (1 to remove)')

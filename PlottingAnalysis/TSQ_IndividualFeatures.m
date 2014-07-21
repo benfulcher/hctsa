@@ -200,7 +200,7 @@ case 'kfold'
         MeanClassificationRate(i) = mean(TestRate); % Mean of means (across all repartitions) 
         
         if (mod(i,floor(size(TS_DataMat,2)/4))==0)
-            fprintf(1,'Less than %s remaining! We''re at %u / %u\n', ...
+            fprintf(1,'Less than %s remaining! We''re at %u / %u.\n', ...
                         BF_thetime(toc(timer)/i*(size(TS_DataMat,2)-i)),i,size(TS_DataMat,2))
         end
     end
@@ -219,7 +219,7 @@ case 'leaveout'
         end
         
         if (mod(i,floor(size(TS_DataMat,2)/4))==0)
-            fprintf(1,'Less than %s remaining! We''re at %u / %u\n', ...
+            fprintf(1,'Less than %s remaining! We''re at %u / %u.\n', ...
                         BF_thetime(toc(timer)/i*(size(TS_DataMat,2)-i)),i,size(TS_DataMat,2))
         end
     end
@@ -279,13 +279,6 @@ case 'none' % in-sample
 %         [teststat,ifeat] = sort(teststat,'ascend');
 %         testspread = testspread(ifeat)*100; % sort, convert to percentages
 %         teststat = teststat*100; % convert to percentages
-    %     
-    % otherwise
-    %     fprintf(1,'Hello!\n')
-    %     [ifeat, teststat] = rankfeatures(TS_DataMat',TimeSeriesGroup,'criterion',ClassMethod);
-    %     [teststat, ix] = sort(teststat,'descend');
-    %     ifeat = ifeat(ix);
-    %     testspread = [];
 end
 
 % --------------------------------------------------------------------------

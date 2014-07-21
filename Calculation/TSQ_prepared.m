@@ -367,6 +367,7 @@ if ismember(RetrieveWhatEntries,{'null','error'})
 	end    
 end
 
+
 % ------------------------------------------------------------------------------
 %% Fill Metadata
 % ------------------------------------------------------------------------------
@@ -394,7 +395,9 @@ SelectString = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WH
         				'(' BF_cat(unique([Operations.MasterID]),',') ')'];
 [masterinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
-    fprintf(1,'Error retrieving Master information...\n'); keyboard
+    fprintf(1,'Error retrieving Master information...\n');
+    disp(emsg);
+    keyboard
 else
     MasterOperations = cell2struct(masterinfo',{'ID','Label','Code'});
 end

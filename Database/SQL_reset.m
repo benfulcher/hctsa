@@ -7,7 +7,7 @@ reply = input(['Are you sure you want to DELETE ALL DATA AND RESET EVERYTHING in
 if ~strcmp(reply,'yes')
     fprintf(1,'I didn''t think so... Better to be safe than sorry, hey?\n'); return
 end
-fprintf(1,'Omg be careful, we''re destroying everything\n');
+fprintf(1,'zomg be careful, we''re destroying everything\n');
 mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s;',dbname));
 fprintf(1,'%s and all the data contained within it dropped\n',dbname);
 mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s;',dbname));
