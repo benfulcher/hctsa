@@ -46,26 +46,26 @@
 % ------------------------------------------------------------------------------
 
 function ids = SQL_getids(TsorOps,LengthRange,KeywordInclude,KeywordRemove,idr,dbname)
-%%% FOREPLAY
-%% Check inputs -- set defaults
-% if nargin < 5; disp('You must provide 5 inputs! And no, I''m not asking nicely!!'); return; end
 
-% if strcmp(TsorOps,'ts')
-    % empty LengthRange means no length contraint, which is a fine default now...
-%     
-    % if isempty(LengthRange)
-        % LengthRange = [200, 20000];
-        % fprintf(1,'Setting default length constraints: %u--%u\n',LengthRange(1),LengthRange(2))
-    % end
+% ------------------------------------------------------------------------------
+%% Check inputs -- set defaults
+% ------------------------------------------------------------------------------
 
 if ~ismember(TsorOps,{'ts','ops'})
 	error('First input must be either ''ts'' or ''ops''.');
 end
 
+% empty LengthRange means no length contraint, which is a fine default now...
+% if isempty(LengthRange)
+%     LengthRange = [200, 20000];
+%     fprintf(1,'Setting default length constraints: %u--%u\n',LengthRange(1),LengthRange(2))
+% end
+
 if strcmp(TsorOps,'ops')
 	MasterPull = LengthRange;
 	if isempty(MasterPull)
-		MasterPull = 1; % retrieves other outputs of all master functions implicated in the range
+        % Retrieves other outputs of all master functions implicated in the range:
+		MasterPull = 1;
 		fprintf(1,'Pulling in all pointers by default\n');
 	end
 end
@@ -77,11 +77,15 @@ end
 if nargin < 5
 	idr = [];
 end
+
 if nargin < 6
 	dbname = ''; % Use default database by default
 end
 
-% seperate into keywords to include: kyes
+% ------------------------------------------------------------------------------
+%% Foreplay:
+% ------------------------------------------------------------------------------
+% Seperate into keywords to include: kyes
 % and the number of that keyword to include: kyesn
 if ~isempty(KeywordInclude)
     kyes = KeywordInclude(:,1); kyesn = vertcat(KeywordInclude{:,2});
@@ -89,10 +93,12 @@ else
     kyes = {}; kyesn = [];
 end
 
-%% Open connection to mySQL database
+% Open connection to mySQL database
 dbc = SQL_opendatabase(dbname);
 
+% ------------------------------------------------------------------------------
 %%% TIME SERIES
+% ------------------------------------------------------------------------------
 if strcmp(TsorOps,'ts')
 
 	%% Filter time series by keyword
@@ -111,12 +117,6 @@ if strcmp(TsorOps,'ts')
 		s{2} = ['ts_id NOT IN (SELECT ts_id FROM TsKeywordsRelate WHERE tskw_id IN ' ...
 							'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword IN (' BF_cat(KeywordRemove,',','''') '))) '];
 	end
-	
-    % % Extra qualifier pcalcr to have PercentageCalculated only in a certain range
-    % % s{3} -- pcalcr
-    % if ~isempty(pcalcr)
-    %     s{3} = sprintf('PercentageCalculated BETWEEN %f AND %f',pcalcr(1),pcalcr(2));
-    % end
 	
 	% Length constraint in words
     if isempty(LengthRange)

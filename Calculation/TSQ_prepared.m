@@ -104,9 +104,9 @@ op_ids_string = BF_cat(op_ids,',');
 nts = length(ts_ids); nops = length(op_ids);
 
 if (nts == 0)
-	error('Oops. There''s nothing to do! No time series to retrieve!\n');
+	error('Oops. There''s nothing to do! No time series to retrieve!');
 elseif (nops == 0)
-	error('Oops. There''s nothing to do! No operations to retrieve!\n');
+	error('Oops. There''s nothing to do! No operations to retrieve!');
 end
 
 % Open database connection

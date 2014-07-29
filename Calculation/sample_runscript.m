@@ -21,42 +21,49 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-%% Parameters for run:
-parallelize = 0; % set to 1 to parallelize computations over available CPUs using Matlab's Parellel Computing Toolbox?
-DoLog = 0; % set to 1 to log results to a .log file? (usually not necessary)
-tsidmin = 1; % calculate from this ts_id...
-tsidmax = 100; % to this ts_id
-WriteWhat = 'null'; % retrieve and write back missing (NULL) entries in the database
+% ------------------------------------------------------------------------------
+%% SET RANGE OF TS_IDs TO COMPUTE:
+% ------------------------------------------------------------------------------
+tsid_min = 1; % Calculate from this ts_id...
+tsid_max = 100; % To this ts_id
 
-% Set a range of time series to calculate, as tsidr
-tsidr = (tsidmin:tsidmax); % calculate across the given range of ts_ids one at a time
+% ------------------------------------------------------------------------------
+%% Default parameters for computation:
+% ------------------------------------------------------------------------------
+doParallelize = 0; % Set to 1 to parallelize computations over available CPUs using Matlab's Parellel Computing Toolbox?
+doLog = 0; % Set to 1 to log results to a .log file? (usually not necessary)
+writeWhat = 'null'; % Retrieve and write back only missing (NULL) entries in the database
+
+% Calculate across the given range of ts_ids one at a time:
+tsid_range = (tsid_min:tsid_max);
 
 % Retrieve a vector of op_idds to calculate subject to additional conditions
 % Here we remove operations with labels 'shit', 'tisean', 'kalafutvisscher', and 'waveletTB'
-opids = SQL_getids('ops',1,{},{'shit','tisean','kalafutvisscher','waveletTB'});
+opids = SQL_getids('ops',1,{},{'shit','kalafutvisscher','waveletTB'});
 
-% Range of op_ids retrieved at each iteration:
-opidr = [min(opids), max(opids)];
-
-%% Now start calculating
+% ------------------------------------------------------------------------------
+%% Start calculating:
+% ------------------------------------------------------------------------------
 % Provide a quick message:
-fprintf(1,['About to calculate across ts_ids %u--%u and op_ids %u--%u over a total of '  ...
-    		 '%u iterations\n'],tsidr(1),tsidr(end),opidr(1),opidr(end),length(tsidr));
+fprintf(1,['About to calculate across %u time series (ts_ids %u--%u) and %u op_ids ' ...
+                    '(between %u--%u) over a total of %u iterations\n'], ...
+                    length(tsid_range),tsid_min,tsid_max,length(opids),min(opids),max(opids));
 
-for i = 1:length(tsidr) % Loop over single time series
+% Loop across time series, one at a time:
+for i = 1:length(tsid_range)
 	fprintf(1,'\n\n\nWe''re looking at ts_id %u and %u op_ids, from %u--%u\n\n\n', ...
-                                	tsidr(i),length(opids),opidr(1),opidr(2))
+                            	tsid_range(i),length(opids),min(opids),max(opids))
 	
-	% We loop over:
+	% Loop over:
 	% (i) Running TSQ_prepared to retrieve data from the database -> HCTSA_loc.mat
 	% (ii) Using TSQ_brawn to calculate missing entries
 	% (iii) Running TSQ_agglomerate to write results back into the database
 
-	DidWrite = TSQ_prepared(tsidr(i),opids,WriteWhat); % Collect the null entries in the database
+	DidWrite = TSQ_prepared(tsid_range(i),opids,writeWhat); % Collect the null entries in the database
     if DidWrite % Only calculate if TSQ_prepared found time series to retrieve:
-        TSQ_brawn(DoLog,parallelize); % computes the operations and time series retrieved
-        TSQ_agglomerate(WriteWhat,DoLog); % stores the results back to the database
+        TSQ_brawn(doLog,doParallelize); % Compute the operations and time series retrieved
+        TSQ_agglomerate(writeWhat,doLog); % Store the results back to the database
     else
-        fprintf(1,'No time series retrieved for ts_id = %u\n',tsidr(i));
+        fprintf(1,'No calculation performed at ts_id = %u\n',tsid_range(i));
     end
 end

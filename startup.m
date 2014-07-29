@@ -49,7 +49,7 @@ fprintf(1,', Michael Small')
 addpath(fullfile(pwd,'Toolboxes','Michael_Small'));
 
 % Code from Matlab Central
-fprintf(1,'Matlab Central code')
+fprintf(1,', Matlab Central code')
 addpath(fullfile(pwd,'Toolboxes','MatlabCentral'));
 
 % Rudy Moddemeijer's code

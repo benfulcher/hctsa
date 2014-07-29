@@ -306,12 +306,12 @@ for i = 1:NumTimeSeries
 		% time taken to evaluate the master code.
 
         % Calculate statistics for writing to file/screen
-        % The number of calculated operations that returned real outputs without errors, ngood:
-		ngood = sum(qqi == 0);
-        % The number of fatal errors encountered, nerror:
-		nerror = sum(qqi == 1);
-        % The number of other special outputs, nother:
-		nother = sum(qqi > 1);
+        % The number of calculated operations that returned real outputs without errors, numGood:
+		numGood = sum(qqi == 0);
+        % The number of fatal errors encountered, numErrors:
+		numErrors = sum(qqi == 1);
+        % The number of other special outputs, numSpecial:
+		numSpecial = sum(qqi > 1);
     end
     
     % The time taken to calculate (or not, if ncal = 0) all operations for this time series:
@@ -321,13 +321,13 @@ for i = 1:NumTimeSeries
     %% Calculation complete: display information about this time series calculation
     % --------------------------------------------------------------------------
 	fprintf(fid,'********************************************************************\n')
-    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
-    fprintf(fid,'oOoOo Calculation complete for %s (ts_id = %u, N = %u)  oOoOo\n', ...
+    fprintf(fid,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
+    fprintf(fid,'oOoOo Calculation complete for %s oOoOo\nts_id = %u, N = %u\n', ...
                             TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length);
     if ncal > 0 % Some amount of calculation was performed
-	    fprintf(fid,'%u real-valued outputs, %u errors, %u other outputs stored. [%u / %u]\n',...
-	     					ngood,nerror,nother,ncal,NumOps);
-		fprintf(fid,'Calculations for this time series took %s.\n',BF_thetime(times(i),1));
+	    fprintf(fid,'%u real-valued outputs, %u errors, %u special-valued outputs stored. [%u / %u]\n',...
+	     					numGood,numErrors,numSpecial,ncal,NumOps);
+		fprintf(fid,'All calculations for this time series took %s.\n',BF_thetime(times(i),1));
     else
     	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',NumOps);
     end
@@ -336,7 +336,8 @@ for i = 1:NumTimeSeries
     	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n', ...
                                         	BF_thetime(((NumTimeSeries-i)*mean(times(1:i))),1));
     else % The final time series
-        fprintf(fid,'- - - - - - - -  All time series calculated! - - - - - - - -\n',NumTimeSeries-i);
+        fprintf(fid,'- - - - - - - - - - All %u time series calculated! - - - - - - - - - -\n', ...
+                                                    NumTimeSeries);
     end
     fprintf(fid,'********************************************************************\n');
 

@@ -236,65 +236,6 @@ else
     error('All time series have constant feature vectors?!')
 end
 
-% % (iii) Trim based on high covariances
-% cov_thresh_r = FilterOptions{2}(1);
-% cov_thresh_c = FilterOptions{2}(2);
-% if cov_thresh_r>0
-%     F_c=corrcoef(F'); % I *think* this transpose is appropriate
-%     [xi xj]=find(abs(F_c)>cov_thresh_r);
-%     x = [xi xj];
-%     r=setxor(1:size(x,1),find(x(:,1)>=x(:,2))); % do not include diagonal or below-diagonal entries
-%     if ~isempty(r) % some rows are highly correlated
-%         x=x(r,:);
-%         kr3=setxor(1:size(F,1),unique(x(:,1)));
-%         % have a mx2 list of indicies pairing rows with common variation across the time series
-%         % strategy is to go through and eliminate the first one each time:
-%         disp(['Removed time series with covariance greater than ' num2str(cov_thresh_r*100) ...
-%             ' : from ' num2str(size(F,1)) ' to ' num2str(length(kr3))])
-%         if ~isempty(kr3)
-%             F=F(kr3,:);        % ********************* kr3 *******************************
-%         else
-%             disp(['No time series meet the ' num2str(thresh_cov_r) ' covariance criterion. Exiting.'])
-%             return
-%         end
-%     else
-%         disp('No filtering of time series based on high covariance')
-%         kr3 = (1:size(F,1));
-%     end
-% 
-% else
-%     disp('No filtering of time series based on high covariance')
-%     kr3 = (1:size(F,1));
-% end
-% 
-% if cov_thresh_c>0
-%     F_c=corrcoef(Fc); % I *think* this transpose is appropriate
-%     [xi xj]=find(abs(F_c)>cov_thresh_c);
-%     x=[xi xj];
-%     r=setxor(1:size(x,1),find(x(:,1)>=x(:,2))); % do not include diagonal or below-diagonal entries
-%     if ~isempty(r) % some rows are highly correlated
-%         x=x(r,:);
-%         kc3=setxor(1:size(F,2),unique(x(:,1)));
-%         % have a mx2 list of indicies pairing rows with common variation across the time series
-%         % strategy is to go through and eliminate the first one each time:
-%         disp(['Removed time series with covariance greater than ' num2str(cov_thresh_c*100) ...
-%             ' : from ' num2str(size(F,2)) ' to ' num2str(length(kc3))])
-%         if ~isempty(kc3)
-%             F=F(:,kc3);    % ********************* KC3 ***************************
-%         else
-%             disp(['No metrics meet the ' num2str(thresh_cov_c) ' covariance criterion. Exiting.'])
-%             return
-%         end
-%     else
-%         disp('No filtering of metrics based on high covariance')
-%         kc3=1:size(F,2);
-%     end
-% 
-% else
-%     disp('No filtering of metrics based on high covariance')
-%     kc3 = (1:size(F,2));
-% end
-
 % --------------------------------------------------------------------------
 %% Update the labels after filtering
 % --------------------------------------------------------------------------
@@ -325,14 +266,15 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_Da
 % --------------------------------------------------------------------------
 
 if ismember(NormFunction,{'nothing','none'})
-    fprintf(1,'You specified ''%s'', so NO ACTUAL NORMALIZING IS BEING DONE!!!\n',NormFunction)
+    fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',NormFunction)
 else
     if isempty(trainset)
-        % no training subset
+        % No training subset specified
         fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',length(TimeSeries),length(Operations))
         TS_DataMat = BF_NormalizeMatrix(TS_DataMat,NormFunction);
     else
-        % retrieve a subset
+        % Train the normalization parameters only on a specified set of training data, then apply 
+        % that transformation to the full data matrix
         fprintf(1,['Normalizing a %u x %u object using %u training time series to train the transformation!' ...
                 ' Please be patient...\n'],length(TimeSeries),length(Operations),length(trainset))
         TS_DataMat = BF_NormalizeMatrix(TS_DataMat,NormFunction,trainset);
