@@ -11,8 +11,8 @@
 %  Use '0' to retrieve all of a given class.
 %  Can also use an empty label, '', to select anything at random from all time series.
 % 
-% Example usage:
-% KeywordGroups = {'space',100;'',200;'medical',0;...};
+%---EXAMPLE USAGE:
+% GroupIndices = TSQ_LabelGroups('norm',{'space',100;'',200;'medical',0;...},'ts');
 % 
 %---INPUTS:
 % KeywordGroups: The keyword groups, a cell of strings: 

@@ -25,20 +25,14 @@
 %                 detection of non-uniform steps in noisy signals", Comp. Phys.
 %                 Comm., 179(2008), 716-723.
 %                 
-%           (ii) 'ck': Chung-Kennedy
-%                 S.H. Chung, R.A. Kennedy (1991), "Forward-backward non-linear
-%                 filtering technique for extracting small biological signals
-%                 from noise", J. Neurosci. Methods. 40(1):71-86.
-%                 
-%           (iii) 'l1pwc': L1 method
+%           (ii) 'l1pwc': L1 method
 %                 This code is based on code originally written by Kim et al.:
 %                 "l_1 Trend Filtering", S.-J. Kim et al., SIAM Review 51, 339
 %                 (2009).
 % 
 % params, the parameters for the given method used:
 %           (i) 'kv': (no parameters required)
-%           (ii) 'ck': params = [K,M,p]
-%           (iii) 'l1pwc': params = lambda
+%           (ii) 'l1pwc': params = lambda
 % 
 %---OUTPUTS:
 % Statistics on the output of the step-detection method, including the intervals
@@ -47,6 +41,7 @@
 % occurrence of change points.
 % 
 %---HISTORY:
+% Ben Fulcher, 2014-10-08 Commented out Chung-Kennedy.
 % Ben Fulcher, 12/4/2010
 % 
 % ------------------------------------------------------------------------------
@@ -105,50 +100,51 @@ switch method
             chpts = [1; steps(2:end-1)+1];
         end
         
-    case 'ck'
-        % ------------------------------------------------------------------------------
-        %% Chung-Kennedy
-        % ------------------------------------------------------------------------------
-        % The algorithm is described in:
-        % S.H. Chung, R.A. Kennedy (1991), "Forward-backward non-linear filtering
-        % technique for extracting small biological signals from noise",
-        % J. Neurosci. Methods. 40(1):71-86.
-        % It is quite slow...
-        
-        % Inputs:
-        %  y - Input signal
-        %  K - Maximum forward/backward moving average filter length (samples)
-        %  M - Prediction error analysis window size (samples)
-        %  p - Positive scaling of prediction error
-        % Outputs:
-        %  x - Step-filtered output signal
-        
-        % Set defaults, params should be [K,M,p]
-        if nargin < 3
-            params = [];
-        end
-        if length(params) >= 1
-            K = params(1);
-        else
-            K = 1/20; % 1/20th of time series length
-        end
-        if K < 1
-            K = floor(N*K);
-        end
-        if length(params) >= 2
-            M = params(2);
-        else
-            M = 1/10; % 1/10th the time series length
-        end
-        if M < 1
-            M = floor(N*M);
-        end
-        if length(params) >= 3
-            p = params(3);
-        else
-            p = 10;
-        end
-        steppedy = ML_ckfilter(y, K, M, p);
+    % case 'ck'
+    %     % ------------------------------------------------------------------------------
+    %     %% Chung-Kennedy
+    %     % ------------------------------------------------------------------------------
+    %     % The algorithm is described in:
+    %     % S.H. Chung, R.A. Kennedy (1991), "Forward-backward non-linear filtering
+    %     % technique for extracting small biological signals from noise",
+    %     % J. Neurosci. Methods. 40(1):71-86.
+    %     % It is quite slow...
+    %     % And not supported!
+    %
+    %     % Inputs:
+    %     %  y - Input signal
+    %     %  K - Maximum forward/backward moving average filter length (samples)
+    %     %  M - Prediction error analysis window size (samples)
+    %     %  p - Positive scaling of prediction error
+    %     % Outputs:
+    %     %  x - Step-filtered output signal
+    %
+    %     % Set defaults, params should be [K,M,p]
+    %     if nargin < 3
+    %         params = [];
+    %     end
+    %     if length(params) >= 1
+    %         K = params(1);
+    %     else
+    %         K = 1/20; % 1/20th of time series length
+    %     end
+    %     if K < 1
+    %         K = floor(N*K);
+    %     end
+    %     if length(params) >= 2
+    %         M = params(2);
+    %     else
+    %         M = 1/10; % 1/10th the time series length
+    %     end
+    %     if M < 1
+    %         M = floor(N*M);
+    %     end
+    %     if length(params) >= 3
+    %         p = params(3);
+    %     else
+    %         p = 10;
+    %     end
+    %     steppedy = ML_ckfilter(y, K, M, p);
         
     case 'l1pwc'
         % ------------------------------------------------------------------------------
@@ -214,6 +210,7 @@ switch method
         else
             chpts = 1; % no changes
         end
+		
     otherwise
         error('Unknown step detection method ''%s''',method);
 end
