@@ -98,7 +98,7 @@ if strcmp(TheData,'cl') || strcmp(TheData,'norm')
     load(TheDataFile,'TS_DataMat');
     if strcmp(TsorOps,'ts')
         load(TheDataFile,'Operations')
-        DimensionLabels = {Operations.Name}; clear Operations % We just need their names
+        dimensionLabels = {Operations.Name}; clear Operations % We just need their names
         if isstruct(annotatep) || length(annotatep) > 1 || annotatep > 0
             load(TheDataFile,'TimeSeries')
             DataLabels = {TimeSeries.FileName};
@@ -115,7 +115,7 @@ if strcmp(TheData,'cl') || strcmp(TheData,'norm')
         end
     else
         load(TheDataFile,'TimeSeries')
-        DimensionLabels = {TimeSeries.FileName}; clear TimeSeries
+        dimensionLabels = {TimeSeries.FileName}; clear TimeSeries
     end
     fprintf(1,' Loaded.\n');
 else
@@ -128,9 +128,9 @@ else
     TS_DataMat = TheData.DataMat;
     DataGroups = TheData.Groups;
     if isfield(TheData,'DimLabels')
-        DimensionLabels = TheData.DimLabels;
+        dimensionLabels = TheData.DimLabels;
     else
-        DimensionLabels = {};
+        dimensionLabels = {};
     end
     if isfield(TheData,'GroupNames')
         GroupNames = TheData.GroupNames;
@@ -157,7 +157,7 @@ end
 
 GroupIndices = BF_ToGroup(DataGroups);
 % if isempty(gi)
-%     gi = SUB_autolabelQ(kwgs,TsorOps,TheData);
+%     gi = SUB_autoLabelQ(kwgs,TsorOps,TheData);
 % end
 % CheckEmpty = cellfun(@isempty,gi);
 % if any(CheckEmpty)
@@ -181,20 +181,20 @@ fprintf(1,'Calculating principal components of the %u x %u data matrix...', ...
                     size(TS_DataMat,1),size(TS_DataMat,2));
 [pc,score,latent] = princomp(TS_DataMat);
 fprintf(1,' Done.\n');
-PercVar = round(latent/sum(latent)*1000)/10; % Percentage of variance explained (1 d.p.)
+percVar = round(latent/sum(latent)*1000)/10; % Percentage of variance explained (1 d.p.)
 
 % Work out the main contributions to each principle component
-featlabel = cell(2,2); % Feature label :: proportion of total [columns are PCs)
-tolabel = cell(2,1);
-ngcontr = min(length(DimensionLabels),2);  % the 2 greatest contributions to the first principle component
+featLabel = cell(2,2); % Feature label :: proportion of total [columns are PCs)
+toLabel = cell(2,1);
+ngcontr = min(length(dimensionLabels),2);  % the 2 greatest contributions to the first principle component
 for i = 1:2
     [s1, ix1] = sort(abs(pc(:,i)),'descend');
-    featlabel{i,1} = DimensionLabels(ix1(1:ngcontr));
-    featlabel{i,2} = round(abs(s1(1:ngcontr)/sum(abs(s1)))*100)/100;
+    featLabel{i,1} = dimensionLabels(ix1(1:ngcontr));
+    featLabel{i,2} = round(abs(s1(1:ngcontr)/sum(abs(s1)))*100)/100;
     for j = 1:ngcontr
-        tolabel{i} = sprintf('%s%s (%f), ',tolabel{i},featlabel{i,1}{j},featlabel{i,2}(j));;
+        toLabel{i} = sprintf('%s%s (%f), ',toLabel{i},featLabel{i,1}{j},featLabel{i,2}(j));;
     end
-    tolabel{i} = tolabel{i}(1:end-2);
+    toLabel{i} = toLabel{i}(1:end-2);
 end
 
 % ------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ end
 
 NameString = 'PC';
 for i = 1:2
-    DataInfo.labels{i} = sprintf('%s%u (%f%%) : %s',NameString,i,PercVar(i),tolabel{i});
+    DataInfo.labels{i} = sprintf('%s%u (%f%%) : %s',NameString,i,percVar(i),toLabel{i});
 end
 
 % function TSQ_plot_2d(Features,DataInfo,TrainTest,annotatep,keepksdensities,lossmeth,extras)
@@ -434,12 +434,12 @@ TSQ_plot_2d(score(:,1:2),DataInfo,{},annotatep,showks,classmeth);
 % %% Labelling
 % switch DimRedMethod
 %     case 'pca'
-%         xlabel(['PC1 (' num2str(PercVar(1)) '%) : ' tolabel{1}],'interpreter','none')
-%         ylabel(['PC2 (' num2str(PercVar(2)) '%) : ' tolabel{2}],'interpreter','none')
+%         xlabel(['PC1 (' num2str(percVar(1)) '%) : ' toLabel{1}],'interpreter','none')
+%         ylabel(['PC2 (' num2str(percVar(2)) '%) : ' toLabel{2}],'interpreter','none')
 %         title('');
 %     case 'nmf'
-%         xlabel(['NMF1: ' tolabel{1}],'interpreter','none')
-%         ylabel(['NMF2: ' tolabel{2}],'interpreter','none')
+%         xlabel(['NMF1: ' toLabel{1}],'interpreter','none')
+%         ylabel(['NMF2: ' toLabel{2}],'interpreter','none')
 %         title(['Mean reconstruction error: ' num2str(meanreconstructionerror)]);
 % end
 % 

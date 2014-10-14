@@ -86,7 +86,9 @@ fprintf(1,' Loaded.\n');
 % In this script, each of these pieces of data (from the database) will be trimmed and normalized
 % then saved to HCTSA_N.mat
 
-%% (0) SUBSET USING GIVEN INDICIES
+% ------------------------------------------------------------------------------
+%% Subset using given indices, subs
+% ------------------------------------------------------------------------------
 if ~isempty(subs)
     kr0 = subs{1}; % rows to keep (0)
     if isempty(kr0),
@@ -150,13 +152,14 @@ if thresh_r > 0 % if 1, then even the worst are included
             fprintf(1,'All %u time series had greater than %4.2f%% good values. Keeping them all.\n', ...
                             size(TS_DataMat,1),thresh_r*100)
         end
-        TS_DataMat = TS_DataMat(kr1,:); % ********************* KR1 ***********************
+        % ********************* kr1 ***********************
+        TS_DataMat = TS_DataMat(kr1,:);
         TS_Quality = TS_Quality(kr1,:);
     else
         error('No time series had more than %4.2f%% good values.',thresh_r*100)
     end
 else
-    fprintf(1,'No filtering of time series based on proportion of bad values.\n')
+    % fprintf(1,'No filtering of time series based on proportion of bad values.\n')
     kr1 = (1:size(TS_DataMat,1));
 end
 
@@ -181,9 +184,9 @@ if thresh_c > 0
                     'keeping them all :-)'],thresh_c*100)
         end
 
-        TS_DataMat = TS_DataMat(:,kc1); % *********************** kc1 *********************
+        % *********************** kc1 *********************
+        TS_DataMat = TS_DataMat(:,kc1);
         TS_Quality = TS_Quality(:,kc1);
-        
     else
         error('No operations had fewer than %u%% good values.',thresh_c*100)
     end

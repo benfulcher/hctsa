@@ -3,18 +3,18 @@
 % --------------------------------------------------------------------------
 % 
 % This function fills in the missing elements of TS_DataMat, from HCTSA_loc.mat
-% (retrieved from the database using TSQ_prepared) The function systematically
-% calculates these missing elements (in parallel over operations for each time
-% series if specified)
+% (retrieved from the database using TSQ_prepared).
+% The function systematically calculates these missing elements (in parallel
+% over operations for each time series if specified).
 % 
 %---INPUTS:
-% tolog:      if 1 (0 by default) writes to a log file.
-% toparallel: if 1, attempts to use the Parallel Computing Toolbox to run
+% doLog:      if 1 (0 by default) writes to a log file.
+% doParallel: if 1, attempts to use the Parallel Computing Toolbox to run
 %             computations in parallel over multiple cores.
 % bevocal:    if 1, gives additional user feedback.
 % 
 %---OUTPUTS:
-% Writes over HCTSA_loc.mat
+% Writes output to file, over HCTSA_loc.mat
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -32,7 +32,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_brawn(tolog,toparallel,bevocal)
+function TSQ_brawn(doLog,doParallel,bevocal)
     
 % --------------------------------------------------------------------------
 %% Check inputs and set defaults
@@ -41,9 +41,9 @@ function TSQ_brawn(tolog,toparallel,bevocal)
 % Log to file
 if nargin < 1
     % By default, do not log to file, write to screen (if bevocal)
-	tolog = 0;
+	doLog = 0;
 end
-if tolog
+if doLog
 	fn = sprintf('HCTSA_brawn_%s.log',datestr(now,30));
 	fid = fopen(fn,'w','n');
 	fprintf(1,'Calculation details will be logged to %s\n',fn);
@@ -54,9 +54,9 @@ end
 
 % Use Matlab's Parallel Computing toolbox?
 if nargin < 2
-	toparallel = 0;
+	doParallel = 0;
 end
-if toparallel
+if doParallel
 	fprintf(fid,'Computation will be performed across multiple cores using Matlab''s Parallel Computing Toolbox\n')
 else % use single-threaded for loops
 	fprintf(fid,'Computations will be performed serially without parallelization\n')
@@ -86,13 +86,13 @@ fprintf(fid,['Calculation has begun on %s using %u datasets ' ...
 % ------------------------------------------------------------------------------
 %% Open parallel processing worker pool
 % ------------------------------------------------------------------------------
-if toparallel
+if doParallel
     % first check that the user can use the Parallel Computing Toolbox:
     heyo = which('matlabpool');
     if isempty(heyo)
         fprintf(1,['Parallel Computing Toolbox not found -- ' ...
                         'cannot perform computations across multiple cores\n'])
-        toparallel = 0;
+        doParallel = 0;
     else
         if (matlabpool('size') == 0)
         	matlabpool open;
@@ -109,7 +109,7 @@ end
 % Times stores the time taken for each time series to have its operations
 % calculated (for determining time remaining)
 times = zeros(NumTimeSeries,1); 
-LastSavedTime = 0; % Last saved time
+lastSavedTime = 0; % Last saved time
 
 % --------------------------------------------------------------------------
 %% Computation
@@ -205,7 +205,7 @@ for i = 1:NumTimeSeries
 		% Evaluate all the master operations
         TimeSeries_i_ID = TimeSeries(i).ID; % Make a PARFOR-friendly version of the ID
         master_timer = tic;
-		if toparallel
+		if doParallel
             parfor jj = 1:nMtocalc % PARFOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
                                 TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj}, ...
@@ -236,7 +236,7 @@ for i = 1:NumTimeSeries
         % --------------------------------------------------------------------------
 		%% Assign all the results to the corresponding operations
         % --------------------------------------------------------------------------
-		if toparallel
+		if doParallel
 	        parfor jj = 1:ncal
                 [ffi(jj), qqi(jj), cti(jj)] = TSQ_brawn_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
                                                    MasterCalcTime(par_OperationMasterInd(jj)), ...
@@ -317,6 +317,7 @@ for i = 1:NumTimeSeries
     % The time taken to calculate (or not, if ncal = 0) all operations for this time series:
     times(i) = toc(bigtimer); clear bigtimer
 
+
     % --------------------------------------------------------------------------
     %% Calculation complete: display information about this time series calculation
     % --------------------------------------------------------------------------
@@ -341,16 +342,20 @@ for i = 1:NumTimeSeries
     end
     fprintf(fid,'********************************************************************\n');
 
-    % --------------------------------------------------------------------------
- 	%% Save to HCTSA_loc every 10 minutes just in case
-    % --------------------------------------------------------------------------
-    if sum(times(1:i))-LastSavedTime > 60*10; % It's been more than 10 mins since last save
-        fprintf(fid,'Not finished calculations yet, but saving progress so far to file...')
-        save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
-                                    'Operations','MasterOperations','-v7.3')
-        fprintf(fid,' All saved.\n')
-        LastSavedTime = sum(times(1:i)); % The last saved time
-    end
+
+ 	%     % --------------------------------------------------------------------------
+ 	% %% Save to HCTSA_loc every 10 minutes in case of disaster
+ 	%     % --------------------------------------------------------------------------
+ 	%     if (sum(times(1:i)) - lastSavedTime) > 60*10
+ 	% 		% It's been more than 10 mins since last save
+ 	%         fprintf(fid,'Not finished calculations yet, but saving progress so far to file...')
+ 	%
+ 	%         save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
+ 	%                                     'Operations','MasterOperations','-v7.3')
+ 	%
+ 	%         fprintf(fid,' All saved.\n')
+ 	%         lastSavedTime = sum(times(1:i)); % The last saved time
+ 	%     end
 end
 
 
@@ -370,7 +375,9 @@ save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
 fprintf(fid,' All saved.\n')
 
 % Close the .log file:
-if tolog, fclose(fid); end
+if doLog
+	fclose(fid);
+end
 
 fprintf(1,['Calculation complete: you can now run TSQ_agglomerate to upload' ...
                                 ' the results to a mySQL database\n'])

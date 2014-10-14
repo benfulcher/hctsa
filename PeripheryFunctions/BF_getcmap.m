@@ -6,7 +6,7 @@
 % from http://colorbrewer2.org/
 % 
 % The online tool, colorbrewer2, is copyright Cynthia Brewer, Mark Harrower and
-% The Pennsylvania State University
+% The Pennsylvania State University.
 % 
 %---INPUTS:
 % whichcmap, the name of a colormap (see long list below)
@@ -20,8 +20,8 @@
 %            (ii) 0: doesn't invert the ordering of the colors. 
 % 
 %---HISTORY:
-% Ben Fulcher, 5/11/2010
-% 
+% Ben Fulcher, 2010-11-5
+% Ben Fulcher, 2014-08-25: Set minimum group number to 3 to avoid empty output
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -50,6 +50,11 @@ if nargin < 3 || isempty(cellout)
 end
 if nargin < 4 || isempty(flipmeout)
     flipmeout = 0; % flips order of output
+end
+
+% Minimum number of groups is 3:
+if ng < 3
+    ng = 3;
 end
 
 % Choices for whichcmap:
@@ -95,9 +100,6 @@ end
 % 'set1'
 % 'set2'
 % 'set3'
-
-% since most maps need at least 3 colours...
-% if ng < 3, ng = 3; end
 
 switch whichcmap
     case 'blues'

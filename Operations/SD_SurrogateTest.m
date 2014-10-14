@@ -50,6 +50,9 @@
 %                 function include a z-test between the two distributions, and
 %                 some comparative rank-based statistics.
 % 
+%---HISTORY:
+% Ben Fulcher, 28/1/2011
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -74,10 +77,10 @@
 % ------------------------------------------------------------------------------
 
 function out = SD_SurrogateTest(x,surrmeth,nsurrs,extrap,teststat)
-% Ben Fulcher, 28/1/2011
 
 doplot = 0; % plot outputs to a figure
 
+% ------------------------------------------------------------------------------
 %% CHECK INPUTS
 if nargin < 2 || isempty(surrmeth)
     surrmeth = 'RP'; % randomize phases
@@ -98,7 +101,8 @@ end
 
 N = length(x); % time-series length
 
-%% OK NOW DO SHIT
+% ------------------------------------------------------------------------------
+%% And we're off!
 
 % 1) make surrogates
 z = SD_MakeSurrogates(x,surrmeth,nsurrs,extrap);
