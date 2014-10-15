@@ -1,3 +1,4 @@
+#include <string.h>
 #include "mextools/mextools.h"
 
 #define MAX_LINE_SIZE 65536

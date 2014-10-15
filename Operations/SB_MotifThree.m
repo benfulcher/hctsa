@@ -40,7 +40,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = ST_MotifThree(y,trit)
+function out = SB_MotifThree(y,trit)
 
 if nargin < 2 || isempty(trit)
     trit = 'quantile';

@@ -77,7 +77,7 @@ for i = 1:nbinr % vary over number of bins in histogram
         end
     end
     if amimins(i) == 0
-		amimins(i) = taur(end)
+		amimins(i) = taur(end);
 	end
 end
 
