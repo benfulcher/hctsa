@@ -36,6 +36,10 @@
 
 function TSQ_plot_2d(Features,DataInfo,TrainTest,annotatep,keepksdensities,lossmeth)
 
+% ------------------------------------------------------------------------------
+%% Check Inputs:
+% ------------------------------------------------------------------------------
+
 % Features should be a Nx2 vector of where to plot each of the N data objects in the two-dimensional space
 if nargin < 1
     error('You must provide two-dimensional feature vectors for the data.')
@@ -138,6 +142,7 @@ switch lossmeth
         end
 end
 
+
 % ------------------------------------------------------------------------------
 %% Plot
 % ------------------------------------------------------------------------------
@@ -157,7 +162,7 @@ else
         c = BF_getcmap('set1',NumGroups,1);
     elseif NumGroups <= 12
         c = BF_getcmap('set3',NumGroups,1);
-    elseif NumGroups<=22
+    elseif NumGroups <= 22
         c = [BF_getcmap('set1',NumGroups,1); ...
                     BF_getcmap('set3',NumGroups,1)];
     elseif NumGroups <= 50
@@ -169,6 +174,7 @@ end
 if (NumGroups == 1)
     c = {'k'}; % Just use black...
 end
+
 
 % ------------------------------------------------------------------------------
 %% Plot distributions
@@ -194,6 +200,7 @@ if keepksdensities
     set(gca,'YTickLabel',[]);
     set(gca,'xlim',[minn,maxx]);
 end
+
 
 % ------------------------------------------------------------------------------
 %% Set up a 2D plot
@@ -240,6 +247,7 @@ end
 %                     'MarkerSize',10,'LineWidth',2);
 % end
 
+
 % ------------------------------------------------------------------------------
 %% Plot a classify boundary?
 % ------------------------------------------------------------------------------
@@ -267,6 +275,7 @@ if (NumGroups == 2) && strcmp(lossmeth,'linclass');
 %     xlabel([labels{mr(1)} ' [' keywords{mr(1)} '] -- loss = ' num2str(round(loss(1)*100)) '%'],'interpreter','none')
 %     ylabel('')
 end
+
 
 % ------------------------------------------------------------------------------
 %% Label Axes
@@ -296,6 +305,7 @@ else
     end
 end
 legend(legs);
+
 
 % ------------------------------------------------------------------------------
 %% Annotate time-series data
@@ -419,6 +429,10 @@ for j = 1:NumAnnotations
                 '-','color',c{TheGroup},'LineWidth',TheLineWidth);
 end
 
+
+
+
+% ------------------------------------------------------------------------------
 function [fr, xr] = plot_ks(v,c,swap)
     % Vector v is the vector of a given group
     % c is the color
@@ -435,5 +449,6 @@ function [fr, xr] = plot_ks(v,c,swap)
         plot(xr,fr,'.','color',c)
     end
 end
+% ------------------------------------------------------------------------------
 	
 end

@@ -27,17 +27,15 @@ fprintf(1,['In the following order, we will' ...
                 '\n- Set up the database,' ...
                 '\n- Add the operations,' ...
                 '\n- Compile the toolboxes,' ...
-                '\n- Test that things are working.'])
+                '\n- Test that things are working.\n'])
 
 % ------------------------------------------------------------------------------
 %% 1. Add the paths:
 % ------------------------------------------------------------------------------
-fprintf(1,'Adding the paths...')
 try
 	startup
-	fprintf('done.\n')
 catch emsg
-	fprintf(1,'error.\n%s\n',emsg)
+	fprintf(1,'error.\n%s\n',emsg.message)
 end
 
 % ------------------------------------------------------------------------------

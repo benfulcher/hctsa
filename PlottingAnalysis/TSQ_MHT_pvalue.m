@@ -11,7 +11,7 @@
 %             assigned to the data
 % 
 %---HISTORY:
-%--Based on previous code named TSQ_MHT.
+%--Based on previous code, TSQ_MHT.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -99,7 +99,9 @@ switch TheTestStatistic
 end
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)))
 
+% ------------------------------------------------------------------------------
 %% How many are significant?
+
 % Fill structure NSig
 
 % (*) No correction!:
@@ -126,6 +128,7 @@ if NSig.BH > 0
                     ' %4.2f\n'],pvals_sort(NSig.BH),teststat(ix(NSig.BH)))
 end
 
+
 if doplot
     % False discovery rate plot
     figure('color','w'); box('on'); hold on
@@ -139,7 +142,8 @@ if doplot
     legend({'linear fdr threshold',['Significant: FDR<' num2str(fdr)],['Not significant: FDR > ' num2str(fdr)]})
 end
 
-%% Estimate False discovery rate
+% ------------------------------------------------------------------------------
+%% Estimate False discovery rate:
 % (algorithm 18.3 in Hastie)
 % choose cut-point, C
 if (NSig.BH > 0) % some were significant
@@ -152,14 +156,15 @@ end
 switch TheTestStatistic
     case 'linclass'
         Robs = sum(teststat <= C); % we observe significant
-        EV = sum(teststatR(:) <= C)/K; % randomly significant
+        EV = sum(teststatR(:) <= C)/K; % significant by chance
     case {'tstat','corrcoef'}
         Robs = sum(abs(teststat) >= abs(C)); % we observe significant
-        EV = sum(abs(teststatR(:)) >= abs(C))/K; % randomly significant
+        EV = sum(abs(teststatR(:)) >= abs(C))/K; % significant by chance
 end
 FDR = EV/Robs;
 fprintf(1,'False discovery rate at threshold C = %4.2f is %4.2f\n',C,FDR)
 
+% ------------------------------------------------------------------------------
 %% Plot histogram with significance thresholds included
 if doplot
     plothow = 'threshold';

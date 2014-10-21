@@ -24,7 +24,7 @@
 %       (iv) 'quality': Just the quality labels
 % 
 %---OUTPUT:
-%--DidWrite [opt] is 1 if Writes new file HCTSA_loc.mat
+%--didWrite [opt] is 1 if Writes new file HCTSA_loc.mat
 % 
 % Other outputs are to the file HCTSA_loc.mat contains
 %--TS_DataMat, contains the data
@@ -50,10 +50,10 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function DidWrite = TSQ_prepared(ts_ids, op_ids, RetrieveWhatEntries, RetrieveWhatData)
+function didWrite = TSQ_prepared(ts_ids, op_ids, RetrieveWhatEntries, RetrieveWhatData)
     
-% Until it actually writes something, set the function output, DidWrite = 0
-DidWrite = 0;
+% Until it actually writes something, set the function output, didWrite = 0
+didWrite = 0;
 
 % --------------------------------------------------------------------------
 %% Check inputs and set defaults
@@ -83,25 +83,25 @@ if ~ischar(RetrieveWhatData) || ~ismember(RetrieveWhatData,RetrieveWhatDataCanBe
                 'one of the following: %s'],BF_cat(RetrieveWhatEntriesCanBe))
 end
 
-% --------------------------------------------------------------------------
-%% Get going
-% --------------------------------------------------------------------------
-% Retrieve from the database over many iterations, retrieving data from a given
-% number of time series at each iteration
-% Could do one big query and then reform to a matrix, but I'll do it row-by-row
-% This is faster than doing one big query
+% ------------------------------------------------------------------------------
+%% Preliminaries
+% ------------------------------------------------------------------------------
 
-% Make sure ts_ids and op_ids are column vectors
+% Make sure ts_ids and op_ids are column vectors:
 if size(ts_ids,2) > size(ts_ids,1), ts_ids = ts_ids'; end
 if size(op_ids,2) > size(op_ids,1), op_ids = op_ids'; end
-% Sort ids ascending
+
+% Sort ids ascending:
 ts_ids = sort(ts_ids,'ascend');
 op_ids = sort(op_ids,'ascend');
-% Write a comma-delimited string of ids
+
+% Write a comma-delimited string of ids:
 ts_ids_string = BF_cat(ts_ids,',');
 op_ids_string = BF_cat(op_ids,',');
+
 % Count the number of time series and operations
-nts = length(ts_ids); nops = length(op_ids);
+nts = length(ts_ids);
+nops = length(op_ids);
 
 if (nts == 0)
 	error('Oops. There''s nothing to do! No time series to retrieve!');
@@ -112,7 +112,10 @@ end
 % Open database connection
 [dbc, dbname] = SQL_opendatabase;
 
-% First refine the set of time series and operations to those that actually exist in the database
+
+% ------------------------------------------------------------------------------
+% Refine the set of time series and operations to those that actually exist in the database
+% ------------------------------------------------------------------------------
 opids_db = mysql_dbquery(dbc,sprintf('SELECT op_id FROM Operations WHERE op_id IN (%s)',op_ids_string));
 opids_db = vertcat(opids_db{:});
 tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string));
@@ -128,6 +131,7 @@ if length(tsids_db) < nts % Actually there are fewer time series in the database
     ts_ids_string = BF_cat(ts_ids,',');
     nts = length(ts_ids);
 end
+
 if length(opids_db) < nops % actually there are fewer operations in the database
     if (length(opids_db) == 0) % now there are no operations to retrieve
         fprintf(1,'None of the %u specified operations exist in ''%s''\n',nops,dbname)
@@ -142,13 +146,14 @@ end
 
 % Tell me about it
 fprintf(1,'We have %u time series and %u operations to retrieve from %s.\n',nts,nops,dbname);
-fprintf(1,'Filling and saving to local Matlab file HCTSA_loc.mat from the Results table of %s.\n',dbname);
+fprintf(1,['Filling and saving to local Matlab file HCTSA_loc.mat from ' ...
+                                'the Results table of %s.\n'],dbname);
 
 % --------------------------------------------------------------------------
 %% Intialize matrices
 % --------------------------------------------------------------------------
 
-% Start as Infs to distinguish unwritten entries after database pull
+% Initialize as Infs to distinguish unwritten entries after database retrieval
 switch RetrieveWhatData
 case 'all'
     TS_DataMat = ones(nts,nops)*Inf;  % Outputs
@@ -163,10 +168,7 @@ case 'quality'
     TS_Quality = ones(nts,nops)*Inf;  % Quality labels
 end
 
-
-% --------------------------------------------------------------------------
-%% Display information
-% --------------------------------------------------------------------------
+% Display information to user:
 switch RetrieveWhatEntries
 case 'all' 
     fprintf(1,['Retrieving all elements from the database (one time series ' ...
@@ -179,12 +181,11 @@ case 'error'
                 'per database query). Please be patient...\n']);
 end
 
+% --------------------------------------------------------------------------
+%% Retrieve the data from the database:
+% --------------------------------------------------------------------------
 IterationTimes = zeros(nts,1); % Record the time taken for each iteration
 DidRetrieve = zeros(nts,1);    % Keep track of whether data was retrieved at each iteration
-
-% --------------------------------------------------------------------------
-%% First retrieve the data:
-% --------------------------------------------------------------------------
 for i = 1:nts
     
     IterationTimer = tic; % Time each iteration using IterationTimer
@@ -299,9 +300,11 @@ end
 %% Finished retrieving from the database!
 % --------------------------------------------------------------------------
 if any(DidRetrieve)
-    fprintf(1,'Retrieved data from %s over %u iterations in %s.\n',dbname,nts,BF_thetime(sum(IterationTimes)));
+    fprintf(1,'Retrieved data from %s over %u iterations in %s.\n',...
+                            dbname,nts,BF_thetime(sum(IterationTimes)));
 else
-    fprintf(1,'Over %u iterations, no data was retrieved from %s.\nNot writing any data to file.\n',nts,dbname);
+    fprintf(1,['Over %u iterations, no data was retrieved from %s.\n' ...
+                            'Not writing any data to file.\n'],nts,dbname);
     SQL_closedatabase(dbc); return
 end
 	
@@ -406,7 +409,7 @@ end
 SQL_closedatabase(dbc)
 
 % ------------------------------------------------------------------------------
-% Save to HCTSA_loc.mat
+%% Save to HCTSA_loc.mat
 % ------------------------------------------------------------------------------
 fprintf(1,'Saving local versions of the data to HCTSA_loc.mat...');
 save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','-v7.3');
@@ -426,10 +429,10 @@ case 'quality'
 end
 
 fprintf(1,' Done.\n');
-DidWrite = 1;
+didWrite = 1;
 
 % ------------------------------------------------------------------------------
-% If retrieved quality labels, display how many entries need to be calculated
+%% If retrieved quality labels, display how many entries need to be calculated
 % ------------------------------------------------------------------------------
 if strcmp(RetrieveWhatData,'outputs')
     fprintf(1,'You have the outputs, but you don''t know which are good or not without the quality labels...\n');

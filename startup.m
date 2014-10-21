@@ -83,11 +83,11 @@ addpath(fullfile(pwd,'Toolboxes','Max_Little','fastdfa'));
 % TSTOOL
 fprintf(1,', TSTOOL')
 addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
-settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL')); % this routine adds the necessary paths for OpenTSTOOL
-
+% Run the routine adds the necessary paths for OpenTSTOOL:
+settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 
 % ------------------------------------------------------------------------------
 %% Finished:
 % ------------------------------------------------------------------------------
 clear addfcn % clear the add function
-fprintf(1,'.\nDone.\n')
+fprintf(1,'.\n---Done.\n')
