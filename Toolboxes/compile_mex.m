@@ -3,9 +3,9 @@
 % It must be run in the Toolboxes directory.
 % 
 %---HISTORY:
-% Romesh Abeysuriya, March 2013
-% Modified by Ben Fulcher, 2013
 % Tweaks by Dror Cohen, 2014-04-08
+% Modified by Ben Fulcher, 2013
+% Romesh Abeysuriya, March 2013
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -52,9 +52,11 @@ try
     cd([ToolDir, 'Max_Little/fastdfa']);
 	mex ML_fastdfa_core.c
     fprintf(1,' done.\n');
-catch
-    fprintf(1,'\n');
-	error('An error occurred while compiling. Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile.m');
+catch emsg
+    fprintf(1,'%s\n\n',emsg.message);
+    error(['An error occurred while compiling.\n' ...
+        'It appears that mex is not set up to work on this system (cf. ''doc mex'').\n' ...
+        'Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile_mex.m']);
 end
 
 % ------------------------------------------------------------------------------
