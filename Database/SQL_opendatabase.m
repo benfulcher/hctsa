@@ -52,16 +52,21 @@ end
 if bevocal
 	fprintf(1,'Using database %s\n',dbname)
     fprintf(1,['Connecting to host ''%s'', database ''%s'', using username' ...
-            ' ''%s'' and password ''%s''\n'],hostname,dbname,username,password)
+            ' ''%s'' and password ''%s''...'],hostname,dbname,username,password)
 end
 
-%% Open database as dbc
+% ------------------------------------------------------------------------------
+% Open database as dbc
 dbc = mysql_dbopen(hostname,dbname,username,password);
 
 if isempty(dbc)
 	error('Failed to load SQL database');
+elseif bevocal
+    fprintf(1,' Connected!\n');
 end
 
 mysql_dbexecute(dbc,['USE ' dbname]);
+
+
 
 end

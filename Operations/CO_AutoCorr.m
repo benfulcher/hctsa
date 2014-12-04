@@ -9,12 +9,16 @@
 % tau, the time-delay. If tau is a scalar, returns autocorrelation for y at that
 %       lag. If tau is a vector, returns autocorrelations for y at that set of
 %       lags.
-% WhatMethod, the method of computing the autocorrelation: 'Fourier',
+% whatMethod, the method of computing the autocorrelation: 'Fourier',
 %             'TimeDomainStat', or 'TimeDomain'.
 %       
 %---OUTPUT: the autocorrelation at the given time-lag.
 %
 %---HISTORY:
+% Ben Fulcher, 2014-10-28. Added a version of the 'TimeDomain' method that can
+% tolerate NaN values in the time series, for a specific application for Simonne
+% Cohen.
+% 
 % Ben Fulcher, 2014-03-24. Added multiple definitions for computing the
 %       autocorrelation Computing mean/std across the full time series makes a
 %       significant difference for short time series, but can produce values
@@ -44,7 +48,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_AutoCorr(y,tau,WhatMethod)
+function out = CO_AutoCorr(y,tau,whatMethod)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -53,15 +57,15 @@ if nargin < 2 || isempty(tau)
     tau = 1; % Use a lag of 1 by default
 end
 
-if nargin < 3 || isempty(WhatMethod)
-    WhatMethod = 'TimeDomain';
+if nargin < 3 || isempty(whatMethod)
+    whatMethod = 'TimeDomain';
 end
 
 % ------------------------------------------------------------------------------
 % Evaluate the time-series autocorrelation
 % ------------------------------------------------------------------------------
 
-switch WhatMethod
+switch whatMethod
 case 'Fourier'
     % ------------------------------------------------------------------------------
     % Estimation based on Matlab function autocorr, based on method of:
@@ -97,8 +101,8 @@ case 'Fourier'
 
 case 'TimeDomainStat'
     % ------------------------------------------------------------------------------
-    % Assume a stationary process and estimate mean and standard deviation
-    % from the full time series, but then values can be outside [-1,1]...
+    % Assume a stationary process and estimate mean and standard deviation from the full time
+    % series, although this method can produce outputs that are outside the range [-1,1]
     
     N = length(y); % time-series length
     sigma2 = var(y); % time-series standard deviation
@@ -120,12 +124,32 @@ case 'TimeDomain'
     % Estimate mean and standard deviation from each portion of the time series
 
     N = length(y); % time-series length
-
-    if length(tau) == 1 % Output a single value at the given time-lag
-        out = mean((y(1:N-tau) - mean(y(1:N-tau))).* ...
+    
+    
+    if length(tau) == 1
+        % Output a single value at the given time-lag:
+        
+        if any(isnan(y))
+            % If NaNs exist in the time series, compute just for a subset
+            % of points
+            goodR = ((~isnan(y(1:N-tau))) & ~isnan(y(tau+1:N)));
+            fprintf(1,'NaNs in time series, computing for %u/%u pairs of points\n',...
+                                sum(goodR),length(goodR));
+            % original time series:
+            y1 = y(1:N-tau);
+            y1N = y1(goodR) - mean(y1(goodR)); % (relative to mean for included points)
+            % lagged time series:
+            y2 = y(tau+1:N);
+            y2N = y2(goodR) - mean(y2(goodR)); % (relative to mean for included points)
+            
+            out = mean(y1N.*y2N)/std(y1(goodR))/std(y2(goodR));
+            
+        else
+            out = mean((y(1:N-tau) - mean(y(1:N-tau))).* ...
                 (y(tau+1:N) - mean(y(tau+1:N))))/std(y(1:N-tau))/std(y(tau+1:N));
+        end
     else
-        % Output values over a range of time lags
+        % Output values over a range of time lags:
         out = zeros(length(tau),1);
         for i = 1:length(tau)
             out(i) = mean((y(1:N-tau(i)) - mean(y(1:N-tau(i)))).*(y(tau(i)+1:N) ...
@@ -134,6 +158,8 @@ case 'TimeDomain'
     end
 
 otherwise
-    error('Unknown autocorrelation estimation method ''%s''',WhatMethod)
+    error('Unknown autocorrelation estimation method ''%s''',whatMethod)
+
+end
 
 end

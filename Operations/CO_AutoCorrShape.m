@@ -4,11 +4,15 @@
 % 
 % Outputs a set of statistics summarizing how the autocorrelation function
 % changes with the time lag, tau.
+% 
 % Outputs include the number of peaks, and autocorrelation in the
 % autocorrelation function itself.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
+% 
+%---HISTORY:
+% Ben Fulcher, 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -34,7 +38,6 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_AutoCorrShape(y)
-% Ben Fulcher, 2009
 
 % Check a curve-fitting toolbox license is available
 BF_CheckToolbox('curve_fitting_toolbox');
@@ -105,7 +108,7 @@ else % less than 5 points, return NaNs:
     out.ac1minima = NaN;
 end
 
-% Autocorrelation of the ACF
+% Autocorrelation of the ACF (how meta!)
 out.ac1 = CO_AutoCorr(acf,1);
 out.ac2 = CO_AutoCorr(acf,2);
 out.ac3 = CO_AutoCorr(acf,3);

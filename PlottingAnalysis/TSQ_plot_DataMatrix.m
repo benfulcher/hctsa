@@ -5,10 +5,10 @@
 % Plot the data matrix.
 % 
 %---INPUTS:
-% WhatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
-%         data in HCTSA_cl.mat (default)
-% kwgs:  specify keyword groups to color different keywords differently in the
-%         data matrix [opt].
+% whatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
+%         data in HCTSA_cl.mat (default), or specify a filename to load data
+%         from that file.
+% colorGroups: Set to 1 to color time-series groups with different colormaps.
 % 
 %---OUTPUT:
 % Produces a colormap plot of the data matrix with time series as rows and
@@ -30,76 +30,76 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_DataMatrix(WhatData,ColorGroups,CustomOrder,CustomColorMap)
+function TSQ_plot_DataMatrix(whatData,colorGroups,customOrder,customColorMap)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
 % ------------------------------------------------------------------------------
 % What data to plot:
-if nargin < 1 || isempty(WhatData)
-    WhatData = 'cl'; % Load data from HCTSA_cl by default
+if nargin < 1 || isempty(whatData)
+    whatData = 'cl'; % Load data from HCTSA_cl by default
 end
 % Color groups of time series differently:
-if nargin < 2 || isempty(ColorGroups)
-    ColorGroups = 0; % Don't color groups by default
+if nargin < 2 || isempty(colorGroups)
+    colorGroups = 0; % Don't color groups by default
 end
-if nargin < 3 || isempty(CustomOrder)
-	CustomOrder = {[],[]};
+if nargin < 3 || isempty(customOrder)
+	customOrder = {[],[]};
 end
 if nargin < 4
-    CustomColorMap = 'redyellowblue';
+    customColorMap = 'redyellowblue';
 end
 
 % --------------------------------------------------------------------------
 %% Read in the data
 % --------------------------------------------------------------------------
-if isstruct(WhatData)
-    % can specify all of this in the WhatData argument
-    TimeSeries = WhatData.TimeSeries;
-    Operations = WhatData.Operations;
-    TS_DataMat = WhatData.TS_DataMat;
+if isstruct(whatData)
+    % can specify all of this in the whatData argument
+    TimeSeries = whatData.TimeSeries;
+    Operations = whatData.Operations;
+    TS_DataMat = whatData.TS_DataMat;
 else
-    if strcmp(WhatData,'cl')
+    if strcmp(whatData,'cl')
         TheFile = 'HCTSA_cl.mat'; TheRoutine = 'TSQ_cluster';
-    elseif strcmp(WhatData,'norm')
+    elseif strcmp(whatData,'norm')
         TheFile = 'HCTSA_N.mat'; TheRoutine = 'TSQ_normalize';
-    elseif ischar(WhatData) % Specify a filename
+    elseif ischar(whatData) % Specify a filename
         a = which(TheFile); % First check it exists
         if isempty(a)
             error('\n%s not found. You should probably run %s...',TheFile,TheRoutine);
         end
     else
         error(['Unknown specifier ''%s'', please input the data structure, ' ...
-                        '\t\nor specify ''norm'', ''cl'', or a FileName'],WhatData)
+                        '\t\n or specify ''norm'', ''cl'', or a FileName'],whatData)
     end
     fprintf(1,'Reading data from %s...',TheFile);
     load(TheFile,'TimeSeries','Operations','TS_DataMat')
     fprintf(1,' Done.\n');
 end
 
-if ColorGroups
-    TimeSeriesGroups = [TimeSeries.Group];
+if colorGroups
+    timeSeriesGroups = [TimeSeries.Group];
     fprintf(1,'Coloring groups of time series...\n');
 end
 
-TimeSeriesFileNames = {TimeSeries.FileName}; clear TimeSeries; % Just extract filenames
-OperationNames = {Operations.Name}; clear Operations; % Just extract operation names
+timeSeriesFileNames = {TimeSeries.FileName}; clear TimeSeries; % Just extract filenames
+operationNames = {Operations.Name}; clear Operations; % Just extract operation names
 
 [nts, nops] = size(TS_DataMat); % size of the data matrix
 
 % ------------------------------------------------------------------------------
-%% Reorder according to CustomOrder
+%% Reorder according to customOrder
 % ------------------------------------------------------------------------------
-if ~isempty(CustomOrder{1}) % reorder rows
+if ~isempty(customOrder{1}) % reorder rows
 	fprintf(1,'Reordering time series according to custom order specified\n');
-	TS_DataMat = TS_DataMat(CustomOrder{1},:);
-    TimeSeriesFileNames = TimeSeriesFileNames(CustomOrder{1});
+	TS_DataMat = TS_DataMat(customOrder{1},:);
+    timeSeriesFileNames = timeSeriesFileNames(customOrder{1});
 end
 
-if ~isempty(CustomOrder{2}) % reorder columns
+if ~isempty(customOrder{2}) % reorder columns
 	fprintf(1,'Reordering operations according to custom order specified\n');
-	TS_DataMat = TS_DataMat(:,CustomOrder{2});
-    OperationNames = OperationNames(CustomOrder{2});
+	TS_DataMat = TS_DataMat(:,customOrder{2});
+    operationNames = operationNames(customOrder{2});
 end
 
 % --------------------------------------------------------------------------
@@ -109,101 +109,101 @@ figure('color','w'); box('on');
 title(sprintf('Data matrix of size %u x %u',nts,nops))
 ng = 6; % number of gradations in each set of colourmap
 
-if ColorGroups    
-    gi = BF_ToGroup(TimeSeriesGroups);
+if colorGroups
+    gi = BF_ToGroup(timeSeriesGroups);
     
-    NumGroups = length(gi);
+    numGroups = length(gi);
     
     % Add a group for unlabelled data items if they exist
     if sum(cellfun(@length,gi)) < nts
         % Add an unlabelled class
         gi0 = gi;
-        gi = cell(NumGroups+1,1);
-        for i = 1:NumGroups
+        gi = cell(numGroups+1,1);
+        for i = 1:numGroups
             gi{i} = gi0{i};
         end
         clear gi0;
         gi{end} = setxor(1:nts,vertcat(gi{:}));
-        NumGroups = NumGroups + 1;
+        numGroups = numGroups + 1;
     end
     
-    fprintf(1,'Coloring data according to %u groups\n',NumGroups);
+    fprintf(1,'Coloring data according to %u groups\n',numGroups);
     
     % Change range of TS_DataMat to make use of new colormap appropriately
     ff = 0.9999999;
     squashme = @(x)ff*(x - min(x(:)))/(max(x(:))-min(x(:)));
     TS_DataMat = squashme(TS_DataMat);
-    for jo = 1:NumGroups
+    for jo = 1:numGroups
         TS_DataMat(gi{jo},:) = squashme(TS_DataMat(gi{jo},:)) + jo - 1;
     end
 else
-    NumGroups = 0;
+    numGroups = 0;
 end
 
 % --------------------------------------------------------------------------
 %% Set the colormap
 % --------------------------------------------------------------------------
-if NumGroups <= 1
-    if strcmp(CustomColorMap,'redyellowblue');
-        CustomColorMap = BF_getcmap('redyellowblue',ng,0);
+if numGroups <= 1
+    if strcmp(customColorMap,'redyellowblue');
+        customColorMap = BF_getcmap('redyellowblue',ng,0);
     else
-        CustomColorMap = gray(ng);
+        customColorMap = gray(ng);
     end
-    colormap(CustomColorMap)
+    colormap(customColorMap)
 else
     cmap = colormap(BF_getcmap('blues',ng,0,1));
-    if NumGroups >= 2
+    if numGroups >= 2
         cmap = [cmap; BF_getcmap('greens',ng,0,1)];
     end
-    if NumGroups >= 3
+    if numGroups >= 3
         cmap = [cmap; BF_getcmap('oranges',ng,0,1)];
     end
-    if NumGroups >= 4
+    if numGroups >= 4
         cmap = [cmap; BF_getcmap('purples',ng,0,1)];
     end
-    if NumGroups >= 5
+    if numGroups >= 5
         cmap = [cmap; BF_getcmap('reds',ng,0,1)];
     end
-    if NumGroups >= 6
+    if numGroups >= 6
         cmap = [cmap; pink(ng)];
     end
-    if NumGroups >= 7
+    if numGroups >= 7
         cmap = [cmap; gray(ng)];
     end
-    if NumGroups >= 8
+    if numGroups >= 8
         cmap = [cmap; BF_getcmap('yelloworangered',ng,0,1)];
     end
-    if NumGroups >= 9
+    if numGroups >= 9
         cmap = [cmap; BF_getcmap('purplebluegreen',ng,0,1)];
     end
-    if NumGroups >= 10
+    if numGroups >= 10
         cmap = [cmap; BF_getcmap('yellowgreenblue',ng,0,1)];
     end
-    if NumGroups >= 11
+    if numGroups >= 11
         cmap = [cmap; BF_getcmap('purpleblue',ng,0,1)];
     end
-    if NumGroups >= 12
+    if numGroups >= 12
         cmap = [cmap; BF_getcmap('purplered',ng,0,1)];
     end
-    if NumGroups >= 13
+    if numGroups >= 13
         cmap = [cmap; BF_getcmap('redpurple',ng,0,1)];
     end
-    if NumGroups >= 14
+    if numGroups >= 14
         cmap = [cmap; BF_getcmap('orangered',ng,0,1)];
     end
-    if NumGroups >= 15
+    if numGroups >= 15
         cmap = [cmap; BF_getcmap('yelloworangebrown',ng,0,1)];
     end
-    if NumGroups >= 16
+    if numGroups >= 16
         cmap = [cmap; BF_getcmap('greenblue',ng,0,1)];
     end
-    if NumGroups >= 17
+    if numGroups >= 17
         cmap = [cmap; BF_getcmap('bluepurple',ng,0,1)];
     end
-    if NumGroups >= 18
+    if numGroups >= 18
         cmap = [cmap; BF_getcmap('bluegreen',ng,0,1)];
     end
-    if NumGroups >= 19
+    if numGroups >= 19
         fprintf(1,'Too many data groups to colour them correctly\n');
         cmap = BF_getcmap('spectral',ng);
     end
@@ -235,9 +235,9 @@ end
 %% Format the plot
 % --------------------------------------------------------------------------
 % Axis labels:
-set(gca,'YTick',1 + (0.5:1:size(TS_DataMat,1)),'YTickLabel',TimeSeriesFileNames); % time series
+set(gca,'YTick',1 + (0.5:1:size(TS_DataMat,1)),'YTickLabel',timeSeriesFileNames); % time series
 if nops < 1000 % otherwise don't bother
-    set(gca,'XTick',1 + (0.5:1:size(TS_DataMat,2)),'XTickLabel',OperationNames);
+    set(gca,'XTick',1 + (0.5:1:size(TS_DataMat,2)),'XTickLabel',operationNames);
 end
 title(sprintf('Data matrix (%ux%u)',size(TS_DataMat,1),size(TS_DataMat,2)))
 set(gca,'FontSize',8) % set font size

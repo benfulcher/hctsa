@@ -4,7 +4,10 @@
 % 
 % Same as pdist but then goes through and fills in NaNs with indiviually
 % calculated values using an overlapping range of good values.
-% 
+%
+% HISTORY:
+% Ben Fulcher, 2014-06-26 -- added support for NaNCorr, which should be a much
+%                           faster approximate implementation for large matrices.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -21,49 +24,56 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function R = BF_pdist(F,DistMetric,ToVector,opts)
+function R = BF_pdist(F,distMetric,toVector,opts,beSilent,minPropGood)
 
 % ------------------------------------------------------------------------------
 % Check Inputs:
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(DistMetric)
-    DistMetric = 'euclidean';
+if nargin < 2 || isempty(distMetric)
+    distMetric = 'euclidean';
     fprintf(1,'Using the Euclidean distance metric\n')
 end
-if nargin < 3 || isempty(ToVector)
-    ToVector = 0;
+if nargin < 3 || isempty(toVector)
+    toVector = 0;
 end
 if nargin < 4
     opts = [];
 end
-
-% if ~ismember(DistMetric,{'euclidean','corr','correlation','abscorr'})
-%     error(['I''ve only done Euclidean and correlation so far you know, not ' DistMetric '!! SORRY!!'])
-% end
+if nargin < 5
+    beSilent = 0;
+end
+if nargin < 6
+    % By default, don't require a minimum proportion of good values to be
+    % present to compute a pairwise distance
+    minPropGood = 0;
+end
 
 [n1, n2] = size(F); % We're computing for rows (operations are rows)
 
 % ------------------------------------------------------------------------------
 % Define the distance function
 % ------------------------------------------------------------------------------
-switch DistMetric
+switch distMetric
     case {'Euclidean','euclidean'}
         dij = @(v1,v2) sqrt(sum((v1-v2).^2))/length(v1)*n2; % if less entries, don't bias
-    case {'corr','correlation','abscorr'}
-        dij = @(v1,v2) subdc(v1,v2);
+    case {'corr','correlation','abscorr','Pearson'}
+        dij = @(v1,v2) subdc(v1,v2,'Pearson');
+    case 'Spearman'
+        dij = @(v1,v2) subdc(v1,v2,'Spearman');
 end
 
 % ------------------------------------------------------------------------------
 % Compute pairwise distances
 % ------------------------------------------------------------------------------
-if strcmp(DistMetric,'mi')
+switch distMetric
+case 'mi'
     % Mutual information distances: can't make use of the inbuilt pdist function
     if ~isempty(opts)
         nbins = opts; % for MI, extra argument specifies nbins
     else
         nbins = 10;
     end
-    fprintf(1,'Using a histogram with %u bins\n',nbins)
+    if ~beSilent, fprintf(1,'Using a histogram with %u bins\n',nbins); end
 
     goodies = ~isnan(F); % now we can deal with NaNs into design matrix
 
@@ -85,20 +95,37 @@ if strcmp(DistMetric,'mi')
     end
     clear mitimer % stop timing
     R = mis; clear mis; % not really an R but ok.
-else
-    % ------------------------------------------------------------------------------
-    % Linear correlations
-    % ------------------------------------------------------------------------------
-    % First use in-built pdist, which is fast
-    fprintf(1,'First computing pairwise distances using pdist...');
+    
+    
+case {'corr_fast','abscorr_fast'}
+    % Try using fast approximation to correlation coefficients when data includes NaNs
+    % This is an approximation in that it centers columns on their full mean rather than
+    % the mean of overlapping good values, but it's a start, and a good approximation
+    % for a small proportion of NaNs.
+    % Ben Fulcher, 2014-06-26
+    if ~beSilent,
+        fprintf(1,'Using BF_NaNCov to approximate correlations between %u objects...',size(F,1));
+    end
     tic
-    if strcmp(DistMetric,'abscorr')
+    R = BF_NaNCov(F',1,1);
+    if ~beSilent, fprintf(1,' Done in %s.\n',BF_thetime(toc)); end
+    
+    
+case {'euclidean','Euclidean','corr','correlation','abscorr'}
+    % First use in-built pdist, which is fast
+    if ~beSilent
+        fprintf(1,'First computing pairwise distances using pdist...');
+    end
+    tic
+    if strcmp(distMetric,'abscorr')
         R = pdist(F,'corr');
     else
-        R = pdist(F,DistMetric);
+        R = pdist(F,distMetric);
     end
     R = squareform(R); % Make a matrix
-    fprintf(1,' Done in %s.\n',BF_thetime(toc));
+    if ~beSilent
+        fprintf(1,' Done in %s.\n',BF_thetime(toc));
+    end
     
     % Now go through and fill in any NaNs
     [nani, nanj] = find(isnan(R));
@@ -108,39 +135,47 @@ else
         nanj = nanj(ij);
         NotNaN = ~isnan(F);
         
-        fprintf(1,['Recalculating distances individually for %u NaN ' ...
+        if ~beSilent
+            fprintf(1,['Recalculating distances individually for %u NaN ' ...
                             'entries in the distance matrix...\n'],length(nani));
+        end
+        
         NaNtimer = tic; % time it
         for i = 1:length(nani)
             ii = nani(i);
             jj = nanj(i);
             goodboth = (NotNaN(ii,:) & NotNaN(jj,:));
-            if any(goodboth)
-                R(ii,jj) = dij(F(ii,goodboth),F(jj,goodboth)); % Calculate the distance
+            if mean(goodboth) >= minPropGood
+                R(ii,jj) = dij(F(ii,goodboth)',F(jj,goodboth)'); % Calculate the distance
             else
-                R(ii,jj) = NaN; % No good, overlapping set of values -- keep as NaN.
+                R(ii,jj) = NaN; % Not enough good, overlapping set of values -- store as NaN.
             end
             R(jj,ii) = R(ii,jj); % Add the symmetrized entry
             
             % Give update on time remaining after 1000 iterations (if more than 10000 total iterations)
             % and then 5 more times...
-            if (i==1000 && length(nani) > 10000) || (mod(i,floor(length(nani)/5))==0)
-                fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
+            if ~beSilent && ((i==1000 && length(nani) > 10000) || (mod(i,floor(length(nani)/5))==0))
+                fprintf(1,'Approximately %s remaining! We''re at %u / %u.\n', ...
                         BF_thetime(toc(NaNtimer)/i*(length(nani)-i)),i,length(nani))
             end
         end
         clear NaNtimer % stop the timer
     end
+otherwise
+    error('Unknown distance metric ''%s''',distMetric);
 end
 
-
-if strcmp(DistMetric,'abscorr')
-    % Transformation from correlation to absolute correlation distance:
+% ------------------------------------------------------------------------------
+% Transform from correlation distance to absolute correlation distance:
+% ------------------------------------------------------------------------------
+if ismember(distMetric,{'abscorr','abscorr_fast'})
     R = 1 - abs(1-R);
 end
 
-
-if ToVector
+% ------------------------------------------------------------------------------
+% Convert from matrix back to a vector:
+% ------------------------------------------------------------------------------
+if toVector
     try
         R = squareform(R); % back to vector
     catch
@@ -149,12 +184,12 @@ if ToVector
 end
 
 % ------------------------------------------------------------------------------
-function d = subdc(v1,v2)
-    rc = corrcoef(v1,v2);
+function d = subdc(v1,v2,corrType)
+    rc = corr(v1,v2,'type',corrType);
     if isnan(rc)
         d = 2; % return maximum distance--for this subset, constant values
     else
-        d = 1 - rc(2,1); % Return the (raw) correlation coefficient
+        d = 1 - rc; % Return the (raw) correlation coefficient
     end
 end
 % ------------------------------------------------------------------------------
