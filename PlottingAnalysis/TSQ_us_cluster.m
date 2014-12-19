@@ -25,7 +25,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [ackwgs, acgi, TS_DataMat_cl] = TSQ_us_cluster(norcl,ClusterMethod,ClusterParams)
+function [ackwgs, acgi, TS_DataMat_cl] = TSQ_us_cluster(norcl,clusterMethod,ClusterParams)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
@@ -37,9 +37,9 @@ if nargin < 1,
     norcl = ''; % not necessary
 end
 
-% 2) ClusterMethod: a string specifying the type of clustering method to use
-if nargin < 2 || isempty(ClusterMethod),
-    ClusterMethod = 'linkage';
+% 2) clusterMethod: a string specifying the type of clustering method to use
+if nargin < 2 || isempty(clusterMethod),
+    clusterMethod = 'linkage';
 end
 
 % 3) ClusterParams: specify the parameters for the clustering method
@@ -68,7 +68,7 @@ end
 % ------------------------------------------------------------------------------
 %% Do the unsupervised clustering
 % ------------------------------------------------------------------------------
-switch ClusterMethod
+switch clusterMethod
 	case 'linkage'
 % 		fprintf(1,'Using inbuilt matlab linkage clustering\n');
         % parameter is a cell:
@@ -293,7 +293,7 @@ switch ClusterMethod
         
 	case 'kmeans_matlab'
         %% Check the inputs
-        disp('Using matlab''s statistics toolbox kmeans clustering')
+        fprintf(1,'Using Matlab''s statistics toolbox implementation of kmeans clustering\n')
         % ClusterParams specifies {k,distancemeasure,nrep,starts}
         % ** k
         if ~isempty(ClusterParams) && ~iscell(ClusterParams), ClusterParams = {ClusterParams}; end
@@ -302,7 +302,7 @@ switch ClusterMethod
             k = ClusterParams{1};
         else
             k = 2;
-            disp('forming 2 clusters using kmeans')
+            disp('Forming 2 clusters using kmeans')
         end
 
         % ** distance measure
@@ -349,7 +349,7 @@ switch ClusterMethod
         
     case 'kmedoids'
         %% Check the inputs
-        disp('Using Ben''s implementation of kmedoids')
+        fprintf(1,'Using Ben''s implementation of kmedoids\n')
         % ClusterParams specifies k, distancemeasure, nrep
         % ** k
         if isfield(ClusterParams,'k')
@@ -511,8 +511,7 @@ switch ClusterMethod
             acgi{i} = find(r.X==i); % unordered within each cluster
         end
 	otherwise
-		disp([ClusterMethod ' -- an invalid clustering option'])
-		return
+		error('%s is an invalid clustering option.',clusterMethod)
 end
 
 

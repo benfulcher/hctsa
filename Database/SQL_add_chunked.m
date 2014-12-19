@@ -2,7 +2,8 @@
 % SQL_add_chunked
 % ------------------------------------------------------------------------------
 % 
-% Insert a set of things into the database using repeated queries.
+% Insert a large set of time series or operations into the database using
+% repeated queries, adding smaller subsets over multiple iterations.
 % 
 %---INPUTS:
 % 

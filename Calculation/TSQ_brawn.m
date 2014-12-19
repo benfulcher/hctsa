@@ -11,7 +11,7 @@
 % doLog:      if 1 (0 by default) writes to a log file.
 % doParallel: if 1, attempts to use the Parallel Computing Toolbox to run
 %             computations in parallel over multiple cores.
-% bevocal:    if 1, gives additional user feedback.
+% beVocal:    if 1, gives additional user feedback.
 % 
 %---OUTPUTS:
 % Writes output to file, over HCTSA_loc.mat
@@ -32,7 +32,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_brawn(doLog,doParallel,bevocal)
+function TSQ_brawn(doLog,doParallel,beVocal)
     
 % --------------------------------------------------------------------------
 %% Check inputs and set defaults
@@ -40,7 +40,7 @@ function TSQ_brawn(doLog,doParallel,bevocal)
 
 % Log to file
 if nargin < 1
-    % By default, do not log to file, write to screen (if bevocal)
+    % By default, do not log to file, write to screen (if beVocal)
 	doLog = 0;
 end
 if doLog
@@ -64,7 +64,7 @@ end
 
 % Be vocal?
 if nargin < 3
-    bevocal = 1; % Write back lots of information to screen
+    beVocal = 1; % Write back lots of information to screen
     % prints every piece of code evaluated (nice for error checking)
 end
 
@@ -209,13 +209,13 @@ for i = 1:NumTimeSeries
             parfor jj = 1:nMtocalc % PARFOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
                                 TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj}, ...
-                                                        fid,bevocal,TimeSeries_i_ID);
+                                                        fid,beVocal,TimeSeries_i_ID);
             end
         else
             for jj = 1:nMtocalc % Normal FOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
                                 TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj}, ...
-                                                        fid,bevocal,TimeSeries_i_ID);
+                                                        fid,beVocal,TimeSeries_i_ID);
             end
 		end
 		
@@ -252,13 +252,12 @@ for i = 1:NumTimeSeries
                                                        par_OperationCodeString{jj},fid);
                 catch
                     fprintf(1,'---Error with %s\n',par_OperationCodeString{jj});
-                    keyboard
                     if (MasterOperations(par_OperationMasterInd(jj)).ID == 0)
                         error(['The operations database is corrupt: there is no link ' ...
                                         'from ''%s'' to a master code'], ...
                                         par_OperationCodeString{jj});
                     else
-                        fprintf(1,'Error retrieving element %s from %s\n',par_OperationCodeString{jj}, ...
+                        fprintf(1,'Error retrieving element %s from %s.\nKeyboard active for debugging...\n',par_OperationCodeString{jj}, ...
                                         par_MasterOperationsLabel{par_OperationMasterInd(jj)})
                         RA_keyboard
                     end

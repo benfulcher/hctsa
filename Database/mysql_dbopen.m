@@ -10,7 +10,7 @@ cl = ct.getContextClassLoader();
 % Open database
 errmsg = []; % error message
 
-% First check driver
+% First check driver:
 try
     java.lang.Class.forName('com.mysql.jdbc.Driver', true, cl);
 catch le
@@ -20,7 +20,7 @@ catch le
     % actually return an error
 end
 
-% Now try to connect
+% Now try to connect:
 try
     dburl = sprintf('jdbc:mysql://%s/%s', serverhost, dbname);
     dbconnection = java.sql.DriverManager.getConnection(dburl, uname, pword);

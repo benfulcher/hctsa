@@ -5,7 +5,6 @@
 % Compares statistics measured in a local region of the time series to that
 % measured of the full time series.
 % 
-% 
 %---INPUTS:
 % y, the time series to analyze
 % 

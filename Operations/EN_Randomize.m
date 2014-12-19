@@ -29,6 +29,9 @@
 % Most statistics measure how these properties decay with randomization, by
 % fitting a function f(x) = Aexp(Bx).
 % 
+%---HISTORY:
+% Ben Fulcher, October 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -53,22 +56,34 @@
 % ------------------------------------------------------------------------------
 
 function out = EN_Randomize(y,howtorand)
-% Ben Fulcher, October 2009
+
+% ------------------------------------------------------------------------------
+% Check toolboxes, and a z-scored time series:
+% ------------------------------------------------------------------------------
 
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
 
-%% Check inputs:
+% For some reason the stupid wavelet entropy is a statistic used for this, so we
+% need the wavelet toolbox (but in future should remove this entropy measure):
+BF_CheckToolbox('wavelet_toolbox');
+
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored for EN_Randomize')
 end
 
+% ------------------------------------------------------------------------------
+%% Check inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(howtorand)
     howtorand = 'statdist'; % use statdist by default
 end
 
+% ------------------------------------------------------------------------------
+
 N = length(y); % length of the time series
 
+%  preliminaries
 nstats = 11;
 randp_max = 2; % time series has been randomized to 2 times its length
 rand_inc = 10/100; % this proportion of the time series between calculations
@@ -293,6 +308,7 @@ out.swss5_1hp = SUB_gethp(stats(:,11));
         ac4 = CO_AutoCorr(y_rand,4);
         
         % Entropies
+        % shen = NaN; % wentropy is nonsense.
         shen = EN_wentropy(y_rand,'shannon');
         sampen = PN_sampenc(y_rand,2,0.2,1);
         

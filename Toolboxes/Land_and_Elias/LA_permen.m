@@ -1,11 +1,13 @@
+% ------------------------------------------------------------------------------
 % LA_permen
-% 
+% ------------------------------------------------------------------------------
 % Originally logisticPE.m
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/logisticPE.m
 % Original code by Bruce Land and Damian Elias
-%
+% ------------------------------------------------------------------------------
 % Modified slightly by Ben Fulcher, 2009
+% ------------------------------------------------------------------------------
 
 function permen = LA_permen(y,ord)
 
@@ -16,15 +18,15 @@ permlist = perms(1:ord);
 c = zeros(size(permlist,1),1);
 
 for j = 1:N-ord
-    [a, iv] = sort(y(j:j+ord-1));
+    [~, iv] = sort(y(j:j+ord-1));
     for jj = 1:length(permlist)
         if (abs(permlist(jj,:)-iv)) == 0
-            c(jj) = c(jj) + 1 ;
+            c(jj) = c(jj) + 1;
         end
     end
 end
 
 p = max(1/N,c/(N-ord));
-permen = -sum(p .* log(p))/(ord-1);
+permen = -sum(p.*log(p))/(ord-1);
 
 end
