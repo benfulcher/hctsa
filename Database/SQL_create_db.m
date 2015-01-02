@@ -21,6 +21,10 @@
 % ------------------------------------------------------------------------------
 
 function SQL_create_db()  
+    
+    % ------------------------------------------------------------------------------
+    % Get host, user, and password details and attempt to connect to the database:
+    % ------------------------------------------------------------------------------
     fprintf(1,['Let''s set up a new database\nWe first require a username and ' ...
                 'password that has CREATE DATABASE and GRANT privileges\n']);
 	fprintf(1,'(This is probably going to be the root account)\n');
@@ -42,7 +46,9 @@ function SQL_create_db()
     fprintf(1,'Connection to %s established\n',hostname);
     
     
-    % Check it really is an account with create and grant privileges:
+    % ------------------------------------------------------------------------------
+    % Check that the new account is a real account with create and grant privileges
+    % ------------------------------------------------------------------------------
     % Kind of a simple one that assumes that you need "GRANT ALL PRIVILEGES"
     % Perhaps not fool-proof, so leave as a warning for now
 	[a,~,~,emsg] = mysql_dbquery(dbc,'SHOW GRANTS');
@@ -51,7 +57,9 @@ function SQL_create_db()
         warning(1,'It doesn''t look like %s has administrative privileges on %s\n', admin_user, hostname);
     end
     
+    % ------------------------------------------------------------------------------
     % Set up a new non-admin user account for the database
+    % ------------------------------------------------------------------------------
 	fprintf(1,'Now creating a mySQL database for highly comparative time-series analysis\n');
     fprintf(1,'Please choose a name for the database (do not include special characters).\n')
     fprintf(1,'NB: be careful, this command will replace the named database if it exists on %s.\n',hostname)
@@ -68,6 +76,10 @@ function SQL_create_db()
 
 	SQL_closedatabase(dbc) % close the database
 
+
+    % ------------------------------------------------------------------------------
+    % Write a .conf file with the connection details for next time
+    % ------------------------------------------------------------------------------
     filename = 'Database/sql_settings.conf';
     fprintf(1,['Writing hostname (%s), database name (%s), username (%s), and ' ...
                 'password (%s) to %s\n'],hostname,dbname,local_u,local_p,filename);
