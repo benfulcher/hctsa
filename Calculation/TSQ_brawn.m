@@ -371,7 +371,7 @@ fprintf(fid,'Calculations took a total of %s.\n',BF_thetime(sum(times),1))
 fprintf(1,'Saving all results to HCTSA_loc.mat...')
 save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
                                 'Operations','MasterOperations','-v7.3')
-fprintf(fid,' All saved.\n')
+fprintf(fid,' Saved.\n')
 
 % Close the .log file:
 if doLog
@@ -379,6 +379,6 @@ if doLog
 end
 
 fprintf(1,['Calculation complete: you can now run TSQ_agglomerate to upload' ...
-                                ' the results to a mySQL database\n'])
+                                ' the results to a mySQL database.\n'])
 
 end

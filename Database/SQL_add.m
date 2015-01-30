@@ -278,7 +278,7 @@ case 'ts' % Prepare toadd cell for time series
             pause(0.01); % wait 0.01 second to show the plotted time series
         end
     end
-    if beVocal, fprintf(1,'\n Time-series data loaded.\n'); end
+    if beVocal, fprintf(1,'\nTime-series data loaded.\n'); end
 
     % Check for duplicates in the input file:
     if length(unique({timeseries.Filename})) < length(timeseries)

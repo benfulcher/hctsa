@@ -22,20 +22,20 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_agglomerate(WriteWhat,LogToFile,dbname)
+function TSQ_agglomerate(writeWhat,logToFile,dbname)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
 if nargin < 1
-	WriteWhat = 'null'; % 'nullerror'
+	writeWhat = 'null'; % 'nullerror'
     % find all nulls in the database and write over them if there are values in local files
 end
-if ~ismember(WriteWhat,{'null','error','nullerror'})
-    error('Unknown specifier ''%s''',WriteWhat)
+if ~ismember(writeWhat,{'null','error','nullerror'})
+    error('Unknown specifier ''%s''',writeWhat)
 end
-if nargin < 2 || isempty(LogToFile)
-	LogToFile = 0;
+if nargin < 2 || isempty(logToFile)
+	logToFile = 0;
 end
 if nargin < 3
 	dbname = '';
@@ -95,9 +95,9 @@ end
 %       (and hopefully full in the local file)
 % ------------------------------------------------------------------------------
 % Parts of calculated subsection that are empty in storage
-fprintf(1,'Retrieving %s elements from the Results table in %s...',WriteWhat,dbname);
+fprintf(1,'Retrieving %s elements from the Results table in %s...',writeWhat,dbname);
 
-switch WriteWhat
+switch writeWhat
 case 'null'
     % collect nulls in the database
     SelectString = sprintf(['SELECT ts_id, op_id FROM Results WHERE ts_id IN (%s)' ...
@@ -117,9 +117,9 @@ end
 RetrievalTimer = tic; % Time the retrieval (should be fast)
 [qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
-    fprintf(1,'\n'); error('Error selecting %s elements from %s',WriteWhat,dbname);
+    fprintf(1,'\n'); error('Error selecting %s elements from %s',writeWhat,dbname);
 elseif isempty(qrc)
-    fprintf(1,'\nNo %s elements in this range in the database anymore!\n',WriteWhat);
+    fprintf(1,'\nNo %s elements in this range in the database anymore!\n',writeWhat);
     SQL_closedatabase(dbc); return
 else
 	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_thetime(toc(RetrievalTimer)));
@@ -134,7 +134,7 @@ ndbel = length(ts_id_db);     % Number of database elements to attempt to write 
 % ------------------------------------------------------------------------------
 % Give user feedback about what database writing will occur
 % ------------------------------------------------------------------------------
-switch WriteWhat
+switch writeWhat
 case 'null'
     fprintf(1,['There are %u NULL entries in Results.\nWill now write calculated ' ...
                     'elements of TS_DataMat into these elements of %s...\n'],ndbel,dbname);
@@ -158,13 +158,13 @@ end
 LocalIndex = zeros(ndbel,2);
 LocalIndex(:,1) = arrayfun(@(x)find([TimeSeries.ID] == x,1),ts_id_db); % Indices of rows in local file for each entry in the database
 LocalIndex(:,2) = arrayfun(@(x)find([Operations.ID] == x,1),op_id_db); % Indicies of columns in local file for each entry in the database
-UpdateMe = zeros(ndbel,1); % Label iterations that should be written to the database
+updateMe = zeros(ndbel,1); % Label iterations that should be written to the database
 
 % ------------------------------------------------------------------------------
 % Begin writing each element to the database, one at a time, using UPDATE commands
 % ------------------------------------------------------------------------------
 
-WriteBackTimer = tic; % Time how long this takes to give user feedback
+writeBackTimer = tic; % Time how long this takes to give user feedback
 
 for i = 1:ndbel	
     
@@ -173,24 +173,24 @@ for i = 1:ndbel
     TS_Quality_ij = TS_Quality(LocalIndex(i,1),LocalIndex(i,2));
     TS_CalcTime_ij = TS_CalcTime(LocalIndex(i,1),LocalIndex(i,2));
     
-    switch WriteWhat
+    switch writeWhat
     case 'null'
         if isfinite(TS_DataMat_ij)
-            UpdateMe(i) = 1; % There is a value in TS_DataMat -- write it back to the NULL entry in the database
+            updateMe(i) = 1; % There is a value in TS_DataMat -- write it back to the NULL entry in the database
         end
     case 'error'
         if isfinite(TS_DataMat_ij) && TS_Quality_ij~=1
-            UpdateMe(i) = 1; % There is a now a non-error value in TS_DataMat previously returned an error (in the database)
+            updateMe(i) = 1; % There is a now a non-error value in TS_DataMat previously returned an error (in the database)
         end
     case 'nullerror'
         if isfinite(TS_DataMat_ij) && (q_db(i)==0 || TS_Quality_ij~=1)
-            UpdateMe(i) = 1; % there is a value in TS_DataMat -- write it to the entry in the database
+            updateMe(i) = 1; % there is a value in TS_DataMat -- write it to the entry in the database
         end
 		% (i) Has been calculated and a value stored in TS_DataMat (isfinite()), and 
 		% (ii) Either the database entry is NULL or we didn't get an error (prevents writing errors over errors)
     end
 	
-    if UpdateMe(i)
+    if updateMe(i)
         
         if isnan(TS_CalcTime_ij) % happens when there is an error in the code
             TS_CalcTime_string = 'NULL';
@@ -213,11 +213,11 @@ for i = 1:ndbel
     % Give user feedback on how long is remaining:
     if (i==1)
         fprintf(1,['Based on the first retrieval, this is taking ' ...
-                'approximately %s per entry to write to the database.\n'],BF_thetime(toc(WriteBackTimer)));
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(WriteBackTimer)/i*(ndbel-i)));
+                'approximately %s per entry to write to the database.\n'],BF_thetime(toc(writeBackTimer)));
+		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(writeBackTimer)/i*(ndbel-i)));
     elseif mod(i,floor(ndbel/5))==0 % Give 5 more time updates...
 		fprintf(1,['Approximately %s remaining! -- so far %u entries (/ %u possible) have been'  ...
-			' written to %s...\n'],BF_thetime(toc(WriteBackTimer)/i*(ndbel-i)),sum(UpdateMe),i,dbname);
+			' written to %s...\n'],BF_thetime(toc(writeBackTimer)/i*(ndbel-i)),sum(updateMe),i,dbname);
 	end
 end
 
@@ -225,21 +225,21 @@ end
 % Finished writing back to the database!
 % ------------------------------------------------------------------------------
 
-fprintf(1,['Well that seemed to go ok -- we wrote %u new calculation results ' ...
-                '(/ %u) to the Results table in %s.\n'],sum(UpdateMe),ndbel,dbname);
-fprintf(1,'Writing to the database took at total of %s.\n',BF_thetime(toc(WriteBackTimer)));
+fprintf(1,['So that all seemed to go well -- we wrote %u new calculation results ' ...
+                '(/ %u) to the Results table in %s.\n'],sum(updateMe),ndbel,dbname);
+fprintf(1,'Writing to the database took at total of %s.\n',BF_thetime(toc(writeBackTimer)));
 
-if any(~UpdateMe) % Some entries were not written to the database
+if any(~updateMe) % Some entries were not written to the database
     fprintf(1,['%u entries were not written (previously-calculated errors) and remain ' ...
-                            'awaiting calculation in the database.\n'],sum(~UpdateMe));
+                            'awaiting calculation in the database.\n'],sum(~updateMe));
 end
 
 
-clear WriteBackTimer % Stop the timer
+clear writeBackTimer % Stop the timer
 
 SQL_closedatabase(dbc) % Close the database connection
 
-% if LogToFile
+% if logToFile
 %     fprintf(1,'Logging to file...\n');
 %     fn = ['TS_agglomerate_' datestr(now,30) '.log'];
 %     fid = fopen(fn,'w','n');
