@@ -20,14 +20,18 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function emsg = SQL_closedatabase(dbc)
+function SQL_closedatabase(dbc)
 
-try
-   dbc.close();
-catch emsg
-	error('Error closing database\n%s',emsg)
+switch class(dbc)
+case 'com.mysql.jdbc.JDBC4Connection'
+    % Database connection opened using java commands:
+    dbc.close();
+case 'database'
+    % Database connection opened using database toolbox:
+    close(dbc);
+otherwise
+    error('Unknown database connection class %s',class(dbc));
 end
 
-clear dbc
 
 end

@@ -328,11 +328,11 @@ end
 if beVocal, fprintf(1,'Checking for duplicates already in the database... '); end
 switch ImportWhat
 case 'ts'
-    ExistingFilenames = mysql_dbquery(dbc,sprintf('SELECT FileName FROM TimeSeries'));
-    isDuplicate = ismember({timeseries.Filename},ExistingFilenames); % isDuplicate = 1 if the item already exists
+    existingFilenames = mysql_dbquery(dbc,sprintf('SELECT FileName FROM TimeSeries'));
+    isDuplicate = ismember({timeseries.Filename},existingFilenames); % isDuplicate = 1 if the item already exists
 case 'ops'
-    ExistingOperationNames = mysql_dbquery(dbc,'SELECT OpName FROM Operations');
-    isDuplicate = ismember({operation.Name},ExistingOperationNames); % isDuplicate = 1 if the MasterLabel already exists    
+    existingOperationNames = mysql_dbquery(dbc,'SELECT OpName FROM Operations');
+    isDuplicate = ismember({operation.Name},existingOperationNames); % isDuplicate = 1 if the MasterLabel already exists    
 case 'mops'
     existing = mysql_dbquery(dbc,'SELECT MasterLabel FROM MasterOperations');
     isDuplicate = ismember({master.MasterLabel},existing); % isDuplicate = 1 if the MasterLabel already exists
@@ -355,7 +355,7 @@ end
 % ------------------------------------------------------------------------------
 maxid = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,thetable));
 maxid = maxid{1}; % the maximum id -- the new items will have ids greater than this
-if isempty(maxid), maxid = 0; end
+if isempty(maxid) || isnan(maxid), maxid = 0; end
 
 % ------------------------------------------------------------------------------
 %% Assemble and execute the INSERT queries
@@ -396,7 +396,7 @@ if ~strcmp(ImportWhat,'mops')
     end
     if ~isempty(emsg),
         fprintf(1,' error. This is really really not good.\n');
-        RA_keyboard
+        keyboard
     else
         if beVocal, fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultstic))); end
     end

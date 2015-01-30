@@ -115,7 +115,7 @@ case 'error'
 end
 
 RetrievalTimer = tic; % Time the retrieval (should be fast)
-[qrc,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+[qrc,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
     fprintf(1,'\n'); error('Error selecting %s elements from %s',WriteWhat,dbname);
 elseif isempty(qrc)

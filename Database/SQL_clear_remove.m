@@ -119,7 +119,7 @@ end
 % ------------------------------------------------------------------------------
 SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
                                 thename,thetable,theid,BF_cat(vin,','));
-[todump,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+[todump,emsg] = mysql_dbquery(dbc,SelectString);
 
 if ~isempty(emsg)
 	error('Error retrieving selected %s indices (%s) from the %s table of %s', ...

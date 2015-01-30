@@ -5,19 +5,19 @@
 % This function retreives data from the mySQL database for subsequent analysis
 % in Matlab. It takes as input a set of constraints on the time series and
 % operations to include, and outputs the relevant subsection of the data matrix
-% and associated metadata in HCTSA_loc
+% and associated metadata to HCTSA_loc.mat
 % 
 %---INPUTS:
 %--ts_ids: a vector of ts_ids to retrieve from the mySQL database.
 %--op_ids: a vector of op_ids to retrieve from the mySQL database.
-%--RetrieveWhatEntries: can be one of the following options:
+%--retrieveWhatEntries: can be one of the following options:
 %        (i) 'null': Retrieve null entries from the database (e.g., for
 %                    calculating)
 %        (ii) 'all': Retrieve all entries from the database (e.g., for
 %                    analyzing)
 %        (iii) 'error': Retrieve previous errors stored in the database (e.g.,
 %                       for re-evaluating previous errors)
-%--RetrieveWhatData: can be one of the following options:
+%--retrieveWhatData: can be one of the following options:
 %       (i) 'all': Retrieves Data, CalcTimes, and Quality labels
 %       (ii) 'nocalctime': Retrieves calculated values and quality labels
 %       (iii) 'outputs': Just the calculated values
@@ -26,10 +26,10 @@
 %---OUTPUT:
 %--didWrite [opt] is 1 if Writes new file HCTSA_loc.mat
 % 
-% Other outputs are to the file HCTSA_loc.mat contains
+% Other outputs are to the file HCTSA_loc.mat, which contains
 %--TS_DataMat, contains the data
 %--TS_Quality, contains the quality codes
-%--TS_CalcTime, contains the calculation times [if RetrieveWhatData = 'all']
+%--TS_CalcTime, contains the calculation times [if retrieveWhatData = 'all']
 %--TimeSeries, contains metadata about the time series, and the time-series data
 %--Operations, contains metadata about the operations
 %--MasterOperations, contains metadata about the implicatedmaster operations
@@ -50,7 +50,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function didWrite = TSQ_prepared(ts_ids, op_ids, RetrieveWhatEntries, RetrieveWhatData)
+function didWrite = TSQ_prepared(ts_ids, op_ids, retrieveWhatEntries, retrieveWhatData)
     
 % Until it actually writes something, set the function output, didWrite = 0
 didWrite = 0;
@@ -62,25 +62,25 @@ if nargin < 2
 	error('You must provide at least two inputs!');
 end
 
-% RetrieveWhatEntries
-if nargin < 3 || isempty(RetrieveWhatEntries)
-	RetrieveWhatEntries = 'all'; % retrieve full sets of things, not just the empty entries in the database
+% retrieveWhatEntries
+if nargin < 3 || isempty(retrieveWhatEntries)
+	retrieveWhatEntries = 'all'; % retrieve full sets of things, not just the empty entries in the database
     fprintf(1,'Retrieving ALL elements from the database in the specified ts_id and op_id ranges by default.\n')
 end
-RetrieveWhatEntriesCanBe = {'null','all','error'};
-if ~ischar(RetrieveWhatEntries) || ~ismember(RetrieveWhatEntries,RetrieveWhatEntriesCanBe)
+retrieveWhatEntriesCanBe = {'null','all','error'};
+if ~ischar(retrieveWhatEntries) || ~ismember(retrieveWhatEntries,retrieveWhatEntriesCanBe)
     error(['The third input to TSQ_prepared must specify what type of entries to retrieve from ' ...
-                'the database, one of the following: %s'],BF_cat(RetrieveWhatEntriesCanBe))
+                'the database, one of the following: %s'],BF_cat(retrieveWhatEntriesCanBe))
 end
 
-% RetrieveWhatData
-if nargin < 4 || isempty(RetrieveWhatData)
-    RetrieveWhatData = 'nocalctime'; % Just get data and quality labels
+% retrieveWhatData
+if nargin < 4 || isempty(retrieveWhatData)
+    retrieveWhatData = 'nocalctime'; % Just get data and quality labels
 end
-RetrieveWhatDataCanBe = {'all','nocalctime','outputs','quality'};
-if ~ischar(RetrieveWhatData) || ~ismember(RetrieveWhatData,RetrieveWhatDataCanBe)
+retrieveWhatDataCanBe = {'all','nocalctime','outputs','quality'};
+if ~ischar(retrieveWhatData) || ~ismember(retrieveWhatData,retrieveWhatDataCanBe)
     error(['The fourth input to TSQ_prepared must specify what data to retrieve from the database, ' ...
-                'one of the following: %s'],BF_cat(RetrieveWhatEntriesCanBe))
+                'one of the following: %s'],BF_cat(retrieveWhatEntriesCanBe))
 end
 
 % ------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ fprintf(1,['Filling and saving to local Matlab file HCTSA_loc.mat from ' ...
 % --------------------------------------------------------------------------
 
 % Initialize as Infs to distinguish unwritten entries after database retrieval
-switch RetrieveWhatData
+switch retrieveWhatData
 case 'all'
     TS_DataMat = ones(nts,nops)*Inf;  % Outputs
     TS_Quality = ones(nts,nops)*Inf;  % Quality labels
@@ -169,7 +169,7 @@ case 'quality'
 end
 
 % Display information to user:
-switch RetrieveWhatEntries
+switch retrieveWhatEntries
 case 'all' 
     fprintf(1,['Retrieving all elements from the database (one time series ' ...
                 'per database query). Please be patient...\n']);
@@ -193,7 +193,7 @@ for i = 1:nts
     ts_id_now = ts_ids(i); % Range of ts_ids retrieved in this iteration
     
     % Start piecing together the mySQL SELECT command:
-    switch RetrieveWhatData
+    switch retrieveWhatData
     case 'all'
         SelectWhat = 'SELECT op_id, Output, QualityCode, CalculationTime FROM Results';
     case 'nocalctime' % Do not retrieve calculation time results
@@ -214,7 +214,7 @@ for i = 1:nts
     % Otherwise op_ids should also be retrieved here, and used to sort
     % the other columns (i.e., outputs, quality codes, calculation times)
     
-    switch RetrieveWhatEntries
+    switch retrieveWhatEntries
     case 'all'
         SelectString = BaseString;
     case 'null'
@@ -225,7 +225,7 @@ for i = 1:nts
     
     % Do the retrieval
     % DatabaseTimer = tic;
-	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,SelectString); % Retrieve data for this time series from the database
+	[qrc, emsg] = mysql_dbquery(dbc,SelectString); % Retrieve data for this time series from the database
     % fprintf(1,'Database query for %u time series took %s\n',BundleSize,BF_thetime(toc(DatabaseTimer)));
     
     if ~isempty(emsg)
@@ -246,12 +246,12 @@ for i = 1:nts
     	qrc(cellfun(@isempty,qrc)) = {NaN};
     
         % Put results from database into rows of local matrix
-        if strcmp(RetrieveWhatEntries,'all') % easy in this case
+        if strcmp(retrieveWhatEntries,'all') % easy in this case
             % Assumes data is ordered by the op_id_string provided
             % This will be the case if all time series and operations
             % were added using SQL_add.
             % Otherwise we'll have nonsense happening...
-            switch RetrieveWhatData
+            switch retrieveWhatData
             case 'all'
                 TS_DataMat(i,:) = vertcat(qrc{:,2});
                 TS_Quality(i,:) = vertcat(qrc{:,3});
@@ -269,7 +269,7 @@ for i = 1:nts
             % We have to match retrieved op_ids to local indicies
             iy = arrayfun(@(x)find(op_ids == x,1),vertcat(qrc{:,1}));
             % Now fill the corresponding entries in the local matrices:
-            switch RetrieveWhatData
+            switch retrieveWhatData
             case 'all'
                 TS_DataMat(i,iy) = vertcat(qrc{:,2});
                 TS_Quality(i,iy) = vertcat(qrc{:,3});
@@ -308,9 +308,9 @@ else
     SQL_closedatabase(dbc); return
 end
 	
-if ismember(RetrieveWhatEntries,{'null','error'})    
+if ismember(retrieveWhatEntries,{'null','error'})
     % We only want to keep rows and columns with (NaNs for 'null' or errors for 'error') in them...
-    switch RetrieveWhatEntries
+    switch retrieveWhatEntries
     case 'null'
         keepme = isnan(TS_DataMat); % NULLs in database
         fprintf(1,['Filtering so that local files contain rows/columns containing at least ' ...
@@ -330,7 +330,7 @@ if ismember(RetrieveWhatEntries,{'null','error'})
 		fprintf(1,'Cutting down from %u to %u time series\n',nts,sum(keepi));
 		ts_ids = ts_ids(keepi); nts = length(ts_ids);
 		ts_ids_string = BF_cat(ts_ids,',');
-        switch RetrieveWhatData
+        switch retrieveWhatData
         case 'all'
     		TS_DataMat = TS_DataMat(keepi,:);
             TS_Quality = TS_Quality(keepi,:);
@@ -354,7 +354,7 @@ if ismember(RetrieveWhatEntries,{'null','error'})
 		fprintf(1,'Cutting down from %u to %u operations\n',nops,sum(keepi));
 		op_ids = op_ids(keepi); nops = length(op_ids);
 		op_ids_string = BF_cat(op_ids,',');
-        switch RetrieveWhatData
+        switch retrieveWhatData
         case 'all'
     		TS_DataMat = TS_DataMat(:,keepi);
             TS_Quality = TS_Quality(:,keepi);
@@ -377,7 +377,7 @@ end
 
 % 1. Retrieve Time Series Metadata
 SelectString = sprintf('SELECT FileName, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
-[tsinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+[tsinfo,emsg] = mysql_dbquery(dbc,SelectString);
 % Convert to a structure array, TimeSeries, containing metadata for all time series
 tsinfo = [num2cell(ts_ids),tsinfo];
 % Define inline functions to convert time-series data text to a vector of floats:
@@ -388,7 +388,7 @@ TimeSeries = cell2struct(tsinfo',{'ID','FileName','Keywords','Length','Data'}); 
 
 % 2. Retrieve Operation Metadata
 SelectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
-[opinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+[opinfo,emsg] = mysql_dbquery(dbc,SelectString);
 opinfo = [num2cell(op_ids), opinfo]; % add op_ids
 Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
 
@@ -396,7 +396,7 @@ Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'
 % (i) Which masters are implicated?
 SelectString = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WHERE mop_id IN ' ...
         				'(' BF_cat(unique([Operations.MasterID]),',') ')'];
-[masterinfo,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+[masterinfo,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
     fprintf(1,'Error retrieving Master information...\n');
     disp(emsg);
@@ -413,7 +413,7 @@ SQL_closedatabase(dbc)
 % ------------------------------------------------------------------------------
 fprintf(1,'Saving local versions of the data to HCTSA_loc.mat...');
 save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','-v7.3');
-switch RetrieveWhatData
+switch retrieveWhatData
 case 'all'
     % Add outputs, quality labels, and calculation times
     save('HCTSA_loc.mat','TS_DataMat','TS_Quality','TS_CalcTime','-append')
@@ -429,12 +429,12 @@ case 'quality'
 end
 
 fprintf(1,' Done.\n');
-didWrite = 1;
+didWrite = 1; % Tag to say that write to HCTSA_loc.mat file is successful
 
 % ------------------------------------------------------------------------------
 %% If retrieved quality labels, display how many entries need to be calculated
 % ------------------------------------------------------------------------------
-if strcmp(RetrieveWhatData,'outputs')
+if strcmp(retrieveWhatData,'outputs')
     fprintf(1,'You have the outputs, but you don''t know which are good or not without the quality labels...\n');
 else
     tocalculate = sum(isnan(TS_Quality(:)) | TS_Quality(:)==1);
