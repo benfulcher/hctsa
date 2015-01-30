@@ -6,7 +6,7 @@
 % message if there's a problem.
 % 
 %---INPUT:
-% thetoolbox, the string identifying the toolbox (in format of license command
+% theToolbox, the string identifying the toolbox (in format of license command
 %               in Matlab)
 % 
 % ------------------------------------------------------------------------------
@@ -27,40 +27,47 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function BF_CheckToolbox(thetoolbox)
+function BF_CheckToolbox(theToolbox)
 
-% First get a more interpretable string for user feedback: thename
-switch thetoolbox
+% ------------------------------------------------------------------------------
+% First get a more interpretable string for user feedback: theName
+% ------------------------------------------------------------------------------
+switch theToolbox
 case 'identification_toolbox'
-    thename = 'Matlab''s System Identification Toolbox';
+    theName = 'Matlab''s System Identification Toolbox';
     
 case 'econometrics_toolbox'
-    thename = 'Matlab''s Econometrics Toolbox';
+    theName = 'Matlab''s Econometrics Toolbox';
     
 case 'curve_fitting_toolbox'
-    thename = 'Matlab''s Curve Fitting Toolbox';
+    theName = 'Matlab''s Curve Fitting Toolbox';
     
 case 'wavelet_toolbox'
-    thename = 'Matlab''s Wavelet Toolbox';
+    theName = 'Matlab''s Wavelet Toolbox';
     
 case 'signal_toolbox'
-    thename = 'Matlab''s Signal Processing Toolbox';
+    theName = 'Matlab''s Signal Processing Toolbox';
+    
+case 'database_toolbox'
+    theName = 'Matlab''s Database Toolbox';
     
 otherwise
-    fprintf(1,'Unknown toolbox ''%s''\n',thetoolbox);
+    error('Unknown toolbox ''%s''\n',theToolbox);
 end
 
+% ------------------------------------------------------------------------------
 % Now do the checks:
+% ------------------------------------------------------------------------------
 % 1. Check the toolbox exists in the current Matlab environment:
-a = license('test',thetoolbox);
+a = license('test',theToolbox);
 if a == 0
-    error('This function requires %s',thename);
+    error('This function requires %s',theName);
 end
     
 % 2. Check to see if there's an available license for this toolbox:
-[lic_free,~] = license('checkout',thetoolbox); % Attempt to check out a license
+[lic_free,~] = license('checkout',theToolbox); % Attempt to check out a license
 if lic_free == 0
-    error('Could not obtain a license for %s',thename);
+    error('Could not obtain a license for %s',theName);
 end
 
 end 

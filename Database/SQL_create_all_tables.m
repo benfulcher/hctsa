@@ -31,7 +31,6 @@ function SQL_create_all_tables()
 
 % Specify the names of tables to create (should be valid names in SQL_TableCreateString)
 TableNames = {'MasterOperations', ...     % MasterOperations Table
-              'OperationCode', ...        % OperationCode Table
               'Operations', ...           % Operations Table
               'TimeSeries', ...           % TimeSeries Table
               'OperationKeywords', ...    % OperationKeywords Table
