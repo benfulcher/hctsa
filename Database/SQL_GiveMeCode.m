@@ -6,7 +6,7 @@
 % outputs.
 % 
 %---INPUT:
-% Theop_id, the operation_id you want code for.
+% the_op_id, the operation_id you want code for.
 % 
 %---OUTPUT:
 % The code as a function handle.
@@ -27,26 +27,29 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TheCode = SQL_GiveMeCode(Theop_id);
+function TheCode = SQL_GiveMeCode(the_op_id);
 
+% ------------------------------------------------------------------------------
 % Open connection to database
 [dbc, dbname] = SQL_opendatabase;
 
 % Get OpCode:
-SelectString = sprintf('SELECT Code FROM Operations WHERE op_id = %u',Theop_id);
+SelectString = sprintf('SELECT Code FROM Operations WHERE op_id = %u',the_op_id);
 OpCode = mysql_dbquery(dbc,SelectString);
 OpCode = OpCode{1};
 
 % Get MasterCode:
 SelectString = sprintf(['SELECT MasterLabel,MasterCode FROM MasterOperations WHERE mop_id = ' ...
-                        '(SELECT mop_id FROM Operations WHERE op_id = %u)'],Theop_id);
+                        '(SELECT mop_id FROM Operations WHERE op_id = %u)'],the_op_id);
 MopData = mysql_dbquery(dbc,SelectString);
 MopLabel = MopData{1};
 MopCode = MopData{2};
 
 % Close connection to the mySQL database
-SQL_closedatabase(dbc) % database closed
+SQL_closedatabase(dbc);
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
 % Combine to give the required code as two function handles:
 DotHere = regexp(OpCode,'\.');
 if ~isempty(DotHere) % A structure output
@@ -56,6 +59,6 @@ if ~isempty(DotHere) % A structure output
 else
     TheCode = eval(sprintf('@(x,y) %s;',MopCode));
 end
+% ------------------------------------------------------------------------------
 
- 
 end

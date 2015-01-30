@@ -521,7 +521,7 @@ end
 % ------------------------------------------------------------------------------
 if ismember(ImportWhat,{'mops','ops'}) % there may be new links
     % Add mop_ids to Operations table
-    fprintf(1,'Evaulating links between operations and master operations...'); tic
+    fprintf(1,'Evaluating links between operations and master operations...'); tic
     UpdateString = ['UPDATE Operations AS o SET o.mop_id = (SELECT mop_id FROM MasterOperations AS m ' ...
                         'WHERE m.MasterLabel = o.MasterLabel) WHERE mop_id IS NULL'];
     [~,emsg] = mysql_dbexecute(dbc,UpdateString);

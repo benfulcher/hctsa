@@ -1,12 +1,13 @@
+% ------------------------------------------------------------------------------
 % TSQ_plot_ColorDendrogram
-% 
+% ------------------------------------------------------------------------------
 % Creates a dendrogram for distance matrix d with colours at each leaf
 % 
 %---INPUTS:
 % d is the (NxN) pairwise distance matrix (e.g., computed using pdist, then squareform)
 % The Nx1 vector groups gives the index each node belongs to
-% The Gx1 cell GroupLabels gives the name of each group (for each of G groups)
-% LinkMethod specifies the linkage method ('complete' by default)
+% The Gx1 cell groupLabels gives the name of each group (for each of G groups)
+% linkMethod specifies the linkage method ('complete' by default)
 % horiz can plot everything horizontally. Don't think this works yet...
 % 
 %---OUTPUT:
@@ -31,13 +32,13 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_ColorDendrogram(d,NodeGroups,GroupLabels,LinkMethod,horiz)
+function TSQ_plot_ColorDendrogram(d,nodeGroups,groupLabels,linkMethod,horiz)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
 % ------------------------------------------------------------------------------
-if nargin < 4 || isempty(LinkMethod) % linkage method
-    LinkMethod = 'complete'; % use average clustering by default
+if nargin < 4 || isempty(linkMethod) % linkage method
+    linkMethod = 'complete'; % use average clustering by default
 end
 if nargin < 5 || isempty(horiz)
     horiz = 0; % display horizontally? not really supported yet
@@ -52,6 +53,9 @@ if horiz
 else
     Orientation = 'top';
 end
+
+% ------------------------------------------------------------------------------
+
 
 % Can specify distance matrix as a string: norcl, and will retrieve and
 % calculate distances as appropriate...
@@ -77,15 +81,15 @@ d = newmaxd * d / max(d);
 
 % Each cell element are indices of that group; turn it into a vector containing
 % group labels
-if iscell(NodeGroups)
-    NodeGroups = BF_ToGroup(NodeGroups);
+if iscell(nodeGroups)
+    nodeGroups = BF_ToGroup(nodeGroups);
 end
 
 % Define the number of objects/nodes:
-NumNodes = length(NodeGroups);
+numNodes = length(nodeGroups);
 
 % The number of groups:
-NumGroups = length(GroupLabels);
+numGroups = length(groupLabels);
 
 % ------------------------------------------------------------------------------
 % Do the linkage clustering:
@@ -96,31 +100,31 @@ NumGroups = length(GroupLabels);
 if size(d,1)==size(d,2)
     d = squareform(d); % convert back to vector
 end
-Z = linkage(d,LinkMethod);
+Z = linkage(d,linkMethod);
 
 % ------------------------------------------------------------------------------
 % Assign labels
 % ------------------------------------------------------------------------------
-NodeLabels = cell(NumNodes,1);
+nodeLabels = cell(numNodes,1);
 % Don't actually label the nodes...""
-for i = 1:NumNodes
-    NodeLabels{i} = '';
+for i = 1:numNodes
+    nodeLabels{i} = '';
 end
 
 % ------------------------------------------------------------------------------
 %% Plot the dendrogram
 % ------------------------------------------------------------------------------
 figure('color','w'); hold on;
-if NumNodes > 1000
-    [H,~,perm] = dendrogram(Z,0,'Orientation',Orientation,'Labels',NodeLabels);
+if numNodes > 1000
+    [H,~,perm] = dendrogram(Z,0,'Orientation',Orientation,'Labels',nodeLabels);
 else % Try optimal leaf order
-    fprintf('Running optimal leaf order for %u nodes...',length(NodeGroups))
+    fprintf('Running optimal leaf order for %u nodes...',length(nodeGroups))
     try
         order = optimalleaforder(Z,d);
-        [H,~,perm] = dendrogram(Z,0,'Reorder',order,'Orientation',Orientation,'Labels',NodeLabels);
+        [H,~,perm] = dendrogram(Z,0,'Reorder',order,'Orientation',Orientation,'Labels',nodeLabels);
         fprintf(1,' Done.\n');
     catch
-        [H,~,perm] = dendrogram(Z,0,'Orientation',Orientation,'Labels',NodeLabels);
+        [H,~,perm] = dendrogram(Z,0,'Orientation',Orientation,'Labels',nodeLabels);
         fprintf(1,' Failed.\n');
     end
 end
@@ -135,34 +139,34 @@ set(gca,'FontSize',12);
 % ------------------------------------------------------------------------------
 ng = 6; % use 6 partitions for each color
 cmap = colormap(BF_getcmap('blues',ng,0,1));
-if NumGroups >= 2
-    cmap = [cmap;BF_getcmap('greens',ng,0,1)];
+if numGroups >= 2
+    cmap = [cmap; BF_getcmap('greens',ng,0,1)];
 end
-if NumGroups >= 3
-    cmap = [cmap;BF_getcmap('oranges',ng,0,1)];
+if numGroups >= 3
+    cmap = [cmap; BF_getcmap('oranges',ng,0,1)];
 end
-if NumGroups >= 4
-    cmap = [cmap;BF_getcmap('purples',ng,0,1)];
+if numGroups >= 4
+    cmap = [cmap; BF_getcmap('purples',ng,0,1)];
 end
-if NumGroups >= 5
-    cmap = [cmap;BF_getcmap('reds',ng,0,1)];
+if numGroups >= 5
+    cmap = [cmap; BF_getcmap('reds',ng,0,1)];
 end
-if NumGroups >= 6
-    cmap = [cmap;pink(ng)];
+if numGroups >= 6
+    cmap = [cmap; pink(ng)];
 end
-if NumGroups >= 7
-    cmap = [cmap;gray(ng)];
+if numGroups >= 7
+    cmap = [cmap; gray(ng)];
 end
-if NumGroups >= 8
-    cmap = [cmap;BF_getcmap('yelloworangered',ng,0,1)];
+if numGroups >= 8
+    cmap = [cmap; BF_getcmap('yelloworangered',ng,0,1)];
 end
-if NumGroups >= 9
-    cmap = [cmap;BF_getcmap('purplebluegreen',ng,0,1)];
+if numGroups >= 9
+    cmap = [cmap; BF_getcmap('purplebluegreen',ng,0,1)];
 end
-if NumGroups >= 10
-    cmap = [cmap;BF_getcmap('yellowgreenblue',ng,0,1)];
+if numGroups >= 10
+    cmap = [cmap; BF_getcmap('yellowgreenblue',ng,0,1)];
 end
-if NumGroups >= 11
+if numGroups >= 11
     error('Too many groups (>10), I can''t handle this!!')
 end
 colors = cmap;
@@ -171,9 +175,9 @@ colors = cmap;
 % Plot little colored bars to label groups on the dendrogram
 % ------------------------------------------------------------------------------
 barheight = 0.4;
-UNodeGroups = unique(NodeGroups);
-for u = 1:length(UNodeGroups)
-    idx = find(NodeGroups==UNodeGroups(u));
+u_nodeGroups = unique(nodeGroups);
+for u = 1:length(u_nodeGroups)
+    idx = find(nodeGroups==u_nodeGroups(u));
     for i = 1:length(idx)
 %         h = line([find(perm==idx(i)),find(perm==idx(i))],[-0.02,-0.01],...
 %                 'LineWidth',1,'Color',colors(u,:));
@@ -220,15 +224,17 @@ hold off;
 % ------------------------------------------------------------------------------
 %% Write legend, do labeling...
 % ------------------------------------------------------------------------------
-% legend(GroupLabels)
+% legend(groupLabels)
 colors = colors(2:ng:end,:);
 y = 0.9;    % vertical height of first colour bar
 x = 0.76;   % left corner of each colour bar
 w = 0.05;   % width of colour bar
 d = 0.045;  % vertical separation between colour bars
-for i = 1:length(GroupLabels)
+
+for i = 1:length(groupLabels)
     annotation(gcf,'line',[x x+w],[y-(i-1)*d y-(i-1)*d],'LineWidth',10,'Color',colors(i,:));
-    annotation(gcf,'textbox',[x+w+0.005 y-(i-1)*d-0.01 0.1782 0.03361],'String',GroupLabels(i),...
+    annotation(gcf,'textbox',[x+w+0.005 y-(i-1)*d-0.01 0.1782 0.03361],'String',groupLabels(i),...
         'FontSize',16,'FitBoxToText','off','LineStyle','none');
-end;
+end
+
 set(gcf,'color','w');

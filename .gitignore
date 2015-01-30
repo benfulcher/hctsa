@@ -36,6 +36,16 @@ sql_settings.conf
 *.mexmaci64
 *.mexa64
 
-# Random shit
+# Random stuff
 plugininstall_*.m
 error.log
+
+# Documentation auxiliary tex files:
+# *.pdf
+# *.png
+# *.aux
+# *.bbl
+# *.blg
+# *.end
+# *.log
+# *.synctex.gz
