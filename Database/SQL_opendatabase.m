@@ -39,7 +39,7 @@ d = s{1};
 hostname = d{1};
 default_dbname = d{2};
 username = d{3};
-password= d{4};
+password = d{4};
 fclose(fid);
 
 if nargin < 1 || isempty(dbname)

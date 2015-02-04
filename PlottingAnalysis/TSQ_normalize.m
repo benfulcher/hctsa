@@ -8,14 +8,14 @@
 % visualization and clustering.
 % 
 %---INPUTS:
-% NormFunction: String specifying how to normalize the data.
+% normFunction: String specifying how to normalize the data.
 % 
-% FilterOptions: Vector specifying thresholds for the minimum proportion of bad
+% filterOptions: Vector specifying thresholds for the minimum proportion of bad
 %                values tolerated in a given row or column, in the form of a 2-vector:
-%                [row proportion, column proportion] If one of the FilterOptions
+%                [row proportion, column proportion] If one of the filterOptions
 %                is set to 1, will have no bad values in your matrix.
 %                
-% FileName_HCTSA_loc: Custom filename to import. Default is 'HCTSA_loc.mat'.
+% fileName_HCTSA_loc: Custom filename to import. Default is 'HCTSA_loc.mat'.
 % 
 % subs [opt]: Only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
@@ -41,29 +41,29 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_normalize(NormFunction,FilterOptions,FileName_HCTSA_loc,subs,trainset)
+function TSQ_normalize(normFunction,filterOptions,fileName_HCTSA_loc,subs,trainset)
 
 % --------------------------------------------------------------------------
 %% Check Inputs
 % --------------------------------------------------------------------------
-if nargin < 1 || isempty(NormFunction)
+if nargin < 1 || isempty(normFunction)
     fprintf(1,'Using the default, scaled quantile-based sigmoidal transform: ''scaledSQzscore''\n')
-    NormFunction = 'scaledSQzscore';
+    normFunction = 'scaledSQzscore';
 end
 
-if nargin < 2 || isempty(FilterOptions)
-    FilterOptions = [0.80, 1];
-    % By default remove less than 90%-good-valued time series, & then less than 
+if nargin < 2 || isempty(filterOptions)
+    filterOptions = [0.80, 1];
+    % By default remove less than 80%-good-valued time series, & then less than 
     % 100%-good-valued operations.
 end
 fprintf(1,['Removing time series with more than %.2f%% special-valued outputs\n' ...
             'Removing operations with more than %.2f%% special-valued outputs\n'], ...
-            (1-FilterOptions(1))*100,(1-FilterOptions(2))*100);
+            (1-filterOptions(1))*100,(1-filterOptions(2))*100);
 
 % By default, work with a file called HCTSA_loc.mat, as obtained from
 % TSQ_prepared...
-if nargin < 3 || isempty(FileName_HCTSA_loc)
-    FileName_HCTSA_loc = 'HCTSA_loc.mat';
+if nargin < 3 || isempty(fileName_HCTSA_loc)
+    fileName_HCTSA_loc = 'HCTSA_loc.mat';
 end
 
 if nargin < 4
@@ -79,8 +79,8 @@ end
 % --------------------------------------------------------------------------
 %% Read data from local files
 % --------------------------------------------------------------------------
-fprintf(1,'Reading data from %s...',FileName_HCTSA_loc);
-load(FileName_HCTSA_loc,'TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations')
+fprintf(1,'Reading data from %s...',fileName_HCTSA_loc);
+load(fileName_HCTSA_loc,'TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations')
 fprintf(1,' Loaded.\n');
 
 % In this script, each of these pieces of data (from the database) will be trimmed and normalized
@@ -129,7 +129,7 @@ fprintf(1,'There are %u special values in the data matrix.\n',sum(TS_Quality(:) 
 % (*) Filter based on proportion of bad entries. If either threshold is 1,
 % the resulting matrix is guaranteed to be free from bad values entirely.
 [badr, badc] = find(isnan(TS_DataMat));
-thresh_r = FilterOptions(1); thresh_c = FilterOptions(2);
+thresh_r = filterOptions(1); thresh_c = filterOptions(2);
 if thresh_r > 0 % if 1, then even the worst are included
     [badr, ~, rj] = unique(badr); % neat code, but really slow to do this
 %     unique... Loop instead
@@ -268,19 +268,19 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_Da
 %% Actually apply the normalizing transformation
 % --------------------------------------------------------------------------
 
-if ismember(NormFunction,{'nothing','none'})
-    fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',NormFunction)
+if ismember(normFunction,{'nothing','none'})
+    fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',normFunction)
 else
     if isempty(trainset)
         % No training subset specified
         fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',length(TimeSeries),length(Operations))
-        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,NormFunction);
+        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction);
     else
         % Train the normalization parameters only on a specified set of training data, then apply 
         % that transformation to the full data matrix
         fprintf(1,['Normalizing a %u x %u object using %u training time series to train the transformation!' ...
                 ' Please be patient...\n'],length(TimeSeries),length(Operations),length(trainset))
-        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,NormFunction,trainset);
+        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction,trainset);
     end
     fprintf(1,'Normalized! The data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))))
 end
@@ -332,10 +332,10 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n', ...
 % Make a structure with statistics on normalization:
 % Save the CodeToRun, so you can check the settings used to run the normalization
 % At the moment, only saves the first two arguments
-CodeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',NormFunction, ...
-                                        FilterOptions(1),FilterOptions(2));
-NormalizationInfo = struct('NormFunction',NormFunction,'FilterOptions', ...
-                                    FilterOptions,'CodeToRun',CodeToRun);
+CodeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',normFunction, ...
+                                        filterOptions(1),filterOptions(2));
+NormalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
+                                    filterOptions,'CodeToRun',CodeToRun);
 
 
 fprintf(1,'Saving the trimmed, normalized data to local files...')

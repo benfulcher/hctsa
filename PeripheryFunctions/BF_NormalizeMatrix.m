@@ -87,7 +87,8 @@ switch normopt
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
-    case 'MixedSigmoid'
+        
+    case 'mixedSigmoid'
         % Ben Fulcher, 2014-06-26
         % Runs a normal sigmoid if iqr=0; a scaled sigmoid otherwise
         % Computes statistics on non-nans
@@ -137,7 +138,7 @@ switch normopt
             end
         end
         
-    case 'scaledsigmoid'
+    case 'scaledSigmoid'
         % A standard sigmoid transform, then a rescaling to the unit interval
         for i = 1:N2 % cycle through the metrics
             rr = ~isnan(F(:,i));

@@ -54,7 +54,7 @@ end
 %% Read in the data
 % --------------------------------------------------------------------------
 if isstruct(whatData)
-    % can specify all of this in the whatData argument
+    % Can specify all of these fields in the whatData argument
     TimeSeries = whatData.TimeSeries;
     Operations = whatData.Operations;
     TS_DataMat = whatData.TS_DataMat;
@@ -214,6 +214,7 @@ end
 %% Plot the data matrix
 % ------------------------------------------------------------------------------
 % Surround by zeros for an accurate and inclusive pcolor:
+% (alternative is to use imagesc)
 pcolor([TS_DataMat, zeros(size(TS_DataMat,1),1); zeros(1,size(TS_DataMat,2)+1)]);
 shading flat
 
