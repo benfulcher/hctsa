@@ -25,7 +25,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [dbConnection, errmsg] = mysql_dbopen(serverHost, dbname, userName, passWord, customPort)
+function [dbConnection, errMessage] = mysql_dbopen(serverHost, dbname, userName, password, customPort)
 
 % Set defaults:
 if nargin < 5
@@ -45,11 +45,12 @@ if dbToolboxExists
     % ------------------------------------------------------------------------------
     
     % A license is available for Matlab's Database Toolbox, use that:
-    dbConnection = database(dbname,userName,passWord,'Vendor','MySQL','Server',serverHost,'PortNumber',customPort);
+    dbConnection = database(dbname,userName,password,'Vendor','MySQL','Server',serverHost,'PortNumber',customPort);
+    errMessage = dbConnection.Message;
     
     % Check for a connection error:
-    if ~isempty(dbConnection.Message)
-        error('%s\n',dbConnection.Message);
+    if ~isempty(errMessage)
+        error('Error connecting to the database using Matlab database toolbox:\n%s',dbConnection.Message);
     end
     
 else
@@ -68,20 +69,20 @@ else
     try
         java.lang.Class.forName('com.mysql.jdbc.Driver', true, cl);
     catch le
-        errmsg = le.message;
+        errMessage = le.message;
         dbConnection = [];
-        error('Error with java database connector: %s',errmsg);
+        error('Error with java database connector:\n%s',errMessage);
     end
 
     % ------------------------------------------------------------------------------
     % Now try to connect:
     try
         dburl = sprintf('jdbc:mysql://%s/%s', serverHost, dbname);
-        dbConnection = java.sql.DriverManager.getConnection(dburl, userName, passWord);
+        dbConnection = java.sql.DriverManager.getConnection(dburl, userName, password);
     catch le
         dbConnection = [];
         error('Error connecting to the database ''%s'' at ''%s'':\n%s\n',dbname,serverHost,le.message);
-        % fprintf(1,['\nPerhaps due to an incorrect username (''%s'') and password (''%s'') combination?\n'], userName, passWord);
+        % fprintf(1,['\nPerhaps due to an incorrect username (''%s'') and password (''%s'') combination?\n'], userName, password);
     end
 end
 
