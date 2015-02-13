@@ -24,7 +24,7 @@ if exist(filename, 'file')
 	sig = signal(filename);
 	dlen = dlens(sig);
 	if  (ndim(sig)==1) & (dlen(1) < 5)
-		[path,name,ext,ver] = fileparts(filename);
+		[path,name,ext] = fileparts(filename);
 		titel = ['Values of ' name];
 		lineNo = dlen(1);
 		prompt  = 'Value(s) :';
@@ -63,7 +63,7 @@ function fhandle = newplotwin(filename)
 % Filename is only needed for the title of the window
 scrsz = get(0,'ScreenSize');   % get Screensize
 
-[path,name,ext,ver] = fileparts(filename);
+[path,name,ext] = fileparts(filename);
 titlestring = [name ext];
 indices = find(titlestring=='_');
 titlestring(find(titlestring=='_')) = ' ';  % remove all underscores

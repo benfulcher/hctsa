@@ -32,7 +32,7 @@ for i=1:length(str(:,1))
 end
 
 
-[path,fname,ext,ver] = fileparts(filename);
+[path,fname,ext] = fileparts(filename);
 
 if ~strcmp(lasttoken,fname)
     if n      

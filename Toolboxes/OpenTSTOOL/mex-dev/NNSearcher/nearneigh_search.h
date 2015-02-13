@@ -266,10 +266,10 @@ void Brute<POINT_SET>::search(ForwardIterator query_point, const long first, con
 	long j;
 	
 	for (j=0; j <= first-1; j++) {
-		test(j, query_point, table.highdist());
+		this->test(j, query_point, this->table.highdist());
 	}
-	for (j=std::max(last+1, first); j < Nused; j++) {
-		test(j, query_point, table.highdist());
+ 	for (j=max(last+1, first); j < this->Nused; j++) {
+ 		this->test(j, query_point, this->table.highdist());
 	}		
 }
 
@@ -282,10 +282,10 @@ long Brute<POINT_SET>::search_k_neighbors(vector<neighbor>& v, const long k, For
 	number_of_queries++;
 #endif
 
-	table.init_search(k);
+	this->table.init_search(k);
 	search(query_point, first, last, epsilon);
 	
-	return table.finish_search(v);	// append table items to v, v should be empty, afterwards table is empty
+	return this->table.finish_search(v);	// append table items to v, v should be empty, afterwards table is empty
 }
 
 
@@ -298,9 +298,9 @@ long Brute<POINT_SET>::search_range(vector<neighbor>& v, const double radius, Fo
 	number_of_queries++;
 #endif
 
-	for (long j=0; j < Nused; j++)
+	for (long j=0; j < this->Nused; j++)
 		if ((j < first) || (j > last)) {
-			const double d = points.distance(j, query_point);
+			const double d = this->points.distance(j, query_point);
 				
 			if (d<=radius) { 
 				v.push_back(neighbor(j,d));
@@ -323,9 +323,9 @@ long Brute<POINT_SET>::count_range(const double radius,ForwardIterator query_poi
 	number_of_queries++;
 #endif
 
-	for (register long j=0; j < Nused; j++)
+	for (register long j=0; j < this->Nused; j++)
 		if ((j < first) || (j > last)) {	
-			if (points.distance(j, query_point) <= radius) count++;	
+			if (this->points.distance(j, query_point) <= radius) count++;	
 #ifdef PROFILE
 			points_searched++;
 #endif			
@@ -344,9 +344,9 @@ void Brute<POINT_SET>::count_range(long& count1, long& count2, const double radi
 	number_of_queries++;
 #endif
 
-	for (register long j=0; j < Nused; j++)
+	for (register long j=0; j < this->Nused; j++)
 		if ((j < first) || (j > last)) {	
-			const double d = points.distance(j, query_point);
+			const double d = this->points.distance(j, query_point);
 			if (d <= radius1) count1++;
 			if (d <= radius2) count2++;	
 #ifdef PROFILE
@@ -357,8 +357,8 @@ void Brute<POINT_SET>::count_range(long& count1, long& count2, const double radi
 
 template<class POINT_SET>
 ATRIA<POINT_SET>::ATRIA(const POINT_SET& p, const long excl, const long minpts) 
-	:	nearneigh_searcher<POINT_SET>(p, excl), root(1,Nused-1), MINPOINTS(minpts), 
-		permutation_table(new neighbor[Nused]), total_clusters(1),
+	:	nearneigh_searcher<POINT_SET>(p, excl), root(1,this->Nused-1), MINPOINTS(minpts), 
+		permutation_table(new neighbor[this->Nused]), total_clusters(1),
 		total_points_in_terminal_node(0), terminal_nodes(0)
 {
 #ifdef VERBOSE
@@ -371,14 +371,14 @@ ATRIA<POINT_SET>::ATRIA(const POINT_SET& p, const long excl, const long minpts)
 	terminal_cluster_searched = 0;
 #endif 	    
 	        
-	if (err) {
+	if (this->err) {
 		cerr << "Error initializing parent object" << endl;
 		return;
 	}
 	
 	if (permutation_table == 0) { 
 		cerr << "Out of memory" << endl; 
-		err = 1; 
+		this->err = 1; 
 		return;
 	}
 				
@@ -443,17 +443,17 @@ pair<long, long> ATRIA<POINT_SET>::find_child_cluster_centers(const cluster* con
 	centers.second = center_right;
 	
 	// move this center the the last (rightmost) element of this Section
-	My_Utilities::swap(Section, index, length-1);
+	this->swap(Section, index, length-1);
 	
 	// compute left center, the point that is farthest away from the center_right 
 
 	index = 0;
 	long center_left = Section[index].index();	
-	dist = points.distance(center_right, Section[index].index());
+	dist = this->points.distance(center_right, Section[index].index());
 	Section[index].dist() = dist;
 	
  	for (long i=1; i < length-1; i++) {			
- 		const double d = points.distance(center_right, Section[i].index());
+ 		const double d = this->points.distance(center_right, Section[i].index());
 		Section[i].dist() = d;
  		if (d > dist) {
 			dist = d;
@@ -463,7 +463,7 @@ pair<long, long> ATRIA<POINT_SET>::find_child_cluster_centers(const cluster* con
  	}
 	
 	// move this center the the first (leftmost) element of this Section
-	My_Utilities::swap(Section, index, 0);
+	this->swap(Section, index, 0);
 	
 	centers.first = center_left;
 	
@@ -493,7 +493,7 @@ long ATRIA<POINT_SET>::assign_points_to_centers(neighbor* const Section, const l
 
 		while(i+1 < j) {
 			i++;
-			const double dl = points.distance(center_left, Section[i].index());
+			const double dl = this->points.distance(center_left, Section[i].index());
 			// ruse information instead of calculating dr = points.distance(center_right, Section[i].index());			
 			const double dr = Section[i].dist(); 
 			
@@ -522,7 +522,7 @@ long ATRIA<POINT_SET>::assign_points_to_centers(neighbor* const Section, const l
 			--j;
 
 			const double dr = Section[j].dist(); // points.distance(center_right, Section[j].index());
-			const double dl = points.distance(center_left, Section[j].index());
+			const double dl = this->points.distance(center_left, Section[j].index());
 
 			if (dr >= dl) {
 				// point belongs to the left corner
@@ -547,7 +547,7 @@ long ATRIA<POINT_SET>::assign_points_to_centers(neighbor* const Section, const l
 
 		if (i == j-1) {
 			if ((!i_belongs_to_left) && (!j_belongs_to_right)) {
-			        My_Utilities::swap(Section, i,j);		
+			        this->swap(Section, i,j);		
 			} else if (!i_belongs_to_left) {
 				i--; j--;
 			} else if (!j_belongs_to_right) {	
@@ -555,7 +555,7 @@ long ATRIA<POINT_SET>::assign_points_to_centers(neighbor* const Section, const l
 			}
 			break;		// finished walking through the array
 		} else {
-		       My_Utilities::swap(Section, i,j);
+		       this->swap(Section, i,j);
 		}
 	}
 	
@@ -573,13 +573,13 @@ void ATRIA<POINT_SET>::create_tree()
 {
 	register long k;
 	
-	if (err) return;
+	if (this->err) return;
 	
 	stack<cluster_pointer, cluster_pointer_vector> Stack;	// used for tree construction
 
 	// select random center for root cluster, move this to first position of the indices array
 	
-	root.center = randindex(Nused);
+	root.center = this->randindex(this->Nused);
 	permutation_table[0] = neighbor(root.center, 0);
 
 #ifdef VERBOSE
@@ -590,13 +590,13 @@ void ATRIA<POINT_SET>::create_tree()
 
 	root.Rmax = 0;
 	for (k=0; k < root.center; k++) {
-		const double d = points.distance(k, root.center);
+		const double d = this->points.distance(k, root.center);
 		permutation_table[k+1] = neighbor(k, d);
 		if (d > root.Rmax)
 			root.Rmax = d;
 	}
-	for (k=root.center+1; k < Nused; k++) {
-		const double d = points.distance(k, root.center);
+	for (k=root.center+1; k < this->Nused; k++) {
+		const double d = this->points.distance(k, root.center);
 		permutation_table[k] = neighbor(k, d);
 		if (d > root.Rmax)
 			root.Rmax = d;		
@@ -691,11 +691,11 @@ long ATRIA<POINT_SET>::search_k_neighbors(vector<neighbor>& v, const long k, For
 	number_of_queries++;
 #endif
 
-	table.init_search(k);
+	this->table.init_search(k);
 
 	search(query_point, first, last, epsilon);
 	
-	return table.finish_search(v);	// append table items to v, v should be empty, afterwards table is empty
+	return this->table.finish_search(v);	// append table items to v, v should be empty, afterwards table is empty
 }
 
 template<class POINT_SET>
@@ -705,7 +705,7 @@ void ATRIA<POINT_SET>::search(ForwardIterator query_point, const long first, con
 #ifdef PROFILE
 	points_searched++;
 #endif	
-	const double root_dist = points.distance(root.center, query_point);
+	const double root_dist = this->points.distance(root.center, query_point);
 	
 	while(!search_queue.empty()) search_queue.pop();	// clear search queue
 				
@@ -717,10 +717,10 @@ void ATRIA<POINT_SET>::search(ForwardIterator query_point, const long first, con
 		const SearchItem si = search_queue.top(); search_queue.pop();
 		const cluster* const c = si.clusterp();
 
-		if ((table.highdist() > si.dist()) && ((c->center < first) || (c->center > last)))
-			table.insert(neighbor(c->center, si.dist()));
+		if ((this->table.highdist() > si.dist()) && ((c->center < first) || (c->center > last)))
+			this->table.insert(neighbor(c->center, si.dist()));
 
-		if (table.highdist() >= si.d_min() * (1.0 + epsilon)) {	// approximative (epsilon > 0) queries are supported			
+		if (this->table.highdist() >= si.d_min() * (1.0 + epsilon)) {	// approximative (epsilon > 0) queries are supported			
 			if (c->is_terminal())  {	
 				const neighbor* const Section = permutation_table + c->start;				
 #ifdef PROFILE
@@ -731,26 +731,26 @@ void ATRIA<POINT_SET>::search(ForwardIterator query_point, const long first, con
 					for (long i=0; i < c->length; i++) {
 						const long j = Section[i].index();		
 
-						if (table.highdist() <= si.dist()) 
+						if (this->table.highdist() <= si.dist()) 
 							break;
 
 						if ((j < first) || (j > last)) 
-							table.insert(neighbor(j,si.dist()));
+							this->table.insert(neighbor(j,si.dist()));
 					}	
 				} else {
 					for (long i=0; i < c->length; i++) { 
 						const long j = Section[i].index();		
 
 						if ((j < first) || (j > last)) {
-							if (table.highdist() > fabs(si.dist() - Section[i].dist()))
-								test(j, query_point, table.highdist());	
+							if (this->table.highdist() > fabs(si.dist() - Section[i].dist()))
+								this->test(j, query_point, this->table.highdist());	
 						}				
 					}
 				}
 			}
 			else {				// this is an internal node
-				const double dl = points.distance(c->left->center, query_point);
-				const double dr = points.distance(c->right->center, query_point);
+				const double dl = this->points.distance(c->left->center, query_point);
+				const double dr = this->points.distance(c->right->center, query_point);
 #ifdef PROFILE
 				points_searched += 2;
 #endif		
@@ -778,7 +778,7 @@ long ATRIA<POINT_SET>::search_range(vector<neighbor>& v, const double radius, Fo
 
 	while (!SearchStack.empty()) SearchStack.pop();	// make shure stack is empty
 
-	SearchStack.push(SearchItem(&root, points.distance(root.center, query_point)));
+	SearchStack.push(SearchItem(&root, this->points.distance(root.center, query_point)));
 
 	while (!SearchStack.empty()) 
 	{
@@ -813,9 +813,9 @@ long ATRIA<POINT_SET>::search_range(vector<neighbor>& v, const double radius, Fo
 
 						if ( ((j < first) || (j > last)) && (radius >= fabs(si.dist() - Section[i].dist())) ) {
 #ifdef PARTIAL_SEARCH
-							const double d = points.distance(j, query_point, radius);
+							const double d = this->points.distance(j, query_point, radius);
 #else
-							const double d = points.distance(j, query_point);
+							const double d = this->points.distance(j, query_point);
 #endif		
 							if (d <= radius) {
 								v.push_back(neighbor(j,d));
@@ -832,8 +832,8 @@ long ATRIA<POINT_SET>::search_range(vector<neighbor>& v, const double radius, Fo
 #endif				
 			}
 			else {				// this is an internal node
-				const double dl = points.distance(c->left->center, query_point);
-				const double dr = points.distance(c->right->center, query_point);			
+				const double dl = this->points.distance(c->left->center, query_point);
+				const double dr = this->points.distance(c->right->center, query_point);			
 #ifdef PROFILE
 				points_searched += 2;
 #endif
@@ -861,7 +861,7 @@ long ATRIA<POINT_SET>::count_range(const double radius, ForwardIterator query_po
 
 	while (!SearchStack.empty()) SearchStack.pop();	// make shure stack is empty
 
-	SearchStack.push(SearchItem(&root, points.distance(root.center, query_point)));
+	SearchStack.push(SearchItem(&root, this->points.distance(root.center, query_point)));
 
 	while (!SearchStack.empty()) 
 	{
@@ -895,10 +895,10 @@ long ATRIA<POINT_SET>::count_range(const double radius, ForwardIterator query_po
 
 						if ( ((j < first) || (j > last)) && (radius >= fabs(si.dist() - Section[i].dist())) ) {
 #ifdef PARTIAL_SEARCH
-							if (points.distance(j, query_point, radius) <= radius) 
+							if (this->points.distance(j, query_point, radius) <= radius) 
 								count++;
 #else
-							if (points.distance(j, query_point) <= radius) 
+							if (this->points.distance(j, query_point) <= radius) 
 								count++;
 #endif		
 
@@ -913,8 +913,8 @@ long ATRIA<POINT_SET>::count_range(const double radius, ForwardIterator query_po
 #endif				
 			}
 			else {				// this is an internal node
-				const double dl = points.distance(c->left->center, query_point);
-				const double dr = points.distance(c->right->center, query_point);			
+				const double dl = this->points.distance(c->left->center, query_point);
+				const double dr = this->points.distance(c->right->center, query_point);			
 #ifdef PROFILE
 				points_searched += 2;
 #endif

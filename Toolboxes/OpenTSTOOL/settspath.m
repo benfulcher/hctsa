@@ -6,7 +6,7 @@ function settspath(TSTOOLpath)
 
 if nargin == 0
     if which('units.mat')
-        [TSTOOLpath,~,~,~] = fileparts(which('units.mat'));
+        [TSTOOLpath,~,~] = fileparts(which('units.mat'));
     elseif exist(fullfile(pwd,'tstoolbox','units.mat')) == 2
         TSTOOLpath = fullfile(pwd,'tstoolbox');
     else

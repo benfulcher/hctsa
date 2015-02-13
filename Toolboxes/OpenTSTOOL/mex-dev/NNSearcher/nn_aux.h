@@ -20,6 +20,10 @@ using namespace std;
 #define DBL_MAX 1E+38
 #endif
 
+#ifdef INFINITY
+#undef INFINITY
+#endif
+
 #ifndef INFINITY
 #define INFINITY DBL_MAX
 #endif

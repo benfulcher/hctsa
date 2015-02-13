@@ -4,7 +4,7 @@ function [datafiles] = lload(filename, handles,datafiles)
 
 
 [status,datafiles]=writelevel(filename,datafiles);
-[path,fname,ext,ver] = fileparts(filename);
+[path,fname,ext] = fileparts(filename);
 
 
 datafiles=sortdatafiles(datafiles)

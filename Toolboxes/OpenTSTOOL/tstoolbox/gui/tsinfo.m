@@ -15,7 +15,7 @@ if exist(filename)
 	else
 		temp = dir(filename);
 		filesize = num2str(temp.bytes);
-		[path,Name,ext,ver] = fileparts(filename);
+		[path,Name,ext] = fileparts(filename);
 		yunt = unit(yaxis(sig));		
 		string1 = { ...
 		['Filename                        : ' filename] ; ...

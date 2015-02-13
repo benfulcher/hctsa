@@ -51,7 +51,7 @@ try
 
 	%Settings = get(0, 'UserData');
 	%TSTOOLpath = Settings{1};
-	[TSTOOLpath,dummy,dummy,dummy]=fileparts(which('units.mat'));
+	[TSTOOLpath,dummy,dummy]=fileparts(which('units.mat'));
 
 %	global cwd % Aktuelles Suchverzeichnis und aktuelles Schreibverzechnis
 %	filter = get(lallhandle, 'UserData');
@@ -467,7 +467,7 @@ try
 	  currentfile =fullfile(TSTOOLdatapath,[getlastentry(datafiles,get(lboxhandle,'Value')) TSTOOLfilter]);
 	  if  ~isempty(currentfile)
 	    if exist(currentfile)
-	      [path,name,ext,ver] = fileparts(currentfile);
+	      [path,name,ext] = fileparts(currentfile);
 	      switch action
 	       case 'plot'
 		tsplot(currentfile);
@@ -1150,7 +1150,7 @@ try
 		    sig2 = cut(sig, 2, n, n);
 		    newfilename = newname(currentfile, '', num2str(n), TSTOOLdatapath);
 		    if n==1
-		      [dummy,fname,dummy,dummy]=fileparts(newfilename);
+		      [dummy,fname,dummy]=fileparts(newfilename);
 		    end
 		    
 		    sig2=write(sig2, newfilename);
@@ -1249,8 +1249,8 @@ try
 		if ~isempty(secfilename)
 		  sig = signal(currentfile);
 		  sig2 = signal(secfilename);
-		  [path,name1,ext,ver] = fileparts(currentfile);
-		  [path,name2,ext,ver] = fileparts(secfilename);
+		  [path,name1,ext] = fileparts(currentfile);
+		  [path,name2,ext] = fileparts(secfilename);
 		  if compare(sig,sig2)
 		    msgbox([name1 ' and ' name2 ' have equal values'],'Compare signals')
 		  else
@@ -1307,7 +1307,7 @@ try
 		hded2(currentfile);
 	       case 'newcomment'
 		text = 'Newly added comment text';	
-		[path,name,ext,ver] = fileparts(currentfile);
+		[path,name,ext] = fileparts(currentfile);
 		sig = signal(currentfile);
 		title = ['Comment for ' name];
 		lineNo = 12;
@@ -1332,7 +1332,7 @@ try
 		makescript(sig, fullfile(TSTOOLdatapath, 'scripts', 'macro.m'));
 	       case 'history'
 		text = 'History';	
-		[path,name,ext,ver] = fileparts(currentfile);
+		[path,name,ext] = fileparts(currentfile);
 		sig = signal(currentfile);
 		title = ['History for ' name];
 		lineNo = 12;

@@ -21,15 +21,15 @@ typedef vector<RetrieveItem> RetrieveItem_vector;
 
 template<class POINT_SET>
 ATRIA<POINT_SET>::ATRIA(const POINT_SET& p, const mxArray* inStructArr) // create an ATRIA object from data stored in struct array inStructArr
- : nearneigh_searcher<POINT_SET>(p, 0), root(0,Nused), MINPOINTS(0), permutation_table(0), total_clusters(1),
+ : nearneigh_searcher<POINT_SET>(p, 0), root(0,this->Nused), MINPOINTS(0), permutation_table(0), total_clusters(1),
  total_points_in_terminal_node(0), terminal_nodes(0)
 {	
 	long i;
 	 	
-	err = 0;
+	this->err = 0;
 		
 	if (!mxIsStruct(inStructArr)) {
-		err = 1;
+		this->err = 1;
 		return;
 	}
 	
@@ -38,105 +38,105 @@ ATRIA<POINT_SET>::ATRIA(const POINT_SET& p, const mxArray* inStructArr) // creat
 	const mxArray* tmparr = mxGetField(inStructArr, 0, "params");
 	
 	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != 5)) {
-		err = 1;
+		this->err = 1;
 		return;
 	}
 	const double* tmpptr = mxGetPr(tmparr);
 	
-	Nused = (long) tmpptr[0]; 
+	this->Nused = (long) tmpptr[0]; 
 	total_clusters = (long) tmpptr[1]; 
 	terminal_nodes = (long) tmpptr[2]; 
 	total_points_in_terminal_node = (long) tmpptr[3]; 
 	MINPOINTS = (long) tmpptr[4];
 
-	if ((Nused < 2) || ( Nused > p.size())) {
-		err = 1;
+	if ((this->Nused < 2) || ( this->Nused > p.size())) {
+		this->err = 1;
 		return;
 	}
 	
-	permutation_table = new neighbor[Nused];
+	permutation_table = new neighbor[this->Nused];
 	if (permutation_table == 0) { 
 		cerr << "Out of memory" << endl; 
-		err = 1; 
+		this->err = 1; 
 		return;
 	}
 	// distances
 	
 	tmparr = mxGetField(inStructArr, 0, "distances");
-	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != Nused)) {
-		err = 1;
+	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != this->Nused)) {
+		this->err = 1;
 		return;
 	}
 	
 	tmpptr = mxGetPr(tmparr);
 	
-	for (i=0; i < Nused; i++) permutation_table[i].dist() = tmpptr[i];	
+	for (i=0; i < this->Nused; i++) permutation_table[i].dist() = tmpptr[i];	
 
 	// indices
 	
 	tmparr = mxGetField(inStructArr, 0, "indices");
-	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != Nused)) {
-		err = 1;
+	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != this->Nused)) {
+		this->err = 1;
 		return;
 	}
 	tmpptr = mxGetPr(tmparr);
 	
-	for (i=0; i < Nused; i++) permutation_table[i].index() = (long) tmpptr[i];	// warning : double to long conversion
+	for (i=0; i < this->Nused; i++) permutation_table[i].index() = (long) tmpptr[i];	// warning : double to long conversion
 	
 	// retrieve cluster tree
 	
 	const mxArray* tree = mxGetField(inStructArr, 0, "tree");
 	
 	if ((tree == NULL) || (!mxIsStruct(tree))) {
-		err = 1;
+		this->err = 1;
 		return;
 	}
 
 	tmparr = mxGetField(tree, 0, "center");
 	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != total_clusters)) {
-		err = 1;
+		this->err = 1;
 		return;
 	}
     double* center_arr = mxGetPr(tmparr);
 	
 	tmparr = mxGetField(tree, 0, "Rmax");
 	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != total_clusters)) {
-		err = 1;
+		this->err = 1;
 		return;
 	}	
     double* Rmax_arr = mxGetPr(tmparr);
 
 	tmparr = mxGetField(tree, 0, "start");
 	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != total_clusters)) {
-		err = 1;
+		this->err = 1;
 		return;
 	}    
 	double* start_arr = mxGetPr(tmparr);
 	
 	tmparr = mxGetField(tree, 0, "length");
 	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != total_clusters)) {
-		err = 1;
+		this->err = 1;
 		return;
 	}    
     double* length_arr = mxGetPr(tmparr);
 	
 	tmparr = mxGetField(tree, 0, "leftchild");
 	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != total_clusters)) {
-		err = 1;
+		this->err = 1;
 		return;
 	}    
     double* leftchild_arr = mxGetPr(tmparr);
 	
 	tmparr = mxGetField(tree, 0, "rightchild");
 	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != total_clusters)) {
-		err = 1;
+		this->err = 1;
 		return;
 	}    
     double* rightchild_arr = mxGetPr(tmparr);
 	
 	tmparr = mxGetField(tree, 0, "g");
 	if ((tmparr == NULL) || (!mxIsDouble(tmparr)) || (mxGetM(tmparr) != total_clusters)) {
-		err = 1;
+		this->err = 1;
 		return;
 	}    
     double* g_arr = mxGetPr(tmparr);	
@@ -170,14 +170,14 @@ ATRIA<POINT_SET>::ATRIA(const POINT_SET& p, const mxArray* inStructArr) // creat
 		const cluster_pointer c = new cluster();
 		
 		if ((x.index_of_node_needs_creation < 0) || (x.index_of_node_needs_creation >= total_clusters)) {
-			err = 1;
+			this->err = 1;
 			return;
 		}
 		
 		c->center = (long) center_arr[x.index_of_node_needs_creation];
 		
-		if ((c->center < 0) || (c->center >= Nused)) {
-			err = 1;
+		if ((c->center < 0) || (c->center >= this->Nused)) {
+			this->err = 1;
 			return;
 		}
 		
@@ -186,14 +186,14 @@ ATRIA<POINT_SET>::ATRIA(const POINT_SET& p, const mxArray* inStructArr) // creat
 		
 		if (c->is_terminal()) {
 			c->start = (long) start_arr[x.index_of_node_needs_creation];
-			if ((c->start < 0) || (c->start >= Nused)) {
-				err = 1;
+			if ((c->start < 0) || (c->start >= this->Nused)) {
+				this->err = 1;
 				return;
 			}
 			
 			c->length = (long) length_arr[x.index_of_node_needs_creation];
-			if ((c->length < 0) || (c->length >= Nused)) {
-				err = 1;
+			if ((c->length < 0) || (c->length >= this->Nused)) {
+				this->err = 1;
 				return;
 			}
 		} else {
@@ -270,26 +270,26 @@ mxArray* ATRIA<POINT_SET>::store()	// store an ATRIA object into an MATLAB struc
 	tmparr = mxCreateDoubleMatrix(5, 1, mxREAL);
 	tmpptr = (double *) mxGetPr(tmparr);
 	
-	tmpptr[0] = Nused; tmpptr[1] = total_clusters; tmpptr[2] = terminal_nodes; tmpptr[3] = total_points_in_terminal_node; 
+	tmpptr[0] = this->Nused; tmpptr[1] = total_clusters; tmpptr[2] = terminal_nodes; tmpptr[3] = total_points_in_terminal_node; 
 	tmpptr[4] = MINPOINTS;
 	
 	mxSetField(output, 0, "params", tmparr);
 
 	// store distances
 	
-	tmparr = mxCreateDoubleMatrix(Nused, 1, mxREAL);
+	tmparr = mxCreateDoubleMatrix(this->Nused, 1, mxREAL);
 	tmpptr = (double *) mxGetPr(tmparr);
 	
-	for (i=0; i < Nused; i++) tmpptr[i] = permutation_table[i].dist();	
+	for (i=0; i < this->Nused; i++) tmpptr[i] = permutation_table[i].dist();	
 	
 	mxSetField(output, 0, "distances", tmparr);
 	
 	// store indices
 	
-	tmparr = mxCreateDoubleMatrix(Nused, 1, mxREAL);
+	tmparr = mxCreateDoubleMatrix(this->Nused, 1, mxREAL);
 	tmpptr = (double *) mxGetPr(tmparr);
 	
-	for (i=0; i < Nused; i++) tmpptr[i] = permutation_table[i].index();	// warning : long to double conversion
+	for (i=0; i < this->Nused; i++) tmpptr[i] = permutation_table[i].index();	// warning : long to double conversion
 	
 	mxSetField(output, 0, "indices", tmparr);
 	

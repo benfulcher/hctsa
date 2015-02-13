@@ -74,12 +74,12 @@ end
 if isa(argument, 'char')		% loading file with name given by argument
 	if nargin == 1
 		load(argument, '-mat');
-		[path,nam,ext,ver] = fileparts(argument);
+		[path,nam,ext] = fileparts(argument);
 		% if isempty(name(s))			% give only new name if old one is empty
 		s = setname(s, nam);			
 		%end
 	else
-		[path,nam,ext,ver] = fileparts(argument);
+		[path,nam,ext] = fileparts(argument);
 		switch varargin{1}
 			case {'ASCII', 'ascii', 'ASC', 'asc', 'dat', 'txt'}
 				load(argument,'-ascii'); 

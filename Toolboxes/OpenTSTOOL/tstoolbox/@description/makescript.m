@@ -17,7 +17,7 @@ function makescript(d, filename)
 
 error(nargchk(1,2,nargin));
 
-[path,name,ext,ver] = fileparts(filename); 
+[path,name,ext] = fileparts(filename); 
 
 n = findstr(name, '.m');
 if isempty(n)
