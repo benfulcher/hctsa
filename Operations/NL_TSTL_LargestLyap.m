@@ -151,7 +151,7 @@ end
 % p at lags up to 5
 for i = 1:5
     % evaluate p(1), p(2), ..., p(5) for the output structure
-    eval('out.p%u = p(%u);',i,i);
+    eval(sprintf('out.p%u = p(%u);',i,i));
 end
 out.maxp = max(p);
 

@@ -139,15 +139,10 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TSTOOL code, fracdims:
 % ------------------------------------------------------------------------------
-
-% [philiphorst] 
-% This looks for the file rather than the function, but it does the job.
-% The previous call to exist returned 0 even when the function was
-% accessible
-if ~exist('tstoolbox/@signal/fracdims')
-    error(['Cannot find the code ''fracdims'' from the TSTOOL package. ' ...
-            'Is it installed and in the Matlab path?']);
-end
+%if ~exist('tstoolbox/@signalfracdims')
+%    error(['Cannot find the code ''fracdims'' from the TSTOOL package. ' ...
+%            'Is it installed and in the Matlab path?']);
+%end
 try
     rs = fracdims(s,kmin,kmax,Nref,gstart,gend,past,steps);
 catch me
