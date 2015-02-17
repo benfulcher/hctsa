@@ -32,7 +32,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_brawn(doLog,doParallel,beVocal)
+function TSQ_brawn(doLog,doParallel,beVocal,HCTSA_loc_filename)
     
 % --------------------------------------------------------------------------
 %% Check inputs and set defaults
@@ -68,12 +68,13 @@ if nargin < 3
     % prints every piece of code evaluated (nice for error checking)
 end
 
-
+if nargin < 4
+    HCTSA_loc_filename = 'HCTSA_loc.mat'; 
 % --------------------------------------------------------------------------
 %% Load information from local files
 % --------------------------------------------------------------------------
-fprintf(fid,'Reading in data from HCTSA_loc.mat...');
-load('HCTSA_loc.mat')
+fprintf(fid,['Reading in data from ',HCTSA_loc_filename,'...']);
+load(HCTSA_loc_filename)
 fprintf(fid,' Done.\n');
 
 % Definitions
@@ -368,8 +369,8 @@ fprintf(fid,['!! !! !! !! !! !! !!  Calculation completed at %s !! !! !! ' ...
 fprintf(fid,'Calculations took a total of %s.\n',BF_thetime(sum(times),1))
 
 % Save the local files for subsequent upload to the mySQL database
-fprintf(1,'Saving all results to HCTSA_loc.mat...')
-save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
+fprintf(1,['Saving all results to ',HCTSA_loc_filename,'...']);
+save(HCTSA_loc_filename,'TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
                                 'Operations','MasterOperations','-v7.3')
 fprintf(fid,' Saved.\n')
 
