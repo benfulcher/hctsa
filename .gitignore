@@ -41,6 +41,9 @@ plugininstall_*.m
 error.log
 
 # Documentation auxiliary tex files:
+*.exe
+*.o
+*~
 # *.pdf
 # *.png
 # *.aux
