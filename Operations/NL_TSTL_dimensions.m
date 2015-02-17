@@ -95,8 +95,11 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TSTOOL function:
 % ------------------------------------------------------------------------------
-
-if ~exist('dimensions')
+% [philiphorst] 
+% This looks for the file rather than the function, but it does the job.
+% The previous call to exist returned 0 even when the function was
+% accessible
+if ~exist('tstoolbox/@signal/dimensions')
     error('Cannot find the code ''dimensions'' from the TSTOOL package. Is it installed and in the Matlab path?');
 end
 try

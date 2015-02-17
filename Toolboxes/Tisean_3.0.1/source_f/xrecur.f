@@ -389,7 +389,8 @@ c>--------------------------------------------------------------------
       subroutine random(iseed,s)
 c
 c     random number generator of Park & Miller
-      integer*8 ifac,ibase,iargument
+      integer ifac,ibase,iargument
+c      integer*8 ifac,ibase,iargument
       ifac=7**5
       ibase=2**30-1
       im=im+2**30

@@ -17,6 +17,7 @@ addfcn('PlottingAnalysis'); % code for analysing and plotting results
 addfcn('Operations'); % core code files for performing operations
 addfcn('PeripheryFunctions'); % periphery functions used in the code toolbox
 addfcn('TimeSeries'); % time series data files for analysis
+addpath(genpath(fullfile(pwd,'Helper'))); % helper functions and scripts
 fprintf(1,' Core directories added.\n')
 
 % ------------------------------------------------------------------------------

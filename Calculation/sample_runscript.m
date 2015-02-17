@@ -24,8 +24,8 @@
 % ------------------------------------------------------------------------------
 %% SET RANGE OF TS_IDs TO COMPUTE:
 % ------------------------------------------------------------------------------
-tsid_min = 1; % Calculate from this ts_id...
-tsid_max = 100; % To this ts_id
+tsid_min = 4; % Calculate from this ts_id...
+tsid_max = 4; % To this ts_id
 
 % ------------------------------------------------------------------------------
 %% Default parameters for computation:
@@ -59,7 +59,7 @@ for i = 1:length(tsid_range)
 	% (ii) Using TSQ_brawn to calculate missing entries
 	% (iii) Running TSQ_agglomerate to write results back into the database
 
-	DidWrite = TSQ_prepared(tsid_range(i),opids,writeWhat); % Collect the null entries in the database
+	DidWrite = TSQ_prepared(tsid_range(i),opids,'all'); % Collect the null entries in the database
     if DidWrite % Only calculate if TSQ_prepared found time series to retrieve:
         TSQ_brawn(doLog,doParallelize); % Compute the operations and time series retrieved
         TSQ_agglomerate(writeWhat,doLog); % Store the results back to the database

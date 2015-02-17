@@ -1,0 +1,57 @@
+diff --git a/Makefile.in b/Makefile.in
+index c1f3e0c..60f9720 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -9,8 +9,8 @@ HAVE_NR = @HAVE_NR@
+ 
+ all:
+ 	@head -20 README
+-	-if test -n "${FC}"; then (cd source_f && $(MAKE) $@); fi
+-	-if test -n "${CC}"; then (cd source_c && $(MAKE) $@); fi
++	$(MAKE) -C source_f $@
++	$(MAKE) -C source_c $@
+ 
+ install: do_install missing
+ 	@echo "******************************************************************"
+diff --git a/source_c/Makefile.in b/source_c/Makefile.in
+index 1ab10e4..2efb803 100644
+--- a/source_c/Makefile.in
++++ b/source_c/Makefile.in
+@@ -23,10 +23,10 @@ LOADLIBS = routines/libddtsa.a -lm
+ all: $(ALL) 
+ 
+ routines/libddtsa.a:
+-	(cd routines && $(MAKE))
++	$(MAKE) -C routines
+ 
+ $(ALL): routines/libddtsa.a *.c
+-	-$(CC) $(CFLAGS) $(COPTS) -o $@ $@.c $(LOADLIBS)
++	-$(CC) $(LDFLAGS) $(CFLAGS) $(COPTS) -o $@ $@.c $(LOADLIBS)
+ 
+ install: all
+ 	-for bin in $(ALL); do $(INSTALL) $$bin $(BINDIR); done
+diff --git a/source_f/Makefile.in b/source_f/Makefile.in
+index 6525b72..e45eea7 100644
+--- a/source_f/Makefile.in
++++ b/source_f/Makefile.in
+@@ -37,17 +37,17 @@ istdio.o: istdio_temp.f
+ 	$(FC) $(FFLAGS) -c istdio.f -o istdio.o
+ 
+ $(BINS): libtsa.a libsla.a *.f
+-	-$(FC) $(FFLAGS) -o $@ $@.f $(LOADLIBES) $(LDFLAGS)
++	-$(FC) $(LDFLAGS) $(FFLAGS) -o $@ $@.f $(LOADLIBES)
+ 
+ libtsa.a: $(INC)
+ 	$(AR) $(ARFLAGS) libtsa.a $?
+ 	$(RANLIB) libtsa.a
+ 
+ libsla.a: slatec/*.f
+-	(cd slatec && $(MAKE))
++	$(MAKE) -C slatec
+ 
+ Randomize: libtsa.a libsla.a
+-	-(cd randomize && $(MAKE))
++	$(MAKE) -C randomize
+ 
+ clean:
+ 	@rm -f istdio.f

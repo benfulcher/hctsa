@@ -279,7 +279,8 @@ c
 c     random number generator of Park & Miller
 c     random numbers in [0,1] !!!
       real*8 r
-      integer*8 ia,im,ix
+      integer ia,im,ix
+c      integer*8 ia,im,ix
       ia=7**5
       im=2147483647
       ix=iseed

@@ -26,8 +26,8 @@ c===========================================================================
       dimension xx(nx,mx), x(nx,mx), y(nx,mx), xamp(nx,mx), 
      .   xsort(nx,mx), list(nx), icol(mx), rwork(nx)
       character*72 file, fout
-      data nsur/1/, imax/-1/
       external rand
+      data nsur/1/, imax/-1/
       data iverb/15/
 
       call whatido("Create Multivariate Surrogate data",iverb)

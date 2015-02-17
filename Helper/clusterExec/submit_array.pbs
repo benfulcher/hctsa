@@ -1,0 +1,12 @@
+#!/bin/bash
+ 
+#PBS -S /bin/bash
+#PBS -l nodes=1:ppn=1,walltime=48:00:00
+#PBS -V
+#PBS -q ubuntu_standard
+#PBS -j oe
+
+cd $PBS_O_WORKDIR
+INPUT_FILE=`awk "NR==$PBS_ARRAYID" file_list.text`
+matlab -nojvm -nodisplay -nosplash -r "HCTSA_loc_filename = '$INPUT_FILE';run('~/work/matlab/kaggle_test/simple_calc.m');exit;"
+

@@ -1,120 +1,747 @@
-/bin/sh: c1: command not found
-/bin/sh: c2naive: command not found
-/bin/sh: xc2: command not found
-/bin/sh: c2d: command not found
-/bin/sh: c2g: command not found
-/bin/sh: c2t: command not found
-/bin/sh: pc: command not found
-/bin/sh: predict: command not found
-/bin/sh: stp: command not found
-/bin/sh: lazy: command not found
-/bin/sh: project: command not found
-/bin/sh: addnoise: command not found
-Version: ImageMagick 6.2.9 09/24/06 Q16 http://www.imagemagick.org
-Copyright: Copyright (C) 1999-2006 ImageMagick Studio LLC
+/bin/sh: 4: c1: not found
 
-Usage: compare [options ...] image reconstruct difference
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
 
-Where options include:
-  -authenticate value  decrypt image with this password
-  -channel type        apply option to select image channels
-  -colorspace type     alternate image colorspace
-  -compress type       type of pixel compression when writing the image
-  -debug events        display copious debugging information
-  -define format:option
-                       define one or more image format options
-  -density geometry    horizontal and vertical density of the image
-  -depth value         image depth
-  -extract geometry    extract area from image
-  -format "string"     output formatted image characteristics
-  -fuzz distance       colors within this distance are considered equal
-  -help                print program options
-  -identify            identify the format and characteristics of the image
-  -interlace type      type of image interlacing scheme
-  -limit type value    pixel cache resource limit
-  -log format          format of debugging information
-  -metric type         measure differences between images with this metric
-  -monitor             monitor progress
-  -profile filename    add, delete, or apply an image profile
-  -quality value       JPEG/MIFF/PNG compression level
-  -quiet               suppress all error or warning messages
-  -quantize colorspace reduce colors in this colorspace
-  -regard-warnings     pay attention to warning messages
-  -sampling-factor geometry
-                       horizontal and vertical sampling factor
-  -set attribute value set an image attribute
-  -size geometry       width and height of image
-  -transparent-color color
-                       transparent color
-  -type type           image type
-  -verbose             print detailed information about the image
-  -version             print version information
-  -virtual-pixel method
-                       virtual pixel access method
-/bin/sh: upo: command not found
-/bin/sh: upoembed: command not found
-/bin/sh: cluster: command not found
-/bin/sh: choose: command not found
-/bin/sh: rms: command not found
-/bin/sh: notch: command not found
-/bin/sh: autocor: command not found
-/bin/sh: spectrum: command not found
-/bin/sh: wiener1: command not found
-/bin/sh: wiener2: command not found
-/bin/sh: surrogates: command not found
-/bin/sh: endtoend: command not found
-/bin/sh: timerev: command not found
-/bin/sh: events: command not found
-/bin/sh: intervals: command not found
-/bin/sh: spikespec: command not found
-/bin/sh: spikeauto: command not found
-/bin/sh: henon: command not found
-/bin/sh: ikeda: command not found
-/bin/sh: lorenz: command not found
-/bin/sh: ar-run: command not found
-/bin/sh: xrecur: command not found
-/bin/sh: randomize_auto_exp_random: command not found
-/bin/sh: randomize_autop_exp_random: command not found
-/bin/sh: randomize_spikeauto_exp_random: command not found
-/bin/sh: randomize_spikespec_exp_event: command not found
-/bin/sh: randomize_uneven_exp_random: command not found
-/bin/sh: poincare: command not found
-/bin/sh: extrema: command not found
-/bin/sh: rescale: command not found
-/bin/sh: recurr: command not found
-/bin/sh: corr: command not found
-/bin/sh: mutual: command not found
-/bin/sh: false_nearest: command not found
-/bin/sh: lyap_r: command not found
-/bin/sh: lyap_k: command not found
-/bin/sh: lyap_spec: command not found
-/bin/sh: d2: command not found
-/bin/sh: av-d2: command not found
-/bin/sh: makenoise: command not found
-/bin/sh: nrlazy: command not found
-/bin/sh: low121: command not found
-/bin/sh: lzo-test: command not found
-/bin/sh: lfo-run: command not found
-/bin/sh: lfo-test: command not found
-/bin/sh: rbf: command not found
-/bin/sh: polynom: command not found
-/bin/sh: polyback: command not found
-/bin/sh: polynomp: command not found
-/bin/sh: polypar: command not found
-/bin/sh: ar-model: command not found
-/bin/sh: mem_spec: command not found
-/bin/sh: pca: command not found
-/bin/sh: ghkss: command not found
-/bin/sh: lfo-ar: command not found
-/bin/sh: xzero: command not found
-/bin/sh: xcor: command not found
-/bin/sh: boxcount: command not found
-/bin/sh: fsle: command not found
-/bin/sh: resample: command not found
-/bin/sh: histogram: command not found
-/bin/sh: nstat_z: command not found
-/bin/sh: sav_gol: command not found
-/bin/sh: delay: command not found
-/bin/sh: lzo-gm: command not found
-/bin/sh: arima-model: command not found
-/bin/sh: lzo-run: command not found
+c2naive: correlation sum, complete naive neighbour search,   univariate data only
+
+Usage: c2naive -d# -M# -t# [-m# -## -o outfile -l# -x# -c# -V# -h] file(s)
+    -d <delay>
+    -M <maximal embedding dimension>
+    -t <minimal time separation>
+    -m <minimal embedding dimension [1]>
+    -# <resolution, values per octave [2]>
+    -l <number of values to be read [all]>
+    -x <number of values to be skipped [0]>
+    -c <column to be read [1 or file,#]>
+    -o <output file name, just -o means file_c2>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+xc2: cross correlation sum of two data sets
+
+Usage: xc2 -M#,# [-d# -n# -N# -## -r# -R# -o outfile -l# -x# -L# -X# -c#[,#] -V# -h] file1 file2
+    -M <# of components, maximal embedding dimension [1,2]>
+    -d <delay [1]>
+    -n <minimal number of center points [1000]>
+    -N <maximal number of pairs [1000]>
+    -# <resolution, values per octave [2]>
+    -r <minimal scale to be probed (as long as pairs found)>
+    -R <maximal scale to be probed [xmax-xmin]>
+    -l <length of time series 1 to be read [all data]>
+    -x <# of initial lines of 1 to be skipped [0]>
+    -L <length of time series 2 to be read [all data]>
+    -X <# of initial lines of 2 to be skipped [0]>
+    -c <columns to be read [1,2,3,.., # of components]>
+    -o <output file name, just -o means file1_file2_xc2>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+c2d: local slopes from c1/c2 correlation sum data
+
+Usage: c2d [-a# -o outfile -V# -h] file
+    -a <average using -#,...,+# [1]>
+    -o <output file name, just -o means file_d>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+c2g: Gaussian kernel correlation sum from c2
+
+Usage: c2g [-o outfile -V# -h] file
+    -o <output file name, just -o means file_g>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+c2t: Takens' estimator from correlation sum data
+
+Usage: c2t [-o outfile -V# -h] file
+    -o <output file name, just -o means file_t>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+pc: embed using principal components
+
+Usage: pc -m# [-d# -q# -o outfile -l# -x# -c# -V# -h] file
+    -m <initial embedding dimension>
+    -d <delay for initial embedding (1)>
+    -q <number of principal components (2)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_pc>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+predict: prediction with locally constant fits
+
+Usage: predict -d# -m# [-r# | -v#] [-s# -o outfile -l# -x# -c# -V# -h] file(s)
+   either -r or -v must be present
+    -d <delay>
+    -m <embedding dimension>
+    -r <absolute radius of neighbourhoods>
+    -v <same as fraction of standard deviation>
+    -s <time steps ahead forecast (one step)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_pred>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+stp: space-time separation plot
+
+Usage: stp  -d# -m# [-## -t# -%# -o outfile -l# -x# -c# -V# -h] file
+    -d <delay>
+    -m <embedding dimension>
+    -# <time resolution (1)>
+    -t <time steps (100, <500)>
+    -% <fraction at wich to create levels (0.05, >0.01)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_stp>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lazy: simple nonlinear noise reduction
+
+Usage: lazy -m# [-r# | -v#] [-i# -o outfile -l# -x# -c# -V# -h] file
+   either -r or -v must be present
+    -m <embedding dimension>
+    -r <absolut radius of neighbourhoods>
+    -v <same as fraction of standard deviation>
+    -i <number of iterations (1)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_lc,  file_lcc (etc.)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+project: nonlinear noise reduction (see also: noise)
+
+Usage: project -m# -q# -r# -k# [-i# -o outfile -l# -x# -c# -V# -h] file
+    -m <embedding dimension>
+    -q <dimension of manifold>
+    -r <radius of neighbourhoods>
+    -k <minimal number of neighbours>
+    -i <number of iterations (1)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_c, file_cc (etc.)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = state of neighbour search
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+addnoise: add Gaussian/uniform noise
+
+Usage: addnoise [-r# | -v#] [-u -0 -o outfile -l# -x# -c# -V# -h] file(s)
+   either -r or -v must be present
+    -r <absolute noise level>
+    -v <same as fraction of standard deviation>
+    -u <add uniform noise (default Gaussian)>
+    -0 <do not read input, just issue random numbers>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_noisy>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+compare: compare time series in RMS sense
+
+Usage: compare [-l# -x# -c#[,#] -V# -h] file
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <columns to be read (1,2)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+upo: locate unstable periodic points
+
+Usage: upo -m# [-r# | -v#] [-p# -w# -W# -a# -s# -n# -o outfile -l# -x# -c# -V# -h] file(s)
+   either -r or -v must be present
+    -m <embedding dimension>
+    -r <absolute kernel bandwidth>
+    -v <same as fraction of standard deviation>
+    -p <period of orbit (1)>
+    -w <minimal separation of trial points (e)>
+    -W <minimal separation of distinct orbits (e)>
+    -a <maximal error of orbit to be plotted (all plotted)>
+    -s <initial separation for stability (e)>
+    -n <number of trials (all points)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_upo_pp>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = print orbits found
+             4 = status after 1000 points
+             8 = status after 100 points
+            16 = status after 10 points
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+upoembed: embed using delay coordinates
+
+Usage: upoembed -d# [-m# -p# -o outfile -l# -x# -c# -V# -h] file
+    -d <delay>
+    -m <embedding dimension (2)>
+    -p <period of orbit (1)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_delay>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+cluster: clustering a dissimilarity matrix
+
+Usage: cluster -## [-= -X xfile] file
+    -# <number of clusters>
+    -= <if set, bias towards similar size clusters>
+    -X <list of indices with fixed cluster assignments>
+    -o <output file name, just -o means file_clust>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = state of clustering
+             8 = temperature / cost at cooling
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+choose: Choose columns and sub-sequences from a file
+
+Usage: choose [-o outfile -l# -x# -m# -c#[,#] -V# -h] file
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -m <number of columns to be read (1)>
+    -c <columns to be read (1)>
+    -o <output file name, just -o means file_select>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+rms: compute mean/standard deviation, normalise
+
+Usage: rms [-a -v -o outfile -l# -x# -c# -V# -h] file(s)
+    -a <subtract average>
+    -v <subtract mean, normalise to unit variance>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_a (if -a), file_v (if -v)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+notch: notch filter
+
+Usage: notch -X# [-f# -w# -o outfile -l# -x# -c# -V# -h] file(s)
+    -X <frequency to be cancelled>
+    -f <sampling rate of data (1)>
+    -w <width of filter (f/100)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_notch>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+autocor: autocorrelation function estimated by FFT
+
+Usage: autocor [-v -p -P -o outfile -l# -x# -c# -V# -h] file(s)
+    -v <give unnormalised autocovariance>
+    -p <assume periodic continuation>
+    -P <assume periodic continuation exactly>
+    -l <number of values to be read [all]>
+    -x <number of values to be skipped [0]>
+    -c <column to be read [1 or file,#]>
+    -o <output file name, just -o means file_co>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+spectrum: Power spectrum by FFT
+
+Usage: spectrum [-f# -w# -o outfile -l# -x# -c# -V# -h] file(s)
+    -f <sampling rate, e.g. in Hz [default 1.]>
+    -w <frequency resolution, e.g. in Hz, [default 1/N]>
+    -l <number of values to be read [all]>
+    -x <number of values to be skipped [0]>
+    -c <column to be read, [1] or file,#>
+    -o <output file name, just -o means file_sp>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+wiener1: Wiener filter (first part)
+
+Usage: wiener1 [-f# -w# -o outfile -l# -x# -c# -V# -h] file
+   then edit file_amp and run: wiener2 [-f# -w# -o outfile -l# -x# -c# -V# -h] file
+    -f <sampling rate (e.g. in Hz, default 1.)>
+    -w <frequency resolution (e.g. in Hz, default 1/N)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_amp>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Note: "-" not accepted as file
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+wiener2: Wiener filter (second part)
+
+Usage: wiener2 [-f# -w# -o outfile1 -O outfile -l# -x# -c# -V# -h] file
+   to provide periodogram, first run: wiener1 [-f# -w# -o outfile -l# -x# -c# -V# -h] file
+   make sure -f# -w# are the same in both wiener calls
+    -f <sampling rate (e.g. in Hz, default 1.)>
+    -w <frequency resolution (e.g. in Hz, default 1/N)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file of wiener1, just -o means file_amp>
+    -O <final output file name, just -O means file_wc>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Note: "-" not accepted as file
+
+/bin/sh: 4: surrogates: not found
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+endtoend: Determine end-to-end mismatch
+
+Usage: endtoend [-j# -o outfile -l# -x# -c# -V# -h] file
+    -j <weight given to jump relative to slip (0.5)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -m <number of columns to be read (1)>
+    -c <columns to be read (1)>
+    -o <output file name, just -o means file_end>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+timerev: time reversal asymmetry statistic
+
+Usage: timerev [-d# -l# -x# -c# -V# -h] file(s)
+    -d <delay (1)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+events: interval to event time conversion
+
+Usage: events [-o outfile -l# -x# -c# -V# -h] file(s)
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_st>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+intervals: event time to interval conversion
+
+Usage: intervals [-o outfile -l# -x# -c# -V# -h] file(s)
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_ss>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+spikespec: power spectrum of spike trains
+
+Usage: spikespec [-F# -## -w# -i -o outfile -l# -x# -c# -V# -h] file(s)
+    -F <maximal frequency [2*l / total time]>
+    -# <number of frequencies [F* total time /2]>
+    -w <frequency resolution [0]>
+    -i <input data: intervals rather than times>
+    -l <number of values to be read [all]>
+    -x <number of values to be skipped [0]>
+    -c <column to be read [1 or file,#]>
+    -o <output file name, just -o means file_ss>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+spikeauto: spike train autocorrelation function
+
+Usage: spikeauto -d# -D# [-i -o outfile -l# -x# -c# -V# -h] file(s)
+    -d <time span of one bin>
+    -D <total time spanned>
+    -i <expect intervals rather than times>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_sco>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+henon: Henon map
+
+Usage: henon -l# [-A# -B# -X# -Y# -o outfile -x# -V# -h]
+    -l <number of points x,y (l=0: infinite)>
+    -A <parameter a (1.4)>
+    -B <parameter b (0.3)>
+    -X <initial x>
+    -Y <initial y>
+    -x <number of transients discarded (10000)>
+    -o <output file name, just -o means henon.dat>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+ikeda: Ikeda map
+
+Usage: ikeda -l# [-A# -B# -C# -R# -I# -o outfile -x# -V# -h]
+    -l <number of points x,y (l=0: infinite)>
+    -A <parameter a (0.4)>
+    -B <parameter b (6.0)>
+    -C <parameter c (0.9)>
+    -R <initial Re(z)>
+    -I <initial Im(z)>
+    -x <number of transients discarded (10000)>
+    -o <output file name, just -o means ikeda.dat>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+/bin/sh: 4: lorenz: not found
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+ar-run: iterate AR model, e.g. as fitted by ar-model
+
+Usage: ar-run -l# [-p# -I# -o outfile -x# -V# -h] file
+    -l <number of iterations (l=0: infinite)>
+    -p <order of AR-model (default determined from input)>
+    -I <seed for random numbers>
+    -x <number of transients discarded (10000)>
+    -o <output file name, just -o means ar.dat>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+/bin/sh: 4: xrecur: not found
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_auto_exp_random: constrained randomization
+
+Usage: randomize_auto_exp_random [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: -D# [-W#]
+    -D <number of lags>
+    -W <average: 0=max(c) 1=|c|/lag 2=(c/lag)**2 3=max(c)/lag (0)>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+   Permutation options: [-X xfile]
+    -X <list of indices excluded from permutation>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_autop_exp_random: constrained randomization
+
+Usage: randomize_autop_exp_random [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: -D# [-W#]
+    -D <number of lags>
+    -W <average: 0=max(c) 1=|c|/lag 2=(c/lag)**2 3=max(c)/lag (0)>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+   Permutation options: [-X xfile]
+    -X <list of indices excluded from permutation>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_spikeauto_exp_random: constrained randomization
+
+Usage: randomize_spikeauto_exp_random [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: -d# -D# [-i -W#]
+    -d <time span of one bin>
+    -D <total time spanned>
+    -i <expect intervals rather than times>
+    -W <average: 0=max(c) 1=|c|/lag 2=(c/lag)**2 (0)>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+   Permutation options: [-X xfile]
+    -X <list of indices excluded from permutation>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_spikespec_exp_event: constrained randomization
+
+Usage: randomize_spikespec_exp_event [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: [-F# -## -w# -i]
+    -W <average: 0=max(s) 1=|s|/f 2=(s/f)**2 3=|s| (0)>
+    -F <maximal frequency (2*l / total time)>
+    -# <number of frequencies (F* total time /2)>
+    -w <frequency resolution (0)>
+    -i <expect intervals rather than times>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_uneven_exp_random: constrained randomization
+
+Usage: randomize_uneven_exp_random [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: -d# -D# [-W#]
+    -d <time span of one bin>
+    -D <total time spanned>
+    -W <average: 0=max(c) 1=|c|/lag 2=(c/lag)**2 (0)>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+   Permutation options: [-X xfile]
+    -X <list of indices excluded from permutation>
+
+/bin/sh: 4: poincare: not found
+/bin/sh: 4: extrema: not found
+/bin/sh: 4: rescale: not found
+/bin/sh: 4: recurr: not found
+/bin/sh: 4: corr: not found
+/bin/sh: 4: mutual: not found
+/bin/sh: 4: false_nearest: not found
+/bin/sh: 4: lyap_r: not found
+/bin/sh: 4: lyap_k: not found
+/bin/sh: 4: lyap_spec: not found
+/bin/sh: 4: d2: not found
+/bin/sh: 4: av-d2: not found
+/bin/sh: 4: makenoise: not found
+/bin/sh: 4: nrlazy: not found
+/bin/sh: 4: low121: not found
+/bin/sh: 4: lzo-test: not found
+/bin/sh: 4: lfo-run: not found
+/bin/sh: 4: lfo-test: not found
+/bin/sh: 4: rbf: not found
+/bin/sh: 4: polynom: not found
+/bin/sh: 4: polyback: not found
+/bin/sh: 4: polynomp: not found
+/bin/sh: 4: polypar: not found
+/bin/sh: 4: ar-model: not found
+/bin/sh: 4: mem_spec: not found
+/bin/sh: 4: pca: not found
+/bin/sh: 4: ghkss: not found
+/bin/sh: 4: lfo-ar: not found
+/bin/sh: 4: xzero: not found
+/bin/sh: 4: xcor: not found
+/bin/sh: 4: boxcount: not found
+/bin/sh: 4: fsle: not found
+/bin/sh: 4: resample: not found
+/bin/sh: 4: histogram: not found
+/bin/sh: 4: nstat_z: not found
+/bin/sh: 4: sav_gol: not found
+/bin/sh: 4: delay: not found
+/bin/sh: 4: lzo-gm: not found
+/bin/sh: 4: arima-model: not found
+/bin/sh: 4: lzo-run: not found

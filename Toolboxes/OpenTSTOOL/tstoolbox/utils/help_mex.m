@@ -4,7 +4,7 @@ d = dir('*.mexsg64');		% ".dll'
 
 for i = 1:length(d)
 	n = d(i).name;
-	[path,name,ext,ver] = fileparts(n);
+	[path,name,ext] = fileparts(n);
 	myeval(name, 'disp(lasterr)');
 end
 

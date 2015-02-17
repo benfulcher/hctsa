@@ -11,14 +11,14 @@ cl = ct.getContextClassLoader();
 
 errmsg = ''; % error message empty by default
 
-% First check driver:
-try
-    java.lang.Class.forName('com.mysql.jdbc.Driver', true, cl);
-catch le
-    errmsg = le.message;
-    dbconnection = [];
-    error('Error with java database connector: %s',errmsg);
-end
+% % First check driver:
+% try
+%     java.lang.Class.forName('com.mysql.jdbc.Driver', true, cl);
+% catch le
+%     errmsg = le.message;
+%     dbconnection = [];
+%     error('Error with java database connector: %s',errmsg);
+% end
 
 % ------------------------------------------------------------------------------
 % Now try to connect:

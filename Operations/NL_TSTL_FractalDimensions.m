@@ -139,7 +139,12 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TSTOOL code, fracdims:
 % ------------------------------------------------------------------------------
-if ~exist('fracdims')
+
+% [philiphorst] 
+% This looks for the file rather than the function, but it does the job.
+% The previous call to exist returned 0 even when the function was
+% accessible
+if ~exist('tstoolbox/@signal/fracdims')
     error(['Cannot find the code ''fracdims'' from the TSTOOL package. ' ...
             'Is it installed and in the Matlab path?']);
 end

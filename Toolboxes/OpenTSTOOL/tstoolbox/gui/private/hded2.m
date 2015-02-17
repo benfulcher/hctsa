@@ -1,6 +1,6 @@
 function hded1(currentfile)
 
-[path,nam,ext,ver] = fileparts(currentfile);
+[path,nam,ext] = fileparts(currentfile);
 sig = signal(currentfile);
 title = ['Axes Editor for ' nam];
 lineNo = 1;
