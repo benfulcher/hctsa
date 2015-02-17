@@ -1,7 +1,7 @@
 # Generated automatically from Makefile.in by configure.
 SHELL = /bin/sh
 
-prefix = /Users/ben
+prefix = /home/philip/work/Git_repositories/hctsa/Toolboxes/Tisean_3.0.1/
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 
@@ -24,10 +24,10 @@ LOADLIBS = routines/libddtsa.a -lm
 all: $(ALL) 
 
 routines/libddtsa.a:
-	(cd routines && $(MAKE))
+	$(MAKE) -C routines
 
 $(ALL): routines/libddtsa.a *.c
-	-$(CC) $(CFLAGS) $(COPTS) -o $@ $@.c $(LOADLIBS)
+	-$(CC) $(LDFLAGS) $(CFLAGS) $(COPTS) -o $@ $@.c $(LOADLIBS)
 
 install: all
 	-for bin in $(ALL); do $(INSTALL) $$bin $(BINDIR); done

@@ -1,17 +1,17 @@
 # Generated automatically from Makefile.in by configure.
 SHELL = /bin/sh
 
-prefix = /Users/ben
+prefix = /home/philip/work/Git_repositories/hctsa/Toolboxes/Tisean_3.0.1/
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 CC = cc
-FC = gfortran
+FC = f77
 HAVE_NR = @HAVE_NR@
 
 all:
 	@head -20 README
-	-if test -n "${FC}"; then (cd source_f && $(MAKE) $@); fi
-	-if test -n "${CC}"; then (cd source_c && $(MAKE) $@); fi
+	$(MAKE) -C source_f $@
+	$(MAKE) -C source_c $@
 
 install: do_install missing
 	@echo "******************************************************************"

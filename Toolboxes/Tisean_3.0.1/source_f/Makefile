@@ -1,11 +1,11 @@
 # Generated automatically from Makefile.in by configure.
 SHELL = /bin/sh
 
-prefix = /Users/ben
+prefix = /home/philip/work/Git_repositories/hctsa/Toolboxes/Tisean_3.0.1/
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 
-FC = gfortran
+FC = f77
 FFLAGS = -O
 LDFLAGS = 
 AR = ar
@@ -38,17 +38,17 @@ istdio.o: istdio_temp.f
 	$(FC) $(FFLAGS) -c istdio.f -o istdio.o
 
 $(BINS): libtsa.a libsla.a *.f
-	-$(FC) $(FFLAGS) -o $@ $@.f $(LOADLIBES) $(LDFLAGS)
+	-$(FC) $(LDFLAGS) $(FFLAGS) -o $@ $@.f $(LOADLIBES)
 
 libtsa.a: $(INC)
 	$(AR) $(ARFLAGS) libtsa.a $?
 	$(RANLIB) libtsa.a
 
 libsla.a: slatec/*.f
-	(cd slatec && $(MAKE))
+	$(MAKE) -C slatec
 
 Randomize: libtsa.a libsla.a
-	-(cd randomize && $(MAKE))
+	$(MAKE) -C randomize
 
 clean:
 	@rm -f istdio.f

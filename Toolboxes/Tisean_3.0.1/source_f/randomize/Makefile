@@ -1,11 +1,11 @@
 # Generated automatically from Makefile.in by configure.
 SHELL = /bin/sh
 
-prefix = /Users/ben
+prefix = /home/philip/work/Git_repositories/hctsa/Toolboxes/Tisean_3.0.1/
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 
-FC = gfortran
+FC = f77
 FFLAGS = -O
 INSTALL = /usr/bin/install -c
 LDFLAGS = 

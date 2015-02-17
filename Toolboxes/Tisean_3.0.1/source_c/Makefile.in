@@ -23,10 +23,10 @@ LOADLIBS = routines/libddtsa.a -lm
 all: $(ALL) 
 
 routines/libddtsa.a:
-	(cd routines && $(MAKE))
+	$(MAKE) -C routines
 
 $(ALL): routines/libddtsa.a *.c
-	-$(CC) $(CFLAGS) $(COPTS) -o $@ $@.c $(LOADLIBS)
+	-$(CC) $(LDFLAGS) $(CFLAGS) $(COPTS) -o $@ $@.c $(LOADLIBS)
 
 install: all
 	-for bin in $(ALL); do $(INSTALL) $$bin $(BINDIR); done
