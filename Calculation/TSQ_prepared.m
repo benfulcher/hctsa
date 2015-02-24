@@ -251,7 +251,6 @@ for i = 1:nts
             % This will be the case if all time series and operations
             % were added using SQL_add.
             % Otherwise we'll have nonsense happening...
-            keyboard
             switch retrieveWhatData
             case 'all'
                 TS_DataMat(i,:) = vertcat(qrc{:,2});
