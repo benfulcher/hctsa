@@ -398,9 +398,9 @@ SelectString = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WH
         				'(' BF_cat(unique([Operations.MasterID]),',') ')'];
 [masterinfo,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
-    fprintf(1,'Error retrieving Master information...\n');
+    fprintf(1,'Error retrieving Master information using:\n%s\n',SelectString);
     disp(emsg);
-    keyboard
+    error('Master information could not be retrieved')
 else
     MasterOperations = cell2struct(masterinfo',{'ID','Label','Code'});
 end
