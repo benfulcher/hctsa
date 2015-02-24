@@ -118,7 +118,7 @@ RetrievalTimer = tic; % Time the retrieval (should be fast)
 [qrc,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
     fprintf(1,'\n'); error('Error selecting %s elements from %s',WriteWhat,dbname);
-elseif isempty(qrc)
+elseif isempty(qrc) || strcmp(qrc{1},'No Data')
     fprintf(1,'\nNo %s elements in this range in the database anymore!\n',WriteWhat);
     SQL_closedatabase(dbc); return
 else

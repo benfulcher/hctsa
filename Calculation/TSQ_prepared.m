@@ -112,7 +112,6 @@ end
 % Open database connection
 [dbc, dbname] = SQL_opendatabase;
 
-
 % ------------------------------------------------------------------------------
 % Refine the set of time series and operations to those that actually exist in the database
 % ------------------------------------------------------------------------------
@@ -229,11 +228,12 @@ for i = 1:nts
     % fprintf(1,'Database query for %u time series took %s\n',BundleSize,BF_thetime(toc(DatabaseTimer)));
     
     if ~isempty(emsg)
-        error('Error retrieving outputs from %s!!! :(\n%s',dbname,emsg);
+        error('Error retrieving outputs from %s.\n%s',dbname,emsg);
     end
     
     % Check results look ok:
-    if (size(qrc) == 0) % There are no entries in Results that match the requested conditions
+    if isempty(qrc) || strcmp(qrc{1},'No Data') % qrc empty if using java; qrc{1} is 'No Data' if using database toolbox
+        % There are no entries in Results that match the requested conditions
         fprintf(1,'No data to retrieve for ts_id = %u\n',ts_id_now);
         % Leave local files (e.g., TS_DataMat, TS_Quality, TS_CalcTime as Inf)
         
@@ -251,6 +251,7 @@ for i = 1:nts
             % This will be the case if all time series and operations
             % were added using SQL_add.
             % Otherwise we'll have nonsense happening...
+            keyboard
             switch retrieveWhatData
             case 'all'
                 TS_DataMat(i,:) = vertcat(qrc{:,2});
