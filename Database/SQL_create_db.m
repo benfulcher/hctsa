@@ -28,11 +28,18 @@ function SQL_create_db()
     fprintf(1,['Let''s set up a new database\nWe first require a username and ' ...
                 'password that has CREATE DATABASE and GRANT privileges\n']);
 	fprintf(1,'(This is probably going to be the root account)\n');
+    
 	hostname = input('Hostname of mySQL server (e.g., ''localhost''): ','s');
 	admin_user = input('Administrator username: ','s');
-	admin_password = input('Administrator password (WARNING: this will appear on screen!): ','s');
+    admin_password = input('Administrator password (WARNING: this will appear on screen!): ','s');
+    customPort = input('Custom port to connect through (DEFAULT: 3306): ','s');
+    if isempty(customPort)
+        customPort = '3306';
+    end
+    customPort = str2num(customPort);
+    
 	try
-	    [dbc, emsg] = mysql_dbopen(hostname,'',admin_user,admin_password);
+	    [dbc, emsg] = mysql_dbopen(hostname,'',admin_user,admin_password,customPort);
 	    if ~isempty(emsg)
 	        error('Please check your username/password and that the mySQL server is accessible');
 	    end
@@ -51,7 +58,7 @@ function SQL_create_db()
     % ------------------------------------------------------------------------------
     % Kind of a simple one that assumes that you need "GRANT ALL PRIVILEGES"
     % Perhaps not fool-proof, so leave as a warning for now
-	[a,~,~,emsg] = mysql_dbquery(dbc,'SHOW GRANTS');
+	[a,emsg] = mysql_dbquery(dbc,'SHOW GRANTS');
     if iscell(a), a = a{1}; end % take first entry
     if ~strncmp(a,'GRANT ALL PRIVILEGES',20); % check first entry starts with "GRANT ALL PRIVILEGES"
         warning(1,'It doesn''t look like %s has administrative privileges on %s\n', admin_user, hostname);
@@ -80,11 +87,11 @@ function SQL_create_db()
     % ------------------------------------------------------------------------------
     % Write a .conf file with the connection details for next time
     % ------------------------------------------------------------------------------
-    filename = 'Database/sql_settings.conf';
+    fileName = 'Database/sql_settings.conf';
     fprintf(1,['Writing hostname (%s), database name (%s), username (%s), and ' ...
-                'password (%s) to %s\n'],hostname,dbname,local_u,local_p,filename);
-	fid = fopen(filename,'w');
-	fprintf(fid,'%s,%s,%s,%s',hostname,dbname,local_u,local_p);
+                'password (%s) to %s\n'],hostname,dbname,local_u,local_p,fileName);
+	fid = fopen(fileName,'w');
+	fprintf(fid,'%s,%s,%s,%s,%u',hostname,dbname,local_u,local_p,customPort);
 	fclose(fid);
 
 	try

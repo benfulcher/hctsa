@@ -5,7 +5,7 @@
 % This function retreives data from the mySQL database for subsequent analysis
 % in Matlab. It takes as input a set of constraints on the time series and
 % operations to include, and outputs the relevant subsection of the data matrix
-% and associated metadata in HCTSA_loc
+% and associated metadata to HCTSA_loc.mat
 % 
 %---INPUTS:
 %--ts_ids: a vector of ts_ids to retrieve from the mySQL database.
@@ -26,7 +26,7 @@
 %---OUTPUT:
 %--didWrite [opt] is 1 if Writes new file HCTSA_loc.mat
 % 
-% Other outputs are to the file HCTSA_loc.mat contains
+% Other outputs are to the file HCTSA_loc.mat, which contains
 %--TS_DataMat, contains the data
 %--TS_Quality, contains the quality codes
 %--TS_CalcTime, contains the calculation times [if retrieveWhatData = 'all']
@@ -111,7 +111,6 @@ end
 
 % Open database connection
 [dbc, dbname] = SQL_opendatabase;
-
 
 % ------------------------------------------------------------------------------
 % Refine the set of time series and operations to those that actually exist in the database
@@ -225,15 +224,16 @@ for i = 1:numTS
     
     % Do the retrieval
     % DatabaseTimer = tic;
-	[qrc, ~, ~, emsg] = mysql_dbquery(dbc,selectString); % Retrieve data for this time series from the database
+	[qrc, emsg] = mysql_dbquery(dbc,selectString); % Retrieve data for this time series from the database
     % fprintf(1,'Database query for %u time series took %s\n',BundleSize,BF_thetime(toc(DatabaseTimer)));
     
     if ~isempty(emsg)
-        error('Error retrieving outputs from %s!!! :(\n%s',dbname,emsg);
+        error('Error retrieving outputs from %s.\n%s',dbname,emsg);
     end
     
     % Check results look ok:
-    if (size(qrc) == 0) % There are no entries in Results that match the requested conditions
+    if isempty(qrc) || strcmp(qrc{1},'No Data') % qrc empty if using java; qrc{1} is 'No Data' if using database toolbox
+        % There are no entries in Results that match the requested conditions
         fprintf(1,'No data to retrieve for ts_id = %u\n',ts_id_now);
         % Leave local files (e.g., TS_DataMat, TS_Quality, TS_CalcTime as Inf)
         
@@ -377,7 +377,7 @@ end
 
 % 1. Retrieve Time Series Metadata
 selectString = sprintf('SELECT FileName, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
-[tsinfo,~,~,emsg] = mysql_dbquery(dbc,selectString);
+[tsinfo,emsg] = mysql_dbquery(dbc,selectString);
 % Convert to a structure array, TimeSeries, containing metadata for all time series
 tsinfo = [num2cell(ts_ids),tsinfo];
 % Define inline functions to convert time-series data text to a vector of floats:
@@ -388,7 +388,7 @@ TimeSeries = cell2struct(tsinfo',{'ID','FileName','Keywords','Length','Data'}); 
 
 % 2. Retrieve Operation Metadata
 selectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
-[opinfo,~,~,emsg] = mysql_dbquery(dbc,selectString);
+[opinfo,emsg] = mysql_dbquery(dbc,selectString);
 opinfo = [num2cell(op_ids), opinfo]; % add op_ids
 Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
 
@@ -396,11 +396,11 @@ Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'
 % (i) Which masters are implicated?
 selectString = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WHERE mop_id IN ' ...
         				'(' BF_cat(unique([Operations.MasterID]),',') ')'];
-[masterinfo,~,~,emsg] = mysql_dbquery(dbc,selectString);
+[masterinfo,emsg] = mysql_dbquery(dbc,selectString);
 if ~isempty(emsg)
-    fprintf(1,'Error retrieving Master information...\n');
+    fprintf(1,'Error retrieving Master information using:\n%s\n',SelectString);
     disp(emsg);
-    keyboard
+    error('Master information could not be retrieved')
 else
     MasterOperations = cell2struct(masterinfo',{'ID','Label','Code'});
 end
@@ -429,7 +429,7 @@ case 'quality'
 end
 
 fprintf(1,' Done.\n');
-didWrite = 1;
+didWrite = 1; % Tag to say that write to HCTSA_loc.mat file is successful
 
 % ------------------------------------------------------------------------------
 %% If retrieved quality labels, display how many entries need to be calculated

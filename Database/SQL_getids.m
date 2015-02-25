@@ -165,8 +165,8 @@ if strcmp(tsOrOps,'ts')
 				end
 			end
 
-			% execute the select statement
-			[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+			% Execute the select statement
+			[ts_ids,emsg] = mysql_dbquery(dbc,SelectString);
 			if isempty(ts_ids) && isempty(emsg)
 				fprintf(1,'No time series matched the given constraints for the keyword ''%s''\n',kyes{i});
 			elseif ~isempty(emsg)
@@ -200,7 +200,7 @@ if strcmp(tsOrOps,'ts')
 		% else
 		% 	SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ss_tsl ' ' keywordRemoveextrastring];
 		% end
-		[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+		[ts_ids,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
 			fprintf(1,'Database call failed\n%s\n',SelectString); disp(emsg); keyboard
 		else
@@ -300,7 +300,7 @@ else
 			end
 		
 			% Execute the query
-			[op_ids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
+			[op_ids,emsg] = mysql_dbquery(dbc,SelectString);
 		
 			if ~isempty(emsg)
 				fprintf(1,'Error finding %s\n',kyes{i}); disp(emsg); keyboard
@@ -330,7 +330,7 @@ else
 		else
 			SelectString = ['SELECT op_id FROM Operations WHERE ' conditions(6:end)]; % (remove "AND ")
 		end
-		[op_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+		[op_ids,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
 			fprintf(1,'Database call failed\n%s\n',SelectString); disp(emsg); keyboard
 		else
@@ -342,7 +342,7 @@ else
 	if masterPull && ~isempty(op_ids_keep)
 		% Find implicated Master functions (a super inefficient way of doing it:)
 		SelectString = ['SELECT op_id FROM Operations WHERE mop_id IN (SELECT DISTINCT mop_id FROM Operations WHERE op_id IN (' BF_cat(op_ids_keep,',') '))'];
-		[newmids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+		[newmids,emsg] = mysql_dbquery(dbc,SelectString);
 		if isempty(emsg)
 			if ~isempty(newmids) % there are some master functions implicated
 				newmids = vertcat(newmids{:});
