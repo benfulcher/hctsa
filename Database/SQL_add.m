@@ -6,7 +6,7 @@
 % database.
 % 
 %---INPUTS:
-% ImportWhat: 'mops' (for master operations), 'ops' (for operations), or 'ts'
+% importWhat: 'mops' (for master operations), 'ops' (for operations), or 'ts'
 %             (for time series)
 % INPfile:    the filename of the tab-delimited textfile to be read in [default
 %             = INP_ts.txt or INP_ops.txt or INP_mops.txt]
@@ -38,15 +38,15 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_add(ImportWhat, INPfile, dbname, beVocal)
+function SQL_add(importWhat, INPfile, dbname, beVocal)
 
 % ------------------------------------------------------------------------------
 %% Check inputs, set defaults:
 % ------------------------------------------------------------------------------
 
-% ImportWhat
+% importWhat
 % SHOULD BE TS, MOP, or OP -- or can iterate through each possibility
-if nargin < 1 || isempty(ImportWhat) || ~ismember(ImportWhat,{'ops','ts','mops'})
+if nargin < 1 || isempty(importWhat) || ~ismember(importWhat,{'ops','ts','mops'})
     error(['Error setting first input argument -- should be ''ts'' for TimeSeries ' ...
                 ', ''ops'' for Operations, or ''mops'' for Master Operations']);
 end
@@ -54,7 +54,7 @@ end
 % INPfile
 if nargin < 2 || isempty(INPfile)
     % Default filenames:
-    if strcmp(ImportWhat,'ts')
+    if strcmp(importWhat,'ts')
         INPfile = 'INP_ts.txt';
     else
         INPfile = 'INP_ops.txt';
@@ -85,28 +85,28 @@ ticker = tic;
 % Define strings to unify the different strands of code for time series /
 % operations
 % ------------------------------------------------------------------------------
-switch ImportWhat
+switch importWhat
     case 'ts'
-        thewhat = 'time series';
+        theWhat = 'time series';
         theid = 'ts_id';
         thekid = 'tskw_id';
-        thetable = 'TimeSeries';
+        theTable = 'TimeSeries';
         thektable = 'TimeSeriesKeywords';
-        thereltable = 'TsKeywordsRelate';
+        theRelTable = 'TsKeywordsRelate';
         thename = 'Filename';
         maxL = 50000; % the longest time series length accepted in the database
     case 'ops'
-        thewhat = 'operations';
+        theWhat = 'operations';
         theid = 'op_id';
         thekid = 'opkw_id';
-        thetable = 'Operations';
+        theTable = 'Operations';
         thektable = 'OperationKeywords';
-        thereltable = 'OpKeywordsRelate';
+        theRelTable = 'OpKeywordsRelate';
         thename = 'OpName';
     case 'mops'
-        thewhat = 'master operations';
+        theWhat = 'master operations';
         theid = 'mop_id';
-        thetable = 'MasterOperations';
+        theTable = 'MasterOperations';
 end
 
 
@@ -119,7 +119,7 @@ if (fid==-1)
     error('Could not load the specified input file ''%s''',INPfile)
 end
 
-switch ImportWhat
+switch importWhat
 case 'ts' % Read the time series input file:
     if beVocal
         fprintf(1,['Need to format %s (Time Series input file) as: Filename ' ...
@@ -161,8 +161,8 @@ numItems = size(datain,1); % Number of items in the input file
 if numItems == 0, error('The input file ''%s'' seems to be empty??',INPfile), end
 
 if beVocal
-    fprintf(1,'Found %u %s in %s, I think. Take a look:\n',numItems,thewhat,INPfile)
-    switch ImportWhat
+    fprintf(1,'Found %u %s in %s, I think. Take a look:\n',numItems,theWhat,INPfile)
+    switch importWhat
     case 'ts'
         fprintf(1,'%s\t%s\n','Filename','Keywords')
         fprint_ts = @(x) fprintf('%s\t%s\n',datain{x,1},datain{x,2});
@@ -175,7 +175,7 @@ if beVocal
     end
     
     for i = 1:min(3,numItems)
-        switch ImportWhat
+        switch importWhat
         case 'ts', fprint_ts(i);
         case 'ops', fprint_ops(i);
         case 'mops', fprint_mops(i);
@@ -185,7 +185,7 @@ if beVocal
     if numItems > 3
         fprintf(1,'..................(%u).....................\n',max(numItems-6,0))
         for i = max(numItems-2,4):numItems
-            switch ImportWhat
+            switch importWhat
             case 'ts', fprint_ts(i);
             case 'ops', fprint_ops(i);
             case 'mops', fprint_mops(i);
@@ -217,10 +217,10 @@ esc = @RA_sqlescapestring; % Inline function to add escape strings to format myS
 % ------------------------------------------------------------------------------
 if beVocal
     fprintf(1,['Preparing mySQL INSERT statements to add %u %s to the ' ...
-                                'database %s...'],numItems,thewhat,dbname);
+                                'database %s...'],numItems,theWhat,dbname);
 end
 toadd = cell(numItems,1);
-switch ImportWhat
+switch importWhat
 case 'ts' % Prepare toadd cell for time series
     if beVocal; figure('color','w','WindowStyle','docked'); end
     for j = 1:numItems
@@ -326,7 +326,7 @@ end
 %% Check for duplicates
 % ------------------------------------------------------------------------------
 if beVocal, fprintf(1,'Checking for duplicates already in the database... '); end
-switch ImportWhat
+switch importWhat
 case 'ts'
     existingFilenames = mysql_dbquery(dbc,sprintf('SELECT FileName FROM TimeSeries'));
     isDuplicate = ismember({timeseries.Filename},existingFilenames); % isDuplicate = 1 if the item already exists
@@ -341,27 +341,27 @@ if beVocal, fprintf(1,'done.\n'); end
 
 % Tell the user about duplicates
 if all(isDuplicate)
-    fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',numItems,thewhat,INPfile,dbname,thewhat);
+    fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',numItems,theWhat,INPfile,dbname,theWhat);
     return
 elseif sum(isDuplicate) > 0
     if beVocal
-        fprintf(1,'I found %u duplicate %s already in the database %s!\n',sum(isDuplicate),thewhat,dbname)
-        fprintf(1,'There are %u new %s to add to %s.\n',sum(~isDuplicate),thewhat,dbname)
+        fprintf(1,'I found %u duplicate %s already in the database %s!\n',sum(isDuplicate),theWhat,dbname)
+        fprintf(1,'There are %u new %s to add to %s.\n',sum(~isDuplicate),theWhat,dbname)
     end
 end
 
 % ------------------------------------------------------------------------------
 %% Select the maximum id already in the table
 % ------------------------------------------------------------------------------
-maxid = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,thetable));
+maxid = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,theTable));
 maxid = maxid{1}; % the maximum id -- the new items will have ids greater than this
 if isempty(maxid) || isnan(maxid), maxid = 0; end
 
 % ------------------------------------------------------------------------------
 %% Assemble and execute the INSERT queries
 % ------------------------------------------------------------------------------
-fprintf('Adding %u new %s to the %s table in %s...',sum(~isDuplicate),thewhat,thetable,dbname)
-switch ImportWhat
+fprintf('Adding %u new %s to the %s table in %s...',sum(~isDuplicate),theWhat,theTable,dbname)
+switch importWhat
 case 'ts' % Add time series to the TimeSeries table just 5 at a time
           % (so as not to exceed the max_allowed_packet when transmitting the 
           % time-series data) Appropriate chunk size will depend on the length of
@@ -381,12 +381,12 @@ fprintf(1,' done.\n')
 % ------------------------------------------------------------------------------
 % Add new entries to the Results table
 % ------------------------------------------------------------------------------
-if ~strcmp(ImportWhat,'mops')
+if ~strcmp(importWhat,'mops')
     resultstic = tic;
     if beVocal
         fprintf(1,'Updating the Results Table in %s (this could take a while, please be patient!)...',dbname)
     end
-    switch ImportWhat
+    switch importWhat
     case 'ts'
         [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id ' ...
                     'FROM TimeSeries t CROSS JOIN Operations o ON t.ts_id > %u ORDER BY t.ts_id, o.op_id'],maxid));
@@ -402,14 +402,14 @@ if ~strcmp(ImportWhat,'mops')
     end
 end
 
-if ~strcmp(ImportWhat,'mops')
+if ~strcmp(importWhat,'mops')
     % ------------------------------------------------------------------------------
     % Update the keywords table
     % ------------------------------------------------------------------------------
     fprintf(1,'Updating the %s table in %s...',thektable,dbname)
 
     % First find unique keywords from new time series by splitting against commas
-    switch ImportWhat
+    switch importWhat
     case 'ts'
         kws = {timeseries(~isDuplicate).Keywords};
     case 'ops'
@@ -427,7 +427,7 @@ if ~strcmp(ImportWhat,'mops')
         end
     end
     nkw = length(ukws); % The number of unique keywords in the new set of time series
-    if beVocal, fprintf(1,'\nI found %u unique keywords in the %u new %s in %s...',nkw,sum(~isDuplicate),thewhat,INPfile); end
+    if beVocal, fprintf(1,'\nI found %u unique keywords in the %u new %s in %s...',nkw,sum(~isDuplicate),theWhat,INPfile); end
 
     % How many overlap with existing keywords??:
     allkws = mysql_dbquery(dbc,sprintf('SELECT Keyword FROM %s',thektable));
@@ -463,29 +463,29 @@ if ~strcmp(ImportWhat,'mops')
     %% Fill new keyword relationships
     % ------------------------------------------------------------------------------
     fprintf(1,'Writing new keyword relationships to the %s table in %s...', ...
-                                            thereltable,dbname)
+                                            theRelTable,dbname)
 
     % Try doing it from scratch...:
-    switch ImportWhat
+    switch importWhat
     case 'ts'
-        allnames = BF_cat({timeseries(~isDuplicate).Filename},',','''');
+        allNames = BF_cat({timeseries(~isDuplicate).Filename},',','''');
     case 'ops'
-        allnames = BF_cat({operation(~isDuplicate).Name},',','''');
+        allNames = BF_cat({operation(~isDuplicate).Name},',','''');
     end
     ourids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE %s IN (%s)',theid, ...
-                                                        thetable,thename,allnames));
+                                                        theTable,thename,allNames));
     ourids = vertcat(ourids{:}); % ids matching FileNames/OpNames
     ourkids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Keyword IN (%s)', ...
                                             thekid,thektable,BF_cat(ukws,',','''')));
     ourkids = vertcat(ourkids{:}); % ids matching FileNames/OpNames
-    nkwrels = sum(cellfun(@(x)length(x),kwsplit)); % number of keyword relationships in the input file
-    addcell = {};
+    % nkwrels = sum(cellfun(@(x)length(x),kwsplit)); % number of keyword relationships in the input file
+    addCell = {};
     for i = 1:length(kwsplit)
         for j = 1:length(kwsplit{i})
-            addcell{end+1} = sprintf('(%u,%u)',ourids(i),ourkids(strcmp(kwsplit{i}{j},ukws)));
+            addCell{end+1} = sprintf('(%u,%u)',ourids(i),ourkids(strcmp(kwsplit{i}{j},ukws)));
         end
     end
-    SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',thereltable,theid,thekid),addcell); % add them all in chunks
+    SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell); % add them all in chunks
         
     % Increment Nmatches in the keywords table
     fprintf(1,' done.\nNow calculating the match counts for keywords...')
@@ -493,9 +493,9 @@ if ~strcmp(ImportWhat,'mops')
     for k = 1:nkw % keywords implicated in this import
         SelectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
         theopkw = mysql_dbquery(dbc,SelectString);
-        UpdateString = sprintf('UPDATE %s SET NumOccur = (SELECT COUNT(*) FROM %s WHERE %s = %u) WHERE %s = %u', ...
-                                    thektable,thereltable,thekid,theopkw{1},thekid,theopkw{1});
-        [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+        updateString = sprintf('UPDATE %s SET NumOccur = (SELECT COUNT(*) FROM %s WHERE %s = %u) WHERE %s = %u', ...
+                                    thektable,theRelTable,thekid,theopkw{1},thekid,theopkw{1});
+        [~,emsg] = mysql_dbexecute(dbc, updateString);
         if ~isempty(emsg)
             error('\n Error updating keyword count in %s\n%s',thektable,emsg)
         end
@@ -504,10 +504,10 @@ if ~strcmp(ImportWhat,'mops')
     %     % nnkw = sum(cellfun(@(x)ismember(ukws{k},x),kwsplit));
     %     Selectopkwid = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
     %     SelectCount = sprintf(['SELECT COUNT(*) FROM %s WHERE %s = %s ' ...
-    %                             'AND %s > %u'],thereltable,thekid,Selectopkwid,theid,maxid);
-    %     UpdateString = sprintf(['UPDATE %s SET NumOccur = NumOccur + (%s) ' ...
+    %                             'AND %s > %u'],theRelTable,thekid,Selectopkwid,theid,maxid);
+    %     updateString = sprintf(['UPDATE %s SET NumOccur = NumOccur + (%s) ' ...
     %                             'WHERE Keyword = ''%s'''],thektable,SelectCount,ukws{k});
-    %     [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+    %     [~,emsg] = mysql_dbexecute(dbc, updateString);
     %     if ~isempty(emsg)
     %         RA_keyboard
     %         fprintf(1,'\n Error updating keyword count in %s',thektable)
@@ -519,12 +519,12 @@ end
 % ------------------------------------------------------------------------------
 %% Update links between operations and master operations
 % ------------------------------------------------------------------------------
-if ismember(ImportWhat,{'mops','ops'}) % there may be new links
+if ismember(importWhat,{'mops','ops'}) % there may be new links
     % Add mop_ids to Operations table
     fprintf(1,'Evaluating links between operations and master operations...'); tic
-    UpdateString = ['UPDATE Operations AS o SET o.mop_id = (SELECT mop_id FROM MasterOperations AS m ' ...
+    updateString = ['UPDATE Operations AS o SET o.mop_id = (SELECT mop_id FROM MasterOperations AS m ' ...
                         'WHERE m.MasterLabel = o.MasterLabel) WHERE mop_id IS NULL'];
-    [~,emsg] = mysql_dbexecute(dbc,UpdateString);
+    [~,emsg] = mysql_dbexecute(dbc,updateString);
     
     % ---------------------
     % Should probably add a check that the update happened; i.e., that no mop_id are left NULL
@@ -546,7 +546,7 @@ if ismember(ImportWhat,{'mops','ops'}) % there may be new links
         error('\nOops! Error finding links between Operations and MasterOperations:\n%s\n',emsg);
     end
     
-    %     % if strcmp(ImportWhat,'ops')
+    %     % if strcmp(importWhat,'ops')
     %     %     % operations were imported -- match their MasterLabels with elements of the MasterOperations table using mySQL JOIN
     %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
     %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.op_id > %u',maxid];
@@ -556,9 +556,9 @@ if ismember(ImportWhat,{'mops','ops'}) % there may be new links
     %     % end
     %     
     
-    UpdateString = sprintf(['UPDATE MasterOperations AS m SET NPointTo = ' ...
+    updateString = sprintf(['UPDATE MasterOperations AS m SET NPointTo = ' ...
                     '(SELECT COUNT(o.mop_id) FROM Operations AS o WHERE m.mop_id = o.mop_id)']);
-    [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+    [~,emsg] = mysql_dbexecute(dbc, updateString);
     if ~isempty(emsg)
         error('Error counting NPointTo operations for mop_id = %u\n%s\n',M_ids(k),emsg);
     end
@@ -566,10 +566,10 @@ if ismember(ImportWhat,{'mops','ops'}) % there may be new links
     % M_ids = mysql_dbquery(dbc,'SELECT mop_id FROM MasterOperations');
     % M_ids = vertcat(M_ids{:}); % vector of master_ids    
     % for k = 1:length(M_ids)
-    %     UpdateString = sprintf(['UPDATE MasterOperations SET NPointTo = ' ...
+    %     updateString = sprintf(['UPDATE MasterOperations SET NPointTo = ' ...
     %                     '(SELECT COUNT(mop_id) FROM Operations WHERE mop_id = %u)' ...
     %                         'WHERE mop_id = %u'],M_ids(k),M_ids(k));
-    %     [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+    %     [~,emsg] = mysql_dbexecute(dbc, updateString);
     %     if ~isempty(emsg)
     %         fprintf(1,'Error counting NPointTo operations for mop_id = %u\n',M_ids(k));
     %         fprintf(1,'%s\n',emsg)
@@ -587,8 +587,8 @@ SQL_closedatabase(dbc)
 % ------------------------------------------------------------------------------
 %% Tell the user all about it
 % ------------------------------------------------------------------------------
-fprintf('All tasks completed reading %s for adding %u %s into %s in %s.\n', ...
-            INPfile,sum(~isDuplicate),thewhat,dbname,BF_thetime(toc(ticker)));
+fprintf('All tasks completed in %s.\nRead %s then added %u %s into %s.\n', ...
+            BF_thetime(toc(ticker)), INPfile, sum(~isDuplicate), theWhat, dbname);
 
 
 end
