@@ -30,7 +30,7 @@
 function SQL_create_all_tables()
 
 % Specify the names of tables to create (should be valid names in SQL_TableCreateString)
-TableNames = {'MasterOperations', ...     % MasterOperations Table
+tableNames = {'MasterOperations', ...     % MasterOperations Table
               'Operations', ...           % Operations Table
               'TimeSeries', ...           % TimeSeries Table
               'OperationKeywords', ...    % OperationKeywords Table
@@ -40,31 +40,47 @@ TableNames = {'MasterOperations', ...     % MasterOperations Table
               'Results'};                 % Results Table
           
 % Convert Table names to mySQL CREATE TABLE statements:
-createString = arrayfun(@(x)SQL_TableCreateString(TableNames{x}),1:length(TableNames),'UniformOutput',0);
+createString = arrayfun(@(x)SQL_TableCreateString(tableNames{x}),1:length(tableNames),'UniformOutput',0);
+existString = arrayfun(@(x)['SHOW TABLES LIKE ''' tableNames{x} ''''],1:length(tableNames),'UniformOutput',0);
 
 % ------------------------------------------------------------------------------
 %% Write all of this to the database:
 % ------------------------------------------------------------------------------
 [dbc, dbname] = SQL_opendatabase; % opens dbc, the default database (named dbname)
 
+nperline = 3; % Make a new line after adding this many tables to the database
 fprintf(1,'Creating tables in %s:\n',dbname);
-numPerLine = 5;
 for j = 1:length(createString)
-    [~, emsg] = mysql_dbexecute(dbc,createString{j});
-    if isempty(emsg)
+    
+    % First check whether the table already exists:
+    [output,emsg] = mysql_dbquery(dbc,existString{j});
+    
+    if ~isempty(output) % Table already exists
         if j == length(createString)
-            fprintf(1,'%s.',TableNames{j})
+            fprintf(1,'(%s already exists).',tableNames{j});
         else
-            fprintf(1,'%s, ',TableNames{j})
+            fprintf(1,'(%s already exists), ',tableNames{j});
         end
     else
-        fprintf(1,'**** Error creating table: %s\n',TableNames{j});
+        % Table does not yet exist; attempt to create it:
+        [rs, emsg] = mysql_dbexecute(dbc,createString{j});
+        if ~isempty(rs)
+            if j == length(createString)
+                fprintf(1,'%s.',tableNames{j})
+            else
+                fprintf(1,'%s, ',tableNames{j})
+            end
+        else
+            fprintf(1,'**** Error creating table: %s\n',tableNames{j});
+        end
     end
-    if (mod(j,numPerLine) == 0) && (j < length(createString))
-        fprintf(1,'\n'); % Make new line to avoid cramping on display
+    
+    % Make new line to avoid cramping on display
+    if (mod(j,nperline) == 0) && (j < length(createString))
+        fprintf(1,'\n');
     end
 end
-fprintf(1,'\nTables created in %s\n',dbname);
+fprintf(1,'\nTables created in %s.\n',dbname);
 
 SQL_closedatabase(dbc) % close the connection to the database
 
