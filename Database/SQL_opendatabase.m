@@ -23,22 +23,23 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [dbc, dbname] = SQL_opendatabase(dbname,bevocal)
+function [dbc, dbname] = SQL_opendatabase(dbname,beVocal)
 
 % ------------------------------------------------------------------------------
 % Default: don't display details to the prompt:
 
-if nargin < 2 || isempty(bevocal)
-	bevocal = 0; % by default, do not display the mySQL database used to the prompt
+if nargin < 2 || isempty(beVocal)
+	beVocal = 0; % by default, do not display the mySQL database used to the prompt
 end
 % ------------------------------------------------------------------------------
 
-theconfigfile = which('sql_settings.conf');
-if isempty(theconfigfile)
+theConfigFile = which('sql_settings.conf');
+if isempty(theConfigFile)
     % no sql_settings.conf found
-    error('No sql_settings.conf file found. Please create sql_settings.conf file using SQL_create_db.')
+    error(['No sql_settings.conf file found.\n  ' ...
+    'Please create sql_settings.conf file using SQL_create_db, or generate one yourself (cf. Documentation).'])
 else
-    fid = fopen(theconfigfile);
+    fid = fopen(theConfigFile);
 end
 
 % Read the file:
@@ -61,7 +62,7 @@ if isempty(customPort) || customPort==0
 end
 
 % ------------------------------------------------------------------------------
-if bevocal
+if beVocal
 	fprintf(1,'Using database %s\n',dbname)
     fprintf(1,['Connecting to host ''%s'', database ''%s'' (port %u) using username' ...
             ' ''%s'' and password ''%s''...'],hostname,dbname,customPort,username,password)
@@ -74,7 +75,7 @@ dbc = mysql_dbopen(hostname,dbname,username,password,customPort);
 
 if isempty(dbc)
 	error('Failed to load SQL database');
-elseif bevocal
+elseif beVocal
     fprintf(1,' Connected!\n');
 end
 
