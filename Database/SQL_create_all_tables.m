@@ -38,7 +38,7 @@ TableNames = {'MasterOperations', ...     % MasterOperations Table
               'TimeSeriesKeywords', ...   % TimeSeriesKeywords
               'TsKeywordsRelate', ...     % TsKeywordsRelate Table
               'Results'};                 % Results Table
-          
+              
 % Convert Table names to mySQL CREATE TABLE statements:
 CreateString = arrayfun(@(x)SQL_TableCreateString(TableNames{x}),1:length(TableNames),'UniformOutput',0);
 

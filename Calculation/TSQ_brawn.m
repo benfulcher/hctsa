@@ -142,7 +142,7 @@ for i = 1:NumTimeSeries
 		if size(x,2) ~= 1
 			if size(x,1) == 1
                 fprintf(fid,['***** The time series %s is a row vector. Not sure how it snuck through the cracks, but I ' ...
-                                            'need a column vector...\n'],TimeSeries(i).FileName);
+                                        'need a column vector...\n'],TimeSeries(i).FileName);
 				fprintf(fid,'I''ll transpose it for you for now....\n');
 				x = x';
 			else
@@ -322,7 +322,7 @@ for i = 1:NumTimeSeries
     % --------------------------------------------------------------------------
 	fprintf(fid,'********************************************************************\n')
     fprintf(fid,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
-    fprintf(fid,'oOoOo Calculation complete for %s oOoOo\nts_id = %u, N = %u\n', ...
+    fprintf(fid,'oOoOo Calculation complete for %s (ts_id = %u, N = %u) oOoOo\n', ...
                             TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length);
     if ncal > 0 % Some amount of calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u special-valued outputs stored. [%u / %u]\n',...
@@ -363,9 +363,9 @@ end
 %% Finished calculating!!
 % --------------------------------------------------------------------------
 % --------------------------------------------------------------------------
-fprintf(fid,['!! !! !! !! !! !! !!  Calculation completed at %s !! !! !! ' ...
+fprintf(fid,['!! !! !! !! !! !! Calculation completed at %s !! !! ' ...
                                                 '!! !! !!\n'],datestr(now))
-fprintf(fid,'Calculations took a total of %s.\n',BF_thetime(sum(times),1))
+fprintf(fid,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1))
 
 % Save the local files for subsequent upload to the mySQL database
 fprintf(1,'Saving all results to HCTSA_loc.mat...')

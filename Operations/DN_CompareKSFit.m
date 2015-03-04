@@ -11,7 +11,7 @@
 % 
 %---INPUTS:
 % x, the input time series
-% whatdbn, the type of distribution to fit to the data:
+% whatDistn, the type of distribution to fit to the data:
 %           'norm' (normal), 'ev' (extreme value), 'uni' (uniform),
 %           'beta' (Beta), 'rayleigh' (Rayleigh), 'exp' (exponential),
 %           'gamma' (Gamma), 'logn' (Log-Normal), 'wbl' (Weibull).
@@ -45,17 +45,17 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_CompareKSFit(x,whatdbn)
+function out = DN_CompareKSFit(x,whatDistn)
 
 % ------------------------------------------------------------------------------
 %% PREPROCESSING
 % ------------------------------------------------------------------------------
 
-% Fit the distribution 'whatdbn' to the input data, x.
+% Fit the distribution 'whatDistn' to the input data, x.
 % xtry=linspace(-40,40,400);
 xstep = std(x)/100; % set a step size
 
-switch whatdbn
+switch whatDistn
     case 'norm'
         [a, b] = normfit(x);
 		peaky = normpdf(a,a,b); thresh = peaky/100; % stop when gets to 1/100 of peak value
@@ -92,7 +92,7 @@ switch whatdbn
             
     case 'rayleigh'
         if any(x < 0),
-            fprintf(1,'The data is not positive, but Rayleigh is a positive-only distribution\n')
+            fprintf(1,'The data is not positive, but Rayleigh is a positive-only distribution.\n')
             out = NaN;
             return
         else % fit a Rayleigh distribution to the positive-only data
@@ -105,7 +105,7 @@ switch whatdbn
         
     case 'exp'
         if any(x < 0)
-            fprintf(1,'The data contains negative values, but Exponential is a positive-only distribution\n')
+            fprintf(1,'The data contains negative values, but Exponential is a positive-only distribution.\n')
             out = NaN; return
         else a = expfit(x);
 			peaky = exppdf(0,a); thresh = peaky/100;
@@ -116,7 +116,7 @@ switch whatdbn
         
     case 'gamma'
         if any(x < 0)
-            fprintf(1,'The data contains negative values, but Gamma is a positive-only distribution\n')
+            fprintf(1,'The data contains negative values, but Gamma is a positive-only distribution.\n')
             out = NaN; return
         else a = gamfit(x);
 			if a(1) < 1
@@ -131,7 +131,7 @@ switch whatdbn
         
     case 'logn'
         if any(x <= 0)
-            fprintf(1,'The data is not positive, but Log-Normal is a positive-only distribution\n')
+            fprintf(1,'The data is not positive, but Log-Normal is a positive-only distribution.\n')
             out = NaN; return
         else
 			a = lognfit(x);
@@ -143,7 +143,7 @@ switch whatdbn
         
     case 'wbl'
         if any(x <= 0)
-            fprintf(1,'The data is not positive, but Weibull is a positive-only distribution\n')
+            fprintf(1,'The data is not positive, but Weibull is a positive-only distribution.\n')
             out = NaN; return
         else
 			a = wblfit(x);
@@ -159,7 +159,7 @@ switch whatdbn
         end
         
     otherwise
-        error('Unknown distribution %s',whatdbn)
+        error('Unknown distribution %s',whatDistn)
 end
 % xtmafit=[floor(xtmafit(1)*10)/10 ceil(xtmafit(end)*10)/10];
 
@@ -184,7 +184,7 @@ x2 = max([xf(2), xi(end)]);
 % (Inefficient, but easier to do it this way)
 xi = linspace(x1,x2,1000);
 f = ksdensity(x,xi); % the smoothed empirical distribution
-switch whatdbn
+switch whatDistn
     case 'norm'
         ffit = normpdf(xi,a,b);
     case 'ev'

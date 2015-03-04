@@ -24,7 +24,7 @@ function [masteroutput, mastertime] = TSQ_brawn_masterloop(x, y, Mcode, fid, BeV
 
 if BeVocal
     % Display code name for error checking
-    fprintf(fid,'[%u] %s...',TheTsID,Mcode);
+    fprintf(fid,'[ts_id=%u] %s...',TheTsID,Mcode);
 end
 
 try
