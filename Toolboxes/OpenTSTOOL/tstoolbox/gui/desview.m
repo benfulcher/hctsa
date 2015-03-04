@@ -16,7 +16,7 @@ if isempty(s)
 	warndlg(['Error opeing signal ' filename]);
 end
 
-[path,nam,ext,ver] = fileparts(filename);
+[path,nam,ext] = fileparts(filename);
 lt = list;
 
 lt = TSTL_append(lt, [num2str(ndim(s)) '-dimensional signal ' filename]);

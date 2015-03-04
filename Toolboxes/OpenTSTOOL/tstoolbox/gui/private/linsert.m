@@ -7,7 +7,7 @@ function [datafiles] = linsert(filename, handles,datafiles,s,nos)
 
 if isempty(s)
   [status,datafiles]=writelevel(filename,datafiles);
-  [path,fname,ext,ver] = fileparts(filename);
+  [path,fname,ext] = fileparts(filename);
 else
   [status,datafiles]=siglevel(s,datafiles);
   fname=name(s);

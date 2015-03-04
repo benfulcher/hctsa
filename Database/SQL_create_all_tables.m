@@ -38,7 +38,7 @@ tableNames = {'MasterOperations', ...     % MasterOperations Table
               'TimeSeriesKeywords', ...   % TimeSeriesKeywords
               'TsKeywordsRelate', ...     % TsKeywordsRelate Table
               'Results'};                 % Results Table
-          
+              
 % Convert Table names to mySQL CREATE TABLE statements:
 createString = arrayfun(@(x)SQL_TableCreateString(tableNames{x}),1:length(tableNames),'UniformOutput',0);
 existString = arrayfun(@(x)['SHOW TABLES LIKE ''' tableNames{x} ''''],1:length(tableNames),'UniformOutput',0);

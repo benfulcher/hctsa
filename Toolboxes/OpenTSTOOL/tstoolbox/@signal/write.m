@@ -15,12 +15,12 @@ function [sig]=write(s, filename, varargin)
 error(nargchk(2,3, nargin));
 
 if nargin == 2
-        [path,nam,ext,ver] = fileparts(filename);
+        [path,nam,ext] = fileparts(filename);
         s=addhistory(s,['write as >' nam '<']);       
 	s=setname(s,nam);
  	save(filename, 's');
 else
-	[path,nam,ext,ver] = fileparts(filename);
+	[path,nam,ext] = fileparts(filename);
 	switch varargin{1}
 		case {'ASCII', 'ascii', 'ASC', 'asc', 'dat', 'txt'}
 		    dat = data(s);

@@ -79,12 +79,12 @@ class point_set : public point_set_base<METRIC> {			// this implementation is fo
 				
 		typedef interleaved_pointer<double> row_iterator; // a smart pointer that iterates over the elements of one point in the point_set (points are row vectors)
 		
-		row_iterator point_begin(const long n) const { return row_iterator(matrix_ptr + n, N); }
-		row_iterator point_end(const long n) const { return row_iterator(matrix_ptr + n + N*D, N); }	// past-the-end	
+		row_iterator point_begin(const long n) const { return row_iterator(matrix_ptr + n, this->N); }
+		row_iterator point_end(const long n) const { return row_iterator(matrix_ptr + n + this->N*D, this->N); }	// past-the-end	
 
 		// indices may vary between 0 and N-1, or 0 and D-1
 		// vec2 must be a double vector of length D, vec1[0] ... vec1[D-1]	
-		double coordinate(const long n, const long d) const { return matrix_ptr[n + N*d]; };
+		double coordinate(const long n, const long d) const { return matrix_ptr[n + this->N*d]; };
 
 		template<class ForwardIterator>
 		inline double distance(const long index1, ForwardIterator vec2) const
@@ -108,7 +108,7 @@ class point_set : public point_set_base<METRIC> {			// this implementation is fo
 		template<class ForwardIterator>
 		inline void add(ForwardIterator vec, const long index) const
 		{
-			for (register long d=0; d < D; d++) vec[d] += matrix_ptr[index + N*d];
+			for (register long d=0; d < D; d++) vec[d] += matrix_ptr[index + this->N*d];
 		}
 };
 

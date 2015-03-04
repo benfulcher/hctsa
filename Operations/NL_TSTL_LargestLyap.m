@@ -33,6 +33,9 @@
 % much of the range of scales as possible while simultaneously achieving the
 % best possible linear fit.
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -57,14 +60,17 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_LargestLyap(y,Nref,maxtstep,past,NNR,embedparams)
-% Ben Fulcher, November 2009
 
+% ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
+% ------------------------------------------------------------------------------
 
-doplot = 0; % whether to plot outputs to a figure
+doPlot = 0; % whether to plot outputs to a figure
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
 % (1) Nref: number of randomly-chosen reference points
@@ -113,7 +119,9 @@ else
     end
 end
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
+% ------------------------------------------------------------------------------
 % convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedparams{1},embedparams{2},1);
 
@@ -132,7 +140,8 @@ end
     
 p = data(rs);
 t = spacing(rs);
-if doplot
+
+if doPlot
     figure('color','w'); box('on');
     plot(t,p,'.-k')
 end
@@ -142,7 +151,9 @@ end
 %                                sum(log2(dist(reference point + tau, nearest neighbor +
 %                                tau)/dist(reference point, nearest neighbor)))
 
+% ------------------------------------------------------------------------------
 %% Get output stats
+% ------------------------------------------------------------------------------
 
 if all(p == 0)
     out = NaN; return
@@ -151,11 +162,11 @@ end
 % p at lags up to 5
 for i = 1:5
     % evaluate p(1), p(2), ..., p(5) for the output structure
-    eval('out.p%u = p(%u);',i,i);
+    out.(sprintf('p%u',i)) = p(i);
 end
 out.maxp = max(p);
 
-% number/proportion of crossings at 80% and 90% of maximum
+% Number/proportion of crossings at 80% and 90% of maximum
 ncrossx = @(x) sum((p(1:end-1)-x*max(p)).*(p(2:end)-x*max(p)) < 0);
 
 out.ncross09maxold = sum((p(1:end-1)-0.9*max(p)).*(p(2:end)-0.9*max(p)) < 0);
@@ -187,7 +198,9 @@ out.to05max = ttomaxx(0.5);
 if isempty(out.to05max), out.to05max = NaN; end
 
 
-%% find scaling region:
+% ------------------------------------------------------------------------------
+%% Find scaling region:
+% ------------------------------------------------------------------------------
 % fit from zero to 95% of maximum...
 imax = find(p > 0.95*max(p),1,'first');
 
@@ -297,7 +310,7 @@ else
     out.expfit_rmse = NaN;
 end
 
-if doplot
+if doPlot
     hold on
     plot(t,c.a*(1-exp(c.b*t)),':r');
     hold off
@@ -309,7 +322,7 @@ end
         end
         pp = polyfit(x,y,1);
         pfit = pp(1)*x+pp(2);
-        res = pfit-y;
+        res = pfit - y;
         badness = mean(abs(res))-gamma*length(x); % want to still maximize length(x)
     end
 

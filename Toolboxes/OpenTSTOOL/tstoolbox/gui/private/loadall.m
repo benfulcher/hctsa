@@ -15,7 +15,7 @@ d = dir(cwd);
 cwd = fileparts(cwd);
 for i=1:length(d)
 	filename = d(i).name;
-	[path,name,ext,ver] = fileparts(filename);
+	[path,name,ext] = fileparts(filename);
 	if strcmp(cwd, '.')
 		fullname = filename;		% keine laestigen Punkte vor Files im lokalen Verzeichnis
 	else

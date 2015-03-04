@@ -3,14 +3,14 @@
 % ------------------------------------------------------------------------------
 % 
 % Iteratively applies a transformation to the time series and measures how
-% various properties of the time series change as the transformation is
-% iteratively applied to it.
+% various properties of is change as the transformation is iteratively applied
+% to it.
 % 
 %---INPUTS:
 % 
 % y, the input time series
 % 
-% detrndmeth, the detrending method to apply:
+% dtMeth, the detrending method to apply:
 %           (i) 'spline' removes a spine fit,
 %           (ii) 'diff' takes incremental differences,
 %           (iii) 'medianf' applies a median filter,
@@ -44,7 +44,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = PP_Iterate(y,detrndmeth)
+function out = PP_Iterate(y,dtMeth)
 
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
@@ -60,7 +60,7 @@ N = length(y); % Length of the input time series
 %% Determine the number of times the processing will be progressively performed
 % ------------------------------------------------------------------------------
 % This information is stored in nr.
-switch detrndmeth
+switch dtMeth
     case 'spline', nr = (1:20);
     case 'diff', nr = (1:5);
     case 'medianf', nr = round(linspace(1,N/25,25));
@@ -68,7 +68,7 @@ switch detrndmeth
     case 'resampleup', nr = (1:20);
     case 'resampledown', nr = (1:20);
     otherwise
-        error('Unknown detrending method ''%s''',detrndmeth);
+        error('Unknown detrending method ''%s''',dtMeth);
 end
 
 % ------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ end
 outmat = zeros(length(nr),10);
 for q = 1:length(nr)
     n = nr(q);
-    switch detrndmeth
+    switch dtMeth
         case 'spline' % Spline detrend
             nknots = n; % progressively make more knots
             intp = 4; % cubic interpolants

@@ -136,8 +136,8 @@ ndbel = length(ts_id_db);     % Number of database elements to attempt to write 
 % ------------------------------------------------------------------------------
 switch writeWhat
 case 'null'
-    fprintf(1,['There are %u NULL entries in Results.\nWill now write calculated ' ...
-                    'elements of TS_DataMat into these elements of %s...\n'],ndbel,dbname);
+    fprintf(1,['There are %u NULL entries in Results.\nNow writing calculated ' ...
+                    'elements of TS_DataMat to %s...\n'],ndbel,dbname);
 case 'error'
     fprintf(1,['There are %u entries in Results (all previous errors) ' ...
                     'that are being written to %s...\n'],ndbel,dbname);

@@ -15,7 +15,7 @@
 % 
 % nbins, maximum number of partitions per axis.
 % 
-% embedparams, embedding parameters to feed BF_embed.m for embedding the
+% embedParams, embedding parameters to feed BF_embed.m for embedding the
 %              signal in the form {tau,m}
 % 
 % 
@@ -49,7 +49,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_TSTL_dimensions(y,nbins,embedparams)
+function out = NL_TSTL_dimensions(y,nbins,embedParams)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries, check inputs
@@ -63,11 +63,11 @@ if nargin < 2 || isempty(nbins)
 end
 
 % (2) Set embedding parameters to defaults
-if nargin < 3 || isempty(embedparams)
-    embedparams = {'ac','cao'};
+if nargin < 3 || isempty(embedParams)
+    embedParams = {'ac','cao'};
     fprintf(1,'Using default time-delay embedding parameters: autocorrelation and cao')
 else
-    if length(embedparams) ~= 2
+    if length(embedParams) ~= 2
         error('Embedding parameters are incorrectly formatted -- need {tau,m}')
     end
 end
@@ -76,7 +76,7 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert to embedded signal object for TSTOOL
-s = BF_embed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedParams{1},embedParams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Time-delay embedding for TSTOOL failed')
@@ -86,7 +86,7 @@ if size(data(s),2) < 3 % embedded with dimension < 3
     % note the 'true' predicted embedding dimension
     mopt = size(data(s),2);
     % embed with dimension m = 3
-    s = BF_embed(y,embedparams{1},3,1);
+    s = BF_embed(y,embedParams{1},3,1);
     fprintf(1,'Re-embedded with embedding dimension 3\n')
 else
 	mopt = size(data(s),2);
@@ -95,8 +95,8 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TSTOOL function:
 % ------------------------------------------------------------------------------
-
-if ~exist('dimensions')
+% This looks for the dimensions file in the tstoolbox/@signal/dimensions directory
+if ~exist(fullfile('tstoolbox','@signal','dimensions'))
     error('Cannot find the code ''dimensions'' from the TSTOOL package. Is it installed and in the Matlab path?');
 end
 try

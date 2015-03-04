@@ -3,7 +3,7 @@ function nname = newname(oldname, praefix, suffix, newpath, newext)
 % returns a filename that does not yet exist using the old name and extension, 
 % a praefix and a suffix and if necessary a number
 
-[path,name,ext,ver] = fileparts(oldname);
+[path,name,ext] = fileparts(oldname);
 
 if nargin < 1, help(mfilename); return; end
 

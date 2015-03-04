@@ -70,7 +70,7 @@ BF_CheckToolbox('curve_fitting_toolbox');
 %% Preliminaries
 % ------------------------------------------------------------------------------
 N = length(y); % Length of time series
-doplot = 0; % Don't plot results by default
+doPlot = 0; % Don't plot results by default
 
 % ------------------------------------------------------------------------------
 %% Check inputs
@@ -139,7 +139,9 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TSTOOL code, fracdims:
 % ------------------------------------------------------------------------------
-if ~exist('fracdims')
+
+% Checks that tstoolbox/@signal/fracdims exists
+if ~exist(fullfile('tstoolbox','@signal','fracdims'))
     error(['Cannot find the code ''fracdims'' from the TSTOOL package. ' ...
             'Is it installed and in the Matlab path?']);
 end
@@ -157,15 +159,17 @@ end
 Dq = data(rs);
 q = spacing(rs);
 
+% ------------------------------------------------------------------------------
 % Plot the results in a figure:
-if doplot
+% ------------------------------------------------------------------------------
+if doPlot
     figure('color','w'); box('on');
     subplot(2,1,1); view(rs);
     subplot(2,1,2); plot(q,dq);
 end
 
 % ------------------------------------------------------------------------------
-%% Get output statistics
+%% Get output statistics:
 % ------------------------------------------------------------------------------
 out.rangeDq = range(Dq);
 out.minDq = min(Dq);
@@ -192,7 +196,7 @@ f = fittype('a*exp(b*x)+c','options',s);
 out.expfit_a = c.a;
 out.expfit_b = c.b;
 out.expfit_c = c.c;
-out.expfit_r2 = gof.rsquare; % I think that this one is the most important!
+out.expfit_r2 = gof.rsquare; % I reckon this one is the most important!
 out.expfit_adjr2 = gof.adjrsquare;
 out.expfit_rmse = gof.rmse;
 
