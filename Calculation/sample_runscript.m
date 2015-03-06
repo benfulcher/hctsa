@@ -25,7 +25,7 @@
 %% SET RANGE OF TS_IDs TO COMPUTE:
 % ------------------------------------------------------------------------------
 tsid_min = 1; % Calculate from this ts_id...
-tsid_max = 100; % To this ts_id
+tsid_max = 3; % To this ts_id
 
 % ------------------------------------------------------------------------------
 %% Default parameters for computation:
