@@ -1398,7 +1398,7 @@ PP_Compare(x,'resample_1_2')	PP_Compare_resample_1_2
 PP_Compare(x,'resample_2_1')	PP_Compare_resample_2_1
 PP_Compare(x,'logr')			PP_Compare_logr
 PP_Compare(x,'boxcox')			PP_Compare_boxcox
-PP_Iterate(x,'spline')			PP_Iterate_spline
+# PP_Iterate(x,'spline')            PP_Iterate_spline
 PP_Iterate(x,'diff')			PP_Iterate_diff
 PP_Iterate(x,'medianf')			PP_Iterate_medianf
 PP_Iterate(x,'rav')				PP_Iterate_rav

@@ -46,6 +46,8 @@
 
 function out = PP_Iterate(y,dtMeth)
 
+doPlot = 1;
+
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
 % ------------------------------------------------------------------------------
@@ -74,6 +76,10 @@ end
 % ------------------------------------------------------------------------------
 %% Do the progessive processing with running statistical evaluation
 % ------------------------------------------------------------------------------
+if doPlot
+    f = figure('color','w'); box('on'); hold on
+    h1 = plot(y,'k');
+end
 outmat = zeros(length(nr),10);
 for q = 1:length(nr)
     n = nr(q);
@@ -102,8 +108,15 @@ for q = 1:length(nr)
             y_d = resample(y,1,n);
     end
     outmat(q,:) = doyourcalcthing(y,y_d);
+    if doPlot
+        if q==1
+            h2 = plot(y_d,'r');
+        else
+            h2.YData = (y_d);
+        end
+        keyboard
+    end
 end
-% out1 = outmat;
 
 % ------------------------------------------------------------------------------
 %% Calculate four statistics from each test
@@ -111,7 +124,7 @@ end
 
 stats = zeros(10,4);
 for t = 1:10;
-    if any(~isfinite(stats(t,:))),
+    if any(~isfinite(outmat(:,t))),
         fprintf(1,'This is a bad statistic\n')
     end
     stats(t,:) = doyourtestthing(outmat(:,t)); 
@@ -180,11 +193,12 @@ out.normdiff_jump = stats(10,2);
 out.normdiff_lin = stats(10,3);
 out.normdiff_exp = stats(10,4);
 
-    % ------------------------------------------------------------------------------
-    %% TESTS
-    % ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+%% TESTS:
+% ------------------------------------------------------------------------------
     function f = doyourcalcthing(y,y_d)
         y = BF_zscore(y); y_d = BF_zscore(y_d);
+        
         f = zeros(10,1); % vector of features to output
         % 1) Stationarity
         % (a) StatAv
@@ -235,7 +249,8 @@ out.normdiff_exp = stats(10,4);
            f(8:10) = NaN; % like for differencing where lose some points
         end
     end
-
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
     function g = doyourtestthing(f)
         if ~all(isfinite(f))
             g = NaN*ones(4,1); return
@@ -308,9 +323,8 @@ out.normdiff_exp = stats(10,4);
             else % unable to run 'fit' command -- fatal error
                 return
             end
-        end
-
-        
+        end   
     end
+% ------------------------------------------------------------------------------
 end
      
