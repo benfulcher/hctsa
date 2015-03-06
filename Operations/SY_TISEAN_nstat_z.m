@@ -37,6 +37,9 @@
 % minimum, and maximum cross-prediction error, the minimum off-diagonal
 % cross-prediction error, and eigenvalues of the cross-prediction error matrix.
 % 
+%---HISTORY:
+% Ben Fulcher, 17/11/2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -61,7 +64,10 @@
 % ------------------------------------------------------------------------------
 
 function out = SY_TISEAN_nstat_z(y,nseg,embedparams)
-% Ben Fulcher, 17/11/2009
+
+% ------------------------------------------------------------------------------
+%% Check Inputs / Set defaults
+% ------------------------------------------------------------------------------
 
 if nargin < 1
     error('Input a time series')
@@ -71,21 +77,27 @@ if nargin < 2 || isempty(nseg)
     nseg = 5; % divide the data into 5 segments by default
 end
 
-%% Check Inputs / Set defaults
 if nargin < 3
     embedparams = {1,3};
     fprintf(1,'Using default embedding using tau = 1 and m = 3\n')
 end
+
+% ------------------------------------------------------------------------------
+%% Write the file to disk for TISEAN to work with
+% ------------------------------------------------------------------------------
+
+% Embed the time series:
 tm = BF_embed(y,embedparams{1},embedparams{2},2);
 
-%% Write the file
 tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
 % to the millisecond (only get double-write error for same function called in same millisecond
 fn = sprintf('tisean_temp_nstat_z_%s.dat',tnow);
 dlmwrite(fn,y);
 fprintf(1,'Just written temporary file %s for TISEAN\n',fn)
 
+% ------------------------------------------------------------------------------
 %% Do the calculation
+% ------------------------------------------------------------------------------
 N = length(y); % length of the time series
 if N/tm(1) < nseg*8 % heuristic
     % it may be more tm(1) itself rather than compared to nseg...?
@@ -102,7 +114,9 @@ delete(fn) % remove the temporary file fn
 if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
 
 
-%% Read the input
+% ------------------------------------------------------------------------------
+%% Read the output from TISEAN
+% ------------------------------------------------------------------------------
 s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('Writing to stdout',s);
 if isempty(wi)
@@ -121,8 +135,9 @@ end
 
 % pcolor(xperr)
 
-
+% ------------------------------------------------------------------------------
 %% Output statistics
+% ------------------------------------------------------------------------------
 % diagonal elements are using a segment to predict itself -- ought to be
 % pretty good:
 out.trace = sum(diag(xperr)); % trace

@@ -28,6 +28,9 @@
 %---OUTPUTS: include the Gaussianity of the test statistics, a z-test, and
 % various tests based on fitted kernel densities.
 % 
+%---HISTORY:
+% Ben Fulcher, 15/11/2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -52,9 +55,10 @@
 % ------------------------------------------------------------------------------
 
 function out = SD_TSTL_surrogates(y, tau, nsurr, surrmethod, surrfn)
-% Ben Fulcher, 15/11/2009
 
+% ------------------------------------------------------------------------------
 %% Check inputs, set defaults
+% ------------------------------------------------------------------------------
 % 1) time delay, TAU
 if nargin < 2 || isempty(tau)
     tau = 1;
@@ -64,7 +68,6 @@ if strcmp(tau,'ac')
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
-
 
 % 2) number of surrogate data sets to generate, NSURR
 if nargin < 3 || isempty(nsurr)
@@ -86,8 +89,10 @@ if nargin < 5 || isempty(surrfn)
     surrfn = 'tc3';
 end
 
+% ------------------------------------------------------------------------------
 %% Do the calculation
-% Make a signal object of time series
+% ------------------------------------------------------------------------------
+% Make a TSTOOL signal object of time series
 s = signal(y);
 
 switch surrfn
@@ -111,9 +116,11 @@ tc3_surr = tc3dat(2:end);
 
 [n, x] = hist(tc3_surr,50);
 % hold off; plot(x,n); hold on; plot(tc3_y,max(n),'or'); hold off;
-    
+
+% ------------------------------------------------------------------------------
 %% Get some outputs
-% these are completely made up by me
+% ------------------------------------------------------------------------------
+% These are completely from my intuition
 
 % 1) fit a Gaussian to surrogates
 % [muhat,sigmahat] = normfit(tc3_surr);

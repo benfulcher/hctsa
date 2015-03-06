@@ -316,15 +316,16 @@ if doPlot
     hold off
 end
 
+    % ------------------------------------------------------------------------------
     function badness = lfitbadness(x,y,gamma)
         if nargin < 3,
-            gamma = 0.006; % regularization parameter, gamma, chosen empirically, kind of ad hoc
+            gamma = 0.006; % regularization parameter, gamma, chosen empirically
         end
         pp = polyfit(x,y,1);
         pfit = pp(1)*x+pp(2);
         res = pfit - y;
         badness = mean(abs(res))-gamma*length(x); % want to still maximize length(x)
     end
-
+    % ------------------------------------------------------------------------------
 
 end

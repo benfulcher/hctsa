@@ -105,8 +105,8 @@ cd Toolboxes
 compile_mex
 cd('../');
 
-fprintf(1,'Hope everything compiled ok?!\n')
-fprintf(1,['Ready when you are to add time series to the database using ' ...
+fprintf(1,'Hope everything compiled ok?!\n\n')
+fprintf(1,['All done! Ready when you are to add time series to the database using ' ...
                             'SQL_add(''ts'',''<timeSeries_inputFile.txt>'')...!\n']);
 
 % Attempt to add a time series

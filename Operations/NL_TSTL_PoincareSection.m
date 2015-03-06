@@ -28,6 +28,9 @@
 % Another thing that could be cool to do is to analyze variation in the plots as
 % ref changes... (not done here)
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -52,12 +55,10 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_PoincareSection(y,ref,embedparams)
-% Ben Fulcher, November 2009
 
-doplot = 0; % plot outputs to a figure
-
+% ------------------------------------------------------------------------------
 %% Check inputs
-N = length(y); % length of the time series
+% ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(ref)
     ref = 'max'; % reference point is the first maximum of the time series
@@ -94,8 +95,13 @@ end
 if isempty(ref), out = NaN; return; end % ridiculous
 if ref < 2, ref = 2; end % gives an error, uses previous value in algorithm
 
+doPlot = 0; % plot outputs to a figure
+
+% ------------------------------------------------------------------------------
 %% Do your magic, TSTOOL!:
+% ------------------------------------------------------------------------------
 % time-delay embed the signal:
+N = length(y); % length of the time series
 s = BF_embed(y,embedparams{1},3,1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
@@ -115,20 +121,22 @@ catch me
     end
 end
 
-% convert to Matlab forms
+% Convert back to Matlab forms
 v = data(rs); % vectors on poincare surface
 NN = length(v);
 % labeling poincare surface plane x-y
 x = (v(:,1));
 y = (v(:,2)); 
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(x,y,'.k'); axis equal
 end
 
+% ------------------------------------------------------------------------------
 %% Get statistics out
+% ------------------------------------------------------------------------------
 
-% basic stats
+% Basic statistics:
 out.pcross = NN/N; % proportion of time series that crosses poincare surface
 
 out.maxx = max(x);
@@ -213,6 +221,7 @@ out.tracepbox5 = sum(diag(pbox));
 % space, or finding the line whos vicinity includes many points, etc. but I
 % think this is enough for now.
 
+% ------------------------------------------------------------------------------
     function boxcounts = subcountboxes(x,y,nbox)
         boxcounts = zeros(nbox);
         % boxes are quantiles along each axis
@@ -229,6 +238,6 @@ out.tracepbox5 = sum(diag(pbox));
             end
         end     
     end
-
+% ------------------------------------------------------------------------------
 
 end

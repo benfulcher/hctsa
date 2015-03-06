@@ -18,6 +18,9 @@
 % 
 %---OUTPUTS: A set of statistics on the detail coefficients.
 %       
+%---HISTORY:
+% Ben Fulcher 23/1/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -42,14 +45,17 @@
 % ------------------------------------------------------------------------------
 
 function out = WL_DetailCoeffs(y, wname, maxlevel)
-% Ben Fulcher 23/1/2010
 
+% ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
 BF_CheckToolbox('wavelet_toolbox');
+% ------------------------------------------------------------------------------
 
-doplot = 0; % plot outputs to figure
+doPlot = 0; % plot outputs to figure
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length
 
 if nargin < 2 || isempty(wname)
@@ -68,7 +74,9 @@ if wmaxlev(N, wname) < maxlevel
     fprintf(1,'Using a wavelet level of %u instead.\n',maxlevel)
 end
 
+% ------------------------------------------------------------------------------
 %% Perform a single-level wavelet decomposition
+% ------------------------------------------------------------------------------
 means = zeros(maxlevel,1); % mean detail coefficient magnitude at each level
 medians = zeros(maxlevel,1); % median detail coefficient magnitude at each level
 maxs = zeros(maxlevel,1); % max detail coefficient magnitude at each level
@@ -85,9 +93,11 @@ for k = 1:maxlevel
     maxs(k) = max(abs(det));
 end
 
+% ------------------------------------------------------------------------------
 %% Plot the bad boy
+% ------------------------------------------------------------------------------
 
-if doplot
+if doPlot
     subplot(5,1,1:2); title('signal')
     plot(y);
     subplot(5,1,3); title('means');
@@ -98,7 +108,9 @@ if doplot
     plot(maxs);
 end
 
+% ------------------------------------------------------------------------------
 %% Return statistics on detail coefficients
+% ------------------------------------------------------------------------------
 % Sort
 means_s = sort(means,'descend');
 medians_s = sort(medians,'descend');
@@ -134,15 +146,16 @@ out.wslesr_max = SUB_slosr(maxs);
 r = corrcoef(maxs,medians);
 out.corrcoef_max_medians = r(1,2);
 
-
-function meisgorilla = SUB_slosr(xx)
+% ------------------------------------------------------------------------------
+function meIsGorilla = SUB_slosr(xx)
     maxlevel = length(xx);
     slosr = zeros(maxlevel-2,1);
     for i = 2:maxlevel-1
         slosr(i-1) = sum(xx(1:i-1))/sum(xx(i+1:end));
     end
     absm1 = abs(slosr-1); % how close to 1 (the same sum on either side) each is
-    meisgorilla = find(absm1 == min(absm1),1,'first') + 1;
+    meIsGorilla = find(absm1 == min(absm1),1,'first') + 1;
 end
-    
+% ------------------------------------------------------------------------------
+
 end

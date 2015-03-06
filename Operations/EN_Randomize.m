@@ -10,7 +10,7 @@
 % 
 %---INPUTS:
 % y, the input (z-scored) time series
-% howtorand, specifies the randomization scheme for each iteration:
+% randomizeHow, specifies the randomization scheme for each iteration:
 %      (i) 'statdist' -- substitutes a random element of the time series with
 %                           one from the original time-series distribution
 %      (ii) 'dyndist' -- overwrites a random element of the time
@@ -55,7 +55,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_Randomize(y,howtorand)
+function out = EN_Randomize(y,randomizeHow)
 
 % ------------------------------------------------------------------------------
 % Check toolboxes, and a z-scored time series:
@@ -67,24 +67,28 @@ BF_CheckToolbox('curve_fitting_toolbox');
 % For some reason the stupid wavelet entropy is a statistic used for this, so we
 % need the wavelet toolbox (but in future should remove this entropy measure):
 BF_CheckToolbox('wavelet_toolbox');
+% ------------------------------------------------------------------------------
 
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored for EN_Randomize')
+    warning('The input time series should be z-scored for EN_Randomize.')
 end
 
 % ------------------------------------------------------------------------------
 %% Check inputs:
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(howtorand)
-    howtorand = 'statdist'; % use statdist by default
+if nargin < 2 || isempty(randomizeHow)
+    randomizeHow = 'statdist'; % use statdist by default
 end
 
+% Don't plot to screen by default:
+doPlot = 0;
 % ------------------------------------------------------------------------------
+
 
 N = length(y); % length of the time series
 
 %  preliminaries
-nstats = 11;
+numStats = 11;
 randp_max = 2; % time series has been randomized to 2 times its length
 rand_inc = 10/100; % this proportion of the time series between calculations
 ncalcs = randp_max/rand_inc;
@@ -92,14 +96,14 @@ calc_ints = floor(randp_max*N/ncalcs);
 calc_pts = (0:calc_ints:randp_max*N);
 ncalcs = length(calc_pts); % some rounding issues inevitable
 
-stats = zeros(ncalcs,nstats); % record a stat at each randomization increment
+stats = zeros(ncalcs,numStats); % record a stat at each randomization increment
 
 y_rand = y; % this vector will be randomized
 
 stats(1,:) = SUB_doyourcalcthing(y,y_rand); % initial condition: apply on itself
 
 for i = 1:N*randp_max
-    switch howtorand
+    switch randomizeHow
         
         case 'statdist'
             % randomize by substituting a random element of the time series by
@@ -120,7 +124,7 @@ for i = 1:N*randp_max
             y_rand(randis(2)) = y_rand(randis(1));
             
         otherwise
-            error('Unknown randomization method ''%s''',howtorand);
+            error('Unknown randomization method ''%s''.',randomizeHow);
     end
     
     if ismember(i,calc_pts)
@@ -130,10 +134,15 @@ for i = 1:N*randp_max
     
 end
 
-% plot(stats,'.-');
-% out=stats;
+if doPlot
+    f = figure('color','w'); box('on');
+    plot(stats,'.-');
+    out = stats;
+end
 
+% ------------------------------------------------------------------------------
 %% Fit to distributions of output
+% ------------------------------------------------------------------------------
 r = (1:size(stats,1))'; % gives an 'x-axis' for fitting
 
 % 1) xcn1: cross correlation at negative 1
@@ -292,6 +301,9 @@ out.swss5_1fexprmse = gof.rmse;
 out.swss5_1diff = abs((stats(end,11)-stats(1,11))/stats(end,11));
 out.swss5_1hp = SUB_gethp(stats(:,11));
 
+
+
+% ------------------------------------------------------------------------------
     function out = SUB_doyourcalcthing(y,y_rand)
         % Cross Correlation to original signal
         xc = xcorr(y,y_rand,1,'coeff');
@@ -318,7 +330,9 @@ out.swss5_1hp = SUB_gethp(stats(:,11));
         
         out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, shen, sampen, statav5, swss5_1];
     end
-
+% ------------------------------------------------------------------------------
+    
+% ------------------------------------------------------------------------------
 	function thehp = SUB_gethp(v)
 		if v(end) > v(1)
 			thehp = find(v > 0.5*(v(end)+v(1)),1,'first');
@@ -326,5 +340,6 @@ out.swss5_1hp = SUB_gethp(stats(:,11));
 			thehp = find(v < 0.5*(v(end)+v(1)),1,'first'); % last?
 		end
 	end
+% ------------------------------------------------------------------------------
 
 end

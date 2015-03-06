@@ -41,11 +41,15 @@
 
 function out = CO_TSTL_amutual2(y,maxtau)
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % length of time series
 s = signal(y); % convert to signal object for TSTOOL
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 maxtau0 = maxtau;
 if nargin < 2 || isempty(maxtau)
     maxtau = ceil(N/4);
@@ -53,28 +57,33 @@ else
     maxtau = min(maxtau,ceil(N/2)); % if given a number, don't go above N/2
 end
 
-%% Run
+% ------------------------------------------------------------------------------
+%% Run the TSTOOL function, amutual2
+% ------------------------------------------------------------------------------
 ami = data(amutual2(s,maxtau));
 
 %% Give output
-% (c.f., CO_TSTL_amutual -- similar routine here)
+% (c.f., CO_TSTL_amutual -- similar code here)
 
-% output the raw values
+% ------------------------------------------------------------------------------
+% Output the raw values:
+% ------------------------------------------------------------------------------
 for i = 1:maxtau0
     if i <= maxtau
-        eval(sprintf('out.ami%u = ami(%u);',i,i));
+        out.(sprintf('ami%u',i)) = ami(i);
     else
-        eval(sprintf('out.ami%u = NaN;',i));
+        out.(sprintf('ami%u',i)) = NaN;
     end
 end
 
-% output statistics
+% ------------------------------------------------------------------------------
+% Output statistics:
+% ------------------------------------------------------------------------------
 lami = length(ami);
 
 % mean mutual information over this lag range
 out.mami = mean(ami);
 out.stdami = std(ami);
-
 
 % first miniimum of mutual information across range
 dami = diff(ami);

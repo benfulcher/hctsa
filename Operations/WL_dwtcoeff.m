@@ -15,6 +15,9 @@
 % level, the level of wavelet decomposition (can be set to 'max' for the maximum
 %               level determined by wmaxlev)
 % 
+%---HISTORY:
+% Ben Fulcher, January 2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -39,13 +42,16 @@
 % ------------------------------------------------------------------------------
 
 function out = WL_dwtcoeff(y,wname,level)
-% Ben Fulcher, January 2010
 
+% ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('wavelet_toolbox')
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
-doplot = 0; % Plot results to figures
+% ------------------------------------------------------------------------------
+doPlot = 0; % Plot results to figures
 N = length(y); % Length of the time series
 
 if nargin < 2 || isempty(wname)
@@ -63,7 +69,9 @@ if maxlevelallowed < level
     fprintf(1,'Chosen level is too large for this wavelet on this signal...\n');
 end
 
+% ------------------------------------------------------------------------------
 %% Perform Wavelet Decomposition
+% ------------------------------------------------------------------------------
 % Computes the following:
 %   (*) Wavelet decomposition vector, c
 %   (*) Bookkeeping vector, l
@@ -92,7 +100,7 @@ end
 % cfd = wcodemat(cfd,nbcol,'row');
 
 %% Do the plotting
-if doplot
+if doPlot
     figure('color','w'); box('on');
     colormap(pink(nbcol));
     image(cfd);
@@ -104,7 +112,9 @@ if doplot
     ylabel('Level');
 end
 
+% ------------------------------------------------------------------------------
 %% Get statistics on coefficients
+% ------------------------------------------------------------------------------
 for k = 1:level
     if k <= maxlevelallowed
         d = detcoef(c,l,k); % detail coefficients at level k

@@ -21,6 +21,9 @@
 % Adapted from example in Matlab Wavelet Toolbox documentation. It's kind of a
 % weird idea to apply the method to generic time series.
 % 
+%---HISTORY:
+% Ben Fulcher, 26/1/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -45,16 +48,21 @@
 % ------------------------------------------------------------------------------
 
 function out = WL_scal2frq(y, wname, amax, delta)
-% Ben Fulcher, 26/1/2010.
 
+% ------------------------------------------------------------------------------
+%% Check that a Wavelet Toolbox license is available:
+% ------------------------------------------------------------------------------
+BF_CheckToolbox('wavelet_toolbox')
+
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 doplot = 0; % plot outputs to figure
 N = length(y); % length of the time series
 
-%% Check that a Wavelet Toolbox license is available:
-BF_CheckToolbox('wavelet_toolbox')
-
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(wname)
     fprintf(1,'Wavelet not specified -- using the default db3 wavelet\n')
     wname = 'db3';
@@ -78,7 +86,9 @@ if maxlevel < amax
     fprintf(1,' changed to maximum level computed with wmaxlev: %u\n',amax);
 end
 
+% ------------------------------------------------------------------------------
 %% Do your thing:
+% ------------------------------------------------------------------------------
 % This example demonstrates that, starting from the periodic function
 % x(t) = 5*sin(5t) + 3*sin(2t) + 2*sin(t), the scal2frq function translates
 % the scales corresponding to the maximum values of the CWT coefficients

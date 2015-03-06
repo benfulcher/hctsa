@@ -51,6 +51,9 @@ case 'signal_toolbox'
 case 'database_toolbox'
     theName = 'Matlab''s Database Toolbox';
     
+case 'robust_toolbox'
+    theName = 'Matlab''s Robust Control Toolbox';
+    
 otherwise
     error('Unknown toolbox ''%s''\n',theToolbox);
 end

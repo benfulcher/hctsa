@@ -33,6 +33,9 @@
 % spread, histogram entropy, and fits to gaussian, exponential, and powerlaw
 % distributions.
 % 
+%---HISTORY:
+% Ben Fulcher, October 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -57,9 +60,10 @@
 % ------------------------------------------------------------------------------
 
 function out = NW_VisibilityGraph(y,meth,maxL)
-% Ben Fulcher, October 2009
 
+% ------------------------------------------------------------------------------
 %% Preliminaries, check inputs
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length
 
 if size(y,2) > size(y,1), y = y'; end % make sure a column vector
@@ -88,11 +92,14 @@ end
 % end
 % % end
 
+
 A = zeros(N); % adjacency matrix
 y = y - min(y); % adjust so that minimum of y is at zero
 yr = flipud(y); % reversed order
 
-%% Calculate the visibility graph
+% ------------------------------------------------------------------------------
+%% Compute the visibility graph:
+% ------------------------------------------------------------------------------
 switch meth
 	case 'norm'
         % normal visibility graph
@@ -138,7 +145,9 @@ end
 if N <= 5000, A = sparse(A); end
 A = A + A'; A(A > 0) = 1;
 
+% ------------------------------------------------------------------------------
 %%% Statistics on the output
+% ------------------------------------------------------------------------------
 % spy(A);
 %% Degree distribution: basic statistics
 k = sum(A); % the degree distribution
@@ -158,7 +167,9 @@ out.ol90 = mean(k(k>=quantile(k,0.05) & k<=quantile(k,0.95)))/mean(k);
 out.olu90 = (mean(k(k>=quantile(k,0.95)))-mean(k))/std(k); % top 5% of points are
                                                        % how far from mean (in std units)?
 
+% ------------------------------------------------------------------------------
 %% Fit distributions to degree distribution
+% ------------------------------------------------------------------------------
 % % (1) Gauss1: Gaussian fit to degree distribution
 dgaussout = DN_SimpleFit(k,'gauss1',range(k)); % range(k)-bin single gaussian fit
 if ~isstruct(dgaussout) && isnan(dgaussout)
@@ -213,8 +224,9 @@ else
 	out.dpowerk_resruns = dpowerout.resruns; % runs test on residuals -- outputs p-value
 end
 
-
-% Using likelihood now:
+% ------------------------------------------------------------------------------
+%% Using likelihood now:
+% ------------------------------------------------------------------------------
 % (1) Gauss
 [muhat, sigmahat] = normfit(k);
 out.gaussmu = muhat;
@@ -236,7 +248,9 @@ out.evparm1 = paramhat(1);
 out.evparm2 = paramhat(2);
 out.evnlogL = evlike(paramhat,k);
 
-%% Entropy of distribution
+% ------------------------------------------------------------------------------
+%% Entropy of distribution:
+% ------------------------------------------------------------------------------
 % for a range of bins
 
 binr = (10:100); % range of nbins to try

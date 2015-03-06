@@ -159,16 +159,18 @@ switch whatDistn
         end
         
     otherwise
-        error('Unknown distribution %s',whatDistn)
+        error('Unknown distribution: %s.',whatDistn)
 end
 % xtmafit=[floor(xtmafit(1)*10)/10 ceil(xtmafit(end)*10)/10];
 
-% Determine smoothed empirical distribution
+% ------------------------------------------------------------------------------
+% Estimate smoothed empirical distribution
+% ------------------------------------------------------------------------------
 [f, xi] = ksdensity(x);
 xi = xi(f > 1E-6); % only keep values greater than 1E-6
 if isempty(xi)
     out = NaN; return
-    % in future should change to the threshold from 1E-6 to some fraction
+    % in future could change to the threshold from 1E-6 to some fraction
     % of the peak value...
 end
 

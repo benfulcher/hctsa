@@ -25,6 +25,9 @@
 % The suggestion to implement this idea was provided by Siddarth Arora.
 % (Siddharth Arora, <arora@maths.ox.ac.uk>)
 % 
+%---HISTORY:
+% Ben Fulcher, 25/2/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -49,8 +52,10 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_embed_PCA(y,tau,m)
-% Ben Fulcher, 25/2/2010
 
+% ------------------------------------------------------------------------------
+% Check Inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
     tau = 'ac'; % embed by first zero-crossing of autocorrelation function
 end
@@ -59,7 +64,7 @@ if nargin < 3 || isempty(m)
     m = 3; % three-dimensional embedding
 end
 
-% embed the signal via time-delay method
+% Embed the signal via time-delay method
 y_embed = BF_embed(y,tau,m,0);
 
 if isnan(y_embed);
@@ -68,16 +73,18 @@ if isnan(y_embed);
     out = NaN; return
 end
 
-% Do the pca using Bioinformatics toolbox routine 'princomp'
+% ------------------------------------------------------------------------------
+% Do the pca using Statistics toolbox function, 'princomp'
+% ------------------------------------------------------------------------------
 [pc, score, latent] = princomp(y_embed);
 
-% perc=round(latent/sum(latent)*1000)/10; % percentage of variance explained (1 d.p.)
-% sum(latent)
-perc = latent/sum(latent); % percentage of variance explained
+perc = latent/sum(latent); % proportion of variance explained
 
 % plot(perc); ylim([0,1]);
 
+% ------------------------------------------------------------------------------
 %% Get statistics off the eigenvalue distribution
+% ------------------------------------------------------------------------------
 csperc = cumsum(perc);
 out.std = std(perc);
 out.range = max(perc) - min(perc);

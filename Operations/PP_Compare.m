@@ -189,7 +189,7 @@ else
     error('Invalid detrending method ''%s''',detrendmeth)
 end
 
-%% quick error checks
+%% Quick error check
 if all(y_d == 0)
     out = NaN; return
 end

@@ -22,6 +22,9 @@
 % input time series... A bit of a strange one, but I'll return some statistics
 % and see what they do.
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -46,9 +49,10 @@
 % ------------------------------------------------------------------------------
 
 function out = TSTL_delaytime(y,maxdelay,past)
-% Ben Fulcher, November 2009
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % length of time series
 try
     s = signal(y); % convert to a signal for TSTOOL
@@ -56,6 +60,9 @@ catch
     error('Error converting time series to signal class using TSTOOL function ''signal''')
 end
 
+% ------------------------------------------------------------------------------
+% Check Inputs:
+% ------------------------------------------------------------------------------
 % (1) Maximum delay, maxdelay
 if nargin < 2 || isempty(maxdelay)
     maxdelay = 0.2; % 1/5 the length of the time series
@@ -69,11 +76,15 @@ if maxdelay < 10,
     fprintf(1,'Maxdelay set to its minimum: delaytime = 10\n')
 end
 
+% ------------------------------------------------------------------------------
 %% Run
+% ------------------------------------------------------------------------------
 tau = data(delaytime(s,maxdelay,past));
 % plot(tau);
 
+% ------------------------------------------------------------------------------
 %% Output Statistics
+% ------------------------------------------------------------------------------
 % tau tends to start low and then rise to some (noisy) value
 out.tau1 = tau(1);
 out.tau2 = tau(2);

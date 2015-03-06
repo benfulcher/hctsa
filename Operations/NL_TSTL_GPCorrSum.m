@@ -130,7 +130,7 @@ elseif length(data(s)) < thwin
 end
 
 % ------------------------------------------------------------------------------
-%% Run
+%% Run TSTOOL function, corrsum or corrsum2
 % ------------------------------------------------------------------------------
 me = []; % error catch
 if dotwo == 1 % use corrsum
@@ -176,7 +176,7 @@ end
 % ------------------------------------------------------------------------------
 rgood = (isfinite(lnCr));
 if ~any(rgood)
-    fprintf(1,'No good outputs obtained from corrsum\n');
+    fprintf(1,'No good outputs obtained from corrsum.\n');
     out = NaN; return
 end
 lnCr = lnCr(rgood);
@@ -192,7 +192,6 @@ out.minlnCr = min(lnCr);
 out.maxlnCr = max(lnCr);
 out.rangelnCr = range(lnCr);
 out.meanlnCr = mean(lnCr);
-
 
 % Fit linear to log-log plot (full range)
 enoughpoints = 1;
@@ -213,7 +212,7 @@ if enoughpoints
     out.robfit_sea2 = stats.se(2);
 
     fit_lnCr = a(2)*lnr+a(1);
-    if doplot,hold on;plot(lnr,fit_lnCr,'r');hold off;end
+    if doplot, hold on; plot(lnr,fit_lnCr,'r'); hold off; end
     res = lnCr-fit_lnCr';
     
     out.robfitresmeanabs = mean(abs(res));

@@ -24,6 +24,9 @@
 % the time-delay embedding, including the minimum and maximum values, the range,
 % the standard deviation, mean, median, and autocorrelation.
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -48,9 +51,10 @@
 % ------------------------------------------------------------------------------
 
 function out = TSTL_localdensity(y,NNR,past,embedparams)
-% Ben Fulcher, November 2009
 
+% ------------------------------------------------------------------------------
 %% Check inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(NNR)
     NNR = 3; % 3 nearest neighbours
 end
@@ -64,23 +68,20 @@ if nargin < 4 || isempty(embedparams)
     fprintf(1,'Using default embedding using autocorrelation and cao\n')
 end
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
+% ------------------------------------------------------------------------------
 s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding failed.')
-    % out = NaN;
-    % return
 end
 
-%% Run the code
-% try
+% ------------------------------------------------------------------------------
+%% Run the TSTOOL function, localdensity
+% ------------------------------------------------------------------------------
 rs = localdensity(s,NNR,past);
-% catch emsg
-%     if strcmp(emsg.message,'Fast nearest neighbour searcher : To many neighbors for each query point are requested')
-%         out = NaN; return
-%     end
-% end
+
 %% Convert output to data
 locden = data(rs);
 if all(locden == 0)

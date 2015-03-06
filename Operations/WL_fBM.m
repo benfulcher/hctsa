@@ -11,6 +11,9 @@
 % 
 %---OUTPUTS: All three outputs of wfbmesti are returned from this function.
 % 
+%---HISTORY:
+% Ben Fulcher 23/1/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -36,9 +39,10 @@
 
 function out = WL_fBM(y)
 % Relies on the Wavelet Toolbox function, wfbmesti
-% Ben Fulcher 23/1/2010
 
+% ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('wavelet_toolbox')
 
 % Parameter estimation of fractional Brownian motion

@@ -22,7 +22,7 @@
 % tau, time delay (can also be 'ac' or 'mi' for first zero-crossing of the
 %          autocorrelation function or the first minimum of the automutual information
 %          function)
-%          
+%
 % NNR, number of nearest neighbours to use
 % 
 % Nref, number of reference points (can also be a fraction; of data length)
@@ -41,6 +41,8 @@
 %---OUTPUTS: statistics on the result, including when the output quantity first
 % passes a given threshold, and the m at which it levels off.
 % 
+%---HISTORY:
+% Ben Fulcher, October 2009
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -65,14 +67,12 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_CaosMethod(y,maxdim,tau,NNR,Nref,justanum)
-% Ben Fulcher, October 2009
 
 % ------------------------------------------------------------------------------
-%% Preliminaries
+%% Check defaults
 % ------------------------------------------------------------------------------
-doplot = 0; % plot outputs to figure
+doPlot = 0; % plot outputs to figure
 N = length(y); % length of time series
-s = signal(y); % convert to signal object for TSTOOL
 
 % (1) Maximum dimension, maxdim
 if nargin < 2 || isempty(maxdim)
@@ -112,8 +112,11 @@ if nargin < 6
 end
 
 % ------------------------------------------------------------------------------
-%% Run:
+%% Do stuff:
 % ------------------------------------------------------------------------------
+% Convert to signal
+s = signal(y); % convert to signal object for TSTOOL
+
 try
     [caoo1, caoo2] = cao(s,maxdim,tau,NNR,Nref);
 catch err
@@ -177,10 +180,11 @@ if ~isempty(justanum) % JUST OUTPUT A SINGLE NUMBER, AN ESTIMATE FOR THE EMBEDDI
         otherwise
             error('Unknown specifier for determining the embedding dimension: ''%s''',justanum{1});
     end
+    
 else % RETURN STATISTICS ON CURVES
     
-    %% Give output
-    if doplot
+    %% Plot to screen:
+    if doPlot
         figure('color','w'); box('on');
         plot(caoo1,'.-b'); hold on; plot(caoo2,'.-k'); hold off
     end
@@ -278,14 +282,14 @@ else % RETURN STATISTICS ON CURVES
 	    out.fmmmax_2 = find(mm2 == max(mm2),1,'first')+1;
 	end
 
-
 end
 
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(boxdimo,'k');
 end
 
+% ------------------------------------------------------------------------------
     function yep = SUB_first(x,ab,th,maxdim)
         % for input vector x, returns first index that it exceeds (ab = 'above') or
         % goes under ('below') the threshold th
@@ -295,7 +299,7 @@ end
             yep = find(x < th,1,'first');
         end
         if isempty(yep), yep = maxdim + 1; end 
-        
     end
+% ------------------------------------------------------------------------------
 
 end

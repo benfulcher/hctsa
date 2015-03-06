@@ -17,6 +17,9 @@
 % 
 %---OUTPUTS: Simple summaries of the outputs from corrdim.
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -41,11 +44,12 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_BoxCorrDim(y,nbins,embedparams)
-% Ben Fulcher, November 2009
 
-doplot = 0; % plot outputs to a figure
+doPlot = 0; % plot outputs to a figure
 
-%% Preliminaries
+% ------------------------------------------------------------------------------
+%% Check inputs, preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
 % (1) Maxmum number of partitions per axis, nbins
@@ -62,7 +66,9 @@ else
     end
 end
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
+% ------------------------------------------------------------------------------
 % convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedparams{1},embedparams{2},1);
 
@@ -70,36 +76,36 @@ if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Time-series embedding to signal class for TSTOOL failed')
 end
 
+% ------------------------------------------------------------------------------
 %% Run
+% ------------------------------------------------------------------------------
 rs = data(corrdim(s,nbins));
+
 % Contains ldr as rows for embedding dimensions 1:m as columns;
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(rs,'k');
 end
 
+% ------------------------------------------------------------------------------
 %% Output Statistics
-% Note: these aren't particularly well motivated.
+% ------------------------------------------------------------------------------
+% These statistics are just from my intuition
+
 m = size(rs,2); % number of embedding dimensions
-ldr = size(rs,1); % I don't really know what this means; = 17
+ldr = size(rs,1); % not completely clear from TSTOOL what ldr represents (= 17)
+
 for i = 2:m
-    meani = mean(rs(:,i));
-    eval(sprintf('out.meand%u = meani;',i))
-    mediani = median(rs(:,i));
-    eval(sprintf('out.mediand%u = mediani;',i))
-    mini = min(rs(:,i));
-    eval(sprintf('out.mind%u = mini;',i))
+    out.(sprintf('meand%u',i)) = mean(rs(:,i));
+    out.(sprintf('mediand%u',i)) = median(rs(:,i));
+    out.(sprintf('mind%u',i)) = min(rs(:,i));
 end
 
 for i = 2:ldr
-    meani = mean(rs(i,:));
-    eval(sprintf('out.meanr%u = meani;',i))
-    mediani = median(rs(i,:));
-    eval(sprintf('out.medianr%u = mediani;',i))
-    mini = min(rs(i,:));
-    eval(sprintf('out.minr%u = mini;',i))
-    meanchi = mean(diff(rs(i,:)));
-    eval(sprintf('out.meanchr%u = meanchi;',i))
+    out.(sprintf('meanr%u',i)) = mean(rs(i,:));
+    out.(sprintf('medianr%u',i)) = median(rs(i,:));
+    out.(sprintf('minr%u',i)) = min(rs(i,:));
+    out.(sprintf('meanchr%u',i)) = mean(diff(rs(i,:)));
 end
 
 out.stdmean = std(mean(rs));
@@ -109,6 +115,5 @@ rsstretch = rs(:);
 out.medianstretch = median(rsstretch);
 out.minstretch = min(rsstretch);
 out.iqrstretch = iqr(rsstretch);
-
 
 end
