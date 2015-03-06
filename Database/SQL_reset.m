@@ -29,7 +29,7 @@ reply = input(['Are you sure you want to DELETE ALL DATA AND RESET EVERYTHING in
 if ~strcmp(reply,'yes')
     fprintf(1,'I didn''t think so... Better to be safe than sorry, hey?\n'); return
 end
-reply = input(sprintf('Zomg be careful, we''re destroying everything. Check again that you want %s to be deleted? (say ''yes'')\n'));
+reply = input(sprintf('Zomg be careful, we''re destroying everything. Check again that you want %s to be deleted? (say ''yes'') ',dbname),'s');
 if ~strcmp(reply,'yes')
     fprintf(1,'I didn''t think so... Better to be safe than sorry, hey?\n'); return
 end
