@@ -15,13 +15,12 @@
 ac_cv_c_const=${ac_cv_c_const=yes}
 ac_cv_func_memcmp_clean=${ac_cv_func_memcmp_clean=yes}
 ac_cv_header_limits_h=${ac_cv_header_limits_h=yes}
-ac_cv_header_malloc_h=${ac_cv_header_malloc_h=yes}
+ac_cv_header_malloc_h=${ac_cv_header_malloc_h=no}
 ac_cv_header_stdc=${ac_cv_header_stdc=yes}
 ac_cv_lib_m_main=${ac_cv_lib_m_main=yes}
 ac_cv_path_install=${ac_cv_path_install='/usr/bin/install -c'}
 ac_cv_prog_AR=${ac_cv_prog_AR=ar}
 ac_cv_prog_CPP=${ac_cv_prog_CPP='cc -E'}
-ac_cv_prog_GP=${ac_cv_prog_GP=gnuplot}
 ac_cv_prog_RANLIB=${ac_cv_prog_RANLIB=ranlib}
 ac_cv_prog_make_make_set=${ac_cv_prog_make_make_set=yes}
 ac_cv_type_size_t=${ac_cv_type_size_t=yes}

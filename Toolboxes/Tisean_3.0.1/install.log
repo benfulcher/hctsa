@@ -1,120 +1,1732 @@
-/bin/sh: c1: command not found
-/bin/sh: c2naive: command not found
-/bin/sh: xc2: command not found
-/bin/sh: c2d: command not found
-/bin/sh: c2g: command not found
-/bin/sh: c2t: command not found
-/bin/sh: pc: command not found
-/bin/sh: predict: command not found
-/bin/sh: stp: command not found
-/bin/sh: lazy: command not found
-/bin/sh: project: command not found
-/bin/sh: addnoise: command not found
-Version: ImageMagick 6.2.9 09/24/06 Q16 http://www.imagemagick.org
-Copyright: Copyright (C) 1999-2006 ImageMagick Studio LLC
 
-Usage: compare [options ...] image reconstruct difference
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
 
-Where options include:
-  -authenticate value  decrypt image with this password
-  -channel type        apply option to select image channels
-  -colorspace type     alternate image colorspace
-  -compress type       type of pixel compression when writing the image
-  -debug events        display copious debugging information
-  -define format:option
-                       define one or more image format options
-  -density geometry    horizontal and vertical density of the image
-  -depth value         image depth
-  -extract geometry    extract area from image
-  -format "string"     output formatted image characteristics
-  -fuzz distance       colors within this distance are considered equal
-  -help                print program options
-  -identify            identify the format and characteristics of the image
-  -interlace type      type of image interlacing scheme
-  -limit type value    pixel cache resource limit
-  -log format          format of debugging information
-  -metric type         measure differences between images with this metric
-  -monitor             monitor progress
-  -profile filename    add, delete, or apply an image profile
-  -quality value       JPEG/MIFF/PNG compression level
-  -quiet               suppress all error or warning messages
-  -quantize colorspace reduce colors in this colorspace
-  -regard-warnings     pay attention to warning messages
-  -sampling-factor geometry
-                       horizontal and vertical sampling factor
-  -set attribute value set an image attribute
-  -size geometry       width and height of image
-  -transparent-color color
-                       transparent color
-  -type type           image type
-  -verbose             print detailed information about the image
-  -version             print version information
-  -virtual-pixel method
-                       virtual pixel access method
-/bin/sh: upo: command not found
-/bin/sh: upoembed: command not found
-/bin/sh: cluster: command not found
-/bin/sh: choose: command not found
-/bin/sh: rms: command not found
-/bin/sh: notch: command not found
-/bin/sh: autocor: command not found
-/bin/sh: spectrum: command not found
-/bin/sh: wiener1: command not found
-/bin/sh: wiener2: command not found
-/bin/sh: surrogates: command not found
-/bin/sh: endtoend: command not found
-/bin/sh: timerev: command not found
-/bin/sh: events: command not found
-/bin/sh: intervals: command not found
-/bin/sh: spikespec: command not found
-/bin/sh: spikeauto: command not found
-/bin/sh: henon: command not found
-/bin/sh: ikeda: command not found
-/bin/sh: lorenz: command not found
-/bin/sh: ar-run: command not found
-/bin/sh: xrecur: command not found
-/bin/sh: randomize_auto_exp_random: command not found
-/bin/sh: randomize_autop_exp_random: command not found
-/bin/sh: randomize_spikeauto_exp_random: command not found
-/bin/sh: randomize_spikespec_exp_event: command not found
-/bin/sh: randomize_uneven_exp_random: command not found
-/bin/sh: poincare: command not found
-/bin/sh: extrema: command not found
-/bin/sh: rescale: command not found
-/bin/sh: recurr: command not found
-/bin/sh: corr: command not found
-/bin/sh: mutual: command not found
-/bin/sh: false_nearest: command not found
-/bin/sh: lyap_r: command not found
-/bin/sh: lyap_k: command not found
-/bin/sh: lyap_spec: command not found
-/bin/sh: d2: command not found
-/bin/sh: av-d2: command not found
-/bin/sh: makenoise: command not found
-/bin/sh: nrlazy: command not found
-/bin/sh: low121: command not found
-/bin/sh: lzo-test: command not found
-/bin/sh: lfo-run: command not found
-/bin/sh: lfo-test: command not found
-/bin/sh: rbf: command not found
-/bin/sh: polynom: command not found
-/bin/sh: polyback: command not found
-/bin/sh: polynomp: command not found
-/bin/sh: polypar: command not found
-/bin/sh: ar-model: command not found
-/bin/sh: mem_spec: command not found
-/bin/sh: pca: command not found
-/bin/sh: ghkss: command not found
-/bin/sh: lfo-ar: command not found
-/bin/sh: xzero: command not found
-/bin/sh: xcor: command not found
-/bin/sh: boxcount: command not found
-/bin/sh: fsle: command not found
-/bin/sh: resample: command not found
-/bin/sh: histogram: command not found
-/bin/sh: nstat_z: command not found
-/bin/sh: sav_gol: command not found
-/bin/sh: delay: command not found
-/bin/sh: lzo-gm: command not found
-/bin/sh: arima-model: command not found
-/bin/sh: lzo-run: command not found
+c1: fixed mass approach to d1 estimation
+
+Usage: c1 -d# -m# -M# -t# -n# [-## -K# -o outfile -I# -l# -x# -c#,# -V# -h] file
+    -d <delay>
+    -m <minimal total embedding dimension>
+    -M <maximal total embedding dimension>
+    -t <minimal time separation>
+    -n <minimal number of center points>
+    -# <resolution, values per octave (2)>
+    -K <maximal number of neighbours (100)>
+    -I <seed for random numbers>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column(s) to be read (1 or file,#)>
+    -o <output file name, just -o means file_c1>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+c2naive: correlation sum, complete naive neighbour search,   univariate data only
+
+Usage: c2naive -d# -M# -t# [-m# -## -o outfile -l# -x# -c# -V# -h] file(s)
+    -d <delay>
+    -M <maximal embedding dimension>
+    -t <minimal time separation>
+    -m <minimal embedding dimension [1]>
+    -# <resolution, values per octave [2]>
+    -l <number of values to be read [all]>
+    -x <number of values to be skipped [0]>
+    -c <column to be read [1 or file,#]>
+    -o <output file name, just -o means file_c2>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+xc2: cross correlation sum of two data sets
+
+Usage: xc2 -M#,# [-d# -n# -N# -## -r# -R# -o outfile -l# -x# -L# -X# -c#[,#] -V# -h] file1 file2
+    -M <# of components, maximal embedding dimension [1,2]>
+    -d <delay [1]>
+    -n <minimal number of center points [1000]>
+    -N <maximal number of pairs [1000]>
+    -# <resolution, values per octave [2]>
+    -r <minimal scale to be probed (as long as pairs found)>
+    -R <maximal scale to be probed [xmax-xmin]>
+    -l <length of time series 1 to be read [all data]>
+    -x <# of initial lines of 1 to be skipped [0]>
+    -L <length of time series 2 to be read [all data]>
+    -X <# of initial lines of 2 to be skipped [0]>
+    -c <columns to be read [1,2,3,.., # of components]>
+    -o <output file name, just -o means file1_file2_xc2>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+c2d: local slopes from c1/c2 correlation sum data
+
+Usage: c2d [-a# -o outfile -V# -h] file
+    -a <average using -#,...,+# [1]>
+    -o <output file name, just -o means file_d>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+c2g: Gaussian kernel correlation sum from c2
+
+Usage: c2g [-o outfile -V# -h] file
+    -o <output file name, just -o means file_g>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+c2t: Takens' estimator from correlation sum data
+
+Usage: c2t [-o outfile -V# -h] file
+    -o <output file name, just -o means file_t>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+pc: embed using principal components
+
+Usage: pc -m# [-d# -q# -o outfile -l# -x# -c# -V# -h] file
+    -m <initial embedding dimension>
+    -d <delay for initial embedding (1)>
+    -q <number of principal components (2)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_pc>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+predict: prediction with locally constant fits
+
+Usage: predict -d# -m# [-r# | -v#] [-s# -o outfile -l# -x# -c# -V# -h] file(s)
+   either -r or -v must be present
+    -d <delay>
+    -m <embedding dimension>
+    -r <absolute radius of neighbourhoods>
+    -v <same as fraction of standard deviation>
+    -s <time steps ahead forecast (one step)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_pred>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+stp: space-time separation plot
+
+Usage: stp  -d# -m# [-## -t# -%# -o outfile -l# -x# -c# -V# -h] file
+    -d <delay>
+    -m <embedding dimension>
+    -# <time resolution (1)>
+    -t <time steps (100, <500)>
+    -% <fraction at wich to create levels (0.05, >0.01)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_stp>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lazy: simple nonlinear noise reduction
+
+Usage: lazy -m# [-r# | -v#] [-i# -o outfile -l# -x# -c# -V# -h] file
+   either -r or -v must be present
+    -m <embedding dimension>
+    -r <absolut radius of neighbourhoods>
+    -v <same as fraction of standard deviation>
+    -i <number of iterations (1)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_lc,  file_lcc (etc.)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+project: nonlinear noise reduction (see also: noise)
+
+Usage: project -m# -q# -r# -k# [-i# -o outfile -l# -x# -c# -V# -h] file
+    -m <embedding dimension>
+    -q <dimension of manifold>
+    -r <radius of neighbourhoods>
+    -k <minimal number of neighbours>
+    -i <number of iterations (1)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_c, file_cc (etc.)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = state of neighbour search
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+addnoise: add Gaussian/uniform noise
+
+Usage: addnoise [-r# | -v#] [-u -0 -o outfile -l# -x# -c# -V# -h] file(s)
+   either -r or -v must be present
+    -r <absolute noise level>
+    -v <same as fraction of standard deviation>
+    -u <add uniform noise (default Gaussian)>
+    -0 <do not read input, just issue random numbers>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_noisy>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+compare: compare time series in RMS sense
+
+Usage: compare [-l# -x# -c#[,#] -V# -h] file
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <columns to be read (1,2)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+upo: locate unstable periodic points
+
+Usage: upo -m# [-r# | -v#] [-p# -w# -W# -a# -s# -n# -o outfile -l# -x# -c# -V# -h] file(s)
+   either -r or -v must be present
+    -m <embedding dimension>
+    -r <absolute kernel bandwidth>
+    -v <same as fraction of standard deviation>
+    -p <period of orbit (1)>
+    -w <minimal separation of trial points (e)>
+    -W <minimal separation of distinct orbits (e)>
+    -a <maximal error of orbit to be plotted (all plotted)>
+    -s <initial separation for stability (e)>
+    -n <number of trials (all points)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_upo_pp>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = print orbits found
+             4 = status after 1000 points
+             8 = status after 100 points
+            16 = status after 10 points
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+upoembed: embed using delay coordinates
+
+Usage: upoembed -d# [-m# -p# -o outfile -l# -x# -c# -V# -h] file
+    -d <delay>
+    -m <embedding dimension (2)>
+    -p <period of orbit (1)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_delay>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+ option -h unrecognized - ignored
+Usage: cluster <options> graphfile
+    -C k - generate no more than k clusters (0)
+       0 : no limit
+    -c k - use clustering method k (0)
+       0 : use modularity
+       1 : use modularity quality
+    -o <outfile> - output file (stdout)
+    -v   - verbose mode
+    -?   - print usage
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+choose: Choose columns and sub-sequences from a file
+
+Usage: choose [-o outfile -l# -x# -m# -c#[,#] -V# -h] file
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -m <number of columns to be read (1)>
+    -c <columns to be read (1)>
+    -o <output file name, just -o means file_select>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+rms: compute mean/standard deviation, normalise
+
+Usage: rms [-a -v -o outfile -l# -x# -c# -V# -h] file(s)
+    -a <subtract average>
+    -v <subtract mean, normalise to unit variance>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_a (if -a), file_v (if -v)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+notch: notch filter
+
+Usage: notch -X# [-f# -w# -o outfile -l# -x# -c# -V# -h] file(s)
+    -X <frequency to be cancelled>
+    -f <sampling rate of data (1)>
+    -w <width of filter (f/100)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_notch>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+autocor: autocorrelation function estimated by FFT
+
+Usage: autocor [-v -p -P -o outfile -l# -x# -c# -V# -h] file(s)
+    -v <give unnormalised autocovariance>
+    -p <assume periodic continuation>
+    -P <assume periodic continuation exactly>
+    -l <number of values to be read [all]>
+    -x <number of values to be skipped [0]>
+    -c <column to be read [1 or file,#]>
+    -o <output file name, just -o means file_co>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+spectrum: Power spectrum by FFT
+
+Usage: spectrum [-f# -w# -o outfile -l# -x# -c# -V# -h] file(s)
+    -f <sampling rate, e.g. in Hz [default 1.]>
+    -w <frequency resolution, e.g. in Hz, [default 1/N]>
+    -l <number of values to be read [all]>
+    -x <number of values to be skipped [0]>
+    -c <column to be read, [1] or file,#>
+    -o <output file name, just -o means file_sp>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+wiener1: Wiener filter (first part)
+
+Usage: wiener1 [-f# -w# -o outfile -l# -x# -c# -V# -h] file
+   then edit file_amp and run: wiener2 [-f# -w# -o outfile -l# -x# -c# -V# -h] file
+    -f <sampling rate (e.g. in Hz, default 1.)>
+    -w <frequency resolution (e.g. in Hz, default 1/N)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_amp>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Note: "-" not accepted as file
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+wiener2: Wiener filter (second part)
+
+Usage: wiener2 [-f# -w# -o outfile1 -O outfile -l# -x# -c# -V# -h] file
+   to provide periodogram, first run: wiener1 [-f# -w# -o outfile -l# -x# -c# -V# -h] file
+   make sure -f# -w# are the same in both wiener calls
+    -f <sampling rate (e.g. in Hz, default 1.)>
+    -w <frequency resolution (e.g. in Hz, default 1/N)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file of wiener1, just -o means file_amp>
+    -O <final output file name, just -O means file_wc>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Note: "-" not accepted as file
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+surrogates: Create Multivariate Surrogate data
+
+Usage: surrogates [-n# -i# -S -I# -o outfile -l# -x# -m# -c#[,#] -V# -h] file
+    -n <number of surrogates (1)>
+    -i <number of iterations (until no change)>
+    -S <make spectrum exact rather than distribution>
+    -I <seed for random numbers>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -m <number of columns to be read (1)>
+    -c <columns to be read (1)>
+    -o <output file name, just -o means file_surr(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = iterations / discrepancy
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+endtoend: Determine end-to-end mismatch
+
+Usage: endtoend [-j# -o outfile -l# -x# -c# -V# -h] file
+    -j <weight given to jump relative to slip (0.5)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -m <number of columns to be read (1)>
+    -c <columns to be read (1)>
+    -o <output file name, just -o means file_end>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+timerev: time reversal asymmetry statistic
+
+Usage: timerev [-d# -l# -x# -c# -V# -h] file(s)
+    -d <delay (1)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+events: interval to event time conversion
+
+Usage: events [-o outfile -l# -x# -c# -V# -h] file(s)
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_st>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+intervals: event time to interval conversion
+
+Usage: intervals [-o outfile -l# -x# -c# -V# -h] file(s)
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_ss>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+spikespec: power spectrum of spike trains
+
+Usage: spikespec [-F# -## -w# -i -o outfile -l# -x# -c# -V# -h] file(s)
+    -F <maximal frequency [2*l / total time]>
+    -# <number of frequencies [F* total time /2]>
+    -w <frequency resolution [0]>
+    -i <input data: intervals rather than times>
+    -l <number of values to be read [all]>
+    -x <number of values to be skipped [0]>
+    -c <column to be read [1 or file,#]>
+    -o <output file name, just -o means file_ss>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+spikeauto: spike train autocorrelation function
+
+Usage: spikeauto -d# -D# [-i -o outfile -l# -x# -c# -V# -h] file(s)
+    -d <time span of one bin>
+    -D <total time spanned>
+    -i <expect intervals rather than times>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_sco>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+henon: Henon map
+
+Usage: henon -l# [-A# -B# -X# -Y# -o outfile -x# -V# -h]
+    -l <number of points x,y (l=0: infinite)>
+    -A <parameter a (1.4)>
+    -B <parameter b (0.3)>
+    -X <initial x>
+    -Y <initial y>
+    -x <number of transients discarded (10000)>
+    -o <output file name, just -o means henon.dat>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+ikeda: Ikeda map
+
+Usage: ikeda -l# [-A# -B# -C# -R# -I# -o outfile -x# -V# -h]
+    -l <number of points x,y (l=0: infinite)>
+    -A <parameter a (0.4)>
+    -B <parameter b (6.0)>
+    -C <parameter c (0.9)>
+    -R <initial Re(z)>
+    -I <initial Im(z)>
+    -x <number of transients discarded (10000)>
+    -o <output file name, just -o means ikeda.dat>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lorenz: integration of the Lorenz system
+
+Usage: lorenz -l# [-f# -r# -R# -S# -B# -o outfile -x# -V# -h]
+    -l <length of trajectory x,y,z>
+    -f <sample points per unit time [100]>
+    -r <absolute noise amplitute [0]>
+    -R <parameter r [28]>
+    -S <parameter sigma [10]>
+    -B <parameter b [8/3]>
+    -x <transient discarded [100 units of time]>
+    -o <output file name, just -o means lorenz.dat>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+ar-run: iterate AR model, e.g. as fitted by ar-model
+
+Usage: ar-run -l# [-p# -I# -o outfile -x# -V# -h] file
+    -l <number of iterations (l=0: infinite)>
+    -p <order of AR-model (default determined from input)>
+    -I <seed for random numbers>
+    -x <number of transients discarded (10000)>
+    -o <output file name, just -o means ar.dat>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+xrecur: cross recurrence plot of two scalar or vector valued data sets
+
+Usage: xrecur [ -m#,# -d# -r# -k# -o outfile -l# -x# -L# -X# -c#[,#] -%# -V#    -n -h] file1 file2
+    -m <# of components, embedding dimension [1,2]>
+    -c <columns to be read [1,2,3,...,# of components]>
+    -d <delay [1]>
+    -r <diameter of the neighbourhood as absolute value [.001]>
+    -k <find the # closest points, starting with diameter r>
+    -% <print only percentage of dots [100], no effect if -k is set>
+    -l <length of time series 1 to be read [all data]>
+    -x <# of initial lines in 1 to be skipped [0]>
+    -s <use only every # delay vector of file 1 [1]>
+    -L <length of time series 2 to be read [all data]>
+    -X <# of initial lines in 2 to be skipped [0]>
+    -S <use only every # delay vector of file 2 [1]>
+    -n <if set: do NOT normalize data to unit interval>
+    -o <output file name, just -o means file1_file2_xrec>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_auto_exp_random: constrained randomization
+
+Usage: randomize_auto_exp_random [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: -D# [-W#]
+    -D <number of lags>
+    -W <average: 0=max(c) 1=|c|/lag 2=(c/lag)**2 3=max(c)/lag (0)>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+   Permutation options: [-X xfile]
+    -X <list of indices excluded from permutation>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_autop_exp_random: constrained randomization
+
+Usage: randomize_autop_exp_random [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: -D# [-W#]
+    -D <number of lags>
+    -W <average: 0=max(c) 1=|c|/lag 2=(c/lag)**2 3=max(c)/lag (0)>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+   Permutation options: [-X xfile]
+    -X <list of indices excluded from permutation>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_spikeauto_exp_random: constrained randomization
+
+Usage: randomize_spikeauto_exp_random [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: -d# -D# [-i -W#]
+    -d <time span of one bin>
+    -D <total time spanned>
+    -i <expect intervals rather than times>
+    -W <average: 0=max(c) 1=|c|/lag 2=(c/lag)**2 (0)>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+   Permutation options: [-X xfile]
+    -X <list of indices excluded from permutation>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_spikespec_exp_event: constrained randomization
+
+Usage: randomize_spikespec_exp_event [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: [-F# -## -w# -i]
+    -W <average: 0=max(s) 1=|s|/f 2=(s/f)**2 3=|s| (0)>
+    -F <maximal frequency (2*l / total time)>
+    -# <number of frequencies (F* total time /2)>
+    -w <frequency resolution (0)>
+    -i <expect intervals rather than times>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+randomize_uneven_exp_random: constrained randomization
+
+Usage: randomize_uneven_exp_random [-n# -u# -I# -o outfile -l# -x# -c# -V# -h] [cost opt.] [cooling opt.] [permutation opt.] file
+    -n <number of surrogates (1)>
+    -u <improvement factor before write (0.9)>
+    -I <seed for random numbers (0)>
+    -l <number of values to be read (all)>
+    -x <number of values to be skipped (0)>
+    -c <column to be read (1 or file,#)>
+    -o <output file name, just -o means file_rnd(_nnn)>
+    -V <verbosity level (0 = only fatal errors)>
+    -h <show this message>
+
+   Verbosity levels (add what you want):
+             1 = input/output
+             2 = current cost if improved
+             4 = cost mismatch
+             8 = temperature etc. at cooling
+            16 = verbose cost if improved
+            32 = verbose cost mismatch
+
+   Cost function options: -d# -D# [-W#]
+    -d <time span of one bin>
+    -D <total time spanned>
+    -W <average: 0=max(c) 1=|c|/lag 2=(c/lag)**2 (0)>
+
+   Cooling options: [-T# -a# -S# -s# -z# -C#]
+    -T <initial temperature (auto)>
+    -a <cooling factor (auto)>
+    -S <total steps before cooling (20000)>
+    -s <successful steps before cooling (2000)>
+    -z <minimal successful steps before cooling (200)>
+    -C <goal value of cost function (0.0)>
+
+   Permutation options: [-X xfile]
+    -X <list of indices excluded from permutation>
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+poincare: Make a Poincare section
+
+ Usage: poincare [Options]
+
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of points to be used [Default: whole file]
+	-x #of lines to be ignored [Default: 0]
+	-c column to read  [Default: 1]
+	-m embedding dimension [Default: 2]
+	-d delay [Default: 1]
+	-q component to cut [Default: last]
+	-C direction of the cut (0: from below,1: from above)
+		[Default: 0]
+	-a set crossing at [Default: average of data]
+	-o outfile [Default: 'datafile'.poin]
+	-V verbosity level [Default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h  show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+extrema: Determines the maxima (minima) of a possibly multivariate time series
+
+Usage: extrema [options]
+Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of points to use [Default: whole file]
+	-x # of lines to be ignored [Default: 0]
+	-m dimension (# of components) [Default: 1]
+	-c columns to read [Default: 1,...,# of components]
+	-w which component to maxi(mini)mize [Default: 1]
+	-z determine minima instead of maxima [Default: maxima]
+	-t minimal required time between two extrema [Default: 0.0]
+	-o output file name [Default: 'datafile'.ext, without -o: stdout]
+	-V verbosity level [Default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+rescale: Rescales the data
+
+ Usage: rescale [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to ignore [default: 0]
+	-m # of components to be read [default: 1]
+	-c columns to read [default: 1,...,# of components]
+	-z minimum of the new series [default: 0.0]
+	-Z maximum of the new series [default: 1.0]
+	-a create a series with average value equals 0
+	-v create a series with variance 1
+	-o output file name [default: 'datafile'.res']
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+recurr: This programs makes a recurrence plot for the data.
+
+Usage: recurr [options]
+Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [Default: whole file]
+	-x # of lines to be ignored [Default: 0]
+	-c columns to read [Default: 1]
+	-m # of components,embedding dimension [Default: 1,2]
+	-d delay [Default: 1]
+	-r size of the neighbourhood [Default: (data interval)/1000]
+	-% print only a percentage of points found [Default:  100.0]
+	-o output file name [Default: 'datafile'.rec
+		without -o: stdout]
+	-V verbosity level [Default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+corr: Estimates the autocorrelations of a data set
+
+ Usage: corr [Options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l length [default is whole file]
+	-x # of lines to be ignored [default 0]
+	-c column to read [default is 1]
+	-D corrlength  [default is 100]
+	-n don't normalize to the variance of the data [not set]
+	-o output_file  [default is 'datafile'.cor; no -o means stdout]
+	-V verbosity level [default is 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+mutual: Estimates the time delayed mutual information
+	of the data set
+
+ Usage: mutual [Options]
+
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of points to be used [Default is all]
+	-x # of lines to be ignored [Default is 0]
+	-c column to read  [Default is 1]
+	-b # of boxes [Default is 16]
+	-D max. time delay [Default is 20]
+	-o output file [-o without name means 'datafile'.mut;
+		No -o means write to stdout]
+	-V verbosity level [Default is 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h  show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+false_nearest: Determines the fraction of false nearest neighbors.
+
+ Usage: false_nearest [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data [default: whole file]
+	-x # of lines to ignore [default: 0]
+	-c columns to read [default: 1]
+	-m min. test embedding dimension [default: 1]
+	-M # of components,max. emb. dim. [default: 1,5]
+	-d delay [default: 1]
+	-f escape factor [default: 2.00]
+	-t theiler window [default: 0]
+	-o output file [default: 'datafile'.fnn; without -o stdout]
+	-V verbosity level [default: 3]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ information about the current state
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lyap_r: Estimates the maximal Lyapunov exponent; Rosenstein et al.
+
+ Usage: lyap_r [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of datapoints [default is whole file]
+	-x # of lines to be ignored [default is 0]
+	-c column to read[default 1]
+	-m embedding dimension [default 2]
+	-d delay  [default 1]
+	-t time window to omit [default 0]
+	-r epsilon size to start with [default (data interval)/1000]
+	-s # of iterations [default 10]
+	-o name of output file [default 'datafile'.ros]
+	-V verbosity level [default 3]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ give more detailed information about the length scales
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lyap_k: Estimates the maximal Lyapunov exponent using the Kantz
+	algorithm
+
+ Usage: lyap_k [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data [default: whole file]
+	-x # of lines to be ignored [default: 0]
+	-c column to read [default: 1]
+	-M maxdim [default: 2]
+	-m mindim [default: 2]
+	-d delay [default: 1]
+	-r mineps [default: (data interval)/1000]
+	-R maxeps [default: (data interval)/100]
+	-# # of eps [default: 5]
+	-n # of reference points [default: # of data]
+	-s # of iterations [default: 50]
+	-t time window [default: 0]
+	-o outfile [default: 'datafile'.lyap]
+	-V verbosity level [default: 3]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ plus statistics'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lyap_spec: Estimates the spectrum of Lyapunov exponents using the
+	method of Sano and Sawada.
+
+ Usage: lyap_spec [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of datapoints [default is whole file]
+	-x # of lines to be ignored [default is 0]
+	-c column to read[default 1]
+	-m # of components,embedding dimension [default 1,2]
+	-r epsilon size to start with [default (data interval)/1000]
+	-f factor to increase epsilon [default: 1.2]
+	-k # of neighbors to use [default: 30]
+	-n # of iterations [default: length]
+	-I invert the time series [default: no]
+	-o name of output file [default 'datafile'.lyaps]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+d2: Estimates the correlation sum, -dimension and -entropy
+
+  Usage: d2 [options]
+  Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l datapoints [default is whole file]
+	-x exclude # points [default 0]
+	-d delay  [default 1]
+	-M # of components, max. embedding dim. [default 1,10]
+	-c columns [default 1,...,# of components]
+	-t theiler-window [default 0]
+	-R max-epsilon [default: max data interval]
+	-r min-epsilon [default: (max data interval)/1000]
+	-# #-of-epsilons [default 100]
+	-N max-#-of-pairs (0 means all) [default 1000]
+	-E use rescaled data [default: not rescaled]
+ 	-o outfiles [without exts.! default datafile[.d2][.h2][.stat][.c2]]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ output message each time output is done
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+av-d2: Smoothes the output of the d2 program
+
+Usage: av-d2 [options]
+Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+Stdin does NOT work.
+	-m dimension to start with [Default: 1]
+	-M dimension to end with [Default: whole file]
+	-a n average over (2n+1) values [Default: 1]
+	-E use rescaled data for the length scales
+		[Default: use units of data]
+	-o name of output file [Default: stdout,
+		-o without value means 'datafile'.av]
+	-V verbosity level [Default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+makenoise: Adds noise to a time series or just creates random numbers
+
+ Usage: makenoise [Options]
+
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of points to be used [Default: whole file]
+	-x # of lines to be ignored [Default: 0]
+	-m # of columns to read [Default: 1]
+	-c column(s) to read  [Default: 1]
+	-% noiselevel in % [Default:  5.0e+00%]
+	-r absolute noise level (or absolute variance in case
+		of gaussian noise) [Default: not set]
+	-g (use gaussian noise)     [Default: uniform]
+	-I seed for the rnd-generator (If seed=0, the time
+		command is used to set the seed) [Default: fixed]
+	-0 do not read input, just generate random numbers
+		(needs -l and -r) [Default: not set]
+	-o outfile [Without argument 'datafile'.noi; Without -o stdout is used]
+	-V verbosity level [Default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+  -h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+nrlazy: Performs simple noise reduction.
+
+ Usage: nrlazy [Options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to be ignored [default: 0]
+	-c column to read [default: 1]
+	-m no. of comp.,embedding dim. [default: 1,5]
+	-d delay [default: 1]
+	-i iterations [default: 1]
+	-r neighborhoud size [default: (interval of data)/1000]
+	-v neighborhoud size (in units of the std. dev. of the data 
+		(overwrites -r) [default: not set]
+	-o output file name [Default: 'datafile'.laz.n,
+		where n is the number of the last iteration,
+		without -o the last iteration is written to stdout.]
+	-V verbosity level [Default: 3]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ write output of all iterations to files'
+		4='+ write the number of neighbors found for each point
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+low121: Simple lowpass filter in the time domain
+
+Usage: low121 [options]
+Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of points to use [Default: whole file]
+	-x # of lines to be ignored [Default: 0]
+	-c column to read [Default: 1]
+	-i # of iterations [Default: 1]
+	-V verbosity level [Default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ print each iteration to a separate file
+	-o output file name(s) [Default: 'datafile'.low.n,
+		where n is the number of the iteration.
+		without -o the last iteration is written to stdout.]
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lzo-test: Estimates the average forecast error for a zeroth
+	order fit from a multidimensional time series
+
+ Usage: lzo-test [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to be ignored [default: 0]
+	-c columns to read [default: 1,...,X]
+	-m dimension and embedding dimension [default: 1,2]
+	-d delay [default: 1]
+	-n # of reference points [default: length]
+	-S temporal distance between the reference points [default: 1]
+	-k minimal number of neighbors for the fit [default: 30]
+	-r neighborhoud size to start with [default: (data interval)/1000]
+	-f factor to increase size [default: 1.2]
+	-s steps to forecast [default: 1]
+	-C width of causality window [default: steps]
+	-o output file [default: 'datafile.zer', without -o: stdout]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='give individual forecast errors for the max step'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lfo-run: Makes a local linear fit for multivariate data
+and iterates a trajectory
+
+ Usage: lfo-run [Options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to be used [default whole file]
+	-x # of lines to be ignored [default 0]
+	-c column [default 1,...,# of components]
+	-m #of components,embedding dimension [default 1,2]
+	-d delay for the embedding [default 1]
+	-L # of iterations [default 1000]
+	-k # of neighbors  [default 30]
+	-r size of initial neighborhood [ default (data interval)/1000]
+	-f factor to increase size [default 1.2]
+	-0 perfom a zeroth order fit [default not set]
+	-o output file [default 'datafile'.cast; no -o means write to stdout]
+	-V verbosity level [default 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h  show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lfo-test: Estimates the average forecast error of a local
+	linear fit
+
+ Usage: lfo-test [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to be ignored [default: 0]
+	-c columns to read [default: 1]
+	-m # of components, embedding dimension [default: 1,2]
+	-d delay [default: 1]
+	-n iterations [default: length]
+	-k minimal number of neighbors for the fit [default: 30]
+	-r neighborhoud size to start with [default: (data interval)/1000]
+	-f factor to increase size [default: 1.2]
+	-s steps to forecast [default: 1]
+	-C width of causality window [default: steps]
+	-o output file [default 'datafile'.fce no -o means write to stdout]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ print indiviual forecast errors'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+rbf: Fits a RBF-model to the data
+
+ Usage: rbf [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: all from file]
+	-x # of lines to be ignored [default: 0]
+	-c column to read [default: 1]
+	-m embedding dimension [default: 2]
+	-d delay [default: 1]
+	-p number of centers [default: 10]
+	-X deactivate drift [default: activated]
+	-s steps to forecast [default: 1]
+	-n # of points for insample [default: # of data]
+	-L steps to cast [default: none]
+	-o output file name [default: 'datafile'.rbf]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+polynom: Fits a polynomial to the data
+
+ Usage: polynom [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to be ignored [default: 0]
+	-c column to read [default: 1]
+	-m embedding dimension [default: 2]
+	-d delay [default: 1]
+	-p order of the polynomial [default: 2]
+	-n # of points for insample [default: # of data]
+	-L steps to cast [default: none]
+	-o output file name [default: 'datafile'.pol]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+polyback: Does a backward elimination for a polynomial
+
+Usage: polyback [Options]
+Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to ignore [default: 0]
+	-c column to read [default: 1]
+	-m embedding dimension [default: 2]
+	-d delay [default: 1]
+	-n insample data [default: all]
+	-s steps to forecast [default: 1]
+	-# reduce down to # terms [default: 1]
+	-p name of parameter file [default: parameter.pol]
+	-o output file name [default: 'datafile'.pbe]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+polynomp: Fits a polynomial to the data.
+
+Usage: polynomp [Options]
+Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to ignore [default: 0]
+	-c column to read [default: 1]
+	-m embedding dimension [default: 2]
+	-d delay [default: 1]
+	-n insample data [default: all]
+	-L length of forecasted series [default: 1000]
+	-p name of parameter file [default: parameter.pol]
+	-o output file name [default: 'datafile'.pbf]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+polypar: Creates a parameter file containing all terms
+	for a polynomial
+
+ Usage: polypar [Options]
+ Options:
+	-m embedding dimension [Default: 2]
+	-p order of the polynomial [Default: 3]
+	-o parameter file [Default: parameter.pol]
+	-V verbosity level [Default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+ar-model: Fits an multivariate AR model to the data and gives the coefficients
+	and the residues (or an iterated model)
+
+ Usage: ar-model [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l length of file [default is whole file]
+	-x # of lines to be ignored [default is 0]
+	-m dimension [default is 1]
+	-c columns to read [default is 1,...,dimension]
+	-p #order of AR-Fit [default is 1]
+	-s length of iterated model [default no iteration]
+	-o output file name [default is 'datafile'.ar]
+	-V verbosity level [default is 1]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ print residuals though iterating a model'
+		4='+ print original data plus residuals'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+mem_spec: Estimates the power spectrum of the data
+
+ Usage: mem_spec [Options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l length of file [default is whole file]
+	-x # of lines to be ignored [default is 0]
+	-c column to read [default is 1]
+	-p number of poles [default is 128 or file length]
+	-P number of frequences out [default is 2000]
+	-f sampling rate in Hz [default is 1]
+	-o outfile [default is 'datafile'.spec]
+	-V verbosity level [default is 1]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ print the ar coefficients too'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+pca: Performs a global PCA
+
+ Usage: pca [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [Default: whole file]
+	-x # of lines to be ignore [Default: 0]
+	-c columns to read [Default: 2]
+	-m columns,embedding dim. to use [Default: 2,1]
+	-d delay to use [Default: 1]
+	-q projection dimension [Default: no projection]
+	-W # what to write: [Default: 0]
+		0 write eigenvalues only
+		1 write eigenvectors
+		2 write (projected) pca components
+		3 write projected data
+	-o output file name 
+		[Default: stdout; -o without value means 'datafile'.pca]
+	-V verbosity level [Default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+ghkss: Multivariate noise reduction using the GHKSS algorithm
+
+Usage: ghkss [options]
+Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [Default: whole file]
+	-x # of lines to be ignored [Default: 0]
+	-c column to read [Default: 1,..,# of components]
+	-m # of components,embedding dimension [Default: 1,5]
+	-d delay [Default: 1]
+	-q dimension to project to [Default: 2]
+	-k minimal number of neighbours [Default: 50]
+	-r minimal neighbourhood size 
+		[Default: (interval of data)/1000]
+	-i # of iterations [Default: 1]
+	-2 use euklidean metric [Default: non euklidean]
+	-o name of output file 
+		[Default: 'datafile'.opt.n, where n is the iteration.
+		 If no -o is given, the last iteration is also written to stdout]
+	-V verbosity level [Default: 7]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ average correction and trend'
+		4='+ how many points for which epsilon'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lfo-ar: Estimates the average forecast error for a local
+	linear fit as a function of the neighborhood size.
+
+ Usage: lfo-ar [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to be ignored [default: 0]
+	-c columns to read [default: 1,...,# of components]
+	-m # of components,embedding dimension [default: 1,2]
+	-d delay [default: 1]
+	-i iterations [default: length]
+	-r neighborhood size to start with [default: (interval of data)/1000)]
+	-R neighborhood size to end with [default: interval of data]
+	-f factor to increase size [default: 1.2]
+	-s steps to forecast [default: 1]
+	-C width of causality window [default: steps]
+	-o output file name [default: 'datafile.ll']
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+xzero: Estimates the average cross forecast error for a zeroth
+	order fit between two series given as two columns of one file.
+
+ Usage: xzero [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to be ignored [default: 0]
+	-c columns to read [default: 1,2]
+	-m embedding dimension [default: 3]
+	-d delay [default: 1]
+	-n # of reference points [default: length]
+	-k minimal number of neighbors for the fit [default: 30]
+	-r neighborhoud size to start with [default: (data interval)/1000]
+	-f factor to increase size [default: 1.2]
+	-s steps to forecast [default: 1]
+	-o output file [default: 'datafile.cze', without -o: stdout]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+xcor: Estimates the crosscorrelations of two data sets
+	given as two columns of one file.
+
+ Usage: xcor [Options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l length [default is whole file]
+	-x # of lines to be ignored [default 0]
+	-c which columns (separated by commas) [default is 1,2]
+	-D corrlength  [default is 100]
+	-o output_file  [default is 'datafile'.crc; no -o means stdout]
+	-V verbosity level [default is 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+boxcount: Estimates the Renyi entropy of Qth order
+	using a partition instead of a covering.
+
+Usage: boxcount [Options]
+Options:
+	-l # of datapoints [Default: whole file]
+	-x # of lines to ignore [Default: 0]
+	-M # of columns,maximal embedding dimension [Default: 1,10]
+	-c columns to read  [Default: 1,...,#of compon.]
+	-d delay [Default: 1]
+	-Q order of the Renyi entropy [Default: 2.0]
+	-r minimal epsilon [Default: (data interval)/1000]
+	-R maximal epsilon [Default: data interval]
+	-# # of epsilons to use [Default: 20]
+	-o output file name [Default: 'datafile'.box]
+	-V verbosity level [Default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+fsle: Estimates the finite size Lyapunov exponent; Vulpiani et al.
+
+ Usage: fsle [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of datapoints [default is whole file]
+	-x # of lines to be ignored [default is 0]
+	-c column to read[default 1]
+	-m embedding dimension [default 2]
+	-d delay  [default 1]
+	-t time window to omit [default 0]
+	-r epsilon size to start with [default (std. dev. of data)/1000]
+	-o name of output file [default 'datafile'.fsl ,without -o: stdout]
+	-V verbosity level [default 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+resample: Resample the data
+
+ Usage: resample [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l length of file [default is whole file]
+	-x # of lines to be ignored [default is 0]
+	-c column to read [default is 1]
+	-s new sampling time (in units of the old one) [default is 0.500000]
+	-p order of the interpolation [default is 4]
+	-o output file name [default is 'datafile'.rs]
+	-V verbosity level [default is 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+histogram: Makes a histogram of the data
+
+ Usage: histogram [options]
+ options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read.  Just - also means stdin
+	-l length of file [default whole file]
+	-x # of lines to ignore [default 0]
+	-c column to read [default 1]
+	-b # of intervals [default 50]
+	-o output file [default 'datafile'.dat ; If no -o is given: stdout]
+	-V verbosity level [default 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+nstat_z: Tests for nonstationarity by means of the average
+	forecast error for a zeroth order fit
+
+ Usage: nstat_z -# [other options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to be ignored [default: 0]
+	-c column to read [default: 1]
+	-m embedding dimension [default: 3]
+	-d delay [default: 1]
+	-# # of pieces [no default]
+	-1 which pieces for the first window [default: 1-pieces]
+	-2 which pieces for the second window [default: 1-pieces]
+	-n # of reference points in the window [default: all]
+	-k minimal number of neighbors for the fit [default: 30]
+	-r neighborhoud size to start with [default: (data interval)/1000]
+	-f factor to increase size [default: 1.2]
+	-s steps to forecast [default: 1]
+	-C width of causality window [default: steps]
+	-o output file [default: 'datafile.nsz', without -o: stdout]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+	 The -# option has to be set
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+sav_gol: Savitzky-Golay filter: Filters the data or estimates
+	filtered derivatives, respectively.
+
+  Usage: sav_gol [options]
+  Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l datapoints [default is whole file]
+	-x exclude # points [default 0]
+	-c columns [default 1]
+	-m no. of components [default 1]
+	-n nb,nf [default 2,2]
+	-p power of the polynomial [default 2]
+	-D order of the estimated derivative [default 0]
+ 	-o outfile [default 'datafile'.sg; Without -o data is written to stdout]
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+delay: Produces delay vectors
+
+
+Usage: delay [options]
+Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data [default: whole file]
+	-x # of rows to ignore [default: 0]
+	-M num. of columns to read [default: 1]
+	-c columns to read [default: 1,...,M]
+	-m dimension [default: 2]
+	-F format of the delay vector (see man page)
+	-d delay [default: 1]
+	-D multi delay list (see man page)
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-o output file [default: 'datafile'.del, without -o: stdout]
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lzo-gm: Estimates the average forecast error for a local
+	constant fit as a function of the neighborhood size.
+
+ Usage: lzo-gm [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to use [default: whole file]
+	-x # of lines to be ignored [default: 0]
+	-c columns to read [default: 1,...,# of components]
+	-m # of components,embedding dimension [default: 1,2]
+	-d delay [default: 1]
+	-i iterations [default: length]
+	-r neighborhood size to start with [default: (interval of data)/1000)]
+	-R neighborhood size to end with [default: interval of data]
+	-f factor to increase size [default: 1.2]
+	-s steps to forecast [default: 1]
+	-C width of causality window [default: steps]
+	-o output file name [default: 'datafile.lm']
+	-V verbosity level [default: 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h show these options
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+arima-model: Fits an multivariate ARIMA model to the data and gives the coefficients
+	and the residues (or an iterated model)
+
+ Usage: arima-model [options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l length of file [default is whole file]
+	-x # of lines to be ignored [default is 0]
+	-m dimension [default is 1]
+	-c columns to read [default is 1,...,dimension]
+	-p order of initial AR-Fit [default is 10]
+	-P order of AR,I,MA-Fit [default is 0,0,0]
+	-I # of arima iterations [default is 50]
+	-e accuracy of convergence [default is 0.001000]
+	-s length of iterated model [default no iteration]
+	-o output file name [default is 'datafile'.ari]
+	-V verbosity level [default is 1]
+		0='only panic messages'
+		1='+ input/output messages'
+		2='+ print residuals though iterating a model'
+		4='+ print original data plus residuals'
+	-h show these options
+
+
+TISEAN 3.0.1 (C) R. Hegger, H. Kantz, T. Schreiber (1998-2007)
+
+lzo-run: Makes a local zeroth order forecast for multivariate data
+and iterates a trajectory
+
+ Usage: lzo-run [Options]
+ Options:
+Everything not being a valid option will be interpreted as a possible datafile.
+If no datafile is given stdin is read. Just - also means stdin
+	-l # of data to be used [default whole file]
+	-x # of lines to be ignored [default 0]
+	-c column [default 1,...,# of components]
+	-m #of components,embedding dimension [default 1,2]
+	-d delay for the embedding [default 1]
+	-L # of iterations [default 1000]
+	-k # of neighbors  [default 50]
+	-K fix # of neighbors  [default no]
+	-% # variance of noise [default 10.0]
+	-I seed for the rnd-generator (If seed=0, the time
+		command is used to set the seed) [Default: fixed]
+	-r size of initial neighborhood [ default (data interval)/1000]
+	-f factor to increase size [default 1.2]
+	-o output file [default 'datafile'.lzr; no -o means write to stdout]
+	-V verbosity level [default 1]
+		0='only panic messages'
+		1='+ input/output messages'
+	-h  show these options

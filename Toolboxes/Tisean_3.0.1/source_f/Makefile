@@ -1,7 +1,7 @@
 # Generated automatically from Makefile.in by configure.
 SHELL = /bin/sh
 
-prefix = /Users/ben
+prefix = /Users/benfulcher
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 
