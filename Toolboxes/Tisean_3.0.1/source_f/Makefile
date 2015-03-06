@@ -5,15 +5,15 @@ prefix = /Users/benfulcher
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 
-FC = gfortran
-FFLAGS = -O
+FC = 
+FFLAGS = 
 LDFLAGS = 
 AR = ar
 ARFLAGS = r
 RANLIB = ranlib
 INSTALL = /usr/bin/install -c
 LOADLIBES = libtsa.a libsla.a
-ERRUNIT = 0
+ERRUNIT = 
 
 # list of executables we want to produce
    BINS = c1 c2naive xc2 \
