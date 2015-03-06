@@ -64,10 +64,6 @@ addpath(fullfile(pwd,'Toolboxes','Land_and_Elias'));
 fprintf(1,', TS_Research\n')
 addpath(fullfile(pwd,'Toolboxes','TS_Research'));
 
-% Bill Davidson's hurst exponent code
-fprintf(1,'Bill Davidson');
-addpath(fullfile(pwd,'Toolboxes','Bill_Davidson'));
-
 % Physionet
 fprintf(1,', Physionet');
 addpath(fullfile(pwd,'Toolboxes','Physionet'));

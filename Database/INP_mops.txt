@@ -650,7 +650,6 @@ SY_SlidingWindow(y,'AC1','ent',10,2)		SY_SlidingWindow_ac1_ent10_2
 SY_SlidingWindow(y,'AC1','ent',10,10)		SY_SlidingWindow_ac1_ent10_10
 SY_LinearTrend(x)	SY_LinearTrend
 SC_fastdfa(y)	    SC_fastdfa
-SC_HurstExponent(y)	ST_hurst_BillDavidson
 SY_StdNthDer(y,1)	SY_StdNthDer_1
 SY_StdNthDer(y,2)	SY_StdNthDer_2
 SY_StdNthDer(y,3)	SY_StdNthDer_3
@@ -937,7 +936,6 @@ HT_HypothesisTest(y,'runstest')	HT_HypothesisTest_runstest
 HT_HypothesisTest(x,'runstest')	HT_HypothesisTest_runstestraw
 HT_HypothesisTest(y,'lbq')			HT_HypothesisTest_lbqtest
 HT_HypothesisTest(x,'lbq')			HT_HypothesisTest_lbqtestraw
-HT_HypothesisTest(y,'vartest')		HT_HypothesisTest_vartest
 HT_HypothesisTest(y,'ztest')		HT_HypothesisTest_ztest
 HT_HypothesisTest(y,'signrank')	HT_HypothesisTest_signrank
 HT_HypothesisTest(x,'jbtest')		HT_HypothesisTest_jbtest
@@ -1144,11 +1142,11 @@ CO_Embed2_Shapes(y,'tau','circle',0.1)	CO_Embed2_Shapes_tau_circle_01
 CO_Embed2_Shapes(y,'tau','circle',1)	CO_Embed2_Shapes_tau_circle_1
 NW_VisibilityGraph(y,'horiz')	NW_VisibilityGraph_horiz
 SY_DynWin(y,10)	SY_DynWin10
-SY_SpreadRandomLocal(y,'ac2')	SY_SpreadRandomLocal_ac2
-SY_SpreadRandomLocal(y,'ac5')	SY_SpreadRandomLocal_ac5
-SY_SpreadRandomLocal(y,50)	SY_SpreadRandomLocal_50
-SY_SpreadRandomLocal(y,100)	SY_SpreadRandomLocal_100
-SY_SpreadRandomLocal(y,200)	SY_SpreadRandomLocal_200
+SY_SpreadRandomLocal(y,'ac2',100)	SY_SpreadRandomLocal_ac2_100
+SY_SpreadRandomLocal(y,'ac5',100)	SY_SpreadRandomLocal_ac5_100
+SY_SpreadRandomLocal(y,50,100)	SY_SpreadRandomLocal_50_100
+SY_SpreadRandomLocal(y,100,100)	SY_SpreadRandomLocal_100_100
+SY_SpreadRandomLocal(y,200,100)	SY_SpreadRandomLocal_200_100
 SY_DriftingMean(y,'fix',20)	SY_DriftingMean20
 SY_DriftingMean(y,'fix',50)	SY_DriftingMean50
 SY_DriftingMean(y,'fix',100)	SY_DriftingMean100
@@ -1356,14 +1354,14 @@ NL_TSTL_PoincareSection(y,'max',{'ac',3})	NL_TSTL_PoincareSection_max_ac
 NL_TSTL_PoincareSection(y,'max',{1,3})	NL_TSTL_PoincareSection_max_1
 NL_TSTL_LargestLyap(y,0.5,0.1,0.01,3,{'mi','cao'})	NL_TSTL_LargestLyap_05_01_001_3_mi_cao
 NL_TSTL_LargestLyap(y,-1,0.1,0.01,3,{1,4})	NL_TSTL_LargestLyap_n1_01_001_3_1_4
-TSTL_predict(y,1,1,2,0,{1,5})	TSTL_predict_y_1_1_2_0_1_5
-TSTL_predict(y,1,1,2,0,{1,10})	TSTL_predict_y_1_1_2_0_1_10
-TSTL_predict(y,1,1,2,0,{1,'cao'})	TSTL_predict_y_1_1_2_0_1_cao
-TSTL_predict(y,1,1,2,0,{'mi','cao'})	TSTL_predict_y_1_1_2_0_mi_cao
-TSTL_predict(y,1,1,2,0,{'ac','cao'})	TSTL_predict_y_1_1_2_0_ac_cao
-TSTL_predict(y,1,1,2,1,{1,10})	TSTL_predict_y_1_1_2_1_1_10
-TSTL_predict(y,1,1,2,2,{1,10})	TSTL_predict_y_1_1_2_2_1_10
-TSTL_predict(y,1,1,2,3,{1,10})	TSTL_predict_y_1_1_2_3_1_10
+# TSTL_predict(y,1,1,2,0,{1,5})    TSTL_predict_y_1_1_2_0_1_5
+# TSTL_predict(y,1,1,2,0,{1,10})    TSTL_predict_y_1_1_2_0_1_10
+# TSTL_predict(y,1,1,2,0,{1,'cao'})    TSTL_predict_y_1_1_2_0_1_cao
+# TSTL_predict(y,1,1,2,0,{'mi','cao'})    TSTL_predict_y_1_1_2_0_mi_cao
+# TSTL_predict(y,1,1,2,0,{'ac','cao'})    TSTL_predict_y_1_1_2_0_ac_cao
+# TSTL_predict(y,1,1,2,1,{1,10})    TSTL_predict_y_1_1_2_1_1_10
+# TSTL_predict(y,1,1,2,2,{1,10})    TSTL_predict_y_1_1_2_2_1_10
+# TSTL_predict(y,1,1,2,3,{1,10})    TSTL_predict_y_1_1_2_3_1_10
 NL_TSTL_ReturnTime(y,10,1,1,-1,{'ac',8})	NL_TSTL_ReturnTime_10_1_1_n1_ac_8
 NL_TSTL_ReturnTime(y,5,1,40,-1,{1,8})	NL_TSTL_ReturnTime_5_1_40_n1_1_8
 NL_TSTL_ReturnTime(y,0.05,1,0.05,-1,{1,3})	NL_TSTL_ReturnTime_005_1_005_n1_1_3
@@ -1486,7 +1484,7 @@ MF_hmm_fit(y,0.7,3)	MF_hmm_07_3
 MF_hmm_fit(y,0.8,2)	MF_hmm_08_2
 MF_hmm_CompareNStates(y,0.6,2:4)	MF_hmm_CompareNStates_06_24
 MD_hrv_classic(y)	MD_hrv_classic
-CP_ML_StepDetect(y,'kv')	CP_ML_StepDetect_kv
+# CP_ML_StepDetect(y,'kv')    CP_ML_StepDetect_kv
 CP_ML_StepDetect(y,'l1pwc',10)	CP_ML_StepDetect_l1pwc_10
 CP_ML_StepDetect(y,'l1pwc',0.05)	CP_ML_StepDetect_l1pwc_005
 CP_ML_StepDetect(y,'l1pwc',0.2)	CP_ML_StepDetect_l1pwc_02
