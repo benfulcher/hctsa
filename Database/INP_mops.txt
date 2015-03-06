@@ -1464,9 +1464,8 @@ MF_armax(y,[1,1],0.5,1)	MF_armax_1_1_05_1
 MF_armax(y,[2,2],0.5,1)	MF_armax_2_2_05_1
 MF_ARMA_orders(y,1:6,1:4)	MF_ARMA_orders_1_6_1_4
 MF_ExpSmoothing(y,0.5,'best')	MF_ExpSmoothing_05_best
-MF_GARCHfit(y,'ar','default')	MF_GARCHfit_ar_default
-MF_GARCHfit(y,'nothing','auto')	MF_GARCHfit_nothing_auto
-MF_GARCHfit(y,'ar','''R'',2,''M'',1,''P'',2,''Q'',1')	MF_GARCHfit_ar_R2_M1_P2_Q1
+MF_GARCHfit(y,'ar',1,1)    MF_GARCHfit_ar_P1_Q1
+MF_GARCHfit(y,'ar',1,2)    MF_GARCHfit_ar_P1_Q2
 MF_GARCHcompare(y,'ar',1:3,1:3)	MF_compare_GARCH_ar_1_3_1_3
 SY_VarRatioTest(y,2,0)	SY_VarRatioTest_2_0
 SY_VarRatioTest(y,2,1)	SY_VarRatioTest_2_1
