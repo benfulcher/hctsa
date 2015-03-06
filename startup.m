@@ -87,7 +87,19 @@ addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 
 % ------------------------------------------------------------------------------
+% Add path for TISEAN (ASSUMING in ~/bin directory):
+% ------------------------------------------------------------------------------
+[~,homeDir] = system('echo $HOME'); % get system home directory
+homeDir = regexprep(homeDir,'[\s]',''); % remove white space
+tiseanBinaryLocation = fullfile(homeDir,'bin');
+if isempty(regexp(getenv('PATH'),tiseanBinaryLocation))
+    sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
+    setenv('PATH', sysPath)
+    fprintf(1,', System path to TISEAN binaries: %s',tiseanBinaryLocation);
+end
+
+% ------------------------------------------------------------------------------
 %% Finished:
 % ------------------------------------------------------------------------------
 clear addfcn % clear the add function
-fprintf(1,'.\n---Done.\n')
+fprintf(1,'\n---Done.\n')

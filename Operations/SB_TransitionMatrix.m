@@ -27,6 +27,9 @@
 % of the transition matrix, measures of asymmetry, and eigenvalues of the
 % transition matrix.
 % 
+%---HISTORY:
+% Ben Fulcher, August 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -50,17 +53,18 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SB_TransitionMatrix(y,discmeth,ng,tau)
-% Ben Fulcher, August 2009
+function out = SB_TransitionMatrix(y,discmeth,numGroups,tau)
 
+% ------------------------------------------------------------------------------
 % Check inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(discmeth)
     discmeth = 'quantile';
 end
-if nargin < 3 || isempty(ng)
-    ng = 2;
+if nargin < 3 || isempty(numGroups)
+    numGroups = 2;
 end
-if ng < 2
+if numGroups < 2
     error('Too few groups for coarse-graining')
 end
 if nargin < 4 || isempty(tau)
@@ -77,16 +81,18 @@ end
 
 N = length(y); % time-series length
 
+% ------------------------------------------------------------------------------
 %% (((1))) Discretize the time series
+% ------------------------------------------------------------------------------
 switch discmeth
     case 'quantile'
         % 1) discretize the time series into a number of groups given by
         %    dparam
-        th = quantile(y,linspace(0,1,ng+1)); % thresholds for dividing the time series values
+        th = quantile(y,linspace(0,1,numGroups+1)); % thresholds for dividing the time series values
         th(1) = th(1)-1; % this ensures the first point is included
-        % turn the time series into a set of numbers from 1:ng
+        % turn the time series into a set of numbers from 1:numGroups
         yth = zeros(N,1);
-        for i = 1:ng
+        for i = 1:numGroups
             yth(y > th(i) & y <= th(i+1)) = i;
         end
         if any(yth == 0)
@@ -98,19 +104,20 @@ switch discmeth
 end
 
 % Ok, at this stage we should have:
-% (*) yth: a thresholded y containing integers from 1:ng (the number of groups)
+% (*) yth: a thresholded y containing integers from 1:numGroups (the number of groups)
 
-
+% ------------------------------------------------------------------------------
 %% (((2))) find 1-time transition matrix
+% ------------------------------------------------------------------------------
 % probably implemented already, but I'll do it myself
-T = zeros(ng);
-for i = 1:ng
+T = zeros(numGroups);
+for i = 1:numGroups
     ri = find(yth == i);
     if isempty(ri)
         T(i,:) = 0;
     else
         if ri(end) == N; ri = ri(1:end-1); end
-        for j = 1:ng
+        for j = 1:numGroups
             T(i,j) = sum(yth(ri+1) == j); % the next element is off this class
         end
     end
@@ -119,20 +126,22 @@ end
 % normalize to probability:
 T = T/(N-1); % N-1 is appropriate because it's a 1-time transition matrix
 
+% ------------------------------------------------------------------------------
 %% (((3))) output measures from the transition matrix
+% ------------------------------------------------------------------------------
 % (i) the raw values of the transition matrix
-% this has to be done bulkily (only for ng = 2,3):
-if ng == 2; % return all elements of T
+% this has to be done bulkily (only for numGroups = 2,3):
+if numGroups == 2; % return all elements of T
     for i = 1:4
-        eval(sprintf('out.T%u = T(%u);',i,i));
+        out.(sprintf('T%u',i)) = T(i);
     end
-elseif ng == 3; % return all elements of T
+elseif numGroups == 3; % return all elements of T
     for i = 1:9
-        eval(sprintf('out.T%u = T(%u);',i,i));
+        out.(sprintf('T%u',i)) = T(i);
     end
-elseif ng > 3 % return diagonal elements of T
-    for i = 1:ng
-        eval(sprintf('out.TD%u = T(%u,%u);',i,i,i));
+elseif numGroups > 3 % return diagonal elements of T
+    for i = 1:numGroups
+        out.(sprintf('TD%u',i)) = T(i,i);
     end
 end
 

@@ -106,13 +106,9 @@ if N/tm(1) < nseg*8 % heuristic
     out = NaN; return
 end
 
-% disp(['H:\bin\','stp -d' num2str(tm(1)) ' -m' num2str(tm(2)) ...
-%                   ' -%' num2str(flevel) ' -t' num2str(tsteps) ' ' fn]);
 [~, res] = system(sprintf('nstat_z -#%u -d%u -m%u %s',nseg,tm(1),tm(2),fn));
-% [~, res] = system(sprintf('nstat_z -#' num2str(nseg) ' -d' num2str(tm(1)) ' -m' num2str(tm(2)) ' ' fn]);
 delete(fn) % remove the temporary file fn
 if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
-
 
 % ------------------------------------------------------------------------------
 %% Read the output from TISEAN
@@ -120,7 +116,7 @@ if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
 s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('Writing to stdout',s);
 if isempty(wi)
-    error('TISEAN routine ''nstat_z'' didn''t return what I expected...');
+    error('TISEAN routine ''nstat_z'' returned unexpected output...');
 end
 s = s(wi+1:end);
 
@@ -195,11 +191,11 @@ eigs = eig(xperr);
 out.maximageig = max(imag(eigs));
 out.minimageig = min(imag(eigs));
 
-eigs = real(eigs);
-out.rangeeig = range(eigs); % range of real parts of eigenvalues
-out.stdeig = std(eigs);
-out.mineig = min(eigs);
-out.maxeig = max(eigs);
+realEigs = real(eigs);
+out.rangeeig = range(realEigs); % range of real parts of eigenvalues
+out.stdeig = std(realEigs);
+out.mineig = min(realEigs);
+out.maxeig = max(realEigs);
 
 
 end

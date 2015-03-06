@@ -21,6 +21,9 @@
 %---OUTPUTS: the mean and also the standard deviation of this set of 100 local
 % estimates.
 % 
+%---HISTORY:
+% Ben Fulcher, August 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -45,10 +48,12 @@
 % ------------------------------------------------------------------------------
 
 function out = SY_SpreadRandomLocal(y,l,nseg)
-% Ben Fulcher, August 2009
 
-doplot = 0; % set to 1 to plot outputs to figure
+doPlot = 0; % set to 1 to plot outputs to figure
 
+% ------------------------------------------------------------------------------
+% Check Inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(l)
     l = 100; % by default use 100 samples
 end
@@ -79,6 +84,7 @@ if l > 0.9*N % not suitable -- too short
     out = NaN; return % NaN means not suitable
 end
 
+% ------------------------------------------------------------------------------
 % nseg segments, each of length segl data points
 
 nfeat = 9; % number of features
@@ -107,11 +113,13 @@ for j = 1:nseg
     qs(j,9) = taul;
 end
     
-if doplot
+if doPlot
     figure('color','w');
-    subplot(2,1,1); hold on; plot(y,'k'); plot(ists,y(ists),'.r'); title('time series')
+    subplot(2,1,1); hold on;
+    plot(y,'k');
+    plot(ists,y(ists),'.r');
+    title('time series')
     subplot(2,1,2); plot(qs(:,1),'b'); title('local means')
-    input('What do you think?')
 end
 
 % Can think of this as a big bootstrapped distribution of the timeseries at
