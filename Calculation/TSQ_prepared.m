@@ -232,7 +232,7 @@ for i = 1:numTS
     end
     
     % Check results look ok:
-    if isempty(qrc) || strcmp(qrc{1},'No Data') % qrc empty if using java; qrc{1} is 'No Data' if using database toolbox
+    if isempty(qrc) % No data to retrieve
         % There are no entries in Results that match the requested conditions
         fprintf(1,'No data to retrieve for ts_id = %u\n',ts_id_now);
         % Leave local files (e.g., TS_DataMat, TS_Quality, TS_CalcTime as Inf)

@@ -99,17 +99,19 @@ if (theilerwin > 0) && (theilerwin < 1) % specify proportion of time-series leng
     theilerwin = round(theilerwin*N);
 end
 
+% ------------------------------------------------------------------------------
 %% Write the file
+% ------------------------------------------------------------------------------
 tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
 % to the millisecond (only get double-write error for same function called in same millisecond
 fn = sprintf('tisean_temp_d2_%s.dat',tnow); % filename
 dlmwrite(fn,y);
 fprintf(1,'Just wrote the input time series (N = %u) to the temporary file %s for TISEAN\n',length(y),fn)
 
-%% Run the TISEAN code
+% ------------------------------------------------------------------------------
+%% Run the TISEAN code, d2
+% ------------------------------------------------------------------------------
 [~, res] = system(sprintf(['d2 -d%u -M1,%u -t%u %s'],tau,maxm,theilerwin,fn));
-% [~, res] = system(['d2 -d' num2str(tau) ' -M1,' num2str(maxm) ...
-%                     ' -t' num2str(theilerwin) ' ' fn]);
 delete(fn) % remove the temporary time-series data file
 %  * extension .stat: This file shows the current status of the estimate.
 if exist([fn '.stat'])
@@ -217,9 +219,11 @@ delete([fn '.h2']); % delete the file
 
 % h2dat now contains the correlation entropies (second column)
 
-%% Obtain useful from all this data
+%% Time to obtain something useful from all this data
 
-% (1) TAKENS ESTIMATOR
+% ------------------------------------------------------------------------------
+%% (1) TAKENS ESTIMATOR
+% ------------------------------------------------------------------------------
 % correlation dimension at upper length scale of eup
 % (for z-scored time series, std = 1...; in units of this)
 % Kantz & Shreiber recommend taking at half the std of the signal
@@ -240,7 +244,9 @@ out.takens05mmin_stabled = mmintakens05.stabled;
 out.takens05mmin_linrmserr = mmintakens05.linrmserr;
 
 
-% (2) D2, local slopes of correlation integral
+% ------------------------------------------------------------------------------
+%% (2) D2, local slopes of correlation integral
+% ------------------------------------------------------------------------------
 % semilogx(d2dat{1}(:,1),d2dat{1}(:,2))
 
 % (2i) Estimate dimensions using Ben's method
@@ -308,8 +314,9 @@ out.d2_dimstd = scd2.dimstd;
 
 % semilogx(c2tdat{1}(:,1),c2tdat{1}(:,2));
 
-
-% (3) Use Gaussian smoothed estimates
+% ------------------------------------------------------------------------------
+%% (3) Use Gaussian-smoothed estimates
+% ------------------------------------------------------------------------------
 % c2gdat
 % we have the local slopes (d2) in the third column.
 % Do all the same stuff as d2.
@@ -321,9 +328,9 @@ out.d2_dimstd = scd2.dimstd;
 try
     benfindd2g = findscalingr_ind(d2gdat_M);
 catch
-    disp('Error finding scaling range')
-    out = NaN;
-    return
+    error('Error finding scaling range')
+    % out = NaN;
+    % return
 end
     
 % rows: increasing embedding m
@@ -369,9 +376,9 @@ out.d2g_dimest = scd2g.dimest;
 out.d2g_dimstd = scd2g.dimstd;
 
 
-
-
-% (4) H2
+% ------------------------------------------------------------------------------
+%% (4) H2
+% ------------------------------------------------------------------------------
 % h2dat
 % A flat region in this indicates determinism/deterministic chaos
 [h2dat_v h2dat_M] = SUB_celltomat(h2dat,2);
@@ -426,28 +433,14 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 
 
 
-
+% ------------------------------------------------------------------------------
     function dimdat = SUB_readTISEANout(s,maxm,blocker,nc)
         % blocker the string distinguishing sections of output
         % nc number of columns in string
         
-%         w = zeros(maxm+1,1);
-%         if nargin < 3 % use default blocker
-%             for ii = 1:maxm
-%                 w(ii)=strmatch(['#dim= ' num2str(ii)],s,'exact');
-%             end
-%         else
-%            for ii = 1:maxm
-%                 try
-%                     w(ii) = strmatch([blocker num2str(ii)],s,'exact');
-%                 catch
-%                    keyboard 
-%                 end
-%            end
-%         end
         w = strmatch(blocker,s);
         if length(w)~=maxm
-            disp('error reading TISEAN output'); return
+            error('error reading TISEAN output');
         end
         w(end+1) = length(s)+1; % as if there were another marker at the entry after the last data row
         
@@ -457,17 +450,26 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             nn = zeros(length(ss),nc);
             for jj = 1:length(ss)
                 if nc == 2
-                    tmp = textscan(ss{jj},'%n%n');
+                    tmp = textscan(ss{jj},'%f%f');
                 elseif nc == 3
-                    tmp = textscan(ss{jj},'%n%n%n');
+                    tmp = textscan(ss{jj},'%f%f%f');
                 end
-                nn(jj,:) = horzcat(tmp{:});
+                if all(cellfun(@isempty,tmp))
+                    % Ben Fulcher, 2015-03-06
+                    % Sometimes a comment at the bottom of the output file
+                    nn = nn(1:jj-1,:);
+                    break
+                else
+                    nn(jj,:) = horzcat(tmp{:});
+                end
             end
             dimdat{ii} = nn;
         end
 
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function takensp = SUB_takens(dat,eup)
         % dat is takens estimator data, cell with a component corresponding to each
         % embedding dimension
@@ -487,7 +489,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         end
         
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function out = findscalingr(x)
         % finds constant regions in matrix x
         % if x a matrix, finds scaling regions requiring all columns to
@@ -534,7 +538,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %         hold off;
 %         keyboard
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function results = findscalingr_ind(x)
         % AS ABOVE EXCEPT LOOKS FOR SCALING RANGES FOR INDIVIDUAL DIMENSIONS
         % finds constant regions in matrix x
@@ -575,7 +581,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         end
         
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function [thevector, thematrix] = SUB_celltomat(thecell,thecolumn)
         % converts cell to matrix, where each (specified) column in cell
         % becomes a column in the new matrix
@@ -616,7 +624,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         end
         
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function out = SUB_findmmin(ds)
         % estimated dimensions for d = 1, ... , m
         % estimates when they stabilize to a limiting value
@@ -653,7 +663,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         out.linrmserr = sqrt(mean((ds'-pfit).^2));
         
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function results = SUB_getslopes(x,Y)
         dx = log10(x(2))-log10(x(1));
 %         dx = x(2) - x(1);
@@ -688,9 +700,10 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %             hold off;
 %             keyboard
         end
-        
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function results = SUB_doesflatten(x,Y)
         % look for region of zero gradient amidst regions of negative
         % gradient -- e.g., by two moving boundaries and a t-test between
@@ -745,6 +758,6 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %             keyboard
         end
     end
-
+% ------------------------------------------------------------------------------
 
 end

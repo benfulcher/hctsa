@@ -5,7 +5,7 @@ prefix = /Users/benfulcher
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 CC = cc
-FC = gfortran
+FC = 
 HAVE_NR = @HAVE_NR@
 
 all:

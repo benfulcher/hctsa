@@ -83,7 +83,25 @@ addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 
 % ------------------------------------------------------------------------------
+% Add path for TISEAN (ASSUMING in ~/bin directory):
+% ------------------------------------------------------------------------------
+[~,homeDir] = system('echo $HOME'); % get system home directory
+homeDir = regexprep(homeDir,'[\s]',''); % remove white space
+tiseanBinaryLocation = fullfile(homeDir,'bin');
+if isempty(regexp(getenv('PATH'),tiseanBinaryLocation))
+    sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
+    setenv('PATH', sysPath)
+    fprintf(1,',\nSystem path to TISEAN binaries: %s',tiseanBinaryLocation);
+    clear sysPath
+end
+clear homeDir tiseanBinaryLocation
+
+% TISEAN also requires this DYLD path to be set (I assume this works also on Windows):
+setenv('DYLD_LIBRARY_PATH','/usr/local/bin');
+fprintf(1,', DYLD library path\n');
+
+% ------------------------------------------------------------------------------
 %% Finished:
 % ------------------------------------------------------------------------------
 clear addfcn % clear the add function
-fprintf(1,'.\n---Done.\n')
+fprintf(1,'\n---Done.\n')

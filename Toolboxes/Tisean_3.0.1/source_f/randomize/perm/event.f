@@ -50,7 +50,12 @@ c
       parameter(nx=100000) 
       dimension x(nx)
       common nmax,cost,temp,cmin,rate,x
-
+      
+C       Ben Fulcher, 2015-03-06 Need to fix fortran integer looping
+C       (not obvious how f77 does it though :/ and don't want to change
+C        until I'm sure...)
+C       INTEGER :: loopMax
+C       loopMax = FLOOR(nmax*log(nmax*1.))
       do 10 n=1,nmax*log(nmax*1.)
          call permute(n1,n2)
  10      call exch(n1,n2)

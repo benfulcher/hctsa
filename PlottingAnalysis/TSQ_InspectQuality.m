@@ -7,7 +7,9 @@ ax = gca;
 ylabel('Time series')
 ax.YTick = 1:length(TimeSeries);
 ax.YTickLabel = {TimeSeries.FileName};
-xlabel('Operations')
+xlabel('Operations (op_id)','interpreter','none')
+ax.XTick = 1:length(Operations);
+ax.XTickLabel = [Operations.ID];
 
 % Add a color bar:
 allLabels = {'good','error','NaN','Inf','-Inf','complex'};

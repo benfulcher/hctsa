@@ -54,7 +54,7 @@ for j = 1:length(createString)
     
     % First check whether the table already exists:
     [output,emsg] = mysql_dbquery(dbc,existString{j});
-    if ~isempty(output) && ~strcmp(output{1},'No Data') % Table already exists
+    if ~isempty(output) % Table already exists
         if j == length(createString)
             fprintf(1,'(%s already exists).',tableNames{j});
         else

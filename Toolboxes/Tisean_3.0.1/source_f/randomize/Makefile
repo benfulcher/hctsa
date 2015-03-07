@@ -5,8 +5,8 @@ prefix = /Users/benfulcher
 exec_prefix = ${prefix}
 BINDIR = ${exec_prefix}/bin
 
-FC = gfortran
-FFLAGS = -O
+FC = 
+FFLAGS = 
 INSTALL = /usr/bin/install -c
 LDFLAGS = 
 

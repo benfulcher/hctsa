@@ -118,7 +118,7 @@ RetrievalTimer = tic; % Time the retrieval (should be fast)
 [qrc,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
     fprintf(1,'\n'); error('Error selecting %s elements from %s',writeWhat,dbname);
-elseif isempty(qrc) || strcmp(qrc{1},'No Data')
+elseif isempty(qrc)
     fprintf(1,'\nNo %s elements in this range in the database anymore!\n',writeWhat);
     SQL_closedatabase(dbc); return
 else
@@ -136,7 +136,7 @@ ndbel = length(ts_id_db);     % Number of database elements to attempt to write 
 % ------------------------------------------------------------------------------
 switch writeWhat
 case 'null'
-    fprintf(1,['There are %u NULL entries in Results.\nNow writing calculated ' ...
+    fprintf(1,['There are %u NULL entries in Results.\nWriting calculated ' ...
                     'elements of TS_DataMat to %s...\n'],ndbel,dbname);
 case 'error'
     fprintf(1,['There are %u entries in Results (all previous errors) ' ...
@@ -155,9 +155,9 @@ case 'nullerror'
     fprintf(1,'However, NULLS will be written over with any result from the local files\n')
 end
 
-LocalIndex = zeros(ndbel,2);
-LocalIndex(:,1) = arrayfun(@(x)find([TimeSeries.ID] == x,1),ts_id_db); % Indices of rows in local file for each entry in the database
-LocalIndex(:,2) = arrayfun(@(x)find([Operations.ID] == x,1),op_id_db); % Indicies of columns in local file for each entry in the database
+localIndex = zeros(ndbel,2);
+localIndex(:,1) = arrayfun(@(x)find([TimeSeries.ID] == x,1),ts_id_db); % Indices of rows in local file for each entry in the database
+localIndex(:,2) = arrayfun(@(x)find([Operations.ID] == x,1),op_id_db); % Indicies of columns in local file for each entry in the database
 updateMe = zeros(ndbel,1); % Label iterations that should be written to the database
 
 % ------------------------------------------------------------------------------
@@ -169,9 +169,9 @@ writeBackTimer = tic; % Time how long this takes to give user feedback
 for i = 1:ndbel	
     
     % Retrieve the elements
-    TS_DataMat_ij = TS_DataMat(LocalIndex(i,1),LocalIndex(i,2));
-    TS_Quality_ij = TS_Quality(LocalIndex(i,1),LocalIndex(i,2));
-    TS_CalcTime_ij = TS_CalcTime(LocalIndex(i,1),LocalIndex(i,2));
+    TS_DataMat_ij = TS_DataMat(localIndex(i,1),localIndex(i,2));
+    TS_Quality_ij = TS_Quality(localIndex(i,1),localIndex(i,2));
+    TS_CalcTime_ij = TS_CalcTime(localIndex(i,1),localIndex(i,2));
     
     switch writeWhat
     case 'null'
@@ -204,9 +204,9 @@ for i = 1:ndbel
 							TS_CalcTime_string,ts_id_db(i),op_id_db(i));
         [~,emsg] = mysql_dbexecute(dbc, UpdateString);
         if ~isempty(emsg)
-            SQL_closedatabase(dbc) % close the database connection first...
+            SQL_closedatabase(dbc) % close the database connection before calling the error...
         	error('Error storing (ts_id,op_id) = (%u,%u) to %s??!!\n%s\n', ...
-                			[TimeSeries(LocalIndex(i,1)).ID],[Operations(LocalIndex(i,2)).ID],dbname,emsg);
+                			[TimeSeries(localIndex(i,1)).ID],[Operations(localIndex(i,2)).ID],dbname,emsg);
         end
     end
 
@@ -216,7 +216,7 @@ for i = 1:ndbel
                 'approximately %s per entry to write to the database.\n'],BF_thetime(toc(writeBackTimer)));
 		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(writeBackTimer)/i*(ndbel-i)));
     elseif mod(i,floor(ndbel/5))==0 % Give 5 more time updates...
-		fprintf(1,['Approximately %s remaining! -- so far %u entries (/ %u possible) have been'  ...
+		fprintf(1,['Approximately %s remaining! -- so far %u (/ %u possible) entries have been'  ...
 			' written to %s...\n'],BF_thetime(toc(writeBackTimer)/i*(ndbel-i)),sum(updateMe),i,dbname);
 	end
 end
