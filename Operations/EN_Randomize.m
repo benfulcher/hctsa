@@ -180,8 +180,8 @@ out.d1fexpr2 = gof.rsquare;
 out.d1fexpadjr2 = gof.adjrsquare;
 out.d1fexprmse = gof.rmse;
 
-% d1diff will always be 1 since stats(1,3) will always be zero, so don't include:
-% out.d1diff = abs((stats(end,3)-stats(1,3))/stats(end,3));
+% d1diff will always be 1 since stats(1,3) will always be zero (included here for back-compatability):
+out.d1diff = abs((stats(end,3)-stats(1,3))/stats(end,3));
 out.d1hp = SUB_gethp(stats(:,3));
 
 % 4) ac1
