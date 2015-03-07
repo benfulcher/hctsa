@@ -95,13 +95,14 @@ tiseanBinaryLocation = fullfile(homeDir,'bin');
 if isempty(regexp(getenv('PATH'),tiseanBinaryLocation))
     sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
     setenv('PATH', sysPath)
-    fprintf(1,', System path to TISEAN binaries: %s',tiseanBinaryLocation);
+    fprintf(1,',\nSystem path to TISEAN binaries: %s',tiseanBinaryLocation);
     clear sysPath
 end
 clear homeDir tiseanBinaryLocation
 
 % TISEAN also requires this DYLD path to be set (I assume this works also on Windows):
 setenv('DYLD_LIBRARY_PATH','/usr/local/bin');
+fprintf(1,', DYLD library path\n');
 
 % ------------------------------------------------------------------------------
 %% Finished:
