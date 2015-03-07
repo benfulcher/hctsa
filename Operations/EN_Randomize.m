@@ -64,11 +64,7 @@ function out = EN_Randomize(y,randomizeHow)
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
 
-% For some reason the stupid wavelet entropy is a statistic used for this, so we
-% need the wavelet toolbox (but in future should remove this entropy measure):
-BF_CheckToolbox('wavelet_toolbox');
-% ------------------------------------------------------------------------------
-
+% Check input time series is z-scored:
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored for EN_Randomize.')
 end
@@ -88,7 +84,7 @@ doPlot = 0;
 N = length(y); % length of the time series
 
 %  preliminaries
-numStats = 11;
+numStats = 10;
 randp_max = 2; % time series has been randomized to 2 times its length
 rand_inc = 10/100; % this proportion of the time series between calculations
 ncalcs = randp_max/rand_inc;
@@ -184,7 +180,8 @@ out.d1fexpr2 = gof.rsquare;
 out.d1fexpadjr2 = gof.adjrsquare;
 out.d1fexprmse = gof.rmse;
 
-out.d1diff = abs((stats(end,3)-stats(1,3))/stats(end,3));
+% d1diff will always be 1 since stats(1,3) will always be zero, so don't include:
+% out.d1diff = abs((stats(end,3)-stats(1,3))/stats(end,3));
 out.d1hp = SUB_gethp(stats(:,3));
 
 % 4) ac1
@@ -246,23 +243,23 @@ out.ac4hp = SUB_gethp(stats(:,7));
 
 % 8) shen (Shannon entropy)
 % I think this is all rubbish
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -1, 0.4]);
+% s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -1, 0.4]);
+% f = fittype('a*exp(b*x)+c','options',s);
+% [c, gof] = fit(r,stats(:,8),f);
+% out.shenfexpa = c.a;
+% out.shenfexpb = c.b;
+% out.shenfexpc = c.c;
+% out.shenfexpr2 = gof.rsquare;
+% out.shenfexpadjr2 = gof.adjrsquare;
+% out.shenfexprmse = gof.rmse;
+%
+% out.shendiff = abs((stats(end,8)-stats(1,8))/stats(end,8));
+% out.shenhp = SUB_gethp(stats(:,8));
+
+% 8) sampen (Sample Entropy)
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,8) -0.2 stats(end,8)]);
 f = fittype('a*exp(b*x)+c','options',s);
 [c, gof] = fit(r,stats(:,8),f);
-out.shenfexpa = c.a;
-out.shenfexpb = c.b;
-out.shenfexpc = c.c;
-out.shenfexpr2 = gof.rsquare;
-out.shenfexpadjr2 = gof.adjrsquare;
-out.shenfexprmse = gof.rmse;
-
-out.shendiff = abs((stats(end,8)-stats(1,8))/stats(end,8));
-out.shenhp = SUB_gethp(stats(:,8));
-
-% 9) sampen (Sample Entropy)
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,9) -0.2 stats(end,9)]);
-f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(r,stats(:,9),f);
 out.sampen2_02fexpa = c.a;
 out.sampen2_02fexpb = c.b;
 out.sampen2_02fexpc = c.c;
@@ -270,13 +267,13 @@ out.sampen2_02fexpr2 = gof.rsquare;
 out.sampen2_02fexpadjr2 = gof.adjrsquare;
 out.sampen2_02fexprmse = gof.rmse;
 
-out.sampen2_02diff = abs((stats(end,9)-stats(1,9))/stats(end,9));
-out.sampen2_02hp = SUB_gethp(stats(:,9));
+out.sampen2_02diff = abs((stats(end,8)-stats(1,8))/stats(end,8));
+out.sampen2_02hp = SUB_gethp(stats(:,8));
 
-% 10) statav5
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,10) -0.1 stats(end,10)]);
+% 9) statav5
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,9) -0.1 stats(end,9)]);
 f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(r,stats(:,10),f);
+[c, gof] = fit(r,stats(:,9),f);
 out.statav5fexpa = c.a;
 out.statav5fexpb = c.b;
 out.statav5fexpc = c.c;
@@ -284,13 +281,13 @@ out.statav5fexpr2 = gof.rsquare;
 out.statav5fexpadjr2 = gof.adjrsquare;
 out.statav5fexprmse = gof.rmse;
 
-out.statav5diff = abs((stats(end,10)-stats(1,10))/stats(end,10));
-out.statav5hp = SUB_gethp(stats(:,10));
+out.statav5diff = abs((stats(end,9)-stats(1,9))/stats(end,9));
+out.statav5hp = SUB_gethp(stats(:,9));
 
-% 11) swss5_1
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,11) -0.1 stats(end,11)]);
+% 10) swss5_1
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,10) -0.1 stats(end,10)]);
 f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(r,stats(:,11),f);
+[c, gof] = fit(r,stats(:,10),f);
 out.swss5_1fexpa = c.a;
 out.swss5_1fexpb = c.b;
 out.swss5_1fexpc = c.c;
@@ -298,8 +295,8 @@ out.swss5_1fexpr2 = gof.rsquare;
 out.swss5_1fexpadjr2 = gof.adjrsquare;
 out.swss5_1fexprmse = gof.rmse;
 
-out.swss5_1diff = abs((stats(end,11)-stats(1,11))/stats(end,11));
-out.swss5_1hp = SUB_gethp(stats(:,11));
+out.swss5_1diff = abs((stats(end,10)-stats(1,10))/stats(end,10));
+out.swss5_1hp = SUB_gethp(stats(:,10));
 
 
 
@@ -321,14 +318,14 @@ out.swss5_1hp = SUB_gethp(stats(:,11));
         
         % Entropies
         % shen = NaN; % wentropy is nonsense.
-        shen = EN_wentropy(y_rand,'shannon');
+        % shen = EN_wentropy(y_rand,'shannon');
         sampen = PN_sampenc(y_rand,2,0.2,1);
         
         % Stationarity
         statav5 = SY_StatAv(y_rand,'seg',5);
         swss5_1 = SY_SlidingWindow(y_rand,'std','std',5,1);
         
-        out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, shen, sampen, statav5, swss5_1];
+        out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, sampen, statav5, swss5_1];
     end
 % ------------------------------------------------------------------------------
     
