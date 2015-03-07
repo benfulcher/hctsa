@@ -82,7 +82,12 @@ end
 % Seperate into keywords to include: kyes
 % and the number of that keyword to include: kyesn
 if ~isempty(keywordInclude)
-    kyes = keywordInclude(:,1); kyesn = vertcat(keywordInclude{:,2});
+    if ischar(keywordInclude)
+        % Strange syntax; assume that they want to include all of this keyword
+        kyes = {keywordInclude}; kyesn = 0;
+    else
+        kyes = keywordInclude(:,1); kyesn = vertcat(keywordInclude{:,2});
+    end
 else
     kyes = {}; kyesn = [];
 end
@@ -141,12 +146,6 @@ if strcmp(tsOrOps,'ts')
 								'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
 			else % constrain to some number (using the LIMIT command in mySQL)
-                % switch howtolimit
-                %     case 'pcmax'
-                %         limitme = sprintf(' ORDER BY PercentageCalculated DESC LIMIT %u',ncut);
-                %     case 'pcmin'
-                %         limitme = sprintf(' ORDER BY PercentageCalculated LIMIT %u',ncut);
-                %     case 'rand'
                 limitme = sprintf(' ORDER BY RAND() LIMIT %u',ncut);
                         % I know this is a slow implementation -- probably better
                         % to create the random numbers here to constrain
@@ -167,12 +166,10 @@ if strcmp(tsOrOps,'ts')
 
 			% Execute the select statement
 			[ts_ids,emsg] = mysql_dbquery(dbc,SelectString);
-			if isempty(ts_ids) && isempty(emsg)
+			if (isempty(ts_ids) && isempty(emsg)) || (ischar(ts_ids{1}) && strcmp(ts_ids{1},'No Data'))
 				fprintf(1,'No time series matched the given constraints for the keyword ''%s''\n',kyes{i});
 			elseif ~isempty(emsg)
-				fprintf(1,'Error retrieving time series for %s\n',kyes{i});
-				disp(emsg)
-				keyboard
+				error('Error retrieving time series for %s\n%s',kyes{i},SelectString);
 			else
 				C_tskwyes{i} = vertcat(ts_ids{:});
 				ngot = length(C_tskwyes{i});
