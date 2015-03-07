@@ -166,7 +166,7 @@ if strcmp(tsOrOps,'ts')
 
 			% Execute the select statement
 			[ts_ids,emsg] = mysql_dbquery(dbc,SelectString);
-			if (isempty(ts_ids) && isempty(emsg)) || (ischar(ts_ids{1}) && strcmp(ts_ids{1},'No Data'))
+			if (isempty(ts_ids) && isempty(emsg))
 				fprintf(1,'No time series matched the given constraints for the keyword ''%s''\n',kyes{i});
 			elseif ~isempty(emsg)
 				error('Error retrieving time series for %s\n%s',kyes{i},SelectString);
@@ -192,14 +192,10 @@ if strcmp(tsOrOps,'ts')
 		end
 	
 	else % just use the other constraints
-		% if isempty(keywordRemove)
 		SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' conditions(6:end)];
-		% else
-		% 	SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ss_tsl ' ' keywordRemoveextrastring];
-		% end
 		[ts_ids,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
-			fprintf(1,'Database call failed\n%s\n',SelectString); disp(emsg); keyboard
+			fprintf(1,'Database call failed\n%s\n%s',SelectString,emsg);
 		else
 			ts_ids_keep = unique(vertcat(ts_ids{:}));
 		end
@@ -258,7 +254,7 @@ else
 
 	if ~isempty(kyes)
 		C_kyes = cell(length(kyes),1);
-		for i=1:length(kyes)
+		for i = 1:length(kyes)
 			ncut = kyesn(i);
 
 			% Now do the rest of the query at once: do the keyword matches and length constraints
@@ -269,17 +265,7 @@ else
 								'(SELECT opkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
 			else % constrain to some number (using the LIMIT command in mySQL)
-                % switch howtolimit
-                    % case 'pcmax'
-                        % limitme = [' ORDER BY PercentageCalculated DESC LIMIT ' num2str(ncut)];
-                    % case 'pcmin'
-                        % limitme = [' ORDER BY PercentageCalculated LIMIT ' num2str(ncut)];
-                    % case 'rand'
-                limitme = [' ORDER BY RAND() LIMIT ' num2str(ncut)];
-                        % I know this is a slow implementation -- probably better
-                        % to create the random numbers here to constrain
-                % end
-                
+                limitme = [' ORDER BY RAND() LIMIT ' num2str(ncut)];                
                 
 				if isempty(kyes{i}) % empty keyword -- just constrain by number
 					if isempty(conditions)
@@ -300,7 +286,7 @@ else
 			[op_ids,emsg] = mysql_dbquery(dbc,SelectString);
 		
 			if ~isempty(emsg)
-				fprintf(1,'Error finding %s\n',kyes{i}); disp(emsg); keyboard
+				error('Error finding %s\n%s\n%s',kyes{i},emsg,SelectString);
 			end
 			C_kyes{i} = vertcat(op_ids{:});
 		

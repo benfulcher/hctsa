@@ -29,6 +29,11 @@ case 'database'
     % Close cursor object:
     close(curs);
     
+    % If 'No Data', change to empty, to match the syntax of 'com.mysql.jdbc.JDBC4Connection'
+    if isempty(errmessage) && iscell(outputData) && ischar(outputData{1}) && strcmp(outputData{1},'No Data')
+        outputData = {};
+    end
+    
 case 'com.mysql.jdbc.JDBC4Connection'
     % Database connection opened using java commands:
     try
