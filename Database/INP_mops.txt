@@ -1310,8 +1310,9 @@ SC_FluctAnal(y,2,'dfa',25,1,2,1)	SC_FluctAnal_2_dfa_25_1_2_logi
 SC_FluctAnal(y,2,'dfa',25,1,3,1)	SC_FluctAnal_2_dfa_25_1_3_logi
 SC_FluctAnal(BF_zscore(abs(y)),2,'dfa',25,2,[],1)	SC_FluctAnal_mag_2_dfa_25_2_logi
 SC_FluctAnal(BF_zscore(sign(y)),2,'dfa',25,2,[],1)	SC_FluctAnal_sign_2_dfa_25_2_logi
-SP_Summaries(y,'periodogram','hamming',[],0,0)	SP_basic_pgram_hamm
-SP_Summaries(y,'periodogram','hamming',[],1,0)	SP_basic_pgram_hamm_cep
+SP_Summaries(y,'periodogram','hamming',[],0,1)	SP_basic_pgram_hamm_power
+SP_Summaries(y,'fft',[],[],0,1)	SP_basic_fft_power
+SP_Summaries(y,'fft',[],[],1,1)	SP_basic_fft_logdev_power
 # RP_crpsimp(y,'fnn','mi',0.1,'euclidean')	RP_crpsimp_fnn_mi_01_euclid
 # RP_crpsimp(y,'fnn','mi',1,'euclidean')	RP_crpsimp_fnn_mi_1_euclid
 # RP_crpsimp(y,'fnn','mi',2,'euclidean')	RP_crpsimp_fnn_mi_2_euclid
@@ -1494,8 +1495,6 @@ ST_MomentCorr(y,0.02,0.2,'mean','std','abs')	ST_MomentCorr_002_02_mean_std_abs
 ST_MomentCorr(y,0.02,0.2,'median','iqr','abs')	ST_MomentCorr_002_02_median_iqr_abs
 ST_MomentCorr(y,0.02,0.2,'mean','std','sqrt')	ST_MomentCorr_002_02_mean_std_sqrt
 ST_MomentCorr(y,0.02,0.2,'median','iqr','sqrt')	ST_MomentCorr_002_02_median_iqr_sqrt
-SP_Summaries(y,'periodogram','hamming',[],0,1)	SP_basic_pgram_hamm_power
 SD_SurrogateTest(y,'RP',99,[],{'ami1','fmmi','o3','tc3'})	SD_SurrogateTest_RP_99
-SP_Summaries(y,'fft',[],[],0,1)	SP_basic_fft_power
 MD_pNN(x)	MD_pNN_raw
 MD_rawHRVmeas(x)	MD_rawHRVmeas
