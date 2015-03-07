@@ -4,9 +4,11 @@
 % 
 % Implements a bootstrap-based stationarity measure: nseg time-series segments
 % of length l are selected at random from the time series and in each
-% segment a local quantity is calculated: mean, standard deviation, skewness,
+% segment some statistic is calculated: mean, standard deviation, skewness,
 % kurtosis, ApEn(1,0.2), SampEn(1,0.2), AC(1), AC(2), and the first
 % zero-crossing of the autocorrelation function.
+% Outputs summarize how these quantities vary in different local segments of the
+% time series.
 % 
 %---INPUTS:
 % y, the input time series
@@ -71,16 +73,22 @@ if ischar(l)
     otherwise
         error('Unknown specifier ''%s''',l);
     end
+    
+    % Very short l for this sort of time series:
+    if l < 5
+        warning(['This time series has a very short correlation length;\nSetting ' ...
+            'l=%.1f means that changes estimates will be difficult to compare...']);
+    end
 end
 
 if nargin < 3 || isempty(nseg)
     nseg = 100; % 100 segments by default
 end
 
+% Check the parameters are appropriate for the length of the input time series:
 N = length(y); % the length of the time series
-
-if l > 0.9*N % not suitable -- too short
-	fprintf(1,'This time series (N = %u) is too short to use l = %u\n',N,l)
+if l > 0.9*N % operation is not suitable -- time series is too short
+	fprintf(1,'This time series (N = %u) is too short to use l = %.1f\n',N,l)
     out = NaN; return % NaN means not suitable
 end
 
@@ -88,17 +96,16 @@ end
 % nseg segments, each of length segl data points
 
 nfeat = 9; % number of features
-fs = zeros(nseg,nfeat);
 qs = zeros(nseg,nfeat);
 
 for j = 1:nseg
     % pick a range
     % in this implementation, ranges CAN overlap
-    % ist = randint(1,1,[1, N-1-l]); % random start point (not exceeding the endpoint)
+    
     ist = randi(N-1-l,1); % random start point (not exceeding the endpoint)
     ifh = ist+l-1; % finish index
     rs = ist:ifh; % sample range (from starting to finishing index)
-    ysub = y(rs); % subsection
+    ysub = y(rs); % subsection of the time series
 
     taul = CO_FirstZero(ysub,'ac');
     
@@ -122,27 +129,15 @@ if doPlot
     subplot(2,1,2); plot(qs(:,1),'b'); title('local means')
 end
 
+% ------------------------------------------------------------------------------
+% Take mean and standard deviation of this set of local time-series statistics:
+% ------------------------------------------------------------------------------
+
 % Can think of this as a big bootstrapped distribution of the timeseries at
 % a scale given by the length l
-fs(1:nfeat) = mean(qs); % the mean value of the feature across subsegments of the time series
-fs(nfeat+1:nfeat*2) = std(qs); % the spread of the feature across subsegments of the time series
-    
-%     fs(i,nfeat+1:2*nfeat)=std(qs);
-
-% switch meattray
-%     case 'std'
-%         out=std(qs)/std(y);
-%     case 'apen'
-%         out=EN_ApEn(qs,1,0.2); % ApEn of the sliding window measures
-%     case 'ent'
-%         out=DN_FitKernelSmooth(qs,'entropy'); % distributional entropy
-%     case 'lbq' % lbq test for randomness
-%         [h, p] = lbqtest(y);
-%         out=p;
-% end
-% end
-
-% plot(fs)
+fs = zeros(nfeat*2,1);
+fs(1:nfeat) = nanmean(qs); % the mean value of the feature across subsegments of the time series
+fs(nfeat+1:nfeat*2) = nanstd(qs); % the spread of the feature across subsegments of the time series
 
 out.meanmean = fs(1);
 out.meanstd = fs(2);
