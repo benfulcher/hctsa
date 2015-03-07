@@ -74,7 +74,9 @@
 
 function out = FC_Surprise(y,whatinf,memory,ng,cgmeth,nits)
 
+% ------------------------------------------------------------------------------
 %% Check inputs and set defaults
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(whatinf)
     whatinf = 'dist'; % expect probabilities based on prior observed distribution
 end
@@ -107,11 +109,11 @@ yth = SB_CoarseGrain(y,cgmeth,ng); % a coarse-grained time series using the numb
 
 N = length(yth); % will be the same as y, for 'quantile', and 'updown'
 
-%% Get prior information
-rs = randperm(N-memory) + memory;
-rs = rs(1:min(nits,end));
+% Select random samples to test:
+rs = randperm(N-memory) + memory; % Can't do beginning of time series, up to memory
+rs = rs(1:min(nits,end)); % Just use a random sample of nits points to test
 
-store = zeros(nits,1);
+store = zeros(nits,1); % store probabilities
 for i = 1:length(rs)
     switch whatinf
         case 'dist'
@@ -162,10 +164,10 @@ iz = (store == 0);
 store(iz) = 1; % to avoid log(0) error in next line
 store = -log(store); % transform to surprises/information gains
 store(iz) = 0; % so that log(0) = 0
-% May be strange? maybe remove these points rather than setting to zero?
+% May be better to remove these points than setting them to zero?
 % plot(store)
 
-out.min = min(store); % Minimum amount of information you can gain in this way
+out.min = min(store); % Minimum amount of information you can gain in this way (not so useful: always zero)
 out.max = max(store); % Maximum amount of information you can gain in this way
 out.mean = mean(store); % mean
 out.median = median(store); % median
