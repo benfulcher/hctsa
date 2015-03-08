@@ -124,9 +124,10 @@ end
 % Convert back to Matlab forms
 v = data(rs); % vectors on poincare surface
 NN = length(v);
-% labeling poincare surface plane x-y
+% Labeling poincare surface plane x-y
 x = (v(:,1));
-y = (v(:,2)); 
+y = (v(:,2));
+
 if doPlot
     figure('color','w'); box('on');
     plot(x,y,'.k'); axis equal
@@ -159,12 +160,12 @@ out.tauacy = CO_FirstZero(y,'ac');
 
 out.boxarea = range(x)*range(y);
 
-% statistics on distance between adjacent points, ds
+% Statistics on distance between adjacent points, ds
 vdiff = v(2:end,:)-v(1:end-1,:);
 ds = sqrt(vdiff(:,1).^2 + vdiff(:,2).^2);
 
-% probability that next point in series is within radius r of current point
-% in the poincare section
+% Probability that next point in series is within radius r of current point in
+% the poincare section:
 out.pwithinr01 = sum(ds<0.1)/(NN-1);
 out.pwithin02 = sum(ds<0.2)/(NN-1);
 out.pwithin03 = sum(ds<0.3)/(NN-1);
@@ -176,7 +177,7 @@ out.maxds = max(ds);
 out.minds = min(ds);
 out.iqrds = iqr(ds);
 
-% now normalize both axes and look for structure in the cloud of points
+% Now normalize both axes and look for structure in the cloud of points
 % don't normalize for standard deviation -- this probably reveals some
 % structure...? But location is already noted.
 x = x - mean(x);
@@ -193,29 +194,26 @@ out.ac1D = CO_AutoCorr(D,1);
 out.ac2D = CO_AutoCorr(D,2);
 out.tauacD = CO_FirstZero(D,'ac');
 
-% Entropy of boxed distribution
-boxcounts = subcountboxes(x,y,10); % 10 partitions per axis
-pbox = boxcounts/NN;
+% ------------------------------------------------------------------------------
+%% Statistics of the boxed distribution:
+% ------------------------------------------------------------------------------
 
+numPartitions = [5,10];
+% (i) 5 partitions per axis
+% (ii) 10 partitions per axis
 
-out.maxpbox10 = max(pbox(:));
-out.minpbox10 = min(pbox(:));
-out.zerospbox10 = sum(pbox(:) == 0);
-out.meanpbox10 = mean(pbox(:));
-out.rangepbox10 = range(pbox(:));
-out.hboxcounts10 = -sum(pbox(pbox > 0).*log(pbox(pbox > 0)));
-out.tracepbox10 = sum(diag(pbox)); % trace
+for i = 1:length(numPartitions)
+    boxcounts = subcountboxes(x,y,numPartitions(i));
+    pbox = boxcounts/NN;
 
-boxcounts = subcountboxes(x,y,5);% 5 partitions per axis
-pbox = boxcounts/NN;
-out.maxpbox5 = max(pbox(:));
-out.minpbox5 = min(pbox(:));
-out.zerospbox5 = sum(pbox(:) == 0);
-out.meanpbox5 = mean(pbox(:));
-out.rangepbox5 = range(pbox(:));
-out.hboxcounts5 = -sum(pbox(pbox>0).*log(pbox(pbox>0)));
-out.tracepbox5 = sum(diag(pbox));
-
+    out.(sprintf('maxpbox%u',numPartitions(i))) = max(pbox(:));
+    out.(sprintf('minpbox%u',numPartitions(i))) = min(pbox(:));
+    out.(sprintf('zerospbox%u',numPartitions(i))) = sum(pbox(:) == 0);
+    out.(sprintf('meanpbox%u',numPartitions(i))) = mean(pbox(:));
+    out.(sprintf('rangepbox%u',numPartitions(i))) = range(pbox(:));
+    out.(sprintf('hboxcounts%u',numPartitions(i))) = -sum(pbox(pbox > 0).*log(pbox(pbox > 0)));
+    out.(sprintf('tracepbox%u',numPartitions(i))) = sum(diag(pbox)); % trace
+end
 
 % can imagine doing many more things; like seeing different slabs of the
 % space, or finding the line whos vicinity includes many points, etc. but I
@@ -230,11 +228,11 @@ out.tracepbox5 = sum(diag(pbox));
         xbox(end) = xbox(end)+1;
         ybox(end) = ybox(end)+1;
         
-        for i = 1:nbox % x
-            rx = (x >= xbox(i) & x < xbox(i+1)); % these x are in range
-            for j = 1:nbox % y
+        for ii = 1:nbox % x
+            rx = (x >= xbox(ii) & x < xbox(ii+1)); % these x are in range
+            for jj = 1:nbox % y
                 % only need to look at those ys for which the xs are in range
-                boxcounts(i,j) = sum(y(rx) >= ybox(j) & y(rx) < ybox(j+1));
+                boxcounts(ii,jj) = sum(y(rx) >= ybox(jj) & y(rx) < ybox(jj+1));
             end
         end     
     end

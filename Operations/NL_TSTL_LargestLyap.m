@@ -69,7 +69,7 @@ BF_CheckToolbox('curve_fitting_toolbox');
 doPlot = 0; % whether to plot outputs to a figure
 
 % ------------------------------------------------------------------------------
-%% Preliminaries
+%% Check inputs, preliminaries:
 % ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
@@ -160,6 +160,7 @@ if all(p == 0)
 end
 
 % p at lags up to 5
+% (note that p1 = 0, so not so useful to record)
 for i = 1:5
     % evaluate p(1), p(2), ..., p(5) for the output structure
     out.(sprintf('p%u',i)) = p(i);
@@ -238,7 +239,7 @@ else
             mybad(i,j) = lfitbadness(t_scal(stptr(i):endptr(j)),p_scal(stptr(i):endptr(j))');
         end
     end
-    [a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+    [a, b] = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
     
     % Do the optimum fit again
     t_opt = t_scal(stptr(a):endptr(b));
@@ -265,7 +266,7 @@ else
     for i = 1:length(endptr)
         mybad(i) = lfitbadness(t_scal(1:endptr(i)),p_scal(1:endptr(i))');
     end
-    b = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+    b = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
     
     % Do the optimum fit again
     t_opt = t_scal(1:endptr(b));
@@ -322,9 +323,9 @@ end
             gamma = 0.006; % regularization parameter, gamma, chosen empirically
         end
         pp = polyfit(x,y,1);
-        pfit = pp(1)*x+pp(2);
+        pfit = pp(1)*x + pp(2);
         res = pfit - y;
-        badness = mean(abs(res))-gamma*length(x); % want to still maximize length(x)
+        badness = mean(abs(res)) - gamma*length(x); % want to still maximize length(x)
     end
     % ------------------------------------------------------------------------------
 
