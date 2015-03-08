@@ -5,6 +5,40 @@
 % Plots the dataset in a two-dimensional space
 % e.g., that of two chosen operations, or two principal components.
 % 
+%---INPUTS:
+% Features, an Nx2 vector of where to plot each of the N data objects in the
+%           two-dimensional space
+%
+% DataInfo, a structure containing all the information about the data. Fields
+%           can include:
+%               - labels (feature labels, cols of Features)
+%               - DataLabels (labels for each data point, rows of Features)
+%               - GroupIndices (a group index for each data point, rows of Features)
+%               - GroupNames (name for each group)
+%               - TimeSeriesData (cell of vectors containing time-series data)
+% 
+% TrainTest, whether to plot separately indices of training and test datapoints.
+%               Of the form {index_train,index_test}.
+%               If of the form [index], then just plots the subset index of the
+%                       points in Features.
+%               
+% annotatep, a structure containing all the information about how to annotate
+%           data points. Fields can include:
+%               - n, the number of data points to annotate
+%               - UserInput, 0: randomly selected datapoints, 1: user clicks to annotate datapoints
+%               - fdim, 1x2 vector with width and height of time series as fraction of plot size
+%               - maxL, maximum length of annotated time series
+%               - TextAnnotation: 'filename', 'tsid', or 'none' to annotate this data
+%               - cmap, a cell of colors, with elements for each group
+%               - TheMarkerSize, a custom marker size
+%               - TheLineWidth: line width for annotated time series
+% 
+% keepksdensities, if 1 (default), plots marginal density estimates for each variable
+%                   (above and to the right of the plot), otherwise set to 0.
+%                   
+% lossMeth, can select a classifier to fit to the different classes (e.g.,
+%               'linclass' for a linear classifier).
+% 
 %---HISTORY
 % Borrows from TSQ_pca plotting routines
 % Ben Fulcher 24/3/2010
@@ -15,7 +49,7 @@
 % Ben Fulcher 20/10/2010: added annotatep option: number of time series
 %                annotations to make (default = 0)
 % Ben Fulcher 20/10/2010: also added keepksdensities option
-% Ben Fulcher 27/10/2010: added lossmeth option (choose how to calculate
+% Ben Fulcher 27/10/2010: added lossMeth option (choose how to calculate
 %                           loss)
 %
 % ------------------------------------------------------------------------------
@@ -34,7 +68,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_2d(Features,DataInfo,TrainTest,annotatep,keepksdensities,lossmeth)
+function TSQ_plot_2d(Features,DataInfo,TrainTest,annotatep,keepksdensities,lossMeth)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
@@ -53,18 +87,19 @@ if nargin < 3 || isempty(TrainTest)
 end
 
 if nargin < 4 || isempty(annotatep)
-    annotatep = struct('n',0);
+    annotatep = struct('n',0); % don't annotate
 end
 
+% By default, plot kernel density estimates above and on the side of the plot:
 if nargin < 5 || isempty(keepksdensities)
     keepksdensities = 1;
 end
 
-if nargin < 6 || isempty(lossmeth)
-    lossmeth = 'linclass';
+if nargin < 6 || isempty(lossMeth)
+    lossMeth = 'linclass';
 end
 
-MakeFigure = 1; % default is to plot on a brand new figure('color','w')
+makeFigure = 1; % default is to plot on a brand new figure('color','w')
 
 % ------------------------------------------------------------------------------
 %% Load data
@@ -113,7 +148,7 @@ end
 % ------------------------------------------------------------------------------
 loss = zeros(3,1); % loss1, loss2, lossboth
 gig = BF_ToGroup(GroupIndices); % Convert GroupIndices to group form
-switch lossmeth
+switch lossMeth
     case 'linclass'
         kfold = 10;
         nrepeats = 5;
@@ -146,7 +181,7 @@ end
 % ------------------------------------------------------------------------------
 %% Plot
 % ------------------------------------------------------------------------------
-if MakeFigure % can set extras.MakeFigure = 0 to plot within a given setting
+if makeFigure % can set extras.makeFigure = 0 to plot within a given setting
     figure('color','w'); box('on'); % white figure
 end
 
@@ -251,7 +286,7 @@ end
 % ------------------------------------------------------------------------------
 %% Plot a classify boundary?
 % ------------------------------------------------------------------------------
-if (NumGroups == 2) && strcmp(lossmeth,'linclass');
+if (NumGroups == 2) && strcmp(lossMeth,'linclass');
     modeorder = 'linear'; % or 'quadratic'
     
     xlim = get(gca,'XLim'); ylim=get(gca,'YLim');
@@ -271,7 +306,7 @@ if (NumGroups == 2) && strcmp(lossmeth,'linclass');
     h2 = ezplot(f,[xlim(1), xlim(2), ylim(1), ylim(2)]);
     set(h2,'LineStyle','--','color','k','LineWidth',2)
     % ezplot overrides the figure title. Reinstate:
-%     title(['combined loss (' lossmeth ') = ' num2str(round(loss(3)*100)) '%']);
+%     title(['combined loss (' lossMeth ') = ' num2str(round(loss(3)*100)) '%']);
 %     xlabel([labels{mr(1)} ' [' keywords{mr(1)} '] -- loss = ' num2str(round(loss(1)*100)) '%'],'interpreter','none')
 %     ylabel('')
 end
@@ -280,16 +315,16 @@ end
 % ------------------------------------------------------------------------------
 %% Label Axes
 % ------------------------------------------------------------------------------
-title(sprintf('Combined misclassification rate (%s) = %.2f%%',lossmeth, ...
+title(sprintf('Combined misclassification rate (%s) = %.2f%%',lossMeth, ...
                     round(loss(3,1)*100)),'interpreter','none');
 
-LabelText = cell(2,1);
+labelText = cell(2,1);
 for i = 1:2
-    LabelText{i} = sprintf('%s (%.2f %%)',labels{i}, ...
+    labelText{i} = sprintf('%s (%.2f %%)',labels{i}, ...
                             round(loss(i,1)*100)); %,round(loss(i,2)*100));
 end
-xlabel(LabelText{1},'interpreter','none')
-ylabel(LabelText{2},'interpreter','none')
+xlabel(labelText{1},'interpreter','none')
+ylabel(labelText{2},'interpreter','none')
 
 % Set Legend
 if isempty(TrainTest)
@@ -349,7 +384,7 @@ pheight = diff(pylim); % plot height
 AlreadyPicked = zeros(NumAnnotations,2); % record those already picked
 PlotCircle = 1; % magenta circle around annotated points
 
-% produce xy points
+% Produce xy points
 xy = cell(NumGroups,1);
 for i = 1:NumGroups
     xy{i} = [Features(GroupIndices{i},1),Features(GroupIndices{i},2)];
