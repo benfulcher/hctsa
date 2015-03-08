@@ -3,15 +3,15 @@
 <head>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
   <meta name="author" content="Carl E. Rasmussen and Hannes Nickisch">
-  <meta name="description" content="User documentation of the Gaussian process for machine learning 3.2">
+  <meta name="description" content="User documentation of the Gaussian process for machine learning code 3.4">
   <title>Documentation for GPML Matlab Code</title>
   <link type="text/css" rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Documentation for GPML Matlab Code version 3.2</h1>
+<h1>Documentation for GPML Matlab Code version 3.5</h1>
 
-<h2>What?</h2>
+<h2>1) What?</h2>
 
 <p>The code provided here originally demonstrated the main algorithms
 from Rasmussen and Williams: <a
@@ -28,35 +28,35 @@ and <a href="http://www.mathworks.com/products/matlab/">Matlab</a>&reg; 7.x and 
 The code is based on <a href="http://gaussianprocess.org/gpml/code/matlab/release/oldcode.html">previous versions</a> 
 written by Carl Edward Rasmussen and Chris Williams.</p>
 
-<h2>Download, Install and Documentation</h2>
+<h2>2) Download, Install and Documentation</h2>
 
 <p>All the code including demonstrations and html documentation can be
 downloaded in a <a
- href="http://gaussianprocess.org/gpml/code/matlab/release/gpml-matlab-v3.2-2013-01-15.tar.gz">tar</a>
+ href="http://gaussianprocess.org/gpml/code/matlab/release/gpml-matlab-v3.5-2014-12-08.tar.gz">tar</a>
 or <a
- href="http://gaussianprocess.org/gpml/code/matlab/release/gpml-matlab-v3.2-2013-01-15.zip">zip</a>
+ href="http://gaussianprocess.org/gpml/code/matlab/release/gpml-matlab-v3.5-2014-12-08.zip">zip</a>
 archive file.</p>
 
 <p>Minor changes and incremental bugfixes to the current version are
 documented in the <a href="changelog">changelog</a>, changes from
 previous versions are documented
-in <a href="../README">README</a>. </p>
+in <a href="README">README</a>. </p>
 
 <p>Please read the <a href="../Copyright">copyright</a> notice.</p>
 
-<p>After unpacking the tar or zip file you will find 6 subdirectories:
-cov, doc, inf, lik, mean and util. It is not necessary to install
+<p>After unpacking the tar or zip file you will find 7 subdirectories:
+cov, doc, inf, lik, mean, prior and util. It is not necessary to install
 anything to get started, just run the <a
 href="../startup.m"><tt>startup</tt></a> script to set your path.</p>
 
 <p>Details about the directory contents and on how to compile mex
-files can be found in the <a href="../README">README</a>. The getting
+files can be found in the <a href="README">README</a>. The getting
 started guide is the remainder of the html file you are currently
 reading (also available at <a href="http://gaussianprocess.org/gpml/code/matlab/doc">http://gaussianprocess.org/gpml/code/matlab/doc</a>). A Developer's Guide containing technical documentation is
 found in <a href="manual.pdf"><tt>manual.pdf</tt></a>, but for the casual user,
 the guide is below.</p>
 
-<h2>Theory</h2>
+<h2> 3) Theory</h2>
 
 <p>Gaussian Processes (GPs) can conveniently be used for Bayesian
 supervised learning, such as regression and classification. In its
@@ -106,15 +106,39 @@ need to know about:</p>
   <a href="usageMean.m"><tt>usageMean</tt></a> and <a href="usageCov.m">usageCov</a> functions.
 <dt><strong>Hyperparameters</strong>
 <dd>GPs are typically specified using mean and covariance functions
- which have free parameters called <em>hyperparameters</em>. Also
- likelihood functions may have such parameters. These are encoded in
- a struct with the fields <tt>mean</tt>, <tt>cov</tt> and
- <tt>lik</tt> (some of which may be empty). When specifying
+  which have free parameters called <em>hyperparameters</em>. Also
+  likelihood functions may have such parameters. These are encoded in
+  a struct with the fields <tt>mean</tt>, <tt>cov</tt> and
+  <tt>lik</tt> (some of which may be empty). When specifying
   hyperparameters, it is important that the number of elements in each
   of these struct fields, precisely match the number of parameters expected
   by the mean function, the covariance function and the likelihood
   functions respectively (otherwise an error will result). Hyperparameters whose
- natural domain is positive are represented by their logarithms.
+  natural domain is positive are represented by their logarithms.
+  When working with FITC approximate inference, the inducing inputs <tt>xu</tt>
+  can also be treated as hyperparameters for some common stationary covariances.
+<dt><strong>Hyperparameter Prior Distributions</strong>
+<dd>When optimising the marginal likelihood w.r.t. hyperparameters, it is
+  sometimes useful to softly constrain the hyperparameters by means of prior knowledge.
+  A <a href="../priorDistributions.m">hyperprior</a> is a probability distribution over
+  individual or a group of hyperparameters. All hyperpriors begin with
+  letters <tt>prior</tt> and reside in the <a href="../prior"><tt>prior</tt>
+  directory</a>. An overview is provided by the <a
+  href="../priorDistributions.m"><tt>priorDistributions</tt></a> help function (type <tt>help
+  priorDistributions</tt> to get help). Some examples are 
+  <a href="../prior/priorGauss.m"><tt>priorGauss</tt></a> and 
+  <a href="../prior/priorGaussMulti.m"><tt>priorGaussMulti</tt></a> the
+  uni- and multivariate Gaussian prior, 
+  <a href="../prior/priorSmoothBox1.m"><tt>priorSmoothBox1</tt></a> and 
+  <a href="../prior/priorSmoothBox2.m"><tt>priorSmoothBox2</tt></a> the
+  univariate (smoothed) box prior with linear or quadratic decay,
+  <a href="../prior/priorMix.m"><tt>priorMix</tt></a> the mixture prior, and
+  <a href="../prior/priorTransform.m"><tt>priorTransform</tt></a> allowing to place
+  a prior on a transformation g(x) rather than on x directly.
+  Further, we have the two equivalents <tt>priorDelta</tt> and <tt>priorClamp</tt>
+  to exclude a parameter from optimisation.
+  <br>
+  Examples are given below and in the <a href="usagePrior.m"><tt>usagePrior</tt></a> function.
 <dt><strong>Likelihood Functions</strong>
 <dd>The <a href="../likFunctions.m">likelihood function</a> specifies
   the probability of the observations given the latent function, i.e. the GP (and the
@@ -124,286 +148,587 @@ need to know about:</p>
   href="../likFunctions.m"><tt>likFunctions</tt></a> help function (type <tt>help
   likFunctions</tt> to get help). Some examples are 
   <a href="../lik/likGauss.m"><tt>likGauss</tt></a> the Gaussian likelihood for regression, 
-  <a href="../lik/likPoisson.m"><tt>likPoisson</tt></a> the Poisson likelihood for count data, and
+  <a href="../lik/likPoisson.m"><tt>likPoisson</tt></a> the Poisson likelihood for count data,
+  <a href="../lik/likGamma.m"><tt>likGamma</tt></a> the Gamma likelihood for positive data, 
+  <a href="../lik/likBeta.m"><tt>likBeta</tt></a> the Beta likelihood for interval data, and
   <a href="../lik/likLogistic.m"><tt>likLogistic</tt></a> the logistic 
-  function used in classification (a.k.a. logistic regression).
+  function used in classification (a.k.a. logistic regression). Output dependent noise can
+  be modeled using warped GPs implemented by <a href="../lik/likGaussWarp.m"><tt>likGaussWarp</tt></a>.
   As for the mean and covariance functions there is also a composite likelihood
-  <a href="lik/likMix.m"><tt>likMix</tt></a> that can be used to generate
+  <a href="../lik/likMix.m"><tt>likMix</tt></a> that can be used to generate
   mixtures of other likelihood functions.
   <br>
   Examples are given below and in the <a href="usageLik.m"><tt>usageLik</tt></a> function.
 <dt><strong>Inference Methods</strong>
-<dd>The <a href="../infMethods.m">inference methods</a> specify how
-  to compute with the model, i.e. how to infer the (approximate)
-  posterior process, how to find hyperparameters, evaluate the log
-  marginal likelihood and how to make predictions. Inference methods
-  all begin with the three letters <tt>inf</tt> and reside in the <a
-  href="../inf">inf directory</a>. An overview is provided by the <a
-  href="../infMethods.m"><tt>infMethods</tt></a> help file (type <tt>help
-  infMethods</tt> to get help). Some examples are
-  <a href="../inf/infExact.m"><tt>infExact</tt></a> for exact inference 
-  (regression with Gaussian likelihood), <a href="../inf/infFITC.m"><tt>infFITC</tt></a> 
-  for large scale Gaussian regression,   <a href="../inf/infEP.m"><tt>infEP</tt></a> for the Expectation Propagation
-  algorithm, or <a href="../inf/infFITC_Laplace.m"><tt>infFITC_Laplace</tt></a> for large scale Laplace's approximation. Further usage examples are provided for both 
-  <a href="usageRegression.m">regression</a> and 
-  <a href="usageClassification.m">classification</a>.
-  However, not all combinations of likelihood function and inference method
-  are possible (e.g. you cannot do exact inference with a Laplace likelihood).
-  An exhaustive compatibility matrix between likelihoods (rows) and 
-  inference methods (columns) is given in the table below:
+<dd>The <a href="../infMethods.m">inference methods</a> specify how to compute 
+    with the model, i.e. how to infer the (approximate) posterior process, how 
+    to find hyperparameters, evaluate the log marginal likelihood and how to make 
+    predictions. Inference methods all begin with the three letters <tt>inf</tt> 
+    and reside in the <a href="../inf">inf directory</a>. An overview is provided by the 
+	<a href="../infMethods.m"><tt>infMethods</tt></a> help file (type <tt>help infMethods</tt> 
+    to get help). Some examples are <a href="../inf/infExact.m"><tt>infExact</tt></a> 
+    for exact inference (regression with Gaussian likelihood), 
+	<a href="../inf/infFITC.m"><tt>infFITC</tt></a> and <a href="../inf/infGrid.m"><tt>infGrid</tt></a>
+    for large scale Gaussian regression, <a href="../inf/infEP.m"><tt>infEP</tt></a> 
+    for the Expectation Propagation algorithm, <a href="../inf/infVB.m"><tt>infVB</tt></a> 
+    and <a href="../inf/infKL.m"><tt>infKL</tt></a> for two variational approximations 
+    based on a lower bound to the marginal likelihood, or <a href="../inf/infFITC_Laplace.m"><tt>infFITC_Laplace</tt></a> 
+    for large scale Laplace's approximation.
+	<br>
+	Further usage examples are provided 
+    for both <a href="usageRegression.m">regression</a> and <a href="usageClassification.m">classification</a>. 
+    However, not all combinations of likelihood function and inference method 
+    are possible (e.g. you cannot do exact inference with a Laplace likelihood). 
+    An exhaustive compatibility matrix between likelihoods (rows) and inference 
+    methods (columns) is given in the table below:
 </dl>
 
-<table cellpadding=3 border="1" align="center">
-<tr>
-<td align="right">Inference</td>
-<td align="center" rowspan="2">GPML name</td>
-<td align="center">Exact<br><a href="../inf/infExact.m">infExact</a></td>
-<td align="center">EP<br><a href="../inf/infEP.m">infEP</a></td>
-<td align="center">Laplace<br><a href="../inf/infLaplace.m">infLaplace</a></td>
-<td align="center" rowspan="2">Variational Bayes<br><a href="../inf/infVB.m">infVB</a></td>
-<td align="center" rowspan="2">Sampling<br><a href="../inf/infMCMC.m">infMCMC</a></td>
-<td align="center" rowspan="2">LOO<br><a href="../inf/infLOO.m">infLOO</a></td>
-<td rowspan="2">type, output domain<br>&nbsp;</td>
-<td rowspan="2">alternate names<br>&nbsp;</td>
-</tr>
-<td align="left">Likelihood</td>
-<td align="center">FITC<br><a href="../inf/infFITC.m">infFITC</a></td>
-<td align="center">FITC-EP<br><a href="../inf/infFITC_EP.m">infFITC_EP</a></td>
-<td align="center">FITC-Laplace<br><a href="../inf/infFITC_Laplace.m">infFITC_Laplace</a></td>
-</tr>
-
-<tr><td align="left">Gaussian</td>
-<td align="left"><a href="../lik/likGauss.m">likGauss</a></td>
-<td align="center"><span class="math"><img
+<table border="1" align="center" cellpadding=2 cellspacing="0" bordercolor="#000000">
+  <tr bgcolor="#999999"> 
+    <td colspan="11" align="left">Plain Regression Likelihoods</td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="right">Inference</td>
+    <td rowspan="3" align="center">GPML name</td>
+    <td align="center">Exact<br> <a href="../inf/infExact.m">infExact</a></td>
+    <td align="center">EP<br> <a href="../inf/infEP.m">infEP</a></td>
+    <td align="center">Laplace<br> <a href="../inf/infLaplace.m">infLaplace</a></td>
+    <td rowspan="3" align="center">Variational Bayes<br> <a href="../inf/infVB.m">infVB</a></td>
+    <td rowspan="3" align="center">Kullback Leibler<br> <a href="../inf/infKL.m">infKL</a></td>
+    <td rowspan="3" align="center">Sampling<br> <a href="../inf/infMCMC.m">infMCMC</a></td>
+    <td rowspan="3" align="center">LOO<br> <a href="../inf/infLOO.m">infLOO</a></td>
+    <td rowspan="3">type, output domain<br>&nbsp;</td>
+    <td rowspan="3">alternative names<br>&nbsp;</td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="left" rowspan="2">Likelihood</td>
+    <td align="center">FITC<br> <a href="../inf/infFITC.m">infFITC</a></td>
+    <td align="center">FITC-EP<br> <a href="../inf/infFITC_EP.m">infFITC_EP</a></td>
+    <td align="center">FITC-Laplace<br> <a href="../inf/infFITC_Laplace.m">infFITC_Laplace</a></td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="center">Grid<br> <a href="../inf/infGrid.m">infGrid</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+  </tr>
+  <tr> 
+    <td align="left">Gaussian</td>
+    <td align="left"><a href="../lik/likGauss.m">likGauss</a></td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="left">regression, IR</td>
-<td>&nbsp;</td>
-</tr>
-
-<tr><td align="left">Sech-squared</td>
-<td align="left"><a href="../lik/likSech2.m">likSech2</a></td>
-<td align="center">&nbsp;</td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="left">regression, IR</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr> 
+    <td align="left">Warped Gaussian</td>
+    <td align="left"><a href="../lik/likGaussWarp.m">likGaussWarp</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="left">regression, IR</td>
-<td>&nbsp;</td></tr>
-
-<tr><td align="left">Laplacian</td>
-<td align="left"><a href="../lik/likLaplace.m">likLaplace</a></td>
-<td align="center">&nbsp;</td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center">&nbsp;</td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="left">regression, IR</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr> 
+    <td align="left">Gumbel</td>
+    <td align="left"><a href="../lik/likGumbel.m">likGumbel</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="left">regression, IR</td>
-<td>double exponential</td></tr>
-
-<tr><td align="left">Student's t</td>
-<td align="left"><a href="../lik/likT.m">likT</a></td>
-<td align="center">&nbsp;</td>
-<td align="center">&nbsp;</td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="left">regression, IR</td>
+    <td>extremal value regression</td>
+  </tr>
+  <tr> 
+    <td align="left">Sech squared</td>
+    <td align="left"><a href="../lik/likSech2.m">likSech2</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="left">regression, IR</td>
-<td>&nbsp;</td></tr>
-
-<tr><td align="left">Mixture</td>
-<td align="left"><a href="../lik/likMix.m">likMix</a></td>
-<td align="center">&nbsp;</td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center">&nbsp;</td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="left">classification, &plusmn;1 and regression, IR</td>
-<td>mixing meta likelihood</td>
-</tr>
-
-<tr><td align="left">Uniform</td>
-<td align="left"><a href="../lik/likUni.m">likUni</a></td>
-<td align="center">&nbsp;</td>
-<td align="center"><span class="math"><img
+    <td align="left">regression, IR</td>
+    <td align="left">logistic distribution</td>
+  </tr>
+  <tr> 
+    <td align="left">Laplacian</td>
+    <td align="left"><a href="../lik/likLaplace.m">likLaplace</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="left">classification, &plusmn;1</td>
-<td>label noise</td>
-</tr>
-
-<tr><td align="left">Error function</td>
-<td align="left"><a href="../lik/likErf.m">likErf</a></td>
-<td align="center">&nbsp;</td>
-<td align="center"><span class="math"><img
+    <td align="left">regression, IR</td>
+    <td>double exponential</td>
+  </tr>
+  <tr> 
+    <td align="left">Student's t</td>
+    <td align="left"><a href="../lik/likT.m">likT</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="left">classification, &plusmn;1</td>
-<td>probit regression</td>
-</tr>
-
-<tr><td align="left">Logistic function</td>
-<td align="left"><a href="../lik/likLogistic.m">likLogistic</a></td>
-<td align="center">&nbsp;</td>
-<td align="center"><span class="math"><img
+    <td align="left">regression, IR</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr bgcolor="#999999"> 
+    <td colspan="11" align="left">Composite Likelihoods</td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="right">Inference</td>
+    <td rowspan="3" align="center">GPML name</td>
+    <td align="center">Exact<br> <a href="../inf/infExact.m">infExact</a></td>
+    <td align="center">EP<br> <a href="../inf/infEP.m">infEP</a></td>
+    <td align="center">Laplace<br> <a href="../inf/infLaplace.m">infLaplace</a></td>
+    <td rowspan="3" align="center">Variational Bayes<br> <a href="../inf/infVB.m">infVB</a></td>
+    <td rowspan="3" align="center">Kullback Leibler<br> <a href="../inf/infKL.m">infKL</a></td>
+    <td rowspan="3" align="center">Sampling<br> <a href="../inf/infMCMC.m">infMCMC</a></td>
+    <td rowspan="3" align="center">LOO<br> <a href="../inf/infLOO.m">infLOO</a></td>
+    <td rowspan="3">type, output domain<br>&nbsp;</td>
+    <td rowspan="3">alternative names<br>&nbsp;</td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="left" rowspan="2">Likelihood</td>
+    <td align="center">FITC<br> <a href="../inf/infFITC.m">infFITC</a></td>
+    <td align="center">FITC-EP<br> <a href="../inf/infFITC_EP.m">infFITC_EP</a></td>
+    <td align="center">FITC-Laplace<br> <a href="../inf/infFITC_Laplace.m">infFITC_Laplace</a></td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="center">Grid<br> <a href="../inf/infGrid.m">infGrid</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+  </tr>
+  <tr> 
+    <td align="left">Mixture</td>
+    <td align="left"><a href="../lik/likMix.m">likMix</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="left">classification, &plusmn;1</td>
- <td>logistic regression<br>logit regression</td>
-</tr>
-
-<tr><td align="left">Poisson</td>
-<td align="left"><a href="../lik/Poisson.m">likPoisson</a></td>
-<td align="center">&nbsp;</td>
-<td align="center"><span class="math"><img
+    <td align="left">classification, &plusmn;1 and regression, IR</td>
+    <td>mixing meta likelihood</td>
+  </tr>
+  <tr bgcolor="#999999"> 
+    <td colspan="11" align="left">Classification Likelihoods</td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="right">Inference</td>
+    <td rowspan="3" align="center">GPML name</td>
+    <td align="center">Exact<br> <a href="../inf/infExact.m">infExact</a></td>
+    <td align="center">EP<br> <a href="../inf/infEP.m">infEP</a></td>
+    <td align="center">Laplace<br> <a href="../inf/infLaplace.m">infLaplace</a></td>
+    <td rowspan="3" align="center">Variational Bayes<br> <a href="../inf/infVB.m">infVB</a></td>
+    <td rowspan="3" align="center">Kullback Leibler<br> <a href="../inf/infKL.m">infKL</a></td>
+    <td rowspan="3" align="center">Sampling<br> <a href="../inf/infMCMC.m">infMCMC</a></td>
+    <td rowspan="3" align="center">LOO<br> <a href="../inf/infLOO.m">infLOO</a></td>
+    <td rowspan="3">type, output domain<br>&nbsp;</td>
+    <td rowspan="3">alternative names<br>&nbsp;</td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="left" rowspan="2">Likelihood</td>
+    <td align="center">FITC<br> <a href="../inf/infFITC.m">infFITC</a></td>
+    <td align="center">FITC-EP<br> <a href="../inf/infFITC_EP.m">infFITC_EP</a></td>
+    <td align="center">FITC-Laplace<br> <a href="../inf/infFITC_Laplace.m">infFITC_Laplace</a></td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="center">Grid<br> <a href="../inf/infGrid.m">infGrid</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+  </tr>
+  <tr> 
+    <td align="left">Uniform</td>
+    <td align="left"><a href="../lik/likUni.m">likUni</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
-<td align="center">&nbsp;</td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="center"><span class="math"><img
+    <td align="center"><span class="math"><img
  width="18" height="14" align="bottom" border="0"
  src="checkmark.png"
  alt="$\checkmark$"></span></td>
- <td align="left">count data, IN</td>
- <td>Poisson regression</td>
-</tr>
-
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="left">classification, &plusmn;1</td>
+    <td>label noise</td>
+  </tr>
+  <tr> 
+    <td align="left">Error function</td>
+    <td align="left"><a href="../lik/likErf.m">likErf</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="left">classification, &plusmn;1</td>
+    <td>probit regression</td>
+  </tr>
+  <tr> 
+    <td align="left">Logistic function</td>
+    <td align="left"><a href="../lik/likLogistic.m">likLogistic</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="left">classification, &plusmn;1</td>
+    <td>logistic regression<br>
+      logit regression</td>
+  </tr>
+  <tr bgcolor="#999999"> 
+    <td colspan="11" align="left">Generalized Linear Model Likelihoods</td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="right">Inference</td>
+    <td rowspan="3" align="center">GPML name</td>
+    <td align="center">Exact<br> <a href="../inf/infExact.m">infExact</a></td>
+    <td align="center">EP<br> <a href="../inf/infEP.m">infEP</a></td>
+    <td align="center">Laplace<br> <a href="../inf/infLaplace.m">infLaplace</a></td>
+    <td rowspan="3" align="center">Variational Bayes<br> <a href="../inf/infVB.m">infVB</a></td>
+    <td rowspan="3" align="center">Kullback Leibler<br> <a href="../inf/infKL.m">infKL</a></td>
+    <td rowspan="3" align="center">Sampling<br> <a href="../inf/infMCMC.m">infMCMC</a></td>
+    <td rowspan="3" align="center">LOO<br> <a href="../inf/infLOO.m">infLOO</a></td>
+    <td rowspan="3">type, output domain<br>&nbsp;</td>
+    <td rowspan="3">alternative names<br>&nbsp;</td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="left" rowspan="2">Likelihood</td>
+    <td align="center">FITC<br> <a href="../inf/infFITC.m">infFITC</a></td>
+    <td align="center">FITC-EP<br> <a href="../inf/infFITC_EP.m">infFITC_EP</a></td>
+    <td align="center">FITC-Laplace<br> <a href="../inf/infFITC_Laplace.m">infFITC_Laplace</a></td>
+  </tr>
+  <tr bgcolor="#CCCCCC"> 
+    <td align="center">Grid<br> <a href="../inf/infGrid.m">infGrid</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+  </tr>
+  <tr> 
+    <td align="left">Weibull</td>
+    <td align="left"><a href="../lik/likWeibull.m">likWeibull</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="left">positive data, IR+\{0}</td>
+    <td>nonnegative regression</td>
+  </tr>
+  <tr> 
+    <td align="left">Gamma</td>
+    <td align="left"><a href="../lik/likGamma.m">likGamma</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="left">positive data, IR+\{0}</td>
+    <td>nonnegative regression</td>
+  </tr>
+  <tr> 
+    <td align="left">Exponential</td>
+    <td align="left"><a href="../lik/likExp.m">likExp</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="left">positive data, IR+\{0}</td>
+    <td>nonnegative regression</td>
+  </tr>
+  <tr> 
+    <td align="left">Inverse Gaussian</td>
+    <td align="left"><a href="../lik/likInvGauss.m">likInvGauss</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="left">positive data, IR+\{0}</td>
+    <td>nonnegative regression</td>
+  </tr>
+  <tr> 
+    <td align="left">Poisson</td>
+    <td align="left"><a href="../lik/likPoisson.m">likPoisson</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">(<span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span>)*</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="left">count data, IN</td>
+    <td>Poisson regression</td>
+  </tr>
+  <tr> 
+    <td align="left">Beta</td>
+    <td align="left"><a href="../lik/likBeta.m">likBeta</a></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="center"><span class="math"><img
+ width="18" height="14" align="bottom" border="0"
+ src="checkmark.png"
+ alt="$\checkmark$"></span></td>
+    <td align="left">interval data, [0,1]</td>
+    <td>range regression</td>
+  </tr>
 </table>
+
+<p>* EP might not converge in some cases since quadrature is used.</p>
 
 <p>All of the objects described above are written in a modular way, so
 you can add functionality if you feel constrained despite the
@@ -416,7 +741,7 @@ is not possible with MCMC. Please see <a href="usageSampling.m">usageSampling</a
 for a toy example illustrating the usage of the implemented samplers.
 </p>
 
-<h2>Practice</h2>
+<h2> 4) Practice</h2>
 
 <p>Using the GPML package is simple. There is only one single function to
 call: <a href="../gp.m">gp</a>, it does posterior inference, learns
@@ -465,7 +790,7 @@ example here on this page, or using the two scripts <a
  href="demoClassification.m">demoClassification</a> (using the
 scripts, you still need to follow the explanation on this page).
 
-<h3>Regression</h3>
+<h3>3a) Regression</h3>
 
 <p>You can either follow the example here on this page, or use the script <a
 href="demoRegression.m">demoRegression</a>.</p>
@@ -509,7 +834,7 @@ to 0.5) and an off-set (set to 1). The number and the order of these
 hyperparameters conform to the mean function specification. You can
 find out how many hyperparameters a mean (or covariance or likelihood
 function) expects by calling it without arguments, such as
-<tt>feval(@meanfunc{:})</tt>. For more information on mean functions
+<tt>feval(meanfunc{:})</tt>. For more information on mean functions
 see <a href="../meanFunctions.m">meanFunctions</a> and the directory
 <a href="../mean">mean/</a>.</p>
 
@@ -660,7 +985,33 @@ marginal likelihood.</p>
 function (although the covariance function is still different from
 that of the generating process).</p>
 
-<h4>Large scale regression</h4>
+<h4>Guiding marginal likelihood optimisation with a hyperprior</h4>
+<p>It can be usefull to put a prior distribution on (a part of)
+the hyperparameters. Sometimes, one may want to exclude some hyperparameters
+from the optimisation i.e. fix their values beforehand and treat them as constants.
+</p>
+<p>In these cases, a hyperprior comes to bear. A hyperprior is specified by
+augmenting the <tt>inf</tt> parameter of <tt>gp.m</tt> In the regression
+before, we had <tt>inf = @infExact;</tt>. To put a Gaussian prior
+on the first mean hyperparameter <tt>hyp.mean(1)</tt> and a Laplacian prior
+on the second mean hyperparameter <tt>hyp.mean(2)</tt> and wished to fix
+the noise variance hyperparameter <tt>hyp.lik</tt>, we simple need to
+set up the corresponding <tt>prior</tt> structure as detailed below.
+</p>
+
+<pre>
+  mu = 1.0; s2 = 0.01^2;
+  prior.mean = {{@priorGauss,mu,s2}; {'priorLaplace',mu,s2}};
+  prior.lik = {{@priorDelta}};
+  inf = {@infPrior,@infExact,prior};
+  hyp = minimize(hyp, @gp, -100, inf, meanfunc, covfunc, likfunc, x, y);
+</pre>
+
+<p>
+Further examples are provided in <a href="usagePrior.m"><tt>usagePrior</tt></a>.
+</p>
+
+<h4>Large scale regression using the FITC approximation</h4>
 
 <p>In case the number of training inputs <tt>x</tt> exceeds a few 
 thousands, exact inference using
@@ -701,6 +1052,45 @@ one can simply use a random subset of the training points.
 
 <center><img src="f5.gif" alt="f5.gif"></center><br>
 
+<h4>Large scale regression exploiting the grid structure</h4>
+
+<p>A covariance function factorising over coordinates axes leads
+to a covariance matrix with Kronecker structure. This can be exploited
+to scale GPs beyond the O(n³) limit. If there are observations for
+all points of the grid, all computations are exact. The example below
+contains the most relevant code from the script 
+<a href="demoGrid.m">demoGrid</a>, where we extrapolate a pixel image
+beyond its boundaries.</p>
+
+<p> For a comprehensive set of examples and more resources, see a <a href="http://www.cs.cmu.edu/~andrewgw/pattern/"> website by Andrew Wilson</a>.
+</p>
+
+<p> We start off by setting up the training data and the GP on a [-2,2]x[-3,3] lattice with 14400 pixels -- a size where a usual dens GP would be computationally infeasible. Then we wrap the covariance functions for the axes into <tt>covGrid</tt> and specify the initial values for the hyperparameters. Note that <tt>covGrid</tt> can only be used in conjunction with <tt>infGrid</tt>.
+</p>
+<pre>
+  xg = {linspace(-2,2,120)',linspace(-3,3,120)'}; xe = covGrid('expand',xg);
+  x = (1:size(xe,1))'; y = sin(xe(:,2)) + xe(:,1) + 0.01*gpml_randn(1,size(x));
+  cov = {{@covSEiso},{@covSEiso}}; covg = {@covGrid,cov,xg};
+  hyp.cov = zeros(4,1); hyp.mean = []; hyp.lik = log(0.1);
+</pre>
+
+<p>
+As a next step, we perform hyperparameter optimisation as with a usual GP model. The inference method <tt>inGrid</tt> only supports <tt>likGauss</tt>, hence we can leave the field empty.
+</p>
+<pre>
+  hyp = minimize(hyp,@gp,-50,@infGrid,@meanZero,covg,[],x,y);
+</pre>
+
+<p> Finally, we predict on a [-4,4]x[-6,6] lattice to see the result of the extrapolation. The figure shows on the left the training data and on the right the prediction. Note that, we also support partial observations.
+</p>
+<pre>
+  xs = covGrid('expand',{linspace(-4,4,100)',linspace(-6,6,110)'});
+  opt.cg_maxit = 200; opt.cg_tol = 5e-3;
+  post = infGrid(hyp,{@meanZero},covg,'likGauss',x,y,opt); post.L = @(a) a;
+  ym = gp(hyp, @infGrid,[],covg,[],x,post,xs);
+</pre>
+<center><img src="f9.png" alt="f9.png"></center><br>
+
 <h4>Exercises for the reader</h4>
 
 <dl>
@@ -718,7 +1108,7 @@ the previous case?
 </dl>
 
 
-<h3>Classification</h3>
+<h3>3b) Classification</h3>
 
 <p>You can either follow the example here on this page, or use the script <a
 href="demoClassification.m">demoClassification</a>.</p>
@@ -826,7 +1216,7 @@ hyperparameters (so <tt>hyp.lik</tt> does not exist).</p>
 learning, you will find that they are fairly similar, reflecting the
 fact that for this data set, both inputs important.</p>
 
-<h4>Large scale classification</h4>
+<h4>Large scale classification using the FITC approximation</h4>
 
 <p>In case the number of training inputs <tt>x</tt> exceeds a few 
 hundreds, approximate inference using
@@ -867,7 +1257,6 @@ points can be used as inducing points.
 <center><img src="f8.gif" alt="f8.gif"></center><br>
 
 <h4>Exercise for the reader</h4>
-
 <dl>
 <dt><strong>Inference Methods</strong>
 <dd>Use the Laplace
@@ -881,13 +1270,13 @@ approximation is best?
 is best?
 </dl>
 
-<h2>Acknowledgements</h2>
+<h2>5) Acknowledgements</h2>
 
 <p>Innumerable colleagues have helped to improve this software. Some
 of these are: John Cunningham, M&aacute;t&eacute; Lengyel, Joris Mooij, 
-Iain Murray, David Duvenaud, James Lloyd, Andrew McHutchon, Rowan McAllister, Daniel Marthaler and Chris Williams. Especially Ed Snelson helped to improve the code and to include sparse approximations.</p>
+Iain Murray, David Duvenaud, Andrew McHutchon, Rowan McAllister, Daniel Marthaler, Giampiero Salvi, Mark van der Wilk, Marco Fraccaro, Dali Wei, Ernst Kloppenburg, Ryan Turner and Chris Williams. Especially Ed Snelson helped to improve the code and to include sparse approximations and Roman Garnett and Jos&eacute; Vallet helped to include hyperparameter priors. The spectral mixture covariance function and the grid-based inference were contributed by Andrew Gordon Wilson and periodic covariances were added by James Robert Lloyd.</p>
 
 <hr>
-Last modified: January 15th 2013
+Last modified: December 8th 2014
 </body>
 </html>

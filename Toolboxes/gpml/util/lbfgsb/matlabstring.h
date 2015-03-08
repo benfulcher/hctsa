@@ -2,7 +2,7 @@
 #define INCLUDE_MATLABSTRING
 
 #include "mex.h"
-#include <string.h>
+#include <string>
 
 // Function declarations.
 // -----------------------------------------------------------------

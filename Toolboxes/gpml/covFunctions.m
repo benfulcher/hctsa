@@ -3,20 +3,31 @@
 %
 % simple covariance functions:
 %   covConst      - covariance for constant functions
-%   covLIN        - linear covariance function
+%   covCos        - sine periodic covariance function (1d) with unit period
+%   covLIN        - linear covariance function without parameters
 %   covLINard     - linear covariance function with ARD
+%   covLINiso     - linear covariance function
 %   covLINone     - linear covariance function with bias
+%   covMaternard  - Matern covariance function with nu=1/2, 3/2 or 5/2 with ARD
 %   covMaterniso  - Matern covariance function with nu=1/2, 3/2 or 5/2
 %   covNNone      - neural network covariance function
 %   covNoise      - independent covariance function (i.e. white noise)
-%   covPeriodic   - smooth periodic covariance function (1d) with unit period
+%   covPeriodic   - smooth periodic covariance function (1d)
+%   covPeriodicNoDC - as above but with zero DC component and properly scaled
 %   covPoly       - polynomial covariance function
+%   covPPard      - piecewise polynomial covariance function (compact support)
 %   covPPiso      - piecewise polynomial covariance function (compact support)
 %   covRQard      - rational quadratic covariance function with ARD
 %   covRQiso      - isotropic rational quadratic covariance function
 %   covSEard      - squared exponential covariance function with ARD
 %   covSEiso      - isotropic squared exponential covariance function
-%   covSEisoU     - as above but without latent scale
+%   covSEisoU     - same as above but without latent scale
+%   covSEvlen     - spatially varying lengthscale squared exponential
+%   covSEfact     - factor analysis squared exponential covariance function
+%   covSM         - spectral mixture covariance function
+%   covGaborard   - Gabor covariance function with ARD
+%   covGaborsio   - isotropic Gabor covariance function
+%   covDiscrete   - precomputed covariance for discrete data
 %
 % composite (meta) covariance functions (see explanation at the bottom):
 %   covScale      - scaled version of a covariance function
@@ -24,11 +35,16 @@
 %   covSum        - sums of covariance functions
 %   covADD        - additive covariance function
 %   covMask       - mask some dimensions of the data
+%   covPERard     - make ARD stationary covariance periodic
+%   covPERiso     - make isotropic stationary covariance periodic
+%   covPref       - difference covariance for preference learning
 %
 % special purpose (wrapper) covariance functions
-%   covFITC       - to be used in conjunction with infFITC for large scale 
-%                   regression problems; any covariance can be wrapped by
+%   covFITC       - to be used in conjunction with infFITC* for large scale 
+%                   inference problems; any covariance can be wrapped by
 %                   covFITC such that the FITC approximation is applicable
+%   covGrid       - to be used in conjunction with infGrid* for large scale 
+%                   inference problems on grids resulting Kronecker structure
 %
 % Naming convention: all covariance functions are named "cov/cov*.m". A trailing
 % "iso" means isotropic, "ard" means Automatic Relevance Determination, and
@@ -107,4 +123,5 @@
 %
 % See also doc/usageCov.m.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-01-21
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+%                                      File automatically generated using noweb.

@@ -20,29 +20,35 @@ function [post nlZ dnlZ] = infFITC_EP(hyp, mean, cov, lik, x, y)
 % Sigma = inv(inv(K)+diag(W)) = diag(d) + P'*R0'*R'*R*R0*P. Here, we use the
 % site parameters: b,w=$b,\pi$=tnu,ttau, P=$P'$, nn=$\nu$, gg=$\gamma$
 %             
-% The function takes a specified covariance function (see covFunction.m) and
-% likelihood function (see likFunction.m), and is designed to be used with
-% gp.m and in conjunction with covFITC. 
+% The function takes a specified covariance function (see covFunctions.m) and
+% likelihood function (see likFunctions.m), and is designed to be used with
+% gp.m and in conjunction with covFITC.
 %
-% Copyright (c) by Hannes Nickisch, 2012-11-09.
+% The inducing points can be specified through 1) the 2nd covFITC parameter or
+% by 2) providing a hyp.xu hyperparameters. Note that 2) has priority over 1).
+% In case 2) is provided and derivatives dnlZ are requested, there will also be
+% a dnlZ.xu field allowing to optimise w.r.t. to the inducing points xu. However
+% the derivatives dnlZ.xu can only be computed for one of the following eight
+% covariance functions: cov{Matern|PP|RQ|SE}{iso|ard}.
+%
+% Copyright (c) by Hannes Nickisch, 2013-10-29.
 %
 % See also INFMETHODS.M, COVFITC.M.
 
-cov1 = cov{1}; if isa(cov1, 'function_handle'), cov1 = func2str(cov1); end
-if ~strcmp(cov1,'covFITC'); error('Only covFITC supported.'), end    % check cov
-
 persistent last_ttau last_tnu              % keep tilde parameters between calls
 tol = 1e-4; max_sweep = 20; min_sweep = 2;     % tolerance to stop EP iterations
-
 inf = 'infEP';
-n = size(x,1);
+cov1 = cov{1}; if isa(cov1, 'function_handle'), cov1 = func2str(cov1); end
+if ~strcmp(cov1,'covFITC'); error('Only covFITC supported.'), end    % check cov
+if isfield(hyp,'xu'), cov{3} = hyp.xu; end  % hyp.xu is provided, replace cov{3}
+
 [diagK,Kuu,Ku] = feval(cov{:}, hyp.cov, x);         % evaluate covariance matrix
 if ~isempty(hyp.lik)                          % hard coded inducing inputs noise
   sn2 = exp(2*hyp.lik(end)); snu2 = 1e-6*sn2;               % similar to infFITC
 else
   snu2 = 1e-6;
 end
-nu = size(Kuu,1);
+[n, D] = size(x); nu = size(Kuu,1);
 m = feval(mean{:}, hyp.mean, x);                      % evaluate the mean vector
 
 rot180   = @(A)   rot90(rot90(A));                     % little helper functions
@@ -106,7 +112,7 @@ last_ttau = ttau; last_tnu = tnu;                       % remember for next call
 
 post.sW = sqrt(ttau);                  % unused for FITC_EP prediction with gp.m
 dd = 1./(d0+1./ttau);
-alpha = tnu./ttau.*dd;
+alpha = tnu./(1+d0.*ttau);
 RV = R*V; R0tV = R0'*V;
 alpha = alpha - (RV'*(RV*alpha)).*dd;     % long alpha vector for ordinary infEP
 post.alpha = R0tV*alpha;       % alpha = R0'*V*inv(Kt+diag(1./ttau))*(tnu./ttau)
@@ -140,6 +146,29 @@ if nargout>2                                           % do we want derivatives?
     dm = feval(mean{:}, hyp.mean, x, i);
     dnlZ.mean(i) = -dlZ'*dm;
   end
+  if isfield(hyp,'xu')                   % derivatives w.r.t. inducing points xu
+    xu = cov{3};
+    cov = cov{2};             % get the non FITC part of the covariance function
+    Kpu  = cov_deriv_sq_dist(cov,hyp.cov,xu,x);             % d K(xu,x ) / d D^2
+    Kpuu = cov_deriv_sq_dist(cov,hyp.cov,xu);               % d K(xu,xu) / d D^2
+    if iscell(cov), covstr = cov{1}; else covstr = cov; end
+    if ~ischar(covstr), covstr = func2str(covstr); end
+    if numel(strfind(covstr,'iso'))>0              % characteristic length scale
+      e = 2*exp(-2*hyp.cov(1));
+    else
+      e = 2*exp(-2*hyp.cov(1:D));
+    end
+    B = (R0'*R0)*Ku;
+
+    W = ttau;
+    t = W./(1+W.*d0);
+    diag_dK = alpha.*alpha + sum(RVdd.*RVdd,1)' - t;
+    v = diag_dK+t;                 % BdK = B * ( dnlZ/dK - diag(diag(dnlZ/dK)) )
+    BdK = (B*alpha)*alpha' - B.*repmat(v',nu,1);
+    BdK = BdK + (B*RVdd')*RVdd;
+    A = Kpu.*BdK; C = Kpuu.*(BdK*B'); C = diag(sum(C,2)-sum(A,2)) - C;
+    dnlZ.xu = A*x*diag(e) + C*xu*diag(e);    % bring in data and inducing points
+  end
 end
 
 % refresh the representation of the posterior from initial and site parameters
@@ -169,7 +198,7 @@ function [nlZ,nu_n,tau_n] = ...
   nu = size(gg,1);
   U = (R0*P0)'.*repmat(1./sqrt(d0+1./ttau),1,nu);
   L = chol(eye(nu)+U'*U);
-  ld = 2*sum(log(diag(L))) + sum(log(d0+1./ttau)) + sum(log(ttau));
+  ld = 2*sum(log(diag(L))) + sum(log(1+d0.*ttau));
   t = T*tnu; tnu_Sigma_tnu = tnu'*(d.*tnu) + t'*t;
   nlZ = ld/2 -sum(lZ) -tnu_Sigma_tnu/2  ...
     -(nu_n-m.*tau_n)'*((ttau./tau_n.*(nu_n-m.*tau_n)-2*tnu)./(ttau+tau_n))/2 ...

@@ -97,7 +97,7 @@ while i < abs(length)                                      % while not finished
         
         [f3 df3] = feval(f, rewrap(Z,X+x3*s), varargin{:});
         df3 = unwrap(df3);
-        if isnan(f3) || isinf(f3) || any(isnan(df3)+isinf(df3)), error(''), end
+        if isnan(f3) || isinf(f3) || any(isnan(df3)+isinf(df3)), error(' '),end
         success = 1;
       catch                                % catch any error which occured in f
         x3 = (x2+x3)/2;                                  % bisect and try again

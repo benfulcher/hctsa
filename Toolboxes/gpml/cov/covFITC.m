@@ -15,7 +15,7 @@ function [K,Kuu,Ku] = covFITC(cov, xu, hyp, x, z, i)
 
 if nargin<4, K = feval(cov{:}); return, end
 if nargin<5, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
 if size(xu,2) ~= size(x,2)
   error('Dimensionality of inducing inputs must match training inputs');

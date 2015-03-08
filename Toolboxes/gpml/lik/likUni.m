@@ -12,7 +12,7 @@ function [varargout] = likUni(hyp, y, mu, s2, inf, i)
 % respectively, see likFunctions.m for the details. In general, care is taken
 % to avoid numerical issues when the arguments are extreme.
 %
-% Copyright (c) by Hannes Nickisch, 2012-11-07
+% Copyright (c) by Hannes Nickisch, 2013-09-02.
 %
 % See also LIKFUNCTIONS.M.
 
@@ -64,17 +64,10 @@ else
     end
 
   case 'infVB'
-    if nargin<6                                             % no derivative mode
-      % variational lower site bound
-      % t(s) = 1/2
-      % the bound has the form: b*s - s.^2/(2*ga) - h(ga)/2 with b=y/ga
-      ga = s2; n = numel(ga); b = y./ga; y = y.*ones(n,1);
-      db = -y./ga.^2; d2b = 2*y./ga.^3;
-      h = y.^2./ga + 2*log(2);
-      dh = -y.^2./ga.^2; d2h = 2*y.^2./ga.^3;
-      varargout = {h,b,dh,db,d2h,d2b};
-    else
-      varargout = {[]};                                     % deriv. wrt hyp.lik
-    end
+    % variational lower site bound
+    % t(s) = 1/2
+    % the bound has the form: (b+z/ga)*f - f.^2/(2*ga) - h(ga)/2
+    n = numel(s2); b = zeros(n,1); y = y.*ones(n,1); z = y;
+    varargout = {b,z};
   end
 end

@@ -15,7 +15,7 @@ function K = covPoly(d, hyp, x, z, i)
 
 if nargin<3, K = '2'; return; end                  % report number of parameters
 if nargin<4, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
 c = exp(hyp(1));                                          % inhomogeneous offset
 sf2 = exp(2*hyp(2));                                           % signal variance

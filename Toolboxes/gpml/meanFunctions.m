@@ -7,7 +7,12 @@
 %   meanOne       - one mean function
 %   meanConst     - constant mean function
 %   meanLinear    - linear mean function
-% 
+%   meanPoly      - polynomial mean function
+%   meanDiscrete  - precomputed mean for discrete data
+%   meanGP        - predictive mean of another GP
+%   meanGPexact   - predictive mean of a regression GP
+%   meanNN        - nearest neighbor mean function
+%
 % composite covariance functions (see explanation at the bottom):
 %
 %   meanScale     - scaled version of a mean function
@@ -15,6 +20,7 @@
 %   meanProd      - products of mean functions
 %   meanSum       - sums of mean functions
 %   meanMask      - mask some dimensions of the data
+%   meanPref      - difference mean for preference learning
 %
 % Naming convention: all mean functions are named "mean/mean*.m".
 %
@@ -44,4 +50,5 @@
 %
 % See also doc/usageMean.m.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-01-21
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+%                                      File automatically generated using noweb.

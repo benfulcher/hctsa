@@ -1,5 +1,10 @@
+#ifdef __linux__
+  #include "mex.h"
+#else
+  #include "matrix.h"
+#endif
+
 #include "arrayofmatrices.h"
-#include "matrix.h"
 
 // Function definitions for class ArrayOfMatrices.
 // -----------------------------------------------------------------

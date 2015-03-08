@@ -15,7 +15,7 @@ function C = sq_dist(a, b)
 
 if nargin<1  || nargin>3 || nargout>1, error('Wrong number of arguments.'); end
 bsx = exist('bsxfun','builtin');      % since Matlab R2007a 7.4.0 and Octave 3.0
-if ~bsx, bsx = exist('bsxfun'); end      % bsxfun is not yes "builtin" in Octave
+if ~bsx, bsx = exist('bsxfun'); end      % bsxfun is not yet "builtin" in Octave
 [D, n] = size(a);
 
 % Computation of a^2 - 2*a*b + b^2 is less stable than (a-b)^2 because numerical

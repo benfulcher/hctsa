@@ -3,7 +3,7 @@ function K = covSEard(hyp, x, z, i)
 % Squared Exponential covariance function with Automatic Relevance Detemination
 % (ARD) distance measure. The covariance function is parameterized as:
 %
-% k(x^p,x^q) = sf2 * exp(-(x^p - x^q)'*inv(P)*(x^p - x^q)/2)
+% k(x^p,x^q) = sf^2 * exp(-(x^p - x^q)'*inv(P)*(x^p - x^q)/2)
 %
 % where the P matrix is diagonal with ARD parameters ell_1^2,...,ell_D^2, where
 % D is the dimension of the input space and sf2 is the signal variance. The
@@ -13,7 +13,7 @@ function K = covSEard(hyp, x, z, i)
 %         log(ell_2)
 %          .
 %         log(ell_D)
-%         log(sqrt(sf2)) ]
+%         log(sf) ]
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
 %
@@ -21,7 +21,7 @@ function K = covSEard(hyp, x, z, i)
 
 if nargin<2, K = '(D+1)'; return; end              % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
 [n,D] = size(x);
 ell = exp(hyp(1:D));                               % characteristic length scale

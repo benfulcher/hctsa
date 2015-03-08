@@ -1,14 +1,15 @@
 function K = covPeriodic(hyp, x, z, i)
 
-% Stationary covariance function for a smooth periodic function, with period p:
+% Stationary covariance function for a smooth periodic function, with period p 
+% in 1d (see covPERiso and covPERard for multivariate data):
 %
-% k(x,y) = sf2 * exp( -2*sin^2( pi*||x-y||/p )/ell^2 )
+% k(x,z) = sf^2 * exp( -2*sin^2( pi*||x-z||/p )/ell^2 )
 %
 % where the hyperparameters are:
 %
 % hyp = [ log(ell)
 %         log(p)
-%         log(sqrt(sf2)) ]
+%         log(sf) ]
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2011-01-05.
 %
@@ -16,9 +17,10 @@ function K = covPeriodic(hyp, x, z, i)
 
 if nargin<2, K = '3'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
-n = size(x,1);
+[n,D] = size(x);
+if D>1, error('Covariance is defined for 1d data only.'), end
 ell = exp(hyp(1));
 p   = exp(hyp(2));
 sf2 = exp(2*hyp(3));

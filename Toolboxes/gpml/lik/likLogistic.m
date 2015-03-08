@@ -10,7 +10,7 @@ function [varargout] = likLogistic(hyp, y, mu, s2, inf, i)
 % \int f^k likLogistic(y,f) N(f|mu,var) df are calculated via a cumulative 
 % Gaussian scale mixture approximation.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-07-22.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-09-02.
 %
 % See also LIKFUNCTIONS.M.
 
@@ -75,73 +75,30 @@ else                                                            % inference mode
       % The scale mixture approximation does not capture the correct asymptotic
       % behavior; we have linear decay instead of quadratic decay as suggested
       % by the scale mixture approximation. By observing that for large values 
-      % of -f*y ln(p(y|f)) of likLogistic is linear in f with slope y, we are
-      % able to analytically integrate the tail region; there is no contribution
-      % to the second derivative
+      % of -f*y ln(p(y|f)) for likLogistic is linear in f with slope y, we are
+      % able to analytically integrate the tail region.
       val = abs(mu)-196/200*s2-4;       % empirically determined bound at val==0
       lam = 1./(1+exp(-10*val));                         % interpolation weights
-      lZtail = min(s2/2-abs(mu),-.1);   % apply the same to p(y|f) = 1 - p(-y|f)
-      dlZtail = -sign(mu);
+      lZtail = min(s2/2-abs(mu),-0.1);  % apply the same to p(y|f) = 1 - p(-y|f)
+      dlZtail = -sign(mu); d2lZtail = zeros(size(mu));
       id = y.*mu>0; lZtail(id) = log(1-exp(lZtail(id)));  % label and mean agree
       dlZtail(id) = 0;
-      lZ  = (1-lam).* lZ + lam.* lZtail; % interpolate between scale mixture ..
-      dlZ = (1-lam).*dlZ + lam.*dlZtail;             % .. and tail approximation
+      lZ   = (1-lam).*  lZ + lam.*  lZtail;      % interpolate between scale ..
+      dlZ  = (1-lam).* dlZ + lam.* dlZtail;              % ..  mixture and   ..
+      d2lZ = (1-lam).*d2lZ + lam.*d2lZtail;              % .. tail approximation
       varargout = {lZ,dlZ,d2lZ};
     else                                                       % derivative mode
       varargout = {[]};                                     % deriv. wrt hyp.lik
     end
     
   case 'infVB'
-    if nargin<6                                             % no derivative mode
-      % variational lower site bound
-      % using -log(1+exp(-s)) = s/2 -log( 2*cosh(s/2) );
-      % the bound has the form: b*s - s.^2/(2*ga) - h(ga)/2 with b=1/2
-      ga = s2; n = numel(ga); b = (y/2).*ones(n,1); db = zeros(n,1); d2b = db;
-      h = zeros(n,1); dh = h; d2h = h;     % allocate memory for return argument
-      idlo = ga(:)<=4; h(idlo) = 2*log(2);              % constant value below 4   
-      idup = 50<=ga(:); zn = zeros(n,1);      % linear behavior for large gammas
-      h(idup) = ga(idup)/4; dh(idup) = zn(idup)+1/4; d2h(idup) = zn(idup);    
-      id = ~idlo & ~idup;                       % interesting zone is in between
-      [g,dg,d2g] = inv_xcothx(1/4*ga(id));
-      thg = tanh(g);
-        h(id) = 2*logcosh(g) +2*log(2) -g.*thg;
-      g1mt2 = g.*(1-thg.^2);
-       dh(id) = dg.*( thg - g1mt2 )/4;
-      d2h(id) = ( g1mt2.*(2*dg.^2.*thg-d2g) + d2g.*thg )/16;
-      varargout = {h,b,dh,db,d2h,d2b};
-    else                                                       % derivative mode
-      varargout = {[]};                                     % deriv. wrt hyp.lik
-    end
+    % variational lower site bound
+    % using -log(1+exp(-s)) = s/2 -log( 2*cosh(s/2) );
+    % the bound has the form: (b+z/ga)*f - f.^2/(2*ga) - h(ga)/2
+    n = numel(s2); b = (y/2).*ones(n,1); z = zeros(size(b));
+    varargout = {b,z};
   end
 end
-
-% numerically safe version of log(cosh(x)) = log(exp(x)+exp(-x))-log(2)
-function f = logcosh(x)
-  f = abs(x)  + log(1+exp(-2*abs(x))) - log(2);
-
-% Invert f(x) = x.*coth(x) = y, return the positive value
-% uses Newton's method to minimize (y-f(x))² w.r.t. x
-function [x,dx,d2x] = inv_xcothx(y)
-  %   f = @(x) x.*coth(x);
-  %  df = @(x) x + (1-f(x)).*coth(x);
-  % d2f = @(x) 2*(1-f(x)).*(1-coth(x).^2);
-  if numel(y)==0, x=[]; dx=[]; d2x=[]; return, end
-  x  = sqrt(y.^2-1); i = 1; % init
-  ep = eps./(1+abs(x)); th=tanh(x); fx=(x+ep)./(th+ep);               % function
-  r  = fx-y; % init
-  while i==1 || (i<10 && max(abs(r))>1e-12)
-    dfx  = x + (1-fx)./(th+ep);                               % first derivative
-    d2fx = 2*(  1-fx + (x-th+ep/3)./(th.*th.*th+ep) );       % second derivative
-    x = x - r.*dfx./(dfx.^2+r.*d2fx+ep);                           % Newton step
-    ep = eps./(1+abs(x)); th=tanh(x); fx=(x+ep)./(th+ep);
-    r  = fx-y; i = i+1;
-  end
-  % first derivative dx/dy
-  % derivatives of inverse functions are reciprocals
-  dx = 1./dfx;
-  % second derivative d2x/dy2
-  % quotient rule and chaine rule
-  d2x = -d2fx.*dx./dfx./dfx;
 
 %  computes y = log( exp(A)*x ) in a numerically safe way by subtracting the
 %  maximal value in each row to avoid cancelation after taking the exp

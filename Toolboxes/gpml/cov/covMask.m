@@ -22,7 +22,7 @@ if max(mask)<2 && length(mask)>1, mask = find(mask); end    % convert 1/0->index
 D = length(mask);                                             % masked dimension
 if nargin<3, K = num2str(eval(nh_string)); return, end    % number of parameters
 if nargin<4, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
 if eval(nh_string)~=length(hyp)                          % check hyperparameters
   error('number of hyperparameters does not match size of masked data')

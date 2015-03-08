@@ -1,13 +1,14 @@
 % demonstrate usage of regression
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2010-07-21.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2013-10-16.
 clear all, close all
 
 %% SAY WHICH CODE WE WISH TO EXERCISE
-id = [1,1]; % use Exact
-% id = [1,2; 3,2; 4,2]; % compare Laplace
-id = [1,3; 2,3; 3,3]; % compare EP
-id = [1,4; 2,4; 3,4; 4,4]; % compare VB
+id = [1,1]; % use Gauss/Exact
+id = [1,2; 3,2; 4,2]; % compare Laplace
+id = [1,3; 2,3; 3,3]; % study EP
+id = [1,5; 2,5]; % look into KL (takes quite a while)
+id = [1,4; 2,4; 3,4; 4,4]; % deal with VB
 
 seed = 197; randn('seed',seed), rand('seed',seed)
 
@@ -26,7 +27,7 @@ mean = {@meanSum,{@meanLinear,@meanConst}}; a = 1/5; b = 1;       % m(x) = a*x+b
 hyp0.mean = [a;b];
 
 lik_list = {'likGauss','likLaplace','likSech2','likT'};   % possible likelihoods
-inf_list = {'infExact','infLaplace','infEP','infVB'}; % allowable inference algs
+inf_list = {'infExact','infLaplace','infEP','infVB','infKL'};   % inference algs
 
 Ncg = 50;                                   % number of conjugate gradient steps
 sdscale = 0.5;                  % how many sd wide should the error bars become?

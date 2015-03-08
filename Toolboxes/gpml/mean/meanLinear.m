@@ -18,7 +18,7 @@ function A = meanLinear(hyp, x, i)
 if nargin<2, A = 'D'; return; end             % report number of hyperparameters 
 [n,D] = size(x);
 if any(size(hyp)~=[D,1]), error('Exactly D hyperparameters needed.'), end
-a = hyp;
+a = hyp(:);
 if nargin==2
   A = x*a;                                                       % evaluate mean
 else

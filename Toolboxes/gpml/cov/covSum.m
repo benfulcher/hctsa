@@ -9,7 +9,7 @@ function K = covSum(cov, hyp, x, z, i)
 %
 % See also COVFUNCTIONS.M.
 
-if numel(cov)==0, error('We require at least one summand.'), end
+if ~isempty(cov)==0, error('We require at least one summand.'), end
 for ii = 1:numel(cov)                        % iterate over covariance functions
   f = cov(ii); if iscell(f{:}), f = f{:}; end   % expand cell array if necessary
   j(ii) = cellstr(feval(f{:}));                          % collect number hypers

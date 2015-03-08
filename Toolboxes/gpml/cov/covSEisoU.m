@@ -18,7 +18,7 @@ function K = covSEisoU(hyp, x, z, i)
 
 if nargin<2, K = '1'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
 ell = exp(hyp(1));                                 % characteristic length scale
 

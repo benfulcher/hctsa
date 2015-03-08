@@ -1,3 +1,4 @@
+#include <cstring>
 #include "matlabstring.h"
 #include "matlabexception.h"
 

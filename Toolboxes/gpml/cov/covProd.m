@@ -9,7 +9,7 @@ function K = covProd(cov, hyp, x, z, i)
 %
 % See also COVFUNCTIONS.M.
 
-if numel(cov)==0, error('We require at least one factor.'), end
+if isempty(cov), error('We require at least one factor.'), end
 for ii = 1:numel(cov)                        % iterate over covariance functions
   f = cov(ii); if iscell(f{:}), f = f{:}; end   % expand cell array if necessary
   j(ii) = cellstr(feval(f{:}));                          % collect number hypers
@@ -25,7 +25,7 @@ v = [];               % v vector indicates to which covariance parameters belong
 for ii = 1:length(cov), v = [v repmat(ii, 1, eval(char(j(ii))))]; end
 
 if nargin<5                                                        % covariances
-  K = 1; if nargin==3, z = []; end                                 % set default
+  K = 1;                                                                  % init
   for ii = 1:length(cov)                       % iteration over factor functions
     f = cov(ii); if iscell(f{:}), f = f{:}; end % expand cell array if necessary
     K = K .* feval(f{:}, hyp(v==ii), x, z);             % accumulate covariances

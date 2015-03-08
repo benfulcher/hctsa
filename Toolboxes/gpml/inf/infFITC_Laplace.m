@@ -17,11 +17,18 @@ function [post nlZ dnlZ] = infFITC_Laplace(hyp, mean, cov, lik, x, y)
 % The posterior N(f|h,Sigma) is given by h = m+mu with mu = nn + P'*gg and
 % Sigma = inv(inv(K)+diag(W)) = diag(d) + P'*R0'*R'*R*R0*P.
 %             
-% The function takes a specified covariance function (see covFunction.m) and
-% likelihood function (see likFunction.m), and is designed to be used with
-% gp.m and in conjunction with covFITC. 
+% The function takes a specified covariance function (see covFunctions.m) and
+% likelihood function (see likFunctions.m), and is designed to be used with
+% gp.m and in conjunction with covFITC.
 %
-% Copyright (c) by Hannes Nickisch, 2012-11-07.
+% The inducing points can be specified through 1) the 2nd covFITC parameter or
+% by 2) providing a hyp.xu hyperparameters. Note that 2) has priority over 1).
+% In case 2) is provided and derivatives dnlZ are requested, there will also be
+% a dnlZ.xu field allowing to optimise w.r.t. to the inducing points xu. However
+% the derivatives dnlZ.xu can only be computed for one of the following eight
+% covariance functions: cov{Matern|PP|RQ|SE}{iso|ard}.
+%
+% Copyright (c) by Hannes Nickisch, 2013-10-28.
 %
 % See also INFMETHODS.M, COVFITC.M.
 
@@ -31,16 +38,17 @@ tol = 1e-6;                   % tolerance for when to stop the Newton iterations
 smax = 2; Nline = 10; thr = 1e-4;                       % line search parameters
 maxit = 20;                                    % max number of Newton steps in f
 inf = 'infLaplace';
-n = size(x,1);
 cov1 = cov{1}; if isa(cov1, 'function_handle'), cov1 = func2str(cov1); end
 if ~strcmp(cov1,'covFITC'); error('Only covFITC supported.'), end    % check cov
+if isfield(hyp,'xu'), cov{3} = hyp.xu; end  % hyp.xu is provided, replace cov{3}
+
 [diagK,Kuu,Ku] = feval(cov{:}, hyp.cov, x);         % evaluate covariance matrix
 if ~isempty(hyp.lik)                          % hard coded inducing inputs noise
   sn2 = exp(2*hyp.lik(end)); snu2 = 1e-6*sn2;               % similar to infFITC
 else
   snu2 = 1e-6;
 end
-nu = size(Kuu,1);
+[n, D] = size(x); nu = size(Kuu,1);
 m = feval(mean{:}, hyp.mean, x);                      % evaluate the mean vector
 
 rot180   = @(A)   rot90(rot90(A));                     % little helper functions
@@ -142,6 +150,27 @@ if nargout>2                                           % do we want derivatives?
     dnlZ.mean(i) = -alpha'*dm;                                   % explicit part
     Zdm = mvmZ(dm,RVdd,t);
     dnlZ.mean(i) = dnlZ.mean(i) - dfhat'*(dm-mvmK(Zdm,V,d0));    % implicit part
+  end
+  if isfield(hyp,'xu')                   % derivatives w.r.t. inducing points xu
+    xu = cov{3};
+    cov = cov{2};             % get the non FITC part of the covariance function
+    Kpu  = cov_deriv_sq_dist(cov,hyp.cov,xu,x);             % d K(xu,x ) / d D^2
+    Kpuu = cov_deriv_sq_dist(cov,hyp.cov,xu);               % d K(xu,xu) / d D^2
+    if iscell(cov), covstr = cov{1}; else covstr = cov; end
+    if ~ischar(covstr), covstr = func2str(covstr); end
+    if numel(strfind(covstr,'iso'))>0              % characteristic length scale
+      e = 2*exp(-2*hyp.cov(1));
+    else
+      e = 2*exp(-2*hyp.cov(1:D));
+    end
+    q = dfhat - mvmZ(mvmK(dfhat,V,d0),RVdd,t);                   % implicit part
+    B = (R0'*R0)*Ku;
+    diag_dK = alpha.*alpha + sum(RVdd.*RVdd,1)' - t + 2*dlp.*q;
+    v = diag_dK+t;                 % BdK = B * ( dnlZ/dK - diag(diag(dnlZ/dK)) )
+    BdK = (B*alpha)*alpha' - B.*repmat(v',nu,1) + (B*dlp)*q' + (B*q)*dlp';
+    BdK = BdK + (B*RVdd')*RVdd;
+    A = Kpu.*BdK; C = Kpuu.*(BdK*B'); C = diag(sum(C,2)-sum(A,2)) - C;
+    dnlZ.xu = A*x*diag(e) + C*xu*diag(e);    % bring in data and inducing points
   end
 end
 

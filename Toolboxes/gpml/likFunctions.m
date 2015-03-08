@@ -5,11 +5,17 @@
 %   likUni         (Uniform likelihood, classification)
 %
 %   likGauss       (Gaussian, regression)
+%   likGaussWarp   (Warped Gaussian, regression)
+%   likGumbel      (Gumbel likelihood for extremal values)
 %   likLaplace     (Laplacian or double exponential, regression)
 %   likSech2       (Sech-square, regression)
 %   likT           (Student's t, regression)
 %
 %   likPoisson     (Poisson regression, count data)
+%   likGamma       (Nonnegative regression, positive data)
+%   likExp         (Nonnegative regression, positive data)
+%   likInvGauss    (Nonnegative regression, positive data)
+%   likBeta        (Beta regression, interval data)
 %
 %   likMix         (Mixture of individual covariance functions)
 %
@@ -77,14 +83,10 @@
 % dlZhyp = d log(Z) / dhyp_i
 %
 %
-% c1) [h,b,dh,db,d2h,d2b] = lik(hyp, y, [], ga, 'infVB')
+% c1) [b,z] = lik(hyp, y, [], ga, 'infVB')
 % ga is the variance of a Gaussian lower bound to the likelihood p(y|f).
-%   p(y|f) \ge exp( b*f - f.^2/(2*ga) - h(ga)/2 ) \propto N(f|b*ga,ga)
-% The function returns the linear part b and the "scaling function" h(ga) and
-% derivatives dh = d h/dga, db = d b/dga, d2h = d^2 h/dga and d2b = d^2 b/dga.
-%
-% c2) [dhhyp] = lik(hyp, y, [], ga, 'infVB', i)
-% dhhyp = dh / dhyp_i, the derivative w.r.t. the ith hyperparameter
+%   p(y|f) \ge exp( b*(f+z) - (f+z).^2/(2*ga) - h(ga)/2 ) \propto N(f|b*ga-z,ga)
+% The function returns the linear part b and z.
 %
 % Cumulative likelihoods are designed for binary classification. Therefore, they
 % only look at the sign of the targets y; zero values are treated as +1.
@@ -97,4 +99,5 @@
 % See the help for the individual likelihood for the computations specific to
 % each likelihood function.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-01-21
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+%                                      File automatically generated using noweb.
