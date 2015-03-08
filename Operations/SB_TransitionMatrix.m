@@ -6,16 +6,16 @@
 % series given a method to symbolize or coarse-grain the time series.
 % 
 % The input time series is transformed into a symbolic string using an
-% equiprobable alphabet of ng letters. The transition probabilities are
+% equiprobable alphabet of numGroups letters. The transition probabilities are
 % calculated at a lag tau.
 % 
 %---INPUTS:
 % y, the input time series
 %
-% discmeth, the method of discretization (currently 'quantile' is the only
+% howtocg, the method of discretization (currently 'quantile' is the only
 %           option; could incorporate SB_CoarseGrain for more options in future)
 %
-% ng: number of groups in the course-graining
+% numGroups: number of groups in the course-graining
 %
 % tau: analyze transition matricies corresponding to this lag. We
 %      could either downsample the time series at this lag and then do the
@@ -53,13 +53,13 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SB_TransitionMatrix(y,discmeth,numGroups,tau)
+function out = SB_TransitionMatrix(y,howtocg,numGroups,tau)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(discmeth)
-    discmeth = 'quantile';
+if nargin < 2 || isempty(howtocg)
+    howtocg = 'quantile';
 end
 if nargin < 3 || isempty(numGroups)
     numGroups = 2;
@@ -84,53 +84,42 @@ N = length(y); % time-series length
 % ------------------------------------------------------------------------------
 %% (((1))) Discretize the time series
 % ------------------------------------------------------------------------------
-switch discmeth
-    case 'quantile'
-        % 1) discretize the time series into a number of groups given by
-        %    dparam
-        th = quantile(y,linspace(0,1,numGroups+1)); % thresholds for dividing the time series values
-        th(1) = th(1)-1; % this ensures the first point is included
-        % turn the time series into a set of numbers from 1:numGroups
-        yth = zeros(N,1);
-        for i = 1:numGroups
-            yth(y > th(i) & y <= th(i+1)) = i;
-        end
-        if any(yth == 0)
-            % error -- they should all be assigned to a group
-            error('Some time-series values not assigned to a group')
-        end
-    otherwise
-        error('Unknown discritization method ''%s''',discmeth)
-end
+yth = SB_CoarseGrain(y,howtocg,numGroups);
 
-% Ok, at this stage we should have:
-% (*) yth: a thresholded y containing integers from 1:numGroups (the number of groups)
+% At this point we should have:
+% (*) yth: a thresholded y containing integers from 1 to numGroups
+
+if size(yth,2) > size(yth,1)
+    yth = yth';
+end
 
 % ------------------------------------------------------------------------------
 %% (((2))) find 1-time transition matrix
 % ------------------------------------------------------------------------------
-% probably implemented already, but I'll do it myself
-T = zeros(numGroups);
+% Probably implemented already, but I'll do it myself
+T = zeros(numGroups); % probability of transition from state i -> state j
 for i = 1:numGroups
-    ri = find(yth == i);
-    if isempty(ri)
-        T(i,:) = 0;
+    ri = (yth == i); % indices where the time series is in state i
+    if sum(ri)==0 % is never in state i
+        T(i,:) = 0; % all transition probabilities are zero (could be NaN)
     else
-        if ri(end) == N; ri = ri(1:end-1); end
+        % Indices of states immediately following a state i:
+        ri_next = [logical(0);ri(1:end-1)];
+        % Compute transitions from state i to each of the states j:
         for j = 1:numGroups
-            T(i,j) = sum(yth(ri+1) == j); % the next element is off this class
+            T(i,j) = sum(yth(ri_next) == j); % the next element is of this class
         end
     end
 end
 
-% normalize to probability:
+% Normalize from counts to probabilities:
 T = T/(N-1); % N-1 is appropriate because it's a 1-time transition matrix
 
 % ------------------------------------------------------------------------------
 %% (((3))) output measures from the transition matrix
 % ------------------------------------------------------------------------------
-% (i) the raw values of the transition matrix
-% this has to be done bulkily (only for numGroups = 2,3):
+% (i) Raw values of the transition matrix
+% [this has to be done bulkily (only for numGroups = 2,3)]:
 if numGroups == 2; % return all elements of T
     for i = 1:4
         out.(sprintf('T%u',i)) = T(i);
@@ -139,33 +128,34 @@ elseif numGroups == 3; % return all elements of T
     for i = 1:9
         out.(sprintf('T%u',i)) = T(i);
     end
-elseif numGroups > 3 % return diagonal elements of T
+elseif numGroups > 3 % return just diagonal elements of T
     for i = 1:numGroups
         out.(sprintf('TD%u',i)) = T(i,i);
     end
 end
 
-% (ii) measures on the diagonal
+% (ii) Measures on the diagonal
 out.ondiag = sum(diag(T)); % trace
 out.stddiag = std(diag(T)); % std of diagonal elements
 
-% (iii) measures of symmetry:
+% (iii) Measures of symmetry:
 out.symdiff = sum(sum(abs((T-T')))); % sum of differences of individual elements
 out.symsumdiff = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower 
                                                           % triangular parts of T
 
-% (iv) measures from covariance matrix:
+% (iv) Measures from covariance matrix:
 out.sumdiagcov = sum(diag(cov(T))); % trace of covariance matrix
 
-% (v) measures from eigenvalues of T
+% (v) Measures from eigenvalues of T
 eigT = eig(T);
 out.stdeig = std(eigT); % std of eigenvalues
 out.maxeig = max(real(eigT)); % maximum eigenvalue
 out.mineig = min(real(eigT)); % minimum eigenvalue
 out.meaneig = mean(real(eigT)); % mean eigenvalue
+% (ought to be always zero? Not necessary to measure:)
 out.maximeig = max(imag(eigT)); % maximum imaginary part of eigenavlues
 
-% (vi) measures from eigenvalues of covariance matrix:
+% (vi) Measures from eigenvalues of covariance matrix:
 eigcovT = eig(cov(T));
 out.stdeigcov = std(eigcovT); % std of eigenvalues of covariance matrix
 out.maxeigcov = max(eigcovT); % max eigenvalue of covariance matrix
