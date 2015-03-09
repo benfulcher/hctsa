@@ -219,10 +219,11 @@ for i = 1:np
 end
 
 % Check if fits went well...
-if all(isBad)
+if all(isBad(:))
     % Nothing fit well! Output a NaN:
     warning('None of the ARCH or GARCH models could be fit.')
     out = NaN;
+    return
 end
 
 % ------------------------------------------------------------------------------
