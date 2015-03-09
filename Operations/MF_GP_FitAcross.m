@@ -64,8 +64,9 @@ if nargin < 3 || isempty(npoints)
     npoints = 20;
 end
 
-
+% ------------------------------------------------------------------------------
 %% Get the points
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length
 tt = floor(linspace(1,N,npoints))'; % time range (training)
 yt = y(tt);
@@ -80,17 +81,11 @@ s = feval(covFunc{:}); % string in form '2+1', ... tells how many
 % covariance function
 nhps = eval(s);
 
+% Set up the details of the GP:
 hyp = struct; % structure for storing hyperparameter information in latest version of GMPL toolbox
-
-% Mean function (mean zero process):
-meanFunc = {'meanZero'}; hyp.mean = [];
-
-% Likelihood (Gaussian):
-likFunc = @likGauss; hyp.lik = log(0.1);
-
-% Inference algorithm (Laplace approximation)
-infAlg = @infLaplace;
-
+meanFunc = {'meanZero'}; hyp.mean = []; % Mean function (mean zero process):
+likFunc = @likGauss; hyp.lik = log(0.1); % Likelihood (Gaussian):
+infAlg = @infLaplace; % Inference algorithm (Laplace approximation)
 nfevals = -50; % number of function evaluations (with negative)
 
 try

@@ -5104,7 +5104,7 @@ SP_basic_pgram_hamm_power.linfitloglog_lf_a2	SP_basic_pgram_hamm_power_linfitlog
 SP_basic_pgram_hamm_power.linfitloglog_lf_sigrat	SP_basic_pgram_hamm_power_linfitloglog_lf_sigrat	powerspectrum
 SP_basic_pgram_hamm_power.linfitloglog_lf_s	SP_basic_pgram_hamm_power_linfitloglog_lf_s	powerspectrum
 SP_basic_pgram_hamm_power.linfitloglog_lf_sea1	SP_basic_pgram_hamm_power_linfitloglog_lf_sea1	powerspectrum
-SP_basic_pgram_hamm_power.linfitloglog_lf_sea2	SP_basic_pgram_hamm_power_linfitloglog_lf_sea2	powerspectrum,constant,shit
+SP_basic_pgram_hamm_power.linfitloglog_lf_sea2	SP_basic_pgram_hamm_power_linfitloglog_lf_sea2	powerspectrum
 SP_basic_pgram_hamm_power.linfitloglog_hf_a1	SP_basic_pgram_hamm_power_linfitloglog_hf_a1	powerspectrum
 SP_basic_pgram_hamm_power.linfitloglog_hf_a2	SP_basic_pgram_hamm_power_linfitloglog_hf_a2	powerspectrum
 SP_basic_pgram_hamm_power.linfitloglog_hf_sigrat	SP_basic_pgram_hamm_power_linfitloglog_hf_sigrat	powerspectrum
@@ -5467,36 +5467,6 @@ SP_basic_fft_logdev_power.ncross2    SP_basic_fft_logdev_power_ncross2    powers
 SP_basic_fft_logdev_power.ncross5    SP_basic_fft_logdev_power_ncross5    powerspectrum
 SP_basic_fft_logdev_power.ncross10    SP_basic_fft_logdev_power_ncross10    powerspectrum
 SP_basic_fft_logdev_power.ncross20    SP_basic_fft_logdev_power_ncross20    powerspectrum
-# RP_crpsimp_fnn_mi_01_euclid.recur_rate  RP_crpsimp_fnn_mi_01_euclid_recur_rate  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_01_euclid.det  RP_crpsimp_fnn_mi_01_euclid_det  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_01_euclid.meandiagl  RP_crpsimp_fnn_mi_01_euclid_meandiagl  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_01_euclid.longdiag  RP_crpsimp_fnn_mi_01_euclid_longdiag  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_01_euclid.entdiagl  RP_crpsimp_fnn_mi_01_euclid_entdiagl  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_01_euclid.laminarity  RP_crpsimp_fnn_mi_01_euclid_laminarity  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_01_euclid.trapt  RP_crpsimp_fnn_mi_01_euclid_trapt  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_01_euclid.longvert  RP_crpsimp_fnn_mi_01_euclid_longvert  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_01_euclid.rec1  RP_crpsimp_fnn_mi_01_euclid_rec1  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_01_euclid.rec2  RP_crpsimp_fnn_mi_01_euclid_rec2  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.recur_rate  RP_crpsimp_fnn_mi_1_euclid_recur_rate  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.det  RP_crpsimp_fnn_mi_1_euclid_det  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.meandiagl  RP_crpsimp_fnn_mi_1_euclid_meandiagl  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.longdiag  RP_crpsimp_fnn_mi_1_euclid_longdiag  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.entdiagl  RP_crpsimp_fnn_mi_1_euclid_entdiagl  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.laminarity  RP_crpsimp_fnn_mi_1_euclid_laminarity  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.trapt  RP_crpsimp_fnn_mi_1_euclid_trapt  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.longvert  RP_crpsimp_fnn_mi_1_euclid_longvert  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.rec1  RP_crpsimp_fnn_mi_1_euclid_rec1  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_1_euclid.rec2  RP_crpsimp_fnn_mi_1_euclid_rec2  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.recur_rate  RP_crpsimp_fnn_mi_2_euclid_recur_rate  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.det  RP_crpsimp_fnn_mi_2_euclid_det  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.meandiagl  RP_crpsimp_fnn_mi_2_euclid_meandiagl  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.longdiag  RP_crpsimp_fnn_mi_2_euclid_longdiag  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.entdiagl  RP_crpsimp_fnn_mi_2_euclid_entdiagl  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.laminarity  RP_crpsimp_fnn_mi_2_euclid_laminarity  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.trapt  RP_crpsimp_fnn_mi_2_euclid_trapt  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.longvert  RP_crpsimp_fnn_mi_2_euclid_longvert  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.rec1  RP_crpsimp_fnn_mi_2_euclid_rec1  rqa,crptool,shit
-# RP_crpsimp_fnn_mi_2_euclid.rec2  RP_crpsimp_fnn_mi_2_euclid_rec2  rqa,crptool,shit
 NL_crptool_fnn_10_2_mi.mdrop	NL_crptool_fnn_10_2_mi_mdrop	nonlinear,dimension,crptool
 NL_crptool_fnn_10_2_mi.pdrop	NL_crptool_fnn_10_2_mi_pdrop	nonlinear,dimension,crptool,stochastic
 NL_crptool_fnn_10_2_mi.fnn2		NL_crptool_fnn_10_2_mi_fnn2	nonlinear,dimension,crptool,stochastic,stochastic
@@ -6745,202 +6715,6 @@ NL_TSTL_LargestLyap_n1_01_001_3_1_4.expfit_b	NL_TSTL_LargestLyap_n1_01_001_3_1_4
 NL_TSTL_LargestLyap_n1_01_001_3_1_4.expfit_r2	NL_TSTL_LargestLyap_n1_01_001_3_1_4_expfit_r2	nonlinear,tstool,largelyap
 NL_TSTL_LargestLyap_n1_01_001_3_1_4.expfit_adjr2	NL_TSTL_LargestLyap_n1_01_001_3_1_4_expfit_adjr2	nonlinear,tstool,largelyap
 NL_TSTL_LargestLyap_n1_01_001_3_1_4.expfit_rmse	NL_TSTL_LargestLyap_n1_01_001_3_1_4_expfit_rmse	nonlinear,tstool,largelyap
-# TSTL_predict_y_1_1_2_0_1_5.pred1mean    TSTL_predict_y_1_1_2_0_1_5_pred1mean    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred1std    TSTL_predict_y_1_1_2_0_1_5_pred1std    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred1maxc    TSTL_predict_y_1_1_2_0_1_5_pred1maxc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred1minc    TSTL_predict_y_1_1_2_0_1_5_pred1minc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.predminc    TSTL_predict_y_1_1_2_0_1_5_predminc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred1rangec    TSTL_predict_y_1_1_2_0_1_5_pred1rangec    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.maxabsxcf    TSTL_predict_y_1_1_2_0_1_5_maxabsxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.maxabsxcflag    TSTL_predict_y_1_1_2_0_1_5_maxabsxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.maxxcf    TSTL_predict_y_1_1_2_0_1_5_maxxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.maxxcflag    TSTL_predict_y_1_1_2_0_1_5_maxxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.meanxcf    TSTL_predict_y_1_1_2_0_1_5_meanxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.minxcf    TSTL_predict_y_1_1_2_0_1_5_minxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.stdxcf    TSTL_predict_y_1_1_2_0_1_5_stdxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred1_ac1    TSTL_predict_y_1_1_2_0_1_5_pred1_ac1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred1ac1diff    TSTL_predict_y_1_1_2_0_1_5_pred1ac1diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred1_ac2    TSTL_predict_y_1_1_2_0_1_5_pred1_ac2    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred1ac2diff    TSTL_predict_y_1_1_2_0_1_5_pred1ac2diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred_tau_comp    TSTL_predict_y_1_1_2_0_1_5_pred_tau_comp    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.acs1_10_sumabsdiffpred1    TSTL_predict_y_1_1_2_0_1_5_acs1_10_sumabsdiffpred1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.pred1rmsres    TSTL_predict_y_1_1_2_0_1_5_pred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.Nlagxcorr    TSTL_predict_y_1_1_2_0_1_5_Nlagxcorr    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.bestpred1rmsres    TSTL_predict_y_1_1_2_0_1_5_bestpred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.ac1bestres    TSTL_predict_y_1_1_2_0_1_5_ac1bestres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.fracres005    TSTL_predict_y_1_1_2_0_1_5_fracres005    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.fracres01    TSTL_predict_y_1_1_2_0_1_5_fracres01    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.fracres02    TSTL_predict_y_1_1_2_0_1_5_fracres02    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.fracres03    TSTL_predict_y_1_1_2_0_1_5_fracres03    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_5.fracres05    TSTL_predict_y_1_1_2_0_1_5_fracres05    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1mean    TSTL_predict_y_1_1_2_0_1_10_pred1mean    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1std    TSTL_predict_y_1_1_2_0_1_10_pred1std    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1maxc    TSTL_predict_y_1_1_2_0_1_10_pred1maxc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1minc    TSTL_predict_y_1_1_2_0_1_10_pred1minc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.predminc    TSTL_predict_y_1_1_2_0_1_10_predminc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1rangec    TSTL_predict_y_1_1_2_0_1_10_pred1rangec    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.maxabsxcf    TSTL_predict_y_1_1_2_0_1_10_maxabsxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.maxabsxcflag    TSTL_predict_y_1_1_2_0_1_10_maxabsxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.maxxcf    TSTL_predict_y_1_1_2_0_1_10_maxxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.maxxcflag    TSTL_predict_y_1_1_2_0_1_10_maxxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.meanxcf    TSTL_predict_y_1_1_2_0_1_10_meanxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.minxcf    TSTL_predict_y_1_1_2_0_1_10_minxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.stdxcf    TSTL_predict_y_1_1_2_0_1_10_stdxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1_ac1    TSTL_predict_y_1_1_2_0_1_10_pred1_ac1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1ac1diff    TSTL_predict_y_1_1_2_0_1_10_pred1ac1diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1_ac2    TSTL_predict_y_1_1_2_0_1_10_pred1_ac2    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1ac2diff    TSTL_predict_y_1_1_2_0_1_10_pred1ac2diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred_tau_comp    TSTL_predict_y_1_1_2_0_1_10_pred_tau_comp    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.acs1_10_sumabsdiffpred1    TSTL_predict_y_1_1_2_0_1_10_acs1_10_sumabsdiffpred1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.pred1rmsres    TSTL_predict_y_1_1_2_0_1_10_pred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.Nlagxcorr    TSTL_predict_y_1_1_2_0_1_10_Nlagxcorr    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.bestpred1rmsres    TSTL_predict_y_1_1_2_0_1_10_bestpred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.ac1bestres    TSTL_predict_y_1_1_2_0_1_10_ac1bestres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.fracres005    TSTL_predict_y_1_1_2_0_1_10_fracres005    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.fracres01    TSTL_predict_y_1_1_2_0_1_10_fracres01    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.fracres02    TSTL_predict_y_1_1_2_0_1_10_fracres02    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.fracres03    TSTL_predict_y_1_1_2_0_1_10_fracres03    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_10.fracres05    TSTL_predict_y_1_1_2_0_1_10_fracres05    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1mean    TSTL_predict_y_1_1_2_0_1_cao_pred1mean    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1std    TSTL_predict_y_1_1_2_0_1_cao_pred1std    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1maxc    TSTL_predict_y_1_1_2_0_1_cao_pred1maxc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1minc    TSTL_predict_y_1_1_2_0_1_cao_pred1minc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.predminc    TSTL_predict_y_1_1_2_0_1_cao_predminc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1rangec    TSTL_predict_y_1_1_2_0_1_cao_pred1rangec    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.maxabsxcf    TSTL_predict_y_1_1_2_0_1_cao_maxabsxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.maxabsxcflag    TSTL_predict_y_1_1_2_0_1_cao_maxabsxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.maxxcf    TSTL_predict_y_1_1_2_0_1_cao_maxxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.maxxcflag    TSTL_predict_y_1_1_2_0_1_cao_maxxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.meanxcf    TSTL_predict_y_1_1_2_0_1_cao_meanxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.minxcf    TSTL_predict_y_1_1_2_0_1_cao_minxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.stdxcf    TSTL_predict_y_1_1_2_0_1_cao_stdxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1_ac1    TSTL_predict_y_1_1_2_0_1_cao_pred1_ac1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1ac1diff    TSTL_predict_y_1_1_2_0_1_cao_pred1ac1diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1_ac2    TSTL_predict_y_1_1_2_0_1_cao_pred1_ac2    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1ac2diff    TSTL_predict_y_1_1_2_0_1_cao_pred1ac2diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred_tau_comp    TSTL_predict_y_1_1_2_0_1_cao_pred_tau_comp    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.acs1_10_sumabsdiffpred1    TSTL_predict_y_1_1_2_0_1_cao_acs1_10_sumabsdiffpred1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.pred1rmsres    TSTL_predict_y_1_1_2_0_1_cao_pred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.Nlagxcorr    TSTL_predict_y_1_1_2_0_1_cao_Nlagxcorr    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.bestpred1rmsres    TSTL_predict_y_1_1_2_0_1_cao_bestpred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.ac1bestres    TSTL_predict_y_1_1_2_0_1_cao_ac1bestres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.fracres005    TSTL_predict_y_1_1_2_0_1_cao_fracres005    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.fracres01    TSTL_predict_y_1_1_2_0_1_cao_fracres01    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.fracres02    TSTL_predict_y_1_1_2_0_1_cao_fracres02    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.fracres03    TSTL_predict_y_1_1_2_0_1_cao_fracres03    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_1_cao.fracres05    TSTL_predict_y_1_1_2_0_1_cao_fracres05    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1mean    TSTL_predict_y_1_1_2_0_mi_cao_pred1mean    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1std    TSTL_predict_y_1_1_2_0_mi_cao_pred1std    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1maxc    TSTL_predict_y_1_1_2_0_mi_cao_pred1maxc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1minc    TSTL_predict_y_1_1_2_0_mi_cao_pred1minc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.predminc    TSTL_predict_y_1_1_2_0_mi_cao_predminc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1rangec    TSTL_predict_y_1_1_2_0_mi_cao_pred1rangec    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.maxabsxcf    TSTL_predict_y_1_1_2_0_mi_cao_maxabsxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.maxabsxcflag    TSTL_predict_y_1_1_2_0_mi_cao_maxabsxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.maxxcf    TSTL_predict_y_1_1_2_0_mi_cao_maxxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.maxxcflag    TSTL_predict_y_1_1_2_0_mi_cao_maxxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.meanxcf    TSTL_predict_y_1_1_2_0_mi_cao_meanxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.minxcf    TSTL_predict_y_1_1_2_0_mi_cao_minxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.stdxcf    TSTL_predict_y_1_1_2_0_mi_cao_stdxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1_ac1    TSTL_predict_y_1_1_2_0_mi_cao_pred1_ac1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1ac1diff    TSTL_predict_y_1_1_2_0_mi_cao_pred1ac1diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1_ac2    TSTL_predict_y_1_1_2_0_mi_cao_pred1_ac2    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1ac2diff    TSTL_predict_y_1_1_2_0_mi_cao_pred1ac2diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred_tau_comp    TSTL_predict_y_1_1_2_0_mi_cao_pred_tau_comp    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.acs1_10_sumabsdiffpred1    TSTL_predict_y_1_1_2_0_mi_cao_acs1_10_sumabsdiffpred1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.pred1rmsres    TSTL_predict_y_1_1_2_0_mi_cao_pred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.Nlagxcorr    TSTL_predict_y_1_1_2_0_mi_cao_Nlagxcorr    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.bestpred1rmsres    TSTL_predict_y_1_1_2_0_mi_cao_bestpred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.ac1bestres    TSTL_predict_y_1_1_2_0_mi_cao_ac1bestres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.fracres005    TSTL_predict_y_1_1_2_0_mi_cao_fracres005    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.fracres01    TSTL_predict_y_1_1_2_0_mi_cao_fracres01    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.fracres02    TSTL_predict_y_1_1_2_0_mi_cao_fracres02    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.fracres03    TSTL_predict_y_1_1_2_0_mi_cao_fracres03    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_mi_cao.fracres05    TSTL_predict_y_1_1_2_0_mi_cao_fracres05    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1mean    TSTL_predict_y_1_1_2_0_ac_cao_pred1mean    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1std    TSTL_predict_y_1_1_2_0_ac_cao_pred1std    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1maxc    TSTL_predict_y_1_1_2_0_ac_cao_pred1maxc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1minc    TSTL_predict_y_1_1_2_0_ac_cao_pred1minc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.predminc    TSTL_predict_y_1_1_2_0_ac_cao_predminc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1rangec    TSTL_predict_y_1_1_2_0_ac_cao_pred1rangec    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.maxabsxcf    TSTL_predict_y_1_1_2_0_ac_cao_maxabsxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.maxabsxcflag    TSTL_predict_y_1_1_2_0_ac_cao_maxabsxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.maxxcf    TSTL_predict_y_1_1_2_0_ac_cao_maxxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.maxxcflag    TSTL_predict_y_1_1_2_0_ac_cao_maxxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.meanxcf    TSTL_predict_y_1_1_2_0_ac_cao_meanxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.minxcf    TSTL_predict_y_1_1_2_0_ac_cao_minxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.stdxcf    TSTL_predict_y_1_1_2_0_ac_cao_stdxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1_ac1    TSTL_predict_y_1_1_2_0_ac_cao_pred1_ac1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1ac1diff    TSTL_predict_y_1_1_2_0_ac_cao_pred1ac1diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1_ac2    TSTL_predict_y_1_1_2_0_ac_cao_pred1_ac2    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1ac2diff    TSTL_predict_y_1_1_2_0_ac_cao_pred1ac2diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred_tau_comp    TSTL_predict_y_1_1_2_0_ac_cao_pred_tau_comp    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.acs1_10_sumabsdiffpred1    TSTL_predict_y_1_1_2_0_ac_cao_acs1_10_sumabsdiffpred1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.pred1rmsres    TSTL_predict_y_1_1_2_0_ac_cao_pred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.Nlagxcorr    TSTL_predict_y_1_1_2_0_ac_cao_Nlagxcorr    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.bestpred1rmsres    TSTL_predict_y_1_1_2_0_ac_cao_bestpred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.ac1bestres    TSTL_predict_y_1_1_2_0_ac_cao_ac1bestres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.fracres005    TSTL_predict_y_1_1_2_0_ac_cao_fracres005    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.fracres01    TSTL_predict_y_1_1_2_0_ac_cao_fracres01    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.fracres02    TSTL_predict_y_1_1_2_0_ac_cao_fracres02    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.fracres03    TSTL_predict_y_1_1_2_0_ac_cao_fracres03    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_0_ac_cao.fracres05    TSTL_predict_y_1_1_2_0_ac_cao_fracres05    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1mean    TSTL_predict_y_1_1_2_2_1_10_pred1mean    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1std    TSTL_predict_y_1_1_2_2_1_10_pred1std    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1maxc    TSTL_predict_y_1_1_2_2_1_10_pred1maxc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1minc    TSTL_predict_y_1_1_2_2_1_10_pred1minc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.predminc    TSTL_predict_y_1_1_2_2_1_10_predminc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1rangec    TSTL_predict_y_1_1_2_2_1_10_pred1rangec    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.maxabsxcf    TSTL_predict_y_1_1_2_2_1_10_maxabsxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.maxabsxcflag    TSTL_predict_y_1_1_2_2_1_10_maxabsxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.maxxcf    TSTL_predict_y_1_1_2_2_1_10_maxxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.maxxcflag    TSTL_predict_y_1_1_2_2_1_10_maxxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.meanxcf    TSTL_predict_y_1_1_2_2_1_10_meanxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.minxcf    TSTL_predict_y_1_1_2_2_1_10_minxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.stdxcf    TSTL_predict_y_1_1_2_2_1_10_stdxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1_ac1    TSTL_predict_y_1_1_2_2_1_10_pred1_ac1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1ac1diff    TSTL_predict_y_1_1_2_2_1_10_pred1ac1diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1_ac2    TSTL_predict_y_1_1_2_2_1_10_pred1_ac2    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1ac2diff    TSTL_predict_y_1_1_2_2_1_10_pred1ac2diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred_tau_comp    TSTL_predict_y_1_1_2_2_1_10_pred_tau_comp    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.acs1_10_sumabsdiffpred1    TSTL_predict_y_1_1_2_2_1_10_acs1_10_sumabsdiffpred1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.pred1rmsres    TSTL_predict_y_1_1_2_2_1_10_pred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.Nlagxcorr    TSTL_predict_y_1_1_2_2_1_10_Nlagxcorr    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.bestpred1rmsres    TSTL_predict_y_1_1_2_2_1_10_bestpred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.ac1bestres    TSTL_predict_y_1_1_2_2_1_10_ac1bestres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.fracres005    TSTL_predict_y_1_1_2_2_1_10_fracres005    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.fracres01    TSTL_predict_y_1_1_2_2_1_10_fracres01    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.fracres02    TSTL_predict_y_1_1_2_2_1_10_fracres02    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.fracres03    TSTL_predict_y_1_1_2_2_1_10_fracres03    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_2_1_10.fracres05    TSTL_predict_y_1_1_2_2_1_10_fracres05    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1mean    TSTL_predict_y_1_1_2_3_1_10_pred1mean    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1std    TSTL_predict_y_1_1_2_3_1_10_pred1std    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1maxc    TSTL_predict_y_1_1_2_3_1_10_pred1maxc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1minc    TSTL_predict_y_1_1_2_3_1_10_pred1minc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.predminc    TSTL_predict_y_1_1_2_3_1_10_predminc    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1rangec    TSTL_predict_y_1_1_2_3_1_10_pred1rangec    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.maxabsxcf    TSTL_predict_y_1_1_2_3_1_10_maxabsxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.maxabsxcflag    TSTL_predict_y_1_1_2_3_1_10_maxabsxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.maxxcf    TSTL_predict_y_1_1_2_3_1_10_maxxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.maxxcflag    TSTL_predict_y_1_1_2_3_1_10_maxxcflag    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.meanxcf    TSTL_predict_y_1_1_2_3_1_10_meanxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.minxcf    TSTL_predict_y_1_1_2_3_1_10_minxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.stdxcf    TSTL_predict_y_1_1_2_3_1_10_stdxcf    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1_ac1    TSTL_predict_y_1_1_2_3_1_10_pred1_ac1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1ac1diff    TSTL_predict_y_1_1_2_3_1_10_pred1ac1diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1_ac2    TSTL_predict_y_1_1_2_3_1_10_pred1_ac2    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1ac2diff    TSTL_predict_y_1_1_2_3_1_10_pred1ac2diff    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred_tau_comp    TSTL_predict_y_1_1_2_3_1_10_pred_tau_comp    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.acs1_10_sumabsdiffpred1    TSTL_predict_y_1_1_2_3_1_10_acs1_10_sumabsdiffpred1    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.pred1rmsres    TSTL_predict_y_1_1_2_3_1_10_pred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.Nlagxcorr    TSTL_predict_y_1_1_2_3_1_10_Nlagxcorr    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.bestpred1rmsres    TSTL_predict_y_1_1_2_3_1_10_bestpred1rmsres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.ac1bestres    TSTL_predict_y_1_1_2_3_1_10_ac1bestres    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.fracres005    TSTL_predict_y_1_1_2_3_1_10_fracres005    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.fracres01    TSTL_predict_y_1_1_2_3_1_10_fracres01    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.fracres02    TSTL_predict_y_1_1_2_3_1_10_fracres02    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.fracres03    TSTL_predict_y_1_1_2_3_1_10_fracres03    nonlinear,tstool,model,shit
-# TSTL_predict_y_1_1_2_3_1_10.fracres05    TSTL_predict_y_1_1_2_3_1_10_fracres05    nonlinear,tstool,model,shit
 NL_TSTL_ReturnTime_10_1_1_n1_ac_8.max	NL_TSTL_ReturnTime_10_1_1_n1_ac_8_max	nonlinear,tstool,returntime
 NL_TSTL_ReturnTime_10_1_1_n1_ac_8.std	NL_TSTL_ReturnTime_10_1_1_n1_ac_8_std	nonlinear,tstool,returntime
 NL_TSTL_ReturnTime_10_1_1_n1_ac_8.pzeros	NL_TSTL_ReturnTime_10_1_1_n1_ac_8_pzeros	nonlinear,tstool,returntime
@@ -8204,8 +7978,8 @@ MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.h1	MF_GP_hype
 MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.logh1	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_logh1	gaussianprocess
 MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.h2	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_h2	gaussianprocess
 MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.logh2	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_logh2	gaussianprocess
-MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.h3	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_h3	gaussianprocess,constant,shit
-MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.logh3	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_logh3	gaussianprocess,constant,shit
+MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.h3	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_h3	gaussianprocess
+MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.logh3	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_logh3	gaussianprocess
 MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.h4	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_h4	gaussianprocess
 MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.logh4	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_logh4	gaussianprocess
 MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.h5	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_h5	gaussianprocess
@@ -9006,9 +8780,7 @@ MF_StateSpace_n4sid_1_05_1.A_1	MF_StateSpace_n4sid_1_05_1_A_1	model,systemidenti
 MF_StateSpace_n4sid_1_05_1.k_1	MF_StateSpace_n4sid_1_05_1_k_1	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_1_05_1.c_1	MF_StateSpace_n4sid_1_05_1_c_1	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_1_05_1.x0mod	MF_StateSpace_n4sid_1_05_1_x0mod	model,systemidentificationtoolbox,statespace
-MF_StateSpace_n4sid_1_05_1.np	MF_StateSpace_n4sid_1_05_1_np	model,systemidentificationtoolbox,statespace,constant,shit
 MF_StateSpace_n4sid_1_05_1.m_noisevar	MF_StateSpace_n4sid_1_05_1_m_noisevar	model,systemidentificationtoolbox,statespace
-MF_StateSpace_n4sid_1_05_1.m_Ts	MF_StateSpace_n4sid_1_05_1_m_Ts	model,systemidentificationtoolbox,statespace,constant,shit
 MF_StateSpace_n4sid_1_05_1.m_lossfn	MF_StateSpace_n4sid_1_05_1_m_lossfn	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_1_05_1.m_fpe	MF_StateSpace_n4sid_1_05_1_m_fpe	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_1_05_1.m_aic	MF_StateSpace_n4sid_1_05_1_m_aic	model,systemidentificationtoolbox,statespace
@@ -9050,9 +8822,7 @@ MF_StateSpace_n4sid_2_05_1.k_2	MF_StateSpace_n4sid_2_05_1_k_2	model,systemidenti
 MF_StateSpace_n4sid_2_05_1.c_1	MF_StateSpace_n4sid_2_05_1_c_1	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_2_05_1.c_2	MF_StateSpace_n4sid_2_05_1_c_2	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_2_05_1.x0mod	MF_StateSpace_n4sid_2_05_1_x0mod	model,systemidentificationtoolbox,statespace
-MF_StateSpace_n4sid_2_05_1.np	MF_StateSpace_n4sid_2_05_1_np	model,systemidentificationtoolbox,statespace,constant,shit
 MF_StateSpace_n4sid_2_05_1.m_noisevar	MF_StateSpace_n4sid_2_05_1_m_noisevar	model,systemidentificationtoolbox,statespace
-MF_StateSpace_n4sid_2_05_1.m_Ts	MF_StateSpace_n4sid_2_05_1_m_Ts	model,systemidentificationtoolbox,statespace,constant,shit
 MF_StateSpace_n4sid_2_05_1.m_lossfn	MF_StateSpace_n4sid_2_05_1_m_lossfn	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_2_05_1.m_fpe	MF_StateSpace_n4sid_2_05_1_m_fpe	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_2_05_1.m_aic	MF_StateSpace_n4sid_2_05_1_m_aic	model,systemidentificationtoolbox,statespace
@@ -9101,9 +8871,7 @@ MF_StateSpace_n4sid_3_05_1.c_1	MF_StateSpace_n4sid_3_05_1_c_1	model,systemidenti
 MF_StateSpace_n4sid_3_05_1.c_2	MF_StateSpace_n4sid_3_05_1_c_2	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_3_05_1.c_3	MF_StateSpace_n4sid_3_05_1_c_3	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_3_05_1.x0mod	MF_StateSpace_n4sid_3_05_1_x0mod	model,systemidentificationtoolbox,statespace
-MF_StateSpace_n4sid_3_05_1.np	MF_StateSpace_n4sid_3_05_1_np	model,systemidentificationtoolbox,statespace,constant,shit
 MF_StateSpace_n4sid_3_05_1.m_noisevar	MF_StateSpace_n4sid_3_05_1_m_noisevar	model,systemidentificationtoolbox,statespace
-MF_StateSpace_n4sid_3_05_1.m_Ts	MF_StateSpace_n4sid_3_05_1_m_Ts	model,systemidentificationtoolbox,statespace,constant,shit
 MF_StateSpace_n4sid_3_05_1.m_lossfn	MF_StateSpace_n4sid_3_05_1_m_lossfn	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_3_05_1.m_fpe	MF_StateSpace_n4sid_3_05_1_m_fpe	model,systemidentificationtoolbox,statespace
 MF_StateSpace_n4sid_3_05_1.m_aic	MF_StateSpace_n4sid_3_05_1_m_aic	model,systemidentificationtoolbox,statespace
@@ -9334,7 +9102,7 @@ MF_GARCHfit_ar_P1_Q1.ARCH_1	MF_GARCHfit_ar_P1_Q1_ARCH_1	model,garch,econometrics
 MF_GARCHfit_ar_P1_Q1.ARCHerr_1	MF_GARCHfit_ar_P1_Q1_ARCHerr_1	model,garch,econometricstoolbox
 MF_GARCHfit_ar_P1_Q1.LLF	MF_GARCHfit_ar_P1_Q1_LLF	model,garch,econometricstoolbox
 MF_GARCHfit_ar_P1_Q1.summaryexitflag	MF_GARCHfit_ar_P1_Q1_summaryexitflag	model,garch,econometricstoolbox
-MF_GARCHfit_ar_P1_Q1.nparams	MF_GARCHfit_ar_P1_Q1_nparams	model,garch,econometricstoolbox,constant,shit
+MF_GARCHfit_ar_P1_Q1.nparams	MF_GARCHfit_ar_P1_Q1_nparams	model,garch,econometricstoolbox
 MF_GARCHfit_ar_P1_Q1.aic	MF_GARCHfit_ar_P1_Q1_aic	model,garch,econometricstoolbox,aic
 MF_GARCHfit_ar_P1_Q1.bic	MF_GARCHfit_ar_P1_Q1_bic	model,garch,econometricstoolbox,bic
 MF_GARCHfit_ar_P1_Q1.maxsigma	MF_GARCHfit_ar_P1_Q1_maxsigma	model,garch,econometricstoolbox,stochastic
@@ -9396,7 +9164,7 @@ MF_GARCHfit_ar_P1_Q2.ARCH_2    MF_GARCHfit_ar_P1_Q2_ARCH_2    model,garch,econom
 MF_GARCHfit_ar_P1_Q2.ARCHerr_2    MF_GARCHfit_ar_P1_Q2_ARCHerr_2    model,garch,econometricstoolbox
 MF_GARCHfit_ar_P1_Q2.LLF	MF_GARCHfit_ar_P1_Q2_LLF	model,garch,econometricstoolbox
 MF_GARCHfit_ar_P1_Q2.summaryexitflag	MF_GARCHfit_ar_P1_Q2_summaryexitflag	model,garch,econometricstoolbox
-MF_GARCHfit_ar_P1_Q2.nparams	MF_GARCHfit_ar_P1_Q2_nparams	model,garch,econometricstoolbox,constant,shit
+MF_GARCHfit_ar_P1_Q2.nparams	MF_GARCHfit_ar_P1_Q2_nparams	model,garch,econometricstoolbox
 MF_GARCHfit_ar_P1_Q2.aic	MF_GARCHfit_ar_P1_Q2_aic	model,garch,econometricstoolbox,aic
 MF_GARCHfit_ar_P1_Q2.bic	MF_GARCHfit_ar_P1_Q2_bic	model,garch,econometricstoolbox,bic
 MF_GARCHfit_ar_P1_Q2.maxsigma	MF_GARCHfit_ar_P1_Q2_maxsigma	model,garch,econometricstoolbox,stochastic
@@ -9566,7 +9334,6 @@ MF_hmm_07_3.Cov	MF_hmm_07_3_Cov	gharamani,hmm,model
 MF_hmm_07_3.Pmeandiag	MF_hmm_07_3_Pmeandiag	gharamani,hmm,model
 MF_hmm_07_3.stdmeanP	MF_hmm_07_3_stdmeanP	gharamani,hmm,model
 MF_hmm_07_3.maxP	MF_hmm_07_3_maxP	gharamani,hmm,model
-MF_hmm_07_3.meanP	MF_hmm_07_3_meanP	gharamani,hmm,model,constant,shit
 MF_hmm_07_3.stdP	MF_hmm_07_3_stdP	gharamani,hmm,model
 MF_hmm_07_3.LLtrainpersample	MF_hmm_07_3_LLtrainpersample	gharamani,hmm,model
 MF_hmm_07_3.nit	MF_hmm_07_3_nit	gharamani,hmm,model
@@ -9580,7 +9347,6 @@ MF_hmm_08_2.Cov	MF_hmm_08_2_Cov	gharamani,hmm,model
 MF_hmm_08_2.Pmeandiag	MF_hmm_08_2_Pmeandiag	gharamani,hmm,model
 MF_hmm_08_2.stdmeanP	MF_hmm_08_2_stdmeanP	gharamani,hmm,model
 MF_hmm_08_2.maxP	MF_hmm_08_2_maxP	gharamani,hmm,model
-MF_hmm_08_2.meanP	MF_hmm_08_2_meanP	gharamani,hmm,model,constant,shit
 MF_hmm_08_2.stdP	MF_hmm_08_2_stdP	gharamani,hmm,model
 MF_hmm_08_2.LLtrainpersample	MF_hmm_08_2_LLtrainpersample	gharamani,hmm,model
 MF_hmm_08_2.nit	MF_hmm_08_2_nit	gharamani,hmm,model
