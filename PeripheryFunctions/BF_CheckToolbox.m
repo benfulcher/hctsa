@@ -54,6 +54,9 @@ case 'database_toolbox'
 case 'robust_toolbox'
     theName = 'Matlab''s Robust Control Toolbox';
     
+case 'financial_toolbox'
+    theName = 'Matlab''s Financial Toolbox';
+    
 otherwise
     error('Unknown toolbox ''%s''\n',theToolbox);
 end

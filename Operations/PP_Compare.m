@@ -181,6 +181,9 @@ elseif strcmp(detrndmeth,'logr')
 
 % 9) Box-Cox Transformation
 elseif strcmp(detrndmeth,'boxcox')
+    % Requires a financial toolbox to run boxcox, check one is available:
+    BF_CheckToolbox('financial_toolbox');
+    
     if all(y > 0), y_d = boxcox(y);
     else
         out = NaN; return % return all NaNs

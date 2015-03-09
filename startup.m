@@ -98,7 +98,7 @@ clear homeDir tiseanBinaryLocation
 
 % TISEAN also requires this DYLD path to be set (I assume this works also on Windows):
 setenv('DYLD_LIBRARY_PATH','/usr/local/bin');
-fprintf(1,', DYLD library path\n');
+fprintf(1,', DYLD library path');
 
 % ------------------------------------------------------------------------------
 %% Finished:
