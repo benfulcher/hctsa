@@ -157,6 +157,7 @@ meanarchps = NaN*ones(np,nq); % mean over 20 lags from Engle's ARCH test on stan
 maxarchps = NaN*ones(np,nq); % maximum p-value over 20 lags from Engle's ARCH test on standardized innovations
 meanlbqps = NaN*ones(np,nq); % mean lbq p-value over 20 lags from Q-test on squared standardized innovations
 maxlbqps = NaN*ones(np,nq); % maximum p-value over 20 lags from Q-test on squared standardized innovations
+isBad = zeros(np,nq);
 
 for i = 1:np
     p = pr(i); % garch order
@@ -174,6 +175,7 @@ for i = 1:np
        nparams = sum(any(estParamCov)); % number of parameters       
        if nparams < p + q + 1
            fprintf(1,'Bad fit at p = %u, q = %u\n',p,q);
+           isBad(i,j) = 1;
            continue; % didn't fit successfully; everything stays NaN
        end
        
@@ -214,6 +216,13 @@ for i = 1:np
        % Difficult to take parameter values since their number if
        % changing...
     end
+end
+
+% Check if fits went well...
+if all(isBad)
+    % Nothing fit well! Output a NaN:
+    warning('None of the ARCH or GARCH models could be fit.')
+    out = NaN;
 end
 
 % ------------------------------------------------------------------------------
