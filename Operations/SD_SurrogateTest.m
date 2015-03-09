@@ -144,14 +144,14 @@ if ismember('fmmi',teststat)
         end
     end
     if any(isnan(fmmisurr))
-        RA_keyboard
+        error('fmmi failed');
     end
     
     % FMMI should be higher for signal than surrogates
     somestats = SDgivemestats(fmmix,fmmisurr,'right');
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(sprintf('out.fmmi_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('fmmi_%s',fnames{i})) = somestats.(fnames{i});
     end
 end
 
@@ -166,7 +166,7 @@ if ismember('o3',teststat) % third order statistic in Schreiber, Schmitz (Physic
     somestats = SDgivemestats(o3x,o3surr,'both');
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(sprintf('out.o3_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('o3_%s',fnames{i})) = somestats.(fnames{i});
     end
 end
 
@@ -183,7 +183,7 @@ if ismember('tc3',teststat) % TC3 statistic -- another time-reversal asymmetry m
     somestats = SDgivemestats(tc3x,tc3surr,'both');
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(sprintf('out.tc3_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('tc3_%s',fnames{i})) = somestats.(fnames{i});
     end
 end
 
@@ -202,7 +202,7 @@ if ismember('nlpe',teststat) % locally constant phase space prediction error
     somestats = SDgivemestats(nlpex,nlpesurr,'right'); % NLPE should be higher than surrogates
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(sprintf('out.nlpe_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('nlpe_%s',fnames{i})) = somestats.(fnames{i});
     end
 end
 
@@ -220,15 +220,15 @@ if ismember('fnn',teststat)
     somestats = SDgivemestats(fnnx,fnnsurr,'right'); % FNN(2) should be higher than surrogates?
     fnames = fieldnames(somestats);
     for i = 1:length(fnames)
-        eval(sprintf('out.fnn_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('fnn_%s',fnames{i})) = somestats.(fnames{i});
     end
 end
 
-
+% ------------------------------------------------------------------------------
 function somestats = SDgivemestats(statx,statsurr,leftrightboth)
     nsurrs = length(statsurr);
     if any(isnan(statsurr))
-        RA_keyboard
+        error('SDgivemestats failed');
     end
 %         leftrightboth = {'left','right','both'}
     % have a distribution of some statistic with samples statsurr
@@ -303,6 +303,6 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
         plot(statx*ones(2,1),[0,2],'r')
     end
 end
-
+% ------------------------------------------------------------------------------
 
 end

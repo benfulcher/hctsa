@@ -509,7 +509,7 @@ if ~strcmp(importWhat,'mops')
     %                             'WHERE Keyword = ''%s'''],thektable,SelectCount,ukws{k});
     %     [~,emsg] = mysql_dbexecute(dbc, updateString);
     %     if ~isempty(emsg)
-    %         RA_keyboard
+    %         keyboard
     %         fprintf(1,'\n Error updating keyword count in %s',thektable)
     %     end
     % end

@@ -257,9 +257,9 @@ for i = 1:NumTimeSeries
                                         'from ''%s'' to a master code'], ...
                                         par_OperationCodeString{jj});
                     else
-                        fprintf(1,'Error retrieving element %s from %s.\nKeyboard active for debugging...\n',par_OperationCodeString{jj}, ...
+                        fprintf(1,'Error retrieving element %s from %s.\nActivating keyboard active for debugging...\n',par_OperationCodeString{jj}, ...
                                         par_MasterOperationsLabel{par_OperationMasterInd(jj)})
-                        RA_keyboard
+                        keyboard
                     end
                 end
             end
