@@ -666,9 +666,8 @@ SY_LocalGlobal(y,'l',20)     SY_LocalGlobal_l20
 SY_LocalGlobal(y,'l',50)     SY_LocalGlobal_l50
 SY_LocalGlobal(y,'l',100)    SY_LocalGlobal_l100
 SY_LocalGlobal(y,'l',500)    SY_LocalGlobal_l500
-SY_LocalGlobal(y,'p',0.001)  SY_LocalGlobal_p001
-SY_LocalGlobal(y,'p',0.005)  SY_LocalGlobal_p005
 SY_LocalGlobal(y,'p',0.01)   SY_LocalGlobal_p01
+SY_LocalGlobal(y,'p',0.05)  SY_LocalGlobal_p05
 SY_LocalGlobal(y,'p',0.1)    SY_LocalGlobal_p1
 SY_LocalGlobal(y,'p',0.5)    SY_LocalGlobal_p5
 SY_LocalGlobal(y,'unicg',10)  SY_LocalGlobal_unicg10
