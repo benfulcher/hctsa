@@ -39,7 +39,9 @@
 
 function out = CO_AutoCorrShape(y)
 
+% ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox');
 
 doplot = 0; % plot outputs from this function

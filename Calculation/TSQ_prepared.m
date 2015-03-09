@@ -392,13 +392,22 @@ selectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WH
 opinfo = [num2cell(op_ids), opinfo]; % add op_ids
 Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
 
+% Check that no operations have bad links to master operations:
+if any(isnan([Operations.MasterID]))
+    fisBad = find(isnan([Operations.MasterID]));
+    for i = 1:length(fisBad)
+        fprintf(1,'Bad link (no master match): %s -- %s\n',Operations(fisBad(i)).Name,Operations(fisBad(i)).CodeString);
+    end
+    error('Bad links of %u operations to non-existent master operations',length(fisBad));
+end
+
 % 3. Retrieve Master Operation Metadata
 % (i) Which masters are implicated?
 selectString = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WHERE mop_id IN ' ...
         				'(' BF_cat(unique([Operations.MasterID]),',') ')'];
 [masterinfo,emsg] = mysql_dbquery(dbc,selectString);
 if ~isempty(emsg)
-    fprintf(1,'Error retrieving Master information using:\n%s\n',SelectString);
+    fprintf(1,'Error retrieving Master information using:\n%s\n',selectString);
     disp(emsg);
     error('Master information could not be retrieved')
 else

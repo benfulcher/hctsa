@@ -64,6 +64,10 @@ end
 %     fprintf(1,'Setting default length constraints: %u--%u\n',lengthRange(1),lengthRange(2))
 % end
 
+if nargin < 3
+    keywordInlcude = {};
+end
+
 if nargin < 4
     keywordRemove = {};
 end

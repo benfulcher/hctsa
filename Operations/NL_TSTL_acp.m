@@ -117,8 +117,9 @@ end
 % Run and get data output from TSTOOL function acp:
 acpf = data(acp(s,tau,past,maxdelay,maxdim,Nref));
 
-
+% ------------------------------------------------------------------------------
 %% Get outputs
+% ------------------------------------------------------------------------------
 % Now, the documentation is pretty vague, in fact does not mention at all
 % what form the output is in... which is a bit shit. But I gather that each
 % column corresponds to an embedding dimension (size(acpf,2)=maxdim), and

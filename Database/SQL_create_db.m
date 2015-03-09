@@ -61,7 +61,7 @@ function SQL_create_db()
 	[a,emsg] = mysql_dbquery(dbc,'SHOW GRANTS');
     if iscell(a), a = a{1}; end % take first entry
     if ~strncmp(a,'GRANT ALL PRIVILEGES',20); % check first entry starts with "GRANT ALL PRIVILEGES"
-        warning(1,'It doesn''t look like %s has administrative privileges on %s\n', admin_user, hostname);
+        warning('It doesn''t look like %s has administrative privileges on %s\n', admin_user, hostname);
     end
     
     % ------------------------------------------------------------------------------
