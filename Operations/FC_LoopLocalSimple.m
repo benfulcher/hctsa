@@ -17,6 +17,9 @@
 % decreases, testing for peaks, variability, autocorrelation, stationarity, and
 % a fit of exponential decay, f(x) = A*exp(Bx) + C, to the variation.
 % 
+%---HISTORY:
+% Ben Fulcher, 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -41,10 +44,16 @@
 % ------------------------------------------------------------------------------
 
 function out = FC_LoopLocalSimple(y,fmeth)
-% Ben Fulcher, 2009
 
+% ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox');
+
+% ------------------------------------------------------------------------------
+% Also uses xcorr from the signal processing toolbox:
+% ------------------------------------------------------------------------------
+BF_CheckToolbox('signal_toolbox');
 
 doplot = 0; % plot outputs to a figure
 
@@ -152,8 +161,8 @@ out.ac1_meansgndiff = mean(sign(diff(stats_st(:,5))));
 out.ac1_stdn = std(stats_st(:,5))/range(stats_st(:,5));
 
 % (6) AC2
-out.ac2_chn=mean(diff(stats_st(:,6)))/(range(stats_st(:,6)));
-out.ac2_meansgndiff=mean(sign(diff(stats_st(:,6))));
-out.ac2_stdn=std(stats_st(:,6))/range(stats_st(:,6));
+out.ac2_chn = mean(diff(stats_st(:,6)))/(range(stats_st(:,6)));
+out.ac2_meansgndiff = mean(sign(diff(stats_st(:,6))));
+out.ac2_stdn = std(stats_st(:,6))/range(stats_st(:,6));
 
 end
