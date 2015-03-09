@@ -10,7 +10,7 @@
 % 
 %---INPUTS:
 % y, the input time series
-% covfunc, the covariance function (structured in the standard way for the gpml toolbox)
+% covFunc, the covariance function (structured in the standard way for the gpml toolbox)
 % npoints, the number of points through the time series to fit the GP model to
 % 
 %---OUTPUTS: summarize the error and fitted hyperparameters.
@@ -44,7 +44,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_GP_FitAcross(y,covfunc,npoints)
+function out = MF_GP_FitAcross(y,covFunc,npoints)
 
 doplot = 0; % set to 1 to visualize behavior
 
@@ -55,9 +55,9 @@ if size(y,2) > size(y,1);
     y = y'; % make sure a column vector
 end
 
-if nargin < 2 || isempty(covfunc)
+if nargin < 2 || isempty(covFunc)
     fprintf(1,'Using default sum of SE and noise covariance function\n')
-    covfunc = {'covSum', {'covSEiso','covNoise'}};
+    covFunc = {'covSum', {'covSEiso','covNoise'}};
 end
 
 if nargin < 3 || isempty(npoints)
@@ -75,27 +75,31 @@ yt = y(tt);
 % ------------------------------------------------------------------------------
 
 % Determine the number of hyperparameters, nhps
-s = feval(covfunc{:}); % string in form '2+1', ... tells how many
+s = feval(covFunc{:}); % string in form '2+1', ... tells how many
 % hyperparameters for each contribution to the
 % covariance function
 nhps = eval(s);
 
-covfunc1 = covfunc{1};
-covfunc2 = covfunc{2};
-if (strcmp(covfunc1,'covSum')) && (strcmp(covfunc2{1},'covSEiso')) && (strcmp(covfunc2{2},'covNoise'))
-    init_loghp = ones(3,1)*-1;
-    % length parameter is in the ballpark of the difference between time
-    % elements
-    init_loghp(1) = log(mean(diff(tt)));
-else
-    init_loghp = ones(nhps,1)*-1;
-end
+hyp = struct; % structure for storing hyperparameter information in latest version of GMPL toolbox
+
+% Mean function (mean zero process):
+meanFunc = {'meanZero'}; hyp.mean = [];
+
+% Likelihood (Gaussian):
+likFunc = @likGauss; hyp.lik = log(0.1);
+
+% Inference algorithm (Laplace approximation)
+infAlg = @infLaplace;
+
+nfevals = -50; % number of function evaluations (with negative)
 
 try
-    loghyper = MF_GP_LearnHyperp(covfunc,-50,tt,yt,init_loghp);
+    hyp = MF_GP_LearnHyperp(tt,yt,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp);
 catch emsg
+    keyboard
     error('Error learning hyperparameters for time series')
 end
+loghyper = hyp.cov;
 if isnan(loghyper)
     out = NaN;
     return
@@ -112,9 +116,9 @@ else % memory constraints force us to crudely resample
     ts = round(linspace(1,N,2000))';
 end
 try
-    [mu, S2] = gpr(loghyper, covfunc, tt, yt, ts);
+    % [mu, S2] = gpr(loghyper, covFunc, tt, yt, ts);
+    [mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt, ts); % evaluate at new time points, ts
 catch emsg
-    keyboard
     error('Error running Gaussian Process regression on time series: %s',emsg.message);
 end
 
@@ -122,7 +126,7 @@ end
 %% For Plotting
 if doplot
     xstar = linspace(min(t),max(t),1000)';
-    [mu, S2] = gpr(loghyper, covfunc, t, y, ts);
+    [mu, S2] = gpr(loghyper, covFunc, t, y, ts);
     S2p = S2 - exp(2*loghyper(3)); % remove noise from predictions
     S2p = S2;
     figure('color','w');
@@ -148,7 +152,8 @@ out.stdS = std(S);
 
 % Marginal Likelihood
 try
-    out.mlikelihood = - gpr(loghyper, covfunc, ts, y(ts));
+    % out.mlikelihood = - gpr(loghyper, covFunc, ts, y(ts));
+    out.mlikelihood = gp(hyp, infAlg, meanFunc, covFunc, likFunc, ts, y(ts));
 catch
     out.mlikelihood = NaN;
 end
@@ -159,7 +164,7 @@ for i = 1:nhps
     % eval(sprintf('out.logh%u = loghyper(%u);',i,i));
 end
 
-if strcmp(covfunc1,'covSum') && strcmp(covfunc2{1},'covSEiso') && strcmp(covfunc2{2},'covNoise')
+if strcmp(covFunc{1},'covSum') && strcmp(covFunc{2}{1},'covSEiso') && strcmp(covFunc{2}{2},'covNoise')
    % Give extra output based on length parameter on length of time series
    out.h_lonN = exp(loghyper(1))/N;
 end
@@ -168,7 +173,7 @@ end
 
 %% Subfunctions
 
-%     function loghyper = MF_GP_LearnHyperp(covfunc,nfevals,t,y,init_loghyper)
+%     function loghyper = MF_GP_LearnHyperp(covFunc,nfevals,t,y,init_loghyper)
 %         % nfevals--  negative: specifies maximum number of allowed
 %         % function evaluations
 %         % t: time
@@ -177,7 +182,7 @@ end
 %         if nargin < 5 || isempty(init_loghyper)
 %             % Use default starting values for parameters
 %             % How many hyperparameters
-%             s = feval(covfunc{:}); % string in form '2+1', ... tells how many
+%             s = feval(covFunc{:}); % string in form '2+1', ... tells how many
 %             % hyperparameters for each contribution to the
 %             % covariance function
 %             nhps = eval(s);
@@ -187,7 +192,7 @@ end
 %         
 %         % Perform the optimization
 %         try
-%             loghyper = minimize(init_loghyper, 'gpr', nfevals, covfunc, t, y);
+%             loghyper = minimize(init_loghyper, 'gpr', nfevals, covFunc, t, y);
 %         catch emsg
 %             if strcmp(emsg.identifier,'MATLAB:posdef')
 %                 fprintf(1,'Error: lack of positive definite matrix for this function');

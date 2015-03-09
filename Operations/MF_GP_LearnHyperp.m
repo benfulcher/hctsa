@@ -11,11 +11,14 @@
 % 
 %---INPUTS:
 % 
-% covfunc,       the covariance function, formated as gpml likes it
+% covFunc,       the covariance function, formated as gpml likes it
 % nfevals,       the number of function evaluations
 % t,             time
 % y,             data
 % init_loghyper, inital values for hyperparameters
+% 
+%---HISTORY:
+% Ben Fulcher, 2010
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -40,31 +43,58 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function loghyper = MF_GP_LearnHyperp(covfunc,nfevals,t,y,init_loghyper)
-% Ben Fulcher, 2010
-    
-if nargin < 5 || isempty(init_loghyper)
-    % Use default starting values for parameters
-    % How many hyperparameters
-    s = feval(covfunc{:}); % string in form '2+1', ... tells how many
-    % hyperparameters for each contribution to the covariance function
-    nhps = eval(s);
-    init_loghyper = -1*ones(nhps,1); % Initialize all log hyperparameters at -1
+function hyp = MF_GP_LearnHyperp(t,y,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp)
+
+if nargin < 3 || isempty(covFunc)
+    covFunc = @covSEiso;
 end
-%         init_loghyper(1) = log(mean(diff(t)));
-    
+if nargin < 4 || isempty(meanFunc)
+    % Mean function (mean zero process):
+    meanFunc = {'meanZero'}; hyp.mean = [];
+end
+if nargin < 5 || isempty(likFunc)
+    likFunc = @likGauss; % negative: specifies maximum number of allowed function evaluations
+    hyp.lik = log(0.1);
+end
+if nargin < 6 || isempty(infAlg)
+    % Inference algorithm:
+    infAlg = @infLaplace;
+end
+if nargin < 7 || isempty(nfevals)
+    nfevals = -50; % negative: specifies maximum number of allowed function evaluations
+end
+% ------------------------------------------------------------------------------
+
+% Number of hyperparameters:
+s = feval(covFunc{:});
+nhps = eval(s);
+
+% Initial values for covariance function:
+covFunc1 = covFunc{1};
+covFunc2 = covFunc{2};
+if strcmp(covFunc1,'covSum') && strcmp(covFunc2{1},'covSEiso') && strcmp(covFunc2{2},'covNoise')
+    hyp.cov = zeros(3,1);
+    % length parameter is in the ballpark of the difference between time
+    % elements
+    hyp.cov(1) = log(mean(diff(t)));
+else
+    hyp.cov = zeros(nhps,1); % Default: initialize all log hyperparameters at -1
+end
+
+% ------------------------------------------------------------------------------    
 % Perform the optimization
+% ------------------------------------------------------------------------------
 try
-    loghyper = minimize(init_loghyper, 'gpr', nfevals, covfunc, t, y);
+    % loghyper = minimize(init_loghyper, 'gpr', nfevals, covFunc, t, y);
+    hyp = minimize(hyp, @gp, nfevals, infAlg, meanFunc, covFunc, likFunc, t, y);
 catch emsg
-    switch emsg.identifier
-    case 'MATLAB:posdef'
-        fprintf(1,'Error: lack of positive definite matrix for this function');
-        loghyper = NaN; return
-    case 'MATLAB:nomem'
-        error('Out of memory');
-    otherwise
-        error('Error fitting Gaussian Process to data')
+    if strcmp(emsg.identifier,'MATLAB:posdef')
+        fprintf(1,'Error with lack of positive definite matrix for this function\n');
+        out = NaN; return % return NaN -- the data is not suited to GP fitting
+    elseif strcmp(emsg.identifier,'MATLAB:nomem')
+        error('Not enough memory to fit a Gaussian Process to this data');
+    else
+        error('Error fitting Gaussian Process to data: %s\n',emsg.message)
     end
 end
 

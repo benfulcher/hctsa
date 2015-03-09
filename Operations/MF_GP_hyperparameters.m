@@ -19,13 +19,20 @@
 % (ii) taking the first 200 samples from the time series, or
 % (iii) taking random samples from the time series.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
-% covfunc, the covariance function, in the standard form fo the gmpl package
+% 
+% covFunc, the covariance function, in the standard form of the gmpl package
+% 
 % squishorsquash, whether to squash onto the unit interval, or spread across 1:N
-% maxN, the maximum length of time series to consider -- greater than this
-%               length, time series are resampled down to maxN
+% 
+% maxN, the maximum length of time series to consider -- inputs greater than
+%           this length are resampled down to maxN
+%           
 % methds, specifies the method of how to resample time series longer than maxN
+% 
+%---HISTORY:
+% Ben Fulcher, 19/1/2010
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -50,15 +57,18 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_GP_hyperparameters(y,covfunc,squishorsquash,maxN,methds)
-% Ben Fulcher, 19/1/2010
+function out = MF_GP_hyperparameters(y,covFunc,squishorsquash,maxN,methds)
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
-doplot = 0; % plot basic outputs
-bevocal = 0; % display commentary to command line
+% ------------------------------------------------------------------------------
+doPlot = 0; % plot basic outputs
+beVocal = 0; % display commentary to command line
 N = length(y); % time-series length
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 if size(y,2) > size(y,1);
     y = y'; % ensure a column vector input
 end
@@ -67,9 +77,9 @@ if ~BF_iszscored(y)
     warning('The input time series is not, but should be z-scored')
 end
 
-if nargin < 2 || isempty(covfunc),
+if nargin < 2 || isempty(covFunc),
     fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n')
-    covfunc = {'covSum', {'covSEiso','covNoise'}};
+    covFunc = {'covSum', {'covSEiso','covNoise'}};
 end
 
 if nargin < 3 || isempty(squishorsquash)
@@ -90,7 +100,11 @@ if nargin < 5 || isempty(methds)
     methds = 'resample';
 end
 
+infAlg = @infLaplace;
+
+% ------------------------------------------------------------------------------
 %% Downsample long time series
+% ------------------------------------------------------------------------------
 if (maxN > 0) && (N > maxN)
     switch methds
         case 'resample' % resamples the whole time series down
@@ -99,7 +113,7 @@ if (maxN > 0) && (N > maxN)
             if length(y) > maxN
                 y = y(1:maxN);
             end
-            if bevocal
+            if beVocal
                 fprintf(1,'Resampled the time series from a length %u down to %u (%u)\n',N,length(y),maxN);
             end
             N = length(y); % update time series length (should be maxN)
@@ -146,41 +160,31 @@ else
     t = SUB_settimeindex(N,squishorsquash); % set time index
 end
 
+% ------------------------------------------------------------------------------
 %% Learn the hyperparameters
+% ------------------------------------------------------------------------------
 
 % (1) Determine the number of hyperparameters, nhps
-s = feval(covfunc{:}); % string in form '2+1', ... tells how many
+s = feval(covFunc{:}); % string in form '2+1', ... tells how many
                         % hyperparameters for each contribution to the
                         % covariance function
 nhps = eval(s);
 
-% (2) Intialize hyperparameters before optimization
-covfunc1 = covfunc{1};
-covfunc2 = covfunc{2};
-if strcmp(covfunc1,'covSum') && strcmp(covfunc2{1},'covSEiso') && strcmp(covfunc2{2},'covNoise')
-    init_loghyper = ones(3,1)*-1;
-    % length parameter is in the ballpark of the difference between time
-    % elements
-    init_loghyper(1) = log(mean(diff(t)));
-else
-    init_loghyper = ones(nhps,1)*-1; % Default: initialize all log hyperparameters at -1
-end
+% (2) Intialize hyperparameters before optimization and perform the optimization
+hyp = struct; % structure for storing hyperparameter information in latest version of GMPL toolbox
+
+% Mean function (mean zero process):
+meanFunc = {'meanZero'}; hyp.mean = [];
+
+% Likelihood (Gaussian):
+likFunc = @likGauss; hyp.lik = log(0.1);
+
 nfevals = -50; % negative: specifies maximum number of allowed function evaluations
 
+hyp = MF_GP_LearnHyperp(t,y,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp);
 
-% (3) Perform the optimization
-try
-    loghyper = minimize(init_loghyper, 'gpr', nfevals, covfunc, t, y);
-catch emsg
-    if strcmp(emsg.identifier,'MATLAB:posdef')
-        disp('Error with lack of positive definite matrix for this function');
-        out = NaN; return % return NaN -- the data is not suited to GP fitting
-    elseif strcmp(emsg.identifier,'MATLAB:nomem')
-        error('Not enough memory to fit a Gaussian Process to this data');
-    else
-        error('Error fitting Gaussian Process to data, %s\n',emsg.message)
-    end
-end
+% Get non-logarithmic hyperparameters
+loghyper = hyp.cov;
 hyper = exp(loghyper);
 
 % Output the hyperparameters and log-hyperparameters
@@ -188,16 +192,15 @@ for i = 1:nhps
     % Set up structure output
     eval(sprintf('out.h%u = hyper(%u);',i,i));
     eval(sprintf('out.logh%u = loghyper(%u);',i,i));
-    % eval(['out.h' num2str(i) ' = hyper(' num2str(i) ');']);
-    % eval(['out.logh' num2str(i) ' = loghyper(' num2str(i) ');']);
 end
 
-
+% ------------------------------------------------------------------------------
 %% For Plotting
-if doplot
+% ------------------------------------------------------------------------------
+if doPlot
     xstar = t;
     % xstar = linspace(min(t),max(t),1000)';
-    [mu S2] = gpr(loghyper, covfunc, t, y, xstar);
+    [mu, S2] = gpr(loghyper, covFunc, t, y, xstar);
     % S2p = S2 - exp(2*loghyper(3)); % remove noise from predictions
     S2p = S2;
     
@@ -209,13 +212,16 @@ if doplot
     plot(t,y,'.-k'); % original data
 end
 
+% ------------------------------------------------------------------------------
 %% Other statistics???
+% ------------------------------------------------------------------------------
 
-% Marginal Likelihood using optimized hyperparameters
-out.mlikelihood = - gpr(loghyper, covfunc, t, y);
+% Negative log marginal likelihood using optimized hyperparameters
+out.mlikelihood = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y);
 
-% Mean error from mean function
-[mu, S2] = gpr(loghyper, covfunc, t, y, t); % evaluate at datapoints
+% Mean error from fit
+[mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, t); % evaluate at datapoints
+% [mu, S2] = gpr(loghyper, covFunc, t, y, t); % evaluate at datapoints
 
 if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
     fprintf(1,'This time series is not suited to Gaussian Process fitting\n');
@@ -230,15 +236,18 @@ out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
                             % fitting)
 out.std_S_data = std(sqrt(S2)); % should vary a fair bit
                             
-                            
+
 % Statistics on variance
 xstar = linspace(min(t),max(t),1000)'; % crude, I know, but it's nearly 5pm
-[mu, S2] = gpr(loghyper, covfunc, t, y, xstar); % evaluate at datapoints
+[mu, S2] = gpr(loghyper, covFunc, t, y, xstar); % evaluate at datapoints
 S = sqrt(S2);
 out.maxS = max(S); % maximum variance
 out.minS = min(S); % minimum variance
 out.meanS = mean(S); % mean variance
 
+
+
+    % ------------------------------------------------------------------------------
     function t = SUB_settimeindex(N,squishorsquash)
         %% Set time index
         % Difficult for processes on different time scales -- to squash them all
@@ -250,5 +259,6 @@ out.meanS = mean(S); % mean variance
             t = linspace(0,1,N)';
         end
     end
-
+    % ------------------------------------------------------------------------------
+    
 end
