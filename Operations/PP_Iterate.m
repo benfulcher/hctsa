@@ -46,7 +46,7 @@
 
 function out = PP_Iterate(y,dtMeth)
 
-doPlot = 1;
+doPlot = 0;
 
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
@@ -114,7 +114,6 @@ for q = 1:length(nr)
         else
             h2.YData = (y_d);
         end
-        keyboard
     end
 end
 

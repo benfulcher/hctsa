@@ -38,8 +38,7 @@ writeWhat = 'null'; % Retrieve and write back only missing (NULL) entries in the
 tsid_range = (tsid_min:tsid_max);
 
 % Retrieve a vector of op_idds to calculate subject to additional conditions
-% Here we remove operations with labels 'shit', 'tisean', 'kalafutvisscher', and 'waveletTB'
-opids = SQL_getids('ops',1,{},{'shit','kalafutvisscher','waveletTB'});
+opids = SQL_getids('ops',1);
 
 % ------------------------------------------------------------------------------
 %% Start calculating:
