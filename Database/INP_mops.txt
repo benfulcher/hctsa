@@ -680,146 +680,6 @@ SY_LocalGlobal(y,'randcg',20)  SY_LocalGlobal_randcg20
 SY_LocalGlobal(y,'randcg',50)  SY_LocalGlobal_randcg50
 SY_LocalGlobal(y,'randcg',100)  SY_LocalGlobal_randcg100
 SY_LocalGlobal(y,'randcg',500)  SY_LocalGlobal_randcg500
-# SY_LocalGlobal(y,'mean','l',10)  SY_LocalGlobal_mean_l10
-# SY_LocalGlobal(y,'mean','l',20)  SY_LocalGlobal_mean_l20
-# SY_LocalGlobal(y,'mean','l',50)  SY_LocalGlobal_mean_l50
-# SY_LocalGlobal(y,'mean','l',100)  SY_LocalGlobal_mean_l100
-# SY_LocalGlobal(y,'mean','l',500)  SY_LocalGlobal_mean_l500
-# SY_LocalGlobal(y,'mean','p',0.001)  SY_LocalGlobal_mean_p001
-# SY_LocalGlobal(y,'mean','p',0.005)  SY_LocalGlobal_mean_p005
-# SY_LocalGlobal(y,'mean','p',0.01)  SY_LocalGlobal_mean_p01
-# SY_LocalGlobal(y,'mean','p',0.1)  SY_LocalGlobal_mean_p1
-# SY_LocalGlobal(y,'mean','p',0.5)  SY_LocalGlobal_mean_p5
-# SY_LocalGlobal(y,'mean','unicg',10)  SY_LocalGlobal_mean_unicg10
-# SY_LocalGlobal(y,'mean','unicg',20)  SY_LocalGlobal_mean_unicg20
-# SY_LocalGlobal(y,'mean','unicg',50)  SY_LocalGlobal_mean_unicg50
-# SY_LocalGlobal(y,'mean','unicg',100)  SY_LocalGlobal_mean_unicg100
-# SY_LocalGlobal(y,'mean','unicg',500)  SY_LocalGlobal_mean_unicg500
-# SY_LocalGlobal(y,'mean','randcg',10)  SY_LocalGlobal_mean_randcg10
-# SY_LocalGlobal(y,'mean','randcg',20)  SY_LocalGlobal_mean_randcg20
-# SY_LocalGlobal(y,'mean','randcg',50)  SY_LocalGlobal_mean_randcg50
-# SY_LocalGlobal(y,'mean','randcg',100)  SY_LocalGlobal_mean_randcg100
-# SY_LocalGlobal(y,'mean','randcg',500)  SY_LocalGlobal_mean_randcg500
-# SY_LocalGlobal(y,'std','l',10)  SY_LocalGlobal_std_l10
-# SY_LocalGlobal(y,'std','l',20)  SY_LocalGlobal_std_l20
-# SY_LocalGlobal(y,'std','l',50)  SY_LocalGlobal_std_l50
-# SY_LocalGlobal(y,'std','l',100)  SY_LocalGlobal_std_l100
-# SY_LocalGlobal(y,'std','l',500)  SY_LocalGlobal_std_l500
-# SY_LocalGlobal(y,'std','p',0.001)  SY_LocalGlobal_std_p001
-# SY_LocalGlobal(y,'std','p',0.005)  SY_LocalGlobal_std_p005
-# SY_LocalGlobal(y,'std','p',0.01)  SY_LocalGlobal_std_p01
-# SY_LocalGlobal(y,'std','p',0.1)  SY_LocalGlobal_std_p1
-# SY_LocalGlobal(y,'std','p',0.5)  SY_LocalGlobal_std_p5
-# SY_LocalGlobal(y,'std','unicg',10)  SY_LocalGlobal_std_unicg10
-# SY_LocalGlobal(y,'std','unicg',20)  SY_LocalGlobal_std_unicg20
-# SY_LocalGlobal(y,'std','unicg',50)  SY_LocalGlobal_std_unicg50
-# SY_LocalGlobal(y,'std','unicg',100)  SY_LocalGlobal_std_unicg100
-# SY_LocalGlobal(y,'std','unicg',500)  SY_LocalGlobal_std_unicg500
-# SY_LocalGlobal(y,'std','randcg',10)  SY_LocalGlobal_std_randcg10
-# SY_LocalGlobal(y,'std','randcg',20)  SY_LocalGlobal_std_randcg20
-# SY_LocalGlobal(y,'std','randcg',50)  SY_LocalGlobal_std_randcg50
-# SY_LocalGlobal(y,'std','randcg',100)  SY_LocalGlobal_std_randcg100
-# SY_LocalGlobal(y,'std','randcg',500)  SY_LocalGlobal_std_randcg500
-# SY_LocalGlobal(y,'median','l',10)  SY_LocalGlobal_median_l10
-# SY_LocalGlobal(y,'median','l',20)  SY_LocalGlobal_median_l20
-# SY_LocalGlobal(y,'median','l',50)  SY_LocalGlobal_median_l50
-# SY_LocalGlobal(y,'median','l',100)  SY_LocalGlobal_median_l100
-# SY_LocalGlobal(y,'median','l',500)  SY_LocalGlobal_median_l500
-# SY_LocalGlobal(y,'median','p',0.001)  SY_LocalGlobal_median_p001
-# SY_LocalGlobal(y,'median','p',0.005)  SY_LocalGlobal_median_p005
-# SY_LocalGlobal(y,'median','p',0.01)  SY_LocalGlobal_median_p01
-# SY_LocalGlobal(y,'median','p',0.1)  SY_LocalGlobal_median_p1
-# SY_LocalGlobal(y,'median','p',0.5)  SY_LocalGlobal_median_p5
-# SY_LocalGlobal(y,'median','unicg',10)  SY_LocalGlobal_median_unicg10
-# SY_LocalGlobal(y,'median','unicg',20)  SY_LocalGlobal_median_unicg20
-# SY_LocalGlobal(y,'median','unicg',50)  SY_LocalGlobal_median_unicg50
-# SY_LocalGlobal(y,'median','unicg',100)  SY_LocalGlobal_median_unicg100
-# SY_LocalGlobal(y,'median','unicg',500)  SY_LocalGlobal_median_unicg500
-# SY_LocalGlobal(y,'median','randcg',10)  SY_LocalGlobal_median_randcg10
-# SY_LocalGlobal(y,'median','randcg',20)  SY_LocalGlobal_median_randcg20
-# SY_LocalGlobal(y,'median','randcg',50)  SY_LocalGlobal_median_randcg50
-# SY_LocalGlobal(y,'median','randcg',100)  SY_LocalGlobal_median_randcg100
-# SY_LocalGlobal(y,'median','randcg',500)  SY_LocalGlobal_median_randcg500
-# SY_LocalGlobal(y,'iqr','l',10)  SY_LocalGlobal_iqr_l10
-# SY_LocalGlobal(y,'iqr','l',20)  SY_LocalGlobal_iqr_l20
-# SY_LocalGlobal(y,'iqr','l',50)  SY_LocalGlobal_iqr_l50
-# SY_LocalGlobal(y,'iqr','l',100)  SY_LocalGlobal_iqr_l100
-# SY_LocalGlobal(y,'iqr','l',500)  SY_LocalGlobal_iqr_l500
-# SY_LocalGlobal(y,'iqr','p',0.001)  SY_LocalGlobal_iqr_p001
-# SY_LocalGlobal(y,'iqr','p',0.005)  SY_LocalGlobal_iqr_p005
-# SY_LocalGlobal(y,'iqr','p',0.01)  SY_LocalGlobal_iqr_p01
-# SY_LocalGlobal(y,'iqr','p',0.1)  SY_LocalGlobal_iqr_p1
-# SY_LocalGlobal(y,'iqr','p',0.5)  SY_LocalGlobal_iqr_p5
-# SY_LocalGlobal(y,'iqr','unicg',10)  SY_LocalGlobal_iqr_unicg10
-# SY_LocalGlobal(y,'iqr','unicg',20)  SY_LocalGlobal_iqr_unicg20
-# SY_LocalGlobal(y,'iqr','unicg',50)  SY_LocalGlobal_iqr_unicg50
-# SY_LocalGlobal(y,'iqr','unicg',100)  SY_LocalGlobal_iqr_unicg100
-# SY_LocalGlobal(y,'iqr','unicg',500)  SY_LocalGlobal_iqr_unicg500
-# SY_LocalGlobal(y,'iqr','randcg',10)  SY_LocalGlobal_iqr_randcg10
-# SY_LocalGlobal(y,'iqr','randcg',20)  SY_LocalGlobal_iqr_randcg20
-# SY_LocalGlobal(y,'iqr','randcg',50)  SY_LocalGlobal_iqr_randcg50
-# SY_LocalGlobal(y,'iqr','randcg',100)  SY_LocalGlobal_iqr_randcg100
-# SY_LocalGlobal(y,'iqr','randcg',500)  SY_LocalGlobal_iqr_randcg500
-# SY_LocalGlobal(y,'skewness','l',10)  SY_LocalGlobal_skewness_l10
-# SY_LocalGlobal(y,'skewness','l',20)  SY_LocalGlobal_skewness_l20
-# SY_LocalGlobal(y,'skewness','l',50)  SY_LocalGlobal_skewness_l50
-# SY_LocalGlobal(y,'skewness','l',100)  SY_LocalGlobal_skewness_l100
-# SY_LocalGlobal(y,'skewness','l',500)  SY_LocalGlobal_skewness_l500
-# SY_LocalGlobal(y,'skewness','p',0.001)  SY_LocalGlobal_skewness_p001
-# SY_LocalGlobal(y,'skewness','p',0.005)  SY_LocalGlobal_skewness_p005
-# SY_LocalGlobal(y,'skewness','p',0.01)  SY_LocalGlobal_skewness_p01
-# SY_LocalGlobal(y,'skewness','p',0.1)  SY_LocalGlobal_skewness_p1
-# SY_LocalGlobal(y,'skewness','p',0.5)  SY_LocalGlobal_skewness_p5
-# SY_LocalGlobal(y,'skewness','unicg',10)  SY_LocalGlobal_skewness_unicg10
-# SY_LocalGlobal(y,'skewness','unicg',20)  SY_LocalGlobal_skewness_unicg20
-# SY_LocalGlobal(y,'skewness','unicg',50)  SY_LocalGlobal_skewness_unicg50
-# SY_LocalGlobal(y,'skewness','unicg',100)  SY_LocalGlobal_skewness_unicg100
-# SY_LocalGlobal(y,'skewness','unicg',500)  SY_LocalGlobal_skewness_unicg500
-# SY_LocalGlobal(y,'skewness','randcg',10)  SY_LocalGlobal_skewness_randcg10
-# SY_LocalGlobal(y,'skewness','randcg',20)  SY_LocalGlobal_skewness_randcg20
-# SY_LocalGlobal(y,'skewness','randcg',50)  SY_LocalGlobal_skewness_randcg50
-# SY_LocalGlobal(y,'skewness','randcg',100)  SY_LocalGlobal_skewness_randcg100
-# SY_LocalGlobal(y,'skewness','randcg',500)  SY_LocalGlobal_skewness_randcg500
-# SY_LocalGlobal(y,'kurtosis','l',10)  SY_LocalGlobal_kurtosis_l10
-# SY_LocalGlobal(y,'kurtosis','l',20)  SY_LocalGlobal_kurtosis_l20
-# SY_LocalGlobal(y,'kurtosis','l',50)  SY_LocalGlobal_kurtosis_l50
-# SY_LocalGlobal(y,'kurtosis','l',100)  SY_LocalGlobal_kurtosis_l100
-# SY_LocalGlobal(y,'kurtosis','l',500)  SY_LocalGlobal_kurtosis_l500
-# SY_LocalGlobal(y,'kurtosis','p',0.001)  SY_LocalGlobal_kurtosis_p001
-# SY_LocalGlobal(y,'kurtosis','p',0.005)  SY_LocalGlobal_kurtosis_p005
-# SY_LocalGlobal(y,'kurtosis','p',0.01)  SY_LocalGlobal_kurtosis_p01
-# SY_LocalGlobal(y,'kurtosis','p',0.1)  SY_LocalGlobal_kurtosis_p1
-# SY_LocalGlobal(y,'kurtosis','p',0.5)  SY_LocalGlobal_kurtosis_p5
-# SY_LocalGlobal(y,'kurtosis','unicg',10)  SY_LocalGlobal_kurtosis_unicg10
-# SY_LocalGlobal(y,'kurtosis','unicg',20)  SY_LocalGlobal_kurtosis_unicg20
-# SY_LocalGlobal(y,'kurtosis','unicg',50)  SY_LocalGlobal_kurtosis_unicg50
-# SY_LocalGlobal(y,'kurtosis','unicg',100)  SY_LocalGlobal_kurtosis_unicg100
-# SY_LocalGlobal(y,'kurtosis','unicg',500)  SY_LocalGlobal_kurtosis_unicg500
-# SY_LocalGlobal(y,'kurtosis','randcg',10)  SY_LocalGlobal_kurtosis_randcg10
-# SY_LocalGlobal(y,'kurtosis','randcg',20)  SY_LocalGlobal_kurtosis_randcg20
-# SY_LocalGlobal(y,'kurtosis','randcg',50)  SY_LocalGlobal_kurtosis_randcg50
-# SY_LocalGlobal(y,'kurtosis','randcg',100)  SY_LocalGlobal_kurtosis_randcg100
-# SY_LocalGlobal(y,'kurtosis','randcg',500)  SY_LocalGlobal_kurtosis_randcg500
-# SY_LocalGlobal(y,'AC1','l',10)  SY_LocalGlobal_AC1_l10
-# SY_LocalGlobal(y,'AC1','l',20)  SY_LocalGlobal_AC1_l20
-# SY_LocalGlobal(y,'AC1','l',50)  SY_LocalGlobal_AC1_l50
-# SY_LocalGlobal(y,'AC1','l',100)  SY_LocalGlobal_AC1_l100
-# SY_LocalGlobal(y,'AC1','l',500)  SY_LocalGlobal_AC1_l500
-# SY_LocalGlobal(y,'AC1','p',0.001)  SY_LocalGlobal_AC1_p001
-# SY_LocalGlobal(y,'AC1','p',0.005)  SY_LocalGlobal_AC1_p005
-# SY_LocalGlobal(y,'AC1','p',0.01)  SY_LocalGlobal_AC1_p01
-# SY_LocalGlobal(y,'AC1','p',0.1)  SY_LocalGlobal_AC1_p1
-# SY_LocalGlobal(y,'AC1','p',0.5)  SY_LocalGlobal_AC1_p5
-# SY_LocalGlobal(y,'AC1','unicg',10)  SY_LocalGlobal_AC1_unicg10
-# SY_LocalGlobal(y,'AC1','unicg',20)  SY_LocalGlobal_AC1_unicg20
-# SY_LocalGlobal(y,'AC1','unicg',50)  SY_LocalGlobal_AC1_unicg50
-# SY_LocalGlobal(y,'AC1','unicg',100)  SY_LocalGlobal_AC1_unicg100
-# SY_LocalGlobal(y,'AC1','unicg',500)  SY_LocalGlobal_AC1_unicg500
-# SY_LocalGlobal(y,'AC1','randcg',10)  SY_LocalGlobal_AC1_randcg10
-# SY_LocalGlobal(y,'AC1','randcg',20)  SY_LocalGlobal_AC1_randcg20
-# SY_LocalGlobal(y,'AC1','randcg',50)  SY_LocalGlobal_AC1_randcg50
-# SY_LocalGlobal(y,'AC1','randcg',100)  SY_LocalGlobal_AC1_randcg100
-# SY_LocalGlobal(y,'AC1','randcg',500)  SY_LocalGlobal_AC1_randcg500
 EN_wentropy(y,'shannon')	EN_wentropy_shannon
 EN_Shannonpdf(y)	EN_Shannonpdf
 EN_wentropy(y,'logenergy')		EN_wentropy_logenent
@@ -880,52 +740,12 @@ EN_PermEn(y,2)		EN_PermEn_2
 EN_PermEn(y,3)		EN_PermEn_3
 EN_PermEn(y,4)		EN_PermEn_4
 EN_PermEn(y,5)		EN_PermEn_5
-EN_TSentropy(y,0.2)	EN_TSentropy_02
-EN_TSentropy(y,0.4)	EN_TSentropy_04
-EN_TSentropy(y,0.6)	EN_TSentropy_06
-EN_TSentropy(y,0.8)	EN_TSentropy_08
-EN_TSentropy(y,1)	EN_TSentropy_1
-EN_TSentropy(y,1.5)	EN_TSentropy_15
-EN_TSentropy(y,2)	EN_TSentropy_2
-EN_TSentropy(y,2.5)	EN_TSentropy_25
-EN_TSentropy(y,3)	EN_TSentropy_3
-EN_TSentropy(y,3.5)	EN_TSentropy_35
-EN_TSentropy(y,4)	EN_TSentropy_4
-EN_TSentropy(y,4.5)	EN_TSentropy_45
-EN_TSentropy(y,5)	EN_TSentropy_5
-EN_TSentropy(y,5.5)	EN_TSentropy_55
 DN_Fit_mle(x,'gaussian')	DN_Fit_mle_gaussian
 DN_Fit_mle(y,'geometric')	DN_Fit_mle_geometric
 DN_nlogL_norm(y)	DN_nlogL_norm
 DN_FitKernelSmooth(x,'numcross',[0.05,0.1,0.2,0.3,0.4,0.5],'area',[0.05,0.1,0.2,0.3,0.4,0.5],'arclength',[0.1,0.5,1,2])	DN_FitKernelSmoothraw
 DN_FitKernelSmooth(y)	DN_FitKernelSmoothzscore
-# DN_FitKernelSmooth(x,'numpeaks')	DN_FitKernelSmoothnumpeaks
-# DN_FitKernelSmooth(x,'entropy')	ksentraw
-# DN_FitKernelSmooth(y,'entropy')	ksent
-# DN_FitKernelSmooth(x,'max')	kspeakmaxraw
-# DN_FitKernelSmooth(y,'max')	kspeakmax
-# DN_FitKernelSmooth(x,'asym')	kssimpasym
-# DN_FitKernelSmooth(x,'plsym')	kssimpplsym
-# DN_FitKernelSmooth(x,'numcross',0.05)  kssimpcross005
-# DN_FitKernelSmooth(x,'numcross',0.1)  kssimpcross01
-# DN_FitKernelSmooth(x,'numcross',0.2)  kssimpcross02
-# DN_FitKernelSmooth(x,'numcross',0.3)  kssimpcross03
-# DN_FitKernelSmooth(x,'numcross',0.4)  kssimpcross04
-# DN_FitKernelSmooth(x,'numcross',0.5)  kssimpcross05
-# DN_FitKernelSmooth(x,'area',0.05)  kssimparea005
-# DN_FitKernelSmooth(x,'area',0.1)  kssimparea01
-# DN_FitKernelSmooth(x,'area',0.2)  kssimparea02
-# DN_FitKernelSmooth(x,'area',0.3)  kssimparea03
-# DN_FitKernelSmooth(x,'area',0.4)  kssimparea04
-# DN_FitKernelSmooth(x,'area',0.5)  kssimparea05
-# DN_FitKernelSmooth(x,'arclength',0.1)  kssimparcl01
-# DN_FitKernelSmooth(x,'arclength',0.5)  kssimparcl05
-# DN_FitKernelSmooth(x,'arclength',1)  kssimparcl1
-# DN_FitKernelSmooth(x,'arclength',2)  kssimparcl2
 DN_Compare_zscore(x) DN_Compare_zscorex
-# DN_Compare_zscore(x,'numpeaks')  kscnumpeaks
-# DN_Compare_zscore(x,'max')  kscmax
-# DN_Compare_zscore(x,'entropy')  kscent
 DK_timerev(y,1)	DK_timerev_1
 DK_timerev(y,2)	DK_timerev_2
 DK_timerev(y,3)	DK_timerev_3
@@ -1312,9 +1132,6 @@ SC_FluctAnal(zscore(sign(y)),2,'dfa',25,2,[],1)	SC_FluctAnal_sign_2_dfa_25_2_log
 SP_Summaries(y,'periodogram','hamming',[],0,1)	SP_basic_pgram_hamm_power
 SP_Summaries(y,'fft',[],[],0,1)	SP_basic_fft_power
 SP_Summaries(y,'fft',[],[],1,1)	SP_basic_fft_logdev_power
-# RP_crpsimp(y,'fnn','mi',0.1,'euclidean')	RP_crpsimp_fnn_mi_01_euclid
-# RP_crpsimp(y,'fnn','mi',1,'euclidean')	RP_crpsimp_fnn_mi_1_euclid
-# RP_crpsimp(y,'fnn','mi',2,'euclidean')	RP_crpsimp_fnn_mi_2_euclid
 NL_crptool_fnn(y,10,2,'mi')	NL_crptool_fnn_10_2_mi
 NL_crptool_fnn(y,10,2,'ac')	NL_crptool_fnn_10_2_ac
 NL_crptool_fnn(y,10,2,1)	NL_crptool_fnn_10_2_1
@@ -1354,14 +1171,6 @@ NL_TSTL_PoincareSection(y,'max',{'ac',3})	NL_TSTL_PoincareSection_max_ac
 NL_TSTL_PoincareSection(y,'max',{1,3})	NL_TSTL_PoincareSection_max_1
 NL_TSTL_LargestLyap(y,0.5,0.1,0.01,3,{'mi','cao'})	NL_TSTL_LargestLyap_05_01_001_3_mi_cao
 NL_TSTL_LargestLyap(y,-1,0.1,0.01,3,{1,4})	NL_TSTL_LargestLyap_n1_01_001_3_1_4
-# TSTL_predict(y,1,1,2,0,{1,5})    TSTL_predict_y_1_1_2_0_1_5
-# TSTL_predict(y,1,1,2,0,{1,10})    TSTL_predict_y_1_1_2_0_1_10
-# TSTL_predict(y,1,1,2,0,{1,'cao'})    TSTL_predict_y_1_1_2_0_1_cao
-# TSTL_predict(y,1,1,2,0,{'mi','cao'})    TSTL_predict_y_1_1_2_0_mi_cao
-# TSTL_predict(y,1,1,2,0,{'ac','cao'})    TSTL_predict_y_1_1_2_0_ac_cao
-# TSTL_predict(y,1,1,2,1,{1,10})    TSTL_predict_y_1_1_2_1_1_10
-# TSTL_predict(y,1,1,2,2,{1,10})    TSTL_predict_y_1_1_2_2_1_10
-# TSTL_predict(y,1,1,2,3,{1,10})    TSTL_predict_y_1_1_2_3_1_10
 NL_TSTL_ReturnTime(y,10,1,1,-1,{'ac',8})	NL_TSTL_ReturnTime_10_1_1_n1_ac_8
 NL_TSTL_ReturnTime(y,5,1,40,-1,{1,8})	NL_TSTL_ReturnTime_5_1_40_n1_1_8
 NL_TSTL_ReturnTime(y,0.05,1,0.05,-1,{1,3})	NL_TSTL_ReturnTime_005_1_005_n1_1_3
@@ -1480,7 +1289,6 @@ MF_hmm_fit(y,0.7,3)	MF_hmm_07_3
 MF_hmm_fit(y,0.8,2)	MF_hmm_08_2
 MF_hmm_CompareNStates(y,0.6,2:4)	MF_hmm_CompareNStates_06_24
 MD_hrv_classic(y)	MD_hrv_classic
-# CP_ML_StepDetect(y,'kv')    CP_ML_StepDetect_kv
 CP_ML_StepDetect(y,'l1pwc',10)	CP_ML_StepDetect_l1pwc_10
 CP_ML_StepDetect(y,'l1pwc',0.05)	CP_ML_StepDetect_l1pwc_005
 CP_ML_StepDetect(y,'l1pwc',0.2)	CP_ML_StepDetect_l1pwc_02

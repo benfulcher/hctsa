@@ -60,10 +60,6 @@ addpath(fullfile(pwd,'Toolboxes','Rudy_Moddemeijer'));
 fprintf(1,', Land and Elias');
 addpath(fullfile(pwd,'Toolboxes','Land_and_Elias'));
 
-% TS Research
-fprintf(1,', TS_Research\n')
-addpath(fullfile(pwd,'Toolboxes','TS_Research'));
-
 % Physionet
 fprintf(1,', Physionet');
 addpath(fullfile(pwd,'Toolboxes','Physionet'));
