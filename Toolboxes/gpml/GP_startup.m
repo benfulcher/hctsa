@@ -2,7 +2,7 @@
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2014-11-30.
 
-disp(['executing gpml startup script...']);
+% disp(['executing gpml startup script...']);
 
 OCT = exist('OCTAVE_VERSION') ~= 0;           % check if we run Matlab or Octave
 

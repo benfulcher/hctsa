@@ -61,11 +61,11 @@ fprintf(1,', Land and Elias');
 addpath(fullfile(pwd,'Toolboxes','Land_and_Elias'));
 
 % Physionet
-fprintf(1,', Physionet');
+fprintf(1,', Physionet\n');
 addpath(fullfile(pwd,'Toolboxes','Physionet'));
 
 % Max Little's steps/bumps toolbox
-fprintf(1,', steps_bumps toolkit')
+fprintf(1,'Max Little''s steps_bumps toolkit')
 addpath(fullfile(pwd,'Toolboxes','Max_Little','steps_bumps_toolkit'));
 
 % Max Little's fastdfa code
@@ -94,7 +94,7 @@ clear homeDir tiseanBinaryLocation
 
 % TISEAN also requires this DYLD path to be set (I assume this works also on Windows):
 setenv('DYLD_LIBRARY_PATH','/usr/local/bin');
-fprintf(1,', DYLD library path');
+fprintf(1,', DYLD library path (for TISEAN).');
 
 % ------------------------------------------------------------------------------
 %% Finished:
