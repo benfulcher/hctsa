@@ -95,9 +95,11 @@ switch lorp
         % Takes n uniformly distributed points in time series:
         r = round(linspace(1,N,n));
     case 'randcg'
+        % Reset the seed to the default value (for reproducibility):
+        BF_ResetSeed('default');
         % Takes n random points in time series; there could be repeats:
         r = randi(N,n,1);
-        % This is not veru robust, as it's taking just a single stochastic
+        % This is not very robust, as it's taking just a single stochastic
         % sample with a (possibly) large variance
 
     otherwise

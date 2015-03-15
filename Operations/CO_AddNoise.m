@@ -54,7 +54,7 @@ function out = CO_AddNoise(y,tau,meth,nbins)
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
 
-DoPlot = 0; % plot outputs to figure
+doPlot = 0; % plot outputs to figure
 
 % ------------------------------------------------------------------------------
 %% Check inputs
@@ -72,19 +72,23 @@ end
 % ------------------------------------------------------------------------------
 % Preliminaries
 % ------------------------------------------------------------------------------
-noiser = (0:0.1:2); % across this noise range
-nr = length(noiser);
-amis = zeros(nr,1);
+noiser = (0:0.1:2); % compare properties across this noise range
+BF_ResetSeed('default');
+numRepeats = length(noiser);
+amis = zeros(numRepeats,1);
 noise = randn(size(y));
 
 % ------------------------------------------------------------------------------
 % Compute the automutual information across a range of noise levels
 % ------------------------------------------------------------------------------
-for i = 1:nr
+% The *same* noise vector, noise, is added to the signal, with increasing
+% standard deviation (one could imagine repeating the calculation with different
+% random seeds)...
+for i = 1:numRepeats
     amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,meth,nbins);
 end
 
-out.pdec = sum(diff(amis) < 0)/(nr-1);
+out.pdec = sum(diff(amis) < 0)/(numRepeats-1);
 out.meanch = mean(diff(amis));
 out.ac1 = CO_AutoCorr(amis,1);
 out.ac2 = CO_AutoCorr(amis,2);
@@ -103,17 +107,6 @@ out.fitexpr2 = gof.rsquare;
 out.fitexpadjr2 = gof.adjrsquare;
 out.fitexprmse = gof.rmse;
 
-% Plot output:
-if DoPlot
-    figure('color','w'); box('on');
-    cc = BF_getcmap('set1',2,1);
-    % figure('color','w');
-    hold on; box('on')
-    plot(noiser,c.a*exp(c.b*noiser),'color',cc{2},'linewidth',2)
-    plot(noiser,amis,'.-','color',cc{1})
-    xlabel('\eta'); ylabel('AMI_1')
-end
-
 % ------------------------------------------------------------------------------
 % Fit linear function to output
 % ------------------------------------------------------------------------------
@@ -126,6 +119,20 @@ out.mse = mean((linfit' - amis).^2);
 % ------------------------------------------------------------------------------
 % Number of times the AMI function crosses its mean
 % ------------------------------------------------------------------------------
-out.pcrossmean = sum(BF_sgnchange(amis-mean(amis)))/(nr-1);
+out.pcrossmean = sum(BF_sgnchange(amis-mean(amis)))/(numRepeats-1);
+
+% ------------------------------------------------------------------------------
+% Plot output:
+% ------------------------------------------------------------------------------
+if doPlot
+    figure('color','w'); box('on');
+    cc = BF_getcmap('set1',2,1);
+    % figure('color','w');
+    hold on; box('on')
+    plot(noiser,c.a*exp(c.b*noiser),'color',cc{2},'linewidth',2)
+    plot(noiser,amis,'.-','color',cc{1})
+    xlabel('\eta'); ylabel('AMI_1')
+end
+
 
 end
