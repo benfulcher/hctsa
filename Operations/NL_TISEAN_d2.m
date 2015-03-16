@@ -104,7 +104,7 @@ end
 % ------------------------------------------------------------------------------
 % to the millisecond (only get double-write error for same function called in same millisecond
 tmp_folder = tempdir;
-fileName = sprintf('tisean_temp_d2_tau%u_M%u_t%u_%s.dat',tau,maxm,theilerWin,datestr(now,'yyyymmdd_HHMMSS_FFF')); % filename
+fileName = sprintf('hctsa_tisean_d2_tau%u_M%u_t%u_%s.tmp',tau,maxm,theilerWin,datestr(now,'yymmdd_HHMMSS_FFF')); % filename
 % Place in the system temp directory:
 fileName = fullfile(tmp_folder,fileName);
 dlmwrite(fileName,y);
@@ -130,6 +130,16 @@ if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out?
         error('Call to TISEAN function ''d2'' failed: %s',res)
     end
 end
+
+% Check that all required files were generated (could not be due to problems with path or filename?)
+if ~exist([fileName '.c2']) || ~exist([fileName '.d2']) || ~exist([fileName '.h2'])
+    error([fileName,'.c2/.d2/.h2 not generated?']);
+    % Delete all temporary files that exist:
+    if exist([fileName '.c2']), delete([fileName '.c2']); end
+    if exist([fileName '.d2']), delete([fileName '.d2']); end
+    if exist([fileName '.h2']), delete([fileName '.h2']); end
+end
+
 
 % this creates files in the local directory:
 %  * extension .c2: This file contains the correlation sums for all treated length scales and embedding dimensions.

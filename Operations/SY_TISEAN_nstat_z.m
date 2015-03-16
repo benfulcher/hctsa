@@ -89,11 +89,14 @@ end
 % Embed the time series:
 tm = BF_embed(y,embedparams{1},embedparams{2},2);
 
-tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
-% to the millisecond (only get double-write error for same function called in same millisecond
-fn = sprintf('tisean_temp_nstat_z_%s.dat',tnow);
-dlmwrite(fn,y);
-fprintf(1,'Just written temporary file %s for TISEAN\n',fn)
+% Adds parameter set and timestamp to the millisecond:
+fileName = sprintf('tisean_nstat_z_n%u_d%u_m%u_%s.tmp',nseg,tm(1),tm(2),datestr(now,'yymmdd_HHMMSS_FFF'));
+
+% Place in the system temp directory:
+tmp_folder = tempdir;
+fileName = fullfile(tmp_folder,fileName);
+dlmwrite(fileName,y);
+fprintf(1,'Just written temporary data file %s for TISEAN.\n',fileName)
 
 % ------------------------------------------------------------------------------
 %% Do the calculation
@@ -101,13 +104,13 @@ fprintf(1,'Just written temporary file %s for TISEAN\n',fn)
 N = length(y); % length of the time series
 if N/tm(1) < nseg*8 % heuristic
     % it may be more tm(1) itself rather than compared to nseg...?
-    fprintf(1,'Time delay tau = %u too large for time series length, N = %u\n with %u segments',tm(1),N,nseg);
-    delete(fn) % remove the temporary file fn
+    fprintf(1,'Time delay, tau = %u, is too large for time-series length, N = %u\n with %u segments',tm(1),N,nseg);
+    delete(fileName) % remove the temporary file fileName
     out = NaN; return
 end
 
-[~, res] = system(sprintf('nstat_z -#%u -d%u -m%u %s',nseg,tm(1),tm(2),fn));
-delete(fn) % remove the temporary file fn
+[~, res] = system(sprintf('nstat_z -#%u -d%u -m%u %s',nseg,tm(1),tm(2),fileName));
+delete(fileName) % remove the temporary file fileName
 if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
 
 % ------------------------------------------------------------------------------
