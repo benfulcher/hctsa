@@ -29,7 +29,7 @@
 %       
 % maxm, the maximum embedding dimension
 % 
-% theilerwin, the Theiler window
+% theilerWin, the Theiler window
 % 
 % cf. "Spurious dimension from correlation algorithms applied to limited
 % time-series data", J. Theiler, Phys. Rev. A, 34(3) 2427 (1986)
@@ -70,7 +70,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_TISEAN_d2(y, tau, maxm, theilerwin)
+function out = NL_TISEAN_d2(y, tau, maxm, theilerWin)
 % Ben Fulcher, 18/11/2009
 
 N = length(y); % data length (number of samples)
@@ -92,36 +92,38 @@ if nargin < 3 || isempty(maxm)
 end
 
 % Theiler window
-if nargin < 4 || isempty(theilerwin)
-   theilerwin = 0.01; % Set a Theiler window of 1%% of the data length
+if nargin < 4 || isempty(theilerWin)
+   theilerWin = 0.01; % Set a Theiler window of 1%% of the data length
 end
-if (theilerwin > 0) && (theilerwin < 1) % specify proportion of time-series length
-    theilerwin = round(theilerwin*N);
+if (theilerWin > 0) && (theilerWin < 1) % specify proportion of time-series length
+    theilerWin = round(theilerWin*N);
 end
 
 % ------------------------------------------------------------------------------
 %% Write the file
 % ------------------------------------------------------------------------------
-tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
 % to the millisecond (only get double-write error for same function called in same millisecond
-fn = sprintf('tisean_temp_d2_%s.dat',tnow); % filename
-dlmwrite(fn,y);
-fprintf(1,'Just wrote the input time series (N = %u) to the temporary file %s for TISEAN\n',length(y),fn)
+tmp_folder = tempdir;
+fileName = sprintf('tisean_temp_d2_tau%u_M%u_t%u_%s.dat',tau,maxm,theilerWin,datestr(now,'yyyymmdd_HHMMSS_FFF')); % filename
+% Place in the system temp directory:
+fileName = fullfile(tmp_folder,fileName);
+dlmwrite(fileName,y);
+fprintf(1,'Just wrote the input time series (N = %u) to the temporary file %s for TISEAN\n',length(y),fileName)
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, d2
 % ------------------------------------------------------------------------------
-[~, res] = system(sprintf(['d2 -d%u -M1,%u -t%u %s'],tau,maxm,theilerwin,fn));
-delete(fn) % remove the temporary time-series data file
+[~, res] = system(sprintf(['d2 -d%u -M1,%u -t%u %s'],tau,maxm,theilerWin,fileName));
+delete(fileName) % remove the temporary time-series data file
 %  * extension .stat: This file shows the current status of the estimate.
-if exist([fn '.stat'])
-    delete([fn '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
+if exist([fileName '.stat'])
+    delete([fileName '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
 end
 
 if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
-    if exist([fn '.c2']), delete([fn '.c2']); end
-    if exist([fn '.d2']), delete([fn '.d2']); end
-    if exist([fn '.h2']), delete([fn '.h2']); end
+    if exist([fileName '.c2']), delete([fileName '.c2']); end
+    if exist([fileName '.d2']), delete([fileName '.d2']); end
+    if exist([fileName '.h2']), delete([fileName '.h2']); end
     if isempty(res)
         error('Call to TISEAN function ''d2'' failed.')
     else
@@ -137,14 +139,14 @@ end
 %% Retreve output from file
 
 % % (1) --------- C2 -----------
-% fid_c2 = fopen([fn '.c2']);
+% fid_c2 = fopen([fileName '.c2']);
 % s = textscan(fid_c2,'%[^\n]');
 % if isempty(s)
-%     disp(['Error reading TISEAN output file ' fn '.c2'])
+%     disp(['Error reading TISEAN output file ' fileName '.c2'])
 %     fclose(fid_c2); % close the file
-%     delete([fn '.c2']) % delete this file
-%     delete([fn '.d2']) % delete this file
-%     delete([fn '.h2']) % delete this file
+%     delete([fileName '.c2']) % delete this file
+%     delete([fileName '.d2']) % delete this file
+%     delete([fileName '.h2']) % delete this file
 %     return;
 % end
 % s = s{1};
@@ -158,19 +160,19 @@ end
 
 % ------- GAUSSIAN KERNEL CORRELATION INTEGRAL -----------
 % Now implement Gaussian Kernel Correlation integral
-[~, res] = system(sprintf('c2g %s.c2',fn));
+[~, res] = system(sprintf('c2g %s.c2',fileName));
 % output is in res -- check it
 s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('writing to stdout',s);
 s = s(wi+1:end);
 if isempty(s) % TISEAN did produce valid output
-    delete([fn,'.c2']); delete([fn,'.d2']); delete([fn,'.h2']) % just in case these files were generated...
+    delete([fileName,'.c2']); delete([fileName,'.d2']); delete([fileName,'.h2']) % just in case these files were generated...
     error('TISEAN d2 produced invalid output: %s',res)
 end
 try
     c2gdat = SUB_readTISEANout(s,maxm,'#m=',3);
 catch
-    delete([fn '.c2']); delete([fn '.d2']); delete([fn '.h2'])
+    delete([fileName '.c2']); delete([fileName '.d2']); delete([fileName '.h2'])
     error('There are probably some Inf and NAN values in the TISEAN output files...?')
 end
     
@@ -180,13 +182,13 @@ end
 % ----- TAKENS MAXIMUM LIKELIHOOD ESTIMATOR FROM CORRELATION SUMS ----
 % The integral is computed from the discrete values of C(r) by assuming an
 % exact power law between the available points.
-[~, res] = system(sprintf('c2t %s.c2',fn));
+[~, res] = system(sprintf('c2t %s.c2',fileName));
 % output is in res
 s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('writing to stdout',s);
 s = s(wi+1:end);
 c2tdat = SUB_readTISEANout(s,maxm,'#m=',2);
-delete([fn '.c2']);
+delete([fileName '.c2']);
 
 % c2tdat contains upper length scale r (1), and the takens estimator (2)
 % The integral is computed from the discrete values of C(r) by assuming an
@@ -194,13 +196,13 @@ delete([fn '.c2']);
 
 
 % (2) --------- D2 ------------
-fid_d2 = fopen([fn '.d2']);
+fid_d2 = fopen([fileName '.d2']);
 s = textscan(fid_d2,'%[^\n]');
 s = s{1};
 % FEED THIS INTO SUBROUTINE
 d2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
 fclose(fid_d2); % close the file
-delete([fn '.d2']); % delete the file
+delete([fileName '.d2']); % delete the file
 
 % d2dat now contains the local slopes of the logarithm of correlation sums
 % (second column) as a function of the length scale epsilon (first column) for
@@ -209,13 +211,13 @@ delete([fn '.d2']); % delete the file
 
 % (3) -------------- H2 -------------
 
-fid_h2 = fopen([fn '.h2']);
+fid_h2 = fopen([fileName '.h2']);
 s = textscan(fid_d2,'%[^\n]');
 s = s{1};
 % FEED THIS INTO SUBROUTINE
 h2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
 fclose(fid_h2); % close the file
-delete([fn '.h2']); % delete the file
+delete([fileName '.h2']); % delete the file
 
 % h2dat now contains the correlation entropies (second column)
 
@@ -428,7 +430,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 
 % can look for local slopes using
 % c2d:
-% [pop res] = system(['H:\bin\c2d ' fn '.c2']);
+% [pop res] = system(['H:\bin\c2d ' fileName '.c2']);
 
 
 
