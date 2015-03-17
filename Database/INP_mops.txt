@@ -675,11 +675,6 @@ SY_LocalGlobal(y,'unicg',20)  SY_LocalGlobal_unicg20
 SY_LocalGlobal(y,'unicg',50)  SY_LocalGlobal_unicg50
 SY_LocalGlobal(y,'unicg',100)  SY_LocalGlobal_unicg100
 SY_LocalGlobal(y,'unicg',500)  SY_LocalGlobal_unicg500
-SY_LocalGlobal(y,'randcg',10)  SY_LocalGlobal_randcg10
-SY_LocalGlobal(y,'randcg',20)  SY_LocalGlobal_randcg20
-SY_LocalGlobal(y,'randcg',50)  SY_LocalGlobal_randcg50
-SY_LocalGlobal(y,'randcg',100)  SY_LocalGlobal_randcg100
-SY_LocalGlobal(y,'randcg',500)  SY_LocalGlobal_randcg500
 EN_wentropy(y,'shannon')	EN_wentropy_shannon
 EN_Shannonpdf(y)	EN_Shannonpdf
 EN_wentropy(y,'logenergy')		EN_wentropy_logenent
