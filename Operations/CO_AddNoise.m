@@ -7,21 +7,35 @@
 % Adds Gaussian-distributed noise to the time series with increasing standard
 % deviation, eta, across the range eta = 0, 0.1, ..., 2, and measures the
 % mutual information at each point using histograms with
-% nbins bins (implemented using CO_HistogramAMI).
+% numBins bins (implemented using CO_HistogramAMI).
 % 
 % The output is a set of statistics on the resulting set of automutual
 % information estimates, including a fit to an exponential decay, since the
 % automutual information decreases with the added white noise.
 % 
-% Can calculate these statistics for time delays 'tau', and for a number 'nbins'
+% Can calculate these statistics for time delays 'tau', and for a number 'numBins'
 % bins.
 % 
 % This algorithm is quite different, but was based on the idea of 'noise
 % titration' presented in: "Titration of chaos with added noise", Chi-Sang Poon
 % and Mauricio Barahona P. Natl. Acad. Sci. USA, 98(13) 7107 (2001)
 % 
+%---INPUTS:
+%
+% y, the input time series
+% 
+% tau, the time delay for computing AMI (using CO_HistogramAMI)
+% 
+% amiMethod, the method for computing AMI (using CO_HistogramAMI)
+% 
+% numBins, the number of bins input to CO_HistogramAMI
+% 
+% randomSeed: settings for resetting the random seed for reproducible results
+%               (using BF_ResetSeed)
+%
 %---HISTORY:
 % Ben Fulcher, September 2009
+% Ben Fulcher, 2015-03-19 added random seed input for reproducibility
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -46,7 +60,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_AddNoise(y,tau,meth,nbins)
+function out = CO_AddNoise(y,tau,amiMethod,numBins,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Preliminary checks
@@ -63,17 +77,20 @@ if nargin < 2
     tau = []; % set default in CO_HistogramAMI
 end
 if nargin < 3
-    meth = ''; % set default in CO_HistogramAMI
+    amiMethod = ''; % set default in CO_HistogramAMI
 end
 if nargin < 4
-    nbins = [];
+    numBins = [];
+end
+if nargin < 5
+    randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------
 % Preliminaries
 % ------------------------------------------------------------------------------
 noiser = (0:0.1:2); % compare properties across this noise range
-BF_ResetSeed('default');
+BF_ResetSeed(randomSeed); % reset the random seed if specified
 numRepeats = length(noiser);
 amis = zeros(numRepeats,1);
 noise = randn(size(y));
@@ -85,7 +102,7 @@ noise = randn(size(y));
 % standard deviation (one could imagine repeating the calculation with different
 % random seeds)...
 for i = 1:numRepeats
-    amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,meth,nbins);
+    amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,amiMethod,numBins);
 end
 
 out.pdec = sum(diff(amis) < 0)/(numRepeats-1);

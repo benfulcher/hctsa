@@ -27,7 +27,7 @@
 % embedparams, embedding parameters to feed BF_embed.m for embedding the
 %               signal in the form {tau,m}
 % 
-% dotwo, if this is set to 1, will use corrsum, if set to 2, will use corrsum2.
+% doTwo, if this is set to 1, will use corrsum, if set to 2, will use corrsum2.
 %           For corrsum2, n specifies the number of pairs per bin. Default is 1,
 %           to use corrsum.
 % 
@@ -62,7 +62,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedparams,dotwo)
+function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedparams,doTwo)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -105,11 +105,11 @@ else
     end
 end
 
-if nargin < 7 || isempty(dotwo)
-    dotwo = 1; % use corrsum rather than corrsum2
+if nargin < 7 || isempty(doTwo)
+    doTwo = 1; % use corrsum rather than corrsum2
 end
 
-if (Nref == -1) && (dotwo == 2)
+if (Nref == -1) && (doTwo == 2)
     % we need a *number* of pairs for corrsum2, round down from 50% of time series
     % length
     Nref = floor(N*0.5);
@@ -132,13 +132,13 @@ end
 % ------------------------------------------------------------------------------
 %% Run TSTOOL function, corrsum or corrsum2
 % ------------------------------------------------------------------------------
-me = []; % error catch
-if dotwo == 1 % use corrsum
+me = []; % error catcher
+if doTwo == 1 % use corrsum
     try
         rs = corrsum(s,Nref,r,thwin,nbins);
     catch me % DEAL WITH ERROR MESSAGE BELOW
     end
-elseif dotwo == 2 % use corrsum2
+elseif doTwo == 2 % use corrsum2
     try
         rs = corrsum2(s,Nref,r,thwin,nbins);
     catch me

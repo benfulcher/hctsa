@@ -34,6 +34,9 @@
 % [future: could compare differences in outputs obtained with 'p', 'n', and
 %               'abs' -- could give an idea as to asymmetries/nonstationarities??]
 %               
+%---HISTORY:
+% Ben Fulcher, June 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -58,7 +61,6 @@
 % ------------------------------------------------------------------------------
 
 function out = DN_OutlierInclude(y,howth,inc)
-% Ben Fulcher, June 2009
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -67,7 +69,7 @@ function out = DN_OutlierInclude(y,howth,inc)
 % Check a Curve Fitting toolbox license is available
 BF_CheckToolbox('curve_fitting_toolbox');
 
-doplot = 0; % Plot some outputs
+doPlot = 0; % Plot some outputs
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
@@ -167,8 +169,10 @@ if ~isempty(mj)
     thr = thr(1:mj);
 end
 
+% ------------------------------------------------------------------------------
 %% Plot output
-if doplot
+% ------------------------------------------------------------------------------
+if doPlot
     figure('color','w'); hold on
     plot(thr,msDt(:,1),'.-k');
     plot(thr,msDt(:,2),'.-b');
@@ -181,7 +185,10 @@ end
 % ------------------------------------------------------------------------------
 %%% Generate outputs:
 % ------------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------------
 %% Fit an Exponential to the mean as a function of the threshold
+% ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[0.1 2.5 1]);
 f = fittype('a*exp(b*x)+c','options',s);
 emsg = '';
@@ -207,7 +214,9 @@ else
     out.mfexprmse = NaN;
 end
 
+% ------------------------------------------------------------------------------
 %% Fit an exponential to N: the valid proportion left in calculation
+% ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[120, -1, -16]);
 f = fittype('a*exp(b*x)+c','options',s);
 [c, gof] = fit(thr',msDt(:,3),f);
@@ -219,7 +228,9 @@ out.nfexpr2 = gof.rsquare;
 out.nfexpadjr2 = gof.adjrsquare;
 out.nfexprmse = gof.rmse;
 
+% ------------------------------------------------------------------------------
 %% Fit an linaer to N: the valid proportion left in calculation
+% ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-40, 100]);
 f = fittype('a*x+b','options',s);
 [c, gof] = fit(thr',msDt(:,3),f);
@@ -230,7 +241,9 @@ out.nflr2 = gof.rsquare;
 out.nfladjr2 = gof.adjrsquare;
 out.nflrmse = gof.rmse;
 
+% ------------------------------------------------------------------------------
 %% Stationarity assumption
+% ------------------------------------------------------------------------------
 % mean, median and std of the mean and median of range indicies
 out.mdrm = mean(msDt(:,4));
 out.mdrmd = median(msDt(:,4));
@@ -240,12 +253,16 @@ out.mrm = mean(msDt(:,5));
 out.mrmd = median(msDt(:,5));
 out.mrstd = std(msDt(:,5));
 
+% ------------------------------------------------------------------------------
 %% Cross correlation between mean and error
+% ------------------------------------------------------------------------------
 xc = xcorr(msDt(:,1),msDt(:,2),1,'coeff');
 out.xcmerr1 = xc(end); % this is the cross-correlation at lag 1
 out.xcmerrn1 = xc(1); % this is the cross-correlation at lag -1
 
+% ------------------------------------------------------------------------------
 %% Fit exponential to std in range
+% ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[5, 1, 15]);
 f = fittype('a*exp(b*x)+c','options',s);
 emsg = [];
@@ -271,7 +288,9 @@ else
     out.stdrfexprmse = NaN;
 end
 
+% ------------------------------------------------------------------------------
 %% Fit linear to errors in range
+% ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[40, 4]);
 f = fittype('a*x +b','options',s);
 [c, gof] = fit(thr',msDt(:,6),f);
@@ -282,7 +301,7 @@ out.stdrflr2 = gof.rsquare;
 out.stdrfladjr2 = gof.adjrsquare;
 out.stdrflrmse = gof.rmse;
 
-if doplot
+if doPlot
     figure('color','w')
     errorbar(thr,msDt(:,1),msDt(:,2),'k');
 end

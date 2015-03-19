@@ -26,6 +26,7 @@
 % 
 %---HISTORY:
 % Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -105,7 +106,7 @@ catch me
     error('Error running TSTOOL code dimensions: %s',me.message);
 end
 
-% we now have the scaling of the boxcounting dimension, D0, the information
+% We now have the scaling of the boxcounting dimension, D0, the information
 % dimension D1, and the correlation dimension D2.
 
 % ------------------------------------------------------------------------------
@@ -395,8 +396,9 @@ out.scr_co_mopt_scaling_exp = outscr_co_mopt.scaling_exp;
 out.scr_co_mopt_scaling_int = outscr_co_mopt.scaling_int;
 out.scr_co_mopt_minbad = outscr_co_mopt.minbad;
 
-
+% ------------------------------------------------------------------------------
 %% What m gives best fit?
+% ------------------------------------------------------------------------------
 % box counting dimension
 bestm_bc = SUB_bestm(bc_logr,bc_logN);
 out.bc_minscalingexp = bestm_bc.minscalingexp;
@@ -419,6 +421,8 @@ out.co_meanscalingexp = bestm_co.meanscalingexp;
 out.co_mbestfit = bestm_co.mbestfit;
 
 
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
     function subout = SUB_mch(logr,logN)
         % looks at how changes with m. Since m will in general be different for each
         % different time series (i.e., if choosing an automatic method for
@@ -466,6 +470,7 @@ out.co_mbestfit = bestm_co.mbestfit;
         
     end
 
+    % ------------------------------------------------------------------------------
     function subout = SUB_scr(logr,logN)
         % determines the scaling range in r for some m
         % we remove points from either extreme in r until minimize some
@@ -515,6 +520,7 @@ out.co_mbestfit = bestm_co.mbestfit;
         end
     end
 
+    % ------------------------------------------------------------------------------
     function subout = SUB_bestm(logr,logNN)
         % logNN is a matrix... logN is a vector for a given m
 		% determines the scaling range in r for some m

@@ -17,6 +17,8 @@
 % 
 % n, the parameter for the method specified above
 % 
+% randomSeed, an option for whether (and how) to reset the random seed, for the
+% 'randcg' input
 % 
 %---OUTPUTS: the mean, standard deviation, median, interquartile range,
 % skewness, kurtosis, AC(1), and SampEn(1,0.1).
@@ -29,6 +31,7 @@
 % 
 %---HISTORY:
 % Ben Fulcher, September 2009
+% Ben Fulcher, 2015-03-19 added randomSeed input
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -53,7 +56,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SY_LocalGlobal(y,lorp,n)
+function out = SY_LocalGlobal(y,lorp,n,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Preliminaries
@@ -96,10 +99,15 @@ switch lorp
         % Takes n uniformly distributed points in time series:
         r = round(linspace(1,N,n));
     case 'randcg'
-        % Reset the seed to the default value (for reproducibility):
-        BF_ResetSeed('default');
-        % Takes n random points in time series; there could be repeats:
+        if nargin < 4
+            randomSeed = [];
+        end
+        % Reset the random seed if specified (for reproducibility):
+        BF_ResetSeed(randomSeed);
+        
+        % Take n random points in time series; there could be repeats:
         r = randi(N,n,1);
+        
         % This is not very robust, as it's taking just a single stochastic
         % sample with a (possibly) large variance
     otherwise

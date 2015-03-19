@@ -23,10 +23,11 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
+
 function BF_ResetSeed(resetHow)
 
 % Check defaults
-if nargin < 1
+if nargin < 1 || isempty(resetHow)
     resetHow = 'default';
 end
 
@@ -36,6 +37,8 @@ switch resetHow
 case 'default'
     % Reset to the default (the Mersenne Twister with seed 0)
     rng(0,'twister');
+case 'none' % don't change the seed
+    return
 otherwise
     error('Now sure how to reset using ''%s''',resetHow);
 end

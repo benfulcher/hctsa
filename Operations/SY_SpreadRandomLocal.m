@@ -20,6 +20,8 @@
 % 
 % numSegs, the number of randomly-selected local segments to analyze
 % 
+% randomSeed, the input to BF_ResetSeed to control reproducibility
+% 
 %---OUTPUTS: the mean and also the standard deviation of this set of 100 local
 % estimates.
 % 
@@ -49,7 +51,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SY_SpreadRandomLocal(y,l,numSegs)
+function out = SY_SpreadRandomLocal(y,l,numSegs,randomSeed)
 
 doPlot = 0; % set to 1 to plot outputs to figure
 
@@ -92,6 +94,10 @@ if l > 0.9*N % operation is not suitable -- time series is too short
     out = NaN; return % NaN means not suitable
 end
 
+if nargin < 4
+    randomSeed = []; % use default random seed
+end
+
 % ------------------------------------------------------------------------------
 % numSegs segments, each of length segl data points
 
@@ -99,7 +105,7 @@ numFeat = 9; % number of features
 qs = zeros(numSegs,numFeat);
 
 % Reset random seed, for reproducibility:
-BF_ResetSeed('default');
+BF_ResetSeed(randomSeed);
 
 for j = 1:numSegs
     % pick a range
