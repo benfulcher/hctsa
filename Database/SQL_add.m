@@ -161,16 +161,16 @@ numItems = size(datain,1); % Number of items in the input file
 if numItems == 0, error('The input file ''%s'' seems to be empty??',INPfile), end
 
 if beVocal
-    fprintf(1,'Found %u %s in %s, I think. Take a look:\n',numItems,theWhat,INPfile)
+    fprintf(1,'Found %u %s in %s, I think. Take a look:\n\n',numItems,theWhat,INPfile)
     switch importWhat
     case 'ts'
-        fprintf(1,'%s\t%s\n','Filename','Keywords')
+        fprintf(1,'%s\t%s\n','-Filename-','-Keywords-')
         fprint_ts = @(x) fprintf('%s\t%s\n',datain{x,1},datain{x,2});
     case 'ops'
-        fprintf(1,'%s\t%s\t%s\n','Operation Name','Operation Code','Operation Keywords')
+        fprintf(1,'%s\t%s\t%s\n','-Operation Name-','-Operation Code-','-Operation Keywords-')
         fprint_ops = @(x) fprintf('%s\t%s\t%s\n',datain{x,1},datain{x,2},datain{x,3});
     case 'mops'
-        fprintf(1,'%s\t%s\n','Master Code','Master Label')
+        fprintf(1,'%s\t%s\n','-Master Code-','-Master Label-')
         fprint_mops = @(x) fprintf('%s\t%s\n',datain{x,1},datain{x,2});
     end
     
@@ -193,12 +193,12 @@ if beVocal
         end
     end
     
-    fprintf(1,['How does it look? Make sure the time series and everything ' ...
+    fprintf(1,['\nHow does it look? Make sure the time series and everything ' ...
                                             'match up to their headings\n'])
 
     reply = input(['If we go on, we will attempt to read all timeseries ' ...
                     'from file and add all ' ...
-                    'data to the database. Type ''y'' to continue...'],'s');
+                    'data to the database.\n<<<Type ''y'' to continue...>>>'],'s');
     
     if ~strcmp(reply,'y')
         fprintf(1,'I didn''t think so. Come back later...\n')

@@ -124,7 +124,7 @@ end
 stats = zeros(10,4);
 for t = 1:10;
     if any(~isfinite(outmat(:,t))),
-        fprintf(1,'This is a bad statistic\n')
+        fprintf(1,'%u is a bad statistic\n',t)
     end
     stats(t,:) = doyourtestthing(outmat(:,t)); 
 end
