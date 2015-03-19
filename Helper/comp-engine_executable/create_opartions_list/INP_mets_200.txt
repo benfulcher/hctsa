@@ -1,0 +1,317 @@
+S	 ST_trmean(x,2)	 trmean2	 1	 location,raw,locdep
+M	 ST_benlocext(y,'l',50)	 MASTER_ST_benlocext_l50
+P	 MASTER_ST_benlocext_l50.maxabsext	 ST_benlocext_l50_maxabsext	 1	 distribution,stationarity
+S	 DF_mlefits(x,1,2)	 gfit_std	 1	 distribution,spread,fit,raw,spreaddep
+M	 ST_benlocext(y,'l',100)	 MASTER_ST_benlocext_l100
+P	 MASTER_ST_benlocext_l100.meanext	 ST_benlocext_l100_meanext	 1	 distribution,stationarity
+M	 ST_benlocext(y,'n',50)	 MASTER_ST_benlocext_n50
+P	 MASTER_ST_benlocext_n50.meanmax	 ST_benlocext_n50_meanmax	 1	 distribution,stationarity
+S	 CO_autocorr(y,1)	 AC_1	 1	 correlation,autocorrelation
+M	 CO_tc3(y,'mi')	 MASTER_CO_tc3_mi
+P	 MASTER_CO_tc3_mi.num	 CO_tc3_mi_num	 1	 correlation,nonlinear,autocorrelation
+S	 CO_glscf(y,1,1,1)	 CO_glscf_1_1_1	 1	 correlation,glscf
+S	 CO_glscf(y,1,1,'tau')	 CO_glscf_1_1_tau	 1	 correlation,glscf
+S	 CO_glscf(y,1,2,4)	 CO_glscf_1_2_4	 1	 correlation,glscf
+M	 CO_acfshape(y)	 MASTER_CO_acfshape
+P	 MASTER_CO_acfshape.nmaxima	 CO_acfshape_nmaxima	 1	 correlation
+S	 CO_information(y(1:end-6),y(7:end))	 AMI_6	 1	 information,correlation,AMI
+M	 TSTL_amutual(y,20,10)	 MASTER_TSTL_amutual_20_10
+P	 MASTER_TSTL_amutual_20_10.mami	 TSTL_amutual_20_10_mami	 1	 entropy,tstool,AMI
+M	 TSTL_amutual2(y,50)	 MASTER_TSTL_amutual2_50
+P	 MASTER_TSTL_amutual2_50.mami	 TSTL_amutual2_50_mami	 1	 entropy,tstool,AMI
+P	 MASTER_TSTL_amutual2_50.modeperiodmax	 TSTL_amutual2_50_modeperiodmax	 1	 entropy,tstool,AMI
+M	 TSTL_amutual2(diff(y),50)	 MASTER_TSTL_amutual2_diff__50
+P	 MASTER_TSTL_amutual2_diff__50.mami	 TSTL_amutual2_diff__50_mami	 1	 entropy,tstool,AMI
+S	 CO_ami_benhist(y,4,'std1',6)	 CO_ami_benhist_4_std1_6	 1	 information,correlation,AMI
+S	 CO_ami_benhist(y,3,'even',20)	 CO_ami_benhist_3_even_20	 1	 information,correlation,AMI
+S	 CO_ami_benhist(y,2,'quantiles',10)	 CO_ami_benhist_2_quantiles_10	 1	 information,correlation,AMI
+M	 CO_ami_fmin(y,'std2',[2:80])	 MASTER_CO_ami_fmin_std2_2_80
+P	 MASTER_CO_ami_fmin_std2_2_80.nlocmax	 CO_ami_fmin_std2_2_80_nlocmax	 1	 correlation,AMI
+M	 DN_olmi(y,'abs')	 MASTER_olmi_abs
+P	 MASTER_olmi_abs.mrm	 olmi_abs_mrm	 1	 distribution,outliers
+P	 MASTER_olmi_abs.mrstd	 olmi_abs_mrstd	 1	 distribution,outliers
+P	 MASTER_olmi_abs.stdrfla	 olmi_abs_stdrfla	 1	 distribution,outliers
+P	 MASTER_olmi_abs.stdrfladjr2	 olmi_abs_stdrfladjr2	 1	 distribution,outliers
+M	 CO_acfremove(y,'absfar',0.8)	 MASTER_CO_acfremove_absfar_08
+P	 MASTER_CO_acfremove_absfar_08.ac3diff	 CO_acfremove_absfar_08_ac3diff	 1	 correlation,outliers
+M	 CO_acfremove(y,'min',0.1)	 MASTER_CO_acfremove_min_01
+P	 MASTER_CO_acfremove_min_01.mean	 CO_acfremove_min_01_mean	 1	 correlation,outliers
+M	 EX_altmannben(y,0.1,0.1)	 MASTER_EX_altmannben_01_01
+P	 MASTER_EX_altmannben_01_01.stdq	 EX_altmannben_01_01_stdq	 1	 outliers
+M	 EX_altmannben(y,0.1,0.02)	 MASTER_EX_altmannben_01_002
+P	 MASTER_EX_altmannben_01_002.minq	 EX_altmannben_01_002_minq	 1	 outliers
+P	 MASTER_EX_altmannben_01_002.meanqover	 EX_altmannben_01_002_meanqover	 1	 outliers
+M	 MF_M_mtlbfit(y,'gauss1',10)	 MASTER_gauss1_h10
+P	 MASTER_gauss1_h10.resruns	 fd_gauss1_resruns_h10	 1	 distribution,gof,gauss1
+M	 MF_M_mtlbfit(y,'gauss1',30)	 MASTER_gauss1_h30
+P	 MASTER_gauss1_h30.resAC1	 fd_gauss1_AC1_h30	 1	 distribution,gof,gauss1
+M	 MF_M_mtlbfit(y,'exp1',0)	 MASTER_exp1_ks
+P	 MASTER_exp1_ks.adjr2	 fd_exp1_adjr2_ks	 1	 distribution,gof,exp1
+M	 CO_ami_noise(y,1,'quantiles',20)	 MASTER_CO_ami_noise_1_quantiles_20
+P	 MASTER_CO_ami_noise_1_quantiles_20.fitlina	 CO_ami_noise_1_quantiles_20_fitlina	 1	 correlation,AMI,entropy,stochastic
+M	 CO_basicrecurf(y,1)	 MASTER_CO_basicrecurf_1
+P	 MASTER_CO_basicrecurf_1.downdiag05	 CO_basicrecurf_1_downdiag05	 1	 correlation
+P	 MASTER_CO_basicrecurf_1.parabdown05	 CO_basicrecurf_1_parabdown05	 1	 correlation
+M	 CO_basicrecurf(y,'tau')	 MASTER_CO_basicrecurf_tau
+P	 MASTER_CO_basicrecurf_tau.ring1_02	 CO_basicrecurf_tau_ring1_02	 1	 correlation
+M	 TSTL_acp(y,'mi',1,[],10,[])	 MASTER_TSTL_acp_mi_1__10
+P	 MASTER_TSTL_acp_mi_1__10.ac1_acpf_2	 TSTL_acp_mi_1__10_ac1_acpf_2	 1	 nonlinear,acp,correlation,tstool,stochastic
+P	 MASTER_TSTL_acp_mi_1__10.sacpf_3	 TSTL_acp_mi_1__10_sacpf_3	 1	 nonlinear,acp,correlation,tstool,stochastic
+P	 MASTER_TSTL_acp_mi_1__10.ac1_acpf_8	 TSTL_acp_mi_1__10_ac1_acpf_8	 1	 nonlinear,acp,correlation,tstool,stochastic
+M	 TSTL_acp(y,1,0.01,0.25,10,0.5)	 MASTER_TSTL_acp_1_001_025_10_05
+P	 MASTER_TSTL_acp_1_001_025_10_05.macpf_5	 TSTL_acp_1_001_025_10_05_macpf_5	 1	 nonlinear,acp,correlation,tstool,stochastic,slow
+P	 MASTER_TSTL_acp_1_001_025_10_05.ac1_acpf_8	 TSTL_acp_1_001_025_10_05_ac1_acpf_8	 1	 nonlinear,acp,correlation,tstool,stochastic,slow
+M	 ST_benmotif_bin(y,'mean')	 MASTER_ST_benmotif_bin_mean
+P	 MASTER_ST_benmotif_bin_mean.ddu	 benmotif_bin_mean_ddu	 1	 motifs
+M	 ST_benmotif_bin(y,'median')	 MASTER_ST_benmotif_bin_median
+P	 MASTER_ST_benmotif_bin_median.duuu	 benmotif_bin_median_duuu	 1	 motifs
+M	 ST_benmotif_tri(y,'quantile')	 MASTER_ST_benmotif_tri_quantile
+P	 MASTER_ST_benmotif_tri_quantile.bac	 benmotif_tri_quantile_bac	 1	 motifs
+P	 MASTER_ST_benmotif_tri_quantile.bcba	 benmotif_tri_quantile_bcba	 1	 motifs
+P	 MASTER_ST_benmotif_tri_quantile.cbaa	 benmotif_tri_quantile_cbaa	 1	 motifs
+M	 ST_transition(y,'quantile',3,1)	 MASTER_sttransq31
+P	 MASTER_sttransq31.sumdiagcov	 ST_transq31_sumdiagcov	 1	 transitionmat
+M	 ST_transition(y,'quantile',5,1)	 MASTER_sttransq51
+P	 MASTER_sttransq51.mineig	 ST_transq51_mineig	 1	 transitionmat
+M	 ST_transition(y,'quantile',5,'ac')	 MASTER_sttransq5ac
+P	 MASTER_sttransq5ac.sumdiagcov	 ST_transq5ac_sumdiagcov	 1	 transitionmat
+S	 MD_polvar(y,0.5,5)	 MD_polvar_05_5	 1	 medical,maxlittle,symbolic
+M	 ST_dyntransition(y,2:40,1)	 MASTER_dyntrans40_1
+P	 MASTER_dyntrans40_1.maxeig_fexpb	 ST_dyntrans40_1_maxeig_fexpb	 1	 transitionmat
+S	 EN_histent(y,'hist',10,0.05)	 EN_histen_hist_10_005	 1	 entropy
+S	 EN_histent(x,'ks',[],0.05)	 EN_histen_raw_ks__005	 1	 entropy,raw,spreaddep
+S	 MS_complexity(y,9,[])	 MS_complexity_9	 1	 MichaelSmall,complexity,mex,LempelZiv
+S	 MS_complexity(y,9,'diff')	 MS_complexity_9_diff	 1	 MichaelSmall,complexity,mex,LempelZiv
+M	 MS_shannon(y,3,1:10)	 MASTER_MS_shannon_3_1t10
+P	 MASTER_MS_shannon_3_1t10.meanent	 MS_shannon_3_1t10_meanent	 1	 MichaelSmall,entropy,mex,shannon
+M	 IN_surprise(y,'dist',100,4,'updown')	 MASTER_IN_surprise_dist_100_4_udq
+P	 MASTER_IN_surprise_dist_100_4_udq.uq	 IN_surprise_dist_100_4_udq_uq	 1	 information,stochastic
+P	 MASTER_IN_surprise_dist_100_4_udq.std	 IN_surprise_dist_100_4_udq_std	 1	 information,stochastic
+M	 EN_sampenc2(y,4,0.15)	 MASTER_EN_sampenc2_4_015
+P	 MASTER_EN_sampenc2_4_015.meanchsampen	 EN_sampenc2_4_015_meanchsampen	 1	 entropy,sampen
+M	 EN_sampenc2(y,4,0.2,'diff1')	 MASTER_EN_sampenc2_4_02_diff1
+P	 MASTER_EN_sampenc2_4_02_diff1.sampen2	 EN_sampenc2_4_02_diff1_sampen2	 1	 entropy,controlen
+M	 IN_surprise(y,'T1',20,2,'updown')	 MASTER_IN_surprise_T1_20_2_udq
+P	 MASTER_IN_surprise_T1_20_2_udq.median	 IN_surprise_T1_20_2_udq_median	 1	 information,stochastic
+M	 IN_surprise(y,'T1',100,5,'updown')	 MASTER_IN_surprise_T1_100_5_udq
+P	 MASTER_IN_surprise_T1_100_5_udq.tstat	 IN_surprise_T1_100_5_udq_tstat	 1	 information,stochastic
+M	 IN_surprise(y,'dist',10,'tau','embed2quadrants')	 MASTER_IN_surprise_dist_10_tau_m2quad
+P	 MASTER_IN_surprise_dist_10_tau_m2quad.mean	 IN_surprise_dist_10_tau_m2quad_mean	 1	 information,stochastic
+S	 SY_stdnthder(y,8)	 stdnthder_8	 1	 entropy
+M	 EN_progranz(y,'dyndist')	 MASTER_progranz_dyndist
+P	 MASTER_progranz_dyndist.ac1fexpadjr2	 EN_progranz_dyndist_ac1fexpadjr2	 1	 entropy,stochastic,slow
+P	 MASTER_progranz_dyndist.statav5fexpc	 EN_progranz_dyndist_statav5fexpc	 1	 entropy,stochastic,slow
+M	 EN_progranz(y,'statdist')	 MASTER_progranz_statdist
+P	 MASTER_progranz_statdist.statav5fexpb	 EN_progranz_statdist_statav5fexpb	 1	 entropy,stochastic,slow
+M	 EN_progranz(y,'permute')	 MASTER_progranz_permute
+P	 MASTER_progranz_permute.ac2fexpadjr2	 EN_progranz_permute_ac2fexpadjr2	 1	 entropy,stochastic,slow
+M	 SC_benfa(y,2,'nothing',25,[],[],1)	 MASTER_SC_benfa_2_nothing_25_logi
+P	 MASTER_SC_benfa_2_nothing_25_logi.ssr	 SC_benfa_2_nothing_25_logi_ssr	 1	 scaling,fa
+M	 SC_benfa(y,2,'range',1)	 MASTER_SC_benfa_2_range_1
+P	 MASTER_SC_benfa_2_range_1.r2_se1	 SC_benfa_2_range_1_r2_se1	 1	 scaling,fa,lini
+M	 SC_benfa(y,2,'range',25,[],[],1)	 MASTER_SC_benfa_2_range_25_logi
+P	 MASTER_SC_benfa_2_range_25_logi.r2_linfitint	 SC_benfa_2_range_25_logi_r2_linfitint	 1	 scaling,fa
+M	 SC_benfa(y,2,'rsrange',1)	 MASTER_SC_benfa_2_rsrange_1
+P	 MASTER_SC_benfa_2_rsrange_1.linfitint	 SC_benfa_2_rsrange_1_linfitint	 1	 scaling,rsrange,lini
+P	 MASTER_SC_benfa_2_rsrange_1.r1_linfitint	 SC_benfa_2_rsrange_1_r1_linfitint	 1	 scaling,rsrange,lini
+P	 MASTER_SC_benfa_2_rsrange_1.r1_stats_coeffcorr	 SC_benfa_2_rsrange_1_r1_stats_coeffcorr	 1	 scaling,rsrange,lini
+M	 SC_benfa(y,2,'rsrangefit',2,1)	 MASTER_SC_benfa_2_rsrangefit_2_1
+P	 MASTER_SC_benfa_2_rsrangefit_2_1.r1_se2	 SC_benfa_2_rsrangefit_2_1_r1_se2	 1	 scaling,rsrange,lini
+M	 SC_benfa(y,2,'dfa',2,1)	 MASTER_SC_benfa_2_dfa_2_1
+P	 MASTER_SC_benfa_2_dfa_2_1.se2	 SC_benfa_2_dfa_2_1_se2	 1	 scaling,dfa,lini
+P	 MASTER_SC_benfa_2_dfa_2_1.ssr	 SC_benfa_2_dfa_2_1_ssr	 1	 scaling,dfa,lini
+M	 SC_benfa(y,2,'dfa',25,2,[],1)	 MASTER_SC_benfa_2_dfa_25_2_logi
+P	 MASTER_SC_benfa_2_dfa_25_2_logi.se1	 SC_benfa_2_dfa_25_2_logi_se1	 1	 scaling,dfa
+P	 MASTER_SC_benfa_2_dfa_25_2_logi.resac1	 SC_benfa_2_dfa_25_2_logi_resac1	 1	 scaling,dfa
+P	 MASTER_SC_benfa_2_dfa_25_2_logi.r2_se2	 SC_benfa_2_dfa_25_2_logi_r2_se2	 1	 scaling,dfa
+M	 SC_benfa(y,2,'dfa',25,1,3,1)	 MASTER_SC_benfa_2_dfa_25_1_3_logi
+P	 MASTER_SC_benfa_2_dfa_25_1_3_logi.stats_coeffcorr	 SC_benfa_2_dfa_25_1_3_logi_stats_coeffcorr	 1	 scaling,dfa,lengthdep
+M	 SC_benfa(zscore(abs(y)),2,'dfa',25,2,[],1)	 MASTER_SC_benfa_mag_2_dfa_25_2_logi
+P	 MASTER_SC_benfa_mag_2_dfa_25_2_logi.linfitint	 SC_benfa_mag_2_dfa_25_2_logi_linfitint	 1	 scaling,dfa
+S	 SY_StatAv(y,50,'len')	 StatAvl50	 1	 stationarity,StatAv
+S	 SY_slidwin(y,'mean','std',10,2)	 swms10_2	 1	 stationarity,slidingwin
+S	 SY_slidwin(y,'std','ent',5,10)	 swsent5_10	 1	 stationarity,slidingwin
+S	 SY_slidwin(y,'ent','std',5,2)	 swents5_2	 1	 stationarity,slidingwin
+S	 SY_slidwin(y,'apen','apen',5,1)	 swapenapen5_1	 1	 stationarity,slidingwin
+S	 SY_slidwin(y,'lillie','apen',10,10)	 swlilapen10_10	 1	 stationarity,slidingwin
+S	 SY_slidwin(y,'AC1','std',10,10)	 swac1s10_10	 1	 stationarity,slidingwin
+M	 SY_dynpick(y,200)	 MASTER_sydynpick200
+P	 MASTER_sydynpick200.stdstd	 dynpick200_stdstd	 1	 stationarity,stochastic
+S	 ST_cumul(y,'mean','randcg',500)	 ST_cumul_mean_randcg500	 1	 stationarity,stochastic
+S	 ST_cumul(y,'median','p',0.01)	 ST_cumul_median_p01	 1	 stationarity
+S	 ST_cumul(y,'iqr','l',50)	 ST_cumul_iqr_l50	 1	 stationarity
+S	 ST_cumul(y,'kurtosis','p',0.1)	 ST_cumul_kurtosis_p1	 1	 stationarity
+S	 ST_cumul(y,'AC1','l',50)	 ST_cumul_AC1_l50	 1	 stationarity
+M	 TISEAN_nstat_z(y,4,{1,3})	 MASTER_TISEAN_nstat_z_4_1_3
+P	 MASTER_TISEAN_nstat_z_4_1_3.stdmedian	 TISEAN_nstat_z_4_1_3_stdmedian	 1	 nonlinear,tisean,model,stationarity
+M	 TISEAN_nstat_z(y,5,{1,3})	 MASTER_TISEAN_nstat_z_5_1_3
+P	 MASTER_TISEAN_nstat_z_5_1_3.range	 TISEAN_nstat_z_5_1_3_range	 1	 nonlinear,tisean,model,stationarity
+M	 TISEAN_nstat_z(y,4,{'ac',3})	 MASTER_TISEAN_nstat_z_4_ac_3
+P	 MASTER_TISEAN_nstat_z_4_ac_3.median	 TISEAN_nstat_z_4_ac_3_median	 1	 nonlinear,tisean,model,stationarity
+M	 EC_kpsstest(y,0:10)	 MASTER_EC_kpsstest_0_10
+P	 MASTER_EC_kpsstest_0_10.minstat	 EC_kpsstest_0_10_minstat	 1	 kpsstest,econometricstoolbox,stationarity,hypothesistest
+M	 FC_primitive(y,'mean',2)	 MASTER_fcprim_mean2
+P	 MASTER_fcprim_mean2.gofnadjr2	 FC_prim_mean2_gofadjr2	 1	 forecasting
+M	 FC_primitive(y,'mean',3)	 MASTER_fcprim_mean3
+P	 MASTER_fcprim_mean3.stderr	 FC_prim_mean3_stderr	 1	 forecasting
+M	 FC_primitive(y,'median',7)	 MASTER_fcprim_median7
+P	 MASTER_fcprim_median7.rmserr	 FC_prim_median7_rmserr	 1	 forecasting
+M	 GP_hps(y,{'covSum',{'covSEiso','covPeriodic','covNoise'}},1,200,'resample')	 MASTER_GP_hps_covSEiso_covPeriodic_covNoise_1_200_resample
+P	 MASTER_GP_hps_covSEiso_covPeriodic_covNoise_1_200_resample.h5	 GP_hps_covSEiso_covPeriodic_covNoise_1_200_resample_h5	 1	 gaussianprocess
+M	 GP_predict(y,{'covSum',{'covSEiso','covNoise'}},10,3,20,'randomgap')	 MASTER_GP_predict_covSEiso_covNoise_10_3_20_randomgap
+P	 MASTER_GP_predict_covSEiso_covNoise_10_3_20_randomgap.meanerrbar	 GP_predict_covSEiso_covNoise_10_3_20_randomgap_meanerrbar	 1	 gaussianprocess,stochastic
+M	 GP_givealittle(y,{'covSum',{'covSEiso','covNoise'}},20)	 MASTER_GP_givealittle_covSEiso_covNoise_20
+P	 MASTER_GP_givealittle_covSEiso_covNoise_20.logh3	 GP_givealittle_covSEiso_covNoise_20_logh3	 1	 gaussianprocess
+M	 MF_M_mtlbfit(y,'sin3')	 MASTER_SIN3
+P	 MASTER_SIN3.rmse	 fit_sin3rmse	 1	 model,rmse,sin3
+M	 MF_steps_ahead(y,'ar','best',6)	 MASTER_MF_steps_ahead_ar_best_6
+P	 MASTER_MF_steps_ahead_ar_best_6.rmserr_4	 MF_steps_ahead_ar_best_6_rmserr_4	 1	 model,systemidentificationtoolbox,prediction,ar,arfit
+M	 MF_ss_tt(y,'arsbc',[],'uniform',[25,0.1])	 MASTER_MF_ss_tt_arsbc_uniform_25_01
+P	 MASTER_MF_ss_tt_arsbc_uniform_25_01.orders_mean	 MF_ss_tt_arsbc_uniform_25_01_orders_mean	 1	 model,systemidentificationtoolbox,prediction,ar,arfit
+M	 MF_ss_testset(y,'ar','best','uniform',[25,0.1],1)	 MASTER_MF_ss_testset_y_ar_best_uniform_25_01_1
+P	 MASTER_MF_ss_testset_y_ar_best_uniform_25_01_1.rmserr_std	 MF_ss_testset_y_ar_best_uniform_25_01_1_rmserr_std	 1	 model,systemidentificationtoolbox,prediction,ar,arfit
+P	 MASTER_MF_ss_testset_y_ar_best_uniform_25_01_1.stdrats_mean	 MF_ss_testset_y_ar_best_uniform_25_01_1_stdrats_mean	 1	 model,systemidentificationtoolbox,prediction,ar,arfit
+M	 MF_linmodelorders(y,1:10,'all')	 MASTER_MF_linmodelorders_1_10_all
+P	 MASTER_MF_linmodelorders_1_10_all.meanv	 MF_linmodelorders_1_10_all_meanv	 1	 model,systemidentificationtoolbox,ar
+P	 MASTER_MF_linmodelorders_1_10_all.meandiff	 MF_linmodelorders_1_10_all_meandiff	 1	 model,systemidentificationtoolbox,ar
+P	 MASTER_MF_linmodelorders_1_10_all.bestmdl	 MF_linmodelorders_1_10_all_bestmdl	 1	 model,systemidentificationtoolbox,ar
+M	 MF_steps_ahead(y,'arma',[3,1],6)	 MASTER_MF_steps_ahead_arma_3_1_6
+P	 MASTER_MF_steps_ahead_arma_3_1_6.maxdiffrms	 MF_steps_ahead_arma_3_1_6_maxdiffrms	 1	 model,systemidentificationtoolbox,prediction,arma
+M	 MF_armax(y,[2,2],0.5,1)	 MASTER_MF_armax_2_2_05_1
+P	 MASTER_MF_armax_2_2_05_1.acsnd0	 MF_armax_2_2_05_1_acsnd0	 1	 model,systemidentificationtoolbox,arma
+M	 MF_arma_orders(y,1:6,1:4)	 MASTER_MF_arma_orders_1_6_1_4
+P	 MASTER_MF_arma_orders_1_6_1_4.mean_all_aics	 MF_arma_orders_1_6_1_4_mean_all_aics	 1	 model,systemidentificationtoolbox,arma
+M	 SID_Exponential_Smoothing(y,0.5,'best')	 MASTER_SID_Exponential_Smoothing_05_best
+P	 MASTER_SID_Exponential_Smoothing_05_best.p2_5	 SID_Exponential_Smoothing_05_best_p2_5	 1	 model,siddarth,expsmoothing
+P	 MASTER_SID_Exponential_Smoothing_05_best.minfpe	 SID_Exponential_Smoothing_05_best_minfpe	 1	 model,siddarth,expsmoothing
+M	 MF_GARCH(y,'nothing','auto')	 MASTER_MF_GARCH_nothing_auto
+P	 MASTER_MF_GARCH_nothing_auto.maxlbqpval_stde2	 MF_GARCH_nothing_auto_maxlbqpval_stde2	 1	 model,garch,econometricstoolbox
+M	 SP_basicmeasures(y,'periodogram','hamming',[],0,0)	 MASTER_SP_basic_pgram_hamm
+P	 MASTER_SP_basic_pgram_hamm.fpoly2csS_p3	 SP_basic_pgram_hamm_fpoly2csS_p3	 1	 powerspectrum
+P	 MASTER_SP_basic_pgram_hamm.logarea_3_2	 SP_basic_pgram_hamm_logarea_3_2	 1	 powerspectrum
+P	 MASTER_SP_basic_pgram_hamm.area_4_2	 SP_basic_pgram_hamm_area_4_2	 1	 powerspectrum
+P	 MASTER_SP_basic_pgram_hamm.area_4_3	 SP_basic_pgram_hamm_area_4_3	 1	 powerspectrum
+P	 MASTER_SP_basic_pgram_hamm.logarea_5_5	 SP_basic_pgram_hamm_logarea_5_5	 1	 powerspectrum
+M	 SP_basicmeasures(y,'periodogram','hamming',[],0,1)	 MASTER_SP_basic_pgram_hamm_power
+P	 MASTER_SP_basic_pgram_hamm_power.std	 SP_basic_pgram_hamm_power_std	 1	 powerspectrum
+P	 MASTER_SP_basic_pgram_hamm_power.q10mel	 SP_basic_pgram_hamm_power_q10mel	 1	 powerspectrum
+P	 MASTER_SP_basic_pgram_hamm_power.fpoly2_rmse	 SP_basic_pgram_hamm_power_fpoly2_rmse	 1	 powerspectrum
+M	 SP_basicmeasures(y,'periodogram','hamming',[],1,0)	 MASTER_SP_basic_pgram_hamm_cep
+P	 MASTER_SP_basic_pgram_hamm_cep.q75log	 SP_basic_pgram_hamm_cep_q75log	 1	 cepstrum
+P	 MASTER_SP_basic_pgram_hamm_cep.area_3_1	 SP_basic_pgram_hamm_cep_area_3_1	 1	 cepstrum
+M	 MD_hrv_classic(y)	 MASTER_MD_hrv_classic
+P	 MASTER_MD_hrv_classic.vlf	 MD_hrv_classic_vlf	 1	 medical,maxlittle
+M	 WL_cwt(y,'db3',32)	 MASTER_WL_cwt_db3_32
+P	 MASTER_WL_cwt_db3_32.meanabsC	 WL_cwt_db3_32_meanabsC	 1	 wavelet,cwt,statTB,waveletTB
+M	 WL_cwt(y,'sym2',32)	 MASTER_WL_cwt_sym2_32
+P	 MASTER_WL_cwt_sym2_32.maxonmedC	 WL_cwt_sym2_32_maxonmedC	 1	 wavelet,cwt,statTB,waveletTB
+M	 WL_powerlevels(y,'db3','max')	 MASTER_WL_powerlevels_db3_max
+P	 MASTER_WL_powerlevels_db3_max.wslesr_mean	 WL_powerlevels_db3_max_wslesr_mean	 1	 wavelet,waveletTB
+M	 WL_coeffs(y,'db3',2)	 MASTER_WL_coeffs_db3_2
+P	 MASTER_WL_coeffs_db3_2.max_coeff	 WL_coeffs_db3_2_max_coeff	 1	 wavelet,waveletTB
+M	 WL_coeffs(y,'db3',5)	 MASTER_WL_coeffs_db3_5
+P	 MASTER_WL_coeffs_db3_5.wb25m	 WL_coeffs_db3_5_wb25m	 1	 wavelet,waveletTB
+M	 NL_fnnmar(y,10,2,'mi')	 MASTER_fnnmar_10_2_mi
+P	 MASTER_fnnmar_10_2_mi.m02	 fnnmar_10_2_mi_m02	 1	 nonlinear,dimension,crptool,stochastic
+M	 MS_fnn(y,1:10,'mi',5,1)	 MASTER_MS_fnn_1_10_mi_5_1
+P	 MASTER_MS_fnn_1_10_mi_5_1.pfnn_6	 MS_fnn_1_10_mi_5_1_pfnn_6	 1	 nonlinear,MichaelSmall,fnn,slow
+M	 TSTL_cao(y,10,'mi',2,100)	 MASTER_TSTL_cao_10_mi_2_100
+P	 MASTER_TSTL_cao_10_mi_2_100.caoo1_5	 TSTL_cao_10_mi_2_100_caoo1_5	 1	 nonlinear,dimension,tstool,cao,stochastic
+M	 TSTL_cao(y,10,'mi',2,0.2)	 MASTER_TSTL_cao_10_mi_2_02
+P	 MASTER_TSTL_cao_10_mi_2_02.min2	 TSTL_cao_10_mi_2_02_min2	 1	 nonlinear,dimension,tstool,cao,stochastic
+P	 MASTER_TSTL_cao_10_mi_2_02.median2	 TSTL_cao_10_mi_2_02_median2	 1	 nonlinear,dimension,tstool,cao,stochastic
+M	 TISEAN_d2(y,'ac',10,0.01)	 MASTER_TISEAN_d2_ac_10_001
+P	 MASTER_TISEAN_d2_ac_10_001.benmmind2_logminl	 TISEAN_d2_ac_10_001_benmmind2_logminl	 1	 nonlinear,tisean,dimension
+P	 MASTER_TISEAN_d2_ac_10_001.benmmind2g_logminl	 TISEAN_d2_ac_10_001_benmmind2g_logminl	 1	 nonlinear,tisean,dimension
+P	 MASTER_TISEAN_d2_ac_10_001.slopesh2_goodness	 TISEAN_d2_ac_10_001_slopesh2_goodness	 1	 nonlinear,tisean,dimension
+M	 TISEAN_c1(y,1,[1,7],0.02,0.5)	 MASTER_TISEAN_c1_1_1_7_002_05
+P	 MASTER_TISEAN_c1_1_1_7_002_05.mediand	 TISEAN_c1_1_1_7_002_05_mediand	 1	 nonlinear,tisean,dimension,entropy
+M	 TSTL_corrdim(y,50,{'ac',5})	 MASTER_TSTL_corrdim_50_ac_5
+P	 MASTER_TSTL_corrdim_50_ac_5.meanr15	 TSTL_corrdim_50_ac_5_meanr15	 1	 nonlinear,correlation,tstool,corrdim
+M	 TSTL_corrsum(y,-1,0.5,100,20,{'ac','cao'},2)	 MASTER_TSTL_corrsum2_n1_05_100_20_ac_cao
+P	 MASTER_TSTL_corrsum2_n1_05_100_20_ac_cao.meanlnCr	 TSTL_corrsum2_n1_05_100_20_ac_cao_meanlnCr	 1	 nonlinear,correlation,tstool,corrsum2,stochastic
+M	 TSTL_dimensions(y,50,{'ac','cao'})	 MASTER_TSTL_dimensions_50_ac_cao
+P	 MASTER_TSTL_dimensions_50_ac_cao.in_minm1	 TSTL_dimensions_50_ac_cao_in_minm1	 1	 nonlinear,tstool,scaling,dimension,stochastic
+P	 MASTER_TSTL_dimensions_50_ac_cao.co_lfitbmax	 TSTL_dimensions_50_ac_cao_co_lfitbmax	 1	 nonlinear,tstool,scaling,dimension,stochastic
+P	 MASTER_TSTL_dimensions_50_ac_cao.scr_in_mopt_pgone	 TSTL_dimensions_50_ac_cao_scr_in_mopt_pgone	 1	 nonlinear,tstool,scaling,dimension,stochastic
+P	 MASTER_TSTL_dimensions_50_ac_cao.scr_co_m3_pgone	 TSTL_dimensions_50_ac_cao_scr_co_m3_pgone	 1	 nonlinear,tstool,scaling,dimension,stochastic
+P	 MASTER_TSTL_dimensions_50_ac_cao.in_maxscalingexp	 TSTL_dimensions_50_ac_cao_in_maxscalingexp	 1	 nonlinear,tstool,scaling,dimension,stochastic
+M	 TSTL_fracdims(y,5,100,0.2,1,10,0,32,{'ac',3})	 MASTER_TSTL_fracdims_5_100_02_1_10_0_32_ac_3
+P	 MASTER_TSTL_fracdims_5_100_02_1_10_0_32_ac_3.meanDq	 TSTL_fracdims_5_100_02_1_10_0_32_ac_3_meanDq	 1	 nonlinear,tstool,dimension,correlation,stochastic
+P	 MASTER_TSTL_fracdims_5_100_02_1_10_0_32_ac_3.expfit_adjr2	 TSTL_fracdims_5_100_02_1_10_0_32_ac_3_expfit_adjr2	 1	 nonlinear,tstool,dimension,correlation,stochastic
+M	 TSTL_poincare(y,'max',{'mi',3})	 MASTER_TSTL_poincare_max_mi
+P	 MASTER_TSTL_poincare_max_mi.ac1y	 TSTL_poincare_max_mi_ac1y	 1	 nonlinear,tstool,poincare
+P	 MASTER_TSTL_poincare_max_mi.meands	 TSTL_poincare_max_mi_meands	 1	 nonlinear,tstool,poincare
+M	 TSTL_poincare(y,'max',{'ac',3})	 MASTER_TSTL_poincare_max_ac
+P	 MASTER_TSTL_poincare_max_ac.meands	 TSTL_poincare_max_ac_meands	 1	 nonlinear,tstool,poincare
+M	 TSTL_largelyap(y,0.5,0.1,0.01,3,{'mi','cao'})	 MASTER_TSTL_largelyap_05_01_001_3_mi_cao
+P	 MASTER_TSTL_largelyap_05_01_001_3_mi_cao.vse_meanabsres	 TSTL_largelyap_05_01_001_3_mi_cao_vse_meanabsres	 1	 nonlinear,tstool,largelyap,stochastic
+M	 TSTL_largelyap(y,-1,0.1,0.01,3,{1,4})	 MASTER_TSTL_largelyap_n1_01_001_3_1_4
+P	 MASTER_TSTL_largelyap_n1_01_001_3_1_4.to095max	 TSTL_largelyap_n1_01_001_3_1_4_to095max	 1	 nonlinear,tstool,largelyap
+M	 TSTL_surr_nlac(y,1,100,1,'tc3')	 MASTER_TSTL_tc3_1_100_1
+P	 MASTER_TSTL_tc3_1_100_1.normpatponmax	 TSTL_tc3_1_100_1_normpatponmax	 1	 nonlinear,tstool,correlation,surrogate,stochastic
+M	 TSTL_surr_nlac(y,1,100,2,'trev')	 MASTER_TSTL_trev_1_100_2
+P	 MASTER_TSTL_trev_1_100_2.normpatponmax	 TSTL_trev_1_100_2_normpatponmax	 1	 nonlinear,tstool,correlation,surrogate,stochastic
+M	 TSTL_surr_nlac(y,'mi',100,2,'trev')	 MASTER_TSTL_trev_mi_100_2
+P	 MASTER_TSTL_trev_mi_100_2.normpatponmax	 TSTL_trev_mi_100_2_normpatponmax	 1	 nonlinear,tstool,correlation,surrogate,stochastic
+M	 PP_compareba(x,'sin2')	 MASTER_PP_sin2
+P	 MASTER_PP_sin2.swms5_2	 PP_sin2_swms5_2	 1	 preprocessing,raw
+M	 PP_compareba(x,'spline24')	 MASTER_PP_spline24
+P	 MASTER_PP_spline24.gauss1_h10_adjr2	 PP_spline24_gauss1_h10_adjr2	 1	 preprocessing,spline,raw
+P	 MASTER_PP_spline24.kscn_adiff	 PP_spline24_kscn_adiff	 1	 preprocessing,spline,raw
+M	 PP_compareba(x,'spline44')	 MASTER_PP_spline44
+P	 MASTER_PP_spline44.swms2_2	 PP_spline44_swms2_2	 1	 preprocessing,spline,raw
+P	 MASTER_PP_spline44.swss2_2	 PP_spline44_swss2_2	 1	 preprocessing,spline,raw
+P	 MASTER_PP_spline44.olbt_s5	 PP_spline44_olbt_s5	 1	 preprocessing,spline,raw
+M	 PP_compareba(x,'diff1')	 MASTER_PP_diff1
+P	 MASTER_PP_diff1.swms5_2	 PP_diff1_swms5_2	 1	 preprocessing,raw
+M	 PP_compareba(x,'diff2')	 MASTER_PP_diff2
+P	 MASTER_PP_diff2.swss5_2	 PP_diff2_swss5_2	 1	 preprocessing,raw
+P	 MASTER_PP_diff2.gauss1_kd_adjr2	 PP_diff2_gauss1_kd_adjr2	 1	 preprocessing,raw
+P	 MASTER_PP_diff2.gauss1_kd_resruns	 PP_diff2_gauss1_kd_resruns	 1	 preprocessing,raw
+M	 PP_compareba(x,'rav2')	 MASTER_PP_rav2
+P	 MASTER_PP_rav2.statav2	 PP_rav2_statav2	 1	 preprocessing,raw,locdep
+M	 PP_compareba(x,'rav4')	 MASTER_PP_rav4
+P	 MASTER_PP_rav4.kscn_peaksepy	 PP_rav4_kscn_peaksepy	 1	 preprocessing,raw
+M	 PP_progpp(x,'spline')	 MASTER_PP_spline
+P	 MASTER_PP_spline.normdiff_trend	 PP_spline_normdiff_trend	 1	 preprocessing,spline,raw
+M	 DV_dynsys_dblwell(y,[1,0.5,0.2])	 MASTER_DV_dynsys_dblwell_1_05_02
+P	 MASTER_DV_dynsys_dblwell_1_05_02.mean	 DV_dynsys_dblwell_1_05_02_mean	 1	 dynsys,dblwell
+M	 NW_visgraphben(y,'horiz')	 MASTER_NW_visgraphben_horiz
+P	 MASTER_NW_visgraphben_horiz.maxent	 NW_visgraphben_horiz_maxent	 1	 network,visibilitygraph
+M	 CO_t_shape_translate(y,'circle',3.5,'pts')	 MASTER_CO_t_shape_translate_circle_35_pts
+P	 MASTER_CO_t_shape_translate_circle_35_pts.statav4_s	 CO_t_shape_translate_circle_35_pts_statav4_s	 1	 correlation
+M	 TR_walker(y,'prop',0.1)	 MASTER_TR_walker_prop_01
+P	 MASTER_TR_walker_prop_01.res_swss5_1	 TR_walker_prop_01_swss5_1	 1	 trend
+S	 WL_varchg(y,'db3',2,10,0.01)	 WL_varchg_db3_2_10_001	 1	 wavelet,waveletTB,varchg
+M	 EC_pptest(y,0:5,'ts','t1')	 MASTER_EC_pptest_0_5_ts_t1
+P	 MASTER_EC_pptest_0_5_ts_t1.minBIC	 EC_pptest_0_5_ts_t1_minBIC	 1	 pptest,unitroot,econometricstoolbox,bic
+M	 DV_dynsys_sine(y,[10,0.04,10])	 MASTER_DV_dynsys_sine_10_004_10
+P	 MASTER_DV_dynsys_sine_10_004_10.mean	 DV_dynsys_sine_10_004_10_mean	 1	 dynsys,sine
+P	 MASTER_DV_dynsys_sine_10_004_10.std	 DV_dynsys_sine_10_004_10_std	 1	 dynsys,sine
+M	 CO_stickangles(y)	 MASTER_CO_stickangles_y
+P	 MASTER_CO_stickangles_y.mean	 CO_stickangles_y_mean	 1	 correlation
+P	 MASTER_CO_stickangles_y.statav5_p_s	 CO_stickangles_y_statav5_p_s	 1	 correlation
+M	 CO_stickangles(x)	 MASTER_CO_stickangles_x
+P	 MASTER_CO_stickangles_x.statav5_p_m	 CO_stickangles_x_statav5_p_m	 1	 correlation,raw,locdep
+P	 MASTER_CO_stickangles_x.kurtosis_all	 CO_stickangles_x_kurtosis_all	 1	 correlation,raw,locdep
+M	 PP_compareba(x,'medianf2')	 MASTER_PP_medianf2
+P	 MASTER_PP_medianf2.swss5_2	 PP_medianf2_swss5_2	 1	 preprocessing,raw
+P	 MASTER_PP_medianf2.olbt_m5	 PP_medianf2_olbt_m5	 1	 preprocessing,raw
+M	 PP_compareba(x,'medianf4')	 MASTER_PP_medianf4
+P	 MASTER_PP_medianf4.swms5_2	 PP_medianf4_swms5_2	 1	 preprocessing,raw
+P	 MASTER_PP_medianf4.swss10_2	 PP_medianf4_swss10_2	 1	 preprocessing,raw
+M	 PP_compareba(x,'rav3')	 MASTER_PP_rav3
+P	 MASTER_PP_rav3.swms2_2	 PP_rav3_swms2_2	 1	 preprocessing,raw
+P	 MASTER_PP_rav3.kscn_relent	 PP_rav3_kscn_relent	 1	 preprocessing,raw
+P	 MASTER_PP_rav3.olbt_s2	 PP_rav3_olbt_s2	 1	 preprocessing,raw
+M	 TR_walker(y,'prop',0.5)	 MASTER_TR_walker_prop_05
+P	 MASTER_TR_walker_prop_05.w_std	 TR_walker_prop_05_w_std	 1	 trend
+P	 MASTER_TR_walker_prop_05.sw_meanabsdiff	 TR_walker_prop_05_sw_meanabsdiff	 1	 trend
+P	 MASTER_TR_walker_prop_05.sw_maxrat	 TR_walker_prop_05_sw_maxrat	 1	 trend
+M	 TR_walker(y,'prop',0.9)	 MASTER_TR_walker_prop_09
+P	 MASTER_TR_walker_prop_09.w_mean	 TR_walker_prop_09_w_mean	 1	 trend
+P	 MASTER_TR_walker_prop_09.w_median	 TR_walker_prop_09_w_median	 1	 trend
+P	 MASTER_TR_walker_prop_09.w_min	 TR_walker_prop_09_w_min	 1	 trend
+M	 MF_compare_garch(y,'ar',1:3,1:3)	 MASTER_MF_compare_GARCH_ar_1_3_1_3
+P	 MASTER_MF_compare_GARCH_ar_1_3_1_3.mean_meanarchps	 MF_compare_GARCH_ar_1_3_1_3_mean_meanarchps	 1	 model,garch,econometricstoolbox

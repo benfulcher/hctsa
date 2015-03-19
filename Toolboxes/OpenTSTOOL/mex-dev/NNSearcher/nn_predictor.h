@@ -28,6 +28,7 @@ struct linear_weight {
 
 // McNames biweight-function (1 - (r/rmax)^2)^2	  
 struct biquadratic_weight { 
+    
 	double operator()(double x) { 
 		const double y = 1 - x * x;
 		return (y * y);				

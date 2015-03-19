@@ -57,9 +57,10 @@ void cross_validate(Searcher& searcher, const Point_set& px, const long trajecto
 			switch(mode/2) {
 				case 0  : 
 					w = uniform_weight(r);
-					break;
+                    break;
 				case 1  : 
-					w = linear_weight(r);
+                    linear_weight lw;
+					w = lw(r);
 					break;
 				case 2  : 
 					w = biquadratic_weight(r);

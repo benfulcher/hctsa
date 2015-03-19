@@ -24,8 +24,8 @@
 % ------------------------------------------------------------------------------
 %% SET RANGE OF TS_IDs TO COMPUTE:
 % ------------------------------------------------------------------------------
-tsid_min = 4; % Calculate from this ts_id...
-tsid_max = 4; % To this ts_id
+tsid_min = 5; % Calculate from this ts_id...
+tsid_max = 5; % To this ts_id
 
 % ------------------------------------------------------------------------------
 %% Default parameters for computation:
@@ -39,8 +39,8 @@ tsid_range = (tsid_min:tsid_max);
 
 % Retrieve a vector of op_idds to calculate subject to additional conditions
 % Here we remove operations with labels 'shit', 'tisean', 'kalafutvisscher', and 'waveletTB'
-opids = SQL_getids('ops',1,{},{'shit','kalafutvisscher','waveletTB'});
-
+%opids = SQL_getids('ops',1,{},{'shit','kalafutvisscher','waveletTB'});
+opids = PK_create_HCTSA_op_loc('TS_loc_guides_N.mat','oldnew_names_roslyn.csv');
 % ------------------------------------------------------------------------------
 %% Start calculating:
 % ------------------------------------------------------------------------------
