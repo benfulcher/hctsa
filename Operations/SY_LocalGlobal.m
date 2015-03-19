@@ -12,7 +12,8 @@
 %             (i) 'l': the first n points in a time series,
 %             (ii) 'p': an initial proportion of the full time series, n
 %             (iii) 'unicg': n evenly-spaced points throughout the time series
-%             (iv) 'randcg': n randomly-chosen points from the time series (chosen with replacement)
+%             (iv) 'randcg': n randomly-chosen points from the time series
+%                               (chosen with replacement)
 % 
 % n, the parameter for the method specified above
 % 
@@ -61,7 +62,7 @@ function out = SY_LocalGlobal(y,lorp,n)
 % Check input time series is z-scored:
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored (mean=%g and std-1=%g)', ...
-                                                mean(y),std(y)-1)
+                                            mean(y),std(y)-1)
 end
 
 % Set default l
@@ -99,7 +100,6 @@ switch lorp
         r = randi(N,n,1);
         % This is not veru robust, as it's taking just a single stochastic
         % sample with a (possibly) large variance
-
     otherwise
         error('Unknown specifier, ''%s''',lorp);
 end
