@@ -49,7 +49,7 @@
 
 function y_embed = BF_embed(y,tau,m,sig)
 
-bevocal = 0; % display information about embedding
+beVocal = 0; % display information about embedding
 N = length(y); % length of the input time series, y
 
 % ------------------------------------------------------------------------------
@@ -177,9 +177,9 @@ if ~sig
    % this is actually faster than my implementation, which is commented out below
 end
 
-if bevocal
-    fprintf(1,['Time series embedded successfully: time delay tau = %s, ' ...
-                        'embedding dimension m = %s'],sstau,ssm);
+if beVocal
+    fprintf(1,['Time series embedded successfully:\n--Time delay %s%u\n' ...
+                        '--Embedding dimension m %s\n'],sstau,tau,ssm);
 end
 
 
