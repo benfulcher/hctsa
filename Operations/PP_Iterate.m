@@ -61,14 +61,20 @@ N = length(y); % Length of the input time series
 % ------------------------------------------------------------------------------
 %% Determine the number of times the processing will be progressively performed
 % ------------------------------------------------------------------------------
-% This information is stored in nr.
+% This information is stored in nRange.
 switch dtMeth
-    case 'spline', nr = (1:20);
-    case 'diff', nr = (1:5);
-    case 'medianf', nr = round(linspace(1,N/25,25));
-    case 'rav', nr = round(linspace(1,N/25,25));
-    case 'resampleup', nr = (1:20);
-    case 'resampledown', nr = (1:20);
+    case 'spline'
+        nRange = (1:20);
+    case 'diff'
+        nRange = (1:5);
+    case 'medianf'
+        nRange = round(linspace(1,N/25,25));
+    case 'rav'
+        nRange = round(linspace(1,N/25,25));
+    case 'resampleup'
+        nRange = (1:20);
+    case 'resampledown'
+        nRange = (1:20);
     otherwise
         error('Unknown detrending method ''%s''',dtMeth);
 end
@@ -80,9 +86,10 @@ if doPlot
     f = figure('color','w'); box('on'); hold on
     h1 = plot(y,'k');
 end
-outmat = zeros(length(nr),10);
-for q = 1:length(nr)
-    n = nr(q);
+
+outmat = zeros(length(nRange),10);
+for q = 1:length(nRange)
+    n = nRange(q);
     switch dtMeth
         case 'spline' % Spline detrend
             nknots = n; % progressively make more knots

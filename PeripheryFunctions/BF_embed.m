@@ -11,12 +11,17 @@
 % 
 %---INPUTS:
 % y, univariate scalar time series
+% 
 % tau, time-delay. Can be a string, 'ac', 'mi', ...
+% 
 % m, the embedding dimension. Must be a cell specifying method and parameters,
 %    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1...
+%    
 % sig [opt], if 1, uses TSTOOL to embed and returns a signal object.
 %           (default = 0, i.e., not to do this and instead return matrix).
 %           If 2, returns a vector of [tau m] rather than any explicit embedding
+%           
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 % 
 %---OUTPUT:
 % A matrix of width m containing the vectors in the new embedding space...
@@ -47,10 +52,16 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function y_embed = BF_embed(y,tau,m,sig)
+function y_embed = BF_embed(y,tau,m,sig,randomSeed)
 
-bevocal = 0; % display information about embedding
+beVocal = 0; % display information about embedding
 N = length(y); % length of the input time series, y
+
+
+% randomSeed: how to treat the randomization
+if nargin < 4
+    randomSeed = []; % default
+end
 
 % ------------------------------------------------------------------------------
 %% (1) Time-delay, tau
@@ -109,7 +120,7 @@ else % use a routine to inform m
                     th = m{2};
                 end
                 try
-                    m = NL_crptool_fnn(y,10,2,tau,th);
+                    m = NL_crptool_fnn(y,10,2,tau,th,randomSeed);
                 catch
                     fprintf(1,'Error with FNN code')
                     y_embed = NaN;
@@ -177,7 +188,7 @@ if ~sig
    % this is actually faster than my implementation, which is commented out below
 end
 
-if bevocal
+if beVocal
     fprintf(1,['Time series embedded successfully: time delay tau = %s, ' ...
                         'embedding dimension m = %s'],sstau,ssm);
 end

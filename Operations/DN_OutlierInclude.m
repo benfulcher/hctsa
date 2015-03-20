@@ -33,7 +33,7 @@
 % 
 % [future: could compare differences in outputs obtained with 'p', 'n', and
 %               'abs' -- could give an idea as to asymmetries/nonstationarities??]
-%               
+% 
 %---HISTORY:
 % Ben Fulcher, June 2009
 % 

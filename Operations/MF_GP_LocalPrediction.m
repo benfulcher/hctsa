@@ -30,6 +30,7 @@
 %                    series by training on the other values in that segment.
 % 
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%               (for 'randomgap' prediction)
 % 
 %---OUTPUTS: summaries of the quality of predictions made, the mean and
 % spread of obtained hyperparameter values, and marginal likelihoods.

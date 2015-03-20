@@ -29,6 +29,8 @@
 %           
 % order, the order of the AR model to fit to the data
 % 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% 
 %---HISTORY:
 % Ben Fulcher, 18/2/2010
 % 
@@ -55,7 +57,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = PP_ModelFit(y,model,order)
+function out = PP_ModelFit(y,model,order,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -75,10 +77,15 @@ if nargin < 3 || isempty(order)
     order = 2;
 end
 
+% randomSeed: how to treat the randomization
+if nargin < 4
+    randomSeed = []; % default
+end
+
 % ------------------------------------------------------------------------------
 %% Apply a range of preprocessings
 % ------------------------------------------------------------------------------
-yp = PP_PreProcess(y,'');
+yp = PP_PreProcess(y,'',[],[],[],randomSeed);
 % Returns a structure, yp, with a range of time series in it, each a different
 % transformation of the original, y.
 %% ____________________FIT MODEL TO ALL:_______________________ %%
