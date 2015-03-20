@@ -39,15 +39,15 @@
 % 
 %---INPUTS:
 % y, the input time series
+% 
 % preproc, the preprocessing to apply, can be 'ar' or 'none'
-% params, the parameters of the GARCH model to fit, can be:
-%           (i) 'default', fits the default model
-%           (ii) 'auto', automated routine to select parameters for this time series
-%           (iii) e.g., params = '''R'',2,''M'',1,''P'',2,''Q'',1', sets r = 2,
-%                                   m = 1, p = 2, q = 1
 % 
+% P, the GARCH model order
 % 
-% ***In future this code should be revised by an expert in GARCH model fitting.***
+% Q, the ARCH model order
+% 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%               (for pre-processing: PP_PreProcess)
 % 
 %---HISTORY:
 % Ben Fulcher, 25/2/2010
@@ -75,7 +75,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_GARCHfit(y,preproc,P,Q)
+function out = MF_GARCHfit(y,preproc,P,Q,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -105,28 +105,22 @@ if nargin < 4 || isempty(Q)
     Q = 1;
 end
 
+% randomSeed: how to treat the randomization
+if nargin < 5
+    randomSeed = [];
+end
+
 % ------------------------------------------------------------------------------
 %% (1) Data preprocessing
 % ------------------------------------------------------------------------------
 % Save the original, unprocessed time series
 y0 = y;
 
-if strcmp(preproc,'ar')
-    % Apply a standard AR preprocessing to the data and return them in the
-    % structure ypp. Also chooses the best preprocessing based on the worst fit
-    % of an AR2 model to the processed time series.
-    % has to beat doing nothing by 5% (error)
-    % No spectral methods allowed...
-    [ypp, best] = PP_PreProcess(y,'ar',2,0.05,0);
-    y = ypp.(best);
-    if beVocal
-        fprintf(1,'Preprocessed according to AR(2) criterion using %s.\n',best);
-    end
-end
+y = BF_Whiten(y,preproc,beVocal,randomSeed);
 
 y = BF_zscore(y); % z-score the time series
 
-% Length of the time series, y
+% Length of the (potentially whitened) time series, y
 % Note that this could be different to the original, y0 (if choose a differencing, e.g.)
 N = length(y);
 
@@ -134,7 +128,6 @@ N = length(y);
 % The original, unprocessed time series is retained in y0.
 % (Note that y=y0 is possible; when all preprocessings are found to be
 %   worse at the given criterion).
-
 
 % ------------------------------------------------------------------------------
 %% (2) Data pre-estimation
@@ -256,7 +249,7 @@ try
     errors = sqrt(diag(estParamCov));
     % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(GModel,y);
 catch emsg
-    error('GARCH fit failed: %s',emsg.message);
+    error('GARCH fit failed (data does not allow a valid GARCH model to be estimated): %s',emsg.message);
 end
 
 % ------------------------------------------------------------------------------

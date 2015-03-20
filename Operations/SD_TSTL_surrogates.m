@@ -3,8 +3,8 @@
 % ------------------------------------------------------------------------------
 % 
 % Generates surrogate time series and tests them against the original time
-% series according to some test statistics: T_{C3}, using the
-% TSTOOL code tc3 or T_{rev}, using TSTOOL code trev.
+% series according to some test statistics: T_{C3}, using the TSTOOL code tc3 or
+% T_{rev}, using TSTOOL code trev.
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 

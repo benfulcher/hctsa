@@ -3,7 +3,7 @@
 % ------------------------------------------------------------------------------
 % 
 % Generates surrogate time series given a method (surrogates), number of
-% surrogates (nsurrs), and any extra parameters (extrap)
+% surrogates (numSurrs), and any extra parameters (extrap)
 % 
 % Method described relatively clearly in Guarin Lopez et al. (arXiv, 2010)
 % Used bits of aaft code that references (and presumably was obtained from)
@@ -17,14 +17,19 @@
 %---INPUTS:
 % x, the input time series
 % 
-% surrmethod, the method for generating surrogates:
+% surrMethod, the method for generating surrogates:
 %             (i) 'RP' -- random phase surrogates
 %             (ii) 'AAFT' -- amplitude adjusted Fourier transform
 %             (iii) 'TFT' -- truncated Fourier transform
 % 
-% nsurrs, the number of surrogates to generate
+% numSurrs, the number of surrogates to generate
 % 
 % extrap, extra parameters required by the selected surrogate generation method
+%
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%
+%---HISTORY: 
+% Ben Fulcher, 27/1/2011
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -49,15 +54,16 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SD_MakeSurrogates(x,surrmethod,nsurrs,extrap)
-% Ben Fulcher, 27/1/2011
+function out = SD_MakeSurrogates(x,surrMethod,numSurrs,extrap,randomSeed)
 
-bevocal = 0; % Display text information/commentary to screen
+beVocal = 0; % Display text information/commentary to screen
 
-% INPUTS:
-% number of surrogates to generate
-if nargin < 3 || isempty(nsurrs)
-    nsurrs = 1; % just create a single surrogate
+% ------------------------------------------------------------------------------
+% Check Inputs:
+% ------------------------------------------------------------------------------
+% Number of surrogates to generate:
+if nargin < 3 || isempty(numSurrs)
+    numSurrs = 1; % just create a single surrogate
 end
 
 % Any extra parameters (some methods require)
@@ -65,31 +71,40 @@ if nargin < 4
     extrap = [];
 end
 
+% randomSeed: how to treat the randomization
+if nargin < 5
+    randomSeed = [];
+end
+
+% ------------------------------------------------------------------------------
 
 N = length(x); % length of the time series
-out = zeros(N,nsurrs); % each column is a new surrogate
+out = zeros(N,numSurrs); % each column is a new surrogate
 tic % time it
 
-switch surrmethod
+% Control the random seed (for reproducibility):
+BF_ResetSeed(randomSeed);
+
+switch surrMethod
     case 'RP'
         % Random Phase Surrogates
         % Surrogates maintain linear correlations in the data, but any
         % nonlinear structure is destroyed by the phase randomization
         
-        if bevocal
-            fprintf(1,'Constructing %u surrogates using the Random Phase Method\n',nsurrs)
+        if beVocal
+            fprintf(1,'Constructing %u surrogates using the Random Phase Method\n',numSurrs)
             fprintf(1,['Linear correlations are maintained but nonlinear structure will be ' ...
                         'destroyed by the phase randomization\n'])
         end
         
-        % lost a datapoint if odd
+        % We've lost a datapoint if odd length time series
         if rem(N,2) == 0
           n2 = N/2;
         else
           n2 = (N-1)/2;
         end
        
-        for surri = 1:nsurrs
+        for surri = 1:numSurrs
             % (*) Compute Fourier Transform of x => z
             z = fft(x,2*n2);
             
@@ -115,9 +130,9 @@ switch surrmethod
         end
         
     case 'AAFT'
-        if bevocal
+        if beVocal
             fprintf(1,['Constructing %u surrogates using the Amplitude Adjusted Fourier '...
-                    'Transform (AAFT) Method\n'],nsurrs)
+                    'Transform (AAFT) Method\n'],numSurrs)
             fprintf(1,['Linear correlations are maintained but nonlinear structure will be destroyed ' ...
                     'by the phase randomization. Amplitude Distribution is approximately maintained\n'])
         end
@@ -133,7 +148,7 @@ switch surrmethod
           n2 = (N-1)/2;
         end
         
-        for surri = 1:nsurrs
+        for surri = 1:numSurrs
             % Rand order white Gaussian-distributed noise
             nSort = sort(randn(N,1));
             y = nSort(xRO); % sorted Guassian white noise reordered as x
@@ -169,9 +184,9 @@ switch surrmethod
         end        
         
     case 'TFT'
-        if bevocal
+        if beVocal
             fprintf(1,['Constructing %u surrogates using the Truncated Fourier '...
-                'Transform (TFT) Method.\n'],nsurrs)
+                'Transform (TFT) Method.\n'],numSurrs)
             fprintf(1,['Low Frequency phases are preserved, and high frequency phases will be ' ...
                     'randomized. A way of dealing with non-stationarity.\n'])
         end
@@ -192,7 +207,7 @@ switch surrmethod
           n2 = (N-1)/2;
         end
        
-        for surri = 1:nsurrs
+        for surri = 1:numSurrs
             % (*) Compute Fourier Transform of x => z
             z = fft(x,2*n2);
             
@@ -208,23 +223,22 @@ switch surrmethod
             % negative phases to ensure complex conjugates -- IFT will be
             % real.
             newPhase = [0; randphase; zPhase(n2+1); -flipud(randphase)];
-            
-            
+                        
             % zNew is like z, but with randomized phases:
             zNew = [zMag(1:n2+1)' flipud(zMag(2:n2))']' .* exp(newPhase .* 1i);
-            
+
             % Transform back into the time domain
             xNew = real(ifft(zNew,N));
             out(:,surri) = xNew;
         end
         
     otherwise
-        error('Unknown surrogate generation method ''%s''',surrmethod)
+        error('Unknown surrogate generation method ''%s''',surrMethod)
 end
 
 % Cute farewell message
-if bevocal
-    fprintf(1,'Generated %u %s surrogates in %s.\n',nsurrs,surrmethod,BF_thetime(toc,1))
+if beVocal
+    fprintf(1,'Generated %u %s surrogates in %s.\n',numSurrs,surrMethod,BF_thetime(toc,1))
 end
 
 

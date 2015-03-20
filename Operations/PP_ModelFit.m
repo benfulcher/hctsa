@@ -29,6 +29,9 @@
 %           
 % order, the order of the AR model to fit to the data
 % 
+%---HISTORY:
+% Ben Fulcher, 18/2/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -53,12 +56,15 @@
 % ------------------------------------------------------------------------------
 
 function out = PP_ModelFit(y,model,order)
-% Ben Fulcher, 18/2/2010
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % length of the time series
 
+% ------------------------------------------------------------------------------
 %% Inputs
+% ------------------------------------------------------------------------------
 % Model: the model to fit preprocessed time series to
 if nargin < 2 || isempty(model)
     model = 'ar';
@@ -69,7 +75,9 @@ if nargin < 3 || isempty(order)
     order = 2;
 end
 
-%% Do a range of preprocessings
+% ------------------------------------------------------------------------------
+%% Apply a range of preprocessings
+% ------------------------------------------------------------------------------
 yp = PP_PreProcess(y,'');
 % Returns a structure, yp, with a range of time series in it, each a different
 % transformation of the original, y.
@@ -82,7 +90,7 @@ nfields = length(fields);
 for i = 1:nfields
     data = [];
     % for each preprocessing, fit the model
-    eval(sprintf('data = yp.%s;',fields{i})); 
+    data = yp.(fields{i});
     % data is the current preprocessed data
 
     switch model % SO MANY OPTIONS! ;-)
@@ -107,7 +115,9 @@ for i = 1:nfields
     end
 end
 
+% ------------------------------------------------------------------------------
 %% Return statistics on statistics
+% ------------------------------------------------------------------------------
 % actually often as you make more stationary and remove trends it becomes
 % harder to predict because these trends are very easy to predict, and
 % making the series whiter will obviously decrease its predictability.
@@ -120,8 +130,7 @@ end
 
 % No, I'll just do in-sample rms error, for a single model no point fpeing
 for i = 2:nfields
-    wow = statstore.rmserr(i)/statstore.rmserr(1);
-    eval(sprintf('out.rmserrrat_%s = wow;',fields{i}));
+    out.(sprintf('rmserrrat_%s',fields{i})) = statstore.rmserr(i)/statstore.rmserr(1);
 end
 % In fact, greater error in this case means a better detrending in some
 % sense -- it's remobed more of the 'obvious' linear structure (assuming
@@ -129,7 +138,6 @@ end
 
 % could also return statistics on other things like prediction error, but
 % not alot of point, I think.
-
 
 % 
 %     function ydt =  SUB_remps(y,n,method)
