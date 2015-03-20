@@ -60,20 +60,21 @@ if isstruct(whatData)
     TS_DataMat = whatData.TS_DataMat;
 else
     if strcmp(whatData,'cl')
-        TheFile = 'HCTSA_cl.mat'; TheRoutine = 'TSQ_cluster';
+        theFile = 'HCTSA_cl.mat'; TheRoutine = 'TSQ_cluster';
     elseif strcmp(whatData,'norm')
-        TheFile = 'HCTSA_N.mat'; TheRoutine = 'TSQ_normalize';
-    elseif ischar(whatData) % Specify a filename
-        a = which(TheFile); % First check it exists
+        theFile = 'HCTSA_N.mat'; TheRoutine = 'TSQ_normalize';
+    elseif ischar(whatData) && exist(whatData) % Specify a filename
+        theFile = whatData;
+        a = which(theFile); % First check it exists
         if isempty(a)
-            error('\n%s not found. You should probably run %s...',TheFile,TheRoutine);
+            error('\n%s not found. You should probably run %s...',theFile,TheRoutine);
         end
     else
         error(['Unknown specifier ''%s'', please input the data structure, ' ...
                         '\t\n or specify ''norm'', ''cl'', or a FileName'],whatData)
     end
-    fprintf(1,'Reading data from %s...',TheFile);
-    load(TheFile,'TimeSeries','Operations','TS_DataMat')
+    fprintf(1,'Reading data from %s...',theFile);
+    load(theFile,'TimeSeries','Operations','TS_DataMat')
     fprintf(1,' Done.\n');
 end
 
