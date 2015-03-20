@@ -32,7 +32,7 @@
 %                   Identification Toolbox. Outputs are statistics on the FPE,
 %                   and fitted AR and MA parameters.
 %                   
-% howtosubset, how to choose segments from the time series, either 'uniform'
+% subsetHow, how to choose segments from the time series, either 'uniform'
 %               (uniformly) or 'rand' (at random).
 %               
 % samplep, a two-vector specifying how many segments to take and of what length.
@@ -40,9 +40,13 @@
 %           the time-series length. e.g., [20,0.1] takes 20 segments of 10% the
 %           time-series length.
 % 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%               (for when subsetHow is 'rand')
+% 
 %---OUTPUTS: depend on the model, as described above.
 % 
-%---HISTORY: Ben Fulcher, 12/2/2010
+%---HISTORY:
+% Ben Fulcher, 12/2/2010
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -67,7 +71,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_FitSubsegments(y,model,order,howtosubset,samplep)
+function out = MF_FitSubsegments(y,model,order,subsetHow,samplep,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -80,7 +84,7 @@ N = length(y); % length of time series
 
 % (1) y: column vector time series
 if nargin < 1 || isempty(y)
-    disp('Give us a time series, ya mug'); return
+    error('Give us a time series, ya mug');
 end
 % Convert y to time series object
 y = iddata(y,[],1);
@@ -95,9 +99,9 @@ if nargin < 3 || isempty(order)
     order = 2; % model of order 2 by default. Not very good defaults.
 end
 
-% (4) How to choose subsets from the time series, howtosubset
-if nargin < 4 || isempty(howtosubset)
-    howtosubset = 'rand'; % takes segments randomly from time series
+% (4) How to choose subsets from the time series, subsetHow
+if nargin < 4 || isempty(subsetHow)
+    subsetHow = 'rand'; % takes segments randomly from time series
 end
 
 % (5) Sampling parameters, samplep
@@ -105,33 +109,38 @@ if nargin < 5 || isempty(samplep)
     samplep = [20, 0.1]; % sample 20 times with 10%-length subsegments
 end
 
-% % (6) Predict some number of steps ahead in test sets, steps
-% if nargin < 6 || isempty(steps)
-%     steps = 2; % default: predict 2 steps ahead in test set
-% end
+% (6) randomSeed: how to treat the randomization
+if nargin < 6
+    randomSeed = [];
+end
 
 % ------------------------------------------------------------------------------
 %% Set the ranges beforehand
 % ------------------------------------------------------------------------------
-% Number of samples to take, npred
-npred = samplep(1);
-r = zeros(npred,2); % ranges
+% Number of samples to take, numPred
+numPred = samplep(1);
+r = zeros(numPred,2); % ranges
 
-switch howtosubset
+switch subsetHow
     case 'rand'
         if samplep(2) < 1 % specified a fraction of time series
             l = floor(N*samplep(2));
         else % specified an absolute interval
             l = samplep(2);
         end
-        spts = randi(N-l+1,npred,1); % npred starting points
+        
+        % Control the random seed (for reproducibility):
+        BF_ResetSeed(randomSeed);
+        
+        % numPred random starting points:
+        spts = randi(N-l+1,numPred,1);
         r(:,1) = spts;
         r(:,2) = spts+l-1;
         
     case 'uniform'
         if length(samplep) == 1 % size will depend on number of unique subsegments
-            spts = round(linspace(0,N,npred+1)); % npred+1 boundaries = npred portions
-            r(:,1) = spts(1:npred)+1;
+            spts = round(linspace(0,N,numPred+1)); % numPred+1 boundaries = numPred portions
+            r(:,1) = spts(1:numPred)+1;
             r(:,2) = spts(2:end);
         else
             if samplep(2) < 1 % specified a fraction of time series
@@ -139,13 +148,13 @@ switch howtosubset
             else % specified an absolute interval
                 l = samplep(2);
             end
-            spts = round(linspace(1,N-l+1,npred)); % npred+1 boundaries = npred portions
+            spts = round(linspace(1,N-l+1,numPred)); % numPred+1 boundaries = numPred portions
             r(:,1) = spts;
             r(:,2) = spts+l-1;
         end
         
     otherwise
-        error('Unknown subset method ''%s''',howtosubset);
+        error('Unknown subset method ''%s''',subsetHow);
 end
 
 % ------------------------------------------------------------------------------
@@ -162,10 +171,10 @@ switch model
         % fit AR models of 'best' order, return statistics on how this best
         % order changes. The order input argument is not used for this
         % option.
-        orders = zeros(npred,1);
-        sbcs = zeros(npred,1);
+        orders = zeros(numPred,1);
+        sbcs = zeros(numPred,1);
         yy = y.y;
-        for i = 1:npred
+        for i = 1:numPred
             % Use arfit software to retrieve the optimum AR(p) order by
             % Schwartz's Bayesian Criterion, SBC (or BIC); in the range
             % p = 1-10
@@ -181,6 +190,7 @@ switch model
             orders(i) = length(Aest);
             sbcs(i) = min(SBC);
         end
+        
         % Return statistics
         out.orders_mode = mode(orders);
         out.orders_mean = mean(orders);
@@ -202,9 +212,9 @@ switch model
         %% Check that a System Identification Toolbox license is available to run the 'ar' function:
         BF_CheckToolbox('identification_toolbox')
         
-        fpes = zeros(npred,1);
-        as = zeros(npred,order+1);
-        for i = 1:npred
+        fpes = zeros(numPred,1);
+        as = zeros(numPred,order+1);
+        for i = 1:numPred
             % fit the ar model
             m = ar(y(r(i,1):r(i,2)),order);
             % get parameters and goodness of fit
@@ -236,8 +246,8 @@ switch model
         %% Fit state space models of specified order
         % Return statistics on goodness of fit
         % Could do parameters too, but I this would involve many outputs
-        fpes = zeros(npred,1);
-        for i = 1:npred
+        fpes = zeros(numPred,1);
+        for i = 1:numPred
             try  m = n4sid(y(r(i,1):r(i,2)),order);
             catch
                 % Some range of the time series is invalid for fitting the
@@ -258,11 +268,11 @@ switch model
         %% fit an ARMA model of specified order(s)
         % Note: order should be a two-component vector
         % Output parameters and goodness of fit
-        fpes = zeros(npred,1);
-        ps = zeros(npred,order(1)+1);
-        qs = zeros(npred,order(2)+1);
+        fpes = zeros(numPred,1);
+        ps = zeros(numPred,order(1)+1);
+        qs = zeros(numPred,order(2)+1);
         
-        for i = 1:npred
+        for i = 1:numPred
             try
                 m = armax(y(r(i,1):r(i,2)),order);
             catch emsg

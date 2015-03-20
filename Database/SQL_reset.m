@@ -39,7 +39,7 @@ end
 % Drop the database:
 % ------------------------------------------------------------------------------
 mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s;',dbname));
-fprintf(1,'%s and all the data contained within it dropped\n',dbname);
+fprintf(1,'%s and all the data contained within it dropped.\n',dbname);
 mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s;',dbname));
 SQL_closedatabase(dbc) % Close the database
 SQL_create_all_tables; % Create all basic tables required by the database

@@ -2,7 +2,7 @@
 % SY_SpreadRandomLocal
 % ------------------------------------------------------------------------------
 % 
-% Implements a bootstrap-based stationarity measure: nseg time-series segments
+% Implements a bootstrap-based stationarity measure: numSegs time-series segments
 % of length l are selected at random from the time series and in each
 % segment some statistic is calculated: mean, standard deviation, skewness,
 % kurtosis, ApEn(1,0.2), SampEn(1,0.2), AC(1), AC(2), and the first
@@ -18,7 +18,9 @@
 %       (i) 'ac2': twice the first zero-crossing of the autocorrelation function
 %       (ii) 'ac5': five times the first zero-crossing of the autocorrelation function
 % 
-% nseg, the number of randomly-selected local segments to analyze
+% numSegs, the number of randomly-selected local segments to analyze
+% 
+% randomSeed, the input to BF_ResetSeed to control reproducibility
 % 
 %---OUTPUTS: the mean and also the standard deviation of this set of 100 local
 % estimates.
@@ -49,7 +51,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SY_SpreadRandomLocal(y,l,nseg)
+function out = SY_SpreadRandomLocal(y,l,numSegs,randomSeed)
 
 doPlot = 0; % set to 1 to plot outputs to figure
 
@@ -81,8 +83,8 @@ if ischar(l)
     end
 end
 
-if nargin < 3 || isempty(nseg)
-    nseg = 100; % 100 segments by default
+if nargin < 3 || isempty(numSegs)
+    numSegs = 100; % 100 segments by default
 end
 
 % Check the parameters are appropriate for the length of the input time series:
@@ -92,13 +94,20 @@ if l > 0.9*N % operation is not suitable -- time series is too short
     out = NaN; return % NaN means not suitable
 end
 
+if nargin < 4
+    randomSeed = []; % use default random seed
+end
+
 % ------------------------------------------------------------------------------
-% nseg segments, each of length segl data points
+% numSegs segments, each of length segl data points
 
-nfeat = 9; % number of features
-qs = zeros(nseg,nfeat);
+numFeat = 9; % number of features
+qs = zeros(numSegs,numFeat);
 
-for j = 1:nseg
+% Reset random seed, for reproducibility:
+BF_ResetSeed(randomSeed);
+
+for j = 1:numSegs
     % pick a range
     % in this implementation, ranges CAN overlap
     
@@ -119,7 +128,10 @@ for j = 1:nseg
     qs(j,8) = CO_AutoCorr(ysub,2); % AC2
     qs(j,9) = taul;
 end
-    
+
+% ------------------------------------------------------------------------------
+% Plot some output?:
+% ------------------------------------------------------------------------------
 if doPlot
     figure('color','w');
     subplot(2,1,1); hold on;
@@ -135,28 +147,28 @@ end
 
 % Can think of this as a big bootstrapped distribution of the timeseries at
 % a scale given by the length l
-fs = zeros(nfeat*2,1);
-fs(1:nfeat) = nanmean(qs); % the mean value of the feature across subsegments of the time series
-fs(nfeat+1:nfeat*2) = nanstd(qs); % the spread of the feature across subsegments of the time series
+fs = zeros(numFeat,2);
+fs(:,1) = nanmean(qs); % the mean value of the feature across subsegments of the time series
+fs(:,2) = nanstd(qs); % the spread of the feature across subsegments of the time series
 
-out.meanmean = fs(1);
-out.meanstd = fs(2);
-out.meanskew = fs(3);
-out.meankurt = fs(4);
-out.meanapen1_02 = fs(5);
-out.meansampen1_02 = fs(6);
-out.meanac1 = fs(7);
-out.meanac2 = fs(8);
-out.meantaul = fs(9);
+out.meanmean = fs(1,1);
+out.meanstd = fs(2,1);
+out.meanskew = fs(3,1);
+out.meankurt = fs(4,1);
+out.meanapen1_02 = fs(5,1);
+out.meansampen1_02 = fs(6,1);
+out.meanac1 = fs(7,1);
+out.meanac2 = fs(8,1);
+out.meantaul = fs(9,1);
 
-out.stdmean = fs(10);
-out.stdstd = fs(11);
-out.stdskew = fs(12);
-out.stdkurt = fs(13);
-out.stdapen1_02 = fs(14);
-out.stdsampen1_02 = fs(15);
-out.stdac1 = fs(16);
-out.stdac2 = fs(17);
-out.stdtaul = fs(18);
+out.stdmean = fs(1,2);
+out.stdstd = fs(2,2);
+out.stdskew = fs(3,2);
+out.stdkurt = fs(4,2);
+out.stdapen1_02 = fs(5,2);
+out.stdsampen1_02 = fs(6,2);
+out.stdac1 = fs(7,2);
+out.stdac2 = fs(8,2);
+out.stdtaul = fs(9,2);
 
 end

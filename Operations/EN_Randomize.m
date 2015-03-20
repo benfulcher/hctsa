@@ -10,6 +10,7 @@
 % 
 %---INPUTS:
 % y, the input (z-scored) time series
+% 
 % randomizeHow, specifies the randomization scheme for each iteration:
 %      (i) 'statdist' -- substitutes a random element of the time series with
 %                           one from the original time-series distribution
@@ -17,6 +18,8 @@
 %                       series with another random element
 %      (iii) 'permute' -- permutes pairs of elements of the time
 %                       series randomly
+% 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 % 
 %---OUTPUTS: summarize how the properties change as one of these
 % randomization procedures is iterated, including the cross correlation with the
@@ -31,6 +34,7 @@
 % 
 %---HISTORY:
 % Ben Fulcher, October 2009
+% Ben Fulcher, 2015-03-19 added random seed for reproducibility
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -55,7 +59,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_Randomize(y,randomizeHow)
+function out = EN_Randomize(y,randomizeHow,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Check toolboxes, and a z-scored time series:
@@ -72,31 +76,42 @@ end
 % ------------------------------------------------------------------------------
 %% Check inputs:
 % ------------------------------------------------------------------------------
+% randomizeHow, how to do the randomization:
 if nargin < 2 || isempty(randomizeHow)
     randomizeHow = 'statdist'; % use statdist by default
+end
+
+% randomSeed: how to treat the randomization
+if nargin < 3
+    randomSeed = []; % default
 end
 
 % Don't plot to screen by default:
 doPlot = 0;
 % ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
+% Preliminaries
+% ------------------------------------------------------------------------------
 
 N = length(y); % length of the time series
 
-%  preliminaries
 numStats = 10;
 randp_max = 2; % time series has been randomized to 2 times its length
 rand_inc = 10/100; % this proportion of the time series between calculations
-ncalcs = randp_max/rand_inc;
-calc_ints = floor(randp_max*N/ncalcs);
+numCalcs = randp_max/rand_inc; % number of calculations required
+calc_ints = floor(randp_max*N/numCalcs);
 calc_pts = (0:calc_ints:randp_max*N);
-ncalcs = length(calc_pts); % some rounding issues inevitable
+numCalcs = length(calc_pts); % some rounding issues inevitable
 
-stats = zeros(ncalcs,numStats); % record a stat at each randomization increment
+stats = zeros(numCalcs,numStats); % record a stat at each randomization increment
 
 y_rand = y; % this vector will be randomized
 
 stats(1,:) = SUB_doyourcalcthing(y,y_rand); % initial condition: apply on itself
+
+% Control the random seed (for reproducibility):
+BF_ResetSeed(randomSeed);
 
 for i = 1:N*randp_max
     switch randomizeHow
@@ -147,7 +162,6 @@ f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(r,stats(:,1),f);
 out.xcn1fexpa = c.a;
 out.xcn1fexpb = c.b;
-% out.xcn1fexpc = c.c;
 out.xcn1fexpr2 = gof.rsquare;
 out.xcn1fexpadjr2 = gof.adjrsquare;
 out.xcn1fexprmse = gof.rmse;
@@ -161,7 +175,6 @@ f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(r,stats(:,2),f);
 out.xc1fexpa = c.a;
 out.xc1fexpb = c.b;
-% out.xc1fexpc = c.c;
 out.xc1fexpr2 = gof.rsquare;
 out.xc1fexpadjr2 = gof.adjrsquare;
 out.xc1fexprmse = gof.rmse;
@@ -190,7 +203,6 @@ f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(r,stats(:,4),f);
 out.ac1fexpa = c.a;
 out.ac1fexpb = c.b;
-% out.ac1fexpc = c.c;
 out.ac1fexpr2 = gof.rsquare;
 out.ac1fexpadjr2 = gof.adjrsquare;
 out.ac1fexprmse = gof.rmse;
@@ -205,7 +217,6 @@ f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(r,stats(:,5),f);
 out.ac2fexpa = c.a;
 out.ac2fexpb = c.b;
-% out.ac2fexpc = c.c;
 out.ac2fexpr2 = gof.rsquare;
 out.ac2fexpadjr2 = gof.adjrsquare;
 out.ac2fexprmse = gof.rmse;
@@ -219,7 +230,6 @@ f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(r,stats(:,6),f);
 out.ac3fexpa = c.a;
 out.ac3fexpb = c.b;
-% out.ac3fexpc = c.c;
 out.ac3fexpr2 = gof.rsquare;
 out.ac3fexpadjr2 = gof.adjrsquare;
 out.ac3fexprmse = gof.rmse;
@@ -233,28 +243,12 @@ f = fittype('a*exp(b*x)','options',s);
 [c, gof] = fit(r,stats(:,7),f);
 out.ac4fexpa = c.a;
 out.ac4fexpb = c.b;
-% out.ac4fexpc = c.c;
 out.ac4fexpr2 = gof.rsquare;
 out.ac4fexpadjr2 = gof.adjrsquare;
 out.ac4fexprmse = gof.rmse;
 
 out.ac4diff = abs((stats(end,7)-stats(1,7))/stats(end,7));
 out.ac4hp = SUB_gethp(stats(:,7));
-
-% 8) shen (Shannon entropy)
-% I think this is all rubbish
-% s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -1, 0.4]);
-% f = fittype('a*exp(b*x)+c','options',s);
-% [c, gof] = fit(r,stats(:,8),f);
-% out.shenfexpa = c.a;
-% out.shenfexpb = c.b;
-% out.shenfexpc = c.c;
-% out.shenfexpr2 = gof.rsquare;
-% out.shenfexpadjr2 = gof.adjrsquare;
-% out.shenfexprmse = gof.rmse;
-%
-% out.shendiff = abs((stats(end,8)-stats(1,8))/stats(end,8));
-% out.shenhp = SUB_gethp(stats(:,8));
 
 % 8) sampen (Sample Entropy)
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,8) -0.2 stats(end,8)]);
@@ -316,9 +310,7 @@ out.swss5_1hp = SUB_gethp(stats(:,10));
         ac3 = CO_AutoCorr(y_rand,3);
         ac4 = CO_AutoCorr(y_rand,4);
         
-        % Entropies
-        % shen = NaN; % wentropy is nonsense.
-        % shen = EN_wentropy(y_rand,'shannon');
+        % Entropy
         sampen = PN_sampenc(y_rand,2,0.2,1);
         
         % Stationarity

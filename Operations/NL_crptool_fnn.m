@@ -18,6 +18,12 @@
 % th [opt], returns the first time the number of false nearest neighbours drops
 %           under this threshold
 % 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% 
+%---HISTORY:
+% Ben Fulcher, October 2009
+% Ben Fulcher, 2015-03-19 added random seed input
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -41,11 +47,12 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_crptool_fnn(y,maxm,r,taum,th)
-% Ben Fulcher, October 2009
+function out = NL_crptool_fnn(y,maxm,r,taum,th,randomSeed)
 
-%% Preliminaries
-doplot = 0; % plot outputs to figure
+% ------------------------------------------------------------------------------
+%% Preliminaries, input checking
+% ------------------------------------------------------------------------------
+doPlot = 0; % plot outputs to figure
 N = length(y); % length of the input time series
 
 % 1) maxm: the maximum embedding dimension
@@ -84,17 +91,29 @@ if nargin < 5
     th = []; % default is to return statistics
 end
 
-% Here's where the action happens:
-if ~exist('crptool_fnn')
+% 5) randomSeed: how to treat the randomization
+if nargin < 6
+    randomSeed = []; % default
+end
+
+% ------------------------------------------------------------------------------
+%% Here's where the action happens:
+% ------------------------------------------------------------------------------
+if ~exist(fullfile('Marwan_crptool','crptool_fnn'))
     error('Error -- the CRP Toolbox functions for calculating nearest neighbours can not be found');
 end
-nn = crptool_fnn(y,maxm,tau,r,'silent'); % run Marwan's CRPToolbox false nearest neighbors code
+
+% Control the random seed (for reproducibility):
+BF_ResetSeed(randomSeed);
+
+% Run Marwan's CRPToolbox false nearest neighbors code:
+nn = crptool_fnn(y,maxm,tau,r,'silent');
 
 if isnan(nn);
     error('Error running the function ''fnn'' from Marwan''s CRPToolbox')
 end
 
-if doplot
+if doPlot
     figure('color','w')
     plot(1:maxm,nn,'o-k');
 end
@@ -126,7 +145,8 @@ if isempty(th) % output summary statistics
     if isempty(out.m05), out.m05 = maxm + 1; end
 
 
-else % just want a scalar of embedding dimension as output
+else % in this case return a scalar of embedding dimension as output
+    
     out = find(nn < th,1,'first');
     if isempty(out)
         out = maxm + 1;

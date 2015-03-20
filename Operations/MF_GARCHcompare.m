@@ -9,6 +9,13 @@
 % Uses the following functions from Matlab's Econometrics Toolbox: archtest,
 % lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
 % 
+% Compares all combinations of p and q and output statistics are on the models
+% with the best fit.
+% 
+% This operation focuses on the GARCH/variance component, and therefore
+% attempts to pre-whiten and assumes a constant mean process (applies a linear
+% detrending).
+% 
 %---INPUTS:
 % y, the input time series
 % preproc, a preprocessing to apply:
@@ -19,11 +26,8 @@
 % 
 % qr, a vector of model orders, q, to compare
 % 
-% Compares all combinations of p and q and output statistics are on the models
-% with the best fit.
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 % 
-% This operation focuses on the GARCH/variance component, and therefore
-% attempts to pre-whiten and assumes a constant mean process.
 % 
 %---OUTPUTS: include log-likelihoods, Bayesian Information  Criteria (BIC),
 % Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
@@ -31,6 +35,7 @@
 % 
 %---HISTORY:
 % Ben Fulcher 26/2/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -54,7 +59,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_GARCHcompare(y,preproc,pr,qr)
+function out = MF_GARCHcompare(y,preproc,pr,qr,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Check that an Econometrics Toolbox license is available:
@@ -72,8 +77,14 @@ end
 if nargin < 3 || isempty(pr)
     pr = (1:3); % i.e., GARCH(1:3,qr)
 end
+
 if nargin < 4 || isempty(qr)
     qr = (1:3); % i.e., GARCH(pr,1:3);
+end
+
+% randomSeed: how to treat the randomization (in BF_Whiten)
+if nargin < 5
+    randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------
@@ -81,30 +92,12 @@ end
 % ------------------------------------------------------------------------------
 y0 = y; % the original, unprocessed time series
 
-switch preproc
-    case {'nothing','none'}
-        % do nothing.
-        
-    case 'ar'
-        % do the preprocessing that maximizes ar(2) whiteness
-        % apply a number of standard preprocessings and return them in the
-        % structure ypp. Also chooses the best preprocessing based on the worst fit
-        % of an AR2 model to the processed time series.
-        % has to beat doing nothing by 5% (error)
-        % No spectral methods allowed...
-        [ypp, best] = PP_PreProcess(y,'ar',2,0.05,0);
-        y = ypp.(best); % dynamic field referencing
-        % eval(sprintf('y = ypp.%s;',best));
-        fprintf(1,'Preprocessed the time series according to AR(2) criterion using %s\n',best);
-        
-    otherwise
-        error('Unknwon preprocessing setting ''%s''',preproc);
-end
+y = BF_Whiten(y,preproc,0,randomSeed); % Use a basic preprocessing to whiten the time series
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
-y = BF_zscore(y); % make sure the time series is z-scored
+y = BF_zscore(y); % make sure the (whitened) time series is z-scored
 N = length(y); % could be different to original (e.g., if chose a differencing above)
 
 % Now have the preprocessed time series saved over y.

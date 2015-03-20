@@ -7,21 +7,35 @@
 % Adds Gaussian-distributed noise to the time series with increasing standard
 % deviation, eta, across the range eta = 0, 0.1, ..., 2, and measures the
 % mutual information at each point using histograms with
-% nbins bins (implemented using CO_HistogramAMI).
+% numBins bins (implemented using CO_HistogramAMI).
 % 
 % The output is a set of statistics on the resulting set of automutual
 % information estimates, including a fit to an exponential decay, since the
 % automutual information decreases with the added white noise.
 % 
-% Can calculate these statistics for time delays 'tau', and for a number 'nbins'
+% Can calculate these statistics for time delays 'tau', and for a number 'numBins'
 % bins.
 % 
 % This algorithm is quite different, but was based on the idea of 'noise
 % titration' presented in: "Titration of chaos with added noise", Chi-Sang Poon
 % and Mauricio Barahona P. Natl. Acad. Sci. USA, 98(13) 7107 (2001)
 % 
+%---INPUTS:
+%
+% y, the input time series
+% 
+% tau, the time delay for computing AMI (using CO_HistogramAMI)
+% 
+% amiMethod, the method for computing AMI (using CO_HistogramAMI)
+% 
+% numBins, the number of bins input to CO_HistogramAMI
+% 
+% randomSeed: settings for resetting the random seed for reproducible results
+%               (using BF_ResetSeed)
+%
 %---HISTORY:
 % Ben Fulcher, September 2009
+% Ben Fulcher, 2015-03-19 added random seed input for reproducibility
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -46,7 +60,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_AddNoise(y,tau,meth,nbins)
+function out = CO_AddNoise(y,tau,amiMethod,numBins,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Preliminary checks
@@ -54,7 +68,7 @@ function out = CO_AddNoise(y,tau,meth,nbins)
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
 
-DoPlot = 0; % plot outputs to figure
+doPlot = 0; % plot outputs to figure
 
 % ------------------------------------------------------------------------------
 %% Check inputs
@@ -63,28 +77,35 @@ if nargin < 2
     tau = []; % set default in CO_HistogramAMI
 end
 if nargin < 3
-    meth = ''; % set default in CO_HistogramAMI
+    amiMethod = ''; % set default in CO_HistogramAMI
 end
 if nargin < 4
-    nbins = [];
+    numBins = [];
+end
+if nargin < 5
+    randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------
 % Preliminaries
 % ------------------------------------------------------------------------------
-noiser = (0:0.1:2); % across this noise range
-nr = length(noiser);
-amis = zeros(nr,1);
+noiser = (0:0.1:2); % compare properties across this noise range
+BF_ResetSeed(randomSeed); % reset the random seed if specified
+numRepeats = length(noiser);
+amis = zeros(numRepeats,1);
 noise = randn(size(y));
 
 % ------------------------------------------------------------------------------
 % Compute the automutual information across a range of noise levels
 % ------------------------------------------------------------------------------
-for i = 1:nr
-    amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,meth,nbins);
+% The *same* noise vector, noise, is added to the signal, with increasing
+% standard deviation (one could imagine repeating the calculation with different
+% random seeds)...
+for i = 1:numRepeats
+    amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,amiMethod,numBins);
 end
 
-out.pdec = sum(diff(amis) < 0)/(nr-1);
+out.pdec = sum(diff(amis) < 0)/(numRepeats-1);
 out.meanch = mean(diff(amis));
 out.ac1 = CO_AutoCorr(amis,1);
 out.ac2 = CO_AutoCorr(amis,2);
@@ -103,17 +124,6 @@ out.fitexpr2 = gof.rsquare;
 out.fitexpadjr2 = gof.adjrsquare;
 out.fitexprmse = gof.rmse;
 
-% Plot output:
-if DoPlot
-    figure('color','w'); box('on');
-    cc = BF_getcmap('set1',2,1);
-    % figure('color','w');
-    hold on; box('on')
-    plot(noiser,c.a*exp(c.b*noiser),'color',cc{2},'linewidth',2)
-    plot(noiser,amis,'.-','color',cc{1})
-    xlabel('\eta'); ylabel('AMI_1')
-end
-
 % ------------------------------------------------------------------------------
 % Fit linear function to output
 % ------------------------------------------------------------------------------
@@ -126,6 +136,20 @@ out.mse = mean((linfit' - amis).^2);
 % ------------------------------------------------------------------------------
 % Number of times the AMI function crosses its mean
 % ------------------------------------------------------------------------------
-out.pcrossmean = sum(BF_sgnchange(amis-mean(amis)))/(nr-1);
+out.pcrossmean = sum(BF_sgnchange(amis-mean(amis)))/(numRepeats-1);
+
+% ------------------------------------------------------------------------------
+% Plot output:
+% ------------------------------------------------------------------------------
+if doPlot
+    figure('color','w'); box('on');
+    cc = BF_getcmap('set1',2,1);
+    % figure('color','w');
+    hold on; box('on')
+    plot(noiser,c.a*exp(c.b*noiser),'color',cc{2},'linewidth',2)
+    plot(noiser,amis,'.-','color',cc{1})
+    xlabel('\eta'); ylabel('AMI_1')
+end
+
 
 end
