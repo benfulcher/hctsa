@@ -25,9 +25,9 @@
 % 
 % kth, the the distance to next points
 % 
-% [opt] justbest, can be set to 1 to just return the best embedding dimension, m_{best}
+% [opt] justBest, can be set to 1 to just return the best embedding dimension, m_{best}
 % 
-% [opt] bestp, if justbest = 1, can set bestp as the proportion of false nearest
+% [opt] bestp, if justBest = 1, can set bestp as the proportion of false nearest
 %              neighbours at which the optimal embedding dimension is selected.
 % 
 % This function returns statistics on the proportion of false nearest neighbors
@@ -64,7 +64,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_MS_fnn(y,de,tau,th,kth,justbest,bestp)
+function out = NL_MS_fnn(y,de,tau,th,kth,justBest,bestp)
 
 % ------------------------------------------------------------------------------
 %% CHECK INPUTS:
@@ -96,11 +96,12 @@ end
 
 % (Actually better to use MS_unfolding now -- does a near-identical thing
 % to this...)
-if nargin < 6 || isempty(justbest)
-    justbest = 0;
+if nargin < 6 || isempty(justBest)
+    justBest = 0;
 end
+
 if nargin < 7 || isempty(bestp)
-    bestp = 0.05; % first time under 5% of neighest neighbours
+    bestp = 0.1; % first time under 10% of neighest neighbours
 end
 
 % ------------------------------------------------------------------------------
@@ -115,7 +116,7 @@ p = MS_fnn(y,de,tau,th,kth);
 % proportion of false neighbours) and de (the corresonding embedding
 % dimensions) as vectors
 
-if justbest
+if justBest
     % We just want a scalar to choose the embedding with
     out = firstunderf(bestp);
     return
@@ -131,7 +132,7 @@ else
     % Standard deviation
     out.stdpfnn = std(p);
         
-    %% Find de for the first time p goes under x%
+    % Find embedding dimension for the first time p goes under x%
     out.firstunder02 = firstunderf(0.2); % 20%
     out.firstunder01 = firstunderf(0.1); % 10%
     out.firstunder005 = firstunderf(0.05); % 5%

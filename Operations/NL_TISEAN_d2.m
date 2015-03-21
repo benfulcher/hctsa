@@ -47,6 +47,9 @@
 % range of scales and shows the best fit to the data, and return the range, a
 % goodness of fit statistic, and a dimension estimate.
 % 
+%---HISTORY:
+% Ben Fulcher, 18/11/2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -71,11 +74,12 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TISEAN_d2(y, tau, maxm, theilerWin)
-% Ben Fulcher, 18/11/2009
 
 N = length(y); % data length (number of samples)
 
+% ------------------------------------------------------------------------------
 %% Check inputs
+% ------------------------------------------------------------------------------
 % time delay, tau
 if nargin < 2 || isempty(tau)
     tau = 1;

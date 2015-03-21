@@ -119,7 +119,7 @@ if doPlot
 end
 
 if isempty(th) % output summary statistics
-
+    
     % nn drops
     dnn = diff(nn);
     out.mdrop = mean(dnn);
@@ -127,31 +127,30 @@ if isempty(th) % output summary statistics
     
     % fnn
     for i = 2:maxm
-        eval(sprintf('out.fnn%u = nn(%u);',i,i));
+        out.(sprintf('fnn%u',i)) = nn(i);
     end
 
     % first time NN error goes below a set of thresholds
-    firstunderfn = @(x) find(nn < x,1,'first');
-    out.m005 = firstunderfn(0.05);
-    if isempty(out.m005), out.m005 = maxm + 1; end
-    
-    out.m01 = firstunderfn(0.1);
-    if isempty(out.m01), out.m01 = maxm + 1; end
-    
-    out.m02 = firstunderfn(0.2);
-    if isempty(out.m02), out.m02 = maxm + 1; end
-    
-    out.m05 = firstunderfn(0.5);
-    if isempty(out.m05), out.m05 = maxm + 1; end
-
+    % firstunderfn = @(x) find(nn < x,1,'first');
+    out.firstunder08 = firstunderf(0.8,1:maxm,nn);
+    out.firstunder07 = firstunderf(0.7,1:maxm,nn);
+    out.firstunder05 = firstunderf(0.5,1:maxm,nn);
+    out.firstunder02 = firstunderf(0.2,1:maxm,nn);
+    out.firstunder01 = firstunderf(0.1,1:maxm,nn);
+    out.firstunder005 = firstunderf(0.05,1:maxm,nn);
 
 else % in this case return a scalar of embedding dimension as output
-    
-    out = find(nn < th,1,'first');
-    if isempty(out)
-        out = maxm + 1;
-    end
+    out = firstunderf(th,1:maxm,nn);
 end
 
+
+% ------------------------------------------------------------------------------
+function firsti = firstunderf(x,m,p)
+    %% Find m for the first time p goes under x%
+    firsti = m(find(p < x,1,'first'));
+    if isempty(firsti)
+        firsti = m(end) + 1;
+    end
+end
 
 end

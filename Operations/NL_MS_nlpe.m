@@ -104,7 +104,6 @@ end
 % Run Michael Small's nonlinear prediction error code:
 res = MS_nlpe(y,de,tau); % residuals
 
-
 % ------------------------------------------------------------------------------
 %% Compute outputs
 % ------------------------------------------------------------------------------

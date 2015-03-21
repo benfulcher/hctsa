@@ -52,7 +52,7 @@ n = 2*tau; % exclude nearpoints
 nfnn = [];
 localmin = 0; % Ben Fulcher, 2015-03-20 fixed to locamin -> localmin
 
-for d=de
+for d = de
   
     % Embed the data
     X = MS_embed(y,d,tau); % changed from embed -> MS_embed ++BF
@@ -61,9 +61,8 @@ for d=de
     falseneighbours = 0;
     total = 0;
     
-    %find the nearest neighbours of each point
+    % find the nearest neighbours of each point
     ind = MS_nearest(X(:,1:(nx-1)),tau); %whooh hooo!
-
 
     % Distance between each point and its nearest neighbour
     d0 = MS_rms(X(:,(1:(nx-1)))'-X(:,ind)');
@@ -79,15 +78,15 @@ for d=de
 
 %   disp(['de=' int2str(d) ', n(fnn)=' num2str(prop*100) '%']);
 							
-  %is data sufficiently unfolded?
-    if (prop < th) 
+    % Is data sufficiently unfolded?
+    if (prop < th)
         nfnn = prop;
-        return;
-    end;
+        return
+    end
 
     % Or maybe a local minimum
     if (length(nfnn) > 1)
-        if (min(prop,nfnn(end))>nfnn(end-1)),
+        if (min(prop,nfnn(end)) > nfnn(end-1)),
           localmin = 1;
           localmini = length(nfnn)-1;
         end
