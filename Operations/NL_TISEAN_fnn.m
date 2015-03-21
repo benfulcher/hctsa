@@ -65,6 +65,8 @@
 
 function out = NL_TISEAN_fnn(y,tau,maxm,theilerWin,justBest,bestp)
 
+doPlot = 0; % can turn on to see plotted summaries
+
 % ------------------------------------------------------------------------------
 %% Check inputs / set defaults
 % ------------------------------------------------------------------------------
@@ -137,9 +139,12 @@ pNN = data{2}; % fraction of false nearest neighbors
 nHoodSize = data{3}; % average size of the neighbourhood
 nHoodSize2 = data{4}; % average squared size of the neighbourhood
 
-f = figure('color','w'); box('on'); hold on
-plot(pNN,'o-k'); plot(nHoodSize2,'o-r')
-legend('pNN','mean squared size of neighbourhood')
+if doPlot
+    f = figure('color','w'); box('on'); hold on
+    plot(pNN,'o-k'); plot(nHoodSize2,'o-r')
+    legend('pNN','mean squared size of neighbourhood')
+    xlabel('Embedding dimension');
+end
 
 % ------------------------------------------------------------------------------
 % Output(s)
