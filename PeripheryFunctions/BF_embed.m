@@ -54,9 +54,8 @@
 
 function y_embed = BF_embed(y,tau,m,sig,randomSeed)
 
-beVocal = 0; % display information about embedding
+beVocal = 1; % display information about embedding
 N = length(y); % length of the input time series, y
-
 
 % randomSeed: how to treat the randomization
 if nargin < 4
@@ -98,6 +97,17 @@ else % use a routine to inform m
     if ~iscell(m), m = {m}; end
     if ischar(m{1})
         switch m{1}
+            case 'tisean'
+                % Ben Fulcher, 2015-03-21
+                % Uses TISEAN false_nearest code
+                if length(m) == 1
+                    th = 0.4;
+                else
+                    th = m{2};
+                end
+                m = NL_TISEAN_fnn(y,tau,10,0.05,1,th);
+                ssm = sprintf('by TISEAN false_nearest code with 5% theiler window and threshold %f to m = %u',th,m);
+                
             case 'fnnsmall'
                 % uses Michael Small's fnn code
                 if length(m) == 1
@@ -145,6 +155,7 @@ else % use a routine to inform m
                     y_embed = NaN; return
                 end
                 ssm = sprintf('by TSTOOL function ''cao'' using ''mmthresh'' with threshold %f to m = %u',th,m);
+                
             otherwise
                 error('Embedding dimension, m, incorrectly specified.')
         end
@@ -179,7 +190,7 @@ catch me
         y_embed = NaN; return
     else
         % Could always try optimizing my own routine (below) so TSTOOL is not required for this step...
-        error('Embedding time series using TSTOOL function ''embed'' failed')
+        error('Embedding time series using TSTOOL function ''embed'' failed: %s',me.message)
     end
 end
 

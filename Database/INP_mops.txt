@@ -1130,6 +1130,9 @@ SP_Summaries(y,'fft',[],[],1,1)	SP_basic_fft_logdev_power
 NL_crptool_fnn(y,10,2,'mi',[],'default')	NL_crptool_fnn_10_2_mi
 NL_crptool_fnn(y,10,2,'ac',[],'default')	NL_crptool_fnn_10_2_ac
 NL_crptool_fnn(y,10,2,1,[],'default')	NL_crptool_fnn_10_2_1
+NL_TISEAN_fnn(y,'ac',10,0.05,0)     NL_TISEAN_fnn_ac_10_005
+NL_TISEAN_fnn(y,'mi',10,0.05,0)     NL_TISEAN_fnn_mi_10_005
+NL_TISEAN_fnn(y,1,10,0.05,0)     NL_TISEAN_fnn_1_10_005
 SY_TISEAN_nstat_z(y,4,{1,3})	SY_TISEAN_nstat_z_4_1_3
 SY_TISEAN_nstat_z(y,5,{1,3})	SY_TISEAN_nstat_z_5_1_3
 SY_TISEAN_nstat_z(y,4,{'ac',3})	SY_TISEAN_nstat_z_4_ac_3
