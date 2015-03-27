@@ -76,6 +76,10 @@ end
 % ------------------------------------------------------------------------------
 
 switch normopt
+    case 'subtractMean'
+        % Subtract the mean:
+        F = bsxfun(@minus,F,mean(F));
+        
     case 'maxmin'
         % Linear rescaling to the unit interval
         for i = 1:N2 % cycle through the operations
