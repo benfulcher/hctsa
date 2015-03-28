@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% IN_AutoMutualInfo
+% IN_MutualInfo
 % ------------------------------------------------------------------------------
 % 
 % Decided to implement some more rigorous mutual information estimators
@@ -7,9 +7,8 @@
 % 
 %---INPUTS:
 %
-% y: input time series
-% 
-% timeDelay: time lag for automutual information calculation
+% y1: input time series 1
+% y2: input time series 2
 % 
 % estMethod: the estimation method used to compute the mutual information:
 %           (*) 'gaussian'
@@ -21,7 +20,7 @@
 % information: http://dx.doi.org/10.1103/PhysRevE.69.066138
 % 
 %---HISTORY
-% Ben Fulcher, 2015-03-27
+% Ben Fulcher, 2015-03-28
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -46,17 +45,16 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = IN_AutoMutualInfo(y,timeDelay,estMethod,extraParam)
+function out = IN_MutualInfo(y1,y2,estMethod,extraParam)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(timeDelay)
-    timeDelay = 1;
+if nargin < 2 || isempty(y1) || isempty(y2)
+    error('Need to provide two input vectors');
 end
-if strcmp(timeDelay,'tau')
-    timeDelay = CO_FirstZero(y,'ac');
-    fprintf(1,'timeDelay = %u set to fist zero-crossing of ACF\n',timeDelay);
+if size(y1)~=size(y2)
+    error('Input vectors need to be the same size... :/');
 end
 
 if nargin < 3 || isempty(estMethod)
@@ -67,46 +65,16 @@ if nargin < 4
     extraParam = [];
 end
 
-N = length(y);
+N = length(y1);
 
 % ------------------------------------------------------------------------------
 % Initialize miCalc object:
 miCalc = IN_Initialize_MI(estMethod,extraParam);
 
-% Loop over time delays if a vector
-numTimeDelays = length(timeDelay);
-amis = zeros(numTimeDelays,1);
-for k = 1:numTimeDelays
-    
-    if timeDelay(k) > N
-        error('time delay too long');
-    end
-    
-    % ------------------------------------------------------------------------------
-    % Form the time-delay vectors y1 and y2
-    y1 = y(1:end-timeDelay(k));
-    y2 = y(1+timeDelay(k):end);
+% Set observations to two time series:
+miCalc.setObservations(y1, y2);
 
-    % Set observations to time-delayed versions of the time series:
-    miCalc.setObservations(y1, y2);
-
-    % Compute:
-    amis(k) = miCalc.computeAverageLocalOfObservations();
-end
-
-% ------------------------------------------------------------------------------
-% Make outputs:
-
-if numTimeDelays == 1
-    % output a scalar
-    out = amis;
-else
-    % Output a structure:
-    for k = 1:numTimeDelays
-        out.(sprintf('ami%u',timeDelay(k))) = amis(k);
-    end
-end
-
-
+% Compute mutual information:
+out = miCalc.computeAverageLocalOfObservations();
 
 end

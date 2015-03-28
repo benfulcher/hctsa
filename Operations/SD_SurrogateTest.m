@@ -12,7 +12,6 @@
 % The generation of surrogates is done by the periphery function,
 % SD_MakeSurrogates
 % 
-% 
 %---INPUTS:
 % x, the input time series
 % 
@@ -207,7 +206,7 @@ if ismember('tc3',theTestStat) % TC3 statistic -- another time-reversal asymmetr
 end
 
 if ismember('nlpe',theTestStat) % locally constant phase space prediction error
-    fprintf(1,'''nlpe'' can be very time consuming\n')
+    warning('''nlpe'' can be very time consuming...')
     de = 3; tau = 1; % embedding parameters: fixed like a dummy!
     tmp = NL_MS_nlpe(x,de,tau);
     nlpex = tmp.msqerr;
@@ -226,7 +225,8 @@ if ismember('nlpe',theTestStat) % locally constant phase space prediction error
 end
 
 if ismember('fnn',theTestStat)
-    fprintf(1,'fnn takes forever...\n')
+    warning('fnn takes forever...')
+    
     % false nearest neighbours at d=2;
     tmp = NL_MS_fnn(x,2,1,5,1);
     fnnx = tmp.pfnn_2;

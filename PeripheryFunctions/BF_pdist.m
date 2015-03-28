@@ -85,7 +85,9 @@ case 'mi'
         for j = i:n1
             goodj = goodies(j,:);
             goodboth = (goodi & goodj);
-            mis(i,j) = BF_MutualInformation(F(i,goodboth),F(j,goodboth),'quantile','quantile',nbins); % by quantile with nbins
+            % Using Information Dynamics Toolkit:
+            mis(i,j) = IN_MutualInfo(F(i,goodboth),F(j,goodboth),'gaussian');
+            % mis(i,j) = BF_MutualInformation(F(i,goodboth),F(j,goodboth),'quantile','quantile',nbins); % by quantile with nbins
             mis(j,i) = mis(i,j);
         end
         if (mod(i,floor(n1/50)) == 0)

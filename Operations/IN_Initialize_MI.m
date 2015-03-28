@@ -1,15 +1,10 @@
 % ------------------------------------------------------------------------------
-% IN_AutoMutualInfo
+% IN_Initialize_MI
 % ------------------------------------------------------------------------------
 % 
-% Decided to implement some more rigorous mutual information estimators
-% from the information dynamics toolkit.
+% Initializes Information Dynamics Toolkit object for MI computation.
 % 
 %---INPUTS:
-%
-% y: input time series
-% 
-% timeDelay: time lag for automutual information calculation
 % 
 % estMethod: the estimation method used to compute the mutual information:
 %           (*) 'gaussian'
@@ -21,7 +16,7 @@
 % information: http://dx.doi.org/10.1103/PhysRevE.69.066138
 % 
 %---HISTORY
-% Ben Fulcher, 2015-03-27
+% Ben Fulcher, 2015-03-28
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -46,67 +41,37 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = IN_AutoMutualInfo(y,timeDelay,estMethod,extraParam)
+function miCalc = IN_Initialize_MI(estMethod,extraParam)
 
-% ------------------------------------------------------------------------------
-% Check inputs:
-% ------------------------------------------------------------------------------
-if nargin < 2 || isempty(timeDelay)
-    timeDelay = 1;
-end
-if strcmp(timeDelay,'tau')
-    timeDelay = CO_FirstZero(y,'ac');
-    fprintf(1,'timeDelay = %u set to fist zero-crossing of ACF\n',timeDelay);
-end
-
-if nargin < 3 || isempty(estMethod)
-    estMethod = 'kernel';
-end
-
-if nargin < 4
+if nargin < 2
     extraParam = [];
 end
 
-N = length(y);
-
 % ------------------------------------------------------------------------------
-% Initialize miCalc object:
-miCalc = IN_Initialize_MI(estMethod,extraParam);
-
-% Loop over time delays if a vector
-numTimeDelays = length(timeDelay);
-amis = zeros(numTimeDelays,1);
-for k = 1:numTimeDelays
-    
-    if timeDelay(k) > N
-        error('time delay too long');
-    end
-    
-    % ------------------------------------------------------------------------------
-    % Form the time-delay vectors y1 and y2
-    y1 = y(1:end-timeDelay(k));
-    y2 = y(1+timeDelay(k):end);
-
-    % Set observations to time-delayed versions of the time series:
-    miCalc.setObservations(y1, y2);
-
-    % Compute:
-    amis(k) = miCalc.computeAverageLocalOfObservations();
+switch estMethod
+case 'gaussian'
+    implementingClass = 'infodynamics.measures.continuous.gaussian.MutualInfoCalculatorMultiVariateGaussian';
+case 'kernel'
+    implementingClass = 'infodynamics.measures.continuous.kernel.MutualInfoCalculatorMultiVariateKernel';
+case 'kraskov1' % algorithm 1
+    implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov1';
+case 'kraskov2' % algorithm 2
+    implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov2';    
 end
-
 % ------------------------------------------------------------------------------
-% Make outputs:
 
-if numTimeDelays == 1
-    % output a scalar
-    out = amis;
-else
-    % Output a structure:
-    for k = 1:numTimeDelays
-        out.(sprintf('ami%u',timeDelay(k))) = amis(k);
+miCalc = javaObject(implementingClass);
+
+% Specify a univariate calculation:
+miCalc.initialise(1,1);
+
+% Add neighest neighbor option for KSG estimator
+if ismember(estMethod,'kraskov2')
+    if ~isempty(extraParam)
+        miCalc.setProperty('k', extraParam); % 4th input specifies number of nearest neighbors for KSG estimator
+    else
+        miCalc.setProperty('k', '3'); % use 3 nearest neighbors for KSG estimator as default
     end
 end
-
-
 
 end
