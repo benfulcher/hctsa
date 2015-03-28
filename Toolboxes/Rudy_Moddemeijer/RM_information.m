@@ -49,14 +49,14 @@ end
 
 if NRowX~=1
     x = x';
-    %   error('Invalid dimension of X'); % CHANGED BY BEN
+    %   error('Invalid dimension of X'); % ++BF
 end
 
 [NRowY,NColY]=size(y);
 
 if NRowY~=1
     y = y';
-%   error('Invalid dimension of Y'); % CHANGED BY BEN
+%   error('Invalid dimension of Y'); % ++BF
 end
 
 if NColX ~= NColY
@@ -72,7 +72,7 @@ if nargin == 2
 end
 
 if nargin >= 3
-  [h,descriptor]=RM_histogram2(x,y,descriptor);
+  [h,descriptor] = RM_histogram2(x,y,descriptor);
 end
 
 if nargin < 4

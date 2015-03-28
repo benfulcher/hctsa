@@ -129,11 +129,17 @@ if ismember('ami1',theTestStat)
     % could use CO_HistogramAMI or TSTL, but I'll use BF_MutualInformation
     % Apparently there are upper and lower bounds on the number of bins to
     % use: [1+log_2(N)], [sqrt(N)]
-    nbins = ceil(1+log2(N)); %round(mean([1+log2(N),sqrt(N)]));
-    AMIx = BF_MutualInformation(x(1:end-1),x(2:end),'quantile','quantile',nbins);
+    % BF_MutualInformation(x(1:end-1),x(2:end),'quantile','quantile',nbins);
+    % nbins = ceil(1+log2(N)); %round(mean([1+log2(N),sqrt(N)]));
+    
+    % Use the gaussian approximation to estimate automutual information using the
+    % Information Dynamics Toolkit:
+    ami_fn = @(timeSeries,timeDelay) IN_AutoMutualInfo(timeSeries,timeDelay,'gaussian');
+    
+    AMIx = ami_fn(x,1)
     AMIsurr = zeros(numSurrs,1);
     for i = 1:numSurrs
-        AMIsurr(i) = BF_MutualInformation(z(1:end-1,i),z(2:end,i),'quantile','quantile',nbins);
+        AMIsurr(i) = ami_fn(z(:,i),1);
     end
     % so we have a value AMIx, and a distribution for the surrogates
     % AMIsurr -- we must compare and return something meaningful

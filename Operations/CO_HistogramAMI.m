@@ -23,7 +23,7 @@
 %                                series to exclude outliers,
 %           (iii) 'quantiles': equiprobable bins chosen using quantiles.
 % 
-% nbins, the number of bins, required by some methods, meth (see above)
+% numBins, the number of bins, required by some methods, meth (see above)
 % 
 %---OUTPUT: the automutual information calculated in this way.
 %
@@ -53,7 +53,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_HistogramAMI(y,tau,meth,nbins)
+function out = CO_HistogramAMI(y,tau,meth,numBins)
 
 % ------------------------------------------------------------------------------
 %% INPUTS:
@@ -71,8 +71,8 @@ if nargin < 3 || isempty(meth)
     meth = 'even'; % default
 end
 
-if nargin < 4 || isempty(nbins)
-    nbins = 10; % default number of bins: 10
+if nargin < 4 || isempty(numBins)
+    numBins = 10; % default number of bins: 10
 end
 
 % 1) Form the time-delay vectors y1 and y2
@@ -90,20 +90,20 @@ y2 = y(1+tau:end);
 % or small lags)
 switch meth
     case 'even'
-        b = linspace(min(y)-0.1,max(y)+0.1,nbins+1); % +0.1 to make sure all points included
+        b = linspace(min(y)-0.1,max(y)+0.1,numBins+1); % +0.1 to make sure all points included
         
     case 'std1' % std bins up to 1
-        b = linspace(-1,1,nbins+1);
+        b = linspace(-1,1,numBins+1);
         if min(y) < -1; b = [min(y)-0.1, b]; end
         if max(y) > 1; b = [b, max(y)+0.1]; end
             
     case 'std2'
-        b = linspace(-2,2,nbins+1);
+        b = linspace(-2,2,numBins+1);
         if min(y) < -2; b = [min(y)-0.1, b]; end
         if max(y) > 2; b = [b, max(y)+0.1]; end
             
     case 'quantiles' % use quantiles with ~equal number in each bin
-        b = quantile(y,linspace(0,1,nbins+1));
+        b = quantile(y,linspace(0,1,numBins+1));
         b(1) = b(1) - 0.1; b(end) = b(end) + 0.1;
         
     otherwise

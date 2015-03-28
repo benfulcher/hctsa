@@ -78,6 +78,11 @@ addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 % Run the routine adds the necessary paths for OpenTSTOOL:
 settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 
+% Java information dynamics toolkit written by Joseph Lizier
+% (should be ok to re-add this every time startup is run)
+fprintf(1,', Information dynamics toolkit')
+javaaddpath(fullfile(pwd,'Toolboxes','infodynamics-dist','infodynamics.jar'));
+
 % ------------------------------------------------------------------------------
 % Add path for TISEAN (ASSUMING in ~/bin directory):
 % ------------------------------------------------------------------------------
