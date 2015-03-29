@@ -33,27 +33,40 @@ try
     elseif ~isstruct(masterOutput)
         if isnan(masterOutput); % output from Master was a NaN
     		opOutput = NaN; % all structure elements set to NaN
-            opTime = NaN; % calculation times also set to NaN
             opQuality = NaN; % quality will be set later
+            opTime = NaN; % calculation times also set to NaN
         else % A single output -- retrieve it
-            opOutput = masterOutput;
-            opQuality = 0; % assume it's good -- later special value codes will be assigned where appropriate
-            opTime = masterCalcTime;
+            if isempty(masterOutput)
+                opOutput = 0;
+                opQuality = 6;
+                opTime = NaN;                
+            else
+                opOutput = masterOutput;
+                opQuality = 0; % assume it's good -- later special value codes will be assigned where appropriate
+                opTime = masterCalcTime;
+            end
         end
         
-	else % Retrieve the required element from master structure
-        [~, thest] = strtok(operationCode,'.'); thest = thest(2:end); % the field after the '.'
-        opOutput = BF_parevalM(masterOutput,['themasterdat.', thest]);
-		opQuality = 0; % No evaluation error, quality = 0 means good.
-        opTime = masterCalcTime;
+	else % Master code returned a structure: retrieve the required element from the master structure:
+        % First isolate the field after the '.': theField
+        [~, theField] = strtok(operationCode,'.');
+        theField = theField(2:end);
+        opOutput = masterOutput.(theField);
+        if isempty(opOutput) % the field is empty
+            opOutput = 0;
+            opQuality = 6; % label indicates empty
+            opTime = NaN;
+        else
+    		opQuality = 0; % No evaluation error, quality = 0 means good.
+            opTime = masterCalcTime;
+        end
 	end
     
 catch emsg
-	fprintf(fid,'-----Error linking to master operation %s by %s\n',masterLabel,operationCode);
+    fprintf(fid,['-----Error linking to master operation %s by %s.\n'],masterLabel,operationCode);
     fprintf(fid,'%s\n',emsg.message)
-    keyboard
     opOutput = 0; % Output = 0
-	opQuality = 1; % fatal error QualityCode -- something of a different error, though...
+	opQuality = 7; % fatal error QualityCode -- something of a different error, though...
     opTime = NaN; % don't worry about calculation time for errors
 end
 

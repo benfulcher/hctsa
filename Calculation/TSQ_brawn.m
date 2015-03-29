@@ -194,8 +194,8 @@ for i = 1:numTimeSeries
 		numMopsToCalc = length(Master_IDs_calc); % Number of master operations to calculate
         
         % Index sliced variables to minimize the communication overhead in the parallel processing
-        par_MasterOperationCodeCalculate = {MasterOperations(Master_ind_calc).Code}; % Cell array of strings of Code to evaluate
-        % par_OperationMasterID = [Operations(tcal).MasterID]; % Master_IDs corresponding to each Operation
+        par_MasterOpCodeCalc = {MasterOperations(Master_ind_calc).Code}; % Cell array of strings of Code to evaluate
+        % par_mop_id = [Operations(tcal).MasterID]; % Master_IDs corresponding to each Operation
         
 		fprintf(fid,'Evaluating %u master operations...\n',length(Master_IDs_calc));
 		
@@ -205,17 +205,17 @@ for i = 1:numTimeSeries
 		
 		% Evaluate all the master operations
         TimeSeries_i_ID = TimeSeries(i).ID; % Make a PARFOR-friendly version of the ID
-        master_timer = tic;
+        masterTimer = tic;
 		if doParallel
             parfor jj = 1:numMopsToCalc % PARFOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
-                                TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj}, ...
+                                TSQ_brawn_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
                                                         fid,beVocal,TimeSeries_i_ID);
             end
         else
             for jj = 1:numMopsToCalc % Normal FOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
-                                TSQ_brawn_masterloop(x,y,par_MasterOperationCodeCalculate{jj}, ...
+                                TSQ_brawn_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
                                                         fid,beVocal,TimeSeries_i_ID);
             end
 		end
@@ -225,8 +225,8 @@ for i = 1:numTimeSeries
         MasterCalcTime(Master_ind_calc) = MasterCalcTime_tmp;
 		
 		fprintf(fid,'%u master operations evaluated in %s ///\n\n',...
-                            numMopsToCalc,BF_thetime(toc(master_timer)));
-        clear master_timer
+                            numMopsToCalc,BF_thetime(toc(masterTimer)));
+        clear masterTimer
         
         % Set sliced version of matching indicies across the range tcal
         % Indices of MasterOperations corresponding to each Operation (i.e., each index of tcal)
@@ -257,8 +257,9 @@ for i = 1:numTimeSeries
                         error(['The operations database is corrupt: there is no link ' ...
                                 'from ''%s'' to a master code'], par_OperationCodeString{jj});
                     else
-                        fprintf(1,'Error retrieving element %s from %s.\nActivating keyboard active for debugging...\n', ...
-                                par_OperationCodeString{jj}, par_MasterOperationsLabel{par_OperationMasterInd(jj)})
+                        fprintf(1,['Error retrieving element %s from %s.\n' ...
+                                    'Activating keyboard active for debugging...\n'], ...
+                                    par_OperationCodeString{jj}, par_MasterOperationsLabel{par_OperationMasterInd(jj)})
                         keyboard
                     end
                 end
