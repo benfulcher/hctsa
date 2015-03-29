@@ -103,17 +103,21 @@ switch shape
 end
 counts = counts - 1; % ignore self-counts
 
+% ------------------------------------------------------------------------------
 % No meaningful output if never got a count with any other point!
+% ------------------------------------------------------------------------------
 % (radius, r, is probably too small)
 if all(counts == 0)
     fprintf(1,'No counts detected!\n');
     out = NaN; return
 end
 
+% ------------------------------------------------------------------------------
 % Return basic statistics on the counts
-out.ac1 = CO_AutoCorr(counts,1);
-out.ac2 = CO_AutoCorr(counts,2);
-out.ac3 = CO_AutoCorr(counts,3);
+% ------------------------------------------------------------------------------
+out.ac1 = CO_AutoCorr(counts,1,'Fourier');
+out.ac2 = CO_AutoCorr(counts,2,'Fourier');
+out.ac3 = CO_AutoCorr(counts,3,'Fourier');
 out.tau = CO_FirstZero(counts,'ac');
 out.max = max(counts);
 out.std = std(counts);

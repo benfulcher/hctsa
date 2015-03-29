@@ -60,7 +60,7 @@ co_fft = data(acf(signal(y),maxlag*2));
 nlags = length(co_fft);
 co_ben = zeros(nlags,1);
 for i = 1:nlags
-    co_ben(i) = CO_AutoCorr(y,i-1);
+    co_ben(i) = CO_AutoCorr(y,i-1,'Fourier');
 end
 
 out = norm(co_ben - co_fft);

@@ -124,7 +124,7 @@ switch windowstat
         end
     case 'AC1' % Lag-1 autocorrelation
         for i = 1:nsteps
-            qs(i) = CO_AutoCorr(y((i-1)*inc + 1:(i-1)*inc + wlen),1);
+            qs(i) = CO_AutoCorr(y((i-1)*inc + 1:(i-1)*inc + wlen),1,'Fourier');
         end
     otherwise
         error('Unknown statistic ''%s''',windowstat)

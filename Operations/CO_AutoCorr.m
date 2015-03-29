@@ -58,7 +58,7 @@ if nargin < 2 || isempty(tau)
 end
 
 if nargin < 3 || isempty(whatMethod)
-    whatMethod = 'TimeDomain';
+    whatMethod = 'Fourier';
 end
 
 % ------------------------------------------------------------------------------

@@ -137,8 +137,9 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % (iv) Partial autocorrelation function: PACF
 [PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y,20,[],[]);
 
-
+% ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model
+% ------------------------------------------------------------------------------
 % initialize statistics
 np = length(pr);
 nq = length(qr);

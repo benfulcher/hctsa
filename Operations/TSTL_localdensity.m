@@ -101,7 +101,7 @@ out.stdden = std(locden);
 out.meanden = mean(locden);
 out.medianden = median(locden);
 
-F_acden = @(x) CO_AutoCorr(locden,x); % autocorrelation of locden for 1:5
+F_acden = @(x) CO_AutoCorr(locden,x,'Fourier'); % autocorrelation of locden for 1:5
 for i = 1:5
     out.(sprintf('ac%uden',i)) = F_acden(i);
 end

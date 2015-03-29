@@ -57,9 +57,9 @@ for i = 1:ntaur
 	theta = diff(m(:,2))./diff(m(:,1));
 	theta = atan(theta); % measured as deviation from the horizontal
 
-	stats_store(1,i) = CO_AutoCorr(theta,1);
-	stats_store(2,i) = CO_AutoCorr(theta,2);
-	stats_store(3,i) = CO_AutoCorr(theta,3);
+	stats_store(1,i) = CO_AutoCorr(theta,1,'Fourier');
+	stats_store(2,i) = CO_AutoCorr(theta,2,'Fourier');
+	stats_store(3,i) = CO_AutoCorr(theta,3,'Fourier');
 end
 
 if DoPlot
@@ -70,9 +70,9 @@ end
 % ------------------------------------------------------------------------------
 % Compute lots of outputs statistics:
 % ------------------------------------------------------------------------------
-out.ac1_thetaac1 = CO_AutoCorr(stats_store(1,:),1);
-out.ac1_thetaac2 = CO_AutoCorr(stats_store(2,:),1);
-out.ac1_thetaac3 = CO_AutoCorr(stats_store(3,:),1);
+out.ac1_thetaac1 = CO_AutoCorr(stats_store(1,:),1,'Fourier');
+out.ac1_thetaac2 = CO_AutoCorr(stats_store(2,:),1,'Fourier');
+out.ac1_thetaac3 = CO_AutoCorr(stats_store(3,:),1,'Fourier');
 out.mean_thetaac1 = mean(stats_store(1,:));
 out.max_thetaac1 = max(stats_store(1,:));
 out.min_thetaac1 = min(stats_store(1,:));

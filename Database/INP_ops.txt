@@ -5118,10 +5118,6 @@ SP_basic_pgram_hamm_power.w25_75mel	SP_basic_pgram_hamm_power_w25_75mel	powerspe
 SP_basic_pgram_hamm_power.mom3	SP_basic_pgram_hamm_power_mom3	powerspectrum
 SP_basic_pgram_hamm_power.mom4	SP_basic_pgram_hamm_power_mom4	powerspectrum
 SP_basic_pgram_hamm_power.mom5	SP_basic_pgram_hamm_power_mom5	powerspectrum
-SP_basic_pgram_hamm_power.mom6	SP_basic_pgram_hamm_power_mom6	powerspectrum
-SP_basic_pgram_hamm_power.mom7	SP_basic_pgram_hamm_power_mom7	powerspectrum
-SP_basic_pgram_hamm_power.mom8	SP_basic_pgram_hamm_power_mom8	powerspectrum
-SP_basic_pgram_hamm_power.mom9	SP_basic_pgram_hamm_power_mom9	powerspectrum
 SP_basic_pgram_hamm_power.fpoly2csS_p1	SP_basic_pgram_hamm_power_fpoly2csS_p1	powerspectrum
 SP_basic_pgram_hamm_power.fpoly2csS_p2	SP_basic_pgram_hamm_power_fpoly2csS_p2	powerspectrum
 SP_basic_pgram_hamm_power.fpoly2csS_p3	SP_basic_pgram_hamm_power_fpoly2csS_p3	powerspectrum
@@ -5269,10 +5265,6 @@ SP_basic_fft_power.w25_75mel    SP_basic_fft_power_w25_75mel    powerspectrum
 SP_basic_fft_power.mom3    SP_basic_fft_power_mom3    powerspectrum
 SP_basic_fft_power.mom4    SP_basic_fft_power_mom4    powerspectrum
 SP_basic_fft_power.mom5    SP_basic_fft_power_mom5    powerspectrum
-SP_basic_fft_power.mom6    SP_basic_fft_power_mom6    powerspectrum
-SP_basic_fft_power.mom7    SP_basic_fft_power_mom7    powerspectrum
-SP_basic_fft_power.mom8    SP_basic_fft_power_mom8    powerspectrum
-SP_basic_fft_power.mom9    SP_basic_fft_power_mom9    powerspectrum
 SP_basic_fft_power.fpoly2csS_p1    SP_basic_fft_power_fpoly2csS_p1    powerspectrum
 SP_basic_fft_power.fpoly2csS_p2    SP_basic_fft_power_fpoly2csS_p2    powerspectrum
 SP_basic_fft_power.fpoly2csS_p3    SP_basic_fft_power_fpoly2csS_p3    powerspectrum
@@ -5420,10 +5412,6 @@ SP_basic_fft_logdev_power.w25_75mel    SP_basic_fft_logdev_power_w25_75mel    po
 SP_basic_fft_logdev_power.mom3    SP_basic_fft_logdev_power_mom3    powerspectrum
 SP_basic_fft_logdev_power.mom4    SP_basic_fft_logdev_power_mom4    powerspectrum
 SP_basic_fft_logdev_power.mom5    SP_basic_fft_logdev_power_mom5    powerspectrum
-SP_basic_fft_logdev_power.mom6    SP_basic_fft_logdev_power_mom6    powerspectrum
-SP_basic_fft_logdev_power.mom7    SP_basic_fft_logdev_power_mom7    powerspectrum
-SP_basic_fft_logdev_power.mom8    SP_basic_fft_logdev_power_mom8    powerspectrum
-SP_basic_fft_logdev_power.mom9    SP_basic_fft_logdev_power_mom9    powerspectrum
 SP_basic_fft_logdev_power.fpoly2csS_p1    SP_basic_fft_logdev_power_fpoly2csS_p1    powerspectrum
 SP_basic_fft_logdev_power.fpoly2csS_p2    SP_basic_fft_logdev_power_fpoly2csS_p2    powerspectrum
 SP_basic_fft_logdev_power.fpoly2csS_p3    SP_basic_fft_logdev_power_fpoly2csS_p3    powerspectrum

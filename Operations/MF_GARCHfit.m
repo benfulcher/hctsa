@@ -391,8 +391,8 @@ for k = 1:length(fields);
     out.(sprintf('stde_%s',fields{k})) = residout.(fields{k});
 end
 
-out.ac1_stde2 = CO_AutoCorr(stde2,1);
-out.diff_ac1 = CO_AutoCorr(y.^2,1) - CO_AutoCorr(stde2,1);
+out.ac1_stde2 = CO_AutoCorr(stde2,1,'Fourier');
+out.diff_ac1 = CO_AutoCorr(y.^2,1,'Fourier') - CO_AutoCorr(stde2,1,'Fourier');
 
 
 %% (5) Comparison to other models

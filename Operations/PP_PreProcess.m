@@ -216,7 +216,7 @@ switch chooseBest
             e = pe(m,data);
             rmserrs(i) = sqrt(mean(e.^2));
 %             statstore.mabserr(i) = mean(abs(e));
-%             statstore.ac1(i) = CO_AutoCorr(e,1);
+%             statstore.ac1(i) = CO_AutoCorr(e,1,'Fourier');
         end
 
         % Now choose the one with the *most* error (!) -- i.e., the AR
@@ -234,7 +234,7 @@ switch chooseBest
             data = yp.(fields{i}); % dynamic field referencing
             % eval(['data = yp.' fields{i} ';']);
             data = BF_zscore(data); % unnecessary for AC
-            acs(i) = CO_AutoCorr(data,order);
+            acs(i) = CO_AutoCorr(data,order,'Fourier');
         end
         
         % Now choose time series with lowest ac1

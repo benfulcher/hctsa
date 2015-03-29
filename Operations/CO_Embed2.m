@@ -43,7 +43,7 @@
 
 function out = CO_Embed2(y,tau)
 
-doplot = 0; % can set to 1 to plot some outputs
+doPlot = 0; % can set to 1 to plot some outputs
 
 %% Set defaults
 if nargin < 2 || isempty(tau)
@@ -67,7 +67,7 @@ end
 m = [y(1:end-tau), y(1+tau:end)];
 N = size(m,1); % number of points in the recurrence space
 
-if doplot
+if doPlot
     figure('color','w');
     plot(m(:,1),m(:,2),'.');
 end
@@ -79,16 +79,17 @@ theta = diff(m(:,2))./diff(m(:,1));
 theta = atan(theta); % measured as deviation from the horizontal
 
 
-if doplot, ksdensity(theta); end % can plot distribution of angles
-out.theta_ac1 = CO_AutoCorr(theta,1);
-out.theta_ac2 = CO_AutoCorr(theta,2);
-out.theta_ac3 = CO_AutoCorr(theta,3);
+if doPlot, ksdensity(theta); end % can plot distribution of angles
+out.theta_ac1 = CO_AutoCorr(theta,1,'Fourier');
+out.theta_ac2 = CO_AutoCorr(theta,2,'Fourier');
+out.theta_ac3 = CO_AutoCorr(theta,3,'Fourier');
 
 out.theta_mean = mean(theta);
 out.theta_std = std(theta);
 
 x = linspace(-pi/2,pi/2,11); % 10 bins in the histogram
-n = histc(theta,x); n(end-1)=n(end-1)+n(end); n=n(1:end-1); n=n/sum(n);
+n = histc(theta,x);
+n(end-1) = n(end-1)+n(end); n = n(1:end-1); n = n/sum(n);
 out.hist10std = std(n);
 out.histent = -sum(n(n>0).*log(n(n>0)));
 
@@ -109,8 +110,9 @@ out.stdb2 = std(n(:,2));
 out.stdb3 = std(n(:,3));
 out.stdb4 = std(n(:,4));
 
-
+% ------------------------------------------------------------------------------
 % Points in the space
+% ------------------------------------------------------------------------------
 % Stationarity of points in the space (do they move around in the space)
 
 % (1) in terms of distance from origin
@@ -140,7 +142,9 @@ spanareas = maxspanx.*maxspany;
 out.stdspana = std(spanareas);
 out.meanspana = mean(spanareas);
 
+% ------------------------------------------------------------------------------
 % Outliers
+% ------------------------------------------------------------------------------
 % area of max span of all points; versus area of max span of 50% of points closest to origin
 d = sqrt(m(:,1).^2 + m(:,2).^2);
 [d_sort, ix] = sort(d,'ascend');

@@ -236,23 +236,23 @@ out.statav5_all_s = statav_s;
 %% correlations?
 if ~isempty(zangles{1});
     out.tau_p = CO_FirstZero(zangles{1},'ac');
-    out.ac1_p = CO_AutoCorr(zangles{1},1);
-    out.ac2_p = CO_AutoCorr(zangles{1},2);
+    out.ac1_p = CO_AutoCorr(zangles{1},1,'Fourier');
+    out.ac2_p = CO_AutoCorr(zangles{1},2,'Fourier');
 else
     out.tau_p = NaN; out.ac1_p = NaN; out.ac2_p = NaN;
 end
 
 if ~isempty(zangles{2});
     out.tau_n = CO_FirstZero(zangles{2},'ac');
-    out.ac1_n = CO_AutoCorr(zangles{2},1);
-    out.ac2_n = CO_AutoCorr(zangles{2},2);
+    out.ac1_n = CO_AutoCorr(zangles{2},1,'Fourier');
+    out.ac2_n = CO_AutoCorr(zangles{2},2,'Fourier');
 else
     out.tau_n=NaN; out.ac1_n = NaN; out.ac2_n = NaN;
 end
 
 out.tau_all = CO_FirstZero(zallangles,'ac');
-out.ac1_all = CO_AutoCorr(zallangles,1);
-out.ac2_all = CO_AutoCorr(zallangles,2);
+out.ac1_all = CO_AutoCorr(zallangles,1,'Fourier');
+out.ac2_all = CO_AutoCorr(zallangles,2,'Fourier');
 
 % ------------------------------------------------------------------------------
 %% What does the distribution look like?

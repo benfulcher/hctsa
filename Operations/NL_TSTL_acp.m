@@ -168,7 +168,7 @@ for i = 1:maxDim
     % iqr of acp at each dimension
     out.(sprintf('iqracpf_%u',i)) = iqracpf(i);
     % abs(AC1) of acp at each dimension
-    out.(sprintf('ac1_acpf_%u',i)) = abs(CO_AutoCorr(acpf(:,i),1));
+    out.(sprintf('ac1_acpf_%u',i)) = abs(CO_AutoCorr(acpf(:,i),1,'Fourier'));
 end
 
 % plot(macpf)

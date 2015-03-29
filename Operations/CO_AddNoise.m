@@ -90,9 +90,9 @@ end
 % ------------------------------------------------------------------------------
 % Preliminaries
 % ------------------------------------------------------------------------------
-noiser = (0:0.1:2); % compare properties across this noise range
+noiseRange = (0:0.1:2); % compare properties across this noise range
 BF_ResetSeed(randomSeed); % reset the random seed if specified
-numRepeats = length(noiser);
+numRepeats = length(noiseRange);
 amis = zeros(numRepeats,1);
 noise = randn(size(y));
 
@@ -106,11 +106,11 @@ switch amiMethod
 case {'std1','std2','quantiles','even'}
     % histogram-based methods using my naive implementation in CO_Histogram.m
     for i = 1:numRepeats
-        amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,amiMethod,extraParam);
+        amis(i) = CO_HistogramAMI(y+noiseRange(i)*noise,tau,amiMethod,extraParam);
     end
 case {'gaussian','kernel','kraskov1','kraskov2'}
     for i = 1:numRepeats
-        amis(i) = IN_AutoMutualInfo(y+noiser(i)*noise,tau,amiMethod,extraParam);
+        amis(i) = IN_AutoMutualInfo(y+noiseRange(i)*noise,tau,amiMethod,extraParam);
     end
 end
 
@@ -125,22 +125,22 @@ out.pdec = sum(diff(amis) < 0)/(numRepeats-1);
 out.meanch = mean(diff(amis));
 
 % Autocorrelation of AMIs:
-out.ac1 = CO_AutoCorr(amis,1);
-out.ac2 = CO_AutoCorr(amis,2);
+out.ac1 = CO_AutoCorr(amis,1,'Fourier');
+out.ac2 = CO_AutoCorr(amis,2,'Fourier');
 
 % Noise level required to reduce ami to 1/e original value:
-out.ecorrLength = noiser(find(amis<amis(1)/exp(1),1,'first'));
+out.ecorrLength = noiseRange(find(amis<amis(1)/exp(1),1,'first'));
 
 % First time amis drop under value x: 1, 0.5, 0.2, 0.1
 firstUnderVals = [1,0.5,0.2,0.1];
 for i = 1:length(firstUnderVals)
-    out.(sprintf('firstUnder%u',firstUnderVals(i)*10)) = firstUnder_fn(firstUnderVals(i),noiser,amis);
+    out.(sprintf('firstUnder%u',firstUnderVals(i)*10)) = firstUnder_fn(firstUnderVals(i),noiseRange,amis);
 end
 
 % AMI at actual noise levels: 0.5, 1, 1.5 and 2
 noiseLevels = [0.5,1,1.5,2];
 for i = 1:length(noiseLevels)
-    out.(sprintf('ami_at_%u',noiseLevels(i)*10)) = amis(noiser==noiseLevels(i));
+    out.(sprintf('ami_at_%u',noiseLevels(i)*10)) = amis(noiseRange==noiseLevels(i));
 end
 
 % ------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ end
 % ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[amis(1) -1]);
 f = fittype('a*exp(b*x)','options',s);
-[c, gof] = fit(noiser',amis,f);
+[c, gof] = fit(noiseRange',amis,f);
 
 % Output statistics on fit to an exponential decay
 out.fitexpa = c.a;
@@ -160,10 +160,10 @@ out.fitexprmse = gof.rmse;
 % ------------------------------------------------------------------------------
 % Fit linear function to output
 % ------------------------------------------------------------------------------
-p = polyfit(noiser',amis,1);
+p = polyfit(noiseRange',amis,1);
 out.fitlina = p(1);
 out.fitlinb = p(2);
-linfit = polyval(p,noiser);
+linfit = polyval(p,noiseRange);
 out.mse = mean((linfit' - amis).^2);
 
 % ------------------------------------------------------------------------------
@@ -179,8 +179,8 @@ if doPlot
     cc = BF_getcmap('set1',2,1);
     % figure('color','w');
     hold on; box('on')
-    plot(noiser,c.a*exp(c.b*noiser),'color',cc{2},'linewidth',2)
-    plot(noiser,amis,'.-','color',cc{1})
+    plot(noiseRange,c.a*exp(c.b*noiseRange),'color',cc{2},'linewidth',2)
+    plot(noiseRange,amis,'.-','color',cc{1})
     xlabel('\eta'); ylabel('AMI_1')
 end
 

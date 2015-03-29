@@ -190,15 +190,17 @@ out.q25 = quantile(S,0.25);
 out.q25log = log(out.q25);
 out.q75 = quantile(S,0.75);
 out.q75log = log(out.q75);
-out.ac1 = CO_AutoCorr(S,1);
-out.ac2 = CO_AutoCorr(S,1);
-out.ac3 = CO_AutoCorr(S,1);
-out.ac4 = CO_AutoCorr(S,1);
+autoCorrs_S = CO_AutoCorr(S,1:4,'Fourier');
+out.ac1 = autoCorrs_S(1);
+out.ac2 = autoCorrs_S(2);
+out.ac3 = autoCorrs_S(3);
+out.ac4 = autoCorrs_S(4);
 out.tau = CO_FirstZero(S,'ac');
-out.logac1 = CO_AutoCorr(logS,1);
-out.logac2 = CO_AutoCorr(logS,1);
-out.logac3 = CO_AutoCorr(logS,1);
-out.logac4 = CO_AutoCorr(logS,1);
+autoCorrs_logS = CO_AutoCorr(S,1:4,'Fourier');
+out.logac1 = autoCorrs_logS(1);
+out.logac2 = autoCorrs_logS(2);
+out.logac3 = autoCorrs_logS(3);
+out.logac4 = autoCorrs_logS(4);
 out.logtau = CO_FirstZero(logS,'ac');
 out.logmaxonlogmean1e = out.maxSlog/mean(logS(logS<out.maxSlog/exp(1)));
 out.maxwidth = w(i_maxS+find(logS(i_maxS+1:end)<out.maxSlog/exp(1),1,'first'))-...
@@ -250,10 +252,9 @@ out.w25_75 = out.q75-out.q25;
 out.w25_75mel = w2mel(out.w25_75);
 
 % 2) Moments of the power spectrum
-% Take moments from 3--9
-for i = 3:9
-    themom = DN_Moments(S,i);
-    eval(sprintf('out.mom%u = themom;',i));
+% Take moments from 3--5
+for i = 3:5
+    out.(sprintf('mom%u',i)) = DN_Moments(S,i);;
 end
 
 % ------------------------------------------------------------------------------

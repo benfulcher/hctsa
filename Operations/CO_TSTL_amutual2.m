@@ -121,6 +121,6 @@ out.pcrossq10 = sum(BF_sgnchange(ami-quantile(ami,0.1)))/(lami-1);
 out.pcrossq90 = sum(BF_sgnchange(ami-quantile(ami,0.9)))/(lami-1);
 
 % ac1
-out.amiac1 = CO_AutoCorr(ami,1);
+out.amiac1 = CO_AutoCorr(ami,1,'Fourier');
 
 end

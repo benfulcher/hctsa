@@ -173,6 +173,6 @@ for k = 1:length(fields);
     out.(fields{k}) = residout.(fields{k});
 end
 
-out.ac1diff = abs(CO_AutoCorr(y.y,1)) - abs(CO_AutoCorr(mresiduals,1));
+out.ac1diff = abs(CO_AutoCorr(y.y,1,'Fourier')) - abs(CO_AutoCorr(mresiduals,1,'Fourier'));
 
 end

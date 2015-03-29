@@ -305,10 +305,11 @@ out.swss5_1hp = SUB_gethp(stats(:,10));
         d1 = norm(y-y_rand) / length(y);
         
         % Autocorrelation
-        ac1 = CO_AutoCorr(y_rand,1);
-        ac2 = CO_AutoCorr(y_rand,2);
-        ac3 = CO_AutoCorr(y_rand,3);
-        ac4 = CO_AutoCorr(y_rand,4);
+        autoCorrs = CO_AutoCorr(y_rand,1:4,'Fourier');
+        ac1 = autoCorrs(1);
+        ac2 = autoCorrs(2);
+        ac3 = autoCorrs(3);
+        ac4 = autoCorrs(4);
         
         % Entropy
         sampen = PN_sampenc(y_rand,2,0.2,1);

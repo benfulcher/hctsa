@@ -145,8 +145,8 @@ out.minx = min(x);
 out.stdx = std(x);
 out.iqrx = iqr(x);
 out.meanx = mean(x);
-out.ac1x = CO_AutoCorr(x,1);
-out.ac2x = CO_AutoCorr(x,2);
+out.ac1x = CO_AutoCorr(x,1,'Fourier');
+out.ac2x = CO_AutoCorr(x,2,'Fourier');
 out.tauacx = CO_FirstZero(x,'ac');
 
 out.maxy = max(y);
@@ -154,8 +154,8 @@ out.miny = min(y);
 out.stdy = std(y);
 out.iqry = iqr(y);
 out.meany = mean(y);
-out.ac1y = CO_AutoCorr(y,1);
-out.ac2y = CO_AutoCorr(y,2);
+out.ac1y = CO_AutoCorr(y,1,'Fourier');
+out.ac2y = CO_AutoCorr(y,2,'Fourier');
 out.tauacy = CO_FirstZero(y,'ac');
 
 out.boxarea = range(x)*range(y);
@@ -190,8 +190,8 @@ out.minD = min(D);
 out.stdD = std(D);
 out.iqrD = iqr(D);
 out.meanD = mean(D);
-out.ac1D = CO_AutoCorr(D,1);
-out.ac2D = CO_AutoCorr(D,2);
+out.ac1D = CO_AutoCorr(D,1,'Fourier');
+out.ac2D = CO_AutoCorr(D,2,'Fourier');
 out.tauacD = CO_FirstZero(D,'ac');
 
 % ------------------------------------------------------------------------------

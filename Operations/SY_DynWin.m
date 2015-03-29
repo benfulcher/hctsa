@@ -93,10 +93,10 @@ for i = 1:length(nsegr)
         qs(j,4) = kurtosis(ysub); % kurtosis
         qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1
         qs(j,6) = PN_sampenc(ysub,1,0.2,1); % SampEn_1
-        qs(j,7) = CO_AutoCorr(ysub,1); % AC1
-        qs(j,8) = CO_AutoCorr(ysub,2); % AC2
-        qs(j,9) = CO_AutoCorr(ysub,taug); % AC_glob_tau
-        qs(j,10) = CO_AutoCorr(ysub,taul); % AC_loc_tau
+        qs(j,7) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
+        qs(j,8) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
+        qs(j,9) = CO_AutoCorr(ysub,taug,'Fourier'); % AC_glob_tau
+        qs(j,10) = CO_AutoCorr(ysub,taul,'Fourier'); % AC_loc_tau
         qs(j,11) = taul;
     end
     % plot(qs,'o-');
@@ -112,6 +112,10 @@ end
 fs = std(fs); % how much does the 'std stationarity' vary over different scales?
 
 % plot(fs)
+
+% ------------------------------------------------------------------------------
+% Outputs:
+% ------------------------------------------------------------------------------
 out.stdmean = fs(1);
 out.stdstd = fs(2);
 out.stdskew = fs(3);

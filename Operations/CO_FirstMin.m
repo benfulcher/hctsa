@@ -74,7 +74,7 @@ case 'mi-hist'
     corrfn = @(x) BF_MutualInformation(y(1:end-x), y(1+x:end), 'range', 'range',extraParam);
 case {'ac','corr'}
     % Autocorrelation implemented as CO_AutoCorr
-    corrfn = @(x) CO_AutoCorr(y,x);
+    corrfn = @(x) CO_AutoCorr(y,x,'Fourier');
 otherwise
     error('Unknown correlation type specified: ''%s''',minWhat);
 end

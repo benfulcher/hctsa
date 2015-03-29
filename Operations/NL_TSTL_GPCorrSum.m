@@ -217,7 +217,7 @@ if enoughpoints
     
     out.robfitresmeanabs = mean(abs(res));
     out.robfitresmeansq = mean(res.^2);
-    out.robfitresac1 = CO_AutoCorr(res,1);
+    out.robfitresac1 = CO_AutoCorr(res,1,'Fourier');
 else
     out.robfit_a1 = NaN;
     out.robfit_a2 = NaN;

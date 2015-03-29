@@ -192,13 +192,15 @@ if doplot
     legend('y','walker','mean: walker','localvariancefactor','accumulative walker mean')
 end
 
-%% (2) Statistics on walk
+% ------------------------------------------------------------------------------
+%% (2) Statistics on the walk
+% ------------------------------------------------------------------------------
 % (i) The walk itself
 out.w_mean = mean(w);
 out.w_median = median(w);
 out.w_std = std(w);
-out.w_ac1 = CO_AutoCorr(w,1);
-out.w_ac2 = CO_AutoCorr(w,2);
+out.w_ac1 = CO_AutoCorr(w,1,'Fourier');
+out.w_ac2 = CO_AutoCorr(w,2,'Fourier');
 out.w_tau = CO_FirstZero(w,'ac');
 out.w_min = min(w);
 out.w_max = max(w);

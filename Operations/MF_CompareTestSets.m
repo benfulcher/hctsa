@@ -234,7 +234,7 @@ for i = 1:numPred
     
     rmserrs(i) = sqrt(mean(mres.^2));
     mabserrs(i) = mean(abs(mres));
-    ac1s(i) = CO_AutoCorr(mres,1);
+    ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
     
     % Get statistics on output time series
     meandiffs(i) = abs(mean(yp.y) - mean(ytest.y));
