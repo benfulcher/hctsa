@@ -19,6 +19,9 @@
 % Code is heavily derived from that provided by Max A. Little:
 % http://www.maxlittle.net/
 %
+%---HISTORY:
+% Ben Fulcher 24/2/2011
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Max A. Little, <max.a.little@gmail.com>,
 % <http://www.maxlittle.net/> and Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -44,20 +47,20 @@
 % ------------------------------------------------------------------------------
 
 function out = MD_pNN(x)
-% Ben Fulcher 24/2/2011
 
 diffx = diff(x); % successive increments of the time series
 N = length(x); % length of the time series
 
+% ------------------------------------------------------------------------------
 %% Calculate pNNx percentage
+% ------------------------------------------------------------------------------
 % strange to do this for a z-scored time series...
 % pnntime = 20;
 
 Dx = abs(diffx) * 1000; % assume milliseconds as for RR intervals
 pnns = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 for i = 1:length(pnns)
-    thispnn = sum(Dx > pnns(i)) / (N-1);
-    eval(sprintf('out.pnn%u =  thispnn;', pnns(i)))
+    out.(sprintf('pnn%u',pnns(i))) = sum(Dx > pnns(i)) / (N-1);
 end
 
 end

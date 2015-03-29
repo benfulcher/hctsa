@@ -186,15 +186,16 @@ out.stat_2_s_s = std([std2_1, std2_2])/std(SC(:));
 
 % 5-way
 % I know this is terribly inefficient compared to using matrix reshape
-SC_1 = SC(:,1:floor(N/5));
-SC_2 = SC(:,floor(N/5)+1:floor(2*N/5));
-SC_3 = SC(:,floor(2*N/5)+1:floor(3*N/5));
-SC_4 = SC(:,floor(3*N/5)+1:floor(4*N/5));
-SC_5 = SC(:,floor(4*N/5)+1:end);
+SCs = cell(5,1);
+SCs{1} = SC(:,1:floor(N/5));
+SCs{2} = SC(:,floor(N/5)+1:floor(2*N/5));
+SCs{3} = SC(:,floor(2*N/5)+1:floor(3*N/5));
+SCs{4} = SC(:,floor(3*N/5)+1:floor(4*N/5));
+SCs{5} = SC(:,floor(4*N/5)+1:end);
 
 for i = 1:5
-    eval(sprintf('mean5_%u = mean(SC_%u(:));',i,i))
-    eval(sprintf('std5_%u = std(SC_%u(:));',i,i))
+    out.(sprintf('mean5_%u',i)) = mean(SCs{i}(:));
+    out.(sprintf('std5_%u',i)) = std(SCs{i}(:));
 end
 
 % mean5_1 = mean(SC_1(:));

@@ -206,7 +206,7 @@ switch chooseBest
         
         for i = 1:nfields; % each preprocessing performed
             data = [];
-            eval(sprintf('data = yp.%s;',fields{i}));
+            data = yp.(fields{i});
             data = BF_zscore(data);
             
             % (i) fit the model

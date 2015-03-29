@@ -54,7 +54,7 @@ out.e = e; % variance
 
 % Output fitted parameters up to order, p (+1)
 for i = 1:p+1
-	eval(sprintf('out.a%u = a(%u);',i,i));
+	out.(sprintf('a%u',i)) = a(i);
 end
 
 % ------------------------------------------------------------------------------

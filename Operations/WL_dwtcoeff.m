@@ -64,8 +64,8 @@ if strcmp(level,'max')
     level = wmaxlev(N,wname);
 end
 
-maxlevelallowed = wmaxlev(N,wname);
-if maxlevelallowed < level
+maxLevelAllowed = wmaxlev(N,wname);
+if maxLevelAllowed < level
     fprintf(1,'Chosen level is too large for this wavelet on this signal...\n');
 end
 
@@ -76,8 +76,8 @@ end
 %   (*) Wavelet decomposition vector, c
 %   (*) Bookkeeping vector, l
 
-if maxlevelallowed < level
-    [c, l] = wavedec(y, maxlevelallowed, wname);
+if maxLevelAllowed < level
+    [c, l] = wavedec(y, maxLevelAllowed, wname);
 else
     [c, l] = wavedec(y, level, wname);
 end
@@ -116,25 +116,21 @@ end
 %% Get statistics on coefficients
 % ------------------------------------------------------------------------------
 for k = 1:level
-    if k <= maxlevelallowed
+    if k <= maxLevelAllowed
         d = detcoef(c,l,k); % detail coefficients at level k
-        % maximum coefficient at this level
-        maxd = max(d);
-        eval(sprintf('out.maxd_l%u = maxd;',k));
-        % minimum coefficient at this level
-        mind = min(d);
-        eval(sprintf('out.mind_l%u = mind;',k));
-        % std coefficients at this level
-        stdd = std(d);
-        eval(sprintf('out.stdd_l%u = stdd;',k));
-        % 1-D noise coefficient estimate
-        stddd = wnoisest(c,l,k);
-        eval(sprintf('out.stddd_l%u = stddd;',k));
+        % maximum coefficient at this level:
+        out.(sprintf('maxd_l%u',k)) = max(d);
+        % minimum coefficient at this level:
+        out.(sprintf('mind_l%u',k)) = min(d);
+        % std coefficients at this level:
+        out.(sprintf('stdd_l%u',k)) = std(d);
+        % 1-D noise coefficient estimate:
+        out.(sprintf('stddd_l%u',k)) = wnoisest(c,l,k);;
     else
-        eval(sprintf('out.maxd_l%u = NaN;',k));
-        eval(sprintf('out.mind_l%u = NaN;',k));
-        eval(sprintf('out.stdd_l%u = NaN;',k));
-        eval(sprintf('out.stddd_l%u = NaN;',k));
+        out.(sprintf('maxd_l%u',k)) = NaN;
+        out.(sprintf('mind_l%u',k)) = NaN;
+        out.(sprintf('stdd_l%u',k)) = NaN;
+        out.(sprintf('stddd_l%u',k)) = NaN;
     end
 end
 

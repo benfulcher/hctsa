@@ -24,7 +24,7 @@
 % y, the input time series
 % M, the embedding dimension
 % r, the threshold
-% preprocess [opt], (i) 'diff1', incremental difference preprocessing.
+% preProcessHow [opt], (i) 'diff1', incremental difference preProcessingHow.
 % 
 %---HISTORY:
 % Ben Fulcher, November 2009
@@ -52,20 +52,20 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_SampEn(y,M,r,preprocess)
+function out = EN_SampEn(y,M,r,preProcessHow)
 
 if nargin < 4
-    preprocess = ''; % don't apply preprocessing
+    preProcessHow = ''; % don't apply preProcessingHow
 end
 
-if ~isempty(preprocess)
-    switch preprocess
+if ~isempty(preProcessHow)
+    switch preProcessHow
     case 'diff1'
         % First do an incremental differencing of the time series
         % thus yielding the 'Control Entropy'
         y = BF_zscore(diff(y));
     otherwise
-        error('Unknown preprocessing setting ''%s''',preprocess);
+        error('Unknown preprocessing setting: ''%s''',preProcessHow);
     end
 end
 
@@ -79,10 +79,8 @@ end
 % ------------------------------------------------------------------------------
 for i = 1:M
     % Much nicer to use dynamic field referencing
-    out.(['p',num2str(i)]) = p(i);
-    out.(['sampen' num2str(i)]) = e(i);
-    % eval(sprintf('out.p%u = p(%u);',i,i));
-    % eval(sprintf('out.sampen%u = e(%u);',i,i));
+    out.(sprintf('p%u',i)) = p(i);
+    out.(sprintf('sampen%u',i)) = e(i);
 end
 
 out.meanchsampen = mean(diff(e));

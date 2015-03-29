@@ -159,7 +159,7 @@ out.pred1_ac2 = CO_AutoCorr(y_pred1,2,'Fourier'); % autocorrelation at lag one o
 out.pred1ac2diff = abs(out.pred1_ac2 - CO_AutoCorr(y,2,'Fourier')); % difference in autocorrelations of prediction and original
 out.pred_tau_comp = CO_FirstZero(y_pred1,'ac')/CO_FirstZero(y,'ac'); % difference in first zero crossing of autocorrelation function
 
-% autocorrelation structure
+% Autocorrelation structure:
 acs_y = CO_AutoCorr(y,1:10,'Fourier');
 acs_y_pred1 = CO_AutoCorr(y_pred1,1:10,'Fourier');
 out.acs1_10_sumabsdiffpred1 = sum(abs(acs_y - acs_y_pred1));

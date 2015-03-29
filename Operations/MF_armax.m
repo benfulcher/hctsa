@@ -104,12 +104,12 @@ dc = m.dc; % must uncertainties in MA coeffs
 % Make these outputs
 if length(c_ar) > 1
     for i = 2:length(c_ar)
-        eval(sprintf('out.AR_%u = c_ar(%u);',i-1,i));
+        out.(sprintf('AR_%u',i-1)) = c_ar(i);
     end
 end
 if length(c_ma) > 1
     for i = 2:length(c_ma)
-        eval(sprintf('out.MA_%u = c_ma(%u);',i-1,i));
+        out.(sprintf('MA_%u',i-1)) = c_ma(i);
     end
 end
 
@@ -168,7 +168,7 @@ residout = MF_ResidualAnalysis(mresiduals);
 % Convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
-    eval(sprintf('out.%s = residout.%s;',fields{k},fields{k}));
+    out.(fields{k}) = residout.(fields{k});
 end
 
 % % Train on some proportion, ptrain, of data

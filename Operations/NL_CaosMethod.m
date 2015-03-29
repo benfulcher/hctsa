@@ -192,8 +192,8 @@ else % RETURN STATISTICS ON CURVES
     
     % (1) the raw values of each vector
     for i = 1:maxdim
-        eval(sprintf('out.caoo1_%u = caoo1(%u);',i,i))
-        eval(sprintf('out.caoo2_%u = caoo2(%u);',i,i))
+        out.(sprintf('caoo1_%u',i)) = caoo1(i);
+        out.(sprintf('caoo2_%u',i)) = caoo2(i);
     end
     
     % statistics on each vector

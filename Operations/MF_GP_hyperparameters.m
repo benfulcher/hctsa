@@ -206,8 +206,8 @@ hyper = exp(logHyper);
 % Output the hyperparameters and log-hyperparameters
 for i = 1:numHPs
     % Set up structure output
-    eval(sprintf('out.h%u = hyper(%u);',i,i));
-    eval(sprintf('out.logh%u = logHyper(%u);',i,i));
+    out.(sprintf('h%u',i)) = hyper(i);
+    out.(sprintf('logh%u',i)) = logHyper(i);
 end
 
 % ------------------------------------------------------------------------------
