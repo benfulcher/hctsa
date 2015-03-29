@@ -132,8 +132,16 @@ out.ac2 = CO_AutoCorr(amis,2);
 out.ecorrLength = noiser(find(amis<amis(1)/exp(1),1,'first'));
 
 % First time amis drop under value x: 1, 0.5, 0.2, 0.1
+firstUnderVals = [1,0.5,0.2,0.1];
+for i = 1:length(firstUnderVals)
+    out.(sprintf('firstUnder%u',firstUnderVals(i)*10)) = firstUnder_fn(firstUnderVals(i),noiser,amis);
+end
 
 % AMI at actual noise levels: 0.5, 1, 1.5 and 2
+noiseLevels = [0.5,1,1.5,2];
+for i = 1:length(noiseLevels)
+    out.(sprintf('ami_at_%u',noiseLevels(i)*10)) = amis(noiser==noiseLevels(i));
+end
 
 % ------------------------------------------------------------------------------
 % Fit exponential decay to output using Curve Fitting Toolbox
@@ -176,5 +184,16 @@ if doPlot
     xlabel('\eta'); ylabel('AMI_1')
 end
 
+
+% ------------------------------------------------------------------------------
+function firsti = firstUnder_fn(x,m,p)
+    %% Find m for the first time p goes under x
+    firsti = m(find(p < x,1,'first'));
+    % If it never goes under -- saturate as NaN
+    % (could alternatively set to the maximum m...)
+    if isempty(firsti)
+        firsti = NaN;
+    end
+end
 
 end

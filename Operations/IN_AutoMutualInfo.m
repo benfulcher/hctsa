@@ -54,7 +54,7 @@ function out = IN_AutoMutualInfo(y,timeDelay,estMethod,extraParam)
 if nargin < 2 || isempty(timeDelay)
     timeDelay = 1;
 end
-if strcmp(timeDelay,'tau')
+if ischar(timeDelay) && ismember(timeDelay,{'ac','tau'})
     timeDelay = CO_FirstZero(y,'ac');
     fprintf(1,'timeDelay = %u set to fist zero-crossing of ACF\n',timeDelay);
 end

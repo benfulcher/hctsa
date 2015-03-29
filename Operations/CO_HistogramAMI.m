@@ -62,7 +62,7 @@ function out = CO_HistogramAMI(y,tau,meth,numBins)
 if nargin < 2 || isempty(tau)
     tau = 1;  % time-lag of 1
 end
-if strcmp(tau,'tau')
+if ischar(tau) && ismember(tau,{'ac','tau'})
     tau = CO_FirstZero(y,'ac');
     fprintf(1,'tau = %u set to fist zero-crossing of ACF\n',tau);
 end
