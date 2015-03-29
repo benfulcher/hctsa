@@ -56,7 +56,7 @@
 function out = CO_HistogramAMI(y,tau,meth,numBins)
 
 % ------------------------------------------------------------------------------
-%% INPUTS:
+%% Check Inputs:
 % ------------------------------------------------------------------------------
 % Time-lag, tau
 if nargin < 2 || isempty(tau)
@@ -74,10 +74,6 @@ end
 if nargin < 4 || isempty(numBins)
     numBins = 10; % default number of bins: 10
 end
-
-% 1) Form the time-delay vectors y1 and y2
-y1 = y(1:end-tau);
-y2 = y(1+tau:end);
 
 % Number of options:
 % remove outliers first?, number of bins, range of bins, bin sizes
@@ -112,21 +108,37 @@ end
 
 nb = length(b) - 1; % number of bins (-1 since b defines edges)
 
-% (1) Joint distribution of y1 and y2
-pij = NK_hist2(y1,y2,b,b);
-pij = pij(1:nb,1:nb); % joint
-pij = pij/sum(sum(pij)); % joint
-pi = sum(pij,1); % marginal
-pj = sum(pij,2); % other marginal
-% Old-fashioned method (should give same result):
-% pi = histc(y1,b); pi = pi(1:nb); pi = pi/sum(pi); % marginal
-% pj = histc(y2,b); pj= pj(1:nb); pj = pj/sum(pj); % other marginal
+% ------------------------------------------------------------------------------
+% Form the time-delay vectors y1 and y2
+% ------------------------------------------------------------------------------
+amis = zeros(length(tau),1);
+for i = 1:length(tau)
+    y1 = y(1:end-tau(i));
+    y2 = y(1+tau(i):end);
 
-pii = ones(nb,1)*pi;
-pjj = pj*ones(1,nb);
+    % (1) Joint distribution of y1 and y2
+    pij = NK_hist2(y1,y2,b,b);
+    pij = pij(1:nb,1:nb); % joint
+    pij = pij/sum(sum(pij)); % joint
+    pi = sum(pij,1); % marginal
+    pj = sum(pij,2); % other marginal
+    % Old-fashioned method (should give same result):
+    % pi = histc(y1,b); pi = pi(1:nb); pi = pi/sum(pi); % marginal
+    % pj = histc(y2,b); pj= pj(1:nb); pj = pj/sum(pj); % other marginal
 
-r = (pij > 0); % Defining the range in this way, we set log(0) = 0
-ami = pij(r).*log(pij(r)./pii(r)./pjj(r));
-out = sum(ami);
+    pii = ones(nb,1)*pi;
+    pjj = pj*ones(1,nb);
+
+    r = (pij > 0); % Defining the range in this way, we set log(0) = 0
+    amis(i) = sum(pij(r).*log(pij(r)./pii(r)./pjj(r)));
+end
+
+if length(tau)==1
+    out = amis;
+else
+    for i = 1:length(tau)
+        out.(sprintf('ami%u',i)) = amis(i);
+    end
+end
 
 end

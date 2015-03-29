@@ -14,7 +14,7 @@
 % 
 % maxtau, the maximum lag for which to calculate the auto mutual information
 % 
-% nbins, the number of bins for histogram calculation
+% numBins, the number of bins for histogram calculation
 % 
 %---OUTPUTS:
 % A number of statistics of the function over the range of tau, including the
@@ -47,44 +47,50 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_TSTL_amutual(y,maxtau,nbins)
+function out = CO_TSTL_amutual(y,maxtau,numBins)
 
-doplot = 0; % toggle plotting of outputs
+doPlot = 0; % toggle plotting of outputs
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % length of time series
 s = signal(y); % convert to signal object for TSTOOL
 
-%% Existence checks
+% Check existence of code:
 if ~exist('amutual')
     error('''amutual'' not found -- ensure the TSTOOL package is installed correctly??\n');
 end
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(maxtau)
     maxtau = ceil(N/4);
 end
 
-if nargin < 3 || isempty(nbins)
-    nbins = round(sqrt(N/10)); % this is an arbitrary choice (!!) ;-)
+if nargin < 3 || isempty(numBins)
+    numBins = round(sqrt(N/10)); % this is an arbitrary choice (!!) ;-)
 end
 
+% ------------------------------------------------------------------------------
 %% Run
-ami = data(amutual(s,maxtau,nbins));
+% ------------------------------------------------------------------------------
+ami = data(amutual(s,maxtau,numBins));
 lami = length(ami);
 
 % Plot results
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(ami,'-ok');
 end
 
 % Change automutual information vector to a structure for output
 for i = 1:maxtau+1
-    eval(sprintf('out.ami%u = ami(%u);',i,i));
+    out.(sprintf('ami%u',i)) = ami(i);
 end
 
-% mean mutual information over this lag range
+% Mean mutual information over this lag range
 out.mami = mean(ami);
 out.stdami = std(ami);
 
@@ -107,7 +113,7 @@ out.pmaxima = length(dmaximai)/floor(lami/2);
 out.modeperiodmax = mode(dmaximai);
 out.pmodeperiodmax = sum(dmaximai == mode(dmaximai))/length(dmaximai);
 
-if doplot
+if doPlot
     hold on;
     plot(maximai,ami(maximai),'or');
     hold off

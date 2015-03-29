@@ -71,7 +71,7 @@ case 'mi-kraskov2' % (using Information Dynamics Toolkit)
     corrfn = @(x) IN_AutoMutualInfo(y,x,'kraskov2',extraParam);
 case 'mi-hist'
     % Automutual information implemented in super-naive box counting as in BF_MutualInformation
-    corrfn = @(x) BF_MutualInformation(y(1:end-x), y(1+x:end), 'range', 'range');
+    corrfn = @(x) BF_MutualInformation(y(1:end-x), y(1+x:end), 'range', 'range',extraParam);
 case {'ac','corr'}
     % Autocorrelation implemented as CO_AutoCorr
     corrfn = @(x) CO_AutoCorr(y,x);

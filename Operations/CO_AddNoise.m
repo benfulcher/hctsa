@@ -6,14 +6,15 @@
 % noise to the input time series.
 % Adds Gaussian-distributed noise to the time series with increasing standard
 % deviation, eta, across the range eta = 0, 0.1, ..., 2, and measures the
-% mutual information at each point using histograms with
-% numBins bins (implemented using CO_HistogramAMI).
+% mutual information at each point
+% Can be measured using histograms with extraParam bins (implemented using
+% CO_HistogramAMI), or using the Information Dynamics Toolkit.
 % 
 % The output is a set of statistics on the resulting set of automutual
 % information estimates, including a fit to an exponential decay, since the
 % automutual information decreases with the added white noise.
 % 
-% Can calculate these statistics for time delays 'tau', and for a number 'numBins'
+% Can calculate these statistics for time delays 'tau', and for a number 'extraParam'
 % bins.
 % 
 % This algorithm is quite different, but was based on the idea of 'noise
@@ -28,7 +29,7 @@
 % 
 % amiMethod, the method for computing AMI (using CO_HistogramAMI)
 % 
-% numBins, the number of bins input to CO_HistogramAMI
+% extraParam, e.g., the number of bins input to CO_HistogramAMI
 % 
 % randomSeed: settings for resetting the random seed for reproducible results
 %               (using BF_ResetSeed)
@@ -60,7 +61,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_AddNoise(y,tau,amiMethod,numBins,randomSeed)
+function out = CO_AddNoise(y,tau,amiMethod,extraParam,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Preliminary checks
@@ -77,10 +78,10 @@ if nargin < 2
     tau = []; % set default in CO_HistogramAMI
 end
 if nargin < 3
-    amiMethod = ''; % set default in CO_HistogramAMI
+    amiMethod = 'even'; % using evenly spaced bins in CO_HistogramAMI
 end
 if nargin < 4
-    numBins = [];
+    extraParam = []; % number of bins for CO_HistogramAMI
 end
 if nargin < 5
     randomSeed = [];
@@ -101,14 +102,38 @@ noise = randn(size(y));
 % The *same* noise vector, noise, is added to the signal, with increasing
 % standard deviation (one could imagine repeating the calculation with different
 % random seeds)...
-for i = 1:numRepeats
-    amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,amiMethod,numBins);
+switch amiMethod
+case {'std1','std2','quantiles','even'}
+    % histogram-based methods using my naive implementation in CO_Histogram.m
+    for i = 1:numRepeats
+        amis(i) = CO_HistogramAMI(y+noiser(i)*noise,tau,amiMethod,extraParam);
+    end
+case {'gaussian','kernel','kraskov1','kraskov2'}
+    for i = 1:numRepeats
+        amis(i) = IN_AutoMutualInfo(y+noiser(i)*noise,tau,amiMethod,extraParam);
+    end
 end
 
+% ------------------------------------------------------------------------------
+% Statistics
+% ------------------------------------------------------------------------------
+
+% Proportion decreases:
 out.pdec = sum(diff(amis) < 0)/(numRepeats-1);
+
+% Mean change in AMI:
 out.meanch = mean(diff(amis));
+
+% Autocorrelation of AMIs:
 out.ac1 = CO_AutoCorr(amis,1);
 out.ac2 = CO_AutoCorr(amis,2);
+
+% Noise level required to reduce ami to 1/e original value:
+out.ecorrLength = noiser(find(amis<amis(1)/exp(1),1,'first'));
+
+% First time amis drop under value x: 1, 0.5, 0.2, 0.1
+
+% AMI at actual noise levels: 0.5, 1, 1.5 and 2
 
 % ------------------------------------------------------------------------------
 % Fit exponential decay to output using Curve Fitting Toolbox
