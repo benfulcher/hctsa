@@ -793,10 +793,14 @@ CO_trev(y,2)	CO_trev_2
 CO_trev(y,3)	CO_trev_3
 CO_trev(y,'ac')	CO_trev_ac
 CO_trev(y,'mi')	CO_trev_mi
-CO_TSTL_amutual(y,20,[])	CO_TSTL_amutual_20
-CO_TSTL_amutual(y,20,10)	CO_TSTL_amutual_20_10
-CO_TSTL_amutual2(y,50)	CO_TSTL_amutual2_50
-CO_TSTL_amutual2(diff(y),50)	CO_TSTL_amutual2_diff__50
+# CO_TSTL_amutual(y,20,[])    CO_TSTL_amutual_20
+# CO_TSTL_amutual(y,20,10)    CO_TSTL_amutual_20_10
+# CO_TSTL_amutual2(y,50)    CO_TSTL_amutual2_50
+# CO_TSTL_amutual2(diff(y),50)    CO_TSTL_amutual2_diff__50
+IN_AutoMutualInfoStats(y,40,'gaussian') IN_AutoMutualInfoStats_40_gaussian
+IN_AutoMutualInfoStats(y,40,'kraskov1') IN_AutoMutualInfoStats_40_kraskov1
+IN_AutoMutualInfoStats(diff(y),20,'gaussian') IN_AutoMutualInfoStats_diff_20_gaussian
+IN_AutoMutualInfoStats(diff(y),20,'kraskov1') IN_AutoMutualInfoStats_diff_20_kraskov1
 CO_CompareMinAMI(y,'std1',[2:80])	CO_CompareMinAMI_std1_2_80
 CO_CompareMinAMI(y,'quantiles',[2:80])	CO_CompareMinAMI_quantiles_2_80
 CO_CompareMinAMI(y,'even',[2:80])	CO_CompareMinAMI_even_2_80

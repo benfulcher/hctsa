@@ -1,29 +1,23 @@
 % ------------------------------------------------------------------------------
-% CO_TSTL_amutual
+% IN_AutoMutualInfoStats
 % ------------------------------------------------------------------------------
 % 
-% Uses amutual code from TSTOOL, which uses a
-% histogram method with n bins to estimate the mutual information of a
-% time series across a range of time-delays, tau.
+% Returns statistics on the automutual information function computed on the time
+% series
 % 
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
-%
 %---INPUTS:
+% y, column vector of time series data
 % 
-% y, the time series
+% maxTau, maximal time delay
 % 
-% maxtau, the maximum lag for which to calculate the auto mutual information
-% 
-% numBins, the number of bins for histogram calculation
+% estMethod, extraParam -- cf. inputs to IN_AutoMutualInfo.m
 % 
 %---OUTPUTS:
-% A number of statistics of the function over the range of tau, including the
-% mean mutual information, its standard deviation, first minimum, proportion of
-% extrema, and measures of periodicity in the positions of local maxima.
+% Statistics on the AMIs and their pattern across the range of specified time
+% delays
 % 
 %---HISTORY:
-% Ben Fulcher, October 2009
-% 
+% Ben Fulcher, 2009
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -47,79 +41,101 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_TSTL_amutual(y,maxtau,numBins)
-
-doPlot = 0; % toggle plotting of outputs
+function out = IN_AutoMutualInfoStats(y,maxTau,estMethod,extraParam)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
 N = length(y); % length of time series
-s = signal(y); % convert to signal object for TSTOOL
-
-% Check existence of code:
-if ~exist('amutual')
-    error('''amutual'' not found -- ensure the TSTOOL package is installed correctly??\n');
-end
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(maxtau)
-    maxtau = ceil(N/4);
+
+% maxTau: the maximum time delay to investigate
+if nargin < 2 || isempty(maxTau)
+    maxTau = ceil(N/4);
+end
+maxTau0 = maxTau;
+
+% Don't go above N/2
+maxTau = min(maxTau,ceil(N/2));
+
+% estimation method:
+if nargin < 3
+    estMethod = '';
 end
 
-if nargin < 3 || isempty(numBins)
-    numBins = round(sqrt(N/10)); % this is an arbitrary choice (!!) ;-)
+% extraParam
+if nargin < 4
+    extraParam = [];
 end
 
 % ------------------------------------------------------------------------------
-%% Run
+%% Get the AMI data:
 % ------------------------------------------------------------------------------
-ami = data(amutual(s,maxtau,numBins));
+ami = IN_AutoMutualInfo(y,1:maxTau,estMethod,extraParam);
+
+% Convert structure to a vector
+ami = struct2cell(ami);
+ami = [ami{:}];
+
+% ------------------------------------------------------------------------------
+% Output the raw values:
+% ------------------------------------------------------------------------------
+for i = 1:maxTau0
+    if i <= maxTau
+        out.(sprintf('ami%u',i)) = ami(i);
+    else % we've trimmed the maximum back because time series is too short
+        out.(sprintf('ami%u',i)) = NaN;
+    end
+end
+
+% ------------------------------------------------------------------------------
+% Output statistics:
+% ------------------------------------------------------------------------------
 lami = length(ami);
 
-% Plot results
-if doPlot
-    figure('color','w'); box('on');
-    plot(ami,'-ok');
-end
-
-% ------------------------------------------------------------------------------
-% Change automutual information vector to a structure for output
-% ------------------------------------------------------------------------------
-for i = 1:maxtau+1
-    out.(sprintf('ami%u',i)) = ami(i);
-end
-
-% Mean mutual information over this lag range
+% Mean and std of automutual information over this range of time delays:
 out.mami = mean(ami);
 out.stdami = std(ami);
 
-% first miniimum of mutual information across range
+% First minimum of mutual information across range
 dami = diff(ami);
-extremai = find(dami(1:end-1).*dami(2:end)<0);
+extremai = find(dami(1:end-1).*dami(2:end) < 0);
 out.pextrema = length(extremai)/(lami-1);
 if isempty(extremai)
-   out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
+    out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
 else
-    out.fmmi = extremai(1);
+    out.fmmi = min(extremai);
 end
 
 % Look for periodicities in local maxima
 maximai = find(dami(1:end-1) > 0 & dami(2:end) < 0) + 1;
 dmaximai = diff(maximai);
 % is there a big peak in dmaxima?
-% (no need to normalize since a given method inputs its range; but do it anyway... ;-))
+ % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pmaxima = length(dmaximai)/floor(lami/2);
 out.modeperiodmax = mode(dmaximai);
 out.pmodeperiodmax = sum(dmaximai == mode(dmaximai))/length(dmaximai);
 
-if doPlot
-    hold on;
-    plot(maximai,ami(maximai),'or');
-    hold off
-end
+% Same for local minima
+% Look for periodicities in local maxima
+minimai = find(dami(1:end-1) < 0 & dami(2:end) > 0) + 1;
+dminimai = diff(minimai);
+% is there a big peak in dmaxima?
+ % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
+out.pminima = length(dminimai)/floor(lami/2);
+out.modeperiodmin = mode(dminimai);
+out.pmodeperiodmin = sum(dminimai == mode(dminimai))/length(dminimai);
 
+% number of crossings at mean/median level, percentiles
+out.pcrossmean = sum(BF_sgnchange(ami-mean(ami)))/(lami-1);
+out.pcrossmedian = sum(BF_sgnchange(ami-median(ami)))/(lami-1);
+out.pcrossq10 = sum(BF_sgnchange(ami-quantile(ami,0.1)))/(lami-1);
+out.pcrossq90 = sum(BF_sgnchange(ami-quantile(ami,0.9)))/(lami-1);
+
+% ac1
+out.amiac1 = CO_AutoCorr(ami,1,'Fourier');
 
 end
