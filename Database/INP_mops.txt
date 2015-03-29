@@ -1110,10 +1110,10 @@ PP_Compare(x,'rav10')			PP_Compare_rav10
 PP_Compare(x,'resample_1_2')	PP_Compare_resample_1_2
 PP_Compare(x,'resample_2_1')	PP_Compare_resample_2_1
 PP_Iterate(x,'diff')			PP_Iterate_diff
-PP_Iterate(x,'medianf')			PP_Iterate_medianf
-PP_Iterate(x,'rav')				PP_Iterate_rav
-PP_Iterate(x,'resampleup')		PP_Iterate_resampleup
-PP_Iterate(x,'resampledown')	PP_Iterate_resampledown
+# PP_Iterate(x,'medianf')            PP_Iterate_medianf
+# PP_Iterate(x,'rav')                PP_Iterate_rav
+# PP_Iterate(x,'resampleup')        PP_Iterate_resampleup
+# PP_Iterate(x,'resampledown')    PP_Iterate_resampledown
 MF_GP_hyperparameters(y,{'covSum',{'covSEiso','covNoise'}},1,200,'resample')	MF_GP_hyperparameters_covSEiso_covNoise_1_200_resample
 MF_GP_hyperparameters(y,{'covSum',{'covSEiso','covPeriodic','covNoise'}},1,200,'resample')	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample
 MF_GP_hyperparameters(y,{'covSum',{'covSEiso','covNoise'}},1,200,'first')	MF_GP_hyperparameters_covSEiso_covNoise_1_200_first

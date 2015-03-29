@@ -135,7 +135,7 @@ if ismember('ami1',theTestStat)
     % Information Dynamics Toolkit:
     ami_fn = @(timeSeries,timeDelay) IN_AutoMutualInfo(timeSeries,timeDelay,'gaussian');
     
-    AMIx = ami_fn(x,1)
+    AMIx = ami_fn(x,1);
     AMIsurr = zeros(numSurrs,1);
     for i = 1:numSurrs
         AMIsurr(i) = ami_fn(z(:,i),1);

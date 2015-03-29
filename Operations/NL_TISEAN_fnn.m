@@ -157,13 +157,13 @@ end
 
 % Output all of them
 for i = 1:maxm
-    if i > length(mDim)
-        % Not enough points found to estimate at this dimension
-        out.(sprintf('pfnn_%u',mDim(i))) = NaN;
-        out.(sprintf('nHood2_%u',mDim(i))) = NaN;
+    if i <= length(mDim)
+        out.(sprintf('pfnn_%u',i)) = pNN(i); % proportion of false nearest neighbors
+        out.(sprintf('nHood2_%u',i)) = nHoodSize2(i); % mean squared size of neighbourhood
     else
-        out.(sprintf('pfnn_%u',mDim(i))) = pNN(i); % proportion of false nearest neighbors
-        out.(sprintf('nHood2_%u',mDim(i))) = nHoodSize2(i); % mean squared size of neighbourhood
+        % Not enough points found to estimate at this dimension
+        out.(sprintf('pfnn_%u',i)) = NaN;
+        out.(sprintf('nHood2_%u',i)) = NaN;
     end
 end
 

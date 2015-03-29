@@ -210,10 +210,8 @@ end
 % std5_4 = std(SC_4(:));
 % std5_5 = std(SC_5(:));
 
-% out.stat_5_m_m = mean([mean5_1 mean5_2 mean5_3 mean5_4
-% mean5_5])/mean(SC(:));
-out.stat_5_m_s = mean([std5_1, std5_2, std5_3, std5_4, std5_5])/mean(SC(:));
-out.stat_5_s_m = std([mean5_1, mean5_2, mean5_3, mean5_4, mean5_5])/std(SC(:));
-out.stat_5_s_s = std([std5_1, std5_2, std5_3, std5_4, std5_5])/std(SC(:));
+out.stat_5_m_s = mean([out.std5_1, out.std5_2, out.std5_3, out.std5_4, out.std5_5])/mean(SC(:));
+out.stat_5_s_m = std([out.mean5_1, out.mean5_2, out.mean5_3, out.mean5_4, out.mean5_5])/std(SC(:));
+out.stat_5_s_s = std([out.std5_1, out.std5_2, out.std5_3, out.std5_4, out.std5_5])/std(SC(:));
 
 end

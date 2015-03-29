@@ -56,7 +56,7 @@ if nargin < 2 || isempty(timeDelay)
 end
 if ischar(timeDelay) && ismember(timeDelay,{'ac','tau'})
     timeDelay = CO_FirstZero(y,'ac');
-    fprintf(1,'timeDelay = %u set to fist zero-crossing of ACF\n',timeDelay);
+    % fprintf(1,'timeDelay = %u set to fist zero-crossing of ACF.\n',timeDelay);
 end
 
 if nargin < 3 || isempty(estMethod)

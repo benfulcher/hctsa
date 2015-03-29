@@ -83,10 +83,10 @@ case 'Fourier'
     % acf = acf(2:end);
 
     if max(tau) > length(acf)-1 % -1 because acf(1) is lag 0
-        warning(1,'Time lag %u is too long for time-series length %u',max(tau),length(y))
+        warning('Time lag %u is too long for time-series length %u',max(tau),length(y))
     end
     if min(tau) < 0
-        warning(1,'Negative time lags not applicable')
+        warning('Negative time lags not applicable')
     end
     
     out = zeros(length(tau),1);

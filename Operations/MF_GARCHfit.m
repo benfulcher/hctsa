@@ -270,25 +270,43 @@ if isprop(Gfit,'Offset')
     out.offset = Gfit.Offset;
 end
 
-% -- GARCH --
+
+indexAdjust = 0; % required because sometimes you fit at fewer lags than you 
+                 % specified, but the errors output is a vector, 
+                 % so sadly you have to keep count...
+                 
+% -- GARCH component --
 for i = 1:P
     if isprop(Gfit,'GARCH') && length(Gfit.GARCH)>=i
         out.(sprintf('GARCH_%u',i)) = Gfit.GARCH{i};
-        % New format means that this no longer works for custom GARCH models (you can no longer index a particular
-        % error)///
-        out.(sprintf('GARCHerr_%u',i)) = errors(1+i); % first is the constant
+        % New (in this way shit) format means that this no longer works for 
+        % custom GARCH models (you can no longer index a particular
+        % error) ///
+        if Gfit.GARCH{i}==0
+            % no fit at this lag, even though it was specified
+            indexAdjust = indexAdjust + 1;
+            out.(sprintf('GARCHerr_%u',i)) = NaN; % first is the constant
+        else
+            out.(sprintf('GARCHerr_%u',i)) = errors(1+i-indexAdjust); % first is the constant
+        end
     else
-        % GARCH fit not as specified
+        % fitted GARCH model not as specified
         out.(sprintf('GARCH_%u',i)) = NaN;
         out.(sprintf('GARCHerr_%u',i)) = NaN; % first is the constant
     end
 end
 
-% -- ARCH --
+% -- ARCH component --
 for i = 1:Q
     if isprop(Gfit,'ARCH') && length(Gfit.ARCH)>=i
         out.(sprintf('ARCH_%u',i)) = Gfit.ARCH{i};
-        out.(sprintf('ARCHerr_%u',i)) = errors(1+length(Gfit.GARCH)+i); % constant, then GARCH, then ARCH
+        if Gfit.ARCH{i}==0
+            % No fit at this specified lag
+            out.(sprintf('ARCHerr_%u',i)) = NaN; % constant, then GARCH, then ARCH
+            indexAdjust = indexAdjust + 1;
+        else
+            out.(sprintf('ARCHerr_%u',i)) = errors(1+length(Gfit.GARCH)+i-indexAdjust); % constant, then GARCH, then ARCH
+        end
     else
         % ARCH fit not as specified
         out.(sprintf('ARCH_%u',i)) = NaN;

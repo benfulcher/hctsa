@@ -64,7 +64,6 @@ if nargin < 2 || isempty(tau)
 end
 if ischar(tau) && ismember(tau,{'ac','tau'})
     tau = CO_FirstZero(y,'ac');
-    fprintf(1,'tau = %u set to fist zero-crossing of ACF\n',tau);
 end
 
 if nargin < 3 || isempty(meth)

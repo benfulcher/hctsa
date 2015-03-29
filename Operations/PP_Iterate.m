@@ -225,11 +225,15 @@ out.normdiff_exp = stats(10,4);
         end
         
         %   (b) histogram 10 bins
-        me1 = DN_SimpleFit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
-        if ~isstruct(me1) && isnan(me1)
+        try
+            me1 = DN_SimpleFit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian            
+            if ~isstruct(me1) && isnan(me1)
+                f(5) = NaN;
+            else
+                f(5) = me1.rmse;
+            end
+        catch
             f(5) = NaN;
-        else
-            f(5) = me1.rmse;
         end
         
         %   (c) compare distribution to fitted normal distribution
@@ -333,4 +337,3 @@ out.normdiff_exp = stats(10,4);
     end
 % ------------------------------------------------------------------------------
 end
-     
