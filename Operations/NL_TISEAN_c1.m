@@ -138,7 +138,7 @@ fileName = sprintf('hctsa_tisean_c1_tau%u_m%u-%u_t%u_n%u_%s.tmp',tau,mmm(1),mmm(
 tmp_folder = tempdir;
 fileName = fullfile(tmp_folder,fileName);
 dlmwrite(fileName,y);
-fprintf(1,'Just written temporary data file %s for TISEAN\n',fileName)
+fprintf(1,'Wrote temporary data file ''%s'' for TISEAN\n',fileName)
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code

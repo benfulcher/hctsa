@@ -96,7 +96,7 @@ fileName = sprintf('tisean_nstat_z_n%u_d%u_m%u_%s.tmp',nseg,tm(1),tm(2),datestr(
 tmp_folder = tempdir;
 fileName = fullfile(tmp_folder,fileName);
 dlmwrite(fileName,y);
-fprintf(1,'Just written temporary data file %s for TISEAN.\n',fileName)
+fprintf(1,'Wrote temporary data file ''%s'' for TISEAN.\n',fileName)
 
 % ------------------------------------------------------------------------------
 %% Do the calculation

@@ -28,7 +28,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function y = BF_Whiten(y,preProc,beVocal,randomSeed)
+function [y,best] = BF_Whiten(y,preProc,beVocal,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -42,6 +42,7 @@ if nargin < 4
     randomSeed = [];
 end
 % ------------------------------------------------------------------------------
+best = ''; % in case not specified
 
 if ismember(preProc,{'nothing','none'})
     % Don't do ANYTHING to the time series
@@ -51,7 +52,10 @@ end
 % Detrend it first:
 y = detrend(y);
 
-switch preProc        
+switch preProc
+    case 'detrend'
+        % Only detrend (already done)
+        return
     case 'ar'
         % Apply the preprocessing that maximizes ar(2) whiteness
         % Apply a standard AR preprocessing to the data and return them in the

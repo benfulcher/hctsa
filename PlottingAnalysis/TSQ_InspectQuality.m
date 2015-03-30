@@ -28,8 +28,7 @@ function TSQ_InspectQuality()
 
 load('HCTSA_loc.mat','TS_Quality','TimeSeries','Operations');
 
-maxShow = max(TS_Quality(~isnan(TS_Quality))); % maximum quality label to plot
-if isempty(maxShow)
+if ~any(~isnan(TS_Quality(:)))
     error('No good quality labels in HCTSA_loc.mat');
 end
 
@@ -46,10 +45,14 @@ ax.XTickLabel = [Operations.ID];
 
 % Add a color bar:
 allLabels = {'good','error','NaN','Inf','-Inf','complex','empty','link error'};
+labelsExist = unique(TS_Quality(~isnan(TS_Quality)));
+maxShow = max(labelsExist); % maximum quality label to plot
+
 cb = colorbar(ax);
 caxis([-0.5,maxShow+0.5]);
 cb.Ticks = [0:1:maxShow];
 cb.TickLabels = allLabels(1:maxShow+1);
+
 allColors = BF_getcmap('spectral',8,0);
 allColors = allColors([8,1,2,3,4,5,6,7],:);
 colormap(allColors(1:maxShow+1,:))

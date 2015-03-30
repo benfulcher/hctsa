@@ -118,7 +118,7 @@ y0 = y;
 
 y = BF_Whiten(y,preproc,beVocal,randomSeed);
 
-y = BF_zscore(y); % z-score the time series
+y = BF_zscore(y); % z-score the time series (after whitening)
 
 % Length of the (potentially whitened) time series, y
 % Note that this could be different to the original, y0 (if choose a differencing, e.g.)
@@ -165,79 +165,7 @@ N = length(y);
 % ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model
 % ------------------------------------------------------------------------------
-GModel = garch(P,Q); % equivalent to setting nothing in garchfit
-% switch params
-%     % Names of basic models
-%     case 'default'
-%         % (i) The default model:
-%         % a constant, C mean process
-%         % GARCH(1,1) conditionally Gaussian innovations
-%
-%         % C: constant mean of mean-process
-%         % K: constant term in variance-process
-%         % GARCH(1): autoregressive parameter at lag 1 of variance
-%         % ARCH(1): regressive parameter at lag 1 of Gaussian noise process
-%         %           squared onto the variance process
-%
-%         % P = 1, Q = 1 using the new GARCH specification syntax
-%         GModel = garch(1,1); % equivalent to setting nothing in garchfit
-%
-%     case 'auto'
-%         % automatically determines model from statistics above
-%         % This is not a great 'automatic' method...!
-%         % But it's a method...
-%
-%         fprintf(1,'No longer supported//\n');
-%         continue
-%
-%         % % AR component of model from ACF
-%         % R = Lags_acf_y(find(abs(ACF_y) < bounds_acf_y(1),1,'first'))-1;
-%         % % first time autocorrelation drops below significance level.
-%         % if isempty(R), R = length(ACF_y)+1; end
-%         % if R > 4, R = 4; end
-%         % % (**) R=0 implies that no AR component is required.
-%         %
-%         % % MA component of model from PACF
-%         % M = Lags_pacf_y(find(abs(PACF_y) < bounds_pacf_y(1),1,'first'))-1;
-%         % % first time partial autocorrelation drops below signifance level
-%         % if isempty(M), M = Lags_pacf_y(end)+1; end
-%         % if M > 3, M = 3; end % don't want to calculate massive mean models
-%         % % (**) M=0 implies that no MA component is required.
-%         %
-%         %
-%         % % I have no intutition as to how to add the GARCH component. I
-%         % % guess if there's no evidence of heteroskedacity you wouldn't even
-%         % % attempt a GARCH component, but for now let's fit one anyway. This
-%         % % is a GARCH routine, after all...
-%         % P = 1; % autoregression onto lagged conditional variance
-%         % Q = 1; % regression of Gaussian noise process onto conditional variance
-%         %
-%         %
-%         % % make an appropriate string
-%         % garchpval = [R, M, P, Q]; % 4-component vector of model orders
-%         % garchpnam = {'R','M','P','Q'};
-%         % s = '';
-%         % for i = 1:length(garchpval)
-%         %     if ~garchpval(i) == 0 % this should be a component to specify in
-%         %         s = sprintf('%s''%s'', %u, ',s,garchpnam{i},garchpval(i));
-%         %     end
-%         % end
-%         % s = s(1:end-2); % remove the Oxford comma.
-%         % % This string, s, should now specify an argument to garchset
-%         %
-%         % eval(sprintf('GModel = garchset(%s);',s));
-%
-%     otherwise
-%         % Specify the GARCH model as a string in the input
-%         % e.g., 'R, 2, M, 1, P, 1, Q, 1' will fit an ARMA(2,1) to mean
-%         % process and a GARCH(1,1) to the variance process
-%         try
-%             eval(sprintf('GModel = garchset(%s);',params));
-%         catch emsg
-%            error('Error formatting input parameters specifying GARCH model.')
-%         end
-%
-% end
+GModel = garch(P,Q); % ARCH order P, GARCH order Q
 
 % Include a constant in the GARCH model
 GModel.Constant = NaN;
@@ -250,6 +178,8 @@ try
     % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(GModel,y);
 catch emsg
     error('GARCH fit failed (data does not allow a valid GARCH model to be estimated): %s',emsg.message);
+    % Sometimes this happens for some time series (e.g., when it removes some GARCH 
+    % lags and makes the resulting model invalid)
 end
 
 % ------------------------------------------------------------------------------
