@@ -20,11 +20,11 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [masterOutput, masterTime] = TSQ_brawn_masterloop(x, y, masterCode, fid, beVocal, theTsID)
+function [masterOutput, masterTime] = TSQ_brawn_masterloop(x, y, masterCode, masterID, numMasterOps, fid, beVocal, theTsID)
 
 if beVocal
     % Display code name for error checking
-    fprintf(fid,'[ts_id=%u] %s...',theTsID,masterCode);
+    fprintf(fid,'[ts_id = %u, mop_id = %u / %u] %s...', theTsID, masterID, numMasterOps, masterCode);
 end
 
 try

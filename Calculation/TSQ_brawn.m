@@ -195,6 +195,7 @@ for i = 1:numTimeSeries
         
         % Index sliced variables to minimize the communication overhead in the parallel processing
         par_MasterOpCodeCalc = {MasterOperations(Master_ind_calc).Code}; % Cell array of strings of Code to evaluate
+        par_mop_ids = [MasterOperations(Master_ind_calc).ID]; % mop_id for each master operation
         % par_mop_id = [Operations(tcal).MasterID]; % Master_IDs corresponding to each Operation
         
 		fprintf(fid,'Evaluating %u master operations...\n',length(Master_IDs_calc));
@@ -209,14 +210,14 @@ for i = 1:numTimeSeries
 		if doParallel
             parfor jj = 1:numMopsToCalc % PARFOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
-                                TSQ_brawn_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
-                                                        fid,beVocal,TimeSeries_i_ID);
+                            TSQ_brawn_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
+                                        par_mop_ids(jj),numMopsToCalc,fid,beVocal,TimeSeries_i_ID);
             end
         else
             for jj = 1:numMopsToCalc % Normal FOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
-                                TSQ_brawn_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
-                                                        fid,beVocal,TimeSeries_i_ID);
+                            TSQ_brawn_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
+                                        par_mop_ids(jj),numMopsToCalc,fid,beVocal,TimeSeries_i_ID);
             end
 		end
 		
