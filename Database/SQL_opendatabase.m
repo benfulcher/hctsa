@@ -37,7 +37,8 @@ theConfigFile = which('sql_settings.conf');
 if isempty(theConfigFile)
     % no sql_settings.conf found
     error(['No sql_settings.conf file found.\n  ' ...
-    'Please create sql_settings.conf file using SQL_create_db, or generate one yourself (cf. Documentation).'])
+    'Please create sql_settings.conf file using SQL_create_db, SQL_ChangeDatabase,' ...
+        ' or generate one yourself (cf. Documentation).'])
 else
     fid = fopen(theConfigFile);
 end

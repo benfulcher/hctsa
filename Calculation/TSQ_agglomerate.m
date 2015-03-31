@@ -129,7 +129,7 @@ clear RetrievalTimer % Stop timing
 
 ts_id_db = vertcat(qrc{:,1}); % ts_ids (in op_id pairs) of empty database elements in this ts_id/op_id range
 op_id_db = vertcat(qrc{:,2}); % op_ids (in ts_id pairs) of empty database elements in this ts_id/op_id range
-ndbel = length(ts_id_db);     % Number of database elements to attempt to write back to
+numWrite = length(ts_id_db);     % Number of database elements to attempt to write back to
 
 % ------------------------------------------------------------------------------
 % Give user feedback about what database writing will occur
@@ -137,10 +137,10 @@ ndbel = length(ts_id_db);     % Number of database elements to attempt to write 
 switch writeWhat
 case 'null'
     fprintf(1,['There are %u NULL entries in Results.\nWriting calculated ' ...
-                    'elements of TS_DataMat to %s...\n'],ndbel,dbname);
+                    'elements of TS_DataMat to %s...\n'],numWrite,dbname);
 case 'error'
     fprintf(1,['There are %u entries in Results (all previous errors) ' ...
-                    'that are being written to %s...\n'],ndbel,dbname);
+                    'that are being written to %s...\n'],numWrite,dbname);
     fprintf(1,['Previous results stored as errors in the database WILL NOT ' ...
                                     'be overwritten with newer errors\n'])
 case 'nullerror'
@@ -149,16 +149,16 @@ case 'nullerror'
     q_db = vertcat(q_db{:}); % turn cells to a numeric vector
     % so now nulls in database are labeled 0, and previous errors are labeled 1
     fprintf(1,['There are %u entries in Results (either NULL or previous errors) ' ...
-                    'that are being written to %s...\n'],ndbel,dbname);
+                    'that are being written to %s...\n'],numWrite,dbname);
     fprintf(1,['Note that previous results stored as errors in the database WILL NOT ' ...
                                 'be overwritten with newer errors\n'])
     fprintf(1,'However, NULLS will be written over with any result from the local files\n')
 end
 
-localIndex = zeros(ndbel,2);
+localIndex = zeros(numWrite,2);
 localIndex(:,1) = arrayfun(@(x)find([TimeSeries.ID] == x,1),ts_id_db); % Indices of rows in local file for each entry in the database
 localIndex(:,2) = arrayfun(@(x)find([Operations.ID] == x,1),op_id_db); % Indicies of columns in local file for each entry in the database
-updateMe = zeros(ndbel,1); % Label iterations that should be written to the database
+updateMe = zeros(numWrite,1); % Label iterations that should be written to the database
 
 % ------------------------------------------------------------------------------
 % Begin writing each element to the database, one at a time, using UPDATE commands
@@ -166,7 +166,7 @@ updateMe = zeros(ndbel,1); % Label iterations that should be written to the data
 
 writeBackTimer = tic; % Time how long this takes to give user feedback
 
-for i = 1:ndbel	
+for i = 1:numWrite	
     
     % Retrieve the elements
     TS_DataMat_ij = TS_DataMat(localIndex(i,1),localIndex(i,2));
@@ -211,13 +211,13 @@ for i = 1:ndbel
     end
 
     % Give user feedback on how long is remaining:
-    if (i==1)
-        fprintf(1,['Based on the first retrieval, this is taking ' ...
+    if (i==50) && (i < numWrite/5) % give an initial estimate:
+        fprintf(1,['Based on the first 50 retrievals, this is taking ' ...
                 'approximately %s per entry to write to the database.\n'],BF_thetime(toc(writeBackTimer)));
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(writeBackTimer)/i*(ndbel-i)));
-    elseif mod(i,floor(ndbel/5))==0 % Give 5 more time updates...
+		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(writeBackTimer)/i*(numWrite-i)));
+    elseif mod(i,floor(numWrite/5))==0 % Give 5 more time updates...
 		fprintf(1,['Approximately %s remaining! -- so far %u (/ %u possible) entries have been'  ...
-			' written to %s...\n'],BF_thetime(toc(writeBackTimer)/i*(ndbel-i)),sum(updateMe),i,dbname);
+			' written to %s...\n'],BF_thetime(toc(writeBackTimer)/i*(numWrite-i)),sum(updateMe),i,dbname);
 	end
 end
 
@@ -226,16 +226,13 @@ end
 % ------------------------------------------------------------------------------
 
 fprintf(1,['So that all seemed to go well -- we wrote %u new calculation results ' ...
-                '(/ %u) to the Results table in %s.\n'],sum(updateMe),ndbel,dbname);
+                '(/ %u) to the Results table in %s.\n'],sum(updateMe),numWrite,dbname);
 fprintf(1,'Writing to the database took at total of %s.\n',BF_thetime(toc(writeBackTimer)));
 
 if any(~updateMe) % Some entries were not written to the database
     fprintf(1,['%u entries were not written (previously-calculated errors) and remain ' ...
                             'awaiting calculation in the database.\n'],sum(~updateMe));
 end
-
-
-clear writeBackTimer % Stop the timer
 
 SQL_closedatabase(dbc) % Close the database connection
 

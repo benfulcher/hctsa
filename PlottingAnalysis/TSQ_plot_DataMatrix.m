@@ -9,6 +9,9 @@
 %         data in HCTSA_cl.mat (default), or specify a filename to load data
 %         from that file.
 % colorGroups: Set to 1 to color time-series groups with different colormaps.
+% customOrder: reorder rows and columns according to provided permutation vectors
+% customColorMap: use a custom color map (name to match an option in BF_getcmap)
+% colorNaNs: whether to plot rectangles over special-values in the matrix (default: 1)
 % 
 %---OUTPUT:
 % Produces a colormap plot of the data matrix with time series as rows and
@@ -30,7 +33,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_DataMatrix(whatData,colorGroups,customOrder,customColorMap)
+function TSQ_plot_DataMatrix(whatData,colorGroups,customOrder,customColorMap,colorNaNs)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
@@ -46,8 +49,11 @@ end
 if nargin < 3 || isempty(customOrder)
 	customOrder = {[],[]};
 end
-if nargin < 4
+if nargin < 4 || isempty(customColorMap)
     customColorMap = 'redyellowblue';
+end
+if nargin < 5 || isempty(colorNaNs)
+    colorNaNs = 1;
 end
 
 % --------------------------------------------------------------------------
@@ -86,19 +92,19 @@ end
 timeSeriesFileNames = {TimeSeries.FileName}; clear TimeSeries; % Just extract filenames
 operationNames = {Operations.Name}; clear Operations; % Just extract operation names
 
-[nts, nops] = size(TS_DataMat); % size of the data matrix
+[numTS, numOps] = size(TS_DataMat); % size of the data matrix
 
 % ------------------------------------------------------------------------------
 %% Reorder according to customOrder
 % ------------------------------------------------------------------------------
 if ~isempty(customOrder{1}) % reorder rows
-	fprintf(1,'Reordering time series according to custom order specified\n');
+	fprintf(1,'Reordering time series according to custom order specified.\n');
 	TS_DataMat = TS_DataMat(customOrder{1},:);
     timeSeriesFileNames = timeSeriesFileNames(customOrder{1});
 end
 
 if ~isempty(customOrder{2}) % reorder columns
-	fprintf(1,'Reordering operations according to custom order specified\n');
+	fprintf(1,'Reordering operations according to custom order specified.\n');
 	TS_DataMat = TS_DataMat(:,customOrder{2});
     operationNames = operationNames(customOrder{2});
 end
@@ -107,7 +113,7 @@ end
 %% Plot the data matrix in a new figure
 % --------------------------------------------------------------------------
 figure('color','w'); box('on');
-title(sprintf('Data matrix of size %u x %u',nts,nops))
+title(sprintf('Data matrix of size %u x %u',numTS,numOps))
 ng = 6; % number of gradations in each set of colourmap
 
 if colorGroups
@@ -116,7 +122,7 @@ if colorGroups
     numGroups = length(gi);
     
     % Add a group for unlabelled data items if they exist
-    if sum(cellfun(@length,gi)) < nts
+    if sum(cellfun(@length,gi)) < numTS
         % Add an unlabelled class
         gi0 = gi;
         gi = cell(numGroups+1,1);
@@ -124,7 +130,7 @@ if colorGroups
             gi{i} = gi0{i};
         end
         clear gi0;
-        gi{end} = setxor(1:nts,vertcat(gi{:}));
+        gi{end} = setxor(1:numTS,vertcat(gi{:}));
         numGroups = numGroups + 1;
     end
     
@@ -220,16 +226,15 @@ pcolor([TS_DataMat, zeros(size(TS_DataMat,1),1); zeros(1,size(TS_DataMat,2)+1)])
 shading flat
 
 % ------------------------------------------------------------------------------
-% Superimpose green/yellow rectangles over NaN values
+% Superimpose colored rectangles over NaN values
 % ------------------------------------------------------------------------------
-if any(isnan(TS_DataMat(:)))
-    Green = BF_getcmap('greens',5,1);
+if colorNaNs && any(isnan(TS_DataMat(:)))
     [theNaNs_i,theNaNs_j] = find(isnan(TS_DataMat));
-    fprintf(1,['Superimposing green/yellow rectangles over all %u NaNs in ' ...
+    fprintf(1,['Superimposing black rectangles over all %u NaNs in ' ...
                                 'the data matrix\n'],length(theNaNs_i));
     for i = 1:length(theNaNs_i)
-        rectangle('Position',[theNaNs_j(i),theNaNs_i(i),1,1],'FaceColor',Green{end}, ...
-                        'EdgeColor','y')
+        rectangle('Position',[theNaNs_j(i),theNaNs_i(i),1,1],'FaceColor','k', ...
+                        'EdgeColor','k')
     end
 end
 
@@ -238,10 +243,13 @@ end
 % --------------------------------------------------------------------------
 % Axis labels:
 set(gca,'YTick',1 + (0.5:1:size(TS_DataMat,1)),'YTickLabel',timeSeriesFileNames); % time series
-if nops < 1000 % otherwise don't bother
+if numOps < 1000 % otherwise don't bother
     set(gca,'XTick',1 + (0.5:1:size(TS_DataMat,2)),'XTickLabel',operationNames);
 end
 title(sprintf('Data matrix (%ux%u)',size(TS_DataMat,1),size(TS_DataMat,2)))
 set(gca,'FontSize',8) % set font size
+set(gca,'TickLabelInterpreter','none') % Stop from displaying underscores as subscripts
+xlabel('Operations')
+ylabel('Time series')
 
 end

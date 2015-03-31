@@ -131,11 +131,11 @@ end
 %% Label groups from keywords
 % ------------------------------------------------------------------------------
 
-if ~all(cellfun(@ischar,keywordGroups(:))) % Have specified numbers of each
-    KeywordNumbers = horzcat(keywordGroups{:,2}); % Just the number of each part
+if ~all(cellfun(@ischar,keywordGroups(:))) % Hopefully, specified numbers of each keyword
+    keywordNumbers = horzcat(keywordGroups{:,2}); % Just the number of each part
     keywordGroups = keywordGroups(:,1)'; % Just the keyword parts, a cell of strings
 else
-    KeywordNumbers = zeros(length(keywordGroups),1); % include all of each keyword
+    keywordNumbers = zeros(length(keywordGroups),1); % include all of each keyword
 end
 numGroups = length(keywordGroups); % The number of groups
 Keywords = SUB_cell2cellcell(Keywords);
@@ -147,9 +147,9 @@ for jo = 1:numGroups
         if isempty(groupIndices{jo})
             fprintf(1,'No matches found for ''%s''.\n',keywordGroups{jo});
         end
-        if (KeywordNumbers(jo) ~= 0) && (KeywordNumbers(jo) < length(groupIndices{jo})) % Take a random subset of matches
+        if (keywordNumbers(jo) ~= 0) && (keywordNumbers(jo) < length(groupIndices{jo})) % Take a random subset of matches
             rperm = randperm(length(groupIndices{jo}));
-            groupIndices{jo} = groupIndices{jo}(rperm(1:KeywordNumbers(jo)));
+            groupIndices{jo} = groupIndices{jo}(rperm(1:keywordNumbers(jo)));
         end
     else % Take a certain number of random time series
          % integer: retrieve this many: in randomorder
@@ -160,7 +160,7 @@ for jo = 1:numGroups
         for i = 1:length(Keywords)
             if all(~ismember(notKeywordGroups,Keywords{rperm(i)}))
                 groupIndices{jo} = [groupIndices{jo}; rperm(i)];
-                if (length(groupIndices{jo}) == KeywordNumbers(jo))
+                if (length(groupIndices{jo}) == keywordNumbers(jo))
                     break
                 end
             end

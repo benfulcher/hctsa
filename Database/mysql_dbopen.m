@@ -25,7 +25,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [dbConnection, errMessage] = mysql_dbopen(serverHost, dbname, userName, password, customPort)
+function [dbConnection, errMessage] = mysql_dbopen(serverHost, databaseName, userName, password, customPort)
 
 % Set defaults:
 if nargin < 5
@@ -45,12 +45,14 @@ if dbToolboxExists
     % ------------------------------------------------------------------------------
     
     % A license is available for Matlab's Database Toolbox, use that:
-    dbConnection = database(dbname,userName,password,'Vendor','MySQL','Server',serverHost,'PortNumber',customPort);
+    dbConnection = database(databaseName,userName,password,'Vendor','MySQL','Server',serverHost,'PortNumber',customPort);
     errMessage = dbConnection.Message;
     
     % Check for a connection error:
     if ~isempty(errMessage)
-        error('Error connecting to the database using Matlab database toolbox:\n%s',dbConnection.Message);
+        error(['Error connecting to the database using Matlab database toolbox:\n' ...
+                        '%s (pass:%s) connecting to %s at %s\n%s\n'],  ...
+                        userName,password,databaseName,serverHost,dbConnection.Message);
     end
     
 else
@@ -77,11 +79,11 @@ else
     % ------------------------------------------------------------------------------
     % Now try to connect:
     try
-        dburl = sprintf('jdbc:mysql://%s/%s', serverHost, dbname);
+        dburl = sprintf('jdbc:mysql://%s/%s', serverHost, databaseName);
         dbConnection = java.sql.DriverManager.getConnection(dburl, userName, password);
     catch le
         dbConnection = [];
-        error('Error connecting to the database ''%s'' at ''%s'':\n%s\n',dbname,serverHost,le.message);
+        error('Error connecting to the database ''%s'' at ''%s'':\n%s\n',databaseName,serverHost,le.message);
         % fprintf(1,['\nPerhaps due to an incorrect username (''%s'') and password (''%s'') combination?\n'], userName, password);
     end
 end
