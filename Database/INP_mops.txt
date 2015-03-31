@@ -243,7 +243,7 @@ CO_RM_AMInformation(y,10)	CO_RM_AMInformation_10
 CO_FirstMin(y,'mi-gaussian')	CO_FirstMin_mi-gaussian
 CO_FirstMin(y,'mi-kernel')  CO_FirstMin_mi-kernel
 CO_FirstMin(y,'mi-kraskov1')  CO_FirstMin_mi-kraskov1
-CO_FirstMin(y,'mi-kraskov2',3)  CO_FirstMin_mi-kraskov2_3
+CO_FirstMin(y,'mi-kraskov2','3')  CO_FirstMin_mi-kraskov2_3
 CO_FirstMin(y,'mi-hist',5)  CO_FirstMin_mi-hist_5
 CO_FirstMin(y,'mi-hist',10)  CO_FirstMin_mi-hist_10
 CO_HistogramAMI(y,1:5,'std1',2)	CO_HistogramAMI_std1_2
