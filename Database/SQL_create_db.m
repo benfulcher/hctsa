@@ -70,15 +70,16 @@ function SQL_create_db()
 	fprintf(1,'Now creating a mySQL database for highly comparative time-series analysis\n');
     fprintf(1,'Please choose a name for the database (do not include special characters).\n')
     fprintf(1,'NB: be careful, this command will replace the named database if it exists on %s.\n',hostname)
-	dbname = input('Enter a name for the new database [default: hctsa]','s');
-    if isempty(dbname), dbname = 'hctsa'; end
+	databaseName = input('Enter a name for the new database [default: hctsa]','s');
+    if isempty(databaseName), databaseName = 'hctsa'; end
 	fprintf('And we also need a NEW username and password to create a NON-ADMIN account\n');
 	local_u = input('New username: ','s');
 	local_p = input('New password (this will appear on screen and be stored in file!): ','s');
 
-	mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s',dbname));
-	mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s',dbname));
-	mysql_dbexecute(dbc,sprintf('GRANT ALL PRIVILEGES ON %s.* TO ''%s''@''localhost'' IDENTIFIED BY ''%s''',dbname,local_u,local_p));
+	mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s',databaseName));
+	mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s',databaseName));
+	mysql_dbexecute(dbc,sprintf('GRANT ALL PRIVILEGES ON %s.* TO ''%s''@''localhost'' IDENTIFIED BY ''%s''',...
+                                	databaseName,local_u,local_p));
 	mysql_dbexecute(dbc,'FLUSH PRIVILEGES');
 
 	SQL_closedatabase(dbc) % close the database
@@ -87,20 +88,20 @@ function SQL_create_db()
     % ------------------------------------------------------------------------------
     % Write a .conf file with the connection details for next time
     % ------------------------------------------------------------------------------
-    fileName = 'Database/sql_settings.conf';
+    fileName = fullfile('Database','sql_settings.conf');
     fprintf(1,['Writing hostname (%s), database name (%s), username (%s), and ' ...
-                'password (%s) to %s\n'],hostname,dbname,local_u,local_p,fileName);
+                'password (%s) to %s\n'],hostname,databaseName,local_u,local_p,fileName);
 	fid = fopen(fileName,'w');
-	fprintf(fid,'%s,%s,%s,%s,%u',hostname,dbname,local_u,local_p,customPort);
+	fprintf(fid,'%s,%s,%s,%s,%u',hostname,databaseName,local_u,local_p,customPort);
 	fclose(fid);
 
 	try
 		dbc = SQL_opendatabase;
 		SQL_closedatabase(dbc);
-        fprintf(1,'Database %s at %s for %s opens and closes no problem!!\n',dbname,hostname,local_u);
+        fprintf(1,'Database %s at %s for %s opens and closes no problem!!\n',databaseName,hostname,local_u);
         fprintf(1,'We''re good to go!! :)\n');
 	catch
-		fprintf(1,'Error: Unable to open database %s after creation :(\n',dbname);
+		fprintf(1,'Error: Unable to open database %s after creation :(\n',databaseName);
 	end
 
 end
