@@ -143,7 +143,7 @@ if length(opids_db) < numOps % actually there are fewer operations in the databa
     numOps = length(op_ids);
 end
 
-% Tell me about it
+% Tell me about it:
 fprintf(1,'We have %u time series and %u operations to retrieve from %s.\n',numTS,numOps,dbname);
 fprintf(1,['Filling and saving to local Matlab file HCTSA_loc.mat from ' ...
                                 'the Results table of %s.\n'],dbname);
@@ -183,11 +183,10 @@ end
 % --------------------------------------------------------------------------
 %% Retrieve the data from the database:
 % --------------------------------------------------------------------------
-iterationTimes = zeros(numTS,1); % Record the time taken for each iteration
 didRetrieve = zeros(numTS,1);    % Keep track of whether data was retrieved at each iteration
+retrievalTimer = tic; % Time the process using retrievalTimer
+
 for i = 1:numTS
-    
-    iterationTimer = tic; % Time each iteration using iterationTimer
 
     ts_id_now = ts_ids(i); % Range of ts_ids retrieved in this iteration
     
@@ -285,14 +284,13 @@ for i = 1:numTS
         end
     end
     
-    % Note time taken for this iteration, and periodically display indication of time remaining
-	iterationTimes(i) = toc(iterationTimer);
-    if (i==1) % Give an initial indication of time after the first iteration
-        fprintf(1,['Based on the first retrieval, this is taking ' ...
-                'approximately %s per time series...\n'],BF_thetime(iterationTimes(1)));
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(iterationTimes(1)*(numTS-1)));
+    % Periodically display indication of time remaining
+    if (i==50) && (i < numTS/10) % Give an initial indication of time after the first 50 iterations
+        fprintf(1,['Based on the first 50 retrievals, this is taking ' ...
+                'approximately %s per time series...\n'],BF_thetime(toc(retrievalTimer)/i));
+		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(retrievalTimer)/i*(numTS-i)));
     elseif (mod(i,floor(numTS/10))==0) && i~=numTS % Tell us the time remaining 10 times across the total retrieval
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(mean(iterationTimes(1:i))*(numTS-i)));
+		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(retrievalTimer)/i*(numTS-i)));
 	end
 end
 
@@ -301,7 +299,7 @@ end
 % --------------------------------------------------------------------------
 if any(didRetrieve)
     fprintf(1,'Retrieved data from %s over %u iterations in %s.\n',...
-                            dbname,numTS,BF_thetime(sum(iterationTimes)));
+                            dbname,numTS,BF_thetime(toc(retrievalTimer)));
 else
     fprintf(1,['Over %u iterations, no data was retrieved from %s.\n' ...
                             'Not writing any data to file.\n'],numTS,dbname);

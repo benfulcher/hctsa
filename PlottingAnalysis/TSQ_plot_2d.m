@@ -17,23 +17,23 @@
 %               - GroupNames (name for each group)
 %               - TimeSeriesData (cell of vectors containing time-series data)
 % 
-% TrainTest, whether to plot separately indices of training and test datapoints.
+% trainTest, whether to plot separately indices of training and test datapoints.
 %               Of the form {index_train,index_test}.
 %               If of the form [index], then just plots the subset index of the
 %                       points in Features.
 %               
-% annotatep, a structure containing all the information about how to annotate
+% annotateParams, a structure containing all the information about how to annotate
 %           data points. Fields can include:
 %               - n, the number of data points to annotate
-%               - UserInput, 0: randomly selected datapoints, 1: user clicks to annotate datapoints
+%               - userInput, 0: randomly selected datapoints, 1: user clicks to annotate datapoints
 %               - fdim, 1x2 vector with width and height of time series as fraction of plot size
 %               - maxL, maximum length of annotated time series
-%               - TextAnnotation: 'filename', 'tsid', or 'none' to annotate this data
+%               - textAnnotation: 'fileName', 'tsid', or 'none' to annotate this data
 %               - cmap, a cell of colors, with elements for each group
-%               - TheMarkerSize, a custom marker size
-%               - TheLineWidth: line width for annotated time series
+%               - theMarkerSize, a custom marker size
+%               - theLineWidth: line width for annotated time series
 % 
-% keepksdensities, if 1 (default), plots marginal density estimates for each variable
+% showDistr, if 1 (default), plots marginal density estimates for each variable
 %                   (above and to the right of the plot), otherwise set to 0.
 %                   
 % lossMeth, can select a classifier to fit to the different classes (e.g.,
@@ -43,12 +43,12 @@
 % Borrows from TSQ_pca plotting routines
 % Ben Fulcher 24/3/2010
 % Ben Fulcher 28/4/2010: added F input
-% Ben Fulcher 19/10/2010: added TrainTest input: cell to plot seperately
-%                TrainTest = {traini,testi}; if just one component then a
+% Ben Fulcher 19/10/2010: added trainTest input: cell to plot seperately
+%                trainTest = {traini,testi}; if just one component then a
 %                subset
-% Ben Fulcher 20/10/2010: added annotatep option: number of time series
+% Ben Fulcher 20/10/2010: added annotateParams option: number of time series
 %                annotations to make (default = 0)
-% Ben Fulcher 20/10/2010: also added keepksdensities option
+% Ben Fulcher 20/10/2010: also added showDistr option
 % Ben Fulcher 27/10/2010: added lossMeth option (choose how to calculate
 %                           loss)
 %
@@ -68,7 +68,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_2d(Features,DataInfo,TrainTest,annotatep,keepksdensities,lossMeth)
+function TSQ_plot_2d(Features,DataInfo,trainTest,annotateParams,showDistr,lossMeth)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
@@ -82,17 +82,17 @@ end
 % DataInfo should be a structure array with all the information about the data (same length as Features)
 % Group should be a field in this structure array
 
-if nargin < 3 || isempty(TrainTest)
-    TrainTest = {};
+if nargin < 3 || isempty(trainTest)
+    trainTest = {};
 end
 
-if nargin < 4 || isempty(annotatep)
-    annotatep = struct('n',0); % don't annotate
+if nargin < 4 || isempty(annotateParams)
+    annotateParams = struct('n',0); % don't annotate
 end
 
 % By default, plot kernel density estimates above and on the side of the plot:
-if nargin < 5 || isempty(keepksdensities)
-    keepksdensities = 1;
+if nargin < 5 || isempty(showDistr)
+    showDistr = 1;
 end
 
 if nargin < 6 || isempty(lossMeth)
@@ -107,23 +107,23 @@ makeFigure = 1; % default is to plot on a brand new figure('color','w')
 % Data is not loaded, now it must be provided
 
 labels = DataInfo.labels; % Feature labels
-if isstruct(annotatep) || annotatep > 0
+if isstruct(annotateParams) || annotateParams > 0
     DataLabels = DataInfo.DataLabels; % We need data labels
 end
 GroupNames = DataInfo.GroupNames;
 GroupIndices = DataInfo.GroupIndices;
 TimeSeriesData = DataInfo.TimeSeriesData;
-NumGroups = length(GroupNames);
+numGroups = length(GroupNames);
 
 % ------------------------------------------------------------------------------
 %% Subset
 % ------------------------------------------------------------------------------
 % Only use a subset of the full matrix
-if (length(TrainTest)==1 || ~iscell(TrainTest))
-    if iscell(TrainTest)
-        rss = TrainTest{1}; % row subset
+if (length(trainTest)==1 || ~iscell(trainTest))
+    if iscell(trainTest)
+        rss = trainTest{1}; % row subset
     else
-        rss = TrainTest;
+        rss = trainTest;
     end
     fprintf(1,'Subset rows from %u to %u.\n',size(Features,1),length(rss))
     Features = Features(rss,:);
@@ -140,7 +140,7 @@ if (length(TrainTest)==1 || ~iscell(TrainTest))
     for i = 1:length(GroupIndices)
         GroupIndices{i} = find(grpnum==ugrpnum(i));
     end
-    TrainTest = []; % make empty so don't plot TrainTest groups later
+    trainTest = []; % make empty so don't plot trainTest groups later
 end
 
 % ------------------------------------------------------------------------------
@@ -186,39 +186,40 @@ if makeFigure % can set extras.makeFigure = 0 to plot within a given setting
 end
 
 % Set colors
-if isstruct(annotatep) && isfield(annotatep,'cmap')
-    if ischar(annotatep.cmap)
-        c = BF_getcmap(annotatep.cmap,NumGroups,1);
+if isstruct(annotateParams) && isfield(annotateParams,'cmap')
+    if ischar(annotateParams.cmap)
+        groupColors = BF_getcmap(annotateParams.cmap,numGroups,1);
     else
-        c = annotatep.cmap; % specify the cell itself
+        groupColors = annotateParams.cmap; % specify the cell itself
     end
 else
-    if NumGroups < 10
-        c = BF_getcmap('set1',NumGroups,1);
-    elseif NumGroups <= 12
-        c = BF_getcmap('set3',NumGroups,1);
-    elseif NumGroups <= 22
-        c = [BF_getcmap('set1',NumGroups,1); ...
-                    BF_getcmap('set3',NumGroups,1)];
-    elseif NumGroups <= 50
-        c = mat2cell(jet(NumGroups),ones(NumGroups,1));
+    if numGroups < 10
+        groupColors = BF_getcmap('set1',numGroups,1);
+    elseif numGroups <= 12
+        groupColors = BF_getcmap('set3',numGroups,1);
+    elseif numGroups <= 22
+        groupColors = [BF_getcmap('set1',numGroups,1); ...
+                    BF_getcmap('set3',numGroups,1)];
+    elseif numGroups <= 50
+        groupColors = mat2cell(jet(numGroups),ones(numGroups,1));
     else
         error('There aren''t enough colors in the rainbow to plot this many classes!')
     end
 end
-if (NumGroups == 1)
-    c = {'k'}; % Just use black...
+if (numGroups == 1)
+    groupColors = {'k'}; % Just use black...
+    % groupColors = 'rainbow'; % Just use black...
 end
 
 
 % ------------------------------------------------------------------------------
 %% Plot distributions
 % ------------------------------------------------------------------------------
-if keepksdensities
+if showDistr
     subplot(4,4,1:3); hold on; box('on')
     maxx = 0; minn = 100;
-    for i = 1:NumGroups
-        fr = plot_ks(Features(GroupIndices{i},1),c{i},0);
+    for i = 1:numGroups
+        fr = plot_ks(Features(GroupIndices{i},1),groupColors{i},0);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -227,8 +228,8 @@ if keepksdensities
     
     subplot(4,4,[8,12,16]); hold on; box('on')
     maxx = 0; minn = 100;
-    for i = 1:NumGroups
-        fr = plot_ks(Features(GroupIndices{i},2),c{i},1);
+    for i = 1:numGroups
+        fr = plot_ks(Features(GroupIndices{i},2),groupColors{i},1);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -240,53 +241,46 @@ end
 % ------------------------------------------------------------------------------
 %% Set up a 2D plot
 % ------------------------------------------------------------------------------
-if keepksdensities
+if showDistr
     subplot(4,4,[5:7,9:11,13:15]); box('on');
 end
 hold on;
 
-if isfield(annotatep,'TheMarkerSize');
-    TheMarkerSize = annotatep.TheMarkerSize; % specify custom marker size
+if isfield(annotateParams,'theMarkerSize');
+    theMarkerSize = annotateParams.theMarkerSize; % specify custom marker size
 else
-    if isempty(TrainTest)
-        TheMarkerSize = 12; % Marker size for '.'
+    if isempty(trainTest)
+        theMarkerSize = 12; % Marker size for '.'
     else
-        TheMarkerSize = 5; % Marker size for 'o' and 's'
+        theMarkerSize = 5; % Marker size for 'o' and 's'
     end
 end
 
-if isempty(TrainTest)
-    for i = 1:NumGroups
-        plot(Features(GroupIndices{i},1),Features(GroupIndices{i},2),'.','color',c{i},'MarkerSize',TheMarkerSize)
+if isempty(trainTest)
+    for i = 1:numGroups
+        plot(Features(GroupIndices{i},1),Features(GroupIndices{i},2),'.','color',groupColors{i},'MarkerSize',theMarkerSize)
     end
 else % Plot training and test data differently
-    for j = 1:length(TrainTest)
-        for i = 1:NumGroups
+    for j = 1:length(trainTest)
+        for i = 1:numGroups
             if (j==1)
                 % Training data
-                plot(Features(intersect(GroupIndices{i},TrainTest{j}),1),Features(intersect(GroupIndices{i},TrainTest{j}),2),...
-                        'ok','MarkerFaceColor',c{i},'MarkerSize',TheMarkerSize)
+                plot(Features(intersect(GroupIndices{i},trainTest{j}),1),Features(intersect(GroupIndices{i},trainTest{j}),2),...
+                        'ok','MarkerFaceColor',groupColors{i},'MarkerSize',theMarkerSize)
             else
                 % Test data
-                plot(Features(intersect(GroupIndices{i},TrainTest{j}),1),Features(intersect(GroupIndices{i},TrainTest{j}),2),...
-                        'sk','MarkerFaceColor',c{i},'MarkerSize',TheMarkerSize)
+                plot(Features(intersect(GroupIndices{i},trainTest{j}),1),Features(intersect(GroupIndices{i},trainTest{j}),2),...
+                        'sk','MarkerFaceColor',groupColors{i},'MarkerSize',theMarkerSize)
             end
         end
     end
 end
 
-%% Plot cluster centres
-% for i = 1:NumGroups
-%     cc = median(F(gi{i},:));
-%     plot(cc(1),cc(2),'o','color',c{i},'MarkerFaceColor',c{i}+(1-c{i})*0.5,...
-%                     'MarkerSize',10,'LineWidth',2);
-% end
-
-
 % ------------------------------------------------------------------------------
 %% Plot a classify boundary?
 % ------------------------------------------------------------------------------
-if (NumGroups == 2) && strcmp(lossMeth,'linclass');
+didClassify = 0;
+if (numGroups == 2) && strcmp(lossMeth,'linclass');
     modeorder = 'linear'; % or 'quadratic'
     
     xlim = get(gca,'XLim'); ylim=get(gca,'YLim');
@@ -305,38 +299,41 @@ if (NumGroups == 2) && strcmp(lossMeth,'linclass');
     f = sprintf('0 = %g+%g*x+%g*y+%g*x^2+%g*x.*y+%g*y.^2',K,L,Q(1,1),Q(1,2)+Q(2,1),Q(2,2));
     h2 = ezplot(f,[xlim(1), xlim(2), ylim(1), ylim(2)]);
     set(h2,'LineStyle','--','color','k','LineWidth',2)
-    % ezplot overrides the figure title. Reinstate:
-%     title(['combined loss (' lossMeth ') = ' num2str(round(loss(3)*100)) '%']);
-%     xlabel([labels{mr(1)} ' [' keywords{mr(1)} '] -- loss = ' num2str(round(loss(1)*100)) '%'],'interpreter','none')
-%     ylabel('')
+    
+    % Label that classification was performed
+    didClassify = 1;
 end
 
 
 % ------------------------------------------------------------------------------
 %% Label Axes
 % ------------------------------------------------------------------------------
-title(sprintf('Combined misclassification rate (%s) = %.2f%%',lossMeth, ...
+if didClassify
+    title(sprintf('Combined misclassification rate (%s) = %.2f%%',lossMeth, ...
                     round(loss(3,1)*100)),'interpreter','none');
-
-labelText = cell(2,1);
-for i = 1:2
-    labelText{i} = sprintf('%s (%.2f %%)',labels{i}, ...
-                            round(loss(i,1)*100)); %,round(loss(i,2)*100));
+    labelText = cell(2,1);
+    for i = 1:2
+        labelText{i} = sprintf('%s (%.2f %%)',labels{i}, ...
+                                round(loss(i,1)*100)); %,round(loss(i,2)*100));
+    end
+else
+    labelText = labels;
 end
+
 xlabel(labelText{1},'interpreter','none')
 ylabel(labelText{2},'interpreter','none')
 
 % Set Legend
-if isempty(TrainTest)
-    legs = cell(NumGroups,1);
-    for i = 1:NumGroups
+if isempty(trainTest)
+    legs = cell(numGroups,1);
+    for i = 1:numGroups
         legs{i} = sprintf('%s (%u)',GroupNames{i},length(GroupIndices{i}));
     end
 else
-    legs = cell(NumGroups*2,1);
-    for i = 1:NumGroups
-        legs{i} = sprintf('%s train (%u)',GroupNames{i},length(intersect(GroupIndices{i},TrainTest{1})));
-        legs{NumGroups+i} = sprintf('%s test (%u)',GroupNames{i},length(intersect(GroupIndices{i},TrainTest{2})));
+    legs = cell(numGroups*2,1);
+    for i = 1:numGroups
+        legs{i} = sprintf('%s train (%u)',GroupNames{i},length(intersect(GroupIndices{i},trainTest{1})));
+        legs{numGroups+i} = sprintf('%s test (%u)',GroupNames{i},length(intersect(GroupIndices{i},trainTest{2})));
     end
 end
 legend(legs);
@@ -350,110 +347,124 @@ if isempty(TimeSeriesData)
     return
 end
 % Set parameters
-if isfield(annotatep,'maxL')
-    maxL = annotatep.maxL;
+if isfield(annotateParams,'maxL')
+    maxL = annotateParams.maxL;
 else
     maxL = 300; % length of annotated time series segments
 end
-if isfield(annotatep,'UserInput')
-    UserInput = annotatep.UserInput;
+if isfield(annotateParams,'userInput')
+    userInput = annotateParams.userInput;
 else
-    UserInput = 1; % user input points rather than randomly chosen
+    userInput = 1; % user input points rather than randomly chosen
 end
-if isfield(annotatep,'fdim')
-    fdim = annotatep.fdim;
+if isfield(annotateParams,'fdim')
+    fdim = annotateParams.fdim;
 else
     fdim = [0.30,0.08]; % width, height
 end
-if isfield(annotatep,'TextAnnotation')
-    TextAnnotation = annotatep.TextAnnotation; % 'filename','tsid','none'
+if isfield(annotateParams,'textAnnotation')
+    textAnnotation = annotateParams.textAnnotation; % 'fileName','tsid','none'
 else
-    TextAnnotation = 'none'; % no annotations by default
+    textAnnotation = 'none'; % no annotations by default
 end
-if isfield(annotatep,'TheLineWidth')
-    TheLineWidth = annotatep.TheLineWidth;
+if isfield(annotateParams,'theLineWidth')
+    theLineWidth = annotateParams.theLineWidth;
 else
-    TheLineWidth = 0.8; % % line width for time series
+    theLineWidth = 0.8; % % line width for time series
 end
-NumAnnotations = annotatep.n;
+numAnnotations = annotateParams.n;
 
 pxlim = get(gca,'xlim'); % plot limits
 pylim = get(gca,'ylim'); % plot limits
 pwidth = diff(pxlim); % plot width
 pheight = diff(pylim); % plot height
-AlreadyPicked = zeros(NumAnnotations,2); % record those already picked
-PlotCircle = 1; % magenta circle around annotated points
+alreadyPicked = zeros(numAnnotations,2); % record those already picked
+plotCircle = 1; % magenta circle around annotated points
+myColors = [BF_getcmap('set1',5,1);BF_getcmap('dark2',6,1)];
 
 % Produce xy points
-xy = cell(NumGroups,1);
-for i = 1:NumGroups
+xy = cell(numGroups,1);
+for i = 1:numGroups
     xy{i} = [Features(GroupIndices{i},1),Features(GroupIndices{i},2)];
 end
 
-if ~UserInput % points to annotate are randomly picked
-    if NumAnnotations == length(DataLabels) % annotate all
-        fprintf(1,'Annotate all\n')
-        for j = 1:NumAnnotations
-            TheGroup = find(cellfun(@(x)ismember(j,x),GroupIndices));
-            AlreadyPicked(j,1) = TheGroup;
-            AlreadyPicked(j,2) = find(GroupIndices{TheGroup}==j);
+% Don't use user input to select points to annotate: instead they are selected randomly
+if ~userInput
+    if numAnnotations == length(DataLabels) % annotate all
+        fprintf(1,'Annotate all!\n')
+        for j = 1:numAnnotations
+            theGroup = find(cellfun(@(x)ismember(j,x),GroupIndices));
+            alreadyPicked(j,1) = theGroup;
+            alreadyPicked(j,2) = find(GroupIndices{theGroup}==j);
         end
     else
-        AlreadyPicked(:,1) = round(linspace(1,NumGroups,NumAnnotations));
-        randperms = cellfun(@(x)randperm(length(x)),GroupIndices,'UniformOutput',0);
-        counters = ones(NumGroups,1);
-        for j = 1:NumAnnotations
-            AlreadyPicked(j,2) = randperms{AlreadyPicked(j,1)}(counters(AlreadyPicked(j,1))); % random element of the group
-            counters(AlreadyPicked(j,1)) = counters(AlreadyPicked(j,1))+1;
+        alreadyPicked(:,1) = round(linspace(1,numGroups,numAnnotations));
+        randPerms = cellfun(@(x)randperm(length(x)),GroupIndices,'UniformOutput',0);
+        counters = ones(numGroups,1);
+        for j = 1:numAnnotations
+            alreadyPicked(j,2) = randPerms{alreadyPicked(j,1)}(counters(alreadyPicked(j,1))); % random element of the group
+            counters(alreadyPicked(j,1)) = counters(alreadyPicked(j,1))+1;
         end
     end
 end
 
-for j = 1:NumAnnotations
-    if UserInput
+% ------------------------------------------------------------------------------
+% Go through and annotate selected points
+fprintf(1,['Annotating time series segments to %u points in the plot, ' ...
+                        'displaying %u samples from each...\n'],numAnnotations,maxL);
+for j = 1:numAnnotations
+    if userInput
         point = ginput(1);
         iplot = ClosestPoint_ginput(xy,point); % find closest actual point to input point
-        TheGroup = iplot(1); % want this group
+        theGroup = iplot(1); % want this group
         itsme = iplot(2); % and this index
-        AlreadyPicked(j,:) = [TheGroup,itsme];
+        alreadyPicked(j,:) = [theGroup,itsme];
     else
-        TheGroup = AlreadyPicked(j,1);
-        itsme = AlreadyPicked(j,2);
+        theGroup = alreadyPicked(j,1);
+        itsme = alreadyPicked(j,2);
     end
     
-    if (j > 1) && any(sum(abs(AlreadyPicked(1:j-1,:)-repmat(AlreadyPicked(j,:),j-1,1)),2)==0)
+    if (j > 1) && any(sum(abs(alreadyPicked(1:j-1,:) - repmat(alreadyPicked(j,:),j-1,1)),2)==0)
         % Same one has already been picked, don't plot it again
         continue
     end
     
-    PlotPoint = xy{TheGroup}(itsme,:);
-    % fn = DataLabels{GroupIndices{TheGroup}(itsme)}; % filename of timeseries to plot
-    % ts = dlmread(fn);
-    ts = TimeSeriesData{GroupIndices{TheGroup}(itsme)}; % filename of timeseries to plot
+    plotPoint = xy{theGroup}(itsme,:);
+    theDataLabel = DataLabels{GroupIndices{theGroup}(itsme)}; % fileName of timeseries to plot
+    ts = TimeSeriesData{GroupIndices{theGroup}(itsme)}; % fileName of timeseries to plot
     if ~isempty(maxL)
         ts = ts(1:min(maxL,end));
     end
     
-    if PlotCircle
-        plot(PlotPoint(1),PlotPoint(2),'om'); % Plot a magenta circle around the target point
+    % Plot a circle around the annotated point:
+    rainbowColor = myColors{rem(j,length(myColors))};
+    if numGroups==1
+        groupColors{1} = rainbowColor;
+    end
+    if plotCircle
+        plot(plotPoint(1),plotPoint(2),'o','color',rainbowColor)
     end
     
-    switch TextAnnotation
-    case 'filename'
+    % Add text annotations:
+    switch textAnnotation
+    case 'fileName'
         % Annotate text with names of datapoints:
-        text(PlotPoint(1),PlotPoint(2)-0.01*pheight,fn,'interpreter','none','FontSize',8);
+        text(plotPoint(1),plotPoint(2)-0.01*pheight,theDataLabel,...
+                    'interpreter','none','FontSize',8,'color',brighten(groupColors{theGroup},-0.6));
     case 'tsid'
         % Annotate text with ts_id:
-        text(PlotPoint(1),PlotPoint(2)-0.01*pheight,num2str(ts_ids_keep(GroupIndices{TheGroup}(itsme))),'interpreter','none','FontSize',8);
+        text(plotPoint(1),plotPoint(2)-0.01*pheight,...
+                num2str(ts_ids_keep(GroupIndices{theGroup}(itsme))),...
+                    'interpreter','none','FontSize',8,'color',brighten(groupColors{theGroup},-0.6));
     end
     
     % Adjust if annotation goes off axis x-limits
-    px = PlotPoint(1)+[-fdim(1)*pwidth/2,+fdim(1)*pwidth/2];
+    px = plotPoint(1)+[-fdim(1)*pwidth/2,+fdim(1)*pwidth/2];
     if px(1) < pxlim(1), px(1) = pxlim(1); end % can't plot off left side of plot
     if px(2) > pxlim(2), px(1) = pxlim(2)-fdim(1)*pwidth; end % can't plot off right side of plot
     
     % Adjust if annotation goes above maximum y-limits
-    py = PlotPoint(2)+[0,fdim(2)*pheight];
+    py = plotPoint(2)+[0,fdim(2)*pheight];
     if py(2) > pylim(2)
         py(1) = pylim(2)-fdim(2)*pheight;
     end
@@ -461,9 +472,8 @@ for j = 1:NumAnnotations
     % Annotate the time series
     plot(px(1)+linspace(0,fdim(1)*pwidth,length(ts)),...
             py(1)+fdim(2)*pheight*(ts-min(ts))/(max(ts)-min(ts)),...
-                '-','color',c{TheGroup},'LineWidth',TheLineWidth);
+                '-','color',groupColors{theGroup},'LineWidth',theLineWidth);
 end
-
 
 
 
@@ -471,7 +481,7 @@ end
 function [fr, xr] = plot_ks(v,c,swap)
     % Vector v is the vector of a given group
     % c is the color
-    [f, x] = ksdensity(v,linspace(min(v),max(v),1000),'function','pdf');
+    [f, x] = ksdensity(v(~isnan(v)),linspace(min(v),max(v),1000),'function','pdf');
     r = zeros(length(v),1);
     for m = 1:length(v); r(m)=find(x>=v(m),1,'first'); end
     r = sort(r,'ascend');
