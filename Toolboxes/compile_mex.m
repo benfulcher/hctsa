@@ -124,8 +124,9 @@ if ~anyerrors, fprintf(1,' done.\n'); end
 % ------------------------------------------------------------------------------
 % TISEAN
 % ------------------------------------------------------------------------------
-fprintf(1,['NB: To use TISEAN routines, you need to install them on your system using\n  ''./configure''' ...
-            ' ''make clean'' and ''make'' and ''make install'' commands (cf. Documentation)...\n']);
+fprintf(1,['NB: To use TISEAN routines, you need to compile and install them on your system\n' ...
+        'In the commandline, navigate to the Toolboxes/Tisean_3.0.1 directory\n  ''./configure''' ...
+        ' ''make clean'' and ''make'' and ''make install'' commands (cf. Documentation)...\n']);
 
 % Return to base directory
 cd(toolDir);

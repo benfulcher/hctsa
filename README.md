@@ -18,4 +18,4 @@ You can then update to the latest stable version of the repository by pulling th
 git pull upstream master
 ```
 
-Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [pull requests](https://help.github.com/articles/using-pull-requests/).
+Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/SystemsAndSignalsGroup/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).

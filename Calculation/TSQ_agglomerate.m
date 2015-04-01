@@ -58,8 +58,8 @@ fprintf(fid,' Done.\n');
 % ------------------------------------------------------------------------------
 %% Preliminary definitions
 % ------------------------------------------------------------------------------
-nts = length(TimeSeries); % Number of time series
-nm = length(Operations); % Number of operations
+numTS = length(TimeSeries); % Number of time series
+numOps = length(Operations); % Number of operations
 ts_ids_string = BF_cat([TimeSeries.ID],',');
 op_ids_string = BF_cat([Operations.ID],',');
 
@@ -68,23 +68,23 @@ op_ids_string = BF_cat([Operations.ID],',');
 % ------------------------------------------------------------------------------
 % Time series
 SelectString = sprintf('SELECT COUNT(ts_id) FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
-nts_db = mysql_dbquery(dbc,SelectString);
-nts_db = nts_db{1};
+numTS_db = mysql_dbquery(dbc,SelectString);
+numTS_db = numTS_db{1};
 
 % Operations
 SelectString = sprintf('SELECT COUNT(op_id) FROM Operations WHERE op_id IN (%s)',op_ids_string);
-nop_db = mysql_dbquery(dbc,SelectString);
-nop_db = nop_db{1};
+numOps_db = mysql_dbquery(dbc,SelectString);
+numOps_db = numOps_db{1};
 
-if (nm == nop_db) && (nts == nts_db)
+if (numOps == numOps_db) && (numTS == numTS_db)
     fprintf(1,'All local time series and operation ids still exist in %s. This is good.\n',dbname)
 else
-    if nts_db < nts
-        fprintf(1,'There are %u time series that no longer match the database',(nts-nts_db));
+    if numTS_db < numTS
+        fprintf(1,'There are %u time series that no longer match the database',(numTS-numTS_db));
     end
 
-    if nop_db < nm
-    	fprintf(1,'There are %u operations that no longer match the database',(nm-nop_db));
+    if numOps_db < numOps
+    	fprintf(1,'There are %u operations that no longer match the database',(numOps-numOps_db));
     end    
     error(['It could be dangerous to write back to a changed database. ' ...
                 'You should start a TSQ_prepared from scratch.'])
@@ -114,7 +114,7 @@ case 'error'
         					ts_ids_string,op_ids_string);
 end
 
-RetrievalTimer = tic; % Time the retrieval (should be fast)
+retrievalTimer = tic; % Time the retrieval (should be fast)
 [qrc,emsg] = mysql_dbquery(dbc,SelectString);
 if ~isempty(emsg)
     fprintf(1,'\n'); error('Error selecting %s elements from %s',writeWhat,dbname);
@@ -122,14 +122,14 @@ elseif isempty(qrc)
     fprintf(1,'\nNo %s elements in this range in the database anymore!\n',writeWhat);
     SQL_closedatabase(dbc); return
 else
-	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_thetime(toc(RetrievalTimer)));
+	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_thetime(toc(retrievalTimer)));
 end
-clear RetrievalTimer % Stop timing
+clear retrievalTimer % Stop timing
 
 
 ts_id_db = vertcat(qrc{:,1}); % ts_ids (in op_id pairs) of empty database elements in this ts_id/op_id range
 op_id_db = vertcat(qrc{:,2}); % op_ids (in ts_id pairs) of empty database elements in this ts_id/op_id range
-numWrite = length(ts_id_db);     % Number of database elements to attempt to write back to
+numWrite = length(ts_id_db);  % Number of database elements to attempt to write back to
 
 % ------------------------------------------------------------------------------
 % Give user feedback about what database writing will occur
@@ -199,10 +199,10 @@ for i = 1:numWrite
         end
             
         % I can't see any way around running lots of single UPDATE commands (for each entry)
-    	UpdateString = sprintf(['UPDATE Results SET Output = %19.17g, QualityCode = %u, CalculationTime = %s ' ...
+    	updateString = sprintf(['UPDATE Results SET Output = %19.17g, QualityCode = %u, CalculationTime = %s ' ...
 							'WHERE ts_id = %u AND op_id = %u'],TS_DataMat_ij,TS_Quality_ij, ...
 							TS_CalcTime_string,ts_id_db(i),op_id_db(i));
-        [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+        [~,emsg] = mysql_dbexecute(dbc, updateString);
         if ~isempty(emsg)
             SQL_closedatabase(dbc) % close the database connection before calling the error...
         	error('Error storing (ts_id,op_id) = (%u,%u) to %s??!!\n%s\n', ...

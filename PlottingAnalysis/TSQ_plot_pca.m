@@ -50,25 +50,12 @@ if ~any(ismember(TsorOps,{'ops','ts'}));
     error('Specify either operations (''ops'') or time series (''ts'').');
 end
 
-% % Specify a keyword labeling of the data, kwgs:
-% if nargin < 3
-%     kwgs = {};
-%     fprintf(1,'No assignment of the data? Ok up to you...\n');
-% end
-% 
-% % Specify group indices, gi:
-% if nargin < 4
-%     gi = [];
-%     fprintf(1,'Will obtain group indices from file\n');
-% end
-
 if nargin < 3 || isempty(showDist)
     showDist = 1;
 end
 
 if nargin < 4 || isempty(classMeth)
     classMeth = 'linclass';
-    fprintf(1,'No discriminant\n'); 
 end
 
 if nargin < 5 || isempty(annotateParams)
@@ -83,13 +70,17 @@ end
 % ------------------------------------------------------------------------------
 %% Load the data and group labeling from file
 % ------------------------------------------------------------------------------
-if strcmp(whatData,'cl') || strcmp(whatData,'norm') 
+if strcmp(whatData,'cl') || strcmp(whatData,'norm')  || ischar(whatData)
     % Retrive data from local files
-    switch whatData
-    case 'cl'
-        whatDataFile = 'HCTSA_cl.mat';
-    case 'norm'
-        whatDataFile = 'HCTSA_N.mat';
+    if ischar(whatData) % specified a custom filename
+        whatDataFile = whatData;
+    else
+        switch whatData
+        case 'cl'
+            whatDataFile = 'HCTSA_cl.mat';
+        case 'norm'
+            whatDataFile = 'HCTSA_N.mat';
+        end
     end
     fprintf(1,'Loading data and grouping information from %s...',whatDataFile);
     load(whatDataFile,'TS_DataMat');
@@ -120,12 +111,16 @@ if strcmp(whatData,'cl') || strcmp(whatData,'norm')
     fprintf(1,' Loaded.\n');
 else
     % The user provided data yourself
-    if ~isfield(whatData,'DataMat')
-        error('No field ''DataMat'' provided in the data input')
+    if ~isfield(whatData,'DataMat') && ~isfield(whatData,'TS_DataMat')
+        error('No field ''DataMat'' (or ''TS_DataMat'') provided in the data input')
     elseif ~isfield(whatData,'Groups')
         error('No field ''Groups'' provided in the data input')
     end
-    TS_DataMat = whatData.DataMat;
+    if isfield(whatData,'DataMat')
+        TS_DataMat = whatData.DataMat;
+    else
+        TS_DataMat = whatData.TS_DataMat;
+    end
     dataGroups = whatData.Groups;
     if isfield(whatData,'DimLabels')
         dimensionLabels = whatData.DimLabels;

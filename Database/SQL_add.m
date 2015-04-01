@@ -19,7 +19,7 @@
 % transparent structure with as much overlap in syntax as possible.
 %                       Added beVocal input
 % Romesh Abeysuriya, Jan 2013
-% Ben Fulcher, 12/1/2010: added dbname option
+% Ben Fulcher, 12/1/2010: added databaseName option
 % Ben Fulcher, 3/12/2009
 % 
 % ------------------------------------------------------------------------------
@@ -38,7 +38,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_add(importWhat, INPfile, dbname, beVocal)
+function SQL_add(importWhat, INPfile, databaseName, beVocal)
 
 % ------------------------------------------------------------------------------
 %% Check inputs, set defaults:
@@ -61,10 +61,10 @@ if nargin < 2 || isempty(INPfile)
     end
 end
 
-% dbname
+% databaseName
 if nargin < 3
     % Use the default database (specified in sql_settings.conf) by default:
-    dbname = '';
+    databaseName = '';
 end
 
 % beVocal
@@ -79,7 +79,7 @@ ticker = tic;
 % ------------------------------------------------------------------------------
 %% Open Database
 % ------------------------------------------------------------------------------
-[dbc, dbname] = SQL_opendatabase(dbname);
+[dbc, databaseName] = SQL_opendatabase(databaseName);
 
 % ------------------------------------------------------------------------------
 % Define strings to unify the different strands of code for time series /
@@ -87,6 +87,7 @@ ticker = tic;
 % ------------------------------------------------------------------------------
 switch importWhat
     case 'ts'
+        % Check that the time series table exists in the database:
         theWhat = 'time series';
         theid = 'ts_id';
         thekid = 'tskw_id';
@@ -109,6 +110,18 @@ switch importWhat
         theTable = 'MasterOperations';
 end
 
+% ------------------------------------------------------------------------------
+% Check that the table exists in the datbase
+% ------------------------------------------------------------------------------
+existString = ['SHOW TABLES LIKE ''' theTable ''''];
+[output,emsg] = mysql_dbquery(dbc,existString);
+if isempty(output) % Table doesn't exist
+    error(['Table %s doesn''t exist in the database %s.\n' ...
+                'Use: (1) install.m to set the database system up from scratch,\n' ...
+                '(2) SQL_create_all_tables to create empty tables that can later be filled with custom libraries of operations,' ...
+                '(3) SQL_reset to drop all tables in the database, and repopulate all tables with the default library of operations.'],...
+                databaseName);
+end
 
 % ------------------------------------------------------------------------------
 %% Open and read the input file
@@ -217,7 +230,7 @@ esc = @RA_sqlescapestring; % Inline function to add escape strings to format myS
 % ------------------------------------------------------------------------------
 if beVocal
     fprintf(1,['Preparing mySQL INSERT statements to add %u %s to the ' ...
-                                'database %s...'],numItems,theWhat,dbname);
+                                'database %s...'],numItems,theWhat,databaseName);
 end
 toadd = cell(numItems,1);
 switch importWhat
@@ -341,12 +354,12 @@ if beVocal, fprintf(1,'done.\n'); end
 
 % Tell the user about duplicates
 if all(isDuplicate)
-    fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',numItems,theWhat,INPfile,dbname,theWhat);
+    fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',numItems,theWhat,INPfile,databaseName,theWhat);
     return
 elseif sum(isDuplicate) > 0
     if beVocal
-        fprintf(1,'I found %u duplicate %s already in the database %s!\n',sum(isDuplicate),theWhat,dbname)
-        fprintf(1,'There are %u new %s to add to %s.\n',sum(~isDuplicate),theWhat,dbname)
+        fprintf(1,'I found %u duplicate %s already in the database %s!\n',sum(isDuplicate),theWhat,databaseName)
+        fprintf(1,'There are %u new %s to add to %s.\n',sum(~isDuplicate),theWhat,databaseName)
     end
 end
 
@@ -354,13 +367,17 @@ end
 %% Select the maximum id already in the table
 % ------------------------------------------------------------------------------
 maxid = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,theTable));
-maxid = maxid{1}; % the maximum id -- the new items will have ids greater than this
-if isempty(maxid) || isnan(maxid), maxid = 0; end
+if isempty(maxid) || isnan(maxid{1}) || isempty(maxid{1})
+    % No time series exist in the database yet
+    maxid = 0;
+else
+    maxid = maxid{1}; % the maximum id -- the new items will have ids greater than this
+end
 
 % ------------------------------------------------------------------------------
 %% Assemble and execute the INSERT queries
 % ------------------------------------------------------------------------------
-fprintf('Adding %u new %s to the %s table in %s...',sum(~isDuplicate),theWhat,theTable,dbname)
+fprintf('Adding %u new %s to the %s table in %s...',sum(~isDuplicate),theWhat,theTable,databaseName)
 switch importWhat
 case 'ts' % Add time series to the TimeSeries table just 5 at a time
           % (so as not to exceed the max_allowed_packet when transmitting the 
@@ -384,7 +401,7 @@ fprintf(1,' done.\n')
 if ~strcmp(importWhat,'mops')
     resultstic = tic;
     if beVocal
-        fprintf(1,'Updating the Results Table in %s (this could take a while, please be patient!)...',dbname)
+        fprintf(1,'Updating the Results Table in %s (this could take a while, please be patient!)...',databaseName)
     end
     switch importWhat
     case 'ts'
@@ -406,7 +423,7 @@ if ~strcmp(importWhat,'mops')
     % ------------------------------------------------------------------------------
     % Update the keywords table
     % ------------------------------------------------------------------------------
-    fprintf(1,'Updating the %s table in %s...',thektable,dbname)
+    fprintf(1,'Updating the %s table in %s...',thektable,databaseName)
 
     % First find unique keywords from new time series by splitting against commas
     switch importWhat
@@ -441,7 +458,7 @@ if ~strcmp(importWhat,'mops')
     if sum(isnew) > 0
         if beVocal
             fprintf(1,['\nIt turns out that %u keywords are completely new and will be added ' ...
-                        'to the %s table in %s...'],sum(isnew),thektable,dbname)
+                        'to the %s table in %s...'],sum(isnew),thektable,databaseName)
         end
         % Add the new keywords to the Keywords table
         insertstring = sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES',thektable);
@@ -455,7 +472,7 @@ if ~strcmp(importWhat,'mops')
     else
         if beVocal
             fprintf(1,['\nIt turns out that all new keywords already exist in ' ...
-                        'the %s table in %s -- there are no new keywords to add\n'],sum(isnew),thektable,dbname)
+                        'the %s table in %s -- there are no new keywords to add\n'],sum(isnew),thektable,databaseName)
         end
     end
     
@@ -463,7 +480,7 @@ if ~strcmp(importWhat,'mops')
     %% Fill new keyword relationships
     % ------------------------------------------------------------------------------
     fprintf(1,'Writing new keyword relationships to the %s table in %s...', ...
-                                            theRelTable,dbname)
+                                            theRelTable,databaseName)
 
     % Try doing it from scratch...:
     switch importWhat
@@ -588,7 +605,11 @@ SQL_closedatabase(dbc)
 %% Tell the user all about it
 % ------------------------------------------------------------------------------
 fprintf('All tasks completed in %s.\nRead %s then added %u %s into %s.\n', ...
-            BF_thetime(toc(ticker)), INPfile, sum(~isDuplicate), theWhat, dbname);
+            BF_thetime(toc(ticker)), INPfile, sum(~isDuplicate), theWhat, databaseName);
 
+if strcmp(importWhat,'ts')
+    fprintf(1,['Note that the imported data files are now in %s and no longer ' ...
+                        'need to be in the Matlab path.\n'],databaseName);
+end
 
 end

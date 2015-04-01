@@ -182,7 +182,8 @@ end
 %% Plot
 % ------------------------------------------------------------------------------
 if makeFigure % can set extras.makeFigure = 0 to plot within a given setting
-    figure('color','w'); box('on'); % white figure
+    f = figure('color','w'); box('on'); % white figure
+    f.Position = [f.Position(1), f.Position(2), 600, 550];
 end
 
 % Set colors
@@ -324,20 +325,21 @@ xlabel(labelText{1},'interpreter','none')
 ylabel(labelText{2},'interpreter','none')
 
 % Set Legend
-if isempty(trainTest)
-    legs = cell(numGroups,1);
-    for i = 1:numGroups
-        legs{i} = sprintf('%s (%u)',GroupNames{i},length(GroupIndices{i}));
+if numGroups > 1
+    if isempty(trainTest)
+        legs = cell(numGroups,1);
+        for i = 1:numGroups
+            legs{i} = sprintf('%s (%u)',GroupNames{i},length(GroupIndices{i}));
+        end
+    else
+        legs = cell(numGroups*2,1);
+        for i = 1:numGroups
+            legs{i} = sprintf('%s train (%u)',GroupNames{i},length(intersect(GroupIndices{i},trainTest{1})));
+            legs{numGroups+i} = sprintf('%s test (%u)',GroupNames{i},length(intersect(GroupIndices{i},trainTest{2})));
+        end
     end
-else
-    legs = cell(numGroups*2,1);
-    for i = 1:numGroups
-        legs{i} = sprintf('%s train (%u)',GroupNames{i},length(intersect(GroupIndices{i},trainTest{1})));
-        legs{numGroups+i} = sprintf('%s test (%u)',GroupNames{i},length(intersect(GroupIndices{i},trainTest{2})));
-    end
+    legend(legs);
 end
-legend(legs);
-
 
 % ------------------------------------------------------------------------------
 %% Annotate time-series data
@@ -431,9 +433,9 @@ for j = 1:numAnnotations
     
     plotPoint = xy{theGroup}(itsme,:);
     theDataLabel = DataLabels{GroupIndices{theGroup}(itsme)}; % fileName of timeseries to plot
-    ts = TimeSeriesData{GroupIndices{theGroup}(itsme)}; % fileName of timeseries to plot
+    timeSeriesSegment = TimeSeriesData{GroupIndices{theGroup}(itsme)}; % fileName of timeseries to plot
     if ~isempty(maxL)
-        ts = ts(1:min(maxL,end));
+        timeSeriesSegment = timeSeriesSegment(1:min(maxL,end));
     end
     
     % Plot a circle around the annotated point:
@@ -442,7 +444,7 @@ for j = 1:numAnnotations
         groupColors{1} = rainbowColor;
     end
     if plotCircle
-        plot(plotPoint(1),plotPoint(2),'o','color',rainbowColor)
+        plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',rainbowColor,'MarkerFaceColor',brighten(rainbowColor,0.5));
     end
     
     % Add text annotations:
@@ -470,8 +472,8 @@ for j = 1:numAnnotations
     end
     
     % Annotate the time series
-    plot(px(1)+linspace(0,fdim(1)*pwidth,length(ts)),...
-            py(1)+fdim(2)*pheight*(ts-min(ts))/(max(ts)-min(ts)),...
+    plot(px(1)+linspace(0,fdim(1)*pwidth,length(timeSeriesSegment)),...
+            py(1)+fdim(2)*pheight*(timeSeriesSegment-min(timeSeriesSegment))/(max(timeSeriesSegment)-min(timeSeriesSegment)),...
                 '-','color',groupColors{theGroup},'LineWidth',theLineWidth);
 end
 
