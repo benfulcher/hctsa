@@ -314,7 +314,7 @@ if didClassify
                     round(loss(3,1)*100)),'interpreter','none');
     labelText = cell(2,1);
     for i = 1:2
-        labelText{i} = sprintf('%s (%.2f %%)',labels{i}, ...
+        labelText{i} = sprintf('%s (acc = %.2f %%)',labels{i}, ...
                                 round(loss(i,1)*100)); %,round(loss(i,2)*100));
     end
 else
@@ -439,12 +439,13 @@ for j = 1:numAnnotations
     end
     
     % Plot a circle around the annotated point:
-    rainbowColor = myColors{rem(j,length(myColors))};
     if numGroups==1
-        groupColors{1} = rainbowColor;
+        % cycle through rainvow colors sequentially:
+        groupColors{1} = myColors{rem(j,length(myColors))};
     end
     if plotCircle
-        plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',rainbowColor,'MarkerFaceColor',brighten(rainbowColor,0.5));
+        plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',groupColors{theGroup},...
+                            'MarkerFaceColor',brighten(groupColors{theGroup},0.5));
     end
     
     % Add text annotations:
@@ -452,12 +453,14 @@ for j = 1:numAnnotations
     case 'fileName'
         % Annotate text with names of datapoints:
         text(plotPoint(1),plotPoint(2)-0.01*pheight,theDataLabel,...
-                    'interpreter','none','FontSize',8,'color',brighten(groupColors{theGroup},-0.6));
+                    'interpreter','none','FontSize',8,...
+                    'color',brighten(groupColors{theGroup},-0.6));
     case 'tsid'
         % Annotate text with ts_id:
         text(plotPoint(1),plotPoint(2)-0.01*pheight,...
                 num2str(ts_ids_keep(GroupIndices{theGroup}(itsme))),...
-                    'interpreter','none','FontSize',8,'color',brighten(groupColors{theGroup},-0.6));
+                    'interpreter','none','FontSize',8,...
+                    'color',brighten(groupColors{theGroup},-0.6));
     end
     
     % Adjust if annotation goes off axis x-limits
