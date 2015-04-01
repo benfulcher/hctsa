@@ -23,7 +23,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [dbc, dbname] = SQL_opendatabase(dbname,beVocal)
+function [dbc, databaseName] = SQL_opendatabase(databaseName,beVocal)
 
 % ------------------------------------------------------------------------------
 % Default: don't display details to the prompt:
@@ -49,14 +49,14 @@ fclose(fid);
 
 % Interpret the output:
 hostname = s{1}{1};
-default_dbname = s{2}{1};
+default_databaseName = s{2}{1};
 username = s{3}{1};
 password = s{4}{1};
 customPort = s{5};
 
 % ------------------------------------------------------------------------------
-if nargin < 1 || isempty(dbname)
-	dbname = default_dbname; % set default database
+if nargin < 1 || isempty(databaseName)
+	databaseName = default_databaseName; % set default database
 end
 if isempty(customPort) || customPort==0
     customPort = 3306; % default port
@@ -64,15 +64,15 @@ end
 
 % ------------------------------------------------------------------------------
 if beVocal
-	fprintf(1,'Using database %s\n',dbname)
+	fprintf(1,'Using database %s\n',databaseName)
     fprintf(1,['Connecting to host ''%s'', database ''%s'' (port %u) using username' ...
-            ' ''%s'' and password ''%s''...'],hostname,dbname,customPort,username,password)
+            ' ''%s'' and password ''%s''...'],hostname,databaseName,customPort,username,password)
 end
 
 % ------------------------------------------------------------------------------
 % Open database as dbc
 % ------------------------------------------------------------------------------
-dbc = mysql_dbopen(hostname,dbname,username,password,customPort);
+dbc = mysql_dbopen(hostname,databaseName,username,password,customPort);
 
 if isempty(dbc)
 	error('Failed to load SQL database');
@@ -80,7 +80,7 @@ elseif beVocal
     fprintf(1,' Connected!\n');
 end
 
-mysql_dbexecute(dbc,['USE ' dbname]);
+mysql_dbexecute(dbc,['USE ' databaseName]);
 
 
 

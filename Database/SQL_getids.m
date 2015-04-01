@@ -17,7 +17,7 @@
 %--keywordRemove: keywords NOT to include (cell of strings)
 %--idr: range of possible ids to restrict the search to (empty = don't
 %                    restrict -- default)
-%--dbname: can specify a custom database; otherwise opens the default specified
+%--databaseName: can specify a custom database; otherwise opens the default specified
 %           in SQL_opendatabase
 % 
 %---OUTPUTS
@@ -39,13 +39,13 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function ids = SQL_getids(tsOrOps,lengthRange,keywordInclude,keywordRemove,idr,dbname)
+function ids = SQL_getids(tsOrOps,lengthRange,keywordInclude,keywordRemove,idr)
 
 % ------------------------------------------------------------------------------
 %% Check inputs -- set defaults
 % ------------------------------------------------------------------------------
 
-if ~ismember(tsOrOps,{'ts','ops'})
+if nargin < 1 || ~ismember(tsOrOps,{'ts','ops'})
 	error('First input must be either ''ts'' or ''ops''.');
 end
 
@@ -58,6 +58,9 @@ if strcmp(tsOrOps,'ops')
 	end
 end
 
+if nargin < 2
+    lengthRange = [];
+end
 % empty lengthRange means no length contraint, which is a fine default now...
 % if isempty(lengthRange)
 %     lengthRange = [200, 20000];
@@ -65,7 +68,7 @@ end
 % end
 
 if nargin < 3
-    keywordInlcude = {};
+    keywordInclude = {};
 end
 
 if nargin < 4
@@ -74,10 +77,6 @@ end
 
 if nargin < 5
 	idr = [];
-end
-
-if nargin < 6
-	dbname = ''; % Use default database by default
 end
 
 % ------------------------------------------------------------------------------
@@ -97,7 +96,7 @@ else
 end
 
 % Open connection to mySQL database
-dbc = SQL_opendatabase(dbname);
+dbc = SQL_opendatabase;
 
 if strcmp(tsOrOps,'ts')
 

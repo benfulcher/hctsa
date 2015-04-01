@@ -45,8 +45,8 @@ opids = SQL_getids('ops',1);
 % ------------------------------------------------------------------------------
 % Provide a quick message:
 fprintf(1,['About to calculate across %u time series (ts_ids %u--%u) and %u op_ids ' ...
-                    '(between %u--%u) over a total of %u iterations\n'], ...
-                    length(tsid_range),tsid_min,tsid_max,length(opids),min(opids),max(opids));
+                '(between %u--%u) over a total of %u iterations\n'], ...
+                length(tsid_range),tsid_min,tsid_max,length(opids),min(opids),max(opids));
 
 % Loop across time series, one at a time:
 for i = 1:length(tsid_range)
@@ -58,8 +58,8 @@ for i = 1:length(tsid_range)
 	% (ii) Using TSQ_brawn to calculate missing entries
 	% (iii) Running TSQ_agglomerate to write results back into the database
 
-	DidWrite = TSQ_prepared(tsid_range(i),opids,writeWhat); % Collect the null entries in the database
-    if DidWrite % Only calculate if TSQ_prepared found time series to retrieve:
+	didWrite = TSQ_prepared(tsid_range(i),opids,writeWhat); % Collect the null entries in the database
+    if didWrite % Only calculate if TSQ_prepared found time series to retrieve:
         TSQ_brawn(doLog,doParallelize); % Compute the operations and time series retrieved
         TSQ_agglomerate(writeWhat,doLog); % Store the results back to the database
     else

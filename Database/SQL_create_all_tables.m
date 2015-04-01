@@ -48,7 +48,7 @@ existString = arrayfun(@(x)['SHOW TABLES LIKE ''' tableNames{x} ''''],1:length(t
 % ------------------------------------------------------------------------------
 [dbc, dbname] = SQL_opendatabase; % opens dbc, the default database (named dbname)
 
-nperline = 3; % Make a new line after adding this many tables to the database
+numPerLine = 3; % Make a new line after adding this many tables to the database
 fprintf(1,'Creating tables in %s:\n',dbname);
 for j = 1:length(createString)
     
@@ -75,7 +75,7 @@ for j = 1:length(createString)
     end
     
     % Make new line to avoid cramping on display
-    if (mod(j,nperline) == 0) && (j < length(createString))
+    if (mod(j,numPerLine) == 0) && (j < length(createString))
         fprintf(1,'\n');
     end
 end
