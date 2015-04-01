@@ -72,15 +72,14 @@ end
 % ------------------------------------------------------------------------------
 if strcmp(whatData,'cl') || strcmp(whatData,'norm')  || ischar(whatData)
     % Retrive data from local files
-    if ischar(whatData) % specified a custom filename
+    switch whatData
+    case 'cl'
+        whatDataFile = 'HCTSA_cl.mat';
+    case 'norm'
+        whatDataFile = 'HCTSA_N.mat';
+    otherwise
+        % Provided a custom filename to a datafile
         whatDataFile = whatData;
-    else
-        switch whatData
-        case 'cl'
-            whatDataFile = 'HCTSA_cl.mat';
-        case 'norm'
-            whatDataFile = 'HCTSA_N.mat';
-        end
     end
     fprintf(1,'Loading data and grouping information from %s...',whatDataFile);
     load(whatDataFile,'TS_DataMat');
