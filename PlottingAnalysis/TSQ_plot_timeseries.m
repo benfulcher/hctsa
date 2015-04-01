@@ -80,10 +80,10 @@ else
     % Show titles -- removing them allows more to be fit into plot
     displayTitles = 1; % show titles by default
 end
-if isstruct(plotOptions) && isfield(plotOptions,'howtofilter')
-    howtofilter = plotOptions.howtofilter;
+if isstruct(plotOptions) && isfield(plotOptions,'howToFilter')
+    howToFilter = plotOptions.howToFilter;
 else
-    howtofilter = 'evenly'; % by default
+    howToFilter = 'evenly'; % by default
 end
 if isstruct(plotOptions) && isfield(plotOptions,'gic')
     gic = plotOptions.gic; % local color labels -- vector
@@ -97,10 +97,10 @@ else
     colorMap = 'set1';
 end
 % Specify whether to make a free-form plot
-if isstruct(plotOptions) && isfield(plotOptions,'freeform')
-    freeform = plotOptions.freeform;
+if isstruct(plotOptions) && isfield(plotOptions,'plotFreeForm')
+    plotFreeForm = plotOptions.plotFreeForm;
 else
-    freeform = 0; % do a normal subplotted figure
+    plotFreeForm = 0; % do a normal subplotted figure
 end
 % Specify line width for plotting
 if isstruct(plotOptions) && isfield(plotOptions,'LineWidth')
@@ -128,7 +128,7 @@ end
 % ------------------------------------------------------------------------------
 %% Get group indices:
 % ------------------------------------------------------------------------------
-if isempty(whatTimeSeries) && isfield(TimeSeries,'Group');
+if (isempty(whatTimeSeries) || strcmp(whatTimeSeries,'grouped')) && isfield(TimeSeries,'Group');
     % Use default groups
     GroupIndices = BF_ToGroup([TimeSeries.Group]);
     fprintf(1,'Plotting from %u groups of time series from file.\n',length(GroupIndices));
@@ -136,7 +136,7 @@ elseif isempty(whatTimeSeries) || strcmp(whatTimeSeries,'all')
     % Nothing specified but no groups assigned, or specified 'all': plot from all time series
     GroupIndices = {1:length(TimeSeries)};
 elseif ischar(whatTimeSeries)
-    % Just plot this group
+    % Just plot the specified group
     % First load group names:
     if isstruct(whatData)
         GroupNames = whatData.GroupNames;
@@ -160,12 +160,11 @@ iplot = zeros(numGroups*numPerGroup,1);
 classes = zeros(numGroups*numPerGroup,1);
 nhere = zeros(numGroups,1);
 groupSizes = cellfun(@length,GroupIndices);
-% howtofilter = 'rand';
+% howToFilter = 'rand';
 for i = 1:numGroups
     % filter down to numPerGroup if too many in group, otherwise plot all in
     % group
-    switch howtofilter
-        
+    switch howToFilter
         case 'firstcome'
             % just plot first in group (useful when ordered by closeness to
             % cluster centre)
@@ -222,9 +221,10 @@ else
     end    
 end
 
+% ------------------------------------------------------------------------------
 figure('color','w'); box('on');
-Ls = zeros(numToPlot,1);
-if freeform
+Ls = zeros(numToPlot,1); % length of each plotted time series
+if plotFreeForm
 	% FREEFORM: make all within a single plot with text labels
     hold on;
 	yr = linspace(1,0,numToPlot+1);
@@ -272,7 +272,7 @@ if freeform
     xlabel('Time (samples)')
 	
 else
-    % i.e., NOT a freeform plot:
+    % i.e., NOT a FreeForm plot:
 	for i = 1:numToPlot
 	    subplot(numToPlot,1,i)
 	    fn = TimeSeries(iplot(i)).FileName; % the filename

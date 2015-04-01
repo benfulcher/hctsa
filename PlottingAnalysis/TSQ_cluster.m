@@ -3,20 +3,18 @@
 % --------------------------------------------------------------------------
 % 
 % Reads in normalized data from HCTSA_N.mat, clusters the data matrix by
-% reordering rows and columns, then saves the result as HCTSA_cl.mat
+% reordering rows and columns with linkage clustering, and then saves the result
+% as HCTSA_cl.mat
 % 
 %---EXAMPLE USAGE:
 % TSQ_cluster;
 % 
 %---INPUTS:
-% clusterMethRow: specifies the clustering method for rows/time series (default is 'linkage')
-% clusterParamsRow: specifies a cell of parameters specifying the clustering parameters,
-%           including the distance metric, etc. (default is euclidean distances
-%           and average linkage)
-% clusterMethCol: specifies the clustering method for columns/operations (default is the
-%         same as rows)
-% clusterParamsCol: clustering settings for columns (default is correlation distances
-%           and average linkage)
+% distanceMetricRow: specifies the distance metric for computing distances
+%                   between time series (rows)
+% linkageMethodRow: specifies the linkage method for clustering time series (rows)
+% distanceMetricCol: distance metric for distances between operations (columns)
+% linkageMethodCol: linkage method for clustering operations (columns)
 % subSet: should be a cell with three components: the first should be either
 %         'cl' or 'norm' for the row and column indicies provided in the 2nd and
 %         3rd components of the cell. e.g., {'norm',[1,5,...],[]} will load in
