@@ -2,9 +2,9 @@ function [varargout] = likMix(lik, hyp, varargin)
 
 % likMix - Mixture of likelihoods for regression/classification. 
 % The expression for the likelihood is 
-%   log( likMix(t) ) = sum_i=1..m  w_i * log( lik_i(t) ),
+%   likMix(t) = sum_i=1..m  w_i * lik_i(t),
 % where lik_i are the m individual likelihood functions combined by a weighted
-% sum in the log domain with weights wi.
+% sum with weights wi.
 %
 % The hyperparameters are:
 %
@@ -25,7 +25,7 @@ function [varargout] = likMix(lik, hyp, varargin)
 % respectively, see likFunctions.m for the details. In general, care is taken
 % to avoid numerical issues when the arguments are extreme.
 %
-% Copyright (c) by Hannes Nickisch and Rowan McAllister, 2013-01-17
+% Copyright (c) by Hannes Nickisch and Rowan McAllister, 2013-10-23.
 %
 % See also LIKFUNCTIONS.M.
 
@@ -36,9 +36,11 @@ for i = 1:m                                    % iterate over mixture components
   j(i) = cellstr(feval(f{:}));                           % collect number hypers
 end
 
+s = @(x) logsumexp2(x);                 % define a shortcut to util/logsumexp2.m
+
 if nargin<4                                        % report number of parameters
   L = char(j(1)); for i=2:length(lik), L = [L, '+', char(j(i))]; end
-  varargout = {[num2str(m),'+',L]}; return
+  varargout = {['(',num2str(m),'+',L,')']}; return
 end
 mu = varargin{2}; n = length(mu);                       % number of query points
 if numel(varargin)>3
@@ -171,12 +173,3 @@ else
     error('infVB not supported')
   end
 end
-
-% computes y = log( sum(exp(x),2) ), the softmax in a numerically safe way by
-%  subtracting the row maximum to avoid cancelation after taking the exp
-%  the sum is done along the rows
-function [y,x] = s(logx)
-  N = size(logx,2); max_logx = max(logx,[],2);
-  % we have all values in the log domain, and want to calculate a sum
-  x = exp(logx-max_logx*ones(1,N));
-  y = log(sum(x,2)) + max_logx;

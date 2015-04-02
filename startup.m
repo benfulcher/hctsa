@@ -61,20 +61,12 @@ addpath(fullfile(pwd,'Toolboxes','Rudy_Moddemeijer'));
 fprintf(1,', Land and Elias');
 addpath(fullfile(pwd,'Toolboxes','Land_and_Elias'));
 
-% TS Research
-fprintf(1,', TS_Research\n')
-addpath(fullfile(pwd,'Toolboxes','TS_Research'));
-
-% Bill Davidson's hurst exponent code
-fprintf(1,'Bill Davidson');
-addpath(fullfile(pwd,'Toolboxes','Bill_Davidson'));
-
 % Physionet
-fprintf(1,', Physionet');
+fprintf(1,', Physionet\n');
 addpath(fullfile(pwd,'Toolboxes','Physionet'));
 
 % Max Little's steps/bumps toolbox
-fprintf(1,', steps_bumps toolkit')
+fprintf(1,'Max Little''s steps_bumps toolkit')
 addpath(fullfile(pwd,'Toolboxes','Max_Little','steps_bumps_toolkit'));
 
 % Max Little's fastdfa code
@@ -87,8 +79,31 @@ addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 % Run the routine adds the necessary paths for OpenTSTOOL:
 settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 
+% Java information dynamics toolkit written by Joseph Lizier
+% (should be ok to re-add this every time startup is run)
+fprintf(1,', Information dynamics toolkit')
+javaaddpath(fullfile(pwd,'Toolboxes','infodynamics-dist','infodynamics.jar'));
+
+% ------------------------------------------------------------------------------
+% Add path for TISEAN (ASSUMING in ~/bin directory):
+% ------------------------------------------------------------------------------
+[~,homeDir] = system('echo $HOME'); % get system home directory
+homeDir = regexprep(homeDir,'[\s]',''); % remove white space
+tiseanBinaryLocation = fullfile(homeDir,'bin');
+if isempty(regexp(getenv('PATH'),tiseanBinaryLocation))
+    sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
+    setenv('PATH', sysPath)
+    fprintf(1,',\nSystem path to TISEAN binaries: %s',tiseanBinaryLocation);
+    clear sysPath
+end
+clear homeDir tiseanBinaryLocation
+
+% TISEAN also requires this DYLD path to be set (I assume this works also on Windows):
+setenv('DYLD_LIBRARY_PATH','/usr/local/bin');
+fprintf(1,', DYLD library path (for TISEAN).');
+
 % ------------------------------------------------------------------------------
 %% Finished:
 % ------------------------------------------------------------------------------
 clear addfcn % clear the add function
-fprintf(1,'.\n---Done.\n')
+fprintf(1,'\n---Done.\n')

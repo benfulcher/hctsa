@@ -7,7 +7,7 @@
 % contained in the file solve_chol.c, and should be compiled using matlabs mex
 % facility. However, this file also contains a (less efficient) matlab
 % implementation, supplied only as a help to people unfamiliar with mex. If
-% the C code has been properly compiled and is avaiable, it automatically
+% the C code has been properly compiled and is available, it automatically
 % takes precendence over the matlab code in this file.
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2010-09-18.

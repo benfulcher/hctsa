@@ -1,9 +1,9 @@
- GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox version 3.2
+ GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox version 3.5
     for GNU Octave 3.2.x and Matlab 7.x
 
 The code is released under the FreeBSD License.
 
-Copyright (c) 2005-2013 Carl Edward Rasmussen & Hannes Nickisch. All rights reserved.
+Copyright (c) 2005-2015 Carl Edward Rasmussen & Hannes Nickisch. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

@@ -9,6 +9,13 @@
 % Uses the following functions from Matlab's Econometrics Toolbox: archtest,
 % lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
 % 
+% Compares all combinations of p and q and output statistics are on the models
+% with the best fit.
+% 
+% This operation focuses on the GARCH/variance component, and therefore
+% attempts to pre-whiten and assumes a constant mean process (applies a linear
+% detrending).
+% 
 %---INPUTS:
 % y, the input time series
 % preproc, a preprocessing to apply:
@@ -19,15 +26,15 @@
 % 
 % qr, a vector of model orders, q, to compare
 % 
-% Compares all combinations of p and q and output statistics are on the models
-% with the best fit.
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 % 
-% This operation focuses on the GARCH/variance component, and therefore
-% attempts to pre-whiten and assumes a constant mean process.
 % 
 %---OUTPUTS: include log-likelihoods, Bayesian Information  Criteria (BIC),
 % Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
 % Ljung-Box Q-test, and estimates of optimal model orders.
+% 
+%---HISTORY:
+% Ben Fulcher 26/2/2010
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -52,52 +59,46 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_GARCHcompare(y,preproc,pr,qr)
-% Ben Fulcher 26/2/2010
+function out = MF_GARCHcompare(y,preproc,pr,qr,randomSeed)
 
+% ------------------------------------------------------------------------------
 %% Check that an Econometrics Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('econometrics_toolbox')
 
-%% Inputs
+% ------------------------------------------------------------------------------
+%% Check inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(preproc)
     preproc = 'none';
 end
 
-% GARCH parameters, p & q
+% GARCH (p) ARCH (q) parameters
 if nargin < 3 || isempty(pr)
-    pr = (1:3); % i.e., GARCH(1:4,qr)
-end
-if nargin < 4 || isempty(qr)
-    qr = (1:3); % i.e., GARCH(pr,1:4);
+    pr = (1:3); % i.e., GARCH(1:3,qr)
 end
 
+if nargin < 4 || isempty(qr)
+    qr = (1:3); % i.e., GARCH(pr,1:3);
+end
+
+% randomSeed: how to treat the randomization (in BF_Whiten)
+if nargin < 5
+    randomSeed = [];
+end
+
+% ------------------------------------------------------------------------------
 %% (1) Data preprocessing
+% ------------------------------------------------------------------------------
 y0 = y; % the original, unprocessed time series
 
-switch preproc
-    case {'nothing','none'}
-        % do nothing.
-        
-    case 'ar'
-        % do the preprocessing that maximizes ar(2) whiteness
-        % apply a number of standard preprocessings and return them in the
-        % structure ypp. Also chooses the best preprocessing based on the worst fit
-        % of an AR2 model to the processed time series.
-        % has to beat doing nothing by 5% (error)
-        % No spectral methods allowed...
-        [ypp, best] = PP_PreProcess(y,'ar',2,0.05,0);
-        y = ypp.(best); % dynamic field referencing
-        % eval(sprintf('y = ypp.%s;',best));
-        fprintf(1,'Preprocessed the time series according to AR(2) criterion using %s\n',best);
-        
-    otherwise
-        error('Unknwon preprocessing setting ''%s''',preproc);
-end
+y = BF_Whiten(y,preproc,0,randomSeed); % Use a basic preprocessing to whiten the time series
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
-y = BF_zscore(y); % make sure the time series is z-scored
+% ------------------------------------------------------------------------------
+y = BF_zscore(y); % make sure the (whitened) time series is z-scored
 N = length(y); % could be different to original (e.g., if chose a differencing above)
-
 
 % Now have the preprocessed time series saved over y.
 % The original, unprocessed time series is retained in y0.
@@ -136,19 +137,21 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % (iv) Partial autocorrelation function: PACF
 [PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y,20,[],[]);
 
-
+% ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model
+% ------------------------------------------------------------------------------
 % initialize statistics
 np = length(pr);
 nq = length(qr);
-LLFs = zeros(np,nq); % log-likelihood
-AICs = zeros(np,nq); % AIC
-BICs = zeros(np,nq); % BIC
-Ks = zeros(np,nq); % constant term in variance
-meanarchps = zeros(np,nq); % mean over 20 lags from Engle's ARCH test on standardized innovations
-maxarchps = zeros(np,nq); % maximum p-value over 20 lags from Engle's ARCH test on standardized innovations
-meanlbqps = zeros(np,nq); % mean lbq p-value over 20 lags from Q-test on squared standardized innovations
-maxlbqps = zeros(np,nq); % maximum p-value over 20 lags from Q-test on squared standardized innovations
+LLFs = NaN*ones(np,nq); % log-likelihood
+AICs = NaN*ones(np,nq); % AIC
+BICs = NaN*ones(np,nq); % BIC
+Ks = NaN*ones(np,nq); % constant term in variance
+meanarchps = NaN*ones(np,nq); % mean over 20 lags from Engle's ARCH test on standardized innovations
+maxarchps = NaN*ones(np,nq); % maximum p-value over 20 lags from Engle's ARCH test on standardized innovations
+meanlbqps = NaN*ones(np,nq); % mean lbq p-value over 20 lags from Q-test on squared standardized innovations
+maxlbqps = NaN*ones(np,nq); % maximum p-value over 20 lags from Q-test on squared standardized innovations
+isBad = zeros(np,nq);
 
 for i = 1:np
     p = pr(i); % garch order
@@ -156,18 +159,26 @@ for i = 1:np
        q = qr(j); % arch order
        
        % (i) specify a zero-mean, Gaussian innovation GARCH(P,Q) model.
-       spec = garchset('P',p,'Q',q,'C',NaN,'Display','off');
+       GModel = garch(p,q);
+       GModel.Constant = NaN;
        
        % (ii) fit the model
-       [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
+       [Gfit, estParamCov, LLF, info] = estimate(GModel,y,'Display','off');
+       % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
+       
+       nparams = sum(any(estParamCov)); % number of parameters       
+       if nparams < p + q + 1
+           fprintf(1,'Bad fit at p = %u, q = %u\n',p,q);
+           isBad(i,j) = 1;
+           continue; % didn't fit successfully; everything stays NaN
+       end
        
        % (iii) store derived statistics on the fitted model
        LLFs(i,j) = LLF;
-       nparams = garchcount(coeff); % number of parameters
        [AIC, BIC] = aicbic(LLF,nparams,N); % aic and bic of fit
        AICs(i,j) = AIC;
        BICs(i,j) = BIC;
-       Ks(i,j) = coeff.K;
+       Ks(i,j) = Gfit.Constant;
        
        % (iv) store summaries of standardized errors
        %    (less need to compare to original because now we're only
@@ -175,8 +186,10 @@ for i = 1:np
        %    baseline...?) It's just that the absolute values of these
        %    summaries are less meaningful; should be with respect to the
        %    original time series
-       stde = innovations./sigmas; % standardized residuals
-       stde2 = stde.^2;
+       innovations = (y - Gfit.Offset); % residuals (departures from mean process)
+       [sigmas,logL] = infer(Gfit,y); % estimate time series of conditional variance, sigmas
+       stde = innovations./sqrt(sigmas); % standardized residuals
+       stde2 = stde.^2; % squared
        
        % (i) Engle's ARCH test
        %       look at autoregressive lags 1:20
@@ -194,40 +207,47 @@ for i = 1:np
        meanlbqps(i,j) = mean(lbq_pValue_stde2);
        maxlbqps(i,j) = max(lbq_pValue_stde2);
        
-       
        % Difficult to take parameter values since their number if
        % changing...
     end
 end
 
+% Check if fits went well...
+if all(isBad(:))
+    % Nothing fit well! Output a NaN:
+    warning('None of the ARCH or GARCH models could be fit.')
+    out = NaN;
+    return
+end
 
+% ------------------------------------------------------------------------------
 %% Statistics on retrieved model summaries
+% ------------------------------------------------------------------------------
 % 'whole things'
 out.minLLF = min(LLFs(:));
 out.maxLLF = max(LLFs(:));
-out.meanLLF = mean(LLFs(:));
+out.meanLLF = nanmean(LLFs(:));
 out.minBIC = min(BICs(:));
 out.maxBIC = max(BICs(:));
-out.meanBIC = mean(BICs(:));
+out.meanBIC = nanmean(BICs(:));
 out.minAIC = min(AICs(:));
 out.maxAIC = max(AICs(:));
-out.meanAIC = mean(AICs(:));
+out.meanAIC = nanmean(AICs(:));
 out.minK = min(Ks(:));
 out.maxK = max(Ks(:));
-out.meanK = mean(Ks(:));
+out.meanK = nanmean(Ks(:));
 out.min_meanarchps = min(meanarchps(:));
 out.max_meanarchps = max(meanarchps(:));
-out.mean_meanarchps = mean(meanarchps(:));
+out.mean_meanarchps = nanmean(meanarchps(:));
 out.min_maxarchps = min(maxarchps(:));
 out.max_maxarchps = max(maxarchps(:));
-out.mean_maxarchps = mean(maxarchps(:));
+out.mean_maxarchps = nanmean(maxarchps(:));
 out.min_meanlbqps = min(meanlbqps(:));
 out.max_meanlbqps = max(meanlbqps(:));
-out.mean_meanlbqps = mean(meanlbqps(:));
+out.mean_meanlbqps = nanmean(meanlbqps(:));
 out.min_maxlbqps = min(maxlbqps(:));
 out.max_maxlbqps = max(maxlbqps(:));
-out.mean_maxlbqps = mean(maxlbqps(:));
-
+out.mean_maxlbqps = nanmean(maxlbqps(:));
 
 % 'bests' (orders)
 [a, b] = find(LLFs == min(LLFs(:)),1,'first');

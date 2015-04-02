@@ -1,120 +1,121 @@
-function [post, nlZ, dnlZ] = infVB(hyp, mean, cov, lik, x, y)
+function [post, nlZ, dnlZ] = infVB(hyp, mean, cov, lik, x, y, opt)
 
-% Variational approximation to the posterior Gaussian process with MKL 
-% covariance function hyperparameter optimisation.
-% The function takes a likelihood function (see likFunction.m), and is designed
-% to be used with gp.m. See also infFunctions.m.
+% Variational approximation to the posterior Gaussian process.
+% The function takes a specified covariance function (see covFunctions.m) and
+% likelihood function (see likFunctions.m), and is designed to be used with
+% gp.m. See also infMethods.m.
 %
-% Minimisation of an upper bound on the negative marginal likelihood 
-% \int N(f|0,K) p(y|f) df \ge Psi(ga,theta) with hyperparameters 
-% theta=cov.hyp and likelihood lik(y,f) = p(y|f).
+% Minimisation of an upper bound on the negative marginal likelihood using a
+% sequence of infLaplace calls where the smoothed likelihood
+% likVB(f) = lik(..,g,..) * exp(b*(f-g)), g = sign(f-z)*sqrt((f-z)^2+v)+z, where
+%     v   .. marginal variance = (positive) smoothing width, and
+%     lik .. lik function such that p(y|f)=lik(..,f,..).
 %
-% Psi(ga,theta) = nlZ =
-%     = (ln|K+ga|-ln|ga| + h(ga) - b'*inv(inv(K)+inv(ga)))*b)/2
-%     = (ln|A| + ln|K|   + h(ga) - b'*inv(A)*b)/2 with A = inv(K)+inv(ga)
+% The problem is convex whenever the likelihood is log-concave. At the end, the
+% optimal width W is obtained analytically.
 %
-% The map (ga,K) |-> Psi(ga,theta) - ln|K| is jointly convex and ln|K| is
-% concave in its linear parameters theta.
-%
-% We optimise the convex Psi(ga,theta)-ln|K|+z'*theta/2  +  B(t,theta) criterion
-% in the outer loop using the barrier function B(t,theta) = -sum(log(theta))/t 
-% to enforce positivity w.r.t. theta. 
-% The linear term z'*theta/2 is an upper bound on the concave ln|K| term.
-% We use an interleaved optimisation with inner loops doing Newton steps in ga
-% and an outer loop doing joint Newton updates in (ga,theta). Line searches are
-% done using derivative-free 'Brent's minimum' search.
-%
-% Copyright (c) by Hannes Nickisch 2012-11-07.
+% Copyright (c) by Hannes Nickisch 2014-03-20.
 %
 % See also INFMETHODS.M.
 
-maxitinner = 20;                            % number of inner Newton steps in ga
-
-% some less important parameters
-ep = 1e-8;    % small constant for the ridge added to the stab. Newton direction
-smax = 5; Nline = 15; thr = 1e-4;                       % line search parameters
-
-tol = 1e-7;                   % tolerance for when to stop the Newton iterations
-inf = 'infVB';
-[n,D] = size(x);
+n = size(x,1);
 K = feval(cov{:}, hyp.cov, x);                  % evaluate the covariance matrix
 m = feval(mean{:}, hyp.mean, x);                      % evaluate the mean vector
 if iscell(lik), likstr = lik{1}; else likstr = lik; end
 if ~ischar(likstr), likstr = func2str(likstr); end
 
-if    (norm(m)>1e-10 || numel(hyp.mean)>0) ...
-   && (strcmp(likstr,'likErf')||strcmp(likstr,'likLogistic')) 
-    error('only meanZero implemented for classification')
-end
-y = y-m;         % no we have either zero mean or non-classification likelihoods
-if strcmp(likstr,'likGauss')
-  ga = exp(2*hyp.lik)*ones(n,1);      % best ga is known for Gaussian likelihood
-elseif strcmp(likstr,'likErf')
-  ga = ones(n,1);        % use a fixed ga for errf likelihood due to asymptotics
-else
-  % INNER compute the Newton direction of ga
-  ga = ones(n,1);                                               % initial values
-  itinner = 0;
-  nlZ_new = 1e100; nlZ_old = Inf;                  % make sure while loop starts
-  while nlZ_old-nlZ_new>tol && itinner<maxitinner                 % begin Newton
-    itinner = itinner+1;
-    [nlZ_old,dga,d2ga] = Psi(ga,K,inf,hyp,lik,y);       % calculate grad/Hessian   
-    ddga = -(d2ga+ep*eye(n))\dga;    % stabilized Newton direction + line search
-    s = .99*min(ga./max(-ddga,0)); s = min(s,smax);    % max s, s.t. ga+s*ddga>0
-    Psi_s = @(s,ddga,ga,K,inf,hyp,lik,y) Psi(ga+s*ddga,K,inf,hyp,lik,y);
-    [s,nlZ_new] = brentmin(0,s,Nline,thr,   Psi_s,0,ddga,ga,K,inf,hyp,lik,y);
-    ga = abs(ga + s*ddga);                       % update variational parameters
-  end
+if nargin<=6, opt = []; end                        % make opt variable available
+if ~isfield(opt,'postL'), opt.postL = false; end   % not compute L in infLaplace
+if isfield(opt,'out_nmax'), out_nmax = opt.out_nmax; % maximal no of outer loops
+else out_nmax = 15; end                                          % default value
+if isfield(opt,'out_tol'),  out_tol  = opt.out_tol;     % outer loop convergence
+else out_tol = 1e-5; end                                         % default value
+
+sW = ones(n,1);                                % init with some reasonable value
+opt.postL = false;                    % avoid computation of L inside infLaplace
+for i=1:out_nmax
+  U = chol(eye(n)+sW*sW'.*K)'\(repmat(sW,1,n).*K);
+  v = diag(K) - sum(U.*U,1)';             % v = diag( inv(inv(K)+diag(sW.*sW)) )
+  post = infLaplace(hyp, m, K, {@likVB,v,lik}, x, y, opt);
+  % post.sW is very different from the optimal sW for non Gaussian likelihoods
+  sW_old = sW; f = m+K*post.alpha;                              % posterior mean
+  [lp,dlp,d2lp,sW,b,z] = feval(@likVB,v,lik,hyp.lik,y,f);
+  if max(abs(sW-sW_old))<out_tol, break, end              % diagnose convergence
 end
 
-[nlZ,dnlZ,d2nlZ,b] = Psi(ga,K,inf,hyp,lik,y);       % upp bd on neg log marg lik
-W = 1./ga; sW = sqrt(W);                       % return the posterior parameters
-L  = chol(eye(n)+sW*sW'.*K);                          % L'*L = B =eye(n)+sW*K*sW
-iKtil = repmat(sW,1,n).*solve_chol(L,diag(sW));       % sW*B^-1*sW=inv(K+inv(W))
-alpha = b - iKtil*(K*b);
-post.alpha = alpha; post.sW = sW; post.L  = L;
+alpha = post.alpha; post.sW = sW;                         % posterior parameters
+post.L = chol(eye(n)+sW*sW'.*K);            % recompute L'*L = B =eye(n)+sW*K*sW
+
+ga = 1./(sW.*sW); be = b+z./ga;        % variance, lower bound offset from likVB
+h = f.*(2*be-f./ga) - 2*lp - v./ga;     % h(ga) = s*(2*b-f/ga)+ h*(s) - v*(1/ga)
+c = b+(z-m)./ga; t = post.L'\(c./sW);
+nlZ = sum(log(diag(post.L))) + (sum(h) + t'*t - (be.*be)'*ga )/2;   % var. bound
 
 if nargout>2                                           % do we want derivatives?
+  iKtil = repmat(sW,1,n).*solve_chol(post.L,diag(sW));% sW*B^-1*sW=inv(K+inv(W))
   dnlZ = hyp;                                   % allocate space for derivatives
   for j=1:length(hyp.cov)                                    % covariance hypers
     dK = feval(cov{:}, hyp.cov, x, [], j);
-    if j==1, v = iKtil*(b./W); end
-    dnlZ.cov(j) = sum(sum(iKtil.*dK))/2 - (v'*dK*v)/2; % implicit derivative = 0
+    if j==1, w = iKtil*(c.*ga); end
+    dnlZ.cov(j) = sum(sum(iKtil.*dK))/2 - (w'*dK*w)/2;
   end
   if ~strcmp(likstr,'likGauss')                              % likelihood hypers
     for j=1:length(hyp.lik)
-      dhhyp = feval(lik{:},hyp.lik,y,[],ga,inf,j);
-      dnlZ.lik(j) = sum(dhhyp)/2;                      % implicit derivative = 0
+      sign_fmz = 2*(f-z>=0)-1;                % strict sign mapping; sign(0) = 1
+      g = sign_fmz.*sqrt((f-z).^2 + v) + z;
+      dhhyp = -2*feval(lik{:},hyp.lik,y,g,[],'infLaplace',j);
+      dnlZ.lik(j) = sum(dhhyp)/2;
     end
   else                                 % special treatment for the Gaussian case
-    dnlZ.lik = sum(sum( (L'\eye(n)).^2 )) - exp(2*hyp.lik)*(alpha'*alpha);
+    dnlZ.lik = sum(sum( (post.L'\eye(n)).^2 )) - exp(2*hyp.lik)*(alpha'*alpha);
   end
   for j=1:length(hyp.mean)                                         % mean hypers
     dm = feval(mean{:}, hyp.mean, x, j);
-    dnlZ.mean(j) = -alpha'*dm;                         % implicit derivative = 0
+    dnlZ.mean(j) = -alpha'*dm;
   end
 end
 
-% variational lower bound along with derivatives w.r.t. ga and theta=hyp.cov
-% psi = (ln|K+ga|-ln|ga| + h(ga) - b'*inv(inv(K)+inv(ga)))*b)/2
-%     = (ln|A| + ln|K|   + h(ga) - b'*inv(A)*b)/2 with A = inv(K)+inv(ga)
-% the code is numerically stable
-function [nlZ,dga,d2ga,b] = Psi(ga,K,inf,hyp,lik,y)
-  n = size(K,1);
-  [h,b,dh,db,d2h,d2b] = feval(lik{:},hyp.lik,y,[],ga,inf);
-  W = 1./ga; sW = sqrt(W);
-  L = chol(eye(n)+sW*sW'.*K);                     % sum(log(diag(L))) = log|B|/2
-  C = L'\(repmat(sW,1,n).*K);
-  t = C*b;                         % t'*t-b'*K*b = -b'*inv(inv(K)+diag(1./ga))*b
-  nlZ = sum(log(diag(L)))   +   ( sum(h)   +   t'*t-b'*K*b )/2;
-  if nargout>1                     % Hessian w.r.t. variational parameters gamma
-    iKtil = repmat(sW,1,n).*solve_chol(L,diag(sW)); % sW*inv(B)*sW=inv(K+inv(W))
-    Khat = K-C'*C; v = Khat*b;                % K-K*sW*inv(B)*sW*K=inv(inv(K)+W)
-    dga = ( diag(iKtil)-1./ga   +   dh   -   (v./ga).^2 - 2*v.*db )/2;
-    if nargout>2                  % gradient w.r.t. variational parameters gamma
-      w = v./ga.^2;
-      d2ga = ( -iKtil.^2+diag(1./ga.^2)   +   diag(d2h) )/2 ...
-              -Khat.*(w*(w+2*db)') -Khat.*(db*db') +diag(w.^2.*ga)-diag(v.*d2b);
-      d2ga = (d2ga+d2ga')/2;                                        % symmetrise
+% Smoothed likelihood function; instead of p(y|f)=lik(..,f,..) compute
+%   likVB(f) = lik(..,g,..)*exp(b*(f-g)), g = sign(f-z)*sqrt((f-z)^2+v)+z, where
+%     v   .. marginal variance = (positive) smoothing width, and
+%     lik .. lik function such that feval(lik{:},varargin{:}) yields a result.
+% The smoothing results from a lower bound on the likelihood:
+%   p(y|f) \ge exp( (b+z/ga)*f - f.^2/(2*ga) - h(ga)/2 )
+function [varargout] = likVB(v, lik, varargin)
+  [b,z] = feval(lik{:},varargin{1:2},[],zeros(size(v)),'infVB');
+  f = varargin{3};                               % obtain location of evaluation
+  sign_fmz = 2*(f-z>=0)-1;                    % strict sign mapping; sign(0) = 1
+  g = sign_fmz.*sqrt((f-z).^2 + v) + z;
+  varargin{3} = g;
+  id = v==0 | abs(f./sqrt(v+eps))>1e10;     % correct asymptotics of f -> +/-Inf
+
+  varargout = cell(nargout,1);              % allocate output, eval lik(..,g,..)
+  [varargout{1:min(nargout,3)}] = feval(lik{:},varargin{1:3},[],'infLaplace');
+  if nargout>0
+    lp = varargout{1}; 
+    varargout{1} = lp + b.*(f-g);
+    varargout{1}(id) = lp(id);              % correct asymptotics of f -> +/-Inf
+    if nargout>1                                              % first derivative
+      dg_df = (abs(f-z)+eps)./(abs(g-z)+eps);    % stabilised dg/df for v=0, f=0
+      dlp = varargout{2};
+      varargout{2} = dlp.*dg_df + b.*(1-dg_df);
+      varargout{2}(id) = dlp(id);           % correct asymptotics of f -> +/-Inf
+      if nargout>2                                           % second derivative
+        d2lp = varargout{3};
+        g_e = g-z + sign_fmz*eps;
+        v_g3  = v./(g_e.*g_e.*g_e);    % stabilised v./g.^3 to cover v=0 and f=0
+        varargout{3} = (dlp-b).*v_g3 + d2lp.*dg_df.*dg_df;
+        varargout{3}(id) = d2lp(id);        % correct asymptotics of f -> +/-Inf
+        if nargout>3
+          W = abs( (b-dlp)./(g-z+sign_fmz/1.5e8) );           % optimal sW value
+          varargout{4} = sqrt(W);
+          if nargout>4
+            varargout{5} = b;
+            if nargout>5
+              varargout{6} = z;
+            end
+          end
+        end
+      end
     end
   end

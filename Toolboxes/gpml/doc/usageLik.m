@@ -2,7 +2,8 @@
 %
 % See also likFunctions.m.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-01-21
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+%                                      File automatically generated using noweb.
 clear all, close all
 n = 5; f = randn(n,1);       % create random latent function values
 
@@ -11,7 +12,7 @@ yc = sign(f);
 lc0 = {'likErf'};     hypc0 = [];   % no hyperparameters are needed
 lc1 = {@likLogistic}; hypc1 = [];    % also function handles are OK
 lc2 = {'likUni'};     hypc2 = [];
-lc3 = {'likMix',{'likUni',@likErf}}; hypc3 = log([1,2]); %mixture
+lc3 = {'likMix',{'likUni',@likErf}}; hypc3 = log([1;2]); %mixture
 
 % set up simple regression likelihood functions
 yr = f + randn(n,1)/20;
@@ -21,12 +22,22 @@ lr1 = {'likLaplace'}; hypr1 = log(sn);
 lr2 = {'likSech2'};   hypr2 = log(sn);
 nu = 4;                              % number of degrees of freedom
 lr3 = {'likT'};       hypr3 = [log(nu-1); log(sn)];
-lr4 = {'likMix',{lr0,lr1}}; hypr4 = [log([1,2]),hypr0,hypr1];
+lr4 = {'likMix',{lr0,lr1}}; hypr4 = [log([1,2]);hypr0;hypr1];
+
+a = 1; % set up warped Gaussian with g(y) = y + a*sign(y).*y.^2
+lr5 = {'likGaussWarp',['poly2']}; hypr5 = log([a;sn]);
+lr6 = {'likGumbel','+'}; hypr6 = log(sn);
 
 % set up Poisson regression
 yp = fix(abs(f)) + 1;
 lp0 = {@likPoisson,'logistic'}; hypp0 = [];
 lp1 = {@likPoisson,'exp'};      hypp1 = [];
+
+% set up other GLM likelihoods for positive or interval regression
+lg1 = {@likGamma,'logistic'}; al = 2;    hyp.lik = log(al);
+lg2 = {@likInvGauss,'exp'};   lam = 1.1; hyp.lik = log(lam);
+lg3 = {@likBeta,'expexp'};    phi = 2.1; hyp.lik = log(phi);
+lg4 = {@likBeta,'logit'};     phi = 4.7; hyp.lik = log(phi);
 
 % 0) specify the likelihood function
 lik = lc0; hyp = hypc0; y = yc;
@@ -48,4 +59,4 @@ mu = f; s2 = rand(n,1);
 
 % 3c) obtain lower bound on likelihood
 ga = rand(n,1);
-[h,b,dh,db,d2h,d2b] = feval(lik{:}, hyp, y, [], ga, 'infVB');
+[b,z] = feval(lik{:}, hyp, y, [], ga, 'infVB');

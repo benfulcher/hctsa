@@ -99,9 +99,9 @@ out.p5_5 = sum(gS(b(5)+1:b(6)))*(gf(2)-gf(1));
 % function...)
 % Will output both raw values and values scaled by sqrt(length), as is
 % normal (within a constant).
-maxlag = 25;
+maxLag = 25;
 
-acs = CO_AutoCorr(e,1:maxlag); % autocorrelations
+acs = CO_AutoCorr(e,1:maxLag,'Fourier'); % autocorrelations
 sqrtN = sqrt(N);
 
 % Output first three acfs
@@ -115,12 +115,12 @@ out.ac3n = abs(acs(3))*sqrtN; % units of sqrtN from zero
 % Median normalized distance from zero
 out.acmnd0 = median(abs(acs))*sqrtN;
 out.acsnd0 = std(abs(acs))*sqrtN;
-out.propbth = sum(abs(acs) < 2.6/sqrtN)/maxlag;
+out.propbth = sum(abs(acs) < 2.6/sqrtN)/maxLag;
 
 % First time to get below the significance threshold
 out.ftbth = find(abs(acs) < 2.6/sqrtN,1,'first');
 if isempty(out.ftbth)
-    out.ftbth = maxlag+1;
+    out.ftbth = maxLag+1;
 end
 
 % Durbin-Watson test statistic

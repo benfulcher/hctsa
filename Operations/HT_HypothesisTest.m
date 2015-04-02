@@ -11,7 +11,7 @@
 %---INPUTS:
 % x, the input time series
 % 
-% thetest, the hypothesis test to perform:
+% theTest, the hypothesis test to perform:
 %           (i) sign test ('signtest'),
 %           (ii) runs test ('runstest'),
 %           (iii) variance test ('vartest'),
@@ -22,6 +22,9 @@
 %           
 %---OUTPUT:
 % the p-value from the statistical test
+% 
+%---HISTORY:
+% Ben Fulcher, 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -46,10 +49,9 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function p = HT_HypothesisTest(x,thetest)
-% Ben Fulcher, 2009
+function p = HT_HypothesisTest(x,theTest)
 
-switch thetest
+switch theTest
     case 'signtest' % Statistics Toolbox
         [p, ~] = signtest(x);
         % for some reason this one has p-value as the first output
@@ -81,7 +83,7 @@ switch thetest
         [~, p] = lbqtest(x);
         
     otherwise
-        error('Unknown hypothesis test ''%s''',thetest);
+        error('Unknown hypothesis test ''%s''',theTest);
 end
 
 end

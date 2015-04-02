@@ -157,8 +157,8 @@ else
 end
 
 % Autocorrelation structure:
-out.ac1 = CO_AutoCorr(res,1);
-out.ac2 = CO_AutoCorr(res,2);
+out.ac1 = CO_AutoCorr(res,1,'Fourier');
+out.ac2 = CO_AutoCorr(res,2,'Fourier');
 out.taures = CO_FirstZero(res,'ac');
 out.tauresrat = CO_FirstZero(res,'ac')/CO_FirstZero(y,'ac');
 

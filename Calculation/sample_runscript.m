@@ -46,8 +46,8 @@ opids = PK_create_HCTSA_op_loc('TS_loc_guides_N.mat','oldnew_names_roslyn.csv');
 % ------------------------------------------------------------------------------
 % Provide a quick message:
 fprintf(1,['About to calculate across %u time series (ts_ids %u--%u) and %u op_ids ' ...
-                    '(between %u--%u) over a total of %u iterations\n'], ...
-                    length(tsid_range),tsid_min,tsid_max,length(opids),min(opids),max(opids));
+                '(between %u--%u) over a total of %u iterations\n'], ...
+                length(tsid_range),tsid_min,tsid_max,length(opids),min(opids),max(opids));
 
 % Loop across time series, one at a time:
 for i = 1:length(tsid_range)

@@ -1,5 +1,8 @@
 #include "mex.h"
-#include "matrix.h"
+#ifndef __linux__
+  #include "matrix.h"
+#endif
+#include "arrayofmatrices.h"
 #include "matlabexception.h"
 #include "matlabscalar.h"
 #include "matlabstring.h"

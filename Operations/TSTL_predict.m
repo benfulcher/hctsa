@@ -153,15 +153,15 @@ out.minxcf = min(xcf);
 out.stdxcf = std(xcf);
 
 
-out.pred1_ac1 = CO_AutoCorr(y_pred1,1); % autocorrelation at lag one of prediction
-out.pred1ac1diff = abs(out.pred1_ac1 - CO_AutoCorr(y,1)); % difference in autocorrelations of prediction and original
-out.pred1_ac2 = CO_AutoCorr(y_pred1,2); % autocorrelation at lag one of prediction
-out.pred1ac2diff = abs(out.pred1_ac2 - CO_AutoCorr(y,2)); % difference in autocorrelations of prediction and original
+out.pred1_ac1 = CO_AutoCorr(y_pred1,1,'Fourier'); % autocorrelation at lag one of prediction
+out.pred1ac1diff = abs(out.pred1_ac1 - CO_AutoCorr(y,1,'Fourier')); % difference in autocorrelations of prediction and original
+out.pred1_ac2 = CO_AutoCorr(y_pred1,2,'Fourier'); % autocorrelation at lag one of prediction
+out.pred1ac2diff = abs(out.pred1_ac2 - CO_AutoCorr(y,2,'Fourier')); % difference in autocorrelations of prediction and original
 out.pred_tau_comp = CO_FirstZero(y_pred1,'ac')/CO_FirstZero(y,'ac'); % difference in first zero crossing of autocorrelation function
 
-% autocorrelation structure
-acs_y = CO_AutoCorr(y,1:10);
-acs_y_pred1 = CO_AutoCorr(y_pred1,1:10);
+% Autocorrelation structure:
+acs_y = CO_AutoCorr(y,1:10,'Fourier');
+acs_y_pred1 = CO_AutoCorr(y_pred1,1:10,'Fourier');
 out.acs1_10_sumabsdiffpred1 = sum(abs(acs_y - acs_y_pred1));
 
 % mean square residuals: this will likely be a bad measure (as may be out
@@ -188,7 +188,7 @@ end
 out.Nlagxcorr = Nlag;
 res = y_lagged - y_pred1_lagged;
 out.bestpred1rmsres = sqrt(mean(res.^2)); % rms residuals
-out.ac1bestres = CO_AutoCorr(res,1); % autocorrelation of residuals
+out.ac1bestres = CO_AutoCorr(res,1,'Fourier'); % autocorrelation of residuals
 
 % now look at fraction of points that are within a threshold of each
 % other...

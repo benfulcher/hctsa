@@ -29,7 +29,7 @@
 %       
 % maxm, the maximum embedding dimension
 % 
-% theilerwin, the Theiler window
+% theilerWin, the Theiler window
 % 
 % cf. "Spurious dimension from correlation algorithms applied to limited
 % time-series data", J. Theiler, Phys. Rev. A, 34(3) 2427 (1986)
@@ -46,6 +46,9 @@
 % determine an optimal scaling range that simultaneously spans the greatest
 % range of scales and shows the best fit to the data, and return the range, a
 % goodness of fit statistic, and a dimension estimate.
+% 
+%---HISTORY:
+% Ben Fulcher, 18/11/2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -70,12 +73,13 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_TISEAN_d2(y, tau, maxm, theilerwin)
-% Ben Fulcher, 18/11/2009
+function out = NL_TISEAN_d2(y, tau, maxm, theilerWin)
 
 N = length(y); % data length (number of samples)
 
+% ------------------------------------------------------------------------------
 %% Check inputs
+% ------------------------------------------------------------------------------
 % time delay, tau
 if nargin < 2 || isempty(tau)
     tau = 1;
@@ -92,40 +96,54 @@ if nargin < 3 || isempty(maxm)
 end
 
 % Theiler window
-if nargin < 4 || isempty(theilerwin)
-   theilerwin = 0.01; % Set a Theiler window of 1%% of the data length
+if nargin < 4 || isempty(theilerWin)
+   theilerWin = 0.01; % Set a Theiler window of 1%% of the data length
 end
-if (theilerwin > 0) && (theilerwin < 1) % specify proportion of time-series length
-    theilerwin = round(theilerwin*N);
+if (theilerWin > 0) && (theilerWin < 1) % specify proportion of time-series length
+    theilerWin = round(theilerWin*N);
 end
 
+% ------------------------------------------------------------------------------
 %% Write the file
-tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
+% ------------------------------------------------------------------------------
 % to the millisecond (only get double-write error for same function called in same millisecond
-fn = sprintf('tisean_temp_d2_%s.dat',tnow); % filename
-dlmwrite(fn,y);
-fprintf(1,'Just wrote the input time series (N = %u) to the temporary file %s for TISEAN\n',length(y),fn)
+tmp_folder = tempdir;
+fileName = sprintf('hctsa_tisean_d2_tau%u_M%u_t%u_%s.tmp',tau,maxm,theilerWin,datestr(now,'yymmdd_HHMMSS_FFF')); % filename
+% Place in the system temp directory:
+fileName = fullfile(tmp_folder,fileName);
+dlmwrite(fileName,y);
+fprintf(1,'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN\n',length(y),fileName)
 
-%% Run the TISEAN code
-[~, res] = system(sprintf(['d2 -d%u -M1,%u -t%u %s'],tau,maxm,theilerwin,fn));
-% [~, res] = system(['d2 -d' num2str(tau) ' -M1,' num2str(maxm) ...
-%                     ' -t' num2str(theilerwin) ' ' fn]);
-delete(fn) % remove the temporary time-series data file
+% ------------------------------------------------------------------------------
+%% Run the TISEAN code, d2
+% ------------------------------------------------------------------------------
+[~, res] = system(sprintf(['d2 -d%u -M1,%u -t%u %s'],tau,maxm,theilerWin,fileName));
+delete(fileName) % remove the temporary time-series data file
 %  * extension .stat: This file shows the current status of the estimate.
-if exist([fn '.stat'])
-    delete([fn '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
+if exist([fileName '.stat'])
+    delete([fileName '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
 end
 
 if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
-    if exist([fn '.c2']), delete([fn '.c2']); end
-    if exist([fn '.d2']), delete([fn '.d2']); end
-    if exist([fn '.h2']), delete([fn '.h2']); end
+    if exist([fileName '.c2']), delete([fileName '.c2']); end
+    if exist([fileName '.d2']), delete([fileName '.d2']); end
+    if exist([fileName '.h2']), delete([fileName '.h2']); end
     if isempty(res)
         error('Call to TISEAN function ''d2'' failed.')
     else
         error('Call to TISEAN function ''d2'' failed: %s',res)
     end
 end
+
+% Check that all required files were generated (could not be due to problems with path or filename?)
+if ~exist([fileName '.c2']) || ~exist([fileName '.d2']) || ~exist([fileName '.h2'])
+    error([fileName,'.c2/.d2/.h2 not generated?']);
+    % Delete all temporary files that exist:
+    if exist([fileName '.c2']), delete([fileName '.c2']); end
+    if exist([fileName '.d2']), delete([fileName '.d2']); end
+    if exist([fileName '.h2']), delete([fileName '.h2']); end
+end
+
 
 % this creates files in the local directory:
 %  * extension .c2: This file contains the correlation sums for all treated length scales and embedding dimensions.
@@ -135,14 +153,14 @@ end
 %% Retreve output from file
 
 % % (1) --------- C2 -----------
-% fid_c2 = fopen([fn '.c2']);
+% fid_c2 = fopen([fileName '.c2']);
 % s = textscan(fid_c2,'%[^\n]');
 % if isempty(s)
-%     disp(['Error reading TISEAN output file ' fn '.c2'])
+%     disp(['Error reading TISEAN output file ' fileName '.c2'])
 %     fclose(fid_c2); % close the file
-%     delete([fn '.c2']) % delete this file
-%     delete([fn '.d2']) % delete this file
-%     delete([fn '.h2']) % delete this file
+%     delete([fileName '.c2']) % delete this file
+%     delete([fileName '.d2']) % delete this file
+%     delete([fileName '.h2']) % delete this file
 %     return;
 % end
 % s = s{1};
@@ -156,19 +174,19 @@ end
 
 % ------- GAUSSIAN KERNEL CORRELATION INTEGRAL -----------
 % Now implement Gaussian Kernel Correlation integral
-[~, res] = system(sprintf('c2g %s.c2',fn));
+[~, res] = system(sprintf('c2g %s.c2',fileName));
 % output is in res -- check it
 s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('writing to stdout',s);
 s = s(wi+1:end);
 if isempty(s) % TISEAN did produce valid output
-    delete([fn,'.c2']); delete([fn,'.d2']); delete([fn,'.h2']) % just in case these files were generated...
+    delete([fileName,'.c2']); delete([fileName,'.d2']); delete([fileName,'.h2']) % just in case these files were generated...
     error('TISEAN d2 produced invalid output: %s',res)
 end
 try
     c2gdat = SUB_readTISEANout(s,maxm,'#m=',3);
 catch
-    delete([fn '.c2']); delete([fn '.d2']); delete([fn '.h2'])
+    delete([fileName '.c2']); delete([fileName '.d2']); delete([fileName '.h2'])
     error('There are probably some Inf and NAN values in the TISEAN output files...?')
 end
     
@@ -178,13 +196,13 @@ end
 % ----- TAKENS MAXIMUM LIKELIHOOD ESTIMATOR FROM CORRELATION SUMS ----
 % The integral is computed from the discrete values of C(r) by assuming an
 % exact power law between the available points.
-[~, res] = system(sprintf('c2t %s.c2',fn));
+[~, res] = system(sprintf('c2t %s.c2',fileName));
 % output is in res
 s = textscan(res,'%[^\n]'); s = s{1};
 wi = strmatch('writing to stdout',s);
 s = s(wi+1:end);
 c2tdat = SUB_readTISEANout(s,maxm,'#m=',2);
-delete([fn '.c2']);
+delete([fileName '.c2']);
 
 % c2tdat contains upper length scale r (1), and the takens estimator (2)
 % The integral is computed from the discrete values of C(r) by assuming an
@@ -192,13 +210,13 @@ delete([fn '.c2']);
 
 
 % (2) --------- D2 ------------
-fid_d2 = fopen([fn '.d2']);
+fid_d2 = fopen([fileName '.d2']);
 s = textscan(fid_d2,'%[^\n]');
 s = s{1};
 % FEED THIS INTO SUBROUTINE
 d2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
 fclose(fid_d2); % close the file
-delete([fn '.d2']); % delete the file
+delete([fileName '.d2']); % delete the file
 
 % d2dat now contains the local slopes of the logarithm of correlation sums
 % (second column) as a function of the length scale epsilon (first column) for
@@ -207,19 +225,21 @@ delete([fn '.d2']); % delete the file
 
 % (3) -------------- H2 -------------
 
-fid_h2 = fopen([fn '.h2']);
+fid_h2 = fopen([fileName '.h2']);
 s = textscan(fid_d2,'%[^\n]');
 s = s{1};
 % FEED THIS INTO SUBROUTINE
 h2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
 fclose(fid_h2); % close the file
-delete([fn '.h2']); % delete the file
+delete([fileName '.h2']); % delete the file
 
 % h2dat now contains the correlation entropies (second column)
 
-%% Obtain useful from all this data
+%% Time to obtain something useful from all this data
 
-% (1) TAKENS ESTIMATOR
+% ------------------------------------------------------------------------------
+%% (1) TAKENS ESTIMATOR
+% ------------------------------------------------------------------------------
 % correlation dimension at upper length scale of eup
 % (for z-scored time series, std = 1...; in units of this)
 % Kantz & Shreiber recommend taking at half the std of the signal
@@ -240,7 +260,9 @@ out.takens05mmin_stabled = mmintakens05.stabled;
 out.takens05mmin_linrmserr = mmintakens05.linrmserr;
 
 
-% (2) D2, local slopes of correlation integral
+% ------------------------------------------------------------------------------
+%% (2) D2, local slopes of correlation integral
+% ------------------------------------------------------------------------------
 % semilogx(d2dat{1}(:,1),d2dat{1}(:,2))
 
 % (2i) Estimate dimensions using Ben's method
@@ -308,8 +330,9 @@ out.d2_dimstd = scd2.dimstd;
 
 % semilogx(c2tdat{1}(:,1),c2tdat{1}(:,2));
 
-
-% (3) Use Gaussian smoothed estimates
+% ------------------------------------------------------------------------------
+%% (3) Use Gaussian-smoothed estimates
+% ------------------------------------------------------------------------------
 % c2gdat
 % we have the local slopes (d2) in the third column.
 % Do all the same stuff as d2.
@@ -321,9 +344,9 @@ out.d2_dimstd = scd2.dimstd;
 try
     benfindd2g = findscalingr_ind(d2gdat_M);
 catch
-    disp('Error finding scaling range')
-    out = NaN;
-    return
+    error('Error finding scaling range')
+    % out = NaN;
+    % return
 end
     
 % rows: increasing embedding m
@@ -369,9 +392,9 @@ out.d2g_dimest = scd2g.dimest;
 out.d2g_dimstd = scd2g.dimstd;
 
 
-
-
-% (4) H2
+% ------------------------------------------------------------------------------
+%% (4) H2
+% ------------------------------------------------------------------------------
 % h2dat
 % A flat region in this indicates determinism/deterministic chaos
 [h2dat_v h2dat_M] = SUB_celltomat(h2dat,2);
@@ -421,33 +444,19 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 
 % can look for local slopes using
 % c2d:
-% [pop res] = system(['H:\bin\c2d ' fn '.c2']);
+% [pop res] = system(['H:\bin\c2d ' fileName '.c2']);
 
 
 
 
-
+% ------------------------------------------------------------------------------
     function dimdat = SUB_readTISEANout(s,maxm,blocker,nc)
         % blocker the string distinguishing sections of output
         % nc number of columns in string
         
-%         w = zeros(maxm+1,1);
-%         if nargin < 3 % use default blocker
-%             for ii = 1:maxm
-%                 w(ii)=strmatch(['#dim= ' num2str(ii)],s,'exact');
-%             end
-%         else
-%            for ii = 1:maxm
-%                 try
-%                     w(ii) = strmatch([blocker num2str(ii)],s,'exact');
-%                 catch
-%                    keyboard 
-%                 end
-%            end
-%         end
         w = strmatch(blocker,s);
         if length(w)~=maxm
-            disp('error reading TISEAN output'); return
+            error('error reading TISEAN output');
         end
         w(end+1) = length(s)+1; % as if there were another marker at the entry after the last data row
         
@@ -457,17 +466,26 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             nn = zeros(length(ss),nc);
             for jj = 1:length(ss)
                 if nc == 2
-                    tmp = textscan(ss{jj},'%n%n');
+                    tmp = textscan(ss{jj},'%f%f');
                 elseif nc == 3
-                    tmp = textscan(ss{jj},'%n%n%n');
+                    tmp = textscan(ss{jj},'%f%f%f');
                 end
-                nn(jj,:) = horzcat(tmp{:});
+                if all(cellfun(@isempty,tmp))
+                    % Ben Fulcher, 2015-03-06
+                    % Sometimes a comment at the bottom of the output file
+                    nn = nn(1:jj-1,:);
+                    break
+                else
+                    nn(jj,:) = horzcat(tmp{:});
+                end
             end
             dimdat{ii} = nn;
         end
 
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function takensp = SUB_takens(dat,eup)
         % dat is takens estimator data, cell with a component corresponding to each
         % embedding dimension
@@ -487,7 +505,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         end
         
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function out = findscalingr(x)
         % finds constant regions in matrix x
         % if x a matrix, finds scaling regions requiring all columns to
@@ -534,7 +554,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %         hold off;
 %         keyboard
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function results = findscalingr_ind(x)
         % AS ABOVE EXCEPT LOOKS FOR SCALING RANGES FOR INDIVIDUAL DIMENSIONS
         % finds constant regions in matrix x
@@ -575,7 +597,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         end
         
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function [thevector, thematrix] = SUB_celltomat(thecell,thecolumn)
         % converts cell to matrix, where each (specified) column in cell
         % becomes a column in the new matrix
@@ -616,7 +640,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         end
         
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function out = SUB_findmmin(ds)
         % estimated dimensions for d = 1, ... , m
         % estimates when they stabilize to a limiting value
@@ -653,7 +679,9 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         out.linrmserr = sqrt(mean((ds'-pfit).^2));
         
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function results = SUB_getslopes(x,Y)
         dx = log10(x(2))-log10(x(1));
 %         dx = x(2) - x(1);
@@ -688,9 +716,10 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %             hold off;
 %             keyboard
         end
-        
     end
+% ------------------------------------------------------------------------------
 
+% ------------------------------------------------------------------------------
     function results = SUB_doesflatten(x,Y)
         % look for region of zero gradient amidst regions of negative
         % gradient -- e.g., by two moving boundaries and a t-test between
@@ -745,6 +774,6 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %             keyboard
         end
     end
-
+% ------------------------------------------------------------------------------
 
 end

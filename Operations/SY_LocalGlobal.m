@@ -12,10 +12,13 @@
 %             (i) 'l': the first n points in a time series,
 %             (ii) 'p': an initial proportion of the full time series, n
 %             (iii) 'unicg': n evenly-spaced points throughout the time series
-%             (iv) 'randcg': n randomly-chosen points from the time series (chosen with replacement)
+%             (iv) 'randcg': n randomly-chosen points from the time series
+%                               (chosen with replacement)
 % 
 % n, the parameter for the method specified above
 % 
+% randomSeed, an option for whether (and how) to reset the random seed, for the
+% 'randcg' input
 % 
 %---OUTPUTS: the mean, standard deviation, median, interquartile range,
 % skewness, kurtosis, AC(1), and SampEn(1,0.1).
@@ -28,6 +31,7 @@
 % 
 %---HISTORY:
 % Ben Fulcher, September 2009
+% Ben Fulcher, 2015-03-19 added randomSeed input
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -52,7 +56,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SY_LocalGlobal(y,lorp,n)
+function out = SY_LocalGlobal(y,lorp,n,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Preliminaries
@@ -61,7 +65,7 @@ function out = SY_LocalGlobal(y,lorp,n)
 % Check input time series is z-scored:
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored (mean=%g and std-1=%g)', ...
-                                                mean(y),std(y)-1)
+                                            mean(y),std(y)-1)
 end
 
 % Set default l
@@ -95,11 +99,17 @@ switch lorp
         % Takes n uniformly distributed points in time series:
         r = round(linspace(1,N,n));
     case 'randcg'
-        % Takes n random points in time series; there could be repeats:
+        if nargin < 4
+            randomSeed = [];
+        end
+        % Reset the random seed if specified (for reproducibility):
+        BF_ResetSeed(randomSeed);
+        
+        % Take n random points in time series; there could be repeats:
         r = randi(N,n,1);
-        % This is not veru robust, as it's taking just a single stochastic
+        
+        % This is not very robust, as it's taking just a single stochastic
         % sample with a (possibly) large variance
-
     otherwise
         error('Unknown specifier, ''%s''',lorp);
 end
@@ -107,13 +117,13 @@ end
 % ------------------------------------------------------------------------------
 % Compare statistics of this subset to those obtained from the full time series
 % ------------------------------------------------------------------------------
-out.mean = abs(mean(y(r))); %/mean(y); % ** INPUT Y MUST BE Z-SCORED;
+out.absmean = abs(mean(y(r))); %/mean(y); % ** INPUT Y MUST BE Z-SCORED;
 out.std = std(y(r)); %/std(y); % ** INPUT Y MUST BE Z-SCORED
 out.median = median(y(r)); %/median(y); % if median is very small;; could be very noisy
 out.iqr = abs(1-iqr(y(r)) / iqr(y));
 out.skewness = abs(1-skewness(y(r)) / skewness(y)); % how far from true
 out.kurtosis = abs(1-kurtosis(y(r)) / kurtosis(y)); % how far from true
-out.ac1 = abs(1-CO_AutoCorr(y(r),1) / CO_AutoCorr(y,1)); % how far from true
+out.ac1 = abs(1 - CO_AutoCorr(y(r),1,'Fourier') / CO_AutoCorr(y,1,'Fourier')); % how far from true
 out.sampen101 = PN_sampenc(y(r),1,0.1,1) / PN_sampenc(y,1,0.1,1);
 
 

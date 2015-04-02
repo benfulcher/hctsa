@@ -22,25 +22,28 @@
 
 fprintf(1,['This script will set up the Highly Comparative Time-Series ' ...
                                 'Analysis code package from scratch!\n'])
-fprintf(1,['In the following order, we will' ...
-                '\n- Add the paths,' ...
-                '\n- Set up the database,' ...
-                '\n- Add the operations,' ...
-                '\n- Compile the toolboxes,' ...
-                '\n- Test that things are working.\n'])
+fprintf(1,['In the following order, we will:' ...
+            '\n-1- Add the paths needed for the repository,' ...
+            '\n-2- Set up a connection to a mySQL database,' ...
+            '\n-3- Add the time-series analysis operations to the database,' ...
+            '\n-4- Compile the external time-series toolboxes for this system.\n\n'])
 
 % ------------------------------------------------------------------------------
 %% 1. Add the paths:
 % ------------------------------------------------------------------------------
+fprintf(1,'-1- Adding paths needed for the repository...\n');
+input('<<Press any key to continue>>')
 try
 	startup
 catch emsg
 	fprintf(1,'error.\n%s\n',emsg.message)
 end
+fprintf(1,'\n');
 
 % ------------------------------------------------------------------------------
 %% 2. Set up the database:
 % ------------------------------------------------------------------------------
+fprintf(1,'-2- Setting up a link to a mySQL database...\n');
 reply = '';
 while isempty(reply)
     reply = input('Do you need help setting up a mySQL database? [y/n]','s');
@@ -55,19 +58,24 @@ if strcmp(reply,'y') % Set up mySQL database
     % Walks the user through creating the database from a root account and sets
     % up a user account and password:
     SQL_create_db;
+    fprintf(1,['Note that the database access ' ...
+                'settings are stored in ''sql_settings.conf''\n'])
+else
+    fprintf(1,['Ok, then I''ll assume you''ve configured your ''sql_settings.conf'' file correctly.\n' ...
+                '(see Documentation for details on how to configure your Matlab/mySQL connection).\n']);
 end
-fprintf(1,['Note that the database access ' ...
-            'settings are stored in ''sql_settings.conf''\n'])
 
 % ------------------------------------------------------------------------------
 %% 3. Create all (empty) tables in the database
 % ------------------------------------------------------------------------------
 SQL_create_all_tables;
+fprintf(1,'\n');
 
 % ------------------------------------------------------------------------------
 %% 4. Populate the new tables with operations
 % ------------------------------------------------------------------------------
-fprintf(1,'Populating the database with operations (please be patient)...\n')
+fprintf(1,'-3- Populating the database with operations...\n')
+input('<<Press any key to continue>>')
 
 fprintf(1,'Adding Master operations...\n');
 mop_timer = tic;
@@ -80,23 +88,25 @@ op_timer = tic;
 SQL_add('ops','Database/INP_ops.txt','',0)
 % fprintf(1,'Adding a reduced set of operations...\n'); op_timer = tic;
 % SQL_add('ops','Database/INP_ops_reduced.txt','',0)
-fprintf(1,'Operations added in %s.\n',BF_thetime(toc(op_timer)))
+fprintf(1,'Operations added in %s.\n\n',BF_thetime(toc(op_timer)))
 clear op_timer
 
 % ------------------------------------------------------------------------------
 %% 5. Attempt to compile the executables required by the periphery Toolboxes:
 % ------------------------------------------------------------------------------
-fprintf(1,['Attempting to compile the binary executables needed for evaluating ' ...
+fprintf(1,['-4- Attempting to compile the binary executables needed for evaluating ' ...
                                                         'some operations.\n'])
 fprintf(1,['Please make sure that mex is set up with the right compilers for' ...
                                                             ' this system.\n'])
-fprintf(1,['Note that errors here are not the end of the world, but mean that ' ...
+fprintf(1,['Note that errors here are not the end of the world,\nbut mean that ' ...
                         'some operations may fail to execute correctly...\n'])
+input('<<Press any key to continue>>')
 cd Toolboxes
 compile_mex
 cd('../');
-fprintf(1,'Hope everything compiled ok?!\n')
-fprintf(1,['Ready when you are to add time series to the database using ' ...
+
+fprintf(1,'Hope everything compiled ok?!\n\n')
+fprintf(1,['All done! Ready when you are to add time series to the database using ' ...
                             'SQL_add(''ts'',''<timeSeries_inputFile.txt>'')...!\n']);
 
 % Attempt to add a time series

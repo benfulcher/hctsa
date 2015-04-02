@@ -17,7 +17,7 @@
 %--keywordRemove: keywords NOT to include (cell of strings)
 %--idr: range of possible ids to restrict the search to (empty = don't
 %                    restrict -- default)
-%--dbname: can specify a custom database; otherwise opens the default specified
+%--databaseName: can specify a custom database; otherwise opens the default specified
 %           in SQL_opendatabase
 % 
 %---OUTPUTS
@@ -39,13 +39,13 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function ids = SQL_getids(tsOrOps,lengthRange,keywordInclude,keywordRemove,idr,dbname)
+function ids = SQL_getids(tsOrOps,lengthRange,keywordInclude,keywordRemove,idr)
 
 % ------------------------------------------------------------------------------
 %% Check inputs -- set defaults
 % ------------------------------------------------------------------------------
 
-if ~ismember(tsOrOps,{'ts','ops'})
+if nargin < 1 || ~ismember(tsOrOps,{'ts','ops'})
 	error('First input must be either ''ts'' or ''ops''.');
 end
 
@@ -58,11 +58,18 @@ if strcmp(tsOrOps,'ops')
 	end
 end
 
+if nargin < 2
+    lengthRange = [];
+end
 % empty lengthRange means no length contraint, which is a fine default now...
 % if isempty(lengthRange)
 %     lengthRange = [200, 20000];
 %     fprintf(1,'Setting default length constraints: %u--%u\n',lengthRange(1),lengthRange(2))
 % end
+
+if nargin < 3
+    keywordInclude = {};
+end
 
 if nargin < 4
     keywordRemove = {};
@@ -72,23 +79,24 @@ if nargin < 5
 	idr = [];
 end
 
-if nargin < 6
-	dbname = ''; % Use default database by default
-end
-
 % ------------------------------------------------------------------------------
 %% Foreplay:
 % ------------------------------------------------------------------------------
 % Seperate into keywords to include: kyes
 % and the number of that keyword to include: kyesn
 if ~isempty(keywordInclude)
-    kyes = keywordInclude(:,1); kyesn = vertcat(keywordInclude{:,2});
+    if ischar(keywordInclude)
+        % Strange syntax; assume that they want to include all of this keyword
+        kyes = {keywordInclude}; kyesn = 0;
+    else
+        kyes = keywordInclude(:,1); kyesn = vertcat(keywordInclude{:,2});
+    end
 else
     kyes = {}; kyesn = [];
 end
 
 % Open connection to mySQL database
-dbc = SQL_opendatabase(dbname);
+dbc = SQL_opendatabase;
 
 if strcmp(tsOrOps,'ts')
 
@@ -141,12 +149,6 @@ if strcmp(tsOrOps,'ts')
 								'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
 			else % constrain to some number (using the LIMIT command in mySQL)
-                % switch howtolimit
-                %     case 'pcmax'
-                %         limitme = sprintf(' ORDER BY PercentageCalculated DESC LIMIT %u',ncut);
-                %     case 'pcmin'
-                %         limitme = sprintf(' ORDER BY PercentageCalculated LIMIT %u',ncut);
-                %     case 'rand'
                 limitme = sprintf(' ORDER BY RAND() LIMIT %u',ncut);
                         % I know this is a slow implementation -- probably better
                         % to create the random numbers here to constrain
@@ -165,14 +167,12 @@ if strcmp(tsOrOps,'ts')
 				end
 			end
 
-			% execute the select statement
-			[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
-			if isempty(ts_ids) && isempty(emsg)
+			% Execute the select statement
+			[ts_ids,emsg] = mysql_dbquery(dbc,SelectString);
+			if (isempty(ts_ids) && isempty(emsg))
 				fprintf(1,'No time series matched the given constraints for the keyword ''%s''\n',kyes{i});
 			elseif ~isempty(emsg)
-				fprintf(1,'Error retrieving time series for %s\n',kyes{i});
-				disp(emsg)
-				keyboard
+				error('Error retrieving time series for %s\n%s',kyes{i},SelectString);
 			else
 				C_tskwyes{i} = vertcat(ts_ids{:});
 				ngot = length(C_tskwyes{i});
@@ -195,14 +195,10 @@ if strcmp(tsOrOps,'ts')
 		end
 	
 	else % just use the other constraints
-		% if isempty(keywordRemove)
 		SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' conditions(6:end)];
-		% else
-		% 	SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ss_tsl ' ' keywordRemoveextrastring];
-		% end
-		[ts_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+		[ts_ids,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
-			fprintf(1,'Database call failed\n%s\n',SelectString); disp(emsg); keyboard
+			fprintf(1,'Database call failed\n%s\n%s',SelectString,emsg);
 		else
 			ts_ids_keep = unique(vertcat(ts_ids{:}));
 		end
@@ -261,7 +257,7 @@ else
 
 	if ~isempty(kyes)
 		C_kyes = cell(length(kyes),1);
-		for i=1:length(kyes)
+		for i = 1:length(kyes)
 			ncut = kyesn(i);
 
 			% Now do the rest of the query at once: do the keyword matches and length constraints
@@ -272,17 +268,7 @@ else
 								'(SELECT opkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
 			else % constrain to some number (using the LIMIT command in mySQL)
-                % switch howtolimit
-                    % case 'pcmax'
-                        % limitme = [' ORDER BY PercentageCalculated DESC LIMIT ' num2str(ncut)];
-                    % case 'pcmin'
-                        % limitme = [' ORDER BY PercentageCalculated LIMIT ' num2str(ncut)];
-                    % case 'rand'
-                limitme = [' ORDER BY RAND() LIMIT ' num2str(ncut)];
-                        % I know this is a slow implementation -- probably better
-                        % to create the random numbers here to constrain
-                % end
-                
+                limitme = [' ORDER BY RAND() LIMIT ' num2str(ncut)];                
                 
 				if isempty(kyes{i}) % empty keyword -- just constrain by number
 					if isempty(conditions)
@@ -300,10 +286,10 @@ else
 			end
 		
 			% Execute the query
-			[op_ids,qrf,rs,emsg] = mysql_dbquery(dbc,SelectString);
+			[op_ids,emsg] = mysql_dbquery(dbc,SelectString);
 		
 			if ~isempty(emsg)
-				fprintf(1,'Error finding %s\n',kyes{i}); disp(emsg); keyboard
+				error('Error finding %s\n%s\n%s',kyes{i},emsg,SelectString);
 			end
 			C_kyes{i} = vertcat(op_ids{:});
 		
@@ -330,7 +316,7 @@ else
 		else
 			SelectString = ['SELECT op_id FROM Operations WHERE ' conditions(6:end)]; % (remove "AND ")
 		end
-		[op_ids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+		[op_ids,emsg] = mysql_dbquery(dbc,SelectString);
 		if ~isempty(emsg)
 			fprintf(1,'Database call failed\n%s\n',SelectString); disp(emsg); keyboard
 		else
@@ -342,7 +328,7 @@ else
 	if masterPull && ~isempty(op_ids_keep)
 		% Find implicated Master functions (a super inefficient way of doing it:)
 		SelectString = ['SELECT op_id FROM Operations WHERE mop_id IN (SELECT DISTINCT mop_id FROM Operations WHERE op_id IN (' BF_cat(op_ids_keep,',') '))'];
-		[newmids,~,~,emsg] = mysql_dbquery(dbc,SelectString);
+		[newmids,emsg] = mysql_dbquery(dbc,SelectString);
 		if isempty(emsg)
 			if ~isempty(newmids) % there are some master functions implicated
 				newmids = vertcat(newmids{:});

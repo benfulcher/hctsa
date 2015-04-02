@@ -4,14 +4,15 @@ function A = meanScale(mean, hyp, x, i)
 %
 % m(x) = a * m_0(x)
 %
-% The hyperparameter is:
+% The hyperparameters are:
 %
-% hyp = [ a ]
+% hyp = [ a;
+%         hyp_m0 ]
 %
 % This function doesn't actually compute very much on its own, it merely does
-% some bookkeeping, and calls other mean function to do the actual work.
+% some bookkeeping, and calls other mean functions to do the actual work.
 %
-% Copyright (c) by Carl Edward Rasmussen & Hannes Nickisch 2010-07-15.
+% Copyright (c) by Carl Edward Rasmussen & Hannes Nickisch 2014-11-01.
 %
 % See also MEANFUNCTIONS.M.
 

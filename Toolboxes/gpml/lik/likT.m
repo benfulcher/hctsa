@@ -17,7 +17,7 @@ function [varargout] = likT(hyp, y, mu, s2, inf, i)
 % respectively, see likFunctions.m for the details. In general, care is taken
 % to avoid numerical issues when the arguments are extreme.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2012-10-27.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-09-02.
 %
 % See also LIKFUNCTIONS.M.
 
@@ -25,7 +25,7 @@ if nargin<3, varargout = {'2'}; return; end   % report number of hyperparameters
 
 numin = 1;                                                 % minimum value of nu
 nu = exp(hyp(1))+numin; sn2 = exp(2*hyp(2));           % extract hyperparameters
-lZ = loggamma(nu/2+1/2) - loggamma(nu/2) - log(nu*pi*sn2)/2;
+lZ = gammaln(nu/2+1/2) - gammaln(nu/2) - log(nu*pi*sn2)/2;
 
 if nargin<5                              % prediction mode if inf is not present
   if numel(y)==0,  y = zeros(size(mu)); end
@@ -37,10 +37,10 @@ if nargin<5                              % prediction mode if inf is not present
   end
   ymu = {}; ys2 = {};
   if nargout>1
-    ymu = mu;                    % first y moment; for nu<=1 we this is the mode
+    ymu = mu;                       % first y moment; for nu<=1 this is the mode
     if nargout>2
       if nu<=2
-        ys2 = Inf(size(mu));
+        ys2 = Inf(size(mu));                    % variance does not always exist
       else
         ys2 = (s2 + nu*sn2/(nu-2)).*ones(size(mu));            % second y moment
       end
@@ -68,7 +68,7 @@ else
     else                                                       % derivative mode
       a = r2+nu*sn2; a2 = a.*a; a3 = a2.*a;
       if i==1                                             % derivative w.r.t. nu
-        lp_dhyp =  nu*( dloggamma(nu/2+1/2)-dloggamma(nu/2) )/2 - 1/2 ...
+        lp_dhyp =  nu*( psi(nu/2+1/2)-psi(nu/2) )/2 - 1/2 ...
                   -nu*log(1+r2/(nu*sn2))/2 +(nu/2+1/2)*r2./(nu*sn2+r2);
         lp_dhyp = (1-numin/nu)*lp_dhyp;          % correct for lower bound on nu
         dlp_dhyp = nu*r.*( a - sn2*(nu+1) )./a2;
@@ -97,47 +97,13 @@ else
     varargout = {lZ};
 
   case 'infVB'
-    if nargin<6
-      % variational lower site bound
-      % t(s) \propto (1+(s-y)^2/(nu*s2))^(-nu/2+1/2)
-      % the bound has the form: b*s - s.^2/(2*ga) - h(ga)/2 with b=y/ga!!
-      ga = s2; n = numel(ga); b = y./ga; y = y.*ones(n,1);
-      db = -y./ga.^2; d2b = 2*y./ga.^3;
-      id = ga<=sn2*nu/(nu+1);
-      h   =  (nu+1)*( log(ga*(1+1/nu)/sn2) - 1 ) + (nu*sn2+y.^2)./ga;
-      h(id) = y(id).^2./ga(id); h = h - 2*lZ;
-      dh  =  (nu+1)./ga - (nu*sn2+y.^2)./ga.^2;
-      dh(id) = -y(id).^2./ga(id).^2;
-      d2h = -(nu+1)./ga.^2 + 2*(nu*sn2+y.^2)./ga.^3;
-      d2h(id) = 2*y(id).^2./ga(id).^3;
-      id = ga<0; h(id) = Inf; dh(id) = 0; d2h(id) = 0;     % neg. var. treatment
-      varargout = {h,b,dh,db,d2h,d2b};
-    else
-      ga = s2; n = numel(ga); dhhyp = zeros(n,1);
-      id = ga>sn2*nu/(nu+1); % dhhyp(~id) = 0
-      if i==1 % log(nu)
-        % h = (nu+1)*log(1+1/nu) - nu + nu*sn2./ga;
-        dhhyp(id) = nu*log(ga(id)*(1+1/nu)/sn2) - 1 - nu + nu*sn2./ga(id);
-        % lZ = loggamma(nu/2+1/2) - loggamma(nu/2) - log(nu)/2       
-        dhhyp = dhhyp - nu*dloggamma(nu/2+1/2) + nu*dloggamma(nu/2) + 1; % -2*lZ
-        dhhyp = (1-numin/nu)*dhhyp;              % correct for lower bound on nu
-      else % log(sn)
-        % h = (nu+1)*log(1/sn2) + nu*sn2./ga;
-        dhhyp(id) = -2*(nu+1) + 2*nu*sn2./ga(id);
-        % lZ = - log(sn2)/2
-        dhhyp = dhhyp + 2; % -2*lZ
-      end
-      dhhyp(ga<0) = 0;              % negative variances get a special treatment
-      varargout = {dhhyp};                                  % deriv. wrt hyp.lik
-    end
+    % variational lower site bound
+    % t(s) \propto (1+(s-y)^2/(nu*s2))^(-nu/2+1/2)
+    % the bound has the form: (b+z/ga)*f - f.^2/(2*ga) - h(ga)/2
+    n = numel(s2); b = zeros(n,1); y = y.*ones(n,1); z = y;
+    varargout = {b,z};
   end
 end
-
-function f = loggamma(x)
-  f = gammaln(x);
-
-function df = dloggamma(x)
-  df = psi(x);
 
 %  computes y = log( exp(A)*x ) in a numerically safe way by subtracting the
 %  maximal value in each row to avoid cancelation after taking the exp

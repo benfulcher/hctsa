@@ -29,7 +29,7 @@
 % dologabs, if 1, takes log amplitude of the signal before
 %           transforming to the frequency domain.
 % 
-% dopower, analyzes the power spectrum rather than amplitudes of a Fourier
+% doPower, analyzes the power spectrum rather than amplitudes of a Fourier
 %          transform
 % 
 %---OUTPUTS: statistics summarizing various properties of the spectrum,
@@ -40,6 +40,7 @@
 % 
 %---HISTORY:
 % Ben Fulcher, August 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -63,7 +64,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs,dopower)
+function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs,doPower)
 
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
@@ -73,12 +74,24 @@ BF_CheckToolbox('curve_fitting_toolbox')
 % ------------------------------------------------------------------------------
 % Check inputs, set defaults:
 % ------------------------------------------------------------------------------
-if size(y,2) > size(y,1); y = y'; end % Time series must be a column vector
-if nargin < 2 || isempty(psdmeth), psdmeth = 'fft'; end % fft by default
-if nargin < 3 || isempty(wmeth), wmeth = 'none'; end % No window by default
-if nargin < 4, nf = []; end
-if nargin < 5 || isempty(dologabs), dologabs = 0; end
-if nargin < 6 || isempty(dopower), dopower = 1; end % power spectrum by default
+if size(y,2) > size(y,1);
+    y = y'; % Time series must be a column vector
+end
+if nargin < 2 || isempty(psdmeth)
+    psdmeth = 'fft'; % fft by default
+end
+if nargin < 3 || isempty(wmeth)
+    wmeth = 'none'; % No window by default
+end
+if nargin < 4
+    nf = [];
+end
+if nargin < 5 || isempty(dologabs)
+    dologabs = 0;
+end
+if nargin < 6 || isempty(doPower)
+    doPower = 1; % power spectrum (rather than amplitudes) by default
+end
 
 if dologabs % a boolean
     % Analyze the spectrum of logarithmic absolute deviations
@@ -133,23 +146,28 @@ end
 
 if ~any(isfinite(S)) % no finite values in the power spectrum
     % This time series must be really weird -- return NaN (unsuitable operation)...
-    fprintf(1,'This is a weird time series\n');
+    fprintf(1,'This is a weird time series.\n');
     out = NaN; return
 end
 
 % Analyze the power spectrum rather than amplitudes
-if dopower
+if doPower
     S = S.^2;
 end
 
-if size(S,1) > size(S,2); S = S'; w = w'; end
+if size(S,1) > size(S,2);
+    S = S';
+    w = w';
+end
+
 N = length(S); % = length(w)
 % plot(w,S); % plot the spectrum
 logS = log(S);
 logw = log(w);
 dw = w(2) - w(1);
+
 % Normalize to 1: necessary if input not z-scored
-% S=S/(sum(S)*dw);
+% S = S/(sum(S)*dw);
 
 % ------------------------------------------------------------------------------
 % Simple measures of the power spectrum
@@ -172,30 +190,32 @@ out.q25 = quantile(S,0.25);
 out.q25log = log(out.q25);
 out.q75 = quantile(S,0.75);
 out.q75log = log(out.q75);
-out.ac1 = CO_AutoCorr(S,1);
-out.ac2 = CO_AutoCorr(S,1);
-out.ac3 = CO_AutoCorr(S,1);
-out.ac4 = CO_AutoCorr(S,1);
+autoCorrs_S = CO_AutoCorr(S,1:4,'Fourier');
+out.ac1 = autoCorrs_S(1);
+out.ac2 = autoCorrs_S(2);
+out.ac3 = autoCorrs_S(3);
+out.ac4 = autoCorrs_S(4);
 out.tau = CO_FirstZero(S,'ac');
-out.logac1 = CO_AutoCorr(logS,1);
-out.logac2 = CO_AutoCorr(logS,1);
-out.logac3 = CO_AutoCorr(logS,1);
-out.logac4 = CO_AutoCorr(logS,1);
+autoCorrs_logS = CO_AutoCorr(S,1:4,'Fourier');
+out.logac1 = autoCorrs_logS(1);
+out.logac2 = autoCorrs_logS(2);
+out.logac3 = autoCorrs_logS(3);
+out.logac4 = autoCorrs_logS(4);
 out.logtau = CO_FirstZero(logS,'ac');
 out.logmaxonlogmean1e = out.maxSlog/mean(logS(logS<out.maxSlog/exp(1)));
 out.maxwidth = w(i_maxS+find(logS(i_maxS+1:end)<out.maxSlog/exp(1),1,'first'))-...
                 w(find(logS(1:i_maxS)<out.maxSlog/exp(1),1,'last'));
-if isempty(out.maxwidth); out.maxwidth=0; end
+if isempty(out.maxwidth);
+    out.maxwidth=0;
+end
 % out.maxlogwidth=log(w(find(logS(i_maxS+1:end)<out.maxSlog/exp(1),1,'first')))-...
 %                 log(w(find(logS(1:i_maxS-1)<out.maxSlog/exp(1),1,'last')));
 
-% input('see cum sum?')
 csS = cumsum(S);
-% plot(w,csS);
 
 % Measures of central location
 out.centroid = w(find(csS > csS(end)/2,1,'first')); % where area under curve is same above
-                                            % and below this frequency
+                                                    % and below this frequency
 
 % ------------------------------------------------------------------------------
 % Shape of cumulative sum curve
@@ -232,10 +252,9 @@ out.w25_75 = out.q75-out.q25;
 out.w25_75mel = w2mel(out.w25_75);
 
 % 2) Moments of the power spectrum
-% Take moments from 3--9
-for i = 3:9
-    themom = DN_Moments(S,i);
-    eval(sprintf('out.mom%u = themom;',i));
+% Take moments from 3--5
+for i = 3:5
+    out.(sprintf('mom%u',i)) = DN_Moments(S,i);;
 end
 
 % ------------------------------------------------------------------------------

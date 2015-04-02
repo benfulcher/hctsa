@@ -34,6 +34,16 @@ inline double biquadratic_weight(const double r) {
 	return (y * y);					// McNames biweight-function (1 - (r/rmax)^2)^2
 }
 
+// Ben Fulcher, 2015-03-04 -- added due to compiling errors from nn_predictor.h
+inline double linear_weight(const double r) {
+	return 1 - r;
+}
+
+inline double tricubic_weight(const double r) {
+	const double y = 1 - r * r * r;
+	return (y * y * y);
+}
+
 
 template<class Searcher, class Point_set>
 void cross_validate(Searcher& searcher, const Point_set& px, const long trajectory_length, const int mode, const long NNR,
@@ -55,19 +65,19 @@ void cross_validate(Searcher& searcher, const Point_set& px, const long trajecto
 			const double r = v[k].dist() / v[NNR].dist();
 		
 			switch(mode/2) {
-				case 0  : 
+				case 0  :
 					w = uniform_weight(r);
                     break;
 				case 1  : 
                     linear_weight lw;
 					w = lw(r);
 					break;
-				case 2  : 
+				case 2  :
 					w = biquadratic_weight(r);
 					break;
-				case 3  : 
+				case 3  :
 					w = tricubic_weight(r);
-					break;	
+					break;
 				default :
 					w = 1;
 					break;						

@@ -33,6 +33,9 @@
 % much of the range of scales as possible while simultaneously achieving the
 % best possible linear fit.
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -57,14 +60,17 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_LargestLyap(y,Nref,maxtstep,past,NNR,embedparams)
-% Ben Fulcher, November 2009
 
+% ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
+% ------------------------------------------------------------------------------
 
-doplot = 0; % whether to plot outputs to a figure
+doPlot = 0; % whether to plot outputs to a figure
 
-%% Preliminaries
+% ------------------------------------------------------------------------------
+%% Check inputs, preliminaries:
+% ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
 % (1) Nref: number of randomly-chosen reference points
@@ -113,7 +119,9 @@ else
     end
 end
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
+% ------------------------------------------------------------------------------
 % convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedparams{1},embedparams{2},1);
 
@@ -132,7 +140,8 @@ end
     
 p = data(rs);
 t = spacing(rs);
-if doplot
+
+if doPlot
     figure('color','w'); box('on');
     plot(t,p,'.-k')
 end
@@ -142,20 +151,23 @@ end
 %                                sum(log2(dist(reference point + tau, nearest neighbor +
 %                                tau)/dist(reference point, nearest neighbor)))
 
+% ------------------------------------------------------------------------------
 %% Get output stats
+% ------------------------------------------------------------------------------
 
 if all(p == 0)
     out = NaN; return
 end
 
 % p at lags up to 5
+% (note that p1 = 0, so not so useful to record)
 for i = 1:5
     % evaluate p(1), p(2), ..., p(5) for the output structure
-    eval(sprintf('out.p%u = p(%u);',i,i));
+    out.(sprintf('p%u',i)) = p(i);
 end
 out.maxp = max(p);
 
-% number/proportion of crossings at 80% and 90% of maximum
+% Number/proportion of crossings at 80% and 90% of maximum
 ncrossx = @(x) sum((p(1:end-1)-x*max(p)).*(p(2:end)-x*max(p)) < 0);
 
 out.ncross09maxold = sum((p(1:end-1)-0.9*max(p)).*(p(2:end)-0.9*max(p)) < 0);
@@ -187,7 +199,9 @@ out.to05max = ttomaxx(0.5);
 if isempty(out.to05max), out.to05max = NaN; end
 
 
-%% find scaling region:
+% ------------------------------------------------------------------------------
+%% Find scaling region:
+% ------------------------------------------------------------------------------
 % fit from zero to 95% of maximum...
 imax = find(p > 0.95*max(p),1,'first');
 
@@ -225,7 +239,7 @@ else
             mybad(i,j) = lfitbadness(t_scal(stptr(i):endptr(j)),p_scal(stptr(i):endptr(j))');
         end
     end
-    [a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+    [a, b] = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
     
     % Do the optimum fit again
     t_opt = t_scal(stptr(a):endptr(b));
@@ -252,7 +266,7 @@ else
     for i = 1:length(endptr)
         mybad(i) = lfitbadness(t_scal(1:endptr(i)),p_scal(1:endptr(i))');
     end
-    b = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+    b = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
     
     % Do the optimum fit again
     t_opt = t_scal(1:endptr(b));
@@ -297,21 +311,22 @@ else
     out.expfit_rmse = NaN;
 end
 
-if doplot
+if doPlot
     hold on
     plot(t,c.a*(1-exp(c.b*t)),':r');
     hold off
 end
 
+    % ------------------------------------------------------------------------------
     function badness = lfitbadness(x,y,gamma)
         if nargin < 3,
-            gamma = 0.006; % regularization parameter, gamma, chosen empirically, kind of ad hoc
+            gamma = 0.006; % regularization parameter, gamma, chosen empirically
         end
         pp = polyfit(x,y,1);
-        pfit = pp(1)*x+pp(2);
-        res = pfit-y;
-        badness = mean(abs(res))-gamma*length(x); % want to still maximize length(x)
+        pfit = pp(1)*x + pp(2);
+        res = pfit - y;
+        badness = mean(abs(res)) - gamma*length(x); % want to still maximize length(x)
     end
-
+    % ------------------------------------------------------------------------------
 
 end

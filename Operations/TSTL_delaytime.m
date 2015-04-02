@@ -11,16 +11,16 @@
 %---INPUTS:
 % y, column vector of time series data
 % 
-% maxdelay, maximum value of the delay to consider (can also specify a
+% maxDelay, maximum value of the delay to consider (can also specify a
 %           proportion of time series length)
 %           
 % past, the TSTOOL documentation describes this parameter as "?", which is
 %       relatively uninformative.
 % 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 % 
-% It's a stochastic algorithm, so it must rely on some random sampling of the
-% input time series... A bit of a strange one, but I'll return some statistics
-% and see what they do.
+%---HISTORY:
+% Ben Fulcher, November 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -45,10 +45,11 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = TSTL_delaytime(y,maxdelay,past)
-% Ben Fulcher, November 2009
+function out = TSTL_delaytime(y,maxDelay,past,randomSeed)
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % length of time series
 try
     s = signal(y); % convert to a signal for TSTOOL
@@ -56,24 +57,42 @@ catch
     error('Error converting time series to signal class using TSTOOL function ''signal''')
 end
 
-% (1) Maximum delay, maxdelay
-if nargin < 2 || isempty(maxdelay)
-    maxdelay = 0.2; % 1/5 the length of the time series
+% ------------------------------------------------------------------------------
+% Check Inputs:
+% ------------------------------------------------------------------------------
+% (1) Maximum delay, maxDelay
+if nargin < 2 || isempty(maxDelay)
+    maxDelay = 0.2; % 1/5 the length of the time series
 end
-if maxdelay < 1 && maxdelay > 0
-    maxdelay = round(N*maxdelay); % specify a proportion of time series length
-end
-
-if maxdelay < 10,
-    maxdelay = 10;
-    fprintf(1,'Maxdelay set to its minimum: delaytime = 10\n')
+if maxDelay < 1 && maxDelay > 0
+    maxDelay = round(N*maxDelay); % specify a proportion of time series length
 end
 
+if maxDelay < 10,
+    maxDelay = 10;
+    fprintf(1,'Max delay set to its minimum: delaytime = 10\n')
+end
+
+% randomSeed: how to treat the randomization
+if nargin < 4
+    randomSeed = [];
+end
+
+% ------------------------------------------------------------------------------
 %% Run
-tau = data(delaytime(s,maxdelay,past));
+% ------------------------------------------------------------------------------
+
+% Control the random seed (for reproducibility):
+BF_ResetSeed(randomSeed);
+
+% Run the TSTOOL delaytime function on the signal object time series:
+tau = data(delaytime(s,maxDelay,past));
+
 % plot(tau);
 
+% ------------------------------------------------------------------------------
 %% Output Statistics
+% ------------------------------------------------------------------------------
 % tau tends to start low and then rise to some (noisy) value
 out.tau1 = tau(1);
 out.tau2 = tau(2);

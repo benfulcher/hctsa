@@ -1,27 +1,28 @@
 function K = covNoise(hyp, x, z, i)
 
-% Independent covariance function, ie "white noise", with specified variance.
+% Independent covariance function, i.e. "white noise", with specified variance.
 % The covariance function is specified as:
 %
 % k(x^p,x^q) = s2 * \delta(p,q)
 %
 % where s2 is the noise variance and \delta(p,q) is a Kronecker delta function
-% which is 1 iff p=q and zero otherwise. Two data points p and q are considered
-% equal if their norm is less than 1e-9. The hyperparameter is
+% which is 1 iff p=q and zero otherwise in mode 1).
+% In cross covariance mode 2) two data points x_p and z_q are considered equal
+% if their difference norm |x_p-z_q| is less than eps, the machine precision.
+% The hyperparameter is:
 %
 % hyp = [ log(sqrt(s2)) ]
 %
 % For more help on design of covariance functions, try "help covFunctions".
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2012-12-19.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-05-15.
 %
 % See also COVFUNCTIONS.M.
 
-tol = 1e-9;  % threshold on the norm when two vectors are considered to be equal
+tol = eps;   % threshold on the norm when two vectors are considered to be equal
 if nargin<2, K = '1'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
-if ndims(x)==ndims(z) && all(size(x)==size(z)), xeqz = norm(x-z,'inf')<tol; end
+dg = strcmp(z,'diag');                                          % determine mode
 
 n = size(x,1);
 s2 = exp(2*hyp);                                                % noise variance
@@ -30,7 +31,7 @@ s2 = exp(2*hyp);                                                % noise variance
 if dg                                                               % vector kxx
   K = ones(n,1);
 else
-  if xeqz                                                 % symmetric matrix Kxx
+  if numel(z)==0                                          % symmetric matrix Kxx
     K = eye(n);
   else                                                   % cross covariances Kxz
     K = double(sq_dist(x',z')<tol*tol);

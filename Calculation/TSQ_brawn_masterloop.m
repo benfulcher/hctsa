@@ -20,36 +20,36 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [masteroutput, mastertime] = TSQ_brawn_masterloop(x, y, Mcode, fid, BeVocal, TheTsID)
+function [masterOutput, masterTime] = TSQ_brawn_masterloop(x, y, masterCode, masterID, numMasterOps, fid, beVocal, theTsID)
 
-if BeVocal
+if beVocal
     % Display code name for error checking
-    fprintf(fid,'[%u] %s...',TheTsID,Mcode);
+    fprintf(fid,'[ts_id = %u, mop_id = %u / %u] %s...', theTsID, masterID, numMasterOps, masterCode);
 end
 
 try
-	mastertimer = tic;
-    if BeVocal
+	masterTimer = tic;
+    if beVocal
         % Any output text is printed to screen
-    	masteroutput = BF_pareval(x,y,Mcode,1);
+    	masterOutput = BF_pareval(x,y,masterCode,1);
     else
         % Output text stored in T (could log this if you really want to)
-        [masteroutput, T] = BF_pareval(x,y,Mcode,0);
+        [masterOutput, T] = BF_pareval(x,y,masterCode,0);
     end
-	mastertime = toc(mastertimer);
-    if BeVocal
-        fprintf(1,' evaluated (%s).\n',BF_thetime(mastertime))
+	masterTime = toc(masterTimer);
+    if beVocal
+        fprintf(1,' evaluated (%s).\n',BF_thetime(masterTime))
     end
-	% For not-applicable/'real NaN', masteroutput is a NaN, otherwise a
+	% For not-applicable/'real NaN', masterOutput is a NaN, otherwise a
 	% structure with components to be called below by pointer operations.
+    
 catch emsg
-    if BeVocal
-        fprintf(1,' error.\n') % ,BF_thetime(mastertime)
+    if beVocal
+        fprintf(1,' error.\n') % ,BF_thetime(masterTime)
     end
-	fprintf(fid,'---Error evaluating %s\n',Mcode);
-    fprintf(fid,'%s\n',emsg.message)
-    masteroutput = {}; % Keep empty output
-    mastertime = 0; % Set zero calculation time
+	fprintf(fid,'---Error evaluating %s:\n%s\n',masterCode,emsg.message);
+    masterOutput = {}; % Keep empty output
+    masterTime = 0; % Set zero calculation time
 	% Remains an empty cell entry.
 end
 

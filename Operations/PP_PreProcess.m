@@ -7,16 +7,21 @@
 % 
 %---INPUTS:
 % y, the input time series
-% choosebest: (i) '' (empty): the function returns a structure, yp, of all
+% 
+% chooseBest: (i) '' (empty): the function returns a structure, yp, of all
 %                   preprocessings [default]
 %             (ii) 'ar': returns the pre-processing with the worst fit to an AR
 %                        model of specified order
 %             (iii) 'ac': returns the least autocorrelated pre-processing
+%             
 % order [opt], extra parameter for above
-% beatthis, can specify the preprocessed version has to be some percentage
-%           better than the unprocessed input
-% dospectral, whether to include spectral processing
 % 
+% beatThis, can specify the preprocessed version has to be some percentage
+%           better than the unprocessed input
+%           
+% doSpectral, whether to include spectral processing
+% 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 % 
 % If second argument is specified, will choose amongst the preprocessings
 % for the 'best' one according to the given criterion.
@@ -48,36 +53,44 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function [yp, best] = PP_PreProcess(y,choosebest,order,beatthis,dospectral)
+function [yp, best] = PP_PreProcess(y,chooseBest,order,beatThis,doSpectral,randomSeed)
 
 % I think a good way of 'normalizing' over autocorrelation should also be
 % incorporated, but it's not obvious how, other than some downsampling...
 
 % NOTE: yp is NOT z-scored -- needs to be z-scored after, if necessary.
 
-doplot = 0; % plot outputs to figures
+doPlot = 0; % plot outputs to figures
 
 % ------------------------------------------------------------------------------
 %% Check inputs, set defaults
 % ------------------------------------------------------------------------------
 if nargin < 2
-    choosebest = ''; % just return all the time series in structure yp.
+    chooseBest = ''; % just return all the time series in structure yp.
 end
+
 if nargin < 3 || isempty(order);
-   order = 2; % extra parameter for some choosebest settings.
+   order = 2; % extra parameter for some chooseBest settings.
 end
-if nargin < 4 || isempty(beatthis)
-    beatthis = 0; % it has to beat doing nothing by this percentage. i.e., here it 
+
+if nargin < 4 || isempty(beatThis)
+    beatThis = 0; % it has to beat doing nothing by this percentage. i.e., here it 
                 % just has to beat doing nothing. Increasing will increase the
                 % probablility of doing nothing.
 end
-if nargin < 5 || isempty(dospectral)
-    dospectral = 1; % I did this because it's often worse to do a spectral
+
+if nargin < 5 || isempty(doSpectral)
+    doSpectral = 1; % I did this because it's often worse to do a spectral
                     % method when another would do better. i.e., the remove
                     % around a peak can just overpower the structure in the
                     % time series, when indeed all is necessary is a linear
                     % detrending. Eventually we should have a complexity
                     % penalty.
+end
+
+% randomSeed: how to treat the randomization
+if nargin < 6
+    randomSeed = []; % default
 end
 
 % ------------------------------------------------------------------------------
@@ -93,7 +106,7 @@ yp.d3 = diff(y,3);
 %% 2) Remove from power spectrum
 % note that edge effects are dealt with simply by eliminating some small
 % fraction from the start and end of the time series
-if dospectral
+if doSpectral
     yp.lf_02 = SUB_remps(y,0.2,'lf');
     yp.lf_02_d1 = diff(yp.lf_02);
     yp.peaks_08 = SUB_remps(y,0.8,'biggest');
@@ -118,7 +131,11 @@ yp.p2_40 = SUB_rempt(y,2,40);
 % ------------------------------------------------------------------------------
 %% Rank map onto Gaussian distribution
 % ------------------------------------------------------------------------------
-x = sort(randn(N,1),'ascend'); % create the Normal distribution using random numbers
+
+% Control the random seed (for reproducibility):
+BF_ResetSeed(randomSeed);
+
+x = sort(randn(N,1),'ascend'); % generate N samples from a Normal distribution
 % could use mapping through linspace, but then a choice of the most
 % extreme... I think it's statistically better to do this...? It makes it a
 % stochastic algorithm, though...
@@ -148,12 +165,12 @@ end
 
 %% --------------------------------------------------------------
 % Choose 'best' preprocessing according to some specified criterion, if
-% 'choosebest' is specified
+% 'chooseBest' is specified
 %  --------------------------------------------------------------
 
 % Don't do any more (this saves us being indented in an if loop
 %                       throughout the rest)
-if isempty(choosebest)
+if isempty(chooseBest)
     return
 end
 
@@ -179,7 +196,7 @@ nfields = length(fields);
 % 'prewhitening' procedure, rather than just specific choices implemented
 % below. ++BF
 
-switch choosebest
+switch chooseBest
     case 'ar' % picks the *worst* fit to an AR(p) model
         %% Check that a System Identification Toolbox license is available:
         BF_CheckToolbox('identification_toolbox')
@@ -189,7 +206,7 @@ switch choosebest
         
         for i = 1:nfields; % each preprocessing performed
             data = [];
-            eval(sprintf('data = yp.%s;',fields{i}));
+            data = yp.(fields{i});
             data = BF_zscore(data);
             
             % (i) fit the model
@@ -199,12 +216,12 @@ switch choosebest
             e = pe(m,data);
             rmserrs(i) = sqrt(mean(e.^2));
 %             statstore.mabserr(i) = mean(abs(e));
-%             statstore.ac1(i) = CO_AutoCorr(e,1);
+%             statstore.ac1(i) = CO_AutoCorr(e,1,'Fourier');
         end
 
         % Now choose the one with the *most* error (!) -- i.e., the AR
         % model finds it hardest to fit
-        if any(rmserrs > rmserrs(1)*(1+beatthis));
+        if any(rmserrs > rmserrs(1)*(1+beatThis));
             best = fields{rmserrs == max(rmserrs)};
         else
             best = 'nothing';
@@ -217,24 +234,30 @@ switch choosebest
             data = yp.(fields{i}); % dynamic field referencing
             % eval(['data = yp.' fields{i} ';']);
             data = BF_zscore(data); % unnecessary for AC
-            acs(i) = CO_AutoCorr(data,order);
+            acs(i) = CO_AutoCorr(data,order,'Fourier');
         end
         
         % Now choose time series with lowest ac1
-        if any(acs < acs(1)*(1-beatthis))
+        if any(acs < acs(1)*(1-beatThis))
             best = fields{acs == min(acs)};
         else
             best = 'nothing';
         end
         
     otherwise
-        error('Unknown method ''%s''',choosebest);
+        error('Unknown method ''%s''',chooseBest);
 end
 
+
+
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
     function yboxcox = SUB_boxcox(x,lambda)
         yboxcox = (x.^lambda-1)/lambda;
     end
 
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
     function ydt =  SUB_remps(y,n,method)
         % Removes the first n (proportion) of power spectrum
         % Based on my deseasonalize1.m code
@@ -270,7 +293,7 @@ end
 
         
         % PLOT
-        if doplot
+        if doPlot
             figure('color','w'); box('on');
             plot(abs(Fy)),hold on; plot(abs(FyF),'--r'); hold off
             input('Here''s the filtered one...')
@@ -287,13 +310,15 @@ end
         ydt = ydt(1+lose:end-lose);
         
         % PLOT
-        if doplot
+        if doPlot
             figure('color','w'); box('on');
             plot(zscore(ydt),'b'); hold on; plot(y,'r'); hold off;
             % input(['Mean difference is ' num2str(mean(y-ydt))])
         end
     end
-
+    
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
     function ydt = SUB_rempt(y,order,nbits)
         N = length(y);
         ydt = zeros(N,1);
@@ -306,7 +331,7 @@ end
             ydt(r) = ybit-polyval(p,x);
         end
         ydt = BF_zscore(ydt);
-        if doplot
+        if doPlot
             figure('color','w'); box('on');
             plot(y,'b'); hold on; plot(ydt,'r');
             % input('here we are')

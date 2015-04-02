@@ -3,12 +3,12 @@ function K = covLINone(hyp, x, z, i)
 % Linear covariance function with a single hyperparameter. The covariance
 % function is parameterized as:
 %
-% k(x^p,x^q) = (x^p'*x^q + 1)/t2;
+% k(x^p,x^q) = (x^p'*x^q + 1)/t^2;
 %
 % where the P matrix is t2 times the unit matrix. The second term plays the
 % role of the bias. The hyperparameter is:
 %
-% hyp = [ log(sqrt(t2)) ]
+% hyp = [ log(t) ]
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
 %
@@ -16,7 +16,7 @@ function K = covLINone(hyp, x, z, i)
 
 if nargin<2, K = '1'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
 it2 = exp(-2*hyp);                                                  % t2 inverse
 

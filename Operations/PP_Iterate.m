@@ -3,14 +3,14 @@
 % ------------------------------------------------------------------------------
 % 
 % Iteratively applies a transformation to the time series and measures how
-% various properties of the time series change as the transformation is
-% iteratively applied to it.
+% various properties of is change as the transformation is iteratively applied
+% to it.
 % 
 %---INPUTS:
 % 
 % y, the input time series
 % 
-% detrndmeth, the detrending method to apply:
+% dtMeth, the detrending method to apply:
 %           (i) 'spline' removes a spine fit,
 %           (ii) 'diff' takes incremental differences,
 %           (iii) 'medianf' applies a median filter,
@@ -44,7 +44,9 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = PP_Iterate(y,detrndmeth)
+function out = PP_Iterate(y,dtMeth)
+
+doPlot = 0;
 
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
@@ -59,25 +61,36 @@ N = length(y); % Length of the input time series
 % ------------------------------------------------------------------------------
 %% Determine the number of times the processing will be progressively performed
 % ------------------------------------------------------------------------------
-% This information is stored in nr.
-switch detrndmeth
-    case 'spline', nr = (1:20);
-    case 'diff', nr = (1:5);
-    case 'medianf', nr = round(linspace(1,N/25,25));
-    case 'rav', nr = round(linspace(1,N/25,25));
-    case 'resampleup', nr = (1:20);
-    case 'resampledown', nr = (1:20);
+% This information is stored in nRange.
+switch dtMeth
+    case 'spline'
+        nRange = (1:20);
+    case 'diff'
+        nRange = (1:5);
+    case 'medianf'
+        nRange = round(linspace(1,N/25,25));
+    case 'rav'
+        nRange = round(linspace(1,N/25,25));
+    case 'resampleup'
+        nRange = (1:20);
+    case 'resampledown'
+        nRange = (1:20);
     otherwise
-        error('Unknown detrending method ''%s''',detrndmeth);
+        error('Unknown detrending method ''%s''',dtMeth);
 end
 
 % ------------------------------------------------------------------------------
 %% Do the progessive processing with running statistical evaluation
 % ------------------------------------------------------------------------------
-outmat = zeros(length(nr),10);
-for q = 1:length(nr)
-    n = nr(q);
-    switch detrndmeth
+if doPlot
+    f = figure('color','w'); box('on'); hold on
+    h1 = plot(y,'k');
+end
+
+outmat = zeros(length(nRange),10);
+for q = 1:length(nRange)
+    n = nRange(q);
+    switch dtMeth
         case 'spline' % Spline detrend
             nknots = n; % progressively make more knots
             intp = 4; % cubic interpolants
@@ -102,8 +115,14 @@ for q = 1:length(nr)
             y_d = resample(y,1,n);
     end
     outmat(q,:) = doyourcalcthing(y,y_d);
+    if doPlot
+        if q==1
+            h2 = plot(y_d,'r');
+        else
+            h2.YData = (y_d);
+        end
+    end
 end
-% out1 = outmat;
 
 % ------------------------------------------------------------------------------
 %% Calculate four statistics from each test
@@ -111,8 +130,8 @@ end
 
 stats = zeros(10,4);
 for t = 1:10;
-    if any(~isfinite(stats(t,:))),
-        fprintf(1,'This is a bad statistic\n')
+    if any(~isfinite(outmat(:,t))),
+        fprintf(1,'%u is a bad statistic\n',t)
     end
     stats(t,:) = doyourtestthing(outmat(:,t)); 
 end
@@ -180,11 +199,12 @@ out.normdiff_jump = stats(10,2);
 out.normdiff_lin = stats(10,3);
 out.normdiff_exp = stats(10,4);
 
-    % ------------------------------------------------------------------------------
-    %% TESTS
-    % ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+%% TESTS:
+% ------------------------------------------------------------------------------
     function f = doyourcalcthing(y,y_d)
         y = BF_zscore(y); y_d = BF_zscore(y_d);
+        
         f = zeros(10,1); % vector of features to output
         % 1) Stationarity
         % (a) StatAv
@@ -205,11 +225,15 @@ out.normdiff_exp = stats(10,4);
         end
         
         %   (b) histogram 10 bins
-        me1 = DN_SimpleFit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
-        if ~isstruct(me1) && isnan(me1)
+        try
+            me1 = DN_SimpleFit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian            
+            if ~isstruct(me1) && isnan(me1)
+                f(5) = NaN;
+            else
+                f(5) = me1.rmse;
+            end
+        catch
             f(5) = NaN;
-        else
-            f(5) = me1.rmse;
         end
         
         %   (c) compare distribution to fitted normal distribution
@@ -235,7 +259,8 @@ out.normdiff_exp = stats(10,4);
            f(8:10) = NaN; % like for differencing where lose some points
         end
     end
-
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
     function g = doyourtestthing(f)
         if ~all(isfinite(f))
             g = NaN*ones(4,1); return
@@ -308,9 +333,7 @@ out.normdiff_exp = stats(10,4);
             else % unable to run 'fit' command -- fatal error
                 return
             end
-        end
-
-        
+        end   
     end
+% ------------------------------------------------------------------------------
 end
-     

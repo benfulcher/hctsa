@@ -12,11 +12,10 @@
 % The generation of surrogates is done by the periphery function,
 % SD_MakeSurrogates
 % 
-% 
 %---INPUTS:
 % x, the input time series
 % 
-% surrmeth, the method for generating surrogate time series:
+% surrMeth, the method for generating surrogate time series:
 %       (i) 'RP': random phase surrogates that maintain linear correlations in
 %                 the data but destroy any nonlinear structure through phase
 %                 randomization
@@ -29,12 +28,12 @@
 %               "A new surrogate data method for nonstationary time series",
 %                   D. L. Guarin Lopez et al., arXiv 1008.1804 (2010)
 % 
-% nsurrs, the number of surrogates to compute (default is 99 for a 0.01
+% numSurrs, the number of surrogates to compute (default is 99 for a 0.01
 %         significance level 1-sided test)
 % 
 % extrap, extra parameter, the cut-off frequency for 'TFT'
 % 
-% teststat, the test statistic to evalute on all surrogates and the original
+% theTestStat, the test statistic to evalute on all surrogates and the original
 %           time series. Can specify multiple options in a cell and will return
 %           output for each specified test statistic:
 %           (i) 'ami': the automutual information at lag 1, cf.
@@ -49,6 +48,8 @@
 %           (iv) 'tc3': a time-reversal asymmetry measure. Outputs of the
 %                 function include a z-test between the two distributions, and
 %                 some comparative rank-based statistics.
+% 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 % 
 %---HISTORY:
 % Ben Fulcher, 28/1/2011
@@ -76,67 +77,85 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SD_SurrogateTest(x,surrmeth,nsurrs,extrap,teststat)
+function out = SD_SurrogateTest(x,surrMeth,numSurrs,extrap,theTestStat,randomSeed)
 
-doplot = 0; % plot outputs to a figure
+doPlot = 0; % plot outputs to a figure
 
 % ------------------------------------------------------------------------------
-%% CHECK INPUTS
-if nargin < 2 || isempty(surrmeth)
-    surrmeth = 'RP'; % randomize phases
+%% Check inputs
+% ------------------------------------------------------------------------------
+if nargin < 2 || isempty(surrMeth)
+    surrMeth = 'RP'; % randomize phases
 end
-if nargin < 3 || isempty(nsurrs)
-    nsurrs = 99; % create 99 surrogates for a 0.01 significance level 1-sided test
+
+if nargin < 3 || isempty(numSurrs)
+    numSurrs = 99; % create 99 surrogates for a 0.01 significance level 1-sided test
 end
+
 if nargin < 4
     extrap = [];
 end
-if nargin < 5 || isempty(teststat)
-    teststat = 'AMI'; % automutual information
+
+if nargin < 5 || isempty(theTestStat)
+    theTestStat = 'AMI'; % automutual information
 end
 
-if ischar(teststat)
-    teststat = {teststat};
+if ischar(theTestStat)
+    theTestStat = {theTestStat};
+end
+
+% randomSeed: how to treat the randomization
+if nargin < 6
+    randomSeed = [];
 end
 
 N = length(x); % time-series length
 
-% ------------------------------------------------------------------------------
-%% And we're off!
 
-% 1) make surrogates
-z = SD_MakeSurrogates(x,surrmeth,nsurrs,extrap);
+% ------------------------------------------------------------------------------
+%% Generate surrogate time series using SD_MakeSurrogates:
+% ------------------------------------------------------------------------------
+z = SD_MakeSurrogates(x,surrMeth,numSurrs,extrap,randomSeed);
+
 % z is matrix where each column is a surrogate time series
 
-% 2) evaluate test statistic on each surrogate
-if ismember('ami1',teststat)
+% ------------------------------------------------------------------------------
+% Evaluate test statistic on each surrogate
+% ------------------------------------------------------------------------------
+if ismember('ami1',theTestStat)
     % look at AMI(1) of surrogates compared to that of signal itself
     % This statistic is used by Nakamura et al. (2006), PRE
     % could use CO_HistogramAMI or TSTL, but I'll use BF_MutualInformation
     % Apparently there are upper and lower bounds on the number of bins to
     % use: [1+log_2(N)], [sqrt(N)]
-    nbins = ceil(1+log2(N)); %round(mean([1+log2(N),sqrt(N)]));
-    AMIx = BF_MutualInformation(x(1:end-1),x(2:end),'quantile','quantile',nbins);
-    AMIsurr = zeros(nsurrs,1);
-    for i = 1:nsurrs
-        AMIsurr(i) = BF_MutualInformation(z(1:end-1,i),z(2:end,i),'quantile','quantile',nbins);
+    % BF_MutualInformation(x(1:end-1),x(2:end),'quantile','quantile',nbins);
+    % nbins = ceil(1+log2(N)); %round(mean([1+log2(N),sqrt(N)]));
+    
+    % Use the gaussian approximation to estimate automutual information using the
+    % Information Dynamics Toolkit:
+    ami_fn = @(timeSeries,timeDelay) IN_AutoMutualInfo(timeSeries,timeDelay,'gaussian');
+    
+    AMIx = ami_fn(x,1);
+    AMIsurr = zeros(numSurrs,1);
+    for i = 1:numSurrs
+        AMIsurr(i) = ami_fn(z(:,i),1);
     end
     % so we have a value AMIx, and a distribution for the surrogates
     % AMIsurr -- we must compare and return something meaningful
     % surrogates should always have lower AMI than original signal
-    somestats = SDgivemestats(AMIx,AMIsurr,'right');
-    fnames = fieldnames(somestats);
+    someStats = SDgivemestats(AMIx,AMIsurr,'right');
+    fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        eval(sprintf('out.ami_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('ami_%s',fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('fmmi',teststat)
+if ismember('fmmi',theTestStat)
     % look at first minimum of mutual information of surrogates compared to
     % that of signal itself
     fmmix = CO_FirstMin(x,'mi');
-    fmmisurr = zeros(nsurrs,1);
-    for i = 1:nsurrs
+    fmmisurr = zeros(numSurrs,1);
+    for i = 1:numSurrs
         try
             fmmisurr(i) = CO_FirstMin(z(i,:),'mi');
         catch
@@ -144,91 +163,91 @@ if ismember('fmmi',teststat)
         end
     end
     if any(isnan(fmmisurr))
-        RA_keyboard
+        error('fmmi failed');
     end
     
     % FMMI should be higher for signal than surrogates
-    somestats = SDgivemestats(fmmix,fmmisurr,'right');
-    fnames = fieldnames(somestats);
+    someStats = SDgivemestats(fmmix,fmmisurr,'right');
+    fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        eval(sprintf('out.fmmi_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('fmmi_%s',fnames{i})) = someStats.(fnames{i});
     end
 end
 
-
-if ismember('o3',teststat) % third order statistic in Schreiber, Schmitz (Physica D)
+if ismember('o3',theTestStat) % third order statistic in Schreiber, Schmitz (Physica D)
     tau = 1;
     o3x = 1/(N-tau)*sum((x(1+tau:end) - x(1:end-tau)).^3);
-    o3surr = zeros(nsurrs,1);
-    for i = 1:nsurrs
+    o3surr = zeros(numSurrs,1);
+    for i = 1:numSurrs
         o3surr(i) = 1/(N-tau)*sum((z(1+tau:end,i) - z(1:end-tau,i)).^3);
     end
-    somestats = SDgivemestats(o3x,o3surr,'both');
-    fnames = fieldnames(somestats);
+    someStats = SDgivemestats(o3x,o3surr,'both');
+    fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        eval(sprintf('out.o3_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('o3_%s',fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('tc3',teststat) % TC3 statistic -- another time-reversal asymmetry measure
+if ismember('tc3',theTestStat) % TC3 statistic -- another time-reversal asymmetry measure
     tau = 1;
     tmp = CO_tc3(x,tau);
     tc3x = tmp.raw;
-    tc3surr = zeros(nsurrs,1);
-    for i = 1:nsurrs
+    tc3surr = zeros(numSurrs,1);
+    for i = 1:numSurrs
         tmp = CO_tc3(z(:,i),tau);
         tc3surr(i) = tmp.raw;
     end
     
-    somestats = SDgivemestats(tc3x,tc3surr,'both');
-    fnames = fieldnames(somestats);
+    someStats = SDgivemestats(tc3x,tc3surr,'both');
+    fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        eval(sprintf('out.tc3_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('tc3_%s',fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('nlpe',teststat) % locally constant phase space prediction error
-    fprintf(1,'''nlpe'' can be very time consuming\n')
+if ismember('nlpe',theTestStat) % locally constant phase space prediction error
+    warning('''nlpe'' can be very time consuming...')
     de = 3; tau = 1; % embedding parameters: fixed like a dummy!
     tmp = NL_MS_nlpe(x,de,tau);
     nlpex = tmp.msqerr;
-    nlpesurr = zeros(nsurrs,1);
-    for i = 1:nsurrs
+    nlpesurr = zeros(numSurrs,1);
+    for i = 1:numSurrs
         res = MS_nlpe(z(:,i),de,tau);
         msqerr = sum(res.^2);
         nlpesurr(i) = msqerr;
     end
     
-    somestats = SDgivemestats(nlpex,nlpesurr,'right'); % NLPE should be higher than surrogates
-    fnames = fieldnames(somestats);
+    someStats = SDgivemestats(nlpex,nlpesurr,'right'); % NLPE should be higher than surrogates
+    fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        eval(sprintf('out.nlpe_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('nlpe_%s',fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('fnn',teststat)
-    fprintf(1,'fnn takes forever...\n')
+if ismember('fnn',theTestStat)
+    warning('fnn takes forever...')
+    
     % false nearest neighbours at d=2;
     tmp = NL_MS_fnn(x,2,1,5,1);
     fnnx = tmp.pfnn_2;
-    fnnsurr = zeros(nsurrs,1);
-    for i = 1:nsurrs
+    fnnsurr = zeros(numSurrs,1);
+    for i = 1:numSurrs
         tmp = NL_MS_fnn(z(:,i),2,1,5,1);
         fnnsurr(i) = tmp.pfnn_2;
     end
     
-    somestats = SDgivemestats(fnnx,fnnsurr,'right'); % FNN(2) should be higher than surrogates?
-    fnames = fieldnames(somestats);
+    someStats = SDgivemestats(fnnx,fnnsurr,'right'); % FNN(2) should be higher than surrogates?
+    fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        eval(sprintf('out.fnn_%s = somestats.%s;',fnames{i},fnames{i}));
+        out.(sprintf('fnn_%s',fnames{i})) = someStats.(fnames{i});
     end
 end
 
-
-function somestats = SDgivemestats(statx,statsurr,leftrightboth)
-    nsurrs = length(statsurr);
+% ------------------------------------------------------------------------------
+function someStats = SDgivemestats(statx,statsurr,leftrightboth)
+    numSurrs = length(statsurr);
     if any(isnan(statsurr))
-        RA_keyboard
+        error('SDgivemestats failed');
     end
 %         leftrightboth = {'left','right','both'}
     % have a distribution of some statistic with samples statsurr
@@ -239,8 +258,8 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
     % ASSUME GAUSSIAN DISTRIBUTION:
     % so can use 1/2-sided z-statistic
     [~, p, ~, zscore] = ztest(statx, mean(statsurr), std(statsurr), 0.05, leftrightboth);
-    somestats.p = p; % pvalue
-    somestats.zscore = zscore; % z-statistic
+    someStats.p = p; % pvalue
+    someStats.zscore = zscore; % z-statistic
 
     % fit a kernel distribution to zscored distribution:
     if std(statsurr) == 0
@@ -249,10 +268,10 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
         [f, xi] = ksdensity(statsurr);
         % find where the statx value would be:
         if statx < min(xi) || statx > max(xi)
-            somestats.f = 0; % out of range -- assume p=0 here
+            someStats.f = 0; % out of range -- assume p=0 here
         else
             [~, minhere] = min(abs(statx-xi));
-            somestats.f = f(minhere); % return probability density where the point is
+            someStats.f = f(minhere); % return probability density where the point is
         end    
     else
         zscstatsurr = (statsurr-mean(statsurr))/std(statsurr);
@@ -261,10 +280,10 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
 
         % find where the statx value would be:
         if (zscstatx < min(xi)) || (zscstatx > max(xi))
-            somestats.f = 0; % out of range -- assume p=0 here
+            someStats.f = 0; % out of range -- assume p=0 here
         else
             [~, minhere] = min(abs(zscstatx-xi));
-            somestats.f = f(minhere); % return probability density where the point is
+            someStats.f = f(minhere); % return probability density where the point is
         end
     end
     
@@ -272,37 +291,37 @@ function somestats = SDgivemestats(statx,statsurr,leftrightboth)
     medsurr = median(statsurr);
     iqrsurr = iqr(statsurr);
     if iqrsurr == 0
-        somestats.mediqr = NaN;
+        someStats.mediqr = NaN;
     else
-        somestats.mediqr = abs(statx-medsurr)/iqrsurr;
+        someStats.mediqr = abs(statx-medsurr)/iqrsurr;
     end
 
     % rank statistic
     [~, ix] = sort([statx; statsurr]);
     xfitshere = find(ix == 1) - 1;
     if strcmp(leftrightboth,'right') % x statistic smaller than distribution
-        xfitshere = nsurrs + 1 - xfitshere; % how far from highest ranked value
+        xfitshere = numSurrs + 1 - xfitshere; % how far from highest ranked value
     elseif strcmp(leftrightboth,'both')
-        xfitshere = min(xfitshere,nsurrs+1-xfitshere);
+        xfitshere = min(xfitshere,numSurrs+1-xfitshere);
     end
 
     if isempty(xfitshere)
-        somestats.prank = 1/(nsurrs+1); % rank-based p-value
+        someStats.prank = 1/(numSurrs+1); % rank-based p-value
     else
-        somestats.prank = (1+xfitshere)/(nsurrs+1); % rank-based p-value
+        someStats.prank = (1+xfitshere)/(numSurrs+1); % rank-based p-value
     end
     if strcmp(leftrightboth,'both')
-        somestats.prank = somestats.prank*2; % I think this factor should be in here
+        someStats.prank = someStats.prank*2; % I think this factor should be in here
     end
 
     % DO PLOTTING:
-    if doplot
+    if doPlot
         figure('color','w')
-        plot(statsurr,ones(nsurrs,1),'.k');
+        plot(statsurr,ones(numSurrs,1),'.k');
         hold on;
         plot(statx*ones(2,1),[0,2],'r')
     end
 end
-
+% ------------------------------------------------------------------------------
 
 end

@@ -13,7 +13,7 @@
 %---INPUTS:
 % y, the input time series
 % trainp, the proportion of data to train on, 0 < trainp < 1
-% nstates, the number of states in the HMM
+% numStates, the number of states in the HMM
 % 
 %---HISTORY:
 % Ben Fulcher 9/4/2010
@@ -40,11 +40,11 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_hmm_fit(y,trainp,nstates)
+function out = MF_hmm_fit(y,trainp,numStates)
 
 % Check required function files exist:
-if ~exist('ZG_hmm_cl') || ~exist('ZG_hmm')
-    error('Could not find the required hmm fitting functions (Zoubin Gharamani''s code)');
+if ~exist(fullfile('ZG_hmm','ZG_hmm_cl')) || ~exist(fullfile('ZG_hmm','ZG_hmm_cl'))
+    error('Could not find the required HMM fitting functions (Zoubin Gharamani''s code)');
 end
 
 % ------------------------------------------------------------------------------
@@ -57,9 +57,9 @@ if nargin < 2 || isempty(trainp)
     trainp = 0.8; % train on 80% of the data
 end
 
-if nargin < 3 || isempty(nstates)
+if nargin < 3 || isempty(numStates)
     fprintf(1,'Using 3 states by default\n')
-    nstates = 3; % use 3 states
+    numStates = 3; % use 3 states
 end
 
 % ------------------------------------------------------------------------------
@@ -77,9 +77,9 @@ if Ntrain < N
     Ntest = length(ytest);
 end
 
-% Train HMM with <nstates> states for 30 cycles of EM (or until
+% Train HMM with <numStates> states for 30 cycles of EM (or until
 % convergence); default termination tolerance
-[Mu, Cov, P, Pi, LL] = ZG_hmm(ytrain,Ntrain,nstates,30);
+[Mu, Cov, P, Pi, LL] = ZG_hmm(ytrain,Ntrain,numStates,30);
 
 % ------------------------------------------------------------------------------
 %% Output statistics on the training
@@ -103,15 +103,17 @@ out.Cov = Cov;
 out.Pmeandiag = mean(diag(P));
 out.stdmeanP = std(mean(P));
 out.maxP = max(P(:));
-out.meanP = mean(P(:));
+out.meanP = mean(P(:)); % I guess this is just 1/numStates? A constant so not a useful output.
 out.stdP = std(P(:));
 
 % Within-sample log-likelihood
 out.LLtrainpersample = max(LL)/Ntrain; % loglikelihood per sample
 out.nit = length(LL); % number of iterations
 
+% ------------------------------------------------------------------------------
 %% Calculate log likelihood for the test data
-lik = ZG_hmm_cl(ytest,Ntest,nstates,Mu,Cov,P,Pi);
+% ------------------------------------------------------------------------------
+lik = ZG_hmm_cl(ytest,Ntest,numStates,Mu,Cov,P,Pi);
 
 out.LLtestpersample = lik/Ntest;
 

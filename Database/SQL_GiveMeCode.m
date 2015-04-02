@@ -33,17 +33,17 @@ function TheCode = SQL_GiveMeCode(the_op_id);
 % Open connection to database
 [dbc, dbname] = SQL_opendatabase;
 
-% Get OpCode:
-SelectString = sprintf('SELECT Code FROM Operations WHERE op_id = %u',the_op_id);
-OpCode = mysql_dbquery(dbc,SelectString);
-OpCode = OpCode{1};
+% Get opCode:
+selectString = sprintf('SELECT Code FROM Operations WHERE op_id = %u',the_op_id);
+opCode = mysql_dbquery(dbc,selectString);
+opCode = opCode{1};
 
 % Get MasterCode:
-SelectString = sprintf(['SELECT MasterLabel,MasterCode FROM MasterOperations WHERE mop_id = ' ...
+selectString = sprintf(['SELECT MasterLabel,MasterCode FROM MasterOperations WHERE mop_id = ' ...
                         '(SELECT mop_id FROM Operations WHERE op_id = %u)'],the_op_id);
-MopData = mysql_dbquery(dbc,SelectString);
-MopLabel = MopData{1};
-MopCode = MopData{2};
+mopData = mysql_dbquery(dbc,selectString);
+mopLabel = mopData{1};
+mopCode = mopData{2};
 
 % Close connection to the mySQL database
 SQL_closedatabase(dbc);
@@ -51,13 +51,13 @@ SQL_closedatabase(dbc);
 
 % ------------------------------------------------------------------------------
 % Combine to give the required code as two function handles:
-DotHere = regexp(OpCode,'\.');
+DotHere = regexp(opCode,'\.');
 if ~isempty(DotHere) % A structure output
-    WhatField = OpCode(DotHere+1:end);
-    % TheCode{1} = sprintf('@(x,y) %s;',MopCode); % Evaluate the structure
-    TheCode = eval(sprintf('@(x,y) BF_GiveMeField(%s,''%s'');',MopCode,WhatField)); % Take the field from the structure
+    WhatField = opCode(DotHere+1:end);
+    % TheCode{1} = sprintf('@(x,y) %s;',mopCode); % Evaluate the structure
+    TheCode = eval(sprintf('@(x,y) BF_GiveMeField(%s,''%s'');',mopCode,WhatField)); % Take the field from the structure
 else
-    TheCode = eval(sprintf('@(x,y) %s;',MopCode));
+    TheCode = eval(sprintf('@(x,y) %s;',mopCode));
 end
 % ------------------------------------------------------------------------------
 

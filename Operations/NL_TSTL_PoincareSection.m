@@ -28,6 +28,9 @@
 % Another thing that could be cool to do is to analyze variation in the plots as
 % ref changes... (not done here)
 % 
+%---HISTORY:
+% Ben Fulcher, November 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -52,12 +55,10 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_PoincareSection(y,ref,embedparams)
-% Ben Fulcher, November 2009
 
-doplot = 0; % plot outputs to a figure
-
+% ------------------------------------------------------------------------------
 %% Check inputs
-N = length(y); % length of the time series
+% ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(ref)
     ref = 'max'; % reference point is the first maximum of the time series
@@ -94,8 +95,13 @@ end
 if isempty(ref), out = NaN; return; end % ridiculous
 if ref < 2, ref = 2; end % gives an error, uses previous value in algorithm
 
+doPlot = 0; % plot outputs to a figure
+
+% ------------------------------------------------------------------------------
 %% Do your magic, TSTOOL!:
+% ------------------------------------------------------------------------------
 % time-delay embed the signal:
+N = length(y); % length of the time series
 s = BF_embed(y,embedparams{1},3,1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
@@ -115,20 +121,23 @@ catch me
     end
 end
 
-% convert to Matlab forms
+% Convert back to Matlab forms
 v = data(rs); % vectors on poincare surface
 NN = length(v);
-% labeling poincare surface plane x-y
+% Labeling poincare surface plane x-y
 x = (v(:,1));
-y = (v(:,2)); 
-if doplot
+y = (v(:,2));
+
+if doPlot
     figure('color','w'); box('on');
     plot(x,y,'.k'); axis equal
 end
 
+% ------------------------------------------------------------------------------
 %% Get statistics out
+% ------------------------------------------------------------------------------
 
-% basic stats
+% Basic statistics:
 out.pcross = NN/N; % proportion of time series that crosses poincare surface
 
 out.maxx = max(x);
@@ -136,8 +145,8 @@ out.minx = min(x);
 out.stdx = std(x);
 out.iqrx = iqr(x);
 out.meanx = mean(x);
-out.ac1x = CO_AutoCorr(x,1);
-out.ac2x = CO_AutoCorr(x,2);
+out.ac1x = CO_AutoCorr(x,1,'Fourier');
+out.ac2x = CO_AutoCorr(x,2,'Fourier');
 out.tauacx = CO_FirstZero(x,'ac');
 
 out.maxy = max(y);
@@ -145,18 +154,18 @@ out.miny = min(y);
 out.stdy = std(y);
 out.iqry = iqr(y);
 out.meany = mean(y);
-out.ac1y = CO_AutoCorr(y,1);
-out.ac2y = CO_AutoCorr(y,2);
+out.ac1y = CO_AutoCorr(y,1,'Fourier');
+out.ac2y = CO_AutoCorr(y,2,'Fourier');
 out.tauacy = CO_FirstZero(y,'ac');
 
 out.boxarea = range(x)*range(y);
 
-% statistics on distance between adjacent points, ds
+% Statistics on distance between adjacent points, ds
 vdiff = v(2:end,:)-v(1:end-1,:);
 ds = sqrt(vdiff(:,1).^2 + vdiff(:,2).^2);
 
-% probability that next point in series is within radius r of current point
-% in the poincare section
+% Probability that next point in series is within radius r of current point in
+% the poincare section:
 out.pwithinr01 = sum(ds<0.1)/(NN-1);
 out.pwithin02 = sum(ds<0.2)/(NN-1);
 out.pwithin03 = sum(ds<0.3)/(NN-1);
@@ -168,7 +177,7 @@ out.maxds = max(ds);
 out.minds = min(ds);
 out.iqrds = iqr(ds);
 
-% now normalize both axes and look for structure in the cloud of points
+% Now normalize both axes and look for structure in the cloud of points
 % don't normalize for standard deviation -- this probably reveals some
 % structure...? But location is already noted.
 x = x - mean(x);
@@ -181,38 +190,36 @@ out.minD = min(D);
 out.stdD = std(D);
 out.iqrD = iqr(D);
 out.meanD = mean(D);
-out.ac1D = CO_AutoCorr(D,1);
-out.ac2D = CO_AutoCorr(D,2);
+out.ac1D = CO_AutoCorr(D,1,'Fourier');
+out.ac2D = CO_AutoCorr(D,2,'Fourier');
 out.tauacD = CO_FirstZero(D,'ac');
 
-% Entropy of boxed distribution
-boxcounts = subcountboxes(x,y,10); % 10 partitions per axis
-pbox = boxcounts/NN;
+% ------------------------------------------------------------------------------
+%% Statistics of the boxed distribution:
+% ------------------------------------------------------------------------------
 
+numPartitions = [5,10];
+% (i) 5 partitions per axis
+% (ii) 10 partitions per axis
 
-out.maxpbox10 = max(pbox(:));
-out.minpbox10 = min(pbox(:));
-out.zerospbox10 = sum(pbox(:) == 0);
-out.meanpbox10 = mean(pbox(:));
-out.rangepbox10 = range(pbox(:));
-out.hboxcounts10 = -sum(pbox(pbox > 0).*log(pbox(pbox > 0)));
-out.tracepbox10 = sum(diag(pbox)); % trace
+for i = 1:length(numPartitions)
+    boxcounts = subcountboxes(x,y,numPartitions(i));
+    pbox = boxcounts/NN;
 
-boxcounts = subcountboxes(x,y,5);% 5 partitions per axis
-pbox = boxcounts/NN;
-out.maxpbox5 = max(pbox(:));
-out.minpbox5 = min(pbox(:));
-out.zerospbox5 = sum(pbox(:) == 0);
-out.meanpbox5 = mean(pbox(:));
-out.rangepbox5 = range(pbox(:));
-out.hboxcounts5 = -sum(pbox(pbox>0).*log(pbox(pbox>0)));
-out.tracepbox5 = sum(diag(pbox));
-
+    out.(sprintf('maxpbox%u',numPartitions(i))) = max(pbox(:));
+    out.(sprintf('minpbox%u',numPartitions(i))) = min(pbox(:));
+    out.(sprintf('zerospbox%u',numPartitions(i))) = sum(pbox(:) == 0);
+    out.(sprintf('meanpbox%u',numPartitions(i))) = mean(pbox(:));
+    out.(sprintf('rangepbox%u',numPartitions(i))) = range(pbox(:));
+    out.(sprintf('hboxcounts%u',numPartitions(i))) = -sum(pbox(pbox > 0).*log(pbox(pbox > 0)));
+    out.(sprintf('tracepbox%u',numPartitions(i))) = sum(diag(pbox)); % trace
+end
 
 % can imagine doing many more things; like seeing different slabs of the
 % space, or finding the line whos vicinity includes many points, etc. but I
 % think this is enough for now.
 
+% ------------------------------------------------------------------------------
     function boxcounts = subcountboxes(x,y,nbox)
         boxcounts = zeros(nbox);
         % boxes are quantiles along each axis
@@ -221,14 +228,14 @@ out.tracepbox5 = sum(diag(pbox));
         xbox(end) = xbox(end)+1;
         ybox(end) = ybox(end)+1;
         
-        for i = 1:nbox % x
-            rx = (x >= xbox(i) & x < xbox(i+1)); % these x are in range
-            for j = 1:nbox % y
+        for ii = 1:nbox % x
+            rx = (x >= xbox(ii) & x < xbox(ii+1)); % these x are in range
+            for jj = 1:nbox % y
                 % only need to look at those ys for which the xs are in range
-                boxcounts(i,j) = sum(y(rx) >= ybox(j) & y(rx) < ybox(j+1));
+                boxcounts(ii,jj) = sum(y(rx) >= ybox(jj) & y(rx) < ybox(jj+1));
             end
         end     
     end
-
+% ------------------------------------------------------------------------------
 
 end

@@ -23,49 +23,64 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [dbc, dbname] = SQL_opendatabase(dbname,bevocal)
+function [dbc, databaseName] = SQL_opendatabase(databaseName,beVocal)
 
-theconfigfile = which('sql_settings.conf');
-if isempty(theconfigfile)
-    % no sql_settings.conf found
-    error('No sql_settings.conf file found. Please create sql_settings.conf file using SQL_create_db.')
-else
-    fid = fopen(theconfigfile);
+% ------------------------------------------------------------------------------
+% Default: don't display details to the prompt:
+
+if nargin < 2 || isempty(beVocal)
+	beVocal = 0; % by default, do not display the mySQL database used to the prompt
 end
-s = textscan(fid,'%s%s%s%s','Delimiter',',','CommentStyle','%','CollectOutput',1); % 'HeaderLines',1,
-d = s{1};
-% d = regexp(s,',','split');
-% d = regexp(fscanf(fid,'%s'), ',', 'split');
-hostname = d{1};
-default_dbname = d{2};
-username = d{3};
-password = d{4};
+% ------------------------------------------------------------------------------
+
+theConfigFile = which('sql_settings.conf');
+if isempty(theConfigFile)
+    % no sql_settings.conf found
+    error(['No sql_settings.conf file found.\n  ' ...
+    'Please create sql_settings.conf file using SQL_create_db, SQL_ChangeDatabase,' ...
+        ' or generate one yourself (cf. Documentation).'])
+else
+    fid = fopen(theConfigFile);
+end
+
+% Read the file:
+s = textscan(fid,'%s%s%s%s%u','Delimiter',',','CommentStyle','%');
 fclose(fid);
 
-if nargin < 1 || isempty(dbname)
-	dbname = default_dbname; % set default database
+% Interpret the output:
+hostname = s{1}{1};
+default_databaseName = s{2}{1};
+username = s{3}{1};
+password = s{4}{1};
+customPort = s{5};
+
+% ------------------------------------------------------------------------------
+if nargin < 1 || isempty(databaseName)
+	databaseName = default_databaseName; % set default database
 end
-if nargin < 2 || isempty(bevocal)
-	bevocal = 0; % by default, do not display the mySQL database used to the prompt
+if isempty(customPort) || customPort==0
+    customPort = 3306; % default port
 end
 
-if bevocal
-	fprintf(1,'Using database %s\n',dbname)
-    fprintf(1,['Connecting to host ''%s'', database ''%s'', using username' ...
-            ' ''%s'' and password ''%s''...'],hostname,dbname,username,password)
+% ------------------------------------------------------------------------------
+if beVocal
+	fprintf(1,'Using database %s\n',databaseName)
+    fprintf(1,['Connecting to host ''%s'', database ''%s'' (port %u) using username' ...
+            ' ''%s'' and password ''%s''...'],hostname,databaseName,customPort,username,password)
 end
 
 % ------------------------------------------------------------------------------
 % Open database as dbc
-dbc = mysql_dbopen(hostname,dbname,username,password);
+% ------------------------------------------------------------------------------
+dbc = mysql_dbopen(hostname,databaseName,username,password,customPort);
 
 if isempty(dbc)
 	error('Failed to load SQL database');
-elseif bevocal
+elseif beVocal
     fprintf(1,' Connected!\n');
 end
 
-mysql_dbexecute(dbc,['USE ' dbname]);
+mysql_dbexecute(dbc,['USE ' databaseName]);
 
 
 

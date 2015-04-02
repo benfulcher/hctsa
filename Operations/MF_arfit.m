@@ -192,11 +192,11 @@ out.res_siglev = siglev;
 
 % (2) Correlation test of residuals
 % error margins are within 1.96/sqrt(N);
-out.res_ac1 = CO_AutoCorr(res,1);
-out.res_ac1_norm = CO_AutoCorr(res,1)/sqrt(N); % normalize by sqrt(N)
+out.res_ac1 = CO_AutoCorr(res,1,'Fourier');
+out.res_ac1_norm = CO_AutoCorr(res,1,'Fourier')/sqrt(N); % normalize by sqrt(N)
 
 % Calculate correlations up to 20, return how many exceed significance threshold
-acf = CO_AutoCorr(res,1:20);
+acf = CO_AutoCorr(res,1:20,'Fourier');
 out.pcorr_res = sum(abs(acf)>1.96/sqrt(N))/20;
 
 %% (III) Confidence Intervals

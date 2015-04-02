@@ -18,7 +18,7 @@ function K = covNNone(hyp, x, z, i)
 
 if nargin<2, K = '2'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
 n = size(x,1);
 ell2 = exp(2*hyp(1));

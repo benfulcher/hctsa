@@ -75,14 +75,16 @@ if DoPlot
     plot(m(:,1),m(:,2),'.');
 end
 
+% ------------------------------------------------------------------------------
 % Calculate Euclidean distances between successive points in this space, d:
+% ------------------------------------------------------------------------------
 
 d = sum(abs(diff(m(:,1)).^2 + diff(m(:,2)).^2),2); % Correct form, updated 9/7/2011
 
 % Outputs statistics obtained from ordered set of distances between successive points in the recurrence space
-out.d_ac1 = CO_AutoCorr(d,1); % Autocorrelation at lag 1
-out.d_ac2 = CO_AutoCorr(d,2); % Autocorrelation at lag 2
-out.d_ac3 = CO_AutoCorr(d,3); % Autocorrelation at lag 3
+out.d_ac1 = CO_AutoCorr(d,1,'Fourier'); % Autocorrelation at lag 1
+out.d_ac2 = CO_AutoCorr(d,2,'Fourier'); % Autocorrelation at lag 2
+out.d_ac3 = CO_AutoCorr(d,3,'Fourier'); % Autocorrelation at lag 3
 
 out.d_mean = mean(d); % Mean distance
 out.d_median = median(d); % Median distance
@@ -92,6 +94,7 @@ out.d_max = max(d); % Maximum distance
 out.d_min = min(d); % Minimum distance
 out.d_cv = mean(d)/std(d); % coefficient of variation of distances
 
+% ------------------------------------------------------------------------------
 % Empirical distance distribution often fits Exponential distribution quite well
 % Fit to all values (often some extreme outliers, but oh well)
 % Use a histogram with fixed bins

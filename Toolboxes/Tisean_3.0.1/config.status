@@ -39,8 +39,8 @@ s%@SHELL@%/bin/sh%g
 s%@CFLAGS@%-O3%g
 s%@CPPFLAGS@%%g
 s%@CXXFLAGS@%%g
-s%@FFLAGS@%-O%g
-s%@DEFS@% -DHAVE_LIBM=1 -DSTDC_HEADERS=1 -DHAVE_LIMITS_H=1 -DHAVE_MALLOC_H=1 %g
+s%@FFLAGS@%%g
+s%@DEFS@% -DHAVE_LIBM=1 -DSTDC_HEADERS=1 -DHAVE_LIMITS_H=1 %g
 s%@LDFLAGS@%%g
 s%@LIBS@%-lm %g
 s%@exec_prefix@%${prefix}%g
@@ -70,7 +70,7 @@ s%@INSTALL_SCRIPT@%${INSTALL_PROGRAM}%g
 s%@INSTALL_DATA@%${INSTALL} -m 644%g
 s%@SET_MAKE@%%g
 s%@RANLIB@%ranlib%g
-s%@GP@%gnuplot%g
+s%@GP@%%g
 
 CEOF
 

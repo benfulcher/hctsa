@@ -1,72 +1,60 @@
-function [post nlZ dnlZ] = infLaplace(hyp, mean, cov, lik, x, y)
+function [post nlZ dnlZ] = infLaplace(hyp, mean, cov, lik, x, y, opt)
 
 % Laplace approximation to the posterior Gaussian process.
-% The function takes a specified covariance function (see covFunction.m) and
-% likelihood function (see likFunction.m), and is designed to be used with
-% gp.m. See also infFunctions.m.
+% The function takes a specified covariance function (see covFunctions.m) and
+% likelihood function (see likFunctions.m), and is designed to be used with
+% gp.m. See also infMethods.m.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2012-11-09.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2013-05-02.
 %
 % See also INFMETHODS.M.
 
 persistent last_alpha                                   % copy of the last alpha
 if any(isnan(last_alpha)), last_alpha = zeros(size(last_alpha)); end   % prevent
-tol = 1e-6;                   % tolerance for when to stop the Newton iterations
-smax = 2; Nline = 10; thr = 1e-4;                       % line search parameters
 
-maxit = 20;                                    % max number of Newton steps in f
+if nargin<=6, opt = []; end                        % make opt variable available
+if isfield(opt,'postL'), postL = opt.postL;        % recompute matrix L for post
+else postL = true; end                                           % default value
 
 inf = 'infLaplace';
 n = size(x,1);
-K = feval(cov{:},  hyp.cov,  x);                % evaluate the covariance matrix
-m = feval(mean{:}, hyp.mean, x);                      % evaluate the mean vector
+if isnumeric(cov),  K = cov;                    % use provided covariance matrix
+else K = feval(cov{:},  hyp.cov,  x); end       % evaluate the covariance matrix
+if isnumeric(mean), m = mean;                         % use provided mean vector
+else m = feval(mean{:}, hyp.mean, x); end             % evaluate the mean vector
+likfun = @(f) feval(lik{:},hyp.lik,y,f,[],inf);        % log likelihood function
 
-Psi_old = Inf;    % make sure while loop starts by the largest old objective val
 if any(size(last_alpha)~=[n,1])     % find a good starting point for alpha and f
-  alpha = zeros(n,1); f = K*alpha+m;       % start at mean if sizes do not match                  
-  [lp,dlp,d2lp] = feval(lik{:},hyp.lik,y,f,[],inf); W = -d2lp; Psi_new=-sum(lp);
+  alpha = zeros(n,1);                      % start at mean if sizes do not match
 else
-  alpha = last_alpha; f = K*alpha+m;                              % try last one
-  [lp,dlp,d2lp] = feval(lik{:},hyp.lik,y,f,[],inf); W = -d2lp;
-  Psi_new = alpha'*(f-m)/2 - sum(lp);                 % objective for last alpha
-  Psi_def = -sum(feval(lik{:},hyp.lik,y,m,[],inf));% objective for def init f==m
-  if Psi_def < Psi_new                         % if default is better, we use it
-    alpha = zeros(n,1); f = K*alpha+m;
-    [lp,dlp,d2lp] = feval(lik{:},hyp.lik,y,f,[],inf); W=-d2lp; Psi_new=-sum(lp);
+  alpha = last_alpha;                                             % try last one
+  if Psi(alpha,m,K,likfun) > -sum(likfun(m))     % default f==m better => use it
+    alpha = zeros(n,1);
   end
 end
-isWneg = any(W<0);       % flag indicating whether we found negative values of W
-it = 0;                            % this happens for the Student's t likelihood
-while Psi_old - Psi_new > tol && it<maxit                         % begin Newton
-  Psi_old = Psi_new; it = it+1;
-  if isWneg       % stabilise the Newton direction in case W has negative values
-    W = max(W,0);      % stabilise the Hessian to guarantee postive definiteness
-    tol = 1e-10;           % increase accuracy to also get the derivatives right
-    % In Vanhatalo et. al., GPR with Student's t likelihood, NIPS 2009, they use
-    % a more conservative strategy then we do being equivalent to 2 lines below.
-    % nu  = exp(hyp.lik(1));                  % degree of freedom hyperparameter
-    % W  = W + 2/(nu+1)*dlp.^2;               % add ridge according to Vanhatalo
-  end
-  sW = sqrt(W); L = chol(eye(n)+sW*sW'.*K);              % L'*L=B=eye(n)+sW*K*sW
-  b = W.*(f-m) + dlp;
-  dalpha = b - sW.*solve_chol(L,sW.*(K*b)) - alpha;   % Newton dir + line search
-  [s,Psi_new,Nfun,alpha,f,dlp,W] = brentmin(0,smax,Nline,thr, ...
-                                    @Psi_line,4,dalpha,alpha,hyp,K,m,lik,y,inf);
-  isWneg = any(W<0);
-end                                                    % end Newton's iterations
 
+% switch between optimisation methods
+alpha = irls(alpha, m,K,likfun, opt);                         % run optimisation
+
+f = K*alpha+m;                                  % compute latent function values
 last_alpha = alpha;                                     % remember for next call
-[lp,dlp,d2lp,d3lp] = feval(lik{:},hyp.lik,y,f,[],inf); W=-d2lp; isWneg=any(W<0);
+[lp,dlp,d2lp,d3lp] = likfun(f); W = -d2lp; isWneg = any(W<0);
 post.alpha = alpha;                            % return the posterior parameters
 post.sW = sqrt(abs(W)).*sign(W);             % preserve sign in case of negative
 
-if isWneg                    % switch between Cholesky and LU decomposition mode
-  % For post.L = -inv(K+diag(1./W)), we us the non-default parametrisation.
-  [ldA, iA, post.L] = logdetA(K,W);     % A=eye(n)+K*W is as safe as symmetric B
-  nlZ = alpha'*(f-m)/2 - sum(lp) + ldA/2;
-else
-  sW = post.sW; post.L = chol(eye(n)+sW*sW'.*K);                     % recompute
-  nlZ = alpha'*(f-m)/2 + sum(log(diag(post.L))-lp);     % ..(f-m)/2 -lp +ln|B|/2
+% diagnose optimality
+err = @(x,y) norm(x-y)/max([norm(x),norm(y),1]);   % we need to have alpha = dlp
+% dev = err(alpha,dlp);  if dev>1e-4, warning('Not at optimum %1.2e.',dev), end
+
+if postL || nargout>1
+  if isWneg                  % switch between Cholesky and LU decomposition mode
+    % For post.L = -inv(K+diag(1./W)), we us the non-default parametrisation.
+    [ldA, iA, post.L] = logdetA(K,W);   % A=eye(n)+K*W is as safe as symmetric B
+    nlZ = alpha'*(f-m)/2 - sum(lp) + ldA/2;
+  else
+    sW = post.sW; post.L = chol(eye(n)+sW*sW'.*K);                   % recompute
+    nlZ = alpha'*(f-m)/2 + sum(log(diag(post.L))-lp);   % ..(f-m)/2 -lp +ln|B|/2
+  end
 end
 
 if nargout>2                                           % do we want derivatives?
@@ -99,16 +87,47 @@ if nargout>2                                           % do we want derivatives?
   end
 end
 
-% criterion Psi at alpha + s*dalpha for line search
-function [Psi,alpha,f,dlp,W] = Psi_line(s,dalpha,alpha,hyp,K,m,lik,y,inf)
-  alpha = alpha + s*dalpha;
+% Evaluate criterion Psi(alpha) = alpha'*K*alpha + likfun(f), where 
+% f = K*alpha+m, and likfun(f) = feval(lik{:},hyp.lik,y,  f,  [],inf).
+function [psi,dpsi,f,alpha,dlp,W] = Psi(alpha,m,K,likfun)
   f = K*alpha+m;
-  [lp,dlp,d2lp] = feval(lik{:},hyp.lik,y,f,[],inf); W = -d2lp;
-  Psi = alpha'*(f-m)/2 - sum(lp);
+  [lp,dlp,d2lp] = likfun(f); W = -d2lp;
+  psi = alpha'*(f-m)/2 - sum(lp);
+  if nargout>1, dpsi = K*(alpha-dlp); end
+
+% Run IRLS Newton algorithm to optimise Psi(alpha).
+function alpha = irls(alpha, m,K,likfun, opt)
+  if isfield(opt,'irls_maxit'), maxit = opt.irls_maxit; % max no of Newton steps
+  else maxit = 20; end                                           % default value
+  if isfield(opt,'irls_Wmin'),  Wmin = opt.irls_Wmin; % min likelihood curvature
+  else Wmin = 0.0; end                                           % default value
+  if isfield(opt,'irls_tol'),   tol = opt.irls_tol;     % stop Newton iterations
+  else tol = 1e-6; end                                           % default value
+
+  smin_line = 0; smax_line = 2;           % min/max line search steps size range
+  nmax_line = 10;                          % maximum number of line search steps
+  thr_line = 1e-4;                                       % line search threshold
+  Psi_line = @(s,alpha,dalpha) Psi(alpha+s*dalpha, m,K,likfun);    % line search
+  pars_line = {smin_line,smax_line,nmax_line,thr_line};  % line seach parameters
+  search_line = @(alpha,dalpha) brentmin(pars_line{:},Psi_line,5,alpha,dalpha);
+
+  f = K*alpha+m; [lp,dlp,d2lp] = likfun(f); W = -d2lp; n = size(K,1);
+  Psi_new = Psi(alpha,m,K,likfun);
+  Psi_old = Inf;  % make sure while loop starts by the largest old objective val
+  it = 0;                          % this happens for the Student's t likelihood
+  while Psi_old - Psi_new > tol && it<maxit                       % begin Newton
+    Psi_old = Psi_new; it = it+1;
+    % limit stepsize
+    W = max(W,Wmin); % reduce step size by increasing curvature of problematic W
+    sW = sqrt(W); L = chol(eye(n)+sW*sW'.*K);            % L'*L=B=eye(n)+sW*K*sW
+    b = W.*(f-m) + dlp;
+    dalpha = b - sW.*solve_chol(L,sW.*(K*b)) - alpha; % Newton dir + line search
+    [s_line,Psi_new,n_line,dPsi_new,f,alpha,dlp,W] = search_line(alpha,dalpha);
+  end                                                  % end Newton's iterations
 
 % Compute the log determinant ldA and the inverse iA of a square nxn matrix
 % A = eye(n) + K*diag(w) from its LU decomposition; for negative definite A, we 
-% return ldA = Inf. We also return mwiA = -diag(w)*inv(A).
+% return ldA = Inf. We also return mwiA = -diag(w)/A.
 function [ldA,iA,mwiA] = logdetA(K,w)
   [m,n] = size(K); if m~=n, error('K has to be nxn'), end
   A = eye(n)+K.*repmat(w',n,1);
@@ -124,5 +143,5 @@ function [ldA,iA,mwiA] = logdetA(K,w)
   else            % det(L) = 1 and U triangular => det(A) = det(P)*prod(diag(U))
     ldA = sum(log(abs(u)));
   end 
-  if nargout>1, iA = inv(U)*inv(L)*P; end          % return the inverse, as well
+  if nargout>1, iA = U\(L\P); end               % return the inverse if required
   if nargout>2, mwiA = -repmat(w,1,n).*iA; end

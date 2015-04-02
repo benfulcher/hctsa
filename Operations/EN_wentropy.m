@@ -18,6 +18,9 @@
 % Author's cautionary note: it seems likely that this implementation of wentropy
 % is nonsense.
 % 
+%---HISTORY:
+% Ben Fulcher, 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -42,9 +45,15 @@
 % ------------------------------------------------------------------------------
 
 function out = EN_wentropy(y,whaten,p)
-% Ben Fulcher, 2009
 
+% ------------------------------------------------------------------------------
+%% Check that a Wavelet Toolbox license is available:
+% ------------------------------------------------------------------------------
+BF_CheckToolbox('wavelet_toolbox')
+
+% ------------------------------------------------------------------------------
 % Check inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(whaten)
     whaten = 'shannon'; % default
 end

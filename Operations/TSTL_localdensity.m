@@ -16,13 +16,16 @@
 % 
 % past, number of time-correlated points to discard (samples)
 % 
-% embedparams, the embedding parameters, inputs to BF_embed as {tau,m}, where
+% embedParams, the embedding parameters, inputs to BF_embed as {tau,m}, where
 %               tau and m can be characters specifying a given automatic method
 %               of determining tau and/or m (see BF_embed).
 % 
 %---OUTPUTS: various statistics on the local density estimates at each point in
 % the time-delay embedding, including the minimum and maximum values, the range,
 % the standard deviation, mean, median, and autocorrelation.
+% 
+%---HISTORY:
+% Ben Fulcher, November 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -47,10 +50,11 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = TSTL_localdensity(y,NNR,past,embedparams)
-% Ben Fulcher, November 2009
+function out = TSTL_localdensity(y,NNR,past,embedParams)
 
+% ------------------------------------------------------------------------------
 %% Check inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(NNR)
     NNR = 3; % 3 nearest neighbours
 end
@@ -59,29 +63,28 @@ if nargin < 3 || isempty(past)
     past = 40;
 end
 
-if nargin < 4 || isempty(embedparams)
-    embedparams = {'ac','cao'};
-    fprintf(1,'Using default embedding using autocorrelation and cao\n')
+if nargin < 4 || isempty(embedParams)
+    embedParams = {'ac','cao'};
+    fprintf(1,'Using default embedding using autocorrelation and cao''s method.\n')
 end
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
-s = BF_embed(y,embedparams{1},embedparams{2},1);
+% ------------------------------------------------------------------------------
+s = BF_embed(y,embedParams{1},embedParams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding failed.')
-    % out = NaN;
-    % return
 end
 
-%% Run the code
-% try
+% ------------------------------------------------------------------------------
+%% Run the TSTOOL function, localdensity
+% ------------------------------------------------------------------------------
 rs = localdensity(s,NNR,past);
-% catch emsg
-%     if strcmp(emsg.message,'Fast nearest neighbour searcher : To many neighbors for each query point are requested')
-%         out = NaN; return
-%     end
-% end
+
+% ------------------------------------------------------------------------------
 %% Convert output to data
+% ------------------------------------------------------------------------------
 locden = data(rs);
 if all(locden == 0)
     out = NaN; return
@@ -98,12 +101,10 @@ out.stdden = std(locden);
 out.meanden = mean(locden);
 out.medianden = median(locden);
 
-F_acden = @(x) CO_AutoCorr(locden,x); % autocorrelation of locden
-out.ac1den = F_acden(1);
-out.ac2den = F_acden(2);
-out.ac3den = F_acden(3);
-out.ac4den = F_acden(4);
-out.ac5den = F_acden(5);
+F_acden = @(x) CO_AutoCorr(locden,x,'Fourier'); % autocorrelation of locden for 1:5
+for i = 1:5
+    out.(sprintf('ac%uden',i)) = F_acden(i);
+end
 
 % Estimates of correlation length:
 out.tauacden = CO_FirstZero(locden,'ac'); % first zero-crossing of autocorrelation function

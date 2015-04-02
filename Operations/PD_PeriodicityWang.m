@@ -100,7 +100,9 @@ if doplot
     title('Autocorrelation')
 end
 
+% ------------------------------------------------------------------------------
 %% 3. Frequency is the first peak satisfying the following conditions:
+% ------------------------------------------------------------------------------
 % (a) a trough before it
 % (b) difference between peak and trough is at least 0.01
 % (c) peak corresponds to positive correlation
@@ -144,10 +146,12 @@ for k = 1:nths
     end
 end
 
+% ------------------------------------------------------------------------------
 %% Convert vector into a structure for output
+% ------------------------------------------------------------------------------
 % output entries are out.th1, out.th2, ..., out.th7:
 for i = 1:nths
-    eval(sprintf('out.th%u = thefreqs(%u);',i,i))
+    out.(sprintf('th%u',i)) = thefreqs(i);
 end
 
 end

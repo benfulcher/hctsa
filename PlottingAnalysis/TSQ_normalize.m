@@ -144,10 +144,10 @@ if thresh_r > 0 % if 1, then even the worst are included
 
     if ~isempty(kr1)
         if ~isempty(xkr1)
-            fprintf(1,['Removed time series with fewer than %4.2f%% good values:'...
-                            ' from %u to %u.\n'],thresh_r*100,size(TS_DataMat,1),length(kr1))
+            fprintf(1,['\nRemoved %u time series with fewer than %4.2f%% good values:'...
+                            ' from %u to %u.\n'],size(TS_DataMat,1)-length(kr1),thresh_r*100,size(TS_DataMat,1),length(kr1))
             % display filtered times series to screen:
-            fprintf(1,'Lost %u time series: %s.\n',size(TS_DataMat,1)-length(kr1),BF_cat({TimeSeries(xkr1).FileName},','))
+            fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(xkr1).FileName},','))
         else
             fprintf(1,'All %u time series had greater than %4.2f%% good values. Keeping them all.\n', ...
                             size(TS_DataMat,1),thresh_r*100)
@@ -177,8 +177,9 @@ if thresh_c > 0
     
     if ~isempty(kc1)
         if ~isempty(xkc1)
-            fprintf(1,'Removed operations with fewer than %5.2f%% good values: from %u to %u.\n',thresh_c*100,size(TS_DataMat,2),length(kc1))
-            fprintf(1,'Lost %u operations: %s.\n',size(TS_DataMat,2)-length(kc1),BF_cat({Operations(xkc1).Name},','))
+            fprintf(1,'\nRemoved %u operations with fewer than %5.2f%% good values: from %u to %u.\n',...
+                            size(TS_DataMat,2)-length(kc1),thresh_c*100,size(TS_DataMat,2),length(kc1))
+            fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(xkc1).Name},','))
         else
             fprintf(1,['All operations had greater than %5.2f%% good values; ' ...
                     'keeping them all :-)'],thresh_c*100)
@@ -208,8 +209,8 @@ if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all 
 
     if ~isempty(kc2)
         if length(kc2) < size(TS_DataMat,2)
-            fprintf(1,'Removed operations with near-constant outputs: from %u to %u.\n',...
-                             size(TS_DataMat,2),length(kc2))
+            fprintf(1,'Removed %u operations with near-constant outputs: from %u to %u.\n',...
+                             size(TS_DataMat,2)-length(kc2),size(TS_DataMat,2),length(kc2))
             TS_DataMat = TS_DataMat(:,kc2); % ********************* KC2 **********************
             TS_Quality = TS_Quality(:,kc2);
         end
@@ -260,7 +261,7 @@ Operations = Operations(kc_tot); % Filter operations
 
 fprintf(1,'We now have %u time series and %u operations in play.\n', ...
                                 length(TimeSeries),length(Operations))
-fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_DataMat(:))), ...
+fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_DataMat(:))), ...
             sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
 
 
@@ -330,17 +331,17 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n', ...
 % --------------------------------------------------------------------------
 
 % Make a structure with statistics on normalization:
-% Save the CodeToRun, so you can check the settings used to run the normalization
+% Save the codeToRun, so you can check the settings used to run the normalization
 % At the moment, only saves the first two arguments
-CodeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',normFunction, ...
+codeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',normFunction, ...
                                         filterOptions(1),filterOptions(2));
-NormalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
-                                    filterOptions,'CodeToRun',CodeToRun);
+normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
+                                    filterOptions,'codeToRun',codeToRun);
 
 
 fprintf(1,'Saving the trimmed, normalized data to local files...')
 save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-                                    'MasterOperations','NormalizationInfo');
+                                    'MasterOperations','normalizationInfo');
 fprintf(1,' Done.\n')
 
 end

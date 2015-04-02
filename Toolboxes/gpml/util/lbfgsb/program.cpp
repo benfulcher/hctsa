@@ -148,6 +148,6 @@ void Program::callLBFGS (const char* cmd) {
 void Program::initStructures() {
   f   = 0;
   g   = new double[n];
-  wa  = new double[(2*m + 4)*n + 12*m*(m + 1)];
+  wa  = new double[(2*m + 5)*n + 12*m*(m + 1)];
   iwa = new int[3*n];
 }

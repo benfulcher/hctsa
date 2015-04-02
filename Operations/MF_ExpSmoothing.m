@@ -52,7 +52,7 @@
 function out = MF_ExpSmoothing(x,ntrain,alpha)
 % Ben Fulcher, 19/2/2010
 
-doplot = 0; % plot outputs
+doPlot = 0; % plot outputs
 N = length(x); % the length of the time series
 
 % (*) ntrain -- either the number or proportion of training points
@@ -269,12 +269,12 @@ residout = MF_ResidualAnalysis(e);
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields)
-    eval(sprintf('out.%s = residout.%s;',fields{k},fields{k}));
+    out.(fields{k}) = residout.(fields{k});
 end
 
 % t=1:length(yp);
 
-if doplot
+if doPlot
     figure('color','w'); box('on')
     plot(t,x(3:N),'b',t,y(3:N),'k');
     legend('Obs', 'Fit');
@@ -282,6 +282,7 @@ if doplot
     ylabel('Amplitude');
 end
 
+% ------------------------------------------------------------------------------
 function xf = SUB_fit_exp_smooth(x,a)
     % Iterate over rolling window
     ntrain = length(x);

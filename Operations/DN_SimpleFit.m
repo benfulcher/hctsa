@@ -92,13 +92,14 @@ if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
 	catch emsg % this model can't even be fitted OR license problem...
         if strcmp(emsg.identifier,'curvefit:fit:nanComputed') ...
                 || strcmp(emsg.identifier,'curvefit:fit:infComputed')
-            error('Error fitting the model ''%s'' to this data: %s',dmodel,emsg.message);
+            error('Error fitting the model ''%s'' to this data:\n%s',dmodel,emsg.message);
         elseif strcmp(emsg.message,'Power functions cannot be fit to non-positive xdata.') ...
                 || strcmp(emsg.identifier,'curvefit:fit:powerFcnsRequirePositiveData')
             fprintf(1,'The model ''%s'' can not be applied to non-positive data\n',dmodel);
             out = NaN; return
         else
-            error('DN_SimpleFit(x,''%s'',%u): Error fitting %s to the data distribution\n%s',dmodel,nbins,dmodel,emsg.message)
+            error('DN_SimpleFit(x,''%s'',%u): Error fitting %s to the data distribution\n%s',...
+                                                    dmodel,nbins,dmodel,emsg.message)
         end
 	end
     
@@ -127,8 +128,8 @@ end
 out.r2 = gof.rsquare; % rsquared
 out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsqured
 out.rmse = gof.rmse;  % root mean square error
-out.resAC1 = CO_AutoCorr(output.residuals,1); % autocorrelation of residuals at lag 1
-out.resAC2 = CO_AutoCorr(output.residuals,2); % autocorrelation of residuals at lag 2
+out.resAC1 = CO_AutoCorr(output.residuals,1,'Fourier'); % autocorrelation of residuals at lag 1
+out.resAC2 = CO_AutoCorr(output.residuals,2,'Fourier'); % autocorrelation of residuals at lag 2
 out.resruns = HT_HypothesisTest(output.residuals,'runstest'); % runs test on residuals -- outputs p-value
 
 end

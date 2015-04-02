@@ -181,6 +181,9 @@ elseif strcmp(detrndmeth,'logr')
 
 % 9) Box-Cox Transformation
 elseif strcmp(detrndmeth,'boxcox')
+    % Requires a financial toolbox to run boxcox, check one is available:
+    BF_CheckToolbox('financial_toolbox');
+    
     if all(y > 0), y_d = boxcox(y);
     else
         out = NaN; return % return all NaNs
@@ -189,9 +192,12 @@ else
     error('Invalid detrending method ''%s''',detrendmeth)
 end
 
-%% quick error checks
+% ------------------------------------------------------------------------------
+%% Quick error check
+% ------------------------------------------------------------------------------
 if all(y_d == 0)
-    out = NaN; return
+    out = NaN;
+    return
 end
 
 % ------------------------------------------------------------------------------
@@ -257,15 +263,13 @@ if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
     out.gauss1_h10_resAC1 = NaN;
     out.gauss1_h10_resAC2 = NaN;
     out.gauss1_h10_resruns = NaN;
-%     out.gauss1_h10_reslbq = NaN;
 else
     out.gauss1_h10_r2 = me1.r2/me2.r2;
     out.gauss1_h10_adjr2 = me1.adjr2/me2.adjr2;
     out.gauss1_h10_rmse = me1.rmse/me2.rmse;
     out.gauss1_h10_resAC1 = me1.resAC1/me2.resAC1;
-    out.gauss1_h10_resAC2 = me2.resAC2/me2.resAC2;
+    out.gauss1_h10_resAC2 = me1.resAC2/me2.resAC2;
     out.gauss1_h10_resruns = me1.resruns/me2.resruns;
-%     out.gauss1_h10_reslbq = me1.reslbq/me2.reslbq;
 end
 
 % (c) compare distribution to fitted normal distribution

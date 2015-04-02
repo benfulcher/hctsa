@@ -13,7 +13,7 @@ ARFLAGS = r
 RANLIB = ranlib
 INSTALL = /usr/bin/install -c
 LOADLIBES = libtsa.a libsla.a
-ERRUNIT = 0
+ERRUNIT = 
 
 # list of executables we want to produce
    BINS = c1 c2naive xc2 \

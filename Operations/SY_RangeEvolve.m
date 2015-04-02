@@ -73,10 +73,9 @@ out.nuqp50 = cumtox(0.5);
 Ns = [10, 50, 100, 1000];
 for i = 1:length(Ns)
     if N >= Ns(i)
-        herehere = lunique(cums(1:Ns(i)))/out.totnuq;
-        eval(sprintf('out.nuql%u = herehere;',Ns(i)));
+        out.(sprintf('nuql%u',Ns(i))) = lunique(cums(1:Ns(i)))/out.totnuq;
     else
-        eval(sprintf('out.nuql%u = NaN;',Ns(i)));
+        out.(sprintf('nuql%u',Ns(i))) = NaN;
     end
 end
 % if N > 10

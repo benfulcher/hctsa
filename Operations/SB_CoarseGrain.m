@@ -11,6 +11,8 @@
 % ng, either specifies the size of the alphabet for 'quantile' and 'updown'
 %       or sets the timedelay for the embedding subroutines
 % 
+%---HISTORY:
+% Ben Fulcher, September 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -36,7 +38,10 @@
 % ------------------------------------------------------------------------------
 
 function yth = SB_CoarseGrain(y,howtocg,ng)
-% Ben Fulcher, September 2009
+
+% ------------------------------------------------------------------------------
+% Check inputs, preliminaries:
+% ------------------------------------------------------------------------------
 
 % Quantile puts an equal number into each bin
 if nargin < 3
@@ -49,7 +54,9 @@ if ~ismember(howtocg,{'updown','quantile','embed2quadrants','embed2octants'})
     error('Unknown coarse-graining method ''%s''',howtocg);
 end
 
+% ------------------------------------------------------------------------------
 % Some coarse-graining/symbolization methods require initial processing:
+% ------------------------------------------------------------------------------
 switch howtocg
 case 'updown'
    y = diff(y);
@@ -79,6 +86,9 @@ case {'embed2quadrants','embed2octants'}
 end
 
 
+% ------------------------------------------------------------------------------
+% Do the coarse graining
+% ------------------------------------------------------------------------------
 switch howtocg
     case 'quantile'
         th = quantile(y,linspace(0,1,ng+1)); % thresholds for dividing the time series values
@@ -88,6 +98,7 @@ switch howtocg
         for i = 1:ng
             yth(y > th(i) & y <= th(i+1)) = i;
         end
+        
     case 'embed2quadrants' % divides based on quadrants in a 2-D embedding space
 		% create alphabet in quadrants -- {1,2,3,4}
 		yth = zeros(length(m1),1);

@@ -26,6 +26,9 @@
 %---OUTPUTS: parameters from the model fitted to the entire time series, and
 % goodness of fit and residual analysis from n4sid prediction.
 % 
+%---HISTORY:
+% Ben Fulcher, 1/2/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -50,12 +53,15 @@
 % ------------------------------------------------------------------------------
 
 function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)
-% Ben Fulcher, 1/2/2010
 
+% ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('identification_toolbox')
 
+% ------------------------------------------------------------------------------
 %% Check Inputs:
+% ------------------------------------------------------------------------------
 % (1) y: the time series as a column vector
 % Convert y to time series object
 N = length(y); % length of time series, N
@@ -79,9 +85,10 @@ if nargin < 4 || isempty(steps)
 end
 
 
+% ------------------------------------------------------------------------------
 %% Build the state-space model
-% use the whole time series -- prediction comes later...
-% m = n4sid(y,'best'); % chooses the best model order among orders 1:10
+% ------------------------------------------------------------------------------
+% Use the whole time series -- prediction comes later...
 m = n4sid(y,ord); % fits a state-space model of given order
 
 if strcmp(ord,'best')
@@ -89,7 +96,9 @@ if strcmp(ord,'best')
     out.bestorder = length(m.k);
 end
 
+% ------------------------------------------------------------------------------
 %% Model parameters
+% ------------------------------------------------------------------------------
 % Analysis of model
 
 % Parameters
@@ -102,29 +111,32 @@ m_np = length(m.ParameterVector); % number of parameters fitted
 % output parameters
 allm_as = m_as(:);
 for i = 1:length(allm_as)
-    eval(sprintf('out.A_%u = allm_as(%u);',i,i));
+    out.(sprintf('A_%u',i)) = allm_as(i);
 end
 for i = 1:length(m_ks)
-    eval(sprintf('out.k_%u = m_ks(%u);',i,i));
+    out.(sprintf('k_%u',i)) = m_ks(i);
 end
 for i = 1:length(m_cs)
-    eval(sprintf('out.c_%u = m_cs(%u);',i,i));
+    out.(sprintf('c_%u',i)) = m_cs(i);
 end
 out.x0mod = sqrt(sum(m_x0.^2));
-out.np = m_np;
+out.np = m_np; % the number of parameters, only a useful output if not specified
 
+% Transition interval (this should always be 1 in this case, from how we've
+% defined our time series, so not a useful output to record):
+out.m_Ts = m.Ts;
 
 % Goodness of fit outputs
 out.m_noisevar = m.NoiseVariance; % a scalar number
-out.m_Ts = m.Ts; % Transition interval
 out.m_lossfn = m.EstimationInfo.LossFcn;
 out.m_fpe = m.EstimationInfo.FPE;
 out.m_aic = aic(m);
-% out.m_bic = out.m_aic - 2*m_np + m_np*log(N); % scrappy and possibly wrong
 
 % plot(y)
 
+% ------------------------------------------------------------------------------
 %% Prediction
+% ------------------------------------------------------------------------------
 
 % Select first portion of data for estimation
 % This could be any portion, actually... Maybe could look at robustness of
@@ -150,7 +162,7 @@ yp = predict(mp, ytest, steps, 'init', 'e'); % across whole ytest dataset
 % plot the two:
 % plot(y,yp);
 
-mresiduals = ytest.y-yp.y;
+mresiduals = ytest.y - yp.y;
 
 % 1) Get statistics on residuals
 residout = MF_ResidualAnalysis(mresiduals);
@@ -158,9 +170,9 @@ residout = MF_ResidualAnalysis(mresiduals);
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
-    eval(sprintf('out.%s = residout.%s;',fields{k},fields{k}));
+    out.(fields{k}) = residout.(fields{k});
 end
 
-out.ac1diff = abs(CO_AutoCorr(y.y,1))-abs(CO_AutoCorr(mresiduals,1));
+out.ac1diff = abs(CO_AutoCorr(y.y,1,'Fourier')) - abs(CO_AutoCorr(mresiduals,1,'Fourier'));
 
 end

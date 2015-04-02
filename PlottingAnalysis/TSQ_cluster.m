@@ -3,21 +3,19 @@
 % --------------------------------------------------------------------------
 % 
 % Reads in normalized data from HCTSA_N.mat, clusters the data matrix by
-% reordering rows and columns, then saves the result as HCTSA_cl.mat
+% reordering rows and columns with linkage clustering, and then saves the result
+% as HCTSA_cl.mat
 % 
 %---EXAMPLE USAGE:
 % TSQ_cluster;
 % 
 %---INPUTS:
-% ClusterMethRow: specifies the clustering method for rows/time series (default is 'linkage')
-% ClusterParamsRow: specifies a cell of parameters specifying the clustering parameters,
-%           including the distance metric, etc. (default is euclidean distances
-%           and average linkage)
-% ClusterMethCol: specifies the clustering method for columns/operations (default is the
-%         same as rows)
-% ClusterParamsCol: clustering settings for columns (default is correlation distances
-%           and average linkage)
-% SubSet: should be a cell with three components: the first should be either
+% distanceMetricRow: specifies the distance metric for computing distances
+%                   between time series (rows)
+% linkageMethodRow: specifies the linkage method for clustering time series (rows)
+% distanceMetricCol: distance metric for distances between operations (columns)
+% linkageMethodCol: linkage method for clustering operations (columns)
+% subSet: should be a cell with three components: the first should be either
 %         'cl' or 'norm' for the row and column indicies provided in the 2nd and
 %         3rd components of the cell. e.g., {'norm',[1,5,...],[]} will load in
 %         HCTSA_N, and cluster the subset of rows [1,5,...] and all columns.
@@ -38,41 +36,41 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_cluster(ClusterMethRow, ClusterParamsRow, ClusterMethCol, ClusterParamsCol, SubSet)
+function TSQ_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, linkageMethodCol, subSet)
 
 % --------------------------------------------------------------------------
-%% Check input arguments
+%% Check input arguments:
 % --------------------------------------------------------------------------
-if nargin < 1 || isempty(ClusterMethRow)
-    ClusterMethRow = 'linkage';
+if nargin < 1 || isempty(distanceMetricRow)
+    distanceMetricRow = 'euclidean';
 end
 
 % Clustering settings for rows
 % (can specify the string 'none' for no clustering)
-if nargin < 2
-    ClusterParamsRow = {'euclidean','average',0,[],0};
+if nargin < 2 || isempty(linkageMethodRow)
+    linkageMethodRow = 'average';
 end
 
 % use same method as for rows
-if nargin < 3 || isempty(ClusterMethCol)
-    fprintf(1,'Clustering columns in the same way as for the rows: using %s\n',ClusterMethRow)
-    ClusterMethCol = ClusterMethRow;
+if nargin < 3 || isempty(distanceMetricCol)
+    % fprintf(1,'Clustering columns in the same way as for the rows: using %s\n',clusterMethRow)
+    distanceMetricCol = 'corr_fast';
 end
 
 % clustering settings for columns
-if nargin < 4 || isempty(ClusterParamsCol)
-    ClusterParamsCol = {'corr','average',0,[],0};
+if nargin < 4 || isempty(linkageMethodCol)
+    linkageMethodCol = 'average';
 end
 
 % Subsets -- only cluster a subset of the full data matrix
 if nargin < 5
-    SubSet = []; % cluster the full input matrix by default
+    subSet = []; % cluster the full input matrix by default
 end
 
-if ~isempty(SubSet)
-    if (length(SubSet) ~= 3)
+if ~isempty(subSet)
+    if (length(subSet) ~= 3)
         error('The subset should specify ''norm'' or ''cl'' and the subset.')
-    elseif ~ismember(SubSet{1},{'norm','cl'})
+    elseif ~ismember(subSet{1},{'norm','cl'})
         error('The first component of subset should be either ''norm'' or ''cl''.')
     end
 end
@@ -80,16 +78,16 @@ end
 % --------------------------------------------------------------------------
 % Record information about clustering settings so can run the same back again if needed later:
 % --------------------------------------------------------------------------
-CodeToCluster = ['TSQ_cluster(ClusterMethRow, ClusterParamsRow, ClusterMethCol, ' ...
-                                    'ClusterParamsCol, SubSet)'];
-ClusteringInfo = struct('ClusterMethRow',ClusterMethRow,'ClusterParamsRow', ...
-                ClusterParamsRow,'ClusterMethCol',ClusterMethCol,'ClusterParamsCol',ClusterParamsCol, ...
-                'Subset',SubSet,'CodeToCluster',CodeToCluster);
+codeToCluster = ['TSQ_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, ' ...
+                                    'linkageMethodCol, subSet)'];
+clusteringInfo = struct('distanceMetricRow',distanceMetricRow,'linkageMethodRow', ...
+                linkageMethodRow,'distanceMetricCol',distanceMetricCol,'linkageMethodCol',linkageMethodCol, ...
+                'Subset',subSet,'codeToCluster',codeToCluster);
 
 % --------------------------------------------------------------------------
 %% Load information from local files
 % --------------------------------------------------------------------------
-if isempty(SubSet) || strcmp(SubSet{1},'norm')
+if isempty(subSet) || strcmp(subSet{1},'norm')
     TheFile = 'HCTSA_N.mat';
 else % subset of the clustered matrix
     TheFile = 'HCTSA_cl.mat';
@@ -99,26 +97,25 @@ if isempty(wn);
     error('%s not found.',TheFile);
 end
 fprintf(1,'Loading data from %s...',TheFile)
-load('HCTSA_N.mat','TS_DataMat','TimeSeries','Operations','MasterOperations','NormalizationInfo')
+load('HCTSA_N.mat','TS_DataMat','TimeSeries','Operations','MasterOperations','normalizationInfo')
 fprintf(1,' Done.\n')
-
 
 % --------------------------------------------------------------------------
 %% Take subsets of the data
 % --------------------------------------------------------------------------
-if ~isempty(SubSet)
+if ~isempty(subSet)
     fprintf(1,'We are now implementing subset behaviour...\n')
     % subs is in the form {[rowrange],[columnrange]}; a cell of two vectors
 
-    if ~isempty(SubSet{2}); % row subset
-       r = SubSet{2};
+    if ~isempty(subSet{2}); % row subset
+       r = subSet{2};
        TS_DataMat = TS_DataMat(r,:);
        TimeSeries = TimeSeries(r);
        fprintf(1,'Reduced rows/timeseries from %u to %u according to the specified subset.\n',length(TimeSeries),length(r));
     end
 
-    if ~isempty(SubSet{3}); % column subset
-        r = SubSet{3};
+    if ~isempty(subSet{3}); % column subset
+        r = subSet{3};
         TS_DataMat = TS_DataMat(:,r);
         Operations = Operations(r);
         fprintf(1,'Reduced columns/operations from %u to %u according to the specified subset\n',length(Operations),length(r));
@@ -131,62 +128,54 @@ end
 fprintf(1,'Clustering the full %u x %u data matrix.\n',length(TimeSeries),length(Operations))
 
 % Cluster rows
-if ~(ischar(ClusterMethCol) && ismember(ClusterMethRow,{'none','nothing'})) % can specify 'none' to do no clustering
-    fprintf(1,'Clustering rows...\n'); tic
-    [~, acgir] = TSQ_us_cluster(TS_DataMat,ClusterMethRow,ClusterParamsRow);
+if ~(ischar(distanceMetricRow) && ismember(distanceMetricRow,{'none','nothing'})) && size(TS_DataMat,1) > 1
+    % (can specify 'none' to do no clustering)
+    fprintf(1,'\n----Clustering rows using a distance metric %s and %s linkage method----\n',...
+                    distanceMetricRow,linkageMethodRow); tic
+    % [~, ord_row] = TSQ_us_cluster(TS_DataMat,clusterMethRow,clusterParamsRow);
+    ord_row = TSQ_ClusterReorder(TS_DataMat,distanceMetricRow,linkageMethodRow);
     fprintf(1,'Row clustering took %s.\n',BF_thetime(toc))
 else
-    acgir = {};
+    ord_row = 1:size(TS_DataMat,1); % don't reorder at all
 end
 
 % Cluster columns
-if ~(ischar(ClusterMethCol) && ismember(ClusterMethCol,{'none','nothing'})) && size(TS_DataMat,2)>1 % can specify 'none' to do no clustering
-    fprintf(1,'Clustering columns...\n'); tic
-    [~, acgic] = TSQ_us_cluster(TS_DataMat',ClusterMethCol,ClusterParamsCol);
+if ~(ischar(distanceMetricCol) && ismember(distanceMetricCol,{'none','nothing'})) && size(TS_DataMat,2) > 1
+    % (can specify 'none' to do no clustering)
+    fprintf(1,'\n----Clustering columns using a distance metric %s and %s linkage method----\n',...
+                    distanceMetricCol,linkageMethodCol); tic
+    ord_col = TSQ_ClusterReorder(TS_DataMat',distanceMetricCol,linkageMethodCol);
+    % [~, ord_col] = TSQ_us_cluster(TS_DataMat',clusterMethCol,clusterParamsCol);
     fprintf(1,'Column clustering took %s.\n',BF_thetime(toc))
 else
-    acgic = {};
+    ord_col = 1:size(TS_DataMat,2); % don't reorder at all
 end
+
+% Save to the clusteringInfo structure:
+clusteringInfo.ord_row = ord_row;
+clusteringInfo.ord_col = ord_col;
 
 % --------------------------------------------------------------------------
 %% Reorder data structures according to the clustering
 % --------------------------------------------------------------------------
-% Get the permutation vectors ordr (reordering for rows) and ordc
-% (reordering for columns)
-
-if isempty(acgir)
-    ordr = 1:size(TS_DataMat,1); % don't reorder at all
-elseif iscell(acgir)
-    ordr = vertcat(acgir{:});
-else
-    ordr = acgir;
-end
-if isempty(acgic);
-    ordc = 1:size(TS_DataMat,2); % don't reorder at all
-elseif iscell(acgic)
-    ordc = vertcat(acgic{:});
-else
-    ordc = acgic;
-end
 
 % Reorder data matrix
-TS_DataMat = TS_DataMat(ordr,ordc);
+TS_DataMat = TS_DataMat(ord_row,ord_col);
 
 % Reorder time series metadata
-TimeSeries = TimeSeries(ordr);
+TimeSeries = TimeSeries(ord_row);
 
 % Reorder operation metadata
-Operations = Operations(ordc);
-
+Operations = Operations(ord_col);
 
 % --------------------------------------------------------------------------
 %% Save results to file
 % --------------------------------------------------------------------------
 
 % Save information about the clustering to the file
-% You can run CodeToCluster after loading all the clustering info using an eval statement...?
+% You can run codeToCluster after loading all the clustering info using an eval statement...?
 fprintf(1,'Saving the clustered data as ''HCTSA_cl''...')
-save('HCTSA_cl.mat','TS_DataMat','TimeSeries','Operations','MasterOperations','NormalizationInfo','ClusteringInfo')
+save('HCTSA_cl.mat','TS_DataMat','TimeSeries','Operations','MasterOperations','normalizationInfo','clusteringInfo')
 fprintf(1,' Done.\n');
 
 

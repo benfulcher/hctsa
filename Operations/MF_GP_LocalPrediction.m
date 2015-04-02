@@ -11,15 +11,15 @@
 %---INPUTS:
 % y, the input time series
 % 
-% covfunc, covariance function in the standard form for the gpml package.
-%           E.g., covfunc = {'covSum', {'covSEiso','covNoise'}} combines squared 
+% covFunc, covariance function in the standard form for the gpml package.
+%           E.g., covFunc = {'covSum', {'covSEiso','covNoise'}} combines squared 
 %           exponential and noise terms
 %           
-% ntrain, the number of training samples (for each iteration)
+% numTrain, the number of training samples (for each iteration)
 % 
-% ntest, the number of testing samples (for each interation)
+% numTest, the number of testing samples (for each interation)
 % 
-% npreds, the number of predictions to make
+% numPreds, the number of predictions to make
 % 
 % pmode, the prediction mode:
 %       (i) 'beforeafter': predicts the preceding time series values by training
@@ -29,9 +29,15 @@
 %       (iii) 'randomgap': predicts random values within a segment of time
 %                    series by training on the other values in that segment.
 % 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%               (for 'randomgap' prediction)
 % 
 %---OUTPUTS: summaries of the quality of predictions made, the mean and
 % spread of obtained hyperparameter values, and marginal likelihoods.
+% 
+% ---HISTORY:
+% Ben Fulcher, 20/1/2010
+% Ben Fulcher, 2015-03-20 added random seed input
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -56,90 +62,111 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_GP_LocalPrediction(y,covfunc,ntrain,ntest,npreds,pmode)
-% Ben Fulcher, 20/1/2010
+function out = MF_GP_LocalPrediction(y,covFunc,numTrain,numTest,numPreds,pmode,randomSeed)
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
-doplot = 0; % plot outputs
+% ------------------------------------------------------------------------------
+doPlot = 0; % plot outputs
 N = length(y); % time-series length
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 if size(y,2) > size(y,1)
     y = y'; % ensure a column vector input
 end
-if nargin < 2 || isempty(covfunc),
+if nargin < 2 || isempty(covFunc),
     fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n')
-    covfunc = {'covSum', {'covSEiso','covNoise'}};
+    covFunc = {'covSum', {'covSEiso','covNoise'}};
 end
 
-if nargin < 3 || isempty(ntrain)
-    ntrain = 20; % 20 previous data points to predict the next
+if nargin < 3 || isempty(numTrain)
+    numTrain = 20; % 20 previous data points to predict the next
 end
 
-if nargin < 4 || isempty(ntest)
-    ntest = 5; % test on 5 data points into the future
+if nargin < 4 || isempty(numTest)
+    numTest = 5; % test on 5 data points into the future
 end
 
-if nargin < 5 || isempty(npreds) % number of predictions
-    npreds = 10; % do it 10 times (equally-spaced) through the time series
+if nargin < 5 || isempty(numPreds) % number of predictions
+    numPreds = 10; % do it 10 times (equally-spaced) through the time series
 end
 
 if nargin < 6 || isempty(pmode)
-    pmode = 'frombefore'; % predicts from previous ntrain datapoints
+    pmode = 'frombefore'; % predicts from previous numTrain datapoints
     % can also be 'randomgap' -- fills in random gaps in the middle of a string of
     % data
 end
 
-%% Set up loop
-if ismember(pmode,{'frombefore','randomgap'})
-    spns = floor(linspace(1,N-(ntest+ntrain),npreds)); % starting positions
-elseif strcmp(pmode,'beforeafter')
-    spns = floor(linspace(1,N-(ntest+ntrain*2),npreds)); % starting positions
+% randomSeed: how to treat the randomization
+if nargin < 7
+    randomSeed = [];
 end
 
-mus = zeros(ntest,npreds); % predicted values
-stderrs = zeros(ntest,npreds); % standard errors on predictions
-yss = zeros(ntest,npreds); % test values
-mlikelihoods = zeros(npreds,1); % marginal likelihoods of model
+% ------------------------------------------------------------------------------
+%% Set up loop
+% ------------------------------------------------------------------------------
+if ismember(pmode,{'frombefore','randomgap'})
+    spns = floor(linspace(1,N-(numTest+numTrain),numPreds)); % starting positions
+elseif strcmp(pmode,'beforeafter')
+    spns = floor(linspace(1,N-(numTest+numTrain*2),numPreds)); % starting positions
+end
 
-nhps = eval(feval(covfunc{:})); % number of hyperparameters
-loghypers = zeros(nhps,npreds); % loghyperparameters
+% Details of GP:
+meanFunc = {'meanZero'}; % zero-mean process
+likFunc = @likGauss; % likelihood function (Gaussian)
+infAlg = @infLaplace; % Inference algorithm (Laplace approximation)
+nfevals = -50;
+hyp = struct; % structure for storing hyperparameter information in latest version of GMPL toolbox
 
-for i = 1:npreds
+% Initialize variables:
+mus = zeros(numTest,numPreds); % predicted values
+stderrs = zeros(numTest,numPreds); % standard errors on predictions
+yss = zeros(numTest,numPreds); % test values
+mlikelihoods = zeros(numPreds,1); % marginal likelihoods of model
+
+nhps = eval(feval(covFunc{:})); % number of hyperparameters
+loghypers = zeros(nhps,numPreds); % loghyperparameters
+
+for i = 1:numPreds
     %% (0) Set up test and training sets
     switch pmode
     case 'frombefore'
-        tt = (1:ntrain)'; % times (make from 1)
-        rt = spns(i):spns(i)+ntrain-1; % training range
+        tt = (1:numTrain)'; % times (make from 1)
+        rt = spns(i):spns(i)+numTrain-1; % training range
         yt = y(rt); % training data
         
-        ts = (ntrain+1 : ntrain+1 + ntest-1)'; % times
-        rs = spns(i)+ntrain : spns(i)+ntrain + ntest-1; % test range
+        ts = (numTrain+1 : numTrain+1 + numTest-1)'; % times
+        rs = spns(i)+numTrain : spns(i)+numTrain + numTest-1; % test range
         ys = y(rs); % test data
         
     case 'randomgap'
-        t = (1:ntrain+ntest)';
-        r = randperm(ntrain+ntest);
-        yy = y(spns(i):spns(i)+ntrain+ntest-1);
+        % Control the random seed (for reproducibility):
+        BF_ResetSeed(randomSeed);
         
-        rt = sort(r(1:ntrain),'ascend');
+        t = (1:numTrain+numTest)';
+        r = randperm(numTrain+numTest);
+        yy = y(spns(i):spns(i)+numTrain+numTest-1);
+        
+        rt = sort(r(1:numTrain),'ascend');
         tt = t(rt);
         yt = yy(rt);
         
-        rs = sort(r(ntrain+1:end),'ascend');
+        rs = sort(r(numTrain+1:end),'ascend');
         ts = t(rs);
         ys = yy(rs);
         
     case 'beforeafter'
-        t = (1:ntrain*2+ntest)';
-        r = ntrain+1:ntrain+1 + ntest-1;
-        yy = y(spns(i):spns(i)+2*ntrain+ntest-1);
+        t = (1:numTrain*2+numTest)';
+        r = numTrain+1:numTrain+1 + numTest-1;
+        yy = y(spns(i):spns(i)+2*numTrain+numTest-1);
         
-        rt = [1:ntrain, ntrain+ntest+1:ntrain*2+ntest];
+        rt = [1:numTrain, numTrain+numTest+1:numTrain*2+numTest];
         tt = t(rt);
         yt = yy(rt);
         
-        rs = [ntrain+1 : ntrain+ntest];
+        rs = [numTrain+1 : numTrain+numTest];
         ts = t(rs);
         ys = yy(rs);
         
@@ -151,9 +178,17 @@ for i = 1:npreds
     ys = (ys-mean(yt))/std(yt); % same transformation as training set
     yt = (yt-mean(yt))/std(yt); % zscore training set
     
+    % ------------------------------------------------------------------------------
     %% (1) Learn hyperparameters from training set (t)
+    % ------------------------------------------------------------------------------
     
-    loghyper = MF_GP_LearnHyperp(covfunc,-50,tt,yt);
+    % Initialize mean and likelihood
+    hyp.mean = []; hyp.lik = log(0.1);
+    hyp.cov = [];
+    
+    % loghyper = MF_GP_LearnHyperp(covFunc,-50,tt,yt);
+    hyp = MF_GP_LearnHyperp(tt,yt,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp);
+    loghyper = hyp.cov;
     
     if isnan(loghyper)
         fprintf(1,'Unable to learn hyperparameters for this time series\n');
@@ -164,13 +199,17 @@ for i = 1:npreds
     
     % Get marginal likelihood for this model with hyperparameters optimized
     % over training data
-    mlikelihoods(i) = - gpr(loghyper, covfunc, tt, yt);
+    % mlikelihoods(i) = - gpr(loghyper, covFunc, tt, yt);
+    mlikelihoods(i) = - gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt);
     
+    % ------------------------------------------------------------------------------
     %% (2) Evaluate at test set (s)
+    % ------------------------------------------------------------------------------
     
-    % evaluate at test points based on training time/data, predicting for
+    % Evaluate at test points based on training time/data, predicting for
     % test times/data
-    [mu, S2] = gpr(loghyper, covfunc, tt, yt, ts);
+    % [mu, S2] = gpr(loghyper, covFunc, tt, yt, ts); % old version
+    [mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt, ts); % evaluate at new time points, ts
     
     % Compare to actual test data --> store in row of errs
     mus(:,i) = mu; % ~predicted values for time series points
@@ -178,7 +217,7 @@ for i = 1:npreds
     yss(:,i) = ys;
     
     % Plot
-    if doplot
+    if doPlot
         if strcmp(pmode,'frombefore')
             plot(tt,yt,'.-k');
             hold on;
@@ -194,7 +233,7 @@ for i = 1:npreds
         end
     end
 
-%     for j=1:ntest
+%     for j=1:numTest
 %         % set up structure output
 %         err = abs(mu(j)-ys(j))/sqrt(S2(j)); % in units of std at this point
 %         eval(['out.abserr' num2str(i) '_' num2str(j) ' = err;']);
@@ -204,8 +243,13 @@ end
 
 % Ok, we're done.
 
+% ------------------------------------------------------------------------------
 %% Return statistics on how well it did
+% ------------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------------
 %% (1) PREDICTION ERROR MEASURES
+% ------------------------------------------------------------------------------
 allstderrs = abs(mus-yss)./stderrs; % differences between predictions and actual
                               % in units of standard error (95% confidence
                               % interval error bars)
@@ -243,17 +287,18 @@ out.maxerrbar = max(stderrs(:)); % largest error bar
 out.meanerrbar = mean(stderrs(:)); % mean error bar length
 out.minerrbar = min(stderrs(:)); % minimum error bar length
 
-
+% ------------------------------------------------------------------------------
 %% (2) HYPERPARAMETER MEASURES
+% ------------------------------------------------------------------------------
 % mean and std for each hyperparameter
 for i = 1:nhps
-    o1 = mean(loghypers(i,:));
-    eval(sprintf('out.meanlogh%u = o1;',i));
-    o2 = std(loghypers(i,:));
-    eval(sprintf('out.stdlogh%u = o2;',i));
+    out.(sprintf('meanlogh%u',i)) = mean(loghypers(i,:));
+    out.(sprintf('stdlogh%u',i)) = std(loghypers(i,:));
 end
 
+% ------------------------------------------------------------------------------
 %% (3) Marginal likelihood measures
+% ------------------------------------------------------------------------------
 % Best marginal neg-log-likelihood attained
 % Worst marginal neg-log-likelihood attained
 % spread in marginal neg-log-likelihoods
@@ -261,6 +306,5 @@ end
 out.maxmlik = max(mlikelihoods);
 out.minmlik = min(mlikelihoods);
 out.stdmlik = std(mlikelihoods);
-
 
 end

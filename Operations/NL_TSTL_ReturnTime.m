@@ -22,6 +22,9 @@
 %---OUTPUTS: include basic measures from the histogram, including the occurrence of
 % peaks, spread, proportion of zeros, and the distributional entropy.
 % 
+%---HISTORY:
+% Ben Fulcher, 12/11/2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -46,12 +49,12 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedparams)
-% Ben Fulcher, 12/11/2009
 
-doplot = 0; % plot outputs to figures
+% ------------------------------------------------------------------------------
+%% Check Inputs
+% ------------------------------------------------------------------------------
 N = length(y); % length of the input time series
 
-%% Check Inputs
 % Number of nearest neighbours, NNR
 if nargin < 2 || isempty(NNR)
     NNR = 5;
@@ -89,8 +92,11 @@ if nargin < 6 || isempty(embedparams)
     fprintf(1,'Using default embedding using autocorrelation and cao\n')
 end
 
+doPlot = 0; % plot outputs to figures
 
+% ------------------------------------------------------------------------------
 %% Embed the signal
+% ------------------------------------------------------------------------------
 s = BF_embed(y,embedparams{1},embedparams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
@@ -98,7 +104,9 @@ if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     out = NaN; return
 end
 
+% ------------------------------------------------------------------------------
 %% Run the code
+% ------------------------------------------------------------------------------
 try
     rs = return_time(s, NNR, maxT, past, Nref);
 catch emsg
@@ -112,9 +120,10 @@ end
 
 Trett = data(rs);
 NN = length(Trett);
-% plot(Trett),keyboard
 
+% ------------------------------------------------------------------------------
 %% Quantify structure in output
+% ------------------------------------------------------------------------------
 out.max = max(Trett);
 out.std = std(Trett);
 out.pzeros = sum(Trett == 0)/NN;
@@ -145,26 +154,28 @@ out.statrtym = mean(Trett(1:floor(end/2)))/mean(Trett(floor(end/2)+1:end));
 
 out.hhist = -sum(Trett(Trett>0).*log(Trett(Trett>0)));
 
-
-%% course-grain a bit, to 20 bins
+% ------------------------------------------------------------------------------
+%% Coarse-grain to 20 bins
+% ------------------------------------------------------------------------------
 nbins = 20;
 cglav = zeros(nbins,1);
 inds = round(linspace(0,NN,21));
 for i = 1:nbins
     cglav(i) = sum(Trett(inds(i)+1:inds(i+1)));
 end
-if doplot
+if doPlot
     figure('color','w'); box('on'); plot(cglav,'k')
 end
 out.hcgdist = -sum(cglav(cglav > 0).*log(cglav(cglav > 0)));
 out.rangecgdist = range(cglav);
 out.pzeroscgdist = sum(cglav == 0)/nbins;
 
-
+% ------------------------------------------------------------------------------
 %% Get distribution of distribution of return times
+% ------------------------------------------------------------------------------
 [nhist, xout] = hist(Trett,30);
 nhist = nhist/sum(nhist);
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(xout,nhist,'o-k'), keyboard
 end

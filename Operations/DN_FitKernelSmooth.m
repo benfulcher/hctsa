@@ -27,6 +27,9 @@
 % probability thresholds, the arc length, and the symmetry of probability
 % density above and below the mean.
 % 
+%---HISTORY:
+% Ben Fulcher, 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -51,7 +54,6 @@
 % ------------------------------------------------------------------------------
 
 function out = DN_FitKernelSmooth(x,varargin)
-% Ben Fulcher, 2009
 
 % Preliminary definitions
 m = mean(x);
@@ -81,7 +83,9 @@ out1 = sum(abs(diff(f(xi < m))).*(xi(2)-xi(1)));
 out2 = sum(abs(diff(f(xi > m))).*(xi(2)-xi(1)));
 out.plsym = out1/out2;
 
+% ------------------------------------------------------------------------------
 % 6. Numcross
+% ------------------------------------------------------------------------------
 % Specified in input
 varhere = strcmp(varargin,'numcross');
 if any(varhere) % calculate crossing statistics
@@ -89,23 +93,28 @@ if any(varhere) % calculate crossing statistics
     for i = 1:length(thresholds)
         ncrosses = sum(BF_sgnchange(f - thresholds(i)));
         outname = regexprep(sprintf('numcross_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
-        eval(sprintf('out.%s = ncrosses;',outname));
+        out.(outname) = ncrosses;
     end
 end
 
+% ------------------------------------------------------------------------------
 % 7. Area
+% ------------------------------------------------------------------------------
 % Specified in input
+
 varhere = strcmp(varargin,'area');
 if any(varhere) % calculate area statistics
     thresholds = varargin{find(varhere,1,'first') + 1};
     for i = 1:length(thresholds)
         areahere = sum(f(f < thresholds(i)).*(xi(2)-xi(1))); % integral under this portion
         outname = regexprep(sprintf('area_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
-        eval(sprintf('out.%s = areahere;',outname));
+        out.(outname) = areahere;
     end
 end
 
+% ------------------------------------------------------------------------------
 % 8. Arc length
+% ------------------------------------------------------------------------------
 % Specified in input
 varhere = strcmp(varargin,'arclength');
 if any(varhere) % calcualte arc length statistics
@@ -115,7 +124,7 @@ if any(varhere) % calcualte arc length statistics
         fd = abs(diff(f(xi > m - thresholds(i) & xi < m + thresholds(i))));
         arclengthhere = sum(fd.*(xi(2)-xi(1)));
         outname = regexprep(sprintf('arclength_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
-        eval(sprintf('out.%s = arclengthhere;',outname));
+        out.(outname) = arclengthhere;
     end
 end
 

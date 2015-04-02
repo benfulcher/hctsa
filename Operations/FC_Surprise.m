@@ -6,7 +6,7 @@
 % recorded in recent memory.
 % 
 % Coarse-grains the time series, turning it into a sequence of symbols of a
-% given alphabet size, ng, and quantifies measures of surprise of a
+% given alphabet size, numGroups, and quantifies measures of surprise of a
 % process with local memory of the past memory values of the symbolic string.
 % 
 % We then consider a memory length, memory, of the time series, and
@@ -19,7 +19,7 @@
 %---INPUTS:
 % y, the input time series
 % 
-% whatinf, the type of information to store in memory:
+% whatPrior, the type of information to store in memory:
 %           (i) 'dist': the values of the time series in the previous memory
 %                       samples,
 %           (ii) 'T1': the one-point transition probabilities in the previous
@@ -30,7 +30,7 @@
 % memory, the memory length (either number of samples, or a proportion of the
 %           time-series length, if between 0 and 1)
 %           
-% ng, the number of groups to coarse-grain the time series into
+% numGroups, the number of groups to coarse-grain the time series into
 % 
 % cgmeth, the coarse-graining, or symbolization method:
 %          (i) 'quantile': an equiprobable alphabet by the value of each
@@ -40,7 +40,9 @@
 %          (iii) 'embed2quadrants': by the quadrant each data point resides in
 %                          in a two-dimensional embedding space.
 % 
-% nits, the number of iterations to repeat the procedure for.
+% numIters, the number of iterations to repeat the procedure for.
+% 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 % 
 %---OUTPUTS: summaries of this series of information gains, including the
 %            minimum, maximum, mean, median, lower and upper quartiles, and
@@ -48,6 +50,7 @@
 % 
 %---HISTORY:
 % Ben Fulcher, September 2009
+% Ben Fulcher, 2015-03-19 Added random seed input
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -72,48 +75,60 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = FC_Surprise(y,whatinf,memory,ng,cgmeth,nits)
+function out = FC_Surprise(y,whatPrior,memory,numGroups,cgmeth,numIters,randomSeed)
 
+% ------------------------------------------------------------------------------
 %% Check inputs and set defaults
-if nargin < 2 || isempty(whatinf)
-    whatinf = 'dist'; % expect probabilities based on prior observed distribution
+% ------------------------------------------------------------------------------
+if nargin < 2 || isempty(whatPrior)
+    whatPrior = 'dist'; % expect probabilities based on prior observed distribution
 end
-% Memory: how far into the past to base your priors on
+
+% memory: how far into the past to base your priors on
 if nargin < 3 || isempty(memory)
     memory = 0.2; % set it as 20% of the time-series length
 end
 if (memory > 0) && (memory < 1) % specify memory as a proportion of the time-series length
     memory = round(memory*length(y));
 end
+
 % ng -- number of groups for the time-series coarse-graining/symbolization
-if nargin < 4 || isempty(ng)
-    ng = 3; % use three symbols to approximate the time-series values
+if nargin < 4 || isempty(numGroups)
+    numGroups = 3; % use three symbols to approximate the time-series values
 end
+
 % cgmeth: the coase-graining method to use
 if nargin < 5 || isempty(cgmeth)
     cgmeth = 'quantile'; % symbolize time series by their values (quantile)
 end
-% nits: number of iterations
-if nargin < 6 || isempty(nits)
-    nits = 500;
+
+% numIters: number of iterations
+if nargin < 6 || isempty(numIters)
+    numIters = 500;
     % number of iterations of the procedure to perform (does it with random samples)
     % could also imagine doing it exhaustively...?!
+end
+
+% randomSeed: how to treat the randomization
+if nargin < 7
+    randomSeed = []; % default for BF_ResetSeed
 end
 
 % ------------------------------------------------------------------------------
 %% Course Grain
 % ------------------------------------------------------------------------------
-yth = SB_CoarseGrain(y,cgmeth,ng); % a coarse-grained time series using the numbers 1:ng
+yth = SB_CoarseGrain(y,cgmeth,numGroups); % a coarse-grained time series using the numbers 1:numGroups
 
 N = length(yth); % will be the same as y, for 'quantile', and 'updown'
 
-%% Get prior information
-rs = randperm(N-memory) + memory;
-rs = rs(1:min(nits,end));
+% Select random samples to test:
+BF_ResetSeed(randomSeed); % control random seed (for reproducibility)
+rs = randperm(N-memory) + memory; % Can't do beginning of time series, up to memory
+rs = rs(1:min(numIters,end)); % Just use a random sample of numIters points to test
 
-store = zeros(nits,1);
+store = zeros(numIters,1); % store probabilities
 for i = 1:length(rs)
-    switch whatinf
+    switch whatPrior
         case 'dist'
             % Uses the distribution up to memory to inform the next point
             
@@ -127,32 +142,32 @@ for i = 1:length(rs)
             % Estimate transition probabilities from data in memory
             % Find where in memory this has been observed before, and what
             % preceeded it:
-            memorydata = yth(rs(i)-memory:rs(i)-1);
+            memoryData = yth(rs(i)-memory:rs(i)-1);
             % Previous value observed in memory here:
-            inmem = find(memorydata(1:end-1) == yth(rs(i)-1));
+            inmem = find(memoryData(1:end-1) == yth(rs(i)-1));
             if isempty(inmem)
                 p = 0;
             else
-                p = sum(memorydata(inmem+1) == yth(rs(i)))/length(inmem);
+                p = sum(memoryData(inmem+1) == yth(rs(i)))/length(inmem);
             end
             store(i) = p;
             
         case 'T2'
             % Uses two-point correlations in memory to inform the next point
             
-            memorydata = yth(rs(i)-memory:rs(i)-1);
+            memoryData = yth(rs(i)-memory:rs(i)-1);
             % Previous value observed in memory here:
-            inmem1 = find(memorydata(2:end-1) == yth(rs(i)-1)); % the 2:end makes the next line ok...?
-            inmem2 = find(memorydata(inmem1) == yth(rs(i)-2));
+            inmem1 = find(memoryData(2:end-1) == yth(rs(i)-1)); % the 2:end makes the next line ok...?
+            inmem2 = find(memoryData(inmem1) == yth(rs(i)-2));
             if isempty(inmem2)
                 p = 0;
             else
-                p = sum(memorydata(inmem2+2) == yth(rs(i)))/length(inmem2);
+                p = sum(memoryData(inmem2+2) == yth(rs(i)))/length(inmem2);
             end
             store(i) = p;
             
         otherwise
-            error('Unknown method ''%s''',whatinf);
+            error('Unknown method ''%s''',whatPrior);
     end
 end
 
@@ -162,10 +177,10 @@ iz = (store == 0);
 store(iz) = 1; % to avoid log(0) error in next line
 store = -log(store); % transform to surprises/information gains
 store(iz) = 0; % so that log(0) = 0
-% May be strange? maybe remove these points rather than setting to zero?
+% May be better to remove these points than setting them to zero?
 % plot(store)
 
-out.min = min(store); % Minimum amount of information you can gain in this way
+out.min = min(store); % Minimum amount of information you can gain in this way (not so useful: always zero)
 out.max = max(store); % Maximum amount of information you can gain in this way
 out.mean = mean(store); % mean
 out.median = median(store); % median
@@ -174,7 +189,7 @@ out.uq = quantile(store,0.75); % upper quartile
 out.std = std(store); % standard deviation
 
 % t-statistic to information gain of 1
-out.tstat = abs((out.mean-1)/(out.std/sqrt(nits)));
+out.tstat = abs((out.mean-1)/(out.std/sqrt(numIters)));
 
 
 end

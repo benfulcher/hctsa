@@ -9,19 +9,21 @@
 % Requires a very specific (and unfortunately ~unintuitive) structure:
 %  {'Keyword_1',NumberToRetrive;'Keyword2',NumberToRetrive,...}
 %  Use '0' to retrieve all of a given class.
-%  Can also use an empty label, '', to select anything at random from all time series.
+%  Can also use an empty label, '', to select anything at random from all time
+%  series.
 % 
 %---EXAMPLE USAGE:
-% GroupIndices = TSQ_LabelGroups('norm',{'space',100;'',200;'medical',0;...},'ts');
+% groupIndices =
+% TSQ_LabelGroups('norm',{'space',100;'',200;'medical',0;...},'ts');
 % 
 %---INPUTS:
-% KeywordGroups: The keyword groups, a cell of strings: 
+% keywordGroups: The keyword groups, a cell of strings: 
 % TsorOps: Whether grouping is for operations ('ops') or time series ('ts')
-% WhatData: Where to retrive from (and write back to): 'orig', 'norm', or 'cl'
-% SaveBack: Can set to 0 to stop saving the grouping back to the input file.
+% whatData: Where to retrive from (and write back to): 'orig', 'norm', or 'cl'
+% saveBack: Can set to 0 to stop saving the grouping back to the input file.
 %
 %---OUTPUTS:
-% GroupIndices: the indicies corresponding to each keyword in KeywordGroups
+% groupIndices: the indicies corresponding to each keyword in keywordGroups
 % 
 %---HISTORY:
 % Previously named 'SUB_autolabelQ'
@@ -42,26 +44,26 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function GroupIndices = TSQ_LabelGroups(WhatData,KeywordGroups,TsorOps,SaveBack)
+function groupIndices = TSQ_LabelGroups(whatData,keywordGroups,TsorOps,saveBack)
 
 % ------------------------------------------------------------------------------
-%% Check inputs
+%% Check Inputs:
 % ------------------------------------------------------------------------------
-if nargin < 1 || isempty(WhatData)
-    WhatData = 'norm';
-    fprintf(1,'Retrieving from HCTSA_N by default.\n');
+if nargin < 1 || isempty(whatData)
+    whatData = 'norm';
+    fprintf(1,'Retrieving data from HCTSA_N by default.\n');
 end
-if ~isstruct(WhatData) && ~ismember(WhatData,{'orig','norm','cl'})
+if ~isstruct(whatData) && ~ismember(whatData,{'orig','norm','cl'})
     error('When specifying data, we need ''orig'', ''norm'', or ''cl''.')
 end
 
 if nargin < 2
-    KeywordGroups = '';
+    keywordGroups = '';
     % Try to assign by unique keywords later
 end
-if ~isempty(KeywordGroups) && ischar(KeywordGroups);
-    fprintf(1,'Grouping all items with ''%s''.\n',KeywordGroups);
-    KeywordGroups = {KeywordGroups,0};
+if ~isempty(keywordGroups) && ischar(keywordGroups);
+    fprintf(1,'Grouping all items with ''%s''.\n',keywordGroups);
+    keywordGroups = {keywordGroups,0};
 end
 
 if nargin < 3 || isempty(TsorOps)
@@ -72,19 +74,19 @@ if ~ismember(TsorOps,{'ops','ts'})
     error('Specify either ''ops'' or ''ts''.')
 end
 
-if nargin < 4 || isempty(SaveBack)
-    SaveBack = 1; % Saves the grouping back to the HCTSA_*.loc file
+if nargin < 4 || isempty(saveBack)
+    saveBack = 1; % Saves the grouping back to the HCTSA_*.loc file
 end
 
 % ------------------------------------------------------------------------------
 %% Load data from file
 % ------------------------------------------------------------------------------
-if isstruct(WhatData)
-    % Can make WhatData a structure...? Some old functionality...//
-    Keywords = WhatData.Keywords;
-    idsO = WhatData.idsO;
+if isstruct(whatData)
+    % Can make whatData a structure...? Some old functionality...//
+    Keywords = whatData.Keywords;
+    idsO = whatData.idsO;
 else
-    switch WhatData
+    switch whatData
         case 'orig'
             TheFile = 'HCTSA_loc.mat';
         case 'norm'
@@ -108,17 +110,17 @@ end
 % ------------------------------------------------------------------------------
 % Set default keywords?
 % ------------------------------------------------------------------------------
-if isempty(KeywordGroups)
+if isempty(keywordGroups)
     fprintf(1,'No keywords assigned for labeling. Attempting to use unique keywords from data...?\n');
     UKeywords = unique(Keywords);
     NumUniqueKeywords = length(UKeywords);
     fprintf(1,'Shall I use the following %u keywords?: %s\n',NumUniqueKeywords,BF_cat(UKeywords,',',''''));
     reply = input('[y] for ''yes''','s');
     if strcmp(reply,'y')
-        KeywordGroups = cell(NumUniqueKeywords,2);
+        keywordGroups = cell(NumUniqueKeywords,2);
         for i = 1:NumUniqueKeywords
-            KeywordGroups{i,1} = UKeywords{i};
-            KeywordGroups{i,2} = 0;
+            keywordGroups{i,1} = UKeywords{i};
+            keywordGroups{i,2} = 0;
         end
     else
         fprintf(1,'Ok then, thanks anyway\n'); return
@@ -129,36 +131,36 @@ end
 %% Label groups from keywords
 % ------------------------------------------------------------------------------
 
-if ~all(cellfun(@ischar,KeywordGroups(:))) % Have specified numbers of each
-    KeywordNumbers = horzcat(KeywordGroups{:,2}); % Just the number of each part
-    KeywordGroups = KeywordGroups(:,1)'; % Just the keyword parts, a cell of strings
+if ~all(cellfun(@ischar,keywordGroups(:))) % Hopefully, specified numbers of each keyword
+    keywordNumbers = horzcat(keywordGroups{:,2}); % Just the number of each part
+    keywordGroups = keywordGroups(:,1)'; % Just the keyword parts, a cell of strings
 else
-    KeywordNumbers = zeros(length(KeywordGroups),1); % include all of each keyword
+    keywordNumbers = zeros(length(keywordGroups),1); % include all of each keyword
 end
-NumGroups = length(KeywordGroups); % The number of groups
+numGroups = length(keywordGroups); % The number of groups
 Keywords = SUB_cell2cellcell(Keywords);
 
 timer = tic;
-for jo = 1:NumGroups
-    if ~isempty(KeywordGroups{jo}) % Collect time series with this keyword
-        GroupIndices{jo} = find(cellfun(@(x)any(ismember(KeywordGroups{jo},x)),Keywords));
-        if isempty(GroupIndices{jo})
-            fprintf(1,'No matches found for ''%s''.\n',KeywordGroups{jo});
+for jo = 1:numGroups
+    if ~isempty(keywordGroups{jo}) % Collect time series with this keyword
+        groupIndices{jo} = find(cellfun(@(x)any(ismember(keywordGroups{jo},x)),Keywords));
+        if isempty(groupIndices{jo})
+            fprintf(1,'No matches found for ''%s''.\n',keywordGroups{jo});
         end
-        if (KeywordNumbers(jo) ~= 0) && (KeywordNumbers(jo) < length(GroupIndices{jo})) % Take a random subset of matches
-            rperm = randperm(length(GroupIndices{jo}));
-            GroupIndices{jo} = GroupIndices{jo}(rperm(1:KeywordNumbers(jo)));
+        if (keywordNumbers(jo) ~= 0) && (keywordNumbers(jo) < length(groupIndices{jo})) % Take a random subset of matches
+            rperm = randperm(length(groupIndices{jo}));
+            groupIndices{jo} = groupIndices{jo}(rperm(1:keywordNumbers(jo)));
         end
     else % Take a certain number of random time series
          % integer: retrieve this many: in randomorder
         rperm = randperm(length(Keywords));
-        KeywordGroups{jo} = 'Others';
-        GroupIndices{jo} = [];
-        notKeywordGroups = KeywordGroups(setxor(1:NumGroups,jo));
+        keywordGroups{jo} = 'Others';
+        groupIndices{jo} = [];
+        notKeywordGroups = keywordGroups(setxor(1:numGroups,jo));
         for i = 1:length(Keywords)
             if all(~ismember(notKeywordGroups,Keywords{rperm(i)}))
-                GroupIndices{jo} = [GroupIndices{jo}; rperm(i)];
-                if (length(GroupIndices{jo}) == KeywordNumbers(jo))
+                groupIndices{jo} = [groupIndices{jo}; rperm(i)];
+                if (length(groupIndices{jo}) == keywordNumbers(jo))
                     break
                 end
             end
@@ -170,23 +172,23 @@ clear timer % stop timing
 
 % More feedback
 fprintf(1,'We found:\n');
-for i = 1:NumGroups
-    fprintf(1,'%s -- %u matches\n',KeywordGroups{i},length(GroupIndices{i}));
+for i = 1:numGroups
+    fprintf(1,'%s -- %u matches\n',keywordGroups{i},length(groupIndices{i}));
 end
 
 % ------------------------------------------------------------------------------
 %% Save back to file?
 % ------------------------------------------------------------------------------
-if SaveBack
+if saveBack
     % You don't need to check variables, you can just append back to the input file:
-    if ~all(cellfun(@isempty,GroupIndices))
+    if ~all(cellfun(@isempty,groupIndices))
         fprintf(1,'Saving group labels and information back to %s...',TheFile);
         
         % First append/overwrite group names
-        GroupNames = KeywordGroups;
+        GroupNames = keywordGroups;
         
         % Then overwrite labels
-        TheGroups = BF_ToGroup(GroupIndices,length(TimeSeries))';
+        TheGroups = BF_ToGroup(groupIndices,length(TimeSeries))';
         % Now we need to make the cells
         TheGroupsCell = cell(size(TheGroups));
         % Cannot find an in-built for this... :-/

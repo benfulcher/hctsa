@@ -1,6 +1,6 @@
 function K = covSEiso(hyp, x, z, i)
 
-% Squared Exponential covariance function with isotropic distance measure. The 
+% Squared Exponential covariance function with isotropic distance measure. The
 % covariance function is parameterized as:
 %
 % k(x^p,x^q) = sf^2 * exp(-(x^p - x^q)'*inv(P)*(x^p - x^q)/2) 
@@ -19,7 +19,7 @@ function K = covSEiso(hyp, x, z, i)
 
 if nargin<2, K = '2'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
 ell = exp(hyp(1));                                 % characteristic length scale
 sf2 = exp(2*hyp(2));                                           % signal variance

@@ -18,6 +18,9 @@
 % maxlag, the maximum time lag to compute up to -- will compare autocorrelations
 %         up to this value
 % 
+%---HISTORY:
+% Ben Fulcher, October 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -42,19 +45,22 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_TSTL_AutoCorrMethod(y,maxlag)
-% Ben Fulcher, October 2009
 
+% ------------------------------------------------------------------------------
+% Check Inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(maxlag)
     maxlag = 50; % compare across the first maxlag autocorrelations
 end
+% ------------------------------------------------------------------------------
 
-% Calculate autocorrelations across lags 1:maxlag using TSTOOL
+% Calculate autocorrelations across lags 1:maxlag using TSTOOL function, acf
 co_fft = data(acf(signal(y),maxlag*2));
 
 nlags = length(co_fft);
 co_ben = zeros(nlags,1);
 for i = 1:nlags
-    co_ben(i) = CO_AutoCorr(y,i-1);
+    co_ben(i) = CO_AutoCorr(y,i-1,'Fourier');
 end
 
 out = norm(co_ben - co_fft);

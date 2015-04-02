@@ -1,7 +1,7 @@
- GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox version 3.2
+ GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox version 3.5
     for GNU Octave 3.2.x and Matlab 7.x
 
-Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-01-15.
+Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
 
 
 
@@ -28,11 +28,15 @@ d) the paper by Murray, Adams and Mackay: "Elliptical slice sampling",
    AISTATS 2010, in
 e) the report by Neal: "Annealed Importance Sampling", UToronto 1998, in
 f) the paper by Naish-Guzman and Holden: "The Generalized FITC Approximation",
-   NIPS, 2007, and in
+   NIPS, 2007, in
 g) the paper by Duvenaud, Nickisch and Rasmussen: "Additive Gaussian Processes",
-   NIPS, 2011.
+   NIPS, 2011, in
+h) the paper by Wilson and Adams: "Gaussian Process Kernels for Pattern
+   Discovery and Extrapolation", ICML, 2013, and in
+i) the paper Snelson, Rasmussen and Ghahramani: "Warped Gaussian Processes",
+   NIPS, 2003.
 
-There are 6 code subdirectories: cov, doc, inf, lik, mean and util.
+There are 7 code subdirectories: cov, doc, inf, lik, mean, prior and util.
 
 cov/      contains covariance functions cov*.m
           => see covFunctions.m
@@ -52,6 +56,9 @@ lik/      contains the likelihood functions lik*.m
 mean/     contains the mean functions mean*.m
           => see meanFunctions.m
 
+prior/    contains the hyperparameter prior distributions prior*.m
+          => see priorDistributions.m
+
 util/     contains optimisation routines, backward compatibility programs and
           small auxiliary scripts
 
@@ -69,7 +76,7 @@ implementation. However, if you don't know about how to compile MEX files, you
 do not need to worry about this -- the code runs anyway. If you do compile the
 MEX files, this is automatically detected, and the program will run more 
 efficiently. If you do not have a compiler installed on your system, you might
-want to consult [2].
+want to consult [3].
 
 Two components of the toolbox can be accelerated by MEX. 
 
@@ -82,23 +89,25 @@ We recommend the make.m script because it works both under Matlab and Octave.
 
 Second, in order to use the L-BFGS minimiser for hyperparameter optimisation as
 an equivalent to minimize.m, you have to compile Peter Carbonetto's 
-"Matlab interface for L-BFGS-B" [1]. The challenge here is the Fortran 77 code.
+"Matlab interface for L-BFGS-B" [1] which was extended to also work for Octave
+by José Vallet. The challenge here is the Fortran 77 code.
 We provide a Makefile suitable for Linux 32/64 bit and Mac whenever you have 
 1) g77 
 or 
 2) gfortran
-properly set up.
+properly set up. The latter is prefered on current Ubuntu systems.
 Under Ubuntu, you can achieve this by installing the packages fort77 and 
-gfortran, respectively.
+gfortran, respectively. Note that the code is GNU licensed.
 
 Compilation is done by editing util/lbfgsb/Makefile. In any case, you need to 
 provide $MATLAB_HOME which can be found by the commands 'locate matlab' or 
 'find / -name "matlab"'. You can choose between two compilation modes:
-a) using the mex utility by Matlab                                     [default]
-  provide $MEX, then type 'make mex'
-
-b) without mex utility by Matlab
+a) without mex utility by Matlab                                     [default]
   provide $MEX_SUFFIX and $MATLAB_LIB, then type 'make nomex'
+b) using the mex utility by Matlab
+  provide $MEX, then type 'make mex'
+c) compilation for Octave
+  provide Octave variables and type 'make oct'
 
 In Ubuntu 10.04 LTS, the libg2c library needed for both 1)+a) and 1)+b) is not 
 included per default. If 'ls /usr/lib/libg2c.*' does not list anything 
@@ -109,7 +118,19 @@ http://packages.ubuntu.com/hardy/libg2c0.
 After installation, you have to create a symbolic link by 'cd /usr/lib' and 
 'ln -s libg2c.so.0 libg2c.so'.
 
-[1] http://www.cs.ubc.ca/~pcarbo/lbfgsb-for-matlab.html
+There were reports of problems running the mex files on recent 64bit Ubuntu
+since the libgfortran.3.0.0 that comes with matlab
+($(MATLAB_HOME)/sys/os/glnxa64/libgfortran.so.3.0.0) is not the same
+as the libgfortran.3.0.0 that comes with the ubuntu package
+libgfortran3 and that is used when linking. So running the mex file
+results in a version mismatch error. The issue can be solved by changing
+the name of to the matlab file and linking to the ubuntu file instead:
+  in $(MATLAB_HOME)/sys/os/glnxa64 run
+    'sudo mv libgfortran.3.0.0 libgfortran.3.0.0_matlab'
+    'sudo ln -s /usr/lib/x86_64-linux-gnu/libgfortran.so.3.0.0 libgfortran.3.0.0'
+Thanks to Giampiero Salvi for posting the workaround.
+
+[1] https://github.com/pcarbo/lbfgsb-matlab
 [2] http://www.mathworks.com/support/compilers/R2010a
 
 
@@ -117,7 +138,7 @@ After installation, you have to create a symbolic link by 'cd /usr/lib' and
 3) CURRENT VERSION
 ==================
 
-The current version of the programs is 3.2. Previous versions of the code are
+The current version of the programs is 3.5. Previous versions of the code are
 available at http://www.gaussianprocess.org/gpml/code/oldcode.html.
 
 
@@ -125,13 +146,73 @@ available at http://www.gaussianprocess.org/gpml/code/oldcode.html.
 4) DIFFERENCES TO PREVIOUS VERSIONS
 ===================================
 
+NEW in version 3.5, 2014-12-08
+------------------------------
+- mechanism for specifying hyperparameter priors (together with Roman Garnett and José Vallet)
+- new mean/cov functions for preference learning: meanPref/covPref
+- new mean/cov functions for non-vectorial data: meanDiscrete/covDiscrete
+- new piecewise constant nearest neighbor mean function: meanNN
+- new mean functions being predictions from GPs: meanGP and meanGPexact
+- new covariance function for standard additive noise: covEye
+- new covariance function for factor analysis: covSEfact
+- new covariance function with varying length scale : covSEvlen
+- make covScale more general to scaling with a function instead of a scalar
+- bugfix in covGabor* and covSM (due to Andrew Gordon Wilson)
+- bugfix in lik/likBeta.m (suggested by Dali Wei)
+- bugfix in solve_chol.c (due to Todd Small)
+- bugfix in FITC inference mode (due to Joris Mooij) where the wrong mode for post.L was chosen when using infFITC and post.L being a diagonal matrix
+- bugfix in infVB marginal likelihood for likLogistic with nonzero mean function (reported by James Lloyd)
+- removed the combination likErf/infVB as it yields a bad posterior approximation and lacks theoretical justification
+- Matlab and Octave compilation for L-BFGS-B v2.4 and the more recent L-BFGS-B v3.0 (contributed by José Vallet)
+- smaller bugfixes in gp.m (due to Joris Mooij and Ernst Kloppenburg)
+- bugfix in lik/likBeta.m (due to Dali Wei)
+- updated use of logphi in lik/likErf
+- bugfix in util/solve_chol.c where a typing issue occured on OS X (due to Todd Small)
+- bugfix due to Bjørn Sand Jensen noticing that cov_deriv_sq_dist.m was missing in the distribution
+- bugfix in infFITC_EP for ttau->inf (suggested by Ryan Turner)
+
+
+NEW in version 3.4, 2013-11-11
+------------------------------
+- new likelihood function for warped GPs: likGaussWarp
+- new exponential likelihood function: likExp
+- new Weibull likelihood function: likWeibull
+- new Gumbel likelihood function for extremal value regression: likGumbel
+- new polynomial mean function: meanPoly
+- included derivatives w.r.t. inducing points xu in infFITC, infFITC_Laplace, infFITC_EP
+- allow for zero noise variance for infExact
+
+
+NEW in version 3.3, 2013-10-19
+------------------------------
+- new variational inference algorithm based on direct KL minimisation: infKL
+- improved inf/infVB double loop scheme so that only very few likelihood properties are required; infVB is now internally a sequence of infLaplace runs
+- improved inf/infLaplace to be more generic so that optimisers other than scaled Newton can be used
+- improved inf/infEP so that the internal variables (mu,Sigma) now represent the current posterior approximation
+- added three new generalised linear model likelihoods: gamma, beta, inverse Gaussian
+- new covariance functions: spectral mixture covSM, covGaboriso and covGaborard
+- new meta covariance function to turn a stationary covariance into a periodic covariance function covPERard, covPERiso
+- new periodic covariance function with zero DC component and correct scaling covPeriodicNoDC
+
+New likelihood functions in lik/:
+- likGamma.m, likBeta.m, likInvGauss.m
+
+New inference functions in inf/:
+- infKL.m
+
+New covariance functions in cov/:
+- covSM.m, covGaboriso.m, covGaborard.m (contributed by Andrew Gordon Wilson)
+- covPPard.m, covMaternard.m, covLINiso.m
+- covCos.m, covPeriodicNoDC.m (contributed by James Robert Lloyd)
+- covPERiso.m, covPERard.m
+
+
 NEW in version 3.2, 2013-01-15
 ------------------------------
 - added inf/infFITC_Laplace.m and inf/infFITC_EP.m for large scale approximate inference
 - added inf/infMCMC.m to allow for Markov Chain Monte Carlo sampling and Annealed Importance Sampling; we currently support two samplers: Elliptical Slice Sampling (ESS) and Hybrid Monte Carlo (HMC)
 - improved accuracy of the digamma function lik/likT.m/dloggamma from three to ten digits precision (thanks to Edward Challis)
 - added gfortran support to util/lbfgsb/Makefile (thanks to Ernst Kloppenburg)
-- changed parametrisation in cov/covPeriodic.m (thanks to Philipp Hennig)
 - fixed a stupid bug in cov/covFITC.m (thanks to Krzysztof Chalupka)
 - fixed a severe stability bug in the derivatives of inf/infFITC.m (thanks to Andrew McHutchon)
 - changed scalars in util/solve_chol.c to long to provide 64bit compatibility (thanks to Ernst Kloppenburg)
@@ -144,11 +225,14 @@ NEW in version 3.2, 2013-01-15
 - slightly changed the interface for the likelihood functions
 - added likPoisson for Poisson regression of count data
 
+
 NEW in version 3.1, 2010-10-10
 ------------------------------
 - following a suggestion by Ed Snelson we now support FITC regression
 - cov/covFITC.m and inf/infFITC.m have been added with Ed Snelson's help
 - the covariance interface was slightly changed to make that possible
+- changed parametrisation in cov/covPeriodic.m (thanks to Philipp Hennig)
+
 
 NEW in version 3.0, 2010-07-23
 ------------------------------

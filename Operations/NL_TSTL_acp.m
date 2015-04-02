@@ -3,7 +3,7 @@
 % ------------------------------------------------------------------------------
 % 
 % Implements the TSTOOL routine acp using a time lag, tau, a Theiler window,
-% past, maximum delay, maxdelay, maximum embedding dimension, maxdim, and number
+% past, maximum delay, maxDelay, maximum embedding dimension, maxDim, and number
 % of reference points, Nref.
 % 
 % The documentation isn't crystal clear, but I think this function has to do
@@ -20,17 +20,23 @@
 % past, number of samples to exclude before and after each index (to avoid
 %               correlation effects ~ Theiler window)
 % 
-% maxdelay, maximal delay (<< length(y))
+% maxDelay, maximal delay (<< length(y))
 % 
-% maxdim, maximal dimension to use
+% maxDim, maximal dimension to use
 % 
 % Nref, number of reference points
+% 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 % 
 %---OUTPUTS: statistics summarizing the output of the routine.
 % 
 % May in future want to also make outputs normalized by first value; so get
 % metrics on both absolute values at each dimension but also some
 % indication of the shape
+% 
+%---HISTORY:
+% Ben Fulcher, October 2009
+% Ben Fulcher, 2015-03-19 added randomSeed for reproducibility
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -55,8 +61,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_TSTL_acp(y,tau,past,maxdelay,maxdim,Nref)
-% Ben Fulcher, October 2009
+function out = NL_TSTL_acp(y,tau,past,maxDelay,maxDim,Nref,randomSeed)
 
 try
     s = signal(y);
@@ -68,7 +73,9 @@ if ~strcmp(class(s),'signal')
 end
 N = length(y); % length of the time series
 
+% ------------------------------------------------------------------------------
 %% Check inputs
+% ------------------------------------------------------------------------------
 % (*) tau
 if nargin < 2
     tau = 'ac'; % use first zero-crossing of autocorrelation function as default
@@ -91,18 +98,17 @@ if (past > 0) && (past < 1)
 	past = floor(past*N); % specify a proportion of the time series length
 end
 
-
-% (*) maxdelay
-if nargin < 4 || isempty(maxdelay)
-    maxdelay = ceil(N/4);
+% (*) maxDelay
+if nargin < 4 || isempty(maxDelay)
+    maxDelay = ceil(N/4);
 end
-if (maxdelay > 0) && (maxdelay < 1)
-	maxdelay = ceil(maxdelay*N); % specify a proportion of the time series length
+if (maxDelay > 0) && (maxDelay < 1)
+	maxDelay = ceil(maxDelay*N); % specify a proportion of the time series length
 end
 
-% (*) maxdim
-if nargin < 5 || isempty(maxdim)
-    maxdim = 10;
+% (*) maxDim
+if nargin < 5 || isempty(maxDim)
+    maxDim = 10;
 end
 
 % (*) Nref
@@ -113,22 +119,34 @@ if (Nref > 0) && (Nref < 1)
 	Nref = ceil(Nref*N); % specify a proportion of the time series length
 end
 
+% (*) randomSeed: how to treat the randomization
+if nargin < 7
+    randomSeed = []; % default
+end
 
+% ------------------------------------------------------------------------------
 % Run and get data output from TSTOOL function acp:
-acpf = data(acp(s,tau,past,maxdelay,maxdim,Nref));
+% ------------------------------------------------------------------------------
 
+% Control the random seed (for reproducibility):
+BF_ResetSeed(randomSeed);
 
+% Run TSTOOL's acp function
+acpf = data(acp(s,tau,past,maxDelay,maxDim,Nref));
+
+% ------------------------------------------------------------------------------
 %% Get outputs
+% ------------------------------------------------------------------------------
 % Now, the documentation is pretty vague, in fact does not mention at all
 % what form the output is in... which is a bit shit. But I gather that each
-% column corresponds to an embedding dimension (size(acpf,2)=maxdim), and
-% each row corresponds to an increasing time delay up to maxdelay
-% (size(acpf,1) = maxdelay+1)...
+% column corresponds to an embedding dimension (size(acpf,2)=maxDim), and
+% each row corresponds to an increasing time delay up to maxDelay
+% (size(acpf,1) = maxDelay+1)...
 % I propose a returning some measures here
 
-macpf = mean(acpf); % mean vector of length maxdim
-sacpf = std(acpf); % std vector of length maxdim
-iqracpf = iqr(acpf); % iqr vector of length maxdim
+macpf = mean(acpf); % mean vector of length maxDim
+sacpf = std(acpf); % std vector of length maxDim
+iqracpf = iqr(acpf); % iqr vector of length maxDim
 
 % How does the mean crossprediction function decay with m?
 dmacpf = diff(macpf);
@@ -136,23 +154,21 @@ out.mmacpfdiff = mean(abs(dmacpf));
 out.stdmacpfdiff = std(abs(dmacpf));
 out.propdecmacpf = sum(dmacpf < 0)/length(dmacpf);
 
-for i = 1:maxdim-1
-    % give proportion drop at each increase in m
-    drophere = abs(macpf(i)/macpf(i+1)-1);
-    eval(sprintf('out.macpfdrop_%u = drophere;',i));
+for i = 1:maxDim-1
+    % Give proportion drop at each increase in m
+    out.(sprintf('macpfdrop_%u',i)) = abs(macpf(i)/macpf(i+1)-1);
 end
 
 % output statistics on the acp at each dimension
-for i = 1:maxdim
+for i = 1:maxDim
     % mean acp at each dimension
-    eval(sprintf('out.macpf_%u = macpf(%u);',i,i));
+    out.(sprintf('macpf_%u',i)) = macpf(i);
     % std of acp at each dimension
-    eval(sprintf('out.sacpf_%u = sacpf(%u);',i,i));
+    out.(sprintf('sacpf_%u',i)) = sacpf(i);
     % iqr of acp at each dimension
-    eval(sprintf('out.iqracpf_%u = iqracpf(%u);',i,i));
-    % AC1 of acp at each dimension
-    ac1 = abs(CO_AutoCorr(acpf(:,i),1));
-    eval(sprintf('out.ac1_acpf_%u = ac1;',i));
+    out.(sprintf('iqracpf_%u',i)) = iqracpf(i);
+    % abs(AC1) of acp at each dimension
+    out.(sprintf('ac1_acpf_%u',i)) = abs(CO_AutoCorr(acpf(:,i),1,'Fourier'));
 end
 
 % plot(macpf)

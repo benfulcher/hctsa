@@ -15,13 +15,19 @@
 % 
 %---INPUTS:
 % y, the input time series
+% 
 % de, the embedding dimensions to compare across (a vector)
+% 
 % tau, the time-delay (can be 'ac' or 'mi' to be the first zero-crossing of ACF,
 %                       or first minimum of AMI, respectively)
+%                       
 % th, the distance threshold for neighbours
+% 
 % kth, the the distance to next points
-% [opt] justbest, can be set to 1 to just return the best embedding dimension, m_{best}
-% [opt] bestp, if justbest = 1, can set bestp as the proportion of false nearest
+% 
+% [opt] justBest, can be set to 1 to just return the best embedding dimension, m_{best}
+% 
+% [opt] bestp, if justBest = 1, can set bestp as the proportion of false nearest
 %              neighbours at which the optimal embedding dimension is selected.
 % 
 % This function returns statistics on the proportion of false nearest neighbors
@@ -31,6 +37,9 @@
 %---OUTPUTS: include the proportion of false nearest neighbors at each m, the mean
 % and spread, and the smallest m at which the proportion of false nearest
 % neighbors drops below each of a set of fixed thresholds.
+% 
+%---HISTORY:
+% Ben Fulcher, 19/2/2010
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -55,10 +64,11 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_MS_fnn(y,de,tau,th,kth,justbest,bestp)
-% Ben Fulcher, 19/2/2010
+function out = NL_MS_fnn(y,de,tau,th,kth,justBest,bestp)
 
+% ------------------------------------------------------------------------------
 %% CHECK INPUTS:
+% ------------------------------------------------------------------------------
 % Embedding dimension(s), de
 if nargin < 2 || isempty(de)
     de = (1:10);
@@ -86,37 +96,43 @@ end
 
 % (Actually better to use MS_unfolding now -- does a near-identical thing
 % to this...)
-if nargin < 6 || isempty(justbest)
-    justbest = 0;
-end
-if nargin < 7 || isempty(bestp)
-    bestp = 0.05; % first time under 5% of neighest neighbours
+if nargin < 6 || isempty(justBest)
+    justBest = 0;
 end
 
-% Run Michael Small's false nearest neighbour code, MS_fnn:
+if nargin < 7 || isempty(bestp)
+    bestp = 0.1; % first time under 10% of neighest neighbours
+end
+
+% ------------------------------------------------------------------------------
+%% Run Michael Small's false nearest neighbour code, MS_fnn:
+% ------------------------------------------------------------------------------
 p = MS_fnn(y,de,tau,th,kth);
 
+% ------------------------------------------------------------------------------
 %% Now make output
+% ------------------------------------------------------------------------------
 % Assuming we've set tau, and m is a vector, we should have p (the
 % proportion of false neighbours) and de (the corresonding embedding
 % dimensions) as vectors
 
-if justbest
+if justBest
     % We just want a scalar to choose the embedding with
     out = firstunderf(bestp);
     return
 else
     % Output all of them
     for i = 1:length(de)
-        eval(sprintf('out.pfnn_%u = %f;',de(i),p(i)));
+        out.(sprintf('pfnn_%u',de(i))) = p(i);
     end
 
     % Output mean
     out.meanpfnn = mean(p);
+    
     % Standard deviation
     out.stdpfnn = std(p);
         
-    %% Find de for the first time p goes under x%
+    % Find embedding dimension for the first time p goes under x%
     out.firstunder02 = firstunderf(0.2); % 20%
     out.firstunder01 = firstunderf(0.1); % 10%
     out.firstunder005 = firstunderf(0.05); % 5%
@@ -127,6 +143,7 @@ else
     out.max1stepchange = max(abs(diff(p)));
 end
 
+% ------------------------------------------------------------------------------
 function firsti = firstunderf(x)
     %% Find de for the first time p goes under x%
     firsti = de(find(p < x,1,'first'));

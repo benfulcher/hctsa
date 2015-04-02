@@ -17,6 +17,9 @@
 %       assume independent and identically distributed (IID) innovations for
 %       each period.
 % 
+%---HISTORY:
+% Ben Fulcher, 26/2/2010
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -41,13 +44,17 @@
 % ------------------------------------------------------------------------------
 
 function out = SY_VarRatioTest(y,periods,IIDs)
-% Ben Fulcher, 26/2/2010
 
+% ------------------------------------------------------------------------------
+%% Check that an Econometrics Toolbox license is available:
+% ------------------------------------------------------------------------------
+BF_CheckToolbox('econometrics_toolbox')
+
+% ------------------------------------------------------------------------------
+%% Check Inputs:
+% ------------------------------------------------------------------------------
 % Can set step sizes for random walk, and also change the null hypothesis
 % to include non IID random walk increments
-
-%% Check that an Econometrics Toolbox license is available:
-BF_CheckToolbox('econometrics_toolbox')
 
 % periods, e.g., could be [2,4,6,8,2,4,6,8]
 if nargin < 2 || isempty(periods)
@@ -60,7 +67,9 @@ if nargin < 3 || isempty(IIDs)
 end
 IIDs = logical(IIDs);
 
+% ------------------------------------------------------------------------------
 %% Perform the test:
+% ------------------------------------------------------------------------------
 [h, pValue, stat, cValue, ratio] = vratiotest(y,'period',periods,'IID',IIDs);
 
 if length(h) == 1

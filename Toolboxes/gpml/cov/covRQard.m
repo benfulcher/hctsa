@@ -3,7 +3,7 @@ function K = covRQard(hyp, x, z, i)
 % Rational Quadratic covariance function with Automatic Relevance Determination
 % (ARD) distance measure. The covariance function is parameterized as:
 %
-% k(x^p,x^q) = sf2 * [1 + (x^p - x^q)'*inv(P)*(x^p - x^q)/(2*alpha)]^(-alpha)
+% k(x^p,x^q) = sf^2 * [1 + (x^p - x^q)'*inv(P)*(x^p - x^q)/(2*alpha)]^(-alpha)
 %
 % where the P matrix is diagonal with ARD parameters ell_1^2,...,ell_D^2, where
 % D is the dimension of the input space, sf2 is the signal variance and alpha
@@ -13,7 +13,7 @@ function K = covRQard(hyp, x, z, i)
 %         log(ell_2)
 %          ..
 %         log(ell_D)
-%         log(sqrt(sf2))
+%         log(sf)
 %         log(alpha) ]
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-08-04.
@@ -22,7 +22,7 @@ function K = covRQard(hyp, x, z, i)
 
 if nargin<2, K = '(D+2)'; return; end              % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
 [n,D] = size(x);
 ell = exp(hyp(1:D));
@@ -41,7 +41,7 @@ else
 end
 
 if nargin<4                                                        % covariances
-  K = sf2*((1+0.5*D2/alpha).^(-alpha));
+  K = sf2*(1+0.5*D2/alpha).^(-alpha);
 else                                                               % derivatives
   if i<=D                                               % length scale parameter
     if dg
@@ -54,7 +54,7 @@ else                                                               % derivatives
       end
     end
   elseif i==D+1                                            % magnitude parameter
-    K = 2*sf2*((1+0.5*D2/alpha).^(-alpha));
+    K = 2*sf2*(1+0.5*D2/alpha).^(-alpha);
   elseif i==D+2
     K = (1+0.5*D2/alpha);
     K = sf2*K.^(-alpha).*(0.5*D2./K - alpha*log(K));

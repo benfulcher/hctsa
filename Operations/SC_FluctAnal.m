@@ -133,7 +133,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%
 
 N = length(x); % length of the time series
-doplot = 0; % plot outputs to figure
+doPlot = 0; % plot outputs to figure
 
 % 1) Compute integrated sequence
 
@@ -253,10 +253,10 @@ end
     out.se1 = stats.se(1); % standard error in intercept
     out.se2 = stats.se(2); % standard error in mean
     out.ssr = mean(stats.resid.^2); % mean squares residual
-    out.resac1 = CO_AutoCorr(stats.resid,1);
+    out.resac1 = CO_AutoCorr(stats.resid,1,'Fourier');
     
     % PLOT THIS?:
-    if doplot
+    if doPlot
         figure('color','w');
         plot(log(taur),log(F),'o-k');
         title(out.alpha)
@@ -349,7 +349,7 @@ else
     out.r1_se1 = stats.se(1); % standard error in intercept
     out.r1_se2 = stats.se(2); % standard error in mean
     out.r1_ssr = mean(stats.resid.^2); % mean squares residual
-    out.r1_resac1 = CO_AutoCorr(stats.resid,1);
+    out.r1_resac1 = CO_AutoCorr(stats.resid,1,'Fourier');
 end
     
 % R2
@@ -370,7 +370,7 @@ else
     out.r2_se1 = stats.se(1); % standard error in intercept
     out.r2_se2 = stats.se(2); % standard error in mean
     out.r2_ssr = mean(stats.resid.^2); % mean squares residual
-    out.r2_resac1 = CO_AutoCorr(stats.resid,1);
+    out.r2_resac1 = CO_AutoCorr(stats.resid,1,'Fourier');
 end
 
 if isnan(out.r1_alpha) || isnan(out.r2_alpha)

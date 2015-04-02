@@ -57,6 +57,7 @@ c===========================================================================
       do 10 m=mfrom,mto
          write(iunit,'(4h#m= ,i5)') m
          pr=0.
+C          Ben Fulcher, 2015-03-06 requires a fix to integer do loop for some compilers
          do 20 pl=log(1./(nmax-(m-1)*id)),0.,resl
             pln=pl
             call d1(nmax,mcmax,nx,x,id,m,ncmin,pr,pln,rln,ntmin,kmax)

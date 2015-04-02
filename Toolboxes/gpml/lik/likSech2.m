@@ -16,7 +16,7 @@ function [varargout] = likSech2(hyp, y, mu, s2, inf, i)
 % \int f^k likSech2(y,f) N(f|mu,var) df are calculated via a Gaussian
 % scale mixture approximation.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2012-11-04.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-09-02.
 %
 % See also LIKFUNCTIONS.M, LIKLOGISTIC.M.
 
@@ -143,67 +143,13 @@ else                                                            % inference mode
     end
     
   case 'infVB'
-    if nargin<6
-      % variational lower site bound
-      % using -log( 2*cosh(s/2) );
-      % the bound has the form: b*s - s.^2/(2*ga) - h(ga)/2 with b=1/2
-      ga = s2; n = numel(ga); b = y./ga; y = y.*ones(n,1);
-      db = -y./ga.^2; d2b = 2*y./ga.^3;
-      h = zeros(n,1); dh = h; d2h = h;     % allocate memory for return argument
-      idup = 50<=ga(:);                   % asymptotic behavior for large gammas
-      h(idup) = 4*tau^2*ga(idup) -4*log(2);
-      id = ga(:)>1/(2*tau^2) & ~idup;           % interesting zone is in between
-      [g,dg,d2g] = inv_xcothx(2*tau^2*ga(id));
-      thg = tanh(g);
-      h(id) = 4*logcosh(g) -2*g.*thg;
-      h = h + y.^2./ga - 2*lZ;
-      g1mt2 = g.*(1-thg.^2);                                 % first derivatives
-      dh(idup) = 4*tau^2;
-      dh(id) = 4*tau^2*dg.*( thg - g1mt2 );
-      dh = dh - (y./ga).^2;
-      d2h(id) = 8*tau^4*( g1mt2.*(2*dg.^2.*thg-d2g) +d2g.*thg ); % second derivs
-      d2h = d2h + 2*y.^2./ga.^3;
-      id = ga<0; h(id) = Inf; dh(id) = 0; d2h(id) = 0;     % neg. var. treatment
-      varargout = {h,b,dh,db,d2h,d2b};
-    else
-      ga = s2; n = numel(ga); 
-      dhhyp = zeros(n,1);
-      idup = 50<=ga(:);                   % asymptotic behavior for large gammas
-      dhhyp(idup) = -2*pi^2/3/sn^2*ga(idup);           % tau = pi/(2*sqrt(3)*sn)
-      id = ga(:)>1/(2*tau^2) & ~idup;           % interesting zone is in between
-      [g,dg] = inv_xcothx(2*tau^2*ga(id)); thg = tanh(g); [f,df] = logcosh(g);
-      % h = 4*f -2*g.*tanh(g)
-      if any(id)
-        dhhyp(id) = 8*tau^2*ga(id).*dg.*( thg - 2*df + g.*(1-thg.^2) ); 
-      end
-      dhhyp = dhhyp + 2; %          from lZ = log(pi) - log(sn) - log(4*sqrt(3))
-      dhhyp(ga<0) = 0;              % negative variances get a special treatment
-      varargout = {dhhyp};                                  % deriv. wrt hyp.lik
-    end
+    % variational lower site bound
+    % using -log( 2*cosh(s/2) );
+    % the bound has the form: (b+z/ga)*f - f.^2/(2*ga) - h(ga)/2
+    n = numel(s2); b = zeros(n,1); y = y.*ones(n,1); z = y;
+    varargout = {b,z};
   end
 end
-
-% Invert f(x) = x.*coth(x) = y, return the positive value
-% uses Newton's method to minimize (y-f(x))² w.r.t. x
-function [x,dx,d2x] = inv_xcothx(y)
-%   f = @(x) x.*coth(x);
-%  df = @(x) x + (1-f(x)).*coth(x);
-% d2f = @(x) 2*(1-f(x)).*(1-coth(x).^2);
-if numel(y)==0, x=[]; dx=[]; d2x=[]; return, end
-x  = sqrt(y.^2-1); i = 1; % init
-ep = eps./(1+abs(x)); th=tanh(x); fx=(x+ep)./(th+ep);                 % function
-r  = fx-y; % init
-while i==1 || (i<10 && max(abs(r))>1e-12)
-    dfx  = x + (1-fx)./(th+ep);                               % first derivative
-    d2fx = 2*(  1-fx + (x-th+ep/3)./(th.*th.*th+ep) );       % second derivative
-    x = x - r.*dfx./(dfx.^2+r.*d2fx+ep);                           % Newton step
-    ep = eps./(1+abs(x)); th=tanh(x); fx=(x+ep)./(th+ep);
-    r  = fx-y; i = i+1;
-end
-% first derivative dx/dy; derivatives of inverse functions are reciprocals
-dx = 1./dfx;
-% second derivative d2x/dy2; quotient rule and chaine rule
-d2x = -d2fx.*dx./dfx./dfx;
 
 % numerically safe version of log(cosh(x)) = log(exp(x)+exp(-x))-log(2)
 function [f,df,d2f,d3f] = logcosh(x)

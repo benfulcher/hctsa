@@ -23,6 +23,9 @@
 % howtomove, a method specifying how to move the shape about, e.g., 'pts'
 %               places the shape on each point in the time series
 % 
+%---HISTORY:
+% Ben Fulcher, September 2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -47,9 +50,10 @@
 % ------------------------------------------------------------------------------
 
 function out = CO_TranslateShape(y,shape,d,howtomove)
-% Ben Fulcher, September 2009
 
+% ------------------------------------------------------------------------------
 %% Check inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(shape)
     shape = 'circle';
 end
@@ -60,6 +64,9 @@ if nargin < 4 || isempty(howtomove)
     howtomove = 'pts'; % by default, places shapes on each timepoint
 end
 
+% ------------------------------------------------------------------------------
+% Preliminaries:
+% ------------------------------------------------------------------------------
 N = length(y); % the length of the time series
 
 % y must be a column vector, transpose it if it's a row vector
@@ -67,6 +74,7 @@ if size(y,2) > size(y,1)
     y = y';
 end
 
+% Add a time index
 ty = [(1:N)', y]; % has increasing integers as time in the first column
 
 switch howtomove

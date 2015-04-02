@@ -104,7 +104,6 @@ end
 % Run Michael Small's nonlinear prediction error code:
 res = MS_nlpe(y,de,tau); % residuals
 
-
 % ------------------------------------------------------------------------------
 %% Compute outputs
 % ------------------------------------------------------------------------------
@@ -120,7 +119,7 @@ residstats = MF_ResidualAnalysis(res);
 % Convert output of residual analysis to local outputs in quick loop
 fields = fieldnames(residstats);
 for k = 1:length(fields);
-    eval(sprintf('out.%s = residstats.%s;',fields{k},fields{k}));
+    out.(fields{k}) = residstats.(fields{k});
 end
 
 end

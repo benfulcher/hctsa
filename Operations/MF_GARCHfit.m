@@ -39,15 +39,15 @@
 % 
 %---INPUTS:
 % y, the input time series
+% 
 % preproc, the preprocessing to apply, can be 'ar' or 'none'
-% params, the parameters of the GARCH model to fit, can be:
-%           (i) 'default', fits the default model
-%           (ii) 'auto', automated routine to select parameters for this time series
-%           (iii) e.g., params = '''R'',2,''M'',1,''P'',2,''Q'',1', sets r = 2,
-%                                   m = 1, p = 2, q = 1
 % 
+% P, the GARCH model order
 % 
-% ***In future this code should be revised by an expert in GARCH model fitting.***
+% Q, the ARCH model order
+% 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%               (for pre-processing: PP_PreProcess)
 % 
 %---HISTORY:
 % Ben Fulcher, 25/2/2010
@@ -75,13 +75,13 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_GARCHfit(y,preproc,params)
+function out = MF_GARCHfit(y,preproc,P,Q,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
 
-bevocal = 0; % Whether to display commentary on the fitting process
+beVocal = 0; % Whether to display commentary on the fitting process
 
 % Check that an Econometrics Toolbox license is available:
 BF_CheckToolbox('econometrics_toolbox')
@@ -95,9 +95,19 @@ if nargin < 2 || isempty(preproc)
 end
 
 % Fit what type of GARCH model?
-if nargin < 3 || isempty(params)
+if nargin < 3 || isempty(P)
     % Fit the default GARCH model
-    params = 'default';
+    P = 1;
+end
+
+if nargin < 4 || isempty(Q)
+    % Fit the default GARCH model
+    Q = 1;
+end
+
+% randomSeed: how to treat the randomization
+if nargin < 5
+    randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------
@@ -106,26 +116,11 @@ end
 % Save the original, unprocessed time series
 y0 = y;
 
-switch preproc
-    case 'nothing'
-        % Don't do any pre-processing
-        
-    case 'ar'
-        % Apply a number of standard preprocessings and return them in the
-        % structure ypp. Also chooses the best preprocessing based on the worst fit
-        % of an AR2 model to the processed time series.
-        % has to beat doing nothing by 5% (error)
-        % No spectral methods allowed...
-        [ypp, best] = PP_PreProcess(y,'ar',2,0.05,0);
-        eval(sprintf('y = ypp.%s;',best));
-        if bevocal
-            fprintf(1,'Preprocessed according to AR(2) criterion using %s\n',best);
-        end
-end
+y = BF_Whiten(y,preproc,beVocal,randomSeed);
 
-y = BF_zscore(y); % z-score the time series
+y = BF_zscore(y); % z-score the time series (after whitening)
 
-% Length of the time series, y
+% Length of the (potentially whitened) time series, y
 % Note that this could be different to the original, y0 (if choose a differencing, e.g.)
 N = length(y);
 
@@ -133,7 +128,6 @@ N = length(y);
 % The original, unprocessed time series is retained in y0.
 % (Note that y=y0 is possible; when all preprocessings are found to be
 %   worse at the given criterion).
-
 
 % ------------------------------------------------------------------------------
 %% (2) Data pre-estimation
@@ -168,90 +162,24 @@ N = length(y);
 [PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y,20,[],[]);
 
 
+% ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model
-switch params
-    % Names of basic models
-    case 'default'
-        % (i) The default model:
-        % a constant, C mean process
-        % GARCH(1,1) conditionally Gaussian innovations
-        
-        % C: constant mean of mean-process
-        % K: constant term in variance-process
-        % GARCH(1): autoregressive parameter at lag 1 of variance
-        % ARCH(1): regressive parameter at lag 1 of Gaussian noise process
-        %           squared onto the variance process
-        
-        spec = garchset('P', 1, 'Q', 1); % equivalent to setting nothing in garchfit
+% ------------------------------------------------------------------------------
+GModel = garch(P,Q); % ARCH order P, GARCH order Q
 
-    case 'auto'
-        % automatically determines model from statistics above
-        % This is not a great 'automatic' method, I think! But it's a
-        % method...
-        
-        % AR component of model from ACF
-        R = Lags_acf_y(find(abs(ACF_y) < bounds_acf_y(1),1,'first'))-1;
-        % first time autocorrelation drops below significance level.
-        if isempty(R), R = length(ACF_y)+1; end
-        if R > 4, R = 4; end
-        % (**) R=0 implies that no AR component is required.
-        
-        
-        % MA component of model from PACF
-        M = Lags_pacf_y(find(abs(PACF_y) < bounds_pacf_y(1),1,'first'))-1;
-        % first time partial autocorrelation drops below signifance level
-        if isempty(M), M = Lags_pacf_y(end)+1; end
-        if M > 3, M = 3; end % don't want to calculate massive mean models
-        % (**) M=0 implies that no MA component is required.
-        
-        
-        % I have no intutition as to how to add the GARCH component. I
-        % guess if there's no evidence of heteroskedacity you wouldn't even
-        % attempt a GARCH component, but for now let's fit one anyway. This
-        % is a GARCH routine, after all...
-        P = 1; % autoregression onto lagged conditional variance
-        Q = 1; % regression of Gaussian noise process onto conditional variance
-        
-        
-        % make an appropriate string
-        garchpval = [R, M, P, Q]; % 4-component vector of model orders
-        garchpnam = {'R','M','P','Q'};
-        s = '';
-        for i = 1:length(garchpval)
-            if ~garchpval(i) == 0 % this should be a component to specify in 
-                s = sprintf('%s''%s'', %u, ',s,garchpnam{i},garchpval(i));
-            end
-        end
-        s = s(1:end-2); % remove the Oxford comma.
-        % This string, s, should now specify an argument to garchset
-        
-        eval(sprintf('spec = garchset(%s);',s));
-        
-    otherwise
-        % Specify the GARCH model as a string in the input
-        % e.g., 'R, 2, M, 1, P, 1, Q, 1' will fit an ARMA(2,1) to mean
-        % process and a GARCH(1,1) to the variance process
-        try
-            eval(sprintf('spec = garchset(%s);',params));
-        catch emsg
-           error('Error formatting input parameters specifying GARCH model.')
-        end
-    
-end
-
-spec = garchset(spec,'C', NaN,'Display','off'); % fix C=0 -- zero-mean process
-% In fact this gives quite different results, even when you C ends up being
-% very close to zero...? Strangely not for the ARMA, but for the GARCH...
+% Include a constant in the GARCH model
+GModel.Constant = NaN;
 
 % Fit the model
 try
-    [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
+    [Gfit, estParamCov, LLF, info] = estimate(GModel,y,'Display','off');
+    % Estimate standard errors using variance/covariance matrix:
+    errors = sqrt(diag(estParamCov));
+    % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(GModel,y);
 catch emsg
-    error('GARCH fit failed');
-end
-
-if all(isnan(innovations))
-    error('GARCH fit failed');
+    error('GARCH fit failed (data does not allow a valid GARCH model to be estimated): %s',emsg.message);
+    % Sometimes this happens for some time series (e.g., when it removes some GARCH 
+    % lags and makes the resulting model invalid)
 end
 
 % ------------------------------------------------------------------------------
@@ -260,56 +188,70 @@ end
 
 % (i) Return coefficients, and their standard errors as seperate statistics
 % ___Mean_Process___
-% --C--
-% C=NaN --> C=0;
-
-%   --AR--
-if isfield(coeff,'AR')
-    for i = 1:length(coeff.AR)
-        eval(sprintf('out.AR_%u = coeff.AR(%u);',i,i));
-        eval(sprintf('out.ARerr_%u = errors.AR(%u);',i,i));
-    end 
-end
-
-%  --MA--
-if isfield(coeff,'MA')
-    for i = 1:length(coeff.MA)
-        eval(sprintf('out.MA_%u = coeff.MA(%u);',i,i));
-        eval(sprintf('out.MAerr_%u = errors.MA(%u);',i,i));
-    end 
+% --Constant--
+if isprop(Gfit,'Constant')
+    out.constant = Gfit.Constant;
+    out.constanterr = errors(1);
 end
 
 % __Variance_Process___
-% -- K --
-if isfield(coeff,'K')
-    out.K = coeff.K;
+% -- Offset (should be zero for z-scored time series)--
+if isprop(Gfit,'Offset')
+    out.offset = Gfit.Offset;
 end
 
-% -- GARCH --
-if isfield(coeff,'GARCH')
-    for i = 1:length(coeff.GARCH)
-        eval(sprintf('out.GARCH_%u = coeff.GARCH(%u);',i,i));
-        eval(sprintf('out.GARCHerr_%u = errors.GARCH(%u);',i,i));
+
+indexAdjust = 0; % required because sometimes you fit at fewer lags than you 
+                 % specified, but the errors output is a vector, 
+                 % so sadly you have to keep count...
+                 
+% -- GARCH component --
+for i = 1:P
+    if isprop(Gfit,'GARCH') && length(Gfit.GARCH)>=i
+        out.(sprintf('GARCH_%u',i)) = Gfit.GARCH{i};
+        % New (in this way shit) format means that this no longer works for 
+        % custom GARCH models (you can no longer index a particular
+        % error) ///
+        if Gfit.GARCH{i}==0
+            % no fit at this lag, even though it was specified
+            indexAdjust = indexAdjust + 1;
+            out.(sprintf('GARCHerr_%u',i)) = NaN; % first is the constant
+        else
+            out.(sprintf('GARCHerr_%u',i)) = errors(1+i-indexAdjust); % first is the constant
+        end
+    else
+        % fitted GARCH model not as specified
+        out.(sprintf('GARCH_%u',i)) = NaN;
+        out.(sprintf('GARCHerr_%u',i)) = NaN; % first is the constant
     end
 end
 
-% -- ARCH --
-if isfield(coeff,'ARCH')
-    for i = 1:length(coeff.ARCH)
-        eval(sprintf('out.ARCH_%u = coeff.ARCH(%u);',i,i));
-        eval(sprintf('out.ARCHerr_%u = errors.ARCH(%u);',i,i));
+% -- ARCH component --
+for i = 1:Q
+    if isprop(Gfit,'ARCH') && length(Gfit.ARCH)>=i
+        out.(sprintf('ARCH_%u',i)) = Gfit.ARCH{i};
+        if Gfit.ARCH{i}==0
+            % No fit at this specified lag
+            out.(sprintf('ARCHerr_%u',i)) = NaN; % constant, then GARCH, then ARCH
+            indexAdjust = indexAdjust + 1;
+        else
+            out.(sprintf('ARCHerr_%u',i)) = errors(1+length(Gfit.GARCH)+i-indexAdjust); % constant, then GARCH, then ARCH
+        end
+    else
+        % ARCH fit not as specified
+        out.(sprintf('ARCH_%u',i)) = NaN;
+        out.(sprintf('ARCHerr_%u',i)) = NaN;
     end
 end
-
 
 % More statistics given from the fit
 out.LLF = LLF; % log-likelihood function
 
-out.summaryexitflag = summary.exitFlag; % whether the fit worked ok.
+out.summaryexitflag = info.exitflag; % whether the fit worked ok.
 % This is just a record, really, since the numerical values are only
 % symbolic.
 
-nparams = garchcount(coeff); % number of parameters
+nparams = sum(any(estParamCov)); % number of parameters
 out.nparams = nparams;
 
 % use aicbic function
@@ -317,19 +259,24 @@ out.nparams = nparams;
 out.aic = AIC;
 out.bic = BIC;
 
-%% Statistics on sigmas
-% sigmas is the time series of conditional variance. For a time series with
-% strong ARCH/GARCH effects, this will fluctuate; otherwise will be
-% quite flat...
+% ------------------------------------------------------------------------------
+%% Sigmas, the time series of conditional variances
+% ------------------------------------------------------------------------------
+% Estimate it:
+[sigmas,logL] = infer(Gfit,y);
+% For a time series with strong ARCH/GARCH effects, this will fluctuate;
+% otherwise will be quite flat...
 out.maxsigma = max(sigmas);
 out.minsigma = min(sigmas);
-out.rangesigma = max(sigmas)-min(sigmas);
+out.rangesigma = max(sigmas) - min(sigmas);
 out.stdsigma = std(sigmas);
 out.meansigma = mean(sigmas);
 
+% ------------------------------------------------------------------------------
 %% Check residuals
-e = innovations; % 'innovations' -- departures from mean process
-stde = e./sigmas; % standardized residuals
+% ------------------------------------------------------------------------------
+res = (y - Gfit.Offset); % residuals (departures from mean process)
+stde = res./sqrt(sigmas); % standardize residuals by conditional standard deviation
 stde2 = stde.^2;
 
 % (i) Engle's ARCH test
@@ -349,11 +296,11 @@ stde2 = stde.^2;
 % correlated now, it is a signature that GARCH effects were significant in
 % the original signal
 
-% Mean improvement in Engle pValue
+% Mean/max improvement in Engle pValue
 out.engle_mean_diff_p = mean(Engle_pValue_stde - Engle_pValue_y);
 out.engle_max_diff_p = max(Engle_pValue_stde - Engle_pValue_y);
 
-% Mean improvement in lbq pValue for squared time series
+% Mean/max improvement in lbq pValue for squared time series
 out.lbq_mean_diff_p = mean(lbq_pValue_stde2 - lbq_pValue_y2);
 out.lbq_max_diff_p = max(lbq_pValue_stde2 - lbq_pValue_y2);
 
@@ -369,6 +316,7 @@ out.lbq_pval_stde_5 = lbq_pValue_stde2(5);
 out.lbq_pval_stde_10 = lbq_pValue_stde2(10);
 out.minlbqpval_stde2 = min(lbq_pValue_stde2);
 out.maxlbqpval_stde2 = max(lbq_pValue_stde2);
+
 
 
 % (iii) Correlation in time series: autocorrelation
@@ -388,11 +336,11 @@ residout = MF_ResidualAnalysis(stde);
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
-    eval(sprintf('out.stde_%s = residout.%s;',fields{k},fields{k}));
+    out.(sprintf('stde_%s',fields{k})) = residout.(fields{k});
 end
 
-out.ac1_stde2 = CO_AutoCorr(stde2,1);
-out.diff_ac1 = CO_AutoCorr(y.^2,1) - CO_AutoCorr(stde2,1);
+out.ac1_stde2 = CO_AutoCorr(stde2,1,'Fourier');
+out.diff_ac1 = CO_AutoCorr(y.^2,1,'Fourier') - CO_AutoCorr(stde2,1,'Fourier');
 
 
 %% (5) Comparison to other models

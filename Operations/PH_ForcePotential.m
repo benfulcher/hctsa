@@ -136,9 +136,9 @@ out.std = std(x); % standard deviation
 out.range = range(x); % range
 out.proppos = sum(x > 0)/N; % proportion positive
 out.pcross = sum((x(1:end-1)).*(x(2:end)) < 0)/(N-1); % n crosses middle
-out.ac1 = abs(CO_AutoCorr(x,1)); % magnitude of autocorrelation at lag 1
-out.ac10 = abs(CO_AutoCorr(x,10)); % magnitude of autocorrelation at lag 10
-out.ac50 = abs(CO_AutoCorr(x,50)); % magnitude of autocorrelation at lag 50
+out.ac1 = abs(CO_AutoCorr(x,1,'Fourier')); % magnitude of autocorrelation at lag 1
+out.ac10 = abs(CO_AutoCorr(x,10,'Fourier')); % magnitude of autocorrelation at lag 10
+out.ac50 = abs(CO_AutoCorr(x,50,'Fourier')); % magnitude of autocorrelation at lag 50
 out.tau = CO_FirstZero(x,'ac'); % first zero crossing of the autocorrelation function
 out.finaldev = abs(x(end)); % final position
 

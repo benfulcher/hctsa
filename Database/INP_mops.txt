@@ -240,127 +240,24 @@ CO_RM_AMInformation(y,7)	CO_RM_AMInformation_7
 CO_RM_AMInformation(y,8)	CO_RM_AMInformation_8
 CO_RM_AMInformation(y,9)	CO_RM_AMInformation_9
 CO_RM_AMInformation(y,10)	CO_RM_AMInformation_10
-CO_FirstMin(y,'mi')	CO_FirstMin_mi
-CO_HistogramAMI(y,1,'std1',2)	CO_HistogramAMI_1_std1_2
-CO_HistogramAMI(y,1,'std1',4)	CO_HistogramAMI_1_std1_4
-CO_HistogramAMI(y,1,'std1',6)	CO_HistogramAMI_1_std1_6
-CO_HistogramAMI(y,1,'std1',8)	CO_HistogramAMI_1_std1_8
-CO_HistogramAMI(y,1,'std1',10)	CO_HistogramAMI_1_std1_10
-CO_HistogramAMI(y,1,'std1',20)	CO_HistogramAMI_1_std1_20
-CO_HistogramAMI(y,2,'std1',2)	CO_HistogramAMI_2_std1_2
-CO_HistogramAMI(y,2,'std1',4)	CO_HistogramAMI_2_std1_4
-CO_HistogramAMI(y,2,'std1',6)	CO_HistogramAMI_2_std1_6
-CO_HistogramAMI(y,2,'std1',8)	CO_HistogramAMI_2_std1_8
-CO_HistogramAMI(y,2,'std1',10)	CO_HistogramAMI_2_std1_10
-CO_HistogramAMI(y,2,'std1',20)	CO_HistogramAMI_2_std1_20
-CO_HistogramAMI(y,3,'std1',2)	CO_HistogramAMI_3_std1_2
-CO_HistogramAMI(y,3,'std1',4)	CO_HistogramAMI_3_std1_4
-CO_HistogramAMI(y,3,'std1',6)	CO_HistogramAMI_3_std1_6
-CO_HistogramAMI(y,3,'std1',8)	CO_HistogramAMI_3_std1_8
-CO_HistogramAMI(y,3,'std1',10)	CO_HistogramAMI_3_std1_10
-CO_HistogramAMI(y,3,'std1',20)	CO_HistogramAMI_3_std1_20
-CO_HistogramAMI(y,4,'std1',2)	CO_HistogramAMI_4_std1_2
-CO_HistogramAMI(y,4,'std1',4)	CO_HistogramAMI_4_std1_4
-CO_HistogramAMI(y,4,'std1',6)	CO_HistogramAMI_4_std1_6
-CO_HistogramAMI(y,4,'std1',8)	CO_HistogramAMI_4_std1_8
-CO_HistogramAMI(y,4,'std1',10)	CO_HistogramAMI_4_std1_10
-CO_HistogramAMI(y,4,'std1',20)	CO_HistogramAMI_4_std1_20
-CO_HistogramAMI(y,5,'std1',2)	CO_HistogramAMI_5_std1_2
-CO_HistogramAMI(y,5,'std1',4)	CO_HistogramAMI_5_std1_4
-CO_HistogramAMI(y,5,'std1',6)	CO_HistogramAMI_5_std1_6
-CO_HistogramAMI(y,5,'std1',8)	CO_HistogramAMI_5_std1_8
-CO_HistogramAMI(y,5,'std1',10)	CO_HistogramAMI_5_std1_10
-CO_HistogramAMI(y,5,'std1',20)	CO_HistogramAMI_5_std1_20
-CO_HistogramAMI(y,1,'std2',2)	CO_HistogramAMI_1_std2_2
-CO_HistogramAMI(y,1,'std2',4)	CO_HistogramAMI_1_std2_4
-CO_HistogramAMI(y,1,'std2',6)	CO_HistogramAMI_1_std2_6
-CO_HistogramAMI(y,1,'std2',8)	CO_HistogramAMI_1_std2_8
-CO_HistogramAMI(y,1,'std2',10)	CO_HistogramAMI_1_std2_10
-CO_HistogramAMI(y,1,'std2',20)	CO_HistogramAMI_1_std2_20
-CO_HistogramAMI(y,2,'std2',2)	CO_HistogramAMI_2_std2_2
-CO_HistogramAMI(y,2,'std2',4)	CO_HistogramAMI_2_std2_4
-CO_HistogramAMI(y,2,'std2',6)	CO_HistogramAMI_2_std2_6
-CO_HistogramAMI(y,2,'std2',8)	CO_HistogramAMI_2_std2_8
-CO_HistogramAMI(y,2,'std2',10)	CO_HistogramAMI_2_std2_10
-CO_HistogramAMI(y,2,'std2',20)	CO_HistogramAMI_2_std2_20
-CO_HistogramAMI(y,3,'std2',2)	CO_HistogramAMI_3_std2_2
-CO_HistogramAMI(y,3,'std2',4)	CO_HistogramAMI_3_std2_4
-CO_HistogramAMI(y,3,'std2',6)	CO_HistogramAMI_3_std2_6
-CO_HistogramAMI(y,3,'std2',8)	CO_HistogramAMI_3_std2_8
-CO_HistogramAMI(y,3,'std2',10)	CO_HistogramAMI_3_std2_10
-CO_HistogramAMI(y,3,'std2',20)	CO_HistogramAMI_3_std2_20
-CO_HistogramAMI(y,4,'std2',2)	CO_HistogramAMI_4_std2_2
-CO_HistogramAMI(y,4,'std2',4)	CO_HistogramAMI_4_std2_4
-CO_HistogramAMI(y,4,'std2',6)	CO_HistogramAMI_4_std2_6
-CO_HistogramAMI(y,4,'std2',8)	CO_HistogramAMI_4_std2_8
-CO_HistogramAMI(y,4,'std2',10)	CO_HistogramAMI_4_std2_10
-CO_HistogramAMI(y,4,'std2',20)	CO_HistogramAMI_4_std2_20
-CO_HistogramAMI(y,5,'std2',2)	CO_HistogramAMI_5_std2_2
-CO_HistogramAMI(y,5,'std2',4)	CO_HistogramAMI_5_std2_4
-CO_HistogramAMI(y,5,'std2',6)	CO_HistogramAMI_5_std2_6
-CO_HistogramAMI(y,5,'std2',8)	CO_HistogramAMI_5_std2_8
-CO_HistogramAMI(y,5,'std2',10)	CO_HistogramAMI_5_std2_10
-CO_HistogramAMI(y,5,'std2',20)	CO_HistogramAMI_5_std2_20
-CO_HistogramAMI(y,1,'even',2)	CO_HistogramAMI_1_even_2
-CO_HistogramAMI(y,1,'even',4)	CO_HistogramAMI_1_even_4
-CO_HistogramAMI(y,1,'even',6)	CO_HistogramAMI_1_even_6
-CO_HistogramAMI(y,1,'even',8)	CO_HistogramAMI_1_even_8
-CO_HistogramAMI(y,1,'even',10)	CO_HistogramAMI_1_even_10
-CO_HistogramAMI(y,1,'even',20)	CO_HistogramAMI_1_even_20
-CO_HistogramAMI(y,2,'even',2)	CO_HistogramAMI_2_even_2
-CO_HistogramAMI(y,2,'even',4)	CO_HistogramAMI_2_even_4
-CO_HistogramAMI(y,2,'even',6)	CO_HistogramAMI_2_even_6
-CO_HistogramAMI(y,2,'even',8)	CO_HistogramAMI_2_even_8
-CO_HistogramAMI(y,2,'even',10)	CO_HistogramAMI_2_even_10
-CO_HistogramAMI(y,2,'even',20)	CO_HistogramAMI_2_even_20
-CO_HistogramAMI(y,3,'even',2)	CO_HistogramAMI_3_even_2
-CO_HistogramAMI(y,3,'even',4)	CO_HistogramAMI_3_even_4
-CO_HistogramAMI(y,3,'even',6)	CO_HistogramAMI_3_even_6
-CO_HistogramAMI(y,3,'even',8)	CO_HistogramAMI_3_even_8
-CO_HistogramAMI(y,3,'even',10)	CO_HistogramAMI_3_even_10
-CO_HistogramAMI(y,3,'even',20)	CO_HistogramAMI_3_even_20
-CO_HistogramAMI(y,4,'even',2)	CO_HistogramAMI_4_even_2
-CO_HistogramAMI(y,4,'even',4)	CO_HistogramAMI_4_even_4
-CO_HistogramAMI(y,4,'even',6)	CO_HistogramAMI_4_even_6
-CO_HistogramAMI(y,4,'even',8)	CO_HistogramAMI_4_even_8
-CO_HistogramAMI(y,4,'even',10)	CO_HistogramAMI_4_even_10
-CO_HistogramAMI(y,4,'even',20)	CO_HistogramAMI_4_even_20
-CO_HistogramAMI(y,5,'even',2)	CO_HistogramAMI_5_even_2
-CO_HistogramAMI(y,5,'even',4)	CO_HistogramAMI_5_even_4
-CO_HistogramAMI(y,5,'even',6)	CO_HistogramAMI_5_even_6
-CO_HistogramAMI(y,5,'even',8)	CO_HistogramAMI_5_even_8
-CO_HistogramAMI(y,5,'even',10)	CO_HistogramAMI_5_even_10
-CO_HistogramAMI(y,5,'even',20)	CO_HistogramAMI_5_even_20
-CO_HistogramAMI(y,1,'quantiles',2)	CO_HistogramAMI_1_quantiles_2
-CO_HistogramAMI(y,1,'quantiles',4)	CO_HistogramAMI_1_quantiles_4
-CO_HistogramAMI(y,1,'quantiles',6)	CO_HistogramAMI_1_quantiles_6
-CO_HistogramAMI(y,1,'quantiles',8)	CO_HistogramAMI_1_quantiles_8
-CO_HistogramAMI(y,1,'quantiles',10)	CO_HistogramAMI_1_quantiles_10
-CO_HistogramAMI(y,1,'quantiles',20)	CO_HistogramAMI_1_quantiles_20
-CO_HistogramAMI(y,2,'quantiles',2)	CO_HistogramAMI_2_quantiles_2
-CO_HistogramAMI(y,2,'quantiles',4)	CO_HistogramAMI_2_quantiles_4
-CO_HistogramAMI(y,2,'quantiles',6)	CO_HistogramAMI_2_quantiles_6
-CO_HistogramAMI(y,2,'quantiles',8)	CO_HistogramAMI_2_quantiles_8
-CO_HistogramAMI(y,2,'quantiles',10)	CO_HistogramAMI_2_quantiles_10
-CO_HistogramAMI(y,2,'quantiles',20)	CO_HistogramAMI_2_quantiles_20
-CO_HistogramAMI(y,3,'quantiles',2)	CO_HistogramAMI_3_quantiles_2
-CO_HistogramAMI(y,3,'quantiles',4)	CO_HistogramAMI_3_quantiles_4
-CO_HistogramAMI(y,3,'quantiles',6)	CO_HistogramAMI_3_quantiles_6
-CO_HistogramAMI(y,3,'quantiles',8)	CO_HistogramAMI_3_quantiles_8
-CO_HistogramAMI(y,3,'quantiles',10)	CO_HistogramAMI_3_quantiles_10
-CO_HistogramAMI(y,3,'quantiles',20)	CO_HistogramAMI_3_quantiles_20
-CO_HistogramAMI(y,4,'quantiles',2)	CO_HistogramAMI_4_quantiles_2
-CO_HistogramAMI(y,4,'quantiles',4)	CO_HistogramAMI_4_quantiles_4
-CO_HistogramAMI(y,4,'quantiles',6)	CO_HistogramAMI_4_quantiles_6
-CO_HistogramAMI(y,4,'quantiles',8)	CO_HistogramAMI_4_quantiles_8
-CO_HistogramAMI(y,4,'quantiles',10)	CO_HistogramAMI_4_quantiles_10
-CO_HistogramAMI(y,4,'quantiles',20)	CO_HistogramAMI_4_quantiles_20
-CO_HistogramAMI(y,5,'quantiles',2)	CO_HistogramAMI_5_quantiles_2
-CO_HistogramAMI(y,5,'quantiles',4)	CO_HistogramAMI_5_quantiles_4
-CO_HistogramAMI(y,5,'quantiles',6)	CO_HistogramAMI_5_quantiles_6
-CO_HistogramAMI(y,5,'quantiles',8)	CO_HistogramAMI_5_quantiles_8
-CO_HistogramAMI(y,5,'quantiles',10)	CO_HistogramAMI_5_quantiles_10
-CO_HistogramAMI(y,5,'quantiles',20)	CO_HistogramAMI_5_quantiles_20
+CO_FirstMin(y,'mi-gaussian')	CO_FirstMin_mi-gaussian
+CO_FirstMin(y,'mi-kernel')  CO_FirstMin_mi-kernel
+CO_FirstMin(y,'mi-kraskov1')  CO_FirstMin_mi-kraskov1
+CO_FirstMin(y,'mi-kraskov2','3')  CO_FirstMin_mi-kraskov2_3
+CO_FirstMin(y,'mi-hist',5)  CO_FirstMin_mi-hist_5
+CO_FirstMin(y,'mi-hist',10)  CO_FirstMin_mi-hist_10
+CO_HistogramAMI(y,1:5,'std1',2)	CO_HistogramAMI_std1_2
+CO_HistogramAMI(y,1:5,'std1',5)	CO_HistogramAMI_std1_5
+CO_HistogramAMI(y,1:5,'std1',10)	CO_HistogramAMI_std1_10
+CO_HistogramAMI(y,1:5,'std2',2)	CO_HistogramAMI_std2_2
+CO_HistogramAMI(y,1:5,'std2',5)	CO_HistogramAMI_std2_5
+CO_HistogramAMI(y,1:5,'std2',10)	CO_HistogramAMI_std2_10
+CO_HistogramAMI(y,1:5,'even',2)    CO_HistogramAMI_even_2
+CO_HistogramAMI(y,1:5,'even',5)    CO_HistogramAMI_even_5
+CO_HistogramAMI(y,1:5,'even',10)    CO_HistogramAMI_even_10
+CO_HistogramAMI(y,1:5,'quantiles',2)    CO_HistogramAMI_quantiles_2
+CO_HistogramAMI(y,1:5,'quantiles',5)    CO_HistogramAMI_quantiles_5
+CO_HistogramAMI(y,1:5,'quantiles',10)    CO_HistogramAMI_quantiles_10
 CO_glscf(y,1,1,1)	CO_glscf_1_1_1
 CO_glscf(y,1,1,2)	CO_glscf_1_1_2
 CO_glscf(y,1,1,3)	CO_glscf_1_1_3
@@ -650,7 +547,6 @@ SY_SlidingWindow(y,'AC1','ent',10,2)		SY_SlidingWindow_ac1_ent10_2
 SY_SlidingWindow(y,'AC1','ent',10,10)		SY_SlidingWindow_ac1_ent10_10
 SY_LinearTrend(x)	SY_LinearTrend
 SC_fastdfa(y)	    SC_fastdfa
-SC_HurstExponent(y)	ST_hurst_BillDavidson
 SY_StdNthDer(y,1)	SY_StdNthDer_1
 SY_StdNthDer(y,2)	SY_StdNthDer_2
 SY_StdNthDer(y,3)	SY_StdNthDer_3
@@ -667,9 +563,8 @@ SY_LocalGlobal(y,'l',20)     SY_LocalGlobal_l20
 SY_LocalGlobal(y,'l',50)     SY_LocalGlobal_l50
 SY_LocalGlobal(y,'l',100)    SY_LocalGlobal_l100
 SY_LocalGlobal(y,'l',500)    SY_LocalGlobal_l500
-SY_LocalGlobal(y,'p',0.001)  SY_LocalGlobal_p001
-SY_LocalGlobal(y,'p',0.005)  SY_LocalGlobal_p005
 SY_LocalGlobal(y,'p',0.01)   SY_LocalGlobal_p01
+SY_LocalGlobal(y,'p',0.05)  SY_LocalGlobal_p05
 SY_LocalGlobal(y,'p',0.1)    SY_LocalGlobal_p1
 SY_LocalGlobal(y,'p',0.5)    SY_LocalGlobal_p5
 SY_LocalGlobal(y,'unicg',10)  SY_LocalGlobal_unicg10
@@ -677,151 +572,6 @@ SY_LocalGlobal(y,'unicg',20)  SY_LocalGlobal_unicg20
 SY_LocalGlobal(y,'unicg',50)  SY_LocalGlobal_unicg50
 SY_LocalGlobal(y,'unicg',100)  SY_LocalGlobal_unicg100
 SY_LocalGlobal(y,'unicg',500)  SY_LocalGlobal_unicg500
-SY_LocalGlobal(y,'randcg',10)  SY_LocalGlobal_randcg10
-SY_LocalGlobal(y,'randcg',20)  SY_LocalGlobal_randcg20
-SY_LocalGlobal(y,'randcg',50)  SY_LocalGlobal_randcg50
-SY_LocalGlobal(y,'randcg',100)  SY_LocalGlobal_randcg100
-SY_LocalGlobal(y,'randcg',500)  SY_LocalGlobal_randcg500
-# SY_LocalGlobal(y,'mean','l',10)  SY_LocalGlobal_mean_l10
-# SY_LocalGlobal(y,'mean','l',20)  SY_LocalGlobal_mean_l20
-# SY_LocalGlobal(y,'mean','l',50)  SY_LocalGlobal_mean_l50
-# SY_LocalGlobal(y,'mean','l',100)  SY_LocalGlobal_mean_l100
-# SY_LocalGlobal(y,'mean','l',500)  SY_LocalGlobal_mean_l500
-# SY_LocalGlobal(y,'mean','p',0.001)  SY_LocalGlobal_mean_p001
-# SY_LocalGlobal(y,'mean','p',0.005)  SY_LocalGlobal_mean_p005
-# SY_LocalGlobal(y,'mean','p',0.01)  SY_LocalGlobal_mean_p01
-# SY_LocalGlobal(y,'mean','p',0.1)  SY_LocalGlobal_mean_p1
-# SY_LocalGlobal(y,'mean','p',0.5)  SY_LocalGlobal_mean_p5
-# SY_LocalGlobal(y,'mean','unicg',10)  SY_LocalGlobal_mean_unicg10
-# SY_LocalGlobal(y,'mean','unicg',20)  SY_LocalGlobal_mean_unicg20
-# SY_LocalGlobal(y,'mean','unicg',50)  SY_LocalGlobal_mean_unicg50
-# SY_LocalGlobal(y,'mean','unicg',100)  SY_LocalGlobal_mean_unicg100
-# SY_LocalGlobal(y,'mean','unicg',500)  SY_LocalGlobal_mean_unicg500
-# SY_LocalGlobal(y,'mean','randcg',10)  SY_LocalGlobal_mean_randcg10
-# SY_LocalGlobal(y,'mean','randcg',20)  SY_LocalGlobal_mean_randcg20
-# SY_LocalGlobal(y,'mean','randcg',50)  SY_LocalGlobal_mean_randcg50
-# SY_LocalGlobal(y,'mean','randcg',100)  SY_LocalGlobal_mean_randcg100
-# SY_LocalGlobal(y,'mean','randcg',500)  SY_LocalGlobal_mean_randcg500
-# SY_LocalGlobal(y,'std','l',10)  SY_LocalGlobal_std_l10
-# SY_LocalGlobal(y,'std','l',20)  SY_LocalGlobal_std_l20
-# SY_LocalGlobal(y,'std','l',50)  SY_LocalGlobal_std_l50
-# SY_LocalGlobal(y,'std','l',100)  SY_LocalGlobal_std_l100
-# SY_LocalGlobal(y,'std','l',500)  SY_LocalGlobal_std_l500
-# SY_LocalGlobal(y,'std','p',0.001)  SY_LocalGlobal_std_p001
-# SY_LocalGlobal(y,'std','p',0.005)  SY_LocalGlobal_std_p005
-# SY_LocalGlobal(y,'std','p',0.01)  SY_LocalGlobal_std_p01
-# SY_LocalGlobal(y,'std','p',0.1)  SY_LocalGlobal_std_p1
-# SY_LocalGlobal(y,'std','p',0.5)  SY_LocalGlobal_std_p5
-# SY_LocalGlobal(y,'std','unicg',10)  SY_LocalGlobal_std_unicg10
-# SY_LocalGlobal(y,'std','unicg',20)  SY_LocalGlobal_std_unicg20
-# SY_LocalGlobal(y,'std','unicg',50)  SY_LocalGlobal_std_unicg50
-# SY_LocalGlobal(y,'std','unicg',100)  SY_LocalGlobal_std_unicg100
-# SY_LocalGlobal(y,'std','unicg',500)  SY_LocalGlobal_std_unicg500
-# SY_LocalGlobal(y,'std','randcg',10)  SY_LocalGlobal_std_randcg10
-# SY_LocalGlobal(y,'std','randcg',20)  SY_LocalGlobal_std_randcg20
-# SY_LocalGlobal(y,'std','randcg',50)  SY_LocalGlobal_std_randcg50
-# SY_LocalGlobal(y,'std','randcg',100)  SY_LocalGlobal_std_randcg100
-# SY_LocalGlobal(y,'std','randcg',500)  SY_LocalGlobal_std_randcg500
-# SY_LocalGlobal(y,'median','l',10)  SY_LocalGlobal_median_l10
-# SY_LocalGlobal(y,'median','l',20)  SY_LocalGlobal_median_l20
-# SY_LocalGlobal(y,'median','l',50)  SY_LocalGlobal_median_l50
-# SY_LocalGlobal(y,'median','l',100)  SY_LocalGlobal_median_l100
-# SY_LocalGlobal(y,'median','l',500)  SY_LocalGlobal_median_l500
-# SY_LocalGlobal(y,'median','p',0.001)  SY_LocalGlobal_median_p001
-# SY_LocalGlobal(y,'median','p',0.005)  SY_LocalGlobal_median_p005
-# SY_LocalGlobal(y,'median','p',0.01)  SY_LocalGlobal_median_p01
-# SY_LocalGlobal(y,'median','p',0.1)  SY_LocalGlobal_median_p1
-# SY_LocalGlobal(y,'median','p',0.5)  SY_LocalGlobal_median_p5
-# SY_LocalGlobal(y,'median','unicg',10)  SY_LocalGlobal_median_unicg10
-# SY_LocalGlobal(y,'median','unicg',20)  SY_LocalGlobal_median_unicg20
-# SY_LocalGlobal(y,'median','unicg',50)  SY_LocalGlobal_median_unicg50
-# SY_LocalGlobal(y,'median','unicg',100)  SY_LocalGlobal_median_unicg100
-# SY_LocalGlobal(y,'median','unicg',500)  SY_LocalGlobal_median_unicg500
-# SY_LocalGlobal(y,'median','randcg',10)  SY_LocalGlobal_median_randcg10
-# SY_LocalGlobal(y,'median','randcg',20)  SY_LocalGlobal_median_randcg20
-# SY_LocalGlobal(y,'median','randcg',50)  SY_LocalGlobal_median_randcg50
-# SY_LocalGlobal(y,'median','randcg',100)  SY_LocalGlobal_median_randcg100
-# SY_LocalGlobal(y,'median','randcg',500)  SY_LocalGlobal_median_randcg500
-# SY_LocalGlobal(y,'iqr','l',10)  SY_LocalGlobal_iqr_l10
-# SY_LocalGlobal(y,'iqr','l',20)  SY_LocalGlobal_iqr_l20
-# SY_LocalGlobal(y,'iqr','l',50)  SY_LocalGlobal_iqr_l50
-# SY_LocalGlobal(y,'iqr','l',100)  SY_LocalGlobal_iqr_l100
-# SY_LocalGlobal(y,'iqr','l',500)  SY_LocalGlobal_iqr_l500
-# SY_LocalGlobal(y,'iqr','p',0.001)  SY_LocalGlobal_iqr_p001
-# SY_LocalGlobal(y,'iqr','p',0.005)  SY_LocalGlobal_iqr_p005
-# SY_LocalGlobal(y,'iqr','p',0.01)  SY_LocalGlobal_iqr_p01
-# SY_LocalGlobal(y,'iqr','p',0.1)  SY_LocalGlobal_iqr_p1
-# SY_LocalGlobal(y,'iqr','p',0.5)  SY_LocalGlobal_iqr_p5
-# SY_LocalGlobal(y,'iqr','unicg',10)  SY_LocalGlobal_iqr_unicg10
-# SY_LocalGlobal(y,'iqr','unicg',20)  SY_LocalGlobal_iqr_unicg20
-# SY_LocalGlobal(y,'iqr','unicg',50)  SY_LocalGlobal_iqr_unicg50
-# SY_LocalGlobal(y,'iqr','unicg',100)  SY_LocalGlobal_iqr_unicg100
-# SY_LocalGlobal(y,'iqr','unicg',500)  SY_LocalGlobal_iqr_unicg500
-# SY_LocalGlobal(y,'iqr','randcg',10)  SY_LocalGlobal_iqr_randcg10
-# SY_LocalGlobal(y,'iqr','randcg',20)  SY_LocalGlobal_iqr_randcg20
-# SY_LocalGlobal(y,'iqr','randcg',50)  SY_LocalGlobal_iqr_randcg50
-# SY_LocalGlobal(y,'iqr','randcg',100)  SY_LocalGlobal_iqr_randcg100
-# SY_LocalGlobal(y,'iqr','randcg',500)  SY_LocalGlobal_iqr_randcg500
-# SY_LocalGlobal(y,'skewness','l',10)  SY_LocalGlobal_skewness_l10
-# SY_LocalGlobal(y,'skewness','l',20)  SY_LocalGlobal_skewness_l20
-# SY_LocalGlobal(y,'skewness','l',50)  SY_LocalGlobal_skewness_l50
-# SY_LocalGlobal(y,'skewness','l',100)  SY_LocalGlobal_skewness_l100
-# SY_LocalGlobal(y,'skewness','l',500)  SY_LocalGlobal_skewness_l500
-# SY_LocalGlobal(y,'skewness','p',0.001)  SY_LocalGlobal_skewness_p001
-# SY_LocalGlobal(y,'skewness','p',0.005)  SY_LocalGlobal_skewness_p005
-# SY_LocalGlobal(y,'skewness','p',0.01)  SY_LocalGlobal_skewness_p01
-# SY_LocalGlobal(y,'skewness','p',0.1)  SY_LocalGlobal_skewness_p1
-# SY_LocalGlobal(y,'skewness','p',0.5)  SY_LocalGlobal_skewness_p5
-# SY_LocalGlobal(y,'skewness','unicg',10)  SY_LocalGlobal_skewness_unicg10
-# SY_LocalGlobal(y,'skewness','unicg',20)  SY_LocalGlobal_skewness_unicg20
-# SY_LocalGlobal(y,'skewness','unicg',50)  SY_LocalGlobal_skewness_unicg50
-# SY_LocalGlobal(y,'skewness','unicg',100)  SY_LocalGlobal_skewness_unicg100
-# SY_LocalGlobal(y,'skewness','unicg',500)  SY_LocalGlobal_skewness_unicg500
-# SY_LocalGlobal(y,'skewness','randcg',10)  SY_LocalGlobal_skewness_randcg10
-# SY_LocalGlobal(y,'skewness','randcg',20)  SY_LocalGlobal_skewness_randcg20
-# SY_LocalGlobal(y,'skewness','randcg',50)  SY_LocalGlobal_skewness_randcg50
-# SY_LocalGlobal(y,'skewness','randcg',100)  SY_LocalGlobal_skewness_randcg100
-# SY_LocalGlobal(y,'skewness','randcg',500)  SY_LocalGlobal_skewness_randcg500
-# SY_LocalGlobal(y,'kurtosis','l',10)  SY_LocalGlobal_kurtosis_l10
-# SY_LocalGlobal(y,'kurtosis','l',20)  SY_LocalGlobal_kurtosis_l20
-# SY_LocalGlobal(y,'kurtosis','l',50)  SY_LocalGlobal_kurtosis_l50
-# SY_LocalGlobal(y,'kurtosis','l',100)  SY_LocalGlobal_kurtosis_l100
-# SY_LocalGlobal(y,'kurtosis','l',500)  SY_LocalGlobal_kurtosis_l500
-# SY_LocalGlobal(y,'kurtosis','p',0.001)  SY_LocalGlobal_kurtosis_p001
-# SY_LocalGlobal(y,'kurtosis','p',0.005)  SY_LocalGlobal_kurtosis_p005
-# SY_LocalGlobal(y,'kurtosis','p',0.01)  SY_LocalGlobal_kurtosis_p01
-# SY_LocalGlobal(y,'kurtosis','p',0.1)  SY_LocalGlobal_kurtosis_p1
-# SY_LocalGlobal(y,'kurtosis','p',0.5)  SY_LocalGlobal_kurtosis_p5
-# SY_LocalGlobal(y,'kurtosis','unicg',10)  SY_LocalGlobal_kurtosis_unicg10
-# SY_LocalGlobal(y,'kurtosis','unicg',20)  SY_LocalGlobal_kurtosis_unicg20
-# SY_LocalGlobal(y,'kurtosis','unicg',50)  SY_LocalGlobal_kurtosis_unicg50
-# SY_LocalGlobal(y,'kurtosis','unicg',100)  SY_LocalGlobal_kurtosis_unicg100
-# SY_LocalGlobal(y,'kurtosis','unicg',500)  SY_LocalGlobal_kurtosis_unicg500
-# SY_LocalGlobal(y,'kurtosis','randcg',10)  SY_LocalGlobal_kurtosis_randcg10
-# SY_LocalGlobal(y,'kurtosis','randcg',20)  SY_LocalGlobal_kurtosis_randcg20
-# SY_LocalGlobal(y,'kurtosis','randcg',50)  SY_LocalGlobal_kurtosis_randcg50
-# SY_LocalGlobal(y,'kurtosis','randcg',100)  SY_LocalGlobal_kurtosis_randcg100
-# SY_LocalGlobal(y,'kurtosis','randcg',500)  SY_LocalGlobal_kurtosis_randcg500
-# SY_LocalGlobal(y,'AC1','l',10)  SY_LocalGlobal_AC1_l10
-# SY_LocalGlobal(y,'AC1','l',20)  SY_LocalGlobal_AC1_l20
-# SY_LocalGlobal(y,'AC1','l',50)  SY_LocalGlobal_AC1_l50
-# SY_LocalGlobal(y,'AC1','l',100)  SY_LocalGlobal_AC1_l100
-# SY_LocalGlobal(y,'AC1','l',500)  SY_LocalGlobal_AC1_l500
-# SY_LocalGlobal(y,'AC1','p',0.001)  SY_LocalGlobal_AC1_p001
-# SY_LocalGlobal(y,'AC1','p',0.005)  SY_LocalGlobal_AC1_p005
-# SY_LocalGlobal(y,'AC1','p',0.01)  SY_LocalGlobal_AC1_p01
-# SY_LocalGlobal(y,'AC1','p',0.1)  SY_LocalGlobal_AC1_p1
-# SY_LocalGlobal(y,'AC1','p',0.5)  SY_LocalGlobal_AC1_p5
-# SY_LocalGlobal(y,'AC1','unicg',10)  SY_LocalGlobal_AC1_unicg10
-# SY_LocalGlobal(y,'AC1','unicg',20)  SY_LocalGlobal_AC1_unicg20
-# SY_LocalGlobal(y,'AC1','unicg',50)  SY_LocalGlobal_AC1_unicg50
-# SY_LocalGlobal(y,'AC1','unicg',100)  SY_LocalGlobal_AC1_unicg100
-# SY_LocalGlobal(y,'AC1','unicg',500)  SY_LocalGlobal_AC1_unicg500
-# SY_LocalGlobal(y,'AC1','randcg',10)  SY_LocalGlobal_AC1_randcg10
-# SY_LocalGlobal(y,'AC1','randcg',20)  SY_LocalGlobal_AC1_randcg20
-# SY_LocalGlobal(y,'AC1','randcg',50)  SY_LocalGlobal_AC1_randcg50
-# SY_LocalGlobal(y,'AC1','randcg',100)  SY_LocalGlobal_AC1_randcg100
-# SY_LocalGlobal(y,'AC1','randcg',500)  SY_LocalGlobal_AC1_randcg500
 EN_wentropy(y,'shannon')	EN_wentropy_shannon
 EN_Shannonpdf(y)	EN_Shannonpdf
 EN_wentropy(y,'logenergy')		EN_wentropy_logenent
@@ -882,62 +632,12 @@ EN_PermEn(y,2)		EN_PermEn_2
 EN_PermEn(y,3)		EN_PermEn_3
 EN_PermEn(y,4)		EN_PermEn_4
 EN_PermEn(y,5)		EN_PermEn_5
-EN_TSentropy(y,0.2)	EN_TSentropy_02
-EN_TSentropy(y,0.4)	EN_TSentropy_04
-EN_TSentropy(y,0.6)	EN_TSentropy_06
-EN_TSentropy(y,0.8)	EN_TSentropy_08
-EN_TSentropy(y,1)	EN_TSentropy_1
-EN_TSentropy(y,1.5)	EN_TSentropy_15
-EN_TSentropy(y,2)	EN_TSentropy_2
-EN_TSentropy(y,2.5)	EN_TSentropy_25
-EN_TSentropy(y,3)	EN_TSentropy_3
-EN_TSentropy(y,3.5)	EN_TSentropy_35
-EN_TSentropy(y,4)	EN_TSentropy_4
-EN_TSentropy(y,4.5)	EN_TSentropy_45
-EN_TSentropy(y,5)	EN_TSentropy_5
-EN_TSentropy(y,5.5)	EN_TSentropy_55
 DN_Fit_mle(x,'gaussian')	DN_Fit_mle_gaussian
 DN_Fit_mle(y,'geometric')	DN_Fit_mle_geometric
 DN_nlogL_norm(y)	DN_nlogL_norm
 DN_FitKernelSmooth(x,'numcross',[0.05,0.1,0.2,0.3,0.4,0.5],'area',[0.05,0.1,0.2,0.3,0.4,0.5],'arclength',[0.1,0.5,1,2])	DN_FitKernelSmoothraw
 DN_FitKernelSmooth(y)	DN_FitKernelSmoothzscore
-# DN_FitKernelSmooth(x,'numpeaks')	DN_FitKernelSmoothnumpeaks
-# DN_FitKernelSmooth(x,'entropy')	ksentraw
-# DN_FitKernelSmooth(y,'entropy')	ksent
-# DN_FitKernelSmooth(x,'max')	kspeakmaxraw
-# DN_FitKernelSmooth(y,'max')	kspeakmax
-# DN_FitKernelSmooth(x,'asym')	kssimpasym
-# DN_FitKernelSmooth(x,'plsym')	kssimpplsym
-# DN_FitKernelSmooth(x,'numcross',0.05)  kssimpcross005
-# DN_FitKernelSmooth(x,'numcross',0.1)  kssimpcross01
-# DN_FitKernelSmooth(x,'numcross',0.2)  kssimpcross02
-# DN_FitKernelSmooth(x,'numcross',0.3)  kssimpcross03
-# DN_FitKernelSmooth(x,'numcross',0.4)  kssimpcross04
-# DN_FitKernelSmooth(x,'numcross',0.5)  kssimpcross05
-# DN_FitKernelSmooth(x,'area',0.05)  kssimparea005
-# DN_FitKernelSmooth(x,'area',0.1)  kssimparea01
-# DN_FitKernelSmooth(x,'area',0.2)  kssimparea02
-# DN_FitKernelSmooth(x,'area',0.3)  kssimparea03
-# DN_FitKernelSmooth(x,'area',0.4)  kssimparea04
-# DN_FitKernelSmooth(x,'area',0.5)  kssimparea05
-# DN_FitKernelSmooth(x,'arclength',0.1)  kssimparcl01
-# DN_FitKernelSmooth(x,'arclength',0.5)  kssimparcl05
-# DN_FitKernelSmooth(x,'arclength',1)  kssimparcl1
-# DN_FitKernelSmooth(x,'arclength',2)  kssimparcl2
 DN_Compare_zscore(x) DN_Compare_zscorex
-# DN_Compare_zscore(x,'numpeaks')  kscnumpeaks
-# DN_Compare_zscore(x,'max')  kscmax
-# DN_Compare_zscore(x,'entropy')  kscent
-# RN_Gaussian(y)	RN_Gaussian_1
-# RN_Gaussian(y)	RN_Gaussian_2
-# RN_Gaussian(y)	RN_Gaussian_3
-# RN_Gaussian(y)	RN_Gaussian_4
-# RN_Gaussian(y)	RN_Gaussian_5
-# RN_Gaussian(y)	RN_Gaussian_6
-# RN_Gaussian(y)	RN_Gaussian_7
-# RN_Gaussian(y)	RN_Gaussian_8
-# RN_Gaussian(y)	RN_Gaussian_9
-# RN_Gaussian(y)	RN_Gaussian_10
 DK_timerev(y,1)	DK_timerev_1
 DK_timerev(y,2)	DK_timerev_2
 DK_timerev(y,3)	DK_timerev_3
@@ -947,7 +647,6 @@ HT_HypothesisTest(y,'runstest')	HT_HypothesisTest_runstest
 HT_HypothesisTest(x,'runstest')	HT_HypothesisTest_runstestraw
 HT_HypothesisTest(y,'lbq')			HT_HypothesisTest_lbqtest
 HT_HypothesisTest(x,'lbq')			HT_HypothesisTest_lbqtestraw
-HT_HypothesisTest(y,'vartest')		HT_HypothesisTest_vartest
 HT_HypothesisTest(y,'ztest')		HT_HypothesisTest_ztest
 HT_HypothesisTest(y,'signrank')	HT_HypothesisTest_signrank
 HT_HypothesisTest(x,'jbtest')		HT_HypothesisTest_jbtest
@@ -1026,7 +725,7 @@ NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'ac',3})	NL_TSTL_TakensEstimator_n1_005_
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'mi',8})	NL_TSTL_TakensEstimator_n1_005_005_mi_8
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'mi',3})	NL_TSTL_TakensEstimator_n1_005_005_mi_3
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'mi','cao'})	NL_TSTL_TakensEstimator_n1_005_005_mi_cao
-NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'mi','fnnmar'})	NL_TSTL_TakensEstimator_n1_005_005_mi_fnnmar
+NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'mi','fnnmar'},'default')	NL_TSTL_TakensEstimator_n1_005_005_mi_fnnmar
 NL_TSTL_TakensEstimator(y,-1,0.1,0.05,{1,10})	NL_TSTL_TakensEstimator_n1_01_005_1_10
 DN_OutlierTest(y,2)  	DN_OutlierTest2
 DN_OutlierTest(y,5)  	DN_OutlierTest5
@@ -1094,19 +793,28 @@ CO_trev(y,2)	CO_trev_2
 CO_trev(y,3)	CO_trev_3
 CO_trev(y,'ac')	CO_trev_ac
 CO_trev(y,'mi')	CO_trev_mi
-CO_TSTL_amutual(y,20,[])	CO_TSTL_amutual_20
-CO_TSTL_amutual(y,20,10)	CO_TSTL_amutual_20_10
-CO_TSTL_amutual2(y,50)	CO_TSTL_amutual2_50
-CO_TSTL_amutual2(diff(y),50)	CO_TSTL_amutual2_diff__50
+# CO_TSTL_amutual(y,20,[])    CO_TSTL_amutual_20
+# CO_TSTL_amutual(y,20,10)    CO_TSTL_amutual_20_10
+# CO_TSTL_amutual2(y,50)    CO_TSTL_amutual2_50
+# CO_TSTL_amutual2(diff(y),50)    CO_TSTL_amutual2_diff__50
+IN_AutoMutualInfoStats(y,40,'gaussian') IN_AutoMutualInfoStats_40_gaussian
+IN_AutoMutualInfoStats(y,40,'kraskov1') IN_AutoMutualInfoStats_40_kraskov1
+IN_AutoMutualInfoStats(diff(y),20,'gaussian') IN_AutoMutualInfoStats_diff_20_gaussian
+IN_AutoMutualInfoStats(diff(y),20,'kraskov1') IN_AutoMutualInfoStats_diff_20_kraskov1
 CO_CompareMinAMI(y,'std1',[2:80])	CO_CompareMinAMI_std1_2_80
 CO_CompareMinAMI(y,'quantiles',[2:80])	CO_CompareMinAMI_quantiles_2_80
 CO_CompareMinAMI(y,'even',[2:80])	CO_CompareMinAMI_even_2_80
 CO_CompareMinAMI(y,'std2',[2:80])	CO_CompareMinAMI_std2_2_80
-CO_AddNoise(y,1,'quantiles',10)	CO_AddNoise_1_quantiles_10
-CO_AddNoise(y,2,'quantiles',10)	CO_AddNoise_2_quantiles_10
-CO_AddNoise(y,1,'quantiles',20)	CO_AddNoise_1_quantiles_20
-CO_AddNoise(y,2,'quantiles',20)	CO_AddNoise_2_quantiles_20
-CO_AddNoise(y,1,'std1',10)	CO_AddNoise_1_std1_10
+CO_AddNoise(y,1,'quantiles',10,'default')	CO_AddNoise_1_quantiles_10
+CO_AddNoise(y,'ac','quantiles',10,'default')	CO_AddNoise_ac_quantiles_10
+CO_AddNoise(y,1,'even',10,'default')	CO_AddNoise_1_even_10
+CO_AddNoise(y,'ac','even',10,'default')	CO_AddNoise_ac_even_10
+CO_AddNoise(y,1,'std1',10,'default')    CO_AddNoise_1_std1_10
+CO_AddNoise(y,'ac','std1',10,'default')    CO_AddNoise_ac_std1_10
+CO_AddNoise(y,1,'gaussian',[],'default')    CO_AddNoise_1_gaussian
+CO_AddNoise(y,'ac','gaussian',[],'default')    CO_AddNoise_ac_gaussian
+CO_AddNoise(y,1,'kraskov1',[],'default')    CO_AddNoise_1_kraskov1
+CO_AddNoise(y,'ac','kraskov1',[],'default')    CO_AddNoise_ac_kraskov1
 SB_TransitionMatrix(y,'quantile',2,1)	SB_TransitionMatrix_21
 SB_TransitionMatrix(y,'quantile',3,1)	SB_TransitionMatrix_31
 SB_TransitionMatrix(y,'quantile',4,1)	SB_TransitionMatrix_41
@@ -1154,11 +862,11 @@ CO_Embed2_Shapes(y,'tau','circle',0.1)	CO_Embed2_Shapes_tau_circle_01
 CO_Embed2_Shapes(y,'tau','circle',1)	CO_Embed2_Shapes_tau_circle_1
 NW_VisibilityGraph(y,'horiz')	NW_VisibilityGraph_horiz
 SY_DynWin(y,10)	SY_DynWin10
-SY_SpreadRandomLocal(y,'ac2')	SY_SpreadRandomLocal_ac2
-SY_SpreadRandomLocal(y,'ac5')	SY_SpreadRandomLocal_ac5
-SY_SpreadRandomLocal(y,50)	SY_SpreadRandomLocal_50
-SY_SpreadRandomLocal(y,100)	SY_SpreadRandomLocal_100
-SY_SpreadRandomLocal(y,200)	SY_SpreadRandomLocal_200
+SY_SpreadRandomLocal(y,'ac2',100,'default')	SY_SpreadRandomLocal_ac2_100
+SY_SpreadRandomLocal(y,'ac5',100,'default')	SY_SpreadRandomLocal_ac5_100
+SY_SpreadRandomLocal(y,50,100,'default')	SY_SpreadRandomLocal_50_100
+SY_SpreadRandomLocal(y,100,100,'default')	SY_SpreadRandomLocal_100_100
+SY_SpreadRandomLocal(y,200,100,'default')	SY_SpreadRandomLocal_200_100
 SY_DriftingMean(y,'fix',20)	SY_DriftingMean20
 SY_DriftingMean(y,'fix',50)	SY_DriftingMean50
 SY_DriftingMean(y,'fix',100)	SY_DriftingMean100
@@ -1173,42 +881,42 @@ SY_LocalDistributions(y,3,'each')	SY_LocalDistributions_3_each
 SY_LocalDistributions(y,4,'each')	SY_LocalDistributions_4_each
 SY_LocalDistributions(y,5,'each')	SY_LocalDistributions_5_each
 SY_RangeEvolve(y)	SY_RangeEvolve
-FC_Surprise(y,'dist',5,2,'quantile')	FC_Surprise_dist_5_2_q
-FC_Surprise(y,'dist',20,2,'quantile')	FC_Surprise_dist_20_2_q
-FC_Surprise(y,'dist',50,3,'quantile')	FC_Surprise_dist_50_3_q
-FC_Surprise(y,'dist',100,4,'quantile')	FC_Surprise_dist_100_4_q
-FC_Surprise(y,'dist',100,5,'quantile')	FC_Surprise_dist_100_5_q
-FC_Surprise(y,'T1',20,2,'quantile')	FC_Surprise_T1_20_2_q
-FC_Surprise(y,'T1',50,3,'quantile')	FC_Surprise_T1_50_3_q
-FC_Surprise(y,'T1',100,4,'quantile')	FC_Surprise_T1_100_4_q
-FC_Surprise(y,'T1',100,5,'quantile')	FC_Surprise_T1_100_5_q
-FC_Surprise(y,'T2',20,2,'quantile')	FC_Surprise_T2_20_2_q
-FC_Surprise(y,'T2',50,3,'quantile')	FC_Surprise_T2_50_3_q
-FC_Surprise(y,'T2',100,4,'quantile')	FC_Surprise_T2_100_4_q
-FC_Surprise(y,'T2',100,5,'quantile')	FC_Surprise_T2_100_5_q
-FC_Surprise(y,'dist',5,2,'updown')	FC_Surprise_dist_5_2_udq
-FC_Surprise(y,'dist',20,2,'updown')	FC_Surprise_dist_20_2_udq
-FC_Surprise(y,'dist',50,3,'updown')	FC_Surprise_dist_50_3_udq
-FC_Surprise(y,'dist',100,4,'updown')	FC_Surprise_dist_100_4_udq
-FC_Surprise(y,'dist',100,5,'updown')	FC_Surprise_dist_100_5_udq
-FC_Surprise(y,'T1',20,2,'updown')	FC_Surprise_T1_20_2_udq
-FC_Surprise(y,'T1',50,3,'updown')	FC_Surprise_T1_50_3_udq
-FC_Surprise(y,'T1',100,4,'updown')	FC_Surprise_T1_100_4_udq
-FC_Surprise(y,'T1',100,5,'updown')	FC_Surprise_T1_100_5_udq
-FC_Surprise(y,'T2',20,2,'updown')	FC_Surprise_T2_20_2_udq
-FC_Surprise(y,'T2',50,3,'updown')	FC_Surprise_T2_50_3_udq
-FC_Surprise(y,'T2',100,4,'updown')	FC_Surprise_T2_100_4_udq
-FC_Surprise(y,'T2',100,5,'updown')	FC_Surprise_T2_100_5_udq
-FC_Surprise(y,'dist',5,1,'embed2quadrants')	FC_Surprise_dist_5_1_m2quad
-FC_Surprise(y,'dist',5,'tau','embed2quadrants')	FC_Surprise_dist_5_tau_m2quad
-FC_Surprise(y,'dist',10,'tau','embed2quadrants')	FC_Surprise_dist_10_tau_m2quad
-FC_Surprise(y,'dist',20,'tau','embed2quadrants')	FC_Surprise_dist_20_tau_m2quad
-FC_Surprise(y,'T1',10,1,'embed2quadrants')	FC_Surprise_T1_10_1_m2quad
-FC_Surprise(y,'T1',10,'tau','embed2quadrants')	FC_Surprise_T1_10_tau_m2quad
-FC_Surprise(y,'T1',20,'tau','embed2quadrants')	FC_Surprise_T1_20_tau_m2quad
-FC_Surprise(y,'T1',50,'tau','embed2quadrants')	FC_Surprise_T1_50_tau_m2quad
-FC_Surprise(y,'T2',50,'tau','embed2quadrants')	FC_Surprise_T2_50_tau_m2quad
-FC_Surprise(y,'T2',100,'tau','embed2quadrants')	FC_Surprise_T2_100_tau_m2quad
+FC_Surprise(y,'dist',5,2,'quantile',500,'default')	FC_Surprise_dist_5_2_q_500
+FC_Surprise(y,'dist',20,2,'quantile',500,'default')	FC_Surprise_dist_20_2_q_500
+FC_Surprise(y,'dist',50,3,'quantile',500,'default')	FC_Surprise_dist_50_3_q_500
+FC_Surprise(y,'dist',100,4,'quantile',500,'default')	FC_Surprise_dist_100_4_q_500
+FC_Surprise(y,'dist',100,5,'quantile',500,'default')	FC_Surprise_dist_100_5_q_500
+FC_Surprise(y,'T1',20,2,'quantile',500,'default')	FC_Surprise_T1_20_2_q_500
+FC_Surprise(y,'T1',50,3,'quantile',500,'default')	FC_Surprise_T1_50_3_q_500
+FC_Surprise(y,'T1',100,4,'quantile',500,'default')	FC_Surprise_T1_100_4_q_500
+FC_Surprise(y,'T1',100,5,'quantile',500,'default')	FC_Surprise_T1_100_5_q_500
+FC_Surprise(y,'T2',20,2,'quantile',500,'default')	FC_Surprise_T2_20_2_q_500
+FC_Surprise(y,'T2',50,3,'quantile',500,'default')	FC_Surprise_T2_50_3_q_500
+FC_Surprise(y,'T2',100,4,'quantile',500,'default')	FC_Surprise_T2_100_4_q_500
+FC_Surprise(y,'T2',100,5,'quantile',500,'default')	FC_Surprise_T2_100_5_q_500
+FC_Surprise(y,'dist',5,2,'updown',500,'default')	FC_Surprise_dist_5_2_udq_500
+FC_Surprise(y,'dist',20,2,'updown',500,'default')	FC_Surprise_dist_20_2_udq_500
+FC_Surprise(y,'dist',50,3,'updown',500,'default')	FC_Surprise_dist_50_3_udq_500
+FC_Surprise(y,'dist',100,4,'updown',500,'default')	FC_Surprise_dist_100_4_udq_500
+FC_Surprise(y,'dist',100,5,'updown',500,'default')	FC_Surprise_dist_100_5_udq_500
+FC_Surprise(y,'T1',20,2,'updown',500,'default')	FC_Surprise_T1_20_2_udq_500
+FC_Surprise(y,'T1',50,3,'updown',500,'default')	FC_Surprise_T1_50_3_udq_500
+FC_Surprise(y,'T1',100,4,'updown',500,'default')	FC_Surprise_T1_100_4_udq_500
+FC_Surprise(y,'T1',100,5,'updown',500,'default')	FC_Surprise_T1_100_5_udq_500
+FC_Surprise(y,'T2',20,2,'updown',500,'default')	FC_Surprise_T2_20_2_udq_500
+FC_Surprise(y,'T2',50,3,'updown',500,'default')	FC_Surprise_T2_50_3_udq_500
+FC_Surprise(y,'T2',100,4,'updown',500,'default')	FC_Surprise_T2_100_4_udq_500
+FC_Surprise(y,'T2',100,5,'updown',500,'default')	FC_Surprise_T2_100_5_udq_500
+FC_Surprise(y,'dist',5,1,'embed2quadrants',500,'default')	FC_Surprise_dist_5_1_m2quad_500
+FC_Surprise(y,'dist',5,'tau','embed2quadrants',500,'default')	FC_Surprise_dist_5_tau_m2quad_500
+FC_Surprise(y,'dist',10,'tau','embed2quadrants',500,'default')	FC_Surprise_dist_10_tau_m2quad_500
+FC_Surprise(y,'dist',20,'tau','embed2quadrants',500,'default')	FC_Surprise_dist_20_tau_m2quad_500
+FC_Surprise(y,'T1',10,1,'embed2quadrants',500,'default')	FC_Surprise_T1_10_1_m2quad_500
+FC_Surprise(y,'T1',10,'tau','embed2quadrants',500,'default')	FC_Surprise_T1_10_tau_m2quad_500
+FC_Surprise(y,'T1',20,'tau','embed2quadrants',500,'default')	FC_Surprise_T1_20_tau_m2quad_500
+FC_Surprise(y,'T1',50,'tau','embed2quadrants',500,'default')	FC_Surprise_T1_50_tau_m2quad_500
+FC_Surprise(y,'T2',50,'tau','embed2quadrants',500,'default')	FC_Surprise_T2_50_tau_m2quad_500
+FC_Surprise(y,'T2',100,'tau','embed2quadrants',500,'default')	FC_Surprise_T2_100_tau_m2quad_500
 PH_Walker(y,'prop',0.1)	PH_Walker_prop_01
 PH_Walker(y,'prop',0.5)	PH_Walker_prop_05
 PH_Walker(y,'prop',0.9)	PH_Walker_prop_09
@@ -1225,9 +933,9 @@ EN_SampEn(y,4,0.2)	EN_SampEn_4_02
 EN_SampEn(y,4,0.3)	EN_SampEn_4_03
 EN_SampEn(y,4,0.1,'diff1')	EN_SampEn_4_01_diff1
 EN_SampEn(y,4,0.2,'diff1')	EN_SampEn_4_02_diff1
-EN_Randomize(y,'statdist')	EN_Randomize_statdist
-EN_Randomize(y,'dyndist')	EN_Randomize_dyndist
-EN_Randomize(y,'permute')	EN_Randomize_permute
+EN_Randomize(y,'statdist','default')	EN_Randomize_statdist
+EN_Randomize(y,'dyndist','default')	EN_Randomize_dyndist
+EN_Randomize(y,'permute','default')	EN_Randomize_permute
 FC_LocalSimple(y,'mean',1)	FC_LocalSimple_mean1
 FC_LocalSimple(y,'mean',2)	FC_LocalSimple_mean2
 FC_LocalSimple(y,'mean',3)	FC_LocalSimple_mean3
@@ -1305,8 +1013,8 @@ SC_FluctAnal(y,2,'dfa',2,2,[],0)	SC_FluctAnal_2_dfa_2_2
 SC_FluctAnal(y,2,'dfa',2,3,[],0)	SC_FluctAnal_2_dfa_2_3
 SC_FluctAnal(y,2,'dfa',2,1,2,0)	SC_FluctAnal_2_dfa_2_1_2
 SC_FluctAnal(y,2,'dfa',2,1,3,0)	SC_FluctAnal_2_dfa_2_1_3
-SC_FluctAnal(BF_zscore(abs(y)),2,'dfa',2,2,[],0)	SC_FluctAnal_mag_2_dfa_2_2
-SC_FluctAnal(BF_zscore(sign(y)),2,'dfa',2,2,[],0)	SC_FluctAnal_sign_2_dfa_2_2
+SC_FluctAnal(zscore(abs(y)),2,'dfa',2,2,[],0)	SC_FluctAnal_mag_2_dfa_2_2
+SC_FluctAnal(zscore(sign(y)),2,'dfa',2,2,[],0)	SC_FluctAnal_sign_2_dfa_2_2
 SC_FluctAnal(y,2,'nothing',25,[],[],1)	SC_FluctAnal_2_nothing_25_logi
 SC_FluctAnal(y,2,'endptdiff',25,[],[],1)	SC_FluctAnal_2_endptdiff_25_logi
 SC_FluctAnal(y,2,'range',25,[],[],1)	SC_FluctAnal_2_range_25_logi
@@ -1320,16 +1028,17 @@ SC_FluctAnal(y,2,'dfa',25,2,[],1)	SC_FluctAnal_2_dfa_25_2_logi
 SC_FluctAnal(y,2,'dfa',25,3,[],1)	SC_FluctAnal_2_dfa_25_3_logi
 SC_FluctAnal(y,2,'dfa',25,1,2,1)	SC_FluctAnal_2_dfa_25_1_2_logi
 SC_FluctAnal(y,2,'dfa',25,1,3,1)	SC_FluctAnal_2_dfa_25_1_3_logi
-SC_FluctAnal(BF_zscore(abs(y)),2,'dfa',25,2,[],1)	SC_FluctAnal_mag_2_dfa_25_2_logi
-SC_FluctAnal(BF_zscore(sign(y)),2,'dfa',25,2,[],1)	SC_FluctAnal_sign_2_dfa_25_2_logi
-SP_Summaries(y,'periodogram','hamming',[],0,0)	SP_basic_pgram_hamm
-SP_Summaries(y,'periodogram','hamming',[],1,0)	SP_basic_pgram_hamm_cep
-# RP_crpsimp(y,'fnn','mi',0.1,'euclidean')	RP_crpsimp_fnn_mi_01_euclid
-# RP_crpsimp(y,'fnn','mi',1,'euclidean')	RP_crpsimp_fnn_mi_1_euclid
-# RP_crpsimp(y,'fnn','mi',2,'euclidean')	RP_crpsimp_fnn_mi_2_euclid
-NL_crptool_fnn(y,10,2,'mi')	NL_crptool_fnn_10_2_mi
-NL_crptool_fnn(y,10,2,'ac')	NL_crptool_fnn_10_2_ac
-NL_crptool_fnn(y,10,2,1)	NL_crptool_fnn_10_2_1
+SC_FluctAnal(zscore(abs(y)),2,'dfa',25,2,[],1)	SC_FluctAnal_mag_2_dfa_25_2_logi
+SC_FluctAnal(zscore(sign(y)),2,'dfa',25,2,[],1)	SC_FluctAnal_sign_2_dfa_25_2_logi
+SP_Summaries(y,'periodogram','hamming',[],0,1)	SP_basic_pgram_hamm_power
+SP_Summaries(y,'fft',[],[],0,1)	SP_basic_fft_power
+SP_Summaries(y,'fft',[],[],1,1)	SP_basic_fft_logdev_power
+NL_crptool_fnn(y,10,2,'mi',[],'default')	NL_crptool_fnn_10_2_mi
+NL_crptool_fnn(y,10,2,'ac',[],'default')	NL_crptool_fnn_10_2_ac
+NL_crptool_fnn(y,10,2,1,[],'default')	NL_crptool_fnn_10_2_1
+NL_TISEAN_fnn(y,'ac',10,0.05,0)     NL_TISEAN_fnn_ac_10_005
+NL_TISEAN_fnn(y,'mi',10,0.05,0)     NL_TISEAN_fnn_mi_10_005
+NL_TISEAN_fnn(y,1,10,0.05,0)     NL_TISEAN_fnn_1_10_005
 SY_TISEAN_nstat_z(y,4,{1,3})	SY_TISEAN_nstat_z_4_1_3
 SY_TISEAN_nstat_z(y,5,{1,3})	SY_TISEAN_nstat_z_5_1_3
 SY_TISEAN_nstat_z(y,4,{'ac',3})	SY_TISEAN_nstat_z_4_ac_3
@@ -1351,7 +1060,7 @@ NL_TSTL_GPCorrSum(y,-1,0.5,40,20,{'ac','cao'},2)	NL_TSTL_GPCorrSum2_n1_05_40_20_
 NL_TSTL_GPCorrSum(y,-1,0.5,100,20,{'ac','cao'},2)	NL_TSTL_GPCorrSum2_n1_05_100_20_ac_cao
 NL_TSTL_GPCorrSum(y,-1,0.1,40,20,{'ac','cao'},2)	NL_TSTL_GPCorrSum2_n1_01_40_20_ac_cao
 NL_TSTL_GPCorrSum(y,-1,0.1,40,40,{'ac','cao'},2)	NL_TSTL_GPCorrSum2_n1_01_40_40_ac_cao
-TSTL_delaytime(y,0.1,1)	TSTL_delaytime_01_1
+TSTL_delaytime(y,0.1,1,'default')	TSTL_delaytime_01_1
 NL_TSTL_dimensions(y,50,{'ac','cao'})	NL_TSTL_dimensions_50_ac_cao
 NL_TSTL_FractalDimensions(y,5,20,0.2,1,10,0,32,{'ac','cao'})	NL_TSTL_FractalDimensions_5_20_02_1_10_0_32_ac_cao
 NL_TSTL_FractalDimensions(y,5,100,0.2,1,10,0,32,{'ac',3})	NL_TSTL_FractalDimensions_5_100_02_1_10_0_32_ac_3
@@ -1366,29 +1075,21 @@ NL_TSTL_PoincareSection(y,'max',{'ac',3})	NL_TSTL_PoincareSection_max_ac
 NL_TSTL_PoincareSection(y,'max',{1,3})	NL_TSTL_PoincareSection_max_1
 NL_TSTL_LargestLyap(y,0.5,0.1,0.01,3,{'mi','cao'})	NL_TSTL_LargestLyap_05_01_001_3_mi_cao
 NL_TSTL_LargestLyap(y,-1,0.1,0.01,3,{1,4})	NL_TSTL_LargestLyap_n1_01_001_3_1_4
-TSTL_predict(y,1,1,2,0,{1,5})	TSTL_predict_y_1_1_2_0_1_5
-TSTL_predict(y,1,1,2,0,{1,10})	TSTL_predict_y_1_1_2_0_1_10
-TSTL_predict(y,1,1,2,0,{1,'cao'})	TSTL_predict_y_1_1_2_0_1_cao
-TSTL_predict(y,1,1,2,0,{'mi','cao'})	TSTL_predict_y_1_1_2_0_mi_cao
-TSTL_predict(y,1,1,2,0,{'ac','cao'})	TSTL_predict_y_1_1_2_0_ac_cao
-TSTL_predict(y,1,1,2,1,{1,10})	TSTL_predict_y_1_1_2_1_1_10
-TSTL_predict(y,1,1,2,2,{1,10})	TSTL_predict_y_1_1_2_2_1_10
-TSTL_predict(y,1,1,2,3,{1,10})	TSTL_predict_y_1_1_2_3_1_10
 NL_TSTL_ReturnTime(y,10,1,1,-1,{'ac',8})	NL_TSTL_ReturnTime_10_1_1_n1_ac_8
 NL_TSTL_ReturnTime(y,5,1,40,-1,{1,8})	NL_TSTL_ReturnTime_5_1_40_n1_1_8
 NL_TSTL_ReturnTime(y,0.05,1,0.05,-1,{1,3})	NL_TSTL_ReturnTime_005_1_005_n1_1_3
-SD_TSTL_surrogates(y,1,100,1,'tc3')	TSTL_tc3_1_100_1
-SD_TSTL_surrogates(y,'mi',100,1,'tc3')	TSTL_tc3_mi_100_1
-SD_TSTL_surrogates(y,1,100,2,'tc3')	TSTL_tc3_1_100_2
-SD_TSTL_surrogates(y,'mi',100,2,'tc3')	TSTL_tc3_mi_100_2
-SD_TSTL_surrogates(y,1,100,3,'tc3')	TSTL_tc3_1_100_3
-SD_TSTL_surrogates(y,'mi',100,3,'tc3')	TSTL_tc3_mi_100_3
-SD_TSTL_surrogates(y,1,100,1,'trev')	TSTL_trev_1_100_1
-SD_TSTL_surrogates(y,'mi',100,1,'trev')	TSTL_trev_mi_100_1
-SD_TSTL_surrogates(y,1,100,2,'trev')	TSTL_trev_1_100_2
-SD_TSTL_surrogates(y,'mi',100,2,'trev')	TSTL_trev_mi_100_2
-SD_TSTL_surrogates(y,1,100,3,'trev')	TSTL_trev_1_100_3
-SD_TSTL_surrogates(y,'mi',100,3,'trev')	TSTL_trev_mi_100_3
+SD_TSTL_surrogates(y,1,100,1,'tc3','default')	SD_TSTL_surrogates_1_100_1_tc3
+SD_TSTL_surrogates(y,'mi',100,1,'tc3','default')	SD_TSTL_surrogates_mi_100_1_tc3
+SD_TSTL_surrogates(y,1,100,2,'tc3','default')	SD_TSTL_surrogates_1_100_2_tc3
+SD_TSTL_surrogates(y,'mi',100,2,'tc3','default')	SD_TSTL_surrogates_mi_100_2_tc3
+SD_TSTL_surrogates(y,1,100,3,'tc3','default')	SD_TSTL_surrogates_1_100_3_tc3
+SD_TSTL_surrogates(y,'mi',100,3,'tc3','default')	SD_TSTL_surrogates_mi_100_3_tc3
+SD_TSTL_surrogates(y,1,100,1,'trev','default')	SD_TSTL_surrogates_1_100_1_trev
+SD_TSTL_surrogates(y,'mi',100,1,'trev','default')	SD_TSTL_surrogates_mi_100_1_trev
+SD_TSTL_surrogates(y,1,100,2,'trev','default')	SD_TSTL_surrogates_1_100_2_trev
+SD_TSTL_surrogates(y,'mi',100,2,'trev','default')	SD_TSTL_surrogates_mi_100_2_trev
+SD_TSTL_surrogates(y,1,100,3,'trev','default')	SD_TSTL_surrogates_1_100_3_trev
+SD_TSTL_surrogates(y,'mi',100,3,'trev','default')	SD_TSTL_surrogates_mi_100_3_trev
 PP_Compare(x,'poly1')			PP_Compare_poly1
 PP_Compare(x,'poly2')			PP_Compare_poly2
 PP_Compare(x,'sin1')			PP_Compare_sin1
@@ -1408,22 +1109,19 @@ PP_Compare(x,'rav4')			PP_Compare_rav4
 PP_Compare(x,'rav10')			PP_Compare_rav10
 PP_Compare(x,'resample_1_2')	PP_Compare_resample_1_2
 PP_Compare(x,'resample_2_1')	PP_Compare_resample_2_1
-PP_Compare(x,'logr')			PP_Compare_logr
-PP_Compare(x,'boxcox')			PP_Compare_boxcox
-PP_Iterate(x,'spline')			PP_Iterate_spline
 PP_Iterate(x,'diff')			PP_Iterate_diff
-PP_Iterate(x,'medianf')			PP_Iterate_medianf
-PP_Iterate(x,'rav')				PP_Iterate_rav
-PP_Iterate(x,'resampleup')		PP_Iterate_resampleup
-PP_Iterate(x,'resampledown')	PP_Iterate_resampledown
+# PP_Iterate(x,'medianf')            PP_Iterate_medianf
+# PP_Iterate(x,'rav')                PP_Iterate_rav
+# PP_Iterate(x,'resampleup')        PP_Iterate_resampleup
+# PP_Iterate(x,'resampledown')    PP_Iterate_resampledown
 MF_GP_hyperparameters(y,{'covSum',{'covSEiso','covNoise'}},1,200,'resample')	MF_GP_hyperparameters_covSEiso_covNoise_1_200_resample
 MF_GP_hyperparameters(y,{'covSum',{'covSEiso','covPeriodic','covNoise'}},1,200,'resample')	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample
 MF_GP_hyperparameters(y,{'covSum',{'covSEiso','covNoise'}},1,200,'first')	MF_GP_hyperparameters_covSEiso_covNoise_1_200_first
 MF_GP_hyperparameters(y,{'covSum',{'covSEiso','covPeriodic','covNoise'}},1,200,'first')	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_first
-MF_GP_hyperparameters(y,{'covSum',{'covSEiso','covNoise'}},1,50,'random_i')	MF_GP_hyperparameters_covSEiso_covNoise_1_50_random_i
+MF_GP_hyperparameters(y,{'covSum',{'covSEiso','covNoise'}},1,50,'random_i','default')	MF_GP_hyperparameters_covSEiso_covNoise_1_50_random_i
 MF_GP_LocalPrediction(y,{'covSum',{'covSEiso','covNoise'}},5,3,10,'beforeafter')	MF_GP_LocalPrediction_covSEiso_covNoise_5_3_10_beforeafter
 MF_GP_LocalPrediction(y,{'covSum',{'covSEiso','covNoise'}},10,3,20,'frombefore')	MF_GP_LocalPrediction_covSEiso_covNoise_10_3_20_frombefore
-MF_GP_LocalPrediction(y,{'covSum',{'covSEiso','covNoise'}},10,3,20,'randomgap')	MF_GP_LocalPrediction_covSEiso_covNoise_10_3_20_randomgap
+MF_GP_LocalPrediction(y,{'covSum',{'covSEiso','covNoise'}},10,3,20,'randomgap','default')	MF_GP_LocalPrediction_covSEiso_covNoise_10_3_20_randomgap
 MF_GP_FitAcross(y,{'covSum',{'covSEiso','covNoise'}},20)	MF_GP_FitAcross_covSEiso_covNoise_20
 WL_cwt(y,'db3',32)	WL_cwt_db3_32
 WL_cwt(y,'sym2',32)	WL_cwt_sym2_32
@@ -1451,17 +1149,17 @@ EN_MS_shannon(y,3,1:10)	MS_shannon_3_1t10
 EN_MS_shannon(y,4,1:10)	MS_shannon_4_1t10
 NL_embed_PCA(y,'mi',10)	NL_embed_PCA_mi_10
 NL_embed_PCA(y,1,10)	NL_embed_PCA_1_10
-PP_ModelFit(y,'ar',2)	PP_ModelFit_ar_2
+PP_ModelFit(y,'ar',2,'default')	PP_ModelFit_ar_2
 MF_steps_ahead(y,'ar',2,6)	MF_steps_ahead_ar_2_6
 MF_steps_ahead(y,'ar','best',6)	MF_steps_ahead_ar_best_6
 MF_steps_ahead(y,'ss','best',6)	MF_steps_ahead_ss_best_6
 MF_steps_ahead(y,'arma',[3,1],6)	MF_steps_ahead_arma_3_1_6
 MF_FitSubsegments(y,'arsbc',[],'uniform',[25,0.1])	MF_FitSubsegments_arsbc_uniform_25_01
-MF_FitSubsegments(y,'arsbc',[],'rand',[25,0.1])	MF_FitSubsegments_arsbc_rand_25_01
+MF_FitSubsegments(y,'arsbc',[],'rand',[25,0.1],'default')	MF_FitSubsegments_arsbc_rand_25_01
 MF_FitSubsegments(y,'ar',2,'uniform',[25,0.1])	MF_FitSubsegments_ar_2_uniform_25_01
 MF_FitSubsegments(y,'ss',2,'uniform',[25,0.1])	MF_FitSubsegments_ss_2_uniform_25_01
 MF_FitSubsegments(y,'arma',[2,2],'uniform',[25,0.1])	MF_FitSubsegments_arma_2_2_uniform_25_01
-MF_CompareTestSets(y,'ar',4,'rand',[25,0.1],1)	MF_CompareTestSets_y_ar_4_rand_25_01_1
+MF_CompareTestSets(y,'ar',4,'rand',[25,0.1],1,'default')	MF_CompareTestSets_y_ar_4_rand_25_01_1
 MF_CompareTestSets(y,'ar','best','uniform',[25,0.1],1)	MF_CompareTestSets_y_ar_best_uniform_25_01_1
 MF_CompareTestSets(y,'ss','best','uniform',[25,0.1],1)	MF_CompareTestSets_y_ss_best_uniform_25_01_1
 MF_CompareTestSets(y,'ss',2,'uniform',[25,0.1],1)	MF_CompareTestSets_y_ss_2_uniform_25_01_1
@@ -1476,9 +1174,8 @@ MF_armax(y,[1,1],0.5,1)	MF_armax_1_1_05_1
 MF_armax(y,[2,2],0.5,1)	MF_armax_2_2_05_1
 MF_ARMA_orders(y,1:6,1:4)	MF_ARMA_orders_1_6_1_4
 MF_ExpSmoothing(y,0.5,'best')	MF_ExpSmoothing_05_best
-MF_GARCHfit(y,'ar','default')	MF_GARCHfit_ar_default
-MF_GARCHfit(y,'nothing','auto')	MF_GARCHfit_nothing_auto
-MF_GARCHfit(y,'ar','''R'',2,''M'',1,''P'',2,''Q'',1')	MF_GARCHfit_ar_R2_M1_P2_Q1
+MF_GARCHfit(y,'ar',1,1)    MF_GARCHfit_ar_P1_Q1
+MF_GARCHfit(y,'ar',1,2)    MF_GARCHfit_ar_P1_Q2
 MF_GARCHcompare(y,'ar',1:3,1:3)	MF_compare_GARCH_ar_1_3_1_3
 SY_VarRatioTest(y,2,0)	SY_VarRatioTest_2_0
 SY_VarRatioTest(y,2,1)	SY_VarRatioTest_2_1
@@ -1496,7 +1193,6 @@ MF_hmm_fit(y,0.7,3)	MF_hmm_07_3
 MF_hmm_fit(y,0.8,2)	MF_hmm_08_2
 MF_hmm_CompareNStates(y,0.6,2:4)	MF_hmm_CompareNStates_06_24
 MD_hrv_classic(y)	MD_hrv_classic
-CP_ML_StepDetect(y,'kv')	CP_ML_StepDetect_kv
 CP_ML_StepDetect(y,'l1pwc',10)	CP_ML_StepDetect_l1pwc_10
 CP_ML_StepDetect(y,'l1pwc',0.05)	CP_ML_StepDetect_l1pwc_005
 CP_ML_StepDetect(y,'l1pwc',0.2)	CP_ML_StepDetect_l1pwc_02
@@ -1507,8 +1203,6 @@ ST_MomentCorr(y,0.02,0.2,'mean','std','abs')	ST_MomentCorr_002_02_mean_std_abs
 ST_MomentCorr(y,0.02,0.2,'median','iqr','abs')	ST_MomentCorr_002_02_median_iqr_abs
 ST_MomentCorr(y,0.02,0.2,'mean','std','sqrt')	ST_MomentCorr_002_02_mean_std_sqrt
 ST_MomentCorr(y,0.02,0.2,'median','iqr','sqrt')	ST_MomentCorr_002_02_median_iqr_sqrt
-SP_Summaries(y,'periodogram','hamming',[],0,1)	SP_basic_pgram_hamm_power
-SD_SurrogateTest(y,'RP',99,[],{'ami1','fmmi','o3','tc3'})	SD_SurrogateTest_RP_99
-SP_Summaries(y,'fft',[],[],0,1)	SP_basic_fft_power
+SD_SurrogateTest(y,'RP',99,[],{'ami1','fmmi','o3','tc3'},'default')	SD_SurrogateTest_RP_99
 MD_pNN(x)	MD_pNN_raw
 MD_rawHRVmeas(x)	MD_rawHRVmeas

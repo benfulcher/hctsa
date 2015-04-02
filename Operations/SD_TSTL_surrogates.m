@@ -3,8 +3,8 @@
 % ------------------------------------------------------------------------------
 % 
 % Generates surrogate time series and tests them against the original time
-% series according to some test statistics: T_{C3}, using the
-% TSTOOL code tc3 or T_{rev}, using TSTOOL code trev.
+% series according to some test statistics: T_{C3}, using the TSTOOL code tc3 or
+% T_{rev}, using TSTOOL code trev.
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 % 
@@ -25,8 +25,14 @@
 % surrfn, the surrogate statistic to evaluate on all surrogates, either 'tc3' or
 %           'trev'
 % 
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% 
 %---OUTPUTS: include the Gaussianity of the test statistics, a z-test, and
 % various tests based on fitted kernel densities.
+% 
+%---HISTORY:
+% Ben Fulcher, 15/11/2009
+% Ben Fulcher, 2015-03-19 added random seed
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -51,10 +57,11 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SD_TSTL_surrogates(y, tau, nsurr, surrmethod, surrfn)
-% Ben Fulcher, 15/11/2009
+function out = SD_TSTL_surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 
+% ------------------------------------------------------------------------------
 %% Check inputs, set defaults
+% ------------------------------------------------------------------------------
 % 1) time delay, TAU
 if nargin < 2 || isempty(tau)
     tau = 1;
@@ -65,20 +72,19 @@ elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
 
-
 % 2) number of surrogate data sets to generate, NSURR
 if nargin < 3 || isempty(nsurr)
     nsurr = 50;
 end
 
 % 3) surrogate data method, SURRMETHOD
-if nargin < 4 || isempty(surrmethod)
+if nargin < 4 || isempty(surrMethod)
     fprintf(1,'Surrogate method set to default: ''surrogate1''.\n');
-    surrmethod = 1;
+    surrMethod = 1;
 end
-% surrmethod = 1: randomizes phases of fourier spectrum
-% surrmethod = 2:  (see Theiler algorithm II)
-% surrmethod = 3: permutes samples randomly
+% surrMethod = 1: randomizes phases of fourier spectrum
+% surrMethod = 2:  (see Theiler algorithm II)
+% surrMethod = 3: permutes samples randomly
 
 % 4) surrogate function, SURRFN
 if nargin < 5 || isempty(surrfn)
@@ -86,17 +92,27 @@ if nargin < 5 || isempty(surrfn)
     surrfn = 'tc3';
 end
 
+% 5) randomSeed: how to treat the randomization
+if nargin < 6
+    randomSeed = []; % default for BF_ResetSeed
+end
+
+% ------------------------------------------------------------------------------
 %% Do the calculation
-% Make a signal object of time series
+% ------------------------------------------------------------------------------
+% Make a TSTOOL signal object of time series
 s = signal(y);
+
+% Control random seed (for reproducibility):
+BF_ResetSeed(randomSeed);
 
 switch surrfn
     case 'tc3'
         % Run external TSTOOL code, tc3
-        rs = tc3(s, tau, nsurr, surrmethod);
+        rs = tc3(s, tau, nsurr, surrMethod);
     case 'trev'
         % Run external TSTOOL code, trev
-        rs = trev(s, tau, nsurr, surrmethod);
+        rs = trev(s, tau, nsurr, surrMethod);
     otherwise
         error('Unknown surrogate function ''%s''',surrfn)
 end
@@ -104,16 +120,17 @@ end
 tc3dat = data(rs);
 if all(isnan(tc3dat))
     error('TSTOOL: ''%s'' failed',surrfn);
-    % out = NaN; return
 end
 tc3_y = tc3dat(1);
 tc3_surr = tc3dat(2:end);
 
 [n, x] = hist(tc3_surr,50);
 % hold off; plot(x,n); hold on; plot(tc3_y,max(n),'or'); hold off;
-    
+
+% ------------------------------------------------------------------------------
 %% Get some outputs
-% these are completely made up by me
+% ------------------------------------------------------------------------------
+% These are completely from my intuition
 
 % 1) fit a Gaussian to surrogates
 % [muhat,sigmahat] = normfit(tc3_surr);
@@ -142,7 +159,7 @@ out.meansurr = muhat;
 [ksf, ksx] = ksdensity(tc3_surr,'function','pdf');
 % hold on;plot(ksx,ksf,'r')
 ksdx = ksx(2) - ksx(1);
-ihit = find(ksx>tc3_y,1,'first');
+ihit = find(ksx > tc3_y,1,'first');
 
 if isempty(ihit) %% off the scale!
     out.kspminfromext = 0;

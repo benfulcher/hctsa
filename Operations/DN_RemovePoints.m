@@ -56,7 +56,7 @@ function out = DN_RemovePoints(y,howtorem,p)
 %% Preliminaries
 % ------------------------------------------------------------------------------
 N = length(y); % time-series length
-DoPlot = 0; % plot output
+doPlot = 0; % plot output
 
 % ------------------------------------------------------------------------------
 %% Check inputs
@@ -68,6 +68,7 @@ if nargin < 3 || isempty(p)
     p = 0.1; % 10%
 end
 
+% ------------------------------------------------------------------------------
 switch howtorem
     case 'absclose' % remove a proportion p of points closest to the mean
         [~, is] = sort(abs(y),'descend');
@@ -86,7 +87,7 @@ end
 rkeep = sort(is(1:round(N*(1-p))),'ascend');
 y_trim = y(rkeep);
 
-if DoPlot
+if doPlot
     figure('color','w')
     hold off
     plot(y,'ok');
@@ -99,7 +100,7 @@ end
 acf_y = SUB_acf(y,8);
 acf_y_trim = SUB_acf(y_trim,8);
 
-if DoPlot
+if doPlot
     figure('color','w')
     hold off;
     plot(acf_y,':b'); hold on;
@@ -122,12 +123,13 @@ out.skewnessrat = skewness(y_trim)/skewness(y); % Statistics Toolbox
 out.kurtosisrat = kurtosis(y_trim)/kurtosis(y); % Statistics Toolbox
 
 
+% ------------------------------------------------------------------------------
 function acf = SUB_acf(x,n)
     % computes autocorrelation of the input sequence, x, up to a maximum time
     % lag, n
     acf = zeros(n,1);
     for i = 1:n
-        acf(i) = CO_AutoCorr(x,i-1);
+        acf(i) = CO_AutoCorr(x,i-1,'Fourier');
     end
 end
 

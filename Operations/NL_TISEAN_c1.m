@@ -38,6 +38,9 @@
 % tau, embedding dimensions, m, ranging from m_{min} to m_{max}, a time
 % separation, tsep, and a number of reference points, Nref.
 % 
+%---HISTORY:
+% Ben Fulcher, 20/11/2009
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -62,9 +65,10 @@
 % ------------------------------------------------------------------------------
 
 function out = NL_TISEAN_c1(y, tau, mmm, tsep, Nref)
-% Ben Fulcher, 20/11/2009
 
-%% Check inputs:
+% ------------------------------------------------------------------------------
+%% Preliminaries:
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length (number of samples)
 
 % ++BF 12/5/2010 -- for some reason timeseries of length near a multiple of 512
@@ -78,7 +82,9 @@ if freakystat <= 6
     N = length(y); % new time-series length
 end
 
+% ------------------------------------------------------------------------------
 %% Check inputs
+% ------------------------------------------------------------------------------
 % time delay, tau
 if nargin < 2 || isempty(tau)
     tau = 1;
@@ -92,6 +98,9 @@ end
 % Min/max embedding dimension, mmm
 if nargin < 3 || isempty(mmm)
     mmm = [2, 10];
+end
+if length(mmm)==1
+    error('Please set a minimum and maximum embedding dimension as a 2-vector');
 end
 
 % Time separation, tsep
@@ -110,48 +119,54 @@ if (Nref > 0) && (Nref <= 1)
     Nref = ceil(Nref*N); % specify a proportion of data length
 end
 Nrefmin = 100;
-Nrefmax = 2000;
+Nrefmax = 2500;
 
 if Nref > Nrefmax
     Nref = Nrefmax;
-end % for time reasons, don't use more than 2000 reference points
+end % for time reasons, don't use more than 2500 reference points
 
 if (Nref < Nrefmin) && (N > Nrefmin)
     Nref = Nrefmin;
 end % can't have less than 100 reference points
 
 % ------------------------------------------------------------------------------
-%% Write the data file
+%% Write the temporary data file
 % ------------------------------------------------------------------------------
-tnow = datestr(now,'yyyymmdd_HHMMSS_FFF');
-% to the millisecond (only get double-write error for same function called in same millisecond
-fn = sprintf('tisean_temp_c1_%s.dat',tnow);
-dlmwrite(fn,y);
-fprintf(1,'Just written temporary data file %s for TISEAN\n',fn)
+% Adds parameter set and timestamp to the millisecond:
+fileName = sprintf('hctsa_tisean_c1_tau%u_m%u-%u_t%u_n%u_%s.tmp',tau,mmm(1),mmm(2),tsep,Nref,datestr(now,'HHMMSS_FFF'));
+% Place in the system temp directory:
+tmp_folder = tempdir;
+fileName = fullfile(tmp_folder,fileName);
+dlmwrite(fileName,y);
+fprintf(1,'Wrote temporary data file ''%s'' for TISEAN\n',fileName)
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code
 % ------------------------------------------------------------------------------
 % run c1 code
 tic
-[~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',tau,mmm(1),mmm(2),tsep,Nref,fn,fn));
-delete(fn) % remove the temporary data file
+[~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',tau,mmm(1),mmm(2),tsep,Nref,fileName,fileName));
+delete(fileName) % remove the temporary data file
 % [~, res] = system(['c1 -d' num2str(tau) ' -m' num2str(mmm(1)) ...
 %                     ' -M' num2str(mmm(2)) ' -t' num2str(tsep) ' -n' ...
-%                     num2str(Nref) ' -o ' fn '.c1 ' fn]);
+%                     num2str(Nref) ' -o ' fileName '.c1 ' fileName]);
 if isempty(res)
-    if exist([fn '.c1']), delete([fn '.c1']); end % remove the TISEAN file write output
+    if exist([fileName '.c1']), delete([fileName '.c1']); end % remove the TISEAN file write output
     error('Call to TISEAN method ''c1'' failed');
 else
     fprintf(1,'TISEAN function ''c1'' took %s\n',BF_thetime(toc,1))
 end
 
+if ~exist([fileName '.c1'])
+    error([fileName,'.c1 not generated??! Could be due to an overly long filename...']);
+end
+
 % Get local slopes from c1 file output of previous call
 tic
-[~, res] = system(sprintf('c2d -a2 %s.c1',fn));
+[~, res] = system(sprintf('c2d -a2 %s.c1',fileName));
 
 if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
-    if exist([fn '.c1']), delete([fn '.c1']); end % remove the TISEAN file write output
+    if exist([fileName '.c1']), delete([fileName '.c1']); end % remove the TISEAN file write output
     if isempty(res)
         error('Call to TISEAN function ''c1'' failed');
     else
@@ -160,17 +175,17 @@ if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out?
 end
 
 fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc,1))
-if exist([fn '.c1']), delete([fn '.c1']); end % remove the TISEAN file write output
+if exist([fileName '.c1']), delete([fileName '.c1']); end % remove the TISEAN file write output
 
 % ------------------------------------------------------------------------------
 %% Get the output
 % ------------------------------------------------------------------------------
 % 1) C1 (don't worry about this anymore, just the local slopes
 
-% fid = fopen([fn '.c1']);
+% fid = fopen([fileName '.c1']);
 % s = textscan(fid,'%[^\n]');
 % if isempty(s)
-%     disp(['Error reading TISEAN output file ' fn '.c1'])
+%     disp(['Error reading TISEAN output file ' fileName '.c1'])
 %     return;
 % end
 % s = s{1};
@@ -180,11 +195,11 @@ if exist([fn '.c1']), delete([fn '.c1']); end % remove the TISEAN file write out
 s = textscan(res,'%[^\n]');
 s = s{1};
 if isempty(s)
-    error('Error reading TISEAN output file %s.c1',fn)
+    error('Error reading TISEAN output file %s.c1',fileName)
 end
 c1dat = SUB_readTISEANout(s,'#m=',2);
 if isempty(c1dat)
-    error('Error reading TISEAN output file %s.c1: %s',fn,s{1})
+    error('Error reading TISEAN output file %s.c1: %s',fileName,s{1})
 end
 
 % issues: x-values differ for each dimension

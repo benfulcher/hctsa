@@ -4,7 +4,7 @@
 % 
 % Given a model, characterizes the variation in goodness of model predictions
 % across a range of prediction lengths, l, which is made to vary from
-% 1-step ahead to maxsteps steps-ahead predictions.
+% 1-step ahead to maxSteps steps-ahead predictions.
 % 
 % Models are fit using code from Matlab's System Identification Toolbox:
 % (i) AR models using the ar function,
@@ -21,14 +21,14 @@
 % 
 % order, the order of the model to fit
 % 
-% maxsteps, the maximum number of steps ahead to predict
+% maxSteps, the maximum number of steps ahead to predict
 % 
-%---OUTPUTS: include the errors, for prediction lengths l = 1, 2, ..., maxsteps,
+%---OUTPUTS: include the errors, for prediction lengths l = 1, 2, ..., maxSteps,
 % returned for each model relative to the best performance from basic null
 % predictors, including sliding 1- and 2-sample mean predictors and simply
 % predicting each point as the mean of the full time series. Additional outputs
 % quantify how the errors change as the prediction length increases from l = 1,
-% ..., maxsteps (relative to a simple predictor).
+% ..., maxSteps (relative to a simple predictor).
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -53,7 +53,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_steps_ahead(y,model,order,maxsteps)
+function out = MF_steps_ahead(y,model,order,maxSteps)
 % Ben Fulcher, 17/2/2010
 
 %% Check that a System Identification Toolbox license is available:
@@ -78,9 +78,9 @@ if nargin < 3 || isempty(order)
     order = 2; % hopefully this is meaningful!
 end
 
-% maxsteps, maximum number of steps ahead for prediction
-if nargin < 4 || isempty(maxsteps)
-    maxsteps = 6; % compare up to 5 steps ahead by default
+% maxSteps, maximum number of steps ahead for prediction
+if nargin < 4 || isempty(maxSteps)
+    maxSteps = 6; % compare up to 5 steps ahead by default
 end
 
 %% Set up test and training sets
@@ -110,28 +110,29 @@ switch model
         error('Unknown model ''%s''',model);
 end
 
-
+% ------------------------------------------------------------------------------
 %% Do the model and dumb predictions
+% ------------------------------------------------------------------------------
 yy = y.y;
-steps = 1:maxsteps;
+steps = 1:maxSteps;
 
 % Initialize statistic vectors
 % ((-)) mf structure: for the model fit
-mf.rmserrs = zeros(maxsteps,1);
-mf.mabserrs = zeros(maxsteps,1);
-mf.ac1s = zeros(maxsteps,1);
+mf.rmserrs = zeros(maxSteps,1);
+mf.mabserrs = zeros(maxSteps,1);
+mf.ac1s = zeros(maxSteps,1);
 
 % ((-)) sliding mean 1
-sm1.rmserrs = zeros(maxsteps,1);
-sm1.mabserrs = zeros(maxsteps,1);
-sm1.ac1s = zeros(maxsteps,1);
+sm1.rmserrs = zeros(maxSteps,1);
+sm1.mabserrs = zeros(maxSteps,1);
+sm1.ac1s = zeros(maxSteps,1);
 
 % ((-)) sliding mean 2
-sm2.rmserrs = zeros(maxsteps,1);
-sm2.mabserrs = zeros(maxsteps,1);
-sm2.ac1s = zeros(maxsteps,1);
+sm2.rmserrs = zeros(maxSteps,1);
+sm2.mabserrs = zeros(maxSteps,1);
+sm2.ac1s = zeros(maxSteps,1);
 
-for i = 1:maxsteps
+for i = 1:maxSteps
     % (1) *** Model m ***
     yp = predict(m, ytest, steps(i)); % across test set
 
@@ -141,7 +142,7 @@ for i = 1:maxsteps
     
     mf.rmserrs(i) = sqrt(mean(mres.^2));
     mf.mabserrs(i) = mean(abs(mres));
-    mf.ac1s(i) = CO_AutoCorr(mres,1);
+    mf.ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
     
     % (2) *** Sliding mean 1 ***
     % A sliding mean of length 1
@@ -151,7 +152,7 @@ for i = 1:maxsteps
     
     sm1.rmserrs(i) = sqrt(mean(mres.^2));
     sm1.mabserrs(i) = mean(abs(mres));
-    sm1.ac1s(i) = CO_AutoCorr(mres,1);
+    sm1.ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
     
     % (3) *** Sliding mean 2 ***
     % A sliding mean of length 2
@@ -168,18 +169,22 @@ for i = 1:maxsteps
     
     sm2.rmserrs(i) = sqrt(mean(mres.^2));
     sm2.mabserrs(i) = mean(abs(mres));
-    sm2.ac1s(i) = CO_AutoCorr(mres,1);
+    sm2.ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
 end
 
+% ------------------------------------------------------------------------------
 % % (3) SMINF
+% ------------------------------------------------------------------------------
 % % sample mean predictor
 sminf.res = yy - mean(yy);
 sminf.rmserr = sqrt(mean(sminf.res.^2));
 sminf.mabserr = mean(abs(sminf.res));
-sminf.ac1 = CO_AutoCorr(sminf.res,1);
+sminf.ac1 = CO_AutoCorr(sminf.res,1,'Fourier');
 
 
+% ------------------------------------------------------------------------------
 %% Get some output statistics
+% ------------------------------------------------------------------------------
 % note that num2str loses precision, but I don't care so much about this --
 % I don't think we need such precision, anyway.
 
@@ -188,22 +193,24 @@ sminf.ac1 = CO_AutoCorr(sminf.res,1);
 % bestdumbac1 = min(abs([sm1.ac1,sm2.ac1,sminf.ac1]));
 
 
-for i = 1:maxsteps
+for i = 1:maxSteps
     % all relative to best dumb
     mirms = mf.rmserrs(i)/min([sm1.rmserrs(i), sm2.rmserrs(i), sminf.rmserr]); % rms error
     miabs = mf.mabserrs(i)/min([sm1.mabserrs(i), sm2.mabserrs(i), sminf.mabserr]); % absolute error
 
-    eval(sprintf('out.rmserr_%u = mirms;',i));
-    eval(sprintf('out.mabserr_%u = miabs;',i));
+    out.(sprintf('rmserr_%u',i)) = mirms;
+    out.(sprintf('mabserr_%u',i)) = miabs;
     
     % raw ac1 values -- ratios don't really make sense
-    makeitso = abs(mf.ac1s(i));
-    eval(sprintf('out.ac1_%u = makeitso;',i));
+    makeItSo = abs(mf.ac1s(i));
+    out.(sprintf('ac1_%u',i)) = makeItSo;
 end
 
 out.meandiffrmsabs = abs(mean(mf.rmserrs-mf.mabserrs));
 
-% Try to quickly quantify shape   
+% ------------------------------------------------------------------------------
+% Quantify shape:
+% ------------------------------------------------------------------------------
 % Other than being a boring increasing curve
 out.meandiffrms = mean(diff(mf.rmserrs));
 out.maxdiffrms = max(diff(mf.rmserrs));
