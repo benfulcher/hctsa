@@ -24,8 +24,8 @@
 % ------------------------------------------------------------------------------
 %% SET RANGE OF TS_IDs TO COMPUTE:
 % ------------------------------------------------------------------------------
-tsid_min = 5; % Calculate from this ts_id...
-tsid_max = 5; % To this ts_id
+tsid_min = 1; % Calculate from this ts_id...
+tsid_max = 1; % To this ts_id
 
 % ------------------------------------------------------------------------------
 %% Default parameters for computation:
@@ -39,8 +39,8 @@ tsid_range = (tsid_min:tsid_max);
 
 % Retrieve a vector of op_idds to calculate subject to additional conditions
 % Here we remove operations with labels 'shit', 'tisean', 'kalafutvisscher', and 'waveletTB'
-%opids = SQL_getids('ops',1,{},{'shit','kalafutvisscher','waveletTB'});
-opids = PK_create_HCTSA_op_loc('TS_loc_guides_N.mat','oldnew_names_roslyn.csv');
+opids = SQL_getids('ops',1);
+%opids = PK_create_HCTSA_op_loc('TS_loc_guides_N.mat','oldnew_names_roslyn.csv');
 % ------------------------------------------------------------------------------
 %% Start calculating:
 % ------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ for i = 1:length(tsid_range)
 	DidWrite = TSQ_prepared(tsid_range(i),opids,'all'); % Collect the null entries in the database
     if DidWrite % Only calculate if TSQ_prepared found time series to retrieve:
         TSQ_brawn(doLog,doParallelize); % Compute the operations and time series retrieved
-        TSQ_agglomerate(writeWhat,doLog); % Store the results back to the database
+        %TSQ_agglomerate(writeWhat,doLog); % Store the results back to the database
     else
         fprintf(1,'No calculation performed at ts_id = %u\n',tsid_range(i));
     end
