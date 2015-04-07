@@ -36,7 +36,7 @@
 % showDistr, if 1 (default), plots marginal density estimates for each variable
 %                   (above and to the right of the plot), otherwise set to 0.
 %                   
-% lossMeth, can select a classifier to fit to the different classes (e.g.,
+% classMethod, can select a classifier to fit to the different classes (e.g.,
 %               'linclass' for a linear classifier).
 % 
 %---HISTORY
@@ -49,8 +49,8 @@
 % Ben Fulcher 20/10/2010: added annotateParams option: number of time series
 %                annotations to make (default = 0)
 % Ben Fulcher 20/10/2010: also added showDistr option
-% Ben Fulcher 27/10/2010: added lossMeth option (choose how to calculate
-%                           loss)
+% Ben Fulcher 27/10/2010: added classMethod option (choose how to calculate
+%                           classRate)
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -68,7 +68,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_2d(Features,DataInfo,trainTest,annotateParams,showDistr,lossMeth)
+function TSQ_plot_2d(Features,DataInfo,trainTest,annotateParams,showDistr,classMethod)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
@@ -95,8 +95,8 @@ if nargin < 5 || isempty(showDistr)
     showDistr = 1;
 end
 
-if nargin < 6 || isempty(lossMeth)
-    lossMeth = 'linclass';
+if nargin < 6 || isempty(classMethod)
+    classMethod = 'linclass';
 end
 
 makeFigure = 1; % default is to plot on a brand new figure('color','w')
@@ -146,32 +146,32 @@ end
 % ------------------------------------------------------------------------------
 % Compute classification rates
 % ------------------------------------------------------------------------------
-loss = zeros(3,1); % loss1, loss2, lossboth
-gig = BF_ToGroup(GroupIndices); % Convert GroupIndices to group form
-switch lossMeth
+classRate = zeros(3,1); % classRate1, classRate2, classRateboth
+groupLabels = BF_ToGroup(GroupIndices); % Convert GroupIndices to group form
+switch classMethod
     case 'linclass'
         kfold = 10;
-        nrepeats = 5;
-        Classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
+        numRepeats = 5;
+        classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
                         sum(ytest == classify(Xtest,XTrain,yTrain,'linear'))/length(ytest);
         try
-            loss(1) = mean(Classify_fn(Features(:,1),gig,Features(:,1),gig));
-            loss(2) = mean(Classify_fn(Features(:,2),gig,Features(:,2),gig));
-            loss(3) = mean(Classify_fn(Features(:,1:2),gig,Features(:,1:2),gig));
+            classRate(1) = mean(classify_fn(Features(:,1),groupLabels,Features(:,1),groupLabels));
+            classRate(2) = mean(classify_fn(Features(:,2),groupLabels,Features(:,2),groupLabels));
+            classRate(3) = mean(classify_fn(Features(:,1:2),groupLabels,Features(:,1:2),groupLabels));
         catch emsg
             fprintf(1,'%s\n',emsg.message);
         end
         fprintf(1,'Linear in-sample classification rates computed\n');
     case {'knn','knn_matlab'}
         k = 3;
-        nrepeats = 10;
+        numRepeats = 10;
         try
-            lf1 = TSQ_cfnerr('knn',k,Features(:,1),gig,[],{'kfold',10,nrepeats});
-            loss(1,:) = [mean(lf1),std(lf1)];
-            lf2 = TSQ_cfnerr('knn',k,Features(:,2),gig,[],{'kfold',10,nrepeats});
-            loss(2,:) = [mean(lf2),std(lf2)];
-            lf3 = TSQ_cfnerr('knn',k,Features(:,1:2),gig,[],{'kfold',10,nrepeats});
-            loss(3,:) = [mean(lf3),std(lf3)];
+            lf1 = TSQ_cfnerr('knn',k,Features(:,1),groupLabels,[],{'kfold',10,numRepeats});
+            classRate(1,:) = [mean(lf1),std(lf1)];
+            lf2 = TSQ_cfnerr('knn',k,Features(:,2),groupLabels,[],{'kfold',10,numRepeats});
+            classRate(2,:) = [mean(lf2),std(lf2)];
+            lf3 = TSQ_cfnerr('knn',k,Features(:,1:2),groupLabels,[],{'kfold',10,numRepeats});
+            classRate(3,:) = [mean(lf3),std(lf3)];
         catch emsg
             fprintf(1,'%s\n',emsg);
         end
@@ -281,10 +281,10 @@ end
 %% Plot a classify boundary?
 % ------------------------------------------------------------------------------
 didClassify = 0;
-if (numGroups == 2) && strcmp(lossMeth,'linclass');
+if (numGroups == 2) && strcmp(classMethod,'linclass');
     modeorder = 'linear'; % or 'quadratic'
     
-    xlim = get(gca,'XLim'); ylim=get(gca,'YLim');
+    xlim = get(gca,'XLim'); ylim = get(gca,'YLim');
     group = BF_ToGroup(GroupIndices);
     [X, Y] = meshgrid(linspace(xlim(1),xlim(2),200),linspace(ylim(1),ylim(2),200));
     X = X(:); Y = Y(:);
@@ -310,12 +310,12 @@ end
 %% Label Axes
 % ------------------------------------------------------------------------------
 if didClassify
-    title(sprintf('Combined misclassification rate (%s) = %.2f%%',lossMeth, ...
-                    round(loss(3,1)*100)),'interpreter','none');
+    title(sprintf('Combined classification rate (%s) = %.2f%%',classMethod, ...
+                    round(classRate(3,1)*100)),'interpreter','none');
     labelText = cell(2,1);
     for i = 1:2
         labelText{i} = sprintf('%s (acc = %.2f %%)',labels{i}, ...
-                                round(loss(i,1)*100)); %,round(loss(i,2)*100));
+                                round(classRate(i,1)*100)); %,round(classRate(i,2)*100));
     end
 else
     labelText = labels;
