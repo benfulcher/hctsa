@@ -66,11 +66,16 @@ miCalc = javaObject(implementingClass);
 miCalc.initialise(1,1);
 
 % Add neighest neighbor option for KSG estimator
-if ismember(estMethod,'kraskov2')
+if ismember(estMethod,{'kraskov1','kraskov2'})
     if ~isempty(extraParam)
+        if isnumeric(extraParam)
+            warning(['Should set number of nearest neighbors to a string... ' ...
+                            'I''ll do it for you this time though...'])
+            extraParam = num2str(extraParam);
+        end
         miCalc.setProperty('k', extraParam); % 4th input specifies number of nearest neighbors for KSG estimator
     else
-        miCalc.setProperty('k', '3'); % use 3 nearest neighbors for KSG estimator as default
+        miCalc.setProperty('k', '4'); % use 4 nearest neighbors for KSG estimator as default
     end
 end
 

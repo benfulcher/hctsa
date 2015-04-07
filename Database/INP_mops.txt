@@ -242,8 +242,8 @@ CO_RM_AMInformation(y,9)	CO_RM_AMInformation_9
 CO_RM_AMInformation(y,10)	CO_RM_AMInformation_10
 CO_FirstMin(y,'mi-gaussian')	CO_FirstMin_mi-gaussian
 CO_FirstMin(y,'mi-kernel')  CO_FirstMin_mi-kernel
-CO_FirstMin(y,'mi-kraskov1')  CO_FirstMin_mi-kraskov1
-CO_FirstMin(y,'mi-kraskov2','3')  CO_FirstMin_mi-kraskov2_3
+CO_FirstMin(y,'mi-kraskov1','4')  CO_FirstMin_mi-kraskov1_4
+CO_FirstMin(y,'mi-kraskov2','4')  CO_FirstMin_mi-kraskov2_4
 CO_FirstMin(y,'mi-hist',5)  CO_FirstMin_mi-hist_5
 CO_FirstMin(y,'mi-hist',10)  CO_FirstMin_mi-hist_10
 CO_HistogramAMI(y,1:5,'std1',2)	CO_HistogramAMI_std1_2
@@ -798,9 +798,9 @@ CO_trev(y,'mi')	CO_trev_mi
 # CO_TSTL_amutual2(y,50)    CO_TSTL_amutual2_50
 # CO_TSTL_amutual2(diff(y),50)    CO_TSTL_amutual2_diff__50
 IN_AutoMutualInfoStats(y,40,'gaussian') IN_AutoMutualInfoStats_40_gaussian
-IN_AutoMutualInfoStats(y,40,'kraskov1') IN_AutoMutualInfoStats_40_kraskov1
+IN_AutoMutualInfoStats(y,40,'kraskov1','4') IN_AutoMutualInfoStats_40_kraskov1_4
 IN_AutoMutualInfoStats(diff(y),20,'gaussian') IN_AutoMutualInfoStats_diff_20_gaussian
-IN_AutoMutualInfoStats(diff(y),20,'kraskov1') IN_AutoMutualInfoStats_diff_20_kraskov1
+IN_AutoMutualInfoStats(diff(y),20,'kraskov1','4') IN_AutoMutualInfoStats_diff_20_kraskov1_4
 CO_CompareMinAMI(y,'std1',[2:80])	CO_CompareMinAMI_std1_2_80
 CO_CompareMinAMI(y,'quantiles',[2:80])	CO_CompareMinAMI_quantiles_2_80
 CO_CompareMinAMI(y,'even',[2:80])	CO_CompareMinAMI_even_2_80
@@ -813,8 +813,8 @@ CO_AddNoise(y,1,'std1',10,'default')    CO_AddNoise_1_std1_10
 CO_AddNoise(y,'ac','std1',10,'default')    CO_AddNoise_ac_std1_10
 CO_AddNoise(y,1,'gaussian',[],'default')    CO_AddNoise_1_gaussian
 CO_AddNoise(y,'ac','gaussian',[],'default')    CO_AddNoise_ac_gaussian
-CO_AddNoise(y,1,'kraskov1',[],'default')    CO_AddNoise_1_kraskov1
-CO_AddNoise(y,'ac','kraskov1',[],'default')    CO_AddNoise_ac_kraskov1
+CO_AddNoise(y,1,'kraskov1','4','default')    CO_AddNoise_1_kraskov1_4
+CO_AddNoise(y,'ac','kraskov1','4','default')    CO_AddNoise_ac_kraskov1_4
 SB_TransitionMatrix(y,'quantile',2,1)	SB_TransitionMatrix_21
 SB_TransitionMatrix(y,'quantile',3,1)	SB_TransitionMatrix_31
 SB_TransitionMatrix(y,'quantile',4,1)	SB_TransitionMatrix_41
