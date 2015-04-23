@@ -83,7 +83,7 @@ end
 
 % (*) embedparams
 if nargin < 6 || isempty(embedparams)
-    embedparams = {'ac','cao'};
+    embedparams = {'ac','fnnmar'};
     fprintf(1,'Using default embedding using autocorrelation for tau and Cao''s method for m\n')
 end
 

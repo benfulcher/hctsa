@@ -58,7 +58,7 @@ beVocal = 1; % display information about embedding
 N = length(y); % length of the input time series, y
 
 % randomSeed: how to treat the randomization
-if nargin < 4
+if nargin < 5
     randomSeed = []; % default
 end
 
@@ -137,7 +137,7 @@ else % use a routine to inform m
                     y_embed = NaN;
                     return
                 end
-                ssm = sprintf('by N. Marwan''s CRPtoolbox ''fnn'' code with threshold %f to m = %u',th,m);
+                ssm = sprintf('by N. Marwan''s CRPtoolbox (GPL) ''fnn'' code with threshold %f to m = %u',th,m);
                 
             case 'cao'
                 % Uses TSTOOL code for cao method to determine optimal

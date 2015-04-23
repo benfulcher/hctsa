@@ -72,7 +72,7 @@ end
 
 % 4) Embedding parameters
 if nargin < 5 || isempty(embedParams)
-    embedParams = {'ac','cao'};
+    embedParams = {'ac','fnnmar'};
     fprintf(1,'Using default time-delay embedding using autocorrelation and cao\n')
 else
     if length(embedParams) ~= 2

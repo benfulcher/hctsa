@@ -59,7 +59,7 @@ end
 
 % (2) Set embedding parameters to defaults
 if nargin < 3 || isempty(embedparams)
-    embedparams = {'ac','cao'};
+    embedparams = {'ac','fnnmar'};
 else
     if length(embedparams) ~= 2
         error('Embedding parameters should be formatted like {tau,m}')

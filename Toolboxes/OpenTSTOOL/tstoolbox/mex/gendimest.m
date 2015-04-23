@@ -4,7 +4,7 @@
 %   we are interested in the scaling behaviour of the Renyi information
 %   for small distances, we don't need to compute all interpoint
 %   distances, the distances to k nearest neighbors for each reference
-%   point are sufficient .
+%   point are sufficient.
 %
 %   Robust estimation is used instead of mean square error fitting.
 %

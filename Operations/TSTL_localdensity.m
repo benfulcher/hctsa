@@ -64,7 +64,7 @@ if nargin < 3 || isempty(past)
 end
 
 if nargin < 4 || isempty(embedParams)
-    embedParams = {'ac','cao'};
+    embedParams = {'ac','fnnmar'};
     fprintf(1,'Using default embedding using autocorrelation and cao''s method.\n')
 end
 
