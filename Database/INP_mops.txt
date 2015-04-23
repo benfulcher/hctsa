@@ -724,7 +724,6 @@ NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'ac',8})	NL_TSTL_TakensEstimator_n1_005_
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'ac',3})	NL_TSTL_TakensEstimator_n1_005_005_ac_3
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'mi',8})	NL_TSTL_TakensEstimator_n1_005_005_mi_8
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'mi',3})	NL_TSTL_TakensEstimator_n1_005_005_mi_3
-NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'mi','cao'})	NL_TSTL_TakensEstimator_n1_005_005_mi_cao
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'mi','fnnmar'},'default')	NL_TSTL_TakensEstimator_n1_005_005_mi_fnnmar
 NL_TSTL_TakensEstimator(y,-1,0.1,0.05,{1,10})	NL_TSTL_TakensEstimator_n1_01_005_1_10
 DN_OutlierTest(y,2)  	DN_OutlierTest2
