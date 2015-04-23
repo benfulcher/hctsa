@@ -118,16 +118,17 @@ end
 if (Nref > 0) && (Nref <= 1)
     Nref = ceil(Nref*N); % specify a proportion of data length
 end
-Nrefmin = 100;
-Nrefmax = 2500;
+
+Nrefmin = 100; % can't have fewer than 100 reference points
+Nrefmax = 2500; % for time reasons, don't use more than 2500 reference points
 
 if Nref > Nrefmax
     Nref = Nrefmax;
-end % for time reasons, don't use more than 2500 reference points
+end
 
 if (Nref < Nrefmin) && (N > Nrefmin)
     Nref = Nrefmin;
-end % can't have less than 100 reference points
+end
 
 % ------------------------------------------------------------------------------
 %% Write the temporary data file
