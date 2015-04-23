@@ -108,7 +108,7 @@ if nargout>2, error('Too many output arguments'), end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% splash the GPL
 
-splash_gpl('crp');
+% splash_gpl('crp'); % Do not do this
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% error control
 try 

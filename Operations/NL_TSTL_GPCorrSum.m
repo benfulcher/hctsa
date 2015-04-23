@@ -67,7 +67,7 @@ function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedparams,doTwo)
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
-doplot = 0; % whether to plot outputs to figure
+doPlot = 0; % whether to plot outputs to figure
 N = length(y); % length of time series
 
 % (1) Number of reference points, Nref
@@ -164,7 +164,7 @@ end
 lnr = spacing(rs);
 lnCr = data(rs);
 
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(lnr,lnCr,'.-k');
 end
@@ -174,13 +174,15 @@ end
 % ------------------------------------------------------------------------------
 %% Remove any Infs in lnCr
 % ------------------------------------------------------------------------------
-rgood = (isfinite(lnCr));
-if ~any(rgood)
+rGood = (isfinite(lnCr));
+if ~any(rGood)
     fprintf(1,'No good outputs obtained from corrsum.\n');
     out = NaN; return
 end
-lnCr = lnCr(rgood);
-lnr = lnr(rgood);
+
+% Only keep finite values:
+lnCr = lnCr(rGood);
+lnr = lnr(rGood);
 
 % ------------------------------------------------------------------------------
 %% Output Statistics
@@ -212,8 +214,10 @@ if enoughpoints
     out.robfit_sea2 = stats.se(2);
 
     fit_lnCr = a(2)*lnr+a(1);
-    if doplot, hold on; plot(lnr,fit_lnCr,'r'); hold off; end
-    res = lnCr-fit_lnCr';
+    if doPlot, hold on; plot(lnr,fit_lnCr,'r'); hold off; end
+    
+    % Compute residuals:
+    res = lnCr - fit_lnCr';
     
     out.robfitresmeanabs = mean(abs(res));
     out.robfitresmeansq = mean(res.^2);

@@ -91,7 +91,7 @@ end
 %% Determine the embedding dimension, m
 % ------------------------------------------------------------------------------
 if nargin < 3 || isempty(m) % set to default value
-    m = 2; % embed in 2-dimensional space by default! Probably not a great default!
+    m = 2; % Embed in 2-dimensional space by default
     ssm = sprintf('to (strange) default of %u',m);
 else % use a routine to inform m
     if ~iscell(m), m = {m}; end
@@ -124,8 +124,9 @@ else % use a routine to inform m
                 % default is 0.1
                 % e.g., {'fnnmar',0.2} would use a threshold of 0.2
                 % uses time delay determined above
-                if length(m) == 1 % set default threshold 0.1
-                    th = 0.1;
+                
+                if length(m) == 1 % no threshold specified
+                    th = 0.4; % set default threshold 0.4
                 else
                     th = m{2};
                 end
