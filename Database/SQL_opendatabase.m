@@ -23,13 +23,16 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [dbc, databaseName] = SQL_opendatabase(databaseName,beVocal)
+function [dbc, databaseName] = SQL_opendatabase(databaseName,beVocal,useDBToolbox)
 
 % ------------------------------------------------------------------------------
 % Default: don't display details to the prompt:
 
 if nargin < 2 || isempty(beVocal)
 	beVocal = 0; % by default, do not display the mySQL database used to the prompt
+end
+if nargin < 3
+    useDBToolbox = 0; % the Matlab implementation is sometimes much slower
 end
 % ------------------------------------------------------------------------------
 
@@ -72,7 +75,7 @@ end
 % ------------------------------------------------------------------------------
 % Open database as dbc
 % ------------------------------------------------------------------------------
-dbc = mysql_dbopen(hostname,databaseName,username,password,customPort);
+dbc = mysql_dbopen(hostname,databaseName,username,password,customPort,useDBToolbox);
 
 if isempty(dbc)
 	error('Failed to load SQL database');

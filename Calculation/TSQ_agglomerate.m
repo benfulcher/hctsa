@@ -44,7 +44,9 @@ end
 % ------------------------------------------------------------------------------
 %% Open a mySQL database connection
 % ------------------------------------------------------------------------------
-[dbc, dbname] = SQL_opendatabase(dbname);
+% Much faster to use java connector than the Matlab database toolbox
+% (exec commands are slow; update commands are even slower)
+[dbc, dbname] = SQL_opendatabase(dbname,0,0);
 
 % ------------------------------------------------------------------------------
 %% Load local files
@@ -56,6 +58,15 @@ fprintf(fid,'Loading data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat')
 fprintf(fid,' Done in %s.\n',BF_thetime(toc(loadTimer)));
 clear loadTimer
+
+% ------------------------------------------------------------------------------
+% Check that TS_CalcTime exists
+% ------------------------------------------------------------------------------
+% It will not exist if you've (by default) not retrieved calculation time data
+% from the database, and not generated it from the computation
+if ~exist('TS_CalcTime')
+    error('No calculation time data found in HCTSA_loc.mat');
+end
 
 % ------------------------------------------------------------------------------
 %% Preliminary definitions
@@ -202,10 +213,10 @@ for i = 1:numWrite
             TS_CalcTime_string = sprintf('%f',TS_CalcTime_ij);
         end
             
-        % I can't see any way around running lots of single UPDATE commands (for each entry)
+        % I can't see any simple way around running lots of single UPDATE commands (for each entry)
     	updateString = sprintf(['UPDATE Results SET Output = %19.17g, QualityCode = %u, CalculationTime = %s ' ...
-							'WHERE ts_id = %u AND op_id = %u'],TS_DataMat_ij,TS_Quality_ij, ...
-							TS_CalcTime_string,ts_id_db(i),op_id_db(i));
+						'WHERE ts_id = %u AND op_id = %u'],TS_DataMat_ij,TS_Quality_ij, ...
+						TS_CalcTime_string,ts_id_db(i),op_id_db(i));
         [~,emsg] = mysql_dbexecute(dbc, updateString);
         if ~isempty(emsg)
             SQL_closedatabase(dbc) % close the database connection before calling the error...
@@ -231,7 +242,7 @@ end
 
 fprintf(1,['So that all seemed to go well -- we wrote %u new calculation results ' ...
                 '(/ %u) to the Results table in %s.\n'],sum(updateMe),numWrite,dbname);
-fprintf(1,'Writing to the database took at total of %s.\n',BF_thetime(toc(writeBackTimer)));
+fprintf(1,'Writing to the database took a total of %s.\n',BF_thetime(toc(writeBackTimer)));
 
 if any(~updateMe) % Some entries were not written to the database
     fprintf(1,['%u entries were not written (previously-calculated errors) and remain ' ...

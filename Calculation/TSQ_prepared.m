@@ -110,7 +110,8 @@ elseif (numOps == 0)
 end
 
 % Open database connection
-[dbc, dbname] = SQL_opendatabase;
+% (attempt to use the Matlab database toolbox, which is faster for retrievals)
+[dbc, dbname] = SQL_opendatabase('',0,1);
 
 % ------------------------------------------------------------------------------
 % Refine the set of time series and operations to those that actually exist in the database
@@ -183,24 +184,27 @@ end
 % --------------------------------------------------------------------------
 %% Retrieve the data from the database:
 % --------------------------------------------------------------------------
-didRetrieve = zeros(numTS,1);    % Keep track of whether data was retrieved at each iteration
+
+% Start piecing together the mySQL SELECT command:
+
+switch retrieveWhatData
+case 'all' % retrieve all columns
+    selectWhat = 'SELECT op_id, Output, QualityCode, CalculationTime FROM Results';
+case 'nocalctime' % Do not retrieve calculation time results
+    selectWhat = 'SELECT op_id, Output, QualityCode FROM Results';
+case 'outputs' % just outputs
+    selectWhat = 'SELECT op_id, Output FROM Results';
+case 'quality' % just quality codes
+    selectWhat = 'SELECT op_id, QualityCode FROM Results';
+end
+
+
+didRetrieve = zeros(numTS,1); % Keep track of whether data was retrieved at each iteration
 retrievalTimer = tic; % Time the process using retrievalTimer
 
 for i = 1:numTS
 
     ts_id_now = ts_ids(i); % Range of ts_ids retrieved in this iteration
-    
-    % Start piecing together the mySQL SELECT command:
-    switch retrieveWhatData
-    case 'all' % retrieve all columns
-        selectWhat = 'SELECT op_id, Output, QualityCode, CalculationTime FROM Results';
-    case 'nocalctime' % Do not retrieve calculation time results
-        selectWhat = 'SELECT op_id, Output, QualityCode FROM Results';
-    case 'outputs' % just outputs
-        selectWhat = 'SELECT op_id, Output FROM Results';
-    case 'quality' % just quality codes
-        selectWhat = 'SELECT op_id, QualityCode FROM Results';
-    end
     
     baseString = sprintf('%s WHERE ts_id = %u AND op_id IN (%s)',selectWhat, ...
                                             ts_id_now,op_ids_string);
@@ -222,9 +226,7 @@ for i = 1:numTS
     end
     
     % Do the retrieval
-    % DatabaseTimer = tic;
 	[qrc, emsg] = mysql_dbquery(dbc,selectString); % Retrieve data for this time series from the database
-    % fprintf(1,'Database query for %u time series took %s\n',BundleSize,BF_thetime(toc(DatabaseTimer)));
     
     if ~isempty(emsg)
         error('Error retrieving outputs from %s.\n%s',dbname,emsg);
@@ -419,10 +421,12 @@ SQL_closedatabase(dbc)
 %% Save to HCTSA_loc.mat
 % ------------------------------------------------------------------------------
 fprintf(1,'Saving local versions of the data to HCTSA_loc.mat...');
+saveTimer = tic;
 save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','-v7.3');
 switch retrieveWhatData
 case 'all'
     % Add outputs, quality labels, and calculation times
+    keyboard
     save('HCTSA_loc.mat','TS_DataMat','TS_Quality','TS_CalcTime','-append')
 case 'nocalctime'
     % Add outputs and quality labels
@@ -435,7 +439,8 @@ case 'quality'
     save('HCTSA_loc.mat','TS_Quality','-append')
 end
 
-fprintf(1,' Done.\n');
+fprintf(1,' Done in %s.\n',BF_thetime(toc(saveTimer)));
+clear saveTimer % stop timing
 didWrite = 1; % Tag to say that write to HCTSA_loc.mat file is successful
 
 % ------------------------------------------------------------------------------
@@ -445,7 +450,7 @@ if strcmp(retrieveWhatData,'outputs')
     fprintf(1,'You have the outputs, but you don''t know which are good or not without the quality labels...\n');
 else
     toCalculate = sum(isnan(TS_Quality(:)) | TS_Quality(:)==1);
-    fprintf(1,'There are %u entries (=%4.2f%%) to calculate in the data matrix (%ux%u).\n', ...
+    fprintf(1,'There are %u entries (%4.2f%%) to calculate in the %u x %u data matrix.\n', ...
                                         toCalculate,toCalculate/numOps/numTS*100,numTS,numOps);
 end
 

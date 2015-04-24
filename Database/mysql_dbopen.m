@@ -25,36 +25,31 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [dbConnection, errMessage] = mysql_dbopen(serverHost, databaseName, userName, password, customPort, useODBC)
+function [dbConnection, errMessage] = mysql_dbopen(serverHost, databaseName, userName, password, customPort, useDBToolbox)
 
 % Set defaults:
 if nargin < 5
     customPort = 3306; % use default port for mySQL: 3306
 end
 if nargin < 6
-    useODBC = 0; % faster, but Windows-only database connection
+    useDBToolbox = 0; % This is much slower than using java directly
 end
 
 % ------------------------------------------------------------------------------
 % Connect to the database (using either the database toolbox or the mySQL J-connector)
 % ------------------------------------------------------------------------------
 
-% Check if a Matlab database toolbox exists, and if so use it:
+% Check if a Matlab database toolbox exists, and use it if specified:
 dbToolboxExists = license('test','database_toolbox');
 
-if dbToolboxExists
+if useDBToolbox && dbToolboxExists
     % ------------------------------------------------------------------------------
-    % Connect using the Matlab's database toolbox (default)
+    % Connect using the Matlab's database toolbox
     % ------------------------------------------------------------------------------
     
-    % A license is available for Matlab's Database Toolbox, use that:
-    if useODBC
-        % The native ODBC connection is faster and isn't restricted by JVM heap memory, but Windows-only:
-        dbConnection = database.ODBCConnection(databaseName,userName,password);
-    else
-        % The JDBC interface is slower but platform independent
-        dbConnection = database(databaseName,userName,password,'Vendor','MySQL','Server',serverHost,'PortNumber',customPort);
-    end
+    % The JDBC interface is slower but platform independent
+    dbConnection = database(databaseName,userName,password,'Vendor','MySQL','Server',serverHost,'PortNumber',customPort);
+
     errMessage = dbConnection.Message;
     
     % Check for a connection error:

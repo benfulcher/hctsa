@@ -23,7 +23,7 @@
 %
 %---INPUTS:
 % tsorop -- either 'ts' or 'ops' for whether to eliminate either a time series of a metric, respectively
-% vin -- a vector of the ts_ids or op_ids in the database to remove
+% idRange -- a vector of the ts_ids or op_ids in the database to remove
 % dbname -- can specify a custom database else will use default database in SQL_opendatabase
 % doLog -- generate a .log file describing what was done (does this by default)
 % 
@@ -47,7 +47,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_clear_remove(tsorop,vin,doremove,dbname,doLog)
+function SQL_clear_remove(tsorop,idRange,doRemove,dbname,doLog)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries and input checking
@@ -73,12 +73,12 @@ otherwise
 end
 
 % Must specify a set of time series
-if nargin < 2 || min(size(vin)) ~= 1
+if nargin < 2 || min(size(idRange)) ~= 1
 	fprintf(1,'Error with second input. Exiting.\n');
 	return
 end
 
-if nargin < 3 % doremove
+if nargin < 3 % doRemove
     error('You must specify whether to remove the %s or just clear their data results',thewhat)
 end
 
@@ -96,19 +96,19 @@ end
 % ------------------------------------------------------------------------------
 %% Provide some user feedback
 % ------------------------------------------------------------------------------
-if (doremove == 0) % clear data
-    reply = input(sprintf(['Preparing to clear data for %u %s from %s.' ...
-                                'Press any key to continue...\n'], ...
-                                    length(vin),thewhat,dbname),'s');
-    dowhating = 'clearing';
-    dowhat = 'clear';
+if (doRemove == 0) % clear data
+    reply = input(sprintf(['Preparing to clear data for %u %s from %s. ' ...
+                                '[press any key to continue]'], ...
+                                    length(idRange),thewhat,dbname),'s');
+    doingWhat = 'clearing';
+    doWhat = 'clear';
     
-elseif doremove == 1
+elseif doRemove == 1
     reply = input(sprintf(['Preparing to REMOVE %u %s from %s -- DRASTIC STUFF! ' ...
                                 'I HOPE THIS IS OK?! [press any key to continue]\n'], ...
-                                length(vin),thewhat,dbname),'s');
-    dowhating = 'removing';
-    dowhat = 'remove';
+                                length(idRange),thewhat,dbname),'s');
+    doingWhat = 'remoidRangeg';
+    doWhat = 'remove';
     
 else
     error('Third input must be (0 to clear), or (1 to remove)')
@@ -118,21 +118,21 @@ end
 %% Check what to clear/remove
 % ------------------------------------------------------------------------------
 selectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
-                                thename,thetable,theid,BF_cat(vin,','));
-[todump,emsg] = mysql_dbquery(dbc,selectString);
+                                thename,thetable,theid,BF_cat(idRange,','));
+[toDump,emsg] = mysql_dbquery(dbc,selectString);
 
 if ~isempty(emsg)
-	error('Error retrieving selected %s indices (%s) from the %s table of %s', ...
+	error('Error retrieidRangeg selected %s indices (%s) from the %s table of %s', ...
                                     	thewhat,theid,thetable,dbname)
 end
 reply = input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
-      			dbname ' [press any key to show them]'],length(vin),thewhat),'s');
+      			dbname ' [press any key to show them]'],length(idRange),thewhat),'s');
 
 % ------------------------------------------------------------------------------
 %% List all items to screen
 % ------------------------------------------------------------------------------
-for i = 1:length(todump)
-    fprintf(1,'%s\n',todump{i});
+for i = 1:length(toDump)
+    fprintf(1,'%s\n',toDump{i});
 end
 
 reply = input(['Does this look right? Check carefully -- clearing data cannot ' ...
@@ -149,14 +149,14 @@ end
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
 
-if doremove
+if doRemove
     % Before delete them, first get keyword information, and information about masters (for operations)
     %<><>><><><><><><>
     
-	DeleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',thetable,theid,BF_cat(vin,','));
+	DeleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',thetable,theid,BF_cat(idRange,','));
     [~,emsg] = mysql_dbexecute(dbc, DeleteString);
     if isempty(emsg)
-        fprintf(1,'%u %s removed from %s in %s\n',length(todump),thewhat,thetable,dbname)
+        fprintf(1,'%u %s removed from %s in %s\n',length(toDump),thewhat,thetable,dbname)
     end
     
     if strcmp(tsorop,'ops')
@@ -190,7 +190,7 @@ else
     fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s...\n',dbname)
     fprintf(1,'Patience...\n');
 
-    UpdateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(vin,','));
+    UpdateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(idRange,','));
     [~,emsg] = mysql_dbexecute(dbc, UpdateString);
 
     if isempty(emsg)
@@ -198,12 +198,12 @@ else
     		% Get number of operations to work out how many entries were cleared
     		selectString = 'SELECT COUNT(op_id) as numOps FROM Operations';
     		numOps = mysql_dbquery(dbc,selectString); numOps = numOps{1};		
-    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),numOps,numOps*length(vin),dbname);
+    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(idRange),numOps,numOps*length(idRange),dbname);
     	else
     		% Get number of time series to work out how many entries were cleared
-    		selectString = 'SELECT COUNT(ts_id) as nts FROM TimeSeries';
-    		nts = mysql_dbquery(dbc,selectString); nts = nts{1};
-    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),nts,nts*length(vin),dbname);
+    		selectString = 'SELECT COUNT(ts_id) as numTs FROM TimeSeries';
+    		numTs = mysql_dbquery(dbc,selectString); numTs = numTs{1};
+    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(idRange),numTs,numTs*length(idRange),dbname);
     	end
     else
     	fprintf(1,'Error clearing results from %s... This is pretty bad news....\n%s',dbname,emsg); keyboard
@@ -225,11 +225,11 @@ if doLog
 	fid = fopen(fn, 'w', 'n');
 	fprintf(fid,'Document created on %s\n',datestr(now));
 	if strcmp(tsorop,'ts')
-		fprintf(fid,'Cleared outputs of %u time series\n',length(vin));
+		fprintf(fid,'Cleared outputs of %u time series\n',length(idRange));
 	else
-		fprintf(fid,'Cleared outputs of %u operations\n',length(vin));
+		fprintf(fid,'Cleared outputs of %u operations\n',length(idRange));
 	end
-	for i = 1:length(todump), fprintf(fid,'%s\n',todump{i}); end
+	for i = 1:length(toDump), fprintf(fid,'%s\n',toDump{i}); end
 	fclose(fid);
     
 	fprintf(1,'Logged and done and dusted!!\n');
