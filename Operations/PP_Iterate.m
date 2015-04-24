@@ -114,7 +114,7 @@ for q = 1:length(nRange)
         case 'resampledown' % downsample
             y_d = resample(y,1,n);
     end
-    outmat(q,:) = doyourcalcthing(y,y_d);
+    outmat(q,:) = doYourCalcThing(y,y_d);
     if doPlot
         if q==1
             h2 = plot(y_d,'r');
@@ -124,16 +124,20 @@ for q = 1:length(nRange)
     end
 end
 
+keyboard
+
 % ------------------------------------------------------------------------------
 %% Calculate four statistics from each test
 % ------------------------------------------------------------------------------
 
 stats = zeros(10,4);
 for t = 1:10;
-    if any(~isfinite(outmat(:,t))),
-        fprintf(1,'%u is a bad statistic\n',t)
+    if any(~isfinite(outmat(:,t)))
+        if ~(strcmp(dtMeth,'diff') && t > 7) % expected that these won't work
+            fprintf(1,'%u is a bad statistic\n',t)
+        end
     end
-    stats(t,:) = doyourtestthing(outmat(:,t)); 
+    stats(t,:) = doYourTestThing(outmat(:,t)); 
 end
 
 % ------------------------------------------------------------------------------
@@ -199,10 +203,11 @@ out.normdiff_jump = stats(10,2);
 out.normdiff_lin = stats(10,3);
 out.normdiff_exp = stats(10,4);
 
+
 % ------------------------------------------------------------------------------
 %% TESTS:
 % ------------------------------------------------------------------------------
-    function f = doyourcalcthing(y,y_d)
+    function f = doYourCalcThing(y,y_d)
         y = BF_zscore(y); y_d = BF_zscore(y_d);
         
         f = zeros(10,1); % vector of features to output
@@ -256,12 +261,12 @@ out.normdiff_exp = stats(10,4);
             % Norm of differences between original and randomized signals
             f(10) = norm(y-y_d)/length(y);
         else
-           f(8:10) = NaN; % like for differencing where lose some points
+            f(8:10) = NaN; % like for differencing where lose some points
         end
     end
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
-    function g = doyourtestthing(f)
+    function g = doYourTestThing(f)
         if ~all(isfinite(f))
             g = NaN*ones(4,1); return
         else
