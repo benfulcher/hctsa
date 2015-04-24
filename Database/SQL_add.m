@@ -8,7 +8,7 @@
 %---INPUTS:
 % importWhat: 'mops' (for master operations), 'ops' (for operations), or 'ts'
 %             (for time series)
-% INPfile:    the filename of the tab-delimited textfile to be read in [default
+% inputFile:    the filename of the tab-delimited textfile to be read in [default
 %             = INP_ts.txt or INP_ops.txt or INP_mops.txt]
 %             The input file should be formatted with whitespace as a delimiter
 %             between the entries to import.
@@ -38,7 +38,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_add(importWhat, INPfile, databaseName, beVocal)
+function SQL_add(importWhat, inputFile, databaseName, beVocal)
 
 % ------------------------------------------------------------------------------
 %% Check inputs, set defaults:
@@ -51,13 +51,13 @@ if nargin < 1 || isempty(importWhat) || ~ismember(importWhat,{'ops','ts','mops'}
                 ', ''ops'' for Operations, or ''mops'' for Master Operations']);
 end
 
-% INPfile
-if nargin < 2 || isempty(INPfile)
+% inputFile
+if nargin < 2 || isempty(inputFile)
     % Default filenames:
     if strcmp(importWhat,'ts')
-        INPfile = 'INP_ts.txt';
+        inputFile = 'INP_ts.txt';
     else
-        INPfile = 'INP_ops.txt';
+        inputFile = 'INP_ops.txt';
     end
 end
 
@@ -73,7 +73,7 @@ if nargin < 4
     beVocal = 1;
 end
 
-if beVocal, fprintf(1,'Using input file %s\n',INPfile); end
+if beVocal, fprintf(1,'Using input file %s\n',inputFile); end
 ticker = tic;
 
 % ------------------------------------------------------------------------------
@@ -126,17 +126,17 @@ end
 % ------------------------------------------------------------------------------
 %% Open and read the input file
 % ------------------------------------------------------------------------------
-fid = fopen(INPfile);
+fid = fopen(inputFile);
 
 if (fid==-1)
-    error('Could not load the specified input file ''%s''',INPfile)
+    error('Could not load the specified input file ''%s''',inputFile)
 end
 
 switch importWhat
 case 'ts' % Read the time series input file:
     if beVocal
         fprintf(1,['Need to format %s (Time Series input file) as: Filename ' ...
-                                                            'Keywords\n'],INPfile)
+                                                            'Keywords\n'],inputFile)
         fprintf(1,'Assuming no header line\n')
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
@@ -146,7 +146,7 @@ case 'ts' % Read the time series input file:
 case 'ops' % Read the operations input file:
     if beVocal
         fprintf(1,['Need to format %s (Operations input file) as: OperationCode ' ...
-                                        'OperationName OperationKeywords\n'],INPfile)
+                                        'OperationName OperationKeywords\n'],inputFile)
         fprintf(1,'Assuming no header lines\n')
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
@@ -155,7 +155,7 @@ case 'ops' % Read the operations input file:
     
 case 'mops' % Read the master operations input file:
     if beVocal
-        fprintf(1,'Need to format %s (Master Operations input file) as: MasterCode MasterLabel\n',INPfile)
+        fprintf(1,'Need to format %s (Master Operations input file) as: MasterCode MasterLabel\n',inputFile)
         fprintf(1,'Assuming no header lines\n')
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
@@ -171,10 +171,10 @@ fclose(fid);
 datain = datain{1}; % Collect one big matrix of cells
 numItems = size(datain,1); % Number of items in the input file
 
-if numItems == 0, error('The input file ''%s'' seems to be empty??',INPfile), end
+if numItems == 0, error('The input file ''%s'' seems to be empty??',inputFile), end
 
 if beVocal
-    fprintf(1,'Found %u %s in %s, I think. Take a look:\n\n',numItems,theWhat,INPfile)
+    fprintf(1,'Found %u %s in %s, I think. Take a look:\n\n',numItems,theWhat,inputFile)
     switch importWhat
     case 'ts'
         fprintf(1,'%s\t%s\n','-Filename-','-Keywords-')
@@ -219,7 +219,7 @@ if beVocal
     end
 end
 
-fprintf(1,'%s read.\n',INPfile)
+fprintf(1,'%s read.\n',inputFile)
 
 esc = @RA_sqlescapestring; % Inline function to add escape strings to format mySQL queries
 
@@ -354,7 +354,7 @@ if beVocal, fprintf(1,'done.\n'); end
 
 % Tell the user about duplicates
 if all(isDuplicate)
-    fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',numItems,theWhat,INPfile,databaseName,theWhat);
+    fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',numItems,theWhat,inputFile,databaseName,theWhat);
     return
 elseif sum(isDuplicate) > 0
     if beVocal
@@ -367,7 +367,7 @@ end
 %% Select the maximum id already in the table
 % ------------------------------------------------------------------------------
 maxid = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,theTable));
-if isempty(maxid) || isnan(maxid{1}) || isempty(maxid{1})
+if isempty(maxid) || isempty(maxid{1}) || isnan(maxid{1})
     % No time series exist in the database yet
     maxid = 0;
 else
@@ -444,7 +444,7 @@ if ~strcmp(importWhat,'mops')
         end
     end
     nkw = length(ukws); % The number of unique keywords in the new set of time series
-    if beVocal, fprintf(1,'\nI found %u unique keywords in the %u new %s in %s...',nkw,sum(~isDuplicate),theWhat,INPfile); end
+    if beVocal, fprintf(1,'\nI found %u unique keywords in the %u new %s in %s...',nkw,sum(~isDuplicate),theWhat,inputFile); end
 
     % How many overlap with existing keywords??:
     allkws = mysql_dbquery(dbc,sprintf('SELECT Keyword FROM %s',thektable));
@@ -605,7 +605,7 @@ SQL_closedatabase(dbc)
 %% Tell the user all about it
 % ------------------------------------------------------------------------------
 fprintf('All tasks completed in %s.\nRead %s then added %u %s into %s.\n', ...
-            BF_thetime(toc(ticker)), INPfile, sum(~isDuplicate), theWhat, databaseName);
+            BF_thetime(toc(ticker)), inputFile, sum(~isDuplicate), theWhat, databaseName);
 
 if strcmp(importWhat,'ts')
     fprintf(1,['Note that the imported data files are now in %s and no longer ' ...

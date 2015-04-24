@@ -180,6 +180,7 @@ updateMe = zeros(numWrite,1); % Label iterations that should be written to the d
 % ------------------------------------------------------------------------------
 
 writeBackTimer = tic; % Time how long this takes to give user feedback
+numReports = 3; % the number of time remaining updates to provide the user
 
 for i = 1:numWrite	
     
@@ -226,12 +227,12 @@ for i = 1:numWrite
     end
 
     % Give user feedback on how long is remaining:
-    if (i==50) && (i < numWrite/5) % give an initial estimate:
+    if (i==50) && (i < numWrite/numReports) % give an initial estimate:
         fprintf(1,['Based on the first 50 retrievals, this is taking ' ...
                 'approximately %s per entry to write to the database.\n'],BF_thetime(toc(writeBackTimer)));
 		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(writeBackTimer)/i*(numWrite-i)));
-    elseif mod(i,floor(numWrite/5))==0 % Give 5 more time updates...
-		fprintf(1,['Approximately %s remaining! -- so far %u (/ %u possible) entries have been'  ...
+    elseif mod(i,floor(numWrite/numReports))==0 % Give numReports more time updates...
+		fprintf(1,['Approximately %s remaining -- %u (/ %u possible) entries have been'  ...
 			' written to %s...\n'],BF_thetime(toc(writeBackTimer)/i*(numWrite-i)),sum(updateMe),i,dbname);
 	end
 end

@@ -59,7 +59,7 @@ end
 if doParallel
 	fprintf(fid,'Computation will be performed across multiple cores using Matlab''s Parallel Computing Toolbox\n')
 else % use single-threaded for loops
-	fprintf(fid,'Computations will be performed serially without parallelization\n')
+	fprintf(fid,'Computations will be performed serially without parallelization.\n')
 end
 
 % Be vocal?
