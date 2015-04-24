@@ -134,7 +134,7 @@ retrievalTimer = tic; % Time the retrieval (should be fast)
 if ~isempty(emsg)
     fprintf(1,'\n'); error('Error selecting %s elements from %s',writeWhat,dbname);
 elseif isempty(qrc)
-    fprintf(1,'\nNo %s elements in this range in the database anymore!\n',writeWhat);
+    fprintf(1,'\nNo %s elements in this range in the database anymore! Nothing to write.\n',writeWhat);
     SQL_closedatabase(dbc); return
 else
 	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_thetime(toc(retrievalTimer)));
@@ -241,9 +241,9 @@ end
 % Finished writing back to the database!
 % ------------------------------------------------------------------------------
 
-fprintf(1,['So that all seemed to go well -- we wrote %u new calculation results ' ...
-                '(/ %u) to the Results table in %s.\n'],sum(updateMe),numWrite,dbname);
-fprintf(1,'Writing to the database took a total of %s.\n',BF_thetime(toc(writeBackTimer)));
+fprintf(1,['Successfully wrote %u new calculation results ' ...
+            '(/ %u) to the Results table of %s in %s.\n'],...
+            sum(updateMe),numWrite,dbname,BF_thetime(toc(writeBackTimer)));
 
 if any(~updateMe) % Some entries were not written to the database
     fprintf(1,['%u entries were not written (previously-calculated errors) and remain ' ...
