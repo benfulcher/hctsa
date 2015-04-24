@@ -25,11 +25,14 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [dbConnection, errMessage] = mysql_dbopen(serverHost, databaseName, userName, password, customPort)
+function [dbConnection, errMessage] = mysql_dbopen(serverHost, databaseName, userName, password, customPort, useODBC)
 
 % Set defaults:
 if nargin < 5
     customPort = 3306; % use default port for mySQL: 3306
+end
+if nargin < 6
+    useODBC = 0; % faster, but Windows-only database connection
 end
 
 % ------------------------------------------------------------------------------
@@ -45,7 +48,13 @@ if dbToolboxExists
     % ------------------------------------------------------------------------------
     
     % A license is available for Matlab's Database Toolbox, use that:
-    dbConnection = database(databaseName,userName,password,'Vendor','MySQL','Server',serverHost,'PortNumber',customPort);
+    if useODBC
+        % The native ODBC connection is faster and isn't restricted by JVM heap memory, but Windows-only:
+        dbConnection = database.ODBCConnection(databaseName,userName,password);
+    else
+        % The JDBC interface is slower but platform independent
+        dbConnection = database(databaseName,userName,password,'Vendor','MySQL','Server',serverHost,'PortNumber',customPort);
+    end
     errMessage = dbConnection.Message;
     
     % Check for a connection error:

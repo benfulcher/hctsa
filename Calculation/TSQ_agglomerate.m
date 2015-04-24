@@ -51,17 +51,21 @@ end
 % ------------------------------------------------------------------------------
 %% Read in information from local files
 fid = 1; % haha no more logging option...
+loadTimer = tic;
 fprintf(fid,'Loading data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat')
-fprintf(fid,' Done.\n');
+fprintf(fid,' Done in %s.\n',BF_thetime(toc(loadTimer)));
+clear loadTimer
 
 % ------------------------------------------------------------------------------
 %% Preliminary definitions
 % ------------------------------------------------------------------------------
 numTS = length(TimeSeries); % Number of time series
 numOps = length(Operations); % Number of operations
-ts_ids_string = BF_cat([TimeSeries.ID],',');
-op_ids_string = BF_cat([Operations.ID],',');
+ts_id_loc = [TimeSeries.ID]; % tsids in local file
+op_id_loc = [Operations.ID]; % opids in local file
+ts_ids_string = BF_cat(ts_id_loc,',');
+op_ids_string = BF_cat(op_id_loc,',');
 
 % ------------------------------------------------------------------------------
 %% Check that nothing has been deleted since the data was loaded...
@@ -156,8 +160,8 @@ case 'nullerror'
 end
 
 localIndex = zeros(numWrite,2);
-localIndex(:,1) = arrayfun(@(x)find([TimeSeries.ID] == x,1),ts_id_db); % Indices of rows in local file for each entry in the database
-localIndex(:,2) = arrayfun(@(x)find([Operations.ID] == x,1),op_id_db); % Indicies of columns in local file for each entry in the database
+localIndex(:,1) = arrayfun(@(x)find(ts_id_loc == x,1),ts_id_db); % Indices of rows in local file for each entry in the database
+localIndex(:,2) = arrayfun(@(x)find(op_id_loc == x,1),op_id_db); % Indicies of columns in local file for each entry in the database
 updateMe = zeros(numWrite,1); % Label iterations that should be written to the database
 
 % ------------------------------------------------------------------------------

@@ -357,9 +357,11 @@ fprintf(fid,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1)
 
 % Save the local files for subsequent upload to the mySQL database
 fprintf(1,'Saving all results to HCTSA_loc.mat...')
+saveTimer = tic;
 save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
                                 'Operations','MasterOperations','-v7.3')
-fprintf(fid,' Saved.\n')
+fprintf(fid,' Saved in %s.\n',BF_thetime(toc(saveTimer)))
+clear saveTimer
 
 % Close the .log file:
 if doLog

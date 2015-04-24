@@ -8,34 +8,34 @@
 % Removed the additional outputs that are never actually used.
 % ------------------------------------------------------------------------------
 
-function [execresult, errmessage] = mysql_dbexecute(dbconn, sqlcommand)
+function [execResult, errMessage] = mysql_dbexecute(dbconn, sqlcommand)
 
 switch class(dbconn)
 case 'database'
     % Database connection opened using database toolbox:
     curs = exec(dbconn,sqlcommand);
-    errmessage = curs.Message;
+    errMessage = curs.Message;
 
     % Close cursor object:
     close(curs);
     
-    if isempty(errmessage)
+    if isempty(errMessage)
         % Success!:
-        execresult = 0;
+        execResult = 0;
     else
-        execresult = [];
+        execResult = [];
     end
 
 case 'com.mysql.jdbc.JDBC4Connection'
     % Database connection opened using java commands:
     try
         dbstmt = dbconn.createStatement();
-        execresult = dbstmt.execute(sqlcommand);
-        errmessage = [];
+        execResult = dbstmt.execute(sqlcommand);
+        errMessage = [];
     catch
         le = lasterror;
-        errmessage = le.message;
-        execresult = [];
+        errMessage = le.message;
+        execResult = [];
     end
 
 otherwise

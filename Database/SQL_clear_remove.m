@@ -22,10 +22,10 @@
 % 
 %
 %---INPUTS:
-% tsorop -- either 'ts' or 'mets' for whether to eliminate either a time series of a metric, respectively
+% tsorop -- either 'ts' or 'ops' for whether to eliminate either a time series of a metric, respectively
 % vin -- a vector of the ts_ids or op_ids in the database to remove
 % dbname -- can specify a custom database else will use default database in SQL_opendatabase
-% dolog -- generate a .log file describing what was done (does this by default)
+% doLog -- generate a .log file describing what was done (does this by default)
 % 
 %---HISTORY:
 % 2/12/2009 Ben Fulcher. Rehauled to use mySQL database system.
@@ -47,7 +47,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_clear_remove(tsorop,vin,doremove,dbname,dolog)
+function SQL_clear_remove(tsorop,vin,doremove,dbname,doLog)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries and input checking
@@ -89,8 +89,8 @@ if nargin < 4, dbname = ''; fprintf(1,'Using default database\n'); end
 [dbc, dbname] = SQL_opendatabase(dbname);
 
 % write a .log file of the clearing process by default
-if nargin < 5 || isempty(dolog)
-	dolog = 0;
+if nargin < 5 || isempty(doLog)
+	doLog = 0;
 end
 
 % ------------------------------------------------------------------------------
@@ -117,9 +117,9 @@ end
 % ------------------------------------------------------------------------------
 %% Check what to clear/remove
 % ------------------------------------------------------------------------------
-SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
+selectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
                                 thename,thetable,theid,BF_cat(vin,','));
-[todump,emsg] = mysql_dbquery(dbc,SelectString);
+[todump,emsg] = mysql_dbquery(dbc,selectString);
 
 if ~isempty(emsg)
 	error('Error retrieving selected %s indices (%s) from the %s table of %s', ...
@@ -196,13 +196,13 @@ else
     if isempty(emsg)
     	if strcmp(tsorop,'ts')
     		% Get number of operations to work out how many entries were cleared
-    		SelectString = 'SELECT COUNT(op_id) as nm FROM Operations';
-    		nm = mysql_dbquery(dbc,SelectString); nm = nm{1};		
-    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),nm,nm*length(vin),dbname);
+    		selectString = 'SELECT COUNT(op_id) as numOps FROM Operations';
+    		numOps = mysql_dbquery(dbc,selectString); numOps = numOps{1};		
+    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),numOps,numOps*length(vin),dbname);
     	else
     		% Get number of time series to work out how many entries were cleared
-    		SelectString = 'SELECT COUNT(ts_id) as nts FROM TimeSeries';
-    		nts = mysql_dbquery(dbc,SelectString); nts = nts{1};
+    		selectString = 'SELECT COUNT(ts_id) as nts FROM TimeSeries';
+    		nts = mysql_dbquery(dbc,selectString); nts = nts{1};
     		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),nts,nts*length(vin),dbname);
     	end
     else
@@ -218,7 +218,7 @@ SQL_closedatabase(dbc) % database closed
 % ------------------------------------------------------------------------------
 %% Write a log file of information
 % ------------------------------------------------------------------------------
-if dolog
+if doLog
     fn = 'SQL_clear.log'; % log filename
 	fprintf(1,'Writing log file to ''%s''\n',fn)
 
