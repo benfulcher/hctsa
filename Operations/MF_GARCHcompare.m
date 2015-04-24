@@ -59,7 +59,7 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_GARCHcompare(y,preproc,pr,qr,randomSeed)
+function out = MF_GARCHcompare(y,preproc,pr,qr,randomSeed,beVocal)
 
 % ------------------------------------------------------------------------------
 %% Check that an Econometrics Toolbox license is available:
@@ -85,6 +85,11 @@ end
 % randomSeed: how to treat the randomization (in BF_Whiten)
 if nargin < 5
     randomSeed = [];
+end
+
+% beVocal: whether to speak to the command line
+if nargin < 6
+    beVocal = 0; % (no by default)
 end
 
 % ------------------------------------------------------------------------------
@@ -166,16 +171,18 @@ for i = 1:np
        [Gfit, estParamCov, LLF, info] = estimate(GModel,y,'Display','off');
        % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
        
-       nparams = sum(any(estParamCov)); % number of parameters       
-       if nparams < p + q + 1
-           fprintf(1,'Bad fit at p = %u, q = %u\n',p,q);
+       numParams = sum(any(estParamCov)); % number of parameters       
+       if numParams < p + q + 1
+           if beVocal
+               fprintf(1,'Bad fit at p = %u, q = %u\n',p,q);
+           end
            isBad(i,j) = 1;
            continue; % didn't fit successfully; everything stays NaN
        end
        
        % (iii) store derived statistics on the fitted model
        LLFs(i,j) = LLF;
-       [AIC, BIC] = aicbic(LLF,nparams,N); % aic and bic of fit
+       [AIC, BIC] = aicbic(LLF,numParams,N); % aic and bic of fit
        AICs(i,j) = AIC;
        BICs(i,j) = BIC;
        Ks(i,j) = Gfit.Constant;

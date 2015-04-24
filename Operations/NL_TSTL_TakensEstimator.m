@@ -73,7 +73,7 @@ end
 % 4) Embedding parameters
 if nargin < 5 || isempty(embedParams)
     embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default time-delay embedding using autocorrelation and cao\n')
+    fprintf(1,'Using default time-delay embedding using autocorrelation and fnn-mar\n')
 else
     if length(embedParams) ~= 2
         error('Embedding parameters are incorrectly formatted, we need {tau,m}')

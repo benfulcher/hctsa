@@ -52,14 +52,16 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function y_embed = BF_embed(y,tau,m,sig,randomSeed)
+function y_embed = BF_embed(y,tau,m,sig,randomSeed,beVocal)
 
-beVocal = 1; % display information about embedding
 N = length(y); % length of the input time series, y
 
 % randomSeed: how to treat the randomization
 if nargin < 5
     randomSeed = []; % default
+end
+if nargin < 6
+    beVocal = 0; % by default, do not display information about the embedding
 end
 
 % ------------------------------------------------------------------------------
