@@ -193,7 +193,7 @@ else
     	if strcmp(tsorop,'ts')
     		% Get number of operations to work out how many entries were cleared
     		selectString = 'SELECT COUNT(op_id) as numOps FROM Operations';
-    		numOps = mysql_dbquery(dbc,selectString); numOps = numOps{1};		
+    		numOps = mysql_dbquery(dbc,selectString); numOps = numOps{1};
     		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(idRange),numOps,numOps*length(idRange),dbname);
     	else
     		% Get number of time series to work out how many entries were cleared
