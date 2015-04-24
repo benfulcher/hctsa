@@ -111,20 +111,15 @@ end
 % ------------------------------------------------------------------------------
 %% Write the file
 % ------------------------------------------------------------------------------
-% to the millisecond (only get double-write error for same function called in same millisecond
-tmp_folder = tempdir;
-fileName = sprintf('hctsa_tisean_fnn_tau%u_M%u_t%u_%s.tmp',tau,maxm,theilerWin,datestr(now,'yymmdd_HHMMSS_FFF')); % filename
-% Place in the system temp directory:
-fileName = fullfile(tmp_folder,fileName);
-dlmwrite(fileName,y);
-fprintf(1,'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN\n',length(y),fileName)
+filePath = BF_WriteTempFile(y);
+fprintf(1,'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN.\n',length(y),filePath)
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, false_nearest
 % ------------------------------------------------------------------------------
-tisean_command = sprintf(['false_nearest -d%u -m1 -M1,%u -t%u -V0 %s'],tau,maxm,theilerWin,fileName);
+tisean_command = sprintf(['false_nearest -d%u -m1 -M1,%u -t%u -V0 %s'],tau,maxm,theilerWin,filePath);
 [~, res] = system(tisean_command);
-delete(fileName) % remove the temporary time-series data file
+delete(filePath) % remove the temporary time-series data file
 
 % first column: the embedding dimension
 % second column: the fraction of false nearest neighbors

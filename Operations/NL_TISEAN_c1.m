@@ -133,60 +133,55 @@ end
 % ------------------------------------------------------------------------------
 %% Write the temporary data file
 % ------------------------------------------------------------------------------
-% Adds parameter set and timestamp to the millisecond:
-fileName = sprintf('hctsa_tisean_c1_tau%u_m%u-%u_t%u_n%u_%s.tmp',tau,mmm(1),mmm(2),tsep,Nref,datestr(now,'HHMMSS_FFF'));
-% Place in the system temp directory:
-tmp_folder = tempdir;
-fileName = fullfile(tmp_folder,fileName);
-dlmwrite(fileName,y);
-fprintf(1,'Wrote temporary data file ''%s'' for TISEAN\n',fileName)
+filePath = BF_WriteTempFile(y);
+fprintf(1,'Wrote temporary data file ''%s'' for TISEAN\n',filePath)
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code
 % ------------------------------------------------------------------------------
 % run c1 code
 tic
-[~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',tau,mmm(1),mmm(2),tsep,Nref,fileName,fileName));
-delete(fileName) % remove the temporary data file
+[~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',tau,mmm(1),mmm(2),tsep,Nref,filePath,filePath));
+delete(filePath) % remove the temporary data file
 % [~, res] = system(['c1 -d' num2str(tau) ' -m' num2str(mmm(1)) ...
 %                     ' -M' num2str(mmm(2)) ' -t' num2str(tsep) ' -n' ...
-%                     num2str(Nref) ' -o ' fileName '.c1 ' fileName]);
+%                     num2str(Nref) ' -o ' filePath '.c1 ' filePath]);
 if isempty(res)
-    if exist([fileName '.c1']), delete([fileName '.c1']); end % remove the TISEAN file write output
-    error('Call to TISEAN method ''c1'' failed');
+    if exist([filePath '.c1']), delete([filePath '.c1']); end % remove the TISEAN file write output
+    error('Call to TISEAN method ''c1'' failed.');
 else
-    fprintf(1,'TISEAN function ''c1'' took %s\n',BF_thetime(toc,1))
+    fprintf(1,'TISEAN function ''c1'' took %s.\n',BF_thetime(toc,1))
 end
 
-if ~exist([fileName '.c1'])
-    error([fileName,'.c1 not generated??! Could be due to an overly long filename...']);
+if ~exist([filePath '.c1'])
+    error([filePath,'.c1 not generated??! Could be due to an overly long filename...']);
 end
 
 % Get local slopes from c1 file output of previous call
 tic
-[~, res] = system(sprintf('c2d -a2 %s.c1',fileName));
+[~, res] = system(sprintf('c2d -a2 %s.c1',filePath));
 
 if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
-    if exist([fileName '.c1']), delete([fileName '.c1']); end % remove the TISEAN file write output
+    if exist([filePath '.c1']), delete([filePath '.c1']); end % remove the TISEAN file write output
     if isempty(res)
-        error('Call to TISEAN function ''c1'' failed');
+        error('Call to TISEAN function ''c1'' failed.');
     else
-        error('Call to TISEAN function ''c1'' failed: %s',res)
+        error('Call to TISEAN function ''c1'' failed: %s.',res)
     end
 end
 
 fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc,1))
-if exist([fileName '.c1']), delete([fileName '.c1']); end % remove the TISEAN file write output
+if exist([filePath '.c1']), delete([filePath '.c1']); end % remove the TISEAN file write output
 
 % ------------------------------------------------------------------------------
 %% Get the output
 % ------------------------------------------------------------------------------
 % 1) C1 (don't worry about this anymore, just the local slopes
 
-% fid = fopen([fileName '.c1']);
+% fid = fopen([filePath '.c1']);
 % s = textscan(fid,'%[^\n]');
 % if isempty(s)
-%     disp(['Error reading TISEAN output file ' fileName '.c1'])
+%     disp(['Error reading TISEAN output file ' filePath '.c1'])
 %     return;
 % end
 % s = s{1};
@@ -196,11 +191,11 @@ if exist([fileName '.c1']), delete([fileName '.c1']); end % remove the TISEAN fi
 s = textscan(res,'%[^\n]');
 s = s{1};
 if isempty(s)
-    error('Error reading TISEAN output file %s.c1',fileName)
+    error('Error reading TISEAN output file %s.c1',filePath)
 end
 c1dat = SUB_readTISEANout(s,'#m=',2);
 if isempty(c1dat)
-    error('Error reading TISEAN output file %s.c1: %s',fileName,s{1})
+    error('Error reading TISEAN output file %s.c1: %s',filePath,s{1})
 end
 
 % issues: x-values differ for each dimension
