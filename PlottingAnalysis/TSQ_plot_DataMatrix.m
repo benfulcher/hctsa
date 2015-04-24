@@ -114,7 +114,7 @@ end
 % --------------------------------------------------------------------------
 figure('color','w'); box('on');
 title(sprintf('Data matrix of size %u x %u',numTS,numOps))
-ng = 6; % number of gradations in each set of colourmap
+numColorMapGrads = 6; % number of gradations in each set of colourmap
 
 if colorGroups
     gi = BF_ToGroup(timeSeriesGroups);
@@ -152,67 +152,67 @@ end
 % --------------------------------------------------------------------------
 if numGroups <= 1
     if strcmp(customColorMap,'redyellowblue');
-        customColorMap = BF_getcmap('redyellowblue',ng,0);
+        customColorMap = flipud(BF_getcmap('redyellowblue',numColorMapGrads,0));
     else
-        customColorMap = gray(ng);
+        customColorMap = gray(numColorMapGrads);
     end
     colormap(customColorMap)
 else
-    cmap = colormap(BF_getcmap('blues',ng,0,1));
+    cmap = colormap(BF_getcmap('blues',numColorMapGrads,0,1));
     if numGroups >= 2
-        cmap = [cmap; BF_getcmap('greens',ng,0,1)];
+        cmap = [cmap; BF_getcmap('greens',numColorMapGrads,0,1)];
     end
     if numGroups >= 3
-        cmap = [cmap; BF_getcmap('oranges',ng,0,1)];
+        cmap = [cmap; BF_getcmap('oranges',numColorMapGrads,0,1)];
     end
     if numGroups >= 4
-        cmap = [cmap; BF_getcmap('purples',ng,0,1)];
+        cmap = [cmap; BF_getcmap('purples',numColorMapGrads,0,1)];
     end
     if numGroups >= 5
-        cmap = [cmap; BF_getcmap('reds',ng,0,1)];
+        cmap = [cmap; BF_getcmap('reds',numColorMapGrads,0,1)];
     end
     if numGroups >= 6
-        cmap = [cmap; pink(ng)];
+        cmap = [cmap; pink(numColorMapGrads)];
     end
     if numGroups >= 7
-        cmap = [cmap; gray(ng)];
+        cmap = [cmap; gray(numColorMapGrads)];
     end
     if numGroups >= 8
-        cmap = [cmap; BF_getcmap('yelloworangered',ng,0,1)];
+        cmap = [cmap; BF_getcmap('yelloworangered',numColorMapGrads,0,1)];
     end
     if numGroups >= 9
-        cmap = [cmap; BF_getcmap('purplebluegreen',ng,0,1)];
+        cmap = [cmap; BF_getcmap('purplebluegreen',numColorMapGrads,0,1)];
     end
     if numGroups >= 10
-        cmap = [cmap; BF_getcmap('yellowgreenblue',ng,0,1)];
+        cmap = [cmap; BF_getcmap('yellowgreenblue',numColorMapGrads,0,1)];
     end
     if numGroups >= 11
-        cmap = [cmap; BF_getcmap('purpleblue',ng,0,1)];
+        cmap = [cmap; BF_getcmap('purpleblue',numColorMapGrads,0,1)];
     end
     if numGroups >= 12
-        cmap = [cmap; BF_getcmap('purplered',ng,0,1)];
+        cmap = [cmap; BF_getcmap('purplered',numColorMapGrads,0,1)];
     end
     if numGroups >= 13
-        cmap = [cmap; BF_getcmap('redpurple',ng,0,1)];
+        cmap = [cmap; BF_getcmap('redpurple',numColorMapGrads,0,1)];
     end
     if numGroups >= 14
-        cmap = [cmap; BF_getcmap('orangered',ng,0,1)];
+        cmap = [cmap; BF_getcmap('orangered',numColorMapGrads,0,1)];
     end
     if numGroups >= 15
-        cmap = [cmap; BF_getcmap('yelloworangebrown',ng,0,1)];
+        cmap = [cmap; BF_getcmap('yelloworangebrown',numColorMapGrads,0,1)];
     end
     if numGroups >= 16
-        cmap = [cmap; BF_getcmap('greenblue',ng,0,1)];
+        cmap = [cmap; BF_getcmap('greenblue',numColorMapGrads,0,1)];
     end
     if numGroups >= 17
-        cmap = [cmap; BF_getcmap('bluepurple',ng,0,1)];
+        cmap = [cmap; BF_getcmap('bluepurple',numColorMapGrads,0,1)];
     end
     if numGroups >= 18
-        cmap = [cmap; BF_getcmap('bluegreen',ng,0,1)];
+        cmap = [cmap; BF_getcmap('bluegreen',numColorMapGrads,0,1)];
     end
     if numGroups >= 19
         fprintf(1,'Too many data groups to colour them correctly\n');
-        cmap = BF_getcmap('spectral',ng);
+        cmap = BF_getcmap('spectral',numColorMapGrads);
     end
     colormap(cmap)
 end

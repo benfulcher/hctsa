@@ -100,16 +100,12 @@ if (doRemove == 0) % clear data
     reply = input(sprintf(['Preparing to clear data for %u %s from %s. ' ...
                                 '[press any key to continue]'], ...
                                     length(idRange),thewhat,dbname),'s');
-    doingWhat = 'clearing';
     doWhat = 'clear';
-    
 elseif doRemove == 1
     reply = input(sprintf(['Preparing to REMOVE %u %s from %s -- DRASTIC STUFF! ' ...
                                 'I HOPE THIS IS OK?! [press any key to continue]\n'], ...
                                 length(idRange),thewhat,dbname),'s');
-    doingWhat = 'remoidRangeg';
     doWhat = 'remove';
-    
 else
     error('Third input must be (0 to clear), or (1 to remove)')
 end
