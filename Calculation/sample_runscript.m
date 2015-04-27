@@ -55,12 +55,12 @@ for i = 1:length(tsid_range)
 	
 	% Loop over:
 	% (i) Running SQL_retrieve to retrieve data from the database -> HCTSA_loc.mat
-	% (ii) Using TSQ_brawn to calculate missing entries
+	% (ii) Using TS_compute to calculate missing entries
 	% (iii) Running SQL_store to write results back into the database
 
 	didWrite = SQL_retrieve(tsid_range(i),opids,writeWhat); % Collect the null entries in the database
     if didWrite % Only calculate if SQL_retrieve found time series to retrieve:
-        TSQ_brawn(doLog,doParallelize); % Compute the operations and time series retrieved
+        TS_compute(doLog,doParallelize); % Compute the operations and time series retrieved
         SQL_store(writeWhat,doLog); % Store the results back to the database
     else
         fprintf(1,'No calculation performed at ts_id = %u\n',tsid_range(i));

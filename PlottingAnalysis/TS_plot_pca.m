@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% TSQ_plot_pca
+% TS_plot_pca
 % ------------------------------------------------------------------------------
 %
 % Calculates then plots a lower-dimensional feature-based representation of the
@@ -32,7 +32,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_pca(whatData,TsorOps,showDist,classMeth,annotateParams)
+function TS_plot_pca(whatData,TsorOps,showDist,classMeth,annotateParams)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
@@ -99,7 +99,7 @@ if strcmp(whatData,'cl') || strcmp(whatData,'norm')  || ischar(whatData)
                 dataGroups = {};
                 GroupNames = {'all data'};
                 % fprintf(1,'\n');
-                % error('No groups assigned -- Use TSQ_LabelGroups to provide group information.')
+                % error('No groups assigned -- Use TS_LabelGroups to provide group information.')
             end
             clear('TimeSeries'); % we no longer need you
         end
@@ -192,7 +192,7 @@ featLabel = cell(2,2); % Feature label :: proportion of total (columns are PCs)
 % end
 
 % ------------------------------------------------------------------------------
-% Plot this two-dimensional representation of the data using TSQ_plot_2d
+% Plot this two-dimensional representation of the data using TS_plot_2d
 % ------------------------------------------------------------------------------
 
 nameString = 'PC';
@@ -200,13 +200,13 @@ for i = 1:2
     DataInfo.labels{i} = sprintf('%s %u (%.2f%%)',nameString,i,percVar(i));
 end
 
-% function TSQ_plot_2d(Features,DataInfo,TrainTest,annotateParams,keepksdensities,lossmeth,extras)
+% function TS_plot_2d(Features,DataInfo,TrainTest,annotateParams,keepksdensities,lossmeth,extras)
 
 DataInfo.GroupNames = GroupNames;
 DataInfo.GroupIndices = GroupIndices;
 DataInfo.DataLabels = DataLabels;
 DataInfo.TimeSeriesData = TimeSeriesData;
 
-TSQ_plot_2d(score(:,1:2),DataInfo,{},annotateParams,showDist,classMeth);
+TS_plot_2d(score(:,1:2),DataInfo,{},annotateParams,showDist,classMeth);
 
 end

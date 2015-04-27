@@ -1,5 +1,5 @@
 % --------------------------------------------------------------------------
-% TSQ_InspectQuality
+% TS_InspectQuality
 % --------------------------------------------------------------------------
 % 
 % This function loads the matrix in HCTSA_loc.mat, plots it, showing the 
@@ -24,7 +24,7 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-function TSQ_InspectQuality()
+function TS_InspectQuality()
 
 load('HCTSA_loc.mat','TS_Quality','TimeSeries','Operations');
 

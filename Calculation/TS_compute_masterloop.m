@@ -1,8 +1,8 @@
 % ------------------------------------------------------------------------------
-% TSQ_brawn_masterloop
+% TS_compute_masterloop
 % ------------------------------------------------------------------------------
 % 
-% Function used in a loop by TSQ_brawn to evaluate a given master function.
+% Function used in a loop by TS_compute to evaluate a given master function.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -20,7 +20,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [masterOutput, masterTime] = TSQ_brawn_masterloop(x, y, masterCode, masterID, numMasterOps, fid, beVocal, theTsID)
+function [masterOutput, masterTime] = TS_compute_masterloop(x, y, masterCode, masterID, numMasterOps, fid, beVocal, theTsID)
 
 if beVocal
     % Display code name for error checking

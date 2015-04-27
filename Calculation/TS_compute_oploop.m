@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% TSQ_brawn_oploop
+% TS_compute_oploop
 % ------------------------------------------------------------------------------
 % 
 % Function that links operations to outputs of corresponding master operations,
@@ -21,7 +21,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [opOutput, opQuality, opTime] = TSQ_brawn_oploop(masterOutput, masterCalcTime, masterLabel, operationCode, fid)
+function [opOutput, opQuality, opTime] = TS_compute_oploop(masterOutput, masterCalcTime, masterLabel, operationCode, fid)
     
 try
     if iscell(masterOutput) % there was an error evaluating this master operation:

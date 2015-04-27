@@ -1,5 +1,5 @@
 % --------------------------------------------------------------------------
-% TSQ_brawn
+% TS_compute
 % --------------------------------------------------------------------------
 % 
 % This function fills in the missing elements of TS_DataMat, from HCTSA_loc.mat
@@ -32,7 +32,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_brawn(doLog,doParallel,beVocal)
+function TS_compute(doLog,doParallel,beVocal)
     
 % --------------------------------------------------------------------------
 %% Check inputs and set defaults
@@ -210,13 +210,13 @@ for i = 1:numTimeSeries
 		if doParallel
             parfor jj = 1:numMopsToCalc % PARFOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
-                            TSQ_brawn_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
+                            TS_compute_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
                                         par_mop_ids(jj),numMopsToCalc,fid,beVocal,TimeSeries_i_ID);
             end
         else
             for jj = 1:numMopsToCalc % Normal FOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
-                            TSQ_brawn_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
+                            TS_compute_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
                                         par_mop_ids(jj),numMopsToCalc,fid,beVocal,TimeSeries_i_ID);
             end
 		end
@@ -240,7 +240,7 @@ for i = 1:numTimeSeries
         % --------------------------------------------------------------------------
 		if doParallel
 	        parfor jj = 1:numCalc
-                [ffi(jj), qqi(jj), cti(jj)] = TSQ_brawn_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
+                [ffi(jj), qqi(jj), cti(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
                                                    MasterCalcTime(par_OperationMasterInd(jj)), ...
                                                    par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
                                                    par_OperationCodeString{jj},fid);
@@ -248,7 +248,7 @@ for i = 1:numTimeSeries
 		else
             for jj = 1:numCalc
                 try
-                    [ffi(jj), qqi(jj), cti(jj)] = TSQ_brawn_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
+                    [ffi(jj), qqi(jj), cti(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
                                                        MasterCalcTime(par_OperationMasterInd(jj)), ...
                                                        par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
                                                        par_OperationCodeString{jj},fid);

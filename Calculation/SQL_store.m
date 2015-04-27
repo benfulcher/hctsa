@@ -4,7 +4,7 @@
 % 
 % Uploads data in the HCTSA_loc file in the current directory back into the
 % mySQL database. Should be done to store the result new computations done by
-% TSQ_brawn.
+% TS_compute.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

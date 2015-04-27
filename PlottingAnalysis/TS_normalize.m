@@ -1,5 +1,5 @@
 % --------------------------------------------------------------------------
-% TSQ_normalize
+% TS_normalize
 % --------------------------------------------------------------------------
 % 
 % Reads in data from HCTSA_loc.mat, writes a trimmed, normalized version to
@@ -41,7 +41,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_normalize(normFunction,filterOptions,fileName_HCTSA_loc,subs,trainset)
+function TS_normalize(normFunction,filterOptions,fileName_HCTSA_loc,subs,trainset)
 
 % --------------------------------------------------------------------------
 %% Check Inputs
@@ -333,7 +333,7 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n', ...
 % Make a structure with statistics on normalization:
 % Save the codeToRun, so you can check the settings used to run the normalization
 % At the moment, only saves the first two arguments
-codeToRun = sprintf('TSQ_normalize(''%s'',[%f,%f])',normFunction, ...
+codeToRun = sprintf('TS_normalize(''%s'',[%f,%f])',normFunction, ...
                                         filterOptions(1),filterOptions(2));
 normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
                                     filterOptions,'codeToRun',codeToRun);

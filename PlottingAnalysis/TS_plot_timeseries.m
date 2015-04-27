@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% TSQ_plot_timeseries
+% TS_plot_timeseries
 % ------------------------------------------------------------------------------
 % 
 % Plots the time series read from a local file, in a specified format.
@@ -39,7 +39,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_timeseries(whatData,whatTimeSeries,numPerGroup,maxLength,plotOptions)
+function TS_plot_timeseries(whatData,whatTimeSeries,numPerGroup,maxLength,plotOptions)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs

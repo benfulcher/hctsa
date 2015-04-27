@@ -1,5 +1,5 @@
 % --------------------------------------------------------------------------
-% TSQ_LabelGroups
+% TS_LabelGroups
 % --------------------------------------------------------------------------
 % 
 % You provide a set of keyword options to store a specific grouping of time series.
@@ -14,7 +14,7 @@
 % 
 %---EXAMPLE USAGE:
 % groupIndices =
-% TSQ_LabelGroups('norm',{'space',100;'',200;'medical',0;...},'ts');
+% TS_LabelGroups('norm',{'space',100;'',200;'medical',0;...},'ts');
 % 
 %---INPUTS:
 % keywordGroups: The keyword groups, a cell of strings: 
@@ -44,7 +44,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function groupIndices = TSQ_LabelGroups(whatData,keywordGroups,TsorOps,saveBack)
+function groupIndices = TS_LabelGroups(whatData,keywordGroups,TsorOps,saveBack)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:

@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% TSQ_combine
+% TS_combine
 % ------------------------------------------------------------------------------
 % 
 % This function joins two HCTSA_loc.mat files.
@@ -11,7 +11,7 @@
 %---INPUTS:
 % HCTSA_loc_1: the path to the first HCTSA_loc.mat file
 % HCTSA_loc_2: the path to the second HCTSA_loc.mat file
-% Compare_tsids: whether to consider ts_ids in each file as the same. If
+% compare_tsids: whether to consider ts_ids in each file as the same. If
 % this is true (default) , it removes matching ts_ids so duplicates cannot occur in the 
 % combined matrix. But if the two to be joined are from different databases,
 % then this should be set to 0.
@@ -35,7 +35,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_combine(HCTSA_loc_1,HCTSA_loc_2,Compare_tsids)
+function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -48,9 +48,9 @@ end
 if nargin < 3
     % Assume both are from the same database, so we should filter out any
     % intersection between ts_ids in the two matrices
-    Compare_tsids = 1;
+    compare_tsids = 1;
 end
-if Compare_tsids
+if compare_tsids
     fprintf(1,['Assuming both %s and %s came from the same database so that' ...
                     ' ts_ids are comparable.\n'],HCTSA_loc_1,HCTSA_loc_2);
 else
@@ -82,16 +82,16 @@ end
 % Load the two local files
 % ------------------------------------------------------------------------------
 fprintf(1,'Loading data...');
-LoadedData = cell(2,1);
+loadedData = cell(2,1);
 for i = 1:2
-    LoadedData{i} = load(HCTSA_locs{i});
+    loadedData{i} = load(HCTSA_locs{i});
 end
 fprintf(1,' Loaded.\n');
 
 % Give some information
 for i = 1:2
     fprintf(1,'%u: The file, %s, contains information for %u time series and %u operations.\n', ...
-                    i,HCTSA_locs{i},length(LoadedData{i}.TimeSeries),length(LoadedData{i}.Operations));
+                    i,HCTSA_locs{i},length(loadedData{i}.TimeSeries),length(loadedData{i}.Operations));
 end
 
 % ------------------------------------------------------------------------------
@@ -100,27 +100,27 @@ end
 % As a basic concatenation, then remove any duplicates
 
 % First want to remove any additional fields
-isextrafield = cellfun(@(x)~ismember(fieldnames(x.TimeSeries),{'ID','FileName','Keywords', ...
-                            'Length','Data'}),LoadedData,'UniformOutput',0);
+isextrafield = cellfun(@(x)~ismember(fieldnames(x.TimeSeries),{'ID','fileName','Keywords', ...
+                            'Length','Data'}),loadedData,'UniformOutput',0);
 for i = 1:2
     if any(isextrafield{i})
         theextrafields = find(isextrafield{i});
-        thefieldnames = fieldnames(LoadedData{i}.TimeSeries);
+        thefieldnames = fieldnames(loadedData{i}.TimeSeries);
         for j = 1:length(theextrafields)
-            LoadedData{i}.TimeSeries = rmfield(LoadedData{i}.TimeSeries,thefieldnames{theextrafields(j)});
+            loadedData{i}.TimeSeries = rmfield(loadedData{i}.TimeSeries,thefieldnames{theextrafields(j)});
             fprintf(1,'Extra field ''%s'' in %s\n',thefieldnames{theextrafields(j)},HCTSA_locs{i});
         end
     end
 end
 
 % Now that fields should match the default fields, concatenate:
-TimeSeries = cell2struct([struct2cell(LoadedData{1}.TimeSeries), ...
-                          struct2cell(LoadedData{2}.TimeSeries)], ...
-                                {'ID','FileName','Keywords','Length','Data'});
+TimeSeries = cell2struct([struct2cell(loadedData{1}.TimeSeries), ...
+                          struct2cell(loadedData{2}.TimeSeries)], ...
+                                {'ID','fileName','Keywords','Length','Data'});
 % Check for time series duplicates
 [uniquetsids, ix] = unique(vertcat(TimeSeries.ID));
-DidTrim = 0;
-if Compare_tsids % ts_ids are comprable between the two files (i.e., retrieved from the same mySQL database)
+didTrim = 0;
+if compare_tsids % ts_ids are comprable between the two files (i.e., retrieved from the same mySQL database)
     if length(uniquetsids) < length(TimeSeries)
         fprintf(1,'We''re assuming that ts_ids are equivalent between the two input files\n');
         fprintf(1,'We need to trim duplicates with the same ts_ids\n');
@@ -129,7 +129,7 @@ if Compare_tsids % ts_ids are comprable between the two files (i.e., retrieved f
         fprintf(1,'Trimming %u duplicate time series to a total of %u\n', ...
                         length(TimeSeries)-length(uniquetsids),length(uniquetsids));
         TimeSeries = TimeSeries(ix);
-        DidTrim = 1;
+        didTrim = 1;
     else
         fprintf(1,'All time series were distinct, we now have a total of %u.\n',length(TimeSeries));
     end
@@ -139,11 +139,11 @@ end
 % Construct an intersection of operations
 % ------------------------------------------------------------------------------
 % Take intersection of operation ids, and take information from first input
-[allopids,keepopi_1,keepopi_2] = intersect(vertcat(LoadedData{1}.Operations.ID),vertcat(LoadedData{2}.Operations.ID));
-% keepopi_1 = ismember(LoadedData{1}.Operations.ID,allopids); % Indices of operations kept in Loaded Data (1)
-% keepopi_2 = ismember(LoadedData{2}.Operations.ID,allopids); % Indices of operations kept in Loaded Data (2)
+[allopids,keepopi_1,keepopi_2] = intersect(vertcat(loadedData{1}.Operations.ID),vertcat(loadedData{2}.Operations.ID));
+% keepopi_1 = ismember(loadedData{1}.Operations.ID,allopids); % Indices of operations kept in Loaded Data (1)
+% keepopi_2 = ismember(loadedData{2}.Operations.ID,allopids); % Indices of operations kept in Loaded Data (2)
 % Data from first file goes in (should be identical to in the second file)
-Operations = LoadedData{1}.Operations(keepopi_1);
+Operations = loadedData{1}.Operations(keepopi_1);
 
 fprintf(1,'Keeping the %u overlapping operations.\n',length(allopids));
 
@@ -151,45 +151,45 @@ fprintf(1,'Keeping the %u overlapping operations.\n',length(allopids));
 % Construct an intersection of MasterOperations
 % ------------------------------------------------------------------------------
 % Take intersection, like operations -- those that are in both
-[allmopids,keepmopi_1] = intersect(vertcat(LoadedData{1}.MasterOperations.ID),vertcat(LoadedData{2}.MasterOperations.ID));
-MasterOperations = LoadedData{1}.MasterOperations(keepmopi_1);
+[allmopids,keepmopi_1] = intersect(vertcat(loadedData{1}.MasterOperations.ID),vertcat(loadedData{2}.MasterOperations.ID));
+MasterOperations = loadedData{1}.MasterOperations(keepmopi_1);
 
 % ------------------------------------------------------------------------------
 % 3. Data:
 % ------------------------------------------------------------------------------
-GotData = 0;
-if isfield(LoadedData{1},'TS_DataMat') && isfield(LoadedData{2},'TS_DataMat')
+gotData = 0;
+if isfield(loadedData{1},'TS_DataMat') && isfield(loadedData{2},'TS_DataMat')
     % Both contain data matrices
-    GotData = 1;
+    gotData = 1;
     fprintf(1,'Combining data matrices...');
-    TS_DataMat = [LoadedData{1}.TS_DataMat(:,keepopi_1);LoadedData{2}.TS_DataMat(:,keepopi_2)];
-    if DidTrim, TS_DataMat = TS_DataMat(ix,:); end
+    TS_DataMat = [loadedData{1}.TS_DataMat(:,keepopi_1);loadedData{2}.TS_DataMat(:,keepopi_2)];
+    if didTrim, TS_DataMat = TS_DataMat(ix,:); end
     fprintf(1,' Done.\n');
 end
 
 % ------------------------------------------------------------------------------
 % 4. Quality
 % ------------------------------------------------------------------------------
-GotQuality = 0;
-if isfield(LoadedData{1},'TS_Quality') && isfield(LoadedData{2},'TS_Quality')
-    GotQuality = 1;
+gotQuality = 0;
+if isfield(loadedData{1},'TS_Quality') && isfield(loadedData{2},'TS_Quality')
+    gotQuality = 1;
     % Both contain Quality matrices
     fprintf(1,'Combining quality label matrices...');
-    TS_Quality = [LoadedData{1}.TS_Quality(:,keepopi_1);LoadedData{2}.TS_Quality(:,keepopi_2)];
-    if DidTrim, TS_Quality = TS_Quality(ix,:); end
+    TS_Quality = [loadedData{1}.TS_Quality(:,keepopi_1);loadedData{2}.TS_Quality(:,keepopi_2)];
+    if didTrim, TS_Quality = TS_Quality(ix,:); end
     fprintf(1,' Done.\n');
 end
 
 % ------------------------------------------------------------------------------
 % 5. Calculation times
 % ------------------------------------------------------------------------------
-GotCalcTimes = 0;
-if isfield(LoadedData{1},'TS_CalcTime') && isfield(LoadedData{2},'TS_CalcTime')
-    GotCalcTimes = 1;
+gotCalcTimes = 0;
+if isfield(loadedData{1},'TS_CalcTime') && isfield(loadedData{2},'TS_CalcTime')
+    gotCalcTimes = 1;
     % Both contain Calculation time matrices
     fprintf(1,'Combining calculation time matrices...');
-    TS_CalcTime = [LoadedData{1}.TS_CalcTime(:,keepopi_1);LoadedData{2}.TS_CalcTime(:,keepopi_2)];
-    if DidTrim, TS_CalcTime = TS_CalcTime(ix,:); end
+    TS_CalcTime = [loadedData{1}.TS_CalcTime(:,keepopi_1);loadedData{2}.TS_CalcTime(:,keepopi_2)];
+    if didTrim, TS_CalcTime = TS_CalcTime(ix,:); end
     fprintf(1,' Done.\n');
 end
 
@@ -198,27 +198,27 @@ end
 % ------------------------------------------------------------------------------
 % First check that HCTSA_loc.mat doesn't exist
 fprintf(1,'A %u x %u matrix\n',size(TS_DataMat,1),size(TS_DataMat,2));
-HereSheIs = which('HCTSA_loc.mat');
-if isempty(HereSheIs)
-    FileName = 'HCTSA_loc.mat';
-        fprintf(1,['----------Saving to %s----------\n'],FileName)
+hereSheIs = which('HCTSA_loc.mat');
+if isempty(hereSheIs)
+    fileName = 'HCTSA_loc.mat';
+        fprintf(1,['----------Saving to %s----------\n'],fileName)
 else
-    FileName = 'HCTSA_loc_combined.mat';
+    fileName = 'HCTSA_loc_combined.mat';
     fprintf(1,['----------Saving to %s----------\nYou''ll have to rename to HCTSA_loc.mat for' ...
-    ' normal analysis routines like TSQ_normalize to work...\n'],FileName);
+    ' normal analysis routines like TS_normalize to work...\n'],fileName);
 end
 
 % ------------------------------------------------------------------------------
 % Save
 % ------------------------------------------------------------------------------
-save(FileName,'TimeSeries','Operations','MasterOperations','-v7.3');
-if GotData, save(FileName,'TS_DataMat','-append'); end % add data matrix
-if GotQuality, save(FileName,'TS_Quality','-append'); end % add quality labels
-if GotCalcTimes, save(FileName,'TS_CalcTime','-append'); end % add calculation times
+save(fileName,'TimeSeries','Operations','MasterOperations','-v7.3');
+if gotData, save(fileName,'TS_DataMat','-append'); end % add data matrix
+if gotQuality, save(fileName,'TS_Quality','-append'); end % add quality labels
+if gotCalcTimes, save(fileName,'TS_CalcTime','-append'); end % add calculation times
 
 fprintf(1,['Saved new Matlab file containing combined versions of %s ' ...
-                    'and %s to %s\n'],HCTSA_locs{1},HCTSA_locs{2},FileName);
-fprintf(1,'%s contains %u time series and %u operations\n',FileName, ...
+                    'and %s to %s\n'],HCTSA_locs{1},HCTSA_locs{2},fileName);
+fprintf(1,'%s contains %u time series and %u operations\n',fileName, ...
                                 length(TimeSeries),length(Operations));
  
 end

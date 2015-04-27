@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% TSQ_plot_2d
+% TS_plot_2d
 % ------------------------------------------------------------------------------
 % 
 % Plots the dataset in a two-dimensional space
@@ -68,7 +68,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_2d(Features,DataInfo,trainTest,annotateParams,showDistr,classMethod)
+function TS_plot_2d(Features,DataInfo,trainTest,annotateParams,showDistr,classMethod)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:

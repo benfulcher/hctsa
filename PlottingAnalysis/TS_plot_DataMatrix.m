@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% TSQ_plot_DataMatrix
+% TS_plot_DataMatrix
 % ------------------------------------------------------------------------------
 % 
 % Plot the data matrix.
@@ -33,7 +33,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_plot_DataMatrix(whatData,colorGroups,customOrder,customColorMap,colorNaNs)
+function TS_plot_DataMatrix(whatData,colorGroups,customOrder,customColorMap,colorNaNs)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
@@ -66,9 +66,9 @@ if isstruct(whatData)
     TS_DataMat = whatData.TS_DataMat;
 else
     if strcmp(whatData,'cl')
-        theFile = 'HCTSA_cl.mat'; TheRoutine = 'TSQ_cluster';
+        theFile = 'HCTSA_cl.mat'; TheRoutine = 'TS_cluster';
     elseif strcmp(whatData,'norm')
-        theFile = 'HCTSA_N.mat'; TheRoutine = 'TSQ_normalize';
+        theFile = 'HCTSA_N.mat'; TheRoutine = 'TS_normalize';
     elseif ischar(whatData) && exist(whatData) % Specify a filename
         theFile = whatData;
         a = which(theFile); % First check it exists

@@ -1,5 +1,5 @@
 % --------------------------------------------------------------------------
-% TSQ_cluster
+% TS_cluster
 % --------------------------------------------------------------------------
 % 
 % Reads in normalized data from HCTSA_N.mat, clusters the data matrix by
@@ -7,7 +7,7 @@
 % as HCTSA_cl.mat
 % 
 %---EXAMPLE USAGE:
-% TSQ_cluster;
+% TS_cluster;
 % 
 %---INPUTS:
 % distanceMetricRow: specifies the distance metric for computing distances
@@ -36,7 +36,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, linkageMethodCol, subSet)
+function TS_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, linkageMethodCol, subSet)
 
 % --------------------------------------------------------------------------
 %% Check input arguments:
@@ -78,7 +78,7 @@ end
 % --------------------------------------------------------------------------
 % Record information about clustering settings so can run the same back again if needed later:
 % --------------------------------------------------------------------------
-codeToCluster = ['TSQ_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, ' ...
+codeToCluster = ['TS_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, ' ...
                                     'linkageMethodCol, subSet)'];
 clusteringInfo = struct('distanceMetricRow',distanceMetricRow,'linkageMethodRow', ...
                 linkageMethodRow,'distanceMetricCol',distanceMetricCol,'linkageMethodCol',linkageMethodCol, ...
@@ -133,7 +133,7 @@ if ~(ischar(distanceMetricRow) && ismember(distanceMetricRow,{'none','nothing'})
     fprintf(1,'\n----Clustering rows using a distance metric %s and %s linkage method----\n',...
                     distanceMetricRow,linkageMethodRow); tic
     % [~, ord_row] = TSQ_us_cluster(TS_DataMat,clusterMethRow,clusterParamsRow);
-    ord_row = TSQ_ClusterReorder(TS_DataMat,distanceMetricRow,linkageMethodRow);
+    ord_row = BF_ClusterReorder(TS_DataMat,distanceMetricRow,linkageMethodRow);
     fprintf(1,'Row clustering took %s.\n',BF_thetime(toc))
 else
     ord_row = 1:size(TS_DataMat,1); % don't reorder at all
@@ -144,7 +144,7 @@ if ~(ischar(distanceMetricCol) && ismember(distanceMetricCol,{'none','nothing'})
     % (can specify 'none' to do no clustering)
     fprintf(1,'\n----Clustering columns using a distance metric %s and %s linkage method----\n',...
                     distanceMetricCol,linkageMethodCol); tic
-    ord_col = TSQ_ClusterReorder(TS_DataMat',distanceMetricCol,linkageMethodCol);
+    ord_col = BF_ClusterReorder(TS_DataMat',distanceMetricCol,linkageMethodCol);
     % [~, ord_col] = TSQ_us_cluster(TS_DataMat',clusterMethCol,clusterParamsCol);
     fprintf(1,'Column clustering took %s.\n',BF_thetime(toc))
 else

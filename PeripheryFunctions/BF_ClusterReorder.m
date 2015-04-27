@@ -1,7 +1,9 @@
 % ------------------------------------------------------------------------------
-% TSQ_ClusterReorder
+% BF_ClusterReorder
 % ------------------------------------------------------------------------------
+% 
 % Can put a distance matrix in distanceMetric if you want
+% 
 % ------------------------------------------------------------------------------
 %---HISTORY:
 % Ben Fulcher, 2014-04-21
@@ -22,7 +24,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [ord,R,keepers] = TSQ_ClusterReorder(dataMatrix,distanceMetric,linkageMethod)
+function [ord,R,keepers] = BF_ClusterReorder(dataMatrix,distanceMetric,linkageMethod)
 
 if nargin < 2
     distanceMetric = 'corr'; % correlation distances by default
