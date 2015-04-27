@@ -30,22 +30,37 @@ function SQL_reset()
 % Get how many time series and operations are in the database
 % ------------------------------------------------------------------------------
 selectString = 'SELECT COUNT(op_id) as numOps FROM Operations';
-numOps = mysql_dbquery(dbc,selectString); numOps = numOps{1};
+numOps = mysql_dbquery(dbc,selectString);
+if isempty(numOps), numOps = 0;
+else numOps = numOps{1};
+end
 
 selectString = 'SELECT COUNT(ts_id) as numTs FROM TimeSeries';
-numTs = mysql_dbquery(dbc,selectString); numTs = numTs{1};
+numTs = mysql_dbquery(dbc,selectString);
+if isempty(numTs), numTs = 0;
+else numTs = numTs{1};
+end
 
 % ------------------------------------------------------------------------------
 % Make doubly sure the user wants to do this!!:
 % ------------------------------------------------------------------------------
-fprintf(1,['Are you sure you want to DELETE ALL EXISTING DATA FOR %u TIME SERIES' ...
-                    ' AND %u OPERATIONS in %s?!\n'],numTs,numOps,databaseName);
-reply = input(['THIS WILL RESET EVERYTHING in ' databaseName '?!?!?! (say ''yes'') '],'s');
-if ~strcmp(reply,'yes')
-    fprintf(1,'I didn''t think so... Better to be safe than sorry, hey?\n'); return
+if numOps==0 && numTs==0
+    % No Operations or Timeseries tables with anything in it
+    fprintf(1,['Database does not contain any identifiable Operations or TimeSeries.\n' ...
+            'This will drop all tables (if they exist) and populate %s with the hctsa software.\n'], ...
+            databaseName);
+    reply = input(['Happy with this in ' databaseName '?!?!?! (say ''yes'') '],'s');
+else
+    % Operations or Timeseries tables exist and contain data
+    fprintf(1,['Are you sure you want to DELETE ALL EXISTING DATA FOR %u TIME SERIES' ...
+                        ' AND %u OPERATIONS in %s?!\n'],numTs,numOps,databaseName);
+    reply = input(['THIS WILL RESET EVERYTHING in ' databaseName '?!?!?! (say ''yes'') '],'s');
+    if ~strcmp(reply,'yes')
+        fprintf(1,'I didn''t think so... Better to be safe than sorry, hey?\n'); return
+    end
+    reply = input(sprintf(['Zomg be careful, we''re destroying everything.\n' ...
+                            'Confirm that you want %s to be deleted? (say ''yes'') '],databaseName),'s');
 end
-reply = input(sprintf(['Zomg be careful, we''re destroying everything.\n' ...
-                        'Confirm that you want %s to be deleted? (say ''yes'') '],databaseName),'s');
 if ~strcmp(reply,'yes')
     fprintf(1,'I didn''t think so... Better to be safe than sorry, hey?\n'); return
 end

@@ -73,7 +73,14 @@ if nargin < 4
     beVocal = 1;
 end
 
-if beVocal, fprintf(1,'Using input file %s\n',inputFile); end
+% ------------------------------------------------------------------------------
+% Display welcome message:
+% ------------------------------------------------------------------------------
+if beVocal,
+    fprintf(1,'Using input file %s\n',inputFile);
+else
+    fprintf(1,'No user feedback shown (use beVocal to get information about your import).\n');
+end
 ticker = tic;
 
 % ------------------------------------------------------------------------------
@@ -141,7 +148,7 @@ case 'ts' % Read the time series input file:
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
-	datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
+	dataIn = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
     
 case 'ops' % Read the operations input file:
     if beVocal
@@ -151,7 +158,7 @@ case 'ops' % Read the operations input file:
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
-    datain = textscan(fid,'%s %s %s','CommentStyle','#','CollectOutput',1);    
+    dataIn = textscan(fid,'%s %s %s','CommentStyle','#','CollectOutput',1);    
     
 case 'mops' % Read the master operations input file:
     if beVocal
@@ -160,7 +167,7 @@ case 'mops' % Read the master operations input file:
         fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
         fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
     end
-    datain = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
+    dataIn = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
 end
 
 fclose(fid);
@@ -168,8 +175,8 @@ fclose(fid);
 % ------------------------------------------------------------------------------
 % Show the user what's been imported:
 % ------------------------------------------------------------------------------
-datain = datain{1}; % Collect one big matrix of cells
-numItems = size(datain,1); % Number of items in the input file
+dataIn = dataIn{1}; % Collect one big matrix of cells
+numItems = size(dataIn,1); % Number of items in the input file
 
 if numItems == 0, error('The input file ''%s'' seems to be empty??',inputFile), end
 
@@ -178,13 +185,13 @@ if beVocal
     switch importWhat
     case 'ts'
         fprintf(1,'%s\t%s\n','-Filename-','-Keywords-')
-        fprint_ts = @(x) fprintf('%s\t%s\n',datain{x,1},datain{x,2});
+        fprint_ts = @(x) fprintf('%s\t%s\n',dataIn{x,1},dataIn{x,2});
     case 'ops'
         fprintf(1,'%s\t%s\t%s\n','-Operation Name-','-Operation Code-','-Operation Keywords-')
-        fprint_ops = @(x) fprintf('%s\t%s\t%s\n',datain{x,1},datain{x,2},datain{x,3});
+        fprint_ops = @(x) fprintf('%s\t%s\t%s\n',dataIn{x,1},dataIn{x,2},dataIn{x,3});
     case 'mops'
         fprintf(1,'%s\t%s\n','-Master Code-','-Master Label-')
-        fprint_mops = @(x) fprintf('%s\t%s\n',datain{x,1},datain{x,2});
+        fprint_mops = @(x) fprintf('%s\t%s\n',dataIn{x,1},dataIn{x,2});
     end
     
     for i = 1:min(3,numItems)
@@ -225,20 +232,20 @@ esc = @RA_sqlescapestring; % Inline function to add escape strings to format myS
 
 % ------------------------------------------------------------------------------
 % Construct a more intuitive structure array for the time series / operations /
-% master operations Fill a cell, toadd, containing mySQL INSERT commands for
+% master operations Fill a cell, toAdd, containing mySQL INSERT commands for
 % each item in the input file.
 % ------------------------------------------------------------------------------
 if beVocal
     fprintf(1,['Preparing mySQL INSERT statements to add %u %s to the ' ...
                                 'database %s...'],numItems,theWhat,databaseName);
 end
-toadd = cell(numItems,1);
+toAdd = cell(numItems,1);
 switch importWhat
-case 'ts' % Prepare toadd cell for time series
+case 'ts' % Prepare toAdd cell for time series
     if beVocal; figure('color','w','WindowStyle','docked'); end
     for j = 1:numItems
-        timeseries(j).Filename = datain{j,1};
-        timeseries(j).Keywords = regexprep(datain{j,2},'\"',''); % Take out inverted commas from keywords lists
+        timeseries(j).Filename = dataIn{j,1};
+        timeseries(j).Keywords = regexprep(dataIn{j,2},'\"',''); % Take out inverted commas from keywords lists
 
         % Read the time series to record its length:
         try
@@ -277,7 +284,7 @@ case 'ts' % Prepare toadd cell for time series
                             'Check that it''s in Matlab''s path.'], ...
                                 timeseries(j).Filename)
         end
-        toadd{j} = sprintf('(''%s'',''%s'',%u,''%s'')', ...
+        toAdd{j} = sprintf('(''%s'',''%s'',%u,''%s'')', ...
                             esc(timeseries(j).Filename),esc(timeseries(j).Keywords), ...
                             timeseries(j).Length,timeseries(j).Data);
         
@@ -298,25 +305,25 @@ case 'ts' % Prepare toadd cell for time series
         error('Input file contains duplicates.');
     end
     
-case 'mops' % Prepare toadd cell for master operations
+case 'mops' % Prepare toAdd cell for master operations
     for j = 1:numItems
-        master(j).MasterCode = datain{j,1};
-        master(j).MasterLabel = datain{j,2};
-        toadd{j} = sprintf('(''%s'', ''%s'')',esc(master(j).MasterLabel),esc(master(j).MasterCode));
+        master(j).MasterCode = dataIn{j,1};
+        master(j).MasterLabel = dataIn{j,2};
+        toAdd{j} = sprintf('(''%s'', ''%s'')',esc(master(j).MasterLabel),esc(master(j).MasterCode));
     end
     if beVocal, fprintf(1,' Done.\n'); end
     
-case 'ops' % Prepare toadd cell for operations        
+case 'ops' % Prepare toAdd cell for operations        
     for j = 1:numItems
-        operation(j).Code = datain{j,1};
-        operation(j).Name = datain{j,2};
-        operation(j).Keywords = datain{j,3};
+        operation(j).Code = dataIn{j,1};
+        operation(j).Name = dataIn{j,2};
+        operation(j).Keywords = dataIn{j,3};
         if strfind(operation(j).Code,'(') % single operation
             operation(j).MasterLabel = '';
-            toadd{j} = sprintf('(''%s'', ''%s'',NULL,''%s'')',esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).Keywords));
+            toAdd{j} = sprintf('(''%s'', ''%s'',NULL,''%s'')',esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).Keywords));
         else % pointer operation
             operation(j).MasterLabel = strtok(operation(j).Code,'.');
-            toadd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).MasterLabel),esc(operation(j).Keywords));
+            toAdd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).MasterLabel),esc(operation(j).Keywords));
         end
     end
     if beVocal, fprintf(1,' Done.\n'); end
@@ -329,7 +336,7 @@ case 'ops' % Prepare toadd cell for operations
             length(operation)-length(uniqueOpNames),length(operation),length(uniqueOpNames));
         % Only keep the unique ones:
         operation = operation(ia);
-        toadd = toadd(ia);
+        toAdd = toAdd(ia);
         numItems = length(operation);
         fprintf(1,'We now have %u operations to input...\n',numItems);
     end    
@@ -385,13 +392,13 @@ case 'ts' % Add time series to the TimeSeries table just 5 at a time
           % time series in general
 
     SQL_add_chunked(dbc,['INSERT INTO TimeSeries (FileName, Keywords, Length, ' ...
-                                    'Data) VALUES'],toadd,isDuplicate,5);
+                                    'Data) VALUES'],toAdd,isDuplicate,5);
 case 'ops' % Add operations to the Operations table 500 at a time
     SQL_add_chunked(dbc,['INSERT INTO Operations (OpName, Code, MasterLabel, ' ...
-                                    'Keywords) VALUES'],toadd,isDuplicate,500);        
+                                    'Keywords) VALUES'],toAdd,isDuplicate,500);        
 case 'mops' % Add master operations to the MasterOperations table 500 at a time
     SQL_add_chunked(dbc,['INSERT INTO MasterOperations (MasterLabel, ' ...
-                                'MasterCode) VALUES'],toadd,isDuplicate,500);
+                                'MasterCode) VALUES'],toAdd,isDuplicate,500);
 end
 fprintf(1,' done.\n')
 
@@ -462,12 +469,12 @@ if ~strcmp(importWhat,'mops')
         end
         % Add the new keywords to the Keywords table
         insertstring = sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES',thektable);
-        toadd = cell(sum(isnew),1);
+        toAdd = cell(sum(isnew),1);
         fisnew = find(isnew); % Indicies of new keywords
         for k = 1:sum(isnew);
-            toadd{k} = sprintf('(''%s'',0)',ukws{fisnew(k)});
+            toAdd{k} = sprintf('(''%s'',0)',ukws{fisnew(k)});
         end
-        SQL_add_chunked(dbc,insertstring,toadd);
+        SQL_add_chunked(dbc,insertstring,toAdd);
         fprintf(1,' added %u new keywords!\n',sum(isnew))
     else
         if beVocal

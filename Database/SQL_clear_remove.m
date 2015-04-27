@@ -22,7 +22,7 @@
 % 
 %
 %---INPUTS:
-% tsorop -- either 'ts' or 'ops' for whether to eliminate either a time series of a metric, respectively
+% tsOrOps -- either 'ts' or 'ops' for whether to eliminate either a time series of a metric, respectively
 % idRange -- a vector of the ts_ids or op_ids in the database to remove
 % dbname -- can specify a custom database else will use default database in SQL_opendatabase
 % doLog -- generate a .log file describing what was done (does this by default)
@@ -47,7 +47,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_clear_remove(tsorop,idRange,doRemove,dbname,doLog)
+function SQL_clear_remove(tsOrOps,idRange,doRemove,dbname,doLog)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries and input checking
@@ -57,7 +57,7 @@ if nargin < 1
 	error('You must provide inputs')
 end
 
-switch tsorop
+switch tsOrOps
 case 'ts'
     thewhat = 'time series';
     theid = 'ts_id';
@@ -122,7 +122,7 @@ if ~isempty(emsg)
                                     	thewhat,theid,thetable,dbname)
 end
 reply = input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
-      			dbname ' [press any key to show them]'],length(idRange),thewhat),'s');
+      			dbname '. [press any key to show them]'],length(idRange),thewhat),'s');
 
 % ------------------------------------------------------------------------------
 %% List all items to screen
@@ -155,7 +155,7 @@ if doRemove
         fprintf(1,'%u %s removed from %s in %s\n',length(toDump),thewhat,thetable,dbname)
     end
     
-    if strcmp(tsorop,'ops')
+    if strcmp(tsOrOps,'ops')
         % What about masters??
         % 1. Get master_ids that link to deleted operations
         %<><>><><><><><><>        
@@ -186,11 +186,11 @@ else
     fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s...\n',dbname)
     fprintf(1,'Patience...\n');
 
-    UpdateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(idRange,','));
-    [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+    updateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(idRange,','));
+    [~,emsg] = mysql_dbexecute(dbc, updateString);
 
     if isempty(emsg)
-    	if strcmp(tsorop,'ts')
+    	if strcmp(tsOrOps,'ts')
     		% Get number of operations to work out how many entries were cleared
     		selectString = 'SELECT COUNT(op_id) as numOps FROM Operations';
     		numOps = mysql_dbquery(dbc,selectString); numOps = numOps{1};
@@ -220,7 +220,7 @@ if doLog
 
 	fid = fopen(fn, 'w', 'n');
 	fprintf(fid,'Document created on %s\n',datestr(now));
-	if strcmp(tsorop,'ts')
+	if strcmp(tsOrOps,'ts')
 		fprintf(fid,'Cleared outputs of %u time series\n',length(idRange));
 	else
 		fprintf(fid,'Cleared outputs of %u operations\n',length(idRange));
