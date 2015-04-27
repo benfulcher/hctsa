@@ -1,5 +1,5 @@
 % --------------------------------------------------------------------------
-% TSQ_prepared
+% SQL_retrieve
 % --------------------------------------------------------------------------
 % 
 % This function retreives data from the mySQL database for subsequent analysis
@@ -50,7 +50,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function didWrite = TSQ_prepared(ts_ids, op_ids, retrieveWhatEntries, retrieveWhatData)
+function didWrite = SQL_retrieve(ts_ids, op_ids, retrieveWhatEntries, retrieveWhatData)
     
 % Until it actually writes something, set the function output, didWrite = 0
 didWrite = 0;
@@ -69,7 +69,7 @@ if nargin < 3 || isempty(retrieveWhatEntries)
 end
 retrieveWhatEntriesCanBe = {'null','all','error'};
 if ~ischar(retrieveWhatEntries) || ~ismember(retrieveWhatEntries,retrieveWhatEntriesCanBe)
-    error(['The third input to TSQ_prepared must specify what type of entries to retrieve from ' ...
+    error(['The third input to SQL_retrieve must specify what type of entries to retrieve from ' ...
                 'the database, one of the following: %s'],BF_cat(retrieveWhatEntriesCanBe))
 end
 
@@ -79,7 +79,7 @@ if nargin < 4 || isempty(retrieveWhatData)
 end
 retrieveWhatDataCanBe = {'all','nocalctime','outputs','quality'};
 if ~ischar(retrieveWhatData) || ~ismember(retrieveWhatData,retrieveWhatDataCanBe)
-    error(['The fourth input to TSQ_prepared must specify what data to retrieve from the database, ' ...
+    error(['The fourth input to SQL_retrieve must specify what data to retrieve from the database, ' ...
                 'one of the following: %s'],BF_cat(retrieveWhatEntriesCanBe))
 end
 

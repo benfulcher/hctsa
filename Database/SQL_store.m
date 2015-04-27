@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% TSQ_agglomerate
+% SQL_store
 % ------------------------------------------------------------------------------
 % 
 % Uploads data in the HCTSA_loc file in the current directory back into the
@@ -22,7 +22,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TSQ_agglomerate(writeWhat,logToFile,dbname)
+function SQL_store(writeWhat,logToFile,dbname)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs

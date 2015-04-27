@@ -3,7 +3,7 @@
 % --------------------------------------------------------------------------
 % 
 % This function fills in the missing elements of TS_DataMat, from HCTSA_loc.mat
-% (retrieved from the database using TSQ_prepared).
+% (retrieved from the database using SQL_retrieve).
 % The function systematically calculates these missing elements (in parallel
 % over operations for each time series if specified).
 % 
@@ -368,7 +368,7 @@ if doLog
 	fclose(fid);
 end
 
-fprintf(1,['Calculation complete: you can now run TSQ_agglomerate to upload' ...
+fprintf(1,['Calculation complete: you can now run SQL_store to upload' ...
                                 ' the results to a mySQL database.\n'])
 
 end

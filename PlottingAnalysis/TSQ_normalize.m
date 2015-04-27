@@ -61,7 +61,7 @@ fprintf(1,['Removing time series with more than %.2f%% special-valued outputs\n'
             (1-filterOptions(1))*100,(1-filterOptions(2))*100);
 
 % By default, work with a file called HCTSA_loc.mat, as obtained from
-% TSQ_prepared...
+% SQL_retrieve...
 if nargin < 3 || isempty(fileName_HCTSA_loc)
     fileName_HCTSA_loc = 'HCTSA_loc.mat';
 end
