@@ -102,7 +102,7 @@ else
     	fprintf(1,'There are %u operations that no longer match the database',(numOps-numOps_db));
     end    
     error(['It could be dangerous to write back to a changed database. ' ...
-                'You should start a TSQ_prepared from scratch.'])
+                'You should start a SQL_retrieve from scratch.'])
 end
 
 % ------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ case 'nullerror'
     					' AND op_id IN (%s) AND (QualityCode IS NULL OR QualityCode = 1)'], ...
         					ts_ids_string,op_ids_string);
 case 'error'
-    % Collect all previous errors (assume done a TSQ_prepared using 'error' input)
+    % Collect all previous errors (assume done a SQL_retrieve using 'error' input)
     SelectString = sprintf(['SELECT ts_id, op_id FROM Results WHERE ts_id IN (%s)' ...
     					' AND op_id IN (%s) AND QualityCode = 1'], ...
         					ts_ids_string,op_ids_string);
