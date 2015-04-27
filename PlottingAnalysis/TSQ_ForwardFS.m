@@ -18,9 +18,9 @@
 % 
 %---OUTPUTS:
 % ifeat: indices of features selected.
-% TestStat: test statistics for all operations.
+% testStat: test statistics for all operations.
 % TrainErr: training errors for selected features.
-% TestErr: test errors for selected features.
+% testErr: test errors for selected features.
 % TestClass: classificaiton of the test data.
 %
 % ------------------------------------------------------------------------------
@@ -39,8 +39,8 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [ifeat, TestStat, TrainErr, TestErr, TestClass] = TSQ_ForwardFS(WhatData, ...
-                        iTrain,criterion,CrossVal,NumFeatSelect,howzero)
+function [ifeat, testStat, TrainErr, testErr, TestClass] = TSQ_ForwardFS(WhatData, ...
+                        iTrain,criterion,crossVal,numFeatSelect,howzero)
 
 % --------------------------------------------------------------------------
 %% Check inputs:
@@ -58,13 +58,13 @@ if nargin < 3 || isempty(criterion)
     fprintf(1,'Default: Using in-sample linear classification rate\n');
 end
 
-if nargin < 4 || isempty(CrossVal)
-    CrossVal = 'none';
+if nargin < 4 || isempty(crossVal)
+    crossVal = 'none';
     fprintf(1,'Default: No cross-validation inside the training data\n');
 end
 
-if nargin < 5 || isempty(NumFeatSelect)
-    NumFeatSelect = 2; % Stop after two features are selected
+if nargin < 5 || isempty(numFeatSelect)
+    numFeatSelect = 2; % Stop after two features are selected
 end
 
 if nargin < 6 || isempty(howzero)
@@ -84,12 +84,12 @@ end
 if ischar(WhatData)
     switch WhatData
     case 'norm'
-        TheDataFile = 'HCTSA_N.mat';
+        theDataFile = 'HCTSA_N.mat';
     case 'cl'
-        TheDataFile = 'HCTSA_cl.mat';
+        theDataFile = 'HCTSA_cl.mat';
     end
-    fprintf(1,'Loading data from %s...',TheDataFile);
-    load(TheDataFile,'TS_DataMat','Operations','TimeSeries');
+    fprintf(1,'Loading data from %s...',theDataFile);
+    load(theDataFile,'TS_DataMat','Operations','TimeSeries');
     fprintf(1,' Loaded.\n');
 elseif isstruct(WhatData)
     % Already loaded and given here as a structure
@@ -150,19 +150,19 @@ end
 % Define groups as a column vector:
 TimeSeriesGroups = [TimeSeries.Group]';
 
-switch CrossVal
+switch crossVal
 case 'kfold'
     fprintf(1,'Using 10-fold stratified cross-validation within the training data\n');
-    DataPartitions = cvpartition(TimeSeriesGroups(iTrain),'k',10);
+    dataPartitions = cvpartition(TimeSeriesGroups(iTrain),'k',10);
 case 'leaveout'
     fprintf(1,'Using leave-one-out cross-validation within the training data\n');
-    DataPartitions = cvpartition(TimeSeriesGroups(iTrain),'leaveout');
-    fprintf(1,'(Using %u different test sets)\n',DataPartitions.NumTestSets);
+    dataPartitions = cvpartition(TimeSeriesGroups(iTrain),'leaveout');
+    fprintf(1,'(Using %u different test sets)\n',dataPartitions.NumTestSets);
 case 'none'
     fprintf(1,'No cross-validation performed within the training set\n');
-    DataPartitions = [];
+    dataPartitions = [];
 otherwise
-    error('Unknown cross validation setting ''%s''',CrossVal)
+    error('Unknown cross validation setting ''%s''',crossVal)
 end
 
 % --------------------------------------------------------------------------
@@ -175,27 +175,27 @@ fprintf(1,['Performing greedy forward feature selection ' ...
                         'using ''%s'' on the training data...\n'],criterion);
 
 % Initialize variables:
-ifeat = zeros(NumFeatSelect,1); % Stores indicies of features chosen at each stage
-TestStat = zeros(NumFeatSelect,length(Operations)); % Test statistic (classification rate) for all features at each stage
-TrainErr = zeros(NumFeatSelect,1); % Training error at each iteration
+ifeat = zeros(numFeatSelect,1); % Stores indicies of features chosen at each stage
+testStat = zeros(numFeatSelect,length(Operations)); % Test statistic (classification rate) for all features at each stage
+TrainErr = zeros(numFeatSelect,1); % Training error at each iteration
 
 FS_timer = tic; % start a timer
-for j = 1:NumFeatSelect
+for j = 1:numFeatSelect
     % Find the feature that works best in combination with those already chosen:
     for i = 1:length(Operations)
         try
-            if isempty(DataPartitions)
+            if isempty(dataPartitions)
                 % No cross-validation
                 % Compute in-sample training errors and hope we're not overfitting ;-)
-                TestStat(j,i) = Classify_fn(TS_DataMat(iTrain,[ifeat(1:j-1);i]),TimeSeriesGroups(iTrain), ...
+                testStat(j,i) = Classify_fn(TS_DataMat(iTrain,[ifeat(1:j-1);i]),TimeSeriesGroups(iTrain), ...
                                         TS_DataMat(iTrain,[ifeat(1:j-1);i]),TimeSeriesGroups(iTrain));
             else
                 % Take mean over cross-validation data partitions specified above:
-                TestStat(j,i) = mean(crossval(Classify_fn,TS_DataMat(iTrain,[ifeat(1:j-1);i]), ...
-                                    TimeSeriesGroups(iTrain),'partition',DataPartitions));
+                testStat(j,i) = mean(crossval(Classify_fn,TS_DataMat(iTrain,[ifeat(1:j-1);i]), ...
+                                    TimeSeriesGroups(iTrain),'partition',dataPartitions));
             end
         catch emsg
-            TestStat(j,i) = NaN;
+            testStat(j,i) = NaN;
             % keyboard
             fprintf(1,'Error at iteration %u (with feature %u): %s\n',j,i,emsg.identifier)
         end
@@ -204,51 +204,51 @@ for j = 1:NumFeatSelect
     % --------------------------------------------------------------------------
     % Add the best feature to the list
     % --------------------------------------------------------------------------            
-    if all(isnan(TestStat(j,:)))
+    if all(isnan(testStat(j,:)))
         ifeat(j) = NaN;
         TrainErr(j) = NaN;
         error('Error selecting feature at iteration %u\n',j)
     else
-        TopOps = find(TestStat(j,:)==min(TestStat(j,:)));
+        TopOps = find(testStat(j,:)==min(testStat(j,:)));
         if length(TopOps) > 1 % More than one 'equal best': pick from best at random
             fprintf(1,['Selecting a feature at random from the %u' ...
-                ' operations with %4.1f%% error\n'],length(TopOps),min(TestStat(j,:))*100)
+                ' operations with %4.1f%% error\n'],length(TopOps),min(testStat(j,:))*100)
             rp = randperm(length(TopOps));
             ifeat(j) = TopOps(rp(1));
         else
             ifeat(j) = TopOps; % Only one best
         end
-        TrainErr(j) = min(TestStat(j,:))*100;
+        TrainErr(j) = min(testStat(j,:))*100;
         fprintf(1,'Feature %u: %s (%4.2f%% training error)\n',j,Operations(ifeat(j)).Name,TrainErr(j))
     end
     
     % --------------------------------------------------------------------------
     % Evaluate the termination criteria
     % --------------------------------------------------------------------------
-    if strcmp(howzero,'NaN') && (j < NumFeatSelect) && (j > 1) && (min(TestStat(j,:))==0)
+    if strcmp(howzero,'NaN') && (j < numFeatSelect) && (j > 1) && (min(testStat(j,:))==0)
         % Stop because already at zero error
         % Set ifeat for more features to NaN
         fprintf(1,'Already at perfect classification -- stopping here.\n')
-        ifeat(j+1:NumFeatSelect) = NaN;
-        for k = j+1:NumFeatSelect
-            TestStat(k,:) = NaN; %ones(length(Operations),1)*NaN;
+        ifeat(j+1:numFeatSelect) = NaN;
+        for k = j+1:numFeatSelect
+            testStat(k,:) = NaN; %ones(length(Operations),1)*NaN;
         end
         break
-    elseif strcmp(howzero,'NaN') && (j > 1) && min(TestStat(j,:))==min(TestStat(j-1,:))
+    elseif strcmp(howzero,'NaN') && (j > 1) && min(testStat(j,:))==min(testStat(j-1,:))
         % Stop because no improvement from adding this feature
         % Set ifeat for this many features to NaN
         fprintf(1,'No improvement!! -- stopping one feature before here.\n')
-        ifeat(j:NumFeatSelect) = NaN; % Remove this one
-        for k = j:NumFeatSelect
+        ifeat(j:numFeatSelect) = NaN; % Remove this one
+        for k = j:numFeatSelect
             % Forget about them:
-            TestStat(k,:) = NaN; % ones(length(Operations),1)*NaN; 
+            testStat(k,:) = NaN; % ones(length(Operations),1)*NaN; 
         end
         break
     end
 end
 
 % Finished selecting features!
-fprintf(1,'Feature selection to %u features completed in %s.\n',NumFeatSelect,BF_thetime(toc(FS_timer)))
+fprintf(1,'Feature selection to %u features completed in %s.\n',numFeatSelect,BF_thetime(toc(FS_timer)))
 clear FS_timer;
 
 % --------------------------------------------------------------------------
@@ -256,34 +256,34 @@ clear FS_timer;
 %% Classify the test set using the selected features
 % --------------------------------------------------------------------------
 % --------------------------------------------------------------------------
-fprintf(1,'Classifying the test data using the %u selected features...\n',NumFeatSelect);
+fprintf(1,'Classifying the test data using the %u selected features...\n',numFeatSelect);
 
 
 % Get classification rule from training sets and then apply to test sets
-TestErr = zeros(NumFeatSelect,1);
-TestCfn = zeros(NumFeatSelect,length(iTest));
-for i = 1:NumFeatSelect
+testErr = zeros(numFeatSelect,1);
+testCfn = zeros(numFeatSelect,length(iTest));
+for i = 1:numFeatSelect
     % Get the classification rule from the training data
     try
         % Evaluate the classifier trained on all the training data on the test data:
         TestClass = Classify_fn_label(TS_DataMat(iTrain,ifeat(1:i)),TimeSeriesGroups(iTrain), ...
                                 TS_DataMat(iTest,ifeat(1:i)));
-        TestErr(i) = mean(TestClass~=TimeSeriesGroups(iTest))*100;
-        TestCfn(i,:) = TestClass; % The test classification
+        testErr(i) = mean(TestClass~=TimeSeriesGroups(iTest))*100;
+        testCfn(i,:) = TestClass; % The test classification
     catch
         fprintf(1,'Error classifying train and test data at %u\n',i);
         TrainErr(i) = NaN;
-        TestErr(i) = NaN;
+        testErr(i) = NaN;
         TestClass(i,:) = NaN;
     end
     
     fprintf(1,'Train/Test error rates (%u features): %3.1f%% / %3.1f%%\n', ...
-                                i,round(TrainErr(i)),round(TestErr(i)))
+                                i,round(TrainErr(i)),round(testErr(i)))
 end
 
 % % print the top 25
 % for i = 1:25
-%     disp([Operations(ifeat(i)).Name ' -- ' Operaitons(ifeat(i)).Keywords ' :: ' num2str(TestStat(i))]);
+%     disp([Operations(ifeat(i)).Name ' -- ' Operaitons(ifeat(i)).Keywords ' :: ' num2str(testStat(i))]);
 % end
 
 
