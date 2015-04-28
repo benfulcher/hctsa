@@ -5,7 +5,7 @@
 % Either clears results or removes entirely a given set of ts_ids
 % or op_ids from the database.
 %
-% *** Clear ***:
+% *** Clear *** (doRemove = 0):
 % The results of a particular operation or time series in the Results Table  are
 % converted back to NULL. Clears *all* results from a given set of operations,
 % or a given set of time series.
@@ -17,7 +17,7 @@
 % operation when the master operation is changed (especially when the master
 % code is stochastic)
 % 
-% *** Remove ***
+% *** Remove *** (doRemove = 1):
 % Removes COMPLETELY the selected ts_ids or op_ids from the Database.
 % 
 %
@@ -26,10 +26,6 @@
 % idRange -- a vector of the ts_ids or op_ids in the database to remove
 % dbname -- can specify a custom database else will use default database in SQL_opendatabase
 % doLog -- generate a .log file describing what was done (does this by default)
-% 
-%---HISTORY:
-% 2/12/2009 Ben Fulcher. Rehauled to use mySQL database system.
-% 1/12/2012 Ben Fulcher. Minor changes.
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>

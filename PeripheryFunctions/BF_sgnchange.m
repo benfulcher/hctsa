@@ -6,7 +6,7 @@
 % 
 %---INPUTS:
 % y, the input vector
-% dofind, (i) 0: returns a logical vector with 1s where the input changes sign
+% doFind, (i) 0: returns a logical vector with 1s where the input changes sign
 %         (ii) 1: returns a vector of indicies of where the input vector changes
 %                 sign
 % 
@@ -28,10 +28,10 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = BF_sgnchange(y,dofind)
+function out = BF_sgnchange(y,doFind)
 
 if nargin < 2
-    dofind = 0; % by default don't find, just return logical of where the sign changes (faster)
+    doFind = 0; % by default don't find, just return logical of where the sign changes (faster)
 end
 
 out = (y(2:end).*y(1:end-1) < 0); % successive differences change sign
@@ -39,7 +39,7 @@ out = (y(2:end).*y(1:end-1) < 0); % successive differences change sign
 % [case of adding equality, as <= 0, but I think better to 
 % make hard changes in sign as < 0]
 
-if dofind
+if doFind
     out = find(out); % return indicies of where sign changes
 end
 

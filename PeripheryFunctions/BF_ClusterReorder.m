@@ -2,7 +2,12 @@
 % BF_ClusterReorder
 % ------------------------------------------------------------------------------
 % 
-% Can put a distance matrix in distanceMetric if you want
+% Computes a reordering of the rows of an input data matrix (under a given
+% distance metric), placing similar rows close together in the output
+% permutation, ord.
+% 
+% Alternatively, you can input a distance matrix for distanceMetric if
+% pre-computed.
 % 
 % ------------------------------------------------------------------------------
 %---HISTORY:

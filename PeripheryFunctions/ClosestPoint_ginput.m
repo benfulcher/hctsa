@@ -1,16 +1,17 @@
 % ------------------------------------------------------------------------------
 % ClosestPoint_ginput
 % ------------------------------------------------------------------------------
-% Returns the closest InputPoint to the one given
+% Returns the closest input point to the one given
+% 
 % Ben Fulcher 20/10/2010
 %
 %---INPUTS:
 % xy can be a cell, each component of which is a different group plotted,
 %                       contains a Nx2 vector of co-ordinates
-% InputPoint is the output of a ginput
+% inputPoint is the output of a ginput
 % 
 %---OUTPUT:
-% PlotMe, the closest point.
+% plotMe, the closest point.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -28,33 +29,33 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function PlotMe = ClosestPoint_ginput(xy,InputPoint)
+function plotMe = ClosestPoint_ginput(xy,inputPoint)
 
-if nargin < 2 || isempty(InputPoint)
-    InputPoint = ginput(1);
+if nargin < 2 || isempty(inputPoint)
+    inputPoint = ginput(1);
 end
 
 if iscell(xy)
-    NumGroups = length(xy);
+    numGroups = length(xy);
 else
-    NumGroups = 1;
+    numGroups = 1;
 end
 
-% Calculate distances from each point to input InputPoint
-dpxy = cell(NumGroups,1);
-for i = 1:NumGroups
-    dpxy{i} = sum((xy{i} - repmat(InputPoint,size(xy{i},1),1)).^2,2); % Euclidean distances to the input point
+% Calculate distances from each point to input inputPoint
+dpxy = cell(numGroups,1);
+for i = 1:numGroups
+    dpxy{i} = sum((xy{i} - repmat(inputPoint,size(xy{i},1),1)).^2,2); % Euclidean distances to the input point
 end
 if iscell(xy)
     mins = cellfun(@(x)min(x),dpxy);
-    thisgroup = find(mins==min(mins),1); % This group contains closest element to InputPoint
+    thisGroup = find(mins==min(mins),1); % This group contains closest element to inputPoint
 else
-    thisgroup = 1;
+    thisGroup = 1;
 end
 
-PlotMe = find(dpxy{thisgroup} == min(mins),1); % this is the point to plot
+plotMe = find(dpxy{thisGroup} == min(mins),1); % this is the point to plot
 if iscell(xy)
-    PlotMe = [thisgroup,PlotMe]; % Also output the group
+    plotMe = [thisGroup,plotMe]; % Also output the group
 end
 
 end

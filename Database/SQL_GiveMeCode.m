@@ -6,7 +6,7 @@
 % outputs.
 % 
 %---INPUT:
-% the_op_id, the operation_id you want code for.
+% op_id, the operation_id you want code for.
 % 
 %---OUTPUT:
 % The code as a function handle.
@@ -27,20 +27,20 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TheCode = SQL_GiveMeCode(the_op_id);
+function theCode = SQL_GiveMeCode(op_id);
 
 % ------------------------------------------------------------------------------
 % Open connection to database
 [dbc, dbname] = SQL_opendatabase;
 
 % Get opCode:
-selectString = sprintf('SELECT Code FROM Operations WHERE op_id = %u',the_op_id);
+selectString = sprintf('SELECT Code FROM Operations WHERE op_id = %u',op_id);
 opCode = mysql_dbquery(dbc,selectString);
 opCode = opCode{1};
 
 % Get MasterCode:
 selectString = sprintf(['SELECT MasterLabel,MasterCode FROM MasterOperations WHERE mop_id = ' ...
-                        '(SELECT mop_id FROM Operations WHERE op_id = %u)'],the_op_id);
+                        '(SELECT mop_id FROM Operations WHERE op_id = %u)'],op_id);
 mopData = mysql_dbquery(dbc,selectString);
 mopLabel = mopData{1};
 mopCode = mopData{2};
@@ -51,13 +51,13 @@ SQL_closedatabase(dbc);
 
 % ------------------------------------------------------------------------------
 % Combine to give the required code as two function handles:
-DotHere = regexp(opCode,'\.');
-if ~isempty(DotHere) % A structure output
-    WhatField = opCode(DotHere+1:end);
-    % TheCode{1} = sprintf('@(x,y) %s;',mopCode); % Evaluate the structure
-    TheCode = eval(sprintf('@(x,y) BF_GiveMeField(%s,''%s'');',mopCode,WhatField)); % Take the field from the structure
+dotHere = regexp(opCode,'\.');
+if ~isempty(dotHere) % A structure output
+    whatField = opCode(dotHere+1:end);
+    % theCode{1} = sprintf('@(x,y) %s;',mopCode); % Evaluate the structure
+    theCode = eval(sprintf('@(x,y) BF_GiveMeField(%s,''%s'');',mopCode,whatField)); % Take the field from the structure
 else
-    TheCode = eval(sprintf('@(x,y) %s;',mopCode));
+    theCode = eval(sprintf('@(x,y) %s;',mopCode));
 end
 % ------------------------------------------------------------------------------
 

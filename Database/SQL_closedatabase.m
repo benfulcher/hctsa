@@ -2,7 +2,7 @@
 % SQL_closedatabase
 % ------------------------------------------------------------------------------
 % 
-% Closes the connection to database, dbc
+% Closes the connection to database, dbc.
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013

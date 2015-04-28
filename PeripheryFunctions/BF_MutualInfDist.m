@@ -19,6 +19,9 @@
 %---OUTPUT:
 % mi, the mutual information computed between v1 and v2
 % 
+%---HISTORY:
+% Ben Fulcher 17/1/2011
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,9 +41,10 @@
 % ------------------------------------------------------------------------------
 
 function D = BF_MutualInfDist(mis,mymethod,doasqf)
-% Ben Fulcher 17/1/2011
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(mymethod)
     % select method for converting MIs to distances
     mymethod = 'CL'; % 'CL', 'CR', 'mindiff', 'meandiff'
@@ -51,7 +55,9 @@ if nargin < 3 || isempty(doasqf)
     doasqf = 0;
 end
 
+% ------------------------------------------------------------------------------
 %% Do it
+% ------------------------------------------------------------------------------
 % difference between MI to itself and MI to this operation
 D = zeros(size(mis));
 switch mymethod

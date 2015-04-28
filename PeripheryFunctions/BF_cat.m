@@ -10,7 +10,7 @@
 % d, the delimiter (a comma by default)
 % surr, an optional string to surround each element of s (empty by default, but
 %       can be handy for surrounding each string by inverted commas, for
-%       example)
+%       example).
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -39,21 +39,21 @@ else
 end
 
 if nargin < 3 || isempty(surr)
-    sumstr = [];
+    sumString = [];
     if iscellstr(s)
-        for i = 1:length(s), sumstr = [sumstr, s{i}, d]; end
+        for i = 1:length(s), sumString = [sumString, s{i}, d]; end
     elseif isnumeric(s)
-        for i = 1:length(s), sumstr = [sumstr, num2str(s(i)), d]; end
+        for i = 1:length(s), sumString = [sumString, num2str(s(i)), d]; end
     end
 else
-    sumstr = [];
+    sumString = [];
     if iscellstr(s)
-        for i = 1:length(s), sumstr = [sumstr, surr, s{i}, surr, d]; end
+        for i = 1:length(s), sumString = [sumString, surr, s{i}, surr, d]; end
     elseif isnumeric(s)
-        for i = 1:length(s), sumstr = [sumstr, surr, num2str(s(i)), surr, d]; end
+        for i = 1:length(s), sumString = [sumString, surr, num2str(s(i)), surr, d]; end
     end    
 end
 
-out = sumstr(1:end-length(d));
+out = sumString(1:end-length(d));
 
 end

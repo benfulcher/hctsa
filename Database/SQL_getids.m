@@ -17,10 +17,8 @@
 %--keywordRemove: keywords NOT to include (cell of strings)
 %--idr: range of possible ids to restrict the search to (empty = don't
 %                    restrict -- default)
-%--databaseName: can specify a custom database; otherwise opens the default specified
-%           in SQL_opendatabase
 % 
-%---OUTPUTS
+%---OUTPUTS:
 % ids: a vector or either ts_ids or op_ids that match the input constraints
 % 
 % ------------------------------------------------------------------------------
@@ -62,10 +60,6 @@ if nargin < 2
     lengthRange = [];
 end
 % empty lengthRange means no length contraint, which is a fine default now...
-% if isempty(lengthRange)
-%     lengthRange = [200, 20000];
-%     fprintf(1,'Setting default length constraints: %u--%u\n',lengthRange(1),lengthRange(2))
-% end
 
 if nargin < 3
     keywordInclude = {};

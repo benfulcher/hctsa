@@ -9,10 +9,9 @@
 % 
 % dbc, the database connection
 % 
-% insertstring, the insert portion of the query
+% insertString, the insert portion of the query
 % 
 % dataset, a cell array of formatted strings like {'(''abc'',1)'}
-% 
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Romesh Abeysuriya
@@ -30,17 +29,17 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_add_chunked(dbc,insertstring,dataset,isduplicate,chunksize)
+function SQL_add_chunked(dbc,insertString,dataset,isDuplicate,chunkSize)
 
 % ------------------------------------------------------------------------------
 % Check inputs
 % ------------------------------------------------------------------------------
-if nargin < 4 || isempty(isduplicate)
-    isduplicate = zeros(size(dataset));
+if nargin < 4 || isempty(isDuplicate)
+    isDuplicate = zeros(size(dataset));
 end
 
-if nargin < 5 || isempty(chunksize)
-    chunksize = 50; % Run this many queries at a time
+if nargin < 5 || isempty(chunkSize)
+    chunkSize = 50; % Run this many queries at a time
     % This parameter can be tweaked depend on the value of max_allowed_packet
     % on the mySQL server.
 end
@@ -48,23 +47,22 @@ end
 % ------------------------------------------------------------------------------
 % Start adding chunks to the database
 % ------------------------------------------------------------------------------
-for k = 1:chunksize:length(dataset)
-    query = insertstring; % Start with the insert statement
-    for j = k:min(k+chunksize-1,length(dataset)) % Don't repeat statements
-        if ~isduplicate(j)
+for k = 1:chunkSize:length(dataset)
+    query = insertString; % Start with the insert statement
+    for j = k:min(k+chunkSize-1,length(dataset)) % Don't repeat statements
+        if ~isDuplicate(j)
             query = sprintf('%s %s,',query,dataset{j}); % Add values in parentheses in dataset{j}
         end
     end
     
-    if (length(query) > length(insertstring))
-        % There's something to be added, i.e., not all isduplicate in this chunk:
+    if (length(query) > length(insertString))
+        % There's something to be added, i.e., not all isDuplicate in this chunk:
     
         query = query(1:end-1); % Remove the final comma
     
         [~, emsg] = mysql_dbexecute(dbc,query); % Evaluate this chunk
         if ~isempty(emsg)
-            fprintf(1,'Error in SQL_add_chunked for chunk %u with chunk size %u...\n%s\n',k,chunksize,emsg)
-            keyboard
+            error('Error in SQL_add_chunked for chunk %u with chunk size %u...\n%s\n',k,chunkSize,emsg)
         end
     end
 end

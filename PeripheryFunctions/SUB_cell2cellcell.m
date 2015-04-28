@@ -23,18 +23,20 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function cellcell = SUB_cell2cellcell(cellin,delimiter)
+function outputCellCell = SUB_cell2cellcell(inputCell,delimiter)
 
+% Comma delimited by default:
 if nargin < 2 || isempty(delimiter)
     delimiter = ',';
 end
 
-Nelements = length(cellin); % number of elements in the input cell
-cellcell = cell(Nelements,1);
+% ------------------------------------------------------------------------------
 
-for i = 1:Nelements
-    cellcell{i} = regexp(cellin{i}, delimiter, 'split');
+numElements = length(inputCell); % number of elements in the input cell
+outputCellCell = cell(numElements,1);
+
+for i = 1:numElements
+    outputCellCell{i} = regexp(inputCell{i}, delimiter, 'split');
 end
-
 
 end

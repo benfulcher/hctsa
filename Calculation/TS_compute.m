@@ -14,7 +14,7 @@
 % beVocal:    if 1, gives additional user feedback.
 % 
 %---OUTPUTS:
-% Writes output to file, over HCTSA_loc.mat
+% Writes output into HCTSA_loc.mat
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,

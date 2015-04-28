@@ -3,9 +3,8 @@
 % ------------------------------------------------------------------------------
 % 
 % Determines the appropriate mySQL CREATE TABLE statement to use to create a given
-% table, identified by the input string, WhatTable
+% table, identified by the input string, whatTable
 % 
-% Ben Fulcher, May 2013.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -22,9 +21,9 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function createString = SQL_TablecreateString(WhatTable)
+function createString = SQL_TablecreateString(whatTable)
 
-switch WhatTable
+switch whatTable
 case 'Operations'
     createString = ['CREATE TABLE Operations ' ...
         '(op_id INTEGER NOT NULL AUTO_INCREMENT, ' ... % Unique integer identifier
@@ -110,8 +109,7 @@ case 'Results'
         'INDEX element (ts_id,op_id))'];
 
 otherwise
-    error('Unknown table ''%s''',WhatTable)
-    
+    error('Unknown table ''%s''',whatTable)
 end
 
 end

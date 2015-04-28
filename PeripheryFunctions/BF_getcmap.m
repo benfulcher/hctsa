@@ -10,11 +10,11 @@
 % 
 %---INPUTS:
 % whichcmap, the name of a colormap (see long list below)
-% ng, the number of colors to return from that color scheme (some maps can
+% numGrads, the number of colors to return from that color scheme (some maps can
 %           support larger numbers of colors, and the minimum is usually 3)
 % cellout, (i) 1: returns a cell of colors, where each component is an rgb
 %                 3-vector
-%          (ii) 0: returns a ng x 3 matrix for use in the Matlab colormap
+%          (ii) 0: returns a numGrads x 3 matrix for use in the Matlab colormap
 %                  function, for example
 % flipmeout, (i) 1: inverts the ordering of the colors.
 %            (ii) 0: doesn't invert the ordering of the colors. 
@@ -22,6 +22,7 @@
 %---HISTORY:
 % Ben Fulcher, 2010-11-5
 % Ben Fulcher, 2014-08-25: Set minimum group number to 3 to avoid empty output
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -40,10 +41,11 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function cmapout = BF_getcmap(whichcmap,ng,cellout,flipmeout)
+function cmapout = BF_getcmap(whichcmap,numGrads,cellout,flipmeout)
 
-if nargin < 2 || isempty(ng)
-    ng = 6;
+% Number of gradations, numGrads:
+if nargin < 2 || isempty(numGrads)
+    numGrads = 6;
 end
 if nargin < 3 || isempty(cellout)
     cellout = 0; % output as matrix for colourmap instead
@@ -53,8 +55,8 @@ if nargin < 4 || isempty(flipmeout)
 end
 
 % Minimum number of groups is 3:
-if ng < 3
-    ng = 3;
+if numGrads < 3
+    numGrads = 3;
 end
 
 % Choices for whichcmap:
@@ -103,8 +105,8 @@ end
 
 switch whichcmap
     case 'blues'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [222, 235, 247;
                     158, 202, 225;
@@ -156,8 +158,8 @@ switch whichcmap
                     8, 48, 107];
         end
     case 'greens'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [229, 245, 224;
                     161, 217, 155;
@@ -209,8 +211,8 @@ switch whichcmap
                     0, 68, 27];
         end
     case 'oranges'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [254, 230, 206;
                     253, 174, 107;
@@ -262,8 +264,8 @@ switch whichcmap
                     127, 39, 4];
         end
     case 'purples'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [239, 237, 245;
                     188, 189, 220;
@@ -315,8 +317,8 @@ switch whichcmap
                     63, 0, 125];
         end
     case 'reds'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [254, 224, 210;
                     252, 146, 114;
@@ -368,8 +370,8 @@ switch whichcmap
                     103, 0, 13];
         end
     case 'bluegreen'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [229, 245, 249;
                     153, 216, 201;
@@ -421,8 +423,8 @@ switch whichcmap
                     0, 68, 27];
         end
     case 'bluepurple'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [224, 236, 244;
                     158, 188, 218;
@@ -474,8 +476,8 @@ switch whichcmap
                     77, 0, 75];
         end
     case 'greenblue'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [224, 243, 219;
                     168, 221, 181;
@@ -527,8 +529,8 @@ switch whichcmap
                     8, 64, 129];
         end
     case 'orangered'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [254, 232, 200;
                     253, 187, 132;
@@ -580,8 +582,8 @@ switch whichcmap
                     127, 0, 0];
         end
     case 'purpleblue'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [236, 231, 242;
                     166, 189, 219;
@@ -633,8 +635,8 @@ switch whichcmap
                     2, 56, 88];
         end
     case 'purplebluegreen'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [236, 226, 240;
                     166, 189, 219;
@@ -686,8 +688,8 @@ switch whichcmap
                     1, 70, 54];
         end
     case 'purplered'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [231, 225, 239;
                     201, 148, 199;
@@ -739,8 +741,8 @@ switch whichcmap
                     103, 0, 31];
         end
     case 'redpurple'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [253, 224, 221;
                     250, 159, 181;
@@ -792,8 +794,8 @@ switch whichcmap
                     73, 0, 106];
         end
     case 'yellowgreen'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [247, 252, 185;
                     173, 221, 142;
@@ -845,8 +847,8 @@ switch whichcmap
                     0, 69, 41];
         end
     case 'yellowgreenblue'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [237, 248, 177;
                     127, 205, 187;
@@ -898,8 +900,8 @@ switch whichcmap
                     8, 29, 88];
         end
     case 'yelloworangebrown'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [255, 247, 188;
                     254, 196, 79;
@@ -951,8 +953,8 @@ switch whichcmap
                     102, 37, 6];
         end
     case 'yelloworangered'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [255, 237, 160;
                     254, 178, 76;
@@ -1004,8 +1006,8 @@ switch whichcmap
                     128, 0, 38];
         end
     case 'browngreen'
-        if ng > 9, ng = 9; end
-        switch ng
+        if numGrads > 9, numGrads = 9; end
+        switch numGrads
             case 3
                 cmapout = [216,179,101;
                             245,245,245;
@@ -1080,8 +1082,8 @@ switch whichcmap
                             0, 60, 48];
         end
     case 'pinkgreen'
-        if ng > 11, ng = 11; end
-        switch ng
+        if numGrads > 11, numGrads = 11; end
+        switch numGrads
             case 3
                 cmapout = [233, 163, 201;
                             247, 247, 247;
@@ -1156,8 +1158,8 @@ switch whichcmap
                             39, 100, 25];
         end
     case 'purplegreen'
-        if ng > 11, ng = 11; end
-        switch ng
+        if numGrads > 11, numGrads = 11; end
+        switch numGrads
             case 3
                 cmapout = [175, 141, 195;
                             247, 247, 247;
@@ -1232,8 +1234,8 @@ switch whichcmap
                             0, 68, 27];
         end
     case 'purpleorange'
-        if ng > 11, ng = 11; end
-        switch ng
+        if numGrads > 11, numGrads = 11; end
+        switch numGrads
             case 3
                 cmapout = [241, 163, 64;
                             247, 247, 247;
@@ -1308,8 +1310,8 @@ switch whichcmap
                             45, 0, 75];
         end
     case 'redblue'
-        if ng > 11, ng = 11; end
-        switch ng
+        if numGrads > 11, numGrads = 11; end
+        switch numGrads
             case 3
                 cmapout = [239, 138, 98;
                         247, 247, 247;
@@ -1384,8 +1386,8 @@ switch whichcmap
                     5, 48, 97];
         end
     case 'redgray'
-        if ng > 11, ng = 11; end
-        switch ng
+        if numGrads > 11, numGrads = 11; end
+        switch numGrads
             case 3
                 cmapout = [239, 138, 98;
                     255, 255, 255;
@@ -1460,8 +1462,8 @@ switch whichcmap
                     26, 26, 26];
         end
     case 'redyellowblue'
-        if ng > 11, ng = 11; end
-        switch ng
+        if numGrads > 11, numGrads = 11; end
+        switch numGrads
             case 3
                 cmapout = [252, 141, 89;
                     255, 255, 191;
@@ -1536,8 +1538,8 @@ switch whichcmap
                     49, 54, 149];
         end
     case 'redyellowgreen'
-        if ng > 11, ng = 11; end
-        switch ng
+        if numGrads > 11, numGrads = 11; end
+        switch numGrads
             case 3
                 cmapout = [252, 141, 89;
                     255, 255, 191;
@@ -1612,8 +1614,8 @@ switch whichcmap
                     0, 104, 55];
         end
     case 'spectral'
-        if ng > 11, ng = 11; end
-        switch ng
+        if numGrads > 11, numGrads = 11; end
+        switch numGrads
             case 3
                 cmapout = [252, 141, 89;
                     255, 255, 191;
@@ -1688,7 +1690,7 @@ switch whichcmap
                     94, 79, 162];
         end
     case 'accent'
-        if ng > 8, ng = 8; end
+        if numGrads > 8, numGrads = 8; end
         cmapout = [127, 201, 127;
             190, 174, 212;
             253, 192, 134;
@@ -1697,9 +1699,9 @@ switch whichcmap
             240, 2, 127;
             191, 91, 23;
             102, 102, 102]; % 8 class
-        cmapout = cmapout(1:ng,:);
+        cmapout = cmapout(1:numGrads,:);
     case 'dark2'
-        if ng > 8, ng = 8; end
+        if numGrads > 8, numGrads = 8; end
         cmapout = [27, 158, 119;
             217, 95, 2;
             117, 112, 179;
@@ -1708,9 +1710,9 @@ switch whichcmap
             230, 171, 2;
             166, 118, 29;
             102, 102, 102]; % 8 class
-        cmapout = cmapout(1:ng,:);
+        cmapout = cmapout(1:numGrads,:);
     case 'paired'
-        if ng > 11, ng = 11; end
+        if numGrads > 11, numGrads = 11; end
         cmapout = [166, 206, 227;
             31, 120, 180;
             178, 223, 138;
@@ -1722,9 +1724,9 @@ switch whichcmap
             202, 178, 214;
             106, 61, 154;
             255, 255, 153]; % 11 class
-        cmapout = cmapout(1:ng,:);
+        cmapout = cmapout(1:numGrads,:);
     case 'pastel1'
-        if ng > 9, ng = 9; end
+        if numGrads > 9, numGrads = 9; end
         cmapout = [251, 180, 174;
             179, 205, 227;
             204, 235, 197;
@@ -1734,9 +1736,9 @@ switch whichcmap
             229, 216, 189;
             253, 218, 236;
             242, 242, 242]; % 9 class
-        cmapout = cmapout(1:ng,:);
+        cmapout = cmapout(1:numGrads,:);
     case 'pastel2'
-        if ng > 8, ng = 8; end
+        if numGrads > 8, numGrads = 8; end
         cmapout = [179, 226, 205;
             253, 205, 172;
             203, 213, 232;
@@ -1745,9 +1747,9 @@ switch whichcmap
             255, 242, 174;
             241, 226, 204;
             204, 204, 204]; % 8 class
-        cmapout = cmapout(1:ng,:);
+        cmapout = cmapout(1:numGrads,:);
     case 'set1'
-        if ng > 9, ng = 9; end
+        if numGrads > 9, numGrads = 9; end
         cmapout = [228, 26, 28;
             55, 126, 184;
             77, 175, 74;
@@ -1757,9 +1759,9 @@ switch whichcmap
             166, 86, 40;
             247, 129, 191;
             153, 153, 153]; % 9 class
-        cmapout = cmapout(1:ng,:);
+        cmapout = cmapout(1:numGrads,:);
     case 'set2'
-        if ng > 8, ng = 8; end
+        if numGrads > 8, numGrads = 8; end
         cmapout = [102, 194, 165;
             252, 141, 98;
             141, 160, 203;
@@ -1768,9 +1770,9 @@ switch whichcmap
             255, 217, 47;
             229, 196, 148;
             179, 179, 179]; % 8 class
-        cmapout = cmapout(1:ng,:);
+        cmapout = cmapout(1:numGrads,:);
     case 'set3'
-        if ng > 12, ng = 12; end
+        if numGrads > 12, numGrads = 12; end
         cmapout = [141, 211, 199;
             255, 255, 179;
             190, 186, 218;
@@ -1783,9 +1785,9 @@ switch whichcmap
             188, 128, 189;
             204, 235, 197;
             255, 237, 111]; % 12 class
-        cmapout = cmapout(1:ng,:);
+        cmapout = cmapout(1:numGrads,:);
     case 'ben'
-        if ng > 10, ng = 10; end
+        if numGrads > 10, numGrads = 10; end
         cmapout = 255*[1, 0.4, 0.4; % red
                         0.4, 0.4, 1; % blue
                         [1, 0.7, 0.4]*0.95; % a bit darker orange
@@ -1796,7 +1798,7 @@ switch whichcmap
                         0, 0.7, 0;
                         0, 0, 0;
                         1, 1, 0];
-        cmapout = cmapout(1:ng,:);
+        cmapout = cmapout(1:numGrads,:);
     otherwise
         error('Unknown color map specified: ''%s''',whichcmap);
 end

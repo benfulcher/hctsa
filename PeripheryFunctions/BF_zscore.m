@@ -28,11 +28,10 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function z = BF_zscore(x)
+function zscoredData = BF_zscore(inputData)
 
-% By default, do it twice to reduce the numerical error:
-
-z = (x - mean(x)) / std(x);
-z = (z - mean(z)) / std(z);
+% By default, z-score twice to reduce the numerical error:
+zscoredData = (inputData - mean(inputData)) / std(inputData);
+zscoredData = (zscoredData - mean(zscoredData)) / std(zscoredData);
 
 end

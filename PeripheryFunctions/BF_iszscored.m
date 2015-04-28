@@ -2,9 +2,9 @@
 % BF_iszscored
 % ------------------------------------------------------------------------------
 % 
-% Checks whether the input time series is (~eps-close to being) z-scored.
-% Used for displaying warning messages for functions that require z-scored
-% inputs.
+% Performs a crude check as to whether the input time series is (~eps-close to
+% being) z-scored. Used for displaying warning messages for functions that
+% require z-scored inputs.
 % 
 %---INPUT:
 % x, the input time series (or any vector)
@@ -36,8 +36,8 @@
 function iszscored = BF_iszscored(x)
 
 % Give it a bit of numerical lee-way... Down in the 2e-14 region:
-Threshold = 100*eps;
+numericThreshold = 100*eps;
 
-iszscored = ((abs(mean(x)) < Threshold) && (abs(std(x)-1) < Threshold));
+iszscored = ((abs(mean(x)) < numericThreshold) && (abs(std(x)-1) < numericThreshold));
 
 end
