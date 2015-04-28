@@ -3,14 +3,15 @@
 % ------------------------------------------------------------------------------
 % 
 % Opens the database as dbc for use in retrieving and storing in the mySQL
-% database
+% database.
 % 
 %---HISTORY
-% (c) 2013
-% Ben D. Fulcher <ben.d.fulcher@gmail.com>, <http://www.benfulcher.com>
-% 2013: Updated to use sql_settings.conf by Romesh Abeysuriya
-% 2009: Max Little
+% 2013: Idea to use sql_settings.conf file by Romesh Abeysuriya
+% 
 % ------------------------------------------------------------------------------
+% Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>
+% <http://www.benfulcher.com>
+% 
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",

@@ -4,16 +4,15 @@
 % 
 % Create all the tables in the database
 % 
-% Uses SQL_tablecreatestring to retrieve the appropriate mySQL CREATE TABLE
+% Uses SQL_TableCreateString to retrieve the appropriate mySQL CREATE TABLE
 % statements.
 % 
 %---HISTORY:
-% Ben Fulcher, now uses SQL_TableCreateString, May 2013
-% Romesh Abeysuriya, March 2013
+% Thanks to Romesh Abeysuriya for helping with initial work on this function.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013, Romesh Abeysuriya
-% Ben D. Fulcher <ben.d.fulcher@gmail.com>, <http://www.benfulcher.com>
+% Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>, 
+% <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series

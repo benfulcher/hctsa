@@ -4,8 +4,8 @@
 % Drops and recreates the default database (set in SQL_opendatabase)
 % 
 %---HISTORY:
-% Initial idea to add by Romesh Abeysuriya, March 2013
-% Inane prompt voice added by Ben Fulcher, May 2013
+% Thanks to Romesh Abeysuriya for the idea to add this functionality, March 2013
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
