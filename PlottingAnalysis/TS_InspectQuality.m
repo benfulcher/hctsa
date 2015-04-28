@@ -29,6 +29,7 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
+
 function TS_InspectQuality(inspectWhat)
 
 % ------------------------------------------------------------------------------
@@ -52,13 +53,18 @@ if ~any(~isnan(TS_Quality(:)))
 end
 
 % ------------------------------------------------------------------------------
-% Get handles for figure (f) and axes (ax):
-f = figure('color','w');
-ax = gca;
 
 switch inspectWhat
 case 'full'
-    % Plot the quality labels:
+    % Plot all quality labels (for all time series and all operations)
+    
+    % Check that the size is not too large to plot:
+    checkSize(TS_Quality);
+    
+    % Plot:
+    % Get handles for figure (f) and axes (ax):
+    f = figure('color','w');
+    ax = gca;
     imagesc(TS_Quality)
     
     xlabel('Operations (op_id)','interpreter','none')
@@ -71,6 +77,14 @@ case 'reduced'
     % First find where problems exist, and only show these columns
     qualityMean = mean(TS_Quality);
     hadProblem = (qualityMean > 0);
+    
+    % Check that the size is not too large to plot:
+    checkSize(TS_Quality(:,hadProblem));
+    
+    % Plot:
+    % Get handles for figure (f) and axes (ax):
+    f = figure('color','w');
+    ax = gca;
     imagesc(TS_Quality(:,hadProblem));
     
     ax.XTick = 1:sum(hadProblem);
@@ -107,6 +121,9 @@ case 'master'
     % Now keep only master operations with problems:
     hadProblem = (mean(qualities)>0)
     
+    % Get handles for figure (f) and axes (ax):
+    f = figure('color','w');
+    ax = gca;
     imagesc(qualities(:,hadProblem));
     
     colormap([0.1686,0.5137,0.7294; 0.8431,0.0980,0.1098]);
@@ -124,6 +141,8 @@ case 'master'
 end
 
 
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 function formatYAxisColorBar()
     % For visualizing where you have time series on y-axis and color shows what quality
     % label for each computation
@@ -151,5 +170,14 @@ function formatYAxisColorBar()
     allColors = allColors([8,1,2,3,4,5,6,7],:);
     colormap(allColors(1:maxShow+1,:))
 end
+% ------------------------------------------------------------------------------
+function checkSize(A)
+    % Checks size of a matrix, and sends a warning if too large
+    if size(A,1)*size(A,2) > 100*9000
+        fprintf('Attempting to plot each value in a large matrix (%ux%u)...\n',size(A,1),size(A,2))
+        reply = input('[Press any key to continue (or cntrl-C to abort)]','s');
+    end
+end
+% ------------------------------------------------------------------------------
 
 end
