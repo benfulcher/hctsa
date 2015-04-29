@@ -2,8 +2,8 @@
 % TS_plot_pca
 % ------------------------------------------------------------------------------
 %
-% Calculates then plots a lower-dimensional feature-based representation of the
-% data (e.g., using PCA).
+% Calculates and then plots a 2-dimensional feature-based representation of the
+% data (using PCA).
 % 
 %---EXAMPLE USAGE:
 % 
@@ -166,9 +166,14 @@ if any(isnan(TS_DataMat(:)))
 end
 fprintf(1,'Calculating principal components of the %u x %u data matrix...', ...
                     size(TS_DataMat,1),size(TS_DataMat,2));
-[pc,score,latent] = princomp(TS_DataMat);
+                    
+% The new pca function is a much faster implementation to compute just the first
+% 2 components:
+[pcCoeff, pcScore, latent, ~, percVar] = pca(TS_DataMat,'NumComponents',2);
+% [pc,pcScore,latent] = princomp(TS_DataMat);
+% percVar = round(latent/sum(latent)*1000)/10; % Percentage of variance explained (1 d.p.)
+
 fprintf(1,' Done.\n');
-percVar = round(latent/sum(latent)*1000)/10; % Percentage of variance explained (1 d.p.)
 
 % Work out the main contributions to each principle component
 featLabel = cell(2,2); % Feature label :: proportion of total (columns are PCs)
@@ -200,6 +205,6 @@ DataInfo.GroupIndices = GroupIndices;
 DataInfo.DataLabels = DataLabels;
 DataInfo.TimeSeriesData = TimeSeriesData;
 
-TS_plot_2d(score(:,1:2),DataInfo,{},annotateParams,showDist,classMeth);
+TS_plot_2d(pcScore(:,1:2),DataInfo,{},annotateParams,showDist,classMeth);
 
 end

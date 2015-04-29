@@ -30,25 +30,21 @@
 currentDir = pwd;
 
 % Path split using platform-dependent separator
-if isunix
-    weHere = regexp(currentDir,'/','split');
-else
-    weHere = regexp(currentDir,'\','split');
-end
+weHere = regexp(currentDir,filesep,'split');
 
 if ~strcmp(weHere{end},'Toolboxes')
     error('This code must be run in the ''Toolboxes'' directory of the HCTSA package...')
 end
 
 % Sweet. Toolbox path is:
-toolDir = [currentDir '/'];
+toolDir = [currentDir,filesep];
 
 % ------------------------------------------------------------------------------
 % Max Little's fastdfa code
 % ------------------------------------------------------------------------------
 fprintf(1,'fastdfa...');
 try
-    cd([toolDir, 'Max_Little/fastdfa']);
+    cd([toolDir,'Max_Little',filesep,'fastdfa']);
 	mex ML_fastdfa_core.c
     fprintf(1,' done.\n');
 catch emsg
@@ -62,7 +58,7 @@ end
 % Max Little's Steps Bumps Toolkit
 % ------------------------------------------------------------------------------
 fprintf(1,'Max Little''s ''Steps and bumps'' toolkit...');
-cd([toolDir,'Max_Little/steps_bumps_toolkit'])
+cd([toolDir,'Max_Little',filesep,'steps_bumps_toolkit'])
 anyerrors = 0;
 try
     mex ML_kvsteps_core.cpp
@@ -98,7 +94,7 @@ if ~anyerrors, fprintf(1,' done.\n'); end
 % Gaussian Process code, gpml
 % ------------------------------------------------------------------------------
 fprintf(1,'Gaussian Process Toolbox, Carl Edward Rasmussen and Hannes Nickisch...');
-cd([toolDir,'gpml/util'])
+cd([toolDir,'gpml',filesep,'util'])
 anyerrors = 0;
 try
     make
@@ -111,7 +107,7 @@ if ~anyerrors, fprintf(1,' done.\n'); end
 % TSTOOL routines (such a mess)
 % ------------------------------------------------------------------------------
 fprintf(1,'TSTOOL...');
-cd([toolDir,'OpenTSTOOL/mex-dev'])
+cd([toolDir,'OpenTSTOOL',filesep,'mex-dev'])
 anyerrors = 0;
 try
     makemex
@@ -124,48 +120,9 @@ if ~anyerrors, fprintf(1,' done.\n'); end
 % TISEAN
 % ------------------------------------------------------------------------------
 fprintf(1,['NB: To use TISEAN routines, you need to compile and install them on your system\n' ...
-        'In the commandline, navigate to the Toolboxes/Tisean_3.0.1 directory\n  ''./configure''' ...
-        ' ''make clean'' and ''make'' and ''make install'' commands (cf. Documentation)...\n']);
+    'In the commandline, navigate to the Toolboxes%sTisean_3.0.1 directory\n  ''./configure''' ...
+    ' ''make clean'' and ''make'' and ''make install'' commands\n(cf. Documentation for instructions,' ...
+    ' including implementations for Windows)...\n'],filesep);
 
 % Return to base directory
 cd(toolDir);
-
-%     fprintf('------\nNow installing the CRPTool\n');
-%     fprintf('At the prompts\n-Remove existing toolbox\n-Create folder if asked\n-DO NOT add to the path\n-DO NOT delete the installation file\n-----\n');
-% 
-%     plugininstall_x86_64('./CRPTool');
-%     if rp_failed()
-%         fprintf(1,'rp_plugin failed, trying a different version...\n')
-%         plugininstall_i686('./CRPTool');
-%     else 
-%         return
-%     end
-%     if rp_failed()
-%         fprintf(1,'rp_plugin failed, trying a different version...\n')
-%         plugininstall_ia64('./CRPTool');
-%     else 
-%         return
-%     end
-%     if rp_failed()
-%         fprintf(1,'None of the rp_plugins worked. So you will be unable to use this operation\n')
-%     end
-% 
-% function status = rp_failed()
-%     plugin_path = fileparts(which('rp_plugin'));
-% 
-%     if ispc
-%         plugin_name = 'rp_plugin.exe';
-%     else
-%         plugin_name = 'rp_plugin';
-%         if isunix
-%             fileattrib([plugin_path, filesep, plugin_name], '+x')
-%         end
-%     end
-% 
-%     try
-%           [status, plugin_version] = system([plugin_path,filesep,plugin_name,' -V']);
-%     catch
-%           status = 1;
-%     end
-% end
-% end
