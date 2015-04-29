@@ -151,6 +151,56 @@ case 'master'
     
     title('Master operations producing special-valued outputs.','interpreter','none')
     
+case 'summary'
+    % Summary as a line plot for operations that had some bad values
+    
+    % First find where problems exist, and only show these columns
+    qualityMean = nanmean(TS_Quality);
+    hadProblem = (qualityMean > 0);
+
+    % Stop if there are no special values:
+    if sum(hadProblem)==0
+        fprintf(1,'No operations have problems! Nothing to inspect.\n');
+        return
+    end
+    
+    % Resize TS_Quality
+    TS_Quality = TS_Quality(:,hadProblem);
+    
+    % Give uncalculated entries the label 8
+    TS_Quality(isnan(TS_Quality)) = 8;
+
+    % Compute the proportion of each label per column:
+    whatLabel = zeros(9,sum(hadProblem));
+    for i = 1:9
+        whatLabel(i,:) = mean(TS_Quality==i-1);
+    end
+    
+    % Sort by the proportion of good values
+    propGood = whatLabel(1,:);
+    [~,ix] = sort(propGood,'ascend');
+    whatLabel = whatLabel(:,ix);
+    
+    % Plot:
+    % Get handles for figure (f) and axes (ax):
+    f = figure('color','w');
+    ax = gca;    
+    
+    bar(whatLabel','stacked');
+    
+    ax.XTick = 1:sum(hadProblem);
+    unSortedTicks = [Operations(hadProblem).ID];
+    ax.XTickLabel = unSortedTicks(ix);
+    
+    title(sprintf('Displaying %u/%u operations with some special values)',...
+                    sum(hadProblem),length(hadProblem)),...
+                    'interpreter','none')
+
+    formatYAxisColorBar(0,1);
+    
+    xlabel('Operations (op_id)','interpreter','none')
+    ylabel(sprintf('Proportion of outputs (across %u time series)',size(TS_Quality,1)))
+    
 otherwise
     error('Unknown input option ''%s''',inspectWhat);
 end
@@ -158,14 +208,22 @@ end
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
-function formatYAxisColorBar()
+function formatYAxisColorBar(doYaxis,offSet)
     % For visualizing where you have time series on y-axis and color shows what quality
     % label for each computation
+    if nargin < 1
+        doYaxis = 1;
+    end
+    if nargin < 2
+        offSet = 0;
+    end
     
-    % Format the y axis
-    ax.YTick = 1:length(TimeSeries);
-    ylabel('Time series')
-    ax.YTickLabel = {TimeSeries.FileName};
+    if doYaxis
+        % Format the y axis
+        ax.YTick = 1:length(TimeSeries);
+        ylabel('Time series')
+        ax.YTickLabel = {TimeSeries.FileName};
+    end
 
     % Get rid of tex interpreter format (for strings with underscores)
     set(ax,'TickLabelInterpreter','none');
@@ -176,8 +234,8 @@ function formatYAxisColorBar()
     maxShow = max(labelsExist); % maximum quality label to plot
 
     cb = colorbar(ax);
-    caxis([-0.5,maxShow+0.5]);
-    cb.Ticks = [0:1:maxShow];
+    caxis([-0.5+offSet,maxShow+0.5+offSet]);
+    cb.Ticks = [0+offSet:1:maxShow+offSet];
     cb.TickLabels = allLabels(1:maxShow+1);
 
     % Set the colormap:
