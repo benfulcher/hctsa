@@ -21,7 +21,7 @@
 % n, the order of derivative to analyze
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -40,11 +40,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = SY_StdNthDer(y,n)
-% Ben Fulcher, 2010
 
 if nargin < 2 || isempty(n)
     n = 2;

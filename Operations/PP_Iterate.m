@@ -17,12 +17,9 @@
 %           (iv) 'rav' applies a running mean filter,
 %           (v) 'resampleup' progressively upsamples the time series,
 %           (vi) 'resampledown' progressively downsamples the time series.
-%
-%---HISTORY:
-% Ben Fulcher, 10/7/09
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,7 +38,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = PP_Iterate(y,dtMeth)

@@ -21,7 +21,7 @@
 % n, somehow specifies the window length given the setting of lorf above.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -40,11 +40,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = ST_LocalExtrema(y,lorf,n)
-% Ben Fulcher, August 2008
+
+% ------------------------------------------------------------------------------
+% Check Inputs
+% ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(lorf)
     lorf = 'l';
@@ -58,11 +61,13 @@ if nargin < 3 || isempty(n)
     end
 end
 
-doplot = 0; % plot outputs to a figure
+doPlot = 0; % plot outputs to a figure
 
 N = length(y); % length of time series
 
-%% set window length
+% ------------------------------------------------------------------------------
+%% Set window length
+% ------------------------------------------------------------------------------
 switch lorf
     case 'l'
         wl = n; % window length
@@ -81,7 +86,9 @@ if (wl > N) || (wl <= 1)
     out = NaN; return
 end
 
+% ------------------------------------------------------------------------------
 %% Buffer the time series
+% ------------------------------------------------------------------------------
 y_buff = buffer(y,wl); % no overlap
 % each *column* is a window of samples
 if y_buff(end) == 0
@@ -89,7 +96,9 @@ if y_buff(end) == 0
 end
 nw = size(y_buff,2); % number of windows
 
+% ------------------------------------------------------------------------------
 %% Find local extrema
+% ------------------------------------------------------------------------------
 locmax = max(y_buff); % summary of local maxima
 locmin = min(y_buff); % summary of local minima
 abslocmin = abs(locmin); % absoluate value of local minima
@@ -97,7 +106,7 @@ exti = find(abslocmin>locmax);
 locext = locmax; locext(exti) = locmin(exti); % local extrema (furthest from mean; either maxs or mins)
 abslocext = abs(locext); % the magnitude of the most extreme events in each window
 
-if doplot
+if doPlot
     figure('color','w'); hold on;
     plot(locmax);
     plot(abslocext,'--g');
@@ -105,7 +114,9 @@ if doplot
     plot(locext,'k');
 end
 
+% ------------------------------------------------------------------------------
 %% Return outputs
+% ------------------------------------------------------------------------------
 out.meanrat = mean(locmax)/mean(abslocmin);
 out.medianrat = median(locmax)/median(abslocmin);
 out.minmax = min(locmax);

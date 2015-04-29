@@ -11,14 +11,11 @@
 % distribution of distances.
 % 
 %---INPUTS:
-% y, a z-scored column vector representing the input time series
+% y, a z-scored column vector representing the input time series.
 % tau, the time delay.
 % 
-%---HISTORY:
-% Ben Fulcher, September 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -37,12 +34,12 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CO_Embed2_Dist(y,tau)
 
-DoPlot = 0; % whether to plot results
+doPlot = 0; % whether to plot results
 
 % ------------------------------------------------------------------------------
 %% Check inputs:
@@ -70,7 +67,7 @@ m = [y(1:end-tau), y(1+tau:end)];
 
 
 % Plot some outputs
-if DoPlot
+if doPlot
     figure('color','w'); box('on');
     plot(m(:,1),m(:,2),'.');
 end

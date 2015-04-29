@@ -27,11 +27,8 @@
 %---OUTPUTS: measures of the sum of absolute deviations between distributions
 % across the different pairwise comparisons.
 % 
-%---HISTORY:
-% Ben Fulcher, August 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -50,13 +47,13 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = SY_LocalDistributions(y,nseg,eachorpar,npoints)
 
 % Plot outputs?
-doplot = 0;
+doPlot = 0;
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -87,7 +84,7 @@ for i = 1:nseg
     dns(:,i) = ksdensity(y((i-1)*lseg+1:i*lseg),r,'function','pdf');
 end
 
-if doplot
+if doPlot
     figure('color','w')
     plot(dns,'k')
 end
@@ -103,7 +100,7 @@ switch eachorpar
         for i = 1:nseg
             divs(i) = sum(abs(dns(:,i)-pardn')); % each is just divergence to parent
         end
-        if doplot
+        if doPlot
             hold on; plot(pardn,'r','LineWidth',2); hold off
         end
         

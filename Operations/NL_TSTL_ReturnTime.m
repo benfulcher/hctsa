@@ -17,16 +17,13 @@
 % maxT, maximum return time to consider
 % past, Theiler window
 % Nref, number of reference indicies
-% embedparams, to feed into BF_embed
+% embedParams, to feed into BF_embed
 % 
 %---OUTPUTS: include basic measures from the histogram, including the occurrence of
 % peaks, spread, proportion of zeros, and the distributional entropy.
 % 
-%---HISTORY:
-% Ben Fulcher, 12/11/2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -45,10 +42,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedparams)
+function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedParams)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
@@ -87,8 +84,8 @@ if nargin < 5 || isempty(Nref)
 end
 
 % embed parameters
-if nargin < 6 || isempty(embedparams)
-    embedparams = {'ac','fnnmar'};
+if nargin < 6 || isempty(embedParams)
+    embedParams = {'ac','fnnmar'};
     fprintf(1,'Using default embedding using autocorrelation and cao\n')
 end
 
@@ -97,7 +94,7 @@ doPlot = 0; % plot outputs to figures
 % ------------------------------------------------------------------------------
 %% Embed the signal
 % ------------------------------------------------------------------------------
-s = BF_embed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedParams{1},embedParams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     fprintf(1,'Embedding failed\n');

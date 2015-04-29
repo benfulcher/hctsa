@@ -7,24 +7,19 @@
 %---INPUTS:
 % whatData, The data to get information from: can be a structure, or 'norm' or
 %           'cl' to load from HCTSA_N or HCTSA_cl
+%           
 % whatTimeSeries, Can provide indices to plot that subset, a keyword to plot
 %                   matches to the keyword, 'all' to plot all, or an empty vector
 %                   to plot default groups in TimeSeries.Group
+%                   
 % numPerGroup, If plotting groups, plots this many examples per group
-% maxLength, the maximum number of samples of each time series to plot
-% displayTitles, shows time-series labels on the plot.
-% plotOptions, additional plotting options as a structure.
 % 
-%----HISTORY:
-% Previously called 'TSQ_plot_examples'
-% Ben Fulcher, 9/4/2010
-% Ben Fulcher, 13/5/2010 added F option (a matrix, 'norm', or 'cl')
-% Ben Fulcher, 24/6/2010 added option to show examples from each class in
-%                       kwgs, rather than all from the first class. In this
-%                       case, <numPerGroup> means per class.
+% maxLength, the maximum number of samples of each time series to plot
+% 
+% plotOptions, additional plotting options as a structure.
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
@@ -33,8 +28,8 @@
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
 % This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
@@ -68,7 +63,6 @@ end
 if nargin < 5
 	plotOptions = [];
 end
-
 
 % ------------------------------------------------------------------------------
 % Evaluate any custom plotting options specified in the structure plotOptions

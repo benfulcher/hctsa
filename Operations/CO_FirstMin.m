@@ -8,21 +8,18 @@
 %---INPUTS:
 % y, the input time series
 % minWhat, the type of correlation to minimize: either 'ac' for autocorrelation,
-%           or 'mi' for automutual information
+%           or 'mi' for automutual information. By default, 'mi' specifies the
+%           'gaussian' method from the Information Dynamics Toolkit. Other
+%           options can also be implemented as 'mi-kernel', 'mi-kraskov1',
+%           'mi-kraskov2' (all from Information Dynamics Toolkit implementations),
+%           or 'mi-hist' (histogram-based method).
 % 
 % Note that selecting 'ac' is unusual operation: standard operations are the
 % first zero-crossing of the autocorrelation (as in CO_FirstZero), or the first
 % minimum of the mutual information function ('mi').
-%
-% The 'mi' option uses Rudy Moddemeijer's RM_information.m code that may or may
-% not be great...
-% 
-%---HISTORY
-% Ben Fulcher, 2015-03-27 updated to using Information Dynamics Toolkit by default
-% Ben Fulcher, 2008
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,11 +38,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CO_FirstMin(y,minWhat,extraParam)
 
+% ------------------------------------------------------------------------------
+% Check inputs:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(minWhat)
     % Mutual information using gaussian method from Information Dynamics Toolkit:
     minWhat = 'mi-gaussian';

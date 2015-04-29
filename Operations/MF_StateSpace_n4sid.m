@@ -26,11 +26,8 @@
 %---OUTPUTS: parameters from the model fitted to the entire time series, and
 % goodness of fit and residual analysis from n4sid prediction.
 % 
-%---HISTORY:
-% Ben Fulcher, 1/2/2010
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -49,7 +46,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)

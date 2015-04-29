@@ -37,11 +37,8 @@
 % minimum, and maximum cross-prediction error, the minimum off-diagonal
 % cross-prediction error, and eigenvalues of the cross-prediction error matrix.
 % 
-%---HISTORY:
-% Ben Fulcher, 17/11/2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -60,7 +57,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = SY_TISEAN_nstat_z(y,nseg,embedparams)

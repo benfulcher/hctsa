@@ -34,12 +34,8 @@
 % metrics on both absolute values at each dimension but also some
 % indication of the shape
 % 
-%---HISTORY:
-% Ben Fulcher, October 2009
-% Ben Fulcher, 2015-03-19 added randomSeed for reproducibility
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -58,7 +54,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_acp(y,tau,past,maxDelay,maxDim,Nref,randomSeed)

@@ -34,12 +34,8 @@
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed,
 %             for settings of resampleHow that involve random number generation
 % 
-%---HISTORY:
-% Ben Fulcher, 19/1/2010
-% Ben Fulcher, 2015-03-20 Added randomSeed input
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -58,7 +54,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MF_GP_hyperparameters(y,covFunc,squishorsquash,maxN,resampleHow,randomSeed)

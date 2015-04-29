@@ -1,19 +1,18 @@
 % ------------------------------------------------------------------------------
 % BF_NaNCov
 % ------------------------------------------------------------------------------
-% Covariance estimate including NaNs for an input matrix, X
+% 
+% Covariance estimate including NaNs for an input matrix, X.
+% 
 % Not exact, because removes full mean across all values, rather than across
 % overlapping range, but should a reasonable approximation when number of NaNs
 % is small.
+% 
 % Output can be either the covariance matrix, or matrix of correlation
-% coefficients, depending on the second input.
+% coefficients, specified by the second input, makeCoeff.
 %
-% 
-%---HISTORY:
-% Ben Fulcher, 2014-06-26
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % This function is free software: you can redistribute it and/or modify it under
@@ -27,7 +26,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function C = NaNCov(X,makeCoeff,makeDist)

@@ -10,18 +10,15 @@
 %---INPUTS:
 % y, column vector of time series data
 % 
-% nbins, maximum number of partitions per axis
+% numBins, maximum number of partitions per axis
 % 
-% embedparams [opt], embedding parameters as {tau,m} in 2-entry cell for a
+% embedParams [opt], embedding parameters as {tau,m} in 2-entry cell for a
 %                   time-delay, tau, and embedding dimension, m. As inputs to BF_embed.
 % 
 %---OUTPUTS: Simple summaries of the outputs from corrdim.
 % 
-%---HISTORY:
-% Ben Fulcher, November 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -40,10 +37,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_BoxCorrDim(y,nbins,embedparams)
+function out = NL_BoxCorrDim(y,numBins,embedParams)
 
 doPlot = 0; % plot outputs to a figure
 
@@ -52,16 +49,16 @@ doPlot = 0; % plot outputs to a figure
 % ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
-% (1) Maxmum number of partitions per axis, nbins
-if nargin < 2 || isempty(nbins)
-    nbins = 100; % default number of bins per axis is 100
+% (1) Maxmum number of partitions per axis, numBins
+if nargin < 2 || isempty(numBins)
+    numBins = 100; % default number of bins per axis is 100
 end
 
 % (2) Set embedding parameters to defaults
-if nargin < 3 || isempty(embedparams)
-    embedparams = {'ac','fnnmar'};
+if nargin < 3 || isempty(embedParams)
+    embedParams = {'ac','fnnmar'};
 else
-    if length(embedparams) ~= 2
+    if length(embedParams) ~= 2
         error('Embedding parameters should be formatted like {tau,m}')
     end
 end
@@ -70,7 +67,7 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % convert to embedded signal object for TSTOOL
-s = BF_embed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedParams{1},embedParams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Time-series embedding to signal class for TSTOOL failed')
@@ -79,7 +76,7 @@ end
 % ------------------------------------------------------------------------------
 %% Run
 % ------------------------------------------------------------------------------
-rs = data(corrdim(s,nbins));
+rs = data(corrdim(s,numBins));
 
 % Contains ldr as rows for embedding dimensions 1:m as columns;
 if doPlot

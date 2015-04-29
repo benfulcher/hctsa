@@ -10,14 +10,14 @@
 %---INPUTS:
 % y, vector of equally-spaced time series data
 % orders, a vector of possible model orders
-% howtotest, specify a fraction, or provide a string 'all' to train and test on
+% testHow, specify a fraction, or provide a string 'all' to train and test on
 %            all the data
 % 
 %---OUTPUTS: statistics on the loss at each model order, which are obtained by
 % applying the model trained on the training data to the testing data.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -36,13 +36,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_CompareAR(y,orders,howtotest)
-% Ben Fulcher, 1/2/2010
+function out = MF_CompareAR(y,orders,testHow)
 
+% ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('identification_toolbox')
 
 % Preliminaries
@@ -62,35 +63,39 @@ if size(orders,1) == 1
    orders = orders'; % make sure a column vector
 end
 
-% (3) howtotest -- either all (trains and tests on the whole time series);
+% (3) testHow -- either all (trains and tests on the whole time series);
 % or a proportion of the time series to train on; will test on the
 % remaining portion.
-if nargin < 3 || isempty(howtotest)
-    howtotest = 'all';
+if nargin < 3 || isempty(testHow)
+    testHow = 'all';
 end
 
+% ------------------------------------------------------------------------------
 %% Run
+% ------------------------------------------------------------------------------
 % Get normalized prediction errors, V, from training to test set for each
 % model order
 % This could be done for model residuals using code in, say,
 % MF_StateSpaceCompOrder, or MF_StateSpace_n4sid...
 
-if ischar(howtotest)
-    if strcmp(howtotest,'all')
+if ischar(testHow)
+    if strcmp(testHow,'all')
         ytrain = y;
         ytest = y;
     else
-        error('Unknown testing set specifier ''%s''',howtotest);
+        error('Unknown testing set specifier ''%s''',testHow);
     end
 else % use first <proportion> to train, rest to test
-    co = floor(N*howtotest); % cutoff
+    co = floor(N*testHow); % cutoff
     ytrain = y(1:co);
     ytest = y(co+1:end);
 end
 
 V = arxstruc(ytrain,ytest,orders);
 
+% ------------------------------------------------------------------------------
 %% Output
+% ------------------------------------------------------------------------------
 % Statistics on V, which contains loss functions at each order (normalized sum of
 % squared prediction errors)
 v = V(1,1:end-1); % the loss function vector over the range of orders
@@ -118,13 +123,17 @@ if isempty(out.where01max), out.where01max = NaN; end
 out.whereen4 = find(stdfromi < 1e-4,1,'first');
 if isempty(out.whereen4), out.whereen4 = NaN; end
 
+% ------------------------------------------------------------------------------
 %% Plotting
+% ------------------------------------------------------------------------------
 if doplot
     plot(v);
     plot(stdfromi,'r');
 end
 
+% ------------------------------------------------------------------------------
 %% Use selstruc function to obtain 'best' order measures
+% ------------------------------------------------------------------------------
 % Get specific 'best' measures
 [nn, vmod0] = selstruc(V,0); % minimizes squared prediction errors
 out.best_n = nn;

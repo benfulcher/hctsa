@@ -14,19 +14,18 @@
 %       
 %---OUTPUT: the autocorrelation at the given time-lag.
 %
-%---HISTORY:
-% Ben Fulcher, 2014-10-28. Added a version of the 'TimeDomain' method that can
-% tolerate NaN values in the time series, for a specific application for Simonne
-% Cohen.
+%---NOTES:
+% Specifying whatMethod = 'TimeDomain' can tolerate NaN values in the time
+% series.
 % 
-% Ben Fulcher, 2014-03-24. Added multiple definitions for computing the
-%       autocorrelation Computing mean/std across the full time series makes a
-%       significant difference for short time series, but can produce values
-%       outside [-1,+1]. The filtering-based method used by Matlab's autocorr,
-%       is probably the best for short time series, and is now implemented here.
+% Computing mean/std across the full time series makes a significant difference
+% for short time series, but can produce values outside [-1,+1]. The
+% filtering-based method used by Matlab's autocorr, is probably the best for
+% short time series, and is implemented here by specifying: whatMethod =
+% 'Fourier'.
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -45,7 +44,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CO_AutoCorr(y,tau,whatMethod)

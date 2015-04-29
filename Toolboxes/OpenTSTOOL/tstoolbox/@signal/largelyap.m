@@ -27,7 +27,7 @@ if nargin < 4
 	return;
 end
 
-if nargin<5
+if nargin < 5
 	nnr = 1;
 end
 
@@ -52,3 +52,5 @@ rs = addhistory(rs,  ['Computed largest lyapunov exponent']);
 rs = addcommandlines(rs, 's = largelyap(s', n, stepsahead, past, nnr);
 rs = setyname(rs, 'p');
 rs = setlabel(rs, 'Prediction error');
+
+end

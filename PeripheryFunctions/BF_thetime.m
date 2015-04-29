@@ -9,20 +9,17 @@
 % 
 %---INPUTS:
 % tsec, the duration in seconds
-% FormatLong, (i) 0: display short units (like 's' instead of 'seconds')
+% formatLong, (i) 0: display short units (like 's' instead of 'seconds')
 %                    [default]
 %             (ii) 1: display long units (like 'seconds' instead of 's')
 % 
 %---OUTPUT:
-% TimeString, an interpretable text version of the input time.
+% timeString, an interpretable text version of the input time.
 % 
 % This code is useful for displaying user feedback on tic/toc statements.
-% 
-%---HISTORY:
-% Ben Fulcher, 2009
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % This function is free software: you can redistribute it and/or modify it under
@@ -36,48 +33,49 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function TimeString = BF_thetime(tsec,FormatLong)
+function timeString = BF_thetime(tsec,formatLong)
 
-if nargin < 2 || isempty(FormatLong)
-    FormatLong = 0; % Set to 1 to use a longer format for the unit
+if nargin < 2 || isempty(formatLong)
+    formatLong = 0; % Set to 1 to use a longer format for the unit
 end
 
+
 if tsec < 1E-3
-    if FormatLong
-        TimeString = '< 1 milliseconds';
+    if formatLong
+        timeString = '< 1 milliseconds';
     else
-        TimeString = '< 1ms';
+        timeString = '< 1ms';
     end
 elseif tsec < 1 % less than a second, display in integer number of milliseconds
-    if FormatLong
-        TimeString = sprintf('%.0f milliseconds',tsec*1000);
+    if formatLong
+        timeString = sprintf('%.0f milliseconds',tsec*1000);
     else
-        TimeString = sprintf('%.0fms',tsec*1000);
+        timeString = sprintf('%.0fms',tsec*1000);
     end
 elseif tsec <= 60 % less than a minute, display in seconds
-    if FormatLong
-        TimeString = sprintf('%.1f seconds',tsec);
+    if formatLong
+        timeString = sprintf('%.1f seconds',tsec);
     else
-    	TimeString = sprintf('%.1fs',tsec);
+    	timeString = sprintf('%.1fs',tsec);
     end
 elseif tsec <= 60*60 % less than an hour, display in minutes
-    if FormatLong
-        TimeString = sprintf('%.1f minutes',tsec/60);
+    if formatLong
+        timeString = sprintf('%.1f minutes',tsec/60);
     else
-        TimeString = sprintf('%.1fmin',tsec/60);
+        timeString = sprintf('%.1fmin',tsec/60);
     end
 elseif tsec <= 60*24*60 % less than a day, display in hours
-    if FormatLong
-        TimeString = sprintf('%.1f hours',tsec/60/60);
+    if formatLong
+        timeString = sprintf('%.1f hours',tsec/60/60);
     else
-        TimeString = sprintf('%.1fh',tsec/60/60);
+        timeString = sprintf('%.1fh',tsec/60/60);
     end
 % elseif tsec<=60*24*7*60 % less than a week, display in days
 else % display in days
-	TimeString = sprintf('%.1f days',tsec/60/60/24);
+	timeString = sprintf('%.1f days',tsec/60/60/24);
 end
 
 end

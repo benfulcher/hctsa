@@ -36,11 +36,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MD_rawHRVmeas(x)
-% Ben Fulcher 24/2/2011 -- want to do this on raw RR intervals
 
 N = length(x); % time-series length
 

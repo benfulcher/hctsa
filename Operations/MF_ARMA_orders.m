@@ -25,7 +25,7 @@
 % model rather than just in-sample FPE/AIC...
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -44,16 +44,19 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MF_ARMA_orders(y,pr,qr)
-% Ben Fulcher, 17/2/2010
 
+% ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('identification_toolbox')
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 % Convert y to time series object
 y = iddata(y,[],1);
 
@@ -67,12 +70,15 @@ if nargin < 3 || isempty(qr)
     qr = (1:5);
 end
 
-
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 fpes = zeros(length(pr),length(qr));
 aics = zeros(length(pr),length(qr));
 
+% ------------------------------------------------------------------------------
 %% Fit the models
+% ------------------------------------------------------------------------------
 for i = 1:length(pr)
     p = pr(i);
     for j = 1:length(qr)

@@ -10,15 +10,12 @@
 %---INPUTS:
 % y, the input time series
 % p, the percentage of values to remove beyond upper and lower percentiles
-% justme [opt], just returns a number:
+% justMe [opt], just returns a number:
 %               (i) 'mean' -- returns the mean of the middle portion of the data
 %               (ii) 'std' -- returns the std of the middle portion of the data
 % 
-%---HISTORY:
-% Ben Fulcher, 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -37,16 +34,16 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_OutlierTest(y,p,justme)
+function out = DN_OutlierTest(y,p,justMe)
 
 if nargin < 2 || isempty(p)
     p = 2; % by default, remove 2% of values from upper and lower percentiles
 end
 if nargin < 3
-    justme = ''; % return a structure with both the mean and std
+    justMe = ''; % return a structure with both the mean and std
 end
 
 % mean of the middle (100-2*p)% of the data
@@ -56,14 +53,14 @@ out.mean = mean(y(y > prctile(y,p) & y < prctile(y,100-p)));
 out.std = std(y(y > prctile(y,p) & y < prctile(y,100-p))) / std(y); % [although std(y) should be 1]
 
 % Output just a specified element of the output structure:
-if ~isempty(justme)
-    switch justme
+if ~isempty(justMe)
+    switch justMe
     case 'mean'
         out = out.mean;
     case 'std'
         out = out.std;
     otherwise
-        error('Unknown option ''%s''',justme);
+        error('Unknown option ''%s''',justMe);
     end
 end
 

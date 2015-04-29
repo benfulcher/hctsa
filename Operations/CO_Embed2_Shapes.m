@@ -6,19 +6,20 @@
 % embedding space sequentially. This function counts the points inside this shape
 % as a function of time, and returns statistics on this extracted time series.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time-series as a (z-scored) column vector
 % tau, the time-delay
 % shape, has to be 'circle' for now...
 % r, the radius of the circle
 % 
-% Outputs are of the constructed time series of the number of nearby points, and
+%---OUTPUTS:
+% The constructed time series of the number of nearby points, and
 % include the autocorrelation, maximum, median, mode, a Poisson fit to the
 % distribution, histogram entropy, and stationarity over fifths of the time
 % series.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -37,15 +38,16 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CO_Embed2_Shapes(y,tau,shape,r)
-% Ben Fulcher, September 2009
 
-doplot = 0; % plot results for debugging
+doPlot = 0; % plot results for debugging
 
+% ------------------------------------------------------------------------------
 %% Check inputs, set defaults:
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
 	fprintf(1,['Setting tau as the first zero crossing ' ...
     			'of the autocorrelation function.\n'])
@@ -73,11 +75,13 @@ if size(y,2) > size(y,1);
 	y = y';
 end
 
+% ------------------------------------------------------------------------------
 %% Create the recurrence space, populated by points m
+% ------------------------------------------------------------------------------
 m = [y(1:end-tau), y(1+tau:end)];
 N = length(m);
 
-if doplot % plot the recurrence space:
+if doPlot % plot the recurrence space:
 	plot(m(:,1),m(:,2),'.');
 end
 

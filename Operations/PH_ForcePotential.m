@@ -15,7 +15,7 @@
 %---INPUTS:
 % y, the input time series
 % 
-% whatpot, the potential function to simulate:
+% whatPotential, the potential function to simulate:
 %               (i) 'dblwell' (a double well potential function)
 %               (ii) 'sine' (a sinusoidal potential function)
 % 
@@ -32,12 +32,13 @@
 %               * kappa is the coefficient of friction,
 %               * deltat sets the time step for the simulation.
 % 
-%---OUTPUTS: statistics summarizing the trajectory of the simulated particle,
+%---OUTPUTS:
+% Statistics summarizing the trajectory of the simulated particle,
 % including its mean, the range, proportion positive, proportion of times it
 % crosses zero, its autocorrelation, final position, and standard deviation.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -56,37 +57,41 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = PH_ForcePotential(y,whatpot,params)
-% Ben Fulcher, September 2009
+function out = PH_ForcePotential(y,whatPotential,params)
 
+% ------------------------------------------------------------------------------
 % Check inputs
-if nargin < 2 || isempty(whatpot)
-    whatpot = 'dblwell'; % by default
+% ------------------------------------------------------------------------------
+if nargin < 2 || isempty(whatPotential)
+    whatPotential = 'dblwell'; % by default
 end
 if nargin < 3 || isempty(params)
     % default parameters
-    switch whatpot
+    switch whatPotential
     case 'dblwell'
         params = [2, 0.1, 0.1];
     case 'sine'
         params = [1, 1, 1];
     otherwise
-        error('Unknown system ''%s''', whatpot);
+        error('Unknown system ''%s''', whatPotential);
     end
 end
 
-doplot = 0; % plot results
+doPlot = 0; % plot results
 N = length(y); % length of the time series
+
+% ------------------------------------------------------------------------------
+
 
 alpha = params(1);
 kappa = params(2);
 deltat = params(3); % time step
 
 % Specify the potential function
-switch whatpot
+switch whatPotential
 case 'sine'
     V = @(x) -cos(x/alpha);
     F = @(x) sin(x/alpha)/alpha;
@@ -94,7 +99,7 @@ case 'dblwell'
     F = @(x) -x.^3 + alpha^2*x; % the double well function (the force from a double well potential)
     V = @(x) x.^4/4 - alpha^2*x.^2/2;
 otherwise
-    error('Unknown potential function ''%s'' specified', whatpot);
+    error('Unknown potential function ''%s'' specified', whatPotential);
 end
     
 x = zeros(N,1); % Position
@@ -105,8 +110,8 @@ for i = 2:N
     v(i) = v(i-1) + (F(x(i-1))+y(i-1)-kappa*v(i-1))*deltat;
 end
 
-if doplot
-    switch whatpot
+if doPlot
+    switch whatPotential
     case 'dblwell'
         figure('color','w'); hold on;
         plot(-100:0.1:100, F(-100:0.1:100), 'k') % plot the potential
@@ -129,7 +134,9 @@ if isnan(x(end)) || abs(x(end)) > 1E10
     out = NaN; return % not suitable for this time series
 end
 
+% ------------------------------------------------------------------------------
 %% Output some basic features of the trajectory
+% ------------------------------------------------------------------------------
 out.mean = mean(x); % mean
 out.median = median(x); % median
 out.std = std(x); % standard deviation
@@ -143,7 +150,7 @@ out.tau = CO_FirstZero(x,'ac'); % first zero crossing of the autocorrelation fun
 out.finaldev = abs(x(end)); % final position
 
 % A couple of additional outputs for double well:
-if strcmp(whatpot,'dblwell')
+if strcmp(whatPotential,'dblwell')
     % number of times the trajectory crosses the middle of the upper well
     out.pcrossup = sum((x(1:end-1)-alpha).*(x(2:end)-alpha) < 0)/(N-1);
     % number of times the trajectory crosses the middle of the lower well

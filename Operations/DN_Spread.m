@@ -8,16 +8,14 @@
 %---INPUTS:
 % y, the input time series
 % 
-% SpreadMeasure, the spead measure:
+% spreadMeasure, the spead measure:
 %               (i) 'std': standard deviation
 %               (ii) 'iqr': interquartile range
 %               (iii) 'mad': mean absolute deviation
 %               (iv) 'mead': median absolute deviation
-% 
-%---HISTORY:
-% Ben Fulcher, 2008
+%               
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -36,23 +34,23 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_Spread(y,SpreadMeasure)
+function out = DN_Spread(y,spreadMeasure)
 
 % ------------------------------------------------------------------------------
 % Check Inputs
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(SpreadMeasure)
-    SpreadMeasure = 'std'; % return std by default
+if nargin < 2 || isempty(spreadMeasure)
+    spreadMeasure = 'std'; % return std by default
 end
 
 
 % ------------------------------------------------------------------------------
 % Evaluate the spread measure
 % ------------------------------------------------------------------------------
-switch SpreadMeasure
+switch spreadMeasure
 	case 'std'
         % Standard deviation
 		out = std(y);
@@ -70,7 +68,7 @@ switch SpreadMeasure
         out = mad(y,1);
         
     otherwise
-        error('Unknown spread measure ''%s''',SpreadMeasure)
+        error('Unknown spread measure ''%s''',spreadMeasure)
 end
 
 end

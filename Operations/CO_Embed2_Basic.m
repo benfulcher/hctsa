@@ -15,7 +15,7 @@
 % y_{tau} plot, including parabolas, rings, and circles.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -34,13 +34,12 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CO_Embed2_Basic(y,tau)
-% Ben Fulcher, September 2009
 
-doplot = 0; % plot outputs to a figure
+doPlot = 0; % plot outputs to a figure
 
 if strcmp(tau,'tau')
 	% Make tau the first zero crossing of the autocorrelation function
@@ -104,7 +103,7 @@ out.medianincircle = median([out.incircle_01, out.incircle_02, out.incircle_05 .
 out.stdincircle = std([out.incircle_01, out.incircle_02, out.incircle_05 ...
                         out.incircle_1, out.incircle_2, out.incircle_3]);
 
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(xt,xtp,'.k');
     hold on

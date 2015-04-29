@@ -18,7 +18,7 @@
 % 
 %---INPUTS:
 % y, the input time series
-% preproc, a preprocessing to apply:
+% preProc, a preprocessing to apply:
 %           (i) 'none': no preprocessing is performed
 %           (ii) 'ar': performs a preprocessing that maximizes AR(2) whiteness,
 %           
@@ -33,11 +33,8 @@
 % Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
 % Ljung-Box Q-test, and estimates of optimal model orders.
 % 
-%---HISTORY:
-% Ben Fulcher 26/2/2010
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -56,10 +53,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_GARCHcompare(y,preproc,pr,qr,randomSeed,beVocal)
+function out = MF_GARCHcompare(y,preProc,pr,qr,randomSeed,beVocal)
 
 % ------------------------------------------------------------------------------
 %% Check that an Econometrics Toolbox license is available:
@@ -69,8 +66,8 @@ BF_CheckToolbox('econometrics_toolbox')
 % ------------------------------------------------------------------------------
 %% Check inputs:
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(preproc)
-    preproc = 'none';
+if nargin < 2 || isempty(preProc)
+    preProc = 'none';
 end
 
 % GARCH (p) ARCH (q) parameters
@@ -97,7 +94,7 @@ end
 % ------------------------------------------------------------------------------
 y0 = y; % the original, unprocessed time series
 
-y = BF_Whiten(y,preproc,0,randomSeed); % Use a basic preprocessing to whiten the time series
+y = BF_Whiten(y,preProc,0,randomSeed); % Use a basic preprocessing to whiten the time series
 
 % ------------------------------------------------------------------------------
 %% Preliminaries

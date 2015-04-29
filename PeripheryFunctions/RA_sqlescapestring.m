@@ -10,9 +10,6 @@
 % 
 %---OUTPUT:
 % S, the output string
-%
-%---HISTORY:
-% Romesh Abeysuriya, 10/12/2012
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Romesh Abeysuriya <romesh.abey@gmail.com>
@@ -28,7 +25,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function escapedString = RA_sqlescapestring(inputString)

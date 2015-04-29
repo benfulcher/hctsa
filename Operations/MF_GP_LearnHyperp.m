@@ -11,17 +11,16 @@
 % 
 %---INPUTS:
 % 
-% covFunc,       the covariance function, formated as gpml likes it
-% nfevals,       the number of function evaluations
 % t,             time
 % y,             data
-% init_loghyper, inital values for hyperparameters
-% 
-%---HISTORY:
-% Ben Fulcher, 2010
+% covFunc,       the covariance function, formatted as gpml likes it
+% meanFunc, the mean function, formatted as gpml likes it
+% likFunc, the likelihood function, formatted as gpml likes it
+% infAlg, the inference algorithm (in gpml form)
+% nfevals,       the number of function evaluations
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -40,7 +39,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function hyp = MF_GP_LearnHyperp(t,y,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp)

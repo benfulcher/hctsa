@@ -3,20 +3,21 @@
 % ------------------------------------------------------------------------------
 % 
 % Very simple function that uses the skewness and kurtosis functions in 
-% Matlab's Statistics Toolbox to calculate these higher order moments of input time series, y
+% Matlab's Statistics Toolbox to calculate these higher order moments of input
+% time series, y
 % 
 %---INPUTS:
 % 
 % y, the input time series
 % 
-% whatcum, the type of higher order moment:
+% cumWhatMay, the type of higher order moment:
 %           (i) 'skew1', skewness
 %           (ii) 'skew2', skewness correcting for bias
 %           (iii) 'kurt1', kurtosis
 %           (iv) 'kurt2', kurtosis correcting for bias
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -35,17 +36,16 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_Cumulants(y,whatcum)
-% Ben Fulcher, 2008
+function out = DN_Cumulants(y,cumWhatMay)
 
-if nargin < 2 || isempty(whatcum)
-    whatcum = 'skew1'; % do skewness by default
+if nargin < 2 || isempty(cumWhatMay)
+    cumWhatMay = 'skew1'; % do skewness by default
 end
 
-switch whatcum
+switch cumWhatMay
 case 'skew1' % skewness
 	out = skewness(y);
     
@@ -59,7 +59,7 @@ case 'kurt2' % corrects for bias
     out = kurtosis(y,0);        
     
 otherwise
-    error('Unknown cumulant ''%s'' specified: should be ''skew1'', ''skew2'', ''kurt1'', or ''kur2''',whatcum)
+    error('Unknown cumulant ''%s'' specified: should be ''skew1'', ''skew2'', ''kurt1'', or ''kur2''',cumWhatMay)
 end
 
 end

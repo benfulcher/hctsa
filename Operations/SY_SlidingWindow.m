@@ -41,7 +41,7 @@
 %       window at each increment)
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -60,13 +60,12 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = SY_SlidingWindow(y,windowstat,acrosswindowstat,nseg,nmov)
-% Ben Fulcher, 2009
 
-doplot = 0; % plot outputs
+doPlot = 0; % plot outputs
 
 if nargin < 2 || isempty(windowstat)
     windowstat = 'mean'; % do a sliding window mean
@@ -130,7 +129,7 @@ switch windowstat
         error('Unknown statistic ''%s''',windowstat)
 end
 
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(round(wlen/2):inc:(nsteps-1)*inc+round(wlen/2),qs,'r');
 end

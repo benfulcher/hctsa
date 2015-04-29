@@ -10,12 +10,12 @@
 % 
 %---INPUTS:
 % x, the input time series
-% thetest, the hypothesis test to perform:
+% theTest, the hypothesis test to perform:
 %           (i) 'chi2gof': chi^2 goodness of fit test
 %           (ii) 'ks': Kolmogorov-Smirnov test
 %           (iii) 'lillie': Lilliefors test
 % 
-% thedistn, the distribution to fit:
+% theDistn, the distribution to fit:
 %           (i) 'norm' (Normal)
 %           (ii) 'ev' (Extreme value)
 %           (iii) 'uni' (Uniform)
@@ -26,13 +26,13 @@
 %           (viii) 'logn' (Log-normal)
 %           (ix) 'wbl' (Weibull)
 % 
-% nbins, the number of bins to use for the chi2 goodness of fit test
+% numBins, the number of bins to use for the chi2 goodness of fit test
 % 
 % All of these functions for hypothesis testing are implemented in Matlab's
 % Statistics Toolbox.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -51,14 +51,15 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function p = HT_DistributionTest(x,thetest,thedistn,nbins)
-% Ben Fulcher, 2009
+function p = HT_DistributionTest(x,theTest,theDistn,numBins)
 
+% ------------------------------------------------------------------------------
 %% First fit the distribution
-switch thedistn
+% ------------------------------------------------------------------------------
+switch theDistn
     case 'norm'
         [a, b] = normfit(x);
     case 'ev'
@@ -91,12 +92,12 @@ switch thedistn
         else a = wblfit(x);
         end
     otherwise
-        error('Unknown distibution ''%s''',thedistn);
+        error('Unknown distibution ''%s''',theDistn);
 end
 
-switch thetest
+switch theTest
     case 'chi2gof' % PERFORM A CHI2 GOODNESS OF FIT TEST
-        switch thedistn
+        switch theDistn
             case 'norm'
                 mycdf = {@normcdf,a,b};
             case 'ev'
@@ -119,7 +120,7 @@ switch thetest
                 mycdf = {@wblcdf,a(1),a(2)};
         end
         warning('off','stats:chi2gof:LowCounts') % temporarily disable this warning
-        [h, p] = chi2gof(x,'cdf',mycdf,'nbins',nbins);
+        [h, p] = chi2gof(x,'cdf',mycdf,'nbins',numBins);
         warning('on','stats:chi2gof:LowCounts') % temporarily disable this warning
         
     case 'ks' % KOLMOGOROV-SMIRNOV TEST
@@ -129,7 +130,7 @@ switch thetest
         if size(x1,1) < size(x1,2);
             x1 = x1';
         end
-        switch thedistn
+        switch theDistn
             case 'norm'
                 mycdf = [x1, normcdf(x1,a,b)];
             case 'ev'
@@ -155,13 +156,13 @@ switch thetest
     case 'lillie' % LILLIEFORS TEST
         % Temporarily suspend low/high tabulated p-value warnings that often occur with this hypothesis test
         warning('off','stats:lillietest:OutOfRangePLow'); warning('off','stats:lillietest:OutOfRangePHigh');
-        if any(ismember({'norm','ev'},thedistn))
-            [h, p] = lillietest(x,0.05,thedistn);
-        elseif strcmp('exp',thedistn)
+        if any(ismember({'norm','ev'},theDistn))
+            [h, p] = lillietest(x,0.05,theDistn);
+        elseif strcmp('exp',theDistn)
             if any(x < 0)
                 p = NaN; return
             else
-                [h, p] = lillietest(x,0.05,thedistn);
+                [h, p] = lillietest(x,0.05,theDistn);
             end
         else
            p = NaN;
@@ -169,7 +170,7 @@ switch thetest
         end
         warning('on','stats:lillietest:OutOfRangePLow'); warning('on','stats:lillietest:OutOfRangePHigh');
     otherwise
-        error('Unknown test ''%s''',thetest);
+        error('Unknown test ''%s''',theTest);
 end
 
 end

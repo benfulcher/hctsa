@@ -12,32 +12,32 @@
 % 
 % y, the input time series
 % 
-% walkerrule, the kinematic rule by which the walker moves in response to the
+% walkerRule, the kinematic rule by which the walker moves in response to the
 %             time series over time:
 %             
 %             (i) 'prop': the walker narrows the gap between its value and that
 %                         of the time series by a given proportion p.
-%                         wparam = p;
+%                         walkerParams = p;
 %                         
 %             (ii) 'biasprop': the walker is biased to move more in one
 %                          direction; when it is being pushed up by the time
 %                          series, it narrows the gap by a proportion p_{up},
 %                          and when it is being pushed down by the time series,
 %                          it narrows the gap by a (potentially different)
-%                          proportion p_{down}. wparam = [pup,pdown].
+%                          proportion p_{down}. walkerParams = [pup,pdown].
 %                          
 %             (iii) 'momentum': the walker moves as if it has mass m and inertia
 %                          from the previous time step and the time series acts
 %                          as a force altering its motion in a classical
-%                          Newtonian dynamics framework. [wparam = m], the mass.
+%                          Newtonian dynamics framework. [walkerParams = m], the mass.
 %                          
 %              (iv) 'runningvar': the walker moves with inertia as above, but
 %                          its values are also adjusted so as to match the local
 %                          variance of time series by a multiplicative factor.
-%                          wparam = [m,wl], where m is the inertial mass and wl
+%                          walkerParams = [m,wl], where m is the inertial mass and wl
 %                          is the window length.
 % 
-% wparam, the parameters for the specified walkerrule, explained above.
+% walkerParams, the parameters for the specified walkerRule, explained above.
 % 
 %---OUTPUTS: include the mean, spread, maximum, minimum, and autocorrelation of the
 % walker's trajectory, the number of crossings between the walker and the
@@ -48,7 +48,7 @@
 % walker's trajectory and the original time series.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -67,45 +67,50 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = PH_Walker(y,walkerrule,wparam)
-% Ben Fulcher, August 2009
+function out = PH_Walker(y,walkerRule,walkerParams)
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
-doplot = 0; % plot outputs to figure
+% ------------------------------------------------------------------------------
+doPlot = 0; % plot outputs to figure
 N = length(y); % the length of the input time series, y
 
+% ------------------------------------------------------------------------------
 %% Check inputs
-if nargin < 2 || isempty(walkerrule)
-    walkerrule = 'prop'; % default
+% ------------------------------------------------------------------------------
+if nargin < 2 || isempty(walkerRule)
+    walkerRule = 'prop'; % default
 end
 
-if nargin < 3 || isempty(wparam)
+if nargin < 3 || isempty(walkerParams)
     % Set default parameter for this type of walker dynamics
-    switch walkerrule
+    switch walkerRule
     case 'prop'
-        wparam = 0.5;
+        walkerParams = 0.5;
     case 'biasprop'
-        wparam = [0.1, 0.2];
+        walkerParams = [0.1, 0.2];
     case 'momentum'
-        wparam = 2;
+        walkerParams = 2;
     case 'runningvar'
-        wparam = [1.5, 50];
+        walkerParams = [1.5, 50];
     end
 end
 
+% ------------------------------------------------------------------------------
 %% (1) Walk
+% ------------------------------------------------------------------------------
 
 w = zeros(N,1); % the walker's trajectory, w
 
-switch walkerrule
+switch walkerRule
     case 'prop'
         % walker starts at zero and narrows the gap between its position
         % and the time series value at that point by the proportion given
-        % in wparam, to give the value at the subsequent time step
-        p = wparam;
+        % in walkerParams, to give the value at the subsequent time step
+        p = walkerParams;
         
         w(1) = 0; % start at zero
         for i = 2:N
@@ -115,8 +120,8 @@ switch walkerrule
     case 'biasprop'
         % walker is biased in one or the other direction (i.e., prefers to
         % go up, or down). Requires a vector of inputs: [p_up, p_down]
-        pup = wparam(1);
-        pdown = wparam(2);
+        pup = walkerParams(1);
+        pdown = walkerParams(2);
         
         w(1) = 0;
         for i = 2:N
@@ -131,8 +136,8 @@ switch walkerrule
         % walker moves as if it had inertia from the previous time step,
         % i.e., it 'wants' to move the same amount; the time series acts as
         % a force changing its motion
-        m = wparam(1); % 'inertial mass'
-%         F=wparam(2); % weight of 'force' from time series
+        m = walkerParams(1); % 'inertial mass'
+%         F=walkerParams(2); % weight of 'force' from time series
         
         w(1) = y(1);
         w(2) = y(2);
@@ -148,8 +153,8 @@ switch walkerrule
     case 'runningvar'
         % walker moves with momentum defined by amplitude of past values in
         % a given length window
-        m = wparam(1); % 'inertial mass'
-        wl = wparam(2); % window length
+        m = walkerParams(1); % 'inertial mass'
+        wl = walkerParams(2); % window length
         
         w(1) = y(1);
         w(2) = y(2);
@@ -164,11 +169,13 @@ switch walkerrule
         end
         
     otherwise
-        error('Unknown method ''%s'' for simulating walker on the time series', walkerrule)
+        error('Unknown method ''%s'' for simulating walker on the time series', walkerRule)
 end
 
-%% % PLOT WALKER AND ORIGINAL TIME SERIES TOGETHER:
-if doplot
+% ------------------------------------------------------------------------------
+%% PLOT WALKER AND ORIGINAL TIME SERIES TOGETHER:
+% ------------------------------------------------------------------------------
+if doPlot
     lw = 1; % set the line width for plotting
     figure('color','w'); box('on'); hold on;
     c = BF_getcmap('set1',3,1);

@@ -7,18 +7,15 @@
 % 
 %---INPUTS:
 % y, time series to analyze
-% trit, the coarse-graining method to use:
+% cgHow, the coarse-graining method to use:
 %       (i) 'quantile': equiprobable alphabet by time-series value
 %       (ii) 'diffquant': equiprobably alphabet by time-series increments
 % 
 %---OUTPUTS:
 % Statistics on words of length 1, 2, 3, and 4.
 % 
-%---HISTORY:
-% This code was laboriously written by Ben Fulcher, 2009.
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -37,16 +34,16 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SB_MotifThree(y,trit)
+function out = SB_MotifThree(y,cgHow)
 
-if nargin < 2 || isempty(trit)
-    trit = 'quantile';
+if nargin < 2 || isempty(cgHow)
+    cgHow = 'quantile';
 end
 
-switch trit
+switch cgHow
 	case 'quantile'
 		yt = SB_CoarseGrain(y,'quantile',3);
         

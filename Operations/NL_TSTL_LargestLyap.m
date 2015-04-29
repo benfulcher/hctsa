@@ -24,7 +24,7 @@
 % 
 % NNR, number of nearest neighbours
 % 
-% embedparams, input to BF_embed, how to time-delay-embed the time series, in
+% embedParams, input to BF_embed, how to time-delay-embed the time series, in
 %               the form {tau,m}, where string specifiers can indicate standard
 %               methods of determining tau or m.
 % 
@@ -33,11 +33,8 @@
 % much of the range of scales as possible while simultaneously achieving the
 % best possible linear fit.
 % 
-%---HISTORY:
-% Ben Fulcher, November 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -56,15 +53,15 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_TSTL_LargestLyap(y,Nref,maxtstep,past,NNR,embedparams)
+function out = NL_TSTL_LargestLyap(y,Nref,maxtstep,past,NNR,embedParams)
 
 % ------------------------------------------------------------------------------
-% Check a curve-fitting toolbox license is available:
+%% Check a curve-fitting toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox');
-% ------------------------------------------------------------------------------
 
 doPlot = 0; % whether to plot outputs to a figure
 
@@ -79,6 +76,9 @@ if nargin < 2 || isempty(Nref)
 end
 if Nref < 1 && Nref > 0
     Nref = round(N*Nref); % specify a proportion of time series length
+end
+if Nref > -1
+    fprintf('This algorithm relies on stochastic sampling of %u data points.\n',Nref)
 end
 
 % (2) maxtstep: maximum prediction length
@@ -109,12 +109,12 @@ if nargin < 5 || isempty(NNR)
     NNR = 3;
 end
 
-% (5) Embedding parameters, embedparams
-if nargin < 6 || isempty(embedparams)
-    embedparams = {'ac','fnnmar'};
+% (5) Embedding parameters, embedParams
+if nargin < 6 || isempty(embedParams)
+    embedParams = {'ac','fnnmar'};
     disp('using default embedding using autocorrelation and cao')
 else
-    if length(embedparams) ~= 2
+    if length(embedParams) ~= 2
         error('Embedding parameters formatted incorrectly -- should be {tau,m}')
     end
 end
@@ -123,13 +123,15 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % convert to embedded signal object for TSTOOL
-s = BF_embed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedParams{1},embedParams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding failed');
 end
 
-%% Run the TSTOOL code, largelyap:
+% ------------------------------------------------------------------------------
+%% Run the TSTOOL code, largelyap (which is stochastic):
+% ------------------------------------------------------------------------------
 try
     rs = largelyap(s,Nref,maxtstep,past,NNR);
 catch
@@ -227,8 +229,9 @@ else
     % hold on; plot(t_scal,pfit,'-r'); hold off;
     % keyboard
     
-    
+    % ------------------------------------------------------------------------------
     %% Adjust start and end times for best scaling
+    % ------------------------------------------------------------------------------
     
     l = imax; % = length(t_scal)
     stptr = 1:floor(l/2)-1; % start point must be in the first half (not necessarily, but for here)
@@ -289,15 +292,13 @@ end
 % Fit exponential
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[max(p) -0.5]);
 f = fittype('a*(1-exp(b*x))','options',s);
-fitworked = 1;
+fitWorked = 1;
 try
     [c, gof] = fit(t',p,f);
 catch me
-    if strcmp(me.message,'Inf computed by model function.')
-        fitworked = 0;
-    end
+    fitWorked = 0;
 end
-if fitworked
+if fitWorked
     out.expfit_a = c.a;
     out.expfit_b = c.b;
     out.expfit_r2 = gof.rsquare;

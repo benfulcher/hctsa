@@ -1,4 +1,4 @@
-function [rs, s] = corrsum(s, npairs, range, past, bins)
+function [rs, s] = corrsum(s, npairs, range, past, bins, opt_flag)
 
 %tstoolbox/@signal/corrsum2
 %   Syntax:

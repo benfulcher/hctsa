@@ -38,22 +38,9 @@
 %                   
 % classMethod, can select a classifier to fit to the different classes (e.g.,
 %               'linclass' for a linear classifier).
-% 
-%---HISTORY
-% Borrows from TSQ_pca plotting routines
-% Ben Fulcher 24/3/2010
-% Ben Fulcher 28/4/2010: added F input
-% Ben Fulcher 19/10/2010: added trainTest input: cell to plot seperately
-%                trainTest = {traini,testi}; if just one component then a
-%                subset
-% Ben Fulcher 20/10/2010: added annotateParams option: number of time series
-%                annotations to make (default = 0)
-% Ben Fulcher 20/10/2010: also added showDistr option
-% Ben Fulcher 27/10/2010: added classMethod option (choose how to calculate
-%                           classRate)
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
@@ -62,8 +49,8 @@
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
 % This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------

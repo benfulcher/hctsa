@@ -17,14 +17,9 @@
 % Note that NaNs are ignored -- only real data is used for the normalization
 % (assume NaNs are a minority of the data).
 % 
-%---HISTORY:
-% Ben Fulcher 28/1/2011 -- Added this NaN capability 
-% Ben Fulcher 12/9/2011 -- Added itrain input: obtain the transformation
-%                           on this subset, apply it to all the data.
-% Ben Fulcher, 2014-06-26 -- Added a mixed sigmoid approach
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -43,7 +38,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
     
 function F = BF_NormalizeMatrix(F,normMethod,itrain)

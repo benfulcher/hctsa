@@ -31,7 +31,7 @@
 % http://www.maxlittle.net/
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -50,17 +50,18 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MD_hrv_classic(y)
-% Ben Fulcher, 12/4/2010.
 
 % Standard defaults
 diffy = diff(y);
 N = length(y); % time-series length
 
-%% Calculate pNNx percentage
+% ------------------------------------------------------------------------------
+% Calculate pNNx percentage
+% ------------------------------------------------------------------------------
 % pNNx: recommendation as per Mietus et. al. 2002, "The pNNx files: ...", Heart
 % strange to do this for a z-scored time series...
 % pnntime = 20;
@@ -77,11 +78,15 @@ out.pnn20 = PNNxfn(20); %sum(Dy > 20)/(N-1);
 out.pnn30 = PNNxfn(30); %sum(Dy > 30)/(N-1);
 out.pnn40 = PNNxfn(40); %sum(Dy > 40)/(N-1);
 
+% ------------------------------------------------------------------------------
 % Calculate PSD
+% ------------------------------------------------------------------------------
 % [Pxx, F] = psd(series,1024,1,hanning(1024),512);
 [Pxx, F] = periodogram(y,hann(N)); % periodogram with hanning window
 
+% ------------------------------------------------------------------------------
 % Calculate spectral measures such as subband spectral power percentage, LF/HF ratio etc.
+% ------------------------------------------------------------------------------
 % LF/HF: as per Malik et. al. 1996, "Heart Rate Variability"
 LF_lo = 0.04; % /pi -- fraction of total power (max F is pi)
 LF_hi = 0.15;
@@ -101,11 +106,15 @@ out.vlf   = vlfp/total * 100;
 out.lf    = lfp/total * 100;
 out.hf    = hfp/total * 100;
 
+% ------------------------------------------------------------------------------
 % Triangular histogram index
+% ------------------------------------------------------------------------------
 out.tri = length(y)/max(hist(y));
 
-% Poincare plot measures: see
-% "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)
+% ------------------------------------------------------------------------------
+% Poincare plot measures:
+% ------------------------------------------------------------------------------
+% cf. "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)
 rmssd = std(diffy); % std of differenced series
 sigma = std(y); % should be 1 for zscored time series
 out.SD1 = 1/sqrt(2) * rmssd * 1000;

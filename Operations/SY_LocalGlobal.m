@@ -8,7 +8,7 @@
 %---INPUTS:
 % y, the time series to analyze
 % 
-% lorp, the local subset of time series to study:
+% subsetHow, the local subset of time series to study:
 %             (i) 'l': the first n points in a time series,
 %             (ii) 'p': an initial proportion of the full time series, n
 %             (iii) 'unicg': n evenly-spaced points throughout the time series
@@ -28,13 +28,8 @@
 % A better approach would be to repeat over many local subsets and compare the
 % statistics of these local regions to the full time series.
 % 
-% 
-%---HISTORY:
-% Ben Fulcher, September 2009
-% Ben Fulcher, 2015-03-19 added randomSeed input
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -53,10 +48,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SY_LocalGlobal(y,lorp,n,randomSeed)
+function out = SY_LocalGlobal(y,subsetHow,n,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Preliminaries
@@ -69,13 +64,13 @@ if ~BF_iszscored(y)
 end
 
 % Set default l
-if nargin < 2 || isempty(lorp)
-    lorp = 'l';
+if nargin < 2 || isempty(subsetHow)
+    subsetHow = 'l';
 end
 
 % Set default n
 if nargin < 3 || isempty(n)
-    switch lorp
+    switch subsetHow
     case {'l','unicg','randcg'}
         n = 100; % 100 samples
     case 'p'
@@ -88,7 +83,7 @@ N = length(y); % Length of the time series
 % ------------------------------------------------------------------------------
 % Determine subset range to use: r
 % ------------------------------------------------------------------------------
-switch lorp
+switch subsetHow
     case 'l'
         % Takes first n points of time series:
         r = (1:min(n,N));
@@ -111,7 +106,7 @@ switch lorp
         % This is not very robust, as it's taking just a single stochastic
         % sample with a (possibly) large variance
     otherwise
-        error('Unknown specifier, ''%s''',lorp);
+        error('Unknown specifier, ''%s''',subsetHow);
 end
 
 % ------------------------------------------------------------------------------

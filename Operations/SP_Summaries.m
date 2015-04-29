@@ -32,17 +32,15 @@
 % doPower, analyzes the power spectrum rather than amplitudes of a Fourier
 %          transform
 % 
-%---OUTPUTS: statistics summarizing various properties of the spectrum,
+%---OUTPUTS:
+% Statistics summarizing various properties of the spectrum,
 % including its maximum, minimum, spread, correlation, centroid, area in certain
 % (normalized) frequency bands, moments of the spectrum, Shannon spectral
 % entropy, a spectral flatness measure, power-law fits, and the number of
 % crossings of the spectrum at various amplitude thresholds.
 % 
-%---HISTORY:
-% Ben Fulcher, August 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -61,7 +59,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs,doPower)

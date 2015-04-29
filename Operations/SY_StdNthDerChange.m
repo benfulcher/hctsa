@@ -22,7 +22,7 @@
 % signals increase...?
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,16 +41,17 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = SY_StdNthDerChange(y,maxd)
-% Ben Fulcher, 2009
 
+% ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox')
 
-doplot = 0; % plot outputs
+doPlot = 0; % plot outputs
 
 if nargin < 2 || isempty(maxd)
     maxd = 10; % do 10 by default
@@ -61,7 +62,7 @@ for i = 1:maxd
     ms(i) = SY_StdNthDer(y,i);
 end
 
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(ms,'o-k')
 end

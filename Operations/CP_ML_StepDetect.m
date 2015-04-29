@@ -40,12 +40,8 @@
 % variance from removing the piece-wise constants, and stationarity in the
 % occurrence of change points.
 % 
-%---HISTORY:
-% Ben Fulcher, 2014-10-08 Commented out Chung-Kennedy.
-% Ben Fulcher, 12/4/2010
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -64,7 +60,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CP_ML_StepDetect(y,method,params)

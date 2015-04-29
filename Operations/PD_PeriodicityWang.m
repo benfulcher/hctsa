@@ -21,11 +21,8 @@
 % uses a range of thresholds: 0, 0.01, 0.1, 0.2, 1\sqrt{N}, 5\sqrt{N}, and
 % 10\sqrt{N}, where N is the length of the time series.
 % 
-%---HISTORY:
-% Ben Fulcher, 9/7/09
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -44,7 +41,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = PD_PeriodicityWang(y)
@@ -52,7 +49,7 @@ function out = PD_PeriodicityWang(y)
 % ------------------------------------------------------------------------------
 %% Preliminaries:
 % ------------------------------------------------------------------------------
-doplot = 0; % plot outputs to figure
+doPlot = 0; % plot outputs to figure
 
 % Check that a Curve-Fitting Toolbox license is available:
 % (for the splines)
@@ -83,7 +80,7 @@ nths = length(ths); % the number of thresholds
 spline = spap2(2,4,1:N,y); % just a single middle knot with cubic interpolants
 y_spl = fnval(spline,1:N); % evaluated at the 1:N time intervals
 y = y - y_spl';
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(y_or,'k'); hold on; plot(y,'r'); hold off
 end
@@ -94,7 +91,7 @@ acf = zeros(acmax,1); % the autocorrelation function
 for i = 1:acmax % i is the \tau, the AC lag
     acf(i) = mean(y(1:N-i).*y(i+1:N));
 end
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(acf,'k')
     title('Autocorrelation')

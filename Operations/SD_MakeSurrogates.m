@@ -3,7 +3,7 @@
 % ------------------------------------------------------------------------------
 % 
 % Generates surrogate time series given a method (surrogates), number of
-% surrogates (numSurrs), and any extra parameters (extrap)
+% surrogates (numSurrs), and any extra parameters (extraParams)
 % 
 % Method described relatively clearly in Guarin Lopez et al. (arXiv, 2010)
 % Used bits of aaft code that references (and presumably was obtained from)
@@ -24,15 +24,12 @@
 % 
 % numSurrs, the number of surrogates to generate
 % 
-% extrap, extra parameters required by the selected surrogate generation method
+% extraParams, extra parameters required by the selected surrogate generation method
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%
-%---HISTORY: 
-% Ben Fulcher, 27/1/2011
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -51,10 +48,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SD_MakeSurrogates(x,surrMethod,numSurrs,extrap,randomSeed)
+function out = SD_MakeSurrogates(x,surrMethod,numSurrs,extraParams,randomSeed)
 
 beVocal = 0; % Display text information/commentary to screen
 
@@ -68,7 +65,7 @@ end
 
 % Any extra parameters (some methods require)
 if nargin < 4
-    extrap = [];
+    extraParams = [];
 end
 
 % randomSeed: how to treat the randomization
@@ -190,11 +187,11 @@ switch surrMethod
             fprintf(1,['Low Frequency phases are preserved, and high frequency phases will be ' ...
                     'randomized. A way of dealing with non-stationarity.\n'])
         end
-        if isempty(extrap)
+        if isempty(extraParams)
             fprintf(1,'You haven''t specified a cut-off frequency!! Setting N/8\n')
             fc = round(N/8);
         else
-            fc = extrap; % extra input is the frequency cut-off
+            fc = extraParams; % extra input is the frequency cut-off
             if fc < 1
                 fc = N*fc;
             end

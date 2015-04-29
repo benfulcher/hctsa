@@ -8,10 +8,10 @@
 % 
 % y, the input time series
 % 
-% minormax, either 'min' or 'max' to return either the minimum or maximum of y
+% minOrMax, either 'min' or 'max' to return either the minimum or maximum of y
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -30,13 +30,12 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_MinMax(y,minormax)
-% Ben Fulcher, 2008
+function out = DN_MinMax(y,minOrMax)
 
-switch minormax
+switch minOrMax
     case 'max'
         out = max(y);
         
@@ -44,7 +43,7 @@ switch minormax
         out = min(y);
         
     otherwise
-        error('Unknown method ''%s''',minormax)
+        error('Unknown method ''%s''',minOrMax)
 end
 
 end

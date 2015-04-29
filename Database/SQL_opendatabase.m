@@ -5,9 +5,6 @@
 % Opens the database as dbc for use in retrieving and storing in the mySQL
 % database.
 % 
-%---HISTORY
-% 2013: Idea to use sql_settings.conf file by Romesh Abeysuriya
-% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>
 % <http://www.benfulcher.com>
@@ -18,8 +15,8 @@
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
 % This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
@@ -52,7 +49,7 @@ s = textscan(fid,'%s%s%s%s%u','Delimiter',',','CommentStyle','%');
 fclose(fid);
 
 % Interpret the output:
-hostname = s{1}{1};
+hostName = s{1}{1};
 default_databaseName = s{2}{1};
 username = s{3}{1};
 password = s{4}{1};
@@ -70,13 +67,13 @@ end
 if beVocal
 	fprintf(1,'Using database %s\n',databaseName)
     fprintf(1,['Connecting to host ''%s'', database ''%s'' (port %u) using username' ...
-            ' ''%s'' and password ''%s''...'],hostname,databaseName,customPort,username,password)
+            ' ''%s'' and password ''%s''...'],hostName,databaseName,customPort,username,password)
 end
 
 % ------------------------------------------------------------------------------
 % Open database as dbc
 % ------------------------------------------------------------------------------
-dbc = mysql_dbopen(hostname,databaseName,username,password,customPort,useDBToolbox);
+dbc = mysql_dbopen(hostName,databaseName,username,password,customPort,useDBToolbox);
 
 if isempty(dbc)
 	error('Failed to load SQL database');
@@ -85,7 +82,6 @@ elseif beVocal
 end
 
 mysql_dbexecute(dbc,['USE ' databaseName]);
-
 
 
 end

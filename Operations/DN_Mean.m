@@ -8,7 +8,7 @@
 % 
 % y, the input time series
 % 
-% meantype, (i) 'norm' or 'arithmetic', arithmetic mean
+% meanType, (i) 'norm' or 'arithmetic', arithmetic mean
 %           (ii) 'median', median
 %           (iii) 'geom', geometric mean
 %           (iv) 'harm', harmonic mean
@@ -17,7 +17,7 @@
 %           (vii) 'midhinge', midhinge
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -36,20 +36,21 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_Mean(y,meantype)
-% Ben Fulcher, 2008
+function out = DN_Mean(y,meanType)
 
+% ------------------------------------------------------------------------------
 % Check Inputs
-if nargin < 2 || isempty(meantype)
-    meantype = 'arithmetic'; % normal mean
+% ------------------------------------------------------------------------------
+if nargin < 2 || isempty(meanType)
+    meanType = 'arithmetic'; % normal mean
 end
 
 N = length(y); % time-series length
 
-switch meantype
+switch meanType
 	case {'norm','arithmetic'} % mean
 		out = mean(y);
         
@@ -74,7 +75,7 @@ switch meantype
         out = mean(p);
         
     otherwise
-        error('Unknown mean type ''%s''', meantype);
+        error('Unknown mean type ''%s''', meanType);
 end
 
 end

@@ -26,11 +26,8 @@
 %---OUTPUT:
 % A matrix of width m containing the vectors in the new embedding space...
 % 
-%---HISTORY:
-% Ben Fulcher, October 2009
-%
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -49,7 +46,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function y_embed = BF_embed(y,tau,m,sig,randomSeed,beVocal)

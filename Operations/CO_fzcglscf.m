@@ -10,17 +10,14 @@
 % Keeps calculating until the function finds a minimum, and returns this lag.
 % 
 %---INPUTS:
-% y, the input time series
-% alpha, the parameter alpha
-% beta, the parameter beta
+% y, the input time series.
+% alpha, the parameter alpha.
+% beta, the parameter beta.
 % maxtau [opt], a maximum time delay to search up to (default is the time-series
-%                length)
-% 
-%---HISTORY:
-% Ben Fulcher, 2009
+%                length).
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -39,7 +36,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CO_fzcglscf(y,alpha,beta,maxtau)

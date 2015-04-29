@@ -8,12 +8,12 @@
 % 
 %---INPUTS:
 % y, the time series
-% fitwhat, the type of fit to do: 'gaussian', 'uniform', or 'geometric'.
+% fitWhat, the type of fit to do: 'gaussian', 'uniform', or 'geometric'.
 % 
 %---OUTPUTS: parameters from the fit.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -32,17 +32,18 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_Fit_mle(y,fitwhat)
-% Ben Fulcher, 2009
+function out = DN_Fit_mle(y,fitWhat)
 
+% Check Inputs:
 if nargin < 2
-    fitwhat = 'gaussian'; % fit a Gaussian by default
+    fitWhat = 'gaussian'; % fit a Gaussian by default
 end
 
-switch fitwhat
+% Fit:
+switch fitWhat
 case 'gaussian'
 	phat = mle(y);
 	out.mean = phat(1); % mean of Gaussian fit
@@ -57,7 +58,7 @@ case 'geometric'
     out = mle(y,'distribution','geometric'); % just a single output
     
 otherwise
-    error('Invalid fit specifier, ''%s''',fitwhat)
+    error('Invalid fit specifier, ''%s''',fitWhat)
 end
 
 end

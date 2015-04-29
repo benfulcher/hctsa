@@ -30,7 +30,7 @@
 % l, either the length ('fix') or number of segments ('num')
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -49,15 +49,16 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = SY_DriftingMean(y,howl,l)
-% Ben Fulcher, 2009
 
 N = length(y); % length of the input time series
 
+% ------------------------------------------------------------------------------
 % Check inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(howl)
     howl = 'num'; % a specified number of segments
 end
@@ -75,6 +76,8 @@ if nargin < 3 || isempty(l)
         l = 200; % 200-sample segments
     end
 end
+
+% ------------------------------------------------------------------------------
 
 % ++BF 19/3/2010
 if N < l % doesn't make sense to split into more windows than there are data points

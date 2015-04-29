@@ -7,15 +7,16 @@
 % 
 % Most useful for checking where errors/special-valued outputs are occuring
 % 
-%---INPUTS:
+%---INPUT:
 %
-% inspectWhat: 'full', show the full data matrix
-%              ''
+% inspectWhat: 'full' or 'all', show the full data matrix
+%              'reduced', only show operations that produce special-valued outputs
+%              'summary', summarize the proportion of each operation's outputs
+%                         that correspond to each type of special-valued output
 % 
-% Ben Fulcher, 2015-03-29
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
@@ -24,8 +25,8 @@
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
 % This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
@@ -36,7 +37,7 @@ function TS_InspectQuality(inspectWhat)
 % Check Inputs:
 % ------------------------------------------------------------------------------
 if nargin < 1 || isempty(inspectWhat)
-    inspectWhat = 'reduced'; % only show operations that had at least one problem
+    inspectWhat = 'summary'; % only show operations that had at least one problem
 end
 
 % ------------------------------------------------------------------------------

@@ -11,8 +11,8 @@
 % 
 % y, the input time series
 % 
-% ng, the number of groups in the coarse-graining (scalar for constant, or a
-%       vector of ng to compare across this range)
+% numGroups, the number of groups in the coarse-graining (scalar for constant, or a
+%       vector of numGroups to compare across this range)
 % 
 % tau: the time-delay; transition matricies corresponding to this time-delay. We
 %      can either downsample the time series at this lag and then do the
@@ -25,7 +25,7 @@
 % of the transition matrix.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -44,17 +44,18 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SB_TransitionpAlphabet(y,ng,tau)
-% Ben Fulcher, August 2009
+function out = SB_TransitionpAlphabet(y,numGroups,tau)
 
+% ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox')
 
-if nargin < 2 || isempty(ng)
-    ng = (2:10); % compare across alphabet sizes from 2 to 10
+if nargin < 2 || isempty(numGroups)
+    numGroups = (2:10); % compare across alphabet sizes from 2 to 10
 end
 if nargin < 3 || isempty(tau)
     tau = 1; % use a time-lag of 1
@@ -70,40 +71,40 @@ if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
 end
 
 nfeat = 9; % the number of features calculated at each point
-if (length(ng) == 1) && (length(tau) > 1) % vary tau
-    if ng < 2; return; end % need more than 2 groups
+if (length(numGroups) == 1) && (length(tau) > 1) % vary tau
+    if numGroups < 2; return; end % need more than 2 groups
     taur = tau; % the tau range
     store = zeros(length(taur),nfeat);
     
     for i = 1:length(taur)
         tau = taur(i);
         if tau > 1; y = resample(y,1,tau); end % resample
-        yth = SUB_discretize(y,ng); % threshold
+        yth = SUB_discretize(y,numGroups); % threshold
         store(i,:) = getmeasures(yth);
     end
 
     error('This setting kind of doesn''t work yet. Sorry.')
     
-elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
-    if min(ng) < 2; error('Need more than 2 groups'); end % need more than 2 groups, always
-    ngr = ng; % the ng range (ng is an input vector)
-    store = zeros(length(ngr),nfeat);
+elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
+    if min(numGroups) < 2; error('Need more than 2 groups'); end % need more than 2 groups, always
+    numGroupsRange = numGroups; % the numGroups range (numGroups is an input vector)
+    store = zeros(length(numGroupsRange),nfeat);
     if tau > 1; y = resample(y,1,tau); end % resample
     
-    for i = 1:length(ngr)
-        ng = ngr(i);
-        yth = SUB_discretize(y,ng); % thresholded data: yth
-        store(i,:) = loc_getmeasures(yth,ng);
+    for i = 1:length(numGroupsRange)
+        numGroups = numGroupsRange(i);
+        yth = SUB_discretize(y,numGroups); % thresholded data: yth
+        store(i,:) = loc_getmeasures(yth,numGroups);
     end
     
     
-    ngr = ngr'; % needs to be a column vector for the fitting routines
+    numGroupsRange = numGroupsRange'; % needs to be a column vector for the fitting routines
     
     % 1) mean of diagonal elements of the transition matrix: shows an exponential
     % decay to zero
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c, gof] = fit(ngr,store(:,1),f);
+    [c, gof] = fit(numGroupsRange,store(:,1),f);
     out.meandiagfexp_a = c.a;
     out.meandiagfexp_b = c.b;
     out.meandiagfexp_r2 = gof.rsquare;
@@ -114,7 +115,7 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     % decay to zero
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c, gof] = fit(ngr,store(:,2),f);
+    [c, gof] = fit(numGroupsRange,store(:,2),f);
     out.maxdiagfexp_a = c.a;
     out.maxdiagfexp_b = c.b;
     out.maxdiagfexp_r2 = gof.rsquare;
@@ -125,7 +126,7 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     % fit exponential
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c, gof] = fit(ngr,store(:,3),f);
+    [c, gof] = fit(numGroupsRange,store(:,3),f);
     out.trfexp_a = c.a;
     out.trfexp_b = c.b;
     out.trfexp_r2 = gof.rsquare;
@@ -139,7 +140,7 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     
     r1 = find(store(:,3)>store(1,3)/5);
     if length(r1) > 2
-        [~, gof] = fit(ngr(r1),store(r1,3),f);
+        [~, gof] = fit(numGroupsRange(r1),store(r1,3),f);
         out.trflin5_adjr2 = gof.adjrsquare;
     else
         out.trflin5_adjr2 = NaN;
@@ -147,7 +148,7 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     
     r2 = find(store(:,3)>store(1,3)/10);
     if length(r2) > 2
-        [~, gof] = fit(ngr(r2),store(r2,3),f);
+        [~, gof] = fit(numGroupsRange(r2),store(r2,3),f);
         out.trflin10adjr2 = gof.adjrsquare;
     else
         out.trflin10adjr2 = NaN;
@@ -157,7 +158,7 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     % return the slope
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[0.1 0]);
     f = fittype('a*x+b','options',s);
-    c = fit(ngr,store(:,4),f);
+    c = fit(numGroupsRange,store(:,4),f);
     out.symd_a = c.a;
     
     % return approximately when starts to rise; where means before and
@@ -165,13 +166,13 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     if all(store(:,4) == store(1,4)); % all the same
         out.symd_risept = NaN;
     else
-        mba = zeros(length(ngr),2); % means before and after
-        sba = zeros(length(ngr),2); % standard deviation before and after
-        for i = 3:length(ngr-2)
+        mba = zeros(length(numGroupsRange),2); % means before and after
+        sba = zeros(length(numGroupsRange),2); % standard deviation before and after
+        for i = 3:length(numGroupsRange-2)
             mba(i,1) = mean(store(1:i-1,4));
             sba(i,1) = std(store(1:i-1,4))/sqrt(i-1);
             mba(i,2) = mean(store(i+1:end,4));
-            sba(i,2) = std(store(i+1:end,4))/sqrt(length(ngr)-i+1);
+            sba(i,2) = std(store(i+1:end,4))/sqrt(length(numGroupsRange)-i+1);
         end
         tstats = abs((mba(:,1)-mba(:,2))./sqrt(sba(:,1).^2 + sba(:,2).^2));
         out.symd_risept = find(tstats == max(tstats),1,'first');
@@ -180,13 +181,13 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     % 5) trace of covariance matrix
     % check jump:
     out.trcov_jump = store(2,5)-store(1,5);
-    if store(2,5) > store(1,5); r1 = 2:length(ngr); % jump
-    else r1 = 1:length(ngr);
+    if store(2,5) > store(1,5); r1 = 2:length(numGroupsRange); % jump
+    else r1 = 1:length(numGroupsRange);
     end
     % fit exponential decay to range without possible first jump
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.5]);
     f = fittype('a*exp(b*x)','options',s);
-    [c, gof] = fit(ngr(r1),store(r1,5),f);
+    [c, gof] = fit(numGroupsRange(r1),store(r1,5),f);
     out.trcovfexp_a = c.a;
     out.trcovfexp_b = c.b;
     out.trcovfexp_r2 = gof.rsquare;
@@ -197,7 +198,7 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c, gof] = fit(ngr,store(:,6),f);
+    [c, gof] = fit(numGroupsRange,store(:,6),f);
     out.stdeigfexp_a = c.a;
     out.stdeigfexp_b = c.b;
     out.stdeigfexp_r2 = gof.rsquare;
@@ -208,7 +209,7 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c, gof] = fit(ngr,store(:,7),f);
+    [c, gof] = fit(numGroupsRange,store(:,7),f);
     out.maxeig_fexpa = c.a;
     out.maxeig_fexpb = c.b;
     out.maxeig_fexpr2 = gof.rsquare;
@@ -219,7 +220,7 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c,gof] = fit(ngr,store(:,8),f);
+    [c,gof] = fit(numGroupsRange,store(:,8),f);
     out.mineigfexp_a = c.a;
     out.mineigfexp_b = c.b;
     out.mineigfexp_r2 = gof.rsquare;
@@ -230,7 +231,7 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
     f = fittype('a*exp(b*x)','options',s);
-    [c, gof] = fit(ngr,store(:,9),f);
+    [c, gof] = fit(numGroupsRange,store(:,9),f);
     out.meaneigfexp_a = c.a;
     out.meaneigfexp_b = c.b;
     out.meaneigfexp_r2 = gof.rsquare;
@@ -239,15 +240,17 @@ elseif (length(tau) == 1) && (length(ng) > 1) % vary ng
     
 end
 
+% ------------------------------------------------------------------------------
 %% Subfunctions
+% ------------------------------------------------------------------------------
 
-    function yth = SUB_discretize(y,ng)
+    function yth = SUB_discretize(y,numGroups)
         % 1) discretize the time series into a number of groups np
-        th = quantile(y,linspace(0,1,ng+1)); % thresholds for dividing the time series values
+        th = quantile(y,linspace(0,1,numGroups+1)); % thresholds for dividing the time series values
         th(1) = th(1)-1; % this ensures the first point is included
-        % turn the time series into a set of numbers from 1:ng
+        % turn the time series into a set of numbers from 1:numGroups
         yth = zeros(length(y),1);
-        for li = 1:ng
+        for li = 1:numGroups
             yth(y>th(li) & y<=th(li+1)) = li;
         end
         if any(yth == 0) % error -- they should all be assigned to a group
@@ -257,20 +260,21 @@ end
         
     end
 
-    function out = loc_getmeasures(yth,ng)
+    % ------------------------------------------------------------------------------
+    function out = loc_getmeasures(yth,numGroups)
         % returns a bunch of metrics on the transition matrix
         N = length(yth);
 %         ng = max(yth);
         
         % 1) Calculate the one-time transition matrix
-        T = zeros(ng);
-        for j = 1:ng
+        T = zeros(numGroups);
+        for j = 1:numGroups
             ri = find(yth == j);
             if isempty(ri) % yth is never j
                 T(j,:) = 0;
             else
                 if ri(end) == N; ri = ri(1:end-1); end % looking at next element; remove last point
-                for k = 1:ng
+                for k = 1:numGroups
                     T(j,k) = sum(yth(ri+1) == k); % the next element is of this class
                 end
             end

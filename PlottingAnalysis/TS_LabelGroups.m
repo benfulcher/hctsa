@@ -6,30 +6,31 @@
 % Useful when doing a classification task -- can store your classifications
 % in the local structure arrays.
 % 
-% Requires a very specific (and unfortunately ~unintuitive) structure:
-%  {'Keyword_1',NumberToRetrive;'Keyword2',NumberToRetrive,...}
-%  Use '0' to retrieve all of a given class.
-%  Can also use an empty label, '', to select anything at random from all time
-%  series.
-% 
 %---EXAMPLE USAGE:
-% groupIndices =
-% TS_LabelGroups('norm',{'space',100;'',200;'medical',0;...},'ts');
+%
+% Label all time series with 'disease' in one group and all with 'healthy' in
+% another group:
+% 
+% groupIndices = TS_LabelGroups('norm',{'disease',0;'healthy',0},'ts');
 % 
 %---INPUTS:
-% keywordGroups: The keyword groups, a cell of strings: 
-% TsorOps: Whether grouping is for operations ('ops') or time series ('ts')
 % whatData: Where to retrive from (and write back to): 'orig', 'norm', or 'cl'
+% 
+% keywordGroups: The keyword groups, a cell of strings, as
+%                    {'Keyword_1',numberToRetrive; 'keyword2',numberToRetrive,...}
+%                   Use '0' to retrieve all of a given class.
+%                   Can also use an empty label, '', to select anything at
+%                   random from all time series.
+%                   
+% TsorOps: Whether grouping is for operations ('ops') or time series ('ts')
+% 
 % saveBack: Can set to 0 to stop saving the grouping back to the input file.
 %
 %---OUTPUTS:
-% groupIndices: the indicies corresponding to each keyword in keywordGroups
-% 
-%---HISTORY:
-% Previously named 'SUB_autolabelQ'
+% groupIndices: the indicies corresponding to each keyword in keywordGroups.
 % 
 % --------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
@@ -38,8 +39,8 @@
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
 % This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------

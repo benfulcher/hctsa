@@ -21,13 +21,8 @@
 % from removing the piecewise constants was recorded. Outputs summarize how the
 % these quantities vary with lambda.
 % 
-%---HISTORY:
-% Ben Fulcher, 2010-04-13
-% Ben Fulcher, 2014-02-24. Fixed a problem with no matches giving an error
-% instead of a NaN.
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -46,7 +41,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CP_l1pwc_sweep_lambda(y,lambdar)

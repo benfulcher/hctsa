@@ -9,13 +9,16 @@
 %
 % For more information, cf. http://physionet.org/physiotools/ApEn/
 % 
-%--INPUTS:
+%---INPUTS:
 % y, the input time series
 % mnom, the embedding dimension
 % rth, the threshold for judging closeness/similarity
 %
+%---NOTES:
+% No record of where this was obtained from.
+%
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -34,12 +37,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = EN_ApEn(y,mnom,rth)
-% Ben Fulcher cannot remember whether he wrote or obtained this code from
-% somewhere. (Cannot find an original)
 
 % Check inputs, set defaults:
 if nargin < 2 || isempty(mnom)

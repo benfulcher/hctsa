@@ -18,11 +18,8 @@
 % the angles, stationarity, autocorrelation, and measures of the distribution of
 % these stick angles.
 % 
-%---HISTORY:
-% Ben Fulcher, September 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,7 +38,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CO_StickAngles(y)
@@ -52,7 +49,7 @@ function out = CO_StickAngles(y)
 % buffer function used for StatAv calculation...
 BF_CheckToolbox('signal_toolbox');
 
-doplot = 0; % whether to plot output
+doPlot = 0; % whether to plot output
 N = length(y);
 
 ix = cell(2,1); %indicies for positive(1) and negative(2) entries of time series vector
@@ -75,9 +72,9 @@ for j = 1:2
     end
     angles{j} = atan(angles{j});
 end
-allangles = vertcat(angles{:});
+allAngles = vertcat(angles{:});
 
-if doplot
+if doPlot
     figure('color','w')
     % A few options of what to plot:
     hold off; plot(angles{1},'.k'); hold on
@@ -102,15 +99,15 @@ out.std_n = std(angles{2});
 out.mean_n = mean(angles{2});
 out.median_n = median(angles{2});
 
-out.std = std(allangles);
-out.mean = mean(allangles);
-out.median = median(allangles);
+out.std = std(allAngles);
+out.mean = mean(allAngles);
+out.median = median(allAngles);
 
 % ------------------------------------------------------------------------------
 %% Difference between positive and negative angles
 % ------------------------------------------------------------------------------
 % Return difference in densities
-ksx = linspace(min(allangles),max(allangles),200);
+ksx = linspace(min(allAngles),max(allAngles),200);
 if ~isempty(angles{1}) && ~isempty(angles{2})
     ksy1 = ksdensity(angles{1},ksx); % spans the range of full extent (of both positive and negative angles)
     ksy2 = ksdensity(angles{2},ksx); % spans the range of full extent (of both positive and negative angles)
@@ -143,9 +140,11 @@ else
 end
 
 
-%% z-score
+% z-score:
 zangles = cell(2,1);
-zangles{1} = zscore(angles{1}); zangles{2} = zscore(angles{2}); zallangles = zscore(allangles);
+zangles{1} = zscore(angles{1});
+zangles{2} = zscore(angles{2});
+zallAngles = zscore(allAngles);
 
 % ------------------------------------------------------------------------------
 %% How stationary are the angle sets?
@@ -214,22 +213,22 @@ end
 % All angles:
 
 % StatAv2
-[statav_m, statav_s] = SUB_statav(zallangles,2);
+[statav_m, statav_s] = SUB_statav(zallAngles,2);
 out.statav2_all_m = statav_m;
 out.statav2_all_s = statav_s;
 
 % StatAv3
-[statav_m, statav_s] = SUB_statav(zallangles,3);
+[statav_m, statav_s] = SUB_statav(zallAngles,3);
 out.statav3_all_m = statav_m;
 out.statav3_all_s = statav_s;
 
 % StatAv4
-[statav_m, statav_s] = SUB_statav(zallangles,4);
+[statav_m, statav_s] = SUB_statav(zallAngles,4);
 out.statav4_all_m = statav_m;
 out.statav4_all_s = statav_s;
 
 % StatAv5
-[statav_m, statav_s] = SUB_statav(zallangles,5);
+[statav_m, statav_s] = SUB_statav(zallAngles,5);
 out.statav5_all_m = statav_m;
 out.statav5_all_s = statav_s;
 
@@ -250,9 +249,9 @@ else
     out.tau_n=NaN; out.ac1_n = NaN; out.ac2_n = NaN;
 end
 
-out.tau_all = CO_FirstZero(zallangles,'ac');
-out.ac1_all = CO_AutoCorr(zallangles,1,'Fourier');
-out.ac2_all = CO_AutoCorr(zallangles,2,'Fourier');
+out.tau_all = CO_FirstZero(zallAngles,'ac');
+out.ac1_all = CO_AutoCorr(zallAngles,1,'Fourier');
+out.ac2_all = CO_AutoCorr(zallAngles,2,'Fourier');
 
 % ------------------------------------------------------------------------------
 %% What does the distribution look like?
@@ -284,13 +283,13 @@ else
     out.skewness_n = NaN; out.kurtosis_n = NaN;
 end
 
-F_quantz = @(x) quantile(zallangles,x);
+F_quantz = @(x) quantile(zallAngles,x);
 out.q1_all = F_quantz(0.01);
 out.q10_all = F_quantz(0.1);
 out.q90_all = F_quantz(0.9);
 out.q99_all = F_quantz(0.99);
-out.skewness_all = skewness(allangles);
-out.kurtosis_all = kurtosis(allangles);
+out.skewness_all = skewness(allAngles);
+out.kurtosis_all = kurtosis(allAngles);
 
 %% Outliers?
 % forget about this, I think.

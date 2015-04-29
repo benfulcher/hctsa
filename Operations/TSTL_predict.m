@@ -16,7 +16,7 @@
 % 
 % NNR, number of nearest neighbours
 % 
-% stepsize, number of samples to step for each prediction
+% stepSize, number of samples to step for each prediction
 % 
 % pmode, prediction mode, four options:
 %           (i) 0: output vectors are means of images of nearest neighbours
@@ -26,11 +26,11 @@
 %                    mean of the images of the neighbours
 %           (iv) 3: output vectors are calculated using local flow and the
 %                    weighted mean of the images of the neighbours
-% embedparams, as usual to feed into BF_embed, except that now you can set
+% embedParams, as usual to feed into BF_embed, except that now you can set
 %              to zero to not embed.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -49,14 +49,15 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = TSTL_predict(y, plen, NNR, stepsize, pmode, embedparams)
-% Ben Fulcher, November 2009
+function out = TSTL_predict(y, plen, NNR, stepSize, pmode, embedParams)
 
+% ------------------------------------------------------------------------------
 %% Foreplay
-doplot = 0; % plot outputs to figure (e.g., for debugging)
+% ------------------------------------------------------------------------------
+doPlot = 0; % plot outputs to figure (e.g., for debugging)
 N = length(y); % time-series length
 
 % (*) Prediction length, plen (the length of the output time series)
@@ -71,9 +72,9 @@ if nargin < 3 || isempty(NNR)
     NNR = 1; % use 1 nearest neighbour
 end
 
-% (*) stepsize (in samples)
-if nargin < 4 || isempty(stepsize)
-    stepsize = 2;
+% (*) stepSize (in samples)
+if nargin < 4 || isempty(stepSize)
+    stepSize = 2;
 end
 
 % (*) prediction mode, pmode:
@@ -81,20 +82,22 @@ if nargin < 5 || isempty(pmode)
     pmode = 0; % output vectors are means of the images of nearest neighbours
 end
 
-% (*) embedparams
-if nargin < 6 || isempty(embedparams)
-    embedparams = {'ac','fnnmar'};
+% (*) embedParams
+if nargin < 6 || isempty(embedParams)
+    embedParams = {'ac','fnnmar'};
     fprintf(1,'Using default embedding using autocorrelation for tau and Cao''s method for m\n')
 end
 
 
+% ------------------------------------------------------------------------------
 %% Embed the scalar time series by time-delay method
-% embedpn = BF_embed(y,embedparams{1},embedparams{2},2);
+% ------------------------------------------------------------------------------
+% embedpn = BF_embed(y,embedParams{1},embedParams{2},2);
 % delay = embedpn(1);
 % dim = embedpn(2);
-if iscell(embedparams)
-    s = BF_embed(y,embedparams{1},embedparams{2},1); % last in
-elseif embedparams == 0
+if iscell(embedParams)
+    s = BF_embed(y,embedParams{1},embedParams{2},1); % last in
+elseif embedParams == 0
     s = signal(y);
 end
 
@@ -111,9 +114,11 @@ if plen > 0 && plen <= 1
     plen = floor(plen*Ns); % specify a proportion of the time series length
 end
 
+% ------------------------------------------------------------------------------
 %% Run the code
+% ------------------------------------------------------------------------------
 try
-    rs = predict(s, plen, NNR, stepsize, pmode);
+    rs = predict(s, plen, NNR, stepSize, pmode);
 catch
     error('TSTOOL''s predict function didn''t run correctly')
 end
@@ -121,14 +126,16 @@ end
 y_pred = data(rs);
 y_pred1 = y_pred(:,1); % for this embedding dimension (?)
 
-if doplot
+if doPlot
     figure('color','w'); box('on'); view(rs);
 
     figure('color','w'); box('on');
     hold off; plot(y,'k'), hold on; plot(y_pred1,'m'), hold off;
 end
 
+% ------------------------------------------------------------------------------
 %% Compare the output to the properties of the true time series
+% ------------------------------------------------------------------------------
 
 % actual basic statistical properties
 out.pred1mean = mean(y_pred1);

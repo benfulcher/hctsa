@@ -7,7 +7,7 @@
 % 
 % The distribution of time-series values is estimated using either a
 % kernel-smoothed density via the Matlab function ksdensity with the default
-% width parameter, or by a histogram with a specified number of bins, nbins.
+% width parameter, or by a histogram with a specified number of bins, numBins.
 % 
 %---INPUTS:
 % x, the input time series
@@ -26,19 +26,15 @@
 %           (v) 'fourier2'
 %           (vi) 'fourier3'
 % 
-% nbins, the number of bins for a histogram-estimate of the distribution of
-%       time-series values. If nbins = 0, uses ksdensity instead of histogram.
+% numBins, the number of bins for a histogram-estimate of the distribution of
+%       time-series values. If numBins = 0, uses ksdensity instead of histogram.
 % 
 % 
 %---OUTPUTS: the goodness of fifit, R^2, rootmean square error, the
 % autocorrelation of the residuals, and a runs test on the residuals.
 % 
-% 
-%---HISTORY:
-% Ben Fulcher, 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -57,10 +53,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_SimpleFit(x,dmodel,nbins)
+function out = DN_SimpleFit(x,dmodel,numBins)
 
 % ------------------------------------------------------------------------------
 % Preliminaries
@@ -73,19 +69,23 @@ BF_CheckToolbox('curve_fitting_toolbox');
 %% Fit the model
 % ------------------------------------------------------------------------------
 % Two cases: distribution fits and fits on the data
-Distmods = {'gauss1','gauss2','exp1','power1'}; % valid distribution models
-TSmods = {'sin1','sin2','sin3','fourier1','fourier2','fourier3'}; % valid time series models
+distModels = {'gauss1','gauss2','exp1','power1'}; % valid distribution models
+TSmodels = {'sin1','sin2','sin3','fourier1','fourier2','fourier3'}; % valid time series models
 
-if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
-    if nargin < 3 || isempty(nbins); % haven't specified nbins
+if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
+    if nargin < 3 || isempty(numBins); % haven't specified numBins
         nbin = 10; % use 10 bins by default
     end
-    if nbins == 0; % use ksdensity instead of a histogram
+    if numBins == 0; % use ksdensity instead of a histogram
         [dny, dnx] = ksdensity(x);
     else
-        [dny, dnx] = hist(x,nbins);
+        [dny, dnx] = hist(x,numBins);
     end
-    if size(dnx,2) > size(dnx,1); dnx = dnx'; dny = dny'; end % must be column vectors
+    
+    % Must be column vectors:
+    if size(dnx,2) > size(dnx,1);
+        dnx = dnx'; dny = dny';
+    end
     
     try
         [cfun, gof, output] = fit(dnx,dny,dmodel); % fit the model
@@ -99,11 +99,11 @@ if any(strcmp(Distmods,dmodel)); % valid DISTRIBUTION model name
             out = NaN; return
         else
             error('DN_SimpleFit(x,''%s'',%u): Error fitting %s to the data distribution\n%s',...
-                                                    dmodel,nbins,dmodel,emsg.message)
+                                                    dmodel,numBins,dmodel,emsg.message)
         end
 	end
     
-elseif any(strcmp(TSmods,dmodel)); % Valid time-series model name
+elseif any(strcmp(TSmodels,dmodel)); % Valid time-series model name
     if size(x,2) > size(x,1)
         x = x';
     end % x must be a column vector
@@ -115,7 +115,7 @@ elseif any(strcmp(TSmods,dmodel)); % Valid time-series model name
             fprintf(1,'The model %s failed for this data -- returning NaNs for all fitting outputs\n',dmodel);
             out = NaN; return
         else
-            error('DN_SimpleFit(x,%s,%u): Unexpected error fitting ''%s'' to the time series',dmoel,nbins,dmodel)
+            error('DN_SimpleFit(x,%s,%u): Unexpected error fitting ''%s'' to the time series',dmodel,numBins,dmodel)
         end
 	end
 else

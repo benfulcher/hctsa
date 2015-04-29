@@ -19,3 +19,5 @@ git pull upstream master
 ```
 
 Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/SystemsAndSignalsGroup/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).
+
+Many thanks go to Romesh Abeysuriya for helping with the database set-up process and install scripts.

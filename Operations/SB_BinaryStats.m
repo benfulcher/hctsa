@@ -8,21 +8,24 @@
 % Provides information about the coarse-grained behavior of the time series
 % 
 %---INPUTS:
+%
 % y, the input time series
 % 
-% binarymeth, the symbolization rule:
+% binaryMethod, the symbolization rule:
 %         (i) 'diff': by whether incremental differences of the time series are
 %                      positive (1), or negative (0),
 %          (ii) 'mean': by whether each point is above (1) or below the mean (0)
 %          (iii) 'iqr': by whether the time series is within the interquartile range
 %                      (1), or not (0).
 % 
-%---OUTPUTS: include the Shannon entropy of the string, the longest stretches of 0s
+%---OUTPUTS:
+%
+% Include the Shannon entropy of the string, the longest stretches of 0s
 % or 1s, the mean length of consecutive 0s or 1s, and the spread of consecutive
 % strings of 0s or 1s.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,13 +44,12 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SB_BinaryStats(y,binarymeth)
-% Ben Fulcher, 2009
+function out = SB_BinaryStats(y,binaryMethod)
 
-switch binarymeth
+switch binaryMethod
     case 'diff' % 1 if 
         y = ((sign(diff(y)))+1)/2; % binary signal, equal to one for stepwise increases
         
@@ -61,7 +63,7 @@ switch binarymeth
         y(iniqr) = 1;
         
     otherwise
-        error('Unknown method ''%s''', binarymeth);
+        error('Unknown method ''%s''', binaryMethod);
 end
 
 N = length(y); % length of signal - 1 (difference operation)
