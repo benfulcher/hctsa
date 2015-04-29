@@ -8,19 +8,22 @@
 % 
 % The function returns a set of statistics on the set of first minimums of the
 % automutual information function obtained over a range of the number of bins
-% used in the histogram estimation, when specifying 'nbins' as a vector
+% used in the histogram estimation, when specifying 'numBins' as a vector
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
 % meth, the method for estimating mutual information (input to CO_HistogramAMI)
 % 
-% nbins, the number of bins for the AMI estimation to compare over (can be a
+% numBins, the number of bins for the AMI estimation to compare over (can be a
 %           scalar or vector)
 % 
 % Outputs include the minimum, maximum, range, number of unique values, and the
 % position and periodicity of peaks in the set of automutual information
 % minimums.
+% 
+%---HISTORY:
+% Ben Fulcher, September 2009
 % 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -45,61 +48,64 @@
 % this program.  If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_CompareMinAMI(y,meth,nbins)
-% Ben Fulcher, September 2009
+function out = CO_CompareMinAMI(y,meth,numBins)
 
-%% Set defaults:
+% ------------------------------------------------------------------------------
+%% Check inputs and set defaults:
+% ------------------------------------------------------------------------------
 % Default number of bins
 if nargin < 3,
-	nbins = 10;
+	numBins = 10;
 end
+% ------------------------------------------------------------------------------
 
-doplot = 0; % plot outputs to figure
+doPlot = 0; % plot outputs to figure
 N = length(y); % time-series length
 
 % Range of time lags, tau, to consider
 %	(although loop usually broken before this maximum)
-taur = (0:1:round(N/2));
-ntaur = length(taur);
+tauRange = (0:1:round(N/2));
+numTaus = length(tauRange);
 
 % Range of bin numbers to consider
-nbinr = length(nbins);
-amimins = zeros(nbinr,1);
+numBinsRange = length(numBins);
+amiMins = zeros(numBinsRange,1);
 
 % Calculate automutual information
-for i = 1:nbinr % vary over number of bins in histogram
-    amis = zeros(ntaur,1);
-    for j = 1:ntaur % vary over time lags, tau
-        amis(j) = CO_HistogramAMI(y,taur(j),meth,nbins(i));
+for i = 1:numBinsRange % vary over number of bins in histogram
+    amis = zeros(numTaus,1);
+    for j = 1:numTaus % vary over time lags, tau
+        amis(j) = CO_HistogramAMI(y,tauRange(j),meth,numBins(i));
         if (j > 2) && ((amis(j)-amis(j-1))*(amis(j-1)-amis(j-2)) < 0)
-            amimins(i) = taur(j-1);
+            amiMins(i) = tauRange(j-1);
             break
         end
     end
-    if amimins(i) == 0
-		amimins(i) = taur(end);
+    if amiMins(i) == 0
+		amiMins(i) = tauRange(end);
 	end
 end
 
-if doplot
+% Plot:
+if doPlot
     figure('color','w');
-    plot(amimins,'o-k');
+    plot(amiMins,'o-k');
 end
 
 % Things to look for in the variation
 % Basic statistics
-out.min = min(amimins);
-out.max = max(amimins);
-out.range = range(amimins);
-out.median = median(amimins);
-out.mean = mean(amimins);
-out.std = std(amimins);
-out.iqr = iqr(amimins);
+out.min = min(amiMins);
+out.max = max(amiMins);
+out.range = range(amiMins);
+out.median = median(amiMins);
+out.mean = mean(amiMins);
+out.std = std(amiMins);
+out.iqr = iqr(amiMins);
 
 % Unique values, mode
-out.nunique = length(unique(amimins));
-[out.mode, out.modef] = mode(amimins);
-out.modef = out.modef/nbinr;
+out.nunique = length(unique(amiMins));
+[out.mode, out.modef] = mode(amiMins);
+out.modef = out.modef/numBinsRange;
 % hist = zeros(length(u),1);
 % for i=1:length(u)
 %     hist(i) = sum(n == u(i));
@@ -107,20 +113,20 @@ out.modef = out.modef/nbinr;
 % out.mode = u(find(hist == max(hist),1,'first'));
 
 % Converged value?
-out.conv4 = mean(amimins(end-4:end));
+out.conv4 = mean(amiMins(end-4:end));
 
-% Look for peaks
+% Look for peaks (local maxima)
 % local maxima above 1*std from mean
 % inspired by curious result of periodic maxima for periodic signal with
 % bin size... ('quantiles', [2:80])
-loc_extr = intersect(find(diff(amimins(1:end-1)) > 0), BF_sgnchange(diff(amimins(1:end-1)),1)) + 1;
-big_loc_extr = intersect(find(amimins > out.mean+out.std),loc_extr);
+loc_extr = intersect(find(diff(amiMins(1:end-1)) > 0), BF_sgnchange(diff(amiMins(1:end-1)),1)) + 1;
+big_loc_extr = intersect(find(amiMins > out.mean+out.std),loc_extr);
 out.nlocmax = length(big_loc_extr);
-if out.nlocmax > 2
+
+if out.nlocmax > 2 % number of local maxima
     out.maxp = std(diff(big_loc_extr));
 else
     out.maxp = NaN;
 end
-
 
 end

@@ -55,7 +55,7 @@ end
 % ------------------------------------------------------------------------------
 
 switch inspectWhat
-case 'full'
+case {'full','all'}
     % Plot all quality labels (for all time series and all operations)
     
     % Check that the size is not too large to plot:
@@ -65,6 +65,9 @@ case 'full'
     % Get handles for figure (f) and axes (ax):
     f = figure('color','w');
     ax = gca;
+    
+    % Give uncalculated entries the label 8
+    TS_Quality(isnan(TS_Quality)) = 8;
     imagesc(TS_Quality)
     
     xlabel('Operations (op_id)','interpreter','none')
@@ -75,8 +78,13 @@ case 'full'
     
 case 'reduced'
     % First find where problems exist, and only show these columns
-    qualityMean = mean(TS_Quality);
+    qualityMean = nanmean(TS_Quality);
     hadProblem = (qualityMean > 0);
+    
+    if sum(hadProblem)==0
+        fprintf(1,'No operations have problems! Nothing to inspect.\n');
+        return
+    end
     
     % Check that the size is not too large to plot:
     checkSize(TS_Quality(:,hadProblem));
@@ -85,12 +93,16 @@ case 'reduced'
     % Get handles for figure (f) and axes (ax):
     f = figure('color','w');
     ax = gca;
+    
+    % Give uncalculated entries the label 8
+    TS_Quality(isnan(TS_Quality)) = 8;
+    
     imagesc(TS_Quality(:,hadProblem));
     
     ax.XTick = 1:sum(hadProblem);
     ax.XTickLabel = [Operations(hadProblem).ID];
     
-    title(sprintf('Displaying %u x %u (keeping %u/%u operations with some special values)',...
+    title(sprintf('Displaying %u x %u (displaying %u/%u operations with some special values)',...
                     size(TS_Quality,1),sum(hadProblem),sum(hadProblem),size(TS_Quality,2)),...
                     'interpreter','none')
                     
@@ -138,6 +150,9 @@ case 'master'
     set(ax,'TickLabelInterpreter','none');
     
     title('Master operations producing special-valued outputs.','interpreter','none')
+    
+otherwise
+    error('Unknown input option ''%s''',inspectWhat);
 end
 
 
@@ -156,7 +171,7 @@ function formatYAxisColorBar()
     set(ax,'TickLabelInterpreter','none');
     
     % Add a color bar:
-    allLabels = {'good','error','NaN','Inf','-Inf','complex','empty','link error'};
+    allLabels = {'good','error','NaN','Inf','-Inf','complex','empty','link error','(uncalculated)'};
     labelsExist = unique(TS_Quality(~isnan(TS_Quality)));
     maxShow = max(labelsExist); % maximum quality label to plot
 
@@ -166,8 +181,8 @@ function formatYAxisColorBar()
     cb.TickLabels = allLabels(1:maxShow+1);
 
     % Set the colormap:
-    allColors = BF_getcmap('spectral',8,0);
-    allColors = allColors([8,1,2,3,4,5,6,7],:);
+    allColors = [BF_getcmap('spectral',8,0); 0,0,0];
+    allColors = allColors([8,1,2,3,4,5,6,7,9],:);
     colormap(allColors(1:maxShow+1,:))
 end
 % ------------------------------------------------------------------------------

@@ -106,6 +106,6 @@ end
 % ------------------------------------------------------------------------------
 % out = -sum(px.*log(eps+px))*(xr(2)-xr(1));
 % Changed to make 0*log0=0 ++Ben Fulcher, 2014-06-04:
-out = -sum(px.*log(px(px>0)))*(xr(2)-xr(1));
+out = -sum(px(px>0).*log(px(px>0)))*(xr(2)-xr(1));
 
 end

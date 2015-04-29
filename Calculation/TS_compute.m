@@ -32,14 +32,19 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TS_compute(doLog,doParallel,beVocal)
+function TS_compute(doParallel,doLog,beVocal)
     
 % --------------------------------------------------------------------------
 %% Check inputs and set defaults
 % --------------------------------------------------------------------------
 
-% Log to file
+% Use Matlab's Parallel Computing toolbox?
 if nargin < 1
+	doParallel = 0;
+end
+
+% Log to file
+if nargin < 2
     % By default, do not log to file, write to screen (if beVocal)
 	doLog = 0;
 end
@@ -52,16 +57,6 @@ else
     fid = 1;
 end
 
-% Use Matlab's Parallel Computing toolbox?
-if nargin < 2
-	doParallel = 0;
-end
-if doParallel
-	fprintf(fid,'Computation will be performed across multiple cores using Matlab''s Parallel Computing Toolbox\n')
-else % use single-threaded for loops
-	fprintf(fid,'Computations will be performed serially without parallelization.\n')
-end
-
 % Be vocal?
 if nargin < 3
     beVocal = 1; % Write back lots of information to screen
@@ -69,12 +64,21 @@ if nargin < 3
 end
 
 
+% Start the log by telling the user about how the computation will be performed:
+if doParallel
+    fprintf(fid,['Computation will be performed across multiple cores' ...
+            ' using Matlab''s Parallel Computing Toolbox.\n'])
+else % use single-threaded for loops
+	fprintf(fid,'Computations will be performed serially without parallelization.\n')
+end
+
+
 % --------------------------------------------------------------------------
 %% Load information from local files
 % --------------------------------------------------------------------------
-fprintf(fid,'Reading in data from HCTSA_loc.mat...');
+fprintf(fid,'Loading data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat')
-fprintf(fid,' Done.\n');
+fprintf(fid,' Loaded.\n');
 
 % Definitions
 numTimeSeries = length(TimeSeries); % Number of time series
