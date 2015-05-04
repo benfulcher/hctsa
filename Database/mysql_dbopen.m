@@ -54,7 +54,7 @@ if useDBToolbox && dbToolboxExists
     % Check for a connection error:
     if ~isempty(errMessage)
         error(['Error connecting to the database using Matlab database toolbox:\n' ...
-                        '%s (pass:%s) connecting to %s at %s\n%s\n'],  ...
+                        '%s (pass:%s) connecting to %s at %s:\n%s\n'],  ...
                         userName,password,databaseName,serverHost,dbConnection.Message);
     end
     
@@ -82,7 +82,7 @@ else
     % ------------------------------------------------------------------------------
     % Now try to connect:
     try
-        dburl = sprintf('jdbc:mysql://%s/%s', serverHost, databaseName);
+        dburl = sprintf('jdbc:mysql://%s:%u/%s', serverHost, customPort, databaseName);
         dbConnection = java.sql.DriverManager.getConnection(dburl, userName, password);
     catch le
         dbConnection = [];

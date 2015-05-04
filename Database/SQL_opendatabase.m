@@ -34,33 +34,11 @@ if nargin < 3
 end
 % ------------------------------------------------------------------------------
 
-theConfigFile = which('sql_settings.conf');
-if isempty(theConfigFile)
-    % no sql_settings.conf found
-    error(['No sql_settings.conf file found.\n  ' ...
-    'Please create sql_settings.conf file using SQL_create_db, SQL_ChangeDatabase,' ...
-        ' or generate one yourself (cf. Documentation).'])
-else
-    fid = fopen(theConfigFile);
-end
-
-% Read the file:
-s = textscan(fid,'%s%s%s%s%u','Delimiter',',','CommentStyle','%');
-fclose(fid);
-
-% Interpret the output:
-hostName = s{1}{1};
-default_databaseName = s{2}{1};
-username = s{3}{1};
-password = s{4}{1};
-customPort = s{5};
+[hostName, default_databaseName, username, password, customPort] = SQL_ShowConnSettings(0);
 
 % ------------------------------------------------------------------------------
 if nargin < 1 || isempty(databaseName)
 	databaseName = default_databaseName; % set default database
-end
-if isempty(customPort) || customPort==0
-    customPort = 3306; % default port
 end
 
 % ------------------------------------------------------------------------------
