@@ -182,6 +182,8 @@ switch model
                 if strcmp(emsg.message,'Time series too short.')
                    fprintf(1,'Time Series is too short for ARFIT\n');
                    out = NaN; return
+                else
+                    error('Problem fitting AR model');
                 end
             end
             orders(i) = length(Aest);
