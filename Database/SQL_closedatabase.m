@@ -5,7 +5,7 @@
 % Closes the connection to database, dbc.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013
+% Copyright (C) 2015
 % Ben D. Fulcher <ben.d.fulcher@gmail.com>, <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:

@@ -29,7 +29,7 @@
 % p - probability of obtaining a sequence of consecutive ones/zeros
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013, Max A. Little, <max.a.little@gmail.com>,
+% Copyright (C) 2015, Max A. Little, <max.a.little@gmail.com>,
 % <http://www.maxlittle.net/> and Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
