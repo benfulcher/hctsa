@@ -93,7 +93,7 @@ switch addWhat
         theid = 'ts_id';
         thekid = 'tskw_id';
         theTable = 'TimeSeries';
-        thektable = 'TimeSeriesKeywords';
+        theKeywordTable = 'TimeSeriesKeywords';
         theRelTable = 'TsKeywordsRelate';
         thename = 'Filename';
         maxL = 50000; % the longest time series length accepted in the database
@@ -102,7 +102,7 @@ switch addWhat
         theid = 'op_id';
         thekid = 'opkw_id';
         theTable = 'Operations';
-        thektable = 'OperationKeywords';
+        theKeywordTable = 'OperationKeywords';
         theRelTable = 'OpKeywordsRelate';
         thename = 'OpName';
     case 'mops'
@@ -424,10 +424,13 @@ case 'ops' % Prepare toAdd cell for operations
         operation(j).Keywords = dataIn{j,3};
         if strfind(operation(j).Code,'(') % single operation
             operation(j).MasterLabel = '';
-            toAdd{j} = sprintf('(''%s'', ''%s'',NULL,''%s'')',esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).Keywords));
+            toAdd{j} = sprintf('(''%s'', ''%s'',NULL,''%s'')',...
+                        esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).Keywords));
         else % pointer operation
             operation(j).MasterLabel = strtok(operation(j).Code,'.');
-            toAdd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).MasterLabel),esc(operation(j).Keywords));
+            toAdd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',...
+                        esc(operation(j).Name),esc(operation(j).Code),...
+                        esc(operation(j).MasterLabel),esc(operation(j).Keywords));
         end
     end
     if beVocal, fprintf(1,' Done.\n'); end
@@ -463,14 +466,18 @@ case 'mops'
 end
 if beVocal, fprintf(1,'done.\n'); end
 
+
 % Tell the user about duplicates
 if all(isDuplicate)
-    fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',numItems,theWhat,inputFile,databaseName,theWhat);
+    fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',...
+                    numItems,theWhat,inputFile,databaseName,theWhat);
     return
 elseif sum(isDuplicate) > 0
     if beVocal
-        fprintf(1,'I found %u duplicate %s already in the database %s!\n',sum(isDuplicate),theWhat,databaseName)
-        fprintf(1,'There are %u new %s to add to %s.\n',sum(~isDuplicate),theWhat,databaseName)
+        fprintf(1,'I found %u duplicate %s already in the database %s!\n',...
+                        sum(isDuplicate),theWhat,databaseName)
+        fprintf(1,'There are %u new %s to add to %s.\n',...
+                        sum(~isDuplicate),theWhat,databaseName)
     end
 end
 
@@ -488,31 +495,33 @@ end
 % ------------------------------------------------------------------------------
 %% Assemble and execute the INSERT queries
 % ------------------------------------------------------------------------------
-fprintf('Adding %u new %s to the %s table in %s...',sum(~isDuplicate),theWhat,theTable,databaseName)
+fprintf('Adding %u new %s to the %s table in %s...',...
+                    sum(~isDuplicate),theWhat,theTable,databaseName)
 switch addWhat
-case 'ts' % Add time series to the TimeSeries table just 5 at a time
+case 'ts' % Add time series to the TimeSeries table just 10 at a time
           % (so as not to exceed the max_allowed_packet when transmitting the 
           % time-series data) Appropriate chunk size will depend on the length of
           % time series in general
 
     SQL_add_chunked(dbc,['INSERT INTO TimeSeries (FileName, Keywords, Length, ' ...
-                                    'Data) VALUES'],toAdd,isDuplicate,5);
+                                    'Data) VALUES'],toAdd,isDuplicate,10);
 case 'ops' % Add operations to the Operations table 500 at a time
     SQL_add_chunked(dbc,['INSERT INTO Operations (OpName, Code, MasterLabel, ' ...
-                                    'Keywords) VALUES'],toAdd,isDuplicate,500);        
+                                    'Keywords) VALUES'],toAdd,isDuplicate,500);
 case 'mops' % Add master operations to the MasterOperations table 500 at a time
     SQL_add_chunked(dbc,['INSERT INTO MasterOperations (MasterLabel, ' ...
                                 'MasterCode) VALUES'],toAdd,isDuplicate,500);
 end
-fprintf(1,' done.\n')
+fprintf(1,' Done.\n')
 
 % ------------------------------------------------------------------------------
 % Add new entries to the Results table
 % ------------------------------------------------------------------------------
 if ~strcmp(addWhat,'mops')
-    resultstic = tic;
+    resultsTic = tic;
     if beVocal
-        fprintf(1,'Updating the Results Table in %s (this could take a while, please be patient!)...',databaseName)
+        fprintf(1,['Updating the Results Table in %s (this could take a while, ' ...
+                                'please be patient!)...'],databaseName)
     end
     switch addWhat
     case 'ts'
@@ -524,9 +533,8 @@ if ~strcmp(addWhat,'mops')
     end
     if ~isempty(emsg),
         fprintf(1,' error. This is really really not good.\n');
-        keyboard
     else
-        if beVocal, fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultstic))); end
+        if beVocal, fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultsTic))); end
     end
 end
 
@@ -534,7 +542,7 @@ if ~strcmp(addWhat,'mops')
     % ------------------------------------------------------------------------------
     % Update the keywords table
     % ------------------------------------------------------------------------------
-    fprintf(1,'Updating the %s table in %s...',thektable,databaseName)
+    fprintf(1,'Updating the %s table in %s...',theKeywordTable,databaseName)
 
     % First find unique keywords from new time series by splitting against commas
     switch addWhat
@@ -544,46 +552,42 @@ if ~strcmp(addWhat,'mops')
         kws = {operation(~isDuplicate).Keywords};
     end
     
-    kwsplit = cell(length(kws),1); % Split into each individual keyword
-    ukws = {};
-    for i = 1:length(kws)
-        kwsplit{i} = regexp(kws{i},',','split','ignorecase');
-        for j = 1:length(kwsplit{i})
-            if ~ismember(kwsplit{i}{j},ukws) % add it to ukws
-                ukws{end+1} = kwsplit{i}{j};
-            end
-        end
-    end
+    % Split into each individual keyword:
+    kwSplit = regexp(kws,',','split','ignorecase');
+    ukws = unique(horzcat(kwSplit{:}));
     nkw = length(ukws); % The number of unique keywords in the new set of time series
-    if beVocal, fprintf(1,'\nI found %u unique keywords in the %u new %s in %s...',nkw,sum(~isDuplicate),theWhat,inputFile); end
+    if beVocal
+        fprintf(1,'\nI found %u unique keywords in the %u new %s in %s...',...
+                        nkw,sum(~isDuplicate),theWhat,inputFile);
+    end
 
     % How many overlap with existing keywords??:
-    allkws = mysql_dbquery(dbc,sprintf('SELECT Keyword FROM %s',thektable));
+    allkws = mysql_dbquery(dbc,sprintf('SELECT Keyword FROM %s',theKeywordTable));
     if ~isempty(allkws) % the table may be empty, in which case all keywords will be new
-        isnew = ~ismember(ukws,allkws);
+        isNew = ~ismember(ukws,allkws);
         % cellfun(@(x)~isempty(x),regexp(ukws,allkws,'ignorecase')); % ignore case for keywords
     else
-        isnew = ones(nkw,1); % All are new
+        isNew = ones(nkw,1); % All are new
     end
     
-    if sum(isnew) > 0
+    if sum(isNew) > 0
         if beVocal
             fprintf(1,['\nIt turns out that %u keywords are completely new and will be added ' ...
-                        'to the %s table in %s...'],sum(isnew),thektable,databaseName)
+                        'to the %s table in %s...'],sum(isNew),theKeywordTable,databaseName)
         end
         % Add the new keywords to the Keywords table
-        insertstring = sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES',thektable);
-        toAdd = cell(sum(isnew),1);
-        fisnew = find(isnew); % Indicies of new keywords
-        for k = 1:sum(isnew);
-            toAdd{k} = sprintf('(''%s'',0)',ukws{fisnew(k)});
+        insertString = sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES',theKeywordTable);
+        toAdd = cell(sum(isNew),1);
+        fisNew = find(isNew); % Indicies of new keywords
+        for k = 1:sum(isNew);
+            toAdd{k} = sprintf('(''%s'',0)',ukws{fisNew(k)});
         end
-        SQL_add_chunked(dbc,insertstring,toAdd);
-        fprintf(1,' added %u new keywords!\n',sum(isnew))
+        SQL_add_chunked(dbc,insertString,toAdd);
+        fprintf(1,' Added %u new keywords!\n',sum(isNew))
     else
         if beVocal
             fprintf(1,['\nIt turns out that all new keywords already exist in ' ...
-                        'the %s table in %s -- there are no new keywords to add\n'],sum(isnew),thektable,databaseName)
+                    'the %s table in %s -- there are no new keywords to add\n'],sum(isNew),theKeywordTable,databaseName)
         end
     end
     
@@ -604,41 +608,42 @@ if ~strcmp(addWhat,'mops')
                                                         theTable,thename,allNames));
     ourids = vertcat(ourids{:}); % ids matching FileNames/OpNames
     ourkids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Keyword IN (%s)', ...
-                                            thekid,thektable,BF_cat(ukws,',','''')));
+                                            thekid,theKeywordTable,BF_cat(ukws,',','''')));
     ourkids = vertcat(ourkids{:}); % ids matching FileNames/OpNames
-    % nkwrels = sum(cellfun(@(x)length(x),kwsplit)); % number of keyword relationships in the input file
+    % nkwrels = sum(cellfun(@(x)length(x),kwSplit)); % number of keyword relationships in the input file
     addCell = {};
-    for i = 1:length(kwsplit)
-        for j = 1:length(kwsplit{i})
-            addCell{end+1} = sprintf('(%u,%u)',ourids(i),ourkids(strcmp(kwsplit{i}{j},ukws)));
+    for i = 1:length(kwSplit)
+        for j = 1:length(kwSplit{i})
+            addCell{end+1} = sprintf('(%u,%u)',ourids(i),ourkids(strcmp(kwSplit{i}{j},ukws)));
         end
     end
-    SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell); % add them all in chunks
+    % Add them all in chunks
+    SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell);
         
     % Increment Nmatches in the keywords table
     fprintf(1,' done.\nNow calculating the match counts for keywords...')
     % Redo them from scratch should be easier actually...?
     for k = 1:nkw % keywords implicated in this import
-        SelectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
-        theopkw = mysql_dbquery(dbc,SelectString);
+        selectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,theKeywordTable,ukws{k});
+        theopkw = mysql_dbquery(dbc,selectString);
         updateString = sprintf('UPDATE %s SET NumOccur = (SELECT COUNT(*) FROM %s WHERE %s = %u) WHERE %s = %u', ...
-                                    thektable,theRelTable,thekid,theopkw{1},thekid,theopkw{1});
+                                    theKeywordTable,theRelTable,thekid,theopkw{1},thekid,theopkw{1});
         [~,emsg] = mysql_dbexecute(dbc, updateString);
         if ~isempty(emsg)
-            error('\n Error updating keyword count in %s\n%s',thektable,emsg)
+            error('\n Error updating keyword count in %s\n%s',theKeywordTable,emsg)
         end
     end
     % for k = 1:nkw % for each unique keyword in the keyword table...
-    %     % nnkw = sum(cellfun(@(x)ismember(ukws{k},x),kwsplit));
-    %     Selectopkwid = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,thektable,ukws{k});
+    %     % nnkw = sum(cellfun(@(x)ismember(ukws{k},x),kwSplit));
+    %     Selectopkwid = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,theKeywordTable,ukws{k});
     %     SelectCount = sprintf(['SELECT COUNT(*) FROM %s WHERE %s = %s ' ...
     %                             'AND %s > %u'],theRelTable,thekid,Selectopkwid,theid,maxid);
     %     updateString = sprintf(['UPDATE %s SET NumOccur = NumOccur + (%s) ' ...
-    %                             'WHERE Keyword = ''%s'''],thektable,SelectCount,ukws{k});
+    %                             'WHERE Keyword = ''%s'''],theKeywordTable,SelectCount,ukws{k});
     %     [~,emsg] = mysql_dbexecute(dbc, updateString);
     %     if ~isempty(emsg)
     %         keyboard
-    %         fprintf(1,'\n Error updating keyword count in %s',thektable)
+    %         fprintf(1,'\n Error updating keyword count in %s',theKeywordTable)
     %     end
     % end
     fprintf(1,' done.\n')

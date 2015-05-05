@@ -21,7 +21,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function createString = SQL_TablecreateString(whatTable)
+function createString = SQL_TableCreateString(whatTable)
 
 switch whatTable
 case 'Operations'

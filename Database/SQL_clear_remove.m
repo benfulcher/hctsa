@@ -55,15 +55,15 @@ end
 
 switch tsOrOps
 case 'ts'
-    thewhat = 'time series';
+    theWhat = 'time series';
     theid = 'ts_id';
-    thetable = 'TimeSeries';
-    thename = 'Filename';
+    theTable = 'TimeSeries';
+    theName = 'Filename';
 case 'ops'
-    thewhat = 'operations';
+    theWhat = 'operations';
     theid = 'op_id';
-    thetable = 'Operations';
-    thename = 'OpName';
+    theTable = 'Operations';
+    theName = 'OpName';
 otherwise
     error('First input must be either ''ts'' or ''ops''')
 end
@@ -75,7 +75,7 @@ if nargin < 2 || min(size(idRange)) ~= 1
 end
 
 if nargin < 3 % doRemove
-    error('You must specify whether to remove the %s or just clear their data results',thewhat)
+    error('You must specify whether to remove the %s or just clear their data results',theWhat)
 end
 
 % Use default database if none specified
@@ -95,12 +95,12 @@ end
 if (doRemove == 0) % clear data
     reply = input(sprintf(['Preparing to clear data for %u %s from %s. ' ...
                                 '[press any key to continue]'], ...
-                                    length(idRange),thewhat,dbname),'s');
+                                    length(idRange),theWhat,dbname),'s');
     doWhat = 'clear';
 elseif doRemove == 1
     reply = input(sprintf(['Preparing to REMOVE %u %s from %s -- DRASTIC STUFF! ' ...
-                                'I HOPE THIS IS OK?! [press any key to continue]\n'], ...
-                                length(idRange),thewhat,dbname),'s');
+                                'I HOPE THIS IS OK?!\n[press any key to continue]\n'], ...
+                                length(idRange),theWhat,dbname),'s');
     doWhat = 'remove';
 else
     error('Third input must be (0 to clear), or (1 to remove)')
@@ -110,15 +110,21 @@ end
 %% Check what to clear/remove
 % ------------------------------------------------------------------------------
 selectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
-                                thename,thetable,theid,BF_cat(idRange,','));
+                                theName,theTable,theid,BF_cat(idRange,','));
 [toDump,emsg] = mysql_dbquery(dbc,selectString);
 
 if ~isempty(emsg)
-	error('Error retrieidRangeg selected %s indices (%s) from the %s table of %s', ...
-                                    	thewhat,theid,thetable,dbname)
+	error('Error retrieving selected %s indices (%s) from the %s table of %s', ...
+                                    	theWhat,theid,theTable,dbname)
 end
+
+if length(toDump)==0
+    fprintf(1,'No %s found in the given range of %s.\n',theWhat,theid);
+    return
+end
+
 reply = input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
-      			dbname '. [press any key to show them]'],length(idRange),thewhat),'s');
+      			dbname '.\n[press any key to show them]'],length(toDump),theWhat),'s');
 
 % ------------------------------------------------------------------------------
 %% List all items to screen
@@ -145,16 +151,18 @@ if doRemove
     % Before delete them, first get keyword information, and information about masters (for operations)
     %<><>><><><><><><>
     
-	DeleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',thetable,theid,BF_cat(idRange,','));
-    [~,emsg] = mysql_dbexecute(dbc, DeleteString);
+	deleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',theTable,theid,BF_cat(idRange,','));
+    [~,emsg] = mysql_dbexecute(dbc, deleteString);
     if isempty(emsg)
-        fprintf(1,'%u %s removed from %s in %s\n',length(toDump),thewhat,thetable,dbname)
+        fprintf(1,'%u %s removed from %s in %s.\n',length(toDump),theWhat,theTable,dbname)
     end
+    
+    SQL_FlushKeywords(tsOrOps);
     
     if strcmp(tsOrOps,'ops')
         % What about masters??
         % 1. Get master_ids that link to deleted operations
-        %<><>><><><><><><>        
+        %<><>><><><><><><>
         % 2. Update their NPoint counters
         %<><>><><><><><><>
         % 3. Delete those that now point to zero operations to

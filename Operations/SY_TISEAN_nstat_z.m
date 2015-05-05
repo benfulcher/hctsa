@@ -106,19 +106,13 @@ minNeighbors = 30; % minimum number of neighbors for fit
 % able to find enough neighbors and getting stuck in a while loop...
 % Try this heuristic (multiplying the actual minimum number by 1.5):
 if (clength-(m-1)*tau-incStep) <= minNeighbors*1.5
-    delete(filePath); % remove the temporary file filePath
+    delete(filePath); % remove the temporary file
     warning('Not enough neighbors to reliably estimate prediction errors with these settings');
     out = NaN; return
 end
-% if N/tm(1) < numSeg*8 % heuristic
-%     % it may be more tm(1) itself rather than compared to numSeg...?
-%     fprintf(1,'Time delay, tau = %u, is too large for time-series length, N = %u\n with %u segments',tm(1),N,numSeg);
-%     delete(filePath) % remove the temporary file filePath
-%     out = NaN; return
-% end
 
 % ------------------------------------------------------------------------------
-%% Do the calculation
+%% Do the calculation in the commandline
 % ------------------------------------------------------------------------------
 
 [~, res] = system(sprintf('nstat_z -# %u -d%u -m%u %s',numSeg,tau,m,filePath));
