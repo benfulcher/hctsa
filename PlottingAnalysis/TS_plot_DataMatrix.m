@@ -69,7 +69,7 @@ else
         theFile = 'HCTSA_cl.mat'; TheRoutine = 'TS_cluster';
     elseif strcmp(whatData,'norm')
         theFile = 'HCTSA_N.mat'; TheRoutine = 'TS_normalize';
-    elseif ischar(whatData) && exist(whatData) % Specify a filename
+    elseif ischar(whatData) && exist(whatData,'file') % Specify a filename
         theFile = whatData;
         a = which(theFile); % First check it exists
         if isempty(a)

@@ -95,7 +95,7 @@ end
 % ------------------------------------------------------------------------------
 %% Here's where the action happens:
 % ------------------------------------------------------------------------------
-if ~exist(fullfile('Marwan_crptool','crptool_fnn'))
+if ~exist(fullfile('Marwan_crptool','crptool_fnn'),'file')
     error('Error -- the CRP Toolbox functions for calculating nearest neighbours can not be found');
 end
 

@@ -112,14 +112,14 @@ fprintf(1,'Wrote the input time series (N = %u) to the temporary file ''%s'' for
 [~, res] = system(sprintf(['d2 -d%u -M1,%u -t%u %s'],tau,maxm,theilerWin,filePath));
 delete(filePath) % remove the temporary time-series data file
 %  * extension .stat: This file shows the current status of the estimate.
-if exist([filePath '.stat'])
+if exist([filePath '.stat'],'file')
     delete([filePath '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
 end
 
 if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
-    if exist([filePath '.c2']), delete([filePath '.c2']); end
-    if exist([filePath '.d2']), delete([filePath '.d2']); end
-    if exist([filePath '.h2']), delete([filePath '.h2']); end
+    if exist([filePath '.c2'],'file'), delete([filePath '.c2']); end
+    if exist([filePath '.d2'],'file'), delete([filePath '.d2']); end
+    if exist([filePath '.h2'],'file'), delete([filePath '.h2']); end
     if isempty(res)
         error('Call to TISEAN function ''d2'' failed.')
     else
@@ -128,12 +128,13 @@ if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out?
 end
 
 % Check that all required files were generated (could not be due to problems with path or filename?)
-if ~exist([filePath '.c2']) || ~exist([filePath '.d2']) || ~exist([filePath '.h2'])
-    error([filePath,'.c2/.d2/.h2 not generated?']);
+if ~exist([filePath '.c2'],'file') || ~exist([filePath '.d2'],'file') || ~exist([filePath '.h2'],'file')
     % Delete all temporary files that exist:
-    if exist([filePath '.c2']), delete([filePath '.c2']); end
-    if exist([filePath '.d2']), delete([filePath '.d2']); end
-    if exist([filePath '.h2']), delete([filePath '.h2']); end
+    if exist([filePath '.c2'],'file'), delete([filePath '.c2']); end
+    if exist([filePath '.d2'],'file'), delete([filePath '.d2']); end
+    if exist([filePath '.h2'],'file'), delete([filePath '.h2']); end
+    % Then throw an error:
+    error([filePath,'.c2/.d2/.h2 not generated?']);
 end
 
 

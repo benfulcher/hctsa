@@ -44,6 +44,9 @@ function out = MF_StateSpaceCompOrder(y,maxOrder)
 % ------------------------------------------------------------------------------
 BF_CheckToolbox('identification_toolbox')
 
+% ------------------------------------------------------------------------------
+% Inputs:
+% ------------------------------------------------------------------------------
 % Maximum model order, maxOrder (compare models from order 1 up to
 %           this)
 if nargin < 2 || isempty(maxOrder)
@@ -55,9 +58,6 @@ end
 N = length(y); % The length of the time series
 
 % Convert y to time series object
-if ~exist('iddata')
-    error('System Identification Toolbox needs to be installed');
-end
 y = iddata(y,[],1);
 
 % ------------------------------------------------------------------------------

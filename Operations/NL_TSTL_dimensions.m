@@ -93,7 +93,7 @@ end
 %% Run the TSTOOL function:
 % ------------------------------------------------------------------------------
 % This looks for the dimensions file in the tstoolbox/@signal/dimensions directory
-if ~exist(fullfile('tstoolbox','@signal','dimensions'))
+if ~exist(fullfile('tstoolbox','@signal','dimensions'),'file')
     error('Cannot find the code ''dimensions'' from the TSTOOL package. Is it installed and in the Matlab path?');
 end
 try
