@@ -17,19 +17,16 @@
 %---INPUTS:
 % y, the input time series
 % n, the (integer) number of bits to encode the data into
-% PreProc [opt], first apply a given PreProcessing to the time series. For now,
+% preProc [opt], first apply a given preProcessing to the time series. For now,
 %               just 'diff' is implemented, which zscores incremental
 %               differences and then applies the complexity method.
 % 
 %---OUTPUT: the normalized Lempel-Ziv complexity: i.e., the number of distinct
 %           symbol sequences in the time series divided by the expected number
 %           of distinct symbols for a noise sequence.
-% 
-%---HISTORY:
-% Ben Fulcher, 19/2/2010
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -48,25 +45,25 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_MS_LZcomplexity(y,n,PreProc)
+function out = NL_MS_LZcomplexity(y,n,preProc)
 
 if nargin < 2 || isempty(n)
     n = 2; % n-bit encoding
 end
 if nargin < 3
-    PreProc = []; % no PreProcessing
+    preProc = []; % no preprocessing
 end
 
 % Apply some pre-processing to the time series before performing the analysis
-if ischar(PreProc)
-    switch PreProc
+if ischar(preProc)
+    switch preProc
     case 'diff'
         y = BF_zscore(diff(y));
     otherwise
-        error('Unknown preprocessing setting ''%s''', PreProc);
+        error('Unknown preprocessing setting ''%s''', preProc);
     end
 end
 

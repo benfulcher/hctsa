@@ -35,12 +35,9 @@
 %---OUTPUTS: basic statistics on the outputs of corrsum, including iteratively
 % re-weighted least squares linear fits to log-log plots using the robustfit
 % function in Matlab's Statistics Toolbox.
-% 
-%---HISTORY:
-% Ben Fulcher, November 2009
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -59,7 +56,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedparams,doTwo)
@@ -67,7 +64,7 @@ function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedparams,doTwo)
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
-doplot = 0; % whether to plot outputs to figure
+doPlot = 0; % whether to plot outputs to figure
 N = length(y); % length of time series
 
 % (1) Number of reference points, Nref
@@ -98,7 +95,7 @@ end
 
 % (5) Set embedding parameters to defaults
 if nargin < 6 || isempty(embedparams)
-    embedparams = {'ac','cao'};
+    embedparams = {'ac','fnnmar'};
 else
     if length(embedparams) ~= 2
         error('Embedding parameters are formatted incorrectly -- need {tau,m}')
@@ -164,7 +161,7 @@ end
 lnr = spacing(rs);
 lnCr = data(rs);
 
-if doplot
+if doPlot
     figure('color','w'); box('on');
     plot(lnr,lnCr,'.-k');
 end
@@ -174,13 +171,15 @@ end
 % ------------------------------------------------------------------------------
 %% Remove any Infs in lnCr
 % ------------------------------------------------------------------------------
-rgood = (isfinite(lnCr));
-if ~any(rgood)
+rGood = (isfinite(lnCr));
+if ~any(rGood)
     fprintf(1,'No good outputs obtained from corrsum.\n');
     out = NaN; return
 end
-lnCr = lnCr(rgood);
-lnr = lnr(rgood);
+
+% Only keep finite values:
+lnCr = lnCr(rGood);
+lnr = lnr(rGood);
 
 % ------------------------------------------------------------------------------
 %% Output Statistics
@@ -212,8 +211,10 @@ if enoughpoints
     out.robfit_sea2 = stats.se(2);
 
     fit_lnCr = a(2)*lnr+a(1);
-    if doplot, hold on; plot(lnr,fit_lnCr,'r'); hold off; end
-    res = lnCr-fit_lnCr';
+    if doPlot, hold on; plot(lnr,fit_lnCr,'r'); hold off; end
+    
+    % Compute residuals:
+    res = lnCr - fit_lnCr';
     
     out.robfitresmeanabs = mean(abs(res));
     out.robfitresmeansq = mean(res.^2);

@@ -44,12 +44,9 @@
 %               (for when subsetHow is 'rand')
 % 
 %---OUTPUTS: depend on the model, as described above.
-% 
-%---HISTORY:
-% Ben Fulcher, 12/2/2010
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -68,7 +65,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MF_FitSubsegments(y,model,order,subsetHow,samplep,randomSeed)
@@ -185,6 +182,8 @@ switch model
                 if strcmp(emsg.message,'Time series too short.')
                    fprintf(1,'Time Series is too short for ARFIT\n');
                    out = NaN; return
+                else
+                    error('Problem fitting AR model');
                 end
             end
             orders(i) = length(Aest);

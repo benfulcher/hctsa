@@ -10,17 +10,14 @@
 % corrFun, the self-correlation function to measure:
 %         (i) 'ac': normal linear autocorrelation function. Uses CO_AutoCorr to
 %                   calculate autocorrelations.
-% maxTau, a maximum time-delay to search up to
+% maxTau, a maximum time-delay to search up to.
 % 
 % In future, could add an option to return the point at which the function
 % crosses the axis, rather than the first integer lag at which it has already
-% crossed (what is currently implemented)
-% 
-%---HISTORY:
-% Ben Fulcher, 2008
+% crossed (what is currently implemented).
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -39,10 +36,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = CO_FirstZero(y,corrFun,maxTau)
+
+% ------------------------------------------------------------------------------
+% Check inputs:
+% ------------------------------------------------------------------------------
 
 N = length(y); % the length of the time series
 

@@ -3,7 +3,7 @@
 % ------------------------------------------------------------------------------
 % 
 % Fits state space models using n4sid (from Matlab's System Identification
-% Toolbox) of orders 1, 2, ..., maxorder and returns statistics on how the
+% Toolbox) of orders 1, 2, ..., maxOrder and returns statistics on how the
 % goodness of fit changes across this range.
 % 
 % c.f., MF_CompareAR -- does a similar thing for AR models
@@ -12,10 +12,10 @@
 % 
 %---INPUTS:
 % y, the input time series
-% maxorder, the maximum model order to consider.
+% maxOrder, the maximum model order to consider.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -34,21 +34,22 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_StateSpaceCompOrder(y,maxorder)
-% Ben Fulcher, 12/2/2010
+function out = MF_StateSpaceCompOrder(y,maxOrder)
 
+% ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('identification_toolbox')
 
-% Maximum model order, maxorder (compare models from order 1 up to
+% Maximum model order, maxOrder (compare models from order 1 up to
 %           this)
-if nargin < 2 || isempty(maxorder)
-    maxorder = 10;
+if nargin < 2 || isempty(maxOrder)
+    maxOrder = 10;
 end
-% orders = 1:maxorder;
+% orders = 1:maxOrder;
 
 %% Preliminaries
 N = length(y); % The length of the time series
@@ -59,19 +60,22 @@ if ~exist('iddata')
 end
 y = iddata(y,[],1);
 
+% ------------------------------------------------------------------------------
 %% Fit the state space models, returning basic fit statistics as we go
+% ------------------------------------------------------------------------------
+
 % Initialize statistics -- all within-sample statistics. Could also fit on
 % a portion and then predict on another...
 
-% noisevars = zeros(maxorder,1); % Noise variance -- for us the same as
+% noisevars = zeros(maxOrder,1); % Noise variance -- for us the same as
 % loss fn
-lossfns = zeros(maxorder,1); % Loss function
-fpes = zeros(maxorder,1); % Akaike's final prediction error
-aics = zeros(maxorder,1); % Akaike's information criterion
-% bics = zeros(maxorder,1); % Bayesian information criterion
+lossfns = zeros(maxOrder,1); % Loss function
+fpes = zeros(maxOrder,1); % Akaike's final prediction error
+aics = zeros(maxOrder,1); % Akaike's information criterion
+% bics = zeros(maxOrder,1); % Bayesian information criterion
 
 
-for k = 1:maxorder
+for k = 1:maxOrder
     % Fit the state space model for this order, k
     try
         m = n4sid(y,k);

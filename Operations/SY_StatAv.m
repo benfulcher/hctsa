@@ -13,17 +13,14 @@
 % 
 % y, the input time series
 % 
-% WhatType, the type of StatAv to perform:
+% whatType, the type of StatAv to perform:
 %           (i) 'seg': divide the time series into n segments
 %           (ii) 'len': divide the time series into segments of length n
 % 
 % n, either the number of subsegments ('seg') or their length ('len')
 % 
-%---HISTORY:
-% Ben Fulcher, 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -42,17 +39,17 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SY_StatAv(y,WhatType,n)
+function out = SY_StatAv(y,whatType,n)
 % Might be nicer to use the 'buffer' function for this...?
 
 % ------------------------------------------------------------------------------
 % Check Inputs
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(WhatType)
-    WhatType = 'seg'; % divide into n segments by default
+if nargin < 2 || isempty(whatType)
+    whatType = 'seg'; % divide into n segments by default
 end
 
 if nargin < 3 || isempty(n)
@@ -65,7 +62,7 @@ N = length(y); % Time-series length
 % Compute the means in local time-series segments
 % ------------------------------------------------------------------------------
 
-switch WhatType
+switch whatType
 case 'seg'
     % divide time series into n segments
     M = zeros(n,1);
@@ -83,12 +80,12 @@ case 'len'
             M(j) = mean(y((j-1)*n+1:j*n));
         end
     else
-        fprintf(1,'This time series (N = %u) is too short for StatAv(%s,''%u'')\n',N,WhatType,n)
+        fprintf(1,'This time series (N = %u) is too short for StatAv(%s,''%u'')\n',N,whatType,n)
         out = NaN; return
     end
     
 otherwise
-    error('Error evaluating StatAv of type ''%s'', please select either ''seg'' or ''len''',WhatType)
+    error('Error evaluating StatAv of type ''%s'', please select either ''seg'' or ''len''',whatType)
     
 end
 

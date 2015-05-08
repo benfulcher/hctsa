@@ -32,12 +32,8 @@
 % Most statistics measure how these properties decay with randomization, by
 % fitting a function f(x) = Aexp(Bx).
 % 
-%---HISTORY:
-% Ben Fulcher, October 2009
-% Ben Fulcher, 2015-03-19 added random seed for reproducibility
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -56,7 +52,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = EN_Randomize(y,randomizeHow,randomSeed)

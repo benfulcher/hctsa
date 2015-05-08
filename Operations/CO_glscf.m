@@ -7,7 +7,8 @@
 % 10--15 (2007) in the paper "Yet on statistical properties of traded volume: 
 % Correlation and mutual information at different value magnitudes"
 % 
-% The function considers magnitude correlations:
+% The function considers magnitude correlations.
+% 
 %---INPUTS:
 % y, the input time series
 % alpha and beta are real and nonzero parameters
@@ -18,11 +19,8 @@
 % When alpha ~= beta, estimates correlations between different magnitudes of the
 % time series.
 % 
-%---HISTORY:
-% Ben Fulcher, September 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,7 +39,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function glscf = CO_glscf(y,alpha,beta,tau)

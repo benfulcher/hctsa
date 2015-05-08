@@ -5,7 +5,7 @@
 % Either clears results or removes entirely a given set of ts_ids
 % or op_ids from the database.
 %
-% *** Clear ***:
+% *** Clear *** (doRemove = 0):
 % The results of a particular operation or time series in the Results Table  are
 % converted back to NULL. Clears *all* results from a given set of operations,
 % or a given set of time series.
@@ -17,22 +17,18 @@
 % operation when the master operation is changed (especially when the master
 % code is stochastic)
 % 
-% *** Remove ***
+% *** Remove *** (doRemove = 1):
 % Removes COMPLETELY the selected ts_ids or op_ids from the Database.
 % 
 %
 %---INPUTS:
-% tsorop -- either 'ts' or 'mets' for whether to eliminate either a time series of a metric, respectively
-% vin -- a vector of the ts_ids or op_ids in the database to remove
+% tsOrOps -- either 'ts' or 'ops' for whether to eliminate either a time series of a metric, respectively
+% idRange -- a vector of the ts_ids or op_ids in the database to remove
 % dbname -- can specify a custom database else will use default database in SQL_opendatabase
-% dolog -- generate a .log file describing what was done (does this by default)
-% 
-%---HISTORY:
-% 2/12/2009 Ben Fulcher. Rehauled to use mySQL database system.
-% 1/12/2012 Ben Fulcher. Minor changes.
+% doLog -- generate a .log file describing what was done (does this by default)
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
@@ -41,13 +37,13 @@
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
 % This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_clear_remove(tsorop,vin,doremove,dbname,dolog)
+function SQL_clear_remove(tsOrOps,idRange,doRemove,dbname,doLog)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries and input checking
@@ -57,29 +53,29 @@ if nargin < 1
 	error('You must provide inputs')
 end
 
-switch tsorop
+switch tsOrOps
 case 'ts'
-    thewhat = 'time series';
+    theWhat = 'time series';
     theid = 'ts_id';
-    thetable = 'TimeSeries';
-    thename = 'Filename';
+    theTable = 'TimeSeries';
+    theName = 'Filename';
 case 'ops'
-    thewhat = 'operations';
+    theWhat = 'operations';
     theid = 'op_id';
-    thetable = 'Operations';
-    thename = 'OpName';
+    theTable = 'Operations';
+    theName = 'OpName';
 otherwise
     error('First input must be either ''ts'' or ''ops''')
 end
 
 % Must specify a set of time series
-if nargin < 2 || min(size(vin)) ~= 1
+if nargin < 2 || min(size(idRange)) ~= 1
 	fprintf(1,'Error with second input. Exiting.\n');
 	return
 end
 
-if nargin < 3 % doremove
-    error('You must specify whether to remove the %s or just clear their data results',thewhat)
+if nargin < 3 % doRemove
+    error('You must specify whether to remove the %s or just clear their data results',theWhat)
 end
 
 % Use default database if none specified
@@ -89,27 +85,23 @@ if nargin < 4, dbname = ''; fprintf(1,'Using default database\n'); end
 [dbc, dbname] = SQL_opendatabase(dbname);
 
 % write a .log file of the clearing process by default
-if nargin < 5 || isempty(dolog)
-	dolog = 0;
+if nargin < 5 || isempty(doLog)
+	doLog = 0;
 end
 
 % ------------------------------------------------------------------------------
 %% Provide some user feedback
 % ------------------------------------------------------------------------------
-if (doremove == 0) % clear data
-    reply = input(sprintf(['Preparing to clear data for %u %s from %s.' ...
-                                'Press any key to continue...\n'], ...
-                                    length(vin),thewhat,dbname),'s');
-    dowhating = 'clearing';
-    dowhat = 'clear';
-    
-elseif doremove == 1
+if (doRemove == 0) % clear data
+    reply = input(sprintf(['Preparing to clear data for %u %s from %s. ' ...
+                                '[press any key to continue]'], ...
+                                    length(idRange),theWhat,dbname),'s');
+    doWhat = 'clear';
+elseif doRemove == 1
     reply = input(sprintf(['Preparing to REMOVE %u %s from %s -- DRASTIC STUFF! ' ...
-                                'I HOPE THIS IS OK?! [press any key to continue]\n'], ...
-                                length(vin),thewhat,dbname),'s');
-    dowhating = 'removing';
-    dowhat = 'remove';
-    
+                                'I HOPE THIS IS OK?!\n[press any key to continue]\n'], ...
+                                length(idRange),theWhat,dbname),'s');
+    doWhat = 'remove';
 else
     error('Third input must be (0 to clear), or (1 to remove)')
 end
@@ -117,22 +109,28 @@ end
 % ------------------------------------------------------------------------------
 %% Check what to clear/remove
 % ------------------------------------------------------------------------------
-SelectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
-                                thename,thetable,theid,BF_cat(vin,','));
-[todump,emsg] = mysql_dbquery(dbc,SelectString);
+selectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
+                                theName,theTable,theid,BF_cat(idRange,','));
+[toDump,emsg] = mysql_dbquery(dbc,selectString);
 
 if ~isempty(emsg)
 	error('Error retrieving selected %s indices (%s) from the %s table of %s', ...
-                                    	thewhat,theid,thetable,dbname)
+                                    	theWhat,theid,theTable,dbname)
 end
+
+if length(toDump)==0
+    fprintf(1,'No %s found in the given range of %s.\n',theWhat,theid);
+    return
+end
+
 reply = input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
-      			dbname ' [press any key to show them]'],length(vin),thewhat),'s');
+      			dbname '.\n[press any key to show them]'],length(toDump),theWhat),'s');
 
 % ------------------------------------------------------------------------------
 %% List all items to screen
 % ------------------------------------------------------------------------------
-for i = 1:length(todump)
-    fprintf(1,'%s\n',todump{i});
+for i = 1:length(toDump)
+    fprintf(1,'%s\n',toDump{i});
 end
 
 reply = input(['Does this look right? Check carefully -- clearing data cannot ' ...
@@ -149,20 +147,22 @@ end
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
 
-if doremove
+if doRemove
     % Before delete them, first get keyword information, and information about masters (for operations)
     %<><>><><><><><><>
     
-	DeleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',thetable,theid,BF_cat(vin,','));
-    [~,emsg] = mysql_dbexecute(dbc, DeleteString);
+	deleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',theTable,theid,BF_cat(idRange,','));
+    [~,emsg] = mysql_dbexecute(dbc, deleteString);
     if isempty(emsg)
-        fprintf(1,'%u %s removed from %s in %s\n',length(todump),thewhat,thetable,dbname)
+        fprintf(1,'%u %s removed from %s in %s.\n',length(toDump),theWhat,theTable,dbname)
     end
     
-    if strcmp(tsorop,'ops')
+    SQL_FlushKeywords(tsOrOps);
+    
+    if strcmp(tsOrOps,'ops')
         % What about masters??
         % 1. Get master_ids that link to deleted operations
-        %<><>><><><><><><>        
+        %<><>><><><><><><>
         % 2. Update their NPoint counters
         %<><>><><><><><><>
         % 3. Delete those that now point to zero operations to
@@ -190,20 +190,20 @@ else
     fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s...\n',dbname)
     fprintf(1,'Patience...\n');
 
-    UpdateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(vin,','));
-    [~,emsg] = mysql_dbexecute(dbc, UpdateString);
+    updateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(idRange,','));
+    [~,emsg] = mysql_dbexecute(dbc, updateString);
 
     if isempty(emsg)
-    	if strcmp(tsorop,'ts')
+    	if strcmp(tsOrOps,'ts')
     		% Get number of operations to work out how many entries were cleared
-    		SelectString = 'SELECT COUNT(op_id) as nm FROM Operations';
-    		nm = mysql_dbquery(dbc,SelectString); nm = nm{1};		
-    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),nm,nm*length(vin),dbname);
+    		selectString = 'SELECT COUNT(op_id) as numOps FROM Operations';
+    		numOps = mysql_dbquery(dbc,selectString); numOps = numOps{1};
+    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(idRange),numOps,numOps*length(idRange),dbname);
     	else
     		% Get number of time series to work out how many entries were cleared
-    		SelectString = 'SELECT COUNT(ts_id) as nts FROM TimeSeries';
-    		nts = mysql_dbquery(dbc,SelectString); nts = nts{1};
-    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(vin),nts,nts*length(vin),dbname);
+    		selectString = 'SELECT COUNT(ts_id) as numTs FROM TimeSeries';
+    		numTs = mysql_dbquery(dbc,selectString); numTs = numTs{1};
+    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(idRange),numTs,numTs*length(idRange),dbname);
     	end
     else
     	fprintf(1,'Error clearing results from %s... This is pretty bad news....\n%s',dbname,emsg); keyboard
@@ -218,18 +218,18 @@ SQL_closedatabase(dbc) % database closed
 % ------------------------------------------------------------------------------
 %% Write a log file of information
 % ------------------------------------------------------------------------------
-if dolog
+if doLog
     fn = 'SQL_clear.log'; % log filename
 	fprintf(1,'Writing log file to ''%s''\n',fn)
 
 	fid = fopen(fn, 'w', 'n');
 	fprintf(fid,'Document created on %s\n',datestr(now));
-	if strcmp(tsorop,'ts')
-		fprintf(fid,'Cleared outputs of %u time series\n',length(vin));
+	if strcmp(tsOrOps,'ts')
+		fprintf(fid,'Cleared outputs of %u time series\n',length(idRange));
 	else
-		fprintf(fid,'Cleared outputs of %u operations\n',length(vin));
+		fprintf(fid,'Cleared outputs of %u operations\n',length(idRange));
 	end
-	for i = 1:length(todump), fprintf(fid,'%s\n',todump{i}); end
+	for i = 1:length(toDump), fprintf(fid,'%s\n',toDump{i}); end
 	fclose(fid);
     
 	fprintf(1,'Logged and done and dusted!!\n');

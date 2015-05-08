@@ -6,7 +6,7 @@
 % over when running highly comparative computations.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
@@ -15,8 +15,8 @@
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
 % This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
@@ -54,14 +54,14 @@ for i = 1:length(tsid_range)
                             	tsid_range(i),length(opids),min(opids),max(opids))
 	
 	% Loop over:
-	% (i) Running TSQ_prepared to retrieve data from the database -> HCTSA_loc.mat
-	% (ii) Using TSQ_brawn to calculate missing entries
-	% (iii) Running TSQ_agglomerate to write results back into the database
+	% (i) Running SQL_retrieve to retrieve data from the database -> HCTSA_loc.mat
+	% (ii) Using TS_compute to calculate missing entries
+	% (iii) Running SQL_store to write results back into the database
 
-	didWrite = TSQ_prepared(tsid_range(i),opids,writeWhat); % Collect the null entries in the database
-    if didWrite % Only calculate if TSQ_prepared found time series to retrieve:
-        TSQ_brawn(doLog,doParallelize); % Compute the operations and time series retrieved
-        TSQ_agglomerate(writeWhat,doLog); % Store the results back to the database
+	didWrite = SQL_retrieve(tsid_range(i),opids,writeWhat); % Collect the null entries in the database
+    if didWrite % Only calculate if SQL_retrieve found time series to retrieve:
+        TS_compute(doLog,doParallelize); % Compute the operations and time series retrieved
+        SQL_store(writeWhat,doLog); % Store the results back to the database
     else
         fprintf(1,'No calculation performed at ts_id = %u\n',tsid_range(i));
     end

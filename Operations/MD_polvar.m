@@ -29,7 +29,7 @@
 % p - probability of obtaining a sequence of consecutive ones/zeros
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013, Max A. Little, <max.a.little@gmail.com>,
+% Copyright (C) 2015, Max A. Little, <max.a.little@gmail.com>,
 % <http://www.maxlittle.net/> and Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
@@ -49,11 +49,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function p = MD_polvar(x, d, D)
-% Ben Fulcher, April 2010
+
+% ------------------------------------------------------------------------------
+% Check Inputs:
+% ------------------------------------------------------------------------------
 
 % coding time difference, d
 if nargin < 2 || isempty(d)
@@ -64,6 +67,8 @@ end
 if nargin < 3 || isempty(D)
     D = 6;   % Look for symbol words of this default length
 end
+
+% ------------------------------------------------------------------------------
 
 dx = abs(diff(x)); % absolute differences in consecutive values of the time series
 N = length(dx); % number of differences in the input time series

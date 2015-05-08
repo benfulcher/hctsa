@@ -12,7 +12,7 @@
 % S, the output string
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013, Romesh Abeysuriya <romesh.abey@gmail.com>
+% Copyright (C) 2015, Romesh Abeysuriya <romesh.abey@gmail.com>
 %
 % This function is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free Software
@@ -25,11 +25,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function S = RA_sqlescapestring(s)
-% Romesh Abeysuriya, 10/12/2012
+function escapedString = RA_sqlescapestring(inputString)
 
 % From MySQL manual pages:
 % http://dev.mysql.com/doc/refman/4.1/en/string-syntax.html
@@ -44,7 +43,6 @@ function S = RA_sqlescapestring(s)
 % \%	A “%” character. See note following the table.
 % \_	A “_” character. See note following the table.
 
-S = regexprep(s,'([\''\\])','\\$1'); % Replace backslashes and single quotes
-%S2 = regexprep(s,'([\''\\\_\%])','\\$1'); % Replace backslashes and single quotes
+escapedString = regexprep(inputString,'([\''\\])','\\$1'); % Replace backslashes and single quotes
 
 end

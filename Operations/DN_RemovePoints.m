@@ -10,7 +10,7 @@
 % 
 % INPUTS:
 % y, the input time series
-% howtorem, how to remove points from the time series:
+% removeHow, how to remove points from the time series:
 %               (i) 'absclose': those that are the closest to the mean,
 %               (ii) 'absfar': those that are the furthest from the mean,
 %               (iii) 'min': the lowest values,
@@ -24,11 +24,8 @@
 % 
 % Note that this is a similar idea to that implemented in DN_OutlierInclude.
 % 
-%---HISTORY:
-% Ben Fulcher, September 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -47,10 +44,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_RemovePoints(y,howtorem,p)
+function out = DN_RemovePoints(y,removeHow,p)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -61,15 +58,15 @@ doPlot = 0; % plot output
 % ------------------------------------------------------------------------------
 %% Check inputs
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(howtorem)
-    howtorem = 'absfar'; % default
+if nargin < 2 || isempty(removeHow)
+    removeHow = 'absfar'; % default
 end
 if nargin < 3 || isempty(p)
     p = 0.1; % 10%
 end
 
 % ------------------------------------------------------------------------------
-switch howtorem
+switch removeHow
     case 'absclose' % remove a proportion p of points closest to the mean
         [~, is] = sort(abs(y),'descend');
     case 'absfar' % remove a proportion p of points furthest from the mean
@@ -81,7 +78,7 @@ switch howtorem
     case 'random'
         is = randperm(N);
     otherwise
-        error('Unknwon method ''%s''',howtorem);
+        error('Unknwon method ''%s''',removeHow);
 end
 
 rkeep = sort(is(1:round(N*(1-p))),'ascend');

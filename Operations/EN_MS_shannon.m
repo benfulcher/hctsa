@@ -16,13 +16,13 @@
 % also across a range of depth and nbin to return statistics on how the obtained
 % entropies change.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % nbin, the number of bins to discretize the time series into (i.e., alphabet size)
 % depth, the length of strings to analyze
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,11 +41,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = EN_MS_shannon(y,nbin,depth)
-% Ben Fulcher, 2009
 
 if nargin < 2 || isempty(nbin)
     nbin = 2; % two bins to discretize the time series, y
@@ -54,14 +53,18 @@ if nargin < 3 || isempty(depth)
     depth = 3; % three-long strings
 end
 
-%% (*) evaluate the shannon entropy for a given set of parameters
+% ------------------------------------------------------------------------------
+%% Evaluate the shannon entropy for a given set of parameters
+% ------------------------------------------------------------------------------
 if (length(nbin) == 1) && (length(depth) == 1)
     % Run the code, just return a number
     % scales with depth, so it's nice to normalize by this factor:
     out = MS_shannon(y,nbin,depth) / depth;
 end
 
+% ------------------------------------------------------------------------------
 %% (*) Return statistics over depths (constant number of bins)
+% ------------------------------------------------------------------------------
 % Somewhat strange behaviour -- very variable
 if (length(nbin) == 1) && (length(depth) > 1)
     % range over depths specified in the vector
@@ -80,7 +83,9 @@ if (length(nbin) == 1) && (length(depth) > 1)
     out.stdent = std(ents);
 end
 
+% ------------------------------------------------------------------------------
 %% (*) Statistics over different bin numbers
+% ------------------------------------------------------------------------------
 if (length(nbin) > 1) && (length(depth) == 1)
     % range over depths specified in the vector
     % return statistics on results
@@ -97,7 +102,9 @@ if (length(nbin) > 1) && (length(depth) == 1)
     out.stdent = std(ents);
 end
 
+% ------------------------------------------------------------------------------
 %% (*) statistics over both nbins and depths
+% ------------------------------------------------------------------------------
 if (length(nbin) > 1) && (length(depth) > 1)
     nbins = length(nbin);
     ndepths = length(depth);

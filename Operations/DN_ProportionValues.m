@@ -9,13 +9,13 @@
 %---INPUTS:
 % x, the input time series
 % 
-% propwhat, the proportion of a given type of value in the time series:
+% propWhat, the proportion of a given type of value in the time series:
 %           (i) 'zeros': values that equal zero
 %           (ii) 'positive': values that are strictly positive
 %           (iii) 'geq0': values that are greater than or equal to zero
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -34,15 +34,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_ProportionValues(x,propwhat)
-% Ben Fulcher, 2009
+function out = DN_ProportionValues(x,propWhat)
 
 N = length(x); % length of the time series
 
-switch propwhat
+switch propWhat
     case 'zeros' % returns the proportion of zeros in the input vector
         out = sum(x == 0)/N;
         
@@ -53,7 +52,7 @@ switch propwhat
         out = sum(x >= 0)/N;
         
     otherwise
-        error('Unknown condition to measure: ''%s''',propwhat);
+        error('Unknown condition to measure: ''%s''',propWhat);
 end
 
 end

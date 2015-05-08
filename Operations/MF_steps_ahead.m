@@ -31,7 +31,7 @@
 % ..., maxSteps (relative to a simple predictor).
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -50,19 +50,24 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MF_steps_ahead(y,model,order,maxSteps)
-% Ben Fulcher, 17/2/2010
 
+% ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('identification_toolbox')
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % length of the input time series
 
+% ------------------------------------------------------------------------------
 %% Inputs
+% ------------------------------------------------------------------------------
 % y, column vector of equally-spaced time series measurements
 y = iddata(y,[],1); % Convert y to time series object
 
@@ -83,11 +88,15 @@ if nargin < 4 || isempty(maxSteps)
     maxSteps = 6; % compare up to 5 steps ahead by default
 end
 
-%% Set up test and training sets
+% ------------------------------------------------------------------------------
+%% Set up training and test sets
+% ------------------------------------------------------------------------------
 ytrain = y; % the whole time series
 ytest = y; % the whole time series
 
+% ------------------------------------------------------------------------------
 %% Fit the model
+% ------------------------------------------------------------------------------
 switch model
     case 'ar' % AR model
         if strcmp(order,'best') % fit 'best' AR model; by sbc

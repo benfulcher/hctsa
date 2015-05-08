@@ -12,7 +12,7 @@
 %---OUTPUTS: based on the dynamics of how new extreme events occur with time.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -31,13 +31,12 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = SY_RangeEvolve(y)
-% Ben Fulcher, September 2009
 
-doplot = 0; % plot outputs
+doPlot = 0; % plot outputs
 N = length(y); % length of the time series
 cums = zeros(N,1);
 
@@ -46,7 +45,7 @@ for i = 1:N
 end
 % cums=cums/range(y);
 
-if doplot
+if doPlot
     figure('color','w');
     plot(cums);
 end

@@ -4,16 +4,16 @@
 % 
 % Estimates custom skewness measures, the Pearson and Bowley skewnesses.
 % 
-% INPUTS:
+%---INPUTS:
 % y, the input time series
 % 
-% whichskew, the skewness measure to calculate, either 'pearson' or 'bowley'
+% whatSkew, the skewness measure to calculate, either 'pearson' or 'bowley'
 % 
 % The Bowley skewness uses the quantile function from Matlab's Statistics
 % Toolbox.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -32,13 +32,12 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_CustomSkewness(y,whichskew)
-% Ben Fulcher, 2009
+function out = DN_CustomSkewness(y,whatSkew)
 
-switch whichskew
+switch whatSkew
     case 'pearson'
         out = (3*mean(y)-median(y))./std(y);
         
@@ -48,7 +47,7 @@ switch whichskew
         % Quartile skewness coefficient
         
     otherwise
-        error('Unknown skewness type ''%s''',whichskew)
+        error('Unknown skewness type ''%s''',whatSkew)
 end
 
 end

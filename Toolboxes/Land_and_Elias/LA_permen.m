@@ -4,9 +4,8 @@
 % Originally logisticPE.m
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/logisticPE.m
+% 
 % Original code by Bruce Land and Damian Elias
-% ------------------------------------------------------------------------------
-% Modified slightly by Ben Fulcher, 2009
 % ------------------------------------------------------------------------------
 
 function permen = LA_permen(y,ord)

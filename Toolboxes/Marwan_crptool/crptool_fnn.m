@@ -10,7 +10,7 @@ function out = crptool_fnn(varargin)
 %    The defeault is T=1.
 %
 %    Y=FNN(X,M,T,R,S), where R and S are scalars, applies the neighbourhood
-%    criterion R and the size of the neighbourhood S. The defeault is R=2
+%    criterion R and the size of the neighbourhood S. The defeault is R=10
 %    and S=Inf.
 %
 %    Y=FNN(X,M,T,R,S,N), where N is a scalar, uses N random samples for
@@ -51,10 +51,16 @@ function out = crptool_fnn(varargin)
 % Norbert Marwan, Potsdam University, Germany
 % http://www.agnld.uni-potsdam.de
 %
-% $Date: 2011/05/18 09:46:17 $
-% $Revision: 5.8 $
+% $Date: 2014/09/23 07:11:25 $
+% $Revision: 5.11 $
 %
 % $Log: fnn.m,v $
+% Revision 5.11  2014/09/23 07:11:25  marwan
+% Matlab R2014b incompatibility issues fixed
+%
+% Revision 5.9  2013/08/06 12:20:41  marwan
+% fix of intermixed variables in the code
+%
 % Revision 5.8  2011/05/18 09:46:17  marwan
 % default figure background color bug fixed
 %
@@ -98,11 +104,11 @@ action='';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% check the input
 
 error(nargchk(0,99,nargin));
-if nargout > 2, error('Too many output arguments'), end
+if nargout>2, error('Too many output arguments'), end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% splash the GPL
 
-% splash_gpl('crp'); %% ++BF Not necessary for calling this function
+% splash_gpl('crp'); % Do not do this
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% error control
 try 
@@ -146,13 +152,13 @@ if nargin & isnumeric(varargin{1})
         r = varargin{i_x(3)};
       case 4
         maxM = varargin{i_x(1)};
-        r = varargin{i_x(2)};
-        t = varargin{i_x(3)};
+        t = varargin{i_x(2)};
+        r = varargin{i_x(3)};
         s = varargin{i_x(4)};
       case 5
         maxM = varargin{i_x(1)};
-        r = varargin{i_x(2)};
-        t = varargin{i_x(3)};
+        t = varargin{i_x(2)};
+        r = varargin{i_x(3)};
         s = varargin{i_x(4)};
         maxN = varargin{i_x(5)};
     end
@@ -477,16 +483,23 @@ case 'compute'
     warning off
     if ~nogui
         h_fig=findobj('tag','FNN_Fig');
+        set(0,'ShowHidden','on')
+        h_axes=findobj('Tag','fnn_axes','Parent',gcf); h_axes=h_axes(1);
+        h_stopbutton = findobj('tag','button_apply','Parent',h_fig(1));
+        h_storebutton = findobj('Tag','button_store');
         setptr(gcf,'watch'), 
         obj=({'maxM','method','r','s','maxN','button_store','button_print','button_close','text'});
         for j=1:length(obj); 
             h=findobj('Tag',obj{j},'Parent',h_fig(1)); 
             if ~isempty(h), set(h,'Enable','Off'), end
         end
-        h=findobj('tag','button_apply');
-        set(h(1),'ToolTip','Stops the computation.','String','Stop','Callback','set(0,''ShowHidden'',''on'');h=findobj(''tag'',''button_apply'');set(h(1),''String'',''Stopped'');set(0,''ShowHidden'',''off'')')
+        set(h_stopbutton(1),'ToolTip','Stops the computation.','String','Stop','Callback','set(0,''ShowHidden'',''on'');h=findobj(''tag'',''button_apply'');set(h(1),''String'',''Stopped'');set(0,''ShowHidden'',''off'')')
     end
-    if nogui~=2; hw=waitbar(0,'Estimation progress'); end
+    if nogui~=2; 
+        hw=waitbar(0,'Estimation progress'); 
+%        hw=waitbar(0,'Estimation progress','CreateCancelBtn','return'); 
+    end
+   
 
     FNN(1,1) = 1;
     x_s = s * std(x);
@@ -494,8 +507,7 @@ case 'compute'
         % check if stop button was pressed
         if ~nogui
             set(0,'ShowHidden','on')
-            h=findobj('tag','button_apply','Parent',h_fig(1));
-            if strcmpi(get(h(1),'string'),'stopped')
+            if strcmpi(get(h_stopbutton(1),'string'),'stopped')
                 FNN((m:maxM)+1,1)=NaN;
                 break
             end
@@ -532,31 +544,27 @@ case 'compute'
             end
             [distance is] = sort(distance);
             
-            if is(2) < NX & idx(i) < NX & distance(2) < x_s
-                FNN(m,1) = FNN(m,1) + double((abs(x(idx(i)+m) - x(is(2)+m))/distance(2) > r));
+            if (is(2)+m*t) < N & (idx(i)+m*t) < N & distance(2) < x_s
+                %FNN(m,1) = FNN(m,1) + double((abs(x(idx(i)+m) - x(is(2)+m))/distance(2) > r));
+                FNN(m,1) = FNN(m,1) + double((abs(x(idx(i)+(m)*t) - x(is(2)+(m)*t))/distance(2) > r));
                 cnt = cnt + 1;
             end
             % check if stop button was pressed
             if ~nogui
-                set(0,'ShowHidden','on')
-                h=findobj('tag','button_apply','Parent',h_fig(1));
-                if strcmpi(get(h(1),'string'),'stopped')
+                if strcmpi(get(h_stopbutton(1),'string'),'stopped')
                     FNN((m:maxM)+1,1)=NaN;
                     break
                 end
             end
-
         end
         FNN(m,1) = FNN(m,1) / cnt;
         
         if ~nogui, 
-            if ~isempty(findobj('Tag','FNN_Fig'))
-                h=findobj('Tag','button_store');
-                out_str=FNN;
-                set(h(1),...
-                      'UserData',out_str)
-            end
-            fnn('plot_fnn')
+            %fnn('plot_fnn')
+            plot(h_axes,1:length(FNN),FNN)
+            xlabel(h_axes,'Dimension'), ylabel(h_axes,'False Nearest Neighbours')
+            set(h_axes,'Tag','fnn_axes','layer','top','xlim',[1 maxM],'ylim',[0 1],'xtick',[1:1:maxM],'xgrid','on','ygrid','on')
+            drawnow
         end
     
     end
@@ -572,6 +580,9 @@ case 'compute'
         end
 	    setptr(h_fig(1),'arrow')
         if ~isempty(findobj('Tag','FNN_Fig'))
+                out_str=FNN;
+                set(h_storebutton(1),...
+                      'UserData',out_str)
             h=findobj('Tag','button_store');
             set(h(1),'Enable','On')
         end

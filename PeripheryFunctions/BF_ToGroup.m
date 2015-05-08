@@ -3,57 +3,64 @@
 % ------------------------------------------------------------------------------
 %
 % Converts to Matlab's group form (a vector of group labels) from my
-% GroupIndices form (which has indicies for each group as a cell).
+% groupIndices form (which has indicies for each group as a cell).
 % 
 % Or vice-versa (6/1/2014)
 % 
-% --------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% ------------------------------------------------------------------------------
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
 % 
-% This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
-% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
-% California, 94041, USA.
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+% details.
+% 
+% You should have received a copy of the GNU General Public License along with
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function group = BF_ToGroup(GroupIndices,MaxLength)
+function group = BF_ToGroup(groupIndices,maxLength)
 
-if iscell(GroupIndices) % Convert to vector of group indices
+if iscell(groupIndices) % Convert to vector of group indices
     
-    if all(cellfun(@isempty,GroupIndices)) % all empty -- rubbish
+    if all(cellfun(@isempty,groupIndices)) % all empty -- rubbish
         error('Nothing in the group indices')
     end
     
     % Second input only important for cell -> vector transformation
-    if nargin < 2 || isempty(MaxLength)
-        MaxLength = max(cellfun(@max,GroupIndices));
+    if nargin < 2 || isempty(maxLength)
+        maxLength = max(cellfun(@max,groupIndices));
         % Make the length of output equal to the maximum index
     end
     
-    group = zeros(MaxLength,1);
+    group = zeros(maxLength,1);
 
-    for i = 1:length(GroupIndices)
-        group(GroupIndices{i}) = i;
+    for i = 1:length(groupIndices)
+        group(groupIndices{i}) = i;
     end
 
-    if sum(cellfun(@length,GroupIndices)) < length(group)
+    if sum(cellfun(@length,groupIndices)) < length(group)
         warning('Group is missing some labels')
     end
     
 else
     % Convert from vector of group labels to cell of group indices:
     
-    NGroups = max(GroupIndices);
-    group = cell(NGroups,1);
-    for i = 1:NGroups
-        group{i} = find(GroupIndices==i);
+    numGroups = max(groupIndices);
+    group = cell(numGroups,1);
+    for i = 1:numGroups
+        group{i} = find(groupIndices==i);
     end
 end
 

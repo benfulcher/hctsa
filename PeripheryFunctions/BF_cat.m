@@ -10,11 +10,16 @@
 % d, the delimiter (a comma by default)
 % surr, an optional string to surround each element of s (empty by default, but
 %       can be handy for surrounding each string by inverted commas, for
-%       example)
+%       example).
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
 % This function is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free Software
@@ -27,7 +32,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = BF_cat(s,d,surr)
@@ -39,21 +44,21 @@ else
 end
 
 if nargin < 3 || isempty(surr)
-    sumstr = [];
+    sumString = [];
     if iscellstr(s)
-        for i = 1:length(s), sumstr = [sumstr, s{i}, d]; end
+        for i = 1:length(s), sumString = [sumString, s{i}, d]; end
     elseif isnumeric(s)
-        for i = 1:length(s), sumstr = [sumstr, num2str(s(i)), d]; end
+        for i = 1:length(s), sumString = [sumString, num2str(s(i)), d]; end
     end
 else
-    sumstr = [];
+    sumString = [];
     if iscellstr(s)
-        for i = 1:length(s), sumstr = [sumstr, surr, s{i}, surr, d]; end
+        for i = 1:length(s), sumString = [sumString, surr, s{i}, surr, d]; end
     elseif isnumeric(s)
-        for i = 1:length(s), sumstr = [sumstr, surr, num2str(s(i)), surr, d]; end
+        for i = 1:length(s), sumString = [sumString, surr, num2str(s(i)), surr, d]; end
     end    
 end
 
-out = sumstr(1:end-length(d));
+out = sumString(1:end-length(d));
 
 end

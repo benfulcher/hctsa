@@ -17,12 +17,9 @@
 %           (iv) 'rav' applies a running mean filter,
 %           (v) 'resampleup' progressively upsamples the time series,
 %           (vi) 'resampledown' progressively downsamples the time series.
-%
-%---HISTORY:
-% Ben Fulcher, 10/7/09
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,7 +38,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = PP_Iterate(y,dtMeth)
@@ -114,7 +111,7 @@ for q = 1:length(nRange)
         case 'resampledown' % downsample
             y_d = resample(y,1,n);
     end
-    outmat(q,:) = doyourcalcthing(y,y_d);
+    outmat(q,:) = doYourCalcThing(y,y_d);
     if doPlot
         if q==1
             h2 = plot(y_d,'r');
@@ -128,12 +125,14 @@ end
 %% Calculate four statistics from each test
 % ------------------------------------------------------------------------------
 
-stats = zeros(10,4);
+stats = zeros(10,3);
 for t = 1:10;
-    if any(~isfinite(outmat(:,t))),
-        fprintf(1,'%u is a bad statistic\n',t)
+    if any(~isfinite(outmat(:,t)))
+        if ~(strcmp(dtMeth,'diff') && t > 7) % expected that these won't work
+            fprintf(1,'%u is a bad statistic\n',t)
+        end
     end
-    stats(t,:) = doyourtestthing(outmat(:,t)); 
+    stats(t,:) = doYourTestThing(outmat(:,t)); 
 end
 
 % ------------------------------------------------------------------------------
@@ -143,66 +142,66 @@ end
 out.statav5_trend = stats(1,1);
 out.statav5_jump = stats(1,2);
 out.statav5_lin = stats(1,3);
-out.statav5_exp = stats(1,4);
+% out.statav5_exp = stats(1,4);
 
 % 2) Sliding Window Mean
 out.swms5_2_trend = stats(2,1);
 out.swms5_2_jump = stats(2,2);
 out.swms5_2_lin = stats(2,3);
-out.swms5_2_exp = stats(2,4);
+% out.swms5_2_exp = stats(2,4);
 
 % 3) Sliding Window std
 out.swss5_2_trend = stats(3,1);
 out.swss5_2_jump = stats(3,2);
 out.swss5_2_lin = stats(3,3);
-out.swss5_2_exp = stats(3,4);
+% out.swss5_2_exp = stats(3,4);
 
 % 4) Gaussian kernel density fit, rmse
 out.gauss1_kd_trend = stats(4,1);
 out.gauss1_kd_jump = stats(4,2);
 out.gauss1_kd_lin = stats(4,3);
-out.gauss1_kd_exp = stats(4,4);
+% out.gauss1_kd_exp = stats(4,4);
 
 % 5) Gaussian 10-bin histogram fit, rmse
 out.gauss1_h10_trend = stats(5,1);
 out.gauss1_h10_jump = stats(5,2);
 out.gauss1_h10_lin = stats(5,3);
-out.gauss1_h10_exp = stats(5,4);
+% out.gauss1_h10_exp = stats(5,4);
 
 % 6) Compare normal fit
 out.norm_kscomp_trend = stats(6,1);
 out.norm_kscomp_jump = stats(6,2);
 out.norm_kscomp_lin = stats(6,3);
-out.norm_kscomp_exp = stats(6,4);
+% out.norm_kscomp_exp = stats(6,4);
 
 % 7) Outliers: ben test
 out.ol_trend = stats(7,1);
 out.ol_jump = stats(7,2);
 out.ol_lin = stats(7,3);
-out.ol_exp = stats(7,4);
+% out.ol_exp = stats(7,4);
 
 % 8) Cross correlation to original signal (-1)
 out.xcn1_trend = stats(8,1);
 out.xcn1_jump = stats(8,2);
 out.xcn1_lin = stats(8,3);
-out.xcn1_exp = stats(8,4);
+% out.xcn1_exp = stats(8,4);
 
 % 9) Cross correlation to original signal (+1)
 out.xc1_trend = stats(9,1);
 out.xc1_jump = stats(9,2);
 out.xc1_lin = stats(9,3);
-out.xc1_exp = stats(9,4);
+% out.xc1_exp = stats(9,4);
 
 % 10) Norm of differences to original and processed signals
 out.normdiff_trend = stats(10,1);
 out.normdiff_jump = stats(10,2);
 out.normdiff_lin = stats(10,3);
-out.normdiff_exp = stats(10,4);
+% out.normdiff_exp = stats(10,4);
 
 % ------------------------------------------------------------------------------
 %% TESTS:
 % ------------------------------------------------------------------------------
-    function f = doyourcalcthing(y,y_d)
+    function f = doYourCalcThing(y,y_d)
         y = BF_zscore(y); y_d = BF_zscore(y_d);
         
         f = zeros(10,1); % vector of features to output
@@ -256,18 +255,19 @@ out.normdiff_exp = stats(10,4);
             % Norm of differences between original and randomized signals
             f(10) = norm(y-y_d)/length(y);
         else
-           f(8:10) = NaN; % like for differencing where lose some points
+            f(8:10) = NaN; % like for differencing where lose some points
         end
     end
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
-    function g = doyourtestthing(f)
+    function g = doYourTestThing(f)
         if ~all(isfinite(f))
-            g = NaN*ones(4,1); return
+            g = NaN*ones(3,1); return
         else
-            g = zeros(4,1);
+            g = zeros(3,1);
         end
         f = zscore(f);
+        
         % for each return a set of simple little tests:
         % (1) Is it increasing/decreasing?
         %       do this by the sum of differences; could take sign?
@@ -290,10 +290,7 @@ out.normdiff_exp = stats(10,4);
 
         % t-statistic at this point
         tstat = abs((mbfatd(ind,1)-mbfatd(ind,2))/sqrt(mbfatd(ind,3)^2+mbfatd(ind,4)^2));
-        if tstat > 15; %2 && ind < length(f)-2 && mbfatd(ind-1) < mbfatd(ind) && mbfatd(ind+1) < mbfatd(ind)
-            g(2) = ind;
-        else g(2) = NaN;
-        end
+        g(2) = tstat;
         
         % (3) is it linear?
         try
@@ -303,37 +300,32 @@ out.normdiff_exp = stats(10,4);
                 return
             end
         end
-        
-        if gof.rsquare > 0.9
-            g(3) = cfun.p1; % returns the gradient of the line
-        else
-            g(3) = NaN;
-        end
-        
-        % (4) is it exponential?
-        
-        if g(1) > 0 % increasing, fit saturating exponential
-            stpt = [-f(end), -0.1, f(end)];
-        else % decreasing, fit decaying exponential
-            stpt = [f(end), -0.1, f(end)];
-        end
-        
-        fopt = fitoptions('Method','NonlinearLeastSquares','StartPoint',stpt);
-        ftyp = fittype('a*exp(b*x)+c','options',fopt);
-        try 
-            [c, gof] = fit((1:length(f))',f,ftyp);
-            if gof.rsquare > 0.9
-                g(4) = c.b; % return the decay coefficient
-            else
-                g(4) = NaN;
-            end
-        catch emsg
-            if (strcmp(emsg.message,'Inf computed by model function.') || strcmp(emsg.message,'NaN computed by model function.'))
-                g(4) = NaN; % error fitting -- return a NaN
-            else % unable to run 'fit' command -- fatal error
-                return
-            end
-        end   
+        % The gradient of the line
+        g(3) = cfun.p1;
+                
+        % % (4) is it exponential? This is really slow
+        % if g(1) > 0 % increasing, fit saturating exponential
+        %     stpt = [-f(end), -0.1, f(end)];
+        % else % decreasing, fit decaying exponential
+        %     stpt = [f(end), -0.1, f(end)];
+        % end
+        %
+        % fopt = fitoptions('Method','NonlinearLeastSquares','StartPoint',stpt);
+        % ftyp = fittype('a*exp(b*x)+c','options',fopt);
+        % try
+        %     [c, gof] = fit((1:length(f))',f,ftyp);
+        %     if gof.rsquare > 0.9
+        %         g(4) = c.b; % return the decay coefficient
+        %     else
+        %         g(4) = NaN;
+        %     end
+        % catch emsg
+        %     if (strcmp(emsg.message,'Inf computed by model function.') || strcmp(emsg.message,'NaN computed by model function.'))
+        %         g(4) = NaN; % error fitting -- return a NaN
+        %     else % unable to run 'fit' command -- fatal error
+        %         return
+        %     end
+        % end
     end
 % ------------------------------------------------------------------------------
 end

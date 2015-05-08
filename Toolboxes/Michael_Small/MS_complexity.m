@@ -15,18 +15,17 @@
 % Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
 % Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
 % references therein.
-% (minor cosmetic changes by Ben Fulcher, 2010)
 
 function cmp = MS_complexity(x,n);
 
-if nargin<2,
-    n=2;
-end;
+if nargin < 2
+    n = 2;
+end
 
-if length(n)>1,
-   for ni=1:length(n),
+if length(n) > 1
+   for ni = 1:length(n)
         cmp(ni) = MS_complexity(x,n(ni)); 
-   end;    
+   end
 else,
     
     if 1,
@@ -57,3 +56,5 @@ else,
     cmp=MS_complexitybs(x);
 
 end;
+
+end

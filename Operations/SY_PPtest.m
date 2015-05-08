@@ -16,7 +16,7 @@
 %               'ts': trend stationary,
 %               (see Matlab documentation for information)
 %               
-% teststat, the test statistic:
+% testStatistic, the test statistic:
 %               't1': the standard t-statistic, or
 %               't2' a lag-adjusted, 'unStudentized' t statistic.
 %               (see Matlab documentation for information)
@@ -25,7 +25,7 @@
 % well as measures of the regression statistics.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -44,16 +44,19 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SY_PPtest(y,lags,model,teststat)
-% Ben Fulcher, 1/3/2010
+function out = SY_PPtest(y,lags,model,testStatistic)
 
+% ------------------------------------------------------------------------------
 %% Check that an Econometrics Toolbox license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('econometrics_toolbox');
 
+% ------------------------------------------------------------------------------
 %% Inputs
+% ------------------------------------------------------------------------------
 % The number of autocovariance lags to include in the Newey-West estimator
 % of the long-run variance, lags.
 if nargin < 2 || isempty(lags)
@@ -66,16 +69,20 @@ if nargin < 3 || isempty(model)
     model = 'ar'; % autoregressive
 end
 
-% The test statistics, teststat. Can be 't1': standard t statistics; or
+% The test statistics, testStatistic. Can be 't1': standard t statistics; or
 % 't2': a lag-adjusted, 'unstudentized' t statistic.
-if nargin < 4 || isempty(teststat)
-    teststat = 't1'; % standard t statistic
+if nargin < 4 || isempty(testStatistic)
+    testStatistic = 't1'; % standard t statistic
 end
 
+% ------------------------------------------------------------------------------
 %% Run the test
-[h, pValue, stat, cValue, reg] = pptest(y,'lags',lags,'model',model,'test',teststat);
+% ------------------------------------------------------------------------------
+[h, pValue, stat, cValue, reg] = pptest(y,'lags',lags,'model',model,'test',testStatistic);
 
+% ------------------------------------------------------------------------------
 %% Get outputs
+% ------------------------------------------------------------------------------
 nout = length(h);
 
 if nout == 1

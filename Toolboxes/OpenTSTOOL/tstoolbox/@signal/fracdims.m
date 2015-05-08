@@ -68,4 +68,4 @@ rs = addcommandlines(rs, 's = fracdims(s', kmin, kmax, Nref, gstart, gend, past,
 rs = setyname(rs, 'D(q)');
 rs = setlabel(rs, 'Renyi dimension spectrum');
 
-
+end

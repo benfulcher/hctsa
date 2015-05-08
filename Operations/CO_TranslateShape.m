@@ -20,14 +20,11 @@
 % 
 % d, a parameter specifying the size of the shape (e.g., d = 2)
 % 
-% howtomove, a method specifying how to move the shape about, e.g., 'pts'
-%               places the shape on each point in the time series
-% 
-%---HISTORY:
-% Ben Fulcher, September 2009
+% howToMove, a method specifying how to move the shape about, e.g., 'pts'
+%               places the shape on each point in the time series.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -46,10 +43,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_TranslateShape(y,shape,d,howtomove)
+function out = CO_TranslateShape(y,shape,d,howToMove)
 
 % ------------------------------------------------------------------------------
 %% Check inputs:
@@ -60,8 +57,8 @@ end
 if nargin < 3 || isempty(d)
     d = 2; % a default distance d = 2
 end
-if nargin < 4 || isempty(howtomove)
-    howtomove = 'pts'; % by default, places shapes on each timepoint
+if nargin < 4 || isempty(howToMove)
+    howToMove = 'pts'; % by default, places shapes on each timepoint
 end
 
 % ------------------------------------------------------------------------------
@@ -77,7 +74,7 @@ end
 % Add a time index
 ty = [(1:N)', y]; % has increasing integers as time in the first column
 
-switch howtomove
+switch howToMove
     case 'pts' % Place shapes on each timepoint (excluding a range at start and end)
         switch shape
             case 'circle' % uses a circle of radius 'd'
@@ -138,7 +135,7 @@ switch howtomove
             error('Unknwon shape ''%s''',shape)
         end
     otherwise
-        error('Unknwon setting for ''howtomove'' input: ''%s''',howtomove)
+        error('Unknwon setting for ''howToMove'' input: ''%s''',howToMove)
 end
 
 % plot(np)

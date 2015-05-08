@@ -35,12 +35,8 @@
 %---OUTPUTS: summaries of the quality of predictions made, the mean and
 % spread of obtained hyperparameter values, and marginal likelihoods.
 % 
-% ---HISTORY:
-% Ben Fulcher, 20/1/2010
-% Ben Fulcher, 2015-03-20 added random seed input
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -59,7 +55,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MF_GP_LocalPrediction(y,covFunc,numTrain,numTest,numPreds,pmode,randomSeed)

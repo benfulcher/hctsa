@@ -12,17 +12,14 @@
 %                           etc. (see Wavelet Toolbox Documentation for all
 %                           options)
 % 
-% maxscale, the maximum scale of wavelet analysis.
+% maxScale, the maximum scale of wavelet analysis.
 % 
 % 
 %---OUTPUTS: statistics on the coefficients, entropy, and results of
 % coefficients summed across scales.
 % 
-%---HISTORY:
-% Ben Fulcher, 26/1/2010
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,10 +38,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = WL_cwt(y, wname, maxscale)
+function out = WL_cwt(y, wname, maxScale)
 
 % ------------------------------------------------------------------------------
 % Check that a Wavelet Toolbox license is available:
@@ -61,12 +58,12 @@ if nargin < 2 || isempty(wname)
     wname = 'db3';
     fprintf(1,'Using default wavelet ''%s''\n',wname)
 end
-if nargin < 3 || isempty(maxscale)
-    maxscale = 32;
-    fprintf(1,'Using default maxscale of %u\n',maxscale)
+if nargin < 3 || isempty(maxScale)
+    maxScale = 32;
+    fprintf(1,'Using default maxScale of %u\n',maxScale)
 end
 
-scales = (1:maxscale);
+scales = (1:maxScale);
 coeffs = cwt(y, scales, wname);
 
 S = abs(coeffs.*coeffs); % power
@@ -135,15 +132,15 @@ out.SC_h = -sum(SC_a.*log(SC_a));
 % ------------------------------------------------------------------------------
 %% Weird 2-D entropy idea -- first discretize
 % ------------------------------------------------------------------------------
-% (i) Discretize the space into nboxes boxes along the time axis
+% (i) Discretize the space into numBoxes boxes along the time axis
 % Many choices, let's discretize into maximum energy
 % (could also do average, or proportion inside box with more energy than
 % average, ...)
-nboxes = 10;
-dd_SC = zeros(maxscale, nboxes);
-cutoffs = round(linspace(0, N, nboxes+1));
-for i = 1:maxscale
-   for j = 1:nboxes
+numBoxes = 10;
+dd_SC = zeros(maxScale, numBoxes);
+cutoffs = round(linspace(0, N, numBoxes+1));
+for i = 1:maxScale
+   for j = 1:numBoxes
        dd_SC(i,j) = max(SC(i,cutoffs(j)+1:cutoffs(j+1)));
    end
 end

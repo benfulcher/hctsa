@@ -1,4 +1,4 @@
-function [rs, s] = corrsum(s, npairs, range, past, bins)
+function [rs, s] = corrsum(s, npairs, range, past, bins, opt_flag)
 
 %tstoolbox/@signal/corrsum2
 %   Syntax:
@@ -24,7 +24,7 @@ if nargin < 5
 	bins  = 32;
 end
 if nargin < 6
-	opt_flag = 0;
+	opt_flag = 1; % to suppress output?
 end
 
 [N,dim] = size(data(s));
@@ -49,3 +49,5 @@ rs = addhistory(rs,  ['Computed correlation dimension (GPA)']);
 rs = addcommandlines(rs, 's = corrsum2(s', npairs, range, past, opt_flag);
 rs = setyname(rs, 'ln C(r)');
 rs = setlabel(rs, 'Correlation sum');
+
+end

@@ -2,9 +2,9 @@
 % BF_iszscored
 % ------------------------------------------------------------------------------
 % 
-% Checks whether the input time series is (~eps-close to being) z-scored.
-% Used for displaying warning messages for functions that require z-scored
-% inputs.
+% Performs a crude check as to whether the input time series is (~eps-close to
+% being) z-scored. Used for displaying warning messages for functions that
+% require z-scored inputs.
 % 
 %---INPUT:
 % x, the input time series (or any vector)
@@ -12,12 +12,14 @@
 %---OUTPUT:
 % iszscored, a logical with the verdict.
 % 
-%---HISTORY:
-% Ben Fulcher, 2013
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
 % This function is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free Software
@@ -30,14 +32,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function iszscored = BF_iszscored(x)
 
 % Give it a bit of numerical lee-way... Down in the 2e-14 region:
-Threshold = 100*eps;
+numericThreshold = 100*eps;
 
-iszscored = ((abs(mean(x)) < Threshold) && (abs(std(x)-1) < Threshold));
+iszscored = ((abs(mean(x)) < numericThreshold) && (abs(std(x)-1) < numericThreshold));
 
 end

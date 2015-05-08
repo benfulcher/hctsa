@@ -11,11 +11,8 @@
 % e, should be raw residuals as prediction minus data (e = yp - y) as a column
 %       vector. Will take absolute values / even powers of e as necessary.
 % 
-%---HISTORY:
-% Ben Fulcher, 10/2/2010
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -34,7 +31,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MF_ResidualAnalysis(e)

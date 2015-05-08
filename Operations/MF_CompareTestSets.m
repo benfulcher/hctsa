@@ -40,11 +40,8 @@
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (when 'rand' specified for subsetHow)
 % 
-%---HISTORY:
-% Ben Fulcher, 12/2/2010
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -63,7 +60,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = MF_CompareTestSets(y,theModel,ord,subsetHow,samplep,steps,randomSeed)

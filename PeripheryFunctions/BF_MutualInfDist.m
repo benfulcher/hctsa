@@ -20,8 +20,13 @@
 % mi, the mutual information computed between v1 and v2
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite:
+% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
 % This function is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free Software
@@ -34,13 +39,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function D = BF_MutualInfDist(mis,mymethod,doasqf)
-% Ben Fulcher 17/1/2011
 
+% ------------------------------------------------------------------------------
 %% Check Inputs
+% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(mymethod)
     % select method for converting MIs to distances
     mymethod = 'CL'; % 'CL', 'CR', 'mindiff', 'meandiff'
@@ -51,7 +57,9 @@ if nargin < 3 || isempty(doasqf)
     doasqf = 0;
 end
 
+% ------------------------------------------------------------------------------
 %% Do it
+% ------------------------------------------------------------------------------
 % difference between MI to itself and MI to this operation
 D = zeros(size(mis));
 switch mymethod

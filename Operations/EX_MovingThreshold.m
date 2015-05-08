@@ -28,7 +28,7 @@
 % minimum number of kicks), and returns a and b...?
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -47,15 +47,16 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = EX_MovingThreshold(y,a,b)
-% Ben Fulcher, October 2009
 
-doplot = 0; % can set to 1 to plot outputs
+doPlot = 0; % can set to 1 to plot outputs
 
-% Check inputs:
+% ------------------------------------------------------------------------------
+%% Check inputs:
+% ------------------------------------------------------------------------------
 % Check that the time series is z-scored
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored')
@@ -72,7 +73,9 @@ if (b < 0) || (b > 1)
     error('The decay proportion, b, should be between 0 and 1');
 end
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % time-series length
 y = abs(y); % extreme events defined in terms of absolute deviation from mean
 q = zeros(N,1); % the barrier
@@ -97,7 +100,7 @@ for i = 2:N
 	end
 end
 
-if doplot
+if doPlot
     figure('color','w'); box('on')
     hold on
     plot(y,'.-k')
@@ -105,7 +108,9 @@ if doplot
     hold off
 end
 
+% ------------------------------------------------------------------------------
 %% Outputs
+% ------------------------------------------------------------------------------
 
 % Basic statistics on the barrier dynamics, q
 out.meanq = mean(q);

@@ -26,11 +26,8 @@
 %---OUTPUT:
 % A matrix of width m containing the vectors in the new embedding space...
 % 
-%---HISTORY:
-% Ben Fulcher, October 2009
-%
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -49,17 +46,19 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function y_embed = BF_embed(y,tau,m,sig,randomSeed)
+function y_embed = BF_embed(y,tau,m,sig,randomSeed,beVocal)
 
-beVocal = 1; % display information about embedding
 N = length(y); % length of the input time series, y
 
 % randomSeed: how to treat the randomization
-if nargin < 4
+if nargin < 5
     randomSeed = []; % default
+end
+if nargin < 6
+    beVocal = 0; % by default, do not display information about the embedding
 end
 
 % ------------------------------------------------------------------------------
@@ -91,7 +90,7 @@ end
 %% Determine the embedding dimension, m
 % ------------------------------------------------------------------------------
 if nargin < 3 || isempty(m) % set to default value
-    m = 2; % embed in 2-dimensional space by default! Probably not a great default!
+    m = 2; % Embed in 2-dimensional space by default
     ssm = sprintf('to (strange) default of %u',m);
 else % use a routine to inform m
     if ~iscell(m), m = {m}; end
@@ -124,8 +123,9 @@ else % use a routine to inform m
                 % default is 0.1
                 % e.g., {'fnnmar',0.2} would use a threshold of 0.2
                 % uses time delay determined above
-                if length(m) == 1 % set default threshold 0.1
-                    th = 0.1;
+                
+                if length(m) == 1 % no threshold specified
+                    th = 0.4; % set default threshold 0.4
                 else
                     th = m{2};
                 end
@@ -136,7 +136,7 @@ else % use a routine to inform m
                     y_embed = NaN;
                     return
                 end
-                ssm = sprintf('by N. Marwan''s CRPtoolbox ''fnn'' code with threshold %f to m = %u',th,m);
+                ssm = sprintf('by N. Marwan''s CRPtoolbox (GPL) ''fnn'' code with threshold %f to m = %u',th,m);
                 
             case 'cao'
                 % Uses TSTOOL code for cao method to determine optimal

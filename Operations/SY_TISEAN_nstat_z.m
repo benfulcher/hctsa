@@ -25,10 +25,10 @@
 % 
 % y, the input time series
 % 
-% nseg, the number of equally-spaced segments to divide the time series into,
+% numSeg, the number of equally-spaced segments to divide the time series into,
 %       and used to predict the other time series segments
 % 
-% embedparams, in the form {tau,m}, as usual for BF_embed. That is, for an
+% embedParams, in the form {tau,m}, as usual for BF_embed. That is, for an
 %               embedding dimension, tau, and embedding dimension, m. E.g.,
 %               {1,3} has a time-delay of 1 and embedding dimension of 3.
 % 
@@ -37,11 +37,8 @@
 % minimum, and maximum cross-prediction error, the minimum off-diagonal
 % cross-prediction error, and eigenvalues of the cross-prediction error matrix.
 % 
-%---HISTORY:
-% Ben Fulcher, 17/11/2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -60,10 +57,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SY_TISEAN_nstat_z(y,nseg,embedparams)
+function out = SY_TISEAN_nstat_z(y,numSeg,embedParams)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs / Set defaults
@@ -73,44 +70,53 @@ if nargin < 1
     error('Input a time series')
 end
 
-if nargin < 2 || isempty(nseg)
-    nseg = 5; % divide the data into 5 segments by default
+if nargin < 2 || isempty(numSeg)
+    numSeg = 5; % divide the data into 5 segments by default
 end
 
 if nargin < 3
-    embedparams = {1,3};
+    embedParams = {1,3};
     fprintf(1,'Using default embedding using tau = 1 and m = 3\n')
 end
+
+N = length(y); % length of the time series
 
 % ------------------------------------------------------------------------------
 %% Write the file to disk for TISEAN to work with
 % ------------------------------------------------------------------------------
 
-% Embed the time series:
-tm = BF_embed(y,embedparams{1},embedparams{2},2);
+% Write a temporary file in the system temp directory:
+filePath = BF_WriteTempFile(y);
+fprintf(1,'Wrote temporary data file ''%s'' for TISEAN.\n',filePath)
 
-% Adds parameter set and timestamp to the millisecond:
-fileName = sprintf('tisean_nstat_z_n%u_d%u_m%u_%s.tmp',nseg,tm(1),tm(2),datestr(now,'yymmdd_HHMMSS_FFF'));
-
-% Place in the system temp directory:
-tmp_folder = tempdir;
-fileName = fullfile(tmp_folder,fileName);
-dlmwrite(fileName,y);
-fprintf(1,'Wrote temporary data file ''%s'' for TISEAN.\n',fileName)
+% Get embedding parameters:
+tm = BF_embed(y,embedParams{1},embedParams{2},2);
+tau = tm(1); % time delay
+m = tm(2); % embedding dimension
 
 % ------------------------------------------------------------------------------
-%% Do the calculation
+% Do some preliminary checks:
 % ------------------------------------------------------------------------------
-N = length(y); % length of the time series
-if N/tm(1) < nseg*8 % heuristic
-    % it may be more tm(1) itself rather than compared to nseg...?
-    fprintf(1,'Time delay, tau = %u, is too large for time-series length, N = %u\n with %u segments',tm(1),N,nseg);
-    delete(fileName) % remove the temporary file fileName
+clength = (N-(m-1)*tau)/numSeg;
+incStep = 1; % step increment
+minNeighbors = 30; % minimum number of neighbors for fit
+
+% Don't understand the c++ source code to work out exactly where the
+% find_neighbors routine is crashing, but it's definitely to do with not being
+% able to find enough neighbors and getting stuck in a while loop...
+% Try this heuristic (multiplying the actual minimum number by 1.5):
+if (clength-(m-1)*tau-incStep) <= minNeighbors*1.5
+    delete(filePath); % remove the temporary file
+    warning('Not enough neighbors to reliably estimate prediction errors with these settings');
     out = NaN; return
 end
 
-[~, res] = system(sprintf('nstat_z -#%u -d%u -m%u %s',nseg,tm(1),tm(2),fileName));
-delete(fileName) % remove the temporary file fileName
+% ------------------------------------------------------------------------------
+%% Do the calculation in the commandline
+% ------------------------------------------------------------------------------
+
+[~, res] = system(sprintf('nstat_z -# %u -d%u -m%u %s',numSeg,tau,m,filePath));
+delete(filePath) % remove the temporary file filePath
 if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
 
 % ------------------------------------------------------------------------------
@@ -123,11 +129,11 @@ if isempty(wi)
 end
 s = s(wi+1:end);
 
-xperr = zeros(nseg); % cross prediction error from using segment i to forecast segment j
+xperr = zeros(numSeg); % cross prediction error from using segment i to forecast segment j
 
-for i = 1:nseg
-    for j = 1:nseg
-        tmp = textscan(s{(i-1)*nseg+j},'%n%n%n');
+for i = 1:numSeg
+    for j = 1:numSeg
+        tmp = textscan(s{(i-1)*numSeg+j},'%n%n%n');
         xperr(i,j) = tmp{3};
     end
 end

@@ -22,7 +22,7 @@
 %                   vector (returns statistics on changes across these time lags)
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -41,13 +41,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = SY_KPSStest(y,lags)
-% Ben Fulcher, 26/2/2010
 
+% ------------------------------------------------------------------------------
 %% Check that an Econometrics license is available:
+% ------------------------------------------------------------------------------
 BF_CheckToolbox('econometrics_toolbox')
 
 % Check inputs
@@ -55,10 +56,14 @@ if nargin < 2 || isempty(lags)
     lags = 0;
 end
 
+% ------------------------------------------------------------------------------
 %% (1) Perform the test(s)
+% ------------------------------------------------------------------------------
 [h, pValue, stat, cValue] = kpsstest(y,'lags',lags);
 
+% ------------------------------------------------------------------------------
 %% (2) Return statistics on outputs of test(s)
+% ------------------------------------------------------------------------------
 if length(lags) > 1
     % Return statistics on outputs
     out.maxpValue = max(pValue);

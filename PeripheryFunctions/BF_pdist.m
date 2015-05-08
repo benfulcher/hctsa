@@ -2,14 +2,13 @@
 % BF_pdist
 % ------------------------------------------------------------------------------
 % 
+% Computes pairwise distances between rows of a data matrix.
+% 
 % Same as pdist but then goes through and fills in NaNs with indiviually
 % calculated values using an overlapping range of good values.
-%
-% HISTORY:
-% Ben Fulcher, 2014-06-26 -- added support for NaNCorr, which should be a much
-%                           faster approximate implementation for large matrices.
+%                           
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
@@ -18,8 +17,8 @@
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
 % This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------

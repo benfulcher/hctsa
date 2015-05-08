@@ -15,11 +15,8 @@
 % cf. Kraskov, A., Stoegbauer, H., Grassberger, P., Estimating mutual
 % information: http://dx.doi.org/10.1103/PhysRevE.69.066138
 % 
-%---HISTORY
-% Ben Fulcher, 2015-03-28
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -38,7 +35,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function miCalc = IN_Initialize_MI(estMethod,extraParam)
@@ -66,11 +63,16 @@ miCalc = javaObject(implementingClass);
 miCalc.initialise(1,1);
 
 % Add neighest neighbor option for KSG estimator
-if ismember(estMethod,'kraskov2')
+if ismember(estMethod,{'kraskov1','kraskov2'})
     if ~isempty(extraParam)
+        if isnumeric(extraParam)
+            warning(['Should set number of nearest neighbors to a string... ' ...
+                            'I''ll do it for you this time though...'])
+            extraParam = num2str(extraParam);
+        end
         miCalc.setProperty('k', extraParam); % 4th input specifies number of nearest neighbors for KSG estimator
     else
-        miCalc.setProperty('k', '3'); % use 3 nearest neighbors for KSG estimator as default
+        miCalc.setProperty('k', '4'); % use 4 nearest neighbors for KSG estimator as default
     end
 end
 

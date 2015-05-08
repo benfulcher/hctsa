@@ -4,17 +4,14 @@
 % 
 % Investigates how the autocorrelation of angles between successive points in
 % the two-dimensional time-series embedding change as tau varies from
-% tau = 1, 2, ..., maxtau.
+% tau = 1, 2, ..., maxTau.
 % 
 %---INPUTS:
 % y, a column vector time series
-% maxtau, the maximum time lag to consider
-% 
-%---HISTORY:
-% Ben Fulcher, September 2009
+% maxTau, the maximum time lag to consider
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -33,24 +30,24 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_Embed2_AngleTau(y,maxtau)
+function out = CO_Embed2_AngleTau(y,maxTau)
 
-DoPlot = 0;
-taur = (1:1:maxtau);
-ntaur = length(taur);
+doPlot = 0;
+tauRange = (1:1:maxTau);
+numTau = length(tauRange);
 
 % Ensure y is a column vector
 if size(y,2) > size(y,1);
 	y = y';
 end
 
-stats_store = zeros(3,ntaur);
+stats_store = zeros(3,numTau);
 
-for i = 1:ntaur
-	tau = taur(i);
+for i = 1:numTau
+	tau = tauRange(i);
 	
 	m = [y(1:end-tau), y(1+tau:end)];
 
@@ -62,7 +59,7 @@ for i = 1:ntaur
 	stats_store(3,i) = CO_AutoCorr(theta,3,'Fourier');
 end
 
-if DoPlot
+if doPlot
     figure('color','w'); box('on');
     plot(stats_store');
 end

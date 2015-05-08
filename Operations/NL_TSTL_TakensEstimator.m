@@ -19,11 +19,8 @@
 % 
 %---OUTPUT: the Taken's estimator of the correlation dimension, d2.
 % 
-%---HISTORY:
-% Ben Fulcher, 14/11/2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -42,7 +39,7 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
 function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
@@ -72,8 +69,8 @@ end
 
 % 4) Embedding parameters
 if nargin < 5 || isempty(embedParams)
-    embedParams = {'ac','cao'};
-    fprintf(1,'Using default time-delay embedding using autocorrelation and cao\n')
+    embedParams = {'ac','fnnmar'};
+    fprintf(1,'Using default time-delay embedding using autocorrelation and fnn-mar\n')
 else
     if length(embedParams) ~= 2
         error('Embedding parameters are incorrectly formatted, we need {tau,m}')

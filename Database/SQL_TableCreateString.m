@@ -1,13 +1,12 @@
 % ------------------------------------------------------------------------------
-% SQL_TableCreateString
+% SQL_TablecreateString
 % ------------------------------------------------------------------------------
 % 
 % Determines the appropriate mySQL CREATE TABLE statement to use to create a given
-% table, identified by the input string, WhatTable
+% table, identified by the input string, whatTable
 % 
-% Ben Fulcher, May 2013.
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 % 
 % If you use this code for your research, please cite:
@@ -16,17 +15,17 @@
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 % 
 % This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send
+% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
+% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function CreateString = SQL_TableCreateString(WhatTable)
+function createString = SQL_TableCreateString(whatTable)
 
-switch WhatTable
+switch whatTable
 case 'Operations'
-    CreateString = ['CREATE TABLE Operations ' ...
+    createString = ['CREATE TABLE Operations ' ...
         '(op_id INTEGER NOT NULL AUTO_INCREMENT, ' ... % Unique integer identifier
         'OpName VARCHAR(255), ' ... % Unique name for the operation
         'Code VARCHAR(255), ' ... % Code to execute, or Master to retrieve from
@@ -38,7 +37,7 @@ case 'Operations'
         'FOREIGN KEY (mop_id) REFERENCES MasterOperations(mop_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
 
 case 'OperationCode'
-    CreateString = ['CREATE TABLE OperationCode ' ...
+    createString = ['CREATE TABLE OperationCode ' ...
         '(c_id INTEGER NOT NULL AUTO_INCREMENT, ' ...
         'CodeName VARCHAR(255), ' ...
         'Description TEXT, ' ...
@@ -46,7 +45,7 @@ case 'OperationCode'
         'PRIMARY KEY (c_id))'];
 
 case 'TimeSeries'
-    CreateString = ['CREATE TABLE TimeSeries ' ...
+    createString = ['CREATE TABLE TimeSeries ' ...
         '(ts_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ... % Unique integer identifier
         'Filename VARCHAR(255) NOT NULL, ' ... % FileName of the time series
         'Keywords VARCHAR(255), ' ... % Comma-delimited keywords assigned to the time series
@@ -59,7 +58,7 @@ case 'TimeSeries'
         % 'Description TEXT, ' ... % More information about this specific time series
 
 case 'MasterOperations'
-    CreateString = ['CREATE TABLE MasterOperations ' ...
+    createString = ['CREATE TABLE MasterOperations ' ...
         '(mop_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ... % Unique integer identifier
         'MasterLabel VARCHAR(255), ' ... % Name given to master code file
         'MasterCode VARCHAR(255), ' ... % Code to execute
@@ -67,7 +66,7 @@ case 'MasterOperations'
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)']; % Time stamp of when entry was last modified
         
 case 'OperationKeywords'
-    CreateString = ['CREATE TABLE OperationKeywords ' ...
+    createString = ['CREATE TABLE OperationKeywords ' ...
         '(opkw_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ...
         'Keyword VARCHAR(255), ' ...
         'NumOccur INTEGER)'];
@@ -77,28 +76,28 @@ case 'OperationKeywords'
 %         'MeanCalcTime FLOAT)'];
         
 case 'OpKeywordsRelate'
-    CreateString = ['CREATE TABLE OpKeywordsRelate ' ...
+    createString = ['CREATE TABLE OpKeywordsRelate ' ...
         '(op_id INTEGER,' ...
         'opkw_id INTEGER, '  ...
         'FOREIGN KEY (opkw_id) REFERENCES OperationKeywords (opkw_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
         'FOREIGN KEY (op_id) REFERENCES Operations (op_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
         
 case 'TimeSeriesKeywords'
-    CreateString = ['CREATE TABLE TimeSeriesKeywords ' ...
+    createString = ['CREATE TABLE TimeSeriesKeywords ' ...
         '(tskw_id INTEGER AUTO_INCREMENT PRIMARY KEY, ' ... % Unique identifier for each keyword
         'Keyword varchar(50), ' ... % The keyword
         'NumOccur INTEGER UNSIGNED, ' ... % Number of time series with this keyword
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)'];
     
 case 'TsKeywordsRelate'
-    CreateString = ['CREATE TABLE TsKeywordsRelate ' ...
+    createString = ['CREATE TABLE TsKeywordsRelate ' ...
         '(ts_id INTEGER, ' ...
         'tskw_id INTEGER, ' ...
         'FOREIGN KEY (tskw_id) REFERENCES TimeSeriesKeywords(tskw_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
         'FOREIGN KEY (ts_id) REFERENCES TimeSeries(ts_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
     
 case 'Results'
-    CreateString = ['CREATE TABLE Results ' ...
+    createString = ['CREATE TABLE Results ' ...
         '(ts_id integer, ' ...
         'op_id INTEGER, ' ...
         'Output DOUBLE, ' ...
@@ -106,12 +105,11 @@ case 'Results'
         'CalculationTime FLOAT, ' ...
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, ' ...
         'FOREIGN KEY (ts_id) REFERENCES TimeSeries(ts_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
-        'FOREIGN KEY (op_id) REFERENCES Operations(op_id) ON DELETE CASCADE ON UPDATE CASCADE, '...
-        'PRIMARY KEY(ts_id,op_id))'];
+        'FOREIGN KEY (op_id) REFERENCES Operations(op_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
+        'INDEX element (ts_id,op_id))'];
 
 otherwise
-    error('Unknown table ''%s''',WhatTable)
-    
+    error('Unknown table ''%s''',whatTable)
 end
 
 end

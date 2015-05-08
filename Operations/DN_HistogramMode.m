@@ -9,10 +9,10 @@
 % 
 % y, the input time series.
 % 
-% nbins, the number of bins to use in the histogram.
+% numBins, the number of bins to use in the histogram.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -31,13 +31,12 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_HistogramMode(y,nbins)
-% Ben Fulcher, October 2009
+function out = DN_HistogramMode(y,numBins)
 
-[dny, dnx] = hist(y,nbins);
+[dny, dnx] = hist(y,numBins);
 
 % mean of position of maximums (if multiple):
 out = mean(dnx(dny == max(dny)));

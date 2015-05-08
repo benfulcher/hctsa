@@ -17,7 +17,7 @@
 % 
 % maxnchpts, the maximum number of change points
 % 
-% mindelay, the minimum delay between consecutive change points (can be
+% minDelay, the minimum delay between consecutive change points (can be
 %           specified as a proportion of the time-series length, e.g., 0.02
 %           ensures that change points are separated by at least 2% of the
 %           time-series length)
@@ -25,12 +25,9 @@
 % 
 %---OUTPUT: 
 % The optimal number of change points.
-% 
-%---HISTORY:
-% Ben Fulcher, 23/1/2010
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -49,10 +46,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CP_wavelet_varchg(y, wname, level, maxnchpts, mindelay)
+function out = CP_wavelet_varchg(y, wname, level, maxnchpts, minDelay)
 
 % Check that a Wavelet Toolbox license is available:
 BF_CheckToolbox('wavelet_toolbox');
@@ -77,11 +74,11 @@ if nargin < 4 || isempty(maxnchpts)
    maxnchpts = 5; % maximum number of change points
 end
 
-if nargin < 5 || isempty(mindelay)
-     mindelay = 0.01; % 1% of the time series length
+if nargin < 5 || isempty(minDelay)
+     minDelay = 0.01; % 1% of the time series length
 end
-if (mindelay > 0) && (mindelay < 1)
-   mindelay = ceil(mindelay*N);
+if (minDelay > 0) && (minDelay < 1)
+   minDelay = ceil(minDelay*N);
 end
 
 if wmaxlev(N, wname) < level
@@ -114,7 +111,7 @@ det(abs(det) > v2p100) = mean(det);
 % 3. Use wvarchg to estimate the change points
 % ------------------------------------------------------------------------------
 try
-    [~, kopt, ~] = wvarchg(det, maxnchpts, mindelay);
+    [~, kopt, ~] = wvarchg(det, maxnchpts, minDelay);
 catch emsg
     if strcmp(emsg.identifier,'MATLAB:nomem')
        error('Not enough memory.');

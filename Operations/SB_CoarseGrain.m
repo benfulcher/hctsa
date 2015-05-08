@@ -8,14 +8,11 @@
 %---INPUTS:
 % howtocg, the method of coarse-graining
 % 
-% ng, either specifies the size of the alphabet for 'quantile' and 'updown'
+% numGroups, either specifies the size of the alphabet for 'quantile' and 'updown'
 %       or sets the timedelay for the embedding subroutines
 % 
-%---HISTORY:
-% Ben Fulcher, September 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -34,10 +31,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function yth = SB_CoarseGrain(y,howtocg,ng)
+function yth = SB_CoarseGrain(y,howtocg,numGroups)
 
 % ------------------------------------------------------------------------------
 % Check inputs, preliminaries:
@@ -66,10 +63,10 @@ case 'updown'
 case {'embed2quadrants','embed2octants'}
 	% Construct the embedding
 
-	if strcmp(ng,'tau')
+	if strcmp(numGroups,'tau')
         tau = CO_FirstZero(y,'ac'); % first zero-crossing of the autocorrelation function
     else
-        tau = ng;
+        tau = numGroups;
 	end
 	if tau > N/25; tau = floor(N/25); end
 	m1 = y(1:end-tau);
@@ -91,11 +88,11 @@ end
 % ------------------------------------------------------------------------------
 switch howtocg
     case 'quantile'
-        th = quantile(y,linspace(0,1,ng+1)); % thresholds for dividing the time series values
+        th = quantile(y,linspace(0,1,numGroups+1)); % thresholds for dividing the time series values
         th(1) = th(1)-1; % this ensures the first point is included
-        % turn the time series into a set of numbers from 1:ng
+        % turn the time series into a set of numbers from 1:numGroups
         yth = zeros(N,1);
-        for i = 1:ng
+        for i = 1:numGroups
             yth(y > th(i) & y <= th(i+1)) = i;
         end
         

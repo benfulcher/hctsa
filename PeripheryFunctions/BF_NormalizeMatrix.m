@@ -6,7 +6,7 @@
 % 
 %---INPUTS:
 % F, the input matrix
-% normopt, the normalization method to use (see body of the code for options)
+% normMethod, the normalization method to use (see body of the code for options)
 % itrain, learn the normalization parameters just on these indices, then apply
 %         it on the full dataset (required for training/testing procedures where
 %         the testing data has to remain unseen).
@@ -17,13 +17,9 @@
 % Note that NaNs are ignored -- only real data is used for the normalization
 % (assume NaNs are a minority of the data).
 % 
-%---HISTORY:
-% Ben Fulcher 28/1/2011 -- Added this NaN capability 
-% Ben Fulcher 12/9/2011 -- Added itrain input: obtain the transformation
-%                           on this subset, apply it to all the data.
-% Ben Fulcher, 2014-06-26 -- Added a mixed sigmoid approach
+% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -42,18 +38,18 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
     
-function F = BF_NormalizeMatrix(F,normopt,itrain)
+function F = BF_NormalizeMatrix(F,normMethod,itrain)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
 
-if nargin < 2 || isempty(normopt)
+if nargin < 2 || isempty(normMethod)
     fprintf(1,'We''re normalizing using sigmoid transform by default\n')
-    normopt = 'sigmoid';
+    normMethod = 'sigmoid';
 end
 
 if nargin < 3
@@ -66,7 +62,7 @@ if isempty(itrain)
     FT = F; % train the transformation on the full dataset
 else
     FT = F(itrain,:); % train the transformation on the specified subset
-    if ~strcmp(normopt,'scaledSQzscore')
+    if ~strcmp(normMethod,'scaledSQzscore')
         error('TRAINING SPECIFIER ONLY WORKS FOR ''scaledSQzscore''...');
     end
 end
@@ -75,7 +71,7 @@ end
 % Normalize according to the specified normalizing transformation
 % ------------------------------------------------------------------------------
 
-switch normopt
+switch normMethod
     case 'subtractMean'
         % Subtract the mean:
         F = bsxfun(@minus,F,mean(F));
@@ -289,7 +285,7 @@ switch normopt
         end
         
     otherwise
-        error('Invalid normalization method ''%s''', normopt)
+        error('Invalid normalization method ''%s''', normMethod)
 end
 
 end

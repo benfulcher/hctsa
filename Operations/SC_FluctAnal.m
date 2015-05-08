@@ -45,7 +45,7 @@
 %           analysis of nonstationary signals" J. Alvarez-Ramirez et al. Phys.
 %           Rev. E 79(5) 057202 (2009)
 % 
-% taustep, increments in tau for linear range (i.e., if loginc = 0), or number of tau
+% tauStep, increments in tau for linear range (i.e., if logInc = 0), or number of tau
 %           steps in logarithmic range if login = 1
 %           The spacing of time scales, tau, is commonly logarithmic through a range from
 %           5 samples to a quarter of the length of the time series, as suggested in
@@ -60,7 +60,7 @@
 % 
 % lag, optional time-lag, as in Alvarez-Ramirez (see (vii) above)
 % 
-% loginc, whether to use logarithmic increments in tau (it should be logarithmic).
+% logInc, whether to use logarithmic increments in tau (it should be logarithmic).
 % 
 %---OUTPUTS: include statistics of fitting a linear function to a plot of log(F) as
 % a function of log(tau), and for fitting two straight lines to the same data,
@@ -75,11 +75,8 @@
 % All results are obtained with both linearly, and logarithmically-spaced time
 % scales tau.
 % 
-%---HISTORY:
-% Ben Fulcher, September 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -98,10 +95,14 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SC_FluctAnal(x,q,wtf,taustep,k,lag,loginc)
+function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
+
+% ------------------------------------------------------------------------------
+% Check Inputs:
+% ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(q)
     q = 2; % RMS fluctuations
@@ -111,10 +112,10 @@ if nargin < 3 || isempty(wtf)
     wtf = 'rsrange'; % re-scaled range analysis by default
 end
 
-if nargin < 4 || isempty(taustep)
+if nargin < 4 || isempty(tauStep)
     % the increment of tau (for linear)
     % or number of points in logarithmic range (for logarithmic)
-    taustep = 1;
+    tauStep = 1;
 end
 
 if nargin < 5 || isempty(k)
@@ -126,11 +127,12 @@ if nargin < 6
 end
 
 if nargin < 7
-	loginc = 1; % use linear spacing (this shouldn't really be default, but this 
+	logInc = 1; % use linear spacing (this shouldn't really be default, but this 
 				% is for consistency with already-implemented precedent)
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%
+% ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 
 N = length(x); % length of the time series
 doPlot = 0; % plot outputs to figure
@@ -146,16 +148,15 @@ else
 end
 
 
-
 % perform scaling over a range of tau, up to a fifth the length
 % of the time series
 % Peng (1995) suggests 5:N/4 for DFA
 % Caccia suggested from 10 to (N-1)/2...
-if loginc
-	taur = unique(round(exp(linspace(log(5),log(floor(N/4)),taustep))));
-	% in this case taustep is the number of points to compute
+if logInc
+	taur = unique(round(exp(linspace(log(5),log(floor(N/4)),tauStep))));
+	% in this case tauStep is the number of points to compute
 else
-	taur = 5:taustep:floor(N/4); % maybe increased??
+	taur = 5:tauStep:floor(N/4); % maybe increased??
 end
 ntau = length(taur); % analyze the time series across this many timescales
 
@@ -288,15 +289,17 @@ end
 %     out.lt_resac1 = CO_AutoCorr(stats.resid,1);
 
 
-%% Try assuming two components
-% move through, and fit a straight line to loglog before and after each point.
+% ------------------------------------------------------------------------------
+%% Try assuming two components (2 distinct scaling regimes)
+% ------------------------------------------------------------------------------
+% Move through, and fit a straight line to loglog before and after each point.
 % Find point with the minimum sum of squared errors
 F = F';
 
 % First spline interpolate to get an even sampling of the interval
 % (currently, in the log scale, there are relatively more at large scales
 
-if loginc
+if logInc
 	logtt = log(taur);
 	logFF = log(F);
 	ntt = ntau;
@@ -378,14 +381,5 @@ if isnan(out.r1_alpha) || isnan(out.r2_alpha)
 else
     out.alpharat = NaN;
 end
-
-
-% %     plot(y_dt); input('heyheyhey');
-%     
-%     F(i) = (mean(y_dt.^q))^(1/q);
-    
-% end
-
-% alpha = robustfit(log(taur),log(F))
 
 end

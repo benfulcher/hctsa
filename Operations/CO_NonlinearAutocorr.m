@@ -18,24 +18,23 @@
 %   e.g., [2] computes <x_i x_{i-2}>
 %   e.g., [1,2] computes <x_i x_{i-1} x{i-2}>
 %   e.g., [1,1,3] computes <x_i x_{i-1}^2 x{i-3}>
-% doabs [opt] -- a boolean (0,1) -- if one, takes an absolute value before
+% doAbs [opt] -- a boolean (0,1) -- if one, takes an absolute value before
 %                taking the final mean -- useful for an odd number of
 %                contributions to the sum. Default is to do this for odd
 %                numbers anyway, if not specified.
 %
-% Note: for odd numbers of regressions (i.e., even number length
+%---NOTES:
+% (*) For odd numbers of regressions (i.e., even number length
 %         taus vectors) the result will be near zero due to fluctuations
-%         below the mean; even for highly-correlated signals. (doabs)
-% Note: doabs = 1 is really a different operation that can't be compared with
-%         the values obtained from taking doabs = 0 (i.e., for odd lengths
+%         below the mean; even for highly-correlated signals. (doAbs)
+%         
+% (*) doAbs = 1 is really a different operation that can't be compared with
+%         the values obtained from taking doAbs = 0 (i.e., for odd lengths
 %         of taus)
-% Note: It can be helpful to look at nlac at each iteration.
-% 
-%---HISTORY
-% Ben Fulcher, 8/6/09
+% (*) It can be helpful to look at nlac at each iteration.
 % 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -54,18 +53,20 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_NonlinearAutocorr(y,taus,doabs)
+function out = CO_NonlinearAutocorr(y,taus,doAbs)
 
+% ------------------------------------------------------------------------------
 %% Check Inputs:
-if nargin < 3 || isempty(doabs) % use default settings for doabs
+% ------------------------------------------------------------------------------
+if nargin < 3 || isempty(doAbs) % use default settings for doAbs
     if rem(length(taus),2) == 1
-        doabs = 0; 
+        doAbs = 0; 
     else
         % Even number of time-lags
-        doabs = 1; % take abs, otherwise will be a very small number
+        doAbs = 1; % take abs, otherwise will be a very small number
     end
 end
 
@@ -79,7 +80,7 @@ for i = 1:length(taus)
 end
 
 % Compute output
-if doabs
+if doAbs
     out = mean(abs(nlac));
 else
     out = mean(nlac);

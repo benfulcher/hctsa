@@ -2,22 +2,25 @@
 % SB_BinaryStretch
 % ------------------------------------------------------------------------------
 % 
-% Measures the longest stretch of consecutive zeros or ones in a symbolized time
-% series as a proportion of the time-series length.
+% (DOESN'T ACTUALLY, see note) measure the longest stretch of consecutive zeros or ones in
+% a symbolized time series as a proportion of the time-series length.
 % 
 % The time series is symbolized to a binary string by whether it's above (1) or
 % below (0) its mean.
 % 
-% It doesn't actually measure this correctly, due to an error in the code, but
-% it's still kind of an interesting operation...?!
-% 
 %---INPUTS:
+%
 % x, the input time series
-% stretchwhat, (i) 'lseq1', measures something related to consecutive 1s
+% 
+% stretchWhat, (i) 'lseq1', measures something related to consecutive 1s
 %              (ii) 'lseq0', measures something related to consecutive 0s
 % 
+%---NOTES:
+% It doesn't actually measure what it's supposed to measure correctly, due to an
+% implementation error, but it's still kind of an interesting operation...!
+% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -36,21 +39,20 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SB_BinaryStretch(x,stretchwhat)
-% Ben Fulcher, 2009
+function out = SB_BinaryStretch(x,stretchWhat)
 
-if nargin < 2 || isempty(stretchwhat)
-    stretchwhat = 'lseq1'; % by default
+if nargin < 2 || isempty(stretchWhat)
+    stretchWhat = 'lseq1'; % by default
 end
 
 N = length(x); % length of the time series
 x(x > 0) = 1;
 x(x <= 0) = 0;
 
-switch stretchwhat
+switch stretchWhat
     case 'lseq1'
         % longest stretch of 1s (this doesn't actually measure this!)
         out = max(diff(BF_sgnchange(diff(find(x == 1))-1.5,1)))/N;
@@ -58,7 +60,7 @@ switch stretchwhat
         % longest stretch of 0s (this doesn't actualy measure this!)
         out = max(diff(BF_sgnchange(diff(find(x == 0))-1.5,1)))/N;
     otherwise
-        error('Unknown input %s',stretchwhat)
+        error('Unknown input %s',stretchWhat)
 end
 
 if isempty(out)

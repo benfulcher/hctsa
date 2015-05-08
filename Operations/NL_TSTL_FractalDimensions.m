@@ -27,17 +27,14 @@
 % 
 % steps [opt], number of moments to calculate (default=32);
 % 
-% embedparams, how to embed the time series using a time-delay reconstruction
+% embedParams, how to embed the time series using a time-delay reconstruction
 % 
 % 
 %---OUTPUTS: include basic statistics of D(q) and q, statistics from a linear fit,
 % and an exponential fit of the form D(q) = Aexp(Bq) + C.
 % 
-%---HISTORY:
-% Ben Fulcher, November 2009
-% 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2013,  Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -56,10 +53,10 @@
 % details.
 % 
 % You should have received a copy of the GNU General Public License along with
-% this program.  If not, see <http://www.gnu.org/licenses/>.
+% this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = NL_TSTL_FractalDimensions(y,kmin,kmax,Nref,gstart,gend,past,steps,embedparams)
+function out = NL_TSTL_FractalDimensions(y,kmin,kmax,Nref,gstart,gend,past,steps,embedParams)
 
 % ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available:
@@ -120,8 +117,8 @@ if nargin < 8 || isempty(steps)
 end
 
 % (8) Embedding parameters
-if nargin < 9 || isempty(embedparams)
-    embedparams = {'ac','cao'};
+if nargin < 9 || isempty(embedParams)
+    embedParams = {'ac','fnnmar'};
     fprintf(1,'Using default embedding parameters of autocorrelation for tau and cao method for m\n')
 end
 
@@ -130,7 +127,7 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert the scalar time series, y, to embedded signal object s for TSTOOL
-s = BF_embed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedParams{1},embedParams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding of the %u-sample time series failed',N)
@@ -139,7 +136,6 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TSTOOL code, fracdims:
 % ------------------------------------------------------------------------------
-
 % Checks that tstoolbox/@signal/fracdims exists
 if ~exist(fullfile('tstoolbox','@signal','fracdims'))
     error(['Cannot find the code ''fracdims'' from the TSTOOL package. ' ...
