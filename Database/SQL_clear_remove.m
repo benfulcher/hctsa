@@ -22,10 +22,11 @@
 % 
 %
 %---INPUTS:
-% tsOrOps -- either 'ts' or 'ops' for whether to eliminate either a time series of a metric, respectively
+% tsOrOps -- either 'ts' or 'ops' for whether to eliminate either a time series
+%            of a operation, respectively
 % idRange -- a vector of the ts_ids or op_ids in the database to remove
-% dbname -- can specify a custom database else will use default database in SQL_opendatabase
-% doLog -- generate a .log file describing what was done (does this by default)
+% doRemove -- whether to remove entries (specify 1), or just clear their data (specify 0)
+% doLog -- generate a .log file describing what was done
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>
@@ -43,7 +44,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_clear_remove(tsOrOps,idRange,doRemove,dbname,doLog)
+function SQL_clear_remove(tsOrOps,idRange,doRemove,doLog)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries and input checking
@@ -78,14 +79,11 @@ if nargin < 3 % doRemove
     error('You must specify whether to remove the %s or just clear their data results',theWhat)
 end
 
-% Use default database if none specified
-if nargin < 4, dbname = ''; fprintf(1,'Using default database\n'); end
-
 % Open connection to database
-[dbc, dbname] = SQL_opendatabase(dbname);
+[dbc, dbName] = SQL_opendatabase();
 
 % write a .log file of the clearing process by default
-if nargin < 5 || isempty(doLog)
+if nargin < 4 || isempty(doLog)
 	doLog = 0;
 end
 
@@ -93,14 +91,14 @@ end
 %% Provide some user feedback
 % ------------------------------------------------------------------------------
 if (doRemove == 0) % clear data
-    reply = input(sprintf(['Preparing to clear data for %u %s from %s. ' ...
+    reply = input(sprintf(['Preparing to clear data for %u %s from %s.\n' ...
                                 '[press any key to continue]'], ...
-                                    length(idRange),theWhat,dbname),'s');
+                                    length(idRange),theWhat,dbName),'s');
     doWhat = 'clear';
 elseif doRemove == 1
     reply = input(sprintf(['Preparing to REMOVE %u %s from %s -- DRASTIC STUFF! ' ...
-                                'I HOPE THIS IS OK?!\n[press any key to continue]\n'], ...
-                                length(idRange),theWhat,dbname),'s');
+                                'I HOPE THIS IS OK?!\n[press any key to continue]'], ...
+                                length(idRange),theWhat,dbName),'s');
     doWhat = 'remove';
 else
     error('Third input must be (0 to clear), or (1 to remove)')
@@ -109,13 +107,13 @@ end
 % ------------------------------------------------------------------------------
 %% Check what to clear/remove
 % ------------------------------------------------------------------------------
-selectString = sprintf('SELECT %s FROM %s WHERE %s IN (%s)', ...
-                                theName,theTable,theid,BF_cat(idRange,','));
+selectString = sprintf('SELECT %s, %s FROM %s WHERE %s IN (%s)', ...
+                                theid,theName,theTable,theid,BF_cat(idRange,','));
 [toDump,emsg] = mysql_dbquery(dbc,selectString);
 
 if ~isempty(emsg)
 	error('Error retrieving selected %s indices (%s) from the %s table of %s', ...
-                                    	theWhat,theid,theTable,dbname)
+                                    	theWhat,theid,theTable,dbName)
 end
 
 if length(toDump)==0
@@ -123,18 +121,21 @@ if length(toDump)==0
     return
 end
 
-reply = input(sprintf(['About to clear all data from %u %s stored in the Results table of ' ...
-      			dbname '.\n[press any key to show them]'],length(toDump),theWhat),'s');
+toDump_id = [toDump{:,1}];
+toDump_name = toDump(:,2);
+
+reply = input(sprintf(['About to %s %u %s stored in the Results table of %s.\n' ...
+      			'[press any key to show them]'],doWhat,length(toDump_name),theWhat,dbName),'s');
 
 % ------------------------------------------------------------------------------
 %% List all items to screen
 % ------------------------------------------------------------------------------
-for i = 1:length(toDump)
-    fprintf(1,'%s\n',toDump{i});
+for i = 1:length(toDump_id)
+    fprintf(1,'[%s = %u] %s\n',theid,toDump_id(i),toDump_name{i});
 end
 
-reply = input(['Does this look right? Check carefully -- clearing data cannot ' ...
-                            'be undone? Type ''y'' to continue...'],'s');
+reply = input(sprintf(['Does this look right? Check carefully -- this %s operation cannot ' ...
+                            'be undone.\nType ''y'' to continue...'],doWhat),'s');
 if ~strcmp(reply,'y')
 	fprintf(1,'Better to be safe than sorry. Check again and come back later.\n');
 	return
@@ -148,25 +149,60 @@ end
 % ------------------------------------------------------------------------------
 
 if doRemove
+    % ---DELETE MODE---
+    
     % Before delete them, first get keyword information, and information about masters (for operations)
     %<><>><><><><><><>
+    
+    % First you want to get the masters
+    if strcmp(tsOrOps,'ops')
+        selectString = sprintf('SELECT mop_id FROM %s WHERE %s IN (%s)',theTable,theid,BF_cat(idRange,','));
+        mop_ids = mysql_dbquery(dbc, selectString);
+        mop_ids = mop_ids{:};
+    end
     
 	deleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',theTable,theid,BF_cat(idRange,','));
     [~,emsg] = mysql_dbexecute(dbc, deleteString);
     if isempty(emsg)
-        fprintf(1,'%u %s removed from %s in %s.\n',length(toDump),theWhat,theTable,dbname)
+        fprintf(1,'%u %s removed from %s in %s.\n',length(toDump_id),theWhat,theTable,dbName)
     end
     
     SQL_FlushKeywords(tsOrOps);
     
     if strcmp(tsOrOps,'ops')
-        % What about masters??
-        % 1. Get master_ids that link to deleted operations
-        %<><>><><><><><><>
-        % 2. Update their NPoint counters
-        %<><>><><><><><><>
-        % 3. Delete those that now point to zero operations to
-        %<><>><><><><><><>
+        % --- Update the NPointTo counters of any implicated master operations:
+        fprintf(1,'Updating NPointTo counters of implicated master operations...');
+        updateString = sprintf(['UPDATE MasterOperations AS m SET NPointTo = ' ...
+                        '(SELECT COUNT(o.mop_id) FROM Operations AS o WHERE m.mop_id = o.mop_id) ' ...
+                            'WHERE m.mop_id IN (%s)'],BF_cat(mop_ids,','));
+        [~,emsg] = mysql_dbexecute(dbc, updateString);
+        if ~isempty(emsg)
+            error('Error counting NPointTo operations for mop_id = %u\n%s\n',M_ids(k),emsg);
+        else
+            fprintf(1,' Done.\n');
+        end
+
+        % --- Delete master operations that now point to zero operations
+        selectString = sprintf('SELECT mop_id, MasterCode FROM MasterOperations WHERE NPointTo = 0');
+        dbOutput = mysql_dbquery(dbc, selectString);
+        if isempty(dbOutput)
+            fprintf(1,'All master operations still have usable operations, and remain unchanged.\n');
+        else
+            delete_mop_ids = dbOutput{:,1};
+            delete_masterCode = dbOutput(:,2);
+            deleteString = sprintf('DELETE FROM MasterOperations WHERE NPointTo = 0');
+            [~,emsg] = mysql_dbexecute(dbc, deleteString);
+            if ~isempty(emsg)
+                error('Error deleting redundant master operations');
+            else
+                fprintf(1,'DELETED %u master operations that are now redundant.\n',length(delete_mop_ids));
+                reply = input('[press any key to see them]','s');
+                for k = 1:length(delete_mop_ids)
+                    fprintf(1,'%u/%u. [mop_id = %u]: %s\n',k,length(delete_mop_ids),delete_mop_ids(k),delete_masterCode{k});
+                end
+            end
+        end
+        
     end
     
     % Update Keyword tables (should just need to update nlink, and delete keywords that are no longer used...)
@@ -176,18 +212,18 @@ if doRemove
     
     % %% Re-run keyword tables
     % if strcmp(mort, 'ts')
-    %     disp(['Recalculating TimeSeriesKeywords and TsKeywordsRelate in ' dbname '. Please be patient.']);
-    %     SQL_update_tskw(dbname) % updates time series keywords (will be different without the deleted time series)
+    %     disp(['Recalculating TimeSeriesKeywords and TsKeywordsRelate in ' dbName '. Please be patient.']);
+    %     SQL_update_tskw(dbName) % updates time series keywords (will be different without the deleted time series)
     % else
-    %     disp(['Recalculating OperationKeywords and OpKeywordsRelate in ' dbname '. Please be patient']);
-    %     SQL_update_opkw(dbname) % updates operation keywords (will be different without the deleted operations)
+    %     disp(['Recalculating OperationKeywords and OpKeywordsRelate in ' dbName '. Please be patient']);
+    %     SQL_update_opkw(dbName) % updates operation keywords (will be different without the deleted operations)
     %     % disp(['Recalculating links between masters and pointers']);
-    %     % SQL_linkpointermaster(dbname) % update master/pointer links
-    %     % SQL_masternpointto(dbname) % counts master/pointer links for MasterOperations table
+    %     % SQL_linkpointermaster(dbName) % update master/pointer links
+    %     % SQL_masternpointto(dbName) % counts master/pointer links for MasterOperations table
     % end
 else
     %% Do the clearing
-    fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s...\n',dbname)
+    fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s...\n',dbName)
     fprintf(1,'Patience...\n');
 
     updateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(idRange,','));
@@ -198,15 +234,15 @@ else
     		% Get number of operations to work out how many entries were cleared
     		selectString = 'SELECT COUNT(op_id) as numOps FROM Operations';
     		numOps = mysql_dbquery(dbc,selectString); numOps = numOps{1};
-    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(idRange),numOps,numOps*length(idRange),dbname);
+    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(idRange),numOps,numOps*length(idRange),dbName);
     	else
     		% Get number of time series to work out how many entries were cleared
     		selectString = 'SELECT COUNT(ts_id) as numTs FROM TimeSeries';
     		numTs = mysql_dbquery(dbc,selectString); numTs = numTs{1};
-    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(idRange),numTs,numTs*length(idRange),dbname);
+    		fprintf(1,'Clearing Successful! I''ve just cleared %u x %u = %u entries from %s\n',length(idRange),numTs,numTs*length(idRange),dbName);
     	end
     else
-    	fprintf(1,'Error clearing results from %s... This is pretty bad news....\n%s',dbname,emsg); keyboard
+    	fprintf(1,'Error clearing results from %s... This is pretty bad news....\n%s',dbName,emsg); keyboard
     end
 end
 
@@ -229,7 +265,9 @@ if doLog
 	else
 		fprintf(fid,'Cleared outputs of %u operations\n',length(idRange));
 	end
-	for i = 1:length(toDump), fprintf(fid,'%s\n',toDump{i}); end
+	for i = 1:length(toDump_id)
+        fprintf(fid,'%s\n',toDump{i});
+    end
 	fclose(fid);
     
 	fprintf(1,'Logged and done and dusted!!\n');

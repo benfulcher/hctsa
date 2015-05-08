@@ -70,11 +70,8 @@ HCTSA_locs = {HCTSA_loc_1, HCTSA_loc_2};
 % ------------------------------------------------------------------------------
 % FullPath = cell(2,1);
 for i = 1:2
-    path = exist(HCTSA_locs{i});
-    if (path==0)
+    if ~exist(HCTSA_locs{i},'file')
         error('Could not find %s',HCTSA_locs{i});
-    % else
-    %     FullPath{i} = path;
     end
 end
 

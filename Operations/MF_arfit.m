@@ -74,7 +74,7 @@ if nargin < 4 || isempty(selector)
 end
 
 % Check the ARfit toolbox is installed and in the Matlab path
-if ~exist('ARFIT_arfit')
+if ~exist('ARFIT_arfit','file')
     error('Cannot find the function ''ARFIT_arfit''. There''s a problem with the ARfit toolbox.')
 end
 

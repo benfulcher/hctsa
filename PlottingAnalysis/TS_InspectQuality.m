@@ -45,7 +45,7 @@ end
 % ------------------------------------------------------------------------------
 load('HCTSA_loc.mat','TS_Quality','TimeSeries','Operations','MasterOperations');
 
-if ~exist('TS_Quality')
+if ~exist('TS_Quality','var')
     error('Quality labels not found in HCTSA_loc.mat');
 end
 

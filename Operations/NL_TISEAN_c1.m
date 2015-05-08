@@ -144,13 +144,13 @@ delete(filePath) % remove the temporary data file
 %                     ' -M' num2str(mmm(2)) ' -t' num2str(tsep) ' -n' ...
 %                     num2str(Nref) ' -o ' filePath '.c1 ' filePath]);
 if isempty(res)
-    if exist([filePath '.c1']), delete([filePath '.c1']); end % remove the TISEAN file write output
+    if exist([filePath '.c1'],'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
     error('Call to TISEAN method ''c1'' failed.');
 else
     fprintf(1,'TISEAN function ''c1'' took %s.\n',BF_thetime(toc,1))
 end
 
-if ~exist([filePath '.c1'])
+if ~exist([filePath '.c1'],'file')
     error([filePath,'.c1 not generated??! Could be due to an overly long filename...']);
 end
 
@@ -159,7 +159,7 @@ tic
 [~, res] = system(sprintf('c2d -a2 %s.c1',filePath));
 
 if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
-    if exist([filePath '.c1']), delete([filePath '.c1']); end % remove the TISEAN file write output
+    if exist([filePath '.c1'],'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
     if isempty(res)
         error('Call to TISEAN function ''c1'' failed.');
     else
@@ -168,7 +168,7 @@ if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out?
 end
 
 fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc,1))
-if exist([filePath '.c1']), delete([filePath '.c1']); end % remove the TISEAN file write output
+if exist([filePath '.c1'],'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
 
 % ------------------------------------------------------------------------------
 %% Get the output

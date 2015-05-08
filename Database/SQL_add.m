@@ -51,7 +51,7 @@ if nargin < 2 || isempty(inputFile)
         inputFile = 'INP_ops.txt';
     end
 end
-if ~exist(inputFile)
+if ~exist(inputFile,'file')
     error('Unknown file ''%s''',inputFile);
 end
 
@@ -242,7 +242,7 @@ else
     end
         
     % Load the 3 cells specifying the data:
-    if ~exist(inputFile)
+    if ~exist(inputFile,'file')
         error('Could not load specified input .mat file: %s',inputFile);
     end
     inputData = load(inputFile,'timeSeriesData','labels','keywords');

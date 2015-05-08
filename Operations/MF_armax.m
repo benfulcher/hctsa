@@ -80,13 +80,10 @@ if nargin < 4 || isempty(nsteps)
     nsteps = 1; % one-step-ahead predictions
 end
 
+% ------------------------------------------------------------------------------
 %% Fit the model
+% ------------------------------------------------------------------------------
 % Uses the System Identification Toolbox function armax
-
-% Check function exists:
-if ~exist('armax')
-    error('System Identification Toolbox not installed')
-end
 
 m = armax(y, orders);
 

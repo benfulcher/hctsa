@@ -64,7 +64,7 @@ clear loadTimer
 % ------------------------------------------------------------------------------
 % It will not exist if you've (by default) not retrieved calculation time data
 % from the database, and not generated it from the computation
-if ~exist('TS_CalcTime')
+if ~exist('TS_CalcTime','var')
     error('No calculation time data found in HCTSA_loc.mat');
 end
 

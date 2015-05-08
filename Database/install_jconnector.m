@@ -6,11 +6,17 @@
 % java class path
 % 
 %---INPUT:
-% a path specifying a mysql-connector-java file
+% jConnectorWhere: a path specifying a mysql-connector-java file
+% permanentDir: the directory to install the mysql java connector to (by default
+%               this will be the jarext directory of the current Matlab installation)
+%               Consider specifying this to be a custom directory of java files
+%               (with a static path) if you don't have permission to install in 
+%               the jarext directory.
 % 
 %---EXAMPLE USAGE:
 %
-% install_jconnector('Database/mysql-connector-java-5.1.35-bin.jar')
+% Installs the j-connector in the jarext directory of the Matlab installation
+% >> install_jconnector('Database/mysql-connector-java-5.1.35-bin.jar')
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -28,14 +34,14 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function install_jconnector(jConnectorWhere)
+function install_jconnector(jConnectorWhere,permanentDir)
 
 if nargin < 1
-    maybeHere_1 = fullfile('mysql-connector-java-5.1.35-bin.jar');
-    maybeHere_2 = fullfile('Database','mysql-connector-java-5.1.35-bin.jar');
-    if exist(maybeHere_1)
+    maybeHere_1 = fullfile(pwd,'mysql-connector-java-5.1.35-bin.jar');
+    maybeHere_2 = fullfile(pwd,'Database','mysql-connector-java-5.1.35-bin.jar');
+    if exist(maybeHere_1,'file')
         jConnectorWhere = maybeHere_1;
-    elseif exist(maybeHere_2)
+    elseif exist(maybeHere_2,'file')
         jConnectorWhere = maybeHere_2;
     else
         error('Please specify the location of the mysql-connector-java file');
@@ -51,16 +57,32 @@ fileName = fileName{end};
 % 1. Copy the mysql-connector to the jar/jarext directory in matlabroot
 % ------------------------------------------------------------------------------
 
-jarextDir = fullfile(matlabroot,'java','jarext');
+if nargin < 2 || isempty(permanentDir)
+    permanentDir = fullfile(matlabroot,'java','jarext'); % the jarext directory
+    fprintf(1,'Installing the j-connector to %s by default\n',permanentDir)
+else
+    % Check the provided directory exists
+    if ~exist(permanentDir,'dir')
+        error('%s is not a valid target directory',permanentDir);
+    end
+end
 
-doesExist = exist(fullfile(jarextDir,fileName));
+doesExist = exist(fullfile(permanentDir,fileName),'file');
 
 if doesExist
-    fprintf(1,'%s already exists in %s.\n\n',fileName,jarextDir);
+    fprintf(1,'%s already exists in %s.\n\n',fileName,permanentDir);
 else
-    fprintf(1,'Copying %s to the %s directory...',jConnectorWhere,jarextDir);
+    reply = input(sprintf('Copying %s to the %s directory...[press any key to continue]',jConnectorWhere,permanentDir),'s');
 
-    copyfile(jConnectorWhere,jarextDir);
+    try
+        copyfile(jConnectorWhere,permanentDir);
+    catch emsg
+        fprintf(1,'\n');
+        error(['Error copying file %s to %s.\n(Write permission error?).\nYou should either provide a valid custom ' ...
+                    'directory (to which you have write access),' ...
+                    '\nor do this step manually (see Documentation).'],...
+                    jConnectorWhere,permanentDir);
+    end
 
     fprintf(1,' Done.\n\n');
 end
@@ -69,21 +91,29 @@ end
 % 2. Add reference to it to the javaclasspath.txt
 % ------------------------------------------------------------------------------
 
-doesExist = exist(fullfile(prefdir,'javaclasspath.txt'));
+doesExist = exist(fullfile(prefdir,'javaclasspath.txt'),'file');
 
 if doesExist
     % Already exists -- 
     fprintf(1,'javaclasspath.txt file already exists in %s\n',prefdir);
-    fprintf(1,'You must manually add the following line to it (if it doesn''t already exist):\n');
-    fprintf(1,'\n$matlabroot%sjava%sjarext%s%s\n',filesep,filesep,filesep,fileName);
+    fprintf(1,'You must manually add the following line to it (if it doesn''t already exist):\n');    
+    if nargin < 2
+        fprintf(1,'\n$matlabroot%sjava%sjarext%s%s\n',filesep,filesep,filesep,fileName);
+    else
+        fprintf(1,'\n%s%s%s\n',permanentDir,filesep,fileName);
+    end
     fprintf(1,'\nRun the following code to edit:\n>> edit %s%sjavaclasspath.txt;\n',prefdir,filesep);
     fprintf(1,'\nOnce this is complete, restart Matlab to start using the mySQL java connector.\n');
 else
     % Easy, we can create it:
     fprintf(1,'Writing new javaclasspath.txt file in the preference directory: %s ...',prefdir);
     fid = fopen(fullfile(prefdir,'javaclasspath.txt'),'w');
-    fprintf(fid,'$matlabroot%sjava%sjarext%s%s\n',filesep,filesep,filesep,fileName);
-    % fprintf(fid,'%s%s%s\n',jarextDir,filesep,fileName);
+    if nargin < 2
+        fprintf(fid,'$matlabroot%sjava%sjarext%s%s\n',filesep,filesep,filesep,fileName);
+    else
+        fprintf(fid,'\n%s%s%s\n',permanentDir,filesep,fileName);
+    end
+    % fprintf(fid,'%s%s%s\n',permanentDir,filesep,fileName);
     fclose(fid);
     fprintf(1,' Done.\n Success! Restart Matlab to start using the mySQL java connector.\n');
 end

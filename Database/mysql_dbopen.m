@@ -34,6 +34,8 @@ if nargin < 6
     useDBToolbox = 0; % This is much slower than using java directly
 end
 
+errMessage = []; % empty by default
+
 % ------------------------------------------------------------------------------
 % Connect to the database (using either the database toolbox or the mySQL J-connector)
 % ------------------------------------------------------------------------------

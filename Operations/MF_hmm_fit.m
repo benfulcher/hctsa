@@ -41,7 +41,7 @@
 function out = MF_hmm_fit(y,trainp,numStates)
 
 % Check required function files exist:
-if ~exist(fullfile('ZG_hmm','ZG_hmm_cl')) || ~exist(fullfile('ZG_hmm','ZG_hmm_cl'))
+if ~exist(fullfile('ZG_hmm','ZG_hmm_cl'),'file') || ~exist(fullfile('ZG_hmm','ZG_hmm_cl'),'file')
     error('Could not find the required HMM fitting functions (Zoubin Gharamani''s code)');
 end
 

@@ -137,7 +137,7 @@ end
 %% Run the TSTOOL code, fracdims:
 % ------------------------------------------------------------------------------
 % Checks that tstoolbox/@signal/fracdims exists
-if ~exist(fullfile('tstoolbox','@signal','fracdims'))
+if ~exist(fullfile('tstoolbox','@signal','fracdims'),'file')
     error(['Cannot find the code ''fracdims'' from the TSTOOL package. ' ...
             'Is it installed and in the Matlab path?']);
 end

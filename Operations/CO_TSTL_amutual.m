@@ -55,7 +55,7 @@ N = length(y); % length of time series
 s = signal(y); % convert to signal object for TSTOOL
 
 % Check existence of code:
-if ~exist('amutual')
+if ~exist('amutual','file')
     error('''amutual'' not found -- ensure the TSTOOL package is installed correctly??\n');
 end
 
