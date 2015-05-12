@@ -5008,7 +5008,20 @@ SC_FluctAnal_sign_2_dfa_25_2_logi.r2_se2	SC_FluctAnal_sign_2_dfa_25_2_logi_r2_se
 SC_FluctAnal_sign_2_dfa_25_2_logi.r2_ssr	SC_FluctAnal_sign_2_dfa_25_2_logi_r2_ssr	scaling,dfa
 SC_FluctAnal_sign_2_dfa_25_2_logi.r2_resac1	SC_FluctAnal_sign_2_dfa_25_2_logi_r2_resac1	scaling,dfa
 SC_FluctAnal_sign_2_dfa_25_2_logi.alpharat	SC_FluctAnal_sign_2_dfa_25_2_logi_alpharat	scaling,dfa
-
+SC_MMA_0__n5_5.meanHurstExponent        SC_MMA_0__n5_5_meanHurstExponent        scaling,fractal
+SC_MMA_0__n5_5.stdHurstExponent         SC_MMA_0__n5_5_stdHurstExponent         scaling,fractal
+SC_MMA_0__n5_5.minHurstExponent         SC_MMA_0__n5_5_minHurstExponent         scaling,fractal
+SC_MMA_0__n5_5.maxHurstExponent         SC_MMA_0__n5_5_maxHurstExponent         scaling,fractal
+SC_MMA_0__n5_5.scaleHurstStd            SC_MMA_0__n5_5_scaleHurstStd            scaling,fractal
+SC_MMA_0__n5_5.scaleHurstTrend          SC_MMA_0__n5_5_scaleHurstTrend          scaling,fractal
+SC_MMA_0__n5_5.qHurstStd                SC_MMA_0__n5_5_qHurstStd                scaling,fractal
+SC_MMA_0__n5_5.qHurstTrend              SC_MMA_0__n5_5_qHurstTrend              scaling,fractal
+SC_MMA_0__n5_5.maxHurstQ                SC_MMA_0__n5_5_maxHurstQ                scaling,fractal
+SC_MMA_0__n5_5.maxHurstScale            SC_MMA_0__n5_5_maxHurstScale            scaling,fractal
+SC_MMA_0__n5_5.minHurstQ                SC_MMA_0__n5_5_minHurstQ                scaling,fractal
+SC_MMA_0__n5_5.minHurstScale            SC_MMA_0__n5_5_minHurstScale            scaling,fractal
+SC_MMA_0__n5_5.stdStdHurstQ             SC_MMA_0__n5_5_stdStdHurstQ             scaling,fractal
+SC_MMA_0__n5_5.stdStdHurstScale         SC_MMA_0__n5_5_stdStdHurstScale         scaling,fractal
 SP_basic_pgram_hamm_power.std	SP_basic_pgram_hamm_power_std	powerspectrum
 SP_basic_pgram_hamm_power.stdlog	SP_basic_pgram_hamm_power_stdlog	powerspectrum
 SP_basic_pgram_hamm_power.logstd	SP_basic_pgram_hamm_power_logstd	powerspectrum
