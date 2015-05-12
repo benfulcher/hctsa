@@ -45,7 +45,7 @@ function out = MF_StateSpaceCompOrder(y,maxOrder)
 BF_CheckToolbox('identification_toolbox')
 
 % ------------------------------------------------------------------------------
-% Inputs:
+% Check inputs:
 % ------------------------------------------------------------------------------
 % Maximum model order, maxOrder (compare models from order 1 up to
 %           this)
@@ -54,7 +54,9 @@ if nargin < 2 || isempty(maxOrder)
 end
 % orders = 1:maxOrder;
 
+% ------------------------------------------------------------------------------
 %% Preliminaries
+% ------------------------------------------------------------------------------
 N = length(y); % The length of the time series
 
 % Convert y to time series object

@@ -66,7 +66,7 @@ for j = 1:length(createString)
                 fprintf(1,'%s, ',tableNames{j})
             end
         else
-            fprintf(1,'**** Error creating table: %s\n',tableNames{j});
+            fprintf(1,'**** Error creating table: %s [%s]\n',tableNames{j},emsg);
         end
     end
     

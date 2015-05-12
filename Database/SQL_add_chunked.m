@@ -29,16 +29,13 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_add_chunked(dbc,insertString,dataSet,isDuplicate,chunkSize)
+function SQL_add_chunked(dbc,insertString,dataSet,chunkSize)
 
 % ------------------------------------------------------------------------------
 % Check inputs
 % ------------------------------------------------------------------------------
-if nargin < 4 || isempty(isDuplicate)
-    isDuplicate = zeros(size(dataSet));
-end
 
-if nargin < 5 || isempty(chunkSize)
+if nargin < 4 || isempty(chunkSize)
     chunkSize = 50; % Run this many queries at a time
     % This parameter can be tweaked depend on the value of max_allowed_packet
     % on the mySQL server.
@@ -47,23 +44,29 @@ end
 % ------------------------------------------------------------------------------
 % Start adding chunks to the database
 % ------------------------------------------------------------------------------
-for k = 1:chunkSize:length(dataSet)
-    query = insertString; % Start with the insert statement
-    for j = k:min(k+chunkSize-1,length(dataSet)) % Don't repeat statements
-        if ~isDuplicate(j)
-            query = sprintf('%s %s,',query,dataSet{j}); % Add values in parentheses in dataSet{j}
+chunkExtent = 0:chunkSize:length(dataSet);
+numChunks = length(chunkExtent);
+for k = 1:numChunks % loop over chunks
+    
+    % Start with the insert statement:
+    theQuery = insertString;
+    
+    % Move through this chunk:
+    for j = 1:chunkSize
+        ind = chunkExtent(k) + j;
+        if ind > length(dataSet) % don't exceed the dataset size
+            break;
         end
+        % Grow the query incrementally:
+        theQuery = sprintf('%s %s,',theQuery,dataSet{ind}); % Add values in parentheses in dataSet{j}
     end
-    
-    if (length(query) > length(insertString))
-        % There's something to be added, i.e., not all isDuplicate in this chunk:
-    
-        query = query(1:end-1); % Remove the final comma
-    
-        [~, emsg] = mysql_dbexecute(dbc,query); % Evaluate this chunk
-        if ~isempty(emsg)
-            error('Error in SQL_add_chunked for chunk %u with chunk size %u...\n%s\n',k,chunkSize,emsg)
-        end
+    % fprintf(1,'%u/%u (%u--%u)\n',k,numChunks,chunkExtent(k)+1,ind);
+    theQuery = theQuery(1:end-1); % Remove the final comma
+
+    % Execute this chunk:
+    [~, emsg] = mysql_dbexecute(dbc,theQuery);
+    if ~isempty(emsg)
+        error('Error in SQL_add_chunked for chunk %u with chunk size %u...\n%s\n',k,chunkSize,emsg)
     end
 end
 

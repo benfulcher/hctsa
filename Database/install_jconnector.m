@@ -36,7 +36,7 @@
 
 function install_jconnector(jConnectorWhere,permanentDir)
 
-if nargin < 1
+if nargin < 1 || isempty(jConnectorWhere)
     maybeHere_1 = fullfile(pwd,'mysql-connector-java-5.1.35-bin.jar');
     maybeHere_2 = fullfile(pwd,'Database','mysql-connector-java-5.1.35-bin.jar');
     if exist(maybeHere_1,'file')

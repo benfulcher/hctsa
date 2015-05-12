@@ -1,5 +1,5 @@
 ST_length	length	misc,raw,lengthdep
-DN_burstiness	burstiness	burstiness,raw,locdep
+DN_burstiness	burstiness	raw,locdep
 DN_max	maximum	distribution
 DN_min	miminmum	misc
 DN_mean	mean	location,raw,locdep
@@ -21,7 +21,7 @@ DN_Spread_std	standard_deviation	spread,raw,spreaddep
 DN_Spread_mad	mean_absolute_deviation	spread,raw,spreaddep
 DN_Spread_iqr	interquartile_range	spread,raw,spreaddep
 DN_Spread_mead	median_absolute_deviation	spread,raw,spreaddep
-DN_Spread_std_diff	DN_Spread_std_diff	spread,raw,spreaddep,diff
+DN_Spread_std_diff	DN_Spread_std_diff	    spread,raw,spreaddep
 DN_Moments_3	mom_3	distribution,moment,shape
 DN_Moments_4	mom_4	distribution,moment,shape
 DN_Moments_5	mom_5	distribution,moment,shape
@@ -83,7 +83,7 @@ DN_cv_3	coeff_var_3	spread,cv,raw,locdep,spreaddep
 DN_cv_4	coeff_var_4	spread,cv,raw,locdep,spreaddep
 DN_cv_5	coeff_var_5	spread,cv,raw,locdep,spreaddep
 DN_cv_6	coeff_var_6	spread,cv,raw,locdep,spreaddep
-DN_HighLowMu	HighLowMu	distribution,skewness,raw,locdep,spreaddep
+DN_HighLowMu	HighLowMu	distribution,raw,locdep,spreaddep
 ST_SimpleStats_zcross	ST_SimpleStats_zcross	noisiness
 ST_SimpleStats_max	ST_SimpleStats_max	noisiness
 ST_SimpleStats_min	ST_SimpleStats_min	noisiness
@@ -938,20 +938,20 @@ SY_LocalGlobal_unicg50.ac1	SY_LocalGlobal_AC1_unicg50	stationarity
 SY_LocalGlobal_unicg100.ac1	SY_LocalGlobal_AC1_unicg100	stationarity
 SY_LocalGlobal_unicg500.ac1	SY_LocalGlobal_AC1_unicg500	stationarity
 EN_wentropy_shannon	EN_wentropy_shannon	entropy,shannon
-EN_Shannonpdf	EN_Shannonpdf	entropy,shannonpdf
-EN_wentropy_logenent	EN_wentropy_logenent	entropy,logenergy
-EN_wentropy_threshent01	EN_wentropy_threshent01	entropy,threshold
-EN_wentropy_threshent02	EN_wentropy_threshent02	entropy,threshold
-EN_wentropy_threshent05	EN_wentropy_threshent05	entropy,threshold
-EN_wentropy_threshent1	EN_wentropy_threshent1	entropy,threshold
-EN_wentropy_threshent15	EN_wentropy_threshent15	entropy,threshold
-EN_wentropy_threshent2	EN_wentropy_threshent2	entropy,threshold
-EN_wentropy_sureent01	EN_wentropy_sureent01	entropy,sure
-EN_wentropy_sureent02	EN_wentropy_sureent02	entropy,sure
-EN_wentropy_sureent05	EN_wentropy_sureent05	entropy,sure
-EN_wentropy_sureent1	EN_wentropy_sureent1	entropy,sure
-EN_wentropy_sureent15	EN_wentropy_sureent15	entropy,sure
-EN_wentropy_sureent2	EN_wentropy_sureent2	entropy,sure
+EN_Shannonpdf	EN_Shannonpdf	entropy
+EN_wentropy_logenent	EN_wentropy_logenent	entropy
+EN_wentropy_threshent01	EN_wentropy_threshent01	entropy
+EN_wentropy_threshent02	EN_wentropy_threshent02	entropy
+EN_wentropy_threshent05	EN_wentropy_threshent05	entropy
+EN_wentropy_threshent1	EN_wentropy_threshent1	entropy
+EN_wentropy_threshent15	EN_wentropy_threshent15	entropy
+EN_wentropy_threshent2	EN_wentropy_threshent2	entropy
+EN_wentropy_sureent01	EN_wentropy_sureent01	entropy
+EN_wentropy_sureent02	EN_wentropy_sureent02	entropy
+EN_wentropy_sureent05	EN_wentropy_sureent05	entropy
+EN_wentropy_sureent1	EN_wentropy_sureent1	entropy
+EN_wentropy_sureent15	EN_wentropy_sureent15	entropy
+EN_wentropy_sureent2	EN_wentropy_sureent2	entropy
 RM_entropy	RM_entropy	entropy
 EN_histen_ks_001_0	EN_histen_ks_001_0	entropy
 EN_histen_ks_005_0	EN_histen_ks_005_0	entropy
@@ -1001,37 +1001,13 @@ DN_Fit_mle_gaussian.mean	DN_Fit_mle_gaussian_mean	distribution,location,fit,raw,
 DN_Fit_mle_gaussian.std		DN_Fit_mle_gaussian_std		distribution,spread,fit,raw,spreaddep
 DN_Fit_mle_geometric		DN_Fit_mle_geometric		distribution,fit
 DN_nlogL_norm	DN_nlogL_norm	distribution,gof,lengthdep
-# DN_FitKernelSmooth(x)  DN_FitKernelSmoothraw
-# DN_FitKernelSmooth(y)  DN_FitKernelSmoothzscore
-DN_FitKernelSmoothraw.npeaks	DN_FitKernelSmoothraw_numpeaks	distribution,ksdensity,numpeaks,raw,spreaddep
+DN_FitKernelSmoothraw.npeaks	DN_FitKernelSmoothraw_numpeaks	distribution,ksdensity,raw,spreaddep
 DN_FitKernelSmoothraw.entropy	DN_FitKernelSmoothraw_entropy	distribution,ksdensity,entropy,raw,spreaddep
 DN_FitKernelSmoothzscore.entropy	DN_FitKernelSmoothzscore_entropy	distribution,ksdensity,entropy
-# ksentraw	ksentraw	distribution,ksdensity,entropy,raw,spreaddep
-# ksent  ksent  distribution,ksdensity,entropy
-# kspeakmaxraw  kspeakmaxraw  distribution,ksdensity,peakmax,raw,spreaddep
-# kspeakmax  kspeakmax  distribution,ksdensity,peakmax
-DN_FitKernelSmoothraw.max  DN_FitKernelSmoothraw_max  distribution,ksdensity,peakmax,raw,spreaddep
-DN_FitKernelSmoothzscore.max  DN_FitKernelSmoothzscore_max  distribution,ksdensity,peakmax
-# kssimpasym  kssimpasym  distribution,ksdensity,area,symmetry,raw
-# kssimpplsym  kssimpplsym  distribution,ksdensity,arclength,symmetry,raw
-DN_FitKernelSmoothraw.asym  DN_FitKernelSmoothraw_asym  distribution,ksdensity,area,symmetry,raw
-DN_FitKernelSmoothraw.plsym  DN_FitKernelSmoothraw_plsym  distribution,ksdensity,arclength,symmetry,raw
-# DN_FitKernelSmooth(x,'numcross',0.05)  kssimpcross005
-# DN_FitKernelSmooth(x,'numcross',0.1)  kssimpcross01
-# DN_FitKernelSmooth(x,'numcross',0.2)  kssimpcross02
-# DN_FitKernelSmooth(x,'numcross',0.3)  kssimpcross03
-# DN_FitKernelSmooth(x,'numcross',0.4)  kssimpcross04
-# DN_FitKernelSmooth(x,'numcross',0.5)  kssimpcross05
-# DN_FitKernelSmooth(x,'area',0.05)  kssimparea005
-# DN_FitKernelSmooth(x,'area',0.1)  kssimparea01
-# DN_FitKernelSmooth(x,'area',0.2)  kssimparea02
-# DN_FitKernelSmooth(x,'area',0.3)  kssimparea03
-# DN_FitKernelSmooth(x,'area',0.4)  kssimparea04
-# DN_FitKernelSmooth(x,'area',0.5)  kssimparea05
-# DN_FitKernelSmooth(x,'arclength',0.1)  kssimparcl01
-# DN_FitKernelSmooth(x,'arclength',0.5)  kssimparcl05
-# DN_FitKernelSmooth(x,'arclength',1)  kssimparcl1
-# DN_FitKernelSmooth(x,'arclength',2)  kssimparcl2
+DN_FitKernelSmoothraw.max  DN_FitKernelSmoothraw_max  distribution,ksdensity,raw,spreaddep
+DN_FitKernelSmoothzscore.max  DN_FitKernelSmoothzscore_max  distribution,ksdensity
+DN_FitKernelSmoothraw.asym  DN_FitKernelSmoothraw_asym  distribution,ksdensity,symmetry,raw
+DN_FitKernelSmoothraw.plsym  DN_FitKernelSmoothraw_plsym  distribution,ksdensity,symmetry,raw
 DN_FitKernelSmoothraw.numcross_005  DN_FitKernelSmooth_ncross_005  distribution,ksdensity,crossconst,raw,spreaddep
 DN_FitKernelSmoothraw.numcross_010  DN_FitKernelSmooth_ncross_01  distribution,ksdensity,crossconst,raw,spreaddep
 DN_FitKernelSmoothraw.numcross_020  DN_FitKernelSmooth_ncross_02  distribution,ksdensity,crossconst,raw,spreaddep
@@ -1048,40 +1024,21 @@ DN_FitKernelSmoothraw.arclength_010  DN_FitKernelSmooth_arcl_01  distribution,ks
 DN_FitKernelSmoothraw.arclength_050  DN_FitKernelSmooth_arcl_05  distribution,ksdensity,arclength,raw,spreaddep
 DN_FitKernelSmoothraw.arclength_100  DN_FitKernelSmooth_arcl_1  distribution,ksdensity,arclength,raw,spreaddep
 DN_FitKernelSmoothraw.arclength_200  DN_FitKernelSmooth_arcl_2  distribution,ksdensity,arclength,raw,spreaddep
-# kssimpcross005  kssimpcross005  distribution,ksdensity,crossconst,raw,spreaddep
-# kssimpcross01  kssimpcross01  distribution,ksdensity,crossconst,raw,spreaddep
-# kssimpcross02  kssimpcross02  distribution,ksdensity,crossconst,raw,spreaddep
-# kssimpcross03  kssimpcross03  distribution,ksdensity,crossconst,raw,spreaddep
-# kssimpcross04  kssimpcross04  distribution,ksdensity,crossconst,raw,spreaddep
-# kssimpcross05  kssimpcross05  distribution,ksdensity,crossconst,raw,spreaddep
-# kssimparea005  kssimparea005  distribution,ksdensity,areaconst,raw,spreaddep
-# kssimparea01  kssimparea01  distribution,ksdensity,areaconst,raw,spreaddep
-# kssimparea02  kssimparea02  distribution,ksdensity,areaconst,raw,spreaddep
-# kssimparea03  kssimparea03  distribution,ksdensity,areaconst,raw,spreaddep
-# kssimparea04  kssimparea04  distribution,ksdensity,areaconst,raw,spreaddep
-# kssimparea05  kssimparea05  distribution,ksdensity,areaconst,raw,spreaddep
-# kssimparcl01  kssimparcl01  distribution,ksdensity,arclength,raw,spreaddep
-# kssimparcl05  kssimparcl05  distribution,ksdensity,arclength,raw,spreaddep
-# kssimparcl1  kssimparcl1  distribution,ksdensity,arclength,raw,spreaddep
-# kssimparcl2  kssimparcl2  distribution,ksdensity,arclength,raw,spreaddep
-DN_Compare_zscorex.numpeaks  kscnumpeaks  distribution,ksdensity,compare,numpeaks,raw,spreaddep
-DN_Compare_zscorex.max  kscmax  distribution,ksdensity,compare,max,raw,spreaddep
-DN_Compare_zscorex.entropy  kscent  distribution,ksdensity,compare,entropy,raw,spreaddep
-# kscnumpeaks  kscnumpeaks  distribution,ksdensity,compare,numpeaks,raw,spreaddep
-# kscmax  kscmax  distribution,ksdensity,compare,max,raw,spreaddep
-# kscent  kscent  distribution,ksdensity,compare,entropy,raw,spreaddep
-DK_timerev_1	DK_timerev_1	trevasym,nonlinearity
-DK_timerev_2	DK_timerev_2	trevasym,nonlinearity
-DK_timerev_3	DK_timerev_3	trevasym,nonlinearity
-DK_timerev_4	DK_timerev_4	trevasym,nonlinearity
+DN_Compare_zscorex.numpeaks     kscnumpeaks  distribution,ksdensity,compare,raw,spreaddep
+DN_Compare_zscorex.max          kscmax  distribution,ksdensity,compare,raw,spreaddep
+DN_Compare_zscorex.entropy      kscent  distribution,ksdensity,compare,entropy,raw,spreaddep
+DK_timerev_1	                DK_timerev_1	nonlinearity
+DK_timerev_2	                DK_timerev_2	nonlinearity
+DK_timerev_3	                DK_timerev_3	nonlinearity
+DK_timerev_4	                DK_timerev_4	nonlinearity
 HT_HypothesisTest_signtest		signtest	hypothesistest,signtest
-HT_HypothesisTest_runstest		runstest	hypothesistest,randomness,runstest
-HT_HypothesisTest_runstestraw	runstestraw	hypothesistest,randomness,runstest,raw
-HT_HypothesisTest_lbqtest		lbqtest	hypothesistest,randomness,lbq,econometricstoolbox
-HT_HypothesisTest_lbqtestraw	lbqtestraw	hypothesistest,randomness,lbq,econometricstoolbox,raw
-HT_HypothesisTest_ztest		ztest	hypothesistest,ztest
-HT_HypothesisTest_signrank		signrank	hypothesistest,signrank
-HT_HypothesisTest_jbtest		jbtest	hypothesistest,jbtest,raw
+HT_HypothesisTest_runstest		runstest	hypothesistest,randomness
+HT_HypothesisTest_runstestraw	runstestraw	hypothesistest,randomness,raw
+HT_HypothesisTest_lbqtest		lbqtest	hypothesistest,randomness,econometricstoolbox
+HT_HypothesisTest_lbqtestraw	lbqtestraw	hypothesistest,randomness,econometricstoolbox,raw
+HT_HypothesisTest_ztest		    ztest	hypothesistest
+HT_HypothesisTest_signrank		signrank	hypothesistest
+HT_HypothesisTest_jbtest		jbtest	hypothesistest,raw
 HT_DistributionTest_chi2norm5	HT_DistributionTest_chi2norm5	hypothesistest,distribution,chi2gof,raw
 HT_DistributionTest_chi2norm10	HT_DistributionTest_chi2norm10	hypothesistest,distribution,chi2gof,raw
 HT_DistributionTest_chi2norm25	HT_DistributionTest_chi2norm25	hypothesistest,distribution,chi2gof,raw
@@ -1127,15 +1084,15 @@ HT_DistributionTest_chi2wbl10	HT_DistributionTest_chi2wbl10	hypothesistest,distr
 HT_DistributionTest_chi2wbl25	HT_DistributionTest_chi2wbl25	hypothesistest,distribution,chi2gof,raw,locdep
 HT_DistributionTest_chi2wbl50	HT_DistributionTest_chi2wbl50	hypothesistest,distribution,chi2gof,raw,locdep
 HT_DistributionTest_chi2wbl100	HT_DistributionTest_chi2wbl100	hypothesistest,distribution,chi2gof,raw,locdep
-HT_DistributionTest_ks_norm	HT_DistributionTest_ks_norm	hypothesistest,distribution,ks,raw
-HT_DistributionTest_ks_ev	HT_DistributionTest_ks_ev	hypothesistest,distribution,ks,raw
-HT_DistributionTest_ks_uni	HT_DistributionTest_ks_uni	hypothesistest,distribution,ks,raw
-HT_DistributionTest_ks_beta	HT_DistributionTest_ks_beta	hypothesistest,distribution,ks,raw
-HT_DistributionTest_ks_rayl	HT_DistributionTest_ks_rayl	hypothesistest,distribution,ks,raw,locdep
-HT_DistributionTest_ks_exp	HT_DistributionTest_ks_exp	hypothesistest,distribution,ks,raw,locdep
-HT_DistributionTest_ks_gam	HT_DistributionTest_ks_gam	hypothesistest,distribution,ks,raw,locdep
-HT_DistributionTest_ks_logn	HT_DistributionTest_ks_logn	hypothesistest,distribution,ks,raw,locdep
-HT_DistributionTest_ks_wbl	HT_DistributionTest_ks_wbl	hypothesistest,distribution,ks,raw,locdep
+HT_DistributionTest_ks_norm	    HT_DistributionTest_ks_norm	    hypothesistest,distribution,ks,raw
+HT_DistributionTest_ks_ev	    HT_DistributionTest_ks_ev	    hypothesistest,distribution,ks,raw
+HT_DistributionTest_ks_uni	    HT_DistributionTest_ks_uni	    hypothesistest,distribution,ks,raw
+HT_DistributionTest_ks_beta	    HT_DistributionTest_ks_beta	    hypothesistest,distribution,ks,raw
+HT_DistributionTest_ks_rayl	    HT_DistributionTest_ks_rayl	    hypothesistest,distribution,ks,raw,locdep
+HT_DistributionTest_ks_exp	    HT_DistributionTest_ks_exp	    hypothesistest,distribution,ks,raw,locdep
+HT_DistributionTest_ks_gam	    HT_DistributionTest_ks_gam	    hypothesistest,distribution,ks,raw,locdep
+HT_DistributionTest_ks_logn	    HT_DistributionTest_ks_logn	    hypothesistest,distribution,ks,raw,locdep
+HT_DistributionTest_ks_wbl	    HT_DistributionTest_ks_wbl	    hypothesistest,distribution,ks,raw,locdep
 HT_DistributionTest_lillie_norm	HT_DistributionTest_lillie_norm	hypothesistest,distribution,lillie,raw
 HT_DistributionTest_lillie_ev	HT_DistributionTest_lillie_ev	hypothesistest,distribution,lillie,raw
 HT_DistributionTest_lillie_exp	HT_DistributionTest_lillie_exp	hypothesistest,distribution,lillie,raw,locdep
@@ -4263,74 +4220,74 @@ SB_MotifThree_diffquant.ccca	benmotif_tri_diffquant_ccca	motifs
 SB_MotifThree_diffquant.cccb	benmotif_tri_diffquant_cccb	motifs
 SB_MotifThree_diffquant.cccc	benmotif_tri_diffquant_cccc	motifs
 SB_MotifThree_diffquant.hhhh	benmotif_tri_diffquant_hhhh	motifs
-MF_AR_arcov_1.a2	MF_AR_arcov_1_a2	model,AR,fit
-MF_AR_arcov_1.rms	MF_AR_arcov_1_res_rms	model,AR,gof
-MF_AR_arcov_1.mu	MF_AR_arcov_1_res_mu	model,AR,gof
-MF_AR_arcov_1.std	MF_AR_arcov_1_res_std	model,AR,gof
-MF_AR_arcov_1.AC1	MF_AR_arcov_1_res_AC1	model,AR,gof
-MF_AR_arcov_1.AC2	MF_AR_arcov_1_res_AC2	model,AR,gof
-MF_AR_arcov_2.a2	MF_AR_arcov_2_a2	model,AR,fit
-MF_AR_arcov_2.a3	MF_AR_arcov_2_a3	model,AR,fit
-MF_AR_arcov_2.e		MF_AR_arcov_2_var	model,AR,fit,var
-MF_AR_arcov_2.rms	MF_AR_arcov_2_res_rms	model,AR,gof
-MF_AR_arcov_2.mu	MF_AR_arcov_2_res_mu	model,AR,gof
-MF_AR_arcov_2.std	MF_AR_arcov_2_res_std	model,AR,gof
-MF_AR_arcov_2.AC1	MF_AR_arcov_2_res_AC1	model,AR,gof
-MF_AR_arcov_2.AC2	MF_AR_arcov_2_res_AC2	model,AR,gof
-MF_AR_arcov_3.a2	MF_AR_arcov_3_a2		model,AR,fit
-MF_AR_arcov_3.a3	MF_AR_arcov_3_a3		model,AR,fit
-MF_AR_arcov_3.a4	MF_AR_arcov_3_a4		model,AR,fit
-MF_AR_arcov_3.e		MF_AR_arcov_3_var		model,AR,fit,var
-MF_AR_arcov_3.rms	MF_AR_arcov_3_res_rms	model,AR,gof
-MF_AR_arcov_3.mu	MF_AR_arcov_3_res_mu	model,AR,gof
-MF_AR_arcov_3.std	MF_AR_arcov_3_res_std	model,AR,gof
-MF_AR_arcov_3.AC1	MF_AR_arcov_3_res_AC1	model,AR,gof
-MF_AR_arcov_3.AC2	MF_AR_arcov_3_res_AC2	model,AR,gof
-MF_AR_arcov_4.a2	MF_AR_arcov_4_a2		model,AR,fit
-MF_AR_arcov_4.a3	MF_AR_arcov_4_a3		model,AR,fit
-MF_AR_arcov_4.a4	MF_AR_arcov_4_a4		model,AR,fit
-MF_AR_arcov_4.a5	MF_AR_arcov_4_a5		model,AR,fit
-MF_AR_arcov_4.e		MF_AR_arcov_4_var		model,AR,fit,var
-MF_AR_arcov_4.rms	MF_AR_arcov_4_res_rms	model,AR,gof
-MF_AR_arcov_4.mu	MF_AR_arcov_4_res_mu	model,AR,gof
-MF_AR_arcov_4.std	MF_AR_arcov_4_res_std	model,AR,gof
-MF_AR_arcov_4.AC1	MF_AR_arcov_4_res_AC1	model,AR,gof
-MF_AR_arcov_4.AC2	MF_AR_arcov_4_res_AC2	model,AR,gof
-MF_AR_arcov_5.a2	MF_AR_arcov_5_a2		model,AR,fit
-MF_AR_arcov_5.a3	MF_AR_arcov_5_a3		model,AR,fit
-MF_AR_arcov_5.a4	MF_AR_arcov_5_a4		model,AR,fit
-MF_AR_arcov_5.a5	MF_AR_arcov_5_a5		model,AR,fit
-MF_AR_arcov_5.a6	MF_AR_arcov_5_a6		model,AR,fit
-MF_AR_arcov_5.e		MF_AR_arcov_5_var		model,AR,fit,var
-MF_AR_arcov_5.rms	MF_AR_arcov_5_res_rms	model,AR,gof
-MF_AR_arcov_5.mu	MF_AR_arcov_5_res_mu	model,AR,gof
-MF_AR_arcov_5.std	MF_AR_arcov_5_res_std	model,AR,gof
-MF_AR_arcov_5.AC1	MF_AR_arcov_5_res_AC1	model,AR,gof
-MF_AR_arcov_5.AC2	MF_AR_arcov_5_res_AC2	model,AR,gof
-DN_SimpleFit_sin1.r2	DN_SimpleFit_sin1_r2	model,r2,sin1
-DN_SimpleFit_sin1.adjr2	DN_SimpleFit_sin1_adjr2	model,adjr2,sin1
-DN_SimpleFit_sin1.rmse	DN_SimpleFit_sin1_rmse	model,rmse,sin1
-DN_SimpleFit_sin1.resAC1	DN_SimpleFit_sin1_resAC1	model,resAC1,sin1
-DN_SimpleFit_sin1.resAC2	DN_SimpleFit_sin1_resAC2	model,resAC2,sin1
-DN_SimpleFit_sin1.resruns	DN_SimpleFit_sin1_resruns	model,resruns,sin1
-DN_SimpleFit_sin2.r2	DN_SimpleFit_sin2_r2	model,r2,sin2
-DN_SimpleFit_sin2.adjr2	DN_SimpleFit_sin2_adjr2	model,adjr2,sin2
-DN_SimpleFit_sin2.rmse	DN_SimpleFit_sin2_rmse	model,rmse,sin2
-DN_SimpleFit_sin2.resAC1	DN_SimpleFit_sin2_resAC1	model,resAC1,sin2
-DN_SimpleFit_sin2.resAC2	DN_SimpleFit_sin2_resAC2	model,resAC2,sin2
-DN_SimpleFit_sin2.resruns	DN_SimpleFit_sin2_resruns	model,resruns,sin2
-DN_SimpleFit_sin3.r2	DN_SimpleFit_sin3_r2	model,r2,sin3
-DN_SimpleFit_sin3.adjr2	DN_SimpleFit_sin3_adjr2	model,adjr2,sin3
-DN_SimpleFit_sin3.rmse	DN_SimpleFit_sin3_rmse	model,rmse,sin3
-DN_SimpleFit_sin3.resAC1	DN_SimpleFit_sin3_resAC1	model,resAC1,sin3
-DN_SimpleFit_sin3.resAC2	DN_SimpleFit_sin3_resAC2	model,resAC2,sin3
-DN_SimpleFit_sin3.resruns	DN_SimpleFit_sin3_resruns	model,resruns,sin3
-DN_SimpleFit_fourier1.r2	DN_SimpleFit_fourier1_r2	model,r2,fourier1
-DN_SimpleFit_fourier1.adjr2	DN_SimpleFit_fourier1_adjr2	model,adjr2,fourier1
-DN_SimpleFit_fourier1.rmse	DN_SimpleFit_fourier1_rmse	model,rmse,fourier1
-DN_SimpleFit_fourier1.resAC1	DN_SimpleFit_fourier1_resAC1	model,resAC1,fourier1
-DN_SimpleFit_fourier1.resAC2	DN_SimpleFit_fourier1_resAC2	model,resAC2,fourier1
-DN_SimpleFit_fourier1.resruns	DN_SimpleFit_fourier1_resruns	model,resruns,fourier1
+MF_AR_arcov_1.a2	MF_AR_arcov_1_a2	    model,ar,fit
+MF_AR_arcov_1.rms	MF_AR_arcov_1_res_rms	model,ar,gof
+MF_AR_arcov_1.mu	MF_AR_arcov_1_res_mu	model,ar,gof
+MF_AR_arcov_1.std	MF_AR_arcov_1_res_std	model,ar,gof
+MF_AR_arcov_1.AC1	MF_AR_arcov_1_res_AC1	model,ar,gof
+MF_AR_arcov_1.AC2	MF_AR_arcov_1_res_AC2	model,ar,gof
+MF_AR_arcov_2.a2	MF_AR_arcov_2_a2	    model,ar,fit
+MF_AR_arcov_2.a3	MF_AR_arcov_2_a3	    model,ar,fit
+MF_AR_arcov_2.e		MF_AR_arcov_2_var	    model,ar,fit
+MF_AR_arcov_2.rms	MF_AR_arcov_2_res_rms	model,ar,gof
+MF_AR_arcov_2.mu	MF_AR_arcov_2_res_mu	model,ar,gof
+MF_AR_arcov_2.std	MF_AR_arcov_2_res_std	model,ar,gof
+MF_AR_arcov_2.AC1	MF_AR_arcov_2_res_AC1	model,ar,gof
+MF_AR_arcov_2.AC2	MF_AR_arcov_2_res_AC2	model,ar,gof
+MF_AR_arcov_3.a2	MF_AR_arcov_3_a2		model,ar,fit
+MF_AR_arcov_3.a3	MF_AR_arcov_3_a3		model,ar,fit
+MF_AR_arcov_3.a4	MF_AR_arcov_3_a4		model,ar,fit
+MF_AR_arcov_3.e		MF_AR_arcov_3_var		model,ar,fit
+MF_AR_arcov_3.rms	MF_AR_arcov_3_res_rms	model,ar,gof
+MF_AR_arcov_3.mu	MF_AR_arcov_3_res_mu	model,ar,gof
+MF_AR_arcov_3.std	MF_AR_arcov_3_res_std	model,ar,gof
+MF_AR_arcov_3.AC1	MF_AR_arcov_3_res_AC1	model,ar,gof
+MF_AR_arcov_3.AC2	MF_AR_arcov_3_res_AC2	model,ar,gof
+MF_AR_arcov_4.a2	MF_AR_arcov_4_a2		model,ar,fit
+MF_AR_arcov_4.a3	MF_AR_arcov_4_a3		model,ar,fit
+MF_AR_arcov_4.a4	MF_AR_arcov_4_a4		model,ar,fit
+MF_AR_arcov_4.a5	MF_AR_arcov_4_a5		model,ar,fit
+MF_AR_arcov_4.e		MF_AR_arcov_4_var		model,ar,fit
+MF_AR_arcov_4.rms	MF_AR_arcov_4_res_rms	model,ar,gof
+MF_AR_arcov_4.mu	MF_AR_arcov_4_res_mu	model,ar,gof
+MF_AR_arcov_4.std	MF_AR_arcov_4_res_std	model,ar,gof
+MF_AR_arcov_4.AC1	MF_AR_arcov_4_res_AC1	model,ar,gof
+MF_AR_arcov_4.AC2	MF_AR_arcov_4_res_AC2	model,ar,gof
+MF_AR_arcov_5.a2	MF_AR_arcov_5_a2		model,ar,fit
+MF_AR_arcov_5.a3	MF_AR_arcov_5_a3		model,ar,fit
+MF_AR_arcov_5.a4	MF_AR_arcov_5_a4		model,ar,fit
+MF_AR_arcov_5.a5	MF_AR_arcov_5_a5		model,ar,fit
+MF_AR_arcov_5.a6	MF_AR_arcov_5_a6		model,ar,fit
+MF_AR_arcov_5.e		MF_AR_arcov_5_var		model,ar,fit
+MF_AR_arcov_5.rms	MF_AR_arcov_5_res_rms	model,ar,gof
+MF_AR_arcov_5.mu	MF_AR_arcov_5_res_mu	model,ar,gof
+MF_AR_arcov_5.std	MF_AR_arcov_5_res_std	model,ar,gof
+MF_AR_arcov_5.AC1	MF_AR_arcov_5_res_AC1	model,ar,gof
+MF_AR_arcov_5.AC2	MF_AR_arcov_5_res_AC2	model,ar,gof
+DN_SimpleFit_sin1.r2	DN_SimpleFit_sin1_r2	        model,gof,sin1
+DN_SimpleFit_sin1.adjr2	DN_SimpleFit_sin1_adjr2	        model,gof,sin1
+DN_SimpleFit_sin1.rmse	DN_SimpleFit_sin1_rmse	        model,gof,sin1
+DN_SimpleFit_sin1.resAC1	DN_SimpleFit_sin1_resAC1	model,sin1
+DN_SimpleFit_sin1.resAC2	DN_SimpleFit_sin1_resAC2	model,sin1
+DN_SimpleFit_sin1.resruns	DN_SimpleFit_sin1_resruns	model,sin1
+DN_SimpleFit_sin2.r2	DN_SimpleFit_sin2_r2	        model,gof,sin2
+DN_SimpleFit_sin2.adjr2	DN_SimpleFit_sin2_adjr2	        model,gof,sin2
+DN_SimpleFit_sin2.rmse	DN_SimpleFit_sin2_rmse	        model,gof,sin2
+DN_SimpleFit_sin2.resAC1	DN_SimpleFit_sin2_resAC1	model,sin2
+DN_SimpleFit_sin2.resAC2	DN_SimpleFit_sin2_resAC2	model,sin2
+DN_SimpleFit_sin2.resruns	DN_SimpleFit_sin2_resruns	model,sin2
+DN_SimpleFit_sin3.r2	DN_SimpleFit_sin3_r2	        model,gof,sin3
+DN_SimpleFit_sin3.adjr2	DN_SimpleFit_sin3_adjr2	        model,gof,sin3
+DN_SimpleFit_sin3.rmse	DN_SimpleFit_sin3_rmse	        model,gof,sin3
+DN_SimpleFit_sin3.resAC1	DN_SimpleFit_sin3_resAC1	model,sin3
+DN_SimpleFit_sin3.resAC2	DN_SimpleFit_sin3_resAC2	model,sin3
+DN_SimpleFit_sin3.resruns	DN_SimpleFit_sin3_resruns	model,sin3
+DN_SimpleFit_fourier1.r2	DN_SimpleFit_fourier1_r2	model,gof,fourier1
+DN_SimpleFit_fourier1.adjr2	DN_SimpleFit_fourier1_adjr2	model,gof,fourier1
+DN_SimpleFit_fourier1.rmse	DN_SimpleFit_fourier1_rmse	model,gof,fourier1
+DN_SimpleFit_fourier1.resAC1	DN_SimpleFit_fourier1_resAC1	model,fourier1
+DN_SimpleFit_fourier1.resAC2	DN_SimpleFit_fourier1_resAC2	model,fourier1
+DN_SimpleFit_fourier1.resruns	DN_SimpleFit_fourier1_resruns	model,fourier1
 SC_FluctAnal_2_nothing_1.linfitint	SC_FluctAnal_2_nothing_1_linfitint	scaling,fa,lini
 SC_FluctAnal_2_nothing_1.alpha	SC_FluctAnal_2_nothing_1_alpha	scaling,fa,lini
 SC_FluctAnal_2_nothing_1.stats_coeffcorr	SC_FluctAnal_2_nothing_1_stats_coeffcorr	scaling,fa,lini,lengthdep
