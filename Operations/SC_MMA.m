@@ -1,10 +1,16 @@
 % ------------------------------------------------------------------------------
-% PN_MMA
+% SC_MMA
 % ------------------------------------------------------------------------------
-% Multiscale Multifractal Analysis
+% 
+% Physionet implementation of multiscale multifractal analysis
+% 
+% Scale-dependent estimates of multifractal scaling in a time series
+% 
+% ------------------------------------------------------------------------------
+% Modified by Ben Fulcher for use in hctsa, 2015-05-12.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2014 Jan Gieraltowski
-% Modified by Ben Fulcher, 2015-05-12
+% ------------------------------------------------------------------------------
 % 
 % This program is free software; you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free Software
@@ -40,11 +46,12 @@
 % for Complex Physiologic Signals. 
 % Circulation 101(23):e215-e220 
 % [Circulation Electronic Pages; http://circ.ahajournals.org/cgi/content/full/101/23/e215]; 2000 (June 13).
+% ------------------------------------------------------------------------------
 
 function out = SC_MMA(y,doOverlap,scaleRange,qRange)
 
 % Generate a plot:
-doPlot = 1;
+doPlot = 0;
 
 % Time-series length:
 N = length(y);

@@ -156,13 +156,15 @@ case 'summary'
     % Summary as a line plot for operations that had some bad values
     
     % First find where problems exist, and only show these columns
-    qualityMean = nanmean(TS_Quality);
+    qualityMean = nanmean(TS_Quality,1);
     hadProblem = (qualityMean > 0);
 
     % Stop if there are no special values:
     if sum(hadProblem)==0
         fprintf(1,'No operations have problems! Nothing to inspect.\n');
         return
+    else
+        fprintf(1,'%u operations have special values\n',sum(hadProblem));
     end
     
     % Resize TS_Quality
@@ -174,7 +176,7 @@ case 'summary'
     % Compute the proportion of each label per column:
     whatLabel = zeros(9,sum(hadProblem));
     for i = 1:9
-        whatLabel(i,:) = mean(TS_Quality==i-1);
+        whatLabel(i,:) = mean(TS_Quality==i-1,1);
     end
     
     % Sort by the proportion of good values
@@ -193,7 +195,7 @@ case 'summary'
     unSortedTicks = [Operations(hadProblem).ID];
     ax.XTickLabel = unSortedTicks(ix);
     
-    title(sprintf('Displaying %u/%u operations with some special values)',...
+    title(sprintf('Displaying %u/%u operations with some special values',...
                     sum(hadProblem),length(hadProblem)),...
                     'interpreter','none')
 

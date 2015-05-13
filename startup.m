@@ -72,9 +72,9 @@ addpath(fullfile(pwd,'Toolboxes','MatlabCentral'));
 fprintf(1,', Rudy Moddemeijer')
 addpath(fullfile(pwd,'Toolboxes','Rudy_Moddemeijer'));
 
-% Land and Elias (code from http://people.ece.cornell.edu/land/PROJECTS/Complexity/)
-fprintf(1,', Land and Elias');
-addpath(fullfile(pwd,'Toolboxes','Land_and_Elias'));
+% DVV Toolbox
+fprintf(1,', DVV Toolbox')
+addpath(fullfile(pwd,'Toolboxes','DVV_Toolbox'));
 
 % Physionet
 fprintf(1,', Physionet\n');
@@ -96,7 +96,7 @@ settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 
 % Java information dynamics toolkit written by Joseph Lizier
 % (should be ok to re-add this every time startup is run)
-fprintf(1,', Information dynamics toolkit')
+fprintf(1,', Information dynamics toolkit,\n')
 javaaddpath(fullfile(pwd,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 
 % ------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ clear homeDir tiseanBinaryLocation
 
 % TISEAN also requires this DYLD path to be set (I assume this works also on Windows):
 setenv('DYLD_LIBRARY_PATH','/usr/local/bin');
-fprintf(1,', DYLD library path (for TISEAN).');
+fprintf(1,'DYLD library path (for TISEAN).');
 
 % ------------------------------------------------------------------------------
 %% Finished:

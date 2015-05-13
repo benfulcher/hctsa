@@ -178,51 +178,51 @@ if sig == 2 % Just return the embedding parameters
     return
 end
 
-% Use the TSTOOL embed function.
-if size(y,2) > size(y,1) % make sure it's a column vector
+% Make sure it's a column vector:
+if size(y,2) > size(y,1)
     y = y';
 end
-try
-    y_embed = embed(signal(y),m,tau);
-catch me
-    if strcmp(me.message,'Time series to short for chosen embedding parameters')
-        fprintf(1,'Time series (N = %u) too short to embed\n',N);
-        y_embed = NaN; return
-    else
-        % Could always try optimizing my own routine (below) so TSTOOL is not required for this step...
-        error('Embedding time series using TSTOOL function ''embed'' failed: %s',me.message)
+
+if sig
+    % Use the TSTOOL embed function:
+    try
+        y_embed = embed(signal(y),m,tau);
+    catch me
+        if strcmp(me.message,'Time series to short for chosen embedding parameters')
+            fprintf(1,'Time series (N = %u) too short to embed\n',N);
+            y_embed = NaN; return
+        else
+            % Could always try optimizing my own routine (below) so TSTOOL is not required for this step...
+            error('Embedding time series using TSTOOL function ''embed'' failed: %s',me.message)
+        end
+    end
+
+    % if ~sig
+    %    y_embed = data(y_embed);
+    %    % this is actually faster than my implementation, which is commented out below
+    % end
+    
+else
+    % Use a Matlab-based implementation:
+    N_embed = N-(m-1)*tau;
+    if N_embed <=0
+        error('Time Series (N = %u) too short to embed with these embedding parameters',N);
+    end
+    
+    % Each embedding vector is a row (of length m columns)
+    % Number of ebmedding vectors is N_embed = N - (m-1)*tau
+    y_embed = zeros(N_embed,m);
+
+    for i = 1:m
+       y_embed(:,i) = y(1+(i-1)*tau:N_embed+(i-1)*tau);
     end
 end
 
-if ~sig
-   y_embed = data(y_embed);
-   % this is actually faster than my implementation, which is commented out below
-end
-
+% Tell me about it:
 if beVocal
     fprintf(1,['Time series embedded successfully:\n--Time delay %s%u\n' ...
                         '--Embedding dimension m %s\n'],sstau,tau,ssm);
 end
-
-
-% if sig
-%     y_embed = embed(signal(y),m,tau);
-% else
-% %     % my own routine
-% %     % create matrix of element indicies
-% %     % m wide (each embedding vector)
-% %     % N-m*tau long (number of embedding vectors)
-% %     y_embed = zeros(N-(m-1)*tau,m);
-% %     for i=1:m
-% %        y_embed(:,i) = (1+(i-1)*tau:1+(i-1)*tau+N-(m-1)*tau-1)';
-% %     end
-% % %     keyboard
-% %     y_embed = arrayfun(@(x)y(x),y_embed); % take these elements of y
-%     
-%     % Shit, it's actually faster for large time series to use the TSTOOL version!!:
-%     y_embed = data(embed(signal(y),m,tau));
-%     
-% end
 
 
 end

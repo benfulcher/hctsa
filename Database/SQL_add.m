@@ -403,7 +403,7 @@ case 'ts' % Prepare toAdd cell for time series
                             timeseries(j).Length,timeseries(j).Data);
         
         if beVocal % plot the time series
-            numSubplots = min(numItems,5);
+            numSubplots = min(numItems,4);
             subplot(numSubplots,1,mod(j-1,numSubplots)+1);
             plot(x,'-k'); xlim([1,length(x)]);
             titleText = sprintf('\n[%u/%u] %s (%u), keywords = %s',j,numItems,...
@@ -567,8 +567,8 @@ fprintf(1,' Done.\n')
 if ~strcmp(addWhat,'mops')
     resultsTic = tic;
     if beVocal
-        fprintf(1,['Updating the Results Table in %s (this could take a while, ' ...
-                                'please be patient!)...'],databaseName)
+        fprintf(1,['Updating the Results table in %s\n(This could take a while, ' ...
+                                'please be patient)...'],databaseName)
     end
     switch addWhat
     case 'ts'
@@ -578,10 +578,12 @@ if ~strcmp(addWhat,'mops')
         [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id ' ...
                     'FROM TimeSeries t CROSS JOIN Operations o ON o.op_id > %u ORDER BY t.ts_id, o.op_id'],maxId));
     end
-    if ~isempty(emsg),
-        fprintf(1,' error. This is really really not good.\n');
+    if ~isempty(emsg)
+        fprintf(1,' Error. This is really really not good.\n%s',emsg);
     else
-        if beVocal, fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultsTic))); end
+        if beVocal
+            fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultsTic)));
+        end
     end
 end
 
@@ -634,7 +636,8 @@ if ~strcmp(addWhat,'mops')
     else
         if beVocal
             fprintf(1,['\nIt turns out that all new keywords already exist in ' ...
-                    'the %s table in %s -- there are no new keywords to add\n'],sum(isNew),theKeywordTable,databaseName)
+                    'the %s table in %s -- there are no new keywords to add\n'],...
+                    sum(isNew),theKeywordTable)
         end
     end
     
