@@ -32,7 +32,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TS_compute(doParallel,doLog,beVocal)
+function TS_compute(doParallel,ts_id_range,op_id_range,doLog,beVocal)
     
 % --------------------------------------------------------------------------
 %% Check inputs and set defaults
@@ -43,8 +43,15 @@ if nargin < 1
 	doParallel = 0;
 end
 
-% Log to file
 if nargin < 2
+    ts_id_range = []; % compute all ts_ids in the file by default
+end
+if nargin < 3
+    op_id_range = []; % compute all op_ids in the file by default
+end
+
+% Log to file
+if nargin < 4
     % By default, do not log to file, write to screen (if beVocal)
 	doLog = 0;
 end
@@ -58,7 +65,7 @@ else
 end
 
 % Be vocal?
-if nargin < 3
+if nargin < 5
     beVocal = 1; % Write back lots of information to screen
     % prints every piece of code evaluated (nice for error checking)
 end
@@ -80,9 +87,30 @@ fprintf(fid,'Loading data from HCTSA_loc.mat...');
 load('HCTSA_loc.mat')
 fprintf(fid,' Loaded.\n');
 
+% ------------------------------------------------------------------------------
+% Get indices if computing a subset
+% ------------------------------------------------------------------------------
+allIDs = [TimeSeries.ID];
+if isempty(ts_id_range)
+    ts_id_range = allIDs;
+    tsIndex = 1:length(TimeSeries);
+else
+    ts_id_range = intersect(ts_id_range,allIDs);
+    tsIndex = find(ismember(allIDs,ts_id_range));
+    % tsIndex = arrayfun(@(x)find(allIDs==x,1),ts_id_range);
+end
+allIDs = [Operations.ID];
+if isempty(op_id_range)
+    op_id_range = allIDs;
+    opCompute = ones(1,length(Operations));
+else
+    op_id_range = intersect(op_id_range,allIDs);
+    opCompute = ismember(allIDs,op_id_range);
+end
+
 % Definitions
-numTimeSeries = length(TimeSeries); % Number of time series
-numOps = length(Operations); % Number of operations
+numTimeSeries = length(ts_id_range); % Number of time series
+numOps = length(op_id_range); % Number of operations
 
 fprintf(fid,['Calculation has begun on %s using %u datasets ' ...
                             'and %u operations\n'],datestr(now),numTimeSeries,numOps);
@@ -92,8 +120,8 @@ fprintf(fid,['Calculation has begun on %s using %u datasets ' ...
 % ------------------------------------------------------------------------------
 if doParallel
     % first check that the user can use the Parallel Computing Toolbox:
-    heyo = which('matlabpool');
-    if isempty(heyo)
+    heyLo = which('matlabpool');
+    if isempty(heyLo)
         fprintf(1,['Parallel Computing Toolbox not found -- ' ...
                         'cannot perform computations across multiple cores\n'])
         doParallel = 0;
@@ -119,18 +147,26 @@ lastSavedTime = 0; % Last saved time
 %% Computation
 % --------------------------------------------------------------------------
 for i = 1:numTimeSeries
+    tsInd = tsIndex(i);
+    
 	bigTimer = tic;
 
-	qq = TS_Quality(i,:); % The calculation states of any existing results for the current time series, a line of TS_Quality
+    % ----
+    % Which operations need calculating for this time series?:
+    % ----
+	qq = TS_Quality(tsInd,:); % The calculation states of any existing results for the current time series, a line of TS_Quality
 					   	  % NaN indicates a value never before calculated, 1 indicates fatal error before (try again now)
-    tcal = (isnan(qq) | qq == 1); % Operations awaiting calculation
-    numCalc = sum(tcal); % Number of operations to evaluate
+    toCalc = (opCompute & isnan(qq) | qq == 1); % Operations awaiting calculation
+    numCalc = sum(toCalc); % Number of operations to evaluate
     
+    % -----
     % Check that all operations have a master ID attached:
-    if length([Operations(tcal).MasterID]) < numCalc
+    % -----
+    if length([Operations(toCalc).MasterID]) < numCalc
         % Error in the database structure; some operations are missing MasterID assignment
         error('Database structure error: some operations have not been assigned a valid master operation');
     end
+    
     
     if numCalc > 0 % some to calculate
         ffi = zeros(numCalc,1); % Output of each operation
@@ -138,7 +174,7 @@ for i = 1:numTimeSeries
 		cti = ones(numCalc,1)*NaN; % Calculation time for each operation
         
         % Load the time-series data as x
-        x = TimeSeries(i).Data;
+        x = TimeSeries(tsInd).Data;
         
         % --------------------------------------------------------------------------
 		%% Basic checking on x
@@ -147,13 +183,13 @@ for i = 1:numTimeSeries
 		if size(x,2) ~= 1
 			if size(x,1) == 1
                 fprintf(fid,['***** The time series %s is a row vector. Not sure how it snuck through the cracks, but I ' ...
-                                        'need a column vector...\n'],TimeSeries(i).FileName);
+                                        'need a column vector...\n'],TimeSeries(tsInd).FileName);
 				fprintf(fid,'I''ll transpose it for you for now....\n');
 				x = x';
 			else
 				fprintf(fid,'******************************************************************************************\n')
                 fprintf(fid,['MASSIVE ERROR WITH THIS TIME SERIES!!!: %s -- is it multivariate or something weird???.' ...
-                                                                    ' Skipping it!!\n'], TimeSeries(i).FileName);
+                                                                    ' Skipping it!!\n'], TimeSeries(tsInd).FileName);
 				fprintf(fid,'******************************************************************************************\n');
 				continue % skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
             end
@@ -172,16 +208,13 @@ for i = 1:numTimeSeries
         % --------------------------------------------------------------------------
 		%% Display information
         % --------------------------------------------------------------------------
-		WhichTimeSeries = which(TimeSeries(i).FileName);
-		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
-	    fprintf(fid,'; ; ; : : : : ; ; ; ;    %s     ; ; ; ; : : : ; ; ;\n',datestr(now))
-	    fprintf(fid,'- - - - - - - -  Loaded time series %u / %u - - - - - - - -\n',i,numTimeSeries)
-		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
-		fprintf(fid,'%s\n',WhichTimeSeries)
-		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+		fprintf(fid,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+	    fprintf(fid,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now))
+	    fprintf(fid,'- - - - - - - - - - - Loaded time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries)
+		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'Preparing to calculate %s\nts_id = %u, N = %u samples\nComputing %u / %u operations.\n', ...
-                            		TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length,numCalc,numOps)
-	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
+                            		TimeSeries(tsInd).FileName,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length,numCalc,numOps)
+	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
 
         % --------------------------------------------------------------------------
 		%% Evaluate all master operation functions (maybe in parallel)
@@ -193,14 +226,14 @@ for i = 1:numTimeSeries
 		MasterOutput = cell(length(MasterOperations),1); % Ouput structures
 		MasterCalcTime = zeros(length(MasterOperations),1); % Calculation times for each master operation
 		
-		Master_IDs_calc = unique([Operations(tcal).MasterID]); % Master_IDs that need to be calculated
+		Master_IDs_calc = unique([Operations(toCalc).MasterID]); % Master_IDs that need to be calculated
         Master_ind_calc = arrayfun(@(x)find([MasterOperations.ID]==x,1),Master_IDs_calc); % Indicies of MasterOperations that need to be calculated
 		numMopsToCalc = length(Master_IDs_calc); % Number of master operations to calculate
         
         % Index sliced variables to minimize the communication overhead in the parallel processing
         par_MasterOpCodeCalc = {MasterOperations(Master_ind_calc).Code}; % Cell array of strings of Code to evaluate
         par_mop_ids = [MasterOperations(Master_ind_calc).ID]; % mop_id for each master operation
-        % par_mop_id = [Operations(tcal).MasterID]; % Master_IDs corresponding to each Operation
+        % par_mop_id = [Operations(toCalc).MasterID]; % Master_IDs corresponding to each Operation
         
 		fprintf(fid,'Evaluating %u master operations...\n',length(Master_IDs_calc));
 		
@@ -208,20 +241,22 @@ for i = 1:numTimeSeries
         MasterOutput_tmp = cell(numMopsToCalc,1);
         MasterCalcTime_tmp = zeros(numMopsToCalc,1);
 		
+        % ----
 		% Evaluate all the master operations
-        TimeSeries_i_ID = TimeSeries(i).ID; % Make a PARFOR-friendly version of the ID
+        % ----
+        TimeSeries_i_ID = TimeSeries(tsInd).ID; % Make a PARFOR-friendly version of the ID
         masterTimer = tic;
 		if doParallel
             parfor jj = 1:numMopsToCalc % PARFOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
                             TS_compute_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
-                                        par_mop_ids(jj),numMopsToCalc,fid,beVocal,TimeSeries_i_ID);
+                                        par_mop_ids(jj),numMopsToCalc,fid,beVocal,TimeSeries_i_ID,jj);
             end
         else
             for jj = 1:numMopsToCalc % Normal FOR Loop
                 [MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
                             TS_compute_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
-                                        par_mop_ids(jj),numMopsToCalc,fid,beVocal,TimeSeries_i_ID);
+                                        par_mop_ids(jj),numMopsToCalc,fid,beVocal,TimeSeries_i_ID,jj);
             end
 		end
 		
@@ -233,11 +268,11 @@ for i = 1:numTimeSeries
                             numMopsToCalc,BF_thetime(toc(masterTimer)));
         clear masterTimer
         
-        % Set sliced version of matching indicies across the range tcal
-        % Indices of MasterOperations corresponding to each Operation (i.e., each index of tcal)
-        par_OperationMasterInd = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations(tcal).MasterID]);
+        % Set sliced version of matching indicies across the range toCalc
+        % Indices of MasterOperations corresponding to each Operation (i.e., each index of toCalc)
+        par_OperationMasterInd = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations(toCalc).MasterID]);
         par_MasterOperationsLabel = {MasterOperations.Label}; % Master labels
-        par_OperationCodeString = {Operations(tcal).CodeString}; % Code string for each operation to calculate (i.e., in tcal)
+        par_OperationCodeString = {Operations(toCalc).CodeString}; % Code string for each operation to calculate (i.e., in toCalc)
         
         % --------------------------------------------------------------------------
 		%% Assign all the results to the corresponding operations
@@ -304,9 +339,9 @@ for i = 1:numTimeSeries
         % ------------------------------------------------------------------------------
 		%% Store the calculated information back to local matrices
         % ------------------------------------------------------------------------------
-        TS_DataMat(i,tcal) = ffi; % store outputs in TS_DataMat
-		TS_CalcTime(i,tcal) = cti; % store calculation times in TS_CalcTime
-		TS_Quality(i,tcal) = qqi; % store quality labels in TS_Quality
+        TS_DataMat(tsInd,toCalc) = ffi; % store outputs in TS_DataMat
+		TS_CalcTime(tsInd,toCalc) = cti; % store calculation times in TS_CalcTime
+		TS_Quality(tsInd,toCalc) = qqi; % store quality labels in TS_Quality
 		% NB: the calculation time assigned for individual operations is the total calculation
 		% time taken to evaluate the master code.
 
@@ -329,7 +364,7 @@ for i = 1:numTimeSeries
 	fprintf(fid,'********************************************************************\n')
     fprintf(fid,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
     fprintf(fid,'oOoOo Calculation complete for %s (ts_id = %u, N = %u) oOoOo\n', ...
-                            TimeSeries(i).FileName,TimeSeries(i).ID,TimeSeries(i).Length);
+                            TimeSeries(tsInd).FileName,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length);
     if numCalc > 0 % Some amount of calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u special-valued outputs stored. [%u / %u]\n',...
 	     					numGood,numErrors,numSpecial,numCalc,numOps);
@@ -372,7 +407,7 @@ if doLog
 	fclose(fid);
 end
 
-fprintf(1,['Calculation complete: you can now run SQL_store to upload' ...
-                                ' the results to a mySQL database.\n'])
+fprintf(1,'Calculation complete!\n')
+% ': you can now run SQL_store to upload the results to a mySQL database.\n'])
 
 end

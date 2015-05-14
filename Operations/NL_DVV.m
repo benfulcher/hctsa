@@ -26,6 +26,7 @@
 % A Delay Vector Variance (DVV) toolbox for MATLAB
 % (c) Copyright Danilo P. Mandic 2008
 % http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm
+% http://www.commsp.ee.ic.ac.uk/~mandic/dvv/papers/dvv_proj.pdf
 % 
 % Modified by Ben Fulcher, 2015-05-13, for use in hctsa.
 % 
@@ -45,7 +46,7 @@
 %   Foundation, Inc.,675 Mass Ave, Cambridge, MA 02139, USA.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed)
+function out = NL_DVV(x,m,numDVs,nd,Ntv,numSurr,randomSeed)
 
 % Plot output plot:
 doPlot = 0;

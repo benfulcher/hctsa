@@ -60,6 +60,16 @@ fprintf(fid,' Done in %s.\n',BF_thetime(toc(loadTimer)));
 clear loadTimer
 
 % ------------------------------------------------------------------------------
+% Check that this file was actually retrieved from the database (such that these
+% ts_ids and op_ids represent items stored in the linked mySQL database)
+% ------------------------------------------------------------------------------
+if ~fromDatabase
+    theLoc = which('HCTSA_loc.mat');
+    error(['It looks like:\n%s\nwas generated using TS_init and does not match up ' ...
+            'with ID entries a mySQL database...'],theLoc);
+end
+
+% ------------------------------------------------------------------------------
 % Check that TS_CalcTime exists
 % ------------------------------------------------------------------------------
 % It will not exist if you've (by default) not retrieved calculation time data

@@ -20,11 +20,11 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [masterOutput, masterTime] = TS_compute_masterloop(x, y, masterCode, masterID, numMasterOps, fid, beVocal, theTsID)
+function [masterOutput, masterTime] = TS_compute_masterloop(x, y, masterCode, masterID, numMasterOps, fid, beVocal, theTsID, iterNum)
 
 if beVocal
     % Display code name for error checking
-    fprintf(fid,'[ts_id = %u, mop_id = %u / %u] %s...', theTsID, masterID, numMasterOps, masterCode);
+    fprintf(fid,'[ts_id = %u, mop_id = %u (%u/%u)] %s...', theTsID, masterID, iterNum, numMasterOps, masterCode);
 end
 
 try

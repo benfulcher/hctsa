@@ -73,7 +73,7 @@ SQL_closedatabase(dbc) % Close the database
 SQL_create_all_tables; % Create all basic tables required by the database
 
 % Add operations
-SQL_add('mops','Database/INP_mops.txt','',0)
-SQL_add('ops','Database/INP_ops.txt','',0)
+SQL_add('mops','Database/INP_mops.txt',1,0);
+SQL_add('ops','Database/INP_ops.txt',1,0);
 
 end

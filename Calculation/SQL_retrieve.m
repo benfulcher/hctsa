@@ -84,6 +84,14 @@ if ~ischar(retrieveWhatData) || ~ismember(retrieveWhatData,retrieveWhatDataCanBe
 end
 
 % ------------------------------------------------------------------------------
+% First check whether you're about to overwrite an existing file
+% ------------------------------------------------------------------------------
+% if exist('./HCTSA_loc.mat','file')
+%     reply = input(['Warning: HCTSA_loc.mat already exists -- if you continue, this ' ...
+%                     'file will be overwritten.\n[press any key to continue]'],'s');
+% end
+
+% ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
 
@@ -109,7 +117,9 @@ elseif (numOps == 0)
 	error('Oops. There''s nothing to do! No operations to retrieve!');
 end
 
-% Open database connection
+% ------------------------------------------------------------------------------
+% Open a database connection
+% ------------------------------------------------------------------------------
 % (attempt to use the Matlab database toolbox, which is faster for retrievals)
 [dbc, dbname] = SQL_opendatabase('',0,1);
 
@@ -328,7 +338,8 @@ if ismember(retrieveWhatEntries,{'null','error'})
         SQL_closedatabase(dbc); return % Close the database connection, then exit
 	elseif sum(keepi) < numTS
 		fprintf(1,'Cutting down from %u to %u time series\n',numTS,sum(keepi));
-		ts_ids = ts_ids(keepi); numTS = length(ts_ids);
+		ts_ids = ts_ids(keepi);
+        numTS = length(ts_ids);
 		ts_ids_string = BF_cat(ts_ids,',');
         switch retrieveWhatData
         case 'all'
@@ -422,7 +433,8 @@ SQL_closedatabase(dbc)
 % ------------------------------------------------------------------------------
 fprintf(1,'Saving local versions of the data to HCTSA_loc.mat...');
 saveTimer = tic;
-save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','-v7.3');
+fromDatabase = 1; % mark that we retrieved this data from the mySQL database
+save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','fromDatabase','-v7.3');
 switch retrieveWhatData
 case 'all'
     % Add outputs, quality labels, and calculation times
