@@ -545,7 +545,7 @@ SY_SlidingWindow(y,'AC1','ent',5,10)		SY_SlidingWindow_ac1_ent5_10
 SY_SlidingWindow(y,'AC1','ent',10,1)		SY_SlidingWindow_ac1_ent10_1
 SY_SlidingWindow(y,'AC1','ent',10,2)		SY_SlidingWindow_ac1_ent10_2
 SY_SlidingWindow(y,'AC1','ent',10,10)		SY_SlidingWindow_ac1_ent10_10
-SY_LinearTrend(x)	SY_LinearTrend
+SY_Trend(y)	    SY_Trend
 SC_fastdfa(y)	    SC_fastdfa
 SY_StdNthDer(y,1)	SY_StdNthDer_1
 SY_StdNthDer(y,2)	SY_StdNthDer_2
@@ -587,6 +587,8 @@ EN_wentropy(y,'sure',0.5)		EN_wentropy_sureent05
 EN_wentropy(y,'sure',1)			EN_wentropy_sureent1
 EN_wentropy(y,'sure',1.5)		EN_wentropy_sureent15
 EN_wentropy(y,'sure',2)			EN_wentropy_sureent2
+EN_rpde(y,3,1)              EN_rpde_3_1
+EN_rpde(y,3,'ac')           EN_rpde_3_ac
 EN_RM_entropy(y)	RM_entropy
 EN_CID(y)           EN_CID
 EN_DistributionEntropy(y,'ks',0.01,0)	EN_histen_ks_001_0
@@ -743,12 +745,6 @@ ST_FitPolynomial(x,1)	ST_FitPolynomial_1
 ST_FitPolynomial(x,2)	ST_FitPolynomial_2
 ST_FitPolynomial(x,3)	ST_FitPolynomial_3
 ST_FitPolynomial(x,4)	ST_FitPolynomial_4
-ST_FitPolynomial(x,5)	ST_FitPolynomial_5
-ST_FitPolynomial(x,6)	ST_FitPolynomial_6
-ST_FitPolynomial(x,7)	ST_FitPolynomial_7
-ST_FitPolynomial(x,8)	ST_FitPolynomial_8
-ST_FitPolynomial(x,9)	ST_FitPolynomial_9
-ST_FitPolynomial(x,10)	ST_FitPolynomial_10
 DK_crinkle(y)	DK_crinkle_statistic
 DK_theilerQ(y)	DK_TheilerQ
 CP_wavelet_varchg(y,'db3',2,10,0.01)	CP_wavelet_varchg_db3_2_10_001
@@ -802,10 +798,10 @@ CO_trev(y,2)	CO_trev_2
 CO_trev(y,3)	CO_trev_3
 CO_trev(y,'ac')	CO_trev_ac
 CO_trev(y,'mi')	CO_trev_mi
-# CO_TSTL_amutual(y,20,[])    CO_TSTL_amutual_20
-# CO_TSTL_amutual(y,20,10)    CO_TSTL_amutual_20_10
-# CO_TSTL_amutual2(y,50)    CO_TSTL_amutual2_50
-# CO_TSTL_amutual2(diff(y),50)    CO_TSTL_amutual2_diff__50
+# CO_TSTL_amutual(y,20,[],0)          CO_TSTL_amutual_20
+# CO_TSTL_amutual(y,20,10,0)          CO_TSTL_amutual_20_10
+# CO_TSTL_amutual(y,50,[],1)          CO_TSTL_amutual2_50
+# CO_TSTL_amutual(diff(y),50,[],1)    CO_TSTL_amutual2_diff__50
 IN_AutoMutualInfoStats(y,40,'gaussian') IN_AutoMutualInfoStats_40_gaussian
 IN_AutoMutualInfoStats(y,40,'kraskov1','4') IN_AutoMutualInfoStats_40_kraskov1_4
 IN_AutoMutualInfoStats(diff(y),20,'gaussian') IN_AutoMutualInfoStats_diff_20_gaussian

@@ -1,20 +1,21 @@
 % ------------------------------------------------------------------------------
-% ST_FitPolynomial
+% SY_Trend
 % ------------------------------------------------------------------------------
 % 
-% Fits a polynomial of order k to the time series, and returns the mean
-% square error of the fit.
+% Quantifies various measures of trend in the time series.
 % 
-% Usually kind of a stupid thing to do with a time series, but it's sometimes
-% somehow informative for time series with large trends.
+%---INPUT:
+% y, the input time series
 % 
-%---INPUTS:
-% y, the input time series.
-% k, the order of the polynomial to fit to y.
-% 
-%---OUTPUT:
-% RMS error of the fit.
+%---OUTPUTS:
 %
+% Linearly detrends the time series using detrend, and returns the ratio of
+% standard deviations before and after the linear detrending. If a strong linear
+% trend is present in the time series, this operation should output a low value.
+% 
+% Also fits a line and gives parameters from that fit, as well as statistics on
+% a cumulative sum of the time series.
+% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,38 +39,38 @@
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = ST_FitPolynomial(y,k)
+function out = SY_Trend(y)
 
-if nargin < 2 || isempty(k)
-    k = 1; % Linear by default
+if ~BF_iszscored(y)
+    warning('The input time series should be z-scored')
 end
 
-N = length(y); % Length of the time series (number of samples)
-t = (1:N)'; % Get a range for the time axis for time series y
+N = length(y);
+
+% Ratio of std before and after linear detrending:
+out.stdRatio = std(detrend(y)) / std(y);
+
+% Linear fit:
+[out.gradient,out.intercept] = LinearFit(1:N,y);
+
+% Stats on the cumulative sum:
+yC = cumsum(y);
+out.meanYC = mean(yC);
+out.stdYC = std(yC);
+[out.gradientYC,out.interceptYC] = LinearFit(1:N,yC);
+
+% Mean cumsum in first and second half of the time series:
+out.meanYC12 = mean(yC(1:floor(N/2)));
+out.meanYC22 = mean(yC(floor(N/2)+1:end));
 
 % ------------------------------------------------------------------------------
-% Fit a polynomial to the time series
+function [m,b] = LinearFit(xData,yData)
+    if size(xData,1) ~= size(yData,1);
+        yData = yData';
+    end
+    coeff = polyfit(xData,yData,1);
+    m = coeff(1); b = coeff(2);
+end
 % ------------------------------------------------------------------------------
-% Supress the (valid!) warning from stupidly fitting a polynomial to a time series...
-warning('off','MATLAB:polyfit:RepeatedPointsOrRescale');
-cf = polyfit(t,y,k);
-warning('on','MATLAB:polyfit:RepeatedPointsOrRescale');
-
-f = polyval(cf,t);
-out = mean((y-f).^2); % mean RMS ERROR OF FIT
-
-% ------------------------------------------------------------------------------
-% Plot
-% ------------------------------------------------------------------------------
-% % n=10;
-% errs=zeros(n,1);
-% x=1:length(y);
-% for i=1:n
-% cf=polyfit(x,y',i);
-% f=polyval(cf,x);
-% errs(i)=sum((y'-f).^2);
-% % end
-% % hold on;plot(f,'k')
-% % plot(errs);
-
+    
 end

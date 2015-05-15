@@ -111,23 +111,22 @@ end
 % Look for periodicities in local maxima
 maximai = find(dami(1:end-1) > 0 & dami(2:end) < 0) + 1;
 dmaximai = diff(maximai);
-% is there a big peak in dmaxima?
+% Is there a big peak in dmaxima?
  % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pmaxima = length(dmaximai)/floor(lami/2);
 out.modeperiodmax = mode(dmaximai);
 out.pmodeperiodmax = sum(dmaximai == mode(dmaximai))/length(dmaximai);
 
-% Same for local minima
-% Look for periodicities in local maxima
+% Look for periodicities in local minima
 minimai = find(dami(1:end-1) < 0 & dami(2:end) > 0) + 1;
 dminimai = diff(minimai);
-% is there a big peak in dmaxima?
+% Is there a big peak in dmaxima?
  % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pminima = length(dminimai)/floor(lami/2);
 out.modeperiodmin = mode(dminimai);
 out.pmodeperiodmin = sum(dminimai == mode(dminimai))/length(dminimai);
 
-% number of crossings at mean/median level, percentiles
+% Number of crossings at mean/median level, percentiles
 out.pcrossmean = sum(BF_sgnchange(ami-mean(ami)))/(lami-1);
 out.pcrossmedian = sum(BF_sgnchange(ami-median(ami)))/(lami-1);
 out.pcrossq10 = sum(BF_sgnchange(ami-quantile(ami,0.1)))/(lami-1);

@@ -17,7 +17,7 @@
 % m, the embedding dimension. Must be a cell specifying method and parameters,
 %    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1...
 %    
-% sig [opt], if 1, uses TSTOOL to embed and returns a signal object.
+% makeSignal [opt], if 1, uses TSTOOL to embed and returns a signal object.
 %           (default = 0, i.e., not to do this and instead return matrix).
 %           If 2, returns a vector of [tau m] rather than any explicit embedding
 %           
@@ -49,7 +49,7 @@
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function y_embed = BF_embed(y,tau,m,sig,randomSeed,beVocal)
+function y_embed = BF_embed(y,tau,m,makeSignal,randomSeed,beVocal)
 
 N = length(y); % length of the input time series, y
 
@@ -170,10 +170,10 @@ end
 %% Do the embedding
 % ------------------------------------------------------------------------------
 if nargin < 4
-    sig = 0; % Don't return a signal object, return a matrix
+    makeSignal = 0; % Don't return a signal object, return a matrix
 end
 
-if sig == 2 % Just return the embedding parameters
+if makeSignal == 2 % Just return the embedding parameters
     y_embed = [tau, m];
     return
 end
@@ -183,7 +183,8 @@ if size(y,2) > size(y,1)
     y = y';
 end
 
-if sig
+
+if makeSignal
     % Use the TSTOOL embed function:
     try
         y_embed = embed(signal(y),m,tau);
@@ -197,7 +198,7 @@ if sig
         end
     end
 
-    % if ~sig
+    % if ~makeSignal
     %    y_embed = data(y_embed);
     %    % this is actually faster than my implementation, which is commented out below
     % end
