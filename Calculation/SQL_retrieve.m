@@ -387,18 +387,18 @@ end
 % ------------------------------------------------------------------------------
 
 % 1. Retrieve Time Series Metadata
-selectString = sprintf('SELECT FileName, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
+selectString = sprintf('SELECT Name, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
 [tsinfo,emsg] = mysql_dbquery(dbc,selectString);
 % Convert to a structure array, TimeSeries, containing metadata for all time series
 tsinfo = [num2cell(ts_ids),tsinfo];
 % Define inline functions to convert time-series data text to a vector of floats:
-ScanCommas = @(x) textscan(x,'%f','Delimiter',',');
-TakeFirstCell = @(x) x{1};
-tsinfo(:,end) = cellfun(@(x) TakeFirstCell(ScanCommas(x)),tsinfo(:,end),'UniformOutput',0); % Do the conversion
-TimeSeries = cell2struct(tsinfo',{'ID','FileName','Keywords','Length','Data'}); % Convert to structure array
+scanCommas = @(x) textscan(x,'%f','Delimiter',',');
+takeFirstCell = @(x) x{1};
+tsinfo(:,end) = cellfun(@(x) takeFirstCell(scanCommas(x)),tsinfo(:,end),'UniformOutput',0); % Do the conversion
+TimeSeries = cell2struct(tsinfo',{'ID','Name','Keywords','Length','Data'}); % Convert to structure array
 
 % 2. Retrieve Operation Metadata
-selectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
+selectString = sprintf('SELECT Name, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
 [opinfo,emsg] = mysql_dbquery(dbc,selectString);
 opinfo = [num2cell(op_ids), opinfo]; % add op_ids
 Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});

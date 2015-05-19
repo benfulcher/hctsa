@@ -238,7 +238,7 @@ if plotFreeForm
 	set(gca,'YTick',[],'YTickLabel',{})
 	
 	for i = 1:numToPlot
-	    fn = TimeSeries(iplot(i)).FileName; % the filename
+	    fn = TimeSeries(iplot(i)).Name; % the name of the time series
 	    kw = TimeSeries(iplot(i)).Keywords; % the keywords
 	    x = TimeSeries(iplot(i)).Data;
 	    N0 = length(x);
@@ -269,7 +269,7 @@ else
     % i.e., NOT a FreeForm plot:
 	for i = 1:numToPlot
 	    subplot(numToPlot,1,i)
-	    fn = TimeSeries(iplot(i)).FileName; % the filename
+	    fn = TimeSeries(iplot(i)).Name; % the filename
 	    kw = TimeSeries(iplot(i)).Keywords; % the keywords
 	    x = TimeSeries(iplot(i)).Data;
 	    N = length(x);

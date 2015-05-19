@@ -89,19 +89,19 @@ if isstruct(whatData)
 else
     switch whatData
         case 'orig'
-            TheFile = 'HCTSA_loc.mat';
+            theFile = 'HCTSA_loc.mat';
         case 'norm'
-            TheFile = 'HCTSA_N.mat';
+            theFile = 'HCTSA_N.mat';
         case 'cl'
-            TheFile = 'HCTSA_cl.mat';
+            theFile = 'HCTSA_cl.mat';
     end
-    fprintf(1,'Loaded data from %s...',TheFile);
+    fprintf(1,'Loaded data from %s...',theFile);
     if strcmp(TsorOps,'ts') % Time series
-        load(TheFile,'TimeSeries')
+        load(theFile,'TimeSeries')
         Keywords = {TimeSeries.Keywords};
         IDs = [TimeSeries.ID];
     else % Operations
-        load(TheFile,'Operations')
+        load(theFile,'Operations')
         Keywords = {Operations.Keywords};
         IDs = [Operations.ID];
     end
@@ -183,7 +183,7 @@ end
 if saveBack
     % You don't need to check variables, you can just append back to the input file:
     if ~all(cellfun(@isempty,groupIndices))
-        fprintf(1,'Saving group labels and information back to %s...',TheFile);
+        fprintf(1,'Saving group labels and information back to %s...',theFile);
         
         % First append/overwrite group names
         GroupNames = keywordGroups;
@@ -207,11 +207,11 @@ if saveBack
 
         % Then append the new group information:
         TimeSeries = cell2struct([struct2cell(TimeSeries);TheGroupsCell],NewFieldNames);
-        % {'ID','FileName','Keywords','Length','Data','Group'}
+        % {'ID','Name','Keywords','Length','Data','Group'}
 
         % Save everything back to file:
-        save(TheFile,'TimeSeries','-append')
-        save(TheFile,'GroupNames','-append')
+        save(theFile,'TimeSeries','-append')
+        save(theFile,'GroupNames','-append')
         fprintf(1,' Saved.\n');
     end
 end

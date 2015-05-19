@@ -27,7 +27,7 @@ switch whatTable
 case 'Operations'
     createString = ['CREATE TABLE Operations ' ...
         '(op_id INTEGER NOT NULL AUTO_INCREMENT, ' ... % Unique integer identifier
-        'OpName VARCHAR(255), ' ... % Unique name for the operation
+        'Name VARCHAR(255), ' ... % Unique name for the operation
         'Code VARCHAR(255), ' ... % Code to execute, or Master to retrieve from
         'Keywords VARCHAR(255), ' ... % Comma separated keyword metadata ...
         'MasterLabel VARCHAR(255), ' ... % Label of master code ...
@@ -47,7 +47,7 @@ case 'OperationCode'
 case 'TimeSeries'
     createString = ['CREATE TABLE TimeSeries ' ...
         '(ts_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ... % Unique integer identifier
-        'Filename VARCHAR(255) NOT NULL, ' ... % FileName of the time series
+        'Name VARCHAR(255) NOT NULL, ' ... % Name (e.g., filename) of the time series
         'Keywords VARCHAR(255), ' ... % Comma-delimited keywords assigned to the time series
         'Length INTEGER UNSIGNED, ' ... % Length of the time series
         'Data MEDIUMTEXT, ' ... % Add data into database :-O

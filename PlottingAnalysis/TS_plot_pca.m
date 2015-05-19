@@ -53,8 +53,8 @@ end
 
 if nargin < 5 || isempty(annotateParams)
     % Annotate 10 points by default
-    fprintf(1,'Annotating 10 points by default with time series segment and filenames\n');
-    annotateParams = struct('n',10,'textAnnotation','fileName');
+    fprintf(1,'Annotating 10 points by default with time series segment and names\n');
+    annotateParams = struct('n',10,'textAnnotation','Name');
 end
 if ~isstruct(annotateParams)
     annotateParams = struct('n',annotateParams);
@@ -81,7 +81,7 @@ if strcmp(whatData,'cl') || strcmp(whatData,'norm')  || ischar(whatData)
         dimensionLabels = {Operations.Name}; clear Operations % We just need their names
         if isstruct(annotateParams) || length(annotateParams) > 1 || annotateParams > 0
             load(whatDataFile,'TimeSeries')
-            DataLabels = {TimeSeries.FileName};
+            DataLabels = {TimeSeries.Name};
             data_ids = [TimeSeries.ID];
             TimeSeriesData = {TimeSeries.Data};
             if isfield(TimeSeries,'Group')
@@ -98,7 +98,7 @@ if strcmp(whatData,'cl') || strcmp(whatData,'norm')  || ischar(whatData)
         end
     else
         load(whatDataFile,'TimeSeries')
-        dimensionLabels = {TimeSeries.FileName}; clear TimeSeries
+        dimensionLabels = {TimeSeries.Name}; clear TimeSeries
     end
     fprintf(1,' Loaded.\n');
 else

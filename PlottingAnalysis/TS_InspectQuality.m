@@ -225,7 +225,7 @@ function formatYAxisColorBar(doYaxis,offSet)
         % Format the y axis
         ax.YTick = 1:length(TimeSeries);
         ylabel('Time series')
-        ax.YTickLabel = {TimeSeries.FileName};
+        ax.YTickLabel = {TimeSeries.Name};
     end
 
     % Get rid of tex interpreter format (for strings with underscores)

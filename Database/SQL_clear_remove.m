@@ -59,12 +59,10 @@ case 'ts'
     theWhat = 'time series';
     theid = 'ts_id';
     theTable = 'TimeSeries';
-    theName = 'Filename';
 case 'ops'
     theWhat = 'operations';
     theid = 'op_id';
     theTable = 'Operations';
-    theName = 'OpName';
 otherwise
     error('First input must be either ''ts'' or ''ops''')
 end
@@ -107,8 +105,8 @@ end
 % ------------------------------------------------------------------------------
 %% Check what to clear/remove
 % ------------------------------------------------------------------------------
-selectString = sprintf('SELECT %s, %s FROM %s WHERE %s IN (%s)', ...
-                                theid,theName,theTable,theid,BF_cat(idRange,','));
+selectString = sprintf('SELECT %s, Name FROM %s WHERE %s IN (%s)', ...
+                                theid,theTable,theid,BF_cat(idRange,','));
 [toDump,emsg] = mysql_dbquery(dbc,selectString);
 
 if ~isempty(emsg)

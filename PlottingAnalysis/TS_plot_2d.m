@@ -28,7 +28,7 @@
 %               - userInput, 0: randomly selected datapoints, 1: user clicks to annotate datapoints
 %               - fdim, 1x2 vector with width and height of time series as fraction of plot size
 %               - maxL, maximum length of annotated time series
-%               - textAnnotation: 'fileName', 'tsid', or 'none' to annotate this data
+%               - textAnnotation: 'Name', 'tsid', or 'none' to annotate this data
 %               - cmap, a cell of colors, with elements for each group
 %               - theMarkerSize, a custom marker size
 %               - theLineWidth: line width for annotated time series
@@ -352,7 +352,7 @@ else
     fdim = [0.30,0.08]; % width, height
 end
 if isfield(annotateParams,'textAnnotation')
-    textAnnotation = annotateParams.textAnnotation; % 'fileName','tsid','none'
+    textAnnotation = annotateParams.textAnnotation; % 'Name','tsid','none'
 else
     textAnnotation = 'none'; % no annotations by default
 end
@@ -419,8 +419,8 @@ for j = 1:numAnnotations
     end
     
     plotPoint = xy{theGroup}(itsme,:);
-    theDataLabel = DataLabels{GroupIndices{theGroup}(itsme)}; % fileName of timeseries to plot
-    timeSeriesSegment = TimeSeriesData{GroupIndices{theGroup}(itsme)}; % fileName of timeseries to plot
+    theDataLabel = DataLabels{GroupIndices{theGroup}(itsme)}; % Name of timeseries to plot
+    timeSeriesSegment = TimeSeriesData{GroupIndices{theGroup}(itsme)}; % Name of timeseries to plot
     if ~isempty(maxL)
         timeSeriesSegment = timeSeriesSegment(1:min(maxL,end));
     end
@@ -437,7 +437,7 @@ for j = 1:numAnnotations
     
     % Add text annotations:
     switch textAnnotation
-    case 'fileName'
+    case 'Name'
         % Annotate text with names of datapoints:
         text(plotPoint(1),plotPoint(2)-0.01*pheight,theDataLabel,...
                     'interpreter','none','FontSize',8,...

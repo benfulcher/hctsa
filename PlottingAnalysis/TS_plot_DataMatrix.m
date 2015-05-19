@@ -89,7 +89,7 @@ if colorGroups
     fprintf(1,'Coloring groups of time series...\n');
 end
 
-timeSeriesFileNames = {TimeSeries.FileName}; clear TimeSeries; % Just extract filenames
+timeSeriesNames = {TimeSeries.Name}; clear TimeSeries; % Just extract time series names
 operationNames = {Operations.Name}; clear Operations; % Just extract operation names
 
 [numTS, numOps] = size(TS_DataMat); % size of the data matrix
@@ -100,7 +100,7 @@ operationNames = {Operations.Name}; clear Operations; % Just extract operation n
 if ~isempty(customOrder{1}) % reorder rows
 	fprintf(1,'Reordering time series according to custom order specified.\n');
 	TS_DataMat = TS_DataMat(customOrder{1},:);
-    timeSeriesFileNames = timeSeriesFileNames(customOrder{1});
+    timeSeriesNames = timeSeriesNames(customOrder{1});
 end
 
 if ~isempty(customOrder{2}) % reorder columns
@@ -242,7 +242,7 @@ end
 %% Format the plot
 % --------------------------------------------------------------------------
 % Axis labels:
-set(gca,'YTick',1 + (0.5:1:size(TS_DataMat,1)),'YTickLabel',timeSeriesFileNames); % time series
+set(gca,'YTick',1 + (0.5:1:size(TS_DataMat,1)),'YTickLabel',timeSeriesNames); % time series
 if numOps < 1000 % otherwise don't bother
     set(gca,'XTick',1 + (0.5:1:size(TS_DataMat,2)),'XTickLabel',operationNames);
 end

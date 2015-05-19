@@ -132,7 +132,6 @@ if ~(ischar(distanceMetricRow) && ismember(distanceMetricRow,{'none','nothing'})
     % (can specify 'none' to do no clustering)
     fprintf(1,'\n----Clustering rows using a distance metric %s and %s linkage method----\n',...
                     distanceMetricRow,linkageMethodRow); tic
-    % [~, ord_row] = TSQ_us_cluster(TS_DataMat,clusterMethRow,clusterParamsRow);
     ord_row = BF_ClusterReorder(TS_DataMat,distanceMetricRow,linkageMethodRow);
     fprintf(1,'Row clustering took %s.\n',BF_thetime(toc))
 else
@@ -145,7 +144,6 @@ if ~(ischar(distanceMetricCol) && ismember(distanceMetricCol,{'none','nothing'})
     fprintf(1,'\n----Clustering columns using a distance metric %s and %s linkage method----\n',...
                     distanceMetricCol,linkageMethodCol); tic
     ord_col = BF_ClusterReorder(TS_DataMat',distanceMetricCol,linkageMethodCol);
-    % [~, ord_col] = TSQ_us_cluster(TS_DataMat',clusterMethCol,clusterParamsCol);
     fprintf(1,'Column clustering took %s.\n',BF_thetime(toc))
 else
     ord_col = 1:size(TS_DataMat,2); % don't reorder at all

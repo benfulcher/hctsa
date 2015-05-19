@@ -97,11 +97,11 @@ end
 % As a basic concatenation, then remove any duplicates
 
 % First want to remove any additional fields
-isextrafield = cellfun(@(x)~ismember(fieldnames(x.TimeSeries),{'ID','fileName','Keywords', ...
+isExtraField = cellfun(@(x)~ismember(fieldnames(x.TimeSeries),{'ID','Name','Keywords', ...
                             'Length','Data'}),loadedData,'UniformOutput',0);
 for i = 1:2
-    if any(isextrafield{i})
-        theextrafields = find(isextrafield{i});
+    if any(isExtraField{i})
+        theextrafields = find(isExtraField{i});
         thefieldnames = fieldnames(loadedData{i}.TimeSeries);
         for j = 1:length(theextrafields)
             loadedData{i}.TimeSeries = rmfield(loadedData{i}.TimeSeries,thefieldnames{theextrafields(j)});
@@ -113,7 +113,7 @@ end
 % Now that fields should match the default fields, concatenate:
 TimeSeries = cell2struct([struct2cell(loadedData{1}.TimeSeries), ...
                           struct2cell(loadedData{2}.TimeSeries)], ...
-                                {'ID','fileName','Keywords','Length','Data'});
+                                {'ID','Name','Keywords','Length','Data'});
 % Check for time series duplicates
 [uniquetsids, ix] = unique(vertcat(TimeSeries.ID));
 didTrim = 0;

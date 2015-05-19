@@ -183,13 +183,13 @@ for i = 1:numTimeSeries
 		if size(x,2) ~= 1
 			if size(x,1) == 1
                 fprintf(fid,['***** The time series %s is a row vector. Not sure how it snuck through the cracks, but I ' ...
-                                        'need a column vector...\n'],TimeSeries(tsInd).FileName);
+                                        'need a column vector...\n'],TimeSeries(tsInd).Name);
 				fprintf(fid,'I''ll transpose it for you for now....\n');
 				x = x';
 			else
 				fprintf(fid,'******************************************************************************************\n')
                 fprintf(fid,['MASSIVE ERROR WITH THIS TIME SERIES!!!: %s -- is it multivariate or something weird???.' ...
-                                                                    ' Skipping it!!\n'], TimeSeries(tsInd).FileName);
+                                                                    ' Skipping it!!\n'], TimeSeries(tsInd).Name);
 				fprintf(fid,'******************************************************************************************\n');
 				continue % skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
             end
@@ -213,7 +213,7 @@ for i = 1:numTimeSeries
 	    fprintf(fid,'- - - - - - - - - - - Loaded time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries)
 		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'Preparing to calculate %s\nts_id = %u, N = %u samples\nComputing %u / %u operations.\n', ...
-                            		TimeSeries(tsInd).FileName,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length,numCalc,numOps)
+                            		TimeSeries(tsInd).Name,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length,numCalc,numOps)
 	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
 
         % --------------------------------------------------------------------------
@@ -364,7 +364,7 @@ for i = 1:numTimeSeries
 	fprintf(fid,'********************************************************************\n')
     fprintf(fid,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
     fprintf(fid,'oOoOo Calculation complete for %s (ts_id = %u, N = %u) oOoOo\n', ...
-                            TimeSeries(tsInd).FileName,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length);
+                            TimeSeries(tsInd).Name,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length);
     if numCalc > 0 % Some amount of calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u special-valued outputs stored. [%u / %u]\n',...
 	     					numGood,numErrors,numSpecial,numCalc,numOps);
