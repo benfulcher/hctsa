@@ -438,7 +438,6 @@ save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','fromDatabase'
 switch retrieveWhatData
 case 'all'
     % Add outputs, quality labels, and calculation times
-    keyboard
     save('HCTSA_loc.mat','TS_DataMat','TS_Quality','TS_CalcTime','-append')
 case 'nocalctime'
     % Add outputs and quality labels

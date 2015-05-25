@@ -112,6 +112,12 @@ end
 numTimeSeries = length(ts_id_range); % Number of time series
 numOps = length(op_id_range); % Number of operations
 
+% Check that some computable range exists
+if numTimeSeries==0 || numOps==0
+    fprintf(1,'%u time series and %u operations match the ids provided. Exiting.\n');;
+    return
+end
+
 fprintf(fid,['Calculation has begun on %s using %u datasets ' ...
                             'and %u operations\n'],datestr(now),numTimeSeries,numOps);
 
@@ -143,9 +149,18 @@ end
 times = zeros(numTimeSeries,1); 
 lastSavedTime = 0; % Last saved time
 
+% Initialize TS_CalcTime and TS_Quality if they don't yet exist
+if ~exist('TS_CalcTime','var')
+    TS_CalcTime = zeros(size(TS_DataMat));
+end
+if ~exist('TS_Quality','var')
+    TS_Quality = zeros(size(TS_DataMat));
+end
+
 % --------------------------------------------------------------------------
 %% Computation
 % --------------------------------------------------------------------------
+
 for i = 1:numTimeSeries
     tsInd = tsIndex(i);
     
@@ -397,8 +412,7 @@ fprintf(fid,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1)
 % Save the local files for subsequent upload to the mySQL database
 fprintf(1,'Saving all results to HCTSA_loc.mat...')
 saveTimer = tic;
-save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','TimeSeries', ...
-                                'Operations','MasterOperations','-v7.3')
+save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','-append','-v7.3')
 fprintf(fid,' Saved in %s.\n',BF_thetime(toc(saveTimer)))
 clear saveTimer
 
