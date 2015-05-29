@@ -24,9 +24,9 @@
 %       (iv) 'quality': Just the quality labels
 % 
 %---OUTPUT:
-%--didWrite [opt] is 1 if Writes new file HCTSA_loc.mat
+%--didWrite [opt] is 1 if HCTSA_loc.mat was written
 % 
-% Other outputs are to the file HCTSA_loc.mat, which contains
+% Other outputs are saved to the file HCTSA_loc.mat:
 %--TS_DataMat, contains the data
 %--TS_Quality, contains the quality codes
 %--TS_CalcTime, contains the calculation times [if retrieveWhatData = 'all']
@@ -64,7 +64,7 @@ end
 
 % retrieveWhatEntries
 if nargin < 3 || isempty(retrieveWhatEntries)
-	retrieveWhatEntries = 'all'; % retrieve full sets of things, not just the empty entries in the database
+	retrieveWhatEntries = 'all'; % default: retrieve full sets of things, not just the empty entries in the database
     fprintf(1,'Retrieving ALL elements from the database in the specified ts_id and op_id ranges by default.\n')
 end
 retrieveWhatEntriesCanBe = {'null','all','error'};
@@ -75,7 +75,7 @@ end
 
 % retrieveWhatData
 if nargin < 4 || isempty(retrieveWhatData)
-    retrieveWhatData = 'nocalctime'; % Just get data and quality labels
+    retrieveWhatData = 'nocalctime'; % default: just retrieve data and quality labels
 end
 retrieveWhatDataCanBe = {'all','nocalctime','outputs','quality'};
 if ~ischar(retrieveWhatData) || ~ismember(retrieveWhatData,retrieveWhatDataCanBe)
@@ -85,6 +85,7 @@ end
 
 % ------------------------------------------------------------------------------
 % First check whether you're about to overwrite an existing file
+% (actually you probably don't want to do this when you're looping in a script)
 % ------------------------------------------------------------------------------
 % if exist('./HCTSA_loc.mat','file')
 %     reply = input(['Warning: HCTSA_loc.mat already exists -- if you continue, this ' ...
@@ -124,13 +125,20 @@ end
 [dbc, dbname] = SQL_opendatabase('',0,1);
 
 % ------------------------------------------------------------------------------
-% Refine the set of time series and operations to those that actually exist in the database
+% Refine the set of time series and operations to those that actually exist in
+% the database
 % ------------------------------------------------------------------------------
+
+% Operation IDs that exist in the database:
 opids_db = mysql_dbquery(dbc,sprintf('SELECT op_id FROM Operations WHERE op_id IN (%s)',op_ids_string));
 opids_db = vertcat(opids_db{:});
+
+% TimeSeries IDs that exist in the database:
 tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string));
 tsids_db = vertcat(tsids_db{:});
-if length(tsids_db) < numTS % Actually there are fewer time series in the database than requested
+
+% There are fewer time series in the database than requested
+if length(tsids_db) < numTS
     if (length(tsids_db) == 0) % Now there are no time series to retrieve
         fprintf(1,'None of the %u specified time series exist in ''%s''\n',numTS,dbname)
         SQL_closedatabase(dbc); return % Close the database connection before returning
@@ -142,8 +150,9 @@ if length(tsids_db) < numTS % Actually there are fewer time series in the databa
     numTS = length(ts_ids);
 end
 
-if length(opids_db) < numOps % actually there are fewer operations in the database
-    if (length(opids_db) == 0) % now there are no operations to retrieve
+% There are fewer operations in the database than requested:
+if length(opids_db) < numOps
+    if (length(opids_db) == 0) % Now there are no operations to retrieve
         fprintf(1,'None of the %u specified operations exist in ''%s''\n',numOps,dbname)
         SQL_closedatabase(dbc); return % Close the database connection before returning
     end
@@ -452,6 +461,7 @@ end
 
 fprintf(1,' Done in %s.\n',BF_thetime(toc(saveTimer)));
 clear saveTimer % stop timing
+
 didWrite = 1; % Tag to say that write to HCTSA_loc.mat file is successful
 
 % ------------------------------------------------------------------------------

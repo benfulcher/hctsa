@@ -2,16 +2,17 @@
 % TS_compute
 % --------------------------------------------------------------------------
 % 
-% This function fills in the missing elements of TS_DataMat, from HCTSA_loc.mat
-% (retrieved from the database using SQL_retrieve).
-% The function systematically calculates these missing elements (in parallel
-% over operations for each time series if specified).
+% This function computes missing elements of TS_DataMat loaded in from
+% HCTSA_loc.mat
 % 
 %---INPUTS:
-% doLog:      if 1 (0 by default) writes to a log file.
-% doParallel: if 1, attempts to use the Parallel Computing Toolbox to run
-%             computations in parallel over multiple cores.
-% beVocal:    if 1, gives additional user feedback.
+% doParallel:  if 1, attempts to use the Parallel Computing Toolbox to run
+%               computations in parallel over multiple cores.
+% ts_id_range: a custom range of time series IDs to compute (default: [] -- compute all)
+% op_id_range: a custom range of operation IDs to compute (default: [] -- compute all)
+% doLog:       if 1 writes results to a log file (0 by default -- output to prompt).
+% beVocal:     if 1, gives additional user feedback about the calculation of
+%               each individual operation.
 % 
 %---OUTPUTS:
 % Writes output into HCTSA_loc.mat
@@ -43,9 +44,12 @@ if nargin < 1
 	doParallel = 0;
 end
 
+% Custom range of ts_ids to compute
 if nargin < 2
     ts_id_range = []; % compute all ts_ids in the file by default
 end
+
+% Custom range of op_ids to compute
 if nargin < 3
     op_id_range = []; % compute all op_ids in the file by default
 end
@@ -56,9 +60,9 @@ if nargin < 4
 	doLog = 0;
 end
 if doLog
-	fn = sprintf('HCTSA_brawn_%s.log',datestr(now,30));
-	fid = fopen(fn,'w','n');
-	fprintf(1,'Calculation details will be logged to %s\n',fn);
+	fileName = sprintf('TS_compute_%s.log',datestr(now,30));
+	fid = fopen(fileName,'w','n');
+	fprintf(1,'Calculation details will be logged to %s\n',fileName);
 else
     % Write output to screen rather than .log file
     fid = 1;
@@ -114,7 +118,7 @@ numOps = length(op_id_range); % Number of operations
 
 % Check that some computable range exists
 if numTimeSeries==0 || numOps==0
-    fprintf(1,'%u time series and %u operations match the ids provided. Exiting.\n');;
+    fprintf(fid,'%u time series and %u operations match the ids provided. Exiting.\n');;
     return
 end
 
@@ -128,7 +132,7 @@ if doParallel
     % first check that the user can use the Parallel Computing Toolbox:
     heyLo = which('matlabpool');
     if isempty(heyLo)
-        fprintf(1,['Parallel Computing Toolbox not found -- ' ...
+        fprintf(fid,['Parallel Computing Toolbox not found -- ' ...
                         'cannot perform computations across multiple cores\n'])
         doParallel = 0;
     else
@@ -228,7 +232,7 @@ for i = 1:numTimeSeries
 	    fprintf(fid,'- - - - - - - - - - - Loaded time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries)
 		fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 		fprintf(fid,'Preparing to calculate %s\nts_id = %u, N = %u samples\nComputing %u / %u operations.\n', ...
-                            		TimeSeries(tsInd).Name,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length,numCalc,numOps)
+                    		TimeSeries(tsInd).Name,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length,numCalc,numOps)
 	    fprintf(fid,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
 
         % --------------------------------------------------------------------------
@@ -275,7 +279,7 @@ for i = 1:numTimeSeries
             end
 		end
 		
-        % Map back from temporary versions to the full versions
+        % Map from temporary versions to the full versions:
         MasterOutput(Master_ind_calc) = MasterOutput_tmp;
         MasterCalcTime(Master_ind_calc) = MasterCalcTime_tmp;
 		
@@ -283,21 +287,33 @@ for i = 1:numTimeSeries
                             numMopsToCalc,BF_thetime(toc(masterTimer)));
         clear masterTimer
         
+        % --------------------------------------------------------------------------
+		%% Assign all the results to the corresponding operations
+        % --------------------------------------------------------------------------
         % Set sliced version of matching indicies across the range toCalc
         % Indices of MasterOperations corresponding to each Operation (i.e., each index of toCalc)
         par_OperationMasterInd = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations(toCalc).MasterID]);
         par_MasterOperationsLabel = {MasterOperations.Label}; % Master labels
         par_OperationCodeString = {Operations(toCalc).CodeString}; % Code string for each operation to calculate (i.e., in toCalc)
         
-        % --------------------------------------------------------------------------
-		%% Assign all the results to the corresponding operations
-        % --------------------------------------------------------------------------
 		if doParallel
 	        parfor jj = 1:numCalc
-                [ffi(jj), qqi(jj), cti(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
+                try
+                    [ffi(jj), qqi(jj), cti(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
                                                    MasterCalcTime(par_OperationMasterInd(jj)), ...
                                                    par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
                                                    par_OperationCodeString{jj},fid);
+               catch
+                   fprintf(fid,'---Error with %s\n',par_OperationCodeString{jj});
+                   if (MasterOperations(par_OperationMasterInd(jj)).ID == 0)
+                       error(['The operations database is corrupt: there is no link ' ...
+                               'from ''%s'' to a master code'], par_OperationCodeString{jj});
+                   else
+                       fprintf(fid,['Error retrieving element %s from %s.\n' ...
+                                   'Activating keyboard active for debugging...\n'], ...
+                                   par_OperationCodeString{jj}, par_MasterOperationsLabel{par_OperationMasterInd(jj)})
+                   end
+               end
             end
 		else
             for jj = 1:numCalc
@@ -307,15 +323,14 @@ for i = 1:numTimeSeries
                                                        par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
                                                        par_OperationCodeString{jj},fid);
                 catch
-                    fprintf(1,'---Error with %s\n',par_OperationCodeString{jj});
+                    fprintf(fid,'---Error with %s\n',par_OperationCodeString{jj});
                     if (MasterOperations(par_OperationMasterInd(jj)).ID == 0)
                         error(['The operations database is corrupt: there is no link ' ...
                                 'from ''%s'' to a master code'], par_OperationCodeString{jj});
                     else
-                        fprintf(1,['Error retrieving element %s from %s.\n' ...
+                        fprintf(fid,['Error retrieving element %s from %s.\n' ...
                                     'Activating keyboard active for debugging...\n'], ...
                                     par_OperationCodeString{jj}, par_MasterOperationsLabel{par_OperationMasterInd(jj)})
-                        keyboard
                     end
                 end
             end
@@ -372,21 +387,22 @@ for i = 1:numTimeSeries
     % The time taken to calculate (or not, if numCalc = 0) all operations for this time series:
     times(i) = toc(bigTimer); clear bigTimer
 
-
     % --------------------------------------------------------------------------
     %% Calculation complete: display information about this time series calculation
     % --------------------------------------------------------------------------
 	fprintf(fid,'********************************************************************\n')
     fprintf(fid,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
     fprintf(fid,'oOoOo Calculation complete for %s (ts_id = %u, N = %u) oOoOo\n', ...
-                            TimeSeries(tsInd).Name,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length);
-    if numCalc > 0 % Some amount of calculation was performed
+                        TimeSeries(tsInd).Name,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length);
+                        
+    if numCalc > 0 % Some calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u special-valued outputs stored. [%u / %u]\n',...
 	     					numGood,numErrors,numSpecial,numCalc,numOps);
 		fprintf(fid,'All calculations for this time series took %s.\n',BF_thetime(times(i),1));
-    else
+    else % No calculation was performed
     	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',numOps);
     end
+    
     if i < numTimeSeries
         fprintf(fid,'- - - - - - - -  %u time series remaining - - - - - - - -\n',numTimeSeries-i);
     	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n', ...
@@ -410,18 +426,17 @@ fprintf(fid,['!! !! !! !! !! !! Calculation completed at %s !! !! ' ...
 fprintf(fid,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1))
 
 % Save the local files for subsequent upload to the mySQL database
-fprintf(1,'Saving all results to HCTSA_loc.mat...')
+fprintf(fid,'Saving all results to HCTSA_loc.mat...')
 saveTimer = tic;
 save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','-append','-v7.3')
 fprintf(fid,' Saved in %s.\n',BF_thetime(toc(saveTimer)))
 clear saveTimer
 
-% Close the .log file:
+% Close the log file:
 if doLog
 	fclose(fid);
 end
 
-fprintf(1,'Calculation complete!\n')
-% ': you can now run SQL_store to upload the results to a mySQL database.\n'])
+fprintf(fid,'Calculation complete!\n')
 
 end

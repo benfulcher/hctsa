@@ -44,7 +44,7 @@ end
 % ------------------------------------------------------------------------------
 % Start adding chunks to the database
 % ------------------------------------------------------------------------------
-chunkExtent = 0:chunkSize:length(dataSet);
+chunkExtent = 0:chunkSize:length(dataSet)-1;
 numChunks = length(chunkExtent);
 for k = 1:numChunks % loop over chunks
     
@@ -53,7 +53,7 @@ for k = 1:numChunks % loop over chunks
     
     % Move through this chunk:
     for j = 1:chunkSize
-        ind = chunkExtent(k) + j;
+        ind = chunkExtent(k) + j
         if ind > length(dataSet) % don't exceed the dataset size
             break;
         end
@@ -66,7 +66,8 @@ for k = 1:numChunks % loop over chunks
     % Execute this chunk:
     [~, emsg] = mysql_dbexecute(dbc,theQuery);
     if ~isempty(emsg)
-        error('Error in SQL_add_chunked for chunk %u with chunk size %u...\n%s\n',k,chunkSize,emsg)
+        error(['Error in SQL_add_chunked for chunk %u with chunk size %u...\n' ...
+                'Attempted query: %s\n%s\n'],k,chunkSize,theQuery,emsg)
     end
 end
 
