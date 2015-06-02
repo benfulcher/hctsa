@@ -571,10 +571,10 @@ end
 fprintf('Adding %u new %s to the %s table in %s...',...
                     sum(~isBad),theWhat,theTable,databaseName)
 switch addWhat
-case 'ts' % Add time series to the TimeSeries table just 10 at a time
+case 'ts' % Add time series to the TimeSeries table just 20 at a time
           % (so as not to exceed the max_allowed_packet when transmitting the 
           % time-series data) An appropriate chunk size will depend on the length of
-          % time series in general
+          % time series in general...
     SQL_add_chunked(dbc,['INSERT INTO TimeSeries (Name, Keywords, Length, ' ...
                                     'Data) VALUES'],toAdd(~isBad),20);
 case 'ops' % Add operations to the Operations table 500 at a time
