@@ -53,7 +53,7 @@ for k = 1:numChunks % loop over chunks
     
     % Move through this chunk:
     for j = 1:chunkSize
-        ind = chunkExtent(k) + j
+        ind = chunkExtent(k) + j;
         if ind > length(dataSet) % don't exceed the dataset size
             break;
         end
