@@ -37,10 +37,10 @@ end
 switch tsOrOps
 case 'ts'
     dataStruct = 'TimeSeries';
-    theName = 'FileName';
+    theName = 'Name'; %'FileName';
 case 'ops'
     dataStruct = 'Operations';
-    theName = 'OpName';
+    theName = 'Name'; %'OpName';
 otherwise
     error('Unknown specifier ''%s''. Should be ''ts'' or ''ops''.',tsOrOps);
 end
@@ -66,6 +66,7 @@ loadedData = load(theFile,'TS_DataMat',dataStruct);
 dataStruct = loadedData.(dataStruct);
 TS_DataMat = loadedData.TS_DataMat;
 numItems = length(dataStruct);
+numNeighbors = min(numItems,numNeighbors) - 1;
 clear loadedData
 
 % ------------------------------------------------------------------------------
