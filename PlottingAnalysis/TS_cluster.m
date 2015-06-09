@@ -76,7 +76,8 @@ if ~isempty(subSet)
 end
 
 % --------------------------------------------------------------------------
-% Record information about clustering settings so can run the same back again if needed later:
+% Record information about clustering settings so can run the same back again if
+% needed later:
 % --------------------------------------------------------------------------
 codeToCluster = ['TS_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, ' ...
                                     'linkageMethodCol, subSet)'];
@@ -88,15 +89,15 @@ clusteringInfo = struct('distanceMetricRow',distanceMetricRow,'linkageMethodRow'
 %% Load information from local files
 % --------------------------------------------------------------------------
 if isempty(subSet) || strcmp(subSet{1},'norm')
-    TheFile = 'HCTSA_N.mat';
+    theFile = 'HCTSA_N.mat';
 else % subset of the clustered matrix
-    TheFile = 'HCTSA_cl.mat';
+    theFile = 'HCTSA_cl.mat';
 end
-wn = which(TheFile); % Check that HCTSA_N exists
-if isempty(wn);
-    error('%s not found.',TheFile);
+% Check that the file exists:
+if ~exist(theFile,'file');
+    error('%s not found.',theFile);
 end
-fprintf(1,'Loading data from %s...',TheFile)
+fprintf(1,'Loading data from %s...',theFile)
 load('HCTSA_N.mat','TS_DataMat','TimeSeries','Operations','MasterOperations','normalizationInfo')
 fprintf(1,' Done.\n')
 
@@ -111,19 +112,21 @@ if ~isempty(subSet)
        r = subSet{2};
        TS_DataMat = TS_DataMat(r,:);
        TimeSeries = TimeSeries(r);
-       fprintf(1,'Reduced rows/timeseries from %u to %u according to the specified subset.\n',length(TimeSeries),length(r));
+       fprintf(1,'Reduced rows/timeseries from %u to %u according to the specified subset.\n',...
+                                   length(TimeSeries),length(r));
     end
 
     if ~isempty(subSet{3}); % column subset
         r = subSet{3};
         TS_DataMat = TS_DataMat(:,r);
         Operations = Operations(r);
-        fprintf(1,'Reduced columns/operations from %u to %u according to the specified subset\n',length(Operations),length(r));
+        fprintf(1,'Reduced columns/operations from %u to %u according to the specified subset\n',...
+                                    length(Operations),length(r));
     end
 end
 
 % --------------------------------------------------------------------------
-%% Do the clustering
+%% Perform the clustering
 % --------------------------------------------------------------------------
 fprintf(1,'Clustering the full %u x %u data matrix.\n',length(TimeSeries),length(Operations))
 
@@ -131,7 +134,8 @@ fprintf(1,'Clustering the full %u x %u data matrix.\n',length(TimeSeries),length
 if ~(ischar(distanceMetricRow) && ismember(distanceMetricRow,{'none','nothing'})) && size(TS_DataMat,1) > 1
     % (can specify 'none' to do no clustering)
     fprintf(1,'\n----Clustering rows using a distance metric %s and %s linkage method----\n',...
-                    distanceMetricRow,linkageMethodRow); tic
+                    distanceMetricRow,linkageMethodRow);
+    tic
     ord_row = BF_ClusterReorder(TS_DataMat,distanceMetricRow,linkageMethodRow);
     fprintf(1,'Row clustering took %s.\n',BF_thetime(toc))
 else
@@ -142,7 +146,8 @@ end
 if ~(ischar(distanceMetricCol) && ismember(distanceMetricCol,{'none','nothing'})) && size(TS_DataMat,2) > 1
     % (can specify 'none' to do no clustering)
     fprintf(1,'\n----Clustering columns using a distance metric %s and %s linkage method----\n',...
-                    distanceMetricCol,linkageMethodCol); tic
+                    distanceMetricCol,linkageMethodCol);
+    tic
     ord_col = BF_ClusterReorder(TS_DataMat',distanceMetricCol,linkageMethodCol);
     fprintf(1,'Column clustering took %s.\n',BF_thetime(toc))
 else
@@ -172,7 +177,7 @@ Operations = Operations(ord_col);
 
 % Save information about the clustering to the file
 % You can run codeToCluster after loading all the clustering info using an eval statement...?
-fprintf(1,'Saving the clustered data as ''HCTSA_cl''...')
+fprintf(1,'Saving the clustered data as ''HCTSA_cl.mat''...')
 save('HCTSA_cl.mat','TS_DataMat','TimeSeries','Operations','MasterOperations','normalizationInfo','clusteringInfo')
 fprintf(1,' Done.\n');
 

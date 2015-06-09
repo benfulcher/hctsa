@@ -728,7 +728,6 @@ DK_quickde(y,2,2)	Kaplan_determinism_2_2
 DK_quickde(y,3,2)	Kaplan_determinism_3_2
 DK_quickde(y,4,2)	Kaplan_determinism_4_2
 DK_quickde(y,5,2)	Kaplan_determinism_5_2
-CO_TSTL_AutoCorrMethod(y)	CO_TSTL_AutoCorrMethod_err
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{1,8})	NL_TSTL_TakensEstimator_n1_005_005_1_8
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{1,3})	NL_TSTL_TakensEstimator_n1_005_005_1_3
 NL_TSTL_TakensEstimator(y,-1,0.05,0.05,{'ac',8})	NL_TSTL_TakensEstimator_n1_005_005_ac_8

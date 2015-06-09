@@ -18,6 +18,9 @@ You can then update to the latest stable version of the repository by pulling th
 git pull upstream master
 ```
 
+We recommend keeping the repository without any changes so that the latest version can be pulled from the upstream repository.
+However, details on how to merge the latest version of the repository with the local changes in your fork can be found [here](https://help.github.com/articles/syncing-a-fork/).
+
 Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/SystemsAndSignalsGroup/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).
 
 Many thanks go to Romesh Abeysuriya for helping with the database set-up process and install scripts.
