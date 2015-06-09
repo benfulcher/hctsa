@@ -2,9 +2,9 @@
 % CO_TSTL_amutual
 % ------------------------------------------------------------------------------
 % 
-% Uses amutual code from TSTOOL, which uses a
-% histogram method with n bins to estimate the mutual information of a
-% time series across a range of time-delays, tau.
+% Uses amutual code from TSTOOL, which uses a histogram method with n bins to
+% estimate the mutual information of a time series across a range of
+% time-delays, tau.
 % 
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %

@@ -538,7 +538,6 @@ CO_CompareMinAMI_std2_2_80.modef	CO_CompareMinAMI_std2_2_80_modef	correlation,AM
 CO_CompareMinAMI_std2_2_80.conv4	CO_CompareMinAMI_std2_2_80_conv4	correlation,AMI
 CO_CompareMinAMI_std2_2_80.nlocmax	CO_CompareMinAMI_std2_2_80_nlocmax	correlation,AMI
 CO_CompareMinAMI_std2_2_80.maxp	CO_CompareMinAMI_std2_2_80_maxp	correlation,AMI
-
 CO_glscf_1_1_1	CO_glscf_1_1_1	correlation,glscf
 CO_glscf_1_1_2	CO_glscf_1_1_2	correlation,glscf
 CO_glscf_1_1_3	CO_glscf_1_1_3	correlation,glscf
