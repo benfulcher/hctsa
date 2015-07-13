@@ -1,22 +1,22 @@
 % --------------------------------------------------------------------------
 % TS_normalize
 % --------------------------------------------------------------------------
-% 
+%
 % Reads in data from HCTSA_loc.mat, writes a trimmed, normalized version to
 % HCTSA_loc_N.mat
 % The normalization is all about a rescaling to the [0,1] interval for
 % visualization and clustering.
-% 
+%
 %---INPUTS:
 % normFunction: String specifying how to normalize the data.
-% 
+%
 % filterOptions: Vector specifying thresholds for the minimum proportion of bad
 %                values tolerated in a given row or column, in the form of a 2-vector:
 %                [row proportion, column proportion] If one of the filterOptions
 %                is set to 1, will have no bad values in your matrix.
-%                
+%
 % fileName_HCTSA_loc: Custom filename to import. Default is 'HCTSA_loc.mat'.
-% 
+%
 % subs [opt]: Only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
 %             subsequently be clustered and further subsetted using TS_cluster2...
@@ -28,12 +28,12 @@
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -53,7 +53,7 @@ end
 
 if nargin < 2 || isempty(filterOptions)
     filterOptions = [0.80, 1];
-    % By default remove less than 80%-good-valued time series, & then less than 
+    % By default remove less than 80%-good-valued time series, & then less than
     % 100%-good-valued operations.
 end
 fprintf(1,['Removing time series with more than %.2f%% special-valued outputs\n' ...
@@ -98,7 +98,7 @@ if ~isempty(subs)
         TS_DataMat = TS_DataMat(kr0,:);
         TS_Quality = TS_Quality(kr0,:);
     end
-    
+
     kc0 = subs{2}; % columns to keep (0)
     if isempty(kc0),
         kc0 = 1:size(TS_DataMat,2);
@@ -144,11 +144,13 @@ if thresh_r > 0 % if 1, then even the worst are included
     if ~isempty(kr1)
         if ~isempty(xkr1)
             fprintf(1,['\nRemoved %u time series with fewer than %4.2f%% good values:'...
-                            ' from %u to %u.\n'],size(TS_DataMat,1)-length(kr1),thresh_r*100,size(TS_DataMat,1),length(kr1))
+                        ' from %u to %u.\n'],size(TS_DataMat,1)-length(kr1),...
+                        thresh_r*100,size(TS_DataMat,1),length(kr1))
             % display filtered times series to screen:
             fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(xkr1).Name},','))
         else
-            fprintf(1,'All %u time series had greater than %4.2f%% good values. Keeping them all.\n', ...
+            fprintf(1,['All %u time series had greater than %4.2f%% good values.' ...
+                            ' Keeping them all.\n'], ...
                             size(TS_DataMat,1),thresh_r*100)
         end
         % ********************* kr1 ***********************
@@ -173,7 +175,7 @@ if thresh_c > 0
     badcp = badcp/size(TS_DataMat,1);
     xkc1 = badc(badcp >= 1-thresh_c); % don't keep columns if fewer good values than thresh_c
     kc1 = setxor(1:size(TS_DataMat,2),xkc1); % keep columns (1)
-    
+
     if ~isempty(kc1)
         if ~isempty(xkc1)
             fprintf(1,'\nRemoved %u operations with fewer than %5.2f%% good values: from %u to %u.\n',...
@@ -260,7 +262,8 @@ Operations = Operations(kc_tot); % Filter operations
 
 fprintf(1,'We now have %u time series and %u operations in play.\n', ...
                                 length(TimeSeries),length(Operations))
-fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',sum(isnan(TS_DataMat(:))), ...
+fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',...
+            sum(isnan(TS_DataMat(:))), ...
             sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
 
 
@@ -277,7 +280,7 @@ else
                                 length(TimeSeries),length(Operations))
         TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction);
     else
-        % Train the normalization parameters only on a specified set of training data, then apply 
+        % Train the normalization parameters only on a specified set of training data, then apply
         % that transformation to the full data matrix
         fprintf(1,['Normalizing a %u x %u object using %u training time series to train the transformation!' ...
                 ' Please be patient...\n'],length(TimeSeries),length(Operations),length(trainSet))
@@ -325,6 +328,13 @@ fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n', ...
             sum(isnan(TS_DataMat(:))),sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100, ...
             size(TS_DataMat,1),size(TS_DataMat,2))
 
+% ------------------------------------------------------------------------------
+% Set default clustering details
+% ------------------------------------------------------------------------------
+ts_clust = struct('distanceMetric','none','Dij',[],...
+                'ord',1:size(TS_DataMat,1),'linkageMethod','none');
+op_clust = struct('distanceMetric','none','Dij',[],...
+                'ord',1:size(TS_DataMat,2),'linkageMethod','none');
 
 % --------------------------------------------------------------------------
 %% Save results to file
@@ -341,7 +351,7 @@ normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
 
 fprintf(1,'Saving the trimmed, normalized data to local files...')
 save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-                                    'MasterOperations','normalizationInfo');
+                'MasterOperations','normalizationInfo','ts_clust','op_clust');
 fprintf(1,' Done.\n')
 
 end

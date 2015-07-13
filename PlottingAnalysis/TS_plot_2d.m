@@ -1,27 +1,27 @@
 % ------------------------------------------------------------------------------
 % TS_plot_2d
 % ------------------------------------------------------------------------------
-% 
+%
 % Plots the dataset in a two-dimensional space
 % e.g., that of two chosen operations, or two principal components.
-% 
+%
 %---INPUTS:
 % Features, an Nx2 vector of where to plot each of the N data objects in the
 %           two-dimensional space
 %
-% DataInfo, a structure containing all the information about the data. Fields
+% dataInfo, a structure containing all the information about the data. Fields
 %           can include:
 %               - labels (feature labels, cols of Features)
 %               - DataLabels (labels for each data point, rows of Features)
 %               - GroupIndices (a group index for each data point, rows of Features)
 %               - GroupNames (name for each group)
 %               - TimeSeriesData (cell of vectors containing time-series data)
-% 
+%
 % trainTest, whether to plot separately indices of training and test datapoints.
 %               Of the form {index_train,index_test}.
 %               If of the form [index], then just plots the subset index of the
 %                       points in Features.
-%               
+%
 % annotateParams, a structure containing all the information about how to annotate
 %           data points. Fields can include:
 %               - n, the number of data points to annotate
@@ -32,22 +32,22 @@
 %               - cmap, a cell of colors, with elements for each group
 %               - theMarkerSize, a custom marker size
 %               - theLineWidth: line width for annotated time series
-% 
+%
 % showDistr, if 1 (default), plots marginal density estimates for each variable
 %                   (above and to the right of the plot), otherwise set to 0.
-%                   
+%
 % classMethod, can select a classifier to fit to the different classes (e.g.,
 %               'linclass' for a linear classifier).
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -66,7 +66,7 @@ if nargin < 1
     error('You must provide two-dimensional feature vectors for the data.')
 end
 
-% DataInfo should be a structure array with all the information about the data (same length as Features)
+% dataInfo should be a structure array with all the information about the data (same length as Features)
 % Group should be a field in this structure array
 
 if nargin < 3 || isempty(trainTest)
@@ -93,13 +93,13 @@ makeFigure = 1; % default is to plot on a brand new figure('color','w')
 % ------------------------------------------------------------------------------
 % Data is not loaded, now it must be provided
 
-labels = DataInfo.labels; % Feature labels
+labels = dataInfo.labels; % Feature labels
 if isstruct(annotateParams) || annotateParams > 0
-    DataLabels = DataInfo.DataLabels; % We need data labels
+    DataLabels = dataInfo.DataLabels; % We need data labels
 end
-GroupNames = DataInfo.GroupNames;
-GroupIndices = DataInfo.GroupIndices;
-TimeSeriesData = DataInfo.TimeSeriesData;
+GroupNames = dataInfo.GroupNames;
+GroupIndices = dataInfo.GroupIndices;
+TimeSeriesData = dataInfo.TimeSeriesData;
 numGroups = length(GroupNames);
 
 % ------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ if showDistr
     set(gca,'XTickLabel',[]);
     set(gca,'YTickLabel',[]);
     set(gca,'ylim',[minn,maxx]);
-    
+
     subplot(4,4,[8,12,16]); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numGroups
@@ -270,13 +270,13 @@ end
 didClassify = 0;
 if (numGroups == 2) && strcmp(classMethod,'linclass');
     modeorder = 'linear'; % or 'quadratic'
-    
+
     xlim = get(gca,'XLim'); ylim = get(gca,'YLim');
     group = BF_ToGroup(GroupIndices);
     [X, Y] = meshgrid(linspace(xlim(1),xlim(2),200),linspace(ylim(1),ylim(2),200));
     X = X(:); Y = Y(:);
     [~,~,~,~,coeff] = classify([X Y],Features(:,1:2), group, modeorder);
-    
+
     hold on;
     K = coeff(1,2).const; L = coeff(1,2).linear;
     if strcmp(modeorder,'linear')
@@ -287,7 +287,7 @@ if (numGroups == 2) && strcmp(classMethod,'linclass');
     f = sprintf('0 = %g+%g*x+%g*y+%g*x^2+%g*x.*y+%g*y.^2',K,L,Q(1,1),Q(1,2)+Q(2,1),Q(2,2));
     h2 = ezplot(f,[xlim(1), xlim(2), ylim(1), ylim(2)]);
     set(h2,'LineStyle','--','color','k','LineWidth',2)
-    
+
     % Label that classification was performed
     didClassify = 1;
 end
@@ -412,19 +412,19 @@ for j = 1:numAnnotations
         theGroup = alreadyPicked(j,1);
         itsme = alreadyPicked(j,2);
     end
-    
+
     if (j > 1) && any(sum(abs(alreadyPicked(1:j-1,:) - repmat(alreadyPicked(j,:),j-1,1)),2)==0)
         % Same one has already been picked, don't plot it again
         continue
     end
-    
+
     plotPoint = xy{theGroup}(itsme,:);
     theDataLabel = DataLabels{GroupIndices{theGroup}(itsme)}; % Name of timeseries to plot
     timeSeriesSegment = TimeSeriesData{GroupIndices{theGroup}(itsme)}; % Name of timeseries to plot
     if ~isempty(maxL)
         timeSeriesSegment = timeSeriesSegment(1:min(maxL,end));
     end
-    
+
     % Plot a circle around the annotated point:
     if numGroups==1
         % cycle through rainvow colors sequentially:
@@ -434,7 +434,7 @@ for j = 1:numAnnotations
         plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',groupColors{theGroup},...
                             'MarkerFaceColor',brighten(groupColors{theGroup},0.5));
     end
-    
+
     % Add text annotations:
     switch textAnnotation
     case 'Name'
@@ -449,18 +449,18 @@ for j = 1:numAnnotations
                     'interpreter','none','FontSize',8,...
                     'color',brighten(groupColors{theGroup},-0.6));
     end
-    
+
     % Adjust if annotation goes off axis x-limits
     px = plotPoint(1)+[-fdim(1)*pwidth/2,+fdim(1)*pwidth/2];
     if px(1) < pxlim(1), px(1) = pxlim(1); end % can't plot off left side of plot
     if px(2) > pxlim(2), px(1) = pxlim(2)-fdim(1)*pwidth; end % can't plot off right side of plot
-    
+
     % Adjust if annotation goes above maximum y-limits
     py = plotPoint(2)+[0,fdim(2)*pheight];
     if py(2) > pylim(2)
         py(1) = pylim(2)-fdim(2)*pheight;
     end
-    
+
     % Annotate the time series
     plot(px(1)+linspace(0,fdim(1)*pwidth,length(timeSeriesSegment)),...
             py(1)+fdim(2)*pheight*(timeSeriesSegment-min(timeSeriesSegment))/(max(timeSeriesSegment)-min(timeSeriesSegment)),...
@@ -487,5 +487,5 @@ function [fr, xr] = plot_ks(v,c,swap)
     end
 end
 % ------------------------------------------------------------------------------
-	
+
 end

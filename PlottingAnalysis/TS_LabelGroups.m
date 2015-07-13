@@ -186,14 +186,14 @@ if saveBack
         fprintf(1,'Saving group labels and information back to %s...',theFile);
         
         % First append/overwrite group names
-        GroupNames = keywordGroups;
+        groupNames = keywordGroups;
         
         % Then overwrite labels
-        TheGroups = BF_ToGroup(groupIndices,length(TimeSeries))';
+        theGroups = BF_ToGroup(groupIndices,length(TimeSeries))';
         % Now we need to make the cells
-        TheGroupsCell = cell(size(TheGroups));
+        theGroupsCell = cell(size(theGroups));
         % Cannot find an in-built for this... :-/
-        for i = 1:length(TheGroups), TheGroupsCell{i} = TheGroups(i); end
+        for i = 1:length(theGroups), theGroupsCell{i} = theGroups(i); end
         
         % First remove Group field if it exists
         if isfield(TimeSeries,'Group')
@@ -201,17 +201,17 @@ if saveBack
         end
         
         % Add fields to the TimeSeries structure array
-        NewFieldNames = fieldnames(TimeSeries);
+        newFieldNames = fieldnames(TimeSeries);
         % Add two new fields:
-        NewFieldNames{length(NewFieldNames)+1} = 'Group';
+        newFieldNames{length(newFieldNames)+1} = 'Group';
 
         % Then append the new group information:
-        TimeSeries = cell2struct([struct2cell(TimeSeries);TheGroupsCell],NewFieldNames);
+        TimeSeries = cell2struct([struct2cell(TimeSeries);theGroupsCell],newFieldNames);
         % {'ID','Name','Keywords','Length','Data','Group'}
 
         % Save everything back to file:
         save(theFile,'TimeSeries','-append')
-        save(theFile,'GroupNames','-append')
+        save(theFile,'groupNames','-append')
         fprintf(1,' Saved.\n');
     end
 end

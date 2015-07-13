@@ -1,12 +1,12 @@
 % --------------------------------------------------------------------------
 % SQL_retrieve
 % --------------------------------------------------------------------------
-% 
+%
 % This function retreives data from the mySQL database for subsequent analysis
 % in Matlab. It takes as input a set of constraints on the time series and
 % operations to include, and outputs the relevant subsection of the data matrix
 % and associated metadata to HCTSA_loc.mat
-% 
+%
 %---INPUTS:
 %--ts_ids: a vector of ts_ids to retrieve from the mySQL database.
 %--op_ids: a vector of op_ids to retrieve from the mySQL database.
@@ -22,10 +22,10 @@
 %       (ii) 'nocalctime': Retrieves calculated values and quality labels
 %       (iii) 'outputs': Just the calculated values
 %       (iv) 'quality': Just the quality labels
-% 
+%
 %---OUTPUT:
 %--didWrite [opt] is 1 if HCTSA_loc.mat was written
-% 
+%
 % Other outputs are saved to the file HCTSA_loc.mat:
 %--TS_DataMat, contains the data
 %--TS_Quality, contains the quality codes
@@ -33,16 +33,16 @@
 %--TimeSeries, contains metadata about the time series, and the time-series data
 %--Operations, contains metadata about the operations
 %--MasterOperations, contains metadata about the implicatedmaster operations
-% 
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -51,7 +51,7 @@
 % ------------------------------------------------------------------------------
 
 function didWrite = SQL_retrieve(ts_ids, op_ids, retrieveWhatEntries, retrieveWhatData)
-    
+
 % Until it actually writes something, set the function output, didWrite = 0
 didWrite = 0;
 
@@ -189,7 +189,7 @@ end
 
 % Display information to user:
 switch retrieveWhatEntries
-case 'all' 
+case 'all'
     fprintf(1,['Retrieving all elements from the database (one time series ' ...
                 'per database query). Please be patient...\n']);
 case 'null'
@@ -224,17 +224,17 @@ retrievalTimer = tic; % Time the process using retrievalTimer
 for i = 1:numTS
 
     ts_id_now = ts_ids(i); % Range of ts_ids retrieved in this iteration
-    
+
     baseString = sprintf('%s WHERE ts_id = %u AND op_id IN (%s)',selectWhat, ...
                                             ts_id_now,op_ids_string);
-    
+
     % We could do a (kind of blind) retrieval, i.e., without retrieving op_ids safely
     % as long as for a given ts_id, the op_ids are in ascending order in the Results table.
     % This will be the case if time series and operations are added
     % using SQL_add because of the SORT BY specifier in SQL_add commands.
     % Otherwise op_ids should also be retrieved here, and used to sort
     % the other columns (i.e., outputs, quality codes, calculation times)
-    
+
     switch retrieveWhatEntries
     case 'all'
         selectString = baseString;
@@ -243,28 +243,28 @@ for i = 1:numTS
     case 'error'
     	selectString = sprintf('%s AND QualityCode = 1',baseString);
     end
-    
+
     % Do the retrieval
 	[qrc, emsg] = mysql_dbquery(dbc,selectString); % Retrieve data for this time series from the database
-    
+
     if ~isempty(emsg)
         error('Error retrieving outputs from %s.\n%s',dbname,emsg);
     end
-    
+
     % Check results look ok:
     if isempty(qrc) % No data to retrieve
         % There are no entries in Results that match the requested conditions
         fprintf(1,'No data to retrieve for ts_id = %u\n',ts_id_now);
         % Leave local files (e.g., TS_DataMat, TS_Quality, TS_CalcTime as Inf)
-        
+
     else
         % Entries need to be written to local matrices
         % Set didRetrieve = 1 for this iteration
         didRetrieve(i) = 1;
-        
+
     	% Convert empty entries to NaNs
     	qrc(cellfun(@isempty,qrc)) = {NaN};
-    
+
         % Put results from database into rows of local matrix
         if strcmp(retrieveWhatEntries,'all') % easy in this case
             % Assumes data is ordered by the op_id_string provided
@@ -304,7 +304,7 @@ for i = 1:numTS
             end
         end
     end
-    
+
     % Periodically display indication of time remaining
     if (i==50) && (i < numTS/10) % Give an initial indication of time after the first 50 iterations
         fprintf(1,['Based on the first 50 retrievals, this is taking ' ...
@@ -326,7 +326,7 @@ else
                             'Not writing any data to file.\n'],numTS,dbname);
     SQL_closedatabase(dbc); return
 end
-	
+
 if ismember(retrieveWhatEntries,{'null','error'})
     % We only want to keep rows and columns with (NaNs for 'null' or errors for 'error') in them...
     switch retrieveWhatEntries
@@ -339,7 +339,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
         fprintf(1,['Filtering so that local files contain rows/columns containing at least ' ...
                                 'one entry that was an error in the database.\n']);
     end
-    
+
 	% Time series
     keepi = (sum(keepme,2) > 0); % there is at least one entry to calculate in this row
     if sum(keepi) == 0
@@ -364,7 +364,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
             TS_Quality = TS_Quality(keepi,:);
         end
 	end
-	
+
 	% Operations
     keepi = (sum(keepme,1) > 0); % there is at least one entry to calculate in this column
 	if sum(keepi) == 0
@@ -379,7 +379,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
     		TS_DataMat = TS_DataMat(:,keepi);
             TS_Quality = TS_Quality(:,keepi);
             TS_CalcTime = TS_CalcTime(:,keepi);
-        case 'nocalctime' 
+        case 'nocalctime'
     		TS_DataMat = TS_DataMat(:,keepi);
             TS_Quality = TS_Quality(:,keepi);
         case 'outputs'
@@ -387,7 +387,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
         case 'quality'
             TS_Quality = TS_Quality(:,keepi);
         end
-	end    
+	end
 end
 
 

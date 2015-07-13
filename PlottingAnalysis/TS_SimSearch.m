@@ -1,22 +1,22 @@
 % ------------------------------------------------------------------------------
 % TS_SimSearch
 % ------------------------------------------------------------------------------
-% 
-% Finds nearest neighbors of a given item, providing a local context for a 
+%
+% Finds nearest neighbors of a given item, providing a local context for a
 % particular time series or operation.
-% 
+%
 %---INPUTS:
-% 
+%
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -24,7 +24,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TS_SimSearch(tsOrOps,whatData,targetID,numNeighbors)
+function TS_SimSearch(tsOrOps,whatDataFile,targetID,numNeighbors)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -34,46 +34,46 @@ if nargin < 1 || isempty(tsOrOps)
     tsOrOps = 'ts';
     fprintf(1,'Time series by default.\n');
 end
-switch tsOrOps
-case 'ts'
-    dataStruct = 'TimeSeries';
-    theName = 'Name'; %'FileName';
-case 'ops'
-    dataStruct = 'Operations';
-    theName = 'Name'; %'OpName';
-otherwise
+if ~ismember(tsOrOps,{'ts','ops'})
     error('Unknown specifier ''%s''. Should be ''ts'' or ''ops''.',tsOrOps);
 end
 
+if nargin < 2
+    whatDataFile = 'norm';
+end
+
+if nargin < 3
+    targetID = 1;
+end
+
 if nargin < 4 || isempty(numNeighbors)
-    numNeighbors = 10;
+    numNeighbors = 20;
 end
 
 % ------------------------------------------------------------------------------
 % Load data
 % ------------------------------------------------------------------------------
-switch whatData
-    case 'orig'
-        theFile = 'HCTSA_loc.mat';
-    case 'norm'
-        theFile = 'HCTSA_N.mat';
-    case 'cl'
-        theFile = 'HCTSA_cl.mat';
-    otherwise
-        error('Unknown specifier ''%s''',whatData);
+
+[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataFile);
+if strcmp(tsOrOps,'ts')
+    dataStruct = TimeSeries;
+    clear Operations
+    tmp = load(whatDataFile,'ts_clust');
+    clustStruct = tmp.ts_clust; clear tmp
+else
+    dataStruct = Operations;
+    clear TimeSeries
+    tmp = load(whatDataFile,'op_clust');
+    clustStruct = tmp.op_clust; clear tmp
 end
-loadedData = load(theFile,'TS_DataMat',dataStruct);
-dataStruct = loadedData.(dataStruct);
-TS_DataMat = loadedData.TS_DataMat;
 numItems = length(dataStruct);
 numNeighbors = min(numItems,numNeighbors) - 1;
-clear loadedData
 
 % ------------------------------------------------------------------------------
 % Match the specified index to the data structure
 % ------------------------------------------------------------------------------
-theIndex = find([dataStruct.ID]==targetID);
-if isempty(theIndex)
+targetInd = find([dataStruct.ID]==targetID);
+if isempty(targetInd)
     error('ID %u not found in the index for %s in %s.',targetID,dataStruct,which(theFile));
 end
 
@@ -84,23 +84,33 @@ end
 % file for retrieval later). I guess use this if it exists, otherwise just
 % calculate for this one.
 
-fprintf(1,'Computing distances to %u objects...',numItems);
 
-switch tsOrOps
-case 'ts'
-    Dj = bsxfun(@minus,TS_DataMat,TS_DataMat(theIndex,:));
-    Dj = sqrt(mean(Dj.^2,2));
-case 'ops'
-    % Is there a nicer way of computing correlations?
-    Dj = zeros(numItems,1);
-    for j = 1:numItems
-        Dj(j) = corr(TS_DataMat(:,theIndex),TS_DataMat(:,j));
+if isfield(clustStruct,'Dij')
+    % pairwise distances already computed, stored in the HCTSA .mat file
+    fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile)
+    Dij = squareform(clustStruct.Dij);
+    Dj = Dij(:,targetInd);
+    clear Dij;
+else
+    fprintf(1,'Computing distances to %u objects...',numItems);
+    switch tsOrOps
+    case 'ts'
+        Dj = bsxfun(@minus,TS_DataMat,TS_DataMat(targetInd,:));
+        Dj = sqrt(mean(Dj.^2,2));
+    case 'ops'
+        % Is there a nicer way of computing correlations?
+        Dj = zeros(numItems,1);
+        for j = 1:numItems
+            Dj(j) = corr(TS_DataMat(:,targetInd),TS_DataMat(:,j));
+        end
     end
-    % Transpose for consistency in later parts of the code
-    TS_DataMat = TS_DataMat';
+    fprintf(1,' Done.\n');
 end
 
-fprintf(1,' Done.\n');
+if strcmp(tsOrOps,'ops')
+    % Now that distances are computed, transpose for consistency with later parts of the code
+    TS_DataMat = TS_DataMat';
+end
 
 % ------------------------------------------------------------------------------
 % Find N neighbors under a given distance metric
@@ -115,9 +125,9 @@ neighborInd = dix(1:numNeighbors+1);
 % ------------------------------------------------------------------------------
 % List matches to screen
 % ------------------------------------------------------------------------------
-fprintf(1,'---%s---\n',dataStruct(theIndex).(theName));
+fprintf(1,'---%s---\n',dataStruct(targetInd).Name);
 for j = 2:numNeighbors+1
-    fprintf(1,'%u. %s (d = %.2f)\n',j-1,dataStruct(neighborInd(j)).(theName),Dj(neighborInd(j)));
+    fprintf(1,'%u. %s (d = %.2f)\n',j-1,dataStruct(neighborInd(j)).Name,Dj(neighborInd(j)));
 end
 
 % ------------------------------------------------------------------------------
@@ -132,18 +142,17 @@ Dij = squareform(pdist(TS_DataMat(neighborInd,:),'euclidean')/sqrt(size(TS_DataM
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-% Scatter plot for top 12
+% Scatter plot for top (up to 12)
 % ------------------------------------------------------------------------------
 f = figure('color','w');
 for j = 2:min(12,numNeighbors)+1
     subplot(3,4,j-1);
-    plot(TS_DataMat(theIndex,:),TS_DataMat(neighborInd(j),:),'.k','MarkerSize',4)
-    xlabel(sprintf('[%u] %s',dataStruct(theIndex).ID,dataStruct(theIndex).(theName)),'interpreter','none','FontSize',9);
-    ylabel(sprintf('[%u] %s',dataStruct(neighborInd(j)).ID,dataStruct(neighborInd(j)).(theName)),'interpreter','none','FontSize',9);
+    plot(TS_DataMat(targetInd,:),TS_DataMat(neighborInd(j),:),'.k','MarkerSize',4)
+    xlabel(sprintf('[%u] %s',dataStruct(targetInd).ID,dataStruct(targetInd).Name),'interpreter','none','FontSize',9);
+    ylabel(sprintf('[%u] %s',dataStruct(neighborInd(j)).ID,dataStruct(neighborInd(j)).Name),'interpreter','none','FontSize',9);
     title(sprintf('Match %u. d = %.3f',j,Dj(neighborInd(j))))
     axis square
 end
-
 
 % ------------------------------------------------------------------------------
 % Clustered distance matrix
@@ -155,7 +164,7 @@ dataStruct_clust = dataStruct(neighborInd(ord));
 
 labels = cell(numNeighbors+1);
 for i = 1:numNeighbors+1
-    labels{i} = sprintf('[%u] %s',dataStruct_clust(i).ID,dataStruct_clust(i).(theName));
+    labels{i} = sprintf('[%u] %s',dataStruct_clust(i).ID,dataStruct_clust(i).Name);
 end
 
 f = figure('color','w');
@@ -228,7 +237,7 @@ else
 end
 
 A(logical(eye(size(A)))) = 0;
-NetVis_netvis(A,0.01,{dataStruct.(theName)},[0.9,0.8,0.7,0.6],nodeLabels,[],[1000,1],'set1');
+NetVis_netvis(A,0.01,{dataStruct.Name},[0.9,0.8,0.7,0.6],nodeLabels,[],[1000,1],'set1');
 
 % ------------------------------------------------------------------------------
 function X = NormMinMax(x)

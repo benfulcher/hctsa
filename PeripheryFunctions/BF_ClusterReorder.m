@@ -1,23 +1,23 @@
 % ------------------------------------------------------------------------------
 % BF_ClusterReorder
 % ------------------------------------------------------------------------------
-% 
+%
 % Computes a reordering of the rows of an input data matrix (under a given
 % distance metric), placing similar rows close together in the output
 % permutation, ord.
-% 
+%
 % Alternatively, you can input a distance matrix for distanceMetric if
 % pre-computed.
-% 
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -45,7 +45,7 @@ else
     R = distanceMetric;
 end
 
-% squareform if still a vector:
+% Convert pairwise distances to matrix using squareform if stored as a vector:
 if size(R,1)==1 || size(R,2)==1
     R = squareform(R);
 end
@@ -76,7 +76,6 @@ if sqrt(length(R)) < 2000 % small enough to try optimalleaforder
         [~,~,ord] = dendrogram(links,0,'r',ord);
         fprintf(1,'Used optimalleaforder!\n')
     catch
-        beep
         fprintf(1,'optimalleaforder was not used :(\n')
         [~,~,ord] = dendrogram(links,0);
     end

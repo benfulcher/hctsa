@@ -11,9 +11,10 @@
 %
 % tsOrOps: Compute pairwise distances between all pairs of time series 
 %               ('ts', default), or operations ('ops')
-%               
+%
 % whatData: 'orig' (load data from HCTSA_loc.mat)
 %           'norm' (default: load data from HCTSA_N.mat)
+%           can also provide a data matrix, and saves it back to HCTSA_N.mat
 %
 % distanceMetric: what distance metric to use, e.g., 'euclidean' (default for
 %                 time series) or 'corr_fast' (default for operations)
@@ -34,7 +35,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function Dij = TS_PairwiseDist(tsOrOps,whatData,distanceMetric)
+function Dij = TS_PairwiseDist(tsOrOps,whatData,distanceMetric,doSave)
     
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -61,18 +62,30 @@ if nargin < 3
     end
 end
 
+% doSave
+if nargin < 4
+    % By default, save back to file
+    doSave = 1;
+end
+
 % ------------------------------------------------------------------------------
 % Load data
 % ------------------------------------------------------------------------------
-switch whatData
-    case 'orig'
-        theFile = 'HCTSA_loc.mat';
-    case 'norm'
-        theFile = 'HCTSA_N.mat';
-    otherwise
-        error('Invalid specifier ''%s''.',whatData);
+if ischar(whatData)
+    switch whatData
+        case 'orig'
+            theFile = 'HCTSA_loc.mat';
+        case 'norm'
+            theFile = 'HCTSA_N.mat';
+        otherwise
+            error('Invalid specifier ''%s''.',whatData);
+    end
+    load(theFile,'TS_DataMat');
+else
+    % Provided a matrix:
+    TS_DataMat = whatData;
+    theFile = 'HCTSA_N.mat';
 end
-load(theFile,'TS_DataMat');
    
 % ------------------------------------------------------------------------------
 % Compute pairwise distances between all objects
@@ -82,23 +95,30 @@ if strcmp(tsOrOps,'ops')
 end
 
 fprintf(1,'Computing %s distances between %u objects...',distanceMetric,size(TS_DataMat,1));
-Dij = BF_pdist(TS_DataMat,distanceMetric,1);
+Dij = BF_pdist(TS_DataMat,distanceMetric,1,[],1);
 fprintf(1,' Done.\n');
 
 % ------------------------------------------------------------------------------
-% Save back
+% Save back to the local .mat file (in hctsa format)
 % ------------------------------------------------------------------------------
-fprintf(1,'Saving back to %s...',theFile);
-switch tsOrOps
-case 'ts'
-    distanceMetricTimeSeries = distanceMetric;
-    Dij_TimeSeries = Dij;
-    save(theFile,'Dij_TimeSeries','distanceMetricTimeSeries','-append')
-case 'ops'
-    distanceMetricOperations = distanceMetric;
-    Dij_Operations = Dij;
-    save(theFile,'Dij_Operations','distanceMetricOperations','-append')
+if doSave
+    switch tsOrOps
+    case 'ts'
+        theWhat = 'time series';
+    case 'ops' 
+        theWhat = 'operations';
+    end
+    fprintf(1,'Saving pairwise distance information for %s back to %s...',...
+                        theWhat,theFile);
+    switch tsOrOps
+    case 'ts'
+        ts_clust = struct('Dij',Dij,'distanceMetric',distanceMetric);
+        save(theFile,'ts_clust','-append')
+    case 'ops'
+        op_clust = struct('Dij',Dij,'distanceMetric',distanceMetric);
+        save(theFile,'op_clust','-append')
+    end
+    fprintf(1,' Done.\n');
 end
-fprintf(1,' Done.\n');
 
 end

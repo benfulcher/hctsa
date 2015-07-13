@@ -1,9 +1,9 @@
 % ------------------------------------------------------------------------------
 % TS_plot_DataMatrix
 % ------------------------------------------------------------------------------
-% 
+%
 % Plot the data matrix.
-% 
+%
 %---INPUTS:
 % whatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
 %         data in HCTSA_cl.mat (default), or specify a filename to load data
@@ -12,20 +12,20 @@
 % customOrder: reorder rows and columns according to provided permutation vectors
 % customColorMap: use a custom color map (name to match an option in BF_getcmap)
 % colorNaNs: whether to plot rectangles over special-values in the matrix (default: 1)
-% 
+%
 %---OUTPUT:
 % Produces a colormap plot of the data matrix with time series as rows and
 %   operations as columns.
-% 
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -65,23 +65,7 @@ if isstruct(whatData)
     Operations = whatData.Operations;
     TS_DataMat = whatData.TS_DataMat;
 else
-    if strcmp(whatData,'cl')
-        theFile = 'HCTSA_cl.mat'; TheRoutine = 'TS_cluster';
-    elseif strcmp(whatData,'norm')
-        theFile = 'HCTSA_N.mat'; TheRoutine = 'TS_normalize';
-    elseif ischar(whatData) && exist(whatData,'file') % Specify a filename
-        theFile = whatData;
-        a = which(theFile); % First check it exists
-        if isempty(a)
-            error('\n%s not found. You should probably run %s...',theFile,TheRoutine);
-        end
-    else
-        error(['Unknown specifier ''%s'', please input the data structure, ' ...
-                        '\t\n or specify ''norm'', ''cl'', or a FileName'],whatData)
-    end
-    fprintf(1,'Reading data from %s...',theFile);
-    load(theFile,'TimeSeries','Operations','TS_DataMat')
-    fprintf(1,' Done.\n');
+    [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 end
 
 if colorGroups
@@ -118,9 +102,9 @@ numColorMapGrads = 6; % number of gradations in each set of colourmap
 
 if colorGroups
     gi = BF_ToGroup(timeSeriesGroups);
-    
+
     numGroups = length(gi);
-    
+
     % Add a group for unlabelled data items if they exist
     if sum(cellfun(@length,gi)) < numTS
         % Add an unlabelled class
@@ -133,9 +117,9 @@ if colorGroups
         gi{end} = setxor(1:numTS,vertcat(gi{:}));
         numGroups = numGroups + 1;
     end
-    
+
     fprintf(1,'Coloring data according to %u groups\n',numGroups);
-    
+
     % Change range of TS_DataMat to make use of new colormap appropriately
     ff = 0.9999999;
     squashme = @(x)ff*(x - min(x(:)))/(max(x(:))-min(x(:)));
@@ -239,17 +223,26 @@ if colorNaNs && any(isnan(TS_DataMat(:)))
 end
 
 % --------------------------------------------------------------------------
-%% Format the plot
+%% Format the axes
 % --------------------------------------------------------------------------
 % Axis labels:
-set(gca,'YTick',1 + (0.5:1:size(TS_DataMat,1)),'YTickLabel',timeSeriesNames); % time series
-if numOps < 1000 % otherwise don't bother
-    set(gca,'XTick',1 + (0.5:1:size(TS_DataMat,2)),'XTickLabel',operationNames);
-end
-title(sprintf('Data matrix (%ux%u)',size(TS_DataMat,1),size(TS_DataMat,2)))
-set(gca,'FontSize',8) % set font size
-set(gca,'TickLabelInterpreter','none') % Stop from displaying underscores as subscripts
-xlabel('Operations')
+ax = gca;
+ax.FontSize = 8; % small font size (often large datasets)
+ax.TickLabelInterpreter = 'none'; % Stop from displaying underscores as subscripts
+
+% Rows -- time series
 ylabel('Time series')
+ax.YTick = 1 + (0.5:1:size(TS_DataMat,1));
+ax.YTickLabel = timeSeriesNames;
+
+% Columns: operations:
+xlabel('Operations')
+if numOps < 1000 % if too many operations, it's too much to list them all...
+    ax.XTick = 1 + (0.5:1:size(TS_DataMat,2));
+    ax.XTickLabel = operationNames;
+    ax.XTickLabelRotation = 90;
+end
+
+title(sprintf('Data matrix (%ux%u)',size(TS_DataMat,1),size(TS_DataMat,2)))
 
 end
