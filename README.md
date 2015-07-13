@@ -11,8 +11,10 @@ This code repository is a more in-depth accompaniment to this work, that helps t
 
 To use the repository, please make a private fork of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
 ```
-git remote add upstream https://github.com/SystemsAndSignalsGroup/hctsa.git
-````
+git remote add upstream git://github.com/SystemsAndSignalsGroup/hctsa.git
+```
+(make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your github account).
+
 You can then update to the latest stable version of the repository by pulling the master branch to your local repository:
 ```
 git pull upstream master
