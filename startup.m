@@ -2,16 +2,16 @@
 % startup.m
 % ------------------------------------------------------------------------------
 % Add all paths required for the highly comparative time-series analysis package
-% 
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -53,7 +53,7 @@ addpath(fullfile(pwd,'Toolboxes','gpml'));
 GP_startup % add nested directories
 
 % Zoubin Gharamani's hmm toolbox, ZG_hmm
-fprintf(1,', HMM toolbox')
+fprintf(1,'HMM toolbox')
 addpath(fullfile(pwd,'Toolboxes','ZG_hmm'));
 
 % ARFIT Toolbox
@@ -112,7 +112,7 @@ tiseanBinaryLocation = fullfile(homeDir,'bin');
 if isempty(regexp(getenv('PATH'),tiseanBinaryLocation))
     sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
     setenv('PATH', sysPath)
-    fprintf(1,'System path to TISEAN binaries: %s, ',tiseanBinaryLocation);
+    fprintf(1,' system path to TISEAN binaries: %s, ',tiseanBinaryLocation);
     clear sysPath
 end
 clear homeDir tiseanBinaryLocation
@@ -120,7 +120,7 @@ clear homeDir tiseanBinaryLocation
 % TISEAN also requires this DYLD path to be set (I assume this works also on
 % cygwin/Windows?):
 setenv('DYLD_LIBRARY_PATH','/usr/local/bin');
-fprintf(1,' DYLD library path (for TISEAN).');
+fprintf(1,'\n DYLD library path (for TISEAN).');
 
 % ------------------------------------------------------------------------------
 %% Finished:

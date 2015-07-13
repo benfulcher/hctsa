@@ -3,13 +3,13 @@
 % ------------------------------------------------------------------------------
 % 
 % Looks at local motifs in a binary symbolization of the time series, which is
-% performed by:
+% performed by a given binarization method.
 % 
 %---INPUTS:
 %
 % y, the input time series
 % 
-% bint, the binary transformation method:
+% binarizeHow, the binary transformation method:
 %       (i) 'diff': incremental time-series increases are encoded as 1, and
 %                   decreases as 0,
 %       (ii) 'mean': time-series values above its mean are given 1, and those
@@ -44,45 +44,45 @@
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SB_MotifTwo(y,bint)
+function out = SB_MotifTwo(y,binarizeHow)
 
-if nargin < 2 || isempty(bint)
+if nargin < 2 || isempty(binarizeHow)
     % Use changes in the time series as the basis for the transformation
-    bint = 'diff';
+    binarizeHow = 'diff';
 end
 
 % Binary difference signs
-switch bint
+switch binarizeHow
 	case 'diff'
         % Binary signal: 1 for stepwise increases, 0 for stepwise decreases
-		yb = ((sign(diff(y)))+1)/2;
+		yBin = ((sign(diff(y)))+1)/2;
         
 	case 'mean'
         % Binary signal: 1 for above mean, 0 for below mean
-		yb = (sign(y)+1)/2;
+		yBin = (sign(y)+1)/2;
         
 	case 'median'
         % Binary signal: 1 for above median, 0 for below median
-		yb = (sign(y-median(y))+1)/2;
+		yBin = (sign(y-median(y))+1)/2;
         
     otherwise
-        error('Unknown binary transformation setting ''%s''',bint)
+        error('Unknown binary transformation setting ''%s''',binarizeHow)
 end
 
 % Define the length of the new, symbolized sequence: N
-N = length(yb);
+N = length(yBin);
 
 % ------------------------------------------------------------------------------
 %% Find single occurences of a symbol
 % ------------------------------------------------------------------------------
 % 0
-r0 = find(yb == 0);
+r0 = find(yBin == 0);
 % 1
-r1 = find(yb == 1);
+r1 = find(yBin == 1);
 
 % ------ Record these -------
-out.u = length(r1)/N; % proportion 1 (corresponds to a movement up for 'diff')
-out.d = length(r0)/N; % proportion 0 (corresponds to a movement down for 'diff')
+out.u = mean(r1); % proportion 1 (corresponds to a movement up for 'diff')
+out.d = mean(r0); % proportion 0 (corresponds to a movement down for 'diff')
 out.h = -(out.u*log(out.u) + out.d*log(out.d)); % entropy of this result
 
 %% 2
@@ -91,20 +91,20 @@ if ~isempty(r0) && r0(end) == N; r0 = r0(1:end-1); end
 if ~isempty(r1) && r1(end) == N; r1 = r1(1:end-1); end
 
 % 00
-r00 = r0((yb(r0+1) == 0));
+r00 = r0((yBin(r0+1) == 0));
 % 01
-r01 = r0((yb(r0+1) == 1));
+r01 = r0((yBin(r0+1) == 1));
 % 10
-r10 = r1((yb(r1+1) == 0));
+r10 = r1((yBin(r1+1) == 0));
 % 11
-r11 = r1((yb(r1+1) == 1));
+r11 = r1((yBin(r1+1) == 1));
 
 
 % ------ Record these -------
-out.dd = length(r00)/(N-1); % down, down
-out.du = length(r01)/(N-1); % down, up
-out.ud = length(r10)/(N-1); % up, down
-out.uu = length(r11)/(N-1); % up, up
+out.dd = mean(r00); % down, down
+out.du = mean(r01); % down, up
+out.ud = mean(r10); % up, down
+out.uu = mean(r11); % up, up
 
 pp = [out.dd, out.du, out.ud, out.uu];
 out.hh = -sum(pp(pp>0).*log(pp(pp>0)));
@@ -112,7 +112,9 @@ out.hh = -sum(pp(pp>0).*log(pp(pp>0)));
 % 			out.ud*log(out.ud) + out.uu*log(out.uu))/2; % entropy of this result
 
 
+% ------------------------------------------------------------------------------
 %% 3
+% ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
 if ~isempty(r00) && r00(end) == N-1; r00 = r00(1:end-1); end
 if ~isempty(r01) && r01(end) == N-1; r01 = r01(1:end-1); end
@@ -120,32 +122,32 @@ if ~isempty(r10) && r10(end) == N-1; r10 = r10(1:end-1); end
 if ~isempty(r11) && r11(end) == N-1; r11 = r11(1:end-1); end
 
 % 000
-r000 = r00(yb(r00+2) == 0);
+r000 = r00(yBin(r00+2) == 0);
 % 001
-r001 = r00(yb(r00+2) == 1);
+r001 = r00(yBin(r00+2) == 1);
 % 010
-r010 = r01(yb(r01+2) == 0);
+r010 = r01(yBin(r01+2) == 0);
 % 011
-r011 = r01(yb(r01+2) == 1);
+r011 = r01(yBin(r01+2) == 1);
 % 100
-r100 = r10(yb(r10+2) == 0);
+r100 = r10(yBin(r10+2) == 0);
 % 101
-r101 = r10(yb(r10+2) == 1);
+r101 = r10(yBin(r10+2) == 1);
 % 110
-r110 = r11(yb(r11+2) == 0);
+r110 = r11(yBin(r11+2) == 0);
 % 111
-r111 = r11(yb(r11+2) == 1);
+r111 = r11(yBin(r11+2) == 1);
 
 
 % ----- Record these -----
-out.ddd = length(r000)/(N-2);
-out.ddu = length(r001)/(N-2);
-out.dud = length(r010)/(N-2);
-out.duu = length(r011)/(N-2);
-out.udd = length(r100)/(N-2);
-out.udu = length(r101)/(N-2);
-out.uud = length(r110)/(N-2);
-out.uuu = length(r111)/(N-2);
+out.ddd = mean(r000);
+out.ddu = mean(r001);
+out.dud = mean(r010);
+out.duu = mean(r011);
+out.udd = mean(r100);
+out.udu = mean(r101);
+out.uud = mean(r110);
+out.uuu = mean(r111);
 
 ppp = [out.ddd, out.ddu, out.dud, out.duu, out.udd, out.udd, out.udu, out.uud, out.uuu];
 out.hhh = -sum(ppp(ppp>0).*log(ppp(ppp>0)));
@@ -154,8 +156,9 @@ out.hhh = -sum(ppp(ppp>0).*log(ppp(ppp>0)));
 % out.dud*log(out.dud) + out.duu*log(out.duu) + ...
 % 			out.udd*log(out.udd) + out.udu*log(out.udu) + out.uud*log(out.uud) + out.uuu*log(out.uuu))/3; % entropy of this result
 
-
+% ------------------------------------------------------------------------------
 %% 4
+% ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
 if ~isempty(r000) && r000(end) == N-2; r000 = r000(1:end-1); end
 if ~isempty(r001) && r001(end) == N-2; r001 = r001(1:end-1); end
@@ -168,56 +171,56 @@ if ~isempty(r111) && r111(end) == N-2; r111 = r111(1:end-1); end
 
 
 % 0000
-r0000 = r000(yb(r000+3) == 0);
+r0000 = r000(yBin(r000+3) == 0);
 % 0001
-r0001 = r000(yb(r000+3) == 1);
+r0001 = r000(yBin(r000+3) == 1);
 % 0010
-r0010 = r001(yb(r001+3) == 0);
+r0010 = r001(yBin(r001+3) == 0);
 % 0011
-r0011 = r001(yb(r001+3) == 1);
+r0011 = r001(yBin(r001+3) == 1);
 % 0100
-r0100 = r010(yb(r010+3) == 0);
+r0100 = r010(yBin(r010+3) == 0);
 % 0101
-r0101 = r010(yb(r010+3) == 1);
+r0101 = r010(yBin(r010+3) == 1);
 % 0110
-r0110 = r011(yb(r011+3) == 0);
+r0110 = r011(yBin(r011+3) == 0);
 % 0111
-r0111 = r011(yb(r011+3) == 1);
+r0111 = r011(yBin(r011+3) == 1);
 % 1000
-r1000 = r100(yb(r100+3) == 0);
+r1000 = r100(yBin(r100+3) == 0);
 % 1001
-r1001 = r100(yb(r100+3) == 1);
+r1001 = r100(yBin(r100+3) == 1);
 % 1010
-r1010 = r101(yb(r101+3) == 0);
+r1010 = r101(yBin(r101+3) == 0);
 % 1011
-r1011 = r101(yb(r101+3) == 1);
+r1011 = r101(yBin(r101+3) == 1);
 % 1100
-r1100 = r110(yb(r110+3) == 0);
+r1100 = r110(yBin(r110+3) == 0);
 % 1101
-r1101 = r110(yb(r110+3) == 1);
+r1101 = r110(yBin(r110+3) == 1);
 % 1110
-r1110 = r111(yb(r111+3) == 0);
+r1110 = r111(yBin(r111+3) == 0);
 % 1111
-r1111 = r111(yb(r111+3) == 1);
+r1111 = r111(yBin(r111+3) == 1);
 
 
 % ----- Record these -----
-out.dddd = length(r0000)/(N-3);
-out.dddu = length(r0001)/(N-3);
-out.ddud = length(r0010)/(N-3);
-out.dduu = length(r0011)/(N-3);
-out.dudd = length(r0100)/(N-3);
-out.dudu = length(r0101)/(N-3);
-out.duud = length(r0110)/(N-3);
-out.duuu = length(r0111)/(N-3);
-out.uddd = length(r1000)/(N-3);
-out.uddu = length(r1001)/(N-3);
-out.udud = length(r1010)/(N-3);
-out.uduu = length(r1011)/(N-3);
-out.uudd = length(r1100)/(N-3);
-out.uudu = length(r1101)/(N-3);
-out.uuud = length(r1110)/(N-3);
-out.uuuu = length(r1111)/(N-3);
+out.dddd = mean(r0000);
+out.dddu = mean(r0001);
+out.ddud = mean(r0010);
+out.dduu = mean(r0011);
+out.dudd = mean(r0100);
+out.dudu = mean(r0101);
+out.duud = mean(r0110);
+out.duuu = mean(r0111);
+out.uddd = mean(r1000);
+out.uddu = mean(r1001);
+out.udud = mean(r1010);
+out.uduu = mean(r1011);
+out.uudd = mean(r1100);
+out.uudu = mean(r1101);
+out.uuud = mean(r1110);
+out.uuuu = mean(r1111);
 
 pppp = [out.dddd, out.dddu, out.ddud, out.dduu, out.dudd, out.dudu, out.duud, out.duuu, out.uddd, ...
               out.uddu, out.udud, out.uduu, out.uudd, out.uudu, out.uuud, out.uuuu];
@@ -226,7 +229,6 @@ out.hhhh = -sum(pppp(pppp>0).*log(pppp(pppp>0)));
 % 			out.dudd*log(out.dudd) + out.dudu*log(out.dudu) + out.duud*log(out.duud) + out.duuu*log(out.duuu) +  ...
 % 			out.uddd*log(out.uddd) + out.uddu*log(out.uddu) + out.udud*log(out.udud) + out.uduu*log(out.uduu) + ...
 % 			out.uudd*log(out.uudd) + out.uudu*log(out.uudu) + out.uuud*log(out.uuud) + out.uuuu*log(out.uuuu) )/4;
-
 
 
 end

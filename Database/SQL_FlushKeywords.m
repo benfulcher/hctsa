@@ -136,7 +136,7 @@ relTimer = tic;
 db_kwids = 1:numKeywords;
 
 % Add for each keyword in each time series
-addCell = cell(length(horzcat(kwSplit{:})));
+addCell = cell(length(horzcat(kwSplit{:})),1);
 k = 1;
 for i = 1:length(kwSplit)
     for j = 1:length(kwSplit{i})
@@ -144,8 +144,9 @@ for i = 1:length(kwSplit)
         k = k + 1;
     end
 end
-SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell); % add them all in chunks
 
+% Add them all in chunks
+SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell,500);
 
 fprintf(1,' done in %s.\n',BF_thetime(toc(relTimer)));
 

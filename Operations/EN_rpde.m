@@ -99,7 +99,7 @@ H_norm = H/log(N); % log(N) is the H for an iid process
 out.H = H;
 out.H_norm = H_norm;
 
-% proportion of non-zero entries:
+% Proportion of non-zero entries:
 out.propNonZero = mean(rpd>0); % proportion of rpds that are non-zero
 out.meanNonZero = mean(rpd(rpd>0))*N; % mean value when rpd is non-zero (rescale by N)
 out.maxRPD = max(rpd)*N; % maximum value of rpd (rescale by N)
