@@ -1,10 +1,10 @@
 % --------------------------------------------------------------------------
 % TS_compute
 % --------------------------------------------------------------------------
-% 
+%
 % This function computes missing elements of TS_DataMat loaded in from
 % HCTSA_loc.mat
-% 
+%
 %---INPUTS:
 % doParallel:  if 1, attempts to use the Parallel Computing Toolbox to run
 %               computations in parallel over multiple cores.
@@ -13,19 +13,19 @@
 % doLog:       if 1 writes results to a log file (0 by default -- output to prompt).
 % beVocal:     if 1, gives additional user feedback about the calculation of
 %               each individual operation.
-% 
+%
 %---OUTPUTS:
 % Writes output into HCTSA_loc.mat
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -34,7 +34,7 @@
 % ------------------------------------------------------------------------------
 
 function TS_compute(doParallel,ts_id_range,op_id_range,doLog,beVocal)
-    
+
 % --------------------------------------------------------------------------
 %% Check inputs and set defaults
 % --------------------------------------------------------------------------
@@ -150,7 +150,7 @@ end
 
 % Times stores the time taken for each time series to have its operations
 % calculated (for determining time remaining)
-times = zeros(numTimeSeries,1); 
+times = zeros(numTimeSeries,1);
 lastSavedTime = 0; % Last saved time
 
 % Initialize TS_CalcTime and TS_Quality if they don't yet exist
@@ -167,7 +167,7 @@ end
 
 for i = 1:numTimeSeries
     tsInd = tsIndex(i);
-    
+
 	bigTimer = tic;
 
     % ----
@@ -177,7 +177,7 @@ for i = 1:numTimeSeries
 					   	  % NaN indicates a value never before calculated, 1 indicates fatal error before (try again now)
     toCalc = (opCompute & isnan(qq) | qq == 1); % Operations awaiting calculation
     numCalc = sum(toCalc); % Number of operations to evaluate
-    
+
     % -----
     % Check that all operations have a master ID attached:
     % -----
@@ -185,16 +185,16 @@ for i = 1:numTimeSeries
         % Error in the database structure; some operations are missing MasterID assignment
         error('Database structure error: some operations have not been assigned a valid master operation');
     end
-    
-    
+
+
     if numCalc > 0 % some to calculate
         ffi = zeros(numCalc,1); % Output of each operation
 		qqi = zeros(numCalc,1); % Quality of output from each operation
 		cti = ones(numCalc,1)*NaN; % Calculation time for each operation
-        
+
         % Load the time-series data as x
         x = TimeSeries(tsInd).Data;
-        
+
         % --------------------------------------------------------------------------
 		%% Basic checking on x
         % --------------------------------------------------------------------------
@@ -244,22 +244,22 @@ for i = 1:numTimeSeries
 		% Put the output from each Master operation in an element of MasterOutput
 		MasterOutput = cell(length(MasterOperations),1); % Ouput structures
 		MasterCalcTime = zeros(length(MasterOperations),1); % Calculation times for each master operation
-		
+
 		Master_IDs_calc = unique([Operations(toCalc).MasterID]); % Master_IDs that need to be calculated
         Master_ind_calc = arrayfun(@(x)find([MasterOperations.ID]==x,1),Master_IDs_calc); % Indicies of MasterOperations that need to be calculated
 		numMopsToCalc = length(Master_IDs_calc); % Number of master operations to calculate
-        
+
         % Index sliced variables to minimize the communication overhead in the parallel processing
         par_MasterOpCodeCalc = {MasterOperations(Master_ind_calc).Code}; % Cell array of strings of Code to evaluate
         par_mop_ids = [MasterOperations(Master_ind_calc).ID]; % mop_id for each master operation
         % par_mop_id = [Operations(toCalc).MasterID]; % Master_IDs corresponding to each Operation
-        
+
 		fprintf(fid,'Evaluating %u master operations...\n',length(Master_IDs_calc));
-		
+
 	    % Store in temporary variables for parfor loop then map back later
         MasterOutput_tmp = cell(numMopsToCalc,1);
         MasterCalcTime_tmp = zeros(numMopsToCalc,1);
-		
+
         % ----
 		% Evaluate all the master operations
         % ----
@@ -278,15 +278,15 @@ for i = 1:numTimeSeries
                                         par_mop_ids(jj),numMopsToCalc,fid,beVocal,TimeSeries_i_ID,jj);
             end
 		end
-		
+
         % Map from temporary versions to the full versions:
         MasterOutput(Master_ind_calc) = MasterOutput_tmp;
         MasterCalcTime(Master_ind_calc) = MasterCalcTime_tmp;
-		
+
 		fprintf(fid,'%u master operations evaluated in %s ///\n\n',...
                             numMopsToCalc,BF_thetime(toc(masterTimer)));
         clear masterTimer
-        
+
         % --------------------------------------------------------------------------
 		%% Assign all the results to the corresponding operations
         % --------------------------------------------------------------------------
@@ -295,7 +295,7 @@ for i = 1:numTimeSeries
         par_OperationMasterInd = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations(toCalc).MasterID]);
         par_MasterOperationsLabel = {MasterOperations.Label}; % Master labels
         par_OperationCodeString = {Operations(toCalc).CodeString}; % Code string for each operation to calculate (i.e., in toCalc)
-        
+
 		if doParallel
 	        parfor jj = 1:numCalc
                 [ffi(jj), qqi(jj), cti(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
@@ -323,7 +323,7 @@ for i = 1:numTimeSeries
                 end
             end
         end
-        
+
         % --------------------------------------------------------------------------
 		%% Code special values:
         % --------------------------------------------------------------------------
@@ -341,13 +341,13 @@ for i = 1:numTimeSeries
 		if any(RR)
 			qqi(RR) = 3; ffi(RR) = 0;
 		end
-		
+
         % (*) Output = -Inf: q = 4, Output = 0
 		RR = (isinf(ffi) & ffi < 0);
 		if any(RR)
 			qqi(RR) = 4; ffi(RR) = 0;
 		end
-        
+
 		% (*) Output is a complex number: q = 5, Output = 0
 		RR = (imag(ffi)~=0);
 		if any(RR)
@@ -371,7 +371,7 @@ for i = 1:numTimeSeries
         % The number of other special outputs, numSpecial:
 		numSpecial = sum(qqi > 1);
     end
-    
+
     % The time taken to calculate (or not, if numCalc = 0) all operations for this time series:
     times(i) = toc(bigTimer); clear bigTimer
 
@@ -382,7 +382,7 @@ for i = 1:numTimeSeries
     fprintf(fid,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
     fprintf(fid,'oOoOo Calculation complete for %s (ts_id = %u, N = %u) oOoOo\n', ...
                         TimeSeries(tsInd).Name,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length);
-                        
+
     if numCalc > 0 % Some calculation was performed
 	    fprintf(fid,'%u real-valued outputs, %u errors, %u special-valued outputs stored. [%u / %u]\n',...
 	     					numGood,numErrors,numSpecial,numCalc,numOps);
@@ -390,7 +390,7 @@ for i = 1:numTimeSeries
     else % No calculation was performed
     	fprintf(fid,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',numOps);
     end
-    
+
     if i < numTimeSeries
         fprintf(fid,'- - - - - - - -  %u time series remaining - - - - - - - -\n',numTimeSeries-i);
     	fprintf(fid,'- - - - - - - -  %s remaining - - - - - - - - -\n', ...
@@ -416,7 +416,7 @@ fprintf(fid,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1)
 % Save the local files for subsequent upload to the mySQL database
 fprintf(fid,'Saving all results to HCTSA_loc.mat...')
 saveTimer = tic;
-save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','-append','-v7.3')
+save('HCTSA_loc.mat','TS_DataMat','TS_CalcTime','TS_Quality','-append')
 fprintf(fid,' Saved in %s.\n',BF_thetime(toc(saveTimer)))
 clear saveTimer
 
