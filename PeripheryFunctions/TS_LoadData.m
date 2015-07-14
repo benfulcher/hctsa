@@ -41,6 +41,21 @@ if nargin < 2 || isempty(getClustered)
 end
 
 %-------------------------------------------------------------------------------
+% In some cases, you provide a structure with the pre-loaded data already in it
+% e.g., as a whatDataFile = load('HCTSA_loc.mat');
+% In this case, no further loading is required -- just a restructuring
+%-------------------------------------------------------------------------------
+if isstruct(whatDataFile)
+    if ~isfield(whatDataFile,{'TS_DataMat','TimeSeries','Operations'})
+        error('Invalid input structure (requires TS_DataMat, TimeSeries, Operations as fields)');
+    end
+    TS_DataMat = whatDataFile.TS_DataMat;
+    TimeSeries = whatDataFile.TimeSeries;
+    Operations = whatDataFile.Operations;
+    return
+end
+
+%-------------------------------------------------------------------------------
 % Use intuitive settings for HCTSA package defaults -- setting 'norm' or 'cl'
 switch whatDataFile
 case 'orig'

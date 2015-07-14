@@ -191,7 +191,7 @@ cB = colorbar('northoutside');
 cB.Label.String = 'Distance';
 
 % Box the target:
-indexCl = find([dataStruct_clust.ID]==1);
+indexCl = find([dataStruct_clust.ID]==targetID);
 rectangle('Position',[indexCl-0.5,indexCl-0.5,1,1])
 plot(indexCl,indexCl,'*k')
 

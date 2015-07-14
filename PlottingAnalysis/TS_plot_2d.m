@@ -55,7 +55,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TS_plot_2d(Features,DataInfo,trainTest,annotateParams,showDistr,classMethod)
+function TS_plot_2d(Features,dataInfo,trainTest,annotateParams,showDistr,classMethod)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:

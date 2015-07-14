@@ -1,43 +1,43 @@
 % --------------------------------------------------------------------------
 % TS_LabelGroups
 % --------------------------------------------------------------------------
-% 
+%
 % You provide a set of keyword options to store a specific grouping of time series.
 % Useful when doing a classification task -- can store your classifications
 % in the local structure arrays.
-% 
+%
 %---EXAMPLE USAGE:
 %
 % Label all time series with 'disease' in one group and all with 'healthy' in
 % another group:
-% 
+%
 % groupIndices = TS_LabelGroups('norm',{'disease',0;'healthy',0},'ts');
-% 
+%
 %---INPUTS:
 % whatData: Where to retrive from (and write back to): 'orig', 'norm', or 'cl'
-% 
+%
 % keywordGroups: The keyword groups, a cell of strings, as
 %                    {'Keyword_1',numberToRetrive; 'keyword2',numberToRetrive,...}
 %                   Use '0' to retrieve all of a given class.
 %                   Can also use an empty label, '', to select anything at
 %                   random from all time series.
-%                   
+%
 % TsorOps: Whether grouping is for operations ('ops') or time series ('ts')
-% 
+%
 % saveBack: Can set to 0 to stop saving the grouping back to the input file.
 %
 %---OUTPUTS:
 % groupIndices: the indicies corresponding to each keyword in keywordGroups.
-% 
+%
 % --------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -45,7 +45,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function groupIndices = TS_LabelGroups(whatData,keywordGroups,TsorOps,saveBack)
+function groupIndices = TS_LabelGroups(whatData,keywordGroups,saveBack)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
@@ -54,8 +54,8 @@ if nargin < 1 || isempty(whatData)
     whatData = 'norm';
     fprintf(1,'Retrieving data from HCTSA_N by default.\n');
 end
-if ~isstruct(whatData) && ~ismember(whatData,{'orig','norm','cl'})
-    error('When specifying data, we need ''orig'', ''norm'', or ''cl''.')
+if ~isstruct(whatData) && ~ismember(whatData,{'orig','norm'})
+    error('When specifying data, we need ''orig'', ''norm'', or a custom filename.')
 end
 
 if nargin < 2
@@ -67,14 +67,6 @@ if ~isempty(keywordGroups) && ischar(keywordGroups);
     keywordGroups = {keywordGroups,0};
 end
 
-if nargin < 3 || isempty(TsorOps)
-    TsorOps = 'ts';
-    fprintf(1,'Grouping time series.\n');
-end
-if ~ismember(TsorOps,{'ops','ts'})
-    error('Specify either ''ops'' or ''ts''.')
-end
-
 if nargin < 4 || isempty(saveBack)
     saveBack = 1; % Saves the grouping back to the HCTSA_*.loc file
 end
@@ -82,31 +74,10 @@ end
 % ------------------------------------------------------------------------------
 %% Load data from file
 % ------------------------------------------------------------------------------
-if isstruct(whatData)
-    % Can make whatData a structure...? Some old functionality...//
-    Keywords = whatData.Keywords;
-    idsO = whatData.idsO;
-else
-    switch whatData
-        case 'orig'
-            theFile = 'HCTSA_loc.mat';
-        case 'norm'
-            theFile = 'HCTSA_N.mat';
-        case 'cl'
-            theFile = 'HCTSA_cl.mat';
-    end
-    fprintf(1,'Loaded data from %s...',theFile);
-    if strcmp(TsorOps,'ts') % Time series
-        load(theFile,'TimeSeries')
-        Keywords = {TimeSeries.Keywords};
-        IDs = [TimeSeries.ID];
-    else % Operations
-        load(theFile,'Operations')
-        Keywords = {Operations.Keywords};
-        IDs = [Operations.ID];
-    end
-    fprintf(1,' Loaded.\n');
-end
+[~,TimeSeries,~,theFile] = TS_LoadData(whatData);
+Keywords = {TimeSeries.Keywords};
+IDs = [TimeSeries.ID];
+numTimeSeries = length(TimeSeries);
 
 % ------------------------------------------------------------------------------
 % Set default keywords?
@@ -131,7 +102,6 @@ end
 % ------------------------------------------------------------------------------
 %% Label groups from keywords
 % ------------------------------------------------------------------------------
-
 if ~all(cellfun(@ischar,keywordGroups(:))) % Hopefully, specified numbers of each keyword
     keywordNumbers = horzcat(keywordGroups{:,2}); % Just the number of each part
     keywordGroups = keywordGroups(:,1)'; % Just the keyword parts, a cell of strings
@@ -174,32 +144,32 @@ clear timer % stop timing
 % More feedback
 fprintf(1,'We found:\n');
 for i = 1:numGroups
-    fprintf(1,'%s -- %u matches\n',keywordGroups{i},length(groupIndices{i}));
+    fprintf(1,'%s -- %u matches (/%u)\n',keywordGroups{i},length(groupIndices{i}),numTimeSeries);
 end
 
 % ------------------------------------------------------------------------------
-%% Save back to file?
+%% Save back to the input file?
 % ------------------------------------------------------------------------------
 if saveBack
     % You don't need to check variables, you can just append back to the input file:
     if ~all(cellfun(@isempty,groupIndices))
         fprintf(1,'Saving group labels and information back to %s...',theFile);
-        
+
         % First append/overwrite group names
         groupNames = keywordGroups;
-        
+
         % Then overwrite labels
-        theGroups = BF_ToGroup(groupIndices,length(TimeSeries))';
+        theGroups = BF_ToGroup(groupIndices,numTimeSeries)';
         % Now we need to make the cells
         theGroupsCell = cell(size(theGroups));
         % Cannot find an in-built for this... :-/
         for i = 1:length(theGroups), theGroupsCell{i} = theGroups(i); end
-        
+
         % First remove Group field if it exists
         if isfield(TimeSeries,'Group')
             TimeSeries = rmfield(TimeSeries,'Group');
         end
-        
+
         % Add fields to the TimeSeries structure array
         newFieldNames = fieldnames(TimeSeries);
         % Add two new fields:

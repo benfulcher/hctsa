@@ -9,9 +9,9 @@
 %         data in HCTSA_cl.mat (default), or specify a filename to load data
 %         from that file.
 % colorGroups: Set to 1 to color time-series groups with different colormaps.
-% customOrder: reorder rows and columns according to provided permutation vectors
 % customColorMap: use a custom color map (name to match an option in BF_getcmap)
 % colorNaNs: whether to plot rectangles over special-values in the matrix (default: 1)
+% customOrder: reorder rows and columns according to provided permutation vectors
 %
 %---OUTPUT:
 % Produces a colormap plot of the data matrix with time series as rows and
@@ -33,44 +33,42 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TS_plot_DataMatrix(whatData,colorGroups,customOrder,customColorMap,colorNaNs)
+function TS_plot_DataMatrix(whatData,colorGroups,customColorMap,colorNaNs,customOrder)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
 % ------------------------------------------------------------------------------
 % What data to plot:
 if nargin < 1 || isempty(whatData)
-    whatData = 'cl'; % Load data from HCTSA_cl by default
+    whatData = 'cl'; % Load clustered data from HCTSA_N if it exists (by default)
 end
 % Color groups of time series differently:
 if nargin < 2 || isempty(colorGroups)
     colorGroups = 0; % Don't color groups by default
 end
-if nargin < 3 || isempty(customOrder)
-	customOrder = {[],[]};
-end
-if nargin < 4 || isempty(customColorMap)
+if nargin < 3 || isempty(customColorMap)
     customColorMap = 'redyellowblue';
 end
-if nargin < 5 || isempty(colorNaNs)
+if nargin < 4 || isempty(colorNaNs)
     colorNaNs = 1;
+end
+if nargin < 5 || isempty(customOrder)
+	customOrder = {[],[]};
 end
 
 % --------------------------------------------------------------------------
 %% Read in the data
 % --------------------------------------------------------------------------
-if isstruct(whatData)
-    % Can specify all of these fields in the whatData argument
-    TimeSeries = whatData.TimeSeries;
-    Operations = whatData.Operations;
-    TS_DataMat = whatData.TS_DataMat;
-else
-    [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
-end
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
 if colorGroups
-    timeSeriesGroups = [TimeSeries.Group];
-    fprintf(1,'Coloring groups of time series...\n');
+    if isfield(TimeSeries,'Group')
+        timeSeriesGroups = [TimeSeries.Group];
+        fprintf(1,'Coloring groups of time series...\n');
+    else
+        warning('No group information found')
+        colorGroups = 0;
+    end
 end
 
 timeSeriesNames = {TimeSeries.Name}; clear TimeSeries; % Just extract time series names
@@ -122,10 +120,10 @@ if colorGroups
 
     % Change range of TS_DataMat to make use of new colormap appropriately
     ff = 0.9999999;
-    squashme = @(x)ff*(x - min(x(:)))/(max(x(:))-min(x(:)));
-    TS_DataMat = squashme(TS_DataMat);
+    squashMe = @(x)ff*(x - min(x(:)))/(max(x(:))-min(x(:)));
+    TS_DataMat = squashMe(TS_DataMat);
     for jo = 1:numGroups
-        TS_DataMat(gi{jo},:) = squashme(TS_DataMat(gi{jo},:)) + jo - 1;
+        TS_DataMat(gi{jo},:) = squashMe(TS_DataMat(gi{jo},:)) + jo - 1;
     end
 else
     numGroups = 0;
@@ -206,6 +204,7 @@ end
 % ------------------------------------------------------------------------------
 % Surround by zeros for an accurate and inclusive pcolor:
 % (alternative is to use imagesc)
+% imagesc(flipud(TS_DataMat));
 pcolor([TS_DataMat, zeros(size(TS_DataMat,1),1); zeros(1,size(TS_DataMat,2)+1)]);
 shading flat
 
