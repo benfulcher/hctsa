@@ -132,6 +132,7 @@ if op_update
 end
 
 
+
 % ------------------------------------------------------------------------------
 function [ordering,didUpdate] = getDistances(dMetricNow,tsOrOps,theLinkageMethod,numObjects,saveBack)
 
