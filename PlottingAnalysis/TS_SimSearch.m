@@ -213,7 +213,7 @@ if any(ismember('matrix',whatPlots))
     xlabel('Time (samples)');
     ax.TickLabelInterpreter = 'none';
     for j = 1:numNeighbors+1
-        tsData = dataStruct(neighborInd(ord(j))).Data(1:100);
+        tsData = dataStruct(neighborInd(ord(j))).Data(1:tsLength);
         lengthHere = min(tsLength,length(tsData));
         plot(1:lengthHere,j-0.5+NormMinMax(tsData),'-k');
     end
