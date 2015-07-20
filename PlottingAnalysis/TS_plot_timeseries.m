@@ -51,7 +51,7 @@ end
 
 if nargin < 3 || isempty(numPerGroup)
     % Default: plot 5 time series per group
-    numPerGroup = 5;
+    numPerGroup = 10;
 end
 
 if nargin < 4

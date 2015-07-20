@@ -158,7 +158,7 @@ end
 fprintf(1,'\n');
 
 % ------------------------------------------------------------------------------
-% Compute pairwise distances between all neighbors
+% Compute/retrieve pairwise distances between all neighbors
 % ------------------------------------------------------------------------------
 if isfield(clustStruct,'Dij')
     % Use pre-computed distances:
@@ -204,27 +204,46 @@ if any(ismember('matrix',whatPlots))
     end
 
     f = figure('color','w');
-    sp1 = subplot(1,5,1); ax = gca; hold on
-    ax.YTick = (1:numNeighbors+1);
-    ax.YTickLabel = labels;
-    ax.YLim = [0.5,numNeighbors+1.5];
+
+    % (I) Time-series annotations
+    sp1 = subplot(1,5,1); ax1 = gca; hold on
+    ax1.YTick = (1:numNeighbors+1);
+    ax1.YTickLabel = labels;
+    ax1.YLim = [0.5,numNeighbors+1.5];
     tsLength = 100;
-    ax.XLim = [1,tsLength];
+    ax1.XLim = [1,tsLength];
     xlabel('Time (samples)');
-    ax.TickLabelInterpreter = 'none';
+    ax1.TickLabelInterpreter = 'none';
     for j = 1:numNeighbors+1
         tsData = dataStruct(neighborInd(ord(j))).Data(1:tsLength);
         lengthHere = min(tsLength,length(tsData));
         plot(1:lengthHere,j-0.5+NormMinMax(tsData),'-k');
     end
-    sp2 = subplot(1,5,2:5); ax = gca; hold on
-    imagesc(Dij_clust)
-    caxis([min(Dij(Dij>0)),max(Dij(:))])
-    colormap(BF_getcmap('redyellowblue',8,0));
+
+    % (II) Pairwise similarity matrix
+    sp2 = subplot(1,5,2:5); box('on'); ax2 = gca; hold on
+    dLims = [min(Dij(Dij>0)),max(Dij(:))];
+    if isfield(dataStruct,'Group')
+        dRescale = @(x) dLims(1)-diff(dLims) + diff(dLims)*(x - min(x)/(max(x)-min(x)))*0.9999;
+        imagesc(0,1,dRescale([dataStruct_clust.Group]'))
+        imagesc(Dij_clust)
+        plot(ones(2,1)*0.5,[0.5,numNeighbors+1.5],'k')
+        % caxis([min(Dij(Dij>0)),max(Dij(:))])
+        colormap([BF_getcmap('spectral',8,0);BF_getcmap('redyellowblue',8,0)]);
+        caxis([dLims(1)-diff(dLims),dLims(2)])
+    else
+        imagesc(Dij_clust)
+        colormap(BF_getcmap('redyellowblue',8,0));
+        caxis([min(Dij(Dij>0)),max(Dij(:))])
+    end
+
 
     % Add a color bar:
     cB = colorbar('northoutside');
     cB.Label.String = 'Distance';
+    if isfield(dataStruct,'Group')
+        cB.Limits = dLims;
+    end
 
     % Box the target:
     indexCl = find([dataStruct_clust.ID]==targetID);
@@ -233,13 +252,21 @@ if any(ismember('matrix',whatPlots))
 
     % Set axes:
     axis('square')
-    ax.XLim = [0.5,numNeighbors+1.5];
-    ax.YLim = [0.5,numNeighbors+1.5];
-    ax.XTick = 1:numNeighbors+1;
-    ax.XTickLabel = [dataStruct_clust.ID];
-    ax.YTick = 1:numNeighbors+1;
-    ax.YTickLabel = {};
+    if isfield(dataStruct,'Group')
+        ax2.XLim = [-0.5,numNeighbors+1.5];
+    else
+        ax2.XLim = [0.5,numNeighbors+1.5];
+    end
+    ax2.XTick = 1:numNeighbors+1;
+    ax2.XTickLabel = [dataStruct_clust.ID];
+
+    ax2.YLim = [0.5,numNeighbors+1.5];
+    ax2.YTick = 1:numNeighbors+1;
+    ax2.YTickLabel = {};
     xlabel('ID');
+
+    % Link axes:
+    linkaxes([ax1,ax2],'y');
 
     % Reposition tight
     sp2.Position = [0.4,0.1,0.6,0.75];

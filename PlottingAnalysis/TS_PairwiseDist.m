@@ -73,7 +73,7 @@ end
 % ------------------------------------------------------------------------------
 
 if ischar(whatData)
-    TS_DataMat = TS_LoadData(theFile);
+    [TS_DataMat,~,~,theFile] = TS_LoadData(whatData);
 else
     % If provided a matrix, assume it's from HCTSA_N.mat by default:
     TS_DataMat = whatData;
