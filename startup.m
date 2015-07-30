@@ -22,7 +22,7 @@
 % We use this function a bit:
 addfcn = @(x) addpath(fullfile(pwd,x));
 
-fprintf(1,'Adding paths for the highly comparative time-series analysis package...')
+fprintf(1,'Adding paths for the highly comparative time-series analysis package...\n')
 
 % ------------------------------------------------------------------------------
 %% First add all the basic paths:
@@ -33,7 +33,7 @@ addfcn('PlottingAnalysis'); % code for analysing and plotting results
 addfcn('Operations'); % core code files for performing operations
 addfcn('PeripheryFunctions'); % periphery functions used in the code toolbox
 addfcn('TimeSeries'); % time series data files for analysis
-fprintf(1,' Core directories added.\n')
+fprintf(1,'Core directories added.\n')
 
 % ------------------------------------------------------------------------------
 %% Now add all the external code packages and periphery toolboxes:
@@ -100,7 +100,7 @@ settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 
 % Java information dynamics toolkit written by Joseph Lizier
 % (should be ok to re-add this every time startup is run)
-fprintf(1,'Information dynamics toolkit,')
+fprintf(1,'Information dynamics toolkit, ')
 javaaddpath(fullfile(pwd,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 
 % ------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ tiseanBinaryLocation = fullfile(homeDir,'bin');
 if isempty(regexp(getenv('PATH'),tiseanBinaryLocation))
     sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
     setenv('PATH', sysPath)
-    fprintf(1,' system path to TISEAN binaries: %s, ',tiseanBinaryLocation);
+    fprintf(1,'System path to TISEAN binaries: %s\n',tiseanBinaryLocation);
     clear sysPath
 end
 clear homeDir tiseanBinaryLocation
@@ -120,7 +120,7 @@ clear homeDir tiseanBinaryLocation
 % TISEAN also requires this DYLD path to be set (I assume this works also on
 % cygwin/Windows?):
 setenv('DYLD_LIBRARY_PATH','/usr/local/bin');
-fprintf(1,'\n DYLD library path (for TISEAN).');
+fprintf(1,'DYLD library path (for TISEAN).');
 
 % ------------------------------------------------------------------------------
 %% Finished:

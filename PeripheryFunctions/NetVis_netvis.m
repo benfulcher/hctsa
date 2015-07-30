@@ -52,6 +52,10 @@ default_labelLength = 0;
 check_labelLength = @(x) validateattributes(x,{'numeric'},{'positive'});
 addOptional(inputP,'labelLength',default_labelLength,check_labelLength);
 
+% dataLabels, A piece of time-series data for each node
+default_dataLabels = cell(numNodes,1);
+addOptional(inputP,'dataLabels',default_dataLabels,@iscell);
+
 % Number of iterations, repeats: nits
 default_nits = [2000,1]; % [maxIter,numRepeats];
 check_nits = @(x) isnumeric(x) && length(x)==2;
@@ -89,6 +93,7 @@ textLabels = inputP.Results.textLabels;
 linkThresh = inputP.Results.linkThresh;
 nodeLabels = inputP.Results.nodeLabels;
 labelLength = inputP.Results.labelLength;
+dataLabels = inputP.Results.dataLabels;
 nits = inputP.Results.nits;
 colorMap = inputP.Results.colorMap;
 tagStyle = inputP.Results.tagStyle;
@@ -298,6 +303,8 @@ legend(arrayfun(@(x)num2str(linkThresh(x)),sort(anyLinks,'descend'),'UniformOutp
 % ------------------------------------------------------------------------------
 pwidth = diff(get(gca,'XLim')); % plot width
 pheight = diff(get(gca,'YLim')); % plot height
+fdim = [0.2,0.05]; % fractional width/height of time-series annotations
+maxL = 100; % maximum number of annotated samples
 for i = 1:numGroups
     if length(nodeSize) > 1
         % sizes specified for each node as a vector
@@ -314,17 +321,18 @@ for i = 1:numGroups
                 'MarkerFaceColor',c{i},'MarkerEdgeColor','k', ...
                 'LineWidth',1.5,'markerSize',nodeSize); %,'MarkerEdgeColor','k'); % nodes
     end
+
     % Annotate time series to the plot:
-    % if ~isempty(tsx)
-    %     % do it as a proportion (fdim) of plot size
-    %     Nodes_in_i = find(nodeLabels==i);
-    %     for j = 1:length(Nodes_in_i)
-    %         ts = tsx{Nodes_in_i(j)};
-    %         plot(x(Nodes_in_i(j)) + linspace(0,pwidth*fdim(1),length(ts)),...
-    %                 y(Nodes_in_i(j)) - pheight*fdim(2) + pheight*fdim(2)*(ts-min(ts))/(max(ts)-min(ts)),...
-    %                 'Color',c{i},'LineWidth',1.0)
-    %     end
-    % end
+    if ~isempty(dataLabels)
+        % do it as a proportion (fdim) of plot size
+        Nodes_in_i = find(nodeLabels==i);
+        for j = 1:length(Nodes_in_i)
+            ts = dataLabels{Nodes_in_i(j)}(1:min(maxL,end));
+            plot(x(Nodes_in_i(j)) + linspace(0,pwidth*fdim(1),length(ts)),...
+                    y(Nodes_in_i(j)) - pheight*fdim(2) + pheight*fdim(2)*(ts-min(ts))/(max(ts)-min(ts)),...
+                    'Color',c{i},'LineWidth',1.0)
+        end
+    end
 
     % ------------------------------------------------------------------------------
     % Text annotations:

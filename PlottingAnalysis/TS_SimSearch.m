@@ -95,7 +95,12 @@ else
     clustStruct = tmp.op_clust; clear tmp
 end
 numItems = length(dataStruct);
-numNeighbors = min(numItems,numNeighbors) - 1;
+
+if numNeighbors == 0 % code for 'all'
+    numNeighbors = numItems - 1;
+else % specify a number of neighbours
+    numNeighbors = min(numItems,numNeighbors) - 1;
+end
 
 % ------------------------------------------------------------------------------
 % Match the specified index to the data structure
@@ -144,6 +149,7 @@ end
 
 % Sort distances (ascending):
 [~,dix] = sort(Dj,'ascend');
+
 
 % Indices of nearest neighbors:
 neighborInd = dix(1:numNeighbors+1);
@@ -206,7 +212,7 @@ if any(ismember('matrix',whatPlots))
     f = figure('color','w');
 
     % (I) Time-series annotations
-    sp1 = subplot(1,5,1); ax1 = gca; hold on
+    sp1 = subplot(1,5,1); ax1 = gca; box('on'); hold on
     ax1.YTick = (1:numNeighbors+1);
     ax1.YTickLabel = labels;
     ax1.YLim = [0.5,numNeighbors+1.5];
@@ -218,25 +224,40 @@ if any(ismember('matrix',whatPlots))
         tsData = dataStruct(neighborInd(ord(j))).Data(1:tsLength);
         lengthHere = min(tsLength,length(tsData));
         plot(1:lengthHere,j-0.5+NormMinMax(tsData),'-k');
+        if j < numNeighbors+1
+            plot([1,tsLength],(j+0.5)*ones(2,1),':k')
+        end
     end
 
     % (II) Pairwise similarity matrix
     sp2 = subplot(1,5,2:5); box('on'); ax2 = gca; hold on
-    dLims = [min(Dij(Dij>0)),max(Dij(:))];
+    Dij_clust(logical(eye(numNeighbors+1))) = NaN; % zero diagonals mess things up
+    Dij_clust(Dij_clust==0) = NaN; % all zeros mess things up
+    dLims = [min(Dij_clust(~isnan(Dij_clust))),max(Dij_clust(~isnan(Dij_clust)))];
+    imagesc(Dij_clust)
     if isfield(dataStruct,'Group')
-        dRescale = @(x) dLims(1)-diff(dLims) + diff(dLims)*(x - min(x)/(max(x)-min(x)))*0.9999;
+        dRescale = @(x) dLims(1)-diff(dLims) + diff(dLims)*(x - min(x)/(max(x)-min(x)))*0.99999;
         imagesc(0,1,dRescale([dataStruct_clust.Group]'))
-        imagesc(Dij_clust)
         plot(ones(2,1)*0.5,[0.5,numNeighbors+1.5],'k')
         % caxis([min(Dij(Dij>0)),max(Dij(:))])
         colormap([BF_getcmap('spectral',8,0);BF_getcmap('redyellowblue',8,0)]);
         caxis([dLims(1)-diff(dLims),dLims(2)])
     else
-        imagesc(Dij_clust)
         colormap(BF_getcmap('redyellowblue',8,0));
         caxis([min(Dij(Dij>0)),max(Dij(:))])
     end
 
+    % Black rectangles over NaNs:
+    [theNaNs_i,theNaNs_j] = find(isnan(Dij_clust));
+    for i = 1:length(theNaNs_i)
+        rectangle('Position',[theNaNs_j(i)-0.5,theNaNs_i(i)-0.5,1,1],'FaceColor','k', ...
+                        'EdgeColor','k')
+    end
+
+    % Box the target:
+    indexCl = find([dataStruct_clust.ID]==targetID);
+    rectangle('Position',[indexCl-0.5,indexCl-0.5,1,1],'EdgeColor','w','LineWidth',2)
+    plot(indexCl,indexCl,'*w')
 
     % Add a color bar:
     cB = colorbar('northoutside');
@@ -244,11 +265,6 @@ if any(ismember('matrix',whatPlots))
     if isfield(dataStruct,'Group')
         cB.Limits = dLims;
     end
-
-    % Box the target:
-    indexCl = find([dataStruct_clust.ID]==targetID);
-    rectangle('Position',[indexCl-0.5,indexCl-0.5,1,1])
-    plot(indexCl,indexCl,'*k')
 
     % Set axes:
     axis('square')
@@ -297,10 +313,17 @@ if any(ismember(whatPlots,'network'))
         nodeLabels(1) = 1;
     end
 
+    if strcmp(tsOrOps,'ts')
+        dataLabels = {dataStruct(dix(1:numNetwork)).Data};
+    else
+        dataLabels = {};
+    end
+
     A(logical(eye(size(A)))) = 0;
     NetVis_netvis(A,'k',0.01,'textLabels',{dataStruct.Name},...
                     'linkThresh',[0.9,0.8,0.7,0.6],...
                     'nodeLabels',nodeLabels,...
+                    'dataLabels',dataLabels,...
                     'colorMap','set1');
 end
 

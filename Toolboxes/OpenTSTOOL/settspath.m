@@ -1,7 +1,7 @@
 function settspath(TSTOOLpath)
 % Set environment for using TSTOOL
 %
-% Either use 'settspath(TSTOOLpath)' 
+% Either use 'settspath(TSTOOLpath)'
 % or just 'settspath' when in the OpenTSTool-Directory
 
 if nargin == 0
@@ -28,6 +28,10 @@ addpath(fullfile(TSTOOLpath, 'demos'));
 addpath(fullfile(TSTOOLpath, 'gui'));
 addpath(fullfile(TSTOOLpath, 'utils'));
 addpath(fullfile(TSTOOLpath, 'mex'));
-addpath(fullfile(TSTOOLpath, fullfile('mex', mexext)));
+
+% If mex compilation hasn't been done, then this won't exist:
+if exist(fullfile(TSTOOLpath, 'mex', mexext),'file')
+    addpath(fullfile(TSTOOLpath, 'mex', mexext));
+end
 
 end
