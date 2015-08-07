@@ -1,3 +1,4 @@
+function TS_SimSearch(varargin)
 % ------------------------------------------------------------------------------
 % TS_SimSearch
 % ------------------------------------------------------------------------------
@@ -27,8 +28,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_SimSearch(varargin)
 
 % ------------------------------------------------------------------------------
 % Check inputs, and set defaults
@@ -149,7 +148,6 @@ end
 
 % Sort distances (ascending):
 [~,dix] = sort(Dj,'ascend');
-
 
 % Indices of nearest neighbors:
 neighborInd = dix(1:numNeighbors+1);

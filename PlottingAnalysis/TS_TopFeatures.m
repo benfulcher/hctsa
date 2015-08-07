@@ -1,10 +1,15 @@
-function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat,doNull,plotoutputs)
+function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat,doNull,varargin)
+%-------------------------------------------------------------------------------
+% TS_TopFeatures
+%-------------------------------------------------------------------------------
 % Determines the top features for discriminating the groups in the time-series
 % dataset.
 %
 %---INPUTS:
 %
 % EXAMPLE USAGE:
+%
+% TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions','cluster'});
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -34,35 +39,21 @@ if nargin < 2 || isempty(whatTestStat)
     fprintf(1,'Using ''%s'' by default\n', whatTestStat);
 end
 if nargin < 3
-    doNull = 1;
-end
-if nargin < 4
-    plotoutputs = 5; % number of figures outputs by default
+    doNull = 1; % compute an empirical null distribution by randomizing class labels
 end
 
-% --------------------------------------------------------------------------
-% Place plotting options in a structure: plotopts
-% --------------------------------------------------------------------------
-if ~isstruct(plotoutputs)
-    if plotoutputs > 0 % plot all outputs
-        plotopts.histogram = 1;
-        plotopts.nfigs = plotoutputs;
-    else
-        plotopts.histogram = 0;
-        plotopts.nfigs = 0;
-    end
-else
-    if isfield(plotoutputs,'histogram')
-        plotopts.histogram = plotoutputs.histogram; % plot histogram
-    else
-        plotopts.histogram = 1;
-    end
-    if isfield(plotoutputs,'nfigs')
-        plotopts.nfigs = plotoutputs.nfigs;
-    else
-        plotopts.nfigs = 5;
-    end
-end
+% Use an inputParser to control plotting options:
+inputP = inputParser;
+default_whatPlots = {'histogram','distributions','cluster'};
+check_whatPlots = @(x) iscell(x) || ischar(x);
+addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
+default_numTopFeatures = 25;
+addParameter(inputP,'numTopFeatures',default_numTopFeatures,@isnumeric);
+parse(inputP,varargin{:});
+
+whatPlots = inputP.Results.whatPlots;
+numTopFeatures = inputP.Results.numTopFeatures;
+clear inputP;
 
 % --------------------------------------------------------------------------
 %%                          Load the data
@@ -163,13 +154,17 @@ end
 % --------------------------------------------------------------------------
 %%                          Plot outputs
 % --------------------------------------------------------------------------
-if plotopts.histogram
+
+%-------------------------------------------------------------------------------
+% Histogram of distribution of test statistics for labeled and null data
+%-------------------------------------------------------------------------------
+if any(ismember(whatPlots,'histogram'))
     colors = BF_getcmap('spectral',5,1);
     % 1) a figure to show the distribution of test statistics across all
     % features:
     f = figure('color','w'); hold on
     if ~doNull
-        h_real = histogram(testStat,numBins,'Normalization','probability',...
+        h_real = histogram(testStat,'Normalization','probability',...
                     'BinMethod','auto','FaceColor',colors{5},'FaceAlpha',0);
         maxH = max(h_real.Values);
     else
@@ -186,21 +181,23 @@ if plotopts.histogram
     end
 
     % Add chance line
-    plot(chanceLine*ones(2,1),[0,maxH],':.k')
+    plot(chanceLine*ones(2,1),[0,maxH],'--k')
     % Add mean of real distribution
     plot(mean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2)
     xlabel(sprintf('Individual %s across %u features',whatTestStat,numOps))
     ylabel('Probability')
 end
 
-if plotopts.nfigs > 0
+%-------------------------------------------------------------------------------
+% Distributions across classes for top features
+%-------------------------------------------------------------------------------
+if any(ismember(whatPlots,'distributions'))
     subPerFig = 5; % subplots per figure
-    topHowMany = 10;
     ks_or_hist = 'ks'; % view as either histograms or kernel-smoothed distributions
     colors = BF_getcmap('spectral',max(numGroups,5),1);
     if numGroups==2, colors = colors([2,4]); end
 
-    numFigs = ceil(topHowMany/subPerFig);
+    numFigs = ceil(numTopFeatures/subPerFig);
 
     for figi = 1:numFigs
         if figi*subPerFig > length(ifeat)
@@ -246,12 +243,36 @@ if plotopts.nfigs > 0
             end
             xlabel(sprintf('[%u] %s (%s=%4.2f)',Operations(op_ind).ID,Operations(op_ind).Name,...
                                 whatTestStat,testStat(op_ind)),'interpreter','none')
-
         end
-
     end
 end
 
+%-------------------------------------------------------------------------------
+% Dependence of top features
+%-------------------------------------------------------------------------------
+if any(ismember(whatPlots,'cluster'))
+
+    % 1. Get pairwise similarity matrix
+    op_ind = ifeat(1:numTopFeatures); % plot these operations indices
+
+    % (if it exists already, use that; otherwise compute it on the fly)
+    tmp = load(whatDataFile,'op_clust');
+    clustStruct = tmp.op_clust; clear tmp
+    if isfield(clustStruct,'Dij')
+        % pairwise distances already computed, stored in the HCTSA .mat file
+        fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile)
+        Dij = squareform(clustStruct.Dij);
+        Dij = Dij(op_ind,op_ind);
+    else
+        % Compute correlations on the fly
+        Dij = BF_pdist(TS_DataMat(:,op_ind)');
+    end
+    makeLabel = @(x) sprintf('[%u] %s (%4.2f)',Operations(x).ID,Operations(x).Name,...
+                        testStat(x));
+    objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
+    BF_ClusterDown(Dij,floor(numTopFeatures/5),'whatDistance','corr',...
+                        'objectLabels',objectLabels);
+end
 
 
 %-------------------------------------------------------------------------------
