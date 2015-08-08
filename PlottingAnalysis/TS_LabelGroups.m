@@ -1,6 +1,5 @@
-% --------------------------------------------------------------------------
-% TS_LabelGroups
-% --------------------------------------------------------------------------
+function groupIndices = TS_LabelGroups(whatData,keywordGroups,saveBack)
+% TS_LabelGroups    Label groups of a time series using assigned keywords
 %
 % You provide a set of keyword options to store a specific grouping of time series.
 % Useful when doing a classification task -- can store your classifications
@@ -28,7 +27,7 @@
 %
 %---OUTPUTS:
 % groupIndices: the indicies corresponding to each keyword in keywordGroups.
-%
+
 % --------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -44,8 +43,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function groupIndices = TS_LabelGroups(whatData,keywordGroups,saveBack)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:

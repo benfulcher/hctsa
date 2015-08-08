@@ -1,9 +1,6 @@
-% ------------------------------------------------------------------------------
-% CO_AutoCorr
-% ------------------------------------------------------------------------------
-% 
-% Computes the autocorrelation of an input time series, y, at a time-lag, tau
-% 
+function out = CO_AutoCorr(y,tau,whatMethod)
+% CO_AutoCorr   Compute the autocorrelation of an input time series
+%
 %---INPUTS:
 % y, a scalar time series column vector.
 % tau, the time-delay. If tau is a scalar, returns autocorrelation for y at that
@@ -11,19 +8,19 @@
 %       lags.
 % whatMethod, the method of computing the autocorrelation: 'Fourier',
 %             'TimeDomainStat', or 'TimeDomain'.
-%       
+%
 %---OUTPUT: the autocorrelation at the given time-lag.
 %
 %---NOTES:
 % Specifying whatMethod = 'TimeDomain' can tolerate NaN values in the time
 % series.
-% 
+%
 % Computing mean/std across the full time series makes a significant difference
 % for short time series, but can produce values outside [-1,+1]. The
 % filtering-based method used by Matlab's autocorr, is probably the best for
 % short time series, and is implemented here by specifying: whatMethod =
 % 'Fourier'.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -37,17 +34,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_AutoCorr(y,tau,whatMethod)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -78,7 +73,7 @@ case 'Fourier'
     acf = ifft(F);
     acf = acf./acf(1); % Normalize
     acf = real(acf);
-    
+
     % acf = acf(2:end);
 
     if max(tau) > length(acf)-1 % -1 because acf(1) is lag 0
@@ -87,7 +82,7 @@ case 'Fourier'
     if min(tau) < 0
         warning('Negative time lags not applicable')
     end
-    
+
     out = zeros(length(tau),1);
     for i = 1:length(tau)
         if (tau(i) > length(acf)-1) || (tau(i) < 0)
@@ -102,7 +97,7 @@ case 'TimeDomainStat'
     % ------------------------------------------------------------------------------
     % Assume a stationary process and estimate mean and standard deviation from the full time
     % series, although this method can produce outputs that are outside the range [-1,1]
-    
+
     N = length(y); % time-series length
     sigma2 = var(y); % time-series standard deviation
     mu = mean(y); % time-series mean
@@ -117,17 +112,17 @@ case 'TimeDomainStat'
         % Output values over a range of time lags
         out = arrayfun(@(x)ACFy(x),tau);
     end
-    
+
 case 'TimeDomain'
     % ------------------------------------------------------------------------------
     % Estimate mean and standard deviation from each portion of the time series
 
     N = length(y); % time-series length
-    
-    
+
+
     if length(tau) == 1
         % Output a single value at the given time-lag:
-        
+
         if any(isnan(y))
             % If NaNs exist in the time series, compute just for a subset
             % of points
@@ -140,9 +135,9 @@ case 'TimeDomain'
             % lagged time series:
             y2 = y(tau+1:N);
             y2N = y2(goodR) - mean(y2(goodR)); % (relative to mean for included points)
-            
+
             out = mean(y1N.*y2N)/std(y1(goodR))/std(y2(goodR));
-            
+
         else
             out = mean((y(1:N-tau) - mean(y(1:N-tau))).* ...
                 (y(tau+1:N) - mean(y(tau+1:N))))/std(y(1:N-tau))/std(y(tau+1:N));

@@ -1,18 +1,17 @@
-% ------------------------------------------------------------------------------
-% EN_CID
-% ------------------------------------------------------------------------------
-% 
+function out = EN_CID(y)
+% EN_CID    Simple complexity measure of a time series.
+%
 % Estimates of 'complexity' of a time series as the stretched-out length of the
 % lines resulting from a line-graph of the time series.
-% 
+%
 % cf. Batista, G. E. A. P. A., Keogh, E. J., Tataw, O. M. & de Souza, V. M. A.
 % CID: an efficient complexity-invariant distance for time series. Data Min.
 % Knowl. Disc. 28, 634–669 (2014).
-% 
+%
 %---INPUTS:
 %
 % y, the input time series
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -26,17 +25,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = EN_CID(y)
 
 % Original definition (in Table 2 of paper cited above)
 out.CE1 = sqrt(mean(diff(y).^2)); % sum -> mean to deal with non-equal time-series lengths

@@ -1,23 +1,22 @@
-% ------------------------------------------------------------------------------
-% TSTL_predict
-% ------------------------------------------------------------------------------
-% 
+function out = TSTL_predict(y, plen, NNR, stepSize, pmode, embedParams)
+% TSTL_predict  Local constant iterative time-series prediction.
+%
 % References TSTOOL code 'predict', which does local constant iterative
-% prediction for scalar data using fast nearest neighbour searching. There are
-% four modes available for the prediction output.
-% 
+% prediction for scalar data using fast nearest neighbour searching.
+% There are four modes available for the prediction output.
+%
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
+%
 %---INPUTS:
-% 
+%
 % y, scalar column vector time series
-% 
+%
 % plen, prediction length in samples or as proportion of time series length NNR,
-% 
+%
 % NNR, number of nearest neighbours
-% 
+%
 % stepSize, number of samples to step for each prediction
-% 
+%
 % pmode, prediction mode, four options:
 %           (i) 0: output vectors are means of images of nearest neighbours
 %           (ii) 1: output vectors are distance-weighted means of images
@@ -28,7 +27,7 @@
 %                    weighted mean of the images of the neighbours
 % embedParams, as usual to feed into BF_embed, except that now you can set
 %              to zero to not embed.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -42,17 +41,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = TSTL_predict(y, plen, NNR, stepSize, pmode, embedParams)
 
 % ------------------------------------------------------------------------------
 %% Foreplay

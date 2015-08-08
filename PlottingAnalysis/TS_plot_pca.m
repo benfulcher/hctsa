@@ -1,14 +1,12 @@
-% ------------------------------------------------------------------------------
-% TS_plot_pca
-% ------------------------------------------------------------------------------
+function TS_plot_pca(whatData,TsorOps,showDist,classMeth,annotateParams)
+% TS_plot_pca   2-dimensional feature-based representation of a time-series dataset.
 %
-% Calculates and then plots a 2-dimensional feature-based representation of the
-% data (using PCA).
+% The low-dimensional representation is computed using PCA.
 %
 %---EXAMPLE USAGE:
 %
 % TSQ_plot_pca('norm');
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -24,8 +22,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_plot_pca(whatData,TsorOps,showDist,classMeth,annotateParams)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:

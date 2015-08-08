@@ -1,27 +1,25 @@
-% ------------------------------------------------------------------------------
-% NL_TSTL_ReturnTime
-% ------------------------------------------------------------------------------
-% 
-% Computes a histogram of return times, the time taken for the time series to
-% return to a similar location in phase space for a given reference point using
-% the code return_time from TSTOOL.
-% 
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
+function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedParams)
+% NL_TSTL_ReturnTime    Analysis of the histogram of return times.
+%
+% Return times are the time taken for the time series to return to a similar
+% location in phase space for a given reference point
+%
 % Strong peaks in the histogram are indicative of periodicities in the data.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, scalar time series as a column vector
 % NNR, number of nearest neighbours
 % maxT, maximum return time to consider
 % past, Theiler window
 % Nref, number of reference indicies
 % embedParams, to feed into BF_embed
-% 
+%
 %---OUTPUTS: include basic measures from the histogram, including the occurrence of
 % peaks, spread, proportion of zeros, and the distributional entropy.
-% 
+
+% Uses the code, return_time, from TSTOOL.
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -35,17 +33,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedParams)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
@@ -70,7 +66,7 @@ if (maxT > 0) && (maxT <= 1) % specify a proportion
 end
 
 % Theiler window, past
-if nargin < 4 || isempty(past) 
+if nargin < 4 || isempty(past)
     past = 10;
 end
 if (past > 0) && (past < 1) % specify a proportion
@@ -132,7 +128,7 @@ icross05 = find((Trett(1:end-1)-0.5*max(Trett)).*(Trett(2:end)-0.5*max(Trett)) <
 if ~isempty(icross05) && length(icross05) > 2
     difficross05 = diff(icross05);
     difficross05 = difficross05(difficross05 > 0.4*max(difficross05)); % remove small entries, crossing peaks
-    
+
     out.meanpeaksep = mean(difficross05)/NN;
     out.maxpeaksep = max(difficross05)/NN;
     out.minpeaksep = min(difficross05)/NN;

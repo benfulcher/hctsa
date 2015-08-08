@@ -1,16 +1,15 @@
-% ------------------------------------------------------------------------------
-% SY_RangeEvolve
-% ------------------------------------------------------------------------------
-% 
+function out = SY_RangeEvolve(y)
+% SY_RangeEvolve    How the time-series range changes across time.
+%
 % Measures of the range of the time series as a function of time,
 % i.e., range(x_{1:i}) for i = 1, 2, ..., N, where N is the length of the time
 % series.
-% 
+%
 %---INPUT:
 % y, the time series
-% 
+%
 %---OUTPUTS: based on the dynamics of how new extreme events occur with time.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -24,17 +23,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_RangeEvolve(y)
 
 doPlot = 0; % plot outputs
 N = length(y); % length of the time series
@@ -83,15 +80,15 @@ end
 %     out.nuql10 = NaN;
 % end
 % if N > 50
-%     
+%
 % out.nuql50 = lunique(cums(1:50))/out.totnuq;
-% 
+%
 % if N > 100
 %     out.nuql100 = lunique(cums(1:100))/out.totnuq;
 % else
 %     out.nuql100 = NaN;
 % end
-%     
+%
 % if N > 1000
 %     out.nuql1000 = lunique(cums(1:1000))/out.totnuq;
 % else
@@ -118,13 +115,13 @@ for i = 1:length(Ns)
 end
 % out.l10 = cums(10)/fullr;
 % out.l50 = cums(50)/fullr;
-% 
+%
 % if N > 100
 %     out.l100 = cums(100)/fullr;
 % else
 %     out.l100 = NaN;
 % end
-% 
+%
 % if N > 1000,
 %     out.l1000 = cums(1000)/fullr;
 % else

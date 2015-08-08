@@ -1,29 +1,28 @@
-% ------------------------------------------------------------------------------
-% TSTL_localdensity
-% ------------------------------------------------------------------------------
-% 
-% Uses TSTOOL code localdensity, which is very poorly documented in the TSTOOL
-% documentation, but we can assume it returns local density estimates in the
+function out = TSTL_localdensity(y,NNR,past,embedParams)
+% TSTL_localdensity     Local density estimates in the time-delay embedding space
+%
+% TSTOOL code localdensity is very poorly documented in the TSTOOL
+% package, can assume it returns local density estimates in the
 % time-delay embedding space.
-% 
+%
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the time series as a column vector
-% 
+%
 % NNR, number of nearest neighbours to compute
-% 
+%
 % past, number of time-correlated points to discard (samples)
-% 
+%
 % embedParams, the embedding parameters, inputs to BF_embed as {tau,m}, where
 %               tau and m can be characters specifying a given automatic method
 %               of determining tau and/or m (see BF_embed).
-% 
+%
 %---OUTPUTS: various statistics on the local density estimates at each point in
 % the time-delay embedding, including the minimum and maximum values, the range,
 % the standard deviation, mean, median, and autocorrelation.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -37,17 +36,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = TSTL_localdensity(y,NNR,past,embedParams)
 
 % ------------------------------------------------------------------------------
 %% Check inputs

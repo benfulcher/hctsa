@@ -1,12 +1,11 @@
-% ------------------------------------------------------------------------------
-% PP_Compare
-% ------------------------------------------------------------------------------
-% 
+function out = PP_Compare(y,detrndmeth)
+% PP_Compare    Compare how time-series properties change after pre-processing.
+%
 % Applies a given pre-processing transformation to the time series, and returns
 % statistics on how various time-series properties change as a result.
-% 
-% Inputs are structured in a clunky way, unfortunately...
-% 
+%
+% Inputs are structured in a clunky way, unfortunately:
+%
 %---INPUTS:
 % y, the input time series
 % detrndmeth, the method to use for detrending:
@@ -56,14 +55,14 @@
 %                       data, else returns a NaN.
 %      (ix) 'boxcox': makes a Box-Cox transformation of the data. Only valid for
 %                     positive only data; otherwise returns a NaN.
-% 
+%
 % If multiple detrending methods are specified, they should be in a cell of
 % strings; the methods will be executed in order, e.g., {'poly1','sin1'} does a
 % linear polynomial then a simple one-frequency seasonal detrend (in that order)
-% 
+%
 %---OUTPUTS: include comparisons of stationarity and distributional measures
 % between the original and transformed time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -77,17 +76,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = PP_Compare(y,detrndmeth)
 
 % ------------------------------------------------------------------------------
 %% Check inputs, set default
@@ -112,10 +109,10 @@ r = (1:N)'; % the t-range over which to fit
 % 1) Polynomial detrend
 % starts with 'poly' and ends with integer from 1--9
 if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'poly') && ~isempty(str2double(detrndmeth(5)))
-    
+
     % Check a curve-fitting toolbox license is available:
     BF_CheckToolbox('curve_fitting_toolbox');
-    
+
     [cfun, gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
     y_d = y-y_fit;
@@ -125,7 +122,7 @@ elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2
 
     % Check a curve-fitting toolbox license is available:
     BF_CheckToolbox('curve_fitting_toolbox');
-    
+
     [cfun, gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
     y_d = y-y_fit;
@@ -134,7 +131,7 @@ elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2
 elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6),'spline') && ~isempty(str2double(detrndmeth(7))) && ~isempty(str2double(detrndmeth(8)))
     nknots = str2double(detrndmeth(7));
     intp = str2double(detrndmeth(8));
-    
+
     %% Check that a Curve-Fitting Toolbox license is available:
     BF_CheckToolbox('curve_fitting_toolbox')
 
@@ -180,7 +177,7 @@ elseif strcmp(detrndmeth,'logr')
 elseif strcmp(detrndmeth,'boxcox')
     % Requires a financial toolbox to run boxcox, check one is available:
     BF_CheckToolbox('financial_toolbox');
-    
+
     if all(y > 0), y_d = boxcox(y);
     else
         out = NaN; return % return all NaNs

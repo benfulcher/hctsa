@@ -1,27 +1,26 @@
-% ------------------------------------------------------------------------------
+function out = CO_CompareMinAMI(y,meth,numBins)
 % CO_CompareMinAMI
-% ------------------------------------------------------------------------------
-% 
+%
 % Finds the first minimum of the automutual information by various different
 % estimation methods, and sees how this varies over different coarse-grainings
 % of the time series.
-% 
+%
 % The function returns a set of statistics on the set of first minimums of the
 % automutual information function obtained over a range of the number of bins
 % used in the histogram estimation, when specifying 'numBins' as a vector
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % meth, the method for estimating mutual information (input to CO_HistogramAMI)
-% 
+%
 % numBins, the number of bins for the AMI estimation to compare over (can be a
 %           scalar or vector)
-% 
+%
 % Outputs include the minimum, maximum, range, number of unique values, and the
 % position and periodicity of peaks in the set of automutual information
 % minimums.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -35,17 +34,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_CompareMinAMI(y,meth,numBins)
 
 % ------------------------------------------------------------------------------
 %% Check inputs and set defaults:

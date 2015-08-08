@@ -4,7 +4,7 @@
 % 
 % Whitens a time series by comparing and testing a range of time-series
 % preprocessings.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

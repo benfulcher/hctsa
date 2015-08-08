@@ -1,42 +1,40 @@
-% ------------------------------------------------------------------------------
-% PH_ForcePotential
-% ------------------------------------------------------------------------------
-% 
-% Couples the values of the time series to a given dynamical system. The input
-% time series forces a particle in the given potential well.
-% 
+function out = PH_ForcePotential(y,whatPotential,params)
+% PH_ForcePotential   Couples the values of the time series to a dynamical system
+%
+% The input time series forces a particle in the given potential well.
+%
 % The time series contributes to a forcing term on a simulated particle in a:
-% 
+%
 % (i) Quartic double-well potential with potential energy V(x) = x^4/4 - alpha^2
 %           x^2/2, or a force F(x) = -x^3 + alpha^2 x
-% 
+%
 % (ii) Sinusoidal potential with V(x) = -cos(x/alpha), or F(x) = sin(x/alpha)/alpha
 %
 %---INPUTS:
 % y, the input time series
-% 
+%
 % whatPotential, the potential function to simulate:
 %               (i) 'dblwell' (a double well potential function)
 %               (ii) 'sine' (a sinusoidal potential function)
-% 
+%
 % params, the parameters for simulation, should be in the form:
 %                   params = [alpha, kappa, deltat]
-%                   
+%
 %           (i) The double-well potential has three parameters:
 %               * alpha controls the relative positions of the wells,
 %               * kappa is the coefficient of friction,
 %               * deltat sets the time step for the simulation.
-%           
+%
 %           (ii) The sinusoidal potential also has three parameters:
 %               * alpha controls the period of oscillations in the potential
 %               * kappa is the coefficient of friction,
 %               * deltat sets the time step for the simulation.
-% 
+%
 %---OUTPUTS:
 % Statistics summarizing the trajectory of the simulated particle,
 % including its mean, the range, proportion positive, proportion of times it
 % crosses zero, its autocorrelation, final position, and standard deviation.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -50,20 +48,18 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = PH_ForcePotential(y,whatPotential,params)
-
 % ------------------------------------------------------------------------------
-% Check inputs
+% Check inputs and set defaults
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(whatPotential)
     whatPotential = 'dblwell'; % by default
@@ -101,7 +97,7 @@ case 'dblwell'
 otherwise
     error('Unknown potential function ''%s'' specified', whatPotential);
 end
-    
+
 x = zeros(N,1); % Position
 v = zeros(N,1); % Velocity
 
@@ -117,7 +113,7 @@ if doPlot
         plot(-100:0.1:100, F(-100:0.1:100), 'k') % plot the potential
         plot(x,V(x),'or')
         plot(x)
-        
+
     case 'sine'
         figure('color','w');
         subplot(3,1,1); plot(y,'k'); title('Time series -> drive')

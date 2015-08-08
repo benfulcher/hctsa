@@ -6,7 +6,7 @@
 % groupIndices form (which has indicies for each group as a cell).
 % 
 % Or vice-versa (6/1/2014)
-% 
+ 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

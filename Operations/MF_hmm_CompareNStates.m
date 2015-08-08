@@ -1,10 +1,9 @@
-% ------------------------------------------------------------------------------
-% MF_hmm_CompareNStates
-% ------------------------------------------------------------------------------
-% 
+function out = MF_hmm_CompareNStates(y,trainp,nstater)
+% MF_hmm_CompareNStates     Hidden Markov Model (HMM) fitting to a time series.
+%
 % Fits HMMs with different numbers of states, and compares the resulting
 % test-set likelihoods.
-% 
+%
 % The code relies on Zoubin Gharamani's implementation of HMMs for real-valued
 % Gassian-distributed observations, including the hmm and hmm_cl routines (
 % renamed ZG_hmm and ZG_hmm_cl here).
@@ -12,20 +11,20 @@
 % http://www.gatsby.ucl.ac.uk/~zoubin/software.html
 % or, specifically:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software/hmm.tar.gz
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % trainp, the initial proportion of the time series to train the model on
-% 
+%
 % nstater, the vector of state numbers to compare. E.g., (2:4) compares a number
 %               of states 2, 3, and 4.
-% 
+%
 %---OUTPUTS: statistics on how the log likelihood of the test data changes with
 % the number of states n_{states}$. We implement the code for p_{train} = 0.6$
 % as n_{states}$ varies across the range n_{states} = 2, 3, 4$.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -39,17 +38,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_hmm_CompareNStates(y,trainp,nstater)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
@@ -86,9 +83,9 @@ for j = 1:Nstate
     % train HMM with <numStates> states for 30 cycles of EM (or until
     % convergence); default termination tolerance
     [Mu, Cov, P, Pi, LL] = ZG_hmm(ytrain,Ntrain,numStates,30);
-    
+
     LLtrains(j) = LL(end)/Ntrain;
-    
+
     %% Calculate log likelihood for the test data
     lik = ZG_hmm_cl(ytest,Ntest,numStates,Mu,Cov,P,Pi);
 

@@ -1,6 +1,5 @@
-% ------------------------------------------------------------------------------
-% TS_cluster
-% ------------------------------------------------------------------------------
+function TS_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, linkageMethodCol, doSave)
+% TS_cluster    Linkage clustering for hctsa data.
 %
 % Reads in normalized data from HCTSA_N.mat, clusters the data matrix by
 % reordering rows and columns with linkage clustering, and then saves the result
@@ -17,7 +16,7 @@
 % linkageMethodCol: linkage method for clustering operations (columns)
 % doSave: controls whether to save pairwise distance information (which can be large)
 %         to the local file (HCTSA_N.mat)
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -33,8 +32,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, linkageMethodCol, doSave)
 
 % --------------------------------------------------------------------------
 %% Check input arguments:

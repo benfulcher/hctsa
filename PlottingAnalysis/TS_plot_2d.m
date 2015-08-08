@@ -1,9 +1,7 @@
-% ------------------------------------------------------------------------------
-% TS_plot_2d
-% ------------------------------------------------------------------------------
+function TS_plot_2d(Features,dataInfo,trainTest,annotateParams,showDistr,classMethod)
+% TS_plot_2d   Plots a dataset in a two-dimensional space.
 %
-% Plots the dataset in a two-dimensional space
-% e.g., that of two chosen operations, or two principal components.
+% e.g., The space of two chosen features, or two principal components.
 %
 %---INPUTS:
 % Features, an Nx2 vector of where to plot each of the N data objects in the
@@ -38,7 +36,7 @@
 %
 % classMethod, can select a classifier to fit to the different classes (e.g.,
 %               'linclass' for a linear classifier).
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -54,8 +52,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_plot_2d(Features,dataInfo,trainTest,annotateParams,showDistr,classMethod)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:

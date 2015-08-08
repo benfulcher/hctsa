@@ -10,7 +10,7 @@
 % 
 % Output can be either the covariance matrix, or matrix of correlation
 % coefficients, specified by the second input, makeCoeff.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

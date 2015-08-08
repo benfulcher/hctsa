@@ -1,14 +1,12 @@
-% ------------------------------------------------------------------------------
-% NL_DVV
-% ------------------------------------------------------------------------------
-% 
-% Delay Vector Variance method for real and complex signals. Uses predictability
-% of the signal in phase space to characterize the time series.
-% 
+function out = NL_DVV(x,m,numDVs,nd,Ntv,numSurr,randomSeed)
+% NL_DVV 	Delay Vector Variance method for real and complex signals.
+%
+% Uses predictability of the signal in phase space to characterize the
+% time series.
+%
 % This function uses the original code from the DVV toolbox to do the computation
 % and produces statistics on the outputs -- comparing the DVV curves for both
 % the real and the surrogate data.
-%
 %
 %---USAGE:
 % outputStats = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed)
@@ -27,9 +25,9 @@
 % (c) Copyright Danilo P. Mandic 2008
 % http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm
 % http://www.commsp.ee.ic.ac.uk/~mandic/dvv/papers/dvv_proj.pdf
-% 
+%
 % Modified by Ben Fulcher, 2015-05-13, for use in hctsa.
-% 
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   This program is free software; you can redistribute it and/or modify it
 %   under the terms of the GNU General Public License as published by the Free
@@ -45,8 +43,6 @@
 %   http://www.gnu.org/copyleft/gpl.html or by writing to Free Software
 %   Foundation, Inc.,675 Mass Ave, Cambridge, MA 02139, USA.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function out = NL_DVV(x,m,numDVs,nd,Ntv,numSurr,randomSeed)
 
 % Plot output plot:
 doPlot = 0;
@@ -122,7 +118,7 @@ if doPlot
     % DVV scatter plot
     subplot(1,2,2); hold on
     biSector = 0:0.5:1;
-    plot(biSector, biSector, ':k'); axis([ 0 1 0 1]); 
+    plot(biSector, biSector, ':k'); axis([ 0 1 0 1]);
     title('DVV Scatter Plot'); xlabel('Original'); ylabel('Surrogates'); grid on; hold on
     errorbar(dvv_data(:,2),mean_dvv_surr(:,2),std(dvv_surr(:,2,:),[],3));
 end

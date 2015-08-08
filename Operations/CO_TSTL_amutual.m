@@ -1,28 +1,27 @@
-% ------------------------------------------------------------------------------
-% CO_TSTL_amutual
-% ------------------------------------------------------------------------------
-% 
+function out = CO_TSTL_amutual(y,maxTau,numBins,versionTwo)
+% CO_TSTL_amutual   Automutual information calculation using code from TSTOOL.
+%
 % Uses amutual code from TSTOOL, which uses a histogram method with n bins to
 % estimate the mutual information of a time series across a range of
 % time-delays, tau.
-% 
+%
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %
 %---INPUTS:
-% 
+%
 % y, the time series
-% 
+%
 % maxTau, the maximum lag for which to calculate the auto mutual information
-% 
+%
 % numBins, the number of bins for histogram calculation
-% 
+%
 % versionTwo, uses amutual2 instead of amutual (from the TSTOOL package)
-% 
+%
 %---OUTPUTS:
 % A number of statistics of the function over the range of tau, including the
 % mean mutual information, its standard deviation, first minimum, proportion of
 % extrema, and measures of periodicity in the positions of local maxima.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -36,17 +35,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_TSTL_amutual(y,maxTau,numBins,versionTwo)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries

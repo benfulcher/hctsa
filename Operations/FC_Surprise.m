@@ -1,24 +1,20 @@
-% ------------------------------------------------------------------------------
-% FC_Surprise
-% ------------------------------------------------------------------------------
-% 
-% How surprised you might be by the next recorded data points given the data
-% recorded in recent memory.
-% 
+function out = FC_Surprise(y,whatPrior,memory,numGroups,cgmeth,numIters,randomSeed)
+% FC_Surprise   How surprised you would be of the next data point given recent memory.
+%
 % Coarse-grains the time series, turning it into a sequence of symbols of a
 % given alphabet size, numGroups, and quantifies measures of surprise of a
 % process with local memory of the past memory values of the symbolic string.
-% 
+%
 % We then consider a memory length, memory, of the time series, and
 % use the data in the proceeding memory samples to inform our expectations of
 % the following sample.
-% 
+%
 % The 'information gained', log(1/p), at each sample using expectations
 % calculated from the previous memory samples, is estimated.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % whatPrior, the type of information to store in memory:
 %           (i) 'dist': the values of the time series in the previous memory
 %                       samples,
@@ -26,12 +22,12 @@
 %                       memory samples, and
 %           (iii) 'T2': the two-point transition probabilities in the previous
 %                       memory samples.
-%                       
+%
 % memory, the memory length (either number of samples, or a proportion of the
 %           time-series length, if between 0 and 1)
-%           
+%
 % numGroups, the number of groups to coarse-grain the time series into
-% 
+%
 % cgmeth, the coarse-graining, or symbolization method:
 %          (i) 'quantile': an equiprobable alphabet by the value of each
 %                          time-series datapoint,
@@ -39,15 +35,15 @@
 %                         changes in the time-series values, and
 %          (iii) 'embed2quadrants': by the quadrant each data point resides in
 %                          in a two-dimensional embedding space.
-% 
+%
 % numIters, the number of iterations to repeat the procedure for.
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-% 
+%
 %---OUTPUTS: summaries of this series of information gains, including the
 %            minimum, maximum, mean, median, lower and upper quartiles, and
 %            standard deviation.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -61,17 +57,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = FC_Surprise(y,whatPrior,memory,numGroups,cgmeth,numIters,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Check inputs and set defaults
@@ -127,14 +121,14 @@ for i = 1:length(rs)
     switch whatPrior
         case 'dist'
             % Uses the distribution up to memory to inform the next point
-            
+
             % Calculate probability of this given past memory
             p = sum(yth(rs(i)-memory:rs(i)-1) == yth(rs(i)))/memory;
             store(i) = p;
-            
+
         case 'T1'
             % Uses one-point correlations in memory to inform the next point
-            
+
             % Estimate transition probabilities from data in memory
             % Find where in memory this has been observed before, and what
             % preceeded it:
@@ -147,10 +141,10 @@ for i = 1:length(rs)
                 p = sum(memoryData(inmem+1) == yth(rs(i)))/length(inmem);
             end
             store(i) = p;
-            
+
         case 'T2'
             % Uses two-point correlations in memory to inform the next point
-            
+
             memoryData = yth(rs(i)-memory:rs(i)-1);
             % Previous value observed in memory here:
             inmem1 = find(memoryData(2:end-1) == yth(rs(i)-1)); % the 2:end makes the next line ok...?
@@ -161,7 +155,7 @@ for i = 1:length(rs)
                 p = sum(memoryData(inmem2+2) == yth(rs(i)))/length(inmem2);
             end
             store(i) = p;
-            
+
         otherwise
             error('Unknown method ''%s''',whatPrior);
     end

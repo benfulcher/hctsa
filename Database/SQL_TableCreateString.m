@@ -1,27 +1,24 @@
-% ------------------------------------------------------------------------------
+function createString = SQL_TableCreateString(whatTable)
 % SQL_TablecreateString
-% ------------------------------------------------------------------------------
-% 
-% Determines the appropriate mySQL CREATE TABLE statement to use to create a given
-% table, identified by the input string, whatTable
-% 
+%
+% Determine the appropriate mySQL CREATE TABLE statement to use to create a given
+% table, identified by the input string, whatTable.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function createString = SQL_TableCreateString(whatTable)
 
 switch whatTable
 case 'Operations'
@@ -64,7 +61,7 @@ case 'MasterOperations'
         'MasterCode VARCHAR(255), ' ... % Code to execute
         'NPointTo INTEGER UNSIGNED, ' ... % Number of children
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)']; % Time stamp of when entry was last modified
-        
+
 case 'OperationKeywords'
     createString = ['CREATE TABLE OperationKeywords ' ...
         '(opkw_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ' ...
@@ -74,28 +71,28 @@ case 'OperationKeywords'
 %         'PercentageCalculated FLOAT, ' ...
 %         'PercentageGood FLOAT, ' ...
 %         'MeanCalcTime FLOAT)'];
-        
+
 case 'OpKeywordsRelate'
     createString = ['CREATE TABLE OpKeywordsRelate ' ...
         '(op_id INTEGER,' ...
         'opkw_id INTEGER, '  ...
         'FOREIGN KEY (opkw_id) REFERENCES OperationKeywords (opkw_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
         'FOREIGN KEY (op_id) REFERENCES Operations (op_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
-        
+
 case 'TimeSeriesKeywords'
     createString = ['CREATE TABLE TimeSeriesKeywords ' ...
         '(tskw_id INTEGER AUTO_INCREMENT PRIMARY KEY, ' ... % Unique identifier for each keyword
         'Keyword varchar(50), ' ... % The keyword
         'NumOccur INTEGER UNSIGNED, ' ... % Number of time series with this keyword
         'LastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)'];
-    
+
 case 'TsKeywordsRelate'
     createString = ['CREATE TABLE TsKeywordsRelate ' ...
         '(ts_id INTEGER, ' ...
         'tskw_id INTEGER, ' ...
         'FOREIGN KEY (tskw_id) REFERENCES TimeSeriesKeywords(tskw_id) ON DELETE CASCADE ON UPDATE CASCADE, ' ...
         'FOREIGN KEY (ts_id) REFERENCES TimeSeries(ts_id) ON DELETE CASCADE ON UPDATE CASCADE)'];
-    
+
 case 'Results'
     createString = ['CREATE TABLE Results ' ...
         '(ts_id integer, ' ...

@@ -1,17 +1,14 @@
-% ------------------------------------------------------------------------------
-% EN_PermEn
-% ------------------------------------------------------------------------------
-% 
-% Estimates the Permutation Entropy of the time series
-% 
+function out = EN_PermEn(y,m,tau)
+% EN_PermEn     Permutation Entropy of a time series.
+%
 % "Permutation Entropy: A Natural Complexity Measure for Time Series"
 % C. Bandt and B. Pompe, Phys. Rev. Lett. 88(17) 174102 (2002)
-% 
+%
 %---INPUTS:
 % y, the input time series
 % m, the embedding dimension (or order of the permutation entropy)
 % tau, the time-delay for the embedding
-% 
+%
 %---OUTPUT:
 % Outputs the permutation entropy and normalized version computed according to
 % different implementations
@@ -29,17 +26,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = EN_PermEn(y,m,tau)
 
 if nargin < 2 || isempty(m)
     m = 2; % order 2
@@ -64,16 +59,16 @@ countPerms = zeros(numPerms,1);
 
 % Count each type of permutation through the time series
 for j = 1:Nx
-    
+
     % Get the permutation for this local time-series segment:
     [~,ix] = sort(x(j,:));
-    
+
     % Match this to one of the permutations:
-    
+
     % (i) Nicer but slower:
     % thisPerm = find(all(bsxfun(@minus,ix,permList)==0,2),1);
     % countPerms(thisPerm) = countPerms(thisPerm) + 1;
-    
+
     % (ii) Uglier but faster:
     for k = 1:numPerms
         if all(permList(k,:)-ix == 0)

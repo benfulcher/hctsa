@@ -1,34 +1,31 @@
-% ------------------------------------------------------------------------------
-% MF_arfit
-% ------------------------------------------------------------------------------
-% 
-% Fit an AR model to the time series then returns statistics about it.
-% 
+function out = MF_arfit(y,pmin,pmax,selector)
+% MF_arfit      Statistics of a fitted AR model to a time series.
+%
 % Uses various functions implemented in the ARfit package, which is
 % freely-available at http://www.gps.caltech.edu/~tapio/arfit/
-% 
+%
 % cf. "Estimation of parameters and eigenmodes of multivariate autoregressive
 %       models", A. Neumaier and T. Schneider, ACM Trans. Math. Softw. 27, 27 (2001)
-% 
+%
 % cf. "Algorithm 808: ARFIT---a Matlab package for the estimation of parameters
 %      and eigenmodes of multivariate autoregressive models",
 %      T. Schneider and A. Neumaier, ACM Trans. Math. Softw. 27, 58 (2001)
-% 
+%
 % Autoregressive (AR) models are fitted with orders p = pmin, pmin + 1, ..., pmax.
-% 
+%
 % The optimal model order is selected using Schwartz's Bayesian Criterion (SBC).
-% 
+%
 %---INPUTS:
 % y, the input time series
 % pmin, the minimum AR model order to fit
 % pmax, the maximum AR model order to fit
 % selector, crierion to select optimal time-series model order (e.g., 'sbc', cf.
 %           ARFIT package documentation)
-% 
+%
 %---OUTPUTS: include the model coefficients obtained, the SBCs at each model order,
 % various tests on residuals, and statistics from an eigendecomposition of the
 % time series using the estimated AR model.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -42,17 +39,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_arfit(y,pmin,pmax,selector)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs

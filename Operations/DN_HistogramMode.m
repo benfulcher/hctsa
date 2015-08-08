@@ -1,16 +1,15 @@
-% ------------------------------------------------------------------------------
-% DN_HistogramMode
-% ------------------------------------------------------------------------------
-% 
-% Measures the mode of the time series using histograms a given numbers
+function out = DN_HistogramMode(y,numBins)
+% DN_HistogramMode      Mode of a data vector.
+%
+% Measures the mode of the data vector using histograms with a given number
 % of bins.
-% 
+%
 %---INPUTS:
-% 
-% y, the input time series.
-% 
+%
+% y, the input data vector
+%
 % numBins, the number of bins to use in the histogram.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -24,21 +23,24 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_HistogramMode(y,numBins)
+if nargin < 2
+    numBins = ceil(sqrt(length(y)));
+end
 
+% Compute the histogram from the data:
 [dny, dnx] = hist(y,numBins);
 
-% mean of position of maximums (if multiple):
+% Mean of position of maximums (if multiple):
 out = mean(dnx(dny == max(dny)));
 
 end

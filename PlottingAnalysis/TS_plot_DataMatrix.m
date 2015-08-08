@@ -1,8 +1,5 @@
-% ------------------------------------------------------------------------------
-% TS_plot_DataMatrix
-% ------------------------------------------------------------------------------
-%
-% Plot the data matrix.
+function TS_plot_DataMatrix(varargin)
+% TS_plot_DataMatrix   Plot the data matrix.
 %
 %---INPUTS:
 % whatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
@@ -16,11 +13,11 @@
 %---OUTPUT:
 % Produces a colormap plot of the data matrix with time series as rows and
 %   operations as columns.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-%
+
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
@@ -32,8 +29,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_plot_DataMatrix(varargin)
 
 % ------------------------------------------------------------------------------
 %% Check inputs and set defaults:

@@ -1,10 +1,8 @@
-% ------------------------------------------------------------------------------
-% EN_SampEn
-% ------------------------------------------------------------------------------
-% 
-% Estimates the Sample Entropy of the time series, SampEn(m,r), by referencing
-% code from PhysioNet.
-% 
+function out = EN_SampEn(y,M,r,preProcessHow)
+% EN_SampEn     Sample Entropy of a time series.
+%
+% SampEn(m,r), using code from PhysioNet.
+%
 % The publicly-available PhysioNet code, sampenc (renamed here to RN_sampenc) is
 % available from:
 % http://www.physionet.org/physiotools/sampen/matlab/1.1/sampenc.m
@@ -12,20 +10,20 @@
 % cf. "Physiological time-series analysis using approximate entropy and sample
 % entropy", J. S. Richman and J. R. Moorman, Am. J. Physiol. Heart Circ.
 % Physiol., 278(6) H2039 (2000)
-% 
+%
 % This function can also calculate the SampEn of successive increments of time
 % series, i.e., we using an incremental differencing pre-processing, as
 % used in the so-called Control Entropy quantity:
-% 
+%
 % "Control Entropy: A complexity measure for nonstationary signals"
 % E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
-% 
+%
 %---INPUTS:
 % y, the input time series
 % M, the embedding dimension
 % r, the threshold
 % preProcessHow [opt], (i) 'diff1', incremental difference preProcessingHow.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -39,17 +37,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = EN_SampEn(y,M,r,preProcessHow)
 
 if nargin < 4
     preProcessHow = ''; % don't apply preProcessingHow

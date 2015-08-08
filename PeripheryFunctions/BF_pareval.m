@@ -4,7 +4,7 @@
 % 
 % parfor loops don't allow the 'eval' function. This sneaky sneaky gets around
 % that.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

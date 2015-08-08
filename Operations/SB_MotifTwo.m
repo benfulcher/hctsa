@@ -1,14 +1,10 @@
-% ------------------------------------------------------------------------------
-% SB_MotifTwo
-% ------------------------------------------------------------------------------
-% 
-% Looks at local motifs in a binary symbolization of the time series, which is
-% performed by a given binarization method.
-% 
-%---INPUTS:
+function out = SB_MotifTwo(y,binarizeHow)
+% SB_MotifTwo   Local motifs in a binary symbolization of the time series
+
+% The coarse-graining is performed by a given binarization method.
 %
+%---INPUTS:
 % y, the input time series
-% 
 % binarizeHow, the binary transformation method:
 %       (i) 'diff': incremental time-series increases are encoded as 1, and
 %                   decreases as 0,
@@ -16,11 +12,11 @@
 %                    below the mean are 0,
 %       (iii) 'median': time-series values above the median are given 1, and
 %       those below the median 0.
-% 
+%
 %---OUTPUTS:
 % Probabilities of words in the binary alphabet of lengths 1, 2, 3, and 4, and
 % their entropies.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,17 +30,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SB_MotifTwo(y,binarizeHow)
 
 if nargin < 2 || isempty(binarizeHow)
     % Use changes in the time series as the basis for the transformation
@@ -56,15 +50,15 @@ switch binarizeHow
 	case 'diff'
         % Binary signal: 1 for stepwise increases, 0 for stepwise decreases
 		yBin = ((sign(diff(y)))+1)/2;
-        
+
 	case 'mean'
         % Binary signal: 1 for above mean, 0 for below mean
 		yBin = (sign(y)+1)/2;
-        
+
 	case 'median'
         % Binary signal: 1 for above median, 0 for below median
 		yBin = (sign(y-median(y))+1)/2;
-        
+
     otherwise
         error('Unknown binary transformation setting ''%s''',binarizeHow)
 end

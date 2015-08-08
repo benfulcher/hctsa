@@ -1,11 +1,8 @@
-% --------------------------------------------------------------------------
-% TS_PairwiseDist
-% --------------------------------------------------------------------------
+function Dij = TS_PairwiseDist(tsOrOps,whatData,distanceMetric,doSave)
+% TS_PairwiseDist   Pairwise distances between either TimeSeries or Operations
 %
-% Computes pairwise distances between all objects (either TimeSeries or
-% Operations) and stores the data back in the local .mat file.
-%
-% Warning: this can be large.
+% (If doSave), stores pairwise distances back the data back in the local .mat
+% file. Warning: this can be huge for large datasets.
 %
 %---INPUTS:
 %
@@ -18,7 +15,7 @@
 %
 % distanceMetric: what distance metric to use, e.g., 'euclidean' (default for
 %                 time series) or 'corr_fast' (default for operations)
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -35,10 +32,8 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function Dij = TS_PairwiseDist(tsOrOps,whatData,distanceMetric,doSave)
-
 % ------------------------------------------------------------------------------
-% Check inputs:
+% Check Inputs, set defaults:
 % ------------------------------------------------------------------------------
 
 if nargin < 1 || isempty(tsOrOps)

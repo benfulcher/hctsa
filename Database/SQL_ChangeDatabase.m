@@ -1,21 +1,19 @@
-% ------------------------------------------------------------------------------
+function SQL_ChangeDatabase()
 % SQL_ChangeDatabase
-% ------------------------------------------------------------------------------
-% 
-% This function can be used to change the database that the hctsa package reads
-% from and writes to.
-% 
+%
+% Changes the database that the hctsa package reads from and writes to.
+%
 % Writes a new sql_settings.conf file with a new set of connection details.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -23,8 +21,6 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_ChangeDatabase()
-    
 fprintf(1,['Time to change databases?\nThis script assumes that you have created ' ...
             'a database on a mySQL server and have the access details for it. ' ...
             'Continuing with this script will overwrite ' ...

@@ -1,42 +1,41 @@
-% ------------------------------------------------------------------------------
-% SY_TISEAN_nstat_z
-% ------------------------------------------------------------------------------
-% 
+function out = SY_TISEAN_nstat_z(y,numSeg,embedParams)
+% SY_TISEAN_nstat_z     Cross-forecast errors of zeroth-order time-series models
+%
 % Uses the nstat_z routine from the TISEAN package for nonlinear time-series
 % analysis to calculate cross-forecast errors of zeroth-order models for the
 % time-delay embedded time series.
-% 
+%
 % The program looks for nonstationarity in a time series by dividing it
 % into a number of segments and calculating the cross-forecast errors
 % between the different segments. The model used for the forecast is
 % zeroth order model as proposed by Schreiber.
-% 
+%
 % cf. "Practical implementation of nonlinear time series methods: The TISEAN
 % package", R. Hegger, H. Kantz, and T. Schreiber, Chaos 9(2) 413 (1999)
-% 
+%
 % Available here:
 % http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
-% 
+%
 % The TISEAN routines are performed in the command line using 'system' commands
 % in Matlab, and require that TISEAN is installed and compiled, and able to be
 % executed in the command line.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % numSeg, the number of equally-spaced segments to divide the time series into,
 %       and used to predict the other time series segments
-% 
+%
 % embedParams, in the form {tau,m}, as usual for BF_embed. That is, for an
 %               embedding dimension, tau, and embedding dimension, m. E.g.,
 %               {1,3} has a time-delay of 1 and embedding dimension of 3.
-% 
-% 
+%
+%
 %---OUTPUTS: include the trace of the cross-prediction error matrix, the mean,
 % minimum, and maximum cross-prediction error, the minimum off-diagonal
 % cross-prediction error, and eigenvalues of the cross-prediction error matrix.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -50,17 +49,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_TISEAN_nstat_z(y,numSeg,embedParams)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs / Set defaults

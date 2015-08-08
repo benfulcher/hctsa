@@ -1,23 +1,20 @@
-% ------------------------------------------------------------------------------
-% WL_cwt
-% ------------------------------------------------------------------------------
-% 
-% Applies a continuous wavelet transform to the time series using the function
-% cwt from Matlab's Wavelet Toolbox.
-% 
+function out = WL_cwt(y, wname, maxScale)
+% WL_cwt    Continuous wavelet transform of a time series
+%
+% Uses the function cwt from Matlab's Wavelet Toolbox.
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % wname, the wavelet name, e.g., 'db3' (Daubechies wavelet), 'sym2' (Symlet),
 %                           etc. (see Wavelet Toolbox Documentation for all
 %                           options)
-% 
+%
 % maxScale, the maximum scale of wavelet analysis.
-% 
-% 
+%
 %---OUTPUTS: statistics on the coefficients, entropy, and results of
 % coefficients summed across scales.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -31,17 +28,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = WL_cwt(y, wname, maxScale)
 
 % ------------------------------------------------------------------------------
 % Check that a Wavelet Toolbox license is available:
@@ -114,7 +109,7 @@ if doplot
     figure('color','w');
     ksdensity(SC(:));
 end
-    
+
 out.exp_muhat = expfit(SC(:));
 gamma_phat = gamfit(SC(:));
 out.gam1 = gamma_phat(1);

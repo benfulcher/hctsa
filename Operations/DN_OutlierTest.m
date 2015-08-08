@@ -1,19 +1,18 @@
-% ------------------------------------------------------------------------------
-% DN_OutlierTest
-% ------------------------------------------------------------------------------
-% 
+function out = DN_OutlierTest(y,p,justMe)
+% DN_OutlierTest    How distributional statistics depend on distributional outliers.
+%
 % Removes the p% of highest and lowest values in the time series (i.e., 2*p%
 % removed from the time series in total) and returns the ratio of either the
 % mean or the standard deviation of the time series, before and after this
 % transformation.
-% 
+%
 %---INPUTS:
-% y, the input time series
+% y, the input data vector
 % p, the percentage of values to remove beyond upper and lower percentiles
 % justMe [opt], just returns a number:
 %               (i) 'mean' -- returns the mean of the middle portion of the data
 %               (ii) 'std' -- returns the std of the middle portion of the data
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -27,17 +26,19 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_OutlierTest(y,p,justMe)
+%-------------------------------------------------------------------------------
+% Check Inputs:
+%-------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(p)
     p = 2; % by default, remove 2% of values from upper and lower percentiles
@@ -46,6 +47,9 @@ if nargin < 3
     justMe = ''; % return a structure with both the mean and std
 end
 
+%-------------------------------------------------------------------------------
+% Get going:
+%-------------------------------------------------------------------------------
 % mean of the middle (100-2*p)% of the data
 out.mean = mean(y(y > prctile(y,p) & y < prctile(y,100-p)));
 

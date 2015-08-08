@@ -1,14 +1,12 @@
-% ------------------------------------------------------------------------------
-% ST_LocalExtrema
-% ------------------------------------------------------------------------------
-% 
+function out = ST_LocalExtrema(y,lorf,n)
+% ST_LocalExtrema   How local maximums and minimums vary across the time series.
+%
 % Finds maximums and minimums within given segments of the time series and
-% analyses the results. Outputs quantify how local maximums and minimums vary
-% across the time series.
-% 
+% analyses the results.
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % lorf, whether to use:
 %     (i) 'l', windows of a given length (in which case the third input, n
 %             specifies the length)
@@ -17,9 +15,9 @@
 %     (iii) 'tau', sets a window length equal to the correlation length of the
 %                 time series, the first zero-crossing of the autocorrelation
 %                 function.
-%                   
+%
 % n, somehow specifies the window length given the setting of lorf above.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -33,17 +31,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = ST_LocalExtrema(y,lorf,n)
 
 % ------------------------------------------------------------------------------
 % Check Inputs

@@ -1,17 +1,9 @@
-% ------------------------------------------------------------------------------
-% NL_MS_nlpe
-% ------------------------------------------------------------------------------
-% 
-% Computes the normalized 'drop-one-out' constant interpolation nonlinear
-% prediction error for a time-delay embedded time series using Michael Small's
-% code nlpe (renamed MS_nlpe here):
-% 
-% cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
-% Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
-% Vol. 52 (2005)
-% 
-% Michael Small's Matlab code is available at http://small.eie.polyu.edu.hk/matlab/
-% 
+function out = NL_MS_nlpe(y,de,tau,maxN)
+% NL_MS_nlpe   Normalized drop-one-out constant interpolation nonlinear prediction error.
+%
+% Computes the nlpe for a time-delay embedded time series using Michael Small's
+% code, nlpe (renamed MS_nlpe here):
+%
 %---INPUTS:
 % y, the input time series
 % de, the embedding dimension (can be an integer, or 'fnn' to select as the
@@ -20,10 +12,15 @@
 % tau, the time-delay (can be an integer or 'ac' to be the first zero-crossing
 %       of the ACF or 'mi' to be the first minimum of the automutual information
 %       function)
-% 
+%
 %---OUTPUTS: include measures of the meanerror of the nonlinear predictor, and a
 % set of measures on the correlation, Gaussianity, etc. of the residuals.
-% 
+
+% cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
+% Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
+% Vol. 52 (2005)
+%
+% Michael Small's Matlab code is available at http://small.eie.polyu.edu.hk/matlab/
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -37,17 +34,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_MS_nlpe(y,de,tau,maxN)
 
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored')

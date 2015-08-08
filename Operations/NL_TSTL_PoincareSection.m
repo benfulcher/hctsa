@@ -1,33 +1,29 @@
-% ------------------------------------------------------------------------------
-% NL_TSTL_PoincareSection
-% ------------------------------------------------------------------------------
-% 
+function out = NL_TSTL_PoincareSection(y,ref,embedParams)
+% NL_TSTL_PoincareSection   Poincare sectino analysis of a time series.
+%
 % Obtains a Poincare section of the time-delay embedded time series, producing a
 % set of vector points projected orthogonal to the tangential vector at the
-% specified index using TSTOOL code 'poincare'. This function then tries to
-% obtain interesting structural measures from this output.
-% 
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
+% specified index using TSTOOL code 'poincare'.
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % ref: the reference point. Can be an absolute number (2 takes the second point
 %      in the (embedded) time series) or a string like 'max' or 'min' that takes
 %      the first maximum, ... in the (scalar) time series, ...
-% 
-% embedparams: the usual thing to give BF_embed for the time-delay embedding, as
+%
+% embedParams: the usual thing to give BF_embed for the time-delay embedding, as
 %               {tau,m}. A common choice for m is 3 -- i.e., embed in a 3
 %               dimensional space so that the Poincare section is 2-dimensional.
-% 
-% 
+%
 %---OUTPUTS: include statistics on the x- and y- components of these vectors on the
 % Poincare surface, on distances between adjacent points, distances from the
 % mean position, and the entropy of the vector cloud.
-% 
+
 % Another thing that could be cool to do is to analyze variation in the plots as
 % ref changes... (not done here)
-% 
+%
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -41,17 +37,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TSTL_PoincareSection(y,ref,embedparams)
 
 % ------------------------------------------------------------------------------
 %% Check inputs
@@ -61,13 +55,13 @@ if nargin < 2 || isempty(ref)
     ref = 'max'; % reference point is the first maximum of the time series
 end
 
-if nargin < 3 || isempty(embedparams)
-    embedparams = {'mi', 3};
+if nargin < 3 || isempty(embedParams)
+    embedParams = {'mi', 3};
     fprintf(1,'Using default embedding settings: minimum of the automutual information for tau and m = 3\n')
 end
 
-if embedparams{2} ~= 3
-    embedparams{2} = 3;
+if embedParams{2} ~= 3
+    embedParams{2} = 3;
     fprintf(1,'Three-dimensional embedding\n')
 end
 
@@ -78,12 +72,12 @@ if ischar(ref)
             % first local maximum
             dydt = diff(y);
             ref = find(dydt(1:end-1)>=0 & dydt(2:end)<0,1,'first')+1;
-            
+
         case 'min'
             % first local minimum
             dydt = diff(y);
             ref = find(dydt(1:end-1)<=0 & dydt(2:end)>0,1,'first')+1;
-            
+
         otherwise
             error('Unknown reference setting ''%s''',ref);
     end
@@ -99,7 +93,7 @@ doPlot = 0; % plot outputs to a figure
 % ------------------------------------------------------------------------------
 % time-delay embed the signal:
 N = length(y); % length of the time series
-s = BF_embed(y,embedparams{1},3,1);
+s = BF_embed(y,embedParams{1},3,1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding failed');
@@ -224,14 +218,14 @@ end
         ybox = quantile(y,linspace(0,1,nbox+1));
         xbox(end) = xbox(end)+1;
         ybox(end) = ybox(end)+1;
-        
+
         for ii = 1:nbox % x
             rx = (x >= xbox(ii) & x < xbox(ii+1)); % these x are in range
             for jj = 1:nbox % y
                 % only need to look at those ys for which the xs are in range
                 boxcounts(ii,jj) = sum(y(rx) >= ybox(jj) & y(rx) < ybox(jj+1));
             end
-        end     
+        end
     end
 % ------------------------------------------------------------------------------
 

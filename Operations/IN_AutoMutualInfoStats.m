@@ -1,21 +1,17 @@
-% ------------------------------------------------------------------------------
-% IN_AutoMutualInfoStats
-% ------------------------------------------------------------------------------
-% 
-% Returns statistics on the automutual information function computed on the time
-% series
-% 
+function out = IN_AutoMutualInfoStats(y,maxTau,estMethod,extraParam)
+% IN_AutoMutualInfoStats    Statistics on automutual information function for a time series.
+%
 %---INPUTS:
 % y, column vector of time series data
-% 
+%
 % maxTau, maximal time delay
-% 
+%
 % estMethod, extraParam -- cf. inputs to IN_AutoMutualInfo.m
-% 
+%
 %---OUTPUTS:
 % Statistics on the AMIs and their pattern across the range of specified time
 % delays
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -29,17 +25,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = IN_AutoMutualInfoStats(y,maxTau,estMethod,extraParam)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries

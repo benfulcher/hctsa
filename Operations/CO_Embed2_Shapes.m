@@ -1,23 +1,22 @@
-% ------------------------------------------------------------------------------
+function out = CO_Embed2_Shapes(y,tau,shape,r)
 % CO_Embed2_Shapes
-% ------------------------------------------------------------------------------
-% 
+%
 % Takes a shape and places it on each point in the two-dimensional time-delay
 % embedding space sequentially. This function counts the points inside this shape
 % as a function of time, and returns statistics on this extracted time series.
-% 
+%
 %---INPUTS:
 % y, the input time-series as a (z-scored) column vector
 % tau, the time-delay
 % shape, has to be 'circle' for now...
 % r, the radius of the circle
-% 
+%
 %---OUTPUTS:
 % The constructed time series of the number of nearby points, and
 % include the autocorrelation, maximum, median, mode, a Poisson fit to the
 % distribution, histogram entropy, and stationarity over fifths of the time
 % series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -31,17 +30,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_Embed2_Shapes(y,tau,shape,r)
 
 doPlot = 0; % plot results for debugging
 
@@ -95,13 +92,13 @@ switch shape
 		% counts how many points are inside this shape, looks at the time series thus formed
 
 		for i = 1:N % across all points in the time series
-			
+
 			m_c = m - ones(N,1)*m(i,:); % points wrt current point i
 			m_c_d = sum(m_c.^2,2); % Euclidean distances from point i
-			
+
 		    counts(i) = sum(m_c_d <= r^2); % number of points enclosed in a circle of radius r
 		end
-        
+
     otherwise
         error('Unknown shape ''%s''', shape)
 end

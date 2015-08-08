@@ -1,7 +1,6 @@
-% ------------------------------------------------------------------------------
+function SQL_clear_remove(tsOrOps,idRange,doRemove,doLog)
 % SQL_clear_remove
-% ------------------------------------------------------------------------------
-% 
+%
 % Either clears results or removes entirely a given set of ts_ids
 % or op_ids from the database.
 %
@@ -16,10 +15,10 @@
 % Note that it's better practice to clear results from all pointers to a master
 % operation when the master operation is changed (especially when the master
 % code is stochastic)
-% 
+%
 % *** Remove *** (doRemove = 1):
 % Removes COMPLETELY the selected ts_ids or op_ids from the Database.
-% 
+%
 %
 %---INPUTS:
 % tsOrOps -- either 'ts' or 'ops' for whether to eliminate either a time series
@@ -27,24 +26,22 @@
 % idRange -- a vector of the ts_ids or op_ids in the database to remove
 % doRemove -- whether to remove entries (specify 1), or just clear their data (specify 0)
 % doLog -- generate a .log file describing what was done
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function SQL_clear_remove(tsOrOps,idRange,doRemove,doLog)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries and input checking
@@ -148,25 +145,25 @@ end
 
 if doRemove
     % ---DELETE MODE---
-    
+
     % Before delete them, first get keyword information, and information about masters (for operations)
     %<><>><><><><><><>
-    
+
     % First you want to get the masters
     if strcmp(tsOrOps,'ops')
         selectString = sprintf('SELECT mop_id FROM %s WHERE %s IN (%s)',theTable,theid,BF_cat(idRange,','));
         mop_ids = mysql_dbquery(dbc, selectString);
         mop_ids = mop_ids{:};
     end
-    
+
 	deleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',theTable,theid,BF_cat(idRange,','));
     [~,emsg] = mysql_dbexecute(dbc, deleteString);
     if isempty(emsg)
         fprintf(1,'%u %s removed from %s in %s.\n',length(toDump_id),theWhat,theTable,dbName)
     end
-    
+
     SQL_FlushKeywords(tsOrOps);
-    
+
     if strcmp(tsOrOps,'ops')
         % --- Update the NPointTo counters of any implicated master operations:
         fprintf(1,'Updating NPointTo counters of implicated master operations...');
@@ -200,14 +197,14 @@ if doRemove
                 end
             end
         end
-        
+
     end
-    
+
     % Update Keyword tables (should just need to update nlink, and delete keywords that are no longer used...)
     %<><>><><><><><><>
         %<><>><><><><><><>
             %<><>><><><><><><>
-    
+
     % %% Re-run keyword tables
     % if strcmp(mort, 'ts')
     %     disp(['Recalculating TimeSeriesKeywords and TsKeywordsRelate in ' dbName '. Please be patient.']);
@@ -267,7 +264,7 @@ if doLog
         fprintf(fid,'%s\n',toDump{i});
     end
 	fclose(fid);
-    
+
 	fprintf(1,'Logged and done and dusted!!\n');
 end
 

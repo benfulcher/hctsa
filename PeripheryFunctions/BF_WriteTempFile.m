@@ -1,7 +1,7 @@
 % BF_WriteTempFile
 % 
 % Writes a temporary file in the system temporary directory
-% 
+ 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

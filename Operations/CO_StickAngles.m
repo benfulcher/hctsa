@@ -1,23 +1,22 @@
-% ------------------------------------------------------------------------------
-% CO_StickAngles
-% ------------------------------------------------------------------------------
-% 
-% Analyzes line-of-sight angles between time-series points where each
-% time-series value is treated as a stick protruding from an opaque baseline
-% level. Statistics are returned on the raw time series, where sticks protrude
+function out = CO_StickAngles(y)
+% CO_StickAngles    Analysis of line-of-sight angles between time-series data points.
+%
+% Line-of-sight angles between time-series points treat each % time-series value
+% as a stick protruding from an opaque baseline level.
+% Statistics are returned on the raw time series, where sticks protrude
 % from the zero-level, and the z-scored time series, where sticks
 % protrude from the mean level of the time series.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 %---OUTPUTS: are returned on the obtained sequence of angles, theta, reflecting the
 % maximum deviation a stick can rotate before hitting a stick representing
 % another time point. Statistics include the mean and spread of theta,
 % the different between positive and negative angles, measures of symmetry of
 % the angles, stationarity, autocorrelation, and measures of the distribution of
 % these stick angles.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -31,22 +30,19 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_StickAngles(y)
-
 % ------------------------------------------------------------------------------
 %% Check that a Signal Processing Toolbox license is available:
-% ------------------------------------------------------------------------------
-% buffer function used for StatAv calculation...
+% (which is needed for the buffer function used for StatAv calculation...)
 BF_CheckToolbox('signal_toolbox');
 
 doPlot = 0; % whether to plot output
@@ -85,8 +81,6 @@ if doPlot
     hist(angles{1},50);
 end
 
-
-% quite interesting
 % ------------------------------------------------------------------------------
 %% Basic stats?
 % ------------------------------------------------------------------------------
@@ -159,22 +153,22 @@ if ~isempty(zangles{1});
     [statav_m, statav_s] = SUB_statav(zangles{1},2);
     out.statav2_p_m = statav_m;
     out.statav2_p_s = statav_s;
-    
+
     % StatAv3
     [statav_m, statav_s] = SUB_statav(zangles{1},3);
     out.statav3_p_m = statav_m;
     out.statav3_p_s = statav_s;
-    
+
     % StatAv 4
     [statav_m, statav_s] = SUB_statav(zangles{1},4);
     out.statav4_p_m = statav_m;
     out.statav4_p_s = statav_s;
-    
+
     % StatAv 5
     [statav_m, statav_s] = SUB_statav(zangles{1},5);
     out.statav5_p_m = statav_m;
     out.statav5_p_s = statav_s;
-    
+
 else
     out.statav2_p_m = NaN; out.statav2_p_s = NaN;
     out.statav3_p_m = NaN; out.statav3_p_s = NaN;
@@ -188,17 +182,17 @@ if ~isempty(zangles{2});
     [statav_m, statav_s] = SUB_statav(zangles{2},2);
     out.statav2_n_m = statav_m;
     out.statav2_n_s = statav_s;
-    
+
     % StatAv3
     [statav_m, statav_s] = SUB_statav(zangles{2},3);
     out.statav3_n_m = statav_m;
     out.statav3_n_s = statav_s;
-    
+
     % StatAv4
     [statav_m, statav_s] = SUB_statav(zangles{2},4);
     out.statav4_n_m = statav_m;
     out.statav4_n_s = statav_s;
-    
+
     % StatAv5
     [statav_m, statav_s] = SUB_statav(zangles{2},5);
     out.statav5_n_m = statav_m;
@@ -303,7 +297,7 @@ function [statavmean, statavstd] = SUB_statav(x,n)
         statavmean = NaN; statavstd = NaN;
         return
     end
-    
+
     x_buff = buffer(x,floor(NN/n));
     if size(x_buff,2) > n, x_buff = x_buff(:,1:n); end % lose last point
     statavmean = std(mean(x_buff))/std(x);

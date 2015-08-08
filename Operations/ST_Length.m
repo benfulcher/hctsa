@@ -1,14 +1,11 @@
-% ------------------------------------------------------------------------------
-% ST_Length
-% ------------------------------------------------------------------------------
-% 
-% Measures the length of the input time series vector.
-% 
-%---INPUT:
-% y, the time series vector
-% 
-%---OUTPUT: the length of the time series
+function out = ST_Length(y)
+% ST_Length     Length of an input data vector.
 %
+%---INPUT:
+% y, data vector
+%
+%---OUTPUT: the length of the time series
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -22,17 +19,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = ST_Length(y)
 
 out = length(y); % the number of samples in the input vector, y
 

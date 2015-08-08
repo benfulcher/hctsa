@@ -1,20 +1,18 @@
-% ------------------------------------------------------------------------------
-% MF_hmm_fit
-% ------------------------------------------------------------------------------
-% 
+function out = MF_hmm_fit(y,trainp,numStates)
+% MF_hmm_fit    Fits a Hidden Markov Model to sequential data.
+%
+%---INPUTS:
+% y, the input time series
+% trainp, the proportion of data to train on, 0 < trainp < 1
+% numStates, the number of states in the HMM
+
 % Uses Zoubin Gharamani's implementation of HMMs for real-valued Gaussian
 % observations:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software.html
 % or, specifically:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software/hmm.tar.gz
-% 
+%
 % Uses ZG_hmm (renamed from hmm) and ZG_hmm_cl (renamed from hmm_cl)
-% 
-%---INPUTS:
-% y, the input time series
-% trainp, the proportion of data to train on, 0 < trainp < 1
-% numStates, the number of states in the HMM
-% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -28,17 +26,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_hmm_fit(y,trainp,numStates)
 
 % Check required function files exist:
 if ~exist(fullfile('ZG_hmm','ZG_hmm_cl'),'file') || ~exist(fullfile('ZG_hmm','ZG_hmm_cl'),'file')

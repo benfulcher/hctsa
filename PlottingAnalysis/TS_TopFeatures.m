@@ -1,16 +1,12 @@
 function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat,doNull,varargin)
-%-------------------------------------------------------------------------------
-% TS_TopFeatures
-%-------------------------------------------------------------------------------
-% Determines the top features for discriminating the groups in the time-series
-% dataset.
+% TS_TopFeatures    Top individual features for discriminating labeled time series
 %
 %---INPUTS:
 %
-% EXAMPLE USAGE:
+%---EXAMPLE USAGE:
 %
 % TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions','cluster'});
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -28,7 +24,7 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % ------------------------------------------------------------------------------
 
 % --------------------------------------------------------------------------
-%%                          Check inputs
+%% Check inputs
 % --------------------------------------------------------------------------
 
 if nargin < 1 || isempty(whatData)

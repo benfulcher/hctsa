@@ -1,14 +1,13 @@
-% ------------------------------------------------------------------------------
-% DN_nlogL_norm
-% ------------------------------------------------------------------------------
-% 
+function nlogL = DN_nlogL_norm(y)
+% DN_nlogL_norm     Negative log likelihood of data coming from a Gaussian distribution.
+%
 % Fits a Gaussian distribution to the data using the normfit function in
 % Matlab's Statistics Toolbox and returns the negative log likelihood of the
 % data coming from a Gaussian distribution using the normlike function.
-% 
+%
 %---INPUT:
 % y, the time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -22,17 +21,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function nlogL = DN_nlogL_norm(y)
 
 [muhat, sigmahat] = normfit(y);
 nlogL = normlike([muhat, sigmahat],y);

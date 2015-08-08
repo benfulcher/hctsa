@@ -1,18 +1,16 @@
 function TS_SimSearch(varargin)
-% ------------------------------------------------------------------------------
-% TS_SimSearch
-% ------------------------------------------------------------------------------
+% TS_SimSearch  Nearest neighbors of a given time series of operation from an hctsa analysis.
 %
-% Finds nearest neighbors of a given item, providing a local context for a
-% particular time series or operation.
+% Nearest neighbors can provide a local context for a particular time series or
+% operation.
 %
 %---INPUTS:
 %
-% EXAMPLE USAGE:
+%---EXAMPLE USAGE:
 % Find neighbors of time series (ID=30), and visualize as a similarity matrix
 % and network plot:
 % TS_SimSearch(30,'whatPlots',{'matrix','network'})
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

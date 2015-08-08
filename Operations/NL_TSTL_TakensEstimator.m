@@ -1,24 +1,20 @@
-% ------------------------------------------------------------------------------
-% NL_TSTL_TakensEstimator
-% ------------------------------------------------------------------------------
-% 
-% Implements the Taken's estimator for correlation dimension using the
-% TSTOOL code takens_estimator.
+function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
+% NL_TSTL_TakensEstimator   Taken's estimator for correlation dimension.
 %
 % cf. "Detecting strange attractors in turbulence", F. Takens.
 % Lect. Notes Math. 898 p366 (1981)
-% 
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
+%
 %---INPUTS:
 % y, the input time series
 % Nref, the number of reference points (can be -1 to use all points)
 % rad, the maximum search radius (as a proportion of the attractor size)
 % past, the Theiler window
 % embedParams, the embedding parameters for BF_embed, in the form {tau,m}
-% 
+%
 %---OUTPUT: the Taken's estimator of the correlation dimension, d2.
-% 
+
+% Uses the TSTOOL code, takens_estimator.
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,17 +28,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Check inputs
@@ -50,7 +44,7 @@ function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedParams, randomSe
 N = length(y); % time-series length
 
 % 1) Nref
-if nargin < 2 || isempty(Nref) 
+if nargin < 2 || isempty(Nref)
     Nref = -1; % use all points
 end
 

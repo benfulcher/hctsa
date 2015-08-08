@@ -1,9 +1,5 @@
-% ------------------------------------------------------------------------------
-% install.m
-% ------------------------------------------------------------------------------
-%
-% Installs the highly comparative time-series analysis code package from scratch.
-%
+% INSTALL   Installs the hctsa code package from scratch.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

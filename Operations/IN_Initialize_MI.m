@@ -1,20 +1,17 @@
-% ------------------------------------------------------------------------------
-% IN_Initialize_MI
-% ------------------------------------------------------------------------------
-% 
-% Initializes Information Dynamics Toolkit object for MI computation.
-% 
+function miCalc = IN_Initialize_MI(estMethod,extraParam)
+% IN_Initialize_MI  Initialize Information Dynamics Toolkit object for MI computation.
+%
 %---INPUTS:
-% 
+%
 % estMethod: the estimation method used to compute the mutual information:
 %           (*) 'gaussian'
 %           (*) 'kernel'
 %           (*) 'kraskov1'
 %           (*) 'kraskov2'
-% 
+%
 % cf. Kraskov, A., Stoegbauer, H., Grassberger, P., Estimating mutual
 % information: http://dx.doi.org/10.1103/PhysRevE.69.066138
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -28,17 +25,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function miCalc = IN_Initialize_MI(estMethod,extraParam)
 
 if nargin < 2
     extraParam = [];
@@ -53,7 +48,7 @@ case 'kernel'
 case 'kraskov1' % algorithm 1
     implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov1';
 case 'kraskov2' % algorithm 2
-    implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov2';    
+    implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov2';
 end
 % ------------------------------------------------------------------------------
 

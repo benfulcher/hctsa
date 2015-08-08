@@ -1,20 +1,9 @@
-% ------------------------------------------------------------------------------
-% NL_TISEAN_c1
-% ------------------------------------------------------------------------------
+function out = NL_TISEAN_c1(y, tau, mmm, tsep, Nref)
+% NL_TISEAN_c1  Information dimension.
 %
 % Implements the c1 and c2d routines from the TISEAN nonlinear time-series
 % analysis package that compute curves for the fixed mass computation of the
 % information dimension.
-%
-% cf. "Practical implementation of nonlinear time series methods: The TISEAN
-% package" Hegger, R. and Kantz, H. and Schreiber, T., Chaos 9(2) 413 (1999)
-%
-% Available here:
-% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
-%
-% The TISEAN routines are performed in the command line using 'system' commands
-% in Matlab, and require that TISEAN is installed and compiled, and able to be
-% executed in the command line.
 %
 %---INPUTS:
 %
@@ -33,11 +22,19 @@
 % Nref, the number of reference points (can also be between 0 and 1 to specify a
 %       proportion of the time-series length)
 %
-%
 %---OUTPUTS: optimal scaling ranges and dimension estimates for a time delay,
 % tau, embedding dimensions, m, ranging from m_{min} to m_{max}, a time
 % separation, tsep, and a number of reference points, Nref.
+
+% cf. "Practical implementation of nonlinear time series methods: The TISEAN
+% package" Hegger, R. and Kantz, H. and Schreiber, T., Chaos 9(2) 413 (1999)
 %
+% Available here:
+% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
+%
+% The TISEAN routines are performed in the command line using 'system' commands
+% in Matlab, and require that TISEAN is installed and compiled, and able to be
+% executed in the command line.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -60,8 +57,6 @@
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TISEAN_c1(y, tau, mmm, tsep, Nref)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries:

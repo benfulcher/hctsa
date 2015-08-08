@@ -1,38 +1,29 @@
-% ------------------------------------------------------------------------------
-% NL_TSTL_LargestLyap
-% ------------------------------------------------------------------------------
-% 
-% Computes the largest Lyapunov exponent of a time-delay reconstructed time
-% series using the TSTOOL code 'largelyap'.
-% 
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
-% The algorithm used (using formula (1.5) in Parlitz Nonlinear Time Series
-% Analysis book) is very similar to the Wolf algorithm:
-% "Determining Lyapunov exponents from a time series", A. Wolf et al., Physica D
-% 16(3) 285 (1985)
-% 
+function out = NL_TSTL_LargestLyap(y,Nref,maxtstep,past,NNR,embedParams)
+% NL_TSTL_LargestLyap   Largest Lyapunov exponent of a time series.
+%
 %---INPUTS:
-% 
 % y, the time series to analyze
-% 
 % Nref, number of randomly-chosen reference points (-1 == all)
-% 
 % maxtstep, maximum prediction length (samples)
-% 
 % past, exclude -- Theiler window idea
-% 
 % NNR, number of nearest neighbours
-% 
 % embedParams, input to BF_embed, how to time-delay-embed the time series, in
 %               the form {tau,m}, where string specifiers can indicate standard
 %               methods of determining tau or m.
-% 
+%
 %---OUTPUTS: a range of statistics on the outputs from this function, including
 % a penalized linear regression to the scaling range in an attempt to fit to as
 % much of the range of scales as possible while simultaneously achieving the
 % best possible linear fit.
-% 
+
+% Uses the TSTOOL code 'largelyap'.
+%
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
+%
+% The algorithm used (using formula (1.5) in Parlitz Nonlinear Time Series
+% Analysis book) is very similar to the Wolf algorithm:
+% "Determining Lyapunov exponents from a time series", A. Wolf et al., Physica D
+% 16(3) 285 (1985)
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -46,17 +37,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TSTL_LargestLyap(y,Nref,maxtstep,past,NNR,embedParams)
 
 % ------------------------------------------------------------------------------
 %% Check a curve-fitting toolbox license is available:
@@ -139,7 +128,7 @@ catch
    out = NaN;
    return
 end
-    
+
 p = data(rs);
 t = spacing(rs);
 
@@ -215,7 +204,7 @@ if imax <= 3
     out.vse_gradient = NaN;
     out.vse_intercept = NaN;
     out.vse_minbad = NaN;
-    
+
     out.ve_meanabsres = NaN;
     out.ve_rmsres = NaN;
     out.ve_gradient = NaN;
@@ -228,11 +217,11 @@ else
     % hold on; plot(t_scal,p_scal,'.-r'); hold off
     % hold on; plot(t_scal,pfit,'-r'); hold off;
     % keyboard
-    
+
     % ------------------------------------------------------------------------------
     %% Adjust start and end times for best scaling
     % ------------------------------------------------------------------------------
-    
+
     l = imax; % = length(t_scal)
     stptr = 1:floor(l/2)-1; % start point must be in the first half (not necessarily, but for here)
     endptr = ceil(l/2)+1:l; % end point must be in second half (not necessarily, but for here)
@@ -243,14 +232,14 @@ else
         end
     end
     [a, b] = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
-    
+
     % Do the optimum fit again
     t_opt = t_scal(stptr(a):endptr(b));
     p_opt = p_scal(stptr(a):endptr(b))';
     pp = polyfit(t_opt,p_opt,1);
     pfit = pp(1)*t_opt+pp(2);
     res = pfit - p_opt;
-    
+
     % hold on; plot(t_opt,p_opt,'og'); hold off;
     % hold on; plot(t_opt,pfit,'-g'); hold off;
     % vse == vary start and end times
@@ -260,24 +249,24 @@ else
     out.vse_intercept = pp(2);
     out.vse_minbad = min(mybad(:));
     if isempty(out.vse_minbad), out.vse_minbad = NaN; end
-    
+
     %% Adjust just end time for best scaling
     imin = find(p > 0.50*max(p),1,'first');
-    
+
     endptr = imin:imax; % end point is at least at 50% mark of maximum
     mybad = zeros(length(endptr),1);
     for i = 1:length(endptr)
         mybad(i) = lfitbadness(t_scal(1:endptr(i)),p_scal(1:endptr(i))');
     end
     b = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
-    
+
     % Do the optimum fit again
     t_opt = t_scal(1:endptr(b));
     p_opt = p_scal(1:endptr(b))';
     pp = polyfit(t_opt,p_opt,1);
     pfit = pp(1)*t_opt+pp(2);
     res = pfit-p_opt;
-    
+
     % hold on; plot(t_opt,p_opt,'om'); hold off;
     % hold on; plot(t_opt,pfit,'-m'); hold off;
     out.ve_meanabsres = mean(abs(res));
@@ -286,7 +275,7 @@ else
     out.ve_intercept = pp(2);
     out.ve_minbad = min(mybad(:));
     if isempty(out.ve_minbad), out.ve_minbad = NaN; end
-    
+
 end
 
 % Fit exponential

@@ -1,9 +1,9 @@
-% --------------------------------------------------------------------------
-% TS_compute
-% --------------------------------------------------------------------------
+function TS_compute(doParallel,ts_id_range,op_id_range,doLog,beVocal)
+% TS_compute    Computes missing elements of TS_DataMat (loaded in from
+% HCTSA_loc.mat)
 %
-% This function computes missing elements of TS_DataMat loaded in from
-% HCTSA_loc.mat
+%---EXAMPLE USAGE:
+% TS_compute;
 %
 %---INPUTS:
 % doParallel:  if 1, attempts to use the Parallel Computing Toolbox to run
@@ -16,7 +16,7 @@
 %
 %---OUTPUTS:
 % Writes output into HCTSA_loc.mat
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,8 +32,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_compute(doParallel,ts_id_range,op_id_range,doLog,beVocal)
 
 % --------------------------------------------------------------------------
 %% Check inputs and set defaults

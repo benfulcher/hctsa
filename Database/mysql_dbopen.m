@@ -1,27 +1,25 @@
-% ------------------------------------------------------------------------------
-% mysql_dbopen
-% ------------------------------------------------------------------------------
+function [dbConnection, errMessage] = mysql_dbopen(serverHost, databaseName, userName, password, customPort, useDBToolbox)
+% MYSQL_DBOPEN
+%
 % Opens a connection to the database using the mySQL j-connector.
 % Checks for an available database toolbox and uses that, but otherwise uses
 % java commands that should achieve the same thing.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function [dbConnection, errMessage] = mysql_dbopen(serverHost, databaseName, userName, password, customPort, useDBToolbox)
 
 % ------------------------------------------------------------------------------
 % Check inputs and set defaults:
@@ -47,19 +45,19 @@ if useDBToolbox && dbToolboxExists
     % ------------------------------------------------------------------------------
     % Connect using the Matlab's database toolbox
     % ------------------------------------------------------------------------------
-    
+
     % The JDBC interface is slower but platform independent
     dbConnection = database(databaseName,userName,password,'Vendor','MySQL','Server',serverHost,'PortNumber',customPort);
 
     errMessage = dbConnection.Message;
-    
+
     % Check for a connection error:
     if ~isempty(errMessage)
         error(['Error connecting to the database using Matlab database toolbox:\n' ...
                         '%s (pass:%s) connecting to %s at %s:\n%s\n'],  ...
                         userName,password,databaseName,serverHost,dbConnection.Message);
     end
-    
+
 else
     % ------------------------------------------------------------------------------
     % Connect using the mySQL J-connector (if no database toolbox exists)

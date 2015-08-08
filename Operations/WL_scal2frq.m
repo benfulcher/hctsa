@@ -1,26 +1,25 @@
-% ------------------------------------------------------------------------------
-% WL_scal2frq
-% ------------------------------------------------------------------------------
-% 
-% Estimates frequency components in a periodic time series using functions from
-% Matlab's Wavelet Toolbox, including the scal2frq function.
-% 
+function out = WL_scal2frq(y, wname, amax, delta)
+% WL_scal2frq   Frequency components in a periodic time series
+%
+% Estimates frequency components using functions from Matlab's Wavelet Toolbox,
+% including the scal2frq function.
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % wname, the name of the mother wavelet to analyze the data with: e.g., 'db3',
 %           'sym2', cf. Wavelet Toolbox Documentation for details
-% 
+%
 % amax, the maximum scale / level (can be 'max' to set according to wmaxlev)
-% 
+%
 % delta, the sampling period
-% 
+%
 %---OUTPUTS: the level with the highest energy coefficients, the dominant
 % period, and the dominant pseudo-frequency.
-% 
+%
 % Adapted from example in Matlab Wavelet Toolbox documentation. It's kind of a
 % weird idea to apply the method to generic time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,17 +33,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = WL_scal2frq(y, wname, amax, delta)
 
 % ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
@@ -103,7 +100,7 @@ a = 2.^scales;
 f = scal2frq(a, wname, delta);
 
 % Compute associated pseudo-periods.
-per = 1./f; 
+per = 1./f;
 
 % Decompose the time series at level specified as maximum
 [c, l] = wavedec(y, amax, wname);
@@ -122,5 +119,5 @@ end
 out.lmax = jmax; % level with highest energy coefficients
 out.period = per(jmax); % output dominant period
 out.pf = f(jmax); % output dominant pseudo-frequency
-      
+
 end

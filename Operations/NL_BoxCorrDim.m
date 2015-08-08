@@ -1,22 +1,19 @@
-% ------------------------------------------------------------------------------
-% NL_BoxCorrDim
-% ------------------------------------------------------------------------------
-% 
+function out = NL_BoxCorrDim(y,numBins,embedParams)
+% NL_BoxCorrDim  Correlation dimension of a time series.
+%
 % References TSTOOL code, corrdim, to estimate the correlation dimension of a
 % time-delay embedded time series using a box-counting approach.
-% 
+%
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
+%
 %---INPUTS:
 % y, column vector of time series data
-% 
 % numBins, maximum number of partitions per axis
-% 
 % embedParams [opt], embedding parameters as {tau,m} in 2-entry cell for a
 %                   time-delay, tau, and embedding dimension, m. As inputs to BF_embed.
-% 
+%
 %---OUTPUTS: Simple summaries of the outputs from corrdim.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -30,17 +27,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_BoxCorrDim(y,numBins,embedParams)
 
 doPlot = 0; % plot outputs to a figure
 

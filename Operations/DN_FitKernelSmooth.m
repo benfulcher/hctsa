@@ -1,12 +1,8 @@
-% ------------------------------------------------------------------------------
-% DN_FitKernelSmooth
-% ------------------------------------------------------------------------------
-% 
-% Fits a kernel-smoothed distribution to the data using the ksdensity function
-% from Matlab's Statistics Toolbox and returns a set of simple statistics.
-% 
+function out = DN_FitKernelSmooth(x,varargin)
+% DN_FitKernelSmooth    Statistics of a kernel-smoothed distribution of the data.
+%
 %---INPUTS:
-% x, the input time series
+% x, the input data vector
 % <can also produce additional outputs with the following optional settings>
 % [opt] 'numcross': number of times the distribution crosses the given threshold
 %           e.g., usage: DN_FitKernelSmooth(x,'numcross',[0.5,0.7]) for
@@ -15,18 +11,18 @@
 %               Usage as for 'numcross' above
 % [opt] 'arclength': arclength between where the distribution passes given
 %       thresholds. Usage as above.
-% 
-%---EXAMPLE USAGE:                  
+%
+%---EXAMPLE USAGE:
 % DN_FitKernelSmooth(x,'numcross',[0.05,0.1],'area',[0.1,0.2,0.4],'arclength',[0.5,1,2])
 % returns all the basic outputs, plus those for numcross, area, and arclength
 % for the thresholds given
-% 
+%
 %---OUTPUTS: a set of statistics summarizing the obtained distribution, including
 % the number of peaks, the distributional entropy, the number of times the curve
 % crosses fifixed probability thresholds, the area under the curve for fifixed
 % probability thresholds, the arc length, and the symmetry of probability
 % density above and below the mean.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -40,18 +36,33 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_FitKernelSmooth(x,varargin)
+%-------------------------------------------------------------------------------
+% Check inputs using the inputParser:
+%-------------------------------------------------------------------------------
+inputP = inputParser;
+check_isPositive = @(x) validateattributes(x,{'numeric'},{'positive'});
+addParameter(inputP,'area',[],check_isPositive);
+addParameter(inputP,'numcross',[],check_isPositive);
+addParameter(inputP,'arclength',[],check_isPositive);
+parse(inputP,varargin{:});
 
+% Make variables from results of input parser:
+area = inputP.Results.area;
+numcross = inputP.Results.numcross;
+arclength = inputP.Results.arclength;
+clear inputP;
+
+%-------------------------------------------------------------------------------
 % Preliminary definitions
 m = mean(x);
 
@@ -84,13 +95,12 @@ out.plsym = out1/out2;
 % 6. Numcross
 % ------------------------------------------------------------------------------
 % Specified in input
-varhere = strcmp(varargin,'numcross');
-if any(varhere) % calculate crossing statistics
-    thresholds = varargin{find(varhere,1,'first') + 1};
+if ~isempty(numcross) % calculate crossing statistics
+    thresholds = numcross;
     for i = 1:length(thresholds)
-        ncrosses = sum(BF_sgnchange(f - thresholds(i)));
-        outname = regexprep(sprintf('numcross_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
-        out.(outname) = ncrosses;
+        numCrosses = sum(BF_sgnchange(f - thresholds(i)));
+        outName = regexprep(sprintf('numcross_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
+        out.(outName) = numCrosses;
     end
 end
 
@@ -99,13 +109,12 @@ end
 % ------------------------------------------------------------------------------
 % Specified in input
 
-varhere = strcmp(varargin,'area');
-if any(varhere) % calculate area statistics
-    thresholds = varargin{find(varhere,1,'first') + 1};
+if ~isempty(area) % calculate area statistics
+    thresholds = area;
     for i = 1:length(thresholds)
-        areahere = sum(f(f < thresholds(i)).*(xi(2)-xi(1))); % integral under this portion
-        outname = regexprep(sprintf('area_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
-        out.(outname) = areahere;
+        areaHere = sum(f(f < thresholds(i)).*(xi(2)-xi(1))); % integral under this portion
+        outName = regexprep(sprintf('area_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
+        out.(outName) = areaHere;
     end
 end
 
@@ -113,17 +122,15 @@ end
 % 8. Arc length
 % ------------------------------------------------------------------------------
 % Specified in input
-varhere = strcmp(varargin,'arclength');
-if any(varhere) % calcualte arc length statistics
-    thresholds = varargin{find(varhere,1,'first') + 1};
+if ~isempty(arclength) % calcualte arc length statistics
+    thresholds = arclength;
     for i = 1:length(thresholds)
         % The integrand in the path length formula:
         fd = abs(diff(f(xi > m - thresholds(i) & xi < m + thresholds(i))));
-        arclengthhere = sum(fd.*(xi(2)-xi(1)));
-        outname = regexprep(sprintf('arclength_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
-        out.(outname) = arclengthhere;
+        arclengthHere = sum(fd.*(xi(2)-xi(1)));
+        outName = regexprep(sprintf('arclength_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
+        out.(outName) = arclengthHere;
     end
 end
-
 
 end

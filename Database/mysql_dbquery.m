@@ -1,28 +1,24 @@
-% ------------------------------------------------------------------------------
-% mysql_dbquery
-% ------------------------------------------------------------------------------
-% 
-% Used to retrieve data from a database connection.
+function [outputData, errmessage] = mysql_dbquery(dbconn, sqlquery)
+% MYSQL_DBQUERY     Retrieves data from a database connection.
+%
 % Can fetch data from either a JDBC4 connection, or using a Matlab database
 % object (depending on the input class).
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function [outputData, errmessage] = mysql_dbquery(dbconn, sqlquery)
 
 switch class(dbconn)
 case 'database'
@@ -32,22 +28,22 @@ case 'database'
     errmessage = curs.Message;
     qrfields = {};
     queryresult = [];
-    
+
     if isempty(curs.Message)
         % Success!:
         outputData = curs.Data;
     else
         outputData = {};
     end
-    
+
     % Close cursor object:
     close(curs);
-    
+
     % If 'No Data', change to empty, to match the syntax of 'com.mysql.jdbc.JDBC4Connection'
     if isempty(errmessage) && iscell(outputData) && ischar(outputData{1}) && strcmp(outputData{1},'No Data')
         outputData = {};
     end
-    
+
 case 'com.mysql.jdbc.JDBC4Connection'
     % Database connection opened using java commands:
     try
@@ -86,7 +82,7 @@ case 'com.mysql.jdbc.JDBC4Connection'
         % le = lasterror;
         errmessage = le.message;
     end
-    
+
 otherwise
     error('Unknown database connection class %s',class(dbc));
 end

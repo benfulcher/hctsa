@@ -1,6 +1,5 @@
-% --------------------------------------------------------------------------
-% TS_normalize
-% --------------------------------------------------------------------------
+function TS_normalize(normFunction,filterOptions,fileName_HCTSA_loc,subs,trainSet)
+% TS_normalize  Trims and normalizes data from an hctsa analysis.
 %
 % Reads in data from HCTSA_loc.mat, writes a trimmed, normalized version to
 % HCTSA_loc_N.mat
@@ -24,7 +23,7 @@
 %             time series.
 %             subs in the form {[rowrange],[columnrange]} (rows and columns to
 %             keep, from HCTSA_loc).
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -40,8 +39,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_normalize(normFunction,filterOptions,fileName_HCTSA_loc,subs,trainSet)
 
 % --------------------------------------------------------------------------
 %% Check Inputs

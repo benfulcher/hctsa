@@ -1,21 +1,21 @@
-% ------------------------------------------------------------------------------
-% EN_rpde
-% ------------------------------------------------------------------------------
-% Performs fast recurrence period density entropy (RPDE) analysis on an input
-% signal to obtain an estimate of the H_norm value and other related statistics.
-% 
+function out = EN_rpde(x, m, tau, epsilon, T_max)
+% EN_rpde   Recurrence period density entropy (RPDE).
+%
+% Fast RPDE analysis on an input signal to obtain an estimate of the H_norm value
+% and other related statistics.
+%
 % Based on Max Little's code rpde (see below)
 %
 %---USAGE:
 % [H_norm, rpd] = rpde(x, m, tau)
 % [H_norm, rpd] = rpde(x, m, tau, epsilon)
 % [H_norm, rpd] = rpde(x, m, tau, epsilon, T_max)
-% 
+%
 %---INPUTS:
 %    x       - input signal: must be a row vector
 %    m       - embedding dimension
 %    tau     - embedding time delay
-%    
+%
 %---OPTIONAL INPUTS:
 %    epsilon - recurrence neighbourhood radius
 %              (If not specified, then a suitable value is chosen automatically)
@@ -24,7 +24,7 @@
 %---OUTPUTS:
 %    H_norm  - Estimated RPDE value
 %    rpd     - Estimated recurrence period density
-% 
+
 % ------------------------------------------------------------------------------
 % (c) 2007 Max Little.
 % ------------------------------------------------------------------------------
@@ -37,8 +37,6 @@
 % Minor tweaks and additional outputs added by Ben Fulcher, 2015-05-15, for use
 % with the hctsa package
 % ------------------------------------------------------------------------------
-
-function out = EN_rpde(x, m, tau, epsilon, T_max)
 
 % ------------------------------------------------------------------------------
 % Check inputs and set defaults

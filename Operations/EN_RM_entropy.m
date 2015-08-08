@@ -1,17 +1,14 @@
-% ------------------------------------------------------------------------------
-% EN_RM_entropy
-% ------------------------------------------------------------------------------
-% 
-% Measures the entropy of the time series using a function by Rudy Moddemeijer
-% 
+function out = EN_RM_entropy(y)
+% EN_RM_entropy     Entropy of a time series using Rudy Moddemeijer's code.
+%
 % Original code, now RM_entropy, was obtained from:
 % http://www.cs.rug.nl/~rudy/matlab/
-% 
+%
 % The above website has code and documentation for the function.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -25,17 +22,16 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_RM_entropy(y)
 % Wrapper for R. Moddemeijer's entropy code, RM_entropy
 
 out = RM_entropy(y);

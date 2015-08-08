@@ -1,6 +1,5 @@
-% ------------------------------------------------------------------------------
+function structArray = SQL_add(addWhat, inputFile, forDatabase, beVocal)
 % SQL_add
-% ------------------------------------------------------------------------------
 %
 % Adds a set of time series, operations, or master operations to the mySQL
 % database.
@@ -12,7 +11,7 @@
 %             = INP_ts.txt or INP_ops.txt or INP_mops.txt]
 %             The input file should be formatted with whitespace as a delimiter
 %             between the entries to import.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -28,8 +27,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function structArray = SQL_add(addWhat, inputFile, forDatabase, beVocal)
 
 % ------------------------------------------------------------------------------
 %% Check inputs, set defaults:

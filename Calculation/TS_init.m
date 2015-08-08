@@ -1,11 +1,8 @@
-% --------------------------------------------------------------------------
-% TS_init
-% --------------------------------------------------------------------------
+function TS_init(INP_ts,INP_mops,INP_ops,beVocal)
+% TS_init       Takes in time series, master operation, and operation input
+% files and produces a formatted HCTSA_loc.mat file.
 %
-% This function is for users not using a mySQL database.
-%
-% Takes in time series, master operation, and operation input files and formats
-% a HCTSA_loc.mat file.
+% This function is used instead to run hctsa analysis without a linked mySQL database.
 %
 %---INPUTS:
 % INP_ts: A time-series input file
@@ -15,7 +12,7 @@
 %
 %---OUTPUTS:
 % Writes output into HCTSA_loc.mat
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -31,8 +28,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_init(INP_ts,INP_mops,INP_ops,beVocal)
 
 % ------------------------------------------------------------------------------
 % Check Inputs:

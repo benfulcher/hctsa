@@ -1,41 +1,32 @@
-% ------------------------------------------------------------------------------
-% NL_TSTL_GPCorrSum
-% ------------------------------------------------------------------------------
-% 
-% Uses TSTOOL code corrsum (or corrsum2) to compute scaling of the correlation sum for a
-% time-delay reconstructed time series by the Grassberger-Proccacia algorithm
-% using fast nearest neighbor search.
-% 
-% cf. "Characterization of Strange Attractors", P. Grassberger and I. Procaccia,
-% Phys. Rev. Lett. 50(5) 346 (1983)
-% 
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
+function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedParams,doTwo)
+% NL_TSTL_GPCorrSum correlation sum scaling by Grassberger-Proccacia algorithm
+%
 %---INPUTS:
 % y, column vector of time-series data
-% 
 % Nref, number of (randomly-chosen) reference points (-1: use all points,
 %       if a decimal, then use this fraction of the time series length)
-%       
 % r, maximum search radius relative to attractor size, 0 < r < 1
-% 
 % thwin, number of samples to exclude before and after each reference index
 %        (~ Theiler window)
-% 
 % nbins, number of partitioned bins
-% 
-% embedparams, embedding parameters to feed BF_embed.m for embedding the
+% embedParams, embedding parameters to feed BF_embed.m for embedding the
 %               signal in the form {tau,m}
-% 
 % doTwo, if this is set to 1, will use corrsum, if set to 2, will use corrsum2.
 %           For corrsum2, n specifies the number of pairs per bin. Default is 1,
 %           to use corrsum.
-% 
-% 
+%
 %---OUTPUTS: basic statistics on the outputs of corrsum, including iteratively
 % re-weighted least squares linear fits to log-log plots using the robustfit
 % function in Matlab's Statistics Toolbox.
+
+% Uses TSTOOL code corrsum (or corrsum2) to compute scaling of the correlation
+% sum for a time-delay reconstructed time series by the Grassberger-Proccacia
+% algorithm using fast nearest-neighbor search.
 %
+% cf. "Characterization of Strange Attractors", P. Grassberger and I. Procaccia,
+% Phys. Rev. Lett. 50(5) 346 (1983)
+%
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -49,17 +40,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedparams,doTwo)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -94,10 +83,10 @@ if nargin < 5 || isempty(nbins)
 end
 
 % (5) Set embedding parameters to defaults
-if nargin < 6 || isempty(embedparams)
-    embedparams = {'ac','fnnmar'};
+if nargin < 6 || isempty(embedParams)
+    embedParams = {'ac','fnnmar'};
 else
-    if length(embedparams) ~= 2
+    if length(embedParams) ~= 2
         error('Embedding parameters are formatted incorrectly -- need {tau,m}')
     end
 end
@@ -116,13 +105,13 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert to embedded signal object for TSTOOL
-s = BF_embed(y,embedparams{1},embedparams{2},1);
+s = BF_embed(y,embedParams{1},embedParams{2},1);
 
 if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
     error('Embedding of the %u-sample time series failed',N)
 elseif length(data(s)) < thwin
     fprintf(1,['Embedded time series (N = %u, m = %u, tau = %u) too short' ...
-                'to do a correlation sum\n'],N,embedparams{1},embedparams{2})
+                'to do a correlation sum\n'],N,embedParams{1},embedParams{2})
     out = NaN; return
 end
 
@@ -142,7 +131,7 @@ elseif doTwo == 2 % use corrsum2
     end
 end
 
-if ~isempty(me) 
+if ~isempty(me)
     switch me.message
     case 'Maximal search radius must be greater than starting radius'
         fprintf(1,'Max search radius less than starting radius. Returning NaNs.\n')
@@ -212,10 +201,10 @@ if enoughpoints
 
     fit_lnCr = a(2)*lnr+a(1);
     if doPlot, hold on; plot(lnr,fit_lnCr,'r'); hold off; end
-    
+
     % Compute residuals:
     res = lnCr - fit_lnCr';
-    
+
     out.robfitresmeanabs = mean(abs(res));
     out.robfitresmeansq = mean(res.^2);
     out.robfitresac1 = CO_AutoCorr(res,1,'Fourier');
@@ -226,12 +215,12 @@ else
     out.robfit_s = NaN;
     out.robfit_sea1 = NaN;
     out.robfit_sea2 = NaN;
-    
+
     out.robfitresmeanabs = NaN;
     out.robfitresmeansq = NaN;
     out.robfitresac1 = NaN;
 end
-    
+
 
 % now non-robust linear fit
 % [p, S] = polyfit(lnr',lnCr,1);

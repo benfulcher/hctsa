@@ -11,7 +11,7 @@
 % 
 %---OUTPUT:
 % iszscored, a logical with the verdict.
-% 
+ 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

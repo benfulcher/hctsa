@@ -1,19 +1,20 @@
-% ------------------------------------------------------------------------------
-% CO_tc3
-% ------------------------------------------------------------------------------
+function out = CO_tc3(y,tau)
+% CO_tc3    Normalized nonlinear autocorrelation function, tc3.
 %
 % Computes the tc3 function, a normalized nonlinear autocorrelation, at a
 % given time-delay, tau.
-% Outputs are the raw tc3 expression, its magnitude, the numerator and its magnitude, and
-% the denominator.
-% 
+%
 %---INPUTS:
 % y, input time series
 % tau, time lag
-% 
+%
+%---OUTPUTS:
+% The raw tc3 expression, its magnitude, the numerator and its magnitude, and
+% the denominator.
+%
 % See documentation of the TSTOOL package (http://www.physik3.gwdg.de/tstool/)
 % for further details about this function.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -27,17 +28,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_tc3(y,tau)
 
 % ------------------------------------------------------------------------------
 %% Set defaults:

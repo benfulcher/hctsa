@@ -1,9 +1,6 @@
-% ------------------------------------------------------------------------------
-% CO_FirstZero
-% ------------------------------------------------------------------------------
-% 
-% Returns the first zero-crossing of a given autocorrelation function.
-% 
+function out = CO_FirstZero(y,corrFun,maxTau)
+% CO_FirstZero      The first zero-crossing of a given autocorrelation function
+%
 %---INPUTS:
 %
 % y, the input time series
@@ -11,11 +8,11 @@
 %         (i) 'ac': normal linear autocorrelation function. Uses CO_AutoCorr to
 %                   calculate autocorrelations.
 % maxTau, a maximum time-delay to search up to.
-% 
+%
 % In future, could add an option to return the point at which the function
 % crosses the axis, rather than the first integer lag at which it has already
 % crossed (what is currently implemented).
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -29,17 +26,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_FirstZero(y,corrFun,maxTau)
 
 % ------------------------------------------------------------------------------
 % Check inputs:

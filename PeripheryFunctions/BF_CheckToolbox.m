@@ -8,7 +8,7 @@
 %---INPUT:
 % theToolbox, the string identifying the toolbox (in format of license command
 %               in Matlab)
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

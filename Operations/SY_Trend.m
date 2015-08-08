@@ -1,21 +1,17 @@
-% ------------------------------------------------------------------------------
-% SY_Trend
-% ------------------------------------------------------------------------------
-% 
-% Quantifies various measures of trend in the time series.
-% 
-%---INPUT:
-% y, the input time series
-% 
-%---OUTPUTS:
+function out = SY_Trend(y)
+% SY_Trend  Quantifies various measures of trend in a time series.
 %
+%---INPUT:
+% y, the input time series.
+%
+%---OUTPUTS:
 % Linearly detrends the time series using detrend, and returns the ratio of
 % standard deviations before and after the linear detrending. If a strong linear
 % trend is present in the time series, this operation should output a low value.
-% 
+%
 % Also fits a line and gives parameters from that fit, as well as statistics on
 % a cumulative sum of the time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -29,17 +25,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_Trend(y)
 
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored')
@@ -72,5 +66,5 @@ function [m,b] = LinearFit(xData,yData)
     m = coeff(1); b = coeff(2);
 end
 % ------------------------------------------------------------------------------
-    
+
 end

@@ -21,7 +21,7 @@
 %                  function, for example
 % flipMe, (i) 1: inverts the ordering of the colors.
 %            (ii) 0: doesn't invert the ordering of the colors. 
-% 
+ 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

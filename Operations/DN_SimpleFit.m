@@ -1,17 +1,15 @@
-% ------------------------------------------------------------------------------
-% DN_SimpleFit
-% ------------------------------------------------------------------------------
-% 
-% Fits different distributions or simple time-series models to the time series
-% using 'fit' function from Matlab's Curve Fitting Toolbox.
-% 
+function out = DN_SimpleFit(x,dmodel,numBins)
+% DN_SimpleFit  Fit distributions or simple time-series models to the data.
+%
+% Uses the 'fit' function from Matlab's Curve Fitting Toolbox.
+%
 % The distribution of time-series values is estimated using either a
 % kernel-smoothed density via the Matlab function ksdensity with the default
 % width parameter, or by a histogram with a specified number of bins, numBins.
-% 
+%
 %---INPUTS:
 % x, the input time series
-% 
+%
 % dmodel, the model to fit:
 %       (I) distribution models:
 %           (i) 'gauss1'
@@ -25,14 +23,14 @@
 %           (iv) 'fourier1'
 %           (v) 'fourier2'
 %           (vi) 'fourier3'
-% 
+%
 % numBins, the number of bins for a histogram-estimate of the distribution of
 %       time-series values. If numBins = 0, uses ksdensity instead of histogram.
-% 
-% 
+%
+%
 %---OUTPUTS: the goodness of fifit, R^2, rootmean square error, the
 % autocorrelation of the residuals, and a runs test on the residuals.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -46,17 +44,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = DN_SimpleFit(x,dmodel,numBins)
 
 % ------------------------------------------------------------------------------
 % Preliminaries
@@ -81,12 +77,12 @@ if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
     else
         [dny, dnx] = hist(x,numBins);
     end
-    
+
     % Must be column vectors:
     if size(dnx,2) > size(dnx,1);
         dnx = dnx'; dny = dny';
     end
-    
+
     try
         [cfun, gof, output] = fit(dnx,dny,dmodel); % fit the model
 	catch emsg % this model can't even be fitted OR license problem...
@@ -102,7 +98,7 @@ if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
                                                     dmodel,numBins,dmodel,emsg.message)
         end
 	end
-    
+
 elseif any(strcmp(TSmodels,dmodel)); % Valid time-series model name
     if size(x,2) > size(x,1)
         x = x';

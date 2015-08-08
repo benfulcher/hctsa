@@ -1,26 +1,25 @@
-% ------------------------------------------------------------------------------
-% CP_l1pwc_sweep_lambda
-% ------------------------------------------------------------------------------
-% 
+function out = CP_l1pwc_sweep_lambda(y,lambdar)
+% CP_l1pwc_sweep_lambda     Dependence of step detection on regularization parameter.
+%
 % Gives information about discrete steps in the signal across a range of
 % regularization parameters lambda, using the function l1pwc from Max Little's
 % step detection toolkit.
-% 
+%
 % cf.,
 % "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
 % Machine Dynamics", Max A. Little, and Nick S. Jones, Proc. ICASSP (2010)
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % lambdar, a vector specifying the lambda parameters to use
-% 
+%
 %---OUTPUTS:
 % At each iteration, the CP_ML_StepDetect code was run with a given
 % lambda, and the number of segments, and reduction in root mean square error
 % from removing the piecewise constants was recorded. Outputs summarize how the
 % these quantities vary with lambda.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,17 +33,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CP_l1pwc_sweep_lambda(y,lambdar)
 
 Llambdar = length(lambdar);
 nsegs = zeros(Llambdar,1);

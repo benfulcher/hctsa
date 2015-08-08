@@ -1,33 +1,29 @@
-% ------------------------------------------------------------------------------
-% SY_LocalGlobal
-% ------------------------------------------------------------------------------
-% 
-% Compares statistics measured in a local region of the time series to that
-% measured of the full time series.
-% 
+function out = SY_LocalGlobal(y,subsetHow,n,randomSeed)
+% SY_LocalGlobal  Compares local statistics to global statistics of a time series.
+%
 %---INPUTS:
 % y, the time series to analyze
-% 
+%
 % subsetHow, the local subset of time series to study:
 %             (i) 'l': the first n points in a time series,
 %             (ii) 'p': an initial proportion of the full time series, n
 %             (iii) 'unicg': n evenly-spaced points throughout the time series
 %             (iv) 'randcg': n randomly-chosen points from the time series
 %                               (chosen with replacement)
-% 
+%
 % n, the parameter for the method specified above
-% 
+%
 % randomSeed, an option for whether (and how) to reset the random seed, for the
 % 'randcg' input
-% 
+%
 %---OUTPUTS: the mean, standard deviation, median, interquartile range,
 % skewness, kurtosis, AC(1), and SampEn(1,0.1).
-% 
+%
 % This is not the most reliable or systematic operation because only a single
 % sample is taken from the time series and compared to the full time series.
 % A better approach would be to repeat over many local subsets and compare the
 % statistics of these local regions to the full time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -41,17 +37,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_LocalGlobal(y,subsetHow,n,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Preliminaries
@@ -99,10 +93,10 @@ switch subsetHow
         end
         % Reset the random seed if specified (for reproducibility):
         BF_ResetSeed(randomSeed);
-        
+
         % Take n random points in time series; there could be repeats:
         r = randi(N,n,1);
-        
+
         % This is not very robust, as it's taking just a single stochastic
         % sample with a (possibly) large variance
     otherwise

@@ -1,39 +1,36 @@
-% ------------------------------------------------------------------------------
-% NW_VisibilityGraph
-% ------------------------------------------------------------------------------
-% 
+function out = NW_VisibilityGraph(y,meth,maxL)
+% NW_VisibilityGraph    Visibility graph analysis of a time series.
+%
 % Constructs a visibility graph of the time series and returns various
 % statistics on the properties of the resulting network.
-% 
+%
 % cf.: "From time series to complex networks: The visibility graph"
 % Lacasa, Lucas and Luque, Bartolo and Ballesteros, Fernando and Luque, Jordi
 % and Nuno, Juan Carlos P. Natl. Acad. Sci. USA. 105(13) 4972 (2008)
-% 
+%
 % "Horizontal visibility graphs: Exact results for random time series"
 % Luque, B. and Lacasa, L. and Ballesteros, F. and Luque, J.
 % Phys. Rev. E. 80(4) 046103 (2009)
-% 
-% The normal visibility graph may not be implemented correctly, we focused only
-% on the horizontal visibility graph.
-% 
+%
 %---INPUTS:
 % y, the time series (a column vector)
-% 
+%
 % meth, the method for constructing:
 % 			(i) 'norm': the normal visibility definition
 % 			(ii) 'horiz': uses only horizonatal lines to link nodes/datums
-%             
+%
 % maxL, the maximum number of samples to consider. Due to memory constraints,
 %               only the first maxL (6000 by default) points of time series are
 %               analyzed. Longer time series are reduced to their first maxL
 %               samples.
-% 
-% 
+%
 %---OUTPUTS:
 % Statistics on the degree distribution, including the mode, mean,
 % spread, histogram entropy, and fits to gaussian, exponential, and powerlaw
 % distributions.
-% 
+
+% NOTE: The normal visibility graph may not be implemented correctly, we focused
+% only on the horizontal visibility graph.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -47,17 +44,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NW_VisibilityGraph(y,meth,maxL)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries, check inputs
@@ -112,13 +107,13 @@ switch meth
 				cummax(j) = max(m(1:j));
 			end
 			links = (m >= cummax);
-	
+
 			% so we have 'links' which are the time series points following it in the series
 			% that are visible from it (1 means the following point, and should always be included)
 			% Store this information in the adjacency matrix, A
 			A(i,i+1:end) = links';
 		end
-        
+
 	case 'horiz'
         % horizontal visibility graph
 		for i = 1:N
@@ -127,14 +122,14 @@ switch meth
     			nahead = find(y(i+1:end) > y(i),1,'first');
                 A(i,i+nahead) = 1;
             end
-            
+
             % Look back to the first hit, then stop
             if i > 1
     			nback = find(yr(N-i+2:end) > yr(N-i+1),1,'first');
                 A(i-nback,i) = 1;
             end
 		end
-        
+
     otherwise
         error('Unknown visibility graph method ''%s''',meth);
 end

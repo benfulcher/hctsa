@@ -1,19 +1,17 @@
-% ------------------------------------------------------------------------------
-% SB_MotifThree
-% ------------------------------------------------------------------------------
-% 
-% As for SB_MotifTwo, but using an alphabet of three letters, i.e., looks for
-% motifs in a course-graining of the time series to an alphabet of three letters
-% 
+function out = SB_MotifThree(y,cgHow)
+% SB_MotifThree     Motifs in a coarse-graining of a time series to a 3-letter alphabet
+%
+% (As SB_MotifTwo but with a 3-letter alphabet)
+%
 %---INPUTS:
 % y, time series to analyze
 % cgHow, the coarse-graining method to use:
 %       (i) 'quantile': equiprobable alphabet by time-series value
 %       (ii) 'diffquant': equiprobably alphabet by time-series increments
-% 
+%
 %---OUTPUTS:
 % Statistics on words of length 1, 2, 3, and 4.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -27,17 +25,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SB_MotifThree(y,cgHow)
 
 if nargin < 2 || isempty(cgHow)
     cgHow = 'quantile';
@@ -46,10 +42,10 @@ end
 switch cgHow
 	case 'quantile'
 		yt = SB_CoarseGrain(y,'quantile',3);
-        
+
 	case 'diffquant'
 		yt = SB_CoarseGrain(diff(y),'quantile',3);
-        
+
     otherwise
         error('Unknown coarse-graining method ''%s''');
 end

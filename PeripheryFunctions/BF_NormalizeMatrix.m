@@ -1,23 +1,23 @@
+function F = BF_NormalizeMatrix(F,normMethod,itrain)
 % ------------------------------------------------------------------------------
 % BF_NormalizeMatrix
 % ------------------------------------------------------------------------------
-% 
+%
 % Normalizes all columns of an input matrix.
-% 
+%
 %---INPUTS:
 % F, the input matrix
 % normMethod, the normalization method to use (see body of the code for options)
 % itrain, learn the normalization parameters just on these indices, then apply
 %         it on the full dataset (required for training/testing procedures where
 %         the testing data has to remain unseen).
-% 
+%
 %---OUTPUT:
 % F, the normalized matrix
-% 
+%
 % Note that NaNs are ignored -- only real data is used for the normalization
 % (assume NaNs are a minority of the data).
-% 
-% 
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -31,17 +31,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-    
-function F = BF_NormalizeMatrix(F,normMethod,itrain)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
@@ -75,7 +73,7 @@ switch normMethod
     case 'subtractMean'
         % Subtract the mean:
         F = bsxfun(@minus,F,mean(F));
-        
+
     case 'maxmin'
         % Linear rescaling to the unit interval
         for i = 1:N2 % cycle through the operations
@@ -87,20 +85,20 @@ switch normMethod
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
-        
+
     case 'mixedSigmoid'
         % Ben Fulcher, 2014-06-26
         % Runs a normal sigmoid if iqr=0; a scaled sigmoid otherwise
         % Computes statistics on non-nans
-        
+
         % Rescale to unit interval:
         UnityRescale = @(x) (x-min(x(~isnan(x))))/(max(x(~isnan(x)))-min(x(~isnan(x))));
         % Outlier-adjusted sigmoid:
         SQ_Sig = @(x) UnityRescale(1./(1 + exp(-(x-median(x(~isnan(x))))/(iqr(x(~isnan(x))/1.35)))));
         SQ_Sig_noiqr = @(x) UnityRescale(1./(1 + exp(-(x-mean(x(~isnan(x))))/std(x(~isnan(x))))));
-        
+
         F_norm = zeros(size(F));
-        
+
         for i = 1:N2 % cycle through columns
             if max(F(:,i))==min(F(:,i))
                 % A constant column is set to 0:
@@ -116,9 +114,9 @@ switch normMethod
                 F_norm(:,i) = SQ_Sig(F(:,i));
             end
         end
-        
+
         F = F_norm; % set F_norm to F to output
-        
+
     case 'scaledSQzscore'
         % A scaled sigmoided quantile zscore
         % Problem is that if iqr=0, this is not defined
@@ -137,7 +135,7 @@ switch normMethod
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
-        
+
     case 'scaledSigmoid'
         % A standard sigmoid transform, then a rescaling to the unit interval
         for i = 1:N2 % cycle through the metrics
@@ -150,7 +148,7 @@ switch normMethod
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
-        
+
     case 'scaledsigmoid5q'
         % First caps at 5th and 95th quantile, then does scaled sigmoid
         for i = 1:N2 % cycle through the metrics
@@ -169,7 +167,7 @@ switch normMethod
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
-        
+
     case 'sigmoid'
         for i = 1:N2 % cycle through the metrics
             rr = ~isnan(F(:,i));
@@ -177,7 +175,7 @@ switch normMethod
 %             F(:,i) = 1./(1+exp(-pi*zscore(F(:,i))/sqrt(3)));
             F(rr,i) = 1./(1+exp(-zscore(FF)));
         end
-        
+
 % 	case 'maxmin'
 % 		for i = 1:N2 % cycle through the metrics
 %             rr = ~isnan(F(:,i));
@@ -195,7 +193,7 @@ switch normMethod
             rr = ~isnan(F(:,i));
             F(rr,i) = zscore(F(rr,i));
         end
-        
+
     case 'Qzscore'
         % quantile zscore
         % invented by me.
@@ -208,7 +206,7 @@ switch normMethod
                 F(rr,i) = (FF-median(FF))/(iqr(FF)/1.35);
             end
         end
-        
+
     case 'SQzscore'
         % sigmoided quantile zscore
         for i = 1:N2
@@ -221,7 +219,7 @@ switch normMethod
                 F(rr,i) = 1./(1+exp(-F1));
             end
         end
-        
+
     case 'scaled2ways'
         for i = 1:N2
             rr = ~isnan(F(:,i));
@@ -243,7 +241,7 @@ switch normMethod
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
-        
+
     case 'LDscaled'
         % (i) maxmin
         % linear rescaling to the unit interval
@@ -256,8 +254,8 @@ switch normMethod
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
-        
-        
+
+
         % (ii) outliersigmoid or sigmoid or nothing
         for i = 1:N2
             rr = ~isnan(F(:,i));
@@ -283,7 +281,7 @@ switch normMethod
                 F(rr,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
-        
+
     otherwise
         error('Invalid normalization method ''%s''', normMethod)
 end

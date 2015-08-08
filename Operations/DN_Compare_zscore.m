@@ -1,15 +1,12 @@
-% ------------------------------------------------------------------------------
-% DN_Compare_zscore
-% ------------------------------------------------------------------------------
-% 
-% Compares the distribution of a time series to a z-scored version of it
-% 
+function out = DN_Compare_zscore(x)
+% DN_Compare_zscore Compares the distribution of a time series to a z-scored version of it.
+%
 %---INPUT:
 % x, a (not z-scored) time series
-% 
+%
 %---OUTPUTS: ratios of features between the original and z-scored time series,
 % including the number of peaks, the maximum, and the distributional entropy.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -23,32 +20,31 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = DN_Compare_zscore(x)
 
 [f, xi] = ksdensity(x); % the smoothed empirical distribution
 [fz, xiz] = ksdensity(BF_zscore(x)); % smoothed z-scored empirical distribution
 
 % 1. Number of peaks: numpeaks
+threshold = 0.0002;
 
 df = diff(f);
 ddf = diff(df); % original
 sdsp = ddf(BF_sgnchange(df));
-out1 = sum(sdsp < -0.0002); % 'large enough' maxima
+out1 = sum(sdsp < -threshold); % 'large enough' maxima
 
 df = diff(fz);
 ddf = diff(df); % zscored
 sdsp = ddf(BF_sgnchange(df));
-out2 = sum(sdsp < -0.0002); % 'large enough' maxima
+out2 = sum(sdsp < -threshold); % 'large enough' maxima
 
 out.numpeaks = out2/out1; % This shouldn't be meaningful
 

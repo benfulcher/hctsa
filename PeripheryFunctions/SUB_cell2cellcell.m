@@ -4,7 +4,7 @@
 % 
 % Inputs a cell with some delimiter, and outputs a cell of cells using this
 % delimiter.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

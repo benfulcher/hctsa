@@ -1,38 +1,26 @@
-% ------------------------------------------------------------------------------
-% NL_TSTL_FractalDimensions
-% ------------------------------------------------------------------------------
-% 
+function out = NL_TSTL_FractalDimensions(y,kmin,kmax,Nref,gstart,gend,past,steps,embedParams)
+% NL_TSTL_FractalDimensions    Fractal dimension spectrum, D(q), of a time series.
+%
+%---INPUTS:
+% y, column vector of time series data
+% kmin, minimum number of neighbours for each reference point
+% kmax, maximum number of neighbours for each reference point
+% Nref, number of randomly-chosen reference points (-1: use all points)
+% gstart, starting value for moments
+% gend, end value for moments
+% past [opt], number of samples to exclude before an after each reference
+%             index (default=0)
+% steps [opt], number of moments to calculate (default=32);
+% embedParams, how to embed the time series using a time-delay reconstruction
+%
+%---OUTPUTS: include basic statistics of D(q) and q, statistics from a linear fit,
+% and an exponential fit of the form D(q) = Aexp(Bq) + C.
+
 % Computes the fractal dimension spectrum, D(q), using moments of neighbor
 % distances for time-delay embedded time series by referencing the code,
 % fracdims, from the TSTOOL package.
-% 
+%
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
-%---INPUTS:
-% 
-% y, column vector of time series data
-% 
-% kmin, minimum number of neighbours for each reference point
-% 
-% kmax, maximum number of neighbours for each reference point
-% 
-% Nref, number of randomly-chosen reference points (-1: use all points)
-% 
-% gstart, starting value for moments
-% 
-% gend, end value for moments
-% 
-% past [opt], number of samples to exclude before an after each reference
-%             index (default=0)
-% 
-% steps [opt], number of moments to calculate (default=32);
-% 
-% embedParams, how to embed the time series using a time-delay reconstruction
-% 
-% 
-%---OUTPUTS: include basic statistics of D(q) and q, statistics from a linear fit,
-% and an exponential fit of the form D(q) = Aexp(Bq) + C.
-% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -46,17 +34,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TSTL_FractalDimensions(y,kmin,kmax,Nref,gstart,gend,past,steps,embedParams)
 
 % ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available:

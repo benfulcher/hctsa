@@ -1,20 +1,19 @@
-% ------------------------------------------------------------------------------
-% WL_dwtcoeff
-% ------------------------------------------------------------------------------
-% 
+function out = WL_dwtcoeff(y,wname,level)
+% WL_dwtcoeff   Discrete wavelet transform coefficients.
+%
 % Decomposes the time series using a given wavelet and outputs statistics on the
 % coefficients obtained up to a maximum level, level.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % wname, the mother wavelet, e.g., 'db3', 'sym2' (see Wavelet Toolbox
 %           Documentation)
-%           
+%
 % level, the level of wavelet decomposition (can be set to 'max' for the maximum
 %               level determined by wmaxlev)
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -28,17 +27,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = WL_dwtcoeff(y,wname,level)
 
 % ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
@@ -81,7 +78,7 @@ end
 
 %% Expand DWT coefficients for visualization
 % nbcol = 64; % color discretization steps
-% 
+%
 % cfd = zeros(level,N); % detail coefficients
 % for k = 1:level
 %     d = detcoef(c,l,k);
@@ -89,7 +86,7 @@ end
 %     d = d(ones(1,2^k),:);
 %     cfd(k,:) = wkeep1(d(:)',N);
 % end
-% 
+%
 % cfd =  cfd(:);
 % I = find(abs(cfd)<sqrt(eps));
 % cfd(I) = zeros(size(I));
@@ -136,8 +133,8 @@ end
 % % Set approximation coefficients to zero
 % % nc = wthcoef('a',c,l);
 % NC = wthcoef('t',c,l,N,T,SORH);
-% 
-% 
+%
+%
 % %% Single Level Reconstruction
 % X = waverec(c,l,wname);
 % plot(X);

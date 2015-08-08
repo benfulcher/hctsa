@@ -1,12 +1,9 @@
-% ------------------------------------------------------------------------------
-% TS_plot_timeseries
-% ------------------------------------------------------------------------------
-%
-% Plots the time series read from a local file, in a specified format.
+function TS_plot_timeseries(whatData,whatTimeSeries,numPerGroup,maxLength,plotOptions)
+% TS_plot_timeseries    Plots examples of time series in an hctsa analysis.
 %
 %---INPUTS:
-% whatData, The data to get information from: can be a structure, or 'norm' or
-%           'cl' to load from HCTSA_N or HCTSA_cl
+% whatData, The data to get information from: can be a structure, or, e.g.,
+%           'norm' to load from HCTSA_N
 %
 % whatTimeSeries, Can provide indices to plot that subset, a keyword to plot
 %                   matches to the keyword, 'all' to plot all, or an empty vector
@@ -16,8 +13,8 @@
 %
 % maxLength, the maximum number of samples of each time series to plot
 %
-% plotOptions, additional plotting options as a structure.
-%
+% plotOptions, additional plotting options as a structure
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -33,8 +30,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_plot_timeseries(whatData,whatTimeSeries,numPerGroup,maxLength,plotOptions)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs

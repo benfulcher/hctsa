@@ -1,18 +1,17 @@
-% ------------------------------------------------------------------------------
-% SY_SlidingWindow
-% ------------------------------------------------------------------------------
-% 
+function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
+% SY_SlidingWindow  Sliding window measures of stationarity.
+%
 % This function is based on sliding a window along the time series, measuring
 % some quantity in each window, and outputting some summary of this set of local
 % estimates of that quantity.
-% 
+%
 % Another way of saying it: calculate 'windowStat' in each window, and computes
 % 'acrossWinStat' for the set of statistics calculated in each window.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % windowStat, the measure to calculate in each window:
 %               (i) 'mean', mean
 %               (ii) 'std', standard deviation
@@ -23,7 +22,7 @@
 %               (vii) 'lillie', the p-value for a Lilliefors Gaussianity test
 %               (viii) 'AC1', the lag-1 autocorrelation
 %               (ix) 'apen', Approximate Entropy
-% 
+%
 % acrossWinStat, controls how the obtained sequence of local estimates is
 %                   compared (as a ratio to the full time series):
 %                       (i) 'std': standard deviation
@@ -32,14 +31,14 @@
 %                               cf. "Approximate entropy as a measure of system
 %                               complexity", S. M. Pincus, P. Natl. Acad. Sci.
 %                               USA 88(6) 2297 (1991)
-% 
+%
 % numSeg, the number of segments to divide the time series up into, thus
 %       controlling the window length
-% 
+%
 % incMove, the increment to move the window at each iteration, as 1/fraction of the
 %       window length (e.g., incMove = 2, means the window moves half the length of the
 %       window at each increment)
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -53,17 +52,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
 
 doPlot = 0; % plot outputs
 

@@ -1,39 +1,26 @@
-% ------------------------------------------------------------------------------
-% NL_TSTL_acp
-% ------------------------------------------------------------------------------
-% 
-% Implements the TSTOOL routine acp using a time lag, tau, a Theiler window,
-% past, maximum delay, maxDelay, maximum embedding dimension, maxDim, and number
-% of reference points, Nref.
-% 
-% The documentation isn't crystal clear, but I think this function has to do
-% with cross-prediction.
-% 
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
+function out = NL_TSTL_acp(y,tau,past,maxDelay,maxDim,Nref,randomSeed)
+% NL_TSTL_acp   acp function in TSTOOL
+%
+% The documentation isn't crystal clear, but this function seems to be related
+% to cross-prediction.
 %
 %---INPUTS:
-% 
 % y, time series
-% 
 % tau, delay time
-% 
 % past, number of samples to exclude before and after each index (to avoid
 %               correlation effects ~ Theiler window)
-% 
 % maxDelay, maximal delay (<< length(y))
-% 
 % maxDim, maximal dimension to use
-% 
 % Nref, number of reference points
-% 
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-% 
+%
 %---OUTPUTS: statistics summarizing the output of the routine.
-% 
+
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
+%
 % May in future want to also make outputs normalized by first value; so get
 % metrics on both absolute values at each dimension but also some
 % indication of the shape
-% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -47,17 +34,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TSTL_acp(y,tau,past,maxDelay,maxDim,Nref,randomSeed)
 
 try
     s = signal(y);

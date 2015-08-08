@@ -1,6 +1,5 @@
-% --------------------------------------------------------------------------
-% SQL_retrieve
-% --------------------------------------------------------------------------
+function didWrite = SQL_retrieve(ts_ids, op_ids, retrieveWhatEntries, retrieveWhatData)
+% SQL_retrieve 		Retrieve data from the mySQL database
 %
 % This function retreives data from the mySQL database for subsequent analysis
 % in Matlab. It takes as input a set of constraints on the time series and
@@ -33,7 +32,7 @@
 %--TimeSeries, contains metadata about the time series, and the time-series data
 %--Operations, contains metadata about the operations
 %--MasterOperations, contains metadata about the implicatedmaster operations
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -49,8 +48,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function didWrite = SQL_retrieve(ts_ids, op_ids, retrieveWhatEntries, retrieveWhatData)
 
 % Until it actually writes something, set the function output, didWrite = 0
 didWrite = 0;

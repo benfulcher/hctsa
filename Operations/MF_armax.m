@@ -1,30 +1,26 @@
-% ------------------------------------------------------------------------------
-% MF_armax
-% ------------------------------------------------------------------------------
-% 
-% Fits an ARMA(p,q) model to the time series and returns various statistics on
-% the result.
-% 
+function out = MF_armax(y, orders, ptrain, nsteps)
+% MF_armax  Statistics on a fitted ARMA model.
+%
 % Uses the functions iddata, armax, aic, and predict from Matlab's System
 % Identification Toolbox
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % orders, a two-vector for p and q, the AR and MA components of the model,
 %           respectively,
-% 
+%
 % ptrain, the proportion of data to train the model on (the remainder is used
 %           for testing),
-% 
+%
 % nsteps, number of steps to predict into the future for testing the model.
-% 
-% 
+%
+%
 %---OUTPUTS: include the fitted AR and MA coefficients, the goodness of fit in
 % the training data, and statistics on the residuals from using the fitted model
 % to predict the testing data.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,17 +34,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_armax(y, orders, ptrain, nsteps)
 
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
@@ -60,7 +54,7 @@ BF_CheckToolbox('identification_toolbox')
 % ------------------------------------------------------------------------------
 % (1) y, the time series as a column vector
 if size(y,2) > size(y,1)
-   y = y'; % ensure a column vector 
+   y = y'; % ensure a column vector
 end
 N = length(y); % number of samples
 % Convert y to time series object
@@ -71,7 +65,7 @@ if nargin < 2 || isempty(orders)
     orders = [3, 3]; % AR3, MA3
 end
 if nargin < 3 || isempty(ptrain)
-    ptrain = 0.8; % train on 80% of the data 
+    ptrain = 0.8; % train on 80% of the data
 end
 % if nargin < 4 || isempty(trainmode)
 %     trainmode = 'first'; % trains on first ptrain proportion of the data.
@@ -173,7 +167,7 @@ end
 % yp = predict(mp,ytrain,2); % 1-step ahead, predictions of length ptrain*N
 % % We want only the length of test data worth of predictions, though
 % yp = yp(1:N-floor(ptrain*N));
-% 
+%
 % plot(yp.y,'b');
 % hold on;
 % plot(ytest.y,'r');
@@ -194,15 +188,15 @@ end
 % e = randn(N,1);
 % % yp = filter(c_ma,c_ar,e);
 % yp = predict(m,iddata([],e,1),1);
-% 
+%
 % marma = armax(y,[3,2]);
 % compare(y,marma,2)
-% 
+%
 % %%
-% 
+%
 % % returns an idpoly model m with estimated parameters and covariances (parameter uncertainties).
 % % Estimates the parameters using the prediction-error method and specified orders.
-% 
+%
 % yp = predict
 
 

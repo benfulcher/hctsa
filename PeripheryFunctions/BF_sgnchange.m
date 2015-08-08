@@ -9,7 +9,7 @@
 % doFind, (i) 0: returns a logical vector with 1s where the input changes sign
 %         (ii) 1: returns a vector of indicies of where the input vector changes
 %                 sign
-% 
+ 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

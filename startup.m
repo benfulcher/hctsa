@@ -1,8 +1,5 @@
-% ------------------------------------------------------------------------------
-% startup.m
-% ------------------------------------------------------------------------------
-% Add all paths required for the highly comparative time-series analysis package
-%
+% STARTUP   Add all paths required for the hctsa package.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

@@ -1,19 +1,18 @@
-% ------------------------------------------------------------------------------
-% MF_StateSpaceCompOrder
-% ------------------------------------------------------------------------------
-% 
+function out = MF_StateSpaceCompOrder(y,maxOrder)
+% MF_StateSpaceCompOrder    Change in goodness of fit across different state space models.
+%
 % Fits state space models using n4sid (from Matlab's System Identification
 % Toolbox) of orders 1, 2, ..., maxOrder and returns statistics on how the
 % goodness of fit changes across this range.
-% 
+%
 % c.f., MF_CompareAR -- does a similar thing for AR models
 % Uses the functions iddata, n4sid, and aic from Matlab's System Identification
 % Toolbox
-% 
+%
 %---INPUTS:
 % y, the input time series
 % maxOrder, the maximum model order to consider.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -27,17 +26,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_StateSpaceCompOrder(y,maxOrder)
 
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
@@ -84,11 +81,11 @@ for k = 1:maxOrder
     catch emsg
         error('Model fitting failed for k = %u',k)
     end
-    
+
     lossfns(k) = m.EstimationInfo.LossFcn;
     fpes(k) = m.EstimationInfo.FPE;
     aics(k) = aic(m);
-    
+
     np = length(m.ParameterVector);
 %     bics(k) = aics(k) - 2*np + np*log(N); % scrappy and probably wrong
 end
@@ -112,6 +109,5 @@ out.meandiffaic = mean(diff(aics));
 out.maxdiffaic = max(diff(aics));
 out.mindiffaic = min(diff(aics));
 out.ndownaic = sum(diff(aics) < 0);
-
 
 end

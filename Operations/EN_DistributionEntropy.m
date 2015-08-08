@@ -1,32 +1,31 @@
-% ------------------------------------------------------------------------------
-% EN_DistributionEntropy
-% ------------------------------------------------------------------------------
-% 
-% Estimates of entropy from the static distribution of the time series. The
+function out = EN_DistributionEntropy(y,histOrKS,numBins,olremp)
+% EN_DistributionEntropy    Distributional entropy.
+%
+% Estimates of entropy from the distribution of a data vector. The
 % distribution is estimated either using a histogram with numBins bins, or as a
 % kernel-smoothed distribution, using the ksdensity function from Matlab's
 % Statistics Toolbox with width parameter, w (specified as the iunput numBins).
-% 
+%
 % An optional additional parameter can be used to remove a proportion of the
 % most extreme positive and negative deviations from the mean as an initial
 % pre-processing.
-% 
+%
 %---INPUTS:
 %
 % y, the input time series
-% 
+%
 % histOrKS: 'hist' for histogram, or 'ks' for ksdensity
-% 
+%
 % numBins: (*) (for 'hist'): an integer, uses a histogram with that many bins
 %          (*) (for 'ks'): a positive real number, for the width parameter for
 %                       ksdensity (can also be empty for default width
 %                                       parameter, optimum for Gaussian)
-%                                       
+%
 % olremp [opt]: the proportion of outliers at both extremes to remove
 %               (e.g., if olremp = 0.01; keeps only the middle 98% of data; 0
 %               keeps all data. This parameter ought to be less than 0.5, which
 %               keeps none of the data).
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -40,17 +39,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = EN_DistributionEntropy(y,histOrKS,numBins,olremp)
 
 doPlot = 0; % plot outputs to figure
 

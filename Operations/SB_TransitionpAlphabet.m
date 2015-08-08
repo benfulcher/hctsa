@@ -1,29 +1,25 @@
-% ------------------------------------------------------------------------------
-% SB_TransitionpAlphabet
-% ------------------------------------------------------------------------------
-% 
-% Calculates the transition probabilities and measures how they change as the
-% size of the alphabet increases.
-% 
+function out = SB_TransitionpAlphabet(y,numGroups,tau)
+% SB_TransitionpAlphabet    How transition probabilities change with alphabet size.
+%
 % Discretization is done by quantile separation.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % numGroups, the number of groups in the coarse-graining (scalar for constant, or a
 %       vector of numGroups to compare across this range)
-% 
+%
 % tau: the time-delay; transition matricies corresponding to this time-delay. We
 %      can either downsample the time series at this lag and then do the
 %      discretization as normal, or do the discretization and then just
 %      look at this dicrete lag. Here we do the former. (scalar for
 %      constant tau, vector for range to vary across)
-% 
+%
 %---OUTPUTS: include the decay rate of the sum, mean, and maximum of diagonal
 % elements of the transition matrices, changes in symmetry, and the eigenvalues
 % of the transition matrix.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -37,17 +33,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SB_TransitionpAlphabet(y,numGroups,tau)
 
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
@@ -75,7 +69,7 @@ if (length(numGroups) == 1) && (length(tau) > 1) % vary tau
     if numGroups < 2; return; end % need more than 2 groups
     taur = tau; % the tau range
     store = zeros(length(taur),nfeat);
-    
+
     for i = 1:length(taur)
         tau = taur(i);
         if tau > 1; y = resample(y,1,tau); end % resample
@@ -84,22 +78,22 @@ if (length(numGroups) == 1) && (length(tau) > 1) % vary tau
     end
 
     error('This setting kind of doesn''t work yet. Sorry.')
-    
+
 elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     if min(numGroups) < 2; error('Need more than 2 groups'); end % need more than 2 groups, always
     numGroupsRange = numGroups; % the numGroups range (numGroups is an input vector)
     store = zeros(length(numGroupsRange),nfeat);
     if tau > 1; y = resample(y,1,tau); end % resample
-    
+
     for i = 1:length(numGroupsRange)
         numGroups = numGroupsRange(i);
         yth = SUB_discretize(y,numGroups); % thresholded data: yth
         store(i,:) = loc_getmeasures(yth,numGroups);
     end
-    
-    
+
+
     numGroupsRange = numGroupsRange'; % needs to be a column vector for the fitting routines
-    
+
     % 1) mean of diagonal elements of the transition matrix: shows an exponential
     % decay to zero
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
@@ -110,7 +104,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     out.meandiagfexp_r2 = gof.rsquare;
     out.meandiagfexp_adjr2 = gof.adjrsquare;
     out.meandiagfexp_rmse = gof.rmse;
-    
+
     % 2) maximum of diagonal elements of the transition matrix: shows an exponential
     % decay to zero
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
@@ -121,7 +115,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     out.maxdiagfexp_r2 = gof.rsquare;
     out.maxdiagfexp_adjr2 = gof.adjrsquare;
     out.maxdiagfexp_rmse = gof.rmse;
-    
+
     % 3) trace of T
     % fit exponential
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
@@ -132,12 +126,12 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     out.trfexp_r2 = gof.rsquare;
     out.trfexp_adjr2 = gof.adjrsquare;
     out.trfexp_rmse = gof.rmse;
-    
+
     % Also fit linear from the start to a fifth, a tenth of the starting
     % value
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-0.05 1]);
     f = fittype('a*x+b','options',s);
-    
+
     r1 = find(store(:,3)>store(1,3)/5);
     if length(r1) > 2
         [~, gof] = fit(numGroupsRange(r1),store(r1,3),f);
@@ -145,7 +139,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     else
         out.trflin5_adjr2 = NaN;
     end
-    
+
     r2 = find(store(:,3)>store(1,3)/10);
     if length(r2) > 2
         [~, gof] = fit(numGroupsRange(r2),store(r2,3),f);
@@ -160,7 +154,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     f = fittype('a*x+b','options',s);
     c = fit(numGroupsRange,store(:,4),f);
     out.symd_a = c.a;
-    
+
     % return approximately when starts to rise; where means before and
     % after a moving dividing point are most different
     if all(store(:,4) == store(1,4)); % all the same
@@ -177,7 +171,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
         tstats = abs((mba(:,1)-mba(:,2))./sqrt(sba(:,1).^2 + sba(:,2).^2));
         out.symd_risept = find(tstats == max(tstats),1,'first');
     end
-    
+
     % 5) trace of covariance matrix
     % check jump:
     out.trcov_jump = store(2,5)-store(1,5);
@@ -193,7 +187,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     out.trcovfexp_r2 = gof.rsquare;
     out.trcovfexp_adjr2 = gof.adjrsquare;
     out.trcovfexp_rmse = gof.rmse;
-    
+
     % 6) Standard deviation of eigenvalues of T
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
@@ -204,7 +198,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     out.stdeigfexp_r2 = gof.rsquare;
     out.stdeigfexp_adjr2 = gof.adjrsquare;
     out.stdeigfexp_rmse = gof.rmse;
-    
+
     % 7) maximum (real) eigenvalue of T
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
@@ -215,7 +209,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     out.maxeig_fexpr2 = gof.rsquare;
     out.maxeig_fexpadjr2 = gof.adjrsquare;
     out.maxeig_fexprmse = gof.rmse;
-    
+
     % 8) minimum (real) eigenvalue of T
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
@@ -226,7 +220,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     out.mineigfexp_r2 = gof.rsquare;
     out.mineigfexp_adjr2 = gof.adjrsquare;
     out.mineigfexp_rmse = gof.rmse;
-    
+
     % 9) mean real eigenvalue of T
     % Fit an exponential decay
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
@@ -237,7 +231,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     out.meaneigfexp_r2 = gof.rsquare;
     out.meaneigfexp_adjr2 = gof.adjrsquare;
     out.meaneigfexp_rmse = gof.rmse;
-    
+
 end
 
 % ------------------------------------------------------------------------------
@@ -257,7 +251,7 @@ end
             error('Some values were not assigned to a group')
             % yth = []; return;
         end
-        
+
     end
 
     % ------------------------------------------------------------------------------
@@ -265,7 +259,7 @@ end
         % returns a bunch of metrics on the transition matrix
         N = length(yth);
 %         ng = max(yth);
-        
+
         % 1) Calculate the one-time transition matrix
         T = zeros(numGroups);
         for j = 1:numGroups
@@ -280,7 +274,7 @@ end
             end
         end
         T = T/(N-1); % N-1 is appropriate because it's a 1-time transition matrix
-        
+
         % 2) return some quantities on the transition matrix, T
         %   (i) diagonal elements
         out(1) = mean(diag(T)); % mean of diagonal elements
@@ -290,7 +284,7 @@ end
 
         %  (ii) measures of symmetry:
         out(4) = sum(sum(abs((T-T')))); % sum of differences of individual elements
-%         out(5) = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower 
+%         out(5) = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower
                                                           % triangular parts of T
 
         % (iii) measures from covariance matrix:
@@ -312,7 +306,7 @@ end
 % %         out(16) = min(eigcovT); % min eigenvalue of covariance matrix
 %         out(11) = std(eigcovT); % std of eigenvalues of covariance matrix
 %         out(12) = mean(eigcovT); % mean eigenvalue of covariance matrix
-        
+
     end
 
 

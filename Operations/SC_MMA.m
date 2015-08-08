@@ -1,54 +1,49 @@
-% ------------------------------------------------------------------------------
-% SC_MMA
-% ------------------------------------------------------------------------------
-% 
-% Physionet implementation of multiscale multifractal analysis
-% 
-% Scale-dependent estimates of multifractal scaling in a time series
-% 
+function out = SC_MMA(y,doOverlap,scaleRange,qRange)
+% SC_MMA   Physionet implementation of multiscale multifractal analysis
+%
+% Scale-dependent estimates of multifractal scaling in a time series.
+
 % ------------------------------------------------------------------------------
 % Modified by Ben Fulcher for use in hctsa, 2015-05-12.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2014 Jan Gieraltowski
 % ------------------------------------------------------------------------------
-% 
+%
 % This program is free software; you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation; either version 2 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT ANY
 % WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 % PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 % Place - Suite 330, Boston, MA 02111-1307, USA.
-% 
+%
 % Author: Jan Gieraltowski
 % Warsaw University of Technology
 % Faculty of Physics
 % gieraltowski@if.pw.edu.pl
 % http://gieraltowski.fizyka.pw.edu.pl/
-% 
+%
 % Method was first proposed in:
-% J. Gieraltowski, J. J. Zebrowski, and R. Baranowski, 
-% Multiscale multifractal analysis of heart rate variability recordings 
-% with a large number of occurrences of arrhythmia, 
+% J. Gieraltowski, J. J. Zebrowski, and R. Baranowski,
+% Multiscale multifractal analysis of heart rate variability recordings
+% with a large number of occurrences of arrhythmia,
 % Phys. Rev. E 85, 021915 (2012).
 % http://dx.doi.org/10.1103/PhysRevE.85.021915
-% 
-% Please cite the above publication when referencing this material, 
+%
+% Please cite the above publication when referencing this material,
 % and also include the standard citation for PhysioNet:
-% Goldberger AL, Amaral LAN, Glass L, Hausdorff JM, Ivanov PCh, Mark RG, 
-% Mietus JE, Moody GB, Peng C-K, Stanley HE. 
-% PhysioBank, PhysioToolkit, and PhysioNet: Components of a New Research Resource 
-% for Complex Physiologic Signals. 
-% Circulation 101(23):e215-e220 
+% Goldberger AL, Amaral LAN, Glass L, Hausdorff JM, Ivanov PCh, Mark RG,
+% Mietus JE, Moody GB, Peng C-K, Stanley HE.
+% PhysioBank, PhysioToolkit, and PhysioNet: Components of a New Research Resource
+% for Complex Physiologic Signals.
+% Circulation 101(23):e215-e220
 % [Circulation Electronic Pages; http://circ.ahajournals.org/cgi/content/full/101/23/e215]; 2000 (June 13).
 % ------------------------------------------------------------------------------
-
-function out = SC_MMA(y,doOverlap,scaleRange,qRange)
 
 % Generate a plot:
 doPlot = 0;
@@ -98,7 +93,7 @@ qList(qList == 0) = 0.0001;
 % end
 
 % ------------------------------------------------------------------------------
-    
+
 signal = y;
 
 prof = cumsum(signal);
@@ -110,7 +105,7 @@ sListFull = unique(round(linspace(minScale,maxScale,numIncrements)));
 
 timer = tic;
 for s = sListFull
-    
+
     if doOverlap == 1
         vec = [0:s-1];
         ind = [1:slength-s+1]';
@@ -119,7 +114,7 @@ for s = sListFull
         ind2 = [1:size(prof,1)];
         coordinates = reshape(ind2(1:(size(prof,1)-mod(size(prof,1),s))),s,(size(prof,1)-mod(size(prof,1),s))/s)';
     end
-    
+
     segments = prof(coordinates);
     xbase = [1:1:s];
     f2nis = [];
@@ -130,7 +125,7 @@ for s = sListFull
         variance = mean((seg - polyval(fit,xbase)).^2);
         f2nis(end+1) = variance;
     end
-    
+
     for q = qList
         fqs = [fqs; q s (mean(f2nis.^(q/2)))^(1/q)];
     end
@@ -174,10 +169,10 @@ for si = 1:length(sList)
     sit = sList(si);
     for qi = 1:length(qList)
         qit = qList(qi);
-        
+
         fitTemp = fqsll(fqsll(:,1) == qit & fqsll(:,2) >= sit & fqsll(:,2) <= 5*sit,:);
         hTemp = polyfit(fitTemp(:,3),fitTemp(:,4),1);
-        
+
         hqs(qi,si) = hTemp(1);
         % hqs = [hqs; qit 3*sit hTemp(1)];
     end
@@ -200,7 +195,7 @@ if doPlot
     else
         hLim = ceil((max(max(hqs))*10))/10;
     end
-    
+
     f = figure('color','w'); box('on');
     hqsplot = surf(sListScaled,qList,hqs);
     colormap(jet);

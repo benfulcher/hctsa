@@ -1,43 +1,41 @@
-% ------------------------------------------------------------------------------
-% NL_MS_fnn
-% ------------------------------------------------------------------------------
-% 
+function out = NL_MS_fnn(y,de,tau,th,kth,justBest,bestp)
+% NL_MS_fnn     False nearest neighbors of a time series.
+%
 % Determines the number of false nearest neighbors for the embedded time series
-% using Michael Small's false nearest neighbor code, fnn (renamed MS_fnn here)
-% 
+% using Michael Small's false nearest neighbor code, fnn (renamed MS_fnn here).
+%
+% False nearest neighbors are judged using a ratio of the distances between the
+% next k points and the neighboring points of a given datapoint.
+%
+%---INPUTS:
+% y, the input time series
+%
+% de, the embedding dimensions to compare across (a vector)
+%
+% tau, the time-delay (can be 'ac' or 'mi' to be the first zero-crossing of ACF,
+%                       or first minimum of AMI, respectively)
+%
+% th, the distance threshold for neighbours
+%
+% kth, the the distance to next points
+%
+% [opt] justBest, can be set to 1 to just return the best embedding dimension, m_{best}
+%
+% [opt] bestp, if justBest = 1, can set bestp as the proportion of false nearest
+%              neighbours at which the optimal embedding dimension is selected.
+%
+% This function returns statistics on the proportion of false nearest neighbors
+% as a function of the embedding dimension m = m_{min}, m_{min}+1, ..., m_{max}
+% for a given time lag tau, and distance threshold for neighbors, d_{th}.
+%
+%---OUTPUTS: include the proportion of false nearest neighbors at each m, the mean
+% and spread, and the smallest m at which the proportion of false nearest
+% neighbors drops below each of a set of fixed thresholds.
+
 % cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
 % Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
 % Vol. 52 (2005)
 % Code available at http://small.eie.polyu.edu.hk/matlab/
-% 
-% False nearest neighbors are judged using a ratio of the distances between the
-% next k points and the neighboring points of a given datapoint.
-% 
-%---INPUTS:
-% y, the input time series
-% 
-% de, the embedding dimensions to compare across (a vector)
-% 
-% tau, the time-delay (can be 'ac' or 'mi' to be the first zero-crossing of ACF,
-%                       or first minimum of AMI, respectively)
-%                       
-% th, the distance threshold for neighbours
-% 
-% kth, the the distance to next points
-% 
-% [opt] justBest, can be set to 1 to just return the best embedding dimension, m_{best}
-% 
-% [opt] bestp, if justBest = 1, can set bestp as the proportion of false nearest
-%              neighbours at which the optimal embedding dimension is selected.
-% 
-% This function returns statistics on the proportion of false nearest neighbors
-% as a function of the embedding dimension m = m_{min}, m_{min}+1, ..., m_{max}
-% for a given time lag tau, and distance threshold for neighbors, d_{th}.
-% 
-%---OUTPUTS: include the proportion of false nearest neighbors at each m, the mean
-% and spread, and the smallest m at which the proportion of false nearest
-% neighbors drops below each of a set of fixed thresholds.
-% 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -51,17 +49,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_MS_fnn(y,de,tau,th,kth,justBest,bestp)
 
 % ------------------------------------------------------------------------------
 %% CHECK INPUTS:
@@ -125,10 +121,10 @@ else
 
     % Output mean
     out.meanpfnn = mean(p);
-    
+
     % Standard deviation
     out.stdpfnn = std(p);
-        
+
     % Find embedding dimension for the first time p goes under x%
     out.firstunder02 = firstunderf(0.2); % 20%
     out.firstunder01 = firstunderf(0.1); % 10%

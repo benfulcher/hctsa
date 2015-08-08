@@ -1,35 +1,31 @@
-% ------------------------------------------------------------------------------
-% MD_hrv_classic
-% ------------------------------------------------------------------------------
-% 
-% Packages up a bunch of classic heart rate variability (HRV) statistics and
-% applies them to the input time series.
-% 
-% Assumes an NN/RR time series in units of seconds.
-% 
+function out = MD_hrv_classic(y)
+% MD_hrv_classic    Classic heart rate variability (HRV) statistics.
+%
+% Typically assumes an NN/RR time series in units of seconds.
+%
 %---INPUTS:
 % y, the input time series.
-% 
+%
 % Includes:
 %  (i) pNNx
 %  cf. "The pNNx files: re-examining a widely used heart rate variability
 %           measure", J.E. Mietus et al., Heart 88(4) 378 (2002)
-% 
+%
 %  (ii) Power spectral density ratios in different frequency ranges
 %   cf. "Heart rate variability: Standards of measurement, physiological
 %       interpretation, and clinical use",
 %       M. Malik et al., Eur. Heart J. 17(3) 354 (1996)
-% 
+%
 %  (iii) Triangular histogram index, and
-%  
+%
 %  (iv) Poincare plot measures
 %  cf. "Do existing measures of Poincare plot geometry reflect nonlinear
 %       features of heart rate variability?"
 %       M. Brennan, et al., IEEE T. Bio.-Med. Eng. 48(11) 1342 (2001)
-%  
+%
 % Code is heavily derived from that provided by Max A. Little:
 % http://www.maxlittle.net/
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -43,17 +39,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MD_hrv_classic(y)
 
 % Standard defaults
 diffy = diff(y);
@@ -66,7 +60,7 @@ N = length(y); % time-series length
 % strange to do this for a z-scored time series...
 % pnntime = 20;
 
-Dy = abs(diffy) * 1000; 
+Dy = abs(diffy) * 1000;
 
 % Anonymous function to do the PNNx calcualtion:
 PNNxfn = @(x) sum(Dy > x)/(N-1);
@@ -90,7 +84,7 @@ out.pnn40 = PNNxfn(40); %sum(Dy > 40)/(N-1);
 % LF/HF: as per Malik et. al. 1996, "Heart Rate Variability"
 LF_lo = 0.04; % /pi -- fraction of total power (max F is pi)
 LF_hi = 0.15;
-HF_lo = 0.15; 
+HF_lo = 0.15;
 HF_hi = 0.4;
 
 fbinsize = F(2) - F(1);

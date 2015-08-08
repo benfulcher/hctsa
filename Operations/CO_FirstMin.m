@@ -1,10 +1,8 @@
-% ------------------------------------------------------------------------------
+function out = CO_FirstMin(y,minWhat,extraParam)
 % CO_FirstMin
-% ------------------------------------------------------------------------------
-% 
-% Returns the time at which the first minimum in a given correlation function
-% occurs.
-% 
+%
+% The time at which the first minimum in a given correlation function occurs.
+%
 %---INPUTS:
 % y, the input time series
 % minWhat, the type of correlation to minimize: either 'ac' for autocorrelation,
@@ -13,11 +11,11 @@
 %           options can also be implemented as 'mi-kernel', 'mi-kraskov1',
 %           'mi-kraskov2' (all from Information Dynamics Toolkit implementations),
 %           or 'mi-hist' (histogram-based method).
-% 
+%
 % Note that selecting 'ac' is unusual operation: standard operations are the
 % first zero-crossing of the autocorrelation (as in CO_FirstZero), or the first
 % minimum of the mutual information function ('mi').
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -31,17 +29,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_FirstMin(y,minWhat,extraParam)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -88,7 +84,7 @@ autoCorr = zeros(N-1,1); % preallocate autocorrelation vector
 for i = 1:N-1
     % Calculate the auto-correlation at this lag:
     autoCorr(i) = corrfn(i);
-    
+
     % We're at a minimum:
     if i==2 && (autoCorr(2) > autoCorr(1))
         out = 1; return % already increases at lag of 2 from lag of 1: a minimum (since ac(0) is maximal)

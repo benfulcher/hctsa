@@ -11,7 +11,7 @@
 % surr, an optional string to surround each element of s (empty by default, but
 %       can be handy for surrounding each string by inverted commas, for
 %       example).
-% 
+ 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

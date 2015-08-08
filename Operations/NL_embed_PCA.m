@@ -1,30 +1,29 @@
-% ------------------------------------------------------------------------------
-% NL_embed_PCA
-% ------------------------------------------------------------------------------
-% 
+function out = NL_embed_PCA(y,tau,m)
+% NL_embed_PCA  Principal Components analysis of a time series in an embedding space.
+%
 % Reconstructs the time series as a time-delay embedding, and performs Principal
 % Components Analysis on the result using princomp code from
 % Matlab's Bioinformatics Toolbox.
-% 
-% This technique is known as singular spectrum analysis
-% 
+%
+% This technique is known as singular spectrum analysis.
+%
 % "Extracting qualitative dynamics from experimental data"
 % D. S. Broomhead and G. P. King, Physica D 20(2-3) 217 (1986)
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % tau, the time-delay, can be an integer or 'ac', or 'mi' for first
 %               zero-crossing of the autocorrelation function or first minimum
 %               of the automutual information, respectively
-%               
+%
 % m, the embedding dimension
-% 
+%
 % OUTPUTS: Various statistics summarizing the obtained eigenvalue distribution.
-% 
+%
 % The suggestion to implement this idea was provided by Siddarth Arora.
 % (Siddharth Arora, <arora@maths.ox.ac.uk>)
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,17 +37,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_embed_PCA(y,tau,m)
 
 % ------------------------------------------------------------------------------
 % Check Inputs:

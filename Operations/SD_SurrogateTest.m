@@ -1,20 +1,16 @@
-% ------------------------------------------------------------------------------
-% SD_SurrogateTest
-% ------------------------------------------------------------------------------
-% 
-% Analyzes the test statistics obtained from surrogate time series compared to
-% those measured from the given time series.
-% 
-% This code was based on information found in:
+function out = SD_SurrogateTest(x,surrMeth,numSurrs,extrap,theTestStat,randomSeed)
+% SD_SurrogateTest   Analyzes test statistics obtained from surrogate time series
+%
+% This function is based on information found in:
 % "Surrogate data test for nonlinearity including nonmonotonic transforms"
 % D. Kugiumtzis Phys. Rev. E 62(1) R25 (2000)
-% 
+%
 % The generation of surrogates is done by the periphery function,
 % SD_MakeSurrogates
-% 
+%
 %---INPUTS:
 % x, the input time series
-% 
+%
 % surrMeth, the method for generating surrogate time series:
 %       (i) 'RP': random phase surrogates that maintain linear correlations in
 %                 the data but destroy any nonlinear structure through phase
@@ -27,12 +23,12 @@
 %                    with non-stationarity, cf.:
 %               "A new surrogate data method for nonstationary time series",
 %                   D. L. Guarin Lopez et al., arXiv 1008.1804 (2010)
-% 
+%
 % numSurrs, the number of surrogates to compute (default is 99 for a 0.01
 %         significance level 1-sided test)
-% 
+%
 % extrap, extra parameter, the cut-off frequency for 'TFT'
-% 
+%
 % theTestStat, the test statistic to evalute on all surrogates and the original
 %           time series. Can specify multiple options in a cell and will return
 %           output for each specified test statistic:
@@ -48,9 +44,9 @@
 %           (iv) 'tc3': a time-reversal asymmetry measure. Outputs of the
 %                 function include a z-test between the two distributions, and
 %                 some comparative rank-based statistics.
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -64,17 +60,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SD_SurrogateTest(x,surrMeth,numSurrs,extrap,theTestStat,randomSeed)
 
 doPlot = 0; % plot outputs to a figure
 
@@ -127,11 +121,11 @@ if ismember('ami1',theTestStat)
     % use: [1+log_2(N)], [sqrt(N)]
     % BF_MutualInformation(x(1:end-1),x(2:end),'quantile','quantile',nbins);
     % nbins = ceil(1+log2(N)); %round(mean([1+log2(N),sqrt(N)]));
-    
+
     % Use the gaussian approximation to estimate automutual information using the
     % Information Dynamics Toolkit:
     ami_fn = @(timeSeries,timeDelay) IN_AutoMutualInfo(timeSeries,timeDelay,'gaussian');
-    
+
     AMIx = ami_fn(x,1);
     AMIsurr = zeros(numSurrs,1);
     for i = 1:numSurrs
@@ -162,7 +156,7 @@ if ismember('fmmi',theTestStat)
     if any(isnan(fmmisurr))
         error('fmmi failed');
     end
-    
+
     % FMMI should be higher for signal than surrogates
     someStats = SDgivemestats(fmmix,fmmisurr,'right');
     fnames = fieldnames(someStats);
@@ -194,7 +188,7 @@ if ismember('tc3',theTestStat) % TC3 statistic -- another time-reversal asymmetr
         tmp = CO_tc3(z(:,i),tau);
         tc3surr(i) = tmp.raw;
     end
-    
+
     someStats = SDgivemestats(tc3x,tc3surr,'both');
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
@@ -213,7 +207,7 @@ if ismember('nlpe',theTestStat) % locally constant phase space prediction error
         msqerr = sum(res.^2);
         nlpesurr(i) = msqerr;
     end
-    
+
     someStats = SDgivemestats(nlpex,nlpesurr,'right'); % NLPE should be higher than surrogates
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
@@ -223,7 +217,7 @@ end
 
 if ismember('fnn',theTestStat)
     warning('fnn takes forever...')
-    
+
     % false nearest neighbours at d=2;
     tmp = NL_MS_fnn(x,2,1,5,1);
     fnnx = tmp.pfnn_2;
@@ -232,7 +226,7 @@ if ismember('fnn',theTestStat)
         tmp = NL_MS_fnn(z(:,i),2,1,5,1);
         fnnsurr(i) = tmp.pfnn_2;
     end
-    
+
     someStats = SDgivemestats(fnnx,fnnsurr,'right'); % FNN(2) should be higher than surrogates?
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
@@ -269,7 +263,7 @@ function someStats = SDgivemestats(statx,statsurr,leftrightboth)
         else
             [~, minhere] = min(abs(statx-xi));
             someStats.f = f(minhere); % return probability density where the point is
-        end    
+        end
     else
         zscstatsurr = (statsurr-mean(statsurr))/std(statsurr);
         zscstatx = (statx-mean(statsurr))/std(statsurr);
@@ -283,7 +277,7 @@ function someStats = SDgivemestats(statx,statsurr,leftrightboth)
             someStats.f = f(minhere); % return probability density where the point is
         end
     end
-    
+
     % What fraction of the range is the sample in?
     medsurr = median(statsurr);
     iqrsurr = iqr(statsurr);

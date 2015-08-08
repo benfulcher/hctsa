@@ -1,28 +1,25 @@
-% ------------------------------------------------------------------------------
-% SQL_store
-% ------------------------------------------------------------------------------
-% 
+function SQL_store(writeWhat,logToFile,dbname)
+% SQL_store 	Upload data to the mySQL database.
+%
 % Uploads data in the HCTSA_loc file in the current directory back into the
 % mySQL database. Should be done to store the result new computations done by
 % TS_compute.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function SQL_store(writeWhat,logToFile,dbname)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
@@ -110,7 +107,7 @@ else
 
     if numOps_db < numOps
     	fprintf(1,'There are %u operations that no longer match the database',(numOps-numOps_db));
-    end    
+    end
     error(['It could be dangerous to write back to a changed database. ' ...
                 'You should start a SQL_retrieve from scratch.'])
 end
@@ -192,13 +189,13 @@ updateMe = zeros(numWrite,1); % Label iterations that should be written to the d
 writeBackTimer = tic; % Time how long this takes to give user feedback
 numReports = 3; % the number of time remaining updates to provide the user
 
-for i = 1:numWrite	
-    
+for i = 1:numWrite
+
     % Retrieve the elements
     TS_DataMat_ij = TS_DataMat(localIndex(i,1),localIndex(i,2));
     TS_Quality_ij = TS_Quality(localIndex(i,1),localIndex(i,2));
     TS_CalcTime_ij = TS_CalcTime(localIndex(i,1),localIndex(i,2));
-    
+
     switch writeWhat
     case 'null'
         if isfinite(TS_DataMat_ij)
@@ -212,18 +209,18 @@ for i = 1:numWrite
         if isfinite(TS_DataMat_ij) && (q_db(i)==0 || TS_Quality_ij~=1)
             updateMe(i) = 1; % there is a value in TS_DataMat -- write it to the entry in the database
         end
-		% (i) Has been calculated and a value stored in TS_DataMat (isfinite()), and 
+		% (i) Has been calculated and a value stored in TS_DataMat (isfinite()), and
 		% (ii) Either the database entry is NULL or we didn't get an error (prevents writing errors over errors)
     end
-	
+
     if updateMe(i)
-        
+
         if isnan(TS_CalcTime_ij) % happens when there is an error in the code
             TS_CalcTime_string = 'NULL';
         else
             TS_CalcTime_string = sprintf('%f',TS_CalcTime_ij);
         end
-            
+
         % I can't see any simple way around running lots of single UPDATE commands (for each entry)
     	updateString = sprintf(['UPDATE Results SET Output = %19.17g, QualityCode = %u, CalculationTime = %s ' ...
 						'WHERE ts_id = %u AND op_id = %u'],TS_DataMat_ij,TS_Quality_ij, ...
@@ -267,12 +264,12 @@ SQL_closedatabase(dbc) % Close the database connection
 %     fn = ['TS_agglomerate_' datestr(now,30) '.log'];
 %     fid = fopen(fn,'w','n');
 %     disp(['Log file created: ' fn]);
-% 
+%
 %     fprintf(fid, '%s\n', ['Updated ' num2str(length(tsgoodi)) ' time series: ']);
 %     for i=1:length(tsgoodi)
 %         fprintf(fid, '%s\n',tsf{tsgoodi(i)});
 %     end
-% 
+%
 %     fprintf(fid, '\n\n\n\n\n%s\n', '******************************');
 %     fprintf(fid, '%s\n', ['Updated ' num2str(length(mgoodi)) ' operations: ']);
 %     for i=1:length(mgoodi)

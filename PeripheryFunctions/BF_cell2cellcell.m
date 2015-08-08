@@ -13,7 +13,7 @@
 % cellcell, the cell of cells, using this delimiter
 % 
 % Used for some tasks involving mySQL.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

@@ -1,41 +1,37 @@
-% ------------------------------------------------------------------------------
-% TS_combine
-% ------------------------------------------------------------------------------
-% 
-% This function joins two HCTSA_loc.mat files.
+function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids)
+% TS_combine, join two HCTSA_loc.mat files
+%
 % Any data matrices are combined, and the guides are updated to reflect the
 % concatenation.
 % Note that in the case of duplicates, the first file will have precedence.
 % Takes a union of time series, and an intersection of operations.
-% 
+%
 %---INPUTS:
 % HCTSA_loc_1: the path to the first HCTSA_loc.mat file
 % HCTSA_loc_2: the path to the second HCTSA_loc.mat file
 % compare_tsids: whether to consider ts_ids in each file as the same. If
-% this is true (default) , it removes matching ts_ids so duplicates cannot occur in the 
+% this is true (default) , it removes matching ts_ids so duplicates cannot occur in the
 % combined matrix. But if the two to be joined are from different databases,
 % then this should be set to 0.
 %
 %---OUTPUTS:
 % Writes a new, combined HCTSA_loc.mat
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -217,5 +213,5 @@ fprintf(1,['Saved new Matlab file containing combined versions of %s ' ...
                     'and %s to %s\n'],HCTSA_locs{1},HCTSA_locs{2},fileName);
 fprintf(1,'%s contains %u time series and %u operations\n',fileName, ...
                                 length(TimeSeries),length(Operations));
- 
+
 end

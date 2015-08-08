@@ -1,27 +1,23 @@
-% ------------------------------------------------------------------------------
-% ST_MomentCorr
-% ------------------------------------------------------------------------------
-% 
-% Calculates correlations between simple statistics summarizing the distribution
-% of values in local windows of the signal.
-% 
-% Idea to implement this operation was of Nick S. Jones.
-% 
+function out = ST_MomentCorr(x,windowLength,wOverlap,mom1,mom2,whatTransform)
+% ST_MomentCorr   Correlations between simple statistics in local windows of a time series.
+%
+% Idea to implement by Nick S. Jones.
+%
 %---INPUTS:
 % x, the input time series
-% 
+%
 % windowLength, the sliding window length (can be a fraction to specify a proportion of
 %       the time-series length)
-%       
+%
 % wOverlap, the overlap between consecutive windows as a fraction of the window
 %       length,
-% 
+%
 % mom1, mom2: the statistics to investigate correlations between (in each window):
 %               (i) 'iqr': interquartile range
 %               (ii) 'median': median
 %               (iii) 'std': standard deviation (about the local mean)
 %               (iv) 'mean': mean
-% 
+%
 % whatTransform: the pre-processing whatTransformormation to apply to the time series before
 %         analyzing it:
 %               (i) 'abs': takes absolute values of all data points
@@ -29,7 +25,7 @@
 %                            data points
 %               (iii) 'sq': takes the square of every data point
 %               (iv) 'none': does no whatTransformormation
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -43,23 +39,25 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = ST_MomentCorr(x,windowLength,wOverlap,mom1,mom2,whatTransform)
 
 doPlot = 0; % plot outputs
 
 N = length(x); % number of samples in the input signal
 
-% sliding window length (samples)
+%-------------------------------------------------------------------------------
+% Check inputs, set defaults
+%-------------------------------------------------------------------------------
+
+% Sliding window length (samples)
 if nargin < 2 || isempty(windowLength)
     windowLength = 0.02; % 2% of the time-series length
 end
@@ -147,7 +145,7 @@ function moms = SUB_calcmemoments(x_buff,momType)
             moms = iqr(x_buff);
         otherwise
             error('Unknown statistic ''%s''',momType)
-    end        
+    end
 end
 % ------------------------------------------------------------------------------
 
