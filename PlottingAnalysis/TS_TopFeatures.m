@@ -52,13 +52,13 @@ numTopFeatures = inputP.Results.numTopFeatures;
 clear inputP;
 
 % --------------------------------------------------------------------------
-%%                          Load the data
+%% Load the data
 % --------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 numOps = length(Operations);
 
 %-------------------------------------------------------------------------------
-% Check that grouping information exists:
+%% Check that grouping information exists:
 %-------------------------------------------------------------------------------
 if ~isfield(TimeSeries,'Group')
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
@@ -115,7 +115,7 @@ fprintf(1,'Mean %s across %u operations = %4.2f; (Random guessing for %u equipro
         whatTestStat,numOps,mean(testStat),numGroups,chanceLine);
 
 %-------------------------------------------------------------------------------
-% Compute null distribution
+%% Compute null distribution
 %-------------------------------------------------------------------------------
 numRepeats = 10;
 testStat_rand = zeros(numOps,numRepeats);
@@ -131,11 +131,8 @@ if doNull
                                     whatTestStat,BF_thetime(toc(timer)));
 end
 
-
-
-
 % --------------------------------------------------------------------------
-%%          Display information the top n operations
+%% Display information about the top topN operations
 % --------------------------------------------------------------------------
 [testStat_sort, ifeat] = sort(testStat,'descend');
 
@@ -148,7 +145,7 @@ end
 
 
 % --------------------------------------------------------------------------
-%%                          Plot outputs
+%% Plot outputs
 % --------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
@@ -270,7 +267,8 @@ if any(ismember(whatPlots,'cluster'))
                         'objectLabels',objectLabels);
 end
 
-
+%-------------------------------------------------------------------------------
+% Functions
 %-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
 function tStat = fn_tStat(d1,d2)

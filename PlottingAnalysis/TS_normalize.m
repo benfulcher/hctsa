@@ -44,8 +44,8 @@ function TS_normalize(normFunction,filterOptions,fileName_HCTSA_loc,subs,trainSe
 %% Check Inputs
 % --------------------------------------------------------------------------
 if nargin < 1 || isempty(normFunction)
-    fprintf(1,'Using the default, scaled quantile-based sigmoidal transform: ''scaledSQzscore''\n')
-    normFunction = 'scaledSQzscore';
+    fprintf(1,'Using the default, scaled quantile-based sigmoidal transform: ''scaledRobustSigmoid''\n')
+    normFunction = 'scaledRobustSigmoid';
 end
 
 if nargin < 2 || isempty(filterOptions)

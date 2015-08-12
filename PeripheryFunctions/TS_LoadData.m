@@ -1,16 +1,15 @@
-% ------------------------------------------------------------------------------
-% TS_LoadData
-% ------------------------------------------------------------------------------
+function [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataFile,getClustered)
+% TS_LoadData   Load HCTSA data from file.
 %
 % Reorders a data matrix and TimeSeries and Operation structures according to the
 % permutation information in the given data file (ts_clust or op_clust), or
 % provided explicitly by the user.
 %
-% INPUTS:
+%---INPUTS:
 % whatDataFile: the name of the HCTSA data file to load in. Use 'norm' (default)
 %               to load in HCTSA_N.mat
 % getClustered: whether to reorder the structures according to a clustering
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -26,8 +25,6 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataFile,getClustered)
 
 %-------------------------------------------------------------------------------
 % Check inputs, set defaults

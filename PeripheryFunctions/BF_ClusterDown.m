@@ -1,11 +1,9 @@
 function [distMat_cl,cluster_Groupi,ord] = BF_ClusterDown(distMat,numClusters,varargin)
-% ------------------------------------------------------------------------------
-% BF_ClusterDown
-% ------------------------------------------------------------------------------
+% BF_ClusterDown    Reduce a pairwise similarity matrix into smaller clusters.
 %
-% Shows a visualization of a pairwise similarity matrix, with an attempt to
+% Yields a visualization of a pairwise similarity matrix, with an attempt to
 % deduce a set of smaller clusters of objects showing highly correlated behavior.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
