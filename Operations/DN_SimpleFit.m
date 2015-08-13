@@ -70,15 +70,16 @@ TSmodels = {'sin1','sin2','sin3','fourier1','fourier2','fourier3'}; % valid time
 
 if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
     if nargin < 3 || isempty(numBins); % haven't specified numBins
-        nbin = 10; % use 10 bins by default
+        numBins = 10; % use 10 bins by default
     end
     if numBins == 0; % use ksdensity instead of a histogram
         [dny, dnx] = ksdensity(x);
     else
-        [dny, dnx] = hist(x,numBins);
+        [dny, binEdges] = histcounts(x,numBins);
+        dnx = mean([binEdges(1:end-1); binEdges(2:end)]);
     end
 
-    % Must be column vectors:
+    % Both must be column vectors:
     if size(dnx,2) > size(dnx,1);
         dnx = dnx'; dny = dny';
     end

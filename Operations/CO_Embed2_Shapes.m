@@ -127,10 +127,10 @@ out.iqr = iqr(counts);
 out.iqronrange = out.iqr/range(counts);
 
 % Distribution
-x = (0:max(counts));
-n = hist(counts,x); n = n/sum(n);
-[out.mode_val, mix] = max(n);
-out.mode = x(mix);
+[N,binEdges] = histcounts(counts,'BinMethod','integers','Normalization','probability');
+binCentres = mean([binEdges(1:end-1); binEdges(2:end)]);
+[out.mode_val, mix] = max(N);
+out.mode = binCentres(mix);
 
 % Poisson fit to distribution
 % (note that this is actually rarely a good fit...)
@@ -141,12 +141,15 @@ out.poissfit_l = l;
 out.poissfit_absdiff = sum(abs(poiss_n-n));
 out.poissfit_sqdiff = sum((poiss_n-n).^2);
 
-% Entropy in 10-bin histogram
-[n, x] = hist(counts,10); n = n/(sum(n)*(x(2)-x(1)));
-out.hist10_ent = sum(n(n>0).*log(n(n > 0)));
+% Entropy in a 10-bin histogram
+numBins = 10;
+N = histcounts(counts,numBins,'Normalization','probability');
+out.hist10_ent = sum(N(N > 0).*log(N(N > 0)));
 
-% plot(x,poisspdf(x,l),'g'); hold on;
-% plot(x,n,'k'); hold off
+if doPlot
+	plot(x,poisspdf(x,l),'g'); hold on;
+	plot(x,n,'k'); hold off
+end
 
 % Stationarity measure for fifths of the time series
 afifth = floor(N/5);

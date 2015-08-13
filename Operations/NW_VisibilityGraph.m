@@ -28,9 +28,10 @@ function out = NW_VisibilityGraph(y,meth,maxL)
 % Statistics on the degree distribution, including the mode, mean,
 % spread, histogram entropy, and fits to gaussian, exponential, and powerlaw
 % distributions.
-
+%
 % NOTE: The normal visibility graph may not be implemented correctly, we focused
 % only on the horizontal visibility graph.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -247,11 +248,10 @@ out.evnlogL = evlike(paramhat,k);
 % for a range of bins
 
 binr = (10:100); % range of nbins to try
-h = zeros(size(binr));
+h = zeros(size(binr)); % distributional entropy
 for i = 1:length(binr);
-    [n, x] = hist(k,binr(i));
-    n = n/N;
-    h(i) = - sum(n(n>0).*log(n(n>0)));
+    N = histcounts(k,binr(i),'Normalization','probability');
+    h(i) = - sum(N(N>0).*log(N(N>0)));
 end
 out.maxent = max(h);
 out.minnbinmaxent = binr(find(h == max(h),1,'first'));

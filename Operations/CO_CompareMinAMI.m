@@ -100,11 +100,6 @@ out.iqr = iqr(amiMins);
 out.nunique = length(unique(amiMins));
 [out.mode, out.modef] = mode(amiMins);
 out.modef = out.modef/numBinsRange;
-% hist = zeros(length(u),1);
-% for i=1:length(u)
-%     hist(i) = sum(n == u(i));
-% end
-% out.mode = u(find(hist == max(hist),1,'first'));
 
 % Converged value?
 out.conv4 = mean(amiMins(end-4:end));

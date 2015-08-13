@@ -25,6 +25,8 @@ function out = EN_DistributionEntropy(y,histOrKS,numBins,olremp)
 %               (e.g., if olremp = 0.01; keeps only the middle 98% of data; 0
 %               keeps all data. This parameter ought to be less than 0.5, which
 %               keeps none of the data).
+%               If olremp is specified, returns the difference in entropy from
+%               removing the outliers.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -68,12 +70,17 @@ end
 % (1) Remove outliers?
 % ------------------------------------------------------------------------------
 if olremp ~= 0
-    y = y(y >= quantile(y,olremp) & y <= quantile(y,1-olremp));
-    if isempty(y)
+    yHat = y(y >= quantile(y,olremp) & y <= quantile(y,1-olremp));
+    if isempty(yHat)
         % removed the entire time series?!
         % shouldn't be possible for good values of olremp with equality
         % in the above inequalities
-        h = NaN; return
+        out = NaN; return
+    else
+        % Return the difference in entropy from removing outliers
+        out = EN_DistributionEntropy(y,histOrKS,numBins) - ...
+                EN_DistributionEntropy(yHat,histOrKS,numBins);
+        return
     end
 end
 
@@ -82,8 +89,13 @@ end
 % ------------------------------------------------------------------------------
 switch histOrKS
 case 'hist' % Use histogram to calculate pdf
-    [px, xr] = hist(y,numBins);
-    px = px/(sum(px)*(xr(2)-xr(1))); % normalize to a probability density
+    if isnumeric(numBins)
+        [px,binEdges] = histcounts(y,numBins,'Normalization','probability');
+    else
+        [px,binEdges] = histcounts(y,'BinMethod',numBins,'Normalization','probability');
+    end
+    % Compute bin centers:
+    xr = mean([binEdges(1:end-1); binEdges(2:end)]);
 
 case 'ks' % Use ksdensity to calculate pdf
     if isempty(numBins)
@@ -104,7 +116,6 @@ end
 % ------------------------------------------------------------------------------
 % (3) Compute the entropy sum and return it as output
 % ------------------------------------------------------------------------------
-% out = -sum(px.*log(eps+px))*(xr(2)-xr(1));
 % Changed to make 0*log0=0 ++Ben Fulcher, 2014-06-04:
 out = -sum(px(px>0).*log(px(px>0)))*(xr(2)-xr(1));
 

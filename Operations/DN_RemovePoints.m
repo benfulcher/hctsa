@@ -18,7 +18,7 @@ function out = DN_RemovePoints(y,removeHow,p)
 %---OUTPUTS: Statistics include the change in autocorrelation, time scales, mean,
 % spread, and skewness.
 %
-% Note that this is a similar idea to that implemented in DN_OutlierInclude.
+% NOTE: This is a similar idea to that implemented in DN_OutlierInclude.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -85,7 +85,7 @@ if doPlot
     hold on;
     plot(rKeep,y_trim,'.r')
     hold off;
-    hist(y_trim,50)
+    histogram(y_trim,50)
 end
 
 acf_y = SUB_acf(y,8);

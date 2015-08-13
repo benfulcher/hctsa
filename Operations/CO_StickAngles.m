@@ -78,7 +78,7 @@ if doPlot
     [yp, xp] = ksdensity(angles{1});
     [yn, xn] = ksdensity(angles{2});
     plot(xp,yp,'r'); hold on; plot(xn,yn,'b');
-    hist(angles{1},50);
+    histogram(angles{1},50);
 end
 
 % ------------------------------------------------------------------------------

@@ -34,13 +34,22 @@ function out = DN_HistogramMode(y,numBins)
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    numBins = ceil(sqrt(length(y)));
+    numBins = 'auto'; % ceil(sqrt(length(y)));
 end
 
 % Compute the histogram from the data:
-[dny, dnx] = hist(y,numBins);
+if isnumeric(numBins)
+    [N,binEdges] = histcounts(y,numBins);
+elseif ischar(numBins)
+    [N,binEdges] = histcounts(y,'BinMethod',numBins);
+else
+    error('Unknown format for numBins');
+end
 
-% Mean of position of maximums (if multiple):
-out = mean(dnx(dny == max(dny)));
+% Compute bin centers from bin edges:
+binCenters = mean([binEdges(1:end-1); binEdges(2:end)]);
+
+% Mean position of maximums (if multiple):
+out = mean(binCenters(N == max(N)));
 
 end
