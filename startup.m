@@ -104,7 +104,7 @@ javaaddpath(fullfile(pwd,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 % Add path for TISEAN (ASSUMING in ~/bin directory):
 % ------------------------------------------------------------------------------
 [~,homeDir] = system('echo $HOME'); % get system home directory
-homeDir = regexprep(homeDir,'[\s]',''); % remove white space
+homeDir = regexprep(homeDir,'[\s]',''); % remove whitespace
 tiseanBinaryLocation = fullfile(homeDir,'bin');
 if isempty(regexp(getenv('PATH'),tiseanBinaryLocation))
     sysPath = [getenv('PATH'),':',tiseanBinaryLocation];

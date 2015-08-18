@@ -1,5 +1,5 @@
 function out = NL_TISEAN_d2(y, tau, maxm, theilerWin)
-% NL_TISEAN_d2  d2 routine from the TISEAN package for nonlinear time-series analysis.
+% NL_TISEAN_d2  d2 routine from the TISEAN package.
 %
 % The function estimates the correlation sum, the correlation dimension and
 % the correlation entropy of a given time series, y. Our code uses the outputs
@@ -42,7 +42,7 @@ function out = NL_TISEAN_d2(y, tau, maxm, theilerWin)
 % determine an optimal scaling range that simultaneously spans the greatest
 % range of scales and shows the best fit to the data, and return the range, a
 % goodness of fit statistic, and a dimension estimate.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -119,6 +119,8 @@ if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out?
     else
         error('Call to TISEAN function ''d2'' failed: %s',res)
     end
+elseif strfind(res,'dyld: Library not loaded')
+    error('DYLD library not found -- try recompiling TISEAN:\n%s',res);
 end
 
 % Check that all required files were generated (could not be due to problems with path or filename?)

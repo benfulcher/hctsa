@@ -155,7 +155,7 @@ fprintf(1,'Calculating principal components of the %u x %u data matrix...', ...
 
 % The new pca function is a much faster implementation to compute just the first
 % 2 components:
-[pcCoeff, pcScore, latent, ~, percVar] = pca(TS_DataMat,'NumComponents',2);
+[pcCoeff, pcScore, latent, ~, percVar] = pca(zscore(TS_DataMat),'NumComponents',2);
 fprintf(1,' Done.\n');
 
 % Work out the main contributions to each principle component

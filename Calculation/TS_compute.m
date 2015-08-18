@@ -1,6 +1,5 @@
 function TS_compute(doParallel,ts_id_range,op_id_range,doLog,beVocal)
-% TS_compute    Computes missing elements of TS_DataMat (loaded in from
-% HCTSA_loc.mat)
+% TS_compute    Computes missing elements of TS_DataMat (in HCTSA_loc.mat)
 %
 %---EXAMPLE USAGE:
 % TS_compute;
@@ -72,8 +71,9 @@ if nargin < 5
     % prints every piece of code evaluated (nice for error checking)
 end
 
-
-% Start the log by telling the user about how the computation will be performed:
+%-------------------------------------------------------------------------------
+% Tell the user about how the computation will be performed:
+%-------------------------------------------------------------------------------
 if doParallel
     fprintf(fid,['Computation will be performed across multiple cores' ...
             ' using Matlab''s Parallel Computing Toolbox.\n'])
@@ -86,7 +86,13 @@ end
 %% Load information from local files
 % --------------------------------------------------------------------------
 fprintf(fid,'Loading data from HCTSA_loc.mat...');
-load('HCTSA_loc.mat')
+fileName = 'HCTSA_loc.mat';
+fileVarsStruct = whos('-file',fileName);
+fileVars = {fileVarsStruct.name};
+if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat','TS_CalcTime','TS_Quality'},fileVars))
+	error('\nCannot compute on %s: missing variables.',fileName);
+end
+load(fileName,'TimeSeries','Operations','MasterOperations','TS_DataMat','TS_CalcTime','TS_Quality');
 fprintf(fid,' Loaded.\n');
 
 % ------------------------------------------------------------------------------
@@ -171,9 +177,9 @@ for i = 1:numTimeSeries
     % ----
     % Which operations need calculating for this time series?:
     % ----
-	qq = TS_Quality(tsInd,:); % The calculation states of any existing results for the current time series, a line of TS_Quality
+	qualityLabels = TS_Quality(tsInd,:); % The calculation states of any existing results for the current time series, a line of TS_Quality
 					   	  % NaN indicates a value never before calculated, 1 indicates fatal error before (try again now)
-    toCalc = (opCompute & isnan(qq) | qq == 1); % Operations awaiting calculation
+    toCalc = (opCompute & isnan(qualityLabels) | qualityLabels > 0); % Operations awaiting calculation
     numCalc = sum(toCalc); % Number of operations to evaluate
 
     % -----
@@ -205,8 +211,7 @@ for i = 1:numTimeSeries
 				x = x';
 			else
 				fprintf(fid,'******************************************************************************************\n')
-                fprintf(fid,['MASSIVE ERROR WITH THIS TIME SERIES!!!: %s -- is it multivariate or something weird???.' ...
-                                                                    ' Skipping it!!\n'], TimeSeries(tsInd).Name);
+                fprintf(fid,['ERROR WITH ''%s'' -- is it multivariate or something weird? Skipping!\n'],TimeSeries(tsInd).Name);
 				fprintf(fid,'******************************************************************************************\n');
 				continue % skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
             end

@@ -82,7 +82,6 @@ fprintf(1,'Computing linkage information for %ux%u gene expression data...',...
 links = linkage(distMat,linkageMeth);
 fprintf(1,' Done.\n');
 
-
 % ------------------------------------------------------------------------------
 % Compute the dendrogram
 % ------------------------------------------------------------------------------
@@ -94,6 +93,7 @@ f.Position(4) = 800;
 % Get the dendrogram reordering:
 subplot(1,6,6); ax1 = gca;
 [h_dend,~,ord] = dendrogram(links,0,'Orientation','right');
+ord = fliplr(ord); % so everything matches up with the dendrogram
 % Reorder the distance matrix by dendrogram ordering: [could add optimalleaforder]
 distMat_cl = distMat(ord,ord);
 

@@ -105,11 +105,12 @@ for i = 1:2
         end
     end
 end
+theFieldnames = fieldnames(loadedData{1}.TimeSeries);
 
 % Now that fields should match the default fields, concatenate:
-TimeSeries = cell2struct([struct2cell(loadedData{1}.TimeSeries), ...
-                          struct2cell(loadedData{2}.TimeSeries)], ...
-                                {'ID','Name','Keywords','Length','Data'});
+TimeSeries = cell2struct([squeeze(struct2cell(loadedData{1}.TimeSeries)), ...
+                          squeeze(struct2cell(loadedData{2}.TimeSeries))], ...
+                                theFieldnames);
 % Check for time series duplicates
 [uniquetsids, ix] = unique(vertcat(TimeSeries.ID));
 didTrim = 0;

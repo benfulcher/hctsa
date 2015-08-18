@@ -173,7 +173,8 @@ if saveBack
         newFieldNames{length(newFieldNames)+1} = 'Group';
 
         % Then append the new group information:
-        TimeSeries = cell2struct([struct2cell(TimeSeries);theGroupsCell],newFieldNames);
+        % (some weird bug -- squeeze is sometimes needed here...:)
+        TimeSeries = cell2struct([squeeze(struct2cell(TimeSeries));theGroupsCell],newFieldNames);
         % {'ID','Name','Keywords','Length','Data','Group'}
 
         % Save everything back to file:
