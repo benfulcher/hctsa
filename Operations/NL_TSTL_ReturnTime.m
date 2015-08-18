@@ -150,10 +150,10 @@ out.hhist = -sum(Trett(Trett>0).*log(Trett(Trett>0)));
 % ------------------------------------------------------------------------------
 %% Coarse-grain to 20 bins
 % ------------------------------------------------------------------------------
-nbins = 20;
-cglav = zeros(nbins,1);
+numBins = 20;
+cglav = zeros(numBins,1);
 inds = round(linspace(0,NN,21));
-for i = 1:nbins
+for i = 1:numBins
     cglav(i) = sum(Trett(inds(i)+1:inds(i+1)));
 end
 if doPlot
@@ -161,16 +161,15 @@ if doPlot
 end
 out.hcgdist = -sum(cglav(cglav > 0).*log(cglav(cglav > 0)));
 out.rangecgdist = range(cglav);
-out.pzeroscgdist = sum(cglav == 0)/nbins;
+out.pzeroscgdist = sum(cglav == 0)/numBins;
 
 % ------------------------------------------------------------------------------
 %% Get distribution of distribution of return times
 % ------------------------------------------------------------------------------
-[nhist, xout] = hist(Trett,30);
-nhist = nhist/sum(nhist);
+[nhist, binEdges] = histcounts(Trett,'BinMethod','sqrt','Normalization','probability');
 if doPlot
-    figure('color','w'); box('on');
-    plot(xout,nhist,'o-k'), keyboard
+    binCenters = mean([binEdges(1:end-1); binEdges(2:end)]);
+    figure('color','w'); plot(binCenters,nhist,'o-k')
 end
 out.maxhisthist = max(nhist);
 out.phisthistmin = nhist(1);

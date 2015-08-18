@@ -103,7 +103,8 @@ out.hf    = hfp/total * 100;
 % ------------------------------------------------------------------------------
 % Triangular histogram index
 % ------------------------------------------------------------------------------
-out.tri = length(y)/max(hist(y));
+numBins = 10;
+out.tri = length(y)/max(histcounts(y,numBins));
 
 % ------------------------------------------------------------------------------
 % Poincare plot measures:
@@ -113,6 +114,5 @@ rmssd = std(diffy); % std of differenced series
 sigma = std(y); % should be 1 for zscored time series
 out.SD1 = 1/sqrt(2) * rmssd * 1000;
 out.SD2 = sqrt(2 * sigma^2 - (1/2) * rmssd^2) * 1000;
-
 
 end

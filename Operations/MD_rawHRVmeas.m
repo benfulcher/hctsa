@@ -41,9 +41,9 @@ function out = MD_rawHRVmeas(x)
 N = length(x); % time-series length
 
 % Triangular histogram index
-out.tri10 = N/max(hist(x,10));
-out.tri20 = N/max(hist(x,20));
-out.trisqrt = N/max(hist(x,sqrt(N)));
+out.tri10 = N/max(histcounts(x,10));
+out.tri20 = N/max(histcounts(x,20));
+out.trisqrt = N/max(histcounts(x,'BinMethod','sqrt'));
 
 % Poincare plot measures: see
 % "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)

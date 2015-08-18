@@ -1,5 +1,5 @@
 function out = CO_Embed2_Dist(y,tau)
-% CO_Embed2_Dist
+% CO_Embed2_Dist    Analyzes distances in a 2-d embedding space of a time series.
 %
 % Returns statistics on the sequence of successive Euclidean distances between
 % points in a two-dimensional time-delay embedding space with a given
@@ -91,16 +91,16 @@ out.d_cv = mean(d)/std(d); % coefficient of variation of distances
 % ------------------------------------------------------------------------------
 % Empirical distance distribution often fits Exponential distribution quite well
 % Fit to all values (often some extreme outliers, but oh well)
-% Use a histogram with fixed bins
-[n, x] = hist(d,20);
-n = n/(sum(n)*(x(2)-x(1))); % normalize to proportional bin counts
 l = expfit(d);
 nlogL = explike(l,d);
-expf = exppdf(x,l);
 out.d_expfit_l = l;
 out.d_expfit_nlogL = nlogL;
-% Sum of abs differences between exp fit and observed:
-out.d_expfit_sumdiff = sum(abs(n - expf));
 
+% Sum of abs differences between exp fit and observed:
+% Use a histogram with automatic binning
+[N,binEdges] = histcounts(d,'BinMethod','auto','Normalization','probability');
+binCentres = mean([binEdges(1:end-1); binEdges(2:end)]);
+expf = exppdf(binCentres,l); % exponential fit in each bin
+out.d_expfit_meandiff = mean(abs(N - expf)); % mean absolute error of fit
 
 end

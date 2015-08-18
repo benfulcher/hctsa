@@ -24,8 +24,9 @@ function out = SD_TSTL_surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 %
 %---OUTPUTS: include the Gaussianity of the test statistics, a z-test, and
 % various tests based on fitted kernel densities.
-
+%
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -114,8 +115,7 @@ end
 tc3_y = tc3dat(1);
 tc3_surr = tc3dat(2:end);
 
-[n, x] = hist(tc3_surr,50);
-% hold off; plot(x,n); hold on; plot(tc3_y,max(n),'or'); hold off;
+% figure; histogram(tc3_surr);
 
 % ------------------------------------------------------------------------------
 %% Get some outputs

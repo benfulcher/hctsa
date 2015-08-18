@@ -33,6 +33,6 @@ function out = DN_HighLowMu(y)
 mu = mean(y); % mean of data
 mhi = mean(y(y > mu)); % mean of data above the mean
 mlo = mean(y(y < mu)); % mean of data below the mean
-out = mhi-mu/(mu-mlo); % ratio of the differences
+out = (mhi-mu)/(mu-mlo); % ratio of the differences
 
 end
