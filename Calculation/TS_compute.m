@@ -89,10 +89,15 @@ fprintf(fid,'Loading data from HCTSA_loc.mat...');
 fileName = 'HCTSA_loc.mat';
 fileVarsStruct = whos('-file',fileName);
 fileVars = {fileVarsStruct.name};
-if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat','TS_CalcTime','TS_Quality'},fileVars))
+if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat'},fileVars))
 	error('\nCannot compute on %s: missing variables.',fileName);
 end
-load(fileName,'TimeSeries','Operations','MasterOperations','TS_DataMat','TS_CalcTime','TS_Quality');
+load(fileName,'TimeSeries','Operations','MasterOperations','TS_DataMat');
+if ismember('TS_CalcTime',fileVars)
+	load(fileName,'TS_CalcTime');
+elseif ismember('TS_Quality',fileVars)
+	load(fileName,'TS_Quality');
+end
 fprintf(fid,' Loaded.\n');
 
 % ------------------------------------------------------------------------------

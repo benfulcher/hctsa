@@ -1,7 +1,7 @@
 function out = SB_MotifTwo(y,binarizeHow)
 % SB_MotifTwo   Local motifs in a binary symbolization of the time series
-
-% The coarse-graining is performed by a given binarization method.
+%
+% Coarse-graining is performed by a given binarization method.
 %
 %---INPUTS:
 % y, the input time series
