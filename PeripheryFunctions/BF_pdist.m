@@ -141,7 +141,7 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
             ii = nani(i);
             jj = nanj(i);
             goodboth = (NotNaN(ii,:) & NotNaN(jj,:));
-            if mean(goodboth) >= minPropGood
+            if mean(goodboth) > minPropGood
                 R(ii,jj) = dij(F(ii,goodboth)',F(jj,goodboth)'); % Calculate the distance
             else
                 R(ii,jj) = NaN; % Not enough good, overlapping set of values -- store as NaN.

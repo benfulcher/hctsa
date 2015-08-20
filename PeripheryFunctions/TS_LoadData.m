@@ -53,9 +53,9 @@ if isstruct(whatDataFile)
 end
 
 %-------------------------------------------------------------------------------
-% Use intuitive settings for HCTSA package defaults -- setting 'norm' or 'cl'
+% Use intuitive settings for HCTSA package defaults -- setting 'loc', 'norm', or 'cl'
 switch whatDataFile
-case 'orig'
+case 'loc'
     whatDataFile = 'HCTSA_loc.mat';
     getClustered = 0;
 case 'norm'

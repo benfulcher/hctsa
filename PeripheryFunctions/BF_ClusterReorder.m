@@ -52,7 +52,7 @@ end
 
 if any(isnan(R(:)))
     % Remove NaNs:
-    [R,keepers] = RemoveNaN_DistMat(R);
+    [R,keepers] = BF_RemoveNaN_DistMat(R);
     fprintf(1,'***CAUTION: Removed %u bad features from the distance matrix\n', ...
                         sum(keepers==0));
 else

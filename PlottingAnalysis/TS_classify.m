@@ -44,6 +44,7 @@ end
 timeSeriesGroup = [TimeSeries.Group]; % Use group form
 numClasses = length(unique(timeSeriesGroup));
 numFeatures = length(Operations);
+numTimeSeries = length(TimeSeries);
 
 %-------------------------------------------------------------------------------
 % Set up the classification model
@@ -66,14 +67,21 @@ end
 %-------------------------------------------------------------------------------
 % Fit the model using k-fold cross validation:
 %-------------------------------------------------------------------------------
-numFolds = 10;
+pointsPerClass = numTimeSeries/numClasses;
+if pointsPerClass < 5
+    numFolds = 2;
+elseif pointsPerClass < 10
+    numFolds = 5;
+else
+    numFolds = 10;
+end
 CVcfnModel = fitcecoc(TS_DataMat,timeSeriesGroup,'Learners',cfnModel,'KFold',numFolds);
 
 % Get misclassification rates from each fold:
 foldLosses = 100*(1 - kfoldLoss(CVcfnModel,'Mode','individual'));
 
-fprintf(1,['Classification rate (%u-class) using %u-fold %s classification with %u' ...
-                 ' features:\n%.3f +/- %.3f%%\n'],...
+fprintf(1,['\nClassification rate (%u-class) using %u-fold %s classification with %u' ...
+                 ' features:\n%.3f +/- %.3f%%\n\n'],...
                             numClasses,...
                             numFolds,...
                             whatLearners,...
@@ -100,14 +108,14 @@ if doPCs
     % Compute cumulative performance of PCs:
     PC_cfn = cell(numPCs,1);
     cfnRate = zeros(numPCs,2);
-    fprintf('Computing classification rates keeping top 1--%u PCs...',numPCs)
+    fprintf('Computing classification rates keeping top 1--%u PCs...\n',numPCs)
     for i = 1:numPCs
         PC_cfn{i} = fitcecoc(pcScore(:,1:i),timeSeriesGroup,'Learners',cfnModel,'KFold',numFolds);
-        losses = 1-kfoldLoss(CVcfnModel,'Mode','individual');
+        losses = 1-kfoldLoss(PC_cfn{i},'Mode','individual');
         cfnRate(i,1) = mean(losses)*100;
         cfnRate(i,2) = std(losses)*100;
+        fprintf(1,'%u PCs:   %.3f +/- %.3f%%\n',i,cfnRate(i,1),cfnRate(i,2))
     end
-    fprintf(' Done.\n')
 
     plotColors = BF_getcmap('spectral',3,1);
 

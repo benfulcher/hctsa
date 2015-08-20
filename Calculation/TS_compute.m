@@ -95,7 +95,8 @@ end
 load(fileName,'TimeSeries','Operations','MasterOperations','TS_DataMat');
 if ismember('TS_CalcTime',fileVars)
 	load(fileName,'TS_CalcTime');
-elseif ismember('TS_Quality',fileVars)
+end
+if ismember('TS_Quality',fileVars)
 	load(fileName,'TS_Quality');
 end
 fprintf(fid,' Loaded.\n');

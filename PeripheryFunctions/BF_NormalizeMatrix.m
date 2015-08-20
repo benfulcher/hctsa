@@ -201,6 +201,9 @@ end
 function xhat = UnityRescale(x)
     % Linearly rescale a data vector to unit interval:
     goodVals = ~isnan(x); % only work with non-NaN data
+    if ~any(goodVals) % all NaNs:
+        xhat = x;
+    end
     minX = min(x(goodVals));
     maxX = max(x(goodVals));
     if minX==maxX

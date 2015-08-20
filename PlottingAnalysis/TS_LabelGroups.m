@@ -76,7 +76,6 @@ end
 % ------------------------------------------------------------------------------
 [~,TimeSeries,~,theFile] = TS_LoadData(whatData);
 Keywords = SUB_cell2cellcell({TimeSeries.Keywords}); % Split into sub-cells using comma delimiter
-keywordsAll = [Keywords{:}]; % every keyword used across the dataset
 numTimeSeries = length(TimeSeries);
 
 % ------------------------------------------------------------------------------
@@ -85,6 +84,7 @@ numTimeSeries = length(TimeSeries);
 % Set group labels as each unique keyword in the data. Works only in simple cases.
 if isempty(keywordGroups)
     fprintf(1,'No keywords assigned for labeling. Attempting to use unique keywords from data...\n');
+    keywordsAll = [Keywords{:}]; % every keyword used across the dataset
     UKeywords = unique(keywordsAll);
     numUniqueKeywords = length(UKeywords);
     fprintf(1,'Shall I use the following %u keywords?: %s\n',numUniqueKeywords,BF_cat(UKeywords,',',''''));
