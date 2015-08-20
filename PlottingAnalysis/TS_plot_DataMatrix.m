@@ -1,11 +1,17 @@
 function TS_plot_DataMatrix(varargin)
 % TS_plot_DataMatrix   Plot the data matrix.
 %
+%---EXAMPLE USAGE:
+% TS_plot_DataMatrix; % plots clustered data if it exists
+% TS_plot_DataMatrix('whatData','norm'); % plots normalized data
+%
 %---INPUTS:
 % whatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
 %         data in HCTSA_cl.mat (default), or specify a filename to load data
 %         from that file.
-% colorGroups: Set to 1 to color time-series groups with different colormaps.
+% addTimeSeries: set to 1 to annotate time series segments to the left of the data matrix
+% timeSeriesLength: length of time-series annotations (number of samples)
+% colorGroups: set to 1 to color time-series groups with different colormaps
 % customColorMap: use a custom color map (name to match an option in BF_getcmap)
 % colorNaNs: whether to plot rectangles over special-values in the matrix (default: 1)
 % customOrder: reorder rows and columns according to provided permutation vectors
@@ -35,15 +41,15 @@ function TS_plot_DataMatrix(varargin)
 % ------------------------------------------------------------------------------
 inputP = inputParser;
 
-% addTimeSeries, annotates time series segments to the side of the plot
-default_addTimeSeries = 1;
-check_addTimeSeries = @(x) (x==0 || x==1);
-addOptional(inputP,'addTimeSeries',default_addTimeSeries,check_addTimeSeries);
-
 % whatDataFile
 default_whatData = 'cl';
 check_whatData = @(x)1;
 addOptional(inputP,'whatData',default_whatData,check_whatData);
+
+% addTimeSeries, annotates time series segments to the side of the plot
+default_addTimeSeries = 1;
+check_addTimeSeries = @(x) isnumeric(x) && (x==0 || x==1);
+addOptional(inputP,'addTimeSeries',default_addTimeSeries,check_addTimeSeries);
 
 % timeSeriesLength, length of time-series annotations to the left of the main plot
 default_timeSeriesLength = 100;

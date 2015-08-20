@@ -85,48 +85,53 @@ end
 
 winLength = floor(length(y)/numSeg); % size of window
 inc = floor(winLength/incMove); % increment to move at each step
-if inc == 0; inc = 1; end % increment rounded down to zero, prop it up
+% If increment rounded down to zero, prop it up:
+if inc == 0
+    inc = 1;
+end
 
 numSteps = (floor((length(y)-winLength)/inc)+1);
 qs = zeros(numSteps,1);
 
+% Convert a step index (stepInd) to a range of indices corresponding to that window:
+getWindow = @(stepInd) ((stepInd-1)*inc + 1:(stepInd-1)*inc + winLength);
+
 switch windowStat
     case 'mean' % Sliding window mean
         for i = 1:numSteps
-            qs(i) = mean(y((i-1)*inc + 1:(i-1)*inc + winLength));
+            qs(i) = mean(y(getWindow(i)));
         end
     case 'std' % Sliding window std
         for i = 1:numSteps
-            qs(i) = std(y((i-1)*inc + 1:(i-1)*inc + winLength));
+            qs(i) = std(y(getWindow(i)));
         end
     case 'ent' % Sliding window distributional entropy
         for i = 1:numSteps
-            ksstats = DN_FitKernelSmooth(y((i-1)*inc + 1:(i-1)*inc + winLength),'entropy');
-            qs(i) = ksstats.entropy;
+            qs(i) = EN_DistributionEntropy(y(getWindow(i)),'ks',[]);
         end
     case 'apen' % Sliding window ApEn
         for i = 1:numSteps
-            qs(i) = EN_ApEn(y((i-1)*inc + 1:(i-1)*inc + winLength),1,0.2);
+            qs(i) = EN_ApEn(y(getWindow(i)),1,0.2);
         end
     case 'mom3' % Third moment
         for i = 1:numSteps
-            qs(i) = DN_Moments(y((i-1)*inc + 1:(i-1)*inc + winLength),3);
+            qs(i) = DN_Moments(y(getWindow(i)),3);
         end
     case 'mom4' % Fourth moment
         for i = 1:numSteps
-            qs(i) = DN_Moments(y((i-1)*inc + 1:(i-1)*inc + winLength),4);
+            qs(i) = DN_Moments(y(getWindow(i)),4);
         end
     case 'mom5' % Fifth moment
         for i = 1:numSteps
-            qs(i) = DN_Moments(y((i-1)*inc + 1:(i-1)*inc + winLength),5);
+            qs(i) = DN_Moments(y(getWindow(i)),5);
         end
     case 'lillie' % Lilliefors test
         for i = 1:numSteps
-            qs(i) = HT_DistributionTest(y((i-1)*inc + 1:(i-1)*inc + winLength),'lillie','norm');
+            qs(i) = HT_DistributionTest(y(getWindow(i)),'lillie','norm');
         end
     case 'AC1' % Lag-1 autocorrelation
         for i = 1:numSteps
-            qs(i) = CO_AutoCorr(y((i-1)*inc + 1:(i-1)*inc + winLength),1,'Fourier');
+            qs(i) = CO_AutoCorr(y(getWindow(i)),1,'Fourier');
         end
     otherwise
         error('Unknown statistic ''%s''',windowStat)

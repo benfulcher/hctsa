@@ -1,17 +1,5 @@
-function cellcell = BF_cell2cellcell(cellin,delimiter)
-% BF_cell2cellcell  Turn a cell of strings into a cell of cells, splitting on a delimiter.
-%
-% Inputs a cell with some delimiter, and outputs a cell of cells using this
-% delimiter.
-%
-%---INPUTS:
-% cellin, the cell
-% delimiter, the delimiter
-%
-%---OUTPUT:
-% cellcell, the cell of cells, using this delimiter
-
-% (Used for some tasks involving mySQL)
+function ts_ids = TS_getIDs(whatData,theKeyword)
+% TS_getIDs   Retrieve IDs of time series based on keyword matching.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -29,15 +17,17 @@ function cellcell = BF_cell2cellcell(cellin,delimiter)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-if nargin < 2 || isempty(delimiter)
-    delimiter = ','; % comma as the default delimiter
-end
+%-------------------------------------------------------------------------------
+% Load data:
+%-------------------------------------------------------------------------------
+[~,TimeSeries] = TS_LoadData(whatData);
 
-numElements = length(cellin); % number of elements in the input cell
-cellcell = cell(numElements,1);
-
-for i = 1:numElements
-    cellcell{i} = regexp(cellin{i}, delimiter, 'split');
-end
+%-------------------------------------------------------------------------------
+% Match time series on an input keyword:
+%-------------------------------------------------------------------------------
+Keywords = SUB_cell2cellcell({TimeSeries.Keywords}); % Split into sub-cells using comma delimiter
+matches = cellfun(@(x)any(ismember(theKeyword,x)),Keywords);
+keyboard
+ts_ids = [TimeSeries(matches).ID];
 
 end

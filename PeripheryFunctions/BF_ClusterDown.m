@@ -1,11 +1,9 @@
 function [distMat_cl,cluster_Groupi,ord] = BF_ClusterDown(distMat,numClusters,varargin)
-% ------------------------------------------------------------------------------
-% BF_ClusterDown
-% ------------------------------------------------------------------------------
+% BF_ClusterDown    Reduce a pairwise similarity matrix into smaller clusters.
 %
-% Shows a visualization of a pairwise similarity matrix, with an attempt to
+% Yields a visualization of a pairwise similarity matrix, with an attempt to
 % deduce a set of smaller clusters of objects showing highly correlated behavior.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -84,7 +82,6 @@ fprintf(1,'Computing linkage information for %ux%u gene expression data...',...
 links = linkage(distMat,linkageMeth);
 fprintf(1,' Done.\n');
 
-
 % ------------------------------------------------------------------------------
 % Compute the dendrogram
 % ------------------------------------------------------------------------------
@@ -96,6 +93,7 @@ f.Position(4) = 800;
 % Get the dendrogram reordering:
 subplot(1,6,6); ax1 = gca;
 [h_dend,~,ord] = dendrogram(links,0,'Orientation','right');
+ord = fliplr(ord); % so everything matches up with the dendrogram
 % Reorder the distance matrix by dendrogram ordering: [could add optimalleaforder]
 distMat_cl = distMat(ord,ord);
 

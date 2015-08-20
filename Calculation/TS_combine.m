@@ -46,10 +46,10 @@ if nargin < 3
     % intersection between ts_ids in the two matrices
     compare_tsids = 1;
 end
-if compare_tsids
+if compare_tsids == 1
     fprintf(1,['Assuming both %s and %s came from the same database so that' ...
-                    ' ts_ids are comparable.\n'],HCTSA_loc_1,HCTSA_loc_2);
-else
+                ' ts_ids are comparable.\n'],HCTSA_loc_1,HCTSA_loc_2);
+elseif compare_tsids == 0
     fprintf(1,['Assuming that %s and %s came different databases so' ...
         ' duplicate ts_ids can occur in the resulting matrix.\n'], ...
                                         HCTSA_loc_1,HCTSA_loc_2);
@@ -105,14 +105,16 @@ for i = 1:2
         end
     end
 end
+theFieldnames = fieldnames(loadedData{1}.TimeSeries);
 
 % Now that fields should match the default fields, concatenate:
-TimeSeries = cell2struct([struct2cell(loadedData{1}.TimeSeries), ...
-                          struct2cell(loadedData{2}.TimeSeries)], ...
-                                {'ID','Name','Keywords','Length','Data'});
+TimeSeries = cell2struct([squeeze(struct2cell(loadedData{1}.TimeSeries)), ...
+                          squeeze(struct2cell(loadedData{2}.TimeSeries))], ...
+                                theFieldnames);
+
 % Check for time series duplicates
-[uniquetsids, ix] = unique(vertcat(TimeSeries.ID));
 didTrim = 0;
+[uniquetsids, ix] = unique(vertcat(TimeSeries.ID));
 if compare_tsids % ts_ids are comprable between the two files (i.e., retrieved from the same mySQL database)
     if length(uniquetsids) < length(TimeSeries)
         fprintf(1,'We''re assuming that ts_ids are equivalent between the two input files\n');
@@ -124,7 +126,12 @@ if compare_tsids % ts_ids are comprable between the two files (i.e., retrieved f
         TimeSeries = TimeSeries(ix);
         didTrim = 1;
     else
+        % Check for duplicate indices
         fprintf(1,'All time series were distinct, we now have a total of %u.\n',length(TimeSeries));
+    end
+else
+    if length(uniquetsids) < length(TimeSeries)
+        warning('There are duplicate IDs in the time series -- consider running TS_ReIndex on the resulting .mat file')
     end
 end
 
@@ -186,6 +193,15 @@ if isfield(loadedData{1},'TS_CalcTime') && isfield(loadedData{2},'TS_CalcTime')
     fprintf(1,' Done.\n');
 end
 
+%-------------------------------------------------------------------------------
+% fromDatabase
+%-------------------------------------------------------------------------------
+if loadedData{1}.fromDatabase ~= loadedData{2}.fromDatabase
+    error('Weird that fromDatabase flags are inconsistent across the two HCTSA_loc files');
+else
+    fromDatabase = loadedData{1}.fromDatabase;
+end
+
 % ------------------------------------------------------------------------------
 % Save the results
 % ------------------------------------------------------------------------------
@@ -201,10 +217,8 @@ else
     ' normal analysis routines like TS_normalize to work...\n'],fileName);
 end
 
-% ------------------------------------------------------------------------------
-% Save
-% ------------------------------------------------------------------------------
-save(fileName,'TimeSeries','Operations','MasterOperations','-v7.3');
+% --- Actually save it:
+save(fileName,'TimeSeries','Operations','MasterOperations','fromDatabase','-v7.3');
 if gotData, save(fileName,'TS_DataMat','-append'); end % add data matrix
 if gotQuality, save(fileName,'TS_Quality','-append'); end % add quality labels
 if gotCalcTimes, save(fileName,'TS_CalcTime','-append'); end % add calculation times

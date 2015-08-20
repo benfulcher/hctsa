@@ -1,6 +1,8 @@
-% Network Visualization
+function NetVis_netvis(A,varargin)
+% NetVis_netvis     Network visualization.
 %
-% Adjacency matrix to be plotted is A.
+% Adjacency matrix to be plotted is A. A range of other options are available
+% to set visualization and annotation settings.
 %
 % If not a single connected component, set k > 0, see below.
 %
@@ -8,12 +10,18 @@
 % 1. Adjacency matrix is symmetric.
 % 2. Adjacency matrix is not sparse.
 %
-% ------------------------------------------------------------------------------
-% Mechanics of network code from Dr. Dave Smith, 28/5/2011
-% Alterations made by Ben Fulcher
-% ------------------------------------------------------------------------------
+%---EXAMPLE USAGE:
+% NetVis_netvis(A,'k',0.01,...
+%                'textLabels',textLabels,...
+%                'linkThresh',[0.9,0.8,0.7,0.6],...
+%                'nodeLabels',nodeLabels,...
+%                'dataLabels',dataLabels,...
+%                'colorMap','set1');
 
-function NetVis_netvis(A,varargin) %k,textLabels,linkThresh,nodeLabels,labelLength,nits,opts)
+% ------------------------------------------------------------------------------
+% Function designed by Ben Fulcher around the mechanics of the visualization
+% algorithm by Dr. Dave Smith, 28/5/2011
+% ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
 %% Check Inputs

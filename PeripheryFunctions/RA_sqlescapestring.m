@@ -1,16 +1,15 @@
-% ------------------------------------------------------------------------------
-% RA_sqlescapestring
-% ------------------------------------------------------------------------------
-% 
-% Converts an input string into one that won't interfere with MySQL queries by
+function escapedString = RA_sqlescapestring(inputString)
+% RA_sqlescapestring    Escape a string for mySQL queries
+%
+% Converts an input string into one that won't interfere with mySQL queries by
 % making the required conversions.
-% 
+%
 %---INPUT:
 % s, the input string
-% 
+%
 %---OUTPUT:
 % S, the output string
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Romesh Abeysuriya <romesh.abey@gmail.com>
 %
@@ -18,17 +17,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function escapedString = RA_sqlescapestring(inputString)
 
 % From MySQL manual pages:
 % http://dev.mysql.com/doc/refman/4.1/en/string-syntax.html

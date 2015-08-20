@@ -8,7 +8,7 @@ SP_basic_pgram_hamm_power.q90mel	SP_basic_pgram_hamm_power_q90mel	powerspectrum
 
 # Features for Gunpoint dataset:
 SY_LocalDistributions_2_par.mindiv	SY_LocalDistributions_2_par_mindiv	stationarity
-CO_HistogramAMI_1_even_20	CO_HistogramAMI_1_even_20	information,correlation,AMI
+# CO_HistogramAMI_1_even_20	CO_HistogramAMI_1_even_20	information,correlation,AMI
 
 # Features for the CBF dataset:
 MF_armax_1_1_05_1.meanabs	MF_armax_1_1_05_1_meanabs	model,systemidentificationtoolbox,arma
@@ -17,13 +17,14 @@ SB_MotifTwo_diff.uuuu	benmotif_bin_diff_uuuu	motifs
 # Features of the Face(All) dataset:
 CO_Embed2_tau.eucdm3	CO_Embed2_tau_eucdm3	correlation,embedding
 DN_OutlierInclude_abs.mrm	DN_OutlierInclude_abs_mrm	distribution,outliers
-SP_basic_pgram_hamm.q50mel	SP_basic_pgram_hamm_q50mel	powerspectrum
+SP_basic_pgram_hamm_power.q50mel	SP_basic_pgram_hamm_power_q50mel	powerspectrum
 CO_trev_2.num	CO_trev_2_num	correlation,nonlinear,autocorrelation
 SP_basic_fft_power.fpolysat_rmse	SP_basic_fft_power_fpolysat_rmse	powerspectrum
 
 # Features of the OSU Leaf dataset:
 EN_SampEn_4_005.sampen4	EN_SampEn_4_005_sampen4	entropy,sampen
-CO_HistogramAMI_4_std1_4	CO_HistogramAMI_4_std1_4	information,correlation,AMI
+CO_HistogramAMI_std1_5.ami4     CO_HistogramAMI_std1_5_4    information,correlation,AMI
+# CO_HistogramAMI_4_std1_4	CO_HistogramAMI_4_std1_4	information,correlation,AMI
 MF_armax_2_2_05_1.MA_1	MF_armax_2_2_05_1_MA_1	model,systemidentificationtoolbox,arma
 SB_MotifThree_diffquant.ba	benmotif_tri_diffquant_ba	motifs
 EN_wentropy_threshent05	EN_wentropy_threshent05	entropy,threshold
@@ -33,14 +34,14 @@ FC_LocalSimple_median7.meanabserr	FC_LocalSimple_median7_meanabserr	forecasting
 MF_armax_2_2_05_1.AR_1	MF_armax_2_2_05_1_AR_1	model,systemidentificationtoolbox,arma
 PP_Compare_medianf10.kscn_relent	PP_Compare_medianf10_kscn_relent	preprocessing,raw
 MF_armax_2_2_05_1.maxdc	MF_armax_2_2_05_1_maxdc	model,systemidentificationtoolbox,arma
-SP_basic_pgram_hamm.area_5_3	SP_basic_pgram_hamm_area_5_3	powerspectrum
+SP_basic_pgram_hamm_power.area_5_3	SP_basic_pgram_hamm_power_area_5_3	powerspectrum
 
 # Features of the 50 Words dataset:
 MF_steps_ahead_ar_2_6.rmserr_2	MF_steps_ahead_ar_2_6_rmserr_2	model,systemidentificationtoolbox,prediction,ar
 DN_OutlierInclude_abs.mrm	DN_OutlierInclude_abs_mrm	distribution,outliers
 DN_OutlierInclude_abs.nfla	DN_OutlierInclude_abs_nfla	distribution,outliers
 NW_VisibilityGraph_horiz.evparm2	NW_VisibilityGraph_horiz_evparm2	network,visibilitygraph
-FC_Surprise_dist_20_2_q.mean	FC_Surprise_dist_20_2_q_mean	information,stochastic,symbolic
+FC_Surprise_dist_20_2_q_500.mean	FC_Surprise_dist_20_2_q_500_mean	information,symbolic
 SB_MotifTwo_diff.uuuu	benmotif_bin_diff_uuuu	motifs
 MF_arfit_1_8_sbc.sbc_5	MF_arfit_1_8_sbc_sbc_5	modelfit,arfit
 
@@ -49,7 +50,7 @@ CO_trev_3.raw	CO_trev_3_raw	correlation,nonlinear,autocorrelation
 
 # Features of the Two Patterns dataset:
 CO_trev_ac.num	CO_trev_ac_num	correlation,nonlinear,autocorrelation
-SY_SpreadRandomLocal_100.meanmean	SY_SpreadRandomLocal_100_meanmean	stationarity,stochastic
+SY_SpreadRandomLocal_100_100.meanmean	SY_SpreadRandomLocal_100_100_meanmean	stationarity
 
 # Features of the Wafer dataset:
 SB_MotifTwo_diff.dudu	benmotif_bin_diff_dudu	motifs
@@ -66,8 +67,9 @@ SP_basic_fft_power.fpolysat_a	SP_basic_fft_power_fpolysat_a	powerspectrum
 # Features of the Lightning (seven) dataset:
 CO_Embed2_tau.mean_eucds	CO_Embed2_tau_mean_eucds	correlation,embedding
 SY_SlidingWindow_ent_s5_10		SY_SlidingWindow_ent_s5_10		stationarity,slidingwin
-CO_TSTL_amutual_20.ami8	CO_TSTL_amutual_20_ami8	entropy,tstool,AMI
-SP_basic_pgram_hamm.mom7	SP_basic_pgram_hamm_mom7	powerspectrum
+# CO_TSTL_amutual_20.ami8	CO_TSTL_amutual_20_ami8	entropy,tstool,AMI
+IN_AutoMutualInfoStats_40_gaussian.ami8  IN_AutoMutualInfoStats_40_gaussian_ami8  information,correlation,AMI
+# SP_basic_pgram_hamm.mom7	SP_basic_pgram_hamm_mom7	powerspectrum
 
 # ECG dataset:
 DN_Spread_std	standard_deviation	spread,raw,spreaddep
@@ -93,17 +95,17 @@ TSTL_localdensity_5_40_ac_2.stdden	TSTL_localdensity_5_40_ac_2_stdden	nonlinear,
 MF_steps_ahead_arma_3_1_6.mabserr_1	MF_steps_ahead_arma_3_1_6_mabserr_1	model,systemidentificationtoolbox,prediction,arma
 
 # Beef dataset:
-SP_basic_pgram_hamm.fpoly2csS_p2	SP_basic_pgram_hamm_fpoly2csS_p2	powerspectrum
+SP_basic_pgram_hamm_power.fpoly2csS_p2	SP_basic_pgram_hamm_power_fpoly2csS_p2	powerspectrum
 SC_FluctAnal_2_iqr_1.ratsplitminerr	SC_FluctAnal_2_iqr_1_ratsplitminerr	scaling,fa,lini
-SP_basic_pgram_hamm_cep.area_4_4	SP_basic_pgram_hamm_cep_area_4_4	cepstrum
+# SP_basic_pgram_hamm_cep.area_4_4	SP_basic_pgram_hamm_cep_area_4_4	cepstrum
 SB_MotifTwo_diff.ddu	benmotif_bin_diff_ddu	motifs
-PP_Iterate_resampleup.gauss1_h10_lin	PP_Iterate_resampleup_gauss1_h10_lin	preprocessing,raw
+# PP_Iterate_resampleup.gauss1_h10_lin	PP_Iterate_resampleup_gauss1_h10_lin	preprocessing,raw
 
 # Coffee dataset:
 CO_trev_2.absnum	CO_trev_2_absnum	correlation,nonlinear,autocorrelation
 
 # Olive Oil dataset:
-PP_Iterate_spline.swms5_2_exp	PP_Iterate_spline_swms5_2_exp	preprocessing,spline,raw
+# PP_Iterate_spline.swms5_2_exp	PP_Iterate_spline_swms5_2_exp	preprocessing,spline,raw
 DN_RemovePoints_max_01.median	DN_RemovePoints_max_01_median	correlation,outliers
 
 # ------------------------------------------------------------------------------
@@ -115,7 +117,7 @@ DN_RemovePoints_max_01.median	DN_RemovePoints_max_01_median	correlation,outliers
 # index_match = arrayfun(@(x)find([Operations.ID]==x),op_centers);
 # index_match = sort(index_match,'ascend');
 # for i = 1:length(op_centers);fprintf(fid,'%s\t%s\t%s\n',Operations(index_match(i)).CodeString,Operations(index_match(i)).Name,Operations(index_match(i)).Keywords);end
-# 200 ~ independent operations on an fMRI dataset: 
+# 200 ~ independent operations on an fMRI dataset:
 
 DN_Moments_6	mom_6	distribution,moment,shape
 DN_cv_1	coeff_var_1	spread,cv,raw,locdep,spreaddep
@@ -123,7 +125,7 @@ DN_cv_4	coeff_var_4	spread,cv,raw,locdep,spreaddep
 AC_4	AC_4	correlation,autocorrelation
 AC_38	AC_38	correlation,autocorrelation
 AC_nl_13	AC_nl_13	correlation,autocorrelation,nonlinearautocorr
-CO_HistogramAMI_4_std1_2	CO_HistogramAMI_4_std1_2	information,correlation,AMI
+CO_HistogramAMI_std1_5.ami2     CO_HistogramAMI_std1_5_2    information,correlation,AMI
 CO_glscf_1_2_5	CO_glscf_1_2_5	correlation,glscf
 CO_glscf_2_5_3	CO_glscf_2_5_3	correlation,glscf
 SY_SlidingWindow_m_s2_2	SY_SlidingWindow_m_s2_2	stationarity,slidingwin
@@ -141,10 +143,8 @@ SY_SlidingWindow_lil_s10_2	SY_SlidingWindow_lil_s10_2	stationarity,slidingwin
 SY_SlidingWindow_lil_apen10_10	SY_SlidingWindow_lil_apen10_10	stationarity,slidingwin
 SY_SlidingWindow_ac1_s5_10	SY_SlidingWindow_ac1_s5_10	stationarity,slidingwin
 SY_SlidingWindow_ac1_apen5_2	SY_SlidingWindow_ac1_apen5_2	stationarity,slidingwin
-SY_LocalGlobal_randcg500.mean	SY_LocalGlobal_mean_randcg500	stationarity,stochastic
 SY_LocalGlobal_l10.std	SY_LocalGlobal_std_l10	stationarity
 SY_LocalGlobal_p01.std	SY_LocalGlobal_std_p01	stationarity
-SY_LocalGlobal_randcg10.std	SY_LocalGlobal_std_randcg10	stationarity,stochastic
 SY_LocalGlobal_l50.median	SY_LocalGlobal_median_l50	stationarity
 SY_LocalGlobal_p1.ac1	SY_LocalGlobal_AC1_p1	stationarity
 EN_wentropy_shannon	EN_wentropy_shannon	entropy,shannon
@@ -185,10 +185,10 @@ CO_StickAngles_x.statav4_all_m	CO_StickAngles_x_statav4_all_m	correlation,raw,lo
 CO_StickAngles_x.skewness_n	CO_StickAngles_x_skewness_n	correlation,raw,locdep
 CO_StickAngles_x.skewness_all	CO_StickAngles_x_skewness_all	correlation,raw,locdep
 CO_Embed2_Shapes_tau_circle_1.std	CO_Embed2_Shapes_tau_circle_1_std	correlation,embedding
-SY_SpreadRandomLocal_ac2.meanac1	SY_SpreadRandomLocal_ac2_meanac1	stationarity,stochastic
+SY_SpreadRandomLocal_ac2_100.meanac1	SY_SpreadRandomLocal_ac2_100_meanac1	stationarity
 SY_DriftingMeann10.mean	SY_DriftingMeann10_mean	stationarity
-FC_Surprise_dist_100_5_q.mean	FC_Surprise_dist_100_5_q_mean	information,stochastic,symbolic
-FC_Surprise_T2_20_2_udq.tstat	FC_Surprise_T2_20_2_udq_tstat	information,stochastic,symbolic
+FC_Surprise_dist_100_5_q_500.mean	FC_Surprise_dist_100_5_q_500_mean	information,symbolic
+FC_Surprise_T2_20_2_udq_500.tstat	FC_Surprise_T2_20_2_udq_500_tstat	information,symbolic
 PH_Walker_prop_09.w_mean	PH_Walker_prop_09_w_mean	trend
 PH_Walker_prop_09.w_min	PH_Walker_prop_09_w_min	trend
 PH_Walker_prop_11.sw_meanabsdiff	PH_Walker_prop_11_sw_meanabsdiff	trend
@@ -241,13 +241,13 @@ SC_FluctAnal_2_nothing_25_logi.ssr	SC_FluctAnal_2_nothing_25_logi_ssr	scaling,fa
 SC_FluctAnal_2_dfa_25_0_logi.ssr	SC_FluctAnal_2_dfa_25_0_logi_ssr	scaling,dfa
 SC_FluctAnal_2_dfa_25_0_logi.logtausplit	SC_FluctAnal_2_dfa_25_0_logi_logtausplit	scaling,dfa
 SC_FluctAnal_2_dfa_25_1_2_logi.ratsplitminerr	SC_FluctAnal_2_dfa_25_1_2_logi_ratsplitminerr	scaling,dfa
-SP_basic_pgram_hamm.logtau	SP_basic_pgram_hamm_logtau	powerspectrum
-SP_basic_pgram_hamm.linfitloglog_hf_s	SP_basic_pgram_hamm_linfitloglog_hf_s	powerspectrum
-SP_basic_pgram_hamm.area_4_3	SP_basic_pgram_hamm_area_4_3	powerspectrum
-SP_basic_pgram_hamm_cep.maxS	SP_basic_pgram_hamm_cep_maxS	cepstrum
-SP_basic_pgram_hamm_cep.linfitloglog_all_sea1	SP_basic_pgram_hamm_cep_linfitloglog_all_sea1	cepstrum,lengthdep
-SP_basic_pgram_hamm_cep.logarea_2_1	SP_basic_pgram_hamm_cep_logarea_2_1	cepstrum
-SP_basic_pgram_hamm_cep.statav5_s	SP_basic_pgram_hamm_cep_statav5_s	cepstrum
+SP_basic_pgram_hamm_power.logtau	SP_basic_pgram_hamm_power_logtau	powerspectrum
+SP_basic_pgram_hamm_power.linfitloglog_hf_s	SP_basic_pgram_hamm_power_linfitloglog_hf_s	powerspectrum
+SP_basic_pgram_hamm_power.area_4_3	SP_basic_pgram_hamm_power_area_4_3	powerspectrum
+# SP_basic_pgram_hamm_cep.maxS	SP_basic_pgram_hamm_cep_maxS	cepstrum
+# SP_basic_pgram_hamm_cep.linfitloglog_all_sea1	SP_basic_pgram_hamm_cep_linfitloglog_all_sea1	cepstrum,lengthdep
+# SP_basic_pgram_hamm_cep.logarea_2_1	SP_basic_pgram_hamm_cep_logarea_2_1	cepstrum
+# SP_basic_pgram_hamm_cep.statav5_s	SP_basic_pgram_hamm_cep_statav5_s	cepstrum
 SY_TISEAN_nstat_z_4_1_3.maximageig	SY_TISEAN_nstat_z_4_1_3_maximageig	nonlinear,tisean,model,stationarity
 NL_TISEAN_c1_1_2_6_25_01.mind	NL_TISEAN_c1_1_2_6_25_01_mind	nonlinear,tisean,dimension,entropy
 PP_Compare_poly1.swms5_1	PP_Compare_poly1_swms5_1	preprocessing,raw
@@ -281,8 +281,6 @@ PP_Compare_rav4.kscn_peaksepy	PP_Compare_rav4_kscn_peaksepy	preprocessing,raw
 PP_Compare_rav10.gauss1_kd_r2	PP_Compare_rav10_gauss1_kd_r2	preprocessing,raw
 PP_Compare_resample_1_2.gauss1_kd_r2	PP_Compare_resample_1_2_gauss1_kd_r2	preprocessing,raw
 PP_Compare_resample_2_1.olbt_s5	PP_Compare_resample_2_1_olbt_s5	preprocessing,raw
-PP_Iterate_diff.swms5_2_trend	PP_Iterate_diff_swms5_2_trend	preprocessing,raw
-PP_Iterate_resampleup.gauss1_kd_trend	PP_Iterate_resampleup_gauss1_kd_trend	preprocessing,raw
 MF_GP_hyperparameters_covSEiso_covNoise_1_200_resample.std_mu_data	MF_GP_hyperparameters_covSEiso_covNoise_1_200_resample_std_mu_data	gaussianprocess
 MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample.maxS	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample_maxS	gaussianprocess
 MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_first.maxS	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_first_maxS	gaussianprocess
@@ -305,8 +303,6 @@ MF_armax_3_1_05_1.acmnd0	MF_armax_3_1_05_1_acmnd0	model,systemidentificationtool
 MF_armax_3_1_05_1.minfpe	MF_armax_3_1_05_1_minfpe	model,systemidentificationtoolbox,arma
 MF_ExpSmoothing_05_best.p3_5	MF_ExpSmoothing_05_best_p3_5	model,siddarth,expsmoothing
 MF_ExpSmoothing_05_best.ac3	MF_ExpSmoothing_05_best_ac3	model,siddarth,expsmoothing
-MF_GARCHfit_ar_default.GARCH_1	MF_GARCHfit_ar_default_GARCH_1	model,garch,econometricstoolbox
-MF_GARCHfit_ar_default.bic	MF_GARCHfit_ar_default_bic	model,garch,econometricstoolbox,bic
 SY_VarRatioTest_24682468_00001111.maxstat	SY_VarRatioTest_24682468_00001111_maxstat	vratiotest,econometricstoolbox
 SY_KPSStest_2.stat	SY_KPSStest_2_stat	kpsstest,econometricstoolbox,stationarity,hypothesistest
 MF_hmm_08_2.Pmeandiag	MF_hmm_08_2_Pmeandiag	gharamani,hmm,model

@@ -1,27 +1,30 @@
-function groupIndices = TS_LabelGroups(whatData,keywordGroups,saveBack)
+function groupLabels = TS_LabelGroups(keywordGroups,whatData,saveBack)
 % TS_LabelGroups    Label groups of a time series using assigned keywords
 %
 % You provide a set of keyword options to store a specific grouping of time series.
 % Useful when doing a classification task -- can store your classifications
 % in the local structure arrays.
 %
+% Requires that each time series is labeled uniquely to a single group and that
+% all groups contain members.
+% (if needed, can trim your HCTSA file to generate a dataset that can meet these
+% criteria)
+%
 %---EXAMPLE USAGE:
 %
-% Label all time series with 'disease' in one group and all with 'healthy' in
-% another group:
+% Label all time series with keyword 'disease' as one group and all with the
+% keyword 'healthy' in another group -- saving the group information back to
+% HCTSA_N.mat:
 %
-% groupIndices = TS_LabelGroups('norm',{'disease',0;'healthy',0},'ts');
+% groupIndices = TS_LabelGroups({'disease','healthy'});
 %
 %---INPUTS:
-% whatData: Where to retrive from (and write back to): 'orig', 'norm', or 'cl'
-%
 % keywordGroups: The keyword groups, a cell of strings, as
-%                    {'Keyword_1',numberToRetrive; 'keyword2',numberToRetrive,...}
-%                   Use '0' to retrieve all of a given class.
+%                   {'keyword_1', 'keyword2',...}
 %                   Can also use an empty label, '', to select anything at
 %                   random from all time series.
 %
-% TsorOps: Whether grouping is for operations ('ops') or time series ('ts')
+% whatData: Where to retrive from (and write back to): 'orig' or 'norm'
 %
 % saveBack: Can set to 0 to stop saving the grouping back to the input file.
 %
@@ -47,7 +50,16 @@ function groupIndices = TS_LabelGroups(whatData,keywordGroups,saveBack)
 % ------------------------------------------------------------------------------
 %% Check Inputs:
 % ------------------------------------------------------------------------------
-if nargin < 1 || isempty(whatData)
+if nargin < 1
+    keywordGroups = {};
+    % Try to assign by unique keywords later
+end
+if ~isempty(keywordGroups) && ischar(keywordGroups);
+    fprintf(1,'Grouping all items with ''%s''.\n',keywordGroups);
+    keywordGroups = {keywordGroups};
+end
+
+if nargin < 2 || isempty(whatData)
     whatData = 'norm';
     fprintf(1,'Retrieving data from HCTSA_N by default.\n');
 end
@@ -55,16 +67,7 @@ if ~isstruct(whatData) && ~ismember(whatData,{'orig','norm'})
     error('When specifying data, we need ''orig'', ''norm'', or a custom filename.')
 end
 
-if nargin < 2
-    keywordGroups = '';
-    % Try to assign by unique keywords later
-end
-if ~isempty(keywordGroups) && ischar(keywordGroups);
-    fprintf(1,'Grouping all items with ''%s''.\n',keywordGroups);
-    keywordGroups = {keywordGroups,0};
-end
-
-if nargin < 4 || isempty(saveBack)
+if nargin < 3 || isempty(saveBack)
     saveBack = 1; % Saves the grouping back to the HCTSA_*.loc file
 end
 
@@ -72,76 +75,77 @@ end
 %% Load data from file
 % ------------------------------------------------------------------------------
 [~,TimeSeries,~,theFile] = TS_LoadData(whatData);
-Keywords = {TimeSeries.Keywords};
-IDs = [TimeSeries.ID];
+Keywords = SUB_cell2cellcell({TimeSeries.Keywords}); % Split into sub-cells using comma delimiter
 numTimeSeries = length(TimeSeries);
 
 % ------------------------------------------------------------------------------
 % Set default keywords?
 % ------------------------------------------------------------------------------
+% Set group labels as each unique keyword in the data. Works only in simple cases.
 if isempty(keywordGroups)
-    fprintf(1,'No keywords assigned for labeling. Attempting to use unique keywords from data...?\n');
-    UKeywords = unique(Keywords);
-    NumUniqueKeywords = length(UKeywords);
-    fprintf(1,'Shall I use the following %u keywords?: %s\n',NumUniqueKeywords,BF_cat(UKeywords,',',''''));
+    fprintf(1,'No keywords assigned for labeling. Attempting to use unique keywords from data...\n');
+    keywordsAll = [Keywords{:}]; % every keyword used across the dataset
+    UKeywords = unique(keywordsAll);
+    numUniqueKeywords = length(UKeywords);
+    fprintf(1,'Shall I use the following %u keywords?: %s\n',numUniqueKeywords,BF_cat(UKeywords,',',''''));
     reply = input('[y] for ''yes''','s');
     if strcmp(reply,'y')
-        keywordGroups = cell(NumUniqueKeywords,2);
-        for i = 1:NumUniqueKeywords
-            keywordGroups{i,1} = UKeywords{i};
-            keywordGroups{i,2} = 0;
-        end
+        keywordGroups = UKeywords;
     else
-        fprintf(1,'Ok then, thanks anyway\n'); return
+        fprintf(1,'No wuckers, thanks anyway\n'); return
     end
 end
 
 % ------------------------------------------------------------------------------
 %% Label groups from keywords
 % ------------------------------------------------------------------------------
-if ~all(cellfun(@ischar,keywordGroups(:))) % Hopefully, specified numbers of each keyword
-    keywordNumbers = horzcat(keywordGroups{:,2}); % Just the number of each part
-    keywordGroups = keywordGroups(:,1)'; % Just the keyword parts, a cell of strings
-else
-    keywordNumbers = zeros(length(keywordGroups),1); % include all of each keyword
-end
 numGroups = length(keywordGroups); % The number of groups
-Keywords = SUB_cell2cellcell(Keywords);
 
 timer = tic;
+groupIndices = logical(zeros(numTimeSeries,numGroups));
 for jo = 1:numGroups
-    if ~isempty(keywordGroups{jo}) % Collect time series with this keyword
-        groupIndices{jo} = find(cellfun(@(x)any(ismember(keywordGroups{jo},x)),Keywords));
-        if isempty(groupIndices{jo})
-            fprintf(1,'No matches found for ''%s''.\n',keywordGroups{jo});
-        end
-        if (keywordNumbers(jo) ~= 0) && (keywordNumbers(jo) < length(groupIndices{jo})) % Take a random subset of matches
-            rperm = randperm(length(groupIndices{jo}));
-            groupIndices{jo} = groupIndices{jo}(rperm(1:keywordNumbers(jo)));
-        end
-    else % Take a certain number of random time series
-         % integer: retrieve this many: in randomorder
-        rperm = randperm(length(Keywords));
-        keywordGroups{jo} = 'Others';
-        groupIndices{jo} = [];
-        notKeywordGroups = keywordGroups(setxor(1:numGroups,jo));
-        for i = 1:length(Keywords)
-            if all(~ismember(notKeywordGroups,Keywords{rperm(i)}))
-                groupIndices{jo} = [groupIndices{jo}; rperm(i)];
-                if (length(groupIndices{jo}) == keywordNumbers(jo))
-                    break
-                end
-            end
-        end
+    groupIndices(:,jo) = cellfun(@(x)any(ismember(keywordGroups{jo},x)),Keywords);
+    if all(groupIndices(:,jo)==0)
+        fprintf(1,'No matches found for ''%s''.\n',keywordGroups{jo});
     end
 end
 fprintf(1,'Group labeling complete in %s.\n',BF_thetime(toc(timer)));
 clear timer % stop timing
 
-% More feedback
+%-------------------------------------------------------------------------------
+% Checks:
+%-------------------------------------------------------------------------------
+
+% Check each group has some members:
+emptyGroups = (sum(groupIndices,1)==0);
+if any(emptyGroups)
+    error('%u keywords have no matches: %s',sum(emptyGroups),BF_cat(keywordGroups(emptyGroups),',',''''));
+end
+
+% Check unlabeled:
+unlabeled = (sum(groupIndices,2)==0);
+if any(unlabeled)
+    error('%u time series are unlabeled: %s',sum(unlabeled),BF_cat({TimeSeries(unlabeled).Name},','));
+end
+
+% Check overlaps:
+overlapping = (sum(groupIndices,2)>1);
+if any(overlapping)
+    error('%u time series have multiple group assignments: %s',sum(overlapping),BF_cat({TimeSeries(overlapping).Name},','));
+end
+
+% Everything checks out so now we can make group labels:
+groupLabels = zeros(1,numTimeSeries);
+for i = 1:numGroups
+    groupLabels(groupIndices(:,i)) = i;
+end
+
+%-------------------------------------------------------------------------------
+% User feedback:
+%-------------------------------------------------------------------------------
 fprintf(1,'We found:\n');
 for i = 1:numGroups
-    fprintf(1,'%s -- %u matches (/%u)\n',keywordGroups{i},length(groupIndices{i}),numTimeSeries);
+    fprintf(1,'%s -- %u matches (/%u)\n',keywordGroups{i},sum(groupIndices(:,i)),numTimeSeries);
 end
 
 % ------------------------------------------------------------------------------
@@ -149,38 +153,33 @@ end
 % ------------------------------------------------------------------------------
 if saveBack
     % You don't need to check variables, you can just append back to the input file:
-    if ~all(cellfun(@isempty,groupIndices))
-        fprintf(1,'Saving group labels and information back to %s...',theFile);
+    fprintf(1,'Saving group labels and information back to %s...',theFile);
 
-        % First append/overwrite group names
-        groupNames = keywordGroups;
+    % First append/overwrite group names
+    groupNames = keywordGroups;
 
-        % Then overwrite labels
-        theGroups = BF_ToGroup(groupIndices,numTimeSeries)';
-        % Now we need to make the cells
-        theGroupsCell = cell(size(theGroups));
-        % Cannot find an in-built for this... :-/
-        for i = 1:length(theGroups), theGroupsCell{i} = theGroups(i); end
+    % Make a cell version of group indices (to use cell2struct)
+    theGroupsCell = cell(size(groupLabels));
 
-        % First remove Group field if it exists
-        if isfield(TimeSeries,'Group')
-            TimeSeries = rmfield(TimeSeries,'Group');
-        end
+    % Cannot find an in-built function for this... :-/
+    for i = 1:length(groupLabels), theGroupsCell{i} = groupLabels(i); end
 
-        % Add fields to the TimeSeries structure array
-        newFieldNames = fieldnames(TimeSeries);
-        % Add two new fields:
-        newFieldNames{length(newFieldNames)+1} = 'Group';
-
-        % Then append the new group information:
-        TimeSeries = cell2struct([struct2cell(TimeSeries);theGroupsCell],newFieldNames);
-        % {'ID','Name','Keywords','Length','Data','Group'}
-
-        % Save everything back to file:
-        save(theFile,'TimeSeries','-append')
-        save(theFile,'groupNames','-append')
-        fprintf(1,' Saved.\n');
+    % First remove Group field if it exists
+    if isfield(TimeSeries,'Group')
+        TimeSeries = rmfield(TimeSeries,'Group');
     end
+
+    % Add new field to the TimeSeries structure array
+    newFieldNames = fieldnames(TimeSeries);
+    newFieldNames{length(newFieldNames)+1} = 'Group';
+
+    % Then append the new group information:
+    % (some weird bug -- squeeze is sometimes needed here...:)
+    TimeSeries = cell2struct([squeeze(struct2cell(TimeSeries));theGroupsCell],newFieldNames);
+
+    % Save everything back to file:
+    save(theFile,'TimeSeries','groupNames','-append')
+    fprintf(1,' Saved.\n');
 end
 
 end

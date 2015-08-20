@@ -1,29 +1,24 @@
-% ------------------------------------------------------------------------------
-% BF_pdist
-% ------------------------------------------------------------------------------
-% 
-% Computes pairwise distances between rows of a data matrix.
-% 
+function R = BF_pdist(F,distMetric,toVector,opts,beSilent,minPropGood)
+% BF_pdist  Pairwise distances between rows of a data matrix.
+%
 % Same as pdist but then goes through and fills in NaNs with indiviually
 % calculated values using an overlapping range of good values.
-%                           
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function R = BF_pdist(F,distMetric,toVector,opts,beSilent,minPropGood)
 
 % ------------------------------------------------------------------------------
 % Check Inputs:
@@ -96,8 +91,8 @@ case 'mi'
     end
     clear mitimer % stop timing
     R = mis; clear mis; % not really an R but ok.
-    
-    
+
+
 case {'corr_fast','abscorr_fast'}
     % Try using fast approximation to correlation coefficients when data includes NaNs
     % This is an approximation in that it centers columns on their full mean rather than
@@ -110,8 +105,8 @@ case {'corr_fast','abscorr_fast'}
     tic
     R = BF_NaNCov(F',1,1);
     if ~beSilent, fprintf(1,' Done in %s.\n',BF_thetime(toc)); end
-    
-    
+
+
 case {'euclidean','Euclidean','corr','correlation','abscorr'}
     % First use in-built pdist, which is fast
     if ~beSilent
@@ -127,7 +122,7 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
     if ~beSilent
         fprintf(1,' Done in %s.\n',BF_thetime(toc));
     end
-    
+
     % Now go through and fill in any NaNs
     [nani, nanj] = find(isnan(R));
     if ~isempty(nani) % there are NaNs in R
@@ -135,24 +130,24 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
         nani = nani(ij);
         nanj = nanj(ij);
         NotNaN = ~isnan(F);
-        
+
         if ~beSilent
             fprintf(1,['Recalculating distances individually for %u NaN ' ...
                             'entries in the distance matrix...\n'],length(nani));
         end
-        
+
         NaNtimer = tic; % time it
         for i = 1:length(nani)
             ii = nani(i);
             jj = nanj(i);
             goodboth = (NotNaN(ii,:) & NotNaN(jj,:));
-            if mean(goodboth) >= minPropGood
+            if mean(goodboth) > minPropGood
                 R(ii,jj) = dij(F(ii,goodboth)',F(jj,goodboth)'); % Calculate the distance
             else
                 R(ii,jj) = NaN; % Not enough good, overlapping set of values -- store as NaN.
             end
             R(jj,ii) = R(ii,jj); % Add the symmetrized entry
-            
+
             % Give update on time remaining after 1000 iterations (if more than 10000 total iterations)
             % and then 5 more times...
             if ~beSilent && ((i==1000 && length(nani) > 10000) || (mod(i,floor(length(nani)/5))==0))

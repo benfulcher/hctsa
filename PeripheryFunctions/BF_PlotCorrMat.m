@@ -1,11 +1,15 @@
 function BF_PlotCorrMat(D_corr,rangeHow)
-% ------------------------------------------------------------------------------
-% BF_ClusterDown
-% ------------------------------------------------------------------------------
+% BF_PlotCorrMat    Visualization of a pairwise similarity matrix
 %
-% Shows a visualization of a pairwise similarity matrix, with an attempt to
-% deduce a set of smaller clusters of objects showing highly correlated behavior.
+% Attempts to determine a set of smaller clusters of objects showing similar
+% behavior.
 %
+%---INPUTS:
+% D_corr, a pairwise distance matrix
+% rangeHow, the colorbar extent: (i) '' (automatic)
+%                                (ii) '-1to1' (range from -1 to 1)
+%                                (iii) '0to1' (range from 0 to 1)
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

@@ -1,17 +1,5 @@
-function cellcell = BF_cell2cellcell(cellin,delimiter)
-% BF_cell2cellcell  Turn a cell of strings into a cell of cells, splitting on a delimiter.
-%
-% Inputs a cell with some delimiter, and outputs a cell of cells using this
-% delimiter.
-%
-%---INPUTS:
-% cellin, the cell
-% delimiter, the delimiter
-%
-%---OUTPUT:
-% cellcell, the cell of cells, using this delimiter
-
-% (Used for some tasks involving mySQL)
+function [R, keepers] = BF_RemoveNaN_DistMat(R)
+% BF_RemoveNaN_DistMat     Removes NaNs from an input distance matrix
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -29,15 +17,20 @@ function cellcell = BF_cell2cellcell(cellin,delimiter)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-if nargin < 2 || isempty(delimiter)
-    delimiter = ','; % comma as the default delimiter
-end
+keepers = logical(ones(length(R),1));
 
-numElements = length(cellin); % number of elements in the input cell
-cellcell = cell(numElements,1);
+if any(isnan(R(:)))
+    areNaN = 1;
 
-for i = 1:numElements
-    cellcell{i} = regexp(cellin{i}, delimiter, 'split');
+    while areNaN
+        NumNaNs = sum(isnan(R(keepers,keepers)));
+        [~,irem] = max(NumNaNs); % the index (of keepers==1) that has the most NaNs
+        fkeep = find(keepers);
+        keepers(fkeep(irem)) = 0; % remove this index from the full list, keepers
+        R_keep_tmp = R(keepers,keepers);
+        areNaN = any(isnan(R_keep_tmp(:))); % are there still more NaNs after removing this?
+    end
+    R = R(keepers,keepers);
 end
 
 end

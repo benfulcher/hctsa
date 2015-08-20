@@ -1,24 +1,19 @@
-% ------------------------------------------------------------------------------
-% BF_MutualInfDist
-% ------------------------------------------------------------------------------
-% 
+function D = BF_MutualInfDist(mis,myMethod,doasqf)
+% BF_MutualInfDist  Converts a matrix of mutual information to distances
+%
 % Converts a matrix of mutual informations (mis) into a distance matrix (D) by whatever
 % method you select.
 % See Dawy et al. (2005) for discussion of 'CL' and 'CR'
-% 
+%
 %---INPUTS:
-% v1, the first input vector
-% v2, the second input vector
-% r1, the bin-partitioning method for the first input vector, v1
-% r2, the bin-partitioning method for the second input vector, v2
-% nbins, the number of bins to partition each vector into.
-% 
-% NB: r1 and r2 can also be two-component vectors, that specify a custom range
-%     for binning
-% 
+% mis, vector of mutual informations
+% myMethod, how to convert to distances
+% doasqf, whether to return pairwise distances as a vector (0; default)
+%          or as the squareform matrix (1)
+%
 %---OUTPUT:
-% mi, the mutual information computed between v1 and v2
- 
+% D, the pairwise distances
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,24 +27,22 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function D = BF_MutualInfDist(mis,mymethod,doasqf)
-
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(mymethod)
+if nargin < 2 || isempty(myMethod)
     % select method for converting MIs to distances
-    mymethod = 'CL'; % 'CL', 'CR', 'mindiff', 'meandiff'
+    myMethod = 'CL'; % 'CL', 'CR', 'mindiff', 'meandiff'
 end
 if nargin < 3 || isempty(doasqf)
     % return a vector of pairwise distances rather than the full matrix to
@@ -62,7 +55,7 @@ end
 % ------------------------------------------------------------------------------
 % difference between MI to itself and MI to this operation
 D = zeros(size(mis));
-switch mymethod
+switch myMethod
     case 'mindiff'
         % my naive way
         disp('converting mutual informations to distances by minimum difference')

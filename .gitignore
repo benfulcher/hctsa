@@ -14,19 +14,6 @@ HCTSA_loc.mat
 HCTSA_N.mat
 HCTSA_cl.mat
 
-TS_loc.mat
-TS_loc_N.mat
-TS_loc_cl.mat
-
-TS_loc_guides.mat
-TS_loc_guides_N.mat
-TS_loc_guides_cl.mat
-
-TS_loc_q.mat
-TS_loc_q_N.mat
-
-TS_loc_ct.mat
-
 # Database configuration
 sql_settings.conf
 
@@ -39,6 +26,9 @@ sql_settings.conf
 # Random stuff
 plugininstall_*.m
 error.log
+
+# TISEAN generates platform-specific files:
+/Toolboxes/Tisean_3.0.1/
 
 # Documentation auxiliary tex files:
 # *.pdf

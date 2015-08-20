@@ -1,6 +1,5 @@
-% ------------------------------------------------------------------------------
-% BF_ClusterReorder
-% ------------------------------------------------------------------------------
+function [ord,R,keepers] = BF_ClusterReorder(dataMatrix,distanceMetric,linkageMethod)
+% BF_ClusterReorder     A clustered reordering of the rows of an input data matrix.
 %
 % Computes a reordering of the rows of an input data matrix (under a given
 % distance metric), placing similar rows close together in the output
@@ -8,7 +7,7 @@
 %
 % Alternatively, you can input a distance matrix for distanceMetric if
 % pre-computed.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -25,8 +24,9 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function [ord,R,keepers] = BF_ClusterReorder(dataMatrix,distanceMetric,linkageMethod)
-
+%-------------------------------------------------------------------------------
+% Check Inputs:
+%-------------------------------------------------------------------------------
 if nargin < 2
     distanceMetric = 'corr'; % correlation distances by default
 end
@@ -52,7 +52,7 @@ end
 
 if any(isnan(R(:)))
     % Remove NaNs:
-    [R,keepers] = RemoveNaN_DistMat(R);
+    [R,keepers] = BF_RemoveNaN_DistMat(R);
     fprintf(1,'***CAUTION: Removed %u bad features from the distance matrix\n', ...
                         sum(keepers==0));
 else

@@ -44,8 +44,8 @@ function TS_normalize(normFunction,filterOptions,fileName_HCTSA_loc,subs,trainSe
 %% Check Inputs
 % --------------------------------------------------------------------------
 if nargin < 1 || isempty(normFunction)
-    fprintf(1,'Using the default, scaled quantile-based sigmoidal transform: ''scaledSQzscore''\n')
-    normFunction = 'scaledSQzscore';
+    fprintf(1,'Using the default, scaled quantile-based sigmoidal transform: ''scaledRobustSigmoid''\n')
+    normFunction = 'scaledRobustSigmoid';
 end
 
 if nargin < 2 || isempty(filterOptions)
@@ -76,7 +76,7 @@ end
 %% Read data from local files
 % --------------------------------------------------------------------------
 fprintf(1,'Reading data from %s...',fileName_HCTSA_loc);
-load(fileName_HCTSA_loc,'TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations')
+load(fileName_HCTSA_loc,'TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations','fromDatabase')
 fprintf(1,' Loaded.\n');
 
 % In this script, each of these pieces of data (from the database) will be trimmed and normalized
@@ -348,7 +348,7 @@ normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
 
 fprintf(1,'Saving the trimmed, normalized data to local files...')
 save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-                'MasterOperations','normalizationInfo','ts_clust','op_clust');
+            'fromDatabase','MasterOperations','normalizationInfo','ts_clust','op_clust');
 fprintf(1,' Done.\n')
 
 end

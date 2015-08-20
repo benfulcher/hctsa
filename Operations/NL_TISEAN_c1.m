@@ -133,14 +133,15 @@ fprintf(1,'Wrote temporary data file ''%s'' for TISEAN\n',filePath)
 % ------------------------------------------------------------------------------
 % run c1 code
 tic
-[~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',tau,mmm(1),mmm(2),tsep,Nref,filePath,filePath));
+[~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',...
+            tau,mmm(1),mmm(2),tsep,Nref,filePath,filePath));
 delete(filePath) % remove the temporary data file
-% [~, res] = system(['c1 -d' num2str(tau) ' -m' num2str(mmm(1)) ...
-%                     ' -M' num2str(mmm(2)) ' -t' num2str(tsep) ' -n' ...
-%                     num2str(Nref) ' -o ' filePath '.c1 ' filePath]);
+
 if isempty(res)
     if exist([filePath '.c1'],'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
     error('Call to TISEAN method ''c1'' failed.');
+elseif strfind(res,'dyld: Library not loaded')
+    error('DYLD library not found -- try recompiling TISEAN:\n%s',res);
 else
     fprintf(1,'TISEAN function ''c1'' took %s.\n',BF_thetime(toc,1))
 end
