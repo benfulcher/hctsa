@@ -1,4 +1,4 @@
-function ts_ids = TS_getIDs(whatData,theKeyword)
+function ts_ids = TS_getIDs(theKeyword,whatData)
 % TS_getIDs   Retrieve IDs of time series based on keyword matching.
 
 % ------------------------------------------------------------------------------
@@ -18,6 +18,13 @@ function ts_ids = TS_getIDs(whatData,theKeyword)
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
+% Check inputs, set defaults:
+%-------------------------------------------------------------------------------
+if nargin < 2
+    whatData = 'norm';
+end
+
+%-------------------------------------------------------------------------------
 % Load data:
 %-------------------------------------------------------------------------------
 [~,TimeSeries] = TS_LoadData(whatData);
@@ -27,7 +34,6 @@ function ts_ids = TS_getIDs(whatData,theKeyword)
 %-------------------------------------------------------------------------------
 Keywords = SUB_cell2cellcell({TimeSeries.Keywords}); % Split into sub-cells using comma delimiter
 matches = cellfun(@(x)any(ismember(theKeyword,x)),Keywords);
-keyboard
 ts_ids = [TimeSeries(matches).ID];
 
 end

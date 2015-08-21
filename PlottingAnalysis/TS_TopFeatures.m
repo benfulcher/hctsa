@@ -265,19 +265,25 @@ if any(ismember(whatPlots,'cluster'))
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
     BF_ClusterDown(Dij,floor(numTopFeatures/5),'whatDistance','corr',...
                         'objectLabels',objectLabels);
+    title(sprintf('Dependencies between %u top features',numTopFeatures))
+end
+
+% Don't display lots of crap to screen unless the user wants it:
+if nargout == 0
+    clear ifeat testStat testStat_rand
 end
 
 %-------------------------------------------------------------------------------
 % Functions
 %-------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------
 function tStat = fn_tStat(d1,d2)
+    % Return test statistic from a 2-sample Welch's t-test
     [h,p,ci,stats] = ttest2(d1,d2,'Vartype','unequal');
     tStat = stats.tstat;
 end
 
-%-------------------------------------------------------------------------------
 function testStat = giveMeStats(dataMatrix,groupLabels)
+    % Return test statistic for each operation
     testStat = zeros(numOps,1);
     for i = 1:numOps
         try
@@ -287,5 +293,6 @@ function testStat = giveMeStats(dataMatrix,groupLabels)
         end
     end
 end
+%-------------------------------------------------------------------------------
 
 end

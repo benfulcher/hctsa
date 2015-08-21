@@ -1,4 +1,4 @@
-function TS_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, linkageMethodCol, doSave)
+function TS_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, linkageMethodCol, doSave, theFile)
 % TS_cluster    Linkage clustering for hctsa data.
 %
 % Reads in normalized data from HCTSA_N.mat, clusters the data matrix by
@@ -57,10 +57,20 @@ if nargin < 4 || isempty(linkageMethodCol)
     linkageMethodCol = 'average';
 end
 
+% argument 5, doSave, set later
+
+if nargin < 6
+    theFile = 'norm';
+end
+
 % --------------------------------------------------------------------------
 %% Load information from local mat file
 % --------------------------------------------------------------------------
-theFile = 'HCTSA_N.mat';
+% Interpret 'norm':
+if strcmp(theFile,'norm')
+    theFile = 'HCTSA_N.mat';
+end
+
 % Check that the file exists:
 if ~exist(theFile,'file');
     error('%s not found.',theFile);
@@ -161,10 +171,10 @@ function [ordering,didUpdate] = getDistances(dMetricNow,tsOrOps,theLinkageMethod
             else
                 fprintf(1,'Changing distance metric for %s from %s to %s\n',...
                             theWhat,clust_data.distanceMetric,dMetricNow);
-                Dij = TS_PairwiseDist(tsOrOps,'norm',dMetricNow,saveBack);
+                Dij = TS_PairwiseDist(tsOrOps,theFile,dMetricNow,saveBack);
             end
         else
-            Dij = TS_PairwiseDist(tsOrOps,'norm',dMetricNow,saveBack);
+            Dij = TS_PairwiseDist(tsOrOps,theFile,dMetricNow,saveBack);
         end
 
         % Reorder using linkage clustering:

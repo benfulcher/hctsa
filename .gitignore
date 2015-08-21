@@ -9,15 +9,13 @@ Icon?
 ehthumbs.db
 Thumbs.db
 
-# Database-retrieved files:
-HCTSA_loc.mat
-HCTSA_N.mat
-HCTSA_cl.mat
+# HCTSA data files:
+HCTSA_*.mat
 
 # Database configuration
 sql_settings.conf
 
-# mexed files
+# Platform-specific mexed files
 *.mexw32
 *.mexw64
 *.mexmaci64
@@ -25,7 +23,7 @@ sql_settings.conf
 
 # Random stuff
 plugininstall_*.m
-error.log
+*.log
 
 # TISEAN generates platform-specific files:
 /Toolboxes/Tisean_3.0.1/

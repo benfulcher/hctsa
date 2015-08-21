@@ -57,14 +57,14 @@ TS_DataMat = TS_DataMat(i_keep.TimeSeries,i_keep.Operations);
 TimeSeries = TimeSeries(i_keep.TimeSeries);
 Operations = Operations(i_keep.Operations);
 
-fprintf('Data now contains %u -> %u time series and %u -> %u operations\n',...
+fprintf('The hctsa dataset now contains %u -> %u time series and %u -> %u operations\n',...
             numTimeSeries,length(TimeSeries),numOperations,length(Operations))
 
 if doSave
     % Save result to file
 
     % Remove group information because this will no longer be valid for sure
-    if ~isempty(ts_ids_keep)
+    if ~isempty(ts_ids_keep) && isfield(TimeSeries,'Group')
         rmfield(TimeSeries,'Group');
         fprintf('Warning: group information removed -- regenerate for subset data using TS_LabelGroups\n')
     end
@@ -74,6 +74,14 @@ if doSave
     copyfile(whatDataFile,outputFileName);
     save(outputFileName,'TS_DataMat','TimeSeries','Operations','-append');
 
+    % Remove clustering information, because it will no longer be valid
+    ts_clust = struct('distanceMetric','none','Dij',[],...
+                    'ord',1:size(TS_DataMat,1),'linkageMethod','none');
+    op_clust = struct('distanceMetric','none','Dij',[],...
+                    'ord',1:size(TS_DataMat,2),'linkageMethod','none');
+    save(outputFileName,'ts_clust','op_clust','-append');
+
+    % Add the quality and calctime matrices if they exist:
     varNames = whos('-file',whatDataFile);
     varNames = {varNames.name};
     if ismember('TS_Quality',varNames)
@@ -95,6 +103,11 @@ if doSave
     end
 
     fprintf(1,'Data saved to %s!\n',outputFileName)
+
+    % Don't display all of this info to screen if it's been saved and not stored
+    if nargout == 0
+        clear TS_DataMat TimeSeries Operations
+    end
 end
 
 %-------------------------------------------------------------------------------

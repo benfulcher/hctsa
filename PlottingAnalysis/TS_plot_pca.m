@@ -93,7 +93,6 @@ if strcmp(whatData,'cl') || strcmp(whatData,'norm')  || ischar(whatData)
         dimensionLabels = {TimeSeries.Name}; clear TimeSeries
     end
     clear('TimeSeries','Operations'); % we no longer need you
-    fprintf(1,' Loaded.\n');
 else
     % The user provided data themself
     if ~isfield(whatData,'DataMat') && ~isfield(whatData,'TS_DataMat')

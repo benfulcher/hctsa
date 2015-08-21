@@ -199,11 +199,11 @@ end
 %% And time series with constant feature vectors
 % --------------------------------------------------------------------------
 if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all will be constant!
-    crap_op = zeros(size(TS_DataMat,2),1);
+    bad_op = zeros(size(TS_DataMat,2),1);
     for j = 1:size(TS_DataMat,2)
-        crap_op(j) = (range(TS_DataMat(~isnan(TS_DataMat(:,j)),j)) < eps);
+        bad_op(j) = (range(TS_DataMat(~isnan(TS_DataMat(:,j)),j)) < eps);
     end
-    kc2 = find(crap_op==0); % kept column (2)
+    kc2 = find(bad_op==0); % kept column (2)
 
     if ~isempty(kc2)
         if length(kc2) < size(TS_DataMat,2)
@@ -221,11 +221,11 @@ else
 end
 
 % (*) Remove time series with constant feature vectors
-crap_ts = zeros(size(TS_DataMat,1),1);
+bad_ts = zeros(size(TS_DataMat,1),1);
 for j = 1:size(TS_DataMat,1)
-    crap_ts(j) = (range(TS_DataMat(j,~isnan(TS_DataMat(j,:)))) < eps);
+    bad_ts(j) = (range(TS_DataMat(j,~isnan(TS_DataMat(j,:)))) < eps);
 end
-kr2 = find(crap_ts == 0); % kept column (2)
+kr2 = find(bad_ts == 0); % kept column (2)
 
 if ~isempty(kr2)
     if (length(kr2) < size(TS_DataMat,1))
@@ -253,9 +253,8 @@ end
 kc_tot = kc0(kc1(kc2)); % The full set of indices remaining after all the filtering
 Operations = Operations(kc_tot); % Filter operations
 
-
-% In an ideal world, you would check to see if any master operations are no longer pointed to
-% and recalibrate the indexing, but I'm not going to bother.
+% At this point, you could check to see if any master operations are no longer
+% pointed to and recalibrate the indexing, but I'm not going to bother.
 
 fprintf(1,'We now have %u time series and %u operations in play.\n', ...
                                 length(TimeSeries),length(Operations))
@@ -263,6 +262,11 @@ fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',...
             sum(isnan(TS_DataMat(:))), ...
             sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
 
+
+if length(TimeSeries)==1
+    % When there is only a single time series, it doesn't actually make sense to normalize
+    error('Only a single time series in the dataset -- no normalization can be applied');
+end
 
 % --------------------------------------------------------------------------
 %% Actually apply the normalizing transformation

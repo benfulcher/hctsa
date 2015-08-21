@@ -28,7 +28,6 @@ tsid_max = 3; % To this ts_id
 %% Default parameters for computation:
 % ------------------------------------------------------------------------------
 doParallelize = 0; % Set to 1 to parallelize computations over available CPUs using Matlab's Parellel Computing Toolbox?
-doLog = 0; % Set to 1 to log results to a .log file? (usually not necessary)
 writeWhat = 'null'; % Retrieve and write back only missing (NULL) entries in the database
 
 % Calculate across the given range of ts_ids one at a time:
@@ -55,10 +54,14 @@ for i = 1:length(tsid_range)
 	% (ii) Using TS_compute to calculate missing entries
 	% (iii) Running SQL_store to write results back into the database
 
-	didWrite = SQL_retrieve(tsid_range(i),opids,writeWhat); % Collect the null entries in the database
+    % (i) Retrieve uncomputed entries from the database
+	didWrite = SQL_retrieve(tsid_range(i),opids,writeWhat);
     if didWrite % Only calculate if SQL_retrieve found time series to retrieve:
-        TS_compute(doLog,doParallelize); % Compute the operations and time series retrieved
-        SQL_store(writeWhat,doLog); % Store the results back to the database
+        % (ii) Compute all the missing data in the retrieved set of
+        % time series and operations:
+        TS_compute(doParallelize);
+        % (iii) Write the results back to the database:
+        SQL_store(writeWhat,doLog);
     else
         fprintf(1,'No calculation performed at ts_id = %u\n',tsid_range(i));
     end

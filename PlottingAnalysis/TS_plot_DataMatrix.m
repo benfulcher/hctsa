@@ -90,7 +90,8 @@ clear inputP;
 % --------------------------------------------------------------------------
 %% Read in the data
 % --------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
+% You always want to retrieve and plot the clustered data if it exists:
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData,1);
 
 if colorGroups
     if isfield(TimeSeries,'Group')

@@ -63,9 +63,6 @@ if nargin < 2 || isempty(whatData)
     whatData = 'norm';
     fprintf(1,'Retrieving data from HCTSA_N by default.\n');
 end
-if ~isstruct(whatData) && ~ismember(whatData,{'orig','norm'})
-    error('When specifying data, we need ''orig'', ''norm'', or a custom filename.')
-end
 
 if nargin < 3 || isempty(saveBack)
     saveBack = 1; % Saves the grouping back to the HCTSA_*.loc file
@@ -87,7 +84,7 @@ if isempty(keywordGroups)
     keywordsAll = [Keywords{:}]; % every keyword used across the dataset
     UKeywords = unique(keywordsAll);
     numUniqueKeywords = length(UKeywords);
-    fprintf(1,'Shall I use the following %u keywords?: %s\n',numUniqueKeywords,BF_cat(UKeywords,',',''''));
+    fprintf(1,'Shall I use the following %u keywords: %s?\n',numUniqueKeywords,BF_cat(UKeywords,',',''''));
     reply = input('[y] for ''yes''','s');
     if strcmp(reply,'y')
         keywordGroups = UKeywords;
