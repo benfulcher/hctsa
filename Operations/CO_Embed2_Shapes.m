@@ -123,35 +123,25 @@ out.tau = CO_FirstZero(counts,'ac');
 out.max = max(counts);
 out.std = std(counts);
 out.median = median(counts);
+out.mean = mean(counts);
 out.iqr = iqr(counts);
 out.iqronrange = out.iqr/range(counts);
 
-% Distribution
-[N,binEdges] = histcounts(counts,'BinMethod','integers','Normalization','probability');
+% --- Distribution
+% Using the sqrt binning method:
+[binP,binEdges] = histcounts(counts,'BinMethod','sqrt','Normalization','probability');
 binCentres = mean([binEdges(1:end-1); binEdges(2:end)]);
-[out.mode_val, mix] = max(N);
+[out.mode_val, mix] = max(binP);
 out.mode = binCentres(mix);
-
-% Poisson fit to distribution
-% (note that this is actually rarely a good fit...)
-l = poissfit(counts);
-poiss_n = poisspdf(x,l);
-out.poissfit_l = l;
-% goodness of fit:
-out.poissfit_absdiff = sum(abs(poiss_n-n));
-out.poissfit_sqdiff = sum((poiss_n-n).^2);
-
-% Entropy in a 10-bin histogram
-numBins = 10;
-N = histcounts(counts,numBins,'Normalization','probability');
-out.hist10_ent = sum(N(N > 0).*log(N(N > 0)));
+% --- histogram entropy:
+out.hist_ent = sum(binP(binP > 0).*log(binP(binP > 0)));
 
 if doPlot
-	plot(x,poisspdf(x,l),'g'); hold on;
-	plot(x,n,'k'); hold off
+	plot(binCentres,poisspdf(binCentres,l),'g'); hold on;
+	plot(binCentres,n,'k'); hold off
 end
 
-% Stationarity measure for fifths of the time series
+% --- Stationarity measure for fifths of the time series
 afifth = floor(N/5);
 buffer_m = zeros(afifth,5); % stores a fifth of the time series (embedding vector) in each entry
 for i = 1:5
