@@ -5,6 +5,7 @@ function TS_normalize(normFunction,filterOptions,fileName_HCTSA_loc,subs,trainSe
 % HCTSA_loc_N.mat
 % The normalization is all about a rescaling to the [0,1] interval for
 % visualization and clustering.
+% TODO: clean up this code.
 %
 %---INPUTS:
 % normFunction: String specifying how to normalize the data.

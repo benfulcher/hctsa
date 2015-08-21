@@ -1,8 +1,5 @@
 function out = CO_AutoCorrShape(y)
-% CO_AutoCorrShape
-%
-% Outputs a set of statistics summarizing how the autocorrelation function
-% changes with the time lag, tau.
+% CO_AutoCorrShape   how the autocorrelation function changes with the time lag
 %
 % Outputs include the number of peaks, and autocorrelation in the
 % autocorrelation function itself.
@@ -38,12 +35,12 @@ function out = CO_AutoCorrShape(y)
 % ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox');
 
-doplot = 0; % plot outputs from this function
+doPlot = 0; % plot outputs from this function
 N = length(y); % length of the time series
 
-% Only look up to when two consecutive values are under the threshold for
-% significance:
-th = 2/sqrt(N); % significance threshold, th
+% Only look up to when two consecutive values are under the significance threshold
+% (normally 2/sqrt(N), but we'll be generous):
+th = 1/sqrt(N); % significance threshold, th
 
 % Initialize autocorrelation function
 acf = zeros(N,1);
@@ -104,7 +101,7 @@ else % less than 5 points, return NaNs:
     out.ac1minima = NaN;
 end
 
-% Autocorrelation of the ACF (so damn meta!)
+% Autocorrelation of the ACF (so meta right now)
 out.ac1 = CO_AutoCorr(acf,1,'Fourier');
 out.ac2 = CO_AutoCorr(acf,2,'Fourier');
 out.ac3 = CO_AutoCorr(acf,3,'Fourier');
@@ -144,7 +141,7 @@ if Nac > 3 % Need at least four points to fit exponential
     %% fit linear to local maxima
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-0.1 1]);
     f = fittype('a*x+b','options',s);
-    if doplot
+    if doPlot
         figure('color','w');
         plot(maxr,acf(maxr),'ok');
     end

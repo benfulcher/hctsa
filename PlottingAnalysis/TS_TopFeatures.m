@@ -75,22 +75,30 @@ groupNames = groupNames.groupNames;
 switch whatTestStat
 case {'linear','linclass'}
     fprintf(1,'Using a linear classifier\n');
+    cfnName = 'linear classifier';
+    cfnUnit = '%';
     fn_testStat = @(XTrain,yTrain,Xtest,ytest) ...
                     mean(ytest == classify(Xtest,XTrain,yTrain,'linear'))*100;
     chanceLine = 100/length(unique(timeSeriesGroup));
 case 'diaglinear'
     fprintf(1,'A Naive Bayes classifier\n');
+    cfnName = 'naive bayes classifier';
+    cfnUnit = '%';
     fn_testStat = @(XTrain,yTrain,Xtest,ytest) ...
                     mean(ytest == classify(Xtest,XTrain,yTrain,'diaglinear'))*100;
     chanceLine = 100/length(unique(timeSeriesGroup));
 case {'svm','svmlinear'}
     fprintf(1,'A linear support vector machine\n');
+    cfnName = 'SVM classifier';
+    cfnUnit = '%';
     fn_testStat = @(XTrain,yTrain,Xtest,ytest) ...
                     mean(ytest == svmclassify(svmtrain(XTrain,yTrain, ...
                                 'Kernel_Function','linear'),Xtest))*100;
     chanceLine = 100/length(unique(timeSeriesGroup));
 case {'ttest','tstat'}
     fprintf(1,'A Welch''s t-statistic\n')
+    cfnName = 'Welch t-stat';
+    cfnUnit = '';
     if numGroups > 2
         error('Cannot use t-test as test statistic with more than two groups :/');
     end
@@ -111,8 +119,8 @@ testStat = giveMeStats(TS_DataMat,timeSeriesGroup);
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
 
 % Give mean and that expected from random classifier (may be a little overfitting)
-fprintf(1,'Mean %s across %u operations = %4.2f; (Random guessing for %u equiprobable classes = %4.2f)\n', ...
-        whatTestStat,numOps,mean(testStat),numGroups,chanceLine);
+fprintf(1,'Mean %s across %u operations = %4.2f%s; (Random guessing for %u equiprobable classes = %4.2f%s)\n', ...
+        cfnName,numOps,nanmean(testStat),cfnUnit,numGroups,chanceLine,cfnUnit);
 
 %-------------------------------------------------------------------------------
 %% Compute null distribution
@@ -120,15 +128,20 @@ fprintf(1,'Mean %s across %u operations = %4.2f; (Random guessing for %u equipro
 numRepeats = 10;
 testStat_rand = zeros(numOps,numRepeats);
 if doNull
-    fprintf(1,'Now for %u nulls...',numRepeats)
+    fprintf(1,'Now for %u nulls... ',numRepeats)
     tic
     for j = 1:numRepeats
+        if j<numRepeats
+            fprintf(1,'%u,',j)
+        else
+            fprintf(1,'%u',j)
+        end
         % Shuffle labels:
         groupLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
         testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels);
     end
     fprintf(1,' %u %s statistics computed in %s.\n',numOps*numRepeats,...
-                                    whatTestStat,BF_thetime(toc(timer)));
+                                    cfnName,BF_thetime(toc(timer)));
 end
 
 % --------------------------------------------------------------------------
@@ -136,13 +149,14 @@ end
 % --------------------------------------------------------------------------
 [testStat_sort, ifeat] = sort(testStat,'descend');
 
-topN = min(10,length(Operations));
+isNaN = isnan(testStat_sort);
+testStat_sort = testStat_sort(~isNaN);
+ifeat = ifeat(~isNaN);
+topN = min(20,length(Operations));
 for i = 1:topN
     fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations(ifeat(i)).ID, ...
             Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,testStat_sort(i));
 end
-
-
 
 % --------------------------------------------------------------------------
 %% Plot outputs
@@ -177,7 +191,7 @@ if any(ismember(whatPlots,'histogram'))
     plot(chanceLine*ones(2,1),[0,maxH],'--k')
     % Add mean of real distribution
     plot(mean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2)
-    xlabel(sprintf('Individual %s across %u features',whatTestStat,numOps))
+    xlabel(sprintf('Individual %s across %u features',cfnName,numOps))
     ylabel('Probability')
 end
 
@@ -187,7 +201,7 @@ end
 if any(ismember(whatPlots,'distributions'))
     subPerFig = 5; % subplots per figure
     ks_or_hist = 'ks'; % view as either histograms or kernel-smoothed distributions
-    colors = BF_getcmap('spectral',max(numGroups,5),1);
+    colors = BF_getcmap('set1',max(numGroups,5),1);
     if numGroups==2, colors = colors([2,4]); end
 
     numFigs = ceil(numTopFeatures/subPerFig);
@@ -234,8 +248,8 @@ if any(ismember(whatPlots,'distributions'))
                 end
                 ylabel('Probability')
             end
-            xlabel(sprintf('[%u] %s (%s=%4.2f)',Operations(op_ind).ID,Operations(op_ind).Name,...
-                                whatTestStat,testStat(op_ind)),'interpreter','none')
+            xlabel(sprintf('[%u] %s (%s=%4.2f%s)',Operations(op_ind).ID,Operations(op_ind).Name,...
+                                cfnName,testStat(op_ind),cfnUnit),'interpreter','none')
         end
     end
 end
@@ -251,19 +265,19 @@ if any(ismember(whatPlots,'cluster'))
     % (if it exists already, use that; otherwise compute it on the fly)
     tmp = load(whatDataFile,'op_clust');
     clustStruct = tmp.op_clust; clear tmp
-    if isfield(clustStruct,'Dij')
+    if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
         % pairwise distances already computed, stored in the HCTSA .mat file
         fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile)
         Dij = squareform(clustStruct.Dij);
         Dij = Dij(op_ind,op_ind);
     else
         % Compute correlations on the fly
-        Dij = BF_pdist(TS_DataMat(:,op_ind)');
+        Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
     end
     makeLabel = @(x) sprintf('[%u] %s (%4.2f)',Operations(x).ID,Operations(x).Name,...
                         testStat(x));
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
-    BF_ClusterDown(Dij,floor(numTopFeatures/5),'whatDistance','corr',...
+    BF_ClusterDown(Dij,floor(numTopFeatures/5),'whatDistance','general',...
                         'objectLabels',objectLabels);
     title(sprintf('Dependencies between %u top features',numTopFeatures))
 end

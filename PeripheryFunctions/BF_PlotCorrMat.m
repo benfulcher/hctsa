@@ -49,7 +49,7 @@ case '0to1' % assume [0,1] (a normalized distance metric)
     caxis([0,1])
     colormap(BF_getcmap('reds',9,0))
 otherwise
-    colormap(BF_getcmap('reds',9,0))
+    colormap(flipud(BF_getcmap('reds',9,0)))
 end
 
 % ------------------------------------------------------------------------------

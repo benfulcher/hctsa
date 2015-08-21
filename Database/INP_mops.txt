@@ -572,8 +572,7 @@ SY_LocalGlobal(y,'unicg',20)  SY_LocalGlobal_unicg20
 SY_LocalGlobal(y,'unicg',50)  SY_LocalGlobal_unicg50
 SY_LocalGlobal(y,'unicg',100)  SY_LocalGlobal_unicg100
 SY_LocalGlobal(y,'unicg',500)  SY_LocalGlobal_unicg500
-EN_wentropy(y,'shannon')	EN_wentropy_shannon
-EN_Shannonpdf(y)	EN_Shannonpdf
+EN_wentropy(y,'shannon')	    EN_wentropy_shannon
 EN_wentropy(y,'logenergy')		EN_wentropy_logenent
 EN_wentropy(y,'threshold',0.1)	EN_wentropy_threshent01
 EN_wentropy(y,'threshold',0.2)	EN_wentropy_threshent02
@@ -659,7 +658,6 @@ DN_Fit_mle(y,'geometric')	DN_Fit_mle_geometric
 DN_nlogL_norm(y)	DN_nlogL_norm
 DN_FitKernelSmooth(x,'numcross',[0.05,0.1,0.2,0.3,0.4,0.5],'area',[0.05,0.1,0.2,0.3,0.4,0.5],'arclength',[0.1,0.5,1,2])	DN_FitKernelSmoothraw
 DN_FitKernelSmooth(y)	DN_FitKernelSmoothzscore
-DN_Compare_zscore(x) DN_Compare_zscorex
 DK_timerev(y,1)	DK_timerev_1
 DK_timerev(y,2)	DK_timerev_2
 DK_timerev(y,3)	DK_timerev_3

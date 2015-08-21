@@ -500,7 +500,7 @@ case 'ops'
     structArray = Operations;
 end
 if ~forDatabase
-    fprintf(1,'Returning a structure array of %u %s!\n',length(structArray),theWhat);
+    fprintf(1,'Returning a structure array of %u %s.\n',length(structArray),theWhat);
     return
 end
 

@@ -1,4 +1,4 @@
-function R = BF_pdist(F,distMetric,toVector,opts,beSilent,minPropGood)
+function R = BF_pdist(dataMatrix,distMetric,toVector,opts,beSilent,minPropGood)
 % BF_pdist  Pairwise distances between rows of a data matrix.
 %
 % Same as pdist but then goes through and fills in NaNs with indiviually
@@ -42,7 +42,7 @@ if nargin < 6
     minPropGood = 0;
 end
 
-[n1, n2] = size(F); % We're computing for rows (operations are rows)
+[n1, n2] = size(dataMatrix); % We're computing for rows (operations are rows)
 
 % ------------------------------------------------------------------------------
 % Define the distance function
@@ -69,7 +69,7 @@ case 'mi'
     end
     if ~beSilent, fprintf(1,'Using a histogram with %u bins\n',nbins); end
 
-    goodies = ~isnan(F); % now we can deal with NaNs into design matrix
+    goodies = ~isnan(dataMatrix); % now we can deal with NaNs into design matrix
 
     mis = zeros(n1);
     mitimer = tic; % Way faster to not store the time taken for every iteration
@@ -80,8 +80,8 @@ case 'mi'
             goodj = goodies(j,:);
             goodboth = (goodi & goodj);
             % Using Information Dynamics Toolkit:
-            mis(i,j) = IN_MutualInfo(F(i,goodboth),F(j,goodboth),'gaussian');
-            % mis(i,j) = BF_MutualInformation(F(i,goodboth),F(j,goodboth),'quantile','quantile',nbins); % by quantile with nbins
+            mis(i,j) = IN_MutualInfo(dataMatrix(i,goodboth),dataMatrix(j,goodboth),'gaussian');
+            % mis(i,j) = BF_MutualInformation(dataMatrix(i,goodboth),dataMatrix(j,goodboth),'quantile','quantile',nbins); % by quantile with nbins
             mis(j,i) = mis(i,j);
         end
         if (mod(i,floor(n1/50)) == 0)
@@ -100,10 +100,10 @@ case {'corr_fast','abscorr_fast'}
     % for a small proportion of NaNs.
     % Ben Fulcher, 2014-06-26
     if ~beSilent,
-        fprintf(1,'Using BF_NaNCov to approximate correlations between %u objects...',size(F,1));
+        fprintf(1,'Using BF_NaNCov to approximate correlations between %u objects...',size(dataMatrix,1));
     end
     tic
-    R = BF_NaNCov(F',1,1);
+    R = BF_NaNCov(dataMatrix',1,1);
     if ~beSilent, fprintf(1,' Done in %s.\n',BF_thetime(toc)); end
 
 
@@ -114,9 +114,9 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
     end
     tic
     if strcmp(distMetric,'abscorr')
-        R = pdist(F,'corr');
+        R = pdist(dataMatrix,'corr');
     else
-        R = pdist(F,distMetric);
+        R = pdist(dataMatrix,distMetric);
     end
     R = squareform(R); % Make a matrix
     if ~beSilent
@@ -129,7 +129,7 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
         ij = (nanj >= nani); % only keep diagonal or upper diagonal entries
         nani = nani(ij);
         nanj = nanj(ij);
-        NotNaN = ~isnan(F);
+        NotNaN = ~isnan(dataMatrix);
 
         if ~beSilent
             fprintf(1,['Recalculating distances individually for %u NaN ' ...
@@ -142,7 +142,7 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
             jj = nanj(i);
             goodboth = (NotNaN(ii,:) & NotNaN(jj,:));
             if mean(goodboth) > minPropGood
-                R(ii,jj) = dij(F(ii,goodboth)',F(jj,goodboth)'); % Calculate the distance
+                R(ii,jj) = dij(dataMatrix(ii,goodboth)',dataMatrix(jj,goodboth)'); % Calculate the distance
             else
                 R(ii,jj) = NaN; % Not enough good, overlapping set of values -- store as NaN.
             end

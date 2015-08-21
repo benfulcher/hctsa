@@ -78,7 +78,7 @@ end
 % ------------------------------------------------------------------------------
 %% Get statistics from CWT
 % ------------------------------------------------------------------------------
-Nentries = size(coeffs,1)*size(coeffs,2); % number of entries in coeffs matrix
+numEntries = size(coeffs,1)*size(coeffs,2); % number of entries in coeffs matrix
 
 % 1) Coefficients, coeffs
 out.meanC = mean(coeffs(:));
@@ -87,7 +87,6 @@ out.medianabsC = median(abs(coeffs(:)));
 out.maxabsC = max(abs(coeffs(:)));
 out.maxonmedC = max(abs(coeffs(:)))/median(abs(coeffs(:)));
 
-
 % 2) Power, SC
 out.meanSC = mean(SC(:));
 out.medianSC = median(SC(:));
@@ -95,7 +94,7 @@ out.maxSC = max(SC(:));
 out.maxonmedSC = max(SC(:))/median(SC(:));
 
 % Proportion of coeffs matrix over ___ maximum (thresholded)
-poverfn = @(x) sum(SC(SC > x*max(SC(:))))/Nentries;
+poverfn = @(x) sum(SC(SC > x*max(SC(:))))/numEntries;
 out.pover99 = poverfn(0.99);
 out.pover98 = poverfn(0.88);
 out.pover95 = poverfn(0.95);

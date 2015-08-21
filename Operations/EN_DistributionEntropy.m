@@ -96,6 +96,8 @@ case 'hist' % Use histogram to calculate pdf
     end
     % Compute bin centers:
     xr = mean([binEdges(1:end-1); binEdges(2:end)]);
+    % Compute bin widths:
+    binWidths = diff(binEdges);
 
 case 'ks' % Use ksdensity to calculate pdf
     if isempty(numBins)
@@ -103,6 +105,7 @@ case 'ks' % Use ksdensity to calculate pdf
     else
         [px, xr] = ksdensity(y,'width',numBins,'function','pdf'); % uses specified width
     end
+    binWidths = ones(length(px),1)*(xr(2)-xr(1));
 
 otherwise
     error('Unknown distribution method -- specify ''ks'' or ''hist''') % error; must specify 'ks' or 'hist'
@@ -116,7 +119,7 @@ end
 % ------------------------------------------------------------------------------
 % (3) Compute the entropy sum and return it as output
 % ------------------------------------------------------------------------------
-% Changed to make 0*log0=0 ++Ben Fulcher, 2014-06-04:
-out = -sum(px(px>0).*log(px(px>0)))*(xr(2)-xr(1));
+% 0*log0 = 0:
+out = -sum(px(px>0).*log(px(px>0)./binWidths(px>0)));
 
 end

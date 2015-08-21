@@ -1,4 +1,4 @@
-function TS_InspectQuality(inspectWhat)
+function hadProblem = TS_InspectQuality(inspectWhat)
 % TS_InspectQuality   Statistics of quality labels from an hctsa analysis.
 %
 % This function loads the matrix in HCTSA_loc.mat, plots it, showing the
@@ -138,15 +138,24 @@ case 'master'
     colormap([0.1686,0.5137,0.7294; 0.8431,0.0980,0.1098]);
 
     ax.YTick = 1:8;
-    ax.YTickLabel = {'error','NaN','Inf','-Inf','complex','empty','link error'};
+    qLabels = {'error','NaN','Inf','-Inf','complex','empty','link error'};
+    ax.YTickLabel = qLabels;
 
     ax.XTick = 1:sum(hadProblem);
-    ax.XTickLabel = {MasterOperations(hadProblem).Label};
+    ax.XTickLabel = {MasterOperations(hadProblem).Code};
+    ax.XTickLabelRotation = 90;
 
     % Get rid of tex interpreter format (for strings with underscores)
     set(ax,'TickLabelInterpreter','none');
 
     title('Master operations producing special-valued outputs.','interpreter','none')
+
+    % List to screen:
+    for i = 1:length(qLabels)
+        if any(qualities(i,:))
+            ListEachMaster(MasterOperations(logical(qualities(i,:))),qLabels{i});
+        end
+    end
 
 case 'summary'
     % Summary as a line plot for operations that had some bad values
@@ -204,6 +213,9 @@ otherwise
     error('Unknown input option ''%s''',inspectWhat);
 end
 
+if nargout==0
+    clear all
+end
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
@@ -251,5 +263,12 @@ function checkSize(A)
     end
 end
 % ------------------------------------------------------------------------------
+function ListEachMaster(structureArray,text);
+    % Lists each element to screen
+    for i = 1:length(structureArray)
+        fprintf(1,'%s: [%u]%s\n',text,structureArray(i).ID,structureArray(i).Code)
+    end
+end
+
 
 end

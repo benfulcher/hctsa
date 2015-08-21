@@ -152,7 +152,7 @@ out.hhist = -sum(Trett(Trett>0).*log(Trett(Trett>0)));
 % ------------------------------------------------------------------------------
 numBins = 20;
 cglav = zeros(numBins,1);
-inds = round(linspace(0,NN,21));
+inds = round(linspace(0,NN,numBins+1));
 for i = 1:numBins
     cglav(i) = sum(Trett(inds(i)+1:inds(i+1)));
 end

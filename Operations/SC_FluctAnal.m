@@ -372,9 +372,9 @@ else
 end
 
 if isnan(out.r1_alpha) || isnan(out.r2_alpha)
-    out.alpharat = out.r1_alpha/out.r2_alpha;
-else
     out.alpharat = NaN;
+else
+    out.alpharat = out.r1_alpha/out.r2_alpha;
 end
 
 end

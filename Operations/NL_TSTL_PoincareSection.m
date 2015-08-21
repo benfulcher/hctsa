@@ -19,11 +19,12 @@ function out = NL_TSTL_PoincareSection(y,ref,embedParams)
 %---OUTPUTS: include statistics on the x- and y- components of these vectors on the
 % Poincare surface, on distances between adjacent points, distances from the
 % mean position, and the entropy of the vector cloud.
+%
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
 
 % Another thing that could be cool to do is to analyze variation in the plots as
 % ref changes... (not done here)
 %
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -202,6 +203,7 @@ for i = 1:length(numPartitions)
     out.(sprintf('zerospbox%u',numPartitions(i))) = sum(pbox(:) == 0);
     out.(sprintf('meanpbox%u',numPartitions(i))) = mean(pbox(:));
     out.(sprintf('rangepbox%u',numPartitions(i))) = range(pbox(:));
+    % This probably needs to be normalized:
     out.(sprintf('hboxcounts%u',numPartitions(i))) = -sum(pbox(pbox > 0).*log(pbox(pbox > 0)));
     out.(sprintf('tracepbox%u',numPartitions(i))) = sum(diag(pbox)); % trace
 end
@@ -211,22 +213,22 @@ end
 % think this is enough for now.
 
 % ------------------------------------------------------------------------------
-    function boxcounts = subcountboxes(x,y,nbox)
-        boxcounts = zeros(nbox);
-        % boxes are quantiles along each axis
-        xbox = quantile(x,linspace(0,1,nbox+1));
-        ybox = quantile(y,linspace(0,1,nbox+1));
-        xbox(end) = xbox(end)+1;
-        ybox(end) = ybox(end)+1;
+function boxcounts = subcountboxes(x,y,nbox)
+    boxcounts = zeros(nbox);
+    % boxes are quantiles along each axis
+    xbox = quantile(x,linspace(0,1,nbox+1));
+    ybox = quantile(y,linspace(0,1,nbox+1));
+    xbox(end) = xbox(end)+1;
+    ybox(end) = ybox(end)+1;
 
-        for ii = 1:nbox % x
-            rx = (x >= xbox(ii) & x < xbox(ii+1)); % these x are in range
-            for jj = 1:nbox % y
-                % only need to look at those ys for which the xs are in range
-                boxcounts(ii,jj) = sum(y(rx) >= ybox(jj) & y(rx) < ybox(jj+1));
-            end
+    for ii = 1:nbox % x
+        rx = (x >= xbox(ii) & x < xbox(ii+1)); % these x are in range
+        for jj = 1:nbox % y
+            % only need to look at those ys for which the xs are in range
+            boxcounts(ii,jj) = sum(y(rx) >= ybox(jj) & y(rx) < ybox(jj+1));
         end
     end
+end
 % ------------------------------------------------------------------------------
 
 end

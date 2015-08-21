@@ -77,7 +77,7 @@ clear inputP;
 % Do the linkage clustering:
 %-------------------------------------------------------------------------------
 numItems = length(distMat);
-fprintf(1,'Computing linkage information for %ux%u gene expression data...',...
+fprintf(1,'Computing linkage information for %ux%u data...',...
             numItems,numItems);
 links = linkage(distMat,linkageMeth);
 fprintf(1,' Done.\n');
@@ -146,11 +146,16 @@ subplot(1,6,2:5)
 ax2 = gca;
 switch whatDistance
 case 'corr'
-    % Input is a absolute correlation matrix:
+    % Input is a correlation matrix:
     BF_PlotCorrMat(1-distMat_cl);
+case 'abscorr'
+    % Input is a correlation matrix -> absolute value distances
+    BF_PlotCorrMat(1-abs(distMat_cl));
 case 'general'
     % Input is a general distance matrix:
     BF_PlotCorrMat(distMat_cl);
+otherwise
+    error('Unknown distance ''%s''',whatDistance);
 end
 
 % Add rectangles to indicate highly correlated clusters of statistics:

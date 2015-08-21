@@ -1,8 +1,5 @@
 function out = CO_AddNoise(y,tau,amiMethod,extraParam,randomSeed)
-% CO_AddNoise
-%
-% Analyzes changes in the automutual information function with the addition of
-% noise to the input time series.
+% CO_AddNoise  Changes in the automutual information with the addition of noise
 %
 % Adds Gaussian-distributed noise to the time series with increasing standard
 % deviation, eta, across the range eta = 0, 0.1, ..., 2, and measures the
@@ -63,11 +60,14 @@ function out = CO_AddNoise(y,tau,amiMethod,extraParam,randomSeed)
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
 
-doPlot = 0; % plot outputs to figure
+doPlot = 1; % plot outputs to figure
 
 % ------------------------------------------------------------------------------
 %% Check inputs
 % ------------------------------------------------------------------------------
+% Expecting a z-scored input time series:
+iszscored = BF_iszscored(y);
+
 if nargin < 2
     tau = []; % set default in CO_HistogramAMI
 end
@@ -84,7 +84,7 @@ end
 % ------------------------------------------------------------------------------
 % Preliminaries
 % ------------------------------------------------------------------------------
-noiseRange = (0:0.1:2); % compare properties across this noise range
+noiseRange = linspace(0,3,50); % compare properties across this noise range
 BF_ResetSeed(randomSeed); % reset the random seed if specified
 numRepeats = length(noiseRange);
 amis = zeros(numRepeats,1);
@@ -122,19 +122,16 @@ out.meanch = mean(diff(amis));
 out.ac1 = CO_AutoCorr(amis,1,'Fourier');
 out.ac2 = CO_AutoCorr(amis,2,'Fourier');
 
-% Noise level required to reduce ami to 1/e original value:
-out.ecorrLength = noiseRange(find(amis<amis(1)/exp(1),1,'first'));
-
-% First time amis drop under value x: 1, 0.5, 0.2, 0.1
-firstUnderVals = [1,0.5,0.2,0.1];
+% Noise level required to reduce ami to proportion x of its lag-zero value:
+firstUnderVals = [0.75,0.5,0.25];
 for i = 1:length(firstUnderVals)
-    out.(sprintf('firstUnder%u',firstUnderVals(i)*10)) = firstUnder_fn(firstUnderVals(i),noiseRange,amis);
+    out.(sprintf('firstUnder%u',firstUnderVals(i)*100)) = firstUnder_fn(firstUnderVals(i)*amis(1),noiseRange,amis);
 end
 
 % AMI at actual noise levels: 0.5, 1, 1.5 and 2
 noiseLevels = [0.5,1,1.5,2];
 for i = 1:length(noiseLevels)
-    out.(sprintf('ami_at_%u',noiseLevels(i)*10)) = amis(noiseRange==noiseLevels(i));
+    out.(sprintf('ami_at_%u',noiseLevels(i)*10)) = amis(find(noiseRange>=noiseLevels(i),1,'first'));
 end
 
 % ------------------------------------------------------------------------------

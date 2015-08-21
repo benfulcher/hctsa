@@ -1,5 +1,5 @@
 function out = CO_Embed2(y,tau)
-% CO_Embed2
+% CO_Embed2     2-dimensional embedding space
 %
 % Embeds the z-scored time series in a two-dimensional time-delay
 % embedding space with a given time-delay, tau, and outputs a set of
@@ -84,11 +84,11 @@ out.theta_ac3 = CO_AutoCorr(theta,3,'Fourier');
 out.theta_mean = mean(theta);
 out.theta_std = std(theta);
 
-x = linspace(-pi/2,pi/2,11); % 10 bins in the histogram
-n = histc(theta,x);
-n(end-1) = n(end-1)+n(end); n = n(1:end-1); n = n/sum(n);
-out.hist10std = std(n);
-out.histent = -sum(n(n>0).*log(n(n>0)));
+binEdges = linspace(-pi/2,pi/2,11); % 10 bins in the histogram
+[px,binEdges] = histcounts(theta,binEdges,'Normalization','probability');
+binWidths = diff(binEdges);
+out.hist10std = std(px);
+out.histent = -sum(px(px>0).*log(px(px>0)./binWidths(px>0)));
 
 % Stationarity in fifths of the time series
 % Use histograms with 4 bins

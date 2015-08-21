@@ -245,20 +245,9 @@ out.evnlogL = evlike(paramhat,k);
 % ------------------------------------------------------------------------------
 %% Entropy of distribution:
 % ------------------------------------------------------------------------------
-% for a range of bins
+out.entropy = EN_DistributionEntropy(k,'hist','sqrt');
 
-binr = (10:100); % range of nbins to try
-h = zeros(size(binr)); % distributional entropy
-for i = 1:length(binr);
-    N = histcounts(k,binr(i),'Normalization','probability');
-    h(i) = - sum(N(N>0).*log(N(N>0)));
-end
-out.maxent = max(h);
-out.minnbinmaxent = binr(find(h == max(h),1,'first'));
-out.meanent = mean(h);
-diffh = diff(h);
-out.meanchent = mean(diffh(diffh~=0));
-
+% Autocorrelations:
 out.kac1 = CO_AutoCorr(k,1,'Fourier');
 out.kac2 = CO_AutoCorr(k,2,'Fourier');
 out.kac3 = CO_AutoCorr(k,3,'Fourier');
