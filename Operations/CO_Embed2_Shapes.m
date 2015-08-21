@@ -128,15 +128,13 @@ out.iqr = iqr(counts);
 out.iqronrange = out.iqr/range(counts);
 
 % --- Distribution
-[N,binEdges] = histcounts(counts,'BinMethod','sqrt','Normalization','probability');
+% Using the sqrt binning method:
+[binP,binEdges] = histcounts(counts,'BinMethod','sqrt','Normalization','probability');
 binCentres = mean([binEdges(1:end-1); binEdges(2:end)]);
-[out.mode_val, mix] = max(N);
+[out.mode_val, mix] = max(binP);
 out.mode = binCentres(mix);
-
-% --- Entropy in a 10-bin histogram
-numBins = 10;
-N = histcounts(counts,numBins,'Normalization','probability');
-out.hist10_ent = sum(N(N > 0).*log(N(N > 0)));
+% --- histogram entropy:
+out.hist_ent = sum(binP(binP > 0).*log(binP(binP > 0)));
 
 if doPlot
 	plot(binCentres,poisspdf(binCentres,l),'g'); hold on;
