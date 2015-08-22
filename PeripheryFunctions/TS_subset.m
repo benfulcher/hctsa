@@ -1,5 +1,5 @@
-function [TS_DataMat,TimeSeries,Operations] = TS_subset(whatData,ts_ids_keep,op_ids_keep,doSave)
-% TS_subset save a given subset of data, based on time series and operation IDs
+function [TS_DataMat,TimeSeries,Operations] = TS_subset(whatData,ts_ids_keep,op_ids_keep,doSave,outputFileName)
+% TS_subset     Save a given subset of data, based on time series and operation IDs
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -31,6 +31,12 @@ if nargin < 3
 end
 if nargin < 4
     doSave = 1;
+end
+if nargin < 5
+    outputFileName = regexprep(whatDataFile,'.mat','_subset.mat');
+end
+if ~strcmp(outputFileName(end-3:end),'.mat')
+    error('Specify a .mat filename as output');
 end
 
 if isempty(ts_ids_keep) && isempty(op_ids_keep)
@@ -70,20 +76,26 @@ if doSave
     end
 
     % Copy to a new subset .mat file, then save over with the new subset variables
-    outputFileName = regexprep(whatDataFile,'.mat','_subset.mat');
     copyfile(whatDataFile,outputFileName);
     save(outputFileName,'TS_DataMat','TimeSeries','Operations','-append');
 
-    % Remove clustering information, because it will no longer be valid
-    ts_clust = struct('distanceMetric','none','Dij',[],...
-                    'ord',1:size(TS_DataMat,1),'linkageMethod','none');
-    op_clust = struct('distanceMetric','none','Dij',[],...
-                    'ord',1:size(TS_DataMat,2),'linkageMethod','none');
-    save(outputFileName,'ts_clust','op_clust','-append');
-
-    % Add the quality and calctime matrices if they exist:
+    % Add additional variables to the new file, if they exist in the previous file:
     varNames = whos('-file',whatDataFile);
     varNames = {varNames.name};
+
+    % Remove clustering information, because it will no longer be valid
+    if ismember('ts_clust',varNames)
+        ts_clust = struct('distanceMetric','none','Dij',[],...
+                    'ord',1:size(TS_DataMat,1),'linkageMethod','none');
+        save(outputFileName,'ts_clust','-append');
+    end
+    if ismember('op_clust',varNames)
+        op_clust = struct('distanceMetric','none','Dij',[],...
+                    'ord',1:size(TS_DataMat,2),'linkageMethod','none');
+        save(outputFileName,'op_clust','-append');
+    end
+
+    % Add the quality and calctime matrices if they exist:
     if ismember('TS_Quality',varNames)
         load(whatDataFile,'TS_Quality')
         TS_Quality = TS_Quality(i_keep.TimeSeries,i_keep.Operations);

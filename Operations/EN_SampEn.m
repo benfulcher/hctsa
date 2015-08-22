@@ -65,18 +65,19 @@ end
 % ------------------------------------------------------------------------------
 % Use the physionet code to calculate the Sample Entropy using these parameters:
 % ------------------------------------------------------------------------------
-[e, p, ~, ~] = PN_sampenc(y,M,r);
+[sampEn, p, ~, ~] = PN_sampenc(y,M,r);
 
 % ------------------------------------------------------------------------------
 % Compute outputs from the code
 % ------------------------------------------------------------------------------
+% sampEn is just -log(p), so there's no need to record both
 for i = 1:M
     % Much nicer to use dynamic field referencing
-    out.(sprintf('p%u',i)) = p(i);
-    out.(sprintf('sampen%u',i)) = e(i);
+    % out.(sprintf('p%u',i)) = p(i);
+    out.(sprintf('sampen%u',i)) = sampEn(i);
 end
 
 out.meanchsampen = mean(diff(e));
-out.meanchp = mean(diff(p));
+% out.meanchp = mean(diff(p));
 
 end
