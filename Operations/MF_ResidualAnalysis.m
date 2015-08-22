@@ -1,16 +1,15 @@
-% ------------------------------------------------------------------------------
-% MF_ResidualAnalysis
-% ------------------------------------------------------------------------------
-% 
-% Given an input residual time series residuals, e, this function exports a
-% structure with fields corresponding to structural tests on the residuals.
+function out = MF_ResidualAnalysis(e)
+% MF_ResidualAnalysis   Analysis of residuals from a model fit.
+%
+% Given an input residual time series residuals, e, this function returns a
+% structure with fields corresponding to statistical tests on the residuals.
 % These are motivated by a general expectation of model residuals to be
 % uncorrelated.
 %
 %---INPUT:
 % e, should be raw residuals as prediction minus data (e = yp - y) as a column
-%       vector. Will take absolute values / even powers of e as necessary.
-% 
+%       vector.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -24,17 +23,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_ResidualAnalysis(e)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -45,6 +42,11 @@ BF_CheckToolbox('identification_toolbox')
 
 if size(e,2) > size(e,1)
     e = e'; % make sure residuals are a column vector
+end
+if all(e>0)
+    warning('Very weird that all model residuals are positive...')
+elseif all(e<0)
+    warning('Very weird that all model residuals are negative...')
 end
 ee = iddata(e,[],1);
 N = length(e);

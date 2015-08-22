@@ -1,26 +1,24 @@
-% ------------------------------------------------------------------------------
-% EN_MS_shannon
-% ------------------------------------------------------------------------------
-% 
-% Calculates the approximate Shannon entropy of a time series using an
-% nbin-bin encoding and depth-symbol sequences.
+function out = EN_MS_shannon(y,nbin,depth)
+% EN_MS_shannon     Approximate Shannon entropy of a time series.
+%
+% Uses an nbin-bin encoding and depth-symbol sequences.
 % Uniform population binning is used, and the implementation uses Michael Small's code
 % MS_shannon.m (renamed from the original, simply shannon.m)
-% 
+%
 % cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
 % Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
 % Vol. 52 (2005)
 % Michael Small's code is available at available at http://small.eie.polyu.edu.hk/matlab/
-% 
+%
 % In this wrapper function, you can evaluate the code at a given n and d, and
 % also across a range of depth and nbin to return statistics on how the obtained
 % entropies change.
-% 
+%
 %---INPUTS:
 % y, the input time series
 % nbin, the number of bins to discretize the time series into (i.e., alphabet size)
 % depth, the length of strings to analyze
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,17 +32,19 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = EN_MS_shannon(y,nbin,depth)
+%-------------------------------------------------------------------------------
+% Check Inputs:
+%-------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(nbin)
     nbin = 2; % two bins to discretize the time series, y
@@ -108,7 +108,7 @@ end
 if (length(nbin) > 1) && (length(depth) > 1)
     nbins = length(nbin);
     ndepths = length(depth);
-    
+
     ents = zeros(nbins,ndepths);
     for i = 1:nbins
         for j = 1:ndepths

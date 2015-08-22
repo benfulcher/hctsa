@@ -1,52 +1,48 @@
-% ------------------------------------------------------------------------------
-% NL_TISEAN_d2
-% ------------------------------------------------------------------------------
-% 
-% Implements the d2 routine from the popular TISEAN package for
-% nonlinear time-series analysis:
-% 
-% cf. "Practical implementation of nonlinear time series methods: The TISEAN
-% package", R. Hegger, H. Kantz, and T. Schreiber, Chaos 9(2) 413 (1999)
-% 
-% The TISEAN package is available here:
-% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
-% 
-% The TISEAN routines are performed in the command line using 'system' commands
-% in Matlab, and require that TISEAN is installed and compiled, and able to be
-% executed in the command line.
-% 
+function out = NL_TISEAN_d2(y, tau, maxm, theilerWin)
+% NL_TISEAN_d2  d2 routine from the TISEAN package.
+%
 % The function estimates the correlation sum, the correlation dimension and
 % the correlation entropy of a given time series, y. Our code uses the outputs
 % from this algorithm to return a set of informative features about the results.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, input time series
-% 
+%
 % tau, time-delay (can be 'ac' or 'mi' for first zero-crossing of
 %       autocorrelation function, or first minimum of the automutual
 %       information)
-%       
+%
 % maxm, the maximum embedding dimension
-% 
+%
 % theilerWin, the Theiler window
-% 
+
+% cf. "Practical implementation of nonlinear time series methods: The TISEAN
+% package", R. Hegger, H. Kantz, and T. Schreiber, Chaos 9(2) 413 (1999)
+%
+% The TISEAN package is available here:
+% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
+%
+% The TISEAN routines are performed in the command line using 'system' commands
+% in Matlab, and require that TISEAN is installed and compiled, and able to be
+% executed in the command line.
+%
 % cf. "Spurious dimension from correlation algorithms applied to limited
 % time-series data", J. Theiler, Phys. Rev. A, 34(3) 2427 (1986)
-% 
+%
 % cf. "Nonlinear Time Series Analysis", Cambridge University Press, H. Kantz
 % and T. Schreiber (2004)
-% 
+%
 % Taken's estimator is computed for the correlation dimension, as well as related
 % statistics, including other dimension estimates by finding appropriate scaling
 % ranges, and searching for a flat region in the output of TISEAN's h2
 % algorithm, which indicates determinism/deterministic chaos.
-% 
+%
 % To find a suitable scaling range, a penalized regression procedure is used to
 % determine an optimal scaling range that simultaneously spans the greatest
 % range of scales and shows the best fit to the data, and return the range, a
 % goodness of fit statistic, and a dimension estimate.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -60,17 +56,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TISEAN_d2(y, tau, maxm, theilerWin)
 
 N = length(y); % data length (number of samples)
 
@@ -125,6 +119,8 @@ if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out?
     else
         error('Call to TISEAN function ''d2'' failed: %s',res)
     end
+elseif strfind(res,'dyld: Library not loaded')
+    error('DYLD library not found -- try recompiling TISEAN:\n%s',res);
 end
 
 % Check that all required files were generated (could not be due to problems with path or filename?)
@@ -160,7 +156,7 @@ end
 % w = zeros(maxm+1,1);
 % c2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
 % fclose(fid_c2); % close the file
-% 
+%
 % % c2dat now contains the correlation sums (second column)
 % % as a function of the length scale epsilon (first column) for
 % % the different embedding dimension (cell components 1--10)
@@ -182,7 +178,7 @@ catch
     delete([filePath '.c2']); delete([filePath '.d2']); delete([filePath '.h2'])
     error('There are probably some Inf and NAN values in the TISEAN output files...?')
 end
-    
+
 % c2gdat contains r (1), the Gaussian kernel correlation integral (2), and its
 % logarithmic derivative with respect to r (3)
 
@@ -341,7 +337,7 @@ catch
     % out = NaN;
     % return
 end
-    
+
 % rows: increasing embedding m
 % columns: stpt, endpt, goodness, dim
 out.bend2g_mindim = min(benfindd2g(:,4));
@@ -444,13 +440,13 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
     function dimdat = SUB_readTISEANout(s,maxm,blocker,nc)
         % blocker the string distinguishing sections of output
         % nc number of columns in string
-        
+
         w = strmatch(blocker,s);
         if length(w)~=maxm
             error('error reading TISEAN output');
         end
         w(end+1) = length(s)+1; % as if there were another marker at the entry after the last data row
-        
+
         dimdat = cell(maxm,1); % stores data for each embedding dimension
         for ii = 1:maxm
             ss = s(w(ii)+1:w(ii+1)-1);
@@ -494,7 +490,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
                 takensp(ii) = NaN;
             end
         end
-        
+
     end
 % ------------------------------------------------------------------------------
 
@@ -505,7 +501,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         % match up. (i.e., to exhibit scaling at the same time)
         % starting point must be in first half of data
         % end point must be in last half of data
-        
+
         l = size(x,2);
         gamma = 0.002; % regularization parameter selected empirically
         % for a consistent regularizer, need to data in [0,1] so weights
@@ -524,8 +520,8 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
                 for k = 1:nock
                     spreads(k) = mean((x(:,stptr(i)+k-1)-mm).^2);
                 end
-                
-                mybad(i,j) = mean(spreads)-gamma*nock; % want to still maximize length(x)    
+
+                mybad(i,j) = mean(spreads)-gamma*nock; % want to still maximize length(x)
             end
         end
         [a, b] = find(mybad == min(min(mybad)),1,'first'); % this defines the 'best' scaling range
@@ -536,8 +532,8 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         out.goodness = min(mybad(:));
         out.dimest = mean(mean(x(:,ri1:ri2)));
         out.dimstd = std(mean(x(:,ri1:ri2)));
-        
-        
+
+
 %         hold off;
 %         plot(1:l,x,'o-k');
 %         hold on;
@@ -555,7 +551,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         % match up. (i.e., to exhibit scaling at the same time)
         % starting point must be in first half of data
         % end point must be in last half of data
-        
+
         l = size(x,2);      % number of distance/scaling points per dimension
         ndim = size(x,1);   % number of dimensions
         gamma = 1E-3;       % regularization parameter selected 'empirically'
@@ -563,7 +559,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         stptr = 1:floor(l/2)-1; % must be in the first half
         endptr = ceil(l/2)+1:l; % must be in second half
         results = zeros(ndim,4); %stpt, endpt, goodness, dim
-        
+
         for c = 1:ndim
             mybad = zeros(length(stptr),length(endptr));
             v = x(c,:); % the vector of data for length scales
@@ -578,7 +574,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             results(c,2) = endptr(b);
             results(c,3) = min(mybad(:));
             results(c,4) = mean(v(stptr(a):endptr(b)));
-            
+
 %             hold off;
 %             plot(1:l,v,'o-k');
 %             hold on;
@@ -586,7 +582,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %             hold off;
 %             keyboard
         end
-        
+
     end
 % ------------------------------------------------------------------------------
 
@@ -607,10 +603,10 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         for ii = 1:nn % rescales each dimension so all share common scale
             thecell{ii} = thecell{ii}(thecell{ii}(:,1) >= mini & thecell{ii}(:,1) <= maxi,:);
         end
-        
+
         thevector = thecell{1}(:,1);
         ee = length(thevector);
-        
+
         goodones = cellfun(@(x)length(x),thecell) == ee;
         if ~all(goodones)
             % there's a bug in TISEAN where sometimes there are repeated 'x'
@@ -621,7 +617,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
                 thecell{theproblems(ii)} = thecell{theproblems(ii)}(m,:);
             end
         end
-        
+
         thematrix = zeros(nn,ee); % across the rows for dimensions; across columns for lengths/epsilons
         for ii = 1:nn
             try thematrix(ii,:) = thecell{ii}(:,thecolumn);
@@ -629,7 +625,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
                 return
             end
         end
-        
+
     end
 % ------------------------------------------------------------------------------
 
@@ -637,10 +633,10 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
     function out = SUB_findmmin(ds)
         % estimated dimensions for d = 1, ... , m
         % estimates when they stabilize to a limiting value
-        
+
         % algorithm leaves out starting at the start, progressively,
         % to minimize variance
-        
+
         l = length(ds);
         gamma = 0.1; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
         dsraw = ds; % before normalization
@@ -657,7 +653,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         out.ri1 = stptr(a); % minimum index of scaling range
         out.goodness = min(mybad);
         out.stabled = mean(dsraw(a:end));
-        
+
 %         hold off;
 %         plot(1:l,ds,'o-k');
 %         hold on;
@@ -668,7 +664,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         p = polyfit([1:l]',ds,1);
         pfit = polyval(p,1:l);
         out.linrmserr = sqrt(mean((ds'-pfit).^2));
-        
+
     end
 % ------------------------------------------------------------------------------
 
@@ -682,10 +678,10 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         stptr = 1:floor(l/2)-1; % must be in the first half
         endptr = ceil(l/2)+1:l; % must be in second half
         results = zeros(ndim,4); %stpt, endpt, goodness, dim
-        
+
         for c = 1:ndim
             % () find best scaling region in which to estimate gradient
-            
+
             mybad = zeros(length(stptr),length(endptr));
             v = diff(Y(c,:)).*dx; % make transformation to vector of local gradients
             vnorm = (v-min(v))./(max(v)-min(v)); % normalize regardless of range
@@ -699,7 +695,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             results(c,2) = endptr(b);
             results(c,3) = min(mybad(:));
             results(c,4) = mean(v(stptr(a):endptr(b)));
-            
+
 %             hold off;
 %             plot(v,'.k')
 %             hold on;
@@ -718,7 +714,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         % for each embedding dimension (size(Y,1)), returns the goodness of
         % flatness in first column, and the mean of the quantity in Y
         % across this best range
-        
+
         dx = log10(x(2))-log10(x(1));
         ndim = size(Y,1); % number of embeding dimensions
         gamma = 1E-3; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
@@ -726,7 +722,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
         stptr = 5:floor(l/2)-1; % must be in the first half
         endptr = ceil(l/2)+1:l-5; % must be in second half
         results = zeros(ndim,2); % h2, goodness
-        
+
         for c = 1:ndim
             % regions that deviate least from zero
             mybad = zeros(length(stptr),length(endptr));
@@ -743,11 +739,11 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
                 end
             end
             [a, b] = find(mybad == min(mybad(:)),1,'first'); % this defines the 'best' scaling range
-            
+
             % best range for being near-flat: ri1--ri2
             ri1 = stptr(a);
             ri2 = endptr(b);
-            
+
             % goodness function: is this range close to zero compared to rest?
             results(c,1) = min(mybad(:)); % goodness
 %             if results(c,1)<-1 % good enough
@@ -755,7 +751,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %             else
 %                 results(c,2) = NaN; % no scaling
 %             end
-            
+
 %             hold off;
 %             plot(v,'.k')
 %             hold on;

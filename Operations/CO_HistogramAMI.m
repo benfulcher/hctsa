@@ -1,32 +1,30 @@
-% ------------------------------------------------------------------------------
-% CO_HistogramAMI
-% ------------------------------------------------------------------------------
-% 
-% Calculates the automutual information using histograms, using a given approach
-% to binning the data.
-% 
-% Uses hist2.m function (renamed NK_hist2.m here) by Nedialko Krouchev, obtained
-% from Matlab Central,
-% http://www.mathworks.com/matlabcentral/fileexchange/12346-hist2-for-the-people
-% [[hist2 for the people by Nedialko Krouchev, 20 Sep 2006 (Updated 21 Sep 2006)]]
-% 
+function out = CO_HistogramAMI(y,tau,meth,numBins)
+% CO_HistogramAMI      The automutual information of the distribution using histograms.
+%
+% The approach used to bin the data is provided.
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % tau, the time-lag (1 by default)
-% 
+%
 % meth, the method of computing automutual information:
 %           (i) 'even': evenly-spaced bins through the range of the time series,
 %           (ii) 'std1', 'std2': bins that extend only up to a multiple of the
 %                                standard deviation from the mean of the time
 %                                series to exclude outliers,
 %           (iii) 'quantiles': equiprobable bins chosen using quantiles.
-% 
+%
 % numBins, the number of bins, required by some methods, meth (see above)
-% 
+%
 %---OUTPUT: the automutual information calculated in this way.
-% 
+
+% Uses the hist2 function (renamed NK_hist2.m here) by Nedialko Krouchev, obtained
+% from Matlab Central,
+% http://www.mathworks.com/matlabcentral/fileexchange/12346-hist2-for-the-people
+% [[hist2 for the people by Nedialko Krouchev, 20 Sep 2006 (Updated 21 Sep 2006)]]
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -40,17 +38,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_HistogramAMI(y,tau,meth,numBins)
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:
@@ -83,21 +79,21 @@ end
 switch meth
     case 'even'
         b = linspace(min(y)-0.1,max(y)+0.1,numBins+1); % +0.1 to make sure all points included
-        
+
     case 'std1' % std bins up to 1
         b = linspace(-1,1,numBins+1);
         if min(y) < -1; b = [min(y)-0.1, b]; end
         if max(y) > 1; b = [b, max(y)+0.1]; end
-            
+
     case 'std2'
         b = linspace(-2,2,numBins+1);
         if min(y) < -2; b = [min(y)-0.1, b]; end
         if max(y) > 2; b = [b, max(y)+0.1]; end
-            
+
     case 'quantiles' % use quantiles with ~equal number in each bin
         b = quantile(y,linspace(0,1,numBins+1));
         b(1) = b(1) - 0.1; b(end) = b(end) + 0.1;
-        
+
     otherwise
         error('Unknown method ''%s''',meth)
 end

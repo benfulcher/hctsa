@@ -1,16 +1,12 @@
-% ------------------------------------------------------------------------------
-% SB_CoarseGrain
-% ------------------------------------------------------------------------------
-% 
-% Coarse-grains the continuous time series to a discrete alphabet
-% by a given method.
-% 
+function yth = SB_CoarseGrain(y,howtocg,numGroups)
+% SB_CoarseGrain   Coarse-grains a continuous time series to a discrete alphabet.
+%
 %---INPUTS:
 % howtocg, the method of coarse-graining
-% 
+%
 % numGroups, either specifies the size of the alphabet for 'quantile' and 'updown'
 %       or sets the timedelay for the embedding subroutines
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -24,17 +20,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function yth = SB_CoarseGrain(y,howtocg,numGroups)
 
 % ------------------------------------------------------------------------------
 % Check inputs, preliminaries:
@@ -95,13 +89,13 @@ switch howtocg
         for i = 1:numGroups
             yth(y > th(i) & y <= th(i+1)) = i;
         end
-        
+
     case 'embed2quadrants' % divides based on quadrants in a 2-D embedding space
 		% create alphabet in quadrants -- {1,2,3,4}
 		yth = zeros(length(m1),1);
 		yth(q1r) = 1; yth(q2r) = 2; yth(q3r) = 3; yth(q4r) = 4;
 
-	case 'embed2octants' % divide based on octants in 2-D embedding space		
+	case 'embed2octants' % divide based on octants in 2-D embedding space
 		o1r = q1r(m2(q1r)<m1(q1r)); % points in octant 1
 		o2r = q1r(m2(q1r)>=m1(q1r)); % points in octant 2
 		o3r = q2r(m2(q2r)>=-m1(q2r)); % points in octant 3
@@ -119,6 +113,6 @@ end
 
 if any(yth == 0)
     error('All values in the sequence were not assigned to a group')
-end 
+end
 
 end

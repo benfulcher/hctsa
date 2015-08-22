@@ -1,19 +1,17 @@
-% ------------------------------------------------------------------------------
-% SB_MotifThree
-% ------------------------------------------------------------------------------
-% 
-% As for SB_MotifTwo, but using an alphabet of three letters, i.e., looks for
-% motifs in a course-graining of the time series to an alphabet of three letters
-% 
+function out = SB_MotifThree(y,cgHow)
+% SB_MotifThree     Motifs in a coarse-graining of a time series to a 3-letter alphabet
+%
+% (As SB_MotifTwo but with a 3-letter alphabet)
+%
 %---INPUTS:
 % y, time series to analyze
 % cgHow, the coarse-graining method to use:
 %       (i) 'quantile': equiprobable alphabet by time-series value
 %       (ii) 'diffquant': equiprobably alphabet by time-series increments
-% 
+%
 %---OUTPUTS:
 % Statistics on words of length 1, 2, 3, and 4.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -27,17 +25,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SB_MotifThree(y,cgHow)
 
 if nargin < 2 || isempty(cgHow)
     cgHow = 'quantile';
@@ -46,10 +42,10 @@ end
 switch cgHow
 	case 'quantile'
 		yt = SB_CoarseGrain(y,'quantile',3);
-        
+
 	case 'diffquant'
 		yt = SB_CoarseGrain(diff(y),'quantile',3);
-        
+
     otherwise
         error('Unknown coarse-graining method ''%s''');
 end
@@ -73,7 +69,7 @@ end
 out.a = out1(1); % proportion of a
 out.b = out1(2); % proportion of b
 out.c = out1(3); % proportion of c
-out.h = -sum(out1(out1 > 0).*log(out1(out1 > 0))); % entropy of this result
+out.h = f_entropy(out1); % entropy of this result
 
 
 % ------------------------------------------------------------------------------
@@ -100,7 +96,7 @@ out.aa = out2(1,1); out.ab = out2(1,2); out.ac = out2(1,3);
 out.ba = out2(2,1); out.bb = out2(2,2); out.bc = out2(2,3);
 out.ca = out2(3,1); out.cb = out2(3,2); out.cc = out2(3,3);
 
-out.hh = -sum(out2(out2 > 0).*log(out2(out2 > 0)))/2; % entropy of this result
+out.hh = f_entropy(out2); % entropy of this result
 
 % ------------------------------------------------------------------------------
 %% Words of length 3
@@ -136,7 +132,7 @@ out.caa = out3(3,1,1); out.cab = out3(3,1,2); out.cac = out3(3,1,3);
 out.cba = out3(3,2,1); out.cbb = out3(3,2,2); out.cbc = out3(3,2,3);
 out.cca = out3(3,3,1); out.ccb = out3(3,3,2); out.ccc = out3(3,3,3);
 
-out.hhh = -sum(out3(out3 > 0).*log(out3(out3 > 0)))/3; % entropy of this result
+out.hhh = f_entropy(out3); % entropy of this result
 
 % ------------------------------------------------------------------------------
 %% Words of length 4
@@ -204,6 +200,12 @@ out.ccaa = out4(3,3,1,1); out.ccab = out4(3,3,1,2); out.ccac = out4(3,3,1,3);
 out.ccba = out4(3,3,2,1); out.ccbb = out4(3,3,2,2); out.ccbc = out4(3,3,2,3);
 out.ccca = out4(3,3,3,1); out.cccb = out4(3,3,3,2); out.cccc = out4(3,3,3,3);
 
-out.hhhh = -sum(out4(out4 > 0).*log(out4(out4 > 0)))/4; % entropy of this result
+out.hhhh = f_entropy(out4); % entropy of this result
+
+%-------------------------------------------------------------------------------
+function h = f_entropy(x)
+    % entropy of a set of counts, log(0)=0
+    h = -sum(x(x > 0).*log(x(x > 0)));
+end
 
 end

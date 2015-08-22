@@ -1,24 +1,24 @@
-% ------------------------------------------------------------------------------
-% SY_StatAv
-% ------------------------------------------------------------------------------
-% 
-% The StatAv measure is a simple mean-stationarity metric that divides
-% the time series into non-overlapping subsegments, calculates the mean in each
-% of these segments and returns the standard deviation of this set of means.
-% 
-% "Heart rate control in normal and aborted-SIDS infants", S. M. Pincus et al.
+function out = SY_StatAv(y,whatType,n)
+% SY_StatAv     Simple mean-stationarity metric, StatAv.
+%
+% The StatAv measure divides the time series into non-overlapping subsegments,
+% calculates the mean in each of these segments and returns the standard deviation
+% of this set of means.
+%
+% cf. "Heart rate control in normal and aborted-SIDS infants", S. M. Pincus et al.
 % Am J. Physiol. Regul. Integr. Comp. Physiol. 264(3) R638 (1993)
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % whatType, the type of StatAv to perform:
 %           (i) 'seg': divide the time series into n segments
 %           (ii) 'len': divide the time series into segments of length n
-% 
+%
 % n, either the number of subsegments ('seg') or their length ('len')
-% 
+
+% Might be nicer to use the 'buffer' function for this...?
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,18 +32,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_StatAv(y,whatType,n)
-% Might be nicer to use the 'buffer' function for this...?
 
 % ------------------------------------------------------------------------------
 % Check Inputs
@@ -67,7 +64,7 @@ case 'seg'
     % divide time series into n segments
     M = zeros(n,1);
     p = floor(N/n);% lose the last N mod n data points
-    
+
     for j = 1:n
         M(j) = mean(y(p*(j-1)+1:p*j));
     end
@@ -83,10 +80,10 @@ case 'len'
         fprintf(1,'This time series (N = %u) is too short for StatAv(%s,''%u'')\n',N,whatType,n)
         out = NaN; return
     end
-    
+
 otherwise
     error('Error evaluating StatAv of type ''%s'', please select either ''seg'' or ''len''',whatType)
-    
+
 end
 
 % ------------------------------------------------------------------------------

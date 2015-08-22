@@ -1,12 +1,11 @@
-% --------------------------------------------------------------------------
-% SQL_retrieve
-% --------------------------------------------------------------------------
-% 
+function didWrite = SQL_retrieve(ts_ids, op_ids, retrieveWhatEntries, retrieveWhatData)
+% SQL_retrieve 		Retrieve data from the mySQL database
+%
 % This function retreives data from the mySQL database for subsequent analysis
 % in Matlab. It takes as input a set of constraints on the time series and
 % operations to include, and outputs the relevant subsection of the data matrix
 % and associated metadata to HCTSA_loc.mat
-% 
+%
 %---INPUTS:
 %--ts_ids: a vector of ts_ids to retrieve from the mySQL database.
 %--op_ids: a vector of op_ids to retrieve from the mySQL database.
@@ -22,27 +21,27 @@
 %       (ii) 'nocalctime': Retrieves calculated values and quality labels
 %       (iii) 'outputs': Just the calculated values
 %       (iv) 'quality': Just the quality labels
-% 
+%
 %---OUTPUT:
-%--didWrite [opt] is 1 if Writes new file HCTSA_loc.mat
-% 
-% Other outputs are to the file HCTSA_loc.mat, which contains
+%--didWrite [opt] is 1 if HCTSA_loc.mat was written
+%
+% Other outputs are saved to the file HCTSA_loc.mat:
 %--TS_DataMat, contains the data
 %--TS_Quality, contains the quality codes
 %--TS_CalcTime, contains the calculation times [if retrieveWhatData = 'all']
 %--TimeSeries, contains metadata about the time series, and the time-series data
 %--Operations, contains metadata about the operations
 %--MasterOperations, contains metadata about the implicatedmaster operations
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -50,8 +49,6 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function didWrite = SQL_retrieve(ts_ids, op_ids, retrieveWhatEntries, retrieveWhatData)
-    
 % Until it actually writes something, set the function output, didWrite = 0
 didWrite = 0;
 
@@ -64,7 +61,7 @@ end
 
 % retrieveWhatEntries
 if nargin < 3 || isempty(retrieveWhatEntries)
-	retrieveWhatEntries = 'all'; % retrieve full sets of things, not just the empty entries in the database
+	retrieveWhatEntries = 'all'; % default: retrieve full sets of things, not just the empty entries in the database
     fprintf(1,'Retrieving ALL elements from the database in the specified ts_id and op_id ranges by default.\n')
 end
 retrieveWhatEntriesCanBe = {'null','all','error'};
@@ -75,13 +72,22 @@ end
 
 % retrieveWhatData
 if nargin < 4 || isempty(retrieveWhatData)
-    retrieveWhatData = 'nocalctime'; % Just get data and quality labels
+    retrieveWhatData = 'nocalctime'; % default: just retrieve data and quality labels
 end
 retrieveWhatDataCanBe = {'all','nocalctime','outputs','quality'};
 if ~ischar(retrieveWhatData) || ~ismember(retrieveWhatData,retrieveWhatDataCanBe)
     error(['The fourth input to SQL_retrieve must specify what data to retrieve from the database, ' ...
                 'one of the following: %s'],BF_cat(retrieveWhatEntriesCanBe))
 end
+
+% ------------------------------------------------------------------------------
+% First check whether you're about to overwrite an existing file
+% (actually you probably don't want to do this when you're looping in a script)
+% ------------------------------------------------------------------------------
+% if exist('./HCTSA_loc.mat','file')
+%     reply = input(['Warning: HCTSA_loc.mat already exists -- if you continue, this ' ...
+%                     'file will be overwritten.\n[press any key to continue]'],'s');
+% end
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -109,18 +115,27 @@ elseif (numOps == 0)
 	error('Oops. There''s nothing to do! No operations to retrieve!');
 end
 
-% Open database connection
+% ------------------------------------------------------------------------------
+% Open a database connection
+% ------------------------------------------------------------------------------
 % (attempt to use the Matlab database toolbox, which is faster for retrievals)
 [dbc, dbname] = SQL_opendatabase('',0,1);
 
 % ------------------------------------------------------------------------------
-% Refine the set of time series and operations to those that actually exist in the database
+% Refine the set of time series and operations to those that actually exist in
+% the database
 % ------------------------------------------------------------------------------
+
+% Operation IDs that exist in the database:
 opids_db = mysql_dbquery(dbc,sprintf('SELECT op_id FROM Operations WHERE op_id IN (%s)',op_ids_string));
 opids_db = vertcat(opids_db{:});
+
+% TimeSeries IDs that exist in the database:
 tsids_db = mysql_dbquery(dbc,sprintf('SELECT ts_id FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string));
 tsids_db = vertcat(tsids_db{:});
-if length(tsids_db) < numTS % Actually there are fewer time series in the database than requested
+
+% There are fewer time series in the database than requested
+if length(tsids_db) < numTS
     if (length(tsids_db) == 0) % Now there are no time series to retrieve
         fprintf(1,'None of the %u specified time series exist in ''%s''\n',numTS,dbname)
         SQL_closedatabase(dbc); return % Close the database connection before returning
@@ -132,8 +147,9 @@ if length(tsids_db) < numTS % Actually there are fewer time series in the databa
     numTS = length(ts_ids);
 end
 
-if length(opids_db) < numOps % actually there are fewer operations in the database
-    if (length(opids_db) == 0) % now there are no operations to retrieve
+% There are fewer operations in the database than requested:
+if length(opids_db) < numOps
+    if (length(opids_db) == 0) % Now there are no operations to retrieve
         fprintf(1,'None of the %u specified operations exist in ''%s''\n',numOps,dbname)
         SQL_closedatabase(dbc); return % Close the database connection before returning
     end
@@ -170,7 +186,7 @@ end
 
 % Display information to user:
 switch retrieveWhatEntries
-case 'all' 
+case 'all'
     fprintf(1,['Retrieving all elements from the database (one time series ' ...
                 'per database query). Please be patient...\n']);
 case 'null'
@@ -205,17 +221,17 @@ retrievalTimer = tic; % Time the process using retrievalTimer
 for i = 1:numTS
 
     ts_id_now = ts_ids(i); % Range of ts_ids retrieved in this iteration
-    
+
     baseString = sprintf('%s WHERE ts_id = %u AND op_id IN (%s)',selectWhat, ...
                                             ts_id_now,op_ids_string);
-    
+
     % We could do a (kind of blind) retrieval, i.e., without retrieving op_ids safely
     % as long as for a given ts_id, the op_ids are in ascending order in the Results table.
     % This will be the case if time series and operations are added
     % using SQL_add because of the SORT BY specifier in SQL_add commands.
     % Otherwise op_ids should also be retrieved here, and used to sort
     % the other columns (i.e., outputs, quality codes, calculation times)
-    
+
     switch retrieveWhatEntries
     case 'all'
         selectString = baseString;
@@ -224,28 +240,28 @@ for i = 1:numTS
     case 'error'
     	selectString = sprintf('%s AND QualityCode = 1',baseString);
     end
-    
+
     % Do the retrieval
 	[qrc, emsg] = mysql_dbquery(dbc,selectString); % Retrieve data for this time series from the database
-    
+
     if ~isempty(emsg)
         error('Error retrieving outputs from %s.\n%s',dbname,emsg);
     end
-    
+
     % Check results look ok:
     if isempty(qrc) % No data to retrieve
         % There are no entries in Results that match the requested conditions
         fprintf(1,'No data to retrieve for ts_id = %u\n',ts_id_now);
         % Leave local files (e.g., TS_DataMat, TS_Quality, TS_CalcTime as Inf)
-        
+
     else
         % Entries need to be written to local matrices
         % Set didRetrieve = 1 for this iteration
         didRetrieve(i) = 1;
-        
+
     	% Convert empty entries to NaNs
     	qrc(cellfun(@isempty,qrc)) = {NaN};
-    
+
         % Put results from database into rows of local matrix
         if strcmp(retrieveWhatEntries,'all') % easy in this case
             % Assumes data is ordered by the op_id_string provided
@@ -285,7 +301,7 @@ for i = 1:numTS
             end
         end
     end
-    
+
     % Periodically display indication of time remaining
     if (i==50) && (i < numTS/10) % Give an initial indication of time after the first 50 iterations
         fprintf(1,['Based on the first 50 retrievals, this is taking ' ...
@@ -307,7 +323,7 @@ else
                             'Not writing any data to file.\n'],numTS,dbname);
     SQL_closedatabase(dbc); return
 end
-	
+
 if ismember(retrieveWhatEntries,{'null','error'})
     % We only want to keep rows and columns with (NaNs for 'null' or errors for 'error') in them...
     switch retrieveWhatEntries
@@ -320,7 +336,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
         fprintf(1,['Filtering so that local files contain rows/columns containing at least ' ...
                                 'one entry that was an error in the database.\n']);
     end
-    
+
 	% Time series
     keepi = (sum(keepme,2) > 0); % there is at least one entry to calculate in this row
     if sum(keepi) == 0
@@ -328,7 +344,8 @@ if ismember(retrieveWhatEntries,{'null','error'})
         SQL_closedatabase(dbc); return % Close the database connection, then exit
 	elseif sum(keepi) < numTS
 		fprintf(1,'Cutting down from %u to %u time series\n',numTS,sum(keepi));
-		ts_ids = ts_ids(keepi); numTS = length(ts_ids);
+		ts_ids = ts_ids(keepi);
+        numTS = length(ts_ids);
 		ts_ids_string = BF_cat(ts_ids,',');
         switch retrieveWhatData
         case 'all'
@@ -344,7 +361,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
             TS_Quality = TS_Quality(keepi,:);
         end
 	end
-	
+
 	% Operations
     keepi = (sum(keepme,1) > 0); % there is at least one entry to calculate in this column
 	if sum(keepi) == 0
@@ -359,7 +376,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
     		TS_DataMat = TS_DataMat(:,keepi);
             TS_Quality = TS_Quality(:,keepi);
             TS_CalcTime = TS_CalcTime(:,keepi);
-        case 'nocalctime' 
+        case 'nocalctime'
     		TS_DataMat = TS_DataMat(:,keepi);
             TS_Quality = TS_Quality(:,keepi);
         case 'outputs'
@@ -367,7 +384,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
         case 'quality'
             TS_Quality = TS_Quality(:,keepi);
         end
-	end    
+	end
 end
 
 
@@ -376,18 +393,18 @@ end
 % ------------------------------------------------------------------------------
 
 % 1. Retrieve Time Series Metadata
-selectString = sprintf('SELECT FileName, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
+selectString = sprintf('SELECT Name, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
 [tsinfo,emsg] = mysql_dbquery(dbc,selectString);
 % Convert to a structure array, TimeSeries, containing metadata for all time series
 tsinfo = [num2cell(ts_ids),tsinfo];
 % Define inline functions to convert time-series data text to a vector of floats:
-ScanCommas = @(x) textscan(x,'%f','Delimiter',',');
-TakeFirstCell = @(x) x{1};
-tsinfo(:,end) = cellfun(@(x) TakeFirstCell(ScanCommas(x)),tsinfo(:,end),'UniformOutput',0); % Do the conversion
-TimeSeries = cell2struct(tsinfo',{'ID','FileName','Keywords','Length','Data'}); % Convert to structure array
+scanCommas = @(x) textscan(x,'%f','Delimiter',',');
+takeFirstCell = @(x) x{1};
+tsinfo(:,end) = cellfun(@(x) takeFirstCell(scanCommas(x)),tsinfo(:,end),'UniformOutput',0); % Do the conversion
+TimeSeries = cell2struct(tsinfo',{'ID','Name','Keywords','Length','Data'}); % Convert to structure array
 
 % 2. Retrieve Operation Metadata
-selectString = sprintf('SELECT OpName, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
+selectString = sprintf('SELECT Name, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
 [opinfo,emsg] = mysql_dbquery(dbc,selectString);
 opinfo = [num2cell(op_ids), opinfo]; % add op_ids
 Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
@@ -422,11 +439,11 @@ SQL_closedatabase(dbc)
 % ------------------------------------------------------------------------------
 fprintf(1,'Saving local versions of the data to HCTSA_loc.mat...');
 saveTimer = tic;
-save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','-v7.3');
+fromDatabase = 1; % mark that we retrieved this data from the mySQL database
+save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','fromDatabase','-v7.3');
 switch retrieveWhatData
 case 'all'
     % Add outputs, quality labels, and calculation times
-    keyboard
     save('HCTSA_loc.mat','TS_DataMat','TS_Quality','TS_CalcTime','-append')
 case 'nocalctime'
     % Add outputs and quality labels
@@ -441,6 +458,7 @@ end
 
 fprintf(1,' Done in %s.\n',BF_thetime(toc(saveTimer)));
 clear saveTimer % stop timing
+
 didWrite = 1; % Tag to say that write to HCTSA_loc.mat file is successful
 
 % ------------------------------------------------------------------------------

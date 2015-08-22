@@ -1,22 +1,20 @@
-% ------------------------------------------------------------------------------
-% SY_VarRatioTest
-% ------------------------------------------------------------------------------
-% 
-% This code performs a variance ratio test on the time series, implemented using
-% the vratiotest function from Matlab's Econometrics Toolbox.
-% 
+function out = SY_VarRatioTest(y,periods,IIDs)
+% SY_VarRatioTest   Variance ratio test.
+%
+% Implemented using the vratiotest function from Matlab's Econometrics Toolbox.
+%
 % The test assesses the null hypothesis of a random walk in the time series,
 % which is rejected for some critical p-value.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % periods, a vector (or scalar) of period(s)
-% 
+%
 % IIDs, a vector (or scalar) representing boolean values indicating whether to
 %       assume independent and identically distributed (IID) innovations for
 %       each period.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -30,17 +28,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_VarRatioTest(y,periods,IIDs)
 
 % ------------------------------------------------------------------------------
 %% Check that an Econometrics Toolbox license is available:
@@ -86,7 +82,7 @@ else
    out.periodminpValue = periods(iminp);
    out.IIDperiodmaxpValue = IIDs(imaxp);
    out.IIDperiodminpValue = IIDs(iminp);
-   
+
    out.meanstat = mean(stat);
    out.maxstat = max(stat);
    out.minstat = min(stat);

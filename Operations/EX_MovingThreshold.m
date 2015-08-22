@@ -1,32 +1,30 @@
-% ------------------------------------------------------------------------------
-% EX_MovingThreshold
-% ------------------------------------------------------------------------------
-% 
-% A measure based on a moving threshold model for extreme events. Inspired by an
-% idea contained in the following paper:
+function out = EX_MovingThreshold(y,a,b)
+% EX_MovingThreshold    Moving threshold model for extreme events in a time series.
+%
+% Inspired by an idea contained in:
 % "Reactions to extreme events: Moving threshold model"
 % Altmann et al., Physica A 364, 435--444 (2006)
-% 
+%
 % This algorithm is based on this idea: it uses the occurrence of extreme events
 % to modify a hypothetical 'barrier' that classes new points as 'extreme' or not.
 % The barrier begins at sigma, and if the absolute value of the next data point
 % is greater than the barrier, the barrier is increased by a proportion 'a',
 % otherwise the position of the barrier is decreased by a proportion 'b'.
-% 
+%
 %---INPUTS:
 % y, the input (z-scored) time series
 % a, the barrier jump parameter (in extreme event)
 % b, the barrier decay proportion (in absence of extreme event)
-% 
+%
 %---OUTPUTS: the mean, spread, maximum, and minimum of the time series for the
 % barrier, the mean of the difference between the barrier and the time series
 % values, and statistics on the occurrence of 'kicks' (times at which the
 % threshold is modified), and by how much the threshold changes on average.
-% 
+%
 % In future could make a variant operation that optimizes a and b to minimize the
 % quantity meanqover/pkick (hugged the shape as close as possible with the
 % minimum number of kicks), and returns a and b...?
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -40,24 +38,22 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = EX_MovingThreshold(y,a,b)
 
 doPlot = 0; % can set to 1 to plot outputs
 
 % ------------------------------------------------------------------------------
 %% Check inputs:
 % ------------------------------------------------------------------------------
-% Check that the time series is z-scored
+% Check that the time series is z-scored (just a warning)
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored')
 end

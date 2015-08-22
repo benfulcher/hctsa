@@ -1,26 +1,25 @@
-% ------------------------------------------------------------------------------
-% PD_PeriodicityWang
-% ------------------------------------------------------------------------------
-% 
+function out = PD_PeriodicityWang(y)
+% PD_PeriodicityWang    Periodicity extraction measure of Wang et al.
+%
 % Implements an idea based on the periodicity extraction measure proposed in:
-% 
+%
 % "Structure-based Statistical Features and Multivariate Time Series Clustering"
 % Wang, X. and Wirth, A. and Wang, L.
 % Seventh IEEE International Conference on Data Mining, 351--360 (2007)
 % DOI: 10.1109/ICDM.2007.103
 %
-% This function detrends the time series using a single-knot cubic regression
-% spline, and then computes autocorrelations up to one third of the length of
+% Detrends the time series using a single-knot cubic regression spline
+% and then computes autocorrelations up to one third of the length of
 % the time series. The frequency is the first peak in the autocorrelation
 % function satisfying a set of conditions.
-% 
-%---INPUTS:
+%
+%---INPUT:
 % y, the input time series.
-% 
+%
 % The single threshold of 0.01 was considered in the original paper, this code
 % uses a range of thresholds: 0, 0.01, 0.1, 0.2, 1\sqrt{N}, 5\sqrt{N}, and
 % 10\sqrt{N}, where N is the length of the time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,17 +33,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = PD_PeriodicityWang(y)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries:
@@ -122,22 +119,22 @@ for k = 1:nths
         if isempty(ftrough); continue; end
         itrough = troughs(ftrough); % acf lag at which there is a trough (the first one preceeding the peak)
         thetrough = acf(itrough); % acf at the trough
-        
+
         % (a) a trough before it: should be implicit in the ftrough bit above
         %     if troughs(1)>ipeak % the first trough is after it
         %         continue
         %     end
-        
+
         % (b) difference between peak and trough is at least 0.01
         if thepeak - thetrough < ths(k)
             continue
         end
-        
+
         % (c) peak corresponds to positive correlation
         if thepeak < 0
             continue
         end
-        
+
         % we made it! Use this frequency!
         thefreqs(k) = ipeak; break
     end

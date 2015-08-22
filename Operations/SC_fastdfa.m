@@ -1,16 +1,14 @@
-% ------------------------------------------------------------------------------
-% SC_fastdfa
-% ------------------------------------------------------------------------------
-% 
+function out = SC_fastdfa(y)
+% SC_fastdfa   Matlab wrapper for Max Little's ML_fastdfa code
+%
 % Measures the scaling exponent of the time series using a fast implementation
 % of detrended fluctuation analysis (DFA).
-% 
-% The original fastdfa code is by Max A. Little and publicly-available at
-% http://www.maxlittle.net/software/index.php
 %
 %---INPUT:
 % y, the input time series, is fed straight into the fastdfa script.
-% 
+
+% The original fastdfa code is by Max A. Little and publicly-available at
+% http://www.maxlittle.net/software/index.php
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -24,18 +22,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SC_fastdfa(y)
-% Matlab wrapper for Max Little's ML_fastdfa code
 
 if size(y,2) > size(y,1);
     y = y'; % Ensure input time series is a column vector

@@ -1,16 +1,12 @@
-% ------------------------------------------------------------------------------
-% CO_AutoCorrShape
-% ------------------------------------------------------------------------------
-% 
-% Outputs a set of statistics summarizing how the autocorrelation function
-% changes with the time lag, tau.
-% 
+function out = CO_AutoCorrShape(y)
+% CO_AutoCorrShape   how the autocorrelation function changes with the time lag
+%
 % Outputs include the number of peaks, and autocorrelation in the
 % autocorrelation function itself.
-% 
+%
 %---INPUTS:
 % y, the input time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -24,29 +20,27 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_AutoCorrShape(y)
 
 % ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available
 % ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox');
 
-doplot = 0; % plot outputs from this function
+doPlot = 0; % plot outputs from this function
 N = length(y); % length of the time series
 
-% Only look up to when two consecutive values are under the threshold for
-% significance:
-th = 2/sqrt(N); % significance threshold, th
+% Only look up to when two consecutive values are under the significance threshold
+% (normally 2/sqrt(N), but we'll be generous):
+th = 1/sqrt(N); % significance threshold, th
 
 % Initialize autocorrelation function
 acf = zeros(N,1);
@@ -107,7 +101,7 @@ else % less than 5 points, return NaNs:
     out.ac1minima = NaN;
 end
 
-% Autocorrelation of the ACF (so damn meta!)
+% Autocorrelation of the ACF (so meta right now)
 out.ac1 = CO_AutoCorr(acf,1,'Fourier');
 out.ac2 = CO_AutoCorr(acf,2,'Fourier');
 out.ac3 = CO_AutoCorr(acf,3,'Fourier');
@@ -115,7 +109,7 @@ out.actau = CO_AutoCorr(acf,CO_FirstZero(acf,'ac'),'Fourier');
 
 
 if Nac > 3 % Need at least four points to fit exponential
-    
+
     %% Fit exponential decay to absolute ACF:
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.5]);
     f = fittype('a*exp(b*x)','options',s);
@@ -131,7 +125,7 @@ if Nac > 3 % Need at least four points to fit exponential
         out.fexpabsacf_r2 = gof.rsquare; % this is more important!
         out.fexpabsacf_adjr2 = gof.adjrsquare;
         out.fexpabsacf_rmse = gof.rmse;
-    
+
         expfit = c.a*exp(c.b*[1:Nac]');
         res = abs(acf)-expfit;
         out.fexpabsacf_varres = var(res);
@@ -143,15 +137,15 @@ if Nac > 3 % Need at least four points to fit exponential
         out.fexpabsacf_rmse = NaN;
         out.fexpabsacf_varres = NaN;
     end
-    
+
     %% fit linear to local maxima
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-0.1 1]);
     f = fittype('a*x+b','options',s);
-    if doplot
+    if doPlot
         figure('color','w');
         plot(maxr,acf(maxr),'ok');
     end
-    
+
     b = 1;
     try [c, gof] = fit(maxr,acf(maxr),f);
     catch

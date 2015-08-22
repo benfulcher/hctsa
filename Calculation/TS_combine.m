@@ -1,41 +1,37 @@
-% ------------------------------------------------------------------------------
-% TS_combine
-% ------------------------------------------------------------------------------
-% 
-% This function joins two HCTSA_loc.mat files.
+function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids)
+% TS_combine, join two HCTSA_loc.mat files
+%
 % Any data matrices are combined, and the guides are updated to reflect the
 % concatenation.
 % Note that in the case of duplicates, the first file will have precedence.
 % Takes a union of time series, and an intersection of operations.
-% 
+%
 %---INPUTS:
 % HCTSA_loc_1: the path to the first HCTSA_loc.mat file
 % HCTSA_loc_2: the path to the second HCTSA_loc.mat file
 % compare_tsids: whether to consider ts_ids in each file as the same. If
-% this is true (default) , it removes matching ts_ids so duplicates cannot occur in the 
+% this is true (default) , it removes matching ts_ids so duplicates cannot occur in the
 % combined matrix. But if the two to be joined are from different databases,
 % then this should be set to 0.
 %
 %---OUTPUTS:
 % Writes a new, combined HCTSA_loc.mat
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -50,10 +46,10 @@ if nargin < 3
     % intersection between ts_ids in the two matrices
     compare_tsids = 1;
 end
-if compare_tsids
+if compare_tsids == 1
     fprintf(1,['Assuming both %s and %s came from the same database so that' ...
-                    ' ts_ids are comparable.\n'],HCTSA_loc_1,HCTSA_loc_2);
-else
+                ' ts_ids are comparable.\n'],HCTSA_loc_1,HCTSA_loc_2);
+elseif compare_tsids == 0
     fprintf(1,['Assuming that %s and %s came different databases so' ...
         ' duplicate ts_ids can occur in the resulting matrix.\n'], ...
                                         HCTSA_loc_1,HCTSA_loc_2);
@@ -97,11 +93,11 @@ end
 % As a basic concatenation, then remove any duplicates
 
 % First want to remove any additional fields
-isextrafield = cellfun(@(x)~ismember(fieldnames(x.TimeSeries),{'ID','fileName','Keywords', ...
+isExtraField = cellfun(@(x)~ismember(fieldnames(x.TimeSeries),{'ID','Name','Keywords', ...
                             'Length','Data'}),loadedData,'UniformOutput',0);
 for i = 1:2
-    if any(isextrafield{i})
-        theextrafields = find(isextrafield{i});
+    if any(isExtraField{i})
+        theextrafields = find(isExtraField{i});
         thefieldnames = fieldnames(loadedData{i}.TimeSeries);
         for j = 1:length(theextrafields)
             loadedData{i}.TimeSeries = rmfield(loadedData{i}.TimeSeries,thefieldnames{theextrafields(j)});
@@ -109,14 +105,16 @@ for i = 1:2
         end
     end
 end
+theFieldnames = fieldnames(loadedData{1}.TimeSeries);
 
 % Now that fields should match the default fields, concatenate:
-TimeSeries = cell2struct([struct2cell(loadedData{1}.TimeSeries), ...
-                          struct2cell(loadedData{2}.TimeSeries)], ...
-                                {'ID','fileName','Keywords','Length','Data'});
+TimeSeries = cell2struct([squeeze(struct2cell(loadedData{1}.TimeSeries)), ...
+                          squeeze(struct2cell(loadedData{2}.TimeSeries))], ...
+                                theFieldnames);
+
 % Check for time series duplicates
-[uniquetsids, ix] = unique(vertcat(TimeSeries.ID));
 didTrim = 0;
+[uniquetsids, ix] = unique(vertcat(TimeSeries.ID));
 if compare_tsids % ts_ids are comprable between the two files (i.e., retrieved from the same mySQL database)
     if length(uniquetsids) < length(TimeSeries)
         fprintf(1,'We''re assuming that ts_ids are equivalent between the two input files\n');
@@ -128,7 +126,12 @@ if compare_tsids % ts_ids are comprable between the two files (i.e., retrieved f
         TimeSeries = TimeSeries(ix);
         didTrim = 1;
     else
+        % Check for duplicate indices
         fprintf(1,'All time series were distinct, we now have a total of %u.\n',length(TimeSeries));
+    end
+else
+    if length(uniquetsids) < length(TimeSeries)
+        warning('There are duplicate IDs in the time series -- consider running TS_ReIndex on the resulting .mat file')
     end
 end
 
@@ -190,6 +193,15 @@ if isfield(loadedData{1},'TS_CalcTime') && isfield(loadedData{2},'TS_CalcTime')
     fprintf(1,' Done.\n');
 end
 
+%-------------------------------------------------------------------------------
+% fromDatabase
+%-------------------------------------------------------------------------------
+if loadedData{1}.fromDatabase ~= loadedData{2}.fromDatabase
+    error('Weird that fromDatabase flags are inconsistent across the two HCTSA_loc files');
+else
+    fromDatabase = loadedData{1}.fromDatabase;
+end
+
 % ------------------------------------------------------------------------------
 % Save the results
 % ------------------------------------------------------------------------------
@@ -205,10 +217,8 @@ else
     ' normal analysis routines like TS_normalize to work...\n'],fileName);
 end
 
-% ------------------------------------------------------------------------------
-% Save
-% ------------------------------------------------------------------------------
-save(fileName,'TimeSeries','Operations','MasterOperations','-v7.3');
+% --- Actually save it:
+save(fileName,'TimeSeries','Operations','MasterOperations','fromDatabase','-v7.3');
 if gotData, save(fileName,'TS_DataMat','-append'); end % add data matrix
 if gotQuality, save(fileName,'TS_Quality','-append'); end % add quality labels
 if gotCalcTimes, save(fileName,'TS_CalcTime','-append'); end % add calculation times
@@ -217,5 +227,5 @@ fprintf(1,['Saved new Matlab file containing combined versions of %s ' ...
                     'and %s to %s\n'],HCTSA_locs{1},HCTSA_locs{2},fileName);
 fprintf(1,'%s contains %u time series and %u operations\n',fileName, ...
                                 length(TimeSeries),length(Operations));
- 
+
 end

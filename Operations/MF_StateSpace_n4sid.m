@@ -1,31 +1,27 @@
-% ------------------------------------------------------------------------------
-% MF_StateSpace_n4sid
-% ------------------------------------------------------------------------------
-% 
-% Fits a state space model of given order to the time series using the n4sid
-% function in Matlab's System Identification Toolbox.
-% 
+function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)
+% MF_StateSpace_n4sid   State space time-series model fitting.
+%
 % First fits the model to the whole time series, then trains it on the first
 % portion and tries to predict the rest.
-% 
+%
 % In the second portion of this code, the state space model is fitted to the
 % first p*N samples of the time series, where p is a given proportion and N is
 % the length of the time series.
-% 
+%
 % This model is then used to predict the latter portion of the time
 % series (i.e., the subsequent (1-p)*N samples).
-% 
-% Uses the functions iddata, n4sid, aic, and predict from Matlab's System Identification Toolbox
-% 
+%
 %---INPUTS:
 % y, the input time series
 % ord, the order of state-space model to implement (can also be the string 'best')
 % ptrain, the proportion of the time series to use for training
 % steps, the number of steps ahead to predict
-% 
+%
 %---OUTPUTS: parameters from the model fitted to the entire time series, and
 % goodness of fit and residual analysis from n4sid prediction.
-% 
+
+% Uses the functions iddata, n4sid, aic, and predict from Matlab's System
+% Identification Toolbox
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -39,17 +35,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)
 
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:

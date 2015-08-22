@@ -1,9 +1,8 @@
-% ------------------------------------------------------------------------------
-% BF_GiveMeField
-% ------------------------------------------------------------------------------
-% 
+function theField = BF_GiveMeField(inputStruct,whatField);
+% BF_GiveMeField    Return a field of a structure.
+%
 % Returns a specified field (whatField) of an input structure (inputStruct).
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -17,18 +16,16 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function theField = BF_GiveMeField(inputStruct,whatField);
-    
-    theField = inputStruct.(whatField);
-    
+theField = inputStruct.(whatField);
+
 end

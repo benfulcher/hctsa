@@ -1,22 +1,21 @@
-% ------------------------------------------------------------------------------
-% EN_ApEn
-% ------------------------------------------------------------------------------
-% 
-% Estimates the Approximate Entropy of the time series, ApEn(m,r).
-% 
+function out = EN_ApEn(y,mnom,rth)
+% EN_ApEn   Approximate Entropy of a time series
+%
+% ApEn(m,r).
+%
 % cf. S. M. Pincus, "Approximate entropy as a measure of system complexity",
 % P. Natl. Acad. Sci. USA, 88(6) 2297 (1991)
 %
 % For more information, cf. http://physionet.org/physiotools/ApEn/
-% 
+%
 %---INPUTS:
 % y, the input time series
 % mnom, the embedding dimension
 % rth, the threshold for judging closeness/similarity
 %
 %---NOTES:
-% No record of where this was obtained from.
-%
+% No record of where this was code was derived from :-/
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -30,17 +29,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = EN_ApEn(y,mnom,rth)
 
 % Check inputs, set defaults:
 if nargin < 2 || isempty(mnom)
@@ -60,12 +57,12 @@ for k = 1:2
     C = zeros(N-m+1,1);
     % Define the matrix x, containing subsequences of u
     x = zeros(N-m+1,m);
-    
+
     % Form vector sequences x from the time series y
     for i = 1:N-m+1
         x(i,:) = y(i:i+m-1);
     end
-    
+
     ax = ones(N-m+1,m);
     for i = 1:N-m+1
         for j = 1:m

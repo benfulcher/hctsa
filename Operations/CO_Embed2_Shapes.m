@@ -1,23 +1,22 @@
-% ------------------------------------------------------------------------------
+function out = CO_Embed2_Shapes(y,tau,shape,r)
 % CO_Embed2_Shapes
-% ------------------------------------------------------------------------------
-% 
+%
 % Takes a shape and places it on each point in the two-dimensional time-delay
 % embedding space sequentially. This function counts the points inside this shape
 % as a function of time, and returns statistics on this extracted time series.
-% 
+%
 %---INPUTS:
 % y, the input time-series as a (z-scored) column vector
 % tau, the time-delay
 % shape, has to be 'circle' for now...
 % r, the radius of the circle
-% 
+%
 %---OUTPUTS:
 % The constructed time series of the number of nearby points, and
 % include the autocorrelation, maximum, median, mode, a Poisson fit to the
 % distribution, histogram entropy, and stationarity over fifths of the time
 % series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -31,17 +30,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_Embed2_Shapes(y,tau,shape,r)
 
 doPlot = 0; % plot results for debugging
 
@@ -95,13 +92,13 @@ switch shape
 		% counts how many points are inside this shape, looks at the time series thus formed
 
 		for i = 1:N % across all points in the time series
-			
+
 			m_c = m - ones(N,1)*m(i,:); % points wrt current point i
 			m_c_d = sum(m_c.^2,2); % Euclidean distances from point i
-			
+
 		    counts(i) = sum(m_c_d <= r^2); % number of points enclosed in a circle of radius r
 		end
-        
+
     otherwise
         error('Unknown shape ''%s''', shape)
 end
@@ -126,32 +123,25 @@ out.tau = CO_FirstZero(counts,'ac');
 out.max = max(counts);
 out.std = std(counts);
 out.median = median(counts);
+out.mean = mean(counts);
 out.iqr = iqr(counts);
 out.iqronrange = out.iqr/range(counts);
 
-% Distribution
-x = (0:max(counts));
-n = hist(counts,x); n = n/sum(n);
-[out.mode_val, mix] = max(n);
-out.mode = x(mix);
+% --- Distribution
+% Using the sqrt binning method:
+[binP,binEdges] = histcounts(counts,'BinMethod','sqrt','Normalization','probability');
+binCentres = mean([binEdges(1:end-1); binEdges(2:end)]);
+[out.mode_val, mix] = max(binP);
+out.mode = binCentres(mix);
+% --- histogram entropy:
+out.hist_ent = sum(binP(binP > 0).*log(binP(binP > 0)));
 
-% Poisson fit to distribution
-% (note that this is actually rarely a good fit...)
-l = poissfit(counts);
-poiss_n = poisspdf(x,l);
-out.poissfit_l = l;
-% goodness of fit:
-out.poissfit_absdiff = sum(abs(poiss_n-n));
-out.poissfit_sqdiff = sum((poiss_n-n).^2);
+if doPlot
+	plot(binCentres,poisspdf(binCentres,l),'g'); hold on;
+	plot(binCentres,n,'k'); hold off
+end
 
-% Entropy in 10-bin histogram
-[n, x] = hist(counts,10); n = n/(sum(n)*(x(2)-x(1)));
-out.hist10_ent = sum(n(n>0).*log(n(n > 0)));
-
-% plot(x,poisspdf(x,l),'g'); hold on;
-% plot(x,n,'k'); hold off
-
-% Stationarity measure for fifths of the time series
+% --- Stationarity measure for fifths of the time series
 afifth = floor(N/5);
 buffer_m = zeros(afifth,5); % stores a fifth of the time series (embedding vector) in each entry
 for i = 1:5

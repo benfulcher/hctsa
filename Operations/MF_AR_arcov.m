@@ -1,18 +1,16 @@
-% ------------------------------------------------------------------------------
-% MF_AR_arcov
-% ------------------------------------------------------------------------------
-% 
-% Fits an AR model of a given order, p, using arcov code from Matlab's Signal
-% Processing Toolbox.
-% 
+function out = MF_AR_arcov(y,p)
+% MF_AR_arcov    Fits an AR model of a given order, p.
+%
+% Uses arcov code from Matlab's Signal Processing Toolbox.
+%
 %---INPUTS:
 % y, the input time series
 % p, the AR model order
-% 
+%
 %---OUTPUTS: include the parameters of the fitted model, the variance estimate of a
 % white noise input to the AR model, the root-mean-square (RMS) error of a
 % reconstructed time series, and the autocorrelation of residuals.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -26,19 +24,20 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = MF_AR_arcov(y,p)
-
 N = length(y); % Length of input time series
+
+% Does a Signal Processing Toolbox exist?
+BF_CheckToolbox('signal_toolbox');
 
 if nargin < 2 || isempty(p)
     p = 2; % Fit AR(2) model by default

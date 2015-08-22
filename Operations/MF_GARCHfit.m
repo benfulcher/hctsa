@@ -1,10 +1,9 @@
-% ------------------------------------------------------------------------------
-% MF_GARCHfit
-% ------------------------------------------------------------------------------
-% 
+function out = MF_GARCHfit(y,preproc,P,Q,randomSeed)
+% MF_GARCHfit   GARCH time-series modeling.
+%
 % Simulates a procedure for fitting Generalized Autoregressive Conditional
 % Heteroskedasticity (GARCH) models to a time series, namely:
-% 
+%
 % (1) Preprocessing the data to remove strong trends,
 % (2) Pre-estimation to calculate initial correlation properties of the time
 %       series and motivate a GARCH model,
@@ -12,43 +11,43 @@
 %           of the fitted model, and
 % (4) Post-estimation, involves calculating statistics on residuals and
 %           standardized residuals.
-% 
+%
 % The idea is that all of these stages can be pre-specified or skipped using
 % arguments to the function.
-% 
+%
 % Uses functions from Matlab's Econometrics Toolbox: archtest, lbqtest,
 % autocorr, parcorr, garchset, garchfit, garchcount, aicbic
-% 
+%
 % All methods implemented are from Matlab's Econometrics Toolbox, including
 % Engle's ARCH test (archtest), the Ljung-Box Q-test (lbqtest), estimating the
 % partial autocorrelation function (parcorr), as well as specifying (garchset)
 % and fitting (garchfit) the GARCH model to the time series.
-% 
+%
 % As part of this code, a very basic automatic pre-processing routine,
 % PP_ModelFit, is implemented, that applies a range of pre-processings and
 % returns the preprocessing of the time series that shows the worst fit to an
 % AR(2) model.
-% 
+%
 % In the case that no simple transformations of the time series are
 % significantly more stationary/less trivially correlated than the original time
 % series (by more than 5%), the original time series is simply used without
 % transformation.
-% 
+%
 % Where r and m are the autoregressive and moving average orders of the model,
 % respectively, and p and q control the conditional variance parameters.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % preproc, the preprocessing to apply, can be 'ar' or 'none'
-% 
+%
 % P, the GARCH model order
-% 
+%
 % Q, the ARCH model order
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (for pre-processing: PP_PreProcess)
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -62,17 +61,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_GARCHfit(y,preproc,P,Q,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -175,7 +172,7 @@ try
     % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(GModel,y);
 catch emsg
     error('GARCH fit failed (data does not allow a valid GARCH model to be estimated): %s',emsg.message);
-    % Sometimes this happens for some time series (e.g., when it removes some GARCH 
+    % Sometimes this happens for some time series (e.g., when it removes some GARCH
     % lags and makes the resulting model invalid)
 end
 
@@ -198,15 +195,15 @@ if isprop(Gfit,'Offset')
 end
 
 
-indexAdjust = 0; % required because sometimes you fit at fewer lags than you 
-                 % specified, but the errors output is a vector, 
+indexAdjust = 0; % required because sometimes you fit at fewer lags than you
+                 % specified, but the errors output is a vector,
                  % so sadly you have to keep count...
-                 
+
 % -- GARCH component --
 for i = 1:P
     if isprop(Gfit,'GARCH') && length(Gfit.GARCH)>=i
         out.(sprintf('GARCH_%u',i)) = Gfit.GARCH{i};
-        % New (in this way shit) format means that this no longer works for 
+        % New (in this way shit) format means that this no longer works for
         % custom GARCH models (you can no longer index a particular
         % error) ///
         if Gfit.GARCH{i}==0

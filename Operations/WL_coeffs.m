@@ -1,20 +1,19 @@
-% ------------------------------------------------------------------------------
-% WL_coeffs
-% ------------------------------------------------------------------------------
-% 
+function out = WL_coeffs(y, wname, level)
+% WL_coeffs     Wavelet decomposition of the time series.
+%
 % Performs a wavelet decomposition of the time series using a given wavelet at a
 % given level and returns a set of statistics on the coefficients obtained.
-% 
+%
 % Uses Matlab's Wavelet Toolbox.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % wname, the wavelet name, e.g., 'db3' (see Wavelet Toolbox Documentation for
 %                                       all options)
-% 
+%
 % level, the level of wavelet decomposition
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -28,17 +27,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = WL_coeffs(y, wname, level)
 
 % ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
@@ -66,7 +63,7 @@ if wmaxlev(N,wname) < level
 end
 
 % ------------------------------------------------------------------------------
-%% Perform a single-level wavelet decomposition 
+%% Perform a single-level wavelet decomposition
 % (Recover a noisy signal by suppressing an approximation)
 
 [c, l] = wavedec(y,level,wname);

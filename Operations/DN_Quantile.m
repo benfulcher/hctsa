@@ -1,14 +1,13 @@
-% ------------------------------------------------------------------------------
-% DN_Quantile
-% ------------------------------------------------------------------------------
-% 
-% Calculates the quantile value at a specified proportion p using the Statistics
-% Toolbox function, quantile.
-% 
-% INPUTS:
-% y, the input time series
+function out = DN_Quantile(y,p)
+% DN_Quantile   Quantile of the data vector
+%
+% Calculates the quantile value at a specified proportion, p, using the
+% Statistics Toolbox function, quantile.
+%
+%---INPUTS:
+% y, the input data vector
 % p, the quantile proportion
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -22,24 +21,22 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = DN_Quantile(y,p)
 
 if nargin < 2
     fprintf(1,'Using quantile p = 0.5 (median) by default\n');
     p = 0.5;
 end
-if (p < 0) || (p > 1)
-    error('p must specify a proportion, 0 <= p <= 1');
+if ~isnumeric(p) || (p < 0) || (p > 1)
+    error('p must specify a proportion, in (0,1)');
 end
 
 out = quantile(y,p);

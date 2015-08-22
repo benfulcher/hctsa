@@ -1,21 +1,18 @@
-% ------------------------------------------------------------------------------
-% MF_CompareAR
-% ------------------------------------------------------------------------------
-% 
-% Compares fits of AR models of various orders to the input time series.
-% 
+function out = MF_CompareAR(y,orders,testHow)
+% MF_CompareAR  Compares model fits of various orders to a time series.
+%
 % Uses functions from Matlab's System Identification Toolbox: iddata, arxstruc,
 % and selstruc
-% 
+%
 %---INPUTS:
-% y, vector of equally-spaced time series data
+% y, vector of time-series data
 % orders, a vector of possible model orders
 % testHow, specify a fraction, or provide a string 'all' to train and test on
 %            all the data
-% 
+%
 %---OUTPUTS: statistics on the loss at each model order, which are obtained by
 % applying the model trained on the training data to the testing data.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -29,17 +26,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_CompareAR(y,orders,testHow)
 
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
@@ -102,7 +97,7 @@ v = V(1,1:end-1); % the loss function vector over the range of orders
 
 out.maxv = max(v);
 out.minv = min(v);
-out.meanv = mean(v);    
+out.meanv = mean(v);
 out.medianv = median(v);
 out.firstonmin = v(1)/min(v);
 out.maxonmed = max(v)/median(v);

@@ -1,26 +1,25 @@
-% ------------------------------------------------------------------------------
-% SY_StdNthDerChange
-% ------------------------------------------------------------------------------
-% 
-% This operation returns statistics on how the output of SY_StdNthDer changes
-% with the order of the derivative of the signal.
-% 
+function out = SY_StdNthDerChange(y,maxd)
+% SY_StdNthDerChange    How the output of SY_StdNthDer changes with order parameter.
+%
+% Order parameter controls the derivative of the signal.
+%
 % Operation inspired by a comment on the Matlab Central forum: "You can
 % measure the standard deviation of the n-th derivative, if you like." --
 % Vladimir Vassilevsky, DSP and Mixed Signal Design Consultant from
 % http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % maxd, the maximum derivative to take.
-% 
+%
+%---OUTPUTS:
 % An exponential function, f(x) = Aexp(bx), is fitted to the variation across
 % successive derivatives; outputs are the parameters and quality of this fit.
-% 
+%
 % Typically an excellent fit to exponential: regular signals decrease, irregular
 % signals increase...?
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,17 +33,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_StdNthDerChange(y,maxd)
 
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:

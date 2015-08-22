@@ -1,35 +1,31 @@
-% ------------------------------------------------------------------------------
-% MF_steps_ahead
-% ------------------------------------------------------------------------------
-% 
+function out = MF_steps_ahead(y,model,order,maxSteps)
+% MF_steps_ahead    Goodness of model predictions across a range of prediction lengths.
+%
 % Given a model, characterizes the variation in goodness of model predictions
 % across a range of prediction lengths, l, which is made to vary from
 % 1-step ahead to maxSteps steps-ahead predictions.
-% 
+%
 % Models are fit using code from Matlab's System Identification Toolbox:
 % (i) AR models using the ar function,
 % (ii) ARMA models using armax code, and
 % (iii) state-space models using n4sid code.
-% 
+%
 % The model is fitted on the full time series and then used to predict the same
 % data.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
 % model, the time-series model to fit: 'ar', 'arma', or 'ss'
-% 
 % order, the order of the model to fit
-% 
 % maxSteps, the maximum number of steps ahead to predict
-% 
+%
 %---OUTPUTS: include the errors, for prediction lengths l = 1, 2, ..., maxSteps,
 % returned for each model relative to the best performance from basic null
 % predictors, including sliding 1- and 2-sample mean predictors and simply
 % predicting each point as the mean of the full time series. Additional outputs
 % quantify how the errors change as the prediction length increases from l = 1,
 % ..., maxSteps (relative to a simple predictor).
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -43,17 +39,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_steps_ahead(y,model,order,maxSteps)
 
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
@@ -105,16 +99,16 @@ switch model
             % Uses Matlab code from ARfit
             % http://www.gps.caltech.edu/~tapio/arfit/
             [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(ytrain.y, 1, 10, 'sbc', 'zero');
-            order = length(Aest); 
+            order = length(Aest);
         end
         m = ar(ytrain,order);
-        
+
     case 'arma'
         m = armax(ytrain,order);
-        
+
     case 'ss'
         m = n4sid(ytrain,order);
-        
+
     otherwise
         error('Unknown model ''%s''',model);
 end
@@ -148,21 +142,21 @@ for i = 1:maxSteps
     % Get statistics on residuals
     mres = yp.y - ytest.y;
     mres = mres(i:end);
-    
+
     mf.rmserrs(i) = sqrt(mean(mres.^2));
     mf.mabserrs(i) = mean(abs(mres));
     mf.ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
-    
+
     % (2) *** Sliding mean 1 ***
     % A sliding mean of length 1
     % for n-step-ahead prediction, will predict using the value n steps
     % before it.
     mres = yy(i+1:end)-yy(1:N-i);
-    
+
     sm1.rmserrs(i) = sqrt(mean(mres.^2));
     sm1.mabserrs(i) = mean(abs(mres));
     sm1.ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
-    
+
     % (3) *** Sliding mean 2 ***
     % A sliding mean of length 2
     sm2p = zeros(N-i-1,1);
@@ -175,7 +169,7 @@ for i = 1:maxSteps
         sm2p(j) = p;
     end
     mres = yy(i+2:end) - sm2p;
-    
+
     sm2.rmserrs(i) = sqrt(mean(mres.^2));
     sm2.mabserrs(i) = mean(abs(mres));
     sm2.ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
@@ -209,7 +203,7 @@ for i = 1:maxSteps
 
     out.(sprintf('rmserr_%u',i)) = mirms;
     out.(sprintf('mabserr_%u',i)) = miabs;
-    
+
     % raw ac1 values -- ratios don't really make sense
     makeItSo = abs(mf.ac1s(i));
     out.(sprintf('ac1_%u',i)) = makeItSo;

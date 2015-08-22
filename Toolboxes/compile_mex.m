@@ -1,21 +1,21 @@
 % ------------------------------------------------------------------------------
 % compile_mex
 % ------------------------------------------------------------------------------
-% 
+%
 % This script compiles the mex files required for all operations implemented in
 % the HCTSA package.
-% 
+%
 % It must be run in the Toolboxes directory.
-% 
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -49,7 +49,7 @@ try
     fprintf(1,' done.\n');
 catch emsg
     fprintf(1,'%s\n\n',emsg.message);
-    error(['An error occurred while compiling.\n' ...
+    error(['An error occurred while compiling ML_Fastdfa_core C code.\n' ...
         'It appears that mex is not set up to work on this system (cf. ''doc mex'' and ''mex -setup'').\n' ...
         'Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile_mex.m']);
 end
@@ -59,20 +59,33 @@ end
 % ------------------------------------------------------------------------------
 fprintf(1,'Max Little''s ''Steps and bumps'' toolkit...');
 cd([toolDir,'Max_Little',filesep,'steps_bumps_toolkit'])
-anyerrors = 0;
+anyErrors = 0;
 try
     mex ML_kvsteps_core.cpp
 catch
-    fprintf(1,'ERROR: Max Little''s ''Steps and bumps'' toolkit failed to compile correctly\n');
+    fprintf(1,'ERROR: Max Little''s ''Steps and bumps'' C++ code failed to compile correctly\n');
 end
-if ~anyerrors, fprintf(1,' done.\n'); end
+if ~anyErrors, fprintf(1,' done.\n'); end
+
+% ------------------------------------------------------------------------------
+% Max Little's RPDE toolkit
+% ------------------------------------------------------------------------------
+fprintf(1,'Max Little''s ''RPDE'' code...');
+cd([toolDir,'Max_Little',filesep,'rpde'])
+anyErrors = 0;
+try
+    mex ML_close_ret.c
+catch
+    fprintf(1,'ERROR: Max Little''s ''RPDE'' C code failed to compile correctly\n');
+end
+if ~anyErrors, fprintf(1,' done.\n'); end
 
 % ------------------------------------------------------------------------------
 % Michael Small's code
 % ------------------------------------------------------------------------------
 fprintf(1,'Michael Small''s code...');
 cd([toolDir,'Michael_Small'])
-anyerrors = 0;
+anyErrors = 0;
 try
     mex MS_complexitybs.c % compile Michael Small's complexitybs C code
 catch
@@ -88,33 +101,34 @@ try
 catch
     fprintf(1,'ERROR: Michael Small''s ''shannon'' C code failed to compile correctly\n');
 end
-if ~anyerrors, fprintf(1,' done.\n'); end
+if ~anyErrors, fprintf(1,' done.\n'); end
 
 % ------------------------------------------------------------------------------
 % Gaussian Process code, gpml
 % ------------------------------------------------------------------------------
 fprintf(1,'Gaussian Process Toolbox, Carl Edward Rasmussen and Hannes Nickisch...');
 cd([toolDir,'gpml',filesep,'util'])
-anyerrors = 0;
+anyErrors = 0;
 try
     make
 catch
     fprintf(1,'ERROR: Gaussian Process Toolbox failed to compile correctly\n');
 end
-if ~anyerrors, fprintf(1,' done.\n'); end
+if ~anyErrors, fprintf(1,' done.\n'); end
 
 % ------------------------------------------------------------------------------
 % TSTOOL routines (such a mess)
 % ------------------------------------------------------------------------------
 fprintf(1,'TSTOOL...');
 cd([toolDir,'OpenTSTOOL',filesep,'mex-dev'])
-anyerrors = 0;
+anyErrors = 0;
 try
     makemex
+    settspath(fullfile(toolDir,'OpenTSTOOL'));
 catch
     fprintf(1,'ERROR: TSTOOL failed to compile correctly (not a huge surprise)\n');
 end
-if ~anyerrors, fprintf(1,' done.\n'); end
+if ~anyErrors, fprintf(1,' done.\n'); end
 
 % ------------------------------------------------------------------------------
 % TISEAN

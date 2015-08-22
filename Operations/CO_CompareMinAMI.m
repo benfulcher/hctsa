@@ -1,27 +1,26 @@
-% ------------------------------------------------------------------------------
-% CO_CompareMinAMI
-% ------------------------------------------------------------------------------
-% 
+function out = CO_CompareMinAMI(y,binMethod,numBins)
+% CO_CompareMinAMI	Variability in first minimum of automutual information
+%
 % Finds the first minimum of the automutual information by various different
 % estimation methods, and sees how this varies over different coarse-grainings
 % of the time series.
-% 
+%
 % The function returns a set of statistics on the set of first minimums of the
 % automutual information function obtained over a range of the number of bins
 % used in the histogram estimation, when specifying 'numBins' as a vector
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
-% meth, the method for estimating mutual information (input to CO_HistogramAMI)
-% 
+%
+% binMethod, the method for estimating mutual information (input to CO_HistogramAMI)
+%
 % numBins, the number of bins for the AMI estimation to compare over (can be a
 %           scalar or vector)
-% 
+%
 % Outputs include the minimum, maximum, range, number of unique values, and the
 % position and periodicity of peaks in the set of automutual information
 % minimums.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -35,17 +34,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_CompareMinAMI(y,meth,numBins)
 
 % ------------------------------------------------------------------------------
 %% Check inputs and set defaults:
@@ -72,7 +69,7 @@ amiMins = zeros(numBinsRange,1);
 for i = 1:numBinsRange % vary over number of bins in histogram
     amis = zeros(numTaus,1);
     for j = 1:numTaus % vary over time lags, tau
-        amis(j) = CO_HistogramAMI(y,tauRange(j),meth,numBins(i));
+        amis(j) = CO_HistogramAMI(y,tauRange(j),binMethod,numBins(i));
         if (j > 2) && ((amis(j)-amis(j-1))*(amis(j-1)-amis(j-2)) < 0)
             amiMins(i) = tauRange(j-1);
             break
@@ -86,44 +83,35 @@ end
 % Plot:
 if doPlot
     figure('color','w');
-    plot(amiMins,'o-k');
+    plot(numBins,amiMins,'o-k');
 end
 
-% Things to look for in the variation
+%-------------------------------------------------------------------------------
 % Basic statistics
+%-------------------------------------------------------------------------------
 out.min = min(amiMins);
 out.max = max(amiMins);
 out.range = range(amiMins);
 out.median = median(amiMins);
 out.mean = mean(amiMins);
 out.std = std(amiMins);
-out.iqr = iqr(amiMins);
 
 % Unique values, mode
 out.nunique = length(unique(amiMins));
 [out.mode, out.modef] = mode(amiMins);
 out.modef = out.modef/numBinsRange;
-% hist = zeros(length(u),1);
-% for i=1:length(u)
-%     hist(i) = sum(n == u(i));
-% end
-% out.mode = u(find(hist == max(hist),1,'first'));
 
 % Converged value?
 out.conv4 = mean(amiMins(end-4:end));
 
+%-------------------------------------------------------------------------------
 % Look for peaks (local maxima)
+%-------------------------------------------------------------------------------
 % local maxima above 1*std from mean
 % inspired by curious result of periodic maxima for periodic signal with
 % bin size... ('quantiles', [2:80])
 loc_extr = intersect(find(diff(amiMins(1:end-1)) > 0), BF_sgnchange(diff(amiMins(1:end-1)),1)) + 1;
 big_loc_extr = intersect(find(amiMins > out.mean+out.std),loc_extr);
 out.nlocmax = length(big_loc_extr);
-
-if out.nlocmax > 2 % number of local maxima
-    out.maxp = std(diff(big_loc_extr));
-else
-    out.maxp = NaN;
-end
 
 end

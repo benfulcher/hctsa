@@ -1,16 +1,13 @@
-% ------------------------------------------------------------------------------
-% BF_NaNCov
-% ------------------------------------------------------------------------------
-% 
-% Covariance estimate including NaNs for an input matrix, X.
-% 
+function C = NaNCov(X,makeCoeff,makeDist)
+% BF_NaNCov     Covariance estimate including NaNs for an input matrix, X.
+%
 % Not exact, because removes full mean across all values, rather than across
 % overlapping range, but should a reasonable approximation when number of NaNs
 % is small.
-% 
+%
 % Output can be either the covariance matrix, or matrix of correlation
 % coefficients, specified by the second input, makeCoeff.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -24,17 +21,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function C = NaNCov(X,makeCoeff,makeDist)
 
 % ------------------------------------------------------------------------------
 % Check Inputs:
@@ -56,7 +51,7 @@ end
 if any(isnan(X(:)))
     % Indicate non-NaN values:
     GoodValues = single(~isnan(X));
-    
+
     % Compute column means, excluding NaNs:
     % Problem is with X(~isnan) -> 0
     meanNotNan = @(x) mean(x(~isnan(x)));
@@ -64,17 +59,17 @@ if any(isnan(X(:)))
 
     % Remove mean from each column, to make centered version:
     Xc = bsxfun(@minus,X,ColMeans);
-    
+
     % X0 copies Xc but puts zeros over NaNs:
     X0 = Xc;
     X0(~GoodValues) = 0; % NaN -> 0
-    
+
     % Count good points (overlapping non-NaN values)
     GoodBoth = GoodValues' * GoodValues;
-    
+
     % This is our approximation to the covariance matrix:
     C = (X0' * X0) ./ (GoodBoth - 1);
-    
+
     % Convert to a correlation coefficient:
     if makeCoeff
         % Normalize by sample standard deviations:
@@ -86,7 +81,7 @@ if any(isnan(X(:)))
 else
     % no NaNs, use the matlab cov function:
     C = cov(X);
-    
+
     if makeCoeff
         % Normalize by sample standard deviations:
         ColStds = arrayfun(@(x)std(X(:,x)),1:numCol);

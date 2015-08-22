@@ -1,23 +1,21 @@
-% ------------------------------------------------------------------------------
-% BF_MutualInformation
-% ------------------------------------------------------------------------------
-% 
-% Returns mutual information between two vectors v1 and v2 using a
-% histogram-based, bin-counting method.
-% 
+function mi = BF_MutualInformation(v1,v2,r1,r2,numBins)
+% BF_MutualInformation  Mutual information between two data vectors using bin counting.
+%
+% Mutual information computed using a histogram-based, bin-counting method.
+%
 %---INPUTS:
 % v1, the first input vector
 % v2, the second input vector
 % r1, the bin-partitioning method for the first input vector, v1
 % r2, the bin-partitioning method for the second input vector, v2
 % numBins, the number of bins to partition each vector into.
-% 
+%
 % NB: r1 and r2 can also be two-component vectors, that specify a custom range
 %     for binning
-% 
+%
 %---OUTPUT:
 % mi, the mutual information computed between v1 and v2
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -31,17 +29,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function mi = BF_MutualInformation(v1,v2,r1,r2,numBins)
 
 % ------------------------------------------------------------------------------
 %% Check inputs and set defaults:
@@ -108,21 +104,21 @@ end
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
-    function edges = SUB_GiveMeEdges(r,v,nbins)
-        EE = 1E-6; % this small addition gets lost in the last bin
-        if strcmp(r,'range')
-            edges = linspace(min(v),max(v)+EE,nbins+1);
-            
-        elseif strcmp(r,'quantile') % bin edges based on quantiles
-            edges = quantile(v,linspace(0,1,nbins+1));
+function edges = SUB_GiveMeEdges(r,v,nbins)
+    EE = 1E-6; % this small addition gets lost in the last bin
+    if strcmp(r,'range')
+        edges = linspace(min(v),max(v)+EE,nbins+1);
+
+    elseif strcmp(r,'quantile') % bin edges based on quantiles
+        edges = quantile(v,linspace(0,1,nbins+1));
 %             edges(1) = edges(1) - 0.1;
-            edges(end) = edges(end) + EE;
+        edges(end) = edges(end) + EE;
 %             edges = sort(unique(edges)); % in case you have many repeated values -- will bias MI calculation
-        elseif length(r)==2 % a two-component vector
-            edges = linspace(r(1),r(2)+EE,nbins+1);
-        else
-            error('Unknown partitioning method ''%s''',r);
-        end
+    elseif length(r)==2 % a two-component vector
+        edges = linspace(r(1),r(2)+EE,nbins+1);
+    else
+        error('Unknown partitioning method ''%s''',r);
     end
+end
 % ------------------------------------------------------------------------------
 end

@@ -1,39 +1,38 @@
-% ------------------------------------------------------------------------------
-% DN_OutlierInclude
-% ------------------------------------------------------------------------------
-% 
+function out = DN_OutlierInclude(y,thresholdHow,inc)
+% DN_OutlierInclude     How statistics depend on distributional outliers.
+%
 % Measures a range of different statistics about the time series as more and
 % more outliers are included in the calculation according to a specified rule:
-% 
+%
 % (i) 'abs': outliers are furthest from the mean,
 % (ii) 'p': outliers are the greatest positive deviations from the mean, or
 % (iii) 'n': outliers are the greatest negative deviations from the mean.
-% 
+%
 % The threshold for including time-series data points in the analysis increases
 % from zero to the maximum deviation, in increments of 0.01*sigma (by default),
 % where sigma is the standard deviation of the time series.
-% 
+%
 % At each threshold, the mean, standard error, proportion of time series points
 % included, median, and standard deviation are calculated, and outputs from the
 % algorithm measure how these statistical quantities change as more extreme
 % points are included in the calculation.
-% 
+%
 %---INPUTS:
 % y, the input time series (ideally z-scored)
-% 
+%
 % thresholdHow, the method of how to determine outliers: 'abs', 'p', or 'n' (see above
 %           for descriptions)
-% 
+%
 % inc, the increment to move through (fraction of std if input time series is
 %       z-scored)
-% 
+%
 % Most of the outputs measure either exponential, i.e., f(x) = Aexp(Bx)+C, or
 % linear, i.e., f(x) = Ax + B, fits to the sequence of statistics obtained in
 % this way.
-% 
+%
 % [future: could compare differences in outputs obtained with 'p', 'n', and
 %               'abs' -- could give an idea as to asymmetries/nonstationarities??]
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -47,17 +46,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = DN_OutlierInclude(y,thresholdHow,inc)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -86,7 +83,7 @@ if nargin < 2 || isempty(thresholdHow)
     thresholdHow = 'abs'; % Analyze absolute value deviations in the time series by default
 end
 
-if nargin < 3 
+if nargin < 3
     inc = 0.01; % increment through z-scored time-series values
 end
 
@@ -98,15 +95,15 @@ switch thresholdHow
     case 'abs' % analyze absolute value deviations
         thr = (0:inc:max(abs(y)));
         tot = N;
-        
+
     case 'p' % analyze only positive deviations
         thr = (0:inc:max(y));
         tot = sum(y >= 0);
-        
+
     case 'n' % analyze only negative deviations
         thr = (0:inc:max(-y));
         tot = sum(y <= 0);
-        
+
 otherwise
     error('Error thresholding with ''%s''. Must select either ''abs'', ''p'', or ''n''.',thresholdHow)
 end
@@ -115,15 +112,15 @@ if isempty(thr)
     error('I suspect that this is a highly peculiar time series?!!!')
 end
 
-msDt = zeros(length(thr),6); % mean, std, proportion_of_time_series_included, 
+msDt = zeros(length(thr),6); % mean, std, proportion_of_time_series_included,
                              % median of index relative to middle, mean,
                              % error
 for i = 1:length(thr)
     th = thr(i); % the threshold
-    
+
     % Construct a time series consisting of inter-event intervals for parts
     % of the time serie exceeding the threshold, th
-    
+
     if strcmp(thresholdHow,'abs')% look at absolute value deviations
         r = find(abs(y) >= th);
     elseif strcmp(thresholdHow,'n')% look at only positive deviations
@@ -131,9 +128,9 @@ for i = 1:length(thr)
     elseif strcmp(thresholdHow,'p')% look at only negative deviations
         r = find(y >= th);
     end
-    
+
     Dt_exc = diff(r); % Delta t (interval) time series; exceeding threshold
-       
+
     msDt(i,1) = mean(Dt_exc); % the mean value of this sequence
     msDt(i,2) = std(Dt_exc)/sqrt(length(r)); % error on the mean
     msDt(i,3) = length(Dt_exc)/tot*100; % this is just really measuring the distribution
@@ -143,7 +140,7 @@ for i = 1:length(thr)
     msDt(i,4) = median(r)/(N/2)-1;
     msDt(i,5) = mean(r)/(N/2)-1; % between -1 and 1
     msDt(i,6) = std(r)/sqrt(length(r));
-    
+
 end
 
 % ------------------------------------------------------------------------------

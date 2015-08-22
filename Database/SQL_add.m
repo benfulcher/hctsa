@@ -1,10 +1,9 @@
-% ------------------------------------------------------------------------------
+function structArray = SQL_add(addWhat, inputFile, forDatabase, beVocal)
 % SQL_add
-% ------------------------------------------------------------------------------
-% 
+%
 % Adds a set of time series, operations, or master operations to the mySQL
 % database.
-% 
+%
 %---INPUTS:
 % addWhat: 'mops' (for master operations), 'ops' (for operations), or 'ts'
 %             (for time series)
@@ -12,16 +11,16 @@
 %             = INP_ts.txt or INP_ops.txt or INP_mops.txt]
 %             The input file should be formatted with whitespace as a delimiter
 %             between the entries to import.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -29,14 +28,11 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function SQL_add(addWhat, inputFile, databaseName, beVocal)
-
 % ------------------------------------------------------------------------------
 %% Check inputs, set defaults:
 % ------------------------------------------------------------------------------
 
-% addWhat
-% SHOULD BE 'ts', 'mops', or 'ops'
+% addWhat: 'ts', 'mops', or 'ops'
 if nargin < 1 || isempty(addWhat) || ~ismember(addWhat,{'ops','ts','mops'})
     error(['Error setting first input argument -- should be ''ts'' for TimeSeries ' ...
                 ', ''ops'' for Operations, or ''mops'' for Master Operations']);
@@ -55,10 +51,10 @@ if ~exist(inputFile,'file')
     error('Unknown file ''%s''',inputFile);
 end
 
-% databaseName
-if nargin < 3
-    % Use the default database (specified in sql_settings.conf) by default:
-    databaseName = '';
+% forDatabase
+if nargin < 3 || isempty(forDatabase)
+    % Write the results directly to the mySQL database specified in sql_settings.conf
+    forDatabase = 1;
 end
 
 % beVocal
@@ -70,7 +66,7 @@ end
 % ------------------------------------------------------------------------------
 % Display welcome message:
 % ------------------------------------------------------------------------------
-if beVocal,
+if beVocal
     fprintf(1,'Using input file: %s\n',inputFile);
 else
     fprintf(1,'No user feedback shown (use beVocal to get information about your import).\n');
@@ -78,9 +74,11 @@ end
 ticker = tic;
 
 % ------------------------------------------------------------------------------
-%% Open Database
+%% Open database connection
 % ------------------------------------------------------------------------------
-[dbc, databaseName] = SQL_opendatabase(databaseName);
+if forDatabase
+    [dbc, databaseName] = SQL_opendatabase();
+end
 
 % ------------------------------------------------------------------------------
 % Define strings to unify the different strands of code for time series /
@@ -95,7 +93,6 @@ switch addWhat
         theTable = 'TimeSeries';
         theKeywordTable = 'TimeSeriesKeywords';
         theRelTable = 'TsKeywordsRelate';
-        thename = 'Filename';
         maxL = 50000; % the longest time series length accepted in the database
     case 'ops'
         theWhat = 'operations';
@@ -104,7 +101,6 @@ switch addWhat
         theTable = 'Operations';
         theKeywordTable = 'OperationKeywords';
         theRelTable = 'OpKeywordsRelate';
-        thename = 'OpName';
     case 'mops'
         theWhat = 'master operations';
         theid = 'mop_id';
@@ -114,14 +110,16 @@ end
 % ------------------------------------------------------------------------------
 % Check that the table exists in the datbase
 % ------------------------------------------------------------------------------
-existString = ['SHOW TABLES LIKE ''' theTable ''''];
-[output,emsg] = mysql_dbquery(dbc,existString);
-if isempty(output) % Table doesn't exist
-    error(['Table %s doesn''t exist in the database %s.\n' ...
-                'Use: (1) install.m to set the database system up from scratch,\n' ...
-                '(2) SQL_create_all_tables to create empty tables that can later be filled with custom libraries of operations,' ...
-                '(3) SQL_reset to drop all tables in the database, and repopulate all tables with the default library of operations.'],...
-                theTable,databaseName);
+if forDatabase
+    existString = ['SHOW TABLES LIKE ''' theTable ''''];
+    [output,emsg] = mysql_dbquery(dbc,existString);
+    if isempty(output) % Table doesn't exist
+        error(['Table %s doesn''t exist in the database %s.\n' ...
+                    'Use: (1) install.m to set the database system up from scratch,\n' ...
+                    '(2) SQL_create_all_tables to create empty tables that can later be filled with custom libraries of operations,' ...
+                    '(3) SQL_reset to drop all tables in the database, and repopulate all tables with the default library of operations.'],...
+                    theTable,databaseName);
+    end
 end
 
 % ------------------------------------------------------------------------------
@@ -137,7 +135,7 @@ end
 
 if ~isMatFile
     % Specified a input text file
-    
+
     fid = fopen(inputFile);
 
     if (fid==-1)
@@ -147,14 +145,14 @@ if ~isMatFile
     switch addWhat
     case 'ts' % Read the time series input file:
         if beVocal
-            fprintf(1,['Need to format %s (Time Series input file) as: Filename ' ...
+            fprintf(1,['Need to format %s (Time Series input file) as: Name ' ...
                                                                 'Keywords\n'],inputFile)
             fprintf(1,'Assuming no header line\n')
             fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
             fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
         end
     	dataIn = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
-    
+
     case 'ops' % Read the operations input file:
         if beVocal
             fprintf(1,['Need to format %s (Operations input file) as: OperationCode ' ...
@@ -163,8 +161,8 @@ if ~isMatFile
             fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
             fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
         end
-        dataIn = textscan(fid,'%s %s %s','CommentStyle','#','CollectOutput',1);    
-    
+        dataIn = textscan(fid,'%s %s %s','CommentStyle','#','CollectOutput',1);
+
     case 'mops' % Read the master operations input file:
         if beVocal
             fprintf(1,'Need to format %s (Master Operations input file) as: MasterCode MasterLabel\n',inputFile)
@@ -176,7 +174,7 @@ if ~isMatFile
     end
 
     fclose(fid);
-    
+
 
     % ------------------------------------------------------------------------------
     % Show the user what's been imported:
@@ -190,16 +188,16 @@ if ~isMatFile
         fprintf(1,'Found %u %s in %s, I think. Take a look:\n\n',numItems,theWhat,inputFile)
         switch addWhat
         case 'ts'
-            fprintf(1,'%s\t%s\n','-Filename-','-Keywords-')
+            fprintf(1,'%s\t%s\n','-Name-','-Keywords-')
             fprint_ts = @(x) fprintf('%s\t%s\n',dataIn{x,1},dataIn{x,2});
         case 'ops'
-            fprintf(1,'%s\t%s\t%s\n','-Operation Name-','-Operation Code-','-Operation Keywords-')
+            fprintf(1,'%s\t%s\t%s\n','-Operation Name-','-Master Label-','-Operation Keywords-')
             fprint_ops = @(x) fprintf('%s\t%s\t%s\n',dataIn{x,1},dataIn{x,2},dataIn{x,3});
         case 'mops'
             fprintf(1,'%s\t%s\n','-Master Code-','-Master Label-')
             fprint_mops = @(x) fprintf('%s\t%s\n',dataIn{x,1},dataIn{x,2});
         end
-    
+
         for i = 1:min(3,numItems)
             switch addWhat
             case 'ts', fprint_ts(i);
@@ -207,7 +205,7 @@ if ~isMatFile
             case 'mops', fprint_mops(i);
             end
         end
-    
+
         if numItems > 3
             fprintf(1,'..................(%u).....................\n',max(numItems-6,0))
             for i = max(numItems-2,4):numItems
@@ -218,14 +216,14 @@ if ~isMatFile
                 end
             end
         end
-    
-        fprintf(1,['\nHow does it look? Make sure the time series and everything ' ...
-                                                'match up to their headings\n'])
 
-        reply = input(['If we go on, we will attempt to read all timeseries ' ...
+        fprintf(1,['\nHow does it look? Make sure the time series and metadata ' ...
+                                                'match up with their headings\n'])
+
+        reply = input(['If we go on, we will attempt to read all time series ' ...
                         'from file and add all ' ...
                         'data to the database.\n<<<Type ''y'' to continue...>>>'],'s');
-    
+
         if ~strcmp(reply,'y')
             fprintf(1,'I didn''t think so. Come back later...\n')
             return
@@ -233,20 +231,20 @@ if ~isMatFile
     end
 
     fprintf(1,'%s read.\n',inputFile)
-    
+
 else
     % Only allow .mat file input when importing time series
     if ~strcmp(addWhat,'ts')
         error(['.mat file input type only supported for importing time series. ' ...
                 'Please specify a text file for importing master operations or operations.']);
     end
-        
+
     % Load the 3 cells specifying the data:
     if ~exist(inputFile,'file')
         error('Could not load specified input .mat file: %s',inputFile);
     end
     inputData = load(inputFile,'timeSeriesData','labels','keywords');
-    
+
     % Check that they're all as they should be:
     if ~isfield(inputData,'timeSeriesData') || ~isfield(inputData,'labels') || ~isfield(inputData,'keywords') ...
                 || ~(iscell(inputData.timeSeriesData) || isnumeric(inputData.timeSeriesData)) ...
@@ -254,7 +252,7 @@ else
         error(['Expecting input file, %s, to contain: ''timeSeriesData'' (cell or matrix), ' ...
                             '''labels'' (cell), and ''keywords'' (cell).'],inputFile);
     end
-    
+
     % Get number of time series (as numItems):
     if iscell(inputData.timeSeriesData)
         numItems = length(inputData.timeSeriesData);
@@ -264,18 +262,20 @@ else
     end
     if beVocal
         fprintf(1,['We have %u time series (rows) in your data matrix, timeSeriesData ' ...
-                                    '(loaded from %s).'],numItems,inputFile)
-        fprintf(1,['Will store time-series data from matlab file in the database to an' ...
+                                    '(loaded from %s).\n'],numItems,inputFile)
+        if forDatabase
+            fprintf(1,['Will store time-series data from matlab file in the database to an' ...
                         ' accuracy of 6 significant figures...\n']);
+        end
     end
-    
+
     % Check sizes match:
     if length(inputData.labels) ~= numItems || length(inputData.keywords) ~= numItems
         fprintf(1,'%u time series, %u labels, %u keywords in %s.\n',numItems,...
                     length(inputData.labels),length(inputData.keywords),inputFile);
         error('All cells in the input file %s must be the same length.',inputFile);
     end
-    
+
     % Plot some to screen
     if beVocal
         plotNum = min(5,numItems); % display as many as the first 5 time series to demonstrate
@@ -292,161 +292,216 @@ else
                 xlabel('Time (samples)')
             end
         end
-        
-        reply = input(sprintf(['Does this look ok for the first %u time series?\n If we continue, ' ...
-                        'we will attempt to add all %u time series in the input file' ...
-                        ' to the database.\n<<<Type ''y'' to continue...>>>'],plotNum,numItems),'s');
+
+        if forDatabase
+            reply = input(sprintf(['Does this look ok for the first %u time series?\nIf we continue, ' ...
+                'we will attempt to add all %u time series in the input file' ...
+                ' to the database.\n<<<Type ''y'' to continue...>>>'],plotNum,numItems),'s');
+        else
+            reply = input(sprintf(['Does this look ok for the first %u time series?\n' ...
+                                    '<<<Type ''y'' to continue...>>>'],plotNum),'s');
+        end
         if ~strcmp(reply,'y')
             fprintf(1,'I didn''t think so. Come back later...\n')
             return
         end
         close
     end
-    
+
     % Ok, so we have inputData.timeSeriesData, inputData.labels, and inputData.keywords
 end
 
 esc = @RA_sqlescapestring; % Inline function to add escape strings to format mySQL queries
 
 % ------------------------------------------------------------------------------
-% Construct a more intuitive structure array for the time series / operations /
-% master operations Fill a cell, toAdd, containing mySQL INSERT commands for
+% Construct a structure array for the time series / operations /
+% master operations and fill a cell, toAdd, containing mySQL INSERT commands for
 % each item in the input file.
 % ------------------------------------------------------------------------------
-if beVocal
+if forDatabase & beVocal
     fprintf(1,['Preparing mySQL statements to add %u %s to the ' ...
                                 'database %s...'],numItems,theWhat,databaseName);
 end
+
 toAdd = cell(numItems,1);
+
 switch addWhat
 case 'ts' % Prepare toAdd cell for time series
     if beVocal; figure('color','w','WindowStyle','docked'); end
+
+    wasGood = logical(zeros(1,numItems)); % record whether data was added or not
+                                 % (if too long or contains missing values, it is not added)
+
     for j = 1:numItems
-        
+
         % Assign filename and keywords strings to this time series, and load it as x
         if isMatFile
-            timeseries(j).Filename = inputData.labels{j};
-            timeseries(j).Keywords = inputData.keywords{j}; % Take out inverted commas from keywords lists
+            TimeSeries(j).Name = inputData.labels{j};
+            TimeSeries(j).Keywords = inputData.keywords{j}; % Take out inverted commas from keywords lists
             if iscell(inputData.timeSeriesData)
                 x = inputData.timeSeriesData{j};
             else
                 x = inputData.timeSeriesData(j,:);
             end
         else
-            timeseries(j).Filename = dataIn{j,1};
-            timeseries(j).Keywords = regexprep(dataIn{j,2},'\"',''); % Take out inverted commas from keywords lists
+            TimeSeries(j).Name = dataIn{j,1};
+            TimeSeries(j).Keywords = regexprep(dataIn{j,2},'\"',''); % Take out inverted commas from keywords lists
             % Read the time series from its filename:
             try
-                x = dlmread(timeseries(j).Filename);
+                x = dlmread(TimeSeries(j).Name);
             catch emsg
                 fprintf(1,'%s\n',emsg.message)
                 error(['\nCould not read the data file for ''%s''.' ...
                                 'Check that it''s in Matlab''s path.'], ...
-                                    timeseries(j).Filename)
+                                    TimeSeries(j).Name)
             end
         end
 
         % Assign the length of the time series
-        timeseries(j).Length = length(x);
-        
+        TimeSeries(j).Length = length(x);
+
+        %---TESTS (time-series contains good values, and is not too long)---
+
         % Check if the time series contains any NaN of Inf values:
         if any(isnan(x)) || any(~isfinite(x))
-            fprintf(1,['\nDid you know that the time series %s contains special values' ...
-                        ' (e.g., NaN or Inf)...?\n'],which(timeseries(j).Filename))
-            fprintf(1,'I''m not quite sure what to do with this... Please reformat.\n')
-            return
+            beep
+            warning(['\nDid you know that the time series %s contains special values' ...
+                        ' (e.g., NaN or Inf)...?\n'],which(TimeSeries(j).Name))
+            fprintf(1,'This time series will not be added...\n')
+            continue
         end
-        
+
         % If this time series is longer than the maximum allowed, then exit:
         if length(x) > maxL
-            fprintf(['\n%s contains %u samples, this framework can efficiently ' ...
-                            'deal with time series up to %u samples\n'],...
-                                timeseries(j).Filename,timeseries(j).Length,maxL)
-            fprintf(1,['Safest not to do anything now -- perhaps you can remove this ' ...
-                                    'time series from the input file?']); return
+            beep
+            warning(['\n%s contains %u samples, this framework can efficiently ' ...
+                        'deal with time series up to %u samples\nSkipping this time series...'],...
+                                TimeSeries(j).Name,TimeSeries(j).Length,maxL)
+            continue
         end
-        
-        % Now assign the time-series data (stored as singles in the case of a .mat file data)
-        if isMatFile
-            xtext = sprintf('%.6g,',x); % keeps 6 figures of accuracy
-            xtext = xtext(1:end-1); % remove trailing comma
-        else
-            % Read in the time series from file as strings using textscan
-            fid = fopen(timeseries(j).Filename);
-            timeSeriesData_text = textscan(fid,'%s');
-            fclose(fid);
-        
-            % Turn the time series into a comma-delimited string
-            timeSeriesData_text = timeSeriesData_text{1}; % cell of time series values as strings
-            xtext = ''; % make a comma-delimited text version of the time series as xtext
-            for k = 1:length(timeSeriesData_text)
-                xtext = [xtext,',',timeSeriesData_text{k}];
+
+        % Passed both tests! Assign wasGood = 1
+        wasGood(j) = 1;
+
+        % Assign the time-series data as text (stored as singles in the case of a .mat file data)
+        if forDatabase
+            % Want time-series data as a comma-delimited string:
+            if isMatFile
+                xtext = sprintf('%.6g,',x); % keeps 6 figures of accuracy
+                xtext = xtext(1:end-1); % remove trailing comma
+            else
+                % Read in the time series from file as strings using textscan
+                fid = fopen(TimeSeries(j).Name);
+                timeSeriesData_text = textscan(fid,'%s');
+                fclose(fid);
+
+                % Turn the time series into a comma-delimited string
+                timeSeriesData_text = timeSeriesData_text{1}; % cell of time series values as strings
+                xtext = ''; % make a comma-delimited text version of the time series as xtext
+                for k = 1:length(timeSeriesData_text)
+                    xtext = [xtext,',',timeSeriesData_text{k}];
+                end
+                xtext = xtext(2:end);
             end
-            xtext = xtext(2:end);
+            TimeSeries(j).Data = xtext;
+        else
+            % Want to keep time-series data as a vector
+            TimeSeries(j).Data = x;
         end
-        timeseries(j).Data = xtext;
-        
+
         % ------------------------------------------------------------------------------
         % Prepare the data to be added to the database in an INSERT command:
         toAdd{j} = sprintf('(''%s'',''%s'',%u,''%s'')', ...
-                            esc(timeseries(j).Filename),esc(timeseries(j).Keywords), ...
-                            timeseries(j).Length,timeseries(j).Data);
-        
+                            esc(TimeSeries(j).Name),esc(TimeSeries(j).Keywords), ...
+                            TimeSeries(j).Length,TimeSeries(j).Data);
+
         if beVocal % plot the time series
-            nsubplots = min(numItems,5);
-            subplot(nsubplots,1,mod(j-1,nsubplots)+1);
+            numSubplots = min(numItems,4);
+            subplot(numSubplots,1,mod(j-1,numSubplots)+1);
             plot(x,'-k'); xlim([1,length(x)]);
-            titletext = sprintf('\n[%u/%u] %s (%u), keywords = %s',j,numItems,timeseries(j).Filename,timeseries(j).Length,timeseries(j).Keywords);
-            title(titletext,'interpreter','none');
-            fprintf(1,'%s --- loaded successfully.',titletext)
+            titleText = sprintf('\n[%u/%u] %s (%u), keywords = %s',j,numItems,...
+                    TimeSeries(j).Name,TimeSeries(j).Length,TimeSeries(j).Keywords);
+            title(titleText,'interpreter','none');
+            fprintf(1,'%s --- loaded successfully.',titleText)
             pause(0.01); % wait 0.01 second to show the plotted time series
         end
     end
-    if beVocal, fprintf(1,'\nAll time-series data loaded, ready to be uploaded to the mySQL database.\n'); end
 
     % Check for duplicates in the input file:
-    if length(unique({timeseries.Filename})) < length(timeseries)
+    if length(unique({TimeSeries.Name})) < length(TimeSeries)
         error('Input file contains duplicates.');
     end
-    
-case 'mops' % Prepare toAdd cell for master operations
-    for j = 1:numItems
-        master(j).MasterCode = dataIn{j,1};
-        master(j).MasterLabel = dataIn{j,2};
-        toAdd{j} = sprintf('(''%s'', ''%s'')',esc(master(j).MasterLabel),esc(master(j).MasterCode));
+
+    % Check that some passed quality checks
+    if sum(wasGood)==0
+        fprintf(1,'None of the %u time series in the input file passed quality checks.\n', ...
+                                length(wasGood));
+        return
     end
-    if beVocal, fprintf(1,' Done.\n'); end
-    
-case 'ops' % Prepare toAdd cell for operations        
-    for j = 1:numItems
-        operation(j).Code = dataIn{j,1};
-        operation(j).Name = dataIn{j,2};
-        operation(j).Keywords = dataIn{j,3};
-        if strfind(operation(j).Code,'(') % single operation
-            operation(j).MasterLabel = '';
-            toAdd{j} = sprintf('(''%s'', ''%s'',NULL,''%s'')',...
-                        esc(operation(j).Name),esc(operation(j).Code),esc(operation(j).Keywords));
-        else % pointer operation
-            operation(j).MasterLabel = strtok(operation(j).Code,'.');
-            toAdd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',...
-                        esc(operation(j).Name),esc(operation(j).Code),...
-                        esc(operation(j).MasterLabel),esc(operation(j).Keywords));
+
+    % Tell them about it:
+    if beVocal
+        fprintf(1,['\nAll time-series data loaded (%u/%u passed quality tests),' ...
+            ' ready to be uploaded to the mySQL database.\n'],sum(wasGood),length(wasGood));
+        if any(~wasGood)
+            reply = input(sprintf('[List %u time series that failed... (press any key)]',sum(~wasGood)),'s');
+            iNoGood = find(~wasGood);
+            for i = 1:length(iNoGood)
+                fprintf(1,'*NOT UPLOADING:* %s (%s), N = %u\n',TimeSeries(iNoGood(i)).Name,TimeSeries(iNoGood(i)).Keywords,...
+                                                TimeSeries(iNoGood(i)).Length);
+            end
+            reply = input(sprintf('[press any key to continue to add the remaining %u time series]',sum(wasGood)),'s');
         end
     end
+
+case 'mops' % Prepare toAdd cell for master operations
+    for j = 1:numItems
+        MasterOperations(j).Code = dataIn{j,1};
+        MasterOperations(j).Label = dataIn{j,2};
+        toAdd{j} = sprintf('(''%s'', ''%s'')',esc(MasterOperations(j).Label),esc(MasterOperations(j).Code));
+    end
     if beVocal, fprintf(1,' Done.\n'); end
-    
+
+case 'ops' % Prepare toAdd cell for operations
+    for j = 1:numItems
+        Operations(j).CodeString = dataIn{j,1};
+        Operations(j).Name = dataIn{j,2};
+        Operations(j).Keywords = dataIn{j,3};
+        Operations(j).Label = strtok(Operations(j).CodeString,'.');
+        toAdd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',...
+                    esc(Operations(j).Name),esc(Operations(j).CodeString),...
+                    esc(Operations(j).Label),esc(Operations(j).Keywords));
+    end
+    if beVocal, fprintf(1,' Done.\n'); end
+
     % Check for duplicates in the input file:
-    [uniqueOpNames,ia] = unique({operation.Name});
-    if length(uniqueOpNames) < length(operation)
+    [uniqueOpNames,ia] = unique({Operations.Name});
+    if length(uniqueOpNames) < length(Operations)
         warning(['Input file contains %u duplicate entries, which are being removed.\n' ...
                         'Inputting %u -> %u operations...'], ...
-            length(operation)-length(uniqueOpNames),length(operation),length(uniqueOpNames));
+            length(Operations)-length(uniqueOpNames),length(Operations),length(uniqueOpNames));
         % Only keep the unique ones:
-        operation = operation(ia);
+        Operations = Operations(ia);
         toAdd = toAdd(ia);
-        numItems = length(operation);
+        numItems = length(Operations);
         fprintf(1,'We now have %u operations to input...\n',numItems);
-    end    
+    end
+end
+
+% ------------------------------------------------------------------------------
+% Leave now if not writing to a database
+% ------------------------------------------------------------------------------
+switch addWhat
+case 'ts'
+    structArray = TimeSeries(wasGood);
+case 'mops'
+    structArray = MasterOperations;
+case 'ops'
+    structArray = Operations;
+end
+if ~forDatabase
+    fprintf(1,'Returning a structure array of %u %s.\n',length(structArray),theWhat);
+    return
 end
 
 % ------------------------------------------------------------------------------
@@ -455,19 +510,20 @@ end
 if beVocal, fprintf(1,'Checking for duplicates already in the database... '); end
 switch addWhat
 case 'ts'
-    existingFilenames = mysql_dbquery(dbc,sprintf('SELECT FileName FROM TimeSeries'));
-    isDuplicate = ismember({timeseries.Filename},existingFilenames); % isDuplicate = 1 if the item already exists
+    existingNames = mysql_dbquery(dbc,sprintf('SELECT Name FROM TimeSeries'));
+    isDuplicate = ismember({TimeSeries.Name},existingNames); % isDuplicate = 1 if the item already exists
 case 'ops'
-    existingOperationNames = mysql_dbquery(dbc,'SELECT OpName FROM Operations');
-    isDuplicate = ismember({operation.Name},existingOperationNames); % isDuplicate = 1 if the MasterLabel already exists    
+    existingOperationNames = mysql_dbquery(dbc,'SELECT Name FROM Operations');
+    isDuplicate = ismember({Operations.Name},existingOperationNames); % isDuplicate = 1 if the operation already exists
 case 'mops'
     existing = mysql_dbquery(dbc,'SELECT MasterLabel FROM MasterOperations');
-    isDuplicate = ismember({master.MasterLabel},existing); % isDuplicate = 1 if the MasterLabel already exists
+    isDuplicate = ismember({MasterOperations.Label},existing); % isDuplicate = 1 if the master operation already exists
 end
-if beVocal, fprintf(1,'done.\n'); end
+if beVocal, fprintf(1,'Done.\n'); end
 
-
+% ------------------------------------------------------------------------------
 % Tell the user about duplicates
+% ------------------------------------------------------------------------------
 if all(isDuplicate)
     fprintf(1,'All %u %s from %s already exist in %s---no new %s to add!\n',...
                     numItems,theWhat,inputFile,databaseName,theWhat);
@@ -482,35 +538,53 @@ elseif sum(isDuplicate) > 0
 end
 
 % ------------------------------------------------------------------------------
+% Incorporate isDuplicate with wasGood
+% ------------------------------------------------------------------------------
+if strcmp(addWhat,'ts')
+    isBad = (isDuplicate | ~wasGood);
+    if all(isBad)
+        fprintf(1,['All input time series either already exist in the database, ' ...
+                    'or did not pass the required quality checks. Exiting.']);
+        return
+    end
+else
+    isBad = isDuplicate;
+end
+
+% ------------------------------------------------------------------------------
 %% Select the maximum id already in the table
 % ------------------------------------------------------------------------------
-maxid = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,theTable));
-if isempty(maxid) || isempty(maxid{1}) || isnan(maxid{1})
+maxId = mysql_dbquery(dbc,sprintf('SELECT MAX(%s) FROM %s',theid,theTable));
+if isempty(maxId) || isempty(maxId{1}) || isnan(maxId{1})
     % No time series exist in the database yet
-    maxid = 0;
+    maxId = 0;
 else
-    maxid = maxid{1}; % the maximum id -- the new items will have ids greater than this
+    maxId = maxId{1}; % the maximum id -- the new items will have ids greater than this
 end
 
 % ------------------------------------------------------------------------------
 %% Assemble and execute the INSERT queries
 % ------------------------------------------------------------------------------
 fprintf('Adding %u new %s to the %s table in %s...',...
-                    sum(~isDuplicate),theWhat,theTable,databaseName)
+                    sum(~isBad),theWhat,theTable,databaseName)
 switch addWhat
-case 'ts' % Add time series to the TimeSeries table just 10 at a time
-          % (so as not to exceed the max_allowed_packet when transmitting the 
-          % time-series data) Appropriate chunk size will depend on the length of
-          % time series in general
-
-    SQL_add_chunked(dbc,['INSERT INTO TimeSeries (FileName, Keywords, Length, ' ...
-                                    'Data) VALUES'],toAdd,isDuplicate,10);
+case 'ts' % Add time series to the TimeSeries table just 5 at a time
+          % (so as not to exceed the max_allowed_packet when transmitting the
+          % time-series data). An appropriate chunk size will depend on the length of
+          % time series in general...
+    maxLength = max([TimeSeries.Length]);
+    % 5 at a time works for 20,000 sample time series using default mySQL settings.
+    % Calibrate to this:
+    numPerChunk = max([floor(20000/maxLength*5),1]); % no fewer than 1 per chunk
+    numPerChunk = min([numPerChunk,500]); % no more than 500 per chunk
+    SQL_add_chunked(dbc,['INSERT INTO TimeSeries (Name, Keywords, Length, ' ...
+                                    'Data) VALUES'],toAdd(~isBad),numPerChunk);
 case 'ops' % Add operations to the Operations table 500 at a time
-    SQL_add_chunked(dbc,['INSERT INTO Operations (OpName, Code, MasterLabel, ' ...
-                                    'Keywords) VALUES'],toAdd,isDuplicate,500);
+    SQL_add_chunked(dbc,['INSERT INTO Operations (Name, Code, MasterLabel, ' ...
+                                    'Keywords) VALUES'],toAdd(~isBad),500);
 case 'mops' % Add master operations to the MasterOperations table 500 at a time
     SQL_add_chunked(dbc,['INSERT INTO MasterOperations (MasterLabel, ' ...
-                                'MasterCode) VALUES'],toAdd,isDuplicate,500);
+                                'MasterCode) VALUES'],toAdd(~isBad),500);
 end
 fprintf(1,' Done.\n')
 
@@ -520,21 +594,23 @@ fprintf(1,' Done.\n')
 if ~strcmp(addWhat,'mops')
     resultsTic = tic;
     if beVocal
-        fprintf(1,['Updating the Results Table in %s (this could take a while, ' ...
-                                'please be patient!)...'],databaseName)
+        fprintf(1,['Updating the Results table in %s\n(This could take a while, ' ...
+                                'please be patient)...'],databaseName)
     end
     switch addWhat
     case 'ts'
         [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id ' ...
-                    'FROM TimeSeries t CROSS JOIN Operations o ON t.ts_id > %u ORDER BY t.ts_id, o.op_id'],maxid));
+                    'FROM TimeSeries t CROSS JOIN Operations o ON t.ts_id > %u ORDER BY t.ts_id, o.op_id'],maxId));
     case 'ops'
         [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id ' ...
-                    'FROM TimeSeries t CROSS JOIN Operations o ON o.op_id > %u ORDER BY t.ts_id, o.op_id'],maxid));
+                    'FROM TimeSeries t CROSS JOIN Operations o ON o.op_id > %u ORDER BY t.ts_id, o.op_id'],maxId));
     end
-    if ~isempty(emsg),
-        fprintf(1,' error. This is really really not good.\n');
+    if ~isempty(emsg)
+        fprintf(1,' Error. This is really really not good.\n%s',emsg);
     else
-        if beVocal, fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultsTic))); end
+        if beVocal
+            fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultsTic)));
+        end
     end
 end
 
@@ -547,18 +623,18 @@ if ~strcmp(addWhat,'mops')
     % First find unique keywords from new time series by splitting against commas
     switch addWhat
     case 'ts'
-        kws = {timeseries(~isDuplicate).Keywords};
+        kws = {TimeSeries(~isBad).Keywords};
     case 'ops'
-        kws = {operation(~isDuplicate).Keywords};
+        kws = {Operations(~isBad).Keywords};
     end
-    
+
     % Split into each individual keyword:
     kwSplit = regexp(kws,',','split','ignorecase');
     ukws = unique(horzcat(kwSplit{:}));
     nkw = length(ukws); % The number of unique keywords in the new set of time series
     if beVocal
         fprintf(1,'\nI found %u unique keywords in the %u new %s in %s...',...
-                        nkw,sum(~isDuplicate),theWhat,inputFile);
+                        nkw,sum(~isBad),theWhat,inputFile);
     end
 
     % How many overlap with existing keywords??:
@@ -569,7 +645,7 @@ if ~strcmp(addWhat,'mops')
     else
         isNew = ones(nkw,1); % All are new
     end
-    
+
     if sum(isNew) > 0
         if beVocal
             fprintf(1,['\nIt turns out that %u keywords are completely new and will be added ' ...
@@ -577,20 +653,21 @@ if ~strcmp(addWhat,'mops')
         end
         % Add the new keywords to the Keywords table
         insertString = sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES',theKeywordTable);
-        toAdd = cell(sum(isNew),1);
         fisNew = find(isNew); % Indicies of new keywords
+        toAdd = cell(sum(isNew),1);
         for k = 1:sum(isNew);
             toAdd{k} = sprintf('(''%s'',0)',ukws{fisNew(k)});
         end
-        SQL_add_chunked(dbc,insertString,toAdd);
+        SQL_add_chunked(dbc,insertString,toAdd,100);
         fprintf(1,' Added %u new keywords!\n',sum(isNew))
     else
         if beVocal
             fprintf(1,['\nIt turns out that all new keywords already exist in ' ...
-                    'the %s table in %s -- there are no new keywords to add\n'],sum(isNew),theKeywordTable,databaseName)
+                    'the %s table in %s -- there are no new keywords to add\n'],...
+                    sum(isNew),theKeywordTable)
         end
     end
-    
+
     % ------------------------------------------------------------------------------
     %% Fill new keyword relationships
     % ------------------------------------------------------------------------------
@@ -600,34 +677,42 @@ if ~strcmp(addWhat,'mops')
     % Try doing it from scratch...:
     switch addWhat
     case 'ts'
-        allNames = BF_cat({timeseries(~isDuplicate).Filename},',','''');
+        allNames = BF_cat({TimeSeries(~isBad).Name},',','''');
     case 'ops'
-        allNames = BF_cat({operation(~isDuplicate).Name},',','''');
+        allNames = BF_cat({Operations(~isBad).Name},',','''');
     end
-    ourids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE %s IN (%s)',theid, ...
-                                                        theTable,thename,allNames));
-    ourids = vertcat(ourids{:}); % ids matching FileNames/OpNames
+
+    % ourids: ids matching time series or operations
+    ourids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Name IN (%s)',theid, ...
+                                                        theTable,allNames));
+    ourids = vertcat(ourids{:});
+
+    % ourkids: kw_ids matching keywords
     ourkids = mysql_dbquery(dbc,sprintf('SELECT %s FROM %s WHERE Keyword IN (%s)', ...
                                             thekid,theKeywordTable,BF_cat(ukws,',','''')));
-    ourkids = vertcat(ourkids{:}); % ids matching FileNames/OpNames
-    % nkwrels = sum(cellfun(@(x)length(x),kwSplit)); % number of keyword relationships in the input file
+    ourkids = vertcat(ourkids{:});
     addCell = {};
     for i = 1:length(kwSplit)
         for j = 1:length(kwSplit{i})
-            addCell{end+1} = sprintf('(%u,%u)',ourids(i),ourkids(strcmp(kwSplit{i}{j},ukws)));
+            try
+                addCell{end+1} = sprintf('(%u,%u)',ourids(i),ourkids(strcmp(kwSplit{i}{j},ukws)));
+            catch
+                keyboard
+            end
         end
     end
-    % Add them all in chunks
-    SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell);
-        
+    % Add them all in 1000-sized chunks
+    SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell,1000);
+
+
     % Increment Nmatches in the keywords table
-    fprintf(1,' done.\nNow calculating the match counts for keywords...')
+    fprintf(1,' Done.\nNow calculating the match counts for keywords...')
     % Redo them from scratch should be easier actually...?
     for k = 1:nkw % keywords implicated in this import
         selectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,theKeywordTable,ukws{k});
         theopkw = mysql_dbquery(dbc,selectString);
         updateString = sprintf('UPDATE %s SET NumOccur = (SELECT COUNT(*) FROM %s WHERE %s = %u) WHERE %s = %u', ...
-                                    theKeywordTable,theRelTable,thekid,theopkw{1},thekid,theopkw{1});
+                                theKeywordTable,theRelTable,thekid,theopkw{1},thekid,theopkw{1});
         [~,emsg] = mysql_dbexecute(dbc, updateString);
         if ~isempty(emsg)
             error('\n Error updating keyword count in %s\n%s',theKeywordTable,emsg)
@@ -637,7 +722,7 @@ if ~strcmp(addWhat,'mops')
     %     % nnkw = sum(cellfun(@(x)ismember(ukws{k},x),kwSplit));
     %     Selectopkwid = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,theKeywordTable,ukws{k});
     %     SelectCount = sprintf(['SELECT COUNT(*) FROM %s WHERE %s = %s ' ...
-    %                             'AND %s > %u'],theRelTable,thekid,Selectopkwid,theid,maxid);
+    %                             'AND %s > %u'],theRelTable,thekid,Selectopkwid,theid,maxId);
     %     updateString = sprintf(['UPDATE %s SET NumOccur = NumOccur + (%s) ' ...
     %                             'WHERE Keyword = ''%s'''],theKeywordTable,SelectCount,ukws{k});
     %     [~,emsg] = mysql_dbexecute(dbc, updateString);
@@ -646,7 +731,7 @@ if ~strcmp(addWhat,'mops')
     %         fprintf(1,'\n Error updating keyword count in %s',theKeywordTable)
     %     end
     % end
-    fprintf(1,' done.\n')
+    fprintf(1,' Done.\n')
 end
 
 % ------------------------------------------------------------------------------
@@ -658,13 +743,13 @@ if ismember(addWhat,{'mops','ops'}) % there may be new links
     updateString = ['UPDATE Operations AS o SET o.mop_id = (SELECT mop_id FROM MasterOperations AS m ' ...
                         'WHERE m.MasterLabel = o.MasterLabel) WHERE mop_id IS NULL'];
     [~,emsg] = mysql_dbexecute(dbc,updateString);
-    
+
     % ---------------------
     % Should probably add a check that the update happened; i.e., that no mop_id are left NULL
     % after this process (e.g., if no Master Operations exist, then this will complete with no
     % error; even though no mop_ids were actually assigned...)
 
-    
+
     %----ALTERNATIVE: FILL A LINKING TABLE AS A JOIN ON MasterLabel:
     % Delete the linking table and recreate it from scratch is easiest
     % fprintf(1,'Filling MasterPointerRelate...');
@@ -674,30 +759,30 @@ if ismember(addWhat,{'mops','ops'}) % there may be new links
     % [~,emsg] = mysql_dbexecute(dbc,InsertString);
 
     if isempty(emsg)
-        fprintf(' done.\n');
+        fprintf(' Done.\n');
     else
         error('\nOops! Error finding links between Operations and MasterOperations:\n%s\n',emsg);
     end
-    
+
     %     % if strcmp(addWhat,'ops')
     %     %     % operations were imported -- match their MasterLabels with elements of the MasterOperations table using mySQL JOIN
     %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
-    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.op_id > %u',maxid];
+    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.op_id > %u',maxId];
     %     % else
     %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
-    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE m.mop_id > %u',maxid];
+    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE m.mop_id > %u',maxId];
     %     % end
-    %     
-    
+    %
+
     updateString = sprintf(['UPDATE MasterOperations AS m SET NPointTo = ' ...
                     '(SELECT COUNT(o.mop_id) FROM Operations AS o WHERE m.mop_id = o.mop_id)']);
     [~,emsg] = mysql_dbexecute(dbc, updateString);
     if ~isempty(emsg)
         error('Error counting NPointTo operations for mop_id = %u\n%s\n',M_ids(k),emsg);
     end
-    
+
     % M_ids = mysql_dbquery(dbc,'SELECT mop_id FROM MasterOperations');
-    % M_ids = vertcat(M_ids{:}); % vector of master_ids    
+    % M_ids = vertcat(M_ids{:}); % vector of master_ids
     % for k = 1:length(M_ids)
     %     updateString = sprintf(['UPDATE MasterOperations SET NPointTo = ' ...
     %                     '(SELECT COUNT(mop_id) FROM Operations WHERE mop_id = %u)' ...
@@ -721,7 +806,7 @@ SQL_closedatabase(dbc)
 %% Tell the user all about it
 % ------------------------------------------------------------------------------
 fprintf('All tasks completed in %s.\nRead %s then added %u %s into %s.\n', ...
-            BF_thetime(toc(ticker)), inputFile, sum(~isDuplicate), theWhat, databaseName);
+            BF_thetime(toc(ticker)), inputFile, sum(~isBad), theWhat, databaseName);
 
 if strcmp(addWhat,'ts')
     fprintf(1,['**The imported data are now in %s and no longer ' ...

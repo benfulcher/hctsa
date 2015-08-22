@@ -1,26 +1,26 @@
-% ------------------------------------------------------------------------------
-% CO_trev
-% ------------------------------------------------------------------------------
-% 
+function out = CO_trev(y,tau)
+% CO_trev   The trev function of a time series.
+%
 % Calculates the trev function, a normalized nonlinear autocorrelation,
 % mentioned in the documentation of the TSTOOL nonlinear time-series analysis
 % package (available here: http://www.physik3.gwdg.de/tstool/).
-% 
+%
 % The quantity is often used as a nonlinearity statistic in surrogate data
 % analysis, cf. "Surrogate time series", T. Schreiber and A. Schmitz, Physica D,
 % 142(3-4) 346 (2000).
-% 
+%
 %---INPUTS:
-% 
+%
 % y, time series
-% 
+%
 % tau, time lag (can be 'ac' or 'mi' to set as the first zero-crossing of the
 %       autocorrelation function, or the first minimum of the automutual
 %       information function, respectively)
-% 
-%---OUTPUTS: the raw trev expression, its magnitude, the numerator and its
-% magnitude, and the denominator.
-% 
+%
+%---OUTPUTS:
+% the raw trev expression, its magnitude, the numerator and its magnitude, and
+% the denominator.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,17 +34,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_trev(y,tau)
 
 % ------------------------------------------------------------------------------
 %% Set defaults:

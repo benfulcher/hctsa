@@ -1,42 +1,34 @@
-% ------------------------------------------------------------------------------
-% NL_TISEAN_fnn
-% ------------------------------------------------------------------------------
-% 
-% Uses the false_nearest routine from the TISEAN package for nonlinear time-series
-% analysis.
-% 
-% cf. "Practical implementation of nonlinear time series methods: The TISEAN
-% package", R. Hegger, H. Kantz, and T. Schreiber, Chaos 9(2) 413 (1999)
-% 
-% Available here:
-% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
-% 
-% Documentation here:
-% http://www.mpipks-dresden.mpg.de/~tisean/TISEAN_2.1/docs/docs_c/false_nearest.html
-% 
-% The TISEAN routines are performed in the command line using 'system' commands
-% in Matlab, and require that TISEAN is installed and compiled, and able to be
-% executed in the command line.
-% 
+function out = NL_TISEAN_fnn(y,tau,maxm,theilerWin,justBest,bestp)
+% NL_TISEAN_fnn     false nearest neighbors of a time series.
+%
 %---INPUTS:
-% 
 % y, the input time series
-% 
 % tau, the time delay
-% 
 % maxm, the maximum embedding dimension
-% 
 % theilerWin, the Theiler window
-% 
 % justBest, if 1 just outputs a scalar estimate of embedding dimension
-% 
 % bestp, only used if justBest==1 -- the fnn threshold for picking an embedding
 %                dimension
-% 
+%
 %---OUTPUTS: individual false nearest neighbors proportions, as well as
 % summaries of neighborhood size, and embedding dimensions at which the
 % proportion of nearest neighbours falls below a range of thresholds
-% 
+
+% Uses the false_nearest routine from the TISEAN package for nonlinear time-series
+% analysis.
+%
+% cf. "Practical implementation of nonlinear time series methods: The TISEAN
+% package", R. Hegger, H. Kantz, and T. Schreiber, Chaos 9(2) 413 (1999)
+%
+% Available here:
+% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
+%
+% Documentation here:
+% http://www.mpipks-dresden.mpg.de/~tisean/TISEAN_2.1/docs/docs_c/false_nearest.html
+%
+% The TISEAN routines are performed in the command line using 'system' commands
+% in Matlab, and require that TISEAN is installed and compiled, and able to be
+% executed in the command line.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -50,17 +42,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TISEAN_fnn(y,tau,maxm,theilerWin,justBest,bestp)
 
 doPlot = 0; % can turn on to see plotted summaries
 
@@ -167,7 +157,7 @@ out.stdpfnn = std(pNN); % standard deviation
 % nHood2 summaries:
 out.maxnHood2 = max(nHoodSize2); % maximum
 out.meannHood2 = mean(nHoodSize2); % mean
-    
+
 % Find embedding dimension for the first time p goes under x%
 out.firstunder09 = firstunderf(0.9,mDim,pNN);   % 80%
 out.firstunder08 = firstunderf(0.8,mDim,pNN);   % 80%

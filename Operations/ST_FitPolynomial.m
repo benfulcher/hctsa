@@ -1,20 +1,16 @@
-% ------------------------------------------------------------------------------
-% ST_FitPolynomial
-% ------------------------------------------------------------------------------
-% 
-% Fits a polynomial of order k to the time series, and returns the mean
-% square error of the fit.
-% 
+function out = ST_FitPolynomial(y,k)
+% ST_FitPolynomial   Goodness of a polynomial fit to a time series
+%
 % Usually kind of a stupid thing to do with a time series, but it's sometimes
 % somehow informative for time series with large trends.
-% 
+%
 %---INPUTS:
 % y, the input time series.
 % k, the order of the polynomial to fit to y.
-% 
+%
 %---OUTPUT:
 % RMS error of the fit.
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -28,17 +24,17 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = ST_FitPolynomial(y,k)
+doPlot = 0; % Plot stuff to screen
 
 if nargin < 2 || isempty(k)
     k = 1; % Linear by default
@@ -56,21 +52,22 @@ cf = polyfit(t,y,k);
 warning('on','MATLAB:polyfit:RepeatedPointsOrRescale');
 
 f = polyval(cf,t);
-out = sum((y-f).^2)/N; % mean RMS ERROR OF FIT
-
+out = mean((y-f).^2); % mean RMS ERROR OF FIT
 
 % ------------------------------------------------------------------------------
 % Plot
 % ------------------------------------------------------------------------------
-% % n=10;
-% errs=zeros(n,1);
-% x=1:length(y);
-% for i=1:n
-% cf=polyfit(x,y',i);
-% f=polyval(cf,x);
-% errs(i)=sum((y'-f).^2);
-% % end
-% % hold on;plot(f,'k')
-% % plot(errs);
+if doPlot
+    n=10;
+    errs=zeros(n,1);
+    x=1:length(y);
+    for i=1:n
+    cf=polyfit(x,y',i);
+    f=polyval(cf,x);
+    errs(i)=sum((y'-f).^2);
+    end
+    hold on;plot(f,'k')
+    plot(errs);
+end
 
 end

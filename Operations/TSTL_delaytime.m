@@ -1,24 +1,22 @@
-% ------------------------------------------------------------------------------
-% TSTL_delaytime
-% ------------------------------------------------------------------------------
-% 
-% Uses the TSTOOL code delaytime, that computes an optimal delay time using the
-% method of Parlitz and Wichard (this method is specified in the TSTOOL
+function out = TSTL_delaytime(y,maxDelay,past,randomSeed)
+% TSTL_delaytime    Optimal delay time using the method of Parlitz and Wichard.
+%
+% Uses the TSTOOL code delaytime (this method is specified in the TSTOOL
 % documentation but without reference).
-% 
+%
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
+%
 %---INPUTS:
 % y, column vector of time series data
-% 
+%
 % maxDelay, maximum value of the delay to consider (can also specify a
 %           proportion of time series length)
-%           
+%
 % past, the TSTOOL documentation describes this parameter as "?", which is
 %       relatively uninformative.
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,17 +30,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = TSTL_delaytime(y,maxDelay,past,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries

@@ -1,22 +1,21 @@
-% ------------------------------------------------------------------------------
-% FC_LoopLocalSimple
-% ------------------------------------------------------------------------------
-% 
+function out = FC_LoopLocalSimple(y,forecastMeth)
+% FC_LoopLocalSimple    How simple local forecasting depends on window length.
+%
 % Analyzes the outputs of FC_LocalSimple for a range of local window lengths, l.
 % Loops over the length of the data to use for FC_LocalSimple prediction
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
-% fmeth, the prediction method:
+%
+% forecastMeth, the prediction method:
 %            (i) 'mean', local mean prediction
 %            (ii) 'median', local median prediction
-% 
-%---OUTPUTS: statistics including whether the mean square error increases or
+%
+%---OUTPUTS: Statistics including whether the mean square error increases or
 % decreases, testing for peaks, variability, autocorrelation, stationarity, and
 % a fit of exponential decay, f(x) = A*exp(Bx) + C, to the variation.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -30,17 +29,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = FC_LoopLocalSimple(y,fmeth)
 
 % ------------------------------------------------------------------------------
 % Check a curve-fitting toolbox license is available:
@@ -54,25 +51,25 @@ BF_CheckToolbox('signal_toolbox');
 
 doplot = 0; % plot outputs to a figure
 
-if nargin < 2 || isempty(fmeth)
-    fmeth = 'mean'; % do mean prediction by default
+if nargin < 2 || isempty(forecastMeth)
+    forecastMeth = 'mean'; % do mean prediction by default
 end
 
-switch fmeth
+switch forecastMeth
     case 'mean'
         ngr = (1:10)';
-        
+
     case 'median'
         ngr = (1:2:19)';
-        
+
     otherwise
-        error('Unknown prediction method ''%s''',fmeth);
+        error('Unknown prediction method ''%s''',forecastMeth);
 end
 
 stats_st = zeros(length(ngr),6);
 
 for i = 1:length(ngr)
-    switch fmeth
+    switch forecastMeth
         case 'mean'
             outtmp = FC_LocalSimple(y,'mean',ngr(i));
         case 'median'
@@ -111,7 +108,7 @@ if out.rmserr_chn < 1; % on the whole decreasing, as expected
 else
     wigv = min(stats_st(:,1));
     wig = find(stats_st(:,1) == wigv,1,'first');
-    
+
     if wig ~= 1 && stats_st(wig-1,1) < wigv
         wig = NaN; % maximum is not a local maximum; previous value exceeds it
     elseif wig ~= length(ngr) && stats_st(wig+1,1) < wigv

@@ -1,24 +1,23 @@
-% ------------------------------------------------------------------------------
-% MF_CompareTestSets
-% ------------------------------------------------------------------------------
-% 
-% Looks at robustness of test set goodness of fit over different samples in
-% the time series from fitting a given time-series model.
-% 
+function out = MF_CompareTestSets(y,theModel,ord,subsetHow,samplep,steps,randomSeed)
+% MF_CompareTestSets    Robustness of test-set goodness of fit
+%
+% Robustness is quantified over different samples in the time series from
+% fitting a specified time-series model.
+%
 % Similar to MF_FitSubsegments, except fits the model on the full time
 % series and compares how well it predicts time series in different local
 % time-series segments.
-% 
+%
 % Says something of stationarity in spread of values, and something of the
 % suitability of model in level of values.
-% 
+%
 % Uses function iddata and predict from Matlab's System Identification Toolbox,
 % as well as either ar, n4sid, or armax from Matlab's System Identification
 % Toolbox to fit the models, depending on the specified model to fit to the data.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % theModel, the type of time-series model to fit:
 %           (i) 'ar', fits an AR model
 %           (ii) 'ss', first a state-space model
@@ -30,16 +29,16 @@
 %           (i) 'rand', select at random
 %           (ii) 'uniform', uniformly distributed segments throughout the time
 %                   series
-%                   
+%
 % samplep, a two-vector specifying the sampling parameters
 %           e.g., [20, 0.1] repeats 20 times for segments 10% the length of the
 %                           time series
-% 
+%
 % steps, the number of steps ahead to do the predictions.
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (when 'rand' specified for subsetHow)
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -53,17 +52,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_CompareTestSets(y,theModel,ord,subsetHow,samplep,steps,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
@@ -91,7 +88,7 @@ if nargin < 2 || isempty(theModel)
     theModel = 'ss';
     % Fit a state space model by default
 end
-    
+
 % (3) Model order, ord
 if nargin < 3 || isempty(ord)
     ord = 2;
@@ -140,14 +137,14 @@ switch theModel
             ord = length(Aest);
         end
         m = ar(y,ord);
-        
+
     case 'ss' % fit a state space model of specified order
         m = n4sid(y,ord);
-        
+
     case 'arma' % fit an arma model of specified orders
         % Note: order should be a two-component vector
         m = armax(y,ord);
-        
+
     otherwise
         error('Unknown model ''%s''', theModel);
 end
@@ -174,15 +171,15 @@ switch subsetHow
         else % specified an absolute interval
             l = samplep(2);
         end
-        
+
         % Control the random seed (for reproducibility):
         BF_ResetSeed(randomSeed);
-        
+
         % numPred starting points:
         spts = randi(N-l+1,numPred,1);
         r(:,1) = spts;
         r(:,2) = spts+l-1;
-        
+
     case 'uniform'
         if length(samplep) == 1 % size will depend on number of unique subsegments
             spts = round(linspace(0,N,numPred+1)); % numPred+1 boundaries = numPred portions
@@ -214,12 +211,12 @@ for i = 1:numPred
     % retrieve the test set
 
     ytest = y(r(i,1):r(i,2));
-    
+
     % Compute step-ahead predictions using System Identification Toolbox:
     yp = predict(m, ytest, steps); % across test set using model, m,
                                    % fitted to entire data set
 
-%     e = pe(m, ytest); % prediction errors -- exactly the same as returning 
+%     e = pe(m, ytest); % prediction errors -- exactly the same as returning
 %                       % residuals of 1-step-ahead prediction model
 
 
@@ -228,26 +225,26 @@ for i = 1:numPred
 
     % Get statistics on residuals
     mres = yp.y - ytest.y;
-    
+
     rmserrs(i) = sqrt(mean(mres.^2));
     mabserrs(i) = mean(abs(mres));
     ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
-    
+
     % Get statistics on output time series
     meandiffs(i) = abs(mean(yp.y) - mean(ytest.y));
     stdrats(i) = abs(std(yp.y))/abs(std(ytest.y));
-    
-    
+
+
 %     % 1) Get statistics on residuals
 %     residout = MF_ResidualAnalysis(mresiduals);
-% 
+%
 %     % convert these to local outputs in quick loop
 %     fields = fieldnames(residout);
 %     for k=1:length(fields);
 %         eval(['out.' fields{k} ' = residout.' fields{k} ';']);
 %     end
 
-    
+
 end
 
 % ------------------------------------------------------------------------------
@@ -271,7 +268,7 @@ out.mabserr_iqr = iqr(mabserrs);
 % ac1s...
 out.ac1s_mean = abs(mean(ac1s));
 out.ac1s_median = abs(median(ac1s));
-out.ac1s_std = std(ac1s);   
+out.ac1s_std = std(ac1s);
 out.ac1s_iqr = iqr(ac1s);
 
 % Differences in mean between two series

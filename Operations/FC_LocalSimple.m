@@ -1,26 +1,25 @@
-% ------------------------------------------------------------------------------
-% FC_LocalSimple
-% ------------------------------------------------------------------------------
-% 
-% Does local forecasting using very simple predictors using the past l values
-% of the time series to predict its next value.
-% 
+function out = FC_LocalSimple(y,forecastMeth,trainLength)
+% FC_LocalSimple    Simple local time-series forecasting.
+%
+% Simple predictors using the past trainLength values of the time series to predict
+% its next value.
+%
 %---INPUTS:
 % y, the input time series
-% 
-% fmeth, the forecasting method:
-%          (i) 'mean': local mean prediction using the past ltrain time-series
+%
+% forecastMeth, the forecasting method:
+%          (i) 'mean': local mean prediction using the past trainLength time-series
 %                       values,
-%          (ii) 'median': local median prediction using the past ltrain
+%          (ii) 'median': local median prediction using the past trainLength
 %                         time-series values
-%          (iii) 'lfit': local linear prediction using the past ltrain
+%          (iii) 'lfit': local linear prediction using the past trainLength
 %                         time-series values.
-% 
-% ltrain, the number of time-series values to use to forecast the next value
-% 
+%
+% trainLength, the number of time-series values to use to forecast the next value
+%
 %---OUTPUTS: the mean error, stationarity of residuals, Gaussianity of
 % residuals, and their autocorrelation structure.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -34,28 +33,26 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = FC_LocalSimple(y,fmeth,ltrain)
-
 % ------------------------------------------------------------------------------
 % Check inputs
 % ------------------------------------------------------------------------------
-% Forecasting method, fmeth
-if nargin < 2 || isempty(fmeth)
-    fmeth = 'mean';
+% Forecasting method, forecastMeth
+if nargin < 2 || isempty(forecastMeth)
+    forecastMeth = 'mean';
 end
-% Number of samples to train with, ltrain
-if nargin < 2 || isempty(ltrain)
-    ltrain = 3;
+% Number of samples to train with, trainLength
+if nargin < 2 || isempty(trainLength)
+    trainLength = 3;
 end
 
 N = length(y); % Time-series length
@@ -64,24 +61,24 @@ N = length(y); % Time-series length
 % Do the local prediction
 % ------------------------------------------------------------------------------
 
-switch fmeth
+switch forecastMeth
     case 'mean'
-        if strcmp(ltrain,'ac')
+        if strcmp(trainLength,'ac')
             lp = CO_FirstZero(y,'ac'); % make it tau
         else
-            lp = ltrain; % the length of the subsegment preceeding to use to predict the subsequent value
+            lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
         end
         evalr = lp+1:N; % range over which to evaluate the forecast
         res = zeros(length(evalr),1); % residuals
         for i = 1:length(evalr)
             res(i) = mean(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction-value
         end
-        
+
     case 'median'
-        if strcmp(ltrain,'ac')
+        if strcmp(trainLength,'ac')
             lp = CO_FirstZero(y,'ac'); % make it tau
         else
-            lp = ltrain; % the length of the subsegment preceeding to use to predict the subsequent value
+            lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
         end
         evalr = lp+1:N; % range over which to evaluate the forecast
         res = zeros(length(evalr),1); % residuals
@@ -90,13 +87,13 @@ switch fmeth
         end
 
 %     case 'acf' % autocorrelation function
-%         acl=ltrain; % autocorrelation 'length'
+%         acl=trainLength; % autocorrelation 'length'
 %         acc=zeros(acl,1); % autocorrelation coefficients
 %         for i=1:acl, acc(i)=CO_AutoCorr(y,i); end
 %         % normalize to a sum of 1 (so that operating on three mean values
 %         % of the time series, also returns the mean value as output)
 %         acc=acc/sum(acc);
-%         
+%
 %         evalr=acl+1:N; % range over which to evaluate the forecast
 %         res=zeros(length(evalr),1); % residuals
 %         for i=1:length(evalr)
@@ -104,10 +101,10 @@ switch fmeth
 %         end
 
     case 'lfit'
-        if strcmp(ltrain,'ac')
+        if strcmp(trainLength,'ac')
             lp = CO_FirstZero(y,'ac'); % make it tau
         else
-            lp = ltrain; % the length of the subsegment preceeding to use to predict the subsequent value
+            lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
         end
         evalr = lp+1:N; % range over which to evaluate the forecast
         res = zeros(length(evalr),1); % residuals
@@ -118,9 +115,9 @@ switch fmeth
             warning('on','MATLAB:polyfit:PolyNotUnique'); % Re-enable warning
             res(i) = polyval(p,lp+1) - y(evalr(i)); % prediction - value
         end
-        
+
     otherwise
-        error('Unknown forecasting method ''%s''',fmeth);
+        error('Unknown forecasting method ''%s''',forecastMeth);
 end
 
 % out=res;

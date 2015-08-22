@@ -1,37 +1,33 @@
-% --------------------------------------------------------------------------
-% TS_InspectQuality
-% --------------------------------------------------------------------------
-% 
-% This function loads the matrix in HCTSA_loc.mat, plots it, showing the 
+function hadProblem = TS_InspectQuality(inspectWhat)
+% TS_InspectQuality   Statistics of quality labels from an hctsa analysis.
+%
+% This function loads the matrix in HCTSA_loc.mat, plots it, showing the
 % quality labels of each entry.
-% 
+%
 % Most useful for checking where errors/special-valued outputs are occuring
-% 
+%
 %---INPUT:
 %
-% inspectWhat: 'full' or 'all', show the full data matrix
-%              'reduced', only show operations that produce special-valued outputs
-%              'summary', summarize the proportion of each operation's outputs
+% inspectWhat: (i) 'full' or 'all', show the full data matrix
+%              (ii) 'reduced', only show operations that produce special-valued outputs
+%              (iii) 'summary', summarize the proportion of each operation's outputs
 %                         that correspond to each type of special-valued output
-% 
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function TS_InspectQuality(inspectWhat)
 
 % ------------------------------------------------------------------------------
 % Check Inputs:
@@ -58,62 +54,62 @@ end
 switch inspectWhat
 case {'full','all'}
     % Plot all quality labels (for all time series and all operations)
-    
+
     % Check that the size is not too large to plot:
     checkSize(TS_Quality);
-    
+
     % Plot:
     % Get handles for figure (f) and axes (ax):
     f = figure('color','w');
     ax = gca;
-    
+
     % Give uncalculated entries the label 8
     TS_Quality(isnan(TS_Quality)) = 8;
     imagesc(TS_Quality)
-    
+
     xlabel('Operations (op_id)','interpreter','none')
     ax.XTick = 1:length(Operations);
     ax.XTickLabel = [Operations.ID];
 
     formatYAxisColorBar;
-    
+
 case 'reduced'
     % First find where problems exist, and only show these columns
     qualityMean = nanmean(TS_Quality);
     hadProblem = (qualityMean > 0);
-    
+
     if sum(hadProblem)==0
         fprintf(1,'No operations have problems! Nothing to inspect.\n');
         return
     end
-    
+
     % Check that the size is not too large to plot:
     checkSize(TS_Quality(:,hadProblem));
-    
+
     % Plot:
     % Get handles for figure (f) and axes (ax):
     f = figure('color','w');
     ax = gca;
-    
+
     % Give uncalculated entries the label 8
     TS_Quality(isnan(TS_Quality)) = 8;
-    
+
     imagesc(TS_Quality(:,hadProblem));
-    
+
     ax.XTick = 1:sum(hadProblem);
     ax.XTickLabel = [Operations(hadProblem).ID];
-    
+
     title(sprintf('Displaying %u x %u (displaying %u/%u operations with some special values',...
                     size(TS_Quality,1),sum(hadProblem),sum(hadProblem),size(TS_Quality,2)),...
                     'interpreter','none')
-                    
+
     formatYAxisColorBar;
-    
+
 case 'master'
     % Summarize at the level of master operations
     % Each row is now a different quality label
-    
-    % First get 
+
+    % First get
     numMasters = length(MasterOperations);
     opMIDs = [Operations.MasterID]; % save time by getting this first
     qualities = zeros(7,numMasters);
@@ -130,82 +126,96 @@ case 'master'
             qualities(:,k) = ismember(1:7,qualityLabels);
         end
     end
-    
+
     % Now keep only master operations with problems:
     hadProblem = (mean(qualities)>0)
-    
+
     % Get handles for figure (f) and axes (ax):
     f = figure('color','w');
     ax = gca;
     imagesc(qualities(:,hadProblem));
-    
+
     colormap([0.1686,0.5137,0.7294; 0.8431,0.0980,0.1098]);
-    
+
     ax.YTick = 1:8;
-    ax.YTickLabel = {'error','NaN','Inf','-Inf','complex','empty','link error'};
-    
+    qLabels = {'error','NaN','Inf','-Inf','complex','empty','link error'};
+    ax.YTickLabel = qLabels;
+
     ax.XTick = 1:sum(hadProblem);
-    ax.XTickLabel = {MasterOperations(hadProblem).Label};
+    ax.XTickLabel = {MasterOperations(hadProblem).Code};
+    ax.XTickLabelRotation = 90;
 
     % Get rid of tex interpreter format (for strings with underscores)
     set(ax,'TickLabelInterpreter','none');
-    
+
     title('Master operations producing special-valued outputs.','interpreter','none')
-    
+
+    % List to screen:
+    for i = 1:length(qLabels)
+        if any(qualities(i,:))
+            ListEachMaster(MasterOperations(logical(qualities(i,:))),qLabels{i});
+        end
+    end
+
 case 'summary'
     % Summary as a line plot for operations that had some bad values
-    
+
     % First find where problems exist, and only show these columns
-    qualityMean = nanmean(TS_Quality);
+    qualityMean = nanmean(TS_Quality,1);
     hadProblem = (qualityMean > 0);
 
     % Stop if there are no special values:
     if sum(hadProblem)==0
         fprintf(1,'No operations have problems! Nothing to inspect.\n');
         return
+    else
+        fprintf(1,'%u operations have special values\n',sum(hadProblem));
     end
-    
+
     % Resize TS_Quality
     TS_Quality = TS_Quality(:,hadProblem);
-    
+
     % Give uncalculated entries the label 8
     TS_Quality(isnan(TS_Quality)) = 8;
 
     % Compute the proportion of each label per column:
     whatLabel = zeros(9,sum(hadProblem));
     for i = 1:9
-        whatLabel(i,:) = mean(TS_Quality==i-1);
+        whatLabel(i,:) = mean(TS_Quality==i-1,1);
     end
-    
+
     % Sort by the proportion of good values
     propGood = whatLabel(1,:);
     [~,ix] = sort(propGood,'ascend');
     whatLabel = whatLabel(:,ix);
-    
+
     % Plot:
     % Get handles for figure (f) and axes (ax):
     f = figure('color','w');
-    ax = gca;    
-    
+    ax = gca;
+
     bar(whatLabel','stacked');
-    
+
     ax.XTick = 1:sum(hadProblem);
     unSortedTicks = [Operations(hadProblem).ID];
     ax.XTickLabel = unSortedTicks(ix);
-    
-    title(sprintf('Displaying %u/%u operations with some special values)',...
+
+    title(sprintf('Displaying %u/%u operations with some special values',...
                     sum(hadProblem),length(hadProblem)),...
                     'interpreter','none')
 
     formatYAxisColorBar(0,1);
-    
+
     xlabel('Operations (op_id)','interpreter','none')
     ylabel(sprintf('Proportion of outputs (across %u time series)',size(TS_Quality,1)))
-    
+
 otherwise
     error('Unknown input option ''%s''',inspectWhat);
 end
 
+if nargout==0
+    clear all
+end
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
@@ -218,17 +228,17 @@ function formatYAxisColorBar(doYaxis,offSet)
     if nargin < 2
         offSet = 0;
     end
-    
+
     if doYaxis
         % Format the y axis
         ax.YTick = 1:length(TimeSeries);
         ylabel('Time series')
-        ax.YTickLabel = {TimeSeries.FileName};
+        ax.YTickLabel = {TimeSeries.Name};
     end
 
     % Get rid of tex interpreter format (for strings with underscores)
     set(ax,'TickLabelInterpreter','none');
-    
+
     % Add a color bar:
     allLabels = {'good','error','NaN','Inf','-Inf','complex','empty','link error','(uncalculated)'};
     labelsExist = unique(TS_Quality(~isnan(TS_Quality)));
@@ -253,5 +263,12 @@ function checkSize(A)
     end
 end
 % ------------------------------------------------------------------------------
+function ListEachMaster(structureArray,text);
+    % Lists each element to screen
+    for i = 1:length(structureArray)
+        fprintf(1,'%s: [%u]%s\n',text,structureArray(i).ID,structureArray(i).Code)
+    end
+end
+
 
 end

@@ -1,27 +1,26 @@
-% ------------------------------------------------------------------------------
-% BF_getcmap
-% ------------------------------------------------------------------------------
-% 
+function cmapOut = BF_getcmap(whichMap,numGrads,cellOut,flipMe)
+% BF_getcmap    Colorbrewer colors for Matlab.
+%
 % Returns a nice set of colors to make a nice colormap using the color schemes
 % from http://colorbrewer2.org/
-% 
+%
 % The online tool, colorbrewer2, is copyright Cynthia Brewer, Mark Harrower and
 % The Pennsylvania State University.
-% 
+%
 %---INPUTS:
 %
 % whichMap, the name of a colormap (see long list below)
-% 
+%
 % numGrads, the number of colors to return from that color scheme (some maps can
 %           support larger numbers of colors, and the minimum is usually 3)
-%           
+%
 % cellOut, (i) 1: returns a cell of colors, where each component is an rgb
 %                 3-vector
 %          (ii) 0: returns a numGrads x 3 matrix for use in the Matlab colormap
 %                  function, for example
 % flipMe, (i) 1: inverts the ordering of the colors.
-%            (ii) 0: doesn't invert the ordering of the colors. 
-% 
+%            (ii) 0: doesn't invert the ordering of the colors.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -35,17 +34,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function cmapOut = BF_getcmap(whichMap,numGrads,cellOut,flipMe)
 
 % Number of gradations, numGrads:
 if nargin < 2 || isempty(numGrads)
@@ -64,14 +61,14 @@ if numGrads < 3
 end
 
 % Choices for whichMap:
-% 
+%
 % SEQUENTIAL MONOHUE:
 % 'blues'
 % 'greens'
 % 'oranges'
 % 'purples'
 % 'reds'
-% 
+%
 % SEQUENTIAL MULTIHUE:
 % 'bluegreen'
 % 'bluepurple'
@@ -85,7 +82,7 @@ end
 % 'yellowgreenblue'
 % 'yelloworangebrown'
 % 'yelloworangered'
-% 
+%
 % DIVERGENT:
 % 'spectral'
 % 'redyellowgreen'
@@ -96,7 +93,7 @@ end
 % 'purplegreen'
 % 'pinkgreen'
 % 'browngreen'
-% 
+%
 % QUALITATIVE:
 % 'accent'
 % 'dark2'

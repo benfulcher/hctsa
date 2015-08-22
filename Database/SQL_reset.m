@@ -1,26 +1,22 @@
-% ------------------------------------------------------------------------------
-% SQL_reset
-% ------------------------------------------------------------------------------
-% 
-% Drops and recreates the default database (set in SQL_opendatabase)
-% 
+function SQL_reset()
+% SQL_reset      Drops all tables and data and recreates the default hctsa package
+% in the mySQL database
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function SQL_reset()
 
 [dbc, databaseName] = SQL_opendatabase;
 
@@ -73,7 +69,7 @@ SQL_closedatabase(dbc) % Close the database
 SQL_create_all_tables; % Create all basic tables required by the database
 
 % Add operations
-SQL_add('mops','Database/INP_mops.txt','',0)
-SQL_add('ops','Database/INP_ops.txt','',0)
+SQL_add('mops','Database/INP_mops.txt',1,0);
+SQL_add('ops','Database/INP_ops.txt',1,0);
 
 end

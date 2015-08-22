@@ -1,39 +1,34 @@
-% ------------------------------------------------------------------------------
-% MF_GP_hyperparameters
-% ------------------------------------------------------------------------------
-% 
-% Fits a Gaussian Process model to a portion of the time series and returns the
-% fitted hyperparameters, as well as statistics describing the goodness of fit
-% of the model.
-% 
+function out = MF_GP_hyperparameters(y,covFunc,squishorsquash,maxN,resampleHow,randomSeed)
+% MF_GP_hyperparameters    Gaussian Process time-series model parameters and goodness of fit
+%
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
-% 
+%
 % The code can accomodate a range of covariance functions, e.g.:
 % (i) a sum of squared exponential and noise terms, and
 % (ii) a sum of squared exponential, periodic, and noise terms.
-% 
+%
 % The model is fitted to <> samples from the time series, which are
 % chosen by:
 % (i) resampling the time series down to this many data points,
 % (ii) taking the first 200 samples from the time series, or
 % (iii) taking random samples from the time series.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % covFunc, the covariance function, in the standard form of the gmpl package
-% 
+%
 % squishorsquash, whether to squash onto the unit interval, or spread across 1:N
-% 
+%
 % maxN, the maximum length of time series to consider -- inputs greater than
 %           this length are resampled down to maxN
-%           
+%
 % resampleHow, specifies the method of how to resample time series longer than maxN
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed,
 %             for settings of resampleHow that involve random number generation
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -47,17 +42,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = MF_GP_hyperparameters(y,covFunc,squishorsquash,maxN,resampleHow,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -87,7 +80,7 @@ if nargin < 3 || isempty(squishorsquash)
 end
 
 if nargin < 4 || isempty(maxN)
-    maxN = 500; % maximum length time series we do this for -- 
+    maxN = 500; % maximum length time series we do this for --
                  % resample longer time series
     % maxN = 0 --> include the whole thing
 end
@@ -144,12 +137,12 @@ if (maxN > 0) && (N > maxN)
             y = y(sind:sind+maxN-1); % take this bit
             N = length(y); % update time series length (should be maxN)
             t = SUB_settimeindex(maxN,squishorsquash); % set time index
-            
+
         case 'first' % takes first maxN indicies from the time series
             y = y(1:maxN); % take this bit
             N = length(y); % update time series length (should be maxN)
             t = SUB_settimeindex(maxN,squishorsquash); % set time index
-            
+
         case 'random_both' % takes a random starting position and then takes a 1/5 sample from that
             % Control the random seed (for reproducibility):
             BF_ResetSeed(randomSeed);
@@ -215,7 +208,7 @@ if doPlot
     [mu, S2] = gpr(logHyper, covFunc, t, y, xstar);
     % S2p = S2 - exp(2*logHyper(3)); % remove noise from predictions
     S2p = S2;
-    
+
     figure('color','w');
     f = [mu+2*sqrt(S2p); flipdim(mu-2*sqrt(S2p),1)];
     fill([xstar; flipdim(xstar,1)], f, [6, 7, 7]/8, 'EdgeColor', [7, 7, 6]/8); % grayscale error bars
@@ -247,7 +240,7 @@ out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
                             % (if not close to one, means a problem with
                             % fitting)
 out.std_S_data = std(sqrt(S2)); % should vary a fair bit
-                            
+
 
 % Statistics on variance
 xstar = linspace(min(t),max(t),1000)'; % crude, I know, but it's nearly 5pm
@@ -272,5 +265,5 @@ out.meanS = mean(S); % mean variance
         end
     end
     % ------------------------------------------------------------------------------
-    
+
 end

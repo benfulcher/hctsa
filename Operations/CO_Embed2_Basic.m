@@ -1,19 +1,18 @@
-% ------------------------------------------------------------------------------
+function out = CO_Embed2_Basic(y,tau)
 % CO_Embed2_Basic
-% ------------------------------------------------------------------------------
-% 
-% Obtains a set of measures of point density in a plot of y_i against y_{i-tau}.
+%
+% Computes a set of point density measures in a plot of y_i against y_{i-tau}.
 %
 % INPUTS:
 % y, the input time series
-% 
+%
 % tau, the time lag (can be set to 'tau' to set the time lag the first zero
 %                       crossing of the autocorrelation function)
-% 
+%
 % Outputs include the number of points near the diagonal, and similarly, the
-% number of points that are close to certain geometric shapes in the y_{i-tau}, 
+% number of points that are close to certain geometric shapes in the y_{i-tau},
 % y_{tau} plot, including parabolas, rings, and circles.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -27,17 +26,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_Embed2_Basic(y,tau)
 
 doPlot = 0; % plot outputs to a figure
 

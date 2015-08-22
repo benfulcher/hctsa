@@ -1,31 +1,30 @@
-% ------------------------------------------------------------------------------
-% CP_wavelet_varchg
-% ------------------------------------------------------------------------------
-% 
+function out = CP_wavelet_varchg(y, wname, level, maxnchpts, minDelay)
+% CP_wavelet_varchg     Variance change points in a time series.
+%
 % Finds variance change points using functions from Matlab's Wavelet Toolbox,
 % including the primary function wvarchg, which estimates the change points in
 % the time series.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % wname, the name of the mother wavelet to analyze the data with: e.g., 'db3',
 %           'sym2', cf. Wavelet Toolbox Documentation for details
-% 
+%
 % level, the level of wavelet decomposition
-% 
+%
 % maxnchpts, the maximum number of change points
-% 
+%
 % minDelay, the minimum delay between consecutive change points (can be
 %           specified as a proportion of the time-series length, e.g., 0.02
 %           ensures that change points are separated by at least 2% of the
 %           time-series length)
-% 
-% 
-%---OUTPUT: 
-% The optimal number of change points.
 %
+%
+%---OUTPUT:
+% The optimal number of change points.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -39,17 +38,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CP_wavelet_varchg(y, wname, level, maxnchpts, minDelay)
 
 % Check that a Wavelet Toolbox license is available:
 BF_CheckToolbox('wavelet_toolbox');

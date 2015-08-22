@@ -1,12 +1,6 @@
-% ------------------------------------------------------------------------------
-% NL_crptool_fnn
-% ------------------------------------------------------------------------------
-% 
-% Computes and analyzes the false-nearest neighbours statistic.
-% 
-% Computation is done by referencing N. Marwan's code from the CRP Toolbox:
-% http://tocsy.pik-potsdam.de/CRPtoolbox/
-% 
+function out = NL_crptool_fnn(y,maxm,r,taum,th,randomSeed)
+% NL_crptool_fnn    Analyzes the false-nearest neighbours statistic.
+%
 %---INPUTS:
 % y, the input time series
 % maxm, the maximum embedding dimension to consider
@@ -14,12 +8,14 @@
 % taum, the method of determining the time delay, 'corr' for first zero-crossing
 %       of autocorrelation function, or 'mi' for the first minimum of the mutual
 %       information
-% 
+%
 % th [opt], returns the first time the number of false nearest neighbours drops
 %           under this threshold
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-% 
+
+% Computation uses N. Marwan's code from the CRP Toolbox:
+% http://tocsy.pik-potsdam.de/CRPtoolbox/
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -33,17 +29,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_crptool_fnn(y,maxm,r,taum,th,randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries, input checking
@@ -115,12 +109,12 @@ if doPlot
 end
 
 if isempty(th) % output summary statistics
-    
+
     % nn drops
     dnn = diff(nn);
     out.mdrop = mean(dnn);
     out.pdrop = -sum(sign(dnn))/(maxm-1);
-    
+
     % fnn
     for i = 2:maxm
         out.(sprintf('fnn%u',i)) = nn(i);

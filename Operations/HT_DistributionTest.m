@@ -1,20 +1,19 @@
-% ------------------------------------------------------------------------------
-% HT_DistributionTest
-% ------------------------------------------------------------------------------
-% 
+function p = HT_DistributionTest(x,theTest,theDistn,numBins)
+% HT_DistributionTest   Hypothesis test for distributional fits to a data vector.
+%
 % Fits a distribution to the data and then performs an appropriate hypothesis
-% test to quantify the difference between the two distributions. We fit
-% Gaussian, Extreme Value, Uniform, Beta, Rayleigh, Exponential, Gamma,
-% Log-Normal, and Weibull distributions, using code described for
-% DN_M_kscomp.
+% test to quantify the difference between the two distributions.
 % 
+% We fit Gaussian, Extreme Value, Uniform, Beta, Rayleigh, Exponential, Gamma,
+% Log-Normal, and Weibull distributions, using code described for DN_M_kscomp.
+%
 %---INPUTS:
-% x, the input time series
+% x, the input data vector
 % theTest, the hypothesis test to perform:
 %           (i) 'chi2gof': chi^2 goodness of fit test
 %           (ii) 'ks': Kolmogorov-Smirnov test
 %           (iii) 'lillie': Lilliefors test
-% 
+%
 % theDistn, the distribution to fit:
 %           (i) 'norm' (Normal)
 %           (ii) 'ev' (Extreme value)
@@ -25,12 +24,12 @@
 %           (vii) 'gamma' (Gamma)
 %           (viii) 'logn' (Log-normal)
 %           (ix) 'wbl' (Weibull)
-% 
+%
 % numBins, the number of bins to use for the chi2 goodness of fit test
-% 
+%
 % All of these functions for hypothesis testing are implemented in Matlab's
 % Statistics Toolbox.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -44,17 +43,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function p = HT_DistributionTest(x,theTest,theDistn,numBins)
 
 % ------------------------------------------------------------------------------
 %% First fit the distribution
@@ -122,7 +119,7 @@ switch theTest
         warning('off','stats:chi2gof:LowCounts') % temporarily disable this warning
         [h, p] = chi2gof(x,'cdf',mycdf,'nbins',numBins);
         warning('on','stats:chi2gof:LowCounts') % temporarily disable this warning
-        
+
     case 'ks' % KOLMOGOROV-SMIRNOV TEST
         x1 = sort(unique(round(x*1E6)/1E6)); % unique values to 6 places
         if x1(1) > min(x), x1 = [min(x); x1]; end
@@ -150,9 +147,9 @@ switch theTest
             case 'wbl'
                 mycdf = [x1, wblcdf(x1,a(1),a(2))];
         end
-        
+
         [h, p] = kstest(x,mycdf);
-        
+
     case 'lillie' % LILLIEFORS TEST
         % Temporarily suspend low/high tabulated p-value warnings that often occur with this hypothesis test
         warning('off','stats:lillietest:OutOfRangePLow'); warning('off','stats:lillietest:OutOfRangePHigh');

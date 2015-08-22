@@ -1,35 +1,32 @@
-% ------------------------------------------------------------------------------
+function out = SD_TSTL_surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % SD_TSTL_surrogates
-% ------------------------------------------------------------------------------
-% 
+%
 % Generates surrogate time series and tests them against the original time
 % series according to some test statistics: T_{C3}, using the TSTOOL code tc3 or
 % T_{rev}, using TSTOOL code trev.
-% 
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
-% 
+%
 %---INPUTS:
-% 
 % y, the input time series
-% 
+%
 % tau, the autocorrelation lag length <x_n x_{n-tau} x_{n-2tau)>/abs(<x_n
 %                                                   x_{n-tau}|^3/2
 % nsurr, the number of surrogates to generate
-% 
+%
 % surrmeth, the method of generating surrogates:
 %               (i) 1: randomizes phases of fourier spectrum
 %               (ii) 2:  (see Theiler algorithm II)
 %               (iii) 3: permutes samples randomly
-% 
-% 
+%
 % surrfn, the surrogate statistic to evaluate on all surrogates, either 'tc3' or
 %           'trev'
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-% 
+%
 %---OUTPUTS: include the Gaussianity of the test statistics, a z-test, and
 % various tests based on fitted kernel densities.
-% 
+%
+% TSTOOL: http://www.physik3.gwdg.de/tstool/
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -43,17 +40,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SD_TSTL_surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 
 % ------------------------------------------------------------------------------
 %% Check inputs, set defaults
@@ -120,8 +115,7 @@ end
 tc3_y = tc3dat(1);
 tc3_surr = tc3dat(2:end);
 
-[n, x] = hist(tc3_surr,50);
-% hold off; plot(x,n); hold on; plot(tc3_y,max(n),'or'); hold off;
+% figure; histogram(tc3_surr);
 
 % ------------------------------------------------------------------------------
 %% Get some outputs

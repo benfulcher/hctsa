@@ -1,31 +1,27 @@
-% ------------------------------------------------------------------------------
-% SY_DynWin
-% ------------------------------------------------------------------------------
-% 
-% Analyzes how stationarity estimates depend on the number of segments used to
-% segment up the time series.
-% 
+function out = SY_DynWin(y,maxnseg)
+% SY_DynWin  How stationarity estimates depend on the number of time-series subsegments
+%
 % Specifically, variation in a range of local measures are implemented: mean,
 % standard deviation, skewness, kurtosis, ApEn(1,0.2), SampEn(1,0.2), AC(1),
 % AC(2), and the first zero-crossing of the autocorrelation function.
-% 
+%
 % The standard deviation of local estimates of these quantities across the time
 % series are calculated as an estimate of the stationarity in this quantity as a
 % function of the number of splits, n_{seg}, of the time series.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % maxnseg, the maximum number of segments to consider. Will sweep from 2
 %           segments to maxnseg.
-% 
-% 
+%
+%
 %---OUTPUTS:
 %
 % The standard deviation of this set of 'stationarity' estimates
 % across these window sizes.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -39,17 +35,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_DynWin(y,maxnseg)
 
 if nargin < 2 || isempty(maxnseg)
     maxnseg = 10;
@@ -70,12 +64,12 @@ for i = 1:length(nsegr)
 
     nsteps = (floor((length(y)-wlen)/inc)+1);
     % qs = struct;
-    qs = zeros(nsteps,nfeat);    
-    
+    qs = zeros(nsteps,nfeat);
+
     for j = 1:nsteps
         ysub = y((j-1)*inc+1:(j-1)*inc+wlen);
         taul = CO_FirstZero(ysub,'ac');
-        
+
         % qs.mean(j) = mean(ysub); % mean
         % qs.std(j) = std(ysub); % standard deviation
         % qs.skew(j) = skewness(ysub); % skewness
@@ -102,7 +96,7 @@ for i = 1:length(nsegr)
     end
     % plot(qs,'o-');
     % input('what do you think?')
-    
+
     % fs(i,1:nfeat) = structfun(@(x)std(x),qs,'UniformOutput',1);
     % fs(i) = structfun(@(x)std(x),qs,'UniformOutput',0);
     fs(i,1:nfeat) = std(qs);

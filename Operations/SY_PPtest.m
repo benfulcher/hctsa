@@ -1,29 +1,27 @@
-% ------------------------------------------------------------------------------
-% SY_PPtest
-% ------------------------------------------------------------------------------
-% 
-% Performs the Phillips-Peron unit root test for a time series via the code
-% pptest from Matlab's Econometrics Toolbox.
-% 
+function out = SY_PPtest(y,lags,model,testStatistic)
+% SY_PPtest   Phillips-Peron unit root test.
+%
+% Uses the pptest code from Matlab's Econometrics Toolbox.
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % lags, a vector of lags
-% 
+%
 % model, a specified model:
 %               'ar': autoregressive
 %               'ard': autoregressive with drift, or
 %               'ts': trend stationary,
 %               (see Matlab documentation for information)
-%               
+%
 % testStatistic, the test statistic:
 %               't1': the standard t-statistic, or
 %               't2' a lag-adjusted, 'unStudentized' t statistic.
 %               (see Matlab documentation for information)
-%               
+%
 %---OUTPUTS: statistics on the p-values and lags obtained from the set of tests, as
 % well as measures of the regression statistics.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -37,17 +35,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_PPtest(y,lags,model,testStatistic)
 
 % ------------------------------------------------------------------------------
 %% Check that an Econometrics Toolbox license is available:
@@ -95,7 +91,7 @@ if nout == 1
     out.BIC = reg.BIC;
     out.HQC = reg.HQC;
     out.rmse = reg.RMSE;
-    
+
 else
     % Return statistics on the set of outputs
     out.maxpValue = max(pValue);
@@ -106,11 +102,11 @@ else
     iminp = find(pValue == min(pValue),1,'first');
     out.lagmaxp = lags(imaxp);
     out.lagminp = lags(iminp);
-    
+
     out.meanstat = mean(stat);
     out.maxstat = max(stat);
     out.minstat = min(stat);
-    
+
     % some regression statistics
 %     out.meancoeff1 = mean(reg.coeff(1)); % could be multiple, depending on the model
     out.meanloglikelihood = mean(vertcat(reg.LL));

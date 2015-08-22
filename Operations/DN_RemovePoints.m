@@ -1,14 +1,10 @@
-% ------------------------------------------------------------------------------
-% DN_RemovePoints
-% ------------------------------------------------------------------------------
-% 
-% Analyze how some time-series properties function changes as points are removed
-% from a time series.
-% 
+function out = DN_RemovePoints(y,removeHow,p)
+% DN_RemovePoints   How time-series properties change as points are removed.
+%
 % A proportion, p, of points are removed from the time series according to some
 % rule, and a set of statistics are computed before and after the change.
-% 
-% INPUTS:
+%
+%---INPUTS:
 % y, the input time series
 % removeHow, how to remove points from the time series:
 %               (i) 'absclose': those that are the closest to the mean,
@@ -16,14 +12,14 @@
 %               (iii) 'min': the lowest values,
 %               (iv) 'max': the highest values,
 %               (v) 'random': at random.
-%               
+%
 % p, the proportion of points to remove
-% 
-% Output statistics include the change in autocorrelation, time scales, mean,
+%
+%---OUTPUTS: Statistics include the change in autocorrelation, time scales, mean,
 % spread, and skewness.
-% 
-% Note that this is a similar idea to that implemented in DN_OutlierInclude.
-% 
+%
+% NOTE: This is a similar idea to that implemented in DN_OutlierInclude.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -37,17 +33,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = DN_RemovePoints(y,removeHow,p)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -81,17 +75,17 @@ switch removeHow
         error('Unknwon method ''%s''',removeHow);
 end
 
-rkeep = sort(is(1:round(N*(1-p))),'ascend');
-y_trim = y(rkeep);
+rKeep = sort(is(1:round(N*(1-p))),'ascend');
+y_trim = y(rKeep);
 
 if doPlot
     figure('color','w')
     hold off
     plot(y,'ok');
     hold on;
-    plot(rkeep,y_trim,'.r')
+    plot(rKeep,y_trim,'.r')
     hold off;
-    hist(y_trim,50)
+    histogram(y_trim,50)
 end
 
 acf_y = SUB_acf(y,8);

@@ -1,30 +1,28 @@
-% ------------------------------------------------------------------------------
-% SY_SpreadRandomLocal
-% ------------------------------------------------------------------------------
-% 
-% Implements a bootstrap-based stationarity measure: numSegs time-series segments
-% of length l are selected at random from the time series and in each
-% segment some statistic is calculated: mean, standard deviation, skewness,
-% kurtosis, ApEn(1,0.2), SampEn(1,0.2), AC(1), AC(2), and the first
-% zero-crossing of the autocorrelation function.
+function out = SY_SpreadRandomLocal(y,l,numSegs,randomSeed)
+% SY_SpreadRandomLocal  Bootstrap-based stationarity measure.
+%
+% numSegs time-series segments of length l are selected at random from the time
+% series and in each segment some statistic is calculated: mean, standard
+% deviation, skewness, kurtosis, ApEn(1,0.2), SampEn(1,0.2), AC(1), AC(2), and the
+% first zero-crossing of the autocorrelation function.
 % Outputs summarize how these quantities vary in different local segments of the
 % time series.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % l, the length of local time-series segments to analyze as a positive integer.
 %    Can also be a specified character string:
 %       (i) 'ac2': twice the first zero-crossing of the autocorrelation function
 %       (ii) 'ac5': five times the first zero-crossing of the autocorrelation function
-% 
+%
 % numSegs, the number of randomly-selected local segments to analyze
-% 
+%
 % randomSeed, the input to BF_ResetSeed to control reproducibility
-% 
+%
 %---OUTPUTS: the mean and also the standard deviation of this set of 100 local
 % estimates.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -38,17 +36,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_SpreadRandomLocal(y,l,numSegs,randomSeed)
 
 doPlot = 0; % set to 1 to plot outputs to figure
 
@@ -64,15 +60,15 @@ if ischar(l)
     case 'ac2'
         taug = CO_FirstZero(y,'ac'); % tau (global)
         l = 2*taug;
-        
+
     case 'ac5'
         taug = CO_FirstZero(y,'ac'); % tau (global)
         l = 5*taug;
-        
+
     otherwise
         error('Unknown specifier ''%s''',l);
     end
-    
+
     % Very short l for this sort of time series:
     if l < 5
         warning(['This time series has a very short correlation length;\nSetting ' ...
@@ -107,14 +103,14 @@ BF_ResetSeed(randomSeed);
 for j = 1:numSegs
     % pick a range
     % in this implementation, ranges CAN overlap
-    
+
     ist = randi(N-1-l,1); % random start point (not exceeding the endpoint)
     ifh = ist+l-1; % finish index
     rs = ist:ifh; % sample range (from starting to finishing index)
     ysub = y(rs); % subsection of the time series
 
     taul = CO_FirstZero(ysub,'ac');
-    
+
     qs(j,1) = mean(ysub); % mean
     qs(j,2) = std(ysub); % standard deviation
     qs(j,3) = skewness(ysub); % skewness

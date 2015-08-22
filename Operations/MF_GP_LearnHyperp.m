@@ -1,16 +1,14 @@
-% ------------------------------------------------------------------------------
-% MF_GP_LearnHyperp
-% ------------------------------------------------------------------------------
-% 
-% Function used by main Gaussian Process model fitting operations that learns
-% Gaussian Process hyperparameters for the time series.
-% 
+function hyp = MF_GP_LearnHyperp(t,y,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp)
+% MF_GP_LearnHyperp     Learns Gaussian Process hyperparameters for a time series
+%
+% Used by main Gaussian Process model fitting operations.
+%
 % References code 'minimize' from the GAUSSIAN PROCESS REGRESSION AND
 % CLASSIFICATION Toolbox version 3.2, which is avilable at:
 % http://gaussianprocess.org/gpml/code
-% 
+%
 %---INPUTS:
-% 
+%
 % t,             time
 % y,             data
 % covFunc,       the covariance function, formatted as gpml likes it
@@ -18,7 +16,7 @@
 % likFunc, the likelihood function, formatted as gpml likes it
 % infAlg, the inference algorithm (in gpml form)
 % nfevals,       the number of function evaluations
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,17 +30,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function hyp = MF_GP_LearnHyperp(t,y,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp)
 
 if nargin < 3 || isempty(covFunc)
     covFunc = @covSEiso;
@@ -80,7 +76,7 @@ else
     hyp.cov = zeros(nhps,1); % Default: initialize all log hyperparameters at -1
 end
 
-% ------------------------------------------------------------------------------    
+% ------------------------------------------------------------------------------
 % Perform the optimization
 % ------------------------------------------------------------------------------
 try

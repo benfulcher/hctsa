@@ -1,17 +1,16 @@
-% ------------------------------------------------------------------------------
-% DN_Fit_mle
-% ------------------------------------------------------------------------------
-% 
+function out = DN_Fit_mle(y,fitWhat)
+% DN_Fit_mle    Maximum likelihood distribution fit to data.
+%
 % Fits either a Gaussian, Uniform, or Geometric distribution to the data using
 % maximum likelihood estimation via the Matlab function mle
 % from the Statistics Toolbox.
-% 
+%
 %---INPUTS:
-% y, the time series
+% y, the input data vector.
 % fitWhat, the type of fit to do: 'gaussian', 'uniform', or 'geometric'.
-% 
+%
 %---OUTPUTS: parameters from the fit.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -25,38 +24,40 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_Fit_mle(y,fitWhat)
-
+%-------------------------------------------------------------------------------
 % Check Inputs:
+%-------------------------------------------------------------------------------
 if nargin < 2
     fitWhat = 'gaussian'; % fit a Gaussian by default
 end
 
-% Fit:
+%-------------------------------------------------------------------------------
+% Do the fitting:
+%-------------------------------------------------------------------------------
 switch fitWhat
 case 'gaussian'
 	phat = mle(y);
 	out.mean = phat(1); % mean of Gaussian fit
     out.std = phat(2); % std of Gaussian fit
-    
+
 case 'uniform' % turns out to be shit
     phat = mle(y,'distribution','uniform');
     out.a = phat(1);
     out.b = phat(2);
-    
+
 case 'geometric'
     out = mle(y,'distribution','geometric'); % just a single output
-    
+
 otherwise
     error('Invalid fit specifier, ''%s''',fitWhat)
 end

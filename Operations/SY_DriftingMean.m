@@ -1,34 +1,32 @@
-% ------------------------------------------------------------------------------
-% SY_DriftingMean
-% ------------------------------------------------------------------------------
-% 
+function out = SY_DriftingMean(y,howl,l)
+% SY_DriftingMean   Mean and variance in local time-series subsegments.
+%
+% Splits the time series into segments, computes the mean and variance in each
+% segment and compares the maximum and minimum mean to the mean variance.
+%
 % This function implements an idea found in the Matlab Central forum:
 % http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
-% 
+%
 % >> It seems to me that you are looking for a measure for a drifting mean.
 % >> If so, this is what I would try:
-% >> 
+% >>
 % >> - Decide on a frame length N
 % >> - Split your signal in a number of frames of length N
 % >> - Compute the means of each frame
 % >> - Compute the variance for each frame
 % >> - Compare the ratio of maximum and minimum mean
 % >>   with the mean variance of the frames.
-% >> 
+% >>
 % >> Rune
-% 
-% This operation splits the time series into segments, computes the mean and
-% variance in each segment and compares the maximum and minimum mean to the mean
-% variance.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % howl, (i) 'fix': fixed-length segments (of length l)
 %       (ii) 'num': a given number, l, of segments
-%       
+%
 % l, either the length ('fix') or number of segments ('num')
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -42,17 +40,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_DriftingMean(y,howl,l)
 
 N = length(y); % length of the input time series
 

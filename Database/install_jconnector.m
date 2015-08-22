@@ -1,32 +1,29 @@
-% ------------------------------------------------------------------------------
-% install_jconnector
-% ------------------------------------------------------------------------------
-% 
-% Installs the j connector to the current version of Matlab and adds it to the
-% java class path
-% 
-%---INPUT:
+function install_jconnector(jConnectorWhere,permanentDir)
+% install_jconnector     Installs the j connector to the current version of
+% Matlab and adds it to the java class path
+%
+%---INPUTS:
 % jConnectorWhere: a path specifying a mysql-connector-java file
 % permanentDir: the directory to install the mysql java connector to (by default
 %               this will be the jarext directory of the current Matlab installation)
 %               Consider specifying this to be a custom directory of java files
-%               (with a static path) if you don't have permission to install in 
+%               (with a static path) if you don't have permission to install in
 %               the jarext directory.
-% 
+%
 %---EXAMPLE USAGE:
 %
-% Installs the j-connector in the jarext directory of the Matlab installation
-% >> install_jconnector('Database/mysql-connector-java-5.1.35-bin.jar')
-%
+% Installs the j-connector in the jarext directory of the Matlab installation:
+% install_jconnector('Database/mysql-connector-java-5.1.35-bin.jar')
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -34,9 +31,7 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function install_jconnector(jConnectorWhere,permanentDir)
-
-if nargin < 1
+if nargin < 1 || isempty(jConnectorWhere)
     maybeHere_1 = fullfile(pwd,'mysql-connector-java-5.1.35-bin.jar');
     maybeHere_2 = fullfile(pwd,'Database','mysql-connector-java-5.1.35-bin.jar');
     if exist(maybeHere_1,'file')
@@ -94,9 +89,9 @@ end
 doesExist = exist(fullfile(prefdir,'javaclasspath.txt'),'file');
 
 if doesExist
-    % Already exists -- 
+    % Already exists --
     fprintf(1,'javaclasspath.txt file already exists in %s\n',prefdir);
-    fprintf(1,'You must manually add the following line to it (if it doesn''t already exist):\n');    
+    fprintf(1,'You must manually add the following line to it (if it doesn''t already exist):\n');
     if nargin < 2
         fprintf(1,'\n$matlabroot%sjava%sjarext%s%s\n',filesep,filesep,filesep,fileName);
     else

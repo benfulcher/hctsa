@@ -1,44 +1,43 @@
-% ------------------------------------------------------------------------------
-% PH_Walker
-% ------------------------------------------------------------------------------
-% 
-% This operation simulates a hypothetical particle (or 'walker'), that moves in
-% the time domain in response to values of the time series at each point.
-% 
+function out = PH_Walker(y,walkerRule,walkerParams)
+% PH_Walker Simulates a hypothetical walker moving through the time domain.
+%
+% The hypothetical particle (or 'walker') moves in response to values of the
+% time series at each point.
+%
 % Outputs from this operation are summaries of the walker's motion, and
 % comparisons of it to the original time series.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % walkerRule, the kinematic rule by which the walker moves in response to the
 %             time series over time:
-%             
+%
 %             (i) 'prop': the walker narrows the gap between its value and that
 %                         of the time series by a given proportion p.
 %                         walkerParams = p;
-%                         
+%
 %             (ii) 'biasprop': the walker is biased to move more in one
 %                          direction; when it is being pushed up by the time
 %                          series, it narrows the gap by a proportion p_{up},
 %                          and when it is being pushed down by the time series,
 %                          it narrows the gap by a (potentially different)
 %                          proportion p_{down}. walkerParams = [pup,pdown].
-%                          
+%
 %             (iii) 'momentum': the walker moves as if it has mass m and inertia
 %                          from the previous time step and the time series acts
 %                          as a force altering its motion in a classical
 %                          Newtonian dynamics framework. [walkerParams = m], the mass.
-%                          
+%
 %              (iv) 'runningvar': the walker moves with inertia as above, but
 %                          its values are also adjusted so as to match the local
 %                          variance of time series by a multiplicative factor.
 %                          walkerParams = [m,wl], where m is the inertial mass and wl
 %                          is the window length.
-% 
+%
 % walkerParams, the parameters for the specified walkerRule, explained above.
-% 
+%
 %---OUTPUTS: include the mean, spread, maximum, minimum, and autocorrelation of the
 % walker's trajectory, the number of crossings between the walker and the
 % original time series, the ratio or difference of some basic summary statistics
@@ -46,7 +45,7 @@
 % comparing the distributions of the walker and original time series, and
 % various statistics summarizing properties of the residuals between the
 % walker's trajectory and the original time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -60,17 +59,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = PH_Walker(y,walkerRule,walkerParams)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -111,18 +108,18 @@ switch walkerRule
         % and the time series value at that point by the proportion given
         % in walkerParams, to give the value at the subsequent time step
         p = walkerParams;
-        
+
         w(1) = 0; % start at zero
         for i = 2:N
             w(i) = w(i-1) + p*(y(i-1)-w(i-1));
         end
-        
+
     case 'biasprop'
         % walker is biased in one or the other direction (i.e., prefers to
         % go up, or down). Requires a vector of inputs: [p_up, p_down]
         pup = walkerParams(1);
         pdown = walkerParams(2);
-        
+
         w(1) = 0;
         for i = 2:N
             if y(i) > y(i-1) % time series increases
@@ -131,14 +128,14 @@ switch walkerRule
                 w(i) = w(i-1) + pdown*(y(i-1)-w(i-1));
             end
         end
-        
+
     case 'momentum'
         % walker moves as if it had inertia from the previous time step,
         % i.e., it 'wants' to move the same amount; the time series acts as
         % a force changing its motion
         m = walkerParams(1); % 'inertial mass'
 %         F=walkerParams(2); % weight of 'force' from time series
-        
+
         w(1) = y(1);
         w(2) = y(2);
         for i = 3:N
@@ -149,13 +146,13 @@ switch walkerRule
             % where the 'force' F is the change in the original time series
             % at that point
         end
-        
+
     case 'runningvar'
         % walker moves with momentum defined by amplitude of past values in
         % a given length window
         m = walkerParams(1); % 'inertial mass'
         wl = walkerParams(2); % window length
-        
+
         w(1) = y(1);
         w(2) = y(2);
         for i = 3:N
@@ -167,7 +164,7 @@ switch walkerRule
                 w(i) = w_mom;
             end
         end
-        
+
     otherwise
         error('Unknown method ''%s'' for simulating walker on the time series', walkerRule)
 end

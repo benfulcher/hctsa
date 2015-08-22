@@ -1,19 +1,18 @@
-% ------------------------------------------------------------------------------
-% SY_SlidingWindow
-% ------------------------------------------------------------------------------
-% 
+function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
+% SY_SlidingWindow  Sliding window measures of stationarity.
+%
 % This function is based on sliding a window along the time series, measuring
 % some quantity in each window, and outputting some summary of this set of local
 % estimates of that quantity.
-% 
-% Another way of saying it: calculate 'windowstat' in each window, and computes
-% 'acrosswindowstat' for the set of statistics calculated in each window.
-% 
+%
+% Another way of saying it: calculate 'windowStat' in each window, and computes
+% 'acrossWinStat' for the set of statistics calculated in each window.
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
-% windowstat, the measure to calculate in each window:
+%
+% windowStat, the measure to calculate in each window:
 %               (i) 'mean', mean
 %               (ii) 'std', standard deviation
 %               (iii) 'ent', distribution entropy
@@ -23,8 +22,8 @@
 %               (vii) 'lillie', the p-value for a Lilliefors Gaussianity test
 %               (viii) 'AC1', the lag-1 autocorrelation
 %               (ix) 'apen', Approximate Entropy
-% 
-% acrosswindowstat, controls how the obtained sequence of local estimates is
+%
+% acrossWinStat, controls how the obtained sequence of local estimates is
 %                   compared (as a ratio to the full time series):
 %                       (i) 'std': standard deviation
 %                       (ii) 'ent' histogram entropy
@@ -32,14 +31,14 @@
 %                               cf. "Approximate entropy as a measure of system
 %                               complexity", S. M. Pincus, P. Natl. Acad. Sci.
 %                               USA 88(6) 2297 (1991)
-% 
-% nseg, the number of segments to divide the time series up into, thus
+%
+% numSeg, the number of segments to divide the time series up into, thus
 %       controlling the window length
-% 
-% nmov, the increment to move the window at each iteration, as 1/fraction of the
-%       window length (e.g., nmov = 2, means the window moves half the length of the
+%
+% incMove, the increment to move the window at each iteration, as 1/fraction of the
+%       window length (e.g., incMove = 2, means the window moves half the length of the
 %       window at each increment)
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -53,88 +52,103 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SY_SlidingWindow(y,windowstat,acrosswindowstat,nseg,nmov)
-
 doPlot = 0; % plot outputs
 
-if nargin < 2 || isempty(windowstat)
-    windowstat = 'mean'; % do a sliding window mean
+% ------------------------------------------------------------------------------
+% Check Inputs
+% ------------------------------------------------------------------------------
+
+if nargin < 2 || isempty(windowStat)
+    windowStat = 'mean'; % measure within each window
 end
-if nargin < 3 || isempty(acrosswindowstat)
-    acrosswindowstat = 'std';
+if nargin < 3 || isempty(acrossWinStat)
+    acrossWinStat = 'std'; % measure across all windows
 end
-if nargin < 4 || isempty(nseg)
-    nseg = 5;
+if nargin < 4 || isempty(numSeg)
+    numSeg = 5;
 end
-if nargin < 5 || isempty(nmov)
-    nmov = 2;
+if nargin < 5 || isempty(incMove)
+    incMove = 2;
 end
 
-wlen = floor(length(y)/nseg); % size of window
-inc = floor(wlen/nmov); % increment to move at each step
-if inc == 0; inc = 1; end % increment rounded down to zero, prop it up
+% ------------------------------------------------------------------------------
 
-nsteps = (floor((length(y)-wlen)/inc)+1);
-qs = zeros(nsteps,1);
+winLength = floor(length(y)/numSeg); % size of window
+inc = floor(winLength/incMove); % increment to move at each step
+% If increment rounded down to zero, prop it up:
+if inc == 0
+    inc = 1;
+end
 
-switch windowstat
+numSteps = (floor((length(y)-winLength)/inc)+1);
+qs = zeros(numSteps,1);
+
+% Convert a step index (stepInd) to a range of indices corresponding to that window:
+getWindow = @(stepInd) ((stepInd-1)*inc + 1:(stepInd-1)*inc + winLength);
+
+switch windowStat
     case 'mean' % Sliding window mean
-        for i = 1:nsteps
-            qs(i) = mean(y((i-1)*inc + 1:(i-1)*inc + wlen));
+        for i = 1:numSteps
+            qs(i) = mean(y(getWindow(i)));
         end
     case 'std' % Sliding window std
-        for i = 1:nsteps
-            qs(i) = std(y((i-1)*inc + 1:(i-1)*inc + wlen));
+        for i = 1:numSteps
+            qs(i) = std(y(getWindow(i)));
         end
     case 'ent' % Sliding window distributional entropy
-        for i = 1:nsteps
-            ksstats = DN_FitKernelSmooth(y((i-1)*inc + 1:(i-1)*inc + wlen),'entropy');
-            qs(i) = ksstats.entropy;
+        for i = 1:numSteps
+            qs(i) = EN_DistributionEntropy(y(getWindow(i)),'ks',[]);
         end
     case 'apen' % Sliding window ApEn
-        for i = 1:nsteps
-            qs(i) = EN_ApEn(y((i-1)*inc + 1:(i-1)*inc + wlen),1,0.2);
+        for i = 1:numSteps
+            qs(i) = EN_ApEn(y(getWindow(i)),1,0.2);
         end
     case 'mom3' % Third moment
-        for i = 1:nsteps
-            qs(i) = DN_Moments(y((i-1)*inc + 1:(i-1)*inc + wlen),3);
+        for i = 1:numSteps
+            qs(i) = DN_Moments(y(getWindow(i)),3);
         end
     case 'mom4' % Fourth moment
-        for i = 1:nsteps
-            qs(i) = DN_Moments(y((i-1)*inc + 1:(i-1)*inc + wlen),4);
+        for i = 1:numSteps
+            qs(i) = DN_Moments(y(getWindow(i)),4);
         end
     case 'mom5' % Fifth moment
-        for i = 1:nsteps
-            qs(i) = DN_Moments(y((i-1)*inc + 1:(i-1)*inc + wlen),5);
+        for i = 1:numSteps
+            qs(i) = DN_Moments(y(getWindow(i)),5);
         end
     case 'lillie' % Lilliefors test
-        for i = 1:nsteps
-            qs(i) = HT_DistributionTest(y((i-1)*inc + 1:(i-1)*inc + wlen),'lillie','norm');
+        for i = 1:numSteps
+            qs(i) = HT_DistributionTest(y(getWindow(i)),'lillie','norm');
         end
     case 'AC1' % Lag-1 autocorrelation
-        for i = 1:nsteps
-            qs(i) = CO_AutoCorr(y((i-1)*inc + 1:(i-1)*inc + wlen),1,'Fourier');
+        for i = 1:numSteps
+            qs(i) = CO_AutoCorr(y(getWindow(i)),1,'Fourier');
         end
     otherwise
-        error('Unknown statistic ''%s''',windowstat)
+        error('Unknown statistic ''%s''',windowStat)
 end
 
+% ------------------------------------------------------------------------------
+% Plot
+% ------------------------------------------------------------------------------
 if doPlot
     figure('color','w'); box('on');
-    plot(round(wlen/2):inc:(nsteps-1)*inc+round(wlen/2),qs,'r');
+    plot(round(winLength/2):inc:(numSteps-1)*inc+round(winLength/2),qs,'r');
 end
 
-switch acrosswindowstat
+% ------------------------------------------------------------------------------
+% Compute the output statistic
+% ------------------------------------------------------------------------------
+switch acrossWinStat
     case 'std'
         out = std(qs)/std(y);
     case 'apen'
@@ -143,7 +157,7 @@ switch acrosswindowstat
         kssimpouts = DN_FitKernelSmooth(qs); % get a load of statistics from kernel-smoothed distribution
         out = kssimpouts.entropy; % distributional entropy
     otherwise
-        error('Unknown statistic: ''%s''',acrosswindowstat)
+        error('Unknown statistic: ''%s''',acrossWinStat)
 end
 
 end

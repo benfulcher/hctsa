@@ -1,28 +1,23 @@
-% ------------------------------------------------------------------------------
-% NL_TSTL_dimensions
-% ------------------------------------------------------------------------------
-% 
+function out = NL_TSTL_dimensions(y,nbins,embedParams)
+% NL_TSTL_dimensions box counting, information, and correlation dimension of a time series.
+%
 % Computes the box counting, information, and correlation dimension of a
 % time-delay embedded time series using the TSTOOL code 'dimensions'.
 % This function contains extensive code for estimating the best scaling range to
 % estimate the dimension using a penalized regression procedure.
-% 
-% TSTOOL, http://www.physik3.gwdg.de/tstool/
-% 
+%
 %---INPUTS:
-% 
 % y, column vector of time series data
-% 
-% nbins, maximum number of partitions per axis.
-% 
+% nbins, maximum number of partitions per axis
 % embedParams, embedding parameters to feed BF_embed.m for embedding the
 %              signal in the form {tau,m}
-% 
+%
 %---OUTPUTS:
 % A range of statistics are returned about how each dimension estimate changes
 % with m, the scaling range in r, and the embedding dimension at which the best
 % fit is obtained.
-% 
+
+% cf. TSTOOL, http://www.physik3.gwdg.de/tstool/
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -36,17 +31,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TSTL_dimensions(y,nbins,embedParams)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries, check inputs
@@ -424,36 +417,36 @@ out.co_mbestfit = bestm_co.mbestfit;
         % different time series (i.e., if choosing an automatic method for
         % determining the embedding parameters), we have that m is at least
         % 3 here so that we can do statistics on at least these ones...
-        
+
         % (i) on average the raw means at each m up to m = 3
         subout.meanm1 = mean(logN(:,1));
         subout.meanm2 = mean(logN(:,2));
         subout.meanm3 = mean(logN(:,3));
         subout.meanmmax = mean(logN(:,end));
-        
+
         % (ii) raw minimum at each m up to m = 3
         subout.minm1 = min(logN(:,1));
         subout.minm2 = min(logN(:,2));
         subout.minm3 = min(logN(:,3));
         subout.minmmax = min(logN(:,end));
-        
+
         % (iii) range at each m up to m = 3
         subout.range1 = range(logN(:,1));
         subout.range2 = range(logN(:,2));
         subout.range3 = range(logN(:,3));
         subout.rangemmax = range(logN(:,end));
-        
+
         % (iv) increments with m
         subout.mindiff = mean([min(logN(:,2))-min(logN(:,1)),min(logN(:,3))-min(logN(:,2))]);
         subout.meandiff = mean([mean(logN(:,2))-mean(logN(:,1)),mean(logN(:,3))-mean(logN(:,2))]);
-        
+
         % (v) slopes and goodness of fit across whole r range
         [subout.lfitm1 subout.lfitb1 subout.lfitmeansqdev1] = subsublinfit(logr,logN(:,1)');
         [subout.lfitm2 subout.lfitb2 subout.lfitmeansqdev2] = subsublinfit(logr,logN(:,2)');
         [subout.lfitm3 subout.lfitb3 subout.lfitmeansqdev3] = subsublinfit(logr,logN(:,3)');
         [subout.lfitmmax subout.lfitbmax subout.lfitmeansqdevmax] = subsublinfit(logr,logN(:,end)');
-        
-        
+
+
         function [m, b, meansqdev] = subsublinfit(x,y)
             p1 = polyfit(x,y,1);
             pfit = p1(1)*x + p1(2);
@@ -462,8 +455,8 @@ out.co_mbestfit = bestm_co.mbestfit;
             b = p1(2); % intercept
             meansqdev = mean(res.^2);
         end
-        
-        
+
+
     end
 
     % ------------------------------------------------------------------------------
@@ -491,7 +484,7 @@ out.co_mbestfit = bestm_co.mbestfit;
         subout.logrmin = logr(stptr(a)); % minimum of scaling range
         subout.logrmax = logr(endptr(b)); % maximum of scaling range
         subout.logrrange = logr(endptr(b))-logr(stptr(a)); % range of scaling... range
-        subout.pgone = (stptr(a)-1 + l - endptr(b))/length(logr); % number of points removed in process 
+        subout.pgone = (stptr(a)-1 + l - endptr(b))/length(logr); % number of points removed in process
                                                    				  % of choosing the optimum scaling range
 
 		% Do the optimum fit again
@@ -505,14 +498,14 @@ out.co_mbestfit = bestm_co.mbestfit;
         subout.scaling_exp = p(1);
 		subout.scaling_int = p(2);
 		subout.minbad = min(min(mybad));
-        
+
         function badness = lfitbadness(x,y)
             gamma = 0.02; % reguralization parameter gamma selected empirically, could be tweaked in future work
             p = polyfit(x,y,1);
             pfit = p(1)*x+p(2);
             res = pfit-y;
             badness = mean(abs(res)) - gamma*length(x); % want to still maximize length(x)
-            
+
         end
     end
 
@@ -529,7 +522,7 @@ out.co_mbestfit = bestm_co.mbestfit;
 		store_meansqres = zeros(size(logNN,2),1);
 		for k = 1:size(logNN,2);
 			logN = logNN(:,k); % take this element
-			
+
 	        l = length(logr);
 	        stptr = 1:floor(l/2)-1; % must be in the first half (not necessarily, but for here)
 	        endptr = ceil(l/2)+1:l; % must be in second half (not necessarily, but for here)
@@ -552,7 +545,7 @@ out.co_mbestfit = bestm_co.mbestfit;
 			% subout.scaling_exp = p(1);
 			% subout.scaling_int = p(2);
 			% subout.minbad = min(min(mybad));
-			
+
 			store_scalingexps(k) = p(1);
 			store_meansqres(k) = mean(res.^2);
 		end
@@ -561,7 +554,7 @@ out.co_mbestfit = bestm_co.mbestfit;
 		subout.meanscalingexp = mean(store_scalingexps);
 		subout.maxscalingexp = max(store_scalingexps);
 		subout.mbestfit = find(store_meansqres == min(store_meansqres),1,'first');
-		
+
         function badness = lfitbadness(x,y)
             gamma = 0.02; % reguralization parameter gamma selected empirically, could be tweaked in future work
             p = polyfit(x,y,1);

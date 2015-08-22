@@ -1,24 +1,23 @@
-% ------------------------------------------------------------------------------
-% WL_DetailCoeffs
-% ------------------------------------------------------------------------------
-% 
+function out = WL_DetailCoeffs(y, wname, maxlevel)
+% WL_DetailCoeffs   Detail coefficients of a wavelet decomposition.
+%
 % Compares the detail coefficients obtained at each level of the wavelet
 % decomposition from 1 to the maximum possible level for the wavelet given the
 % length of the input time series (computed using wmaxlev from
 % Matlab's Wavelet Toolbox).
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % wname, the name of the mother wavelet to analyze the data with: e.g., 'db3',
 %           'sym2', cf. Wavelet Toolbox Documentation for details
-%           
+%
 % maxlevel, the maximum wavelet decomposition level (can also set to 'max' to be
 %               that determined by wmaxlev)
-% 
+%
 %---OUTPUTS:
-% A set of statistics on the detail coefficients.
-% 
+% Statistics on the detail coefficients.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,17 +31,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = WL_DetailCoeffs(y, wname, maxlevel)
 
 % ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
@@ -81,11 +78,11 @@ maxs = zeros(maxlevel,1); % max detail coefficient magnitude at each level
 
 for k = 1:maxlevel
     level = k;
-    
+
     [c, l] = wavedec(y,level,wname);
     % Reconstruct detail at this level
     det = wrcoef('d',c,l,wname,level);
-    
+
     means(k) = mean(abs(det));
     medians(k) = median(abs(det));
     maxs(k) = max(abs(det));

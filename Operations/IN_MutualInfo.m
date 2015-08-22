@@ -1,24 +1,22 @@
-% ------------------------------------------------------------------------------
-% IN_MutualInfo
-% ------------------------------------------------------------------------------
-% 
-% Decided to implement some more rigorous mutual information estimators
-% from the information dynamics toolkit.
-% 
+function out = IN_MutualInfo(y1,y2,estMethod,extraParam)
+% IN_MutualInfo     Mutual information of two data vectors.
+%
+% Uses the information dynamics toolkit implementation.
+%
 %---INPUTS:
 %
 % y1: input time series 1
 % y2: input time series 2
-% 
+%
 % estMethod: the estimation method used to compute the mutual information:
 %           (*) 'gaussian'
 %           (*) 'kernel'
 %           (*) 'kraskov1'
 %           (*) 'kraskov2'
-% 
+%
 % cf. Kraskov, A., Stoegbauer, H., Grassberger, P., Estimating mutual
 % information: http://dx.doi.org/10.1103/PhysRevE.69.066138
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,17 +30,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = IN_MutualInfo(y1,y2,estMethod,extraParam)
 
 % ------------------------------------------------------------------------------
 % Check inputs:

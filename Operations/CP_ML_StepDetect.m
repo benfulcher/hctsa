@@ -1,45 +1,44 @@
-% ------------------------------------------------------------------------------
-% CP_ML_StepDetect
-% ------------------------------------------------------------------------------
-% 
+function out = CP_ML_StepDetect(y,method,params)
+% CP_ML_StepDetect      Analysis of discrete steps in a time series.
+%
 % Gives information about discrete steps in the signal, using the function
 % l1pwc from Max A. Little's step detection toolkit.
-% 
+%
 % cf.,
 % "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
 % Machine Dynamics", Max A. Little, and Nick S. Jones, Proc. ICASSP (2010)
-% 
+%
 % "Steps and bumps: precision extraction of discrete states of molecular machines"
 % M. A. Little, B. C. Steel, F. Bai, Y. Sowa, T. Bilyard, D. M. Mueller,
 % R. M. Berry, N. S. Jones. Biophysical Journal, 101(2):477-485 (2011)
-% 
+%
 % Software available at: http://www.maxlittle.net/software/index.php
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % method, the step-detection method:
 %           (i) 'kv': Kalafut-Visscher
 %                 cf. The algorithm described in:
 %                 Kalafut, Visscher, "An objective, model-independent method for
 %                 detection of non-uniform steps in noisy signals", Comp. Phys.
 %                 Comm., 179(2008), 716-723.
-%                 
+%
 %           (ii) 'l1pwc': L1 method
 %                 This code is based on code originally written by Kim et al.:
 %                 "l_1 Trend Filtering", S.-J. Kim et al., SIAM Review 51, 339
 %                 (2009).
-% 
+%
 % params, the parameters for the given method used:
 %           (i) 'kv': (no parameters required)
 %           (ii) 'l1pwc': params = lambda
-% 
+%
 %---OUTPUTS:
 % Statistics on the output of the step-detection method, including the intervals
 % between change points, the proportion of constant segments, the reduction in
 % variance from removing the piece-wise constants, and stationarity in the
 % occurrence of change points.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -53,17 +52,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CP_ML_StepDetect(y,method,params)
 
 % ------------------------------------------------------------------------------
 % Preliminaries, check inputs:
@@ -84,10 +81,10 @@ switch method
         % ------------------------------------------------------------------------------
         %% Kalafut-Visscher
         % ------------------------------------------------------------------------------
-        
+
         % (1) Do the step detection
         [steppedy, steps] = ML_kvsteps(y);
-        
+
         % Put in chpts form: a vector specifying indicies of starts of
         % constant runs.
         if length(steps) == 2
@@ -95,7 +92,7 @@ switch method
         else
             chpts = [1; steps(2:end-1)+1];
         end
-        
+
     % case 'ck'
     %     % ------------------------------------------------------------------------------
     %     %% Chung-Kennedy
@@ -141,10 +138,10 @@ switch method
     %         p = 10;
     %     end
     %     steppedy = ML_ckfilter(y, K, M, p);
-        
+
     case 'l1pwc'
         % ------------------------------------------------------------------------------
-        % Based around code originally written by 
+        % Based around code originally written by
         % S.J. Kim, K. Koh, S. Boyd and D. Gorinevsky. If you use this code for
         % your research, please cite:
         % M.A. Little, Nick S. Jones (2010)
@@ -152,7 +149,7 @@ switch method
         % Machine Dynamics", in 2010 IEEE International Conference on Acoustics,
         % Speech and Signal Processing, 2010, ICASSP 2010 Proceedings.
         % ------------------------------------------------------------------------------
-        
+
         % Input arguments:
         % - y          Original signal to denoise, size N x 1.
         % - lambda     A vector of positive regularization parameters, size L x 1.
@@ -172,7 +169,7 @@ switch method
         % - lambdamax  Maximum value of lambda for the given y. If
         %              lambda >= lambdamax, the output is the trivial constant
         %              solution x = mean(y).
-        
+
         % Set defaults, params should be [lambda]
         if nargin < 3
             params = [];
@@ -185,19 +182,19 @@ switch method
         if lambda < 1 % specify as a proportion of lambdamax
             lambda = ML_l1pwclmax(y)*lambda;
         end
-        
+
         % Run the code
         [steppedy, E, s, lambdamax] = ML_l1pwc(y, lambda, 0); % use defaults for stoptol and maxiter
-        
+
         % round to this precision to remove numberical flucuations of order
         % less than 1e-4
         steppedy = round(steppedy*1e4)/1e4;
-        
+
         % Return outputs
         out.E = E;
         out.s = s;
         out.lambdamax = lambdamax;
-        
+
         % Get step indicies from steppedy
         % these give the index of the start of each run
         whch = find(diff(steppedy)~=0);
@@ -206,7 +203,7 @@ switch method
         else
             chpts = 1; % no changes
         end
-		
+
     otherwise
         error('Unknown step detection method ''%s''',method);
 end

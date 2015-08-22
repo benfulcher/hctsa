@@ -1,15 +1,15 @@
-% ------------------------------------------------------------------------------
-% DN_cv
-% ------------------------------------------------------------------------------
-% 
-% Calculates the coefficient of variation, sigma^k / mu^k, of order k.
-% 
+function out = DN_cv(x,k)
+% DN_cv     Coefficient of variation
+%
+% Coefficient of variation of order k is sigma^k / mu^k (for sigma, standard
+% deviation and mu, mean) of a data vector, x
+%
 %---INPUTS:
-% 
-% x, the input time series
-% 
-% k, the order of coefficient of variation (k = 1 is usual)
-% 
+%
+% x, the input data vector
+%
+% k, the order of coefficient of variation (k = 1 is default)
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -23,19 +23,19 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_cv(x,k)
-
+%-------------------------------------------------------------------------------
 % Check inputs
+%-------------------------------------------------------------------------------
 if nargin < 2 || isempty(k)
     k = 1; % Do standard CV by default
 end

@@ -1,23 +1,21 @@
-% ------------------------------------------------------------------------------
-% TS_plot_pca
-% ------------------------------------------------------------------------------
+function TS_plot_pca(whatData,TsorOps,showDist,classMeth,annotateParams)
+% TS_plot_pca   2-dimensional feature-based representation of a time-series dataset.
 %
-% Calculates and then plots a 2-dimensional feature-based representation of the
-% data (using PCA).
-% 
+% The low-dimensional representation is computed using PCA.
+%
 %---EXAMPLE USAGE:
-% 
-% TSQ_plot_pca('norm');
 %
+% TSQ_plot_pca('norm');
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
@@ -25,14 +23,12 @@
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-function TS_plot_pca(whatData,TsorOps,showDist,classMeth,annotateParams)
-
 % ------------------------------------------------------------------------------
 %% Check Inputs:
 % ------------------------------------------------------------------------------
 if nargin < 1 || isempty(whatData)
     whatData = 'norm';
-    fprintf(1,'Getting data from HCTSA_N\n'); 
+    fprintf(1,'Getting data from HCTSA_N\n');
 end
 
 if nargin < 2 || isempty(TsorOps)
@@ -53,8 +49,8 @@ end
 
 if nargin < 5 || isempty(annotateParams)
     % Annotate 10 points by default
-    fprintf(1,'Annotating 10 points by default with time series segment and filenames\n');
-    annotateParams = struct('n',10,'textAnnotation','fileName');
+    fprintf(1,'Annotating 6 points by default with time series segment and names\n');
+    annotateParams = struct('n',6,'textAnnotation','Name');
 end
 if ~isstruct(annotateParams)
     annotateParams = struct('n',annotateParams);
@@ -65,44 +61,40 @@ end
 % ------------------------------------------------------------------------------
 if strcmp(whatData,'cl') || strcmp(whatData,'norm')  || ischar(whatData)
     % Retrive data from local files
-    switch whatData
-    case 'cl'
-        whatDataFile = 'HCTSA_cl.mat';
-    case 'norm'
+    if ismember(whatData,{'norm','cl'})
         whatDataFile = 'HCTSA_N.mat';
-    otherwise
+    else
         % Provided a custom filename to a datafile
         whatDataFile = whatData;
     end
-    fprintf(1,'Loading data and grouping information from %s...',whatDataFile);
-    load(whatDataFile,'TS_DataMat');
+
+    % Load in data:
+    [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
+
+    % Construct labels for data points:
     if strcmp(TsorOps,'ts')
-        load(whatDataFile,'Operations')
         dimensionLabels = {Operations.Name}; clear Operations % We just need their names
         if isstruct(annotateParams) || length(annotateParams) > 1 || annotateParams > 0
-            load(whatDataFile,'TimeSeries')
-            DataLabels = {TimeSeries.FileName};
+            dataLabels = {TimeSeries.Name};
             data_ids = [TimeSeries.ID];
-            TimeSeriesData = {TimeSeries.Data};
+            timeSeriesData = {TimeSeries.Data};
             if isfield(TimeSeries,'Group')
-                load(whatDataFile,'GroupNames')
+                load(whatDataFile,'groupNames')
                 dataGroups = [TimeSeries.Group];
             else
                 % No groups assigned:
                 dataGroups = {};
-                GroupNames = {'all data'};
+                groupNames = {'all data'};
                 % fprintf(1,'\n');
                 % error('No groups assigned -- Use TS_LabelGroups to provide group information.')
             end
-            clear('TimeSeries'); % we no longer need you
         end
     else
-        load(whatDataFile,'TimeSeries')
-        dimensionLabels = {TimeSeries.FileName}; clear TimeSeries
+        dimensionLabels = {TimeSeries.Name}; clear TimeSeries
     end
-    fprintf(1,' Loaded.\n');
+    clear('TimeSeries','Operations'); % we no longer need you
 else
-    % The user provided data yourself
+    % The user provided data themself
     if ~isfield(whatData,'DataMat') && ~isfield(whatData,'TS_DataMat')
         error('No field ''DataMat'' (or ''TS_DataMat'') provided in the data input')
     elseif ~isfield(whatData,'Groups')
@@ -119,20 +111,20 @@ else
     else
         dimensionLabels = {};
     end
-    if isfield(whatData,'GroupNames')
-        GroupNames = whatData.GroupNames;
+    if isfield(whatData,'groupNames')
+        groupNames = whatData.groupNames;
     else
-        GroupNames = {};
+        groupNames = {};
     end
-    if isfield(whatData,'DataLabels')
-        DataLabels = whatData.DataLabels;
+    if isfield(whatData,'dataLabels')
+        dataLabels = whatData.dataLabels;
     else
-        DataLabels = {};
+        dataLabels = {};
     end
-    if isfield(whatData,'TimeSeriesData')
-        TimeSeriesData = whatData.TimeSeriesData;
+    if isfield(whatData,'timeSeriesData')
+        timeSeriesData = whatData.timeSeriesData;
     else
-        TimeSeriesData = {};
+        timeSeriesData = {};
     end
 end
 
@@ -144,50 +136,29 @@ end
 
 % Label groups
 if ~isempty(dataGroups)
-    GroupIndices = BF_ToGroup(dataGroups);
+    groupIndices = BF_ToGroup(dataGroups);
 else
-    GroupIndices = {1:size(TS_DataMat,1)};
+    groupIndices = {1:size(TS_DataMat,1)};
 end
-numGroups = length(GroupIndices); % Number of groups
+numGroups = length(groupIndices); % Number of groups
 
 % ------------------------------------------------------------------------------
-%% Do the dimensionality reduction
+%% Do the dimensionality reduction using Matlab's built-in PCA algorithm
 % ------------------------------------------------------------------------------
-
-% Matlab's build-in PCA
-% Sort it so that when choose different set of keywords the output is consistent
-% There's a strange thing in princomp that can give different scores when the
-% input rows are in a different order. The geometry is the same, but they're reflected
-% relative to different orderings
-
 % Can't run PCA on data containing NaNs:
 if any(isnan(TS_DataMat(:)))
     error('Data matrix contains NaNs');
 end
 fprintf(1,'Calculating principal components of the %u x %u data matrix...', ...
                     size(TS_DataMat,1),size(TS_DataMat,2));
-                    
+
 % The new pca function is a much faster implementation to compute just the first
 % 2 components:
-[pcCoeff, pcScore, latent, ~, percVar] = pca(TS_DataMat,'NumComponents',2);
-% [pc,pcScore,latent] = princomp(TS_DataMat);
-% percVar = round(latent/sum(latent)*1000)/10; % Percentage of variance explained (1 d.p.)
-
+[pcCoeff, pcScore, latent, ~, percVar] = pca(zscore(TS_DataMat),'NumComponents',2);
 fprintf(1,' Done.\n');
 
 % Work out the main contributions to each principle component
 featLabel = cell(2,2); % Feature label :: proportion of total (columns are PCs)
-% toLabel = cell(2,1);
-% topNcont = 1; %min(length(dimensionLabels),1);  % the top contribution to the first principle component
-% for i = 1:2
-%     [s1, ix1] = sort(abs(pc(:,i)),'descend');
-%     featLabel{i,1} = dimensionLabels(ix1(1:topNcont));
-%     featLabel{i,2} = round(abs(s1(1:topNcont)/sum(abs(s1)))*100)/100;
-%     for j = 1:topNcont
-%         toLabel{i} = sprintf('%s%s (%f), ',toLabel{i},featLabel{i,1}{j},featLabel{i,2}(j));;
-%     end
-%     toLabel{i} = toLabel{i}(1:end-2);
-% end
 
 % ------------------------------------------------------------------------------
 % Plot this two-dimensional representation of the data using TS_plot_2d
@@ -195,16 +166,14 @@ featLabel = cell(2,2); % Feature label :: proportion of total (columns are PCs)
 
 nameString = 'PC';
 for i = 1:2
-    DataInfo.labels{i} = sprintf('%s %u (%.2f%%)',nameString,i,percVar(i));
+    dataInfo.labels{i} = sprintf('%s %u (%.2f%%)',nameString,i,percVar(i));
 end
 
-% function TS_plot_2d(Features,DataInfo,TrainTest,annotateParams,keepksdensities,lossmeth,extras)
+dataInfo.GroupNames = groupNames;
+dataInfo.GroupIndices = groupIndices;
+dataInfo.DataLabels = dataLabels;
+dataInfo.TimeSeriesData = timeSeriesData;
 
-DataInfo.GroupNames = GroupNames;
-DataInfo.GroupIndices = GroupIndices;
-DataInfo.DataLabels = DataLabels;
-DataInfo.TimeSeriesData = TimeSeriesData;
-
-TS_plot_2d(pcScore(:,1:2),DataInfo,{},annotateParams,showDist,classMeth);
+TS_plot_2d(pcScore(:,1:2),dataInfo,{},annotateParams,showDist,classMeth);
 
 end

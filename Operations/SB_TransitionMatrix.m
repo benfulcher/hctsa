@@ -1,14 +1,12 @@
-% ------------------------------------------------------------------------------
-% SB_TransitionMatrix
-% ------------------------------------------------------------------------------
-% 
-% Calculates the transition probabilities between different states of the time
-% series given a method to symbolize or coarse-grain the time series.
-% 
+function out = SB_TransitionMatrix(y,howtocg,numGroups,tau)
+% SB_TransitionMatrix  transition probabilities between different time-series states
+%
+% The time series is coarse-grained according to a given method.
+%
 % The input time series is transformed into a symbolic string using an
 % equiprobable alphabet of numGroups letters. The transition probabilities are
 % calculated at a lag tau.
-% 
+%
 %---INPUTS:
 % y, the input time series
 %
@@ -22,11 +20,11 @@
 %      discretization as normal, or do the discretization and then just
 %      look at this dicrete lag. Here we do the former. Can also set tau to 'ac'
 %      to set tau to the first zero-crossing of the autocorrelation function.
-% 
+%
 %---OUTPUTS: include the transition probabilities themselves, as well as the trace
 % of the transition matrix, measures of asymmetry, and eigenvalues of the
 % transition matrix.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -40,17 +38,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SB_TransitionMatrix(y,howtocg,numGroups,tau)
 
 % ------------------------------------------------------------------------------
 % Check inputs:
@@ -137,7 +133,7 @@ out.stddiag = std(diag(T)); % std of diagonal elements
 
 % (iii) Measures of symmetry:
 out.symdiff = sum(sum(abs((T-T')))); % sum of differences of individual elements
-out.symsumdiff = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower 
+out.symsumdiff = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower
                                                           % triangular parts of T
 
 % (iv) Measures from covariance matrix:

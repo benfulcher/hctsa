@@ -1,15 +1,12 @@
-% ------------------------------------------------------------------------------
-% PP_Iterate
-% ------------------------------------------------------------------------------
-% 
-% Iteratively applies a transformation to the time series and measures how
-% various properties of is change as the transformation is iteratively applied
-% to it.
-% 
+function out = PP_Iterate(y,dtMeth)
+% PP_Iterate  How time-series properties change in response to iterative pre-processing.
+%
+% The pre-processing transformation is iteratively applied to the time series.
+%
 %---INPUTS:
-% 
+%
 % y, the input time series
-% 
+%
 % dtMeth, the detrending method to apply:
 %           (i) 'spline' removes a spine fit,
 %           (ii) 'diff' takes incremental differences,
@@ -17,7 +14,7 @@
 %           (iv) 'rav' applies a running mean filter,
 %           (v) 'resampleup' progressively upsamples the time series,
 %           (vi) 'resampledown' progressively downsamples the time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -31,17 +28,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = PP_Iterate(y,dtMeth)
 
 doPlot = 0;
 
@@ -94,20 +89,20 @@ for q = 1:length(nRange)
             spline = spap2(nknots,intp,[1:N]',y); % just a single middle knot with cubic interpolants
             y_spl = fnval(spline,1:N); % evaluate at the 1:N time intervals
             y_d = y - y_spl';
-            
+
         case 'diff' % Differencing
             ndiffs = n; % progressively difference
             y_d = diff(y,ndiffs);
-            
+
         case 'medianf' % Median Filter; n is the order of filtering
             y_d = medfilt1(y,n);
-            
+
         case 'rav' % Running Average; n is the window size
             y_d = filter(ones(1,n)/n,1,y);
-            
+
         case 'resampleup' % upsample
             y_d = resample(y,n,1);
-            
+
         case 'resampledown' % downsample
             y_d = resample(y,1,n);
     end
@@ -132,7 +127,7 @@ for t = 1:10;
             fprintf(1,'%u is a bad statistic\n',t)
         end
     end
-    stats(t,:) = doYourTestThing(outmat(:,t)); 
+    stats(t,:) = doYourTestThing(outmat(:,t));
 end
 
 % ------------------------------------------------------------------------------
@@ -203,7 +198,7 @@ out.normdiff_lin = stats(10,3);
 % ------------------------------------------------------------------------------
     function f = doYourCalcThing(y,y_d)
         y = BF_zscore(y); y_d = BF_zscore(y_d);
-        
+
         f = zeros(10,1); % vector of features to output
         % 1) Stationarity
         % (a) StatAv
@@ -212,20 +207,20 @@ out.normdiff_lin = stats(10,3);
         f(2) = SY_SlidingWindow(y_d,'mean','std',5,2);
         % (c) Sliding window std
         f(3) = SY_SlidingWindow(y_d,'std','std',5,2)/SY_SlidingWindow(y,'std','std',5,2);
-        
+
         % 2) Gaussianity
         %   (a) kernel density estimation method
         me1 = DN_SimpleFit(y_d,'gauss1',0); % kernel density fit to 1-peak gaussian
-        
+
         if ~isstruct(me1) && isnan(me1)
             f(4) = NaN;
         else
             f(4) = me1.rmse;
         end
-        
+
         %   (b) histogram 10 bins
         try
-            me1 = DN_SimpleFit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian            
+            me1 = DN_SimpleFit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
             if ~isstruct(me1) && isnan(me1)
                 f(5) = NaN;
             else
@@ -234,7 +229,7 @@ out.normdiff_lin = stats(10,3);
         catch
             f(5) = NaN;
         end
-        
+
         %   (c) compare distribution to fitted normal distribution
         me1 = DN_CompareKSFit(y_d,'norm');
         if ~isstruct(me1) && isnan(me1)
@@ -242,10 +237,10 @@ out.normdiff_lin = stats(10,3);
         else
             f(6) = me1.adiff;
         end
-        
+
         % 3) Outliers
         f(7) = DN_OutlierTest(y_d,5,'mean');
-        
+
         % Cross Correlation to original signal
         if length(y) == length(y_d)
             xc = xcorr(y,y_d,1,'coeff');
@@ -267,12 +262,12 @@ out.normdiff_lin = stats(10,3);
             g = zeros(3,1);
         end
         f = zscore(f);
-        
+
         % for each return a set of simple little tests:
         % (1) Is it increasing/decreasing?
         %       do this by the sum of differences; could take sign?
         g(1) = sum(diff(f));
-        
+
         % (2) Is there a jump anywhere? If so, where?
         % this is done crudely -- needs to be a sudden jump in a single
         % step
@@ -291,7 +286,7 @@ out.normdiff_lin = stats(10,3);
         % t-statistic at this point
         tstat = abs((mbfatd(ind,1)-mbfatd(ind,2))/sqrt(mbfatd(ind,3)^2+mbfatd(ind,4)^2));
         g(2) = tstat;
-        
+
         % (3) is it linear?
         try
             [cfun, gof] = fit((1:length(f))',f,'poly1');
@@ -302,7 +297,7 @@ out.normdiff_lin = stats(10,3);
         end
         % The gradient of the line
         g(3) = cfun.p1;
-                
+
         % % (4) is it exponential? This is really slow
         % if g(1) > 0 % increasing, fit saturating exponential
         %     stpt = [-f(end), -0.1, f(end)];

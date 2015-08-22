@@ -1,15 +1,14 @@
-% ------------------------------------------------------------------------------
+function out = CO_Embed2_AngleTau(y,maxTau)
 % CO_Embed2_AngleTau
-% ------------------------------------------------------------------------------
-% 
+%
 % Investigates how the autocorrelation of angles between successive points in
 % the two-dimensional time-series embedding change as tau varies from
 % tau = 1, 2, ..., maxTau.
-% 
+%
 %---INPUTS:
 % y, a column vector time series
 % maxTau, the maximum time lag to consider
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -23,17 +22,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_Embed2_AngleTau(y,maxTau)
 
 doPlot = 0;
 tauRange = (1:1:maxTau);
@@ -48,7 +45,7 @@ stats_store = zeros(3,numTau);
 
 for i = 1:numTau
 	tau = tauRange(i);
-	
+
 	m = [y(1:end-tau), y(1+tau:end)];
 
 	theta = diff(m(:,2))./diff(m(:,1));

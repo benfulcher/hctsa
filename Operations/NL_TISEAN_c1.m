@@ -1,43 +1,40 @@
-% ------------------------------------------------------------------------------
-% NL_TISEAN_c1
-% ------------------------------------------------------------------------------
-% 
+function out = NL_TISEAN_c1(y, tau, mmm, tsep, Nref)
+% NL_TISEAN_c1  Information dimension.
+%
 % Implements the c1 and c2d routines from the TISEAN nonlinear time-series
 % analysis package that compute curves for the fixed mass computation of the
 % information dimension.
-% 
-% cf. "Practical implementation of nonlinear time series methods: The TISEAN
-% package" Hegger, R. and Kantz, H. and Schreiber, T., Chaos 9(2) 413 (1999)
-% 
-% Available here:
-% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
-% 
-% The TISEAN routines are performed in the command line using 'system' commands
-% in Matlab, and require that TISEAN is installed and compiled, and able to be
-% executed in the command line.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, the time series to analyze
-% 
+%
 % tau, the time-delay (can be 'ac' or 'mi' for the first zero-crossing of the
 %           autocorrelation function or first minimum of the automutual
 %           information function)
-% 
+%
 % mmm, a two-vector specifying the minimum and maximum embedding dimensions,
 %       e.g., [2,10] for m = 2 up to m = 10
-% 
+%
 % tsep, time separation (can be between 0 and 1 for a proportion of the
 %       time-series length)
-%       
+%
 % Nref, the number of reference points (can also be between 0 and 1 to specify a
 %       proportion of the time-series length)
-% 
-% 
+%
 %---OUTPUTS: optimal scaling ranges and dimension estimates for a time delay,
 % tau, embedding dimensions, m, ranging from m_{min} to m_{max}, a time
 % separation, tsep, and a number of reference points, Nref.
-% 
+
+% cf. "Practical implementation of nonlinear time series methods: The TISEAN
+% package" Hegger, R. and Kantz, H. and Schreiber, T., Chaos 9(2) 413 (1999)
+%
+% Available here:
+% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
+%
+% The TISEAN routines are performed in the command line using 'system' commands
+% in Matlab, and require that TISEAN is installed and compiled, and able to be
+% executed in the command line.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -51,17 +48,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = NL_TISEAN_c1(y, tau, mmm, tsep, Nref)
 
 % ------------------------------------------------------------------------------
 %% Preliminaries:
@@ -138,14 +133,15 @@ fprintf(1,'Wrote temporary data file ''%s'' for TISEAN\n',filePath)
 % ------------------------------------------------------------------------------
 % run c1 code
 tic
-[~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',tau,mmm(1),mmm(2),tsep,Nref,filePath,filePath));
+[~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s',...
+            tau,mmm(1),mmm(2),tsep,Nref,filePath,filePath));
 delete(filePath) % remove the temporary data file
-% [~, res] = system(['c1 -d' num2str(tau) ' -m' num2str(mmm(1)) ...
-%                     ' -M' num2str(mmm(2)) ' -t' num2str(tsep) ' -n' ...
-%                     num2str(Nref) ' -o ' filePath '.c1 ' filePath]);
+
 if isempty(res)
     if exist([filePath '.c1'],'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
     error('Call to TISEAN method ''c1'' failed.');
+elseif strfind(res,'dyld: Library not loaded')
+    error('DYLD library not found -- try recompiling TISEAN:\n%s',res);
 else
     fprintf(1,'TISEAN function ''c1'' took %s.\n',BF_thetime(toc,1))
 end
@@ -198,7 +194,7 @@ end
 % issues: x-values differ for each dimension
 % spline interpolate for a consistent range
 % consistent min/max range:
-% 
+%
 % This works, but higher dimensions don't probe the lower length scales,
 % so it's a bit tricky...
 % nn = length(c1dat);
@@ -262,8 +258,8 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
 
 
 % c1 -d# -m# -M# -t# -n# [-## -K# -o outfile -l# -x# -c#[,#] -V# -h]  file
-% 
-% 
+%
+%
 %     -d delay
 %     -m minimal embedding dimension
 %     -M maximal embedding dimension (at least 2)
@@ -276,13 +272,13 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
 %     -c column(s) to be read (1 or file,#)
 %     -o output file name, just -o means file_c1
 %     -V verbosity level (0 = only fatal errors)
-%     -h show this message 
-    
+%     -h show this message
+
 
     function dimdat = SUB_readTISEANout(s,blocker,nc)
         % blocker the string distinguishing sections of output
         % nc number of columns in string
-        
+
 %         w = zeros(maxm+1,1);
 %         if nargin < 3 % use default blocker
 %             for ii = 1:maxm
@@ -293,7 +289,7 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
 %                 try
 %                     w(ii) = strmatch([blocker num2str(ii)],s,'exact');
 %                 catch
-%                    keyboard 
+%                    keyboard
 %                 end
 %            end
 %         end
@@ -303,7 +299,7 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
 %         end
         maxm = length(w);
         w(end+1) = length(s)+1; % as if there were another marker at the entry after the last data row
-        
+
         dimdat = cell(maxm,1); % stores data for each embedding dimension
         for ii = 1:maxm
             ss = s(w(ii)+1:w(ii+1)-1);
@@ -320,11 +316,11 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
         end
 
     end
-    
+
     function [thevector, thematrix] = SUB_celltomat(thecell,thecolumn)
         % converts cell to matrix, where each (specified) column in cell
         % becomes a column in the new matrix
-        
+
         % But higher dimensions may not reach low enough length scales
         % rescale range to greatest common span
         nn = length(thecell);
@@ -339,12 +335,12 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
         end
         thevector = thecell{1}(:,1);
         ee = length(thevector);
-        
+
         thematrix = zeros(nn,ee); % across the rows for dimensions; across columns for lengths/epsilons
         for ii = 1:nn
             thematrix(ii,:) = thecell{ii}(:,thecolumn);
         end
-        
+
     end
 
     function results = findscalingr_ind(x)
@@ -354,14 +350,14 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
         % match up. (i.e., to exhibit scaling at the same time)
         % starting point must be in first half of data
         % end point must be in last half of data
-        
+
         l = length(x); % number of distance/scaling points per dimension
         gamma = 0.005; % regularization parameter, chosen empirically
 
         stptr = 1:floor(l/4)-1; % must be in the first quarter
         endptr = ceil(l/4)+1:l; % must be in second three quarters
         results = zeros(4,1); %stpt, endpt, goodness, dim
-        
+
         mybad = zeros(length(stptr),length(endptr));
         v = x; % the vector of data for length scales
         vnorm = v; %(v-min(v))./(max(v)-min(v)); % normalize regardless of range
@@ -376,7 +372,7 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
         results(3) = min(mybad(:));
         results(4) = mean(v(stptr(a):endptr(b)));
         results(5) = std(v(stptr(a):endptr(b)));
-        
+
 %         hold off;
 %         plot(1:l,v,'o-k');
 %         hold on;

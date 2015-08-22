@@ -8,7 +8,7 @@
 % INPUTS:
 % y, the input time series
 % tau, the time lag at which to calculate the automutual information
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

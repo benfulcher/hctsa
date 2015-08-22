@@ -1,16 +1,14 @@
-% ------------------------------------------------------------------------------
-% EN_Randomize
-% ------------------------------------------------------------------------------
-% 
-% Progressively randomizes the input time series according to some randomization
-% scheme, and returns measures of how the properties of the time series change
-% with this process.
-% 
+function out = EN_Randomize(y,randomizeHow,randomSeed)
+% EN_Randomize  How time-series properties change with increasing randomization.
+%
+% Progressively randomizes the input time series according to a specified
+% randomization procedure
+%
 % The procedure is repeated 2N times, where N is the length of the time series.
-% 
+%
 %---INPUTS:
 % y, the input (z-scored) time series
-% 
+%
 % randomizeHow, specifies the randomization scheme for each iteration:
 %      (i) 'statdist' -- substitutes a random element of the time series with
 %                           one from the original time-series distribution
@@ -18,20 +16,20 @@
 %                       series with another random element
 %      (iii) 'permute' -- permutes pairs of elements of the time
 %                       series randomly
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-% 
+%
 %---OUTPUTS: summarize how the properties change as one of these
 % randomization procedures is iterated, including the cross correlation with the
 % original time series, the autocorrelation of the randomized time series, its
 % entropy, and stationarity.
-% 
+%
 % These statistics are calculated every N/10 iterations, and thus 20 times
 % throughout the process in total.
-% 
+%
 % Most statistics measure how these properties decay with randomization, by
 % fitting a function f(x) = Aexp(Bx).
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -45,17 +43,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = EN_Randomize(y,randomizeHow,randomSeed)
 
 % ------------------------------------------------------------------------------
 % Check toolboxes, and a z-scored time series:
@@ -81,15 +77,13 @@ end
 if nargin < 3
     randomSeed = []; % default
 end
-
-% Don't plot to screen by default:
-doPlot = 0;
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
 % Preliminaries
 % ------------------------------------------------------------------------------
 
+doPlot = 0; % Don't plot to screen by default:
 N = length(y); % length of the time series
 
 numStats = 10;
@@ -111,34 +105,34 @@ BF_ResetSeed(randomSeed);
 
 for i = 1:N*randp_max
     switch randomizeHow
-        
+
         case 'statdist'
             % randomize by substituting a random element of the time series by
             % a random element from the static original time series distribution
             y_rand(randi(N)) = y(randi(N));
-            
+
         case 'dyndist'
             % randomize by substituting a random element of the time series
-            % by a random element of the current, already partially randomized, 
+            % by a random element of the current, already partially randomized,
             % time series
             y_rand(randi(N)) = y_rand(randi(N));
-            
+
         case 'permute'
             % randomize by permuting elements of the time series so that
             % the distribution remains static
             randis = randi(N,[2, 1]);
             y_rand(randis(1)) = y_rand(randis(2));
             y_rand(randis(2)) = y_rand(randis(1));
-            
+
         otherwise
             error('Unknown randomization method ''%s''.',randomizeHow);
     end
-    
+
     if ismember(i,calc_pts)
         stats(calc_pts == i,:) = SUB_doyourcalcthing(y,y_rand);
         % disp([num2str(i) ' out of ' num2str(N*randp_max)])
     end
-    
+
 end
 
 if doPlot
@@ -296,28 +290,28 @@ out.swss5_1hp = SUB_gethp(stats(:,10));
         xc = xcorr(y,y_rand,1,'coeff');
         xcn1 = xc(1);
         xc1 = xc(3);
-        
+
         % Norm of differences between original and randomized signals
         d1 = norm(y-y_rand) / length(y);
-        
+
         % Autocorrelation
         autoCorrs = CO_AutoCorr(y_rand,1:4,'Fourier');
         ac1 = autoCorrs(1);
         ac2 = autoCorrs(2);
         ac3 = autoCorrs(3);
         ac4 = autoCorrs(4);
-        
+
         % Entropy
         sampen = PN_sampenc(y_rand,2,0.2,1);
-        
+
         % Stationarity
         statav5 = SY_StatAv(y_rand,'seg',5);
         swss5_1 = SY_SlidingWindow(y_rand,'std','std',5,1);
-        
+
         out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, sampen, statav5, swss5_1];
     end
 % ------------------------------------------------------------------------------
-    
+
 % ------------------------------------------------------------------------------
 	function thehp = SUB_gethp(v)
 		if v(end) > v(1)

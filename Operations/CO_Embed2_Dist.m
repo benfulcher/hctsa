@@ -1,19 +1,18 @@
-% ------------------------------------------------------------------------------
-% CO_Embed2_Dist
-% ------------------------------------------------------------------------------
-% 
+function out = CO_Embed2_Dist(y,tau)
+% CO_Embed2_Dist    Analyzes distances in a 2-d embedding space of a time series.
+%
 % Returns statistics on the sequence of successive Euclidean distances between
 % points in a two-dimensional time-delay embedding space with a given
 % time-delay, tau.
-% 
+%
 % Outputs include the autocorrelation of distances, the mean distance, the
 % spread of distances, and statistics from an exponential fit to the
 % distribution of distances.
-% 
+%
 %---INPUTS:
 % y, a z-scored column vector representing the input time series.
 % tau, the time delay.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -27,17 +26,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = CO_Embed2_Dist(y,tau)
 
 doPlot = 0; % whether to plot results
 
@@ -94,16 +91,16 @@ out.d_cv = mean(d)/std(d); % coefficient of variation of distances
 % ------------------------------------------------------------------------------
 % Empirical distance distribution often fits Exponential distribution quite well
 % Fit to all values (often some extreme outliers, but oh well)
-% Use a histogram with fixed bins
-[n, x] = hist(d,20);
-n = n/(sum(n)*(x(2)-x(1))); % normalize to proportional bin counts
 l = expfit(d);
 nlogL = explike(l,d);
-expf = exppdf(x,l);
 out.d_expfit_l = l;
 out.d_expfit_nlogL = nlogL;
-% Sum of abs differences between exp fit and observed:
-out.d_expfit_sumdiff = sum(abs(n - expf));
 
+% Sum of abs differences between exp fit and observed:
+% Use a histogram with automatic binning
+[N,binEdges] = histcounts(d,'BinMethod','auto','Normalization','probability');
+binCentres = mean([binEdges(1:end-1); binEdges(2:end)]);
+expf = exppdf(binCentres,l); % exponential fit in each bin
+out.d_expfit_meandiff = mean(abs(N - expf)); % mean absolute error of fit
 
 end

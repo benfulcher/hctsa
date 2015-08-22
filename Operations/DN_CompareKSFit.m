@@ -1,24 +1,23 @@
-% ------------------------------------------------------------------------------
-% DN_CompareKSFit
-% ------------------------------------------------------------------------------
-% 
+function out = DN_CompareKSFit(x,whatDistn)
+% DN_CompareKSFit       Fits a distribution to data.
+%
 % Returns simple statistics on the discrepancy between the
 % kernel-smoothed distribution of the time-series values, and the distribution
 % fitted to it by some model: Gaussian (using normfifit from Matlab's
 % Statistics Toolbox), Extreme Value (evfifit), Uniform (unififit), Beta
 % (betafifit), Rayleigh (raylfifit), Exponential (expfifit), Gamma (gamfit),
 % LogNormal (lognfifit), and Weibull (wblfifit).
-% 
+%
 %---INPUTS:
-% x, the input time series
+% x, the input data vector
 % whatDistn, the type of distribution to fit to the data:
 %           'norm' (normal), 'ev' (extreme value), 'uni' (uniform),
 %           'beta' (Beta), 'rayleigh' (Rayleigh), 'exp' (exponential),
 %           'gamma' (Gamma), 'logn' (Log-Normal), 'wbl' (Weibull).
-% 
+%
 %---OUTPUTS: include the absolute area between the two distributions, the peak
 % separation, overlap integral, and relative entropy.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,61 +31,58 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = DN_CompareKSFit(x,whatDistn)
-
 % ------------------------------------------------------------------------------
-%% PREPROCESSING
+%% Preprocessing
 % ------------------------------------------------------------------------------
 
 % Fit the distribution 'whatDistn' to the input data, x.
-% xtry=linspace(-40,40,400);
-xstep = std(x)/100; % set a step size
+xStep = std(x)/100; % set a step size
 
 switch whatDistn
     case 'norm'
         [a, b] = normfit(x);
 		peaky = normpdf(a,a,b); thresh = peaky/100; % stop when gets to 1/100 of peak value
 		xf(1) = mean(x); ange = 10;
-        while ange > thresh, xf(1) = xf(1)-xstep; ange = normpdf(xf(1),a,b); end
+        while ange > thresh, xf(1) = xf(1)-xStep; ange = normpdf(xf(1),a,b); end
 		xf(2) = mean(x); ange = 10;
-        while ange > thresh, xf(2) = xf(2)+xstep; ange = normpdf(xf(2),a,b); end
-            
+        while ange > thresh, xf(2) = xf(2)+xStep; ange = normpdf(xf(2),a,b); end
+
     case 'ev'
         a = evfit(x);
 		peaky = evpdf(a(1),a(1),a(2)); thresh = peaky/100;
 		xf(1) = 0; ange = 10;
-        while ange > thresh, xf(1) = xf(1)-xstep; ange = evpdf(xf(1),a(1),a(2)); end
+        while ange > thresh, xf(1) = xf(1)-xStep; ange = evpdf(xf(1),a(1),a(2)); end
 		xf(2) = 0; ange = 10;
-        while ange > thresh, xf(2) = xf(2)+xstep; ange = evpdf(xf(2),a(1),a(2)); end
-            
+        while ange > thresh, xf(2) = xf(2)+xStep; ange = evpdf(xf(2),a(1),a(2)); end
+
     case 'uni'
         [a, b] = unifit(x);
 		peaky = unifpdf(mean(x),a,b); thresh = peaky/100;
 		xf(1) = 0; ange = 10;
-        while ange > thresh, xf(1) = xf(1)-xstep; ange = unifpdf(xf(1),a,b); end
+        while ange > thresh, xf(1) = xf(1)-xStep; ange = unifpdf(xf(1),a,b); end
 		xf(2) = 0; ange = 10;
-        while ange > thresh, xf(2) = xf(2)+xstep; ange = unifpdf(xf(2),a,b); end
-            
+        while ange > thresh, xf(2) = xf(2)+xStep; ange = unifpdf(xf(2),a,b); end
+
     case 'beta'
         % clumsily scale to the range (0,1)
         x = (x-min(x)+0.01*std(x))/(max(x)-min(x)+0.02*std(x));
         a = betafit(x);
 		thresh = 1E-5; % ok -- consistent since all scaled to the same range
 		xf(1) = mean(x); ange = 10;
-        while ange > thresh, xf(1) = xf(1)-xstep; ange = betapdf(xf(1),a(1),a(2)); end
+        while ange > thresh, xf(1) = xf(1)-xStep; ange = betapdf(xf(1),a(1),a(2)); end
 		xf(2) = mean(x); ange = 10;
-        while ange > thresh, xf(2) = xf(2)+xstep; ange = betapdf(xf(2),a(1),a(2)); end
-            
+        while ange > thresh, xf(2) = xf(2)+xStep; ange = betapdf(xf(2),a(1),a(2)); end
+
     case 'rayleigh'
         if any(x < 0),
             fprintf(1,'The data is not positive, but Rayleigh is a positive-only distribution.\n')
@@ -97,9 +93,9 @@ switch whatDistn
 			peaky = raylpdf(a,a); thresh=peaky/100;
 			xf(1) = 0;
 			xf(2) = a; ange = 10;
-            while ange > thresh, xf(2) = xf(2)+xstep; ange = raylpdf(xf(2),a); end
+            while ange > thresh, xf(2) = xf(2)+xStep; ange = raylpdf(xf(2),a); end
         end
-        
+
     case 'exp'
         if any(x < 0)
             fprintf(1,'The data contains negative values, but Exponential is a positive-only distribution.\n')
@@ -108,9 +104,9 @@ switch whatDistn
 			peaky = exppdf(0,a); thresh = peaky/100;
 			xf(1) = 0;
 			xf(2) = 0; ange = 10;
-            while ange > thresh, xf(2) = xf(2)+xstep; ange = exppdf(xf(2),a); end
+            while ange > thresh, xf(2) = xf(2)+xStep; ange = exppdf(xf(2),a); end
         end
-        
+
     case 'gamma'
         if any(x < 0)
             fprintf(1,'The data contains negative values, but Gamma is a positive-only distribution.\n')
@@ -123,9 +119,9 @@ switch whatDistn
 			end
 			xf(1) = 0;
 			xf(2) = a(1)*a(2); ange = 10;
-            while ange > thresh, xf(2) = xf(2)+xstep; ange = gampdf(xf(2),a(1),a(2)); end
+            while ange > thresh, xf(2) = xf(2)+xStep; ange = gampdf(xf(2),a(1),a(2)); end
         end
-        
+
     case 'logn'
         if any(x <= 0)
             fprintf(1,'The data is not positive, but Log-Normal is a positive-only distribution.\n')
@@ -135,9 +131,9 @@ switch whatDistn
 			peaky = lognpdf(exp(a(1)-a(2)^2),a(1),a(2)); thresh = peaky/100;
 			xf(1) = 0;
 			xf(2) = exp(a(1)-a(2)^2); ange = 10;
-            while ange > thresh, xf(2) = xf(2)+xstep; ange = lognpdf(xf(2),a(1),a(2)); end
+            while ange > thresh, xf(2) = xf(2)+xStep; ange = lognpdf(xf(2),a(1),a(2)); end
         end
-        
+
     case 'wbl'
         if any(x <= 0)
             fprintf(1,'The data is not positive, but Weibull is a positive-only distribution.\n')
@@ -152,9 +148,9 @@ switch whatDistn
 			end
 			xf(1) = 0;
 			xf(2) = 0; ange = 10;
-            while ange > thresh, xf(2) = xf(2)+xstep; ange = wblpdf(xf(2),a(1),a(2)); end
+            while ange > thresh, xf(2) = xf(2)+xStep; ange = wblpdf(xf(2),a(1),a(2)); end
         end
-        
+
     otherwise
         error('Unknown distribution: %s.',whatDistn)
 end

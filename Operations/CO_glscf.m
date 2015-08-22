@@ -1,24 +1,22 @@
-% ------------------------------------------------------------------------------
-% CO_glscf
-% ------------------------------------------------------------------------------
-% 
-% Calculates the generalized linear self-correlation function of a time series.
+function glscf = CO_glscf(y,alpha,beta,tau)
+% CO_glscf      The generalized linear self-correlation function of a time series.
+%
 % This function was introduced in Queiros and Moyano in Physica A, Vol. 383, pp.
-% 10--15 (2007) in the paper "Yet on statistical properties of traded volume: 
+% 10--15 (2007) in the paper "Yet on statistical properties of traded volume:
 % Correlation and mutual information at different value magnitudes"
-% 
+%
 % The function considers magnitude correlations.
-% 
+%
 %---INPUTS:
 % y, the input time series
 % alpha and beta are real and nonzero parameters
 % tau is the time-delay (can also be 'tau' to set to first zero-crossing of the ACF)
-% 
+%
 % When alpha = beta estimates how values of the same order of magnitude are
 % related in time
 % When alpha ~= beta, estimates correlations between different magnitudes of the
 % time series.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -32,17 +30,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function glscf = CO_glscf(y,alpha,beta,tau)
 
 % ------------------------------------------------------------------------------
 %% Check inputs and set defaults

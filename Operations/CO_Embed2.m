@@ -1,20 +1,19 @@
-% ------------------------------------------------------------------------------
-% CO_Embed2
-% ------------------------------------------------------------------------------
-% 
+function out = CO_Embed2(y,tau)
+% CO_Embed2     2-dimensional embedding space
+%
 % Embeds the z-scored time series in a two-dimensional time-delay
 % embedding space with a given time-delay, tau, and outputs a set of
-% statistics about the structure in this space, including angular 
+% statistics about the structure in this space, including angular
 % distribution, etc.
-% 
+%
 %---INPUTS:
 % y, the column-vector time series
 % tau, the time-delay (can be 'tau' for first zero-crossing of ACF)
-% 
+%
 %---OUTPUTS: include the distribution of angles between successive points in the
 % space, stationarity of this angular distribution, euclidean distances from the
 % origin, and statistics on outliers.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -28,21 +27,22 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = CO_Embed2(y,tau)
 
 doPlot = 0; % can set to 1 to plot some outputs
 
-%% Set defaults
+%-------------------------------------------------------------------------------
+%% Check inputs and set defaults
+%-------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
     tau = 'tau';
 end
@@ -84,11 +84,11 @@ out.theta_ac3 = CO_AutoCorr(theta,3,'Fourier');
 out.theta_mean = mean(theta);
 out.theta_std = std(theta);
 
-x = linspace(-pi/2,pi/2,11); % 10 bins in the histogram
-n = histc(theta,x);
-n(end-1) = n(end-1)+n(end); n = n(1:end-1); n = n/sum(n);
-out.hist10std = std(n);
-out.histent = -sum(n(n>0).*log(n(n>0)));
+binEdges = linspace(-pi/2,pi/2,11); % 10 bins in the histogram
+[px,binEdges] = histcounts(theta,binEdges,'Normalization','probability');
+binWidths = diff(binEdges);
+out.hist10std = std(px);
+out.histent = -sum(px(px>0).*log(px(px>0)./binWidths(px>0)));
 
 % Stationarity in fifths of the time series
 % Use histograms with 4 bins

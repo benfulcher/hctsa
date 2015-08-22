@@ -1,44 +1,40 @@
-% ------------------------------------------------------------------------------
-% SP_Summaries
-% ------------------------------------------------------------------------------
-% 
-% Returns a set of measures summarizing an estimate of the Fourier transform of
-% the signal.
-% 
+function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs,doPower)
+% SP_Summaries  Statistics of the power spectrum of a time series
+%
 % The estimation can be done using a periodogram, using the periodogram code in
 % Matlab's Signal Processing Toolbox, or a fast fourier transform, implemented
 % using Matlab's fft code.
-% 
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % psdmeth, the method of obtaining the spectrum from the signal:
 %               (i) 'periodogram': periodogram
 %               (ii) 'fft': fast fourier transform
-% 
+%
 % wmeth, the window to use:
 %               (i) 'boxcar'
 %               (iii) 'bartlett'
 %               (iv) 'hann'
 %               (v) 'hamming'
 %               (vi) 'none'
-%               
+%
 % nf, the number of frequency components to include, if
 %           empty (default), it's approx length(y)
-%       
+%
 % dologabs, if 1, takes log amplitude of the signal before
 %           transforming to the frequency domain.
-% 
+%
 % doPower, analyzes the power spectrum rather than amplitudes of a Fourier
 %          transform
-% 
+%
 %---OUTPUTS:
 % Statistics summarizing various properties of the spectrum,
 % including its maximum, minimum, spread, correlation, centroid, area in certain
 % (normalized) frequency bands, moments of the spectrum, Shannon spectral
 % entropy, a spectral flatness measure, power-law fits, and the number of
 % crossings of the spectrum at various amplitude thresholds.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -52,17 +48,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs,doPower)
 
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
@@ -119,7 +113,7 @@ switch psdmeth
                 % There are other options, but these aren't implemented here
                 error('Unknown window ''%s''',wmeth);
         end
-        
+
         if isempty(nf)
             % (2) Estimate the spectrum
             [S, w] = periodogram(y,window);
@@ -127,7 +121,7 @@ switch psdmeth
             w = linspace(0,pi,nf);
             [S, w] = periodogram(y,window,w);
         end
-        
+
     case 'fft'
         % Fast Fourier Transform
         Fs = 1; % sampling frequency
@@ -285,19 +279,19 @@ out.fpolysat_rmse = gof.rmse;
 % KP on http://www.dsprelated.com/showmessage/108326/1.php
 % If zscored, power spectrum should already be normalized
 % sum(P(f))(dw)=1  (where P(f) is the power spectrum)
-% 
+%
 % 2) Transform with the Shannon function:
 % H(f)=Q(f)[log(1/Q(f))]
-% 
+%
 % 3) Spectral entropy:
 % E=sum(H(f))/log(Nf)  (where Nf is the number of frequency components.
-% 
-% For wavelet spectral entropy, your step (1) is appropriate.  You need to 
+%
+% For wavelet spectral entropy, your step (1) is appropriate.  You need to
 % replace you step (2) with:
-% 
-% 2) Transform with the Shannon function: 
+%
+% 2) Transform with the Shannon function:
 % Hi=Pi[log(1/Pi)]
-% 
+%
 % 3) Wavelet spectral entropy:
 % E=sum(Hi)/log(Ni) (where Ni is the number of subbands)
 
@@ -331,7 +325,7 @@ out.ylogareatopeak = sum(logS(1:i_maxS))*dw; % (semilogy)
 % ------------------------------------------------------------------------------
 
 % Suppress rank deficient warnings for this section:
-warning('off','stats:robustfit:RankDeficient') 
+warning('off','stats:robustfit:RankDeficient')
 
 % (1): Across full range
 [a, stats] = robustfit(log(w),log(S));

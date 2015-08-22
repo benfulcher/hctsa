@@ -1,32 +1,28 @@
-% ------------------------------------------------------------------------------
-% PP_PreProcess
-% ------------------------------------------------------------------------------
-% 
-% Returns a bunch of time series in the structure yp that have been
-% preprocessed in a number of different ways.
-% 
+function [yp, best] = PP_PreProcess(y,chooseBest,order,beatThis,doSpectral,randomSeed)
+% PP_PreProcess Returns a bunch of time series, preprocessed in different ways.
+%
 %---INPUTS:
 % y, the input time series
-% 
+%
 % chooseBest: (i) '' (empty): the function returns a structure, yp, of all
 %                   preprocessings [default]
 %             (ii) 'ar': returns the pre-processing with the worst fit to an AR
 %                        model of specified order
 %             (iii) 'ac': returns the least autocorrelated pre-processing
-%             
+%
 % order [opt], extra parameter for above
-% 
+%
 % beatThis, can specify the preprocessed version has to be some percentage
 %           better than the unprocessed input
-%           
+%
 % doSpectral, whether to include spectral processing
-% 
+%
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-% 
+%
 % If second argument is specified, will choose amongst the preprocessings
 % for the 'best' one according to the given criterion.
 % Based on (really improvement/development of) PP_ModelFit.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -40,17 +36,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function [yp, best] = PP_PreProcess(y,chooseBest,order,beatThis,doSpectral,randomSeed)
 
 % I think a good way of 'normalizing' over autocorrelation should also be
 % incorporated, but it's not obvious how, other than some downsampling...
@@ -71,7 +65,7 @@ if nargin < 3 || isempty(order);
 end
 
 if nargin < 4 || isempty(beatThis)
-    beatThis = 0; % it has to beat doing nothing by this percentage. i.e., here it 
+    beatThis = 0; % it has to beat doing nothing by this percentage. i.e., here it
                 % just has to beat doing nothing. Increasing will increase the
                 % probablility of doing nothing.
 end
@@ -197,18 +191,18 @@ switch chooseBest
     case 'ar' % picks the *worst* fit to an AR(p) model
         %% Check that a System Identification Toolbox license is available:
         BF_CheckToolbox('identification_toolbox')
-        
+
         % order = 2; % should be set from inputs/defaults
         rmserrs = zeros(nfields,1);
-        
+
         for i = 1:nfields; % each preprocessing performed
             data = [];
             data = yp.(fields{i});
             data = BF_zscore(data);
-            
+
             % (i) fit the model
             m = ar(data,order);
-            
+
             % (ii) in-sample prediction error
             e = pe(m,data);
             rmserrs(i) = sqrt(mean(e.^2));
@@ -233,14 +227,14 @@ switch chooseBest
             data = BF_zscore(data); % unnecessary for AC
             acs(i) = CO_AutoCorr(data,order,'Fourier');
         end
-        
+
         % Now choose time series with lowest ac1
         if any(acs < acs(1)*(1-beatThis))
             best = fields{acs == min(acs)};
         else
             best = 'nothing';
         end
-        
+
     otherwise
         error('Unknown method ''%s''',chooseBest);
 end
@@ -258,7 +252,7 @@ end
     function ydt =  SUB_remps(y,n,method)
         % Removes the first n (proportion) of power spectrum
         % Based on my deseasonalize1.m code
-        
+
 
         %% Take the Fourier Transform
 
@@ -274,21 +268,21 @@ end
         switch method
             case 'lf'
                 cullr = 1:floor(length(Fy1)*n);
-                
+
             case 'biggest'
                 cullr = find(abs(Fy1) > quantile(abs(Fy1),n));
-                
+
             otherwise
                 error('Unknown method ''%s''', method);
         end
-            
+
         meanrest = mean(abs(Fy1(setxor(1:end,cullr))));
 %         meanrest = 0;
         FyF = Fy;
         FyF(cullr) = meanrest;
         FyF(end-cullr+2) = meanrest;
 
-        
+
         % PLOT
         if doPlot
             figure('color','w'); box('on');
@@ -297,7 +291,7 @@ end
             plot(abs(FyF),'k');
             % input('Again on it''s own...')
         end
-            
+
         %% Inverse Fourier Transform
         ydt = ifft(FyF,NFFT);
         ydt = BF_zscore(ydt(1:Ny)); % crop to desired length
@@ -305,7 +299,7 @@ end
         % CRUDE REMOVAL OF EDGE EFFECTS
         lose = min(5,floor(0.01*length(ydt))); % don't want to lose more than 1% of time series
         ydt = ydt(1+lose:end-lose);
-        
+
         % PLOT
         if doPlot
             figure('color','w'); box('on');
@@ -313,7 +307,7 @@ end
             % input(['Mean difference is ' num2str(mean(y-ydt))])
         end
     end
-    
+
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
     function ydt = SUB_rempt(y,order,nbits)

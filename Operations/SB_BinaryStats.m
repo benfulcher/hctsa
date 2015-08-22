@@ -1,29 +1,25 @@
-% ------------------------------------------------------------------------------
-% SB_BinaryStats
-% ------------------------------------------------------------------------------
-% 
-% Returns statistics on a binary symbolization of the time series (to a symbolic
-% string of 0s and 1s).
-% 
-% Provides information about the coarse-grained behavior of the time series
-% 
-%---INPUTS:
+function out = SB_BinaryStats(y,binaryMethod)
+% SB_BinaryStats    Statistics on a binary symbolization of the time series
 %
+% Binary symbolization of the time series is a symbolic string of 0s and 1s.
+%
+% Provides information about the coarse-grained behavior of the time series
+%
+%---INPUTS:
 % y, the input time series
-% 
+%
 % binaryMethod, the symbolization rule:
 %         (i) 'diff': by whether incremental differences of the time series are
 %                      positive (1), or negative (0),
 %          (ii) 'mean': by whether each point is above (1) or below the mean (0)
 %          (iii) 'iqr': by whether the time series is within the interquartile range
 %                      (1), or not (0).
-% 
-%---OUTPUTS:
 %
+%---OUTPUTS:
 % Include the Shannon entropy of the string, the longest stretches of 0s
 % or 1s, the mean length of consecutive 0s or 1s, and the spread of consecutive
 % strings of 0s or 1s.
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -37,31 +33,29 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-function out = SB_BinaryStats(y,binaryMethod)
-
 switch binaryMethod
-    case 'diff' % 1 if 
+    case 'diff' % 1 if
         y = ((sign(diff(y)))+1)/2; % binary signal, equal to one for stepwise increases
-        
+
     case 'mean' % 1 if above mean, zero otherwise
         y = (sign(y)+1)/2;
-        
+
     case 'iqr' % 1 if inside interquartile range, 0 otherwise
         iqr = quantile(y,[0.25, 0.75]);
         iniqr = find(y > iqr(1) & y <= iqr(2));
         y = zeros(length(y),1);
         y(iniqr) = 1;
-        
+
     otherwise
         error('Unknown method ''%s''', binaryMethod);
 end
@@ -116,12 +110,12 @@ out.stdstretchrat = out.stdstretch1/out.stdstretch0;
 
 a = sum(stretch1 == 1); b = sum(stretch1 == 2);
 if b > 0, out.rat21stretch1 = a/b;
-else out.rat21stretch1 = NaN; 
+else out.rat21stretch1 = NaN;
 end
 
 a = sum(stretch0 == 1); b = sum(stretch0 == 2);
 if b > 0, out.rat21stretch0 = a/b;
-else out.rat21stretch0 = NaN; 
+else out.rat21stretch0 = NaN;
 end
 
 end

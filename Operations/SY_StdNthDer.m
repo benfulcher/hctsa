@@ -1,25 +1,22 @@
-% ------------------------------------------------------------------------------
-% SY_StdNthDer
-% ------------------------------------------------------------------------------
-% 
-% Estimates the standard deviation of the nth derivative of the time series.
-% 
+function out = SY_StdNthDer(y,n)
+% SY_StdNthDer  Standard deviation of the nth derivative of the time series.
+%
 % Based on an idea by Vladimir Vassilevsky, a DSP and Mixed Signal Design
 % Consultant in a Matlab forum, who stated that You can measure the standard
 % deviation of the nth derivative, if you like".
-% 
+%
 % cf. http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
-% 
+%
 % The derivative is estimated very simply by simply taking successive increments
 % of the time series; the process is repeated to obtain higher order
 % derivatives.
-% 
+%
 %---INPUTS:
-% 
+%
 % y, time series to analyze
-% 
+%
 % n, the order of derivative to analyze
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -33,17 +30,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function out = SY_StdNthDer(y,n)
 
 if nargin < 2 || isempty(n)
     n = 2;

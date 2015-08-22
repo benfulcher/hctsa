@@ -1,11 +1,10 @@
-% ------------------------------------------------------------------------------
+function ids = SQL_getids(tsOrOps,lengthRange,keywordInclude,keywordRemove,idr)
 % SQL_getids
-% ------------------------------------------------------------------------------
-% 
+%
 % Takes as input a set of constraints on the time series and operations to
 % include then runs the appropriate mySQL commands and outputs the relevant
 % ts_ids / op_ids
-% 
+%
 %---INPUTS:
 %--tsOrOps: specifies 'ops' for metrics or 'ts' for time series
 %--lengthRange (ts): contrain included time series by length [minimum_length maximum_length] (1x2 vector)
@@ -17,27 +16,25 @@
 %--keywordRemove: keywords NOT to include (cell of strings)
 %--idr: range of possible ids to restrict the search to (empty = don't
 %                    restrict -- default)
-% 
+%
 %---OUTPUTS:
 % ids: a vector or either ts_ids or op_ids that match the input constraints
-% 
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-% 
+%
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
 % J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
-% 
+%
 % This work is licensed under the Creative Commons
 % Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-function ids = SQL_getids(tsOrOps,lengthRange,keywordInclude,keywordRemove,idr)
 
 % ------------------------------------------------------------------------------
 %% Check inputs -- set defaults
@@ -101,7 +98,7 @@ if strcmp(tsOrOps,'ts')
 	%% Filter time series by keyword
 	% keywords as a cell: kyes; and how many of each to include: kyesn
 	s = {'','','',''};
-	
+
 	% Extra qualifier to only look in a certain range
 	% s{1} -- IDR
 	if ~isempty(idr)
@@ -114,14 +111,14 @@ if strcmp(tsOrOps,'ts')
 		s{2} = ['ts_id NOT IN (SELECT ts_id FROM TsKeywordsRelate WHERE tskw_id IN ' ...
 							'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword IN (' BF_cat(keywordRemove,',','''') '))) '];
 	end
-	
+
 	% Length constraint in words
     if isempty(lengthRange)
         s{3} = '';
     else
     	s{3} = sprintf('TimeSeries.Length BETWEEN %u AND %u',lengthRange(1),lengthRange(2));
     end
-	
+
 	% Combine these results into part of a mySQL query string
 	conditions = '';
 	for j = 1:length(s)
@@ -136,9 +133,9 @@ if strcmp(tsOrOps,'ts')
 		for i = 1:length(kyes)
 			ncut = kyesn(i);
 
-			% Now do the rest of the query at once: do the keyword matches and length constraints		
+			% Now do the rest of the query at once: do the keyword matches and length constraints
 			if ncut == 0 % Get all keyword matches
-				SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
+				selectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
 								'ts_id IN (SELECT ts_id FROM TsKeywordsRelate WHERE tskw_id = '  ...
 								'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
@@ -147,14 +144,14 @@ if strcmp(tsOrOps,'ts')
                         % I know this is a slow implementation -- probably better
                         % to create the random numbers here to constrain
                 % end
-                
+
 				if isempty(kyes{i})
-					SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
+					selectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
 									conditions(6:end) limitme];
 
-                else		
+                else
 					% constrain by PercentageCalculated
-					SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
+					selectString = ['SELECT ts_id FROM TimeSeries WHERE ' ...
 									'ts_id IN (SELECT ts_id FROM TsKeywordsRelate WHERE tskw_id = '  ...
 									'(SELECT tskw_id FROM TimeSeriesKeywords WHERE Keyword = ''' kyes{i} ''')) ' ...
 									conditions limitme];
@@ -162,15 +159,15 @@ if strcmp(tsOrOps,'ts')
 			end
 
 			% Execute the select statement
-			[ts_ids,emsg] = mysql_dbquery(dbc,SelectString);
+			[ts_ids,emsg] = mysql_dbquery(dbc,selectString);
 			if (isempty(ts_ids) && isempty(emsg))
 				fprintf(1,'No time series matched the given constraints for the keyword ''%s''\n',kyes{i});
 			elseif ~isempty(emsg)
-				error('Error retrieving time series for %s\n%s',kyes{i},SelectString);
+				error('Error retrieving time series for %s\n%s',kyes{i},selectString);
 			else
 				C_tskwyes{i} = vertcat(ts_ids{:});
 				ngot = length(C_tskwyes{i});
-			
+
 				if isempty(kyes{i})
 					fprintf(1,'Found %u time series selected at random\n',ngot);
 				else
@@ -178,7 +175,7 @@ if strcmp(tsOrOps,'ts')
 				end
 			end
 		end
-	
+
 		% Finally, now keep all that are left
 		ts_ids_keep = vertcat(C_tskwyes{:});
 		lbefore = length(ts_ids_keep);
@@ -187,12 +184,12 @@ if strcmp(tsOrOps,'ts')
 		if lafter<lbefore
 			fprintf(1,'We''ve lost %u time series to keyword overlap...\n',lbefore-lafter);
 		end
-	
+
 	else % just use the other constraints
-		SelectString = ['SELECT ts_id FROM TimeSeries WHERE ' conditions(6:end)];
-		[ts_ids,emsg] = mysql_dbquery(dbc,SelectString);
+		selectString = ['SELECT ts_id FROM TimeSeries WHERE ' conditions(6:end)];
+		[ts_ids,emsg] = mysql_dbquery(dbc,selectString);
 		if ~isempty(emsg)
-			fprintf(1,'Database call failed\n%s\n%s',SelectString,emsg);
+			fprintf(1,'Database call failed\n%s\n%s',selectString,emsg);
 		else
 			ts_ids_keep = unique(vertcat(ts_ids{:}));
 		end
@@ -207,14 +204,14 @@ if strcmp(tsOrOps,'ts')
 		fprintf(1,'Time Series Filtered: %u\n',nts);
 		ids = ts_ids_keep;
 	end
-	
+
 else
     % ------------------------------------------------------------------------------
 	%% Retrieve operation ids
     % ------------------------------------------------------------------------------
 
 	s = {'','',''};
-	
+
 	% Extra qualifier to only look in a certain range
 	% s{1} -- IDR
 	if ~isempty(idr)
@@ -227,13 +224,13 @@ else
 		s{2} = ['op_id NOT IN (SELECT op_id FROM OpKeywordsRelate WHERE opkw_id IN ' ...
 							'(SELECT opkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(keywordRemove,',','''') '))) '];
 	end
-	
+
     % % Extra qualifier pcalcr to have PercentageCalculated only in a certain range
     % % s{3} -- pcalcr
     % if ~isempty(pcalcr)
     %     s{3} = ['PercentageCalculated BETWEEN ' num2str(pcalcr(1)) ' AND ' num2str(pcalcr(2))];
     % end
-	
+
 	% Combine these results into part of a mySQL query string
 	conditions='';
 	for j = 1:length(s)
@@ -241,7 +238,7 @@ else
 			conditions = [conditions ' AND ' s{j}];
 		end
 	end
-	
+
 	% if ~isempty(keywordRemove)
 	% 	mnoextrastring = ['AND op_id NOT IN (SELECT op_id FROM OpKeywordsRelate WHERE opkw_id IN ' ...
 	% 						'(SELECT opkw_id FROM OperationKeywords WHERE Keyword IN (' BF_cat(mno,',','''') '))) '];
@@ -255,38 +252,38 @@ else
 			ncut = kyesn(i);
 
 			% Now do the rest of the query at once: do the keyword matches and length constraints
-		
-			if ncut==0 % Get all matches			
-				SelectString = ['SELECT op_id FROM Operations WHERE ' ...
+
+			if ncut==0 % Get all matches
+				selectString = ['SELECT op_id FROM Operations WHERE ' ...
 								'op_id IN (SELECT op_id FROM OpKeywordsRelate WHERE opkw_id = '  ...
 								'(SELECT opkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 								conditions];
 			else % constrain to some number (using the LIMIT command in mySQL)
-                limitme = [' ORDER BY RAND() LIMIT ' num2str(ncut)];                
-                
+                limitme = [' ORDER BY RAND() LIMIT ' num2str(ncut)];
+
 				if isempty(kyes{i}) % empty keyword -- just constrain by number
 					if isempty(conditions)
-						SelectString = ['SELECT op_id FROM Operations' limitme];
+						selectString = ['SELECT op_id FROM Operations' limitme];
 					else
-						SelectString = ['SELECT op_id FROM Operations WHERE ' conditions(6:end) ...
+						selectString = ['SELECT op_id FROM Operations WHERE ' conditions(6:end) ...
 											limitme];
 					end
 				else
-					SelectString = ['SELECT op_id FROM Operations WHERE ' ...
+					selectString = ['SELECT op_id FROM Operations WHERE ' ...
 									'op_id IN (SELECT op_id FROM OpKeywordsRelate WHERE opkw_id = '  ...
 									 '(SELECT opkw_id FROM OperationKeywords WHERE Keyword = ''' kyes{i} '''))' ...
 									   conditions limitme];
 				end
 			end
-		
+
 			% Execute the query
-			[op_ids,emsg] = mysql_dbquery(dbc,SelectString);
-		
+			[op_ids,emsg] = mysql_dbquery(dbc,selectString);
+
 			if ~isempty(emsg)
-				error('Error finding %s\n%s\n%s',kyes{i},emsg,SelectString);
+				error('Error finding %s\n%s\n%s',kyes{i},emsg,selectString);
 			end
 			C_kyes{i} = vertcat(op_ids{:});
-		
+
 			ngot = length(C_kyes{i});
 			if isempty(kyes{i})
 				fprintf(1,'Found %u operations chosen at random\n',ngot);
@@ -294,7 +291,7 @@ else
 				fprintf(1,'Found %u operations with keyword ''%s''\n',ngot,kyes{i});
 			end
 		end
-	
+
 		% Agglomerate all the bits
 		op_ids_keep = vertcat(C_kyes{:});
 		lbefore = length(op_ids_keep);
@@ -303,16 +300,16 @@ else
 		if lafter < lbefore
 			fprintf(1,'We lost %u  to overlapping keywords!\n',lbefore-lafter);
 		end
-	
+
 	else % just use the length/keywordRemove constraint
 		if isempty(conditions)
-			SelectString = 'SELECT op_id FROM Operations'; % include all operations -- exclude nothing
+			selectString = 'SELECT op_id FROM Operations'; % include all operations -- exclude nothing
 		else
-			SelectString = ['SELECT op_id FROM Operations WHERE ' conditions(6:end)]; % (remove "AND ")
+			selectString = ['SELECT op_id FROM Operations WHERE ' conditions(6:end)]; % (remove "AND ")
 		end
-		[op_ids,emsg] = mysql_dbquery(dbc,SelectString);
+		[op_ids,emsg] = mysql_dbquery(dbc,selectString);
 		if ~isempty(emsg)
-			fprintf(1,'Database call failed\n%s\n',SelectString); disp(emsg); keyboard
+			fprintf(1,'Database call failed\n%s\n',selectString); disp(emsg); keyboard
 		else
 			op_ids_keep = unique(vertcat(op_ids{:}));
 		end
@@ -321,8 +318,8 @@ else
 	%% Get other metrics which point to master functions which will be called anyway
 	if masterPull && ~isempty(op_ids_keep)
 		% Find implicated Master functions (a super inefficient way of doing it:)
-		SelectString = ['SELECT op_id FROM Operations WHERE mop_id IN (SELECT DISTINCT mop_id FROM Operations WHERE op_id IN (' BF_cat(op_ids_keep,',') '))'];
-		[newmids,emsg] = mysql_dbquery(dbc,SelectString);
+		selectString = ['SELECT op_id FROM Operations WHERE mop_id IN (SELECT DISTINCT mop_id FROM Operations WHERE op_id IN (' BF_cat(op_ids_keep,',') '))'];
+		[newmids,emsg] = mysql_dbquery(dbc,selectString);
 		if isempty(emsg)
 			if ~isempty(newmids) % there are some master functions implicated
 				newmids = vertcat(newmids{:});
