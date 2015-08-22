@@ -1,37 +1,36 @@
-% PN_sampenc
-% 
+function [e, p, A, B] = PN_sampenc(y,M,r,justM)
+% PN_sampenc    Sample Entropy (physionet implementation)
+%
 % function [e,A,B]=sampenc(y,M,r);
 %
 % INPUTS:
-% 
+%
 % y input data
 % M maximum template length
 % r matching tolerance
-% 
+%
 % Output
-% 
+%
 % e sample entropy estimates for m=0,1,...,M-1
 % A number of matches for m=1,...,M
 % B number of matches for m=1,...,M excluding last point
-% 
+%
 % --------------------------------------------------------------------
-% Modified very slightly by Ben Fulcher, from original code sampenc.m from 
+% Modified very slightly by Ben Fulcher, from original code sampenc.m from
 % http://physionet.org/physiotools/sampen/
 % http://www.physionet.org/physiotools/sampen/matlab/1.1/sampenc.m
 % Code by DK Lake (dlake@virginia.edu), JR Moorman and Cao Hanqing.
-% 
+%
 % BF added input checking, and altered a few minor things, including
 % how the outputs are presented.
 % BF also added input 'justM', to give e just for the given M, and not for
 % all other m up to it
-% 
+%
 % This PhysioNet code, and the minor modifications to it, is shared under the
 % GNU General Public License, cf.
 % http://www.physionet.org/faq.shtml#license
-% 
+%-------------------------------------------------------------------------------
 
-function [e, p, A, B] = PN_sampenc(y,M,r,justM)
-% Ben Fulcher, 2010
 
 % Check inputs
 if nargin < 2 || isempty(M)
@@ -55,11 +54,11 @@ for i = 1:(N-1)
    nj = N-i;
    y1 = y(i);
    for jj = 1:nj
-      j = jj + i;      
+      j = jj + i;
       if abs(y(j)-y1)<r
          run(jj) = lastrun(jj)+1;
          M1 = min(M,run(jj));
-         for m = 1:M1           
+         for m = 1:M1
             A(m) = A(m)+1;
             if j < N
                B(m) = B(m)+1;
