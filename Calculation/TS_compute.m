@@ -1,4 +1,4 @@
-function TS_compute(doParallel,ts_id_range,op_id_range,doLog,beVocal)
+function TS_compute(doParallel,ts_id_range,op_id_range,customFile,doLog,beVocal)
 % TS_compute    Computes missing elements of TS_DataMat (in HCTSA_loc.mat)
 %
 %---EXAMPLE USAGE:
@@ -51,8 +51,13 @@ if nargin < 3
     op_id_range = []; % compute all op_ids in the file by default
 end
 
-% Log to file
+% Custom HCTSA_loc.mat file:
 if nargin < 4
+    customFile = ''; % compute all op_ids in the file by default
+end
+
+% Log to file
+if nargin < 5
     % By default, do not log to file, write to screen (if beVocal)
 	doLog = 0;
 end
@@ -66,7 +71,7 @@ else
 end
 
 % Be vocal?
-if nargin < 5
+if nargin < 6
     beVocal = 1; % Write back lots of information to screen
     % prints every piece of code evaluated (nice for error checking)
 end
@@ -81,12 +86,13 @@ else % use single-threaded for loops
 	fprintf(fid,'Computations will be performed serially without parallelization.\n')
 end
 
-
 % --------------------------------------------------------------------------
 %% Load information from local files
 % --------------------------------------------------------------------------
 fprintf(fid,'Loading data from HCTSA_loc.mat...');
-fileName = 'HCTSA_loc.mat';
+if isempty(fileName)
+	fileName = 'HCTSA_loc.mat';
+end
 fileVarsStruct = whos('-file',fileName);
 fileVars = {fileVarsStruct.name};
 if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat'},fileVars))
