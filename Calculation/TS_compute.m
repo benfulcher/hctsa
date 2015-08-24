@@ -62,9 +62,9 @@ if nargin < 5
 	doLog = 0;
 end
 if doLog
-	fileName = sprintf('TS_compute_%s.log',datestr(now,30));
-	fid = fopen(fileName,'w','n');
-	fprintf(1,'Calculation details will be logged to %s\n',fileName);
+	logFileName = sprintf('TS_compute_%s.log',datestr(now,30));
+	fid = fopen(logFileName,'w','n');
+	fprintf(1,'Calculation details will be logged to %s\n',logFileName);
 else
     % Write output to screen rather than .log file
     fid = 1;
@@ -90,20 +90,20 @@ end
 %% Load information from local files
 % --------------------------------------------------------------------------
 fprintf(fid,'Loading data from HCTSA_loc.mat...');
-if isempty(fileName)
-	fileName = 'HCTSA_loc.mat';
+if isempty(customFile)
+	customFile = 'HCTSA_loc.mat';
 end
-fileVarsStruct = whos('-file',fileName);
+fileVarsStruct = whos('-file',customFile);
 fileVars = {fileVarsStruct.name};
 if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat'},fileVars))
-	error('\nCannot compute on %s: missing variables.',fileName);
+	error('\nCannot compute on %s: missing variables.',customFile);
 end
-load(fileName,'TimeSeries','Operations','MasterOperations','TS_DataMat');
+load(customFile,'TimeSeries','Operations','MasterOperations','TS_DataMat');
 if ismember('TS_CalcTime',fileVars)
-	load(fileName,'TS_CalcTime');
+	load(customFile,'TS_CalcTime');
 end
 if ismember('TS_Quality',fileVars)
-	load(fileName,'TS_Quality');
+	load(customFile,'TS_Quality');
 end
 fprintf(fid,' Loaded.\n');
 
