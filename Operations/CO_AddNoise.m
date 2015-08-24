@@ -155,7 +155,7 @@ p = polyfit(noiseRange',amis,1);
 out.fitlina = p(1);
 out.fitlinb = p(2);
 linfit = polyval(p,noiseRange);
-out.mse = mean((linfit' - amis).^2);
+out.linfit_mse = mean((linfit' - amis).^2);
 
 % ------------------------------------------------------------------------------
 % Number of times the AMI function crosses its mean

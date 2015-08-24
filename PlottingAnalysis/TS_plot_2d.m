@@ -400,7 +400,7 @@ fprintf(1,['Annotating time series segments to %u points in the plot, ' ...
 for j = 1:numAnnotations
     if userInput
         point = ginput(1);
-        iplot = ClosestPoint_ginput(xy,point); % find closest actual point to input point
+        iplot = BF_ClosestPoint_ginput(xy,point); % find closest actual point to input point
         theGroup = iplot(1); % want this group
         itsme = iplot(2); % and this index
         alreadyPicked(j,:) = [theGroup,itsme];

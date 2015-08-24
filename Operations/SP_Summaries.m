@@ -275,30 +275,10 @@ out.fpolysat_r2 = gof.rsquare; % this is more important!
 out.fpolysat_adjr2 = gof.adjrsquare;
 out.fpolysat_rmse = gof.rmse;
 
-
-% KP on http://www.dsprelated.com/showmessage/108326/1.php
-% If zscored, power spectrum should already be normalized
-% sum(P(f))(dw)=1  (where P(f) is the power spectrum)
-%
-% 2) Transform with the Shannon function:
-% H(f)=Q(f)[log(1/Q(f))]
-%
-% 3) Spectral entropy:
-% E=sum(H(f))/log(Nf)  (where Nf is the number of frequency components.
-%
-% For wavelet spectral entropy, your step (1) is appropriate.  You need to
-% replace you step (2) with:
-%
-% 2) Transform with the Shannon function:
-% Hi=Pi[log(1/Pi)]
-%
-% 3) Wavelet spectral entropy:
-% E=sum(Hi)/log(Ni) (where Ni is the number of subbands)
-
 % ------------------------------------------------------------------------------
 % Shannon spectral entropy
 % ------------------------------------------------------------------------------
-Hshann = S.*log(1./S); % Shannon function
+Hshann = -S.*log(S); % Shannon function
 out.spect_shann_ent = sum(Hshann);
 out.spect_shann_ent_norm = sum(Hshann)/length(S);
 
@@ -308,7 +288,6 @@ out.spect_shann_ent_norm = sum(Hshann)/length(S);
 % which is given in dB as 10 log_10(gm/am) where gm is the geometric mean and am
 % is the arithmetic mean of the power spectrum.
 out.sfm = 10*log10(geomean(S)/mean(S));
-
 
 % ------------------------------------------------------------------------------
 % Areas under power spectrum
