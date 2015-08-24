@@ -1,4 +1,4 @@
-function plotMe = ClosestPoint_ginput(xy,inputPoint)
+function plotMe = BF_ClosestPoint_ginput(xy,inputPoint)
 % ClosestPoint_ginput   The closest point in a dataset to the input co-ordinates given.
 %
 %---INPUTS:
@@ -25,6 +25,10 @@ function plotMe = ClosestPoint_ginput(xy,inputPoint)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+
+%-------------------------------------------------------------------------------
+% Check inputs:
+%-------------------------------------------------------------------------------
 if nargin < 2 || isempty(inputPoint)
     inputPoint = ginput(1);
 end
@@ -32,10 +36,13 @@ end
 if iscell(xy)
     numGroups = length(xy);
 else
+    xy = {xy};
     numGroups = 1;
 end
 
+%-------------------------------------------------------------------------------
 % Calculate distances from each point to input inputPoint
+%-------------------------------------------------------------------------------
 dpxy = cell(numGroups,1);
 for i = 1:numGroups
     dpxy{i} = sum((xy{i} - repmat(inputPoint,size(xy{i},1),1)).^2,2); % Euclidean distances to the input point
