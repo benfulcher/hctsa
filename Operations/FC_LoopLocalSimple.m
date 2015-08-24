@@ -12,9 +12,10 @@ function out = FC_LoopLocalSimple(y,forecastMeth)
 %            (i) 'mean', local mean prediction
 %            (ii) 'median', local median prediction
 %
-%---OUTPUTS: Statistics including whether the mean square error increases or
-% decreases, testing for peaks, variability, autocorrelation, stationarity, and
-% a fit of exponential decay, f(x) = A*exp(Bx) + C, to the variation.
+%---OUTPUTS:
+% Statistics including whether the mean square error increases or decreases,
+% testing for peaks, variability, autocorrelation, stationarity, and a fit of
+% exponential decay, f(x) = A*exp(Bx) + C, to the variation.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -49,7 +50,7 @@ BF_CheckToolbox('curve_fitting_toolbox');
 % ------------------------------------------------------------------------------
 BF_CheckToolbox('signal_toolbox');
 
-doplot = 0; % plot outputs to a figure
+doPlot = 0; % plot outputs to a figure
 
 if nargin < 2 || isempty(forecastMeth)
     forecastMeth = 'mean'; % do mean prediction by default
@@ -57,23 +58,23 @@ end
 
 switch forecastMeth
     case 'mean'
-        ngr = (1:10)';
+        trainLengthRange = (1:10)';
 
     case 'median'
-        ngr = (1:2:19)';
+        trainLengthRange = (1:2:19)';
 
     otherwise
         error('Unknown prediction method ''%s''',forecastMeth);
 end
 
-stats_st = zeros(length(ngr),6);
+stats_st = zeros(length(trainLengthRange),6);
 
-for i = 1:length(ngr)
+for i = 1:length(trainLengthRange)
     switch forecastMeth
         case 'mean'
-            outtmp = FC_LocalSimple(y,'mean',ngr(i));
+            outtmp = FC_LocalSimple(y,'mean',trainLengthRange(i));
         case 'median'
-            outtmp = FC_LocalSimple(y,'median',ngr(i));
+            outtmp = FC_LocalSimple(y,'median',trainLengthRange(i));
             % median needs more tweaking
     end
     stats_st(i,1) = outtmp.rmserr;
@@ -84,12 +85,14 @@ for i = 1:length(ngr)
     stats_st(i,6) = outtmp.ac2;
 end
 
-if doplot
+if doPlot
     figure('color','w')
     plot(stats_st,'k')
 end
 
-% Get statistics from the shapes of the curves
+%-------------------------------------------------------------------------------
+% Compute statistics from the shapes of the curves
+%-------------------------------------------------------------------------------
 
 % (1) root mean square error
 % (i) (expect error to decrease with increasing forecast window?:)
@@ -102,7 +105,7 @@ if out.rmserr_chn < 1; % on the whole decreasing, as expected
     wig = find(stats_st(:,1) == wigv,1,'first');
     if wig ~= 1 && stats_st(wig-1,1) > wigv
         wig = NaN; % maximum is not a local maximum; previous value exceeds it
-    elseif wig ~= length(ngr) && stats_st(wig+1,1) > wigv
+    elseif wig ~= length(trainLengthRange) && stats_st(wig+1,1) > wigv
         wig = NaN; % maximum is not a local maximum; the next value exceeds it
     end
 else
@@ -111,7 +114,7 @@ else
 
     if wig ~= 1 && stats_st(wig-1,1) < wigv
         wig = NaN; % maximum is not a local maximum; previous value exceeds it
-    elseif wig ~= length(ngr) && stats_st(wig+1,1) < wigv
+    elseif wig ~= length(trainLengthRange) && stats_st(wig+1,1) < wigv
         wig = NaN; % maximum is not a local maximum; the next value exceeds it
     end
 end
@@ -133,10 +136,10 @@ out.sws_chn = mean(diff(stats_st(:,3)))/(range(stats_st(:,3)));
 out.sws_meansgndiff = mean(sign(diff(stats_st(:,3))));
 out.sws_stdn = std(stats_st(:,3))/range(stats_st(:,3));
 
-% fit exponential decay
+% Fit exponential decay:
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[range(stats_st(:,3)), -0.5 min(stats_st(:,3))]);
 f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(ngr,stats_st(:,3),f);
+[c, gof] = fit(trainLengthRange,stats_st(:,3),f);
 out.sws_fexp_a = c.a;
 out.sws_fexp_b = c.b; % this is important
 out.sws_fexp_c = c.c;
