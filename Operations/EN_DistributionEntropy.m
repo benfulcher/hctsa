@@ -105,7 +105,7 @@ case 'ks' % Use ksdensity to calculate pdf
     else
         [px, xr] = ksdensity(y,'width',numBins,'function','pdf'); % uses specified width
     end
-    binWidths = ones(length(px),1)*(xr(2)-xr(1));
+    binWidths = ones(1,length(px))*(xr(2)-xr(1));
 
 otherwise
     error('Unknown distribution method -- specify ''ks'' or ''hist''') % error; must specify 'ks' or 'hist'
