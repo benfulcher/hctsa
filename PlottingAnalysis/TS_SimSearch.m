@@ -114,7 +114,7 @@ end
 % file for retrieval later). I guess use this if it exists, otherwise just
 % calculate for this one.
 
-if isfield(clustStruct,'Dij')
+if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
     % pairwise distances already computed, stored in the HCTSA .mat file
     fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile)
     Dij = squareform(clustStruct.Dij);
@@ -162,7 +162,7 @@ fprintf(1,'\n');
 % ------------------------------------------------------------------------------
 % Compute/retrieve pairwise distances between all neighbors
 % ------------------------------------------------------------------------------
-if isfield(clustStruct,'Dij')
+if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
     % Use pre-computed distances:
     Dij = Dij(neighborInd,neighborInd)/sqrt(size(TS_DataMat,2)+1);
 else
@@ -232,12 +232,12 @@ if any(ismember('matrix',whatPlots))
     dLims = [min(Dij_clust(~isnan(Dij_clust))),max(Dij_clust(~isnan(Dij_clust)))];
     imagesc(Dij_clust)
     if isfield(dataStruct,'Group')
-        dRescale = @(x) dLims(1)-diff(dLims) + diff(dLims)*(x - min(x)/(max(x)-min(x)))*0.99999;
+        numGroups = length(unique([dataStruct_clust.Group]));
+        dRescale = @(x) dLims(1) + numGroups/8*diff(dLims)*(-1 + 0.9999*(x - min(x))./(max(x)-min(x)));
         imagesc(0,1,dRescale([dataStruct_clust.Group]'))
         plot(ones(2,1)*0.5,[0.5,numNeighbors+1.5],'k')
-        % caxis([min(Dij(Dij>0)),max(Dij(:))])
-        colormap([BF_getcmap('spectral',8,0);BF_getcmap('redyellowblue',8,0)]);
-        caxis([dLims(1)-diff(dLims),dLims(2)])
+        colormap([BF_getcmap('dark2',numGroups,0);BF_getcmap('redyellowblue',8,0)]);
+        caxis([dLims(1)-diff(dLims)*numGroups/8,dLims(2)])
     else
         colormap(BF_getcmap('redyellowblue',8,0));
         caxis([min(Dij(Dij>0)),max(Dij(:))])

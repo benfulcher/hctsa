@@ -8,10 +8,10 @@ function hadProblem = TS_InspectQuality(inspectWhat)
 %
 %---INPUT:
 %
-% inspectWhat: (i) 'full' or 'all', show the full data matrix
-%              (ii) 'reduced', only show operations that produce special-valued outputs
-%              (iii) 'summary', summarize the proportion of each operation's outputs
-%                         that correspond to each type of special-valued output
+% inspectWhat: (i) 'summary' (default), summarize the proportion of each operation's
+%                   outputs that correspond to each type of special-valued output
+%              (ii) 'full' or 'all', show the full data matrix
+%              (iii) 'reduced', only show operations that produce special-valued outputs
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

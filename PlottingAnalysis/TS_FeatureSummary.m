@@ -150,6 +150,7 @@ for j = 1:numAnnotate
     fn = TimeSeries(iFF).Name; % filename of timeseries to plot
     ts = TimeSeries(iFF).Data; % data of time series to plot
     if strcmp(whereann,'onplot')
+        % Add time series traces as little annotations on the distribution plot
         if plotCircle
             plot(plotpoint(1),plotpoint(2),'o','color',cblue); % plot magenta circle around target point
         end
@@ -178,7 +179,10 @@ for j = 1:numAnnotate
         plot(px(1)+linspace(0,fdim(1)*pWidth,length(ts)),...
             py(1)+fdim(2)*pHeight*(ts-min(ts))/(max(ts)-min(ts)),...
             '-','color','k','LineWidth',lineWidth);
-    else % plot in a subplot
+
+    else
+        % Plot time series traces in a subplot below the distribution -- to
+        % visualize one at a time
         subplot(3,1,[1,2]); hold on
         if plotCircle
             plot(plotpoint(1),plotpoint(2),'om'); % plot magenta circle around target point
