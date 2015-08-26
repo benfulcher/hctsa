@@ -262,10 +262,7 @@ out.fpoly2_r2 = gof.rsquare;
 out.fpoly2_adjr2 = gof.adjrsquare;
 out.fpoly2_rmse = gof.rmse;
 
-% (ii) fit polysat ~x^2/(b+x^2) (has zero derivative at zero, though)
-% s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1]);
-% f = fittype('a*x^2/(b+x^2)','problem','a','independent','x','options',s); % set 'a' from maximum
-% [c,gof] = fit(w,csS,f,'problem',csS(end)); % the saturation value
+% (ii) fit polysat a*x^2/(b+x^2) (has zero derivative at zero, though)
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[csS(end), 100]);
 f = fittype('a*x^2/(b+x^2)','independent','x','options',s); % set 'a' from maximum
 [c, gof] = fit(w',csS',f);
