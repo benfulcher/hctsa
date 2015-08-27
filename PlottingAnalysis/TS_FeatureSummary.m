@@ -30,6 +30,10 @@ function TS_FeatureSummary(opID, whatData, annotateParams)
 % Check inputs
 %-------------------------------------------------------------------------------
 
+if nargin < 1
+    opID = 1;
+end
+
 if nargin < 2 || isempty(whatData)
    whatData = 'loc'; % Visualize at unnormalized outputs
 end
@@ -47,6 +51,7 @@ theOp = ([Operations.ID]==opID);
 dataVector = TS_DataMat(:,theOp); % the outputs of interest
 notNaN = find(~isnan(dataVector));
 dataVector = dataVector(notNaN); % remove bad values
+TimeSeries = TimeSeries(notNaN0); % remove bad values
 theOperation = Operations(theOp);
 
 if isempty(dataVector)
@@ -90,27 +95,41 @@ end
 %-------------------------------------------------------------------------------
 %% Plot the kernel smoothed density
 %-------------------------------------------------------------------------------
-numPoints = 1000;
 fig = figure('color','w'); box('on'); hold on
 if strcmp(whereann,'newplot')
     subplot(3,1,[1,2]); box('on'); hold on
 end
-[f,x] = ksdensity(dataVector,linspace(min(dataVector),max(dataVector),numPoints),'function','pdf');
-getIndex = @(m) find(x>=dataVector(m),1,'first');
-ind = arrayfun(getIndex,1:length(dataVector));
-plot(x,f,'k'); % the curve
-plot(x(ind),f(ind),'.k','MarkerSize',8); % individual TimeSeries as points
 
+if isfield(TimeSeries,'Group')
+    numGroups = length(unique([TimeSeries.Group]));
+    groupColors = BF_getcmap('set1',numGroups,1);
+    % Repeat for each group
+    fx = cell(numGroups+1,1);
+    [f,x,ind] = plot_ks(dataVector,ones(1,3)*0.5,1,8);
+    fx{1} = [x(ind)',f(ind)'];
+    tsInd = []; % keeps track of indices from TimeSeries structure
+    for k = 1:numGroups
+        [f,x,ind] = plot_ks(dataVector([TimeSeries.Group]==k),groupColors{k},2,12);
+        fx{k+1} = [x(ind)',f(ind)'];
+        tsInd = [tsInd;find([TimeSeries.Group]==k)];
+    end
+    xy = vertcat(fx{2:end});
+    TimeSeries = TimeSeries(tsInd);
+else
+    % Just run a single global one
+    [f,x,ind] = plot_ks(dataVector,'k',1.5,10);
+    xy = [x(ind)',f(ind)'];
+    whichGroup = ones(size(xy,1),1);
+end
 
 %-------------------------------------------------------------------------------
 %% Annotate time series:
 %-------------------------------------------------------------------------------
-% Vector of points in the space, xy:
-xy = [x(ind)',f(ind)'];
-% Want on a common scale for finding neighbors:
-xy_std = std(xy);
-xy_mean = mean(xy);
-xy_zscore = zscore(xy);
+
+BF_AnnotatePoints(xy,TimeSeries,annotateParams);
+xlabel(theOperation.Name,'Interpreter','none');
+ylabel('Probability Density')
+
 
 pWidth = diff(get(gca,'xlim')); % plot width
 pHeight = diff(get(gca,'ylim')); % plot height
@@ -126,54 +145,59 @@ if ~uinput % points to annotate are randomly picked
     alreadyPicked = rp(1:numAnnotate);
 end
 
-xlabel(theOperation.Name,'Interpreter','none');
-ylabel('Probability Density')
 for j = 1:numAnnotate
     title(sprintf('%u points remaining to annotate',numAnnotate-j+1));
 
+    % Get user to pick a point, then find closest datapoint to their input:
     if uinput % user input
         point = ginput(1);
         point_z = (point-xy_mean)./xy_std;
-        iplot = BF_ClosestPoint_ginput(xy_zscore,point_z); % find closest actual point to input point
-        iplot = iplot(2);
-        alreadyPicked(j) = iplot;
+        iPlot = BF_ClosestPoint_ginput(xy_zscore,point_z);
+        iPlot = iPlot(2);
+        alreadyPicked(j) = iPlot;
     else
-        iplot = alreadyPicked(j);
+        iPlot = alreadyPicked(j);
     end
 
-    if j > 1 && any(alreadyPicked(1:j-1)==iplot) % same already been picked
+    if j > 1 && any(alreadyPicked(1:j-1)==iPlot) % same already been picked
         beep; continue; % don't plot this again
     end
 
-    plotpoint = xy(iplot,:);
-    iFF = notNaN(iplot); % index of dataVector
+    plotPoint = xy(iPlot,:);
+    if isfield(TimeSeries,'Group')
+
+    else
+
+    end
+    plotColor
+    iFF = notNaN(iPlot); % index of dataVector
     fn = TimeSeries(iFF).Name; % filename of timeseries to plot
     ts = TimeSeries(iFF).Data; % data of time series to plot
     if strcmp(whereann,'onplot')
         % Add time series traces as little annotations on the distribution plot
         if plotCircle
-            plot(plotpoint(1),plotpoint(2),'o','color',cblue); % plot magenta circle around target point
+            plot(plotPoint(1),plotPoint(2),'o','color',cblue); % plot circle around target point
         end
         if strcmp(textann,'filename')
             % annotate text with filename:
-            text(plotpoint(1),plotpoint(2)-0.01*pHeight,fn,'interpreter','none','FontSize',8);
+            text(plotPoint(1),plotPoint(2)-0.01*pHeight,fn,'interpreter','none','FontSize',8);
         elseif strcmp(textann,'tsid');
             % annotate text with ts_id:
-            text(plotpoint(1),plotpoint(2)-0.01*pHeight,num2str(ts_ids_keep(iplot)),'interpreter','none','FontSize',8);
+            text(plotPoint(1),plotPoint(2)-0.01*pHeight,num2str(ts_ids_keep(iPlot)),'interpreter','none','FontSize',8);
         elseif strcmp(textann,'length')
-            text(plotpoint(1),plotpoint(2)-0.01*pHeight,num2str(length(ts)),'interpreter','none','FontSize',8);
+            text(plotPoint(1),plotPoint(2)-0.01*pHeight,num2str(length(ts)),'interpreter','none','FontSize',8);
         end
         if ~isempty(maxL)
-            ts = ts(1:min(maxL,end)); % crop the time series
+            ts = ts(1:min(maxL,end)); % 'crop' the time series
         end
 
         % adjust if annotation goes off axis x-limits
-        px = plotpoint(1)+[-fdim(1)*pWidth/2,+fdim(1)*pWidth/2];
+        px = plotPoint(1)+[-fdim(1)*pWidth/2,+fdim(1)*pWidth/2];
         if px(1)<pxlim(1), px(1) = pxlim(1); end % can't plot off left side of plot
         if px(2)>pxlim(2), px(1) = pxlim(2)-fdim(1)*pWidth; end % can't plot off right side of plot
 
         % adjust if annotation goes above maximum y-limits
-        py = plotpoint(2)+[0,fdim(2)*pHeight];
+        py = plotPoint(2)+[0,fdim(2)*pHeight];
         if py(2)>pylim(2), py(1) = pylim(2)-fdim(2)*pHeight; end
 
         plot(px(1)+linspace(0,fdim(1)*pWidth,length(ts)),...
@@ -185,14 +209,14 @@ for j = 1:numAnnotate
         % visualize one at a time
         subplot(3,1,[1,2]); hold on
         if plotCircle
-            plot(plotpoint(1),plotpoint(2),'om'); % plot magenta circle around target point
+            plot(plotPoint(1),plotPoint(2),'om'); % plot magenta circle around target point
         end
         subplot(3,1,3);
         if ~isempty(maxL)
             ts = ts(1:min(maxL,end)); % crop the time series
         end
         plot(BF_zscore(ts),'.-k');
-        xlabel(sprintf('[%u] %s (%u)',TimeSeries(iplot).ID,TimeSeries(iplot).Name,length(ts)))
+        xlabel(sprintf('[%u] %s (%u)',TimeSeries(iPlot).ID,TimeSeries(iPlot).Name,length(ts)))
 
         subplot(3,1,[1,2])
         title(num2str(numAnnotate-j));
@@ -200,5 +224,18 @@ for j = 1:numAnnotate
 end
 title(theOperation.Name,'Interpreter','none');
 xlabel('Outputs','Interpreter','none');
+
+%-------------------------------------------------------------------------------
+function [f,x,ind] = plot_ks(dataVector,whatColor,lineWidth,markerSize)
+    % Plot a kernel smoothed distribution with individual datapoints annotated
+    if nargin < 3, lineWidth = 1; end
+    if nargin < 4, markerSize = 8; end
+    numPoints = 1000; % points for the ks density
+    [f,x] = ksdensity(dataVector,linspace(min(dataVector),max(dataVector),numPoints),'function','pdf');
+    getIndex = @(m) find(x>=dataVector(m),1,'first');
+    ind = arrayfun(getIndex,1:length(dataVector));
+    plot(x,f,'color',whatColor,'LineWidth',lineWidth); % the curve
+    plot(x(ind),f(ind),'.','color',whatColor,'MarkerSize',markerSize); % individual TimeSeries as points
+end
 
 end

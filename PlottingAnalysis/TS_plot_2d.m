@@ -203,7 +203,7 @@ if showDistr
     subplot(4,4,1:3); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numGroups
-        fr = plot_ks(Features(GroupIndices{i},1),groupColors{i},0);
+        fr = BF_plot_ks(Features(GroupIndices{i},1),groupColors{i},0);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -213,7 +213,7 @@ if showDistr
     subplot(4,4,[8,12,16]); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numGroups
-        fr = plot_ks(Features(GroupIndices{i},2),groupColors{i},1);
+        fr = BF_plot_ks(Features(GroupIndices{i},2),groupColors{i},1);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -324,164 +324,20 @@ if numGroups > 1
     legend(legs);
 end
 
-% ------------------------------------------------------------------------------
-%% Annotate time-series data
-% ------------------------------------------------------------------------------
-if isempty(TimeSeriesData)
+%-------------------------------------------------------------------------------
+% Annotate points:
+%-------------------------------------------------------------------------------
+if ~isempty(TimeSeriesData)
     % Only attempt to annotate if time-series data is provided
-    return
-end
-% Set parameters
-if isfield(annotateParams,'maxL')
-    maxL = annotateParams.maxL;
-else
-    maxL = 300; % length of annotated time series segments
-end
-if isfield(annotateParams,'userInput')
-    userInput = annotateParams.userInput;
-else
-    userInput = 1; % user input points rather than randomly chosen
-end
-if isfield(annotateParams,'fdim')
-    fdim = annotateParams.fdim;
-else
-    fdim = [0.30,0.08]; % width, height
-end
-if isfield(annotateParams,'textAnnotation')
-    textAnnotation = annotateParams.textAnnotation; % 'Name','tsid','none'
-else
-    textAnnotation = 'none'; % no annotations by default
-end
-if isfield(annotateParams,'theLineWidth')
-    theLineWidth = annotateParams.theLineWidth;
-else
-    theLineWidth = 0.8; % % line width for time series
-end
-numAnnotations = annotateParams.n;
 
-pxlim = get(gca,'xlim'); % plot limits
-pylim = get(gca,'ylim'); % plot limits
-pwidth = diff(pxlim); % plot width
-pheight = diff(pylim); % plot height
-alreadyPicked = zeros(numAnnotations,2); % record those already picked
-plotCircle = 1; % magenta circle around annotated points
-myColors = [BF_getcmap('set1',5,1);BF_getcmap('dark2',6,1)];
-
-% Produce xy points
-xy = cell(numGroups,1);
-for i = 1:numGroups
-    xy{i} = [Features(GroupIndices{i},1),Features(GroupIndices{i},2)];
-end
-
-% Don't use user input to select points to annotate: instead they are selected randomly
-if ~userInput
-    if numAnnotations == length(DataLabels) % annotate all
-        fprintf(1,'Annotate all!\n')
-        for j = 1:numAnnotations
-            theGroup = find(cellfun(@(x)ismember(j,x),GroupIndices));
-            alreadyPicked(j,1) = theGroup;
-            alreadyPicked(j,2) = find(GroupIndices{theGroup}==j);
-        end
-    else
-        alreadyPicked(:,1) = round(linspace(1,numGroups,numAnnotations));
-        randPerms = cellfun(@(x)randperm(length(x)),GroupIndices,'UniformOutput',0);
-        counters = ones(numGroups,1);
-        for j = 1:numAnnotations
-            alreadyPicked(j,2) = randPerms{alreadyPicked(j,1)}(counters(alreadyPicked(j,1))); % random element of the group
-            counters(alreadyPicked(j,1)) = counters(alreadyPicked(j,1))+1;
-        end
-    end
-end
-
-% ------------------------------------------------------------------------------
-% Go through and annotate selected points
-fprintf(1,['Annotating time series segments to %u points in the plot, ' ...
-                        'displaying %u samples from each...\n'],numAnnotations,maxL);
-for j = 1:numAnnotations
-    if userInput
-        point = ginput(1);
-        iplot = BF_ClosestPoint_ginput(xy,point); % find closest actual point to input point
-        theGroup = iplot(1); % want this group
-        itsme = iplot(2); % and this index
-        alreadyPicked(j,:) = [theGroup,itsme];
-    else
-        theGroup = alreadyPicked(j,1);
-        itsme = alreadyPicked(j,2);
+    % Produce xy points
+    xy = cell(numGroups,1);
+    for i = 1:numGroups
+        xy{i} = [Features(GroupIndices{i},1),Features(GroupIndices{i},2)];
     end
 
-    if (j > 1) && any(sum(abs(alreadyPicked(1:j-1,:) - repmat(alreadyPicked(j,:),j-1,1)),2)==0)
-        % Same one has already been picked, don't plot it again
-        continue
-    end
-
-    plotPoint = xy{theGroup}(itsme,:);
-    theDataLabel = DataLabels{GroupIndices{theGroup}(itsme)}; % Name of timeseries to plot
-    timeSeriesSegment = TimeSeriesData{GroupIndices{theGroup}(itsme)}; % Name of timeseries to plot
-    if ~isempty(maxL)
-        timeSeriesSegment = timeSeriesSegment(1:min(maxL,end));
-    end
-
-    % Plot a circle around the annotated point:
-    if numGroups==1
-        % cycle through rainvow colors sequentially:
-        groupColors{1} = myColors{rem(j,length(myColors))};
-    end
-    if plotCircle
-        plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',groupColors{theGroup},...
-                            'MarkerFaceColor',brighten(groupColors{theGroup},0.5));
-    end
-
-    % Add text annotations:
-    switch textAnnotation
-    case 'Name'
-        % Annotate text with names of datapoints:
-        text(plotPoint(1),plotPoint(2)-0.01*pheight,theDataLabel,...
-                    'interpreter','none','FontSize',8,...
-                    'color',brighten(groupColors{theGroup},-0.6));
-    case 'tsid'
-        % Annotate text with ts_id:
-        text(plotPoint(1),plotPoint(2)-0.01*pheight,...
-                num2str(ts_ids_keep(GroupIndices{theGroup}(itsme))),...
-                    'interpreter','none','FontSize',8,...
-                    'color',brighten(groupColors{theGroup},-0.6));
-    end
-
-    % Adjust if annotation goes off axis x-limits
-    px = plotPoint(1)+[-fdim(1)*pwidth/2,+fdim(1)*pwidth/2];
-    if px(1) < pxlim(1), px(1) = pxlim(1); end % can't plot off left side of plot
-    if px(2) > pxlim(2), px(1) = pxlim(2)-fdim(1)*pwidth; end % can't plot off right side of plot
-
-    % Adjust if annotation goes above maximum y-limits
-    py = plotPoint(2)+[0,fdim(2)*pheight];
-    if py(2) > pylim(2)
-        py(1) = pylim(2)-fdim(2)*pheight;
-    end
-
-    % Annotate the time series
-    plot(px(1)+linspace(0,fdim(1)*pwidth,length(timeSeriesSegment)),...
-            py(1)+fdim(2)*pheight*(timeSeriesSegment-min(timeSeriesSegment))/(max(timeSeriesSegment)-min(timeSeriesSegment)),...
-                '-','color',groupColors{theGroup},'LineWidth',theLineWidth);
+    BF_AnnotatePoints(xy,annotateParams);
 end
 
-
-
-% ------------------------------------------------------------------------------
-function [fr, xr] = plot_ks(v,c,swap)
-    % Vector v is the vector of a given group
-    % c is the color
-    [f, x] = ksdensity(v(~isnan(v)),linspace(min(v),max(v),1000),'function','pdf');
-    r = zeros(length(v),1);
-    for m = 1:length(v); r(m)=find(x>=v(m),1,'first'); end
-    r = sort(r,'ascend');
-    fr = f(r); xr = x(r);
-    if swap
-        plot(f,x,'color',c);
-        plot(fr,xr,'.','color',c)
-    else
-        plot(x,f,'color',c);
-        plot(xr,fr,'.','color',c)
-    end
-end
-% ------------------------------------------------------------------------------
 
 end

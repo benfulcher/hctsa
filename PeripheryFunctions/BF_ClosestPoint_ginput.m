@@ -1,9 +1,8 @@
-function plotMe = BF_ClosestPoint_ginput(xy,inputPoint)
+function iPlot = BF_ClosestPoint_ginput(xy,inputPoint)
 % ClosestPoint_ginput   The closest point in a dataset to the input co-ordinates given.
 %
 %---INPUTS:
-% xy can be a cell, each component of which is a different group plotted,
-%                       contains a Nx2 vector of co-ordinates
+% xy is a Nx2 vector of x-y co-ordinates
 % inputPoint is the output of a ginput
 %
 %---OUTPUT:
@@ -25,7 +24,6 @@ function plotMe = BF_ClosestPoint_ginput(xy,inputPoint)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-
 %-------------------------------------------------------------------------------
 % Check inputs:
 %-------------------------------------------------------------------------------
@@ -33,30 +31,10 @@ if nargin < 2 || isempty(inputPoint)
     inputPoint = ginput(1);
 end
 
-if iscell(xy)
-    numGroups = length(xy);
-else
-    xy = {xy};
-    numGroups = 1;
-end
-
 %-------------------------------------------------------------------------------
 % Calculate distances from each point to input inputPoint
 %-------------------------------------------------------------------------------
-dpxy = cell(numGroups,1);
-for i = 1:numGroups
-    dpxy{i} = sum((xy{i} - repmat(inputPoint,size(xy{i},1),1)).^2,2); % Euclidean distances to the input point
-end
-if iscell(xy)
-    mins = cellfun(@(x)min(x),dpxy);
-    thisGroup = find(mins==min(mins),1); % This group contains closest element to inputPoint
-else
-    thisGroup = 1;
-end
-
-plotMe = find(dpxy{thisGroup} == min(mins),1); % this is the point to plot
-if iscell(xy)
-    plotMe = [thisGroup,plotMe]; % Also output the group
-end
+dpxy = sum((xy - repmat(inputPoint,size(xy,1),1)).^2,2); % Euclidean distances to the input point
+[~,iPlot] = min(dpxy);
 
 end
