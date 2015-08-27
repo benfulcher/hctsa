@@ -1,4 +1,4 @@
-function TS_plot_2d(Features,dataInfo,trainTest,annotateParams,showDistr,classMethod)
+function TS_plot_2d(Features,TimeSeries,featureLabels,groupNames,annotateParams,showDistr,classMethod)
 % TS_plot_2d   Plots a dataset in a two-dimensional space.
 %
 % e.g., The space of two chosen features, or two principal components.
@@ -7,18 +7,11 @@ function TS_plot_2d(Features,dataInfo,trainTest,annotateParams,showDistr,classMe
 % Features, an Nx2 vector of where to plot each of the N data objects in the
 %           two-dimensional space
 %
-% dataInfo, a structure containing all the information about the data. Fields
-%           can include:
-%               - labels (feature labels, cols of Features)
-%               - DataLabels (labels for each data point, rows of Features)
-%               - GroupIndices (a group index for each data point, rows of Features)
-%               - GroupNames (name for each group)
-%               - TimeSeriesData (cell of vectors containing time-series data)
+% TimeSeries, structure array for time series metadata
 %
-% trainTest, whether to plot separately indices of training and test datapoints.
-%               Of the form {index_train,index_test}.
-%               If of the form [index], then just plots the subset index of the
-%                       points in Features.
+% featureLabels, cell of labels for each feature
+%
+% groupLabels, cell of labels for each group of timeseries
 %
 % annotateParams, a structure containing all the information about how to annotate
 %           data points. Fields can include:
@@ -62,75 +55,28 @@ if nargin < 1
     error('You must provide two-dimensional feature vectors for the data.')
 end
 
-% dataInfo should be a structure array with all the information about the data (same length as Features)
-% Group should be a field in this structure array
-
-if nargin < 3 || isempty(trainTest)
-    trainTest = {};
-end
-
-if nargin < 4 || isempty(annotateParams)
+if nargin < 5 || isempty(annotateParams)
     annotateParams = struct('n',0); % don't annotate
 end
 
 % By default, plot kernel density estimates above and on the side of the plot:
-if nargin < 5 || isempty(showDistr)
+if nargin < 6 || isempty(showDistr)
     showDistr = 1;
 end
 
-if nargin < 6 || isempty(classMethod)
+if nargin < 7 || isempty(classMethod)
     classMethod = 'linclass';
 end
 
 makeFigure = 1; % default is to plot on a brand new figure('color','w')
 
 % ------------------------------------------------------------------------------
-%% Load data
-% ------------------------------------------------------------------------------
-% Data is not loaded, now it must be provided
-
-labels = dataInfo.labels; % Feature labels
-if isstruct(annotateParams) || annotateParams > 0
-    DataLabels = dataInfo.DataLabels; % We need data labels
-end
-GroupNames = dataInfo.GroupNames;
-GroupIndices = dataInfo.GroupIndices;
-TimeSeriesData = dataInfo.TimeSeriesData;
-numGroups = length(GroupNames);
-
-% ------------------------------------------------------------------------------
-%% Subset
-% ------------------------------------------------------------------------------
-% Only use a subset of the full matrix
-if (length(trainTest)==1 || ~iscell(trainTest))
-    if iscell(trainTest)
-        rss = trainTest{1}; % row subset
-    else
-        rss = trainTest;
-    end
-    fprintf(1,'Subset rows from %u to %u.\n',size(Features,1),length(rss))
-    Features = Features(rss,:);
-    % GroupIndices refers to indicies of the full matrix, we want to convert to subset
-    % matrix
-    % for each subset index, label with it's group number
-    grpnum = zeros(length(rss),1);
-    for i = 1:length(rss)
-        grpnum(i) = find(cellfun(@(x)ismember(rss(i),x),GroupIndices));
-    end
-    % now we make a new GroupIndices
-    ugrpnum = unique(grpnum);
-    GroupIndices = cell(length(ugrpnum),1);
-    for i = 1:length(GroupIndices)
-        GroupIndices{i} = find(grpnum==ugrpnum(i));
-    end
-    trainTest = []; % make empty so don't plot trainTest groups later
-end
-
-% ------------------------------------------------------------------------------
 % Compute classification rates
 % ------------------------------------------------------------------------------
 classRate = zeros(3,1); % classRate1, classRate2, classRateboth
-groupLabels = BF_ToGroup(GroupIndices); % Convert GroupIndices to group form
+groupLabels = [TimeSeries.Group]; % Convert GroupIndices to group form
+numGroups = length(unique(groupLabels));
+
 switch classMethod
     case 'linclass'
         kfold = 10;
@@ -191,10 +137,10 @@ else
     end
 end
 if (numGroups == 1)
-    groupColors = {'k'}; % Just use black...
+    groupColors = {[0,0,0]}; % Just use black...
     % groupColors = 'rainbow'; % Just use black...
 end
-
+annotateParams.groupColors = groupColors;
 
 % ------------------------------------------------------------------------------
 %% Plot distributions
@@ -203,7 +149,7 @@ if showDistr
     subplot(4,4,1:3); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numGroups
-        fr = BF_plot_ks(Features(GroupIndices{i},1),groupColors{i},0);
+        fr = BF_plot_ks(Features([TimeSeries.Group]==i,1),groupColors{i},0);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -213,7 +159,7 @@ if showDistr
     subplot(4,4,[8,12,16]); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numGroups
-        fr = BF_plot_ks(Features(GroupIndices{i},2),groupColors{i},1);
+        fr = BF_plot_ks(Features([TimeSeries.Group]==i,2),groupColors{i},1);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -233,31 +179,12 @@ hold on;
 if isfield(annotateParams,'theMarkerSize');
     theMarkerSize = annotateParams.theMarkerSize; % specify custom marker size
 else
-    if isempty(trainTest)
-        theMarkerSize = 12; % Marker size for '.'
-    else
-        theMarkerSize = 5; % Marker size for 'o' and 's'
-    end
+    theMarkerSize = 12; % Marker size for '.'
 end
 
-if isempty(trainTest)
-    for i = 1:numGroups
-        plot(Features(GroupIndices{i},1),Features(GroupIndices{i},2),'.','color',groupColors{i},'MarkerSize',theMarkerSize)
-    end
-else % Plot training and test data differently
-    for j = 1:length(trainTest)
-        for i = 1:numGroups
-            if (j==1)
-                % Training data
-                plot(Features(intersect(GroupIndices{i},trainTest{j}),1),Features(intersect(GroupIndices{i},trainTest{j}),2),...
-                        'ok','MarkerFaceColor',groupColors{i},'MarkerSize',theMarkerSize)
-            else
-                % Test data
-                plot(Features(intersect(GroupIndices{i},trainTest{j}),1),Features(intersect(GroupIndices{i},trainTest{j}),2),...
-                        'sk','MarkerFaceColor',groupColors{i},'MarkerSize',theMarkerSize)
-            end
-        end
-    end
+for i = 1:numGroups
+    plot(Features([TimeSeries.Group]==i,1),Features([TimeSeries.Group]==i,2),...
+                '.','color',groupColors{i},'MarkerSize',theMarkerSize)
 end
 
 % ------------------------------------------------------------------------------
@@ -297,11 +224,11 @@ if didClassify
                     round(classRate(3,1)*100)),'interpreter','none');
     labelText = cell(2,1);
     for i = 1:2
-        labelText{i} = sprintf('%s (acc = %.2f %%)',labels{i}, ...
+        labelText{i} = sprintf('%s (acc = %.2f %%)',featureLabels{i}, ...
                                 round(classRate(i,1)*100)); %,round(classRate(i,2)*100));
     end
 else
-    labelText = labels;
+    labelText = featureLabels;
 end
 
 xlabel(labelText{1},'interpreter','none')
@@ -309,17 +236,9 @@ ylabel(labelText{2},'interpreter','none')
 
 % Set Legend
 if numGroups > 1
-    if isempty(trainTest)
-        legs = cell(numGroups,1);
-        for i = 1:numGroups
-            legs{i} = sprintf('%s (%u)',GroupNames{i},length(GroupIndices{i}));
-        end
-    else
-        legs = cell(numGroups*2,1);
-        for i = 1:numGroups
-            legs{i} = sprintf('%s train (%u)',GroupNames{i},length(intersect(GroupIndices{i},trainTest{1})));
-            legs{numGroups+i} = sprintf('%s test (%u)',GroupNames{i},length(intersect(GroupIndices{i},trainTest{2})));
-        end
+    legs = cell(numGroups,1);
+    for i = 1:numGroups
+        legs{i} = sprintf('%s (%u)',groupNames{i},sum([TimeSeries.Group]==i));
     end
     legend(legs);
 end
@@ -327,16 +246,14 @@ end
 %-------------------------------------------------------------------------------
 % Annotate points:
 %-------------------------------------------------------------------------------
-if ~isempty(TimeSeriesData)
+if isfield(TimeSeries,'Data')
     % Only attempt to annotate if time-series data is provided
 
     % Produce xy points
-    xy = cell(numGroups,1);
-    for i = 1:numGroups
-        xy{i} = [Features(GroupIndices{i},1),Features(GroupIndices{i},2)];
-    end
+    xy = Features;
 
-    BF_AnnotatePoints(xy,annotateParams);
+    % Go-go-go:
+    BF_AnnotatePoints(xy,TimeSeries,annotateParams);
 end
 
 

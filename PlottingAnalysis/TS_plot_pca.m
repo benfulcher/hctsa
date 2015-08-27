@@ -59,88 +59,24 @@ end
 % ------------------------------------------------------------------------------
 %% Load the data and group labeling from file
 % ------------------------------------------------------------------------------
-if strcmp(whatData,'cl') || strcmp(whatData,'norm')  || ischar(whatData)
-    % Retrive data from local files
-    if ismember(whatData,{'norm','cl'})
-        whatDataFile = 'HCTSA_N.mat';
-    else
-        % Provided a custom filename to a datafile
-        whatDataFile = whatData;
-    end
 
-    % Load in data:
-    [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
+% Load in data:
+[TS_DataMat,TimeSeries,Operations,theFile] = TS_LoadData(whatData);
 
-    % Construct labels for data points:
-    if strcmp(TsorOps,'ts')
-        dimensionLabels = {Operations.Name}; clear Operations % We just need their names
-        if isstruct(annotateParams) || length(annotateParams) > 1 || annotateParams > 0
-            dataLabels = {TimeSeries.Name};
-            data_ids = [TimeSeries.ID];
-            timeSeriesData = {TimeSeries.Data};
-            if isfield(TimeSeries,'Group')
-                load(whatDataFile,'groupNames')
-                dataGroups = [TimeSeries.Group];
-            else
-                % No groups assigned:
-                dataGroups = {};
-                groupNames = {'all data'};
-                % fprintf(1,'\n');
-                % error('No groups assigned -- Use TS_LabelGroups to provide group information.')
-            end
-        end
-    else
-        dimensionLabels = {TimeSeries.Name}; clear TimeSeries
-    end
-    clear('TimeSeries','Operations'); % we no longer need you
+% Retrieve group names also:
+fileVarsStruct = whos('-file',fileName);
+fileVars = {fileVarsStruct.name};
+if ismember('groupNames',fileVars)
+    groupNames = load(theFile,'groupNames');
+    groupNames = groupNames.groupNames;
 else
-    % The user provided data themself
-    if ~isfield(whatData,'DataMat') && ~isfield(whatData,'TS_DataMat')
-        error('No field ''DataMat'' (or ''TS_DataMat'') provided in the data input')
-    elseif ~isfield(whatData,'Groups')
-        error('No field ''Groups'' provided in the data input')
-    end
-    if isfield(whatData,'DataMat')
-        TS_DataMat = whatData.DataMat;
-    else
-        TS_DataMat = whatData.TS_DataMat;
-    end
-    dataGroups = whatData.Groups;
-    if isfield(whatData,'DimLabels')
-        dimensionLabels = whatData.DimLabels;
-    else
-        dimensionLabels = {};
-    end
-    if isfield(whatData,'groupNames')
-        groupNames = whatData.groupNames;
-    else
-        groupNames = {};
-    end
-    if isfield(whatData,'dataLabels')
-        dataLabels = whatData.dataLabels;
-    else
-        dataLabels = {};
-    end
-    if isfield(whatData,'timeSeriesData')
-        timeSeriesData = whatData.timeSeriesData;
-    else
-        timeSeriesData = {};
-    end
+    groupNames = {};
 end
 
 if strcmp(TsorOps,'ops')
     % Take the transpose of the input data matrix for operations
     TS_DataMat = TS_DataMat';
 end
-
-
-% Label groups
-if ~isempty(dataGroups)
-    groupIndices = BF_ToGroup(dataGroups);
-else
-    groupIndices = {1:size(TS_DataMat,1)};
-end
-numGroups = length(groupIndices); % Number of groups
 
 % ------------------------------------------------------------------------------
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm
@@ -165,15 +101,11 @@ featLabel = cell(2,2); % Feature label :: proportion of total (columns are PCs)
 % ------------------------------------------------------------------------------
 
 nameString = 'PC';
+featureLabels = cell(2,1);
 for i = 1:2
-    dataInfo.labels{i} = sprintf('%s %u (%.2f%%)',nameString,i,percVar(i));
+    featureLabels{i} = sprintf('%s %u (%.2f%%)',nameString,i,percVar(i));
 end
 
-dataInfo.GroupNames = groupNames;
-dataInfo.GroupIndices = groupIndices;
-dataInfo.DataLabels = dataLabels;
-dataInfo.TimeSeriesData = timeSeriesData;
-
-TS_plot_2d(pcScore(:,1:2),dataInfo,{},annotateParams,showDist,classMeth);
+TS_plot_2d(pcScore(:,1:2),TimeSeries,featureLabels,groupNames,annotateParams,showDist,classMeth)
 
 end
