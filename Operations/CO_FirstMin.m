@@ -1,7 +1,5 @@
 function out = CO_FirstMin(y,minWhat,extraParam)
-% CO_FirstMin
-%
-% The time at which the first minimum in a given correlation function occurs.
+% CO_FirstMin  Time of first minimum in a given correlation function
 %
 %---INPUTS:
 % y, the input time series

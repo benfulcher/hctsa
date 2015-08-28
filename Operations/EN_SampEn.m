@@ -2,9 +2,12 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 % EN_SampEn     Sample Entropy of a time series.
 %
 % SampEn(m,r), using code from PhysioNet.
+% Uses a compiled C version of the code if available, otherwise uses a (slower)
+% Matlab implementation (which can actually be faster for shorter time series
+% due to overheads of reading/writing to disk)
 %
-% The publicly-available PhysioNet code, sampenc (renamed here to RN_sampenc) is
-% available from:
+% The publicly-available PhysioNet Matlab code, sampenc (renamed here to
+% RN_sampenc) is available from:
 % http://www.physionet.org/physiotools/sampen/matlab/1.1/sampenc.m
 %
 % cf. "Physiological time-series analysis using approximate entropy and sample
@@ -85,7 +88,10 @@ if isempty(b) || length(y) < 3000 % faster to run within Matlab
     % (length of 2000 because of read/write overhead)
     sampEn = PN_sampenc(y,M,r);
 else
-    fprintf('Using compiled C code~~~\n')
+    % fprintf('Using compiled C code~~~\n')
+    % http://www.physionet.org/physiotools/sampen/c/
+    % (use Makefile in Toolboxes/Physionet/ to run make, then make install)
+
     % Run compiled C code:
     filePath = BF_WriteTempFile(y);
     command = sprintf('sampen -m %u -r %f < %s',M,r,filePath);

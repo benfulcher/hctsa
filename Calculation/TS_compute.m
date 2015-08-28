@@ -152,47 +152,9 @@ fprintf(fid,['Calculation has begun on %s using %u datasets ' ...
 %% Open parallel processing worker pool
 % ------------------------------------------------------------------------------
 if doParallel
-    % first check that the user can use the Parallel Computing Toolbox:
-    heyLo = which('matlabpool');
-    if isempty(heyLo)
-        fprintf(fid,['Parallel Computing Toolbox not found -- ' ...
-                        'cannot perform computations across multiple cores\n'])
-        doParallel = 0;
-    else
-		matlabVersion = version('-release');
-		% Syntax changed in Matlab 2015a
-		if str2num(matlabVersion(1:4)) >= 2015
-
-			poolObj = gcp('nocreate'); % If no pool already, create a new one
-
-			if isempty(poolObj) % no matlab pool started yet
-				% Open pool of workers:
-				poolObj = parpool;
-				% Get number of workers:
-				numWorkers = poolObj.NumWorkers;
-				% User feedback:
-				fprintf(fid,['Matlab parallel processing pool opened with %u ' ...
-	                                    'workers\n'],numWorkers)
-			else
-				% Get number of workers:
-				numWorkers = poolObj.NumWorkers;
-				fprintf(fid,['Matlab parallel processing pool already open with ' ...
-											'%u workers\n'],numWorkers)
-			end
-		else
-	        if (matlabpool('size') == 0)
-				% Open pool of workers:
-	        	matlabpool open;
-	            fprintf(fid,['Matlab parallel processing pool opened with %u ' ...
-	                                    'workers\n'],matlabpool('size'))
-	        else
-	            fprintf(fid,['Matlab parallel processing pool already open with ' ...
-	                                        '%u workers\n'],matlabpool('size'))
-	        end
-		end
-    end
+    % Attempt to initiate a parallel worker pool:
+	doParallel = TS_InitiateParallel(0);
 end
-
 
 % The times vector stores the time taken for each time series to have its
 % operations calculated (for determining time remaining)
@@ -211,6 +173,7 @@ end
 % --------------------------------------------------------------------------
 
 for i = 1:numTimeSeries
+
     tsInd = tsIndex(i);
 
 	bigTimer = tic;
@@ -242,7 +205,6 @@ for i = 1:numTimeSeries
         % Error in the database structure; some operations are missing MasterID assignment
         error('Database structure error: some operations have not been assigned a valid master operation');
     end
-
 
     if numCalc > 0 % some to calculate
         ffi = zeros(numCalc,1); % Output of each operation

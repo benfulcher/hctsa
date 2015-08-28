@@ -52,6 +52,9 @@ case 'robust_toolbox'
 case 'financial_toolbox'
     theName = 'Matlab''s Financial Toolbox';
 
+case 'distrib_computing_toolbox'
+    theName = 'Matlab''s Parallel Computing Toolbox';
+
 otherwise
     error('Unknown toolbox ''%s''\n',theToolbox);
 end
