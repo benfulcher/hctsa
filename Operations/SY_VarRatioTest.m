@@ -76,6 +76,7 @@ else
    out.maxpValue = max(pValue);
    out.minpValue = min(pValue);
    out.meanpValue = mean(pValue);
+   
    imaxp = find(pValue == max(pValue),1,'first');
    iminp = find(pValue == min(pValue),1,'first');
    out.periodmaxpValue = periods(imaxp);

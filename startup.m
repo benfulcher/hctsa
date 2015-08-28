@@ -89,6 +89,10 @@ addpath(fullfile(pwd,'Toolboxes','Max_Little','fastdfa'));
 fprintf(1,', rpde')
 addpath(fullfile(pwd,'Toolboxes','Max_Little','rpde'));
 
+% Misc code
+fprintf(1,', misc')
+addpath(fullfile(pwd,'Toolboxes','Misc'));
+
 % TSTOOL
 fprintf(1,', TSTOOL\n')
 addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));

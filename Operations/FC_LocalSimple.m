@@ -1,8 +1,8 @@
 function out = FC_LocalSimple(y,forecastMeth,trainLength)
 % FC_LocalSimple    Simple local time-series forecasting.
 %
-% Simple predictors using the past trainLength values of the time series to predict
-% its next value.
+% Simple predictors using the past trainLength values of the time series to
+% predict its next value.
 %
 %---INPUTS:
 % y, the input time series

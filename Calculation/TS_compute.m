@@ -69,9 +69,9 @@ if nargin < 6
 	doLog = 0;
 end
 if doLog
-	fileName = sprintf('TS_compute_%s.log',datestr(now,30));
-	fid = fopen(fileName,'w','n');
-	fprintf(1,'Calculation details will be logged to %s\n',fileName);
+	logFileName = sprintf('TS_compute_%s.log',datestr(now,30));
+	fid = fopen(logFileName,'w','n');
+	fprintf(1,'Calculation details will be logged to %s\n',logFileName);
 else
     % Write output to screen rather than .log file
     fid = 1;
@@ -93,23 +93,24 @@ else % use single-threaded for loops
 	fprintf(fid,'Computations will be performed serially without parallelization.\n')
 end
 
-
 % --------------------------------------------------------------------------
 %% Load information from local files
 % --------------------------------------------------------------------------
 fprintf(fid,'Loading data from HCTSA_loc.mat...');
-fileName = 'HCTSA_loc.mat';
-fileVarsStruct = whos('-file',fileName);
+if isempty(customFile)
+	customFile = 'HCTSA_loc.mat';
+end
+fileVarsStruct = whos('-file',customFile);
 fileVars = {fileVarsStruct.name};
 if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat'},fileVars))
-	error('\nCannot compute on %s: missing variables.',fileName);
+	error('\nCannot compute on %s: missing variables.',customFile);
 end
-load(fileName,'TimeSeries','Operations','MasterOperations','TS_DataMat');
+load(customFile,'TimeSeries','Operations','MasterOperations','TS_DataMat');
 if ismember('TS_CalcTime',fileVars)
-	load(fileName,'TS_CalcTime');
+	load(customFile,'TS_CalcTime');
 end
 if ismember('TS_Quality',fileVars)
-	load(fileName,'TS_Quality');
+	load(customFile,'TS_Quality');
 end
 fprintf(fid,' Loaded.\n');
 
@@ -158,19 +159,37 @@ if doParallel
                         'cannot perform computations across multiple cores\n'])
         doParallel = 0;
     else
-        if (matlabpool('size') == 0)
-        	matlabpool open;
-            fprintf(fid,['Matlab parallel processing pool opened with %u ' ...
-                                    'and ready to go'],matlabpool('size'))
-        else
-            fprintf(fid,['Matlab parallel processing pool already open. ' ...
-                                        'Size: %u\n'],matlabpool('size'))
-        end
+		matlabVersion = version('-release');
+		% Syntax changed in Matlab 2015a
+		if str2num(matlabVersion(1:4)) >= 2015
+			if isempty(gcp('nocreate')) % no matlab pool started yet
+				% Open pool of workers:
+				poolObj = parpool;
+				% Get number of workers:
+				numWorkers = poolObj.NumWorkers;
+				% User feedback:
+				fprintf(fid,['Matlab parallel processing pool opened with %u ' ...
+	                                    'workers\n'],numWorkers)
+			else
+				fprintf(fid,['Matlab parallel processing pool already open with ' ...
+											'%u workers\n'],numWorkers)
+			end
+		else
+	        if (matlabpool('size') == 0)
+				% Open pool of workers:
+	        	matlabpool open;
+	            fprintf(fid,['Matlab parallel processing pool opened with %u ' ...
+	                                    'workers\n'],matlabpool('size'))
+	        else
+	            fprintf(fid,['Matlab parallel processing pool already open with ' ...
+	                                        '%u workers\n'],matlabpool('size'))
+	        end
+		end
     end
 end
 
 
-% Times stores the time taken for each time series to have its operations
+% times stores the time taken for each time series to have its operations
 % calculated (for determining time remaining)
 times = zeros(numTimeSeries,1);
 lastSavedTime = 0; % Last saved time

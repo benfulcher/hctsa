@@ -28,9 +28,6 @@ function out = NW_VisibilityGraph(y,meth,maxL)
 % Statistics on the degree distribution, including the mode, mean,
 % spread, histogram entropy, and fits to gaussian, exponential, and powerlaw
 % distributions.
-%
-% NOTE: The normal visibility graph may not be implemented correctly, we focused
-% only on the horizontal visibility graph.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -66,84 +63,63 @@ if nargin < 2
     meth = 'horiz';
 end
 if nargin < 3
-    maxL = 6000; % crops time series longer than this maximum length
+    maxL = 5000; % crops time series longer than this maximum length
 end
 
 if N > maxL % too long to store in memory
     % ++BF changed on 8/3/2010 to reduce down to first maxL samples. In future,
     % could alter to take different subsets, or set a maximum distance range
     % allowed to make a link (using sparse), etc.
-	warning(sprintf('Time series (%u > %u) is too long for visibility graph... Analyzing the first %u samples',N,maxL,maxL));
+	warning(sprintf(['Time series (%u > %u) is too long for visibility graph...' ...
+                ' Analyzing the first %u samples'],N,maxL,maxL));
     y = y(1:maxL);
     N = length(y); % new time-series length
 end
-% if N > 4000 % needs too much memory -- need to use (slower to index) sparse representation
-% %     A = sparse(N,N); % sparse is very slow for matricies that end up having
-% %     many zeros
-%     A = zeros(N); % adjacency matrix -- faster for shorter time series
-% else
-%     A = zeros(N); % adjacency matrix -- faster for shorter time series
-% end
-% % end
 
 
-A = zeros(N); % adjacency matrix
 y = y - min(y); % adjust so that minimum of y is at zero
-yr = flipud(y); % reversed order
 
 % ------------------------------------------------------------------------------
 %% Compute the visibility graph:
 % ------------------------------------------------------------------------------
 switch meth
 	case 'norm'
-        % normal visibility graph
-        % **** I'm not so confident about this implementation
-		for i = 1:N-1
-			% compute all subsequent gradients
-			deltay = y(i+1:end) - ones(N-i,1)*y(i); % vector of deltay's
-			deltat = (1:N-i)'; % time from current reference i
-			m = deltay./deltat; % gradients
-			cummax = zeros(N-i,1);
-			for j = 1:N-i
-				cummax(j) = max(m(1:j));
-			end
-			links = (m >= cummax);
-
-			% so we have 'links' which are the time series points following it in the series
-			% that are visible from it (1 means the following point, and should always be included)
-			% Store this information in the adjacency matrix, A
-			A(i,i+1:end) = links';
-		end
+        % Normal visibility graph:
+        A = EZ_VisibilityGraph(y);
 
 	case 'horiz'
-        % horizontal visibility graph
+        % Horizontal visibility graph
+
+        A = zeros(N); % adjacency matrix
+        yr = flipud(y); % reversed order time series
+
 		for i = 1:N
 			% Look forward to first blocker, then stop
             if i < N
-    			nahead = find(y(i+1:end) > y(i),1,'first');
-                A(i,i+nahead) = 1;
+    			nAhead = find(y(i+1:end) > y(i),1,'first');
+                A(i,i+nAhead) = 1;
             end
 
             % Look back to the first hit, then stop
             if i > 1
-    			nback = find(yr(N-i+2:end) > yr(N-i+1),1,'first');
-                A(i-nback,i) = 1;
+    			nBack = find(yr(N-i+2:end) > yr(N-i+1),1,'first');
+                A(i-nBack,i) = 1;
             end
 		end
 
+        % Symmetrize A:
+        A = symmetrize(A);
     otherwise
         error('Unknown visibility graph method ''%s''',meth);
 end
 
-% symmetrize A crudely: (works since lower triangle is zeros)
-if N <= 5000, A = sparse(A); end
-A = A + A'; A(A > 0) = 1;
-
 % ------------------------------------------------------------------------------
 %%% Statistics on the output
 % ------------------------------------------------------------------------------
-% spy(A);
+
+%-------------------------------------------------------------------------------
 %% Degree distribution: basic statistics
+%-------------------------------------------------------------------------------
 k = sum(A); % the degree distribution
 k = full(k);
 
@@ -164,8 +140,14 @@ out.olu90 = (mean(k(k>=quantile(k,0.95)))-mean(k))/std(k); % top 5% of points ar
 % ------------------------------------------------------------------------------
 %% Fit distributions to degree distribution
 % ------------------------------------------------------------------------------
-% % (1) Gauss1: Gaussian fit to degree distribution
-dgaussout = DN_SimpleFit(k,'gauss1',range(k)); % range(k)-bin single gaussian fit
+% (1) Gauss1: Gaussian fit to degree distribution
+try
+    dgaussout = DN_SimpleFit(k,'gauss1',range(k)); % range(k)-bin single gaussian fit
+catch emsg
+    warning(sprintf('Error fitting gaussian distribution to data:\n%s',emsg.message))
+    dgaussout = NaN;
+end
+
 if ~isstruct(dgaussout) && isnan(dgaussout)
     out.dgaussk_r2 = NaN;
     out.dgaussk_adjr2 = NaN;
@@ -182,8 +164,13 @@ else
     out.dgaussk_resruns = dgaussout.resruns; % runs test on residuals -- outputs p-value
 end
 
-% % (2) Exponential1: Exponential fit to degree distribution
-dexpout = DN_SimpleFit(k,'exp1',range(k)); % range(k)-bin single exponential fit
+% (2) Exponential1: Exponential fit to degree distribution
+try
+    dexpout = DN_SimpleFit(k,'exp1',range(k)); % range(k)-bin single exponential fit
+catch emsg
+    warning(sprintf('Error fitting exponential distribution to data:\n%s',emsg.message))
+    dexpout = NaN;
+end
 if ~isstruct(dexpout) && isnan(dexpout)
     out.dexpk_r2 = NaN;
     out.dexpk_adjr2 = NaN;
@@ -200,8 +187,13 @@ else
     out.dexpk_resruns = dexpout.resruns; % runs test on residuals -- outputs p-value
 end
 
-% % (3) Power1: Power-law fit to degree distribution
-dpowerout = DN_SimpleFit(k,'power1',range(k)); % range(k)-bin single power law fit
+% (3) Power1: Power-law fit to degree distribution
+try
+    dpowerout = DN_SimpleFit(k,'power1',range(k)); % range(k)-bin single power law fit
+catch emsg
+    warning(sprintf('Error fitting power-law distribution to data:\n%s',emsg.message))
+    dpowerout = NaN;
+end
 if ~isstruct(dpowerout) && isnan(dpowerout)
 	out.dpowerk_r2 = NaN;
 	out.dpowerk_adjr2 = NaN;
@@ -252,5 +244,25 @@ out.kac1 = CO_AutoCorr(k,1,'Fourier');
 out.kac2 = CO_AutoCorr(k,2,'Fourier');
 out.kac3 = CO_AutoCorr(k,3,'Fourier');
 out.ktau = CO_FirstZero(k,'ac');
+
+%-------------------------------------------------------------------------------
+function A = symmetrize(A)
+    % Symmetrize an upper triangular matrix:
+    At = A';
+    lowerT = logical(tril(ones(size(A))));
+    A(lowerT) = At(lowerT);
+end
+
+function ind = findFirst(vector,threshold)
+    % Find index of the first time a vector exceeds a threshold
+    % -- not used because just as fast to use find(x,1,'first')
+    for k = 1:length(vector)
+        if vector(k)>threshold
+            ind = k;
+            return;
+        end
+    end
+    ind = length(vector);
+end
 
 end

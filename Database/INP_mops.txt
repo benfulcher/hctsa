@@ -874,6 +874,7 @@ CO_Embed2_Dist(y,'tau')	CO_Embed2_Dist_tau
 CO_Embed2_Shapes(y,'tau','circle',0.1)	CO_Embed2_Shapes_tau_circle_01
 CO_Embed2_Shapes(y,'tau','circle',1)	CO_Embed2_Shapes_tau_circle_1
 NW_VisibilityGraph(y,'horiz')	NW_VisibilityGraph_horiz
+NW_VisibilityGraph(y,'norm')	NW_VisibilityGraph_norm
 SY_DynWin(y,10)	SY_DynWin10
 SY_SpreadRandomLocal(y,'ac2',100,'default')	SY_SpreadRandomLocal_ac2_100
 SY_SpreadRandomLocal(y,'ac5',100,'default')	SY_SpreadRandomLocal_ac5_100
