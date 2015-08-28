@@ -264,7 +264,7 @@ end
         % Assigns relevant stats from an exponential fit result, [c,gof]
         out.([fieldName,'fexpa']) = c.a;
         out.([fieldName,'fexpb']) = c.b;
-        if isfield(c,'c')
+        if ismember('c',coeffnames(c))
             out.([fieldName,'fexpc']) = c.c;
         end
         out.([fieldName,'fexpr2']) = gof.rsquare;

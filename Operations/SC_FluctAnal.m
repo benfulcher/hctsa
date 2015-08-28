@@ -172,7 +172,7 @@ for i = 1:ntau
     tau = taur(i); % the scale on which to compute fluctuations
 
     y_buff = buffer(y,tau);
-    if size(y_buff,2)>floor(N/tau) % zero-padded, remove trailing set of points...
+    if size(y_buff,2) > floor(N/tau) % zero-padded, remove trailing set of points...
         y_buff = y_buff(:,1:end-1);
     end
 
@@ -181,8 +181,8 @@ for i = 1:ntau
 
     switch wtf
         case 'nothing'
-
             y_dt = reshape(y_buff,nn,1);
+
         case 'endptdiff'
             % look at differences in end-points in each subsegment
             y_dt = y_buff(end,:) - y_buff(1,:);
