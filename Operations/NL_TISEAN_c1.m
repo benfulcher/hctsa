@@ -151,7 +151,7 @@ if ~exist([filePath '.c1'],'file')
 end
 
 % Get local slopes from c1 file output of previous call
-tic
+c2dtimer = tic;
 [~, res] = system(sprintf('c2d -a2 %s.c1',filePath));
 
 if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
@@ -163,7 +163,8 @@ if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out?
     end
 end
 
-fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc,1))
+% fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc(c2dtimer),1))
+clear c2dtimer
 if exist([filePath '.c1'],'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
 
 % ------------------------------------------------------------------------------
