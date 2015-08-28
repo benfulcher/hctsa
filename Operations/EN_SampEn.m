@@ -47,9 +47,19 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
+% Embedding dimension:
+if nargin < 2
+    M = 2;
+end
+% Tolerance:
+if nargin < 3
+    r = 0.1*std(y);
+end
+
 if nargin < 4
     preProcessHow = ''; % don't apply preProcessingHow
 end
+%-------------------------------------------------------------------------------
 
 if ~isempty(preProcessHow)
     switch preProcessHow
@@ -70,14 +80,22 @@ end
 % ------------------------------------------------------------------------------
 % Compute outputs from the code
 % ------------------------------------------------------------------------------
-% sampEn is just -log(p), so there's no need to record both
 for i = 1:M
-    % Much nicer to use dynamic field referencing
-    % out.(sprintf('p%u',i)) = p(i);
+    % Sample entropy:
     out.(sprintf('sampen%u',i)) = sampEn(i);
+
+    % Quadratic sample entropy (QSE), Lake (2006):
+    % (allows better comparison across r values)
+    out.(sprintf('quadSampEn%u',i)) = sampEn(i) + log(2*r);
+
+    % COSEn (Lake and Moorman, 2011), doesn't really make sense in general;
+    % especially for z-scored series!:
+    % out.(sprintf('COSEn%u',i)) = sampEn(i) + log(2*r) - log(mean(y));
 end
 
-out.meanchsampen = mean(diff(e));
+if M > 1
+    out.meanchsampen = mean(diff(sampEn));
+end
 % out.meanchp = mean(diff(p));
 
 end
