@@ -60,7 +60,7 @@ function out = CO_AddNoise(y,tau,amiMethod,extraParam,randomSeed)
 % Check a curve-fitting toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
 
-doPlot = 1; % plot outputs to figure
+doPlot = 0; % plot outputs to figure
 
 % ------------------------------------------------------------------------------
 %% Check inputs
