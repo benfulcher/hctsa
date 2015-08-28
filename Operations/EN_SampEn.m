@@ -75,18 +75,42 @@ end
 % ------------------------------------------------------------------------------
 % Use the physionet code to calculate the Sample Entropy using these parameters:
 % ------------------------------------------------------------------------------
-[sampEn, p, ~, ~] = PN_sampenc(y,M,r);
+
+% Check if a compiled C version exists:
+[a,b] = system('which sampen');
+
+if isempty(b) || length(y) < 3000 % faster to run within Matlab
+    % No compiled C version detected (for time series longer than 3000 samples):
+    % run in Matlab (slower):
+    % (length of 2000 because of read/write overhead)
+    sampEn = PN_sampenc(y,M,r);
+else
+    fprintf('Using compiled C code~~~\n')
+    % Run compiled C code:
+    filePath = BF_WriteTempFile(y);
+    command = sprintf('sampen -m %u -r %f < %s',M,r,filePath);
+    [~,res] = system(command);
+    s = textscan(res,'%[^\n]'); s = s{1};
+    sampEn = zeros(M,1);
+    for i = 1:M
+        [~,params] = regexp(s{i},'\((\S+)\)','tokens','match');
+        params = regexp(params{1}(2:end-1),',','split');
+        [~,result] = regexp(s{i},'= (\S+)','tokens','match');
+        result = str2num(result{1}(3:end));
+        sampEn(i) = result;
+    end
+end
 
 % ------------------------------------------------------------------------------
 % Compute outputs from the code
 % ------------------------------------------------------------------------------
 for i = 1:M
     % Sample entropy:
-    out.(sprintf('sampen%u',i)) = sampEn(i);
+    out.(sprintf('sampen%u',i-1)) = sampEn(i);
 
     % Quadratic sample entropy (QSE), Lake (2006):
     % (allows better comparison across r values)
-    out.(sprintf('quadSampEn%u',i)) = sampEn(i) + log(2*r);
+    out.(sprintf('quadSampEn%u',i-1)) = sampEn(i) + log(2*r);
 
     % COSEn (Lake and Moorman, 2011), doesn't really make sense in general;
     % especially for z-scored series!:
@@ -96,6 +120,5 @@ end
 if M > 1
     out.meanchsampen = mean(diff(sampEn));
 end
-% out.meanchp = mean(diff(p));
 
 end

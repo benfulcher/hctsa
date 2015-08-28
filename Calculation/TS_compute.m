@@ -194,10 +194,9 @@ if doParallel
 end
 
 
-% times stores the time taken for each time series to have its operations
-% calculated (for determining time remaining)
+% The times vector stores the time taken for each time series to have its
+% operations calculated (for determining time remaining)
 times = zeros(numTimeSeries,1);
-lastSavedTime = 0; % Last saved time
 
 % Initialize TS_CalcTime and TS_Quality if they don't yet exist
 if ~exist('TS_CalcTime','var')
