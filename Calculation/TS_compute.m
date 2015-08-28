@@ -162,7 +162,10 @@ if doParallel
 		matlabVersion = version('-release');
 		% Syntax changed in Matlab 2015a
 		if str2num(matlabVersion(1:4)) >= 2015
-			if isempty(gcp('nocreate')) % no matlab pool started yet
+
+			poolObj = gcp('nocreate'); % If no pool already, create a new one
+
+			if isempty(poolobj) % no matlab pool started yet
 				% Open pool of workers:
 				poolObj = parpool;
 				% Get number of workers:
