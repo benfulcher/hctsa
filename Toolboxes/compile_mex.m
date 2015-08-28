@@ -44,6 +44,7 @@ try
     fprintf(1,' done.\n');
 catch emsg
     fprintf(1,'%s\n\n',emsg.message);
+    cd(toolDir);
     errMsg = sprintf(['An error occurred while compiling ML_Fastdfa_core C code.\n' ...
         'It appears that mex is not set up to work on this system (cf. ''doc mex'' and ''mex -setup'').\n' ...
         'Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile_mex.m']);
