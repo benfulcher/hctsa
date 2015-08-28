@@ -86,22 +86,34 @@ end
 doPlot = 0; % Don't plot to screen by default:
 N = length(y); % length of the time series
 
-numStats = 10;
-randp_max = 2; % time series has been randomized to 2 times its length
-rand_inc = 10/100; % this proportion of the time series between calculations
+% Set up the points through the randomization process at which the
+% calculation of stats will occur:
+randp_max = 2; % time series has been randomized to double its length
+rand_inc = 0.1; % this proportion of the time series has been randomized between calculations
 numCalcs = randp_max/rand_inc; % number of calculations required
 calc_ints = floor(randp_max*N/numCalcs);
 calc_pts = (0:calc_ints:randp_max*N);
+if calc_pts(end) ~= randp_max*N;
+    calc_pts = [calc_pts,randp_max*N];
+end
 numCalcs = length(calc_pts); % some rounding issues inevitable
 
+statNames = {'xcn1', 'xc1', 'd1', 'ac1', 'ac2', 'ac3', 'ac4', 'sampen2_02', 'statav5', 'swss5_1'};
+numStats = length(statNames);
 stats = zeros(numCalcs,numStats); % record a stat at each randomization increment
 
 y_rand = y; % this vector will be randomized
 
-stats(1,:) = SUB_doyourcalcthing(y,y_rand); % initial condition: apply on itself
+stats(1,:) = CalculateStats(y,y_rand); % initial condition: apply on itself
 
 % Control the random seed (for reproducibility):
 BF_ResetSeed(randomSeed);
+
+%-------------------------------------------------------------------------------
+% Do the randomization
+%-------------------------------------------------------------------------------
+randTimer = tic;
+% fprintf(1,'%u/%u calculation points',numCalcs,N*randp_max)
 
 for i = 1:N*randp_max
     switch randomizeHow
@@ -118,8 +130,8 @@ for i = 1:N*randp_max
             y_rand(randi(N)) = y_rand(randi(N));
 
         case 'permute'
-            % randomize by permuting elements of the time series so that
-            % the distribution remains static
+            % randomize by swapping elements of the time series so that
+            % the distribution remains static; only temporal properties will change
             randis = randi(N,[2, 1]);
             y_rand(randis(1)) = y_rand(randis(2));
             y_rand(randis(2)) = y_rand(randis(1));
@@ -128,12 +140,12 @@ for i = 1:N*randp_max
             error('Unknown randomization method ''%s''.',randomizeHow);
     end
 
-    if ismember(i,calc_pts)
-        stats(calc_pts == i,:) = SUB_doyourcalcthing(y,y_rand);
-        % disp([num2str(i) ' out of ' num2str(N*randp_max)])
+    if any(calc_pts==i)
+        stats(calc_pts == i,:) = CalculateStats(y,y_rand);
     end
 
 end
+% fprintf(1,'Randomization took %s',BF_thetime(toc(randTimer)));
 
 if doPlot
     f = figure('color','w'); box('on');
@@ -142,157 +154,60 @@ if doPlot
 end
 
 % ------------------------------------------------------------------------------
-%% Fit to distributions of output
+%% Fit exponentials to outputs:
 % ------------------------------------------------------------------------------
 r = (1:size(stats,1))'; % gives an 'x-axis' for fitting
 
-% 1) xcn1: cross correlation at negative 1
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,1) -0.1]);
-f = fittype('a*exp(b*x)','options',s);
-[c, gof] = fit(r,stats(:,1),f);
-out.xcn1fexpa = c.a;
-out.xcn1fexpb = c.b;
-out.xcn1fexpr2 = gof.rsquare;
-out.xcn1fexpadjr2 = gof.adjrsquare;
-out.xcn1fexprmse = gof.rmse;
-
-out.xcn1diff = abs((stats(end,1)-stats(1,1))/stats(end,1));
-out.xcn1hp = SUB_gethp(stats(:,1));
-
+% 1) xcn1: cross correlation at lag of -1
 % 2) xc1: cross correlation at lag 1
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,2) -0.1]);
-f = fittype('a*exp(b*x)','options',s);
-[c, gof] = fit(r,stats(:,2),f);
-out.xc1fexpa = c.a;
-out.xc1fexpb = c.b;
-out.xc1fexpr2 = gof.rsquare;
-out.xc1fexpadjr2 = gof.adjrsquare;
-out.xc1fexprmse = gof.rmse;
-
-out.xc1diff = abs((stats(end,2)-stats(1,2))/stats(end,2));
-out.xc1hp = SUB_gethp(stats(:,2));
-
 % 3) d1: norm of differences between original and randomized time series
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,3) -0.2 stats(end,3)]);
-f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(r,stats(:,3),f);
-out.d1fexpa = c.a;
-out.d1fexpb = c.b;
-out.d1fexpc = c.c;
-out.d1fexpr2 = gof.rsquare;
-out.d1fexpadjr2 = gof.adjrsquare;
-out.d1fexprmse = gof.rmse;
-
-% d1diff will always be 1 since stats(1,3) will always be zero (included here for back-compatability):
-out.d1diff = abs((stats(end,3)-stats(1,3))/stats(end,3));
-out.d1hp = SUB_gethp(stats(:,3));
-
 % 4) ac1
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,4) -0.2]);
-f = fittype('a*exp(b*x)','options',s);
-[c, gof] = fit(r,stats(:,4),f);
-out.ac1fexpa = c.a;
-out.ac1fexpb = c.b;
-out.ac1fexpr2 = gof.rsquare;
-out.ac1fexpadjr2 = gof.adjrsquare;
-out.ac1fexprmse = gof.rmse;
-
-out.ac1diff = abs((stats(end,4)-stats(1,4))/stats(end,4));
-out.ac1hp = SUB_gethp(stats(:,4));
-
-
 % 5) ac2
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,5) -0.2]);
-f = fittype('a*exp(b*x)','options',s);
-[c, gof] = fit(r,stats(:,5),f);
-out.ac2fexpa = c.a;
-out.ac2fexpb = c.b;
-out.ac2fexpr2 = gof.rsquare;
-out.ac2fexpadjr2 = gof.adjrsquare;
-out.ac2fexprmse = gof.rmse;
-
-out.ac2diff = abs((stats(end,5)-stats(1,5))/stats(end,5));
-out.ac2hp = SUB_gethp(stats(:,5));
-
 % 6) ac3
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,6) -0.2]);
-f = fittype('a*exp(b*x)','options',s);
-[c, gof] = fit(r,stats(:,6),f);
-out.ac3fexpa = c.a;
-out.ac3fexpb = c.b;
-out.ac3fexpr2 = gof.rsquare;
-out.ac3fexpadjr2 = gof.adjrsquare;
-out.ac3fexprmse = gof.rmse;
-
-out.ac3diff = abs((stats(end,6)-stats(1,6))/stats(end,6));
-out.ac3hp = SUB_gethp(stats(:,6));
-
 % 7) ac4
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[stats(1,7) -0.4]);
-f = fittype('a*exp(b*x)','options',s);
-[c, gof] = fit(r,stats(:,7),f);
-out.ac4fexpa = c.a;
-out.ac4fexpb = c.b;
-out.ac4fexpr2 = gof.rsquare;
-out.ac4fexpadjr2 = gof.adjrsquare;
-out.ac4fexprmse = gof.rmse;
-
-out.ac4diff = abs((stats(end,7)-stats(1,7))/stats(end,7));
-out.ac4hp = SUB_gethp(stats(:,7));
-
-% 8) sampen (Sample Entropy)
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,8) -0.2 stats(end,8)]);
-f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(r,stats(:,8),f);
-out.sampen2_02fexpa = c.a;
-out.sampen2_02fexpb = c.b;
-out.sampen2_02fexpc = c.c;
-out.sampen2_02fexpr2 = gof.rsquare;
-out.sampen2_02fexpadjr2 = gof.adjrsquare;
-out.sampen2_02fexprmse = gof.rmse;
-
-out.sampen2_02diff = abs((stats(end,8)-stats(1,8))/stats(end,8));
-out.sampen2_02hp = SUB_gethp(stats(:,8));
-
+% 8) LZcomplex (LZ complexity)
 % 9) statav5
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,9) -0.1 stats(end,9)]);
-f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(r,stats(:,9),f);
-out.statav5fexpa = c.a;
-out.statav5fexpb = c.b;
-out.statav5fexpc = c.c;
-out.statav5fexpr2 = gof.rsquare;
-out.statav5fexpadjr2 = gof.adjrsquare;
-out.statav5fexprmse = gof.rmse;
-
-out.statav5diff = abs((stats(end,9)-stats(1,9))/stats(end,9));
-out.statav5hp = SUB_gethp(stats(:,9));
-
 % 10) swss5_1
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-stats(end,10) -0.1 stats(end,10)]);
-f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(r,stats(:,10),f);
-out.swss5_1fexpa = c.a;
-out.swss5_1fexpb = c.b;
-out.swss5_1fexpc = c.c;
-out.swss5_1fexpr2 = gof.rsquare;
-out.swss5_1fexpadjr2 = gof.adjrsquare;
-out.swss5_1fexprmse = gof.rmse;
 
-out.swss5_1diff = abs((stats(end,10)-stats(1,10))/stats(end,10));
-out.swss5_1hp = SUB_gethp(stats(:,10));
+out = struct();
+for i = 1:length(statNames)
+    % Exponential fits:
+    switch statNames{i}
+    case {'xcn1','xc1'}
+        startPoint = [stats(1,i),-0.1];
+        [c,gof] = f_fix_exp(r,stats(:,i),startPoint,0);
+    case {'ac1','ac2','ac3'}
+        startPoint = [stats(1,i),-0.2];
+        [c,gof] = f_fix_exp(r,stats(:,i),startPoint,0);
+    case 'ac4'
+        startPoint = [stats(1,i),-0.4];
+        [c,gof] = f_fix_exp(r,stats(:,i),startPoint,0);
+    case {'d1','sampen'}
+        startPoint = [-stats(end,i),-0.2,stats(end,i)];
+        [c,gof] = f_fix_exp(r,stats(:,i),startPoint,1);
+    case {'statav5','swss5_1'}
+        startPoint = [-stats(end,i),-0.1,stats(end,i)];
+        [c,gof] = f_fix_exp(r,stats(:,i),startPoint,1);
+    end
+    out = assignExpStats(out,c,gof,statNames{i});
 
+    % Extra statistics:
+    out = assignExtraStats(out,stats(:,i),statNames{i});
+end
 
 
 % ------------------------------------------------------------------------------
-    function out = SUB_doyourcalcthing(y,y_rand)
+    function out = CalculateStats(y,y_rand)
+        % Calculate statistics comparing a time series, y, and a randomized
+        % version of it, y_rand
+
         % Cross Correlation to original signal
         xc = xcorr(y,y_rand,1,'coeff');
         xcn1 = xc(1);
         xc1 = xc(3);
 
         % Norm of differences between original and randomized signals
-        d1 = norm(y-y_rand) / length(y);
+        d1 = norm(y - y_rand) / length(y);
 
         % Autocorrelation
         autoCorrs = CO_AutoCorr(y_rand,1:4,'Fourier');
@@ -301,16 +216,20 @@ out.swss5_1hp = SUB_gethp(stats(:,10));
         ac3 = autoCorrs(3);
         ac4 = autoCorrs(4);
 
-        % Entropy
-        sampen = PN_sampenc(y_rand,2,0.2,1);
+        % 2-bit LZ complexity:
+        % LZcomplex = NL_MS_LZcomplexity(y,3);
+
+        % SampEn(2,0.2,1):
+        sampen2_02 = PN_sampenc(y_rand,2,0.2,1);
 
         % Stationarity
         statav5 = SY_StatAv(y_rand,'seg',5);
         swss5_1 = SY_SlidingWindow(y_rand,'std','std',5,1);
 
-        out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, sampen, statav5, swss5_1];
+        out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, sampen2_02, statav5, swss5_1];
     end
 % ------------------------------------------------------------------------------
+
 
 % ------------------------------------------------------------------------------
 	function thehp = SUB_gethp(v)
@@ -321,5 +240,40 @@ out.swss5_1hp = SUB_gethp(stats(:,10));
 		end
 	end
 % ------------------------------------------------------------------------------
+    function [c,gof] = f_fix_exp(r,dataVector,startPoint,addOffset);
+        % Fits an exponential to the data vector across data points r
 
+        s = fitoptions('Method','NonlinearLeastSquares','StartPoint',startPoint);
+        if addOffset
+            f = fittype('a*exp(b*x)+c','options',s);
+            f_x = @(c,x) c.a*exp(c.b*x)+c.c;
+        else
+            f = fittype('a*exp(b*x)','options',s);
+            f_x = @(c,x) c.a*exp(c.b*x);
+        end
+        [c, gof] = fit(r,dataVector,f);
+        if doPlot;
+            figure('color','w'); hold on;
+            plot(r,dataVector,'x-k');
+            xr = linspace(min(r),max(r),100)
+            plot(xr,f_x(c,xr))
+        end
+    end
+%-------------------------------------------------------------------------------
+    function out = assignExpStats(out,c,gof,fieldName)
+        % Assigns relevant stats from an exponential fit result, [c,gof]
+        out.([fieldName,'fexpa']) = c.a;
+        out.([fieldName,'fexpb']) = c.b;
+        if isfield(c,'c')
+            out.([fieldName,'fexpc']) = c.c;
+        end
+        out.([fieldName,'fexpr2']) = gof.rsquare;
+        out.([fieldName,'fexprmse']) = gof.rmse;
+    end
+%-------------------------------------------------------------------------------
+    function out = assignExtraStats(out,dataVector,fieldName);
+        % Assigns 2 extra statistics about a data vector:
+        out.([fieldName,'diff']) = abs((dataVector(end)-dataVector(1))/dataVector(1));
+        out.([fieldName,'hp']) = SUB_gethp(dataVector);
+    end
 end

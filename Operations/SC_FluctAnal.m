@@ -6,8 +6,8 @@ function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
 % "Power spectrum and detrended fluctuation analysis: Application to daily
 % temperatures" P. Talkner and R. O. Weber, Phys. Rev. E 62(1) 150 (2000)
 %
-% The main difference between algorithms for estimating scaling exponents amount to
-% differences in how fluctuations, F, are quantified in time-series segments.
+% The main difference between algorithms for estimating scaling exponents amount
+% to differences in how fluctuations, F, are quantified in time-series segments.
 % Many alternatives are implemented in this function.
 %
 %---INPUTS:

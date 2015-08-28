@@ -77,7 +77,7 @@ void mexFunction(int nlhs, mxArray  *plhs[], int nrhs, const mxArray  *prhs[])
 		return;
 	}
 
-	mexPrintf("Number of reference points : %d\n", R);
+	// mexPrintf("Number of reference points : %d\n", R);
 
 	if (R < 2) {
 		mexErrMsgTxt("At least two reference indices must be given");
@@ -221,4 +221,3 @@ void mexFunction(int nlhs, mxArray  *plhs[], int nrhs, const mxArray  *prhs[])
 
 	delete searcher;
 }
-
