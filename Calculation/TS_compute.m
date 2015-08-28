@@ -165,7 +165,7 @@ if doParallel
 
 			poolObj = gcp('nocreate'); % If no pool already, create a new one
 
-			if isempty(poolobj) % no matlab pool started yet
+			if isempty(poolObj) % no matlab pool started yet
 				% Open pool of workers:
 				poolObj = parpool;
 				% Get number of workers:
