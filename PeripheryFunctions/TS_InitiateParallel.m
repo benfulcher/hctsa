@@ -83,14 +83,4 @@ if doInitiate
     pctRunOnAll AddJavaClassPathInfoDynamics()
 end
 
-
-%-------------------------------------------------------------------------------
-function AddJavaClassPathInfoDynamics()
-    % Adds the path required for the infodynamics toolkit
-    computeDir = which('TS_compute');
-    splits = regexp(computeDir,filesep);
-    hctsaDir = computeDir(1:splits(end-1));
-    javaaddpath(fullfile(hctsaDir,'Toolboxes','infodynamics-dist','infodynamics.jar'));
-end
-
 end
