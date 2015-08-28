@@ -96,10 +96,10 @@ end
 % --------------------------------------------------------------------------
 %% Load information from local files
 % --------------------------------------------------------------------------
-fprintf(fid,'Loading data from HCTSA_loc.mat...');
 if isempty(customFile)
 	customFile = 'HCTSA_loc.mat';
 end
+fprintf(fid,'Loading data from %s...',customFile);
 fileVarsStruct = whos('-file',customFile);
 fileVars = {fileVarsStruct.name};
 if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat'},fileVars))
