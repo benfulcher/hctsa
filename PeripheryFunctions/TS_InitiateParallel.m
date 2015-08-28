@@ -80,10 +80,17 @@ end
 % Initiate hctsa stuff on all workers using pctRunOnAll
 %-------------------------------------------------------------------------------
 if doInitiate
+    pctRunOnAll AddJavaClassPathInfoDynamics()
+end
+
+
+%-------------------------------------------------------------------------------
+function AddJavaClassPathInfoDynamics()
+    % Adds the path required for the infodynamics toolkit
     computeDir = which('TS_compute');
     splits = regexp(computeDir,filesep);
     hctsaDir = computeDir(1:splits(end-1));
-    pctRunOnAll javaaddpath(fullfile(hctsaDir,'Toolboxes','infodynamics-dist','infodynamics.jar'));
+    javaaddpath(fullfile(hctsaDir,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 end
 
 end
