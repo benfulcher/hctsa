@@ -91,7 +91,7 @@ if strcmp(reply,'y')
     clear op_timer
 else
     choseDatabase = 0;
-    fprintf(1,['-3- No link between Matlab and a mySQL database will be set up.\n'])
+    fprintf(1,['\n-3- No link between Matlab and a mySQL database will be set up.\n'])
     fprintf(1,['You will need to use TS_init to run hctsa analysis within Matlab locally.\n'])
     input('<<Press any key to continue>>')
 end
@@ -99,7 +99,7 @@ end
 % ------------------------------------------------------------------------------
 %% 5. Attempt to compile the executables required by the periphery Toolboxes:
 % ------------------------------------------------------------------------------
-fprintf(1,['-4- Attempting to compile the binary executables needed for evaluating ' ...
+fprintf(1,['\n-4- Attempting to compile the binary executables needed for evaluating ' ...
                                                         'some operations.\n'])
 fprintf(1,['Please make sure that mex is set up with the right compilers for' ...
                                                             ' this system.\n'])
