@@ -29,7 +29,6 @@ function TS_FeatureSummary(opID, whatData, annotateParams)
 %-------------------------------------------------------------------------------
 % Check inputs
 %-------------------------------------------------------------------------------
-
 if nargin < 1
     opID = 1;
 end
@@ -57,6 +56,17 @@ theOperation = Operations(theOp);
 if isempty(dataVector)
     error('No data for %s',Operations(theOp).Name);
 end
+
+% Retrieve group names also:
+fileVarsStruct = whos('-file',whatDataFile);
+fileVars = {fileVarsStruct.name};
+if ismember('groupNames',fileVars)
+    groupNames = load(whatDataFile,'groupNames');
+    groupNames = groupNames.groupNames;
+else
+    groupNames = {};
+end
+
 
 %-------------------------------------------------------------------------------
 % Sort out any custom plotting settings in the annotateParams structure
@@ -103,6 +113,13 @@ if isfield(TimeSeries,'Group')
     xy = vertcat(fx{:});
     tsInd = vertcat(tsInd{:});
     TimeSeries = TimeSeries(tsInd);
+
+    % Set up legend:
+    legendText = cell(length(groupNames)+1,1);
+    legendText{1} = 'combined';
+    legendText(2:end) = groupNames;
+    legend(legendText)
+
 else
     % Just run a single global one
     [fr,xr] = BF_plot_ks(dataVector,'k',0,1.5,10);

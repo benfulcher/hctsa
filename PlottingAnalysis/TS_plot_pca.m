@@ -64,7 +64,7 @@ end
 [TS_DataMat,TimeSeries,Operations,theFile] = TS_LoadData(whatData);
 
 % Retrieve group names also:
-fileVarsStruct = whos('-file',fileName);
+fileVarsStruct = whos('-file',theFile);
 fileVars = {fileVarsStruct.name};
 if ismember('groupNames',fileVars)
     groupNames = load(theFile,'groupNames');

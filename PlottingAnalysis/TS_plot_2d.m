@@ -71,41 +71,23 @@ end
 makeFigure = 1; % default is to plot on a brand new figure('color','w')
 
 % ------------------------------------------------------------------------------
-% Compute classification rates
+% Compute linear classification rates just for fun
 % ------------------------------------------------------------------------------
 classRate = zeros(3,1); % classRate1, classRate2, classRateboth
-groupLabels = [TimeSeries.Group]; % Convert GroupIndices to group form
+groupLabels = [TimeSeries.Group]'; % Convert GroupIndices to group form
 numGroups = length(unique(groupLabels));
 
-switch classMethod
-    case 'linclass'
-        kfold = 10;
-        numRepeats = 5;
-        classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
-                        sum(ytest == classify(Xtest,XTrain,yTrain,'linear'))/length(ytest);
-        try
-            classRate(1) = mean(classify_fn(Features(:,1),groupLabels,Features(:,1),groupLabels));
-            classRate(2) = mean(classify_fn(Features(:,2),groupLabels,Features(:,2),groupLabels));
-            classRate(3) = mean(classify_fn(Features(:,1:2),groupLabels,Features(:,1:2),groupLabels));
-        catch emsg
-            fprintf(1,'%s\n',emsg.message);
-        end
-        fprintf(1,'Linear in-sample classification rates computed\n');
-    case {'knn','knn_matlab'}
-        k = 3;
-        numRepeats = 10;
-        try
-            lf1 = TSQ_cfnerr('knn',k,Features(:,1),groupLabels,[],{'kfold',10,numRepeats});
-            classRate(1,:) = [mean(lf1),std(lf1)];
-            lf2 = TSQ_cfnerr('knn',k,Features(:,2),groupLabels,[],{'kfold',10,numRepeats});
-            classRate(2,:) = [mean(lf2),std(lf2)];
-            lf3 = TSQ_cfnerr('knn',k,Features(:,1:2),groupLabels,[],{'kfold',10,numRepeats});
-            classRate(3,:) = [mean(lf3),std(lf3)];
-        catch emsg
-            fprintf(1,'%s\n',emsg);
-        end
+classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
+                mean(ytest == classify(Xtest,XTrain,yTrain,'linear'));
+try
+    classRate(1) = mean(classify_fn(Features(:,1),groupLabels,Features(:,1),groupLabels));
+    classRate(2) = mean(classify_fn(Features(:,2),groupLabels,Features(:,2),groupLabels));
+    classRate(3) = mean(classify_fn(Features(:,1:2),groupLabels,Features(:,1:2),groupLabels));
+    fprintf(1,'Linear in-sample classification rates computed.\n');
+catch emsg
+    fprintf(1,'Linear classification rates not computed\n(%s)\n',emsg.message);
+    classRate(:) = NaN;
 end
-
 
 % ------------------------------------------------------------------------------
 %% Plot
@@ -138,7 +120,6 @@ else
 end
 if (numGroups == 1)
     groupColors = {[0,0,0]}; % Just use black...
-    % groupColors = 'rainbow'; % Just use black...
 end
 annotateParams.groupColors = groupColors;
 
@@ -149,7 +130,7 @@ if showDistr
     subplot(4,4,1:3); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numGroups
-        fr = BF_plot_ks(Features([TimeSeries.Group]==i,1),groupColors{i},0);
+        fr = BF_plot_ks(Features(groupLabels==i,1),groupColors{i},0);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -159,7 +140,7 @@ if showDistr
     subplot(4,4,[8,12,16]); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numGroups
-        fr = BF_plot_ks(Features([TimeSeries.Group]==i,2),groupColors{i},1);
+        fr = BF_plot_ks(Features(groupLabels==i,2),groupColors{i},1);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     set(gca,'XTickLabel',[]);
@@ -183,7 +164,7 @@ else
 end
 
 for i = 1:numGroups
-    plot(Features([TimeSeries.Group]==i,1),Features([TimeSeries.Group]==i,2),...
+    plot(Features(groupLabels==i,1),Features(groupLabels==i,2),...
                 '.','color',groupColors{i},'MarkerSize',theMarkerSize)
 end
 
@@ -192,24 +173,23 @@ end
 % ------------------------------------------------------------------------------
 didClassify = 0;
 if (numGroups == 2) && strcmp(classMethod,'linclass');
-    modeorder = 'linear'; % or 'quadratic'
+    whatClassifier = 'linear'; % or 'quadratic'
 
     xlim = get(gca,'XLim'); ylim = get(gca,'YLim');
-    group = BF_ToGroup(GroupIndices);
     [X, Y] = meshgrid(linspace(xlim(1),xlim(2),200),linspace(ylim(1),ylim(2),200));
     X = X(:); Y = Y(:);
-    [~,~,~,~,coeff] = classify([X Y],Features(:,1:2), group, modeorder);
+    [~,~,~,~,coeff] = classify([X Y],Features(:,1:2), groupLabels, whatClassifier);
 
     hold on;
     K = coeff(1,2).const; L = coeff(1,2).linear;
-    if strcmp(modeorder,'linear')
+    if strcmp(whatClassifier,'linear')
         Q = zeros(2,2);
     else
         Q = coeff(1,2).quadratic;
     end
     f = sprintf('0 = %g+%g*x+%g*y+%g*x^2+%g*x.*y+%g*y.^2',K,L,Q(1,1),Q(1,2)+Q(2,1),Q(2,2));
     h2 = ezplot(f,[xlim(1), xlim(2), ylim(1), ylim(2)]);
-    set(h2,'LineStyle','--','color','k','LineWidth',2)
+    set(h2,'LineStyle','--','color',ones(1,3)*0.5,'LineWidth',1.5)
 
     % Label that classification was performed
     didClassify = 1;
@@ -220,12 +200,10 @@ end
 %% Label Axes
 % ------------------------------------------------------------------------------
 if didClassify
-    title(sprintf('Combined classification rate (%s) = %.2f%%',classMethod, ...
-                    round(classRate(3,1)*100)),'interpreter','none');
     labelText = cell(2,1);
     for i = 1:2
         labelText{i} = sprintf('%s (acc = %.2f %%)',featureLabels{i}, ...
-                                round(classRate(i,1)*100)); %,round(classRate(i,2)*100));
+                                round(classRate(i,1)*100));
     end
 else
     labelText = featureLabels;
@@ -238,7 +216,7 @@ ylabel(labelText{2},'interpreter','none')
 if numGroups > 1
     legs = cell(numGroups,1);
     for i = 1:numGroups
-        legs{i} = sprintf('%s (%u)',groupNames{i},sum([TimeSeries.Group]==i));
+        legs{i} = sprintf('%s (%u)',groupNames{i},sum(groupLabels==i));
     end
     legend(legs);
 end
@@ -256,5 +234,12 @@ if isfield(TimeSeries,'Data')
     BF_AnnotatePoints(xy,TimeSeries,annotateParams);
 end
 
+%-------------------------------------------------------------------------------
+% Set title:
+%-------------------------------------------------------------------------------
+if didClassify
+    title(sprintf('Combined classification rate (%s) = %.2f%%',classMethod, ...
+                    round(classRate(3,1)*100)),'interpreter','none');
+end
 
 end

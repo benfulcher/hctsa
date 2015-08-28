@@ -181,6 +181,8 @@ for j = 1:numAnnotate
 
 end
 
+% Clear the title
+title('')
 
 %-------------------------------------------------------------------------------
 function groupColors = GiveMeGroupColors(annotateParams,numGroups) % Set colors
