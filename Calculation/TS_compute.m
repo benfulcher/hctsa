@@ -1,4 +1,4 @@
-function TS_compute(doParallel,ts_id_range,op_id_range,customFile,doLog,beVocal)
+function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,doLog,beVocal)
 % TS_compute    Computes missing elements of TS_DataMat (in HCTSA_loc.mat)
 %
 %---EXAMPLE USAGE:
@@ -9,6 +9,9 @@ function TS_compute(doParallel,ts_id_range,op_id_range,customFile,doLog,beVocal)
 %               computations in parallel over multiple cores.
 % ts_id_range: a custom range of time series IDs to compute (default: [] -- compute all)
 % op_id_range: a custom range of operation IDs to compute (default: [] -- compute all)
+% computeWhat: whether to compute just missing values ('missing', default), or
+% 				ALSO retry results that previously threw an error ('error'), or
+% 				ALSO retry any result that previously did not return a good value ('bad')
 % doLog:       if 1 writes results to a log file (0 by default -- output to prompt).
 % beVocal:     if 1, gives additional user feedback about the calculation of
 %               each individual operation.
@@ -51,13 +54,17 @@ if nargin < 3
     op_id_range = []; % compute all op_ids in the file by default
 end
 
+if nargin < 4 || isempty(computeWhat)
+	computeWhat = 'missing';
+end
+
 % Custom HCTSA_loc.mat file:
-if nargin < 4
+if nargin < 5
     customFile = ''; % compute all op_ids in the file by default
 end
 
 % Log to file
-if nargin < 5
+if nargin < 6
     % By default, do not log to file, write to screen (if beVocal)
 	doLog = 0;
 end
@@ -71,7 +78,7 @@ else
 end
 
 % Be vocal?
-if nargin < 6
+if nargin < 7
     beVocal = 1; % Write back lots of information to screen
     % prints every piece of code evaluated (nice for error checking)
 end
@@ -208,8 +215,20 @@ for i = 1:numTimeSeries
     % Which operations need calculating for this time series?:
     % ----
 	qualityLabels = TS_Quality(tsInd,:); % The calculation states of any existing results for the current time series, a line of TS_Quality
-					   	  % NaN indicates a value never before calculated, 1 indicates fatal error before (try again now)
-    toCalc = (opCompute & isnan(qualityLabels) | qualityLabels > 0); % Operations awaiting calculation
+	   	  % NaN indicates a value never before calculated, 1 indicates fatal error before (try again now)
+
+	% Determine which operations are awaiting calculation for this time series:
+	switch computeWhat
+	case 'missing'
+		% try to compute missing values (i.e, never previously computed for this time series)
+	    toCalc = (opCompute & isnan(qualityLabels))
+	case 'error'
+		% compute missing or previously threw an error
+		toCalc = (opCompute & (isnan(qualityLabels) | qualityLabels == 1));
+	case 'bad'
+		% compute missing, or anything that wasn't previously a good value
+		toCalc = (opCompute & (isnan(qualityLabels) | qualityLabels > 0)); % Operations awaiting calculation
+	end
     numCalc = sum(toCalc); % Number of operations to evaluate
 
     % -----

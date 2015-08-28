@@ -1,6 +1,8 @@
 ##hctsa
 ###Highly comparative time-series analysis code repository
 
+A software package for running highly comparative time-series analysis, using Matlab (full support for R2014b or later).
+
 This repository draws on the work published as:
 
 B. D. Fulcher, M. A. Little, N. S. Jones (2013) [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). J. Roy. Soc. Interface. 10, 83.
@@ -25,4 +27,4 @@ However, details on how to merge the latest version of the repository with the l
 
 Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/SystemsAndSignalsGroup/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).
 
-Many thanks go to Romesh Abeysuriya for helping with the database set-up process and install scripts.
+Many thanks go to Romesh Abeysuriya for helping with the mySQL database set-up and install scripts.

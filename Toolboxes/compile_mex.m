@@ -1,11 +1,6 @@
-% ------------------------------------------------------------------------------
-% compile_mex
-% ------------------------------------------------------------------------------
+% compile_mex   Compiles mex files required for hctsa package
 %
-% This script compiles the mex files required for all operations implemented in
-% the HCTSA package.
-%
-% It must be run in the Toolboxes directory.
+% This script must be run in the Toolboxes directory.
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -49,9 +44,10 @@ try
     fprintf(1,' done.\n');
 catch emsg
     fprintf(1,'%s\n\n',emsg.message);
-    error(['An error occurred while compiling ML_Fastdfa_core C code.\n' ...
+    errMsg = sprintf(['An error occurred while compiling ML_Fastdfa_core C code.\n' ...
         'It appears that mex is not set up to work on this system (cf. ''doc mex'' and ''mex -setup'').\n' ...
         'Get ''mex ML_fastdfa_core.c'' to work, and then re-run compile_mex.m']);
+    error(errMsg)
 end
 
 % ------------------------------------------------------------------------------

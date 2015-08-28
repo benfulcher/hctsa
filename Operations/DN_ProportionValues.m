@@ -1,9 +1,9 @@
 function out = DN_ProportionValues(x,propWhat)
-% DN_ProportionValues   Proportion of values in a time series.
+% DN_ProportionValues   Proportion of values in a data vector.
 %
-% Returns statistics on the values of the raw time series: the proportion
-% of zeros in the raw time series, the proportion of positive values, and the
-% proportion of values greater than or equal to zero.
+% Returns statistics on the values of the data vector: the proportion of zeros,
+% the proportion of positive values, and the proportion of values greater than or
+% equal to zero.
 %
 %---INPUTS:
 % x, the input time series

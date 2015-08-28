@@ -122,28 +122,6 @@ fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
 fprintf(1,'Mean %s across %u operations = %4.2f%s; (Random guessing for %u equiprobable classes = %4.2f%s)\n', ...
         cfnName,numOps,nanmean(testStat),cfnUnit,numGroups,chanceLine,cfnUnit);
 
-%-------------------------------------------------------------------------------
-%% Compute null distribution
-%-------------------------------------------------------------------------------
-numRepeats = 10;
-testStat_rand = zeros(numOps,numRepeats);
-if doNull
-    fprintf(1,'Now for %u nulls... ',numRepeats)
-    tic
-    for j = 1:numRepeats
-        if j<numRepeats
-            fprintf(1,'%u,',j)
-        else
-            fprintf(1,'%u',j)
-        end
-        % Shuffle labels:
-        groupLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
-        testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels);
-    end
-    fprintf(1,' %u %s statistics computed in %s.\n',numOps*numRepeats,...
-                                    cfnName,BF_thetime(toc(timer)));
-end
-
 % --------------------------------------------------------------------------
 %% Display information about the top topN operations
 % --------------------------------------------------------------------------
@@ -166,10 +144,33 @@ end
 % Histogram of distribution of test statistics for labeled and null data
 %-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'histogram'))
-    colors = BF_getcmap('spectral',5,1);
-    % 1) a figure to show the distribution of test statistics across all
+    % A figure to show the distribution of test statistics across all
     % features:
+
+    %-------------------------------------------------------------------------------
+    %% Compute null distribution
+    %-------------------------------------------------------------------------------
+    numRepeats = 10;
+    testStat_rand = zeros(numOps,numRepeats);
+    if doNull
+        fprintf(1,'Now for %u nulls... ',numRepeats)
+        tic
+        for j = 1:numRepeats
+            if j<numRepeats
+                fprintf(1,'%u,',j)
+            else
+                fprintf(1,'%u',j)
+            end
+            % Shuffle labels:
+            groupLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
+            testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels);
+        end
+        fprintf(1,' %u %s statistics computed in %s.\n',numOps*numRepeats,...
+                                        cfnName,BF_thetime(toc(timer)));
+    end
+
     f = figure('color','w'); hold on
+    colors = BF_getcmap('spectral',5,1);
     if ~doNull
         h_real = histogram(testStat,'Normalization','probability',...
                     'BinMethod','auto','FaceColor',colors{5},'FaceAlpha',0);
@@ -191,6 +192,7 @@ if any(ismember(whatPlots,'histogram'))
     plot(chanceLine*ones(2,1),[0,maxH],'--k')
     % Add mean of real distribution
     plot(mean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2)
+    % Labels:
     xlabel(sprintf('Individual %s across %u features',cfnName,numOps))
     ylabel('Probability')
 end
