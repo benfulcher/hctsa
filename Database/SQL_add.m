@@ -217,12 +217,29 @@ if ~isMatFile
             end
         end
 
-        fprintf(1,['\nHow does it look? Make sure the time series and metadata ' ...
-                                                'match up with their headings\n'])
+        fprintf(1,['\nHow does it look? Make sure the metadata ' ...
+                                    'matches up with the headings\n'])
 
-        reply = input(['If we go on, we will attempt to read all time series ' ...
-                        'from file and add all ' ...
-                        'data to the database.\n<<<Type ''y'' to continue...>>>'],'s');
+        % Ask the question:
+        if strcmp(addWhat,'ts')
+            if forDatabase
+                reply = input(['If we go on, we will attempt to read all time series ' ...
+                            'from file and add all ' ...
+                            'data to the database.\n<<<Type ''y'' to continue...>>>'],'s');
+            else
+                reply = input(['If we go on, we will attempt to read all time series ' ...
+                            'from file and add all ' ...
+                            'data to HCTSA_loc.mat\n<<<Type ''y'' to continue...>>>'],'s');
+            end
+        else
+            if forDatabase
+                reply = input(['If we go on, we will attempt to add all ' ...
+                            'data to the database.\n<<<Type ''y'' to continue...>>>'],'s');
+            else
+                reply = input(['If we go on, we will attempt to add all ' ...
+                            'data to HCTSA_loc.mat\n<<<Type ''y'' to continue...>>>'],'s');
+            end
+        end
 
         if ~strcmp(reply,'y')
             fprintf(1,'I didn''t think so. Come back later...\n')
@@ -233,7 +250,7 @@ if ~isMatFile
     fprintf(1,'%s read.\n',inputFile)
 
 else
-    % Only allow .mat file input when importing time series
+    % .mat file input is only allowed when importing time series
     if ~strcmp(addWhat,'ts')
         error(['.mat file input type only supported for importing time series. ' ...
                 'Please specify a text file for importing master operations or operations.']);

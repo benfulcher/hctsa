@@ -171,6 +171,8 @@ if doParallel
 				fprintf(fid,['Matlab parallel processing pool opened with %u ' ...
 	                                    'workers\n'],numWorkers)
 			else
+				% Get number of workers:
+				numWorkers = poolObj.NumWorkers;
 				fprintf(fid,['Matlab parallel processing pool already open with ' ...
 											'%u workers\n'],numWorkers)
 			end
@@ -221,7 +223,7 @@ for i = 1:numTimeSeries
 	switch computeWhat
 	case 'missing'
 		% try to compute missing values (i.e, never previously computed for this time series)
-	    toCalc = (opCompute & isnan(qualityLabels))
+	    toCalc = (opCompute & isnan(qualityLabels));
 	case 'error'
 		% compute missing or previously threw an error
 		toCalc = (opCompute & (isnan(qualityLabels) | qualityLabels == 1));
