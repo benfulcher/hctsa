@@ -84,7 +84,7 @@ N = length(y); % length of the time series
 
 % Write a temporary file in the system temp directory:
 filePath = BF_WriteTempFile(y);
-fprintf(1,'Wrote temporary data file ''%s'' for TISEAN.\n',filePath)
+% fprintf(1,'Wrote temporary data file ''%s'' for TISEAN.\n',filePath)
 
 % Get embedding parameters:
 tm = BF_embed(y,embedParams{1},embedParams{2},2);

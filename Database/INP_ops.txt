@@ -963,6 +963,10 @@ EN_rpde_3_ac.maxRPD             EN_rpde_3_ac_maxRPD             entropy
 RM_entropy	RM_entropy	entropy
 EN_CID.CE1 EN_CID_CE1 entropy,complexity
 EN_CID.CE2 EN_CID_CE2 entropy,complexity
+EN_CID.minCE1 EN_CID_minCE1 entropy,complexity,distribution
+EN_CID.minCE2 EN_CID_minCE2 entropy,complexity,distribution
+EN_CID.CE1_norm EN_CID_CE1_norm entropy,complexity
+EN_CID.CE2_norm EN_CID_CE2_norm entropy,complexity
 EN_DistributionEntropy_ks_001_0	        EN_DistributionEntropy_ks_001_0	    entropy
 EN_DistributionEntropy_ks_005_0	        EN_DistributionEntropy_ks_005_0	    entropy
 EN_DistributionEntropy_ks_01_0	        EN_DistributionEntropy_ks_01_0	    entropy

@@ -126,7 +126,7 @@ end
 %% Write the temporary data file
 % ------------------------------------------------------------------------------
 filePath = BF_WriteTempFile(y);
-fprintf(1,'Wrote temporary data file ''%s'' for TISEAN\n',filePath)
+% fprintf(1,'Wrote temporary data file ''%s'' for TISEAN\n',filePath)
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code

@@ -152,12 +152,12 @@ void mexFunction(int nlhs, mxArray  *plhs[], int nrhs, const mxArray  *prhs[])
 
 		if ((metric == 0) || (!strncmp("euclidian", metric, strlen(metric)))) {
 			euclidian_distance dummy;
-			mexPrintf("Using euclidian metric to calculated distances\n");
+			// mexPrintf("Using euclidian metric to calculated distances\n");
 			compute(nlhs, plhs, nrhs, prhs, 1, dummy);
 		}
 		else if ((!strncmp("maximum", metric, strlen(metric)))) {
 			maximum_distance dummy;
-			mexPrintf("Using maximum metric to calculated distances\n");
+			// mexPrintf("Using maximum metric to calculated distances\n");
 			compute(nlhs, plhs, nrhs, prhs, 1, dummy);
 		}
 		else
@@ -167,7 +167,7 @@ void mexFunction(int nlhs, mxArray  *plhs[], int nrhs, const mxArray  *prhs[])
 #endif
 	} else {
 		euclidian_distance dummy;
-		mexPrintf("Using euclidian metric to calculated distances\n");
+		// mexPrintf("Using euclidian metric to calculated distances\n");
 		compute(nlhs, plhs, nrhs, prhs, 0, dummy);
 	}
 
