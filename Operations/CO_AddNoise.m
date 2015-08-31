@@ -88,7 +88,7 @@ noiseRange = linspace(0,3,50); % compare properties across this noise range
 BF_ResetSeed(randomSeed); % reset the random seed if specified
 numRepeats = length(noiseRange);
 amis = zeros(numRepeats,1);
-noise = randn(size(y));
+noise = randn(size(y)); % uncorrelated additive noise
 
 % ------------------------------------------------------------------------------
 % Compute the automutual information across a range of noise levels

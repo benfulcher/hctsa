@@ -36,10 +36,28 @@ function out = EN_CID(y)
 % ------------------------------------------------------------------------------
 
 % Original definition (in Table 2 of paper cited above)
-out.CE1 = sqrt(mean(diff(y).^2)); % sum -> mean to deal with non-equal time-series lengths
+% sum -> mean to deal with non-equal time-series lengths
+% (now scales properly with length)
+f_CE1 = @(x) sqrt(mean(diff(x).^2));
+
+out.CE1 = f_CE1(y);
+
 
 % Definition corresponding to the line segment example in Fig. 9 of the paper
-% cited above (using pythagoras's theorum):
-out.CE2 = mean(sqrt(1+diff(y).^2));
+% cited above (using Pythagoras's theorum):
+f_CE2 = @(x) mean(sqrt(1+diff(x).^2));
+
+out.CE2 = f_CE2(y);
+
+% Defined as a proportion of the minimum such value possible for this time series,
+% this would be attained from putting close values close; i.e., sorting the time
+% series
+
+out.minCE1 = f_CE1(sort(y));
+out.minCE2 = f_CE2(sort(y));
+
+out.CE1_norm = out.CE1/out.minCE1;
+out.CE2_norm = out.CE2/out.minCE2;
+
 
 end

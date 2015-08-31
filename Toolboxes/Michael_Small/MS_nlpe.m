@@ -1,4 +1,5 @@
-% function e = MS_nlpe(y,v);
+function e = MS_nlpe(y,de,tau);
+% MS_nlpe
 %
 % Compute the normalised "drop-one-out" constant interpolation nonlinear
 % prediction error for embedding dimension de and lag tau or for embedding
@@ -13,13 +14,11 @@
 % references therein.
 % (Minor edits by Ben Fulcher, 2010)
 
-function e = MS_nlpe(y,de,tau);
-
 if min(size(y)) > 1
     x = y;
     y = y(1,2:end);
     x = x(:,1:(end-1));
-elseif max(size(de))>1,
+elseif max(size(de)) > 1
     v = de(de > 0);
     [x, y] = MS_embed(y,v-1);
 else

@@ -182,7 +182,7 @@ for i = 1:length(statNames)
     case 'ac4'
         startPoint = [stats(1,i),-0.4];
         [c,gof] = f_fix_exp(r,stats(:,i),startPoint,0);
-    case {'d1','sampen'}
+    case {'d1','sampen2_02'}
         startPoint = [-stats(end,i),-0.2,stats(end,i)];
         [c,gof] = f_fix_exp(r,stats(:,i),startPoint,1);
     case {'statav5','swss5_1'}
