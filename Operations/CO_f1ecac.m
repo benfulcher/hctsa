@@ -1,9 +1,9 @@
 function out = CO_f1ecac(y)
-% CO_f1ecac     The 1/e correlation length.
+% CO_f1ecac     The 1/e correlation length
 % 
 % Finds where autocorrelation function first crosses 1/e
 %
-%---INPUTS:
+%---INPUT:
 % y, the input time series.
 
 % ------------------------------------------------------------------------------
@@ -30,13 +30,15 @@ function out = CO_f1ecac(y)
 % ------------------------------------------------------------------------------
 
 N = length(y); % time-series length
-oone = 1/exp(1); % 1/e
+thresh = 1/exp(1); % 1/e threshold
 
-for i = 1:N-1
+a = zeros(N,1); % autocorrelations
+a(1) = 1; % perfect autocorrelation when no lag
+for i = 2:N
     a(i) = CO_AutoCorr(y,i,'Fourier');
-    if (i > 1) && ((a(i-1)-oone)*(a(i)-oone) < 0)
+    if ((a(i-1)-thresh)*(a(i)-thresh) < 0)
         % Crossed the 1/e line
-        out = i;
+        out = i-1; % -1 since i is tau+1
         return
     end
 end
