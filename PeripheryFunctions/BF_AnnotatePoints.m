@@ -121,7 +121,11 @@ for j = 1:numAnnotate
     plotPoint = xy(iPlot,:);
 
     % Get the group index of the selected time series:
-    theGroup = TimeSeries(iPlot).Group;
+    if isfield(TimeSeries,'Group')
+        theGroup = TimeSeries(iPlot).Group;
+    else
+        theGroup = 1;
+    end
 
     if (j > 1) && any(sum(abs(alreadyPicked(1:j-1,:) - repmat(alreadyPicked(j,:),j-1,1)),2)==0)
         % Same one has already been picked, don't plot it again
