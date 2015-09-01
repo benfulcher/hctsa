@@ -71,6 +71,10 @@ iszscored = BF_iszscored(y);
 if nargin < 2
     tau = []; % set default in CO_HistogramAMI
 end
+% Set tau to minimum of autocorrelation function
+if ~isempty(tau) && ischar(tau) && ismember(tau,{'ac','tau'})
+    tau = CO_FirstZero(y,'ac');
+end
 if nargin < 3
     amiMethod = 'even'; % using evenly spaced bins in CO_HistogramAMI
 end

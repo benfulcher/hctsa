@@ -95,7 +95,7 @@ end
 % ------------------------------------------------------------------------------
 % numSegs segments, each of length segl data points
 
-numFeat = 9; % number of features
+numFeat = 8; % number of features
 qs = zeros(numSegs,numFeat);
 
 % Reset random seed, for reproducibility:
@@ -116,11 +116,11 @@ for j = 1:numSegs
     qs(j,2) = std(ysub); % standard deviation
     qs(j,3) = skewness(ysub); % skewness
     qs(j,4) = kurtosis(ysub); % kurtosis
-    qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1
-    qs(j,6) = PN_sampenc(ysub,1,0.2,1); % SampEn_1
-    qs(j,7) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
-    qs(j,8) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
-    qs(j,9) = taul;
+    entropyStruct = EN_SampEn(ysub,2,0.1);
+    qs(j,5) = entropyStruct.quadsampen1; % SampEn_1_01
+    qs(j,6) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
+    qs(j,7) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
+    qs(j,8) = taul;
 end
 
 % ------------------------------------------------------------------------------
@@ -149,20 +149,20 @@ out.meanmean = fs(1,1);
 out.meanstd = fs(2,1);
 out.meanskew = fs(3,1);
 out.meankurt = fs(4,1);
-out.meanapen1_02 = fs(5,1);
-out.meansampen1_02 = fs(6,1);
-out.meanac1 = fs(7,1);
-out.meanac2 = fs(8,1);
-out.meantaul = fs(9,1);
+% out.meanapen1_02 = fs(5,1);
+out.meansampen1_02 = fs(5,1);
+out.meanac1 = fs(6,1);
+out.meanac2 = fs(7,1);
+out.meantaul = fs(8,1);
 
 out.stdmean = fs(1,2);
 out.stdstd = fs(2,2);
 out.stdskew = fs(3,2);
 out.stdkurt = fs(4,2);
-out.stdapen1_02 = fs(5,2);
-out.stdsampen1_02 = fs(6,2);
-out.stdac1 = fs(7,2);
-out.stdac2 = fs(8,2);
-out.stdtaul = fs(9,2);
+% out.stdapen1_02 = fs(5,2);
+out.stdsampen1_02 = fs(5,2);
+out.stdac1 = fs(6,2);
+out.stdac2 = fs(7,2);
+out.stdtaul = fs(8,2);
 
 end

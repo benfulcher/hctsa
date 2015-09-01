@@ -170,7 +170,7 @@ wi = strmatch('writing to stdout',s);
 s = s(wi+1:end);
 if isempty(s) % TISEAN did produce valid output
     delete([filePath,'.c2']); delete([filePath,'.d2']); delete([filePath,'.h2']) % just in case these files were generated...
-    error('TISEAN d2 produced invalid output: %s',res)
+    error('TISEAN d2 produced invalid output (perhaps due to long tau = %u, N = %u)\n: %s',tau,N,res)
 end
 try
     c2gdat = SUB_readTISEANout(s,maxm,'#m=',3);

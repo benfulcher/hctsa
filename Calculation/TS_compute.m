@@ -132,7 +132,8 @@ numOps = length(op_id_range); % Number of operations
 
 % Check that some computable range exists
 if numTimeSeries==0 || numOps==0
-    fprintf(fid,'%u time series and %u operations match the ids provided. Exiting.\n');;
+    fprintf(fid,'%u time series and %u operations match the ids provided. Exiting.\n',...
+						numTimeSeries,numOps);
     return
 end
 

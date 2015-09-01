@@ -52,8 +52,8 @@ end
 nsegr = (2:1:maxnseg); % range of nseg to sweep across
 nmov = 1; % controls window overlap
 
-nfeat = 11; % number of features
-fs = zeros(length(nsegr),nfeat);
+numFeatures = 10; % number of features
+fs = zeros(length(nsegr),numFeatures); % standard deviation of feature values over windows
 taug = CO_FirstZero(y,'ac'); % global tau
 
 for i = 1:length(nsegr)
@@ -62,11 +62,11 @@ for i = 1:length(nsegr)
     inc = floor(wlen/nmov); % increment to move at each step
     if inc == 0; inc = 1; end % increment rounded down to zero, prop it up
 
-    nsteps = (floor((length(y)-wlen)/inc)+1);
+    numSteps = (floor((length(y)-wlen)/inc)+1);
     % qs = struct;
-    qs = zeros(nsteps,nfeat);
+    qs = zeros(numSteps,numFeatures);
 
-    for j = 1:nsteps
+    for j = 1:numSteps
         ysub = y((j-1)*inc+1:(j-1)*inc+wlen);
         taul = CO_FirstZero(ysub,'ac');
 
@@ -86,27 +86,26 @@ for i = 1:length(nsegr)
         qs(j,2) = std(ysub); % standard deviation
         qs(j,3) = skewness(ysub); % skewness
         qs(j,4) = kurtosis(ysub); % kurtosis
-        qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1
-        qs(j,6) = PN_sampenc(ysub,1,0.2,1); % SampEn_1
-        qs(j,7) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
-        qs(j,8) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
-        qs(j,9) = CO_AutoCorr(ysub,taug,'Fourier'); % AC_glob_tau
-        qs(j,10) = CO_AutoCorr(ysub,taul,'Fourier'); % AC_loc_tau
-        qs(j,11) = taul;
+        % qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1_02
+        sampenStruct = EN_SampEn(ysub,2,0.1);
+        qs(j,5) = sampenStruct.quadSampEn1; % SampEn_1_01
+        qs(j,6) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
+        qs(j,7) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
+        qs(j,8) = CO_AutoCorr(ysub,taug,'Fourier'); % AC_glob_tau
+        qs(j,9) = CO_AutoCorr(ysub,taul,'Fourier'); % AC_loc_tau
+        qs(j,10) = taul;
     end
     % plot(qs,'o-');
     % input('what do you think?')
 
-    % fs(i,1:nfeat) = structfun(@(x)std(x),qs,'UniformOutput',1);
+    % fs(i,1:numFeatures) = structfun(@(x)std(x),qs,'UniformOutput',1);
     % fs(i) = structfun(@(x)std(x),qs,'UniformOutput',0);
-    fs(i,1:nfeat) = std(qs);
+    fs(i,1:numFeatures) = std(qs);
 end
 
 % fs contains std of quantities at all different 'scales' (segment lengths)
 
 fs = std(fs); % how much does the 'std stationarity' vary over different scales?
-
-% plot(fs)
 
 % ------------------------------------------------------------------------------
 % Outputs:
@@ -115,13 +114,12 @@ out.stdmean = fs(1);
 out.stdstd = fs(2);
 out.stdskew = fs(3);
 out.stdkurt = fs(4);
-out.stdapen1_02 = fs(5);
-out.stdsampen1_02 = fs(6);
-out.stdac1 = fs(7);
-out.stdac2 = fs(8);
-out.stdactaug = fs(9);
-out.stdactaul = fs(10);
-out.stdtaul = fs(11);
-
+% out.stdapen1_02 = fs(5);
+out.stdsampen1_02 = fs(5);
+out.stdac1 = fs(6);
+out.stdac2 = fs(7);
+out.stdactaug = fs(8);
+out.stdactaul = fs(9);
+out.stdtaul = fs(10);
 
 end

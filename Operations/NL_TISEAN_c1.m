@@ -25,7 +25,7 @@ function out = NL_TISEAN_c1(y, tau, mmm, tsep, Nref)
 %---OUTPUTS: optimal scaling ranges and dimension estimates for a time delay,
 % tau, embedding dimensions, m, ranging from m_{min} to m_{max}, a time
 % separation, tsep, and a number of reference points, Nref.
-
+%
 % cf. "Practical implementation of nonlinear time series methods: The TISEAN
 % package" Hegger, R. and Kantz, H. and Schreiber, T., Chaos 9(2) 413 (1999)
 %
@@ -35,6 +35,7 @@ function out = NL_TISEAN_c1(y, tau, mmm, tsep, Nref)
 % The TISEAN routines are performed in the command line using 'system' commands
 % in Matlab, and require that TISEAN is installed and compiled, and able to be
 % executed in the command line.
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -187,6 +188,7 @@ s = s{1};
 if isempty(s)
     error('Error reading TISEAN output file %s.c1',filePath)
 end
+
 c1dat = SUB_readTISEANout(s,'#m=',2);
 if isempty(c1dat)
     error('Error reading TISEAN output file %s.c1: %s',filePath,s{1})
