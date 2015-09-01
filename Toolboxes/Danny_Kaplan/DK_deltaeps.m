@@ -1,5 +1,6 @@
+function [delta,epsilon] = DK_deltaeps(z, images, lockout)
 % DK_deltaeps
-% 
+%
 % [delta,epsilon] = deltaeps(z, images)
 % Delta-epsilon method
 % z      -- embedded data as from getimage()
@@ -8,9 +9,10 @@
 % --------------
 % delta  -- distances between pre-images
 % eps    -- distances between corresponding images
-% plot(delta,eps,'.') shows how image distance depends on 
-% pre-image distance
 % 
+% plot(delta,eps,'.') shows how image distance depends on
+% pre-image distance
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 1996, D. Kaplan <kaplan@macalester.edu>
 %
@@ -18,17 +20,15 @@
 % the terms of the GNU General Public License as published by the Free Software
 % Foundation, either version 3 of the License, or (at your option) any later
 % version.
-% 
+%
 % This program is distributed in the hope that it will be useful, but WITHOUT
 % ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 % FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 % details.
-% 
+%
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function [delta,epsilon] = DK_deltaeps(z, images, lockout)
 
 if( nargin < 3 )
   lockout = 0;
@@ -53,7 +53,7 @@ for i = 1:npts
   epsilon((count+1):(count+kk),:) = images(inds(1:kk)) - images(i);
   count = count+kk;
 end
- 
+
 % take the absolute value of the distances between images
-epsilon = abs(epsilon(1:count));  
+epsilon = abs(epsilon(1:count));
 delta = delta(1:count);

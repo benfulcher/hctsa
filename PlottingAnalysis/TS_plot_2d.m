@@ -74,19 +74,25 @@ makeFigure = 1; % default is to plot on a brand new figure('color','w')
 % Compute linear classification rates just for fun
 % ------------------------------------------------------------------------------
 classRate = zeros(3,1); % classRate1, classRate2, classRateboth
-groupLabels = [TimeSeries.Group]'; % Convert GroupIndices to group form
-numGroups = length(unique(groupLabels));
+if isfield(TimeSeries,'Group')
+    groupLabels = [TimeSeries.Group]'; % Convert GroupIndices to group form
+    numGroups = length(unique(groupLabels));
 
-classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
-                mean(ytest == classify(Xtest,XTrain,yTrain,'linear'));
-try
-    classRate(1) = mean(classify_fn(Features(:,1),groupLabels,Features(:,1),groupLabels));
-    classRate(2) = mean(classify_fn(Features(:,2),groupLabels,Features(:,2),groupLabels));
-    classRate(3) = mean(classify_fn(Features(:,1:2),groupLabels,Features(:,1:2),groupLabels));
-    fprintf(1,'Linear in-sample classification rates computed.\n');
-catch emsg
-    fprintf(1,'Linear classification rates not computed\n(%s)\n',emsg.message);
-    classRate(:) = NaN;
+    classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
+                    mean(ytest == classify(Xtest,XTrain,yTrain,'linear'));
+    try
+        classRate(1) = mean(classify_fn(Features(:,1),groupLabels,Features(:,1),groupLabels));
+        classRate(2) = mean(classify_fn(Features(:,2),groupLabels,Features(:,2),groupLabels));
+        classRate(3) = mean(classify_fn(Features(:,1:2),groupLabels,Features(:,1:2),groupLabels));
+        fprintf(1,'Linear in-sample classification rates computed.\n');
+    catch emsg
+        fprintf(1,'Linear classification rates not computed\n(%s)\n',emsg.message);
+        classRate(:) = NaN;
+    end
+else
+    % No group information assigned to time series
+    numGroups = 1;
+    groupLabels = ones(length(TimeSeries),1);
 end
 
 % ------------------------------------------------------------------------------
