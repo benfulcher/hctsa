@@ -21,12 +21,14 @@ function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
 %               (vi) 'mom5', the fifth moment of the distribution
 %               (vii) 'lillie', the p-value for a Lilliefors Gaussianity test
 %               (viii) 'AC1', the lag-1 autocorrelation
-%               (ix) 'sampen', Sample Entropy
+%               (ix) 'apen', Approximate Entropy, ApEn(1,0.2)
+%               (ix) 'sampen', Sample Entropy, SampEn(2,0.1)
 %
 % acrossWinStat, controls how the obtained sequence of local estimates is
 %                   compared (as a ratio to the full time series):
 %                       (i) 'std': standard deviation
 %                       (ii) 'ent' histogram entropy
+%                       (iii) 'apen': Approximate Entropy, ApEn(1,0.2)
 %                       (iii) 'sampen': Sample Entropy, SampEn(2,0.1)
 %
 % numSeg, the number of segments to divide the time series up into, thus
@@ -155,6 +157,9 @@ switch acrossWinStat
         out = std(qs)/std(y);
     case 'apen'
         out = EN_ApEn(qs,1,0.2); % ApEn of the sliding window measures
+    case 'sampen'
+        sampEn_struct = EN_SampEn(qs,2,0.1);
+        out = sampEn_struct.sampen1;
     case 'ent'
         kssimpouts = DN_FitKernelSmooth(qs); % get a load of statistics from kernel-smoothed distribution
         out = kssimpouts.entropy; % distributional entropy
