@@ -1,4 +1,4 @@
-function filePath = BF_WriteTempFile(dataVector)
+function filePath = BF_WriteTempFile(dataVector,whatPrecision)
 % BF_WriteTempFile   Write a temporary file in the system temporary directory
 %
 %---INPUTS:
@@ -27,10 +27,15 @@ function filePath = BF_WriteTempFile(dataVector)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
+if nargin < 2
+    % precision (number of significant digits) to write
+    whatPrecision = 7;
+end
+
 % Filename is the tempname (which will be unique):
 filePath = tempname;
 
 % Write the file:
-dlmwrite(filePath,dataVector);
+dlmwrite(filePath,dataVector,'precision',whatPrecision);
 
 end

@@ -83,16 +83,6 @@ if nargin < 7
     % prints every piece of code evaluated (nice for error checking)
 end
 
-%-------------------------------------------------------------------------------
-% Tell the user about how the computation will be performed:
-%-------------------------------------------------------------------------------
-if doParallel
-    fprintf(fid,['Computation will be performed across multiple cores' ...
-            ' using Matlab''s Parallel Computing Toolbox.\n'])
-else % use single-threaded for loops
-	fprintf(fid,'Computations will be performed serially without parallelization.\n')
-end
-
 % --------------------------------------------------------------------------
 %% Load information from local files
 % --------------------------------------------------------------------------
@@ -155,6 +145,13 @@ if doParallel
     % Attempt to initiate a parallel worker pool:
 	doParallel = TS_InitiateParallel(0);
 end
+if doParallel
+	fprintf(fid,['Computation will be performed across multiple cores' ...
+			' using Matlab''s Parallel Computing Toolbox.\n'])
+else % use single-threaded for loops
+	fprintf(fid,'Computations will be performed serially without parallelization.\n')
+end
+
 
 % The times vector stores the time taken for each time series to have its
 % operations calculated (for determining time remaining)

@@ -113,6 +113,19 @@ catch
 end
 if ~anyErrors, fprintf(1,' done.\n'); end
 
+%-------------------------------------------------------------------------------
+% Physionet sample entropy code (turned to mex)
+%-------------------------------------------------------------------------------
+fprintf(1,'Sample entropy...');
+cd([toolDir,'Physionet'])
+anyErrors = 0;
+try
+    mex sampen_mex.c
+catch
+    fprintf(1,'ERROR: Physionet implementation of sample entropy failed to compile.\n');
+end
+if ~anyErrors, fprintf(1,' done.\n'); end
+
 % ------------------------------------------------------------------------------
 % TSTOOL routines (such a mess)
 % ------------------------------------------------------------------------------
