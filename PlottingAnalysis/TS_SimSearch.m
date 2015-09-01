@@ -6,7 +6,15 @@ function TS_SimSearch(varargin)
 %
 %---INPUTS:
 %
+% targetID, the ID of the target time series or operation
+% numNeighbors, the number of nearest neighbors to analyze
+% whatPlots, a cell of plot types to show, e.g., {'matrix','network'}
+%               (*) 'matrix' plots a pairwise similarity matrix
+%               (*) 'scatter' plots scatter plots of outputs between target and neighbors
+%               (*) 'network', a network visualization of neighbors
+%
 %---EXAMPLE USAGE:
+%
 % Find neighbors of time series (ID=30), and visualize as a similarity matrix
 % and network plot:
 % TS_SimSearch(30,'whatPlots',{'matrix','network'})
@@ -104,7 +112,7 @@ end
 % ------------------------------------------------------------------------------
 targetInd = find([dataStruct.ID]==targetID);
 if isempty(targetInd)
-    error('ID %u not found in the index for %s in %s.',targetID,dataStruct,which(whatDataFile));
+    error('ID %u not found in the index for %s in %s.',targetID,tsOrOps,which(whatDataFile));
 end
 
 % ------------------------------------------------------------------------------
