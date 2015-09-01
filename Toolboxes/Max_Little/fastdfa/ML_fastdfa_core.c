@@ -47,7 +47,7 @@ static void cumulativeSum
 {
    unsigned int i;
    REAL accum = 0.0f;
-   
+
    for (i = 0; i < elements; i ++)
    {
       accum += x[i];
@@ -179,7 +179,7 @@ void mexFunction(
    unsigned long  samples, dimensions, elements, entries;
    unsigned long  N_scales, *intervals, i;
    REAL           *flucts;
-   
+
    REAL     *intvs_out;       /* vector of intervals at each scale */
    REAL     *fluct_out;       /* vector of fluctuations at each scale */
    REAL     *x_in;            /* input vector */

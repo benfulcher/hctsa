@@ -50,6 +50,11 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
+% Check y is a column vector:
+if size(y,1)==1
+    y = y';
+end
+
 % Embedding dimension:
 if nargin < 2
     M = 2;
@@ -78,33 +83,40 @@ end
 % ------------------------------------------------------------------------------
 % Use the physionet code to calculate the Sample Entropy using these parameters:
 % ------------------------------------------------------------------------------
-
 % Check if a compiled C version exists:
-[a,b] = system('which sampen');
+% [a,b] = system('which sampen');
 
-if isempty(b) || length(y) < 3000 % faster to run within Matlab
+try
+    sampEn = sampen_mex(y',M,r);
+    sampEn = sampEn(1:M); % always that extra one for the self-match
+catch
+    fprintf(1,'No mex file found: using a slow matlab implementation instead\n')
+    % No mex version available; use (much slower) Matlab implementation
+    % if isempty(b) || length(y) < 3000 % faster to run within Matlab
     % No compiled C version detected (for time series longer than 3000 samples):
     % run in Matlab (slower):
     % (length of 2000 because of read/write overhead)
     sampEn = PN_sampenc(y,M,r);
-else
-    % fprintf('Using compiled C code~~~\n')
-    % http://www.physionet.org/physiotools/sampen/c/
-    % (use Makefile in Toolboxes/Physionet/ to run make, then make install)
-
-    % Run compiled C code:
-    filePath = BF_WriteTempFile(y);
-    command = sprintf('sampen -m %u -r %f < %s',M,r,filePath);
-    [~,res] = system(command);
-    s = textscan(res,'%[^\n]'); s = s{1};
-    sampEn = zeros(M,1);
-    for i = 1:M
-        [~,params] = regexp(s{i},'\((\S+)\)','tokens','match');
-        params = regexp(params{1}(2:end-1),',','split');
-        [~,result] = regexp(s{i},'= (\S+)','tokens','match');
-        result = str2num(result{1}(3:end));
-        sampEn(i) = result;
-    end
+    % else
+    %     fprintf('Using compiled C code~~~\n')
+    %     % http://www.physionet.org/physiotools/sampen/c/
+    %     % (use Makefile in Toolboxes/Physionet/ to run make, then make install)
+    %
+    %     % Run compiled C code:
+    %     filePath = BF_WriteTempFile(y);
+    %     command = sprintf('sampen -m %u -r %f < %s',M,r,filePath);
+    %     [~,res] = system(command);
+    %     fprintf(1,'%s\n',res)
+    %     s = textscan(res,'%[^\n]'); s = s{1};
+    %     sampEn = zeros(M,1);
+    %     for i = 1:M
+    %         [~,params] = regexp(s{i},'\((\S+)\)','tokens','match');
+    %         params = regexp(params{1}(2:end-1),',','split');
+    %         [~,result] = regexp(s{i},'= (\S+)','tokens','match');
+    %         result = str2num(result{1}(3:end));
+    %         sampEn(i) = result;
+    %     end
+    % end
 end
 
 % ------------------------------------------------------------------------------
