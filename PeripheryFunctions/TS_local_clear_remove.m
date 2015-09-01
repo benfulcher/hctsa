@@ -35,8 +35,10 @@ case 'ts'
     theWhat = 'TimeSeries';
 case 'ops'
     theWhat = 'Operations';
+case 'mops'
+    theWhat = 'MasterOperations';
 otherwise
-    error('Specify either ''ts'' or ''ops''')
+    error('Specify ''mops'', ''ts'', or ''ops''')
 end
 
 % Must specify a set of time series
@@ -63,11 +65,15 @@ end
 switch tsOrOps
 case 'ts'
     dataStruct = TimeSeries;
+    theNameField = 'Name';
 case 'ops'
     dataStruct = Operations;
+    theNameField = 'Name';
 case 'mops'
 	loadedMore = load(whatDataFile,'MasterOperations');
-	dataStruct = loadedMore.MasterOperations;
+    MasterOperations = loadedMore.MasterOperations;
+    dataStruct = MasterOperations;
+    theNameField = 'Label';
 otherwise
     error('Specify ''ts'' or ''ops'' or ''mops''');
 end
@@ -89,7 +95,7 @@ end
 
 iThese = find(doThese);
 for i = 1:sum(doThese)
-    fprintf(1,'%s [%u] %s\n',doWhat,IDs(iThese(i)),dataStruct(iThese(i)).Name)
+    fprintf(1,'%s [%u] %s\n',doWhat,IDs(iThese(i)),dataStruct(iThese(i)).(theNameField))
 end
 
 if doRemove == 0 % clear data
