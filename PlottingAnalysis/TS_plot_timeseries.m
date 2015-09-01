@@ -1,4 +1,4 @@
-function TS_plot_timeseries(whatData,whatTimeSeries,numPerGroup,maxLength,plotOptions)
+function TS_plot_timeseries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOptions)
 % TS_plot_timeseries    Plots examples of time series in an hctsa analysis.
 %
 %---INPUTS:
@@ -39,14 +39,14 @@ if nargin < 1 || isempty(whatData)
     whatData = 'norm';
 end
 
-% Can specify a reduced set of time series by keyword
-if nargin < 2
-    whatTimeSeries = '';
-end
-
-if nargin < 3 || isempty(numPerGroup)
+if nargin < 2 || isempty(numPerGroup)
     % Default: plot 5 time series per group
     numPerGroup = 10;
+end
+
+% Can specify a reduced set of time series by keyword
+if nargin < 3
+    whatTimeSeries = '';
 end
 
 if nargin < 4

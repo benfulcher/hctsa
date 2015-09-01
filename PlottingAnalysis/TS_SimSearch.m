@@ -104,7 +104,7 @@ end
 % ------------------------------------------------------------------------------
 targetInd = find([dataStruct.ID]==targetID);
 if isempty(targetInd)
-    error('ID %u not found in the index for %s in %s.',targetID,dataStruct,which(theFile));
+    error('ID %u not found in the index for %s in %s.',targetID,dataStruct,which(whatDataFile));
 end
 
 % ------------------------------------------------------------------------------
