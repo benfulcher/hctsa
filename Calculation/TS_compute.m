@@ -1,5 +1,5 @@
 function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,doLog,beVocal)
-% TS_compute    Computes missing elements of TS_DataMat (in HCTSA_loc.mat)
+% TS_compute    Computes missing elements of TS_DataMat
 %
 %---EXAMPLE USAGE:
 % TS_compute;
@@ -12,12 +12,13 @@ function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,do
 % computeWhat: whether to compute just missing values ('missing', default), or
 % 				ALSO retry results that previously threw an error ('error'), or
 % 				ALSO retry any result that previously did not return a good value ('bad')
+% customFile: a custom output file to write to
 % doLog:       if 1 writes results to a log file (0 by default -- output to prompt).
 % beVocal:     if 1, gives additional user feedback about the calculation of
 %               each individual operation.
 %
 %---OUTPUTS:
-% Writes output into HCTSA_loc.mat
+% Writes output into customFile (HCTSA_loc.mat by default)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

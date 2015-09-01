@@ -21,16 +21,13 @@ function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
 %               (vi) 'mom5', the fifth moment of the distribution
 %               (vii) 'lillie', the p-value for a Lilliefors Gaussianity test
 %               (viii) 'AC1', the lag-1 autocorrelation
-%               (ix) 'apen', Approximate Entropy
+%               (ix) 'sampen', Sample Entropy
 %
 % acrossWinStat, controls how the obtained sequence of local estimates is
 %                   compared (as a ratio to the full time series):
 %                       (i) 'std': standard deviation
 %                       (ii) 'ent' histogram entropy
-%                       (iii) 'apen': Approximate Entropy, ApEn(1,0.2)
-%                               cf. "Approximate entropy as a measure of system
-%                               complexity", S. M. Pincus, P. Natl. Acad. Sci.
-%                               USA 88(6) 2297 (1991)
+%                       (iii) 'sampen': Sample Entropy, SampEn(2,0.1)
 %
 % numSeg, the number of segments to divide the time series up into, thus
 %       controlling the window length
@@ -112,6 +109,11 @@ switch windowStat
     case 'apen' % Sliding window ApEn
         for i = 1:numSteps
             qs(i) = EN_ApEn(y(getWindow(i)),1,0.2);
+        end
+    case 'sampen' % Sliding window SampEn
+        for i = 1:numSteps
+            sampEn_struct = EN_SampEn(y(getWindow(i)),2,0.1);
+            qs(i) = sampEn_struct.sampen1;
         end
     case 'mom3' % Third moment
         for i = 1:numSteps

@@ -48,6 +48,8 @@ if nargin < 3 || isempty(rth)
     rth = 0.2; % r = 0.2 (default)
 end
 
+%-------------------------------------------------------------------------------
+
 r = rth*std(y); % threshold of similarity
 N = length(y);% length of time series
 phi = zeros(2,1);% phi(1)=phi_m, phi(2)=phi_{m+1}

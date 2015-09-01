@@ -65,8 +65,11 @@ case 'ts'
     dataStruct = TimeSeries;
 case 'ops'
     dataStruct = Operations;
+case 'mops'
+	loadedMore = load(whatDataFile,'MasterOperations');
+	dataStruct = loadedMore.MasterOperations;
 otherwise
-    error('Specify either ''ts'' or ''ops''');
+    error('Specify ''ts'' or ''ops'' or ''mops''');
 end
 IDs = [dataStruct.ID];
 doThese = ismember(IDs,idRange);
@@ -89,7 +92,7 @@ for i = 1:sum(doThese)
     fprintf(1,'%s [%u] %s\n',doWhat,IDs(iThese(i)),dataStruct(iThese(i)).Name)
 end
 
-if (doRemove == 0) % clear data
+if doRemove == 0 % clear data
     reply = input(sprintf(['**Preparing to clear all calculated data for %u %s.\n' ...
                                 '[press any key to continue]'], ...
                                     sum(doThese),theWhat),'s');
@@ -106,35 +109,45 @@ end
 % ------------------------------------------------------------------------------
 if doRemove
     % Need to actually remove metadata entries:
-    if strcmp(tsOrOps,'ts')
+    switch tsOrOps
+	case 'ts'
         TimeSeries(doThese) = [];
-    else
+    case 'ops'
         Operations(doThese) = [];
+	case 'mops'
+		MasterOperations(doThese) = [];
     end
 end
 
-TS_DataMat = f_clear_remove(TS_DataMat,doThese,tsOrOps,doRemove);
+if strcmp(tsOrOps,'mops')
+	save(whatDataFile,'MasterOperations','-append');
+else
+	% Clear or remove data from local matrices:
+	TS_DataMat = f_clear_remove(TS_DataMat,doThese,tsOrOps,doRemove);
 
-save(whatDataFile,'TS_DataMat','TimeSeries','Operations','-append');
+	% Save back to file
+	save(whatDataFile,'TS_DataMat','TimeSeries','Operations','-append');
 
-% Repeat for any other matrix data files:
-varNames = whos('-file',whatDataFile);
-varNames = {varNames.name};
-if ismember('TS_Quality',varNames)
-    load(whatDataFile,'TS_Quality')
-    TS_Quality = f_clear_remove(TS_Quality,doThese,tsOrOps,doRemove);
-    save(whatDataFile,'TS_Quality','-append');
-end
-if ismember('TS_CalcTime',varNames)
-    load(whatDataFile,'TS_CalcTime')
-    TS_CalcTime = f_clear_remove(TS_CalcTime,doThese,tsOrOps,doRemove);
-    save(whatDataFile,'TS_CalcTime','-append');
+	% Repeat for any other matrix data files:
+	varNames = whos('-file',whatDataFile);
+	varNames = {varNames.name};
+	if ismember('TS_Quality',varNames)
+	    load(whatDataFile,'TS_Quality')
+	    TS_Quality = f_clear_remove(TS_Quality,doThese,tsOrOps,doRemove);
+	    save(whatDataFile,'TS_Quality','-append');
+	end
+	if ismember('TS_CalcTime',varNames)
+	    load(whatDataFile,'TS_CalcTime')
+	    TS_CalcTime = f_clear_remove(TS_CalcTime,doThese,tsOrOps,doRemove);
+	    save(whatDataFile,'TS_CalcTime','-append');
+	end
 end
 
 fprintf(1,'Saved back to %s\n',whatDataFile)
 
 %-------------------------------------------------------------------------------
 function A = f_clear_remove(A,ind,tsOrOps,doRemove)
+	% Clears or removes data from a matrix, given a set of row or column indices
     if doRemove
         if strcmp(tsOrOps,'ts')
             A(ind,:) = [];

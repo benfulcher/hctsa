@@ -1056,7 +1056,6 @@ NL_TISEAN_fnn(y,'mi',10,0.05,0)     NL_TISEAN_fnn_mi_10_005
 NL_TISEAN_fnn(y,1,10,0.05,0)     NL_TISEAN_fnn_1_10_005
 SY_TISEAN_nstat_z(y,4,{1,3})	SY_TISEAN_nstat_z_4_1_3
 SY_TISEAN_nstat_z(y,5,{1,3})	SY_TISEAN_nstat_z_5_1_3
-SY_TISEAN_nstat_z(y,4,{'ac',3})	SY_TISEAN_nstat_z_4_ac_3
 NL_TISEAN_d2(y,1,10,0)	NL_TISEAN_d2_1_10_0
 NL_TISEAN_d2(y,'ac',10,0.01)	NL_TISEAN_d2_ac_10_001
 NL_TISEAN_c1(y,1,[1,7],0.02,0.5)	NL_TISEAN_c1_1_1_7_002_05
