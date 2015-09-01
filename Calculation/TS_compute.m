@@ -169,6 +169,7 @@ end
 % --------------------------------------------------------------------------
 %% Computation
 % --------------------------------------------------------------------------
+numCalc_all = zeros(numTimeSeries,1);
 
 for i = 1:numTimeSeries
 
@@ -195,6 +196,7 @@ for i = 1:numTimeSeries
 		toCalc = (opCompute & (isnan(qualityLabels) | qualityLabels > 0)); % Operations awaiting calculation
 	end
     numCalc = sum(toCalc); % Number of operations to evaluate
+	numCalc_all(i) = numCalc; % keep a record of how many were calculated at each iteration
 
     % -----
     % Check that all operations have a master ID attached:
@@ -429,12 +431,14 @@ fprintf(fid,['!! !! !! !! !! !! Calculation completed at %s !! !! ' ...
                                                 '!! !! !!\n'],datestr(now))
 fprintf(fid,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1))
 
-% Save the local files for subsequent upload to the mySQL database
-fprintf(fid,'Saving all results to %s...',customFile)
-saveTimer = tic;
-save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
-fprintf(fid,' Saved in %s.\n',BF_thetime(toc(saveTimer)))
-clear saveTimer
+% Save the local files (if results were computed):
+if any(numCalc_all > 0)
+	fprintf(fid,'Saving all results to %s...',customFile)
+	saveTimer = tic;
+	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
+	fprintf(fid,' Saved in %s.\n',BF_thetime(toc(saveTimer)))
+	clear saveTimer
+end
 
 % Close the log file:
 if doLog
