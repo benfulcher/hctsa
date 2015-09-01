@@ -59,33 +59,6 @@
 #include <math.h>
 #include <string.h>
 
-/* The computational routine */
-// double *readdata(char *filenm, int *filelen);
-// void sampen(double *y, int mm, double r, int n);
-// void sampen2(double *y, int mm, double r, int n);
-// void normalize(double *data, int n);
-// void help(void);
-
-// int main(int argc, char *argv[])
-// {
-//     double *data = NULL;
-//     double r = .2;
-//     int n, mm = 2;
-//     char *filenm = NULL;
-//     int nflag = 0;
-//     int vflag = 0;
-//     int i;
-//
-//     if (nflag)
-// 	normalize(data, n);
-//     if (vflag)
-// 	sampen2(data, mm, r, n);
-//     else
-// 	sampen(data, mm, r, n);
-//     free(data);
-//     return 0;
-// }
-
 /* sampen2 calculates an estimate of sample entropy and the variance of the
    estimate. */
 void sampen2(double *y, int mm, double r, int n)
@@ -271,7 +244,7 @@ void sampen(double *y, int M, double r, int n, double *sampEnt)
     int i;
     double y1;
 
-    // Allocate memory:
+    /* Allocate memory: */
     M++;
     if ((run = (long *) mxCalloc(n, sizeof(long))) == NULL)
 	exit(1);
@@ -309,21 +282,21 @@ void sampen(double *y, int M, double r, int n, double *sampEnt)
     N = (long) (n * (n - 1) / 2);
     p[0] = A[0] / N;
     sampEnt[0] = -log(p[0]);
-    // printf("SampEn(0,%g,%d) = %lf\n", r, n, sampEnt[0]);
+    /* printf("SampEn(0,%g,%d) = %lf\n", r, n, sampEnt[0]); */
 
     for (m = 1; m < M-1; m++) {
 	p[m] = A[m] / B[m - 1];
 	if (p[m] == 0)
     {
         sampEnt[m] = 0;
-	    // printf("No matches! SampEn((%d,%g,%d) = Inf!\n", m, r, n);
+        /* printf("No matches! SampEn((%d,%g,%d) = Inf!\n", m, r, n); */
     }
 	else
     {
         sampEnt[m] = -log(p[m]);
-	    // printf("SampEn(%d,%g,%d) = %lf\n", m, r, n, sampEnt[m]);
-        // printf("A = %lf\n",A[m]));
-        // printf("B = %lf\n",B[m]));
+	    /* printf("SampEn(%d,%g,%d) = %lf\n", m, r, n, sampEnt[m]);
+        printf("A = %lf\n",A[m]));
+        printf("B = %lf\n",B[m])); */
     }
     }
 
@@ -418,13 +391,13 @@ void mexFunction(int nlhs,              /* number of expected outputs */
     /* Calculate number of scales needed */
     sampEnt = (double *)mxCalloc(m+1, sizeof(double));
 
-    // mexPrintf("\nRunning SampEn(%f,%f) on a time series with %d samples\n",m,r,numSamples);
+    /* mexPrintf("\nRunning SampEn(%f,%f) on a time series with %d samples\n",m,r,numSamples); */
 
     /* call the computational routine */
     sampen(x_in, m, r, numSamples, sampEnt);
 
     /* assign output: */
-    // mexPrintf("\nSampEn(%f,%f) completed! Assigning output....\n",m,r);
+    /* mexPrintf("\nSampEn(%f,%f) completed! Assigning output....\n",m,r); */
 
     plhs[0] = mxCreateDoubleMatrix(m+1, 1, mxREAL);
     sampEnt_out = mxGetPr(plhs[0]);
@@ -432,7 +405,7 @@ void mexFunction(int nlhs,              /* number of expected outputs */
     for (i = 0; i < m; i ++)
     {
        sampEnt_out[i] = sampEnt[i];
-    //    mexPrintf("\n %u SampEn(%u) = %f.\n",i,i,sampEnt[i]);
+       /*    mexPrintf("\n %u SampEn(%u) = %f.\n",i,i,sampEnt[i]); */
     }
 
     /* Release allocated memory. */
