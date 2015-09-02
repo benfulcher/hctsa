@@ -92,7 +92,6 @@ case 'Fourier'
         end
     end
 
-
 case 'TimeDomainStat'
     % ------------------------------------------------------------------------------
     % Assume a stationary process and estimate mean and standard deviation from the full time
@@ -105,13 +104,8 @@ case 'TimeDomainStat'
     % Define the time-domain autocorrelation function:
     ACFy = @(tau) mean((y(1:N-tau) - mu).*(y(tau+1:N) - mu))/sigma2;
 
-    if length(tau) == 1
-        % Output a single value at the given time-lag
-        out = ACFy(tau);
-    else
-        % Output values over a range of time lags
-        out = arrayfun(@(x)ACFy(x),tau);
-    end
+    % Output a value for each time-lag provided (one or multiple):
+    out = arrayfun(ACFy,tau);
 
 case 'TimeDomain'
     % ------------------------------------------------------------------------------
@@ -137,7 +131,6 @@ case 'TimeDomain'
             y2N = y2(goodR) - mean(y2(goodR)); % (relative to mean for included points)
 
             out = mean(y1N.*y2N)/std(y1(goodR))/std(y2(goodR));
-
         else
             out = mean((y(1:N-tau) - mean(y(1:N-tau))).* ...
                 (y(tau+1:N) - mean(y(tau+1:N))))/std(y(1:N-tau))/std(y(tau+1:N));
