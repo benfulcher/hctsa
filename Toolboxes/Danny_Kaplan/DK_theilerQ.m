@@ -1,3 +1,4 @@
+function Q = DK_theilerQ(x)
 % DK_theilerQ
 % 
 % theilerQ calculates Q=<(x_t + x_{t+1})^3> normalized by <x^2>^{3/2}
@@ -19,8 +20,6 @@
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function Q = DK_theilerQ(x)
 
 x2 = mean(x.^2)^(3/2);
 

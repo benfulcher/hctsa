@@ -1,3 +1,4 @@
+function res = DK_timerev(x,lag)
 % DK_timerev
 % 
 % Calculates a time reversal asymmetry statistic
@@ -20,8 +21,6 @@
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-function res = DK_timerev(x,lag)
 
 if nargin < 2
   lag = 1;
