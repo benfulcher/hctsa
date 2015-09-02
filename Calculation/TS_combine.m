@@ -213,8 +213,8 @@ if isempty(hereSheIs)
         fprintf(1,['----------Saving to %s----------\n'],fileName)
 else
     fileName = 'HCTSA_loc_combined.mat';
-    fprintf(1,['----------Saving to %s----------\nYou''ll have to rename to HCTSA_loc.mat for' ...
-    ' normal analysis routines like TS_normalize to work...\n'],fileName);
+    fprintf(1,['----------Saving to %s----------\nYou''ll need to specify %s or rename to HCTSA_N.mat for' ...
+    ' normal analysis routines like TS_normalize...\n'],fileName,fileName);
 end
 
 % --- Actually save it:

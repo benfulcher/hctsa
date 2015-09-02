@@ -74,7 +74,9 @@ if ~isempty(preProcessHow)
     switch preProcessHow
     case 'diff1'
         % First do an incremental differencing of the time series
-        % thus yielding the 'Control Entropy'
+        % thus yielding the 'Control Entropy':
+        % "Control Entropy: A complexity measure for nonstationary signals"
+        % E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
         y = BF_zscore(diff(y));
     otherwise
         error('Unknown preprocessing setting: ''%s''',preProcessHow);

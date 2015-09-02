@@ -68,8 +68,6 @@ end
 % ------------------------------------------------------------------------------
 if beVocal
     fprintf(1,'Using input file: %s\n',inputFile);
-else
-    fprintf(1,'No user feedback shown (use beVocal to get information about your import).\n');
 end
 ticker = tic;
 
@@ -247,7 +245,9 @@ if ~isMatFile
         end
     end
 
-    fprintf(1,'%s read.\n',inputFile)
+    if beVocal
+        fprintf(1,'%s read.\n',inputFile)
+    end
 
 else
     % .mat file input is only allowed when importing time series
@@ -517,6 +517,10 @@ case 'ops'
     structArray = Operations;
 end
 if ~forDatabase
+    % Assign default IDs:
+    for i = 1:length(structArray)
+        structArray(i).ID = i;
+    end
     fprintf(1,'Returning a structure array of %u %s.\n',length(structArray),theWhat);
     return
 end

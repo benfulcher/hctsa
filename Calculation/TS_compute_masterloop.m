@@ -1,4 +1,4 @@
-function [masterOutput, masterTime] = TS_compute_masterloop(x, y, masterCode, masterID, numMasterOps, fid, beVocal, theTsID, iterNum)
+function [masterOutput, masterTime] = TS_compute_masterloop(x, y, masterCode, masterID, numMasterOps, beVocal, theTsID, iterNum)
 % TS_compute_masterloop     Used in a loop by TS_compute to evaluate a given master function.
 
 % ------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ function [masterOutput, masterTime] = TS_compute_masterloop(x, y, masterCode, ma
 
 if beVocal
     % Display code name for error checking
-    fprintf(fid,'[ts_id = %u, mop_id = %u (%u/%u)] %s...', theTsID, masterID, iterNum, numMasterOps, masterCode);
+    fprintf(1,'[ts_id = %u, mop_id = %u (%u/%u)] %s...', theTsID, masterID, iterNum, numMasterOps, masterCode);
 end
 
 try
@@ -42,7 +42,7 @@ catch emsg
     if beVocal
         fprintf(1,' error.\n') % ,BF_thetime(masterTime)
     end
-	fprintf(fid,'---Error evaluating %s:\n%s\n',masterCode,emsg.message);
+	fprintf(1,'---Error evaluating %s:\n%s\n',masterCode,emsg.message);
     masterOutput = {}; % Keep empty output
     masterTime = 0; % Set zero calculation time
 	% Remains an empty cell entry.

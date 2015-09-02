@@ -1,4 +1,4 @@
-function [opOutput, opQuality, opTime] = TS_compute_oploop(masterOutput, masterCalcTime, masterLabel, operationCode, fid)
+function [opOutput, opQuality, opTime] = TS_compute_oploop(masterOutput, masterCalcTime, masterLabel, operationCode)
 % TS_compute_oploop     Links operations to outputs of corresponding master operations,
 % including the assignment of error codes.
 
@@ -58,8 +58,8 @@ try
 	end
 
 catch emsg
-    fprintf(fid,['-----Error linking to master operation %s by %s.\n'],masterLabel,operationCode);
-    fprintf(fid,'%s\n',emsg.message)
+    fprintf(1,['-----Error linking to master operation %s by %s.\n'],masterLabel,operationCode);
+    fprintf(1,'%s\n',emsg.message)
     opOutput = 0; % Output = 0
 	opQuality = 7; % fatal error QualityCode -- something of a different error, though...
     opTime = NaN; % don't worry about calculation time for errors

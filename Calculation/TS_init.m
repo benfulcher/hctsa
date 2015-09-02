@@ -63,54 +63,25 @@ end
 
 % ------------------------------------------------------------------------------
 % Get time series, operations, master operations into structure arrays
-% and assign IDs
 % ------------------------------------------------------------------------------
 TimeSeries = SQL_add('ts', INP_ts, 0, beVocal);
-% Assign IDs:
 numTS = length(TimeSeries);
-for i = 1:numTS
-    TimeSeries(i).ID = i;
-end
 
 MasterOperations = SQL_add('mops', INP_mops, 0, beVocal)';
 numMops = length(MasterOperations);
-% Assign IDs:
-for i = 1:numMops
-    MasterOperations(i).ID = i;
-end
 
 Operations = SQL_add('ops', INP_ops, 0, beVocal);
 numOps = length(Operations);
-% Assign IDs:
-for i = 1:numOps
-    Operations(i).ID = i;
-end
-
-% ------------------------------------------------------------------------------
-% Match operations to a master ID
-% ------------------------------------------------------------------------------
-for i = 1:numOps
-    theMasterMatch = strcmp(Operations(i).Label,{MasterOperations.Label});
-    if sum(theMasterMatch)==0
-        error('No master match for operation: %s',Operations(i).Name);
-    end
-    Operations(i).MasterID = MasterOperations(theMasterMatch).ID;
-end
-
-% No longer need the label field
-Operations = removeField(Operations,'Label');
 
 %-------------------------------------------------------------------------------
-% Check that all master operations are required
+% Link operations to their masters using label matching
+% and update the structure arrays using the TS_LinkOperationsWithMasters function
 %-------------------------------------------------------------------------------
-mastersNeeded = ismember([MasterOperations.ID],[Operations.MasterID]);
-if ~all(mastersNeeded)
-    warning(sprintf(['%u/%u master operations are not used by the %u operations' ...
-                         ' and will be removed.'],...
-                        sum(~mastersNeeded),numMops,numOps));
-    MasterOperations = MasterOperations(mastersNeeded);
-    numMops = sum(mastersNeeded);
-end
+
+[Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations)
+
+% MasterOperations may have been trimmed by TS_LinkOperationsWithMasters:
+numMops = length(MasterOperations);
 
 % ------------------------------------------------------------------------------
 % Generate the TS_DataMat, TS_Quality, and TS_CalcTime matrices
@@ -131,20 +102,5 @@ save(outputFile,'TimeSeries','Operations','MasterOperations',...
 
 fprintf(1,'Successfully initialized %s with %u time series, %u master operations, and %u operations\n',...
                         outputFile,numTS,numMops,numOps);
-
-% ------------------------------------------------------------------------------
-function newStructArray = removeField(oldStructArray,fieldToRemove)
-
-    theFieldNames = fieldnames(oldStructArray);
-
-    fieldInd = strcmp(theFieldNames,fieldToRemove);
-
-    oldCell = squeeze(struct2cell(oldStructArray));
-
-    newCell = oldCell(~fieldInd,:);
-
-    newStructArray = cell2struct(newCell,theFieldNames(~fieldInd));
-end
-% ------------------------------------------------------------------------------
 
 end
