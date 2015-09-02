@@ -129,18 +129,18 @@ case 'TimeDomain'
             % lagged time series:
             y2 = y(tau+1:N);
             y2N = y2(goodR) - mean(y2(goodR)); % (relative to mean for included points)
-
-            out = mean(y1N.*y2N)/std(y1(goodR))/std(y2(goodR));
+            % std() flag 1 is used to be consistent with numerator's N normalization
+            out = mean(y1N.*y2N)/std(y1(goodR),1)/std(y2(goodR),1);
         else
             out = mean((y(1:N-tau) - mean(y(1:N-tau))).* ...
-                (y(tau+1:N) - mean(y(tau+1:N))))/std(y(1:N-tau))/std(y(tau+1:N));
+                (y(tau+1:N) - mean(y(tau+1:N))))/std(y(1:N-tau),1)/std(y(tau+1:N),1);
         end
     else
         % Output values over a range of time lags:
         out = zeros(length(tau),1);
         for i = 1:length(tau)
             out(i) = mean((y(1:N-tau(i)) - mean(y(1:N-tau(i)))).*(y(tau(i)+1:N) ...
-                        - mean(y(tau(i)+1:N))))/std(y(1:N-tau(i)))/std(y(tau(i)+1:N));
+                        - mean(y(tau(i)+1:N))))/std(y(1:N-tau(i)),1)/std(y(tau(i)+1:N),1);
         end
     end
 
