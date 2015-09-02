@@ -30,7 +30,7 @@ There are two major steps in the calculations performed by mse:
 
 Output file:
 1st line: shows the r value.
-2nd line: shows the m values. 
+2nd line: shows the m values.
 
 After the 2nd line there are several columns: the first column (of integers)
 is the scale factor. The following columns are SampEn values for coarse-grained
@@ -44,10 +44,10 @@ value and new columns with the corresponding results are written.
 #include <stdlib.h>
 
 #define MAXSTR 1250     /* maximum string size */
-#define DATA_MAX 200000 /* maximum number of data points */  
+#define DATA_MAX 200000 /* maximum number of data points */
 #define M_MAX 10        /* maximum value of the parameter m */
-#define SCALE_MAX 40    /* maximum scale value */ 
-#define R_STEP_MAX 10   /* maximum number of different r values */  
+#define SCALE_MAX 40    /* maximum scale value */
+#define R_STEP_MAX 10   /* maximum number of different r values */
 #define FILEMAX 100     /* maximum number of data files in the list file*/
 
 /* Global variables */
@@ -61,14 +61,44 @@ static char file[500];
 FILE *fl;
 FILE *pin;
 
-main(argc, argv)
+void usage()
+{
+    fprintf(stderr, "usage: %s [options]\n", prog);
+    fprintf(stderr, "\nTo calculate MSE for a single data file:\n"
+	    "    %s <datafile >outputfile\n"
+	    "To calculate MSE for multiple data files:\n"
+	    "    %s -F listfile >outputfile\n"
+	    "(where listfile contains a list of data files).\n\n", prog, prog);
+    fprintf(stderr, "Data files should contain a single column of numbers\n");
+    fprintf(stderr, "Options may include:\n");
+    fprintf(stderr, "  -a N   set scale increment to N [1-%d; default: 1]\n",
+	    SCALE_MAX);
+    fprintf(stderr, "  -b N   set m increment to N [1-%d; default: 1]\n",
+	    M_MAX);
+    fprintf(stderr, "  -c X   set r increment to X [>%g; default: 0.05]\n",
+	    (r_max-r_min)/R_STEP_MAX);
+    fprintf(stderr, "  -i N   set minimum i to N [0-39998; default: 0]\n");
+    fprintf(stderr, "  -I N   set maximum i to N [1-39999: default: 39999]\n");
+    fprintf(stderr, "  -m N   set minimum m to N [1-%d; default: 2]\n", M_MAX);
+    fprintf(stderr, "  -M N   set maximum m to N [1-%d; default: 2]\n", M_MAX);
+    fprintf(stderr, "  -n N   set maximum scale to N [1-%d; default: 20]\n",
+	    SCALE_MAX);
+    fprintf(stderr, "  -r X   set minimum r to X [>0; default: 0.15]\n");
+    fprintf(stderr, "  -R X   set maximum r to X [>0; default: 0.15]\n");
+    fprintf(stderr,
+ "Option arguments indicated as N are integers; those shown as X may be given"
+ "\nin any floating point format.  For further information, visit:\n"
+ "    http://physionet.org/physiotools/mse/\n");
+}
+
+int main(argc, argv)
 int argc;
 char *argv[];
 {
 
-    int i, j, k, l, m, nfile, flag; 
+    int i, j, k, l, m, nfile, flag;
     double r, sd, tmp;
- 
+
     /* Function prototypes */
     void ReadData(void);
     double *array(int n);
@@ -93,7 +123,7 @@ char *argv[];
     c = 0;
     nfile = 0;
     flag = 0;
-  
+
     /* Read and interpret the command line. */
     i = 0;
     while (++i < argc && *argv[i] == '-') {
@@ -159,7 +189,7 @@ char *argv[];
 	         "%s [-r]: minimum r must be greater than 0 (default: 0.15)\n",
 			prog);
 		exit(1);
-	    } 
+	    }
 	    break;
 
 	  case 'R':
@@ -168,7 +198,7 @@ char *argv[];
 		 "%s [-R]: maximum r must be greater than 0 (default: 0.15)\n",
 			prog);
 		exit(1);
-	    } 
+	    }
 	    break;
 
 	  case 'c':
@@ -176,10 +206,10 @@ char *argv[];
 		fprintf(stderr,
 	      "%s [-c]: r increment must be greater than %g (default: 0.05)\n",
 			prog, (r_max-r_min)/R_STEP_MAX);
-	    }
 	    exit(1);
+        }
 	    break;
-    
+
 	  case 'i':
 	    if ((i_min = atoi(argv[++i])) < 0) {
 		fprintf(stderr,
@@ -210,32 +240,31 @@ char *argv[];
 	m_max = m_min;
 	m_min = tmp;
     }
-      
+
     if (r_max < r_min){
 	tmp = r_max;
 	r_max = r_min;
 	r_min = tmp;
     }
-   
+
     /* Memory allocation. */
     u = array(DATA_MAX);
     y = array(DATA_MAX);
 
-
     /* Process a single data file. */
-    if (flag == 0) {  
+    if (flag == 0) {
 	l = 0;
 	nfile = 1;
-    
+
 	/* Read data from stdin. */
 	pin = stdin;
 	ReadData();
-    
+
 	/* Calculate standard deviation. */
 	sd = StandardDeviation();
-    
+
 	/* Perform the coarse-graining procedure. */
-	for (j = 1; j <= scale_max; j += scale_step){      
+	for (j = 1; j <= scale_max; j += scale_step){
 	    CoarseGraining(j);
 
 	    /* Calculate SampEn for each scale and each r value. */
@@ -243,32 +272,32 @@ char *argv[];
 	    for (r = r_min; r <= (r_max*1.0000000001); r += r_step){
 		SampleEntropy(l, r, sd, j);
 		c++;
-	    }   
+	    }
 	}
-    
+
 	/* Print results. */
 	PrintResults(nfile);
     }
-  
+
 
     /* Process multiple data files. */
     if (flag == 1) {
 
-	/* Read the list of data files. */  
-	for (l = 0; fscanf(fl, "%s", file) == 1; l++) {  
+	/* Read the list of data files. */
+	for (l = 0; fscanf(fl, "%s", file) == 1; l++) {
 	    nfile++;   /*count the number of data files*/
-      
+
 	    if ((pin = fopen(file, "r")) == NULL) {   /* open each data file */
 		fprintf(stderr, "%s : Cannot open file %s\n", prog, file);
 		exit(1);
 	    }
-	    
+
 	    /* Read the data. */
 	    ReadData();
-           
+
 	    /* Calculate the standard deviation. */
 	    sd = StandardDeviation ();
-      
+
 	    /* Perform the coarse-graining procedure. */
 	    for (j = 1; j <= scale_max; j += scale_step) {
 		CoarseGraining(j);
@@ -279,7 +308,7 @@ char *argv[];
 		    SampleEntropy (l, r, sd, j);
 		    c++;
 		}
-	    }      
+	    }
 	}
 
 	/* Print results. */
@@ -288,11 +317,11 @@ char *argv[];
 	/* Print average results. */
 	if (nfile > 1)
 	    PrintAverageResults(nfile);
-      
+
 	fclose(pin);
 	fclose(fl);
     }
-  
+
     free(u);
     free(y);
     exit(0);
@@ -302,7 +331,7 @@ double *array(int n)
 {
     int i;
     double *a;
-  
+
     if ((a = calloc (n, sizeof (double))) == NULL) {
 	fprintf(stderr, "%s : insufficient memory\n", prog);
 	exit(2);
@@ -327,7 +356,7 @@ double StandardDeviation(void)
 {
     double sum=0.0, sum2=0.0, sd;
     int j;
-  
+
     for (j = 0; j < nlin; j++) {
 	sum += u[j];
 	sum2 += u[j] * u[j];
@@ -345,19 +374,19 @@ void CoarseGraining(int j)
 	y[i] = 0;
 	for (k = 0; k < j; k++)
 	    y[i] += u[i*j+k];
-	y[i] /= j; 
+	y[i] /= j;
     }
 }
 
 
 void SampleEntropy(int ll, double r, double sd, int j)
 {
-    int i, k, l, nlin_j; 
+    int i, k, l, nlin_j;
     int cont[M_MAX+1];
     double r_new;
 
-    nlin_j = (nlin/j) - m_max; 
-    r_new = r*sd;              
+    nlin_j = (nlin/j) - m_max;
+    r_new = r*sd;
 
     for (i = 0; i < M_MAX; i++)
 	cont[i]=0;
@@ -369,8 +398,8 @@ void SampleEntropy(int ll, double r, double sd, int j)
 		cont[++k]++;
 	    if (k == m_max && fabs(y[i+m_max] - y[l+m_max]) <= r_new)
 		cont[m_max+1]++;
-	} 
-    }     
+	}
+    }
 
     for (i = 1; i <= m_max; i++)
 	if (cont[i+1] == 0 || cont[i] == 0)
@@ -390,7 +419,7 @@ void PrintResults(int nfile)
 	    printf ("\nm = %d,  r = %.3f\n\n", m, r_min+k*r_step);
 	    if (nfile > 1) {
 		fseek(fl, 0, SEEK_SET);
-		for(l = 0; fscanf(fl, "%s", file) == 1; l++)  
+		for(l = 0; fscanf(fl, "%s", file) == 1; l++)
 		    printf("\t%.6s", file);
 		printf("\n");
 	    }
@@ -398,36 +427,36 @@ void PrintResults(int nfile)
 		printf("%d\t", j);
 		for (l=0; l<nfile; l++)
 		    printf("%.3lf\t", SE[l][k][j][m]);
-		printf("\n");   
-	    }  
-	}  
+		printf("\n");
+	    }
+	}
 }
 
 void PrintAverageResults(int nfile)
 {
-    int k, m, j, i, l; 
+    int k, m, j, i, l;
     double av, av2, sd1;
- 
+
     printf("\n**************************\n");
     printf("Mean and SD over all files\n");
     printf("**************************\n");
-      
+
     for (k = 0; k < c; k++) {
 	printf("\n");
-	
+
 	for (m = m_min; m <= m_max; m += m_step)
 	    printf("\tm=%d, r=%5.3lf", m, r_min+k*r_step);
 	printf("\n");
 	for (m = m_min; m <= m_max; m += m_step)
 	    printf("\tmean\tsd");
 	printf("\n");
-	
+
 	for (j = 1; j <= scale_max; j += scale_step) {
 	    printf("%d\t", j);
 	    for (i = m_min; i <= m_max; i += m_step) {
 		av = 0.0;
 		av2 = 0.0;
-		/* Calculate entropy mean values and SD over all files. */ 
+		/* Calculate entropy mean values and SD over all files. */
 		for (l = 0; l < nfile; l++) {
 		    av += SE[l][k][j][i];
 		    av2 += (SE[l][k][j][i]*SE[l][k][j][i]);
@@ -436,40 +465,7 @@ void PrintAverageResults(int nfile)
 		av /= nfile;
 		printf("%.3lf\t%.3lf\t", av, sd1);
 	    }
-	    printf("\n"); 
+	    printf("\n");
 	}
     }
 }
-
-usage()
-{
-    fprintf(stderr, "usage: %s [options]\n", prog);
-    fprintf(stderr, "\nTo calculate MSE for a single data file:\n"
-	    "    %s <datafile >outputfile\n"
-	    "To calculate MSE for multiple data files:\n"
-	    "    %s -F listfile >outputfile\n"
-	    "(where listfile contains a list of data files).\n\n", prog, prog);
-    fprintf(stderr, "Data files should contain a single column of numbers\n");
-    fprintf(stderr, "Options may include:\n");
-    fprintf(stderr, "  -a N   set scale increment to N [1-%d; default: 1]\n",
-	    SCALE_MAX);
-    fprintf(stderr, "  -b N   set m increment to N [1-%d; default: 1]\n",
-	    M_MAX);
-    fprintf(stderr, "  -c X   set r increment to X [>%g; default: 0.05]\n",
-	    (r_max-r_min)/R_STEP_MAX);
-    fprintf(stderr, "  -i N   set minimum i to N [0-39998; default: 0]\n");
-    fprintf(stderr, "  -I N   set maximum i to N [1-39999: default: 39999]\n");
-    fprintf(stderr, "  -m N   set minimum m to N [1-%d; default: 2]\n", M_MAX);
-    fprintf(stderr, "  -M N   set maximum m to N [1-%d; default: 2]\n", M_MAX);
-    fprintf(stderr, "  -n N   set maximum scale to N [1-%d; default: 20]\n",
-	    SCALE_MAX);
-    fprintf(stderr, "  -r X   set minimum r to X [>0; default: 0.15]\n");
-    fprintf(stderr, "  -R X   set maximum r to X [>0; default: 0.15]\n");
-    fprintf(stderr,
- "Option arguments indicated as N are integers; those shown as X may be given"
- "\nin any floating point format.  For further information, visit:\n"
- "    http://physionet.org/physiotools/mse/\n");
-}
-
-
-
