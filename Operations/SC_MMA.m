@@ -130,7 +130,7 @@ for s = sListFull
         fqs = [fqs; q s (mean(f2nis.^(q/2)))^(1/q)];
     end
 end
-fprintf(1,'Detrended fluctuations computed in %s\n',BF_thetime(toc(timer)));
+% fprintf(1,'Detrended fluctuations computed in %s\n',BF_thetime(toc(timer)));
 
 fqsll = [fqs(:,1) fqs(:,2) log(fqs(:,2)) log(fqs(:,3))];
 

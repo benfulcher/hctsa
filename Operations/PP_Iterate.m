@@ -158,9 +158,9 @@ out.gauss1_kd_lin = stats(4,3);
 % out.gauss1_kd_exp = stats(4,4);
 
 % 5) Gaussian 10-bin histogram fit, rmse
-out.gauss1_h10_trend = stats(5,1);
-out.gauss1_h10_jump = stats(5,2);
-out.gauss1_h10_lin = stats(5,3);
+out.gauss1_hsqrt_trend = stats(5,1);
+out.gauss1_hsqrt_jump = stats(5,2);
+out.gauss1_hsqrt_lin = stats(5,3);
 % out.gauss1_h10_exp = stats(5,4);
 
 % 6) Compare normal fit
@@ -220,7 +220,7 @@ out.normdiff_lin = stats(10,3);
 
         %   (b) histogram 10 bins
         try
-            me1 = DN_SimpleFit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
+            me1 = DN_SimpleFit(y_d,'gauss1','sqrt'); % histogram fit to 1-peak gaussian
             if ~isstruct(me1) && isnan(me1)
                 f(5) = NaN;
             else

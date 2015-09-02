@@ -58,8 +58,9 @@ end
 % ------------------------------------------------------------------------------
 %% (1) Perform the test(s)
 % ------------------------------------------------------------------------------
-
+warning('off','econ:kpsstest:StatTooSmall')
 [h, pValue, stat, cValue] = kpsstest(y,'lags',lags);
+warning('on','econ:kpsstest:StatTooSmall')
 
 % ------------------------------------------------------------------------------
 %% (2) Return statistics on outputs of test(s)
