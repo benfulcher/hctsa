@@ -1,5 +1,5 @@
 function out = EN_SampEn(y,M,r,preProcessHow)
-% EN_SampEn     Sample Entropy of a time series.
+% EN_SampEn     Sample Entropy of a time series
 %
 % SampEn(m,r), using code from PhysioNet.
 % Uses a compiled C version of the code if available, otherwise uses a (slower)
@@ -59,6 +59,7 @@ end
 if nargin < 2
     M = 2;
 end
+
 % Tolerance:
 if nargin < 3
     r = 0.1*std(y);

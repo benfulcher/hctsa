@@ -69,11 +69,11 @@ mintrain = 100; % Minimum training set size
 maxtrain = 1000; % Maximum training set size
 
 if ntrain > maxtrain; % larger than maximum training set size
-    fprintf(1,'Training set size exceeded maximum of 1000 samples -- reducing to this.\n');
+    fprintf(1,'Training set size reduced from %u to maximum of 1000 samples.\n',ntrain);
     ntrain = 1000;
 end
 if ntrain < mintrain; % smaller than minimum training set size
-    fprintf(1,'Training set size below minimum of 100 -- increasing to this.\n');
+    fprintf(1,'Training set size increased from %u to minimum of 100.\n',ntrain);
     ntrain = 100;
 end
 

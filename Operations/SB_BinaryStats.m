@@ -43,6 +43,10 @@ function out = SB_BinaryStats(y,binaryMethod)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Binarize the time series:
+%-------------------------------------------------------------------------------
+
 switch binaryMethod
     case 'diff' % 1 if
         y = ((sign(diff(y)))+1)/2; % binary signal, equal to one for stepwise increases
@@ -62,6 +66,10 @@ end
 
 N = length(y); % length of signal - 1 (difference operation)
 
+%-------------------------------------------------------------------------------
+% Basic stats on binarized time series:
+%-------------------------------------------------------------------------------
+
 pup = sum(y == 1)/N;
 pdown = 1 - pup;
 p = [pup, pdown];
@@ -79,43 +87,38 @@ stretch0 = difffy(difffy ~= 1)-1;
 difffy = diff(find([0;y;0] == 0));
 stretch1 = difffy(difffy ~= 1)-1;
 
+%-------------------------------------------------------------------------------
 % pstretches
+%-------------------------------------------------------------------------------
 % number of different stretches as proportion of time series
 out.pstretch1 = length(stretch1)/N;
 out.pstretch0 = length(stretch0)/N;
 out.pstretches = (length(stretch0)+length(stretch1))/N;
 
-if isempty(stretch0) % all 1s (almost never happens)
+if isempty(stretch0) % all 1s (almost impossible to actually occur)
     out.longstretch0 = 0;
     out.meanstretch0 = 0;
     out.stdstretch0 = NaN;
 else
-    out.longstretch0 = max(stretch0)/N; % longest consecutive stretch of zeros
-    out.meanstretch0 = mean(stretch0)/N; % mean stretch of zeros
+    out.longstretch0 = max(stretch0); % longest consecutive stretch of zeros
+    out.meanstretch0 = mean(stretch0); % mean stretch of zeros
     out.stdstretch0 = std(stretch0); % standard deviation of stretch lengths of consecutive zeros
 end
 
-if isempty(stretch1) % all zeros (almost never happens)
+if isempty(stretch1) % all zeros (almost impossible to actually occur)
     out.longstretch1 = 0;
     out.meanstretch1 = 0;
     out.stdstretch1 = NaN;
 else
-    out.longstretch1 = max(stretch1)/N; % longest consecutive stretch of ones
-    out.meanstretch1 = mean(stretch1)/N;
+    out.longstretch1 = max(stretch1); % longest consecutive stretch of ones
+    out.meanstretch1 = mean(stretch1);
     out.stdstretch1 = std(stretch1);
 end
 
-out.meanstretchrat = out.meanstretch1/out.meanstretch0;
-out.stdstretchrat = out.stdstretch1/out.stdstretch0;
+out.meanstretchdiff = out.meanstretch1 - out.meanstretch0;
+out.stdstretchdiff = out.stdstretch1 - out.stdstretch0;
 
-a = sum(stretch1 == 1); b = sum(stretch1 == 2);
-if b > 0, out.rat21stretch1 = a/b;
-else out.rat21stretch1 = NaN;
-end
-
-a = sum(stretch0 == 1); b = sum(stretch0 == 2);
-if b > 0, out.rat21stretch0 = a/b;
-else out.rat21stretch0 = NaN;
-end
+out.diff21stretch1 = mean(stretch1 == 2) - mean(stretch1 == 1);
+out.diff21stretch0 = mean(stretch0 == 2) - mean(stretch0 == 1);
 
 end

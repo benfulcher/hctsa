@@ -159,7 +159,7 @@ switch acrossWinStat
         out = EN_ApEn(qs,1,0.2); % ApEn of the sliding window measures
     case 'sampen'
         sampEn_struct = EN_SampEn(qs,2,0.1);
-        out = sampEn_struct.sampen1;
+        out = sampEn_struct.quadSampEn1;
     case 'ent'
         kssimpouts = DN_FitKernelSmooth(qs); % get a load of statistics from kernel-smoothed distribution
         out = kssimpouts.entropy; % distributional entropy

@@ -297,30 +297,6 @@ out.normdiff_lin = stats(10,3);
         end
         % The gradient of the line
         g(3) = cfun.p1;
-
-        % % (4) is it exponential? This is really slow
-        % if g(1) > 0 % increasing, fit saturating exponential
-        %     stpt = [-f(end), -0.1, f(end)];
-        % else % decreasing, fit decaying exponential
-        %     stpt = [f(end), -0.1, f(end)];
-        % end
-        %
-        % fopt = fitoptions('Method','NonlinearLeastSquares','StartPoint',stpt);
-        % ftyp = fittype('a*exp(b*x)+c','options',fopt);
-        % try
-        %     [c, gof] = fit((1:length(f))',f,ftyp);
-        %     if gof.rsquare > 0.9
-        %         g(4) = c.b; % return the decay coefficient
-        %     else
-        %         g(4) = NaN;
-        %     end
-        % catch emsg
-        %     if (strcmp(emsg.message,'Inf computed by model function.') || strcmp(emsg.message,'NaN computed by model function.'))
-        %         g(4) = NaN; % error fitting -- return a NaN
-        %     else % unable to run 'fit' command -- fatal error
-        %         return
-        %     end
-        % end
     end
 % ------------------------------------------------------------------------------
 end

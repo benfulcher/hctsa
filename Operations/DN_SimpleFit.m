@@ -70,9 +70,14 @@ TSmodels = {'sin1','sin2','sin3','fourier1','fourier2','fourier3'}; % valid time
 
 if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
     if nargin < 3 || isempty(numBins); % haven't specified numBins
-        numBins = 10; % use 10 bins by default
+        numBins = 'sqrt'; % use sqrt of number of data points
     end
-    if numBins == 0; % use ksdensity instead of a histogram
+
+    % Compute the histogram counts:
+    if ischar(numBins) % specify a binning method
+        [dny, binEdges] = histcounts(x,'BinMethod',numBins);
+        dnx = mean([binEdges(1:end-1); binEdges(2:end)]);
+    elseif numBins == 0; % use ksdensity instead of a histogram
         [dny, dnx] = ksdensity(x);
     else
         [dny, binEdges] = histcounts(x,numBins);
@@ -84,12 +89,14 @@ if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
         dnx = dnx'; dny = dny';
     end
 
+    % Fit the distribution model:
     try
         [cfun, gof, output] = fit(dnx,dny,dmodel); % fit the model
 	catch emsg % this model can't even be fitted OR license problem...
         if strcmp(emsg.identifier,'curvefit:fit:nanComputed') ...
                 || strcmp(emsg.identifier,'curvefit:fit:infComputed')
-            error('Error fitting the model ''%s'' to this data:\n%s',dmodel,emsg.message);
+            fprintf(1,'Error fitting the model ''%s'' to this data:\n%s',dmodel,emsg.message);
+            out = NaN; return
         elseif strcmp(emsg.message,'Power functions cannot be fit to non-positive xdata.') ...
                 || strcmp(emsg.identifier,'curvefit:fit:powerFcnsRequirePositiveData')
             fprintf(1,'The model ''%s'' can not be applied to non-positive data\n',dmodel);

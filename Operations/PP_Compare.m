@@ -247,25 +247,6 @@ else
     out.gauss1_kd_resruns = me1.resruns/me2.resruns;
 end
 
-%   (b) histogram 10 bins
-me1 = DN_SimpleFit(y_d,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
-me2 = DN_SimpleFit(y,'gauss1',10); % 10-bin histogram fit to 1-peak gaussian
-if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
-    out.gauss1_h10_r2 = NaN;
-    out.gauss1_h10_adjr2 = NaN;
-    out.gauss1_h10_rmse = NaN;
-    out.gauss1_h10_resAC1 = NaN;
-    out.gauss1_h10_resAC2 = NaN;
-    out.gauss1_h10_resruns = NaN;
-else
-    out.gauss1_h10_r2 = me1.r2/me2.r2;
-    out.gauss1_h10_adjr2 = me1.adjr2/me2.adjr2;
-    out.gauss1_h10_rmse = me1.rmse/me2.rmse;
-    out.gauss1_h10_resAC1 = me1.resAC1/me2.resAC1;
-    out.gauss1_h10_resAC2 = me1.resAC2/me2.resAC2;
-    out.gauss1_h10_resruns = me1.resruns/me2.resruns;
-end
-
 % (c) compare distribution to fitted normal distribution
 me1 = DN_CompareKSFit(y_d,'norm');
 me2 = DN_CompareKSFit(y,'norm');

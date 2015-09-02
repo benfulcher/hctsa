@@ -267,8 +267,7 @@ out.bestqAIC = qr(b);
 % does changing the order (either p or q) have. Sometimes changing q will
 % have negligible effect -- we want to quantify this.
 
-out.Ks_vary_p = mean(std(Ks)); % mean variation along p direction
-out.Ks_vary_q = mean(std(Ks')); % mean variation along q direction
-
+out.Ks_vary_p = nanmean(nanstd(Ks)); % mean variation along p direction
+out.Ks_vary_q = nanmean(nanstd(Ks')); % mean variation along q direction
 
 end

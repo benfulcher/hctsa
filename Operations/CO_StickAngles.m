@@ -1,7 +1,7 @@
 function out = CO_StickAngles(y)
 % CO_StickAngles    Analysis of line-of-sight angles between time-series data points.
 %
-% Line-of-sight angles between time-series points treat each % time-series value
+% Line-of-sight angles between time-series points treat each time-series value
 % as a stick protruding from an opaque baseline level.
 % Statistics are returned on the raw time series, where sticks protrude
 % from the zero-level, and the z-scored time series, where sticks
@@ -52,19 +52,19 @@ ix = cell(2,1); %indicies for positive(1) and negative(2) entries of time series
 ix{1} = find(y >= 0); % bias here -- 'look up' if on 'ground'
 ix{2} = find(y < 0);
 
-n = zeros(2,1);
-n(1) = length(ix{1})-1; % minus one because the last point has no next one to compare to
-n(2) = length(ix{2})-1; % minus one for same reason
+n = cellfun(@length,ix); % number of points in each category
 
+%-------------------------------------------------------------------------------
+% Compute the stick angles
+%-------------------------------------------------------------------------------
+
+% Store positive time points in angles{1}; negative time points in angles{2}
 angles = cell(2,1); % stores the angles
-angles{1} = zeros(n(1),1); % positives (above axis)
-angles{2} = zeros(n(2),1); % negatives (below axis)
-
-% First positive time points: store in angles_p
 for j = 1:2
-    for i = 1:n(j)
-        % find the next time series point with the same sign as the current one:
-        angles{j}(i) = (y(ix{j}(i+1))-y(ix{j}(i)))/(ix{j}(i+1)-ix{j}(i));
+    angles{j} = zeros(n(j)-1,1);
+    for i = 1:n(j)-1
+        % Compare to the next time series point with the same sign as the current one:
+        angles{j}(i) = (y(ix{j}(i+1))-y(ix{j}(i))) / (ix{j}(i+1)-ix{j}(i));
     end
     angles{j} = atan(angles{j});
 end

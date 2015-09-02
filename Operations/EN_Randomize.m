@@ -98,7 +98,7 @@ if calc_pts(end) ~= randp_max*N;
 end
 numCalcs = length(calc_pts); % some rounding issues inevitable
 
-statNames = {'xcn1', 'xc1', 'd1', 'ac1', 'ac2', 'ac3', 'ac4', 'sampen2_02', 'statav5', 'swss5_1'};
+statNames = {'xcn1', 'xc1', 'd1', 'ac1', 'ac2', 'ac3', 'ac4', 'sampen1_01', 'statav5', 'swss5_1'};
 numStats = length(statNames);
 stats = zeros(numCalcs,numStats); % record a stat at each randomization increment
 

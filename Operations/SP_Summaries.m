@@ -316,8 +316,6 @@ out.linfitloglog_all_sea2 = stats.se(2); % standard error of coefficient 2 estim
 [a, stats] = robustfit(log(w(1:round(N/2))),log(S(1:round(N/2))));
 out.linfitloglog_lf_a1 = a(1); % robust intercept
 out.linfitloglog_lf_a2 = a(2); % robust gradient
-out.linfitloglog_lf_sigrat = stats.ols_s/stats.robust_s;
-out.linfitloglog_lf_s = stats.s;
 out.linfitloglog_lf_sea1 = stats.se(1);
 out.linfitloglog_lf_sea2 = stats.se(2);
 

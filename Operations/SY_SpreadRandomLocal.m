@@ -56,23 +56,20 @@ if nargin < 2 || isempty(l)
 end
 
 if ischar(l)
+    taug = CO_FirstZero(y,'ac'); % tau (global)
     switch l
     case 'ac2'
-        taug = CO_FirstZero(y,'ac'); % tau (global)
         l = 2*taug;
-
     case 'ac5'
-        taug = CO_FirstZero(y,'ac'); % tau (global)
         l = 5*taug;
-
     otherwise
         error('Unknown specifier ''%s''',l);
     end
 
     % Very short l for this sort of time series:
     if l < 5
-        warning(['This time series has a very short correlation length;\nSetting ' ...
-            'l=%.1f means that changes estimates will be difficult to compare...']);
+        warning(sprintf(['This time series has a very short correlation length;\nSetting ' ...
+            'l=%u means that changes estimates will be difficult to compare...'],l));
     end
 end
 
@@ -117,7 +114,7 @@ for j = 1:numSegs
     qs(j,3) = skewness(ysub); % skewness
     qs(j,4) = kurtosis(ysub); % kurtosis
     entropyStruct = EN_SampEn(ysub,2,0.1);
-    qs(j,5) = entropyStruct.quadsampen1; % SampEn_1_01
+    qs(j,5) = entropyStruct.quadSampEn1; % SampEn_1_01
     qs(j,6) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
     qs(j,7) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
     qs(j,8) = taul;
@@ -150,7 +147,7 @@ out.meanstd = fs(2,1);
 out.meanskew = fs(3,1);
 out.meankurt = fs(4,1);
 % out.meanapen1_02 = fs(5,1);
-out.meansampen1_02 = fs(5,1);
+out.meansampen1_01 = fs(5,1);
 out.meanac1 = fs(6,1);
 out.meanac2 = fs(7,1);
 out.meantaul = fs(8,1);
@@ -160,7 +157,7 @@ out.stdstd = fs(2,2);
 out.stdskew = fs(3,2);
 out.stdkurt = fs(4,2);
 % out.stdapen1_02 = fs(5,2);
-out.stdsampen1_02 = fs(5,2);
+out.stdsampen1_01 = fs(5,2);
 out.stdac1 = fs(6,2);
 out.stdac2 = fs(7,2);
 out.stdtaul = fs(8,2);

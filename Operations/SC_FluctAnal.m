@@ -130,7 +130,7 @@ end
 % ------------------------------------------------------------------------------
 
 N = length(x); % length of the time series
-doPlot = 0; % plot outputs to figure
+doPlot = 0; % plot relevant outputs to figure
 
 % 1) Compute integrated sequence
 
@@ -142,27 +142,28 @@ else
     y = cumsum(x(1:lag:end));
 end
 
-
-% perform scaling over a range of tau, up to a fifth the length
-% of the time series
+%-------------------------------------------------------------------------------
+% Perform scaling over a range of tau, up to a fifth the time-series length
+%-------------------------------------------------------------------------------
 % Peng (1995) suggests 5:N/4 for DFA
 % Caccia suggested from 10 to (N-1)/2...
+%-------------------------------------------------------------------------------
 if logInc
-	taur = unique(round(exp(linspace(log(5),log(floor(N/4)),tauStep))));
+	taur = unique(round(exp(linspace(log(5),log(floor(N/2)),tauStep))));
 	% in this case tauStep is the number of points to compute
 else
-	taur = 5:tauStep:floor(N/4); % maybe increased??
+	taur = 5:tauStep:floor(N/2); % maybe increased??
 end
 ntau = length(taur); % analyze the time series across this many timescales
 
 if ntau < 8 % fewer than 8 points
-    % ++BF 19/3/2010 (ntau<4); ++BF 28/6/2010 (ntau<8)
-    fprintf(1,'This time series (N = %u) is too short to analyze using this DFA\n',N);
-    out = NaN; return
+    fprintf(1,'This time series (N = %u) is too short to analyze using this fluctuation analysis\n',N);
+    out = NaN;
+    return
 end
 
 % 2) Compute the fluctuation function as follows
-F = zeros(ntau,1);
+F = zeros(1,ntau);
 % F is the fluctuation function
 % each entry correponds to a given scale tau, and contains
 % the fluctuation function at that scale
@@ -235,65 +236,15 @@ for i = 1:ntau
             error('Unknown fluctuation analysis method ''%s''',wtf);
     end
 
+    % Compute fluctuation function:
     F(i) = (mean(y_dt.^q)).^(1/q);
 
-%     plot(y_dt,'o-k'); title(F(i)); input('heyheyhey');
 end
 
-%     Linear fit the log-log plot: all
-    [linfit, stats] = robustfit(log(taur),log(F));
 
-    out.linfitint = linfit(1); % linear fit of loglog-- intercept
-    out.alpha = linfit(2); % linear fit of loglog -- gradient
-    out.stats_coeffcorr = abs(stats.coeffcorr(1,2)); % correlation of coefficient estimates
-    out.se1 = stats.se(1); % standard error in intercept
-    out.se2 = stats.se(2); % standard error in mean
-    out.ssr = mean(stats.resid.^2); % mean squares residual
-    out.resac1 = CO_AutoCorr(stats.resid,1,'Fourier');
-
-    % PLOT THIS?:
-    if doPlot
-        figure('color','w');
-        plot(log(taur),log(F),'o-k');
-        title(out.alpha)
-    end
-
-    %% WE NEED SOME SORT OF AUTOMATIC DETECTION OF GRADIENT CHANGES/NUMBER
-    %% OF PIECEWISE LINEAR PIECES
-
-%     % First tenth
-%     [linfit stats] = robustfit(log(taur(1:ceil(end/10))),log(F(1:ceil(end/10))));
-%
-%     out.ft_linfitint = linfit(1);
-%     out.ft_alpha = linfit(2);
-%     out.ft_stats_coeffcorr = abs(stats.coeffcorr(1,2)); % correlation of coefficient estimates
-%     out.ft_se1 = stats.se(1); % standard error in intercept
-%     out.ft_se2 = stats.se(2); % standard error in mean
-%     out.ft_ssr = mean(stats.resid.^2); % mean squares residual
-%     out.ft_resac1 = CO_AutoCorr(stats.resid,1);
-%
-%     % Last third
-%     [linfit stats] = robustfit(log(taur(floor(end*2/3):end)),log(F(floor(end*2/3):end)));
-%
-%     out.lt_linfitint = linfit(1);
-%     out.lt_alpha = linfit(2);
-%     out.lt_stats_coeffcorr = abs(stats.coeffcorr(1,2)); % correlation of coefficient estimates
-%     out.lt_se1 = stats.se(1); % standard error in intercept
-%     out.lt_se2 = stats.se(2); % standard error in mean
-%     out.lt_ssr = mean(stats.resid.^2); % mean squares residual
-%     out.lt_resac1 = CO_AutoCorr(stats.resid,1);
-
-
-% ------------------------------------------------------------------------------
-%% Try assuming two components (2 distinct scaling regimes)
-% ------------------------------------------------------------------------------
-% Move through, and fit a straight line to loglog before and after each point.
-% Find point with the minimum sum of squared errors
-F = F';
-
-% First spline interpolate to get an even sampling of the interval
-% (currently, in the log scale, there are relatively more at large scales
-
+%-------------------------------------------------------------------------------
+% Smooth unevenly-distributed points in log space:
+%-------------------------------------------------------------------------------
 if logInc
 	logtt = log(taur);
 	logFF = log(F);
@@ -305,76 +256,107 @@ else % need to smooth the unevenly-distributed points (using a spline)
 	logFF = spline(logtaur,logF,logtt);
 end
 
-% plot(logtt,logFF,'k')
+
+%-------------------------------------------------------------------------------
+% Linear fit the log-log plot: full range
+%-------------------------------------------------------------------------------
+out = struct();
+out = DoRobustLinearFit(out,logtt,logFF,1:ntt,'');
+
+% PLOT THIS?:
+if doPlot
+    figure('color','w');
+    plot(logtt,logFF,'o-k');
+    title(out.alpha)
+end
+
+%% WE NEED SOME SORT OF AUTOMATIC DETECTION OF GRADIENT CHANGES/NUMBER
+%% OF PIECEWISE LINEAR PIECES
+
+% ------------------------------------------------------------------------------
+%% Try assuming two components (2 distinct scaling regimes)
+% ------------------------------------------------------------------------------
+% Move through, and fit a straight line to loglog before and after each point.
+% Find point with the minimum sum of squared errors
+
+% First spline interpolate to get an even sampling of the interval
+% (currently, in the log scale, there are relatively more at large scales
 
 % Deterine the errors
-sserr = ones(ntt,1)*999; % don't choose the end points
-for i = 1+2:ntt-3
+sserr = ones(ntt,1)*NaN; % don't choose the end points
+minPoints = 6;
+for i = minPoints:ntt-minPoints
     r1 = 1:i;
     p1 = polyfit(logtt(r1),logFF(r1),1);
-    r2 = i+1:ntt;
+    r2 = i:ntt;
     p2 = polyfit(logtt(r2),logFF(r2),1);
-
+    % Sum of errors from fitting lines to both segments:
     sserr(i) = norm(polyval(p1,logtt(r1))-logFF(r1)) + norm(polyval(p2,logtt(r2))-logFF(r2));
 end
 
-% bkpt is the point where it's best to fit a line before and another line
-% after
-bkpt = find(sserr == min(sserr),1,'first');
-r1 = 1:bkpt;
-r2 = bkpt+1:ntt;
+% breakPt is the point where it's best to fit a line before and another line after
+breakPt = find(sserr == min(sserr),1,'first');
+r1 = 1:breakPt;
+r2 = breakPt:ntt;
 
-out.logtausplit = logtt(bkpt);
+out.logtausplit = logtt(breakPt);
+out.prop_r1 = length(r1)/ntt;
 out.ratsplitminerr = min(sserr)/out.ssr;
+out.meanssr = nanmean(sserr);
+out.stdssr = nanstd(sserr);
 
-% now we do the fitting
-
-% R1
-if length(r1) < 8 || all(isnan(logFF(r1)))
-    out.r1_linfitint = NaN;
-    out.r1_alpha = NaN;
-    out.r1_stats_coeffcorr = NaN;
-    out.r1_se1 = NaN;
-    out.r1_se2 = NaN;
-    out.r1_ssr = NaN;
-    out.r1_resac1 = NaN;
-else
-    [linfit, stats] = robustfit(logtt(r1),logFF(r1));
-
-    out.r1_linfitint = linfit(1); % linear fit intercept
-    out.r1_alpha = linfit(2); % linear fit gradient
-    out.r1_stats_coeffcorr = abs(stats.coeffcorr(1,2)); % correlation of coefficient estimates
-    out.r1_se1 = stats.se(1); % standard error in intercept
-    out.r1_se2 = stats.se(2); % standard error in mean
-    out.r1_ssr = mean(stats.resid.^2); % mean squares residual
-    out.r1_resac1 = CO_AutoCorr(stats.resid,1,'Fourier');
+if doPlot
+    subplot(3,1,1)
+    plot(y)
+    subplot(3,1,2)
+    plot(logtt(r1),logFF(r1),'o-b')
+    hold on;
+    plot(logtt(r2),logFF(r2),'o-r')
+    subplot(3,1,3)
+    plot(logtt,sserr,'x-k')
 end
 
-% R2
-if length(r2) < 8 || all(isnan(logFF(r2)))
-    out.r2_linfitint = NaN;
-    out.r2_alpha = NaN;
-    out.r2_stats_coeffcorr = NaN;
-    out.r2_se1 = NaN;
-    out.r2_se2 = NaN;
-    out.r2_ssr = NaN;
-    out.r2_resac1 = NaN;
-else
-    [linfit, stats] = robustfit(logtt(r2),logFF(r2));
+% Check that at least 3 points are available
 
-    out.r2_linfitint = linfit(1); % linear fit intercept
-    out.r2_alpha = linfit(2); % linear fit gradient
-    out.r2_stats_coeffcorr = abs(stats.coeffcorr(1,2)); % correlation of coefficient estimates
-    out.r2_se1 = stats.se(1); % standard error in intercept
-    out.r2_se2 = stats.se(2); % standard error in mean
-    out.r2_ssr = mean(stats.resid.^2); % mean squares residual
-    out.r2_resac1 = CO_AutoCorr(stats.resid,1,'Fourier');
-end
+%-------------------------------------------------------------------------------
+% Now we perform the robust linear fitting and get statistics on the two segments
+%-------------------------------------------------------------------------------
+% R1:
+out = DoRobustLinearFit(out,logtt,logFF,r1,'r1_');
+
+% R2:
+out = DoRobustLinearFit(out,logtt,logFF,r2,'r2_');
 
 if isnan(out.r1_alpha) || isnan(out.r2_alpha)
     out.alpharat = NaN;
 else
     out.alpharat = out.r1_alpha/out.r2_alpha;
+end
+
+%-------------------------------------------------------------------------------
+function out = DoRobustLinearFit(out,logtt,logFF,theRange,fieldName)
+    % Get robust linear fit statistics on scaling range
+    % Adds fields to the output structure
+
+    if length(theRange) < 8 || all(isnan(logFF(theRange)))
+        out.([fieldName,'linfitint']) = NaN;
+        out.([fieldName,'alpha']) = NaN;
+        out.([fieldName,'stats_coeffcorr']) = NaN;
+        out.([fieldName,'se1']) = NaN;
+        out.([fieldName,'se2']) = NaN;
+        out.([fieldName,'ssr']) = NaN;
+        out.([fieldName,'resac1']) = NaN;
+    else
+        [linfit, stats] = robustfit(logtt(theRange),logFF(theRange));
+
+        out.([fieldName,'linfitint']) = linfit(1); % linear fit intercept
+        out.([fieldName,'alpha']) = linfit(2); % linear fit gradient
+        out.([fieldName,'stats_coeffcorr']) = abs(stats.coeffcorr(1,2)); % correlation of coefficient estimates
+        out.([fieldName,'se1']) = stats.se(1); % standard error in intercept
+        out.([fieldName,'se2']) = stats.se(2); % standard error in mean
+        out.([fieldName,'ssr']) = mean(stats.resid.^2); % mean squares residual
+        out.([fieldName,'resac1']) = CO_AutoCorr(stats.resid,1,'Fourier');
+    end
 end
 
 end
