@@ -1,4 +1,4 @@
-function hadProblem = TS_InspectQuality(inspectWhat)
+function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 % TS_InspectQuality   Statistics of quality labels from an hctsa analysis.
 %
 % This function loads the matrix in HCTSA_loc.mat, plots it, showing the
@@ -12,6 +12,9 @@ function hadProblem = TS_InspectQuality(inspectWhat)
 %                   outputs that correspond to each type of special-valued output
 %              (ii) 'full' or 'all', show the full data matrix
 %              (iii) 'reduced', only show operations that produce special-valued outputs
+%
+% customFile: run on a custom HCTSA file (HCTSA_loc.mat by default), can also be
+%             strings like 'loc' or 'norm' (cf. TS_LoadData)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -35,18 +38,22 @@ function hadProblem = TS_InspectQuality(inspectWhat)
 if nargin < 1 || isempty(inspectWhat)
     inspectWhat = 'summary'; % only show operations that had at least one problem
 end
+if nargin < 2
+    customFile = 'HCTSA_loc.mat';
+end
 
 % ------------------------------------------------------------------------------
 % Load data:
 % ------------------------------------------------------------------------------
-load('HCTSA_loc.mat','TS_Quality','TimeSeries','Operations','MasterOperations');
+[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(customFile);
+load(whatDataFile,'TS_Quality','MasterOperations')
 
 if ~exist('TS_Quality','var')
-    error('Quality labels not found in HCTSA_loc.mat');
+    error('Quality labels not found in %s',whatDataFile);
 end
 
-if ~any(~isnan(TS_Quality(:)))
-    error('No good quality labels in HCTSA_loc.mat');
+if all(isnan(TS_Quality(:)))
+    error('No good quality labels in %s',whatDataFile);
 end
 
 % ------------------------------------------------------------------------------

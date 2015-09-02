@@ -165,7 +165,7 @@ r = (1:size(stats,1))'; % gives an 'x-axis' for fitting
 % 5) ac2
 % 6) ac3
 % 7) ac4
-% 8) LZcomplex (LZ complexity)
+% 8) sample entropy
 % 9) statav5
 % 10) swss5_1
 
