@@ -12,7 +12,7 @@ function out = EN_PermEn(y,m,tau)
 %---OUTPUT:
 % Outputs the permutation entropy and normalized version computed according to
 % different implementations
-%
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -35,6 +35,10 @@ function out = EN_PermEn(y,m,tau)
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% Check inputs and set defaults:
+%-------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(m)
     m = 2; % order 2

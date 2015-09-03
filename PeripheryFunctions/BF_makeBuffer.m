@@ -1,5 +1,8 @@
-function y = BF_preprocess(y,preProcessHow)
-% BF_preprcoess   Preprocess a time series, y
+function y_buffer = BF_makeBuffer(y,bufferSize)
+% BF_makeBuffer    Make a buffered version of a time series
+%
+% y_buffer contains segments (rows) of length bufferSize (columns) corresponding
+% to consecutive, non-overlapping segments of the series of length bufferSize
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -24,22 +27,16 @@ function y = BF_preprocess(y,preProcessHow)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-if ~isempty(preProcessHow)
-    switch preProcessHow
-    case 'diff1'
-        % Takes incremental differences of the input time series
-        y = diff(y);
-    case 'rescale_tau'
-        % Coarse-graining at a given scale, as in multiscale entropy approaches
-        % Find first zero of the autocorrelation function
-        tau = CO_FirstZero(y,'ac');
-        % Buffer the time series into nonoverlapping windows of length tau
-        y_buffer = BF_makeBuffer(y,tau);
-        % Mean each window to get a coarse-grained time series
-        y = mean(y_buffer,2);
-    otherwise
-        error('Unknown preprocessing setting: ''%s''',preProcessHow);
-    end
-end
+N = length(y);
+
+numBuffers = floor(N/bufferSize);
+
+% May need trimming:
+y_buffer = y(1:numBuffers*bufferSize);
+
+% Then reshape:
+y_buffer = reshape(y_buffer,bufferSize,numBuffers)';
+
+% (Each buffer is a contiguous subsequence of the time series; a row of y_buffer)
 
 end

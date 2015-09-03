@@ -339,8 +339,6 @@ SY_SlidingWindow(y,'mean','std',10,1)		SY_SlidingWindow_m_s10_1
 SY_SlidingWindow(y,'mean','std',10,2)		SY_SlidingWindow_m_s10_2
 SY_SlidingWindow(y,'mean','std',10,10)		SY_SlidingWindow_m_s10_10
 SY_SlidingWindow(y,'mean','sampen',2,10)	SY_SlidingWindow_m_sampen2_10
-SY_SlidingWindow(y,'mean','sampen',5,1)		SY_SlidingWindow_m_sampen5_1
-SY_SlidingWindow(y,'mean','sampen',5,2)		SY_SlidingWindow_m_sampen5_2
 SY_SlidingWindow(y,'mean','sampen',5,10)	SY_SlidingWindow_m_sampen5_10
 SY_SlidingWindow(y,'mean','sampen',10,1)	SY_SlidingWindow_m_sampen10_1
 SY_SlidingWindow(y,'mean','sampen',10,2)	SY_SlidingWindow_m_sampen10_2
@@ -364,8 +362,6 @@ SY_SlidingWindow(y,'std','std',10,1)		SY_SlidingWindow_s_s10_1
 SY_SlidingWindow(y,'std','std',10,2)		SY_SlidingWindow_s_s10_2
 SY_SlidingWindow(y,'std','std',10,10)		SY_SlidingWindow_s_s10_10
 SY_SlidingWindow(y,'std','sampen',2,10)		SY_SlidingWindow_s_sampen2_10
-SY_SlidingWindow(y,'std','sampen',5,1)		SY_SlidingWindow_s_sampen5_1
-SY_SlidingWindow(y,'std','sampen',5,2)		SY_SlidingWindow_s_sampen5_2
 SY_SlidingWindow(y,'std','sampen',5,10)		SY_SlidingWindow_s_sampen5_10
 SY_SlidingWindow(y,'std','sampen',10,1)		SY_SlidingWindow_s_sampen10_1
 SY_SlidingWindow(y,'std','sampen',10,2)		SY_SlidingWindow_s_sampen10_2
@@ -389,8 +385,6 @@ SY_SlidingWindow(y,'ent','std',10,1)		SY_SlidingWindow_ent_s10_1
 SY_SlidingWindow(y,'ent','std',10,2)		SY_SlidingWindow_ent_s10_2
 SY_SlidingWindow(y,'ent','std',10,10)		SY_SlidingWindow_ent_s10_10
 SY_SlidingWindow(y,'ent','sampen',2,10)		SY_SlidingWindow_ent_sampen2_10
-SY_SlidingWindow(y,'ent','sampen',5,1)		SY_SlidingWindow_ent_sampen5_1
-SY_SlidingWindow(y,'ent','sampen',5,2)		SY_SlidingWindow_ent_sampen5_2
 SY_SlidingWindow(y,'ent','sampen',5,10)		SY_SlidingWindow_ent_sampen5_10
 SY_SlidingWindow(y,'ent','sampen',10,1)		SY_SlidingWindow_ent_sampen10_1
 SY_SlidingWindow(y,'ent','sampen',10,2)		SY_SlidingWindow_ent_sampen10_2
@@ -414,8 +408,6 @@ SY_SlidingWindow(y,'sampen','std',10,1)		SY_SlidingWindow_sampen_s10_1
 SY_SlidingWindow(y,'sampen','std',10,2)		SY_SlidingWindow_sampen_s10_2
 SY_SlidingWindow(y,'sampen','std',10,10)	SY_SlidingWindow_sampen_s10_10
 SY_SlidingWindow(y,'sampen','sampen',2,10)	SY_SlidingWindow_sampen_sampen2_10
-SY_SlidingWindow(y,'sampen','sampen',5,1)	SY_SlidingWindow_sampen_sampen5_1
-SY_SlidingWindow(y,'sampen','sampen',5,2)	SY_SlidingWindow_sampen_sampen5_2
 SY_SlidingWindow(y,'sampen','sampen',5,10)	SY_SlidingWindow_sampen_sampen5_10
 SY_SlidingWindow(y,'sampen','sampen',10,1)	SY_SlidingWindow_sampen_sampen10_1
 SY_SlidingWindow(y,'sampen','sampen',10,2)	SY_SlidingWindow_sampen_sampen10_2
@@ -439,8 +431,6 @@ SY_SlidingWindow(y,'mom3','std',10,1)		SY_SlidingWindow_mom3_s10_1
 SY_SlidingWindow(y,'mom3','std',10,2)		SY_SlidingWindow_mom3_s10_2
 SY_SlidingWindow(y,'mom3','std',10,10)		SY_SlidingWindow_mom3_s10_10
 SY_SlidingWindow(y,'mom3','sampen',2,10)	SY_SlidingWindow_mom3_sampen2_10
-SY_SlidingWindow(y,'mom3','sampen',5,1)		SY_SlidingWindow_mom3_sampen5_1
-SY_SlidingWindow(y,'mom3','sampen',5,2)		SY_SlidingWindow_mom3_sampen5_2
 SY_SlidingWindow(y,'mom3','sampen',5,10)	SY_SlidingWindow_mom3_sampen5_10
 SY_SlidingWindow(y,'mom3','sampen',10,1)	SY_SlidingWindow_mom3_sampen10_1
 SY_SlidingWindow(y,'mom3','sampen',10,2)	SY_SlidingWindow_mom3_sampen10_2
@@ -464,8 +454,6 @@ SY_SlidingWindow(y,'mom4','std',10,1)		SY_SlidingWindow_mom4_s10_1
 SY_SlidingWindow(y,'mom4','std',10,2)		SY_SlidingWindow_mom4_s10_2
 SY_SlidingWindow(y,'mom4','std',10,10)		SY_SlidingWindow_mom4_s10_10
 SY_SlidingWindow(y,'mom4','sampen',2,10)	SY_SlidingWindow_mom4_sampen2_10
-SY_SlidingWindow(y,'mom4','sampen',5,1)		SY_SlidingWindow_mom4_sampen5_1
-SY_SlidingWindow(y,'mom4','sampen',5,2)		SY_SlidingWindow_mom4_sampen5_2
 SY_SlidingWindow(y,'mom4','sampen',5,10)	SY_SlidingWindow_mom4_sampen5_10
 SY_SlidingWindow(y,'mom4','sampen',10,1)	SY_SlidingWindow_mom4_sampen10_1
 SY_SlidingWindow(y,'mom4','sampen',10,2)	SY_SlidingWindow_mom4_sampen10_2
@@ -489,8 +477,6 @@ SY_SlidingWindow(y,'lillie','std',10,1)		SY_SlidingWindow_lil_s10_1
 SY_SlidingWindow(y,'lillie','std',10,2)		SY_SlidingWindow_lil_s10_2
 SY_SlidingWindow(y,'lillie','std',10,10)	SY_SlidingWindow_lil_s10_10
 SY_SlidingWindow(y,'lillie','sampen',2,10)	SY_SlidingWindow_lil_sampen2_10
-SY_SlidingWindow(y,'lillie','sampen',5,1)	SY_SlidingWindow_lil_sampen5_1
-SY_SlidingWindow(y,'lillie','sampen',5,2)	SY_SlidingWindow_lil_sampen5_2
 SY_SlidingWindow(y,'lillie','sampen',5,10)	SY_SlidingWindow_lil_sampen5_10
 SY_SlidingWindow(y,'lillie','sampen',10,1)	SY_SlidingWindow_lil_sampen10_1
 SY_SlidingWindow(y,'lillie','sampen',10,2)	SY_SlidingWindow_lil_sampen10_2
@@ -514,8 +500,6 @@ SY_SlidingWindow(y,'AC1','std',10,1)		SY_SlidingWindow_ac1_s10_1
 SY_SlidingWindow(y,'AC1','std',10,2)		SY_SlidingWindow_ac1_s10_2
 SY_SlidingWindow(y,'AC1','std',10,10)		SY_SlidingWindow_ac1_s10_10
 SY_SlidingWindow(y,'AC1','sampen',2,10)		SY_SlidingWindow_ac1_sampen2_10
-SY_SlidingWindow(y,'AC1','sampen',5,1)		SY_SlidingWindow_ac1_sampen5_1
-SY_SlidingWindow(y,'AC1','sampen',5,2)		SY_SlidingWindow_ac1_sampen5_2
 SY_SlidingWindow(y,'AC1','sampen',5,10)		SY_SlidingWindow_ac1_sampen5_10
 SY_SlidingWindow(y,'AC1','sampen',10,1)		SY_SlidingWindow_ac1_sampen10_1
 SY_SlidingWindow(y,'AC1','sampen',10,2)		SY_SlidingWindow_ac1_sampen10_2
@@ -923,6 +907,7 @@ EN_SampEn(y,5,0.1,'diff1')	   EN_SampEn_5_01_diff1
 EN_SampEn(y,5,0.2,'diff1')	   EN_SampEn_5_02_diff1
 EN_mse(y,1:10,2,0.15)          EN_mse_1-10_2_015
 EN_mse(y,1:10,2,0.15,'diff1')  EN_mse_1-10_2_015_diff1
+EN_mse(y,1:10,2,0.15,'rescale_tau')  EN_mse_1-10_2_015_rescale_tau
 EN_Randomize(y,'statdist','default')	EN_Randomize_statdist
 EN_Randomize(y,'dyndist','default')	EN_Randomize_dyndist
 EN_Randomize(y,'permute','default')	EN_Randomize_permute
@@ -1117,6 +1102,7 @@ EN_MS_shannon(y,3,1:10)	MS_shannon_3_1t10
 EN_MS_shannon(y,4,1:10)	MS_shannon_4_1t10
 NL_embed_PCA(y,'mi',10)	NL_embed_PCA_mi_10
 NL_embed_PCA(y,1,10)	NL_embed_PCA_1_10
+NL_embed_PCA(y,'ac',3)	NL_embed_PCA_ac_3
 PP_ModelFit(y,'ar',2,'default')	PP_ModelFit_ar_2
 MF_steps_ahead(y,'ar',2,6)	MF_steps_ahead_ar_2_6
 MF_steps_ahead(y,'ar','best',6)	MF_steps_ahead_ar_best_6

@@ -182,13 +182,17 @@ end
 
 % ------------------------------------------------------------------------------
 function firsti = firstUnder_fn(x,m,p)
-    %% Find m for the first time p goes under x
+    % Find the value of m for the first time p goes under the threshold, x
+    % p and m vectors of the same length
+
     firsti = m(find(p < x,1,'first'));
-    % If it never goes under -- saturate as NaN
-    % (could alternatively set to the maximum m...)
+
+    % If it never goes under -- saturate as m at the maximum
+    % (could be NaN, but this is more interpretable/comparable)
     if isempty(firsti)
-        firsti = NaN;
+        firsti = m(end);
     end
+
 end
 
 end

@@ -61,9 +61,9 @@ numScales = length(scaleRange);
 %-------------------------------------------------------------------------------
 % Preprocess
 %-------------------------------------------------------------------------------
-% Do this before applying the coarse-graining
+% Do the specified pre-processing BEFORE applying the coarse-graining
 if ~isempty(preProcessHow)
-    y = BF_preprocess(y,preProcessHow);
+    y = zscore(BF_preprocess(y,preProcessHow));
 end
 
 %-------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ y_cg = cell(numScales,1);
 for i = 1:numScales
     % Want non-overlapping windows of length scaleRange(i)
     bufferSize = scaleRange(i);
-    y_buffer = makeBuffer(y,bufferSize);
+    y_buffer = BF_makeBuffer(y,bufferSize);
     y_cg{i} = mean(y_buffer,2);
 end
 
@@ -123,17 +123,5 @@ out.stdSampEn = nanstd(sampEns);
 out.cvSampEn = out.stdSampEn/out.meanSampEn;
 % Mean change across the range of scales:
 out.meanch = nanmean(diff(sampEns));
-
-%-------------------------------------------------------------------------------
-function y_buffer = makeBuffer(dataVector,bufferSize)
-    % Make a buffered version of a data vector -- segments of length bufferSize
-
-    NN = length(dataVector);
-    numBuffers = floor(NN/bufferSize);
-    % May need trimming:
-    y_buffer = dataVector(1:numBuffers*bufferSize);
-    % Then reshape:
-    y_buffer = reshape(y_buffer,numBuffers,bufferSize);
-end
 
 end

@@ -67,32 +67,68 @@ if isnan(y_embed);
     out = NaN; return
 end
 
+doPlot = 0;
+
 % ------------------------------------------------------------------------------
 % Do the pca using Statistics toolbox function, 'princomp'
 % ------------------------------------------------------------------------------
-[pc, score, latent] = princomp(y_embed);
+[pc, score, latent] = pca(y_embed);
 
 perc = latent/sum(latent); % proportion of variance explained
 
-% plot(perc); ylim([0,1]);
+if doPlot
+    figure('color','w'); plot(perc,'o-k'); ylim([0,1]);
+end
+
+%-------------------------------------------------------------------------------
+% Raw outputs:
+%-------------------------------------------------------------------------------
+for i = 1:m
+    out.(sprintf('perc_%u',i)) = perc(i);
+end
 
 % ------------------------------------------------------------------------------
-%% Get statistics off the eigenvalue distribution
+%% Get statistics of the eigenvalue distribution
 % ------------------------------------------------------------------------------
-csperc = cumsum(perc);
 out.std = std(perc);
 out.range = max(perc) - min(perc);
-out.max = max(perc);
 out.min = min(perc);
+out.max = max(perc);
 out.top2 = sum(perc(1:2)); % variance explained in top two eigendirections
-out.nto80 = find(csperc>0.8,1,'first'); % number of eigenvalues you need to reconstruct 80%
-out.nto90 = find(csperc>0.9,1,'first'); % number of eigenvalues you need to reconstruct 90%
+out.meanch = mean(diff(perc));
 
-out.fb01 = find(perc < 0.1,1,'first'); % when perc goes below 0.1 for the first time
-if isempty(out.fb01), out.fb01 = length(perc) + 1; end % could make it NaN...
+% Number of eigenvalues you need to reconstruct X%
+csperc = cumsum(perc);
+out.nto50 = first_fn(csperc,0.5,+1);
+out.nto60 = first_fn(csperc,0.6,+1);
+out.nto70 = first_fn(csperc,0.7,+1);
+out.nto80 = first_fn(csperc,0.8,+1);
+out.nto90 = first_fn(csperc,0.9,+1);
 
-out.fb001 = find(perc < 0.01,1,'first'); % when perc goes below 0.01 for the first time
-if isempty(out.fb001), out.fb001 = length(perc)+1; end % could also make it NaN...
+% When individual % variance explained goes below X for the first time:
+out.fb05 = first_fn(perc,0.5,-1);
+out.fb02 = first_fn(perc,0.2,-1);
+out.fb01 = first_fn(perc,0.1,-1);
+out.fb001 = first_fn(perc,0.01,-1);
 
+% ------------------------------------------------------------------------------
+function firsti = first_fn(p,threshold,overOrUnder)
+    % Find the first time p goes under the threshold, x
+
+    if overOrUnder==-1
+        % Under threshold
+        firsti = find(p < threshold,1,'first');
+    else
+        % Over threshold
+        firsti = find(p > threshold,1,'first');
+    end
+
+    % If it never goes under -- saturate as m at the maximum
+    % (could be NaN, but this is more interpretable/comparable)
+    if isempty(firsti)
+        firsti = length(p) + 1;
+    end
+
+end
 
 end
