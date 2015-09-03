@@ -22,7 +22,7 @@ CO_trev_2.num	CO_trev_2_num	correlation,nonlinear,autocorrelation
 SP_basic_fft_power.fpolysat_rmse	SP_basic_fft_power_fpolysat_rmse	powerspectrum
 
 # Features of the OSU Leaf dataset:
-EN_SampEn_4_005.sampen3	EN_SampEn_4_005_sampen3	entropy,sampen
+EN_SampEn_3_005.sampen3	EN_SampEn_3_005_sampen3	entropy,sampen
 CO_HistogramAMI_std1_5.ami4     CO_HistogramAMI_std1_5_4    information,correlation,AMI
 # CO_HistogramAMI_4_std1_4	CO_HistogramAMI_4_std1_4	information,correlation,AMI
 MF_armax_2_2_05_1.MA_1	MF_armax_2_2_05_1_MA_1	model,systemidentificationtoolbox,arma
@@ -193,7 +193,7 @@ PH_Walker_prop_09.w_mean	PH_Walker_prop_09_w_mean	trend
 PH_Walker_prop_09.w_min	PH_Walker_prop_09_w_min	trend
 PH_Walker_prop_11.sw_meanabsdiff	PH_Walker_prop_11_sw_meanabsdiff	trend
 PH_Walker_momentum_2.w_mean	PH_Walker_momentum_2_w_mean	trend
-EN_SampEn_4_03.sampen3	EN_SampEn_4_03_sampen3	entropy,sampen
+EN_SampEn_3_03.sampen3	EN_SampEn_3_03_sampen3	entropy,sampen
 EN_Randomize_permute.xc1fexpr2	EN_Randomize_permute_xc1fexpr2	entropy,stochastic,slow
 EN_Randomize_permute.xc1hp	EN_Randomize_permute_xc1hp	entropy,stochastic,slow
 EN_Randomize_permute.d1fexpr2	EN_Randomize_permute_d1fexpr2	entropy,stochastic,slow

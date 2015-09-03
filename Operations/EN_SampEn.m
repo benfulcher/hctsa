@@ -25,7 +25,7 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 % y, the input time series
 % M, the embedding dimension
 % r, the threshold
-% preProcessHow [opt], (i) 'diff1', incremental difference preProcessingHow.
+% preProcessHow [opt], (i) 'diff1', incremental differencing (as per 'Control Entropy').
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -66,21 +66,15 @@ if nargin < 3
 end
 
 if nargin < 4
-    preProcessHow = ''; % don't apply preProcessingHow
+    preProcessHow = ''; % don't apply any preprocessing
 end
 %-------------------------------------------------------------------------------
-
+% Can specify to first apply an incremental differencing of the time series
+% thus yielding the 'Control Entropy':
+% "Control Entropy: A complexity measure for nonstationary signals"
+% E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
 if ~isempty(preProcessHow)
-    switch preProcessHow
-    case 'diff1'
-        % First do an incremental differencing of the time series
-        % thus yielding the 'Control Entropy':
-        % "Control Entropy: A complexity measure for nonstationary signals"
-        % E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
-        y = BF_zscore(diff(y));
-    otherwise
-        error('Unknown preprocessing setting: ''%s''',preProcessHow);
-    end
+    y = BF_preprocess(y,preProcessHow);
 end
 
 % ------------------------------------------------------------------------------
@@ -90,8 +84,8 @@ end
 % [a,b] = system('which sampen');
 
 try
-    sampEn = sampen_mex(y',M,r);
-    sampEn = sampEn(1:M); % always that extra one for the self-match
+    sampEn = sampen_mex(y',M+1,r);
+    sampEn = sampEn(1:M+1); % always that extra one for the M=0
 catch
     fprintf(1,'No mex file found: using a slow matlab implementation instead\n')
     % No mex version available; use (much slower) Matlab implementation
@@ -99,7 +93,7 @@ catch
     % No compiled C version detected (for time series longer than 3000 samples):
     % run in Matlab (slower):
     % (length of 2000 because of read/write overhead)
-    sampEn = PN_sampenc(y,M,r);
+    sampEn = PN_sampenc(y,M+1,r);
     % else
     %     fprintf('Using compiled C code~~~\n')
     %     % http://www.physionet.org/physiotools/sampen/c/
@@ -125,7 +119,7 @@ end
 % ------------------------------------------------------------------------------
 % Compute outputs from the code
 % ------------------------------------------------------------------------------
-for i = 1:M
+for i = 1:M+1
     % Sample entropy:
     out.(sprintf('sampen%u',i-1)) = sampEn(i);
 

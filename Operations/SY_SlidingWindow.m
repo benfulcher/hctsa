@@ -114,7 +114,7 @@ switch windowStat
         end
     case 'sampen' % Sliding window SampEn
         for i = 1:numSteps
-            sampEn_struct = EN_SampEn(y(getWindow(i)),2,0.1);
+            sampEn_struct = EN_SampEn(y(getWindow(i)),1,0.1);
             qs(i) = sampEn_struct.sampen1;
         end
     case 'mom3' % Third moment

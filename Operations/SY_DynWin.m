@@ -52,7 +52,7 @@ end
 nsegr = (2:1:maxnseg); % range of nseg to sweep across
 nmov = 1; % controls window overlap
 
-numFeatures = 10; % number of features
+numFeatures = 11; % number of features
 fs = zeros(length(nsegr),numFeatures); % standard deviation of feature values over windows
 taug = CO_FirstZero(y,'ac'); % global tau
 
@@ -88,12 +88,13 @@ for i = 1:length(nsegr)
         qs(j,4) = kurtosis(ysub); % kurtosis
         % qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1_02
         sampenStruct = EN_SampEn(ysub,2,0.15);
-        qs(j,5) = sampenStruct.quadSampEn1; % SampEn_1_01
-        qs(j,6) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
-        qs(j,7) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
-        qs(j,8) = CO_AutoCorr(ysub,taug,'Fourier'); % AC_glob_tau
-        qs(j,9) = CO_AutoCorr(ysub,taul,'Fourier'); % AC_loc_tau
-        qs(j,10) = taul;
+        qs(j,5) = sampenStruct.quadSampEn1; % SampEn_1_015
+        qs(j,6) = sampenStruct.quadSampEn2; % SampEn_2_015
+        qs(j,7) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
+        qs(j,8) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
+        qs(j,9) = CO_AutoCorr(ysub,taug,'Fourier'); % AC_glob_tau
+        qs(j,10) = CO_AutoCorr(ysub,taul,'Fourier'); % AC_loc_tau
+        qs(j,11) = taul;
     end
     % plot(qs,'o-');
     % input('what do you think?')
@@ -115,10 +116,11 @@ out.stdstd = fs(2);
 out.stdskew = fs(3);
 out.stdkurt = fs(4);
 out.stdsampen1_015 = fs(5);
-out.stdac1 = fs(6);
-out.stdac2 = fs(7);
-out.stdactaug = fs(8);
-out.stdactaul = fs(9);
-out.stdtaul = fs(10);
+out.stdsampen2_015 = fs(6);
+out.stdac1 = fs(7);
+out.stdac2 = fs(8);
+out.stdactaug = fs(9);
+out.stdactaul = fs(10);
+out.stdtaul = fs(11);
 
 end

@@ -98,7 +98,7 @@ if calc_pts(end) ~= randp_max*N;
 end
 numCalcs = length(calc_pts); % some rounding issues inevitable
 
-statNames = {'xcn1', 'xc1', 'd1', 'ac1', 'ac2', 'ac3', 'ac4', 'sampen1_015', 'statav5', 'swss5_1'};
+statNames = {'xcn1', 'xc1', 'd1', 'ac1', 'ac2', 'ac3', 'ac4', 'sampen2_015', 'statav5', 'swss5_1'};
 numStats = length(statNames);
 stats = zeros(numCalcs,numStats); % record a stat at each randomization increment
 
@@ -182,7 +182,7 @@ for i = 1:length(statNames)
     case 'ac4'
         startPoint = [stats(1,i),-0.4];
         [c,gof] = f_fix_exp(r,stats(:,i),startPoint,0);
-    case {'d1','sampen1_015'}
+    case {'d1','sampen2_015'}
         startPoint = [-stats(end,i),-0.2,stats(end,i)];
         [c,gof] = f_fix_exp(r,stats(:,i),startPoint,1);
     case {'statav5','swss5_1'}
@@ -220,15 +220,14 @@ end
         % LZcomplex = NL_MS_LZcomplexity(y,3);
 
         % SampEn(2,0.2,1):
-        % sampen1_01 = PN_sampenc(y_rand,2,0.2,1);
         sampenStruct = EN_SampEn(y_rand,2,0.15);
-        sampen1_015 = sampenStruct.quadSampEn1;
+        sampen2_015 = sampenStruct.quadSampEn2;
 
         % Stationarity
         statav5 = SY_StatAv(y_rand,'seg',5);
         swss5_1 = SY_SlidingWindow(y_rand,'std','std',5,1);
 
-        out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, sampen1_015, statav5, swss5_1];
+        out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, sampen2_015, statav5, swss5_1];
     end
 % ------------------------------------------------------------------------------
 
