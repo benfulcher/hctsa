@@ -86,9 +86,20 @@ if size(x,2) ~= 1
 	end
 end
 
-
-%-------------------------------------------------------------------------------
+% --------------------------------------------------------------------------
+%% Display information
+% --------------------------------------------------------------------------
 numCalc = length(Operations); % Number of features to calculate
+if numCalc == 0
+	error('Nothing to calculate :/')
+end
+
+fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+fprintf(1,'Preparing to calculate %s\nts_id = %u, N = %u samples\nComputing %u operations.\n', ...
+				tsStruct.Name,tsStruct.ID,tsStruct.Length,numCalc)
+fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
+
+% Initialize variables:
 featureVector = zeros(numCalc,1); % Output of each operation
 calcQuality = zeros(numCalc,1); % Quality of output from each operation
 calcTimes = ones(numCalc,1)*NaN; % Calculation time for each operation
@@ -102,6 +113,8 @@ y = BF_zscore(x);
 
 % So we now have the raw time series x and the z-scored time series y.
 % Operations take these as inputs.
+
+fullTimer = tic;
 
 % --------------------------------------------------------------------------
 %% Evaluate all master operation functions (maybe in parallel)
@@ -220,5 +233,26 @@ RR = (imag(featureVector)~=0);
 if any(RR)
 	calcQuality(RR) = 5; featureVector(RR) = 0;
 end
+
+% --------------------------------------------------------------------------
+%% Calculation complete: display information about this time series calculation
+% --------------------------------------------------------------------------
+
+% Calculate statistics for writing to file/screen
+% The number of calculated operations that returned real outputs without errors, numGood:
+numGood = sum(calcQuality == 0);
+% The number of errors encountered, numErrors:
+numErrors = sum(calcQuality == 1);
+% The number of other special outputs, numSpecial:
+numSpecial = sum(calcQuality > 1);
+
+fprintf(1,'********************************************************************\n')
+fprintf(1,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
+fprintf(1,'oOoOo Calculation complete for %s (ts_id = %u, N = %u) oOoOo\n', ...
+					tsStruct.Name,tsStruct.ID,tsStruct.Length);
+fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored. [/%u]\n',...
+					numGood,numErrors,numSpecial,numCalc);
+fprintf(1,'All calculations for this time series took %s.\n',BF_thetime(toc(fullTimer),1));
+
 
 end

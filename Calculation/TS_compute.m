@@ -178,22 +178,13 @@ for i = 1:numTimeSeries
         error('Database structure error: some operations have not been assigned a valid master operation');
     end
 
+	fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+	fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now))
+	fprintf(1,'- - - - - - - - - - - Time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries)
+
     if numCalc > 0 % some to calculate
-
-		% --------------------------------------------------------------------------
-		%% Display information
-		% --------------------------------------------------------------------------
-		fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
-		fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now))
-		fprintf(1,'- - - - - - - - - - - Time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries)
-		fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
-		fprintf(1,'Preparing to calculate %s\nts_id = %u, N = %u samples\nComputing %u / %u operations.\n', ...
-						TimeSeries(tsInd).Name,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length,numCalc,numOps)
-		fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
-
-
 		try
-	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd),doParallel,Operations(toCalc),beVocal);
+	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd),doParallel,Operations(toCalc),MasterOperations,beVocal);
 		catch
 			% skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
 			continue
@@ -207,34 +198,12 @@ for i = 1:numTimeSeries
 		TS_Quality(tsInd,toCalc) = calcQuality; % store quality labels in TS_Quality
 		% NB: the calculation time assigned for individual operations is the total calculation
 		% time taken to evaluate the master code.
-
-        % Calculate statistics for writing to file/screen
-        % The number of calculated operations that returned real outputs without errors, numGood:
-		numGood = sum(calcQuality == 0);
-        % The number of fatal errors encountered, numErrors:
-		numErrors = sum(calcQuality == 1);
-        % The number of other special outputs, numSpecial:
-		numSpecial = sum(calcQuality > 1);
-    end
+    else
+    	fprintf(1,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',numOps);
+	end
 
     % The time taken to calculate (or not, if numCalc = 0) all operations for this time series:
     times(i) = toc(bigTimer); clear bigTimer
-
-    % --------------------------------------------------------------------------
-    %% Calculation complete: display information about this time series calculation
-    % --------------------------------------------------------------------------
-	fprintf(1,'********************************************************************\n')
-    fprintf(1,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
-    fprintf(1,'oOoOo Calculation complete for %s (ts_id = %u, N = %u) oOoOo\n', ...
-                        TimeSeries(tsInd).Name,TimeSeries(tsInd).ID,TimeSeries(tsInd).Length);
-
-    if numCalc > 0 % Some calculation was performed
-	    fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored. [%u / %u]\n',...
-	     					numGood,numErrors,numSpecial,numCalc,numOps);
-		fprintf(1,'All calculations for this time series took %s.\n',BF_thetime(times(i),1));
-    else % No calculation was performed
-    	fprintf(1,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',numOps);
-    end
 
     if i < numTimeSeries
         fprintf(1,'- - - - - - - -  %u time series remaining - - - - - - - -\n',numTimeSeries-i);

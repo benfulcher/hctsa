@@ -64,21 +64,26 @@ end
 % ------------------------------------------------------------------------------
 % Get time series, operations, master operations into structure arrays
 % ------------------------------------------------------------------------------
-TimeSeries = SQL_add('ts', INP_ts, 0, beVocal);
-numTS = length(TimeSeries);
+try
+    TimeSeries = SQL_add('ts', INP_ts, 0, beVocal);
+    numTS = length(TimeSeries);
 
-MasterOperations = SQL_add('mops', INP_mops, 0, beVocal)';
-numMops = length(MasterOperations);
+    MasterOperations = SQL_add('mops', INP_mops, 0, beVocal)';
+    numMops = length(MasterOperations);
 
-Operations = SQL_add('ops', INP_ops, 0, beVocal);
-numOps = length(Operations);
+    Operations = SQL_add('ops', INP_ops, 0, beVocal);
+    numOps = length(Operations);
+catch
+    % The user did not approve of the set of inputs
+    return
+end
 
 %-------------------------------------------------------------------------------
 % Link operations to their masters using label matching
 % and update the structure arrays using the TS_LinkOperationsWithMasters function
 %-------------------------------------------------------------------------------
 
-[Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations)
+[Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 
 % MasterOperations may have been trimmed by TS_LinkOperationsWithMasters:
 numMops = length(MasterOperations);
