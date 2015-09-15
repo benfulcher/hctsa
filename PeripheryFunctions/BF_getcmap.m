@@ -20,15 +20,25 @@ function cmapOut = BF_getcmap(whichMap,numGrads,cellOut,flipMe)
 %                  function, for example
 % flipMe, (i) 1: inverts the ordering of the colors.
 %            (ii) 0: doesn't invert the ordering of the colors.
+%
+%---EXAMPLE USAGE:
+% 
+% 1. Set the colormap to the redyellowblue colormap with 8 gradations:
+% colormap(BF_getcmap('redyellowblue',8));
+%
+% 2. Set blue/red maps for [-1,+1] bounded data:
+% caxis([-1,1])
+% colormap([flipud(BF_getcmap('blues',9));BF_getcmap('reds',9)])
+%
+% 3. Get colors for lines and plot data stored in 5 rows of matrix y:
+% myColors = BF_getcmap('accent',5); hold on
+% for i = 1:5,
+%     plot(y(i,:),'color',myColors(i,:));
+% end
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
-%
-% If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
-% analysis: the empirical structure of time series and their methods",
-% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
 %
 % This function is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free Software

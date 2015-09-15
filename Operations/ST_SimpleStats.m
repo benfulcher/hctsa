@@ -44,18 +44,18 @@ N = length(x); % length of the time series
 
 switch whatStat
     case 'zcross'
-        % proportion of zero-crossings of the time series
-        % (i.e., crosses its mean) should be higher for noise
+        % Proportion of zero-crossings of the time series
+        % (in the case of z-scored input, crosses its mean)
         xch = x(1:end-1).*x(2:end);
         out = sum(xch < 0)/N;
 
     case 'maxima'
-        % proportion of local maxima in the time series
+        % Proportion of local maxima in the time series
         dx = diff(x);
         out = sum(dx(1:end-1) > 0 & dx(2:end) < 0)/(N-1);
 
     case 'minima'
-        % proportion of local minima in the time series
+        % Proportion of local minima in the time series
         dx = diff(x);
         out = sum(dx(1:end-1) < 0 & dx(2:end) > 0)/(N-1);
 

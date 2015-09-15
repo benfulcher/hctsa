@@ -15,12 +15,13 @@ function out = NL_MS_nlpe(y,de,tau,maxN)
 %
 %---OUTPUTS: include measures of the meanerror of the nonlinear predictor, and a
 % set of measures on the correlation, Gaussianity, etc. of the residuals.
-
+%
 % cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
 % Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
 % Vol. 52 (2005)
 %
 % Michael Small's Matlab code is available at http://small.eie.polyu.edu.hk/matlab/
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

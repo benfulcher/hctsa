@@ -199,7 +199,7 @@ for i = 1:numTimeSeries
 		% NB: the calculation time assigned for individual operations is the total calculation
 		% time taken to evaluate the master code.
     else
-    	fprintf(1,'Nothing calculated! All %u operations already complete!!  0O0O0O0O0O0\n',numOps);
+    	fprintf(1,'Nothing calculated! All %u operations already complete!!\n',numOps);
 	end
 
     % The time taken to calculate (or not, if numCalc = 0) all operations for this time series:
@@ -227,7 +227,7 @@ fprintf(1,['!! !! !! !! !! !! Calculation completed at %s !! !! ' ...
                                                 '!! !! !!\n'],datestr(now))
 fprintf(1,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1))
 
-% Save the local files (if results were computed):
+% Save back to local files (if results were computed):
 if any(numCalc_all > 0)
 	fprintf(1,'Saving all results to %s...',customFile)
 	saveTimer = tic;

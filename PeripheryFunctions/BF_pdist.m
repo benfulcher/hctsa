@@ -156,6 +156,9 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
             end
         end
         clear NaNtimer % stop the timer
+        if any(isnan(R(:)))
+            warning('%u pairs still produce NaNs, with less than %.3f%% overlap',sum(isnan(R(:)))/2,minPropGood);
+        end
     end
 otherwise
     error('Unknown distance metric ''%s''',distMetric);

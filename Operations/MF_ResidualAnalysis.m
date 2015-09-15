@@ -48,7 +48,6 @@ if all(e>0)
 elseif all(e<0)
     warning('Very weird that all model residuals are negative...')
 end
-ee = iddata(e,[],1);
 N = length(e);
 
 % ------------------------------------------------------------------------------
@@ -107,9 +106,9 @@ sqrtN = sqrt(N);
 out.ac1 = acs(1);
 out.ac2 = acs(2);
 out.ac3 = acs(3);
-out.ac1n = abs(acs(1))*sqrtN; % units of sqrtN from zero
-out.ac2n = abs(acs(2))*sqrtN; % units of sqrtN from zero
-out.ac3n = abs(acs(3))*sqrtN; % units of sqrtN from zero
+out.ac1n = abs(acs(1))*sqrtN; % units of 1/sqrtN from zero
+out.ac2n = abs(acs(2))*sqrtN; % units of 1/sqrtN from zero
+out.ac3n = abs(acs(3))*sqrtN; % units of 1/sqrtN from zero
 
 % Median normalized distance from zero
 out.acmnd0 = median(abs(acs))*sqrtN;

@@ -109,12 +109,15 @@ else
     out.maxstat = max(stat);
     out.minstat = min(stat);
 
-    % some regression statistics
-%     out.meancoeff1 = mean(reg.coeff(1)); % could be multiple, depending on the model
+    % Some regression statistics
+    % These are all highly correlated; hctsa library records just minBIC by default
     out.meanloglikelihood = mean(vertcat(reg.LL));
     out.minAIC = min(vertcat(reg.AIC));
     out.minBIC = min(vertcat(reg.BIC));
     out.minHQC = min(vertcat(reg.HQC));
+
+    % Somehow these are highly correlated, only minrmse is included in hctsa
+    % library by default
     out.minrmse = min(vertcat(reg.RMSE));
     out.maxrmse = max(vertcat(reg.RMSE));
 end

@@ -22,11 +22,12 @@ function out = CO_AddNoise(y,tau,amiMethod,extraParam,randomSeed)
 %
 % y, the input time series
 %
-% tau, the time delay for computing AMI (using CO_HistogramAMI)
+% tau, the time delay for computing AMI
 %
-% amiMethod, the method for computing AMI (using CO_HistogramAMI)
+% amiMethod, the method for computing AMI
 %
-% extraParam, e.g., the number of bins input to CO_HistogramAMI
+% extraParam, e.g., the number of bins input to CO_HistogramAMI, or parameter
+%             for IN_AutoMutualInfo
 %
 % randomSeed: settings for resetting the random seed for reproducible results
 %               (using BF_ResetSeed)

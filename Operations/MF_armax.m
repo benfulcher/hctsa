@@ -1,4 +1,4 @@
-function out = MF_armax(y, orders, ptrain, nsteps)
+function out = MF_armax(y, orders, ptrain, numSteps)
 % MF_armax  Statistics on a fitted ARMA model.
 %
 % Uses the functions iddata, armax, aic, and predict from Matlab's System
@@ -14,7 +14,7 @@ function out = MF_armax(y, orders, ptrain, nsteps)
 % ptrain, the proportion of data to train the model on (the remainder is used
 %           for testing),
 %
-% nsteps, number of steps to predict into the future for testing the model.
+% numSteps, number of steps to predict into the future for testing the model.
 %
 %
 %---OUTPUTS: include the fitted AR and MA coefficients, the goodness of fit in
@@ -70,8 +70,8 @@ end
 % if nargin < 4 || isempty(trainmode)
 %     trainmode = 'first'; % trains on first ptrain proportion of the data.
 % end
-if nargin < 4 || isempty(nsteps)
-    nsteps = 1; % one-step-ahead predictions
+if nargin < 4 || isempty(numSteps)
+    numSteps = 1; % one-step-ahead predictions
 end
 
 % ------------------------------------------------------------------------------
@@ -117,11 +117,14 @@ end
 % Fit statistics
 % ------------------------------------------------------------------------------
 
+% These three measures are basically equivalent -- default hctsa library
+% only records fpe.
 out.noisevar = m.NoiseVariance; % covariance matrix of noise source
 % covmat = m.CovarianceMatrix; % covariance matrix for parameter vector
 % parameters = m.ParameterVector; % parameter vector for model: initial values, I'd say...
 out.lossfn = m.EstimationInfo.LossFcn;
 out.fpe = m.EstimationInfo.FPE; % Final prediction error of model
+
 out.lastimprovement = m.EstimationInfo.LastImprovement; % Last improvement made in interation
 out.aic = aic(m); % ~ log(fpe)
 
@@ -140,12 +143,8 @@ ytest = y(floor(ptrain*N):end); % overlap
 mp = armax(ytrain, orders);
 
 % Compute step-ahead predictions
-% nsteps = 2; % predicts this many steps ahead
 % Maybe look at trends across different prediction horizons...
-yp = predict(mp, ytest, nsteps, 'init', 'e'); % across whole dataset
-
-% plot the two:
-% plot(y,yp);
+yp = predict(mp, ytest, numSteps, 'init', 'e'); % across whole dataset
 
 mresiduals = ytest.y - yp.y;
 
@@ -155,49 +154,12 @@ mresiduals = ytest.y - yp.y;
 residout = MF_ResidualAnalysis(mresiduals);
 
 % Convert these to local outputs in quick loop
+% Note that default hctsa library does not include rmse field, which is highly
+% correlated with the stde field
 fields = fieldnames(residout);
 for k = 1:length(fields);
     out.(fields{k}) = residout.(fields{k});
 end
-
-% % Train on some proportion, ptrain, of data
-% ytrain = y(1:floor(ptrain*N));
-% ytest = y(floor(ptrain*N)+1:end);
-% mp = armax(ytrain, orders);
-% yp = predict(mp,ytrain,2); % 1-step ahead, predictions of length ptrain*N
-% % We want only the length of test data worth of predictions, though
-% yp = yp(1:N-floor(ptrain*N));
-%
-% plot(yp.y,'b');
-% hold on;
-% plot(ytest.y,'r');
-
-%% This is the way to do it:
-% % Select the first half of the data for estimation
-% y1 = y(1:48)
-% % Estimate a fourth-order autoregressive model
-% % using the first half of the data.
-% m = ar(y1,4);
-% % Compute 6-step ahead prediction
-% yhat = predict(m,y,6);
-% % Plot the predicted and measured outputs
-% plot(y,yhat)
-
-
-%% Estimate the ARMA model using filter
-% e = randn(N,1);
-% % yp = filter(c_ma,c_ar,e);
-% yp = predict(m,iddata([],e,1),1);
-%
-% marma = armax(y,[3,2]);
-% compare(y,marma,2)
-%
-% %%
-%
-% % returns an idpoly model m with estimated parameters and covariances (parameter uncertainties).
-% % Estimates the parameters using the prediction-error method and specified orders.
-%
-% yp = predict
 
 
 end

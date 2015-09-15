@@ -253,6 +253,6 @@ fprintf(1,'oOoOo Calculation complete for %s (ts_id = %u, N = %u) oOoOo\n', ...
 fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored. [/%u]\n',...
 					numGood,numErrors,numSpecial,numCalc);
 fprintf(1,'All calculations for this time series took %s.\n',BF_thetime(toc(fullTimer),1));
-
+fprintf(1,'********************************************************************\n')
 
 end

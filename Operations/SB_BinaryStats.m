@@ -44,56 +44,44 @@ function out = SB_BinaryStats(y,binaryMethod)
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Binarize the time series:
+% Check inputs, set defaults:
 %-------------------------------------------------------------------------------
-
-switch binaryMethod
-    case 'diff' % 1 if
-        y = ((sign(diff(y)))+1)/2; % binary signal, equal to one for stepwise increases
-
-    case 'mean' % 1 if above mean, zero otherwise
-        y = (sign(y)+1)/2;
-
-    case 'iqr' % 1 if inside interquartile range, 0 otherwise
-        iqr = quantile(y,[0.25, 0.75]);
-        iniqr = find(y > iqr(1) & y <= iqr(2));
-        y = zeros(length(y),1);
-        y(iniqr) = 1;
-
-    otherwise
-        error('Unknown method ''%s''', binaryMethod);
+if nargin < 2 || isempty(binaryMethod)
+    binaryMethod = 'diff';
 end
 
-N = length(y); % length of signal - 1 (difference operation)
+%-------------------------------------------------------------------------------
+% Binarize the time series:
+%-------------------------------------------------------------------------------
+yBin = BF_Binarize(y,binaryMethod);
+
+N = length(yBin); % length of signal - 1 (difference operation)
 
 %-------------------------------------------------------------------------------
-% Basic stats on binarized time series:
+% Stationarity of binarized time series:
 %-------------------------------------------------------------------------------
+% (cf. SB_MotifTwo for basic stats on binarized time series)
 
-pup = sum(y == 1)/N;
-pdown = 1 - pup;
-p = [pup, pdown];
+% Stationarity:
+out.pupstat2 = sum(yBin(floor(end/2)+1:end) == 1)/sum(yBin(1:floor(end/2)) == 1);
 
-out.pup = pup;
-out.pupstat2 = sum(y(floor(end/2)+1:end) == 1)/sum(y(1:floor(end/2)) == 1);
+%-------------------------------------------------------------------------------
+% Consecutive string of ones / zeros (normalized by length)
+%-------------------------------------------------------------------------------
+difffy = diff(find([1;yBin;1]));
+stretch0 = difffy(difffy ~= 1) - 1;
 
-% Shannon entropy
-out.h = - sum(p(p > 0).*log(p(p > 0)));
-
-% longest consecutive string of ones / zeros (normalized by length)
-difffy = diff(find([1;y;1]));
-stretch0 = difffy(difffy ~= 1)-1;
-
-difffy = diff(find([0;y;0] == 0));
-stretch1 = difffy(difffy ~= 1)-1;
+difffy = diff(find([0;yBin;0] == 0));
+stretch1 = difffy(difffy ~= 1) - 1;
 
 %-------------------------------------------------------------------------------
 % pstretches
 %-------------------------------------------------------------------------------
-% number of different stretches as proportion of time series
+% Number of different stretches as proportion of time series
 out.pstretch1 = length(stretch1)/N;
-out.pstretch0 = length(stretch0)/N;
-out.pstretches = (length(stretch0)+length(stretch1))/N;
+% The following are trivially dependent on pstretch1:
+% out.pstretch0 = length(stretch0)/N;
+% out.pstretches = (length(stretch0)+length(stretch1))/N;
 
 if isempty(stretch0) % all 1s (almost impossible to actually occur)
     out.longstretch0 = 0;

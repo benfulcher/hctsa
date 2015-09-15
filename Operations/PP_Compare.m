@@ -260,7 +260,6 @@ out.kscn_relent = me1.relent/me2.relent;
 % (d) p-values from gof tests
 out.htdt_chi2n = HT_DistributionTest(y_d,'chi2gof','norm',10) / HT_DistributionTest(y,'chi2gof','norm',10); % chi2
 out.htdt_ksn = HT_DistributionTest(y_d,'ks','norm') / HT_DistributionTest(y,'ks','norm'); % Kolmogorov-Smirnov
-out.htdt_llfn = HT_DistributionTest(y_d,'lillie','norm') / HT_DistributionTest(y,'ks','norm');
 
 % 3) Outliers
 out.olbt_m2 = DN_OutlierTest(y_d,2,'mean') / DN_OutlierTest(y,2,'mean');

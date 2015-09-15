@@ -19,9 +19,10 @@ function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)
 %
 %---OUTPUTS: parameters from the model fitted to the entire time series, and
 % goodness of fit and residual analysis from n4sid prediction.
-
+%
 % Uses the functions iddata, n4sid, aic, and predict from Matlab's System
 % Identification Toolbox
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -118,8 +119,10 @@ out.np = m_np; % the number of parameters, only a useful output if not specified
 out.m_Ts = m.Ts;
 
 % Goodness of fit outputs
-out.m_noisevar = m.NoiseVariance; % a scalar number
-out.m_lossfn = m.EstimationInfo.LossFcn;
+% Since noisevar, lossfunction, and fpe so highly correlated, the default
+% hctsa library only measures fpe.
+out.m_noisevar = m.NoiseVariance; % a scalar number, basically the fpe
+out.m_lossfn = m.EstimationInfo.LossFcn; % basically the fpe
 out.m_fpe = m.EstimationInfo.FPE;
 out.m_aic = aic(m);
 

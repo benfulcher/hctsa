@@ -67,14 +67,13 @@ end
 % ------------------------------------------------------------------------------
 % Somewhat strange behaviour -- very variable
 if (length(nbin) == 1) && (length(depth) > 1)
-    % range over depths specified in the vector
-    % return statistics on results
-    ndepths = length(depth);
-    ents = zeros(ndepths,1);
-    for i = 1:ndepths
+    % Range over depths specified in the vector and return statistics on results
+    numDepths = length(depth);
+    ents = zeros(numDepths,1);
+    for i = 1:numDepths
         ents(i) = MS_shannon(y,nbin,depth(i));
     end
-    % should scale with depth: normalize by this:
+    % Should scale with depth: normalize by this:
     ents = ents./depth';
     out.maxent = max(ents);
     out.minent = min(ents);
@@ -87,14 +86,12 @@ end
 %% (*) Statistics over different bin numbers
 % ------------------------------------------------------------------------------
 if (length(nbin) > 1) && (length(depth) == 1)
-    % range over depths specified in the vector
-    % return statistics on results
+    % Range over bins specified in the vector nbin; return statistics on results
     nbins = length(nbin);
     ents = zeros(nbins,1);
     for i = 1:nbins
         ents(i) = MS_shannon(y,nbin(i),depth);
     end
-    ents = ents/depth; % should scale with depth: normalize by this:
     out.maxent = max(ents);
     out.minent = min(ents);
     out.medent = median(ents);
@@ -107,17 +104,18 @@ end
 % ------------------------------------------------------------------------------
 if (length(nbin) > 1) && (length(depth) > 1)
     nbins = length(nbin);
-    ndepths = length(depth);
+    numDepths = length(depth);
 
-    ents = zeros(nbins,ndepths);
+    ents = zeros(nbins,numDepths);
     for i = 1:nbins
-        for j = 1:ndepths
+        for j = 1:numDepths
             ents(i,j) = MS_shannon(y,nbin(i),depth(j))/depth(j);
         end
     end
     % Don't know what quite to do -- I think stick to above, where only one
     % input is a vector at a time.
     % ***INCOMPLETE*** don't do this.
+    error('Comparing both bins and depth not implemented')
 end
 
 

@@ -341,7 +341,6 @@ function out = DoRobustLinearFit(out,logtt,logFF,theRange,fieldName)
     if length(theRange) < 8 || all(isnan(logFF(theRange)))
         out.([fieldName,'linfitint']) = NaN;
         out.([fieldName,'alpha']) = NaN;
-        out.([fieldName,'stats_coeffcorr']) = NaN;
         out.([fieldName,'se1']) = NaN;
         out.([fieldName,'se2']) = NaN;
         out.([fieldName,'ssr']) = NaN;
@@ -351,7 +350,6 @@ function out = DoRobustLinearFit(out,logtt,logFF,theRange,fieldName)
 
         out.([fieldName,'linfitint']) = linfit(1); % linear fit intercept
         out.([fieldName,'alpha']) = linfit(2); % linear fit gradient
-        out.([fieldName,'stats_coeffcorr']) = abs(stats.coeffcorr(1,2)); % correlation of coefficient estimates
         out.([fieldName,'se1']) = stats.se(1); % standard error in intercept
         out.([fieldName,'se2']) = stats.se(2); % standard error in mean
         out.([fieldName,'ssr']) = mean(stats.resid.^2); % mean squares residual

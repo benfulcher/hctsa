@@ -1,5 +1,5 @@
 function out = SD_TSTL_surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
-% SD_TSTL_surrogates
+% SD_TSTL_surrogates    Surrogate time-series analysis
 %
 % Generates surrogate time series and tests them against the original time
 % series according to some test statistics: T_{C3}, using the TSTOOL code tc3 or

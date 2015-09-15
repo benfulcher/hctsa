@@ -131,7 +131,7 @@ out.C = Cest;
 % There will be a value for each model order from pmin:pmax
 % (i) Return all
 for i = 1:length(ps)
-    out.(['sbc_',num2str(ps(i))]) = SBC(i);
+    out.(sprintf('sbc_%u',ps(i))) = SBC(i);
     % eval(sprintf('out.sbc_%u = SBC(%u);',ps(i),i));
 end
 
@@ -177,8 +177,9 @@ else
 end
 out.aroundmin_fpe = abs(min(FPE))/meanaround;
 
-
+%-------------------------------------------------------------------------------
 %% (II) Test Residuals
+%-------------------------------------------------------------------------------
 
 % Run code from ARfit package:
 [siglev, res] = ARFIT_arres(west,Aest,y);
@@ -195,7 +196,9 @@ out.res_ac1_norm = CO_AutoCorr(res,1,'Fourier')/sqrt(N); % normalize by sqrt(N)
 acf = CO_AutoCorr(res,1:20,'Fourier');
 out.pcorr_res = sum(abs(acf)>1.96/sqrt(N))/20;
 
+%-------------------------------------------------------------------------------
 %% (III) Confidence Intervals
+%-------------------------------------------------------------------------------
 
 % Run code from ARfit package:
 Aerr = ARFIT_arconf(Aest, Cest, th);
@@ -205,7 +208,9 @@ out.aerr_min = min(Aerr);
 out.aerr_max = max(Aerr);
 out.aerr_mean = mean(Aerr);
 
+%-------------------------------------------------------------------------------
 %% (III) Eigendecomposition
+%-------------------------------------------------------------------------------
 
 % Run code from the ARfit package
 [S, Serr, per, tau, exctn] = ARFIT_armode(Aest, Cest, th);

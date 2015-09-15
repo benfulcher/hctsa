@@ -45,23 +45,8 @@ if nargin < 2 || isempty(binarizeHow)
     binarizeHow = 'diff';
 end
 
-% Binary difference signs
-switch binarizeHow
-	case 'diff'
-        % Binary signal: 1 for stepwise increases, 0 for stepwise decreases
-		yBin = ((sign(diff(y)))+1)/2;
-
-	case 'mean'
-        % Binary signal: 1 for above mean, 0 for below mean
-		yBin = (sign(y)+1)/2;
-
-	case 'median'
-        % Binary signal: 1 for above median, 0 for below median
-		yBin = (sign(y-median(y))+1)/2;
-
-    otherwise
-        error('Unknown binary transformation setting ''%s''',binarizeHow)
-end
+% Generate a binarized version of the input time series:
+yBin = BF_Binarize(y,binarizeHow);
 
 % Define the length of the new, symbolized sequence: N
 N = length(yBin);
@@ -80,6 +65,8 @@ r1 = (yBin == 1);
 r0 = (yBin == 0);
 
 % ------ Record these -------
+% (Will be dependent outputs since signal is binary, sum to 1)
+% (Default hctsa library measures just up)
 out.u = sum(r1)/N; % proportion 1 (corresponds to a movement up for 'diff')
 out.d = sum(r0)/N; % proportion 0 (corresponds to a movement down for 'diff')
 pp = [out.d, out.u];

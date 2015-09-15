@@ -137,8 +137,9 @@ out.best_n = nn;
 out.aic_n = nn; % optimum model order minimizing AIC in the range given
 out.bestaic = vmodaic(nn == min(nn));
 
-[nn, vmodmdl] = selstruc(V,'mdl'); % minimize Rissanen's Minimum Description Length (MDL)
-out.mdl_n = nn; % optimal model order minimizing MDL in the range given
-out.bestmdl = vmodmdl(nn == min(nn));
+% Using minimum description length is basically the same as using AIC:
+% [nn, vmodmdl] = selstruc(V,'mdl'); % minimize Rissanen's Minimum Description Length (MDL)
+% out.mdl_n = nn; % optimal model order minimizing MDL in the range given
+% out.bestmdl = vmodmdl(nn == min(nn));
 
 end

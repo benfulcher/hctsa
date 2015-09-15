@@ -74,11 +74,19 @@ linkageMeth = inputP.Results.linkageMeth;
 clear inputP;
 
 %-------------------------------------------------------------------------------
+% Check squareform:
+%-------------------------------------------------------------------------------
+if any(size(distMat)==1)
+    % A vector, probably a squareform version
+    distMat = squareform(distMat);
+end
+
+%-------------------------------------------------------------------------------
 % Do the linkage clustering:
 %-------------------------------------------------------------------------------
 numItems = length(distMat);
-fprintf(1,'Computing linkage information for %ux%u data...',...
-            numItems,numItems);
+fprintf(1,'Computing linkage information for %ux%u data using %s clustering...',...
+            numItems,numItems,linkageMeth);
 links = linkage(distMat,linkageMeth);
 fprintf(1,' Done.\n');
 
@@ -126,6 +134,10 @@ for i = 1:numClusterings
             cluster_Groupi{i}{j} = cluster_Groupi{i}{j}(ix);
         end
     end
+
+    % Reorder by decreasing cluster size
+    [~,ix] = sort(cellfun(@length,cluster_Groupi{i}),'descend');
+    cluster_Groupi{i} = cluster_Groupi{i}(ix);
 
     % Select the closest to cluster centre in each group
     clusterCenters{i} = cellfun(@(x)x(1),cluster_Groupi{i});

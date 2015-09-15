@@ -62,7 +62,7 @@ scales = (1:maxScale);
 coeffs = cwt(y, scales, wname);
 
 S = abs(coeffs.*coeffs); % power
-SC = 100*S./sum(S(:)); % scaled power
+SC = 100*S./sum(S(:)); % scaled power is length-dependent
 
 % These SC values (percentage of energy in each coefficient) are what are
 % displayed in a scalogram (c.f., wscalogram function)
@@ -81,17 +81,18 @@ end
 numEntries = size(coeffs,1)*size(coeffs,2); % number of entries in coeffs matrix
 
 % 1) Coefficients, coeffs
-out.meanC = mean(coeffs(:));
-out.meanabsC = mean(abs(coeffs(:)));
-out.medianabsC = median(abs(coeffs(:)));
-out.maxabsC = max(abs(coeffs(:)));
-out.maxonmedC = max(abs(coeffs(:)))/median(abs(coeffs(:)));
+allCoeffs = coeffs{:}
+out.meanC = mean(allCoeffs);
+out.meanabsC = mean(abs(allCoeffs));
+out.medianabsC = median(abs(allCoeffs));
+out.maxabsC = max(abs(allCoeffs));
+out.maxonmeanC = out.maxabsC/out.meanabsC;
 
-% 2) Power, SC
-out.meanSC = mean(SC(:));
-out.medianSC = median(SC(:));
-out.maxSC = max(SC(:));
-out.maxonmedSC = max(SC(:))/median(SC(:));
+% 2) Power, SC -- it's highly length-dependent
+% out.meanSC = mean(SC(:)); % (reproduces the mean power of power spectrum)
+% out.medianSC = median(SC(:));
+% out.maxSC = max(SC(:));
+out.maxonmeanSC = max(SC(:))/mean(SC(:));
 
 % Proportion of coeffs matrix over ___ maximum (thresholded)
 poverfn = @(x) sum(SC(SC > x*max(SC(:))))/numEntries;
@@ -109,7 +110,6 @@ if doplot
     ksdensity(SC(:));
 end
 
-out.exp_muhat = expfit(SC(:));
 gamma_phat = gamfit(SC(:));
 out.gam1 = gamma_phat(1);
 out.gam2 = gamma_phat(2);

@@ -18,7 +18,7 @@ function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedParams,doTwo)
 %---OUTPUTS: basic statistics on the outputs of corrsum, including iteratively
 % re-weighted least squares linear fits to log-log plots using the robustfit
 % function in Matlab's Statistics Toolbox.
-
+%
 % Uses TSTOOL code corrsum (or corrsum2) to compute scaling of the correlation
 % sum for a time-delay reconstructed time series by the Grassberger-Proccacia
 % algorithm using fast nearest-neighbor search.
@@ -27,6 +27,7 @@ function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedParams,doTwo)
 % Phys. Rev. Lett. 50(5) 346 (1983)
 %
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

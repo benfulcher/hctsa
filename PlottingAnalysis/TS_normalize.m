@@ -5,7 +5,6 @@ function TS_normalize(normFunction,filterOptions,fileName_HCTSA_loc,subs,trainSe
 % HCTSA_loc_N.mat
 % The normalization is all about a rescaling to the [0,1] interval for
 % visualization and clustering.
-% TODO: clean up this code.
 %
 %---INPUTS:
 % normFunction: String specifying how to normalize the data.
@@ -50,8 +49,8 @@ if nargin < 1 || isempty(normFunction)
 end
 
 if nargin < 2 || isempty(filterOptions)
-    filterOptions = [0.80, 1];
-    % By default remove less than 80%-good-valued time series, & then less than
+    filterOptions = [0.90, 1];
+    % By default remove less than 90%-good-valued time series, & then less than
     % 100%-good-valued operations.
 end
 fprintf(1,['Removing time series with more than %.2f%% special-valued outputs\n' ...

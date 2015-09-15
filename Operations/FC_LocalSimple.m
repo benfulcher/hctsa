@@ -143,11 +143,11 @@ out.swm = SY_SlidingWindow(res,'mean','std',5,1);
 % Normality:
 % out.chi2n=HT_DistributionTest(res,'chi2gof','norm',10); % chi2
 % out.ksn=HT_DistributionTest(res,'ks','norm'); % Kolmogorov-Smirnov
-tmp = DN_SimpleFit(y,'gauss1',0);
+tmp = DN_SimpleFit(res,'gauss1',0);
 if ~isstruct(tmp) && isnan(tmp) % fitting failed
-    out.gofnadjr2 = NaN;
+    out.gofr2 = NaN;
 else
-    out.gofnadjr2 = tmp.adjr2; % degrees of freedom-adjusted rsqured
+    out.gofr2 = tmp.r2; % rsqured
 end
 
 % Autocorrelation structure:
