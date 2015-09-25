@@ -17,7 +17,7 @@ function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,be
 %               each individual operation.
 %
 %---OUTPUTS:
-% Writes output into customFile (HCTSA_loc.mat by default)
+% Writes output to customFile (HCTSA_loc.mat by default)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

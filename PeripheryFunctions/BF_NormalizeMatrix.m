@@ -74,7 +74,7 @@ switch normMethod
 
     case 'zscore'
         for i = 1:numFeatures
-            dataMatrix(:,i) = ZScore(dataMatrix(:,i));
+            dataMatrixNorm(:,i) = ZScore(dataMatrix(:,i));
         end
 
     case 'robustSigmoid'
@@ -105,7 +105,6 @@ switch normMethod
         end
 
     case 'mixedSigmoid'
-        % Ben Fulcher, 2014-06-26
         % Uses a scaled sigmoid if iqr=0; a scaled, outlier-robust sigmoid otherwise
         % Uses only non-NaNs
 
@@ -114,16 +113,16 @@ switch normMethod
             theColumn = dataMatrix(:,i);
             if max(dataMatrix(:,i))==min(theColumn)
                 % A constant column is set to 0:
-                datamatrixNorm(:,i) = 0;
+                dataMatrixNorm(:,i) = 0;
             elseif all(isnan(theColumn))
                 % Everything a NaN, kept at NaN:
-                datamatrixNorm(:,i) = NaN;
+                dataMatrixNorm(:,i) = NaN;
             elseif iqr(dataMatrix(~isnan(theColumn),i))==0
                 % iqr of data is zero: perform a normal sigmoidal transformation:
-                datamatrixNorm(:,i) = ScaledSigmoid(dataMatrix(:,i),1);
+                dataMatrixNorm(:,i) = ScaledSigmoid(dataMatrix(:,i),1);
             else
                 % Perform an outlier-robust version of the sigmoid:
-                datamatrixNorm(:,i) = ScaledRobustSigmoid(dataMatrix(:,i),1);
+                dataMatrixNorm(:,i) = RobustSigmoid(dataMatrix(:,i),1);
             end
         end
 
@@ -138,11 +137,11 @@ switch normMethod
             meanF = mean(FF(qr));
             stdF = std(FF(qr));
             if stdF==0
-                dataMatrix(goodRows,i) = NaN; % avoid +/- Infs
+                dataMatrixNorm(goodRows,i) = NaN; % avoid +/- Infs
             else
 %                 kk = 1./(1+exp(-zscore(FF)));
                 kk = 1./(1+exp(-(FF-meanF)/stdF));
-                dataMatrix(goodRows,i) = (kk-min(kk))/(max(kk)-min(kk));
+                dataMatrixNorm(goodRows,i) = (kk-min(kk))/(max(kk)-min(kk));
             end
         end
 
@@ -202,7 +201,7 @@ function xhat = UnityRescale(x)
     % Linearly rescale a data vector to unit interval:
     goodVals = ~isnan(x); % only work with non-NaN data
     if ~any(goodVals) % all NaNs:
-        xhat = x;
+        xhat = x; return
     end
     minX = min(x(goodVals));
     maxX = max(x(goodVals));
