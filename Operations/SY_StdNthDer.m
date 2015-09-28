@@ -11,6 +11,10 @@ function out = SY_StdNthDer(y,n)
 % of the time series; the process is repeated to obtain higher order
 % derivatives.
 %
+% Note that this idea is popular in the heart-rate variability literature, cf.
+% cf. "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)
+% (and function MD_hrv_classic)
+%
 %---INPUTS:
 %
 % y, time series to analyze

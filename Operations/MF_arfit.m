@@ -128,6 +128,7 @@ out.C = Cest;
 % ------------------------------------------------------------------------------
 % (4) Schwartz's Bayesian Criterion, SBC
 % ------------------------------------------------------------------------------
+% (not included in default HCTSA library -- rather the FPE is used)
 % There will be a value for each model order from pmin:pmax
 % (i) Return all
 for i = 1:length(ps)
@@ -157,7 +158,7 @@ out.aroundmin_sbc = abs(min(SBC))/meanaround;
 % ------------------------------------------------------------------------------
 % (i) Return all
 for i = 1:length(ps)
-    out.(['fpe_',num2str(ps(i))]) = FPE(i); % dynamic field referencing
+    out.(['fpe_',num2str(ps(i))]) = FPE(i);
     % eval(sprintf('out.fpe_%u = FPE(%u);',ps(i),i));
 end
 % (ii) Return minimum

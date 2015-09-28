@@ -1,5 +1,5 @@
-function out = NL_MS_LZcomplexity(y,n,preProc)
-% NL_MS_LZcomplexity Lempel-Ziv complexity of a n-bit encoding of a time series
+function out = EN_MS_LZcomplexity(y,n,preProc)
+% EN_MS_LZcomplexity Lempel-Ziv complexity of a n-bit encoding of a time series
 %
 %---INPUTS:
 % y, the input time series

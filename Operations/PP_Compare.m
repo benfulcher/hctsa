@@ -211,7 +211,6 @@ out.statav8 = SY_StatAv(y_d,'seg',8) / SY_StatAv(y,'seg',8);
 out.statav10 = SY_StatAv(y_d,'seg',10) / SY_StatAv(y,'seg',10);
 
 % (b) Sliding window mean
-out.swms2_1 = SY_SlidingWindow(y_d,'mean','std',2,1) / SY_SlidingWindow(y,'mean','std',2,1);
 out.swms2_2 = SY_SlidingWindow(y_d,'mean','std',2,2) / SY_SlidingWindow(y,'mean','std',2,2);
 out.swms5_1 = SY_SlidingWindow(y_d,'mean','std',5,1) / SY_SlidingWindow(y,'mean','std',5,1);
 out.swms5_2 = SY_SlidingWindow(y_d,'mean','std',5,2) / SY_SlidingWindow(y,'mean','std',5,2);

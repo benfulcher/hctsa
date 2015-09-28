@@ -362,7 +362,6 @@ out.area_2_1 = sum(split(:,1))*dw;
 out.logarea_2_1 = sum(log(split(:,1)))*dw;
 out.area_2_2 = sum(split(:,2))*dw;
 out.logarea_2_2 = sum(log(split(:,2)))*dw;
-out.rawstatav2_m = std(mean(split));
 out.statav2_m = std(mean(split))/std(S);
 out.statav2_s = std(std(split))/std(S);
 
@@ -375,7 +374,6 @@ out.area_3_2 = sum(split(:,2))*dw;
 out.logarea_3_2 = sum(log(split(:,2)))*dw;
 out.area_3_3 = sum(split(:,3))*dw;
 out.logarea_3_3 = sum(log(split(:,3)))*dw;
-out.rawstatav3_m = std(mean(split));
 out.statav3_m = std(mean(split))/std(S);
 out.statav3_s = std(std(split))/std(S);
 
@@ -390,7 +388,6 @@ out.area_4_3 = sum(split(:,3))*dw;
 out.logarea_4_3 = sum(log(split(:,3)))*dw;
 out.area_4_4 = sum(split(:,4))*dw;
 out.logarea_4_4 = sum(log(split(:,4)))*dw;
-out.rawstatav4_m = std(mean(split));
 out.statav4_m = std(mean(split))/std(S);
 out.statav4_s = std(std(split))/std(S);
 
@@ -407,7 +404,6 @@ out.area_5_4 = sum(split(:,4))*dw;
 out.logarea_5_4 = sum(log(split(:,4)))*dw;
 out.area_5_5 = sum(split(:,5))*dw;
 out.logarea_5_5 = sum(log(split(:,5)))*dw;
-out.rawstatav5_m = std(mean(split));
 out.statav5_m = std(mean(split))/std(S);
 out.statav5_s = std(std(split))/std(S);
 

@@ -85,7 +85,7 @@ switch whatDistn
 
     case 'rayleigh'
         if any(x < 0),
-            fprintf(1,'The data is not positive, but Rayleigh is a positive-only distribution.\n')
+            fprintf(1,'The data are not positive, but Rayleigh is a positive-only distribution.\n')
             out = NaN;
             return
         else % fit a Rayleigh distribution to the positive-only data
@@ -124,7 +124,7 @@ switch whatDistn
 
     case 'logn'
         if any(x <= 0)
-            fprintf(1,'The data is not positive, but Log-Normal is a positive-only distribution.\n')
+            fprintf(1,'The data are not positive, but Log-Normal is a positive-only distribution.\n')
             out = NaN; return
         else
 			a = lognfit(x);
@@ -136,7 +136,7 @@ switch whatDistn
 
     case 'wbl'
         if any(x <= 0)
-            fprintf(1,'The data is not positive, but Weibull is a positive-only distribution.\n')
+            fprintf(1,'The data are not positive, but Weibull is a positive-only distribution.\n')
             out = NaN; return
         else
 			a = wblfit(x);

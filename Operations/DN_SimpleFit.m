@@ -129,8 +129,10 @@ end
 % ------------------------------------------------------------------------------
 %% Compute the outputs into a structure
 % ------------------------------------------------------------------------------
+% Not included in hctsa library (redundancy with rmse):
 out.r2 = gof.rsquare; % rsquared
 out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsqured
+
 out.rmse = gof.rmse;  % root mean square error
 out.resAC1 = CO_AutoCorr(output.residuals,1,'Fourier'); % autocorrelation of residuals at lag 1
 out.resAC2 = CO_AutoCorr(output.residuals,2,'Fourier'); % autocorrelation of residuals at lag 2

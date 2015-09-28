@@ -217,7 +217,7 @@ end
         ac4 = autoCorrs(4);
 
         % 2-bit LZ complexity:
-        % LZcomplex = NL_MS_LZcomplexity(y,3);
+        % LZcomplex = EN_MS_LZcomplexity(y,3);
 
         % SampEn(2,0.2,1):
         sampenStruct = EN_SampEn(y_rand,2,0.15);

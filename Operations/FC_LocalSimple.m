@@ -130,11 +130,10 @@ end
 
 % Mean error:
 out.meanerr = mean(res);
-out.rmserr = sqrt(mean(res.^2));
-out.meanabserr = mean(abs(res));
 
-% Standard deviation of errors:
+% Spread of errors:
 out.stderr = std(res);
+out.meanabserr = mean(abs(res));
 
 % Stationarity:
 out.sws = SY_SlidingWindow(res,'std','std',5,1);

@@ -38,7 +38,6 @@ function out = MF_AR_arcov(y,p)
 BF_CheckToolbox('signal_toolbox');
 
 % Check inputs, set defaults:
-
 if nargin < 2 || isempty(p)
     p = 2; % Fit AR(2) model by default
 end
@@ -61,10 +60,9 @@ end
 y_est = filter([0, -a(2:end)],1,y);
 err = y - y_est; % residuals
 
-out.rms = sqrt(mean(err.^2)); % RMS error
-out.mu = mean(err); % mean error
-out.std = std(err); % std of error
-out.AC1 = CO_AutoCorr(err,1,'Fourier'); % autocorrelation of residuals at lag 1
-out.AC2 = CO_AutoCorr(err,2,'Fourier'); % autocorrelation of residuals at lag 2
+out.res_mu = mean(err); % mean error
+out.res_std = std(err); % std of error
+out.res_AC1 = CO_AutoCorr(err,1,'Fourier'); % autocorrelation of residuals at lag 1
+out.res_AC2 = CO_AutoCorr(err,2,'Fourier'); % autocorrelation of residuals at lag 2
 
 end

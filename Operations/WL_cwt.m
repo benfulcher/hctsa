@@ -81,7 +81,7 @@ end
 numEntries = size(coeffs,1)*size(coeffs,2); % number of entries in coeffs matrix
 
 % 1) Coefficients, coeffs
-allCoeffs = coeffs{:}
+allCoeffs = coeffs(:);
 out.meanC = mean(allCoeffs);
 out.meanabsC = mean(abs(allCoeffs));
 out.medianabsC = median(abs(allCoeffs));

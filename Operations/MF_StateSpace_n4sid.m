@@ -126,8 +126,6 @@ out.m_lossfn = m.EstimationInfo.LossFcn; % basically the fpe
 out.m_fpe = m.EstimationInfo.FPE;
 out.m_aic = aic(m);
 
-% plot(y)
-
 % ------------------------------------------------------------------------------
 %% Prediction
 % ------------------------------------------------------------------------------

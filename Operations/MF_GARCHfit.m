@@ -143,12 +143,9 @@ N = length(y);
 %       use the 10% significance level
 %       departure from randomness hypothesis test
 [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,'lags',1:20,'alpha',0.1);
-% [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1,[]);
 
 
 % (iii) Correlation in time series: autocorrelation
-% autocorrs_y = CO_AutoCorr(y,1:20);
-% autocorrs_var = CO_AutoCorr(y.^2,1:20);
 [ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y,20,[],[]);
 [ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2,20,[],[]);
 

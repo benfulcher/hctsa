@@ -71,8 +71,6 @@ y = iddata(y,[],1);
 lossfns = zeros(maxOrder,1); % Loss function
 fpes = zeros(maxOrder,1); % Akaike's final prediction error
 aics = zeros(maxOrder,1); % Akaike's information criterion
-% bics = zeros(maxOrder,1); % Bayesian information criterion
-
 
 for k = 1:maxOrder
     % Fit the state space model for this order, k
@@ -97,12 +95,6 @@ out.aicopt = find(aics == min(aics), 1, 'first');
 % out.bicopt = find(bics == min(bics), 1, 'first');
 out.minlossfn = min(lossfns);
 out.lossfnopt = find(lossfns == min(lossfns), 1, 'first');
-
-% Parameters at order 2
-out.aic2 = aics(2);
-% out.bic2 = bics(2);
-out.fpe2 = fpes(2);
-out.lossfn2 = lossfns(2);
 
 % Curve change summary statistics
 out.meandiffaic = mean(diff(aics));
