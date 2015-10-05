@@ -615,7 +615,7 @@ fprintf(1,' Done.\n')
 if ~strcmp(addWhat,'mops')
     resultsTic = tic;
     if beVocal
-        fprintf(1,['Updating the Results table in %s\n(This could take a while, ' ...
+        fprintf(1,['Updating the Results table in %s\n(This could take a while (for 20,000 time series with all operations ~10hours), ' ...
                                 'please be patient)...'],databaseName)
     end
     switch addWhat
