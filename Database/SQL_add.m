@@ -616,7 +616,7 @@ if ~strcmp(addWhat,'mops')
     resultsTic = tic;
     if beVocal
         fprintf(1,['Updating the Results table in %s\n(This could take a while, ' ...
-                                'please be patient)...'],databaseName)
+            'e.g., ~10 hours for 20,000 time series with 9,000 operations; Please be patient!)...'],databaseName)
     end
     switch addWhat
     case 'ts'
