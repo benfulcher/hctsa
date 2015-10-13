@@ -20,9 +20,10 @@ function y_embed = BF_embed(y,tau,m,makeSignal,randomSeed,beVocal)
 %
 %---OUTPUT:
 % A matrix of width m containing the vectors in the new embedding space...
-
+%
 % The makeSignal option uses the TSTOOL code 'embed'
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -67,10 +68,10 @@ else
         switch tau
             case 'mi' % first minimum of mutual information function
                 tau = CO_FirstMin(y,'mi');
-                sstau = sprintf('by first minimum of mutual information to tau = %u');
+                sstau = sprintf('by first minimum of mutual information to tau = ');
             case 'ac' % first zero-crossing of ACF
                 tau = CO_FirstZero(y,'ac');
-                sstau = sprintf('by first zero crossing of autocorrelation function to tau = %u',tau);
+                sstau = sprintf('by first zero crossing of autocorrelation function to tau = ');
             otherwise
                 error('Invalid time-delay method ''%s''.',tau)
         end
@@ -177,7 +178,6 @@ end
 if size(y,2) > size(y,1)
     y = y';
 end
-
 
 if makeSignal
     % Use the TSTOOL embed function:

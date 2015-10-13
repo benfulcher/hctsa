@@ -4,6 +4,13 @@ function SQL_clear_remove(tsOrOps,idRange,doRemove,doLog)
 % Either clears results or removes entirely a given set of ts_ids
 % or op_ids from the database.
 %
+%---INPUTS:
+% tsOrOps -- either 'ts' or 'ops' for whether to eliminate either a time series
+%            of a operation, respectively
+% idRange -- a vector of the ts_ids or op_ids in the database to remove
+% doRemove -- whether to remove entries (specify 1), or just clear their data (specify 0)
+% doLog -- generate a .log file describing what was done
+% 
 % *** Clear *** (doRemove = 0):
 % The results of a particular operation or time series in the Results Table  are
 % converted back to NULL. Clears *all* results from a given set of operations,
@@ -18,14 +25,6 @@ function SQL_clear_remove(tsOrOps,idRange,doRemove,doLog)
 %
 % *** Remove *** (doRemove = 1):
 % Removes COMPLETELY the selected ts_ids or op_ids from the Database.
-%
-%
-%---INPUTS:
-% tsOrOps -- either 'ts' or 'ops' for whether to eliminate either a time series
-%            of a operation, respectively
-% idRange -- a vector of the ts_ids or op_ids in the database to remove
-% doRemove -- whether to remove entries (specify 1), or just clear their data (specify 0)
-% doLog -- generate a .log file describing what was done
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>

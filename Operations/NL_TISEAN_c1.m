@@ -64,15 +64,18 @@ function out = NL_TISEAN_c1(y, tau, mmm, tsep, Nref)
 % ------------------------------------------------------------------------------
 N = length(y); % time-series length (number of samples)
 
-% ++BF 12/5/2010 -- for some reason timeseries of length near a multiple of 512
+% ++BF 12/5/2010 -- for some reason timeseries of length near a multiple of 256
 % stalls the TISEAN routine c1... -- let's do a slight workaround by removing the
 % last (few) points in this case...
-freakystat = mod(N,256);
-if freakystat <= 6
+freakyStat = mod(N,256);
+if freakyStat <= 6
     fprintf(1,'You''re not going to believe this but TISEAN has a problem freezing with this length time series!\n')
-    fprintf(1,'I''m ignoring the last %u points of this time series...\n',freakystat+1)
-    y = y(1:end-(freakystat+1));
+    fprintf(1,'I''m ignoring the last %u points of this time series...\n',freakyStat+1)
+    y = y(1:end-(freakyStat+1));
     N = length(y); % new time-series length
+elseif N == 65 || N==66 || N == 70
+    % Somehow length-70 vectors don't work
+    out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
@@ -92,7 +95,7 @@ end
 if nargin < 3 || isempty(mmm)
     mmm = [2, 10];
 end
-if length(mmm)==1
+if length(mmm)~=2
     error('Please set a minimum and maximum embedding dimension as a 2-vector');
 end
 

@@ -12,9 +12,10 @@ function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedParams, randomSe
 % embedParams, the embedding parameters for BF_embed, in the form {tau,m}
 %
 %---OUTPUT: the Taken's estimator of the correlation dimension, d2.
-
+%
 % Uses the TSTOOL code, takens_estimator.
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -85,6 +86,12 @@ s = BF_embed(y,embedParams{1},embedParams{2},1,randomSeed);
 if ~strcmp(class(s),'signal') && isnan(s); % Embedding failed
     fprintf('Embedding failed.\n')
     out = NaN; return % assume an error with large time-lag or dimension
+end
+
+% Check that there are enough points:
+if size(data(s),1) < 10
+    % Too few data points:
+    out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
