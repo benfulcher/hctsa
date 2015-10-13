@@ -10,7 +10,7 @@ function SQL_clear_remove(tsOrOps,idRange,doRemove,doLog)
 % idRange -- a vector of the ts_ids or op_ids in the database to remove
 % doRemove -- whether to remove entries (specify 1), or just clear their data (specify 0)
 % doLog -- generate a .log file describing what was done
-% 
+%
 % *** Clear *** (doRemove = 0):
 % The results of a particular operation or time series in the Results Table  are
 % converted back to NULL. Clears *all* results from a given set of operations,
@@ -27,7 +27,7 @@ function SQL_clear_remove(tsOrOps,idRange,doRemove,doLog)
 % Removes COMPLETELY the selected ts_ids or op_ids from the Database.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>
+% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
