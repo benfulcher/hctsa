@@ -14,7 +14,7 @@ function out = DN_MinMax(y,minOrMax)
 % If you use this code for your research, please cite:
 % B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
 % analysis: the empirical structure of time series and their methods",
-% J. Roy. Soc. Interface 10(83) 20130048 (2010). DOI: 10.1098/rsif.2013.0048
+% J. Roy. Soc. Interface 10(83) 20130048 (2013). DOI: 10.1098/rsif.2013.0048
 %
 % This function is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free Software
