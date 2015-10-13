@@ -22,7 +22,7 @@ function cmapOut = BF_getcmap(whichMap,numGrads,cellOut,flipMe)
 %            (ii) 0: doesn't invert the ordering of the colors.
 %
 %---EXAMPLE USAGE:
-% 
+%
 % 1. Set the colormap to the redyellowblue colormap with 8 gradations:
 % colormap(BF_getcmap('redyellowblue',8));
 %
@@ -66,6 +66,7 @@ if nargin < 4 || isempty(flipMe)
 end
 
 % Minimum number of groups is 3:
+numGrads0 = numGrads;
 if numGrads < 3
     numGrads = 3;
 end
@@ -1814,15 +1815,20 @@ switch whichMap
         error('Unknown color map specified: ''%s''',whichMap);
 end
 
+%-------------------------------------------------------------------------------
 if flipMe
     cmapOut = flipud(cmapOut/255);
 else
     cmapOut = (cmapOut/255);
 end
 
+% Convert to the number of colors specified if less than the minimum (3)
+if numGrads0 < 3
+    cmapOut = cmapOut(1,:);
+end
+
 if cellOut
     cmapOut = mat2cell(cmapOut,ones(size(cmapOut,1),1));
 end
-
 
 end

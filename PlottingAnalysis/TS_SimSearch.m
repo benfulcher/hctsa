@@ -1,5 +1,5 @@
 function TS_SimSearch(varargin)
-% TS_SimSearch  Nearest neighbors of a given time series of operation from an hctsa analysis.
+% TS_SimSearch  Nearest neighbors of a given time series or operation from an hctsa analysis.
 %
 % Nearest neighbors can provide a local context for a particular time series or
 % operation.
