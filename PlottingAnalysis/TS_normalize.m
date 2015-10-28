@@ -75,12 +75,22 @@ end
 % --------------------------------------------------------------------------
 %% Read data from local files
 % --------------------------------------------------------------------------
+% First check that fromDatabase exists (for back-compatability)
+fileVarsStruct = whos('-file',fileName_HCTSA_loc);
+fileVars = {fileVarsStruct.name};
+if ismember('fromDatabase',fileVars)
+    load(fileName_HCTSA_loc,'fromDatabase')
+else
+    fromDatabase = 1; % set to 1 by default
+end
 fprintf(1,'Reading data from %s...',fileName_HCTSA_loc);
-load(fileName_HCTSA_loc,'TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations','fromDatabase')
+load(fileName_HCTSA_loc,'TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations')
 fprintf(1,' Loaded.\n');
 
-% In this script, each of these pieces of data (from the database) will be trimmed and normalized
-% then saved to HCTSA_N.mat
+%-------------------------------------------------------------------------------
+% In this script, each of these pieces of data (from the database) will be
+% trimmed and normalized, and then saved to HCTSA_N.mat
+%-------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
 %% Subset using given indices, subs

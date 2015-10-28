@@ -12,7 +12,7 @@ function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,be
 % computeWhat: whether to compute just missing values ('missing', default), or
 % 				ALSO retry results that previously threw an error ('error'), or
 % 				ALSO retry any result that previously did not return a good value ('bad')
-% customFile: a custom output file to write to
+% customFile: reads in and writes to a custom output file
 % beVocal:     if 1, gives additional user feedback about the calculation of
 %               each individual operation.
 %

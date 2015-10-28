@@ -10,7 +10,7 @@ function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids)
 % HCTSA_loc_1: the path to the first HCTSA_loc.mat file
 % HCTSA_loc_2: the path to the second HCTSA_loc.mat file
 % compare_tsids: whether to consider ts_ids in each file as the same. If
-% this is true (default) , it removes matching ts_ids so duplicates cannot occur in the
+% this is true (default), it removes matching ts_ids so duplicates cannot occur in the
 % combined matrix. But if the two to be joined are from different databases,
 % then this should be set to 0.
 %

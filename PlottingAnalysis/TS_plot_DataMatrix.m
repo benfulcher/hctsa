@@ -244,8 +244,11 @@ if addTimeSeries
     ax1.TickLabelInterpreter = 'none';
     NormMinMax = @(x) (x-min(x))/(max(x)-min(x));
     for j = 1:numTS
-        tsData = TimeSeries(j).Data(1:timeSeriesLength);
+        % Plot a segment from each time series, up to a maximum length of
+        % timeSeriesLength samples (which is set as an input to the function)
+        tsData = TimeSeries(j).Data;
         lengthHere = min(timeSeriesLength,length(tsData));
+        tsData = tsData(1:lengthHere);
         plot(1:lengthHere,j-0.5+NormMinMax(tsData),'-k');
         if j < numTS
             plot([1,timeSeriesLength],(j+0.5)*ones(2,1),':k')
