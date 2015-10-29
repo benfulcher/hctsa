@@ -30,8 +30,10 @@ numTimeSeries = length(TimeSeries);
 if isfield(annotateParams,'n')
     numAnnotate = annotateParams.n;
 else
-    numAnnotate = min(6,numTimeSeries);
+    numAnnotate = 6;
 end
+% Cannot allow to annotate more points than time series
+numAnnotate = min(numAnnotate,numTimeSeries);
 if isfield(annotateParams,'maxL')
     maxL = annotateParams.maxL;
 else
@@ -40,15 +42,17 @@ end
 if isfield(annotateParams,'userInput')
     userInput = annotateParams.userInput;
 else
-    userInput = 1; % user input points rather than randomly chosen
+    userInput = 1; % user input points rather than being randomly chosen
 end
 if isfield(annotateParams,'fdim')
     fdim = annotateParams.fdim;
 else
     fdim = [0.30,0.08]; % width, height
 end
+% textAnnotation can be: 'Name' (annotate name),
+% 'ID' (annotate ts_id), or 'none' (not annotation)
 if isfield(annotateParams,'textAnnotation')
-    textAnnotation = annotateParams.textAnnotation; % 'Name','tsid','none'
+    textAnnotation = annotateParams.textAnnotation;
 else
     textAnnotation = 'none'; % no annotations by default
 end
@@ -109,11 +113,29 @@ for j = 1:numAnnotate
 
     % Get user to pick a point, then find closest datapoint to their input:
     if userInput % user input
-        point = ginput(1);
-        point_z = (point-xy_mean)./xy_std;
-        iPlot = BF_ClosestPoint_ginput(xy_zscore,point_z);
-        alreadyPicked(j) = iPlot;
+        newPointPicked = 0;
+        numAttempts = 0;
+        % Keep selecting until you get a new point (can't get stuck in infinite
+        % loop because maximum annotations is number of datapoints). Still, you
+        % get 3 attempts to pick a new point
+        while ~newPointPicked && numAttempts < 3
+            point = ginput(1);
+            point_z = (point-xy_mean)./xy_std;
+            iPlot = BF_ClosestPoint_ginput(xy_zscore,point_z);
+            if ~ismember(iPlot,alreadyPicked)
+                alreadyPicked(j) = iPlot;
+                newPointPicked = 1;
+            else
+                beep
+                numAttempts = numAttempts + 1;
+            end
+        end
+        if numAttempts==3 % maxed out
+            alreadyPicked(j) = NaN;
+            continue
+        end
     else
+        % Use a previously-selected point (pre-selected at random)
         iPlot = alreadyPicked(j);
     end
 
@@ -125,11 +147,6 @@ for j = 1:numAnnotate
         theGroup = TimeSeries(iPlot).Group;
     else
         theGroup = 1;
-    end
-
-    if (j > 1) && any(sum(abs(alreadyPicked(1:j-1,:) - repmat(alreadyPicked(j,:),j-1,1)),2)==0)
-        % Same one has already been picked, don't plot it again
-        continue
     end
 
     % Crop the time series:
@@ -149,7 +166,7 @@ for j = 1:numAnnotate
 
     % Add text annotations:
     switch textAnnotation
-    case 'name'
+    case 'Name'
         % Annotate text with names of datapoints:
         text(plotPoint(1),plotPoint(2)-0.01*pHeight,TimeSeries(iPlot).Name,...
                     'interpreter','none','FontSize',8,...

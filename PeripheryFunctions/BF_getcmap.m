@@ -65,7 +65,7 @@ if nargin < 4 || isempty(flipMe)
     flipMe = 0; % flips order of output
 end
 
-% Minimum number of groups is 3:
+% Minimum number of groups is 3 for some color maps:
 numGrads0 = numGrads;
 if numGrads < 3
     numGrads = 3;
@@ -1824,7 +1824,7 @@ end
 
 % Convert to the number of colors specified if less than the minimum (3)
 if numGrads0 < 3
-    cmapOut = cmapOut(1,:);
+    cmapOut = cmapOut(1:numGrads0,:);
 end
 
 if cellOut

@@ -1,4 +1,4 @@
-function TS_plot_pca(whatData,TsorOps,showDist,classMeth,annotateParams)
+function TS_plot_pca(whatData,showDist,classMeth,annotateParams)
 % TS_plot_pca   2-dimensional feature-based representation of a time-series dataset.
 %
 % The low-dimensional representation is computed using PCA.
@@ -27,28 +27,19 @@ function TS_plot_pca(whatData,TsorOps,showDist,classMeth,annotateParams)
 %% Check Inputs:
 % ------------------------------------------------------------------------------
 if nargin < 1 || isempty(whatData)
-    whatData = 'norm';
-    fprintf(1,'Getting data from HCTSA_N\n');
+    whatData = 'norm'; % normalized data by default, from HCTSA_N.mat
 end
 
-if nargin < 2 || isempty(TsorOps)
-    fprintf(1,'Using for time series\n');
-    TsorOps = 'ts';
-end
-if ~any(ismember(TsorOps,{'ops','ts'}));
-    error('Specify either operations (''ops'') or time series (''ts'').');
-end
-
-if nargin < 3 || isempty(showDist)
+if nargin < 2 || isempty(showDist)
     showDist = 1;
 end
 
-if nargin < 4 || isempty(classMeth)
+if nargin < 3 || isempty(classMeth)
     classMeth = 'linclass';
 end
 
-if nargin < 5 || isempty(annotateParams)
-    % Annotate 10 points by default
+if nargin < 4 || isempty(annotateParams)
+    % Annotate 6 points by default
     fprintf(1,'Annotating 6 points by default with time series segment and names\n');
     annotateParams = struct('n',6,'textAnnotation','Name');
 end
@@ -73,11 +64,6 @@ else
     groupNames = {};
 end
 
-if strcmp(TsorOps,'ops')
-    % Take the transpose of the input data matrix for operations
-    TS_DataMat = TS_DataMat';
-end
-
 % ------------------------------------------------------------------------------
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm
 % ------------------------------------------------------------------------------
@@ -93,13 +79,11 @@ fprintf(1,'Calculating principal components of the %u x %u data matrix...', ...
 [pcCoeff, pcScore, latent, ~, percVar] = pca(zscore(TS_DataMat),'NumComponents',2);
 fprintf(1,' Done.\n');
 
-% Work out the main contributions to each principle component
-featLabel = cell(2,2); % Feature label :: proportion of total (columns are PCs)
-
 % ------------------------------------------------------------------------------
 % Plot this two-dimensional representation of the data using TS_plot_2d
 % ------------------------------------------------------------------------------
 
+% Set feature labels:
 nameString = 'PC';
 featureLabels = cell(2,1);
 for i = 1:2
