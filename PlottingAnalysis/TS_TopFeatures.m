@@ -1,11 +1,34 @@
 function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat,doNull,varargin)
 % TS_TopFeatures    Top individual features for discriminating labeled time series
 %
+% This function compares each feature in an hctsa dataset individually for its
+% ability to separate the labeled classes of time series according to a given
+% test statistic.
+%
+% Can also compare this performance to a set of randomized null features to
+% evaluate the statistical significance of the result.
+%
 %---INPUTS:
+% whatData, the hctsa data to use (input to TS_LoadData)
+% whatTestStat, the test statistic to quantify the goodness of each feature
+%               (one of: 'tstat', 'svm', 'linear', 'diaglinear')
+% doNull, (binary) whether to compute a null distribution using permutations of the class
+%           labels
+%
+% ***Additional plotting options***:
+% 'whatPlots', can specify what output plots to produce (cell of strings), e.g.,
+%               specify {'histogram','distributions','cluster'} to produce all
+%               three possible output plots (this is the default).
+% 'numTopFeatures', can specify the number of top features to analyze, both in
+%                   terms of the list of outputs, the histogram plots, and the
+%                   cluster plot.
 %
 %---EXAMPLE USAGE:
 %
-% TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions','cluster'});
+% TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions','cluster'},'numTopFeatures',20);
+%
+%---OUTPUTS:
+%
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -26,7 +49,6 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % --------------------------------------------------------------------------
 %% Check inputs
 % --------------------------------------------------------------------------
-
 if nargin < 1 || isempty(whatData)
     whatData = 'norm';
 end
@@ -297,7 +319,7 @@ function tStat = fn_tStat(d1,d2)
     [h,p,ci,stats] = ttest2(d1,d2,'Vartype','unequal');
     tStat = stats.tstat;
 end
-
+%-------------------------------------------------------------------------------
 function testStat = giveMeStats(dataMatrix,groupLabels)
     % Return test statistic for each operation
     testStat = zeros(numOps,1);

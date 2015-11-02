@@ -45,7 +45,6 @@ end
 % Load in data:
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-numTimeSeries = length(TimeSeries);
 theOp = ([Operations.ID]==opID);
 dataVector = TS_DataMat(:,theOp); % the outputs of interest
 notNaN = find(~isnan(dataVector));
@@ -67,7 +66,6 @@ else
     groupNames = {};
 end
 
-
 %-------------------------------------------------------------------------------
 % Sort out any custom plotting settings in the annotateParams structure
 %-------------------------------------------------------------------------------
@@ -75,7 +73,13 @@ if ~isfield(annotateParams,'userInput')
     annotateParams.userInput = 1; % user clicks to annotate rather than randomly chosen
 end
 if ~isfield(annotateParams,'textAnnotation') % what text annotation to use
-    annotateParams.textAnnotation = 'name';
+    annotateParams.textAnnotation = 'Name';
+end
+if ~isfield(annotateParams,'n')
+    annotateParams.n = min(6,length(TimeSeries));
+end
+if ~isfield(annotateParams,'maxL')
+    annotateParams.maxL = 100;
 end
 
 % if isfield(annotateParams,'whereann') % what text annotation to use
@@ -98,14 +102,15 @@ if isfield(TimeSeries,'Group')
 
     % Repeat for each group
     fx = cell(numGroups,1);
+    lineHandles = cell(numGroups+1,1);
     tsInd = cell(numGroups,1); % keeps track of indices from TimeSeries structure
 
     % Global distribution:
-    [fr,xr] = BF_plot_ks(dataVector,ones(1,3)*0.5,0,1,8);
+    [fr,xr,lineHandles{1}] = BF_plot_ks(dataVector,ones(1,3)*0.5,0,1,8);
 
     % Distribution for each group:
     for k = 1:numGroups
-        [fr,xr] = BF_plot_ks(dataVector([TimeSeries.Group]==k),...
+        [fr,xr,lineHandles{k+1}] = BF_plot_ks(dataVector([TimeSeries.Group]==k),...
                             annotateParams.groupColors{k},0,2,12);
         fx{k} = [xr',fr'];
         tsInd{k} = find([TimeSeries.Group]==k)';
@@ -118,7 +123,7 @@ if isfield(TimeSeries,'Group')
     legendText = cell(length(groupNames)+1,1);
     legendText{1} = 'combined';
     legendText(2:end) = groupNames;
-    legend(legendText)
+    legend(horzcat(lineHandles{:}),legendText)
 
 else
     % Just run a single global one
@@ -126,14 +131,16 @@ else
     xy = [xr',fr'];
 end
 
+fig.Position = [fig.Position(1:2),649,354];
+
 %-------------------------------------------------------------------------------
 %% Annotate time series:
 %-------------------------------------------------------------------------------
 xlabel(theOperation.Name,'Interpreter','none');
 ylabel('Probability Density')
 BF_AnnotatePoints(xy,TimeSeries,annotateParams);
-title(theOperation.Name,'Interpreter','none');
+title(sprintf('[%u] %s (%u-sample annotations)',opID,theOperation.Name, ...
+                annotateParams.maxL),'Interpreter','none');
 xlabel('Outputs','Interpreter','none');
-
 
 end

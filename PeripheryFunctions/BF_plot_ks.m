@@ -1,4 +1,4 @@
-function [fr,xr] = BF_plot_ks(dataVector,whatColor,doSwap,lineWidth,markerSize)
+function [fr,xr,h_line,h_points] = BF_plot_ks(dataVector,whatColor,doSwap,lineWidth,markerSize)
 % Plot a kernel smoothed distribution with individual datapoints annotated
 %
 %---INPUTS:
@@ -29,9 +29,20 @@ if nargin < 4, lineWidth = 1; end
 if nargin < 5, markerSize = 8; end
 
 numPoints = 1000; % points for the ks density
-[f,x] = ksdensity(dataVector,linspace(min(dataVector),max(dataVector),numPoints),'function','pdf');
 
+%-------------------------------------------------------------------------------
+% Estimate a probability density:
+%-------------------------------------------------------------------------------
+[f,x] = ksdensity(dataVector,linspace(min(dataVector),max(dataVector),numPoints),...
+                    'function','pdf');
+
+if all(dataVector==dataVector(1))
+    warning('Attempting to estimate a kernel-smoothed probability distribution using constant data')
+end
+
+%-------------------------------------------------------------------------------
 % Match each datapoint to a point on the distribution:
+%-------------------------------------------------------------------------------
 getIndex = @(m) find(x>=dataVector(m),1,'first');
 ind = arrayfun(getIndex,1:length(dataVector));
 ind = sort(ind,'ascend');
@@ -40,12 +51,15 @@ ind = sort(ind,'ascend');
 xr = x(ind);
 fr = f(ind);
 
-if doSwap
-    plot(f,x,'color',whatColor,'LineWidth',lineWidth); % the curve
-    plot(fr,xr,'.','color',whatColor,'MarkerSize',markerSize); % individual TimeSeries as points
-else
-    plot(x,f,'color',whatColor,'LineWidth',lineWidth); % the curve
-    plot(xr,fr,'.','color',whatColor,'MarkerSize',markerSize); % individual TimeSeries as points
+%-------------------------------------------------------------------------------
+% Plot the line and matched points:
+%-------------------------------------------------------------------------------
+if ~doSwap
+    h_line = plot(x,f,'color',whatColor,'LineWidth',lineWidth); % the curve
+    h_points = plot(xr,fr,'.','color',whatColor,'MarkerSize',markerSize); % individual TimeSeries as points
+else % (plot horizontally rather than vertically)
+    h_line = plot(f,x,'color',whatColor,'LineWidth',lineWidth); % the curve
+    h_points = plot(fr,xr,'.','color',whatColor,'MarkerSize',markerSize); % individual TimeSeries as points
 end
 
 end

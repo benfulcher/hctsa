@@ -1,6 +1,23 @@
-function TS_classify(whatData,whatLearners,doPCs)
-% TS_classify   Classify groups in the data using all features
+function TS_classify(whatData,whatClassifier,doPCs,seedReset)
+% TS_classify   Classify groups in the data using all features (and PCs)
 %
+% This function uses a classifier to learn group labels assigned to time series
+% in the dataset.
+%
+%---USAGE:
+% TS_classify;
+%
+%---INPUTS:
+% whatData, the hctsa data to use (input to TS_LoadData)
+% whatClassifier, the classification method to use ('svm', 'knn', 'linear')
+% doPCs, (binary) whether to investigate the behavior of different numbers of PCs of the
+%        data matrix (default: 1)
+% seedReset, input to BF_ResetSeed, specifying whether (and how) to reset the
+%               random seed (for reproducible results from cross-validation)
+%
+%---OUTPUTS:
+% Text output on classification rate using all features, and if doPCs = 1, also
+% shows how this varies as a function of reduced PCs (text and as an output plot)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -25,11 +42,14 @@ if nargin < 1
     whatData = 'norm';
 end
 if nargin < 2
-    whatLearners = 'svm';
+    whatClassifier = 'svm';
     % 'svm', 'discriminant', 'knn'
 end
 if nargin < 3
     doPCs = 1;
+end
+if nargin < 4
+    seedReset = 'default';
 end
 
 %-------------------------------------------------------------------------------
@@ -49,7 +69,7 @@ numTimeSeries = length(TimeSeries);
 %-------------------------------------------------------------------------------
 % Set up the classification model
 %-------------------------------------------------------------------------------
-switch whatLearners
+switch whatClassifier
 case 'svm'
     % Linear SVM:
     cfnModel = templateSVM('Standardize',1,'KernelFunction','linear');
@@ -61,12 +81,18 @@ case {'discriminant','linear'}
     cfnModel = templateDiscriminant('DiscrimType','linear');
     % could also be 'naivebayes', 'tree', ensemble methods
 otherwise
-    error('Unknown classification model, ''%s''',whatLearners);
+    error('Unknown classification model, ''%s''',whatClassifier);
 end
 
 %-------------------------------------------------------------------------------
 % Fit the model using k-fold cross validation:
 %-------------------------------------------------------------------------------
+
+% Reset the seed?
+BF_ResetSeed(seedReset);
+
+% Set the number of folds for k-fold cross validation using a heuristic
+% (for small datasets with fewer than 10 examples per class):
 pointsPerClass = numTimeSeries/numClasses;
 if pointsPerClass < 5
     numFolds = 2;
@@ -75,16 +101,18 @@ elseif pointsPerClass < 10
 else
     numFolds = 10;
 end
+
+% Fit the classification model to the dataset (for each cross-validation fold)
 CVcfnModel = fitcecoc(TS_DataMat,timeSeriesGroup,'Learners',cfnModel,'KFold',numFolds);
 
-% Get misclassification rates from each fold:
+% Get the misclassification rate from each fold:
 foldLosses = 100*(1 - kfoldLoss(CVcfnModel,'Mode','individual'));
 
 fprintf(1,['\nClassification rate (%u-class) using %u-fold %s classification with %u' ...
                  ' features:\n%.3f +/- %.3f%%\n\n'],...
                             numClasses,...
                             numFolds,...
-                            whatLearners,...
+                            whatClassifier,...
                             numFeatures,...
                             mean(foldLosses),...
                             std(foldLosses))
@@ -95,7 +123,8 @@ fprintf(1,['\nClassification rate (%u-class) using %u-fold %s classification wit
 % xlim([0,100]);
 
 %-------------------------------------------------------------------------------
-% Compare performance of PCs:
+% Compare performance of reduced PCs from the data matrix:
+%-------------------------------------------------------------------------------
 if doPCs
     numPCs = 10;
 
@@ -133,7 +162,7 @@ if doPCs
     titleText = sprintf('Classification rate (%u-class) using %u-fold %s classification',...
                                 numClasses,...
                                 numFolds,...
-                                whatLearners);
+                                whatClassifier);
     title(titleText)
 
 end

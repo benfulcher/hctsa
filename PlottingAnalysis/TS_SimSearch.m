@@ -1,5 +1,5 @@
 function TS_SimSearch(varargin)
-% TS_SimSearch  Nearest neighbors of a given time series or operation from an hctsa analysis.
+% TS_SimSearch  Nearest neighbors of a given time series from an hctsa analysis.
 %
 % Nearest neighbors can provide a local context for a particular time series or
 % operation.
@@ -15,7 +15,7 @@ function TS_SimSearch(varargin)
 %
 %---EXAMPLE USAGE:
 %
-% Find neighbors of time series (ID=30), and visualize as a similarity matrix
+% Find neighbors of time series (ID = 30), and visualize as a similarity matrix
 % and network plot:
 % TS_SimSearch(30,'whatPlots',{'matrix','network'})
 
@@ -67,7 +67,9 @@ default_whatPlots = {'matrix'};
 check_whatPlots = @(x) iscell(x) || ischar(x);
 addOptional(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 
+%-------------------------------------------------------------------------------
 %% Parse inputs:
+%-------------------------------------------------------------------------------
 parse(inputP,varargin{:});
 
 % Additional checks:
@@ -88,23 +90,37 @@ clear inputP;
 % ------------------------------------------------------------------------------
 
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataFile);
+fileVarsStruct = whos('-file',whatDataFile); % additional variables in the datafile
+fileVars = {fileVarsStruct.name};
 if strcmp(tsOrOps,'ts')
     dataStruct = TimeSeries;
     clear Operations
-    tmp = load(whatDataFile,'ts_clust');
-    clustStruct = tmp.ts_clust; clear tmp
+    if ismember('ts_clust',fileVars)
+        tmp = load(whatDataFile,'ts_clust');
+        clustStruct = tmp.ts_clust; clear tmp
+    else
+        % This should be set on normalization -- if missing for some reason, set as default now:
+        clustStruct = struct('distanceMetric','none','Dij',[],...
+                    'ord',1:size(TS_DataMat,1),'linkageMethod','none');
+    end
 else
     dataStruct = Operations;
     clear TimeSeries
-    tmp = load(whatDataFile,'op_clust');
-    clustStruct = tmp.op_clust; clear tmp
+    if ismember('op_clust',fileVars)
+        tmp = load(whatDataFile,'op_clust');
+        clustStruct = tmp.op_clust; clear tmp
+    else
+        % This should be set on normalization -- if missing for some reason, set as default now:
+        clustStruct = struct('distanceMetric','none','Dij',[],...
+                        'ord',1:size(TS_DataMat,2),'linkageMethod','none');
+    end
 end
 numItems = length(dataStruct);
 
 if numNeighbors == 0 % code for 'all'
     numNeighbors = numItems - 1;
 else % specify a number of neighbours
-    numNeighbors = min(numItems,numNeighbors) - 1;
+    numNeighbors = min(numItems-1,numNeighbors);
 end
 
 % ------------------------------------------------------------------------------
@@ -118,9 +134,8 @@ end
 % ------------------------------------------------------------------------------
 % Compute pairwise distances to all other objects
 % ------------------------------------------------------------------------------
-% (There is potential to store pairwise distance information in the HCTSA_loc
-% file for retrieval later). I guess use this if it exists, otherwise just
-% calculate for this one.
+% (There is potential to store pairwise distance information in the HCTSA*.mat
+% file for retrieval later). Use this if it exists, otherwise calculate for this one.
 
 if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
     % pairwise distances already computed, stored in the HCTSA .mat file
@@ -128,7 +143,12 @@ if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
     Dij = squareform(clustStruct.Dij);
     Dj = Dij(:,targetInd);
 else
-    fprintf(1,'Computing distances to %u objects...',numItems);
+    if strcmp(tsOrOps,'ts')
+        theDistanceMetric = 'euclidean';
+    else
+        theDistanceMetric = 'absolute correlation';
+    end
+    fprintf(1,'Computing %s distances to %u objects...',numItems);
     switch tsOrOps
     case 'ts'
         Dj = bsxfun(@minus,TS_DataMat,TS_DataMat(targetInd,:));
@@ -137,7 +157,7 @@ else
         % Is there a nicer way of computing correlations?
         Dj = zeros(numItems,1);
         for j = 1:numItems
-            Dj(j) = corr(TS_DataMat(:,targetInd),TS_DataMat(:,j));
+            Dj(j) = 1 - abs(corr(TS_DataMat(:,targetInd),TS_DataMat(:,j)));
         end
     end
     fprintf(1,' Done.\n');
@@ -149,7 +169,7 @@ if strcmp(tsOrOps,'ops')
 end
 
 % ------------------------------------------------------------------------------
-% Find N neighbors under a given distance metric
+% Find N neighbors under the distance metric (used for Dj)
 % ------------------------------------------------------------------------------
 
 % Sort distances (ascending):
@@ -162,8 +182,8 @@ neighborInd = dix(1:numNeighbors+1);
 % List matches to screen
 % ------------------------------------------------------------------------------
 fprintf(1,'\n---TARGET: %s---\n',dataStruct(targetInd).Name);
-for j = 2:numNeighbors+1
-    fprintf(1,'%u. %s (d = %.2f)\n',j-1,dataStruct(neighborInd(j)).Name,Dj(neighborInd(j)));
+for j = 1:numNeighbors
+    fprintf(1,'%u. %s (d = %.2f)\n',j,dataStruct(neighborInd(j+1)).Name,Dj(neighborInd(j+1)));
 end
 fprintf(1,'\n');
 
@@ -189,14 +209,17 @@ end
 % ------------------------------------------------------------------------------
 if any(ismember(whatPlots,'scatter'))
     f = figure('color','w');
-    for j = 2:min(12,numNeighbors)+1
-        subplot(3,4,j-1);
-        plot(TS_DataMat(targetInd,:),TS_DataMat(neighborInd(j),:),'.k','MarkerSize',4)
+    for j = 1:min(12,numNeighbors)
+        subplot(3,4,j);
+        theNeighborInd = neighborInd(j+1); % Since exclude self-match (neighbor 1)
+        plot(TS_DataMat(targetInd,:),TS_DataMat(theNeighborInd,:),'.k','MarkerSize',4)
         xlabel(sprintf('[%u] %s',dataStruct(targetInd).ID,dataStruct(targetInd).Name),'interpreter','none','FontSize',9);
-        ylabel(sprintf('[%u] %s',dataStruct(neighborInd(j)).ID,dataStruct(neighborInd(j)).Name),'interpreter','none','FontSize',9);
-        title(sprintf('Match %u. d = %.3f',j,Dj(neighborInd(j))))
+        ylabel(sprintf('[%u] %s',dataStruct(theNeighborInd).ID,dataStruct(theNeighborInd).Name),'interpreter','none','FontSize',9);
+        title(sprintf('Match %u. d = %.3f',j,Dj(theNeighborInd)));
         axis square
     end
+    % Set width and height to make a reasonable size:
+    f.Position = [f.Position(1:2),819,622];
 end
 
 % ------------------------------------------------------------------------------
