@@ -67,8 +67,12 @@ case 'cl'
 end
 
 %-------------------------------------------------------------------------------
+% Check the file is a .mat file:
+if ~strcmp(whatDataFile(end-3:end),'.mat')
+    error('Specify a .mat filename');
+end
 
-% Load data:
+% Load data from the file:
 if ~exist(whatDataFile,'file')
     error('%s not found',whatDataFile);
 end
@@ -76,8 +80,10 @@ fprintf(1,'Loading data from %s...',whatDataFile);
 load(whatDataFile,'TS_DataMat','Operations','TimeSeries');
 fprintf(1,' Done.\n',whatDataFile);
 
+%-------------------------------------------------------------------------------
 % Change order according to stored clustering (if none has been run, by default
 % returns the same ordering as the original dataset)
+%-------------------------------------------------------------------------------
 if getClustered
     % Load the clustering permutations and apply them to the data:
     load(whatDataFile,'ts_clust','op_clust')

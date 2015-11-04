@@ -1,11 +1,26 @@
 function TS_local_clear_remove(tsOrOps,idRange,doRemove,whatData)
-% TS_local_clear_remove     Clears or removed data from local files
+% TS_local_clear_remove     Clear or remove data from an hctsa dataset
+%
+% 'Clear' means clearing any calculations performed about a given time series
+% or operation, but keeping it in the dataset.
+% 'Remove' means removing the time series or operation from the dataset completely.
+% The result is saved back to the hctsa .mat datafile provided.
 %
 %---INPUTS:
-% tsOrOps -- either 'ts' or 'ops' for whether to work with either time series or operations
-% idRange -- a vector of the ts_ids or op_ids in the database to remove
-% doRemove -- whether to remove entries (specify 1), or just clear their data (specify 0)
-% whatData -- the data to load (cf. TS_LoadData)
+% tsOrOps -- either 'ts' or 'ops' for whether to work with either time series
+% 				or operations
+% idRange -- a vector of the IDs (of either time series or operations) to remove
+% doRemove -- (binary) whether to remove entries (specify 1), or just clear
+% 				 their data (specify 0).
+% whatData -- the file to load the hctsa dataset from (cf. TS_LoadData).
+%
+%---EXAMPLE USAGE:
+% This clears the data about the time series with IDs 1,2,3,4, and 5 from the hctsa dataset
+% stored in HCTSA_loc.mat:
+% >> TS_local_clear_remove('ts',1:5,0,'HCTSA_loc.mat');
+%
+% This *removes* the time series with IDs from 1:5 from the dataset completely:
+% >> TS_local_clear_remove('ts',1:5,1,'HCTSA_loc.mat');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

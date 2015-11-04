@@ -1,5 +1,22 @@
 function [TS_DataMat,TimeSeries,Operations] = TS_subset(whatData,ts_ids_keep,op_ids_keep,doSave,outputFileName)
-% TS_subset     Save a given subset of data, based on time series and operation IDs
+% TS_subset  Save a given subset of an hctsa dataset, based on time series and operation IDs
+%
+%---INPUTS:
+% whatData, the source of the hctsa dataset (default, 'HCTSA_N.mat', cf. TS_LoadData)
+% ts_ids_keep, the IDs of time series to include in the subset (empty, [], to include all time series)
+% op_ids_keep, the IDs of operations to include in the subset (empty, [], to include all operations)
+% doSave, (binary), saves the result back to file
+% outputFileName, the filename to save the hctsa subset (if doSave==1).
+%
+%---OUTPUTS:
+% TS_DataMat, TimeSeries, Operations: the subset of the hctsa dataset.
+% (if doSave==1): the full subset of the hctsa dataset saved to file.
+%
+%---EXAMPLE USAGE:
+% Import data from 'HCTSA_N.mat', then create a new dataset containing time
+% series with IDs in the range 1--100, and all operations, saving the result
+% back to 'HCTSA_subset.mat':
+% >> TS_subset('norm',1:100,[],1,'HCTSA_subset.mat');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

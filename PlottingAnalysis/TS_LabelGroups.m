@@ -21,10 +21,10 @@ function groupLabels = TS_LabelGroups(keywordGroups,whatData,saveBack)
 %---INPUTS:
 % keywordGroups: The keyword groups, a cell of strings, as
 %                   {'keyword_1', 'keyword2',...}
-%                   Can also use an empty label, '', to select anything at
-%                   random from all time series.
+%                   Can also use an empty label, '', to select unique keywords
+%                   automatically from the dataset.
 %
-% whatData: Where to retrive from (and write back to): 'orig' or 'norm'
+% whatData: Where to retrive from (and write back to): 'loc' (default), cf. TS_LoadData.
 %
 % saveBack: Can set to 0 to stop saving the grouping back to the input file.
 %
@@ -60,8 +60,8 @@ if ~isempty(keywordGroups) && ischar(keywordGroups);
 end
 
 if nargin < 2 || isempty(whatData)
-    whatData = 'norm';
-    fprintf(1,'Retrieving data from HCTSA_N by default.\n');
+    whatData = 'loc';
+    fprintf(1,'Retrieving data from HCTSA_loc by default.\n');
 end
 
 if nargin < 3 || isempty(saveBack)
@@ -84,8 +84,9 @@ if isempty(keywordGroups)
     keywordsAll = [Keywords{:}]; % every keyword used across the dataset
     UKeywords = unique(keywordsAll);
     numUniqueKeywords = length(UKeywords);
-    fprintf(1,'Shall I use the following %u keywords: %s?\n',numUniqueKeywords,BF_cat(UKeywords,',',''''));
-    reply = input('[y] for ''yes''','s');
+    fprintf(1,'Shall I use the following %u keywords: %s?\n',numUniqueKeywords,...
+                BF_cat(UKeywords,',',''''));
+    reply = input('[y] for ''yes''...','s');
     if strcmp(reply,'y')
         keywordGroups = UKeywords;
     else

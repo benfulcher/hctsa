@@ -9,7 +9,7 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % evaluate the statistical significance of the result.
 %
 %---INPUTS:
-% whatData, the hctsa data to use (input to TS_LoadData)
+% whatData, the hctsa data to use (input to TS_LoadData, default: 'loc')
 % whatTestStat, the test statistic to quantify the goodness of each feature
 %               (one of: 'tstat', 'svm', 'linear', 'diaglinear')
 % doNull, (binary) whether to compute a null distribution using permutations of the class
@@ -28,7 +28,9 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions','cluster'},'numTopFeatures',20);
 %
 %---OUTPUTS:
-%
+% ifeat, the ordering of operations by their performance
+% testStat, the test statistic (whatTestStat) for each operation
+% testStat_rand, test statistics making up the null distributions
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -50,7 +52,7 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 %% Check inputs
 % --------------------------------------------------------------------------
 if nargin < 1 || isempty(whatData)
-    whatData = 'norm';
+    whatData = 'loc';
 end
 if nargin < 2 || isempty(whatTestStat)
     whatTestStat = 'linclass';
@@ -141,7 +143,8 @@ testStat = giveMeStats(TS_DataMat,timeSeriesGroup);
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
 
 % Give mean and that expected from random classifier (may be a little overfitting)
-fprintf(1,'Mean %s across %u operations = %4.2f%s; (Random guessing for %u equiprobable classes = %4.2f%s)\n', ...
+fprintf(1,['Mean %s across %u operations = %4.2f%s\n' ...
+            '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
         cfnName,numOps,nanmean(testStat),cfnUnit,numGroups,chanceLine,cfnUnit);
 
 % --------------------------------------------------------------------------
@@ -287,8 +290,16 @@ if any(ismember(whatPlots,'cluster'))
     op_ind = ifeat(1:numTopFeatures); % plot these operations indices
 
     % (if it exists already, use that; otherwise compute it on the fly)
-    tmp = load(whatDataFile,'op_clust');
-    clustStruct = tmp.op_clust; clear tmp
+
+    fileVarsStruct = whos('-file',whatDataFile);
+    fileVars = {fileVarsStruct.name};
+    if ismember('op_clust',fileVars)
+        tmp = load(whatDataFile,'op_clust');
+        clustStruct = tmp.op_clust; clear tmp
+    else
+        % Doesn't exist in the hctsa dataset:
+        clustStruct = struct();
+    end
     if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
         % pairwise distances already computed, stored in the HCTSA .mat file
         fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile)

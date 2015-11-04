@@ -75,17 +75,19 @@ end
 % --------------------------------------------------------------------------
 %% Read data from local files
 % --------------------------------------------------------------------------
+
+% Load data:
+[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(fileName_HCTSA_loc);
+load(whatDataFile,'TS_Quality','MasterOperations');
+
 % First check that fromDatabase exists (for back-compatability)
-fileVarsStruct = whos('-file',fileName_HCTSA_loc);
+fileVarsStruct = whos('-file',whatDataFile);
 fileVars = {fileVarsStruct.name};
 if ismember('fromDatabase',fileVars)
-    load(fileName_HCTSA_loc,'fromDatabase')
+    load(whatDataFile,'fromDatabase')
 else
-    fromDatabase = 1; % set to 1 by default
+    fromDatabase = 1; % (legacy: set to 1 by default)
 end
-fprintf(1,'Reading data from %s...',fileName_HCTSA_loc);
-load(fileName_HCTSA_loc,'TS_DataMat','TS_Quality','TimeSeries','Operations','MasterOperations')
-fprintf(1,' Loaded.\n');
 
 %-------------------------------------------------------------------------------
 % In this script, each of these pieces of data (from the database) will be
@@ -359,10 +361,11 @@ codeToRun = sprintf('TS_normalize(''%s'',[%f,%f])',normFunction, ...
 normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
                                     filterOptions,'codeToRun',codeToRun);
 
+outputFileName = [fileName_HCTSA_loc(1:end-4),'_N.mat'];
 
-fprintf(1,'Saving the trimmed, normalized data to local files...')
-save('HCTSA_N.mat','TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-            'fromDatabase','MasterOperations','normalizationInfo','ts_clust','op_clust');
+fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName)
+save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
+        'fromDatabase','MasterOperations','normalizationInfo','ts_clust','op_clust');
 fprintf(1,' Done.\n')
 
 end
