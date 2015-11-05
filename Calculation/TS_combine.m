@@ -63,7 +63,7 @@ if nargin < 3
 end
 if compare_tsids == 1
     fprintf(1,['Assuming both %s and %s came from the same database so that ' ...
-            'time series IDs are comparable.\nAny intersection of IDs will be filtered out.'],...
+            'time series IDs are comparable.\nAny intersection of IDs will be filtered out.\n'],...
             HCTSA_loc_1,HCTSA_loc_2);
 elseif compare_tsids == 0
     fprintf(1,['Assuming that %s and %s came different databases so' ...
@@ -147,11 +147,13 @@ TimeSeries = cell2struct([squeeze(struct2cell(loadedData{1}.TimeSeries)), ...
 %-------------------------------------------------------------------------------
 % Check for time series duplicates
 %-------------------------------------------------------------------------------
-didTrim = 0;
-[uniquetsids, ix_ts] = unique(vertcat(TimeSeries.ID));
-if compare_tsids % ts_ids are comprable between the two files (i.e., retrieved from the same mySQL database)
+didTrim = 0; % whether you remove time series (that appear in both hctsa data files)
+needReIndex = 0; % whether you need to reindex the result (combined datasets from different indexes)
+
+if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., retrieved from the same mySQL database)
+    [uniquetsids, ix_ts] = unique(vertcat(TimeSeries.ID));
     if ~fromDatabase
-        warning('Be careful, we are assuming that time series IDs were assigned from a single TS_init (later split)')
+        warning('Be careful, we are assuming that time series IDs were assigned from a *single* TS_init')
     end
     if length(uniquetsids) < length(TimeSeries)
         fprintf(1,'We''re assuming that TimeSeries IDs are equivalent between the two input files\n');
@@ -167,10 +169,25 @@ if compare_tsids % ts_ids are comprable between the two files (i.e., retrieved f
         fprintf(1,'All time series were distinct, we now have a total of %u.\n',length(TimeSeries));
     end
 else
-    if length(uniquetsids) < length(TimeSeries)
-        warning(['There are duplicate IDs in the time series -- you should run',
-                 ' TS_ReIndex on the resulting .mat file'])
+    % Check that time series names are unique, and trim if not:
+    [uniqueTimeSeriesNames, ix_ts_names] = unique({TimeSeries.Name});
+    numUniqueTimeSeries = length(uniqueTimeSeriesNames);
+    if numUniqueTimeSeries < length(TimeSeries)
+        beep
+        warning(sprintf('***%u duplicate time series names present in combined dataset -- removed',...
+                                length(TimeSeries) - numUniqueTimeSeries))
+        TimeSeries = TimeSeries(ix_ts_names);
+        didTrim = 1;
     end
+
+    % Now see if there are duplicate IDs (meaning that we need to reindex):
+    [uniquetsids, ix_ts] = unique(vertcat(TimeSeries.ID));
+
+    if length(uniquetsids) < length(TimeSeries)
+        needReIndex = 1;
+        % This is done at the end (after saving all data)
+    end
+
 end
 
 % ------------------------------------------------------------------------------
@@ -186,8 +203,8 @@ if ~fromDatabase
     numOperations = numOperations(1); % both the same
 
     % Check that all operation names match:
-    namesMatch = arrayfun(@(x) strcmp(loadedData{1}.Name{x},loadedData{2}.Name{x}),...
-                                    1:numOperations(1));
+    namesMatch = arrayfun(@(x) strcmp(loadedData{1}.Operations(x).Name,loadedData{2}.Operations(x).Name),...
+                                    1:numOperations);
     if ~all(namesMatch)
         error('TS_init used to generate hctsa datasets, and the names of operations do not match');
     end
@@ -268,12 +285,12 @@ if ~isempty(hereSheIs) % already exists
     outputFileName = [outputFileName(1:end-4),'_combined.mat'];
 end
 fprintf(1,['----------Saving to %s----------\n'],outputFileName);
-if ~strcmp(outputFileName,'HCTSA_loc.mat')
-    fprintf(1,['You''ll need to specify the custom filename ''%s'',' ...
-                ' or rename to HCTSA_N.mat to run' ...
-                ' normal analysis routines like TS_normalize...\n'],...
-                outputFileName,outputFileName);
-end
+% if ~strcmp(outputFileName,'HCTSA_loc.mat')
+%     fprintf(1,['You''ll need to specify the custom filename ''%s'',' ...
+%                 ' or rename to HCTSA_N.mat to run' ...
+%                 ' normal analysis routines like TS_normalize...\n'],...
+%                 outputFileName);
+% end
 
 %--- Now actually save it:
 save(outputFileName,'TimeSeries','Operations','MasterOperations','fromDatabase','-v7.3');
@@ -286,5 +303,13 @@ fprintf(1,['Saved new Matlab file containing combined versions of %s' ...
                     ' and %s to %s\n'],HCTSA_locs{1},HCTSA_locs{2},outputFileName);
 fprintf(1,'%s contains %u time series and %u operations.\n',outputFileName, ...
                                 length(TimeSeries),length(Operations));
+
+%-------------------------------------------------------------------------------
+% ReIndex??
+%-------------------------------------------------------------------------------
+if needReIndex == 1
+    fprintf(1,'There are duplicate IDs in the time series -- we need to reindex\n')
+    TS_ReIndex(outputFileName,'ts',1);
+end
 
 end
