@@ -11,14 +11,10 @@ function out = CO_TranslateShape(y,shape,d,howToMove)
 % In the future, could perform a similar analysis with a soft boundary, some
 % decaying force function V(r), or perhaps truncated...?
 %
-% INPUTS:
-%
+%---INPUTS:
 % y, the input time series
-%
 % shape, the shape to move about the time-domain ('circle')
-%
 % d, a parameter specifying the size of the shape (e.g., d = 2)
-%
 % howToMove, a method specifying how to move the shape about, e.g., 'pts'
 %               places the shape on each point in the time series.
 
@@ -89,11 +85,12 @@ switch howToMove
                 out.max = max(np);
                 out.std = std(np);
 
-                histnp = zeros(2*w+1,1); % maximum possible hits in circle
-                for i = 1:2*w+1
-                    histnp(i) = sum(np == i);
-                end
-
+                % -----
+                % Maximum possible hits in circle:
+                % -----
+                % Count the hits:
+                histnp = arrayfun(@(x)sum(np==x),1:2*w+1);
+                % Compute mode:
                 [out.npatmode, out.mode] = max(histnp);
                 out.npatmode = out.npatmode/NN;
 
@@ -109,25 +106,15 @@ switch howToMove
                 if 2*w + 1 >= 10; out.tens = histnp(10)/NN; end
                 if 2*w + 1 >= 11; out.elevens = histnp(11)/NN; end
 
-                % stationarity in 2,3,4 segments
-                % This would be much nicer if I'd have remembered to use
-                % the buffer command... :(! -- plus it would have been better (equal segment sizes...)
-                div2 = round(linspace(1,NN,3));
-                div3 = round(linspace(1,NN,4));
-                div4 = round(linspace(1,NN,5));
-
-                out.statav2_m = std([mean(np(div2(1):div2(2))), mean(np(div2(2)+1:div2(3)))])/std(np);
-                out.statav2_s = std([std(np(div2(1):div2(2))), std(np(div2(2)+1:div2(3)))])/std(np);
-
-                out.statav3_m = std([mean(np(div3(1):div3(2))), mean(np(div3(2)+1:div3(3))), ...
-                                    mean(np(div3(3)+1:div3(4)))])/std(np);
-                out.statav3_s = std([std(np(div3(1):div3(2))), std(np(div3(2)+1:div3(3))), ...
-                                    std(np(div3(3)+1:div3(4)))])/std(np);
-
-                out.statav4_m = std([mean(np(div4(1):div4(2))), mean(np(div4(2)+1:div4(3))), ...
-                                  mean(np(div4(3)+1:div4(4))), mean(np(div4(4)+1:div4(5)))])/std(np);
-                out.statav4_s = std([std(np(div4(1):div4(2))), std(np(div4(2)+1:div4(3))), ...
-                                  std(np(div4(3)+1:div4(4))), std(np(div4(4)+1:div4(5)))])/std(np);
+                % -----
+                % Stationarity in 2,3,4 segments
+                % -----
+                out.statav2_m = SY_SlidingWindow(np,'mean','std',2,1);
+                out.statav2_s = SY_SlidingWindow(np,'std','std',2,1);
+                out.statav3_m = SY_SlidingWindow(np,'mean','std',3,1);
+                out.statav3_s = SY_SlidingWindow(np,'std','std',3,1);
+                out.statav4_m = SY_SlidingWindow(np,'mean','std',4,1);
+                out.statav4_s = SY_SlidingWindow(np,'std','std',4,1);
         otherwise
             error('Unknwon shape ''%s''',shape)
         end

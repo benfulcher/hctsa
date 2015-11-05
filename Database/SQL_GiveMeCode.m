@@ -1,7 +1,6 @@
 function theCode = SQL_GiveMeCode(op_id);
-% SQL_GiveMeCode
+% SQL_GiveMeCode a string containing code for evaluating an operation with a given op_id
 %
-% Returns a string containing code for evaluating an operation with a given op_id.
 % Can be difficult to do this manually, especially when dealing with structured
 % outputs.
 %

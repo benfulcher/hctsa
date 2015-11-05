@@ -45,8 +45,10 @@ th = 1/sqrt(N); % significance threshold, th
 % Initialize autocorrelation function
 acf = zeros(N,1);
 
+%-------------------------------------------------------------------------------
 % Calculate the autocorrelation function, up to a maximum lag, length of
 % time series (hopefully it's cropped by then)
+%-------------------------------------------------------------------------------
 for i = 1:N
     acf(i) = CO_AutoCorr(y,i-1,'Fourier'); % *** NOTE THIS! *** acf vector indicies are not lags
     if (i > 2) && (abs(acf(i)) < th) && (abs(acf(i-1)) < th)
@@ -59,7 +61,9 @@ Nac = length(acf);
 
 out.Nac = length(acf); % the distance the acf lasts until significance is 'drowned out' (by my definition)
 
+%-------------------------------------------------------------------------------
 % Count peaks
+%-------------------------------------------------------------------------------
 dacf = diff(acf);
 ddacf = diff(dacf);
 extrr = BF_sgnchange(dacf,1);
@@ -110,16 +114,16 @@ out.actau = CO_AutoCorr(acf,CO_FirstZero(acf,'ac'),'Fourier');
 
 if Nac > 3 % Need at least four points to fit exponential
 
+    %-------------------------------------------------------------------------------
     %% Fit exponential decay to absolute ACF:
+    %-------------------------------------------------------------------------------
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.5]);
     f = fittype('a*exp(b*x)','options',s);
-    b = 1;
+    fitSuccess = 0;
     try
-        [c, gof] = fit((1:Nac)',abs(acf),f);
-    catch
-        b = 0;
+        [c, gof] = fit((1:Nac)',abs(acf),f); fitSuccess = 1;
     end
-    if b == 1
+    if fitSuccess % Fit was successful
         out.fexpabsacf_a = c.a;
         out.fexpabsacf_b = c.b; % this is important
         out.fexpabsacf_r2 = gof.rsquare; % this is more important!
@@ -138,7 +142,9 @@ if Nac > 3 % Need at least four points to fit exponential
         out.fexpabsacf_varres = NaN;
     end
 
+    %-------------------------------------------------------------------------------
     %% fit linear to local maxima
+    %-------------------------------------------------------------------------------
     s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-0.1 1]);
     f = fittype('a*x+b','options',s);
     if doPlot
@@ -146,12 +152,10 @@ if Nac > 3 % Need at least four points to fit exponential
         plot(maxr,acf(maxr),'ok');
     end
 
-    b = 1;
-    try [c, gof] = fit(maxr,acf(maxr),f);
-    catch
-        b = 0;
+    fitSuccess = 0;
+    try [c, gof] = fit(maxr,acf(maxr),f); fitSuccess = 1;
     end
-    if b == 1; % Fit was successful
+    if fitSuccess % Fit was successful
         out.flinlmxacf_a = c.a;
         out.flinlmxacf_b = c.b;
         out.flinlmxacf_r2 = gof.rsquare;

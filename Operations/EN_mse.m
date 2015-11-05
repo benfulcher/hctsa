@@ -55,6 +55,10 @@ if nargin < 5
 end
 %-------------------------------------------------------------------------------
 
+% Impose a minimum time-series length of 40 samples to perform a SampEn
+% (should probably be even higher...?)
+minTSLength = 40;
+
 doPlot = 0; % whether to plot outputs
 numScales = length(scaleRange);
 
@@ -84,9 +88,7 @@ end
 sampEns = zeros(numScales,1);
 for si = 1:numScales
     theScale = scaleRange(si);
-    % Impose a minimum time-series length of 50 samples to perform a SampEn
-    % (~should be higher)
-    if length(y_cg{si}) > 50
+    if length(y_cg{si}) >= minTSLength
         sampEnStruct = EN_SampEn(y_cg{si},m,r);
         sampEns(si) = sampEnStruct.(sprintf('sampen%u',m));
     else
@@ -95,8 +97,18 @@ for si = 1:numScales
 end
 
 %-------------------------------------------------------------------------------
-% Multiscale entropy
+% Outputs: multiscale entropy
 %-------------------------------------------------------------------------------
+if all(isnan(sampEns))
+    if ~isempty(preProcessHow)
+        ppText = sprintf('after %s pre-processing',preProcessHow)
+    else
+        ppText = '';
+    end
+    warning(sprintf('Not enough samples (%u %s) to compute SampEn at multiple scales',length(y),ppText))
+    out = NaN; return
+end
+
 if doPlot
     figure('color','w')
     subplot(2,1,1);
@@ -110,7 +122,9 @@ for i = 1:numScales
     out.(sprintf('sampen_s%u',scaleRange(i))) = sampEns(i);
 end
 
-% Output summary statistics of the variation:
+%-------------------------------------------------------------------------------
+% Summary statistics of the variation:
+%-------------------------------------------------------------------------------
 % Maximum, and where it occurred
 [out.maxSampEn,maxInd] = nanmax(sampEns);
 out.maxScale = scaleRange(maxInd);

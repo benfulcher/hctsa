@@ -114,8 +114,11 @@ N = length(yth); % will be the same as y, for 'quantile', and 'updown'
 % Select random samples to test:
 BF_ResetSeed(randomSeed); % control random seed (for reproducibility)
 rs = randperm(N-memory) + memory; % Can't do beginning of time series, up to memory
-rs = rs(1:min(numIters,end)); % Just use a random sample of numIters points to test
+rs = sort(rs(1:min(numIters,end))); % Just use a random sample of numIters points to test
 
+%-------------------------------------------------------------------------------
+% Compute empirical probabilities from time series
+%-------------------------------------------------------------------------------
 store = zeros(numIters,1); % store probabilities
 for i = 1:length(rs)
     switch whatPrior
@@ -138,7 +141,7 @@ for i = 1:length(rs)
             if isempty(inmem)
                 p = 0;
             else
-                p = sum(memoryData(inmem+1) == yth(rs(i)))/length(inmem);
+                p = mean(memoryData(inmem+1) == yth(rs(i)));
             end
             store(i) = p;
 
@@ -161,25 +164,31 @@ for i = 1:length(rs)
     end
 end
 
+%-------------------------------------------------------------------------------
 % Information gained from next observation is log(1/p) = -log(p)
-iz = (store == 0);
-
-store(iz) = 1; % to avoid log(0) error in next line
+%-------------------------------------------------------------------------------
+store(store==0) = 1; % so that we set log(0)==0
 store = -log(store); % transform to surprises/information gains
-store(iz) = 0; % so that log(0) = 0
-% May be better to remove these points than setting them to zero?
 % plot(store)
 
-out.min = min(store); % Minimum amount of information you can gain in this way (not so useful: always zero)
+if any(store > 0)
+    out.min = min(store(store > 0)); % Minimum amount of information you can gain in this way
+else
+    out.min = NaN;
+end
 out.max = max(store); % Maximum amount of information you can gain in this way
 out.mean = mean(store); % mean
+out.sum = sum(store); % sum
 out.median = median(store); % median
 out.lq = quantile(store,0.25); % lower quartile
 out.uq = quantile(store,0.75); % upper quartile
 out.std = std(store); % standard deviation
 
 % t-statistic to information gain of 1
-out.tstat = abs((out.mean-1)/(out.std/sqrt(numIters)));
-
+if out.std==0
+    out.tstat = NaN; % can't compute this if there is no variation
+else
+    out.tstat = abs((out.mean-1)/(out.std/sqrt(numIters)));
+end
 
 end

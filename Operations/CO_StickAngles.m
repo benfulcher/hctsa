@@ -42,13 +42,15 @@ function out = CO_StickAngles(y)
 
 % ------------------------------------------------------------------------------
 %% Check that a Signal Processing Toolbox license is available:
-% (which is needed for the buffer function used for StatAv calculation...)
+%-------------------------------------------------------------------------------
+% (needed for the buffer function used for StatAv calculation...)
 BF_CheckToolbox('signal_toolbox');
 
+%-------------------------------------------------------------------------------
 doPlot = 0; % whether to plot output
 N = length(y);
 
-ix = cell(2,1); %indicies for positive(1) and negative(2) entries of time series vector
+ix = cell(2,1); % indicies for positive(1) and negative(2) entries of time series vector
 ix{1} = find(y >= 0); % bias here -- 'look up' if on 'ground'
 ix{2} = find(y < 0);
 

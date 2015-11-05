@@ -1,17 +1,18 @@
 function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 % TS_InspectQuality   Statistics of quality labels from an hctsa analysis.
 %
-% This function loads the matrix in HCTSA_loc.mat, plots it, showing the
-% quality labels of each entry.
+% This function loads the calculation quality information from HCTSA_loc.mat,
+% and plots a visualization of where different special-valued outputs are occurring.
 %
-% Most useful for checking where errors/special-valued outputs are occuring
+% Useful for checking where errors/special-valued outputs are occurring
 %
-%---INPUT:
+%---INPUTS:
 %
 % inspectWhat: (i) 'summary' (default), summarize the proportion of each operation's
 %                   outputs that correspond to each type of special-valued output
 %              (ii) 'full' or 'all', show the full data matrix
 %              (iii) 'reduced', only show operations that produce special-valued outputs
+%              (iv) 'master', show master operations that produce special-valued outputs
 %
 % customFile: run on a custom HCTSA file (HCTSA_loc.mat by default), can also be
 %             strings like 'loc' or 'norm' (cf. TS_LoadData)
@@ -116,7 +117,6 @@ case 'master'
     % Summarize at the level of master operations
     % Each row is now a different quality label
 
-    % First get
     numMasters = length(MasterOperations);
     opMIDs = [Operations.MasterID]; % save time by getting this first
     qualities = zeros(7,numMasters);
@@ -124,7 +124,7 @@ case 'master'
         masterID = [MasterOperations(k).ID];
         pointInd = (opMIDs==masterID); % indices of operations using this master function
         qualityLabels = TS_Quality(:,pointInd);
-        qualityLabels = qualityLabels(qualityLabels>0); % only want to look at special ones
+        qualityLabels = qualityLabels(qualityLabels > 0); % only want to look at special ones
         if isempty(qualityLabels) % no problems
             continue
         else
@@ -134,9 +134,21 @@ case 'master'
         end
     end
 
-    % Now keep only master operations with problems:
-    hadProblem = (mean(qualities)>0)
+    % Focus on master operations with problems:
+    hadProblem = (mean(qualities) > 0);
 
+    % ------------
+    % Text output:
+    % ------------
+    problemMops = MasterOperations(hadProblem);
+    for i = 1:length(problemMops)
+        fprintf('[%u] %s -- %s\n', problemMops(i).ID, ...
+                problemMops(i).Label, problemMops(i).Code);
+    end
+
+    % ------------
+    % Plotting:
+    % ------------
     % Get handles for figure (f) and axes (ax):
     f = figure('color','w');
     ax = gca;
@@ -157,13 +169,6 @@ case 'master'
 
     title('Master operations producing special-valued outputs.','interpreter','none')
 
-    % List to screen:
-    for i = 1:length(qLabels)
-        if any(qualities(i,:))
-            ListEachMaster(MasterOperations(logical(qualities(i,:))),qLabels{i});
-        end
-    end
-
 case 'summary'
     % Summary as a line plot for operations that had some bad values
 
@@ -176,7 +181,7 @@ case 'summary'
         fprintf(1,'No operations have problems! Nothing to inspect.\n');
         return
     else
-        fprintf(1,'%u operations have special values\n',sum(hadProblem));
+        fprintf(1,'%u operations have special values:\n',sum(hadProblem));
     end
 
     % Resize TS_Quality
@@ -196,7 +201,19 @@ case 'summary'
     [~,ix] = sort(propGood,'ascend');
     whatLabel = whatLabel(:,ix);
 
+    % ------------
+    % Text output:
+    % ------------
+    problemOps = Operations(hadProblem);
+    for i = 1:length(problemOps)
+        ind = ix(i);
+        fprintf('[%u] %s (%s) -- %.1f%% special values.\n', problemOps(ind).ID, problemOps(ind).Name, ...
+                problemOps(ind).CodeString, 100*(1 - propGood(ind)));
+    end
+
+    % ------------
     % Plot:
+    % ------------
     % Get handles for figure (f) and axes (ax):
     f = figure('color','w');
     ax = gca;
@@ -261,19 +278,14 @@ function formatYAxisColorBar(doYaxis,offSet)
     allColors = allColors([8,1,2,3,4,5,6,7,9],:);
     colormap(allColors(1:maxShow+1,:))
 end
+
+
 % ------------------------------------------------------------------------------
 function checkSize(A)
     % Checks size of a matrix, and sends a warning if too large
     if size(A,1)*size(A,2) > 100*9000
         fprintf('Attempting to plot each value in a large matrix (%ux%u)...\n',size(A,1),size(A,2))
         reply = input('[Press any key to continue (or cntrl-C to abort)]','s');
-    end
-end
-% ------------------------------------------------------------------------------
-function ListEachMaster(structureArray,text);
-    % Lists each element to screen
-    for i = 1:length(structureArray)
-        fprintf(1,'%s: [%u]%s\n',text,structureArray(i).ID,structureArray(i).Code)
     end
 end
 

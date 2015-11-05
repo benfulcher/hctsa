@@ -521,12 +521,6 @@ EN_DistributionEntropy(y,'ks',[],0.05)	EN_DistributionEntropy_ks__005
 EN_DistributionEntropy(y,'ks',[],0.1)	EN_DistributionEntropy_ks__01
 EN_DistributionEntropy(y,'ks',[],0.2)	EN_DistributionEntropy_ks__02
 EN_DistributionEntropy(y,'ks',[],0.3)	EN_DistributionEntropy_ks__03
-EN_DistributionEntropy(x,'ks',0.01,0)	EN_DistributionEntropy_raw_ks_001_0
-EN_DistributionEntropy(x,'ks',0.05,0)	EN_DistributionEntropy_raw_ks_005_0
-EN_DistributionEntropy(x,'ks',0.1,0)	EN_DistributionEntropy_raw_ks_01_0
-EN_DistributionEntropy(x,'ks',0.2,0)	EN_DistributionEntropy_raw_ks_02_0
-EN_DistributionEntropy(x,'ks',0.5,0)	EN_DistributionEntropy_raw_ks_05_0
-EN_DistributionEntropy(x,'ks',1,0)	    EN_DistributionEntropy_raw_ks_1_0
 EN_DistributionEntropy(x,'ks',[],0.01)	EN_DistributionEntropy_raw_ks__001
 EN_DistributionEntropy(x,'ks',[],0.02)	EN_DistributionEntropy_raw_ks__002
 EN_DistributionEntropy(x,'ks',[],0.05)	EN_DistributionEntropy_raw_ks__005
@@ -780,7 +774,6 @@ CO_TranslateShape(y,'circle',3.5,'pts')	CO_TranslateShape_circle_35_pts
 CO_TranslateShape(y,'circle',4.5,'pts')	CO_TranslateShape_circle_45_pts
 CO_TranslateShape(y,'circle',5.5,'pts')	CO_TranslateShape_circle_55_pts
 CO_StickAngles(y)	CO_StickAngles_y
-CO_StickAngles(x)	CO_StickAngles_x
 CO_Embed2(y,'tau')	CO_Embed2_tau
 CO_Embed2_AngleTau(y,50)	CO_Embed2_AngleTau_50
 CO_Embed2_Dist(y,'tau')	CO_Embed2_Dist_tau
