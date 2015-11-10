@@ -9,7 +9,7 @@ function Dij = TS_PairwiseDist(tsOrOps,whatData,distanceMetric,doSave)
 % tsOrOps: Compute pairwise distances between all pairs of time series
 %               ('ts', default), or operations ('ops')
 %
-% whatData: 'orig' (load data from HCTSA_loc.mat)
+% whatData: 'loc' (load data from HCTSA.mat)
 %           'norm' (default: load data from HCTSA_N.mat)
 %           can also provide a data matrix, and saves it back to HCTSA_N.mat
 %

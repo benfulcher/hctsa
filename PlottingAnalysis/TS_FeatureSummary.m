@@ -7,7 +7,7 @@ function TS_FeatureSummary(opID, whatData, annotateParams)
 %
 %---INPUTS:
 % opID, the operation ID to plot
-% whatData, the data to visualize (HCTSA_loc.mat by default; cf. TS_LoadData)
+% whatData, the data to visualize (HCTSA.mat by default; cf. TS_LoadData)
 % annotateParams, a structure of custom plotting options
 
 % ------------------------------------------------------------------------------

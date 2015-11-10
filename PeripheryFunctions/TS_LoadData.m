@@ -39,7 +39,7 @@ end
 
 %-------------------------------------------------------------------------------
 % In some cases, you provide a structure with the pre-loaded data already in it
-% e.g., as a whatDataFile = load('HCTSA_loc.mat');
+% e.g., as a whatDataFile = load('HCTSA.mat');
 % In this case, no further loading is required -- just a restructuring
 %-------------------------------------------------------------------------------
 if isstruct(whatDataFile)
@@ -56,7 +56,7 @@ end
 % Use intuitive settings for HCTSA package defaults -- setting 'loc', 'norm', or 'cl'
 switch whatDataFile
 case 'loc'
-    whatDataFile = 'HCTSA_loc.mat';
+    whatDataFile = 'HCTSA.mat';
     getClustered = 0;
 case 'norm'
     whatDataFile = 'HCTSA_N.mat';

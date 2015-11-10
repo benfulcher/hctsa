@@ -61,7 +61,7 @@ end
 
 if nargin < 2 || isempty(whatData)
     whatData = 'loc';
-    fprintf(1,'Retrieving data from HCTSA_loc by default.\n');
+    fprintf(1,'Retrieving data from HCTSA.mat by default.\n');
 end
 
 if nargin < 3 || isempty(saveBack)

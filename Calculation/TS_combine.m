@@ -1,4 +1,4 @@
-function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids,outputFileName)
+function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,outputFileName)
 % TS_combine   Combine two hctsa datasets.
 %
 % Takes a union of time series, and an intersection of operations from two hctsa
@@ -6,15 +6,15 @@ function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids,outputFileName)
 % Any data matrices are combined, and the structure arrays for TimeSeries and
 % Operations are updated to reflect the concatenation.
 %
-% Note that in the case of duplicates, HCTSA_loc_1 takes precedence over
-% HCTSA_loc_2.
+% Note that in the case of duplicates, HCTSA_1 takes precedence over
+% HCTSA_2.
 %
 % When using TS_init to generate datasets, be aware that the *same* set of
 % operations and master operations must be used in both cases.
 %
 %---INPUTS:
-% HCTSA_loc_1: the first hctsa dataset (a .mat filename)
-% HCTSA_loc_2: the second hctsa dataset (a .mat filename)
+% HCTSA_1: the first hctsa dataset (a .mat filename)
+% HCTSA_2: the second hctsa dataset (a .mat filename)
 % compare_tsids: (binary) whether to consider IDs in each file as the same.
 %                If the two datasets to be joined are from different databases,
 %                then a union of all time series results, regardless of the
@@ -22,15 +22,14 @@ function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids,outputFileName)
 %                However, if set to true (1, useful for different parts of a
 %                dataset stored in the same mySQL database), IDs are matched so
 %                that duplicate time series don't occur in the combined matrix.
-% outputFileName: output to a custom .mat file ('HCTSA_loc.mat' by default).
+% outputFileName: output to a custom .mat file ('HCTSA.mat' by default).
 %
 %---OUTPUTS:
 % Writes a new, combined .mat file (to the outputFileName)
 %
 %---USAGE:
 % Combine two datasets into a new one:
-% TS_combine('HCTSA_loc_1.mat','HCTSA_loc_2.mat');
-%
+% TS_combine('HCTSA_1.mat','HCTSA_2.mat');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -53,7 +52,7 @@ function TS_combine(HCTSA_loc_1,HCTSA_loc_2,compare_tsids,outputFileName)
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    error('Must provide paths for two HCTSA_loc files')
+    error('Must provide paths for two HCTSA*.mat files')
 end
 
 if nargin < 3
@@ -64,15 +63,15 @@ end
 if compare_tsids == 1
     fprintf(1,['Assuming both %s and %s came from the same database so that ' ...
             'time series IDs are comparable.\nAny intersection of IDs will be filtered out.\n'],...
-            HCTSA_loc_1,HCTSA_loc_2);
+            HCTSA_1,HCTSA_2);
 elseif compare_tsids == 0
     fprintf(1,['Assuming that %s and %s came different databases so' ...
             ' duplicate ts_ids can occur in the resulting matrix.\n'], ...
-                                        HCTSA_loc_1,HCTSA_loc_2);
+                                        HCTSA_1,HCTSA_2);
 end
 
 if nargin < 4
-    outputFileName = 'HCTSA_loc.mat';
+    outputFileName = 'HCTSA.mat';
 end
 if ~strcmp(outputFileName(end-3:end),'.mat')
     error('Specify a .mat filename to output');
@@ -82,14 +81,14 @@ end
 % ------------------------------------------------------------------------------
 % Combine the local filenames
 % ------------------------------------------------------------------------------
-HCTSA_locs = {HCTSA_loc_1, HCTSA_loc_2};
+HCTSAs = {HCTSA_1, HCTSA_2};
 
 % ------------------------------------------------------------------------------
 % Check paths point to valid files
 % ------------------------------------------------------------------------------
 for i = 1:2
-    if ~exist(HCTSA_locs{i},'file')
-        error('Could not find %s',HCTSA_locs{i});
+    if ~exist(HCTSAs{i},'file')
+        error('Could not find %s',HCTSAs{i});
     end
 end
 
@@ -99,21 +98,21 @@ end
 fprintf(1,'Loading data...');
 loadedData = cell(2,1);
 for i = 1:2
-    loadedData{i} = load(HCTSA_locs{i});
+    loadedData{i} = load(HCTSAs{i});
 end
 fprintf(1,' Loaded.\n');
 
 % Give some information
 for i = 1:2
     fprintf(1,'%u: The file, %s, contains information for %u time series and %u operations.\n', ...
-                i,HCTSA_locs{i},length(loadedData{i}.TimeSeries),length(loadedData{i}.Operations));
+                i,HCTSAs{i},length(loadedData{i}.TimeSeries),length(loadedData{i}.Operations));
 end
 
 %-------------------------------------------------------------------------------
 % Check the fromDatabase flags
 %-------------------------------------------------------------------------------
 if loadedData{1}.fromDatabase ~= loadedData{2}.fromDatabase
-    error('Weird that fromDatabase flags are inconsistent across the two HCTSA_loc files.');
+    error('Weird that fromDatabase flags are inconsistent across the two HCTSA files.');
 else
     fromDatabase = loadedData{1}.fromDatabase;
 end
@@ -133,7 +132,7 @@ for i = 1:2
         for j = 1:length(theextrafields)
             loadedData{i}.TimeSeries = rmfield(loadedData{i}.TimeSeries,...
                                                 thefieldnames{theextrafields(j)});
-            fprintf(1,'Extra field ''%s'' in %s\n',thefieldnames{theextrafields(j)},HCTSA_locs{i});
+            fprintf(1,'Extra field ''%s'' in %s\n',thefieldnames{theextrafields(j)},HCTSAs{i});
         end
     end
 end
@@ -285,7 +284,7 @@ if ~isempty(hereSheIs) % already exists
     outputFileName = [outputFileName(1:end-4),'_combined.mat'];
 end
 fprintf(1,['----------Saving to %s----------\n'],outputFileName);
-% if ~strcmp(outputFileName,'HCTSA_loc.mat')
+% if ~strcmp(outputFileName,'HCTSA.mat')
 %     fprintf(1,['You''ll need to specify the custom filename ''%s'',' ...
 %                 ' or rename to HCTSA_N.mat to run' ...
 %                 ' normal analysis routines like TS_normalize...\n'],...
@@ -300,7 +299,7 @@ if gotCalcTimes, save(outputFileName,'TS_CalcTime','-append'); end % add calcula
 
 %--- Tell the user what just happened:
 fprintf(1,['Saved new Matlab file containing combined versions of %s' ...
-                    ' and %s to %s\n'],HCTSA_locs{1},HCTSA_locs{2},outputFileName);
+                    ' and %s to %s\n'],HCTSAs{1},HCTSAs{2},outputFileName);
 fprintf(1,'%s contains %u time series and %u operations.\n',outputFileName, ...
                                 length(TimeSeries),length(Operations));
 

@@ -50,7 +50,7 @@ for i = 1:length(tsid_range)
                             	tsid_range(i),length(opids),min(opids),max(opids))
 
 	% Loop over:
-	% (i) Running SQL_retrieve to retrieve data from the database -> HCTSA_loc.mat
+	% (i) Running SQL_retrieve to retrieve data from the database -> HCTSA.mat
 	% (ii) Using TS_compute to calculate missing entries
 	% (iii) Running SQL_store to write results back into the database
 

@@ -12,7 +12,7 @@ function TS_init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
 % outputFile: Specify an alternative output filename
 %
 %---OUTPUTS:
-% Writes output into HCTSA_loc.mat (or specified custom filename)
+% Writes output into HCTSA.mat (or specified custom filename)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -47,7 +47,7 @@ if nargin < 4
     beVocal = 0; % by default do your business in peace
 end
 if nargin < 5
-    outputFile = 'HCTSA_loc.mat';
+    outputFile = 'HCTSA.mat';
 end
 
 % ------------------------------------------------------------------------------

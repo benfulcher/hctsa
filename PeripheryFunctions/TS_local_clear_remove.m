@@ -16,11 +16,11 @@ function TS_local_clear_remove(tsOrOps,idRange,doRemove,whatData)
 %
 %---EXAMPLE USAGE:
 % This clears the data about the time series with IDs 1,2,3,4, and 5 from the hctsa dataset
-% stored in HCTSA_loc.mat:
-% >> TS_local_clear_remove('ts',1:5,0,'HCTSA_loc.mat');
+% stored in HCTSA.mat:
+% >> TS_local_clear_remove('ts',1:5,0,'HCTSA.mat');
 %
 % This *removes* the time series with IDs from 1:5 from the dataset completely:
-% >> TS_local_clear_remove('ts',1:5,1,'HCTSA_loc.mat');
+% >> TS_local_clear_remove('ts',1:5,1,'HCTSA.mat');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

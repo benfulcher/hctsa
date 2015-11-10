@@ -4,7 +4,7 @@ function didWrite = SQL_retrieve(ts_ids, op_ids, retrieveWhatEntries, retrieveWh
 % This function retreives data from the mySQL database for subsequent analysis
 % in Matlab. It takes as input a set of constraints on the time series and
 % operations to include, and outputs the relevant subsection of the data matrix
-% and associated metadata to HCTSA_loc.mat
+% and associated metadata to HCTSA.mat
 %
 %---INPUTS:
 %--ts_ids: a vector of ts_ids to retrieve from the mySQL database.
@@ -23,9 +23,9 @@ function didWrite = SQL_retrieve(ts_ids, op_ids, retrieveWhatEntries, retrieveWh
 %       (iv) 'quality': Just the quality labels
 %
 %---OUTPUT:
-%--didWrite [opt] is 1 if HCTSA_loc.mat was written
+%--didWrite [opt] is 1 if HCTSA.mat was written
 %
-% Other outputs are saved to the file HCTSA_loc.mat:
+% Other outputs are saved to the file HCTSA.mat:
 %--TS_DataMat, contains the data
 %--TS_Quality, contains the quality codes
 %--TS_CalcTime, contains the calculation times [if retrieveWhatData = 'all']
@@ -84,8 +84,8 @@ end
 % First check whether you're about to overwrite an existing file
 % (actually you probably don't want to do this when you're looping in a script)
 % ------------------------------------------------------------------------------
-% if exist('./HCTSA_loc.mat','file')
-%     reply = input(['Warning: HCTSA_loc.mat already exists -- if you continue, this ' ...
+% if exist('./HCTSA.mat','file')
+%     reply = input(['Warning: HCTSA.mat already exists -- if you continue, this ' ...
 %                     'file will be overwritten.\n[press any key to continue]'],'s');
 % end
 
@@ -162,7 +162,7 @@ end
 
 % Tell me about it:
 fprintf(1,'We have %u time series and %u operations to retrieve from %s.\n',numTS,numOps,dbname);
-fprintf(1,['Filling and saving to local Matlab file HCTSA_loc.mat from ' ...
+fprintf(1,['Filling and saving to local Matlab file HCTSA.mat from ' ...
                                 'the Results table of %s.\n'],dbname);
 
 % --------------------------------------------------------------------------
@@ -435,31 +435,32 @@ end
 SQL_closedatabase(dbc)
 
 % ------------------------------------------------------------------------------
-%% Save to HCTSA_loc.mat
+%% Save to HCTSA.mat
 % ------------------------------------------------------------------------------
-fprintf(1,'Saving local versions of the data to HCTSA_loc.mat...');
+outputFileName = 'HCTSA.mat';
+fprintf(1,'Saving local versions of the data to %s...',outputFileName);
 saveTimer = tic;
 fromDatabase = 1; % mark that we retrieved this data from the mySQL database
-save('HCTSA_loc.mat','TimeSeries','Operations','MasterOperations','fromDatabase','-v7.3');
+save('HCTSA.mat','TimeSeries','Operations','MasterOperations','fromDatabase','-v7.3');
 switch retrieveWhatData
 case 'all'
     % Add outputs, quality labels, and calculation times
-    save('HCTSA_loc.mat','TS_DataMat','TS_Quality','TS_CalcTime','-append')
+    save(outputFileName,'TS_DataMat','TS_Quality','TS_CalcTime','-append')
 case 'nocalctime'
     % Add outputs and quality labels
-    save('HCTSA_loc.mat','TS_DataMat','TS_Quality','-append')
+    save(outputFileName,'TS_DataMat','TS_Quality','-append')
 case 'outputs'
     % Add outputs
-    save('HCTSA_loc.mat','TS_DataMat','-append')
+    save(outputFileName,'TS_DataMat','-append')
 case 'quality'
     % Add quality labels
-    save('HCTSA_loc.mat','TS_Quality','-append')
+    save(outputFileName,'TS_Quality','-append')
 end
 
 fprintf(1,' Done in %s.\n',BF_thetime(toc(saveTimer)));
 clear saveTimer % stop timing
 
-didWrite = 1; % Tag to say that write to HCTSA_loc.mat file is successful
+didWrite = 1; % Tag to say that write to HCTSA.mat file is successful
 
 % ------------------------------------------------------------------------------
 %% If retrieved quality labels, display how many entries need to be calculated

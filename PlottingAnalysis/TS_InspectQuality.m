@@ -1,7 +1,7 @@
 function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 % TS_InspectQuality   Statistics of quality labels from an hctsa analysis.
 %
-% This function loads the calculation quality information from HCTSA_loc.mat,
+% This function loads the calculation quality information from HCTSA.mat,
 % and plots a visualization of where different special-valued outputs are occurring.
 %
 % Useful for checking where errors/special-valued outputs are occurring
@@ -14,7 +14,7 @@ function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 %              (iii) 'reduced', only show operations that produce special-valued outputs
 %              (iv) 'master', show master operations that produce special-valued outputs
 %
-% customFile: run on a custom HCTSA file (HCTSA_loc.mat by default), can also be
+% customFile: run on a custom HCTSA file (HCTSA.mat by default), can also be
 %             strings like 'loc' or 'norm' (cf. TS_LoadData)
 
 % ------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ if nargin < 1 || isempty(inspectWhat)
     inspectWhat = 'summary'; % only show operations that had at least one problem
 end
 if nargin < 2
-    customFile = 'HCTSA_loc.mat';
+    customFile = 'HCTSA.mat';
 end
 
 % ------------------------------------------------------------------------------

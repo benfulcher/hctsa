@@ -1,7 +1,7 @@
 function SQL_store(writeWhat,logToFile,dbname)
 % SQL_store 	Upload data to the mySQL database.
 %
-% Uploads data in the HCTSA_loc file in the current directory back into the
+% Uploads data in the HCTSA.mat file in the current directory back into the
 % mySQL database. Should be done to store the result new computations done by
 % TS_compute.
 
@@ -51,8 +51,8 @@ end
 %% Read in information from local files
 fid = 1; % haha no more logging option...
 loadTimer = tic;
-fprintf(fid,'Loading data from HCTSA_loc.mat...');
-load('HCTSA_loc.mat')
+fprintf(fid,'Loading data from HCTSA.mat...');
+load('HCTSA.mat')
 fprintf(fid,' Done in %s.\n',BF_thetime(toc(loadTimer)));
 clear loadTimer
 
@@ -61,7 +61,7 @@ clear loadTimer
 % ts_ids and op_ids represent items stored in the linked mySQL database)
 % ------------------------------------------------------------------------------
 if ~fromDatabase
-    theLoc = which('HCTSA_loc.mat');
+    theLoc = which('HCTSA.mat');
     error(['It looks like:\n%s\nwas generated using TS_init and does not match up ' ...
             'with ID entries a mySQL database...'],theLoc);
 end
@@ -72,7 +72,7 @@ end
 % It will not exist if you've (by default) not retrieved calculation time data
 % from the database, and not generated it from the computation
 if ~exist('TS_CalcTime','var')
-    error('No calculation time data found in HCTSA_loc.mat');
+    error('No calculation time data found in HCTSA.mat');
 end
 
 % ------------------------------------------------------------------------------
