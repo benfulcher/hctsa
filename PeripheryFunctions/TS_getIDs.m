@@ -49,7 +49,7 @@ end
 %-------------------------------------------------------------------------------
 % Load data:
 %-------------------------------------------------------------------------------
-[~,TimeSeries,Operations] = TS_LoadData(whatData);
+[~,TimeSeries,Operations,theDataFile] = TS_LoadData(whatData);
 
 %-------------------------------------------------------------------------------
 % Match time series/operations on an input keyword:
@@ -74,5 +74,10 @@ matches = cellfun(@(x)any(ismember(theKeyword,x)),Keywords);
 
 % Return the IDs of the matches:
 IDs = [theStructureArray(matches).ID];
+
+% Check for empty:
+if isempty(IDs)
+    warning('No matches to ''%s'' found in %s',theKeyword,theDataFile)
+end
 
 end

@@ -34,7 +34,7 @@ if nargin < 1
 end
 
 if nargin < 2 || isempty(whatData)
-   whatData = 'loc'; % Visualize at unnormalized outputs
+   whatData = 'raw'; % Visualize unnormalized outputs by default
 end
 
 if nargin < 3 || isempty(annotateParams) % annotation parameters

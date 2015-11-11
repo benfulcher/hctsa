@@ -24,7 +24,7 @@ function groupLabels = TS_LabelGroups(keywordGroups,whatData,saveBack)
 %                   Can also use an empty label, '', to select unique keywords
 %                   automatically from the dataset.
 %
-% whatData: Where to retrive from (and write back to): 'loc' (default), cf. TS_LoadData.
+% whatData: Where to retrive from (and write back to): 'HCTSA.mat' (default), cf. TS_LoadData.
 %
 % saveBack: Can set to 0 to stop saving the grouping back to the input file.
 %
@@ -60,7 +60,7 @@ if ~isempty(keywordGroups) && ischar(keywordGroups);
 end
 
 if nargin < 2 || isempty(whatData)
-    whatData = 'loc';
+    whatData = 'raw';
     fprintf(1,'Retrieving data from HCTSA.mat by default.\n');
 end
 

@@ -9,7 +9,7 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % evaluate the statistical significance of the result.
 %
 %---INPUTS:
-% whatData, the hctsa data to use (input to TS_LoadData, default: 'loc')
+% whatData, the hctsa data to use (input to TS_LoadData, default: 'raw')
 % whatTestStat, the test statistic to quantify the goodness of each feature
 %               (one of: 'tstat', 'svm', 'linear', 'diaglinear')
 % doNull, (binary) whether to compute a null distribution using permutations of the class
@@ -52,7 +52,7 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 %% Check inputs
 % --------------------------------------------------------------------------
 if nargin < 1 || isempty(whatData)
-    whatData = 'loc';
+    whatData = 'raw';
 end
 if nargin < 2 || isempty(whatTestStat)
     whatTestStat = 'linclass';

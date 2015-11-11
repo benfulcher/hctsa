@@ -3,7 +3,7 @@ function [ts_ind, dataCell, codeEval] = TS_WhichProblemTS(opID,whatData)
 %
 %---INPUTS:
 % opID: the ID of the operation to investigate
-% whatData: hctsa data source (default: 'loc'; cf. TS_LoadData)
+% whatData: hctsa data source (default: 'raw'; cf. TS_LoadData)
 %
 %---OUTPUTS:
 % ts_ind: the indices of the time series that produced special-valued outputs
@@ -32,7 +32,7 @@ function [ts_ind, dataCell, codeEval] = TS_WhichProblemTS(opID,whatData)
 % Check inputs:
 %-------------------------------------------------------------------------------
 if nargin < 2
-    whatData = 'loc';
+    whatData = 'raw';
 end
 
 %-------------------------------------------------------------------------------

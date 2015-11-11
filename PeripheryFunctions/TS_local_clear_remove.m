@@ -66,7 +66,7 @@ if nargin < 3 % doRemove
 end
 
 if nargin < 4
-    whatData = 'loc'; % normally want to clear data from the local store
+    whatData = 'raw'; % normally want to clear data from the local store
 end
 
 % ------------------------------------------------------------------------------
@@ -115,11 +115,11 @@ end
 
 if doRemove == 0 % clear data
     reply = input(sprintf(['**Preparing to clear all calculated data for %u %s.\n' ...
-                                '[press any key to continue]'], ...
+                        '[press any key to continue, ctrl-C to abort]'], ...
                                     sum(doThese),theWhat),'s');
 elseif doRemove == 1
     reply = input(sprintf(['Preparing to REMOVE %u %s -- DRASTIC STUFF! ' ...
-                                'I HOPE THIS IS OK?!\n[press any key to continue]'], ...
+            'I HOPE THIS IS OK?!\n[press any key to continue, ctrl-C to abort]'], ...
                                 sum(doThese),theWhat),'s');
 else
     error('Specify either (0 to clear), or (1 to remove)')

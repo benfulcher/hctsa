@@ -15,7 +15,7 @@ function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 %              (iv) 'master', show master operations that produce special-valued outputs
 %
 % customFile: run on a custom HCTSA file (HCTSA.mat by default), can also be
-%             strings like 'loc' or 'norm' (cf. TS_LoadData)
+%             strings like 'raw' or 'norm' (cf. TS_LoadData)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -40,7 +40,7 @@ if nargin < 1 || isempty(inspectWhat)
     inspectWhat = 'summary'; % only show operations that had at least one problem
 end
 if nargin < 2
-    customFile = 'HCTSA.mat';
+    customFile = 'raw'; % use un-normalized data by default, 'HCTSA.mat'
 end
 
 % ------------------------------------------------------------------------------

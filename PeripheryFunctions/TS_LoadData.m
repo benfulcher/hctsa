@@ -9,6 +9,13 @@ function [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataF
 % whatDataFile: the name of the HCTSA data file to load in. Use 'norm' (default)
 %               to load in HCTSA_N.mat
 % getClustered: whether to reorder the structures according to a clustering
+%---OUTPUTS:
+% The key hctsa data objects obtained from the data source:
+%       *) TS_DataMat (matrix)
+%       *) TimeSeries (structure array)
+%       *) Operations (structure array)
+% whatDataFile, a string providing the file name of the data file used to load
+%               the data
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -53,15 +60,15 @@ if isstruct(whatDataFile)
 end
 
 %-------------------------------------------------------------------------------
-% Use intuitive settings for HCTSA package defaults -- setting 'loc', 'norm', or 'cl'
+% Use intuitive settings for HCTSA package defaults -- setting 'raw', 'norm', or 'cl'
 switch whatDataFile
-case 'loc'
+case {'raw','loc'} % the raw, un-normalized data:
     whatDataFile = 'HCTSA.mat';
     getClustered = 0;
-case 'norm'
+case 'norm' % the normalized data:
     whatDataFile = 'HCTSA_N.mat';
     getClustered = 0;
-case 'cl'
+case 'cl' % the clustered data:
     whatDataFile = 'HCTSA_N.mat';
     getClustered = 1;
 end
