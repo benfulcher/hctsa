@@ -1,6 +1,5 @@
-% SAMPLE_RUNSCRIPT  Example script for looping over a hctsa analysis.
-%
-% Selects a set of operations and time series to loop over for an hctsa analysis.
+% SAMPLE_RUNSCRIPT_SQL  Example script for looping over a hctsa analysis when
+%                           using a linked mySQL database.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

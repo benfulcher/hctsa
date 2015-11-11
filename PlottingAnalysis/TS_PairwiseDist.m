@@ -77,6 +77,7 @@ end
 % Compute pairwise distances between all objects
 % ------------------------------------------------------------------------------
 if strcmp(tsOrOps,'ops')
+    % Transpose if we want columns ('ops')
     TS_DataMat = TS_DataMat';
 end
 
@@ -85,7 +86,7 @@ Dij = BF_pdist(TS_DataMat,distanceMetric,1,[],1);
 fprintf(1,' Done.\n');
 
 % ------------------------------------------------------------------------------
-% Save back to the local .mat file (in hctsa format)
+% Save back to the local hctsa .mat file
 % ------------------------------------------------------------------------------
 if doSave
     switch tsOrOps
@@ -96,6 +97,7 @@ if doSave
     end
     fprintf(1,'Saving pairwise distance information for %s back to %s...',...
                         theWhat,theFile);
+
     switch tsOrOps
     case 'ts'
         ts_clust = struct('Dij',Dij,'distanceMetric',distanceMetric);
@@ -104,6 +106,7 @@ if doSave
         op_clust = struct('Dij',Dij,'distanceMetric',distanceMetric);
         save(theFile,'op_clust','-append')
     end
+    
     fprintf(1,' Done.\n');
 end
 

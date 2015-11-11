@@ -241,6 +241,7 @@ if any(ismember(whatPlots,'distributions'))
         featHere = ifeat(r); % features to plot on this figure
 
         f = figure('color','w');
+        f.Position(3:4) = [588, 612]; % make longer
         for opi = 1:subPerFig
             op_ind = featHere(opi);
             subplot(subPerFig,1,opi); box('on'); hold on

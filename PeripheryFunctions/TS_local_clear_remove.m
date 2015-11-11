@@ -122,7 +122,7 @@ elseif doRemove == 1
             'I HOPE THIS IS OK?!\n[press any key to continue, ctrl-C to abort]'], ...
                                 sum(doThese),theWhat),'s');
 else
-    error('Specify either (0 to clear), or (1 to remove)')
+    error('Specify either 0 (to clear data), or 1 (to remove)')
 end
 
 % ------------------------------------------------------------------------------

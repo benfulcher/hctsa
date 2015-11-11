@@ -78,6 +78,7 @@ case {'full','all'}
     xlabel('Operations (op_id)','interpreter','none')
     ax.XTick = 1:length(Operations);
     ax.XTickLabel = [Operations.ID];
+    ax.XTickLabelRotation = 90;
 
     formatYAxisColorBar;
 
@@ -106,6 +107,7 @@ case 'reduced'
 
     ax.XTick = 1:sum(hadProblem);
     ax.XTickLabel = [Operations(hadProblem).ID];
+    ax.XTickLabelRotation = 90;
 
     title(sprintf('Displaying %u x %u (displaying %u/%u operations with some special values',...
                     size(TS_Quality,1),sum(hadProblem),sum(hadProblem),size(TS_Quality,2)),...
@@ -223,6 +225,7 @@ case 'summary'
     ax.XTick = 1:sum(hadProblem);
     unSortedTicks = [Operations(hadProblem).ID];
     ax.XTickLabel = unSortedTicks(ix);
+    ax.XTickLabelRotation = 90;
 
     title(sprintf('Displaying %u/%u operations with some special values',...
                     sum(hadProblem),length(hadProblem)),...

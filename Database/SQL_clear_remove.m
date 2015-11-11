@@ -70,16 +70,16 @@ if nargin < 2 || min(size(idRange)) ~= 1
 end
 
 if nargin < 3 % doRemove
-    error('You must specify whether to remove the %s or just clear their data results',theWhat)
+    error('Please specify whether to remove the %s (1) or just clear their results data (0)',theWhat)
+end
+
+% Write a .log file of the clearing process by default
+if nargin < 4 || isempty(doLog)
+	doLog = 0;
 end
 
 % Open connection to database
 [dbc, dbName] = SQL_opendatabase();
-
-% write a .log file of the clearing process by default
-if nargin < 4 || isempty(doLog)
-	doLog = 0;
-end
 
 % ------------------------------------------------------------------------------
 %% Provide some user feedback

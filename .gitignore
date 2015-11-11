@@ -10,7 +10,7 @@ ehthumbs.db
 Thumbs.db
 
 # HCTSA data files:
-HCTSA_*.mat
+HCTSA*.mat
 
 # Database configuration
 sql_settings.conf
