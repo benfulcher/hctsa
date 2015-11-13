@@ -279,7 +279,6 @@ char *argv[];
 	PrintResults(nfile);
     }
 
-
     /* Process multiple data files. */
     if (flag == 1) {
 
