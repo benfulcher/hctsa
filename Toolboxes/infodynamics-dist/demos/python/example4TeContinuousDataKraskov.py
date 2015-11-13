@@ -30,34 +30,34 @@ jarLocation = "../../infodynamics.jar"
 startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=" + jarLocation)
 
 # Generate some random normalised data.
-numObservations = 1000;
-covariance=0.4;
+numObservations = 1000
+covariance=0.4
 # Source array of random normals:
-sourceArray = [random.normalvariate(0,1) for r in xrange(numObservations)];
+sourceArray = [random.normalvariate(0,1) for r in range(numObservations)]
 # Destination array of random normals with partial correlation to previous value of sourceArray
 destArray = [0] + [sum(pair) for pair in zip([covariance*y for y in sourceArray[0:numObservations-1]], \
-                                             [(1-covariance)*y for y in [random.normalvariate(0,1) for r in xrange(numObservations-1)]] ) ];
+                                             [(1-covariance)*y for y in [random.normalvariate(0,1) for r in range(numObservations-1)]] ) ]
 # Uncorrelated source array:
-sourceArray2 = [random.normalvariate(0,1) for r in xrange(numObservations)];
+sourceArray2 = [random.normalvariate(0,1) for r in range(numObservations)]
 # Create a TE calculator and run it:
 teCalcClass = JPackage("infodynamics.measures.continuous.kraskov").TransferEntropyCalculatorKraskov
-teCalc = teCalcClass();
-teCalc.setProperty("NORMALISE", "true"); # Normalise the individual variables
-teCalc.initialise(1); # Use history length 1 (Schreiber k=1)
-teCalc.setProperty("k", "4"); # Use Kraskov parameter K=4 for 4 nearest points
+teCalc = teCalcClass()
+teCalc.setProperty("NORMALISE", "true") # Normalise the individual variables
+teCalc.initialise(1) # Use history length 1 (Schreiber k=1)
+teCalc.setProperty("k", "4") # Use Kraskov parameter K=4 for 4 nearest points
 # Perform calculation with correlated source:
-teCalc.setObservations(JArray(JDouble, 1)(sourceArray), JArray(JDouble, 1)(destArray));
-result = teCalc.computeAverageLocalOfObservations();
+teCalc.setObservations(JArray(JDouble, 1)(sourceArray), JArray(JDouble, 1)(destArray))
+result = teCalc.computeAverageLocalOfObservations()
 # Note that the calculation is a random variable (because the generated
 #  data is a set of random variables) - the result will be of the order
 #  of what we expect, but not exactly equal to it; in fact, there will
 #  be a large variance around it.
 print("TE result %.4f nats; expected to be close to %.4f nats for these correlated Gaussians" % \
-    (result, math.log(1/(1-math.pow(covariance,2)))));
+    (result, math.log(1/(1-math.pow(covariance,2)))))
 # Perform calculation with uncorrelated source:
-teCalc.initialise(); # Initialise leaving the parameters the same
-teCalc.setObservations(JArray(JDouble, 1)(sourceArray2), JArray(JDouble, 1)(destArray));
-result2 = teCalc.computeAverageLocalOfObservations();
-print("TE result %.4f nats; expected to be close to 0 nats for these uncorrelated Gaussians" % result2);
+teCalc.initialise() # Initialise leaving the parameters the same
+teCalc.setObservations(JArray(JDouble, 1)(sourceArray2), JArray(JDouble, 1)(destArray))
+result2 = teCalc.computeAverageLocalOfObservations()
+print("TE result %.4f nats; expected to be close to 0 nats for these uncorrelated Gaussians" % result2)
 
 

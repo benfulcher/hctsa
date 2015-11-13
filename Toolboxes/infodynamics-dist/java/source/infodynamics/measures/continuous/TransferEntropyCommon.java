@@ -59,7 +59,7 @@ public abstract class TransferEntropyCommon implements
 	/**
 	 * Length of past destination history to consider (embedding length)
 	 */
-	protected int k;
+	protected int k = 1;
 	/**
 	 * Total number of observations supplied.
 	 * Only valid after {@link #finaliseAddObservations()} is called.
@@ -295,9 +295,10 @@ public abstract class TransferEntropyCommon implements
 	 * <p>Valid property names, and what their
 	 * values should represent, include:</p>
 	 * <ul>
-	 * 		<li>{@link #K_PROP_NAME} -- specified by {@link TransferEntropyCalculator}</li>
+	 * 		<li>{@link #K_PROP_NAME} -- specified by {@link TransferEntropyCalculator#setProperty(String, String)}</li>
 	 * </ul>
-	 * <p><b>However -- </b> any other properties specified by {@link TransferEntropyCalculator}
+	 * <p><b>However -- </b> any other properties specified by {@link TransferEntropyCalculator#se}
+	 * 
 	 *  (i.e. {@link #K_TAU_PROP_NAME}, {@link #L_PROP_NAME}, {@link #L_TAU_PROP_NAME} 
 	 *  or {@link #DELAY_PROP_NAME}) are not implemented and will cause 
 	 *  an exception to be thrown.</p>
@@ -331,6 +332,16 @@ public abstract class TransferEntropyCommon implements
 		if (debug && propertySet) {
 			System.out.println(this.getClass().getSimpleName() + ": Set property " + propertyName +
 					" to " + propertyValue);
+		}
+	}
+
+	@Override
+	public String getProperty(String propertyName) {
+		if (propertyName.equalsIgnoreCase(K_PROP_NAME)) {
+			return Integer.toString(k);
+		} else {
+			// No property valid matches for this class
+			return null;
 		}
 	}
 

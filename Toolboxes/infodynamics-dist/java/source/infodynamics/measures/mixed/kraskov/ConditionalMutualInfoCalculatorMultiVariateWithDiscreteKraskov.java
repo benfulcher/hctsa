@@ -421,7 +421,7 @@ public class ConditionalMutualInfoCalculatorMultiVariateWithDiscreteKraskov
 			timeStepsOfKthMins = MatrixUtils.kMinIndicesSubjectTo(
 					jointNorm, 0, k, discreteData, discreteData[t]);
 			// and now we have the closest k points.
-			// Find eps_{x,y} as the maximum x and y norms amongst this set:
+			// Find eps_{x,z} as the maximum x and z norms amongst this set:
 			for (int j = 0; j < k; j++) {
 				int timeStepOfJthPoint = timeStepsOfKthMins[j];
 				if (xzNorms[timeStepOfJthPoint][0] > eps_x) {

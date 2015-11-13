@@ -33,7 +33,7 @@
 
 function plotRawCa(states, rule, plotOptions, saveIt, saveFormat)
 
-	if (nargin < 2)
+	if (nargin < 3)
 		plotOptions = {};
 	end
 	if not(isfield(plotOptions, 'plotRows'))
@@ -56,10 +56,10 @@ function plotRawCa(states, rule, plotOptions, saveIt, saveFormat)
 		fprintf('*** Limiting number of plotted columns to 1000\n');
 		plotOptions.plotCols = 1000;
 	end
-	if (nargin < 3)
+	if (nargin < 4)
 		saveIt = false;
 	end
-	if (nargin < 4)
+	if (nargin < 5)
 		saveFormat = 'eps';
 	end
 

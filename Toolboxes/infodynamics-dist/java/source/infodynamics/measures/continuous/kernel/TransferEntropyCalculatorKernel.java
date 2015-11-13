@@ -95,7 +95,7 @@ public class TransferEntropyCalculatorKernel
 	public static final String NORMALISE_PROP_NAME = "NORMALISE";
 	
 	private boolean dynCorrExcl = false;
-	private int dynCorrExclTime = 100;
+	private int dynCorrExclTime = 0;
 	/**
 	 * Property name for a dynamics exclusion time window (see Kantz and Schreiber),
 	 * default is 0 which means no dynamic exclusion window.
@@ -230,6 +230,23 @@ public class TransferEntropyCalculatorKernel
 		if (debug && propertySet) {
 			System.out.println(this.getClass().getSimpleName() + ": Set property " + propertyName +
 					" to " + propertyValue);
+		}
+	}
+
+	@Override
+	public String getProperty(String propertyName) {
+		if (propertyName.equalsIgnoreCase(KERNEL_WIDTH_PROP_NAME) ||
+				propertyName.equalsIgnoreCase(EPSILON_PROP_NAME)) {
+			return Double.toString(kernelWidth);
+		} else if (propertyName.equalsIgnoreCase(NORMALISE_PROP_NAME)) {
+			return Boolean.toString(normalise);
+		} else if (propertyName.equalsIgnoreCase(DYN_CORR_EXCL_TIME_NAME)) {
+			return Integer.toString(dynCorrExclTime);
+		} else if (propertyName.equalsIgnoreCase(FORCE_KERNEL_COMPARE_TO_ALL)) {
+			return Boolean.toString(forceCompareToAll);
+		} else {
+			// try the superclass:
+			return super.getProperty(propertyName);
 		}
 	}
 

@@ -32,7 +32,7 @@ library("rJava")
 # Create many columns in a multidimensional array (2 rows by 100 columns),
 #  where the next time step (row 2) copies the value of the column on the left
 #  from the previous time step (row 1):
-twoDTimeSeriesRtime1 <- sample(0:1, 100, replace="TRUE")
+twoDTimeSeriesRtime1 <- sample(0:1, 100, replace=TRUE)
 twoDTimeSeriesRtime2 <- c(twoDTimeSeriesRtime1[100], twoDTimeSeriesRtime1[1:99])
 twoDTimeSeriesR <- rbind(twoDTimeSeriesRtime1, twoDTimeSeriesRtime2)
 

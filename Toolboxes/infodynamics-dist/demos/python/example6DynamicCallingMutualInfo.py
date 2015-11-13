@@ -43,8 +43,8 @@ startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=" + jarLocation)
 datafile = '../data/4ColsPairedNoisyDependence-1.txt'
 # List of column numbers for univariate time seres 1 and 2:
 #  (you can select any columns you wish to be contained in each variable)
-univariateSeries1Column = 0; # array indices start from 0 in python
-univariateSeries2Column = 2;
+univariateSeries1Column = 0 # array indices start from 0 in python
+univariateSeries2Column = 2
 # List of column numbers for joint variables 1 and 2:
 #  (you can select any columns you wish to be contained in each variable)
 jointVariable1Columns = [0,1] # array indices start from 0 in python
@@ -53,7 +53,7 @@ jointVariable2Columns = [2,3]
 #  infodynamics.measures.continuous.MutualInfoCalculatorMultiVariate
 #  which we wish to use for the calculation.
 # Note that one could use any of the following calculators (try them all!):
-#  implementingClass = "infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov1" # MI(1;3) as 0.10044, MI([1,2], [3,4]) = 0.36353 (NATS not bits)
+#  implementingClass = "infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov1" # MI(0;2) as 0.10044, MI([0,1]; [2,3]) = 0.36353 (NATS not bits)
 #  implementingClass = "infodynamics.measures.continuous.kernel.MutualInfoCalculatorMultiVariateKernel"
 #  implementingClass = "infodynamics.measures.continuous.gaussian.MutualInfoCalculatorMultiVariateGaussian"
 implementingClass = "infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov1"
@@ -64,8 +64,8 @@ data = readFloatsFile.readFloatsFile(datafile)
 # As numpy array:
 A = numpy.array(data)
 # Pull out the columns from the data set for a univariate MI calculation:
-univariateSeries1 = A[:,univariateSeries1Column];
-univariateSeries2 = A[:,univariateSeries2Column];
+univariateSeries1 = A[:,univariateSeries1Column]
+univariateSeries2 = A[:,univariateSeries2Column]
 # Pull out the columns from the data set for a multivariate MI calculation:
 jointVariable1 = A[:,jointVariable1Columns]
 jointVariable2 = A[:,jointVariable2Columns]

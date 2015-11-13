@@ -3709,6 +3709,29 @@ public class MatrixUtils {
 		out.println();
 	}
 
+	public static String arrayToString(double[] array) {
+		StringBuffer sb = new StringBuffer();
+		for (int r = 0; r < array.length; r++) {
+			sb.append(array[r] + ",");
+		}
+		return sb.toString();
+	}
+
+	public static String arrayToString(int[] array) {
+		StringBuffer sb = new StringBuffer();
+		for (int r = 0; r < array.length; r++) {
+			sb.append(array[r] + ",");
+		}
+		return sb.toString();
+	}
+
+	public static void printArray(PrintStream out, int decimalPlaces, double[] array) {
+		for (int r = 0; r < array.length; r++) {
+				out.printf(String.format("%%.%df ", decimalPlaces), array[r]);
+		}
+		out.println();
+	}
+
 	public static void printArray(PrintStream out, int[] array) {
 		for (int r = 0; r < array.length; r++) {
 				out.print(array[r] + " ");

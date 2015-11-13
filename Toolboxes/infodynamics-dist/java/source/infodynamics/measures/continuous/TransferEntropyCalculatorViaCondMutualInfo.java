@@ -21,6 +21,7 @@ package infodynamics.measures.continuous;
 import infodynamics.utils.EmpiricalMeasurementDistribution;
 import infodynamics.utils.MatrixUtils;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -101,6 +102,28 @@ public class TransferEntropyCalculatorViaCondMutualInfo implements
 	 * Whether we're in debugging mode
 	 */
 	protected boolean debug = false;
+
+	/**
+	 * Storage for source observations supplied via {@link #addObservations(double[], double[])} etc.
+	 */
+	protected Vector<double[]> vectorOfSourceTimeSeries;
+
+	/**
+	 * Storage for destination observations supplied via {@link #addObservations(double[], double[])} etc.
+	 */
+	protected Vector<double[]> vectorOfDestinationTimeSeries;
+
+	/**
+	 * Storage for validity arrays for supplied source observations.
+	 * Entries are null where the whole corresponding observation time-series is valid
+	 */
+	protected Vector<boolean[]> vectorOfValidityOfSource;
+
+	/**
+	 * Storage for validity arrays for supplied destination observations.
+	 * Entries are null where the whole corresponding observation time-series is valid
+	 */
+	protected Vector<boolean[]> vectorOfValidityOfDestination;
 
 	/**
 	 * Construct a transfer entropy calculator using an instance of
@@ -199,19 +222,30 @@ public class TransferEntropyCalculatorViaCondMutualInfo implements
 		this.l_tau = l_tau;
 		this.delay = delay;
 		
-		// Now check which point we can start taking observations from in any
-		//  addObservations call. These two integers represent the last
-		//  point of the destination embedding, in the cases where the destination
-		//  embedding itself determines where we can start taking observations, or
-		//  the case where the source embedding plus delay is longer and so determines
-		//  where we can start taking observations.
+		setStartTimeForFirstDestEmbedding();
+
+		vectorOfSourceTimeSeries = null;
+		vectorOfDestinationTimeSeries = null;
+		vectorOfValidityOfSource = null;
+		vectorOfValidityOfDestination = null;
+	}
+
+	/**
+	 * Protected internal method to 
+	 * set the point at which we can start taking observations from in any
+	 * addObservations call.
+	 */
+	protected void setStartTimeForFirstDestEmbedding() {
+		// These two integers represent the last
+		// point of the destination embedding, in the cases where the destination
+		// embedding itself determines where we can start taking observations, or
+		// the case where the source embedding plus delay is longer and so determines
+		// where we can start taking observations.
 		int startTimeBasedOnDestPast = (k-1)*k_tau;
 		int startTimeBasedOnSourcePast = (l-1)*l_tau + delay - 1;
 		startTimeForFirstDestEmbedding = Math.max(startTimeBasedOnDestPast, startTimeBasedOnSourcePast);
-
-		condMiCalc.initialise(l, 1, k);
 	}
-
+	
 	/**
 	 * Sets properties for the TE calculator.
 	 *  New property values are not guaranteed to take effect until the next call
@@ -257,38 +291,60 @@ public class TransferEntropyCalculatorViaCondMutualInfo implements
 	}
 
 	@Override
+	public String getProperty(String propertyName) throws Exception {
+		if (propertyName.equalsIgnoreCase(K_PROP_NAME)) {
+			return Integer.toString(k);
+		} else if (propertyName.equalsIgnoreCase(K_TAU_PROP_NAME)) {
+			return Integer.toString(k_tau);
+		} else if (propertyName.equalsIgnoreCase(L_PROP_NAME)) {
+			return Integer.toString(l);
+		} else if (propertyName.equalsIgnoreCase(L_TAU_PROP_NAME)) {
+			return Integer.toString(l_tau);
+		} else if (propertyName.equalsIgnoreCase(DELAY_PROP_NAME)) {
+			return Integer.toString(delay);
+		} else {
+			// No property matches for this class, assume it is for the underlying
+			//  conditional MI calculator
+			return condMiCalc.getProperty(propertyName);
+		}
+	}
+	
+	@Override
 	public void setObservations(double[] source, double[] destination) throws Exception {
-		
-		if (source.length != destination.length) {
-			throw new Exception(String.format("Source and destination lengths (%d and %d) must match!",
-					source.length, destination.length));
-		}
-		if (source.length < startTimeForFirstDestEmbedding + 2) {
-			// There are no observations to add here, the time series is too short
-			throw new Exception("Not enough observations to set here given k, k_tau, l, l_tau and delay parameters");
-		}
-		double[][] currentDestPastVectors = 
-				MatrixUtils.makeDelayEmbeddingVector(destination, k, k_tau,
-						startTimeForFirstDestEmbedding,
-						destination.length - startTimeForFirstDestEmbedding - 1);
-		double[][] currentDestNextVectors =
-				MatrixUtils.makeDelayEmbeddingVector(destination, 1,
-						startTimeForFirstDestEmbedding + 1,
-						destination.length - startTimeForFirstDestEmbedding - 1);
-		double[][] currentSourcePastVectors = 
-				MatrixUtils.makeDelayEmbeddingVector(source, l, l_tau,
-						startTimeForFirstDestEmbedding + 1 - delay,
-						source.length - startTimeForFirstDestEmbedding - 1);
-		condMiCalc.setObservations(currentSourcePastVectors, currentDestNextVectors, currentDestPastVectors);
+		startAddObservations();
+		addObservations(source, destination);
+		finaliseAddObservations();
 	}
 
 	@Override
 	public void startAddObservations() {
-		condMiCalc.startAddObservations();
+		vectorOfSourceTimeSeries = new Vector<double[]>();
+		vectorOfDestinationTimeSeries = new Vector<double[]>();
+		vectorOfValidityOfSource = new Vector<boolean[]>();
+		vectorOfValidityOfDestination = new Vector<boolean[]>();
 	}
 	
 	@Override
-	public void addObservations(double[] source, double[] destination) throws Exception {
+	public void addObservations(double[] source, double[] destination)
+			throws Exception {
+		// Store these observations in our vector for now
+		vectorOfSourceTimeSeries.add(source);
+		vectorOfDestinationTimeSeries.add(destination);
+		vectorOfValidityOfSource.add(null); // All observations were valid
+		vectorOfValidityOfDestination.add(null); // All observations were valid
+	}
+
+	/**
+	 * Protected method to internally parse and submit observations through
+	 *  to the underlying conditional MI calculator once any internal parameter settings
+	 *  have been finalised (in the case of automatically determining the embedding
+	 *  parameters) 
+	 * 
+	 * @param source time series of source observations
+	 * @param destination time series of destination observations
+	 * @throws Exception
+	 */
+	protected void addObservationsAfterParamsDetermined(double[] source, double[] destination) throws Exception {
 		if (source.length != destination.length) {
 			throw new Exception(String.format("Source and destination lengths (%d and %d) must match!",
 					source.length, destination.length));
@@ -314,6 +370,37 @@ public class TransferEntropyCalculatorViaCondMutualInfo implements
 		condMiCalc.addObservations(currentSourcePastVectors, currentDestNextVectors, currentDestPastVectors);
 	}
 
+	/**
+	 * Protected method to internally parse and submit observations through
+	 *  to the underlying conditional MI calculator once any internal parameter settings
+	 *  have been finalised (in the case of automatically determining the embedding
+	 *  parameters) 
+	 * This is done given time-series of booleans indicating whether each entry
+	 *  is valid
+	 * 
+	 * @param source time series of source observations
+	 * @param destination time series of destination observations
+	 * @param sourceValid array (with indices the same as source) indicating whether
+	 * 	the source at that index is valid.
+	 * @param destValid array (with indices the same as destination) indicating whether
+	 * 	the destination at that index is valid.
+	 * @throws Exception
+	 */
+	protected void addObservationsAfterParamsDetermined(double[] source, double[] destination,
+			boolean[] sourceValid, boolean[] destValid) throws Exception {
+		
+		// Compute the start and end time pairs using our embedding parameters:
+		Vector<int[]> startAndEndTimePairs = computeStartAndEndTimePairs(sourceValid, destValid);
+		
+		for (int[] timePair : startAndEndTimePairs) {
+			int startTime = timePair[0];
+			int endTime = timePair[1];
+			addObservationsAfterParamsDetermined(
+					MatrixUtils.select(source, startTime, endTime - startTime + 1),
+					MatrixUtils.select(destination, startTime, endTime - startTime + 1));
+		}
+	}
+
 	@Override
 	public void addObservations(double[] source, double[] destination,
 			int startTime, int numTimeSteps) throws Exception {
@@ -329,8 +416,49 @@ public class TransferEntropyCalculatorViaCondMutualInfo implements
 					    MatrixUtils.select(destination, startTime, numTimeSteps));
 	}
 
+	/**
+	 * Hook in case child implementations need to perform any processing on the 
+	 *  observation time series prior to their being processed and supplied
+	 *  to the underlying MI calculator.
+	 * Primarily this is to allow the child implementation to automatically determine
+	 *  embedding parameters if desired.
+	 * Child implementations do not need to override this default empty implementation
+	 *  if no new functionality is required.
+	 */
+	protected void preFinaliseAddObservations() throws Exception {
+		// Empty implementation supplied by default.
+	}
+	
 	@Override
 	public void finaliseAddObservations() throws Exception {
+		// Auto embed if required
+		preFinaliseAddObservations();
+
+		// Initialise the conditional MI calculator, including any auto-embedding length
+		condMiCalc.initialise(l, 1, k);
+		condMiCalc.startAddObservations();
+		// Send all of the observations through:
+		Iterator<double[]> destIterator = vectorOfDestinationTimeSeries.iterator();
+		Iterator<boolean[]> sourceValidityIterator = vectorOfValidityOfSource.iterator();
+		Iterator<boolean[]> destValidityIterator = vectorOfValidityOfDestination.iterator();
+		for (double[] source : vectorOfSourceTimeSeries) {
+			double[] destination = destIterator.next();
+			boolean[] sourceValidity = sourceValidityIterator.next();
+			boolean[] destValidity = destValidityIterator.next();
+			if (sourceValidity == null) {
+				// Add the whole time-series
+				addObservationsAfterParamsDetermined(source, destination);
+			} else {
+				addObservationsAfterParamsDetermined(source, destination,
+						sourceValidity, destValidity);
+			}
+		}
+		vectorOfSourceTimeSeries = null; // No longer required
+		vectorOfDestinationTimeSeries = null; // No longer required
+		vectorOfValidityOfSource = null;
+		vectorOfValidityOfDestination = null;
+		
+		// TODO do we need to throw an exception if there are no observations to add?
 		condMiCalc.finaliseAddObservations();
 	}
 
@@ -338,15 +466,13 @@ public class TransferEntropyCalculatorViaCondMutualInfo implements
 	public void setObservations(double[] source, double[] destination,
 			boolean[] sourceValid, boolean[] destValid) throws Exception {
 		
-		Vector<int[]> startAndEndTimePairs = computeStartAndEndTimePairs(sourceValid, destValid);
-		
-		// We've found the set of start and end times for this pair
 		startAddObservations();
-		for (int[] timePair : startAndEndTimePairs) {
-			int startTime = timePair[0];
-			int endTime = timePair[1];
-			addObservations(source, destination, startTime, endTime - startTime + 1);
-		}
+		// Add these observations and the indication of their validity
+		//  for later analysis:
+		vectorOfSourceTimeSeries.add(source);
+		vectorOfDestinationTimeSeries.add(destination);
+		vectorOfValidityOfSource.add(sourceValid);
+		vectorOfValidityOfDestination.add(destValid);
 		finaliseAddObservations();
 	}
 

@@ -29,9 +29,9 @@ jarLocation = "../../infodynamics.jar"
 startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=" + jarLocation)
 
 # Generate some random binary data.
-sourceArray = [random.randint(0,1) for r in xrange(100)]
-destArray = [0] + sourceArray[0:99];
-sourceArray2 = [random.randint(0,1) for r in xrange(100)]
+sourceArray = [random.randint(0,1) for r in range(100)]
+destArray = [0] + sourceArray[0:99]
+sourceArray2 = [random.randint(0,1) for r in range(100)]
 
 # Create a TE calculator and run it:
 teCalcClass = JPackage("infodynamics.measures.discrete").TransferEntropyCalculatorDiscrete

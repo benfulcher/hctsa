@@ -119,6 +119,7 @@ public class MultiInfoTester extends MultiInfoAbstractTester {
 			// No longer need to set this property as it's set by default:
 			//miCalc.setProperty(MutualInfoCalculatorMultiVariateKraskov.PROP_NORM_TYPE,
 			//		EuclideanUtils.NORM_MAX_NORM_STRING);
+			miCalc.setProperty(MultiInfoCalculatorKraskov.PROP_ADD_NOISE, "0"); // Need consistency of results for unit test
 			miCalc.initialise(data[0].length);
 			miCalc.setObservations(data);
 			miCalc.setDebug(true);

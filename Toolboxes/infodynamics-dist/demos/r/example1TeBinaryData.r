@@ -30,9 +30,9 @@ library("rJava")
 .jaddClassPath("../../infodynamics.jar")
 
 # Generate some random binary data:
-sourceArray<-sample(0:1, 100, replace="TRUE")
+sourceArray<-sample(0:1, 100, replace=TRUE)
 destArray<-c(0L, sourceArray[1:99]); # Need 0L to keep as integer array
-sourceArray2<-sample(0:1, 100, replace="TRUE")
+sourceArray2<-sample(0:1, 100, replace=TRUE)
 
 # Create a TE calculator and run it:
 teCalc<-.jnew("infodynamics/measures/discrete/TransferEntropyCalculatorDiscrete", 2L, 1L)

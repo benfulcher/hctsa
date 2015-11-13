@@ -688,6 +688,25 @@ public class MutualInfoCalculatorMultiVariateKernel
 		}
 	}
 
+	@Override
+	public String getProperty(String propertyName)
+			throws Exception {
+		
+		if (propertyName.equalsIgnoreCase(KERNEL_WIDTH_PROP_NAME) ||
+				propertyName.equalsIgnoreCase(EPSILON_PROP_NAME)) {
+			return Double.toString(kernelWidth);
+		} else if (propertyName.equalsIgnoreCase(NORMALISE_PROP_NAME)) {
+			return Boolean.toString(normalise);
+		} else if (propertyName.equalsIgnoreCase(DYN_CORR_EXCL_TIME_NAME)) {
+			return Integer.toString(dynCorrExclTime);
+		} else if (propertyName.equalsIgnoreCase(FORCE_KERNEL_COMPARE_TO_ALL)) {
+			return Boolean.toString(forceCompareToAll);
+		} else {
+			// try the superclass:
+			return super.getProperty(propertyName);
+		}
+	}
+
 	/**
 	 * 
 	 * @return the kernel width in use in the calculator

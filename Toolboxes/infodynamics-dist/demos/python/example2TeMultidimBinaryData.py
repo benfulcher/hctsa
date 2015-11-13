@@ -31,17 +31,17 @@ jarLocation = "../../infodynamics.jar"
 startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=" + jarLocation)
 
 # Create many columns in a multidimensional array, e.g. for fully random values:
-# twoDTimeSeriesOctave = [[random.randint(0,1) for y in xrange(2)] for x in xrange(10)] # for 10 rows (time-steps) for 2 variables
+# twoDTimeSeriesOctave = [[random.randint(0,1) for y in range(2)] for x in range(10)] # for 10 rows (time-steps) for 2 variables
 
 # However here we want 2 rows by 100 columns where the next time step (row 2) is to copy the
 # value of the column on the left from the previous time step (row 1):
 numObservations = 100
-row1 = [random.randint(0,1) for r in xrange(numObservations)]
+row1 = [random.randint(0,1) for r in range(numObservations)]
 row2 = [row1[numObservations-1]] + row1[0:numObservations-1] # Copy the previous row, offset one column to the right
 twoDTimeSeriesPython = []
 twoDTimeSeriesPython.append(row1)
 twoDTimeSeriesPython.append(row2)
-twoDTimeSeriesJavaInt = JArray(JInt, 2)(twoDTimeSeriesPython); # 2 indicating 2D array
+twoDTimeSeriesJavaInt = JArray(JInt, 2)(twoDTimeSeriesPython) # 2 indicating 2D array
 
 # Create a TE calculator and run it:
 teCalcClass = JPackage("infodynamics.measures.discrete").TransferEntropyCalculatorDiscrete

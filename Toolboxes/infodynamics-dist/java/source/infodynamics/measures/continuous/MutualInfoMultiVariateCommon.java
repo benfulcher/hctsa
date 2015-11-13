@@ -175,6 +175,18 @@ public abstract class MutualInfoMultiVariateCommon implements
 		}
 	}
 
+	@Override
+	public String getProperty(String propertyName)
+			throws Exception {
+		
+		if (propertyName.equalsIgnoreCase(PROP_TIME_DIFF)) {
+			return Integer.toString(timeDiff);
+		} else {
+			// No property was recognised here
+			return null;
+		}
+	}
+
 	public void setObservations(double[][] source, double[][] destination) throws Exception {
 		startAddObservations();
 		addObservations(source, destination);

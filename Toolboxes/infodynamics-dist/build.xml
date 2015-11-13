@@ -5,7 +5,7 @@
 	</description>
 	
 	<!-- set global properties for this build -->
-	<property name="version" value="1.2.1"/>
+	<property name="version" value="1.3"/>
 	<property name="mainfilename" value="infodynamics"/>
 	<property name="jarplainname" value="${mainfilename}.jar" />
 	<property name="jarversiondistnamezip" value="${mainfilename}-jar-${version}.zip" />
@@ -116,6 +116,12 @@
 		<delete file="${jarversiondistnamezip}"/>
 		<delete file="${distnamezip}"/>
 		<delete file="${jarplainname}"/>
+		<delete>
+			 <fileset dir="demos/AutoAnalyser" includes="GeneratedCalculator.*"/>
+		</delete>
+		<delete>
+			 <fileset dir="demos/java/infodynamics/demos/autoanalysis" includes="GeneratedCalculator.*"/>
+		</delete>
 		<!-- Don't delete the readme and version files - the user may not have the template to recreate them from -->
 	</target>
 	
@@ -191,6 +197,7 @@
 			<zipfileset dir="javadocs" includes="**/*.*,**/*" prefix="javadocs"/>
 			<zipfileset dir="notices" includes="**/*.*,**/*" prefix="notices"/>
 			<zipfileset dir="tutorial" prefix="tutorial"/>
+			<zipfileset dir="web" includes="JIDT-logo.png" prefix=""/>
 		</zip>
 	</target>
 </project>

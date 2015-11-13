@@ -24,10 +24,10 @@ def readIntsFile(filename):
 	    for line in f: # read all lines
 	    	if (line.startswith("%") or line.startswith("#")):
 	    		# Assume this is a comment line
-	    		continue;
+	    		continue
 	    	if (len(line.split()) == 0):
 	    		# Line is empty
-	    		continue;
+	    		continue
 		array.append([int(x) for x in line.split()])
 	    return array
     

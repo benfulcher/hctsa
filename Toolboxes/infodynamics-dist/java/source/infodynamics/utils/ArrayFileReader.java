@@ -135,7 +135,9 @@ public class ArrayFileReader {
 		int[][] values = new int[rows][columns];
 		
 		int r = 0;
+		int lineNum = 0;
 		for (String line = br.readLine(); line != null; line = br.readLine()) {
+			lineNum++;
 			// Strip leading whitespace
 			line = line.replaceFirst("^[ \t]*", "");
 			if (line.startsWith("#") || line.startsWith("%")) {
@@ -154,7 +156,13 @@ public class ArrayFileReader {
 					// Got a non-empty entity
 					// Not checking array bounds since this
 					//  was already checked by openArrayFile().
-					values[r][c] = Integer.parseInt(stringValues[i]);
+					try {
+						values[r][c] = Integer.parseInt(stringValues[i]);
+					} catch (NumberFormatException nfe) {
+						throw new NumberFormatException("Illegal format for integer: " +
+								nfe.getMessage() + "; at line " + lineNum +
+								" of the input file, " + (c+1) + "th number on the line");
+					}
 					c++;
 				}
 			}

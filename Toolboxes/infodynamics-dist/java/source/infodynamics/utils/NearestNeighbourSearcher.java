@@ -121,6 +121,22 @@ public abstract class NearestNeighbourSearcher {
 	}
 	
 	/**
+	 * 
+	 * @return the norm type in use
+	 */
+	public int getNormType() {
+		return normTypeToUse;
+	}
+	
+	/**
+	 * 
+	 * @return the norm type in use as a String
+	 */
+	public String getNormTypeAsString() {
+		return convertNormTypeToString(normTypeToUse);
+	}
+	
+	/**
 	 * Validate whether a specified norm type is supported,
 	 *  and return the int corresponding to that type,
 	 *  otherwise through an exception.
@@ -148,6 +164,24 @@ public abstract class NearestNeighbourSearcher {
 		}
 		throw new UnsupportedOperationException("Norm type " + normType +
 				" is not supported in NearestNeighbourSearcher");
+	}
+	
+	/**
+	 * @param an identifier for a norm type
+	 * @return representation of that norm type as a String
+	 */
+	public static String convertNormTypeToString(int normType) {
+		if (normType == EuclideanUtils.NORM_EUCLIDEAN_SQUARED) {
+			return EuclideanUtils.NORM_EUCLIDEAN_SQUARED_STRING;
+		} else if (normType == EuclideanUtils.NORM_EUCLIDEAN) {
+			return EuclideanUtils.NORM_EUCLIDEAN_STRING;
+		} else if (normType == EuclideanUtils.NORM_MAX_NORM) {
+			return EuclideanUtils.NORM_MAX_NORM_STRING;
+		}
+		// Execution should never reach this point as we control
+		//  what normTypeToUse gets set to; it might be possible though
+		//  if a child class mis-handles the value
+		throw new Error("normTypeToUse set to an invalid value: " + normType);
 	}
 	
 	/**

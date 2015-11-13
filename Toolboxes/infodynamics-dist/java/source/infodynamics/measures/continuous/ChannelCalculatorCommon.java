@@ -101,6 +101,21 @@ public abstract interface ChannelCalculatorCommon {
 	public void setProperty(String propertyName, String propertyValue) throws Exception;
 
 	/**
+	 * Get current property values for the calculator.
+	 * 
+	 * <p>Valid property names, and what their
+	 * values should represent, are the same as those for
+	 * {@link #setProperty(String, String)}</p>
+	 * 
+	 * <p>Unknown property values are responded to with a null return value.</p>
+	 * 
+	 * @param propertyName name of the property
+	 * @return current value of the property
+	 * @throws Exception for invalid property values
+	 */
+	public String getProperty(String propertyName) throws Exception;
+	
+	/**
 	 * Signal that we will add in the samples for computing the PDF 
 	 * from several disjoint time-series or trials via calls to
 	 * "addObservations" rather than "setObservations" type methods

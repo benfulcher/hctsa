@@ -28,10 +28,10 @@
 %
 %
 % Inputs
-% - kHistory - destination embedding length
-% - lHistory - source embedding length
+% - kHistory - destination embedding length, or "auto" for an auto-embedding (Ragwitz criteria, which takes a minute or two to run)
+% - lHistory - source embedding length, or "auto" for an auto-embedding (Ragwitz criteria, which takes a minute or two to run)
 % - knns - a scalar specifying a single, or vector specifying multiple, value of K nearest neighbours to evaluate TE (Kraskov) with.
-% - numSurrogates - a scalar specifying the number of surrogates to evaluate TE from null distribution
+% - numSurrogates - a scalar specifying the number of surrogates to evaluate TE from null distribution (which further multiplies the runtime)
 % Outputs
 % - teHeartToBreath - TE (heart -> breath) for each value of k nearest neighbours
 % - teBreathToHeart - TE (breath -> heart) for each value of k nearest neighbours
@@ -67,17 +67,44 @@ function [teHeartToBreath, teBreathToHeart] = runHeartBreathRateKraskov(kHistory
 
 	% Using a KSG estimator for TE is the least biased way to run this:
 	teCalc=javaObject('infodynamics.measures.continuous.kraskov.TransferEntropyCalculatorKraskov');
+	% Set up for any potential auto-embedding:
+	if (ischar(kHistory)) % Assume == 'auto'
+		% we're auto-embedding at least the destination:
+		if (ischar(lHistory)) % Assume == 'auto'
+			% we're auto embedding both source and destination
+			teCalc.setProperty(teCalc.PROP_AUTO_EMBED_METHOD, ...
+		                teCalc.AUTO_EMBED_METHOD_RAGWITZ);
+		else
+			% we're auto embedding destination only
+			teCalc.setProperty(teCalc.PROP_AUTO_EMBED_METHOD, ...
+		                teCalc.AUTO_EMBED_METHOD_RAGWITZ_DEST_ONLY);
+		end
+		teCalc.setProperty(teCalc.PROP_K_SEARCH_MAX, '10');
+		teCalc.setProperty(teCalc.PROP_TAU_SEARCH_MAX, '5');
+	end
 
 	for knnIndex = 1:length(knns)
 		knn = knns(knnIndex);
 		% Compute a TE value for knn nearest neighbours
 				
 		% Perform calculation for heart -> breath (lag 1)
-		teCalc.initialise(kHistory,1,lHistory,1,1);
+		if (ischar(kHistory)) % Assume == 'auto'
+			% we're auto-embedding at least the destination:
+			teCalc.initialise();
+		else
+			% We're not auto embedding
+			teCalc.initialise(kHistory,1,lHistory,1,1);
+		end
 		teCalc.setProperty('k', sprintf('%d',knn));
 		teCalc.setObservations(octaveToJavaDoubleArray(heart), ...
 					octaveToJavaDoubleArray(chestVol));
 		teHeartToBreath(knnIndex) = teCalc.computeAverageLocalOfObservations();
+		% Grab the embedding parameters (in case of auto-embedding), converting from Java to native strings
+		kUsedHB = char(teCalc.getProperty(teCalc.K_PROP_NAME));
+		kTauUsedHB = char(teCalc.getProperty(teCalc.K_TAU_PROP_NAME));
+		lUsedHB = char(teCalc.getProperty(teCalc.L_PROP_NAME));
+		lTauUsedHB = char(teCalc.getProperty(teCalc.L_TAU_PROP_NAME));
+		% And compare to surrogates if required
 		if (numSurrogates > 0)
 			teHeartToBreathNullDist = teCalc.computeSignificance(numSurrogates);
 			teHeartToBreathNullMean = teHeartToBreathNullDist.getMeanOfDistribution();
@@ -85,22 +112,34 @@ function [teHeartToBreath, teBreathToHeart] = runHeartBreathRateKraskov(kHistory
 		end
 		
 		% Perform calculation for breath -> heart (lag 1)
-		teCalc.initialise(kHistory,1,lHistory,1,1);
+		if (ischar(kHistory)) % Assume == 'auto'
+			% we're auto-embedding at least the destination:
+			teCalc.initialise();
+		else
+			% We're not auto embedding
+			teCalc.initialise(kHistory,1,lHistory,1,1);
+		end
 		teCalc.setProperty('k', sprintf('%d',knn));
 		teCalc.setObservations(octaveToJavaDoubleArray(chestVol), ...
 					octaveToJavaDoubleArray(heart));
 		teBreathToHeart(knnIndex) = teCalc.computeAverageLocalOfObservations();
+		% Grab the embedding parameters (in case of auto-embedding)
+		kUsedBH = char(teCalc.getProperty(teCalc.K_PROP_NAME));
+		kTauUsedBH = char(teCalc.getProperty(teCalc.K_TAU_PROP_NAME));
+		lUsedBH = char(teCalc.getProperty(teCalc.L_PROP_NAME));
+		lTauUsedBH = char(teCalc.getProperty(teCalc.L_TAU_PROP_NAME));
+		% And compare to surrogates if required
 		if (numSurrogates > 0)
 			teBreathToHeartNullDist = teCalc.computeSignificance(numSurrogates);
 			teBreathToHeartNullMean = teBreathToHeartNullDist.getMeanOfDistribution();
 			teBreathToHeartNullStd = teBreathToHeartNullDist.getStdOfDistribution();
 		end
 		
-		fprintf('TE(k=%d,l=%d,knn=%d): h->b = %.3f', kHistory, lHistory, knn, teHeartToBreath(knnIndex));
+		fprintf('TE(k=%s,kTau=%s,l=%s,lTau=%s,knn=%d): h->b = %.3f', kUsedHB, kTauUsedHB, lUsedHB, lTauUsedHB, knn, teHeartToBreath(knnIndex));
 		if (numSurrogates > 0)
 			fprintf(' (null = %.3f +/- %.3f)', teHeartToBreathNullMean, teHeartToBreathNullStd);
 		end
-		fprintf(', b->h = %.3f nats', teBreathToHeart(knnIndex));
+		fprintf('; TE(k=%s,kTau=%s,l=%s,lTau=%s,knn=%d): b->h = %.3f nats', kUsedBH, kTauUsedBH, lUsedBH, lTauUsedBH, knn, teBreathToHeart(knnIndex));
 		if (numSurrogates > 0)
 			fprintf('(null = %.3f +/- %.3f)\n', teBreathToHeartNullMean, teBreathToHeartNullStd);
 		else

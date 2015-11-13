@@ -753,12 +753,15 @@ public abstract class InterregionalChannelMeasure {
 	 * A simple method to evaluate the interregional channel measure 
 	 *  for a given pair of files.
 	 * 
-	 * @param args first arg is a property filename
+	 * @param args first arg is a property filename,
+	 *  second and third (optional) are the source and target
+	 *  data files (if they are not supplied on command line
+	 *  they must be named in the properties file)
 	 */
 	public static void main(String[] args) throws Exception {
 		
 		if (args.length < 1) {
-			System.err.println("Usage: InterregionalChannelMeasure <propsFile>");
+			System.err.println("Usage: InterregionalChannelMeasure <propsFile> [<dataFile1> <dataFile2>]");
 			return;
 		}
 		String propertiesFilename = args[0];
@@ -771,9 +774,18 @@ public abstract class InterregionalChannelMeasure {
 
 		// Load in the data
 		// for the one region pair
-		ArrayFileReader afr1 = new ArrayFileReader(props.getStringProperty(PROP_DIRECT_FILE1));
+		ArrayFileReader afr1, afr2;
+		if (args.length < 3) {
+			// Names of *both* data files were not supplied
+			//  on command line
+			afr1 = new ArrayFileReader(props.getStringProperty(PROP_DIRECT_FILE1));
+			afr2 = new ArrayFileReader(props.getStringProperty(PROP_DIRECT_FILE2));
+		} else {
+			// Names of the data files were suppied on command line: 
+			afr1 = new ArrayFileReader(args[1]);
+			afr2 = new ArrayFileReader(args[2]);
+		}
 		double[][] region1 = afr1.getDouble2DMatrix();
-		ArrayFileReader afr2 = new ArrayFileReader(props.getStringProperty(PROP_DIRECT_FILE2));
 		double[][] region2 = afr2.getDouble2DMatrix();
 
 		interregionalCalculator.initialise(props);

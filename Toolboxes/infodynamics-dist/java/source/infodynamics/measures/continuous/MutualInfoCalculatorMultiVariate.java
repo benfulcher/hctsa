@@ -102,4 +102,19 @@ public interface MutualInfoCalculatorMultiVariate extends ChannelCalculatorMulti
 	 * @throws Exception
 	 */
 	public double computeAverageLocalOfObservations(int[] newOrdering) throws Exception;
+
+	/**
+	 * Get current the value for a given property for the calculator.
+	 * 
+	 * <p>Valid property names, and what their
+	 * values should represent, are the same as those for
+	 * {@link #setProperty(String, String)}</p>
+	 * 
+	 * <p>Unknown property values are responded to with a null return value.</p>
+	 * 
+	 * @param propertyName name of the property
+	 * @return current value of the property
+	 * @throws Exception for invalid property values
+	 */
+	public String getProperty(String propertyName) throws Exception;
 }

@@ -59,13 +59,14 @@ function [miHeartToBreath] = runHeartBreathRateKraskovMI()
 	fprintf('MI for heart rate <-> breath rate for Kraskov estimation with %d samples:\n', timeSteps);
 
 	% Using a KSG estimator for MI is the least biased way to run this:
-	miCalc = javaObject('infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov2');
+	miCalc=javaObject('infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov2');
 
 	% Compute an MI value between heart and breath
 	
 	miCalc.initialise(1,1); % univariate calculation
 	miCalc.setProperty('k', '4'); % 4 nearest neighbours for KSG estimator
-	miCalc.setObservations(octaveToJavaDoubleArray(heart),octaveToJavaDoubleArray(chestVol));
+	miCalc.setObservations(octaveToJavaDoubleArray(heart), ...
+				octaveToJavaDoubleArray(chestVol));
 	miHeartToBreath = miCalc.computeAverageLocalOfObservations();
 	fprintf('MI: = %.3f nats\n', miHeartToBreath);
 		

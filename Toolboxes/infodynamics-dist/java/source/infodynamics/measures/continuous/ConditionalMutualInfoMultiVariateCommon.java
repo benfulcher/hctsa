@@ -176,6 +176,16 @@ public abstract class ConditionalMutualInfoMultiVariateCommon implements
 	}
 
 	@Override
+	public String getProperty(String propertyName) {
+		if (propertyName.equalsIgnoreCase(PROP_NORMALISE)) {
+			return Boolean.toString(normalise);
+		} else {
+			// No property matches for this class
+			return null;
+		}
+	}
+
+	@Override
 	public void setObservations(double[][] var1, double[][] var2,
 			double[][] cond) throws Exception {
 		startAddObservations();

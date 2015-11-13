@@ -150,6 +150,11 @@ public class ActiveInfoStorageCalculatorKernelDirect
 		}
 	}
 
+	public String getProperty(String propertyName) {
+		// Only implementing this for compiling, it's not required for this test class
+		return null;
+	}
+	
 	/**
 	 * Flag that the observations are complete, probability distribution functions can now be built.
 	 *

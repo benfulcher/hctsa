@@ -31,8 +31,8 @@ startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=" + jarLocation)
 
 # Generate some random binary data.
 numObservations = 100
-sourceArray = [[random.randint(0,1) for y in xrange(2)] for x in xrange(numObservations)] # for 10 rows (time-steps) for 2 variables
-sourceArray2= [[random.randint(0,1) for y in xrange(2)] for x in xrange(numObservations)] # for 10 rows (time-steps) for 2 variables
+sourceArray = [[random.randint(0,1) for y in range(2)] for x in range(numObservations)] # for 10 rows (time-steps) for 2 variables
+sourceArray2= [[random.randint(0,1) for y in range(2)] for x in range(numObservations)] # for 10 rows (time-steps) for 2 variables
 # Destination variable takes a copy of the first bit of the source in bit 1,
 #  and an XOR of the two bits of the source in bit 2:
 destArray = [[0, 0]]

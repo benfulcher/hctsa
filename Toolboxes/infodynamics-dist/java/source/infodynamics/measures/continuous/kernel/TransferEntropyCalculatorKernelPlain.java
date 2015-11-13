@@ -171,6 +171,20 @@ public class TransferEntropyCalculatorKernelPlain
 		}
 	}
 
+	@Override
+	public String getProperty(String propertyName) {
+		if (propertyName.equalsIgnoreCase(EPSILON_PROP_NAME)) {
+			return Double.toString(epsilon);
+		} else if (propertyName.equalsIgnoreCase(NORMALISE_PROP_NAME)) {
+			return Boolean.toString(normalise);
+		} else if (propertyName.equalsIgnoreCase(DYN_CORR_EXCL_TIME_NAME)) {
+			return Integer.toString(dynCorrExclTime);
+		} else {
+			// try the superclass:
+			return super.getProperty(propertyName);
+		}
+	}
+
 	/**
 	 * Flag that the observations are complete, probability distribution functions can now be built.
 	 *

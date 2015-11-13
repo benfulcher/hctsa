@@ -151,6 +151,21 @@ public interface ActiveInfoStorageCalculator {
 	public void setProperty(String propertyName, String propertyValue) throws Exception;
 
 	/**
+	 * Get current property values for the calculator.
+	 * 
+	 * <p>Valid property names, and what their
+	 * values should represent, are the same as those for
+	 * {@link #setProperty(String, String)}</p>
+	 * 
+	 * <p>Unknown property values are responded to with a null return value.</p>
+	 * 
+	 * @param propertyName name of the property
+	 * @return current value of the property
+	 * @throws Exception for invalid property values
+	 */
+	public String getProperty(String propertyName) throws Exception;
+	
+	/**
 	 * Sets a single time-series from which to compute the PDF for the AIS.
 	 * Cannot be called in conjunction with other methods for setting/adding
 	 * observations.

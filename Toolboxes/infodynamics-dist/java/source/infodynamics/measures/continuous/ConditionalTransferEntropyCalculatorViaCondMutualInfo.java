@@ -367,6 +367,31 @@ public class ConditionalTransferEntropyCalculatorViaCondMutualInfo implements
 		}
 	}
 	
+	@Override
+	public String getProperty(String propertyName) throws Exception {
+		if (propertyName.equalsIgnoreCase(K_PROP_NAME)) {
+			return Integer.toString(k);
+		} else if (propertyName.equalsIgnoreCase(K_TAU_PROP_NAME)) {
+			return Integer.toString(k_tau);
+		} else if (propertyName.equalsIgnoreCase(L_PROP_NAME)) {
+			return Integer.toString(l);
+		} else if (propertyName.equalsIgnoreCase(L_TAU_PROP_NAME)) {
+			return Integer.toString(l_tau);
+		} else if (propertyName.equalsIgnoreCase(DELAY_PROP_NAME)) {
+			return Integer.toString(delay);
+		} else if (propertyName.equalsIgnoreCase(COND_EMBED_LENGTHS_PROP_NAME)) {
+			return MatrixUtils.arrayToString(condEmbedDims);
+		} else if (propertyName.equalsIgnoreCase(COND_EMBED_DELAYS_PROP_NAME)) {
+			return MatrixUtils.arrayToString(cond_taus);
+		} else if (propertyName.equalsIgnoreCase(COND_DELAYS_PROP_NAME)) {
+			return MatrixUtils.arrayToString(condDelays);
+		} else {
+			// No property matches for this class, assume it is for the underlying
+			//  conditional MI calculator
+			return condMiCalc.getProperty(propertyName);
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see infodynamics.measures.continuous.ConditionalTransferEntropyCalculator#setObservations(double[], double[], double[][])
 	 */

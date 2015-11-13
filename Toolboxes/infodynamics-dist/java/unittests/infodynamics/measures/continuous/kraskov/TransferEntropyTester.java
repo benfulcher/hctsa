@@ -18,6 +18,8 @@
 
 package infodynamics.measures.continuous.kraskov;
 
+import java.util.Arrays;
+
 import infodynamics.utils.ArrayFileReader;
 import infodynamics.utils.MatrixUtils;
 
@@ -106,6 +108,8 @@ public class TransferEntropyTester
 		// We already normalised above, and this will do a different
 		//  normalisation without taking the extra values in to account if we did it
 		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_NORMALISE, "false");
+		// Need consistency for unit tests:
+		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_ADD_NOISE, "0");
 		
 		teCalc.initialise(1);
 		teCalc.setObservations(col0, col1);
@@ -256,6 +260,8 @@ public class TransferEntropyTester
 		// We already normalised above, and this will do a different
 		//  normalisation without taking the extra values in to account if we did it
 		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_NORMALISE, "false");
+		// Need consistency for unit tests:
+		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_ADD_NOISE, "0");
 
 		System.out.printf("Kraskov TE comparison 2 to TRENTOOL - univariate random data 1 (col 0->1)");
 		teCalc.initialise(1);
@@ -344,6 +350,8 @@ public class TransferEntropyTester
 		// We already normalised above, and this will do a different
 		//  normalisation without taking the extra values in to account if we did it
 		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_NORMALISE, "false");
+		// Need consistency for unit tests:
+		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_ADD_NOISE, "0");
 
 		System.out.println("Kraskov Cond MI as TE - multivariate coupled data 1, k=2,l=2");
 		System.out.println("  (0->2)");
@@ -394,5 +402,139 @@ public class TransferEntropyTester
 		result = teCalc.computeAverageLocalOfObservations();
 		System.out.printf(" %.5f\n", result);
 		assertEquals(expectedFromTRENTOOL1to2_k1l1, result, 0.000001);
+	}
+	
+	public void testAutoEmbeddingRagwitz() throws Exception {
+		ArrayFileReader afr = new ArrayFileReader("demos/data/SFI-heartRate_breathVol_bloodOx.txt");
+		double[][] data = afr.getDouble2DMatrix();
+		// Select data points 2350:3550
+		data = MatrixUtils.selectRows(data, 2349, 3550-2350+1);
+
+		TransferEntropyCalculatorKraskov teCalc = new TransferEntropyCalculatorKraskov();
+		// teCalc.setDebug(true);
+		
+		// Use one thread to test first:
+		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_NUM_THREADS, "1");
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_AUTO_EMBED_METHOD,
+				TransferEntropyCalculatorKraskov.AUTO_EMBED_METHOD_RAGWITZ); // Embed both source and target
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_K_SEARCH_MAX, "6");
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_TAU_SEARCH_MAX, "4");
+		// Need consistency for unit tests:
+		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_ADD_NOISE, "0");
+		teCalc.initialise();
+		teCalc.setObservations(MatrixUtils.selectColumn(data, 0), MatrixUtils.selectColumn(data, 1));
+		int optimisedK = Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.K_PROP_NAME));
+		int optimisedKTau = Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.K_TAU_PROP_NAME));
+		int optimisedL = Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.L_PROP_NAME));
+		int optimisedLTau = Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.L_TAU_PROP_NAME));
+		double teOptimisedSingleThread = teCalc.computeAverageLocalOfObservations();
+		System.out.println("TE was " + teOptimisedSingleThread + " for k=" + optimisedK +
+				",k_tau=" + optimisedKTau + ",l=" + optimisedL + ",l_tau=" + optimisedLTau +
+				" optimised over kNNs=" +
+				teCalc.getProperty(TransferEntropyCalculatorKraskov.PROP_RAGWITZ_NUM_NNS));
+		
+		// Test that the answer was k=5, k_tau=1, l=2, l_tau=1 for this data set
+		//  (I've not checked this anywhere else, just making sure our result stays stable)
+		assertEquals(5, optimisedK);
+		assertEquals(1, optimisedKTau);
+		assertEquals(2, optimisedL);
+		assertEquals(1, optimisedLTau);
+		// Test that kNNs are equal to that used by the MI calculator when we have not set this
+		assertEquals(teCalc.getProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_K),
+				teCalc.getProperty(TransferEntropyCalculatorKraskov.PROP_RAGWITZ_NUM_NNS));
+		
+		// Test that we get the same answer by a multi-threaded approach
+		// Use one thread to test first:
+		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_NUM_THREADS, 
+				ConditionalMutualInfoCalculatorMultiVariateKraskov.USE_ALL_THREADS);
+		teCalc.initialise();
+		teCalc.setObservations(MatrixUtils.selectColumn(data, 0), MatrixUtils.selectColumn(data, 1));
+		double teOptimisedMultiThread = teCalc.computeAverageLocalOfObservations();
+		assertEquals(teOptimisedSingleThread, teOptimisedMultiThread, 0.00000001);
+		System.out.println("Answer unchanged by multi-threading");
+
+		// Test that optimisation looks the same if source and target swapped
+		teCalc.initialise();
+		teCalc.setObservations(MatrixUtils.selectColumn(data, 1), MatrixUtils.selectColumn(data, 0));
+		assertEquals(teOptimisedSingleThread, teOptimisedMultiThread, 0.00000001);
+		int optimisedSwappedK = Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.K_PROP_NAME));
+		int optimisedSwappedKTau = Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.K_TAU_PROP_NAME));
+		int optimisedSwappedL = Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.L_PROP_NAME));
+		int optimisedSwappedLTau = Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.L_TAU_PROP_NAME));
+		assertEquals(optimisedK, optimisedSwappedL);
+		assertEquals(optimisedKTau, optimisedSwappedLTau);
+		assertEquals(optimisedL, optimisedSwappedK);
+		assertEquals(optimisedLTau, optimisedSwappedKTau);
+		System.out.println("Ragwitz auto-embedding for source and destination swaps around when we swap source and target");
+
+		// Test that we can turn optimisation off now and we can hard code the parameters:
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_AUTO_EMBED_METHOD,
+				TransferEntropyCalculatorKraskov.AUTO_EMBED_METHOD_NONE); // No auto embedding
+		teCalc.initialise(2, 2, 2, 2, 2);
+		teCalc.setObservations(MatrixUtils.selectColumn(data, 0), MatrixUtils.selectColumn(data, 1));
+		double teDifferentParams = teCalc.computeAverageLocalOfObservations();
+		assertFalse(teDifferentParams == teOptimisedSingleThread);
+		assertEquals(2, Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.K_PROP_NAME)));
+		assertEquals(2, Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.K_TAU_PROP_NAME)));
+		assertEquals(2, Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.L_PROP_NAME)));
+		assertEquals(2, Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.L_TAU_PROP_NAME)));
+		System.out.printf("Auto-embedding goes away when we request no auto embedding (result now  TE(k=%d,k_tau=%d,l=%d,l_tau=%d,u=%d)=%.3f)\n",
+				2, 2, 2, 2, 2, teDifferentParams);
+
+		// Test that we get the same answer by setting these parameters
+		teCalc = new TransferEntropyCalculatorKraskov();
+		// Need consistency for unit tests:
+		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_ADD_NOISE, "0");
+		teCalc.initialise(optimisedK, optimisedKTau, optimisedL, optimisedLTau, 1);
+		teCalc.setObservations(MatrixUtils.selectColumn(data, 0), MatrixUtils.selectColumn(data, 1));
+		double teManual = teCalc.computeAverageLocalOfObservations();
+		assertEquals(teOptimisedSingleThread, teManual, 0.00000001);
+		System.out.println("Result stable to hard-coding auto-embedded parameters");
+		
+		// Test optimising destination only
+		teCalc.initialise();
+		// auto embed destination only
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_AUTO_EMBED_METHOD,
+				TransferEntropyCalculatorKraskov.AUTO_EMBED_METHOD_RAGWITZ_DEST_ONLY);
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_K_SEARCH_MAX, "5");
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_TAU_SEARCH_MAX, "5");
+		// Explicitly set the source embedding params
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.L_PROP_NAME, "1");
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.L_TAU_PROP_NAME, "1");
+		teCalc.setObservations(MatrixUtils.selectColumn(data, 0), MatrixUtils.selectColumn(data, 1));
+		double teOptimisedDestOnly = teCalc.computeAverageLocalOfObservations();
+		assertFalse(teOptimisedDestOnly == teOptimisedSingleThread);
+		assertEquals(optimisedK, Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.K_PROP_NAME)));
+		assertEquals(optimisedKTau, Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.K_TAU_PROP_NAME)));
+		assertEquals(1, Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.L_PROP_NAME)));
+		assertEquals(1, Integer.parseInt(teCalc.getProperty(TransferEntropyCalculatorKraskov.L_TAU_PROP_NAME)));
+		System.out.printf("Auto-embedding for dest only does not embed the source (result now  TE(k=%d,k_tau=%d,l=%d,l_tau=%d,u=%d)=%.3f)\n",
+				optimisedK, optimisedKTau, 1, 1, 1, teOptimisedDestOnly);
+
+		// Finally, test that we can use a different number of kNNs to the MI calculator
+		teCalc.initialise();
+		// auto embed source and destination:
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_AUTO_EMBED_METHOD,
+				TransferEntropyCalculatorKraskov.AUTO_EMBED_METHOD_RAGWITZ);
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_RAGWITZ_NUM_NNS, "8");
+		teCalc.setObservations(MatrixUtils.selectColumn(data, 0), MatrixUtils.selectColumn(data, 1));
+
+		// TODO what happens with method to select start and end times if we 
+		// have not selected embedding parameters yet???
+		teCalc = new TransferEntropyCalculatorKraskov();
+		// Need consistency for unit tests:
+		teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_ADD_NOISE, "0");
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_AUTO_EMBED_METHOD,
+				TransferEntropyCalculatorKraskov.AUTO_EMBED_METHOD_RAGWITZ);
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_K_SEARCH_MAX, "5");
+		teCalc.setProperty(TransferEntropyCalculatorKraskov.PROP_TAU_SEARCH_MAX, "5");
+		teCalc.initialise();
+		boolean[] validity = new boolean[data.length];
+		Arrays.fill(validity, true);
+		teCalc.setObservations(MatrixUtils.selectColumn(data, 0), MatrixUtils.selectColumn(data, 1),
+				validity, validity);
+		double teOptimisedWithValidity = teCalc.computeAverageLocalOfObservations();
+		assertEquals(teOptimisedSingleThread, teOptimisedWithValidity, 0.00000001);
+		System.out.println("Answer unchanged by setting validity");
 	}
 }

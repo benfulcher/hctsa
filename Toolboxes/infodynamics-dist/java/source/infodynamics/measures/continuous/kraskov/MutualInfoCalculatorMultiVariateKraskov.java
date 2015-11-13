@@ -19,6 +19,7 @@
 package infodynamics.measures.continuous.kraskov;
 
 import java.util.Calendar;
+import java.util.PriorityQueue;
 import java.util.Random;
 
 import infodynamics.measures.continuous.MutualInfoCalculatorMultiVariate;
@@ -28,6 +29,7 @@ import infodynamics.utils.KdTree;
 import infodynamics.utils.MathsUtils;
 import infodynamics.utils.MatrixUtils;
 import infodynamics.utils.NearestNeighbourSearcher;
+import infodynamics.utils.NeighbourNodeData;
 
 /**
  * <p>Computes the differential mutual information of two given multivariate sets of
@@ -94,7 +96,7 @@ public abstract class MutualInfoCalculatorMultiVariateKraskov
 	public static final String PROP_NORMALISE = "NORMALISE";
 	/**
 	 * Property name for an amount of random Gaussian noise to be
-	 *  added to the data (default is 0).
+	 *  added to the data (default is 1e-8, matching the MILCA toolkit).
 	 */
 	public static final String PROP_ADD_NOISE = "NOISE_LEVEL_TO_ADD";
 	/**
@@ -121,11 +123,11 @@ public abstract class MutualInfoCalculatorMultiVariateKraskov
 	/**
 	 * Whether to add an amount of random noise to the incoming data
 	 */
-	protected boolean addNoise = false;
+	protected boolean addNoise = true;
 	/**
 	 * Amount of random Gaussian noise to add to the incoming data
 	 */
-	protected double noiseLevel = 0.0;
+	protected double noiseLevel = (double) 1e-8;
 	/**
 	 * Whether we use dynamic correlation exclusion
 	 */
@@ -207,10 +209,12 @@ public abstract class MutualInfoCalculatorMultiVariateKraskov
 	 *  <li>{@link #PROP_ADD_NOISE} -- a standard deviation for an amount of
 	 *  	random Gaussian noise to add to
 	 *      each variable, to avoid having neighbourhoods with artificially
-	 *      large counts. The amount is added in after any normalisation,
+	 *      large counts. (We also accept "false" to indicate "0".)
+	 *      The amount is added in after any normalisation,
 	 *      so can be considered as a number of standard deviations of the data.
 	 *      (Recommended by Kraskov. MILCA uses 1e-8; but adds in
-	 *      a random amount of noise in [0,noiseLevel) ). Default 0.</li>
+	 *      a random amount of noise in [0,noiseLevel) ).
+	 *      Default 1e-8 to match the noise order in MILCA toolkit.</li>
 	 *  <li>{@link #PROP_NUM_THREADS} -- the integer number of parallel threads
 	 *  	to use in the computation. Can be passed as a string "USE_ALL"
 	 *      to use all available processors on the machine.
@@ -236,8 +240,14 @@ public abstract class MutualInfoCalculatorMultiVariateKraskov
 			dynCorrExclTime = Integer.parseInt(propertyValue);
 			dynCorrExcl = (dynCorrExclTime > 0);
 		} else if (propertyName.equalsIgnoreCase(PROP_ADD_NOISE)) {
-			addNoise = true;
-			noiseLevel = Double.parseDouble(propertyValue);
+			if (propertyValue.equals("0") ||
+					propertyValue.equalsIgnoreCase("false")) {
+				addNoise = false;
+				noiseLevel = 0;
+			} else {
+				addNoise = true;
+				noiseLevel = Double.parseDouble(propertyValue);
+			}
 		} else if (propertyName.equalsIgnoreCase(PROP_NUM_THREADS)) {
 			if (propertyValue.equalsIgnoreCase(USE_ALL_THREADS)) {
 				numThreads = Runtime.getRuntime().availableProcessors();
@@ -253,6 +263,40 @@ public abstract class MutualInfoCalculatorMultiVariateKraskov
 		if (debug && propertySet) {
 			System.out.println(this.getClass().getSimpleName() + ": Set property " + propertyName +
 					" to " + propertyValue);
+		}
+	}
+
+	/**
+	 * Get property values for the calculator.
+	 * 
+	 * <p>Valid property names, and what their
+	 * values should represent, are the same as those for
+	 * {@link #setProperty(String, String)}</p>
+	 * 
+	 * <p>Unknown property values are responded to with a null return value.</p>
+	 * 
+	 * @param propertyName name of the property
+	 * @return current value of the property
+	 * @throws Exception for invalid property values
+	 */
+	public String getProperty(String propertyName)
+			throws Exception {
+		
+		if (propertyName.equalsIgnoreCase(PROP_K)) {
+			return Integer.toString(k);
+		} else if (propertyName.equalsIgnoreCase(PROP_NORM_TYPE)) {
+			return KdTree.convertNormTypeToString(normType);
+		} else if (propertyName.equalsIgnoreCase(PROP_NORMALISE)) {
+			return Boolean.toString(normalise);
+		} else if (propertyName.equalsIgnoreCase(PROP_DYN_CORR_EXCL_TIME)) {
+			return Integer.toString(dynCorrExclTime);
+		} else if (propertyName.equalsIgnoreCase(PROP_ADD_NOISE)) {
+			return Double.toString(noiseLevel);
+		} else if (propertyName.equalsIgnoreCase(PROP_NUM_THREADS)) {
+			return Integer.toString(numThreads);
+		} else {
+			// try the superclass:
+			return super.getProperty(propertyName);
 		}
 	}
 
@@ -415,25 +459,7 @@ public abstract class MutualInfoCalculatorMultiVariateKraskov
 		
 		double[] returnValues = null;
 		
-		// We need to construct the k-d trees for use by the child
-		//  classes. We check each tree for existence separately
-		//  since source can be used across original and surrogate data
-		// TODO can parallelise these -- best done within the kdTree --
-		//  though it's unclear if there's much point given that
-		//  the tree construction itself afterwards can't really be well parallelised.
-		if (kdTreeJoint == null) {
-			kdTreeJoint = new KdTree(new int[] {dimensionsSource, dimensionsDest},
-						new double[][][] {sourceObservations, destObservations});
-			kdTreeJoint.setNormType(normType);
-		}
-		if (nnSearcherSource == null) {
-			nnSearcherSource = NearestNeighbourSearcher.create(sourceObservations);
-			nnSearcherSource.setNormType(normType);
-		}
-		if (nnSearcherDest == null) {
-			nnSearcherDest = NearestNeighbourSearcher.create(destObservations);
-			nnSearcherDest.setNormType(normType);
-		}
+		ensureKdTreesConstructed();
 		
 		if (numThreads == 1) {
 			// Single-threaded implementation:
@@ -535,6 +561,119 @@ public abstract class MutualInfoCalculatorMultiVariateKraskov
 			int startTimePoint, int numTimePoints, boolean returnLocals) throws Exception;
 
 	/**
+	 * Internal method to ensure that the Kd-tree data structures to represent the
+	 * observational data have been constructed (should be called prior to attempting
+	 * to use these data structures)
+	 */
+	protected void ensureKdTreesConstructed() throws Exception {
+		
+		// We need to construct the k-d trees for use by the child
+		//  classes. We check each tree for existence separately
+		//  since source can be used across original and surrogate data
+		// TODO can parallelise these -- best done within the kdTree --
+		//  though it's unclear if there's much point given that
+		//  the tree construction itself afterwards can't really be well parallelised.
+		if (kdTreeJoint == null) {
+			kdTreeJoint = new KdTree(new int[] {dimensionsSource, dimensionsDest},
+						new double[][][] {sourceObservations, destObservations});
+			kdTreeJoint.setNormType(normType);
+		}
+		if (nnSearcherSource == null) {
+			nnSearcherSource = NearestNeighbourSearcher.create(sourceObservations);
+			nnSearcherSource.setNormType(normType);
+		}
+		if (nnSearcherDest == null) {
+			nnSearcherDest = NearestNeighbourSearcher.create(destObservations);
+			nnSearcherDest.setNormType(normType);
+		}
+	}
+	
+	/**
+	 * Compute the prediction error in one variable from the k nearest neighbours (kNNs) of the observation
+	 *  of the other variable.
+	 * The kNNs of the variable to predict from are formed from the supplied norm type within that variable.
+	 * The number of kNNs to use here is the current property value set for {@link #PROP_K}.
+	 * The prediction error is a sum of absolute errors for each dimension within the variable to predict
+	 * 
+	 * @param predictFirstVariable true for predicting the first variable (Source) or
+	 * false for predicting the second variable (destination)
+	 * @return array of prediction errors for each dimension of the predicted variable
+	 * @throws Exception
+	 */
+	public double[] computePredictionErrorsFromObservations(boolean predictFirstVariable) throws Exception {
+		return computePredictionErrorsFromObservations(predictFirstVariable, k);
+	}
+	
+	/**
+	 * Compute the prediction error in one variable from the k nearest neighbours (kNNs) of the observation
+	 *  of the other variable.
+	 * The kNNs of the variable to predict from are formed from the supplied norm type within that variable.
+	 * The prediction error is a sum of absolute errors for each dimension within the variable to predict
+	 * 
+	 * @param predictFirstVariable true for predicting the first variable (Source) or
+	 * false for predicting the second variable (destination)
+	 * @param kNNs number of nearest neighbours to use
+	 * @return array of prediction errors for each dimension of the predicted variable
+	 * @throws Exception
+	 */
+	public double[] computePredictionErrorsFromObservations(boolean predictFirstVariable, int kNNs) throws Exception {
+		int N = sourceObservations.length; // number of observations
+		
+		double[] totalErrors = null;
+		
+		ensureKdTreesConstructed();
+		
+		if (numThreads == 1) {
+			// Single-threaded implementation:
+			totalErrors = partialComputePredictionErrorFromObservations(0, N, kNNs, predictFirstVariable);
+		} else {
+			// We're going multithreaded:
+			totalErrors = new double[predictFirstVariable ? dimensionsSource : dimensionsDest];
+			
+			// Distribute the observations to the threads for the parallel processing
+			int lTimesteps = N / numThreads; // each thread gets the same amount of data
+			int res = N % numThreads; // the first thread gets the residual data
+			if (debug) {
+				System.out.printf("Computing prediction errors for variable %d from variable %d with %d threads (%d timesteps each, plus %d residual)\n",
+						predictFirstVariable ? 1 : 2, predictFirstVariable ? 2 : 1,
+						numThreads, lTimesteps, res);
+			}
+			Thread[] tCalculators = new Thread[numThreads];
+			MiKraskovPredictionThreadRunner[] runners = new MiKraskovPredictionThreadRunner[numThreads];
+			for (int t = 0; t < numThreads; t++) {
+				int startTime = (t == 0) ? 0 : lTimesteps * t + res;
+				int numTimesteps = (t == 0) ? lTimesteps + res : lTimesteps;
+				if (debug) {
+					System.out.println(t + ".Thread: from " + startTime +
+							" to " + (startTime + numTimesteps)); // Trace Message
+				}
+				runners[t] = new MiKraskovPredictionThreadRunner(this, startTime,
+						numTimesteps, kNNs, predictFirstVariable);
+				tCalculators[t] = new Thread(runners[t]);
+				tCalculators[t].start();
+			}
+			
+			// Here, we should wait for the termination of the all threads
+			//  and collect their results
+			for (int t = 0; t < numThreads; t++) {
+				if (tCalculators[t] != null) {
+					tCalculators[t].join();
+				}
+				// Now we add in the data from this completed thread:
+				MatrixUtils.addInPlace(totalErrors, runners[t].getReturnValues());
+			}
+		}
+		
+		// Finalise the results:
+		if (debug) {
+			System.out.printf("Total prediction error from variable %d to variable %d=",
+					predictFirstVariable ? 2 : 1, predictFirstVariable ? 1 : 2);
+			MatrixUtils.printArray(System.out, 3, totalErrors);
+		}
+		return totalErrors;
+	}
+	
+	/**
 	 * Private class to handle multi-threading of the Kraskov algorithms.
 	 * Each instance calls partialComputeFromObservations()
 	 * to compute nearest neighbours for a part of the data.
@@ -573,8 +712,8 @@ public abstract class MutualInfoCalculatorMultiVariateKraskov
 		 *  or throw any exception that was encountered by the 
 		 *  thread.
 		 * 
-		 * @return an exception previously encountered by this thread.
-		 * @throws Exception
+		 * @return the relevant return values from this part of the data
+		 * @throws Exception an exception previously encountered by this thread.
 		 */
 		public double[] getReturnValues() throws Exception {
 			if (problem != null) {
@@ -598,4 +737,149 @@ public abstract class MutualInfoCalculatorMultiVariateKraskov
 		}
 	}
 	// end class MiKraskovThreadRunner	
+	
+	/**
+	 * Private class to handle multi-threading of the prediction from
+	 * k nearest neighbours.
+	 * Each instance calls partialComputePredictionErrorFromObservations()
+	 * to compute nearest neighbours for a part of the data.
+	 * 
+	 * 
+	 * @author Joseph Lizier (<a href="joseph.lizier at gmail.com">email</a>,
+	 * <a href="http://lizier.me/joseph/">www</a>)
+	 * @author Ipek Özdemir
+	 */
+	private class MiKraskovPredictionThreadRunner implements Runnable {
+		protected MutualInfoCalculatorMultiVariateKraskov miCalc;
+		protected int myStartTimePoint;
+		protected int numberOfTimePoints;
+		protected int kNNs;
+		protected boolean predictFirstVariable;
+		
+		protected double[] returnValues = null;
+		protected Exception problem = null;
+		
+		public MiKraskovPredictionThreadRunner(
+				MutualInfoCalculatorMultiVariateKraskov miCalc,
+				int myStartTimePoint, int numberOfTimePoints,
+				int kNNs, boolean predictFirstVariable) {
+			this.miCalc = miCalc;
+			this.myStartTimePoint = myStartTimePoint;
+			this.numberOfTimePoints = numberOfTimePoints;
+			this.kNNs = kNNs;
+			this.predictFirstVariable = predictFirstVariable;
+		}
+		
+		/**
+		 * Return the sum of prediction errors from this part of the data,
+		 *  or throw any exception that was encountered by the 
+		 *  thread.
+		 * 
+		 * @return sum of prediction errors from this part of the data, for
+		 * each of the dimensions of the relevant variable
+		 * @throws Exception an exception previously encountered by this thread.
+		 */
+		public double[] getReturnValues() throws Exception {
+			if (problem != null) {
+				throw problem;
+			}
+			return returnValues;
+		}
+		
+		/**
+		 * Start the thread for the given parameters
+		 */
+		public void run() {
+			try {
+				returnValues = miCalc.partialComputePredictionErrorFromObservations(
+						myStartTimePoint, numberOfTimePoints, kNNs, predictFirstVariable);
+			} catch (Exception e) {
+				// Store the exception for later retrieval
+				problem = e;
+				return;
+			}
+		}
+	}
+	// end class MiKraskovPredictionThreadRunner
+
+	/**
+	 * Protected method to be used internally for threaded implementations.
+	 * This method implements the guts of examining prediction errors in one variable
+	 *  from the k nearest neighbours of the other.
+	 *  It is intended to be called by one thread to work on that specific
+	 *  sub-set of the data.
+	 * 
+	 * @param startTimePoint start time for the partial set we examine
+	 * @param numTimePoints number of time points (including startTimePoint to examine)
+	 * @param kNNs number of nearest neighbours to use
+	 * @param predictFirstVariable whether to use the second variable to predict the first (true)
+	 *    or first variable to predict the second (false)
+	 * @return an array of the sum of square prediction errors for each dimension within the predicted
+	 *    variable.
+	 * @throws Exception
+	 */
+	protected double[] partialComputePredictionErrorFromObservations(
+			int startTimePoint, int numTimePoints, int kNNs, boolean predictFirstVariable) throws Exception {
+		
+		double startTime = Calendar.getInstance().getTimeInMillis();
+
+		double[] totalErrors = new double[predictFirstVariable ? dimensionsSource : dimensionsDest];
+		
+		for (int t = startTimePoint; t < startTimePoint + numTimePoints; t++) {
+			// Find the k nearest neighbours for the relevant predictor variable
+			if (predictFirstVariable) {
+				// First variable value to predict:
+				double[] sourceValueToPredict = sourceObservations[t];
+				// Find kNNs of second variable
+				PriorityQueue<NeighbourNodeData> nnPQ = 
+						nnSearcherDest.findKNearestNeighbours(kNNs, t, dynCorrExclTime);
+				double[] predictedValue = new double[dimensionsSource];
+				for (NeighbourNodeData kthNnData : nnPQ) {
+					// Retrieve the source value this corresponds to
+					double[] neighbourSourceValue = sourceObservations[kthNnData.sampleIndex];
+					// And include it's contribution in the prediction
+					for (int d = 0; d < dimensionsSource; d++) {
+						predictedValue[d] += neighbourSourceValue[d];
+					}
+				}
+				// Now add in the square prediction errors from the prediction: 
+				for (int d = 0; d < dimensionsSource; d++) {
+					predictedValue[d] /= (double) kNNs;
+					totalErrors[d] += (sourceValueToPredict[d] - predictedValue[d]) * 
+										(sourceValueToPredict[d] - predictedValue[d]);
+				}
+			} else { // predict second variable
+				// Second variable value to predict:
+				double[] destValueToPredict = destObservations[t];
+				// Find kNNs of first variable
+				PriorityQueue<NeighbourNodeData> nnPQ = 
+						nnSearcherSource.findKNearestNeighbours(kNNs, t, dynCorrExclTime);
+				double[] predictedValue = new double[dimensionsDest];
+				for (NeighbourNodeData kthNnData : nnPQ) {
+					// Retrieve the dest value this corresponds to
+					double[] neighbourDestValue = destObservations[kthNnData.sampleIndex];
+					// And include it's contribution in the prediction
+					for (int d = 0; d < dimensionsDest; d++) {
+						predictedValue[d] += neighbourDestValue[d];
+					}
+				}
+				// Now add in the square prediction errors from the prediction: 
+				for (int d = 0; d < dimensionsDest; d++) {
+					predictedValue[d] /= (double) kNNs;
+					totalErrors[d] += (destValueToPredict[d] - predictedValue[d]) * 
+										(destValueToPredict[d] - predictedValue[d]);
+				}
+			}
+		}
+		
+		if (debug) {
+			Calendar rightNow2 = Calendar.getInstance();
+			long endTime = rightNow2.getTimeInMillis();
+			System.out.println("Subset " + startTimePoint + ":" +
+					(startTimePoint + numTimePoints) + " Calculation time: " +
+					((endTime - startTime)/1000.0) + " sec" );
+		}
+		
+		return totalErrors;
+	}	
 }

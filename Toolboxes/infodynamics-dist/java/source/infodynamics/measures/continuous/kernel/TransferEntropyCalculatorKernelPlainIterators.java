@@ -164,6 +164,7 @@ public class TransferEntropyCalculatorKernelPlainIterators
 	 */
 	public void setProperty(String propertyName, String propertyValue) throws Exception {
 		super.setProperty(propertyName, propertyValue);
+		boolean propertySet = true;
 		if (propertyName.equalsIgnoreCase(EPSILON_PROP_NAME)) {
 			epsilon = Double.parseDouble(propertyValue);
 		} else if (propertyName.equalsIgnoreCase(NORMALISE_PROP_NAME)) {
@@ -171,10 +172,28 @@ public class TransferEntropyCalculatorKernelPlainIterators
 		} else if (propertyName.equalsIgnoreCase(DYN_CORR_EXCL_TIME_NAME)) {
 			dynCorrExclTime = Integer.parseInt(propertyValue);
 			dynCorrExcl = (dynCorrExclTime > 0);
+		} else {
+			// try the superclass:
+			propertySet = false;
+			super.setProperty(propertyName, propertyValue);
 		}
-		if (debug) {
+		if (debug && propertySet) {
 			System.out.println("Set property " + propertyName +
 					" to " + propertyValue);
+		}
+	}
+
+	@Override
+	public String getProperty(String propertyName) {
+		if (propertyName.equalsIgnoreCase(EPSILON_PROP_NAME)) {
+			return Double.toString(epsilon);
+		} else if (propertyName.equalsIgnoreCase(NORMALISE_PROP_NAME)) {
+			return Boolean.toString(normalise);
+		} else if (propertyName.equalsIgnoreCase(DYN_CORR_EXCL_TIME_NAME)) {
+			return Integer.toString(dynCorrExclTime);
+		} else {
+			// try the superclass:
+			return super.getProperty(propertyName);
 		}
 	}
 

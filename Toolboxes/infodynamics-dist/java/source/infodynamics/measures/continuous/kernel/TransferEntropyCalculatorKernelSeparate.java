@@ -211,10 +211,28 @@ public class TransferEntropyCalculatorKernelSeparate
 		} else {
 			// No property was set
 			propertySet = false;
+			// try the superclass:
+			super.setProperty(propertyName, propertyValue);
 		}
 		if (debug && propertySet) {
 			System.out.println("Set property " + propertyName +
 					" to " + propertyValue);
+		}
+	}
+
+	@Override
+	public String getProperty(String propertyName) {
+		if (propertyName.equalsIgnoreCase(EPSILON_PROP_NAME)) {
+			return Double.toString(epsilon);
+		} else if (propertyName.equalsIgnoreCase(NORMALISE_PROP_NAME)) {
+			return Boolean.toString(normalise);
+		} else if (propertyName.equalsIgnoreCase(DYN_CORR_EXCL_TIME_NAME)) {
+			return Integer.toString(dynCorrExclTime);
+		} else if (propertyName.equalsIgnoreCase(FORCE_KERNEL_COMPARE_TO_ALL)) {
+			return Boolean.toString(forceCompareToAll);
+		} else {
+			// try the superclass:
+			return super.getProperty(propertyName);
 		}
 	}
 

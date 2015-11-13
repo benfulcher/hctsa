@@ -178,7 +178,7 @@ public class TransferEntropyCalculatorSymbolic
 		// The discrete calculator only uses a history of 1 here - k is built into
 		//  the permutations
 		int base = Math.max(destPermutationIds.length, sourcePermutationIds.length);
-		teCalc = TransferEntropyCalculatorDiscrete.newInstance(base, 1);
+		teCalc = new TransferEntropyCalculatorDiscrete(base, 1);
 		teCalc.initialise();
 	}
 
@@ -218,6 +218,16 @@ public class TransferEntropyCalculatorSymbolic
 		if (debug && propertySet) {
 			System.out.println("Set property " + propertyName +
 					" to " + propertyValue);
+		}
+	}
+
+	@Override
+	public String getProperty(String propertyName) {
+		if (propertyName.equalsIgnoreCase(L_PROP_NAME)) {
+			return Integer.toString(l);
+		} else {
+			// Assume it was a property for the parent class
+			return super.getProperty(propertyName);
 		}
 	}
 

@@ -120,6 +120,7 @@ public class MutualInfoMultiVariateTester
 			// No longer need to set this property as it's set by default:
 			//miCalc.setProperty(MutualInfoCalculatorMultiVariateKraskov.PROP_NORM_TYPE,
 			//		EuclideanUtils.NORM_MAX_NORM_STRING);
+			miCalc.setProperty(MutualInfoCalculatorMultiVariateKraskov.PROP_ADD_NOISE, "0"); // Need consistency for unit tests
 			miCalc.initialise(var1[0].length, var2[0].length);
 			miCalc.setObservations(var1, var2);
 			miCalc.setDebug(true);

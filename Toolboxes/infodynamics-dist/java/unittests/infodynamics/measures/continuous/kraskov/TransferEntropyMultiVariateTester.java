@@ -158,8 +158,11 @@ public class TransferEntropyMultiVariateTester
 			//teCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_NORM_TYPE,
 			//		EuclideanUtils.NORM_MAX_NORM_STRING);
 			teCalc.setProperty(
-					MutualInfoCalculatorMultiVariateKraskov.PROP_NUM_THREADS,
+					ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_NUM_THREADS,
 					NUM_THREADS_TO_USE);
+			teCalc.setProperty(
+					ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_ADD_NOISE,
+					"0"); // Need consistency for unit tests
 			teCalc.initialise(historyK, 1, historyL, 1, 1);
 			// And set the observations
 			teCalc.setObservations(var1, var2);

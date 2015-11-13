@@ -30,29 +30,29 @@ jarLocation = "../../infodynamics.jar"
 startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=" + jarLocation)
 
 # Generate some random normalised data.
-numObservations = 1000;
-covariance=0.4;
+numObservations = 1000
+covariance=0.4
 # Source array of random normals:
-sourceArray = [random.normalvariate(0,1) for r in xrange(numObservations)];
+sourceArray = [random.normalvariate(0,1) for r in range(numObservations)]
 # Destination array of random normals with partial correlation to previous value of sourceArray
 destArray = [0] + [sum(pair) for pair in zip([covariance*y for y in sourceArray[0:numObservations-1]], \
-                                             [(1-covariance)*y for y in [random.normalvariate(0,1) for r in xrange(numObservations-1)]] ) ];
+                                             [(1-covariance)*y for y in [random.normalvariate(0,1) for r in range(numObservations-1)]] ) ]
 # Uncorrelated source array:
-sourceArray2 = [random.normalvariate(0,1) for r in xrange(numObservations)];
+sourceArray2 = [random.normalvariate(0,1) for r in range(numObservations)]
 # Create a TE calculator and run it:
 teCalcClass = JPackage("infodynamics.measures.continuous.kernel").TransferEntropyCalculatorKernel
-teCalc = teCalcClass();
-teCalc.setProperty("NORMALISE", "true"); # Normalise the individual variables
-teCalc.initialise(1, 0.5); # Use history length 1 (Schreiber k=1), kernel width of 0.5 normalised units
-teCalc.setObservations(JArray(JDouble, 1)(sourceArray), JArray(JDouble, 1)(destArray));
+teCalc = teCalcClass()
+teCalc.setProperty("NORMALISE", "true") # Normalise the individual variables
+teCalc.initialise(1, 0.5) # Use history length 1 (Schreiber k=1), kernel width of 0.5 normalised units
+teCalc.setObservations(JArray(JDouble, 1)(sourceArray), JArray(JDouble, 1)(destArray))
 # For copied source, should give something close to 1 bit:
-result = teCalc.computeAverageLocalOfObservations();
+result = teCalc.computeAverageLocalOfObservations()
 print("TE result %.4f bits; expected to be close to %.4f bits for these correlated Gaussians but biased upwards" % \
-    (result, math.log(1/(1-math.pow(covariance,2)))/math.log(2)));
-teCalc.initialise(); # Initialise leaving the parameters the same
-teCalc.setObservations(JArray(JDouble, 1)(sourceArray2), JArray(JDouble, 1)(destArray));
+    (result, math.log(1/(1-math.pow(covariance,2)))/math.log(2)))
+teCalc.initialise() # Initialise leaving the parameters the same
+teCalc.setObservations(JArray(JDouble, 1)(sourceArray2), JArray(JDouble, 1)(destArray))
 # For random source, it should give something close to 0 bits
-result2 = teCalc.computeAverageLocalOfObservations();
+result2 = teCalc.computeAverageLocalOfObservations()
 print("TE result %.4f bits; expected to be close to 0 bits for uncorrelated Gaussians but will be biased upwards" % \
-    result2);
+    result2)
 

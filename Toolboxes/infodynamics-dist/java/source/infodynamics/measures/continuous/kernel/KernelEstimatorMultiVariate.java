@@ -388,7 +388,7 @@ public class KernelEstimatorMultiVariate implements Cloneable {
 
 	/**
 	 * Return the kernel estimate for the probability with dynamic
-	 *  correlation exlcusion if it has been swithced on
+	 *  correlation exclusion if it has been switched on
 	 * 
 	 * @param observation
 	 * @param timeStep

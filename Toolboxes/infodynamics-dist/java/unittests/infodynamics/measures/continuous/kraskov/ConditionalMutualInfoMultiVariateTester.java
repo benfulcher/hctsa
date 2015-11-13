@@ -144,8 +144,9 @@ public class ConditionalMutualInfoMultiVariateTester
 			//condMiCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_NORM_TYPE,
 			//		EuclideanUtils.NORM_MAX_NORM_STRING);
 			condMiCalc.setProperty(
-					MutualInfoCalculatorMultiVariateKraskov.PROP_NUM_THREADS,
+					ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_NUM_THREADS,
 					NUM_THREADS_TO_USE);
+			condMiCalc.setProperty(ConditionalMutualInfoCalculatorMultiVariateKraskov.PROP_ADD_NOISE, "0"); // Need consistency of results for unit test
 			condMiCalc.initialise(var1[0].length * historyL,
 					var2[0].length, var2[0].length * historyK);
 			// Construct the joint vectors of the source states

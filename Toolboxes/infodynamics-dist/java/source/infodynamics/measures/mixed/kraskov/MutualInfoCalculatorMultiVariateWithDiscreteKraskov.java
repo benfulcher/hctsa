@@ -289,7 +289,12 @@ public class MutualInfoCalculatorMultiVariateWithDiscreteKraskov implements Mutu
 			System.out.println(String.format("Average n_x=%.3f, Average n_y=%.3f", avNx, avNy));
 		}
 		
-		mi = MathsUtils.digamma(k) - 1.0/(double)k - averageDiGammas + MathsUtils.digamma(N);
+		// Don't need the 1/k correction here because the conditional entropy term
+		//  is taken over the continuous space only. The correction is (m-1)/k
+		//  for an entropy over m subspaces.
+		// mi = MathsUtils.digamma(k) - 1.0/(double)k - averageDiGammas + MathsUtils.digamma(N);
+		// Instead do:
+		mi = MathsUtils.digamma(k) - averageDiGammas + MathsUtils.digamma(N);
 		miComputed = true;
 		return mi;
 	}
@@ -340,7 +345,12 @@ public class MutualInfoCalculatorMultiVariateWithDiscreteKraskov implements Mutu
 			averageDiGammas += localSum;
 
 			if (debug) {
-				double localValue = MathsUtils.digamma(k) - 1.0/(double)k - localSum + MathsUtils.digamma(N);
+				// Don't need the 1/k correction here because the conditional entropy term
+				//  is taken over the continuous space only. The correction is (m-1)/k
+				//  for an entropy over m subspaces.
+				// double localValue = MathsUtils.digamma(k) - 1.0/(double)k - localSum + MathsUtils.digamma(N);
+				// Instead do:
+				double localValue = MathsUtils.digamma(k) - localSum + MathsUtils.digamma(N);
 				testSum += localValue;
 				if (dimensions == 1) {
 					System.out.printf("t=%d: x=%.3f, eps_x=%.3f, n_x=%d, n_y=%d, local=%.3f, running total = %.5f\n",
@@ -358,11 +368,16 @@ public class MutualInfoCalculatorMultiVariateWithDiscreteKraskov implements Mutu
 			System.out.println(String.format("Average n_x=%.3f (-> digam=%.3f %.3f), Average n_y=%.3f (-> digam=%.3f)",
 					avNx, MathsUtils.digamma((int) avNx), MathsUtils.digamma((int) avNx - 1), avNy, MathsUtils.digamma((int) avNy)));
 			System.out.printf("Independent average num in joint box is %.3f\n", (avNx * avNy / (double) N));
-			System.out.println(String.format("digamma(k)=%.3f - 1/k=%.3f - averageDiGammas=%.3f + digamma(N)=%.3f\n",
-					MathsUtils.digamma(k), 1.0/(double)k, averageDiGammas, MathsUtils.digamma(N)));
+			System.out.println(String.format("digamma(k)=%.3f - averageDiGammas=%.3f + digamma(N)=%.3f\n",
+					MathsUtils.digamma(k), averageDiGammas, MathsUtils.digamma(N)));
 		}
 		
-		mi = MathsUtils.digamma(k) - 1.0/(double)k - averageDiGammas + MathsUtils.digamma(N);
+		// Don't need the 1/k correction here because the conditional entropy term
+		//  is taken over the continuous space only. The correction is (m-1)/k
+		//  for an entropy over m subspaces.
+		// mi = MathsUtils.digamma(k) - 1.0/(double)k - averageDiGammas + MathsUtils.digamma(N);
+		// Instead, do:
+		mi = MathsUtils.digamma(k) - averageDiGammas + MathsUtils.digamma(N);
 		miComputed = true;
 		return mi;
 	}
@@ -421,7 +436,12 @@ public class MutualInfoCalculatorMultiVariateWithDiscreteKraskov implements Mutu
 			averageDiGammas += localSum;
 
 			if (debug) {
-				double localValue = MathsUtils.digamma(k) - 1.0/(double)k - localSum + MathsUtils.digamma(N);
+				// Don't need the 1/k correction here because the conditional entropy term
+				//  is taken over the continuous space only. The correction is (m-1)/k
+				//  for an entropy over m subspaces.
+				// double localValue = MathsUtils.digamma(k) - 1.0/(double)k - localSum + MathsUtils.digamma(N);
+				// Instead do:
+				double localValue = MathsUtils.digamma(k) - localSum + MathsUtils.digamma(N);
 				testSum += localValue;
 				if (dimensions == 1) {
 					System.out.printf("t=%d: x=%.3f, eps_x=%.3f, n_x=%d, n_y=%d, local=%.3f, running total = %.5f\n",
@@ -439,7 +459,12 @@ public class MutualInfoCalculatorMultiVariateWithDiscreteKraskov implements Mutu
 			System.out.println(String.format("Average n_x=%.3f, Average n_y=%.3f", avNx, avNy));
 		}
 		
-		mi = MathsUtils.digamma(k) - 1.0/(double)k - averageDiGammas + MathsUtils.digamma(N);
+		// Don't need the 1/k correction here because the conditional entropy term
+		//  is taken over the continuous space only. The correction is (m-1)/k
+		//  for an entropy over m subspaces.
+		// mi = MathsUtils.digamma(k) - 1.0/(double)k - averageDiGammas + MathsUtils.digamma(N);
+		// Instead do:
+		mi = MathsUtils.digamma(k) - averageDiGammas + MathsUtils.digamma(N);
 		miComputed = true;
 		return mi;
 	}
@@ -549,12 +574,17 @@ public class MutualInfoCalculatorMultiVariateWithDiscreteKraskov implements Mutu
 		int N = continuousNewStates.length; // number of observations
 		double[] locals = new double[N];
 		
-		double fixedPartOfLocals = MathsUtils.digamma(k) - 1.0/(double)k +
-									MathsUtils.digamma(N);
+		// Don't need the 1/k correction here because the conditional entropy term
+		//  is taken over the continuous space only. The correction is (m-1)/k
+		//  for an entropy over m subspaces.
+		// double fixedPartOfLocals = MathsUtils.digamma(k) - 1.0/(double)k +
+		//							MathsUtils.digamma(N);
+		// Instead do:
+		double fixedPartOfLocals = MathsUtils.digamma(k) + MathsUtils.digamma(N);
 		double testSum = 0.0;
 		if (debug) {
-			System.out.printf("digamma(k)=%.3f - 1/k=%.3f + digamma(N)=%.3f\n",
-					MathsUtils.digamma(k), 1.0/(double)k, MathsUtils.digamma(N));
+			System.out.printf("digamma(k)=%.3f + digamma(N)=%.3f\n",
+					MathsUtils.digamma(k), MathsUtils.digamma(N));
 		}
 		double avNx = 0;
 		double avNy = 0;
