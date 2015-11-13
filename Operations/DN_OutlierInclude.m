@@ -217,7 +217,7 @@ f = fittype('a*exp(b*x)+c','options',s);
 
 out.nfexpa = c.a;
 out.nfexpb = c.b;
-out.nfexpc = c.c;
+out.nfexpc = c.c; % linearly anticorrelated with c.a
 out.nfexpr2 = gof.rsquare;
 out.nfexpadjr2 = gof.adjrsquare;
 out.nfexprmse = gof.rmse;

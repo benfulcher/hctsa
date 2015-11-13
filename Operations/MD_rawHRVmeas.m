@@ -51,4 +51,7 @@ diffx = diff(x);
 out.SD1 = 1/sqrt(2) * std(diffx) * 1000;
 out.SD2 = sqrt(2 * var(x) - (1/2) * std(diffx)^2) * 1000;
 
+% NOTE: the SD1 measure is the same (up to a linear transformation)
+%       as the implementation in DN_Spread(diff(x),'std');
+
 end

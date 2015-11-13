@@ -93,7 +93,7 @@ else
     out.stdstretch0 = std(stretch0); % standard deviation of stretch lengths of consecutive zeros
 end
 
-if isempty(stretch1) % all zeros (almost impossible to actually occur)
+if isempty(stretch1) % all 0s (almost impossible to actually occur)
     out.longstretch1 = 0;
     out.meanstretch1 = 0;
     out.stdstretch1 = NaN;

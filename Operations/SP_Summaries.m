@@ -1,4 +1,4 @@
-function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs,doPower)
+function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs)
 % SP_Summaries  Statistics of the power spectrum of a time series
 %
 % The estimation can be done using a periodogram, using the periodogram code in
@@ -73,7 +73,7 @@ if nargin < 2 || isempty(psdmeth)
     psdmeth = 'fft'; % fft by default
 end
 if nargin < 3 || isempty(wmeth)
-    wmeth = 'none'; % No window by default
+    wmeth = 'hamming'; % Hamming window by default
 end
 if nargin < 4
     nf = [];
@@ -81,39 +81,43 @@ end
 if nargin < 5 || isempty(dologabs)
     dologabs = 0;
 end
-if nargin < 6 || isempty(doPower)
-    doPower = 1; % power spectrum (rather than amplitudes) by default
-end
 
 if dologabs % a boolean
     % Analyze the spectrum of logarithmic absolute deviations
     y = log(abs(y));
 end
 
-Ny = length(y); % Time-series length
+doPlot = 0; % plot outputs
+Ny = length(y); % time-series length
+
+%-------------------------------------------------------------------------------
+% Set window (for periodogram and welch):
+%-------------------------------------------------------------------------------
+if ismember(psdmeth,{'periodogram','welch'})
+    switch wmeth % method to use for the window
+        case 'none'
+            window = [];
+        case 'hamming'
+            window = hamming(Ny);
+        case 'hann'
+            window = hann(Ny);
+        case 'bartlett'
+            window = bartlett(Ny);
+        case 'boxcar'
+            window = boxcar(Ny);
+        case 'rect'
+            window = rectwin(Ny);
+        otherwise
+            % There are other options, but these aren't implemented here
+            error('Unknown window ''%s''',wmeth);
+    end
+end
 
 % ------------------------------------------------------------------------------
 % Compute the Fourier Transform
 % ------------------------------------------------------------------------------
 switch psdmeth
     case 'periodogram'
-        % (1) set the window
-        switch wmeth % method to use for the window
-            case 'none'
-                window = [];
-            case 'hamming'
-                window = hamming(Ny);
-            case 'hann'
-                window = hann(Ny);
-            case 'bartlett'
-                window = bartlett(Ny);
-            case 'boxcar'
-                window = boxcar(Ny);
-            otherwise
-                % There are other options, but these aren't implemented here
-                error('Unknown window ''%s''',wmeth);
-        end
-
         if isempty(nf)
             % (2) Estimate the spectrum
             [S, w] = periodogram(y,window);
@@ -127,127 +131,152 @@ switch psdmeth
         Fs = 1; % sampling frequency
         NFFT = 2^nextpow2(Ny);
         f = Fs/2*linspace(0,1,NFFT/2+1); % frequency
-        w = 2*pi*f'; % angular frequency as column vector
-        S = fft(y,NFFT)/Ny; % Fourier Transform
-        S = 2*abs(S(1:NFFT/2+1)); % single-sided amplitudes
-        % convert to power spectrum later if necessary
+        w = 2*pi*f'; % angular frequency (as column vector)
+        S = fft(y,NFFT); % Fourier Transform
+        S = 2*abs(S(1:NFFT/2+1)).^2/Ny; % single-sided power spectral density
+        S = S/(2*pi); % convert to angular frequency space
+
+    case 'welch'
+        % Welch power spectral density estimate:
+        Fs = 1; % sampling frequency
+        N = 2^nextpow2(Ny);
+        [S, f] = pwelch(y,window,[],N,Fs);
+        w = 2*pi*f'; % angular frequency
+        S = S/(2*pi); % adjust so that area remains normalized in angular frequency space
 
     otherwise
-        error('Unknwon power spectral density method ''%s''',psdmeth);
+        error('Unknown spectral estimation method ''%s''',psdmeth);
 end
 
 if ~any(isfinite(S)) % no finite values in the power spectrum
     % This time series must be really weird -- return NaN (unsuitable operation)...
-    fprintf(1,'This is a weird time series.\n');
+    fprintf(1,'NaN in power spectrum? A weird time series.\n');
     out = NaN; return
 end
 
-% Analyze the power spectrum rather than amplitudes
-if doPower
-    S = S.^2;
-end
-
-if size(S,1) > size(S,2);
+% Ensure both w and S are row vectors:
+if size(S,1) > size(S,2)
     S = S';
+end
+if size(w,1) > size(w,2)
     w = w';
 end
 
+if doPlot
+    figure('color','w')
+    plot(w,S,'.-k'); % plot the spectrum
+    % Area under S should sum to 1 if a power spectral density estimate:
+    title(sprintf('Area under psd curve = %.1f (= %.1f)',sum(S*(w(2)-w(1))),var(y)));
+end
+
 N = length(S); % = length(w)
-% plot(w,S); % plot the spectrum
 logS = log(S);
 logw = log(w);
-dw = w(2) - w(1);
+dw = w(2) - w(1); % spacing increment in w
 
-% Normalize to 1: necessary if input not z-scored
+% Normalize to 1; if input not z-scored
 % S = S/(sum(S)*dw);
 
 % ------------------------------------------------------------------------------
 % Simple measures of the power spectrum
 % ------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% Peaks:
+%-------------------------------------------------------------------------------
+% Maximum, and max peak width:
+[out.maxS, i_maxS] = max(S);
+out.maxw = w(i_maxS);
+out.maxWidth = w(i_maxS + find(S(i_maxS+1:end) < out.maxS,1,'first')) - ...
+                    w(find(S(1:i_maxS-1) < out.maxS,1,'last'));
+if isempty(out.maxWidth);
+    out.maxWidth = 0;
+end
+
+% Characterize all peaks using findpeaks function:
+% Minimum angular separation of 0.02...?
+minDist_w = 0.02;
+ptsPerw = length(S)/pi;
+minPkDist = ceil(minDist_w*ptsPerw);
+[pkHeight,pkLoc,pkWidth,pkProm] = findpeaks(S,'SortStr','descend','minPeakDistance',minPkDist);
+pkWidth = pkWidth/ptsPerw;
+pkLoc = pkLoc/ptsPerw;
+
+% Characterize mean peak prominence
+% (use prominence threshold of 2...?)
+out.numPeaks = length(pkHeight); % total number of peaks
+out.numPromPeaks_1 = sum(pkProm > 1); % number of peaks with prominence of at least 1
+out.numPromPeaks_2 = sum(pkProm > 2); % number of peaks with prominence of at least 2
+out.numPromPeaks_5 = sum(pkProm > 5); % number of peaks with prominence of at least 5
+out.numPeaks_overmean = sum(pkProm>mean(pkProm)); % number of peaks with prominence greater than the mean (low for skewed distn)
+out.maxProm = max(pkProm); % maximum prominence of any peak
+out.meanProm_2 = mean(pkProm(pkProm > 2)); % mean peak prominence of those with prominence of at least 2
+
+out.meanPeakWidth_prom2 = mean(pkWidth(pkProm > 2)); % mean peak width of peaks with prominence of at least 2
+out.width_weighted_prom = sum(pkWidth.*pkProm)/sum(pkProm);
+
+% Power in top N peaks:
+nn = @(x) 1:min(x,out.numPeaks);
+out.peakPower_2 = sum(pkHeight(nn(2)).*pkWidth(nn(2)));
+out.peakPower_5 = sum(pkHeight(nn(5)).*pkWidth(nn(5)));
+out.peakPower_prom2 = sum(pkHeight(pkProm > 2).*pkWidth(pkProm > 2)); % power in peaks with prominence of at least 2
+out.w_weighted_peak = sum(pkLoc.*pkProm)/sum(pkProm); % where are prominent peaks located on average (weighted by prominence)
+out.w_weighted_peak_prom = sum(pkLoc.*pkHeight)/sum(pkHeight); % where are prominent peaks located on average (weighted by prominence)
+
+% Number of peaks required to get to 50% of power in peaks
+peakPower = pkHeight.*pkWidth;
+out.numPeaks_50power = find(cumsum(peakPower) > 0.5*sum(peakPower),1,'first');
+out.peakpower_1 = peakPower(1)/sum(peakPower);
+
+%-------------------------------------------------------------------------------
+% Distribution
+%-------------------------------------------------------------------------------
+% Quantiles:
+out.iqr = iqr(S);
+out.logiqr = iqr(logS);
+out.q25 = quantile(S,0.25);
+out.median = median(S);
+out.q75 = quantile(S,0.75);
+
+% Moments:
 out.std = std(S);
 out.stdlog = log(out.std);
 out.logstd = std(logS);
 out.mean = mean(S);
 out.meanlog = log(out.mean);
 out.logmean = mean(logS);
-[out.maxS, i_maxS] = max(S);
-out.maxSlog = log(out.maxS);
-out.maxw = w(i_maxS);
-out.median = median(S);
-out.medianlog = log(out.median);
-out.melmax = w2mel(out.median); % transform to mel scale
-out.iqr = iqr(S);
-out.logiqr = iqr(logS);
-out.q25 = quantile(S,0.25);
-out.q25log = log(out.q25);
-out.q75 = quantile(S,0.75);
-out.q75log = log(out.q75);
+for i = 3:5
+    out.(sprintf('mom%u',i)) = DN_Moments(S,i);;
+end
+
+% Autocorr:
 autoCorrs_S = CO_AutoCorr(S,1:4,'Fourier');
 out.ac1 = autoCorrs_S(1);
 out.ac2 = autoCorrs_S(2);
-out.ac3 = autoCorrs_S(3);
-out.ac4 = autoCorrs_S(4);
 out.tau = CO_FirstZero(S,'ac');
-autoCorrs_logS = CO_AutoCorr(S,1:4,'Fourier');
-out.logac1 = autoCorrs_logS(1);
-out.logac2 = autoCorrs_logS(2);
-out.logac3 = autoCorrs_logS(3);
-out.logac4 = autoCorrs_logS(4);
-out.logtau = CO_FirstZero(logS,'ac');
-out.logmaxonlogmean1e = out.maxSlog/mean(logS(logS<out.maxSlog/exp(1)));
-out.maxwidth = w(i_maxS+find(logS(i_maxS+1:end)<out.maxSlog/exp(1),1,'first'))-...
-                w(find(logS(1:i_maxS)<out.maxSlog/exp(1),1,'last'));
-if isempty(out.maxwidth);
-    out.maxwidth=0;
-end
-% out.maxlogwidth=log(w(find(logS(i_maxS+1:end)<out.maxSlog/exp(1),1,'first')))-...
-%                 log(w(find(logS(1:i_maxS-1)<out.maxSlog/exp(1),1,'last')));
-
-csS = cumsum(S);
-
-% Measures of central location
-out.centroid = w(find(csS > csS(end)/2,1,'first')); % where area under curve is same above
-                                                    % and below this frequency
 
 % ------------------------------------------------------------------------------
 % Shape of cumulative sum curve
 % ------------------------------------------------------------------------------
-% 1) Quantiles
+csS = cumsum(S);
+
+f_frac_w_max = @(f) w(find(csS >= csS(end)*f,1,'first'));
+
 % At what frequency is csS a fraction p of its maximum?
-out.q1 = w(find(csS > 0.01*csS(end),1,'first'));
-out.q1mel = w2mel(out.q1);
-out.q5 = w(find(csS > 0.05*csS(end),1,'first'));
-out.q5mel = w2mel(out.q5);
-out.q10 = w(find(csS > 0.10*csS(end),1,'first'));
-out.q10mel = w2mel(out.q10);
-out.q25 = w(find(csS > 0.25*csS(end),1,'first'));
-out.q25mel = w2mel(out.q25);
-out.q50 = w(find(csS > 0.50*csS(end),1,'first')); % centroid
-out.q50mel = w2mel(out.q50);
-out.q75 = w(find(csS > 0.75*csS(end),1,'first'));
-out.q75mel = w2mel(out.q75);
-out.q90 = w(find(csS > 0.90*csS(end),1,'first'));
-out.q90mel = w2mel(out.q90);
-out.q95 = w(find(csS > 0.95*csS(end),1,'first'));
-out.q95mel = w2mel(out.q95);
-out.q99 = w(find(csS > 0.99*csS(end),1,'first'));
-out.q99mel = w2mel(out.q99);
+out.wmax_1 = f_frac_w_max(0.01);
+out.wmax_5 = f_frac_w_max(0.05);
+out.wmax_10 = f_frac_w_max(0.1);
+out.wmax_25 = f_frac_w_max(0.25);
+out.centroid = f_frac_w_max(0.5);
+out.wmax_75 = f_frac_w_max(0.75);
+out.wmax_90 = f_frac_w_max(0.9);
+out.wmax_95 = f_frac_w_max(0.95);
+out.wmax_99 = f_frac_w_max(0.99);
 
 % Width of saturation measures
-out.w1_99 = out.q99-out.q1;
-out.w1_99mel = w2mel(out.w1_99);
-out.w5_95 = out.q95-out.q5;
-out.w5_95mel = w2mel(out.w5_95);
-out.w10_90 = out.q90-out.q10;% from 10% to 90%:
-out.w10_90mel = w2mel(out.w10_90);
-out.w25_75 = out.q75-out.q25;
-out.w25_75mel = w2mel(out.w25_75);
-
-% 2) Moments of the power spectrum
-% Take moments from 3--5
-for i = 3:5
-    out.(sprintf('mom%u',i)) = DN_Moments(S,i);;
-end
+out.w5_95 = out.wmax_95 - out.wmax_5;
+out.w10_90 = out.wmax_90 - out.wmax_10; % from 10% to 90%:
+out.w25_75 = out.wmax_75 - out.wmax_25;
 
 % ------------------------------------------------------------------------------
 % Fit some functions to this cumulative sum:
@@ -259,17 +288,15 @@ out.fpoly2csS_p2 = c.p2;
 out.fpoly2csS_p3 = c.p3;
 out.fpoly2_sse = gof.sse;
 out.fpoly2_r2 = gof.rsquare;
-out.fpoly2_adjr2 = gof.adjrsquare;
 out.fpoly2_rmse = gof.rmse;
 
-% (ii) fit polysat a*x^2/(b+x^2) (has zero derivative at zero, though)
+% (ii) Fit polysat a*x^2/(b+x^2) (has zero derivative at zero, though)
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[csS(end), 100]);
 f = fittype('a*x^2/(b+x^2)','independent','x','options',s); % set 'a' from maximum
 [c, gof] = fit(w',csS',f);
 out.fpolysat_a = c.a;
 out.fpolysat_b = c.b; % this is important
 out.fpolysat_r2 = gof.rsquare; % this is more important!
-out.fpolysat_adjr2 = gof.adjrsquare;
 out.fpolysat_rmse = gof.rmse;
 
 % ------------------------------------------------------------------------------
@@ -277,7 +304,7 @@ out.fpolysat_rmse = gof.rmse;
 % ------------------------------------------------------------------------------
 Hshann = -S.*log(S); % Shannon function
 out.spect_shann_ent = sum(Hshann);
-out.spect_shann_ent_norm = sum(Hshann)/length(S);
+out.spect_shann_ent_norm = mean(Hshann);
 
 % ------------------------------------------------------------------------------
 % "Spectral Flatness Measure"
@@ -294,57 +321,31 @@ out.areatopeak = sum(S(1:i_maxS))*dw;
 out.ylogareatopeak = sum(logS(1:i_maxS))*dw; % (semilogy)
 % out.logareatopeak=sum(logS(1:i_maxS).*diff(logw(1:i_maxS+1)));
 
-
 % ------------------------------------------------------------------------------
 %% Robust (e.g., iteratively re-weighted least squares) linear fits to log-log
 %   plots
 % ------------------------------------------------------------------------------
 
+% Use the local function, giveMeRobustStats, which adds robust
+% stats to the out structure.
+
 % Suppress rank deficient warnings for this section:
 warning('off','stats:robustfit:RankDeficient')
 
 % (1): Across full range
-[a, stats] = robustfit(log(w),log(S));
-out.linfitloglog_all_a1 = a(1); % robust intercept
-out.linfitloglog_all_a2 = a(2); % robust gradient
-out.linfitloglog_all_sigrat = stats.ols_s/stats.robust_s;
-out.linfitloglog_all_s = stats.s; % esimate on sigma
-out.linfitloglog_all_sea1 = stats.se(1); % standard error of coefficient 1 estimate
-out.linfitloglog_all_sea2 = stats.se(2); % standard error of coefficient 2 estimate
+out = giveMeRobustStats(log(w),log(S),'linfitloglog_all',out);
 
 % (2): First half (low frequency)
-[a, stats] = robustfit(log(w(1:round(N/2))),log(S(1:round(N/2))));
-out.linfitloglog_lf_a1 = a(1); % robust intercept
-out.linfitloglog_lf_a2 = a(2); % robust gradient
-out.linfitloglog_lf_sea1 = stats.se(1);
-out.linfitloglog_lf_sea2 = stats.se(2);
+out = giveMeRobustStats(log(w(1:round(N/2))),log(S(1:round(N/2))),'linfitloglog_lf',out);
 
 % (3): Second half (high frequency)
-[a, stats] = robustfit(log(w(round(N/2):end)),log(S(round(N/2):end)));
-out.linfitloglog_hf_a1 = a(1); % robust intercept
-out.linfitloglog_hf_a2 = a(2); % robust gradient
-out.linfitloglog_hf_sigrat = stats.ols_s/stats.robust_s;
-out.linfitloglog_hf_s = stats.s;
-out.linfitloglog_hf_sea1 = stats.se(1);
-out.linfitloglog_hf_sea2 = stats.se(2);
+out = giveMeRobustStats(log(w(round(N/2):end)),log(S(round(N/2):end)),'linfitloglog_hf',out);
 
 % (4): Middle half (mid-frequencies)
-[a, stats] = robustfit(log(w(round(N/4):round(N*3/4))),log(S(round(N/4):round(N*3/4))));
-out.linfitloglog_mf_a1 = a(1); % robust intercept
-out.linfitloglog_mf_a2 = a(2); % robust gradient
-out.linfitloglog_mf_sigrat = stats.ols_s/stats.robust_s;
-out.linfitloglog_mf_s = stats.s;
-out.linfitloglog_mf_sea1 = stats.se(1);
-out.linfitloglog_mf_sea2 = stats.se(2);
+out = giveMeRobustStats(log(w(round(N/4):round(N*3/4))),log(S(round(N/4):round(N*3/4))),'linfitloglog_mf',out);
 
 % (5) Fit linear to semilog plot (across full range)
-[a, stats] = robustfit(w,log(S));
-out.linfitloglog_all_a1 = a(1); % robust intercpet
-out.linfitloglog_all_a2 = a(2); % robust gradient
-out.linfitloglog_all_sigrat = stats.ols_s/stats.robust_s;
-out.linfitloglog_all_s = stats.s;
-out.linfitloglog_all_sea1 = stats.se(1);
-out.linfitloglog_all_sea2 = stats.se(2);
+out = giveMeRobustStats(w,log(S),'linfitsemilog_all',out);
 
 % Turn the rank-deficient warnings back on
 warning('on','stats:robustfit:RankDeficient')
@@ -411,19 +412,27 @@ out.statav5_s = std(std(split))/std(S);
 % Count crossings:
 % Get a horizontal line and count the number of crossings with the power spectrum
 % ------------------------------------------------------------------------------
-ncrossfn = @(x) sum(BF_sgnchange(S - x));
+ncrossfn_rel = @(f) sum(BF_sgnchange(S - f*max(S)));
+% ncrossfn_abs = @(Sx) sum(BF_sgnchange(S - Sx));
 
-out.ncross01 = ncrossfn(0.1);
-out.ncross02 = ncrossfn(0.2);
-out.ncross05 = ncrossfn(0.5);
-out.ncross1 = ncrossfn(1);
-out.ncross2 = ncrossfn(2);
-out.ncross5 = ncrossfn(5);
-out.ncross10 = ncrossfn(10);
-out.ncross20 = ncrossfn(20);
+out.ncross_f05 = ncrossfn_rel(0.05);
+out.ncross_f01 = ncrossfn_rel(0.1);
+out.ncross_f02 = ncrossfn_rel(0.2);
+out.ncross_f05 = ncrossfn_rel(0.5);
 
+%-------------------------------------------------------------------------------
 function mel = w2mel(w) % convert to mel spectrum
     mel = 1127*log(w/(1400*pi)+1);
+end
+
+function out = giveMeRobustStats(xData,yData,textID,out)
+    [a, stats] = robustfit(xData,yData);
+    out.(sprintf('%s_a1',textID)) = a(1); % robust intercept
+    out.(sprintf('%s_a2',textID)) = a(2); % robust gradient
+    out.(sprintf('%s_sigrat',textID)) = stats.ols_s/stats.robust_s;
+    out.(sprintf('%s_s',textID)) = stats.s; % esimate on sigma
+    out.(sprintf('%s_sea1',textID)) = stats.se(1); % standard error of coefficient 1 estimate
+    out.(sprintf('%s_sea2',textID)) = stats.se(2); % standard error of coefficient 2 estimate
 end
 
 end

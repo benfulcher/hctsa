@@ -9,8 +9,8 @@ function out = IN_AutoMutualInfoStats(y,maxTau,estMethod,extraParam)
 % estMethod, extraParam -- cf. inputs to IN_AutoMutualInfo.m
 %
 %---OUTPUTS:
-% Statistics on the AMIs and their pattern across the range of specified time
-% delays
+% out, a structure containing statistics on the AMIs and their pattern across
+%       the range of specified time delays.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

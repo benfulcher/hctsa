@@ -121,7 +121,7 @@ if isempty(out.ftbth)
     out.ftbth = maxLag+1;
 end
 
-% Durbin-Watson test statistic
+% Durbin-Watson test statistic (like AC1)
 out.dwts = sum((e(2:end)-e(1:end-1)).^2) / sum(e.^2);
 
 % ------------------------------------------------------------------------------

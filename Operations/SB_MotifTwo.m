@@ -66,9 +66,9 @@ r0 = (yBin == 0);
 
 % ------ Record these -------
 % (Will be dependent outputs since signal is binary, sum to 1)
-% (Default hctsa library measures just up)
-out.u = sum(r1)/N; % proportion 1 (corresponds to a movement up for 'diff')
-out.d = sum(r0)/N; % proportion 0 (corresponds to a movement down for 'diff')
+% (Default hctsa library measures just the u output: up)
+out.u = mean(r1); % proportion 1 (corresponds to a movement up for 'diff')
+out.d = mean(r0); % proportion 0 (corresponds to a movement down for 'diff')
 pp = [out.d, out.u];
 out.h = f_entropy(pp);
 

@@ -194,8 +194,9 @@ out.stdstd = std(std(xperr));
 
 % Eigenvalues
 eigs = eig(xperr);
-out.maximageig = max(imag(eigs));
-out.minimageig = min(imag(eigs));
+imagEigs = imag(eigs);
+out.maximageig = max(imagEigs);
+out.minimageig = min(imagEigs); % covaries (negatively) with maximageig
 
 realEigs = real(eigs);
 out.rangeeig = range(realEigs); % range of real parts of eigenvalues

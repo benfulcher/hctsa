@@ -178,7 +178,7 @@ else
 end
 out.max = max(store); % Maximum amount of information you can gain in this way
 out.mean = mean(store); % mean
-out.sum = sum(store); % sum
+out.sum = sum(store); % sum (contains same information as mean since length(store) the same)
 out.median = median(store); % median
 out.lq = quantile(store,0.25); % lower quartile
 out.uq = quantile(store,0.75); % upper quartile

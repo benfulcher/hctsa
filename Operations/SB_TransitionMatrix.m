@@ -137,22 +137,24 @@ out.symsumdiff = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums
                                                           % triangular parts of T
 
 % (iv) Measures from covariance matrix:
-out.sumdiagcov = sum(diag(cov(T))); % trace of covariance matrix
+covT = cov(T);
+out.sumdiagcov = sum(diag(covT)); % trace of covariance matrix
 
 % (v) Measures from eigenvalues of T
 eigT = eig(T);
 out.stdeig = std(eigT); % std of eigenvalues
 out.maxeig = max(real(eigT)); % maximum eigenvalue
 out.mineig = min(real(eigT)); % minimum eigenvalue
-out.meaneig = mean(real(eigT)); % mean eigenvalue
+% mean eigenvalue is equivalent to trace
 % (ought to be always zero? Not necessary to measure:)
 out.maximeig = max(imag(eigT)); % maximum imaginary part of eigenavlues
 
-% (vi) Measures from eigenvalues of covariance matrix:
-eigcovT = eig(cov(T));
+% (vi) Eigenvalues of covariance matrix:
+% (mean eigenvalue of covariance matrix equivalent to trace of covariance matrix).
+% (these measures don't make much sense in the case of 2 groups):
+eigcovT = eig(covT);
 out.stdeigcov = std(eigcovT); % std of eigenvalues of covariance matrix
 out.maxeigcov = max(eigcovT); % max eigenvalue of covariance matrix
 out.mineigcov = min(eigcovT); % min eigenvalue of covariance matrix
-out.meaneigcov = mean(eigcovT); % mean eigenvalue of covariance matrix
 
 end

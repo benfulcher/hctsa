@@ -6,7 +6,7 @@ function nlogL = DN_nlogL_norm(y)
 % data coming from a Gaussian distribution using the normlike function.
 %
 %---INPUT:
-% y, the time series.
+% y, a vector of data
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -32,6 +32,8 @@ function nlogL = DN_nlogL_norm(y)
 % ------------------------------------------------------------------------------
 
 [muhat, sigmahat] = normfit(y);
-nlogL = normlike([muhat, sigmahat],y);
+nlogL = normlike([muhat, sigmahat],y)/length(y);
+
+% ** Somehow this just scales with length, regardless of the distribution of y?
 
 end

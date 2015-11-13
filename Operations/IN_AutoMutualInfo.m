@@ -59,34 +59,60 @@ if nargin < 4
 end
 
 N = length(y);
+doPlot = 0; % whether to plot outputs to screen
 
 % ------------------------------------------------------------------------------
-% Initialize miCalc object:
-miCalc = IN_Initialize_MI(estMethod,extraParam);
-
 % Loop over time delays if a vector
 numTimeDelays = length(timeDelay);
 amis = zeros(numTimeDelays,1);
+
+if numTimeDelays > 1
+    timeDelay = sort(timeDelay);
+end
+
+% Initialize miCalc object (needs to be reinitialized within the loop for kraskov):
+miCalc = IN_Initialize_MI(estMethod,extraParam);
+
 for k = 1:numTimeDelays
 
-    if timeDelay(k) > N
-        error('time delay too long');
+    % Check enough samples to compute an automutual information
+    if timeDelay(k) > N - 5
+        % Minimum 5 samples to compute a mutual information (make higher?)
+        % Time series is too short -- set the remaining to NaNs
+        amis(k:end) = NaN;
+        break
     end
 
-    % ------------------------------------------------------------------------------
     % Form the time-delay vectors y1 and y2
     y1 = y(1:end-timeDelay(k));
     y2 = y(1+timeDelay(k):end);
+
+    % Reinitialize for Kraskov:
+    miCalc.initialise(1,1);
 
     % Set observations to time-delayed versions of the time series:
     miCalc.setObservations(y1, y2);
 
     % Compute:
     amis(k) = miCalc.computeAverageLocalOfObservations();
+
+    % Plot:
+    if doPlot
+        plot(y1,y2,'.k'); title(sprintf('ami = %.3f',amis(k))); pause(0.1)
+    end
 end
 
-% ------------------------------------------------------------------------------
+if any(isnan(amis))
+    warning('time series too short for automutual information calculations up to lags of %u',max(timeDelay))
+end
+
+if doPlot
+    plot(amis,'-k')
+end
+
+%-------------------------------------------------------------------------------
 % Make outputs:
+%-------------------------------------------------------------------------------
 
 if numTimeDelays == 1
     % output a scalar
@@ -97,7 +123,5 @@ else
         out.(sprintf('ami%u',timeDelay(k))) = amis(k);
     end
 end
-
-
 
 end

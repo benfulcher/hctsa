@@ -213,22 +213,13 @@ end
 % ------------------------------------------------------------------------------
 %% Using likelihood now:
 % ------------------------------------------------------------------------------
-% (1) Gauss
-[muhat, sigmahat] = normfit(k);
-out.gaussmu = muhat;
-out.gausssigma = sigmahat;
-out.gaussnlogL = normlike([muhat,sigmahat],k);
+% Gaussian
+out.gaussnlogL = normlike([mean(k),std(k)],k);
 
-% (2) Exp
-muhat = expfit(k);
-out.expmu = muhat;
-out.expnlogL = explike(muhat,k);
+% Exp
+out.expnlogL = explike(mean(k),k);
 
-% (3) Poisson
-lambdahat = poissfit(k);
-out.explambda = lambdahat;
-
-% (4) Extreme Value Distribution
+% Extreme Value Distribution
 paramhat = evfit(k);
 out.evparm1 = paramhat(1);
 out.evparm2 = paramhat(2);

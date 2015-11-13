@@ -6,16 +6,16 @@ function out = ST_SimpleStats(x,whatStat)
 %
 % whatStat, the statistic to return:
 %          (i) 'zcross': the proportionof zero-crossings of the time series
-%                        (z-scored input thus returns mean-crossings),
+%                        (z-scored input thus returns mean-crossings)
 %          (ii) 'maxima': the proportion of the time series that is a local maximum
 %          (iii) 'minima': the proportion of the time series that is a local minimum
 %          (iv) 'pmcross': the ratio of the number of times that the (ideally
 %                          z-scored) time-series crosses +1 (i.e., 1 standard
 %                          deviation above the mean) to the number of times
 %                          that it crosses -1 (i.e., 1 standard deviation below
-%                          the mean).
+%                          the mean)
 %          (v) 'zsczcross': the ratio of zero crossings of raw to detrended
-%                           time series where the raw has zero mean.
+%                           time series where the raw has zero mean
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

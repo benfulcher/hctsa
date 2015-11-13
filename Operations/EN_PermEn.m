@@ -89,7 +89,7 @@ p = countPerms/Nx; %((Nx-(m-1))*tau);
 p_0 = p(p>0); % makes log(0) = 0
 out.permEn = -sum(p_0.*log2(p_0));
 
-% Normalized permutation entropy
+% Normalized permutation entropy (more comparable across m?)
 mFact = factorial(m);
 out.normPermEn = out.permEn/log2(mFact);
 

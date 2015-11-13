@@ -127,14 +127,16 @@ tc3_surr = tc3dat(2:end);
 muhat = mean(tc3_surr);
 sigmahat = std(tc3_surr);
 % probability of data given Guassian surrogates
-% out.normpatp = normpdf(tc3_y,muhat,sigmahat);
 out.normpatponmax = normpdf(tc3_y,muhat,sigmahat)/normpdf(muhat,muhat,sigmahat);
+
 % Probability at least that distance from mean, using ztest:
-[~, ztest_p] = ztest(tc3_y, muhat, sigmahat);
-out.ztestp = ztest_p;
 
 % 2) stds from mean
 out.stdfrommean = abs(tc3_y - mean(tc3_surr))/std(tc3_surr);
+% (~equivalent to a z-test:)
+[~, out.ztestp] = ztest(tc3_y, muhat, sigmahat);
+% (both of these stats are a monotonic function of normpatponmax)
+
 % iqrs from median
 out.iqrsfrommedian = abs(tc3_y - median(tc3_surr))/iqr(tc3_surr);
 
@@ -143,9 +145,6 @@ out.stdsurr = sigmahat;
 out.meansurr = muhat;
 
 % 4) kernel density test
-% ksx = linspace(min(tc3_surr),max(tc3_surr),200); % don't know how to pick
-% extremeties this way...
-% ksf = ksdensity(tc3_surr,ksx,'function','pdf');
 [ksf, ksx] = ksdensity(tc3_surr,'function','pdf');
 % hold on;plot(ksx,ksf,'r')
 ksdx = ksx(2) - ksx(1);

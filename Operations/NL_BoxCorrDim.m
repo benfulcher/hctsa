@@ -82,7 +82,7 @@ end
 % ------------------------------------------------------------------------------
 %% Output Statistics
 % ------------------------------------------------------------------------------
-% These statistics are just from my intuition
+% These statistics are just from intuition
 
 m = size(rs,2); % number of embedding dimensions
 ldr = size(rs,1); % not completely clear from TSTOOL what ldr represents (= 17)
@@ -105,7 +105,7 @@ out.stdmedian = std(median(rs));
 
 rsstretch = rs(:);
 out.medianstretch = median(rsstretch);
-out.minstretch = min(rsstretch);
+out.minstretch = min(rsstretch); % same as at maximum embedding dimension, m, or usually at maximum ldr (18)
 out.iqrstretch = iqr(rsstretch);
 
 end

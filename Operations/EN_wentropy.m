@@ -64,6 +64,7 @@ switch whaten
         out = wentropy(y,'threshold',p)/N;
 
     case 'sure'
+        % Equivalent to threshold entropy?
         out = wentropy(y,'sure',p)/N;
 
     otherwise

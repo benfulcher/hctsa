@@ -146,7 +146,9 @@ catch emsg
     % out = NaN; return
 end
 
-% Compute step-ahead predictions
+%-------------------------------------------------------------------------------
+% Step-ahead predictions
+%-------------------------------------------------------------------------------
 % steps = 2; % predicts this many steps ahead
 % Maybe look at trends across different prediction horizons...
 yp = predict(mp, ytest, steps, 'init', 'e'); % across whole ytest dataset
@@ -156,10 +158,12 @@ yp = predict(mp, ytest, steps, 'init', 'e'); % across whole ytest dataset
 
 mresiduals = ytest.y - yp.y;
 
-% 1) Get statistics on residuals
+%-------------------------------------------------------------------------------
+% Statistics on residuals
+%-------------------------------------------------------------------------------
 residout = MF_ResidualAnalysis(mresiduals);
 
-% convert these to local outputs in quick loop
+% Convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
     out.(fields{k}) = residout.(fields{k});

@@ -172,7 +172,7 @@ if doPlot
     figure('color','w'); plot(binCenters,nhist,'o-k')
 end
 out.maxhisthist = max(nhist);
-out.phisthistmin = nhist(1);
+out.phisthistmin = nhist(1); % this is the same as maxhisthist
 out.hhisthist = -sum(nhist(nhist > 0).*log(nhist(nhist > 0)));
 
 end

@@ -61,7 +61,7 @@ switch meanType
 	case 'rms' % rms
 		out = sqrt(sum(y.^2)/N);
 
-    case 'iqm' % interquartile mean
+    case 'iqm' % interquartile mean, cf. DN_TrimmedMean
         p = prctile(y, [25; 75]);
         out = mean(y(y >= p(1) & y <= p(2)));
 

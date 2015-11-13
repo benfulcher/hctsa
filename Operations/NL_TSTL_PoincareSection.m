@@ -208,6 +208,8 @@ for i = 1:length(numPartitions)
     out.(sprintf('tracepbox%u',numPartitions(i))) = sum(diag(pbox)); % trace
 end
 
+% NOTE: max and range provide almost the same information on real data.
+
 % can imagine doing many more things; like seeing different slabs of the
 % space, or finding the line whos vicinity includes many points, etc. but I
 % think this is enough for now.

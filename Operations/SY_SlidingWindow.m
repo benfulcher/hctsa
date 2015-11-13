@@ -37,6 +37,11 @@ function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
 % incMove, the increment to move the window at each iteration, as 1/fraction of the
 %       window length (e.g., incMove = 2, means the window moves half the length of the
 %       window at each increment)
+%
+% NOTE: SY_SlidingWindow(y,'mean','std',X,1) is the same as StatAvX, computed as
+%                       SY_StatAv(y,'seg',X);
+% cf. "Heart rate control in normal and aborted-SIDS infants", S. M. Pincus et al.
+%           Am J. Physiol. Regul. Integr. Comp. Physiol. 264(3) R638 (1993)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -66,9 +66,9 @@ switch removeHow
     case 'absfar' % remove a proportion p of points furthest from the mean
         [~, is] = sort(abs(y),'ascend');
     case 'min'
-        [~, is] = sort(y,'ascend');
+        [~, is] = sort(y,'descend'); % remove a proportion p of points with the lowest values
     case 'max'
-        [~, is] = sort(y,'descend');
+        [~, is] = sort(y,'ascend'); % remove a proportion p of points with the highest values
     case 'random'
         is = randperm(N);
     otherwise

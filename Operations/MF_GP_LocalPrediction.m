@@ -242,25 +242,35 @@ end
 % ------------------------------------------------------------------------------
 %% (1) PREDICTION ERROR MEASURES
 % ------------------------------------------------------------------------------
-allstderrs = abs(mus-yss)./stderrs; % differences between predictions and actual
-                              % in units of standard error (95% confidence
-                              % interval error bars)
-allabserrs = abs(mus-yss);
 
+% Absolute errors:
+allabserrs = abs(mus-yss);
+% In units of standard errors (95% confidence interval error bars)
+allstderrs = abs(mus-yss)./stderrs;
+
+% ---
+% * Stats on all errors:
+% ---
 
 % largest error:
 out.maxstderr = max(allstderrs(:));
 out.maxabserr = max(allabserrs(:));
+
 % smallest error:
 out.minstderr = min(allstderrs(:));
 out.minabserr = min(allabserrs(:));
+
 % mean error (across all):
 out.meanstderr = mean(allstderrs(:));
 out.meanabserr = mean(allabserrs(:));
 
+% ---
+% * Stats on errors per run
+% ---
+
 % Summary of how it did on each run:
-stderr_run = mean(abs(mus-yss)./stderrs); % per run
-abserr_run = mean(abs(mus-yss));
+stderr_run = mean(allstderrs);
+abserr_run = mean(allabserrs);
 
 % Mean error for a run
 out.meanstderr_run = mean(stderr_run);
@@ -274,7 +284,7 @@ out.maxabserr_run = max(abserr_run);
 out.minstderr_run = min(stderr_run);
 out.minabserr_run = min(abserr_run);
 
-% Error bar stats
+% Error bar stats:
 out.maxerrbar = max(stderrs(:)); % largest error bar
 out.meanerrbar = mean(stderrs(:)); % mean error bar length
 out.minerrbar = min(stderrs(:)); % minimum error bar length

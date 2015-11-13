@@ -64,7 +64,7 @@ if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
     end
 end
 
-nfeat = 9; % the number of features calculated at each point
+nfeat = 8; % the number of features calculated at each point
 if (length(numGroups) == 1) && (length(tau) > 1) % vary tau
     if numGroups < 2; return; end % need more than 2 groups
     taur = tau; % the tau range
@@ -88,9 +88,8 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     for i = 1:length(numGroupsRange)
         numGroups = numGroupsRange(i);
         yth = SUB_discretize(y,numGroups); % thresholded data: yth
-        store(i,:) = loc_getmeasures(yth,numGroups);
+        store(i,:) = SUB_getMeasures(yth,numGroups);
     end
-
 
     numGroupsRange = numGroupsRange'; % needs to be a column vector for the fitting routines
 
@@ -221,17 +220,6 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
     out.mineigfexp_adjr2 = gof.adjrsquare;
     out.mineigfexp_rmse = gof.rmse;
 
-    % 9) mean real eigenvalue of T
-    % Fit an exponential decay
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.2]);
-    f = fittype('a*exp(b*x)','options',s);
-    [c, gof] = fit(numGroupsRange,store(:,9),f);
-    out.meaneigfexp_a = c.a;
-    out.meaneigfexp_b = c.b;
-    out.meaneigfexp_r2 = gof.rsquare;
-    out.meaneigfexp_adjr2 = gof.adjrsquare;
-    out.meaneigfexp_rmse = gof.rmse;
-
 end
 
 % ------------------------------------------------------------------------------
@@ -255,10 +243,9 @@ end
     end
 
     % ------------------------------------------------------------------------------
-    function out = loc_getmeasures(yth,numGroups)
+    function out = SUB_getMeasures(yth,numGroups)
         % returns a bunch of metrics on the transition matrix
         N = length(yth);
-%         ng = max(yth);
 
         % 1) Calculate the one-time transition matrix
         T = zeros(numGroups);
@@ -280,32 +267,18 @@ end
         out(1) = mean(diag(T)); % mean of diagonal elements
         out(2) = max(diag(T)); % max of diagonal elements
         out(3) = sum(diag(T)); % sum of diagonal elements (trace)
-%         out(4) = std(diag(T)); % std of diagonal elements
 
         %  (ii) measures of symmetry:
         out(4) = sum(sum(abs((T-T')))); % sum of differences of individual elements
-%         out(5) = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower
-                                                          % triangular parts of T
 
         % (iii) measures from covariance matrix:
         out(5) = sum(diag(cov(T))); % trace of covariance matrix
-%         out(6) = max(max(cov(T))); % maximum value in the covariance matrix
-%         out(7) = min(min(cov(T))); % minimum value in the covariance matrix
 
         % (iv) measures from eigenvalues of T
         eigT = eig(T);
         out(6) = std(eigT); % std of eigenvalues
         out(7) = max(real(eigT)); % maximum eigenvalue
         out(8) = min(real(eigT)); % minimum eigenvalue
-        out(9) = mean(real(eigT)); % mean eigenvalue
-%         out(14) = max(imag(eigT)); % maximum imaginary part of eigenavlues
-
-        % % (vi) measures from eigenvalues of covariance matrix:
-%         eigcovT = eig(cov(T));
-%         out(10) = max(eigcovT); % max eigenvalue of covariance matrix
-% %         out(16) = min(eigcovT); % min eigenvalue of covariance matrix
-%         out(11) = std(eigcovT); % std of eigenvalues of covariance matrix
-%         out(12) = mean(eigcovT); % mean eigenvalue of covariance matrix
 
     end
 

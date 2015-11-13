@@ -92,10 +92,9 @@ end
 % ------------------------------------------------------------------------------
 out.std = std(perc);
 out.range = max(perc) - min(perc);
-out.min = min(perc);
-out.max = max(perc);
+out.min = min(perc); % (this is the same as perc_(m), since perc is decreasing)
+out.max = max(perc); % (this is the same as perc_1)
 out.top2 = sum(perc(1:2)); % variance explained in top two eigendirections
-out.meanch = mean(diff(perc));
 
 % Number of eigenvalues you need to reconstruct X%
 csperc = cumsum(perc);

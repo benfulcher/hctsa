@@ -24,7 +24,9 @@ function out = CO_AddNoise(y,tau,amiMethod,extraParam,randomSeed)
 %
 % tau, the time delay for computing AMI
 %
-% amiMethod, the method for computing AMI
+% amiMethod, the method for computing AMI:
+%      * one of 'std1','std2','quantiles','even' for histogram-based estimation,
+%      * one of 'gaussian','kernel','kraskov1','kraskov2' for estimation using JIDT
 %
 % extraParam, e.g., the number of bins input to CO_HistogramAMI, or parameter
 %             for IN_AutoMutualInfo
@@ -157,8 +159,8 @@ out.fitexprmse = gof.rmse;
 % Fit linear function to output
 % ------------------------------------------------------------------------------
 p = polyfit(noiseRange',amis,1);
-out.fitlina = p(1);
-out.fitlinb = p(2);
+out.fitlina = p(1); % gradient
+out.fitlinb = p(2); % intercept
 linfit = polyval(p,noiseRange);
 out.linfit_mse = mean((linfit' - amis).^2);
 

@@ -259,7 +259,7 @@ out.bic = BIC;
 % otherwise will be quite flat...
 out.maxsigma = max(sigmas);
 out.minsigma = min(sigmas);
-out.rangesigma = max(sigmas) - min(sigmas);
+out.rangesigma = max(sigmas) - min(sigmas); % very similar information to max(sigma) for most time series
 out.stdsigma = std(sigmas);
 out.meansigma = mean(sigmas);
 
@@ -337,8 +337,6 @@ out.diff_ac1 = CO_AutoCorr(y.^2,1,'Fourier') - CO_AutoCorr(stde2,1,'Fourier');
 %% (5) Comparison to other models
 % e.g., does the additional heteroskedastic component improve the model fit
 % over just the conditional mean component of the model.
-
-
 
 
 end

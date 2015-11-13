@@ -112,7 +112,7 @@ if isempty(th) % output summary statistics
 
     % nn drops
     dnn = diff(nn);
-    out.mdrop = mean(dnn);
+    out.mdrop = mean(dnn); % same information as in fnn(maxm)
     out.pdrop = -sum(sign(dnn))/(maxm-1);
 
     % fnn
