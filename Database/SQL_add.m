@@ -227,7 +227,7 @@ if ~isMatFile
             else
                 reply = input(['If we go on, we will attempt to read all time series ' ...
                             'from file and add all ' ...
-                            'data to HCTSA_loc.mat\n<<<Type ''y'' to continue...>>>'],'s');
+                            'data to HCTSA.mat\n<<<Type ''y'' to continue...>>>'],'s');
             end
         else
             if forDatabase
@@ -235,7 +235,7 @@ if ~isMatFile
                             'data to the database.\n<<<Type ''y'' to continue...>>>'],'s');
             else
                 reply = input(['If we go on, we will attempt to add all ' ...
-                            'data to HCTSA_loc.mat\n<<<Type ''y'' to continue...>>>'],'s');
+                            'data to HCTSA.mat\n<<<Type ''y'' to continue...>>>'],'s');
             end
         end
 

@@ -17,7 +17,7 @@ function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,be
 %               each individual operation.
 %
 %---OUTPUTS:
-% Writes output to customFile (HCTSA_loc.mat by default)
+% Writes output to customFile (HCTSA.mat by default)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -58,7 +58,7 @@ if nargin < 4 || isempty(computeWhat)
 	computeWhat = 'missing';
 end
 
-% Custom HCTSA_loc.mat file:
+% Custom HCTSA.mat file:
 if nargin < 5
     customFile = ''; % compute all op_ids in the file by default
 end
@@ -73,7 +73,7 @@ end
 %% Load information from local files
 % --------------------------------------------------------------------------
 if isempty(customFile)
-	customFile = 'HCTSA_loc.mat';
+	customFile = 'HCTSA.mat';
 end
 fprintf(1,'Loading data from %s...',customFile);
 fileVarsStruct = whos('-file',customFile);

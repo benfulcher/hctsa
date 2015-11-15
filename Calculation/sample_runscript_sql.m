@@ -60,7 +60,7 @@ for i = 1:length(tsid_range)
         % time series and operations:
         TS_compute(doParallelize);
         % (iii) Write the results back to the database:
-        SQL_store(writeWhat,doLog);
+        SQL_store(writeWhat);
     else
         fprintf(1,'No calculation performed at ts_id = %u\n',tsid_range(i));
     end

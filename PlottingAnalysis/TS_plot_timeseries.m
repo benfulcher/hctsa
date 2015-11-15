@@ -105,14 +105,7 @@ if isstruct(whatData)
     % Provide it all yourself
     TimeSeries = whatData.TimeSeries;
 else
-    % If you specify one of these labels, 'norm', or 'orig'
-    switch whatData
-    case 'norm'
-        theFile = 'HCTSA_N.mat';
-    case 'orig'
-        theFile = 'HCTSA_loc.mat';
-    end
-    load(theFile,'TimeSeries');
+    [~,TimeSeries] = TS_LoadData(whatData);
 end
 
 % ------------------------------------------------------------------------------
