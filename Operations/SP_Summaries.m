@@ -310,7 +310,7 @@ out.spect_shann_ent_norm = mean(Hshann);
 % "Spectral Flatness Measure"
 % ------------------------------------------------------------------------------
 % which is given in dB as 10 log_10(gm/am) where gm is the geometric mean and am
-% is the arithmetic mean of the power spectrum.
+% is the arithmetic mean of the power spectral density
 out.sfm = 10*log10(geomean(S)/mean(S));
 
 % ------------------------------------------------------------------------------

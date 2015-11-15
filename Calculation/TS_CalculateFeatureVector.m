@@ -1,5 +1,33 @@
-function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,beVocal)
+function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,codeSpecial,beVocal)
 % TS_CalculateFeatureVector	Compute a feature vector from an input time series
+%
+%---INPUTS:
+% tsStruct, either (i) a vector of time-series data to compute
+% 				or (ii) an hctsa-style structure of time-series data
+% doParallel, (binary) whether to compute the features using parallel processing
+% Operations, an hctsa-style structure array of Operations
+% MasterOperations, an hctsa-style structure array of MasterOperations
+% codeSpecial, whether to code special values with quality labels (for mySQL database)
+% 				this makes sure the featureVector is all real numbers, and any
+%				special values (like NaNs, Infs, etc.) are coded with corresponding
+% 				labels in calcQuality.
+% 				codeSpecial = 0: special values are kept in the feature vector,
+% 								and any errors are coded as NaN.
+% 				codeSpecial = 1: featureVector is all real numbers, and is set to
+% 							     zero where any special-valued outputs occur.
+% beVocal, whether to give user feedback on the computation.
+%
+%---OUTPUTS:
+% featureVector, the feature vector obtained by running MasterOperations and
+% 					retrieving all features defined in the Operations structure
+% 					array on the time series data given in tsStruct.
+% calcTimes, corresponding calculation times for each feature in featureVector
+% calcQuality, quality labels of each calculation (e.g., coding for NaNs, Infs, etc.)
+%
+%---USAGE:
+% Quickly compute a feature vector of a 500-long random time-series using the
+% default operation library using parallel processing:
+% >> features = TS_CalculateFeatureVector(randn(500,1));
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -29,7 +57,7 @@ if isnumeric(tsStruct)
 						'Length',length(tsData));
 end
 if nargin < 2
-	doParallel = 0;
+	doParallel = 1;
 end
 if nargin < 3 || isempty(Operations) || ischar(Operations)
 	% Use a default library:
@@ -50,8 +78,13 @@ if nargin < 4
 	[Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 end
 
-% Whether to give information out to screen
+% Whether to code up special-valued outputs
 if nargin < 5
+	codeSpecial = 0;
+end
+
+% Whether to give information out to screen
+if nargin < 6
 	beVocal = 1;
 end
 
@@ -187,9 +220,9 @@ else
 	for jj = 1:numCalc
 		try
 			[featureVector(jj), calcQuality(jj), calcTimes(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
-											   MasterCalcTime(par_OperationMasterInd(jj)), ...
-											   par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
-											   par_OperationCodeString{jj});
+									   MasterCalcTime(par_OperationMasterInd(jj)), ...
+									   par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
+									   par_OperationCodeString{jj});
 		catch
 			fprintf(1,'---Error with %s\n',par_OperationCodeString{jj});
 			keyboard
@@ -207,31 +240,51 @@ end
 % --------------------------------------------------------------------------
 %% Code special values:
 % --------------------------------------------------------------------------
-% (*) Errorless calculation: q = 0, Output = <real number>
-% (*) Fatal error: q = 1, Output = 0; (this is done already in the code above)
+% (*) Errorless calculation: calcQuality = 0, featureVector = <real number>
 
-% (*) Output = NaN: q = 2, Output = 0
+% (*) Output = NaN: calcQuality = 2, set featureVector = 0
 RR = isnan(featureVector); % NaN
 if any(RR)
-	calcQuality(RR) = 2; featureVector(RR) = 0;
+	calcQuality(RR) = 2;
+	if codeSpecial
+		featureVector(RR) = 0;
+	end
 end
 
-% (*) Output = Inf: q = 3, Output = 0
+% (*) Output = Inf: calcQuality = 3, set featureVector = 0
 RR = (isinf(featureVector) & featureVector > 0); % Inf
 if any(RR)
-	calcQuality(RR) = 3; featureVector(RR) = 0;
+	calcQuality(RR) = 3;
+	if codeSpecial
+		featureVector(RR) = 0;
+	end
 end
 
-% (*) Output = -Inf: q = 4, Output = 0
+% (*) Output = -Inf: calcQuality = 4, set featureVector = 0
 RR = (isinf(featureVector) & featureVector < 0);
 if any(RR)
-	calcQuality(RR) = 4; featureVector(RR) = 0;
+	calcQuality(RR) = 4;
+	if codeSpecial
+		featureVector(RR) = 0;
+	end
 end
 
-% (*) Output is a complex number: q = 5, Output = 0
+% (*) Output is a complex number: calcQuality = 5, set featureVector = 0
 RR = (imag(featureVector)~=0);
 if any(RR)
-	calcQuality(RR) = 5; featureVector(RR) = 0;
+	calcQuality(RR) = 5;
+	if codeSpecial
+		featureVector(RR) = 0;
+	end
+end
+
+% (*) Fatal error: calcQuality = 1, featureVector = 0
+% 		(this is done already in the code above)
+if ~codeSpecial
+	% If you want special values in your feature vector (~codeSpecial), then
+	% we need to put errors back into the feature vector as NaNs:
+	RR = (calcQuality==1);
+	featureVector(RR) = NaN;
 end
 
 % --------------------------------------------------------------------------
@@ -250,9 +303,9 @@ fprintf(1,'********************************************************************\
 fprintf(1,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
 fprintf(1,'Calculation complete for %s (ts_id = %u, N = %u)\n', ...
 					tsStruct.Name,tsStruct.ID,tsStruct.Length);
-fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored\n[/%u total calculations].\n',...
-					numGood,numErrors,numSpecial,numCalc);
-fprintf(1,'All calculations for this time series took %s.\n',BF_thetime(toc(fullTimer),1));
+fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored\n',...
+					numGood,numErrors,numSpecial);
+fprintf(1,'All %u calculations for this time series took %s.\n',numCalc,BF_thetime(toc(fullTimer),1));
 fprintf(1,'********************************************************************\n')
 
 end

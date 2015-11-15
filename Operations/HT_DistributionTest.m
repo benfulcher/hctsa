@@ -3,7 +3,7 @@ function p = HT_DistributionTest(x,theTest,theDistn,numBins)
 %
 % Fits a distribution to the data and then performs an appropriate hypothesis
 % test to quantify the difference between the two distributions.
-% 
+%
 % We fit Gaussian, Extreme Value, Uniform, Beta, Rayleigh, Exponential, Gamma,
 % Log-Normal, and Weibull distributions, using code described for DN_M_kscomp.
 %
@@ -68,25 +68,34 @@ switch theDistn
         x = (x - min(x) + 0.01*std(x)) / (max(x) - min(x) + 0.02*std(x));
         a = betafit(x);        % then fit
     case 'rayleigh'
-        if any(x < 0), p = NaN; return
+        if any(x < 0)
+            p = NaN; return
         else % valid domain to fit a Rayleigh distribution
             a = raylfit(x);
         end
     case 'exp'
-        if any(x < 0), p = NaN; return
-        else a = expfit(x);
+        if any(x < 0)
+            p = NaN; return
+        else
+            a = expfit(x);
         end
     case 'gamma'
-        if any(x < 0), p = NaN; return
-        else a = gamfit(x);
+        if any(x < 0)
+            p = NaN; return
+        else
+            a = gamfit(x);
         end
     case 'logn'
-        if any(x<=0), p = NaN; return
-        else a = lognfit(x);
+        if any(x<=0)
+            p = NaN; return
+        else
+            a = lognfit(x);
         end
     case 'wbl'
-        if any(x<=0), p = NaN; return
-        else a = wblfit(x);
+        if any(x<=0)
+            p = NaN; return
+        else
+            a = wblfit(x);
         end
     otherwise
         error('Unknown distibution ''%s''',theDistn);
