@@ -212,7 +212,7 @@ else
     out.fexpabsacf_r2 = NaN;
     out.fexpabsacf_adjr2 = NaN;
     out.fexpabsacf_rmse = NaN;
-    out.fexpabsacf_varres = NaN;
+    out.fexpabsacf_stdres = NaN;
     % out.flinlmxacf_a = NaN;
     % out.flinlmxacf_b = NaN;
     % out.flinlmxacf_r2 = NaN;
