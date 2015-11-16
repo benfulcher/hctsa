@@ -243,7 +243,6 @@ out.std = std(S);
 out.stdlog = log(out.std);
 out.logstd = std(logS);
 out.mean = mean(S);
-out.meanlog = log(out.mean);
 out.logmean = mean(logS);
 for i = 3:5
     out.(sprintf('mom%u',i)) = DN_Moments(S,i);;
@@ -274,7 +273,6 @@ out.wmax_95 = f_frac_w_max(0.95);
 out.wmax_99 = f_frac_w_max(0.99);
 
 % Width of saturation measures
-out.w5_95 = out.wmax_95 - out.wmax_5;
 out.w10_90 = out.wmax_90 - out.wmax_10; % from 10% to 90%:
 out.w25_75 = out.wmax_75 - out.wmax_25;
 
@@ -333,16 +331,21 @@ out.ylogareatopeak = sum(logS(1:i_maxS))*dw; % (semilogy)
 warning('off','stats:robustfit:RankDeficient')
 
 % (1): Across full range
-out = giveMeRobustStats(log(w),log(S),'linfitloglog_all',out);
+r_all = (w > 0); % avoid -Inf for log(0) when w = 0;
+out = giveMeRobustStats(log(w(r_all)),log(S(r_all)),'linfitloglog_all',out);
 
 % (2): First half (low frequency)
-out = giveMeRobustStats(log(w(1:round(N/2))),log(S(1:round(N/2))),'linfitloglog_lf',out);
+r_lf = (w > 0); % w(1) = 0 -> log(0) = -Inf
+r_lf(floor(N/2)+1:end) = 0; % remove second half of angular frequenciesf
+out = giveMeRobustStats(log(w(r_lf)),log(S(r_lf)),'linfitloglog_lf',out);
 
 % (3): Second half (high frequency)
-out = giveMeRobustStats(log(w(round(N/2):end)),log(S(round(N/2):end)),'linfitloglog_hf',out);
+r_hf = floor(N/2)+1:N;
+out = giveMeRobustStats(log(w(r_hf)),log(S(r_hf)),'linfitloglog_hf',out);
 
 % (4): Middle half (mid-frequencies)
-out = giveMeRobustStats(log(w(round(N/4):round(N*3/4))),log(S(round(N/4):round(N*3/4))),'linfitloglog_mf',out);
+r_mf = round(N/4):round(N*3/4);
+out = giveMeRobustStats(log(w(r_mf)),log(S(r_mf)),'linfitloglog_mf',out);
 
 % (5) Fit linear to semilog plot (across full range)
 out = giveMeRobustStats(w,log(S),'linfitsemilog_all',out);
@@ -426,13 +429,19 @@ function mel = w2mel(w) % convert to mel spectrum
 end
 
 function out = giveMeRobustStats(xData,yData,textID,out)
+    % Add statistics to the output structure from a robust linear fit
+    % between xData and yData
+
+    % Perform the fit:
     [a, stats] = robustfit(xData,yData);
+
+    % Add the statistics to the output structure:
     out.(sprintf('%s_a1',textID)) = a(1); % robust intercept
     out.(sprintf('%s_a2',textID)) = a(2); % robust gradient
-    out.(sprintf('%s_sigrat',textID)) = stats.ols_s/stats.robust_s;
-    out.(sprintf('%s_s',textID)) = stats.s; % esimate on sigma
-    out.(sprintf('%s_sea1',textID)) = stats.se(1); % standard error of coefficient 1 estimate
-    out.(sprintf('%s_sea2',textID)) = stats.se(2); % standard error of coefficient 2 estimate
+    out.(sprintf('%s_sigrat',textID)) = stats.ols_s/stats.robust_s; % ratio of sigma estimates
+    out.(sprintf('%s_sigma',textID)) = stats.s; % esimate on sigma
+    out.(sprintf('%s_sea1',textID)) = stats.se(1); % standard error of 1st coefficient estimate
+    out.(sprintf('%s_sea2',textID)) = stats.se(2); % standard error of 2nd coefficient estimate
 end
 
 end

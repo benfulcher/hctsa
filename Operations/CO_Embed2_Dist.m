@@ -59,21 +59,27 @@ if size(y,2) > size(y,1);
     y = y';
 end
 
+% ------------------------------------------------------------------------------
+% 2-dimensional time-delay embedding:
+% ------------------------------------------------------------------------------
+
 m = [y(1:end-tau), y(1+tau:end)];
-% m2 = y(1+tau:end);
 
-
-% Plot some outputs
+% ------------------------------------------------------------------------------
+% Plot the embedding:
+% ------------------------------------------------------------------------------
 if doPlot
-    figure('color','w'); box('on');
+    figure('color','w'); box('on'); hold on
     plot(m(:,1),m(:,2),'.');
+    plot(m(1:min(200,end),1),m(1:min(200,end),2),'k');
 end
 
 % ------------------------------------------------------------------------------
 % Calculate Euclidean distances between successive points in this space, d:
 % ------------------------------------------------------------------------------
 
-d = sum(abs(diff(m(:,1)).^2 + diff(m(:,2)).^2),2); % Correct form, updated 9/7/2011
+% d = diff(m(:,1)).^2 + diff(m(:,2)).^2; % sum of squared differences
+d = sqrt(diff(m(:,1)).^2 + diff(m(:,2)).^2); % Euclidean distance
 
 % Outputs statistics obtained from ordered set of distances between successive points in the recurrence space
 out.d_ac1 = CO_AutoCorr(d,1,'Fourier'); % Autocorrelation at lag 1
@@ -93,7 +99,6 @@ out.d_cv = mean(d)/std(d); % coefficient of variation of distances
 % Fit to all values (often some extreme outliers, but oh well)
 l = expfit(d);
 nlogL = explike(l,d);
-out.d_expfit_l = l;
 out.d_expfit_nlogL = nlogL;
 
 % Sum of abs differences between exp fit and observed:

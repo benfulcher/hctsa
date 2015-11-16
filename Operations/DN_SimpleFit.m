@@ -66,7 +66,7 @@ BF_CheckToolbox('curve_fitting_toolbox');
 % ------------------------------------------------------------------------------
 % Two cases: distribution fits and fits on the data
 distModels = {'gauss1','gauss2','exp1','power1'}; % valid distribution models
-TSmodels = {'sin1','sin2','sin3','fourier1','fourier2','fourier3'}; % valid time series models
+TSmodels = {'sin1','sin2','sin3','fourier1','fourier2','fourier3'}; % valid time-series models
 
 if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
     if nargin < 3 || isempty(numBins); % haven't specified numBins

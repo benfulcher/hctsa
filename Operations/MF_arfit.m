@@ -228,11 +228,17 @@ out.maxImS = max(imag(S));
 out.maxabsS = max(abs(S));
 out.stdabsS = std(abs(S));
 
-out.meanper = mean(per(1,:));
-out.stdper = std(per(1,:));
-out.maxper = max(per(1,:));
-out.minper = min(per(1,:));
-out.meanpererr = mean(per(2,:));
+% Often you get infinite periods of oscillation -- remove these for the purposes
+% of taking stats:
+perSpecial = ~isfinite(per);
+perFiltered(perSpecial) = NaN;
+
+out.hasInfper = sum(perSpecial(1,:));
+out.meanper = nanmean(perFiltered(1,:));
+out.stdper = nanstd(perFiltered(1,:));
+out.maxper = nanmax(perFiltered(1,:));
+out.minper = nanmin(perFiltered(1,:));
+out.meanpererr = nanmean(per(2,:));
 
 out.meantau = mean(tau(1,:));
 out.maxtau = max(tau(1,:));

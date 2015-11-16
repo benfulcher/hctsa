@@ -45,6 +45,7 @@ function out = NL_TSTL_dimensions(y,nbins,embedParams)
 %% Preliminaries, check inputs
 % ------------------------------------------------------------------------------
 N = length(y); % length of time series
+doPlot = 0; % plot outputs to screen
 
 % (1) Maximum number of bins, nbins
 if nargin < 2 || isempty(nbins)
@@ -98,6 +99,11 @@ end
 % We now have the scaling of the boxcounting dimension, D0, the information
 % dimension D1, and the correlation dimension D2.
 
+% It seems like there's not extra information in the in dimension, D1, by these
+% estimates -- focus on the bc, D0 and correlation, D2.
+% Can switch this here:
+compute_in = 0;
+
 % ------------------------------------------------------------------------------
 %% Convert output to vectors
 % ------------------------------------------------------------------------------
@@ -112,9 +118,11 @@ bc_logr = spacing(bc); % this is log(r) -- length scale
 bc_logNlogr = bc_logN./(ones(size(bc_logN,2),1)*bc_logr)'; % look for this to be constant
 
 % (2) Information dimension (IN)
-in_logl = data(in); % I think this is log(l(r)), look for this to scale linearly
-in_logr = spacing(in);
-in_logllogr = in_logl./(ones(size(in_logl,2),1)*in_logr)'; % look for this to be constant
+if compute_in
+    in_logl = data(in); % I think this is log(l(r)), look for this to scale linearly
+    in_logr = spacing(in);
+    in_logllogr = in_logl./(ones(size(in_logl,2),1)*in_logr)'; % look for this to be constant
+end
 
 % (3) Correlation dimension (CO)
 co_logC = data(co); % look for this to scale linearly
@@ -122,16 +130,19 @@ co_logr = spacing(co);
 co_logClogr = co_logC./(ones(size(co_logC,2),1)*co_logr)'; % look for this to be constant
 
 
-% plot(bc_logr,bc_logNlogr,'o-')
-% plot(bc_logr,bc_logN,'o-')
-% input('BC')
-% plot(in_logr,in_logllogr,'o-')
-% plot(in_logr,in_logl,'o-')
-% input('IN')
-% plot(co_logr,co_logClogr,'o-')
-% plot(co_logr,co_logC,'o-')
-% input('CO')
-
+if doPlot
+    plot(bc_logr,bc_logNlogr,'o-')
+    plot(bc_logr,bc_logN,'o-')
+    input('BC')
+    if compute_in
+        plot(in_logr,in_logllogr,'o-')
+        plot(in_logr,in_logl,'o-')
+        input('IN')
+    end
+    plot(co_logr,co_logClogr,'o-')
+    plot(co_logr,co_logC,'o-')
+    input('CO')
+end
 
 % *** We now have to look for scaling regimes in each of these dimensions
 
@@ -150,7 +161,9 @@ out = struct;
 out = SUB_mch(bc_logr,bc_logN,'bc',out);
 
 % Information dimension:
-out = SUB_mch(bc_logr,bc_logN,'in',out);
+if compute_in
+    out = SUB_mch(bc_logr,bc_logN,'in',out);
+end
 
 % Correlation dimension:
 out = SUB_mch(co_logr,co_logC,'co',out);
@@ -173,17 +186,19 @@ out = SUB_scr(bc_logr,bc_logN(:,3),'scr_bc_m3',out);
 % Box counting dimension m = chosen/given
 out = SUB_scr(bc_logr,bc_logN(:,mopt),'scr_bc_mopt',out);
 
-% Information dimension, m = 1
-out = SUB_scr(in_logr,in_logl(:,1),'scr_in_m1',out);
+if compute_in
+    % Information dimension, m = 1
+    out = SUB_scr(in_logr,in_logl(:,1),'scr_in_m1',out);
 
-% Information dimension m = 2
-out = SUB_scr(in_logr,in_logl(:,2),'scr_in_m2',out);
+    % Information dimension m = 2
+    out = SUB_scr(in_logr,in_logl(:,2),'scr_in_m2',out);
 
-% Information dimension m = 3
-out = SUB_scr(in_logr,in_logl(:,3),'scr_in_m3',out);
+    % Information dimension m = 3
+    out = SUB_scr(in_logr,in_logl(:,3),'scr_in_m3',out);
 
-% Information dimension m = chosen/given
-out = SUB_scr(in_logr,in_logl(:,mopt),'scr_in_mopt',out);
+    % Information dimension m = chosen/given
+    out = SUB_scr(in_logr,in_logl(:,mopt),'scr_in_mopt',out);
+end
 
 % Correlation dimension, m = 1
 out = SUB_scr(co_logr,co_logC(:,1),'scr_co_m1',out);
@@ -205,8 +220,10 @@ out = SUB_scr(co_logr,co_logC(:,mopt),'scr_co_mopt',out);
 % Box counting dimension
 out = SUB_bestm(bc_logr,bc_logN,'bc',out);
 
-% Information dimension
-out = SUB_bestm(in_logr,in_logl,'in',out);
+if compute_in
+    % Information dimension
+    out = SUB_bestm(in_logr,in_logl,'in',out);
+end
 
 % Correlation dimension
 out = SUB_bestm(co_logr,co_logC,'co',out);

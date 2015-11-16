@@ -65,7 +65,7 @@ switch theDistn
         [a, b] = unifit(x);
     case 'beta'
         % clumsily scale to the range (0,1)
-        x = (x - min(x) + 0.01*std(x)) / (max(x) - min(x) + 0.02*std(x));
+        x = (x - min(x) + 0.01*std(x)) / (max(x) - min(x) + 0.01*std(x));
         a = betafit(x);        % then fit
     case 'rayleigh'
         if any(x < 0)
@@ -111,7 +111,7 @@ switch theTest
             case 'uni'
                 mycdf = {@unifcdf,a,b};
             case 'beta'
-                mycdf = {@betapdf,a(1),a(2)};
+                mycdf = {@betacdf,a(1),a(2)};
             case 'rayleigh'
                 mycdf = {@raylcdf,a};
             case 'exp'

@@ -55,9 +55,9 @@ if nargin < 5
 end
 %-------------------------------------------------------------------------------
 
-% Impose a minimum time-series length of 40 samples to perform a SampEn
+% Impose a minimum time-series length of 20 samples to perform a SampEn
 % (should probably be even higher...?)
-minTSLength = 40;
+minTSLength = 20;
 
 doPlot = 0; % whether to plot outputs
 numScales = length(scaleRange);

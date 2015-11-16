@@ -270,7 +270,6 @@ SY_StatAv(y,'len',200)	StatAvl200
 SY_StatAv(y,'len',250)	StatAvl250
 SY_StatAv(y,'len',500)	StatAvl500
 SY_StatAv(y,'len',1000)	StatAvl1000
-SY_StatAv(y,'len',2000)	StatAvl2000
 SY_SlidingWindow(y,'mean','std',2,1)		SY_SlidingWindow_m_s_2_1
 SY_SlidingWindow(y,'mean','std',3,1)		SY_SlidingWindow_m_s_3_1
 SY_SlidingWindow(y,'mean','std',4,1)		SY_SlidingWindow_m_s_4_1
@@ -334,7 +333,6 @@ SY_SlidingWindow(y,'ent','std',10,2)		SY_SlidingWindow_ent_s10_2
 SY_SlidingWindow(y,'ent','std',10,10)		SY_SlidingWindow_ent_s10_10
 SY_SlidingWindow(y,'ent','sampen',2,10)		SY_SlidingWindow_ent_sampen2_10
 SY_SlidingWindow(y,'ent','sampen',5,10)		SY_SlidingWindow_ent_sampen5_10
-SY_SlidingWindow(y,'ent','sampen',10,1)		SY_SlidingWindow_ent_sampen10_1
 SY_SlidingWindow(y,'ent','sampen',10,2)		SY_SlidingWindow_ent_sampen10_2
 SY_SlidingWindow(y,'ent','sampen',10,10)	SY_SlidingWindow_ent_sampen10_10
 SY_SlidingWindow(y,'ent','ent',2,1)			SY_SlidingWindow_ent_ent2_1
@@ -721,7 +719,7 @@ SB_TransitionMatrix(y,'quantile',4,'ac')	SB_TransitionMatrix_4ac
 SB_TransitionMatrix(y,'quantile',5,'ac')	SB_TransitionMatrix_5ac
 SB_TransitionpAlphabet(y,2:40,1)	SB_TransitionpAlphabet_40_1
 SB_TransitionpAlphabet(y,2:20,'ac')	SB_TransitionpAlphabet_20_ac
-CO_AutoCorrShape(y)	CO_AutoCorrShape
+CO_AutoCorrShape(y,'drown')	CO_AutoCorrShape_drown
 CO_Embed2_Basic(y,1)	CO_Embed2_Basic_1
 CO_Embed2_Basic(y,'tau')	CO_Embed2_Basic_tau
 PD_PeriodicityWang(y)	PD_PeriodicityWang
@@ -852,8 +850,7 @@ DN_SimpleFit(y,'gauss2',0)	    DN_SimpleFit_gauss2_ks
 DN_SimpleFit(y,'gauss2','sqrt')	DN_SimpleFit_gauss2_hsqrt
 DN_SimpleFit(y,'exp1',0)	    DN_SimpleFit_exp1_ks
 DN_SimpleFit(y,'exp1','sqrt')	DN_SimpleFit_exp1_hsqrt
-DN_SimpleFit(y,'power1',0)	    DN_SimpleFit_power1_ks
-DN_SimpleFit(y,'power1','sqrt')	DN_SimpleFit_power1_hsqrt
+DN_SimpleFit(x,'power1','sqrt')	DN_SimpleFit_power1_hsqrt
 DN_CompareKSFit(x,'norm')		DN_CompareKSFit_norm
 DN_CompareKSFit(x,'ev')		    DN_CompareKSFit_ev
 DN_CompareKSFit(x,'uni')		DN_CompareKSFit_uni
