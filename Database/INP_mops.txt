@@ -743,8 +743,7 @@ DN_RemovePoints(y,'max',0.8)	DN_RemovePoints_max_08
 CO_TranslateShape(y,'circle',1.5,'pts')	CO_TranslateShape_circle_15_pts
 CO_TranslateShape(y,'circle',2.5,'pts')	CO_TranslateShape_circle_25_pts
 CO_TranslateShape(y,'circle',3.5,'pts')	CO_TranslateShape_circle_35_pts
-CO_TranslateShape(y,'circle',4.5,'pts')	CO_TranslateShape_circle_45_pts
-CO_TranslateShape(y,'circle',5.5,'pts')	CO_TranslateShape_circle_55_pts
+CO_TranslateShape(y,'rectangle',2,'pts')	CO_TranslateShape_rectangle_2_pts
 CO_StickAngles(y)	CO_StickAngles_y
 CO_Embed2(y,'tau')	CO_Embed2_tau
 CO_Embed2_AngleTau(y,50)	CO_Embed2_AngleTau_50
@@ -798,11 +797,11 @@ FC_Surprise(y,'T2',20,2,'updown',500,'default')	FC_Surprise_T2_20_2_udq_500
 FC_Surprise(y,'T2',50,3,'updown',500,'default')	FC_Surprise_T2_50_3_udq_500
 FC_Surprise(y,'T2',100,4,'updown',500,'default')	FC_Surprise_T2_100_4_udq_500
 FC_Surprise(y,'T2',100,5,'updown',500,'default')	FC_Surprise_T2_100_5_udq_500
-FC_Surprise(y,'dist',5,1,'embed2quadrants',500,'default')	FC_Surprise_dist_5_1_m2quad_500
+FC_Surprise(y,'dist',5,1,'embed2quadrants',500,'default')	    FC_Surprise_dist_5_1_m2quad_500
 FC_Surprise(y,'dist',5,'tau','embed2quadrants',500,'default')	FC_Surprise_dist_5_tau_m2quad_500
 FC_Surprise(y,'dist',10,'tau','embed2quadrants',500,'default')	FC_Surprise_dist_10_tau_m2quad_500
 FC_Surprise(y,'dist',20,'tau','embed2quadrants',500,'default')	FC_Surprise_dist_20_tau_m2quad_500
-FC_Surprise(y,'T1',10,1,'embed2quadrants',500,'default')	FC_Surprise_T1_10_1_m2quad_500
+FC_Surprise(y,'T1',10,1,'embed2quadrants',500,'default')	    FC_Surprise_T1_10_1_m2quad_500
 FC_Surprise(y,'T1',10,'tau','embed2quadrants',500,'default')	FC_Surprise_T1_10_tau_m2quad_500
 FC_Surprise(y,'T1',20,'tau','embed2quadrants',500,'default')	FC_Surprise_T1_20_tau_m2quad_500
 FC_Surprise(y,'T1',50,'tau','embed2quadrants',500,'default')	FC_Surprise_T1_50_tau_m2quad_500

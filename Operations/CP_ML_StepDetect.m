@@ -192,7 +192,7 @@ switch method
 
         % Return outputs
         out.E = E;
-        out.s = s;
+        out.s = s; % for some parameter values, this is 1
         out.lambdamax = lambdamax;
 
         % Get step indicies from steppedy

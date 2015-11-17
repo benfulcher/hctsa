@@ -169,7 +169,7 @@ end
 %-------------------------------------------------------------------------------
 store(store==0) = 1; % so that we set log(0)==0
 store = -log(store); % transform to surprises/information gains
-% plot(store)
+% histogram(store)
 
 if any(store > 0)
     out.min = min(store(store > 0)); % Minimum amount of information you can gain in this way

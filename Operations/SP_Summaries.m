@@ -262,7 +262,6 @@ csS = cumsum(S);
 f_frac_w_max = @(f) w(find(csS >= csS(end)*f,1,'first'));
 
 % At what frequency is csS a fraction p of its maximum?
-out.wmax_1 = f_frac_w_max(0.01);
 out.wmax_5 = f_frac_w_max(0.05);
 out.wmax_10 = f_frac_w_max(0.1);
 out.wmax_25 = f_frac_w_max(0.25);

@@ -67,6 +67,10 @@ end
 % Add a time index
 ty = [(1:N)', y]; % has increasing integers as time in the first column
 
+%-------------------------------------------------------------------------------
+% Generate the statistics on the number of points inside the shape as it is
+% translated across the time series
+%-------------------------------------------------------------------------------
 switch howToMove
     case 'pts' % Place shapes on each timepoint (excluding a range at start and end)
         switch shape
@@ -82,45 +86,62 @@ switch howToMove
                     difwin = win - ones(2*w+1,1)*ty(rnge(i),:);
                     np(i) = sum(sum(difwin.^2,2) <= r^2); % number of points enclosed in shape
                 end
-                out.max = max(np);
-                out.std = std(np);
-
-                % -----
-                % Maximum possible hits in circle:
-                % -----
-                % Count the hits:
-                histnp = arrayfun(@(x)sum(np==x),1:2*w+1);
-                % Compute mode:
-                [out.npatmode, out.mode] = max(histnp);
-                out.npatmode = out.npatmode/NN;
-
-                if 2*w + 1 >= 1; out.ones = histnp(1)/NN; end
-                if 2*w + 1 >= 2; out.twos = histnp(2)/NN; end
-                if 2*w + 1 >= 3; out.threes = histnp(3)/NN; end
-                if 2*w + 1 >= 4; out.fours = histnp(4)/NN; end
-                if 2*w + 1 >= 5; out.fives = histnp(5)/NN; end
-                if 2*w + 1 >= 6; out.sixes = histnp(6)/NN; end
-                if 2*w + 1 >= 7; out.sevens = histnp(7)/NN; end
-                if 2*w + 1 >= 8; out.eights = histnp(8)/NN; end
-                if 2*w + 1 >= 9; out.nines = histnp(9)/NN; end
-                if 2*w + 1 >= 10; out.tens = histnp(10)/NN; end
-                if 2*w + 1 >= 11; out.elevens = histnp(11)/NN; end
-
-                % -----
-                % Stationarity in 2,3,4 segments
-                % -----
-                out.statav2_m = SY_SlidingWindow(np,'mean','std',2,1);
-                out.statav2_s = SY_SlidingWindow(np,'std','std',2,1);
-                out.statav3_m = SY_SlidingWindow(np,'mean','std',3,1);
-                out.statav3_s = SY_SlidingWindow(np,'std','std',3,1);
-                out.statav4_m = SY_SlidingWindow(np,'mean','std',4,1);
-                out.statav4_s = SY_SlidingWindow(np,'std','std',4,1);
+            case 'rectangle'
+                % uses a rectangle of half-width d (integer), height as double the current time
+                % series value (on either side of origin)
+                w = d;
+                rnge = 1+d:N-d;
+                NN = length(rnge); % number of admissible points
+                np = zeros(NN,1); % number of points
+                for i = 1:NN
+                    np(i) = sum(abs(y(rnge(i)-d:rnge(i)+d)) <= abs(y(i)));
+                end
         otherwise
-            error('Unknwon shape ''%s''',shape)
+            error('Unknown shape ''%s''',shape)
         end
     otherwise
-        error('Unknwon setting for ''howToMove'' input: ''%s''',howToMove)
+        error('Unknown setting for ''howToMove'' input: ''%s''',howToMove)
 end
+
+%-------------------------------------------------------------------------------
+
+% -----
+% Maximum possible hits in the shape:
+% -----
+out.max = max(np);
+out.std = std(np);
+out.mean = mean(np);
+
+% Count the hits:
+histnp = arrayfun(@(x)sum(np==x),unique(np));
+% bar(histnp)
+
+% Compute mode:
+[out.npatmode, out.mode] = max(histnp);
+out.npatmode = out.npatmode/NN;
+
+% Output all stats:
+if 2*w + 1 >= 1; out.ones = mean(np==1); end
+if 2*w + 1 >= 2; out.twos = mean(np==2); end
+if 2*w + 1 >= 3; out.threes = mean(np==3); end
+if 2*w + 1 >= 4; out.fours = mean(np==4); end
+if 2*w + 1 >= 5; out.fives = mean(np==5); end
+if 2*w + 1 >= 6; out.sixes = mean(np==6); end
+if 2*w + 1 >= 7; out.sevens = mean(np==7); end
+if 2*w + 1 >= 8; out.eights = mean(np==8); end
+if 2*w + 1 >= 9; out.nines = mean(np==9); end
+if 2*w + 1 >= 10; out.tens = mean(np==10); end
+if 2*w + 1 >= 11; out.elevens = mean(np==11); end
+
+% -----
+% Stationarity in 2,3,4 segments
+% -----
+out.statav2_m = SY_SlidingWindow(np,'mean','std',2,1);
+out.statav2_s = SY_SlidingWindow(np,'std','std',2,1);
+out.statav3_m = SY_SlidingWindow(np,'mean','std',3,1);
+out.statav3_s = SY_SlidingWindow(np,'std','std',3,1);
+out.statav4_m = SY_SlidingWindow(np,'mean','std',4,1);
+out.statav4_s = SY_SlidingWindow(np,'std','std',4,1);
 
 % plot(np)
 
