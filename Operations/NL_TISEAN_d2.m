@@ -386,7 +386,7 @@ out.d2g_dimstd = scd2g.dimstd;
 % ------------------------------------------------------------------------------
 % h2dat
 % A flat region in this indicates determinism/deterministic chaos
-[h2dat_v h2dat_M] = SUB_celltomat(h2dat,2);
+[h2dat_v, h2dat_M] = SUB_celltomat(h2dat,2);
 % semilogx(h2dat_v,h2dat_M,'ok')
 % keyboard
 % semilogx(h2dat_v(1:end-1),diff(h2dat_M(1,:)),'ok')

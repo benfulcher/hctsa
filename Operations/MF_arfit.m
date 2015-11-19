@@ -231,6 +231,7 @@ out.stdabsS = std(abs(S));
 % Often you get infinite periods of oscillation -- remove these for the purposes
 % of taking stats:
 perSpecial = ~isfinite(per);
+perFiltered = per;
 perFiltered(perSpecial) = NaN;
 
 out.hasInfper = sum(perSpecial(1,:));
