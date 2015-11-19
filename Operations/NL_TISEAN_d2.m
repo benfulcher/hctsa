@@ -110,7 +110,7 @@ if exist([filePath '.stat'],'file')
     delete([filePath '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
 end
 
-if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
+if isempty(res) || ~isempty(regexp(res,'command not found', 'once')) % nothing came out??
     if exist([filePath '.c2'],'file'), delete([filePath '.c2']); end
     if exist([filePath '.d2'],'file'), delete([filePath '.d2']); end
     if exist([filePath '.h2'],'file'), delete([filePath '.h2']); end
