@@ -1,17 +1,21 @@
-##hctsa
-###Highly comparative time-series analysis code repository
+# *hctsa*, a highly comparative time-series analysis code repository
 
-A software package for running highly comparative time-series analysis, using Matlab (full support for R2014b or later).
+*hctsa* is a software package for running highly comparative time-series analysis, using [Matlab](www.mathworks.com/products/matlab/) (full support for versions R2014b or later).
 
-This repository draws on the work published as:
+The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, producing low-dimensional representations of the data, finding nearest matches to a time series of interest, and a range of methods for visualizing the results.
+All of these types of analysis are described in our accompanying [open access journal article](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
 
-B. D. Fulcher, M. A. Little, N. S. Jones (2013) [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). J. Roy. Soc. Interface. 10, 83.
+To use the *hctsa* software from within python, use this excellent package: [pyopy](https://github.com/strawlab/pyopy).
 
-As part of this work, hundreds of pieces of time-series analysis code were developed that produce thousands of features summarizing structural properties of time series.
-An accompanying web resource for this project is [comp-engine time series](www.comp-engine.org/timeseries), which allows users to compare (and more recently upload) thousands of diverse types of time-series analysis code and time-series data.
-This code repository is a more in-depth accompaniment to this work, that helps the user set up a mySQL database through Matlab and perform highly comparative time-series analysis on custom datasets using the latest set of code and input settings.
+### Documentation
 
-To use the repository, please make a private fork of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
+Comprehensive documentation for *hctsa* is provided [here](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded in a pdf, epub, or mobi format.
+
+### Downloading the repository
+
+For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the *Download .zip* button to the right.
+
+It is recommended to use the repository with git. For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
 ```
 git remote add upstream git://github.com/SystemsAndSignalsGroup/hctsa.git
 ```
@@ -25,6 +29,63 @@ git pull upstream master
 We recommend keeping the repository without any changes so that the latest version can be pulled from the upstream repository.
 However, details on how to merge the latest version of the repository with the local changes in your fork can be found [here](https://help.github.com/articles/syncing-a-fork/).
 
+### Providing feedback
+
 Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/SystemsAndSignalsGroup/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).
 
-Many thanks go to Romesh Abeysuriya for helping with the mySQL database set-up and install scripts.
+### Citation and Acknowledgements
+
+If you use this software, please read and cite the (open-access) work published as:
+
+B. D. Fulcher, M. A. Little, N. S. Jones (2013) [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83.
+
+See also our open access IEEE TKDE paper on [feature-based time-series classification](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425) and an application of these ideas to [fetal heart rate analysis](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629).
+
+Many thanks go to Romesh Abeysuriya for helping with the mySQL database set-up and install scripts, and Santi Villalba for lots of helpful feedback and advice on the software.
+
+### Comp-Engine Time Series
+
+An accompanying web resource for this project is [Comp-Engine Time Series](www.comp-engine.org/timeseries), which allows users to compare (and more recently upload) thousands of diverse types of time-series analysis code and time-series data.
+
+### *hctsa* licenses
+
+There are two licenses applied to the core parts of the repository:
+
+1. Sections of the repository required to compute features from time-series data is licensed as [GNU General Public License version 3](http://www.gnu.org/licenses/gpl-3.0.en.html).
+
+2. Sections implementing the framework for running *hctsa* analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+To use this code for commercial use, please contact [Ben Fulcher](ben.d.fulcher@gmail.com).
+
+In addition, a range of external packages are provided, that each have their own associated license (see below).
+
+### External packages and dependencies
+
+The following Matlab toolboxes are used by *hctsa* and are required for full functionality of the software.
+In the case that some toolboxes are unavailable, the *hctsa* software can still be used, but using a reduced set of time-series features:
+1. Statistics Toolbox
+2. Signal Processing Toolbox
+3. Curve Fitting Toolbox
+4. System Identification Toolbox
+5. Wavelet Toolbox
+6. Econometrics Toolbox
+
+---
+
+The following time-series analysis packages are provided with the software, and are used to compute meaningful structural features from time series:
+
+* [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
+* [*TSTOOL* package for nonlinear time-series analysis (version 1.2)](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
+* Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
+* [*ARFIT* Toolbox for AR model estimation](http://climate-dynamics.org/software/#arfit) (unlicensed).
+* [*gpml* Toolbox for Gaussian Process regression model estimation (version 3.5)](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
+* [Code by Rudy Moddemeijer] (unlicensed).
+* [Cross Recurrence Plot Toolbox](http://tocsy.pik-potsdam.de/CRPtoolbox/) (GPL license)
+* [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
+* Danny Kaplan's Code for embedding statistics (GPL license).
+* Code from Matlab Central (BSD license).
+* [Max Little's Code](http://www.maxlittle.net/software/index.php) (GPL license).
+* [Sample Entropy code from Physionet](http://www.physionet.org/faq.shtml#license) (GPL license).
+
+### Other time-series analysis software packages
+
+* A python-based nonlinear time-series analysis and complex systems code package, [pyunicorn](http://scitation.aip.org/content/aip/journal/chaos/25/11/10.1063/1.4934554).
