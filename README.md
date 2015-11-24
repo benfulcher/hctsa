@@ -62,6 +62,7 @@ In addition, a range of external packages are provided, that each have their own
 
 The following Matlab toolboxes are used by *hctsa* and are required for full functionality of the software.
 In the case that some toolboxes are unavailable, the *hctsa* software can still be used, but using a reduced set of time-series features:
+
 1. Statistics Toolbox
 2. Signal Processing Toolbox
 3. Curve Fitting Toolbox
@@ -71,7 +72,7 @@ In the case that some toolboxes are unavailable, the *hctsa* software can still 
 
 ---
 
-The following time-series analysis packages are provided with the software, and are used to compute meaningful structural features from time series:
+The following time-series analysis packages are provided with the software (in the **Toolboxes** directory), and are used by our main feature extraction algorithms to compute meaningful structural features from time series:
 
 * [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
 * [*TSTOOL* package for nonlinear time-series analysis (version 1.2)](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
@@ -82,7 +83,7 @@ The following time-series analysis packages are provided with the software, and 
 * [Cross Recurrence Plot Toolbox](http://tocsy.pik-potsdam.de/CRPtoolbox/) (GPL license)
 * [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
 * Danny Kaplan's Code for embedding statistics (GPL license).
-* Code from Matlab Central (BSD license).
+* Various code from Matlab Central (BSD license).
 * [Max Little's Code](http://www.maxlittle.net/software/index.php) (GPL license).
 * [Sample Entropy code from Physionet](http://www.physionet.org/faq.shtml#license) (GPL license).
 
