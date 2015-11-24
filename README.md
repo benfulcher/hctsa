@@ -43,8 +43,8 @@ A range of external code packages are provided in the **Toolboxes** directory of
 
 ### External packages and dependencies
 
-The following Matlab toolboxes are used by *hctsa* and are required for full functionality of the software.
-In the case that some toolboxes are unavailable, the *hctsa* software can still be used, but using a reduced set of time-series features:
+The following [Matlab toolboxes](https://mathworks.com/programs/nrd/matlab-toolbox-price-request.html?ref=ggl&s_eid=ppc_18665571802&q=matlab%20toolboxes%20price) are used by *hctsa* and are required for full functionality of the software.
+In the case that some toolboxes are unavailable, the *hctsa* software can still be used, but only a reduced set of time-series features will be computed.
 
 1. Statistics Toolbox
 2. Signal Processing Toolbox
@@ -58,13 +58,13 @@ In the case that some toolboxes are unavailable, the *hctsa* software can still 
 The following time-series analysis packages are provided with the software (in the **Toolboxes** directory), and are used by our main feature extraction algorithms to compute meaningful structural features from time series:
 
 * [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
-* [*TSTOOL* package for nonlinear time-series analysis (version 1.2)](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
-* Joseph T. Lizier's Java Information Dynamics Toolkit (JIDT), v1.3 (GPL license).
+* [*TSTOOL* package for nonlinear time-series analysis, version 1.2](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
+* Joseph T. Lizier's Java Information Dynamics Toolkit (JIDT), version 1.3 (GPL license).
 * Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
 * Max Little's [Time-series analysis Code](http://www.maxlittle.net/software/index.php) (GPL license).
 * Sample Entropy code from [Physionet](http://www.physionet.org/faq.shtml#license) (GPL license).
 * [*ARFIT* Toolbox for AR model estimation](http://climate-dynamics.org/software/#arfit) (unlicensed).
-* [*gpml* Toolbox for Gaussian Process regression model estimation (version 3.5)](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
+* [*gpml* Toolbox for Gaussian Process regression model estimation, version 3.5](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
 * Danilo P. Mandic's [delay vector variance code](http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm) (GPL license).
 * [Cross Recurrence Plot Toolbox](http://tocsy.pik-potsdam.de/CRPtoolbox/) (GPL license)
 * Zoubin Ghahramani's [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
