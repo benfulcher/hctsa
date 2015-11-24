@@ -62,16 +62,15 @@ The following time-series analysis packages are provided with the software (in t
 * Joseph T. Lizier's Java Information Dynamics Toolkit (JIDT), v1.3 (GPL license).
 * Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
 * Max Little's [Time-series analysis Code](http://www.maxlittle.net/software/index.php) (GPL license).
-* [Sample Entropy code from Physionet](http://www.physionet.org/faq.shtml#license) (GPL license).
+* Sample Entropy code from [Physionet](http://www.physionet.org/faq.shtml#license) (GPL license).
 * [*ARFIT* Toolbox for AR model estimation](http://climate-dynamics.org/software/#arfit) (unlicensed).
 * [*gpml* Toolbox for Gaussian Process regression model estimation (version 3.5)](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
-* [Code by Rudy Moddemeijer] (unlicensed).
+* Danilo P. Mandic's [delay vector variance code](http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm) (GPL license).
 * [Cross Recurrence Plot Toolbox](http://tocsy.pik-potsdam.de/CRPtoolbox/) (GPL license)
 * Zoubin Ghahramani's [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
 * Danny Kaplan's Code for embedding statistics (GPL license).
-* Various code from Matlab Central (BSD license).
-* Danilo P. Mandic's [delay vector variance code](http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm) (GPL license).
-
+* Two-dimensional histogram code from Matlab Central (BSD license).
+* Various histogram and entropy code by Rudy Moddemeijer (unlicensed).
 
 ## Citation and Acknowledgements
 
