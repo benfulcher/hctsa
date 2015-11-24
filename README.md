@@ -59,16 +59,18 @@ The following time-series analysis packages are provided with the software (in t
 
 * [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
 * [*TSTOOL* package for nonlinear time-series analysis (version 1.2)](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
+* Joseph T. Lizier's Java Information Dynamics Toolkit (JIDT), v1.3 (GPL license).
 * Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
+* Max Little's [Time-series analysis Code](http://www.maxlittle.net/software/index.php) (GPL license).
+* [Sample Entropy code from Physionet](http://www.physionet.org/faq.shtml#license) (GPL license).
 * [*ARFIT* Toolbox for AR model estimation](http://climate-dynamics.org/software/#arfit) (unlicensed).
 * [*gpml* Toolbox for Gaussian Process regression model estimation (version 3.5)](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
 * [Code by Rudy Moddemeijer] (unlicensed).
 * [Cross Recurrence Plot Toolbox](http://tocsy.pik-potsdam.de/CRPtoolbox/) (GPL license)
-* [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
+* Zoubin Ghahramani's [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
 * Danny Kaplan's Code for embedding statistics (GPL license).
 * Various code from Matlab Central (BSD license).
-* [Max Little's Code](http://www.maxlittle.net/software/index.php) (GPL license).
-* [Sample Entropy code from Physionet](http://www.physionet.org/faq.shtml#license) (GPL license).
+* Danilo P. Mandic's [delay vector variance code](http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm) (GPL license).
 
 
 ## Citation and Acknowledgements
