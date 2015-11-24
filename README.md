@@ -1,15 +1,13 @@
 # *hctsa*, a highly comparative time-series analysis code repository
 
-*hctsa* is a software package for running highly comparative time-series analysis, using [Matlab](www.mathworks.com/products/matlab/) (full support for versions R2014b or later).
+*hctsa* is a software package for running highly comparative time-series analysis, using [Matlab](www.mathworks.com/products/matlab/) (full support for versions R2014b or later; for use in python cf. [pyopy](https://github.com/strawlab/pyopy)).
 
-The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, producing low-dimensional representations of the data, finding nearest matches to a time series of interest, and a range of methods for visualizing the results.
+The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualization and analysis functionality.
 All of these types of analysis are described in our accompanying [open access journal article](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
 
-To use the *hctsa* software from within python, use this excellent package: [pyopy](https://github.com/strawlab/pyopy).
-
-### Documentation
-
 Comprehensive documentation for *hctsa* is provided [on gitbook](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded in a pdf, epub, or mobi format.
+
+Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/SystemsAndSignalsGroup/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).
 
 ### Downloading the repository
 
@@ -30,34 +28,18 @@ git pull upstream master
 For analyzing specific datasets, we recommend working outside of the repository so that incremental updates can be pulled from the upstream repository.
 Details on how to merge the latest version of the repository with the local changes in your fork can be found [here](https://help.github.com/articles/syncing-a-fork/).
 
-### Providing feedback
+## *hctsa* licenses
 
-Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/SystemsAndSignalsGroup/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).
-
-### Citation and Acknowledgements
-
-If you use this software, please read and cite the (open-access) work published as:
-
-B. D. Fulcher, M. A. Little, N. S. Jones (2013) [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83.
-
-See also our open access IEEE TKDE paper on [feature-based time-series classification](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425) and an application of these ideas to [fetal heart rate analysis](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629).
-
-Many thanks go to Romesh Abeysuriya for helping with the mySQL database set-up and install scripts, and Santi Villalba for lots of helpful feedback and advice on the software.
-
-### Comp-Engine Time Series
-
-An accompanying web resource for this project is [Comp-Engine Time Series](www.comp-engine.org/timeseries), which allows users to compare (and more recently upload) thousands of diverse types of time-series analysis code and time-series data.
-
-### *hctsa* licenses
+### Internal licenses
 
 There are two licenses applied to the core parts of the repository:
 
 1. Sections of the repository required to compute features from time-series data is licensed as [GNU General Public License version 3](http://www.gnu.org/licenses/gpl-3.0.en.html).
 
 2. Sections implementing the framework for running *hctsa* analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
-To use this code for commercial use, please contact [Ben Fulcher](ben.d.fulcher@gmail.com).
+To use this portion of the code for commercial use, please contact [Ben Fulcher](ben.d.fulcher@gmail.com).
 
-In addition, a range of external packages are provided, that each have their own associated license (see below).
+A range of external code packages are provided in the **Toolboxes** directory of the repository, and each have their own associated license (see below).
 
 ### External packages and dependencies
 
@@ -87,6 +69,28 @@ The following time-series analysis packages are provided with the software (in t
 * Various code from Matlab Central (BSD license).
 * [Max Little's Code](http://www.maxlittle.net/software/index.php) (GPL license).
 * [Sample Entropy code from Physionet](http://www.physionet.org/faq.shtml#license) (GPL license).
+
+
+## Citation and Acknowledgements
+
+If you use this software, please read and cite the (open-access) work published as:
+
+B. D. Fulcher, M. A. Little, N. S. Jones (2013) [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83.
+
+See also our open access IEEE TKDE paper on [feature-based time-series classification](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425) and an application of these ideas to [fetal heart rate analysis](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629).
+
+Many thanks go to Romesh Abeysuriya for helping with the mySQL database set-up and install scripts, and Santi Villalba for lots of helpful feedback and advice on the software.
+
+## Related resources
+
+### pyopy
+
+This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
+
+### Comp-Engine Time Series
+
+An accompanying web resource for this project is [Comp-Engine Time Series](www.comp-engine.org/timeseries), which allows users to compare thousands of diverse types of time-series analysis code and time-series data.
+Note that the code files on Comp-Engine Time Series are based on an early implementation and rarely match with the updated features and functions contained in this repository.
 
 ### Other time-series analysis software packages
 
