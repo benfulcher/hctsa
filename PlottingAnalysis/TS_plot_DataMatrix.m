@@ -43,7 +43,7 @@ inputP = inputParser;
 
 % whatDataFile
 default_whatData = 'cl';
-check_whatData = @(x)1;
+check_whatData = @(x) ischar(x) || isstruct(x);
 addOptional(inputP,'whatData',default_whatData,check_whatData);
 
 % addTimeSeries, annotates time series segments to the side of the plot

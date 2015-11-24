@@ -59,9 +59,9 @@ The following time-series analysis packages are provided with the software (in t
 
 * [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
 * [*TSTOOL* package for nonlinear time-series analysis, version 1.2](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
-* Joseph T. Lizier's Java Information Dynamics Toolkit (JIDT), version 1.3 (GPL license).
+* Joseph T. Lizier's [Java Information Dynamics Toolkit (JIDT)](https://github.com/jlizier/jidt) for studying information-theoretic measures of computation in complex systems, version 1.3 (GPL license).
 * Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
-* Max Little's [Time-series analysis Code](http://www.maxlittle.net/software/index.php) (GPL license).
+* Max Little's [Time-series analysis code](http://www.maxlittle.net/software/index.php) (GPL license).
 * Sample Entropy code from [Physionet](http://www.physionet.org/faq.shtml#license) (GPL license).
 * [*ARFIT* Toolbox for AR model estimation](http://climate-dynamics.org/software/#arfit) (unlicensed).
 * [*gpml* Toolbox for Gaussian Process regression model estimation, version 3.5](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
