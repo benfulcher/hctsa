@@ -9,13 +9,14 @@ To use the *hctsa* software from within python, use this excellent package: [pyo
 
 ### Documentation
 
-Comprehensive documentation for *hctsa* is provided [here](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded in a pdf, epub, or mobi format.
+Comprehensive documentation for *hctsa* is provided [on gitbook](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded in a pdf, epub, or mobi format.
 
 ### Downloading the repository
 
-For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the *Download .zip* button to the right.
+For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the *Download .zip* button.
 
-It is recommended to use the repository with git. For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
+It is recommended to use the repository with git.
+For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
 ```
 git remote add upstream git://github.com/SystemsAndSignalsGroup/hctsa.git
 ```
@@ -26,8 +27,8 @@ You can then update to the latest stable version of the repository by pulling th
 git pull upstream master
 ```
 
-We recommend keeping the repository without any changes so that the latest version can be pulled from the upstream repository.
-However, details on how to merge the latest version of the repository with the local changes in your fork can be found [here](https://help.github.com/articles/syncing-a-fork/).
+For analyzing specific datasets, we recommend working outside of the repository so that incremental updates can be pulled from the upstream repository.
+Details on how to merge the latest version of the repository with the local changes in your fork can be found [here](https://help.github.com/articles/syncing-a-fork/).
 
 ### Providing feedback
 
