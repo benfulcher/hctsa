@@ -133,25 +133,29 @@ annotateParams.groupColors = groupColors;
 %% Plot distributions
 % ------------------------------------------------------------------------------
 if showDistr
+    % Top distribution (marginal of first feature)
     subplot(4,4,1:3); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numGroups
         fr = BF_plot_ks(Features(groupLabels==i,1),groupColors{i},0);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
-    set(gca,'XTickLabel',[]);
-    set(gca,'YTickLabel',[]);
-    set(gca,'ylim',[minn,maxx]);
+    axTop = gca;
+    set(axTop,'XTickLabel',[]);
+    set(axTop,'YTickLabel',[]);
+    set(axTop,'ylim',[minn,maxx]);
 
+    % Side distribution (marginal of second feature)
     subplot(4,4,[8,12,16]); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numGroups
         fr = BF_plot_ks(Features(groupLabels==i,2),groupColors{i},1);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
-    set(gca,'XTickLabel',[]);
-    set(gca,'YTickLabel',[]);
-    set(gca,'xlim',[minn,maxx]);
+    axSide = gca;
+    set(axSide,'XTickLabel',[]);
+    set(axSide,'YTickLabel',[]);
+    set(axSide,'xlim',[minn,maxx]);
 end
 
 
@@ -160,6 +164,7 @@ end
 % ------------------------------------------------------------------------------
 if showDistr
     subplot(4,4,[5:7,9:11,13:15]); box('on');
+    axMain = gca;
 end
 hold on;
 
@@ -172,6 +177,12 @@ end
 for i = 1:numGroups
     plot(Features(groupLabels==i,1),Features(groupLabels==i,2),...
                 '.','color',groupColors{i},'MarkerSize',theMarkerSize)
+end
+
+% Link axes
+if showDistr
+    linkaxes([axMain,axTop],'x');
+    linkaxes([axMain,axSide],'y');
 end
 
 % ------------------------------------------------------------------------------
@@ -220,11 +231,15 @@ ylabel(labelText{2},'interpreter','none')
 
 % Set Legend
 if numGroups > 1
-    legs = cell(numGroups,1);
+    legendText = cell(numGroups,1);
     for i = 1:numGroups
-        legs{i} = sprintf('%s (%u)',groupNames{i},sum(groupLabels==i));
+        if ~isempty(groupNames)
+            legendText{i} = sprintf('%s (%u)',groupNames{i},sum(groupLabels==i));
+        else
+            legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==i));
+        end
     end
-    legend(legs);
+    legend(legendText);
 end
 
 %-------------------------------------------------------------------------------

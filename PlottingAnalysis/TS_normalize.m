@@ -89,6 +89,13 @@ else
     fromDatabase = 1; % (legacy: set to 1 by default)
 end
 
+% Check that we have the groupNames if already assigned labels
+if ismember('groupNames',fileVars)
+    load(whatDataFile,'groupNames');
+else
+    groupNames = {};
+end
+
 %-------------------------------------------------------------------------------
 % In this script, each of these pieces of data (from the database) will be
 % trimmed and normalized, and then saved to HCTSA_N.mat
@@ -365,7 +372,8 @@ outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 
 fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName)
 save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-        'fromDatabase','MasterOperations','normalizationInfo','ts_clust','op_clust');
+        'MasterOperations','fromDatabase','groupNames','normalizationInfo',...
+        'ts_clust','op_clust');
 fprintf(1,' Done.\n')
 
 end
