@@ -119,7 +119,7 @@ switch normMethod
                 dataMatrixNorm(:,i) = NaN;
             elseif iqr(dataMatrix(~isnan(theColumn),i))==0
                 % iqr of data is zero: perform a normal sigmoidal transformation:
-                dataMatrixNorm(:,i) = ScaledSigmoid(dataMatrix(:,i),1);
+                dataMatrixNorm(:,i) = Sigmoid(dataMatrix(:,i),1);
             else
                 % Perform an outlier-robust version of the sigmoid:
                 dataMatrixNorm(:,i) = RobustSigmoid(dataMatrix(:,i),1);
