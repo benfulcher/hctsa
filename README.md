@@ -7,7 +7,7 @@ All of these types of analysis are described in our accompanying [open access jo
 
 Comprehensive documentation for *hctsa* is provided [on gitbook](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded in a pdf, epub, or mobi format.
 
-Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/SystemsAndSignalsGroup/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).
+Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).
 
 ### Downloading the repository
 
@@ -16,7 +16,7 @@ For users unfamiliar with git, the current version of the repository can be down
 It is recommended to use the repository with git.
 For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
 ```
-git remote add upstream git://github.com/SystemsAndSignalsGroup/hctsa.git
+git remote add upstream git://github.com/benfulcher/hctsa.git
 ```
 (make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your github account).
 
