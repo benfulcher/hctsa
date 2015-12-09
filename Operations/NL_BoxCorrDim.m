@@ -42,8 +42,6 @@ doPlot = 0; % plot outputs to a figure
 % ------------------------------------------------------------------------------
 %% Check inputs, preliminaries
 % ------------------------------------------------------------------------------
-N = length(y); % length of time series
-
 % (1) Maxmum number of partitions per axis, numBins
 if nargin < 2 || isempty(numBins)
     numBins = 100; % default number of bins per axis is 100
@@ -64,7 +62,7 @@ end
 % convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedParams{1},embedParams{2},1);
 
-if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
+if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Time-series embedding to signal class for TSTOOL failed')
 end
 

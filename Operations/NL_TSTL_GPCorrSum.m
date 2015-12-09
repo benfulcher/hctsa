@@ -108,11 +108,11 @@ end
 % Convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedParams{1},embedParams{2},1);
 
-if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
+if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding of the %u-sample time series failed',N)
 elseif length(data(s)) < thwin
     fprintf(1,['Embedded time series (N = %u, m = %u, tau = %u) too short' ...
-                'to do a correlation sum\n'],N,embedParams{1},embedParams{2})
+                'to do a correlation sum\n'],N,embedParams{1},embedParams{2});
     out = NaN; return
 end
 
@@ -135,13 +135,13 @@ end
 if ~isempty(me)
     switch me.message
     case 'Maximal search radius must be greater than starting radius'
-        fprintf(1,'Max search radius less than starting radius. Returning NaNs.\n')
+        fprintf(1,'Max search radius less than starting radius. Returning NaNs.\n');
         out = NaN; return
     case 'Cannot find an interpoint distance greater zero, maybe ill-conditioned data set given'
-        fprintf(1,'Cannot find an interpoint distance greater than zero. Returning NaNs.\n')
+        fprintf(1,'Cannot find an interpoint distance greater than zero. Returning NaNs.\n');
         out = NaN; return
     case 'Reference indices out of range'
-        fprintf(1,'Reference indicies out of range. Returning NaNs.\n')
+        fprintf(1,'Reference indicies out of range. Returning NaNs.\n');
         out = NaN; return
     otherwise
         error('Unknown error %s', me.message);

@@ -1,4 +1,4 @@
-function theField = BF_GiveMeField(inputStruct,whatField);
+function theField = BF_GiveMeField(inputStruct,whatField)
 % BF_GiveMeField    Return a field of a structure.
 %
 % Returns a specified field (whatField) of an input structure (inputStruct).

@@ -61,19 +61,19 @@ doPlot = 0; % Don't plot results by default
 % (1) Minimum number of neighbours, kmin
 if nargin < 2 || isempty(kmin)
     kmin = 3; % default
-    fprintf(1,'Using default, minimum number of neighbours, kmin = %u\n',kmin)
+    fprintf(1,'Using default, minimum number of neighbours, kmin = %u\n',kmin);
 end
 
 % (2) Maximum number of neighbours, kmax
 if nargin < 3 || isempty(kmax)
     kmax = 10; % default
-    fprintf(1,'Using default maximum number of neighbours, kmax = %u\n',kmax)
+    fprintf(1,'Using default maximum number of neighbours, kmax = %u\n',kmax);
 end
 
 % (3) Number of randomly-chosen reference points, Nref
 if nargin < 4 || isempty(Nref)
     Nref = 0.2; % default:  20% of the time series length
-    fprintf(1,'Using default number of reference points: Nref = %f\n',Nref)
+    fprintf(1,'Using default number of reference points: Nref = %f\n',Nref);
 end
 if (Nref > 0) && (Nref < 1)
     Nref = round(N*Nref); % specify a proportion of time series length
@@ -82,19 +82,19 @@ end
 % (4) moment starting value, gstart
 if nargin < 5 || isempty(gstart)
     gstart = 1; % default
-    fprintf(1,'Using default moment starting value, gstart = %u\n', gstart)
+    fprintf(1,'Using default moment starting value, gstart = %u\n',gstart);
 end
 
 % (5) moment ending value, gend
 if nargin < 6 || isempty(gend)
     gend = 10; % default
-    fprintf(1,'Using default moment ending value, gend = %u\n', gend)
+    fprintf(1,'Using default moment ending value, gend = %u\n',gend);
 end
 
 % (6) past
 if nargin < 7 || isempty(past)
     past = 10; % default
-    fprintf(1,'Using default past correlation exclusion window value, past = %u\n')
+    fprintf(1,'Using default past correlation exclusion window value, past = %u\n',past);
 end
 
 % (7) steps
@@ -105,7 +105,7 @@ end
 % (8) Embedding parameters
 if nargin < 9 || isempty(embedParams)
     embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default embedding parameters of autocorrelation for tau and cao method for m\n')
+    fprintf(1,'Using default embedding parameters of autocorrelation for tau and cao method for m\n');
 end
 
 
@@ -115,7 +115,7 @@ end
 % Convert the scalar time series, y, to embedded signal object s for TSTOOL
 s = BF_embed(y,embedParams{1},embedParams{2},1);
 
-if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
+if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding of the %u-sample time series failed',N)
 end
 

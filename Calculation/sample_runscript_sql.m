@@ -46,7 +46,7 @@ fprintf(1,['About to calculate across %u time series (ts_ids %u--%u) and %u op_i
 % Loop across time series, one at a time:
 for i = 1:length(tsid_range)
 	fprintf(1,'\n\n\nWe''re looking at ts_id %u and %u op_ids, from %u--%u\n\n\n', ...
-                            	tsid_range(i),length(opids),min(opids),max(opids))
+                            	tsid_range(i),length(opids),min(opids),max(opids));
 
 	% Loop over:
 	% (i) Running SQL_retrieve to retrieve data from the database -> HCTSA.mat

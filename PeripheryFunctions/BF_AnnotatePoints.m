@@ -1,4 +1,4 @@
-function BF_AnnotatePoints(xy,TimeSeries,annotateParams);
+function BF_AnnotatePoints(xy,TimeSeries,annotateParams)
 % BF_AnnotatePoints     Annotates time series/metadata to a plot
 %
 %---INPUTS:

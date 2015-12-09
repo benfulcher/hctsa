@@ -103,9 +103,6 @@ if colorGroups
     end
 end
 
-TimeSeries; % Just extract time series names
-Operations; % Just extract operation names
-
 [numTS, numOps] = size(TS_DataMat); % size of the data matrix
 
 % ------------------------------------------------------------------------------
@@ -266,8 +263,6 @@ end
 % (alternative is to use imagesc)
 colormap(customColorMap)
 imagesc(TS_DataMat);
-% pcolor([TS_DataMat, zeros(size(TS_DataMat,1),1); zeros(1,size(TS_DataMat,2)+1)]);
-% shading flat
 
 % ------------------------------------------------------------------------------
 % Superimpose colored rectangles over NaN values

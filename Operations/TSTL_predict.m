@@ -55,7 +55,6 @@ function out = TSTL_predict(y, plen, NNR, stepSize, pmode, embedParams)
 %% Foreplay
 % ------------------------------------------------------------------------------
 doPlot = 0; % plot outputs to figure (e.g., for debugging)
-N = length(y); % time-series length
 
 % (*) Prediction length, plen (the length of the output time series)
 if nargin < 2 || isempty(plen)
@@ -82,7 +81,7 @@ end
 % (*) embedParams
 if nargin < 6 || isempty(embedParams)
     embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default embedding using autocorrelation for tau and Cao''s method for m\n')
+    fprintf(1,'Using default embedding using autocorrelation for tau and Cao''s method for m\n');
 end
 
 
@@ -98,7 +97,7 @@ elseif embedParams == 0
     s = signal(y);
 end
 
-if ~strcmp(class(s),'signal')
+if ~isa(s,'signal')
     out = NaN; return
 end
 
@@ -196,7 +195,7 @@ out.ac1bestres = CO_AutoCorr(res,1,'Fourier'); % autocorrelation of residuals
 
 % now look at fraction of points that are within a threshold of each
 % other...
-fracresfn = @(x) sum(abs(res) < x)/Nlag
+fracresfn = @(x) sum(abs(res) < x)/Nlag;
 out.fracres005 = fracresfn(0.05); %sum(abs(res)<0.05)/Nlag;
 out.fracres01 = fracresfn(0.1); %sum(abs(res)<0.1)/Nlag;
 out.fracres02 = fracresfn(0.2); %sum(abs(res)<0.2)/Nlag;

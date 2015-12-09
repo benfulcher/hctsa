@@ -9,6 +9,7 @@ function BF_PlotCorrMat(D_corr,rangeHow)
 % rangeHow, the colorbar extent: (i) '' (automatic)
 %                                (ii) '-1to1' (range from -1 to 1)
 %                                (iii) '0to1' (range from 0 to 1)
+%                                (iv) 'balanced' (range from -X to X, for max possible X)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -27,7 +28,7 @@ function BF_PlotCorrMat(D_corr,rangeHow)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(rangeHow)
-    rangeHow = ''; %'-1to1': range from -1 to 1, or '0to1' for unit interval
+    rangeHow = '';
 end
 %-------------------------------------------------------------------------------
 
@@ -42,6 +43,10 @@ axis square
 
 % Set color limits and colormap
 switch rangeHow
+case 'balanced'
+    maxDev = max(abs(D_corr(:)));
+    caxis([-maxDev,maxDev])
+    colormap([flipud(BF_getcmap('blues',9,0));1,1,1,;BF_getcmap('reds',9,0)])
 case '-1to1'
     caxis([-1,1])
     colormap([flipud(BF_getcmap('blues',9,0));BF_getcmap('reds',9,0)])

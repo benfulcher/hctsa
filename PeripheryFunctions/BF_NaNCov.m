@@ -1,4 +1,4 @@
-function C = NaNCov(X,makeCoeff,makeDist)
+function C = BF_NaNCov(X,makeCoeff,makeDist)
 % BF_NaNCov     Covariance estimate including NaNs for an input matrix, X.
 %
 % Not exact, because removes full mean across all values, rather than across
@@ -46,7 +46,7 @@ end
 % ------------------------------------------------------------------------------
 
 % Number of rows and columns (should be the same):
-[numRow,numCol] = size(X);
+[~,numCol] = size(X);
 
 if any(isnan(X(:)))
     % Indicate non-NaN values:

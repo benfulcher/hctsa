@@ -85,7 +85,7 @@ if ~exist(whatDataFile,'file')
 end
 fprintf(1,'Loading data from %s...',whatDataFile);
 load(whatDataFile,'TS_DataMat','Operations','TimeSeries');
-fprintf(1,' Done.\n',whatDataFile);
+fprintf(1,' Done.\n');
 
 %-------------------------------------------------------------------------------
 % Change order according to stored clustering (if none has been run, by default

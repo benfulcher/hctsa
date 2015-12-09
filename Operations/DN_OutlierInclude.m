@@ -70,7 +70,7 @@ doPlot = 0; % Plot some outputs
 % ------------------------------------------------------------------------------
 % If time series is all the same value -- ridiculous! ++BF 21/3/2010
 if all(y == y(1)) % the whole time series is just a single value
-    fprintf(1,'The time series is a constant!\n')
+    fprintf(1,'The time series is a constant!\n');
     out = NaN; return % this method is not suitable for such time series: return a NaN
 end
 % Check z-scored time series
@@ -263,7 +263,7 @@ emsg = [];
 try
     [c, gof] = fit(thr',msDt(:,6),f);
 catch emsg
-    fprintf(1,'Error fitting exponential growth to std: %s\n',emsg)
+    fprintf(1,'Error fitting exponential growth to std: %s\n',emsg);
 end
 
 if isempty(emsg)

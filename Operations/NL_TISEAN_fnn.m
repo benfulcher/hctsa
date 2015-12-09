@@ -99,12 +99,12 @@ end
 %% Write the file
 % ------------------------------------------------------------------------------
 filePath = BF_WriteTempFile(y);
-fprintf(1,'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN.\n',length(y),filePath)
+fprintf(1,'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN.\n',length(y),filePath);
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, false_nearest
 % ------------------------------------------------------------------------------
-tisean_command = sprintf(['false_nearest -d%u -m1 -M1,%u -t%u -V0 %s'],tau,maxm,theilerWin,filePath);
+tisean_command = sprintf('false_nearest -d%u -m1 -M1,%u -t%u -V0 %s',tau,maxm,theilerWin,filePath);
 [~, res] = system(tisean_command);
 delete(filePath) % remove the temporary time-series data file
 
@@ -118,7 +118,7 @@ data = textscan(res,'%u%f%f%f');
 
 mDim = double(data{1}); % embedding dimension
 pNN = data{2}; % fraction of false nearest neighbors
-nHoodSize = data{3}; % average size of the neighbourhood
+% nHoodSize = data{3}; % average size of the neighbourhood
 nHoodSize2 = data{4}; % average squared size of the neighbourhood
 
 if doPlot

@@ -66,7 +66,7 @@ end
 if wmaxlev(N, wname) < maxlevel
     fprintf(1,'Chosen wavelet level is too large for the %s wavelet for this signal of length N = %u\n',wname,N);
     maxlevel = wmaxlev(N,wname);
-    fprintf(1,'Using a wavelet level of %u instead.\n',maxlevel)
+    fprintf(1,'Using a wavelet level of %u instead.\n',maxlevel);
 end
 
 % ------------------------------------------------------------------------------
@@ -91,7 +91,6 @@ end
 % ------------------------------------------------------------------------------
 %% Plot the bad boy
 % ------------------------------------------------------------------------------
-
 if doPlot
     subplot(5,1,1:2); title('signal')
     plot(y);
@@ -143,9 +142,9 @@ out.corrcoef_max_medians = r(1,2);
 
 % ------------------------------------------------------------------------------
 function meIsGorilla = SUB_slosr(xx)
-    maxlevel = length(xx);
-    slosr = zeros(maxlevel-2,1);
-    for i = 2:maxlevel-1
+    theMaxLevel = length(xx);
+    slosr = zeros(theMaxLevel-2,1);
+    for i = 2:theMaxLevel-1
         slosr(i-1) = sum(xx(1:i-1))/sum(xx(i+1:end));
     end
     absm1 = abs(slosr-1); % how close to 1 (the same sum on either side) each is

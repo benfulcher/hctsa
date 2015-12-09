@@ -43,9 +43,8 @@ case 'com.mysql.jdbc.JDBC4Connection'
         dbstmt = dbconn.createStatement();
         execResult = dbstmt.execute(sqlCommand);
         errMessage = [];
-    catch
-        le = lasterror;
-        errMessage = le.message;
+    catch emsg
+        errMessage = emsg.message;
         execResult = [];
     end
 

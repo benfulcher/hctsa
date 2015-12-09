@@ -106,7 +106,7 @@ if isfield(TimeSeries,'Group')
     tsInd = cell(numGroups,1); % keeps track of indices from TimeSeries structure
 
     % Global distribution:
-    [fr,xr,lineHandles{1}] = BF_plot_ks(dataVector,ones(1,3)*0.5,0,1,8);
+    [~,~,lineHandles{1}] = BF_plot_ks(dataVector,ones(1,3)*0.5,0,1,8);
 
     % Distribution for each group:
     for k = 1:numGroups

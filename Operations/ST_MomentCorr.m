@@ -95,7 +95,7 @@ switch whatTransform
     case 'sqrt'
         x = sqrt(abs(x));
     case 'none'
-        x = x;
+        % x = x;
     otherwise
         error('Unknown tranformation ''%s''',whatTransform)
 end

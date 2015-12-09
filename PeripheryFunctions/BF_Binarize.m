@@ -51,7 +51,7 @@ switch binarizeHow
     case 'iqr'
         % Binary signal: 1 if inside interquartile range, 0 otherwise
         iqr = quantile(y,[0.25, 0.75]);
-        iniqr = find(y > iqr(1) & y <= iqr(2));
+        iniqr = (y > iqr(1) & y <= iqr(2));
         yBin = zeros(length(y),1);
         yBin(iniqr) = 1;
 

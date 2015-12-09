@@ -1,4 +1,4 @@
-function theKeywords = TS_WhatKeywords(whatData)
+function UKeywords = TS_WhatKeywords(whatData)
 % TS_WhatKeywords   Lists keywords contained in the specified HCTSA data file
 
 % ------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ end
 % ------------------------------------------------------------------------------
 %% Load data from file
 % ------------------------------------------------------------------------------
-[~,TimeSeries,~,theFile] = TS_LoadData(whatData);
+[~,TimeSeries] = TS_LoadData(whatData);
 Keywords = SUB_cell2cellcell({TimeSeries.Keywords}); % Split into sub-cells using comma delimiter
 keywordsAll = [Keywords{:}]; % every keyword used across the dataset
 UKeywords = unique(keywordsAll);
@@ -39,7 +39,7 @@ keywordCounts = cellfun(@(x)sum(strcmp(keywordsAll,x)),UKeywords);
 
 fprintf(1,'\nKeyword   # Occurences\n\n');
 for i = 1:numUniqueKeywords
-    fprintf(1,'''%s''   %u\n',UKeywords{ix(i)},keywordCounts(ix(i)))
+    fprintf(1,'''%s''   %u\n',UKeywords{ix(i)},keywordCounts(ix(i)));
 end
 
 

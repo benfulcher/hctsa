@@ -87,7 +87,6 @@ end
 %-------------------------------------------------------------------------------
 sampEns = zeros(numScales,1);
 for si = 1:numScales
-    theScale = scaleRange(si);
     if length(y_cg{si}) >= minTSLength
         sampEnStruct = EN_SampEn(y_cg{si},m,r);
         sampEns(si) = sampEnStruct.(sprintf('sampen%u',m));
@@ -101,11 +100,11 @@ end
 %-------------------------------------------------------------------------------
 if all(isnan(sampEns))
     if ~isempty(preProcessHow)
-        ppText = sprintf('after %s pre-processing',preProcessHow)
+        ppText = sprintf('after %s pre-processing',preProcessHow);
     else
         ppText = '';
     end
-    warning(sprintf('Not enough samples (%u %s) to compute SampEn at multiple scales',length(y),ppText))
+    warning('Not enough samples (%u %s) to compute SampEn at multiple scales',length(y),ppText)
     out = NaN; return
 end
 

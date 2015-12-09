@@ -28,19 +28,19 @@ try
         % Any output text is printed to screen
     	masterOutput = BF_pareval(x,y,masterCode,1);
     else
-        % Output text stored in T (could log this if you really want to)
-        [masterOutput, T] = BF_pareval(x,y,masterCode,0);
+        % Output text stored in second output (could log this if you really want to)
+        masterOutput = BF_pareval(x,y,masterCode,0);
     end
 	masterTime = toc(masterTimer);
     if beVocal
-        fprintf(1,' evaluated (%s).\n',BF_thetime(masterTime))
+        fprintf(1,' evaluated (%s).\n',BF_thetime(masterTime));
     end
 	% For not-applicable/'real NaN', masterOutput is a NaN, otherwise a
 	% structure with components to be called below by pointer operations.
 
 catch emsg
     if beVocal
-        fprintf(1,' error.\n') % ,BF_thetime(masterTime)
+        fprintf(1,' error.\n'); % ,BF_thetime(masterTime)
     end
 	fprintf(1,'---Error evaluating %s:\n%s\n',masterCode,emsg.message);
     masterOutput = {}; % Keep empty output

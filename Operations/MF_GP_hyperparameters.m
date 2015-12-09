@@ -71,7 +71,7 @@ if ~BF_iszscored(y)
 end
 
 if nargin < 2 || isempty(covFunc),
-    fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n')
+    fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n');
     covFunc = {'covSum', {'covSEiso','covNoise'}};
 end
 
@@ -135,12 +135,10 @@ if (maxN > 0) && (N > maxN)
             BF_ResetSeed(randomSeed);
             sind = randi(N-maxN+1); % start index
             y = y(sind:sind+maxN-1); % take this bit
-            N = length(y); % update time series length (should be maxN)
             t = SUB_settimeindex(maxN,squishorsquash); % set time index
 
         case 'first' % takes first maxN indicies from the time series
             y = y(1:maxN); % take this bit
-            N = length(y); % update time series length (should be maxN)
             t = SUB_settimeindex(maxN,squishorsquash); % set time index
 
         case 'random_both' % takes a random starting position and then takes a 1/5 sample from that
@@ -244,7 +242,7 @@ out.std_S_data = std(sqrt(S2)); % should vary a fair bit
 
 % Statistics on variance
 xstar = linspace(min(t),max(t),1000)'; % crude, I know, but it's nearly 5pm
-[mu, S2] = gpr(logHyper, covFunc, t, y, xstar); % evaluate at datapoints
+[~, S2] = gpr(logHyper, covFunc, t, y, xstar); % evaluate at datapoints
 S = sqrt(S2);
 out.maxS = max(S); % maximum variance
 out.minS = min(S); % minimum variance

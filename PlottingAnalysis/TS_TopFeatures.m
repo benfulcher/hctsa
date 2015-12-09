@@ -101,35 +101,39 @@ case {'linear','linclass'}
     fprintf(1,'Using a linear classifier\n');
     cfnName = 'linear classifier';
     cfnUnit = '%';
-    fn_testStat = @(XTrain,yTrain,Xtest,ytest) ...
-                    mean(ytest == classify(Xtest,XTrain,yTrain,'linear'))*100;
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                    mean(yTest == classify(Xtest,XTrain,yTrain,'linear'))*100;
     chanceLine = 100/length(unique(timeSeriesGroup));
 case 'diaglinear'
     fprintf(1,'A Naive Bayes classifier\n');
     cfnName = 'naive bayes classifier';
     cfnUnit = '%';
-    fn_testStat = @(XTrain,yTrain,Xtest,ytest) ...
-                    mean(ytest == classify(Xtest,XTrain,yTrain,'diaglinear'))*100;
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                    mean(yTest == classify(Xtest,XTrain,yTrain,'diaglinear'))*100;
     chanceLine = 100/length(unique(timeSeriesGroup));
 case {'svm','svmlinear'}
     fprintf(1,'A linear support vector machine\n');
     cfnName = 'SVM classifier';
     cfnUnit = '%';
-    fn_testStat = @(XTrain,yTrain,Xtest,ytest) ...
-                    mean(ytest == svmclassify(svmtrain(XTrain,yTrain, ...
-                                'Kernel_Function','linear'),Xtest))*100;
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                    mean(yTest == predict(fitcsvm(XTrain,yTrain, ...
+                            'KernelFunction','linear'),Xtest))*100;
     chanceLine = 100/length(unique(timeSeriesGroup));
+
+    if numGroups > 2
+        error('SVM not supported for multiclass classification with more than 2 classes');
+    end
 case {'ttest','tstat'}
-    fprintf(1,'A Welch''s t-statistic\n')
+    fprintf(1,'A Welch''s t-statistic\n');
     cfnName = 'Welch t-stat';
     cfnUnit = '';
     if numGroups > 2
         error('Cannot use t-test as test statistic with more than two groups :/');
     end
-    fn_testStat = @(XTrain,yTrain,Xtest,ytest) fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
     chanceLine = 0; % by chance, t-stats averge to zero
 otherwise
-    error('Unknown method ''%s''',testStat)
+    error('Unknown method ''%s''',whatTestStat)
 end
 
 
@@ -137,7 +141,7 @@ end
 %%                     Loop over all features
 % --------------------------------------------------------------------------
 % Use the same data for training and testing:
-fprintf(1,'Comparing the (in-sample) performance of %u operations...',length(Operations))
+fprintf(1,'Comparing the (in-sample) performance of %u operations...',length(Operations));
 timer = tic;
 testStat = giveMeStats(TS_DataMat,timeSeriesGroup);
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
@@ -178,13 +182,13 @@ if any(ismember(whatPlots,'histogram'))
     numRepeats = 10;
     testStat_rand = zeros(numOps,numRepeats);
     if doNull
-        fprintf(1,'Now for %u nulls... ',numRepeats)
+        fprintf(1,'Now for %u nulls... ',numRepeats);
         tic
         for j = 1:numRepeats
             if j<numRepeats
-                fprintf(1,'%u,',j)
+                fprintf(1,'%u,',j);
             else
-                fprintf(1,'%u',j)
+                fprintf(1,'%u',j);
             end
             % Shuffle labels:
             groupLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
@@ -303,7 +307,7 @@ if any(ismember(whatPlots,'cluster'))
     end
     if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
         % pairwise distances already computed, stored in the HCTSA .mat file
-        fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile)
+        fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile);
         Dij = squareform(clustStruct.Dij);
         Dij = Dij(op_ind,op_ind);
     else
@@ -328,18 +332,18 @@ end
 %-------------------------------------------------------------------------------
 function tStat = fn_tStat(d1,d2)
     % Return test statistic from a 2-sample Welch's t-test
-    [h,p,ci,stats] = ttest2(d1,d2,'Vartype','unequal');
+    [~,~,~,stats] = ttest2(d1,d2,'Vartype','unequal');
     tStat = stats.tstat;
 end
 %-------------------------------------------------------------------------------
 function testStat = giveMeStats(dataMatrix,groupLabels)
     % Return test statistic for each operation
     testStat = zeros(numOps,1);
-    for i = 1:numOps
+    for k = 1:numOps
         try
-            testStat(i) = fn_testStat(dataMatrix(:,i),groupLabels,dataMatrix(:,i),groupLabels);
+            testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
         catch
-            testStat(i) = NaN;
+            testStat(k) = NaN;
         end
     end
 end

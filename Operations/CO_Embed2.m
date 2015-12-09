@@ -144,7 +144,7 @@ out.meanspana = mean(spanareas);
 % ------------------------------------------------------------------------------
 % area of max span of all points; versus area of max span of 50% of points closest to origin
 d = sqrt(m(:,1).^2 + m(:,2).^2);
-[d_sort, ix] = sort(d,'ascend');
+[~, ix] = sort(d,'ascend');
 
 out.areas_all = range(m(:,1))*range(m(:,2));
 r50 = ix(1:round(end/2)); % 50% of point closest to origin

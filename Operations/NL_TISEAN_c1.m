@@ -69,8 +69,8 @@ N = length(y); % time-series length (number of samples)
 % last (few) points in this case...
 freakyStat = mod(N,256);
 if freakyStat <= 6
-    fprintf(1,'You''re not going to believe this but TISEAN has a problem freezing with this length time series!\n')
-    fprintf(1,'I''m ignoring the last %u points of this time series...\n',freakyStat+1)
+    fprintf(1,'You''re not going to believe this but TISEAN has a problem freezing with this length time series!\n');
+    fprintf(1,'I''m ignoring the last %u points of this time series...\n',freakyStat+1);
     y = y(1:end-(freakyStat+1));
     N = length(y); % new time-series length
 elseif N == 65 || N==66 || N == 70
@@ -147,7 +147,7 @@ if isempty(res)
 elseif strfind(res,'dyld: Library not loaded')
     error('DYLD library not found -- try recompiling TISEAN:\n%s',res);
 else
-    fprintf(1,'TISEAN function ''c1'' took %s.\n',BF_thetime(toc,1))
+    fprintf(1,'TISEAN function ''c1'' took %s.\n',BF_thetime(toc,1));
 end
 
 if ~exist([filePath '.c1'],'file')
@@ -155,10 +155,9 @@ if ~exist([filePath '.c1'],'file')
 end
 
 % Get local slopes from c1 file output of previous call
-c2dtimer = tic;
 [~, res] = system(sprintf('c2d -a2 %s.c1',filePath));
 
-if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out??
+if isempty(res) || ~isempty(regexp(res,'command not found', 'once')) % nothing came out??
     if exist([filePath '.c1'],'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
     if isempty(res)
         error('Call to TISEAN function ''c1'' failed.');
@@ -168,7 +167,6 @@ if isempty(res) || ~isempty(regexp(res,'command not found')) % nothing came out?
 end
 
 % fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc(c2dtimer),1))
-clear c2dtimer
 if exist([filePath '.c1'],'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
 
 % ------------------------------------------------------------------------------
@@ -322,32 +320,32 @@ out.longestscr = max(c1sc(:,6)); % (a log difference)
         end
 
     end
-
-    function [thevector, thematrix] = SUB_celltomat(thecell,thecolumn)
-        % converts cell to matrix, where each (specified) column in cell
-        % becomes a column in the new matrix
-
-        % But higher dimensions may not reach low enough length scales
-        % rescale range to greatest common span
-        nn = length(thecell);
-        mini = min(thecell{1}(:,1));
-        maxi = max(thecell{1}(:,1));
-        for ii = 2:nn
-            mini = max([mini, min(thecell{ii}(:,1))]);
-            maxi = min([maxi, max(thecell{ii}(:,1))]);
-        end
-        for ii = 1:nn % rescales each dimension so all share common scale
-            thecell{ii} = thecell{ii}(thecell{ii}(:,1) >= mini & thecell{ii}(:,1) <= maxi,:);
-        end
-        thevector = thecell{1}(:,1);
-        ee = length(thevector);
-
-        thematrix = zeros(nn,ee); % across the rows for dimensions; across columns for lengths/epsilons
-        for ii = 1:nn
-            thematrix(ii,:) = thecell{ii}(:,thecolumn);
-        end
-
-    end
+% 
+%     function [thevector, thematrix] = SUB_celltomat(thecell,thecolumn)
+%         % converts cell to matrix, where each (specified) column in cell
+%         % becomes a column in the new matrix
+% 
+%         % But higher dimensions may not reach low enough length scales
+%         % rescale range to greatest common span
+%         nn = length(thecell);
+%         mini = min(thecell{1}(:,1));
+%         maxi = max(thecell{1}(:,1));
+%         for ii = 2:nn
+%             mini = max([mini, min(thecell{ii}(:,1))]);
+%             maxi = min([maxi, max(thecell{ii}(:,1))]);
+%         end
+%         for ii = 1:nn % rescales each dimension so all share common scale
+%             thecell{ii} = thecell{ii}(thecell{ii}(:,1) >= mini & thecell{ii}(:,1) <= maxi,:);
+%         end
+%         thevector = thecell{1}(:,1);
+%         ee = length(thevector);
+% 
+%         thematrix = zeros(nn,ee); % across the rows for dimensions; across columns for lengths/epsilons
+%         for ii = 1:nn
+%             thematrix(ii,:) = thecell{ii}(:,thecolumn);
+%         end
+% 
+%     end
 
     function results = findscalingr_ind(x)
         % AS ABOVE EXCEPT LOOKS FOR SCALING RANGES FOR INDIVIDUAL DIMENSIONS

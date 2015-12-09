@@ -44,7 +44,7 @@ fprintf(1,'Creating tables in %s:\n',dbname);
 for j = 1:length(createString)
 
     % First check whether the table already exists:
-    [output,emsg] = mysql_dbquery(dbc,existString{j});
+    output = mysql_dbquery(dbc,existString{j});
     if ~isempty(output) % Table already exists
         if j == length(createString)
             fprintf(1,'(%s already exists).',tableNames{j});
@@ -56,9 +56,9 @@ for j = 1:length(createString)
         [rs, emsg] = mysql_dbexecute(dbc,createString{j});
         if ~isempty(rs)
             if j == length(createString)
-                fprintf(1,'%s.',tableNames{j})
+                fprintf(1,'%s.',tableNames{j});
             else
-                fprintf(1,'%s, ',tableNames{j})
+                fprintf(1,'%s, ',tableNames{j});
             end
         else
             fprintf(1,'**** Error creating table: %s [%s]\n',tableNames{j},emsg);

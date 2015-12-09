@@ -100,7 +100,7 @@ end
 numGroups = length(keywordGroups); % The number of groups
 
 timer = tic;
-groupIndices = logical(zeros(numTimeSeries,numGroups));
+groupIndices = false(numTimeSeries,numGroups);
 for jo = 1:numGroups
     groupIndices(:,jo) = cellfun(@(x)any(ismember(keywordGroups{jo},x)),Keywords);
     if all(groupIndices(:,jo)==0)

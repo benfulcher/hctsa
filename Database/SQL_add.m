@@ -144,29 +144,29 @@ if ~isMatFile
     case 'ts' % Read the time series input file:
         if beVocal
             fprintf(1,['Need to format %s (Time Series input file) as: Name ' ...
-                                                                'Keywords\n'],inputFile)
-            fprintf(1,'Assuming no header line\n')
-            fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
-            fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
+                                                                'Keywords\n'],inputFile);
+            fprintf(1,'Assuming no header line\n');
+            fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n');
+            fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n');
         end
     	dataIn = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
 
     case 'ops' % Read the operations input file:
         if beVocal
             fprintf(1,['Need to format %s (Operations input file) as: OperationCode ' ...
-                                            'OperationName OperationKeywords\n'],inputFile)
-            fprintf(1,'Assuming no header lines\n')
-            fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
-            fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
+                                            'OperationName OperationKeywords\n'],inputFile);
+            fprintf(1,'Assuming no header lines\n');
+            fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n');
+            fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n');
         end
         dataIn = textscan(fid,'%s %s %s','CommentStyle','#','CollectOutput',1);
 
     case 'mops' % Read the master operations input file:
         if beVocal
-            fprintf(1,'Need to format %s (Master Operations input file) as: MasterCode MasterLabel\n',inputFile)
-            fprintf(1,'Assuming no header lines\n')
-            fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n')
-            fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n')
+            fprintf(1,'Need to format %s (Master Operations input file) as: MasterCode MasterLabel\n',inputFile);
+            fprintf(1,'Assuming no header lines\n');
+            fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n');
+            fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n');
         end
         dataIn = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
     end
@@ -183,16 +183,16 @@ if ~isMatFile
     if numItems == 0, error('The input file ''%s'' seems to be empty??',inputFile), end
 
     if beVocal
-        fprintf(1,'Found %u %s in %s, I think. Take a look:\n\n',numItems,theWhat,inputFile)
+        fprintf(1,'Found %u %s in %s, I think. Take a look:\n\n',numItems,theWhat,inputFile);
         switch addWhat
         case 'ts'
-            fprintf(1,'%s\t%s\n','-Name-','-Keywords-')
+            fprintf(1,'%s\t%s\n','-Name-','-Keywords-');
             fprint_ts = @(x) fprintf('%s\t%s\n',dataIn{x,1},dataIn{x,2});
         case 'ops'
-            fprintf(1,'%s\t%s\t%s\n','-Operation Name-','-Master Label-','-Operation Keywords-')
+            fprintf(1,'%s\t%s\t%s\n','-Operation Name-','-Master Label-','-Operation Keywords-');
             fprint_ops = @(x) fprintf('%s\t%s\t%s\n',dataIn{x,1},dataIn{x,2},dataIn{x,3});
         case 'mops'
-            fprintf(1,'%s\t%s\n','-Master Code-','-Master Label-')
+            fprintf(1,'%s\t%s\n','-Master Code-','-Master Label-');
             fprint_mops = @(x) fprintf('%s\t%s\n',dataIn{x,1},dataIn{x,2});
         end
 
@@ -205,7 +205,7 @@ if ~isMatFile
         end
 
         if numItems > 3
-            fprintf(1,'..................(%u).....................\n',max(numItems-6,0))
+            fprintf(1,'..................(%u).....................\n',max(numItems-6,0));
             for i = max(numItems-2,4):numItems
                 switch addWhat
                 case 'ts', fprint_ts(i);
@@ -216,7 +216,7 @@ if ~isMatFile
         end
 
         fprintf(1,['\nHow does it look? Make sure the metadata ' ...
-                                    'matches up with the headings\n'])
+                                    'matches up with the headings\n']);
 
         % Ask the question:
         if strcmp(addWhat,'ts')
@@ -240,13 +240,13 @@ if ~isMatFile
         end
 
         if ~strcmp(reply,'y')
-            fprintf(1,'I didn''t think so. Come back later...\n')
+            fprintf(1,'I didn''t think so. Come back later...\n');
             return
         end
     end
 
     if beVocal
-        fprintf(1,'%s read.\n',inputFile)
+        fprintf(1,'%s read.\n',inputFile);
     end
 
 else
@@ -279,7 +279,7 @@ else
     end
     if beVocal
         fprintf(1,['We have %u time series (rows) in your data matrix, timeSeriesData ' ...
-                                    '(loaded from %s).\n'],numItems,inputFile)
+                                    '(loaded from %s).\n'],numItems,inputFile);
         if forDatabase
             fprintf(1,['Will store time-series data from matlab file in the database to an' ...
                         ' accuracy of 6 significant figures...\n']);
@@ -319,7 +319,7 @@ else
                                     '<<<Type ''y'' to continue...>>>'],plotNum),'s');
         end
         if ~strcmp(reply,'y')
-            fprintf(1,'I didn''t think so. Come back later...\n')
+            fprintf(1,'I didn''t think so. Come back later...\n');
             return
         end
         close
@@ -335,7 +335,7 @@ esc = @RA_sqlescapestring; % Inline function to add escape strings to format myS
 % master operations and fill a cell, toAdd, containing mySQL INSERT commands for
 % each item in the input file.
 % ------------------------------------------------------------------------------
-if forDatabase & beVocal
+if forDatabase && beVocal
     fprintf(1,['Preparing mySQL statements to add %u %s to the ' ...
                                 'database %s...'],numItems,theWhat,databaseName);
 end
@@ -346,7 +346,7 @@ switch addWhat
 case 'ts' % Prepare toAdd cell for time series
     if beVocal; figure('color','w','WindowStyle','docked'); end
 
-    wasGood = logical(zeros(1,numItems)); % record whether data was added or not
+    wasGood = false(1,numItems); % record whether data was added or not
                                  % (if too long or contains missing values, it is not added)
 
     for j = 1:numItems
@@ -367,7 +367,7 @@ case 'ts' % Prepare toAdd cell for time series
             try
                 x = dlmread(TimeSeries(j).Name);
             catch emsg
-                fprintf(1,'%s\n',emsg.message)
+                fprintf(1,'%s\n',emsg.message);
                 error(['\nCould not read the data file for ''%s''.' ...
                                 'Check that it''s in Matlab''s path.'], ...
                                     TimeSeries(j).Name)
@@ -384,7 +384,7 @@ case 'ts' % Prepare toAdd cell for time series
             beep
             warning(['\nDid you know that the time series %s contains special values' ...
                         ' (e.g., NaN or Inf)...?\n'],which(TimeSeries(j).Name))
-            fprintf(1,'This time series will not be added...\n')
+            fprintf(1,'This time series will not be added...\n');
             continue
         end
 
@@ -439,7 +439,7 @@ case 'ts' % Prepare toAdd cell for time series
             titleText = sprintf('\n[%u/%u] %s (%u), keywords = %s',j,numItems,...
                     TimeSeries(j).Name,TimeSeries(j).Length,TimeSeries(j).Keywords);
             title(titleText,'interpreter','none');
-            fprintf(1,'%s --- loaded successfully.',titleText)
+            fprintf(1,'%s --- loaded successfully.',titleText);
             pause(0.01); % wait 0.01 second to show the plotted time series
         end
     end
@@ -461,13 +461,13 @@ case 'ts' % Prepare toAdd cell for time series
         fprintf(1,['\nAll time-series data loaded (%u/%u passed quality tests),' ...
             ' ready to be uploaded to the mySQL database.\n'],sum(wasGood),length(wasGood));
         if any(~wasGood)
-            reply = input(sprintf('[List %u time series that failed... (press any key)]',sum(~wasGood)),'s');
+            input(sprintf('[List %u time series that failed... (press any key)]',sum(~wasGood)),'s');
             iNoGood = find(~wasGood);
             for i = 1:length(iNoGood)
                 fprintf(1,'*NOT UPLOADING:* %s (%s), N = %u\n',TimeSeries(iNoGood(i)).Name,TimeSeries(iNoGood(i)).Keywords,...
                                                 TimeSeries(iNoGood(i)).Length);
             end
-            reply = input(sprintf('[press any key to continue to add the remaining %u time series]',sum(wasGood)),'s');
+            input(sprintf('[press any key to continue to add the remaining %u time series]',sum(wasGood)),'s');
         end
     end
 
@@ -552,9 +552,9 @@ if all(isDuplicate)
 elseif sum(isDuplicate) > 0
     if beVocal
         fprintf(1,'I found %u duplicate %s already in the database %s!\n',...
-                        sum(isDuplicate),theWhat,databaseName)
+                        sum(isDuplicate),theWhat,databaseName);
         fprintf(1,'There are %u new %s to add to %s.\n',...
-                        sum(~isDuplicate),theWhat,databaseName)
+                        sum(~isDuplicate),theWhat,databaseName);
     end
 end
 
@@ -607,7 +607,7 @@ case 'mops' % Add master operations to the MasterOperations table 500 at a time
     SQL_add_chunked(dbc,['INSERT INTO MasterOperations (MasterLabel, ' ...
                                 'MasterCode) VALUES'],toAdd(~isBad),500);
 end
-fprintf(1,' Done.\n')
+fprintf(1,' Done.\n');
 
 % ------------------------------------------------------------------------------
 % Add new entries to the Results table
@@ -616,7 +616,7 @@ if ~strcmp(addWhat,'mops')
     resultsTic = tic;
     if beVocal
         fprintf(1,['Updating the Results table in %s\n(This could take a while, ' ...
-            'e.g., ~10 hours for 20,000 time series with 9,000 operations; Please be patient!)...'],databaseName)
+            'e.g., ~10 hours for 20,000 time series with 9,000 operations; Please be patient!)...'],databaseName);
     end
     switch addWhat
     case 'ts'
@@ -639,7 +639,7 @@ if ~strcmp(addWhat,'mops')
     % ------------------------------------------------------------------------------
     % Update the keywords table
     % ------------------------------------------------------------------------------
-    fprintf(1,'Updating the %s table in %s...',theKeywordTable,databaseName)
+    fprintf(1,'Updating the %s table in %s...',theKeywordTable,databaseName);
 
     % First find unique keywords from new time series by splitting against commas
     switch addWhat
@@ -670,7 +670,7 @@ if ~strcmp(addWhat,'mops')
     if sum(isNew) > 0
         if beVocal
             fprintf(1,['\nIt turns out that %u keywords are completely new and will be added ' ...
-                        'to the %s table in %s...'],sum(isNew),theKeywordTable,databaseName)
+                        'to the %s table in %s...'],sum(isNew),theKeywordTable,databaseName);
         end
         % Add the new keywords to the Keywords table
         insertString = sprintf('INSERT INTO %s (Keyword,NumOccur) VALUES',theKeywordTable);
@@ -680,12 +680,12 @@ if ~strcmp(addWhat,'mops')
             toAdd{k} = sprintf('(''%s'',0)',ukws{fisNew(k)});
         end
         SQL_add_chunked(dbc,insertString,toAdd,100);
-        fprintf(1,' Added %u new keywords!\n',sum(isNew))
+        fprintf(1,' Added %u new keywords!\n',sum(isNew));
     else
         if beVocal
             fprintf(1,['\nIt turns out that all new keywords already exist in ' ...
                     'the %s table in %s -- there are no new keywords to add\n'],...
-                    sum(isNew),theKeywordTable)
+                    sum(isNew),theKeywordTable);
         end
     end
 
@@ -693,7 +693,7 @@ if ~strcmp(addWhat,'mops')
     %% Fill new keyword relationships
     % ------------------------------------------------------------------------------
     fprintf(1,'Writing new keyword relationships to the %s table in %s...', ...
-                                            theRelTable,databaseName)
+                                            theRelTable,databaseName);
 
     % Try doing it from scratch...:
     switch addWhat
@@ -727,7 +727,7 @@ if ~strcmp(addWhat,'mops')
 
 
     % Increment Nmatches in the keywords table
-    fprintf(1,' Done.\nNow calculating the match counts for keywords...')
+    fprintf(1,' Done.\nNow calculating the match counts for keywords...');
     % Redo them from scratch should be easier actually...?
     for k = 1:nkw % keywords implicated in this import
         selectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,theKeywordTable,ukws{k});
@@ -752,7 +752,7 @@ if ~strcmp(addWhat,'mops')
     %         fprintf(1,'\n Error updating keyword count in %s',theKeywordTable)
     %     end
     % end
-    fprintf(1,' Done.\n')
+    fprintf(1,' Done.\n');
 end
 
 % ------------------------------------------------------------------------------

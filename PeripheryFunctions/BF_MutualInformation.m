@@ -98,7 +98,7 @@ if any(summe(:) == 1)
     mi = sum(p_ij(summe).*log(p_ij(summe)./p_ixp_j(summe)));
 else
     fprintf(1,['The histograms aren''t catching any points?? ' ...
-            'Perhaps due to an inappropriate custom range for binning the data...\n'])
+            'Perhaps due to an inappropriate custom range for binning the data...\n']);
     mi = NaN; return
 end
 

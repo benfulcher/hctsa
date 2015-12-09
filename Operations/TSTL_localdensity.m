@@ -59,7 +59,7 @@ end
 
 if nargin < 4 || isempty(embedParams)
     embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default embedding using autocorrelation and cao''s method.\n')
+    fprintf(1,'Using default embedding using autocorrelation and cao''s method.\n');
 end
 
 % ------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ end
 % ------------------------------------------------------------------------------
 s = BF_embed(y,embedParams{1},embedParams{2},1);
 
-if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
+if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding failed.')
 end
 

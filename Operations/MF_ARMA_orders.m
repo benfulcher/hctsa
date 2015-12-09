@@ -100,7 +100,7 @@ out.std_all_aics = std(aics(:)); % no idea why.
 out.mean_all_aics = mean(aics(:)); % no idea why.
 
 out.meanstd_aicsp = mean(std(aics));
-out.meanstd_aicsq = mean(std(aics'));
+out.meanstd_aicsq = mean(std(aics,[],2));
 
 
 end

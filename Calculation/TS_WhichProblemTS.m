@@ -38,7 +38,7 @@ end
 %-------------------------------------------------------------------------------
 % Load data:
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+[~,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 load(whatDataFile,'TS_Quality');
 
 %-------------------------------------------------------------------------------

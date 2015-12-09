@@ -58,7 +58,7 @@ out = mean((y-f).^2); % mean RMS ERROR OF FIT
 % Plot
 % ------------------------------------------------------------------------------
 if doPlot
-    n=10;
+    n = 10;
     errs=zeros(n,1);
     x=1:length(y);
     for i=1:n

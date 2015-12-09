@@ -99,7 +99,7 @@ end
 % ------------------------------------------------------------------------------
 % Compute and store pairwise distances, then cluster:
 % ------------------------------------------------------------------------------
-fprintf(1,'Clustering the full %u x %u data matrix.\n',numTs,numOps)
+fprintf(1,'Clustering the full %u x %u data matrix.\n',numTs,numOps);
 
 % Time series:
 [ts_ord,ts_update] = getDistances(distanceMetricRow,'ts',linkageMethodRow,numTs,doSave(1));
@@ -120,7 +120,7 @@ end
 
 % Time series clustering needs to be updated
 if ts_update
-    fprintf(1,'Saving the clustering information for time series back to %s...',theFile)
+    fprintf(1,'Saving the clustering information for time series back to %s...',theFile);
     load(theFile,'ts_clust');
     ts_clust.ord = ts_ord;
     ts_clust.linkageMethod = linkageMethodRow;
@@ -130,7 +130,7 @@ end
 
 % Operation clustering needs to be updated
 if op_update
-    fprintf(1,'Saving the clustering information for operations back to %s...',theFile)
+    fprintf(1,'Saving the clustering information for operations back to %s...',theFile);
     load(theFile,'op_clust');
     op_clust.ord = op_ord;
     op_clust.linkageMethod = linkageMethodCol;

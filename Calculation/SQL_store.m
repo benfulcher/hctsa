@@ -1,4 +1,4 @@
-function SQL_store(writeWhat,logToFile,dbname)
+function SQL_store(writeWhat,dbname)
 % SQL_store 	Upload data to the mySQL database.
 %
 % Uploads data in the HCTSA.mat file in the current directory back into the
@@ -30,9 +30,6 @@ if nargin < 1
 end
 if ~ismember(writeWhat,{'null','error','nullerror'})
     error('Unknown specifier ''%s''',writeWhat)
-end
-if nargin < 2 || isempty(logToFile)
-	logToFile = 0;
 end
 if nargin < 3
 	dbname = '';
@@ -99,7 +96,7 @@ numOps_db = mysql_dbquery(dbc,SelectString);
 numOps_db = numOps_db{1};
 
 if (numOps == numOps_db) && (numTS == numTS_db)
-    fprintf(1,'All local time series and operation ids still exist in %s. This is good.\n',dbname)
+    fprintf(1,'All local time series and operation ids still exist in %s. This is good.\n',dbname);
 else
     if numTS_db < numTS
         fprintf(1,'There are %u time series that no longer match the database',(numTS-numTS_db));
@@ -164,7 +161,7 @@ case 'error'
     fprintf(1,['There are %u entries in Results (all previous errors) ' ...
                     'that are being written to %s...\n'],numWrite,dbname);
     fprintf(1,['Previous results stored as errors in the database WILL NOT ' ...
-                                    'be overwritten with newer errors\n'])
+                                    'be overwritten with newer errors\n']);
 case 'nullerror'
     q_db = qrc(:,3); % empties (NULL) and fatal error (1)
     q_db(cellfun(@isempty,q_db)) = {0}; % turn NULLs to 0s
@@ -173,8 +170,8 @@ case 'nullerror'
     fprintf(1,['There are %u entries in Results (either NULL or previous errors) ' ...
                     'that are being written to %s...\n'],numWrite,dbname);
     fprintf(1,['Note that previous results stored as errors in the database WILL NOT ' ...
-                                'be overwritten with newer errors\n'])
-    fprintf(1,'However, NULLS will be written over with any result from the local files\n')
+                                'be overwritten with newer errors\n']);
+    fprintf(1,'However, NULLS will be written over with any result from the local files\n');
 end
 
 localIndex = zeros(numWrite,2);
@@ -258,25 +255,6 @@ if any(~updateMe) % Some entries were not written to the database
 end
 
 SQL_closedatabase(dbc) % Close the database connection
-
-% if logToFile
-%     fprintf(1,'Logging to file...\n');
-%     fn = ['TS_agglomerate_' datestr(now,30) '.log'];
-%     fid = fopen(fn,'w','n');
-%     disp(['Log file created: ' fn]);
-%
-%     fprintf(fid, '%s\n', ['Updated ' num2str(length(tsgoodi)) ' time series: ']);
-%     for i=1:length(tsgoodi)
-%         fprintf(fid, '%s\n',tsf{tsgoodi(i)});
-%     end
-%
-%     fprintf(fid, '\n\n\n\n\n%s\n', '******************************');
-%     fprintf(fid, '%s\n', ['Updated ' num2str(length(mgoodi)) ' operations: ']);
-%     for i=1:length(mgoodi)
-%         fprintf(fid, '%s\n',mlab{mgoodi(i)});
-%     end
-%     fclose(fid);
-% end
 
 
 end

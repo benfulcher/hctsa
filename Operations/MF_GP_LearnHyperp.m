@@ -85,7 +85,7 @@ try
 catch emsg
     if strcmp(emsg.identifier,'MATLAB:posdef')
         fprintf(1,'Error with lack of positive definite matrix for this function\n');
-        out = NaN; return % return NaN -- the data is not suited to GP fitting
+        hyp = NaN; return % return NaN -- the data is not suited to GP fitting
     elseif strcmp(emsg.identifier,'MATLAB:nomem')
         error('Not enough memory to fit a Gaussian Process to this data');
     else

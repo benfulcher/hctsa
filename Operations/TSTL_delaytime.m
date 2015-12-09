@@ -63,7 +63,7 @@ end
 
 if maxDelay < 10,
     maxDelay = 10;
-    fprintf(1,'Max delay set to its minimum: delaytime = 10\n')
+    fprintf(1,'Max delay set to its minimum: delaytime = 10\n');
 end
 
 % randomSeed: how to treat the randomization
@@ -96,6 +96,5 @@ out.meantau = mean(tau);
 out.stdtau = std(tau);
 out.mintau = min(tau);
 out.maxtau = max(tau);
-
 
 end

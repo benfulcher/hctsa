@@ -17,7 +17,7 @@ function [R, keepers] = BF_RemoveNaN_DistMat(R)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-keepers = logical(ones(length(R),1));
+keepers = true(length(R),1);
 
 if any(isnan(R(:)))
     areNaN = 1;

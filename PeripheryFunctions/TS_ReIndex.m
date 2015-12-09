@@ -69,12 +69,10 @@ end
 
 % --- TimeSeries
 if strcmp(tsOrOps,'ts') || strcmp(tsOrOps,'both')
-    if overRide
-        doContinue = 1;
-    else
+    if ~overRide
         doContinue = input(sprintf('Be careful -- if you press ''y'', the old index system for TimeSeries in %s will be wiped...',dataFile),'s');
         if ~strcmp(doContinue,'y')
-            fprintf(1,'Didn''t think so! Better to be save than sorry\n')
+            fprintf(1,'Didn''t think so! Better to be save than sorry\n');
         end
     end
 
@@ -85,17 +83,15 @@ if strcmp(tsOrOps,'ts') || strcmp(tsOrOps,'both')
     
     % Save back:
     save(dataFile,'TimeSeries','-append')
-    fprintf(1,'Time series re-indexed and saved back to %s.\n',dataFile)
+    fprintf(1,'Time series re-indexed and saved back to %s.\n',dataFile);
 end
 
 % --- Operations
 if strcmp(tsOrOps,'ops') || strcmp(tsOrOps,'both')
-    if overRide
-        doContinue = 1;
-    else
+    if ~overRide
         doContinue = input(sprintf('Be careful -- if you press ''y'', the old index system for Operations in %s will be wiped...',dataFile),'s');
         if ~strcmp(doContinue,'y')
-            fprintf(1,'Didn''t think so! Better to be save than sorry\n')
+            fprintf(1,'Didn''t think so! Better to be save than sorry\n');
         end
     end
 
@@ -106,7 +102,7 @@ if strcmp(tsOrOps,'ops') || strcmp(tsOrOps,'both')
 
     % Save back:
     save(dataFile,'Operations','-append')
-    fprintf(1,'Operations re-indexed and saved back to %s.\n',dataFile)
+    fprintf(1,'Operations re-indexed and saved back to %s.\n',dataFile);
 end
 
 end

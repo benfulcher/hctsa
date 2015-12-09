@@ -58,8 +58,8 @@ try
 	end
 
 catch emsg
-    fprintf(1,['-----Error linking to master operation %s by %s\n'],masterLabel,operationCode);
-    fprintf(1,'%s\n',emsg.message)
+    fprintf(1,'-----Error linking to master operation %s by %s\n',masterLabel,operationCode);
+    fprintf(1,'%s\n',emsg.message);
     opOutput = 0; % Output = 0
 	opQuality = 7; % fatal error QualityCode -- something of a different error, though...
     opTime = NaN; % don't worry about calculation time for errors

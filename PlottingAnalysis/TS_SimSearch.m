@@ -139,22 +139,19 @@ end
 
 if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
     % pairwise distances already computed, stored in the HCTSA .mat file
-    fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile)
+    fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile);
     Dij = squareform(clustStruct.Dij);
     Dj = Dij(:,targetInd);
 else
-    if strcmp(tsOrOps,'ts')
-        theDistanceMetric = 'euclidean';
-    else
-        theDistanceMetric = 'absolute correlation';
-    end
     fprintf(1,'Computing %s distances to %u objects...',numItems);
+    % Default: compute euclidean distances for time series and compute
+    %           abs correlation distances for features
     switch tsOrOps
     case 'ts'
         Dj = bsxfun(@minus,TS_DataMat,TS_DataMat(targetInd,:));
         Dj = sqrt(mean(Dj.^2,2));
     case 'ops'
-        % Is there a nicer way of computing correlations?
+        % Is there a nicer way of computing abs correlations?
         Dj = zeros(numItems,1);
         for j = 1:numItems
             Dj(j) = 1 - abs(corr(TS_DataMat(:,targetInd),TS_DataMat(:,j)));

@@ -114,7 +114,7 @@ end
 % convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedParams{1},embedParams{2},1);
 
-if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
+if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding failed');
 end
 
@@ -284,7 +284,7 @@ f = fittype('a*(1-exp(b*x))','options',s);
 fitWorked = 1;
 try
     [c, gof] = fit(t',p,f);
-catch me
+catch
     fitWorked = 0;
 end
 if fitWorked

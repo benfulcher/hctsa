@@ -135,7 +135,7 @@ out.dwts = sum((e(2:end)-e(1:end-1)).^2) / sum(e.^2);
 % Fit a zero-mean AR process to residuals using the ARFIT package:
 emsg = '';
 try
-    [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(e, 1, 10, 'sbc', 'zero');
+    [~, Aest, ~, SBC, FPE] = ARFIT_arfit(e, 1, 10, 'sbc', 'zero');
 catch emsg
 end
 

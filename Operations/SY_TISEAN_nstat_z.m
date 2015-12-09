@@ -73,7 +73,7 @@ end
 
 if nargin < 3
     embedParams = {1,3};
-    fprintf(1,'Using default embedding using tau = 1 and m = 3\n')
+    fprintf(1,'Using default embedding using tau = 1 and m = 3\n');
 end
 
 N = length(y); % length of the time series

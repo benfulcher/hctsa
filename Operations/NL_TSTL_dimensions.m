@@ -44,7 +44,6 @@ function out = NL_TSTL_dimensions(y,nbins,embedParams)
 % ------------------------------------------------------------------------------
 %% Preliminaries, check inputs
 % ------------------------------------------------------------------------------
-N = length(y); % length of time series
 doPlot = 0; % plot outputs to screen
 
 % (1) Maximum number of bins, nbins
@@ -56,7 +55,7 @@ end
 % (2) Set embedding parameters to defaults
 if nargin < 3 || isempty(embedParams)
     embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default time-delay embedding parameters: autocorrelation and cao')
+    fprintf(1,'Using default time-delay embedding parameters: autocorrelation and cao');
 else
     if length(embedParams) ~= 2
         error('Embedding parameters are incorrectly formatted -- need {tau,m}')
@@ -69,7 +68,7 @@ end
 % Convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedParams{1},embedParams{2},1);
 
-if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
+if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Time-delay embedding for TSTOOL failed')
 end
 
@@ -78,7 +77,7 @@ if size(data(s),2) < 3 % embedded with dimension < 3
     mopt = size(data(s),2);
     % embed with dimension m = 3
     s = BF_embed(y,embedParams{1},3,1);
-    fprintf(1,'Re-embedded with embedding dimension 3\n')
+    fprintf(1,'Re-embedded with embedding dimension 3\n');
 else
 	mopt = size(data(s),2);
 end
@@ -91,7 +90,7 @@ if ~exist(fullfile('tstoolbox','@signal','dimensions'),'file')
     error('Cannot find the code ''dimensions'' from the TSTOOL package. Is it installed and in the Matlab path?');
 end
 try
-    [bc, in, co] = dimensions(s,nbins);
+    [bc, ~, co] = dimensions(s,nbins);
 catch me
     error('Error running TSTOOL code dimensions: %s',me.message);
 end
@@ -259,10 +258,10 @@ function out = SUB_mch(logr,logN,prefix,out)
     out.([prefix,'_meandiff']) = mean([mean(logN(:,2))-mean(logN(:,1)),mean(logN(:,3))-mean(logN(:,2))]);
 
     % (v) slopes and goodness of fit across whole r range
-    [out.([prefix,'_lfitm1']) out.([prefix,'_lfitb1']) out.([prefix,'_lfitmeansqdev1'])] = subsublinfit(logr,logN(:,1)');
-    [out.([prefix,'_lfitm2']) out.([prefix,'_lfitb2']) out.([prefix,'_lfitmeansqdev2'])] = subsublinfit(logr,logN(:,2)');
-    [out.([prefix,'_lfitm3']) out.([prefix,'_lfitb3']) out.([prefix,'_lfitmeansqdev3'])] = subsublinfit(logr,logN(:,3)');
-    [out.([prefix,'_lfitmmax']) out.([prefix,'_lfitbmax']) out.([prefix,'_lfitmeansqdevmax'])] = subsublinfit(logr,logN(:,end)');
+    [out.([prefix,'_lfitm1']), out.([prefix,'_lfitb1']), out.([prefix,'_lfitmeansqdev1'])] = subsublinfit(logr,logN(:,1)');
+    [out.([prefix,'_lfitm2']), out.([prefix,'_lfitb2']), out.([prefix,'_lfitmeansqdev2'])] = subsublinfit(logr,logN(:,2)');
+    [out.([prefix,'_lfitm3']), out.([prefix,'_lfitb3']), out.([prefix,'_lfitmeansqdev3'])] = subsublinfit(logr,logN(:,3)');
+    [out.([prefix,'_lfitmmax']), out.([prefix,'_lfitbmax']), out.([prefix,'_lfitmeansqdevmax'])] = subsublinfit(logr,logN(:,end)');
 
     function [m, b, meansqdev] = subsublinfit(x,y)
         p1 = polyfit(x,y,1);

@@ -34,7 +34,7 @@ try
     BF_CheckToolbox('distrib_computing_toolbox')
 catch
     fprintf(1,['License for Parallel Computing Toolbox could not be initiated' ...
-                    ' -- cannot perform computations across multiple cores\n'])
+                    ' -- cannot perform computations across multiple cores\n']);
     success = 0;
     return
 end
@@ -55,24 +55,24 @@ if str2num(matlabVersion(1:4)) >= 2014
         numWorkers = poolObj.NumWorkers;
         % User feedback:
         fprintf(1,['Matlab parallel processing pool opened with %u ' ...
-                                'workers\n'],numWorkers)
+                                'workers\n'],numWorkers);
         % Regardless of what you input -- must initiate in this case:
         doInitiate = 1;
     else
         % Get number of workers:
         numWorkers = poolObj.NumWorkers;
         fprintf(1,['Matlab parallel processing pool already open with ' ...
-                                    '%u workers\n'],numWorkers)
+                                    '%u workers\n'],numWorkers);
     end
 else
     if (matlabpool('size') == 0)
         % Open pool of workers:
         matlabpool open;
         fprintf(1,['Matlab parallel processing pool opened with %u ' ...
-                                'workers\n'],matlabpool('size'))
+                                'workers\n'],matlabpool('size'));
     else
         fprintf(1,['Matlab parallel processing pool already open with ' ...
-                                    '%u workers\n'],matlabpool('size'))
+                                    '%u workers\n'],matlabpool('size'));
     end
 end
 

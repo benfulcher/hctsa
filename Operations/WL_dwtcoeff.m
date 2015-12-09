@@ -119,7 +119,7 @@ for k = 1:level
         % std coefficients at this level:
         out.(sprintf('stdd_l%u',k)) = std(d);
         % 1-D noise coefficient estimate:
-        out.(sprintf('stddd_l%u',k)) = wnoisest(c,l,k);;
+        out.(sprintf('stddd_l%u',k)) = wnoisest(c,l,k);
     else
         out.(sprintf('maxd_l%u',k)) = NaN;
         out.(sprintf('mind_l%u',k)) = NaN;

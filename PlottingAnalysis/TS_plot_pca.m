@@ -52,7 +52,7 @@ end
 % ------------------------------------------------------------------------------
 
 % Load in data:
-[TS_DataMat,TimeSeries,Operations,theFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,~,theFile] = TS_LoadData(whatData);
 
 % Retrieve group names also:
 fileVarsStruct = whos('-file',theFile);
@@ -76,7 +76,7 @@ fprintf(1,'Calculating principal components of the %u x %u data matrix...', ...
 
 % The new pca function is a much faster implementation to compute just the first
 % 2 components:
-[pcCoeff, pcScore, latent, ~, percVar] = pca(zscore(TS_DataMat),'NumComponents',2);
+[~, pcScore, ~, ~, percVar] = pca(zscore(TS_DataMat),'NumComponents',2);
 fprintf(1,' Done.\n');
 
 % ------------------------------------------------------------------------------

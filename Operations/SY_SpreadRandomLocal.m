@@ -68,8 +68,8 @@ if ischar(l)
 
     % Very short l for this sort of time series:
     if l < 5
-        warning(sprintf(['This time series has a very short correlation length;\nSetting ' ...
-            'l=%u means that changes estimates will be difficult to compare...'],l));
+        warning(['This time series has a very short correlation length;\nSetting ' ...
+            'l=%u means that changes estimates will be difficult to compare...'],l);
     end
 end
 
@@ -80,8 +80,8 @@ end
 % Check the parameters are appropriate for the length of the input time series:
 N = length(y); % the length of the time series
 if l > 0.9*N % operation is not suitable -- time series is too short
-	warning(sprintf(['SY_SpreadRandomLocal: This time series (N = %u) ' ...
-                                'is too short to use l = %.1f\n'],N,l))
+	warning(['SY_SpreadRandomLocal: This time series (N = %u) ' ...
+                                'is too short to use l = %.1f\n'],N,l)
     out = NaN; return % NaN means not suitable
 end
 

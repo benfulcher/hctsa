@@ -85,7 +85,7 @@ switch whatDistn
 
     case 'rayleigh'
         if any(x < 0),
-            fprintf(1,'The data are not positive, but Rayleigh is a positive-only distribution.\n')
+            fprintf(1,'The data are not positive, but Rayleigh is a positive-only distribution.\n');
             out = NaN;
             return
         else % fit a Rayleigh distribution to the positive-only data
@@ -98,7 +98,7 @@ switch whatDistn
 
     case 'exp'
         if any(x < 0)
-            fprintf(1,'The data contains negative values, but Exponential is a positive-only distribution.\n')
+            fprintf(1,'The data contains negative values, but Exponential is a positive-only distribution.\n');
             out = NaN; return
         else a = expfit(x);
 			peaky = exppdf(0,a); thresh = peaky/100;
@@ -109,7 +109,7 @@ switch whatDistn
 
     case 'gamma'
         if any(x < 0)
-            fprintf(1,'The data contains negative values, but Gamma is a positive-only distribution.\n')
+            fprintf(1,'The data contains negative values, but Gamma is a positive-only distribution.\n');
             out = NaN; return
         else a = gamfit(x);
 			if a(1) < 1
@@ -124,7 +124,7 @@ switch whatDistn
 
     case 'logn'
         if any(x <= 0)
-            fprintf(1,'The data are not positive, but Log-Normal is a positive-only distribution.\n')
+            fprintf(1,'The data are not positive, but Log-Normal is a positive-only distribution.\n');
             out = NaN; return
         else
 			a = lognfit(x);
@@ -136,7 +136,7 @@ switch whatDistn
 
     case 'wbl'
         if any(x <= 0)
-            fprintf(1,'The data are not positive, but Weibull is a positive-only distribution.\n')
+            fprintf(1,'The data are not positive, but Weibull is a positive-only distribution.\n');
             out = NaN; return
         else
 			a = wblfit(x);
@@ -223,9 +223,9 @@ max2 = max(ffit);
 out.peaksepy = max2-max1;
 
 % PEAKSEPX: returns the seperation (in x) between the maxima of each distrn
-% NOT A GREAT POSED STATISTIC FOR GENERAL DISTRIBUTIONS -- scales with variance
-[max1, i1] = max(f);
-[max2, i2] = max(ffit);
+% NOT A VERY WELL POSED STATISTIC FOR GENERAL DISTRIBUTIONS since this scales with variance
+[~, i1] = max(f);
+[~, i2] = max(ffit);
 out.peaksepx = xi(i2)-xi(i1);
 
 % OLAPINT: returns the overlap integral between the two curves; normalized by variance

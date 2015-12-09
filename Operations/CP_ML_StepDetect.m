@@ -68,7 +68,7 @@ function out = CP_ML_StepDetect(y,method,params)
 N = length(y); % time-series length
 
 if nargin < 2 || isempty(method)
-    fprintf(1,'Using Kalafut-Visscher step detection by default\n')
+    fprintf(1,'Using Kalafut-Visscher step detection by default\n');
     method = 'kv';
 end
 

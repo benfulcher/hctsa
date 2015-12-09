@@ -54,13 +54,13 @@ function out = MF_hmm_CompareNStates(y,trainp,nstater)
 N = length(y); % number of samples in time series
 
 if nargin < 2 || isempty(trainp)
-    fprintf(1,'Training the model on 60%% of the data by default\n')
+    fprintf(1,'Training the model on 60%% of the data by default\n');
     trainp = 0.6; % train on 60% of the data
 end
 Ntrain = floor(trainp*N); % number of initial samples to train the model on
 
 if nargin < 3 || isempty(nstater)
-    fprintf(1,'Using 2--4 states by default\n')
+    fprintf(1,'Using 2--4 states by default\n');
     nstater = (2:4); % use 2:4 states
 end
 

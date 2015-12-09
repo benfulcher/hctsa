@@ -51,11 +51,11 @@ N = length(y); % length of the time series
 
 if nargin < 2 || isempty(wname)
     wname = 'db3';
-    fprintf(1,'Using default wavelet ''%s''\n',wname)
+    fprintf(1,'Using default wavelet ''%s''\n',wname);
 end
 if nargin < 3 || isempty(maxScale)
     maxScale = 32;
-    fprintf(1,'Using default maxScale of %u\n',maxScale)
+    fprintf(1,'Using default maxScale of %u\n',maxScale);
 end
 
 scales = (1:maxScale);
@@ -188,18 +188,6 @@ for i = 1:5
     out.(sprintf('mean5_%u',i)) = mean(SCs{i}(:));
     out.(sprintf('std5_%u',i)) = std(SCs{i}(:));
 end
-
-% mean5_1 = mean(SC_1(:));
-% mean5_2 = mean(SC_2(:));
-% mean5_3 = mean(SC_3(:));
-% mean5_4 = mean(SC_4(:));
-% mean5_5 = mean(SC_5(:));
-
-% std5_1 = std(SC_1(:));
-% std5_2 = std(SC_2(:));
-% std5_3 = std(SC_3(:));
-% std5_4 = std(SC_4(:));
-% std5_5 = std(SC_5(:));
 
 out.stat_5_m_s = mean([out.std5_1, out.std5_2, out.std5_3, out.std5_4, out.std5_5])/mean(SC(:));
 out.stat_5_s_m = std([out.mean5_1, out.mean5_2, out.mean5_3, out.mean5_4, out.mean5_5])/std(SC(:));

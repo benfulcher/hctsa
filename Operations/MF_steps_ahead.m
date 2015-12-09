@@ -98,7 +98,7 @@ switch model
             % criterion (Schwartz's Bayesian Criterion, SBC)
             % Uses Matlab code from ARfit
             % http://www.gps.caltech.edu/~tapio/arfit/
-            [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(ytrain.y, 1, 10, 'sbc', 'zero');
+            [~, Aest] = ARFIT_arfit(ytrain.y, 1, 10, 'sbc', 'zero');
             order = length(Aest);
         end
         m = ar(ytrain,order);

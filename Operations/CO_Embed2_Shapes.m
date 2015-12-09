@@ -47,7 +47,7 @@ doPlot = 0; % plot results for debugging
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
 	fprintf(1,['Setting tau as the first zero crossing ' ...
-    			'of the autocorrelation function.\n'])
+    			'of the autocorrelation function.\n']);
     tau = 'tau';
 end
 if nargin < 3 || isempty(shape)

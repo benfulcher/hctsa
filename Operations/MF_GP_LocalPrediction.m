@@ -69,7 +69,7 @@ if size(y,2) > size(y,1)
     y = y'; % ensure a column vector input
 end
 if nargin < 2 || isempty(covFunc),
-    fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n')
+    fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n');
     covFunc = {'covSum', {'covSEiso','covNoise'}};
 end
 
@@ -150,15 +150,14 @@ for i = 1:numPreds
         ys = yy(rs);
 
     case 'beforeafter'
-        t = (1:numTrain*2+numTest)';
-        r = numTrain+1:numTrain+1 + numTest-1;
+        t = (1:2*numTrain+numTest)';
         yy = y(spns(i):spns(i)+2*numTrain+numTest-1);
 
         rt = [1:numTrain, numTrain+numTest+1:numTrain*2+numTest];
         tt = t(rt);
         yt = yy(rt);
 
-        rs = [numTrain+1 : numTrain+numTest];
+        rs = (numTrain+1 : numTrain+numTest);
         ts = t(rs);
         ys = yy(rs);
 

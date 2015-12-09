@@ -1,7 +1,5 @@
 function SQL_ChangeDatabase()
-% SQL_ChangeDatabase
-%
-% Changes the database that the hctsa package reads from and writes to.
+% SQL_ChangeDatabase   Change the database the hctsa package reads and writes to.
 %
 % Writes a new sql_settings.conf file with a new set of connection details.
 
@@ -70,7 +68,7 @@ try
     fprintf(1,'Database %s at %s for %s opens and closes no problem!!\n',databaseName,hostName,local_u);
     fprintf(1,'We''re good to go!! :)\n');
 catch
-	fprintf(1,'Error: Unable to connect using the new database settings :(\n',databaseName);
+	fprintf(1,'Error: Unable to connect to %s using the new database settings :(\n',databaseName);
 end
 
 end

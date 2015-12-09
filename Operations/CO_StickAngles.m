@@ -48,7 +48,6 @@ BF_CheckToolbox('signal_toolbox');
 
 %-------------------------------------------------------------------------------
 doPlot = 0; % whether to plot output
-N = length(y);
 
 ix = cell(2,1); % indicies for positive(1) and negative(2) entries of time series vector
 ix{1} = find(y >= 0); % bias here -- 'look up' if on 'ground'

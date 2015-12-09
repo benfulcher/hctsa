@@ -173,8 +173,8 @@ else
     numUniqueTimeSeries = length(uniqueTimeSeriesNames);
     if numUniqueTimeSeries < length(TimeSeries)
         beep
-        warning(sprintf('***%u duplicate time series names present in combined dataset -- removed',...
-                                length(TimeSeries) - numUniqueTimeSeries))
+        warning('***%u duplicate time series names present in combined dataset -- removed',...
+                                length(TimeSeries) - numUniqueTimeSeries);
         TimeSeries = TimeSeries(ix_ts_names);
         didTrim = 1;
     end
@@ -231,7 +231,7 @@ end
 % Construct an intersection of MasterOperations
 % ------------------------------------------------------------------------------
 % Take intersection, like operations -- those that are in both
-[allmopids,keepmopi_1] = intersect(vertcat(loadedData{1}.MasterOperations.ID),...
+[~,keepmopi_1] = intersect(vertcat(loadedData{1}.MasterOperations.ID),...
                                     vertcat(loadedData{2}.MasterOperations.ID));
 MasterOperations = loadedData{1}.MasterOperations(keepmopi_1);
 
@@ -283,13 +283,7 @@ hereSheIs = which(fullfile(pwd,outputFileName));
 if ~isempty(hereSheIs) % already exists
     outputFileName = [outputFileName(1:end-4),'_combined.mat'];
 end
-fprintf(1,['----------Saving to %s----------\n'],outputFileName);
-% if ~strcmp(outputFileName,'HCTSA.mat')
-%     fprintf(1,['You''ll need to specify the custom filename ''%s'',' ...
-%                 ' or rename to HCTSA_N.mat to run' ...
-%                 ' normal analysis routines like TS_normalize...\n'],...
-%                 outputFileName);
-% end
+fprintf(1,'----------Saving to %s----------\n',outputFileName);
 
 %--- Now actually save it:
 save(outputFileName,'TimeSeries','Operations','MasterOperations','fromDatabase','-v7.3');
@@ -307,7 +301,7 @@ fprintf(1,'%s contains %u time series and %u operations.\n',outputFileName, ...
 % ReIndex??
 %-------------------------------------------------------------------------------
 if needReIndex == 1
-    fprintf(1,'There are duplicate IDs in the time series -- we need to reindex\n')
+    fprintf(1,'There are duplicate IDs in the time series -- we need to reindex\n');
     TS_ReIndex(outputFileName,'ts',1);
 end
 

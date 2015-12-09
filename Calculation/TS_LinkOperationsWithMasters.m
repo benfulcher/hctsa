@@ -40,9 +40,9 @@ Operations = removeField(Operations,'Label');
 %-------------------------------------------------------------------------------
 mastersNeeded = ismember([MasterOperations.ID],[Operations.MasterID]);
 if ~all(mastersNeeded)
-    warning(sprintf(['%u/%u master operations are not used by the %u operations' ...
+    warning(['%u/%u master operations are not used by the %u operations' ...
                          ' and will be removed.'],...
-                        sum(~mastersNeeded),numMops,numOps));
+                        sum(~mastersNeeded),numMops,numOps);
     MasterOperations = MasterOperations(mastersNeeded);
 end
 

@@ -110,15 +110,15 @@ end
 
 iThese = find(doThese);
 for i = 1:sum(doThese)
-    fprintf(1,'%s [%u] %s\n',doWhat,IDs(iThese(i)),dataStruct(iThese(i)).(theNameField))
+    fprintf(1,'%s [%u] %s\n',doWhat,IDs(iThese(i)),dataStruct(iThese(i)).(theNameField));
 end
 
 if doRemove == 0 % clear data
-    reply = input(sprintf(['**Preparing to clear all calculated data for %u %s.\n' ...
+    input(sprintf(['**Preparing to clear all calculated data for %u %s.\n' ...
                         '[press any key to continue, ctrl-C to abort]'], ...
                                     sum(doThese),theWhat),'s');
 elseif doRemove == 1
-    reply = input(sprintf(['Preparing to REMOVE %u %s -- DRASTIC STUFF! ' ...
+    input(sprintf(['Preparing to REMOVE %u %s -- DRASTIC STUFF! ' ...
             'I HOPE THIS IS OK?!\n[press any key to continue, ctrl-C to abort]'], ...
                                 sum(doThese),theWhat),'s');
 else
@@ -164,7 +164,7 @@ else
 	end
 end
 
-fprintf(1,'Saved back to %s\n',whatDataFile)
+fprintf(1,'Saved back to %s\n',whatDataFile);
 
 %-------------------------------------------------------------------------------
 function A = f_clear_remove(A,ind,tsOrOps,doRemove)

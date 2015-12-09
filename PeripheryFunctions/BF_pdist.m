@@ -25,7 +25,7 @@ function R = BF_pdist(dataMatrix,distMetric,toVector,opts,beSilent,minPropGood)
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(distMetric)
     distMetric = 'euclidean';
-    fprintf(1,'Using the Euclidean distance metric\n')
+    fprintf(1,'Using the Euclidean distance metric\n');
 end
 if nargin < 3 || isempty(toVector)
     toVector = 0;
@@ -86,7 +86,7 @@ case 'mi'
         end
         if (mod(i,floor(n1/50)) == 0)
             fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
-                        BF_thetime(toc(mitimer)/i*(n1-i)),i,n1)
+                        BF_thetime(toc(mitimer)/i*(n1-i)),i,n1);
         end
     end
     clear mitimer % stop timing
@@ -152,7 +152,7 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
             % and then 5 more times...
             if ~beSilent && ((i==1000 && length(nani) > 10000) || (mod(i,floor(length(nani)/5))==0))
                 fprintf(1,'Approximately %s remaining! We''re at %u / %u.\n', ...
-                        BF_thetime(toc(NaNtimer)/i*(length(nani)-i)),i,length(nani))
+                        BF_thetime(toc(NaNtimer)/i*(length(nani)-i)),i,length(nani));
             end
         end
         clear NaNtimer % stop the timer

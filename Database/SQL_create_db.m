@@ -54,7 +54,7 @@ fprintf(1,'Connection to %s established\n',hostname);
 % ------------------------------------------------------------------------------
 % Kind of a simple one that assumes that you need "GRANT ALL PRIVILEGES"
 % Perhaps not fool-proof, so leave as a warning for now
-[a,emsg] = mysql_dbquery(dbc,'SHOW GRANTS');
+a = mysql_dbquery(dbc,'SHOW GRANTS');
 if iscell(a), a = a{1}; end % take first entry
 if ~strncmp(a,'GRANT ALL PRIVILEGES',20); % check first entry starts with "GRANT ALL PRIVILEGES"
     warning('It doesn''t look like %s has administrative privileges on %s\n', admin_user, hostname);
@@ -64,8 +64,8 @@ end
 % Set up a new non-admin user account for the database
 % ------------------------------------------------------------------------------
 fprintf(1,'Now creating a mySQL database for highly comparative time-series analysis\n');
-fprintf(1,'Please choose a name for the database (do not include special characters).\n')
-fprintf(1,'NB: be careful, this command will replace the named database if it exists on %s.\n',hostname)
+fprintf(1,'Please choose a name for the database (do not include special characters).\n');
+fprintf(1,'NB: be careful, this command will replace the named database if it exists on %s.\n',hostname);
 databaseName = input('Enter a name for the new database [default: hctsa]','s');
 if isempty(databaseName), databaseName = 'hctsa'; end
 fprintf('And we also need a NEW username and password to create a NON-ADMIN account\n');

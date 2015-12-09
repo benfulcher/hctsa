@@ -1,5 +1,5 @@
 function [outputData, errmessage] = mysql_dbquery(dbconn, sqlquery)
-% MYSQL_DBQUERY     Retrieves data from a database connection.
+% mysql_dbquery     Retrieves data from a database connection.
 %
 % Can fetch data from either a JDBC4 connection, or using a Matlab database
 % object (depending on the input class).
@@ -26,8 +26,6 @@ case 'database'
     curs = exec(dbconn,sqlquery);
     curs = fetch(curs);
     errmessage = curs.Message;
-    qrfields = {};
-    queryresult = [];
 
     if isempty(curs.Message)
         % Success!:
@@ -51,15 +49,15 @@ case 'com.mysql.jdbc.JDBC4Connection'
         queryresult = dbstmt.executeQuery(sqlquery);
         rsmd = queryresult.getMetaData();
         cols = rsmd.getColumnCount();
-        for j = 1:cols
-            qrfields{j} = char(rsmd.getColumnName(j));
-            if (nargout == 0)
-                fprintf('%s\t', char(rsmd.getColumnName(j)));
-            end
-        end
-        if (nargout == 0)
-            fprintf('\n');
-        end
+%         for j = 1:cols
+%             qrfields{j} = char(rsmd.getColumnName(j));
+%             if (nargout == 0)
+%                 fprintf('%s\t', char(rsmd.getColumnName(j)));
+%             end
+%         end
+%         if (nargout == 0)
+%             fprintf('\n');
+%         end
         outputData = {};
         i = 0;
         while (queryresult.next())

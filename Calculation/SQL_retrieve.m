@@ -62,7 +62,7 @@ end
 % retrieveWhatEntries
 if nargin < 3 || isempty(retrieveWhatEntries)
 	retrieveWhatEntries = 'all'; % default: retrieve full sets of things, not just the empty entries in the database
-    fprintf(1,'Retrieving ALL elements from the database in the specified ts_id and op_id ranges by default.\n')
+    fprintf(1,'Retrieving ALL elements from the database in the specified ts_id and op_id ranges by default.\n');
 end
 retrieveWhatEntriesCanBe = {'null','all','error'};
 if ~ischar(retrieveWhatEntries) || ~ismember(retrieveWhatEntries,retrieveWhatEntriesCanBe)
@@ -136,12 +136,12 @@ tsids_db = vertcat(tsids_db{:});
 
 % There are fewer time series in the database than requested
 if length(tsids_db) < numTS
-    if (length(tsids_db) == 0) % Now there are no time series to retrieve
-        fprintf(1,'None of the %u specified time series exist in ''%s''\n',numTS,dbname)
+    if isempty(tsids_db) % Now there are no time series to retrieve
+        fprintf(1,'None of the %u specified time series exist in ''%s''\n',numTS,dbname);
         SQL_closedatabase(dbc); return % Close the database connection before returning
     end
     fprintf(1,['%u specified time series do not exist in ''%s'', retrieving' ...
-                    ' the remaining %u\n'],numTS-length(tsids_db),dbname,length(tsids_db))
+                    ' the remaining %u\n'],numTS-length(tsids_db),dbname,length(tsids_db));
     ts_ids = tsids_db; % Will always be sorted in ascending order
     ts_ids_string = BF_cat(ts_ids,',');
     numTS = length(ts_ids);
@@ -149,12 +149,12 @@ end
 
 % There are fewer operations in the database than requested:
 if length(opids_db) < numOps
-    if (length(opids_db) == 0) % Now there are no operations to retrieve
-        fprintf(1,'None of the %u specified operations exist in ''%s''\n',numOps,dbname)
+    if isempty(opids_db) % Now there are no operations to retrieve
+        fprintf(1,'None of the %u specified operations exist in ''%s''\n',numOps,dbname);
         SQL_closedatabase(dbc); return % Close the database connection before returning
     end
     fprintf(1,['%u specified operations do not exist in ''%s'', retrieving' ...
-                    ' the remaining %u\n'],numOps-length(opids_db),dbname,length(opids_db))
+                    ' the remaining %u\n'],numOps-length(opids_db),dbname,length(opids_db));
     op_ids = opids_db; % Will always be sorted in ascending order
     op_ids_string = BF_cat(op_ids,',');
     numOps = length(op_ids);
@@ -387,14 +387,13 @@ if ismember(retrieveWhatEntries,{'null','error'})
 	end
 end
 
-
 % ------------------------------------------------------------------------------
 %% Fill Metadata
 % ------------------------------------------------------------------------------
 
 % 1. Retrieve Time Series Metadata
 selectString = sprintf('SELECT Name, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
-[tsinfo,emsg] = mysql_dbquery(dbc,selectString);
+tsinfo = mysql_dbquery(dbc,selectString);
 % Convert to a structure array, TimeSeries, containing metadata for all time series
 tsinfo = [num2cell(ts_ids),tsinfo];
 % Define inline functions to convert time-series data text to a vector of floats:
@@ -405,7 +404,7 @@ TimeSeries = cell2struct(tsinfo',{'ID','Name','Keywords','Length','Data'}); % Co
 
 % 2. Retrieve Operation Metadata
 selectString = sprintf('SELECT Name, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
-[opinfo,emsg] = mysql_dbquery(dbc,selectString);
+opinfo = mysql_dbquery(dbc,selectString);
 opinfo = [num2cell(op_ids), opinfo]; % add op_ids
 Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
 

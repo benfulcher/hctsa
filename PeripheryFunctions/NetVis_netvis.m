@@ -115,10 +115,10 @@ numGroups = length(unique(nodeLabels)); % Number of different (colored) groups t
 if isempty(thresholdByProportion)
     if any(linkThresh > 1)
         thresholdByProportion = 0;
-        fprintf(1,'Thresholding by absolute\n')
+        fprintf(1,'Thresholding by absolute\n');
     else
         thresholdByProportion = 1;
-        fprintf(1,'Thresholding by proportion\n')
+        fprintf(1,'Thresholding by proportion\n');
     end
 end
 
@@ -230,7 +230,7 @@ numRepeats = nits(2); % number of repeats
 B = A - diag(diag(A));
 L = diag(sum(B,2)) - B; % Laplacian
 E = L + k*numNodes*speye(numNodes);
-[R, p] = chol(sparse(E));
+R = chol(sparse(E));
 Rtr  = R';
 
 Energy = zeros(numRepeats,3); % energies, gradients
@@ -245,7 +245,7 @@ for jman = 1:numRepeats
 
     % Run through the mechanics of the visualization method:
     for iter = 1:maxIter  % Could use a threshold on the gradient here
-        [f g] = NetVis_Jtilda2d(x,y,numApprox); % Gets the repulsion forces using an approximation
+        f = NetVis_Jtilda2d(x,y,numApprox); % Gets the repulsion forces using an approximation
         J = [(E*x-f);(E*y-g)]; % This is the full gradient (attraction - repulsion)
         % This is only to plot the residual (so can be removed for speed)
         x = R\(Rtr\f); x = x-mean(x); % Update and center
@@ -271,7 +271,7 @@ end
 
 % Now run the best one further (could do this starting with seeds from
 % previous layout) but I won't do it.
-[minE,theBest] = min(Energy(:,1));
+[~,theBest] = min(Energy(:,1));
 x = xy{theBest}(:,1);
 y = xy{theBest}(:,2);
 
@@ -297,7 +297,7 @@ hold off
 % Go through each thresholded adjacency matrix (mutually exclusive links), Ath
 % and plot the links in them a different color
 sizeDecline = linspace(1,0.5,length(linkThresh));
-for i = sort(anyLinks','descend') % length(Ath):-1:1 % plot the weakest links first
+for i = sort(anyLinks,2,'descend') % length(Ath):-1:1 % plot the weakest links first
     [X,Y] = gplot(Ath{i},[x y]); %,'color',clinks{2}); %,'color',c{2}); % links
     plot(X(:),Y(:),'Color',clinks{i},'LineWidth',2*sizeDecline(i)); % (length(A)-i+1)*0.8
     hold on

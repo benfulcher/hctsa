@@ -60,7 +60,7 @@ end
 
 % Custom HCTSA.mat file:
 if nargin < 5
-    customFile = ''; % compute all op_ids in the file by default
+    customFile = 'raw';
 end
 
 % Be vocal?
@@ -72,16 +72,13 @@ end
 % --------------------------------------------------------------------------
 %% Load information from local files
 % --------------------------------------------------------------------------
-if isempty(customFile)
-	customFile = 'HCTSA.mat';
-end
-fprintf(1,'Loading data from %s...',customFile);
+[TS_DataMat,TimeSeries,Operations,customFile] = TS_LoadData(customFile);
 fileVarsStruct = whos('-file',customFile);
 fileVars = {fileVarsStruct.name};
 if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat'},fileVars))
 	error('\nCannot compute on %s: missing variables.',customFile);
 end
-load(customFile,'TimeSeries','Operations','MasterOperations','TS_DataMat');
+load(customFile,'MasterOperations');
 if ismember('TS_CalcTime',fileVars)
 	load(customFile,'TS_CalcTime');
 end
@@ -178,9 +175,9 @@ for i = 1:numTimeSeries
         error('Database structure error: some operations have not been assigned a valid master operation');
     end
 
-	fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
-	fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now))
-	fprintf(1,'- - - - - - - - - - - Time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries)
+	fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
+	fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now));
+	fprintf(1,'- - - - - - - - - - - Time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries);
 
     if numCalc > 0 % some to calculate
 		try
@@ -224,18 +221,18 @@ end
 % --------------------------------------------------------------------------
 % --------------------------------------------------------------------------
 fprintf(1,['!! !! !! !! !! !! Calculation completed at %s !! !! ' ...
-                                                '!! !! !!\n'],datestr(now))
-fprintf(1,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1))
+                                                '!! !! !!\n'],datestr(now));
+fprintf(1,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1));
 
 % Save back to local files (if results were computed):
 if any(numCalc_all > 0)
-	fprintf(1,'Saving all results to %s...',customFile)
+	fprintf(1,'Saving all results to %s...',customFile);
 	saveTimer = tic;
 	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
-	fprintf(1,' Saved in %s.\n',BF_thetime(toc(saveTimer)))
+	fprintf(1,' Saved in %s.\n',BF_thetime(toc(saveTimer)));
 	clear saveTimer
 end
 
-fprintf(1,'Calculation complete!\n')
+fprintf(1,'Calculation complete!\n');
 
 end

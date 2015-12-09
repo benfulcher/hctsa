@@ -58,8 +58,6 @@ if nargin < 4
     extraParam = [];
 end
 
-N = length(y1);
-
 % ------------------------------------------------------------------------------
 % Initialize miCalc object:
 miCalc = IN_Initialize_MI(estMethod,extraParam);

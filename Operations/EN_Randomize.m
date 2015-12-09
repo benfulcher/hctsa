@@ -112,7 +112,6 @@ BF_ResetSeed(randomSeed);
 %-------------------------------------------------------------------------------
 % Do the randomization
 %-------------------------------------------------------------------------------
-randTimer = tic;
 % fprintf(1,'%u/%u calculation points',numCalcs,N*randp_max)
 
 for i = 1:N*randp_max
@@ -150,7 +149,6 @@ end
 if doPlot
     f = figure('color','w'); box('on');
     plot(stats,'.-');
-    out = stats;
 end
 
 % ------------------------------------------------------------------------------
@@ -241,7 +239,7 @@ end
 		end
 	end
 % ------------------------------------------------------------------------------
-    function [c,gof] = f_fix_exp(r,dataVector,startPoint,addOffset);
+    function [c,gof] = f_fix_exp(r,dataVector,startPoint,addOffset)
         % Fits an exponential to the data vector across data points r
 
         s = fitoptions('Method','NonlinearLeastSquares','StartPoint',startPoint);
@@ -256,7 +254,7 @@ end
         if doPlot;
             figure('color','w'); hold on;
             plot(r,dataVector,'x-k');
-            xr = linspace(min(r),max(r),100)
+            xr = linspace(min(r),max(r),100);
             plot(xr,f_x(c,xr))
         end
     end
@@ -272,7 +270,7 @@ end
         out.([fieldName,'fexprmse']) = gof.rmse;
     end
 %-------------------------------------------------------------------------------
-    function out = assignExtraStats(out,dataVector,fieldName);
+    function out = assignExtraStats(out,dataVector,fieldName)
         % Assigns 2 extra statistics about a data vector:
         out.([fieldName,'diff']) = abs((dataVector(end)-dataVector(1))/dataVector(1));
         out.([fieldName,'hp']) = SUB_gethp(dataVector);

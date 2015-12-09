@@ -1,4 +1,4 @@
-function theCode = SQL_GiveMeCode(op_id);
+function theCode = SQL_GiveMeCode(op_id)
 % SQL_GiveMeCode a string containing code for evaluating an operation with a given op_id
 %
 % Can be difficult to do this manually, especially when dealing with structured
@@ -28,7 +28,7 @@ function theCode = SQL_GiveMeCode(op_id);
 
 % ------------------------------------------------------------------------------
 % Open connection to database
-[dbc, dbname] = SQL_opendatabase;
+[dbc, ~] = SQL_opendatabase;
 
 % Get opCode:
 selectString = sprintf('SELECT Code FROM Operations WHERE op_id = %u',op_id);
@@ -36,11 +36,10 @@ opCode = mysql_dbquery(dbc,selectString);
 opCode = opCode{1};
 
 % Get MasterCode:
-selectString = sprintf(['SELECT MasterLabel,MasterCode FROM MasterOperations WHERE mop_id = ' ...
+selectString = sprintf(['SELECT MasterCode FROM MasterOperations WHERE mop_id = ' ...
                         '(SELECT mop_id FROM Operations WHERE op_id = %u)'],op_id);
 mopData = mysql_dbquery(dbc,selectString);
-mopLabel = mopData{1};
-mopCode = mopData{2};
+mopCode = mopData{1};
 
 % Close connection to the mySQL database
 SQL_closedatabase(dbc);
@@ -51,7 +50,6 @@ SQL_closedatabase(dbc);
 dotHere = regexp(opCode,'\.');
 if ~isempty(dotHere) % A structure output
     whatField = opCode(dotHere+1:end);
-    % theCode{1} = sprintf('@(x,y) %s;',mopCode); % Evaluate the structure
     theCode = eval(sprintf('@(x,y) BF_GiveMeField(%s,''%s'');',mopCode,whatField)); % Take the field from the structure
 else
     theCode = eval(sprintf('@(x,y) %s;',mopCode));

@@ -58,7 +58,7 @@ N = length(y); % length of the time series
 %% Check Inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(wname)
-    fprintf(1,'Wavelet not specified -- using the default db3 wavelet\n')
+    fprintf(1,'Wavelet not specified -- using the default db3 wavelet\n');
     wname = 'db3';
 end
 

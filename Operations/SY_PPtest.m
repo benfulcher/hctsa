@@ -75,7 +75,7 @@ end
 %% Run the test
 % ------------------------------------------------------------------------------
 warning('off','econ:pptest:LeftTailStatTooSmall')
-[h, pValue, stat, cValue, reg] = pptest(y,'lags',lags,'model',model,'test',testStatistic);
+[h, pValue, stat, ~, reg] = pptest(y,'lags',lags,'model',model,'test',testStatistic);
 warning('on','econ:pptest:LeftTailStatTooSmall')
 
 % ------------------------------------------------------------------------------

@@ -128,7 +128,7 @@ else % use a routine to inform m
                 try
                     m = NL_crptool_fnn(y,10,2,tau,th,randomSeed);
                 catch
-                    fprintf(1,'Error with FNN code')
+                    fprintf(1,'Error with FNN code');
                     y_embed = NaN;
                     return
                 end
@@ -147,7 +147,7 @@ else % use a routine to inform m
                 try
                     m = NL_CaosMethod(y,10,tau,3,0.2,{'mmthresh',th});
                 catch
-                    fprintf(1,'Call to TSTOOL function ''cao'' failed')
+                    fprintf(1,'Call to TSTOOL function ''cao'' failed');
                     y_embed = NaN; return
                 end
                 ssm = sprintf('by TSTOOL function ''cao'' using ''mmthresh'' with threshold %f to m = %u',th,m);

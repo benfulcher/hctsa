@@ -214,7 +214,7 @@ out.aerr_mean = mean(Aerr);
 %-------------------------------------------------------------------------------
 
 % Run code from the ARfit package
-[S, Serr, per, tau, exctn] = ARFIT_armode(Aest, Cest, th);
+[S, ~, per, tau, exctn] = ARFIT_armode(Aest, Cest, th);
 
 % S: eigenmodes
 % Serr: +/- margins of error (95% confidence intervals)

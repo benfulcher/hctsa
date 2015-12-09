@@ -48,7 +48,7 @@ end
 %% Preparations:
 % ------------------------------------------------------------------------------
 % Get IDs of all time series in the hctsa datafile:
-[~,TimeSeries,Operations,theDataFile] = TS_LoadData(fileName);
+[~,TimeSeries,Operations] = TS_LoadData(fileName);
 tsIDs = [TimeSeries.ID];
 
 % Set the IDs to compute at each iteration:
@@ -65,7 +65,7 @@ fprintf(1,['About to calculate across %u time series and %u operations ' ...
 % Loop across time series:
 for i = 1:length(ID_inc)-1
 	fprintf(1,'\n\n\nWe''re looking at Time series with IDs from %u--%u\n\n\n', ...
-                            	tsIDs(ID_inc(i)),tsIDs(ID_inc(i+1)-1))
+                            	tsIDs(ID_inc(i)),tsIDs(ID_inc(i+1)-1));
 
     % Compute any missing values for this range of time series, then save back:
     TS_compute(doParallelize,tsIDs(ID_inc(i):ID_inc(i+1)-1),[],'missing',fileName);

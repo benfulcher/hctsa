@@ -58,12 +58,12 @@ end
 
 if nargin < 3 || isempty(embedParams)
     embedParams = {'mi', 3};
-    fprintf(1,'Using default embedding settings: minimum of the automutual information for tau and m = 3\n')
+    fprintf(1,'Using default embedding settings: minimum of the automutual information for tau and m = 3\n');
 end
 
 if embedParams{2} ~= 3
     embedParams{2} = 3;
-    fprintf(1,'Three-dimensional embedding\n')
+    fprintf(1,'Three-dimensional embedding\n');
 end
 
 % set ref
@@ -96,7 +96,7 @@ doPlot = 0; % plot outputs to a figure
 N = length(y); % length of the time series
 s = BF_embed(y,embedParams{1},3,1);
 
-if ~strcmp(class(s),'signal') && isnan(s); % embedding failed
+if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding failed');
 end
 

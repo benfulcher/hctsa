@@ -72,7 +72,7 @@ doPlot = 0;
 % ------------------------------------------------------------------------------
 % Do the pca using Statistics toolbox function, 'princomp'
 % ------------------------------------------------------------------------------
-[pc, score, latent] = pca(y_embed);
+[~, ~, latent] = pca(y_embed);
 
 perc = latent/sum(latent); % proportion of variance explained
 

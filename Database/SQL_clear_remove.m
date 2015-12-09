@@ -85,12 +85,12 @@ end
 %% Provide some user feedback
 % ------------------------------------------------------------------------------
 if (doRemove == 0) % clear data
-    reply = input(sprintf(['Preparing to clear data for %u %s from %s.\n' ...
+    input(sprintf(['Preparing to clear data for %u %s from %s.\n' ...
                                 '[press any key to continue]'], ...
                                     length(idRange),theWhat,dbName),'s');
     doWhat = 'clear data';
 elseif doRemove == 1
-    reply = input(sprintf(['Preparing to REMOVE %u %s from %s -- DRASTIC STUFF! ' ...
+    input(sprintf(['Preparing to REMOVE %u %s from %s -- DRASTIC STUFF! ' ...
                                 'I HOPE THIS IS OK?!\n[press any key to continue]'], ...
                                 length(idRange),theWhat,dbName),'s');
     doWhat = 'REMOVE';
@@ -110,7 +110,7 @@ if ~isempty(emsg)
                                     	theWhat,theid,theTable,dbName)
 end
 
-if length(toDump)==0
+if isempty(toDump)
     fprintf(1,'No %s found in the given range of %s.\n',theWhat,theid);
     return
 end
@@ -118,8 +118,8 @@ end
 toDump_id = [toDump{:,1}];
 toDump_name = toDump(:,2);
 
-reply = input(sprintf(['About to %s %u %s stored in the Results table of %s.\n' ...
-      			'[press any key to show them]'],doWhat,length(toDump_name),theWhat,dbName),'s');
+input(sprintf(['About to %s %u %s stored in the Results table of %s.\n' ...
+        '[press any key to show them]'],doWhat,length(toDump_name),theWhat,dbName),'s');
 
 % ------------------------------------------------------------------------------
 %% List all items to screen
@@ -158,7 +158,7 @@ if doRemove
 	deleteString = sprintf('DELETE FROM %s WHERE %s IN (%s)',theTable,theid,BF_cat(idRange,','));
     [~,emsg] = mysql_dbexecute(dbc, deleteString);
     if isempty(emsg)
-        fprintf(1,'%u %s removed from %s in %s.\n',length(toDump_id),theWhat,theTable,dbName)
+        fprintf(1,'%u %s removed from %s in %s.\n',length(toDump_id),theWhat,theTable,dbName);
     end
 
     SQL_FlushKeywords(tsOrOps);
@@ -171,7 +171,7 @@ if doRemove
                             'WHERE m.mop_id IN (%s)'],BF_cat(mop_ids,','));
         [~,emsg] = mysql_dbexecute(dbc, updateString);
         if ~isempty(emsg)
-            error('Error counting NPointTo operations for mop_id = %u\n%s\n',M_ids(k),emsg);
+            error('Error counting NPointTo operations\n%s\n',emsg);
         else
             fprintf(1,' Done.\n');
         end
@@ -190,7 +190,7 @@ if doRemove
                 error('Error deleting redundant master operations');
             else
                 fprintf(1,'DELETED %u master operations that are now redundant.\n',length(delete_mop_ids));
-                reply = input('[press any key to see them]','s');
+                input('[press any key to see them]','s');
                 for k = 1:length(delete_mop_ids)
                     fprintf(1,'%u/%u. [mop_id = %u]: %s\n',k,length(delete_mop_ids),delete_mop_ids(k),delete_masterCode{k});
                 end
@@ -217,7 +217,7 @@ if doRemove
     % end
 else
     %% Do the clearing
-    fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s...\n',dbName)
+    fprintf(1,'Clearing Output, QualityCode, CalculationTime columns of the Results Table of %s...\n',dbName);
     fprintf(1,'Patience...\n');
 
     updateString = sprintf('UPDATE Results SET Output = NULL, QualityCode = NULL, CalculationTime = NULL WHERE %s IN (%s)',theid,BF_cat(idRange,','));
@@ -250,7 +250,7 @@ SQL_closedatabase(dbc) % database closed
 % ------------------------------------------------------------------------------
 if doLog
     fn = 'SQL_clear.log'; % log filename
-	fprintf(1,'Writing log file to ''%s''\n',fn)
+	fprintf(1,'Writing log file to ''%s''\n',fn);
 
 	fid = fopen(fn, 'w', 'n');
 	fprintf(fid,'Document created on %s\n',datestr(now));

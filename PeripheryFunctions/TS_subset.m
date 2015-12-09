@@ -38,7 +38,7 @@ function [TS_DataMat,TimeSeries,Operations] = TS_subset(whatData,ts_ids_keep,op_
 % Check inputs:
 %-------------------------------------------------------------------------------
 if nargin < 1
-    whatData = 'norm';
+    whatData = 'HCTSA_N.mat';
 end
 if nargin < 2
     ts_ids_keep = []; % all
@@ -50,7 +50,7 @@ if nargin < 4
     doSave = 1;
 end
 if nargin < 5
-    outputFileName = regexprep(whatDataFile,'.mat','_subset.mat');
+    outputFileName = regexprep(whatData,'.mat','_subset.mat');
 end
 if ~strcmp(outputFileName(end-3:end),'.mat')
     error('Specify a .mat filename as output');
@@ -88,7 +88,7 @@ if doSave
 
     % Remove group information because this will no longer be valid for sure
     if ~isempty(ts_ids_keep) && isfield(TimeSeries,'Group')
-        rmfield(TimeSeries,'Group');
+        TimeSeries = rmfield(TimeSeries,'Group');
         fprintf('Warning: group information removed -- regenerate for subset data using TS_LabelGroups\n')
     end
 
@@ -131,7 +131,7 @@ if doSave
         save(outputFileName,'groupNames','-append');
     end
 
-    fprintf(1,'Data saved to %s!\n',outputFileName)
+    fprintf(1,'Data saved to %s!\n',outputFileName);
 
     % Don't display all of this info to screen if it's been saved and not stored
     if nargout == 0
@@ -143,7 +143,7 @@ end
 function ind = MatchMe(idsAll,idsMatch)
     % Find matches:
     if isempty(idsMatch)
-        ind = logical(ones(size(idsAll)));
+        ind = true(size(idsAll));
     else
         ind = ismember(idsAll,idsMatch);
     end

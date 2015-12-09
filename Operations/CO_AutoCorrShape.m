@@ -116,10 +116,10 @@ dacf = diff(acf);
 ddacf = diff(dacf);
 extrr = BF_sgnchange(dacf,1);
 sdsp = ddacf(extrr);
-maxr = extrr(sdsp < 0);
-minr = extrr(sdsp > 0);
-nmaxr = length(maxr);
-nminr = length(minr);
+% maxr = extrr(sdsp < 0);
+% minr = extrr(sdsp > 0);
+% nmaxr = length(maxr);
+% nminr = length(minr);
 
 % Proportion of local minima
 out.nminima = sum(sdsp > 0);
@@ -167,7 +167,7 @@ if Nac > 3 % Need at least four points to fit exponential
         out.fexpabsacf_adjr2 = gof.adjrsquare;
         out.fexpabsacf_rmse = gof.rmse;
 
-        expfit = c.a*exp(c.b*[1:Nac]');
+        expfit = c.a*exp(c.b*(1:Nac)');
         res = abs(acf)-expfit;
         out.fexpabsacf_stdres = std(res);
 

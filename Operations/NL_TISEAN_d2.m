@@ -98,12 +98,12 @@ end
 %% Write the file
 % ------------------------------------------------------------------------------
 filePath = BF_WriteTempFile(y);
-fprintf(1,'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN\n',length(y),filePath)
+fprintf(1,'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN\n',length(y),filePath);
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, d2
 % ------------------------------------------------------------------------------
-[~, res] = system(sprintf(['d2 -d%u -M1,%u -t%u %s'],tau,maxm,theilerWin,filePath));
+[~, res] = system(sprintf('d2 -d%u -M1,%u -t%u %s',tau,maxm,theilerWin,filePath));
 delete(filePath) % remove the temporary time-series data file
 %  * extension .stat: This file shows the current status of the estimate.
 if exist([filePath '.stat'],'file')
@@ -613,7 +613,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
             % values -- check for this
             theproblems = find(goodones == 0);
             for ii = 1:length(theproblems)
-                [b, m, n] = unique(thecell{theproblems(ii)}(:,1));
+                [~, m] = unique(thecell{theproblems(ii)}(:,1));
                 thecell{theproblems(ii)} = thecell{theproblems(ii)}(m,:);
             end
         end
@@ -661,7 +661,7 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 %         hold off;
 %         keyboard
         % how linear is it?
-        p = polyfit([1:l]',ds,1);
+        p = polyfit((1:l)',ds,1);
         pfit = polyval(p,1:l);
         out.linrmserr = sqrt(mean((ds'-pfit).^2));
 
@@ -717,7 +717,6 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 
         dx = log10(x(2))-log10(x(1));
         ndim = size(Y,1); % number of embeding dimensions
-        gamma = 1E-3; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
         l = size(Y,2)-1; % number of distance/scaling points per dimension
         stptr = 5:floor(l/2)-1; % must be in the first half
         endptr = ceil(l/2)+1:l-5; % must be in second half
@@ -746,19 +745,8 @@ out.flatsh2min_linrmserr = flatsh2min.linrmserr;
 
             % goodness function: is this range close to zero compared to rest?
             results(c,1) = min(mybad(:)); % goodness
-%             if results(c,1)<-1 % good enough
             results(c,2) = mean(Y(c,ri1:ri2)); % only relevant if goodness is small enough
-%             else
-%                 results(c,2) = NaN; % no scaling
-%             end
 
-%             hold off;
-%             plot(v,'.k')
-%             hold on;
-%             plot(stptr(a):endptr(b),mean(v(stptr(a):endptr(b)))*ones(endptr(b)-stptr(a)+1),'-r');
-%             hold off;
-%             title(num2str(results(c,1)));
-%             keyboard
         end
     end
 % ------------------------------------------------------------------------------

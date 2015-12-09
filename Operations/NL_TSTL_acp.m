@@ -49,7 +49,7 @@ try
 catch
     error('Error running ''signal'' on the input time series -- has TSTOOL been installed?')
 end
-if ~strcmp(class(s),'signal')
+if ~isa(s,'signal')
     error('Error making a signal class of the input time series')
 end
 N = length(y); % length of the time series

@@ -47,12 +47,12 @@ end
 N = length(y); % number of samples in time series
 
 if nargin < 2 || isempty(trainp)
-    fprintf(1,'Training on 80%% of the data by default\n')
+    fprintf(1,'Training on 80%% of the data by default\n');
     trainp = 0.8; % train on 80% of the data
 end
 
 if nargin < 3 || isempty(numStates)
-    fprintf(1,'Using 3 states by default\n')
+    fprintf(1,'Using 3 states by default\n');
     numStates = 3; % use 3 states
 end
 

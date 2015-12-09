@@ -54,7 +54,6 @@ end
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
-N = length(y); % The length of the time series
 
 % Convert y to time series object
 y = iddata(y,[],1);
@@ -83,9 +82,6 @@ for k = 1:maxOrder
     lossfns(k) = m.EstimationInfo.LossFcn;
     fpes(k) = m.EstimationInfo.FPE;
     aics(k) = aic(m);
-
-    np = length(m.ParameterVector);
-%     bics(k) = aics(k) - 2*np + np*log(N); % scrappy and probably wrong
 end
 
 % Optimum model orders

@@ -85,7 +85,7 @@ if N > maxN
     N = maxN;
 end
 if N < 20 % Short time series cause problems:
-    fprintf(1,'Time series (N = %u) is too short\n',length(y))
+    fprintf(1,'Time series (N = %u) is too short\n',length(y));
     out = NaN; return
 end
 

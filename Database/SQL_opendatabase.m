@@ -37,9 +37,9 @@ end
 
 % ------------------------------------------------------------------------------
 if beVocal
-	fprintf(1,'Using database %s\n',databaseName)
+	fprintf(1,'Using database %s\n',databaseName);
     fprintf(1,['Connecting to host ''%s'', database ''%s'' (port %u) using username' ...
-            ' ''%s'' and password ''%s''...'],hostName,databaseName,customPort,username,password)
+            ' ''%s'' and password ''%s''...'],hostName,databaseName,customPort,username,password);
 end
 
 % ------------------------------------------------------------------------------

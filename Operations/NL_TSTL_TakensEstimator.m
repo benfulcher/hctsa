@@ -65,7 +65,7 @@ end
 % 4) Embedding parameters
 if nargin < 5 || isempty(embedParams)
     embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default time-delay embedding using autocorrelation and fnn-mar\n')
+    fprintf(1,'Using default time-delay embedding using autocorrelation and fnn-mar\n');
 else
     if length(embedParams) ~= 2
         error('Embedding parameters are incorrectly formatted, we need {tau,m}')
@@ -83,7 +83,7 @@ end
 % Convert to embedded signal object for TSTOOL
 s = BF_embed(y,embedParams{1},embedParams{2},1,randomSeed);
 
-if ~strcmp(class(s),'signal') && isnan(s); % Embedding failed
+if ~isa(s,'signal') && isnan(s); % Embedding failed
     fprintf('Embedding failed.\n')
     out = NaN; return % assume an error with large time-lag or dimension
 end

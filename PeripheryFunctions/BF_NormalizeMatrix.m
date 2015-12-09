@@ -41,7 +41,7 @@ function dataMatrixNorm = BF_NormalizeMatrix(dataMatrix,normMethod,itrain)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(normMethod)
-    fprintf(1,'We''re normalizing using sigmoid transform by default\n')
+    fprintf(1,'We''re normalizing using sigmoid transform by default\n');
     normMethod = 'sigmoid';
 end
 
@@ -59,7 +59,7 @@ numFeatures = size(dataMatrix,2);
 % Normalize each column according to the specified normalizing transformation
 % ------------------------------------------------------------------------------
 
-datamatrixNorm = zeros(size(dataMatrix));
+dataMatrixNorm = zeros(size(dataMatrix));
 
 switch normMethod
     case 'subtractMean'

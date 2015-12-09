@@ -17,12 +17,12 @@
 % ------------------------------------------------------------------------------
 
 fprintf(1,['This script will set up the Highly Comparative Time-Series ' ...
-                                'Analysis code package from scratch!\n'])
+                                'Analysis code package from scratch!\n']);
 fprintf(1,['In the following order, we will:' ...
             '\n-1- Add the paths needed for the repository,' ...
             '\n-2- Set up a connection to a mySQL database,' ...
             '\n-3- Add the time-series analysis operations to the database,' ...
-            '\n-4- Compile the external time-series toolboxes for this system.\n\n'])
+            '\n-4- Compile the external time-series toolboxes for this system.\n\n']);
 
 % ------------------------------------------------------------------------------
 %% 1. Add the paths:
@@ -32,7 +32,7 @@ input('<<Press any key to continue>>')
 try
 	startup
 catch emsg
-	fprintf(1,'error.\n%s\n',emsg.message)
+	fprintf(1,'error.\n%s\n',emsg.message);
 end
 fprintf(1,'\n');
 
@@ -53,12 +53,12 @@ if strcmp(reply,'y')
     end
     if strcmp(reply,'y') % Set up mySQL database
         fprintf(1,['Setting up the database now--NB: you need to have root access' ...
-                                ' to a mySQL server to do this\n'])
+                                ' to a mySQL server to do this\n']);
         % Walks the user through creating the database from a root account and sets
         % up a user account and password:
         SQL_create_db;
         fprintf(1,['Note that the database access ' ...
-                    'settings are stored in ''sql_settings.conf''\n'])
+                    'settings are stored in ''sql_settings.conf''\n']);
     else
         fprintf(1,['Ok, then I''ll assume you''ve configured your ''sql_settings.conf'' file correctly.\n' ...
                     '(see Documentation for details on how to configure your Matlab/mySQL connection).\n']);
@@ -73,13 +73,13 @@ if strcmp(reply,'y')
     % ------------------------------------------------------------------------------
     %% 4. Populate the new tables with operations
     % ------------------------------------------------------------------------------
-    fprintf(1,'-3- Populating the database with operations...\n')
+    fprintf(1,'-3- Populating the database with operations...\n');
     input('<<Press any key to continue>>')
 
     fprintf(1,'Adding Master operations...\n');
     mop_timer = tic;
     SQL_add('mops','Database/INP_mops.txt','',0)
-    fprintf(1,'Master operations added in %s.\n',BF_thetime(toc(mop_timer)))
+    fprintf(1,'Master operations added in %s.\n',BF_thetime(toc(mop_timer)));
     clear mop_timer
 
     fprintf(1,'Adding all operations...\n');
@@ -87,12 +87,12 @@ if strcmp(reply,'y')
     SQL_add('ops','Database/INP_ops.txt','',0)
     % fprintf(1,'Adding a reduced set of operations...\n'); op_timer = tic;
     % SQL_add('ops','Database/INP_ops_reduced.txt','',0)
-    fprintf(1,'Operations added in %s.\n\n',BF_thetime(toc(op_timer)))
+    fprintf(1,'Operations added in %s.\n\n',BF_thetime(toc(op_timer)));
     clear op_timer
 else
     choseDatabase = 0;
-    fprintf(1,['\n-3- No link between Matlab and a mySQL database will be set up.\n'])
-    fprintf(1,['You will need to use TS_init to run hctsa analysis within Matlab locally.\n'])
+    fprintf(1,'\n-3- No link between Matlab and a mySQL database will be set up.\n');
+    fprintf(1,'You will need to use TS_init to run hctsa analysis within Matlab locally.\n');
     input('<<Press any key to continue>>')
 end
 
@@ -100,17 +100,17 @@ end
 %% 5. Attempt to compile the executables required by the periphery Toolboxes:
 % ------------------------------------------------------------------------------
 fprintf(1,['\n-4- Attempting to compile the binary executables needed for evaluating ' ...
-                                                        'some operations.\n'])
+                                                        'some operations.\n']);
 fprintf(1,['Please make sure that mex is set up with the right compilers for' ...
-                                                            ' this system.\n'])
+                                                            ' this system.\n']);
 fprintf(1,['Note that errors here are not the end of the world,\nbut mean that ' ...
-                        'some operations may fail to execute correctly...\n'])
+                        'some operations may fail to execute correctly...\n']);
 input('<<Press any key to continue>>')
 cd Toolboxes
 compile_mex
 cd('../');
 
-fprintf(1,'Hope everything compiled ok?!\n\n')
+fprintf(1,'Hope everything compiled ok?!\n\n');
 if choseDatabase
     fprintf(1,['All done! Ready when you are to add time series to the database using ' ...
                             'SQL_add(''ts'',''<timeSeries_inputFile.txt>'')...!\n']);

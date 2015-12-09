@@ -115,7 +115,7 @@ fprintf(1,['\nClassification rate (%u-class) using %u-fold %s classification wit
                             whatClassifier,...
                             numFeatures,...
                             mean(foldLosses),...
-                            std(foldLosses))
+                            std(foldLosses));
 
 
 % f = figure('color','w');
@@ -130,7 +130,7 @@ if doPCs
 
     % Compute top 10 PCs of the data matrix:
     fprintf('Computing top %u PCs...',numPCs)
-    [pcCoeff, pcScore, latent, ~, percVar] = pca(zscore(TS_DataMat),'NumComponents',numPCs);
+    [~, pcScore, ~, ~, ~] = pca(zscore(TS_DataMat),'NumComponents',numPCs);
     fprintf(' Done.\n')
     numPCs = min(10,size(pcScore,2)); % sometimes lower than attempted 10
 
@@ -143,7 +143,7 @@ if doPCs
         losses = 1-kfoldLoss(PC_cfn{i},'Mode','individual');
         cfnRate(i,1) = mean(losses)*100;
         cfnRate(i,2) = std(losses)*100;
-        fprintf(1,'%u PCs:   %.3f +/- %.3f%%\n',i,cfnRate(i,1),cfnRate(i,2))
+        fprintf(1,'%u PCs:   %.3f +/- %.3f%%\n',i,cfnRate(i,1),cfnRate(i,2));
     end
 
     plotColors = BF_getcmap('spectral',3,1);

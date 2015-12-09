@@ -46,7 +46,7 @@ end
 % ------------------------------------------------------------------------------
 % Load data:
 % ------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(customFile);
+[~,TimeSeries,Operations,whatDataFile] = TS_LoadData(customFile);
 load(whatDataFile,'TS_Quality','MasterOperations')
 
 if ~exist('TS_Quality','var')
@@ -273,7 +273,7 @@ function formatYAxisColorBar(doYaxis,offSet)
 
     cb = colorbar(ax);
     caxis([-0.5+offSet,maxShow+0.5+offSet]);
-    cb.Ticks = [0+offSet:1:maxShow+offSet];
+    cb.Ticks = (0+offSet:1:maxShow+offSet);
     cb.TickLabels = allLabels(1:maxShow+1);
 
     % Set the colormap:
@@ -288,7 +288,7 @@ function checkSize(A)
     % Checks size of a matrix, and sends a warning if too large
     if size(A,1)*size(A,2) > 100*9000
         fprintf('Attempting to plot each value in a large matrix (%ux%u)...\n',size(A,1),size(A,2))
-        reply = input('[Press any key to continue (or cntrl-C to abort)]','s');
+        input('[Press any key to continue (or cntrl-C to abort)]','s');
     end
 end
 

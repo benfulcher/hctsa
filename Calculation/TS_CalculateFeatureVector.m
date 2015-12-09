@@ -97,9 +97,9 @@ if doParallel
 end
 if doParallel
 	fprintf(1,['Computation will be performed across multiple cores' ...
-			' using Matlab''s Parallel Computing Toolbox.\n'])
+			' using Matlab''s Parallel Computing Toolbox.\n']);
 else % use single-threaded for loops
-	fprintf(1,'Computations will be performed serially without parallelization.\n')
+	fprintf(1,'Computations will be performed serially without parallelization.\n');
 end
 
 % --------------------------------------------------------------------------
@@ -114,7 +114,7 @@ if size(x,2) ~= 1
 		fprintf(1,'I''ll transpose it for you for now....\n');
 		x = x';
 	else
-		fprintf(1,'******************************************************************************************\n')
+		fprintf(1,'******************************************************************************************\n');
 		error('ERROR WITH ''%s'' -- is it multivariate or something weird? Skipping!\n',tsStruct.Name);
 	end
 end
@@ -127,10 +127,10 @@ if numCalc == 0
 	error('Nothing to calculate :/')
 end
 
-fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
 fprintf(1,'Preparing to calculate %s\nts_id = %u, N = %u samples\nComputing %u operations.\n', ...
-				tsStruct.Name,tsStruct.ID,tsStruct.Length,numCalc)
-fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n')
+				tsStruct.Name,tsStruct.ID,tsStruct.Length,numCalc);
+fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n');
 
 % Initialize variables:
 featureVector = zeros(numCalc,1); % Output of each operation
@@ -231,7 +231,7 @@ else
 						'from ''%s'' to a master code'], par_OperationCodeString{jj});
 			else
 				fprintf(1,'Error retrieving element %s from %s.\n', ...
-					par_OperationCodeString{jj}, par_MasterOperationsLabel{par_OperationMasterInd(jj)})
+					par_OperationCodeString{jj}, par_MasterOperationsLabel{par_OperationMasterInd(jj)});
 			end
 		end
 	end
@@ -299,13 +299,13 @@ numErrors = sum(calcQuality == 1);
 % The number of other special outputs, numSpecial:
 numSpecial = sum(calcQuality > 1);
 
-fprintf(1,'********************************************************************\n')
-fprintf(1,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now))
+fprintf(1,'********************************************************************\n');
+fprintf(1,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now));
 fprintf(1,'Calculation complete for %s (ts_id = %u, N = %u)\n', ...
 					tsStruct.Name,tsStruct.ID,tsStruct.Length);
 fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored.\n',...
 					numGood,numErrors,numSpecial);
 fprintf(1,'All %u calculations for this time series took %s.\n',numCalc,BF_thetime(toc(fullTimer),1));
-fprintf(1,'********************************************************************\n')
+fprintf(1,'********************************************************************\n');
 
 end

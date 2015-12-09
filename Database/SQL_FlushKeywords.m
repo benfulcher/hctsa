@@ -89,7 +89,7 @@ db_keywords = dbOutput(:,2);
 % Split into each individual keyword
 % ------------------------------------------------------------------------------
 kwSplit = regexp(db_keywords,',','split','ignorecase'); % split by commas
-[ukws,ia,ic] = unique(horzcat(kwSplit{:})); % unique keywords
+[ukws,~,ic] = unique(horzcat(kwSplit{:})); % unique keywords
 numKeywords = length(ukws); % The number of unique keywords in the new set of time series
 keywordCounts = arrayfun(@(x)sum(ic==x),1:numKeywords);
 
@@ -124,7 +124,7 @@ fprintf(1,'Added %u new keywords to %s!\n',numKeywords,theKeywordTable);
 %% Fill new keyword relationships
 % ------------------------------------------------------------------------------
 fprintf(1,'Writing new keyword relationships to the %s table in %s...', ...
-                                        theRelTable,databaseName)
+                                        theRelTable,databaseName);
 
 relTimer = tic;
 
@@ -152,7 +152,7 @@ function dropTable(whatTable,theTables)
     % Drops a given table (if it exists)
     if ismember(whatTable,theTables)
     	% Already exists -- drop and recreate
-    	[rs,emsg] = mysql_dbexecute(dbc,sprintf('DROP TABLE %s',whatTable));
+    	mysql_dbexecute(dbc,sprintf('DROP TABLE %s',whatTable));
     	fprintf(1,'%s table dropped.\n',whatTable);
     end
 end

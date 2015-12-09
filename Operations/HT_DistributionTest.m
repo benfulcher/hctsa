@@ -126,7 +126,7 @@ switch theTest
                 mycdf = {@wblcdf,a(1),a(2)};
         end
         warning('off','stats:chi2gof:LowCounts') % temporarily disable this warning
-        [h, p] = chi2gof(x,'cdf',mycdf,'nbins',numBins);
+        [~, p] = chi2gof(x,'cdf',mycdf,'nbins',numBins);
         warning('on','stats:chi2gof:LowCounts') % temporarily disable this warning
 
     case 'ks' % KOLMOGOROV-SMIRNOV TEST
@@ -157,22 +157,22 @@ switch theTest
                 mycdf = [x1, wblcdf(x1,a(1),a(2))];
         end
 
-        [h, p] = kstest(x,mycdf);
+        [~, p] = kstest(x,mycdf);
 
     case 'lillie' % LILLIEFORS TEST
         % Temporarily suspend low/high tabulated p-value warnings that often occur with this hypothesis test
         warning('off','stats:lillietest:OutOfRangePLow'); warning('off','stats:lillietest:OutOfRangePHigh');
         if any(ismember({'norm','ev'},theDistn))
-            [h, p] = lillietest(x,0.05,theDistn);
+            [~, p] = lillietest(x,0.05,theDistn);
         elseif strcmp('exp',theDistn)
             if any(x < 0)
                 p = NaN; return
             else
-                [h, p] = lillietest(x,0.05,theDistn);
+                [~, p] = lillietest(x,0.05,theDistn);
             end
         else
            p = NaN;
-           fprintf(1,'***RETURNED AN UNEXPECTED NAN FOR LILLIEFORS TEST\n')
+           fprintf(1,'***RETURNED AN UNEXPECTED NAN FOR LILLIEFORS TEST\n');
         end
         warning('on','stats:lillietest:OutOfRangePLow'); warning('on','stats:lillietest:OutOfRangePHigh');
     otherwise

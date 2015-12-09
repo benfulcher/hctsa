@@ -110,7 +110,7 @@ if ~isempty(subs)
         kr0 = 1:size(TS_DataMat,1);
     else
         fprintf(1,'Filtered down time series by given subset; from %u to %u.\n',...
-                    size(TS_DataMat,1),length(kr0))
+                    size(TS_DataMat,1),length(kr0));
         TS_DataMat = TS_DataMat(kr0,:);
         TS_Quality = TS_Quality(kr0,:);
     end
@@ -120,7 +120,7 @@ if ~isempty(subs)
         kc0 = 1:size(TS_DataMat,2);
     else
         fprintf(1,'Filtered down operations by given subset; from %u to %u.\n',...
-            size(TS_DataMat,2),length(kc0))
+            size(TS_DataMat,2),length(kc0));
         TS_DataMat = TS_DataMat(:,kc0);
         TS_Quality = TS_Quality(:,kc0);
     end
@@ -138,7 +138,7 @@ end
 TS_DataMat(~isfinite(TS_DataMat)) = NaN; % Convert all nonfinite values to NaNs for consistency
 % Need to also incorporate knowledge of bad entries in TS_Quality and filter these out:
 TS_DataMat(TS_Quality > 0) = NaN;
-fprintf(1,'There are %u special values in the data matrix.\n',sum(TS_Quality(:) > 0))
+fprintf(1,'There are %u special values in the data matrix.\n',sum(TS_Quality(:) > 0));
 % Now all bad values are NaNs, and we can get on with the job of filtering them out
 
 % (*) Filter based on proportion of bad entries. If either threshold is 1,
@@ -161,13 +161,13 @@ if thresh_r > 0 % if 1, then even the worst are included
         if ~isempty(xkr1)
             fprintf(1,['\nRemoved %u time series with fewer than %4.2f%% good values:'...
                         ' from %u to %u.\n'],size(TS_DataMat,1)-length(kr1),...
-                        thresh_r*100,size(TS_DataMat,1),length(kr1))
+                        thresh_r*100,size(TS_DataMat,1),length(kr1));
             % display filtered times series to screen:
-            fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(xkr1).Name},','))
+            fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(xkr1).Name},','));
         else
             fprintf(1,['All %u time series had greater than %4.2f%% good values.' ...
                             ' Keeping them all.\n'], ...
-                            size(TS_DataMat,1),thresh_r*100)
+                            size(TS_DataMat,1),thresh_r*100);
         end
         % ********************* kr1 ***********************
         TS_DataMat = TS_DataMat(kr1,:);
@@ -195,11 +195,11 @@ if thresh_c > 0
     if ~isempty(kc1)
         if ~isempty(xkc1)
             fprintf(1,'\nRemoved %u operations with fewer than %5.2f%% good values: from %u to %u.\n',...
-                            size(TS_DataMat,2)-length(kc1),thresh_c*100,size(TS_DataMat,2),length(kc1))
-            fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(xkc1).Name},','))
+                            size(TS_DataMat,2)-length(kc1),thresh_c*100,size(TS_DataMat,2),length(kc1));
+            fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(xkc1).Name},','));
         else
             fprintf(1,['All operations had greater than %5.2f%% good values; ' ...
-                    'keeping them all :-)'],thresh_c*100)
+                    'keeping them all :-)'],thresh_c*100);
         end
 
         % *********************** kc1 *********************
@@ -227,7 +227,7 @@ if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all 
     if ~isempty(kc2)
         if length(kc2) < size(TS_DataMat,2)
             fprintf(1,'Removed %u operations with near-constant outputs: from %u to %u.\n',...
-                             size(TS_DataMat,2)-length(kc2),size(TS_DataMat,2),length(kc2))
+                             size(TS_DataMat,2)-length(kc2),size(TS_DataMat,2),length(kc2));
             TS_DataMat = TS_DataMat(:,kc2); % ********************* KC2 **********************
             TS_Quality = TS_Quality(:,kc2);
         end
@@ -249,7 +249,7 @@ kr2 = find(bad_ts == 0); % kept column (2)
 if ~isempty(kr2)
     if (length(kr2) < size(TS_DataMat,1))
         fprintf(1,'Removed time series with constant feature vectors (weird!): from %u to %u.\n',...
-                            size(TS_DataMat,1),length(kr2))
+                            size(TS_DataMat,1),length(kr2));
         TS_DataMat = TS_DataMat(kr2,:); % ********************* KR2 **********************
         TS_Quality = TS_Quality(kr2,:);
     end
@@ -276,10 +276,10 @@ Operations = Operations(kc_tot); % Filter operations
 % pointed to and recalibrate the indexing, but I'm not going to bother.
 
 fprintf(1,'We now have %u time series and %u operations in play.\n', ...
-                                length(TimeSeries),length(Operations))
+                                length(TimeSeries),length(Operations));
 fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',...
             sum(isnan(TS_DataMat(:))), ...
-            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2))
+            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2));
 
 
 if length(TimeSeries)==1
@@ -292,21 +292,21 @@ end
 % --------------------------------------------------------------------------
 
 if ismember(normFunction,{'nothing','none'})
-    fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',normFunction)
+    fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',normFunction);
 else
     if isempty(trainSet)
         % No training subset specified
         fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',...
-                                length(TimeSeries),length(Operations))
+                                length(TimeSeries),length(Operations));
         TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction);
     else
         % Train the normalization parameters only on a specified set of training data, then apply
         % that transformation to the full data matrix
         fprintf(1,['Normalizing a %u x %u object using %u training time series to train the transformation!' ...
-                ' Please be patient...\n'],length(TimeSeries),length(Operations),length(trainSet))
+                ' Please be patient...\n'],length(TimeSeries),length(Operations),length(trainSet));
         TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction,trainSet);
     end
-    fprintf(1,'Normalized! The data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))))
+    fprintf(1,'Normalized! The data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))));
 end
 
 % --------------------------------------------------------------------------
@@ -341,12 +341,12 @@ if ~isempty(kc) && length(kc) < size(TS_DataMat,2)
     TS_Quality = TS_Quality(:,kc);
     Operations = Operations(kc);
     fprintf(1,'Post-normalization filtering of %u operations with constant outputs: from %u to %u.\n', ...
-                    size(TS_DataMat,2)-length(kc),size(TS_DataMat,2),length(kc))
+                    size(TS_DataMat,2)-length(kc),size(TS_DataMat,2),length(kc));
 end
 
 fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n', ...
             sum(isnan(TS_DataMat(:))),sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100, ...
-            size(TS_DataMat,1),size(TS_DataMat,2))
+            size(TS_DataMat,1),size(TS_DataMat,2));
 
 % ------------------------------------------------------------------------------
 % Set default clustering details
@@ -370,10 +370,10 @@ normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
 
 outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 
-fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName)
+fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName);
 save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
         'MasterOperations','fromDatabase','groupNames','normalizationInfo',...
         'ts_clust','op_clust');
-fprintf(1,' Done.\n')
+fprintf(1,' Done.\n');
 
 end

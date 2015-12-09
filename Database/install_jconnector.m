@@ -54,7 +54,7 @@ fileName = fileName{end};
 
 if nargin < 2 || isempty(permanentDir)
     permanentDir = fullfile(matlabroot,'java','jarext'); % the jarext directory
-    fprintf(1,'Installing the j-connector to %s by default\n',permanentDir)
+    fprintf(1,'Installing the j-connector to %s by default\n',permanentDir);
 else
     % Check the provided directory exists
     if ~exist(permanentDir,'dir')
@@ -67,7 +67,7 @@ doesExist = exist(fullfile(permanentDir,fileName),'file');
 if doesExist
     fprintf(1,'%s already exists in %s.\n\n',fileName,permanentDir);
 else
-    reply = input(sprintf('Copying %s to the %s directory...[press any key to continue]',jConnectorWhere,permanentDir),'s');
+    input(sprintf('Copying %s to the %s directory...[press any key to continue]',jConnectorWhere,permanentDir),'s');
 
     try
         copyfile(jConnectorWhere,permanentDir);

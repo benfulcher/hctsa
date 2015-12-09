@@ -1,7 +1,5 @@
 function [dbConnection, errMessage] = mysql_dbopen(serverHost, databaseName, userName, password, customPort, useDBToolbox)
-% MYSQL_DBOPEN
-%
-% Opens a connection to the database using the mySQL j-connector.
+% mysql_dbopen   Opens a connection to the database using the mySQL j-connector.
 % Checks for an available database toolbox and uses that, but otherwise uses
 % java commands that should achieve the same thing.
 
@@ -85,8 +83,9 @@ else
         dburl = sprintf('jdbc:mysql://%s:%u/%s', serverHost, customPort, databaseName);
         dbConnection = java.sql.DriverManager.getConnection(dburl, userName, password);
     catch le
+        errMessage = le.message;
         dbConnection = [];
-        error('Error connecting to the database ''%s'' at ''%s'':\n%s\n',databaseName,serverHost,le.message);
+        error('Error connecting to the database ''%s'' at ''%s'':\n%s\n',databaseName,serverHost,errMessage);
         % fprintf(1,['\nPerhaps due to an incorrect username (''%s'') and password (''%s'') combination?\n'], userName, password);
     end
 end

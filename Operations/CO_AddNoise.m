@@ -69,7 +69,7 @@ doPlot = 0; % plot outputs to figure
 %% Check inputs
 % ------------------------------------------------------------------------------
 % Expecting a z-scored input time series:
-iszscored = BF_iszscored(y);
+BF_iszscored(y);
 
 if nargin < 2
     tau = []; % set default in CO_HistogramAMI

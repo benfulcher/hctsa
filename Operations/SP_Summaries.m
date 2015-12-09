@@ -171,11 +171,7 @@ end
 
 N = length(S); % = length(w)
 logS = log(S);
-logw = log(w);
 dw = w(2) - w(1); % spacing increment in w
-
-% Normalize to 1; if input not z-scored
-% S = S/(sum(S)*dw);
 
 % ------------------------------------------------------------------------------
 % Simple measures of the power spectrum
@@ -245,7 +241,7 @@ out.logstd = std(logS);
 out.mean = mean(S);
 out.logmean = mean(logS);
 for i = 3:5
-    out.(sprintf('mom%u',i)) = DN_Moments(S,i);;
+    out.(sprintf('mom%u',i)) = DN_Moments(S,i);
 end
 
 % Autocorr:
@@ -415,7 +411,6 @@ out.statav5_s = std(std(split))/std(S);
 % Get a horizontal line and count the number of crossings with the power spectrum
 % ------------------------------------------------------------------------------
 ncrossfn_rel = @(f) sum(BF_sgnchange(S - f*max(S)));
-% ncrossfn_abs = @(Sx) sum(BF_sgnchange(S - Sx));
 
 out.ncross_f05 = ncrossfn_rel(0.05);
 out.ncross_f01 = ncrossfn_rel(0.1);
@@ -423,9 +418,9 @@ out.ncross_f02 = ncrossfn_rel(0.2);
 out.ncross_f05 = ncrossfn_rel(0.5);
 
 %-------------------------------------------------------------------------------
-function mel = w2mel(w) % convert to mel spectrum
-    mel = 1127*log(w/(1400*pi)+1);
-end
+% function mel = w2mel(w) % convert to mel spectrum
+%     mel = 1127*log(w/(1400*pi)+1);
+% end
 
 function out = giveMeRobustStats(xData,yData,textID,out)
     % Add statistics to the output structure from a robust linear fit

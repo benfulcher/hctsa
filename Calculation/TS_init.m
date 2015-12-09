@@ -33,7 +33,6 @@ function TS_init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
 % ------------------------------------------------------------------------------
 % Check Inputs:
 % ------------------------------------------------------------------------------
-
 if nargin < 1 || isempty(INP_ts)
     error('Please supply a formatted time-series input file (see documentation for details).');
 end
@@ -83,7 +82,7 @@ end
 % and update the structure arrays using the TS_LinkOperationsWithMasters function
 %-------------------------------------------------------------------------------
 
-[Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
+[~, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 
 % MasterOperations may have been trimmed by TS_LinkOperationsWithMasters:
 numMops = length(MasterOperations);

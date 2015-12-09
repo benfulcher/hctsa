@@ -182,7 +182,7 @@ numToPlot = length(iPlot);
 
 
 fprintf(1,'Plotting %u (/%u) time series from %u classes\n', ...
-                    numToPlot,sum(cellfun(@length,groupIndices)),numGroups)
+                    numToPlot,sum(cellfun(@length,groupIndices)),numGroups);
 if ~isempty(gic)
     classes = gic; % override with our group information
     % better be firstcome, and makes sense that groupIndices is just a vector of
@@ -231,7 +231,6 @@ if plotFreeForm
 	    kw = TimeSeries(iPlot(i)).Keywords; % the keywords
 	    x = TimeSeries(iPlot(i)).Data;
 	    N0 = length(x);
-		% rectangle('Position',[0,yr(i),1,inc],'EdgeColor','k')
 		if ~isempty(maxN) && (N0 > maxN)
 			% specified a maximum length of time series to plot
             sti = randi(N0-maxN,1);
@@ -245,7 +244,7 @@ if plotFreeForm
 
 		plot(xx,xsc,'-','color',theColors{classes(i)},'LineWidth',lw)
 
-    % Annotate text labels
+        % Annotate text labels
 		if displayTitles
 			theTit = sprintf('{%u} %s [%s] (%u)',TimeSeries(iPlot(i)).ID,fn,kw,N0);
 			text(0.01,yr(i)+0.9*inc,theTit,'interpreter','none','FontSize',8)

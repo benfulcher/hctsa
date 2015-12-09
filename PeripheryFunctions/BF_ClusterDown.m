@@ -118,7 +118,7 @@ clusterCenters_cl = cell(numClusterings,1);
 clusterCenters = cell(numClusterings,1);
 
 for i = 1:numClusterings
-    fprintf(1,'Distance-based clustering with %u clusters\n',numClusters(i))
+    fprintf(1,'Distance-based clustering with %u clusters\n',numClusters(i));
 
     % Cluster the dendrogram:
     T = cluster(links,'maxclust',numClusters(i));
@@ -159,7 +159,7 @@ ax2 = gca;
 switch whatDistance
 case 'corr'
     % Input is a correlation matrix:
-    BF_PlotCorrMat(1-distMat_cl);
+    BF_PlotCorrMat(1-distMat_cl,'balanced');
 case 'abscorr'
     % Input is a correlation matrix -> absolute value distances
     BF_PlotCorrMat(1-abs(distMat_cl));
