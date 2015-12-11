@@ -63,7 +63,7 @@ out.maxonmean = max(e)/abs(mean(e));
 if std(e) == 0
     e = zeros(length(e),1);
 else
-    e = BF_zscore(e);
+    e = zscore(e);
 end
 
 % ------------------------------------------------------------------------------

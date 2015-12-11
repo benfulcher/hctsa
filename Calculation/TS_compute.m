@@ -85,7 +85,6 @@ end
 if ismember('TS_Quality',fileVars)
 	load(customFile,'TS_Quality');
 end
-fprintf(1,' Loaded.\n');
 
 % ------------------------------------------------------------------------------
 % Get indices if computing a subset
@@ -184,6 +183,7 @@ for i = 1:numTimeSeries
 	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd),doParallel,Operations(toCalc),MasterOperations,1,beVocal);
 		catch
 			% skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
+			warning('Calculation for time series %u / %u failed',i,numTimeSeries)
 			continue
 		end
 

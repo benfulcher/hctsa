@@ -96,7 +96,7 @@ y = BF_Whiten(y,preProc,0,randomSeed); % Use a basic preprocessing to whiten the
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
-y = BF_zscore(y); % make sure the (whitened) time series is z-scored
+y = zscore(y); % make sure the (whitened) time series is z-scored
 N = length(y); % could be different to original (e.g., if chose a differencing above)
 
 % Now have the preprocessed time series saved over y.

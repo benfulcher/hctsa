@@ -1,6 +1,6 @@
 function out = PP_ModelFit(y,model,order,randomSeed)
 % PP_ModelFit   See if AR model fit improves with different preprocessings
-% 
+%
 % After performing the range of transformations to the time series, returns the
 % in-sample root-mean-square (RMS) prediction errors for an AR model on each
 % transformed time series as a ratio of the RMS prediction error of the original
@@ -96,7 +96,7 @@ for i = 1:nfields
             %% Check that a System Identification Toolbox license is available:
             BF_CheckToolbox('identification_toolbox')
 
-            data = BF_zscore(data); % zscore the data from this preprocessing
+            data = zscore(data); % zscore the data from this preprocessing
             m = ar(data,order); % fit the model
 
             % Get statistics on fit
@@ -177,7 +177,7 @@ end
 %
 %         %% Inverse Fourier Transform
 %         ydt = ifft(FyF,NFFT);
-%         ydt = BF_zscore(ydt(1:Ny)); % crop to desired length
+%         ydt = zscore(ydt(1:Ny)); % crop to desired length
 %
 %
 %         % PLOT
@@ -197,7 +197,7 @@ end
 %             p = polyfit(x,ybit,order);
 %             ydt(r) = ybit-polyval(p,x);
 %         end
-%         ydt = BF_zscore(ydt);
+%         ydt = zscore(ydt);
 % %         plot(y,'b'); hold on; plot(ydt,'r');
 % %         input('here we are')
 %     end

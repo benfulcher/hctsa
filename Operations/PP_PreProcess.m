@@ -198,7 +198,7 @@ switch chooseBest
         for i = 1:nfields; % each preprocessing performed
             data = [];
             data = yp.(fields{i});
-            data = BF_zscore(data);
+            data = zscore(data);
 
             % (i) fit the model
             m = ar(data,order);
@@ -224,7 +224,7 @@ switch chooseBest
             data = [];
             data = yp.(fields{i}); % dynamic field referencing
             % eval(['data = yp.' fields{i} ';']);
-            data = BF_zscore(data); % unnecessary for AC
+            data = zscore(data); % unnecessary for AC
             acs(i) = CO_AutoCorr(data,order,'Fourier');
         end
 
@@ -294,7 +294,7 @@ end
 
         %% Inverse Fourier Transform
         ydt = ifft(FyF,NFFT);
-        ydt = BF_zscore(ydt(1:Ny)); % crop to desired length
+        ydt = zscore(ydt(1:Ny)); % crop to desired length
 
         % CRUDE REMOVAL OF EDGE EFFECTS
         lose = min(5,floor(0.01*length(ydt))); % don't want to lose more than 1% of time series
@@ -321,7 +321,7 @@ end
             p = polyfit(x,ybit,order);
             ydt(r) = ybit-polyval(p,x);
         end
-        ydt = BF_zscore(ydt);
+        ydt = zscore(ydt);
         if doPlot
             figure('color','w'); box('on');
             plot(y,'b'); hold on; plot(ydt,'r');

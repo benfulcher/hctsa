@@ -199,7 +199,8 @@ end
 % ------------------------------------------------------------------------------
 % z-score both (these metrics will need it, and not done before-hand
 % because of positive-only data, etc.
-y = BF_zscore(y); y_d = BF_zscore(y_d);
+y = zscore(y);
+y_d = zscore(y_d);
 
 % 1) Stationarity
 

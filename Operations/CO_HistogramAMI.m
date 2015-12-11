@@ -114,7 +114,7 @@ for i = 1:length(tau)
     pij = pij/sum(sum(pij)); % joint
     pi = sum(pij,1); % marginal
     pj = sum(pij,2); % other marginal
-    
+
     % Old-fashioned method (should give same result):
     % pi = histc(y1,b); pi = pi(1:nb); pi = pi/sum(pi); % marginal
     % pj = histc(y2,b); pj= pj(1:nb); pj = pj/sum(pj); % other marginal

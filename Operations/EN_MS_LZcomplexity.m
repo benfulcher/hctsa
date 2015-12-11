@@ -56,7 +56,7 @@ end
 if ischar(preProc)
     switch preProc
     case 'diff'
-        y = BF_zscore(diff(y));
+        y = zscore(diff(y));
     otherwise
         error('Unknown preprocessing setting ''%s''', preProc);
     end

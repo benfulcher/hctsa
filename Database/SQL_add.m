@@ -615,8 +615,10 @@ fprintf(1,' Done.\n');
 if ~strcmp(addWhat,'mops')
     resultsTic = tic;
     if beVocal
-        fprintf(1,['Updating the Results table in %s\n(This could take a while, ' ...
-            'e.g., ~10 hours for 20,000 time series with 9,000 operations; Please be patient!)...'],databaseName);
+        fprintf(1,'Updating the Results table in %s...(This could take a while)...',databaseName);
+        if strcmp(addWhat,'ts') && length(TimeSeries) > 1000
+            fprintf(1,'\n(e.g., ~10 hours for 20,000 time series with 9,000 operations---please be patient!)...')
+        end
     end
     switch addWhat
     case 'ts'
@@ -726,19 +728,22 @@ if ~strcmp(addWhat,'mops')
     SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell,1000);
 
 
-    % Increment Nmatches in the keywords table
-    fprintf(1,' Done.\nNow calculating the match counts for keywords...');
-    % Redo them from scratch should be easier actually...?
-    for k = 1:nkw % keywords implicated in this import
-        selectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,theKeywordTable,ukws{k});
-        theopkw = mysql_dbquery(dbc,selectString);
-        updateString = sprintf('UPDATE %s SET NumOccur = (SELECT COUNT(*) FROM %s WHERE %s = %u) WHERE %s = %u', ...
-                                theKeywordTable,theRelTable,thekid,theopkw{1},thekid,theopkw{1});
-        [~,emsg] = mysql_dbexecute(dbc, updateString);
-        if ~isempty(emsg)
-            error('\n Error updating keyword count in %s\n%s',theKeywordTable,emsg)
-        end
-    end
+    % Update Nmatches in the keywords table
+    fprintf(1,' Done.\nNow computing all match counts for all keywords...');
+    SQL_FlushKeywords(addWhat);
+    % % Redo them from scratch should be easier actually...?
+    % Except this doesn't work reliably
+    % for k = 1:nkw % keywords implicated in this import
+    %     selectString = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,theKeywordTable,ukws{k});
+    %     thekwid_k = mysql_dbquery(dbc,selectString);
+    %     updateString = sprintf('UPDATE %s SET NumOccur = (SELECT COUNT(*) FROM %s WHERE %s = %u) WHERE %s = %u', ...
+    %                             theKeywordTable,theRelTable,thekid,thekwid_k,thekid,thekwid_k);
+    %     [~,emsg] = mysql_dbexecute(dbc, updateString);
+    %     if ~isempty(emsg)
+    %         error('\n Error updating keyword count in %s\n%s',theKeywordTable,emsg)
+    %     end
+    % end
+
     % for k = 1:nkw % for each unique keyword in the keyword table...
     %     % nnkw = sum(cellfun(@(x)ismember(ukws{k},x),kwSplit));
     %     Selectopkwid = sprintf('(SELECT %s FROM %s WHERE Keyword = ''%s'')',thekid,theKeywordTable,ukws{k});

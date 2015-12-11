@@ -197,7 +197,8 @@ out.normdiff_lin = stats(10,3);
 %% TESTS:
 % ------------------------------------------------------------------------------
     function f = doYourCalcThing(y,y_d)
-        y = BF_zscore(y); y_d = BF_zscore(y_d);
+        y = zscore(y);
+        y_d = zscore(y_d);
 
         f = zeros(10,1); % vector of features to output
         % 1) Stationarity

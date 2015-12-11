@@ -67,7 +67,7 @@ doesExist = exist(fullfile(permanentDir,fileName),'file');
 if doesExist
     fprintf(1,'%s already exists in %s.\n\n',fileName,permanentDir);
 else
-    input(sprintf('Copying %s to the %s directory...[press any key to continue]',jConnectorWhere,permanentDir),'s');
+    input(sprintf('Copying %s\nto the %s directory...\n[press any key to continue]',jConnectorWhere,permanentDir),'s');
 
     try
         copyfile(jConnectorWhere,permanentDir);
@@ -110,7 +110,7 @@ else
     end
     % fprintf(fid,'%s%s%s\n',permanentDir,filesep,fileName);
     fclose(fid);
-    fprintf(1,' Done.\n Success! Restart Matlab to start using the mySQL java connector.\n');
+    fprintf(1,' Done.\nSuccess! Restart Matlab to start using the mySQL java connector.\n');
 end
 
 end

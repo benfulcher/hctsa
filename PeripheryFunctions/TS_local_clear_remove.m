@@ -96,7 +96,7 @@ IDs = [dataStruct.ID];
 doThese = ismember(IDs,idRange);
 
 if ~any(doThese)
-    error('No matches to %s',tsOrOps);
+    error('No matches to the IDs provided for %s',tsOrOps);
 end
 
 % ------------------------------------------------------------------------------

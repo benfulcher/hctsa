@@ -92,7 +92,7 @@ end
 %% Open parallel processing worker pool
 % ------------------------------------------------------------------------------
 if doParallel
-    % Check that a parallel worker pool is open (if not initiate it):
+    % Check that a parallel worker pool is open (if not attempt to initiate it):
 	doParallel = TS_InitiateParallel(0);
 end
 if doParallel
@@ -140,9 +140,8 @@ calcTimes = ones(numCalc,1)*NaN; % Calculation time for each operation
 % --------------------------------------------------------------------------
 %% Pre-Processing
 % --------------------------------------------------------------------------
-% y is a z-scored transformation of the time series
-% z-score without using a Statistics Toolbox license (i.e., the 'zscore' function):
-y = BF_zscore(x);
+% y is a z-scored transformation of the time series:
+y = zscore(x);
 
 % So we now have the raw time series x and the z-scored time series y.
 % Operations take these as inputs.
@@ -225,7 +224,6 @@ else
 									   par_OperationCodeString{jj});
 		catch
 			fprintf(1,'---Error with %s\n',par_OperationCodeString{jj});
-			keyboard
 			if (MasterOperations(par_OperationMasterInd(jj)).ID == 0)
 				error(['The operations database is corrupt: there is no link ' ...
 						'from ''%s'' to a master code'], par_OperationCodeString{jj});

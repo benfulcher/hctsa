@@ -112,7 +112,7 @@ y0 = y;
 
 y = BF_Whiten(y,preproc,beVocal,randomSeed);
 
-y = BF_zscore(y); % z-score the time series (after whitening)
+y = zscore(y); % z-score the time series (after whitening)
 
 % Length of the (potentially whitened) time series, y
 % Note that this could be different to the original, y0 (if choose a differencing, e.g.)
