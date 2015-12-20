@@ -1,4 +1,4 @@
-function BF_PlotCorrMat(D_corr,rangeHow)
+function BF_PlotCorrMat(D_corr,rangeHow,makeFigure)
 % BF_PlotCorrMat    Visualization of a pairwise similarity matrix
 %
 % Attempts to determine a set of smaller clusters of objects showing similar
@@ -6,10 +6,11 @@ function BF_PlotCorrMat(D_corr,rangeHow)
 %
 %---INPUTS:
 % D_corr, a pairwise distance matrix
-% rangeHow, the colorbar extent: (i) '' (automatic)
+% rangeHow, the colorbar extent: (i) 'auto' (automatic)
 %                                (ii) '-1to1' (range from -1 to 1)
 %                                (iii) '0to1' (range from 0 to 1)
 %                                (iv) 'balanced' (range from -X to X, for max possible X)
+% makeFigure, whether to generate a new figure
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -27,8 +28,15 @@ function BF_PlotCorrMat(D_corr,rangeHow)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Check Inputs:
+%-------------------------------------------------------------------------------
+
 if nargin < 2 || isempty(rangeHow)
-    rangeHow = '';
+    rangeHow = 'auto';
+end
+if nargin < 3
+    makeFigure = 0;
 end
 %-------------------------------------------------------------------------------
 
@@ -37,11 +45,24 @@ if any(size(D_corr)==1)
     D_corr = squareform(D_corr);
 end
 
+% Open a new figure window:
+if makeFigure
+    f = figure('color','w');
+end
+
 imagesc(D_corr)
 
 axis square
 
 % Set color limits and colormap
+if strcmp(rangeHow,'auto')
+    if all(D_corr(:) > 0)
+        rangeHow = 'auto';
+    elseif any(D_corr(:) > 0) && any(D_corr(:) < 0)
+        rangeHow = 'balanced';
+    end
+end
+
 switch rangeHow
 case 'balanced'
     maxDev = max(abs(D_corr(:)));
@@ -53,8 +74,10 @@ case '-1to1'
 case '0to1' % assume [0,1] (a normalized distance metric)
     caxis([0,1])
     colormap(BF_getcmap('reds',9,0))
-otherwise
+case 'auto'
     colormap(flipud(BF_getcmap('reds',9,0)))
+otherwise
+    error('Unknown colormap range option: ''%s''',rangeHow);
 end
 
 % ------------------------------------------------------------------------------
