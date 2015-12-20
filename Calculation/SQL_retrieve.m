@@ -1,4 +1,4 @@
-function didWrite = SQL_retrieve(ts_ids, op_ids, retrieveWhatEntries, retrieveWhatData)
+function didWrite = SQL_retrieve(ts_ids,op_ids,retrieveWhatEntries,retrieveWhatData)
 % SQL_retrieve 		Retrieve data from the mySQL database
 %
 % This function retreives data from the mySQL database for subsequent analysis

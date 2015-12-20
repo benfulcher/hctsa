@@ -159,7 +159,7 @@ ax2 = gca;
 switch whatDistance
 case 'corr'
     % Input is a correlation matrix:
-    BF_PlotCorrMat(1-distMat_cl,'balanced');
+    BF_PlotCorrMat(1-distMat_cl,'auto');
 case 'abscorr'
     % Input is a correlation matrix -> absolute value distances
     BF_PlotCorrMat(1-abs(distMat_cl));
