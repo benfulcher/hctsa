@@ -1,8 +1,29 @@
 function [distMat_cl,cluster_Groupi,ord] = BF_ClusterDown(distMat,numClusters,varargin)
-% BF_ClusterDown    Reduce a pairwise similarity matrix into smaller clusters.
+% BF_ClusterDown    Reduce a pairwise distance matrix into smaller clusters.
 %
-% Yields a visualization of a pairwise similarity matrix, with an attempt to
-% deduce a set of smaller clusters of objects showing highly correlated behavior.
+% Yields a visualization of a pairwise distance matrix, including a set of
+% clusters of objects showing highly correlated behavior.
+%
+%---INPUTS:
+% distMat, a pairwise distance matrix (e.g., generated from pdist)
+% numClusters, the number of clusters to reduce to (default: 3)
+% [EXTRA OPTIONS]:
+% 'objectLabels', labels for axes labels
+% 'whatDistance', the type of distance metric used:
+%        (i) 'corr' (default): provide 1-R, where R is correlation coefficient
+%        (ii) 'abscorr': provide correlation distances, 1-R, but clustering is
+%                        done on abscorr distances (sign of R is ignored), and
+%                        correlations, R, are plotted
+%        (iii) 'abscorr_ii': provide correlation distances, 1-R, but clustering
+%                        is done on abscorr distances(sign of R is ignored), and
+%                        absolute correlations, |R|, are plotted
+%        (iv) 'general': provide any distance matrix, plots the distance matrix
+% 'linkageMeth', the linkage method to use (for Matlab's linkage function)
+%
+%---OUTPUTS:
+% distMat_cl, the distance matrix re-ordered by clustering
+% cluster_Groupi, the assignment of nodes to clusters (cell of indices)
+% ord, the ordering of objects in the dendrogram
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -82,6 +103,17 @@ if any(size(distMat)==1)
 end
 
 %-------------------------------------------------------------------------------
+% Convert to new distance matrix for abscorr:
+%-------------------------------------------------------------------------------
+distMat0 = distMat; % keep distMat0 as the input distance matrix in all cases
+% distMat changes only for abscorr options
+if any(strcmp(whatDistance,{'abscorr','abscorr_ii'}))
+    % Compute distances on absolute correlation distances (where sign of correlation
+    % is irrelevant, it's the magnitude that's important):
+    distMat = 1-abs(1-distMat);
+end
+
+%-------------------------------------------------------------------------------
 % Do the linkage clustering:
 %-------------------------------------------------------------------------------
 numItems = length(distMat);
@@ -93,7 +125,6 @@ fprintf(1,' Done.\n');
 % ------------------------------------------------------------------------------
 % Compute the dendrogram
 % ------------------------------------------------------------------------------
-
 f = figure('color','w');
 f.Position(3) = 1200;
 f.Position(4) = 800;
@@ -104,13 +135,16 @@ subplot(1,6,6); ax1 = gca;
 ord = fliplr(ord); % so everything matches up with the dendrogram
 % Reorder the distance matrix by dendrogram ordering: [could add optimalleaforder]
 distMat_cl = distMat(ord,ord);
+distMat0_cl = distMat0(ord,ord);
 
 % Make the dendrogram look aight
 set(h_dend,'color','k','LineWidth',1)
 ax1.YTickLabel = {};
 xlabel('Distance');
 
+%-------------------------------------------------------------------------------
 % Compute clustering into groups for many different cluster numbers:
+%-------------------------------------------------------------------------------
 numClusterings = length(numClusters);
 cluster_Groupi = cell(numClusterings,1);
 cluster_Groupi_cl = cell(numClusterings,1);
@@ -146,7 +180,6 @@ for i = 1:numClusterings
     clusterCenters_cl{i} = arrayfun(@(y)find(ord==y),clusterCenters{i});
 end
 
-
 % ------------------------------------------------------------------------------
 % Now plot it:
 % ------------------------------------------------------------------------------
@@ -157,12 +190,12 @@ cLevel = min(1,numClusterings); % plot the first clustering
 subplot(1,6,2:5)
 ax2 = gca;
 switch whatDistance
-case 'corr'
-    % Input is a correlation matrix:
-    BF_PlotCorrMat(1-distMat_cl,'auto');
+case {'corr','abscorr_ii'}
+    % Input is a correlation distance matrix, plot correlation coefficients:
+    BF_PlotCorrMat(1-distMat0_cl,'auto');
 case 'abscorr'
-    % Input is a correlation matrix -> absolute value distances
-    BF_PlotCorrMat(1-abs(distMat_cl));
+    % Input is correlation distance matrix, plot absolute correlation coefficients:
+    BF_PlotCorrMat(abs(1-distMat0_cl),'positive');
 case 'general'
     % Input is a general distance matrix:
     BF_PlotCorrMat(distMat_cl);
@@ -170,18 +203,24 @@ otherwise
     error('Unknown distance ''%s''',whatDistance);
 end
 
-% Add rectangles to indicate highly correlated clusters of statistics:
+%-------------------------------------------------------------------------------
+% Add rectangles to group highly correlated clusters:
+%-------------------------------------------------------------------------------
 rectangleColors = BF_getcmap('accent',5,1);
 for i = 1:numClusters
-    % Cluster borders:
+    % Label cluster borders:
     rectangle('Position',[min(cluster_Groupi_cl{cLevel}{i})-0.5,min(cluster_Groupi_cl{cLevel}{i})-0.5, ...
                             length(cluster_Groupi_cl{cLevel}{i}),length(cluster_Groupi_cl{cLevel}{i})], ...
                     'EdgeColor',rectangleColors{1},'LineWidth',3);
 
-    % Cluster centers:
+    % Label cluster centers:
     rectangle('Position',[clusterCenters_cl{cLevel}(i)-0.5,clusterCenters_cl{cLevel}(i)-0.5,1,1], ...
                                 'EdgeColor',rectangleColors{5},'LineWidth',3);
 end
+
+%-------------------------------------------------------------------------------
+% Tweaking plot details:
+%-------------------------------------------------------------------------------
 
 % Add object labels on y-axis if provided
 if ~isempty(objectLabels)
@@ -198,8 +237,10 @@ ax2.XTick = [];
 % Add a color bar:
 cB = colorbar('southoutside');
 switch whatDistance
-case 'corr'
+case {'corr','abscorr_ii'}
     cB.Label.String = 'correlation coefficient';
+case 'abscorr'
+    cB.Label.String = 'absolute correlation coefficient';
 case 'general'
     cB.Label.String = 'distance';
 end

@@ -10,6 +10,7 @@ function BF_PlotCorrMat(D_corr,rangeHow,makeFigure)
 %                                (ii) '-1to1' (range from -1 to 1)
 %                                (iii) '0to1' (range from 0 to 1)
 %                                (iv) 'balanced' (range from -X to X, for max possible X)
+%                                (v) 'positive' (range from 0 to X, for max possible X)
 % makeFigure, whether to generate a new figure
 
 % ------------------------------------------------------------------------------
@@ -64,10 +65,14 @@ if strcmp(rangeHow,'auto')
 end
 
 switch rangeHow
+case 'positive'
+    maxDev = max(D_corr(:));
+    caxis([0,maxDev])
+    colormap(BF_getcmap('greenblue',9,0))
 case 'balanced'
     maxDev = max(abs(D_corr(:)));
     caxis([-maxDev,maxDev])
-    colormap([flipud(BF_getcmap('blues',9,0));1,1,1,;BF_getcmap('reds',9,0)])
+    colormap([flipud(BF_getcmap('blues',9,0));[1,1,1],;BF_getcmap('reds',9,0)])
 case '-1to1'
     caxis([-1,1])
     colormap([flipud(BF_getcmap('blues',9,0));BF_getcmap('reds',9,0)])
@@ -81,7 +86,7 @@ otherwise
 end
 
 % ------------------------------------------------------------------------------
-% Superimpose green/yellow rectangles over NaN values
+% Superimpose black rectangles over NaN values
 % ------------------------------------------------------------------------------
 if any(isnan(D_corr(:)))
     [theNaNs_i,theNaNs_j] = find(isnan(D_corr));
