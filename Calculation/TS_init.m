@@ -82,7 +82,7 @@ end
 % and update the structure arrays using the TS_LinkOperationsWithMasters function
 %-------------------------------------------------------------------------------
 
-[~, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
+[Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 
 % MasterOperations may have been trimmed by TS_LinkOperationsWithMasters:
 numMops = length(MasterOperations);
