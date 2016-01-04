@@ -80,7 +80,7 @@ B. D. Fulcher, M. A. Little, N. S. Jones (2013) [Highly comparative time-series 
 
 See also our open access IEEE TKDE paper on [feature-based time-series classification](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425) and an application of these ideas to [fetal heart rate analysis](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629).
 
-Many thanks go to Romesh Abeysuriya (@RomeshA) for helping with the mySQL database set-up and install scripts, and Santi Villalba (@sdvillal) for lots of helpful feedback and advice on the software.
+Many thanks go to [Romesh Abeysuriya](https://github.com/RomeshA) for helping with the mySQL database set-up and install scripts, and [Santi Villalba](https://github.com/sdvillal) for lots of helpful feedback and advice on the software.
 
 ## Related resources
 
