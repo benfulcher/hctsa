@@ -1,6 +1,5 @@
 function [Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations)
 % TS_LinkOperationsWithMasters    Link Operations with MasterOperations using Label field
-%
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

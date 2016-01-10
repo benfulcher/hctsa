@@ -1,6 +1,6 @@
 function Xs = DVV_surrogate(X, Ns)
 % Generates surrogate data for real and complex signals
-% 
+%
 % Surrogate data generation using iterated amplitude adjusted fourier
 % transform (iAAFT) method for real-valued series, and complex iAAFT method
 % for complex series.
@@ -73,8 +73,7 @@ if (isreal(X))
     for a = 1:Ns
 
         % Random permutation of the original time series
-        temp = randperm(length(X));
-        X_random = X(temp);
+        X_random = X(randperm(length(X)));
 
         % Initializations
         r_prev = X_random;

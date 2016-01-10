@@ -97,9 +97,8 @@ end
 % Don't use user input to select points to annotate: instead they are selected randomly
 %-------------------------------------------------------------------------------
 if ~userInput
-    % random set:
-    rp = randperm(numTimeSeries);
-    alreadyPicked = rp(1:numAnnotate);
+    % Annotate a random set:
+    alreadyPicked = randsample(numTimeSeries,numAnnotate);
 end
 
 % ------------------------------------------------------------------------------

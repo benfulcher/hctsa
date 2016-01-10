@@ -1,16 +1,20 @@
 function structArray = SQL_add(addWhat, inputFile, forDatabase, beVocal)
 % SQL_add
 %
-% Adds a set of time series, operations, or master operations to the mySQL
-% database.
+% Interprets a structured input file of time series time series, operations,
+% or master operations
+% Can also (by default) add the results to a linked mySQL database.
 %
 %---INPUTS:
 % addWhat: 'mops' (for master operations), 'ops' (for operations), or 'ts'
 %             (for time series)
-% inputFile:    the filename of the tab-delimited textfile to be read in [default
-%             = INP_ts.txt or INP_ops.txt or INP_mops.txt]
-%             The input file should be formatted with whitespace as a delimiter
-%             between the entries to import.
+% inputFile: the filename of the tab-delimited textfile to be read in [default
+%            = INP_ts.txt or INP_ops.txt or INP_mops.txt]
+%            The input file should be formatted with whitespace as a delimiter
+%            between the entries to import.
+% forDatabase: if 1 (default) write the results of interpreting the input file
+%               to the default linked mySQL database for hctsa.
+% beVocal: if 1 (default) gives user feedback on the input process.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -70,6 +74,9 @@ if beVocal
     fprintf(1,'Using input file: %s\n',inputFile);
 end
 ticker = tic;
+
+% Initialize structArray
+structArray = struct;
 
 % ------------------------------------------------------------------------------
 %% Open database connection
@@ -266,8 +273,9 @@ else
     if ~isfield(inputData,'timeSeriesData') || ~isfield(inputData,'labels') || ~isfield(inputData,'keywords') ...
                 || ~(iscell(inputData.timeSeriesData) || isnumeric(inputData.timeSeriesData)) ...
                 || ~iscell(inputData.labels) || ~iscell(inputData.keywords)
-        error(['Expecting input file, %s, to contain: ''timeSeriesData'' (cell or matrix), ' ...
-                            '''labels'' (cell), and ''keywords'' (cell).'],inputFile);
+        error(['Incorrectly formatted input file, %s\nExpecting input file to ' ...
+                    'contain: ''timeSeriesData'' (cell or matrix), ' ...
+                    '''labels'' (cell), and ''keywords'' (cell).'],inputFile);
     end
 
     % Get number of time series (as numItems):

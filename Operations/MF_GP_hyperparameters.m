@@ -123,8 +123,7 @@ if (maxN > 0) && (N > maxN)
             % Control the random seed (for reproducibility):
             BF_ResetSeed(randomSeed);
             % Now take samples (unevenly spaced!!)
-            ii = randperm(N);
-            ii = ii(1:maxN);
+            ii = randsample(N,maxN);
             ii = sort(ii,'ascend');
             t = t(ii);
             t = (t-min(t))/max(t)*(maxN-1)+1; % respace from 1:maxN
@@ -150,11 +149,11 @@ if (maxN > 0) && (N > maxN)
             N = length(y); % update time series length (should be maxN)
             t = SUB_settimeindex(N,squishorsquash); % set time index
             % Now take samples (unevenly spaced!!)
-            ii = randperm(N);
-            ii = ii(1:ceil(maxN/5)); % This 5 is really a parameter...
+            ii = randsample(N,ceil(maxN/5)); % This 5 is really a parameter...
             ii = sort(ii,'ascend');
             t = t(ii);
             y = y(ii);
+
         otherwise
             error('Invalid sampling method ''%s''.',resampleHow)
     end
@@ -240,7 +239,7 @@ out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
 out.std_S_data = std(sqrt(S2)); % should vary a fair bit
 
 
-% Statistics on variance
+% Statistics on variance:
 xstar = linspace(min(t),max(t),1000)'; % crude, I know, but it's nearly 5pm
 [~, S2] = gpr(logHyper, covFunc, t, y, xstar); % evaluate at datapoints
 S = sqrt(S2);
@@ -248,20 +247,18 @@ out.maxS = max(S); % maximum variance
 out.minS = min(S); % minimum variance
 out.meanS = mean(S); % mean variance
 
-
-
-    % ------------------------------------------------------------------------------
-    function t = SUB_settimeindex(N,squishorsquash)
-        %% Set time index
-        % Difficult for processes on different time scales -- to squash them all
-        % into one time 'window' with linspace, or spread them all out into a
-        % single 'sampling rate' with 1:N...?
-        if squishorsquash
-            t = (1:N)';
-        else
-            t = linspace(0,1,N)';
-        end
+% ------------------------------------------------------------------------------
+function t = SUB_settimeindex(N,squishorsquash)
+    %% Set time index
+    % Difficult for processes on different time scales -- to squash them all
+    % into one time 'window' with linspace, or spread them all out into a
+    % single 'sampling rate' with 1:N...?
+    if squishorsquash
+        t = (1:N)';
+    else
+        t = linspace(0,1,N)';
     end
-    % ------------------------------------------------------------------------------
+end
+% ------------------------------------------------------------------------------
 
 end

@@ -4,11 +4,18 @@ function TS_init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
 %
 % This function is used instead to run hctsa analysis without a linked mySQL database.
 %
+%---EXAMPLE USAGE:
+% Initiate an HCTSA.mat file on a custom time-series dataset using default
+% feature library, using a formatted input file, 'my_TS_INP_file.mat'
+% >> TS_init('my_TS_INP_file.mat');
+%
 %---INPUTS:
 % INP_ts: A time-series input file
 % INP_mops: A master operations input file
 % INP_ops: An operations input file
-% beVocal: Whether to display details of the progress of the script to screen
+% beVocal: Whether to display details of the progress of the script to screen.
+%           a 3-vector, specifying for 1. time series, 2. master operations,
+%           and 3. operations.
 % outputFile: Specify an alternative output filename
 %
 %---OUTPUTS:
@@ -43,7 +50,16 @@ if nargin < 3 || isempty(INP_ops)
     INP_ops = 'INP_ops.txt';
 end
 if nargin < 4
-    beVocal = 0; % by default do your business in peace
+    if nargin < 2
+        beVocal = [1,0,0]; % by default helps you just for the time series input file you provided
+    elseif nargin < 3
+        beVocal = [1,1,0]; % by help you through the master operations too
+    else
+        beVocal = [1,1,1]; % Provided all custom input files--walks you through all of them
+    end
+end
+if length(beVocal)==1
+    beVocal = ones(3,1)*beVocal;
 end
 if nargin < 5
     outputFile = 'HCTSA.mat';
@@ -63,19 +79,19 @@ end
 % ------------------------------------------------------------------------------
 % Get time series, operations, master operations into structure arrays
 % ------------------------------------------------------------------------------
-try
-    TimeSeries = SQL_add('ts', INP_ts, 0, beVocal);
-    numTS = length(TimeSeries);
+isEmptyStruct = @(x) length(fieldnames(x))==0;
 
-    MasterOperations = SQL_add('mops', INP_mops, 0, beVocal)';
-    numMops = length(MasterOperations);
+TimeSeries = SQL_add('ts', INP_ts, 0, beVocal(1));
+if isEmptyStruct(TimeSeries), return; end % The user did not approve of the set of inputs
+numTS = length(TimeSeries);
 
-    Operations = SQL_add('ops', INP_ops, 0, beVocal);
-    numOps = length(Operations);
-catch
-    % The user did not approve of the set of inputs
-    return
-end
+MasterOperations = SQL_add('mops', INP_mops, 0, beVocal(2))';
+if isEmptyStruct(MasterOperations), return; end % The user did not approve of the set of inputs
+numMops = length(MasterOperations);
+
+Operations = SQL_add('ops', INP_ops, 0, beVocal(3));
+if isEmptyStruct(Operations), return; end % The user did not approve of the set of inputs
+numOps = length(Operations);
 
 %-------------------------------------------------------------------------------
 % Link operations to their masters using label matching

@@ -28,7 +28,7 @@ function data = DVV_dvv(x, m, Nsub, nd, Ntv)
 %   You can obtain a copy of the GNU General Public License from
 %   http://www.gnu.org/copyleft/gpl.html or by writing to
 %   Free Software Foundation, Inc.,675 Mass Ave, Cambridge, MA 02139, USA.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 % ------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ end
 % ------------------------------------------------------------------------------
 N = length(x);              % Length of input vector
 tau = 1;                    % Time delay parameter
-d = zeros(N-m*tau, Nsub); 
+d = zeros(N-m*tau, Nsub);
 y = zeros(Ntv,1);
 
 % Make input vector x a column vector
@@ -67,17 +67,16 @@ if size(x,2) > size(x,1)
 end
 
 % Generate Nsub subset from existing DV's, randomly
-temp = randperm (N - m*tau);
-ref = temp(1:Nsub) + m*tau;
+ref = randsample(N - m*tau,Nsub) + m*tau;
 
 % Compute pairwise distances between reference DVs and all DVs
-count = 0; 
+count = 0;
 acc = 0;
 for i = 1:Nsub
     for j = m*tau+1:N
         d(j-m*tau,i) = norm (x(ref(i)-m*tau:tau:ref(i)-tau) - x(j-m*tau:tau:j-tau));
         if (ref(i) ~= j)
-            acc = acc + d(j-m*tau,i); 
+            acc = acc + d(j-m*tau,i);
             count = count + 1;
         end
     end
@@ -90,7 +89,7 @@ acc = 0;
 for i = 1:Nsub
     for j = m*tau + 1:N
         if (ref(i) ~= j)
-            acc = acc + (d(j-m*tau,i)-avg).^2; 
+            acc = acc + (d(j-m*tau,i)-avg).^2;
             count = count + 1;
         end
     end
@@ -101,7 +100,7 @@ variance = sqrt(acc/(count-1));
 n = (1:Ntv)-1;
 rd = avg-nd*variance + (2*nd*variance*n)/(Ntv-1);
 
-% Creates sets of DV's, for each ref element of subset and value rd, which have norms closer than distance rd to ref 
+% Creates sets of DV's, for each ref element of subset and value rd, which have norms closer than distance rd to ref
 for n = 1:length(rd)
     if rd(n) > 0
         tot = 0;
@@ -112,7 +111,7 @@ for n = 1:length(rd)
             % Only those variance values are considered for which the corresponding
             % sets have atleast 30 DVs
             if (length(IND) >= 30)
-                tot = tot + var(x(IND));                 
+                tot = tot + var(x(IND));
                 count = count+1;
             end
         end
@@ -120,13 +119,13 @@ for n = 1:length(rd)
             y(n) = NaN;
         else
             y(n) = tot/(count*var(x));
-        end 
+        end
     else
         y(n) = NaN;
-    end    
+    end
 end
 
-% Horizontal axis 
+% Horizontal axis
 T = (rd'-avg)/variance;
 
 % DVV Output
