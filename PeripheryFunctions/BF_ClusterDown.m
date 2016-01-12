@@ -195,12 +195,13 @@ case {'corr','abscorr_ii'}
     BF_PlotCorrMat(1-distMat0_cl,'auto');
 case 'abscorr'
     % Input is correlation distance matrix, plot absolute correlation coefficients:
-    BF_PlotCorrMat(abs(1-distMat0_cl),'positive');
+    BF_PlotCorrMat(abs(1-distMat0_cl),'auto');
 case 'general'
     % Input is a general distance matrix:
     BF_PlotCorrMat(distMat_cl);
 otherwise
-    error('Unknown distance ''%s''',whatDistance);
+    warning('No special plotting options for distance metric: ''%s''',whatDistance);
+    BF_PlotCorrMat(distMat_cl);
 end
 
 %-------------------------------------------------------------------------------

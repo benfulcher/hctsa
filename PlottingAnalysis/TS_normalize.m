@@ -165,7 +165,7 @@ if thresh_r > 0 % if 1, then even the worst are included
             % display filtered times series to screen:
             fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(xkr1).Name},','));
         else
-            fprintf(1,['All %u time series had greater than %4.2f%% good values.' ...
+            fprintf(1,['All %u time series have greater than %4.2f%% good values.' ...
                             ' Keeping them all.\n'], ...
                             size(TS_DataMat,1),thresh_r*100);
         end
@@ -198,7 +198,7 @@ if thresh_c > 0
                             size(TS_DataMat,2)-length(kc1),thresh_c*100,size(TS_DataMat,2),length(kc1));
             fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(xkc1).Name},','));
         else
-            fprintf(1,['All operations had greater than %5.2f%% good values; ' ...
+            fprintf(1,['All operations have greater than %5.2f%% good values; ' ...
                     'keeping them all :-)'],thresh_c*100);
         end
 

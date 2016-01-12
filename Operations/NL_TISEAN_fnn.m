@@ -114,12 +114,20 @@ delete(filePath) % remove the temporary time-series data file
 % fourth column: the average of the squared size of the neighborhood
 
 % Read TISEAN output:
+if isempty(res)
+    error('No output from TISEAN routine false_nearest on the data');
+end
 data = textscan(res,'%u%f%f%f');
 
 mDim = double(data{1}); % embedding dimension
 pNN = data{2}; % fraction of false nearest neighbors
 % nHoodSize = data{3}; % average size of the neighbourhood
 nHoodSize2 = data{4}; % average squared size of the neighbourhood
+
+% Check that some data exists:
+if isempty(mDim) || isempty(pNN) || isempty(nHoodSize2)
+    error('Error running TISEAN false_nearest on input data');
+end
 
 if doPlot
     f = figure('color','w'); box('on'); hold on
@@ -178,7 +186,7 @@ function firsti = firstunderf(x,m,p)
     %% Find m for the first time p goes under x%
     firsti = m(find(p < x,1,'first'));
     if isempty(firsti)
-        firsti = m(end) + 1;
+        firsti = m(length(m)) + 1;
     end
 end
 

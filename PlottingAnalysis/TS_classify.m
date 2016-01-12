@@ -126,6 +126,12 @@ fprintf(1,['\nClassification rate (%u-class) using %u-fold %s classification wit
 % Compare performance of reduced PCs from the data matrix:
 %-------------------------------------------------------------------------------
 if doPCs
+    if any(isnan(TS_DataMat(:)))
+        warning(['Cannot compute PCs of data matrix containing NaNs...\n' ...
+                    '(to compute PCs, re-run TS_Normalize to filter out all NaNs)'])
+        return
+    end
+
     numPCs = 10;
 
     % Compute top 10 PCs of the data matrix:

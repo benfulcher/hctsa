@@ -60,10 +60,12 @@ for i = 1:length(nsegr)
     nseg = nsegr(i);
     wlen = floor(length(y)/nseg); % window length
     inc = floor(wlen/nmov); % increment to move at each step
-    if inc == 0; inc = 1; end % increment rounded down to zero, prop it up
+    % If increment rounded down to zero, prop it up
+    if inc == 0
+        inc = 1;
+    end
 
     numSteps = (floor((length(y)-wlen)/inc)+1);
-    % qs = struct;
     qs = zeros(numSteps,numFeatures);
 
     for j = 1:numSteps
@@ -92,10 +94,12 @@ for i = 1:length(nsegr)
         qs(j,6) = sampenStruct.quadSampEn2; % SampEn_2_015
         qs(j,7) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
         qs(j,8) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
+        % (Sometimes taug or taul can be longer than ysub; then these will output NaNs:)
         qs(j,9) = CO_AutoCorr(ysub,taug,'Fourier'); % AC_glob_tau
         qs(j,10) = CO_AutoCorr(ysub,taul,'Fourier'); % AC_loc_tau
         qs(j,11) = taul;
     end
+
     % plot(qs,'o-');
     % input('what do you think?')
 

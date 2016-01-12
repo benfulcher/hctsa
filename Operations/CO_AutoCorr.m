@@ -55,6 +55,16 @@ if nargin < 3 || isempty(whatMethod)
     whatMethod = 'Fourier';
 end
 
+%-------------------------------------------------------------------------------
+% Initial checks on tau:
+%-------------------------------------------------------------------------------
+if max(tau) > length(y)-1 % -1 because acf(1) is lag 0
+    warning('Time lag %u is too long for time-series length %u',max(tau),length(y))
+end
+if min(tau) < 0
+    warning('Negative time lags not applicable')
+end
+
 % ------------------------------------------------------------------------------
 % Evaluate the time-series autocorrelation
 % ------------------------------------------------------------------------------
@@ -74,14 +84,7 @@ case 'Fourier'
     acf = acf./acf(1); % Normalize
     acf = real(acf);
 
-    % acf = acf(2:end);
-
-    if max(tau) > length(acf)-1 % -1 because acf(1) is lag 0
-        warning('Time lag %u is too long for time-series length %u',max(tau),length(y))
-    end
-    if min(tau) < 0
-        warning('Negative time lags not applicable')
-    end
+    acf = acf(1:length(y));
 
     out = zeros(length(tau),1);
     for i = 1:length(tau)

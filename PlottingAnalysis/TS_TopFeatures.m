@@ -310,14 +310,16 @@ if any(ismember(whatPlots,'cluster'))
         fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile);
         Dij = squareform(clustStruct.Dij);
         Dij = Dij(op_ind,op_ind);
+        distanceMetric = clustStruct.distanceMetric;
     else
         % Compute correlations on the fly
         Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
+        distanceMetric = 'abscorr';
     end
     makeLabel = @(x) sprintf('[%u] %s (%4.2f)',Operations(x).ID,Operations(x).Name,...
                         testStat(x));
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
-    BF_ClusterDown(Dij,floor(numTopFeatures/5),'whatDistance','general',...
+    BF_ClusterDown(Dij,floor(numTopFeatures/5),'whatDistance',distanceMetric,...
                         'objectLabels',objectLabels);
     title(sprintf('Dependencies between %u top features',numTopFeatures))
 end
