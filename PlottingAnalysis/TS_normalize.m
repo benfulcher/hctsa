@@ -1,4 +1,4 @@
-function TS_normalize(normFunction,filterOptions,fileName_HCTSA,subs,trainSet)
+function TS_normalize(normFunction,filterOptions,fileName_HCTSA,subs)
 % TS_normalize  Trims and normalizes data from an hctsa analysis.
 %
 % Reads in data from HCTSA.mat, writes a trimmed, normalized version to
@@ -67,11 +67,6 @@ if nargin < 4
     subs = {};
 end
 
-if nargin < 5
-    % Empty by default: get normalization parameters using the full set
-    trainSet = [];
-end
-
 % --------------------------------------------------------------------------
 %% Read data from local files
 % --------------------------------------------------------------------------
@@ -106,29 +101,23 @@ end
 % ------------------------------------------------------------------------------
 if ~isempty(subs)
     kr0 = subs{1}; % rows to keep (0)
-    if isempty(kr0),
-        kr0 = 1:size(TS_DataMat,1);
-    else
+    if ~isempty(kr0)
         fprintf(1,'Filtered down time series by given subset; from %u to %u.\n',...
                     size(TS_DataMat,1),length(kr0));
         TS_DataMat = TS_DataMat(kr0,:);
         TS_Quality = TS_Quality(kr0,:);
+        TimeSeries = TimeSeries(kr0);
     end
 
     kc0 = subs{2}; % columns to keep (0)
-    if isempty(kc0),
-        kc0 = 1:size(TS_DataMat,2);
-    else
+    if ~isempty(kc0)
         fprintf(1,'Filtered down operations by given subset; from %u to %u.\n',...
             size(TS_DataMat,2),length(kc0));
         TS_DataMat = TS_DataMat(:,kc0);
         TS_Quality = TS_Quality(:,kc0);
+        Operations = Operations(kc0);
     end
-else
-    kr0 = 1:size(TS_DataMat,1);
-    kc0 = 1:size(TS_DataMat,2);
 end
-
 
 % --------------------------------------------------------------------------
 %% Trim down bad rows/columns
@@ -143,74 +132,23 @@ fprintf(1,'There are %u special values in the data matrix.\n',sum(TS_Quality(:) 
 
 % (*) Filter based on proportion of bad entries. If either threshold is 1,
 % the resulting matrix is guaranteed to be free from bad values entirely.
-[badr, badc] = find(isnan(TS_DataMat));
-thresh_r = filterOptions(1); thresh_c = filterOptions(2);
-if thresh_r > 0 % if 1, then even the worst are included
-    [badr, ~, rj] = unique(badr); % neat code, but really slow to do this
-%     unique... Loop instead
-    % (ii) Remove rows with more than a proportion thresh_r bad values
-    badrp = zeros(length(badr),1); % stores the number of bad entries
-    for i = 1:length(badr)
-        badrp(i) = sum(rj==i);
-    end
-    badrp = badrp/size(TS_DataMat,2);
-    xkr1 = badr(badrp >= 1 - thresh_r); % don't keep rows (1) if fewer good values than thresh_r
-    kr1 = setxor(1:size(TS_DataMat,1),xkr1);
 
-    if ~isempty(kr1)
-        if ~isempty(xkr1)
-            fprintf(1,['\nRemoved %u time series with fewer than %4.2f%% good values:'...
-                        ' from %u to %u.\n'],size(TS_DataMat,1)-length(kr1),...
-                        thresh_r*100,size(TS_DataMat,1),length(kr1));
-            % display filtered times series to screen:
-            fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(xkr1).Name},','));
-        else
-            fprintf(1,['All %u time series have greater than %4.2f%% good values.' ...
-                            ' Keeping them all.\n'], ...
-                            size(TS_DataMat,1),thresh_r*100);
-        end
-        % ********************* kr1 ***********************
-        TS_DataMat = TS_DataMat(kr1,:);
-        TS_Quality = TS_Quality(kr1,:);
-    else
-        error('No time series had more than %4.2f%% good values.',thresh_r*100)
-    end
-else
-    % fprintf(1,'No filtering of time series based on proportion of bad values.\n')
-    kr1 = (1:size(TS_DataMat,1));
+% Filter time series (rows)
+keepRows = filterNaNs(TS_DataMat,1-filterOptions(1),'time series');
+if any(~keepRows)
+    fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(keepRows).Name},','));
+    TS_DataMat = TS_DataMat(keepRows,:);
+    TS_Quality = TS_Quality(keepRows,:);
+    TimeSeries = TimeSeries(keepRows);
 end
 
-if thresh_c > 0
-    if thresh_r > 0 && ~isempty(kr1) % did row filtering and removed some
-        [~, badc] = find(isnan(TS_DataMat)); % have to recalculate indicies
-    end
-    [badc, ~, cj] = unique(badc);
-    % (iii) Remove metrics that are more than thresh_c bad
-    badcp = zeros(length(badc),1); % stores the number of bad entries
-    for i = 1:length(badc), badcp(i) = length(find(cj==i)); end
-    badcp = badcp/size(TS_DataMat,1);
-    xkc1 = badc(badcp >= 1-thresh_c); % don't keep columns if fewer good values than thresh_c
-    kc1 = setxor(1:size(TS_DataMat,2),xkc1); % keep columns (1)
-
-    if ~isempty(kc1)
-        if ~isempty(xkc1)
-            fprintf(1,'\nRemoved %u operations with fewer than %5.2f%% good values: from %u to %u.\n',...
-                            size(TS_DataMat,2)-length(kc1),thresh_c*100,size(TS_DataMat,2),length(kc1));
-            fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(xkc1).Name},','));
-        else
-            fprintf(1,['All operations have greater than %5.2f%% good values; ' ...
-                    'keeping them all :-)'],thresh_c*100);
-        end
-
-        % *********************** kc1 *********************
-        TS_DataMat = TS_DataMat(:,kc1);
-        TS_Quality = TS_Quality(:,kc1);
-    else
-        error('No operations had fewer than %u%% good values.',thresh_c*100)
-    end
-else
-    % fprintf(1,'No filtering of operations based on proportion of bad values\n')
-    kc1 = (1:size(TS_DataMat,2));
+% Filter operations (columns)
+keepCols = filterNaNs(TS_DataMat',1-filterOptions(2),'operations');
+if any(~keepCols)
+    fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(keepCols).Name},','));
+    TS_DataMat = TS_DataMat(:,keepCols);
+    TS_Quality = TS_Quality(:,keepCols);
+    Operations = Operations(keepCols);
 end
 
 % --------------------------------------------------------------------------
@@ -218,73 +156,38 @@ end
 %% And time series with constant feature vectors
 % --------------------------------------------------------------------------
 if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all will be constant!
-    bad_op = zeros(size(TS_DataMat,2),1);
-    for j = 1:size(TS_DataMat,2)
-        bad_op(j) = (range(TS_DataMat(~isnan(TS_DataMat(:,j)),j)) < eps);
-    end
-    kc2 = find(bad_op==0); % kept column (2)
+    bad_op = (nanstd(TS_DataMat) < eps);
 
-    if ~isempty(kc2)
-        if length(kc2) < size(TS_DataMat,2)
-            fprintf(1,'Removed %u operations with near-constant outputs: from %u to %u.\n',...
-                             size(TS_DataMat,2)-length(kc2),size(TS_DataMat,2),length(kc2));
-            TS_DataMat = TS_DataMat(:,kc2); % ********************* KC2 **********************
-            TS_Quality = TS_Quality(:,kc2);
-        end
+    if all(bad_op)
+        error('All %u operations produced constant outputs on the %u time series?!',...
+                            length(bad_op),size(TS_DataMat,1))
+    elseif any(bad_op)
+        fprintf(1,'Removed %u operations with near-constant outputs: from %u to %u.\n',...
+                         sum(bad_op),length(bad_op),sum(~bad_op));
+        TS_DataMat = TS_DataMat(:,~bad_op);
+        TS_Quality = TS_Quality(:,~bad_op);
+        Operations = Operations(~bad_op);
     else
-        error('All %u operations produced constant outputs on the %u time series?!',length(kc2),size(TS_DataMat,1))
+        fprintf(1,'No operations had near-constant outputs on the dataset\n');
     end
-else
-    % just one time series remains: keep all operations
-    kc2 = ones(1,size(TS_DataMat,2));
-end
-
-% (*) Remove time series with constant feature vectors
-bad_ts = zeros(size(TS_DataMat,1),1);
-for j = 1:size(TS_DataMat,1)
-    bad_ts(j) = (range(TS_DataMat(j,~isnan(TS_DataMat(j,:)))) < eps);
-end
-kr2 = find(bad_ts == 0); % kept column (2)
-
-if ~isempty(kr2)
-    if (length(kr2) < size(TS_DataMat,1))
-        fprintf(1,'Removed time series with constant feature vectors (weird!): from %u to %u.\n',...
-                            size(TS_DataMat,1),length(kr2));
-        TS_DataMat = TS_DataMat(kr2,:); % ********************* KR2 **********************
-        TS_Quality = TS_Quality(kr2,:);
-    end
-else
-    error('All time series have constant feature vectors?!')
 end
 
 % --------------------------------------------------------------------------
 %% Update the labels after filtering
 % --------------------------------------------------------------------------
-% Time series
-kr_tot = kr0(kr1(kr2)); % The full set of indices remaining after all the filtering
-TimeSeries = TimeSeries(kr_tot); % Filter time series
-if ~isempty(trainSet)
-    % Re-adjust training indices too, if relevant
-    trainSet = intersect(trainSet,kr_tot);
-end
-
-% Operations
-kc_tot = kc0(kc1(kc2)); % The full set of indices remaining after all the filtering
-Operations = Operations(kc_tot); % Filter operations
-
 % At this point, you could check to see if any master operations are no longer
 % pointed to and recalibrate the indexing, but I'm not going to bother.
 
 fprintf(1,'We now have %u time series and %u operations in play.\n', ...
-                                length(TimeSeries),length(Operations));
+                            length(TimeSeries),length(Operations));
 fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',...
             sum(isnan(TS_DataMat(:))), ...
-            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,size(TS_DataMat,1),size(TS_DataMat,2));
-
+            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,...
+            size(TS_DataMat,1),size(TS_DataMat,2));
 
 if length(TimeSeries)==1
     % When there is only a single time series, it doesn't actually make sense to normalize
-    error('Only a single time series in the dataset -- no normalization can be applied');
+    error('Only a single time series remains in the dataset -- no normalization can be applied');
 end
 
 % --------------------------------------------------------------------------
@@ -294,18 +197,10 @@ end
 if ismember(normFunction,{'nothing','none'})
     fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',normFunction);
 else
-    if isempty(trainSet)
-        % No training subset specified
-        fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',...
-                                length(TimeSeries),length(Operations));
-        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction);
-    else
-        % Train the normalization parameters only on a specified set of training data, then apply
-        % that transformation to the full data matrix
-        fprintf(1,['Normalizing a %u x %u object using %u training time series to train the transformation!' ...
-                ' Please be patient...\n'],length(TimeSeries),length(Operations),length(trainSet));
-        TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction,trainSet);
-    end
+    % No training subset specified
+    fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',...
+                            length(TimeSeries),length(Operations));
+    TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction);
     fprintf(1,'Normalized! The data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))));
 end
 
@@ -323,25 +218,24 @@ end
 if all(nancol) % all columns are NaNs
     error('After normalization, all columns were bad-values... :(');
 elseif any(nancol) % there are columns that are all NaNs
-    kc = find(nancol==0);
+    kc = (nancol==0);
     TS_DataMat = TS_DataMat(:,kc);
     TS_Quality = TS_Quality(:,kc);
     Operations = Operations(kc);
     fprintf(1,'We just removed %u all-NaN columns from after normalization.\n',sum(nancol));
 end
 
-
 % --------------------------------------------------------------------------
 %% Make sure the operations are still good
 % --------------------------------------------------------------------------
 % check again for constant columns after normalization
-kc = find(range(TS_DataMat) ~= 0); % (NaN or positive)
-if ~isempty(kc) && length(kc) < size(TS_DataMat,2)
+kc = (range(TS_DataMat) ~= 0); % (NaN or positive)
+if ~isempty(kc) && any(kc)
     TS_DataMat = TS_DataMat(:,kc);
     TS_Quality = TS_Quality(:,kc);
     Operations = Operations(kc);
     fprintf(1,'Post-normalization filtering of %u operations with constant outputs: from %u to %u.\n', ...
-                    size(TS_DataMat,2)-length(kc),size(TS_DataMat,2),length(kc));
+                    sum(~kc),length(kc),sum(kc));
 end
 
 fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n', ...
@@ -375,5 +269,33 @@ save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
         'MasterOperations','fromDatabase','groupNames','normalizationInfo',...
         'ts_clust','op_clust');
 fprintf(1,' Done.\n');
+
+%-------------------------------------------------------------------------------
+function keepInd = filterNaNs(XMat,nan_thresh,objectName);
+    % Returns an index of rows of XMat with greater than
+    % nan_thresh NaN values.
+
+    if nan_thresh == 0
+        keepInd = true(size(XMat,1));
+        return
+    else
+        nanMat = isnan(XMat);
+        propNaN = mean(nanMat,2); % proportion of NaNs across rows
+        keepInd = (propNaN <= nan_thresh);
+        if all(~keepInd)
+            error('No %s had more than %4.2f%% good values.',objectName,nan_thresh*100)
+        end
+        if any(keepInd)
+            fprintf(1,['\nRemoving %u %s with fewer than %4.2f%% good values:'...
+                        ' from %u to %u.\n'],sum(~keepInd),objectName,...
+                        nan_thresh*100,length(keepInd),sum(keepInd));
+        else
+            fprintf(1,['All %u %s have greater than %4.2f%% good values.' ...
+                            ' Keeping them all.\n'], ...
+                            length(keepInd),objectName,nan_thresh*100);
+        end
+    end
+end
+%-------------------------------------------------------------------------------
 
 end
