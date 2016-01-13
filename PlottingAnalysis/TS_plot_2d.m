@@ -11,7 +11,7 @@ function TS_plot_2d(Features,TimeSeries,featureLabels,groupNames,annotateParams,
 %
 % featureLabels, cell of labels for each feature
 %
-% groupLabels, cell of labels for each group of timeseries
+% groupNames, cell containing a label for each class of timeseries
 %
 % annotateParams, a structure containing all the information about how to annotate
 %           data points. Fields can include:

@@ -80,7 +80,7 @@ case '0to1' % assume [0,1] (a normalized distance metric)
     caxis([0,1])
     colormap(BF_getcmap('reds',9,0))
 case 'auto'
-    colormap(flipud(BF_getcmap('reds',9,0)))
+    colormap(flipud(gray(64)))
 otherwise
     error('Unknown colormap range option: ''%s''',rangeHow);
 end

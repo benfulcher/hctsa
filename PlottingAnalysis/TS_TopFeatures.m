@@ -194,7 +194,7 @@ if any(ismember(whatPlots,'histogram'))
             groupLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
             testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels);
         end
-        fprintf(1,' %u %s statistics computed in %s.\n',numOps*numRepeats,...
+        fprintf(1,'\n%u %s statistics computed in %s.\n',numOps*numRepeats,...
                                         cfnName,BF_thetime(toc(timer)));
     end
 
