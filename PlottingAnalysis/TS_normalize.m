@@ -178,20 +178,18 @@ end
 % At this point, you could check to see if any master operations are no longer
 % pointed to and recalibrate the indexing, but I'm not going to bother.
 
-fprintf(1,'We now have %u time series and %u operations in play.\n', ...
-                            length(TimeSeries),length(Operations));
-fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',...
-            sum(isnan(TS_DataMat(:))), ...
-            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,...
-            size(TS_DataMat,1),size(TS_DataMat,2));
-
 if length(TimeSeries)==1
     % When there is only a single time series, it doesn't actually make sense to normalize
     error('Only a single time series remains in the dataset -- no normalization can be applied');
 end
 
+fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',...
+            sum(isnan(TS_DataMat(:))), ...
+            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,...
+            size(TS_DataMat,1),size(TS_DataMat,2));
+
 % --------------------------------------------------------------------------
-%% Actually apply the normalizing transformation
+%% Filtering done, now apply the normalizing transformation
 % --------------------------------------------------------------------------
 
 if ismember(normFunction,{'nothing','none'})
@@ -211,30 +209,26 @@ end
 % constant after e.g., the sigmoid transform -- a bit of a weird thing to do if
 % pre-filtering by percentage...
 
-nancol = zeros(size(TS_DataMat,2),1); %column of all NaNs
-for i = 1:size(TS_DataMat,2)
-    nancol(i) = all(isnan(TS_DataMat(:,i)));
-end
-if all(nancol) % all columns are NaNs
+nanCol = (mean(isnan(TS_DataMat))==1);
+if all(nanCol) % all columns are NaNs
     error('After normalization, all columns were bad-values... :(');
-elseif any(nancol) % there are columns that are all NaNs
-    kc = (nancol==0);
-    TS_DataMat = TS_DataMat(:,kc);
-    TS_Quality = TS_Quality(:,kc);
-    Operations = Operations(kc);
-    fprintf(1,'We just removed %u all-NaN columns from after normalization.\n',sum(nancol));
+elseif any(nanCol) % there are columns that are all NaNs
+    TS_DataMat = TS_DataMat(:,~nanCol);
+    TS_Quality = TS_Quality(:,~nanCol);
+    Operations = Operations(~nanCol);
+    fprintf(1,'We just removed %u all-NaN columns from after normalization.\n',sum(nanCol));
 end
 
 % --------------------------------------------------------------------------
 %% Make sure the operations are still good
 % --------------------------------------------------------------------------
 % check again for constant columns after normalization
-kc = (range(TS_DataMat) ~= 0); % (NaN or positive)
-if ~isempty(kc) && any(kc)
-    TS_DataMat = TS_DataMat(:,kc);
-    TS_Quality = TS_Quality(:,kc);
-    Operations = Operations(kc);
-    fprintf(1,'Post-normalization filtering of %u operations with constant outputs: from %u to %u.\n', ...
+kc = (nanstd(TS_DataMat) < eps);
+if any(kc)
+    TS_DataMat = TS_DataMat(:,~kc);
+    TS_Quality = TS_Quality(:,~kc);
+    Operations = Operations(~kc);
+    fprintf(1,'%u operations had near-constant outputs after filtering: from %u to %u.\n', ...
                     sum(~kc),length(kc),sum(kc));
 end
 
