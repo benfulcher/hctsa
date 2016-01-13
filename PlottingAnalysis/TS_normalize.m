@@ -9,9 +9,9 @@ function TS_normalize(normFunction,filterOptions,fileName_HCTSA,subs)
 %---INPUTS:
 % normFunction: String specifying how to normalize the data.
 %
-% filterOptions: Vector specifying thresholds for the minimum proportion of bad
-%                values tolerated in a given row or column, in the form of a 2-vector:
-%                [row proportion, column proportion] If one of the filterOptions
+% filterOptions: Vector specifying thresholds for the minimum proportion of good
+%                values required in a given row or column, in the form of a 2-vector:
+%                [row proportion, column proportion]. If one of the filterOptions
 %                is set to 1, will have no bad values in your matrix.
 %
 % fileName_HCTSA: Custom filename to import. Default is 'HCTSA.mat'.
@@ -134,18 +134,18 @@ fprintf(1,'There are %u special values in the data matrix.\n',sum(TS_Quality(:) 
 % the resulting matrix is guaranteed to be free from bad values entirely.
 
 % Filter time series (rows)
-keepRows = filterNaNs(TS_DataMat,1-filterOptions(1),'time series');
+keepRows = filterNaNs(TS_DataMat,filterOptions(1),'time series');
 if any(~keepRows)
-    fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(keepRows).Name},','));
+    fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(~keepRows).Name},','));
     TS_DataMat = TS_DataMat(keepRows,:);
     TS_Quality = TS_Quality(keepRows,:);
     TimeSeries = TimeSeries(keepRows);
 end
 
 % Filter operations (columns)
-keepCols = filterNaNs(TS_DataMat',1-filterOptions(2),'operations');
+keepCols = filterNaNs(TS_DataMat',filterOptions(2),'operations');
 if any(~keepCols)
-    fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(keepCols).Name},','));
+    fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(~keepCols).Name},','));
     TS_DataMat = TS_DataMat(:,keepCols);
     TS_Quality = TS_Quality(:,keepCols);
     Operations = Operations(keepCols);
@@ -272,16 +272,14 @@ fprintf(1,' Done.\n');
 
 %-------------------------------------------------------------------------------
 function keepInd = filterNaNs(XMat,nan_thresh,objectName);
-    % Returns an index of rows of XMat with greater than
-    % nan_thresh NaN values.
+    % Returns an index of rows of XMat with at least nan_thresh good values.
 
     if nan_thresh == 0
         keepInd = true(size(XMat,1));
         return
     else
-        nanMat = isnan(XMat);
-        propNaN = mean(nanMat,2); % proportion of NaNs across rows
-        keepInd = (propNaN <= nan_thresh);
+        propNaN = mean(isnan(XMat),2); % proportion of NaNs across rows
+        keepInd = (1-propNaN >= nan_thresh);
         if all(~keepInd)
             error('No %s had more than %4.2f%% good values.',objectName,nan_thresh*100)
         end
