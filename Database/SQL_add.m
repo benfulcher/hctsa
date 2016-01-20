@@ -382,6 +382,14 @@ case 'ts' % Prepare toAdd cell for time series
             end
         end
 
+        % Check that label is not empty:
+        if isempty(TimeSeries(j).Name)
+            beep
+            warning(['\n[%u/%u] This time series is assigned an empty label' ...
+                        ' and will not be added...'],j,numItems)
+            continue
+        end
+
         % Assign the length of the time series
         TimeSeries(j).Length = length(x);
 
@@ -390,25 +398,27 @@ case 'ts' % Prepare toAdd cell for time series
         % Check if the time series contains any NaN of Inf values:
         if any(isnan(x)) || any(~isfinite(x))
             beep
-            warning(['\nDid you know that the time series %s contains special values' ...
-                        ' (e.g., NaN or Inf)...?\n'],which(TimeSeries(j).Name))
-            fprintf(1,'This time series will not be added...\n');
+            warning(['\n[%u/%u] The time series: ''%s'' contains special values' ...
+                        ' (e.g., NaN or Inf)...\nThis time series will not be added...'], ...
+                        j,numItems,TimeSeries(j).Name)
             continue
         end
 
         % If this time series is longer than the maximum allowed, then exit:
         if length(x) > maxL
             beep
-            warning(['\n%s contains %u samples, this framework can efficiently ' ...
+            warning(['\n[%u/%u]%s contains %u samples, this framework can efficiently ' ...
                         'deal with time series up to %u samples\nSkipping this time series...'],...
-                                TimeSeries(j).Name,TimeSeries(j).Length,maxL)
+                        j,numItems,TimeSeries(j).Name,TimeSeries(j).Length,maxL)
             continue
         end
 
         % Passed both tests! Assign wasGood = 1
         wasGood(j) = 1;
 
-        % Assign the time-series data as text (stored as singles in the case of a .mat file data)
+        % If storing in a database, need to assign the time-series data as text
+        % (which will be stored as singles in the case of a .mat file data)
+        % If making for a local mat file, keep the same precision.
         if forDatabase
             % Want time-series data as a comma-delimited string:
             if isMatFile
@@ -444,10 +454,10 @@ case 'ts' % Prepare toAdd cell for time series
             numSubplots = min(numItems,4);
             subplot(numSubplots,1,mod(j-1,numSubplots)+1);
             plot(x,'-k'); xlim([1,length(x)]);
-            titleText = sprintf('\n[%u/%u] %s (%u), keywords = %s',j,numItems,...
+            titleText = sprintf('[%u/%u] %s (%u), keywords = %s',j,numItems,...
                     TimeSeries(j).Name,TimeSeries(j).Length,TimeSeries(j).Keywords);
             title(titleText,'interpreter','none');
-            fprintf(1,'%s --- loaded successfully.',titleText);
+            fprintf(1,'\n%s --- loaded successfully.',titleText);
             pause(0.01); % wait 0.01 second to show the plotted time series
         end
     end
@@ -472,10 +482,17 @@ case 'ts' % Prepare toAdd cell for time series
             input(sprintf('[List %u time series that failed... (press any key)]',sum(~wasGood)),'s');
             iNoGood = find(~wasGood);
             for i = 1:length(iNoGood)
-                fprintf(1,'*NOT UPLOADING:* %s (%s), N = %u\n',TimeSeries(iNoGood(i)).Name,TimeSeries(iNoGood(i)).Keywords,...
-                                                TimeSeries(iNoGood(i)).Length);
+                if ~isempty(TimeSeries(iNoGood(i)).Length)
+                    lengthText = sprintf(', N = %u',TimeSeries(iNoGood(i)).Length);
+                else
+                    lengthText = '';
+                end
+                fprintf(1,'*NOT UPLOADING:* [%u] %s (%s)%s\n',iNoGood(i),...
+                    TimeSeries(iNoGood(i)).Name,TimeSeries(iNoGood(i)).Keywords,...
+                    lengthText);
             end
-            input(sprintf('[press any key to continue to add the remaining %u time series]',sum(wasGood)),'s');
+            input(sprintf('[press any key to continue to add the remaining %u time series]',...
+                                                        sum(wasGood)),'s');
         end
     end
 
@@ -695,7 +712,7 @@ if ~strcmp(addWhat,'mops')
         if beVocal
             fprintf(1,['\nIt turns out that all new keywords already exist in ' ...
                     'the %s table in %s -- there are no new keywords to add\n'],...
-                    sum(isNew),theKeywordTable);
+                    theKeywordTable,databaseName);
         end
     end
 
@@ -842,7 +859,7 @@ SQL_closedatabase(dbc)
 fprintf('All tasks completed in %s.\nRead %s then added %u %s into %s.\n', ...
             BF_thetime(toc(ticker)), inputFile, sum(~isBad), theWhat, databaseName);
 
-if strcmp(addWhat,'ts')
+if strcmp(addWhat,'ts') && ~isMatFile
     fprintf(1,['**The imported data are now in %s and no longer ' ...
                     'need to be in the Matlab path.\n'],databaseName);
 end
