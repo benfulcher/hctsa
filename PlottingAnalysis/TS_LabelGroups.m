@@ -117,13 +117,21 @@ clear timer % stop timing
 % Check each group has some members:
 emptyGroups = (sum(groupIndices,1)==0);
 if any(emptyGroups)
-    error('%u keywords have no matches: %s',sum(emptyGroups),BF_cat(keywordGroups(emptyGroups),',',''''));
+    error('%u keywords have no matches to any time series in %s: %s',...
+            sum(emptyGroups),theFile,BF_cat(keywordGroups(emptyGroups),',',''''));
 end
 
 % Check unlabeled:
 unlabeled = (sum(groupIndices,2)==0);
 if any(unlabeled)
-    error('%u time series are unlabeled: %s',sum(unlabeled),BF_cat({TimeSeries(unlabeled).Name},','));
+    reply = input(sprintf('ERROR: %u/%u time series remain unlabeled (press enter to see them)',...
+                                sum(unlabeled),length(unlabeled)));
+    isUnlabeled = find(unlabeled);
+    for i = 1:length(isUnlabeled)
+        fprintf('[%u] %s (%s)\n',TimeSeries(isUnlabeled(i)).ID, ...
+                TimeSeries(isUnlabeled(i)).Name,TimeSeries(isUnlabeled(i)).Keywords);
+    end
+    error('Unable to provide a unique label to all time series');
 end
 
 % Check overlaps:

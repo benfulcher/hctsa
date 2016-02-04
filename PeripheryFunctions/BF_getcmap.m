@@ -54,6 +54,9 @@ function cmapOut = BF_getcmap(whichMap,numGrads,cellOut,flipMe)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Check inputs and set defaults:
+%-------------------------------------------------------------------------------
 % Number of gradations, numGrads:
 if nargin < 2 || isempty(numGrads)
     numGrads = 6;
@@ -114,6 +117,10 @@ end
 % 'set1'
 % 'set2'
 % 'set3'
+
+%-------------------------------------------------------------------------------
+% Match the specified color map name and output the required RGB matrix
+%-------------------------------------------------------------------------------
 
 switch whichMap
     case 'blues'

@@ -87,7 +87,7 @@ fprintf(1,' Done.\n');
 nameString = 'PC';
 featureLabels = cell(2,1);
 for i = 1:2
-    featureLabels{i} = sprintf('%s %u (%.2f%%)',nameString,i,percVar(i));
+    featureLabels{i} = sprintf('%s %u (%.2f%% var)',nameString,i,percVar(i));
 end
 
 TS_plot_2d(pcScore(:,1:2),TimeSeries,featureLabels,groupNames,annotateParams,showDist,classMeth)

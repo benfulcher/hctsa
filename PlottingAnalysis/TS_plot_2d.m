@@ -239,7 +239,7 @@ if numGroups > 1
             legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==i));
         end
     end
-    legend(legendText);
+    legend(legendText,'interpreter','none');
 end
 
 %-------------------------------------------------------------------------------

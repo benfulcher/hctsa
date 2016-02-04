@@ -56,7 +56,7 @@ if nargin < 1 || isempty(whatData)
 end
 if nargin < 2 || isempty(whatTestStat)
     whatTestStat = 'linclass';
-    fprintf(1,'Using ''%s'' by default\n', whatTestStat);
+    fprintf(1,'Using ''%s'' test statistic by default\n', whatTestStat);
 end
 if nargin < 3
     doNull = 1; % compute an empirical null distribution by randomizing class labels
@@ -232,9 +232,21 @@ end
 if any(ismember(whatPlots,'distributions'))
     subPerFig = 5; % subplots per figure
     ks_or_hist = 'ks'; % view as either histograms or kernel-smoothed distributions
-    colors = BF_getcmap('set1',max(numGroups,5),1);
-    if numGroups==2, colors = colors([2,4]); end
 
+    % Set the colors to be assigned to groups:
+    if numGroups<=5
+        colors = BF_getcmap('set1',5,1);
+        if numGroups==2, colors = colors([2,4]); end
+    else
+        colors = BF_getcmap('dark2',numGroups,1);
+        if length(colors) < numGroups
+            % Too many groups for a custom colormap, just space them along the jet colormap:
+            colors = jet(numGroups);
+            colors = arrayfun(@(x)colors(x,:),1:size(colors,1),'UniformOutput',0);
+        end
+    end
+
+    % Space the figures out properly:
     numFigs = ceil(numTopFeatures/subPerFig);
 
     for figi = 1:numFigs
@@ -260,7 +272,7 @@ if any(ismember(whatPlots,'distributions'))
                 end
                 % Add a legend if necessary
                 if opi==1
-                    legend(groupNames)
+                    legend(groupNames,'interpreter','none')
                 end
                 % Add dots:
                 for i = 1:numGroups
@@ -276,7 +288,7 @@ if any(ismember(whatPlots,'distributions'))
                     histogram(featVector,'BinMethod','auto','FaceColor',colors{i},'Normalization','probability')
                 end
                 if opi==1
-                    legend(groupNames)
+                    legend(groupNames,'interpreter','none')
                 end
                 ylabel('Probability')
             end
