@@ -18,9 +18,7 @@ function TS_normalize(normFunction,filterOptions,fileName_HCTSA,subs)
 %
 % subs [opt]: Only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
-%             subsequently be clustered and further subsetted using TS_cluster2...
-%             For example, can choose a subset using SUB_autolabel2 to get only sound
-%             time series.
+%             subsequently be clustered and further subsetted using TS_cluster...
 %             subs in the form {[rowrange],[columnrange]} (rows and columns to
 %             keep, from HCTSA.mat).
 

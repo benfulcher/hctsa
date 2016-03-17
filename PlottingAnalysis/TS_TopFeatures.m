@@ -265,22 +265,31 @@ if any(ismember(whatPlots,'distributions'))
             switch ks_or_hist
             case 'ks'
                 % Plot distributions first for the sake of the legend
+                linePlots = cell(numGroups,1);
                 for i = 1:numGroups
                     featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
-                    [f, x] = ksdensity(featVector);
-                    plot(x,f,'color',colors{i},'LineWidth',2);
+                    [f,x,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,12,1);
+                    % [f, x] = ksdensity(featVector);
+                    % % Plot only the range represented in the actual feature vector
+                    % rMatch = (arrayfun(@(m)find(x >= m,1,'first'),featVector));
+                    % plot(x(rMatch),f(rMatch),'o','MarkerFaceColor',colors{i},'MarkerEdgeColor',colors{i})
+                    % rPlot = (x>=min(featVector) & x<=max(featVector));
+                    % if sum(rPlot) > 0
+                    %     linePlots{i} = plot(x(rPlot),f(rPlot),'color',colors{i},'LineWidth',2);
+                    % else
+                    %     linePlots{i} = plot(ones(2,1)*x(rMatch(1)),[0,f(rMatch(1))],'color',colors{i},'LineWidth',2);
+                    % end
                 end
                 % Add a legend if necessary
                 if opi==1
-                    legend(groupNames,'interpreter','none')
+                    legend([linePlots{:}],groupNames,'interpreter','none')
                 end
-                % Add dots:
-                for i = 1:numGroups
-                    featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
-                    [f, x] = ksdensity(featVector);
-                    r = (arrayfun(@(m)find(x >= m,1,'first'),featVector));
-                    plot(x(r),f(r),'o','MarkerFaceColor',colors{i},'MarkerEdgeColor',colors{i})
-                end
+                % % Add dots:
+                % for i = 1:numGroups
+                %     featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
+                %     [f, x] = ksdensity(featVector);
+                %
+                % end
                 ylabel('Probability density')
             case 'hist'
                 for i = 1:numGroups

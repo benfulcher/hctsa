@@ -3,9 +3,17 @@ function TS_plot_pca(whatData,showDist,classMeth,annotateParams)
 %
 % The low-dimensional representation is computed using PCA.
 %
-%---EXAMPLE USAGE:
+%---INPUTS:
+% whatData, the hctsa data file (or structure) to use (input to TS_LoadData)
+% showDist, whether to also plot marginal class distributions of each PC
+% classMeth, the classification method when running classification in the PC space
+% annotateParams, the annotation parameters used when plotting the dataset using
+%                 TS_plot_2d. Can also specify an integer; will annotate this
+%                 many time series segments to the 2d scatter plot.
 %
-% TSQ_plot_pca('norm');
+%---EXAMPLE USAGE:
+% (*) Plot a PCA projection of the normalized data stored in HCTSA_N.mat
+% >> TSQ_plot_pca('norm');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -67,17 +75,22 @@ end
 % ------------------------------------------------------------------------------
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm
 % ------------------------------------------------------------------------------
-% Can't run PCA on data containing NaNs:
-if any(isnan(TS_DataMat(:)))
-    error('Data matrix contains NaNs');
-end
-fprintf(1,'Calculating principal components of the %u x %u data matrix...', ...
+fprintf(1,'Calculating principal components of the %u x %u data matrix...\n', ...
                     size(TS_DataMat,1),size(TS_DataMat,2));
 
-% The new pca function is a much faster implementation to compute just the first
-% 2 components:
-[~, pcScore, ~, ~, percVar] = pca(zscore(TS_DataMat),'NumComponents',2);
-fprintf(1,' Done.\n');
+% Use pca to compute the first two principal components:
+if ~any(isnan(TS_DataMat))
+    [~,pcScore,~,~,percVar] = pca(TS_DataMat,'NumComponents',2,'Centered','on');
+else
+    warning(sprintf(['Data matrix contains %.2g%% NaNs. Attempting to estimate covariances on remaining data...\n' ...
+                '(Could take some time...)'],100*mean(isnan(TS_DataMat(:)))))
+    % Data matrix contains NaNs; try the pairwise rows approximation to the
+    % covariance matrix:
+    [~,pcScore,~,~,percVar] = pca(TS_DataMat,'Rows','pairwise','Centered','on');
+    % If this fails (covariance matrix not positive definite), could try
+    % the 'algorithm','als' option in pca...
+end
+fprintf(1,'---Done.\n');
 
 % ------------------------------------------------------------------------------
 % Plot this two-dimensional representation of the data using TS_plot_2d

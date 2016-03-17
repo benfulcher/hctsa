@@ -1,9 +1,14 @@
-function [fr,xr,h_line,h_points] = BF_plot_ks(dataVector,whatColor,doSwap,lineWidth,markerSize)
+function [fr,xr,h_line,h_points] = BF_plot_ks(dataVector,whatColor,doSwap,lineWidth,markerSize,trimRange)
 % Plot a kernel smoothed distribution with individual datapoints annotated
 %
 %---INPUTS:
 % dataVector, a vector of data to plot
-
+% whatColor, the color to plot line and points
+% doSwap, (logical) whether to swap axes to be horizontal
+% lineWidth, width of line to plot
+% markerSize, size of markers annotating points
+% trimRange, (logical) whether to trim the range of plot to that of the data points
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -27,6 +32,7 @@ if nargin < 2, whatColor = 'k'; end
 if nargin < 3, doSwap = 0; end
 if nargin < 4, lineWidth = 1; end
 if nargin < 5, markerSize = 8; end
+if nargin < 6, trimRange = 0; end
 
 numPoints = 1000; % points for the ks density
 
@@ -50,6 +56,20 @@ ind = sort(ind,'ascend');
 % The matched points, [xr,fr]
 xr = x(ind);
 fr = f(ind);
+
+%-------------------------------------------------------------------------------
+% Trim
+%-------------------------------------------------------------------------------
+if trimRange
+    rPlot = (x>=min(dataVector) & x<=max(dataVector));
+    if sum(rPlot) > 0
+        x = x(rPlot);
+        f = f(rPlot);
+    else
+        x = ones(2,1)*xr(1);
+        f = [0,fr(1)];
+    end
+end
 
 %-------------------------------------------------------------------------------
 % Plot the line and matched points:

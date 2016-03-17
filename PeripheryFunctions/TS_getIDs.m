@@ -1,4 +1,4 @@
-function IDs = TS_getIDs(theKeyword,whatData,tsOrOps)
+function [IDs,notIDs] = TS_getIDs(theKeyword,whatData,tsOrOps)
 % TS_getIDs   Retrieve IDs of time series (or operations) in an hctsa dataset using keyword matching.
 %
 %---INPUTS:
@@ -78,6 +78,11 @@ IDs = [theStructureArray(matches).ID];
 % Check for empty:
 if isempty(IDs)
     warning('No matches to ''%s'' found in %s',theKeyword,theDataFile)
+end
+
+% Also provide IDs not matching the constraint, if required
+if nargout > 1
+    notIDs = setxor(IDs,[theStructureArray.ID]);
 end
 
 end
