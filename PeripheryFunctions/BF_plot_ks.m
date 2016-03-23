@@ -31,7 +31,7 @@ function [fr,xr,h_line,h_points] = BF_plot_ks(dataVector,whatColor,doSwap,lineWi
 if nargin < 2, whatColor = 'k'; end
 if nargin < 3, doSwap = 0; end
 if nargin < 4, lineWidth = 1; end
-if nargin < 5, markerSize = 8; end
+if nargin < 5, markerSize = 16; end
 if nargin < 6, trimRange = 0; end
 
 numPoints = 1000; % points for the ks density

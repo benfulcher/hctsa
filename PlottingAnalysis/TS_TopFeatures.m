@@ -55,7 +55,7 @@ if nargin < 1 || isempty(whatData)
     whatData = 'raw';
 end
 if nargin < 2 || isempty(whatTestStat)
-    whatTestStat = 'linclass';
+    whatTestStat = 'fast_linear'; % Way faster than proper prediction models
     fprintf(1,'Using ''%s'' test statistic by default\n', whatTestStat);
 end
 if nargin < 3
@@ -96,30 +96,38 @@ groupNames = groupNames.groupNames;
 %% Define the train/test classification rate function, fn_testStat
 % --------------------------------------------------------------------------
 % Also the chanceLine -- where you'd expect by chance (for equiprobable groups...)
+if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','svm_linear'})
+    % Percentage correct:
+    fn_testStat = GiveMeFunctionHandle(whatTestStat,numGroups);
+    % fn_testStat = @(XTrain,yTrain,XTest,yTest) ...
+    %         GiveMeCfn(whatTestStat,XTrain,yTrain,XTest,yTest,numGroups,0)*100;
+    chanceLine = 100/numGroups;
+    cfnUnit = '%';
+end
+
 switch whatTestStat
-case {'linear','linclass'}
+case {'linear','linclass','fast_linear'}
     fprintf(1,'Using a linear classifier\n');
     cfnName = 'linear classifier';
-    cfnUnit = '%';
-    fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                    mean(yTest == classify(Xtest,XTrain,yTrain,'linear'))*100;
-    chanceLine = 100/length(unique(timeSeriesGroup));
+    % cfnUnit = '%';
+    % fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+    %                 mean(yTest == classify(Xtest,XTrain,yTrain,'linear'))*100;
+    % chanceLine = 100/length(unique(timeSeriesGroup));
 case 'diaglinear'
     fprintf(1,'A Naive Bayes classifier\n');
     cfnName = 'naive bayes classifier';
-    cfnUnit = '%';
-    fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                    mean(yTest == classify(Xtest,XTrain,yTrain,'diaglinear'))*100;
-    chanceLine = 100/length(unique(timeSeriesGroup));
+    % cfnUnit = '%';
+    % fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+    %                 mean(yTest == classify(Xtest,XTrain,yTrain,'diaglinear'))*100;
+    % chanceLine = 100/length(unique(timeSeriesGroup));
 case {'svm','svmlinear'}
     fprintf(1,'A linear support vector machine\n');
     cfnName = 'SVM classifier';
-    cfnUnit = '%';
-    fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                    mean(yTest == predict(fitcsvm(XTrain,yTrain, ...
-                            'KernelFunction','linear'),Xtest))*100;
-    chanceLine = 100/length(unique(timeSeriesGroup));
-
+    % cfnUnit = '%';
+    % fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+    %                 mean(yTest == predict(fitcsvm(XTrain,yTrain, ...
+    %                         'KernelFunction','linear'),Xtest))*100;
+    % chanceLine = 100/length(unique(timeSeriesGroup));
     if numGroups > 2
         error('SVM not supported for multiclass classification with more than 2 classes');
     end
@@ -154,20 +162,24 @@ fprintf(1,['Mean %s across %u operations = %4.2f%s\n' ...
 % --------------------------------------------------------------------------
 %% Display information about the top topN operations
 % --------------------------------------------------------------------------
-[testStat_sort, ifeat] = sort(testStat,'descend');
+[testStat_sort, ifeat] = sort(testStat,'descend'); % bigger is better
 
 isNaN = isnan(testStat_sort);
 testStat_sort = testStat_sort(~isNaN);
 ifeat = ifeat(~isNaN);
+
+% List the top 20:
 topN = min(20,length(Operations));
 for i = 1:topN
     fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations(ifeat(i)).ID, ...
             Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,testStat_sort(i));
 end
 
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Plot outputs
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
 % Histogram of distribution of test statistics for labeled and null data
@@ -213,17 +225,24 @@ if any(ismember(whatPlots,'histogram'))
         h_null = histogram(testStat_rand(:),histEdges,'Normalization','probability','FaceColor',colors{1});
         h_real = histogram(testStat,histEdges,'Normalization','probability','FaceColor',colors{5});
         maxH = max([max(h_real.Values),max(h_null.Values)]);
-        legend('null','real')
         plot(mean(testStat_rand(:))*ones(2,1),[0,maxH],'--','color',colors{1},'LineWidth',2)
     end
 
-    % Add chance line
-    plot(chanceLine*ones(2,1),[0,maxH],'--k')
-    % Add mean of real distribution
-    plot(mean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2)
+    % Add chance line:
+    l_chance = plot(chanceLine*ones(2,1),[0,maxH],'--k');
+    % Add mean of real distribution:
+    l_mean = plot(mean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
+
     % Labels:
     xlabel(sprintf('Individual %s across %u features',cfnName,numOps))
     ylabel('Probability')
+
+    % Legend:
+    if doNull,
+        legend([h_null,h_real,l_chance,l_mean],'null','real','chance','real mean')
+    else
+        legend([h_real,l_chance,l_mean],{'real','chance','real mean'});
+    end
 end
 
 %-------------------------------------------------------------------------------
@@ -268,7 +287,7 @@ if any(ismember(whatPlots,'distributions'))
                 linePlots = cell(numGroups,1);
                 for i = 1:numGroups
                     featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
-                    [f,x,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,12,1);
+                    [f,x,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,20,1);
                     % [f, x] = ksdensity(featVector);
                     % % Plot only the range represented in the actual feature vector
                     % rMatch = (arrayfun(@(m)find(x >= m,1,'first'),featVector));
@@ -337,8 +356,8 @@ if any(ismember(whatPlots,'cluster'))
         Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
         distanceMetric = 'abscorr';
     end
-    makeLabel = @(x) sprintf('[%u] %s (%4.2f)',Operations(x).ID,Operations(x).Name,...
-                        testStat(x));
+    makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations(x).ID,Operations(x).Name,...
+                        testStat(x),cfnUnit);
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
     BF_ClusterDown(Dij,floor(numTopFeatures/5),'whatDistance',distanceMetric,...
                         'objectLabels',objectLabels);

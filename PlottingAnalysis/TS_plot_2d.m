@@ -70,28 +70,15 @@ end
 
 makeFigure = 1; % default is to plot on a brand new figure('color','w')
 
-% ------------------------------------------------------------------------------
-% Compute linear classification rates just for fun
-% ------------------------------------------------------------------------------
-classRate = zeros(3,1); % classRate1, classRate2, classRateboth
+%-------------------------------------------------------------------------------
+% Preliminaries
+%-------------------------------------------------------------------------------
 if isfield(TimeSeries,'Group')
     groupLabels = [TimeSeries.Group]'; % Convert GroupIndices to group form
-    numGroups = length(unique(groupLabels));
-
-    classify_fn = @(XTrain,yTrain,Xtest,ytest) ...
-                    mean(ytest == classify(Xtest,XTrain,yTrain,'linear'));
-    try
-        classRate(1) = mean(classify_fn(Features(:,1),groupLabels,Features(:,1),groupLabels));
-        classRate(2) = mean(classify_fn(Features(:,2),groupLabels,Features(:,2),groupLabels));
-        classRate(3) = mean(classify_fn(Features(:,1:2),groupLabels,Features(:,1:2),groupLabels));
-        fprintf(1,'Linear in-sample classification rates computed.\n');
-    catch emsg
-        fprintf(1,'Linear classification rates not computed\n(%s)\n',emsg.message);
-        classRate(:) = NaN;
-    end
+    numClasses = length(unique(groupLabels));
 else
     % No group information assigned to time series
-    numGroups = 1;
+    numClasses = 1;
     groupLabels = ones(length(TimeSeries),1);
 end
 
@@ -106,25 +93,25 @@ end
 % Set colors
 if isstruct(annotateParams) && isfield(annotateParams,'cmap')
     if ischar(annotateParams.cmap)
-        groupColors = BF_getcmap(annotateParams.cmap,numGroups,1);
+        groupColors = BF_getcmap(annotateParams.cmap,numClasses,1);
     else
         groupColors = annotateParams.cmap; % specify the cell itself
     end
 else
-    if numGroups < 10
-        groupColors = BF_getcmap('set1',numGroups,1);
-    elseif numGroups <= 12
-        groupColors = BF_getcmap('set3',numGroups,1);
-    elseif numGroups <= 22
-        groupColors = [BF_getcmap('set1',numGroups,1); ...
-                    BF_getcmap('set3',numGroups,1)];
-    elseif numGroups <= 50
-        groupColors = mat2cell(jet(numGroups),ones(numGroups,1));
+    if numClasses < 10
+        groupColors = BF_getcmap('set1',numClasses,1);
+    elseif numClasses <= 12
+        groupColors = BF_getcmap('set3',numClasses,1);
+    elseif numClasses <= 22
+        groupColors = [BF_getcmap('set1',numClasses,1); ...
+                    BF_getcmap('set3',numClasses,1)];
+    elseif numClasses <= 50
+        groupColors = mat2cell(jet(numClasses),ones(numClasses,1));
     else
         error('There aren''t enough colors in the rainbow to plot this many classes!')
     end
 end
-if (numGroups == 1)
+if (numClasses == 1)
     groupColors = {[0,0,0]}; % Just use black...
 end
 annotateParams.groupColors = groupColors;
@@ -136,7 +123,7 @@ if showDistr
     % Top distribution (marginal of first feature)
     subplot(4,4,1:3); hold on; box('on')
     maxx = 0; minn = 100;
-    for i = 1:numGroups
+    for i = 1:numClasses
         fr = BF_plot_ks(Features(groupLabels==i,1),groupColors{i},0);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
@@ -148,7 +135,7 @@ if showDistr
     % Side distribution (marginal of second feature)
     subplot(4,4,[8,12,16]); hold on; box('on')
     maxx = 0; minn = 100;
-    for i = 1:numGroups
+    for i = 1:numClasses
         fr = BF_plot_ks(Features(groupLabels==i,2),groupColors{i},1);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
@@ -157,7 +144,6 @@ if showDistr
     set(axSide,'YTickLabel',[]);
     set(axSide,'xlim',[minn,maxx]);
 end
-
 
 % ------------------------------------------------------------------------------
 %% Set up a 2D plot
@@ -171,10 +157,10 @@ hold on;
 if isfield(annotateParams,'theMarkerSize');
     theMarkerSize = annotateParams.theMarkerSize; % specify custom marker size
 else
-    theMarkerSize = 12; % Marker size for '.'
+    theMarkerSize = 16; % Marker size for '.'
 end
 
-for i = 1:numGroups
+for i = 1:numClasses
     plot(Features(groupLabels==i,1),Features(groupLabels==i,2),...
                 '.','color',groupColors{i},'MarkerSize',theMarkerSize)
 end
@@ -186,32 +172,62 @@ if showDistr
 end
 
 % ------------------------------------------------------------------------------
-%% Plot a classify boundary?
+%% Do classification and plot a classify boundary?
 % ------------------------------------------------------------------------------
 didClassify = 0;
-if (numGroups == 2) && strcmp(classMethod,'linclass');
-    whatClassifier = 'linear'; % or 'quadratic'
+if numClasses > 1
+    whatClassifier = 'svm_linear';
 
-    xlim = get(gca,'XLim'); ylim = get(gca,'YLim');
-    [X, Y] = meshgrid(linspace(xlim(1),xlim(2),200),linspace(ylim(1),ylim(2),200));
-    X = X(:); Y = Y(:);
-    [~,~,~,~,coeff] = classify([X Y],Features(:,1:2), groupLabels, whatClassifier);
-
-    hold on;
-    K = coeff(1,2).const; L = coeff(1,2).linear;
-    if strcmp(whatClassifier,'linear')
-        Q = zeros(2,2);
-    else
-        Q = coeff(1,2).quadratic;
+    % Compute the in-sample classification rate:
+    classRate = zeros(3,1); % classRate1, classRate2, classRateboth
+    try
+        classRate(1) = GiveMeCfn(whatClassifier,Features(:,1),groupLabels,Features(:,1),groupLabels,numClasses,0,0);
+        classRate(2) = GiveMeCfn(whatClassifier,Features(:,2),groupLabels,Features(:,2),groupLabels,numClasses,0,0);
+        classRate(3) = GiveMeCfn(whatClassifier,Features,groupLabels,Features(:,1:2),groupLabels,numClasses,0,0);
+        % Record that classification was performed successfully:
+        didClassify = 1;
+    catch emsg
+        fprintf(1,'Linear classification rates not computed\n(%s)\n',emsg.message);
+        classRate(:) = NaN;
     end
-    f = sprintf('0 = %g+%g*x+%g*y+%g*x^2+%g*x.*y+%g*y.^2',K,L,Q(1,1),Q(1,2)+Q(2,1),Q(2,2));
-    h2 = ezplot(f,[xlim(1), xlim(2), ylim(1), ylim(2)]);
-    set(h2,'LineStyle','--','color',ones(1,3)*0.5,'LineWidth',1.5)
 
-    % Label that classification was performed
-    didClassify = 1;
+    % Also plot an SVM classification boundary:
+    if numClasses < 5
+        try
+            % Train the model (in-sample):
+            [~,~,Mdl] = GiveMeCfn('svm_linear',Features,groupLabels,Features,groupLabels,numClasses,0,0);
+            % if numClasses==2
+            %     Mdl = fitcsvm(Features,groupLabels,'KernelFunction','linear');
+            % else
+            %     t = templateSVM('KernelFunction','linear');
+            %     Mdl = fitcecoc(Features,groupLabels,'Learners',t);
+            % end
+
+            % Predict scores over the 150x150 grid through space
+            gridInc = 150;
+            [x1Grid,x2Grid] = meshgrid(linspace(min(Features(:,1)),max(Features(:,1)),gridInc),...
+                                       linspace(min(Features(:,2)),max(Features(:,2)),gridInc));
+            fullGrid = [x1Grid(:),x2Grid(:)];
+            predLabels = predict(Mdl,fullGrid);
+
+            % For each class plot the contour of their region of the space:
+            if numClasses==2
+                contour(x1Grid,x2Grid,reshape(predLabels-1.5,size(x1Grid)),[0 0],'--k','LineWidth',2);
+            else
+                for i = 1:numClasses
+                    % isMostProbable = scores(:,i) > max(scores(:,setxor(1:size(scores,2),i)),[],2);
+                    isMostProbable = (predLabels==i);
+                    if ~all(isMostProbable==isMostProbable(1));
+                        contour(x1Grid,x2Grid,reshape(isMostProbable,size(x1Grid)),[0.5 0.5],'-','LineWidth',2,'color',groupColors{i});
+                    end
+                end
+            end
+        catch emsg
+            warning('Error fitting classification model in 2-d space')
+            keyboard
+        end
+    end
 end
-
 
 % ------------------------------------------------------------------------------
 %% Label Axes
@@ -230,9 +246,9 @@ xlabel(labelText{1},'interpreter','none')
 ylabel(labelText{2},'interpreter','none')
 
 % Set Legend
-if numGroups > 1
-    legendText = cell(numGroups,1);
-    for i = 1:numGroups
+if numClasses > 1
+    legendText = cell(numClasses,1);
+    for i = 1:numClasses
         if ~isempty(groupNames)
             legendText{i} = sprintf('%s (%u)',groupNames{i},sum(groupLabels==i));
         else

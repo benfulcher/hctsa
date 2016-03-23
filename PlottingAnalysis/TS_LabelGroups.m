@@ -1,4 +1,4 @@
-function groupLabels = TS_LabelGroups(keywordGroups,whatData,saveBack,filterMissing)
+function [groupLabels,newFileName] = TS_LabelGroups(keywordGroups,whatData,saveBack,filterMissing)
 % TS_LabelGroups    Label groups of a time series using assigned keywords
 %
 % You provide a set of keyword options to store a specific grouping of time series.
@@ -135,6 +135,7 @@ if any(overlapping)
 end
 
 % Check unlabeled:
+newFileName = theFile; % by default you save back to the same file
 unlabeled = (sum(groupIndices,2)==0);
 if any(unlabeled)
     if ~filterMissing
@@ -163,11 +164,12 @@ if any(unlabeled)
         % Filter data and save to new file:
         newFileName = TS_FilterData(theFile,[TimeSeries(~unlabeled).ID]);
         % Label this dataset with the same groups:
-        TS_LabelGroups(keywordGroups,newFileName,saveBack,0);
+        groupLabels = TS_LabelGroups(keywordGroups,newFileName,saveBack,0);
         return
     end
 end
 
+%-------------------------------------------------------------------------------
 % Everything checks out so now we can make group labels:
 groupLabels = zeros(1,numTimeSeries);
 for i = 1:numGroups
