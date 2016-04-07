@@ -28,7 +28,8 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 %
 %---EXAMPLE USAGE:
 %
-% TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions','cluster'},'numTopFeatures',20);
+% TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions',...
+%                           'cluster'},'numTopFeatures',20);
 %
 %---OUTPUTS:
 % ifeat, the ordering of operations by their performance
@@ -94,7 +95,7 @@ if ~isfield(TimeSeries,'Group')
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
 timeSeriesGroup = [TimeSeries.Group]'; % Use group form
-numGroups = length(unique(timeSeriesGroup));
+numClasses = max(timeSeriesGroup); % Assuming classes labeled with integers starting at 1
 groupNames = load(whatDataFile,'groupNames');
 groupNames = groupNames.groupNames;
 
@@ -103,45 +104,38 @@ groupNames = groupNames.groupNames;
 % --------------------------------------------------------------------------
 % Also the chanceLine -- where you'd expect by chance (for equiprobable groups...)
 if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','svm_linear'})
-    % Percentage correct:
-    fn_testStat = GiveMeFunctionHandle(whatTestStat,numGroups);
-    % fn_testStat = @(XTrain,yTrain,XTest,yTest) ...
-    %         GiveMeCfn(whatTestStat,XTrain,yTrain,XTest,yTest,numGroups,0)*100;
-    chanceLine = 100/numGroups;
+
+    %-------------------------------------------------------------------------------
+    % Set up the loss function
+
+    % (first check for possible class imbalance):
+    classNumbers = arrayfun(@(x)sum(timeSeriesGroup==x),1:numClasses);
+    isBalanced = all(classNumbers==classNumbers(1));
+    if isBalanced
+        fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'acc',0);
+        fprintf(1,'Using overall classification accuracy as output measure\n');
+    else
+        fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'balancedAcc',1);
+        fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
+    end
+
+    % fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                    % mean(yTest == classify(Xtest,XTrain,yTrain,'linear'))*100;
+    chanceLine = 100/numClasses;
     cfnUnit = '%';
 end
 
 switch whatTestStat
 case {'linear','linclass','fast_linear'}
-    fprintf(1,'Using a linear classifier\n');
     cfnName = 'linear classifier';
-    % cfnUnit = '%';
-    % fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-    %                 mean(yTest == classify(Xtest,XTrain,yTrain,'linear'))*100;
-    % chanceLine = 100/length(unique(timeSeriesGroup));
 case 'diaglinear'
-    fprintf(1,'A Naive Bayes classifier\n');
-    cfnName = 'naive bayes classifier';
-    % cfnUnit = '%';
-    % fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-    %                 mean(yTest == classify(Xtest,XTrain,yTrain,'diaglinear'))*100;
-    % chanceLine = 100/length(unique(timeSeriesGroup));
-case {'svm','svmlinear'}
-    fprintf(1,'A linear support vector machine\n');
-    cfnName = 'SVM classifier';
-    % cfnUnit = '%';
-    % fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-    %                 mean(yTest == predict(fitcsvm(XTrain,yTrain, ...
-    %                         'KernelFunction','linear'),Xtest))*100;
-    % chanceLine = 100/length(unique(timeSeriesGroup));
-    if numGroups > 2
-        error('SVM not supported for multiclass classification with more than 2 classes');
-    end
+    cfnName = 'Naive bayes classifier';
+case {'svm','svm_linear'}
+    cfnName = 'linear SVM classifier';
 case {'ttest','tstat'}
-    fprintf(1,'A Welch''s t-statistic\n');
-    cfnName = 'Welch t-stat';
+    cfnName = 'Welch''s t-stat';
     cfnUnit = '';
-    if numGroups > 2
+    if numClasses > 2
         error('Cannot use t-test as test statistic with more than two groups :/');
     end
     fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
@@ -150,20 +144,20 @@ otherwise
     error('Unknown method ''%s''',whatTestStat)
 end
 
-
 % --------------------------------------------------------------------------
-%%                     Loop over all features
+%% Loop over all features
 % --------------------------------------------------------------------------
 % Use the same data for training and testing:
-fprintf(1,'Comparing the (in-sample) performance of %u operations...',length(Operations));
+fprintf(1,'Comparing the (in-sample) performance of %u operations for %u classes using a %s...\n',...
+                                length(Operations),numClasses,cfnName);
 timer = tic;
-testStat = giveMeStats(TS_DataMat,timeSeriesGroup);
+testStat = giveMeStats(TS_DataMat,timeSeriesGroup,1);
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
 
 % Give mean and that expected from random classifier (may be a little overfitting)
-fprintf(1,['Mean %s across %u operations = %4.2f%s\n' ...
+fprintf(1,['Mean %s performance across %u operations = %4.2f%s\n' ...
             '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
-        cfnName,numOps,nanmean(testStat),cfnUnit,numGroups,chanceLine,cfnUnit);
+        cfnName,numOps,nanmean(testStat),cfnUnit,numClasses,chanceLine,cfnUnit);
 
 % --------------------------------------------------------------------------
 %% Display information about the top topN operations
@@ -175,7 +169,7 @@ testStat_sort = testStat_sort(~isNaN);
 ifeat = ifeat(~isNaN);
 
 % List the top features:
-topN = min(numHistogramFeatures,length(Operations));
+topN = min(numTopFeatures,length(Operations));
 for i = 1:topN
     fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations(ifeat(i)).ID, ...
             Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,testStat_sort(i));
@@ -197,30 +191,47 @@ if any(ismember(whatPlots,'histogram'))
     %-------------------------------------------------------------------------------
     %% Compute null distribution
     %-------------------------------------------------------------------------------
-    numRepeats = 10;
-    testStat_rand = zeros(numOps,numRepeats);
+    numNulls = 10;
+    testStat_rand = zeros(numOps,numNulls);
     if doNull
-        fprintf(1,'Now for %u nulls... ',numRepeats);
+        fprintf(1,'Now for %u nulls... ',numNulls);
         tic
-        for j = 1:numRepeats
-            if j<numRepeats
+        for j = 1:numNulls
+            if j < numNulls
                 fprintf(1,'%u,',j);
             else
                 fprintf(1,'%u',j);
             end
             % Shuffle labels:
             groupLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
-            testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels);
+            testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,0);
         end
-        fprintf(1,'\n%u %s statistics computed in %s.\n',numOps*numRepeats,...
+        fprintf(1,'\n%u %s statistics computed in %s.\n',numOps*numNulls,...
                                         cfnName,BF_thetime(toc(timer)));
+
+        % Pool nulls to estimate p-values
+        pooledNulls = testStat_rand(:);
+        pvals = arrayfun(@(x)mean(testStat(x) < pooledNulls),1:length(testStat));
+        % FDR-corrected q-values:
+        FDR_qvals = mafdr(pvals,'BHFDR','true');
+        fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls\n',numNulls);
+        fprintf(1,'(Given strong dependences across %u features, will produce conservative p-values)\n',numOps);
+        % Give summary:
+        if any(FDR_qvals < 0.05)
+            fprintf(1,['%u/%u features show better performance using %s than the null distribution' ...
+                        '\nat the magical 0.05 threshold (FDR corrected)\n'],...
+                            sum(FDR_qvals<0.05),length(FDR_qvals),cfnName);
+        else
+            fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...
+                    'the null distribution at a FDR of 0.05.\nDon''t you go p-hacking now, will you?\n']);
+        end
     end
 
     f = figure('color','w'); hold on
     colors = BF_getcmap('spectral',5,1);
     if ~doNull
         h_real = histogram(testStat,'Normalization','probability',...
-                    'BinMethod','auto','EdgeColor',colors{5},'FaceAlpha',0);
+                    'BinMethod','auto','FaceColor',colors{5},'EdgeColor','k','FaceAlpha',0);
         maxH = max(h_real.Values);
     else
         % Plot both real distribution, and null distribution:
@@ -229,23 +240,25 @@ if any(ismember(whatPlots,'histogram'))
         minMax = [min(allTestStat),max(allTestStat)];
         histEdges = linspace(minMax(1),minMax(2),numBins+1);
         h_null = histogram(testStat_rand(:),histEdges,'Normalization','probability','FaceColor',colors{1});
-        h_real = histogram(testStat,histEdges,'Normalization','probability','EdgeColor',colors{5});
+        h_real = histogram(testStat,histEdges,'Normalization','probability',...
+                                'FaceColor',colors{5},'EdgeColor','k');
         maxH = max([max(h_real.Values),max(h_null.Values)]);
-        plot(mean(testStat_rand(:))*ones(2,1),[0,maxH],'--','color',colors{1},'LineWidth',2)
+        l_meannull = plot(nanmean(testStat_rand(:))*ones(2,1),[0,maxH],'--','color',colors{1},'LineWidth',2);
     end
 
     % Add chance line:
     l_chance = plot(chanceLine*ones(2,1),[0,maxH],'--k');
+
     % Add mean of real distribution:
-    l_mean = plot(mean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
+    l_mean = plot(nanmean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
 
     % Labels:
     xlabel(sprintf('Individual %s across %u features',cfnName,numOps))
     ylabel('Probability')
 
     % Legend:
-    if doNull,
-        legend([h_null,h_real,l_chance,l_mean],'null','real','chance','real mean')
+    if doNull
+        legend([h_null,h_real,l_chance,l_meannull,l_mean],'null','real','chance','null mean','real mean')
     else
         legend([h_real,l_chance,l_mean],{'real','chance','real mean'});
     end
@@ -256,23 +269,23 @@ end
 %-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'distributions'))
     subPerFig = 5; % subplots per figure
-    ks_or_hist = 'ks'; % view as either histograms or kernel-smoothed distributions
+    ks_or_hist = 'ks'; % 'ks'/'hist': view as either histograms or kernel-smoothed distributions
 
     % Set the colors to be assigned to groups:
-    if numGroups<=5
+    if numClasses <= 5
         colors = BF_getcmap('set1',5,1);
-        if numGroups==2, colors = colors([2,4]); end
+        if numClasses==2, colors = colors([2,4]); end
     else
-        colors = BF_getcmap('dark2',numGroups,1);
-        if length(colors) < numGroups
+        colors = BF_getcmap('dark2',numClasses,1);
+        if length(colors) < numClasses
             % Too many groups for a custom colormap, just space them along the jet colormap:
-            colors = jet(numGroups);
+            colors = jet(numClasses);
             colors = arrayfun(@(x)colors(x,:),1:size(colors,1),'UniformOutput',0);
         end
     end
 
     % Space the figures out properly:
-    numFigs = ceil(numTopFeatures/subPerFig);
+    numFigs = ceil(numHistogramFeatures/subPerFig);
 
     for figi = 1:numFigs
         if figi*subPerFig > length(ifeat)
@@ -285,39 +298,26 @@ if any(ismember(whatPlots,'distributions'))
         f.Position(3:4) = [588, 612]; % make longer
         for opi = 1:subPerFig
             op_ind = featHere(opi);
-            subplot(subPerFig,1,opi); box('on'); hold on
+            ax = subplot(subPerFig,1,opi); hold on
 
             switch ks_or_hist
             case 'ks'
                 % Plot distributions first for the sake of the legend
-                linePlots = cell(numGroups,1);
-                for i = 1:numGroups
+                linePlots = cell(numClasses,1);
+                for i = 1:numClasses
                     featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
-                    [f,x,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,20,1);
-                    % [f, x] = ksdensity(featVector);
-                    % % Plot only the range represented in the actual feature vector
-                    % rMatch = (arrayfun(@(m)find(x >= m,1,'first'),featVector));
-                    % plot(x(rMatch),f(rMatch),'o','MarkerFaceColor',colors{i},'MarkerEdgeColor',colors{i})
-                    % rPlot = (x>=min(featVector) & x<=max(featVector));
-                    % if sum(rPlot) > 0
-                    %     linePlots{i} = plot(x(rPlot),f(rPlot),'color',colors{i},'LineWidth',2);
-                    % else
-                    %     linePlots{i} = plot(ones(2,1)*x(rMatch(1)),[0,f(rMatch(1))],'color',colors{i},'LineWidth',2);
-                    % end
+                    [~,~,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,20,1);
                 end
+                % Trim x-limits (with 2% overreach)
+                ax.XLim(1) = min(TS_DataMat(:,op_ind))-0.02*range(TS_DataMat(:,op_ind));
+                ax.XLim(2) = max(TS_DataMat(:,op_ind))+0.02*range(TS_DataMat(:,op_ind));
                 % Add a legend if necessary
                 if opi==1
                     legend([linePlots{:}],groupNames,'interpreter','none')
                 end
-                % % Add dots:
-                % for i = 1:numGroups
-                %     featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
-                %     [f, x] = ksdensity(featVector);
-                %
-                % end
                 ylabel('Probability density')
             case 'hist'
-                for i = 1:numGroups
+                for i = 1:numClasses
                     featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
                     histogram(featVector,'BinMethod','auto','FaceColor',colors{i},'Normalization','probability')
                 end
@@ -326,6 +326,10 @@ if any(ismember(whatPlots,'distributions'))
                 end
                 ylabel('Probability')
             end
+
+            % Annotate rectangles under the distributions
+            BF_AnnotateRect(whatTestStat,TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax);
+
             xlabel(sprintf('[%u] %s (%s=%4.2f%s)',Operations(op_ind).ID,Operations(op_ind).Name,...
                                 cfnName,testStat(op_ind),cfnUnit),'interpreter','none')
         end
@@ -333,7 +337,7 @@ if any(ismember(whatPlots,'distributions'))
 end
 
 %-------------------------------------------------------------------------------
-% Dependence of top features
+% Inter-dependence of top features
 %-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'cluster'))
 
@@ -384,14 +388,20 @@ function tStat = fn_tStat(d1,d2)
     tStat = stats.tstat;
 end
 %-------------------------------------------------------------------------------
-function testStat = giveMeStats(dataMatrix,groupLabels)
+function testStat = giveMeStats(dataMatrix,groupLabels,beVerbose)
     % Return test statistic for each operation
     testStat = zeros(numOps,1);
+    loopTimer = tic;
     for k = 1:numOps
         try
             testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
         catch
             testStat(k) = NaN;
+        end
+        % Give estimate of time remaining:
+        if beVerbose && k==20
+            fprintf(1,'(should take approx %s to compute for all %u features)\n',...
+                            BF_thetime(toc(loopTimer)/20*(numOps)),numOps);
         end
     end
 end

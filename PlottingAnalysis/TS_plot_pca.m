@@ -35,7 +35,7 @@ function TS_plot_pca(whatData,showDist,classMeth,annotateParams)
 %% Check Inputs:
 % ------------------------------------------------------------------------------
 if nargin < 1 || isempty(whatData)
-    whatData = 'norm'; % normalized data by default, from HCTSA_N.mat
+    whatData = 'norm'; % load in normalized data by default, from HCTSA_N.mat
 end
 
 if nargin < 2 || isempty(showDist)
@@ -43,7 +43,7 @@ if nargin < 2 || isempty(showDist)
 end
 
 if nargin < 3 || isempty(classMeth)
-    classMeth = 'linclass';
+    classMeth = 'svm_linear';
 end
 
 if nargin < 4 || isempty(annotateParams)
@@ -82,7 +82,7 @@ fprintf(1,'Calculating principal components of the %u x %u data matrix...\n', ..
 if ~any(isnan(TS_DataMat))
     [~,pcScore,~,~,percVar] = pca(TS_DataMat,'NumComponents',2,'Centered','on');
 else
-    warning(sprintf(['Data matrix contains %.2g%% NaNs. Attempting to estimate covariances on remaining data...\n' ...
+    warning(sprintf(['Data matrix contains %.2g%% NaNs. Estimating covariances on remaining data...\n' ...
                 '(Could take some time...)'],100*mean(isnan(TS_DataMat(:)))))
     % Data matrix contains NaNs; try the pairwise rows approximation to the
     % covariance matrix:

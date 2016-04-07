@@ -231,8 +231,9 @@ f = figure('color','w');
 
 if addTimeSeries
     %  First make an additional plot to include time-series subsegments
-
-    sp1 = subplot(1,5,1); ax1 = gca; box('on'); hold on
+    ax1 = subplot(1,5,1);
+    hold(ax1,'on');
+    ax1.Box = 'on';
     ax1.YTick = (1:numTS);
     ax1.YTickLabel = {TimeSeries.Name};
     ax1.YLim = [0.5,numTS+0.5];
@@ -252,7 +253,10 @@ if addTimeSeries
         end
     end
 
-    sp2 = subplot(1,5,2:5); ax2 = gca; box('on'); hold on
+    ax2 = subplot(1,5,2:5);
+    hold(ax2,'on');
+    ax.Box = 'on';
+
     linkaxes([ax1,ax2],'y');
 end
 
@@ -306,15 +310,14 @@ title(sprintf('Data matrix (%u x %u)',numTS,numOps))
 
 if addTimeSeries
     ax2.YTickLabel = {};
-
     % Reposition tight
-    sp2.Position = [0.4,0.1,0.55,0.85];
-    sp1.Position = [0.05,0.1,0.2,0.85];
+    ax2.Position = [0.4,0.1,0.55,0.85];
+    ax1.Position = [0.05,0.1,0.2,0.85];
     % Tight on left:
-    sp1.Position(1) = sp2.Position(1) - sp1.Position(3) - 0.01;
+    ax1.Position(1) = ax2.Position(1) - ax1.Position(3) - 0.01;
     % Both have the same y and height:
-    sp1.Position(2) = sp2.Position(2); % y
-    sp1.Position(4) = sp2.Position(4); % height
+    ax1.Position(2) = ax2.Position(2); % y
+    ax1.Position(4) = ax2.Position(4); % height
 else
     % Rows -- time series need labels
     ylabel('Time series')

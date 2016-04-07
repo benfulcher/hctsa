@@ -5,7 +5,7 @@ function TS_classify(whatData,whatClassifier,doPCs,seedReset)
 % in the dataset.
 %
 %---USAGE:
-% TS_classify;
+% TS_classify();
 %
 %---INPUTS:
 % whatData, the hctsa data to use (input to TS_LoadData)
@@ -42,7 +42,7 @@ if nargin < 1
     whatData = 'norm';
 end
 if nargin < 2
-    whatClassifier = 'svm';
+    whatClassifier = 'svm_linear';
     % 'svm', 'discriminant', 'knn'
 end
 if nargin < 3
@@ -55,41 +55,21 @@ end
 %-------------------------------------------------------------------------------
 % Load in data:
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations,dataFile] = TS_LoadData(whatData);
 
 % Check that group labels have been assigned
 if ~isfield(TimeSeries,'Group')
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
-timeSeriesGroup = [TimeSeries.Group]; % Use group form
-numClasses = length(unique(timeSeriesGroup));
+load(dataFile,'groupNames');
+timeSeriesGroup = [TimeSeries.Group]'; % Use group form (column vector)
+numClasses = max(timeSeriesGroup); % assuming group in form of integer class labels starting at 1
 numFeatures = length(Operations);
 numTimeSeries = length(TimeSeries);
 
 %-------------------------------------------------------------------------------
-% Set up the classification model
+% Fit the model
 %-------------------------------------------------------------------------------
-switch whatClassifier
-case 'svm'
-    % Linear SVM:
-    cfnModel = templateSVM('Standardize',1,'KernelFunction','linear');
-case 'knn'
-    % k-NN (k=3) classification:
-    cfnModel = templateKNN('NumNeighbors',3,'Distance','euclidean');
-case {'discriminant','linear'}
-    % Linear discriminant analysis:
-    cfnModel = templateDiscriminant('DiscrimType','linear');
-    % could also be 'naivebayes', 'tree', ensemble methods
-otherwise
-    error('Unknown classification model, ''%s''',whatClassifier);
-end
-
-%-------------------------------------------------------------------------------
-% Fit the model using k-fold cross validation:
-%-------------------------------------------------------------------------------
-
-% Reset the seed?
-BF_ResetSeed(seedReset);
 
 % Set the number of folds for k-fold cross validation using a heuristic
 % (for small datasets with fewer than 10 examples per class):
@@ -102,25 +82,85 @@ else
     numFolds = 10;
 end
 
-% Fit the classification model to the dataset (for each cross-validation fold)
-CVcfnModel = fitcecoc(TS_DataMat,timeSeriesGroup,'Learners',cfnModel,'KFold',numFolds);
+BF_ResetSeed(seedReset); % reset the random seed for CV-reproducibility
+
+%-------------------------------------------------------------------------------
+% Set up the loss function
+
+classNumbers = arrayfun(@(x)sum(timeSeriesGroup==x),1:numClasses);
+isBalanced = all(classNumbers==classNumbers(1));
 
 % Get the misclassification rate from each fold:
-foldLosses = 100*(1 - kfoldLoss(CVcfnModel,'Mode','individual'));
+if isBalanced
+    fprintf(1,'Using overall classification accuracy as output measure\n');
+    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,'acc',numClasses);
+    outputStat = 'Overall classification rate';
+else
+    fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
+    outputStat = 'Balanced classification rate';
+    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,'balancedAcc',numClasses);
+end
 
-fprintf(1,['\nClassification rate (%u-class) using %u-fold %s classification with %u' ...
+%-------------------------------------------------------------------------------
+% Fit the classification model to the dataset (for each cross-validation fold)
+% and evaluate performance
+fprintf(1,['Training and evaluating a %u-class %s classifier in a %u-feature' ...
+                        ' space using %u-fold cross validation...\n'],...
+                        numClasses,whatClassifier,numFeatures,numFolds);
+[foldLosses,CVMdl] = GiveMeFoldLosses(TS_DataMat,timeSeriesGroup);
+
+fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
                  ' features:\n%.3f +/- %.3f%%\n\n'],...
-                            numClasses,...
-                            numFolds,...
-                            whatClassifier,...
-                            numFeatures,...
-                            mean(foldLosses),...
-                            std(foldLosses));
-
+                    outputStat,...
+                    numClasses,...
+                    numFolds,...
+                    whatClassifier,...
+                    numFeatures,...
+                    mean(foldLosses),...
+                    std(foldLosses));
 
 % f = figure('color','w');
 % histogram(foldLosses*100)
 % xlim([0,100]);
+
+%-------------------------------------------------------------------------------
+% Check nulls:
+%-------------------------------------------------------------------------------
+doNull = 0;
+numNulls = 20;
+if doNull
+    meanNull = zeros(numNulls,1);
+    for i = 1:numNulls
+        % Compute for shuffled data labels:
+        shuffledLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
+        foldLosses_null = GiveMeFoldLosses(TS_DataMat,shuffledLabels);
+        meanNull(i) = mean(foldLosses_null);
+    end
+    fprintf(1,['\nMean %s (%u-class) using %u-fold %s classification with %u' ...
+                     ' features across %u nulls:\n%.3f +/- %.3f%%\n\n'],...
+                    outputStat,...
+                    numClasses,...
+                    numFolds,...
+                    whatClassifier,...
+                    numFeatures,...
+                    numNulls,...
+                    mean(meanNull),...
+                    std(meanNull));
+end
+
+%-------------------------------------------------------------------------------
+% Plot confusion matrix
+%-------------------------------------------------------------------------------
+% CONVERT BOTH TO numClassesxN form before plotting confusion matrix
+realLabels = BF_ToBinaryClass(timeSeriesGroup');
+predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl));
+plotconfusion(realLabels,predictLabels);
+
+% Fix axis labels:
+ax = gca;
+ax.XTickLabel(1:numClasses) = groupNames;
+ax.YTickLabel(1:numClasses) = groupNames;
+ax.TickLabelInterpreter = 'none';
 
 %-------------------------------------------------------------------------------
 % Compare performance of reduced PCs from the data matrix:
@@ -141,14 +181,12 @@ if doPCs
     numPCs = min(10,size(pcScore,2)); % sometimes lower than attempted 10
 
     % Compute cumulative performance of PCs:
-    PC_cfn = cell(numPCs,1);
     cfnRate = zeros(numPCs,2);
-    fprintf('Computing classification rates keeping top 1--%u PCs...\n',numPCs)
+    fprintf('Computing classification rates keeping top 1-%u PCs...\n',numPCs)
     for i = 1:numPCs
-        PC_cfn{i} = fitcecoc(pcScore(:,1:i),timeSeriesGroup,'Learners',cfnModel,'KFold',numFolds);
-        losses = 1-kfoldLoss(PC_cfn{i},'Mode','individual');
-        cfnRate(i,1) = mean(losses)*100;
-        cfnRate(i,2) = std(losses)*100;
+        PCfoldLosses = GiveMeFoldLosses(pcScore(:,1:i),timeSeriesGroup);
+        cfnRate(i,1) = mean(PCfoldLosses);
+        cfnRate(i,2) = std(PCfoldLosses);
         fprintf(1,'%u PCs:   %.3f +/- %.3f%%\n',i,cfnRate(i,1),cfnRate(i,2));
     end
 
@@ -171,6 +209,16 @@ if doPCs
                                 whatClassifier);
     title(titleText)
 
+end
+
+%-------------------------------------------------------------------------------
+function [foldLosses,CVMdl] = GiveMeFoldLosses(dataMatrix,dataLabels)
+    % Returns the output (e.g., loss) for the custom fn_loss function across all folds
+    [foldLosses,CVMdl] = GiveMeCfn(whatClassifier,dataMatrix,...
+                            dataLabels,[],[],numClasses,[],[],1,numFolds);
+    % yPredict = kfoldPredict(CVMdl);
+    % foldLosses = arrayfun(@(x)fn_loss(dataLabels(CVMdl.Partition.test(x)),...
+    %                                 yPredict(CVMdl.Partition.test(x))),1:numFolds);
 end
 
 end

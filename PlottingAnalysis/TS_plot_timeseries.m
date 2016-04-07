@@ -74,16 +74,11 @@ if isstruct(plotOptions) && isfield(plotOptions,'howToFilter')
 else
     howToFilter = 'evenly'; % by default
 end
-if isstruct(plotOptions) && isfield(plotOptions,'gic')
-    gic = plotOptions.gic; % local color labels -- vector
-else
-    gic = [];
-end
 % Specify the colormap to use
 if isstruct(plotOptions) && isfield(plotOptions,'colorMap')
     colorMap = plotOptions.colorMap;
 else
-    colorMap = 'set1';
+    colorMap = ''; % choose automatically using GiveMeColors
 end
 % Specify whether to make a free-form plot
 if isstruct(plotOptions) && isfield(plotOptions,'plotFreeForm')
@@ -143,7 +138,7 @@ iPlot = zeros(numGroups*numPerGroup,1);
 classes = zeros(numGroups*numPerGroup,1);
 nhere = zeros(numGroups,1);
 groupSizes = cellfun(@length,groupIndices);
-% howToFilter = 'rand';
+
 for i = 1:numGroups
     % filter down to numPerGroup if too many in group, otherwise plot all in
     % group
@@ -175,41 +170,32 @@ for i = 1:numGroups
 end
 
 % Summarize time series chosen to plot
-rkeep = (iPlot > 0);
-classes = classes(rkeep);
-iPlot = iPlot(rkeep); % contains all the indicies of time series to plot (in order)
+rKeep = (iPlot > 0);
+classes = classes(rKeep);
+iPlot = iPlot(rKeep); % contains all the indicies of time series to plot (in order)
 numToPlot = length(iPlot);
 
-
+%-------------------------------------------------------------------------------
 fprintf(1,'Plotting %u (/%u) time series from %u classes\n', ...
                     numToPlot,sum(cellfun(@length,groupIndices)),numGroups);
-if ~isempty(gic)
-    classes = gic; % override with our group information
-    % better be firstcome, and makes sense that groupIndices is just a vector of
-    % indicies, otherwise group information is already available!
-    if iscell(colorMap)
-        theColors = colorMap; % specified custom colors as a cell
-    else
-        theColors = BF_getcmap(colorMap,max(classes),1); % 'set2'
-    end
+
+if iscell(colorMap)
+    % Specified a custom colormap as a cell of colors
+    theColors = colorMap;
 else
-    if numGroups==1;
-        theColors = {'k'}; % just plot in black
-    else
-        if iscell(colorMap)
-            theColors = colorMap;
-        else
-            theColors = BF_getcmap(colorMap,numGroups,1); % 'set2'
-        end
-    end
+    % Get some colormap using GiveMeColors
+    theColors = GiveMeColors(numGroups);
 end
 
 % ------------------------------------------------------------------------------
-figure('color','w'); box('on');
+figure('color','w');
 Ls = zeros(numToPlot,1); % length of each plotted time series
 if plotFreeForm
-	% FREEFORM: make all within a single plot with text labels
-    hold on;
+    % FREEFORM: make all within a single plot with text labels
+    ax = gca;
+    ax.Box = 'on';
+    hold(ax,'on');
+
 	yr = linspace(1,0,numToPlot+1);
     inc = abs(yr(2)-yr(1)); % size of increment
     yr = yr(2:end);
@@ -222,9 +208,6 @@ if plotFreeForm
 	else
 		maxN = maxLength;
 	end
-	% Set up axes ticks
-	set(gca,'XTick',linspace(0,1,3),'XTickLabel',round(linspace(0,maxN,3)))
-	set(gca,'YTick',[],'YTickLabel',{})
 
 	for i = 1:numToPlot
 	    fn = TimeSeries(iPlot(i)).Name; % the name of the time series
@@ -250,7 +233,13 @@ if plotFreeForm
 			text(0.01,yr(i)+0.9*inc,theTit,'interpreter','none','FontSize',8)
 	    end
 	end
-	xlim([0,1]) % Don't let the axes annoyingly slip out
+
+    % Set up axes:
+    ax.XTick = linspace(0,1,3);
+    ax.XTickLabel = round(linspace(0,maxN,3));
+    ax.YTick = [];
+    ax.YTickLabel = {};
+	ax.XLim = [0,1]; % Don't let the axes annoyingly slip out
     xlabel('Time (samples)')
 
 else
@@ -303,7 +292,8 @@ else
 
 	% Set all xlims so that they have the same x-axis limits
 	for i = 1:numToPlot
-	    subplot(numToPlot,1,i); set(gca,'xlim',[1,max(Ls)])
+	    ax = subplot(numToPlot,1,i);
+        ax.XLim = [1,max(Ls)];
 	end
 end
 

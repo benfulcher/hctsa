@@ -1,10 +1,10 @@
-function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA,subs)
+function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA,classVarFilter,subs)
 % TS_normalize  Trims and normalizes data from an hctsa analysis.
 %
 % Reads in data from HCTSA.mat, writes a trimmed, normalized version to
 % HCTSA_N.mat
-% The normalization is all about a rescaling to the [0,1] interval for
-% visualization and clustering.
+% Normalization often involves a rescaling of each feature to the unit interval
+% for visualization and clustering.
 %
 %---INPUTS:
 % normFunction: String specifying how to normalize the data.
@@ -15,6 +15,9 @@ function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA
 %                is set to 1, will have no bad values in your matrix.
 %
 % fileName_HCTSA: Custom filename to import. Default is 'HCTSA.mat'.
+%
+% classVarFilter: whether to filter on zero variance of any given class (which
+%                   causes problems for many classification algorithms)
 %
 % subs [opt]: Only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
@@ -61,6 +64,10 @@ if nargin < 3 || isempty(fileName_HCTSA)
 end
 
 if nargin < 4
+    classVarFilter = 0; % don't filter on individual class variance > 0 by default
+end
+
+if nargin < 5
     % Empty by default, i.e., don't subset:
     subs = {};
 end
@@ -143,7 +150,7 @@ end
 % Filter operations (columns)
 keepCols = filterNaNs(TS_DataMat',filterOptions(2),'operations');
 if any(~keepCols)
-    fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(~keepCols).Name},','));
+    % fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(~keepCols).Name},','));
     TS_DataMat = TS_DataMat(:,keepCols);
     TS_Quality = TS_Quality(:,keepCols);
     Operations = Operations(keepCols);
@@ -154,7 +161,7 @@ end
 %% And time series with constant feature vectors
 % --------------------------------------------------------------------------
 if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all will be constant!
-    bad_op = (nanstd(TS_DataMat) < eps);
+    bad_op = (nanstd(TS_DataMat) < 10*eps);
 
     if all(bad_op)
         error('All %u operations produced constant outputs on the %u time series?!',...
@@ -185,6 +192,31 @@ fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',...
             sum(isnan(TS_DataMat(:))), ...
             sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,...
             size(TS_DataMat,1),size(TS_DataMat,2));
+
+%-------------------------------------------------------------------------------
+% Filter on class variance
+%-------------------------------------------------------------------------------
+if classVarFilter
+    if ~isfield(TimeSeries,'Group')
+        fprintf(1,'Group labels not assigned to time series, so cannot filter on class variance\n');
+    end
+    numClasses = length(unique([TimeSeries.Group]));
+    classVars = zeros(numClasses,size(TS_DataMat,2));
+    for i = 1:numClasses
+        classVars(i,:) = nanstd(TS_DataMat([TimeSeries.Group]==i,:));
+    end
+    zeroClassVar = any(classVars < 10*eps,1);
+    if all(zeroClassVar)
+        error('All %u operations produced near-constant class-wise outputs?!',...
+                            length(zeroClassVar),size(TS_DataMat,1))
+    elseif any(zeroClassVar)
+        fprintf(1,'Removed %u operations with near-constant class-wise outputs: from %u to %u.\n',...
+                     sum(zeroClassVar),length(zeroClassVar),sum(~zeroClassVar));
+        TS_DataMat = TS_DataMat(:,~zeroClassVar);
+        TS_Quality = TS_Quality(:,~zeroClassVar);
+        Operations = Operations(~zeroClassVar);
+    end
+end
 
 % --------------------------------------------------------------------------
 %% Filtering done, now apply the normalizing transformation
@@ -220,8 +252,8 @@ end
 % --------------------------------------------------------------------------
 %% Make sure the operations are still good
 % --------------------------------------------------------------------------
-% check again for constant columns after normalization
-kc = (nanstd(TS_DataMat) < eps);
+% Check again for ~constant columns after normalization
+kc = (nanstd(TS_DataMat) < 10*eps);
 if any(kc)
     TS_DataMat = TS_DataMat(:,~kc);
     TS_Quality = TS_Quality(:,~kc);

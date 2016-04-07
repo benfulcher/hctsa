@@ -46,7 +46,7 @@ if nargin < 2 || isempty(linkageMethodRow)
     linkageMethodRow = 'average';
 end
 
-% use same method as for rows
+% Use fast approximations to correlations;
 if nargin < 3 || isempty(distanceMetricCol)
     % fprintf(1,'Clustering columns in the same way as for the rows: using %s\n',clusterMethRow)
     distanceMetricCol = 'corr_fast';
@@ -59,6 +59,7 @@ end
 
 % argument 5, doSave, set later
 
+% What file to use:
 if nargin < 6
     theFile = 'norm';
 end
@@ -137,7 +138,6 @@ if op_update
     save(theFile,'-append','op_clust');
     fprintf(1,' Done.\n');
 end
-
 
 
 % ------------------------------------------------------------------------------

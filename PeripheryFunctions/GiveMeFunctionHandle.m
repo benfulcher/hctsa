@@ -1,11 +1,16 @@
-function fn_handle = GiveMeFunctionHandle(whatClassifier,numClasses,sumLoss)
+function fn_handle = GiveMeFunctionHandle(whatClassifier,numClasses,whatLoss,reWeight)
 % GiveMeFunctionHandle    Returns a function handle for classification accuracy
 %
 %---INPUTS:
 % whatClassifier -- a type of classifier to use (default: 'fast_linear')
 % numClasses -- the number of classes
-% sumLoss -- whether to return a function measuring a total loss measure (1),
-%               or an accuracy rate (0, default)
+% whatLoss -- a custom loss function:
+%               (*) 'acc': classification rate (%)
+%               (*) 'balancedAcc': mean classification rate of each class (%,
+%                                        same as acc when balanced classes)
+%               (*) 'sumLoss': total number of misclassifications
+% reWeight -- whether to reweight observations for compatible classifiers (for
+%               class imbalanced problems)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -28,73 +33,78 @@ if nargin < 1
     whatClassifier = 'fast_linear';
 end
 if nargin < 2
-    numClasses = 3; % multiclass
+    warning('How many classes?! Assuming a multiclass problem')
+    numClasses = 3; % assume multiclass
 end
 if nargin < 3
-    sumLoss = 0;
+    whatLoss = 'acc'; % total accuracy (by default)
+end
+if nargin < 4
+    reWeight = 1;
 end
 %-------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Set the function handle to compute the accuracy/loss measure:
+%-------------------------------------------------------------------------------
 if strcmp(whatClassifier,'fast_linear')
-    if sumLoss
-        fn_handle = @(XTrain,yTrain,XTest,yTest) sum(yTest ~= classify(XTest,XTrain,yTrain,'linear'));
-    else
-        fn_handle = @(XTrain,yTrain,XTest,yTest) 100*mean(yTest == classify(XTest,XTrain,yTrain,'linear'));
-    end
+    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
+    fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,classify(XTest,XTrain,yTrain,'linear'));
     return
 end
 
+%-------------------------------------------------------------------------------
+% Binary model (easier), we can do it in one line:
+%-------------------------------------------------------------------------------
 if numClasses==2
-    % Binary model (easier), we can do it in one line:
+    % Set the loss function:
+    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
+
     switch whatClassifier
     case 'knn'
-        if sumLoss
-            fn_handle = @(XTrain,yTrain,XTest,yTest) sum(yTest ~= predict(fitcknn(XTrain,yTrain),XTest));
-        else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) 100*mean(yTest == predict(fitcknn(XTrain,yTrain),XTest));
-        end
+        fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcknn(XTrain,yTrain),XTest));
     case 'tree'
-        if sumLoss
-            fn_handle = @(XTrain,yTrain,XTest,yTest) sum(yTest ~= predict(fitctree(XTrain,yTrain),XTest));
-        else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) 100*mean(yTest == predict(fitctree(XTrain,yTrain),XTest));
-        end
+        fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitctree(XTrain,yTrain),XTest));
     case {'linear','linclass'}
-        if sumLoss
-            fn_handle = @(XTrain,yTrain,XTest,yTest) sum(yTest ~= predict(fitcdiscr(XTrain,yTrain),XTest));
+        if reWeight
+            fn_handle = @(XTrain,yTrain,XTest,yTest) ...
+                        fn_loss(yTest,predict(fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
+                                    'SaveMemory','on','Weights',InverseProbWeight(yTrain)),XTest));
         else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) 100*mean(yTest == predict(fitcdiscr(XTrain,yTrain),XTest));
+            fn_handle = @(XTrain,yTrain,XTest,yTest) ...
+                        fn_loss(yTest,predict(fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
+                                    'SaveMemory','on'),XTest));
         end
     case 'svm_linear'
-        if sumLoss
-            fn_handle = @(XTrain,yTrain,XTest,yTest) sum(yTest ~= predict(fitcsvm(XTrain,yTrain,'KernelFunction','linear'),XTest));
+        if reWeight
+            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
+                                    'KernelFunction','linear','Weights',InverseProbWeight(yTrain)),XTest));
         else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) 100*mean(yTest == predict(fitcsvm(XTrain,yTrain,'KernelFunction','linear'),XTest));
+            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
+                                    'KernelFunction','linear'),XTest));
         end
     case 'svm_rbf'
-        if sumLoss
-            fn_handle = @(XTrain,yTrain,XTest,yTest) sum(yTest ~= predict(fitcsvm(XTrain,yTrain,'KernelFunction','rbf'),XTest));
+        if reWeight
+            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
+                                    'KernelFunction','rbf','Weights',InverseProbWeight(yTrain)),XTest));
         else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) 100*mean(yTest == predict(fitcsvm(XTrain,yTrain,'KernelFunction','rbf'),XTest));
+            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
+                                    'KernelFunction','rbf'),XTest));
         end
     case 'diaglinear'
-        if sumLoss
-            fn_handle = @(XTrain,yTrain,XTest,yTest) sum(yTest ~= predict(fitcnb(XTrain,yTrain),XTest));
+        if reWeight
+            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcnb(XTrain,yTrain,...
+                                                    'Weights',InverseProbWeight(yTrain)),XTest));
         else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) 100*mean(yTest == predict(fitcnb(XTrain,yTrain),XTest));
+            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcnb(XTrain,yTrain),XTest));
         end
     otherwise
         error('Unknown classifier label: ''%s''',whatClassifier);
     end
 else
-    % Multiclass
-    if sumLoss
-        fn_handle = @(XTrain,yTrain,XTest,yTest) ...
-            GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,0);
-    else
-        fn_handle = @(XTrain,yTrain,XTest,yTest) ...
-            100*GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,0);
-    end
+    % Multiclass, have to use the Cfn function (which is slower to use as a function handle)
+    fn_handle = @(XTrain,yTrain,XTest,yTest) ...
+        GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,0,whatLoss,reWeight);
 end
 
 end

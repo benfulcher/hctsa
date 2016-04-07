@@ -1,4 +1,4 @@
-function TS_plot_2d(Features,TimeSeries,featureLabels,groupNames,annotateParams,showDistr,classMethod)
+function TS_plot_2d(Features,TimeSeries,featureLabels,groupNames,annotateParams,showDistr,whatClassifier)
 % TS_plot_2d   Plots a dataset in a two-dimensional space.
 %
 % e.g., The space of two chosen features, or two principal components.
@@ -27,7 +27,7 @@ function TS_plot_2d(Features,TimeSeries,featureLabels,groupNames,annotateParams,
 % showDistr, if 1 (default), plots marginal density estimates for each variable
 %                   (above and to the right of the plot), otherwise set to 0.
 %
-% classMethod, can select a classifier to fit to the different classes (e.g.,
+% whatClassifier, can select a classifier to fit to the different classes (e.g.,
 %               'linclass' for a linear classifier).
 
 % ------------------------------------------------------------------------------
@@ -55,6 +55,10 @@ if nargin < 1
     error('You must provide two-dimensional feature vectors for the data.')
 end
 
+if nargin < 3 || isempty(featureLabels)
+    featureLabels = {'',''};
+end
+
 if nargin < 5 || isempty(annotateParams)
     annotateParams = struct('n',0); % don't annotate
 end
@@ -64,8 +68,8 @@ if nargin < 6 || isempty(showDistr)
     showDistr = 1;
 end
 
-if nargin < 7 || isempty(classMethod)
-    classMethod = 'linclass';
+if nargin < 7 || isempty(whatClassifier)
+    whatClassifier = 'svm_linear';
 end
 
 makeFigure = 1; % default is to plot on a brand new figure('color','w')
@@ -91,28 +95,18 @@ if makeFigure % can set extras.makeFigure = 0 to plot within a given setting
 end
 
 % Set colors
-if isstruct(annotateParams) && isfield(annotateParams,'cmap')
-    if ischar(annotateParams.cmap)
-        groupColors = BF_getcmap(annotateParams.cmap,numClasses,1);
-    else
-        groupColors = annotateParams.cmap; % specify the cell itself
-    end
-else
-    if numClasses < 10
-        groupColors = BF_getcmap('set1',numClasses,1);
-    elseif numClasses <= 12
-        groupColors = BF_getcmap('set3',numClasses,1);
-    elseif numClasses <= 22
-        groupColors = [BF_getcmap('set1',numClasses,1); ...
-                    BF_getcmap('set3',numClasses,1)];
-    elseif numClasses <= 50
-        groupColors = mat2cell(jet(numClasses),ones(numClasses,1));
-    else
-        error('There aren''t enough colors in the rainbow to plot this many classes!')
-    end
-end
 if (numClasses == 1)
     groupColors = {[0,0,0]}; % Just use black...
+else
+    if isstruct(annotateParams) && isfield(annotateParams,'cmap')
+        if ischar(annotateParams.cmap)
+            groupColors = BF_getcmap(annotateParams.cmap,numClasses,1);
+        else
+            groupColors = annotateParams.cmap; % specify the cell itself
+        end
+    else
+        groupColors = GiveMeColors(numClasses);
+    end
 end
 annotateParams.groupColors = groupColors;
 
@@ -172,36 +166,60 @@ if showDistr
 end
 
 % ------------------------------------------------------------------------------
+% Set Legend
+%-------------------------------------------------------------------------------
+if numClasses > 1
+    legendText = cell(numClasses,1);
+    for i = 1:numClasses
+        if ~isempty(groupNames)
+            legendText{i} = sprintf('%s (%u)',groupNames{i},sum(groupLabels==i));
+        else
+            legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==i));
+        end
+    end
+    legend(legendText,'interpreter','none');
+end
+
+%-------------------------------------------------------------------------------
+% Annotate points:
+%-------------------------------------------------------------------------------
+% Label axes first without classification rates so the user can see what they're doing when annotating
+labelAxes(0);
+if isfield(TimeSeries,'Data')
+    % Only attempt to annotate if time-series data is provided
+
+    % Produce xy points
+    xy = Features;
+
+    % Go-go-go:
+    BF_AnnotatePoints(xy,TimeSeries,annotateParams);
+end
+
+% ------------------------------------------------------------------------------
 %% Do classification and plot a classify boundary?
 % ------------------------------------------------------------------------------
 didClassify = 0;
 if numClasses > 1
-    whatClassifier = 'svm_linear';
-
     % Compute the in-sample classification rate:
     classRate = zeros(3,1); % classRate1, classRate2, classRateboth
     try
-        classRate(1) = GiveMeCfn(whatClassifier,Features(:,1),groupLabels,Features(:,1),groupLabels,numClasses,0,0);
-        classRate(2) = GiveMeCfn(whatClassifier,Features(:,2),groupLabels,Features(:,2),groupLabels,numClasses,0,0);
-        classRate(3) = GiveMeCfn(whatClassifier,Features,groupLabels,Features(:,1:2),groupLabels,numClasses,0,0);
+        fprintf(1,'Estimating %u-class classification rates for each feature (and in combination)...\n',numClasses);
+        classRate(1) = GiveMeCfn(whatClassifier,Features(:,1),groupLabels,Features(:,1),groupLabels,numClasses);
+        classRate(2) = GiveMeCfn(whatClassifier,Features(:,2),groupLabels,Features(:,2),groupLabels,numClasses);
+        classRate(3) = GiveMeCfn(whatClassifier,Features,groupLabels,Features(:,1:2),groupLabels,numClasses);
         % Record that classification was performed successfully:
         didClassify = 1;
     catch emsg
-        fprintf(1,'Linear classification rates not computed\n(%s)\n',emsg.message);
+        fprintf(1,'\nLinear classification rates not computed\n(%s)\n',emsg.message);
         classRate(:) = NaN;
     end
 
     % Also plot an SVM classification boundary:
     if numClasses < 5
+        fprintf(1,'Estimating classification boundaries...\n');
         try
             % Train the model (in-sample):
-            [~,~,Mdl] = GiveMeCfn('svm_linear',Features,groupLabels,Features,groupLabels,numClasses,0,0);
-            % if numClasses==2
-            %     Mdl = fitcsvm(Features,groupLabels,'KernelFunction','linear');
-            % else
-            %     t = templateSVM('KernelFunction','linear');
-            %     Mdl = fitcecoc(Features,groupLabels,'Learners',t);
-            % end
+            [~,Mdl] = GiveMeCfn(whatClassifier,Features,groupLabels,Features,groupLabels,numClasses);
 
             % Predict scores over the 150x150 grid through space
             gridInc = 150;
@@ -229,54 +247,33 @@ if numClasses > 1
     end
 end
 
-% ------------------------------------------------------------------------------
-%% Label Axes
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% Relabel axes with classification rates and set title if classification
+% performed successfully:
+%-------------------------------------------------------------------------------
 if didClassify
-    labelText = cell(2,1);
-    for i = 1:2
-        labelText{i} = sprintf('%s (acc = %.2f %%)',featureLabels{i}, ...
-                                round(classRate(i,1)*100));
-    end
-else
-    labelText = featureLabels;
+    labelAxes(1);
+    title(sprintf('Combined classification rate (%s) = %.2f%%',whatClassifier, ...
+                    round(classRate(3,1))),'interpreter','none');
 end
 
-xlabel(labelText{1},'interpreter','none')
-ylabel(labelText{2},'interpreter','none')
-
-% Set Legend
-if numClasses > 1
-    legendText = cell(numClasses,1);
-    for i = 1:numClasses
-        if ~isempty(groupNames)
-            legendText{i} = sprintf('%s (%u)',groupNames{i},sum(groupLabels==i));
-        else
-            legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==i));
+%-------------------------------------------------------------------------------
+function labelAxes(didClassify)
+    %-------------------------------------------------------------------------------
+    %% Label Axes
+    % ------------------------------------------------------------------------------
+    if didClassify
+        labelText = cell(2,1);
+        for i = 1:2
+            labelText{i} = sprintf('%s (acc = %.2f %%)',featureLabels{i}, ...
+                                    round(classRate(i,1)));
         end
+    else
+        labelText = featureLabels;
     end
-    legend(legendText,'interpreter','none');
-end
 
-%-------------------------------------------------------------------------------
-% Annotate points:
-%-------------------------------------------------------------------------------
-if isfield(TimeSeries,'Data')
-    % Only attempt to annotate if time-series data is provided
-
-    % Produce xy points
-    xy = Features;
-
-    % Go-go-go:
-    BF_AnnotatePoints(xy,TimeSeries,annotateParams);
-end
-
-%-------------------------------------------------------------------------------
-% Set title:
-%-------------------------------------------------------------------------------
-if didClassify
-    title(sprintf('Combined classification rate (%s) = %.2f%%',classMethod, ...
-                    round(classRate(3,1)*100)),'interpreter','none');
+    xlabel(labelText{1},'interpreter','none')
+    ylabel(labelText{2},'interpreter','none')
 end
 
 end
