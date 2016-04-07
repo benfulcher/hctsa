@@ -14,7 +14,8 @@ DN_HistogramMode_20	DN_HistogramMode_20	distribution,location
 DN_max	            maximum	            distribution
 DN_min	            miminmum	        distribution
 DN_rms	            rms	                distribution,location,raw,locdep,spreaddep
-DN_burstiness	    burstiness	        distribution,raw,locdep
+DN_burstiness.B	    burstiness	        distribution,raw,locdep,spreaddep
+DN_burstiness.B_Kim	    burstiness	        distribution,raw,locdep,spreaddep
 DN_Spread_std	    standard_deviation	        distribution,spread,raw,spreaddep
 DN_Spread_mad	    mean_absolute_deviation	    distribution,spread,raw,spreaddep
 DN_Spread_iqr	    interquartile_range	        distribution,spread,raw,spreaddep

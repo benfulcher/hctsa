@@ -1,10 +1,10 @@
-function B = DN_Burstiness(y)
-% DN_Burstiness     Burstiness statistic of a time series.
+function out = DN_Burstiness(y)
+% DN_Burstiness     Burstiness statistic of a time series
 %
-% Returns the 'burstiness' statistic from:
+% Returns the 'burstiness' statistic from
 %
 % Goh and Barabasi, 'Burstiness and memory in complex systems' Europhys. Lett.
-% 81, 48002 (2008)
+% 81, 48002 (2008).
 %
 %---INPUT:
 % y, the input time series
@@ -35,7 +35,17 @@ function B = DN_Burstiness(y)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-% Burstiness statistic, B:
-B = (std(y) - mean(y))/(std(y) + mean(y));
+r = std(y)/mean(y); % coefficient of variation
+
+%-------------------------------------------------------------------------------
+% Original Goh and Barabasi burstiness statistic, B:
+out.B = (r - 1)/(r + 1);
+% B = (std(y) - mean(y))/(std(y) + mean(y));
+
+%-------------------------------------------------------------------------------
+% Improved burstiness statistic, accounting for scaling for finite time series
+% Kim and Jo, 2016, http://arxiv.org/pdf/1604.01125v1.pdf
+N = length(y);
+out.B_Kim = (sqrt(N+1)*r - sqrt(N-1))/((sqrt(N+1)-2)*r + sqrt(N-1));
 
 end
