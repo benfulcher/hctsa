@@ -1,4 +1,4 @@
-function BF_AnnotateRect(whatCfn,featureVector,groupLabels,numClasses,colors,ax)
+function BF_AnnotateRect(whatCfn,featureVector,groupLabels,numClasses,colors,ax,underOrLeft)
 % BF_AnnotateRect Annotates rectangles under distributions for group classification
 %
 %---INPUTS:
@@ -8,6 +8,7 @@ function BF_AnnotateRect(whatCfn,featureVector,groupLabels,numClasses,colors,ax)
 % numClasses, the number of classes (usually the max of the groupLabels)
 % colors, a custom cell of colors for plotting
 % ax, the handle for the axes to annotate
+% underOrLeft, where to annotate (bottom, or to the left of the plot)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -44,6 +45,9 @@ end
 if nargin < 6
     ax = gca;
 end
+if nargin < 7
+    underOrLeft = 'under'; % under the plot (from 0) by default
+end
 
 % How many increments across the axis to determine classification labels:
 numIncrements = 100;
@@ -52,26 +56,52 @@ numIncrements = 100;
 % Learn a basic classification model from the 1-d feature vector:
 [~,Mdl] = GiveMeCfn(whatCfn,featureVector,groupLabels,...
                     featureVector,groupLabels,numClasses,0,'balancedAcc');
-xPlotted = ax.XLim;
-predRange = linspace(xPlotted(1),xPlotted(2),numIncrements)'; % numIncrements-grid through x
+switch underOrLeft
+case 'under'
+    dataPlotted = ax.XLim;
+case 'left'
+    dataPlotted = ax.YLim;
+otherwise
+    error('Unknown setting ''%s'', should be ''under'' or ''left''',underOrLeft);
+end
+predRange = linspace(dataPlotted(1),dataPlotted(2),numIncrements)'; % numIncrements-grid through x
 predLabels = predict(Mdl,predRange);
 
 %-------------------------------------------------------------------------------
 % Annotate rectangles under the distribution reflecting the predictive model:
-yPlotted = ax.YLim;
-rectHeight = 0.1*diff(ax.YLim);
+switch underOrLeft
+case 'under'
+    yPlotted = ax.YLim;
+    rectHeight = 0.1*diff(ax.YLim);
+case 'left'
+    xPlotted = ax.XLim;
+    rectHeight = 0.05*diff(ax.XLim);
+end
+
 ind = 1;
 while ind < numIncrements
     rectLength = find(predLabels(ind+1:end)~=predLabels(ind),1,'first');
     if isempty(rectLength)
         rectLength = length(predLabels)-ind;
     end
-    rectangle('Position',[predRange(ind),-rectHeight*1.1,predRange(ind+rectLength)-predRange(ind),rectHeight],...
+    switch underOrLeft
+    case 'under'
+        rectangle('Position',[predRange(ind),-rectHeight*1.1,predRange(ind+rectLength)-predRange(ind),rectHeight],...
                                 'FaceColor',colors{predLabels(ind)});
+    case 'left'
+        rectangle('Position',[-rectHeight*1.1,predRange(ind),rectHeight,predRange(ind+rectLength)-predRange(ind)],...
+                                'FaceColor',colors{predLabels(ind)});
+    end
     ind = ind+rectLength;
 end
-ax.YLim(1) = -rectHeight*1.1;
-ax.XLim = xPlotted;
-ax.YLim(2) = yPlotted(2);
+
+switch underOrLeft
+case 'under'
+    ax.YLim(1) = -rectHeight*1.1;
+    ax.XLim = xPlotted;
+    ax.YLim(2) = yPlotted(2);
+case 'left'
+    ax.XLim = [-rectHeight*1.1,xPlotted(2)];
+end
 
 end
