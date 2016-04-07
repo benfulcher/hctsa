@@ -72,8 +72,9 @@ xy_mean = mean(xy);
 xy_zscore = zscore(xy);
 
 % Initializing basic parameters/variables:
-pxlim = get(gca,'xlim'); % plot limits
-pylim = get(gca,'ylim'); % plot limits
+ax = gca;
+pxlim = ax.XLim; % plot limits
+pylim = ax.YLim; % plot limits
 pWidth = diff(pxlim); % plot width
 pHeight = diff(pylim); % plot height
 alreadyPicked = zeros(numAnnotate,1); % record those already picked
@@ -86,7 +87,7 @@ else
 end
 
 % Colors:
-myColors = [BF_getcmap('set1',5,1);BF_getcmap('dark2',6,1)];
+myColors = [BF_getcmap('set1',5,1); BF_getcmap('dark2',6,1)];
 if ~isfield(annotateParams,'groupColors')
     groupColors = GiveMeGroupColors(annotateParams,numGroups); % Set colors
 else

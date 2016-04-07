@@ -95,8 +95,8 @@ if ~isempty(ts_keepIDs)
     if all(keepRows)
         warning('Keeping all time series; no need to filter...?');
     end
-    fprintf(1,'Filtering out %u time series from the data in %s\n',...
-                            sum(~keepRows),whatDataFile);
+    fprintf(1,'Keeping %u/%u time series from the data in %s\n',...
+                        sum(keepRows),length(keepRows),whatDataFile);
     TimeSeries = TimeSeries(keepRows);
     TS_DataMat = TS_DataMat(keepRows,:);
     TS_Quality = TS_Quality(keepRows,:);
@@ -112,6 +112,8 @@ if ~isempty(op_keepIDs)
     if all(keepCols)
         error('Keeping all operations; no need to filter...?');
     end
+    fprintf(1,'Keeping %u/%u operations from the data in %s\n',...
+                        sum(keepCols),length(keepCols),whatDataFile);
     Operations = Operations(keepCols);
     TS_DataMat = TS_DataMat(:,keepCols);
     TS_Quality = TS_Quality(:,keepCols);

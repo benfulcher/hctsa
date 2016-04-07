@@ -1,5 +1,5 @@
 function out = SY_VarRatioTest(y,periods,IIDs)
-% SY_VarRatioTest   Variance ratio test.
+% SY_VarRatioTest   Variance ratio test for random walk.
 %
 % Implemented using the vratiotest function from Matlab's Econometrics Toolbox.
 %
@@ -76,7 +76,7 @@ else
    out.maxpValue = max(pValue);
    out.minpValue = min(pValue);
    out.meanpValue = mean(pValue);
-   
+
    imaxp = find(pValue == max(pValue),1,'first');
    iminp = find(pValue == min(pValue),1,'first');
    out.periodmaxpValue = periods(imaxp);

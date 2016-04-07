@@ -85,8 +85,8 @@ end
 % ------------------------------------------------------------------------------
 %% Set up training and test sets
 % ------------------------------------------------------------------------------
-ytrain = y; % the whole time series
-ytest = y; % the whole time series
+yTrain = y; % the whole time series data object
+yTest = y; % the whole time series data object
 
 % ------------------------------------------------------------------------------
 %% Fit the model
@@ -98,16 +98,16 @@ switch model
             % criterion (Schwartz's Bayesian Criterion, SBC)
             % Uses Matlab code from ARfit
             % http://www.gps.caltech.edu/~tapio/arfit/
-            [~, Aest] = ARFIT_arfit(ytrain.y, 1, 10, 'sbc', 'zero');
+            [~, Aest] = ARFIT_arfit(yTrain.y, 1, 10, 'sbc', 'zero');
             order = length(Aest);
         end
-        m = ar(ytrain,order);
+        m = ar(yTrain,order);
 
     case 'arma'
-        m = armax(ytrain,order);
+        m = armax(yTrain,order);
 
     case 'ss'
-        m = n4sid(ytrain,order);
+        m = n4sid(yTrain,order);
 
     otherwise
         error('Unknown model ''%s''',model);
@@ -137,10 +137,10 @@ sm2.ac1s = zeros(maxSteps,1);
 
 for i = 1:maxSteps
     % (1) *** Model m ***
-    yp = predict(m, ytest, steps(i)); % across test set
+    yp = predict(m, yTest, steps(i)); % across test set
 
     % Get statistics on residuals
-    mres = yp.y - ytest.y;
+    mres = yp.y - yTest.y;
     mres = mres(i:end);
 
     mf.rmserrs(i) = sqrt(mean(mres.^2));
@@ -178,23 +178,18 @@ end
 % ------------------------------------------------------------------------------
 % % (3) SMINF
 % ------------------------------------------------------------------------------
-% % sample mean predictor
+% (global) sample mean predictor
 sminf.res = yy - mean(yy);
 sminf.rmserr = sqrt(mean(sminf.res.^2));
 sminf.mabserr = mean(abs(sminf.res));
 sminf.ac1 = CO_AutoCorr(sminf.res,1,'Fourier');
 
-
 % ------------------------------------------------------------------------------
 %% Get some output statistics
 % ------------------------------------------------------------------------------
-% note that num2str loses precision, but I don't care so much about this --
-% I don't think we need such precision, anyway.
-
 % bestdumbrms = min([sm1.rmserr,sm2.rmserr,sminf.rmserr]);
 % bestdumbmabs = min([sm1.mabserr,sm2.mabserr,sminf.mabserr]);
 % bestdumbac1 = min(abs([sm1.ac1,sm2.ac1,sminf.ac1]));
-
 
 for i = 1:maxSteps
     % all relative to best dumb

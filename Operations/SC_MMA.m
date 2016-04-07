@@ -204,7 +204,6 @@ if doPlot
     set(gca,'YDir','reverse');
     view(-62,50);
     axis([sListScaled(1),sListScaled(end),qMin,qMax,0,hLim]);
-    % axis([3*minScale,0.6*maxScale,qMin,qMax,0,hLim]);
     xlabel('scale')
     ylabel('q')
     zlabel('h')

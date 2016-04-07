@@ -30,7 +30,7 @@ function BF_PlotCorrMat(D_corr,rangeHow,makeFigure)
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check Inputs:
+% Check inputs, set defaults:
 %-------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(rangeHow)
@@ -39,8 +39,8 @@ end
 if nargin < 3
     makeFigure = 0;
 end
-%-------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
 % Make a matrix
 if any(size(D_corr)==1)
     D_corr = squareform(D_corr);
@@ -51,15 +51,17 @@ if makeFigure
     f = figure('color','w');
 end
 
+% Plot the image:
 imagesc(D_corr)
 
 axis square
 
+%-------------------------------------------------------------------------------
 % Set color limits and colormap
+
+% If auto setting, can set to balanced if both positive and negative
 if strcmp(rangeHow,'auto')
-    if all(D_corr(:) > 0)
-        rangeHow = 'auto';
-    elseif any(D_corr(:) > 0) && any(D_corr(:) < 0)
+    if any(D_corr(:) > 0) && any(D_corr(:) < 0)
         rangeHow = 'balanced';
     end
 end
@@ -87,7 +89,7 @@ end
 
 % ------------------------------------------------------------------------------
 % Superimpose black rectangles over NaN values
-% ------------------------------------------------------------------------------
+
 if any(isnan(D_corr(:)))
     [theNaNs_i,theNaNs_j] = find(isnan(D_corr));
     for i = 1:length(theNaNs_i)

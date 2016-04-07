@@ -22,6 +22,9 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % 'numTopFeatures', can specify the number of top features to analyze, both in
 %                   terms of the list of outputs, the histogram plots, and the
 %                   cluster plot.
+% 'numHistogramFeatures', can optionally also set a custom number of histograms
+%                       to display (often want to set this lower to avoid producing
+%                       large numbers of figures)
 %
 %---EXAMPLE USAGE:
 %
@@ -67,12 +70,15 @@ inputP = inputParser;
 default_whatPlots = {'histogram','distributions','cluster'};
 check_whatPlots = @(x) iscell(x) || ischar(x);
 addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
-default_numTopFeatures = 25;
+default_numTopFeatures = 40;
 addParameter(inputP,'numTopFeatures',default_numTopFeatures,@isnumeric);
+default_numHistogramFeatures = 10;
+addParameter(inputP,'numHistogramFeatures',default_numHistogramFeatures,@isnumeric);
 parse(inputP,varargin{:});
 
 whatPlots = inputP.Results.whatPlots;
 numTopFeatures = inputP.Results.numTopFeatures;
+numHistogramFeatures = inputP.Results.numHistogramFeatures;
 clear inputP;
 
 % --------------------------------------------------------------------------
@@ -168,8 +174,8 @@ isNaN = isnan(testStat_sort);
 testStat_sort = testStat_sort(~isNaN);
 ifeat = ifeat(~isNaN);
 
-% List the top 20:
-topN = min(20,length(Operations));
+% List the top features:
+topN = min(numHistogramFeatures,length(Operations));
 for i = 1:topN
     fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations(ifeat(i)).ID, ...
             Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,testStat_sort(i));
@@ -214,7 +220,7 @@ if any(ismember(whatPlots,'histogram'))
     colors = BF_getcmap('spectral',5,1);
     if ~doNull
         h_real = histogram(testStat,'Normalization','probability',...
-                    'BinMethod','auto','FaceColor',colors{5},'FaceAlpha',0);
+                    'BinMethod','auto','EdgeColor',colors{5},'FaceAlpha',0);
         maxH = max(h_real.Values);
     else
         % Plot both real distribution, and null distribution:
@@ -223,7 +229,7 @@ if any(ismember(whatPlots,'histogram'))
         minMax = [min(allTestStat),max(allTestStat)];
         histEdges = linspace(minMax(1),minMax(2),numBins+1);
         h_null = histogram(testStat_rand(:),histEdges,'Normalization','probability','FaceColor',colors{1});
-        h_real = histogram(testStat,histEdges,'Normalization','probability','FaceColor',colors{5});
+        h_real = histogram(testStat,histEdges,'Normalization','probability','EdgeColor',colors{5});
         maxH = max([max(h_real.Values),max(h_null.Values)]);
         plot(mean(testStat_rand(:))*ones(2,1),[0,maxH],'--','color',colors{1},'LineWidth',2)
     end

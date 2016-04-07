@@ -26,25 +26,37 @@ function [fr,xr,h_line,h_points] = BF_plot_ks(dataVector,whatColor,doSwap,lineWi
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check Inputs:
+% Check inputs and set defaults:
 %-------------------------------------------------------------------------------
-if nargin < 2, whatColor = 'k'; end
-if nargin < 3, doSwap = 0; end
-if nargin < 4, lineWidth = 1; end
-if nargin < 5, markerSize = 16; end
-if nargin < 6, trimRange = 0; end
+if nargin < 2 || isempty(whatColor)
+    whatColor = 'k';
+end
+if nargin < 3 || isempty(doSwap)
+    doSwap = 0;
+end
+if nargin < 4 || isempty(lineWidth)
+    lineWidth = 1;
+end
+if nargin < 5 || isempty(markerSize)
+    markerSize = 14;
+end
+if nargin < 6 || isempty(trimRange)
+    trimRange = 0;
+end
 
 numPoints = 1000; % points for the ks density
 
 %-------------------------------------------------------------------------------
 % Estimate a probability density:
 %-------------------------------------------------------------------------------
+if all(dataVector-dataVector(1)<10*eps); % ~ constant data vector
+    warning('Constant data')
+    x = dataVector(1);
+    f = 1;
+end
+
 [f,x] = ksdensity(dataVector,linspace(min(dataVector),max(dataVector),numPoints),...
                     'function','pdf');
-
-if all(dataVector==dataVector(1))
-    warning('Attempting to estimate a kernel-smoothed probability distribution using constant data')
-end
 
 %-------------------------------------------------------------------------------
 % Match each datapoint to a point on the distribution:

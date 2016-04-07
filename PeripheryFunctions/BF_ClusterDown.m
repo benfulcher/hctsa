@@ -126,13 +126,12 @@ fprintf(1,' Done.\n');
 % Compute the dendrogram
 % ------------------------------------------------------------------------------
 f = figure('color','w');
-f.Position(3) = 1200;
-f.Position(4) = 800;
+f.Position(3:4) = [1200,800];
 
 % Get the dendrogram reordering:
-subplot(1,6,6); ax1 = gca;
+ax1 = subplot(1,6,6);
 [h_dend,~,ord] = dendrogram(links,0,'Orientation','right');
-ord = fliplr(ord); % so everything matches up with the dendrogram
+ax1.YDir = 'reverse'; % needs to be reversed to match the reversed y-axis of the imagesc plot
 % Reorder the distance matrix by dendrogram ordering: [could add optimalleaforder]
 distMat_cl = distMat(ord,ord);
 distMat0_cl = distMat0(ord,ord);
@@ -187,8 +186,7 @@ end
 cLevel = min(1,numClusterings); % plot the first clustering
 
 % Plot as a similarity matrix:
-subplot(1,6,2:5)
-ax2 = gca;
+ax2 = subplot(1,6,2:5);
 switch whatDistance
 case {'corr','abscorr_ii'}
     % Input is a correlation distance matrix, plot correlation coefficients:
@@ -220,7 +218,7 @@ for i = 1:numClusters
 end
 
 %-------------------------------------------------------------------------------
-% Tweaking plot details:
+% Tweak plot details:
 %-------------------------------------------------------------------------------
 
 % Add object labels on y-axis if provided
@@ -254,7 +252,7 @@ ax2.YLim = [0.5,numItems+0.5];
 
 % Align with dendrogram
 ax1.Position(1) = ax2.Position(1) + ax2.Position(3);
-ax1.Position(2) = ax2.Position(2);
 ax1.Position(4) = ax2.Position(4);
+ax1.Position(2) = ax2.Position(2);
 
 end

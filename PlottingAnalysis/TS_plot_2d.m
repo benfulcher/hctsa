@@ -157,7 +157,7 @@ hold on;
 if isfield(annotateParams,'theMarkerSize');
     theMarkerSize = annotateParams.theMarkerSize; % specify custom marker size
 else
-    theMarkerSize = 16; % Marker size for '.'
+    theMarkerSize = 12; % Marker size for '.'
 end
 
 for i = 1:numClasses

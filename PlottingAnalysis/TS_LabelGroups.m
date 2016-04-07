@@ -24,7 +24,8 @@ function [groupLabels,newFileName] = TS_LabelGroups(keywordGroups,whatData,saveB
 %                   Can also use an empty label, '', to select unique keywords
 %                   automatically from the dataset.
 %
-% whatData: Where to retrive from (and write back to): 'HCTSA.mat' (default), cf. TS_LoadData.
+% whatData: Where to retrive from (and write back to): 'HCTSA.mat' (default),
+%           cf. TS_LoadData.
 %
 % saveBack: Can set to 0 to stop saving the grouping back to the input file.
 %
