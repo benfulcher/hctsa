@@ -70,36 +70,9 @@ numTimeSeries = length(TimeSeries);
 %-------------------------------------------------------------------------------
 % Fit the model
 %-------------------------------------------------------------------------------
-
-% Set the number of folds for k-fold cross validation using a heuristic
-% (for small datasets with fewer than 10 examples per class):
-pointsPerClass = numTimeSeries/numClasses;
-if pointsPerClass < 5
-    numFolds = 2;
-elseif pointsPerClass < 10
-    numFolds = 5;
-else
-    numFolds = 10;
-end
+numFolds = howManyFolds(timeSeriesGroup,numClasses);
 
 BF_ResetSeed(seedReset); % reset the random seed for CV-reproducibility
-
-%-------------------------------------------------------------------------------
-% Set up the loss function
-
-classNumbers = arrayfun(@(x)sum(timeSeriesGroup==x),1:numClasses);
-isBalanced = all(classNumbers==classNumbers(1));
-
-% Get the misclassification rate from each fold:
-if isBalanced
-    fprintf(1,'Using overall classification accuracy as output measure\n');
-    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,'acc',numClasses);
-    outputStat = 'Overall classification rate';
-else
-    fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
-    outputStat = 'Balanced classification rate';
-    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,'balancedAcc',numClasses);
-end
 
 %-------------------------------------------------------------------------------
 % Fit the classification model to the dataset (for each cross-validation fold)
@@ -107,7 +80,7 @@ end
 fprintf(1,['Training and evaluating a %u-class %s classifier in a %u-feature' ...
                         ' space using %u-fold cross validation...\n'],...
                         numClasses,whatClassifier,numFeatures,numFolds);
-[foldLosses,CVMdl] = GiveMeFoldLosses(TS_DataMat,timeSeriesGroup);
+[foldLosses,CVMdl,outputStat] = GiveMeFoldLosses(TS_DataMat,timeSeriesGroup);
 
 fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
                  ' features:\n%.3f +/- %.3f%%\n\n'],...
@@ -212,13 +185,10 @@ if doPCs
 end
 
 %-------------------------------------------------------------------------------
-function [foldLosses,CVMdl] = GiveMeFoldLosses(dataMatrix,dataLabels)
+function [foldLosses,CVMdl,whatLoss] = GiveMeFoldLosses(dataMatrix,dataLabels)
     % Returns the output (e.g., loss) for the custom fn_loss function across all folds
-    [foldLosses,CVMdl] = GiveMeCfn(whatClassifier,dataMatrix,...
+    [foldLosses,CVMdl,whatLoss] = GiveMeCfn(whatClassifier,dataMatrix,...
                             dataLabels,[],[],numClasses,[],[],1,numFolds);
-    % yPredict = kfoldPredict(CVMdl);
-    % foldLosses = arrayfun(@(x)fn_loss(dataLabels(CVMdl.Partition.test(x)),...
-    %                                 yPredict(CVMdl.Partition.test(x))),1:numFolds);
 end
 
 end
