@@ -1,4 +1,4 @@
-function [accuracy,Mdl] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,reWeight,CVFolds)
+function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,reWeight,CVFolds)
 % GiveMeFunctionHandle    Returns classification results from training a classifier on training/test data
 %
 %---INPUTS:
