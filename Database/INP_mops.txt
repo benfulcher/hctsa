@@ -125,6 +125,11 @@ CO_AutoCorr(y,40,'Fourier')	AC_40
 CO_FirstZero(y,'ac')	CO_FirstZero_ac
 CO_f1ecac(y)			CO_f1ecac
 CO_FirstMin(y,'ac')	CO_FirstMin_ac
+CO_FirstMin(y,'mi-gaussian')	CO_FirstMin_mi-gaussian
+CO_FirstMin(y,'mi-kraskov1','4')  CO_FirstMin_mi-kraskov1_4
+CO_FirstMin(y,'mi-kraskov2','4')  CO_FirstMin_mi-kraskov2_4
+CO_FirstMin(y,'mi-hist',5)  CO_FirstMin_mi-hist_5
+CO_FirstMin(y,'mi-hist',10)  CO_FirstMin_mi-hist_10
 CO_NonlinearAutocorr(y,[1,2])	AC_nl_12
 CO_NonlinearAutocorr(y,[1,2,3])	AC_nl_123
 CO_NonlinearAutocorr(y,[1,2,3,4])	AC_nl_1234
@@ -191,12 +196,6 @@ CO_RM_AMInformation(y,7)	CO_RM_AMInformation_7
 CO_RM_AMInformation(y,8)	CO_RM_AMInformation_8
 CO_RM_AMInformation(y,9)	CO_RM_AMInformation_9
 CO_RM_AMInformation(y,10)	CO_RM_AMInformation_10
-CO_FirstMin(y,'mi-gaussian')	CO_FirstMin_mi-gaussian
-CO_FirstMin(y,'mi-kernel')  CO_FirstMin_mi-kernel
-CO_FirstMin(y,'mi-kraskov1','4')  CO_FirstMin_mi-kraskov1_4
-CO_FirstMin(y,'mi-kraskov2','4')  CO_FirstMin_mi-kraskov2_4
-CO_FirstMin(y,'mi-hist',5)  CO_FirstMin_mi-hist_5
-CO_FirstMin(y,'mi-hist',10)  CO_FirstMin_mi-hist_10
 CO_HistogramAMI(y,1:5,'std1',2)	CO_HistogramAMI_std1_2
 CO_HistogramAMI(y,1:5,'std1',5)	CO_HistogramAMI_std1_5
 CO_HistogramAMI(y,1:5,'std1',10)	CO_HistogramAMI_std1_10
