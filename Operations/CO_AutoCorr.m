@@ -3,9 +3,12 @@ function out = CO_AutoCorr(y,tau,whatMethod)
 %
 %---INPUTS:
 % y, a scalar time series column vector.
+% 
 % tau, the time-delay. If tau is a scalar, returns autocorrelation for y at that
 %       lag. If tau is a vector, returns autocorrelations for y at that set of
-%       lags.
+%       lags. Can set tau empty, [], to return the full function for the
+%       'Fourier' estimation method.
+%
 % whatMethod, the method of computing the autocorrelation: 'Fourier',
 %             'TimeDomainStat', or 'TimeDomain'.
 %
@@ -47,7 +50,7 @@ function out = CO_AutoCorr(y,tau,whatMethod)
 % ------------------------------------------------------------------------------
 % Check inputs:
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(tau)
+if nargin < 2
     tau = 1; % Use a lag of 1 by default
 end
 
@@ -58,11 +61,13 @@ end
 %-------------------------------------------------------------------------------
 % Initial checks on tau:
 %-------------------------------------------------------------------------------
-if max(tau) > length(y)-1 % -1 because acf(1) is lag 0
-    warning('Time lag %u is too long for time-series length %u',max(tau),length(y))
-end
-if min(tau) < 0
-    warning('Negative time lags not applicable')
+if ~isempty(tau)
+    if max(tau) > length(y)-1 % -1 because acf(1) is lag 0
+        warning('Time lag %u is too long for time-series length %u',max(tau),length(y))
+    end
+    if min(tau) < 0
+        warning('Negative time lags not applicable')
+    end
 end
 
 % ------------------------------------------------------------------------------
@@ -86,12 +91,16 @@ case 'Fourier'
 
     acf = acf(1:length(y));
 
-    out = zeros(length(tau),1);
-    for i = 1:length(tau)
-        if (tau(i) > length(acf)-1) || (tau(i) < 0)
-            out(i) = NaN;
-        else
-            out(i) = acf(tau(i)+1);
+    if isempty(tau) % return the full function
+        out = acf;
+    else % return a specific set of values
+        out = zeros(length(tau),1);
+        for i = 1:length(tau)
+            if (tau(i) > length(acf)-1) || (tau(i) < 0)
+                out(i) = NaN;
+            else
+                out(i) = acf(tau(i)+1);
+            end
         end
     end
 

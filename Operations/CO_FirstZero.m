@@ -56,14 +56,16 @@ end
 % Eventually could add additional self-correlation functions
 switch corrFun
 case 'ac'
-    Corr_fn = @(x) CO_AutoCorr(y,x,'Fourier'); % autocorrelation at time lag x
+    % Autocorrelation at all time lags
+    corrs = CO_AutoCorr(y,[],'Fourier');
+    corrs = corrs(2:end); % remove the zero-lag result
 otherwise
     error('Unknown correlation function ''%s''',corrFun);
 end
 
 % Calculate autocorrelation at increasing lags, until you find a negative one
 for tau = 1:maxTau-1
-    if Corr_fn(tau) < 0 % we know it starts positive (1), so first negative will be the zero-crossing
+    if corrs(tau) < 0 % we know it starts positive (1), so first negative will be the zero-crossing
         out = tau; return
     end
 end
