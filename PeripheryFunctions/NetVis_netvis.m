@@ -214,15 +214,11 @@ if ~isempty(textLabels)
 end
 
 % ------------------------------------------------------------------------------
-% Number of approximations used in the evaluation of the repulsion forces:
-% ------------------------------------------------------------------------------
-numApprox = 15;
-
-% ------------------------------------------------------------------------------
-% Maximum number of iterations:
+% Set optimization parameters:
 % ------------------------------------------------------------------------------
 maxIter = nits(1); % iterations per run;
 numRepeats = nits(2); % number of repeats
+numApprox = 15; % Number of approximations used in the evaluation of the repulsion forces
 
 % ------------------------------------------------------------------------------
 % Deduct the diagonal entries
@@ -231,7 +227,7 @@ B = A - diag(diag(A));
 L = diag(sum(B,2)) - B; % Laplacian
 E = L + k*numNodes*speye(numNodes);
 R = chol(sparse(E));
-Rtr  = R';
+Rtr = R';
 
 Energy = zeros(numRepeats,3); % energies, gradients
 xy = cell(numRepeats,1); % sets of node positions (x,y)
@@ -245,7 +241,7 @@ for jman = 1:numRepeats
 
     % Run through the mechanics of the visualization method:
     for iter = 1:maxIter  % Could use a threshold on the gradient here
-        f = NetVis_Jtilda2d(x,y,numApprox); % Gets the repulsion forces using an approximation
+        [f,g] = NetVis_Jtilda2d(x,y,numApprox); % Gets the repulsion forces using an approximation
         J = [(E*x-f);(E*y-g)]; % This is the full gradient (attraction - repulsion)
         % This is only to plot the residual (so can be removed for speed)
         x = R\(Rtr\f); x = x-mean(x); % Update and center
@@ -260,9 +256,15 @@ for jman = 1:numRepeats
     Energy(jman,3) = RR(2,1);
     xy{jman} = [x,y];
 
-    fprintf(1,['Iteration %u/%u: E = %.2g [%.2g] (grad = %.2g),' ...
-                    ' corr(input_distance,2d_euclidean_distance) = %.2g)\n'],...
-                jman,numRepeats, ...
+    if numRepeats > 1
+        repeatText = sprintf('Repeat %u/%u: ',jman,numRepeats);
+    else
+        repeatText = '';
+    end
+
+    fprintf(1,['%sE = %.2g [%.2g] (grad = %.2g)\n' ...
+                    'corr(input_distance,2d_euclidean_distance) = %.2g\n'],...
+                repeatText, ...
                 Energy(jman,1), ...
                 Energy(jman,1) - min(Energy(1:jman-1,1)), ...
                 Energy(jman,2), ...
@@ -297,9 +299,11 @@ hold off
 % Go through each thresholded adjacency matrix (mutually exclusive links), Ath
 % and plot the links in them a different color
 sizeDecline = linspace(1,0.5,length(linkThresh));
-for i = sort(anyLinks,2,'descend') % length(Ath):-1:1 % plot the weakest links first
-    [X,Y] = gplot(Ath{i},[x y]); %,'color',clinks{2}); %,'color',c{2}); % links
-    plot(X(:),Y(:),'Color',clinks{i},'LineWidth',2*sizeDecline(i)); % (length(A)-i+1)*0.8
+ordering = sort(anyLinks,2,'descend');
+for i = 1:length(ordering) % length(Ath):-1:1 % plot the weakest links first
+    ii = ordering(i);
+    [X,Y] = gplot(Ath{ii},[x y]); %,'color',clinks{2}); %,'color',c{2}); % links
+    plot(X(:),Y(:),'Color',clinks{ii},'LineWidth',2*sizeDecline(ii)); % (length(A)-i+1)*0.8
     hold on
 end
 
