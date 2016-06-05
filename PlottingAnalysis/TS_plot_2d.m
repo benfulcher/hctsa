@@ -206,9 +206,10 @@ if numClasses > 1
         fprintf(1,'Estimating %u-class classification rates for each feature (and in combination)...\n',numClasses);
         classRate(1) = GiveMeCfn(whatClassifier,Features(:,1),groupLabels,Features(:,1),groupLabels,numClasses);
         classRate(2) = GiveMeCfn(whatClassifier,Features(:,2),groupLabels,Features(:,2),groupLabels,numClasses);
-        classRate(3) = GiveMeCfn(whatClassifier,Features,groupLabels,Features(:,1:2),groupLabels,numClasses);
+        [classRate(3),~,whatLoss] = GiveMeCfn(whatClassifier,Features,groupLabels,Features(:,1:2),groupLabels,numClasses);
         % Record that classification was performed successfully:
         didClassify = 1;
+        fprintf(1,'%s in 2-d space: %.2f%%\n',whatLoss,classRate(3));
     catch emsg
         fprintf(1,'\nLinear classification rates not computed\n(%s)\n',emsg.message);
         classRate(:) = NaN;

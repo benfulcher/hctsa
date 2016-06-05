@@ -57,7 +57,12 @@ if nargin < 4 || isempty(linkageMethodCol)
     linkageMethodCol = 'average';
 end
 
-% argument 5, doSave, set later
+% argument 5, doSave, set defaults later
+if nargin >= 5
+    if length(doSave)~=2
+        error('doSave has two components: for (i) time series and (ii) operations');
+    end
+end
 
 % What file to use:
 if nargin < 6
@@ -169,7 +174,7 @@ function [ordering,didUpdate] = getDistances(dMetricNow,tsOrOps,theLinkageMethod
                 Dij = clust_data.Dij;
                 didUpdate(1) = 0;
             else
-                fprintf(1,'Changing distance metric for %s from %s to %s\n',...
+                fprintf(1,'Changing distance metric for %s from ''%s'' to ''%s''.\n',...
                             theWhat,clust_data.distanceMetric,dMetricNow);
                 Dij = TS_PairwiseDist(tsOrOps,theFile,dMetricNow,saveBack);
             end

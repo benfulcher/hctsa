@@ -18,11 +18,11 @@ function newFileName = TS_FilterData(whatData,ts_keepIDs,op_keepIDs,newFileName)
 % (*) Remove length-dependent features from a raw ('HCTSA.mat') file and save to a
 % new file, 'HCTSA_notLocDep.mat':
 % >>[~,IDs_notlocDep] = TS_getIDs('lengthdep','raw','ops');
-% >> TS_FilterData('raw',[],ID_notlocDep,'HCTSA_notLocDep.mat');
+% >>TS_FilterData('raw',[],ID_notlocDep,'HCTSA_notLocDep.mat');
 %
-% (*) Remove time series with the keyword 'patient' from an hctsa file:
-% >>[~,IDs_notPatient] = TS_getIDs('patient','raw','ts');
-% >> TS_FilterData('raw',[],IDs_notPatient,'HCTSA_noPatient.mat');
+% (*) Keep only time series with the keyword 'patient' from an hctsa file:
+% >>IDs_patient = TS_getIDs('patient','raw','ts');
+% >>TS_FilterData('raw',IDs_Patient,[],'HCTSA_noPatient.mat');
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -57,30 +57,53 @@ end
 % Load data
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-load(whatDataFile,'TS_Quality','MasterOperations');
 
-% First check that fromDatabase exists (for back-compatability)
-fileVarsStruct = whos('-file',whatDataFile);
-fileVars = {fileVarsStruct.name};
-if ismember('fromDatabase',fileVars)
-    load(whatDataFile,'fromDatabase')
+% May be feeding in a loaded data structure:
+if isstruct(whatData)
+    TS_Quality = whatData.TS_Quality;
+    MasterOperations = whatData.MasterOperations;
+    if isfield(whatData,'fromDatabase')
+        fromDatabase = whatData.fromDatabase;
+    else
+        fromDatabase = 1;
+    end
+    if isfield(whatData,'groupNames')
+        groupNames = whatData.groupNames;
+    else
+        groupNames = {};
+    end
+    if isfield(whatData,'normalizationInfo')
+        normalizationInfo = whatData.normalizationInfo;
+    else
+        normalizationInfo = '';
+    end
 else
-    fromDatabase = 1; % (legacy: set to 1 by default)
+    load(whatDataFile,'TS_Quality','MasterOperations');
+
+    % First check that fromDatabase exists (for back-compatability)
+    fileVarsStruct = whos('-file',whatDataFile);
+    fileVars = {fileVarsStruct.name};
+    if ismember('fromDatabase',fileVars)
+        load(whatDataFile,'fromDatabase')
+    else
+        fromDatabase = 1; % (legacy: set to 1 by default)
+    end
+
+    % Check that we have the groupNames if already assigned labels
+    if ismember('groupNames',fileVars)
+        load(whatDataFile,'groupNames');
+    else
+        groupNames = {};
+    end
+
+    % Check if normalizationInfo is present:
+    if ismember('normalizationInfo',fileVars)
+        load(whatDataFile,'normalizationInfo');
+    else
+        normalizationInfo = '';
+    end
 end
 
-% Check that we have the groupNames if already assigned labels
-if ismember('groupNames',fileVars)
-    load(whatDataFile,'groupNames');
-else
-    groupNames = {};
-end
-
-% Check if normalizationInfo is present:
-if ismember('normalizationInfo',fileVars)
-    load(whatDataFile,'normalizationInfo');
-else
-    normalizationInfo = '';
-end
 
 %-------------------------------------------------------------------------------
 % Do the row filtering:
@@ -136,7 +159,7 @@ end
 fprintf(1,'Saving the filtered data to %s...',newFileName);
 save(newFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
         'MasterOperations','fromDatabase','groupNames','normalizationInfo',...
-        'ts_clust','op_clust');
-fprintf(1,'Done.\n',newFileName);
+        'ts_clust','op_clust','-v7.3');
+fprintf(1,'Done.\n');
 
 end

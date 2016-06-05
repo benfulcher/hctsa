@@ -53,7 +53,7 @@ if nargin < 8 || isempty(whatLoss)
     else
         whatLoss = 'balancedAcc';
         reWeight = 1;
-        fprintf(1,'Unbalanced classes: using a balanced accuracy measure to select features (& using reweighting)...\n');
+        fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
     end
 end
 if ~exist('reWeight','var')

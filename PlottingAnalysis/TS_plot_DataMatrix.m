@@ -60,6 +60,11 @@ default_colorGroups = 0;
 check_colorGroups = @(x) (x==0 || x==1);
 addOptional(inputP,'colorGroups',default_colorGroups,check_colorGroups);
 
+% groupReorder, reorder within groups of time series:
+default_groupReorder = 0;
+check_groupReorder = @(x) (x==0 || x==1);
+addOptional(inputP,'groupReorder',default_groupReorder,check_groupReorder);
+
 % custom color map, customColorMap
 default_customColorMap = 'redyellowblue';
 addOptional(inputP,'customColorMap',default_customColorMap,@ischar);
@@ -82,6 +87,7 @@ addTimeSeries = inputP.Results.addTimeSeries;
 whatData = inputP.Results.whatData;
 timeSeriesLength = inputP.Results.timeSeriesLength;
 colorGroups = inputP.Results.colorGroups;
+groupReorder = inputP.Results.groupReorder;
 customColorMap = inputP.Results.customColorMap;
 colorNaNs = inputP.Results.colorNaNs;
 customOrder = inputP.Results.customOrder;
@@ -93,16 +99,6 @@ clear inputP;
 % You always want to retrieve and plot the clustered data if it exists:
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData,1);
 
-if colorGroups
-    if isfield(TimeSeries,'Group')
-        timeSeriesGroups = [TimeSeries.Group];
-        fprintf(1,'Coloring groups of time series...\n');
-    else
-        warning('No group information found')
-        colorGroups = 0;
-    end
-end
-
 [numTS, numOps] = size(TS_DataMat); % size of the data matrix
 
 % ------------------------------------------------------------------------------
@@ -111,7 +107,8 @@ end
 if ~isempty(customOrder{1}) % reorder rows
 	fprintf(1,'Reordering time series according to custom order specified.\n');
 	TS_DataMat = TS_DataMat(customOrder{1},:);
-    TimeSeries = timeSeries(customOrder{1});
+    TimeSeries = TimeSeries(customOrder{1});
+
 end
 
 if ~isempty(customOrder{2}) % reorder columns
@@ -120,11 +117,41 @@ if ~isempty(customOrder{2}) % reorder columns
     Operations = Operations(customOrder{2});
 end
 
+%-------------------------------------------------------------------------------
+% Check group information
+%-------------------------------------------------------------------------------
+if isfield(TimeSeries,'Group')
+    timeSeriesGroups = [TimeSeries.Group];
+    numClasses = max(timeSeriesGroups);
+    fprintf(1,'Coloring groups of time series...\n');
+else
+    warning('No group information found')
+    colorGroups = 0;
+end
+
+%-------------------------------------------------------------------------------
+% Reorder according to groups
+%-------------------------------------------------------------------------------
+if groupReorder
+    [~,ixData] = sort(timeSeriesGroups,'ascend');
+    dataMatReOrd = TS_DataMat(ixData,:);
+    ixAgain = ixData;
+    numClasses
+    for i = 1:numClasses
+        isGroup = [TimeSeries(ixData).Group]==i;
+        ordering = BF_ClusterReorder(dataMatReOrd(isGroup,:),'euclidean','average');
+        istmp = ixData(isGroup);
+        ixAgain(isGroup) = istmp(ordering);
+    end
+    ixData = ixAgain; % set ordering to ordering within groups
+    TimeSeries = TimeSeries(ixData);
+    TS_DataMat = TS_DataMat(ixData,:);
+    timeSeriesGroups = timeSeriesGroups(ixData);
+end
+
 % --------------------------------------------------------------------------
 %% Prepare data matrix for plotting
 % --------------------------------------------------------------------------
-numColorMapGrads = 6; % number of gradations in each set of colourmap
-
 if colorGroups
     gi = BF_ToGroup(timeSeriesGroups);
 
@@ -160,67 +187,18 @@ end
 %% Set the colormap
 % --------------------------------------------------------------------------
 if numGroups <= 1
+    numColorMapGrads = 6; % number of gradations in each set of colourmap
     if strcmp(customColorMap,'redyellowblue');
         customColorMap = flipud(BF_getcmap('redyellowblue',numColorMapGrads,0));
     else
         customColorMap = gray(numColorMapGrads);
     end
 else
-    customColorMap = colormap(BF_getcmap('blues',numColorMapGrads,0,1));
-    if numGroups >= 2
-        customColorMap = [customColorMap; BF_getcmap('greens',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 3
-        customColorMap = [customColorMap; BF_getcmap('oranges',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 4
-        customColorMap = [customColorMap; BF_getcmap('purples',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 5
-        customColorMap = [customColorMap; BF_getcmap('reds',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 6
-        customColorMap = [customColorMap; pink(numColorMapGrads)];
-    end
-    if numGroups >= 7
-        customColorMap = [customColorMap; gray(numColorMapGrads)];
-    end
-    if numGroups >= 8
-        customColorMap = [customColorMap; BF_getcustomColorMap('yelloworangered',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 9
-        customColorMap = [customColorMap; BF_getcmap('purplebluegreen',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 10
-        customColorMap = [customColorMap; BF_getcmap('yellowgreenblue',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 11
-        customColorMap = [customColorMap; BF_getcmap('purpleblue',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 12
-        customColorMap = [customColorMap; BF_getcmap('purplered',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 13
-        customColorMap = [customColorMap; BF_getcmap('redpurple',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 14
-        customColorMap = [customColorMap; BF_getcmap('orangered',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 15
-        customColorMap = [customColorMap; BF_getcmap('yelloworangebrown',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 16
-        customColorMap = [customColorMap; BF_getcmap('greenblue',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 17
-        customColorMap = [customColorMap; BF_getcmap('bluepurple',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 18
-        customColorMap = [customColorMap; BF_getcmap('bluegreen',numColorMapGrads,0,1)];
-    end
-    if numGroups >= 19
-        fprintf(1,'Too many data groups to colour them correctly\n');
-        customColorMap = BF_getcmap('spectral',numColorMapGrads);
+    numColorMapGrads = 20; % number of gradations in each set of colourmap
+    colormapBase = GiveMeColors(numGroups);
+    customColorMap = [];
+    for i = 1:numGroups
+        customColorMap = [customColorMap; BF_MakeBrightenedColorMap(colormapBase{i},numColorMapGrads)];
     end
 end
 

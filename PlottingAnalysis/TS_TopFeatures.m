@@ -11,25 +11,26 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 %---INPUTS:
 % whatData, the hctsa data to use (input to TS_LoadData, default: 'raw')
 % whatTestStat, the test statistic to quantify the goodness of each feature
-%               (one of: 'tstat', 'svm', 'linear', 'diaglinear')
-% doNull, (binary) whether to compute a null distribution using permutations of the class
-%           labels
+%               (e.g., 'fast_linear', 'tstat', 'svm', 'linear', 'diaglinear',
+%                or others supported by GiveMeFunctionHandle)
+% doNull, (boolean) whether to compute a null distribution using permutations
+%           of the class labels
 %
 % ***Additional plotting options***:
 % 'whatPlots', can specify what output plots to produce (cell of strings), e.g.,
-%               specify {'histogram','distributions','cluster'} to produce all
-%               three possible output plots (this is the default).
+%               specify {'histogram','distributions','cluster','datamatrix'} to
+%               produce all four possible output plots (this is the default).
 % 'numTopFeatures', can specify the number of top features to analyze, both in
 %                   terms of the list of outputs, the histogram plots, and the
 %                   cluster plot.
 % 'numHistogramFeatures', can optionally also set a custom number of histograms
 %                       to display (often want to set this lower to avoid producing
-%                       large numbers of figures)
+%                       large numbers of figures).
 %
 %---EXAMPLE USAGE:
 %
 % TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions',...
-%                           'cluster'},'numTopFeatures',20);
+%           'cluster','datamatrix'},'numTopFeatures',40,'numHistogramFeatures',10);
 %
 %---OUTPUTS:
 % ifeat, the ordering of operations by their performance
@@ -66,9 +67,9 @@ if nargin < 3
     doNull = 1; % compute an empirical null distribution by randomizing class labels
 end
 
-% Use an inputParser to control plotting options:
+% Use an inputParser to control additional plotting options as parameters:
 inputP = inputParser;
-default_whatPlots = {'histogram','distributions','cluster'};
+default_whatPlots = {'histogram','distributions','datamatrix','cluster'};
 check_whatPlots = @(x) iscell(x) || ischar(x);
 addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 default_numTopFeatures = 40;
@@ -334,6 +335,18 @@ if any(ismember(whatPlots,'distributions'))
                                 cfnName,testStat(op_ind),cfnUnit),'interpreter','none')
         end
     end
+end
+
+%-------------------------------------------------------------------------------
+% Data matrix containing top features
+%-------------------------------------------------------------------------------
+if any(ismember(whatPlots,'datamatrix'))
+    featInd = ifeat(1:numTopFeatures);
+    ixFeat = BF_ClusterReorder(TS_DataMat(:,featInd)','corr','average');
+    whatData = struct('TS_DataMat',TS_DataMat(:,featInd(ixFeat)),...
+                    'TimeSeries',TimeSeries,...
+                    'Operations',Operations(featInd(ixFeat)));
+    TS_plot_DataMatrix(whatData,'colorGroups',1,'groupReorder',1);
 end
 
 %-------------------------------------------------------------------------------
