@@ -121,7 +121,7 @@ if forDatabase
     if isempty(output) % Table doesn't exist
         error(['Table %s doesn''t exist in the database %s.\n' ...
                     'Use: (1) install.m to set the database system up from scratch,\n' ...
-                    '(2) SQL_create_all_tables to create empty tables that can later be filled with custom libraries of operations,' ...
+                    '(2) SQL_create_all_tables to create empty tables that can later be filled with custom libraries of operations,\n' ...
                     '(3) SQL_reset to drop all tables in the database, and repopulate all tables with the default library of operations.'],...
                     theTable,databaseName);
     end
@@ -639,11 +639,9 @@ fprintf(1,' Done.\n');
 % ------------------------------------------------------------------------------
 if ~strcmp(addWhat,'mops')
     resultsTic = tic;
-    if beVocal
-        fprintf(1,'Updating the Results table in %s...(This could take a while)...',databaseName);
-        if strcmp(addWhat,'ts') && length(TimeSeries) > 1000
-            fprintf(1,'\n(e.g., ~10 hours for 20,000 time series with 9,000 operations---please be patient!)...')
-        end
+    fprintf(1,'Updating the Results table in %s...(This could take a while)...',databaseName);
+    if strcmp(addWhat,'ts') && length(TimeSeries) > 1000
+        fprintf(1,'\n(e.g., ~10 hours for 20,000 time series with 9,000 operations---please be patient!)...')
     end
     switch addWhat
     case 'ts'
@@ -656,9 +654,7 @@ if ~strcmp(addWhat,'mops')
     if ~isempty(emsg)
         fprintf(1,' Error. This is really really not good.\n%s',emsg);
     else
-        if beVocal
-            fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultsTic)));
-        end
+        fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultsTic)));
     end
 end
 
@@ -754,7 +750,7 @@ if ~strcmp(addWhat,'mops')
 
 
     % Update Nmatches in the keywords table
-    fprintf(1,' Done.\nNow computing all match counts for all keywords...');
+    fprintf(1,' Done.\nNow computing all match counts for all keywords...\n');
     SQL_FlushKeywords(addWhat);
     % % Redo them from scratch should be easier actually...?
     % Except this doesn't work reliably
@@ -782,7 +778,7 @@ if ~strcmp(addWhat,'mops')
     %         fprintf(1,'\n Error updating keyword count in %s',theKeywordTable)
     %     end
     % end
-    fprintf(1,' Done.\n');
+    % fprintf(1,' Done.\n');
 end
 
 % ------------------------------------------------------------------------------

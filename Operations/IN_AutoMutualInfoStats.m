@@ -1,5 +1,5 @@
 function out = IN_AutoMutualInfoStats(y,maxTau,estMethod,extraParam)
-% IN_AutoMutualInfoStats    Statistics on automutual information function for a time series.
+% IN_AutoMutualInfoStats  Statistics on automutual information function for a time series.
 %
 %---INPUTS:
 % y, column vector of time series data

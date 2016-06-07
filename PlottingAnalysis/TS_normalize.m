@@ -17,7 +17,7 @@ function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA
 % fileName_HCTSA: Custom filename to import. Default is 'HCTSA.mat'.
 %
 % classVarFilter: whether to filter on zero variance of any given class (which
-%                   causes problems for many classification algorithms)
+%                 can cause problems for many classification algorithms).
 %
 % subs [opt]: Only normalize and trim a subset of the data matrix. This can be used,
 %             for example, to analyze just a subset of the full space, which can
@@ -291,11 +291,11 @@ outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName);
 save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
         'MasterOperations','fromDatabase','groupNames','normalizationInfo',...
-        'ts_clust','op_clust');
+        'ts_clust','op_clust','-v7.3');
 fprintf(1,' Done.\n');
 
 %-------------------------------------------------------------------------------
-function keepInd = filterNaNs(XMat,nan_thresh,objectName);
+function keepInd = filterNaNs(XMat,nan_thresh,objectName)
     % Returns an index of rows of XMat with at least nan_thresh good values.
 
     if nan_thresh == 0

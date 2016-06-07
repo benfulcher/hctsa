@@ -322,12 +322,21 @@ end
 % Network Visualization
 % ------------------------------------------------------------------------------
 if any(ismember(whatPlots,'network'))
-    numNetwork = 30; % max neighbors for network vis
+
+    % First ensure that no more than a maximum number of neighbors are plotted:
+    numNetwork = 35; % max neighbors for network vis
+    if numNeighbors > numNetwork
+        warning('Displaying a maximum of %u neighbors for the network visualization',numNetwork)
+    end
     numNetwork = min(numNeighbors,numNetwork); % number neighbours for network
 
-    % Acl of distances, and a labelscl of labels
+    % Define the adjacency matrix, A (target node is 1)
     A = 1 - Dij(1:numNetwork,1:numNetwork);
 
+    % Remove the diagonal:
+    A(logical(eye(size(A)))) = 0;
+
+    % Assign group labels (or just distinguish the target)
     if isfield(dataStruct,'Group')
         nodeLabels = [dataStruct.Group];
         nodeLabels = nodeLabels(dix(1:numNetwork));
@@ -343,8 +352,7 @@ if any(ismember(whatPlots,'network'))
         dataLabels = {};
     end
 
-    A(logical(eye(size(A)))) = 0;
-    NetVis_netvis(A,'k',0.01,'textLabels',{dataStruct.Name},...
+    NetVis_netvis(A,'k',0.01,'textLabels',{dataStruct(dix(1:numNetwork)).Name},...
                     'linkThresh',[0.9,0.8,0.7,0.6],...
                     'nodeLabels',nodeLabels,...
                     'dataLabels',dataLabels,...

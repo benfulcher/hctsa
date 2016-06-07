@@ -9,7 +9,7 @@ function TS_classify(whatData,whatClassifier,doPCs,seedReset)
 %
 %---INPUTS:
 % whatData, the hctsa data to use (input to TS_LoadData)
-% whatClassifier, the classification method to use ('svm', 'knn', 'linear')
+% whatClassifier, the classification method to use (e.g., 'svm_linear', 'knn', 'linear')
 % doPCs, (binary) whether to investigate the behavior of different numbers of PCs of the
 %        data matrix (default: 1)
 % seedReset, input to BF_ResetSeed, specifying whether (and how) to reset the

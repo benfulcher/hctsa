@@ -90,7 +90,7 @@ This excellent repository allows users to run *hctsa* software from within pytho
 
 ### Comp-Engine Time Series
 
-An accompanying web resource for this project is [Comp-Engine Time Series](www.comp-engine.org/timeseries), which allows users to compare thousands of diverse types of time-series analysis code and time-series data.
+An accompanying web resource for this project is [Comp-Engine Time Series](http://www.comp-engine.org/timeseries), which allows users to compare thousands of diverse types of time-series analysis code and time-series data.
 Note that the code files on Comp-Engine Time Series are based on an early implementation and rarely match with the updated features and functions contained in this repository.
 
 ### Other time-series analysis software packages

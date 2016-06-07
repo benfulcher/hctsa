@@ -69,13 +69,13 @@ predLabels = predict(Mdl,predRange);
 
 %-------------------------------------------------------------------------------
 % Annotate rectangles under the distribution reflecting the predictive model:
+xPlotted = ax.XLim;
+yPlotted = ax.YLim;
 switch underOrLeft
 case 'under'
-    yPlotted = ax.YLim;
-    rectHeight = 0.1*diff(ax.YLim);
+    rectHeight = 0.1*diff(yPlotted);
 case 'left'
-    xPlotted = ax.XLim;
-    rectHeight = 0.05*diff(ax.XLim);
+    rectHeight = 0.05*diff(xPlotted);
 end
 
 ind = 1;

@@ -4,8 +4,8 @@ function [f,g] = NetVis_Jtilda2d(x,y,n)
 % Code provided by David Smith
 
 N = length(x);
-if(nargin<3)
-    n=10;
+if nargin < 3
+    n = 10;
 end
 multfactor = pi/(n*4);
 
