@@ -77,6 +77,7 @@ DN_Quantile(y,0.99)	DN_Quantile_99
 DN_cv(x,1)	DN_cv_1
 DN_cv(x,2)	DN_cv_2
 DN_HighLowMu(x)	DN_HighLowMu
+DN_Unique(x) DN_Unique
 ST_SimpleStats(y,'zcross')	ST_SimpleStats_zcross
 ST_SimpleStats(y,'pmcross')	ST_SimpleStats_pmcross
 DN_ProportionValues(x,'zeros')	DN_ProportionValues_zeros
@@ -854,9 +855,9 @@ DN_CompareKSFit(x,'exp')		DN_CompareKSFit_exp
 DN_CompareKSFit(x,'gamma')		DN_CompareKSFit_gamma
 DN_CompareKSFit(x,'logn')		DN_CompareKSFit_logn
 DN_CompareKSFit(x,'wbl')		DN_CompareKSFit_wbl
-DN_OutlierInclude(y,'abs')	DN_OutlierInclude_abs
-DN_OutlierInclude(y,'p')	DN_OutlierInclude_p
-DN_OutlierInclude(y,'n')	DN_OutlierInclude_n
+DN_OutlierInclude(y,'abs',0.01)	DN_OutlierInclude_abs_001
+DN_OutlierInclude(y,'p',0.01)	DN_OutlierInclude_p_001
+DN_OutlierInclude(y,'n',0.01)	DN_OutlierInclude_n_001
 ST_LocalExtrema(y,'l',50)	ST_LocalExtrema_l50
 ST_LocalExtrema(y,'l',100)	ST_LocalExtrema_l100
 ST_LocalExtrema(y,'n',25)	ST_LocalExtrema_n25
