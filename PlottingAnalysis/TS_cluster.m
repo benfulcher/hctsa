@@ -3,7 +3,7 @@ function TS_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, link
 %
 % Reads in normalized data from HCTSA_N.mat, clusters the data matrix by
 % reordering rows and columns with linkage clustering, and then saves the result
-% back to HCTSA_N.mat
+% back to HCTSA_N.mat (or a custom hctsa file).
 %
 %---EXAMPLE USAGE:
 % TS_cluster;

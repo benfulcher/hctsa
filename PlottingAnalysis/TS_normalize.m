@@ -246,7 +246,8 @@ elseif any(nanCol) % there are columns that are all NaNs
     TS_DataMat = TS_DataMat(:,~nanCol);
     TS_Quality = TS_Quality(:,~nanCol);
     Operations = Operations(~nanCol);
-    fprintf(1,'We just removed %u all-NaN columns from after normalization.\n',sum(nanCol));
+    fprintf(1,'We just removed %u all-NaN columns introduced from %s normalization.\n',...
+                        sum(nanCol),normFunction);
 end
 
 % --------------------------------------------------------------------------

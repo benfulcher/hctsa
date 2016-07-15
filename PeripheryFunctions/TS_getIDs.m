@@ -1,5 +1,6 @@
 function [IDs,notIDs] = TS_getIDs(theKeyword,whatData,tsOrOps)
-% TS_getIDs   Retrieve IDs of time series (or operations) in an hctsa dataset using keyword matching.
+% TS_getIDs   Retrieve IDs of time series (or operations) in an hctsa dataset
+%               using keyword matching.
 %
 %---INPUTS:
 % theKeyword, the keyword to match on (string).

@@ -21,8 +21,8 @@ function newFileName = TS_FilterData(whatData,ts_keepIDs,op_keepIDs,newFileName)
 % >>TS_FilterData('raw',[],ID_notlocDep,'HCTSA_notLocDep.mat');
 %
 % (*) Keep only time series with the keyword 'patient' from an hctsa file:
-% >>IDs_patient = TS_getIDs('patient','raw','ts');
-% >>TS_FilterData('raw',IDs_Patient,[],'HCTSA_noPatient.mat');
+% >> IDs_patient = TS_getIDs('patient','raw','ts');
+% >> TS_FilterData('raw',IDs_Patient,[],'HCTSA_noPatient.mat');
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -120,13 +120,15 @@ end
 %-------------------------------------------------------------------------------
 % Check group information
 %-------------------------------------------------------------------------------
-if isfield(TimeSeries,'Group')
-    timeSeriesGroups = [TimeSeries.Group];
-    numClasses = max(timeSeriesGroups);
-    fprintf(1,'Coloring groups of time series...\n');
-else
-    warning('No group information found')
-    colorGroups = 0;
+if colorGroups==1
+	if isfield(TimeSeries,'Group')
+	    timeSeriesGroups = [TimeSeries.Group];
+	    numClasses = max(timeSeriesGroups);
+	    fprintf(1,'Coloring groups of time series...\n');
+	else
+	    warning('No group information found')
+	    colorGroups = 0;
+	end
 end
 
 %-------------------------------------------------------------------------------
