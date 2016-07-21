@@ -1,12 +1,14 @@
-function [ifeat, testStat, trainErr, testErr, TestClass] = TS_ForwardFS(whatData,iTrain,criterion,cvFolds,numFeatSelect,howzero)
+function [ifeat, testStat, trainErr, testErr, testClass] = TS_ForwardFS(whatData,iTrain,criterion,cvFolds,numFeatSelect)
 % TS_ForwardFS  Greedy forward feature selection
+%
+% --NOT FULLY FUNCTIONAL CURRENTLY--
 %
 % Uses the sequentialfs function from Matlab's Statistics Toolbox.
 % After selecting the features (using specified training indices), then
 % applies the learned classification rule to the training and test sets to get
 % training and test classification errors.
 %
-% Typical usage uses 'linear' for the criterion (linear classification rates),
+% Typical usage uses 'fast_linear' for the criterion (linear classification rates),
 % or 'diaglinear' when there are highly correlated features in the data matrix.
 %
 % NOTE: This function requires a training portion to be specified. If there
@@ -17,15 +19,18 @@ function [ifeat, testStat, trainErr, testErr, TestClass] = TS_ForwardFS(whatData
 %
 %---INPUTS:
 % whatData: the data to load in (cf. TS_LoadData)
-% iTrain: training indices
+% iTrain: indices of data to train on
 % criterion: what criterion on which to evaluate the quality of a feature set
+% cvFolds: the number of cross-validation folds to use in the feature selection
+%           process
+% numFeatSelect: the total number of features to select
 %
 %---OUTPUTS:
 % ifeat: indices of features selected.
 % testStat: test statistics for all operations.
 % trainErr: training errors for selected features.
 % testErr: test errors for selected features.
-% TestClass: classificaiton of the test data.
+% testClass: classification of the test data.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -59,7 +64,7 @@ if nargin < 3 || isempty(criterion)
     fprintf(1,'Default test statistic: Using fast, in-sample linear classification rate\n');
 end
 
-if nargin < 4 || isempty(crossVal)
+if nargin < 4 || isempty(cvFolds)
     cvFolds = 5;
     fprintf(1,'Default: 5-fold cross-validation\n');
 end
@@ -115,7 +120,7 @@ fprintf(1,['Performing greedy forward feature selection ' ...
 opts = statset('display','iter');
 % classify_fn = @(XTrain,yTrain,XTest,yTest) 1 - GiveMeCfn(criterion,XTrain,yTrain,XTest,yTest,numClasses);
 [fs,history] = sequentialfs(classify_fn,TS_DataMat,[TimeSeries.Group]',...
-                    'cv',5,'options',opts,'nfeatures',numFeatSelect);
+                    'cv',cvFolds,'options',opts,'nfeatures',numFeatSelect);
 fprintf(1,'Selected %u features\n',sum(fs));
 
 % Finished selecting features!
