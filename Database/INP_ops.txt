@@ -4265,8 +4265,8 @@ SP_Summaries_pgram_hamm.width_weighted_prom     SP_Summaries_pgram_hamm_width_we
 SP_Summaries_pgram_hamm.peakPower_2     SP_Summaries_pgram_hamm_peakPower_2    spectral
 SP_Summaries_pgram_hamm.peakPower_5     SP_Summaries_pgram_hamm_peakPower_5    spectral
 SP_Summaries_pgram_hamm.peakPower_prom2     SP_Summaries_pgram_hamm_peakPower_prom2    spectral
-SP_Summaries_pgram_hamm.w_weighted_peak     SP_Summaries_pgram_hamm_w_weighted_peak    spectral
-SP_Summaries_pgram_hamm.w_weighted_peak_prom        SP_Summaries_pgram_hamm_w_weighted_peak_prom    spectral
+SP_Summaries_pgram_hamm.w_weighted_peak_prom     SP_Summaries_pgram_hamm_w_weighted_peak_prom    spectral
+SP_Summaries_pgram_hamm.w_weighted_peak_height        SP_Summaries_pgram_hamm_w_weighted_peak_height    spectral
 SP_Summaries_pgram_hamm.numPeaks_50power        SP_Summaries_pgram_hamm_numPeaks_50power    spectral
 SP_Summaries_pgram_hamm.peakpower_1     SP_Summaries_pgram_hamm_peakpower_1    spectral
 SP_Summaries_pgram_hamm.iqr     SP_Summaries_pgram_hamm_iqr    spectral
@@ -4390,8 +4390,8 @@ SP_Summaries_welch_rect.width_weighted_prom     SP_Summaries_welch_rect_width_we
 SP_Summaries_welch_rect.peakPower_2     SP_Summaries_welch_rect_peakPower_2    spectral
 SP_Summaries_welch_rect.peakPower_5     SP_Summaries_welch_rect_peakPower_5    spectral
 SP_Summaries_welch_rect.peakPower_prom2     SP_Summaries_welch_rect_peakPower_prom2    spectral
-SP_Summaries_welch_rect.w_weighted_peak     SP_Summaries_welch_rect_w_weighted_peak    spectral
-SP_Summaries_welch_rect.w_weighted_peak_prom        SP_Summaries_welch_rect_w_weighted_peak_prom    spectral
+SP_Summaries_welch_rect.w_weighted_peak_prom     SP_Summaries_welch_rect_w_weighted_peak_prom    spectral
+SP_Summaries_welch_rect.w_weighted_peak_height        SP_Summaries_welch_rect_w_weighted_peak_height    spectral
 SP_Summaries_welch_rect.numPeaks_50power        SP_Summaries_welch_rect_numPeaks_50power    spectral
 SP_Summaries_welch_rect.peakpower_1     SP_Summaries_welch_rect_peakpower_1    spectral
 SP_Summaries_welch_rect.iqr     SP_Summaries_welch_rect_iqr    spectral
@@ -4514,8 +4514,8 @@ SP_Summaries_fft_logdev.width_weighted_prom     SP_Summaries_fft_logdev_width_we
 SP_Summaries_fft_logdev.peakPower_2     SP_Summaries_fft_logdev_peakPower_2    spectral
 SP_Summaries_fft_logdev.peakPower_5     SP_Summaries_fft_logdev_peakPower_5    spectral
 SP_Summaries_fft_logdev.peakPower_prom2     SP_Summaries_fft_logdev_peakPower_prom2    spectral
-SP_Summaries_fft_logdev.w_weighted_peak     SP_Summaries_fft_logdev_w_weighted_peak    spectral
-SP_Summaries_fft_logdev.w_weighted_peak_prom        SP_Summaries_fft_logdev_w_weighted_peak_prom    spectral
+SP_Summaries_fft_logdev.w_weighted_peak_prom     SP_Summaries_fft_logdev_w_weighted_peak_prom    spectral
+SP_Summaries_fft_logdev.w_weighted_peak_height        SP_Summaries_fft_logdev_w_weighted_peak_height    spectral
 SP_Summaries_fft_logdev.numPeaks_50power        SP_Summaries_fft_logdev_numPeaks_50power    spectral
 SP_Summaries_fft_logdev.peakpower_1     SP_Summaries_fft_logdev_peakpower_1    spectral
 SP_Summaries_fft_logdev.iqr     SP_Summaries_fft_logdev_iqr    spectral

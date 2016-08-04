@@ -216,8 +216,8 @@ nn = @(x) 1:min(x,out.numPeaks);
 out.peakPower_2 = sum(pkHeight(nn(2)).*pkWidth(nn(2)));
 out.peakPower_5 = sum(pkHeight(nn(5)).*pkWidth(nn(5)));
 out.peakPower_prom2 = sum(pkHeight(pkProm > 2).*pkWidth(pkProm > 2)); % power in peaks with prominence of at least 2
-out.w_weighted_peak = sum(pkLoc.*pkProm)/sum(pkProm); % where are prominent peaks located on average (weighted by prominence)
-out.w_weighted_peak_prom = sum(pkLoc.*pkHeight)/sum(pkHeight); % where are prominent peaks located on average (weighted by prominence)
+out.w_weighted_peak_prom = sum(pkLoc.*pkProm)/sum(pkProm); % where are prominent peaks located on average (weighted by prominence)
+out.w_weighted_peak_height = sum(pkLoc.*pkHeight)/sum(pkHeight); % where are prominent peaks located on average (weighted by height)
 
 % Number of peaks required to get to 50% of power in peaks
 peakPower = pkHeight.*pkWidth;
