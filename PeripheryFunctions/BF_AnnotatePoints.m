@@ -32,6 +32,9 @@ if isfield(annotateParams,'n')
 else
     numAnnotate = 6;
 end
+if numAnnotate==0 % no need to go further
+    return
+end
 % Cannot allow to annotate more points than time series
 numAnnotate = min(numAnnotate,numTimeSeries);
 if isfield(annotateParams,'maxL')

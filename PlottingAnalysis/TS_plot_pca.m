@@ -60,7 +60,7 @@ end
 % ------------------------------------------------------------------------------
 
 % Load in data:
-[TS_DataMat,TimeSeries,~,theFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations,theFile] = TS_LoadData(whatData);
 
 % Retrieve group names also:
 fileVarsStruct = whos('-file',theFile);
@@ -80,17 +80,30 @@ fprintf(1,'Calculating principal components of the %u x %u data matrix...\n', ..
 
 % Use pca to compute the first two principal components:
 if ~any(isnan(TS_DataMat))
-    [~,pcScore,~,~,percVar] = pca(TS_DataMat,'NumComponents',2,'Centered','on');
+    [pcCoeff,pcScore,~,~,percVar] = pca(TS_DataMat,'NumComponents',2,'Centered','on');
 else
     warning(sprintf(['Data matrix contains %.2g%% NaNs. Estimating covariances on remaining data...\n' ...
                 '(Could take some time...)'],100*mean(isnan(TS_DataMat(:)))))
     % Data matrix contains NaNs; try the pairwise rows approximation to the
     % covariance matrix:
-    [~,pcScore,~,~,percVar] = pca(TS_DataMat,'Rows','pairwise','Centered','on');
+    [pcCoeff,pcScore,~,~,percVar] = pca(TS_DataMat,'Rows','pairwise','Centered','on');
     % If this fails (covariance matrix not positive definite), could try
     % the 'algorithm','als' option in pca...
 end
 fprintf(1,'---Done.\n');
+
+%-------------------------------------------------------------------------------
+% Print out the types of features loading into the two components
+%-------------------------------------------------------------------------------
+numTopLoadFeat = 20; % display this many features loading onto each PC
+for j = 1:2
+    fprintf(1,'---PC%u---:\n',j);
+    [~,ix] = sort(abs(pcCoeff(:,j)),'descend');
+    for i = 1:numTopLoadFeat
+        fprintf(1,'(%.3f) [%u] %s (%s)\n',pcCoeff(ix(i),j),Operations(ix(i)).ID,...
+                        Operations(ix(i)).Name,Operations(ix(i)).Keywords);
+    end
+end
 
 % ------------------------------------------------------------------------------
 % Plot this two-dimensional representation of the data using TS_plot_2d

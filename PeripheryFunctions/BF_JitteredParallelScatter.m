@@ -79,7 +79,7 @@ end
 
 % Custom colormap
 if ~isfield(extraParams,'theColors')
-    if numGroups==2
+    if numGroups<=3
         theColors = BF_getcmap('set1',numGroups,1);
     else
         theColors = BF_getcmap('spectral',numGroups,1);

@@ -138,7 +138,6 @@ if groupReorder
     [~,ixData] = sort(timeSeriesGroups,'ascend');
     dataMatReOrd = TS_DataMat(ixData,:);
     ixAgain = ixData;
-    numClasses
     for i = 1:numClasses
         isGroup = [TimeSeries(ixData).Group]==i;
         ordering = BF_ClusterReorder(dataMatReOrd(isGroup,:),'euclidean','average');

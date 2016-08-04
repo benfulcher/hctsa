@@ -1,6 +1,5 @@
 function TS_SingleFeature(whatData,featID,makeViolin)
-% TS_SingleFeature  Plot distributions for a single feature given an ID
-%
+% TS_SingleFeature  Plot distributions for a single feature given a feature ID
 %
 %---INPUTS:
 % whatData: the data to load in (cf. TS_LoadData)
@@ -23,6 +22,8 @@ function TS_SingleFeature(whatData,featID,makeViolin)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Check Inputs:
 if nargin < 3
     makeViolin = 0;
 end
@@ -36,6 +37,8 @@ load(whatDataFile,'groupNames')
 timeSeriesGroup = [TimeSeries.Group]'; % Use group form
 numClasses = max(timeSeriesGroup);
 op_ind = find([Operations.ID]==featID);
+
+fprintf(1,'[%u] %s (%s)\n',featID,Operations(op_ind).Name,Operations(op_ind).Keywords);
 
 %-------------------------------------------------------------------------------
 % Plot this stuff:
@@ -61,6 +64,7 @@ if makeViolin
 
     % Adjust appearance:
     ax = gca;
+    yLimits = ax.YLim;
     ax.XLim = [0.5+extraParams.customOffset,numClasses+0.5+extraParams.customOffset];
     ax.XTick = extraParams.customOffset+(1:numClasses);
     ax.XTickLabel = groupNames(ix);
@@ -70,6 +74,7 @@ if makeViolin
 
     % Annotate rectangles:
     BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax,'left');
+    ax.YLim = yLimits;
 
 else
     linePlots = cell(numClasses,1);
@@ -77,7 +82,7 @@ else
         featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
         [~,~,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,20,1);
     end
-    % Trim x-limits
+    % Trim x-limits (with 2% overreach)
     ax.XLim(1) = min(TS_DataMat(:,op_ind))-0.02*range(TS_DataMat(:,op_ind));
     ax.XLim(2) = max(TS_DataMat(:,op_ind))+0.02*range(TS_DataMat(:,op_ind));
 
@@ -98,8 +103,10 @@ end
 %-------------------------------------------------------------------------------
 % Get cross-validated accuracy for this single feature using a Naive Bayes linear classifier:
 numFolds = 10;
-accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,[],[],numClasses,1,[],[],numFolds);
-classificationText = sprintf('%u-fold cross validated balanced accuracy: %.2f +/- %.2f\n',numFolds,mean(accuracy),std(accuracy));
+accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,...
+                        [],[],numClasses,1,[],[],numFolds);
+classificationText = sprintf('%u-fold cross validated balanced accuracy: %.2f +/- %.2f\n',...
+                        numFolds,mean(accuracy),std(accuracy));
 fprintf(1,classificationText);
 title(classificationText)
 

@@ -69,7 +69,7 @@ end
 
 % Use an inputParser to control additional plotting options as parameters:
 inputP = inputParser;
-default_whatPlots = {'histogram','distributions','datamatrix','cluster'};
+default_whatPlots = {'histogram','distributions','cluster'}; % datamatrix
 check_whatPlots = @(x) iscell(x) || ischar(x);
 addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 default_numTopFeatures = 40;
