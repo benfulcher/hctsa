@@ -22,9 +22,9 @@ function out = MF_arfit(y,pmin,pmax,selector)
 % selector, crierion to select optimal time-series model order (e.g., 'sbc', cf.
 %           ARFIT package documentation)
 %
-%---OUTPUTS: include the model coefficients obtained, the SBCs at each model order,
-% various tests on residuals, and statistics from an eigendecomposition of the
-% time series using the estimated AR model.
+%---OUTPUTS: include the model coefficients obtained, the SBCs at each model
+% order, various tests on residuals, and statistics from an eigendecomposition
+% of the time series using the estimated AR model.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -100,12 +100,10 @@ popt = length(Aest);
 out.A1 = Aest(1);
 for i = 2:6
     if popt >= i
-        out.(['A',num2str(i)]) = Aest(i); % dynamic field referencing
-        % eval(sprintf('out.A%u = Aest(%u);',i,i))
+        out.(sprintf('A%u',i)) = Aest(i);
     else
         % it's as if the higher order coefficients are all zero
-        out.(['A',num2str(i)]) = 0; % dynamic field referencing
-        % eval(sprintf('out.A%u = 0;',i,i))
+        out.(sprintf('A%u',i)) = 0;
     end
 end
 

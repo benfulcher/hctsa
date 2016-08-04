@@ -135,9 +135,9 @@ end
 % ------------------------------------------------------------------------------
 % Take mean and standard deviation of this set of local time-series statistics:
 % ------------------------------------------------------------------------------
-
 % Can think of this as a big bootstrapped distribution of the timeseries at
 % a scale given by the length l
+
 fs = zeros(numFeat,2);
 fs(:,1) = nanmean(qs); % the mean value of the feature across subsegments of the time series
 fs(:,2) = nanstd(qs); % the spread of the feature across subsegments of the time series

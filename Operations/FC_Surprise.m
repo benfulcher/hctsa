@@ -33,8 +33,8 @@ function out = FC_Surprise(y,whatPrior,memory,numGroups,cgmeth,numIters,randomSe
 %                          time-series datapoint,
 %          (ii) 'updown': an equiprobable alphabet by the value of incremental
 %                         changes in the time-series values, and
-%          (iii) 'embed2quadrants': by the quadrant each data point resides in
-%                          in a two-dimensional embedding space.
+%          (iii) 'embed2quadrants': 4-letter alphabet of the quadrant each data
+%                            point resides in a two-dimensional embedding space.
 %
 % numIters, the number of iterations to repeat the procedure for.
 %

@@ -90,7 +90,9 @@ binWidths = diff(binEdges);
 out.hist10std = std(px);
 out.histent = -sum(px(px>0).*log(px(px>0)./binWidths(px>0)));
 
+%-------------------------------------------------------------------------------
 % Stationarity in fifths of the time series
+%-------------------------------------------------------------------------------
 % Use histograms with 4 bins
 x = linspace(-pi/2,pi/2,5); % 4 bins
 afifth = floor((N-1)/5); % -1 because angles are correlations *between* points
@@ -99,18 +101,17 @@ for i = 1:5
 	n(:,i) = histc(theta(afifth*(i-1)+1:afifth*i),x);
 end
 n = n/afifth;
-n(4,:) = n(4,:) + n(5,:); n(5,:) = [];
+n(4,:) = n(4,:) + n(5,:);
+n(5,:) = [];
 
-% Output the standard deviation in each bin
-out.stdb1 = std(n(:,1));
-out.stdb2 = std(n(:,2));
-out.stdb3 = std(n(:,3));
-out.stdb4 = std(n(:,4));
+% Output the standard deviation in each bin:
+for i = 1:4
+    out.(sprintf('stdb%u',i)) = std(n(:,i));
+end
 
-% ------------------------------------------------------------------------------
-% Points in the space
-% ------------------------------------------------------------------------------
-% Stationarity of points in the space (do they move around in the space)
+%-------------------------------------------------------------------------------
+% STATIONARITY of points in the space (do they move around in the space)
+%-------------------------------------------------------------------------------
 
 % (1) in terms of distance from origin
 afifth = floor(N/5);
@@ -121,15 +122,19 @@ end
 
 % Mean euclidean distance in each segment
 eucdm = cellfun(@(x)mean(sqrt(x(:,1).^2 + x(:,2).^2)),buffer_m);
-out.eucdm1 = eucdm(1); out.eucdm2 = eucdm(2); out.eucdm3 = eucdm(3);
-out.eucdm4 = eucdm(4); out.eucdm5 = eucdm(5);
-out.std_eucdm = std(eucdm); out.mean_eucdm = mean(eucdm);
+for i = 1:5
+    out.(sprintf('eucdm%u',i)) = eucdm(i);
+end
+out.std_eucdm = std(eucdm);
+out.mean_eucdm = mean(eucdm);
 
 % Standard deviation of Euclidean distances in each segment
 eucds = cellfun(@(x)std(sqrt(x(:,1).^2 + x(:,2).^2)),buffer_m);
-out.eucds1 = eucds(1); out.eucds2 = eucds(2); out.eucds3 = eucds(3);
-out.eucds4 = eucds(4); out.eucds5 = eucds(5);
-out.std_eucds = std(eucds); out.mean_eucds = mean(eucds);
+for i = 1:5
+    out.(sprintf('eucds%u',i)) = eucds(i);
+end
+out.std_eucds = std(eucds);
+out.mean_eucds = mean(eucds);
 
 % Maximum volume in each segment
 % (defined as area of rectangle of max span in each direction)
@@ -140,7 +145,7 @@ out.stdspana = std(spanareas);
 out.meanspana = mean(spanareas);
 
 % ------------------------------------------------------------------------------
-% Outliers
+% Outliers in the embedding space
 % ------------------------------------------------------------------------------
 % area of max span of all points; versus area of max span of 50% of points closest to origin
 d = sqrt(m(:,1).^2 + m(:,2).^2);

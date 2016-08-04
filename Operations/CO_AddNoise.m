@@ -129,16 +129,18 @@ out.meanch = mean(diff(amis));
 out.ac1 = CO_AutoCorr(amis,1,'Fourier');
 out.ac2 = CO_AutoCorr(amis,2,'Fourier');
 
-% Noise level required to reduce ami to proportion x of its lag-zero value:
+% Noise level required to reduce ami to proportion x of its initial value:
 firstUnderVals = [0.75,0.5,0.25];
 for i = 1:length(firstUnderVals)
-    out.(sprintf('firstUnder%u',firstUnderVals(i)*100)) = firstUnder_fn(firstUnderVals(i)*amis(1),noiseRange,amis);
+    out.(sprintf('firstUnder%u',firstUnderVals(i)*100)) = ...
+                    firstUnder_fn(firstUnderVals(i)*amis(1),noiseRange,amis);
 end
 
 % AMI at actual noise levels: 0.5, 1, 1.5 and 2
 noiseLevels = [0.5,1,1.5,2];
 for i = 1:length(noiseLevels)
-    out.(sprintf('ami_at_%u',noiseLevels(i)*10)) = amis(find(noiseRange>=noiseLevels(i),1,'first'));
+    out.(sprintf('ami_at_%u',noiseLevels(i)*10)) = ...
+                        amis(find(noiseRange>=noiseLevels(i),1,'first'));
 end
 
 % ------------------------------------------------------------------------------

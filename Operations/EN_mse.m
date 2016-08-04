@@ -53,8 +53,8 @@ end
 if nargin < 5
     preProcessHow = '';
 end
-%-------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
 % Impose a minimum time-series length of 20 samples to perform a SampEn
 % (should probably be even higher...?)
 minTSLength = 20;
@@ -104,7 +104,8 @@ if all(isnan(sampEns))
     else
         ppText = '';
     end
-    warning('Not enough samples (%u %s) to compute SampEn at multiple scales',length(y),ppText)
+    warning('Not enough samples (%u %s) to compute SampEn at multiple scales',...
+                    length(y),ppText)
     out = NaN; return
 end
 

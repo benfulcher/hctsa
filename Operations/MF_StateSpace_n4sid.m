@@ -11,6 +11,12 @@ function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)
 % This model is then used to predict the latter portion of the time
 % series (i.e., the subsequent (1-p)*N samples).
 %
+% Model of the form:
+% dx/dt = A x(t) + B u(t) + K e(t)
+% y(t) = C x(t) + D u(t) + e(t)
+% (for state space matrices A, B, C, D), disturbance matrix K (coefficients of
+% noise input), input u, output y, vector of states x, and disturbance (noise) e.
+%
 %---INPUTS:
 % y, the input time series
 % ord, the order of state-space model to implement (can also be the string 'best')
@@ -100,7 +106,7 @@ m_cs = m.C; % coefficients for measurement function, y
 m_x0 = m.X0; % initial condition
 m_np = length(m.ParameterVector); % number of parameters fitted
 
-% output parameters
+% Output model parameters
 allm_as = m_as(:);
 for i = 1:length(allm_as)
     out.(sprintf('A_%u',i)) = allm_as(i);

@@ -1,5 +1,5 @@
 /*==========================================================
- * sampen.c -
+ * sampen_mex.c -
  *
  * Converted to mex file for Matlab by Ben Fulcher
  *
