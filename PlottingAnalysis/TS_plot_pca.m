@@ -80,13 +80,13 @@ fprintf(1,'Calculating principal components of the %u x %u data matrix...\n', ..
 
 % Use pca to compute the first two principal components:
 if ~any(isnan(TS_DataMat))
-    [pcCoeff,pcScore,~,~,percVar] = pca(TS_DataMat,'NumComponents',2,'Centered','on');
+    [pcCoeff,pcScore,~,~,percVar] = pca(zscore(TS_DataMat),'NumComponents',2);
 else
     warning(sprintf(['Data matrix contains %.2g%% NaNs. Estimating covariances on remaining data...\n' ...
                 '(Could take some time...)'],100*mean(isnan(TS_DataMat(:)))))
     % Data matrix contains NaNs; try the pairwise rows approximation to the
     % covariance matrix:
-    [pcCoeff,pcScore,~,~,percVar] = pca(TS_DataMat,'Rows','pairwise','Centered','on');
+    [pcCoeff,pcScore,~,~,percVar] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Rows','pairwise');
     % If this fails (covariance matrix not positive definite), could try
     % the 'algorithm','als' option in pca...
 end
