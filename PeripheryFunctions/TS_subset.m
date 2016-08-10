@@ -80,7 +80,7 @@ TS_DataMat = TS_DataMat(i_keep.TimeSeries,i_keep.Operations);
 TimeSeries = TimeSeries(i_keep.TimeSeries);
 Operations = Operations(i_keep.Operations);
 
-fprintf('The hctsa dataset now contains %u -> %u time series and %u -> %u operations\n',...
+fprintf('The hctsa dataset now contains %u -> %u time series and %u -> %u operations.\n',...
             numTimeSeries,length(TimeSeries),numOperations,length(Operations))
 
 if doSave
