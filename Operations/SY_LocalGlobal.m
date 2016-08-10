@@ -22,7 +22,8 @@ function out = SY_LocalGlobal(y,subsetHow,n,randomSeed)
 % This is not the most reliable or systematic operation because only a single
 % sample is taken from the time series and compared to the full time series.
 % A better approach would be to repeat over many local subsets and compare the
-% statistics of these local regions to the full time series.
+% statistics of these local regions to the full time series,
+% cf. SY_SpreadRandomLocal
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

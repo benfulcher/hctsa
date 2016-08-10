@@ -28,7 +28,7 @@ function cmapOut = BF_getcmap(whichMap,numGrads,cellOut,flipMe)
 %
 % 2. Set blue/red maps for [-1,+1] bounded data:
 % caxis([-1,1])
-% colormap([flipud(BF_getcmap('blues',9));BF_getcmap('reds',9)])
+% colormap([flipud(BF_getcmap('blues',9));1,1,1;BF_getcmap('reds',9)])
 %
 % 3. Get colors for lines and plot data stored in 5 rows of matrix y:
 % myColors = BF_getcmap('accent',5); hold on

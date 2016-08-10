@@ -69,7 +69,7 @@ end
 
 % Use an inputParser to control additional plotting options as parameters:
 inputP = inputParser;
-default_whatPlots = {'histogram','distributions','datamatrix','cluster'};
+default_whatPlots = {'histogram','distributions','cluster'}; % datamatrix
 check_whatPlots = @(x) iscell(x) || ischar(x);
 addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 default_numTopFeatures = 40;
@@ -273,17 +273,7 @@ if any(ismember(whatPlots,'distributions'))
     ks_or_hist = 'ks'; % 'ks'/'hist': view as either histograms or kernel-smoothed distributions
 
     % Set the colors to be assigned to groups:
-    if numClasses <= 5
-        colors = BF_getcmap('set1',5,1);
-        if numClasses==2, colors = colors([2,4]); end
-    else
-        colors = BF_getcmap('dark2',numClasses,1);
-        if length(colors) < numClasses
-            % Too many groups for a custom colormap, just space them along the jet colormap:
-            colors = jet(numClasses);
-            colors = arrayfun(@(x)colors(x,:),1:size(colors,1),'UniformOutput',0);
-        end
-    end
+    colors = GiveMeColors(numClasses);
 
     % Space the figures out properly:
     numFigs = ceil(numHistogramFeatures/subPerFig);
@@ -343,7 +333,7 @@ end
 if any(ismember(whatPlots,'datamatrix'))
     featInd = ifeat(1:numTopFeatures);
     ixFeat = BF_ClusterReorder(TS_DataMat(:,featInd)','corr','average');
-    whatData = struct('TS_DataMat',TS_DataMat(:,featInd(ixFeat)),...
+    whatData = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
                     'TimeSeries',TimeSeries,...
                     'Operations',Operations(featInd(ixFeat)));
     TS_plot_DataMatrix(whatData,'colorGroups',1,'groupReorder',1);

@@ -29,8 +29,11 @@ function colorCell = GiveMeColors(numColors)
 
 if numColors == 1
     colorCell = {[0,0,0]}; % Just use black...
-elseif numColors < 5
-    colorCell = BF_getcmap('set1',numColors,1);
+elseif numColors <= 5
+    % colorCell = BF_getcmap('set1',5,1);
+    colorCell = BF_getcmap('set1',numColors,1); % set1, accent, set2
+    % colorCell = BF_getcmap('set2',5,1);
+    % if numColors==2, colorCell = colorCell([2,4]); end
 elseif numColors < 10
     colorCell = BF_getcmap('dark2',numColors,1);
 elseif numColors <= 12
@@ -43,6 +46,5 @@ elseif numColors <= 50
 else
     error('There aren''t enough colors in the rainbow to plot this many groups!')
 end
-
 
 end

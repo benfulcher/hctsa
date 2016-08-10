@@ -238,7 +238,7 @@ out.nflrmse = gof.rmse;
 % ------------------------------------------------------------------------------
 %% Stationarity assumption
 % ------------------------------------------------------------------------------
-% mean, median and std of the mean and median of range indices
+% mean, median and std of the median and mean of range indices
 out.mdrm = mean(msDt(:,4));
 out.mdrmd = median(msDt(:,4));
 out.mdrstd = std(msDt(:,4));

@@ -145,9 +145,8 @@ if doPCs
         return
     end
 
-    numPCs = 10;
-
     % Compute top 10 PCs of the data matrix:
+    numPCs = 10;
     fprintf('Computing top %u PCs...',numPCs)
     [~, pcScore, ~, ~, ~] = pca(zscore(TS_DataMat),'NumComponents',numPCs);
     fprintf(' Done.\n')

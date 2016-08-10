@@ -120,13 +120,15 @@ end
 %-------------------------------------------------------------------------------
 % Check group information
 %-------------------------------------------------------------------------------
-if isfield(TimeSeries,'Group')
-    timeSeriesGroups = [TimeSeries.Group];
-    numClasses = max(timeSeriesGroups);
-    fprintf(1,'Coloring groups of time series...\n');
-else
-    warning('No group information found')
-    colorGroups = 0;
+if colorGroups==1
+	if isfield(TimeSeries,'Group')
+	    timeSeriesGroups = [TimeSeries.Group];
+	    numClasses = max(timeSeriesGroups);
+	    fprintf(1,'Coloring groups of time series...\n');
+	else
+	    warning('No group information found')
+	    colorGroups = 0;
+	end
 end
 
 %-------------------------------------------------------------------------------
@@ -136,7 +138,6 @@ if groupReorder
     [~,ixData] = sort(timeSeriesGroups,'ascend');
     dataMatReOrd = TS_DataMat(ixData,:);
     ixAgain = ixData;
-    numClasses
     for i = 1:numClasses
         isGroup = [TimeSeries(ixData).Group]==i;
         ordering = BF_ClusterReorder(dataMatReOrd(isGroup,:),'euclidean','average');

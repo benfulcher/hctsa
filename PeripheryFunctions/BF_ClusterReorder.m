@@ -79,7 +79,7 @@ if sqrt(length(R)) < 2000 % small enough to try optimalleaforder
         [~,~,ord] = dendrogram(links,0);
     end
 else
-    fprintf(1,'Too big for optimalleaforder, using dendrogram.\n');
+    fprintf(1,'Too many objects to reorder using optimalleaforder, using dendrogram instead.\n');
     [~,~,ord] = dendrogram(links,0);
 end
 close; % close the invisible figure used for the dendrogram

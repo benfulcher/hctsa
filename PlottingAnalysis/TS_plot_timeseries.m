@@ -5,11 +5,11 @@ function TS_plot_timeseries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOp
 % whatData, The data to get information from: can be a structure, or, e.g.,
 %           'norm' to load from HCTSA_N
 %
+% numPerGroup, If plotting groups, plots this many examples per group
+%
 % whatTimeSeries, Can provide indices to plot that subset, a keyword to plot
 %                   matches to the keyword, 'all' to plot all, or an empty vector
 %                   to plot default groups in TimeSeries.Group
-%
-% numPerGroup, If plotting groups, plots this many examples per group
 %
 % maxLength, the maximum number of samples of each time series to plot
 %

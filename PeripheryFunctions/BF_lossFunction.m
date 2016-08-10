@@ -42,7 +42,7 @@ switch whatLoss
 case 'acc'
     % Overall classification rate:
     outputMeasure = 100*mean(yTest==yPredict);
-case 'balancedAcc'
+case {'balancedAcc','balancedAccuracy'}
     if nargin < 4
         numClasses = max(yTest);
     end
@@ -58,6 +58,9 @@ case 'balancedLoss'
         classWeights(i) = 1/classTotals(yTest(i));
     end
     outputMeasure = sum((yTest~=yPredict).*classWeights);
+    outputMeasure = sum((yTest~=yPredict).*classWeights);
+otherwise
+    error('Unknown loss function ''%s''',whatLoss);
 end
 
 end

@@ -1,5 +1,6 @@
 function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,reWeight,CVFolds)
-% GiveMeFunctionHandle    Returns classification results from training a classifier on training/test data
+% GiveMeCfn    Returns classification results from training a classifier on
+%               training/test data
 %
 %---INPUTS:
 % whatClassifier -- a type of classifier to use (default: 'fast_linear')
@@ -30,6 +31,10 @@ function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,
 %-------------------------------------------------------------------------------
 % Check inputs:
 %-------------------------------------------------------------------------------
+% Make sure y a column vector
+if size(yTrain,1) < size(yTrain,2)
+    yTrain = yTrain';
+end
 if nargin < 4
     XTest = [];
 end

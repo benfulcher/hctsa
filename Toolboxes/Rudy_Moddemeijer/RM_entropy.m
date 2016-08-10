@@ -1,3 +1,4 @@
+function [estimate,nbias,sigma,descriptor] = RM_entropy(x,descriptor,approach,base)
 % RM_entropy   Estimates the entropy of stationary signals with
 %               independent samples using various approaches.
 %   [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X) or
@@ -14,7 +15,7 @@
 %   DESCRIPTOR  : Where DESCRIPTOR=[LOWERBOUND,UPPERBOUND,NCELL]
 %     LOWERBOUND: Lowerbound of the RM_histogram
 %     UPPERBOUND: Upperbound of the RM_histogram
-%     NCELL     : The number of cells of the RM_histogram       
+%     NCELL     : The number of cells of the RM_histogram
 %   APPROACH    : The method used, one of the following ones:
 %     'unbiased': The unbiased estimate (default)
 %     'mmse'    : The minimum mean square error estimate
@@ -23,12 +24,10 @@
 %
 %   See also: http://www.cs.rug.nl/~rudy/matlab/
 %
-%   R. Moddemeijer 
+%   R. Moddemeijer
 %   Copyright (c) by R. Moddemeijer
 %   $Revision: 1.1 $  $Date: 2001/02/05 08:59:36 $
-%   
-
-function [estimate,nbias,sigma,descriptor] = RM_entropy(x,descriptor,approach,base)
+%
 
 if nargin < 1
    disp('Usage: [ESTIMATE,NBIAS,SIGMA,DESCRIPTOR] = ENTROPY(X)')
@@ -77,7 +76,7 @@ sigma=0;
 count=0;
 
 for n = 1:ncell
-  if h(n)~=0 
+  if h(n)~=0
     logf = log(h(n));
   else
     logf = 0;
