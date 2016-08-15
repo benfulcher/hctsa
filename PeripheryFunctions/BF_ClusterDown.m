@@ -119,7 +119,7 @@ end
 numItems = length(distMat);
 fprintf(1,'Computing linkage information for %ux%u data using %s clustering...',...
             numItems,numItems,linkageMeth);
-links = linkage(distMat,linkageMeth);
+links = linkage(squareform(distMat),linkageMeth);
 fprintf(1,' Done.\n');
 
 % ------------------------------------------------------------------------------
