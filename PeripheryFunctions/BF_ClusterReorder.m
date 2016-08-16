@@ -67,22 +67,10 @@ links = linkage(R,linkageMethod);
 % ------------------------------------------------------------------------------
 %% Get the optimal dendrogram reordering:
 % ------------------------------------------------------------------------------
-figure('color','w');
+f = figure('color','w');
 set(gcf,'Visible','off'); % suppress figure output
-if sqrt(length(R)) < 2000 % small enough to try optimalleaforder
-    try
-        ord = optimalleaforder(links,R); % NEW!
-        [~,~,ord] = dendrogram(links,0,'r',ord);
-        fprintf(1,'Using optimalleaforder reordering!\n');
-    catch
-        fprintf(1,'Using dendrogram reordering.\n');
-        [~,~,ord] = dendrogram(links,0);
-    end
-else
-    fprintf(1,'Too many objects to reorder using optimalleaforder, using dendrogram instead.\n');
-    [~,~,ord] = dendrogram(links,0);
-end
-close; % close the invisible figure used for the dendrogram
+ord = BF_linkageOrdering(R,links);
+close(f); % close the invisible figure used for the dendrogram
 
 if ~all(keepers==1)
     keepers = find(keepers);

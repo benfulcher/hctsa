@@ -92,6 +92,12 @@ if isstruct(plotOptions) && isfield(plotOptions,'LineWidth')
 else
     lw = 1; % do a normal subplotted figure
 end
+% Determine whether to create a new figure
+if isstruct(plotOptions) && isfield(plotOptions,'newFigure')
+    newFigure = plotOptions.newFigure;
+else
+    newFigure = 1; 
+end
 
 % ------------------------------------------------------------------------------
 %% Load data
@@ -188,7 +194,11 @@ else
 end
 
 % ------------------------------------------------------------------------------
-figure('color','w');
+% Only create a new figure if required
+if newFigure
+    figure('color','w');
+end
+
 Ls = zeros(numToPlot,1); % length of each plotted time series
 if plotFreeForm
     % FREEFORM: make all within a single plot with text labels
