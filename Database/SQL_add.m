@@ -614,14 +614,19 @@ end
 fprintf('Adding %u new %s to the %s table in %s...',...
                     sum(~isBad),theWhat,theTable,databaseName)
 switch addWhat
-case 'ts' % Add time series to the TimeSeries table just 5 at a time
+case 'ts' % Add time series to the TimeSeries table, X at a time
           % (so as not to exceed the max_allowed_packet when transmitting the
-          % time-series data). An appropriate chunk size will depend on the length of
-          % time series in general...
+          % time-series data).
+          % An appropriate chunk size will depend on the length of time series
+          % in general...
+          % A kind of big problem if you add some here and then fail, because
+          % then there will be inconsistencies in the Results table.
+          % Safer would be to initialize results as you go in case you get a
+          % fail at some chunk number... :/
     maxLength = max([TimeSeries.Length]);
-    % 5 at a time works for 20,000 sample time series using default mySQL settings.
+    % 4 at a time works for 20,000 sample time series using default mySQL settings.
     % Calibrate to this:
-    numPerChunk = max([floor(20000/maxLength*5),1]); % no fewer than 1 per chunk
+    numPerChunk = max([floor(20000/maxLength*4),1]); % no fewer than 1 per chunk
     numPerChunk = min([numPerChunk,500]); % no more than 500 per chunk
     SQL_add_chunked(dbc,['INSERT INTO TimeSeries (Name, Keywords, Length, ' ...
                                     'Data) VALUES'],toAdd(~isBad),numPerChunk);
@@ -641,8 +646,12 @@ if ~strcmp(addWhat,'mops')
     resultsTic = tic;
     fprintf(1,'Updating the Results table in %s...(This could take a while)...',databaseName);
     if strcmp(addWhat,'ts') && length(TimeSeries) > 1000
-        fprintf(1,'\n(e.g., ~10 hours for 20,000 time series with 9,000 operations---please be patient!)...')
+        fprintf(1,'\n(e.g., ~10 hours for 20,000 time series with 8,000 operations---please be patient!)...')
     end
+    % The following turns out to be quite slow when adding to an existing database.
+    % Maybe it does the cross join before filtering on ID. So if you have a large
+    % database already, it takes ages to do the cross join, only to filter out most
+    % of it anyway...?
     switch addWhat
     case 'ts'
         [~,emsg] = mysql_dbexecute(dbc,sprintf(['INSERT INTO Results (ts_id,op_id) SELECT t.ts_id,o.op_id ' ...
@@ -653,6 +662,7 @@ if ~strcmp(addWhat,'mops')
     end
     if ~isempty(emsg)
         fprintf(1,' Error. This is really really not good.\n%s',emsg);
+        keyboard
     else
         fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultsTic)));
     end
