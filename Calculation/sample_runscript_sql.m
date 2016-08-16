@@ -32,8 +32,8 @@ writeWhat = 'null'; % Retrieve and write back only missing (NULL) entries in the
 % Calculate across the given range of ts_ids one at a time:
 tsid_range = (tsid_min:tsid_max);
 
-% Retrieve a vector of op_idds to calculate subject to additional conditions
-opids = SQL_getids('ops',1);
+% Calculate all opids:
+opids = 'all';
 
 % ------------------------------------------------------------------------------
 %% Start calculating:
