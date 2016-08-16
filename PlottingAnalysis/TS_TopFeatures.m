@@ -64,7 +64,7 @@ if nargin < 2 || isempty(whatTestStat)
     fprintf(1,'Using ''%s'' test statistic by default\n', whatTestStat);
 end
 if nargin < 3
-    doNull = 1; % compute an empirical null distribution by randomizing class labels
+    doNull = 0; % compute an empirical null distribution by randomizing class labels
 end
 
 % Use an inputParser to control additional plotting options as parameters:
@@ -372,7 +372,9 @@ if any(ismember(whatPlots,'cluster'))
     makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations(x).ID,Operations(x).Name,...
                         testStat(x),cfnUnit);
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
-    BF_ClusterDown(Dij,floor(numTopFeatures/5),'whatDistance',distanceMetric,...
+    clusterThreshold = 0.2; % threshold at which split into clusters
+    BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
+                        'whatDistance',distanceMetric,...
                         'objectLabels',objectLabels);
     title(sprintf('Dependencies between %u top features',numTopFeatures))
 end

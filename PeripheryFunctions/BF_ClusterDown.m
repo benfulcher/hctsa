@@ -1,13 +1,13 @@
-function [distMat_cl,cluster_Groupi,ord] = BF_ClusterDown(distMat,numClusters,varargin)
+function [distMat_cl,cluster_Groupi,ord] = BF_ClusterDown(distMat,varargin)
 % BF_ClusterDown    Reduce a pairwise distance matrix into smaller clusters.
 %
 % Yields a visualization of a pairwise distance matrix, including a set of
 % clusters of objects showing highly correlated behavior.
 %
 %---INPUTS:
-% distMat, a pairwise distance matrix (e.g., generated from pdist)
-% numClusters, the number of clusters to reduce to (default: 3)
+% distMat, a pairwise distance vector or matrix (e.g., generated from pdist)
 % [EXTRA OPTIONS]:
+% 'clusterThreshold', the threshold in the dendrogram for forming clusters
 % 'objectLabels', labels for axes labels
 % 'whatDistance', the type of distance metric used:
 %        (i) 'corr' (default): provide 1-R, where R is correlation coefficient
@@ -44,13 +44,12 @@ function [distMat_cl,cluster_Groupi,ord] = BF_ClusterDown(distMat,numClusters,va
 %-------------------------------------------------------------------------------
 % Check Inputs
 %-------------------------------------------------------------------------------
-% numClusters -- the number of clusters to generate from your data:
-if nargin < 2 || isempty(numClusters)
-    numClusters = 5; % removes very highly-correlated operations
-end
-
 % Custom plotting options using an input parser
 inputP = inputParser;
+
+% Cluster threshold:
+default_clusterThreshold = 0.2;
+addParameter(inputP,'clusterThreshold',default_clusterThreshold,@isnumeric);
 
 % Object labels for axis labels
 default_objectLabels = {};
@@ -95,31 +94,36 @@ linkageMeth = inputP.Results.linkageMeth;
 clear inputP;
 
 %-------------------------------------------------------------------------------
-% Check squareform:
+% Work with vector form of distances (hopefully enough memory)
 %-------------------------------------------------------------------------------
 if any(size(distMat)==1)
-    % A vector, probably a squareform version
-    distMat = squareform(distMat);
+    distVec = distMat;
+else
+    distVec = squareform(distMat); % convert for vector version
 end
+% Solve for number of items from quadratic formula:
+numItems = (1+sqrt(1+8*length(distVec)))/2;
 
 %-------------------------------------------------------------------------------
-% Convert to new distance matrix for abscorr:
+% Convert to absolute correlations:
 %-------------------------------------------------------------------------------
-distMat0 = distMat; % keep distMat0 as the input distance matrix in all cases
-% distMat changes only for abscorr options
-if any(strcmp(whatDistance,{'abscorr','abscorr_ii'}))
+distVec0 = distVec; % keep distVec0 as the input distance matrix in all cases
+% distVec changes only for abscorr options
+if ismember(whatDistance,{'abscorr','abscorr_ii'})
     % Compute distances on absolute correlation distances (where sign of correlation
     % is irrelevant, it's the magnitude that's important):
-    distMat = 1-abs(1-distMat);
+    distVec = 1-abs(1-distVec);
 end
+
+% We need the matrix form also:
+distMat = squareform(distVec);
 
 %-------------------------------------------------------------------------------
 % Do the linkage clustering:
 %-------------------------------------------------------------------------------
-numItems = length(distMat);
 fprintf(1,'Computing linkage information for %ux%u data using %s clustering...',...
             numItems,numItems,linkageMeth);
-links = linkage(squareform(distMat),linkageMeth);
+links = linkage(distVec,linkageMeth);
 fprintf(1,' Done.\n');
 
 % ------------------------------------------------------------------------------
@@ -130,12 +134,9 @@ f.Position(3:4) = [1200,800];
 
 % Get the dendrogram reordering:
 ax1 = subplot(1,6,6);
-ord = optimalleaforder(links,squareform(distMat));
+ord = BF_linkageOrdering(distVec,links);
 h_dend = dendrogram(links,0,'Orientation','right','Reorder',ord);
 ax1.YDir = 'reverse'; % needs to be reversed to match the reversed y-axis of the imagesc plot
-% Reorder the distance matrix by dendrogram ordering: [could add optimalleaforder]
-distMat_cl = distMat(ord,ord);
-distMat0_cl = distMat0(ord,ord);
 
 % Make the dendrogram look aight
 set(h_dend,'color','k','LineWidth',1)
@@ -145,62 +146,56 @@ xlabel('Distance');
 %-------------------------------------------------------------------------------
 % Compute clustering into groups for many different cluster numbers:
 %-------------------------------------------------------------------------------
-numClusterings = length(numClusters);
-cluster_Groupi = cell(numClusterings,1);
-cluster_Groupi_cl = cell(numClusterings,1);
-clusterCenters_cl = cell(numClusterings,1);
-clusterCenters = cell(numClusterings,1);
+% Cluster the dendrogram:
+T = cluster(links,'cutoff',0.2,'criterion','distance');
+numClusters = max(T);
 
-for i = 1:numClusterings
-    fprintf(1,'Distance-based clustering with %u clusters\n',numClusters(i));
+fprintf(1,'Distance-based clustering with %u clusters\n',numClusters);
 
-    % Cluster the dendrogram:
-    T = cluster(links,'maxclust',numClusters(i));
-    numClusters(i) = max(T);
-
-    % Reorder members of each cluster by distance to other members of the cluster:
-    cluster_Groupi{i} = cell(numClusters(i),1);
-    for j = 1:numClusters(i)
-        cluster_Groupi{i}{j} = find(T==j);
-        if length(T==j) > 1
-            % Sort by increasing sum of distances to other members of the cluster
-            [~,ix] = sort(sum(distMat(cluster_Groupi{i}{j},cluster_Groupi{i}{j})),'ascend');
-            cluster_Groupi{i}{j} = cluster_Groupi{i}{j}(ix);
-        end
+% Reorder members of each cluster by distance to other members of the cluster:
+cluster_Groupi = cell(numClusters,1);
+for j = 1:numClusters
+    cluster_Groupi{j} = find(T==j);
+    if length(T==j) > 1
+        % Sort by increasing sum of distances to other members of the cluster
+        [~,ix] = sort(sum(distMat(cluster_Groupi{j},cluster_Groupi{j})),'ascend');
+        cluster_Groupi{j} = cluster_Groupi{j}(ix);
     end
-
-    % Reorder by decreasing cluster size
-    [~,ix] = sort(cellfun(@length,cluster_Groupi{i}),'descend');
-    cluster_Groupi{i} = cluster_Groupi{i}(ix);
-
-    % Select the closest to cluster centre in each group
-    clusterCenters{i} = cellfun(@(x)x(1),cluster_Groupi{i});
-
-    cluster_Groupi_cl{i} = cellfun(@(x)arrayfun(@(y)find(ord==y),x),cluster_Groupi{i},'UniformOutput',0);
-    clusterCenters_cl{i} = arrayfun(@(y)find(ord==y),clusterCenters{i});
 end
+
+% Reorder by decreasing cluster size
+[~,ix] = sort(cellfun(@length,cluster_Groupi),'descend');
+cluster_Groupi = cluster_Groupi(ix);
+
+% Select the closest to cluster centre in each group
+clusterCenters = cellfun(@(x)x(1),cluster_Groupi);
+
+cluster_Groupi_cl = cellfun(@(x)arrayfun(@(y)find(ord==y),x),cluster_Groupi,'UniformOutput',0);
+clusterCenters_cl = arrayfun(@(y)find(ord==y),clusterCenters);
 
 % ------------------------------------------------------------------------------
 % Now plot it:
 % ------------------------------------------------------------------------------
-% Pick a given clustering and plot it
-cLevel = min(1,numClusterings); % plot the first clustering
 
-% Plot as a similarity matrix:
+% Make a square distance matrix, and plot as a pairwise similarity matrix
+% (reordered by ord determined above)
+
 ax2 = subplot(1,6,2:5);
 switch whatDistance
 case {'corr','abscorr_ii'}
     % Input is a correlation distance matrix, plot correlation coefficients:
-    BF_PlotCorrMat(1-distMat0_cl,'auto');
+    distMat0 = squareform(distVec0);
+    BF_PlotCorrMat(1-distMat0(ord,ord),'auto');
 case 'abscorr'
+    distMat0 = squareform(distVec0);
     % Input is correlation distance matrix, plot absolute correlation coefficients:
-    BF_PlotCorrMat(abs(1-distMat0_cl),'auto');
+    BF_PlotCorrMat(abs(1-distMat0(ord,ord)),'auto');
 case 'general'
     % Input is a general distance matrix:
-    BF_PlotCorrMat(distMat_cl);
+    BF_PlotCorrMat(distMat(ord,ord));
 otherwise
     warning('No special plotting options for distance metric: ''%s''',whatDistance);
-    BF_PlotCorrMat(distMat_cl);
+    BF_PlotCorrMat(distMat(ord,ord));
 end
 
 %-------------------------------------------------------------------------------
@@ -209,12 +204,12 @@ end
 rectangleColors = BF_getcmap('accent',5,1);
 for i = 1:numClusters
     % Label cluster borders:
-    rectangle('Position',[min(cluster_Groupi_cl{cLevel}{i})-0.5,min(cluster_Groupi_cl{cLevel}{i})-0.5, ...
-                            length(cluster_Groupi_cl{cLevel}{i}),length(cluster_Groupi_cl{cLevel}{i})], ...
+    rectangle('Position',[min(cluster_Groupi_cl{i})-0.5,min(cluster_Groupi_cl{i})-0.5, ...
+                            length(cluster_Groupi_cl{i}),length(cluster_Groupi_cl{i})], ...
                     'EdgeColor',rectangleColors{1},'LineWidth',3);
 
     % Label cluster centers:
-    rectangle('Position',[clusterCenters_cl{cLevel}(i)-0.5,clusterCenters_cl{cLevel}(i)-0.5,1,1], ...
+    rectangle('Position',[clusterCenters_cl(i)-0.5,clusterCenters_cl(i)-0.5,1,1], ...
                                 'EdgeColor',rectangleColors{5},'LineWidth',3);
 end
 
