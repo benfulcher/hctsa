@@ -293,7 +293,7 @@ for i = 1:numTS
         else
             % We retrieved a subset of the input op_ids
             % We have to match retrieved op_ids to local indicies
-            iy = arrayfun(@(x)find(op_ids == x,1),vertcat(qrc{:,1}));
+            iy = arrayfun(@(x)find(opids_db == x,1),vertcat(qrc{:,1}));
             % Now fill the corresponding entries in the local matrices:
             switch retrieveWhatData
             case 'all'
@@ -328,8 +328,9 @@ if any(didRetrieve)
     fprintf(1,'Retrieved data from %s over %u iterations in %s.\n',...
                             dbname,numTS,BF_thetime(toc(retrievalTimer)));
 else
-    fprintf(1,['Over %u iterations, no data was retrieved from %s.\n' ...
-                            'Not writing any data to file.\n'],numTS,dbname);
+    fprintf(1,['Over %u iterations, no data was retrieved from %s (%s).\n' ...
+                            'Not writing any data to file.\n'],...
+							numTS,dbname,BF_thetime(toc(retrievalTimer)));
     SQL_closedatabase(dbc); return
 end
 
@@ -418,11 +419,10 @@ TimeSeries = cell2struct(tsinfo',{'ID','Name','Keywords','Length','Data'}); % Co
 
 
 % 2. Retrieve Operation Metadata
-if ischar(op_ids) && strcmp(op_ids,'all')
-	selectString = 'SELECT Name, Keywords, Code, mop_id FROM Operations';
-else
-	selectString = sprintf('SELECT Name, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
-end
+% (even if specify 'all', can be fewer for 'null','error' cases, where you restrict
+% the operations that are actually retrieved to the local file)
+% [would still probably be faster to retrieve all above, and then subset the info using keepi]
+selectString = sprintf('SELECT Name, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
 opinfo = mysql_dbquery(dbc,selectString);
 opinfo = [num2cell(opids_db), opinfo]; % add op_ids
 Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
