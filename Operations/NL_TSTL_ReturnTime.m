@@ -17,9 +17,10 @@ function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedParams)
 %
 %---OUTPUTS: include basic measures from the histogram, including the occurrence of
 % peaks, spread, proportion of zeros, and the distributional entropy.
-
+%
 % Uses the code, return_time, from TSTOOL.
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
