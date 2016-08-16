@@ -8,6 +8,7 @@
 Icon?
 ehthumbs.db
 Thumbs.db
+*.asv
 
 # HCTSA data files:
 HCTSA*.mat
