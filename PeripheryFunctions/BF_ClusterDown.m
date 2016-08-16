@@ -119,7 +119,7 @@ end
 numItems = length(distMat);
 fprintf(1,'Computing linkage information for %ux%u data using %s clustering...',...
             numItems,numItems,linkageMeth);
-links = linkage(distMat,linkageMeth);
+links = linkage(squareform(distMat),linkageMeth);
 fprintf(1,' Done.\n');
 
 % ------------------------------------------------------------------------------
@@ -130,7 +130,8 @@ f.Position(3:4) = [1200,800];
 
 % Get the dendrogram reordering:
 ax1 = subplot(1,6,6);
-[h_dend,~,ord] = dendrogram(links,0,'Orientation','right');
+ord = optimalleaforder(links,squareform(distMat));
+h_dend = dendrogram(links,0,'Orientation','right','Reorder',ord);
 ax1.YDir = 'reverse'; % needs to be reversed to match the reversed y-axis of the imagesc plot
 % Reorder the distance matrix by dendrogram ordering: [could add optimalleaforder]
 distMat_cl = distMat(ord,ord);
