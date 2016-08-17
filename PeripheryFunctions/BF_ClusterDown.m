@@ -137,6 +137,7 @@ ax1 = subplot(1,6,6);
 ord = BF_linkageOrdering(distVec,links);
 h_dend = dendrogram(links,0,'Orientation','right','Reorder',ord);
 ax1.YDir = 'reverse'; % needs to be reversed to match the reversed y-axis of the imagesc plot
+distMat_cl = distMat(ord,ord);
 
 % Save the clustered distance matrix for output
 distMat_cl = distMat(ord,ord);
