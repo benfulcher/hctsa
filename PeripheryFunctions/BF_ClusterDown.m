@@ -84,6 +84,7 @@ addParameter(inputP,'linkageMeth',default_linkageMeth,@ischar);
 parse(inputP,varargin{:});
 
 % Make variables from results of input parser:
+clusterThreshold = inputP.Results.clusterThreshold;
 objectLabels = inputP.Results.objectLabels;
 whatDistance = inputP.Results.whatDistance;
 % errTh = inputP.Results.errTh;
@@ -150,7 +151,7 @@ xlabel('Distance');
 % Cluster into groups:
 %-------------------------------------------------------------------------------
 % Cluster the dendrogram:
-T = cluster(links,'cutoff',0.2,'criterion','distance');
+T = cluster(links,'cutoff',clusterThreshold,'criterion','distance');
 numClusters = max(T);
 
 fprintf(1,'Distance-based clustering with %u clusters\n',numClusters);
