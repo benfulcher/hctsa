@@ -38,3 +38,7 @@ plugininstall_*.m
 # *.end
 # *.log
 # *.synctex.gz
+
+# Platform specific Physionet files
+Toolboxes/Physionet/sampen_mex.exp
+Toolboxes/Physionet/sampen_mex.mexw64.manifest

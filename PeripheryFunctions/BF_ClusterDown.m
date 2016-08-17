@@ -130,7 +130,7 @@ fprintf(1,' Done.\n');
 % Compute the dendrogram
 % ------------------------------------------------------------------------------
 f = figure('color','w');
-f.Position(3:4) = [1200,800];
+f.Position(1:4) = get(groot,'Screensize');
 
 % Get the dendrogram reordering:
 ax1 = subplot(1,6,6);
