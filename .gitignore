@@ -19,6 +19,7 @@ sql_settings.conf
 # Platform-specific mexed files
 *.mexw32
 *.mexw64
+*.mexw64.manifest
 *.mexmaci64
 *.mexa64
 
@@ -38,3 +39,6 @@ plugininstall_*.m
 # *.end
 # *.log
 # *.synctex.gz
+
+# Windows-compiled Physionet file
+sampen_mex.exp
