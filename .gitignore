@@ -38,3 +38,5 @@ plugininstall_*.m
 # *.end
 # *.log
 # *.synctex.gz
+Toolboxes/Physionet/sampen_mex.exp
+Toolboxes/Physionet/sampen_mex.mexw64.manifest
