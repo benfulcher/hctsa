@@ -84,6 +84,7 @@ addParameter(inputP,'linkageMeth',default_linkageMeth,@ischar);
 parse(inputP,varargin{:});
 
 % Make variables from results of input parser:
+clusterThreshold = inputP.Results.clusterThreshold;
 objectLabels = inputP.Results.objectLabels;
 whatDistance = inputP.Results.whatDistance;
 % errTh = inputP.Results.errTh;
