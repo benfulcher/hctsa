@@ -47,14 +47,24 @@ end
 % Load data:
 % ------------------------------------------------------------------------------
 [~,TimeSeries,Operations,whatDataFile] = TS_LoadData(customFile);
-load(whatDataFile,'TS_Quality','MasterOperations')
-
-if ~exist('TS_Quality','var')
-    error('Quality labels not found in %s',whatDataFile);
+TS_Quality = TS_GetFromData(whatDataFile,'TS_Quality');
+if isempty(TS_Quality)
+    if ischar(whatDataFile)
+        error('Quality labels, TS_Quality, not found in %s',whatDataFile);
+    else
+        error('Quality labels, TS_Quality, not found in input data structure');
+    end
 end
-
 if all(isnan(TS_Quality(:)))
-    error('No good quality labels in %s',whatDataFile);
+    if ischar(whatDataFile)
+        error('No good quality labels in %s',whatDataFile);
+    else
+        error('No good quality labels in the input data structure');
+    end
+end
+MasterOperations = TS_GetFromData(whatDataFile,'MasterOperations');
+if isempty(MasterOperations)
+    error('Must provide a data input containing MasterOperations');
 end
 
 % ------------------------------------------------------------------------------

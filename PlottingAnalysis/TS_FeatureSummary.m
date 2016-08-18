@@ -57,12 +57,8 @@ if isempty(dataVector)
 end
 
 % Retrieve group names also:
-fileVarsStruct = whos('-file',whatDataFile);
-fileVars = {fileVarsStruct.name};
-if ismember('groupNames',fileVars)
-    groupNames = load(whatDataFile,'groupNames');
-    groupNames = groupNames.groupNames;
-else
+groupNames = TS_GetFromData(whatDataFile,'groupNames');
+if isempty(groupNames)
     groupNames = {};
 end
 

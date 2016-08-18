@@ -88,17 +88,12 @@ clear inputP;
 % ------------------------------------------------------------------------------
 % Load data
 % ------------------------------------------------------------------------------
-
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataFile);
-fileVarsStruct = whos('-file',whatDataFile); % additional variables in the datafile
-fileVars = {fileVarsStruct.name};
 if strcmp(tsOrOps,'ts')
     dataStruct = TimeSeries;
     clear Operations
-    if ismember('ts_clust',fileVars)
-        tmp = load(whatDataFile,'ts_clust');
-        clustStruct = tmp.ts_clust; clear tmp
-    else
+    clustStruct = TS_GetFromData(whatDataFile,'ts_clust');
+    if isempty(clustStruct)
         % This should be set on normalization -- if missing for some reason, set as default now:
         clustStruct = struct('distanceMetric','none','Dij',[],...
                     'ord',1:size(TS_DataMat,1),'linkageMethod','none');
@@ -106,10 +101,8 @@ if strcmp(tsOrOps,'ts')
 else
     dataStruct = Operations;
     clear TimeSeries
-    if ismember('op_clust',fileVars)
-        tmp = load(whatDataFile,'op_clust');
-        clustStruct = tmp.op_clust; clear tmp
-    else
+    clustStruct = TS_GetFromData(whatDataFile,'op_clust');
+    if isempty(clustStruct)
         % This should be set on normalization -- if missing for some reason, set as default now:
         clustStruct = struct('distanceMetric','none','Dij',[],...
                         'ord',1:size(TS_DataMat,2),'linkageMethod','none');
