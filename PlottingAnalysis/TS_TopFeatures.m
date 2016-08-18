@@ -373,10 +373,11 @@ if any(ismember(whatPlots,'cluster'))
                         testStat(x),cfnUnit);
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
     clusterThreshold = 0.2; % threshold at which split into clusters
-    BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
+    [~,cluster_Groupi] = BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
                         'whatDistance',distanceMetric,...
                         'objectLabels',objectLabels);
-    title(sprintf('Dependencies between %u top features',numTopFeatures))
+    title(sprintf('Dependencies between %u top features (organized into %u clusters)',...
+                            numTopFeatures,length(cluster_Groupi)))
 end
 
 % Don't display lots of crap to screen unless the user wants it:

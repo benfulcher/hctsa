@@ -150,7 +150,7 @@ xlabel('Distance');
 % Cluster into groups:
 %-------------------------------------------------------------------------------
 % Cluster the dendrogram:
-T = cluster(links,'cutoff',0.2,'criterion','distance');
+T = cluster(links,'cutoff',clusterThreshold,'criterion','distance');
 numClusters = max(T);
 
 fprintf(1,'Distance-based clustering with %u clusters\n',numClusters);
