@@ -138,16 +138,19 @@ ord = BF_linkageOrdering(distVec,links);
 h_dend = dendrogram(links,0,'Orientation','right','Reorder',ord);
 ax1.YDir = 'reverse'; % needs to be reversed to match the reversed y-axis of the imagesc plot
 
+% Save the clustered distance matrix for output
+distMat_cl = distMat(ord,ord);
+
 % Make the dendrogram look aight
 set(h_dend,'color','k','LineWidth',1)
 ax1.YTickLabel = {};
 xlabel('Distance');
 
 %-------------------------------------------------------------------------------
-% Compute clustering into groups for many different cluster numbers:
+% Cluster into groups:
 %-------------------------------------------------------------------------------
 % Cluster the dendrogram:
-T = cluster(links,'cutoff',0.2,'criterion','distance');
+T = cluster(links,'cutoff',clusterThreshold,'criterion','distance');
 numClusters = max(T);
 
 fprintf(1,'Distance-based clustering with %u clusters\n',numClusters);
@@ -192,10 +195,10 @@ case 'abscorr'
     BF_PlotCorrMat(abs(1-distMat0(ord,ord)),'auto');
 case 'general'
     % Input is a general distance matrix:
-    BF_PlotCorrMat(distMat(ord,ord));
+    BF_PlotCorrMat(distMat_cl);
 otherwise
     warning('No special plotting options for distance metric: ''%s''',whatDistance);
-    BF_PlotCorrMat(distMat(ord,ord));
+    BF_PlotCorrMat(distMat_cl);
 end
 
 %-------------------------------------------------------------------------------
