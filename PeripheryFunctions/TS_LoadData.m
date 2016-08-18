@@ -5,10 +5,14 @@ function [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataF
 % permutation information in the given data file (ts_clust or op_clust), or
 % provided explicitly by the user.
 %
+% Note that extra elements can be loaded subsequently using the TS_GetFromData
+% function.
+%
 %---INPUTS:
 % whatDataFile: the name of the HCTSA data file to load in. Use 'norm' (default)
 %               to load in HCTSA_N.mat
 % getClustered: whether to reorder the structures according to a clustering
+%
 %---OUTPUTS:
 % The key hctsa data objects obtained from the data source:
 %       *) TS_DataMat (matrix)
@@ -56,7 +60,6 @@ if isstruct(whatDataFile)
     TS_DataMat = whatDataFile.TS_DataMat;
     TimeSeries = whatDataFile.TimeSeries;
     Operations = whatDataFile.Operations;
-    whatDataFile = '--INPUT_STRUCTURE--';
     return
 end
 
@@ -94,10 +97,15 @@ fprintf(1,' Done.\n');
 %-------------------------------------------------------------------------------
 if getClustered
     % Load the clustering permutations and apply them to the data:
-    load(whatDataFile,'ts_clust','op_clust')
-    TS_DataMat = TS_DataMat(ts_clust.ord,op_clust.ord);
-    TimeSeries = TimeSeries(ts_clust.ord);
-    Operations = Operations(op_clust.ord);
+    ts_clust = TS_GetFromData(whatDataFile,'ts_clust');
+    op_clust = TS_GetFromData(whatDataFile,'op_clust');
+    if ~isempty(ts_clust) && ~isempty(op_clust)
+        TS_DataMat = TS_DataMat(ts_clust.ord,op_clust.ord);
+        TimeSeries = TimeSeries(ts_clust.ord);
+        Operations = Operations(op_clust.ord);
+    else
+        warning('No clustering info found in the data source -- returning unclustered data');
+    end
 end
 
 end

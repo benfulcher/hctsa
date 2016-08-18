@@ -31,7 +31,11 @@ end
 %-------------------------------------------------------------------------------
 % Load data:
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-load(whatDataFile,'groupNames')
+% Get groupNames if it exists:
+groupNames = TS_GetFromData(whatDataFile,'groupNames');
+if isempty(groupNames)
+    error('You must assign groups to data to use TS_SingleFeature. Use TS_LabelGroups.');
+end
 
 %-------------------------------------------------------------------------------
 timeSeriesGroup = [TimeSeries.Group]'; % Use group form
