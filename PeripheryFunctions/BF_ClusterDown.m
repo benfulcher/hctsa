@@ -84,6 +84,7 @@ addParameter(inputP,'linkageMeth',default_linkageMeth,@ischar);
 parse(inputP,varargin{:});
 
 % Make variables from results of input parser:
+clusterThreshold = inputP.Results.clusterThreshold;
 objectLabels = inputP.Results.objectLabels;
 whatDistance = inputP.Results.whatDistance;
 % errTh = inputP.Results.errTh;
@@ -130,7 +131,7 @@ fprintf(1,' Done.\n');
 % Compute the dendrogram
 % ------------------------------------------------------------------------------
 f = figure('color','w');
-f.Position(3:4) = [1200,800];
+f.Position(1:4) = get(groot,'Screensize');
 
 % Get the dendrogram reordering:
 ax1 = subplot(1,6,6);
