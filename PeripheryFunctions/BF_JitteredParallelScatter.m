@@ -1,4 +1,4 @@
-function BF_JitteredParallelScatter(dataCell,addMeans,doveTail,makeFigure,extraParams)
+function [ff,xx] = BF_JitteredParallelScatter(dataCell,addMeans,doveTail,makeFigure,extraParams)
 % Plots a scatter of a set of distributions with data offset randomly in x
 % input is a cell with each element containing a collection of data.
 %
@@ -89,7 +89,7 @@ if ~isfield(extraParams,'theColors')
     end
 else
     theColors = extraParams.theColors;
-    fprintf(1,'Using custom colors\n');
+    % fprintf(1,'Using custom colors\n');
 end
 
 % ------------------------------------------------------------------------------
