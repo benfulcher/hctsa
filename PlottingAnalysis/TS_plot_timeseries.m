@@ -40,7 +40,7 @@ if nargin < 1 || isempty(whatData)
 end
 
 if nargin < 2 || isempty(numPerGroup)
-    % Default: plot 5 time series per group
+    % Default: plot 10 time series per group
     numPerGroup = 10;
 end
 
@@ -96,18 +96,13 @@ end
 if isstruct(plotOptions) && isfield(plotOptions,'newFigure')
     newFigure = plotOptions.newFigure;
 else
-    newFigure = 1; 
+    newFigure = 1;
 end
 
 % ------------------------------------------------------------------------------
 %% Load data
 % ------------------------------------------------------------------------------
-if isstruct(whatData)
-    % Provide it all yourself
-    TimeSeries = whatData.TimeSeries;
-else
-    [~,TimeSeries] = TS_LoadData(whatData);
-end
+[~,TimeSeries] = TS_LoadData(whatData);
 
 % ------------------------------------------------------------------------------
 %% Get group indices:
@@ -185,7 +180,10 @@ numToPlot = length(iPlot);
 fprintf(1,'Plotting %u (/%u) time series from %u classes\n', ...
                     numToPlot,sum(cellfun(@length,groupIndices)),numGroups);
 
-if iscell(colorMap)
+if isnumeric(colorMap)
+    % Specified a custom colormap as a matrix
+    theColors = mat2cell(colorMap);
+elseif iscell(colorMap)
     % Specified a custom colormap as a cell of colors
     theColors = colorMap;
 else
@@ -235,7 +233,13 @@ if plotFreeForm
 		xx = (1:N) / maxN;
 		xsc = yr(i) + 0.8*(x-min(x))/(max(x)-min(x)) * inc;
 
-		plot(xx,xsc,'-','color',theColors{classes(i)},'LineWidth',lw)
+        if numGroups==1 && (length(theColors)==numToPlot)
+            % Plot as per a set of colors provided:
+            colorNow = theColors{i};
+        else % plot by group color (or all black for 1 class)
+            colorNow = theColors{classes(i)};
+        end
+        plot(xx,xsc,'-','color',colorNow,'LineWidth',lw)
 
         % Annotate text labels
 		if displayTitles
