@@ -1,10 +1,13 @@
-function TS_SingleFeature(whatData,featID,makeViolin)
+function TS_SingleFeature(whatData,featID,makeViolin,makeNewFigure,whatStat,beVocal)
 % TS_SingleFeature  Plot distributions for a single feature given a feature ID
 %
 %---INPUTS:
 % whatData: the data to load in (cf. TS_LoadData)
 % featID: the ID of the feature to plot
 % makeViolin: makes a violin plot instead of overlapping kernel-smoothed distributions
+% makeNewFigure: generates a new figure
+% whatStat: can provide an already-computed stat for the feature (otherwise will
+%           compute a simple linear classification based metric)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -27,6 +30,15 @@ function TS_SingleFeature(whatData,featID,makeViolin)
 if nargin < 3
     makeViolin = 0;
 end
+if nargin < 4
+    makeNewFigure = 0;
+end
+if nargin < 5
+    whatStat = [];
+end
+if nargin < 6
+    beVocal = 1;
+end
 
 %-------------------------------------------------------------------------------
 % Load data:
@@ -42,11 +54,16 @@ timeSeriesGroup = [TimeSeries.Group]'; % Use group form
 numClasses = max(timeSeriesGroup);
 op_ind = find([Operations.ID]==featID);
 
-fprintf(1,'[%u] %s (%s)\n',featID,Operations(op_ind).Name,Operations(op_ind).Keywords);
+if beVocal
+    fprintf(1,'[%u] %s (%s)\n',featID,Operations(op_ind).Name,Operations(op_ind).Keywords);
+end
 
 %-------------------------------------------------------------------------------
 % Plot this stuff:
-f = figure('color','w'); hold on
+if makeNewFigure
+    f = figure('color','w');
+end
+hold on
 ax = gca;
 colors = GiveMeColors(numClasses);
 
@@ -68,17 +85,21 @@ if makeViolin
 
     % Adjust appearance:
     ax = gca;
-    yLimits = ax.YLim;
     ax.XLim = [0.5+extraParams.customOffset,numClasses+0.5+extraParams.customOffset];
     ax.XTick = extraParams.customOffset+(1:numClasses);
     ax.XTickLabel = groupNames(ix);
-    ylabel(Operations(op_ind).Name,'interpreter','none')
+    ylabel('Output')
     ax.TickLabelInterpreter = 'none';
-    f.Position(3:4) = [402,159];
+    if makeNewFigure
+        f.Position(3:4) = [402,159];
+    end
 
     % Annotate rectangles:
     BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax,'left');
-    ax.YLim = yLimits;
+
+    % Trim y-limits (with 2% overreach)
+    ax.YLim(1) = min(TS_DataMat(:,op_ind))-0.02*range(TS_DataMat(:,op_ind));
+    ax.YLim(2) = max(TS_DataMat(:,op_ind))+0.02*range(TS_DataMat(:,op_ind));
 
 else
     linePlots = cell(numClasses,1);
@@ -98,20 +119,31 @@ else
     BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax,'under');
 
     % Add x-label:
-    xlabel(Operations(op_ind).Name,'interpreter','none')
+    xlabel('Output')
 
     % Adjust position
-    f.Position(3:4) = [405,179];
+    if makeNewFigure
+        f.Position(3:4) = [405,179];
+    end
 end
 
 %-------------------------------------------------------------------------------
 % Get cross-validated accuracy for this single feature using a Naive Bayes linear classifier:
-numFolds = 10;
-accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,...
-                        [],[],numClasses,1,[],[],numFolds);
-classificationText = sprintf('%u-fold cross validated balanced accuracy: %.2f +/- %.2f\n',...
-                        numFolds,mean(accuracy),std(accuracy));
-fprintf(1,classificationText);
-title(classificationText)
+if isempty(whatStat)
+    numFolds = 10;
+    accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,...
+                            [],[],numClasses,1,[],[],numFolds);
+    classificationText = sprintf('%u-fold cross validated balanced accuracy: %.2f +/- %.2f%%\n',...
+                            numFolds,mean(accuracy),std(accuracy));
+    fprintf(1,classificationText);
+    statText = sprintf('%.1f%%',mean(accuracy));
+else
+    if isnumeric(whatStat)
+        statText = sprintf('%.1f',whatStat);
+    else % assume text otherwise
+        statText = whatStat;
+    end
+end
+title(sprintf('[%u]%s (%s)',Operations(op_ind).ID,Operations(op_ind).Name,statText),'interpreter','none')
 
 end

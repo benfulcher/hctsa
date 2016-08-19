@@ -97,8 +97,10 @@ if ~isfield(TimeSeries,'Group')
 end
 timeSeriesGroup = [TimeSeries.Group]'; % Use group form
 numClasses = max(timeSeriesGroup); % Assuming classes labeled with integers starting at 1
-groupNames = load(whatDataFile,'groupNames');
-groupNames = groupNames.groupNames;
+groupNames = TS_GetFromData(whatDataFile,'groupNames');
+if isempty(groupNames)
+    error('No group label info in the data source');
+end
 
 % --------------------------------------------------------------------------
 %% Define the train/test classification rate function, fn_testStat
@@ -269,8 +271,8 @@ end
 % Distributions across classes for top features
 %-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'distributions'))
-    subPerFig = 5; % subplots per figure
-    ks_or_hist = 'ks'; % 'ks'/'hist': view as either histograms or kernel-smoothed distributions
+    subPerFig = 16; % subplots per figure
+    % ks_or_hist = 'ks'; % 'ks'/'hist': view as either histograms or kernel-smoothed distributions
 
     % Set the colors to be assigned to groups:
     colors = GiveMeColors(numClasses);
@@ -278,53 +280,79 @@ if any(ismember(whatPlots,'distributions'))
     % Space the figures out properly:
     numFigs = ceil(numHistogramFeatures/subPerFig);
 
+    % Make data structure for TS_SingleFeature
+    data = struct('TS_DataMat',TS_DataMat,'TimeSeries',TimeSeries,...
+                'Operations',Operations);
+    data.groupNames = groupNames;
+
     for figi = 1:numFigs
         if figi*subPerFig > length(ifeat)
             break % We've exceeded number of features
         end
+        % Get the indices of features to plot
         r = ((figi-1)*subPerFig+1:figi*subPerFig);
+        if figi==numFigs % filter down for last one
+            r = r(r<=numHistogramFeatures);
+        end
         featHere = ifeat(r); % features to plot on this figure
-
+        % Make the figure
         f = figure('color','w');
-        f.Position(3:4) = [588, 612]; % make longer
-        for opi = 1:subPerFig
-            op_ind = featHere(opi);
-            ax = subplot(subPerFig,1,opi); hold on
-
-            switch ks_or_hist
-            case 'ks'
-                % Plot distributions first for the sake of the legend
-                linePlots = cell(numClasses,1);
-                for i = 1:numClasses
-                    featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
-                    [~,~,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,20,1);
-                end
-                % Trim x-limits (with 2% overreach)
-                ax.XLim(1) = min(TS_DataMat(:,op_ind))-0.02*range(TS_DataMat(:,op_ind));
-                ax.XLim(2) = max(TS_DataMat(:,op_ind))+0.02*range(TS_DataMat(:,op_ind));
-                % Add a legend if necessary
-                if opi==1
-                    legend([linePlots{:}],groupNames,'interpreter','none')
-                end
-                ylabel('Probability density')
-            case 'hist'
-                for i = 1:numClasses
-                    featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
-                    histogram(featVector,'BinMethod','auto','FaceColor',colors{i},'Normalization','probability')
-                end
-                if opi==1
-                    legend(groupNames,'interpreter','none')
-                end
-                ylabel('Probability')
-            end
-
-            % Annotate rectangles under the distributions
-            BF_AnnotateRect(whatTestStat,TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax);
-
-            xlabel(sprintf('[%u] %s (%s=%4.2f%s)',Operations(op_ind).ID,Operations(op_ind).Name,...
-                                cfnName,testStat(op_ind),cfnUnit),'interpreter','none')
+        f.Position(3:4) = [1353, 857];
+        % Loop through features
+        for opi = 1:length(featHere)
+            subplot(ceil(length(featHere)/4),4,opi);
+            TS_SingleFeature(data,featHere(opi),1,0,testStat(featHere(opi)),0);
         end
     end
+
+    %
+    % for figi = 1:numFigs
+    %     if figi*subPerFig > length(ifeat)
+    %         break % We've exceeded number of features
+    %     end
+    %     r = ((figi-1)*subPerFig+1:figi*subPerFig);
+    %     featHere = ifeat(r); % features to plot on this figure
+    %
+    %     f = figure('color','w');
+    %     f.Position(3:4) = [588, 612]; % make longer
+    %     for opi = 1:subPerFig
+    %         op_ind = featHere(opi);
+    %         ax = subplot(subPerFig,1,opi); hold on
+    %
+    %         switch ks_or_hist
+    %         case 'ks'
+    %             % Plot distributions first for the sake of the legend
+    %             linePlots = cell(numClasses,1);
+    %             for i = 1:numClasses
+    %                 featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
+    %                 [~,~,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,20,1);
+    %             end
+    %             % Trim x-limits (with 2% overreach)
+    %             ax.XLim(1) = min(TS_DataMat(:,op_ind))-0.02*range(TS_DataMat(:,op_ind));
+    %             ax.XLim(2) = max(TS_DataMat(:,op_ind))+0.02*range(TS_DataMat(:,op_ind));
+    %             % Add a legend if necessary
+    %             if opi==1
+    %                 legend([linePlots{:}],groupNames,'interpreter','none')
+    %             end
+    %             ylabel('Probability density')
+    %         case 'hist'
+    %             for i = 1:numClasses
+    %                 featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
+    %                 histogram(featVector,'BinMethod','auto','FaceColor',colors{i},'Normalization','probability')
+    %             end
+    %             if opi==1
+    %                 legend(groupNames,'interpreter','none')
+    %             end
+    %             ylabel('Probability')
+    %         end
+    %
+    %         % Annotate rectangles under the distributions
+    %         BF_AnnotateRect(whatTestStat,TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax);
+    %
+    %         xlabel(sprintf('[%u] %s (%s=%4.2f%s)',Operations(op_ind).ID,Operations(op_ind).Name,...
+    %                             cfnName,testStat(op_ind),cfnUnit),'interpreter','none')
+    %     end
+    % end
 end
 
 %-------------------------------------------------------------------------------
