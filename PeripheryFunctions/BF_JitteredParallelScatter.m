@@ -8,6 +8,10 @@ function [ff,xx] = BF_JitteredParallelScatter(dataCell,addMeans,doveTail,makeFig
 % doveTail, whether to show a kernel smoothed distributions
 % makeFigure, a flag to specify whether to generate a new figure to plot into
 % extraParams, a structure of additional custom parameters
+%
+%---EXAMPLE USAGE:
+% dataCell = {randn(1000,1),randn(500,1)*2+1};
+% BF_JitteredParallelScatter(dataCell,1,1,1);
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

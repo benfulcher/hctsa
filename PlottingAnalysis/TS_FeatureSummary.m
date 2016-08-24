@@ -166,18 +166,18 @@ if doViolin
     title(sprintf('[%u]%s (%s)',theOperation.ID,theOperation.Name,theOperation.Keywords),'interpreter','none')
     ylabel('Feature value');
 
-    % Time series annotations:
+    % Time series annotations (cycling through groups of 10 rainbow colors):
     ax = subplot(1,4,3:4);
     plotOptions.newFigure = 0;
-    numIts = ceil(annotateParams.n/10);
     plotOptions.colorMap = cell(annotateParams.n,1);
-    for i = 1:numIts
-        rMap = (i-1)*10+1:i*10;
-        rMap = rMap(rMap <= annotateParams.n);
-        flipped = flipud(rainbowColors);
-        plotOptions.colorMap(rMap) = flipped(1:length(rMap));
+    for i = 1:annotateParams.n
+        plotOptions.colorMap{i} = rainbowColors{rem(i-1,10)+1};
     end
-    TS_plot_timeseries(whatData,annotateParams.n,fliplr([Operations(r).ID]),annotateParams.maxL,plotOptions);
+    plotOptions.colorMap = flipud(plotOptions.colorMap);
+    dataStruct = struct();
+    dataStruct.TimeSeries = TimeSeries; dataStruct.groupNames = groupNames;
+    dataStruct.TS_DataMat = TS_DataMat; dataStruct.Operations = Operations;
+    TS_plot_timeseries(dataStruct,annotateParams.n,fliplr([Operations(r).ID]),annotateParams.maxL,plotOptions);
 
     % Put rectangles if data is grouped
     if isfield(TimeSeries,'Group')

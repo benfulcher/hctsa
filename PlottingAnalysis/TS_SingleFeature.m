@@ -133,9 +133,8 @@ if isempty(whatStat)
     numFolds = 10;
     accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,...
                             [],[],numClasses,1,[],[],numFolds);
-    classificationText = sprintf('%u-fold cross validated balanced accuracy: %.2f +/- %.2f%%\n',...
+    fprintf(1,'%u-fold cross validated balanced accuracy: %.2f +/- %.2f%%\n',...
                             numFolds,mean(accuracy),std(accuracy));
-    fprintf(1,classificationText);
     statText = sprintf('%.1f%%',mean(accuracy));
 else
     if isnumeric(whatStat)

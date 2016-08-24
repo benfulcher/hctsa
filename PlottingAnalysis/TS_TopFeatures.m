@@ -376,14 +376,8 @@ if any(ismember(whatPlots,'cluster'))
     op_ind = ifeat(1:numTopFeatures); % plot these operations indices
 
     % (if it exists already, use that; otherwise compute it on the fly)
-
-    fileVarsStruct = whos('-file',whatDataFile);
-    fileVars = {fileVarsStruct.name};
-    if ismember('op_clust',fileVars)
-        tmp = load(whatDataFile,'op_clust');
-        clustStruct = tmp.op_clust; clear tmp
-    else
-        % Doesn't exist in the hctsa dataset:
+    clustStruct = TS_GetFromData(whatDataFile,'op_clust');
+    if isempty(clustStruct) % doesn't exist
         clustStruct = struct();
     end
     if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
