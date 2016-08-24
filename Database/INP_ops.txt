@@ -48,6 +48,12 @@ DN_Withinp_15	DN_Withinp_15	distribution,spread
 DN_Withinp_20	DN_Withinp_20	distribution,spread
 DN_Withinp_25	DN_Withinp_25	distribution,spread
 DN_Withinp_30	DN_Withinp_30	distribution,spread
+DN_Withinp_median_05    DN_Withinp_median_05    distribution,spread
+DN_Withinp_median_10    DN_Withinp_median_10    distribution,spread
+DN_Withinp_median_15    DN_Withinp_median_15    distribution,spread
+DN_Withinp_median_20    DN_Withinp_median_20    distribution,spread
+DN_Withinp_median_25    DN_Withinp_median_25    distribution,spread
+DN_Withinp_median_30    DN_Withinp_median_30    distribution,spread
 DN_pleft_005	DN_pleft005	distribution,spread
 DN_pleft_01		DN_pleft01	distribution,spread
 DN_pleft_02		DN_pleft02	distribution,spread
