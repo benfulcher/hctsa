@@ -118,11 +118,11 @@ elseif ischar(whatTimeSeries)
     % Just plot the specified group
     % First load group names:
     if isstruct(whatData)
-        GroupNames = whatData.GroupNames;
+        groupNames = whatData.groupNames;
     else
-        load(theFile,'GroupNames');
+        load(theFile,'groupNames');
     end
-    a = strcmp(whatTimeSeries,GroupNames);
+    a = strcmp(whatTimeSeries,groupNames);
     groupIndices = {find([TimeSeries.Group]==find(a))};
     fprintf(1,'Plotting %u time series matching group name ''%s''\n',length(groupIndices{1}),whatTimeSeries);
 else % Provided a custom range as a vector

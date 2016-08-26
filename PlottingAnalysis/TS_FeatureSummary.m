@@ -177,7 +177,7 @@ if doViolin
     dataStruct = struct();
     dataStruct.TimeSeries = TimeSeries; dataStruct.groupNames = groupNames;
     dataStruct.TS_DataMat = TS_DataMat; dataStruct.Operations = Operations;
-    TS_plot_timeseries(dataStruct,annotateParams.n,fliplr([Operations(r).ID]),annotateParams.maxL,plotOptions);
+    TS_plot_timeseries(dataStruct,annotateParams.n,flipud(r),annotateParams.maxL,plotOptions);
 
     % Put rectangles if data is grouped
     if isfield(TimeSeries,'Group')

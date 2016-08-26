@@ -57,9 +57,12 @@ end
 if nargin < 4 || isempty(computeWhat)
 	computeWhat = 'missing';
 end
+if ~ismember(computeWhat,{'missing','error','bad'})
+	error('Unknown setting ''%s''',computeWhat);
+end
 
 % Custom HCTSA.mat file:
-if nargin < 5
+if nargin < 5 || isempty(customFile)
     customFile = 'raw';
 end
 

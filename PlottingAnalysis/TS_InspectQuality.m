@@ -6,6 +6,9 @@ function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 %
 % Useful for checking where errors/special-valued outputs are occurring
 %
+% Note can use this in conjuction with TS_WhichProblemTS to probe further which
+% time series are causing problems for different types of algorithms.
+%
 %---INPUTS:
 %
 % inspectWhat: (i) 'summary' (default), summarize the proportion of each operation's

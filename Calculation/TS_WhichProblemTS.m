@@ -38,8 +38,8 @@ end
 %-------------------------------------------------------------------------------
 % Load data:
 %-------------------------------------------------------------------------------
-[~,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-load(whatDataFile,'TS_Quality');
+[~,TimeSeries,Operations,whatData] = TS_LoadData(whatData);
+TS_GetFromData(whatData,'TS_Quality');
 
 %-------------------------------------------------------------------------------
 % Get the quality labels for this operation, then output time series info:
@@ -55,7 +55,7 @@ if nargout > 1
 end
 
 if nargout > 2
-    load(whatDataFile,'MasterOperations');
+    MasterOperations = TS_GetFromData(whatData,'MasterOperations');
     codeEval = MasterOperations([MasterOperations.ID]==Operations([Operations.ID]==opID).MasterID).Code;
 end
 
