@@ -193,7 +193,6 @@ for i = 1:length(statNames)
     out = assignExtraStats(out,stats(:,i),statNames{i});
 end
 
-
 % ------------------------------------------------------------------------------
     function out = CalculateStats(y,y_rand)
         % Calculate statistics comparing a time series, y, and a randomized
@@ -229,50 +228,57 @@ end
     end
 % ------------------------------------------------------------------------------
 
-
-% ------------------------------------------------------------------------------
-	function thehp = SUB_gethp(v)
-		if v(end) > v(1)
-			thehp = find(v > 0.5*(v(end)+v(1)),1,'first');
-		else
-			thehp = find(v < 0.5*(v(end)+v(1)),1,'first'); % last?
-		end
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+function thehp = SUB_gethp(v)
+	if v(end) > v(1)
+		thehp = find(v > 0.5*(v(end)+v(1)),1,'first');
+	else
+		thehp = find(v < 0.5*(v(end)+v(1)),1,'first'); % last?
 	end
+end
 % ------------------------------------------------------------------------------
-    function [c,gof] = f_fix_exp(r,dataVector,startPoint,addOffset)
-        % Fits an exponential to the data vector across data points r
+function [c,gof] = f_fix_exp(r,dataVector,startPoint,addOffset)
+    % Fits an exponential to the data vector across data points r
 
-        s = fitoptions('Method','NonlinearLeastSquares','StartPoint',startPoint);
-        if addOffset
-            f = fittype('a*exp(b*x)+c','options',s);
-            f_x = @(c,x) c.a*exp(c.b*x)+c.c;
-        else
-            f = fittype('a*exp(b*x)','options',s);
-            f_x = @(c,x) c.a*exp(c.b*x);
-        end
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',startPoint);
+    if addOffset
+        f = fittype('a*exp(b*x)+c','options',s);
+        f_x = @(c,x) c.a*exp(c.b*x)+c.c;
+    else
+        f = fittype('a*exp(b*x)','options',s);
+        f_x = @(c,x) c.a*exp(c.b*x);
+    end
+    try
         [c, gof] = fit(r,dataVector,f);
-        if doPlot;
-            figure('color','w'); hold on;
-            plot(r,dataVector,'x-k');
-            xr = linspace(min(r),max(r),100);
-            plot(xr,f_x(c,xr))
-        end
+    catch
+        warning('Exponential fit failed :(')
+        c = struct('a',NaN,'b',NaN,'c',NaN);
+        gof = struct('rsquare',NaN,'rmse',NaN);
     end
+    if doPlot;
+        figure('color','w'); hold on;
+        plot(r,dataVector,'x-k');
+        xr = linspace(min(r),max(r),100);
+        plot(xr,f_x(c,xr))
+    end
+end
 %-------------------------------------------------------------------------------
-    function out = assignExpStats(out,c,gof,fieldName)
-        % Assigns relevant stats from an exponential fit result, [c,gof]
-        out.([fieldName,'fexpa']) = c.a;
-        out.([fieldName,'fexpb']) = c.b;
-        if ismember('c',coeffnames(c))
-            out.([fieldName,'fexpc']) = c.c;
-        end
-        out.([fieldName,'fexpr2']) = gof.rsquare;
-        out.([fieldName,'fexprmse']) = gof.rmse;
+function out = assignExpStats(out,c,gof,fieldName)
+    % Assigns relevant stats from an exponential fit result, [c,gof]
+    out.([fieldName,'fexpa']) = c.a;
+    out.([fieldName,'fexpb']) = c.b;
+    if (isstruct(c) && isfield(c,'c')) || ismember('c',coeffnames(c))
+        out.([fieldName,'fexpc']) = c.c;
     end
+    out.([fieldName,'fexpr2']) = gof.rsquare;
+    out.([fieldName,'fexprmse']) = gof.rmse;
+end
 %-------------------------------------------------------------------------------
-    function out = assignExtraStats(out,dataVector,fieldName)
-        % Assigns 2 extra statistics about a data vector:
-        out.([fieldName,'diff']) = abs((dataVector(end)-dataVector(1))/dataVector(1));
-        out.([fieldName,'hp']) = SUB_gethp(dataVector);
-    end
+function out = assignExtraStats(out,dataVector,fieldName)
+    % Assigns 2 extra statistics about a data vector:
+    out.([fieldName,'diff']) = abs((dataVector(end)-dataVector(1))/dataVector(1));
+    out.([fieldName,'hp']) = SUB_gethp(dataVector);
+end
+
 end
