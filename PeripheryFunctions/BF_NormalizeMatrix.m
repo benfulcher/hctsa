@@ -48,7 +48,13 @@ if nargin < 2 || isempty(normMethod)
 end
 
 if nargin < 3
-    isTraining = true(1:size(dataMatrix,1));
+    isTraining = true(size(dataMatrix,1),1);
+end
+if size(isTraining,2) > size(isTraining,1)
+    isTraining = isTraining'; % should be a column vector
+end
+if size(isTraining,1)~=1
+    error('Logical specifying training indices should be a vector');
 end
 %-------------------------------------------------------------------------------
 
@@ -157,7 +163,7 @@ function xhat = Sigmoid(x,doScale)
     % Classic sigmoidal transformation (optionally scaled to the unit interval)
     if nargin < 2, doScale = 1; end
 
-    goodVals = ~isnan(x) && isTraining;
+    goodVals = (~isnan(x) & isTraining);
     meanX = mean(x(goodVals));
     stdX = std(x(goodVals));
 
@@ -174,7 +180,7 @@ function xhat = RobustSigmoid(x,doScale)
     % Outlier-adjusted sigmoid (optionally scaled to unit interval)
     if nargin < 2, doScale = 1; end
 
-    goodVals = ~isnan(x) && isTraining;
+    goodVals = (~isnan(x) & isTraining);
     medianX = median(x(goodVals));
     iqrX = iqr(x(goodVals));
 
@@ -190,7 +196,7 @@ function xhat = RobustSigmoid(x,doScale)
 end
 
 function xhat = ZScore(x)
-    goodVals = ~isnan(x) && isTraining;
+    goodVals = (~isnan(x) & isTraining);
     meanX = mean(x(goodVals));
     stdX = std(x(goodVals));
     xhat = (x-meanX)/stdX;
@@ -198,7 +204,7 @@ end
 
 function xhat = UnityRescale(x)
     % Linearly rescale a data vector to unit interval:
-    goodVals = ~isnan(x) && isTraining; % only work with non-NaN data
+    goodVals = (~isnan(x) & isTraining); % only work with non-NaN data
     if ~any(goodVals) % all NaNs:
         xhat = x; return
     end
