@@ -1,12 +1,14 @@
-function dataMatrixNorm = BF_NormalizeMatrix(dataMatrix,normMethod,itrain)
+function dataMatrixNorm = BF_NormalizeMatrix(dataMatrix,normMethod,isTraining)
 % BF_NormalizeMatrix    Normalizes all columns of an input matrix.
 %
 %---INPUTS:
 % dataMatrix, the input data matrix
 % normMethod, the normalization method to use (see body of the code for options)
-% itrain, learn the normalization parameters just on these training indices, then
-%         apply it to the full dataset (required for training/testing procedures
-%         where the testing data has to remain unseen). [NOT CURRENTLY SUPPORTED]
+% isTraining, learn the normalization parameters just on this training portion
+%             of data, then apply it to the full dataset (required for training
+%             /testing procedures where the testing data has to remain unseen).
+%             Should be input as a logical of the same size as the number of rows
+%             in the dataMatrix.
 %
 %---OUTPUT:
 % dataMatrixNorm, the normalized matrix
@@ -46,10 +48,13 @@ if nargin < 2 || isempty(normMethod)
 end
 
 if nargin < 3
-    itrain = [];
+    isTraining = true(size(dataMatrix,1),1);
 end
-if ~isempty(itrain)
-    error('TRAINING SPECIFIER NOT CURRENTLY SUPPORTED...');
+if size(isTraining,2) > size(isTraining,1)
+    isTraining = isTraining'; % should be a column vector
+end
+if size(isTraining,1)~=1
+    error('Logical specifying training indices should be a vector');
 end
 %-------------------------------------------------------------------------------
 
@@ -158,7 +163,7 @@ function xhat = Sigmoid(x,doScale)
     % Classic sigmoidal transformation (optionally scaled to the unit interval)
     if nargin < 2, doScale = 1; end
 
-    goodVals = ~isnan(x);
+    goodVals = (~isnan(x) & isTraining);
     meanX = mean(x(goodVals));
     stdX = std(x(goodVals));
 
@@ -175,7 +180,7 @@ function xhat = RobustSigmoid(x,doScale)
     % Outlier-adjusted sigmoid (optionally scaled to unit interval)
     if nargin < 2, doScale = 1; end
 
-    goodVals = ~isnan(x);
+    goodVals = (~isnan(x) & isTraining);
     medianX = median(x(goodVals));
     iqrX = iqr(x(goodVals));
 
@@ -191,7 +196,7 @@ function xhat = RobustSigmoid(x,doScale)
 end
 
 function xhat = ZScore(x)
-    goodVals = ~isnan(x);
+    goodVals = (~isnan(x) & isTraining);
     meanX = mean(x(goodVals));
     stdX = std(x(goodVals));
     xhat = (x-meanX)/stdX;
@@ -199,7 +204,7 @@ end
 
 function xhat = UnityRescale(x)
     % Linearly rescale a data vector to unit interval:
-    goodVals = ~isnan(x); % only work with non-NaN data
+    goodVals = (~isnan(x) & isTraining); % only work with non-NaN data
     if ~any(goodVals) % all NaNs:
         xhat = x; return
     end

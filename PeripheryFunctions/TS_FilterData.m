@@ -7,8 +7,8 @@ function newFileName = TS_FilterData(whatData,ts_keepIDs,op_keepIDs,newFileName)
 %
 %---INPUTS:
 % whatData, the input to TS_LoadData that describes the data to load in
-% ts_keepIDs, a vector of TimeSeries IDs to keep
-% op_keepIDs, a vector of Operations IDs to keep
+% ts_keepIDs, a vector of TimeSeries IDs to keep (empty to keep all)
+% op_keepIDs, a vector of Operations IDs to keep (empty to keep all)
 %
 %---OUTPUT:
 % newFileName, the filename of the .mat file that the new, filtered data is saved to
@@ -59,51 +59,23 @@ end
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 
 % May be feeding in a loaded data structure:
-if isstruct(whatData)
-    TS_Quality = whatData.TS_Quality;
-    MasterOperations = whatData.MasterOperations;
-    if isfield(whatData,'fromDatabase')
-        fromDatabase = whatData.fromDatabase;
-    else
-        fromDatabase = 1;
-    end
-    if isfield(whatData,'groupNames')
-        groupNames = whatData.groupNames;
-    else
-        groupNames = {};
-    end
-    if isfield(whatData,'normalizationInfo')
-        normalizationInfo = whatData.normalizationInfo;
-    else
-        normalizationInfo = '';
-    end
-else
-    load(whatDataFile,'TS_Quality','MasterOperations');
-
-    % First check that fromDatabase exists (for back-compatability)
-    fileVarsStruct = whos('-file',whatDataFile);
-    fileVars = {fileVarsStruct.name};
-    if ismember('fromDatabase',fileVars)
-        load(whatDataFile,'fromDatabase')
-    else
-        fromDatabase = 1; % (legacy: set to 1 by default)
-    end
-
-    % Check that we have the groupNames if already assigned labels
-    if ismember('groupNames',fileVars)
-        load(whatDataFile,'groupNames');
-    else
-        groupNames = {};
-    end
-
-    % Check if normalizationInfo is present:
-    if ismember('normalizationInfo',fileVars)
-        load(whatDataFile,'normalizationInfo');
-    else
-        normalizationInfo = '';
-    end
+TS_Quality = TS_GetFromData(whatData,'TS_Quality');
+MasterOperations = TS_GetFromData(whatData,'MasterOperations');
+% First check that fromDatabase exists (for back-compatability):
+fromDatabase = TS_GetFromData(whatData,'fromDatabase');
+if isempty(fromDatabase)
+    fromDatabase = 1; % (legacy: set to 1 by default)
 end
-
+% Check that we have the groupNames if already assigned labels:
+groupNames = TS_GetFromData(whatData,'groupNames');
+if isempty(groupNames)
+    groupNames = {};
+end
+% Check if normalizationInfo is present:
+normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
+if isempty(normalizationInfo)
+    normalizationInfo = '';
+end
 
 %-------------------------------------------------------------------------------
 % Do the row filtering:
@@ -154,7 +126,11 @@ op_clust = struct('distanceMetric','none','Dij',[],...
 % Save back
 %-------------------------------------------------------------------------------
 if isempty(newFileName)
-    newFileName = [whatDataFile(1:end-4),'_filtered.mat'];
+    if isstruct(whatData)
+        newFileName = 'HCTSA_filtered.mat';
+    else
+        newFileName = [whatData(1:end-4),'_filtered.mat'];
+    end
 end
 fprintf(1,'Saving the filtered data to %s...',newFileName);
 save(newFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
