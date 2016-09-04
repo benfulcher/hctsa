@@ -53,7 +53,7 @@ end
 if size(isTraining,2) > size(isTraining,1)
     isTraining = isTraining'; % should be a column vector
 end
-if size(isTraining,1)~=1
+if size(isTraining,2)~=1
     error('Logical specifying training indices should be a vector');
 end
 %-------------------------------------------------------------------------------

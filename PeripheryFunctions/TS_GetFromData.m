@@ -45,7 +45,7 @@ end
 if ischar(dataSource)
     fileVarsStruct = whos('-file',dataSource);
     fileVars = {fileVarsStruct.name};
-    if ismember('groupNames',fileVars)
+    if ismember(dataField,fileVars)
         loadAgain = load(dataSource,dataField);
         result = loadAgain.(dataField);
     else
