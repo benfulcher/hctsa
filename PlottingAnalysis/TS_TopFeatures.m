@@ -74,7 +74,7 @@ check_whatPlots = @(x) iscell(x) || ischar(x);
 addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 default_numTopFeatures = 40;
 addParameter(inputP,'numTopFeatures',default_numTopFeatures,@isnumeric);
-default_numHistogramFeatures = 10;
+default_numHistogramFeatures = 16;
 addParameter(inputP,'numHistogramFeatures',default_numHistogramFeatures,@isnumeric);
 parse(inputP,varargin{:});
 
@@ -361,10 +361,10 @@ end
 if any(ismember(whatPlots,'datamatrix'))
     featInd = ifeat(1:numTopFeatures);
     ixFeat = BF_ClusterReorder(TS_DataMat(:,featInd)','corr','average');
-    whatData = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
+    dataLocal = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
                     'TimeSeries',TimeSeries,...
                     'Operations',Operations(featInd(ixFeat)));
-    TS_plot_DataMatrix(whatData,'colorGroups',1,'groupReorder',1);
+    TS_plot_DataMatrix(dataLocal,'colorGroups',1,'groupReorder',1);
 end
 
 %-------------------------------------------------------------------------------
