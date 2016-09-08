@@ -194,8 +194,12 @@ if numGroups <= 1
     else
         customColorMap = gray(numColorMapGrads);
     end
+elseif numGroups ==2
+	% Special case to make a nice red and blue one
+	customColorMap = [flipud(BF_getcmap('blues',9,0));flipud(BF_getcmap('reds',9,0))];
 else
-    numColorMapGrads = 20; % number of gradations in each set of colourmap
+	% Use the same colors as GiveMeColors, but add brightness gradations to indicate magnitude
+    numColorMapGrads = 20; % number of brightness gradations in each set of colourmap
     colormapBase = GiveMeColors(numGroups);
     customColorMap = [];
     for i = 1:numGroups
