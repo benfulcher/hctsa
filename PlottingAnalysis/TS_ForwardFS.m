@@ -79,14 +79,7 @@ end
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 
 % Retrieve group names also:
-fileVarsStruct = whos('-file',whatDataFile);
-fileVars = {fileVarsStruct.name};
-if ismember('groupNames',fileVars)
-    groupNames = load(whatDataFile,'groupNames');
-    groupNames = groupNames.groupNames;
-else
-    groupNames = {};
-end
+groupNames = TS_GetFromData(whatData,'groupNames');
 numClasses = length(groupNames);
 
 % ------------------------------------------------------------------------------

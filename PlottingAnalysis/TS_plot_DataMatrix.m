@@ -288,6 +288,10 @@ end
 % Add a color bar:
 cB = colorbar('eastoutside');
 cB.Label.String = 'Output';
+if numGroups > 0
+	cB.Ticks = 0.5:1:numGroups;
+	cB.TickLabels = TS_GetFromData(whatData,'groupNames');
+end
 
 title(sprintf('Data matrix (%u x %u)',numTS,numOps))
 

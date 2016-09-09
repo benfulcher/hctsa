@@ -60,10 +60,10 @@ end
 % ------------------------------------------------------------------------------
 
 % Load in data:
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
 % Retrieve group names also:
-groupNames = TS_GetFromData(whatDataFile,'groupNames');
+groupNames = TS_GetFromData(whatData,'groupNames');
 if isempty(groupNames)
     groupNames = {};
 end

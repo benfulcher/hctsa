@@ -1,4 +1,4 @@
-function TS_cluster(distanceMetricRow, linkageMethodRow, distanceMetricCol, linkageMethodCol, doSave, theFile)
+function TS_cluster(distanceMetricRow,linkageMethodRow,distanceMetricCol,linkageMethodCol,doSave,theFile)
 % TS_cluster    Linkage clustering for hctsa data.
 %
 % Reads in normalized data from HCTSA_N.mat, clusters the data matrix by
