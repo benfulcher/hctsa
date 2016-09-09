@@ -42,7 +42,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Load data:
-[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations,whatDataSource] = TS_LoadData(whatData);
 % Get groupNames if it exists:
 groupNames = TS_GetFromData(whatData,'groupNames');
 if isempty(groupNames)
@@ -53,6 +53,10 @@ end
 timeSeriesGroup = [TimeSeries.Group]'; % Use group form
 numClasses = max(timeSeriesGroup);
 op_ind = find([Operations.ID]==featID);
+
+if isempty(op_ind)
+    error('Operation with ID %u not found in %s',featID,whatDataSource);
+end
 
 if beVocal
     fprintf(1,'[%u] %s (%s)\n',featID,Operations(op_ind).Name,Operations(op_ind).Keywords);
@@ -73,8 +77,8 @@ if makeViolin
         dataCell{i} = (TS_DataMat(timeSeriesGroup==i,op_ind));
     end
 
-    % Re-order groups by mean (descending):
-    meanGroup = cellfun(@mean,dataCell);
+    % Re-order groups by mean (excluding any NaNs, descending):
+    meanGroup = cellfun(@nanmean,dataCell);
     [~,ix] = sort(meanGroup,'descend');
 
     extraParams = struct();

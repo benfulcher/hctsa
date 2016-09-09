@@ -301,7 +301,7 @@ if any(ismember(whatPlots,'distributions'))
         % Loop through features
         for opi = 1:length(featHere)
             subplot(ceil(length(featHere)/4),4,opi);
-            TS_SingleFeature(data,featHere(opi),1,0,testStat(featHere(opi)),0);
+            TS_SingleFeature(data,Operations(featHere(opi)).ID,1,0,testStat(featHere(opi)),0);
         end
     end
 
