@@ -60,6 +60,7 @@ if isstruct(whatDataFile)
     TS_DataMat = whatDataFile.TS_DataMat;
     TimeSeries = whatDataFile.TimeSeries;
     Operations = whatDataFile.Operations;
+    whatDataFile = '--INPUT_STRUCTURE--'; % revive this, so this output is always a string
     return
 end
 

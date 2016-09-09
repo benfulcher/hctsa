@@ -42,9 +42,9 @@ end
 
 %-------------------------------------------------------------------------------
 % Load data:
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 % Get groupNames if it exists:
-groupNames = TS_GetFromData(whatDataFile,'groupNames');
+groupNames = TS_GetFromData(whatData,'groupNames');
 if isempty(groupNames)
     error('You must assign groups to data to use TS_SingleFeature. Use TS_LabelGroups.');
 end
@@ -143,6 +143,6 @@ else
         statText = whatStat;
     end
 end
-title(sprintf('[%u]%s (%s)',Operations(op_ind).ID,Operations(op_ind).Name,statText),'interpreter','none')
+title(sprintf('[%u] %s (%s)',Operations(op_ind).ID,Operations(op_ind).Name,statText),'interpreter','none')
 
 end
