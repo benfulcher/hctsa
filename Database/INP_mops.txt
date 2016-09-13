@@ -1048,9 +1048,9 @@ SY_KPSStest(y,0)	SY_KPSStest_0
 SY_KPSStest(y,1)	SY_KPSStest_1
 SY_KPSStest(y,2)	SY_KPSStest_2
 SY_KPSStest(y,0:10)	SY_KPSStest_0_10
-MF_hmm_fit(y,0.7,3)	MF_hmm_07_3
-MF_hmm_fit(y,0.8,2)	MF_hmm_08_2
-MF_hmm_CompareNStates(y,0.6,2:4)	MF_hmm_CompareNStates_06_24
+MF_hmm_fit(y,0.7,3,'default')	MF_hmm_07_3
+MF_hmm_fit(y,0.8,2,'default')	MF_hmm_08_2
+MF_hmm_CompareNStates(y,0.6,2:4,'default')	MF_hmm_CompareNStates_06_24
 MD_hrv_classic(y)	MD_hrv_classic
 CP_ML_StepDetect(y,'l1pwc',10)	CP_ML_StepDetect_l1pwc_10
 CP_ML_StepDetect(y,'l1pwc',0.05)	CP_ML_StepDetect_l1pwc_005
