@@ -49,6 +49,8 @@ case 'kraskov1' % algorithm 1
     implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov1';
 case 'kraskov2' % algorithm 2
     implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov2';
+otherwise
+    error('Unknown mutual information estimation method ''%s''',estMethod);
 end
 % ------------------------------------------------------------------------------
 

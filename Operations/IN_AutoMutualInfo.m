@@ -91,7 +91,7 @@ for k = 1:numTimeDelays
     miCalc.initialise(1,1);
 
     % Set observations to time-delayed versions of the time series:
-    miCalc.setObservations(y1, y2);
+    miCalc.setObservations(y1,y2);
 
     % Compute:
     amis(k) = miCalc.computeAverageLocalOfObservations();
