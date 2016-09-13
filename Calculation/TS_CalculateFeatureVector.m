@@ -56,9 +56,11 @@ if isnumeric(tsStruct)
 						'ID',1, ...
 						'Length',length(tsData));
 end
+
 if nargin < 2
 	doParallel = 1;
 end
+
 if nargin < 3 || isempty(Operations) || ischar(Operations)
 	% Use a default library:
 	if nargin >=3 && ischar(Operations)
@@ -68,6 +70,10 @@ if nargin < 3 || isempty(Operations) || ischar(Operations)
 	end
 	Operations = SQL_add('ops', theINPfile, 0, 0)';
 end
+if isnumeric(Operations)
+	error('Provide an input file or a structure array of Operations');
+end
+
 if nargin < 4 || isempty(MasterOperations)
 	% Use the default library:
 	MasterOperations = SQL_add('mops', 'INP_mops.txt', 0, 0)';

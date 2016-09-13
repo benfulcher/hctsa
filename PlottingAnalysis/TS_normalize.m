@@ -308,14 +308,14 @@ function keepInd = filterNaNs(XMat,nan_thresh,objectName)
         if all(~keepInd)
             error('No %s had more than %4.2f%% good values.',objectName,nan_thresh*100)
         end
-        if any(keepInd)
-            fprintf(1,['\nRemoving %u %s with fewer than %4.2f%% good values:'...
-                        ' from %u to %u.\n'],sum(~keepInd),objectName,...
-                        nan_thresh*100,length(keepInd),sum(keepInd));
-        else
+        if all(keepInd)
             fprintf(1,['All %u %s have greater than %4.2f%% good values.' ...
                             ' Keeping them all.\n'], ...
                             length(keepInd),objectName,nan_thresh*100);
+        else
+            fprintf(1,['\nRemoving %u %s with fewer than %4.2f%% good values:'...
+                        ' from %u to %u.\n'],sum(~keepInd),objectName,...
+                        nan_thresh*100,length(keepInd),sum(keepInd));
         end
     end
 end
