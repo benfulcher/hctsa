@@ -59,8 +59,8 @@ if nargin < 4
 end
 
 % ------------------------------------------------------------------------------
-% Initialize miCalc object:
-miCalc = IN_Initialize_MI(estMethod,extraParam);
+% Initialize miCalc object (don't add noise!):
+miCalc = IN_Initialize_MI(estMethod,extraParam,0);
 
 % Set observations to two time series:
 miCalc.setObservations(y1, y2);
