@@ -59,14 +59,15 @@ out = mean((y-f).^2); % mean RMS ERROR OF FIT
 % ------------------------------------------------------------------------------
 if doPlot
     n = 10;
-    errs=zeros(n,1);
-    x=1:length(y);
-    for i=1:n
-    cf=polyfit(x,y',i);
-    f=polyval(cf,x);
-    errs(i)=sum((y'-f).^2);
+    errs = zeros(n,1);
+    x = 1:length(y);
+    for i = 1:n
+        cf = polyfit(x,y',i);
+        f = polyval(cf,x);
+        errs(i) = sum((y'-f).^2);
     end
-    hold on;plot(f,'k')
+    f = figure('color','w'); hold on;
+    plot(f,'k')
     plot(errs);
 end
 

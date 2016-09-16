@@ -630,10 +630,10 @@ NL_DVV(y,3,100,2,50,10,'default')       NL_DVV_3_100_2_50_10_default
 DN_OutlierTest(y,2)  	DN_OutlierTest2
 DN_OutlierTest(y,5)  	DN_OutlierTest5
 DN_OutlierTest(y,10)  	DN_OutlierTest10
-ST_FitPolynomial(x,1)	ST_FitPolynomial_1
-ST_FitPolynomial(x,2)	ST_FitPolynomial_2
-ST_FitPolynomial(x,3)	ST_FitPolynomial_3
-ST_FitPolynomial(x,4)	ST_FitPolynomial_4
+ST_FitPolynomial(y,1)	ST_FitPolynomial_1
+ST_FitPolynomial(y,2)	ST_FitPolynomial_2
+ST_FitPolynomial(y,3)	ST_FitPolynomial_3
+ST_FitPolynomial(y,4)	ST_FitPolynomial_4
 DK_crinkle(y)	DK_crinkle_statistic
 DK_theilerQ(y)	DK_TheilerQ
 CP_wavelet_varchg(y,'db3',2,10,0.01)	CP_wavelet_varchg_db3_2_10_001
