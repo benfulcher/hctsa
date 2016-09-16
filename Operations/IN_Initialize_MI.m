@@ -73,8 +73,8 @@ if ismember(estMethod,{'kraskov1','kraskov2'})
     end
 end
 
-% Make deterministic:
-if ~addNoise
+% Make deterministic is kraskov1 or 2 (which add a small amount of noise to the signal by default):
+if ~addNoise && ismember(estMethod,{'kraskov1','kraskov2'})
     miCalc.setProperty('NOISE_LEVEL_TO_ADD','0');
 end
 
