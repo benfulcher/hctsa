@@ -93,7 +93,7 @@ fprintf(1,'---Done.\n');
 %-------------------------------------------------------------------------------
 numTopLoadFeat = 20; % display this many features loading onto each PC
 for j = 1:2
-    fprintf(1,'---PC%u---:\n',j);
+    fprintf(1,'---Top feature loadings for PC%u---:\n',j);
     [~,ix] = sort(abs(pcCoeff(:,j)),'descend');
     for i = 1:numTopLoadFeat
         fprintf(1,'(%.3f, r = %.2f) [%u] %s (%s)\n',...

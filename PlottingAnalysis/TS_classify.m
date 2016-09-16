@@ -134,6 +134,8 @@ ax = gca;
 ax.XTickLabel(1:numClasses) = groupNames;
 ax.YTickLabel(1:numClasses) = groupNames;
 ax.TickLabelInterpreter = 'none';
+% Make a nice white figure background:
+f = gcf; f.Color = 'w';
 
 %-------------------------------------------------------------------------------
 % Compare performance of reduced PCs from the data matrix:
