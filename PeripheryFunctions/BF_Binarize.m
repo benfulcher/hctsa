@@ -42,11 +42,11 @@ switch binarizeHow
 
     case 'mean'
         % Binary signal: 1 for above mean, 0 for below mean
-        yBin = (sign(y)+1)/2;
+        yBin = (sign(y - mean(y))+1)/2;
 
     case 'median'
         % Binary signal: 1 for above median, 0 for below median
-        yBin = (sign(y-median(y))+1)/2;
+        yBin = (sign(y - median(y))+1)/2;
 
     case 'iqr'
         % Binary signal: 1 if inside interquartile range, 0 otherwise
