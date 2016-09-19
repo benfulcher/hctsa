@@ -76,6 +76,7 @@ switch whatDistn
     case 'beta'
         % clumsily scale to the range (0,1)
         x = (x-min(x)+0.01*std(x))/(max(x)-min(x)+0.02*std(x));
+        xStep = std(x)/100; % will need a new step size for the rescaled data
         a = betafit(x);
 		thresh = 1E-5; % ok -- consistent since all scaled to the same range
 		xf(1) = mean(x); ange = 10;

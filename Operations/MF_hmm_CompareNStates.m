@@ -1,4 +1,4 @@
-function out = MF_hmm_CompareNStates(y,trainp,nstater)
+function out = MF_hmm_CompareNStates(y,trainp,nstater,randomSeed)
 % MF_hmm_CompareNStates     Hidden Markov Model (HMM) fitting to a time series.
 %
 % Fits HMMs with different numbers of states, and compares the resulting
@@ -63,6 +63,15 @@ if nargin < 3 || isempty(nstater)
     fprintf(1,'Using 2--4 states by default\n');
     nstater = (2:4); % use 2:4 states
 end
+
+if nargin < 4
+    randomSeed = [];
+end
+
+%-------------------------------------------------------------------------------
+% Deal with random seeds
+%-------------------------------------------------------------------------------
+BF_ResetSeed(randomSeed); % reset the random seed if specified
 
 % ------------------------------------------------------------------------------
 %% Train the HMM

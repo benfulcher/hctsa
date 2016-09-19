@@ -115,7 +115,7 @@ if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4),'poly') && ~isempty(str2dou
 
     [cfun, gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
-    y_d = y-y_fit;
+    y_d = y - y_fit;
 
 % 2) Seasonal detrend
 elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4),'9')
@@ -125,7 +125,7 @@ elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3),'sin') && ~isempty(str2
 
     [cfun, gof] = fit(r,y,detrndmeth);
     y_fit = feval(cfun,r);
-    y_d = y-y_fit;
+    y_d = y - y_fit;
 
 % 3) Spline detrend
 elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6),'spline') && ~isempty(str2double(detrndmeth(7))) && ~isempty(str2double(detrndmeth(8)))

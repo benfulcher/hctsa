@@ -87,7 +87,7 @@ try
     sampEn = sampen_mex(y',M+1,r);
     sampEn = sampEn(1:M+1); % always that extra one for the M=0
 catch
-    fprintf(1,'No mex file found: using a slow matlab implementation instead\n');
+    warning('No mex file found: using a slower native Matlab implementation instead');
     % No mex version available; use (much slower) Matlab implementation
     % if isempty(b) || length(y) < 3000 % faster to run within Matlab
     % No compiled C version detected (for time series longer than 3000 samples):

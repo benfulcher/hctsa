@@ -93,7 +93,9 @@ end
 % cfd = reshape(cfd,level,N);
 % cfd = wcodemat(cfd,nbcol,'row');
 
-%% Do the plotting
+%-------------------------------------------------------------------------------
+%% Plotting
+%-------------------------------------------------------------------------------
 if doPlot
     figure('color','w'); box('on');
     colormap(pink(nbcol));
@@ -118,13 +120,13 @@ for k = 1:level
         out.(sprintf('mind_l%u',k)) = min(d);
         % std coefficients at this level:
         out.(sprintf('stdd_l%u',k)) = std(d);
-        % 1-D noise coefficient estimate:
-        out.(sprintf('stddd_l%u',k)) = wnoisest(c,l,k);
+        % 1-D noise coefficient estimate (estimate of the noise std):
+        out.(sprintf('noisestd_l%u',k)) = wnoisest(c,l,k);
     else
         out.(sprintf('maxd_l%u',k)) = NaN;
         out.(sprintf('mind_l%u',k)) = NaN;
         out.(sprintf('stdd_l%u',k)) = NaN;
-        out.(sprintf('stddd_l%u',k)) = NaN;
+        out.(sprintf('noisestd_l%u',k)) = NaN;
     end
 end
 

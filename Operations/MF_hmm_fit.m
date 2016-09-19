@@ -1,5 +1,8 @@
-function out = MF_hmm_fit(y,trainp,numStates)
+function out = MF_hmm_fit(y,trainp,numStates,randomSeed)
 % MF_hmm_fit    Fits a Hidden Markov Model to sequential data.
+%
+% Actually highly stochastic, so for reproducible results helps to reset the
+% random seed...
 %
 %---INPUTS:
 % y, the input time series
@@ -56,6 +59,15 @@ if nargin < 3 || isempty(numStates)
     numStates = 3; % use 3 states
 end
 
+if nargin < 4
+    randomSeed = [];
+end
+
+%-------------------------------------------------------------------------------
+% Deal with random seeds
+%-------------------------------------------------------------------------------
+BF_ResetSeed(randomSeed); % reset the random seed if specified
+
 % ------------------------------------------------------------------------------
 %% Train the HMM
 % ------------------------------------------------------------------------------
@@ -82,7 +94,7 @@ end
 % Mean vector, Mu
 Musort = sort(Mu,'ascend');
 for i = 1:length(Mu)
-    out.(['Mu_',num2str(i)]) = Musort(i); % use dynamic field referencing
+    out.(sprintf('Mu_%u',i)) = Musort(i); % use dynamic field referencing
     % eval(sprintf('out.Mu_%u = Musort(%u);',i,i));
 end
 out.meanMu = mean(Mu);

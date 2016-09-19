@@ -186,7 +186,7 @@ switch subsetHow
             r(:,1) = spts(1:numPred)+1;
             r(:,2) = spts(2:end);
         else
-            if samplep(2)<1 % specified a fraction of time series
+            if samplep(2) < 1 % specified a fraction of time series
                 l = floor(N*samplep(2));
             else % specified an absolute interval
                 l = samplep(2);
@@ -219,7 +219,6 @@ for i = 1:numPred
 %     e = pe(m, ytest); % prediction errors -- exactly the same as returning
 %                       % residuals of 1-step-ahead prediction model
 
-
     % plot the two:
 %     plot(y,yp);
 
@@ -232,8 +231,7 @@ for i = 1:numPred
 
     % Get statistics on output time series
     meandiffs(i) = abs(mean(yp.y) - mean(ytest.y));
-    stdrats(i) = abs(std(yp.y))/abs(std(ytest.y));
-
+    stdrats(i) = abs(std(yp.y)/std(ytest.y));
 
 %     % 1) Get statistics on residuals
 %     residout = MF_ResidualAnalysis(mresiduals);
@@ -243,8 +241,6 @@ for i = 1:numPred
 %     for k=1:length(fields);
 %         eval(['out.' fields{k} ' = residout.' fields{k} ';']);
 %     end
-
-
 end
 
 % ------------------------------------------------------------------------------
@@ -282,6 +278,5 @@ out.stdrats_mean = mean(stdrats);
 out.stdrats_median = median(stdrats);
 out.stdrats_std = std(stdrats);
 out.stdrats_iqr = iqr(stdrats);
-
 
 end

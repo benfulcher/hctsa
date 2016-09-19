@@ -1,5 +1,6 @@
 function out = EX_MovingThreshold(y,a,b)
-% EX_MovingThreshold    Moving threshold model for extreme events in a time series.
+% EX_MovingThreshold    Moving threshold model for extreme events in a
+%                       time series
 %
 % Inspired by an idea contained in:
 % "Reactions to extreme events: Moving threshold model"
@@ -117,7 +118,7 @@ out.minq = min(q);
 out.stdq = std(q);
 out.meanqover = mean(q - y);
 
-% Kicks
+% Kicks (when the barrier is changed due to extreme event)
 out.pkick = sum(kicks)/(N-1); % probability of a kick
 fkicks = find(kicks);
 I_kick = diff(fkicks); % time intervals between successive kicks

@@ -71,7 +71,7 @@ if numTimeDelays > 1
 end
 
 % Initialize miCalc object (needs to be reinitialized within the loop for kraskov):
-miCalc = IN_Initialize_MI(estMethod,extraParam);
+miCalc = IN_Initialize_MI(estMethod,extraParam,0); % NO ADDED NOISE!
 
 for k = 1:numTimeDelays
 
@@ -91,7 +91,7 @@ for k = 1:numTimeDelays
     miCalc.initialise(1,1);
 
     % Set observations to time-delayed versions of the time series:
-    miCalc.setObservations(y1, y2);
+    miCalc.setObservations(y1,y2);
 
     % Compute:
     amis(k) = miCalc.computeAverageLocalOfObservations();
@@ -103,7 +103,8 @@ for k = 1:numTimeDelays
 end
 
 if any(isnan(amis))
-    warning('time series too short for automutual information calculations up to lags of %u',max(timeDelay))
+    warning(['time series too short for automutual information calculations',...
+                ' up to lags of %u'],max(timeDelay))
 end
 
 if doPlot

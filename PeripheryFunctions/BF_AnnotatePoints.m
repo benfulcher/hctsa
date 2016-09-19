@@ -159,8 +159,8 @@ for j = 1:numAnnotate
 
     % Plot a circle around the annotated point:
     if numGroups==1
-        % cycle through rainvow colors sequentially:
-        groupColors{1} = myColors{rem(j,length(myColors))};
+        % cycle through rainbow colors sequentially:
+        groupColors{1} = myColors{rem(j,length(myColors)-1)+1};
     end
     if plotCircle
         plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',groupColors{theGroup},...

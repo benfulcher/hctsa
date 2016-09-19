@@ -3,6 +3,9 @@ function out = CO_tc3(y,tau)
 %
 % Computes the tc3 function, a normalized nonlinear autocorrelation, at a
 % given time-delay, tau.
+% Statistic is for two time-delays, normalized in terms of a single time delay.
+% Used as a test statistic for higher order correlational moments in surrogate
+% data analysis.
 %
 %---INPUTS:
 % y, input time series
@@ -13,7 +16,8 @@ function out = CO_tc3(y,tau)
 % the denominator.
 %
 % See documentation of the TSTOOL package (http://www.physik3.gwdg.de/tstool/)
-% for further details about this function.
+% for further details about this function
+% (i.e., http://www.physik3.gwdg.de/tstool/manual.pdf)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

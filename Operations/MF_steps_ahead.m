@@ -1,5 +1,6 @@
 function out = MF_steps_ahead(y,model,order,maxSteps)
-% MF_steps_ahead    Goodness of model predictions across a range of prediction lengths.
+% MF_steps_ahead    Goodness of model predictions across a range of
+%                   prediction lengths.
 %
 % Given a model, characterizes the variation in goodness of model predictions
 % across a range of prediction lengths, l, which is made to vary from
@@ -192,7 +193,7 @@ sminf.ac1 = CO_AutoCorr(sminf.res,1,'Fourier');
 % bestdumbac1 = min(abs([sm1.ac1,sm2.ac1,sminf.ac1]));
 
 for i = 1:maxSteps
-    % all relative to best dumb
+    % Relative to the best null (dumb) predictor
     mirms = mf.rmserrs(i)/min([sm1.rmserrs(i), sm2.rmserrs(i), sminf.rmserr]); % rms error
     miabs = mf.mabserrs(i)/min([sm1.mabserrs(i), sm2.mabserrs(i), sminf.mabserr]); % absolute error
 

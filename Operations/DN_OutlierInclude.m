@@ -2,11 +2,9 @@ function out = DN_OutlierInclude(y,thresholdHow,inc)
 % DN_OutlierInclude     How statistics depend on distributional outliers.
 %
 % Measures a range of different statistics about the time series as more and
-% more outliers are included in the calculation according to a specified rule:
-%
-% (i) 'abs': outliers are furthest from the mean,
-% (ii) 'p': outliers are the greatest positive deviations from the mean, or
-% (iii) 'n': outliers are the greatest negative deviations from the mean.
+% more outliers are included in the calculation according to a specified rule,
+% of outliers being furthest from the mean, greatest positive, or negative
+% deviations.
 %
 % The threshold for including time-series data points in the analysis increases
 % from zero to the maximum deviation, in increments of 0.01*sigma (by default),
@@ -20,8 +18,10 @@ function out = DN_OutlierInclude(y,thresholdHow,inc)
 %---INPUTS:
 % y, the input time series (ideally z-scored)
 %
-% thresholdHow, the method of how to determine outliers: 'abs', 'p', or 'n' (see above
-%           for descriptions)
+% thresholdHow, the method of how to determine outliers:
+%     (i) 'abs': outliers are furthest from the mean,
+%     (ii) 'p': outliers are the greatest positive deviations from the mean, or
+%     (iii) 'n': outliers are the greatest negative deviations from the mean.
 %
 % inc, the increment to move through (fraction of std if input time series is
 %       z-scored)
@@ -263,7 +263,7 @@ emsg = [];
 try
     [c, gof] = fit(thr',msDt(:,6),f);
 catch emsg
-    fprintf(1,'Error fitting exponential growth to std: %s\n',emsg);
+    warning('Error fitting exponential growth to std: %s\n',emsg.message);
 end
 
 if isempty(emsg)

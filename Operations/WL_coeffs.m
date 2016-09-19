@@ -55,7 +55,6 @@ if strcmp(level,'max')
     level = wmaxlev(N,wname);
 end
 
-
 if wmaxlev(N,wname) < level
     fprintf(1,'Chosen level is too large for this wavelet on this signal\n');
     out = NaN;
@@ -73,7 +72,6 @@ det = wrcoef('d',c,l,wname,level); % detail this level
 
 det_s = sort(abs(det),'descend'); % sorted detail coefficient magnitudes
 
-
 % plot(det_s);
 
 % ------------------------------------------------------------------------------
@@ -83,17 +81,16 @@ out.max_coeff = max(det_s);
 out.med_coeff = median(det_s);
 
 % Decay rate stats ('where below _ maximum' = 'wb_m')
-out.wb99m = findmythreshold(0.99);
-out.wb90m = findmythreshold(0.90);
-out.wb75m = findmythreshold(0.75);
-out.wb50m = findmythreshold(0.50);
-out.wb25m = findmythreshold(0.25);
-out.wb10m = findmythreshold(0.10);
-out.wb1m = findmythreshold(0.01);
-
+out.wb99m = findMyThreshold(0.99);
+out.wb90m = findMyThreshold(0.90);
+out.wb75m = findMyThreshold(0.75);
+out.wb50m = findMyThreshold(0.50);
+out.wb25m = findMyThreshold(0.25);
+out.wb10m = findMyThreshold(0.10);
+out.wb1m = findMyThreshold(0.01);
 
 % ------------------------------------------------------------------------------
-function propt = findmythreshold(x)
+function propt = findMyThreshold(x)
     % where drops below proportion x of maximum
     propt = find(det_s < x*max(det_s),1,'first') / N;
             % (as a proportion of time-series length)

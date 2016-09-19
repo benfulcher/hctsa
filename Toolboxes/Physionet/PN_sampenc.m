@@ -13,8 +13,9 @@ function [e, p, A, B] = PN_sampenc(y,M,r,justM)
 % p probabilities
 % A number of matches for m=1,...,M
 % B number of matches for m=1,...,M excluding last point
-% 
+%
 % NOTE: The mexed implementation is much faster than this Matlab implementation
+%  (sampen_mex.c)
 
 %-------------------------------------------------------------------------------
 % Modified by Ben Fulcher, from original code sampenc.m from

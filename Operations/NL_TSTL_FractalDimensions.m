@@ -154,7 +154,6 @@ end
 %% Get output statistics:
 % ------------------------------------------------------------------------------
 out.rangeDq = range(Dq);
-out.minDq = min(Dq);
 out.maxDq = max(Dq);
 out.meanDq = mean(Dq);
 
@@ -172,15 +171,15 @@ out.linfit_b = p(2);
 out.linfit_rmsqres = sqrt(mean(res.^2));
 
 % Fit exponential
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[range(Dq) -0.5 min(Dq)]);
-f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(q',Dq,f);
-out.expfit_a = c.a;
-out.expfit_b = c.b;
-out.expfit_c = c.c;
-out.expfit_r2 = gof.rsquare; % I reckon this one is the most important!
-out.expfit_adjr2 = gof.adjrsquare;
-out.expfit_rmse = gof.rmse;
+% s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[range(Dq) -0.5 min(Dq)]);
+% f = fittype('a*exp(b*x)+c','options',s);
+% [c, gof] = fit(q',Dq,f);
+% out.expfit_a = c.a;
+% out.expfit_b = c.b;
+% out.expfit_c = c.c;
+% out.expfit_r2 = gof.rsquare; % I reckon this one is the most important!
+% out.expfit_adjr2 = gof.adjrsquare;
+% out.expfit_rmse = gof.rmse;
 
 
 end
