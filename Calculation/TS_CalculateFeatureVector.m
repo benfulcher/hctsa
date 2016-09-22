@@ -94,6 +94,12 @@ if nargin < 6
 	beVocal = 1;
 end
 
+%-------------------------------------------------------------------------------
+% Check Statistics toolbox is available (needed throughout hctsa, including for
+% zscoring)
+%-------------------------------------------------------------------------------
+BF_CheckToolbox('statistics_toolbox');
+
 % ------------------------------------------------------------------------------
 %% Open parallel processing worker pool
 % ------------------------------------------------------------------------------
