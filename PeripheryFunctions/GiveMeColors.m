@@ -29,6 +29,8 @@ function colorCell = GiveMeColors(numColors)
 
 if numColors == 1
     colorCell = {[0,0,0]}; % Just use black...
+elseif numColors==4
+    colorCell = BF_getcmap('set2',numColors,1); % set1, accent, set2
 elseif numColors <= 5
     % colorCell = BF_getcmap('set1',5,1);
     colorCell = BF_getcmap('set1',numColors,1); % set1, accent, set2

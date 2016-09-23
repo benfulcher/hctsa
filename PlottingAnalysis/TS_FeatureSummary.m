@@ -48,7 +48,7 @@ end
 %-------------------------------------------------------------------------------
 % Load in data:
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 theOp = ([Operations.ID]==opID);
 dataVector = TS_DataMat(:,theOp); % the outputs of interest
 notNaN = find(~isnan(dataVector));
@@ -61,7 +61,7 @@ if isempty(dataVector)
 end
 
 % Retrieve group names also:
-groupNames = TS_GetFromData(whatDataFile,'groupNames');
+groupNames = TS_GetFromData(whatData,'groupNames');
 if isempty(groupNames)
     groupNames = {};
     timeSeriesGroup = [];
@@ -80,6 +80,9 @@ if ~isfield(annotateParams,'textAnnotation') % what text annotation to use
 end
 if ~isfield(annotateParams,'n')
     annotateParams.n = min(15,length(TimeSeries));
+end
+if annotateParams.n < 1
+    error('You need to specify at least one time series to annotate with TS_FeatureSummary');
 end
 if ~isfield(annotateParams,'maxL')
     annotateParams.maxL = 500;

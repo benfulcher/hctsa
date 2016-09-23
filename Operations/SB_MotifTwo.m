@@ -134,7 +134,7 @@ out.udu = mean(r101);
 out.uud = mean(r110);
 out.uuu = mean(r111);
 
-ppp = [out.ddd, out.ddu, out.dud, out.duu, out.udd, out.udd, out.udu, out.uud, out.uuu];
+ppp = [out.ddd, out.ddu, out.dud, out.duu, out.udd, out.udu, out.uud, out.uuu];
 out.hhh = f_entropy(ppp);
 
 % ------------------------------------------------------------------------------

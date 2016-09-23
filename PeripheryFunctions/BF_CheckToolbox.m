@@ -28,6 +28,9 @@ function BF_CheckToolbox(theToolbox)
 % First get a more interpretable string for user feedback: theName
 % ------------------------------------------------------------------------------
 switch theToolbox
+case 'statistics_toolbox'
+    theName = 'Matlab''s Statistics Toolbox';
+
 case 'identification_toolbox'
     theName = 'Matlab''s System Identification Toolbox';
 

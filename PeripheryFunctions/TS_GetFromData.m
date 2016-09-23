@@ -37,12 +37,11 @@ if isstruct(dataSource)
     else
         result = [];
     end
-end
 
 %-------------------------------------------------------------------------------
 % Often you provide a .mat file name: load in from file
 %-------------------------------------------------------------------------------
-if ischar(dataSource)
+elseif ischar(dataSource)
 
     % Decode shorthands for default filenames 'raw', 'loc', 'norm', and 'cl':
     switch dataSource
@@ -62,6 +61,8 @@ if ischar(dataSource)
     else
         result = [];
     end
+else
+    error('Unknown data source type');
 end
 
 end
