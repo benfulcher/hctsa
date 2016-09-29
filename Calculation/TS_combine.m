@@ -121,11 +121,12 @@ end
 % Check the git data
 %-------------------------------------------------------------------------------
 if ~isfield(loadedData{1},'gitInfo') || ~isfield(loadedData{2},'gitInfo')
+    % git info not present in at least one -- keep an empty structure
     gitInfo = struct();
 elseif isempty(loadedData{1}.gitInfo) && isempty(loadedData{2}.gitInfo)
     gitInfo = struct();
 elseif ~strcmp(loadedData{1}.gitInfo.hash,loadedData{2}.gitInfo.hash)
-    % Only check the hashes:
+    % Only check the hashes for consistency:
     error('Git versions are inconsistent between the two HCTSA files.');
 else
     gitInfo = loadedData{1}.gitInfo;
@@ -186,8 +187,7 @@ else
     [uniqueTimeSeriesNames, ix_ts_names] = unique({TimeSeries.Name});
     numUniqueTimeSeries = length(uniqueTimeSeriesNames);
     if numUniqueTimeSeries < length(TimeSeries)
-        beep
-        warning('***%u duplicate time series names present in combined dataset -- removed',...
+        warning('%u duplicate time series names present in combined dataset -- removed',...
                                 length(TimeSeries) - numUniqueTimeSeries);
         TimeSeries = TimeSeries(ix_ts_names);
         didTrim = 1;
