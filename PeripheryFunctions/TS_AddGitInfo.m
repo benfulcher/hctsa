@@ -85,18 +85,17 @@ function gitInfo = getGitInfo()
     % authors and should not be interpreted as representing official policies, either expressed
     % or implied, of <copyright holder>.
 
-     gitInfo=[];
-    if ~exist('.git','file') || ~exist('.git/HEAD','file')
+    gitInfo = struct();
+    if ~exist('./.git','file') || ~exist('.git/HEAD','file')
+        warning('No git repository found')
         %Git is not present
         return
     end
 
-
-
     %Read in the HEAD information, this will tell us the location of the file
     %containing the SHA1
-    text=fileread('.git/HEAD');
-    parsed=textscan(text,'%s');
+    text = fileread('./.git/HEAD');
+    parsed = textscan(text,'%s');
 
     if ~strcmp(parsed{1}{1},'ref:') || ~length(parsed{1})>1
             %the HEAD is not in the expected format.
@@ -104,61 +103,55 @@ function gitInfo = getGitInfo()
             return
     end
 
-    path=parsed{1}{2};
-    [pathstr, name, ext]=fileparts(path);
-    branchName=name;
+    path = parsed{1}{2};
+    [pathstr, name, ext] = fileparts(path);
+    branchName = name;
 
-    %save branchname
-    gitInfo.branch=branchName;
+    % Save branchname
+    gitInfo.branch = branchName;
 
+    % Read in SHA1
+    SHA1text = fileread(fullfile(['.git/' pathstr],[name ext]));
+    SHA1 = textscan(SHA1text,'%s');
+    gitInfo.hash = SHA1{1}{1};
 
-    %Read in SHA1
-    SHA1text=fileread(fullfile(['.git/' pathstr],[name ext]));
-    SHA1=textscan(SHA1text,'%s');
-    gitInfo.hash=SHA1{1}{1};
-
-
-    %Read in config file
-    config=fileread('.git/config');
+    % Read in config file
+    config = fileread('./.git/config');
     %Find everything space delimited
-    temp=textscan(config,'%s','delimiter','\n');
-    lines=temp{1};
+    temp = textscan(config,'%s','delimiter','\n');
+    lines = temp{1};
 
-    remote='';
-    %Lets find the name of the remote corresponding to our branchName
-    for k=1:length(lines)
+    remote = '';
+    % Lets find the name of the remote corresponding to our branchName
+    for k = 1:length(lines)
 
         %Are we at the section describing our branch?
         if strcmp(lines{k},['[branch "' branchName '"]'])
-            m=k+1;
+            m = k + 1;
             %While we haven't run out of lines
             %And while we haven't run into another section (which starts with
             % an open bracket)
             while (m<=length(lines) && ~strcmp(lines{m}(1),'[') )
-                temp=textscan(lines{m},'%s');
+                temp = textscan(lines{m},'%s');
                 if length(temp{1})>=3
                     if strcmp(temp{1}{1},'remote') && strcmp(temp{1}{2},'=')
                         %This is the line that tells us the name of the remote
                         remote=temp{1}{3};
                     end
                 end
-
-                m=m+1;
+                m = m+1;
             end
-
-
-
         end
     end
     gitInfo.remote = remote;
 
-    url='';
+    url = '';
     %Find the remote's url
-    for k=1:length(lines)
+    for k = 1:length(lines)
 
         %Are we at the section describing our branch?
         if strcmp(lines{k},['[remote "' remote '"]'])
-            m=k+1;
+            m = k+1;
             % While we haven't run out of lines
             % And while we haven't run into another section (which starts with
             % an open bracket)
@@ -170,12 +163,12 @@ function gitInfo = getGitInfo()
                         url=temp{1}{3};
                     end
                 end
-                m=m+1;
+                m = m + 1;
             end
         end
     end
-
     gitInfo.url=url;
+
 end
 
 end
