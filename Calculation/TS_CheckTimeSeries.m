@@ -26,15 +26,15 @@ function TS_CheckTimeSeries(whatData,whatID,doParallel)
 %-------------------------------------------------------------------------------
 % Check Inputs
 %-------------------------------------------------------------------------------
-% if nargin < 1
+if nargin < 1
     whatData = 'HCTSA.mat';
-% end
-% if nargin < 2
+end
+if nargin < 2
     whatID = [];
-% end
-% if nargin < 3
+end
+if nargin < 3
     doParallel = 1;
-% end
+end
 
 %-------------------------------------------------------------------------------
 % Load in data, and filter
