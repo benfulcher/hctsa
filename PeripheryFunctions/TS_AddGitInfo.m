@@ -10,27 +10,23 @@ function gitInfo = TS_AddGitInfo(whatData)
 %---OUTPUTS:
 % Writes output into HCTSA.mat (or specified custom filename)
 %
-% Relies on getGitInfo function by Andrew Leifer (copyright 2011)
-
-%-------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
-% <http://www.benfulcher.com>
-%
-% If you use this code for your research, please cite:
-% B. D. Fulcher, M. A. Little, N. S. Jones, "Highly comparative time-series
-% analysis: the empirical structure of time series and their methods",
-% J. Roy. Soc. Interface 10(83) 20130048 (2013). DOI: 10.1098/rsif.2013.0048
-%
-% This work is licensed under the Creative Commons
-% Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of
-% this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
-% a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
-% California, 94041, USA.
-%-------------------------------------------------------------------------------
+% Uses the getGitInfo function by Andrew Leifer (copyright 2011)
 
 gitInfo = getGitInfo();
 
+if nargin == 1 && ~isempty(whatData)
+    % Append to an hctsa data file
+    if exist(whatData,'file')
+        fileSave = which(whatData);
+        save(fileSave,'gitInfo','-append')
+        fprintf(1,'Saved git info to %s\n',whatData);
+    else
+        error('%s does not exist',whatData);
+    end
+end
 
+
+%-------------------------------------------------------------------------------
 function gitInfo = getGitInfo()
     % Get information about the Git repository in the current directory, including:
     %          - branch name of the current Git Repo
@@ -154,8 +150,7 @@ function gitInfo = getGitInfo()
 
         end
     end
-    gitInfo.remote=remote;
-
+    gitInfo.remote = remote;
 
     url='';
     %Find the remote's url
@@ -164,8 +159,8 @@ function gitInfo = getGitInfo()
         %Are we at the section describing our branch?
         if strcmp(lines{k},['[remote "' remote '"]'])
             m=k+1;
-            %While we haven't run out of lines
-            %And while we haven't run into another section (which starts with
+            % While we haven't run out of lines
+            % And while we haven't run into another section (which starts with
             % an open bracket)
             while (m<=length(lines) && ~strcmp(lines{m}(1),'[') )
                 temp=textscan(lines{m},'%s');
@@ -175,12 +170,8 @@ function gitInfo = getGitInfo()
                         url=temp{1}{3};
                     end
                 end
-
                 m=m+1;
             end
-
-
-
         end
     end
 
