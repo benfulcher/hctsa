@@ -1,4 +1,4 @@
-function [ifeat, testStat, trainErr, testErr, testClass] = TS_ForwardFS(whatData,iTrain,criterion,cvFolds,numFeatSelect)
+function [ifeat, testStat, trainErr, testErr, testClass] = TS_ForwardFS(whatData,iTrain,criterion,cvFolds,numFeatSelect,annotateParams)
 % TS_ForwardFS  Greedy forward feature selection
 %
 % --NOT FULLY FUNCTIONAL CURRENTLY--
@@ -24,6 +24,7 @@ function [ifeat, testStat, trainErr, testErr, testClass] = TS_ForwardFS(whatData
 % cvFolds: the number of cross-validation folds to use in the feature selection
 %           process
 % numFeatSelect: the total number of features to select
+% annotateParams: annotation parameters for the 2-d space
 %
 %---OUTPUTS:
 % ifeat: indices of features selected.
@@ -71,6 +72,10 @@ end
 
 if nargin < 5 || isempty(numFeatSelect)
     numFeatSelect = 2; % Stop after two features are selected
+end
+
+if nargin < 6
+    annotateParams = struct('n',6,'textAnnotation','Name');
 end
 
 % ------------------------------------------------------------------------------
@@ -132,7 +137,6 @@ for i = 1:2
 end
 
 if sum(fs) > 1
-    annotateParams = struct('n',6,'textAnnotation','Name');
     TS_plot_2d(TS_DataMat(:,ifeat),TimeSeries,featureLabels,groupNames,annotateParams)
 end
 

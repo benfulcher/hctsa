@@ -2,8 +2,7 @@ function TS_plot_timeseries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOp
 % TS_plot_timeseries    Plots examples of time series in an hctsa analysis.
 %
 %---INPUTS:
-% whatData, The data to get information from: can be a structure, or, e.g.,
-%           'norm' to load from HCTSA_N
+% whatData, The hctsa data to load information from (cf. TS_LoadData)
 %
 % numPerGroup, If plotting groups, plots this many examples per group
 %

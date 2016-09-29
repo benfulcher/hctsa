@@ -7,6 +7,18 @@ function [ord,R,keepers] = BF_ClusterReorder(dataMatrix,distanceMetric,linkageMe
 %
 % Alternatively, you can input a distance matrix for distanceMetric if
 % pre-computed.
+%
+%---INPUTS:
+% dataMatrix, input data matrix (looking to cluster rows)
+% distanceMetric, either the name of a metric (e.g., 'euclidean', 'corr', 'abscorr')
+%                or a pairwise distance matrix if already precomputed
+% linkageMethod, how to do the hierarchical clustering (e.g., 'single',
+%                   'average', 'complete')
+%
+%---OUTPUTS:
+% ord, the permutation reordering rows of dataMatrix
+% R, the pairwise distance matrix for rows of dataMatrix using given distance metric
+% keepers, logical of rows kept (after filtering bad performers)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -38,7 +50,7 @@ end
 %% Do linkage:
 % ------------------------------------------------------------------------------
 if ischar(distanceMetric)
-    % Specify a distance metric as an input to pdist/BF_pdist
+    % Specify a distance metric as an input to BF_pdist
     R = BF_pdist(dataMatrix,distanceMetric);
 else
     % Put the pre-computed distance matrix in the second input: distanceMetric
