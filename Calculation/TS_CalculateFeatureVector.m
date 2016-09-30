@@ -1,4 +1,4 @@
-function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,codeSpecial,beVocal)
+function [featureVector,calcTimes,calcQuality,Operations,MasterOperations] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,codeSpecial,beVocal)
 % TS_CalculateFeatureVector	Compute a feature vector from an input time series
 %
 %---INPUTS:
