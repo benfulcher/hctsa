@@ -81,20 +81,19 @@ end
 load(whatDataFile,'TS_Quality','MasterOperations');
 
 % First check that fromDatabase exists (for back-compatability)
-fileVarsStruct = whos('-file',whatDataFile);
-fileVars = {fileVarsStruct.name};
-if ismember('fromDatabase',fileVars)
-    load(whatDataFile,'fromDatabase')
-else
+fromDatabase = TS_GetFromData(fileName_HCTSA,'fromDatabase');
+if isempty(fromDatabase)
     fromDatabase = 1; % (legacy: set to 1 by default)
 end
 
 % Check that we have the groupNames if already assigned labels
-if ismember('groupNames',fileVars)
-    load(whatDataFile,'groupNames');
-else
-    groupNames = {};
+groupNames = TS_GetFromData(fileName_HCTSA,'groupNames');
+if isempty(groupNames)
+    groupnames = {};
 end
+
+% Maybe we kept the git repository info
+gitInfo = TS_GetFromData(fileName_HCTSA,'gitInfo');
 
 %-------------------------------------------------------------------------------
 % In this script, each of these pieces of data (from the database) will be
@@ -292,7 +291,7 @@ outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName);
 save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
         'MasterOperations','fromDatabase','groupNames','normalizationInfo',...
-        'ts_clust','op_clust','-v7.3');
+        'gitInfo','ts_clust','op_clust','-v7.3');
 fprintf(1,' Done.\n');
 
 %-------------------------------------------------------------------------------

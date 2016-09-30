@@ -112,9 +112,24 @@ end
 % Check the fromDatabase flags
 %-------------------------------------------------------------------------------
 if loadedData{1}.fromDatabase ~= loadedData{2}.fromDatabase
-    error('Weird that fromDatabase flags are inconsistent across the two HCTSA files.');
+    error('Weird that fromDatabase flags are inconsistent between the two HCTSA files.');
 else
     fromDatabase = loadedData{1}.fromDatabase;
+end
+
+%-------------------------------------------------------------------------------
+% Check the git data
+%-------------------------------------------------------------------------------
+if ~isfield(loadedData{1},'gitInfo') || ~isfield(loadedData{2},'gitInfo')
+    % git info not present in at least one -- keep an empty structure
+    gitInfo = struct();
+elseif isempty(loadedData{1}.gitInfo) && isempty(loadedData{2}.gitInfo)
+    gitInfo = struct();
+elseif ~strcmp(loadedData{1}.gitInfo.hash,loadedData{2}.gitInfo.hash)
+    % Only check the hashes for consistency:
+    error('Git versions are inconsistent between the two HCTSA files.');
+else
+    gitInfo = loadedData{1}.gitInfo;
 end
 
 % ------------------------------------------------------------------------------
@@ -172,8 +187,7 @@ else
     [uniqueTimeSeriesNames, ix_ts_names] = unique({TimeSeries.Name});
     numUniqueTimeSeries = length(uniqueTimeSeriesNames);
     if numUniqueTimeSeries < length(TimeSeries)
-        beep
-        warning('***%u duplicate time series names present in combined dataset -- removed',...
+        warning('%u duplicate time series names present in combined dataset -- removed',...
                                 length(TimeSeries) - numUniqueTimeSeries);
         TimeSeries = TimeSeries(ix_ts_names);
         didTrim = 1;
@@ -286,7 +300,7 @@ end
 fprintf(1,'----------Saving to %s----------\n',outputFileName);
 
 %--- Now actually save it:
-save(outputFileName,'TimeSeries','Operations','MasterOperations','fromDatabase','-v7.3');
+save(outputFileName,'TimeSeries','Operations','MasterOperations','fromDatabase','gitInfo','-v7.3');
 if gotData, save(outputFileName,'TS_DataMat','-append'); end % add data matrix
 if gotQuality, save(outputFileName,'TS_Quality','-append'); end % add quality labels
 if gotCalcTimes, save(outputFileName,'TS_CalcTime','-append'); end % add calculation times
