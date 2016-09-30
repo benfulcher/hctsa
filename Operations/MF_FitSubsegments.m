@@ -1,5 +1,6 @@
 function out = MF_FitSubsegments(y,model,order,subsetHow,samplep,randomSeed)
-% MF_FitSubsegments Robustness of fitted model parameters across different segments of a time series.
+% MF_FitSubsegments Robustness of fitted model parameters across different
+%                   segments of a time series
 %
 % The spread of parameters obtained (including in-sample goodness of fit
 % statistics) provide some indication of stationarity.

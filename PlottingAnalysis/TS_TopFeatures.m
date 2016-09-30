@@ -6,7 +6,7 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % test statistic.
 %
 % Can also compare this performance to a set of randomized null features to
-% evaluate the statistical significance of the result.
+% evaluate the statistical significance of the result (pooled permutation testing).
 %
 %---INPUTS:
 % whatData, the hctsa data to use (input to TS_LoadData, default: 'raw')
