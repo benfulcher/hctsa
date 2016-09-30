@@ -157,12 +157,12 @@ out.rangeDq = range(Dq);
 out.maxDq = max(Dq);
 out.meanDq = mean(Dq);
 
-out.minq = min(q);
+% out.minq = min(q);
 out.maxq = max(q);
 out.rangeq = range(q);
 out.meanq = mean(q);
 
-% Fit linear
+%---Fit linear
 p = polyfit(q,Dq',1);
 p_fit = q*p(1) + p(2);
 res = p_fit - Dq';
@@ -170,7 +170,7 @@ out.linfit_a = p(1);
 out.linfit_b = p(2);
 out.linfit_rmsqres = sqrt(mean(res.^2));
 
-% Fit exponential
+%---Fit exponential
 % s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[range(Dq) -0.5 min(Dq)]);
 % f = fittype('a*exp(b*x)+c','options',s);
 % [c, gof] = fit(q',Dq,f);
