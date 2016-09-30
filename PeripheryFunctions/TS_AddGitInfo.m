@@ -1,20 +1,39 @@
-function gitInfo = TS_AddGitInfo(whatData)
+function gitInfo = TS_AddGitInfo(whatDir,whatData)
 % TS_AddGitInfo   Appends the git information to the hctsa file
 %
 % Note that after computing, functions and results may change and thus not
 % reflect the commit at the time of initailizing (or whenver this is run).
 %
 %---INPUTS:
+% whatDir: the directory to look for a git repository in
 % whatData: the data file to append
 %
 %---OUTPUTS:
-% Writes output into HCTSA.mat (or specified custom filename)
+% gitInfo, a structure with fields: branch (the current branch),
+%           hash (the SHA code for the current commit)
+%           remote (the name of the remote)
+%           url (the url of the remote)
+%
+% Also writes output into HCTSA.mat (if whatData is provided)
 %
 % Uses the getGitInfo function by Andrew Leifer (copyright 2011)
 
+%-------------------------------------------------------------------------------
+% Check inputs
+%-------------------------------------------------------------------------------
+if nargin < 1
+    % look in the hctsa directory (one level higher than where TS_compute is)
+    calc_dir = which('TS_compute');
+    iHere = regexp(calc_dir,'Calculation');
+    whatDir = calc_dir(1:iHere-1);
+    % whatDir = '.'; % now looky here
+end
+
+% Get the gitInfo for the given directory under git version control
 gitInfo = getGitInfo();
 
-if nargin == 1 && ~isempty(whatData)
+% Also append this information to the hctsa .mat file provided (if )
+if nargin == 2 && ~isempty(whatData)
     % Append to an hctsa data file
     if exist(whatData,'file')
         fileSave = which(whatData);
@@ -86,21 +105,21 @@ function gitInfo = getGitInfo()
     % or implied, of <copyright holder>.
 
     gitInfo = struct();
-    if ~exist('./.git','file') || ~exist('.git/HEAD','file')
-        warning('No git repository found')
-        %Git is not present
+    if ~exist(fullfile(whatDir,'.git'),'file') || ~exist(fullfile(whatDir,'.git','HEAD'),'file')
+        warning('No git repository found in %s',whatDir)
+        % Git is not present
         return
     end
 
-    %Read in the HEAD information, this will tell us the location of the file
-    %containing the SHA1
-    text = fileread('./.git/HEAD');
+    % Read in the HEAD information, this will tell us the location of the file
+    % containing the SHA1
+    text = fileread(fullfile(whatDir,'.git','HEAD'));
     parsed = textscan(text,'%s');
 
     if ~strcmp(parsed{1}{1},'ref:') || ~length(parsed{1})>1
-            %the HEAD is not in the expected format.
-            %give up
-            return
+        % the HEAD is not in the expected format.
+        warning('git HEAD in %s in unexpected format',whatDir)
+        return
     end
 
     path = parsed{1}{2};
@@ -111,21 +130,22 @@ function gitInfo = getGitInfo()
     gitInfo.branch = branchName;
 
     % Read in SHA1
-    SHA1text = fileread(fullfile(['.git/' pathstr],[name ext]));
+    SHA1text = fileread(fullfile(whatDir,'.git',pathstr,[name ext]));
     SHA1 = textscan(SHA1text,'%s');
     gitInfo.hash = SHA1{1}{1};
 
     % Read in config file
-    config = fileread('./.git/config');
-    %Find everything space delimited
+    config = fileread(fullfile(whatDir,'.git','config'));
+    % Find everything space delimited
     temp = textscan(config,'%s','delimiter','\n');
     lines = temp{1};
 
-    remote = '';
+    %---------------------------------------------------------------------------
     % Lets find the name of the remote corresponding to our branchName
+    remote = '';
     for k = 1:length(lines)
 
-        %Are we at the section describing our branch?
+        % Are we at the section describing our branch?
         if strcmp(lines{k},['[branch "' branchName '"]'])
             m = k + 1;
             %While we haven't run out of lines
@@ -145,8 +165,9 @@ function gitInfo = getGitInfo()
     end
     gitInfo.remote = remote;
 
+    %---------------------------------------------------------------------------
+    % Find the remote's url
     url = '';
-    %Find the remote's url
     for k = 1:length(lines)
 
         %Are we at the section describing our branch?
@@ -167,7 +188,7 @@ function gitInfo = getGitInfo()
             end
         end
     end
-    gitInfo.url=url;
+    gitInfo.url = url;
 
 end
 
