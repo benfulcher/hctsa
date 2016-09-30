@@ -32,21 +32,16 @@ writeWhat = 'null'; % Retrieve and write back only missing (NULL) entries in the
 % Calculate across the given range of ts_ids one at a time:
 tsid_range = (tsid_min:tsid_max);
 
-% Calculate all opids:
-opids = 'all';
-
 % ------------------------------------------------------------------------------
 %% Start calculating:
 % ------------------------------------------------------------------------------
 % Provide a quick message:
-fprintf(1,['About to calculate across %u time series (ts_ids %u--%u) and %u op_ids ' ...
-                '(between %u--%u) over a total of %u iterations\n'], ...
-                length(tsid_range),tsid_min,tsid_max,length(opids),min(opids),max(opids));
+fprintf(1,['About to calculate across %u time series (ts_ids %u--%u) and all op_ids\n'], ...
+                length(tsid_range),tsid_min,tsid_max);
 
 % Loop across time series, one at a time:
 for i = 1:length(tsid_range)
-	fprintf(1,'\n\n\nWe''re looking at ts_id %u and %u op_ids (from %u--%u)\n\n\n', ...
-                            	tsid_range(i),length(opids),min(opids),max(opids));
+	fprintf(1,'\n\n\nWe''re looking at ts_id %u and all op_ids\n\n\n',tsid_range(i));
 
 	% Loop over:
 	% (i) Running SQL_retrieve to retrieve data from the database -> HCTSA.mat
@@ -54,7 +49,7 @@ for i = 1:length(tsid_range)
 	% (iii) Running SQL_store to write results back into the database
 
     % (i) Retrieve uncomputed entries from the database
-	didWrite = SQL_retrieve(tsid_range(i),opids,writeWhat);
+	didWrite = SQL_retrieve(tsid_range(i),'all',writeWhat);
     if didWrite % Only calculate if SQL_retrieve found time series to retrieve:
         % (ii) Compute all the missing data in the retrieved set of
         % time series and operations:
