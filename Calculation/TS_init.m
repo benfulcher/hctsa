@@ -111,6 +111,11 @@ TS_DataMat = ones(numTS,numOps)*NaN;
 TS_Quality = ones(numTS,numOps)*NaN;
 TS_CalcTime = ones(numTS,numOps)*NaN;
 
+%-------------------------------------------------------------------------------
+% Get git information to keep track of the version of code used at the time of TS_init
+%-------------------------------------------------------------------------------
+gitInfo = TS_AddGitInfo();
+
 % ------------------------------------------------------------------------------
 % Save to file
 % ------------------------------------------------------------------------------
@@ -118,7 +123,7 @@ TS_CalcTime = ones(numTS,numOps)*NaN;
 % TS_init and shouldn't be written back to a database
 fromDatabase = 0;
 save(outputFile,'TimeSeries','Operations','MasterOperations',...
-            'TS_DataMat','TS_Quality','TS_CalcTime','fromDatabase','-v7.3');
+            'TS_DataMat','TS_Quality','TS_CalcTime','fromDatabase','gitInfo','-v7.3');
 
 fprintf(1,'Successfully initialized %s with %u time series, %u master operations, and %u operations\n',...
                         outputFile,numTS,numMops,numOps);
