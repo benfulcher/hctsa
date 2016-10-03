@@ -504,16 +504,16 @@ save('HCTSA.mat','TimeSeries','Operations','MasterOperations','fromDatabase','gi
 switch retrieveWhatData
 case 'all'
     % Add outputs, quality labels, and calculation times
-    save(outputFileName,'TS_DataMat','TS_Quality','TS_CalcTime','-append')
+    save(outputFileName,'TS_DataMat','TS_Quality','TS_CalcTime','-v7.3','-append')
 case 'nocalctime'
     % Add outputs and quality labels
-    save(outputFileName,'TS_DataMat','TS_Quality','-append')
+    save(outputFileName,'TS_DataMat','TS_Quality','-v7.3','-append')
 case 'outputs'
     % Add outputs
-    save(outputFileName,'TS_DataMat','-append')
+    save(outputFileName,'TS_DataMat','-v7.3','-append')
 case 'quality'
     % Add quality labels
-    save(outputFileName,'TS_Quality','-append')
+    save(outputFileName,'TS_Quality','-v7.3','-append')
 end
 
 fprintf(1,' Done in %s.\n',BF_thetime(toc(saveTimer)));

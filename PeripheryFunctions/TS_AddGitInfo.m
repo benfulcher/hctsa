@@ -37,7 +37,7 @@ if nargin == 2 && ~isempty(whatData)
     % Append to an hctsa data file
     if exist(whatData,'file')
         fileSave = which(whatData);
-        save(fileSave,'gitInfo','-append')
+        save(fileSave,'gitInfo','-v7.3','-append')
         fprintf(1,'Saved git info to %s\n',whatData);
     else
         error('%s does not exist',whatData);

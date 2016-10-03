@@ -231,7 +231,7 @@ fprintf(1,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1));
 if any(numCalc_all > 0)
 	fprintf(1,'Saving all results to %s...',customFile);
 	saveTimer = tic;
-	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
+	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-v7.3','-append')
 	fprintf(1,' Saved in %s.\n',BF_thetime(toc(saveTimer)));
 	clear saveTimer
 end

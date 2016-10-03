@@ -141,13 +141,13 @@ if doRemove
 end
 
 if strcmp(tsOrOps,'mops')
-	save(whatDataFile,'MasterOperations','-append');
+	save(whatDataFile,'MasterOperations','-v7.3','-append');
 else
 	% Clear or remove data from local matrices:
 	TS_DataMat = f_clear_remove(TS_DataMat,doThese,tsOrOps,doRemove);
 
 	% Save back to file
-	save(whatDataFile,'TS_DataMat','TimeSeries','Operations','-append');
+	save(whatDataFile,'TS_DataMat','TimeSeries','Operations','-v7.3','-append');
 
 	% Repeat for any other matrix data files:
 	varNames = whos('-file',whatDataFile);
@@ -155,12 +155,12 @@ else
 	if ismember('TS_Quality',varNames)
 	    load(whatDataFile,'TS_Quality')
 	    TS_Quality = f_clear_remove(TS_Quality,doThese,tsOrOps,doRemove);
-	    save(whatDataFile,'TS_Quality','-append');
+	    save(whatDataFile,'TS_Quality','-v7.3','-append');
 	end
 	if ismember('TS_CalcTime',varNames)
 	    load(whatDataFile,'TS_CalcTime')
 	    TS_CalcTime = f_clear_remove(TS_CalcTime,doThese,tsOrOps,doRemove);
-	    save(whatDataFile,'TS_CalcTime','-append');
+	    save(whatDataFile,'TS_CalcTime','-v7.3','-append');
 	end
 end
 
