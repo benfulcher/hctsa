@@ -76,7 +76,7 @@ default_numHistogramFeatures = 16;
 addParameter(inputP,'numHistogramFeatures',default_numHistogramFeatures,@isnumeric);
 default_numNulls = 0; % by default, don't compute an empirical null distribution
                       % by randomizing class labels
-addParameter(inputP,'numNulls',default_numHistogramFeatures,@isnumeric);
+addParameter(inputP,'numNulls',default_numNulls,@isnumeric);
 parse(inputP,varargin{:});
 
 whatPlots = inputP.Results.whatPlots;
@@ -228,13 +228,14 @@ if any(ismember(whatPlots,'histogram'))
         if any(FDR_qvals < 0.05)
             fprintf(1,['%u/%u features show better performance using %s than the null distribution' ...
                         '\nat the magical 0.05 threshold (FDR corrected)\n'],...
-                            sum(FDR_qvals<0.05),length(FDR_qvals),cfnName);
+                            sum(FDR_qvals < 0.05),length(FDR_qvals),cfnName);
         else
             fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...
                     'the null distribution at a FDR of 0.05.\nDon''t you go p-hacking now, will you?\n']);
         end
     end
 
+    % Plot histogram
     f = figure('color','w'); hold on
     colors = BF_getcmap('spectral',5,1);
     if numNulls == 0
@@ -243,7 +244,7 @@ if any(ismember(whatPlots,'histogram'))
                     'BinMethod','auto','FaceColor',colors{5},'EdgeColor','k','FaceAlpha',0);
         maxH = max(h_real.Values);
     else
-        % Plot both real distribution, and null distribution:
+        % Plot both real distribution and null distribution:
         numBins = 20;
         allTestStat = [testStat(:);testStat_rand(:)];
         minMax = [min(allTestStat),max(allTestStat)];
@@ -268,6 +269,7 @@ if any(ismember(whatPlots,'histogram'))
     % Legend:
     if numNulls > 0
         legend([h_null,h_real,l_chance,l_meannull,l_mean],'null','real','chance','null mean','real mean')
+        title(sprintf('%u features significantly informative of groups (FDR-corrected at 0.05)',sum(FDR_qvals < 0.05)))
     else
         legend([h_real,l_chance,l_mean],{'real','chance','real mean'});
     end
