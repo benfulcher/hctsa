@@ -80,6 +80,9 @@ addParameter(inputP,'numNulls',default_numNulls,@isnumeric);
 parse(inputP,varargin{:});
 
 whatPlots = inputP.Results.whatPlots;
+if ischar(whatPlots)
+    whatPlots = {whatPlots};
+end
 numTopFeatures = inputP.Results.numTopFeatures;
 numHistogramFeatures = inputP.Results.numHistogramFeatures;
 numNulls = inputP.Results.numNulls;
