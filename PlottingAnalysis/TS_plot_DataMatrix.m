@@ -96,8 +96,9 @@ clear inputP;
 % --------------------------------------------------------------------------
 %% Read in the data
 % --------------------------------------------------------------------------
-% You always want to retrieve and plot the clustered data if it exists:
-[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData,1);
+% You always want to retrieve and plot the clustered data if it exists
+getClustered = 1
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData,getClustered);
 
 [numTS, numOps] = size(TS_DataMat); % size of the data matrix
 
@@ -108,7 +109,6 @@ if ~isempty(customOrder{1}) % reorder rows
 	fprintf(1,'Reordering time series according to custom order specified.\n');
 	TS_DataMat = TS_DataMat(customOrder{1},:);
     TimeSeries = TimeSeries(customOrder{1});
-
 end
 
 if ~isempty(customOrder{2}) % reorder columns
@@ -120,10 +120,14 @@ end
 %-------------------------------------------------------------------------------
 % Check group information
 %-------------------------------------------------------------------------------
+if isfield(TimeSeries,'Group')
+	timeSeriesGroups = [TimeSeries.Group];
+	numClasses = max(timeSeriesGroups);
+else
+	timeSeriesGroups = [];
+end
 if colorGroups==1
-	if isfield(TimeSeries,'Group')
-	    timeSeriesGroups = [TimeSeries.Group];
-	    numClasses = max(timeSeriesGroups);
+	if ~isempty(timeSeriesGroups)
 	    fprintf(1,'Coloring groups of time series...\n');
 	else
 	    warning('No group information found')
@@ -135,19 +139,23 @@ end
 % Reorder according to groups
 %-------------------------------------------------------------------------------
 if groupReorder
-    [~,ixData] = sort(timeSeriesGroups,'ascend');
-    dataMatReOrd = TS_DataMat(ixData,:);
-    ixAgain = ixData;
-    for i = 1:numClasses
-        isGroup = [TimeSeries(ixData).Group]==i;
-        ordering = BF_ClusterReorder(dataMatReOrd(isGroup,:),'euclidean','average');
-        istmp = ixData(isGroup);
-        ixAgain(isGroup) = istmp(ordering);
-    end
-    ixData = ixAgain; % set ordering to ordering within groups
-    TimeSeries = TimeSeries(ixData);
-    TS_DataMat = TS_DataMat(ixData,:);
-    timeSeriesGroups = timeSeriesGroups(ixData);
+	if isempty(timeSeriesGroups)
+		warning('Cannot reorder by time series group; no group information found')
+	else
+	    [~,ixData] = sort(timeSeriesGroups,'ascend');
+	    dataMatReOrd = TS_DataMat(ixData,:);
+	    ixAgain = ixData;
+	    for i = 1:numClasses
+	        isGroup = [TimeSeries(ixData).Group]==i;
+	        ordering = BF_ClusterReorder(dataMatReOrd(isGroup,:),'euclidean','average');
+	        istmp = ixData(isGroup);
+	        ixAgain(isGroup) = istmp(ordering);
+	    end
+	    ixData = ixAgain; % set ordering to ordering within groups
+	    TimeSeries = TimeSeries(ixData);
+	    TS_DataMat = TS_DataMat(ixData,:);
+	    timeSeriesGroups = timeSeriesGroups(ixData);
+	end
 end
 
 % --------------------------------------------------------------------------
