@@ -60,6 +60,13 @@ if isstruct(whatDataFile)
     TS_DataMat = whatDataFile.TS_DataMat;
     TimeSeries = whatDataFile.TimeSeries;
     Operations = whatDataFile.Operations;
+
+    % Cluster the data if necessary:
+    if getClustered
+        [TS_DataMat,TimeSeries,Operations] = clusterMe(TS_DataMat,TimeSeries,Operations);
+    end
+
+    % Name the datafile going out of the function as an input structure:
     whatDataFile = '--INPUT_STRUCTURE--'; % revive this, so this output is always a string
     return
 end
@@ -97,15 +104,25 @@ fprintf(1,' Done.\n');
 % returns the same ordering as the original dataset)
 %-------------------------------------------------------------------------------
 if getClustered
+    [TS_DataMat,TimeSeries,Operations] = clusterMe(TS_DataMat,TimeSeries,Operations);
+end
+
+%-------------------------------------------------------------------------------
+function [TS_DataMat,TimeSeries,Operations] = clusterMe(TS_DataMat,TimeSeries,Operations)
     % Load the clustering permutations and apply them to the data:
     ts_clust = TS_GetFromData(whatDataFile,'ts_clust');
     op_clust = TS_GetFromData(whatDataFile,'op_clust');
-    if ~isempty(ts_clust) && ~isempty(op_clust)
-        TS_DataMat = TS_DataMat(ts_clust.ord,op_clust.ord);
-        TimeSeries = TimeSeries(ts_clust.ord);
-        Operations = Operations(op_clust.ord);
-    else
+    if isempty(ts_clust) && isempty(op_clust)
         warning('No clustering info found in the data source -- returning unclustered data');
+    else
+        if ~isempty(ts_clust)
+            TimeSeries = TimeSeries(ts_clust.ord);
+            TS_DataMat = TS_DataMat(ts_clust.ord,:);
+        end
+        if ~isempty(op_clust)
+            Operations = Operations(op_clust.ord);
+            TS_DataMat = TS_DataMat(:,op_clust.ord);
+        end
     end
 end
 
