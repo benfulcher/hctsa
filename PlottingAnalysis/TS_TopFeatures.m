@@ -1,4 +1,4 @@
-function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat,doNull,varargin)
+function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat,varargin)
 % TS_TopFeatures    Top individual features for discriminating labeled time series
 %
 % This function compares each feature in an hctsa dataset individually for its
@@ -13,8 +13,6 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % whatTestStat, the test statistic to quantify the goodness of each feature
 %               (e.g., 'fast_linear', 'tstat', 'svm', 'linear', 'diaglinear',
 %                or others supported by GiveMeFunctionHandle)
-% doNull, (boolean) whether to compute a null distribution using permutations
-%           of the class labels
 %
 % ***Additional plotting options***:
 % 'whatPlots', can specify what output plots to produce (cell of strings), e.g.,
@@ -26,6 +24,9 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % 'numHistogramFeatures', can optionally also set a custom number of histograms
 %                       to display (often want to set this lower to avoid producing
 %                       large numbers of figures).
+% 'numNulls', the number of shuffled nulls to generate (e.g., 10 shuffles pools
+%               shuffles for all M features, for a total of 10*M elements in the
+%               null distribution)
 %
 %---EXAMPLE USAGE:
 %
@@ -63,9 +64,6 @@ if nargin < 2 || isempty(whatTestStat)
     whatTestStat = 'fast_linear'; % Way faster than proper prediction models
     fprintf(1,'Using ''%s'' test statistic by default\n', whatTestStat);
 end
-if nargin < 3
-    doNull = 0; % compute an empirical null distribution by randomizing class labels
-end
 
 % Use an inputParser to control additional plotting options as parameters:
 inputP = inputParser;
@@ -76,11 +74,15 @@ default_numTopFeatures = 40;
 addParameter(inputP,'numTopFeatures',default_numTopFeatures,@isnumeric);
 default_numHistogramFeatures = 16;
 addParameter(inputP,'numHistogramFeatures',default_numHistogramFeatures,@isnumeric);
+default_numNulls = 0; % by default, don't compute an empirical null distribution
+                      % by randomizing class labels
+addParameter(inputP,'numNulls',default_numHistogramFeatures,@isnumeric);
 parse(inputP,varargin{:});
 
 whatPlots = inputP.Results.whatPlots;
 numTopFeatures = inputP.Results.numTopFeatures;
 numHistogramFeatures = inputP.Results.numHistogramFeatures;
+numNulls = inputP.Results.numNulls;
 clear inputP;
 
 % --------------------------------------------------------------------------
@@ -157,6 +159,10 @@ timer = tic;
 testStat = giveMeStats(TS_DataMat,timeSeriesGroup,1);
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
 
+if all(isnan(testStat))
+    error('Error computing statistics for %s (may be due to inclusion of missing data?)',cfnName);
+end
+
 % Give mean and that expected from random classifier (may be a little overfitting)
 fprintf(1,['Mean %s performance across %u operations = %4.2f%s\n' ...
             '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
@@ -194,9 +200,8 @@ if any(ismember(whatPlots,'histogram'))
     %-------------------------------------------------------------------------------
     %% Compute null distribution
     %-------------------------------------------------------------------------------
-    numNulls = 10;
     testStat_rand = zeros(numOps,numNulls);
-    if doNull
+    if numNulls > 0
         fprintf(1,'Now for %u nulls... ',numNulls);
         tic
         for j = 1:numNulls
@@ -232,7 +237,8 @@ if any(ismember(whatPlots,'histogram'))
 
     f = figure('color','w'); hold on
     colors = BF_getcmap('spectral',5,1);
-    if ~doNull
+    if numNulls == 0
+        % Just plot the real distribution of test statistics across all features
         h_real = histogram(testStat,'Normalization','probability',...
                     'BinMethod','auto','FaceColor',colors{5},'EdgeColor','k','FaceAlpha',0);
         maxH = max(h_real.Values);
@@ -260,7 +266,7 @@ if any(ismember(whatPlots,'histogram'))
     ylabel('Probability')
 
     % Legend:
-    if doNull
+    if numNulls > 0
         legend([h_null,h_real,l_chance,l_meannull,l_mean],'null','real','chance','null mean','real mean')
     else
         legend([h_real,l_chance,l_mean],{'real','chance','real mean'});
