@@ -88,6 +88,9 @@ Many thanks go to [Romesh Abeysuriya](https://github.com/RomeshA) for helping wi
 
 This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
 
+### tsfresh
+Native python time-series code to extract hundreds of time-series features, with in-built feature filtering, is [tsfresh](https://github.com/blue-yonder/tsfresh).
+
 ### Comp-Engine Time Series
 
 An accompanying web resource for this project is [Comp-Engine Time Series](http://www.comp-engine.org/timeseries), which allows users to compare thousands of diverse types of time-series analysis code and time-series data.
