@@ -21,7 +21,7 @@ function rs = embed(s, dim, delay, shift, windowtype)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(2, 5, nargin));
+narginchk(2, 5);
 
 if nargin < 3, delay = 1; end
 if nargin < 4, shift = 1; end
@@ -35,16 +35,18 @@ c = embed(s.core, dim, delay,shift, windowtype); 	% call real working routine fo
 rs = signal(c, s);				% special constructor calling syntax for working routines
 
 a = getaxis(s,1);
-rs = setaxis(rs, 1, setdelta(a, delta(a)*shift)); 
-a = achse(unit, 1,1);
-a = setname(a, 'Embedding dimension'); 
-rs = setaxis(rs, 2, a); 	
-rs = addhistory(rs,  'Time delay reconstruction');
-rs = addcommandlines(rs, 's = embed(s', dim, delay, shift, windowtype);
+rs = setaxis(rs,1,setdelta(a,delta(a)*shift));
+a = achse(unit,1,1);
+a = setname(a,'Embedding dimension');
+rs = setaxis(rs,2,a);
+rs = addhistory(rs,'Time delay reconstruction');
+rs = addcommandlines(rs,'s = embed(s',dim,delay,shift,windowtype);
 
 switch dim
 	case 2
 		rs = setplothint(rs, 'xyplot');
 	case 3
 		rs = setplothint(rs, '3dcurve');
+end
+
 end
