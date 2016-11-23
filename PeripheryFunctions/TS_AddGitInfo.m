@@ -55,9 +55,6 @@ function gitInfo = getGitInfo()
     % leifer@fas.harvard.edu
     % http://www.andrewleifer.com
     % 12 September 2011
-    %
-    %
-    %
 
     % Copyright 2011 Andrew Leifer. All rights reserved.
     %
@@ -87,8 +84,9 @@ function gitInfo = getGitInfo()
 
     gitInfo = struct();
     if ~exist('./.git','file') || ~exist('.git/HEAD','file')
-        warning('No git repository found')
-        %Git is not present
+        % Git is not present
+        % Can add a warning if you like...?
+        % warning('No git repository found')
         return
     end
 
