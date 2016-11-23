@@ -97,7 +97,7 @@ clear inputP;
 %% Read in the data
 % --------------------------------------------------------------------------
 % You always want to retrieve and plot the clustered data if it exists
-getClustered = 1
+getClustered = 1;
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData,getClustered);
 
 [numTS, numOps] = size(TS_DataMat); % size of the data matrix
