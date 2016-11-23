@@ -103,7 +103,7 @@ action='';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% check the input
 
-error(nargchk(0,99,nargin));
+narginchk(0,99);
 if nargout>2, error('Too many output arguments'), end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% splash the GPL
@@ -171,7 +171,7 @@ if nargin & isnumeric(varargin{1})
     temp_gui=0;
     
     if ~isempty(i_char)
-        for i=1:length(i_char), 
+        for i=1:length(i_char)
             varargin{i_char(i)}(4)='0';
             temp_meth = temp_meth+strcmpi(varargin{i_char(i)}(1:2),check_meth'); 
             temp_gui = temp_gui+strcmpi(varargin{i_char(i)}(1:3),check_gui'); 
@@ -698,11 +698,11 @@ catch
     disp('   Thank you for your assistance.')
     warning('on')
   end
-  try,if ~nogui
+  try if ~nogui
     setptr(h_fig(1),'arrow')
     h=findobj('tag','button_apply');
     set(h(1),'ToolTip','Starts the computation.','String','Apply','Callback','fnn compute')
-    for j=1:length(obj); 
+    for j=1:length(obj)
         h=findobj('Tag',obj{j},'Parent',h_fig(1)); 
         if ~isempty(h)
           set(h,'Enable','On')
@@ -710,6 +710,6 @@ catch
     end
   end,end
   if nargout, out=NaN; end
-  try, set(0,props.root), end
+  try set(0,props.root), end
   set(0,'ShowHidden','off')
 end

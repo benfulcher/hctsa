@@ -6,7 +6,7 @@ function s = addaxis(s, a)
 % s = addaxis(s)    		% add default axis
 % s = addaxis(s, axis)		% add axis given by argument
 
-error(nargchk(1,2,nargin));
+narginchk(1,2);
 
 if nargin < 2
 	s.xaxes{end+1} = achse;

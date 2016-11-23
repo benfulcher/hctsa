@@ -10,7 +10,7 @@ function rs = spec(s)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(1,1,nargin));
+narginchk(1,1);
 
 c = spec(s.core); 	% call real working routine for parent core object
 rs = signal(c, s);	% special constructor calling syntax for working routines

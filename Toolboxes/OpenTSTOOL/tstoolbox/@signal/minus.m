@@ -14,7 +14,7 @@ function rs = minus(s1,s2)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(2,2,nargin));
+narginchk(2,2);
 
 if isa(s2, 'signal')
 	c = s1.core - s2.core;

@@ -1,3 +1,4 @@
+function [x, E, s, lambdamax] = ML_l1pwc(y, lambda, display, stoptol, maxiter)
 % Performs discrete total variation denoising (TVD) using a primal-dual
 % interior-point solver. It minimizes the following discrete functional:
 %
@@ -32,7 +33,7 @@
 %              lambda >= lambdamax, the output is the trivial constant
 %              solution x = mean(y).
 %
-% (c) Max Little, 2010. Based around code originally written by 
+% (c) Max Little, 2010. Based around code originally written by
 % S.J. Kim, K. Koh, S. Boyd and D. Gorinevsky. If you use this code for
 % your research, please cite:
 % M.A. Little, Nick S. Jones (2010)
@@ -42,11 +43,9 @@
 %
 % This code is released under the terms of GNU General Public License as
 % published by the Free Software Foundation; version 2 or later.
-% 
+%
 
-function [x, E, s, lambdamax] = ML_l1pwc(y, lambda, display, stoptol, maxiter)
-
-error(nargchk(2,5,nargin));
+narginchk(2,5);
 if (nargin < 3)
     display = 1;
 end
@@ -96,8 +95,8 @@ mu2  = ones(M,1);    % Dual of dual variable
 % Work through each value of lambda, with hot-restart on optimization
 % variables
 for l = 1:L
-    
-    t    =  1e-10; 
+
+    t    =  1e-10;
     step =  Inf;
     f1   =  z-lambda(l);
     f2   = -z-lambda(l);
@@ -149,7 +148,7 @@ for l = 1:L
         residual= [resDual; resCent];
 
         % Perform backtracking linesearch
-        negIdx1 = (dmu1 < 0); 
+        negIdx1 = (dmu1 < 0);
         negIdx2 = (dmu2 < 0);
         step = 1;
         if (any(negIdx1))
@@ -193,7 +192,7 @@ for l = 1:L
     if (iters >= maxiter)
         s(l) = 0;
     end
-    
+
     if (display)
         if (s(l))
             fprintf('Solved to precision of duality gap %5.2e\n', gap);

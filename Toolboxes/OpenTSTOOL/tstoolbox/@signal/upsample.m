@@ -18,7 +18,7 @@ function rs = upsample(s, factor, method)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(2,3, nargin));
+narginchk(2,3);
 
 if nargin < 3
 	method = 'fft'; 	% default upsampling method is fft

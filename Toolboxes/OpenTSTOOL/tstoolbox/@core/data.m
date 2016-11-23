@@ -15,7 +15,7 @@ function d = data(c, varargin)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(1,2, nargin));
+narginchk(1,2);
 
 if nargin == 1
 	d = c.data;

@@ -20,7 +20,7 @@ function [rs, s] = largelyap(s, n, stepsahead, past, nnr)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(4,5,nargin));
+narginchk(4,5);
 
 if nargin < 4
 	help(mfilename)

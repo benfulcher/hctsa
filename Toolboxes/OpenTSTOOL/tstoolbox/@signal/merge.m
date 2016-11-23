@@ -24,7 +24,7 @@ function rs = merge(s1,s2,dB)
 %
 % C.Merkwirth,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
 
-error(nargchk(2,3,nargin));
+narginchk(2,3);
 
 if (nargin<3), dB = 0; end
 

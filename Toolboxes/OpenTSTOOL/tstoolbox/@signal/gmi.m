@@ -14,7 +14,7 @@ function rs = gmi(s, D, eps, NNR, len, Nref)
 %   Generalized mutual information function for a scalar time series
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
-error(nargchk(6,6, nargin));
+narginchk(6,6);
 
 
 if (ndim(s) > 1) | (~isreal(data(s)))

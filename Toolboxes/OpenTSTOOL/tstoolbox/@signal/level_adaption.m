@@ -7,14 +7,14 @@ function rs = level_adaption(s, timeconstants, dynamic_limit, threshold)
 %   Each channel of signal s is independently divided by a scaling factor
 %   that adapts to the current level of the samples in this channel. The
 %   adaption process is simulated using a cascade of feedback loops
-%   (Püschel 1998) which consists of low pass filters with time constants
+%   (Pï¿½schel 1998) which consists of low pass filters with time constants
 %   given as second argument to this function. The number of time
 %   constants given determines the number of feedback loops that are used.
 %
 %   Higher values for time constants will result in slower adaption speed.
 %   Short time changes in the signal will be transmitted almost linearily.
 %   In each feedback loop, a nonlinear compressing characteristic (see
-%   Stefan Münkner 1993) limits the signal values to be within
+%   Stefan Mï¿½nkner 1993) limits the signal values to be within
 %   [-dynamic_limit dynamic_limit]. A low value for dynamic_limit will
 %   introduce nonlinear distortions to the signal.
 %
@@ -24,7 +24,7 @@ function rs = level_adaption(s, timeconstants, dynamic_limit, threshold)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(2,4, nargin))
+narginchk(2,4)
 
 if nargin < 4
 	threshold = 0.0000001;

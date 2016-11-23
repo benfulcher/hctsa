@@ -2,7 +2,7 @@ function niceprint(fileName, varargin)
 
 % niceprint(fileName, fontSize, format,  figHandle)
 %
-% Prepare a figure (default is current figure, 
+% Prepare a figure (default is current figure,
 % otherwise with handle <figHandle>) for printing to a file
 % named <fileName> with fontsize <fontSize> as color eps level II
 % (default), using some default settings for a nice appearance
@@ -19,7 +19,7 @@ function niceprint(fileName, varargin)
 % zps - color postscript level II
 % ztiff - tiff image file
 
-nargchk(1,4, nargin);
+narginchk(1,4);
 
 if nargin < 4
 	figHandle = gcf;
@@ -43,7 +43,7 @@ set(figHandle, 'DefaultTextInterpreter', 'Tex')
 
 % Set axis properties
 set(axHandle, 'PlotBoxAspectRatioMode', 'auto')
-% set(axHandle, 'PlotBoxAspectRatio', [px py pz])           
+% set(axHandle, 'PlotBoxAspectRatio', [px py pz])
 set(axHandle, 'Units', 'normalized');
 Width = 0.70;
 XYRatio = 0.7;	% Height/Width
@@ -81,7 +81,7 @@ for h=handles(:)'
 	set(h, 'FontSize', get(h, 'FontSize')*scaleFactor);
 end
 
-% 
+%
 % for c=childs(:)'		% '
 % 	if strcmp(get(c, 'Type'), 'text')  | strcmp(get(c, 'Type'), 'axes')
 % 		set(c, 'FontSize', fontSize)
@@ -91,7 +91,7 @@ end
 % % 		set(c, 'Marker', '.')
 % % 	end
 % end
-% 
+%
 
 set(0, 'ShowHiddenHandles', 'off')
 
@@ -130,6 +130,3 @@ end
 
 %unix(['gv ' fileName ' &']);
 unix(['xpsview ' fileName ' &']);
-
-
-

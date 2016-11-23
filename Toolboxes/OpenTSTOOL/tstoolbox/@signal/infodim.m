@@ -16,7 +16,7 @@ function rs = infodim(s, bins)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(1,2,nargin));
+narginchk(1,2);
 
 if ndim(s) ~= 2
     error('Signal must contain vector data');    

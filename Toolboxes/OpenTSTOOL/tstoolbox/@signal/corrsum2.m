@@ -18,7 +18,7 @@ function [rs, s] = corrsum(s, npairs, range, past, bins, opt_flag)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(4,6, nargin))
+narginchk(4,6)
 
 if nargin < 5
 	bins  = 32;

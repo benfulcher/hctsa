@@ -3,7 +3,7 @@ function answer=sinputdlg(prompt,title,lineNo,defaults,special)
 % sinputdlg - special input dialog for tstool
 
 
-error(nargchk(4,5,nargin));
+narginchk(4,5);
 
 load secfile                           
 ScreenSize=get(0,'ScreenSize');

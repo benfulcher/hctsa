@@ -16,7 +16,7 @@ function [D2, s] = takens_estimator(s, n, range, past)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(4,4, nargin))
+narginchk(4,4)
 
 points = data(s);
 [N,dim] = size(points);

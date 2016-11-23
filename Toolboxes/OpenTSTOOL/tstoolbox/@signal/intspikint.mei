@@ -6,7 +6,7 @@ function rs = intspikeint(s, len)
 %
 %  C.Merkwirth,J.Wichard,K.Peters,F.Bauer,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
 
-error(nargchk(2,2,nargin));
+narginchk(2,2);
 
 
 c = movav(s.core, len);

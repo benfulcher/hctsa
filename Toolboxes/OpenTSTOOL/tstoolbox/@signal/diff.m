@@ -9,7 +9,7 @@ function rs = diff(s, nth)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(1,2,nargin));
+narginchk(1,2);
 
 if nargin < 2
 	nth = 1;

@@ -22,7 +22,7 @@ I.  Durcharbeiten der Funtkionen der Klasse signal (evtl. auch core) :
 	
 Fehlermeldungen :
 error('Wrong type of argument(s) given');
-error(nargchk(2,2, nargin));	
+narginchk(2,2);	
 	
 Beispiel :
 
@@ -39,7 +39,7 @@ function d = setyunit(d, u)
 %
 % C.Merkwirth,J.Wichard,K.Peters,F.Bauer,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
 
-error(nargchk(2,2, nargin));
+narginchk(2,2);
 
 if isa(u, 'unit')
 	d.yunit = u;

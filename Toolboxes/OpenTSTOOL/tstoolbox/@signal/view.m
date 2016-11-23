@@ -28,7 +28,7 @@ function view(s, fontsize, fhandle)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(1,3,nargin));
+narginchk(1,3);
 
 if nargin < 2
 	fontsize = 13;

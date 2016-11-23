@@ -28,7 +28,7 @@ function rs = TSTOOLpredict(s, len, nnr, step, mode)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(2,5,nargin));
+narginchk(2,5);
 
 if nargin < 3, nnr = 1; end
 if nargin < 4, step = 1; end

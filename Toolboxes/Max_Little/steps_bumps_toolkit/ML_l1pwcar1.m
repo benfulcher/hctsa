@@ -46,7 +46,7 @@
 
 function [x, E, s] = ML_l1pwcar1(y, lambda, a, display, stoptol, maxiter)
 
-error(nargchk(3,6,nargin));
+narginchk(3,6);
 
 if (nargin < 4)
     display = 1;

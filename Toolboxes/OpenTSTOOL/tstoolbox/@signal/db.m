@@ -9,7 +9,7 @@ function rs = db(s, dbmin)
 %   If dbmin is ommited it is set to -120.
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
-error(nargchk(1,2,nargin));
+narginchk(1,2);
 if nargin < 2, dbmin = -120; end
 
 yu = yunit(s);

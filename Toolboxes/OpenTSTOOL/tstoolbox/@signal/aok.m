@@ -16,7 +16,7 @@ function rs = aok(s, fensterlen, fftlen, vorschub, volume)
 %
 % see also : spec2
 % C.Merkwirth,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
-error(nargchk(1,5, nargin));
+narginchk(1,5);
 if nargin < 1, help(mfilename); return, end
 
 if nargin < 2

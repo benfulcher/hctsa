@@ -25,7 +25,7 @@ function rs = predict2(s, dim, delay, len, nnr, mode, metric_lambda)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(4,6,nargin));
+narginchk(4,6);
 
 if nargin < 5, nnr = 1; end
 if nargin < 6, mode = 0; end

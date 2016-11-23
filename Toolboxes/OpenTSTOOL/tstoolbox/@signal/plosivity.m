@@ -12,7 +12,7 @@ function rs = plosivity(s, blen, flen, thresh, windowtype)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(2,5, nargin))
+narginchk(2,5)
 
 if nargin < 3
 	flen = 1;
