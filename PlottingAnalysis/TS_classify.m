@@ -124,7 +124,7 @@ end
 %-------------------------------------------------------------------------------
 % Plot confusion matrix
 %-------------------------------------------------------------------------------
-% CONVERT BOTH TO numClassesxN form before plotting confusion matrix
+% CONVERT BOTH TO numClasses x N form before plotting confusion matrix
 realLabels = BF_ToBinaryClass(timeSeriesGroup');
 predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl));
 plotconfusion(realLabels,predictLabels);

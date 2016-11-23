@@ -266,7 +266,7 @@ if any(ismember(whatPlots,'histogram'))
     l_mean = plot(nanmean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
 
     % Labels:
-    xlabel(sprintf('Individual %s across %u features',cfnName,numOps))
+    xlabel(sprintf('Individual %s performance across %u features',cfnName,numOps))
     ylabel('Probability')
 
     % Legend:
