@@ -21,7 +21,7 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % 'numTopFeatures', can specify the number of top features to analyze, both in
 %                   terms of the list of outputs, the histogram plots, and the
 %                   cluster plot.
-% 'numHistogramFeatures', can optionally also set a custom number of histograms
+% 'numFeaturesDistr', can optionally also set a custom number of distributions
 %                       to display (often want to set this lower to avoid producing
 %                       large numbers of figures).
 % 'numNulls', the number of shuffled nulls to generate (e.g., 10 shuffles pools
@@ -31,7 +31,7 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 %---EXAMPLE USAGE:
 %
 % TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions',...
-%           'cluster','datamatrix'},'numTopFeatures',40,'numHistogramFeatures',10);
+%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
 %
 %---OUTPUTS:
 % ifeat, the ordering of operations by their performance
@@ -72,8 +72,8 @@ check_whatPlots = @(x) iscell(x) || ischar(x);
 addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 default_numTopFeatures = 40;
 addParameter(inputP,'numTopFeatures',default_numTopFeatures,@isnumeric);
-default_numHistogramFeatures = 16;
-addParameter(inputP,'numHistogramFeatures',default_numHistogramFeatures,@isnumeric);
+default_numFeaturesDistr = 16;
+addParameter(inputP,'numFeaturesDistr',default_numFeaturesDistr,@isnumeric);
 default_numNulls = 0; % by default, don't compute an empirical null distribution
                       % by randomizing class labels
 addParameter(inputP,'numNulls',default_numNulls,@isnumeric);
@@ -84,7 +84,7 @@ if ischar(whatPlots)
     whatPlots = {whatPlots};
 end
 numTopFeatures = inputP.Results.numTopFeatures;
-numHistogramFeatures = inputP.Results.numHistogramFeatures;
+numFeaturesDistr = inputP.Results.numFeaturesDistr;
 numNulls = inputP.Results.numNulls;
 clear inputP;
 
@@ -271,10 +271,10 @@ if any(ismember(whatPlots,'histogram'))
 
     % Legend:
     if numNulls > 0
-        legend([h_null,h_real,l_chance,l_meannull,l_mean],'null','real','chance','null mean','real mean')
+        legend([h_null,h_real,l_chance,l_meannull,l_mean],'null','real','chance','null mean','mean')
         title(sprintf('%u features significantly informative of groups (FDR-corrected at 0.05)',sum(FDR_qvals < 0.05)))
     else
-        legend([h_real,l_chance,l_mean],{'real','chance','real mean'});
+        legend([h_real,l_chance,l_mean],{'real','chance','mean'});
     end
 end
 
@@ -289,7 +289,7 @@ if any(ismember(whatPlots,'distributions'))
     colors = GiveMeColors(numClasses);
 
     % Space the figures out properly:
-    numFigs = ceil(numHistogramFeatures/subPerFig);
+    numFigs = ceil(numFeaturesDistr/subPerFig);
 
     % Make data structure for TS_SingleFeature
     data = struct('TS_DataMat',TS_DataMat,'TimeSeries',TimeSeries,...
@@ -303,7 +303,7 @@ if any(ismember(whatPlots,'distributions'))
         % Get the indices of features to plot
         r = ((figi-1)*subPerFig+1:figi*subPerFig);
         if figi==numFigs % filter down for last one
-            r = r(r<=numHistogramFeatures);
+            r = r(r<=numFeaturesDistr);
         end
         featHere = ifeat(r); % features to plot on this figure
         % Make the figure
@@ -438,9 +438,9 @@ function testStat = giveMeStats(dataMatrix,groupLabels,beVerbose)
             testStat(k) = NaN;
         end
         % Give estimate of time remaining:
-        if beVerbose && k==20
+        if beVerbose && k==100
             fprintf(1,'(should take approx %s to compute for all %u features)\n',...
-                            BF_thetime(toc(loopTimer)/20*(numOps)),numOps);
+                            BF_thetime(toc(loopTimer)/100*(numOps)),numOps);
         end
     end
 end

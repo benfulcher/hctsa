@@ -166,6 +166,7 @@ if doViolin
         end
         ax.XTick = [];
     end
+    ax.TickLabelInterpreter = 'none';
     title(sprintf('[%u]%s (%s)',theOperation.ID,theOperation.Name,theOperation.Keywords),'interpreter','none')
     ylabel('Feature value');
 

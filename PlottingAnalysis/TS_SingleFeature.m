@@ -147,6 +147,7 @@ else
         statText = whatStat;
     end
 end
-title(sprintf('[%u] %s (%s): %s',Operations(op_ind).ID,Operations(op_ind).Name,Operations(op_ind).Keywords,statText),'interpreter','none')
+title({sprintf('[%u] %s: %s',Operations(op_ind).ID,Operations(op_ind).Name,statText);...
+                        ['(',Operations(op_ind).Keywords,')']},'interpreter','none')
 
 end
