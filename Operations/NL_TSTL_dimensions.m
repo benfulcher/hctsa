@@ -19,7 +19,7 @@ function out = NL_TSTL_dimensions(y,nbins,embedParams)
 
 % cf. TSTOOL, http://www.physik3.gwdg.de/tstool/
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

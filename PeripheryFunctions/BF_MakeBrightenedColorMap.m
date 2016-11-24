@@ -7,7 +7,7 @@ function colormap = BF_MakeBrightenedColorMap(rgb,numGrads)
 % annotateParams, structure of custom plotting parameters
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % This function is free software: you can redistribute it and/or modify it under

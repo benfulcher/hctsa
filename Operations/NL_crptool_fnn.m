@@ -17,7 +17,7 @@ function out = NL_crptool_fnn(y,maxm,r,taum,th,randomSeed)
 % Computation uses N. Marwan's code from the CRP Toolbox:
 % http://tocsy.pik-potsdam.de/CRPtoolbox/
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

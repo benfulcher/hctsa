@@ -3,7 +3,7 @@ function [opOutput, opQuality, opTime] = TS_compute_oploop(masterOutput, masterC
 % including the assignment of error codes.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

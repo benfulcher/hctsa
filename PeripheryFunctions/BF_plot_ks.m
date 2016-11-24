@@ -10,7 +10,7 @@ function [fr,xr,h_line,h_points] = BF_plot_ks(dataVector,whatColor,doSwap,lineWi
 % trimRange, (logical) whether to trim the range of plot to that of the data points
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

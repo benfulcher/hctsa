@@ -44,7 +44,7 @@ function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
 %           Am J. Physiol. Regul. Integr. Comp. Physiol. 264(3) R638 (1993)
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

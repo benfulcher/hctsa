@@ -8,7 +8,7 @@ function weights = InverseProbWeight(Labels)
 % weights: inverse probability weight assigned to each observation
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % This function is free software: you can redistribute it and/or modify it under
