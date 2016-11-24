@@ -46,7 +46,7 @@ if nargin < 2
     % 'svm', 'discriminant', 'knn'
 end
 if nargin < 3
-    doPCs = 1;
+    doPCs = true;
 end
 if nargin < 4
     seedReset = 'default';
@@ -99,7 +99,7 @@ fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
 %-------------------------------------------------------------------------------
 % Check nulls:
 %-------------------------------------------------------------------------------
-doNull = 0;
+doNull = false;
 numNulls = 20;
 if doNull
     meanNull = zeros(numNulls,1);
@@ -134,6 +134,7 @@ ax = gca;
 ax.XTickLabel(1:numClasses) = groupNames;
 ax.YTickLabel(1:numClasses) = groupNames;
 ax.TickLabelInterpreter = 'none';
+
 % Make a nice white figure background:
 f = gcf; f.Color = 'w';
 

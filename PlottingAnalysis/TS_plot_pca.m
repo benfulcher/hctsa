@@ -39,7 +39,7 @@ if nargin < 1 || isempty(whatData)
 end
 
 if nargin < 2 || isempty(showDist)
-    showDist = 1;
+    showDist = true;
 end
 
 if nargin < 3 || isempty(classMeth)

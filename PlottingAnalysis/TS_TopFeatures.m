@@ -260,7 +260,7 @@ if any(ismember(whatPlots,'histogram'))
     end
 
     % Add chance line:
-    l_chance = plot(chanceLine*ones(2,1),[0,maxH],'--k');
+    l_chance = plot(chanceLine*ones(2,1),[0,maxH],'--','color',colors{1});
 
     % Add mean of real distribution:
     l_mean = plot(nanmean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
