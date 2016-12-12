@@ -185,7 +185,7 @@ function xhat = RobustSigmoid(x,doScale)
     iqrX = iqr(x(goodVals));
 
     if iqrX==0 % Can't apply an outlier-robust sigmoid meaningfully
-        xhat = ones(size(x))*NaN;
+        xhat = nan(size(x));
     else
         % Outlier-robust sigmoid:
         xhat = 1./(1 + exp(-(x-medianX)/(iqrX/1.35)));

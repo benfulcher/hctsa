@@ -148,7 +148,7 @@ fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 % Initialize variables:
 featureVector = zeros(numCalc,1); % Output of each operation
 calcQuality = zeros(numCalc,1); % Quality of output from each operation
-calcTimes = ones(numCalc,1)*NaN; % Calculation time for each operation
+calcTimes = nan(numCalc,1); % Calculation time for each operation
 
 % --------------------------------------------------------------------------
 %% Pre-Processing
