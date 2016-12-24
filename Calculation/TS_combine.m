@@ -123,7 +123,8 @@ end
 if ~isfield(loadedData{1},'gitInfo') || ~isfield(loadedData{2},'gitInfo')
     % git info not present in at least one -- keep an empty structure
     gitInfo = struct();
-elseif isempty(loadedData{1}.gitInfo) && isempty(loadedData{2}.gitInfo)
+elseif isempty(fieldnames(loadedData{1}.gitInfo)) && isempty(fieldnames(loadedData{2}.gitInfo))
+    % git info not stored in either HCTSA file
     gitInfo = struct();
 elseif ~strcmp(loadedData{1}.gitInfo.hash,loadedData{2}.gitInfo.hash)
     % Only check the hashes for consistency:
