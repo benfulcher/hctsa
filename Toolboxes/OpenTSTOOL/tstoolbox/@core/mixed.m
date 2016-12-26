@@ -1,5 +1,5 @@
 function [SSPE, REAL, PRED]  = ...
-    mixed (ts_core,DIMS,future,LAGS,normhandle,SHIFTS,exclude,mode, ...
+    mixed(ts_core,DIMS,future,LAGS,normhandle,SHIFTS,exclude,mode, ...
 	   nn_number,exp)
 
 %  MIXED calculates single step prediction error using mixed states.
@@ -71,7 +71,7 @@ function [SSPE, REAL, PRED]  = ...
 %
 % check preconditions and set some useful variables
 %
-error (nargchk(2,10,nargin))
+narginchk(2,10)
 
 TS = data (ts_core);
 
@@ -93,7 +93,7 @@ switch nargin
   SIZE_DIMS = size(DIMS);
   SIZE_LAGS = size(LAGS);
   SIZE_SHIFTS = size(SHIFTS);
-  
+
  case 3
   if max (size(future)) ~= 1 | future <= 0
     error ('future must be a positive integer')
@@ -109,7 +109,7 @@ switch nargin
   SIZE_DIMS = size(DIMS);
   SIZE_LAGS = size(LAGS);
   SIZE_SHIFTS = size(SHIFTS);
-  
+
  case 4
   SIZE_TS = size(TS);
   SIZE_DIMS = size(DIMS);
@@ -127,7 +127,7 @@ switch nargin
     error ('LAGS dims are incorrect')
   end
   SIZE_SHIFTS = size(SHIFTS);
-  
+
  case 5
   SIZE_TS = size(TS);
   SIZE_DIMS = size(DIMS);
@@ -147,7 +147,7 @@ switch nargin
     error ('LAGS dims are incorrect')
   end
   SIZE_SHIFTS = size(SHIFTS);
-  
+
  case 6
   SIZE_TS = size(TS);
   SIZE_DIMS = size(DIMS);
@@ -169,7 +169,7 @@ switch nargin
   if (SIZE_LAGS(1) ~= 1 | SIZE_LAGS(2) ~= SIZE_TS(2))
     error ('LAGS dims are incorrect')
   end
-  
+
  case 7
   SIZE_TS = size(TS);
   SIZE_DIMS = size(DIMS);
@@ -193,7 +193,7 @@ switch nargin
   if (SIZE_LAGS(1) ~= 1 | SIZE_LAGS(2) ~= SIZE_TS(2))
     error ('LAGS dims are incorrect')
   end
-  
+
  case 8
   SIZE_TS = size(TS);
   SIZE_DIMS = size(DIMS);
@@ -214,9 +214,9 @@ switch nargin
   if (SIZE_LAGS(1) ~= 1 | SIZE_LAGS(2) ~= SIZE_TS(2))
     error ('LAGS dims are incorrect')
   end
-  nn_number = 1;   
+  nn_number = 1;
   exp = 0;
-  
+
  case 9
   SIZE_TS = size(TS);
   SIZE_DIMS = size(DIMS);
@@ -241,7 +241,7 @@ switch nargin
     error ('nn_number must be a positive integer')
   end
   exp = 0;
-  
+
  case 10
   SIZE_TS = size(TS);
   SIZE_DIMS = size(DIMS);
@@ -269,7 +269,7 @@ switch nargin
     error ('exp must be a positive integer')
   end
 
-end  
+end
 
 
 if (SIZE_DIMS(1) ~= 1 | SIZE_DIMS(2) ~= SIZE_TS(2))
@@ -296,7 +296,7 @@ if (max (DIMS) == 0)
 
   % create random indizes
   indices = ceil (rand(SIZE_TS(1),1) * (SIZE_TS(1)-future));
-  
+
   % calculate sspe with randomly chosen points
   SSPE = mean (abs (TS((1 : SIZE_TS(1)-future) + future, 1) - ...
 		    TS(indices(1 : SIZE_TS-future) + future, 1)));
@@ -339,44 +339,44 @@ REAL = TS((startIndex:startIndex-1+sP(1)-future) + future, 1);
 switch mode
  case 'normal'
   PRED = TS(index(1:end) + startIndex-1 + future, 1);
-  
+
  case 'absolute'
   size_dist = size (dist);
   zeros (size_dist(1),size_dist(2)-1);
   for k = 1:size_dist(1)
     r(k,:) = dist(k, 1:end-1) / dist(k, end);
   end
-  
+
   weights      = (1 - r.^exp).^exp;
   norm         = sum (weights');
   norm         = norm';
   size_weights = size (weights);
-  
+
   sumbuffer = zeros(size(weights));
   for k = 1:size_weights(1)
     for l = 1:size_weights(2)
       sumbuffer(k,l) = weights(k,l) * TS(index(k,l) + startIndex-1 ...
 					 + future, 1);
-  
+
     end
   end
-  
+
   sumbuffer  = sum (sumbuffer');
   PRED       = sumbuffer' ./ norm;
-  
-  
+
+
  case 'integrated'
   size_dist = size (dist);
   zeros (size_dist(1),size_dist(2)-1);
   for k = 1:size_dist(1)
     r(k,:) = dist(k, 1:end-1) / dist(k, end);
   end
-  
+
   weights      = (1 - r.^exp).^exp;
   norm         = sum (weights');
   norm         = norm';
   size_weights = size (weights);
-  
+
   sumbuffer = zeros(size(weights));
   for k = 1:size_weights(1)
     for l = 1:size_weights(2)
@@ -385,12 +385,12 @@ switch mode
 			   - TS(index(k,l) + startIndex-1, 1)));
     end
   end
-  
+
   sumbuffer  = sum (sumbuffer');
   PRED       = ((TS(startIndex:size_weights(1)+startIndex-1))' ...
 		+ (sumbuffer' ./ norm));
-  
-  
+
+
  otherwise
   error ('unknown mode');
 end

@@ -12,7 +12,7 @@ function [sig]=write(s, filename, varargin)
 %   writes a signal object to file filename (uses matlab's file format)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
-error(nargchk(2,3, nargin));
+narginchk(2,3);
 
 if nargin == 2
         [path,nam,ext] = fileparts(filename);

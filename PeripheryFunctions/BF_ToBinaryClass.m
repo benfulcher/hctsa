@@ -6,7 +6,7 @@ function binMatrix = BF_Binarize(groupLabels,numClasses)
 %---OUTPUT: binMatrix, a binary matrix coding the groupLabels
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -35,7 +35,7 @@ end
 numObs = length(groupLabels);
 
 % Set binary:
-binMatrix = false(numClasses,numObs);
+binMatrix = zeros(numClasses,numObs);
 for i = 1:numClasses
     binMatrix(i,groupLabels==i) = 1;
 end

@@ -73,7 +73,7 @@ function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
 % scales tau.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -183,36 +183,29 @@ for i = 1:ntau
     switch wtf
         case 'nothing'
             y_dt = reshape(y_buff,nn,1);
-
         case 'endptdiff'
             % look at differences in end-points in each subsegment
             y_dt = y_buff(end,:) - y_buff(1,:);
-
         case 'range'
             y_dt = range(y_buff);
-
         case 'std'
             % something like what they do in Cannon et al., Physica A 1997,
             % except with bridge/linear detrending and overlapping segments
             % (scaled windowed variance methods). But I think we have
             % enough of this sort of thing already...
             y_dt = std(y_buff);
-
         case 'iqr'
             y_dt = iqr(y_buff);
-
         case 'dfa'
             tt = (1:tau)'; % faux time range
             for j = 1:size(y_buff,2);
                 % fit a polynomial of order k in each subsegment
                 p = polyfit(tt,y_buff(:,j),k);
-
                 % remove the trend, store back in y_buff
                 y_buff(:,j) = y_buff(:,j) - polyval(p,tt);
             end
             % reshape to a column vector, y_dt (detrended)
             y_dt = reshape(y_buff,nn,1);
-
         case 'rsrange'
             % Remove straight line first: Caccia et al. Physica A, 1997
             % Straight line connects end points
@@ -220,7 +213,6 @@ for i = 1:ntau
             m = y_buff(end,:) - b;
             y_buff = y_buff - (linspace(0,1,tau)'*m + ones(tau,1)*b);
             y_dt = range(y_buff);
-
         case 'rsrangefit' % polynomial fit (order k) rather than endpoints fit: (~DFA)
             tt = (1:tau)'; % faux time range
             for j = 1:size(y_buff,2);
@@ -231,14 +223,12 @@ for i = 1:ntau
                 y_buff(:,j) = y_buff(:,j) - polyval(p,tt);
             end
             y_dt = range(y_buff);
-
         otherwise
             error('Unknown fluctuation analysis method ''%s''',wtf);
     end
 
     % Compute fluctuation function:
     F(i) = (mean(y_dt.^q)).^(1/q);
-
 end
 
 
@@ -283,7 +273,7 @@ end
 % (currently, in the log scale, there are relatively more at large scales
 
 % Deterine the errors
-sserr = ones(ntt,1)*NaN; % don't choose the end points
+sserr = nan(ntt,1); % don't choose the end points
 minPoints = 6;
 for i = minPoints:ntt-minPoints
     r1 = 1:i;

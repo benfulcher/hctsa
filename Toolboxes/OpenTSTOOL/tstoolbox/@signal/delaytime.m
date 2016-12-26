@@ -13,7 +13,7 @@ function rs = delaytime(s, maxdelay, past)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(3,3, nargin));
+narginchk(3,3);
 
 if ndim(s) ~= 1
 	help(mfilename)

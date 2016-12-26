@@ -49,7 +49,7 @@ function [rs, eigvals, eigvecs] = pca(s, mode, maxpercent)
 %
 % C.Merkwirth,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
 
-error(nargchk(1,3,nargin));
+narginchk(1,3);
 
 if nargin < 2
 	mode = 'normalized';

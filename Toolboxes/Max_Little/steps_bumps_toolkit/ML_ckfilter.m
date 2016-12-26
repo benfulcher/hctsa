@@ -1,3 +1,4 @@
+function x = ML_ckfilter(y, K, M, p)
 % Implements the Chung-Kennedy sliding window nonlinear step filter. This
 % filter is similar to a centred moving average filter of length K, but the
 % centre sample in the window is replaced by a weighted sum of forward and
@@ -30,11 +31,9 @@
 % R.M. Berry, N.S. Jones (2011)
 % Steps and bumps: precision extraction of discrete states of molecular machines
 % Biophysical Journal, 101(2):477-485
-% 
 
-function x = ML_ckfilter(y, K, M, p)
 
-error(nargchk(4,4,nargin));
+narginchk(4,4);
 y = y(:);
 
 N = length(y);
@@ -53,13 +52,13 @@ end
 x = y;
 
 for k = (max(K,M)+1):(N-max(K,M)-1)
-    
+
     yb = repmat(y(k-M+1:k),1,K);
     yf = repmat(y(k:k+M-1),1,K);
-    
+
     f = prior*sum((yb-xf(k-M+1:k,:)).^2).^(-p);
 	b = prior*sum((yf-xb(k:k+M-1,:)).^2).^(-p);
-   
+
     if (any(isinf(f)))
         f(isinf(f)) = 1;
         f(~isinf(f)) = 0;
@@ -68,10 +67,10 @@ for k = (max(K,M)+1):(N-max(K,M)-1)
         f(isinf(b)) = 1;
         f(~isinf(b)) = 0;
     end
-    
+
     fb = sum(f+b);
     f = f/fb;
     b = b/fb;
-    
+
     x(k) = f*xf(k,:)'+b*xb(k,:)';
 end

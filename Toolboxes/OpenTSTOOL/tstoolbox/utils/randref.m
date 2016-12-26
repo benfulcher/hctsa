@@ -9,7 +9,7 @@ function ref = randref(low, high, N)
 %
 % length(randref(low, high, N)) will not be exactly equal to N !!!
 
-error(nargchk(3,3,nargin));
+narginchk(3,3);
 
 if (high<=low)
 	error('Cannot create random indices when upper limit is smaller than lower limit');

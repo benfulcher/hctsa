@@ -13,7 +13,7 @@ function surrtest(s, ntests, dim, delay, bins)
 % bins - maximal number of bins per axis for boxcounting 
 
 
-error(nargchk(5,5,nargin))
+narginchk(5,5)
 
 e = embed(s, dim, delay);
 c = cut(corrdim(e, bins), 2, dim, dim);

@@ -4,7 +4,7 @@ function rs = ccf(s1, s2, len)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(2,3, nargin));
+narginchk(2,3);
 if (ndim(s1) > 2) | (~isreal(data(s1)))
 	help(mfilename)
 	return

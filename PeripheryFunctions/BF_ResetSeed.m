@@ -5,7 +5,7 @@ function BF_ResetSeed(resetHow)
 % consistent syntax.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

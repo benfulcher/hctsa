@@ -12,7 +12,7 @@ function rs = scalogram(s, scalemin, scalemax, scalestep, mlen)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(1,5,nargin));
+narginchk(1,5);
 
 if nargin<2
 	scalemin = 0.1;

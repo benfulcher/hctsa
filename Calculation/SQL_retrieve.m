@@ -7,23 +7,23 @@ function didWrite = SQL_retrieve(ts_ids,op_ids,retrieveWhatEntries,retrieveWhatD
 % and associated metadata to HCTSA.mat
 %
 %---INPUTS:
-%--ts_ids: a vector of ts_ids to retrieve from the mySQL database.
-%--op_ids: a vector of op_ids to retrieve from the mySQL database.
-%--retrieveWhatEntries: can be one of the following options:
+% ts_ids: a vector of ts_ids to retrieve from the mySQL database.
+% op_ids: a vector of op_ids to retrieve from the mySQL database.
+% retrieveWhatEntries: can be one of the following options:
 %        (i) 'null': Retrieve null entries from the database (e.g., for
 %                    calculating)
 %        (ii) 'all': Retrieve all entries from the database (e.g., for
 %                    analyzing)
 %        (iii) 'error': Retrieve previous errors stored in the database (e.g.,
 %                       for re-evaluating previous errors)
-%--retrieveWhatData: can be one of the following options:
+% retrieveWhatData: can be one of the following options:
 %       (i) 'all': Retrieves Data, CalcTimes, and Quality labels
 %       (ii) 'nocalctime': Retrieves calculated values and quality labels
 %       (iii) 'outputs': Just the calculated values
 %       (iv) 'quality': Just the quality labels
 %
 %---OUTPUT:
-%--didWrite [opt] is 1 if HCTSA.mat was written
+% didWrite [opt] is 1 if HCTSA.mat was written
 %
 % Other outputs are saved to the file HCTSA.mat:
 %--TS_DataMat, contains the data
@@ -34,7 +34,7 @@ function didWrite = SQL_retrieve(ts_ids,op_ids,retrieveWhatEntries,retrieveWhatD
 %--MasterOperations, contains metadata about the implicatedmaster operations
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

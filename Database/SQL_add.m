@@ -1,9 +1,8 @@
 function structArray = SQL_add(addWhat, inputFile, forDatabase, beVocal)
-% SQL_add
+% SQL_add   Interpret a structured input file of time series, operations,
+%           or master operations.
 %
-% Interprets a structured input file of time series time series, operations,
-% or master operations
-% Can also (by default) add the results to a linked mySQL database.
+% By default adds the results to a linked mySQL database.
 %
 %---INPUTS:
 % addWhat: 'mops' (for master operations), 'ops' (for operations), or 'ts'
@@ -17,7 +16,7 @@ function structArray = SQL_add(addWhat, inputFile, forDatabase, beVocal)
 % beVocal: if 1 (default) gives user feedback on the input process.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

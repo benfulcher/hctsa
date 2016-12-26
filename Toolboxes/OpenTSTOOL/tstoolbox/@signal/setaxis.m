@@ -14,6 +14,6 @@ function s = setaxis(s, dim, a)
 %
 % C.Merkwirth,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
 
-error(nargchk(3,3,nargin));
+narginchk(3,3);
 
 s.xaxes{dim} = a;	

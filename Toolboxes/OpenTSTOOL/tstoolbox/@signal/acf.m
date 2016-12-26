@@ -13,7 +13,7 @@ function rs = acf(s, len)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(1,2, nargin));
+narginchk(1,2);
      
 if (ndim(s) > 1) | (~isreal(data(s)))
 	help(mfilename)

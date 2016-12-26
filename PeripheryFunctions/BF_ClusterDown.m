@@ -1,4 +1,4 @@
-function [distMat_cl,cluster_Groupi,ord] = BF_ClusterDown(distMat,varargin)
+function [distMat_cl,cluster_Groupi,ord,handles] = BF_ClusterDown(distMat,varargin)
 % BF_ClusterDown    Reduce a pairwise distance matrix into smaller clusters.
 %
 % Yields a visualization of a pairwise distance matrix, including a set of
@@ -8,7 +8,7 @@ function [distMat_cl,cluster_Groupi,ord] = BF_ClusterDown(distMat,varargin)
 % distMat, a pairwise distance vector or matrix (e.g., generated from pdist)
 % [EXTRA OPTIONS]:
 % 'clusterThreshold', the threshold in the dendrogram for forming clusters
-% 'objectLabels', labels for axes labels
+% 'objectLabels', labels for axes
 % 'whatDistance', the type of distance metric used:
 %        (i) 'corr' (default): provide 1-R, where R is correlation coefficient
 %        (ii) 'abscorr': provide correlation distances, 1-R, but clustering is
@@ -24,9 +24,11 @@ function [distMat_cl,cluster_Groupi,ord] = BF_ClusterDown(distMat,varargin)
 % distMat_cl, the distance matrix re-ordered by clustering
 % cluster_Groupi, the assignment of nodes to clusters (cell of indices)
 % ord, the ordering of objects in the dendrogram
+% handles, structure containing handles to plotting elements, f (figure),
+%               ax1 (dendrogram), ax2 (pairwise correlation matrix)
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -51,7 +53,7 @@ inputP = inputParser;
 default_clusterThreshold = 0.2;
 addParameter(inputP,'clusterThreshold',default_clusterThreshold,@isnumeric);
 
-% Object labels for axis labels
+% Object labels for axes
 default_objectLabels = {};
 addParameter(inputP,'objectLabels',default_objectLabels,@iscell);
 
@@ -254,5 +256,13 @@ ax2.YLim = [0.5,numItems+0.5];
 ax1.Position(1) = ax2.Position(1) + ax2.Position(3);
 ax1.Position(4) = ax2.Position(4);
 ax1.Position(2) = ax2.Position(2);
+
+% Handles
+if nargout > 3
+    handles = struct();
+    handles.f = f;
+    handles.ax1 = ax1;
+    handles.ax2 = ax2;
+end
 
 end

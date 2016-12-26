@@ -22,7 +22,7 @@ function TS_init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
 % Writes output into HCTSA.mat (or specified custom filename)
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -107,9 +107,9 @@ numMops = length(MasterOperations);
 % Generate the TS_DataMat, TS_Quality, and TS_CalcTime matrices
 % ------------------------------------------------------------------------------
 % All NaNs -> NULL (haven't yet been calculated)
-TS_DataMat = ones(numTS,numOps)*NaN;
-TS_Quality = ones(numTS,numOps)*NaN;
-TS_CalcTime = ones(numTS,numOps)*NaN;
+TS_DataMat = nan(numTS,numOps);
+TS_Quality = nan(numTS,numOps);
+TS_CalcTime = nan(numTS,numOps);
 
 %-------------------------------------------------------------------------------
 % Get git information to keep track of the version of code used at the time of TS_init

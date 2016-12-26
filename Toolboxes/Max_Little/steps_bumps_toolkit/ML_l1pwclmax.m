@@ -23,7 +23,7 @@
 
 function lambdamax = ML_l1pwclmax(y)
 
-error(nargchk(1,1,nargin));
+narginchk(1,1);
 y = y(:);
 N = length(y);
 M = N - 1;

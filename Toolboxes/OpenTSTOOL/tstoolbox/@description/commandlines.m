@@ -9,6 +9,6 @@ function c = commandlines(d)
 
 % C.Merkwirth,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
 
-error(nargchk(1,1,nargin));
+narginchk(1,1);
 
 c = d.commandlines;

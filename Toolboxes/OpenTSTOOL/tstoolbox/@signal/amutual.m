@@ -18,7 +18,7 @@ function rs = amutual(s, maxtau, bins)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(1,3,nargin));
+narginchk(1,3);
 
 if (ndim(s) > 1) | (~isreal(data(s)))
     error('Input signal must be a scalar time series');

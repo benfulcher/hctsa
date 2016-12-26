@@ -20,7 +20,7 @@ function TS_classify(whatData,whatClassifier,doPCs,seedReset)
 % shows how this varies as a function of reduced PCs (text and as an output plot)
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -46,7 +46,7 @@ if nargin < 2
     % 'svm', 'discriminant', 'knn'
 end
 if nargin < 3
-    doPCs = 1;
+    doPCs = true;
 end
 if nargin < 4
     seedReset = 'default';
@@ -99,7 +99,7 @@ fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
 %-------------------------------------------------------------------------------
 % Check nulls:
 %-------------------------------------------------------------------------------
-doNull = 0;
+doNull = false;
 numNulls = 20;
 if doNull
     meanNull = zeros(numNulls,1);
@@ -124,7 +124,7 @@ end
 %-------------------------------------------------------------------------------
 % Plot confusion matrix
 %-------------------------------------------------------------------------------
-% CONVERT BOTH TO numClassesxN form before plotting confusion matrix
+% CONVERT BOTH TO numClasses x N form before plotting confusion matrix
 realLabels = BF_ToBinaryClass(timeSeriesGroup');
 predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl));
 plotconfusion(realLabels,predictLabels);
@@ -134,6 +134,7 @@ ax = gca;
 ax.XTickLabel(1:numClasses) = groupNames;
 ax.YTickLabel(1:numClasses) = groupNames;
 ax.TickLabelInterpreter = 'none';
+
 % Make a nice white figure background:
 f = gcf; f.Color = 'w';
 

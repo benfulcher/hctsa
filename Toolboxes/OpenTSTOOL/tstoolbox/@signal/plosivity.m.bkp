@@ -8,7 +8,7 @@ function rs = plosivity(s, memory, thresh)
 % 
 % C.Merkwirth,J.Wichard,K.Peters,F.Bauer,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
 
-error(nargchk(3,3,nargin));
+narginchk(3,3);
 
 
 d = data(s);

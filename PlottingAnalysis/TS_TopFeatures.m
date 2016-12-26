@@ -1,4 +1,4 @@
-function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat,doNull,varargin)
+function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat,varargin)
 % TS_TopFeatures    Top individual features for discriminating labeled time series
 %
 % This function compares each feature in an hctsa dataset individually for its
@@ -13,8 +13,6 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % whatTestStat, the test statistic to quantify the goodness of each feature
 %               (e.g., 'fast_linear', 'tstat', 'svm', 'linear', 'diaglinear',
 %                or others supported by GiveMeFunctionHandle)
-% doNull, (boolean) whether to compute a null distribution using permutations
-%           of the class labels
 %
 % ***Additional plotting options***:
 % 'whatPlots', can specify what output plots to produce (cell of strings), e.g.,
@@ -23,14 +21,17 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % 'numTopFeatures', can specify the number of top features to analyze, both in
 %                   terms of the list of outputs, the histogram plots, and the
 %                   cluster plot.
-% 'numHistogramFeatures', can optionally also set a custom number of histograms
+% 'numFeaturesDistr', can optionally also set a custom number of distributions
 %                       to display (often want to set this lower to avoid producing
 %                       large numbers of figures).
+% 'numNulls', the number of shuffled nulls to generate (e.g., 10 shuffles pools
+%               shuffles for all M features, for a total of 10*M elements in the
+%               null distribution)
 %
 %---EXAMPLE USAGE:
 %
 % TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions',...
-%           'cluster','datamatrix'},'numTopFeatures',40,'numHistogramFeatures',10);
+%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
 %
 %---OUTPUTS:
 % ifeat, the ordering of operations by their performance
@@ -38,7 +39,7 @@ function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat
 % testStat_rand, test statistics making up the null distributions
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -63,9 +64,6 @@ if nargin < 2 || isempty(whatTestStat)
     whatTestStat = 'fast_linear'; % Way faster than proper prediction models
     fprintf(1,'Using ''%s'' test statistic by default\n', whatTestStat);
 end
-if nargin < 3
-    doNull = 0; % compute an empirical null distribution by randomizing class labels
-end
 
 % Use an inputParser to control additional plotting options as parameters:
 inputP = inputParser;
@@ -74,13 +72,20 @@ check_whatPlots = @(x) iscell(x) || ischar(x);
 addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 default_numTopFeatures = 40;
 addParameter(inputP,'numTopFeatures',default_numTopFeatures,@isnumeric);
-default_numHistogramFeatures = 16;
-addParameter(inputP,'numHistogramFeatures',default_numHistogramFeatures,@isnumeric);
+default_numFeaturesDistr = 16;
+addParameter(inputP,'numFeaturesDistr',default_numFeaturesDistr,@isnumeric);
+default_numNulls = 0; % by default, don't compute an empirical null distribution
+                      % by randomizing class labels
+addParameter(inputP,'numNulls',default_numNulls,@isnumeric);
 parse(inputP,varargin{:});
 
 whatPlots = inputP.Results.whatPlots;
+if ischar(whatPlots)
+    whatPlots = {whatPlots};
+end
 numTopFeatures = inputP.Results.numTopFeatures;
-numHistogramFeatures = inputP.Results.numHistogramFeatures;
+numFeaturesDistr = inputP.Results.numFeaturesDistr;
+numNulls = inputP.Results.numNulls;
 clear inputP;
 
 % --------------------------------------------------------------------------
@@ -157,6 +162,10 @@ timer = tic;
 testStat = giveMeStats(TS_DataMat,timeSeriesGroup,1);
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
 
+if all(isnan(testStat))
+    error('Error computing statistics for %s (may be due to inclusion of missing data?)',cfnName);
+end
+
 % Give mean and that expected from random classifier (may be a little overfitting)
 fprintf(1,['Mean %s performance across %u operations = %4.2f%s\n' ...
             '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
@@ -194,9 +203,8 @@ if any(ismember(whatPlots,'histogram'))
     %-------------------------------------------------------------------------------
     %% Compute null distribution
     %-------------------------------------------------------------------------------
-    numNulls = 10;
     testStat_rand = zeros(numOps,numNulls);
-    if doNull
+    if numNulls > 0
         fprintf(1,'Now for %u nulls... ',numNulls);
         tic
         for j = 1:numNulls
@@ -223,21 +231,23 @@ if any(ismember(whatPlots,'histogram'))
         if any(FDR_qvals < 0.05)
             fprintf(1,['%u/%u features show better performance using %s than the null distribution' ...
                         '\nat the magical 0.05 threshold (FDR corrected)\n'],...
-                            sum(FDR_qvals<0.05),length(FDR_qvals),cfnName);
+                            sum(FDR_qvals < 0.05),length(FDR_qvals),cfnName);
         else
             fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...
                     'the null distribution at a FDR of 0.05.\nDon''t you go p-hacking now, will you?\n']);
         end
     end
 
+    % Plot histogram
     f = figure('color','w'); hold on
     colors = BF_getcmap('spectral',5,1);
-    if ~doNull
+    if numNulls == 0
+        % Just plot the real distribution of test statistics across all features
         h_real = histogram(testStat,'Normalization','probability',...
                     'BinMethod','auto','FaceColor',colors{5},'EdgeColor','k','FaceAlpha',0);
         maxH = max(h_real.Values);
     else
-        % Plot both real distribution, and null distribution:
+        % Plot both real distribution and null distribution:
         numBins = 20;
         allTestStat = [testStat(:);testStat_rand(:)];
         minMax = [min(allTestStat),max(allTestStat)];
@@ -250,20 +260,21 @@ if any(ismember(whatPlots,'histogram'))
     end
 
     % Add chance line:
-    l_chance = plot(chanceLine*ones(2,1),[0,maxH],'--k');
+    l_chance = plot(chanceLine*ones(2,1),[0,maxH],'--','color',colors{1});
 
     % Add mean of real distribution:
     l_mean = plot(nanmean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
 
     % Labels:
-    xlabel(sprintf('Individual %s across %u features',cfnName,numOps))
+    xlabel(sprintf('Individual %s performance across %u features',cfnName,numOps))
     ylabel('Probability')
 
     % Legend:
-    if doNull
-        legend([h_null,h_real,l_chance,l_meannull,l_mean],'null','real','chance','null mean','real mean')
+    if numNulls > 0
+        legend([h_null,h_real,l_chance,l_meannull,l_mean],'null','real','chance','null mean','mean')
+        title(sprintf('%u features significantly informative of groups (FDR-corrected at 0.05)',sum(FDR_qvals < 0.05)))
     else
-        legend([h_real,l_chance,l_mean],{'real','chance','real mean'});
+        legend([h_real,l_chance,l_mean],{'real','chance','mean'});
     end
 end
 
@@ -278,7 +289,7 @@ if any(ismember(whatPlots,'distributions'))
     colors = GiveMeColors(numClasses);
 
     % Space the figures out properly:
-    numFigs = ceil(numHistogramFeatures/subPerFig);
+    numFigs = ceil(numFeaturesDistr/subPerFig);
 
     % Make data structure for TS_SingleFeature
     data = struct('TS_DataMat',TS_DataMat,'TimeSeries',TimeSeries,...
@@ -292,7 +303,7 @@ if any(ismember(whatPlots,'distributions'))
         % Get the indices of features to plot
         r = ((figi-1)*subPerFig+1:figi*subPerFig);
         if figi==numFigs % filter down for last one
-            r = r(r<=numHistogramFeatures);
+            r = r(r<=numFeaturesDistr);
         end
         featHere = ifeat(r); % features to plot on this figure
         % Make the figure
@@ -427,9 +438,9 @@ function testStat = giveMeStats(dataMatrix,groupLabels,beVerbose)
             testStat(k) = NaN;
         end
         % Give estimate of time remaining:
-        if beVerbose && k==20
+        if beVerbose && k==100
             fprintf(1,'(should take approx %s to compute for all %u features)\n',...
-                            BF_thetime(toc(loopTimer)/20*(numOps)),numOps);
+                            BF_thetime(toc(loopTimer)/100*(numOps)),numOps);
         end
     end
 end

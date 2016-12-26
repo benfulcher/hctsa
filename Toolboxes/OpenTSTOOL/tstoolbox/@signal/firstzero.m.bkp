@@ -7,7 +7,7 @@ function [xpos, u] = firstzero(s)
 % using linear interpolation 
 %
 %  C.Merkwirth,J.Wichard,K.Peters,F.Bauer,U.Parlitz,W.Lauterborn  DPI Goettingen 1998
-error(nargchk(1,1, nargin));
+narginchk(1,1);
 
 if ndim(s) ~= 1
 	help(mfilename)

@@ -19,7 +19,7 @@ function [rs, s] = infodim2(s, n, kmax, past)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(4,4, nargin))
+narginchk(4,4)
 
 
 [N,dim] = size(data(s));

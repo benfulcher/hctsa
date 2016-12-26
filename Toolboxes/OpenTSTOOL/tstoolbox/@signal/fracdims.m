@@ -24,7 +24,7 @@ function [rs, s] = fracdims(s, kmin, kmax, Nref, gstart, gend, past, steps)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(6,8, nargin))
+narginchk(6,8)
 
 if nargin < 7
 	past = 0

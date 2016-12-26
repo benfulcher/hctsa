@@ -15,7 +15,7 @@ function analyze(s, maxdim)
 
 
 
-error(nargchk(2,2,nargin));
+narginchk(2,2);
 
 if (ndim(s) > 1) | (~isreal(data(s)))
     error('Input signal must be a scalar time series');

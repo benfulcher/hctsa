@@ -36,7 +36,7 @@ function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs)
 % crossings of the spectrum at various amplitude thresholds.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -432,8 +432,10 @@ function out = giveMeRobustStats(xData,yData,textID,out)
     % Add the statistics to the output structure:
     out.(sprintf('%s_a1',textID)) = a(1); % robust intercept
     out.(sprintf('%s_a2',textID)) = a(2); % robust gradient
-    out.(sprintf('%s_sigrat',textID)) = stats.ols_s/stats.robust_s; % ratio of sigma estimates
-    out.(sprintf('%s_sigma',textID)) = stats.s; % esimate on sigma
+    % ratio of sigma estimates between ordinary least squares (ols) and the robust fit:
+    out.(sprintf('%s_sigrat',textID)) = stats.ols_s/stats.robust_s;
+    % esimate of sigma as the larger of robust_s and a weighted average of ols_s and robust_s:
+    out.(sprintf('%s_sigma',textID)) = stats.s;
     out.(sprintf('%s_sea1',textID)) = stats.se(1); % standard error of 1st coefficient estimate
     out.(sprintf('%s_sea2',textID)) = stats.se(2); % standard error of 2nd coefficient estimate
 end

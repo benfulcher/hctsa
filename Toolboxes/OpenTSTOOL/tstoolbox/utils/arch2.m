@@ -1,15 +1,15 @@
 function [Z,A,B,rss] = arch2(X, na, mode, sil)
-  
+
 %   [Z,A,B,rss] = arch2(X, na, mode, silent )
 %
 %   archetypal analysis of column orientated data set <X>
-%   
+%
 %   input arguments :
 %
 %   - each column of data is one 'observation', e.g. the sample values of
 %     all channels in a multichannel measurement at one point in time
 %
-%   - na : number of generated archetypes 
+%   - na : number of generated archetypes
 %
 %   - mode can be one of the following : 'normalized' (default),
 %     'mean', 'raw'
@@ -22,7 +22,7 @@ function [Z,A,B,rss] = arch2(X, na, mode, sil)
 %
 %   - silent is an optional flag which supresses output of text and plot on the matlab
 %     screen. Returned values (see below) are in no way affected
-%  
+%
 %
 %   output arguments :
 %
@@ -42,14 +42,16 @@ function [Z,A,B,rss] = arch2(X, na, mode, sil)
 
 global silent
 
-error(nargchk(2, 3, nargin));
+narginchk(2,3);
 
-if nargin < 3,  mode = 'normalized'; end
+if nargin < 3
+    mode = 'normalized';
+end
 
 if nargin < 4
-  silent = 0;
+    silent = 0;
 else
-  silent = 1;
+    silent = 1;
 end
 
 [m,n] = size(X);
@@ -83,12 +85,12 @@ else
   X = X ./ repmat(dv, 1, n);
 end
 
-gew1=20*m;              % Gewichtung der Convexitätsbedingung
-gew2=5*m;               % Gewichtung der Convexitätsbedingung
-tol=0.01;              %%Toleranz für die Abbruchbedingung
+gew1=20*m;              % Gewichtung der Convexitï¿½tsbedingung
+gew2=5*m;               % Gewichtung der Convexitï¿½tsbedingung
+tol=0.01;              %%Toleranz fï¿½r die Abbruchbedingung
 numb = 20;              %% Max. Anzahl der Iterationen
 
-%%  x zufällig auswälen
+%%  x zufï¿½llig auswï¿½len
 B=eye(n);
 rp=randperm(na);
 B=B(:,rp);
@@ -98,64 +100,64 @@ Z=X*B;
 rss(1,:)=[ 0 sum(sum(X .* X))]
 count=0;
 
-for c=1:numb;  
-  
+for c=1:numb;
+
   for l=1:na;
-    
-    %% Maximum an Z anfügen
+
+    %% Maximum an Z anfï¿½gen
     MX=max(max(Z));
     Z(m+1,:)=gew1*MX;
     X(m+1,:)=gew1*MX;
-    
+
     %% A suchen bei konstantem Z
     for i=1:n;
       A(:,i)= lsqnonneg(Z,X(:,i));
     end;
-    
+
     %% Gewichtung entfernen
     X=X(1:m,:);
     Z=Z(1:m,:);
-    
+
     %% Z suchen bei konstantem A
     for i=1:n;
       V(:,i)=A(l,i)*(X(:,i) - Z*A(:,i) + A(l,i)*Z(:,l));
     end;
-    
-    %% Singuläre Archetypen durch max ||X-Z*A|| ersetzen
+
+    %% Singulï¿½re Archetypen durch max ||X-Z*A|| ersetzen
     if ( (sum(A(l,:)) .* sum(A(l,:))) ==0)
       VT=sum((X-Z*A).*(X-Z*A));
       [VTC,VTI]=max(VT);
       B(:,l)=0;
       B(VTI,l)=1;
-      
+
     else
       VS=(sum(A(l,:).*A(l,:)))*sum(V,2);
       MV=max(max(X));
       X(m+1,:)=gew2*MV;
       VS(m+1)=gew2*MV;
-      
+
       B(:,l)=nnls(X,VS, 4 * max(size(X)) * norm(X,1) * eps);
-      
+
       %% Gewichtung entfernen
       X=X(1:m,:);
       VS=VS(1:m);
     end;
   end;
-  
+
   Z=X*B;
- 
+
   %% norm RSS berechnen
   rss((c+1),:)=[ c sum(sum((X-Z*A).*(X-Z*A))) ];
-  
+
   if (abs(rss(c+1,2)-rss(c,2)) < tol*rss(c,2) )
     break;
   end;
-  
+
   count=count+1;
 end;
 
 
-%% Ergebnis auf Konsistenz überprüfen
+%% Ergebnis auf Konsistenz ï¿½berprï¿½fen
 [C,I]=max(rss);
 if( (I < count) & (rss(I) < rss(count)) )
   printline('Minimum not reached')
@@ -170,21 +172,21 @@ if silent
   subplot(4,1,1)
   plot(rss(:,1), rss(:,2))
   title('Residual Sum of Squares')
-  
+
   subplot(4,1,2)
   plot(X)
   title('Input Data');
-  
+
   subplot(4,1,3)
   plot((Z),'k')
-  title('Archetypes');  
-  
+  title('Archetypes');
+
   subplot(4,1,4)
   plot((Z),'k')
   hold on;
   plot(X)
   hold off;
-  title('Archetypes & Input Data');  
+  title('Archetypes & Input Data');
 end
 
 
@@ -193,6 +195,3 @@ global silent
 if silent~=1
         disp(string)
 end
-
-
-

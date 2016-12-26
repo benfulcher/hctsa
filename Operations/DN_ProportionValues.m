@@ -14,7 +14,7 @@ function out = DN_ProportionValues(x,propWhat)
 %           (iii) 'geq0': values that are greater than or equal to zero
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

@@ -30,7 +30,7 @@ function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStr
 % >> features = TS_CalculateFeatureVector(randn(500,1));
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -117,12 +117,13 @@ end
 % --------------------------------------------------------------------------
 %% Basic checking on the data
 % --------------------------------------------------------------------------
-% (Univariate and [N x 1])
+% (x a N x 1 column vector)
 x = tsStruct.Data;
 if size(x,2) ~= 1
 	if size(x,1) == 1
-		fprintf(1,['***** The time series %s is a row vector. Not sure how it snuck through the cracks, but I ' ...
-								'need a column vector...\n'],tsStruct.Name);
+		fprintf(1,['***** The time series %s is a row vector. Not sure how it snuck',...
+								' through the processing cracks, but I need' ...
+								' a column vector...\n'],tsStruct.Name);
 		fprintf(1,'I''ll transpose it for you for now....\n');
 		x = x';
 	else
@@ -147,7 +148,7 @@ fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 % Initialize variables:
 featureVector = zeros(numCalc,1); % Output of each operation
 calcQuality = zeros(numCalc,1); % Quality of output from each operation
-calcTimes = ones(numCalc,1)*NaN; % Calculation time for each operation
+calcTimes = nan(numCalc,1); % Calculation time for each operation
 
 % --------------------------------------------------------------------------
 %% Pre-Processing

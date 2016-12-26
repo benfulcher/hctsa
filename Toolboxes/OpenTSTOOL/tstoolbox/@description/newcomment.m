@@ -9,7 +9,7 @@ function d = newcomment(d, c)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(2,2, nargin));	
+narginchk(2,2);	
 
 d.comment = list(c);	% c may have every type that is accepted by list()
 

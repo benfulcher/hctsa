@@ -21,7 +21,7 @@ function rs = acp(s, tau, past, maxdelay, maxdim, nref)
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
 
-error(nargchk(3,6,nargin));
+narginchk(3,6);
 
 if (ndim(s) > 1) | (~isreal(data(s)))
     error('Input signal must be a scalar time series');

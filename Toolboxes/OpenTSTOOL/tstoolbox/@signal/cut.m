@@ -14,7 +14,7 @@ function rs = cut(s, dim, start, stop)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(3,4, nargin));
+narginchk(3,4);
 
 if (dim < 1) | (dim > ndim(s))
 	error('Index dim exceeds matrix number of dimensions');

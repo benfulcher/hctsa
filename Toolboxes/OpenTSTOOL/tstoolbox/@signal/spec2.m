@@ -16,7 +16,7 @@ function rs = spec2(s, fensterlen, fenster, vorschub)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(1,4,nargin));
+narginchk(1,4);
 
 if nargin < 2
 	if dlens(s,1) > 200

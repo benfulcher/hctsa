@@ -47,7 +47,7 @@ function out = PH_Walker(y,walkerRule,walkerParams)
 % walker's trajectory and the original time series.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -180,7 +180,7 @@ if doPlot
     plot(w,'.-','color',c{1},'LineWidth',lw); % walker
     plot([1,length(w)],ones(2,1)*mean(w),'color',c{2},'LineWidth',2); % mean
     % running variance:
-    stds = ones(N,2)*NaN;
+    stds = nan(N,2);
     for i = wl+1:N
         stds(i,1) = std(y(i-wl:i));
         stds(i,2) = std(w(i-wl:i));

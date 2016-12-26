@@ -8,7 +8,7 @@ function d = settype(d, nt)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(2,2,nargin));
+narginchk(2,2);
 
 if isa(nt, 'char')
         d.type = nt;

@@ -37,7 +37,7 @@ function out = SY_TISEAN_nstat_z(y,numSeg,embedParams)
 % cross-prediction error, and eigenvalues of the cross-prediction error matrix.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

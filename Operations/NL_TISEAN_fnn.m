@@ -30,7 +30,7 @@ function out = NL_TISEAN_fnn(y,tau,maxm,theilerWin,justBest,bestp)
 % in Matlab, and require that TISEAN is installed and compiled, and able to be
 % executed in the command line.
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

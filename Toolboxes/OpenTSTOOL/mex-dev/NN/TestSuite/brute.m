@@ -18,7 +18,7 @@ function [indices, distances] = brute(points, refind, nnr, past)
 %
 % Using euclidian norm
 
-error(nargchk(2,4,nargin))
+narginchk(2,4)
 
 if nnr < 1
 	error('At least one neighbor must be requested')

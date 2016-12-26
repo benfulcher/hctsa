@@ -35,7 +35,7 @@ function [groupLabels,newFileName] = TS_LabelGroups(keywordGroups,whatData,saveB
 % groupIndices: the indicies corresponding to each keyword in keywordGroups.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

@@ -1,8 +1,8 @@
 function [dbc, databaseName] = SQL_opendatabase(databaseName,beVocal,useDBToolbox)
-% SQL_opendatabase 		Opens a connection to a mySQL database
+% SQL_opendatabase 		Open a connection to a mySQL database
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -54,6 +54,5 @@ elseif beVocal
 end
 
 mysql_dbexecute(dbc,['USE ' databaseName]);
-
 
 end

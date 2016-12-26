@@ -21,7 +21,7 @@ function [ord,R,keepers] = BF_ClusterReorder(dataMatrix,distanceMetric,linkageMe
 % keepers, logical of rows kept (after filtering bad performers)
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

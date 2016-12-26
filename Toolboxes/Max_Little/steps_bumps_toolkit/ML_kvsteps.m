@@ -1,3 +1,4 @@
+function [y, steps] = ML_kvsteps(x)
 % Implements the Kalafut-Visscher step detection method, using the MEX
 % wrapper of the C version.
 %
@@ -20,11 +21,9 @@
 % R.M. Berry, N.S. Jones (2011)
 % Steps and bumps: precision extraction of discrete states of molecular machines
 % Biophysical Journal, 101(2):477-485
-% 
+%
 
-function [y, steps] = ML_kvsteps(x)
-
-error(nargchk(1,1,nargin));
+narginchk(1,1);
 
 % x = x(:);
 N = length(x);

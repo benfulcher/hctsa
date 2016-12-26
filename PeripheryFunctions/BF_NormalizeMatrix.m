@@ -16,7 +16,7 @@ function dataMatrixNorm = BF_NormalizeMatrix(dataMatrix,normMethod,isTraining)
 % NaNs are ignored -- only real data is used for the normalization
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -185,7 +185,7 @@ function xhat = RobustSigmoid(x,doScale)
     iqrX = iqr(x(goodVals));
 
     if iqrX==0 % Can't apply an outlier-robust sigmoid meaningfully
-        xhat = ones(size(x))*NaN;
+        xhat = nan(size(x));
     else
         % Outlier-robust sigmoid:
         xhat = 1./(1 + exp(-(x-medianX)/(iqrX/1.35)));

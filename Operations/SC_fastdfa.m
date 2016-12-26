@@ -10,7 +10,7 @@ function out = SC_fastdfa(y)
 % The original fastdfa code is by Max A. Little and publicly-available at
 % http://www.maxlittle.net/software/index.php
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

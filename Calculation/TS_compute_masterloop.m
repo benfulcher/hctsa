@@ -2,7 +2,7 @@ function [masterOutput, masterTime] = TS_compute_masterloop(x, y, masterCode, ma
 % TS_compute_masterloop     Used in a loop by TS_compute to evaluate a given master function.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

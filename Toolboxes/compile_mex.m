@@ -3,7 +3,7 @@
 % This script must be run in the Toolboxes directory.
 %
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -136,9 +136,9 @@ try
     makemex
     settspath(fullfile(toolDir,'OpenTSTOOL'));
 catch
-    fprintf(1,'ERROR: TSTOOL failed to compile correctly (not a huge surprise)\n');
+    fprintf(1,'ERROR: The TSTOOL package failed to compile correctly\n');
 end
-if ~anyErrors, fprintf(1,' done.\n'); end
+if ~anyErrors, fprintf(1,'Done!\n'); end
 
 % ------------------------------------------------------------------------------
 % TISEAN

@@ -20,7 +20,7 @@ function rs = crosscorrdim(s, s2, n, range, past, bins)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(5,6, nargin))
+narginchk(5,6)
 
 if nargin < 6
 	bins  = 32;

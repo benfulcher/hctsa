@@ -11,7 +11,7 @@ function escapedString = RA_sqlescapestring(inputString)
 % S, the output string
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Romesh Abeysuriya <romesh.abey@gmail.com>
+% Copyright (C) 2016, Romesh Abeysuriya <romesh.abey@gmail.com>
 %
 % This function is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free Software

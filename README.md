@@ -72,13 +72,24 @@ The following time-series analysis packages are provided with the software (in t
 * Two-dimensional histogram code from Matlab Central (BSD license).
 * Various histogram and entropy code by Rudy Moddemeijer (unlicensed).
 
-## Citation and Acknowledgements
+## Citation
 
-If you use this software, please read and cite the (open-access) work published as:
+If you use this software, please read and cite:
 
 B. D. Fulcher, M. A. Little, N. S. Jones (2013) [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83.
 
-See also our open access IEEE TKDE paper on [feature-based time-series classification](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425) and an application of these ideas to [fetal heart rate analysis](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629).
+
+## Publications
+
+See the following publications for examples of *hctsa* use:
+* ***Implementation paper introducing the hctsa package, with applications to high throughput phenotyping of C. Elegans and Drosophila movement time series*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. Automatic time-series phenotyping using massive feature extraction. *bioRxiv* 081463 (2016). [Link](http://biorxiv.org/lookup/doi/10.1101/081463)
+* ***Application to fMRI data*** &#x1F4D7; : S. S. Sethi, V. Zerbi, N. Wenderoth, A. Fornito, B. D. Fulcher. Structural connectome topology relates to regional BOLD signal dynamics in the mouse brain. *bioRxiv* 085514 (2016). [Link](http://biorxiv.org/lookup/doi/10.1101/085514)
+* ***Application to time-series data mining*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. Highly comparative feature-based time-series classification. *IEEE Trans. Knowl. Data Eng.* **26**, 3026 (2014). [Link](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425)
+* ***Application to fetal heart rate time series*** &#x1F4D7; : B. D. Fulcher, A. E. Georgieva, C. W. G. Redman, N. S. Jones. Highly comparative fetal heart rate analysis. *34th Ann. Int. Conf. IEEE EMBC* 3135 (2012). [Link](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629)
+* ***Original paper, showing that the behavior of thousands of time-series methods on thousands of different time series can provide structure to the interdisciplinary time-series analysis literature*** &#x1F4D7; : B. D. Fulcher, M. A. Little, N. S. Jones. Highly comparative time-series analysis: the empirical structure of time series and their methods. *J. Roy. Soc. Interface* **10**, 20130048 (2013). [Link](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full)
+
+
+## Acknowledgements
 
 Many thanks go to [Romesh Abeysuriya](https://github.com/RomeshA) for helping with the mySQL database set-up and install scripts, and [Santi Villalba](https://github.com/sdvillal) for lots of helpful feedback and advice on the software.
 
@@ -88,11 +99,14 @@ Many thanks go to [Romesh Abeysuriya](https://github.com/RomeshA) for helping wi
 
 This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
 
+### tsfresh
+Native python time-series code to extract hundreds of time-series features, with in-built feature filtering, is [tsfresh](https://github.com/blue-yonder/tsfresh).
+
 ### Comp-Engine Time Series
 
 An accompanying web resource for this project is [Comp-Engine Time Series](http://www.comp-engine.org/timeseries), which allows users to compare thousands of diverse types of time-series analysis code and time-series data.
 Note that the code files on Comp-Engine Time Series are based on an early implementation and rarely match with the updated features and functions contained in this repository.
 
-### Other time-series analysis software packages
+### pyunicorn
 
-* A python-based nonlinear time-series analysis and complex systems code package, [pyunicorn](http://scitation.aip.org/content/aip/journal/chaos/25/11/10.1063/1.4934554).
+A python-based nonlinear time-series analysis and complex systems code package, [pyunicorn](http://scitation.aip.org/content/aip/journal/chaos/25/11/10.1063/1.4934554).

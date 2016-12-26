@@ -8,7 +8,7 @@ function s = setunit(s, dim, u)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(3,3,nargin));
+narginchk(3,3);
 
 a = getaxis(s,dim);
 a = setunit(a, u);

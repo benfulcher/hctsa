@@ -1,11 +1,11 @@
 function SQL_create_all_tables()
-% SQL_create_all_tables      Create all the tables in the database.
+% SQL_create_all_tables      Create all the tables in the database
 %
 % Uses SQL_TableCreateString to retrieve the appropriate mySQL CREATE TABLE
 % statements.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2015, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
@@ -56,7 +56,7 @@ for j = 1:length(createString)
         end
     else
         % Table does not yet exist; attempt to create it:
-        [rs, emsg] = mysql_dbexecute(dbc,createString{j});
+        [rs,emsg] = mysql_dbexecute(dbc,createString{j});
         if ~isempty(rs)
             if j == length(createString)
                 fprintf(1,'%s.',tableNames{j});

@@ -18,7 +18,7 @@ function [E1, E2] = cao(s, maxdim, tau, NNR, Nref)
 %
 % Copyright 1997-2001 DPI Goettingen, License http://www.physik3.gwdg.de/tstool/gpl.txt
 
-error(nargchk(5,5, nargin));
+narginchk(5,5);
 
 if (ndim(s) > 1) | (~isreal(data(s)))
 	help(mfilename)
