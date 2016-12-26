@@ -177,31 +177,29 @@ if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., re
                 ' different databases, or produced using separate TS_init commands)\n']);
         fprintf(1,'Trimming %u duplicate time series to a total of %u\n', ...
                         length(TimeSeries)-length(uniquetsids),length(uniquetsids));
-        TimeSeries = TimeSeries(ix_ts);
         didTrim = 1;
     else
         % Check for duplicate indices
+
         fprintf(1,'All time series were distinct, we now have a total of %u.\n',length(TimeSeries));
     end
 else
     % Check that time series names are unique, and trim if not:
-    [uniqueTimeSeriesNames, ix_ts_names] = unique({TimeSeries.Name});
+    [uniqueTimeSeriesNames, ix_ts] = unique({TimeSeries.Name},'stable');
+    TimeSeries = TimeSeries(ix_ts);
     numUniqueTimeSeries = length(uniqueTimeSeriesNames);
     if numUniqueTimeSeries < length(TimeSeries)
         warning('%u duplicate time series names present in combined dataset -- removed',...
                                 length(TimeSeries) - numUniqueTimeSeries);
-        TimeSeries = TimeSeries(ix_ts_names);
-        didTrim = 1;
+        didTrim = 1; % will trim the data matrix and other such matrices with ix_ts later
     end
 
     % Now see if there are duplicate IDs (meaning that we need to reindex):
-    [uniquetsids, ix_ts] = unique(vertcat(TimeSeries.ID));
-
+    uniquetsids = unique(vertcat(TimeSeries.ID));
     if length(uniquetsids) < length(TimeSeries)
         needReIndex = 1;
         % This is done at the end (after saving all data)
     end
-
 end
 
 % ------------------------------------------------------------------------------
@@ -217,8 +215,9 @@ if ~fromDatabase
     numOperations = numOperations(1); % both the same
 
     % Check that all operation names match:
-    namesMatch = arrayfun(@(x) strcmp(loadedData{1}.Operations(x).Name,loadedData{2}.Operations(x).Name),...
-                                    1:numOperations);
+    namesMatch = arrayfun(@(x) strcmp(loadedData{1}.Operations(x).Name,...
+                                      loadedData{2}.Operations(x).Name),...
+                                      1:numOperations);
     if ~all(namesMatch)
         error('TS_init used to generate hctsa datasets, and the names of operations do not match');
     end
@@ -259,7 +258,10 @@ if isfield(loadedData{1},'TS_DataMat') && isfield(loadedData{2},'TS_DataMat')
     gotData = 1;
     fprintf(1,'Combining data matrices...');
     TS_DataMat = [loadedData{1}.TS_DataMat(:,keepopi_1); loadedData{2}.TS_DataMat(:,keepopi_2)];
-    if didTrim, TS_DataMat = TS_DataMat(ix_ts,:); end
+    if didTrim
+        % Trimmed time series above, need to make sure the data matches now:
+        TS_DataMat = TS_DataMat(ix_ts,:);
+    end
     fprintf(1,' Done.\n');
 end
 
@@ -272,7 +274,10 @@ if isfield(loadedData{1},'TS_Quality') && isfield(loadedData{2},'TS_Quality')
     % Both contain Quality matrices
     fprintf(1,'Combining quality label matrices...');
     TS_Quality = [loadedData{1}.TS_Quality(:,keepopi_1); loadedData{2}.TS_Quality(:,keepopi_2)];
-    if didTrim, TS_Quality = TS_Quality(ix_ts,:); end
+    if didTrim
+        % Trimmed time series above, need to make sure the data matches now:
+        TS_Quality = TS_Quality(ix_ts,:);
+    end
     fprintf(1,' Done.\n');
 end
 
@@ -285,7 +290,10 @@ if isfield(loadedData{1},'TS_CalcTime') && isfield(loadedData{2},'TS_CalcTime')
     % Both contain Calculation time matrices
     fprintf(1,'Combining calculation time matrices...');
     TS_CalcTime = [loadedData{1}.TS_CalcTime(:,keepopi_1); loadedData{2}.TS_CalcTime(:,keepopi_2)];
-    if didTrim, TS_CalcTime = TS_CalcTime(ix_ts,:); end
+    if didTrim
+        % Trimmed time series above, need to make sure the data matches now:
+        TS_CalcTime = TS_CalcTime(ix_ts,:);
+    end
     fprintf(1,' Done.\n');
 end
 

@@ -45,7 +45,7 @@ if nargin < 1 || isempty(whatDataFile)
     whatDataFile = 'norm';
 end
 if nargin < 2 || isempty(getClustered)
-    getClustered = 0;
+    getClustered = false;
 end
 
 %-------------------------------------------------------------------------------
@@ -76,13 +76,13 @@ end
 switch whatDataFile
 case {'raw','loc'} % the raw, un-normalized data:
     whatDataFile = 'HCTSA.mat';
-    getClustered = 0;
+    getClustered = false;
 case 'norm' % the normalized data:
     whatDataFile = 'HCTSA_N.mat';
-    getClustered = 0;
+    getClustered = false;
 case 'cl' % the clustered data:
     whatDataFile = 'HCTSA_N.mat';
-    getClustered = 1;
+    getClustered = true;
 end
 
 %-------------------------------------------------------------------------------
