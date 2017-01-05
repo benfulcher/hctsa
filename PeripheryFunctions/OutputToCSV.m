@@ -34,23 +34,29 @@ load(whatData,'TS_Quality');
 TS_DataMat(TS_Quality~=0) = NaN;
 
 % Output data matrix to file:
-dlmwrite('hctsa_datamatrix.csv',TS_DataMat,'delimiter',',');
+fileName = 'hctsa_datamatrix.csv';
+dlmwrite(fileName,TS_DataMat,'delimiter',',');
+fprintf(1,'Wrote data to %s\n',fileName);
 
 % Output time series info to file:
 combinedStrings = arrayfun(@(x)sprintf('%s (%s)',TimeSeries(x).Name,...
         TimeSeries(x).Keywords),1:length(TimeSeries),'UniformOutput',false)';
 % Write it out
-fid = fopen('hctsa_timeseries.csv','w');
+fileName = 'hctsa_timeseries.csv';
+fid = fopen(fileName,'w');
 for i = 1:length(TimeSeries)
     fprintf(fid,'%s,%s\n',TimeSeries(i).Name,TimeSeries(i).Keywords);
 end
 fclose(fid);
+fprintf(1,'Wrote time-series info to %s\n',fileName);
 
 % Output feature info to file:
-fid = fopen('hctsa_features.csv','w');
+fileName = 'hctsa_features.csv';
+fid = fopen(fileName,'w');
 for i = 1:length(Operations)
     fprintf(fid,'%s,%s\n',Operations(i).Name,Operations(i).CodeString);
 end
 fclose(fid);
+fprintf(1,'Wrote feature info to %s\n',fileName);
 
 end
