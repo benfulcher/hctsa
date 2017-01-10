@@ -68,7 +68,7 @@ if nargin < 3 || isempty(Operations) || ischar(Operations)
 	else
 		theINPfile = 'INP_ops.txt';
 	end
-	Operations = SQL_add('ops', theINPfile, 0, 0)';
+	Operations = SQL_add('ops',theINPfile,0,0)';
 end
 if isnumeric(Operations)
 	error('Provide an input file or a structure array of Operations');
@@ -76,7 +76,7 @@ end
 
 if nargin < 4 || isempty(MasterOperations)
 	% Use the default library:
-	MasterOperations = SQL_add('mops', 'INP_mops.txt', 0, 0)';
+	MasterOperations = SQL_add('mops','INP_mops.txt',0,0)';
 end
 
 % Need to link operations to masters if not already supplied:
