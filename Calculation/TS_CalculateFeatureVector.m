@@ -217,33 +217,22 @@ clear masterTimer
 % --------------------------------------------------------------------------
 % Set sliced version of matching indicies across the range toCalc
 % Indices of MasterOperations corresponding to each Operation (i.e., each index of toCalc)
-par_OperationMasterInd = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations.MasterID]);
-par_MasterOperationsLabel = {MasterOperations.Label}; % Master labels
-par_OperationCodeString = {Operations.CodeString}; % Code string for each operation to calculate (i.e., in toCalc)
+MasterOp_ind = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations.MasterID]);
 
-if doParallel
-	parfor jj = 1:numCalc
-		[featureVector(jj), calcQuality(jj), calcTimes(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
-									   MasterCalcTime(par_OperationMasterInd(jj)), ...
-									   par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
-									   par_OperationCodeString{jj});
-	end
-else
-	for jj = 1:numCalc
-		try
-			[featureVector(jj), calcQuality(jj), calcTimes(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
-									   MasterCalcTime(par_OperationMasterInd(jj)), ...
-									   par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
-									   par_OperationCodeString{jj});
-		catch
-			fprintf(1,'---Error with %s\n',par_OperationCodeString{jj});
-			if (MasterOperations(par_OperationMasterInd(jj)).ID == 0)
-				error(['The operations database is corrupt: there is no link ' ...
-						'from ''%s'' to a master code'], par_OperationCodeString{jj});
-			else
-				fprintf(1,'Error retrieving element %s from %s.\n', ...
-					par_OperationCodeString{jj}, par_MasterOperationsLabel{par_OperationMasterInd(jj)});
-			end
+for jj = 1:numCalc
+	try
+		[featureVector(jj),calcQuality(jj),calcTimes(jj)] = TS_compute_oploop(MasterOutput{MasterOp_ind(jj)}, ...
+							   MasterCalcTime(MasterOp_ind(jj)), ...
+							   MasterOperations(MasterOp_ind(jj)).Label, ... % Master label
+							   Operations(jj).CodeString); % Code string for each operation to calculate (i.e., in toCalc)
+	catch
+		fprintf(1,'---Error with %s\n',Operations(jj).CodeString);
+		if (MasterOperations(MasterOp_ind(jj)).ID == 0)
+			error(['The operations database is corrupt: there is no link ' ...
+					'from ''%s'' to a master code'],Operations(jj).CodeString);
+		else
+			fprintf(1,'Error retrieving element %s from %s.\n', ...
+				Operations(jj).CodeString,MasterOperations(MasterOp_ind(jj)).Label);
 		end
 	end
 end
