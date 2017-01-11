@@ -49,7 +49,7 @@ case 'com.mysql.jdbc.JDBC4Connection'
     end
 
 otherwise
-    error('Unknown database connection class %s',class(dbc));
+    error('Unknown database connection class %s',class(dbconn));
 end
 
 end
