@@ -115,7 +115,7 @@ end
 % Open a database connection
 % ------------------------------------------------------------------------------
 % (attempt to use the Matlab database toolbox, which is faster for retrievals)
-[dbc, dbname] = SQL_opendatabase('',0,1);
+[dbc, dbname] = SQL_opendatabase('',false,true);
 
 % ------------------------------------------------------------------------------
 % Refine the set of time series and operations to those that actually exist in

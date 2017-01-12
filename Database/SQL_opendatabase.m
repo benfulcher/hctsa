@@ -21,14 +21,14 @@ function [dbc, databaseName] = SQL_opendatabase(databaseName,beVocal,useDBToolbo
 % Default: don't display details to the prompt:
 
 if nargin < 2 || isempty(beVocal)
-	beVocal = 0; % by default, do not display the mySQL database used to the prompt
+	beVocal = false; % by default, do not display the mySQL database used to the prompt
 end
 if nargin < 3
-    useDBToolbox = 0; % the Matlab implementation is sometimes much slower
+    useDBToolbox = false; % the Matlab implementation is sometimes much slower
 end
 % ------------------------------------------------------------------------------
 
-[hostName, default_databaseName, username, password, customPort] = SQL_ShowConnSettings(0);
+[hostName, default_databaseName, username, password, customPort] = SQL_ShowConnSettings(false);
 
 % ------------------------------------------------------------------------------
 if nargin < 1 || isempty(databaseName)
@@ -49,7 +49,8 @@ dbc = mysql_dbopen(hostName,databaseName,username,password,customPort,useDBToolb
 
 if isempty(dbc)
 	error('Failed to load SQL database');
-elseif beVocal
+end
+if beVocal
     fprintf(1,' Connected!\n');
 end
 
