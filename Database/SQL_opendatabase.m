@@ -28,7 +28,7 @@ if nargin < 3
 end
 % ------------------------------------------------------------------------------
 
-[hostName, default_databaseName, username, password, customPort] = SQL_ShowConnSettings(false);
+[hostName,default_databaseName,username,password,customPort] = SQL_ShowConnSettings(false);
 
 % ------------------------------------------------------------------------------
 if nargin < 1 || isempty(databaseName)

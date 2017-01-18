@@ -406,9 +406,13 @@ end
 if ischar(ts_ids) && strcmp(ts_ids,'all')
 	selectString = 'SELECT Name, Keywords, Length, Data FROM TimeSeries';
 else
-	selectString = sprintf('SELECT Name, Keywords, Length, Data FROM TimeSeries WHERE ts_id IN (%s)',ts_ids_string);
+	selectString = sprintf(['SELECT Name, Keywords, Length, Data FROM ',...
+								'TimeSeries WHERE ts_id IN (%s)'],ts_ids_string);
 end
-tsinfo = mysql_dbquery(dbc,selectString);
+[tsinfo,emsg] = mysql_dbquery(dbc,selectString);
+if ~isempty(emsg)
+    error('Error retrieving time-series metadata from from %s',dbname);
+end
 % Convert to a structure array, TimeSeries, containing metadata for all time series
 tsinfo = [num2cell(tsids_db),tsinfo];
 % Define inline functions to convert time-series data text to a vector of floats:

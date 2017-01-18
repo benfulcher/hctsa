@@ -22,7 +22,7 @@ function [execResult, errMessage] = mysql_dbexecute(dbconn, sqlCommand)
 % ------------------------------------------------------------------------------
 
 switch class(dbconn)
-case 'database'
+case {'database','database.jdbc.connection'}
     % Database connection opened using database toolbox:
     curs = exec(dbconn,sqlCommand);
     errMessage = curs.Message;
