@@ -66,6 +66,7 @@ if nargin < 3 || isempty(Operations) || ischar(Operations)
 	if nargin >=3 && ischar(Operations)
 		theINPfile = Operations;
 	else
+		fprintf(1,'Importing default set of time-series features\n');
 		theINPfile = 'INP_ops.txt';
 	end
 	Operations = SQL_add('ops',theINPfile,0,0)';
@@ -131,13 +132,20 @@ if size(x,2) ~= 1
 		error('ERROR WITH ''%s'' -- is it multivariate or something weird? Skipping!\n',tsStruct.Name);
 	end
 end
+% (x contains no special values)
+if ~all(isfinite(x))
+	error('ERROR WITH ''%s'' -- contains non-finite values',tsStruct.Name);
+end
+if all(x==x(1))
+	warning('Data are a constant -- there is no information to derive from the time series; many features will fail')
+end
 
 % --------------------------------------------------------------------------
 %% Display information
 % --------------------------------------------------------------------------
 numCalc = length(Operations); % Number of features to calculate
 if numCalc == 0
-	error('Nothing to calculate :/')
+	error('Nothing to calculate :-/')
 end
 
 fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');

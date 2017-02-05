@@ -1,4 +1,4 @@
-function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs)
+function out = SP_Summaries(y,psdMeth,windowType,nf,dologabs)
 % SP_Summaries  Statistics of the power spectrum of a time series
 %
 % The estimation can be done using a periodogram, using the periodogram code in
@@ -8,12 +8,13 @@ function out = SP_Summaries(y,psdmeth,wmeth,nf,dologabs)
 %---INPUTS:
 % y, the input time series
 %
-% psdmeth, the method of obtaining the spectrum from the signal:
+% psdMeth, the method of obtaining the spectrum from the signal:
 %               (i) 'periodogram': periodogram
 %               (ii) 'fft': fast fourier transform
 %
-% wmeth, the window to use:
+% windowType, the window to use:
 %               (i) 'boxcar'
+%               (ii) 'rect'
 %               (iii) 'bartlett'
 %               (iv) 'hann'
 %               (v) 'hamming'
@@ -69,11 +70,11 @@ BF_CheckToolbox('curve_fitting_toolbox')
 if size(y,2) > size(y,1);
     y = y'; % Time series must be a column vector
 end
-if nargin < 2 || isempty(psdmeth)
-    psdmeth = 'fft'; % fft by default
+if nargin < 2 || isempty(psdMeth)
+    psdMeth = 'fft'; % fft by default
 end
-if nargin < 3 || isempty(wmeth)
-    wmeth = 'hamming'; % Hamming window by default
+if nargin < 3 || isempty(windowType)
+    windowType = 'hamming'; % Hamming window by default
 end
 if nargin < 4
     nf = [];
@@ -93,8 +94,8 @@ Ny = length(y); % time-series length
 %-------------------------------------------------------------------------------
 % Set window (for periodogram and welch):
 %-------------------------------------------------------------------------------
-if ismember(psdmeth,{'periodogram','welch'})
-    switch wmeth % method to use for the window
+if ismember(psdMeth,{'periodogram','welch'})
+    switch windowType % method to use for the window
         case 'none'
             window = [];
         case 'hamming'
@@ -109,14 +110,14 @@ if ismember(psdmeth,{'periodogram','welch'})
             window = rectwin(Ny);
         otherwise
             % There are other options, but these aren't implemented here
-            error('Unknown window ''%s''',wmeth);
+            error('Unknown window, ''%s''',windowType);
     end
 end
 
 % ------------------------------------------------------------------------------
 % Compute the Fourier Transform
 % ------------------------------------------------------------------------------
-switch psdmeth
+switch psdMeth
     case 'periodogram'
         if isempty(nf)
             % (2) Estimate the spectrum
@@ -145,7 +146,7 @@ switch psdmeth
         S = S/(2*pi); % adjust so that area remains normalized in angular frequency space
 
     otherwise
-        error('Unknown spectral estimation method ''%s''',psdmeth);
+        error('Unknown spectral estimation method ''%s''',psdMeth);
 end
 
 if ~any(isfinite(S)) % no finite values in the power spectrum
