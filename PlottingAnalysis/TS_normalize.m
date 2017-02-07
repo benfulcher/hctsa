@@ -50,8 +50,8 @@ if nargin < 1 || isempty(normFunction)
 end
 
 if nargin < 2 || isempty(filterOptions)
-    filterOptions = [0.90, 1];
-    % By default remove less than 90%-good-valued time series, & then less than
+    filterOptions = [0.70, 1];
+    % By default remove less than 70%-good-valued time series, & then less than
     % 100%-good-valued operations.
 end
 fprintf(1,['Removing time series with more than %.2f%% special-valued outputs\n' ...
@@ -83,7 +83,7 @@ load(whatDataFile,'TS_Quality','MasterOperations');
 % First check that fromDatabase exists (for back-compatability)
 fromDatabase = TS_GetFromData(fileName_HCTSA,'fromDatabase');
 if isempty(fromDatabase)
-    fromDatabase = 1; % (legacy: set to 1 by default)
+    fromDatabase = true; % (legacy: set to 1 by default)
 end
 
 % Check that we have the groupNames if already assigned labels
@@ -131,8 +131,15 @@ end
 TS_DataMat(~isfinite(TS_DataMat)) = NaN; % Convert all nonfinite values to NaNs for consistency
 % Need to also incorporate knowledge of bad entries in TS_Quality and filter these out:
 TS_DataMat(TS_Quality > 0) = NaN;
-fprintf(1,'There are %u special values in the data matrix.\n',sum(TS_Quality(:) > 0));
-% Now all bad values are NaNs, and we can get on with the job of filtering them out
+fprintf(1,'\nThere are %u special values in the data matrix.\n',sum(TS_Quality(:) > 0));
+percGood_rows = mean(~isnan(TS_DataMat),2)*100;
+fprintf(1,'(pre-filtering): Time series vary from %.2f--%.2f%% good values\n',...
+                min(percGood_rows),max(percGood_rows));
+percGood_cols = mean(~isnan(TS_DataMat),1)*100;
+fprintf(1,'(pre-filtering): Features vary from %.2f--%.2f%% good values\n',...
+                min(percGood_cols),max(percGood_cols));
+
+% Now that all bad values are NaNs, and we can get on with the job of filtering them out
 
 % (*) Filter based on proportion of bad entries. If either threshold is 1,
 % the resulting matrix is guaranteed to be free from bad values entirely.
@@ -176,22 +183,6 @@ if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all 
     end
 end
 
-% --------------------------------------------------------------------------
-%% Update the labels after filtering
-% --------------------------------------------------------------------------
-% At this point, you could check to see if any master operations are no longer
-% pointed to and recalibrate the indexing, but I'm not going to bother.
-
-if length(TimeSeries)==1
-    % When there is only a single time series, it doesn't actually make sense to normalize
-    error('Only a single time series remains in the dataset -- no normalization can be applied');
-end
-
-fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n',...
-            sum(isnan(TS_DataMat(:))), ...
-            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,...
-            size(TS_DataMat,1),size(TS_DataMat,2));
-
 %-------------------------------------------------------------------------------
 % Filter on class variance
 %-------------------------------------------------------------------------------
@@ -216,6 +207,32 @@ if classVarFilter
         Operations = Operations(~zeroClassVar);
     end
 end
+
+%-------------------------------------------------------------------------------
+%% Update the labels after filtering
+%-------------------------------------------------------------------------------
+% At this point, you could check to see if any master operations are no longer
+% pointed to and recalibrate the indexing, but I'm not going to bother.
+
+if length(TimeSeries)==1
+    % When there is only a single time series, it doesn't actually make sense to normalize
+    error('Only a single time series remains in the dataset -- normalization cannot be applied');
+end
+
+fprintf(1,'\n(post-filtering): %u special-valued entries (%4.2f%%) remain in the %ux%u data matrix.\n',...
+            sum(isnan(TS_DataMat(:))), ...
+            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,...
+            size(TS_DataMat,1),size(TS_DataMat,2));
+
+if sum(isnan(TS_DataMat(:)) > 0)
+    percGood_rows = mean(~isnan(TS_DataMat),2)*100;
+    fprintf(1,'(post-filtering): Time series vary from %.2f--%.2f%% good values\n',...
+                                min(percGood_rows),max(percGood_rows));
+    percGood_cols = mean(~isnan(TS_DataMat),1)*100;
+    fprintf(1,'(post-filtering): Features vary from %.2f--%.2f%% good values\n',...
+                                min(percGood_cols),max(percGood_cols));
+end
+fprintf(1,'\n');
 
 % --------------------------------------------------------------------------
 %% Filtering done, now apply the normalizing transformation
@@ -312,7 +329,7 @@ function keepInd = filterNaNs(XMat,nan_thresh,objectName)
                             ' Keeping them all.\n'], ...
                             length(keepInd),objectName,nan_thresh*100);
         else
-            fprintf(1,['\nRemoving %u %s with fewer than %4.2f%% good values:'...
+            fprintf(1,['Removing %u %s with fewer than %4.2f%% good values:'...
                         ' from %u to %u.\n'],sum(~keepInd),objectName,...
                         nan_thresh*100,length(keepInd),sum(keepInd));
         end
