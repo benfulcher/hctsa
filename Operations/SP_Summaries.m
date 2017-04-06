@@ -11,6 +11,7 @@ function out = SP_Summaries(y,psdMeth,windowType,nf,dologabs)
 % psdMeth, the method of obtaining the spectrum from the signal:
 %               (i) 'periodogram': periodogram
 %               (ii) 'fft': fast fourier transform
+%               (iii) 'welch': Welch's method
 %
 % windowType, the window to use:
 %               (i) 'boxcar'
@@ -151,7 +152,7 @@ end
 
 if ~any(isfinite(S)) % no finite values in the power spectrum
     % This time series must be really weird -- return NaN (unsuitable operation)...
-    fprintf(1,'NaN in power spectrum? A weird time series.\n');
+    warning('NaN in power spectrum? A weird time series.');
     out = NaN; return
 end
 
