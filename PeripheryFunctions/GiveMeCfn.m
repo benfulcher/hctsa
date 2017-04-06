@@ -193,7 +193,6 @@ if CVFolds == 0
     if isempty(XTest) || isempty(yTest)
         % No need to compute this if you're just after the model
         accuracy = [];
-        balancedAccuracy = [];
         return
     else
         yPredict = predict(Mdl,XTest);
