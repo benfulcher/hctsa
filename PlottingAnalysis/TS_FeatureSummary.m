@@ -38,7 +38,7 @@ if nargin < 2 || isempty(whatData)
 end
 
 if nargin < 3 || isempty(doViolin) % annotation parameters
-    doViolin = 0;
+    doViolin = false;
 end
 
 if nargin < 4 || isempty(annotateParams) % annotation parameters
@@ -109,7 +109,6 @@ end
 
 if doViolin
     % Violin plots
-
     rainbowColors = [BF_getcmap('set1',5,1); BF_getcmap('dark2',5,1)];
 
     if isfield(TimeSeries,'Group')
@@ -212,10 +211,12 @@ else % kernel distributions
             [fr,xr,lineHandles{k+1}] = BF_plot_ks(dataVector(timeSeriesGroup==k),...
                                 annotateParams.groupColors{k},0,2,12);
             fx{k} = [xr',fr'];
-            tsInd{k} = find(timeSeriesGroup==k)';
+            tsInd{k} = find(timeSeriesGroup==k);
         end
         xy = vertcat(fx{:});
+        % Now make sure that elements of TimeSeries matches ordering of xy
         tsInd = vertcat(tsInd{:});
+        ix = arrayfun(@(x)find(x==tsInd),1:length(TimeSeries));
         TimeSeries = TimeSeries(tsInd);
 
         % Set up legend:
@@ -225,7 +226,7 @@ else % kernel distributions
         legend(horzcat(lineHandles{:}),legendText)
 
     else
-        % Just run a single global one
+        % Just run a single global one (black)
         [fr,xr] = BF_plot_ks(dataVector,'k',0,1.5,10);
         xy = [xr',fr'];
     end

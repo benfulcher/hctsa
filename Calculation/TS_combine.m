@@ -58,13 +58,13 @@ end
 if nargin < 3
     % If compare_tsids = 1, we assume that both are from the same database and thus
     % filter out any intersection between ts_ids in the two datasets
-    compare_tsids = 0;
+    compare_tsids = false;
 end
-if compare_tsids == 1
+if compare_tsids
     fprintf(1,['Assuming both %s and %s came from the same database so that ' ...
             'time series IDs are comparable.\nAny intersection of IDs will be filtered out.\n'],...
             HCTSA_1,HCTSA_2);
-elseif compare_tsids == 0
+else
     fprintf(1,['Assuming that %s and %s came different databases so' ...
             ' duplicate ts_ids can occur in the resulting matrix.\n'], ...
                                         HCTSA_1,HCTSA_2);
@@ -162,8 +162,8 @@ TimeSeries = cell2struct([squeeze(struct2cell(loadedData{1}.TimeSeries)), ...
 %-------------------------------------------------------------------------------
 % Check for time series duplicates
 %-------------------------------------------------------------------------------
-didTrim = 0; % whether you remove time series (that appear in both hctsa data files)
-needReIndex = 0; % whether you need to reindex the result (combined datasets from different indexes)
+didTrim = false; % whether you remove time series (that appear in both hctsa data files)
+needReIndex = false; % whether you need to reindex the result (combined datasets from different indexes)
 
 if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., retrieved from the same mySQL database)
     [uniquetsids, ix_ts] = unique(vertcat(TimeSeries.ID));
@@ -177,7 +177,7 @@ if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., re
                 ' different databases, or produced using separate TS_init commands)\n']);
         fprintf(1,'Trimming %u duplicate time series to a total of %u\n', ...
                         length(TimeSeries)-length(uniquetsids),length(uniquetsids));
-        didTrim = 1;
+        didTrim = true;
     else
         % Check for duplicate indices
 
@@ -191,13 +191,13 @@ else
     if numUniqueTimeSeries < length(TimeSeries)
         warning('%u duplicate time series names present in combined dataset -- removed',...
                                 length(TimeSeries) - numUniqueTimeSeries);
-        didTrim = 1; % will trim the data matrix and other such matrices with ix_ts later
+        didTrim = true; % will trim the data matrix and other such matrices with ix_ts later
     end
 
     % Now see if there are duplicate IDs (meaning that we need to reindex):
     uniquetsids = unique(vertcat(TimeSeries.ID));
     if length(uniquetsids) < length(TimeSeries)
-        needReIndex = 1;
+        needReIndex = true;
         % This is done at the end (after saving all data)
     end
 end
@@ -252,10 +252,10 @@ MasterOperations = loadedData{1}.MasterOperations(keepmopi_1);
 % ------------------------------------------------------------------------------
 % 3. Data:
 % ------------------------------------------------------------------------------
-gotData = 0;
+gotData = false;
 if isfield(loadedData{1},'TS_DataMat') && isfield(loadedData{2},'TS_DataMat')
     % Both contain data matrices
-    gotData = 1;
+    gotData = true;
     fprintf(1,'Combining data matrices...');
     TS_DataMat = [loadedData{1}.TS_DataMat(:,keepopi_1); loadedData{2}.TS_DataMat(:,keepopi_2)];
     if didTrim
@@ -268,9 +268,9 @@ end
 % ------------------------------------------------------------------------------
 % 4. Quality
 % ------------------------------------------------------------------------------
-gotQuality = 0;
+gotQuality = false;
 if isfield(loadedData{1},'TS_Quality') && isfield(loadedData{2},'TS_Quality')
-    gotQuality = 1;
+    gotQuality = true;
     % Both contain Quality matrices
     fprintf(1,'Combining quality label matrices...');
     TS_Quality = [loadedData{1}.TS_Quality(:,keepopi_1); loadedData{2}.TS_Quality(:,keepopi_2)];
@@ -284,9 +284,9 @@ end
 % ------------------------------------------------------------------------------
 % 5. Calculation times
 % ------------------------------------------------------------------------------
-gotCalcTimes = 0;
+gotCalcTimes = false;
 if isfield(loadedData{1},'TS_CalcTime') && isfield(loadedData{2},'TS_CalcTime')
-    gotCalcTimes = 1;
+    gotCalcTimes = true;
     % Both contain Calculation time matrices
     fprintf(1,'Combining calculation time matrices...');
     TS_CalcTime = [loadedData{1}.TS_CalcTime(:,keepopi_1); loadedData{2}.TS_CalcTime(:,keepopi_2)];
@@ -323,7 +323,7 @@ fprintf(1,'%s contains %u time series and %u operations.\n',outputFileName, ...
 %-------------------------------------------------------------------------------
 % ReIndex??
 %-------------------------------------------------------------------------------
-if needReIndex == 1
+if needReIndex
     fprintf(1,'There are duplicate IDs in the time series -- we need to reindex\n');
     TS_ReIndex(outputFileName,'ts',1);
 end

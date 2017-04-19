@@ -183,7 +183,6 @@ if doPCs
                                 numFolds,...
                                 whatClassifier);
     title(titleText)
-
 end
 
 %-------------------------------------------------------------------------------
