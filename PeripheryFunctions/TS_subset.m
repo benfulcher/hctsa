@@ -47,7 +47,7 @@ if nargin < 3
     op_ids_keep = []; % all
 end
 if nargin < 4
-    doSave = 1;
+    doSave = true;
 end
 if nargin < 5
     outputFileName = regexprep(whatData,'.mat','_subset.mat');

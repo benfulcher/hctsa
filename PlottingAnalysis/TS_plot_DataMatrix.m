@@ -99,7 +99,6 @@ clear inputP;
 % You always want to retrieve and plot the clustered data if it exists
 getClustered = true;
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData,getClustered);
-
 [numTS, numOps] = size(TS_DataMat); % size of the data matrix
 
 % ------------------------------------------------------------------------------
@@ -228,17 +227,21 @@ if addTimeSeries
     ax1.YTick = (1:numTS);
     ax1.YTickLabel = {TimeSeries.Name};
     ax1.YLim = [0.5,numTS+0.5];
+	allLengths = cellfun(@length,{TimeSeries.Data});
+	if timeSeriesLength > max(allLengths)
+		timeSeriesLength = max(allLengths);
+	end
     ax1.XLim = [1,timeSeriesLength];
     xlabel('Time (samples)');
     ax1.TickLabelInterpreter = 'none';
-    NormMinMax = @(x) (x-min(x))/(max(x)-min(x));
+    f_NormMinMax = @(x) (x-min(x))/(max(x)-min(x));
     for j = 1:numTS
         % Plot a segment from each time series, up to a maximum length of
         % timeSeriesLength samples (which is set as an input to the function)
         tsData = TimeSeries(j).Data;
         lengthHere = min(timeSeriesLength,length(tsData));
         tsData = tsData(1:lengthHere);
-        plot(1:lengthHere,j-0.5+NormMinMax(tsData),'-k');
+        plot(1:lengthHere,j-0.5+f_NormMinMax(tsData),'-k');
         if j < numTS
             plot([1,timeSeriesLength],(j+0.5)*ones(2,1),':k')
         end

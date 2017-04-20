@@ -54,6 +54,9 @@ if nargin < 2 || isempty(filterOptions)
     % By default remove less than 70%-good-valued time series, & then less than
     % 100%-good-valued operations.
 end
+if any(filterOptions > 1)
+    error('Set filterOptions as a length-2 vector with elements in the unit interval');
+end
 fprintf(1,['Removing time series with more than %.2f%% special-valued outputs\n' ...
             'Removing operations with more than %.2f%% special-valued outputs\n'], ...
             (1-filterOptions(1))*100,(1-filterOptions(2))*100);
@@ -322,7 +325,8 @@ function keepInd = filterNaNs(XMat,nan_thresh,objectName)
         propNaN = mean(isnan(XMat),2); % proportion of NaNs across rows
         keepInd = (1-propNaN >= nan_thresh);
         if all(~keepInd)
-            error('No %s had more than %4.2f%% good values.',objectName,nan_thresh*100)
+            error('No %s had more than %4.2f%% good values.\nSet a more lenient threshold.',...
+                                objectName,nan_thresh*100)
         end
         if all(keepInd)
             fprintf(1,['All %u %s have greater than %4.2f%% good values.' ...
