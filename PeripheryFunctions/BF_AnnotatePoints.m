@@ -90,11 +90,13 @@ else
 end
 
 % Colors:
-myColors = [BF_getcmap('set1',5,1); BF_getcmap('dark2',6,1)];
 if ~isfield(annotateParams,'groupColors')
     groupColors = GiveMeGroupColors(annotateParams,numGroups); % Set colors
 else
     groupColors = annotateParams.groupColors;
+end
+if numGroups==1
+    rainbowColors = [BF_getcmap('set1',5,1); BF_getcmap('dark2',6,1)];
 end
 
 %-------------------------------------------------------------------------------
@@ -116,7 +118,7 @@ for j = 1:numAnnotate
 
     % Get user to pick a point, then find closest datapoint to their input:
     if userInput % user input
-        newPointPicked = 0;
+        newPointPicked = false;
         numAttempts = 0;
         % Keep selecting until you get a new point (can't get stuck in infinite
         % loop because maximum annotations is number of datapoints). Still, you
@@ -127,7 +129,7 @@ for j = 1:numAnnotate
             iPlot = BF_ClosestPoint_ginput(xy_zscore,point_z);
             if ~ismember(iPlot,alreadyPicked)
                 alreadyPicked(j) = iPlot;
-                newPointPicked = 1;
+                newPointPicked = true;
             else
                 beep
                 numAttempts = numAttempts + 1;
@@ -157,11 +159,13 @@ for j = 1:numAnnotate
         timeSeriesSegment = TimeSeries(iPlot).Data(1:min(maxL,end));
     end
 
-    % Plot a circle around the annotated point:
+    % When only one group, cycle through rainbow colors for each annotation:
     if numGroups==1
         % cycle through rainbow colors sequentially:
-        groupColors{1} = myColors{rem(j,length(myColors)-1)+1};
+        groupColors{1} = rainbowColors{rem(j,length(rainbowColors)-1)+1};
     end
+
+    % Plot a circle around the annotated point:
     if plotCircle
         plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',groupColors{theGroup},...
                             'MarkerFaceColor',brighten(groupColors{theGroup},0.5));
@@ -171,7 +175,7 @@ for j = 1:numAnnotate
     switch textAnnotation
     case 'Name'
         % Annotate text with names of datapoints:
-        text(plotPoint(1),plotPoint(2)-0.01*pHeight,TimeSeries(iPlot).Name,...
+        text(plotPoint(1),plotPoint(2)-0.01*pHeight,sprintf('%s-%u',TimeSeries(iPlot).Name,TimeSeries(iPlot).Group),...
                     'interpreter','none','FontSize',8,...
                     'color',brighten(groupColors{theGroup},-0.6));
     case 'ID'

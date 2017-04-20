@@ -41,7 +41,7 @@ function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,be
 
 % Use Matlab's Parallel Computing toolbox?
 if nargin < 1
-	doParallel = 0;
+	doParallel = false;
 end
 
 % Custom range of ts_ids to compute
@@ -68,7 +68,7 @@ end
 
 % Be vocal?
 if nargin < 6
-    beVocal = 1; % Write back lots of information to screen
+    beVocal = true; % Write back lots of information to screen
     % prints every piece of code evaluated (nice for error checking)
 end
 
@@ -183,10 +183,11 @@ for i = 1:numTimeSeries
 
     if numCalc > 0 % some to calculate
 		try
-	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd),doParallel,Operations(toCalc),MasterOperations,1,beVocal);
+	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd),...
+								doParallel,Operations(toCalc),MasterOperations,1,beVocal);
 		catch
 			% skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
-			warning('Calculation for time series %u / %u failed',i,numTimeSeries)
+			warning('Calculation for time series %u / %u failed...',i,numTimeSeries)
 			continue
 		end
 

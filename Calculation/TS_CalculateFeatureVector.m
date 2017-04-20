@@ -66,9 +66,10 @@ if nargin < 3 || isempty(Operations) || ischar(Operations)
 	if nargin >=3 && ischar(Operations)
 		theINPfile = Operations;
 	else
+		fprintf(1,'Importing default set of time-series features\n');
 		theINPfile = 'INP_ops.txt';
 	end
-	Operations = SQL_add('ops', theINPfile, 0, 0)';
+	Operations = SQL_add('ops',theINPfile,0,0)';
 end
 if isnumeric(Operations)
 	error('Provide an input file or a structure array of Operations');
@@ -76,7 +77,7 @@ end
 
 if nargin < 4 || isempty(MasterOperations)
 	% Use the default library:
-	MasterOperations = SQL_add('mops', 'INP_mops.txt', 0, 0)';
+	MasterOperations = SQL_add('mops','INP_mops.txt',0,0)';
 end
 
 % Need to link operations to masters if not already supplied:
@@ -131,13 +132,20 @@ if size(x,2) ~= 1
 		error('ERROR WITH ''%s'' -- is it multivariate or something weird? Skipping!\n',tsStruct.Name);
 	end
 end
+% (x contains no special values)
+if ~all(isfinite(x))
+	error('ERROR WITH ''%s'' -- contains non-finite values',tsStruct.Name);
+end
+if all(x==x(1))
+	warning('Data are a constant -- there is no information to derive from the time series; many features will fail')
+end
 
 % --------------------------------------------------------------------------
 %% Display information
 % --------------------------------------------------------------------------
 numCalc = length(Operations); % Number of features to calculate
 if numCalc == 0
-	error('Nothing to calculate :/')
+	error('Nothing to calculate :-/')
 end
 
 fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
@@ -217,33 +225,22 @@ clear masterTimer
 % --------------------------------------------------------------------------
 % Set sliced version of matching indicies across the range toCalc
 % Indices of MasterOperations corresponding to each Operation (i.e., each index of toCalc)
-par_OperationMasterInd = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations.MasterID]);
-par_MasterOperationsLabel = {MasterOperations.Label}; % Master labels
-par_OperationCodeString = {Operations.CodeString}; % Code string for each operation to calculate (i.e., in toCalc)
+MasterOp_ind = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations.MasterID]);
 
-if doParallel
-	parfor jj = 1:numCalc
-		[featureVector(jj), calcQuality(jj), calcTimes(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
-									   MasterCalcTime(par_OperationMasterInd(jj)), ...
-									   par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
-									   par_OperationCodeString{jj});
-	end
-else
-	for jj = 1:numCalc
-		try
-			[featureVector(jj), calcQuality(jj), calcTimes(jj)] = TS_compute_oploop(MasterOutput{par_OperationMasterInd(jj)}, ...
-									   MasterCalcTime(par_OperationMasterInd(jj)), ...
-									   par_MasterOperationsLabel{par_OperationMasterInd(jj)}, ...
-									   par_OperationCodeString{jj});
-		catch
-			fprintf(1,'---Error with %s\n',par_OperationCodeString{jj});
-			if (MasterOperations(par_OperationMasterInd(jj)).ID == 0)
-				error(['The operations database is corrupt: there is no link ' ...
-						'from ''%s'' to a master code'], par_OperationCodeString{jj});
-			else
-				fprintf(1,'Error retrieving element %s from %s.\n', ...
-					par_OperationCodeString{jj}, par_MasterOperationsLabel{par_OperationMasterInd(jj)});
-			end
+for jj = 1:numCalc
+	try
+		[featureVector(jj),calcQuality(jj),calcTimes(jj)] = TS_compute_oploop(MasterOutput{MasterOp_ind(jj)}, ...
+							   MasterCalcTime(MasterOp_ind(jj)), ...
+							   MasterOperations(MasterOp_ind(jj)).Label, ... % Master label
+							   Operations(jj).CodeString); % Code string for each operation to calculate (i.e., in toCalc)
+	catch
+		fprintf(1,'---Error with %s\n',Operations(jj).CodeString);
+		if (MasterOperations(MasterOp_ind(jj)).ID == 0)
+			error(['The operations database is corrupt: there is no link ' ...
+					'from ''%s'' to a master code'],Operations(jj).CodeString);
+		else
+			fprintf(1,'Error retrieving element %s from %s.\n', ...
+				Operations(jj).CodeString,MasterOperations(MasterOp_ind(jj)).Label);
 		end
 	end
 end

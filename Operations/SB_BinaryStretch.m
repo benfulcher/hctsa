@@ -1,8 +1,8 @@
 function out = SB_BinaryStretch(x,stretchWhat)
-% SB_BinaryStretch
+% SB_BinaryStretch Characterizes stretches of 0/1 in time-series binarization
 %
-% (DOESN'T ACTUALLY, see note) measure the longest stretch of consecutive zeros or ones in
-% a symbolized time series as a proportion of the time-series length.
+% (DOESN'T ACTUALLY, see note) measure the longest stretch of consecutive zeros
+% or ones in a symbolized time series as a proportion of the time-series length.
 %
 % The time series is symbolized to a binary string by whether it's above (1) or
 % below (0) its mean.
@@ -51,10 +51,10 @@ x(x <= 0) = 0;
 
 switch stretchWhat
     case 'lseq1'
-        % longest stretch of 1s (this doesn't actually measure this!)
+        % longest stretch of 1s [this code doesn't actually measure this!]
         out = max(diff(BF_sgnchange(diff(find(x == 1))-1.5,1)))/N;
     case 'lseq0'
-        % longest stretch of 0s (this doesn't actualy measure this!)
+        % longest stretch of 0s [this code doesn't actualy measure this!]
         out = max(diff(BF_sgnchange(diff(find(x == 0))-1.5,1)))/N;
     otherwise
         error('Unknown input %s',stretchWhat)

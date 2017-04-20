@@ -1,5 +1,5 @@
 function out = CO_trev(y,tau)
-% CO_trev   The trev function of a time series.
+% CO_trev   Normalized nonlinear autocorrelation, trev function of a time series
 %
 % Calculates the trev function, a normalized nonlinear autocorrelation,
 % mentioned in the documentation of the TSTOOL nonlinear time-series analysis

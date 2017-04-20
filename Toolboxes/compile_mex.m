@@ -135,8 +135,9 @@ anyErrors = 0;
 try
     makemex
     settspath(fullfile(toolDir,'OpenTSTOOL'));
-catch
-    fprintf(1,'ERROR: The TSTOOL package failed to compile correctly\n');
+catch emsg
+    fprintf(1,'---ERROR: %s\n',emsg.message);
+    fprintf(1,'The TSTOOL package failed to compile correctly\n');
 end
 if ~anyErrors, fprintf(1,'Done!\n'); end
 

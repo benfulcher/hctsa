@@ -66,7 +66,7 @@ if isstruct(plotOptions) && isfield(plotOptions,'displayTitles')
     displayTitles = plotOptions.displayTitles;
 else
     % Show titles -- removing them allows more to be fit into plot
-    displayTitles = 1; % show titles by default
+    displayTitles = true; % show titles by default
 end
 if isstruct(plotOptions) && isfield(plotOptions,'howToFilter')
     howToFilter = plotOptions.howToFilter;
@@ -83,7 +83,7 @@ end
 if isstruct(plotOptions) && isfield(plotOptions,'plotFreeForm')
     plotFreeForm = plotOptions.plotFreeForm;
 else
-    plotFreeForm = 1; % do a normal subplotted figure
+    plotFreeForm = true; % do a normal subplotted figure
 end
 % Specify line width for plotting
 if isstruct(plotOptions) && isfield(plotOptions,'LineWidth')
@@ -95,7 +95,7 @@ end
 if isstruct(plotOptions) && isfield(plotOptions,'newFigure')
     newFigure = plotOptions.newFigure;
 else
-    newFigure = 1;
+    newFigure = true;
 end
 
 % ------------------------------------------------------------------------------
@@ -309,6 +309,5 @@ else
         ax.XLim = [1,max(Ls)];
 	end
 end
-
 
 end

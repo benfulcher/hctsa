@@ -23,7 +23,7 @@ function [hostName, databaseName, username, password, customPort] = SQL_ShowConn
 % ------------------------------------------------------------------------------
 
 if nargin < 1 || isempty(doDisplay)
-    doDisplay = 1;
+    doDisplay = true;
 end
 
 % ------------------------------------------------------------------------------

@@ -122,24 +122,23 @@ end
 
 % out=res;
 % plot(res);
-% measures on the errors time series:
 
 % ------------------------------------------------------------------------------
-% Output statistics
+% Output statistics on the residuals
 % ------------------------------------------------------------------------------
 
-% Mean error:
+% Mean residual (mean error/bias):
 out.meanerr = mean(res);
 
-% Spread of errors:
+% Spread of residuals:
 out.stderr = std(res);
 out.meanabserr = mean(abs(res));
 
-% Stationarity:
+% Stationarity of residuals:
 out.sws = SY_SlidingWindow(res,'std','std',5,1);
 out.swm = SY_SlidingWindow(res,'mean','std',5,1);
 
-% Normality:
+% Normality of residuals:
 tmp = DN_SimpleFit(res,'gauss1',0);
 if ~isstruct(tmp) && isnan(tmp) % fitting failed
     out.gofr2 = NaN;
@@ -147,7 +146,7 @@ else
     out.gofr2 = tmp.r2; % rsqured
 end
 
-% Autocorrelation structure:
+% Autocorrelation structure of the residuals:
 out.ac1 = CO_AutoCorr(res,1,'Fourier');
 out.ac2 = CO_AutoCorr(res,2,'Fourier');
 out.taures = CO_FirstZero(res,'ac');

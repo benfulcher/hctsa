@@ -1,6 +1,5 @@
 function out = CO_TranslateShape(y,shape,d,howToMove)
-% CO_TranslateShape     Statistics on the number of datapoints residing inside
-% geometric shapes moved across the time series.
+% CO_TranslateShape  Statistics on datapoints inside geometric shapes across the time series.
 %
 % Inputs specify a shape and its size, and a method for moving this shape
 % through the time domain.

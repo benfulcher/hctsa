@@ -51,27 +51,34 @@ xStep = std(x)/100; % set a step size
 switch whatDistn
     case 'norm'
         [a, b] = normfit(x);
-		peaky = normpdf(a,a,b); thresh = peaky/100; % stop when gets to 1/100 of peak value
-		xf(1) = mean(x); ange = 10;
+		peaky = normpdf(a,a,b);
+        thresh = peaky/100; % stop when gets to 1/100 of peak value
+		xf(1) = mean(x);
+        ange = 10;
         while ange > thresh, xf(1) = xf(1)-xStep; ange = normpdf(xf(1),a,b); end
-		xf(2) = mean(x); ange = 10;
+		xf(2) = mean(x);
+        ange = 10;
         while ange > thresh, xf(2) = xf(2)+xStep; ange = normpdf(xf(2),a,b); end
 
     case 'ev'
         a = evfit(x);
 		peaky = evpdf(a(1),a(1),a(2)); thresh = peaky/100;
-		xf(1) = 0; ange = 10;
+		xf(1) = 0;
+        ange = 10;
         while ange > thresh, xf(1) = xf(1)-xStep; ange = evpdf(xf(1),a(1),a(2)); end
-		xf(2) = 0; ange = 10;
+		xf(2) = 0;
+        ange = 10;
         while ange > thresh, xf(2) = xf(2)+xStep; ange = evpdf(xf(2),a(1),a(2)); end
 
     case 'uni'
         [a, b] = unifit(x);
 		peaky = unifpdf(mean(x),a,b); thresh = peaky/100;
-		xf(1) = 0; ange = 10;
-        while ange > thresh, xf(1) = xf(1)-xStep; ange = unifpdf(xf(1),a,b); end
-		xf(2) = 0; ange = 10;
-        while ange > thresh, xf(2) = xf(2)+xStep; ange = unifpdf(xf(2),a,b); end
+		xf(1) = 0;
+        ange = 10;
+        while ange > thresh, xf(1) = xf(1) - xStep; ange = unifpdf(xf(1),a,b); end
+		xf(2) = 0;
+        ange = 10;
+        while ange > thresh, xf(2) = xf(2) + xStep; ange = unifpdf(xf(2),a,b); end
 
     case 'beta'
         % clumsily scale to the range (0,1)
@@ -80,32 +87,39 @@ switch whatDistn
         a = betafit(x);
 		thresh = 1E-5; % ok -- consistent since all scaled to the same range
 		xf(1) = mean(x); ange = 10;
-        while ange > thresh, xf(1) = xf(1)-xStep; ange = betapdf(xf(1),a(1),a(2)); end
+        while ange > thresh, xf(1) = xf(1) - xStep; ange = betapdf(xf(1),a(1),a(2)); end
 		xf(2) = mean(x); ange = 10;
-        while ange > thresh, xf(2) = xf(2)+xStep; ange = betapdf(xf(2),a(1),a(2)); end
+        while ange > thresh, xf(2) = xf(2) + xStep; ange = betapdf(xf(2),a(1),a(2)); end
 
     case 'rayleigh'
-        if any(x < 0),
+        if any(x < 0)
             fprintf(1,'The data are not positive, but Rayleigh is a positive-only distribution.\n');
-            out = NaN;
-            return
+            out = NaN; return
+        elseif all(x==x(1))
+            fprintf(1,'Data are a constant\n');
+            out = NaN; return
         else % fit a Rayleigh distribution to the positive-only data
             a = raylfit(x);
-			peaky = raylpdf(a,a); thresh=peaky/100;
+			peaky = raylpdf(a,a); thresh = peaky/100;
 			xf(1) = 0;
-			xf(2) = a; ange = 10;
-            while ange > thresh, xf(2) = xf(2)+xStep; ange = raylpdf(xf(2),a); end
+			xf(2) = a;
+            ange = 10;
+            while ange > thresh, xf(2) = xf(2) + xStep; ange = raylpdf(xf(2),a); end
         end
 
     case 'exp'
         if any(x < 0)
             fprintf(1,'The data contains negative values, but Exponential is a positive-only distribution.\n');
             out = NaN; return
+        elseif all(x==x(1))
+            fprintf(1,'Data are a constant\n');
+            out = NaN; return
         else a = expfit(x);
 			peaky = exppdf(0,a); thresh = peaky/100;
 			xf(1) = 0;
-			xf(2) = 0; ange = 10;
-            while ange > thresh, xf(2) = xf(2)+xStep; ange = exppdf(xf(2),a); end
+			xf(2) = 0;
+            ange = 10;
+            while ange > thresh, xf(2) = xf(2) + xStep; ange = exppdf(xf(2),a); end
         end
 
     case 'gamma'
@@ -119,8 +133,9 @@ switch whatDistn
 				peaky = gampdf((a(1)-1)*a(2),a(1),a(2)); thresh = peaky/100;
 			end
 			xf(1) = 0;
-			xf(2) = a(1)*a(2); ange = 10;
-            while ange > thresh, xf(2) = xf(2)+xStep; ange = gampdf(xf(2),a(1),a(2)); end
+			xf(2) = a(1)*a(2);
+            ange = 10;
+            while ange > thresh, xf(2) = xf(2) + xStep; ange = gampdf(xf(2),a(1),a(2)); end
         end
 
     case 'logn'
@@ -131,7 +146,8 @@ switch whatDistn
 			a = lognfit(x);
 			peaky = lognpdf(exp(a(1)-a(2)^2),a(1),a(2)); thresh = peaky/100;
 			xf(1) = 0;
-			xf(2) = exp(a(1)-a(2)^2); ange = 10;
+			xf(2) = exp(a(1)-a(2)^2);
+            ange = 10;
             while ange > thresh, xf(2) = xf(2)+xStep; ange = lognpdf(xf(2),a(1),a(2)); end
         end
 
@@ -148,7 +164,8 @@ switch whatDistn
 				thresh = peaky/100;
 			end
 			xf(1) = 0;
-			xf(2) = 0; ange = 10;
+			xf(2) = 0;
+            ange = 10;
             while ange > thresh, xf(2) = xf(2)+xStep; ange = wblpdf(xf(2),a(1),a(2)); end
         end
 
@@ -235,6 +252,5 @@ out.olapint = sum(f.*ffit*(xi(2)-xi(1)))*std(x);
 % RELENT: returns the relative entropy of the two distributions
 r = (ffit ~= 0);
 out.relent = sum(f(r).*log(f(r)./ffit(r))*(xi(2)-xi(1)));
-
 
 end

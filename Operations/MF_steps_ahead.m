@@ -1,6 +1,5 @@
 function out = MF_steps_ahead(y,model,order,maxSteps)
-% MF_steps_ahead    Goodness of model predictions across a range of
-%                   prediction lengths.
+% MF_steps_ahead    Goodness of model predictions across prediction lengths.
 %
 % Given a model, characterizes the variation in goodness of model predictions
 % across a range of prediction lengths, l, which is made to vary from
