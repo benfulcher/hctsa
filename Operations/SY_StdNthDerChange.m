@@ -43,16 +43,19 @@ function out = SY_StdNthDerChange(y,maxd)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-% ------------------------------------------------------------------------------
-%% Check that a Curve-Fitting Toolbox license is available:
-% ------------------------------------------------------------------------------
+
+% Check that a Curve-Fitting Toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox')
 
-doPlot = 0; % plot outputs
+doPlot = false; % plot outputs
 
+%-------------------------------------------------------------------------------
+% Set defaults:
+%-------------------------------------------------------------------------------
 if nargin < 2 || isempty(maxd)
     maxd = 10; % do 10 by default
 end
+%-------------------------------------------------------------------------------
 
 ms = zeros(maxd,1);
 for i = 1:maxd

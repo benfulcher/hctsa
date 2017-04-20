@@ -89,7 +89,7 @@ end
 
 winLength = floor(length(y)/numSeg); % length of window
 if winLength==0
-    warning('Time-series of length %u is too short for %u windows',numSeg);
+    warning('Time-series of length %u is too short for %u windows',length(y),numSeg);
     out = NaN;
     return
 end
