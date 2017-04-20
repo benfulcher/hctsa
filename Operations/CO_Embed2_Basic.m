@@ -1,5 +1,5 @@
 function out = CO_Embed2_Basic(y,tau)
-% CO_Embed2_Basic
+% CO_Embed2_Basic Point density statistics in a 2-d embedding space
 %
 % Computes a set of point density measures in a plot of y_i against y_{i-tau}.
 %
@@ -36,7 +36,7 @@ function out = CO_Embed2_Basic(y,tau)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doPlot = 0; % plot outputs to a figure
+doPlot = false; % plot outputs to a figure
 
 if strcmp(tau,'tau')
 	% Make tau the first zero crossing of the autocorrelation function

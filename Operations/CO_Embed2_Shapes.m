@@ -1,5 +1,5 @@
 function out = CO_Embed2_Shapes(y,tau,shape,r)
-% CO_Embed2_Shapes
+% CO_Embed2_Shapes Shape-based statistics in a 2-d embedding space
 %
 % Takes a shape and places it on each point in the two-dimensional time-delay
 % embedding space sequentially. This function counts the points inside this shape

@@ -1,5 +1,5 @@
 function out = CO_Embed2_AngleTau(y,maxTau)
-% CO_Embed2_AngleTau
+% CO_Embed2_AngleTau Angle autocorrelation in a 2-dimensional embedding space
 %
 % Investigates how the autocorrelation of angles between successive points in
 % the two-dimensional time-series embedding change as tau varies from
@@ -32,7 +32,7 @@ function out = CO_Embed2_AngleTau(y,maxTau)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doPlot = 0;
+doPlot = false;
 tauRange = (1:1:maxTau);
 numTau = length(tauRange);
 

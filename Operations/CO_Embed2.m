@@ -1,5 +1,5 @@
 function out = CO_Embed2(y,tau)
-% CO_Embed2     2-dimensional embedding space
+% CO_Embed2    Statistics of the time series in a 2-dimensional embedding space
 %
 % Embeds the z-scored time series in a two-dimensional time-delay
 % embedding space with a given time-delay, tau, and outputs a set of

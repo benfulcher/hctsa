@@ -1,6 +1,5 @@
 function out = EX_MovingThreshold(y,a,b)
-% EX_MovingThreshold    Moving threshold model for extreme events in a
-%                       time series
+% EX_MovingThreshold    Moving threshold model for extreme events in a time series
 %
 % Inspired by an idea contained in:
 % "Reactions to extreme events: Moving threshold model"

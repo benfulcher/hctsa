@@ -1,5 +1,5 @@
 function out = DK_crinkle(x)
-% DK_crinkle
+% DK_crinkle  Computes James Theiler's crinkle statistic
 %
 % Calculates the "crinkle statistic" on a vector x
 % 	<(x_{t-1}-2*x_t+x_{t+1})^4> / < ( x_t^2 ) >^2

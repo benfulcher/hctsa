@@ -1,5 +1,5 @@
 function out = CO_RM_AMInformation(y,tau)
-% CO_RM_AMInformation
+% CO_RM_AMInformation Automutual information (Rudy Moddemeijer implementation)
 %
 % Wrapper for Rudy Moddemeijer's information code to calculate automutual
 % information.
