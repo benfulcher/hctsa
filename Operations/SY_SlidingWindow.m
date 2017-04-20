@@ -151,6 +151,13 @@ switch windowStat
         error('Unknown statistic ''%s''',windowStat)
 end
 
+% Check for all errors (e.g., short time series):
+if all(isnan(qs))
+    warning('These sliding window settings are not suitable for this time series');
+    out = NaN;
+    return
+end
+
 % ------------------------------------------------------------------------------
 % Plot
 % ------------------------------------------------------------------------------

@@ -51,6 +51,10 @@ for i = 1:numTau
 	theta = diff(m(:,2))./diff(m(:,1));
 	theta = atan(theta); % measured as deviation from the horizontal
 
+	if isempty(theta)
+		error('Time series (N=%u) too short for embedding',length(y));
+	end
+
 	stats_store(1,i) = CO_AutoCorr(theta,1,'Fourier');
 	stats_store(2,i) = CO_AutoCorr(theta,2,'Fourier');
 	stats_store(3,i) = CO_AutoCorr(theta,3,'Fourier');
