@@ -79,7 +79,6 @@ end
 if nargin < 5 || isempty(mom2)
     mom2 = 'std';
 end
-
 if nargin < 6 || isempty(whatTransform)
     whatTransform = 'none';
 end

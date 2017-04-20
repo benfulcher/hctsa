@@ -34,6 +34,10 @@ function out = CO_RM_AMInformation(y,tau)
 if nargin < 2 || isempty(tau)
     tau = 1; % Default is to calculate the automutual information at lag 1
 end
+if tau >= length(y)
+    warning('Time series too short for a time lag of %u',tau);
+    out = NaN; return
+end
 
 y1 = y(1:end-tau);
 y2 = y(1+tau:end); % time-delayed version of y
