@@ -52,7 +52,7 @@ function out = NL_TISEAN_fnn(y,tau,maxm,theilerWin,justBest,bestp)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doPlot = 0; % can turn on to see plotted summaries
+doPlot = false; % can turn on to see plotted summaries
 
 % ------------------------------------------------------------------------------
 %% Check inputs / set defaults
@@ -70,6 +70,9 @@ if strcmp(tau,'ac')
     tau = CO_FirstZero(y,'ac'); % first zero-crossing of autocorrelation function
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
+end
+if isnan(tau)
+    error('Time series too short for fnn');
 end
 
 % Maximum embedding dimension:

@@ -52,8 +52,10 @@ end
 % Embed the signal:
 % ------------------------------------------------------------------------------
 x = BF_embed(y,tau,m,0);
-Nx = length(x); % number of embedding vectors produced
-
+Nx = size(x,1); % number of embedding vectors produced
+if Nx < 5 % need at least 5 embedding vectors to actually do a computation
+    error('Time series too short to embed at m = %u, tau = %u',m,tau);
+end
 % Generate permutations up to the embedding dimension, m:
 permList = perms(1:m);
 numPerms = length(permList);
