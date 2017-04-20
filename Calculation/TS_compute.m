@@ -99,7 +99,6 @@ if isempty(ts_id_range)
 else
     ts_id_range = intersect(ts_id_range,allIDs);
     tsIndex = find(ismember(allIDs,ts_id_range));
-    % tsIndex = arrayfun(@(x)find(allIDs==x,1),ts_id_range);
 end
 allIDs = [Operations.ID];
 if isempty(op_id_range)

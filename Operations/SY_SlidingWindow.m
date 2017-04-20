@@ -66,7 +66,7 @@ function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doPlot = 0; % plot outputs
+doPlot = false; % plot outputs
 
 % ------------------------------------------------------------------------------
 % Check Inputs
@@ -87,7 +87,12 @@ end
 
 % ------------------------------------------------------------------------------
 
-winLength = floor(length(y)/numSeg); % size of window
+winLength = floor(length(y)/numSeg); % length of window
+if winLength==0
+    warning('Time-series of length %u is too short for %u windows',numSeg);
+    out = NaN;
+    return
+end
 inc = floor(winLength/incMove); % increment to move at each step
 % If increment rounded down to zero, prop it up:
 if inc == 0
