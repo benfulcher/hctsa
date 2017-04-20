@@ -99,6 +99,9 @@ if strcmp(tau,'ac')
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
+if isnan(tau)
+    error('Time series cannot be embedded (too short?)');
+end
 
 % Min/max embedding dimension, mmm
 if nargin < 3 || isempty(mmm)

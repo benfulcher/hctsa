@@ -66,6 +66,9 @@ end
 if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
     tau = CO_FirstZero(y,'ac');
 end
+if isnan(tau)
+    error('Time series too short to estimate tau');
+end
 
 if tau > 1; % calculate transition matrix at non-unity lag
     % downsample at rate 1:tau

@@ -76,6 +76,9 @@ if strcmp(tau,'ac')
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
 end
+if isnan(tau)
+    error('Time series too short for fnn');
+end
 
 % A distance threshold for neighbours
 if nargin < 4

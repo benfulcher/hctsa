@@ -68,6 +68,9 @@ if strcmp(tau,'ac')
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
+if isnan(tau)
+    error('Time series cannot be embedded (too short?)');
+end
 
 if nargin < 4 || isempty(maxN)
     % Set a maximum time-series length to analyze, due to memory constraints

@@ -1,5 +1,4 @@
-% function [de,nfnn] = MS_unfolding(y,th,de,tau)
-% 
+function [d, nfnn] = MS_unfolding(y,th,de,tau)
 % Estimate the minimum unfolding dimension by calculating when the
 % proportion of false nearest neighbours if first below th.
 %
@@ -9,8 +8,9 @@
 % For each pair of values (de,tau) the data y is embeded and the
 % nearest neighbour to each point (excluding the immediate
 % neighbourhood of n points) is determined. If the ratio of the
-% distance of the next points and these points is greater  
+% distance of the next points and these points is greater
 %
+%-------------------------------------------------------------------------------
 % Michael Small
 % michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
 % 3/3/2005
@@ -19,8 +19,7 @@
 % Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
 % references therein.
 % (Minor changes by Ben Fulcher, 2010)
-
-function [d, nfnn] = MS_unfolding(y,th,de,tau)
+%-------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
 % Check inputs and set defaults:
@@ -36,11 +35,14 @@ if nargin < 4 || isempty(tau)
     tau = 1;
 end
 
-% Other options for tau ++BF
+% Other options for tau
 if strcmp(tau,'ac')
     tau = CO_FirstZero(y,'ac'); % first zero-crossing of autocorrelation function
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
+end
+if isnan(tau)
+    error('Time series cannot be embedded (too short?)');
 end
 % --------------------------------------------------------------------------
 
@@ -53,14 +55,14 @@ nfnn = [];
 localmin = 0; % Ben Fulcher, 2015-03-20 fixed to locamin -> localmin
 
 for d = de
-  
+
     % Embed the data
     X = MS_embed(y,d,tau); % changed from embed -> MS_embed ++BF
     [d,nx] = size(X);
 
     falseneighbours = 0;
     total = 0;
-    
+
     % find the nearest neighbours of each point
     ind = MS_nearest(X(:,1:(nx-1)),tau); %whooh hooo!
 
@@ -77,7 +79,7 @@ for d = de
     prop = sum((d1./d0)>dsp)/length(d0);
 
 %   disp(['de=' int2str(d) ', n(fnn)=' num2str(prop*100) '%']);
-							
+
     % Is data sufficiently unfolded?
     if (prop < th)
         nfnn = prop;
@@ -91,7 +93,7 @@ for d = de
           localmini = length(nfnn)-1;
         end
     end
-  
+
     nfnn = [nfnn, prop];
 end
 

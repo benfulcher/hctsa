@@ -72,7 +72,7 @@ elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
 end
 if isnan(tau)
-    error('Time series too short for fnn');
+    error('Time series cannot be embedded (too short?)');
 end
 
 % Maximum embedding dimension:
