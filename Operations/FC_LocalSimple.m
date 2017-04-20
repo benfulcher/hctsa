@@ -67,7 +67,8 @@ else
 end
 evalr = lp+1:N; % range over which to evaluate the forecast
 if length(evalr)==0
-    error('Time series too short for forecasting');
+    warning('Time series too short for forecasting');
+    out = NaN; return
 end
 res = zeros(length(evalr),1); % residuals
 
