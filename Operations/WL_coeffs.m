@@ -53,6 +53,9 @@ if nargin < 3 || isempty(level)
 end
 if strcmp(level,'max')
     level = wmaxlev(N,wname);
+    if level==0
+        error('Cannot compute wavelet coefficients (short time series?)');
+    end
 end
 
 if wmaxlev(N,wname) < level
@@ -64,8 +67,7 @@ end
 % ------------------------------------------------------------------------------
 %% Perform a single-level wavelet decomposition
 % (Recover a noisy signal by suppressing an approximation)
-
-[c, l] = wavedec(y,level,wname);
+[c,l] = wavedec(y,level,wname);
 
 % Reconstruct detail
 det = wrcoef('d',c,l,wname,level); % detail this level
