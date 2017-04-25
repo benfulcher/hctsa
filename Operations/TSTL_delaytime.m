@@ -65,6 +65,11 @@ if maxDelay < 10
     maxDelay = 10;
     fprintf(1,'Max delay set to its minimum: delaytime = 10\n');
 end
+if maxDelay >= N/2
+    % Heuristic for appropriate time delay
+    warning('Max delay, %u, too long for time series of length %u',maxDelay,N)
+    out = NaN; return
+end
 
 % randomSeed: how to treat the randomization
 if nargin < 4
