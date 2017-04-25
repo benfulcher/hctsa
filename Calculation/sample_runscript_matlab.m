@@ -33,7 +33,7 @@ function sample_runscript_matlab(doParallelize,saveIncrement,fileName)
 %-------------------------------------------------------------------------------
 if nargin < 1
     % Set to 1 to
-    doParallelize = 1;
+    doParallelize = true;
 end
 
 if nargin < 2
@@ -64,7 +64,7 @@ fprintf(1,['About to calculate across %u time series and %u operations ' ...
 %-------------------------------------------------------------------------------
 % Loop across time series:
 for i = 1:length(ID_inc)-1
-	fprintf(1,'\n\n\nWe''re looking at Time series with IDs from %u--%u\n\n\n', ...
+	fprintf(1,'\n\n\nWe''re looking at time series with IDs from %u--%u\n\n\n', ...
                             	tsIDs(ID_inc(i)),tsIDs(ID_inc(i+1)-1));
 
     % Compute any missing values for this range of time series, then save back:
