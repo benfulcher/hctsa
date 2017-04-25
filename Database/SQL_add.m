@@ -57,13 +57,13 @@ end
 % forDatabase
 if nargin < 3 || isempty(forDatabase)
     % Write the results directly to the mySQL database specified in sql_settings.conf
-    forDatabase = 1;
+    forDatabase = true;
 end
 
 % beVocal
 if nargin < 4
     % Give user feedback by default:
-    beVocal = 1;
+    beVocal = true;
 end
 
 % ------------------------------------------------------------------------------
