@@ -111,8 +111,8 @@ s = BF_embed(y,embedParams{1},embedParams{2},1);
 if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding of the %u-sample time series failed',N)
 elseif length(data(s)) < thwin
-    fprintf(1,['Embedded time series (N = %u, m = %u, tau = %u) too short' ...
-                'to do a correlation sum\n'],N,embedParams{1},embedParams{2});
+    warning(['Embedded time series (N = %u, m = %u, tau = %u) too short' ...
+                ' to do a correlation sum\n'],N,embedParams{1},embedParams{2});
     out = NaN; return
 end
 

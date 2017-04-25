@@ -61,7 +61,7 @@ if maxDelay < 1 && maxDelay > 0
     maxDelay = round(N*maxDelay); % specify a proportion of time series length
 end
 
-if maxDelay < 10,
+if maxDelay < 10
     maxDelay = 10;
     fprintf(1,'Max delay set to its minimum: delaytime = 10\n');
 end
