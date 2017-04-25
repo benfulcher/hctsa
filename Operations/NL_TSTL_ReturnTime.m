@@ -86,15 +86,20 @@ if nargin < 6 || isempty(embedParams)
     fprintf(1,'Using default embedding using autocorrelation and cao\n');
 end
 
-doPlot = 0; % plot outputs to figures
+doPlot = false; % plot outputs to figures
 
 % ------------------------------------------------------------------------------
 %% Embed the signal
 % ------------------------------------------------------------------------------
-s = BF_embed(y,embedParams{1},embedParams{2},1);
-
+s = BF_embed(y,embedParams{1},embedParams{2},1,true);
 if ~isa(s,'signal') && isnan(s); % embedding failed
-    fprintf(1,'Embedding failed\n');
+    warning('Embedding failed');
+    out = NaN; return
+end
+numPoints = size(data(s),1);
+if numPoints < 10
+    % Set heuristic minimum (10) on the number of points needed to perform a meaningful analysis
+    warning('Time series not long enough for return time analysis')
     out = NaN; return
 end
 

@@ -1,5 +1,5 @@
 function out = NL_TISEAN_fnn(y,tau,maxm,theilerWin,justBest,bestp)
-% NL_TISEAN_fnn     false nearest neighbors of a time series.
+% NL_TISEAN_fnn     False nearest neighbors of a time series.
 %
 %---INPUTS:
 % y, the input time series
@@ -57,10 +57,13 @@ doPlot = false; % can turn on to see plotted summaries
 % ------------------------------------------------------------------------------
 %% Check inputs / set defaults
 % ------------------------------------------------------------------------------
-N = length(y);
-
 if nargin < 1
     error('Input a time series')
+end
+N = length(y);
+if N < 10
+    warning('Time series (N=%u) too short for fnn',N);
+    out = NaN; return
 end
 
 if nargin < 2 || isempty(tau)
@@ -90,7 +93,7 @@ end
 
 % Just return best dimension:
 if nargin < 5 || isempty(justBest)
-    justBest = 1; % just return the best embedding dimension
+    justBest = true; % just return the best embedding dimension
 end
 
 % How to return the best embedding dimension:
