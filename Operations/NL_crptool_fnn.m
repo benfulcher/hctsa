@@ -1,5 +1,5 @@
 function out = NL_crptool_fnn(y,maxm,r,taum,th,randomSeed)
-% NL_crptool_fnn    Analyzes the false-nearest neighbours statistic.
+% NL_crptool_fnn    Analyzes the false-nearest neighbors statistic.
 %
 %---INPUTS:
 % y, the input time series

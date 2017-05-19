@@ -1,5 +1,5 @@
 function out = EN_mse(y,scaleRange,m,r,preProcessHow)
-% EN_mse multiscale entropy for a time series
+% EN_mse  Multiscale entropy of a time series
 %
 % As per "Multiscale entropy analysis of biological signals",
 % Costa, Goldberger and Peng, PRE, 71, 021906 (2005)

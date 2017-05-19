@@ -1,5 +1,5 @@
 function out = NL_TISEAN_fnn(y,tau,maxm,theilerWin,justBest,bestp)
-% NL_TISEAN_fnn     false nearest neighbors of a time series.
+% NL_TISEAN_fnn     False nearest neighbors of a time series.
 %
 %---INPUTS:
 % y, the input time series

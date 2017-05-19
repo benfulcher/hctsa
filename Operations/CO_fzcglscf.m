@@ -1,5 +1,5 @@
 function out = CO_fzcglscf(y,alpha,beta,maxtau)
-% CO_fzcglscf   The first zero-croessing of the generalized self-correlation function
+% CO_fzcglscf   The first zero-crossing of the generalized self-correlation function
 %
 % Returns the first zero-crossing of the generalized self-correlation function
 % introduced in Duarte Queiros and Moyano in Physica A, Vol. 383, pp. 10--15

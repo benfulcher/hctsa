@@ -45,7 +45,7 @@ BF_CheckToolbox('wavelet_toolbox')
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
-doPlot = 0; % Plot results to figures
+doPlot = false; % Plot results to figures
 N = length(y); % Length of the time series
 
 if nargin < 2 || isempty(wname)

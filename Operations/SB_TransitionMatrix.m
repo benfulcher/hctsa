@@ -1,5 +1,5 @@
 function out = SB_TransitionMatrix(y,howtocg,numGroups,tau)
-% SB_TransitionMatrix  transition probabilities between different time-series states
+% SB_TransitionMatrix  Transition probabilities between different time-series states.
 %
 % The time series is coarse-grained according to a given method.
 %

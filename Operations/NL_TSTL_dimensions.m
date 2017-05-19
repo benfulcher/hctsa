@@ -1,5 +1,5 @@
 function out = NL_TSTL_dimensions(y,nbins,embedParams)
-% NL_TSTL_dimensions box counting, information, and correlation dimension of a time series.
+% NL_TSTL_dimensions Box counting, information, and correlation dimension of a time series.
 %
 % Computes the box counting, information, and correlation dimension of a
 % time-delay embedded time series using the TSTOOL code 'dimensions'.

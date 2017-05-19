@@ -1,5 +1,5 @@
 function out = PP_ModelFit(y,model,order,randomSeed)
-% PP_ModelFit   See if AR model fit improves with different preprocessings
+% PP_ModelFit   Investigates whether AR model fit improves with different preprocessings.
 %
 % After performing the range of transformations to the time series, returns the
 % in-sample root-mean-square (RMS) prediction errors for an AR model on each
