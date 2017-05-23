@@ -5,13 +5,17 @@
 The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualization and analysis functionality.
 All of these types of analysis are described in our accompanying [open access journal article](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
 
-Comprehensive documentation for *hctsa* is provided [on gitbook](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded in a pdf, epub, or mobi format.
 
-Any feedback is hugely helpful ([email me](mailto:ben.d.fulcher@gmail.com)) and, in particular, any improvements to the code would be _much_ appreciated in the form of [issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/).
+&#x1F4D6; &#x1F4D6;
+**Comprehensive documentation**
+&#x1F4D6; &#x1F4D6;
+for *hctsa* is [on gitbook](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded in a pdf, epub, or mobi format.
+
+Any feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), are much appreciated.
 
 ### Downloading the repository
 
-For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the *Download .zip* button.
+For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the green *Download .zip* button.
 
 It is recommended to use the repository with git.
 For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
