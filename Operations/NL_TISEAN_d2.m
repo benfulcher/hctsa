@@ -67,7 +67,10 @@ function out = NL_TISEAN_d2(y, tau, maxm, theilerWin)
 % ------------------------------------------------------------------------------
 
 N = length(y); % data length (number of samples)
-
+if N < 50
+    warning('N=%u too short for nonlinear dimension analysis',N)
+    out = NaN; return
+end
 % ------------------------------------------------------------------------------
 %% Check inputs
 % ------------------------------------------------------------------------------
@@ -80,6 +83,9 @@ if strcmp(tau,'ac')
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
+if isnan(tau)
+    error('Time series cannot be embedded (too short?)');
+end
 
 % Maximum embedding dimension
 if nargin < 3 || isempty(maxm)
@@ -88,7 +94,7 @@ end
 
 % Theiler window
 if nargin < 4 || isempty(theilerWin)
-   theilerWin = 0.01; % Set a Theiler window of 1%% of the data length
+   theilerWin = 0.01; % Set a Theiler window of 1% of the data length
 end
 if (theilerWin > 0) && (theilerWin < 1) % specify proportion of time-series length
     theilerWin = round(theilerWin*N);

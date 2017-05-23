@@ -64,6 +64,11 @@ function out = NL_TISEAN_c1(y, tau, mmm, tsep, Nref)
 % ------------------------------------------------------------------------------
 N = length(y); % time-series length (number of samples)
 
+% Don't compute on short data
+if N < 100
+    warning('Time series too short for c1')
+    out = NaN; return
+end
 % ++BF 12/5/2010 -- for some reason timeseries of length near a multiple of 256
 % stalls the TISEAN routine c1... -- let's do a slight workaround by removing the
 % last (few) points in this case...
@@ -77,7 +82,6 @@ elseif N == 65 || N==66 || N == 70
     % Somehow length-70 vectors don't work
     out = NaN; return
 end
-
 % Also freezes on constant data
 if length(unique(y))==1
     out = NaN; return
@@ -95,13 +99,16 @@ if strcmp(tau,'ac')
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end
+if isnan(tau)
+    error('Time series cannot be embedded (too short?)');
+end
 
 % Min/max embedding dimension, mmm
 if nargin < 3 || isempty(mmm)
     mmm = [2,10];
 end
 if length(mmm)~=2
-    error('Please set a minimum and maximum embedding dimension as a 2-vector');
+    error('Please set a minimum and maximum embedding dimension as a length-2 vector');
 end
 
 % Time separation, tsep

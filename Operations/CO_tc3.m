@@ -60,6 +60,9 @@ elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
     % tau is the first minimum of the automutual information function
 end
+if isnan(tau)
+    error('No valid setting for time delay (time series too short?)');
+end
 
 % ------------------------------------------------------------------------------
 % Compute tc3 statistic

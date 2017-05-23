@@ -83,6 +83,12 @@ for i = 1:N-1
     % Calculate the auto-correlation at this lag:
     autoCorr(i) = corrfn(i);
 
+    % Hit a NaN before got to a minimum -- there is no minimum
+    if isnan(autoCorr(i))
+        warning('No minimum in %s [[time series too short to find it?]]',minWhat)
+        out = NaN; return
+    end
+
     % We're at a minimum:
     if i==2 && (autoCorr(2) > autoCorr(1))
         % already increases at lag of 2 from lag of 1: a minimum (since ac(0) is maximal)

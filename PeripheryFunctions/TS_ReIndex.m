@@ -80,9 +80,9 @@ if strcmp(tsOrOps,'ts') || strcmp(tsOrOps,'both')
     for i = 1:numTimeSeries
         TimeSeries(i).ID = i;
     end
-    
+
     % Save back:
-    save(dataFile,'TimeSeries','-append')
+    save(dataFile,'TimeSeries','-v7.3','-append')
     fprintf(1,'Time series re-indexed and saved back to %s.\n',dataFile);
 end
 
@@ -101,7 +101,7 @@ if strcmp(tsOrOps,'ops') || strcmp(tsOrOps,'both')
     end
 
     % Save back:
-    save(dataFile,'Operations','-append')
+    save(dataFile,'Operations','-v7.3','-append')
     fprintf(1,'Operations re-indexed and saved back to %s.\n',dataFile);
 end
 

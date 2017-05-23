@@ -28,16 +28,19 @@ tableNames = {'MasterOperations', ...     % MasterOperations Table
               'OpKeywordsRelate', ...     % OpKeywordsRelate Table
               'TimeSeriesKeywords', ...   % TimeSeriesKeywords
               'TsKeywordsRelate', ...     % TsKeywordsRelate Table
-              'Results'};                 % Results Table
+              'Results',...               % Results Table
+              'GitInfo'};                 % Git repository information
 
 % Convert Table names to mySQL CREATE TABLE statements:
-createString = arrayfun(@(x)SQL_TableCreateString(tableNames{x}),1:length(tableNames),'UniformOutput',0);
-existString = arrayfun(@(x)['SHOW TABLES LIKE ''' tableNames{x} ''''],1:length(tableNames),'UniformOutput',0);
+createString = arrayfun(@(x)SQL_TableCreateString(tableNames{x}),...
+                        1:length(tableNames),'UniformOutput',0);
+existString = arrayfun(@(x)['SHOW TABLES LIKE ''' tableNames{x} ''''],...
+                        1:length(tableNames),'UniformOutput',0);
 
 % ------------------------------------------------------------------------------
 %% Write all of this to the database:
 % ------------------------------------------------------------------------------
-[dbc, dbname] = SQL_opendatabase; % opens dbc, the default database (named dbname)
+[dbc,dbname] = SQL_opendatabase; % opens dbc, the default database (named dbname)
 
 numPerLine = 3; % Make a new line after adding this many tables to the database
 fprintf(1,'Creating tables in %s:\n',dbname);
@@ -72,6 +75,31 @@ for j = 1:length(createString)
 end
 fprintf(1,'\nTables created in %s.\n',dbname);
 
-SQL_closedatabase(dbc) % close the connection to the database
+%-------------------------------------------------------------------------------
+% Add git repository information
+%-------------------------------------------------------------------------------
+gitInfo = TS_AddGitInfo();
+if isempty(gitInfo)
+    warning('No git information...?')
+end
+values = {gitInfo.branch,gitInfo.hash,gitInfo.remote,gitInfo.url};
+values = cellfun(@makeSQLFriendly,values,'UniformOutput',0);
+insertString = sprintf(['INSERT INTO GitInfo (branch,hash,remote,url) VALUES ',...
+                        '(%s,%s,%s,%s)'],values{1},values{2},values{3},values{4});
+[rs,emsg] = mysql_dbexecute(dbc,insertString);
+
+%-------------------------------------------------------------------------------
+% Close the connection to the database
+SQL_closedatabase(dbc);
+
+%-------------------------------------------------------------------------------
+function sFriendly = makeSQLFriendly(s)
+    % Turn an element of gitInfo into an insert-friendly thingo
+    if isempty(s)
+        sFriendly = 'NULL';
+    elseif ischar(s)
+        sFriendly = sprintf('''%s''',s);
+    end
+end
 
 end

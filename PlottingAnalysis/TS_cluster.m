@@ -130,7 +130,7 @@ if ts_update
     load(theFile,'ts_clust');
     ts_clust.ord = ts_ord;
     ts_clust.linkageMethod = linkageMethodRow;
-    save(theFile,'-append','ts_clust');
+    save(theFile,'-append','-v7.3','ts_clust');
     fprintf(1,' Done.\n');
 end
 
@@ -140,7 +140,7 @@ if op_update
     load(theFile,'op_clust');
     op_clust.ord = op_ord;
     op_clust.linkageMethod = linkageMethodCol;
-    save(theFile,'-append','op_clust');
+    save(theFile,'-append','-v7.3','op_clust');
     fprintf(1,' Done.\n');
 end
 

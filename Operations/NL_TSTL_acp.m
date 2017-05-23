@@ -66,9 +66,15 @@ if strcmp(tau,'mi')
 elseif strcmp(tau,'ac')
     tau = CO_FirstZero(y,'ac');
 end
+if isnan(tau)
+    error('Time series cannot be embedded (too short?)');
+end
 % time delay can't be more than 1/20th of time series length
 if tau > N/20
     tau = floor(N/20);
+end
+if tau==0
+    tau = 1;
 end
 
 % (*) past

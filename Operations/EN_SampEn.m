@@ -51,6 +51,9 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 % ------------------------------------------------------------------------------
 
 % Check y is a column vector:
+if isempty(y)
+    error('Must input a valid data vector');
+end
 if size(y,1)==1
     y = y';
 end

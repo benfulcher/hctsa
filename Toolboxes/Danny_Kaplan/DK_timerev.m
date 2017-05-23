@@ -2,8 +2,8 @@ function res = DK_timerev(x,timeLag)
 % DK_timerev Time reversal asymmetry statistic
 %
 % Calculates a time reversal asymmetry statistic
-% x --- the time series
-% timeLag --- a time scale (in samples) default 1
+% x -- the time series
+% timeLag -- a time scale (in samples) default 1
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 1996, D. Kaplan <kaplan@macalester.edu>
@@ -26,7 +26,7 @@ if nargin < 2
     timeLag = 1;
 end
 
-foo = DK_timeLagembed(x,3,timeLag);
+foo = DK_lagembed(x,3,timeLag);
 a = foo(:,1);
 b = foo(:,2);
 c = foo(:,3);

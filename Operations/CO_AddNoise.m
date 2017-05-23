@@ -108,10 +108,16 @@ case {'std1','std2','quantiles','even'}
     % histogram-based methods using my naive implementation in CO_Histogram.m
     for i = 1:numRepeats
         amis(i) = CO_HistogramAMI(y+noiseRange(i)*noise,tau,amiMethod,extraParam);
+        if isnan(amis(i))
+            error('Error computing AMI: Time series too short (?)');
+        end
     end
 case {'gaussian','kernel','kraskov1','kraskov2'}
     for i = 1:numRepeats
         amis(i) = IN_AutoMutualInfo(y+noiseRange(i)*noise,tau,amiMethod,extraParam);
+        if isnan(amis(i))
+            error('Error computing AMI: Time series too short (?)');
+        end
     end
 end
 

@@ -46,7 +46,7 @@ BF_CheckToolbox('wavelet_toolbox')
 % ------------------------------------------------------------------------------
 %% Check inputs:
 % ------------------------------------------------------------------------------
-doplot = 0; % plot outputs to figures
+doPlot = false; % plot outputs to figures
 N = length(y); % length of the time series
 
 if nargin < 2 || isempty(wname)
@@ -67,7 +67,7 @@ SC = 100*S./sum(S(:)); % scaled power is length-dependent
 % These SC values (percentage of energy in each coefficient) are what are
 % displayed in a scalogram (c.f., wscalogram function)
 
-if doplot
+if doPlot
     figure('color','w'); box('on');
     subplot(3,1,1)
     plot(y);
@@ -105,7 +105,7 @@ out.pover80 = poverfn(0.80);
 % Distribution of scaled power
 % Fit using Statistics Toolbox
 
-if doplot
+if doPlot
     figure('color','w');
     ksdensity(SC(:));
 end
@@ -131,6 +131,9 @@ out.SC_h = -sum(SC_a.*log(SC_a));
 % (could also do average, or proportion inside box with more energy than
 % average, ...)
 numBoxes = 10;
+if N < numBoxes
+    error('Time series too short');
+end
 dd_SC = zeros(maxScale, numBoxes);
 cutoffs = round(linspace(0, N, numBoxes+1));
 for i = 1:maxScale

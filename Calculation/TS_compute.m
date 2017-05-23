@@ -99,7 +99,6 @@ if isempty(ts_id_range)
 else
     ts_id_range = intersect(ts_id_range,allIDs);
     tsIndex = find(ismember(allIDs,ts_id_range));
-    % tsIndex = arrayfun(@(x)find(allIDs==x,1),ts_id_range);
 end
 allIDs = [Operations.ID];
 if isempty(op_id_range)
@@ -232,7 +231,7 @@ fprintf(1,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1));
 if any(numCalc_all > 0)
 	fprintf(1,'Saving all results to %s...',customFile);
 	saveTimer = tic;
-	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
+	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-v7.3','-append')
 	fprintf(1,' Saved in %s.\n',BF_thetime(toc(saveTimer)));
 	clear saveTimer
 end

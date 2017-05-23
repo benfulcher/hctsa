@@ -14,7 +14,7 @@ function y_embed = BF_embed(y,tau,m,makeSignal,randomSeed,beVocal)
 %
 % makeSignal [opt], if 1, uses TSTOOL to embed and returns a signal object.
 %           (default = 0, i.e., not to do this and instead return matrix).
-%           If 2, returns a vector of [tau m] rather than any explicit embedding
+%           If 2, returns a vector of [tau,m] rather than doing any actual embedding.
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
@@ -49,12 +49,13 @@ function y_embed = BF_embed(y,tau,m,makeSignal,randomSeed,beVocal)
 
 N = length(y); % length of the input time series, y
 
+% ---[[NOTE: other input checking done later, below]]---
 % randomSeed: how to treat the randomization
 if nargin < 5
     randomSeed = []; % default
 end
 if nargin < 6
-    beVocal = 0; % by default, do not display information about the embedding
+    beVocal = false; % by default, do not display information about the embedding
 end
 
 % ------------------------------------------------------------------------------
@@ -68,10 +69,16 @@ else
         switch tau
             case 'mi' % first minimum of mutual information function
                 tau = CO_FirstMin(y,'mi');
+                if isnan(tau)
+                    error('Could not get time delay by mutual information (time series too short?)');
+                end
                 sstau = sprintf('by first minimum of mutual information to tau = ');
             case 'ac' % first zero-crossing of ACF
                 tau = CO_FirstZero(y,'ac');
                 sstau = sprintf('by first zero crossing of autocorrelation function to tau = ');
+                if isnan(tau)
+                    error('Could not get time delay by ACF (time series too short?)');
+                end
             otherwise
                 error('Invalid time-delay method ''%s''.',tau)
         end

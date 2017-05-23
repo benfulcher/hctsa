@@ -68,7 +68,7 @@ end
 minScale = scaleRange(1);
 maxScale = scaleRange(2);
 if (maxScale/5) < minScale
-    warning('Time-series (%u) too short for multiscale multifractal analysis');
+    warning('Time-series (N=%u) too short for multiscale multifractal analysis',N);
     out = NaN;
     return
 elseif rem(maxScale,5)~=0
@@ -248,7 +248,6 @@ out.stdStdHurstScale = std(stdS); % will be large if variance changes alot with 
 
 % saveas(hqsplot, [dirname filesep 'MMA_results' filesep 'MMA_' n1 '.jpg']);
 
-
 % ------------------------------------------------------------------------------
 function m = GiveMeGradient(xData,yData)
     if size(xData,1) ~= size(yData,1);
@@ -258,6 +257,5 @@ function m = GiveMeGradient(xData,yData)
     m = p(1);
 end
 % ------------------------------------------------------------------------------
-
 
 end

@@ -76,15 +76,15 @@ end
 % ------------------------------------------------------------------------------
 
 % ++BF 19/3/2010
-if N < l % doesn't make sense to split into more windows than there are data points
+if l==0 || N < l % doesn't make sense to split into more windows than there are data points
     fprintf(1,'Time Series (N = %u < l = %u) is too short for this operation\n',N,l);
     out = NaN; return
 end
 
 % Get going
-nfits = floor(N/l);
-z = zeros(l,nfits);
-for i = 1:nfits; % number of times l fits completely into N
+numFits = floor(N/l); % number of times l fits completely into N
+z = zeros(l,numFits);
+for i = 1:numFits
     z(:,i) = y((i-1)*l+1:i*l);
 end
 zm = mean(z);

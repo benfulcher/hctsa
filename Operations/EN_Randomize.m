@@ -83,7 +83,7 @@ end
 % Preliminaries
 % ------------------------------------------------------------------------------
 
-doPlot = 0; % Don't plot to screen by default:
+doPlot = false; % Don't plot to screen by default:
 N = length(y); % length of the time series
 
 % Set up the points through the randomization process at which the
@@ -92,6 +92,7 @@ randp_max = 2; % time series has been randomized to double its length
 rand_inc = 0.1; % this proportion of the time series has been randomized between calculations
 numCalcs = randp_max/rand_inc; % number of calculations required
 calc_ints = floor(randp_max*N/numCalcs);
+if calc_ints==0, calc_ints=1; end % round up for short time series
 calc_pts = (0:calc_ints:randp_max*N);
 if calc_pts(end) ~= randp_max*N;
     calc_pts = [calc_pts,randp_max*N];

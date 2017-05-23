@@ -310,9 +310,9 @@ fprintf(1,'----------Saving to %s----------\n',outputFileName);
 
 %--- Now actually save it:
 save(outputFileName,'TimeSeries','Operations','MasterOperations','fromDatabase','gitInfo','-v7.3');
-if gotData, save(outputFileName,'TS_DataMat','-append'); end % add data matrix
-if gotQuality, save(outputFileName,'TS_Quality','-append'); end % add quality labels
-if gotCalcTimes, save(outputFileName,'TS_CalcTime','-append'); end % add calculation times
+if gotData, save(outputFileName,'TS_DataMat','-v7.3','-append'); end % add data matrix
+if gotQuality, save(outputFileName,'TS_Quality','-v7.3','-append'); end % add quality labels
+if gotCalcTimes, save(outputFileName,'TS_CalcTime','-v7.3','-append'); end % add calculation times
 
 %--- Tell the user what just happened:
 fprintf(1,['Saved new Matlab file containing combined versions of %s' ...

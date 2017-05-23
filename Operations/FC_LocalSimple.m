@@ -60,54 +60,28 @@ N = length(y); % Time-series length
 % ------------------------------------------------------------------------------
 % Do the local prediction
 % ------------------------------------------------------------------------------
+if strcmp(trainLength,'ac')
+    lp = CO_FirstZero(y,'ac'); % make it tau
+else
+    lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
+end
+evalr = lp+1:N; % range over which to evaluate the forecast
+if length(evalr)==0
+    warning('Time series too short for forecasting');
+    out = NaN; return
+end
+res = zeros(length(evalr),1); % residuals
 
 switch forecastMeth
     case 'mean'
-        if strcmp(trainLength,'ac')
-            lp = CO_FirstZero(y,'ac'); % make it tau
-        else
-            lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
-        end
-        evalr = lp+1:N; % range over which to evaluate the forecast
-        res = zeros(length(evalr),1); % residuals
         for i = 1:length(evalr)
             res(i) = mean(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction-value
         end
-
     case 'median'
-        if strcmp(trainLength,'ac')
-            lp = CO_FirstZero(y,'ac'); % make it tau
-        else
-            lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
-        end
-        evalr = lp+1:N; % range over which to evaluate the forecast
-        res = zeros(length(evalr),1); % residuals
         for i = 1:length(evalr)
             res(i) = median(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction-value
         end
-
-%     case 'acf' % autocorrelation function
-%         acl=trainLength; % autocorrelation 'length'
-%         acc=zeros(acl,1); % autocorrelation coefficients
-%         for i=1:acl, acc(i)=CO_AutoCorr(y,i); end
-%         % normalize to a sum of 1 (so that operating on three mean values
-%         % of the time series, also returns the mean value as output)
-%         acc=acc/sum(acc);
-%
-%         evalr=acl+1:N; % range over which to evaluate the forecast
-%         res=zeros(length(evalr),1); % residuals
-%         for i=1:length(evalr)
-%             res(i)=sum(acc.*(y(evalr(i)-acl:evalr(i)-1))) - y(evalr(i)); % prediction-value
-%         end
-
     case 'lfit'
-        if strcmp(trainLength,'ac')
-            lp = CO_FirstZero(y,'ac'); % make it tau
-        else
-            lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
-        end
-        evalr = lp+1:N; % range over which to evaluate the forecast
-        res = zeros(length(evalr),1); % residuals
         for i = 1:length(evalr)
             % Fit linear
             warning('off','MATLAB:polyfit:PolyNotUnique'); % Disable (potentially important ;)) warning
@@ -115,7 +89,6 @@ switch forecastMeth
             warning('on','MATLAB:polyfit:PolyNotUnique'); % Re-enable warning
             res(i) = polyval(p,lp+1) - y(evalr(i)); % prediction - value
         end
-
     otherwise
         error('Unknown forecasting method ''%s''',forecastMeth);
 end

@@ -102,8 +102,7 @@ if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
             fprintf(1,'The model ''%s'' can not be applied to non-positive data\n',dmodel);
             out = NaN; return
         else
-            error('DN_SimpleFit(x,''%s'',%u): Error fitting %s to the data distribution\n%s',...
-                                                    dmodel,numBins,dmodel,emsg.message)
+            error('Error fitting %s to the data distribution\n%s',dmodel,emsg.message);
         end
 	end
 
