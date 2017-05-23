@@ -68,7 +68,7 @@ BF_CheckToolbox('curve_fitting_toolbox')
 % ------------------------------------------------------------------------------
 % Check inputs, set defaults:
 % ------------------------------------------------------------------------------
-if size(y,2) > size(y,1);
+if size(y,2) > size(y,1)
     y = y'; % Time series must be a column vector
 end
 if nargin < 2 || isempty(psdMeth)
@@ -81,7 +81,7 @@ if nargin < 4
     nf = [];
 end
 if nargin < 5 || isempty(dologabs)
-    dologabs = 0;
+    dologabs = false;
 end
 
 if dologabs % a boolean
@@ -89,7 +89,7 @@ if dologabs % a boolean
     y = log(abs(y));
 end
 
-doPlot = 0; % plot outputs
+doPlot = false; % plot outputs
 Ny = length(y); % time-series length
 
 %-------------------------------------------------------------------------------
@@ -187,7 +187,7 @@ dw = w(2) - w(1); % spacing increment in w
 out.maxw = w(i_maxS);
 out.maxWidth = w(i_maxS + find(S(i_maxS+1:end) < out.maxS,1,'first')) - ...
                     w(find(S(1:i_maxS-1) < out.maxS,1,'last'));
-if isempty(out.maxWidth);
+if isempty(out.maxWidth)
     out.maxWidth = 0;
 end
 
