@@ -3,7 +3,6 @@
 *hctsa* is a software package for running highly comparative time-series analysis, using [Matlab](www.mathworks.com/products/matlab/) (full support for versions R2014b or later; for use in python cf. [pyopy](https://github.com/strawlab/pyopy)).
 
 The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualization and analysis functionality.
-All of these types of analysis are described in our accompanying [open access journal article](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
 
 If you use this software, please read and cite:
 
@@ -12,12 +11,11 @@ If you use this software, please read and cite:
 
 Any feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
 
-
 ### Getting started
 &#x1F4D6; &#x1F4D6;
 Comprehensive documentation
 &#x1F4D6; &#x1F4D6;
-for *hctsa* is [on gitbook](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded in a pdf, epub, or mobi format.
+for *hctsa* is [on gitbook](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded as a pdf, epub, or mobi file.
 
 ### Downloading the repository
 
