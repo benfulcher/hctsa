@@ -5,13 +5,19 @@
 The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualization and analysis functionality.
 All of these types of analysis are described in our accompanying [open access journal article](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
 
+If you use this software, please read and cite:
 
+* B. D. Fulcher, M. A. Little, N. S. Jones [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83 (2013).
+* B. D. Fulcher and N. S. Jones. [Automatic time-series phenotyping using massive feature extraction](http://biorxiv.org/lookup/doi/10.1101/081463). *bioRxiv* 081463 (2016).
+
+Any feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
+
+
+### Getting started
 &#x1F4D6; &#x1F4D6;
-**Comprehensive documentation**
+Comprehensive documentation
 &#x1F4D6; &#x1F4D6;
 for *hctsa* is [on gitbook](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded in a pdf, epub, or mobi format.
-
-Any feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), are much appreciated.
 
 ### Downloading the repository
 
@@ -41,9 +47,10 @@ There are two licenses applied to the core parts of the repository:
 1. Sections of the repository required to compute features from time-series data is licensed as [GNU General Public License version 3](http://www.gnu.org/licenses/gpl-3.0.en.html).
 
 2. Sections implementing the framework for running *hctsa* analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
-To use this portion of the code for commercial use, please contact [Ben Fulcher](ben.d.fulcher@gmail.com).
 
-A range of external code packages are provided in the **Toolboxes** directory of the repository, and each have their own associated license (see below).
+To use *hctsa* for commercial applications, please contact [Ben Fulcher](ben.d.fulcher@gmail.com).
+
+A range of external code packages are provided in the **Toolboxes** directory of the repository, and each have their own associated license (as outlined below).
 
 ### External packages and dependencies
 
@@ -75,13 +82,6 @@ The following time-series analysis packages are provided with the software (in t
 * Danny Kaplan's Code for embedding statistics (GPL license).
 * Two-dimensional histogram code from Matlab Central (BSD license).
 * Various histogram and entropy code by Rudy Moddemeijer (unlicensed).
-
-## Citation
-
-If you use this software, please read and cite:
-
-B. D. Fulcher, M. A. Little, N. S. Jones (2013) [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83.
-
 
 ## Publications
 
