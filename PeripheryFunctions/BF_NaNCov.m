@@ -32,15 +32,15 @@ function C = BF_NaNCov(X,makeCoeff,makeDist)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-% Check Inputs:
+% Check inputs:
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    makeCoeff = 1; % by default, convert to correlation coefficients
+    makeCoeff = true; % by default, convert to correlation coefficients
 end
 
 if nargin < 3
-    makeDist = 0; % by default, don't convert to distances
+    makeDist = false; % by default, don't convert to distances
 end
 
 % ------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ end
 
 if any(isnan(X(:)))
     % Indicate non-NaN values:
-    GoodValues = single(~isnan(X));
+    goodVals = single(~isnan(X));
 
     % Compute column means, excluding NaNs:
     % Problem is with X(~isnan) -> 0
@@ -62,30 +62,29 @@ if any(isnan(X(:)))
 
     % X0 copies Xc but puts zeros over NaNs:
     X0 = Xc;
-    X0(~GoodValues) = 0; % NaN -> 0
+    X0(~goodVals) = 0; % NaN -> 0
 
     % Count good points (overlapping non-NaN values)
-    GoodBoth = GoodValues' * GoodValues;
+    goodBoth = goodVals' * goodVals;
 
     % This is our approximation to the covariance matrix:
-    C = (X0' * X0) ./ (GoodBoth - 1);
+    C = (X0' * X0) ./ (goodBoth - 1);
 
     % Convert to a correlation coefficient:
     if makeCoeff
         % Normalize by sample standard deviations:
         stdNotNan = @(x) std(x(~isnan(x)));
-        ColStds = arrayfun(@(x)stdNotNan(X(:,x)),1:numCol);
-        S = ColStds'*ColStds;
+        colStds = arrayfun(@(x)stdNotNan(X(:,x)),1:numCol);
+        S = colStds'*colStds;
         C = C./S;
     end
 else
     % no NaNs, use the matlab cov function:
     C = cov(X);
-
     if makeCoeff
         % Normalize by sample standard deviations:
-        ColStds = arrayfun(@(x)std(X(:,x)),1:numCol);
-        S = ColStds'*ColStds;
+        colStds = arrayfun(@(x)std(X(:,x)),1:numCol);
+        S = colStds'*colStds;
         C = C./S;
     end
 end
@@ -93,10 +92,9 @@ end
 % ------------------------------------------------------------------------------
 % Convert to distances
 % ------------------------------------------------------------------------------
-
 if makeDist && makeCoeff
     C(logical(eye(size(C)))) = 1;
-    C = 1-C;
+    C = 1 - C;
 end
 
 end

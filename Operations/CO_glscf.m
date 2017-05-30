@@ -10,7 +10,7 @@ function glscf = CO_glscf(y,alpha,beta,tau)
 %---INPUTS:
 % y, the input time series
 % alpha and beta are real and nonzero parameters
-% tau is the time-delay (can also be 'tau' to set to first zero-crossing of the ACF)
+% tau is the time delay (can set to the string 'tau' to set to first zero-crossing of the ACF)
 %
 % When alpha = beta estimates how values of the same order of magnitude are
 % related in time

@@ -49,7 +49,7 @@ end
 % Use fast approximations to correlations;
 if nargin < 3 || isempty(distanceMetricCol)
     % fprintf(1,'Clustering columns in the same way as for the rows: using %s\n',clusterMethRow)
-    distanceMetricCol = 'corr_fast';
+    distanceMetricCol = 'corr';
 end
 
 % clustering settings for columns
@@ -95,10 +95,10 @@ numOps = matrixSize(2);
 if nargin < 5 || isempty(doSave)
     doSave = [1,1];
     if numTs > 1000
-        doSave(1) = 0;
+        doSave(1) = false;
     end
     if numOps > 1000
-        doSave(2) = 0;
+        doSave(2) = false;
     end
 end
 

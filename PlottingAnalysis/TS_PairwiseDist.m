@@ -12,7 +12,7 @@ function Dij = TS_PairwiseDist(tsOrOps,whatData,distanceMetric,doSave)
 % whatData: what hctsa data source to use (cf. TS_LoadData)
 %
 % distanceMetric: what distance metric to use, e.g., 'euclidean' (default for
-%                 time series) or 'corr_fast' (default for operations)
+%                 time series) or 'corr' (default for operations)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -51,14 +51,14 @@ if nargin < 3
     case 'ts'
         distanceMetric = 'euclidean';
     case 'ops'
-        distanceMetric = 'corr_fast';
+        distanceMetric = 'corr';
     end
 end
 
 % doSave
 if nargin < 4
     % By default, save back to the file specified as whatData
-    doSave = 1;
+    doSave = true;
 end
 
 % ------------------------------------------------------------------------------

@@ -126,7 +126,7 @@ else % use a routine to inform m
                 % default is 0.1
                 % e.g., {'fnnmar',0.2} would use a threshold of 0.2
                 % uses time delay determined above
-
+                
                 if length(m) == 1 % no threshold specified
                     th = 0.4; % set default threshold 0.4
                 else

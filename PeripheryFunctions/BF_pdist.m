@@ -28,16 +28,16 @@ if nargin < 2 || isempty(distMetric)
     fprintf(1,'Using the Euclidean distance metric\n');
 end
 if nargin < 3 || isempty(toVector)
-    toVector = 0;
+    toVector = false;
 end
 if nargin < 4
     opts = [];
 end
 if nargin < 5
-    beSilent = 0;
+    beSilent = false;
 end
 if nargin < 6
-    % By default, don't require a minimum proportion of good values to be
+    % By default don't require a minimum proportion of good values to be
     % present to compute a pairwise distance
     minPropGood = 0;
 end
@@ -99,13 +99,14 @@ case {'corr_fast','abscorr_fast'}
     % the mean of overlapping good values, but it's a start, and a good approximation
     % for a small proportion of NaNs.
     % Ben Fulcher, 2014-06-26
-    if ~beSilent,
+    if ~beSilent
         fprintf(1,'Using BF_NaNCov to approximate correlations between %u objects...',size(dataMatrix,1));
     end
     tic
     R = BF_NaNCov(dataMatrix',1,1);
-    if ~beSilent, fprintf(1,' Done in %s.\n',BF_thetime(toc)); end
-
+    if ~beSilent
+        fprintf(1,' Done in %s.\n',BF_thetime(toc));
+    end
 
 case {'euclidean','Euclidean','corr','correlation','abscorr'}
     % First use in-built pdist, which is fast
@@ -113,8 +114,12 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
         fprintf(1,'First computing pairwise distances using pdist...');
     end
     tic
-    if strcmp(distMetric,'abscorr')
-        R = pdist(dataMatrix,'corr');
+    if strcmp(distMetric,'abscorr') || strcmp(distMetric,'abscorr')
+        if minPropGood==0
+            R = 1 - corr(dataMatrix,'type','Pearson','rows','complete');
+        else
+            R = pdist(dataMatrix,'corr');
+        end
     else
         R = pdist(dataMatrix,distMetric);
     end
@@ -157,7 +162,8 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
         end
         clear NaNtimer % stop the timer
         if any(isnan(R(:)))
-            warning('%u pairs still produce NaNs, with less than %.3f%% overlap',sum(isnan(R(:)))/2,minPropGood);
+            warning('%u pairs still produce NaNs, with less than %.3f%% overlap',...
+                                    sum(isnan(R(:)))/2,minPropGood);
         end
     end
 otherwise
