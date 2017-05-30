@@ -156,7 +156,7 @@ calcQuality = zeros(numCalc,1); % Quality of output from each operation
 calcTimes = nan(numCalc,1); % Calculation time for each operation
 
 % --------------------------------------------------------------------------
-%% Pre-Processing
+%% Pre-processing
 % --------------------------------------------------------------------------
 % y is a z-scored transformation of the time series:
 y = zscore(x);
@@ -165,6 +165,18 @@ y = zscore(x);
 % Operations take these as inputs.
 
 fullTimer = tic;
+
+%-------------------------------------------------------------------------------
+% Precompute dependents
+%-------------------------------------------------------------------------------
+% Some functions rely on the same set of basic measurements
+% Can precompute them to save time (especially for longer time series)
+dependents = struct();
+dependents.firstZeroACF = CO_FirstZero(y,'ac');
+dependents.firstMinMI = CO_FirstMin(y,'mi');
+dependents.fnnMarwin_1 = NL_crptool_fnn(y,10,2,1,0.4,[]);
+dependents.fnnMarwin_mi = NL_crptool_fnn(y,10,2,dependents.firstMinMI,0.4,[]);
+dependents.fnnMarwin_mi = NL_crptool_fnn(y,10,2,1,0.4,[]);
 
 % --------------------------------------------------------------------------
 %% Evaluate all master operation functions (maybe in parallel)
