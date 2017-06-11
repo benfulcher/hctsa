@@ -102,7 +102,7 @@ end
 % ------------------------------------------------------------------------------
 %% Provide some user feedback
 % ------------------------------------------------------------------------------
-if (doRemove == 0) % clear data
+if ~doRemove % clear data
     doWhat = 'Clear data from';
 else
     doWhat = '*PERMENANTLY REMOVE*';
@@ -113,16 +113,14 @@ for i = 1:sum(doThese)
     fprintf(1,'%s [%u] %s\n',doWhat,IDs(iThese(i)),dataStruct(iThese(i)).(theNameField));
 end
 
-if doRemove == 0 % clear data
-    input(sprintf(['**Preparing to clear all calculated data for %u %s.\n' ...
-                        '[press any key to continue, ctrl-C to abort]'], ...
-                                    sum(doThese),theWhat),'s');
-elseif doRemove == 1
-    input(sprintf(['Preparing to REMOVE %u %s -- DRASTIC STUFF! ' ...
+if doRemove % clear data
+	input(sprintf(['Preparing to REMOVE %u %s -- DRASTIC STUFF! ' ...
             'I HOPE THIS IS OK?!\n[press any key to continue, ctrl-C to abort]'], ...
                                 sum(doThese),theWhat),'s');
 else
-    error('Specify either 0 (to clear data), or 1 (to remove)')
+    input(sprintf(['**Preparing to clear all calculated data for %u %s.\n' ...
+                        '[press any key to continue, ctrl-C to abort]'], ...
+                                    sum(doThese),theWhat),'s');
 end
 
 % ------------------------------------------------------------------------------
@@ -141,13 +139,13 @@ if doRemove
 end
 
 if strcmp(tsOrOps,'mops')
-	save(whatDataFile,'MasterOperations','-v7.3','-append');
+	save(whatDataFile,'MasterOperations','-append');
 else
 	% Clear or remove data from local matrices:
 	TS_DataMat = f_clear_remove(TS_DataMat,doThese,tsOrOps,doRemove);
 
 	% Save back to file
-	save(whatDataFile,'TS_DataMat','TimeSeries','Operations','-v7.3','-append');
+	save(whatDataFile,'TS_DataMat','TimeSeries','Operations','-append');
 
 	% Repeat for any other matrix data files:
 	varNames = whos('-file',whatDataFile);
@@ -155,12 +153,12 @@ else
 	if ismember('TS_Quality',varNames)
 	    load(whatDataFile,'TS_Quality')
 	    TS_Quality = f_clear_remove(TS_Quality,doThese,tsOrOps,doRemove);
-	    save(whatDataFile,'TS_Quality','-v7.3','-append');
+	    save(whatDataFile,'TS_Quality','-append');
 	end
 	if ismember('TS_CalcTime',varNames)
 	    load(whatDataFile,'TS_CalcTime')
 	    TS_CalcTime = f_clear_remove(TS_CalcTime,doThese,tsOrOps,doRemove);
-	    save(whatDataFile,'TS_CalcTime','-v7.3','-append');
+	    save(whatDataFile,'TS_CalcTime','-append');
 	end
 end
 

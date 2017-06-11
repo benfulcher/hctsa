@@ -104,6 +104,12 @@ switch subsetHow
         error('Unknown specifier, ''%s''',subsetHow);
 end
 
+if length(r) < 5
+    % It's not really appropriate to compute statistics on less than 5 datapoints
+    warning('Time series too short')
+    out = NaN;
+end
+
 % ------------------------------------------------------------------------------
 % Compare statistics of this subset to those obtained from the full time series
 % ------------------------------------------------------------------------------
@@ -115,6 +121,5 @@ out.skewness = abs(1-skewness(y(r)) / skewness(y)); % how far from true
 out.kurtosis = abs(1-kurtosis(y(r)) / kurtosis(y)); % how far from true
 out.ac1 = abs(1 - CO_AutoCorr(y(r),1,'Fourier') / CO_AutoCorr(y,1,'Fourier')); % how far from true
 out.sampen101 = PN_sampenc(y(r),1,0.1,1) / PN_sampenc(y,1,0.1,1);
-
 
 end

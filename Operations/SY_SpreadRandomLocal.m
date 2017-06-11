@@ -80,9 +80,9 @@ end
 % Check the parameters are appropriate for the length of the input time series:
 N = length(y); % the length of the time series
 if l > 0.9*N % operation is not suitable -- time series is too short
-	warning(['SY_SpreadRandomLocal: This time series (N = %u) ' ...
-                                'is too short to use l = %.1f\n'],N,l)
-    out = NaN; return % NaN means not suitable
+	warning('This time series (N = %u) is too short to use l = %.1f\n',N,l)
+    out = NaN;
+    return % NaN means not suitable
 end
 
 if nargin < 4

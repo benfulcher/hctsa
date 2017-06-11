@@ -45,7 +45,7 @@ if nargin < 6
     numClasses = max(yTrain);
 end
 if nargin < 7
-    beVerbose = 0;
+    beVerbose = false;
 end
 if nargin < 8 || isempty(whatLoss)
     % See if it's a balanced problem, and set defaults accordingly
@@ -54,10 +54,10 @@ if nargin < 8 || isempty(whatLoss)
     isBalanced = all(classNumbers==classNumbers(1));
     if isBalanced
         whatLoss = 'acc';
-        reWeight = 0;
+        reWeight = false;
     else
         whatLoss = 'balancedAcc';
-        reWeight = 1;
+        reWeight = true;
         if beVerbose
             fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
         end
