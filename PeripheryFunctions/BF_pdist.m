@@ -111,12 +111,12 @@ case {'corr_fast','abscorr_fast'}
 case {'euclidean','Euclidean','corr','correlation','abscorr'}
     % First use in-built pdist, which is fast
     if ~beSilent
-        fprintf(1,'First computing pairwise distances using pdist...');
+        fprintf(1,'First computing pairwise distances...');
     end
     tic
-    if strcmp(distMetric,'abscorr') || strcmp(distMetric,'abscorr')
+    if strcmp(distMetric,'abscorr') || strcmp(distMetric,'corr')
         if minPropGood==0
-            R = 1 - corr(dataMatrix,'type','Pearson','rows','complete');
+            R = 1 - corr(dataMatrix','type','Pearson','rows','complete');
         else
             R = pdist(dataMatrix,'corr');
         end
