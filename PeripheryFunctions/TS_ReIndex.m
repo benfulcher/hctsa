@@ -82,7 +82,7 @@ if strcmp(tsOrOps,'ts') || strcmp(tsOrOps,'both')
     end
 
     % Save back:
-    save(dataFile,'TimeSeries','-v7.3','-append')
+    save(dataFile,'TimeSeries','-append')
     fprintf(1,'Time series re-indexed and saved back to %s.\n',dataFile);
 end
 
@@ -101,7 +101,7 @@ if strcmp(tsOrOps,'ops') || strcmp(tsOrOps,'both')
     end
 
     % Save back:
-    save(dataFile,'Operations','-v7.3','-append')
+    save(dataFile,'Operations','-append')
     fprintf(1,'Operations re-indexed and saved back to %s.\n',dataFile);
 end
 
