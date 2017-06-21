@@ -215,7 +215,7 @@ if saveBack
     TimeSeries = cell2struct([squeeze(struct2cell(TimeSeries));theGroupsCell],newFieldNames);
 
     % Save everything back to file:
-    save(theFile,'TimeSeries','groupNames','-v7.3','-append')
+    save(theFile,'TimeSeries','groupNames','-append')
     fprintf(1,' Saved.\n');
 end
 
