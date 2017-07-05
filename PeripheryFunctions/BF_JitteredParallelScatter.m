@@ -11,7 +11,7 @@ function [ff,xx] = BF_JitteredParallelScatter(dataCell,addMeans,doveTail,makeFig
 %
 %---EXAMPLE USAGE:
 % dataCell = {randn(1000,1),randn(500,1)*2+1};
-% BF_JitteredParallelScatter(dataCell,1,1,1);
+% BF_JitteredParallelScatter(dataCell,true,true,true);
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -37,17 +37,17 @@ function [ff,xx] = BF_JitteredParallelScatter(dataCell,addMeans,doveTail,makeFig
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    addMeans = 1;
+    addMeans = true;
     % Add strip for mean of each group by default
 end
 
 if nargin < 3
-    doveTail = 1;
+    doveTail = true;
     % Add kernel distribution
 end
 
 if nargin < 4
-    makeFigure = 1;
+    makeFigure = true;
 end
 
 if nargin < 5
@@ -83,7 +83,7 @@ end
 
 % Custom colormap
 if ~isfield(extraParams,'theColors')
-    if numGroups<=3
+    if numGroups <= 3
         theColors = BF_getcmap('set1',numGroups,1);
     else
         theColors = BF_getcmap('spectral',numGroups,1);
