@@ -3,7 +3,7 @@ function out = CO_AutoCorr(y,tau,whatMethod)
 %
 %---INPUTS:
 % y, a scalar time series column vector.
-% 
+%
 % tau, the time-delay. If tau is a scalar, returns autocorrelation for y at that
 %       lag. If tau is a vector, returns autocorrelations for y at that set of
 %       lags. Can set tau empty, [], to return the full function for the
@@ -124,7 +124,6 @@ case 'TimeDomain'
     % Estimate mean and standard deviation from each portion of the time series
 
     N = length(y); % time-series length
-
 
     if length(tau) == 1
         % Output a single value at the given time-lag:

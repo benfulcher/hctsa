@@ -28,16 +28,16 @@ function TS_SingleFeature(whatData,featID,makeViolin,makeNewFigure,whatStat,beVo
 %-------------------------------------------------------------------------------
 % Check Inputs:
 if nargin < 3
-    makeViolin = 0;
+    makeViolin = false;
 end
 if nargin < 4
-    makeNewFigure = 0;
+    makeNewFigure = false;
 end
 if nargin < 5
     whatStat = [];
 end
 if nargin < 6
-    beVocal = 1;
+    beVocal = true;
 end
 
 %-------------------------------------------------------------------------------

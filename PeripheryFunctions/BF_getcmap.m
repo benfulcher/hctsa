@@ -62,10 +62,10 @@ if nargin < 2 || isempty(numGrads)
     numGrads = 6;
 end
 if nargin < 3 || isempty(cellOut)
-    cellOut = 0; % output as matrix for colourmap instead
+    cellOut = false; % output as matrix for colourmap instead
 end
 if nargin < 4 || isempty(flipMe)
-    flipMe = 0; % flips order of output
+    flipMe = false; % flips order of output
 end
 
 % Minimum number of groups is 3 for some color maps:

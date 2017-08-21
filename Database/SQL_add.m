@@ -1,4 +1,4 @@
-function structArray = SQL_add(addWhat, inputFile, forDatabase, beVocal)
+function structArray = SQL_add(addWhat,inputFile,forDatabase,beVocal)
 % SQL_add   Interpret a structured input file of time series, operations,
 %           or master operations.
 %
@@ -832,36 +832,12 @@ if ismember(addWhat,{'mops','ops'}) % there may be new links
         error('\nOops! Error finding links between Operations and MasterOperations:\n%s\n',emsg);
     end
 
-    %     % if strcmp(addWhat,'ops')
-    %     %     % operations were imported -- match their MasterLabels with elements of the MasterOperations table using mySQL JOIN
-    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
-    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE o.op_id > %u',maxId];
-    %     % else
-    %     %     InsertString = ['INSERT INTO MasterPointerRelate SELECT m.mop_id,o.op_id FROM MasterOperations m JOIN ' ...
-    %     %                         'Operations o ON m.MasterLabel = o.MasterLabel WHERE m.mop_id > %u',maxId];
-    %     % end
-    %
-
     updateString = sprintf(['UPDATE MasterOperations AS m SET NPointTo = ' ...
                     '(SELECT COUNT(o.mop_id) FROM Operations AS o WHERE m.mop_id = o.mop_id)']);
     [~,emsg] = mysql_dbexecute(dbc, updateString);
     if ~isempty(emsg)
         error('Error counting NPointTo operations for mop_id = %u\n%s\n',M_ids(k),emsg);
     end
-
-    % M_ids = mysql_dbquery(dbc,'SELECT mop_id FROM MasterOperations');
-    % M_ids = vertcat(M_ids{:}); % vector of master_ids
-    % for k = 1:length(M_ids)
-    %     updateString = sprintf(['UPDATE MasterOperations SET NPointTo = ' ...
-    %                     '(SELECT COUNT(mop_id) FROM Operations WHERE mop_id = %u)' ...
-    %                         'WHERE mop_id = %u'],M_ids(k),M_ids(k));
-    %     [~,emsg] = mysql_dbexecute(dbc, updateString);
-    %     if ~isempty(emsg)
-    %         fprintf(1,'Error counting NPointTo operations for mop_id = %u\n',M_ids(k));
-    %         fprintf(1,'%s\n',emsg)
-    %         keyboard
-    %     end
-    % end
 
 end
 
