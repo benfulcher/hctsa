@@ -503,7 +503,7 @@ gitInfo = gitInfoDatabase;
 outputFileName = 'HCTSA.mat';
 fprintf(1,'Saving local versions of the data to %s...',outputFileName);
 saveTimer = tic;
-fromDatabase = 1; % mark that we retrieved this data from the mySQL database
+fromDatabase = true; % mark that we retrieved this data from the mySQL database
 save('HCTSA.mat','TimeSeries','Operations','MasterOperations','fromDatabase','gitInfo','-v7.3');
 switch retrieveWhatData
 case 'all'

@@ -64,7 +64,7 @@ MasterOperations = TS_GetFromData(whatData,'MasterOperations');
 % First check that fromDatabase exists (for back-compatability):
 fromDatabase = TS_GetFromData(whatData,'fromDatabase');
 if isempty(fromDatabase)
-    fromDatabase = 1; % (legacy: set to 1 by default)
+    fromDatabase = true; % (set to true if doesn't exist; for legacy compatability)
 end
 % Check that we have the groupNames if already assigned labels:
 groupNames = TS_GetFromData(whatData,'groupNames');

@@ -38,7 +38,7 @@ function out = PP_Iterate(y,dtMeth)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doPlot = 0;
+doPlot = false;
 
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
@@ -265,7 +265,7 @@ out.normdiff_lin = stats(10,3);
         f = zscore(f);
 
         % for each return a set of simple little tests:
-        % (1) Is it increasing/decreasing?
+        % (1) Is it increasing/decreasing? (trend)
         %       do this by the sum of differences; could take sign?
         g(1) = sum(diff(f));
 

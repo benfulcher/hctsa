@@ -67,7 +67,7 @@ if nargin < 3 || isempty(fileName_HCTSA)
 end
 
 if nargin < 4
-    classVarFilter = 0; % don't filter on individual class variance > 0 by default
+    classVarFilter = false; % don't filter on individual class variance > 0 by default
 end
 
 if nargin < 5
@@ -86,7 +86,7 @@ load(whatDataFile,'TS_Quality','MasterOperations');
 % First check that fromDatabase exists (for back-compatability)
 fromDatabase = TS_GetFromData(fileName_HCTSA,'fromDatabase');
 if isempty(fromDatabase)
-    fromDatabase = true; % (legacy: set to 1 by default)
+    fromDatabase = true; % (legacy)
 end
 
 % Check that we have the groupNames if already assigned labels

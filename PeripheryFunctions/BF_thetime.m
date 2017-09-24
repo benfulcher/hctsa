@@ -39,7 +39,7 @@ function timeString = BF_thetime(tsec,formatLong)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(formatLong)
-    formatLong = 0; % Set to 1 to use a longer format for the unit
+    formatLong = false; % Set to 1 to use a longer format for the unit
 end
 
 
