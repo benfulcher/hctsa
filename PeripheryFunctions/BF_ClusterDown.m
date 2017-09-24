@@ -28,7 +28,7 @@ function [distMat_cl,cluster_Groupi,ord,handles] = BF_ClusterDown(distMat,vararg
 %               ax1 (dendrogram), ax2 (pairwise correlation matrix)
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

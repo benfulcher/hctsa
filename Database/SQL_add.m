@@ -16,7 +16,7 @@ function structArray = SQL_add(addWhat,inputFile,forDatabase,beVocal)
 % beVocal: if 1 (default) gives user feedback on the input process.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:

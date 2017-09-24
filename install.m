@@ -1,7 +1,7 @@
 % INSTALL   Installs the hctsa code package from scratch.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2016, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite:
