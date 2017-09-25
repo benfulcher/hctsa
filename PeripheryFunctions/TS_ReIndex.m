@@ -49,15 +49,14 @@ if nargin < 3
     overRide = false; % check with the user that they really want to do this
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Load data from file
-% ------------------------------------------------------------------------------
-
+%-------------------------------------------------------------------------------
 [~,TimeSeries,Operations,dataFile] = TS_LoadData(whatData);
 numTimeSeries = length(TimeSeries);
 numOperations = length(Operations);
 
-load(dataFile,'fromDatabase')
+fromDatabase = TS_GetFromData(dataFile,'fromDatabase');
 if fromDatabase
     error(['Shouldn''t be re-indexing data from a mySQL database, as it will' ...
                     ' no longer be matched to the database index']);

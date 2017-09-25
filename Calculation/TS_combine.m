@@ -198,10 +198,23 @@ if merge_features
         error('Some operations overlap between the two files :-/');
     end
 
-    % All unique, so can concatenate:
+    %-------------------------------------------------------------------------------
+    % Make sure that Master Operation IDs do not clash by realigning:
+    %-------------------------------------------------------------------------------
+    maxID1 = max([loadedData{1}.MasterOperations.ID]);
+    minID2 = min([loadedData{2}.Operations.MasterID]);
+    loadedData{2}.Operations.MasterID = loadedData{2}.Operations.MasterID ...
+                        - minID2 + maxID1 + 1;
+    loadedData{2}.MasterOperations.ID = loadedData{2}.MasterOperations.ID - minID2 + maxID1 + 1;
+
+    %-------------------------------------------------------------------------------
+    % All unique, so can simply concatenate:
+    %-------------------------------------------------------------------------------
     Operations = cell2struct([squeeze(struct2cell(loadedData{1}.Operations)), ...
                               squeeze(struct2cell(loadedData{2}.Operations))], ...
                                      fieldnames(loadedData{1}.Operations));
+    fprintf(1,'%u,%u -> %u Operations\n',length(loadedData{1}.Operations),...
+                            length(loadedData{2}.Operations),length(Operations));
 
     % ------------------------------------------------------------------------------
     % Construct a union of MasterOperations
@@ -213,6 +226,8 @@ if merge_features
     MasterOperations = cell2struct([squeeze(struct2cell(loadedData{1}.MasterOperations)), ...
                               squeeze(struct2cell(loadedData{2}.MasterOperations))], ...
                                      fieldnames(loadedData{1}.MasterOperations));
+    fprintf(1,'%u,%u -> %u MasterOperations\n',length(loadedData{1}.MasterOperations),...
+                     length(loadedData{2}.MasterOperations),length(MasterOperations));
 
 else
     %===============================================================================
@@ -420,7 +435,10 @@ fprintf(1,'%s contains %u time series and %u operations.\n',outputFileName, ...
 %-------------------------------------------------------------------------------
 % ReIndex??
 %-------------------------------------------------------------------------------
-if needReIndex
+if merge_features
+    TS_ReIndex(outputFileName,'ops',true);
+elseif needReIndex
+    % Only re-index if ther are duplicate IDs in the TimeSeries structure
     fprintf(1,'There are duplicate IDs in the time series -- we need to reindex\n');
     TS_ReIndex(outputFileName,'ts',true);
 end

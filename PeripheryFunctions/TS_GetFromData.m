@@ -10,6 +10,9 @@ function result = TS_GetFromData(dataSource,dataField)
 %---OUTPUTS:
 % Result is the variable extracted from either the file or structure (depending
 % on the type of dataSource)
+%
+%---EXAMPLE USAGE:
+% fromDatabase = TS_GetFromData('HCTSA_EEGDataset.mat','fromDatabase');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
