@@ -325,10 +325,10 @@ end
 % ------------------------------------------------------------------------------
 % 3. Data:
 % ------------------------------------------------------------------------------
-if ~(isfield(loadedData{1},'TS_DataMat') && isfield(loadedData{2},'TS_DataMat'))
+if isfield(loadedData{1},'TS_DataMat') && isfield(loadedData{2},'TS_DataMat')
     gotData = true;
 else
-    gotData = false
+    gotData = false;
 end
 
 if gotData
