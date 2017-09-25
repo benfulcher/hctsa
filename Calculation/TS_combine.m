@@ -347,7 +347,7 @@ end
 % ------------------------------------------------------------------------------
 [gotData,TS_DataMat] = MergeMe(loadedData,'TS_DataMat',merge_features,ix_ts);
 [gotQuality,TS_Quality] = MergeMe(loadedData,'TS_Quality',merge_features,ix_ts);
-[gotQuality,TS_CalcTime] = MergeMe(loadedData,'TS_CalcTime',merge_features,ix_ts);
+[gotCalcTimes,TS_CalcTime] = MergeMe(loadedData,'TS_CalcTime',merge_features,ix_ts);
 
 % ------------------------------------------------------------------------------
 % Save the results
