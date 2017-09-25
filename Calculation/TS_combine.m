@@ -404,6 +404,8 @@ function [gotTheField,theCombinedMatrix] = MergeMe(loadedData,theField,merge_fea
             theCombinedMatrix = theCombinedMatrix(ix_ts,:);
         end
         fprintf(1,' Done.\n');
+    else
+        theCombinedMatrix = [];
     end
 end
 
