@@ -193,7 +193,7 @@ if merge_features
     %===============================================================================
     % Construct a union of operations
     %===============================================================================
-    [sameOperations, ~] = intersect(loadedData{1}.Operations.Name,loadedData{2}.Operations.Name);
+    [sameOperations, ~] = intersect({loadedData{1}.Operations.Name},{loadedData{2}.Operations.Name});
     if ~isempty(sameOperations)
         error('Some operations overlap between the two files :-/');
     end
@@ -206,7 +206,7 @@ if merge_features
     % ------------------------------------------------------------------------------
     % Construct a union of MasterOperations
     % ------------------------------------------------------------------------------
-    [sameMOperations, ~] = intersect(loadedData{1}.MasterOperations.Name,loadedData{2}.MasterOperations.Name);
+    [sameMOperations, ~] = intersect({loadedData{1}.MasterOperations.Label},{loadedData{2}.MasterOperations.Label});
     if ~isempty(sameMOperations)
         error('Some master operations overlap between the two files :-/');
     end
