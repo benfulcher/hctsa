@@ -69,7 +69,7 @@ if nargin < 3
     compare_tsids = false;
 end
 if compare_tsids
-    fprintf(1,['Assuming both %s and %s came from the same database so that ' ...
+    fprintf(1,['Assuming both %s and %s came from the same database/ID system so that ' ...
             'time series IDs are comparable.\nAny intersection of IDs will be filtered out.\n'],...
             HCTSA_1,HCTSA_2);
 else
@@ -246,7 +246,7 @@ else
     %-------------------------------------------------------------------------------
     % As a basic concatenation, then remove any duplicates
 
-    % Fields should match the default fields, so can concatenate:
+    % Fields now match the default fields, so can concatenate:
     TimeSeries = cell2struct([squeeze(struct2cell(loadedData{1}.TimeSeries)), ...
                               squeeze(struct2cell(loadedData{2}.TimeSeries))], ...
                                     theFieldnames);
@@ -257,19 +257,19 @@ else
     didTrim = false; % whether you remove time series (that appear in both hctsa data files)
 
     if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., retrieved from the same mySQL database)
-        [uniquetsids, ix_ts] = unique(vertcat(TimeSeries.ID)); % will be sorted
+        [uniqueTsids, ix_ts] = unique([TimeSeries.ID]); % will be sorted
         TimeSeries = TimeSeries(ix_ts);
         if ~fromDatabase
             fprintf(1,'Be careful, we are assuming that time series IDs were assigned from a *single* TS_init\n')
         end
         % Check for duplicate indices:
-        if length(uniquetsids) < length(TimeSeries)
+        if length(uniqueTsids) < length(TimeSeries)
             fprintf(1,'We''re assuming that TimeSeries IDs are equivalent between the two input files\n');
             fprintf(1,'We need to trim duplicate time series (with the same IDs)\n');
             fprintf(1,['(NB: This will NOT be appropriate if combinining time series from' ...
                     ' different databases, or produced using separate TS_init commands)\n']);
             fprintf(1,'Trimming %u duplicate time series to a total of %u\n', ...
-                            length(TimeSeries)-length(uniquetsids),length(uniquetsids));
+                            length(TimeSeries)-length(uniqueTsids),length(uniqueTsids));
             didTrim = true;
         else
             fprintf(1,'All time series were distinct, we now have a total of %u.\n',length(TimeSeries));
@@ -286,8 +286,8 @@ else
         end
 
         % Now see if there are duplicate IDs (meaning that we need to reindex):
-        uniquetsids = unique(vertcat(TimeSeries.ID));
-        if length(uniquetsids) < length(TimeSeries)
+        uniqueTsids = unique([TimeSeries.ID]);
+        if length(uniqueTsids) < length(TimeSeries)
             needReIndex = true;
             % This is done at the end (after saving all data)
         end
@@ -399,8 +399,8 @@ function [gotTheField,theCombinedMatrix] = MergeMe(loadedData,theField,merge_fea
         if merge_features
             theCombinedMatrix = [loadedData{1}.(theField),loadedData{2}.(theField)];
         else
-            theCombinedMatrix = [loadedData{1}.(theField)(:,keepopi_1); loadedData{2}.TS_CalcTime(:,keepopi_2)];
-            % Make sure the data matches:
+            theCombinedMatrix = [loadedData{1}.(theField)(:,keepopi_1); loadedData{2}.(theField)(:,keepopi_2)];
+            % Make sure the data matches the new TimeSeries:
             theCombinedMatrix = theCombinedMatrix(ix_ts,:);
         end
         fprintf(1,' Done.\n');
