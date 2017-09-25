@@ -140,7 +140,8 @@ elseif isempty(fieldnames(loadedData{1}.gitInfo)) && isempty(fieldnames(loadedDa
     gitInfo = struct();
 elseif ~strcmp(loadedData{1}.gitInfo.hash,loadedData{2}.gitInfo.hash)
     % Only check the hashes for consistency:
-    error('Git versions are inconsistent between the two HCTSA files.');
+    % error('Git versions are inconsistent between the two HCTSA files.');
+    gitInfo = loadedData{1}.gitInfo;
 else
     gitInfo = loadedData{1}.gitInfo;
 end
@@ -189,6 +190,7 @@ if merge_features
 
     % Ok so same number of time series in both, and all names match:
     TimeSeries = loadedData{1}.TimeSeries; % identical; keep all
+    ix_ts = 1:length(TimeSeries);
 
     %===============================================================================
     % Construct a union of operations
@@ -395,7 +397,14 @@ function [gotTheField,theCombinedMatrix] = MergeMe(loadedData,theField,merge_fea
     end
     if gotTheField
         % Both contain Calculation time matrices
-        fprintf(1,'Combining calculation time matrices...');
+        switch theField
+        case 'TS_DataMat'
+            fprintf(1,'Combining data matrices...');
+        case 'TS_Quality'
+            fprintf(1,'Combining calculation quality matrices...');
+        case 'TS_CalcTime'
+            fprintf(1,'Combining calculation time matrices...');
+        end
         if merge_features
             theCombinedMatrix = [loadedData{1}.(theField),loadedData{2}.(theField)];
         else
