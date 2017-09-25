@@ -1,5 +1,5 @@
-function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,outputFileName)
-% TS_combine   Combine two hctsa datasets.
+function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName)
+% TS_combine   Combine two hctsa datasets (same features, different data)
 %
 % Takes a union of time series, and an intersection of operations from two hctsa
 % datasets and writes the new combined dataset to a new .mat file
@@ -12,23 +12,31 @@ function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,outputFileName)
 % When using TS_init to generate datasets, be aware that the *same* set of
 % operations and master operations must be used in both cases.
 %
+% NB: Use TS_merge if same data, different features
+%
 %---INPUTS:
 % HCTSA_1: the first hctsa dataset (a .mat filename)
 % HCTSA_2: the second hctsa dataset (a .mat filename)
-% compare_tsids: (binary) whether to consider IDs in each file as the same.
+% compare_tsids: (logical) whether to consider IDs in each file as the same.
 %                If the two datasets to be joined are from different databases,
 %                then a union of all time series results, regardless of the
-%                uniqueness of their IDs (0, default).
-%                However, if set to true (1, useful for different parts of a
+%                uniqueness of their IDs (false, default).
+%                However, if set to true (true, useful for different parts of a
 %                dataset stored in the same mySQL database), IDs are matched so
 %                that duplicate time series don't occur in the combined matrix.
+% merge_features: (logical) whehter to merge distinct feature sets that occur
+%                   between the two datasets. By default (false) assumes that
+%                   both datasets were computed using the exact same feature set.
+%                   Setting to true takes the union of the features present in
+%                   both (assumes disjoint).
 % outputFileName: output to a custom .mat file ('HCTSA.mat' by default).
 %
 %---OUTPUTS:
 % Writes a new, combined .mat file (to the outputFileName)
 %
 %---USAGE:
-% Combine two datasets into a new one:
+% Combine two datasets computed using the same set of features, 'HCTSA_1.mat' and
+% 'HCTSA_2.mat', into a new combined HCTSA file:
 % TS_combine('HCTSA_1.mat','HCTSA_2.mat');
 
 % ------------------------------------------------------------------------------
@@ -69,8 +77,12 @@ else
             ' duplicate ts_ids can occur in the resulting matrix.\n'], ...
                                         HCTSA_1,HCTSA_2);
 end
-
 if nargin < 4
+    % By default assumes identical feature sets between the two files:
+    merge_features = false;
+    % (If true, all time series must be identical)
+end
+if nargin < 5
     outputFileName = 'HCTSA.mat';
 end
 if ~strcmp(outputFileName(end-3:end),'.mat')
@@ -133,134 +145,205 @@ else
     gitInfo = loadedData{1}.gitInfo;
 end
 
-% ------------------------------------------------------------------------------
-% Construct a union of time series
-% ------------------------------------------------------------------------------
-% As a basic concatenation, then remove any duplicates
-
-% First want to remove any additional fields
+%-------------------------------------------------------------------------------
+% Remove any additional fields from the TimeSeries structure array:
+%-------------------------------------------------------------------------------
 isExtraField = cellfun(@(x)~ismember(fieldnames(x.TimeSeries),{'ID','Name','Keywords', ...
                             'Length','Data'}),loadedData,'UniformOutput',0);
 for i = 1:2
     if any(isExtraField{i})
-        theextrafields = find(isExtraField{i});
-        thefieldnames = fieldnames(loadedData{i}.TimeSeries);
-        for j = 1:length(theextrafields)
+        theExtraFields = find(isExtraField{i});
+        theFieldnames = fieldnames(loadedData{i}.TimeSeries);
+        for j = 1:length(theExtraFields)
             loadedData{i}.TimeSeries = rmfield(loadedData{i}.TimeSeries,...
-                                                thefieldnames{theextrafields(j)});
-            fprintf(1,'Extra field ''%s'' in %s\n',thefieldnames{theextrafields(j)},HCTSAs{i});
+                                                theFieldnames{theExtraFields(j)});
+            fprintf(1,'Extra field ''%s'' in %s\n',theFieldnames{theExtraFields(j)},HCTSAs{i});
         end
     end
 end
 theFieldnames = fieldnames(loadedData{1}.TimeSeries);
 
-% Now that fields should match the default fields, concatenate:
-TimeSeries = cell2struct([squeeze(struct2cell(loadedData{1}.TimeSeries)), ...
-                          squeeze(struct2cell(loadedData{2}.TimeSeries))], ...
-                                theFieldnames);
-
-%-------------------------------------------------------------------------------
-% Check for time series duplicates
-%-------------------------------------------------------------------------------
-didTrim = false; % whether you remove time series (that appear in both hctsa data files)
 needReIndex = false; % whether you need to reindex the result (combined datasets from different indexes)
 
-if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., retrieved from the same mySQL database)
-    [uniquetsids, ix_ts] = unique(vertcat(TimeSeries.ID));
-    if ~fromDatabase
-        fprintf(1,'Be careful, we are assuming that time series IDs were assigned from a *single* TS_init\n')
-    end
-    if length(uniquetsids) < length(TimeSeries)
-        fprintf(1,'We''re assuming that TimeSeries IDs are equivalent between the two input files\n');
-        fprintf(1,'We need to trim duplicate time series (with the same IDs)\n');
-        fprintf(1,['(NB: This will NOT be appropriate if combinining time series from' ...
-                ' different databases, or produced using separate TS_init commands)\n']);
-        fprintf(1,'Trimming %u duplicate time series to a total of %u\n', ...
-                        length(TimeSeries)-length(uniquetsids),length(uniquetsids));
-        didTrim = true;
-    else
-        % Check for duplicate indices
+if merge_features
+    % Time-series data are identical; features are disjoint
 
-        fprintf(1,'All time series were distinct, we now have a total of %u.\n',length(TimeSeries));
+    %===============================================================================
+    % Check that all time series are identical:
+    %===============================================================================
+    numTimeSeries = arrayfun(@(x)length(loadedData{x}.TimeSeries),1:2);
+    if ~(numTimeSeries(1)==numTimeSeries(2))
+        error(sprintf(['hctsa datasets contain different numbers of\n' ...
+                'time series; TimeSeries IDs are not comparable.']))
     end
-else
-    % Check that time series names are unique, and trim if not:
-    [uniqueTimeSeriesNames, ix_ts] = unique({TimeSeries.Name},'stable');
-    TimeSeries = TimeSeries(ix_ts);
-    numUniqueTimeSeries = length(uniqueTimeSeriesNames);
-    if numUniqueTimeSeries < length(TimeSeries)
-        warning('%u duplicate time series names present in combined dataset -- removed',...
-                                length(TimeSeries) - numUniqueTimeSeries);
-        didTrim = true; % will trim the data matrix and other such matrices with ix_ts later
-    end
+    numTimeSeries = numTimeSeries(1); % both the same
 
-    % Now see if there are duplicate IDs (meaning that we need to reindex):
-    uniquetsids = unique(vertcat(TimeSeries.ID));
-    if length(uniquetsids) < length(TimeSeries)
-        needReIndex = true;
-        % This is done at the end (after saving all data)
-    end
-end
-
-% ------------------------------------------------------------------------------
-% Construct an intersection of operations
-% ------------------------------------------------------------------------------
-% Check that the same number of operations if not from a database:
-if ~fromDatabase
-    numOperations = arrayfun(@(x)length(loadedData{x}.Operations),1:2);
-    if ~(numOperations(1)==numOperations(2))
-        error(['TS_init used to generate hctsa datasets with different numbers of\n' ...
-                'operations; Operation IDs are not comparable.'])
-    end
-    numOperations = numOperations(1); % both the same
-
-    % Check that all operation names match:
-    namesMatch = arrayfun(@(x) strcmp(loadedData{1}.Operations(x).Name,...
-                                      loadedData{2}.Operations(x).Name),...
-                                      1:numOperations);
+    % Check that all TimeSeries names match:
+    namesMatch = arrayfun(@(x) strcmp(loadedData{1}.TimeSeries(x).Name,...
+                                      loadedData{2}.TimeSeries(x).Name),...
+                                      1:numTimeSeries);
     if ~all(namesMatch)
-        error('TS_init used to generate hctsa datasets, and the names of operations do not match');
+        keyboard
+        error('The names of time series in the two files do not match');
     end
 
-    % Ok so same number of operations in both, and all names match:
-    keepopi_1 = 1:numOperations; % range to keep for both is the same
-    keepopi_2 = 1:numOperations; % range to keep for both is the same
-    Operations = loadedData{1}.Operations; % keep all
+    % Ok so same number of time series in both, and all names match:
+    TimeSeries = loadedData{1}.TimeSeries; % identical; keep all
+
+    %===============================================================================
+    % Construct a union of operations
+    %===============================================================================
+    [sameOperations, ~] = intersect(loadedData{1}.Operations.Name,loadedData{2}.Operations.Name);
+    if ~isempty(sameOperations)
+        error('Some operations overlap between the two files :-/');
+    end
+
+    % All unique, so can concatenate:
+    Operations = cell2struct([squeeze(struct2cell(loadedData{1}.Operations)), ...
+                              squeeze(struct2cell(loadedData{2}.Operations))], ...
+                                     fieldnames(loadedData{1}.Operations));
+
+    % ------------------------------------------------------------------------------
+    % Construct a union of MasterOperations
+    % ------------------------------------------------------------------------------
+    [sameMOperations, ~] = intersect(loadedData{1}.MasterOperations.Name,loadedData{2}.MasterOperations.Name);
+    if ~isempty(sameMOperations)
+        error('Some master operations overlap between the two files :-/');
+    end
+    MasterOperations = cell2struct([squeeze(struct2cell(loadedData{1}.MasterOperations)), ...
+                              squeeze(struct2cell(loadedData{2}.MasterOperations))], ...
+                                     fieldnames(loadedData{1}.MasterOperations));
 
 else
-    % --Both datasets are from a database (assume the same database, or
-    % the same operation IDs in both databases)
+    %===============================================================================
+    %===============================================================================
+    % Time-series data are distinct; features overlap
+    %===============================================================================
+    %===============================================================================
 
-    % Take intersection of operation ids, and take information from first input
-    [~,keepopi_1,keepopi_2] = intersect(vertcat(loadedData{1}.Operations.ID),...
-                                        vertcat(loadedData{2}.Operations.ID));
+    %-------------------------------------------------------------------------------
+    % Construct a union of time series
+    %-------------------------------------------------------------------------------
+    % As a basic concatenation, then remove any duplicates
 
-    % Data from first file goes in (should be identical to keepopi_2 in the second file)
-    Operations = loadedData{1}.Operations(keepopi_1);
+    % Fields should match the default fields, so can concatenate:
+    TimeSeries = cell2struct([squeeze(struct2cell(loadedData{1}.TimeSeries)), ...
+                              squeeze(struct2cell(loadedData{2}.TimeSeries))], ...
+                                    theFieldnames);
 
-    fprintf(1,'Keeping the %u overlapping operations.\n',length(Operations));
+    %-------------------------------------------------------------------------------
+    % Check for time series duplicates
+    %-------------------------------------------------------------------------------
+    didTrim = false; % whether you remove time series (that appear in both hctsa data files)
+
+    if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., retrieved from the same mySQL database)
+        [uniquetsids, ix_ts] = unique(vertcat(TimeSeries.ID)); % will be sorted
+        TimeSeries = TimeSeries(ix_ts);
+        if ~fromDatabase
+            fprintf(1,'Be careful, we are assuming that time series IDs were assigned from a *single* TS_init\n')
+        end
+        % Check for duplicate indices:
+        if length(uniquetsids) < length(TimeSeries)
+            fprintf(1,'We''re assuming that TimeSeries IDs are equivalent between the two input files\n');
+            fprintf(1,'We need to trim duplicate time series (with the same IDs)\n');
+            fprintf(1,['(NB: This will NOT be appropriate if combinining time series from' ...
+                    ' different databases, or produced using separate TS_init commands)\n']);
+            fprintf(1,'Trimming %u duplicate time series to a total of %u\n', ...
+                            length(TimeSeries)-length(uniquetsids),length(uniquetsids));
+            didTrim = true;
+        else
+            fprintf(1,'All time series were distinct, we now have a total of %u.\n',length(TimeSeries));
+        end
+    else
+        % Check that time series names are unique, and trim if not:
+        [uniqueTimeSeriesNames, ix_ts] = unique({TimeSeries.Name},'stable');
+        TimeSeries = TimeSeries(ix_ts);
+        numUniqueTimeSeries = length(uniqueTimeSeriesNames);
+        if numUniqueTimeSeries < length(TimeSeries)
+            warning('%u duplicate time series names present in combined dataset -- removed',...
+                                    length(TimeSeries) - numUniqueTimeSeries);
+            didTrim = true; % will trim the data matrix and other such matrices with ix_ts later
+        end
+
+        % Now see if there are duplicate IDs (meaning that we need to reindex):
+        uniquetsids = unique(vertcat(TimeSeries.ID));
+        if length(uniquetsids) < length(TimeSeries)
+            needReIndex = true;
+            % This is done at the end (after saving all data)
+        end
+    end
+
+    % ------------------------------------------------------------------------------
+    % Construct an intersection of operations
+    % ------------------------------------------------------------------------------
+    % Check that the same number of operations if not from a database:
+    if ~fromDatabase
+        numOperations = arrayfun(@(x)length(loadedData{x}.Operations),1:2);
+        if ~(numOperations(1)==numOperations(2))
+            error(sprintf(['TS_init used to generate hctsa datasets with different numbers of\n' ...
+                    'operations; Operation IDs are not comparable.']))
+        end
+        numOperations = numOperations(1); % both the same
+
+        % Check that all operation names match:
+        namesMatch = arrayfun(@(x) strcmp(loadedData{1}.Operations(x).Name,...
+                                          loadedData{2}.Operations(x).Name),...
+                                          1:numOperations);
+        if ~all(namesMatch)
+            error('TS_init used to generate hctsa datasets, and the names of operations do not match');
+        end
+
+        % Ok so same number of operations in both, and all names match:
+        keepopi_1 = 1:numOperations; % range to keep for both is the same
+        keepopi_2 = 1:numOperations; % range to keep for both is the same
+        Operations = loadedData{1}.Operations; % keep all
+
+    else
+        % --Both datasets are from a database (assume the same database, or
+        % the same operation IDs in both databases)
+
+        % Take intersection of operation ids, and take information from first input
+        [~,keepopi_1,keepopi_2] = intersect(vertcat(loadedData{1}.Operations.ID),...
+                                            vertcat(loadedData{2}.Operations.ID));
+
+        % Data from first file goes in (should be identical to keepopi_2 in the second file)
+        Operations = loadedData{1}.Operations(keepopi_1);
+
+        fprintf(1,'Keeping the %u overlapping operations.\n',length(Operations));
+    end
+
+    % ------------------------------------------------------------------------------
+    % Construct an intersection of MasterOperations
+    % ------------------------------------------------------------------------------
+    % Take intersection, like operations -- those that are in both
+    [~,keepmopi_1] = intersect(vertcat(loadedData{1}.MasterOperations.ID),...
+                                        vertcat(loadedData{2}.MasterOperations.ID));
+    MasterOperations = loadedData{1}.MasterOperations(keepmopi_1);
+
 end
-
-% ------------------------------------------------------------------------------
-% Construct an intersection of MasterOperations
-% ------------------------------------------------------------------------------
-% Take intersection, like operations -- those that are in both
-[~,keepmopi_1] = intersect(vertcat(loadedData{1}.MasterOperations.ID),...
-                                    vertcat(loadedData{2}.MasterOperations.ID));
-MasterOperations = loadedData{1}.MasterOperations(keepmopi_1);
 
 % ------------------------------------------------------------------------------
 % 3. Data:
 % ------------------------------------------------------------------------------
-gotData = false;
-if isfield(loadedData{1},'TS_DataMat') && isfield(loadedData{2},'TS_DataMat')
-    % Both contain data matrices
+if ~(isfield(loadedData{1},'TS_DataMat') && isfield(loadedData{2},'TS_DataMat'))
     gotData = true;
+else
+    gotData = false
+end
+
+if gotData
+    % Both hctsa files contain data matrices
     fprintf(1,'Combining data matrices...');
-    TS_DataMat = [loadedData{1}.TS_DataMat(:,keepopi_1); loadedData{2}.TS_DataMat(:,keepopi_2)];
-    if didTrim
-        % Trimmed time series above, need to make sure the data matches now:
-        TS_DataMat = TS_DataMat(ix_ts,:);
+    if merge_features
+        % time series are identical, operations are distinct: simple merge:
+        TS_DataMat = [loadedData{1}.TS_DataMat,loadedData{2}.TS_DataMat];
+    else
+        % Time series are distinct; operations made to match as intersection of two datasets
+        TS_DataMat = [loadedData{1}.TS_DataMat(:,keepopi_1); loadedData{2}.TS_DataMat(:,keepopi_2)];
+        if didTrim
+            % Trimmed time series above, need to make sure the data matches now:
+            TS_DataMat = TS_DataMat(ix_ts,:);
+        end
     end
     fprintf(1,' Done.\n');
 end
@@ -268,15 +351,22 @@ end
 % ------------------------------------------------------------------------------
 % 4. Quality
 % ------------------------------------------------------------------------------
-gotQuality = false;
 if isfield(loadedData{1},'TS_Quality') && isfield(loadedData{2},'TS_Quality')
     gotQuality = true;
-    % Both contain Quality matrices
+else
+    gotQuality = false;
+end
+if gotQuality
+    % Both contain quality matrices
     fprintf(1,'Combining quality label matrices...');
-    TS_Quality = [loadedData{1}.TS_Quality(:,keepopi_1); loadedData{2}.TS_Quality(:,keepopi_2)];
-    if didTrim
-        % Trimmed time series above, need to make sure the data matches now:
-        TS_Quality = TS_Quality(ix_ts,:);
+    if merge_features
+        TS_Quality = [loadedData{1}.TS_Quality,loadedData{2}.TS_Quality];
+    else
+        TS_Quality = [loadedData{1}.TS_Quality(:,keepopi_1); loadedData{2}.TS_Quality(:,keepopi_2)];
+        if didTrim
+            % Trimmed time series above, need to make sure the data matches now:
+            TS_Quality = TS_Quality(ix_ts,:);
+        end
     end
     fprintf(1,' Done.\n');
 end
@@ -284,15 +374,22 @@ end
 % ------------------------------------------------------------------------------
 % 5. Calculation times
 % ------------------------------------------------------------------------------
-gotCalcTimes = false;
 if isfield(loadedData{1},'TS_CalcTime') && isfield(loadedData{2},'TS_CalcTime')
     gotCalcTimes = true;
+else
+    gotCalcTimes = false;
+end
+if gotCalcTimes
     % Both contain Calculation time matrices
     fprintf(1,'Combining calculation time matrices...');
-    TS_CalcTime = [loadedData{1}.TS_CalcTime(:,keepopi_1); loadedData{2}.TS_CalcTime(:,keepopi_2)];
-    if didTrim
-        % Trimmed time series above, need to make sure the data matches now:
-        TS_CalcTime = TS_CalcTime(ix_ts,:);
+    if merge_features
+        TS_CalcTime = [loadedData{1}.TS_CalcTime,loadedData{2}.TS_CalcTime];
+    else
+        TS_CalcTime = [loadedData{1}.TS_CalcTime(:,keepopi_1); loadedData{2}.TS_CalcTime(:,keepopi_2)];
+        if didTrim
+            % Trimmed time series above, need to make sure the data matches now:
+            TS_CalcTime = TS_CalcTime(ix_ts,:);
+        end
     end
     fprintf(1,' Done.\n');
 end
@@ -325,7 +422,7 @@ fprintf(1,'%s contains %u time series and %u operations.\n',outputFileName, ...
 %-------------------------------------------------------------------------------
 if needReIndex
     fprintf(1,'There are duplicate IDs in the time series -- we need to reindex\n');
-    TS_ReIndex(outputFileName,'ts',1);
+    TS_ReIndex(outputFileName,'ts',true);
 end
 
 end
