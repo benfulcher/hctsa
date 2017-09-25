@@ -46,7 +46,7 @@ if ~ismember(tsOrOps,{'ts','ops','both'})
 end
 
 if nargin < 3
-    overRide = 0; % check with the user that they really want to do this
+    overRide = false; % check with the user that they really want to do this
 end
 
 % ------------------------------------------------------------------------------

@@ -94,7 +94,7 @@ if doSave
 
     % Copy to a new subset .mat file, then save over with the new subset variables
     copyfile(whatDataFile,outputFileName);
-    save(outputFileName,'TS_DataMat','TimeSeries','Operations','-v7.3','-append');
+    save(outputFileName,'TS_DataMat','TimeSeries','Operations','-append');
 
     % Add additional variables to the new file, if they exist in the previous file:
     varNames = whos('-file',whatDataFile);
@@ -104,31 +104,31 @@ if doSave
     if ismember('ts_clust',varNames)
         ts_clust = struct('distanceMetric','none','Dij',[],...
                     'ord',1:size(TS_DataMat,1),'linkageMethod','none');
-        save(outputFileName,'ts_clust','-v7.3','-append');
+        save(outputFileName,'ts_clust','-append');
     end
     if ismember('op_clust',varNames)
         op_clust = struct('distanceMetric','none','Dij',[],...
                     'ord',1:size(TS_DataMat,2),'linkageMethod','none');
-        save(outputFileName,'op_clust','-v7.3','-append');
+        save(outputFileName,'op_clust','-append');
     end
 
     % Add the quality and calctime matrices if they exist:
     if ismember('TS_Quality',varNames)
         load(whatDataFile,'TS_Quality')
         TS_Quality = TS_Quality(i_keep.TimeSeries,i_keep.Operations);
-        save(outputFileName,'TS_Quality','-v7.3','-append');
+        save(outputFileName,'TS_Quality','-append');
     end
     if ismember('TS_CalcTime',varNames)
         load(whatDataFile,'TS_CalcTime')
         TS_CalcTime = TS_CalcTime(i_keep.TimeSeries,i_keep.Operations);
-        save(outputFileName,'TS_CalcTime','-v7.3','-append');
+        save(outputFileName,'TS_CalcTime','-append');
     end
 
     % Possible inconsistency with grouping (e.g., if you remove a whole group of time series)
     % Matlab doesn't allow you to remove a variable from a .mat file easily
     if ~isempty(ts_ids_keep) && ismember('groupNames',varNames)
         groupNames = {};
-        save(outputFileName,'groupNames','-v7.3','-append');
+        save(outputFileName,'groupNames','-append');
     end
 
     fprintf(1,'Data saved to %s!\n',outputFileName);

@@ -101,10 +101,10 @@ if doSave
     switch tsOrOps
     case 'ts'
         ts_clust = struct('Dij',Dij,'distanceMetric',distanceMetric);
-        save(theFile,'ts_clust','-v7.3','-append')
+        save(theFile,'ts_clust','-append')
     case 'ops'
         op_clust = struct('Dij',Dij,'distanceMetric',distanceMetric);
-        save(theFile,'op_clust','-v7.3','-append')
+        save(theFile,'op_clust','-append')
     end
 
     fprintf(1,' Done.\n');

@@ -168,7 +168,7 @@ needReIndex = false; % whether you need to reindex the result (combined datasets
 if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., retrieved from the same mySQL database)
     [uniquetsids, ix_ts] = unique(vertcat(TimeSeries.ID));
     if ~fromDatabase
-        warning('Be careful, we are assuming that time series IDs were assigned from a *single* TS_init')
+        fprintf(1,'Be careful, we are assuming that time series IDs were assigned from a *single* TS_init\n')
     end
     if length(uniquetsids) < length(TimeSeries)
         fprintf(1,'We''re assuming that TimeSeries IDs are equivalent between the two input files\n');

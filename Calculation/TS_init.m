@@ -76,6 +76,16 @@ if exist(['./',outputFile],'file')
     end
 end
 
+%-------------------------------------------------------------------------------
+% First check that all input files provided exist:
+%-------------------------------------------------------------------------------
+checkFiles = {INP_ts,INP_mops,INP_ops};
+for i = 1:3
+    if ~exist(checkFiles{i},'file')
+        error('Unknown file: ''%s''',checkFiles{i});
+    end
+end
+
 % ------------------------------------------------------------------------------
 % Get time series, operations, master operations into structure arrays
 % ------------------------------------------------------------------------------
