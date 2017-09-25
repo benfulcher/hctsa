@@ -203,9 +203,14 @@ if merge_features
     %-------------------------------------------------------------------------------
     maxID1 = max([loadedData{1}.MasterOperations.ID]);
     minID2 = min([loadedData{2}.Operations.MasterID]);
-    loadedData{2}.Operations.MasterID = loadedData{2}.Operations.MasterID ...
-                        - minID2 + maxID1 + 1;
-    loadedData{2}.MasterOperations.ID = loadedData{2}.MasterOperations.ID - minID2 + maxID1 + 1;
+    newOpMasterIDs = [loadedData{2}.Operations.MasterID] - minID2 + maxID1 + 1;
+    for i = 1:length(newOpMasterIDs)
+        loadedData{2}.Operations(i).MasterID = newOpMasterIDs(i);
+    end
+    newMopMasterIDs = [loadedData{2}.MasterOperations.ID] - minID2 + maxID1 + 1;
+    for i = 1:length(newMopMasterIDs)
+        loadedData{2}.MasterOperations.ID = newMopMasterIDs(i);
+    end
 
     %-------------------------------------------------------------------------------
     % All unique, so can simply concatenate:
@@ -338,76 +343,11 @@ else
 end
 
 % ------------------------------------------------------------------------------
-% 3. Data:
+% Assemble combined data/quality/calctime matrices:
 % ------------------------------------------------------------------------------
-if isfield(loadedData{1},'TS_DataMat') && isfield(loadedData{2},'TS_DataMat')
-    gotData = true;
-else
-    gotData = false;
-end
-
-if gotData
-    % Both hctsa files contain data matrices
-    fprintf(1,'Combining data matrices...');
-    if merge_features
-        % time series are identical, operations are distinct: simple merge:
-        TS_DataMat = [loadedData{1}.TS_DataMat,loadedData{2}.TS_DataMat];
-    else
-        % Time series are distinct; operations made to match as intersection of two datasets
-        TS_DataMat = [loadedData{1}.TS_DataMat(:,keepopi_1); loadedData{2}.TS_DataMat(:,keepopi_2)];
-        if didTrim
-            % Trimmed time series above, need to make sure the data matches now:
-            TS_DataMat = TS_DataMat(ix_ts,:);
-        end
-    end
-    fprintf(1,' Done.\n');
-end
-
-% ------------------------------------------------------------------------------
-% 4. Quality
-% ------------------------------------------------------------------------------
-if isfield(loadedData{1},'TS_Quality') && isfield(loadedData{2},'TS_Quality')
-    gotQuality = true;
-else
-    gotQuality = false;
-end
-if gotQuality
-    % Both contain quality matrices
-    fprintf(1,'Combining quality label matrices...');
-    if merge_features
-        TS_Quality = [loadedData{1}.TS_Quality,loadedData{2}.TS_Quality];
-    else
-        TS_Quality = [loadedData{1}.TS_Quality(:,keepopi_1); loadedData{2}.TS_Quality(:,keepopi_2)];
-        if didTrim
-            % Trimmed time series above, need to make sure the data matches now:
-            TS_Quality = TS_Quality(ix_ts,:);
-        end
-    end
-    fprintf(1,' Done.\n');
-end
-
-% ------------------------------------------------------------------------------
-% 5. Calculation times
-% ------------------------------------------------------------------------------
-if isfield(loadedData{1},'TS_CalcTime') && isfield(loadedData{2},'TS_CalcTime')
-    gotCalcTimes = true;
-else
-    gotCalcTimes = false;
-end
-if gotCalcTimes
-    % Both contain Calculation time matrices
-    fprintf(1,'Combining calculation time matrices...');
-    if merge_features
-        TS_CalcTime = [loadedData{1}.TS_CalcTime,loadedData{2}.TS_CalcTime];
-    else
-        TS_CalcTime = [loadedData{1}.TS_CalcTime(:,keepopi_1); loadedData{2}.TS_CalcTime(:,keepopi_2)];
-        if didTrim
-            % Trimmed time series above, need to make sure the data matches now:
-            TS_CalcTime = TS_CalcTime(ix_ts,:);
-        end
-    end
-    fprintf(1,' Done.\n');
-end
+[gotData,TS_DataMat] = MergeMe(loadedData,'TS_DataMat',merge_features,ix_ts);
+[gotQuality,TS_Quality] = MergeMe(loadedData,'TS_Quality',merge_features,ix_ts);
+[gotQuality,TS_CalcTime] = MergeMe(loadedData,'TS_CalcTime',merge_features,ix_ts);
 
 % ------------------------------------------------------------------------------
 % Save the results
@@ -442,5 +382,30 @@ elseif needReIndex
     fprintf(1,'There are duplicate IDs in the time series -- we need to reindex\n');
     TS_ReIndex(outputFileName,'ts',true);
 end
+
+%===============================================================================
+function [gotTheField,theCombinedMatrix] = MergeMe(loadedData,theField,merge_features,ix_ts)
+    if nargin < 4
+        ix_ts = [];
+    end
+    if isfield(loadedData{1},theField) && isfield(loadedData{2},theField)
+        gotTheField = true;
+    else
+        gotTheField = false;
+    end
+    if gotTheField
+        % Both contain Calculation time matrices
+        fprintf(1,'Combining calculation time matrices...');
+        if merge_features
+            theCombinedMatrix = [loadedData{1}.(theField),loadedData{2}.(theField)];
+        else
+            theCombinedMatrix = [loadedData{1}.(theField)(:,keepopi_1); loadedData{2}.TS_CalcTime(:,keepopi_2)];
+            % Make sure the data matches:
+            theCombinedMatrix = theCombinedMatrix(ix_ts,:);
+        end
+        fprintf(1,' Done.\n');
+    end
+end
+
 
 end
