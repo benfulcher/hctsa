@@ -20,15 +20,19 @@ function OutputToCSV(whatData)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Check Inputs:
+%-------------------------------------------------------------------------------
 if nargin < 1
     whatData = 'raw';
 end
+%-------------------------------------------------------------------------------
 
 % Load in the data:
 [TS_DataMat,TimeSeries,Operations,whatData] = TS_LoadData(whatData);
 
 % Get the quality info:
-load(whatData,'TS_Quality');
+TS_Quality = TS_GetFromData(whatData,'TS_Quality');
 
 % Put NaNs in TS_DataMat where good quality is lacking (ignoring the code):
 TS_DataMat(TS_Quality~=0) = NaN;
