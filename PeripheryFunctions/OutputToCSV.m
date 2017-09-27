@@ -1,8 +1,9 @@
-function OutputToCSV(whatData)
+function OutputToCSV(whatData,writeTimeSeriesData)
 % OutputToCSV     Outputs data to csv for analysis in other enrivonments
 %
 %---INPUTS:
 % whatData, which HCTSA.mat file to use (default: HCTSA.mat)
+% writeTimeSeriesData, (logical) whether to also output time-series data to file
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -26,6 +27,9 @@ function OutputToCSV(whatData)
 if nargin < 1
     whatData = 'raw';
 end
+if nargin < 2
+    writeTimeSeriesData = false;
+end
 %-------------------------------------------------------------------------------
 
 % Load in the data:
@@ -37,16 +41,20 @@ TS_Quality = TS_GetFromData(whatData,'TS_Quality');
 % Put NaNs in TS_DataMat where good quality is lacking (ignoring the code):
 TS_DataMat(TS_Quality~=0) = NaN;
 
+%-------------------------------------------------------------------------------
 % Output data matrix to file:
+%-------------------------------------------------------------------------------
 fileName = 'hctsa_datamatrix.csv';
 dlmwrite(fileName,TS_DataMat,'delimiter',',');
 fprintf(1,'Wrote data to %s\n',fileName);
 
-% Output time series info to file:
+%-------------------------------------------------------------------------------
+% Output time-series info to file:
+%-------------------------------------------------------------------------------
 combinedStrings = arrayfun(@(x)sprintf('%s (%s)',TimeSeries(x).Name,...
         TimeSeries(x).Keywords),1:length(TimeSeries),'UniformOutput',false)';
 % Write it out
-fileName = 'hctsa_timeseries.csv';
+fileName = 'hctsa_timeseries-info.csv';
 fid = fopen(fileName,'w');
 for i = 1:length(TimeSeries)
     fprintf(fid,'%s,%s\n',TimeSeries(i).Name,TimeSeries(i).Keywords);
@@ -54,7 +62,9 @@ end
 fclose(fid);
 fprintf(1,'Wrote time-series info to %s\n',fileName);
 
+%-------------------------------------------------------------------------------
 % Output feature info to file:
+%-------------------------------------------------------------------------------
 fileName = 'hctsa_features.csv';
 fid = fopen(fileName,'w');
 for i = 1:length(Operations)
@@ -62,5 +72,24 @@ for i = 1:length(Operations)
 end
 fclose(fid);
 fprintf(1,'Wrote feature info to %s\n',fileName);
+
+%-------------------------------------------------------------------------------
+% Output time-series data to file:
+%-------------------------------------------------------------------------------
+if writeTimeSeriesData
+    fprintf(1,'Writing time-series data for %u time series...\n',length(TimeSeries));
+    fileName = 'hctsa_timeseries-data.csv';
+    fid = fopen(fileName,'w');
+    for i = 1:length(TimeSeries)
+        x = TimeSeries(i).Data;
+        L = length(x);
+        for t = 1:L-1
+            fprintf(fid,'%.6g,',x(t)); % up to last value with commas
+        end
+        fprintf(fid,'%.6g\n',x(L)); % final value with new line
+    end
+    fclose(fid);
+    fprintf(1,'Wrote time-series data to %s\n',fileName);
+end
 
 end
