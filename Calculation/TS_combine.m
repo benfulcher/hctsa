@@ -138,9 +138,30 @@ if ~isfield(loadedData{1},'gitInfo') || ~isfield(loadedData{2},'gitInfo')
 elseif isempty(fieldnames(loadedData{1}.gitInfo)) && isempty(fieldnames(loadedData{2}.gitInfo))
     % git info not stored in either HCTSA file
     gitInfo = struct();
+elseif isempty(fieldnames(loadedData{1}.gitInfo)) || isempty(fieldnames(loadedData{2}.gitInfo))
+    % git only stored in one HCTSA file
+    if ~isempty(fieldnames(loadedData{1}.gitInfo))
+        hasGit = HCTSA_1;
+        noGit = HCTSA_2;
+    else
+        hasGit = HCTSA_2;
+        noGit = HCTSA_1;
+    end
+    warning(sprintf(['!!!!!!!!!!%s contains git version info, but %s does not.\n',...
+        'If hctsa versions are inconsistent, results may not be comparable!!!!!!!!!!'],hasGit,noGit))
+
 elseif ~strcmp(loadedData{1}.gitInfo.hash,loadedData{2}.gitInfo.hash)
     % Only check the hashes for consistency:
-    % error('Git versions are inconsistent between the two HCTSA files.');
+    warning('Git versions are inconsistent between the two HCTSA files.');
+    warning(sprintf('%s: %s',HCTSA_1,loadedData{1}.gitInfo.hash));
+    warning(sprintf('%s: %s',HCTSA_2,loadedData{2}.gitInfo.hash));
+    reply = input(['GIT VERSIONS ARE INCONSISTENT; DANGEROUS TO COMBINE.\n',...
+        'IF YOU ARE SURE FEATURES ARE COMPUTED IDENTICALLY BETWEEN THE VERSIONS, TYPE ''DANGER'' TO CONTINUE'],'s');
+    if ~strcmp(reply,'DANGER')
+        fprintf(1,'Check the two hctsa versions and recompute features with consistent versions if necessary...\n');
+        return
+    end
+    fprintf(1,'DANGER-ALERT: We''re faking it by assigning git versioning information from %s\n',HCTSA_1);
     gitInfo = loadedData{1}.gitInfo;
 else
     gitInfo = loadedData{1}.gitInfo;
