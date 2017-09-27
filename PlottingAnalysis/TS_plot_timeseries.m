@@ -72,6 +72,9 @@ if isstruct(plotOptions) && isfield(plotOptions,'howToFilter')
     howToFilter = plotOptions.howToFilter;
 else
     howToFilter = 'evenly'; % by default
+    % 'firstcome' (first time series in order)
+    % 'evenly' (evenly spaced across the ordering)
+    % 'rand' (random set; picks different time series each time)
 end
 % Specify the colormap to use
 if isstruct(plotOptions) && isfield(plotOptions,'colorMap')
@@ -97,11 +100,27 @@ if isstruct(plotOptions) && isfield(plotOptions,'newFigure')
 else
     newFigure = true;
 end
+% Sorting time series by length can help visualization
+if isstruct(plotOptions) && isfield(plotOptions,'sortByLength')
+    sortByLength = plotOptions.sortByLength;
+else
+    sortByLength = false;
+end
+% Carpet plot instead...?
+if isstruct(plotOptions) && isfield(plotOptions,'carpetPlot')
+    carpetPlot = plotOptions.carpetPlot;
+else
+    carpetPlot = false;
+end
 
 % ------------------------------------------------------------------------------
 %% Load data
 % ------------------------------------------------------------------------------
 [~,TimeSeries] = TS_LoadData(whatData);
+if sortByLength
+    [~,ix] = sort([TimeSeries.Length],'descend');
+    TimeSeries = TimeSeries(ix);
+end
 
 % ------------------------------------------------------------------------------
 %% Get group indices:
@@ -147,11 +166,9 @@ for i = 1:numGroups
             % just plot first in group (useful when ordered by closeness to
             % cluster centre)
             jj = (1:min(numPerGroup,groupSizes(i)));
-
         case 'evenly'
             % Plot evenly spaced through the given ordering
             jj = unique(round(linspace(1,groupSizes(i),numPerGroup)));
-
         case 'rand'
             % select ones to plot at random
             if groupSizes(i) > numPerGroup
@@ -162,6 +179,9 @@ for i = 1:numGroups
             else
                 jj = (1:min(numPerGroup,groupSizes(i))); % retain order if not subsampling
             end
+            jj = sort(jj,'ascend'); % Order time series in ascending order of index
+        otherwise
+            error('Unknown filtering option ''%s''',howToFilter);
     end
     nhere(i) = length(jj); % could be less than numPerGroup if a smaller group
     rh = sum(nhere(1:i-1))+1:sum(nhere(1:i)); % range here
@@ -178,7 +198,52 @@ numToPlot = length(iPlot);
 %-------------------------------------------------------------------------------
 fprintf(1,'Plotting %u (/%u) time series from %u classes\n', ...
                     numToPlot,sum(cellfun(@length,groupIndices)),numGroups);
+%-------------------------------------------------------------------------------
 
+% Create a new figure if required
+if newFigure
+    figure('color','w');
+end
+
+% Set default for max length if unspecified (as max length of time series)
+if isempty(maxLength)
+    ls = cellfun(@length,{TimeSeries(iPlot(i)).Data});
+    maxN = max(ls); % maximum length of all time series to plot
+else
+    maxN = maxLength;
+end
+
+% Carpet plot is just a grayscale visualization of many time series
+if carpetPlot
+    % Assemble time-series data matrix:
+    X = nan(numToPlot,maxN);
+    for i = 1:numToPlot
+        x = TimeSeries(iPlot(i)).Data;
+        L = min(maxN,length(x));
+        X(i,1:L) = x(1:L);
+        % NB: other plotting uses random subsegment when longer; here just plot first maxN samples
+    end
+    % Normalize:
+    Xnorm = BF_NormalizeMatrix(X','maxmin')'; % linearly normalize across rows
+    imagesc(Xnorm);
+
+    colormap(gray)
+
+    % Add filenames to axes:
+    if displayTitles
+        ax = gca;
+        fn = {TimeSeries(iPlot).Name}; % the name of the time series
+        ax.YTick = 1:numToPlot;
+        ax.YTickLabel = fn;
+        ax.TickLabelInterpreter = 'none';
+    end
+    xlabel('Time (samples)')
+    return
+end
+
+%-------------------------------------------------------------------------------
+% Set colormap
+%-------------------------------------------------------------------------------
 if isnumeric(colorMap)
     % Specified a custom colormap as a matrix
     theColors = mat2cell(colorMap);
@@ -190,12 +255,9 @@ else
     theColors = GiveMeColors(numGroups);
 end
 
-% ------------------------------------------------------------------------------
-% Only create a new figure if required
-if newFigure
-    figure('color','w');
-end
-
+%-------------------------------------------------------------------------------
+% Plot as conventional time series
+%-------------------------------------------------------------------------------
 Ls = zeros(numToPlot,1); % length of each plotted time series
 if plotFreeForm
     % FREEFORM: make all within a single plot with text labels
@@ -207,14 +269,6 @@ if plotFreeForm
     inc = abs(yr(2)-yr(1)); % size of increment
     yr = yr(2:end);
 	ls = zeros(numToPlot,1); % lengths of each time series
-	if isempty(maxLength)
-		for i = 1:numToPlot
-			ls(i) = length(TimeSeries(iPlot(i)).Data);
-		end
-		maxN = max(ls); % maximum length of all time series to plot
-	else
-		maxN = maxLength;
-	end
 
 	for i = 1:numToPlot
 	    fn = TimeSeries(iPlot(i)).Name; % the name of the time series
@@ -295,11 +349,13 @@ else
 	            end
 	        end
 	    end
-	    set(gca,'YTickLabel','');
+        ax = gca;
+	    ax.YTickLabel = '';
 	    if i~=numToPlot
-	        set(gca,'XTickLabel','','FontSize',8) % put the ticks for the last time series
+	        ax.XTickLabel='';
+            ax.FontSize = 8; % put the ticks for the last time series
         else % label the axis
-            xlabel('Time (samples)')
+            ax.XLabel = 'Time (samples)';
         end
 	end
 
