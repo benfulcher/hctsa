@@ -66,6 +66,11 @@ default_whatPlots = {'matrix'};
 check_whatPlots = @(x) iscell(x) || ischar(x);
 addOptional(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 
+% whatPlots
+default_whatDistMetric = '';
+check_whatDistMetric = @ischar;
+addOptional(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric);
+
 %-------------------------------------------------------------------------------
 %% Parse inputs:
 %-------------------------------------------------------------------------------
@@ -82,7 +87,18 @@ tsOrOps = inputP.Results.tsOrOps;
 numNeighbors = inputP.Results.numNeighbors;
 whatDataFile = inputP.Results.whatDataFile;
 whatPlots = inputP.Results.whatPlots;
+whatDistMetric = inputP.Results.whatDistMetric;
 clear inputP;
+
+if isempty(whatDistMetric)
+    switch tsOrOps
+    case 'ts'
+        whatDistMetric = 'euclidean';
+    case 'ops'
+        whatDistMetric = 'spearman';
+    end
+    fprintf(1,'Using default distance metric: %s\n',whatDistMetric);
+end
 
 % ------------------------------------------------------------------------------
 % Load data
@@ -91,24 +107,22 @@ clear inputP;
 switch tsOrOps
 case 'ts'
     dataStruct = TimeSeries;
-    clear Operations
     clustStruct = TS_GetFromData(whatDataFile,'ts_clust');
-    if isempty(clustStruct)
-        % This should be set on normalization -- if missing for some reason, set as default now:
-        clustStruct = struct('distanceMetric','none','Dij',[],...
-                    'ord',1:size(TS_DataMat,1),'linkageMethod','none');
-    end
 case 'ops'
     dataStruct = Operations;
-    clear TimeSeries
     clustStruct = TS_GetFromData(whatDataFile,'op_clust');
-    if isempty(clustStruct)
-        % This should be set on normalization -- if missing for some reason, set as default now:
-        clustStruct = struct('distanceMetric','none','Dij',[],...
-                        'ord',1:size(TS_DataMat,2),'linkageMethod','none');
-    end
+    % Transpose for consistency with later parts of the code
+    % (items are rows)
+    TS_DataMat = TS_DataMat';
+end
+keyboard
+if isempty(clustStruct)
+    % This should be set on normalization -- if missing for some reason, set as default now:
+    clustStruct = struct('distanceMetric','none','Dij',[],...
+                'ord',1:size(TS_DataMat,1),'linkageMethod','none');
 end
 numItems = length(dataStruct);
+clear TimeSeries Operations
 
 if numNeighbors == 0 % code for 'all'
     numNeighbors = numItems - 1;
@@ -127,7 +141,7 @@ else
 end
 
 % ------------------------------------------------------------------------------
-% Compute pairwise distances to all other objects
+% Compute distance from target to all other objects
 % ------------------------------------------------------------------------------
 % (There is potential to store pairwise distance information in the HCTSA*.mat
 % file for retrieval later). Use this if it exists, otherwise calculate for this one.
@@ -138,27 +152,31 @@ if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
     Dij = squareform(clustStruct.Dij);
     Dj = Dij(:,targetInd);
 else
-    % Default: compute euclidean distances for time series and compute
-    %           abs correlation distances for features
-    switch tsOrOps
-    case 'ts'
+    % Compute distances:
+    % (Note that TS_DataMat has been transposed in the case of 'ops')
+    switch whatDistMetric
+    case 'euclidean'
         fprintf(1,'Computing Euclidean distances to %u other time series...',numItems-1);
         Dj = bsxfun(@minus,TS_DataMat,TS_DataMat(targetInd,:));
         Dj = sqrt(mean(Dj.^2,2));
-    case 'ops'
-        % Is there a nicer way of computing abs correlations?
-        fprintf(1,'Computing absolute correlation distances to %u other features...',numItems-1);
-        Dj = zeros(numItems,1);
-        for j = 1:numItems
-            Dj(j) = 1 - abs(corr(TS_DataMat(:,targetInd),TS_DataMat(:,j)));
+    case {'spearman','pearson','corr'}
+        switch whatDistMetric
+        case 'spearman'
+            theType = 'Spearman';
+        case {'pearson','corr'}
+            theType = 'Pearson';
         end
+        % Is there a nicer way of computing abs correlations?
+        fprintf(1,'Computing absolute %s correlation distances to %u other features...',theType,numItems-1);
+        Dj = zeros(numItems,1);
+        keyboard
+        for j = 1:numItems
+            Dj(j) = 1 - abs(corr(TS_DataMat(targetInd,:)',TS_DataMat(j,:)','type',theType));
+        end
+    otherwise
+        error('Unknown distance metric: %s',whatDistMetric);
     end
     fprintf(1,' Done.\n');
-end
-
-if strcmp(tsOrOps,'ops')
-    % Now that distances are computed, transpose for consistency with later parts of the code
-    TS_DataMat = TS_DataMat';
 end
 
 % ------------------------------------------------------------------------------
@@ -227,13 +245,9 @@ end
 % Clustered distance matrix
 % ------------------------------------------------------------------------------
 if any(ismember('matrix',whatPlots))
-    % Do a quick cluster of distance matrix using euclidean distances, for visualization:
-    switch tsOrOps
-    case 'ts'
-        ord = BF_ClusterReorder(Dij,'euclidean','average');
-    case 'ops'
-        ord = BF_ClusterReorder(Dij,'abscorr','average');
-    end
+    % Do a quick cluster of distance matrix using euclidean distances
+    % (just for visualization):
+    ord = BF_ClusterReorder(Dij,'euclidean','average');
     Dij_clust = Dij(ord,ord);
     dataStruct_clust = dataStruct(neighborInd(ord));
 
