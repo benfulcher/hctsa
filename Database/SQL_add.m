@@ -464,7 +464,7 @@ case 'ts' % Prepare toAdd cell for time series
                     TimeSeries(j).Name,TimeSeries(j).Length,TimeSeries(j).Keywords);
             title(titleText,'interpreter','none');
             fprintf(1,'\n%s --- loaded successfully.',titleText);
-            pause(0.01); % wait 0.01 second to show the plotted time series
+            pause(0.005); % Wait 5ms to show the plotted time series!
         end
     end
 
