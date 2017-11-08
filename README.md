@@ -4,10 +4,10 @@
 
 The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualization and analysis functionality.
 
-If you use this software, please read and cite:
+If you use this software, please read and cite these (open access) articles:
 
 * B. D. Fulcher, M. A. Little, N. S. Jones [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83 (2013).
-* B. D. Fulcher and N. S. Jones. [Automatic time-series phenotyping using massive feature extraction](http://biorxiv.org/lookup/doi/10.1101/081463). *bioRxiv* 081463 (2016).
+* B. D. Fulcher and N. S. Jones. [_hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). *Cell Systems* (2017).
 
 Any feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
 
@@ -84,7 +84,7 @@ The following time-series analysis packages are provided with the software (in t
 ## Publications
 
 See the following publications for examples of *hctsa* use:
-* ***Implementation paper introducing the hctsa package, with applications to high throughput phenotyping of C. Elegans and Drosophila movement time series*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. Automatic time-series phenotyping using massive feature extraction. *bioRxiv* 081463 (2016). [Link](http://biorxiv.org/lookup/doi/10.1101/081463).
+* ***Implementation paper introducing the hctsa package, with applications to high throughput phenotyping of C. Elegans and Drosophila movement time series*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction. *Cell Systems* (2017). [Link](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).
 * ***Introduction to feature-based time-series analysis*** &#x1F4D7; : B. D. Fulcher. Feature-based time-series analysis. *arXiv* 1709.08055 (2017) [Link](https://arxiv.org/abs/1709.08055).
 * ***Application to fMRI data*** &#x1F4D7; : S. S. Sethi, V. Zerbi, N. Wenderoth, A. Fornito, B. D. Fulcher. Structural connectome topology relates to regional BOLD signal dynamics in the mouse brain. *Chaos* **27**, 047405 (2017). [Link](http://aip.scitation.org/doi/10.1063/1.4979281), [preprint](http://biorxiv.org/lookup/doi/10.1101/085514).
 * ***Application to time-series data mining*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. Highly comparative feature-based time-series classification. *IEEE Trans. Knowl. Data Eng.* **26**, 3026 (2014). [Link](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425).
