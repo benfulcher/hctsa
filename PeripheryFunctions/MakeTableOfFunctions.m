@@ -1,9 +1,5 @@
-function BF_ResetSeed(resetHow)
-% BF_ResetSeed      Reset the random seed generator in Matlab
-%
-% Allows functions using random numbers to produce repeatable results with a
-% consistent syntax.
-
+function MakeTableOfFunctions()
+% MakeTableOfFunctions Outputs a csv summarizing INP_mops.txt
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -26,21 +22,33 @@ function BF_ResetSeed(resetHow)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-% Check defaults
-if nargin < 1 || isempty(resetHow)
-    resetHow = 'default';
+% Read in INP_mops.txt to get a list of functions
+fid = fopen('INP_mops.txt');
+Mops = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
+fclose(fid);
+Mops = Mops{1};
+Mops = Mops(:,1);
+
+% Split at the parenthesis:
+MopsSplit = regexp(Mops,'(','split','ignorecase');
+mFiles = cellfun(@(x)x{1},MopsSplit,'UniformOutput',false);
+mFiles = unique(mFiles);
+numMFiles = length(mFiles);
+
+% Get help lines as descriptions:
+helpLines = cell(numMFiles,1);
+for i = 1:numMFiles
+    helpMe = help(mFiles{i});
+    newLines = regexp(helpMe,'\n');
+    theTopLine = helpMe(1:newLines(1)-1);
+    notSpaces = regexp(theTopLine,'\w*');
+    helpLines{i} = theTopLine(notSpaces(2):end);
 end
 
-% ------------------------------------------------------------------------------
-% Reset the seed
-switch resetHow
-case 'default'
-    % Reset to the default (the Mersenne Twister with seed 0)
-    rng(0,'twister');
-case 'none' % don't change the seed
-    return
-otherwise
-    error('Now sure how to reset using ''%s''',resetHow);
-end
+% Make a table
+T = table(mFiles,helpLines);
+
+% Output to csv:
+writetable(T,'codeSummary.csv','Delimiter',',','QuoteStrings',true);
 
 end

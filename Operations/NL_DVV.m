@@ -26,8 +26,19 @@ function out = NL_DVV(x,m,numDVs,nd,Ntv,numSurr,randomSeed)
 % http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm
 % http://www.commsp.ee.ic.ac.uk/~mandic/dvv/papers/dvv_proj.pdf
 %
+% ------------------------------------------------------------------------------
 % Modified by Ben Fulcher, 2015-05-13, for use in hctsa.
+% If you use this code for your research, please cite the following two papers:
 %
+% (1) B.D. Fulcher and N.S. Jones, "hctsa: A Computational Framework for Automated
+% Time-Series Phenotyping Using Massive Feature Extraction, Cell Systems (2017).
+% DOI: 10.1016/j.cels.2017.10.001
+%
+% (2) B.D. Fulcher, M.A. Little, N.S. Jones, "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2013).
+% DOI: 10.1098/rsif.2013.0048
+% ------------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   This program is free software; you can redistribute it and/or modify it
 %   under the terms of the GNU General Public License as published by the Free
@@ -45,10 +56,10 @@ function out = NL_DVV(x,m,numDVs,nd,Ntv,numSurr,randomSeed)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Plot output plot:
-doPlot = 0;
+doPlot = false;
 
 % Talk to me:
-beVocal = 0;
+beVocal = false;
 
 % ------------------------------------------------------------------------------
 % Check inputs:

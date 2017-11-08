@@ -5,6 +5,18 @@ function out = SC_MMA(y,doOverlap,scaleRange,qRange)
 
 % ------------------------------------------------------------------------------
 % Modified by Ben Fulcher for use in hctsa, 2015-05-12.
+% If you use this code for your research, please cite the following two papers:
+%
+% (1) B.D. Fulcher and N.S. Jones, "hctsa: A Computational Framework for Automated
+% Time-Series Phenotyping Using Massive Feature Extraction, Cell Systems (2017).
+% DOI: 10.1016/j.cels.2017.10.001
+%
+% (2) B.D. Fulcher, M.A. Little, N.S. Jones, "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2013).
+% DOI: 10.1098/rsif.2013.0048
+% ------------------------------------------------------------------------------
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2014 Jan Gieraltowski
 % ------------------------------------------------------------------------------
@@ -46,7 +58,7 @@ function out = SC_MMA(y,doOverlap,scaleRange,qRange)
 % ------------------------------------------------------------------------------
 
 % Generate a plot:
-doPlot = 0;
+doPlot = false;
 
 % Time-series length:
 N = length(y);
@@ -55,7 +67,7 @@ N = length(y);
 % Check Inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(doOverlap)
-    doOverlap = 0;
+    doOverlap = false;
     % 0 - time series is partitioned into non overlapping windows of analysis,
     % 1- time series is partitioned into overlapping windows of analysis, step between consecutive windows is = 1 (much longer calculations)
 end
@@ -106,7 +118,7 @@ sListFull = unique(round(linspace(minScale,maxScale,numIncrements)));
 timer = tic;
 for s = sListFull
 
-    if doOverlap == 1
+    if doOverlap
         vec = [0:s-1];
         ind = [1:slength-s+1]';
         coordinates = bsxfun(@plus, vec, ind);

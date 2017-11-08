@@ -35,7 +35,17 @@ function out = EN_rpde(x, m, tau, epsilon, T_max)
 % BioMedical Engineering OnLine 2007, 6:23
 % ------------------------------------------------------------------------------
 % Minor tweaks and additional outputs added by Ben Fulcher, 2015-05-15, for use
-% with the hctsa package
+% with the hctsa package.
+% If you use this code for your research, please cite the following two papers:
+%
+% (1) B.D. Fulcher and N.S. Jones, "hctsa: A Computational Framework for Automated
+% Time-Series Phenotyping Using Massive Feature Extraction, Cell Systems (2017).
+% DOI: 10.1016/j.cels.2017.10.001
+%
+% (2) B.D. Fulcher, M.A. Little, N.S. Jones, "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2013).
+% DOI: 10.1098/rsif.2013.0048
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
