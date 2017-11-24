@@ -38,21 +38,32 @@ if nargin < 2 || isempty(binarizeHow)
 end
 
 %-------------------------------------------------------------------------------
+% function to transform real values to 0 if <=0 and 1 if >0:
+%-------------------------------------------------------------------------------
+
+function Y = stepBinary(X)
+
+    Y = zeros(size(X),'like',X);
+    Y(X > 0) = 1;
+    
+end
+
+%-------------------------------------------------------------------------------
 % Do the binary transformation:
 %-------------------------------------------------------------------------------
 
 switch binarizeHow
     case 'diff'
         % Binary signal: 1 for stepwise increases, 0 for stepwise decreases
-        yBin = ((sign(diff(y)))+1)/2;
+        yBin = stepBinary(diff(y));
 
     case 'mean'
         % Binary signal: 1 for above mean, 0 for below mean
-        yBin = (sign(y - mean(y))+1)/2;
+        yBin = stepBinary(y - mean(y));
 
     case 'median'
         % Binary signal: 1 for above median, 0 for below median
-        yBin = (sign(y - median(y))+1)/2;
+        yBin = stepBinary(y - median(y));
 
     case 'iqr'
         % Binary signal: 1 if inside interquartile range, 0 otherwise
