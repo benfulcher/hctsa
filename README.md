@@ -2,7 +2,7 @@
 
 *hctsa* is a software package for running highly comparative time-series analysis using [Matlab](www.mathworks.com/products/matlab/) (full support for versions R2014b or later; for use in python cf. [pyopy](https://github.com/strawlab/pyopy)).
 
-The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualization and analysis functionality.
+The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualizations and analyses.
 
 If you use this software, please read and cite these (open access) articles:
 
@@ -104,18 +104,26 @@ There are a range of open datasets with pre-computed _hctsa_ features.
 * [C. elegans movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
 * [Drosophila movement speed](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Drosophila_melanogaster_movement_speed/3863553) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingFly).
 
-### pyopy
-
-This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
-
-### tsfresh
-Native python time-series code to extract hundreds of time-series features, with in-built feature filtering, is [tsfresh](https://github.com/blue-yonder/tsfresh).
-
 ### Comp-Engine Time Series
 
 An accompanying web resource for this project is [Comp-Engine Time Series](http://www.comp-engine.org/timeseries), which allows users to compare thousands of diverse types of time-series analysis code and time-series data.
+This website also allows you to download large volumes of univariate time-series data.
 Note that the code files on Comp-Engine Time Series are based on an early implementation and rarely match with the updated features and functions contained in this repository.
 
-### pyunicorn
+### `pyopy`
+
+This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
+
+### `tsfresh`
+
+Native python time-series code to extract hundreds of time-series features, with in-built feature filtering, is [tsfresh](https://github.com/blue-yonder/tsfresh).
+
+### `tscompdata` and `tsfeatures`
+
+These R packages are by (Rob Hyndman)[https://twitter.com/robjhyndman].
+The first, [`tscompdata`](https://github.com/robjhyndman/tscompdata), makes available existing collections of time-series data for analysis.
+The second, (`tsfeatures`)[https://github.com/robjhyndman/tsfeatures], includes implementations of a range of time-series features.
+
+### `pyunicorn`
 
 A python-based nonlinear time-series analysis and complex systems code package, [pyunicorn](http://scitation.aip.org/content/aip/journal/chaos/25/11/10.1063/1.4934554).
