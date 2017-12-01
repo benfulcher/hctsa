@@ -7,7 +7,7 @@ Any modifications to toolbox dependencies would be appreciated.
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
-MATLAB TOOLBOXES (NOT PROVIDED)
+MATLAB TOOLBOXES REQUIRED
 ------------------------------------------------------------------------------
 
 Statistics Toolbox (Matlab Toolbox)

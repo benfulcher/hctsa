@@ -136,11 +136,11 @@ end
 %% Open and read the input file
 % ------------------------------------------------------------------------------
 
-% Determine if it's a .mat file:
+% Determine if input is a .mat file or an input text file based on filename extension:
 if strcmp(inputFile(end-3:end),'.mat');
-    isMatFile = 1;
+    isMatFile = true;
 else
-    isMatFile = 0;
+    isMatFile = false;
 end
 
 if ~isMatFile
@@ -420,13 +420,15 @@ case 'ts' % Prepare toAdd cell for time series
         if length(x) > maxL
             beep
             warning(['\n[%u/%u]%s contains %u samples, this framework can efficiently ' ...
-                        'deal with time series up to %u samples\nSkipping this time series...'],...
-                        j,numItems,TimeSeries(j).Name,TimeSeries(j).Length,maxL)
+                'deal with time series up to %u samples\n',...
+                '[Note that this maximum length can be modified within SQL_add]\n',...
+                'Skipping this time series...'],...
+                j,numItems,TimeSeries(j).Name,TimeSeries(j).Length,maxL)
             continue
         end
 
-        % Passed both tests! Assign wasGood = 1
-        wasGood(j) = 1;
+        % Passed both tests! Assign wasGood = true
+        wasGood(j) = true;
 
         % If storing in a database, need to assign the time-series data as text
         % (which will be stored as singles in the case of a .mat file data)
@@ -480,7 +482,7 @@ case 'ts' % Prepare toAdd cell for time series
     end
 
     % Check that some passed quality checks
-    if sum(wasGood)==0
+    if ~any(wasGood)
         fprintf(1,'None of the %u time series in the input file passed quality checks.\n', ...
                                 length(wasGood));
         return

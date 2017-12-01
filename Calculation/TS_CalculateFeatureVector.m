@@ -64,7 +64,7 @@ if isnumeric(tsStruct)
 end
 
 if nargin < 2
-	doParallel = 1;
+	doParallel = true;
 end
 
 if nargin < 3 || isempty(Operations) || ischar(Operations)

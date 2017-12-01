@@ -224,7 +224,6 @@ for i = 1:ntau
             for j = 1:size(y_buff,2);
                 % fit a polynomial of order k in each subsegment
                 p = polyfit(tt,y_buff(:,j),k);
-
                 % remove the trend, store back in y_buff
                 y_buff(:,j) = y_buff(:,j) - polyval(p,tt);
             end
