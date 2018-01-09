@@ -1,1 +1,3 @@
-SY_sine.dat 	synthetic,periodicSY_noisysinusoid.dat synthetic,stochasticSY_noise.dat  synthetic,stochastic,randomnoise
+SY_sine.dat 	synthetic,periodic
+SY_noisysinusoid.dat synthetic,stochastic
+SY_noise.dat  synthetic,stochastic,randomnoise

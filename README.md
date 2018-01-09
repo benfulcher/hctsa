@@ -120,7 +120,7 @@ Native python time-series code to extract hundreds of time-series features, with
 
 ### `tscompdata` and `tsfeatures`
 
-These R packages are by (Rob Hyndman)[https://twitter.com/robjhyndman].
+These R packages are by [Rob Hyndman](https://twitter.com/robjhyndman).
 The first, [`tscompdata`](https://github.com/robjhyndman/tscompdata), makes available existing collections of time-series data for analysis.
 The second, [`tsfeatures`](https://github.com/robjhyndman/tsfeatures), includes implementations of a range of time-series features.
 
