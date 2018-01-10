@@ -905,9 +905,10 @@ SC_FluctAnal(y,2,'dfa',50,1,3,1)	SC_FluctAnal_2_dfa_50_1_3_logi
 SC_FluctAnal(zscore(abs(y)),2,'dfa',50,2,[],1)	SC_FluctAnal_mag_2_dfa_50_2_logi
 SC_FluctAnal(zscore(sign(y)),2,'dfa',50,2,[],1)	SC_FluctAnal_sign_2_dfa_50_2_logi
 SC_MMA(y,0,[],[-5,5]) SC_MMA_0__n5_5
-SP_Summaries(y,'periodogram','hamming',[],0)	SP_Summaries_pgram_hamm
-SP_Summaries(y,'welch','rect',[],0)	            SP_Summaries_welch_rect
-SP_Summaries(y,'fft',[],[],1)	                SP_Summaries_fft_logdev
+SP_Summaries(y,'periodogram','hamming',[],false)	SP_Summaries_pgram_hamm
+SP_Summaries(y,'welch','rect',[],false)	            SP_Summaries_welch_rect
+SP_Summaries(y,'fft',[],[],false)	                SP_Summaries_fft
+SP_Summaries(y,'fft',[],[],true)	                SP_Summaries_fft_logdev
 NL_crptool_fnn(y,10,2,'mi',[],'default')	NL_crptool_fnn_10_2_mi
 NL_crptool_fnn(y,10,2,'ac',[],'default')	NL_crptool_fnn_10_2_ac
 NL_crptool_fnn(y,10,2,1,[],'default')	NL_crptool_fnn_10_2_1
