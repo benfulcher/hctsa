@@ -91,7 +91,6 @@ nfevals = -50; % number of function evaluations (with negative)
 try
     hyp = MF_GP_LearnHyperp(tt,yt,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp);
 catch emsg
-    keyboard
     error('Error learning hyperparameters for time series')
 end
 loghyper = hyp.cov;

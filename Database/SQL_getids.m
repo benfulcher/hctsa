@@ -315,7 +315,9 @@ else
 		end
 		[op_ids,emsg] = mysql_dbquery(dbc,selectString);
 		if ~isempty(emsg)
-			fprintf(1,'Database call failed\n%s\n',selectString); disp(emsg); keyboard
+			fprintf(1,'Database call failed\n%s\n',selectString);
+			disp(emsg);
+			keyboard
 		else
 			op_ids_keep = unique(vertcat(op_ids{:}));
 		end
@@ -336,7 +338,8 @@ else
 				end
 			end
 		else % an error
-			fprintf(1,'Error retrieving the operations from implicated master functions\n%s',emsg); keyboard
+			fprintf(1,'Error retrieving the operations from implicated master functions\n%s',emsg);
+			keyboard
 		end
 	end
 

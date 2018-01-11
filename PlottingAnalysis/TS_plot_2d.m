@@ -250,7 +250,6 @@ if numClasses > 1
             end
         catch emsg
             warning('Error fitting classification model in 2-d space')
-            keyboard
         end
     end
 end

@@ -121,7 +121,7 @@ case 'ops'
     % (items are rows)
     TS_DataMat = TS_DataMat';
 end
-keyboard
+
 if isempty(clustStruct)
     % This should be set on normalization -- if missing for some reason, set as default now:
     clustStruct = struct('distanceMetric','none','Dij',[],...
@@ -173,9 +173,9 @@ else
             theType = 'Pearson';
         end
         % Is there a nicer way of computing abs correlations?
-        fprintf(1,'Computing absolute %s correlation distances to %u other features...',theType,numItems-1);
+        fprintf(1,'Computing absolute %s correlation distances to %u other features...',...
+                        theType,numItems-1);
         Dj = zeros(numItems,1);
-        keyboard
         for j = 1:numItems
             Dj(j) = 1 - abs(corr(TS_DataMat(targetInd,:)',TS_DataMat(j,:)','type',theType));
         end

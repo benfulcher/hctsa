@@ -211,7 +211,6 @@ if merge_features
                                       loadedData{2}.TimeSeries(x).Name),...
                                       1:numTimeSeries);
     if ~all(namesMatch)
-        keyboard
         error('The names of time series in the two files do not match');
     end
 
