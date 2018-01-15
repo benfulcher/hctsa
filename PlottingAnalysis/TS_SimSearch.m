@@ -274,6 +274,7 @@ if any(ismember('matrix',whatPlots))
         ax1.XLim = [1,tsLength];
         xlabel('Time (samples)');
         ax1.TickLabelInterpreter = 'none';
+        NormMinMax = @(x) (x-min(x))/(max(x)-min(x));
         for j = 1:numNeighbors+1
             tsData = dataStruct(neighborInd(ord(j))).Data(1:tsLength);
             lengthHere = min(tsLength,length(tsData));
@@ -398,11 +399,5 @@ if any(ismember(whatPlots,'network'))
                     'dataLabels',dataLabels,...
                     'colorMap','set1');
 end
-
-% ------------------------------------------------------------------------------
-% function X = NormMinMax(x)
-%     X = (x-min(x))/(max(x)-min(x));
-% end
-% ------------------------------------------------------------------------------
 
 end
