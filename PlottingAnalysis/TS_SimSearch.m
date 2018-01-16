@@ -74,7 +74,7 @@ addOptional(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 
 % whatPlots
 default_whatDistMetric = '';
-check_whatDistMetric = @ischar;
+check_whatDistMetric = @(x) islogical(x) || (isnumeric(x) && (x==0 || x==1));
 addOptional(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric);
 
 %-------------------------------------------------------------------------------
@@ -93,6 +93,9 @@ tsOrOps = inputP.Results.tsOrOps;
 numNeighbors = inputP.Results.numNeighbors;
 whatDataFile = inputP.Results.whatDataFile;
 whatPlots = inputP.Results.whatPlots;
+if ischar(whatPlots)
+    whatPlots = {whatPlots};
+end
 whatDistMetric = inputP.Results.whatDistMetric;
 clear inputP;
 
@@ -231,6 +234,7 @@ end
 % Scatter plot for top (up to 12)
 % ------------------------------------------------------------------------------
 if any(ismember(whatPlots,'scatter'))
+    keyboard
     f = figure('color','w');
     for j = 1:min(12,numNeighbors)
         subplot(3,4,j);
@@ -264,8 +268,9 @@ if any(ismember('matrix',whatPlots))
 
     f = figure('color','w');
 
-    % (I) Time-series annotations
-    if strcmp(tsOrOps,'ts')
+    switch tsOrOps
+    case 'ts'
+        % (I) Time-series annotations
         ax1 = subplot(1,5,1); box('on'); hold on
         ax1.YTick = (1:numNeighbors+1);
         ax1.YTickLabel = labels;
@@ -283,11 +288,10 @@ if any(ismember('matrix',whatPlots))
                 plot([1,tsLength],(j+0.5)*ones(2,1),':k')
             end
         end
-
         % (II) Pairwise similarity matrix
         ax2 = subplot(1,5,2:5); box('on'); hold on
-    else
-        % (II) Pairwise similarity matrix
+    case 'ops'
+        % Pairwise similarity matrix only
         ax2 = gca; box('on'); hold on
     end
 
@@ -339,7 +343,10 @@ if any(ismember('matrix',whatPlots))
 
     ax2.YLim = [0.5,numNeighbors+1.5];
     ax2.YTick = 1:numNeighbors+1;
-    if strcmp(tsOrOps,'ops')
+    switch tsOrOps
+    case 'ts'
+        ax2.YTickLabel = [];
+    case 'ops'
         ax2.YTickLabel = labels;
         ax2.TickLabelInterpreter = 'none';
         ylabel('Name');
@@ -397,7 +404,8 @@ if any(ismember(whatPlots,'network'))
                     'linkThresh',[0.9,0.8,0.7,0.6],...
                     'nodeLabels',nodeLabels,...
                     'dataLabels',dataLabels,...
-                    'colorMap','set1');
+                    'colorMap','set1',...
+                    'makeFigure',true);
 end
 
 end

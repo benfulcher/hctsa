@@ -141,15 +141,21 @@ end
 % Get cross-validated accuracy for this single feature using a Naive Bayes linear classifier:
 if isempty(whatStat)
     numFolds = 10;
-    accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,...
-                            [],[],numClasses,1,[],[],numFolds);
-    fprintf(1,'%u-fold cross validated balanced accuracy: %.2f +/- %.2f%%\n',...
+    try
+        accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,...
+                            [],[],numClasses,true,[],[],numFolds);
+        fprintf(1,'%u-fold cross validated balanced accuracy: %.2f +/- %.2f%%\n',...
                             numFolds,mean(accuracy),std(accuracy));
-    statText = sprintf('%.1f%%',mean(accuracy));
+        statText = sprintf('%.1f%%',mean(accuracy));
+    catch emsg
+        accuracy = NaN;
+        statText = '--';
+        warning('Error fitting classification model: %s',emsg.message)
+    end
 else
     if isnumeric(whatStat)
         statText = sprintf('%.1f',whatStat);
-    else % assume text otherwise
+    else % otherwise assume text
         statText = whatStat;
     end
 end

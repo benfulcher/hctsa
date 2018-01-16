@@ -1,4 +1,4 @@
-function [ifeat, testStat, testStat_rand] = TS_TopFeatures(whatData,whatTestStat,varargin)
+function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,varargin)
 % TS_TopFeatures    Top individual features for discriminating labeled time series
 %
 % This function compares each feature in an hctsa dataset individually for its
@@ -289,7 +289,6 @@ end
 %-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'distributions'))
     subPerFig = 16; % subplots per figure
-    % ks_or_hist = 'ks'; % 'ks'/'hist': view as either histograms or kernel-smoothed distributions
 
     % Set the colors to be assigned to groups:
     colors = GiveMeColors(numClasses);
@@ -318,58 +317,10 @@ if any(ismember(whatPlots,'distributions'))
         % Loop through features
         for opi = 1:length(featHere)
             subplot(ceil(length(featHere)/4),4,opi);
-            TS_SingleFeature(data,Operations(featHere(opi)).ID,1,0,testStat(featHere(opi)),0);
+            TS_SingleFeature(data,Operations(featHere(opi)).ID,true,false,...
+                                                testStat(featHere(opi)),false);
         end
     end
-
-    %
-    % for figi = 1:numFigs
-    %     if figi*subPerFig > length(ifeat)
-    %         break % We've exceeded number of features
-    %     end
-    %     r = ((figi-1)*subPerFig+1:figi*subPerFig);
-    %     featHere = ifeat(r); % features to plot on this figure
-    %
-    %     f = figure('color','w');
-    %     f.Position(3:4) = [588, 612]; % make longer
-    %     for opi = 1:subPerFig
-    %         op_ind = featHere(opi);
-    %         ax = subplot(subPerFig,1,opi); hold on
-    %
-    %         switch ks_or_hist
-    %         case 'ks'
-    %             % Plot distributions first for the sake of the legend
-    %             linePlots = cell(numClasses,1);
-    %             for i = 1:numClasses
-    %                 featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
-    %                 [~,~,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,20,1);
-    %             end
-    %             % Trim x-limits (with 2% overreach)
-    %             ax.XLim(1) = min(TS_DataMat(:,op_ind))-0.02*range(TS_DataMat(:,op_ind));
-    %             ax.XLim(2) = max(TS_DataMat(:,op_ind))+0.02*range(TS_DataMat(:,op_ind));
-    %             % Add a legend if necessary
-    %             if opi==1
-    %                 legend([linePlots{:}],groupNames,'interpreter','none')
-    %             end
-    %             ylabel('Probability density')
-    %         case 'hist'
-    %             for i = 1:numClasses
-    %                 featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
-    %                 histogram(featVector,'BinMethod','auto','FaceColor',colors{i},'Normalization','probability')
-    %             end
-    %             if opi==1
-    %                 legend(groupNames,'interpreter','none')
-    %             end
-    %             ylabel('Probability')
-    %         end
-    %
-    %         % Annotate rectangles under the distributions
-    %         BF_AnnotateRect(whatTestStat,TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax);
-    %
-    %         xlabel(sprintf('[%u] %s (%s=%4.2f%s)',Operations(op_ind).ID,Operations(op_ind).Name,...
-    %                             cfnName,testStat(op_ind),cfnUnit),'interpreter','none')
-    %     end
-    % end
 end
 
 %-------------------------------------------------------------------------------
@@ -424,8 +375,6 @@ if nargout == 0
     clear ifeat testStat testStat_rand
 end
 
-%-------------------------------------------------------------------------------
-% Functions
 %-------------------------------------------------------------------------------
 function tStat = fn_tStat(d1,d2)
     % Return test statistic from a 2-sample Welch's t-test

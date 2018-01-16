@@ -83,8 +83,8 @@ default_pthresh = []; % set default below, after par_OperationCodeString
 addParameter(inputP,'thresholdByProportion',default_pthresh,@isnumeric);
 
 % Make a new figure?:
-default_makeFigure = 1;
-addParameter(inputP,'makeFigure',default_makeFigure,@isnumeric);
+default_makeFigure = true;
+addParameter(inputP,'makeFigure',default_makeFigure,@islogical);
 
 % Marker size, can specify as a scalar, or as a vector with a custom value for
 % each node
@@ -300,15 +300,13 @@ hold off
 % and plot the links in them a different color
 sizeDecline = linspace(1,0.5,length(linkThresh));
 ordering = sort(anyLinks,2,'descend');
+handles = cell(length(ordering),1);
 for i = 1:length(ordering) % length(Ath):-1:1 % plot the weakest links first
     ii = ordering(i);
     [X,Y] = gplot(Ath{ii},[x y]); %,'color',clinks{2}); %,'color',c{2}); % links
-    plot(X(:),Y(:),'Color',clinks{ii},'LineWidth',2*sizeDecline(ii)); % (length(A)-i+1)*0.8
+    handles{i} = plot(X(:),Y(:),'Color',clinks{ii},'LineWidth',2*sizeDecline(ii)); % (length(A)-i+1)*0.8
     hold on
 end
-
-% Set a legend:
-legend(arrayfun(@(x)num2str(linkThresh(x)),sort(anyLinks,'descend'),'UniformOutput',0))
 
 % ------------------------------------------------------------------------------
 % PLOT NODES
@@ -368,6 +366,10 @@ for i = 1:numGroups
         end
     end
 end
+
+%-------------------------------------------------------------------------------
+% Set a legend for links:
+legend([handles{:}],arrayfun(@(x)num2str(linkThresh(x)),sort(anyLinks,'descend'),'UniformOutput',false))
 
 % ------------------------------------------------------------------------------
 % Tidy up:
