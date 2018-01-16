@@ -161,30 +161,16 @@ else
     theMarkerSize = 12; % Marker size for '.'
 end
 
+handles = cell(numClasses,1);
 for i = 1:numClasses
-    plot(featureData(groupLabels==i,1),featureData(groupLabels==i,2),...
-                '.','color',groupColors{i},'MarkerSize',theMarkerSize)
+    handles{i} = plot(featureData(groupLabels==i,1),featureData(groupLabels==i,2),...
+                '.','color',groupColors{i},'MarkerSize',theMarkerSize);
 end
 
 % Link axes
 if showDistr
     linkaxes([axMain,axTop],'x');
     linkaxes([axMain,axSide],'y');
-end
-
-% ------------------------------------------------------------------------------
-% Set Legend
-%-------------------------------------------------------------------------------
-if numClasses > 1
-    legendText = cell(numClasses,1);
-    for i = 1:numClasses
-        if ~isempty(groupNames)
-            legendText{i} = sprintf('%s (%u)',groupNames{i},sum(groupLabels==i));
-        else
-            legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==i));
-        end
-    end
-    legend(legendText,'interpreter','none');
 end
 
 %-------------------------------------------------------------------------------
@@ -205,7 +191,7 @@ end
 % ------------------------------------------------------------------------------
 %% Do classification and plot a classify boundary?
 % ------------------------------------------------------------------------------
-didClassify = 0;
+didClassify = false;
 if numClasses > 1
     % Compute the in-sample classification rate:
     classRate = zeros(3,1); % classRate1, classRate2, classRateboth
@@ -215,7 +201,7 @@ if numClasses > 1
         classRate(2) = GiveMeCfn(whatClassifier,featureData(:,2),groupLabels,featureData(:,2),groupLabels,numClasses);
         [classRate(3),~,whatLoss] = GiveMeCfn(whatClassifier,featureData,groupLabels,featureData(:,1:2),groupLabels,numClasses);
         % Record that classification was performed successfully:
-        didClassify = 1;
+        didClassify = true;
         fprintf(1,'%s in 2-d space: %.2f%%\n',whatLoss,classRate(3));
     catch emsg
         fprintf(1,'\nLinear classification rates not computed\n(%s)\n',emsg.message);
@@ -252,6 +238,21 @@ if numClasses > 1
             warning('Error fitting classification model in 2-d space')
         end
     end
+end
+
+%-------------------------------------------------------------------------------
+% Set Legend
+%-------------------------------------------------------------------------------
+if numClasses > 1
+    legendText = cell(numClasses,1);
+    for i = 1:numClasses
+        if ~isempty(groupNames)
+            legendText{i} = sprintf('%s (%u)',groupNames{i},sum(groupLabels==i));
+        else
+            legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==i));
+        end
+    end
+    legend([handles{:}],legendText,'interpreter','none');
 end
 
 %-------------------------------------------------------------------------------
