@@ -59,7 +59,11 @@ function [groupLabels,newFileName] = TS_LabelGroups(whatData,keywordGroups,saveB
 % ------------------------------------------------------------------------------
 %% Check Inputs:
 % ------------------------------------------------------------------------------
-if nargin < 1
+if nargin < 1 || isempty(whatData)
+    whatData = 'raw';
+    fprintf(1,'Retrieving data from HCTSA.mat by default.\n');
+end
+if nargin < 2
     keywordGroups = {};
     % Try to assign by unique keywords later
 end
@@ -67,12 +71,6 @@ if ~isempty(keywordGroups) && ischar(keywordGroups);
     fprintf(1,'Grouping all items with ''%s''.\n',keywordGroups);
     keywordGroups = {keywordGroups};
 end
-
-if nargin < 2 || isempty(whatData)
-    whatData = 'raw';
-    fprintf(1,'Retrieving data from HCTSA.mat by default.\n');
-end
-
 if nargin < 3 || isempty(saveBack)
     saveBack = true; % Saves the grouping back to the HCTSA_*.loc file
 end
