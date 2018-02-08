@@ -1,4 +1,4 @@
-function TS_FeatureSummary(opID, whatData, doViolin, annotateParams)
+function TS_FeatureSummary(opID,whatData,doViolin,annotateParams)
 % TS_FeatureSummary   How a given feature behaves across a time-series dataset
 %
 % Plots the distribution of outputs of an operation across the given dataset

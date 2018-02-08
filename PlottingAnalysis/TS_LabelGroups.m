@@ -1,4 +1,4 @@
-function [groupLabels,newFileName] = TS_LabelGroups(keywordGroups,whatData,saveBack,filterMissing)
+function [groupLabels,newFileName] = TS_LabelGroups(whatData,keywordGroups,saveBack,filterMissing)
 % TS_LabelGroups    Label groups of a time series using assigned keywords
 %
 % You provide a set of keyword options to store a specific grouping of time series.
@@ -19,17 +19,17 @@ function [groupLabels,newFileName] = TS_LabelGroups(keywordGroups,whatData,saveB
 % groupIndices = TS_LabelGroups({'disease','healthy'});
 %
 %---INPUTS:
+% whatData: Where to retrive from (and write back to): 'HCTSA.mat' (default),
+%           cf. TS_LoadData.
+%
 % keywordGroups: The keyword groups, a cell of strings, as
 %                   {'keyword_1', 'keyword2',...}
 %                   Can also use an empty label, '', to select unique keywords
 %                   automatically from the dataset.
 %
-% whatData: Where to retrive from (and write back to): 'HCTSA.mat' (default),
-%           cf. TS_LoadData.
+% saveBack: Can set to false to stop saving the grouping back to the input file.
 %
-% saveBack: Can set to 0 to stop saving the grouping back to the input file.
-%
-% filterMissing: Set to 1 to remove data that don't match any keywords.
+% filterMissing: Set to true to remove data that don't match any keywords.
 %
 %---OUTPUTS:
 % groupIndices: the indicies corresponding to each keyword in keywordGroups.
@@ -74,11 +74,11 @@ if nargin < 2 || isempty(whatData)
 end
 
 if nargin < 3 || isempty(saveBack)
-    saveBack = 1; % Saves the grouping back to the HCTSA_*.loc file
+    saveBack = true; % Saves the grouping back to the HCTSA_*.loc file
 end
 
 if nargin < 4
-    filterMissing = 0; % don't filter out data with missing labels -- error if not all data are labeled
+    filterMissing = false; % don't filter out data with missing labels -- error if not all data are labeled
 end
 
 % ------------------------------------------------------------------------------

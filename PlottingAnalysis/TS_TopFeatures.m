@@ -26,7 +26,7 @@ function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,v
 %                       large numbers of figures).
 % 'numNulls', the number of shuffled nulls to generate (e.g., 10 shuffles pools
 %               shuffles for all M features, for a total of 10*M elements in the
-%               null distribution)
+%               null distribution) [default: 0]
 %
 %---EXAMPLE USAGE:
 %

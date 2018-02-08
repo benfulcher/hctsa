@@ -41,9 +41,9 @@ end
 numObs = length(groupLabels);
 
 % Set binary:
-binMatrix = zeros(numClasses,numObs);
+binMatrix = false(numClasses,numObs);
 for i = 1:numClasses
-    binMatrix(i,groupLabels==i) = 1;
+    binMatrix(i,groupLabels==i) = true;
 end
 
 end

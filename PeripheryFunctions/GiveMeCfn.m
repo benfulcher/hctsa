@@ -72,7 +72,7 @@ end
 if ~exist('reWeight','var')
     % Reweighted observations by inverse probability weight
     % (for class imbalanced problems)
-    reWeight = 1;
+    reWeight = true;
 end
 if nargin < 10
     CVFolds = 0;

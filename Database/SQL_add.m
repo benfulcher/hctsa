@@ -495,7 +495,7 @@ case 'ts' % Prepare toAdd cell for time series
         else
             textShow = '';
         end
-        fprintf(1,'\nAll time-series data loaded (%u/%u passed quality tests)%s.\n',...
+        fprintf(1,'\nAll time-series data loaded (%u/%u) passed quality tests%s.\n',...
                         sum(wasGood),length(wasGood),textShow);
         if any(~wasGood)
             input(sprintf('[List %u time series that failed... (press any key)]',sum(~wasGood)),'s');
