@@ -1,4 +1,4 @@
-function TS_classify(whatData,whatClassifier,doPCs,seedReset)
+function TS_classify(whatData,whatClassifier,doPCs,doNull,seedReset)
 % TS_classify   Classify groups in the data using all features (and PCs)
 %
 % This function uses a classifier to learn group labels assigned to time series
@@ -10,8 +10,9 @@ function TS_classify(whatData,whatClassifier,doPCs,seedReset)
 %---INPUTS:
 % whatData, the hctsa data to use (input to TS_LoadData)
 % whatClassifier, the classification method to use (e.g., 'svm_linear', 'knn', 'linear')
-% doPCs, (binary) whether to investigate the behavior of different numbers of PCs of the
-%        data matrix (default: 1)
+% doPCs (logical) whether to investigate the behavior of different numbers of PCs of the
+%        data matrix (default: true)
+% doNull (logical), whether to compare to null
 % seedReset, input to BF_ResetSeed, specifying whether (and how) to reset the
 %               random seed (for reproducible results from cross-validation)
 %
@@ -55,6 +56,9 @@ if nargin < 3
     doPCs = true;
 end
 if nargin < 4
+    doNull = false;
+end
+if nargin < 5
     seedReset = 'default';
 end
 
@@ -105,7 +109,6 @@ fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
 %-------------------------------------------------------------------------------
 % Check nulls:
 %-------------------------------------------------------------------------------
-doNull = false;
 numNulls = 20;
 if doNull
     meanNull = zeros(numNulls,1);
@@ -132,8 +135,11 @@ end
 %-------------------------------------------------------------------------------
 % CONVERT BOTH TO numClasses x N form before plotting confusion matrix
 realLabels = BF_ToBinaryClass(timeSeriesGroup');
-predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl));
+numGroups = size(realLabels,1); % also, length(unique(timeSeriesGroup))
+predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl),numGroups);
 plotconfusion(realLabels,predictLabels);
+% (annoying that plotconfusion generates a new figure; it won't plot in the
+% current active figure)
 
 % Fix axis labels:
 ax = gca;
@@ -141,7 +147,7 @@ ax.XTickLabel(1:numClasses) = groupNames;
 ax.YTickLabel(1:numClasses) = groupNames;
 ax.TickLabelInterpreter = 'none';
 
-% Make a nice white figure background:
+% Make the figure background white:
 f = gcf; f.Color = 'w';
 
 %-------------------------------------------------------------------------------
@@ -195,7 +201,7 @@ end
 function [foldLosses,CVMdl,whatLoss] = GiveMeFoldLosses(dataMatrix,dataLabels)
     % Returns the output (e.g., loss) for the custom fn_loss function across all folds
     [foldLosses,CVMdl,whatLoss] = GiveMeCfn(whatClassifier,dataMatrix,...
-                            dataLabels,[],[],numClasses,[],[],1,numFolds);
+                            dataLabels,[],[],numClasses,[],[],true,numFolds);
 end
 
 end
