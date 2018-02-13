@@ -1,4 +1,4 @@
-function TS_classify(whatData,whatClassifier,doPCs,doNull,seedReset)
+function results = TS_classify(whatData,whatClassifier,doPCs,isConfusion,doNull,seedReset)
 % TS_classify   Classify groups in the data using all features (and PCs)
 %
 % This function uses a classifier to learn group labels assigned to time series
@@ -13,6 +13,7 @@ function TS_classify(whatData,whatClassifier,doPCs,doNull,seedReset)
 % doPCs (logical) whether to investigate the behavior of different numbers of PCs of the
 %        data matrix (default: true)
 % doNull (logical), whether to compare to null
+% isConfusion (logical), whether to plot confusion matrix
 % seedReset, input to BF_ResetSeed, specifying whether (and how) to reset the
 %               random seed (for reproducible results from cross-validation)
 %
@@ -56,9 +57,12 @@ if nargin < 3
     doPCs = true;
 end
 if nargin < 4
-    doNull = false;
+    isConfusion = 1;
 end
 if nargin < 5
+    doNull = false;
+end
+if nargin < 6
     seedReset = 'default';
 end
 
@@ -101,6 +105,9 @@ fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
                     numFeatures,...
                     mean(foldLosses),...
                     std(foldLosses));
+                
+% Return classification statistic and associated error                
+results = [mean(foldLosses),std(foldLosses)];
 
 % f = figure('color','w');
 % histogram(foldLosses*100)
@@ -133,22 +140,25 @@ end
 %-------------------------------------------------------------------------------
 % Plot confusion matrix
 %-------------------------------------------------------------------------------
-% CONVERT BOTH TO numClasses x N form before plotting confusion matrix
-realLabels = BF_ToBinaryClass(timeSeriesGroup');
-numGroups = size(realLabels,1); % also, length(unique(timeSeriesGroup))
-predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl),numGroups);
-plotconfusion(realLabels,predictLabels);
-% (annoying that plotconfusion generates a new figure; it won't plot in the
-% current active figure)
+if isConfusion
+    % CONVERT BOTH TO numClasses x N form before plotting confusion matrix
+    realLabels = BF_ToBinaryClass(timeSeriesGroup');
+    numGroups = size(realLabels,1); % also, length(unique(timeSeriesGroup))
+    predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl),numGroups);
+    figure;
+    plotconfusion(realLabels,predictLabels);
+    % (annoying that plotconfusion generates a new figure; it won't plot in the
+    % current active figure)
 
-% Fix axis labels:
-ax = gca;
-ax.XTickLabel(1:numClasses) = groupNames;
-ax.YTickLabel(1:numClasses) = groupNames;
-ax.TickLabelInterpreter = 'none';
+    % Fix axis labels:
+    ax = gca;
+    ax.XTickLabel(1:numClasses) = groupNames;
+    ax.YTickLabel(1:numClasses) = groupNames;
+    ax.TickLabelInterpreter = 'none';
 
-% Make the figure background white:
-f = gcf; f.Color = 'w';
+    % Make the figure background white:
+    f = gcf; f.Color = 'w';
+end
 
 %-------------------------------------------------------------------------------
 % Compare performance of reduced PCs from the data matrix:
