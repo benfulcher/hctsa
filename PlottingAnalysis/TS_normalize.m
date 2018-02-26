@@ -228,12 +228,14 @@ if length(TimeSeries)==1
     error('Only a single time series remains in the dataset -- normalization cannot be applied');
 end
 
-fprintf(1,'\n(post-filtering): %u special-valued entries (%4.2f%%) remain in the %ux%u data matrix.\n',...
-            sum(isnan(TS_DataMat(:))), ...
-            sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100,...
-            size(TS_DataMat,1),size(TS_DataMat,2));
-
-if sum(isnan(TS_DataMat(:)) > 0)
+numBadEntries = sum(isnan(TS_DataMat(:)));
+percBadEntries = numBadEntries/length(TS_DataMat(:))*100;
+if numBadEntries==0
+    fprintf(1,'\n(post-filtering): No special-valued entries in the %ux%u data matrix!\n', ...
+                size(TS_DataMat,1),size(TS_DataMat,2));
+else
+    fprintf(1,'\n(post-filtering): %u special-valued entries (%4.2f%%) remain in the %ux%u data matrix.\n',...
+                numBadEntries,percBadEntries,size(TS_DataMat,1),size(TS_DataMat,2));
     percGood_rows = mean(~isnan(TS_DataMat),2)*100;
     fprintf(1,'(post-filtering): Time series vary from %.2f--%.2f%% good values\n',...
                                 min(percGood_rows),max(percGood_rows));
@@ -288,9 +290,15 @@ if any(kc)
                     sum(~kc),length(kc),sum(kc));
 end
 
-fprintf(1,'%u bad entries (%4.2f%%) in the %ux%u data matrix.\n', ...
-            sum(isnan(TS_DataMat(:))),sum(isnan(TS_DataMat(:)))/length(TS_DataMat(:))*100, ...
-            size(TS_DataMat,1),size(TS_DataMat,2));
+numBadEntries = sum(isnan(TS_DataMat(:)));
+percBadEntries = numBadEntries/length(TS_DataMat(:))*100;
+if numBadEntries==0
+    fprintf(1,'No special-valued entries in the %ux%u data matrix!\n', ...
+                size(TS_DataMat,1),size(TS_DataMat,2));
+else
+    fprintf(1,'%u special-valued entries (%4.2f%%) in the %ux%u data matrix.\n', ...
+                numBadEntries,percBadEntries,size(TS_DataMat,1),size(TS_DataMat,2));
+end
 
 % ------------------------------------------------------------------------------
 % Set default clustering details

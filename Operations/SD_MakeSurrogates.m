@@ -53,7 +53,7 @@ function out = SD_MakeSurrogates(x,surrMethod,numSurrs,extraParams,randomSeed)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-beVocal = 0; % Display text information/commentary to screen
+beVocal = false; % Display text information/commentary to screen
 
 % ------------------------------------------------------------------------------
 % Check Inputs:

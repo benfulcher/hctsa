@@ -122,7 +122,7 @@ fprintf(1,'Group labeling complete in %s.\n',BF_thetime(toc(timer)));
 clear timer % stop timing
 
 %-------------------------------------------------------------------------------
-% Checks:
+%% Checks:
 %-------------------------------------------------------------------------------
 
 % Check each group has some members:
@@ -199,13 +199,10 @@ if saveBack
     % First append/overwrite group names
     groupNames = keywordGroups;
 
-    % Make a cell version of group indices (to use cell2struct)
-    theGroupsCell = cell(size(groupLabels));
+    % Make a cell version of group indices (required to later use cell2struct):
+    groupLabelsCell = num2cell(groupLabels);
 
-    % Cannot find an in-built function for this... :-/
-    for i = 1:length(groupLabels), theGroupsCell{i} = groupLabels(i); end
-
-    % First remove Group field if it exists
+    % First remove 'Group' field if it exists
     if isfield(TimeSeries,'Group')
         TimeSeries = rmfield(TimeSeries,'Group');
     end
@@ -216,7 +213,7 @@ if saveBack
 
     % Then append the new group information:
     % (some weird bug -- squeeze is sometimes needed here...:)
-    TimeSeries = cell2struct([squeeze(struct2cell(TimeSeries));theGroupsCell],newFieldNames);
+    TimeSeries = cell2struct([squeeze(struct2cell(TimeSeries));groupLabelsCell],newFieldNames);
 
     % Save everything back to file:
     save(theFile,'TimeSeries','groupNames','-append')

@@ -234,7 +234,6 @@ end
 % Scatter plot for top (up to 12)
 % ------------------------------------------------------------------------------
 if any(ismember(whatPlots,'scatter'))
-    keyboard
     f = figure('color','w');
     for j = 1:min(12,numNeighbors)
         subplot(3,4,j);
