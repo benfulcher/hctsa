@@ -277,21 +277,8 @@ if plotFreeForm
 	ls = zeros(numToPlot,1); % lengths of each time series
 
     % Group names
-    if numGroups > 0
-        keywords = {};
-        ind = 1;
-        for k = 1:length(TimeSeries)
-            newName = true;
-            for m = 1:length(keywords)
-                if strcmp(TimeSeries(k).Keywords,keywords{m})
-                    newName = false;
-                end
-            end
-            if newName
-                keywords{ind} = TimeSeries(k).Keywords;
-                ind = ind + 1;
-            end
-        end
+    if numGroups > 1
+        keywords = TS_GetFromData(whatData,'groupNames');
         
         % Setup adding legend if groups
         phandles = zeros(1,length(keywords));
@@ -322,11 +309,16 @@ if plotFreeForm
         p = plot(xx,xsc,'-','color',colorNow,'LineWidth',lw);
 
         % Legend
-        if numGroups > 0
+        if numGroups > 1
             allThere = false;
             for k = 1:length(keywords)
                 if ~allThere
-                    if strfind(kw,keywords{k})
+                    
+                    % PREVIOUSLY USED STRFIND, BUT THIS WILL NOT WORK IF
+                    % SOME KEYWORDS CONTAIN THE OTHERS (EG: pulsators and
+                    % non_pulsators). USING ISEQUAL FOR NOW, BUT SHOULD
+                    % FIND A BETTER WAY TO DO THIS (ON MY TO DO LIST) - Nic
+                    if isequal(kw,keywords{k})
                         if phandles(k) == 0
                             phandles(k) = p;
                         end
@@ -346,7 +338,7 @@ if plotFreeForm
     end
     
     % Legend
-    if numGroups > 0
+    if numGroups > 1
         legend(phandles,keywords);
     end
     
