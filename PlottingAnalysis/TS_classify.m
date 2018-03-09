@@ -57,7 +57,7 @@ if nargin < 3
     doPCs = true;
 end
 if nargin < 4
-    isConfusion = 1;
+    isConfusion = true;
 end
 if nargin < 5
     doNull = false;

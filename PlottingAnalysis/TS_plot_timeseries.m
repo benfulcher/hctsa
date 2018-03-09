@@ -336,10 +336,12 @@ if plotFreeForm
 			text(0.01,yr(i)+0.9*inc,theTit,'interpreter','none','FontSize',8)
 	    end
     end
-    
+
     % Legend
     if numGroups > 1
-        legend(phandles,keywords);
+        if ~isempty(phandles(phandles > 0))
+            legend(phandles,keywords,'interpreter','none');
+        end
     end
     
     % Set up axes:
