@@ -308,6 +308,7 @@ cB.Label.String = 'Output';
 if numGroups > 0
 	cB.Ticks = 0.5:1:numGroups;
 	cB.TickLabels = TS_GetFromData(whatData,'groupNames');
+	cB.TickLabelInterpreter = 'none';
 end
 
 title(sprintf('Data matrix (%u x %u)',numTS,numOps))

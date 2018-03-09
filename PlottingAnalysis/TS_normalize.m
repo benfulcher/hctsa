@@ -14,7 +14,7 @@ function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA
 %                [row proportion, column proportion]. If one of the filterOptions
 %                is set to 1, will have no bad values in your matrix.
 %
-% fileName_HCTSA: Custom filename to import. Default is 'HCTSA.mat'.
+% fileName_HCTSA: Custom hctsa data to import. Default: loaded from 'HCTSA.mat'.
 %
 % classVarFilter: whether to filter on zero variance of any given class (which
 %                 can cause problems for many classification algorithms).
@@ -140,13 +140,14 @@ end
 TS_DataMat(~isfinite(TS_DataMat)) = NaN; % Convert all nonfinite values to NaNs for consistency
 % Need to also incorporate knowledge of bad entries in TS_Quality and filter these out:
 TS_DataMat(TS_Quality > 0) = NaN;
-fprintf(1,'\nThere are %u special values in the data matrix.\n',sum(TS_Quality(:) > 0));
-percGood_rows = mean(~isnan(TS_DataMat),2)*100;
+numSpecialValues = sum(TS_Quality(:) > 0);
+fprintf(1,'\nThere are %u special values in the data matrix.\n',numSpecialValues);
+percGoodRows = mean(~isnan(TS_DataMat),2)*100;
+percGoodCols = mean(~isnan(TS_DataMat),1)*100;
 fprintf(1,'(pre-filtering): Time series vary from %.2f--%.2f%% good values\n',...
-                min(percGood_rows),max(percGood_rows));
-percGood_cols = mean(~isnan(TS_DataMat),1)*100;
+                min(percGoodRows),max(percGoodRows));
 fprintf(1,'(pre-filtering): Features vary from %.2f--%.2f%% good values\n',...
-                min(percGood_cols),max(percGood_cols));
+                min(percGoodCols),max(percGoodCols));
 
 % Now that all bad values are NaNs, and we can get on with the job of filtering them out
 
@@ -236,12 +237,13 @@ if numBadEntries==0
 else
     fprintf(1,'\n(post-filtering): %u special-valued entries (%4.2f%%) remain in the %ux%u data matrix.\n',...
                 numBadEntries,percBadEntries,size(TS_DataMat,1),size(TS_DataMat,2));
-    percGood_rows = mean(~isnan(TS_DataMat),2)*100;
+
+    percGoodCols = mean(~isnan(TS_DataMat),1)*100;
+    percGoodRows = mean(~isnan(TS_DataMat),2)*100;
     fprintf(1,'(post-filtering): Time series vary from %.2f--%.2f%% good values\n',...
-                                min(percGood_rows),max(percGood_rows));
-    percGood_cols = mean(~isnan(TS_DataMat),1)*100;
+                                min(percGoodRows),max(percGoodRows));
     fprintf(1,'(post-filtering): Features vary from %.2f--%.2f%% good values\n',...
-                                min(percGood_cols),max(percGood_cols));
+                                min(percGoodCols),max(percGoodCols));
 end
 fprintf(1,'\n');
 
