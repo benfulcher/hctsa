@@ -11,7 +11,7 @@ function TS_plot_2d(featureData,TimeSeries,featureLabels,groupNames,annotatePara
 %
 % featureLabels, cell of labels for each feature
 %
-% groupNames, cell containing a label for each class of timeseries
+% groupNames, cell containing a label for each class of time series
 %
 % annotateParams, a structure containing all the information about how to annotate
 %           data points. Fields can include:
@@ -24,8 +24,8 @@ function TS_plot_2d(featureData,TimeSeries,featureLabels,groupNames,annotatePara
 %               - theMarkerSize, a custom marker size
 %               - theLineWidth: line width for annotated time series
 %
-% showDistr, if 1 (default), plots marginal density estimates for each variable
-%                   (above and to the right of the plot), otherwise set to 0.
+% showDistr, if true (default), plots marginal density estimates for each variable
+%                   (above and to the right of the plot), otherwise set to false.
 %
 % whatClassifier, can select a classifier to fit to the different classes (e.g.,
 %               'linclass' for a linear classifier).

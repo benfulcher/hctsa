@@ -16,6 +16,7 @@ function TS_cluster(distanceMetricRow,linkageMethodRow,distanceMetricCol,linkage
 % linkageMethodCol: linkage method for clustering operations (columns)
 % doSave: controls whether to save pairwise distance information (which can be large)
 %         to the local file (HCTSA_N.mat)
+% theFile: the file to load HCTSA data from and then cluster
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -101,10 +102,10 @@ numOps = matrixSize(2);
 if nargin < 5 || isempty(doSave)
     doSave = [1,1];
     if numTs > 1000
-        doSave(1) = 0;
+        doSave(1) = false;
     end
     if numOps > 1000
-        doSave(2) = 0;
+        doSave(2) = false;
     end
 end
 
@@ -164,7 +165,7 @@ function [ordering,didUpdate] = getDistances(dMetricNow,tsOrOps,theLinkageMethod
     end
 
     % Set to zero if no update was performed for (1) distances, and (2) linkage clustering
-    didUpdate = ones(2,1);
+    didUpdate = true(2,1);
 
     if ~(ischar(dMetricNow) && ismember(dMetricNow,{'none','nothing'}))
         % (can specify 'none' to do no clustering)
@@ -178,7 +179,7 @@ function [ordering,didUpdate] = getDistances(dMetricNow,tsOrOps,theLinkageMethod
                 fprintf(1,'Loaded %s distances (%s) stored in %s\n',...
                             theWhat,clust_data.distanceMetric,theFile);
                 Dij = clust_data.Dij;
-                didUpdate(1) = 0;
+                didUpdate(1) = false;
             else
                 fprintf(1,'Changing distance metric for %s from ''%s'' to ''%s''.\n',...
                             theWhat,clust_data.distanceMetric,dMetricNow);
@@ -193,7 +194,7 @@ function [ordering,didUpdate] = getDistances(dMetricNow,tsOrOps,theLinkageMethod
                 strcmp(clust_data.linkageMethod,theLinkageMethod)
             % Already been clusterd previously under the same distance metric and linkage method:
             ordering = clust_data.ord;
-            didUpdate(2) = 0;
+            didUpdate(2) = false;
         else
             ordering = BF_ClusterReorder([],Dij,theLinkageMethod);
         end
