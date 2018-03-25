@@ -45,7 +45,7 @@ end
 % Load data:
 %-------------------------------------------------------------------------------
 [~,TimeSeries,Operations,whatData] = TS_LoadData(whatData);
-TS_GetFromData(whatData,'TS_Quality');
+TS_Quality = TS_GetFromData(whatData,'TS_Quality');
 
 %-------------------------------------------------------------------------------
 % Get the quality labels for this operation, then output time series info:
