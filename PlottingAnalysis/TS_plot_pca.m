@@ -67,6 +67,7 @@ end
 
 % Load in data:
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
+numFeatures = length(Operations);
 
 % Retrieve group names also:
 groupNames = TS_GetFromData(whatData,'groupNames');
@@ -97,7 +98,7 @@ fprintf(1,'---Done.\n');
 %-------------------------------------------------------------------------------
 % Print out the types of features loading into the two components
 %-------------------------------------------------------------------------------
-numTopLoadFeat = 20; % display this many features loading onto each PC
+numTopLoadFeat = min(numFeatures,20); % display this many features loading onto each PC
 for j = 1:2
     fprintf(1,'---Top feature loadings for PC%u---:\n',j);
     [~,ix] = sort(abs(pcCoeff(:,j)),'descend');
