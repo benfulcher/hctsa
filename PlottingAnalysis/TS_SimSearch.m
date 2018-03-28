@@ -280,7 +280,7 @@ if any(ismember('matrix',whatPlots))
         ax1.TickLabelInterpreter = 'none';
         NormMinMax = @(x) (x-min(x))/(max(x)-min(x));
         for j = 1:numNeighbors+1
-            tsData = dataStruct(neighborInd(ord(j))).Data(1:tsLength);
+            tsData = dataStruct(neighborInd(ord(j))).Data;
             lengthHere = min(tsLength,length(tsData));
             plot(1:lengthHere,j-0.5+NormMinMax(tsData),'-k');
             if j < numNeighbors+1
