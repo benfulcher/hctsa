@@ -99,6 +99,7 @@ clear inputP;
 % --------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 numOps = length(Operations);
+numTopFeatures = min(numTopFeatures,numOps);
 
 %-------------------------------------------------------------------------------
 %% Check that grouping information exists:
