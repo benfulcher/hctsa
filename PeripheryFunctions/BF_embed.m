@@ -106,7 +106,6 @@ else % use a routine to inform m
     if ischar(m{1})
         switch m{1}
             case 'tisean'
-                % Ben Fulcher, 2015-03-21
                 % Uses TISEAN false_nearest code
                 if length(m) == 1
                     th = 0.4;

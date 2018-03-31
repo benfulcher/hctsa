@@ -14,7 +14,7 @@ function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,v
 %               (e.g., 'fast_linear', 'tstat', 'svm', 'linear', 'diaglinear',
 %                or others supported by GiveMeFunctionHandle)
 %
-% ***Additional plotting options***:
+% ***Additional (optional) plotting options***:
 % 'whatPlots', can specify what output plots to produce (cell of strings), e.g.,
 %               specify {'histogram','distributions','cluster','datamatrix'} to
 %               produce all four possible output plots (this is the default).
@@ -99,6 +99,7 @@ clear inputP;
 % --------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 numOps = length(Operations);
+numTopFeatures = min(numTopFeatures,numOps);
 
 %-------------------------------------------------------------------------------
 %% Check that grouping information exists:

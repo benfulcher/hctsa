@@ -56,6 +56,10 @@ end
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 theOp = ([Operations.ID]==opID);
+if ~any(theOp)
+    error('No matches for operation ID %u',opID);
+end
+
 dataVector = TS_DataMat(:,theOp); % the outputs of interest
 notNaN = find(~isnan(dataVector));
 dataVector = dataVector(notNaN); % remove bad values
