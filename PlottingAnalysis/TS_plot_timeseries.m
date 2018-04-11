@@ -150,7 +150,8 @@ elseif ischar(whatTimeSeries)
     groupIndices = {find([TimeSeries.Group]==find(a))};
     fprintf(1,'Plotting %u time series matching group name ''%s''\n',length(groupIndices{1}),whatTimeSeries);
 else % Provided a custom range as a vector
-    groupIndices = {whatTimeSeries};
+    [~,ind] = intersect([TimeSeries.ID],whatTimeSeries);
+    groupIndices = {ind};
     fprintf(1,'Plotting the %u time series matching indices provided\n',length(whatTimeSeries));
 end
 numGroups = length(groupIndices);
@@ -200,7 +201,7 @@ rKeep = (iPlot > 0);
 classes = classes(rKeep);
 iPlot = iPlot(rKeep); % contains all the indicies of time series to plot (in order)
 numToPlot = length(iPlot);
-
+% keyboard;
 %-------------------------------------------------------------------------------
 fprintf(1,'Plotting %u (/%u) time series from %u classes\n', ...
                     numToPlot,sum(cellfun(@length,groupIndices)),numGroups);
