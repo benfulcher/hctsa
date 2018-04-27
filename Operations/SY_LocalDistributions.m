@@ -1,4 +1,4 @@
-function out = SY_LocalDistributions(y,nseg,eachOrPar,numPoints)
+function out = SY_LocalDistributions(y,numSegs,eachOrPar,numPoints)
 % SY_LocalDistributions  Compares the distribution in consecutive time-series segments
 %
 % Returns the sum of differences between each kernel-smoothed distributions
@@ -8,7 +8,7 @@ function out = SY_LocalDistributions(y,nseg,eachOrPar,numPoints)
 %
 % y, the input time series
 %
-% nseg, the number of segments to break the time series into
+% numSegs, the number of segments to break the time series into
 %
 % eachOrPar, (i) 'par': compares each local distribution to the parent (full time
 %                       series) distribution
@@ -16,7 +16,7 @@ function out = SY_LocalDistributions(y,nseg,eachOrPar,numPoints)
 %                         distributions
 %
 % numPoints, number of points to compute the distribution across (in each local
-%          segments)
+%          segments) [200 by default]
 %
 % The operation behaves in one of two modes: each compares the distribution in
 % each segment to that in every other segment, and par compares each
@@ -55,13 +55,13 @@ function out = SY_LocalDistributions(y,nseg,eachOrPar,numPoints)
 % ------------------------------------------------------------------------------
 
 % Plot outputs?
-doPlot = 0;
+doPlot = false;
 
 % ------------------------------------------------------------------------------
 % Check inputs:
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(nseg) % number of segments
-    nseg = 5;
+if nargin < 2 || isempty(numSegs) % number of segments
+    numSegs = 5;
 end
 if nargin < 3 || isempty(eachOrPar)
     eachOrPar = 'par'; % compare each subsection to full (parent) distribution
@@ -75,14 +75,14 @@ end
 % Preliminaries
 % ------------------------------------------------------------------------------
 N = length(y); % Length of the time series (number of samples)
-lseg = floor(N/nseg);
-dns = zeros(numPoints,nseg);
+lseg = floor(N/numSegs);
+dns = zeros(numPoints,numSegs);
 r = linspace(min(y),max(y),numPoints); % Make range of ksdensity uniform across all subsegments
 
 % ------------------------------------------------------------------------------
-% Compute the kernel-smoothed distribution in all nseg segments of the time series
+% Compute the kernel-smoothed distribution in all numSegs segments of the time series
 % ------------------------------------------------------------------------------
-for i = 1:nseg
+for i = 1:numSegs
     dns(:,i) = ksdensity(y((i-1)*lseg+1:i*lseg),r,'function','pdf');
 end
 
@@ -95,36 +95,29 @@ end
 % Compare the local distributions
 % ------------------------------------------------------------------------------
 switch eachOrPar
-    case 'par'
+    case {'par','parent'}
         % Compares each subdistribtuion to the parent (full signal) distribution
         pardn = ksdensity(y,r,'function','pdf');
-        divs = zeros(nseg,1);
-        for i = 1:nseg
+        divs = zeros(numSegs,1);
+        for i = 1:numSegs
             divs(i) = sum(abs(dns(:,i)-pardn')); % each is just divergence to parent
         end
         if doPlot
             hold on; plot(pardn,'r','LineWidth',2); hold off
         end
 
-        % return same statistics as for the 'each' case
-        out.meandiv = mean(divs);
-        out.mediandiv = median(divs);
-        out.mindiv = min(divs);
-        out.maxdiv = max(divs);
-        out.stddiv = std(divs);
-
     case 'each'
         % Compares each subdistribtuion to the parent (full signal) distribution
-        if nseg == 2 % output is just an integer: only two distributions to compare
+        if numSegs == 2 % output is just an integer: only two distributions to compare
             out = sum(abs(dns(:,1)-dns(:,2)));
             return
         end
 
-        % nseg > 2: need to compare a number of different distributions against each other
-        diffmat = NaN * ones(nseg); % store pairwise differences
+        % numSegs > 2: need to compare a number of different distributions against each other
+        diffmat = NaN * ones(numSegs); % store pairwise differences
                                     % start as NaN to easily get upper triangle later
-        for i = 1:nseg
-            for j = 1:nseg
+        for i = 1:numSegs
+            for j = 1:numSegs
                 if j > i
                     diffmat(i,j) = sum(abs(dns(:,i)-dns(:,j))); % store sum of absolute differences
                 end
@@ -139,15 +132,17 @@ switch eachOrPar
         %     out = NaN; return
         % end
 
-        % Return basic statistics on differences in distributions in different segments of the time series
-        out.meandiv = mean(divs);
-        out.mediandiv = median(divs);
-        out.mindiv = min(divs);
-        out.maxdiv = max(divs);
-        out.stddiv = std(divs);
-
     otherwise
         error('Unknown method ''%s'', should be ''each'' or ''par''',eachOrPar);
 end
+
+%-------------------------------------------------------------------------------
+% Return basic statistics on differences in distributions in different
+% segments of the time series
+out.meandiv = mean(divs);
+out.mediandiv = median(divs);
+out.mindiv = min(divs);
+out.maxdiv = max(divs);
+out.stddiv = std(divs);
 
 end
