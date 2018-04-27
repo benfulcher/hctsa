@@ -104,7 +104,7 @@ if makeViolin
         f.Position(3:4) = [402,159];
     end
 
-    % Annotate rectangles:
+    % Annotate rectangles for predicted intervals:
     BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax,'left');
 
     % Trim y-limits (with 2% overreach)

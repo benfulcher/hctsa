@@ -105,7 +105,7 @@ clear inputP;
 % You always want to retrieve and plot the clustered data if it exists
 getClustered = true;
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData,getClustered);
-[numTS, numOps] = size(TS_DataMat); % size of the data matrix
+[numTS,numOps] = size(TS_DataMat); % size of the data matrix
 
 % ------------------------------------------------------------------------------
 %% Reorder according to customOrder

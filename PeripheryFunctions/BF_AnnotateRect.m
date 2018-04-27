@@ -60,8 +60,15 @@ numIncrements = 100;
 
 %--------------------------------------------------------------------
 % Learn a basic classification model from the 1-d feature vector:
-[~,Mdl] = GiveMeCfn(whatCfn,featureVector,groupLabels,...
-                    featureVector,groupLabels,numClasses,0,'balancedAcc');
+try
+    [~,Mdl] = GiveMeCfn(whatCfn,featureVector,groupLabels,...
+                        featureVector,groupLabels,numClasses,false,'balancedAcc');
+catch emsg
+    warning('Unable to fit classification model')
+    return
+end
+
+%-------------------------------------------------------------------------------
 switch underOrLeft
 case 'under'
     dataPlotted = ax.XLim;
@@ -72,6 +79,7 @@ otherwise
 end
 predRange = linspace(dataPlotted(1),dataPlotted(2),numIncrements)'; % numIncrements-grid through x
 predLabels = predict(Mdl,predRange);
+
 
 %-------------------------------------------------------------------------------
 % Annotate rectangles under the distribution reflecting the predictive model:
