@@ -99,6 +99,7 @@ clear inputP;
 % --------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 numOps = length(Operations);
+numTopFeatures = min(numTopFeatures,numOps);
 
 %-------------------------------------------------------------------------------
 %% Check that grouping information exists:
@@ -117,10 +118,9 @@ end
 %% Define the train/test classification rate function, fn_testStat
 % --------------------------------------------------------------------------
 % Also the chanceLine -- where you'd expect by chance (for equiprobable groups...)
-if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','svm_linear'})
 
-    %-------------------------------------------------------------------------------
-    % Set up the loss function
+% Set up the loss function for classifier-based metrics
+if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','svm_linear'})
 
     % (first check for possible class imbalance):
     classNumbers = arrayfun(@(x)sum(timeSeriesGroup==x),1:numClasses);
@@ -132,9 +132,6 @@ if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','
         fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'balancedAcc',1);
         fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
     end
-
-    % fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                    % mean(yTest == classify(Xtest,XTrain,yTrain,'linear'))*100;
     chanceLine = 100/numClasses;
     cfnUnit = '%';
 end
@@ -146,14 +143,24 @@ case 'diaglinear'
     cfnName = 'Naive bayes classifier';
 case {'svm','svm_linear'}
     cfnName = 'linear SVM classifier';
+case {'ustat','ranksum'}
+    cfnName = 'Mann-Whitney approx p-value';
+    cfnUnit = '';
+    chanceLine = NaN;
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),false);
+case {'ustatExact','ranksumExact'}
+    cfnName = 'Mann-Whitney exact p-value';
+    cfnUnit = '';
+    chanceLine = NaN;
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),true);
 case {'ttest','tstat'}
     cfnName = 'Welch''s t-stat';
     cfnUnit = '';
+    chanceLine = 0; % by chance, t-stats averge to zero
     if numClasses > 2
         error('Cannot use t-test as test statistic with more than two groups :/');
     end
     fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
-    chanceLine = 0; % by chance, t-stats averge to zero
 otherwise
     error('Unknown method ''%s''',whatTestStat)
 end
@@ -187,8 +194,7 @@ testStat_sort = testStat_sort(~isNaN);
 ifeat = ifeat(~isNaN);
 
 % List the top features:
-topN = min(numTopFeatures,length(Operations));
-for i = 1:topN
+for i = 1:numTopFeatures
     fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations(ifeat(i)).ID, ...
             Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,testStat_sort(i));
 end
@@ -372,9 +378,20 @@ end
 
 % Don't display lots of crap to screen unless the user wants it:
 if nargout == 0
-    clear ifeat testStat testStat_rand
+    clear('ifeat','testStat','testStat_rand');
 end
 
+%-------------------------------------------------------------------------------
+function uStatP = fn_uStat(d1,d2,doExact)
+    % Return test statistic from Mann-Whitney U-test
+    if doExact
+        [p,~,stats] = ranksum(d1,d2,'method','exact');
+    else
+        [p,~,stats] = ranksum(d1,d2,'method','approx');
+    end
+    uStatP = -log10(p);
+    % uStat = stats.ranksum;
+end
 %-------------------------------------------------------------------------------
 function tStat = fn_tStat(d1,d2)
     % Return test statistic from a 2-sample Welch's t-test
