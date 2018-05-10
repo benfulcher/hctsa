@@ -1,4 +1,4 @@
-function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,reWeight,CVFolds)
+function [accuracy,Mdl,whatLoss,accErr] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,reWeight,CVFolds)
 % GiveMeCfn    Returns classification results from training a classifier on
 %               training/test data
 %
@@ -210,12 +210,14 @@ else
     % Test data is mixed through the training data provided using k-fold cross validation
     % Output is the accuracy/loss measure for each fold, can mean it themselves if they want to
     yPredict = kfoldPredict(Mdl);
-    computePerFold = false;
+    computePerFold = true;
     if computePerFold
         % Compute separately for each fold, store in vector accuracy:
-        accuracy = arrayfun(@(x) BF_lossFunction(yTrain(Mdl.Partition.test(x)),...
+        accuracy_results = arrayfun(@(x) BF_lossFunction(yTrain(Mdl.Partition.test(x)),...
                                     yPredict(Mdl.Partition.test(x)),whatLoss,numClasses),...
                                         1:CVFolds);
+        accErr = std(accuracy_results);
+        accuracy = mean(accuracy_results);
     else
         % Compute aggregate across all folds:
         accuracy = BF_lossFunction(yTrain,yPredict,whatLoss,numClasses);
