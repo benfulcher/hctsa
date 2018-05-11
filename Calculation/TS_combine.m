@@ -70,7 +70,7 @@ if nargin < 2
 end
 
 if nargin < 3
-    % If compare_tsids = 1, we assume that both are from the same database and thus
+    % If compare_tsids is true, we assume that both are from the same database and thus
     % filter out any intersection between ts_ids in the two datasets
     compare_tsids = false;
 end
@@ -155,7 +155,7 @@ elseif isempty(fieldnames(loadedData{1}.gitInfo)) || isempty(fieldnames(loadedDa
     end
     warning(sprintf(['!!!!!!!!!!%s contains git version info, but %s does not.\n',...
         'If hctsa versions are inconsistent, results may not be comparable!!!!!!!!!!'],hasGit,noGit))
-
+    gitInfo = struct(); % inconsistent so remove gitInfo from the combination...
 elseif ~strcmp(loadedData{1}.gitInfo.hash,loadedData{2}.gitInfo.hash)
     % Only check the hashes for consistency:
     warning('Git versions are inconsistent between the two HCTSA files.');

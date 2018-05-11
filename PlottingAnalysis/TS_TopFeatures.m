@@ -99,6 +99,7 @@ clear inputP;
 % --------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 numOps = length(Operations);
+numTopFeatures = min(numTopFeatures,numOps);
 
 %-------------------------------------------------------------------------------
 %% Check that grouping information exists:
@@ -178,17 +179,16 @@ fprintf(1,['Mean %s performance across %u operations = %4.2f%s\n' ...
         cfnName,numOps,nanmean(testStat),cfnUnit,numClasses,chanceLine,cfnUnit);
 
 % --------------------------------------------------------------------------
-%% Display information about the top topN operations
+%% Display information about the top features (numTopFeatures)
 % --------------------------------------------------------------------------
-[testStat_sort, ifeat] = sort(testStat,'descend'); % bigger is better
+[testStat_sort,ifeat] = sort(testStat,'descend'); % bigger is better
 
 isNaN = isnan(testStat_sort);
 testStat_sort = testStat_sort(~isNaN);
 ifeat = ifeat(~isNaN);
 
 % List the top features:
-topN = min(numTopFeatures,length(Operations));
-for i = 1:topN
+for i = 1:numTopFeatures
     fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations(ifeat(i)).ID, ...
             Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,testStat_sort(i));
 end

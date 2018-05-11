@@ -116,7 +116,7 @@ This excellent repository allows users to run *hctsa* software from within pytho
 
 ### `tsfresh`
 
-Native python time-series code to extract hundreds of time-series features, with in-built feature filtering, is [tsfresh](https://github.com/blue-yonder/tsfresh).
+Native python time-series code to extract hundreds of time-series features, with in-built feature filtering, is [tsfresh](https://github.com/blue-yonder/tsfresh); cf. [their paper](https://www.sciencedirect.com/science/article/pii/S0925231218304843).
 
 ### `tscompdata` and `tsfeatures`
 

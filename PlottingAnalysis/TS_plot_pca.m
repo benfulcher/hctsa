@@ -55,7 +55,7 @@ end
 if nargin < 4 || isempty(annotateParams)
     % Annotate 6 points by default
     fprintf(1,'Annotating 6 points by default with time series segment and names\n');
-    annotateParams = struct('n',6,'textAnnotation','Name');
+    annotateParams = struct('n',6,'textAnnotation','Name','userInput',false);
 end
 if ~isstruct(annotateParams)
     annotateParams = struct('n',annotateParams);
