@@ -87,7 +87,7 @@ end
 
 % Load data:
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(fileName_HCTSA);
-load(whatDataFile,'TS_Quality','MasterOperations');
+load(whatDataFile,'TS_Quality','TS_CalcTime','MasterOperations');
 
 % First check that fromDatabase exists (for back-compatability)
 fromDatabase = TS_GetFromData(fileName_HCTSA,'fromDatabase');
@@ -119,6 +119,7 @@ if ~isempty(subs)
                     size(TS_DataMat,1),length(kr0));
         TS_DataMat = TS_DataMat(kr0,:);
         TS_Quality = TS_Quality(kr0,:);
+        TS_CalcTime = TS_CalcTime(kr0,:);
         TimeSeries = TimeSeries(kr0);
     end
 
@@ -128,6 +129,7 @@ if ~isempty(subs)
             size(TS_DataMat,2),length(kc0));
         TS_DataMat = TS_DataMat(:,kc0);
         TS_Quality = TS_Quality(:,kc0);
+        TS_CalcTime = TS_CalcTime(:,kc0);
         Operations = Operations(kc0);
     end
 end
@@ -160,6 +162,7 @@ if any(~keepRows)
     fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(~keepRows).Name},','));
     TS_DataMat = TS_DataMat(keepRows,:);
     TS_Quality = TS_Quality(keepRows,:);
+    TS_CalcTime = TS_CalcTime(keepRows,:);
     TimeSeries = TimeSeries(keepRows);
 end
 
@@ -169,6 +172,7 @@ if any(~keepCols)
     % fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(~keepCols).Name},','));
     TS_DataMat = TS_DataMat(:,keepCols);
     TS_Quality = TS_Quality(:,keepCols);
+    TS_CalcTime = TS_CalcTime(:,keepCols);
     Operations = Operations(keepCols);
 end
 
@@ -187,6 +191,7 @@ if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all 
                          sum(bad_op),length(bad_op),sum(~bad_op));
         TS_DataMat = TS_DataMat(:,~bad_op);
         TS_Quality = TS_Quality(:,~bad_op);
+        TS_CalcTime = TS_CalcTime(:,~bad_op);
         Operations = Operations(~bad_op);
     else
         fprintf(1,'No operations had near-constant outputs on the dataset\n');
@@ -214,6 +219,7 @@ if classVarFilter
                      sum(zeroClassVar),length(zeroClassVar),sum(~zeroClassVar));
         TS_DataMat = TS_DataMat(:,~zeroClassVar);
         TS_Quality = TS_Quality(:,~zeroClassVar);
+        TS_CalcTime = TS_CalcTime(:,~zeroClassVar);
         Operations = Operations(~zeroClassVar);
     end
 end
@@ -274,6 +280,7 @@ if all(nanCol) % all columns are NaNs
 elseif any(nanCol) % there are columns that are all NaNs
     TS_DataMat = TS_DataMat(:,~nanCol);
     TS_Quality = TS_Quality(:,~nanCol);
+    TS_CalcTime = TS_CalcTime(:,~nanCol);
     Operations = Operations(~nanCol);
     fprintf(1,'We just removed %u all-NaN columns introduced from %s normalization.\n',...
                         sum(nanCol),normFunction);
@@ -287,6 +294,7 @@ kc = (nanstd(TS_DataMat) < 10*eps);
 if any(kc)
     TS_DataMat = TS_DataMat(:,~kc);
     TS_Quality = TS_Quality(:,~kc);
+    TS_CalcTime = TS_CalcTime(:,~kc);
     Operations = Operations(~kc);
     fprintf(1,'%u operations had near-constant outputs after filtering: from %u to %u.\n', ...
                     sum(~kc),length(kc),sum(kc));
@@ -325,9 +333,9 @@ normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
 outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 
 fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName);
-save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-        'MasterOperations','fromDatabase','groupNames','normalizationInfo',...
-        'gitInfo','ts_clust','op_clust','-v7.3');
+save(outputFileName,'TS_DataMat','TS_Quality','TS_CalcTime','TimeSeries',...
+    'Operations','MasterOperations','fromDatabase','groupNames',...
+    'normalizationInfo','gitInfo','ts_clust','op_clust','-v7.3');
 fprintf(1,' Done.\n');
 
 %-------------------------------------------------------------------------------
