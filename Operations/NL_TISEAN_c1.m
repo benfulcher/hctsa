@@ -75,18 +75,15 @@ if N < 100
     warning('Time series too short for c1')
     out = NaN; return
 end
-% ++BF 12/5/2010 -- for some reason timeseries of length near a multiple of 256
+% ++BF 12/5/2010 -- for some reason timeseries of length near a multiple of 128
 % stalls the TISEAN routine c1... -- let's do a slight workaround by removing the
 % last (few) points in this case...
-freakyStat = mod(N,256);
+freakyStat = mod(N,128);
 if freakyStat <= 6
     fprintf(1,'You''re not going to believe this but TISEAN has a problem freezing with this length time series!\n');
     fprintf(1,'I''m ignoring the last %u points of this time series...\n',freakyStat+1);
     y = y(1:end-(freakyStat+1));
     N = length(y); % new time-series length
-elseif N == 65 || N==66 || N == 70
-    % Somehow length-70 vectors don't work
-    out = NaN; return
 end
 % Also freezes on constant data
 if length(unique(y))==1
