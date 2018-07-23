@@ -324,7 +324,7 @@ if plotFreeForm
     xlabel('Time (samples)')
 
 else
-    % i.e., NOT a FreeForm plot:
+    % NOT a 'free-form' plot:
     for i = 1:numToPlot
 	    ax = subplot(numToPlot,1,i)
 	    fn = TimeSeries(iPlot(i)).Name; % the filename

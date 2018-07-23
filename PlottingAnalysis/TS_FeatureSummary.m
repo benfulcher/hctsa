@@ -107,7 +107,7 @@ end
 %-------------------------------------------------------------------------------
 %% Plot the kernel smoothed density
 %-------------------------------------------------------------------------------
-fig = figure('color','w'); box('on'); hold on
+f = figure('color','w'); box('on'); hold on
 % if strcmp(whereann,'newplot')
 %     subplot(3,1,[1,2]); box('on'); hold on
 % end
@@ -179,9 +179,11 @@ if doViolin
     title(sprintf('[%u]%s (%s)',theOperation.ID,theOperation.Name,theOperation.Keywords),'interpreter','none')
     ylabel('Feature value');
 
-    % Time series annotations (cycling through groups of 10 rainbow colors):
+    %-------------------------------------------------------------------------------
+    % Time series annotations using TS_plot_timeseries
+    % (cycling through groups of 10 rainbow colors):
     ax = subplot(1,4,3:4);
-    plotOptions.newFigure = 0;
+    plotOptions.newFigure = false;
     plotOptions.colorMap = cell(annotateParams.n,1);
     for i = 1:annotateParams.n
         plotOptions.colorMap{i} = rainbowColors{rem(i-1,10)+1};
@@ -241,7 +243,7 @@ else % kernel distributions
         xy = [xr',fr'];
     end
 
-    fig.Position = [fig.Position(1:2),649,354];
+    f.Position = [f.Position(1:2),649,354];
 
     %-------------------------------------------------------------------------------
     %% Annotate time series:
