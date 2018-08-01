@@ -55,16 +55,16 @@ r = (1:N)'; % range over which to fit
 %-------------------------------------------------------------------------------
 %% Fit a sinusoidal model using the Curve-Fitting Toolbox
 %-------------------------------------------------------------------------------
-[cfun, gof] = fit(r,y,'sin1'); % fits the following form: a1*sin(b1*x+c1)
+[cfun,gof] = fit(r,y,'sin1'); % fits the following form: a1*sin(b1*x+c1)
 
 %-------------------------------------------------------------------------------
 %% Two conditions for determining whether time series contains periodicities:
 %-------------------------------------------------------------------------------
 % Condition 1: fit is ok
-th_fit = 0.3; % r2>th_fit
+th_fit = 0.3; % r2 > th_fit
 
 % Condition 2: amplitude is not too small
-th_ampl = 0.5; % a1>th_ampl
+th_ampl = 0.5; % a1 > th_ampl
 
 if gof.rsquare > th_fit && abs(cfun.a1 > th_ampl)
     out = 1; % test thinks the time series has strong periodicities

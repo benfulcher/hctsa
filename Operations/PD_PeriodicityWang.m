@@ -52,10 +52,9 @@ function out = PD_PeriodicityWang(y)
 % ------------------------------------------------------------------------------
 %% Preliminaries:
 % ------------------------------------------------------------------------------
-doPlot = 0; % plot outputs to figure
+doPlot = false; % plot outputs to figure
 
-% Check that a Curve-Fitting Toolbox license is available:
-% (for the splines)
+% Check that a Curve-Fitting Toolbox license is available (for the splines):
 BF_CheckToolbox('curve_fitting_toolbox')
 
 % Check that the time series is z-scored:
@@ -67,12 +66,12 @@ end
 %% Foreplay
 % ------------------------------------------------------------------------------
 N = length(y); % length of the time series
-ths = [0, 0.01, 0.1, 0.2, 1/sqrt(N), 5/sqrt(N), 10/sqrt(N)]; % the thresholds with which to count a peak
-nths = length(ths); % the number of thresholds
+ths = [0,0.01,0.1,0.2,1/sqrt(N),5/sqrt(N),10/sqrt(N)]; % the thresholds with which to count a peak
+numThresholds = length(ths); % the number of thresholds
 
-% ------------------------------------------------------------------------------
-%% 1: Detrend using a regression spline with 3 knots
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% 1: Detrend using a regression spline with 3 knots
+%-------------------------------------------------------------------------------
 % I'm not quite sure how to do this, but I'm doing it like this:
 % y_or=y; % the original series
 % r=linspace(1,N,3);% range for spline (3 knots)
@@ -88,7 +87,9 @@ if doPlot
     plot(y_or,'k'); hold on; plot(y,'r'); hold off
 end
 
+%-------------------------------------------------------------------------------
 %% 2. Compute autocorrelations up to 1/3 the length of the time series.
+%-------------------------------------------------------------------------------
 acmax = ceil(N/3); % compute autocorrelations up to this lag
 acf = zeros(acmax,1); % the autocorrelation function
 for i = 1:acmax % i is the \tau, the AC lag
@@ -100,9 +101,9 @@ if doPlot
     title('Autocorrelation')
 end
 
-% ------------------------------------------------------------------------------
-%% 3. Frequency is the first peak satisfying the following conditions:
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% 3. Frequency is the first peak satisfying the following conditions:
+%-------------------------------------------------------------------------------
 % (a) a trough before it
 % (b) difference between peak and trough is at least 0.01
 % (c) peak corresponds to positive correlation
@@ -115,14 +116,16 @@ troughs = find(bath == 2) + 1; % finds troughs
 peaks = find(bath == -2) + 1; % finds peaks
 npeaks = length(peaks);
 
-thefreqs = zeros(nths,1);
-for k = 1:nths
-    thefreqs(k) = 1;
+theFreqs = zeros(numThresholds,1);
+for k = 1:numThresholds
+    theFreqs(k) = 1;
     for i = 1:npeaks % search through all peaks for one that meets the condition
         ipeak = peaks(i); % acf lag at which there is a peak
         thepeak = acf(ipeak); % acf at the peak
         ftrough = find(troughs < ipeak,1,'last');
-        if isempty(ftrough); continue; end
+        if isempty(ftrough);
+            continue;
+        end
         itrough = troughs(ftrough); % acf lag at which there is a trough (the first one preceeding the peak)
         thetrough = acf(itrough); % acf at the trough
 
@@ -142,16 +145,16 @@ for k = 1:nths
         end
 
         % we made it! Use this frequency!
-        thefreqs(k) = ipeak; break
+        theFreqs(k) = ipeak; break
     end
 end
 
-% ------------------------------------------------------------------------------
-%% Convert vector into a structure for output
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% Convert vector into a structure for output
+%-------------------------------------------------------------------------------
 % output entries are out.th1, out.th2, ..., out.th7:
-for i = 1:nths
-    out.(sprintf('th%u',i)) = thefreqs(i);
+for i = 1:numThresholds
+    out.(sprintf('th%u',i)) = theFreqs(i);
 end
 
 end

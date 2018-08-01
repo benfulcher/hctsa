@@ -40,7 +40,8 @@ function out = DN_HistogramMode(y,numBins)
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    numBins = 'auto'; % ceil(sqrt(length(y)));
+    numBins = 'auto';
+    % ceil(sqrt(length(y)));
 end
 
 % Compute the histogram from the data:

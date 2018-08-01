@@ -5,7 +5,7 @@ function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,be
 % TS_compute;
 %
 %---INPUTS:
-% doParallel:  if 1, attempts to use the Parallel Computing Toolbox to run
+% doParallel:  if true, attempts to use the Parallel Computing Toolbox to run
 %               computations in parallel over multiple cores.
 % ts_id_range: a custom range of time series IDs to compute (default: [] -- compute all)
 % op_id_range: a custom range of operation IDs to compute (default: [] -- compute all)
@@ -13,7 +13,7 @@ function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,be
 % 				ALSO retry results that previously threw an error ('error'), or
 % 				ALSO retry any result that previously did not return a good value ('bad')
 % customFile: reads in and writes to a custom output file
-% beVocal:     if 1, gives additional user feedback about the calculation of
+% beVocal:     if true, gives additional user feedback about the calculation of
 %               each individual operation.
 %
 %---OUTPUTS:
