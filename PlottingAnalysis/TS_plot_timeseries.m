@@ -156,9 +156,9 @@ else % Provided a custom range as a vector
 end
 numGroups = length(groupIndices);
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Do the plotting
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Want numPerGroup from each time series group
 iPlot = zeros(numGroups*numPerGroup,1);
 classes = zeros(numGroups*numPerGroup,1);
@@ -166,8 +166,7 @@ nhere = zeros(numGroups,1);
 groupSizes = cellfun(@length,groupIndices);
 
 for i = 1:numGroups
-    % filter down to numPerGroup if too many in group, otherwise plot all in
-    % group
+    % filter down to numPerGroup if too many in group, otherwise plot all in group
     switch howToFilter
         case 'firstcome'
             % just plot first in group (useful when ordered by closeness to
@@ -279,13 +278,13 @@ if plotFreeForm
 
     pHandles = zeros(numToPlot,1); % keep plot handles
 	for i = 1:numToPlot
-	    fn = TimeSeries(iPlot(i)).Name; % the name of the time series
-	    kw = TimeSeries(iPlot(i)).Keywords; % the keywords
-	    x = TimeSeries(iPlot(i)).Data;
+        theTS = TimeSeries(iPlot(i));
+
+	    x = theTS.Data; % the data
 	    N0 = length(x);
 		if ~isempty(maxN) && (N0 > maxN)
-			% specified a maximum length of time series to plot
-            sti = randi(N0-maxN,1);
+			% Specified a maximum length of time series to plot
+            sti = 1; % randi(N0-maxN,1);
 			x = x(sti:sti+maxN-1); % subset random segment
             N = length(x);
         else
@@ -304,7 +303,7 @@ if plotFreeForm
 
         % Annotate text labels
 		if displayTitles
-			theTit = sprintf('{%u} %s [%s] (%u)',TimeSeries(iPlot(i)).ID,fn,kw,N0);
+			theTit = sprintf('{%u} %s [%s] (%u)',theTS.ID,theTS.Name,theTS.Keywords,N0);
 			text(0.01,yr(i)+0.9*inc,theTit,'interpreter','none','FontSize',8)
 	    end
 	end

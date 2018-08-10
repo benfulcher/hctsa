@@ -12,7 +12,7 @@ function out = CO_TranslateShape(y,shape,d,howToMove)
 %
 %---INPUTS:
 % y, the input time series
-% shape, the shape to move about the time-domain ('circle')
+% shape, the shape to move about the time-domain (e.g., 'circle')
 % d, a parameter specifying the size of the shape (e.g., d = 2)
 % howToMove, a method specifying how to move the shape about, e.g., 'pts'
 %               places the shape on each point in the time series.
@@ -109,20 +109,18 @@ switch howToMove
 end
 
 %-------------------------------------------------------------------------------
+% Output statistics:
 
-% -----
 % Maximum possible hits in the shape:
-% -----
 out.max = max(np);
 out.std = std(np);
 out.mean = mean(np);
 
 % Count the hits:
 histnp = arrayfun(@(x)sum(np==x),unique(np));
-% bar(histnp)
 
-% Compute mode:
-[out.npatmode, out.mode] = max(histnp);
+% Compute mode of the histogram:
+[out.npatmode,out.mode] = max(histnp);
 out.npatmode = out.npatmode/NN;
 
 % Output all stats:
@@ -139,15 +137,13 @@ if 2*w + 1 >= 10; out.tens = mean(np==10); end
 if 2*w + 1 >= 11; out.elevens = mean(np==11); end
 
 % -----
-% Stationarity of the statistics in 2,3, & 4 segments of the time series
-% -----
+% Stationarity of the statistics in 2,3, & 4 segments of the time series:
+
 out.statav2_m = SY_SlidingWindow(np,'mean','std',2,1);
 out.statav2_s = SY_SlidingWindow(np,'std','std',2,1);
 out.statav3_m = SY_SlidingWindow(np,'mean','std',3,1);
 out.statav3_s = SY_SlidingWindow(np,'std','std',3,1);
 out.statav4_m = SY_SlidingWindow(np,'mean','std',4,1);
 out.statav4_s = SY_SlidingWindow(np,'std','std',4,1);
-
-% plot(np)
 
 end

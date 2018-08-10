@@ -60,12 +60,21 @@ end
 % In this case, no further loading is required -- just a restructuring
 %-------------------------------------------------------------------------------
 if isstruct(whatDataFile)
-    if ~isfield(whatDataFile,{'TS_DataMat','TimeSeries','Operations'})
-        error('Invalid input structure (requires TS_DataMat, TimeSeries, Operations as fields)');
+    if isfield(whatDataFile,'TS_DataMat')
+        TS_DataMat = whatDataFile.TS_DataMat;
+    else
+        TS_DataMat = [];
     end
-    TS_DataMat = whatDataFile.TS_DataMat;
-    TimeSeries = whatDataFile.TimeSeries;
-    Operations = whatDataFile.Operations;
+    if isfield(whatDataFile,'TimeSeries')
+        TimeSeries = whatDataFile.TimeSeries;
+    else
+        TimeSeries = struct();
+    end
+    if isfield(whatDataFile,'Operations')
+        Operations = whatDataFile.Operations;
+    else
+        Operations = struct();
+    end
 
     % Cluster the data if necessary:
     if getClustered

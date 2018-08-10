@@ -2,7 +2,6 @@ function out = SY_LocalDistributions(y,numSegs,eachOrPar,numPoints)
 % SY_LocalDistributions  Compares the distribution in consecutive time-series segments
 %
 % Returns the sum of differences between each kernel-smoothed distributions
-% (using the Matlab function ksdensity).
 %
 %---INPUTS:
 %
@@ -105,7 +104,6 @@ switch eachOrPar
         if doPlot
             hold on; plot(pardn,'r','LineWidth',2); hold off
         end
-
     case 'each'
         % Compares each subdistribtuion to the parent (full signal) distribution
         if numSegs == 2 % output is just an integer: only two distributions to compare
@@ -123,7 +121,7 @@ switch eachOrPar
                 end
             end
         end
-
+        
         divs = diffmat(~isnan(diffmat)); % (the upper triangle of diffmat)
                                          % set of divergences in all pairs of segments of the time series
         % divs = diffmat(diffmat > 0); % a set of non-zero divergences in all pairs of segments of the time series
@@ -131,7 +129,6 @@ switch eachOrPar
         %     fprintf(1,'That''s strange -- no changes in distribution??! This must be a really strange time series.\n');
         %     out = NaN; return
         % end
-
     otherwise
         error('Unknown method ''%s'', should be ''each'' or ''par''',eachOrPar);
 end
