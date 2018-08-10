@@ -1,5 +1,9 @@
-function reducedIDs = TS_ReduceFeatureSet(whatData,distThreshold)
-% Unsupervised clustering to reduce feature set
+function reducedIDs = TS_ReduceFeatureSet(whatData,distThreshold,useSpearman)
+% Unsupervised clustering to a reduced feature set
+%
+%---Output:
+% reducedIDs, A set of Operation IDs that forms the new reduced feature set
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -22,14 +26,20 @@ function reducedIDs = TS_ReduceFeatureSet(whatData,distThreshold)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Check inputs:
+%-------------------------------------------------------------------------------
 if nargin < 1
     whatData = 'norm';
 end
 if nargin < 2
     distThreshold = 0.2;
 end
-useSpearman = true;
+if nargin < 3
+    useSpearman = true;
+end
 
+%-------------------------------------------------------------------------------
 % Load in data:
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
