@@ -1,5 +1,5 @@
 function out = PD_PeriodicityWang(y)
-% PD_PeriodicityWang    Periodicity extraction measure of Wang et al.
+% PD_PeriodicityWang    Periodicity extraction measure of Wang et al. (2007)
 %
 % Implements an idea based on the periodicity extraction measure proposed in:
 %
@@ -108,18 +108,18 @@ end
 % (b) difference between peak and trough is at least 0.01
 % (c) peak corresponds to positive correlation
 
-% (i) find peaks and troughs in ACF
+% (i) Find peaks and troughs in ACF
 diffac = diff(acf); % differenced time series
 sgndiffac = sign(diffac); % sign of differenced time series
 bath = diff(sgndiffac); % differenced, signed, differenced time series
 troughs = find(bath == 2) + 1; % finds troughs
 peaks = find(bath == -2) + 1; % finds peaks
-npeaks = length(peaks);
+numPeaks = length(peaks);
 
 theFreqs = zeros(numThresholds,1);
 for k = 1:numThresholds
     theFreqs(k) = 1;
-    for i = 1:npeaks % search through all peaks for one that meets the condition
+    for i = 1:numPeaks % search through all peaks for one that meets the condition
         ipeak = peaks(i); % acf lag at which there is a peak
         thepeak = acf(ipeak); % acf at the peak
         ftrough = find(troughs < ipeak,1,'last');
@@ -127,7 +127,7 @@ for k = 1:numThresholds
             continue;
         end
         itrough = troughs(ftrough); % acf lag at which there is a trough (the first one preceeding the peak)
-        thetrough = acf(itrough); % acf at the trough
+        theTrough = acf(itrough); % acf at the trough
 
         % (a) a trough before it: should be implicit in the ftrough bit above
         %     if troughs(1)>ipeak % the first trough is after it
@@ -135,7 +135,7 @@ for k = 1:numThresholds
         %     end
 
         % (b) difference between peak and trough is at least 0.01
-        if thepeak - thetrough < ths(k)
+        if thepeak - theTrough < ths(k)
             continue
         end
 
@@ -144,7 +144,7 @@ for k = 1:numThresholds
             continue
         end
 
-        % we made it! Use this frequency!
+        % We made it! Use this frequency!
         theFreqs(k) = ipeak; break
     end
 end
@@ -152,7 +152,6 @@ end
 %-------------------------------------------------------------------------------
 % Convert vector into a structure for output
 %-------------------------------------------------------------------------------
-% output entries are out.th1, out.th2, ..., out.th7:
 for i = 1:numThresholds
     out.(sprintf('th%u',i)) = theFreqs(i);
 end
