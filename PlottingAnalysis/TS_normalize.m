@@ -1,10 +1,9 @@
 function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA,classVarFilter)
 % TS_normalize  Trims and normalizes data from an hctsa analysis.
 %
-% Reads in data from HCTSA.mat, writes a trimmed, normalized version to
-% HCTSA_N.mat
-% Normalization often involves a rescaling of each feature to the unit interval
-% for visualization and clustering.
+% Reads in data from HCTSA.mat, writes a trimmed, normalized version to HCTSA_N.mat
+% For many normalization settings, each feature is normalized to the unit interval
+% for the purposes of visualization and clustering.
 %
 %---INPUTS:
 % normFunction: String specifying how to normalize the data.
@@ -221,7 +220,6 @@ fprintf(1,'\n');
 if ismember(normFunction,{'nothing','none'})
     fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',normFunction);
 else
-    % No training subset specified
     fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',...
                             length(TimeSeries),length(Operations));
     TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction);

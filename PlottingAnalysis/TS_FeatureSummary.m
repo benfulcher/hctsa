@@ -136,7 +136,7 @@ if doViolin
         for i = 1:annotateParams.n
             ri = find(xx{1}>=TS_DataMat(highlightInd(i),theOp),1);
             plot(0.5+0.35*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColors{rem(i-1,10)+1},'LineWidth',2)
-            groupColor = myColors{1+timeSeriesGroup(r(i))};
+            groupColor = myColors{1+timeSeriesGroup(highlightInd(i))};
             plot(0.5+0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
             plot(0.5-0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
         end
@@ -190,7 +190,7 @@ if doViolin
         rectWidth = 0.1;
         for i = 1:annotateParams.n
             rectangle('Position',[-rectWidth*1,(i-1)*rectHeight,rectWidth,rectHeight],...
-                                    'FaceColor',myColors{1+timeSeriesGroup(r(i))});
+                                    'FaceColor',myColors{1+timeSeriesGroup(highlightInd(i))});
         end
         ax.XLim = [-rectWidth,1];
     end

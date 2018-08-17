@@ -14,7 +14,7 @@ function out = EN_ApEn(y,mnom,rth)
 % rth, the threshold for judging closeness/similarity
 %
 %---NOTES:
-% No record of where this was code was derived from :-/
+% I have no record of where this was code was derived from :-/
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -57,8 +57,8 @@ end
 %-------------------------------------------------------------------------------
 
 r = rth*std(y); % threshold of similarity
-N = length(y);% length of time series
-phi = zeros(2,1);% phi(1)=phi_m, phi(2)=phi_{m+1}
+N = length(y); % length of time series
+phi = zeros(2,1); % phi(1)=phi_m, phi(2)=phi_{m+1}
 
 for k = 1:2
     m = mnom+k-1; % pattern length
