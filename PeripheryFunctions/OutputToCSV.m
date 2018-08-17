@@ -55,11 +55,8 @@ dlmwrite(fileName,TS_DataMat,'delimiter',',');
 fprintf(1,'Wrote data to %s\n',fileName);
 
 %-------------------------------------------------------------------------------
-% Output time-series info to file:
+% Output time-series info (Name + Keyword) to csv file:
 %-------------------------------------------------------------------------------
-combinedStrings = arrayfun(@(x)sprintf('%s (%s)',TimeSeries(x).Name,...
-        TimeSeries(x).Keywords),1:length(TimeSeries),'UniformOutput',false)';
-% Write it out
 fileName = 'hctsa_timeseries-info.csv';
 fid = fopen(fileName,'w');
 for i = 1:length(TimeSeries)
@@ -67,6 +64,19 @@ for i = 1:length(TimeSeries)
 end
 fclose(fid);
 fprintf(1,'Wrote time-series info to %s\n',fileName);
+
+%-------------------------------------------------------------------------------
+% Output time-series group info to file:
+%-------------------------------------------------------------------------------
+if isfield(TimeSeries,'Group')
+    fileName = 'hctsa_grouplabel-info.csv';
+    fid = fopen(fileName,'w');
+    for i = 1:length(TimeSeries)
+        fprintf(fid,'%s,%u\n',TimeSeries(i).Name,TimeSeries(i).Group);
+    end
+    fclose(fid);
+    fprintf(1,'Wrote time-series info to %s\n',fileName);
+end
 
 %-------------------------------------------------------------------------------
 % Output feature info to file:

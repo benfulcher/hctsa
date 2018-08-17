@@ -44,7 +44,7 @@ if nargin < 2 || isempty(whatData)
 end
 
 if nargin < 3 || isempty(doViolin) % annotation parameters
-    doViolin = false;
+    doViolin = true;
 end
 
 if nargin < 4 || isempty(annotateParams) % annotation parameters
@@ -80,10 +80,9 @@ else
 end
 
 %-------------------------------------------------------------------------------
-% Sort out any custom plotting settings in the annotateParams structure
-%-------------------------------------------------------------------------------
+% Apply default plotting settings in the annotateParams structure
 if ~isfield(annotateParams,'userInput')
-    annotateParams.userInput = 1; % user clicks to annotate rather than randomly chosen
+    annotateParams.userInput = true; % user clicks to annotate rather than randomly chosen
 end
 if ~isfield(annotateParams,'textAnnotation') % what text annotation to use
     annotateParams.textAnnotation = 'Name';
@@ -95,23 +94,13 @@ if annotateParams.n < 1
     error('You need to specify at least one time series to annotate with TS_FeatureSummary');
 end
 if ~isfield(annotateParams,'maxL')
-    annotateParams.maxL = 500;
+    annotateParams.maxL = 1000;
 end
 
-% if isfield(annotateParams,'whereann') % what text annotation to use
-%     textann = annotateParams.whereann;
-% else
-%     whereann = 'onplot'; %'onplot', 'newplot'
-% end
-
 %-------------------------------------------------------------------------------
-%% Plot the kernel smoothed density
+% Plot the kernel-smoothed probability density
 %-------------------------------------------------------------------------------
-fig = figure('color','w'); box('on'); hold on
-% if strcmp(whereann,'newplot')
-%     subplot(3,1,[1,2]); box('on'); hold on
-% end
-
+f = figure('color','w'); box('on'); hold on
 if isfield(TimeSeries,'Group')
     numGroups = length(unique(timeSeriesGroup));
     annotateParams.groupColors = BF_getcmap('set1',numGroups,1);
@@ -120,6 +109,10 @@ end
 if doViolin
     % Violin plots
     rainbowColors = [BF_getcmap('set1',5,1); BF_getcmap('dark2',5,1)];
+
+    % Determine a subset, highlightInd, of time series to highlight:
+    [~,ix] = sort(TS_DataMat(:,theOp),'ascend');
+    highlightInd = ix(round(linspace(1,length(ix),annotateParams.n)));
 
     if isfield(TimeSeries,'Group')
         dataCell = cell(numGroups+1,1);
@@ -140,12 +133,10 @@ if doViolin
         [ff,xx] = BF_JitteredParallelScatter(dataCell,1,1,0,extraParams);
 
         % Annotate lines for each feature in the distribution:
-        [~,ix] = sort(TS_DataMat(:,theOp),'ascend');
-        r = ix(round(linspace(1,length(ix),annotateParams.n)));
         for i = 1:annotateParams.n
-            ri = find(xx{1}>=TS_DataMat(r(i),theOp),1);
+            ri = find(xx{1}>=TS_DataMat(highlightInd(i),theOp),1);
             plot(0.5+0.35*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColors{rem(i-1,10)+1},'LineWidth',2)
-            groupColor = myColors{1+timeSeriesGroup(r(i))};
+            groupColor = myColors{1+timeSeriesGroup(highlightInd(i))};
             plot(0.5+0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
             plot(0.5-0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
         end
@@ -164,10 +155,8 @@ if doViolin
         [ff,xx] = BF_JitteredParallelScatter(dataCell,1,1,0,extraParams);
 
         % Annotate lines for each feature in the distribution:
-        [~,ix] = sort(TS_DataMat(:,theOp),'ascend');
-        r = ix(round(linspace(1,length(ix),annotateParams.n)));
         for i = 1:annotateParams.n
-            ri = find(xx{1}>=TS_DataMat(r(i),theOp),1);
+            ri = find(xx{1}>=TS_DataMat(highlightInd(i),theOp),1);
             rainbowColor = rainbowColors{rem(i-1,10)+1};
             plot(1+0.25*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColor,'LineWidth',2)
             plot(1+0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
@@ -176,29 +165,32 @@ if doViolin
         ax.XTick = [];
     end
     ax.TickLabelInterpreter = 'none';
-    title(sprintf('[%u]%s (%s)',theOperation.ID,theOperation.Name,theOperation.Keywords),'interpreter','none')
+    title(sprintf('[%u]%s (%s)',theOperation.ID,theOperation.Name,theOperation.Keywords),...
+                                'interpreter','none')
     ylabel('Feature value');
 
-    % Time series annotations (cycling through groups of 10 rainbow colors):
+    %-------------------------------------------------------------------------------
+    % Time series annotations using TS_plot_timeseries
+    % (cycling through groups of 10 rainbow colors):
     ax = subplot(1,4,3:4);
-    plotOptions.newFigure = 0;
+    plotOptions.newFigure = false;
     plotOptions.colorMap = cell(annotateParams.n,1);
     for i = 1:annotateParams.n
         plotOptions.colorMap{i} = rainbowColors{rem(i-1,10)+1};
     end
     plotOptions.colorMap = flipud(plotOptions.colorMap);
-    dataStruct = struct();
-    dataStruct.TimeSeries = TimeSeries; dataStruct.groupNames = groupNames;
-    dataStruct.TS_DataMat = TS_DataMat; dataStruct.Operations = Operations;
-    TS_plot_timeseries(dataStruct,annotateParams.n,flipud(r),annotateParams.maxL,plotOptions);
+
+    dataStruct = struct('TimeSeries',TimeSeries);
+    dataStruct.groupNames = groupNames;
+    TS_plot_timeseries(dataStruct,annotateParams.n,flipud(highlightInd),annotateParams.maxL,plotOptions);
 
     % Put rectangles if data is grouped
     if isfield(TimeSeries,'Group')
         rectHeight = 1/annotateParams.n;
         rectWidth = 0.1;
-        for i = 1:annotateParams.n;
+        for i = 1:annotateParams.n
             rectangle('Position',[-rectWidth*1,(i-1)*rectHeight,rectWidth,rectHeight],...
-                                    'FaceColor',myColors{1+timeSeriesGroup(r(i))});
+                                    'FaceColor',myColors{1+timeSeriesGroup(highlightInd(i))});
         end
         ax.XLim = [-rectWidth,1];
     end
@@ -241,11 +233,10 @@ else % kernel distributions
         xy = [xr',fr'];
     end
 
-    fig.Position = [fig.Position(1:2),649,354];
+    f.Position = [f.Position(1:2),649,354];
 
     %-------------------------------------------------------------------------------
-    %% Annotate time series:
-    %-------------------------------------------------------------------------------
+    % Annotate time series:
     xlabel(theOperation.Name,'Interpreter','none');
     ylabel('Probability Density')
     BF_AnnotatePoints(xy,TimeSeries,annotateParams);

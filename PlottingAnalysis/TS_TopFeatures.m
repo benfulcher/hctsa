@@ -185,9 +185,9 @@ fprintf(1,['Mean %s performance across %u operations = %4.2f%s\n' ...
         cfnName,numOps,nanmean(testStat),cfnUnit,numClasses,chanceLine,cfnUnit);
 
 % --------------------------------------------------------------------------
-%% Display information about the top topN operations
+%% Display information about the top features (numTopFeatures)
 % --------------------------------------------------------------------------
-[testStat_sort, ifeat] = sort(testStat,'descend'); % bigger is better
+[testStat_sort,ifeat] = sort(testStat,'descend'); % bigger is better
 
 isNaN = isnan(testStat_sort);
 testStat_sort = testStat_sort(~isNaN);

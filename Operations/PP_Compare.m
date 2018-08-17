@@ -93,19 +93,17 @@ function out = PP_Compare(y,detrndmeth)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Check inputs, set default
-% ------------------------------------------------------------------------------
+%% Check inputs, set default:
 if nargin < 2 || isempty(detrndmeth)
     detrndmeth = 'medianf'; % median filter by default
 end
 
-% ------------------------------------------------------------------------------
-%% FOREPLAY
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% FOREPLAY
 N = length(y); % time-series length
-r = (1:N)'; % the t-range over which to fit
+r = (1:N)'; % the time-range over which to fit
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% APPLY PREPROCESSINGS
 % ------------------------------------------------------------------------------
 % DETRENDINGS:
@@ -192,19 +190,16 @@ else
     error('Invalid detrending method ''%s''',detrendmeth)
 end
 
-% ------------------------------------------------------------------------------
-%% Quick error check
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%% Quick check that outputs are meaningful
 if all(y_d == 0)
-    out = NaN;
-    return
+    out = NaN; return
 end
 
-% ------------------------------------------------------------------------------
-%% TESTS ON THE ORIGINAL AND PROCESSED SIGNALS
-% ------------------------------------------------------------------------------
-% z-score both (these metrics will need it, and not done before-hand
-% because of positive-only data, etc.
+%-------------------------------------------------------------------------------
+% Statistical tests on original and processed time series
+% z-score both (these metrics will need it, and not always done beforehand
+% because of positive-only data, etc.)
 y = zscore(y);
 y_d = zscore(y_d);
 

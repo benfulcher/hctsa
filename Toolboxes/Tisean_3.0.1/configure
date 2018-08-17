@@ -1020,7 +1020,7 @@ fi
 
 
 
-for fff in "$FC" f77 g77 "f77 +U77" "f77 -q -f -B108 -lU77"; do
+for fff in "$FC" gfortran f77 g77 "f77 +U77" "f77 -q -f -B108 -lU77"; do
    if test -z "$fff"; then 
       continue
    fi

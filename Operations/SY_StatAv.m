@@ -5,6 +5,8 @@ function out = SY_StatAv(y,whatType,n)
 % calculates the mean in each of these segments and returns the standard deviation
 % of this set of means.
 %
+% Empirically mean-stationary data would display StatAv approaching to zero.
+%
 % cf. "Heart rate control in normal and aborted-SIDS infants", S. M. Pincus et al.
 % Am J. Physiol. Regul. Integr. Comp. Physiol. 264(3) R638 (1993)
 %
@@ -74,7 +76,6 @@ case 'seg'
     for j = 1:n
         M(j) = mean(y(p*(j-1)+1:p*j));
     end
-
 case 'len'
     if N > 2*n
         pn = floor(N/n);
@@ -86,15 +87,12 @@ case 'len'
         fprintf(1,'This time series (N = %u) is too short for StatAv(%s,''%u'')\n',N,whatType,n);
         out = NaN; return
     end
-
 otherwise
     error('Error evaluating StatAv of type ''%s'', please select either ''seg'' or ''len''',whatType)
-
 end
 
 % ------------------------------------------------------------------------------
-% Compute the statistic
-% ------------------------------------------------------------------------------
+% Compute the StatAv statistic
 
 s = std(y); % should be 1 (for a z-scored time-series input)
 sdav = std(M);

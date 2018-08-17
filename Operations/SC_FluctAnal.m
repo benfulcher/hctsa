@@ -11,7 +11,7 @@ function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
 % Many alternatives are implemented in this function.
 %
 %---INPUTS:
-% y, the input time series
+% x, the input time series
 %
 % q, the parameter in the fluctuation function q = 2 (usual) gives RMS fluctuations.
 %
@@ -128,7 +128,7 @@ if nargin < 6
 end
 
 if nargin < 7
-	logInc = 1; % use linear spacing (this shouldn't really be default, but this
+	logInc = true; % use linear spacing (this shouldn't really be default, but this
 				% is for consistency with already-implemented precedent)
 end
 
@@ -136,7 +136,7 @@ end
 % ------------------------------------------------------------------------------
 
 N = length(x); % length of the time series
-doPlot = 0; % plot relevant outputs to figure
+doPlot = false; % plot relevant outputs to figure
 
 % 1) Compute integrated sequence
 

@@ -38,7 +38,7 @@ if nargin < 2 || isempty(whatColor)
     whatColor = 'k';
 end
 if nargin < 3 || isempty(doSwap)
-    doSwap = 0;
+    doSwap = false;
 end
 if nargin < 4 || isempty(lineWidth)
     lineWidth = 1;
@@ -47,7 +47,7 @@ if nargin < 5 || isempty(markerSize)
     markerSize = 14;
 end
 if nargin < 6 || isempty(trimRange)
-    trimRange = 0;
+    trimRange = false;
 end
 
 numPoints = 1000; % points for the ks density

@@ -18,7 +18,7 @@ function out = CO_trev(y,tau)
 %       information function, respectively)
 %
 %---OUTPUTS:
-% the raw trev expression, its magnitude, the numerator and its magnitude, and
+% The raw trev expression, its magnitude, the numerator and its magnitude, and
 % the denominator.
 
 % ------------------------------------------------------------------------------
@@ -50,16 +50,14 @@ function out = CO_trev(y,tau)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Set defaults:
-% ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
     tau = 'ac';
 end
 
-% ------------------------------------------------------------------------------
-% Can set the time lag, tau, to be 'ac' or 'mi'
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% Can set the time lag, tau, to be 'ac' or 'mi':
 if strcmp(tau,'ac')
     tau = CO_FirstZero(y,'ac');
     % tau is first zero crossing of the autocorrelation function
@@ -71,9 +69,8 @@ if isnan(tau)
     error('No valid setting for time delay (time series too short?)');
 end
 
-% ------------------------------------------------------------------------------
-% Compute trev quantities
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% Compute trev quantities:
 
 yn = y(1:end-tau);
 yn1 = y(1+tau:end); % yn, tau steps ahead

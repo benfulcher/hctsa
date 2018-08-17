@@ -1,10 +1,9 @@
-function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA,classVarFilter,subs)
+function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA,classVarFilter)
 % TS_normalize  Trims and normalizes data from an hctsa analysis.
 %
-% Reads in data from HCTSA.mat, writes a trimmed, normalized version to
-% HCTSA_N.mat
-% Normalization often involves a rescaling of each feature to the unit interval
-% for visualization and clustering.
+% Reads in data from HCTSA.mat, writes a trimmed, normalized version to HCTSA_N.mat
+% For many normalization settings, each feature is normalized to the unit interval
+% for the purposes of visualization and clustering.
 %
 %---INPUTS:
 % normFunction: String specifying how to normalize the data.
@@ -18,12 +17,6 @@ function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA
 %
 % classVarFilter: whether to filter on zero variance of any given class (which
 %                 can cause problems for many classification algorithms).
-%
-% subs [opt]: Only normalize and trim a subset of the data matrix. This can be used,
-%             for example, to analyze just a subset of the full space, which can
-%             subsequently be clustered and further subsetted using TS_cluster...
-%             subs in the form {[rowrange],[columnrange]} (rows and columns to
-%             keep, from HCTSA.mat).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -56,7 +49,7 @@ if nargin < 1 || isempty(normFunction)
 end
 
 if nargin < 2 || isempty(filterOptions)
-    filterOptions = [0.70, 1];
+    filterOptions = [0.70,1];
     % By default remove less than 70%-good-valued time series, & then less than
     % 100%-good-valued operations.
 end
@@ -76,20 +69,16 @@ if nargin < 4
     classVarFilter = false; % don't filter on individual class variance > 0 by default
 end
 
-if nargin < 5
-    % Empty by default, i.e., don't subset:
-    subs = {};
-end
-
 % --------------------------------------------------------------------------
 %% Read data from local files
 % --------------------------------------------------------------------------
 
 % Load data:
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(fileName_HCTSA);
-load(whatDataFile,'TS_Quality','MasterOperations');
+TS_Quality = TS_GetFromData(fileName_HCTSA,'TS_Quality');
+MasterOperations = TS_GetFromData(fileName_HCTSA,'MasterOperations');
 
-% First check that fromDatabase exists (for back-compatability)
+% Check that fromDatabase exists (legacy)
 fromDatabase = TS_GetFromData(fileName_HCTSA,'fromDatabase');
 if isempty(fromDatabase)
     fromDatabase = true; % (legacy)
@@ -108,29 +97,6 @@ gitInfo = TS_GetFromData(fileName_HCTSA,'gitInfo');
 % In this script, each of these pieces of data (from the database) will be
 % trimmed and normalized, and then saved to HCTSA_N.mat
 %-------------------------------------------------------------------------------
-
-% ------------------------------------------------------------------------------
-%% Subset using given indices, subs
-% ------------------------------------------------------------------------------
-if ~isempty(subs)
-    kr0 = subs{1}; % rows to keep (0)
-    if ~isempty(kr0)
-        fprintf(1,'Filtered down time series by given subset; from %u to %u.\n',...
-                    size(TS_DataMat,1),length(kr0));
-        TS_DataMat = TS_DataMat(kr0,:);
-        TS_Quality = TS_Quality(kr0,:);
-        TimeSeries = TimeSeries(kr0);
-    end
-
-    kc0 = subs{2}; % columns to keep (0)
-    if ~isempty(kc0)
-        fprintf(1,'Filtered down operations by given subset; from %u to %u.\n',...
-            size(TS_DataMat,2),length(kc0));
-        TS_DataMat = TS_DataMat(:,kc0);
-        TS_Quality = TS_Quality(:,kc0);
-        Operations = Operations(kc0);
-    end
-end
 
 % --------------------------------------------------------------------------
 %% Trim down bad rows/columns
@@ -254,7 +220,6 @@ fprintf(1,'\n');
 if ismember(normFunction,{'nothing','none'})
     fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',normFunction);
 else
-    % No training subset specified
     fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',...
                             length(TimeSeries),length(Operations));
     TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction);
@@ -313,7 +278,6 @@ op_clust = struct('distanceMetric','none','Dij',[],...
 % --------------------------------------------------------------------------
 %% Save results to file
 % --------------------------------------------------------------------------
-
 % Make a structure with statistics on normalization:
 % Save the codeToRun, so you can check the settings used to run the normalization
 % At the moment, only saves the first two arguments

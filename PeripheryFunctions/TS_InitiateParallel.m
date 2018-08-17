@@ -2,10 +2,10 @@ function success = TS_InitiateParallel(doInitiate)
 % Initiates a parallel session for hctsa
 %
 %---INPUT:
-% doInitiate: = 1 for the first time you want to initialize all workers
+% doInitiate: = true for the first time you want to initialize all workers
 %
 %---OUTPUT:
-% success -- = 1 if a matlabpool was successfully initiated (or if one already
+% success = true if a matlabpool was successfully initiated (or if one already
 %               exists)
 
 % ------------------------------------------------------------------------------
@@ -83,7 +83,8 @@ try
         end
     end
 catch emsg
-    warning('\nError starting parallel processing pool -- running serially instead:\n%s',emsg.message)
+    warning('\nError starting parallel processing pool -- running serially instead:\n%s',...
+                    emsg.message)
     success = false;
 end
 

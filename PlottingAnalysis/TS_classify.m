@@ -157,12 +157,13 @@ fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
 % Check nulls:
 %-------------------------------------------------------------------------------
 if numNulls > 0
-    fprintf(1,'Computing %s across %u null permutations... ',outputStat,numNulls);
+    fprintf(1,'Computing %s across %u null permutations...',outputStat,numNulls);
     nullStat = zeros(numNulls,1);
-    for i = 1:numNulls
+    parfor i = 1:numNulls
         % Compute for shuffled data labels:
         shuffledLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
-        nullStat(i) = GiveMeFoldLosses(TS_DataMat,shuffledLabels);
+        nullStat(i) = GiveMeCfn(whatClassifier,TS_DataMat,shuffledLabels,[],[],numClasses,[],[],true,numFolds);
+        % nullStat(i) = GiveMeFoldLosses(TS_DataMat,shuffledLabels);
         % meanNull(i) = mean(foldLosses_null);
         if i==1
             fprintf(1,'%u',i);

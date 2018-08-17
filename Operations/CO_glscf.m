@@ -1,9 +1,10 @@
 function glscf = CO_glscf(y,alpha,beta,tau)
-% CO_glscf      The generalized linear self-correlation function of a time series.
+% CO_glscf  The generalized linear self-correlation function of a time series.
 %
 % This function was introduced in Queiros and Moyano in Physica A, Vol. 383, pp.
 % 10--15 (2007) in the paper "Yet on statistical properties of traded volume:
 % Correlation and mutual information at different value magnitudes"
+% https://www.sciencedirect.com/science/article/pii/S0378437107004645
 %
 % The function considers magnitude correlations.
 %
@@ -58,8 +59,9 @@ if strcmp(tau,'tau')
     tau = CO_FirstZero(y,'ac');
 end
 
-y1 = abs(y(1:end-tau)); % take magnitudes
-y2 = abs(y(1+tau:end)); % take magnitudes
+% Take magnitudes of time-delayed versions of the time series:
+y1 = abs(y(1:end-tau));
+y2 = abs(y(1+tau:end));
 
 glscf = (mean((y1.^alpha).*(y2.^beta)) - mean(y1.^alpha)*mean(y2.^beta)) / ...
      		    (sqrt(mean(y1.^(2*alpha)) - mean(y1.^alpha)^2) ...

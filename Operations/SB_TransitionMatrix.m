@@ -144,7 +144,6 @@ out.stddiag = std(diag(T)); % std of diagonal elements
 out.symdiff = sum(sum(abs((T-T')))); % sum of differences of individual elements
 out.symsumdiff = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower
                                                           % triangular parts of T
-
 % (iv) Measures from covariance matrix:
 covT = cov(T);
 out.sumdiagcov = sum(diag(covT)); % trace of covariance matrix

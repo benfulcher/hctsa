@@ -131,33 +131,34 @@ end
 % ------------------------------------------------------------------------------
 %% Get group indices:
 % ------------------------------------------------------------------------------
-if (isempty(whatTimeSeries) || strcmp(whatTimeSeries,'grouped')) && isfield(TimeSeries,'Group');
-    % Use default groups
+if (isempty(whatTimeSeries) || strcmp(whatTimeSeries,'grouped')) && isfield(TimeSeries,'Group')
+    % Use default groups assigned by TS_LabelGroups
     groupIndices = BF_ToGroup([TimeSeries.Group]);
-    fprintf(1,'Plotting from %u groups of time series from file.\n',length(groupIndices));
+    numGroups = length(groupIndices);
+    groupNames = TS_GetFromData(whatData,'groupNames');
+    fprintf(1,'Plotting from %u groups of time series from file.\n',numGroups);
 elseif isempty(whatTimeSeries) || strcmp(whatTimeSeries,'all')
     % Nothing specified but no groups assigned, or specified 'all': plot from all time series
     groupIndices = {1:length(TimeSeries)};
+    groupNames = {};
 elseif ischar(whatTimeSeries)
     % Just plot the specified group
     % First load group names:
-    if isstruct(whatData)
-        groupNames = whatData.groupNames;
-    else
-        load(theFile,'groupNames');
-    end
+    groupNames = TS_GetFromData(dataSource,'groupNames');
     a = strcmp(whatTimeSeries,groupNames);
     groupIndices = {find([TimeSeries.Group]==find(a))};
+    groupNames = {whatTimeSeries};
     fprintf(1,'Plotting %u time series matching group name ''%s''\n',length(groupIndices{1}),whatTimeSeries);
 else % Provided a custom range as a vector
     groupIndices = {whatTimeSeries};
+    groupNames = {};
     fprintf(1,'Plotting the %u time series matching indices provided\n',length(whatTimeSeries));
 end
 numGroups = length(groupIndices);
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Do the plotting
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Want numPerGroup from each time series group
 iPlot = zeros(numGroups*numPerGroup,1);
 classes = zeros(numGroups*numPerGroup,1);
@@ -165,8 +166,7 @@ nhere = zeros(numGroups,1);
 groupSizes = cellfun(@length,groupIndices);
 
 for i = 1:numGroups
-    % filter down to numPerGroup if too many in group, otherwise plot all in
-    % group
+    % filter down to numPerGroup if too many in group, otherwise plot all in group
     switch howToFilter
         case 'firstcome'
             % just plot first in group (useful when ordered by closeness to
@@ -271,19 +271,20 @@ if plotFreeForm
     ax.Box = 'on';
     hold(ax,'on');
 
-	yr = linspace(1,0,numToPlot+1);
+    yr = linspace(1,0,numToPlot+1);
     inc = abs(yr(2)-yr(1)); % size of increment
     yr = yr(2:end);
-	ls = zeros(numToPlot,1); % lengths of each time series
+    ls = zeros(numToPlot,1); % lengths of each time series
 
+    pHandles = zeros(numToPlot,1); % keep plot handles
 	for i = 1:numToPlot
-	    fn = TimeSeries(iPlot(i)).Name; % the name of the time series
-	    kw = TimeSeries(iPlot(i)).Keywords; % the keywords
-	    x = TimeSeries(iPlot(i)).Data;
+        theTS = TimeSeries(iPlot(i));
+
+	    x = theTS.Data; % the data
 	    N0 = length(x);
 		if ~isempty(maxN) && (N0 > maxN)
-			% specified a maximum length of time series to plot
-            sti = randi(N0-maxN,1);
+			% Specified a maximum length of time series to plot
+            sti = 1; % randi(N0-maxN,1);
 			x = x(sti:sti+maxN-1); % subset random segment
             N = length(x);
         else
@@ -298,14 +299,20 @@ if plotFreeForm
         else % plot by group color (or all black for 1 class)
             colorNow = theColors{classes(i)};
         end
-        plot(xx,xsc,'-','color',colorNow,'LineWidth',lw)
+        pHandles(i) = plot(xx,xsc,'-','color',colorNow,'LineWidth',lw);
 
         % Annotate text labels
 		if displayTitles
-			theTit = sprintf('{%u} %s [%s] (%u)',TimeSeries(iPlot(i)).ID,fn,kw,N0);
+			theTit = sprintf('{%u} %s [%s] (%u)',theTS.ID,theTS.Name,theTS.Keywords,N0);
 			text(0.01,yr(i)+0.9*inc,theTit,'interpreter','none','FontSize',8)
 	    end
 	end
+
+    % Legend:
+    if ~isempty(groupNames)
+        [~,b] = unique(classes);
+        legend(pHandles(b),groupNames);
+    end
 
     % Set up axes:
     ax.XTick = linspace(0,1,3);
@@ -316,9 +323,9 @@ if plotFreeForm
     xlabel('Time (samples)')
 
 else
-    % i.e., NOT a FreeForm plot:
-	for i = 1:numToPlot
-	    subplot(numToPlot,1,i)
+    % NOT a 'free-form' plot:
+    for i = 1:numToPlot
+	    ax = subplot(numToPlot,1,i)
 	    fn = TimeSeries(iPlot(i)).Name; % the filename
 	    kw = TimeSeries(iPlot(i)).Keywords; % the keywords
 	    x = TimeSeries(iPlot(i)).Data;
@@ -355,21 +362,20 @@ else
 	            end
 	        end
 	    end
-        ax = gca;
 	    ax.YTickLabel = '';
-	    if i~=numToPlot
-	        ax.XTickLabel='';
+        if i~=numToPlot
+	        ax.XTickLabel = '';
             ax.FontSize = 8; % put the ticks for the last time series
         else % label the axis
             ax.XLabel = 'Time (samples)';
         end
 	end
 
-	% Set all xlims so that they have the same x-axis limits
-	for i = 1:numToPlot
-	    ax = subplot(numToPlot,1,i);
+	% Set all subplots to have the same x-axis limits
+    for i = 1:numToPlot
+        ax = subplot(numToPlot,1,i);
         ax.XLim = [1,max(Ls)];
-	end
+    end
 end
 
 end

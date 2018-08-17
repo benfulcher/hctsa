@@ -68,35 +68,32 @@ function out = CP_ML_StepDetect(y,method,params)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-% ------------------------------------------------------------------------------
-% Preliminaries, check inputs:
-% ------------------------------------------------------------------------------
-N = length(y); % time-series length
-
+%-------------------------------------------------------------------------------
+% Check inputs:
 if nargin < 2 || isempty(method)
     fprintf(1,'Using Kalafut-Visscher step detection by default\n');
     method = 'kv';
 end
 
+%-------------------------------------------------------------------------------
+% Preliminaries:
+doPlot = false; % whether to plot outputs
+N = length(y); % time-series length
+
 % ------------------------------------------------------------------------------
 % Do the step detection:
 % ------------------------------------------------------------------------------
-
 switch method
     case 'kv'
-        % ------------------------------------------------------------------------------
-        %% Kalafut-Visscher
-        % ------------------------------------------------------------------------------
-
-        % (1) Do the step detection
-        [steppedy, steps] = ML_kvsteps(y);
+        % Kalafut-Visscher step detection
+        [steppedy,steps] = ML_kvsteps(y);
 
         % Put in chpts form: a vector specifying indicies of starts of
         % constant runs.
         if length(steps) == 2
             chpts = 1;
         else
-            chpts = [1; steps(2:end-1)+1];
+            chpts = [1;steps(2:end-1)+1];
         end
 
     % case 'ck'
@@ -167,7 +164,7 @@ switch method
         % - maxiter    (Optional) Maximum interior-point iterations, if not
         %              specified defaults to 60.
         %
-        % Output arguments:
+        % Outputs:
         % - x          Denoised output signal for each value of lambda, size N x L.
         % - E          Objective functional at minimum for each lambda, size L x 1.
         % - s          Optimization result, 1 = solved, 0 = maximum iterations
@@ -190,16 +187,15 @@ switch method
         end
 
         % Run the code
-        [steppedy, E, s, lambdamax] = ML_l1pwc(y, lambda, 0); % use defaults for stoptol and maxiter
+        [steppedy,E,s,lambdaMax] = ML_l1pwc(y,lambda,0); % use defaults for stoptol and maxiter
 
-        % round to this precision to remove numberical flucuations of order
-        % less than 1e-4
+        % Round to remove numberical flucuations of order less than 1e-4
         steppedy = round(steppedy*1e4)/1e4;
 
-        % Return outputs
+        % Compute outputs specific to this method:
         out.E = E;
         out.s = s; % for some parameter values, this is 1
-        out.lambdamax = lambdamax;
+        out.lambdamax = lambdaMax;
 
         % Get step indicies from steppedy
         % these give the index of the start of each run
@@ -209,29 +205,41 @@ switch method
         else
             chpts = 1; % no changes
         end
-
     otherwise
         error('Unknown step detection method ''%s''',method);
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% Plot computed change points onto the time series:
+if doPlot
+    f = figure('color','w');
+    hold('on')
+    plot(y,'k')
+    plot(chpts,y(chpts),'or')
+end
+
+%-------------------------------------------------------------------------------
 % Outputs common to all step detection methods:
-% ------------------------------------------------------------------------------
 % requires: chpts -- a vector of indicies for changes in the time series
 %           steppedy -- an (Nx1) vector specifying the new stepped time
 %                       series
+
+numChangePoints = length(chpts);
 
 % Intervals -- of change
 chints = diff([chpts; N]);
 
 % Number of constant segments per sample
-out.nsegments = length(chpts)/N; % will be 1 if there are no changes
+out.nsegments = numChangePoints/N; % will be 1 if there are no changes
+
 % How much reduces variance
 out.rmsoff = std(y) - std(y-steppedy);
+
 % Reduces variance per step
-out.rmsoffpstep = (out.rmsoff)/(length(chpts));
+out.rmsoffpstep = out.rmsoff/numChangePoints;
+
 % Ratio of number of steps in first half of time series to second half
-sum1 = (sum(chpts < N/2)-1);
+sum1 = sum(chpts < N/2) - 1; % (exclude the chpt that's always sitting at 1)
 sum2 = sum(chpts >= N/2);
 if (sum2 > 0) && (sum1 > 0)
     if sum2 > sum1
@@ -242,7 +250,11 @@ if (sum2 > 0) && (sum1 > 0)
 else
     out.ratn12 = 0;
 end
-out.diffn12 = abs(sum1-sum2)/length(chpts);
+% Difference between number of change points in first and second half of data
+% as a proportion of total number of change points
+% Maximal (1) when all change points are in one half of data
+% Minimal (0) when same number of change points in both halves
+out.diffn12 = abs(sum1-sum2)/numChangePoints;
 
 % Proportion of really short steps:
 out.pshort_3 = sum(chints <= 3)/N;
@@ -258,6 +270,5 @@ out.maxstepint = max(chints)/N;
 out.minstepint = min(chints)/N;
 % Median step interval:
 out.medianstepint = median(chints)/N;
-
 
 end

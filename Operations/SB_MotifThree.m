@@ -45,20 +45,20 @@ if nargin < 2 || isempty(cgHow)
     cgHow = 'quantile';
 end
 
+%-------------------------------------------------------------------------------
+% Coarse-grain the data y -> yt
+numLetters = 3;
 switch cgHow
 	case 'quantile'
-		yt = SB_CoarseGrain(y,'quantile',3);
-
+		yt = SB_CoarseGrain(y,'quantile',numLetters);
 	case 'diffquant'
-		yt = SB_CoarseGrain(diff(y),'quantile',3);
-
+		yt = SB_CoarseGrain(diff(y),'quantile',numLetters);
     otherwise
         error('Unknown coarse-graining method ''%s''');
 end
+% So we have a vector yt with entries in {1,2,3}
 
 N = length(yt); % Length of the symbolized sequence derived from the time series
-
-% So we have a vector yt with entries \in {1,2,3}
 
 % ------------------------------------------------------------------------------
 %% Words of length 1
@@ -76,7 +76,6 @@ out.a = out1(1); % proportion of a
 out.b = out1(2); % proportion of b
 out.c = out1(3); % proportion of c
 out.h = f_entropy(out1); % entropy of this result
-
 
 % ------------------------------------------------------------------------------
 %% Words of length 2

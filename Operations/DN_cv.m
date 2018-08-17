@@ -7,7 +7,6 @@ function out = DN_cv(x,k)
 %---INPUTS:
 %
 % x, the input data vector
-%
 % k, the order of coefficient of variation (k = 1 is default)
 
 % ------------------------------------------------------------------------------
