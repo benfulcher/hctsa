@@ -252,7 +252,7 @@ for i = 3:5
     out.(sprintf('mom%u',i)) = DN_Moments(S,i);
 end
 
-% Autocorr:
+% Autocorrelation of amplitude spectrum:
 autoCorrs_S = CO_AutoCorr(S,1:4,'Fourier');
 out.ac1 = autoCorrs_S(1);
 out.ac2 = autoCorrs_S(2);

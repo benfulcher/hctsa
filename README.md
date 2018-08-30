@@ -15,7 +15,7 @@ Any feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https:
 &#x1F4D6; &#x1F4D6;
 Comprehensive documentation
 &#x1F4D6; &#x1F4D6;
-for *hctsa* is [on gitbook](https://www.gitbook.com/book/benfulcher/highly-comparative-time-series-analysis-manual/details), which can be read online or downloaded as a pdf, epub, or mobi file.
+for *hctsa* is on [gitbook](https://hctsa-users.gitbook.io/hctsa-manual).
 
 ### Downloading the repository
 

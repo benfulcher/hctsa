@@ -123,7 +123,6 @@ BF_ResetSeed(randomSeed);
 
 for i = 1:N*randp_max
     switch randomizeHow
-
         case 'statdist'
             % randomize by substituting a random element of the time series by
             % a random element from the static original time series distribution

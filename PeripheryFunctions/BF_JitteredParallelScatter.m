@@ -43,19 +43,14 @@ function [ff,xx] = BF_JitteredParallelScatter(dataCell,addMeans,doveTail,makeFig
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    addMeans = true;
-    % Add strip for mean of each group by default
+    addMeans = true; % Add strip for mean of each group
 end
-
 if nargin < 3
-    doveTail = true;
-    % Add kernel distribution
+    doveTail = true; % Add kernel distribution
 end
-
 if nargin < 4
-    makeFigure = true;
+    makeFigure = true; % Generate a new figure
 end
-
 if nargin < 5
     extraParams = struct;
 end

@@ -38,15 +38,12 @@ function TS_FeatureSummary(opID,whatData,doViolin,annotateParams)
 if nargin < 1
     opID = 1;
 end
-
 if nargin < 2 || isempty(whatData)
    whatData = 'raw'; % Visualize unnormalized outputs by default
 end
-
 if nargin < 3 || isempty(doViolin) % annotation parameters
     doViolin = true;
 end
-
 if nargin < 4 || isempty(annotateParams) % annotation parameters
     annotateParams = struct();
 end

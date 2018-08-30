@@ -45,16 +45,8 @@ function out = WL_cwt(y, wname, maxScale)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-% Check that a Wavelet Toolbox license is available:
-% ------------------------------------------------------------------------------
-BF_CheckToolbox('wavelet_toolbox')
-
-% ------------------------------------------------------------------------------
 %% Check inputs:
 % ------------------------------------------------------------------------------
-doPlot = false; % plot outputs to figures
-N = length(y); % length of the time series
-
 if nargin < 2 || isempty(wname)
     wname = 'db3';
     fprintf(1,'Using default wavelet ''%s''\n',wname);
@@ -64,8 +56,16 @@ if nargin < 3 || isempty(maxScale)
     fprintf(1,'Using default maxScale of %u\n',maxScale);
 end
 
+% ------------------------------------------------------------------------------
+% Preliminaries
+% ------------------------------------------------------------------------------
+BF_CheckToolbox('wavelet_toolbox') % Check that a Wavelet Toolbox license is available:
+doPlot = false; % plot outputs to figures
+N = length(y); % length of the time series
+
+%-------------------------------------------------------------------------------
 scales = (1:maxScale);
-coeffs = cwt(y, scales, wname);
+coeffs = cwt(y,scales,wname);
 
 S = abs(coeffs.*coeffs); % power
 SC = 100*S./sum(S(:)); % scaled power is length-dependent

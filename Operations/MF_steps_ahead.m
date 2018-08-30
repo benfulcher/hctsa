@@ -91,11 +91,11 @@ end
 % ------------------------------------------------------------------------------
 %% Set up training and test sets
 % ------------------------------------------------------------------------------
-yTrain = y; % the whole time series data object
-yTest = y; % the whole time series data object
+yTrain = y; % the whole time series
+yTest = y; % the whole time series
 
 % ------------------------------------------------------------------------------
-%% Fit the model
+%% Fit the model on training data, yTrain (all data)
 % ------------------------------------------------------------------------------
 switch model
     case 'ar' % AR model
