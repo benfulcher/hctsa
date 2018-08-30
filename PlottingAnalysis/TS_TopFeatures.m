@@ -133,29 +133,32 @@ if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','
         fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
     end
     chanceLine = 100/numClasses;
-    cfnUnit = '%';
 end
 
 switch whatTestStat
 case {'linear','linclass','fast_linear'}
     cfnName = 'linear classifier';
+    statUnit = '%%';
 case 'diaglinear'
     cfnName = 'Naive bayes classifier';
+    statUnit = '%%';
 case {'svm','svm_linear'}
     cfnName = 'linear SVM classifier';
+    statUnit = '%%';
 case {'ustat','ranksum'}
     cfnName = 'Mann-Whitney approx p-value';
-    cfnUnit = '';
+    statUnit = ' (log10(p))';
     chanceLine = NaN;
     fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),false);
 case {'ustatExact','ranksumExact'}
     cfnName = 'Mann-Whitney exact p-value';
-    cfnUnit = '';
+    statUnit = ' (log10(p))';
     chanceLine = NaN;
     fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),true);
+    statUnit = ' (log10(p))';
 case {'ttest','tstat'}
     cfnName = 'Welch''s t-stat';
-    cfnUnit = '';
+    statUnit = ' (log10(p))';
     chanceLine = 0; % by chance, t-stats averge to zero
     if numClasses > 2
         error('Cannot use t-test as test statistic with more than two groups :/');
@@ -179,10 +182,16 @@ if all(isnan(testStat))
     error('Error computing statistics for %s (may be due to inclusion of missing data?)',cfnName);
 end
 
-% Give mean and that expected from random classifier (may be a little overfitting)
-fprintf(1,['Mean %s performance across %u operations = %4.2f%s\n' ...
+%-------------------------------------------------------------------------------
+% Give mean and that expected from random classifier (there may be a little overfitting)
+if ~isnan(chanceLine)
+    fprintf(1,['Mean %s performance across %u features = %4.2f%s\n' ...
             '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
-        cfnName,numOps,nanmean(testStat),cfnUnit,numClasses,chanceLine,cfnUnit);
+        cfnName,numOps,nanmean(testStat),statUnit,numClasses,chanceLine,statUnit);
+else
+    fprintf(1,'Mean %s performance across %u features = %4.2f%s\n',...
+        cfnName,numOps,nanmean(testStat),statUnit);
+end
 
 % --------------------------------------------------------------------------
 %% Display information about the top features (numTopFeatures)
@@ -195,8 +204,9 @@ ifeat = ifeat(~isNaN);
 
 % List the top features:
 for i = 1:numTopFeatures
-    fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations(ifeat(i)).ID, ...
-            Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,testStat_sort(i));
+    fprintf(1,'[%u] %s (%s) -- %4.2f%s\n',Operations(ifeat(i)).ID,...
+            Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,...
+            testStat_sort(i),statUnit);
 end
 
 %-------------------------------------------------------------------------------
@@ -208,7 +218,7 @@ end
 %-------------------------------------------------------------------------------
 % Histogram of distribution of test statistics for labeled and null data
 %-------------------------------------------------------------------------------
-if any(ismember(whatPlots,'histogram'))
+if ismember('histogram',whatPlots)
     % A figure to show the distribution of test statistics across all
     % features:
 
@@ -293,7 +303,7 @@ end
 %-------------------------------------------------------------------------------
 % Distributions across classes for top features
 %-------------------------------------------------------------------------------
-if any(ismember(whatPlots,'distributions'))
+if ismember('distributions',whatPlots)
     subPerFig = 16; % subplots per figure
 
     % Set the colors to be assigned to groups:
@@ -332,7 +342,7 @@ end
 %-------------------------------------------------------------------------------
 % Data matrix containing top features
 %-------------------------------------------------------------------------------
-if any(ismember(whatPlots,'datamatrix'))
+if ismember('datamatrix',whatPlots)
     featInd = ifeat(1:numTopFeatures);
     ixFeat = BF_ClusterReorder(TS_DataMat(:,featInd)','corr','average');
     dataLocal = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
@@ -344,7 +354,7 @@ end
 %-------------------------------------------------------------------------------
 % Inter-dependence of top features
 %-------------------------------------------------------------------------------
-if any(ismember(whatPlots,'cluster'))
+if ismember('cluster',whatPlots)
 
     % 1. Get pairwise similarity matrix
     op_ind = ifeat(1:numTopFeatures); % plot these operations indices
@@ -366,7 +376,7 @@ if any(ismember(whatPlots,'cluster'))
         distanceMetric = 'abscorr';
     end
     makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations(x).ID,Operations(x).Name,...
-                        testStat(x),cfnUnit);
+                        testStat(x),statUnit);
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
     clusterThreshold = 0.2; % threshold at which split into clusters
     [~,cluster_Groupi] = BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
