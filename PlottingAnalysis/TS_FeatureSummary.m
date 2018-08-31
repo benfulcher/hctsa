@@ -61,7 +61,7 @@ dataVector = TS_DataMat(:,theOp); % the outputs of interest
 notNaN = find(~isnan(dataVector));
 dataVector = dataVector(notNaN); % remove bad values
 TimeSeries = TimeSeries(notNaN,:); % remove bad values
-theOperation = Operations(theOp,:);
+theOperation = table2struct(Operations(theOp,:));
 
 if isempty(dataVector)
     error('No data for %s',theOperation.Name);
@@ -98,7 +98,7 @@ end
 % Plot the kernel-smoothed probability density
 %-------------------------------------------------------------------------------
 f = figure('color','w'); box('on'); hold on
-if isfield(TimeSeries,'Group')
+if ismember('Group',TimeSeries.Properties.VariableNames)
     numGroups = length(unique(timeSeriesGroup));
     annotateParams.groupColors = BF_getcmap('set1',numGroups,1);
 end
@@ -181,7 +181,7 @@ if doViolin
     TS_plot_timeseries(dataStruct,annotateParams.n,flipud(highlightInd),annotateParams.maxL,plotOptions);
 
     % Put rectangles if data is grouped
-    if isfield(TimeSeries,'Group')
+    if ismember('Group',TimeSeries.Properties.VariableNames)
         rectHeight = 1/annotateParams.n;
         rectWidth = 0.1;
         for i = 1:annotateParams.n
@@ -194,8 +194,7 @@ if doViolin
     fig.Position(3:4) = [1151,886];
 
 else % kernel distributions
-    if isfield(TimeSeries,'Group')
-
+    if smember('Group',TimeSeries.Properties.VariableNames)
         % Repeat for each group
         fx = cell(numGroups,1);
         lineHandles = cell(numGroups+1,1);

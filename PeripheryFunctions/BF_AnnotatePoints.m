@@ -154,7 +154,7 @@ for j = 1:numAnnotate
     plotPoint = xy(iPlot,:);
 
     % Get the group index of the selected time series:
-    if isfield(TimeSeries,'Group')
+    if ismember('Group',TimeSeries.Properties.VariableNames)
         theGroup = TimeSeries.Group(iPlot);
     else
         theGroup = 1;

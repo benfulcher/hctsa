@@ -64,10 +64,9 @@ if nargin < 5
 	plotOptions = [];
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Evaluate any custom plotting options specified in the structure plotOptions
-% ------------------------------------------------------------------------------
-
+%-------------------------------------------------------------------------------
 if isstruct(plotOptions) && isfield(plotOptions,'displayTitles')
     displayTitles = plotOptions.displayTitles;
 else
@@ -130,7 +129,7 @@ end
 % ------------------------------------------------------------------------------
 %% Get group indices:
 % ------------------------------------------------------------------------------
-if (isempty(whatTimeSeries) || strcmp(whatTimeSeries,'grouped')) && isfield(TimeSeries,'Group')
+if (isempty(whatTimeSeries) || strcmp(whatTimeSeries,'grouped')) && ismember('Group',TimeSeries.Properties.VariableNames)
     % Use default groups assigned by TS_LabelGroups
     groupIndices = BF_ToGroup(TimeSeries.Group);
     numGroups = length(groupIndices);
@@ -309,7 +308,7 @@ if plotFreeForm
     % Legend:
     if ~isempty(groupNames)
         [~,b] = unique(classes);
-        legend(pHandles(b),groupNames);
+        legend(pHandles(b),groupNames,'interpreter','none');
     end
 
     % Set up axes:

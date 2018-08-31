@@ -68,7 +68,7 @@ fprintf(1,'Wrote time-series info to %s\n',fileName);
 %-------------------------------------------------------------------------------
 % Output time-series group info to file:
 %-------------------------------------------------------------------------------
-if isfield(TimeSeries,'Group')
+if ismember('Group',TimeSeries.Properties.VariableNames)
     fileName = 'hctsa_grouplabel-info.csv';
     fid = fopen(fileName,'w');
     for i = 1:height(TimeSeries)

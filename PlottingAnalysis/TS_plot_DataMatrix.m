@@ -54,7 +54,7 @@ addOptional(inputP,'whatData',default_whatData,check_whatData);
 
 % addTimeSeries, annotates time series segments to the side of the plot
 default_addTimeSeries = true;
-check_addTimeSeries = @(x) isnumeric(x) && (x==0 || x==1);
+check_addTimeSeries = @(x) (isnumeric(x) || islogical(x)) && (x==0 || x==1);
 addOptional(inputP,'addTimeSeries',default_addTimeSeries,check_addTimeSeries);
 
 % timeSeriesLength, length of time-series annotations to the left of the main plot

@@ -123,7 +123,7 @@ if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','
     % Set up the loss function
 
     % (first check for possible class imbalance):
-    classNumbers = arrayfun(@(x)sum(timeSeriesGroup==x),1:numClasses);
+    classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),1:numClasses);
     isBalanced = all(classNumbers==classNumbers(1));
     if isBalanced
         fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'acc',0);
@@ -165,7 +165,7 @@ end
 fprintf(1,'Comparing the (in-sample) performance of %u operations for %u classes using a %s...\n',...
                                 height(Operations),numClasses,cfnName);
 timer = tic;
-testStat = giveMeStats(TS_DataMat,timeSeriesGroup,1);
+testStat = giveMeStats(TS_DataMat,TimeSeries.Group,true);
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
 
 if all(isnan(testStat))
@@ -188,7 +188,7 @@ ifeat = ifeat(~isNaN);
 
 % List the top features:
 for i = 1:numTopFeatures
-    fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations(ifeat(i)).ID, ...
+    fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations.ID(ifeat(i)), ...
             Operations.Name{ifeat(i)},Operations.Keywords{ifeat(i)},testStat_sort(i));
 end
 
@@ -220,7 +220,7 @@ if any(ismember(whatPlots,'histogram'))
             end
             % Shuffle labels:
             groupLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-            testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,0);
+            testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,false);
         end
         fprintf(1,'\n%u %s statistics computed in %s.\n',numOps*numNulls,...
                                         cfnName,BF_thetime(toc(timer)));
