@@ -38,7 +38,7 @@ for i = 1:numOps
 end
 
 % No longer need the label field from the Operations table
-Operations = removevars(Operations,'Label');
+Operations(:,'Label') = [];
 
 %-------------------------------------------------------------------------------
 % Check that all master operations are required

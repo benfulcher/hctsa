@@ -61,6 +61,8 @@ if isnumeric(tsStruct)
 						'Data',tsData, ...
 						'ID',1, ...
 						'Length',length(tsData));
+elseif istable(tsStruct)
+	tsStruct = table2struct(tsStruct);
 end
 
 if nargin < 2
@@ -179,8 +181,8 @@ fullTimer = tic;
 % Check through the metrics to determine which master functions are relevant for this run
 
 % Put the output from each Master operation in an element of MasterOutput
-MasterOutput = cell(length(MasterOperations),1); % Ouput structures
-MasterCalcTime = zeros(length(MasterOperations),1); % Calculation times for each master operation
+MasterOutput = cell(height(MasterOperations),1); % Ouput structures
+MasterCalcTime = zeros(height(MasterOperations),1); % Calculation times for each master operation
 
 Master_IDs_calc = unique(Operations.MasterID); % Master_IDs that need to be calculated
 Master_ind_calc = arrayfun(@(x)find(MasterOperations.ID==x,1),Master_IDs_calc); % Indicies of MasterOperations that need to be calculated

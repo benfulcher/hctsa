@@ -198,7 +198,7 @@ if saveBack
 
     % First append/overwrite group names
     groupNames = keywordGroups;
-    TimeSeries.Group = groupLabels;
+    TimeSeries.Group = groupLabels';
 
     % Save everything back to file:
     save(theFile,'TimeSeries','groupNames','-append')

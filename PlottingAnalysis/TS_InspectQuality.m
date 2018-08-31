@@ -138,7 +138,7 @@ case 'master'
     % Summarize at the level of master operations
     % Each row is now a different quality label
 
-    numMasters = length(MasterOperations);
+    numMasters = height(MasterOperations);
     opMIDs = Operations.MasterID; % save time by getting this first
     qualities = zeros(7,numMasters);
     for k = 1:numMasters

@@ -95,14 +95,13 @@ end
 % ------------------------------------------------------------------------------
 % Get time series, operations, master operations into structure arrays
 % ------------------------------------------------------------------------------
-
 TimeSeries = SQL_add('ts',INP_ts,false,beVocal(1));
 if height(TimeSeries)==0 % The user did not approve of the set of inputs
     return;
 end
 numTS = height(TimeSeries);
 
-MasterOperations = SQL_add('mops',INP_mops,false,beVocal(2))';
+MasterOperations = SQL_add('mops',INP_mops,false,beVocal(2));
 if height(MasterOperations)==0 % The user did not approve of the set of inputs
     return;
 end
@@ -122,7 +121,7 @@ numOps = height(Operations);
 [Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 
 % MasterOperations may have been trimmed by TS_LinkOperationsWithMasters:
-numMops = length(MasterOperations);
+numMops = height(MasterOperations);
 
 % ------------------------------------------------------------------------------
 % Generate the TS_DataMat, TS_Quality, and TS_CalcTime matrices

@@ -177,9 +177,9 @@ for i = 1:numTimeSeries
     % -----
     % Check that all operations have a master ID attached:
     % -----
-    if length([Operations(toCalc).MasterID]) < numCalc
+    if sum(toCalc) < numCalc
         % Error in the database structure; some operations are missing MasterID assignment
-        error('Database structure error: some operations have not been assigned a valid master operation');
+        error('??Database structure error: some operations have not been assigned a valid master operation');
     end
 
 	fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
@@ -191,7 +191,7 @@ for i = 1:numTimeSeries
 	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd,:),...
 								doParallel,Operations(toCalc,:),MasterOperations,true,beVocal);
 		catch
-			% skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
+			skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
 			warning('Calculation for time series %u / %u failed...',i,numTimeSeries)
 			continue
 		end

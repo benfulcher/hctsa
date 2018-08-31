@@ -212,7 +212,7 @@ end
 
 % Set default for max length if unspecified (as max length of time series)
 if isempty(maxLength)
-    ls = cellfun(@length,TimeSeries.Data{iPlot(i)});
+    ls = TimeSeries.Length(iPlot(i));
     maxN = max(ls); % maximum length of all time series to plot
 else
     maxN = maxLength;
@@ -277,9 +277,7 @@ if plotFreeForm
 
     pHandles = zeros(numToPlot,1); % keep plot handles
 	for i = 1:numToPlot
-        theTS = TimeSeries(iPlot(i),:);
-
-	    x = theTS.Data; % the data
+        x = TimeSeries.Data{iPlot(i)};
 	    N0 = length(x);
 		if ~isempty(maxN) && (N0 > maxN)
 			% Specified a maximum length of time series to plot
@@ -302,7 +300,8 @@ if plotFreeForm
 
         % Annotate text labels
 		if displayTitles
-			theTit = sprintf('{%u} %s [%s] (%u)',theTS.ID,theTS.Name,theTS.Keywords,N0);
+			theTit = sprintf('{%u} %s [%s] (%u)',TimeSeries.ID(iPlot(i)),...
+                        TimeSeries.Name{iPlot(i)},TimeSeries.Keywords{iPlot(i)},N0);
 			text(0.01,yr(i)+0.9*inc,theTit,'interpreter','none','FontSize',8)
 	    end
 	end

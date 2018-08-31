@@ -20,16 +20,16 @@ if min(size(y)) > 1
     x = x(:,1:(end-1));
 elseif max(size(de)) > 1
     v = de(de > 0);
-    [x, y] = MS_embed(y,v-1);
+    [x,y] = MS_embed(y,v-1);
 else
-    [x, y] = MS_embed(y,[-1, 0:tau:((de-1)*tau)]);
+    [x,y] = MS_embed(y,[-1, 0:tau:((de-1)*tau)]);
 end
 
 if isempty(x)
     error('Error embedding the time series.')
 end
 
-[de, n] = size(x);
+[de,n] = size(x);
 
 % dd=sparse(n,n);
 dd = zeros(n,n);
@@ -43,7 +43,7 @@ dd = dd+1./(1-eye(n,n));
 % dd=dd+1./(1-speye);
 warning('on','MATLAB:divideByZero')
 %near is the index of the nearest neighbour of each point
-[dist, near] = min(dd);
+[dist,near] = min(dd);
 %the prediction error is
 e = y(near)-y;
 % e = mean(e.^2);

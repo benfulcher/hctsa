@@ -94,7 +94,7 @@ if doSave
 
     % Remove group information because this will no longer be valid for sure
     if ~isempty(ts_ids_keep) && ismember('Group',TimeSeries.Properties.VariableNames)
-        TimeSeries = removevars(TimeSeries,'Group')
+        TimeSeries(:,'Group') = [];
         fprintf('Warning: group information removed -- regenerate for subset data using TS_LabelGroups\n')
     end
 

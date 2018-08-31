@@ -122,7 +122,7 @@ out.acsnd0 = std(abs(autoCorrResid))*sqrtN;
 out.propbth = sum(abs(autoCorrResid) < 2.6/sqrtN)/maxLag;
 
 % First time to get below the significance threshold
-out.ftbth = find(abs(acs) < 2.6/sqrtN,1,'first');
+out.ftbth = find(abs(autoCorrResid) < 2.6/sqrtN,1,'first');
 if isempty(out.ftbth)
     out.ftbth = maxLag+1;
 end
@@ -141,7 +141,7 @@ out.dwts = sum((e(2:end)-e(1:end-1)).^2) / sum(e.^2);
 % Fit a zero-mean AR process to residuals using the ARFIT package:
 emsg = '';
 try
-    [~, Aest, ~, SBC, FPE] = ARFIT_arfit(e,1,10,'sbc','zero');
+    [~,Aest,~,SBC,FPE] = ARFIT_arfit(e,1,10,'sbc','zero');
 catch emsg
 end
 
@@ -158,7 +158,6 @@ else
     out.minfpe = min(FPE); % Best fpe
     out.sbc1 = SBC(1);
 end
-
 
 % ------------------------------------------------------------------------------
 %% Distribution tests

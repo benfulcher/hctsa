@@ -1,4 +1,4 @@
-function structArray = SQL_add(addWhat,inputFile,forDatabase,beVocal)
+function theTable = SQL_add(addWhat,inputFile,forDatabase,beVocal)
 % SQL_add   Interpret a structured input file of time series, operations,
 %           or master operations.
 %
@@ -11,9 +11,9 @@ function structArray = SQL_add(addWhat,inputFile,forDatabase,beVocal)
 %            = INP_ts.txt or INP_ops.txt or INP_mops.txt]
 %            The input file should be formatted with whitespace as a delimiter
 %            between the entries to import.
-% forDatabase: if 1 (default) write the results of interpreting the input file
+% forDatabase: if true (default) write the results of interpreting the input file
 %               to the default linked mySQL database for hctsa.
-% beVocal: if 1 (default) gives user feedback on the input process.
+% beVocal: if true (default) gives user feedback on the input process.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -145,13 +145,10 @@ end
 
 if ~isMatFile
     % Specified a input text file
-
     fid = fopen(inputFile);
-
     if (fid==-1)
         error('Could not load the specified input text file ''%s''',inputFile)
     end
-
     switch addWhat
     case 'ts' % Read the time series input file:
         if beVocal
@@ -161,8 +158,7 @@ if ~isMatFile
             fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n');
             fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n');
         end
-    	dataIn = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
-
+        formatSpec = '%s%s';
     case 'ops' % Read the operations input file:
         if beVocal
             fprintf(1,['Need to format %s (Operations input file) as: OperationCode ' ...
@@ -171,8 +167,7 @@ if ~isMatFile
             fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n');
             fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n');
         end
-        dataIn = textscan(fid,'%s %s %s','CommentStyle','#','CollectOutput',1);
-
+        formatSpec = '%s%s%s';
     case 'mops' % Read the master operations input file:
         if beVocal
             fprintf(1,'Need to format %s (Master Operations input file) as: MasterCode MasterLabel\n',inputFile);
@@ -180,11 +175,10 @@ if ~isMatFile
             fprintf(1,'Use whitespace as a delimiter and \\n for new lines...\n');
             fprintf(1,'(Be careful that no additional whitespace is in any fields...)\n');
         end
-        dataIn = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
+        formatSpec = '%s%s';
     end
-
+    dataIn = textscan(fid,formatSpec,'CommentStyle','#','EndOfLine','\r\n','CollectOutput',true);
     fclose(fid);
-
 
     % ------------------------------------------------------------------------------
     % Show the user what's been imported:
@@ -199,7 +193,7 @@ if ~isMatFile
         switch addWhat
         case 'ts'
             fprintf(1,'%s\t%s\n','-Name-','-Keywords-');
-            fprint_ts = @(x) fprintf('%s\t%s\n',dataIn{x,1},dataIn{x,2});
+            fprint_ts = @(x)fprintf('%s\t%s\n',dataIn{x,1},dataIn{x,2});
         case 'ops'
             fprintf(1,'%s\t%s\t%s\n','-Operation Name-','-Master Label-','-Operation Keywords-');
             fprint_ops = @(x) fprintf('%s\t%s\t%s\n',dataIn{x,1},dataIn{x,2},dataIn{x,3});
@@ -363,8 +357,10 @@ case 'ts' % Prepare toAdd cell for time series
 
     wasGood = false(1,numItems); % Record whether data was added or not
                                  % (if too long or contains missing values, it is not added)
-    TimeSeries = table('Size',[numItems,5],'VariableTypes',{'double','char','char','cell','double'},...
-                                        'VariableNames',{'ID','Name','Keywords','Data','Length'});
+
+    TimeSeries = table();
+    % 'Size',[numItems,5],'VariableTypes',{'double','char','char','cell','double'},...
+        % ('VariableNames',{'ID','Name','Keywords','Data','Length'});
     for j = 1:numItems
         % Assign filename and keywords strings to this time series, and load it as x
         if isMatFile
@@ -390,8 +386,8 @@ case 'ts' % Prepare toAdd cell for time series
                 x = dlmread(TimeSeries.Name{j});
             catch emsg
                 fprintf(1,'%s\n',emsg.message);
-                error(['\nCould not read the data file for ''%s''.' ...
-                    'Check that it''s in the path.'],TimeSeries.Name{j})
+                error(sprintf(['\nCould not read the data file for ''%s''.' ...
+                    ' Check that it''s in the path.'],TimeSeries.Name{j}))
             end
         end
 
@@ -518,9 +514,10 @@ case 'ts' % Prepare toAdd cell for time series
 
 case 'mops'
     % Prepare toAdd cell for master operations
-    MasterOperations = table('Size',[numItems,3],...
-                                    'VariableTypes',{'double','char','char'},...
-                                    'VariableNames',{'ID','Code','Label'});
+    MasterOperations = table();
+            % 'Size',[numItems,3],...
+            % 'VariableTypes',{'double','char','char'},...
+            % 'VariableNames',{'ID','Code','Label'});
     for j = 1:numItems
         MasterOperations.Code{j} = dataIn{j,1};
         MasterOperations.Label{j} = dataIn{j,2};
@@ -530,9 +527,9 @@ case 'mops'
 
 case 'ops'
     % Prepare toAdd cell for operations
-    Operations = table('Size',[numItems,4],...
-                                'VariableTypes',{'double','char','char','char'},...
-                                'VariableNames',{'ID','Label','CodeString','Keywords'});
+    Operations = table(); %'Size',[numItems,4],...
+                          %    'VariableTypes',{'double','char','char','char'},...
+                          %    'VariableNames',{'ID','Label','CodeString','Keywords'});
     for j = 1:numItems
         Operations.CodeString{j} = dataIn{j,1};
         Operations.Name{j} = dataIn{j,2};
@@ -571,8 +568,8 @@ case 'ops'
 end
 if ~forDatabase
     % Assign ascending IDs:
-    theTable.ID = 1:height(theTable);
-    fprintf(1,'Returning a structure array of %u %s.\n',height(theTable),theWhat);
+    theTable.ID = (1:height(theTable))';
+    fprintf(1,'Returning a table with metadata for %u %s.\n',height(theTable),theWhat);
     return
 end
 
