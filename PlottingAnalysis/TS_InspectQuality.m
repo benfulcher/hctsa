@@ -95,8 +95,8 @@ case {'full','all'}
     imagesc(TS_Quality)
 
     xlabel('Operations (op_id)','interpreter','none')
-    ax.XTick = 1:length(Operations);
-    ax.XTickLabel = [Operations.ID];
+    ax.XTick = 1:height(Operations);
+    ax.XTickLabel = Operations.ID;
     ax.XTickLabelRotation = 90;
 
     formatYAxisColorBar;
@@ -125,7 +125,7 @@ case 'reduced'
     imagesc(TS_Quality(:,hadProblem));
 
     ax.XTick = 1:sum(hadProblem);
-    ax.XTickLabel = [Operations(hadProblem).ID];
+    ax.XTickLabel = Operations.ID(hadProblem);
     ax.XTickLabelRotation = 90;
 
     title(sprintf('Displaying %u x %u (displaying %u/%u operations with some special values',...
@@ -139,10 +139,10 @@ case 'master'
     % Each row is now a different quality label
 
     numMasters = length(MasterOperations);
-    opMIDs = [Operations.MasterID]; % save time by getting this first
+    opMIDs = Operations.MasterID; % save time by getting this first
     qualities = zeros(7,numMasters);
     for k = 1:numMasters
-        masterID = [MasterOperations(k).ID];
+        masterID = MasterOperations.ID(k);
         pointInd = (opMIDs==masterID); % indices of operations using this master function
         qualityLabels = TS_Quality(:,pointInd);
         qualityLabels = qualityLabels(qualityLabels > 0); % only want to look at special ones
@@ -161,10 +161,10 @@ case 'master'
     % ------------
     % Text output:
     % ------------
-    problemMops = MasterOperations(hadProblem);
+    problemMops = MasterOperations(hadProblem,:);
     for i = 1:length(problemMops)
-        fprintf('[%u] %s -- %s\n', problemMops(i).ID, ...
-                problemMops(i).Label, problemMops(i).Code);
+        fprintf('[%u] %s -- %s\n',problemMops.ID(i), ...
+                problemMops.Label{i},problemMops.Code{i});
     end
 
     % ------------
@@ -182,7 +182,7 @@ case 'master'
     ax.YTickLabel = qLabels;
 
     ax.XTick = 1:sum(hadProblem);
-    ax.XTickLabel = {MasterOperations(hadProblem).Code};
+    ax.XTickLabel = MasterOperations.Code(hadProblem);
     ax.XTickLabelRotation = 90;
 
     % Get rid of tex interpreter format (for strings with underscores)
@@ -225,11 +225,11 @@ case 'summary'
     % ------------
     % Text output:
     % ------------
-    problemOps = Operations(hadProblem);
+    problemOps = Operations(hadProblem,:);
     for i = 1:length(problemOps)
         ind = ix(i);
-        fprintf('[%u] %s (%s) -- %.1f%% special values.\n', problemOps(ind).ID, problemOps(ind).Name, ...
-                problemOps(ind).CodeString, 100*(1 - propGood(ind)));
+        fprintf('[%u] %s (%s) -- %.1f%% special values.\n',problemOps.ID(ind),problemOps.Name{ind},...
+                problemOps.CodeString{ind},100*(1 - propGood(ind)));
     end
 
     % ------------
@@ -242,7 +242,7 @@ case 'summary'
     bar(whatLabel','stacked');
 
     ax.XTick = 1:sum(hadProblem);
-    unSortedTicks = [Operations(hadProblem).ID];
+    unSortedTicks = Operations.ID(hadProblem);
     ax.XTickLabel = unSortedTicks(ix);
     ax.XTickLabelRotation = 90;
 
@@ -277,9 +277,9 @@ function formatYAxisColorBar(doYaxis,offSet)
 
     if doYaxis
         % Format the y axis
-        ax.YTick = 1:length(TimeSeries);
+        ax.YTick = 1:height(TimeSeries);
         ylabel('Time series')
-        ax.YTickLabel = {TimeSeries.Name};
+        ax.YTickLabel = TimeSeries.Name;
     end
 
     % Get rid of tex interpreter format (for strings with underscores)

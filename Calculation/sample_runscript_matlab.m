@@ -55,7 +55,7 @@ end
 % ------------------------------------------------------------------------------
 % Get IDs of all time series in the hctsa datafile:
 [~,TimeSeries,Operations] = TS_LoadData(fileName);
-tsIDs = [TimeSeries.ID];
+tsIDs = TimeSeries.ID;
 
 % Set the IDs to compute at each iteration:
 ID_inc = 1:saveIncrement:length(tsIDs)+1;
@@ -63,7 +63,7 @@ ID_inc = 1:saveIncrement:length(tsIDs)+1;
 % Provide a quick message:
 fprintf(1,['About to calculate across %u time series and %u operations ' ...
                 'saving back to file every %u time series\n'], ...
-                length(TimeSeries),length(Operations),saveIncrement);
+                height(TimeSeries),height(Operations),saveIncrement);
 
 %-------------------------------------------------------------------------------
 % Running calculations:

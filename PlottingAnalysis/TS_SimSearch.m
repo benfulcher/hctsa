@@ -115,10 +115,10 @@ end
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataFile);
 switch tsOrOps
 case 'ts'
-    dataStruct = TimeSeries;
+    dataTable = TimeSeries;
     clustStruct = TS_GetFromData(whatDataFile,'ts_clust');
 case 'ops'
-    dataStruct = Operations;
+    dataTable = Operations;
     clustStruct = TS_GetFromData(whatDataFile,'op_clust');
     % Transpose for consistency with later parts of the code
     % (items are rows)
@@ -130,7 +130,7 @@ if isempty(clustStruct)
     clustStruct = struct('distanceMetric','none','Dij',[],...
                 'ord',1:size(TS_DataMat,1),'linkageMethod','none');
 end
-numItems = length(dataStruct);
+numItems = height(dataTable);
 clear TimeSeries Operations
 
 if numNeighbors == 0 % code for 'all'
@@ -142,11 +142,11 @@ end
 % ------------------------------------------------------------------------------
 % Match the specified index to the data structure
 % ------------------------------------------------------------------------------
-targetInd = find([dataStruct.ID]==targetID);
+targetInd = find(dataTable.ID==targetID);
 if isempty(targetInd)
     error('ID %u not found in the index for %s in %s.',targetID,tsOrOps,which(whatDataFile));
 else
-    fprintf(1,'\n---TARGET: [%u] %s---\n',dataStruct(targetInd).ID,dataStruct(targetInd).Name);
+    fprintf(1,'\n---TARGET: [%u] %s---\n',dataStruct.ID{targetInd},dataStruct.Name{targetInd});
 end
 
 % ------------------------------------------------------------------------------
@@ -202,7 +202,7 @@ neighborInd = dix(1:numNeighbors+1);
 % ------------------------------------------------------------------------------
 for j = 1:numNeighbors
     theInd = neighborInd(j+1);
-    fprintf(1,'%u. [%u] %s (d = %.2f)\n',j,dataStruct(theInd).ID,dataStruct(theInd).Name,Dj(theInd));
+    fprintf(1,'%u. [%u] %s (d = %.2f)\n',j,dataTable.ID(theInd),dataTable.Name{theInd},Dj(theInd));
 end
 fprintf(1,'\n');
 
@@ -239,12 +239,12 @@ if any(ismember(whatPlots,'scatter'))
         subplot(3,4,j);
         theNeighborInd = neighborInd(j+1); % Since exclude self-match (neighbor 1)
         plot(TS_DataMat(targetInd,:),TS_DataMat(theNeighborInd,:),'.k','MarkerSize',4)
-        xlabel(sprintf('[%u] %s',dataStruct(targetInd).ID,dataStruct(targetInd).Name),...
+        xlabel(sprintf('[%u] %s',dataTable.ID(targetInd),dataTable.Name{targetInd}),...
                                         'interpreter','none','FontSize',9);
-        ylabel(sprintf('[%u] %s',dataStruct(theNeighborInd).ID,dataStruct(theNeighborInd).Name),...
+        ylabel(sprintf('[%u] %s',dataTable.ID(theNeighborInd),dataTable.Name{theNeighborInd}),...
                                         'interpreter','none','FontSize',9);
         title(sprintf('Match %u: d = %.3f',j,Dj(theNeighborInd)));
-        axis square
+        axis('square')
     end
     % Set width and height to make a reasonable size:
     f.Position = [f.Position(1:2),819,622];
@@ -258,11 +258,11 @@ if any(ismember('matrix',whatPlots))
     % (just for visualization):
     ord = BF_ClusterReorder(Dij,'euclidean','average');
     Dij_clust = Dij(ord,ord);
-    dataStruct_clust = dataStruct(neighborInd(ord));
+    dataTable_clust = dataTable(neighborInd(ord),:);
 
     labels = cell(numNeighbors+1);
     for i = 1:numNeighbors+1
-        labels{i} = sprintf('[%u] %s',dataStruct_clust(i).ID,dataStruct_clust(i).Name);
+        labels{i} = sprintf('[%u] %s',dataTable_clust.ID(i),dataTable_clust.Name{i});
     end
 
     f = figure('color','w');
@@ -280,7 +280,7 @@ if any(ismember('matrix',whatPlots))
         ax1.TickLabelInterpreter = 'none';
         NormMinMax = @(x) (x-min(x))/(max(x)-min(x));
         for j = 1:numNeighbors+1
-            tsData = dataStruct(neighborInd(ord(j))).Data;
+            tsData = dataTable.Data{neighborInd(ord(j))};
             lengthHere = min(tsLength,length(tsData));
             plot(1:lengthHere,j-0.5+NormMinMax(tsData),'-k');
             if j < numNeighbors+1
@@ -298,10 +298,10 @@ if any(ismember('matrix',whatPlots))
     Dij_clust(Dij_clust==0) = NaN; % all zeros mess things up
     dLims = [min(Dij_clust(~isnan(Dij_clust))),max(Dij_clust(~isnan(Dij_clust)))];
     imagesc(Dij_clust)
-    if isfield(dataStruct,'Group')
-        numGroups = length(unique([dataStruct_clust.Group]));
+    if ismember('Group',dataTable.Properties.VariableNames)
+        numGroups = length(unique(dataTable_clust.Group));
         dRescale = @(x) dLims(1) + numGroups/8*diff(dLims)*(-1 + 0.9999*(x - min(x))./(max(x)-min(x)));
-        imagesc(0,1,dRescale([dataStruct_clust.Group]'))
+        imagesc(0,1,dRescale(dataTable_clust.Group'))
         plot(ones(2,1)*0.5,[0.5,numNeighbors+1.5],'k')
         colormap([BF_getcmap('dark2',numGroups,0);BF_getcmap('redyellowblue',8,0)]);
         caxis([dLims(1)-diff(dLims)*numGroups/8,dLims(2)])
@@ -318,26 +318,26 @@ if any(ismember('matrix',whatPlots))
     end
 
     % Box the target:
-    indexCl = find([dataStruct_clust.ID]==targetID);
+    indexCl = find(dataTable_clust.ID==targetID);
     rectangle('Position',[indexCl-0.5,indexCl-0.5,1,1],'EdgeColor','w','LineWidth',2)
     plot(indexCl,indexCl,'*w')
 
     % Add a color bar:
     cB = colorbar('northoutside');
     cB.Label.String = 'Distance';
-    if isfield(dataStruct,'Group')
+    if ismember('Group',dataTable.Properties.VariableNames)
         cB.Limits = dLims;
     end
 
     % Set axes:
     axis('square')
-    if isfield(dataStruct,'Group')
+    if ismember('Group',dataTable.Properties.VariableNames)
         ax2.XLim = [-0.5,numNeighbors+1.5];
     else
         ax2.XLim = [0.5,numNeighbors+1.5];
     end
     ax2.XTick = 1:numNeighbors+1;
-    ax2.XTickLabel = [dataStruct_clust.ID];
+    ax2.XTickLabel = dataTable_clust.ID;
     xlabel('ID');
 
     ax2.YLim = [0.5,numNeighbors+1.5];
@@ -384,8 +384,8 @@ if any(ismember(whatPlots,'network'))
     A(logical(eye(size(A)))) = 0;
 
     % Assign group labels (or just distinguish the target)
-    if isfield(dataStruct,'Group')
-        nodeLabels = [dataStruct.Group];
+    if ismember('Group',dataTable.Properties.VariableNames)
+        nodeLabels = dataTable.Group;
         nodeLabels = nodeLabels(dix(1:numNetwork));
         nodeLabels(1) = max(nodeLabels) + 1;
     else
@@ -394,12 +394,12 @@ if any(ismember(whatPlots,'network'))
     end
 
     if strcmp(tsOrOps,'ts')
-        dataLabels = {dataStruct(dix(1:numNetwork)).Data};
+        dataLabels = dataTable.Data(dix(1:numNetwork));
     else
         dataLabels = {};
     end
 
-    NetVis_netvis(A,'k',0.01,'textLabels',{dataStruct(dix(1:numNetwork)).Name},...
+    NetVis_netvis(A,'k',0.01,'textLabels',dataTable.Name(dix(1:numNetwork)),...
                     'linkThresh',[0.9,0.8,0.7,0.6],...
                     'nodeLabels',nodeLabels,...
                     'dataLabels',dataLabels,...

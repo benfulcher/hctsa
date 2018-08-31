@@ -83,8 +83,8 @@ end
 %% Load data from file
 % ------------------------------------------------------------------------------
 [~,TimeSeries,~,theFile] = TS_LoadData(whatData);
-Keywords = SUB_cell2cellcell({TimeSeries.Keywords}); % Split into sub-cells using comma delimiter
-numTimeSeries = length(TimeSeries);
+Keywords = SUB_cell2cellcell(TimeSeries.Keywords); % Split into sub-cells using comma delimiter
+numTimeSeries = height(TimeSeries);
 
 % ------------------------------------------------------------------------------
 % Set default keywords?
@@ -136,7 +136,7 @@ end
 overlapping = (sum(groupIndices,2)>1);
 if any(overlapping)
     error('%u time series have multiple group assignments: %s',sum(overlapping),...
-                    BF_cat({TimeSeries(overlapping).Name},','));
+                    BF_cat(TimeSeries.Name(overlapping),','));
 end
 
 % Check unlabeled:
@@ -148,8 +148,8 @@ if any(unlabeled)
                                     sum(unlabeled),length(unlabeled)));
         isUnlabeled = find(unlabeled);
         for i = 1:length(isUnlabeled)
-            fprintf('[%u] %s (%s)\n',TimeSeries(isUnlabeled(i)).ID, ...
-                    TimeSeries(isUnlabeled(i)).Name,TimeSeries(isUnlabeled(i)).Keywords);
+            fprintf('[%u] %s (%s)\n',TimeSeries.ID(isUnlabeled(i)), ...
+                    TimeSeries.Name{isUnlabeled(i)},TimeSeries.Keywords{isUnlabeled(i)});
         end
         error('Unable to provide a unique label to all time series (NB: Can set filterMissing input to deal with this)');
     else
@@ -160,16 +160,16 @@ if any(unlabeled)
         end
         isUnlabeled = find(unlabeled);
         for i = 1:length(isUnlabeled)
-            fprintf('[%u] %s (%s)\n',TimeSeries(isUnlabeled(i)).ID, ...
-                    TimeSeries(isUnlabeled(i)).Name,TimeSeries(isUnlabeled(i)).Keywords);
+            fprintf('[%u] %s (%s)\n',TimeSeries.ID(isUnlabeled(i)),...
+                    TimeSeries.Name{isUnlabeled(i)},TimeSeries.Keywords{isUnlabeled(i)});
         end
         input('Look alright? (cntrl-C to cancel)')
 
         % Remove the unlabled data from the TimeSeries structure and the data matrix
         % Filter data and save to new file:
-        newFileName = TS_FilterData(theFile,[TimeSeries(~unlabeled).ID]);
+        newFileName = TS_FilterData(theFile,TimeSeries.ID(~unlabeled));
         % Label this dataset with the same groups:
-        groupLabels = TS_LabelGroups(keywordGroups,newFileName,saveBack,0);
+        groupLabels = TS_LabelGroups(keywordGroups,newFileName,saveBack,false);
         return
     end
 end
@@ -198,22 +198,7 @@ if saveBack
 
     % First append/overwrite group names
     groupNames = keywordGroups;
-
-    % Make a cell version of group indices (required to later use cell2struct):
-    groupLabelsCell = num2cell(groupLabels);
-
-    % First remove 'Group' field if it exists
-    if isfield(TimeSeries,'Group')
-        TimeSeries = rmfield(TimeSeries,'Group');
-    end
-
-    % Add new field to the TimeSeries structure array
-    newFieldNames = fieldnames(TimeSeries);
-    newFieldNames{length(newFieldNames)+1} = 'Group';
-
-    % Then append the new group information:
-    % (some weird bug -- squeeze is sometimes needed here...:)
-    TimeSeries = cell2struct([squeeze(struct2cell(TimeSeries));groupLabelsCell],newFieldNames);
+    TimeSeries.Group = groupLabels;
 
     % Save everything back to file:
     save(theFile,'TimeSeries','groupNames','-append')

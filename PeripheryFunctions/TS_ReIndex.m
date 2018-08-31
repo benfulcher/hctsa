@@ -59,8 +59,8 @@ end
 %% Load data from file
 %-------------------------------------------------------------------------------
 [~,TimeSeries,Operations,dataFile] = TS_LoadData(whatData);
-numTimeSeries = length(TimeSeries);
-numOperations = length(Operations);
+numTimeSeries = height(TimeSeries);
+numOperations = height(Operations);
 
 fromDatabase = TS_GetFromData(dataFile,'fromDatabase');
 if fromDatabase
@@ -80,12 +80,7 @@ if strcmp(tsOrOps,'ts') || strcmp(tsOrOps,'both')
             fprintf(1,'Didn''t think so! Better to be save than sorry\n');
         end
     end
-
-    % Because structure arrays are shit in Matlab, you have to use a for loop:
-    for i = 1:numTimeSeries
-        TimeSeries(i).ID = i;
-    end
-
+    TimeSeries.ID = 1:numTimeSeries;
     % Save back:
     save(dataFile,'TimeSeries','-append')
     fprintf(1,'Time series re-indexed and saved back to %s.\n',dataFile);
@@ -99,12 +94,7 @@ if strcmp(tsOrOps,'ops') || strcmp(tsOrOps,'both')
             fprintf(1,'Didn''t think so! Better to be save than sorry\n');
         end
     end
-
-    % Because structure arrays are shit in Matlab, you have to use a for loop:
-    for i = 1:numOperations
-        Operations(i).ID = i;
-    end
-
+    Operations.ID = 1:numOperations;
     % Save back:
     save(dataFile,'Operations','-append')
     fprintf(1,'Operations re-indexed and saved back to %s.\n',dataFile);

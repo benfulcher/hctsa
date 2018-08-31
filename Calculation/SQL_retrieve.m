@@ -408,42 +408,40 @@ end
 %% Fill Metadata
 % ------------------------------------------------------------------------------
 
-% 1. Retrieve Time Series Metadata
+% 1. Retrieve time-series metadata
 if ischar(ts_ids) && strcmp(ts_ids,'all')
 	selectString = 'SELECT Name, Keywords, Length, Data FROM TimeSeries';
 else
 	selectString = sprintf(['SELECT Name, Keywords, Length, Data FROM ',...
 								'TimeSeries WHERE ts_id IN (%s)'],ts_ids_string);
 end
-[tsinfo,emsg] = mysql_dbquery(dbc,selectString);
+[tsInfo,emsg] = mysql_dbquery(dbc,selectString);
 if ~isempty(emsg)
     error('Error retrieving time-series metadata from from %s',dbname);
 end
-% Convert to a structure array, TimeSeries, containing metadata for all time series
-tsinfo = [num2cell(tsids_db),tsinfo];
+% Convert to TimeSeries table that contains metadata for all time series
+tsInfo = [num2cell(tsids_db),tsInfo];
 % Define inline functions to convert time-series data text to a vector of floats:
 scanCommas = @(x) textscan(x,'%f','Delimiter',',');
-takeFirstCell = @(x) x{1};
-tsinfo(:,end) = cellfun(@(x) takeFirstCell(scanCommas(x)),tsinfo(:,end),'UniformOutput',0); % Do the conversion
-TimeSeries = cell2struct(tsinfo',{'ID','Name','Keywords','Length','Data'}); % Convert to structure array
-
+f_takeFirstCell = @(x) x{1};
+tsInfo(:,end) = cellfun(@(x) f_takeFirstCell(scanCommas(x)),tsInfo(:,end),'UniformOutput',false); % Do the conversion
+TimeSeries = cell2table(tsInfo','VariableNames',{'ID','Name','Keywords','Length','Data'}); % Convert to table
 
 % 2. Retrieve Operation Metadata
 % (even if specify 'all', can be fewer for 'null','error' cases, where you restrict
 % the operations that are actually retrieved to the local file)
 % [would still probably be faster to retrieve all above, and then subset the info using keepi]
 selectString = sprintf('SELECT Name, Keywords, Code, mop_id FROM Operations WHERE op_id IN (%s)',op_ids_string);
-opinfo = mysql_dbquery(dbc,selectString);
-opinfo = [num2cell(opids_db), opinfo]; % add op_ids
-Operations = cell2struct(opinfo',{'ID','Name','Keywords','CodeString','MasterID'});
-
+opInfo = mysql_dbquery(dbc,selectString);
+opInfo = [num2cell(opids_db), opInfo]; % add op_ids
+Operations = cell2table(opInfo','VariableNames',{'ID','Name','Keywords','CodeString','MasterID'}); % Convert to table
 
 % Check that no operations have bad links to master operations:
-if any(isnan([Operations.MasterID]))
+if any(isnan(Operations.MasterID))
     fisBad = find(isnan([Operations.MasterID]));
     for i = 1:length(fisBad)
         fprintf(1,'Bad link (no master match): %s -- %s\n',...
-					Operations(fisBad(i)).Name,Operations(fisBad(i)).CodeString);
+					Operations.Name{fisBad(i)},Operations.CodeString{fisBad(i)});
     end
     error('Bad links of %u operations to non-existent master operations',length(fisBad));
 end
@@ -452,15 +450,14 @@ end
 % 3. Retrieve Master Operation Metadata
 % (i) Which masters are implicated?
 selectString = ['SELECT mop_id, MasterLabel, MasterCode FROM MasterOperations WHERE mop_id IN ' ...
-        				'(' BF_cat(unique([Operations.MasterID]),',') ')'];
+        				'(' BF_cat(unique(Operations.MasterID),',') ')'];
 [masterinfo,emsg] = mysql_dbquery(dbc,selectString);
 if ~isempty(emsg)
     fprintf(1,'Error retrieving Master information using:\n%s\n',selectString);
     disp(emsg);
     error('Master information could not be retrieved')
-else
-    MasterOperations = cell2struct(masterinfo',{'ID','Label','Code'});
 end
+MasterOperations = cell2table(masterinfo','VariableNames',{'ID','Label','Code'}); % Convert to table
 
 %-------------------------------------------------------------------------------
 % Get the git information

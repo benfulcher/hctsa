@@ -1,10 +1,5 @@
 function colormap = BF_MakeBrightenedColorMap(rgb,numGrads)
 % BF_MakeBrightenedColorMap  Given an rgb vector, progressively brightens into a colormap
-%
-%---INPUTS:
-% xy, a vector (or cell) of x-y co-ordinates of points on the plot
-% TimeSeries, a structure array of time series making up the plot
-% annotateParams, structure of custom plotting parameters
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -131,11 +131,11 @@ function [TS_DataMat,TimeSeries,Operations] = clusterMe(TS_DataMat,TimeSeries,Op
         warning('No clustering info found in the data source -- returning unclustered data');
     else
         if ~isempty(ts_clust)
-            TimeSeries = TimeSeries(ts_clust.ord);
+            TimeSeries = TimeSeries(ts_clust.ord,:);
             TS_DataMat = TS_DataMat(ts_clust.ord,:);
         end
         if ~isempty(op_clust)
-            Operations = Operations(op_clust.ord);
+            Operations = Operations(op_clust.ord,:);
             TS_DataMat = TS_DataMat(:,op_clust.ord);
         end
     end

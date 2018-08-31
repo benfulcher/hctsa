@@ -70,31 +70,31 @@ end
 % Load in data:
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-numTimeSeries = length(TimeSeries);
-numOperations = length(Operations);
+numTimeSeries = height(TimeSeries);
+numOperations = height(Operations);
 
 %-------------------------------------------------------------------------------
 % Do the subsetting:
 %-------------------------------------------------------------------------------
 i_keep = struct;
 %--Match to TimeSeries IDs:
-i_keep.TimeSeries = MatchMe([TimeSeries.ID],ts_ids_keep);
+i_keep.TimeSeries = MatchMe(TimeSeries.ID,ts_ids_keep);
 %--Match to Operation IDs:
-i_keep.Operations = MatchMe([Operations.ID],op_ids_keep);
+i_keep.Operations = MatchMe(Operations.ID,op_ids_keep);
 % Subset:
 TS_DataMat = TS_DataMat(i_keep.TimeSeries,i_keep.Operations);
-TimeSeries = TimeSeries(i_keep.TimeSeries);
-Operations = Operations(i_keep.Operations);
+TimeSeries = TimeSeries(i_keep.TimeSeries,:);
+Operations = Operations(i_keep.Operations,:);
 
 fprintf('The hctsa dataset now contains %u -> %u time series and %u -> %u operations.\n',...
-            numTimeSeries,length(TimeSeries),numOperations,length(Operations))
+            numTimeSeries,height(TimeSeries),numOperations,height(Operations))
 
 if doSave
     % Save result to file
 
     % Remove group information because this will no longer be valid for sure
-    if ~isempty(ts_ids_keep) && isfield(TimeSeries,'Group')
-        TimeSeries = rmfield(TimeSeries,'Group');
+    if ~isempty(ts_ids_keep) && ismember('Group',TimeSeries.Properties.VariableNames)
+        TimeSeries = removevars(TimeSeries,'Group')
         fprintf('Warning: group information removed -- regenerate for subset data using TS_LabelGroups\n')
     end
 
@@ -141,7 +141,7 @@ if doSave
 
     % Don't display all of this info to screen if it's been saved and not stored
     if nargout == 0
-        clear TS_DataMat TimeSeries Operations
+        clear('TS_DataMat','TimeSeries','Operations');
     end
 end
 

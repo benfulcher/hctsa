@@ -97,22 +97,21 @@ clear('inputP');
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
 % Check that group labels have been assigned
-if ~isfield(TimeSeries,'Group')
+if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
 groupNames = TS_GetFromData(whatData,'groupNames');
-timeSeriesGroup = [TimeSeries.Group]'; % Use group form (column vector)
-if any(timeSeriesGroup==0)
+if any(TimeSeries.Group==0)
     error('Error labeling time series groups');
 end
-numClasses = max(timeSeriesGroup); % assuming group in form of integer class labels starting at 1
-numFeatures = length(Operations);
+numClasses = max(TimeSeries.Group); % assuming group in form of integer class labels starting at 1
+numFeatures = height(Operations);
 
 %-------------------------------------------------------------------------------
 % Give basic info about the represented classes:
 fprintf(1,'%u-class classification using %s:\n',numClasses,whatClassifier);
 for i = 1:numClasses
-    fprintf(1,'%u time series of class ''%s''\n',sum(timeSeriesGroup==i),groupNames{i});
+    fprintf(1,'%u time series of class ''%s''\n',sum(TimeSeries.Group==i),groupNames{i});
 end
 
 %-------------------------------------------------------------------------------
@@ -121,7 +120,7 @@ end
 if isempty(numFolds) || numFolds==0
     % Use a heuristic to set a default number of folds given the data set size,
     % number of classes
-    numFolds = howManyFolds(timeSeriesGroup,numClasses);
+    numFolds = howManyFolds(TimeSeries.Group,numClasses);
 end
 
 % Reset the random seed:
@@ -136,7 +135,7 @@ fprintf(1,['Training and evaluating a %u-class %s classifier in a %u-feature' ..
 CVMdl = cell(numRepeats,1);
 foldLosses = zeros(numRepeats,1);
 for i = 1:numRepeats
-    [foldLosses(i),CVMdl{i},outputStat] = GiveMeFoldLosses(TS_DataMat,timeSeriesGroup);
+    [foldLosses(i),CVMdl{i},outputStat] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group);
 end
 fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
                  ' features:\n%.3f +/- %.3f%%\n\n'],...
@@ -161,7 +160,7 @@ if numNulls > 0
     nullStat = zeros(numNulls,1);
     parfor i = 1:numNulls
         % Compute for shuffled data labels:
-        shuffledLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
+        shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
         nullStat(i) = GiveMeCfn(whatClassifier,TS_DataMat,shuffledLabels,[],[],numClasses,[],[],true,numFolds);
         % nullStat(i) = GiveMeFoldLosses(TS_DataMat,shuffledLabels);
         % meanNull(i) = mean(foldLosses_null);
@@ -207,7 +206,7 @@ end
 %-------------------------------------------------------------------------------
 % Convert real and predicted class labels to matrix form (numClasses x N),
 % required as input to plotconfusion:
-realLabels = BF_ToBinaryClass(timeSeriesGroup,numClasses,false);
+realLabels = BF_ToBinaryClass(TimeSeries.Group,numClasses,false);
 % Predict from the first CV-partition:
 predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),numClasses,false);
 f = figure('color','w');
@@ -237,7 +236,7 @@ if numPCs > 0
 
     % Compute top X PCs of the data matrix:
     fprintf('Computing top %u PCs...',numPCs)
-    [~, pcScore, ~, ~, ~] = pca(zscore(TS_DataMat),'NumComponents',numPCs);
+    [~,pcScore,~,~,~] = pca(zscore(TS_DataMat),'NumComponents',numPCs);
     fprintf(' Done.\n')
     numPCs = min(numPCs,size(pcScore,2)); % sometimes lower than attempted 10
 
@@ -245,7 +244,7 @@ if numPCs > 0
     cfnRate = zeros(numPCs,1);
     fprintf('Computing classification rates keeping top 1-%u PCs...\n',numPCs)
     for i = 1:numPCs
-        cfnRate(i) = GiveMeFoldLosses(pcScore(:,1:i),timeSeriesGroup);
+        cfnRate(i) = GiveMeFoldLosses(pcScore(:,1:i),TimeSeries.Group);
         fprintf(1,'%u PCs:  %.3f%%\n',i,cfnRate(i));
         % fprintf(1,'%u PCs:   %.3f +/- %.3f%%\n',i,cfnRate(i,1),cfnRate(i,2));
     end
@@ -264,9 +263,7 @@ if numPCs > 0
     ylabel('Classification accuracy (%)')
 
     titleText = sprintf('Classification rate (%u-class) using %u-fold %s classification',...
-                                numClasses,...
-                                numFolds,...
-                                whatClassifier);
+                                numClasses,numFolds,whatClassifier);
     title(titleText,'interpreter','none')
 end
 

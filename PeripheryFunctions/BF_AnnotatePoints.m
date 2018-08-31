@@ -28,7 +28,7 @@ function BF_AnnotatePoints(xy,TimeSeries,annotateParams)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-numTimeSeries = length(TimeSeries);
+numTimeSeries = height(TimeSeries);
 
 % ------------------------------------------------------------------------------
 %% Set default plotting parameters:
@@ -89,8 +89,8 @@ pHeight = diff(pylim); % plot height
 alreadyPicked = zeros(numAnnotate,1); % record those already picked
 
 % Groups:
-if isfield(TimeSeries,'Group')
-    numGroups = length(unique([TimeSeries.Group]));
+if ismember('Group',TimeSeries.Properties.VariableNames)
+    numGroups = length(unique(TimeSeries.Group));
 else
     numGroups = 1;
 end
@@ -155,14 +155,14 @@ for j = 1:numAnnotate
 
     % Get the group index of the selected time series:
     if isfield(TimeSeries,'Group')
-        theGroup = TimeSeries(iPlot).Group;
+        theGroup = TimeSeries.Group(iPlot);
     else
         theGroup = 1;
     end
 
     % Crop the time series:
     if ~isempty(maxL)
-        timeSeriesSegment = TimeSeries(iPlot).Data(1:min(maxL,end));
+        timeSeriesSegment = TimeSeries.Data{iPlot}(1:min(maxL,end));
     end
 
     % When only one group, cycle through rainbow colors for each annotation:
@@ -181,18 +181,19 @@ for j = 1:numAnnotate
     switch textAnnotation
     case 'Name'
         % Annotate text with names of datapoints:
-        text(plotPoint(1),plotPoint(2)-0.01*pHeight,sprintf('%s-%u',TimeSeries(iPlot).Name,TimeSeries(iPlot).Group),...
+        text(plotPoint(1),plotPoint(2)-0.01*pHeight,sprintf('%s-%u',...
+                    TimeSeries.Name{iPlot},TimeSeries.Group(iPlot)),...
                     'interpreter','none','FontSize',8,...
                     'color',brighten(groupColors{theGroup},-0.6));
     case 'ID'
         % Annotate text with ts_id:
         text(plotPoint(1),plotPoint(2)-0.01*pHeight,...
-                num2str(TimeSeries(iPlot).ID),...
+                num2str(TimeSeries.ID(iPlot)),...
                     'interpreter','none','FontSize',8,...
                     'color',brighten(groupColors{theGroup},-0.6));
     case 'length'
         text(plotPoint(1),plotPoint(2)-0.01*pHeight,...
-                num2str(length(TimeSeries(iPlot).Data)),...
+                num2str(length(TimeSeries.Data{iPlot})),...
                 'interpreter','none','FontSize',8,...
                 'color',brighten(groupColors{theGroup},-0.6));
     end

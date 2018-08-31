@@ -88,7 +88,7 @@ end
 %-------------------------------------------------------------------------------
 if ~isempty(ts_keepIDs)
     % Match IDs to local indices:
-    keepRows = ismember([TimeSeries.ID],ts_keepIDs);
+    keepRows = ismember(TimeSeries.ID,ts_keepIDs);
     % A couple of basic checks first:
     if sum(keepRows)==0
         error('No time series to keep');
@@ -98,14 +98,14 @@ if ~isempty(ts_keepIDs)
     end
     fprintf(1,'Keeping %u/%u time series from the data in %s\n',...
                         sum(keepRows),length(keepRows),whatDataFile);
-    TimeSeries = TimeSeries(keepRows);
+    TimeSeries = TimeSeries(keepRows,:);
     TS_DataMat = TS_DataMat(keepRows,:);
     TS_Quality = TS_Quality(keepRows,:);
 end
 
 if ~isempty(op_keepIDs)
     % Match IDs to local indices:
-    keepCols = ismember([Operations.ID],op_keepIDs);
+    keepCols = ismember(Operations.ID,op_keepIDs);
     % A couple of basic checks first:
     if sum(keepCols)==0
         error('No operations to keep');
@@ -115,7 +115,7 @@ if ~isempty(op_keepIDs)
     end
     fprintf(1,'Keeping %u/%u operations from the data in %s\n',...
                         sum(keepCols),length(keepCols),whatDataFile);
-    Operations = Operations(keepCols);
+    Operations = Operations(keepCols,:);
     TS_DataMat = TS_DataMat(:,keepCols);
     TS_Quality = TS_Quality(:,keepCols);
 end

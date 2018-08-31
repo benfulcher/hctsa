@@ -51,30 +51,30 @@ TS_Quality = TS_GetFromData(whatData,'TS_Quality');
 if isempty(MasterOperations) || isempty(TS_Quality)
     error('MasterOperations, TS_Quality not found in the data source');
 end
-if length(TimeSeries) == 0
+if height(TimeSeries) == 0
     error('No time series?!');
 end
 if isempty(whatID)
     idMatch = 1; % just take the first one
 else
-    idMatch = [TimeSeries.ID]==whatID;
+    idMatch = TimeSeries.ID==whatID;
 end
 if ~any(idMatch)
     error('ts_id %u not found in data source',whatID);
 end
-TimeSeries = TimeSeries(idMatch);
+TimeSeries = TimeSeries(idMatch,:);
 TS_DataMat = TS_DataMat(idMatch,:)';
 TS_Quality = TS_Quality(idMatch,:)';
 
 f = figure('color','w');
-plot([TimeSeries.Data],'k')
+plot(TimeSeries.Data,'k')
 title(TimeSeries.Name,'interpreter','none')
 
 %-------------------------------------------------------------------------------
 % Run the check:
 %-------------------------------------------------------------------------------
 [featureVector,~,calcQuality] = TS_CalculateFeatureVector(TimeSeries,...
-                                    doParallel,Operations,MasterOperations,1,1);
+                                    doParallel,Operations,MasterOperations,true,true);
 
 %-------------------------------------------------------------------------------
 % Compare output
@@ -86,12 +86,12 @@ if any(misMatch)
     % ------------
     % Text output:
     fmisMatch = find(misMatch);
-    misMatchOps = Operations(misMatch);
-    for i = 1:length(misMatchOps)
-        fprintf('[%u] %s (%s, %s): %u (file) -> %u (now)\n',misMatchOps(i).ID,...
-            misMatchOps(i).CodeString,...
-            MasterOperations([MasterOperations.ID]==misMatchOps(i).MasterID).Code,...
-            misMatchOps(i).Keywords,...
+    misMatchOps = Operations(misMatch,:);
+    for i = 1:height(misMatchOps)
+        fprintf('[%u] %s (%s, %s): %u (file) -> %u (now)\n',misMatchOps.ID(i),...
+            misMatchOps.CodeString{i},...
+            MasterOperations.Code{MasterOperations.ID==misMatchOps.MasterID(i)},...
+            misMatchOps.Keywords{i},...
             TS_Quality(fmisMatch(i)),calcQuality(fmisMatch(i)));
     end
 else
@@ -109,9 +109,11 @@ noMatch = ((abs(matchMarginProp) > 0.1) & didWork); % more than 0.1% different
 % ------------
 % Find those that are stochastic and wouldn't be expected to reproduce:
 dataStruct = struct();
-dataStruct.Operations = Operations; dataStruct.TimeSeries = []; dataStruct.TS_DataMat = [];
+dataStruct.Operations = Operations;
+dataStruct.TimeSeries = [];
+dataStruct.TS_DataMat = [];
 stochasticIDs = TS_getIDs('stochastic',dataStruct,'ops');
-isStochastic = ismember([Operations.ID],stochasticIDs)';
+isStochastic = ismember(Operations.ID,stochasticIDs)';
 
 for j = 1:2
     if j==1
@@ -128,10 +130,10 @@ for j = 1:2
     for i = 1:length(indx)
         ind = indx(i);
         fprintf('[%u] %s (%s | %s) [diff=%g, %.1f%%] %.8g (file) -> %.8g (now).\n',...
-                Operations(ind).ID,...
-                Operations(ind).CodeString,...
-                MasterOperations([MasterOperations.ID]==Operations(ind).MasterID).Code,...
-                Operations(ind).Keywords,...
+                Operations.ID(ind),...
+                Operations.CodeString{ind},...
+                MasterOperations.Code{MasterOperations.ID==Operations.MasterID(ind)},...
+                Operations.Keywords{ind},...
                 featureVector(ind)-TS_DataMat(ind),...
                 100*(featureVector(ind)-TS_DataMat(ind))/TS_DataMat(ind),...
                 TS_DataMat(ind),...

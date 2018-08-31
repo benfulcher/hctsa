@@ -95,26 +95,31 @@ end
 % ------------------------------------------------------------------------------
 % Get time series, operations, master operations into structure arrays
 % ------------------------------------------------------------------------------
-isEmptyStruct = @(x) length(fieldnames(x))==0;
 
 TimeSeries = SQL_add('ts',INP_ts,false,beVocal(1));
-if isEmptyStruct(TimeSeries), return; end % The user did not approve of the set of inputs
-numTS = length(TimeSeries);
+if height(TimeSeries)==0 % The user did not approve of the set of inputs
+    return;
+end
+numTS = height(TimeSeries);
 
 MasterOperations = SQL_add('mops',INP_mops,false,beVocal(2))';
-if isEmptyStruct(MasterOperations), return; end % The user did not approve of the set of inputs
-numMops = length(MasterOperations);
+if height(MasterOperations)==0 % The user did not approve of the set of inputs
+    return;
+end
+numMops = height(MasterOperations);
 
 Operations = SQL_add('ops',INP_ops,false,beVocal(3));
-if isEmptyStruct(Operations), return; end % The user did not approve of the set of inputs
-numOps = length(Operations);
+if height(Operations)==0
+    return;
+end % The user did not approve of the set of inputs
+numOps = height(Operations);
 
 %-------------------------------------------------------------------------------
 % Link operations to their masters using label matching
 % and update the structure arrays using the TS_LinkOperationsWithMasters function
 %-------------------------------------------------------------------------------
 
-[Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
+[Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 
 % MasterOperations may have been trimmed by TS_LinkOperationsWithMasters:
 numMops = length(MasterOperations);

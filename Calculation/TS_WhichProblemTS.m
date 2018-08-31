@@ -50,19 +50,19 @@ TS_Quality = TS_GetFromData(whatData,'TS_Quality');
 %-------------------------------------------------------------------------------
 % Get the quality labels for this operation, then output time series info:
 %-------------------------------------------------------------------------------
-qualityLabels = TS_Quality(:,[Operations.ID]==opID);
+qualityLabels = TS_Quality(:,Operations.ID==opID);
 
 % indices of time series with bad values:
 ts_ind = find(qualityLabels > 0);
 
 if nargout > 1
     % data for these time series
-    dataCell = {TimeSeries(ts_ind).Data};
+    dataCell = {TimeSeries.Data(ts_ind)};
 end
 
 if nargout > 2
     MasterOperations = TS_GetFromData(whatData,'MasterOperations');
-    codeEval = MasterOperations([MasterOperations.ID]==Operations([Operations.ID]==opID).MasterID).Code;
+    codeEval = MasterOperations.Code{MasterOperations.ID==Operations.MasterID(Operations.ID==opID)};
 end
 
 end

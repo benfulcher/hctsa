@@ -85,20 +85,20 @@ end
 %-------------------------------------------------------------------------------
 switch tsOrOps
 case 'ts'
-    dataStruct = TimeSeries;
+    dataTable = TimeSeries;
     theNameField = 'Name';
 case 'ops'
-    dataStruct = Operations;
+    dataTable = Operations;
     theNameField = 'Name';
 case 'mops'
 	loadedMore = load(whatDataFile,'MasterOperations');
     MasterOperations = loadedMore.MasterOperations;
-    dataStruct = MasterOperations;
+    dataTable = MasterOperations;
     theNameField = 'Label';
 otherwise
     error('Specify ''ts'' or ''ops'' or ''mops''');
 end
-IDs = [dataStruct.ID];
+IDs = dataTable.ID;
 doThese = ismember(IDs,idRange);
 
 if ~any(doThese)
@@ -116,7 +116,7 @@ end
 
 iThese = find(doThese);
 for i = 1:sum(doThese)
-    fprintf(1,'%s [%u] %s\n',doWhat,IDs(iThese(i)),dataStruct(iThese(i)).(theNameField));
+    fprintf(1,'%s [%u] %s\n',doWhat,IDs(iThese(i)),dataTable.(theNameField){iThese(i)});
 end
 
 if doRemove % clear data
@@ -136,11 +136,11 @@ if doRemove
     % Need to actually remove metadata entries:
     switch tsOrOps
 	case 'ts'
-        TimeSeries(doThese) = [];
+        TimeSeries(doThese,:) = [];
     case 'ops'
-        Operations(doThese) = [];
+        Operations(doThese,:) = [];
 	case 'mops'
-		MasterOperations(doThese) = [];
+		MasterOperations(doThese,:) = [];
     end
 end
 

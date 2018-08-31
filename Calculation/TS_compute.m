@@ -98,18 +98,18 @@ end
 % ------------------------------------------------------------------------------
 % Get indices if computing a subset
 % ------------------------------------------------------------------------------
-allIDs = [TimeSeries.ID];
+allIDs = TimeSeries.ID;
 if isempty(ts_id_range)
     ts_id_range = allIDs;
-    tsIndex = 1:length(TimeSeries);
+    tsIndex = 1:height(TimeSeries);
 else
     ts_id_range = intersect(ts_id_range,allIDs);
     tsIndex = find(ismember(allIDs,ts_id_range));
 end
-allIDs = [Operations.ID];
+allIDs = Operations.ID;
 if isempty(op_id_range)
     op_id_range = allIDs;
-    opCompute = ones(1,length(Operations));
+    opCompute = ones(1,height(Operations));
 else
     op_id_range = intersect(op_id_range,allIDs);
     opCompute = ismember(allIDs,op_id_range);
@@ -188,8 +188,8 @@ for i = 1:numTimeSeries
 
     if numCalc > 0 % some to calculate
 		try
-	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd),...
-								doParallel,Operations(toCalc),MasterOperations,1,beVocal);
+	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd,:),...
+								doParallel,Operations(toCalc,:),MasterOperations,true,beVocal);
 		catch
 			% skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
 			warning('Calculation for time series %u / %u failed...',i,numTimeSeries)

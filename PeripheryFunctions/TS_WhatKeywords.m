@@ -24,9 +24,8 @@ function UKeywords = TS_WhatKeywords(whatData)
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check inputs and set defaults:
+% Check inputs, set defaults:
 %-------------------------------------------------------------------------------
-
 if nargin < 1
     whatData = 'raw';
 end
@@ -35,7 +34,7 @@ end
 %% Load data from file
 % ------------------------------------------------------------------------------
 [~,TimeSeries] = TS_LoadData(whatData);
-Keywords = SUB_cell2cellcell({TimeSeries.Keywords}); % Split into sub-cells using comma delimiter
+Keywords = SUB_cell2cellcell(TimeSeries.Keywords); % Split into sub-cells using comma delimiter
 keywordsAll = [Keywords{:}]; % every keyword used across the dataset
 UKeywords = unique(keywordsAll);
 numUniqueKeywords = length(UKeywords);

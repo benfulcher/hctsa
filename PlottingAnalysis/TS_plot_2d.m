@@ -7,7 +7,7 @@ function TS_plot_2d(featureData,TimeSeries,featureLabels,groupNames,annotatePara
 % featureData, an Nx2 vector of where to plot each of the N data objects in the
 %           two-dimensional space
 %
-% TimeSeries, structure array for time series metadata
+% TimeSeries, table of time-series metadata
 %
 % featureLabels, cell of labels for each feature
 %
@@ -84,13 +84,13 @@ makeFigure = true; % default is to plot on a brand new figure('color','w')
 %-------------------------------------------------------------------------------
 % Preliminaries
 %-------------------------------------------------------------------------------
-if isfield(TimeSeries,'Group')
-    groupLabels = [TimeSeries.Group]'; % Convert GroupIndices to group form
+if ismember('Group',TimeSeries.Properties.VariableNames)
+    groupLabels = TimeSeries.Group; % Convert GroupIndices to group form
     numClasses = length(unique(groupLabels));
 else
     % No group information assigned to time series
     numClasses = 1;
-    groupLabels = ones(length(TimeSeries),1);
+    groupLabels = ones(height(TimeSeries),1);
 end
 
 % ------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ end
 %-------------------------------------------------------------------------------
 % Label axes first without classification rates so the user can see what they're doing when annotating
 labelAxes(0);
-if isfield(TimeSeries,'Data')
+if ismember('Data',TimeSeries.Properties.VariableNames)
     % Only attempt to annotate if time-series data is provided
 
     % Produce xy points

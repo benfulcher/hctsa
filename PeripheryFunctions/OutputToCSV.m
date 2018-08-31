@@ -59,8 +59,8 @@ fprintf(1,'Wrote data to %s\n',fileName);
 %-------------------------------------------------------------------------------
 fileName = 'hctsa_timeseries-info.csv';
 fid = fopen(fileName,'w');
-for i = 1:length(TimeSeries)
-    fprintf(fid,'%s,%s\n',TimeSeries(i).Name,TimeSeries(i).Keywords);
+for i = 1:height(TimeSeries)
+    fprintf(fid,'%s,%s\n',TimeSeries.Name{i},TimeSeries.Keywords{i});
 end
 fclose(fid);
 fprintf(1,'Wrote time-series info to %s\n',fileName);
@@ -71,8 +71,8 @@ fprintf(1,'Wrote time-series info to %s\n',fileName);
 if isfield(TimeSeries,'Group')
     fileName = 'hctsa_grouplabel-info.csv';
     fid = fopen(fileName,'w');
-    for i = 1:length(TimeSeries)
-        fprintf(fid,'%s,%u\n',TimeSeries(i).Name,TimeSeries(i).Group);
+    for i = 1:height(TimeSeries)
+        fprintf(fid,'%s,%u\n',TimeSeries.Name{i},TimeSeries.Group(i));
     end
     fclose(fid);
     fprintf(1,'Wrote time-series info to %s\n',fileName);
@@ -83,8 +83,8 @@ end
 %-------------------------------------------------------------------------------
 fileName = 'hctsa_features.csv';
 fid = fopen(fileName,'w');
-for i = 1:length(Operations)
-    fprintf(fid,'%s,%s\n',Operations(i).Name,Operations(i).CodeString);
+for i = 1:height(Operations)
+    fprintf(fid,'%s,%s\n',Operations.Name{i},Operations.CodeString{i});
 end
 fclose(fid);
 fprintf(1,'Wrote feature info to %s\n',fileName);
@@ -93,11 +93,11 @@ fprintf(1,'Wrote feature info to %s\n',fileName);
 % Output time-series data to file:
 %-------------------------------------------------------------------------------
 if writeTimeSeriesData
-    fprintf(1,'Writing time-series data for %u time series...\n',length(TimeSeries));
+    fprintf(1,'Writing time-series data for %u time series...\n',height(TimeSeries));
     fileName = 'hctsa_timeseries-data.csv';
     fid = fopen(fileName,'w');
-    for i = 1:length(TimeSeries)
-        x = TimeSeries(i).Data;
+    for i = 1:height(TimeSeries)
+        x = TimeSeries.Data{i};
         L = length(x);
         for t = 1:L-1
             fprintf(fid,'%.6g,',x(t)); % up to last value with commas

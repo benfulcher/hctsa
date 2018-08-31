@@ -109,7 +109,7 @@ BF_CheckToolbox('statistics_toolbox');
 % ------------------------------------------------------------------------------
 if doParallel
     % Check that a parallel worker pool is open (if not attempt to initiate it):
-	doParallel = TS_InitiateParallel(0);
+	doParallel = TS_InitiateParallel(false);
 end
 if doParallel
 	fprintf(1,['Computation will be performed across multiple cores' ...
@@ -146,7 +146,7 @@ end
 % --------------------------------------------------------------------------
 %% Display information
 % --------------------------------------------------------------------------
-numCalc = length(Operations); % Number of features to calculate
+numCalc = height(Operations); % Number of features to calculate
 if numCalc == 0
 	error('Nothing to calculate :-/')
 end
@@ -182,13 +182,13 @@ fullTimer = tic;
 MasterOutput = cell(length(MasterOperations),1); % Ouput structures
 MasterCalcTime = zeros(length(MasterOperations),1); % Calculation times for each master operation
 
-Master_IDs_calc = unique([Operations.MasterID]); % Master_IDs that need to be calculated
-Master_ind_calc = arrayfun(@(x)find([MasterOperations.ID]==x,1),Master_IDs_calc); % Indicies of MasterOperations that need to be calculated
+Master_IDs_calc = unique(Operations.MasterID); % Master_IDs that need to be calculated
+Master_ind_calc = arrayfun(@(x)find(MasterOperations.ID==x,1),Master_IDs_calc); % Indicies of MasterOperations that need to be calculated
 numMopsToCalc = length(Master_IDs_calc); % Number of master operations to calculate
 
 % Index sliced variables to minimize the communication overhead in the parallel processing
-par_MasterOpCodeCalc = {MasterOperations(Master_ind_calc).Code}; % Cell array of strings of Code to evaluate
-par_mop_ids = [MasterOperations(Master_ind_calc).ID]; % mop_id for each master operation
+par_MasterOpCodeCalc = MasterOperations.Code(Master_ind_calc); % String array of strings of Code to evaluate
+par_mop_ids = MasterOperations.ID(Master_ind_calc); % mop_id for each master operation
 
 fprintf(1,'Evaluating %u master operations...\n',length(Master_IDs_calc));
 
@@ -203,13 +203,13 @@ TimeSeries_i_ID = tsStruct.ID; % Make a PARFOR-friendly version of the ID
 masterTimer = tic;
 if doParallel
 	parfor jj = 1:numMopsToCalc % PARFOR Loop
-		[MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
+		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
 					TS_compute_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
 								par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
 	end
 else
 	for jj = 1:numMopsToCalc % Normal FOR Loop
-		[MasterOutput_tmp{jj}, MasterCalcTime_tmp(jj)] = ...
+		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
 					TS_compute_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
 								par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
 	end
@@ -221,29 +221,29 @@ MasterCalcTime(Master_ind_calc) = MasterCalcTime_tmp;
 
 fprintf(1,'%u master operations evaluated in %s ///\n\n',...
 					numMopsToCalc,BF_thetime(toc(masterTimer)));
-clear masterTimer
+clear('masterTimer')
 
 % --------------------------------------------------------------------------
 %% Assign all the results to the corresponding operations
 % --------------------------------------------------------------------------
 % Set sliced version of matching indicies across the range toCalc
 % Indices of MasterOperations corresponding to each Operation (i.e., each index of toCalc)
-MasterOp_ind = arrayfun(@(x)find([MasterOperations.ID]==x,1),[Operations.MasterID]);
+MasterOp_ind = arrayfun(@(x)find(MasterOperations.ID==x,1),Operations.MasterID);
 
 for jj = 1:numCalc
 	try
 		[featureVector(jj),calcQuality(jj),calcTimes(jj)] = TS_compute_oploop(MasterOutput{MasterOp_ind(jj)}, ...
 							   MasterCalcTime(MasterOp_ind(jj)), ...
-							   MasterOperations(MasterOp_ind(jj)).Label, ... % Master label
-							   Operations(jj).CodeString); % Code string for each operation to calculate (i.e., in toCalc)
+							   MasterOperations.Label{MasterOp_ind(jj)}, ... % Master label
+							   Operations.CodeString{jj}); % Code string for each operation to calculate (i.e., in toCalc)
 	catch
-		fprintf(1,'---Error with %s\n',Operations(jj).CodeString);
-		if (MasterOperations(MasterOp_ind(jj)).ID == 0)
+		fprintf(1,'---Error with %s\n',Operations.CodeString{jj});
+		if (MasterOperations.ID(MasterOp_ind(jj)) == 0)
 			error(['The operations database is corrupt: there is no link ' ...
-					'from ''%s'' to a master code'],Operations(jj).CodeString);
+					'from ''%s'' to a master code'],Operations.CodeString{jj});
 		else
 			fprintf(1,'Error retrieving element %s from %s.\n', ...
-				Operations(jj).CodeString,MasterOperations(MasterOp_ind(jj)).Label);
+				Operations.CodeString{jj},MasterOperations.Label{MasterOp_ind(jj)});
 		end
 	end
 end

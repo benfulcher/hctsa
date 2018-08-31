@@ -113,20 +113,20 @@ getClustered = true;
 if ~isempty(customOrder{1}) % reorder rows
 	fprintf(1,'Reordering time series according to custom order specified.\n');
 	TS_DataMat = TS_DataMat(customOrder{1},:);
-    TimeSeries = TimeSeries(customOrder{1});
+    TimeSeries = TimeSeries(customOrder{1},:);
 end
 
 if ~isempty(customOrder{2}) % reorder columns
 	fprintf(1,'Reordering operations according to custom order specified.\n');
 	TS_DataMat = TS_DataMat(:,customOrder{2});
-    Operations = Operations(customOrder{2});
+    Operations = Operations(customOrder{2},:);
 end
 
 %-------------------------------------------------------------------------------
 % Check group information
 %-------------------------------------------------------------------------------
-if isfield(TimeSeries,'Group')
-	timeSeriesGroups = [TimeSeries.Group];
+if ismember('Group',TimeSeries.Properties.VariableNames)
+	timeSeriesGroups = TimeSeries.Group;
 	numClasses = max(timeSeriesGroups);
 else
 	timeSeriesGroups = [];
@@ -151,15 +151,15 @@ if groupReorder
 	    dataMatReOrd = TS_DataMat(ixData,:);
 	    ixAgain = ixData;
 	    for i = 1:numClasses
-	        isGroup = [TimeSeries(ixData).Group]==i;
+	        isGroup = TimeSeries.Group(ixData)==i;
 	        ordering = BF_ClusterReorder(dataMatReOrd(isGroup,:),'euclidean','average');
 	        istmp = ixData(isGroup);
 	        ixAgain(isGroup) = istmp(ordering);
 	    end
 	    ixData = ixAgain; % set ordering to ordering within groups
-	    TimeSeries = TimeSeries(ixData);
+	    TimeSeries = TimeSeries(ixData,:);
 	    TS_DataMat = TS_DataMat(ixData,:);
-	    timeSeriesGroups = timeSeriesGroups(ixData);
+	    timeSeriesGroups = TimeSeries.Group;
 	end
 end
 
@@ -231,9 +231,9 @@ if addTimeSeries
     hold(ax1,'on');
     ax1.Box = 'on';
     ax1.YTick = (1:numTS);
-    ax1.YTickLabel = {TimeSeries.Name};
+    ax1.YTickLabel = TimeSeries.Name;
     ax1.YLim = [0.5,numTS+0.5];
-	allLengths = cellfun(@length,{TimeSeries.Data});
+	allLengths = cellfun(@length,TimeSeries.Data);
 	if timeSeriesLength > max(allLengths)
 		timeSeriesLength = max(allLengths);
 	end
@@ -244,7 +244,7 @@ if addTimeSeries
     for j = 1:numTS
         % Plot a segment from each time series, up to a maximum length of
         % timeSeriesLength samples (which is set as an input to the function)
-        tsData = TimeSeries(j).Data;
+        tsData = TimeSeries.Data{j};
         lengthHere = min(timeSeriesLength,length(tsData));
         tsData = tsData(1:lengthHere);
         plot(1:lengthHere,j-0.5+f_NormMinMax(tsData),'-k');
@@ -298,7 +298,7 @@ xlabel('Operations')
 ax2.XLim = [0.5,numOps+0.5];
 if numOps < 1000 % if too many operations, it's too much to list them all...
     ax2.XTick = 1:numOps;
-    ax2.XTickLabel = {Operations.Name};
+    ax2.XTickLabel = Operations.Name;
     ax2.XTickLabelRotation = 90;
 end
 
@@ -326,7 +326,7 @@ if addTimeSeries
 else
     % Rows -- time series need labels
     ylabel('Time series')
-    ax2.YTickLabel = {TimeSeries.Name};
+    ax2.YTickLabel = TimeSeries.Name;
 end
 
 end

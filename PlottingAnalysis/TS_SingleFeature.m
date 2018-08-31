@@ -56,16 +56,14 @@ if isempty(groupNames)
 end
 
 %-------------------------------------------------------------------------------
-timeSeriesGroup = [TimeSeries.Group]'; % Use group form
-numClasses = max(timeSeriesGroup);
-op_ind = find([Operations.ID]==featID);
+numClasses = max(TimeSeries.Group);
+op_ind = find(Operations.ID==featID);
 
 if isempty(op_ind)
     error('Operation with ID %u not found in %s',featID,whatDataSource);
 end
-
 if beVocal
-    fprintf(1,'[%u] %s (%s)\n',featID,Operations(op_ind).Name,Operations(op_ind).Keywords);
+    fprintf(1,'[%u] %s (%s)\n',featID,Operations.Name{op_ind},Operations.Keywords{op_ind});
 end
 
 %-------------------------------------------------------------------------------
@@ -73,14 +71,14 @@ end
 if makeNewFigure
     f = figure('color','w');
 end
-hold on
+hold('on')
 ax = gca;
 colors = GiveMeColors(numClasses);
 
 if makeViolin
     dataCell = cell(numClasses,1);
     for i = 1:numClasses
-        dataCell{i} = (TS_DataMat(timeSeriesGroup==i,op_ind));
+        dataCell{i} = (TS_DataMat(TimeSeries.Group==i,op_ind));
     end
 
     % Re-order groups by mean (excluding any NaNs, descending):
@@ -105,7 +103,7 @@ if makeViolin
     end
 
     % Annotate rectangles for predicted intervals:
-    BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax,'left');
+    BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),TimeSeries.Group,numClasses,colors,ax,'left');
 
     % Trim y-limits (with 2% overreach)
     ax.YLim(1) = min(TS_DataMat(:,op_ind))-0.02*range(TS_DataMat(:,op_ind));
@@ -114,7 +112,7 @@ if makeViolin
 else
     linePlots = cell(numClasses,1);
     for i = 1:numClasses
-        featVector = TS_DataMat((timeSeriesGroup==i),op_ind);
+        featVector = TS_DataMat(TimeSeries.Group==i,op_ind);
         [~,~,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,20,1);
     end
     % Trim x-limits (with 2% overreach)
@@ -126,7 +124,7 @@ else
     ylabel('Probability density')
 
     % Annotate rectangles:
-    BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,numClasses,colors,ax,'under');
+    BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),TimeSeries.Group,numClasses,colors,ax,'under');
 
     % Add x-label:
     xlabel('Output')
@@ -142,7 +140,7 @@ end
 if isempty(whatStat)
     numFolds = 10;
     try
-        accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),timeSeriesGroup,...
+        accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),TimeSeries.Group,...
                             [],[],numClasses,true,[],[],numFolds);
         fprintf(1,'%u-fold cross validated balanced accuracy: %.2f +/- %.2f%%\n',...
                             numFolds,mean(accuracy),std(accuracy));
@@ -159,7 +157,7 @@ else
         statText = whatStat;
     end
 end
-title({sprintf('[%u] %s: %s',Operations(op_ind).ID,Operations(op_ind).Name,statText);...
-                        ['(',Operations(op_ind).Keywords,')']},'interpreter','none')
+title({sprintf('[%u] %s: %s',Operations.ID(op_ind),Operations.Name{op_ind},statText);...
+                        ['(',Operations.Keywords{op_ind},')']},'interpreter','none')
 
 end

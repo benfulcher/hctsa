@@ -124,8 +124,7 @@ end
 % ------------------------------------------------------------------------------
 [~,TimeSeries] = TS_LoadData(whatData);
 if sortByLength
-    [~,ix] = sort([TimeSeries.Length],'descend');
-    TimeSeries = TimeSeries(ix);
+    TimeSeries = sortrows(TimeSeries,'Length','descend');
 end
 
 % ------------------------------------------------------------------------------
@@ -133,20 +132,20 @@ end
 % ------------------------------------------------------------------------------
 if (isempty(whatTimeSeries) || strcmp(whatTimeSeries,'grouped')) && isfield(TimeSeries,'Group')
     % Use default groups assigned by TS_LabelGroups
-    groupIndices = BF_ToGroup([TimeSeries.Group]);
+    groupIndices = BF_ToGroup(TimeSeries.Group);
     numGroups = length(groupIndices);
     groupNames = TS_GetFromData(whatData,'groupNames');
     fprintf(1,'Plotting from %u groups of time series from file.\n',numGroups);
 elseif isempty(whatTimeSeries) || strcmp(whatTimeSeries,'all')
     % Nothing specified but no groups assigned, or specified 'all': plot from all time series
-    groupIndices = {1:length(TimeSeries)};
+    groupIndices = {1:height(TimeSeries)};
     groupNames = {};
 elseif ischar(whatTimeSeries)
     % Just plot the specified group
     % First load group names:
     groupNames = TS_GetFromData(dataSource,'groupNames');
     a = strcmp(whatTimeSeries,groupNames);
-    groupIndices = {find([TimeSeries.Group]==find(a))};
+    groupIndices = {find(TimeSeries.Group==find(a))};
     groupNames = {whatTimeSeries};
     fprintf(1,'Plotting %u time series matching group name ''%s''\n',length(groupIndices{1}),whatTimeSeries);
 else % Provided a custom range as a vector
@@ -213,7 +212,7 @@ end
 
 % Set default for max length if unspecified (as max length of time series)
 if isempty(maxLength)
-    ls = cellfun(@length,{TimeSeries(iPlot(i)).Data});
+    ls = cellfun(@length,TimeSeries.Data{iPlot(i)});
     maxN = max(ls); % maximum length of all time series to plot
 else
     maxN = maxLength;
@@ -224,7 +223,7 @@ if carpetPlot
     % Assemble time-series data matrix:
     X = nan(numToPlot,maxN);
     for i = 1:numToPlot
-        x = TimeSeries(iPlot(i)).Data;
+        x = TimeSeries.Data{iPlot(i)};
         L = min(maxN,length(x));
         X(i,1:L) = x(1:L);
         % NB: other plotting uses random subsegment when longer; here just plot first maxN samples
@@ -238,7 +237,7 @@ if carpetPlot
     % Add filenames to axes:
     if displayTitles
         ax = gca;
-        fn = {TimeSeries(iPlot).Name}; % the name of the time series
+        fn = TimeSeries.Name{iPlot}; % the name of the time series
         ax.YTick = 1:numToPlot;
         ax.YTickLabel = fn;
         ax.TickLabelInterpreter = 'none';
@@ -278,7 +277,7 @@ if plotFreeForm
 
     pHandles = zeros(numToPlot,1); % keep plot handles
 	for i = 1:numToPlot
-        theTS = TimeSeries(iPlot(i));
+        theTS = TimeSeries(iPlot(i),:);
 
 	    x = theTS.Data; % the data
 	    N0 = length(x);
@@ -326,14 +325,14 @@ else
     % NOT a 'free-form' plot:
     for i = 1:numToPlot
 	    ax = subplot(numToPlot,1,i)
-	    fn = TimeSeries(iPlot(i)).Name; % the filename
-	    kw = TimeSeries(iPlot(i)).Keywords; % the keywords
-	    x = TimeSeries(iPlot(i)).Data;
+	    fn = TimeSeries.Name{iPlot(i)}; % the filename
+	    kw = TimeSeries.Keywords{iPlot(i)}; % the keywords
+	    x = TimeSeries.Data{iPlot(i)};
 	    N = length(x);
 
 	    % Prepare text for the title
 		if displayTitles
-			startBit = sprintf('{%u} %s [%s]',TimeSeries(iPlot(i)).ID,fn,kw);
+			startBit = sprintf('{%u} %s [%s]',TimeSeries.ID(iPlot(i)),fn,kw);
 	    end
 
 	    % Plot the time series
@@ -342,7 +341,7 @@ else
 	        plot(x,'-','color',theColors{classes(i)})
 	        Ls(i) = N;
 	        if displayTitles
-	            title([startBit ' (' num2str(N) ')'],'interpreter','none','FontSize',8);
+	            title(sprintf('%s (%u)',startBit,N),'interpreter','none','FontSize',8);
 	        end
 	    else
 	        % Specified a maximum length of time series to plot: maxLength
@@ -350,14 +349,14 @@ else
 	            plot(x,'-','color',theColors{classes(i)});
 	            Ls(i) = N;
 	            if displayTitles
-	                title([startBit ' (' num2str(N) ')'],'interpreter','none','FontSize',8);
+	                title(sprintf('%s (%u)',startBit,N),'interpreter','none','FontSize',8);
 	            end
 	        else
 	            sti = randi(N-maxLength,1);
 	            plot(x(sti:sti+maxLength),'-','color',theColors{classes(i)}) % plot a random maxLength-length portion of the time series
 	            Ls(i) = maxLength;
 	            if displayTitles
-	                title([startBit ' (' num2str(N) ' :: ' num2str(sti) '-' num2str(sti+maxLength) ')'],...
+	                title(sprintf('%s (%u :: %u-%u)',startBit,N,sti,sti+maxLength),...
                                 'interpreter','none','FontSize',8);
 	            end
 	        end

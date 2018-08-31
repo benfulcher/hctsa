@@ -123,19 +123,18 @@ fprintf(1,'(pre-filtering): Features vary from %.2f--%.2f%% good values\n',...
 % Filter time series (rows)
 keepRows = filterNaNs(TS_DataMat,filterOptions(1),'time series');
 if any(~keepRows)
-    fprintf(1,'Time series removed: %s.\n\n',BF_cat({TimeSeries(~keepRows).Name},','));
+    fprintf(1,'Time series removed: %s.\n\n',BF_cat(TimeSeries.Name(~keepRows),','));
     TS_DataMat = TS_DataMat(keepRows,:);
     TS_Quality = TS_Quality(keepRows,:);
-    TimeSeries = TimeSeries(keepRows);
+    TimeSeries = TimeSeries(keepRows,:);
 end
 
 % Filter operations (columns)
 keepCols = filterNaNs(TS_DataMat',filterOptions(2),'operations');
 if any(~keepCols)
-    % fprintf(1,'Operations removed: %s.\n\n',BF_cat({Operations(~keepCols).Name},','));
     TS_DataMat = TS_DataMat(:,keepCols);
     TS_Quality = TS_Quality(:,keepCols);
-    Operations = Operations(keepCols);
+    Operations = Operations(keepCols,:);
 end
 
 % --------------------------------------------------------------------------
@@ -153,7 +152,7 @@ if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all 
                          sum(bad_op),length(bad_op),sum(~bad_op));
         TS_DataMat = TS_DataMat(:,~bad_op);
         TS_Quality = TS_Quality(:,~bad_op);
-        Operations = Operations(~bad_op);
+        Operations = Operations(~bad_op,:);
     else
         fprintf(1,'No operations had near-constant outputs on the dataset\n');
     end
@@ -163,13 +162,13 @@ end
 % Filter on class variance
 %-------------------------------------------------------------------------------
 if classVarFilter
-    if ~isfield(TimeSeries,'Group')
+    if ~ismember('Group',TimeSeries.Properties.VariableNames)
         fprintf(1,'Group labels not assigned to time series, so cannot filter on class variance\n');
     end
-    numClasses = length(unique([TimeSeries.Group]));
+    numClasses = length(unique(TimeSeries.Group));
     classVars = zeros(numClasses,size(TS_DataMat,2));
     for i = 1:numClasses
-        classVars(i,:) = nanstd(TS_DataMat([TimeSeries.Group]==i,:));
+        classVars(i,:) = nanstd(TS_DataMat(TimeSeries.Group==i,:));
     end
     zeroClassVar = any(classVars < 10*eps,1);
     if all(zeroClassVar)
@@ -180,7 +179,7 @@ if classVarFilter
                      sum(zeroClassVar),length(zeroClassVar),sum(~zeroClassVar));
         TS_DataMat = TS_DataMat(:,~zeroClassVar);
         TS_Quality = TS_Quality(:,~zeroClassVar);
-        Operations = Operations(~zeroClassVar);
+        Operations = Operations(~zeroClassVar,:);
     end
 end
 
@@ -190,7 +189,7 @@ end
 % At this point, you could check to see if any master operations are no longer
 % pointed to and recalibrate the indexing, but I'm not going to bother.
 
-if length(TimeSeries)==1
+if height(TimeSeries)==1
     % When there is only a single time series, it doesn't actually make sense to normalize
     error('Only a single time series remains in the dataset -- normalization cannot be applied');
 end
@@ -221,7 +220,7 @@ if ismember(normFunction,{'nothing','none'})
     fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',normFunction);
 else
     fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',...
-                            length(TimeSeries),length(Operations));
+                            height(TimeSeries),height(Operations));
     TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction);
     fprintf(1,'Normalized! The data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))));
 end
@@ -239,7 +238,7 @@ if all(nanCol) % all columns are NaNs
 elseif any(nanCol) % there are columns that are all NaNs
     TS_DataMat = TS_DataMat(:,~nanCol);
     TS_Quality = TS_Quality(:,~nanCol);
-    Operations = Operations(~nanCol);
+    Operations = Operations(~nanCol,:);
     fprintf(1,'We just removed %u all-NaN columns introduced from %s normalization.\n',...
                         sum(nanCol),normFunction);
 end
@@ -252,7 +251,7 @@ kc = (nanstd(TS_DataMat) < 10*eps);
 if any(kc)
     TS_DataMat = TS_DataMat(:,~kc);
     TS_Quality = TS_Quality(:,~kc);
-    Operations = Operations(~kc);
+    Operations = Operations(~kc,:);
     fprintf(1,'%u operations had near-constant outputs after filtering: from %u to %u.\n', ...
                     sum(~kc),length(kc),sum(kc));
 end

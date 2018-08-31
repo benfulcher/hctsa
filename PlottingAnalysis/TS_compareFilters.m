@@ -54,14 +54,13 @@ end
 [TS_DataMat,TimeSeries,Operations,dataFile] = TS_LoadData(whatData);
 
 % Check that group labels have been assigned
-if ~isfield(TimeSeries,'Group')
+if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
 load(dataFile,'groupNames');
-timeSeriesGroup = [TimeSeries.Group]'; % Use group form (column vector)
-numClasses = max(timeSeriesGroup); % assuming group in form of integer class labels starting at 1
-numFeatures = length(Operations);
-numFolds = howManyFolds(timeSeriesGroup,numClasses);
+numClasses = max(TimeSeries.Group); % assuming group in form of integer class labels starting at 1
+numFeatures = height(Operations);
+numFolds = howManyFolds(TimeSeries.Group,numClasses);
 
 %-------------------------------------------------------------------------------
 % Get the filters
@@ -92,22 +91,22 @@ fprintf(1,['Training and evaluating a %u-class %s classifier using %u-fold cross
 for i = 1:6
     switch i
     case 1
-        filter = true(length(Operations),1);
+        filter = true(height(Operations),1);
         names{1} = 'all';
     case 2
-        filter = ismember([Operations.ID],ID_notlengthDep);
+        filter = ismember(Operations.ID,ID_notlengthDep);
         names{2} = 'no length';
     case 3
-        filter = ismember([Operations.ID],ID_notlocDep);
+        filter = ismember(Operations.ID,ID_notlocDep);
         names{3} = 'no location';
     case 4
-        filter = ismember([Operations.ID],ID_notspreadDep);
+        filter = ismember(Operations.ID,ID_notspreadDep);
         names{4} = 'no spread';
     case 5
-        filter = ismember([Operations.ID],ID_notraw);
+        filter = ismember(Operations.ID,ID_notraw);
         names{5} = 'no raw';
     case 6
-        filter = ismember([Operations.ID],intersect(intersect(ID_notlengthDep, ID_notlocDep), ID_notspreadDep));
+        filter = ismember(Operations.ID,intersect(intersect(ID_notlengthDep,ID_notlocDep),ID_notspreadDep));
         names{6} = 'no length, location, spread';
     end
     [foldLosses,~,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat(:,filter),...

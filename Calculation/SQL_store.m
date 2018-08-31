@@ -81,10 +81,10 @@ end
 % ------------------------------------------------------------------------------
 %% Preliminary definitions
 % ------------------------------------------------------------------------------
-numTS = length(TimeSeries); % Number of time series
-numOps = length(Operations); % Number of operations
-ts_id_loc = [TimeSeries.ID]; % tsids in local file
-op_id_loc = [Operations.ID]; % opids in local file
+numTS = height(TimeSeries); % Number of time series
+numOps = height(Operations); % Number of operations
+ts_id_loc = TimeSeries.ID; % tsids in local file
+op_id_loc = Operations.ID; % opids in local file
 ts_ids_string = BF_cat(ts_id_loc,',');
 op_ids_string = BF_cat(op_id_loc,',');
 
@@ -232,7 +232,7 @@ for i = 1:numWrite
         if ~isempty(emsg)
             SQL_closedatabase(dbc) % close the database connection before calling the error...
         	error('Error storing (ts_id,op_id) = (%u,%u) to %s??!!\n%s\n', ...
-                			[TimeSeries(localIndex(i,1)).ID],[Operations(localIndex(i,2)).ID],dbname,emsg);
+                			TimeSeries.ID(localIndex(i,1)),Operations.ID(localIndex(i,2)),dbname,emsg);
         end
     end
 

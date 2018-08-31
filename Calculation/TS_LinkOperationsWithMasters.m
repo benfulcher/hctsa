@@ -1,4 +1,4 @@
-function [Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations)
+function [Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations)
 % TS_LinkOperationsWithMasters    Link Operations with MasterOperations using Label field
 
 % ------------------------------------------------------------------------------
@@ -23,48 +23,32 @@ function [Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operation
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-numOps = length(Operations);
-numMops = length(MasterOperations);
+numOps = height(Operations);
+numMops = height(MasterOperations);
 
 % ------------------------------------------------------------------------------
 % Match operations to a master ID
 % ------------------------------------------------------------------------------
 for i = 1:numOps
-    theMasterMatch = strcmp(Operations(i).Label,{MasterOperations.Label});
+    theMasterMatch = strcmp(Operations.Label{i},MasterOperations.Label);
     if sum(theMasterMatch)==0
-        error('No master match for operation: %s',Operations(i).Name);
+        error('No master match for operation: %s',Operations.Name{i});
     end
-    Operations(i).MasterID = MasterOperations(theMasterMatch).ID;
+    Operations.MasterID(i) = MasterOperations.ID(theMasterMatch);
 end
 
-% No longer need the label field
-Operations = removeField(Operations,'Label');
+% No longer need the label field from the Operations table
+Operations = removevars(Operations,'Label');
 
 %-------------------------------------------------------------------------------
 % Check that all master operations are required
 %-------------------------------------------------------------------------------
-mastersNeeded = ismember([MasterOperations.ID],[Operations.MasterID]);
+mastersNeeded = ismember(MasterOperations.ID,Operations.MasterID);
 if ~all(mastersNeeded)
     warning(['%u/%u master operations are not used by the %u operations' ...
                          ' and will be removed.'],...
                         sum(~mastersNeeded),numMops,numOps);
-    MasterOperations = MasterOperations(mastersNeeded);
+    MasterOperations = MasterOperations(mastersNeeded,:);
 end
-
-
-% ------------------------------------------------------------------------------
-function newStructArray = removeField(oldStructArray,fieldToRemove)
-
-    theFieldNames = fieldnames(oldStructArray);
-
-    fieldInd = strcmp(theFieldNames,fieldToRemove);
-
-    oldCell = squeeze(struct2cell(oldStructArray));
-
-    newCell = oldCell(~fieldInd,:);
-
-    newStructArray = cell2struct(newCell,theFieldNames(~fieldInd));
-end
-% ------------------------------------------------------------------------------
 
 end

@@ -63,15 +63,15 @@ end
 %-------------------------------------------------------------------------------
 switch tsOrOps
 case 'ts'
-    theStructureArray = TimeSeries;
+    theDataTable = TimeSeries;
 case 'ops'
-    theStructureArray = Operations;
+    theDataTable = Operations;
 otherwise
     error('Specify ''ts'' or ''ops''');
 end
 
 % The cell of comma-delimited keyword strings:
-theKeywordCell = {theStructureArray.Keywords};
+theKeywordCell = theDataTable.Keywords;
 
 % Split into sub-cells using comma delimiter:
 Keywords = SUB_cell2cellcell(theKeywordCell);
@@ -80,7 +80,7 @@ Keywords = SUB_cell2cellcell(theKeywordCell);
 matches = cellfun(@(x)any(ismember(theKeyword,x)),Keywords);
 
 % Return the IDs of the matches:
-IDs = [theStructureArray(matches).ID];
+IDs = theDataTable.ID(matches);
 
 % Check for empty:
 if isempty(IDs)
@@ -89,7 +89,7 @@ end
 
 % Also provide IDs not matching the constraint, if required
 if nargout > 1
-    notIDs = setxor(IDs,[theStructureArray.ID]);
+    notIDs = setxor(IDs,theDataTable.ID);
 end
 
 end

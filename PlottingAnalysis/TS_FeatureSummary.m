@@ -52,7 +52,7 @@ end
 % Load in data:
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
-theOp = ([Operations.ID]==opID);
+theOp = (Operations.ID==opID);
 if ~any(theOp)
     error('No matches for operation ID %u',opID);
 end
@@ -60,11 +60,11 @@ end
 dataVector = TS_DataMat(:,theOp); % the outputs of interest
 notNaN = find(~isnan(dataVector));
 dataVector = dataVector(notNaN); % remove bad values
-TimeSeries = TimeSeries(notNaN); % remove bad values
-theOperation = Operations(theOp);
+TimeSeries = TimeSeries(notNaN,:); % remove bad values
+theOperation = Operations(theOp,:);
 
 if isempty(dataVector)
-    error('No data for %s',Operations(theOp).Name);
+    error('No data for %s',theOperation.Name);
 end
 
 % Retrieve group names also:
@@ -73,7 +73,7 @@ if isempty(groupNames)
     groupNames = {};
     timeSeriesGroup = [];
 else
-    timeSeriesGroup = [TimeSeries.Group]'; % Use group form
+    timeSeriesGroup = TimeSeries.Group; % Use group form
 end
 
 %-------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ if ~isfield(annotateParams,'textAnnotation') % what text annotation to use
     annotateParams.textAnnotation = 'Name';
 end
 if ~isfield(annotateParams,'n')
-    annotateParams.n = min(15,length(TimeSeries));
+    annotateParams.n = min(15,height(TimeSeries));
 end
 if annotateParams.n < 1
     error('You need to specify at least one time series to annotate with TS_FeatureSummary');
@@ -111,11 +111,11 @@ if doViolin
     [~,ix] = sort(TS_DataMat(:,theOp),'ascend');
     highlightInd = ix(round(linspace(1,length(ix),annotateParams.n)));
 
-    if isfield(TimeSeries,'Group')
+    if ~isempty(timeSeriesGroup)
         dataCell = cell(numGroups+1,1);
         dataCell{1} = TS_DataMat(:,theOp); % global distribution
         for i = 1:numGroups
-            dataCell{i+1} = (TS_DataMat(timeSeriesGroup==i,theOp));
+            dataCell{i+1} = TS_DataMat(timeSeriesGroup==i,theOp);
         end
 
         myColors = cell(numGroups+1,1);
@@ -144,12 +144,11 @@ if doViolin
         ax.XTickLabel = axisLabels;
     else
         % Just run a single global one
-        dataCell = {TS_DataMat(:,theOp)};
         extraParams = struct();
         extraParams.theColors = {ones(3,1)*0.5};
 
         ax = subplot(1,4,1:2);
-        [ff,xx] = BF_JitteredParallelScatter(dataCell,1,1,0,extraParams);
+        [ff,xx] = BF_JitteredParallelScatter({TS_DataMat(:,theOp)},1,1,0,extraParams);
 
         % Annotate lines for each feature in the distribution:
         for i = 1:annotateParams.n
@@ -215,8 +214,8 @@ else % kernel distributions
         xy = vertcat(fx{:});
         % Now make sure that elements of TimeSeries matches ordering of xy
         tsInd = vertcat(tsInd{:});
-        ix = arrayfun(@(x)find(x==tsInd),1:length(TimeSeries));
-        TimeSeries = TimeSeries(tsInd);
+        ix = arrayfun(@(x)find(x==tsInd),1:height(TimeSeries));
+        TimeSeries = TimeSeries(tsInd,:);
 
         % Set up legend:
         legendText = cell(length(groupNames)+1,1);

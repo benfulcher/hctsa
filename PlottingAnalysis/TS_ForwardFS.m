@@ -97,7 +97,7 @@ numClasses = length(groupNames);
 %% Set up the classification function
 % ------------------------------------------------------------------------------
 % We get (*) Classify_fn (takes test labels as input): gives the mean classification rate across partitions
-classNumbers = arrayfun(@(x)sum([TimeSeries.Group]==x),1:numClasses);
+classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),1:numClasses);
 isBalanced = all(classNumbers==classNumbers(1));
 if isBalanced
     whatLoss = 'sumLoss';
@@ -118,12 +118,11 @@ classify_fn = GiveMeFunctionHandle(criterion,numClasses,whatLoss,reWeight);
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
 FS_timer = tic;
-fprintf(1,['Performing greedy forward feature selection ' ...
-                        'using ''%s''...\n'],criterion);
+fprintf(1,['Performing greedy forward feature selection using ''%s''...\n'],criterion);
 
 opts = statset('display','iter');
 % classify_fn = @(XTrain,yTrain,XTest,yTest) 1 - GiveMeCfn(criterion,XTrain,yTrain,XTest,yTest,numClasses);
-[fs,history] = sequentialfs(classify_fn,TS_DataMat,[TimeSeries.Group]',...
+[fs,history] = sequentialfs(classify_fn,TS_DataMat,TimeSeries.Group,...
                     'cv',cvFolds,'options',opts,'nfeatures',numFeatSelect);
 fprintf(1,'Selected %u features\n',sum(fs));
 
@@ -139,7 +138,7 @@ clear FS_timer;
 featureLabels = cell(2,1);
 ifeat = find(history.In(2,:));
 for i = 1:2
-    featureLabels{i} = sprintf('%s (%.2f%%)',Operations(ifeat(i)).Name,100-history.Crit(i)*100);
+    featureLabels{i} = sprintf('%s (%.2f%%)',Operations.Name{ifeat(i)},100-history.Crit(i)*100);
 end
 
 if sum(fs) > 1

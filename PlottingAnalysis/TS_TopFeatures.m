@@ -98,17 +98,16 @@ clear inputP;
 %% Load the data
 % --------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-numOps = length(Operations);
+numOps = height(Operations);
 numTopFeatures = min(numTopFeatures,numOps);
 
 %-------------------------------------------------------------------------------
 %% Check that grouping information exists:
 %-------------------------------------------------------------------------------
-if ~isfield(TimeSeries,'Group')
+if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
-timeSeriesGroup = [TimeSeries.Group]'; % Use group form
-numClasses = max(timeSeriesGroup); % Assuming classes labeled with integers starting at 1
+numClasses = max(TimeSeries.Group); % Assuming classes labeled with integers starting at 1
 groupNames = TS_GetFromData(whatData,'groupNames');
 if isempty(groupNames)
     error('No group label info in the data source');
@@ -164,7 +163,7 @@ end
 % --------------------------------------------------------------------------
 % Use the same data for training and testing:
 fprintf(1,'Comparing the (in-sample) performance of %u operations for %u classes using a %s...\n',...
-                                length(Operations),numClasses,cfnName);
+                                height(Operations),numClasses,cfnName);
 timer = tic;
 testStat = giveMeStats(TS_DataMat,timeSeriesGroup,1);
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
@@ -190,7 +189,7 @@ ifeat = ifeat(~isNaN);
 % List the top features:
 for i = 1:numTopFeatures
     fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations(ifeat(i)).ID, ...
-            Operations(ifeat(i)).Name,Operations(ifeat(i)).Keywords,testStat_sort(i));
+            Operations.Name{ifeat(i)},Operations.Keywords{ifeat(i)},testStat_sort(i));
 end
 
 %-------------------------------------------------------------------------------
@@ -220,7 +219,7 @@ if any(ismember(whatPlots,'histogram'))
                 fprintf(1,'%u',j);
             end
             % Shuffle labels:
-            groupLabels = timeSeriesGroup(randperm(length(timeSeriesGroup)));
+            groupLabels = TimeSeries.Group(randperm(height(TimeSeries)));
             testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,0);
         end
         fprintf(1,'\n%u %s statistics computed in %s.\n',numOps*numNulls,...
@@ -317,7 +316,7 @@ if any(ismember(whatPlots,'distributions'))
         % Loop through features
         for opi = 1:length(featHere)
             subplot(ceil(length(featHere)/4),4,opi);
-            TS_SingleFeature(data,Operations(featHere(opi)).ID,true,false,...
+            TS_SingleFeature(data,Operations.ID(featHere(opi)),true,false,...
                                                 testStat(featHere(opi)),false);
         end
     end
@@ -331,7 +330,7 @@ if any(ismember(whatPlots,'datamatrix'))
     ixFeat = BF_ClusterReorder(TS_DataMat(:,featInd)','corr','average');
     dataLocal = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
                     'TimeSeries',TimeSeries,...
-                    'Operations',Operations(featInd(ixFeat)));
+                    'Operations',Operations(featInd(ixFeat),:));
     TS_plot_DataMatrix(dataLocal,'colorGroups',1,'groupReorder',1);
 end
 
@@ -359,7 +358,7 @@ if any(ismember(whatPlots,'cluster'))
         Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
         distanceMetric = 'abscorr';
     end
-    makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations(x).ID,Operations(x).Name,...
+    makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations.ID(x),Operations.Name{x},...
                         testStat(x),cfnUnit);
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
     clusterThreshold = 0.2; % threshold at which split into clusters
@@ -370,9 +369,9 @@ if any(ismember(whatPlots,'cluster'))
                             numTopFeatures,length(cluster_Groupi)))
 end
 
-% Don't display lots of crap to screen unless the user wants it:
+% Don't display crap to screen unless the user wants it:
 if nargout == 0
-    clear ifeat testStat testStat_rand
+    clear('ifeat','testStat','testStat_rand')
 end
 
 %-------------------------------------------------------------------------------
