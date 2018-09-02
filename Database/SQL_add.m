@@ -50,26 +50,24 @@ end
 % inputFile
 if nargin < 2 || isempty(inputFile)
     % Default filenames:
-    if strcmp(addWhat,'ts')
+    switch inputFile
+    case 'ts'
         inputFile = 'INP_ts.txt';
-    else
+    case 'ops'
         inputFile = 'INP_ops.txt';
+    case 'mops'
+        inputFile = 'INP_mops.txt';
     end
 end
 if ~exist(inputFile,'file')
     error('Unknown file ''%s''',inputFile);
 end
 
-% forDatabase
 if nargin < 3 || isempty(forDatabase)
-    % Write the results directly to the mySQL database specified in sql_settings.conf
-    forDatabase = true;
+    forDatabase = false;
 end
-
-% beVocal
 if nargin < 4
-    % Give user feedback by default:
-    beVocal = true;
+    beVocal = true; % Give user feedback by default:
 end
 
 % ------------------------------------------------------------------------------
@@ -79,9 +77,6 @@ if beVocal
     fprintf(1,'Using input file: %s\n',inputFile);
 end
 ticker = tic;
-
-% Initialize structArray
-structArray = struct;
 
 % ------------------------------------------------------------------------------
 %% Open database connection
@@ -186,7 +181,9 @@ if ~isMatFile
     dataIn = dataIn{1}; % Collect one big matrix of cells
     numItems = size(dataIn,1); % Number of items in the input file
 
-    if numItems == 0, error('The input file ''%s'' seems to be empty??',inputFile), end
+    if numItems == 0
+        error('The input file ''%s'' seems to be empty??',inputFile)
+    end
 
     if beVocal
         fprintf(1,'Found %u %s in %s, I think. Take a look:\n\n',numItems,theWhat,inputFile);
@@ -221,8 +218,7 @@ if ~isMatFile
             end
         end
 
-        fprintf(1,['\nHow does it look? Make sure the metadata ' ...
-                                    'matches up with the headings\n']);
+        fprintf(1,['\nHow does it look? Make sure the metadata matches the headings\n']);
 
         % Ask the question:
         if strcmp(addWhat,'ts')
@@ -335,164 +331,165 @@ else
     % Ok, so we have inputData.timeSeriesData, inputData.labels, and inputData.keywords
 end
 
-esc = @RA_sqlescapestring; % Inline function to add escape strings to format mySQL queries
-
 % ------------------------------------------------------------------------------
-% Construct a structure array for the time series / operations /
+% Construct a table of metadta for the time series / operations /
 % master operations and fill a cell, toAdd, containing mySQL INSERT commands for
 % each item in the input file.
 % ------------------------------------------------------------------------------
-if forDatabase && beVocal
-    fprintf(1,'Preparing mySQL statements to add %u %s to the database %s...',...
+if forDatabase
+    % Define an inline function to add escape strings to format mySQL queries
+    if forDatabase
+        esc = @RA_sqlescapestring;
+        % Initialize:
+        toAdd = cell(numItems,1);
+    end
+    if beVocal
+        fprintf(1,'Preparing mySQL statements to add %u %s to the database %s...',...
                     numItems,theWhat,databaseName);
+    end
 end
 
-toAdd = cell(numItems,1);
+% Prepare local IDs:
+ID = (1:numItems)';
 
 switch addWhat
 case 'ts' % Prepare toAdd cell for time series
     if beVocal
         figure('color','w','WindowStyle','docked');
     end
+    % Record whether data was added or not (not too long and no missing values)
+    wasGood = false(1,numItems);
 
-    wasGood = false(1,numItems); % Record whether data was added or not
-                                 % (if too long or contains missing values, it is not added)
-
-    TimeSeries = table();
-    % 'Size',[numItems,5],'VariableTypes',{'double','char','char','cell','double'},...
-        % ('VariableNames',{'ID','Name','Keywords','Data','Length'});
+    % Initialize:
+    Name = cell(numItems,1);
+    Keywords = cell(numItems,1);
+    Length = zeros(numItems,1);
+    Data = cell(numItems,1);
     for j = 1:numItems
-        % Assign filename and keywords strings to this time series, and load it as x
+        % Assign filename and keywords strings to this time series, and load it
         if isMatFile
-            TimeSeries.Name{j} = inputData.labels{j};
-            TimeSeries.Keywords{j} = inputData.keywords{j}; % Take out inverted commas from keywords lists
+            Name{j} = inputData.labels{j};
+            Keywords{j} = inputData.keywords{j}; % Take out inverted commas from keywords lists
             if iscell(inputData.timeSeriesData)
-                x = inputData.timeSeriesData{j};
-                if size(x,2) > size(x,1)
-                    x = x';
+                Data{j} = inputData.timeSeriesData{j};
+                if size(Data{j},2) > size(Data{j},1)
                     fprintf(1,'Transposing time series\n');
+                    Data{j} = Data{j}';
                 end
-                if size(x,2) ~= 1
-                    error('Multivariate time series input? Each element of timeSeriesData must be univariate');
+                if size(Data{j},2) ~= 1
+                    error('Multivariate time-series input? Each element of timeSeriesData must be univariate');
                 end
             else
-                x = inputData.timeSeriesData(j,:)'; % time series data ought to be column vectors
+                Data{j} = inputData.timeSeriesData(j,:)'; % column vector
             end
         else
-            TimeSeries.Name{j} = dataIn{j,1};
-            TimeSeries.Keywords{j} = regexprep(dataIn{j,2},'\"',''); % Take out inverted commas from keywords lists
+            Name{j} = dataIn{j,1};
+            Keywords{j} = regexprep(dataIn{j,2},'\"',''); % Take out inverted commas from keywords lists
             % Read the time series from its filename:
             try
-                x = dlmread(TimeSeries.Name{j});
+                Data{j} = dlmread(Name{j});
             catch emsg
                 fprintf(1,'%s\n',emsg.message);
-                error(sprintf(['\nCould not read the data file for ''%s''.' ...
-                    ' Check that it''s in the path.'],TimeSeries.Name{j}))
+                error(['\nCould not read the data file for ''%s''.',...
+                        ' Check that it''s in the path.'],Name{j})
             end
         end
 
         % Check that label is not empty:
-        if isempty(TimeSeries.Name{j})
-            beep
+        if isempty(Name{j})
             warning(['\n[%u/%u] This time series is assigned an empty label' ...
                         ' and will not be added...'],j,numItems)
-            continue
+            beep; continue
         end
 
         % Assign the length of the time series
-        TimeSeries.Length(j) = length(x);
+        Length(j) = length(Data{j});
 
-        %---TESTS (time-series contains good values, and is not too long)---
-
-        % Check if the time series contains any NaN of Inf values:
-        if any(isnan(x)) || any(~isfinite(x))
-            beep
-            warning(['\n[%u/%u] The time series: ''%s'' contains special values' ...
-                        ' (e.g., NaN or Inf)...\nThis time series will not be added...'], ...
-                        j,numItems,TimeSeries.Name{j})
-            continue
-        end
-
-        % If this time series is longer than the maximum allowed, then exit:
-        if length(x) > maxL
-            beep
+        % TEST 1: Is the time series longer than the maximum allowed value?
+        if Length(j) > maxL
             warning(['\n[%u/%u]%s contains %u samples, this framework can efficiently ' ...
                 'deal with time series up to %u samples\n',...
-                '[Note that this maximum length can be modified within SQL_add]\n',...
+                '[Note that this maximum length can be modified in SQL_add]\n',...
                 'Skipping this time series...'],...
-                j,numItems,TimeSeries.Name{j},TimeSeries.Length(j),maxL)
-            continue
+                j,numItems,Name{j},Length(j),maxL)
+            beep; continue
+        end
+        % TEST 2: Does the time series contains any NaN of Inf values?
+        if any(isnan(Data{j})) || any(~isfinite(Data{j}))
+            warning(['\n[%u/%u] The time series: ''%s'' contains special values' ...
+                        ' (e.g., NaN or Inf)...\nThis time series will not be added...'], ...
+                        j,numItems,Name{j})
+            beep; continue
         end
 
         % Passed both tests! Assign wasGood = true
         wasGood(j) = true;
 
-        % If storing in a database, need to assign the time-series data as text
+        % If storing in a database, need to reassign the time-series data as text
         % (which will be stored as singles in the case of a .mat file data)
-        % If making for a local mat file, keep the same precision.
+        % If making for a local mat file, keep the same precision as input.
         if forDatabase
             % Want time-series data as a comma-delimited string:
             if isMatFile
-                xtext = sprintf('%.6g,',x); % keeps 6 figures of accuracy
-                xtext = xtext(1:end-1); % remove trailing comma
+                xText = sprintf('%.6g,',Data{j}); % keeps 6 figures of accuracy
+                xText = xText(1:end-1); % remove trailing comma
             else
                 % Read in the time series from file as strings using textscan
-                fid = fopen(TimeSeries.Name{j});
+                fid = fopen(Name{j});
                 timeSeriesData_text = textscan(fid,'%s');
                 fclose(fid);
-
                 % Turn the time series into a comma-delimited string
                 timeSeriesData_text = timeSeriesData_text{1}; % cell of time series values as strings
-                xtext = ''; % make a comma-delimited text version of the time series as xtext
+                xText = ''; % make a comma-delimited text version of the time series as xText
                 for k = 1:length(timeSeriesData_text)
-                    xtext = [xtext,',',timeSeriesData_text{k}];
+                    xText = [xText,',',timeSeriesData_text{k}];
                 end
-                xtext = xtext(2:end);
+                xText = xText(2:end);
             end
-            TimeSeries.Data{j} = xtext;
-        else
-            % Want to keep time-series data as a vector
-            TimeSeries.Data{j} = x;
+            Data{j} = xText;
+            % Prepare the data to be added to the database in an INSERT command:
+            toAdd{j} = sprintf('(''%s'',''%s'',%u,''%s'')',...
+                    esc(Name{j}),esc(Keywords{j}),Length{j},Data{j});
         end
 
-        % ------------------------------------------------------------------------------
-        % Prepare the data to be added to the database in an INSERT command:
-        toAdd{j} = sprintf('(''%s'',''%s'',%u,''%s'')', ...
-                            esc(TimeSeries.Name{j}),esc(TimeSeries.Keywords{j}), ...
-                            TimeSeries.Length(j),TimeSeries.Data{j});
-
-        if beVocal % plot the time series
+        if beVocal
+            % Plot the time series
             numSubplots = min(numItems,4);
-            subplot(numSubplots,1,mod(j-1,numSubplots)+1);
-            plot(x,'-k'); xlim([1,length(x)]);
+            ax = subplot(numSubplots,1,mod(j-1,numSubplots)+1);
+            plot(Data{j},'-k');
+            ax.XLim = [1,Length(j)];
             titleText = sprintf('[%u/%u] %s (%u), keywords = %s',j,numItems,...
-                    TimeSeries.Name{j},TimeSeries.Length(j),TimeSeries.Keywords{j});
+                            Name{j},Length(j),Keywords{j});
             title(titleText,'interpreter','none');
             fprintf(1,'\n%s --- loaded successfully.',titleText);
-            pause(0.005); % Wait 5ms to show the plotted time series!
+            pause(5e-3); % Wait 5ms to show the plotted time series!
         end
     end
 
-    % Check for duplicates in the input file:
+    %-------------------------------------------------------------------------------
+    % All data in -> TimeSeries table
+    TimeSeries = table(ID,Name,Keywords,Length,Data);
+
+    % Check for duplicates on the name field:
     if length(unique(TimeSeries.Name)) < height(TimeSeries)
-        error('Input file contains duplicates.');
+        error('Input file contains duplicate names.');
     end
 
-    % Check that some passed quality checks
+    % Check whether at least some passed the quality checks
     if ~any(wasGood)
-        fprintf(1,'None of the %u time series in the input file passed quality checks.\n',...
+        fprintf(1,'NONE of the %u time series in the input file passed quality checks.\n',...
                                 length(wasGood));
         return
     end
 
-    % Tell them about it:
     if beVocal
+        % Tell me about it:
         if forDatabase
             textShow = ', ready to be uploaded to the mySQL database';
         else
             textShow = '';
         end
-        fprintf(1,'\nAll time-series data loaded (%u/%u) passed quality tests%s.\n',...
+        fprintf(1,'\nAll time-series data loaded; %u/%u passed quality tests%s.\n',...
                         sum(wasGood),length(wasGood),textShow);
         if any(~wasGood)
             input(sprintf('[List %u time series that failed... (press any key)]',sum(~wasGood)),'s');
@@ -513,32 +510,38 @@ case 'ts' % Prepare toAdd cell for time series
     end
 
 case 'mops'
-    % Prepare toAdd cell for master operations
-    MasterOperations = table();
-            % 'Size',[numItems,3],...
-            % 'VariableTypes',{'double','char','char'},...
-            % 'VariableNames',{'ID','Code','Label'});
+    % Prepare metadata for master operations
+    Code = cell(numItems,1);
+    Label = cell(numItems,1);
     for j = 1:numItems
-        MasterOperations.Code{j} = dataIn{j,1};
-        MasterOperations.Label{j} = dataIn{j,2};
-        toAdd{j} = sprintf('(''%s'', ''%s'')',esc(MasterOperations.Label{j}),esc(MasterOperations.Code{j}));
+        Code{j} = dataIn{j,1};
+        Label{j} = dataIn{j,2};
+        if forDatabase
+            toAdd{j} = sprintf('(''%s'', ''%s'')',esc(Label{j}),esc(Code{j}));
+        end
     end
+    % Convert to table of metadata:
+    MasterOperations = table(ID,Label,Code);
     if beVocal, fprintf(1,' Done.\n'); end
 
 case 'ops'
-    % Prepare toAdd cell for operations
-    Operations = table(); %'Size',[numItems,4],...
-                          %    'VariableTypes',{'double','char','char','char'},...
-                          %    'VariableNames',{'ID','Label','CodeString','Keywords'});
+    % Prepare metadata table for operations
+    CodeString = cell(numItems,1);
+    Name = cell(numItems,1);
+    Keywords = cell(numItems,1);
+    Label = cell(numItems,1);
     for j = 1:numItems
-        Operations.CodeString{j} = dataIn{j,1};
-        Operations.Name{j} = dataIn{j,2};
-        Operations.Keywords{j} = dataIn{j,3};
-        Operations.Label{j} = strtok(Operations.CodeString{j},'.');
-        toAdd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',...
-                    esc(Operations.Name{j}),esc(Operations.CodeString{j}),...
-                    esc(Operations.Label{j}),esc(Operations.Keywords{j}));
+        CodeString{j} = dataIn{j,1};
+        Name{j} = dataIn{j,2};
+        Keywords{j} = dataIn{j,3};
+        Label{j} = strtok(CodeString{j},'.');
+        if forDatabase
+            toAdd{j} = sprintf('(''%s'', ''%s'',''%s'',''%s'')',...
+                    esc(Name{j}),esc(CodeString{j}),...
+                    esc(Label{j}),esc(Keywords{j}));
+        end
     end
+    Operations = table(ID,Name,Label,Keywords,CodeString);
     if beVocal, fprintf(1,' Done.\n'); end
 
     % Check for duplicates in the input file:
@@ -546,47 +549,52 @@ case 'ops'
     if length(uniqueOpNames) < height(Operations)
         warning(['Input file contains %u duplicate entries, which are being removed.\n' ...
                         'Inputting %u -> %u operations...'], ...
-            height(Operations)-length(uniqueOpNames),height(Operations),length(uniqueOpNames));
+            height(Operations)-length(uniqueOpNames),...
+            height(Operations),length(uniqueOpNames));
         % Only keep the unique ones:
         Operations = Operations(ia,:);
-        toAdd = toAdd(ia);
         numItems = height(Operations);
         fprintf(1,'We now have %u operations to input...\n',numItems);
+        if forDatabase
+            toAdd = toAdd(ia);
+        end
     end
 end
 
 % ------------------------------------------------------------------------------
-% Leave now if not writing to a database
+% If not writing to a database, then we're done
 % ------------------------------------------------------------------------------
 switch addWhat
 case 'ts'
     theTable = TimeSeries(wasGood,:);
+    % Note that IDs are according to the original input file
 case 'mops'
     theTable = MasterOperations;
 case 'ops'
     theTable = Operations;
 end
 if ~forDatabase
-    % Assign ascending IDs:
-    theTable.ID = (1:height(theTable))';
     fprintf(1,'Returning a table with metadata for %u %s.\n',height(theTable),theWhat);
     return
 end
 
+%-------------------------------------------------------------------------------
+% From here on is for mySQL data import:
 % ------------------------------------------------------------------------------
-%% Check for duplicates
-% ------------------------------------------------------------------------------
-if beVocal, fprintf(1,'Checking for duplicates already in the database... '); end
+% Check for duplicates:
+if beVocal
+    fprintf(1,'Checking for duplicates already in the database... ');
+end
 switch addWhat
 case 'ts'
     existingNames = mysql_dbquery(dbc,sprintf('SELECT Name FROM TimeSeries'));
-    isDuplicate = ismember(theTable.Name,existingNames); % isDuplicate = 1 if the item already exists
+    isDuplicate = ismember(theTable.Name,existingNames);
 case 'ops'
     existingOperationNames = mysql_dbquery(dbc,'SELECT Name FROM Operations');
-    isDuplicate = ismember(theTable.Name,existingOperationNames); % isDuplicate = 1 if the operation already exists
+    isDuplicate = ismember(theTable.Name,existingOperationNames);
 case 'mops'
     existingMasterLabels = mysql_dbquery(dbc,'SELECT MasterLabel FROM MasterOperations');
-    isDuplicate = ismember(theTable.Label,existingMasterLabels); % isDuplicate = 1 if the master operation already exists
+    isDuplicate = ismember(theTable.Label,existingMasterLabels);
 end
 if beVocal, fprintf(1,'Done.\n'); end
 
@@ -781,7 +789,6 @@ if ~strcmp(addWhat,'mops')
     % Add them all in 1000-sized chunks
     SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell,1000);
 
-
     % Update Nmatches in the keywords table
     fprintf(1,' Done.\nNow computing all match counts for all keywords...\n');
     SQL_FlushKeywords(addWhat);
@@ -805,7 +812,7 @@ if ismember(addWhat,{'mops','ops'}) % there may be new links
 
     updateString = sprintf(['UPDATE MasterOperations AS m SET NPointTo = ' ...
                     '(SELECT COUNT(o.mop_id) FROM Operations AS o WHERE m.mop_id = o.mop_id)']);
-    [~,emsg] = mysql_dbexecute(dbc, updateString);
+    [~,emsg] = mysql_dbexecute(dbc,updateString);
     if ~isempty(emsg)
         error('Error counting NPointTo operations for mop_id = %u\n%s\n',M_ids(k),emsg);
     end
@@ -825,7 +832,7 @@ fprintf('All tasks completed in %s.\nRead %s then added %u %s into %s.\n', ...
 
 if strcmp(addWhat,'ts') && ~isMatFile
     fprintf(1,['**The imported data are now in %s and no longer ' ...
-                    'need to be in the Matlab path.\n'],databaseName);
+                    'need to be in the Matlab path**\n'],databaseName);
 end
 
 end

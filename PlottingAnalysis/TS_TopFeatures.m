@@ -1,5 +1,5 @@
 function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,varargin)
-% TS_TopFeatures    Top individual features for discriminating labeled time series
+% TS_TopFeatures  Top individual features for discriminating labeled time series
 %
 % This function compares each feature in an hctsa dataset individually for its
 % ability to separate the labeled classes of time series according to a given

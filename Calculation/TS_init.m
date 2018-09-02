@@ -16,7 +16,7 @@ function TS_init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
 % beVocal: Whether to display details of the progress of the script to screen.
 %           a 3-vector, specifying for 1. time series, 2. master operations,
 %           and 3. operations.
-% outputFile: Specify an alternative output filename
+% outputFile: Specify an output filename
 %
 %---OUTPUTS:
 % Writes output into HCTSA.mat (or specified custom filename)
@@ -65,7 +65,7 @@ if nargin < 4
     end
 end
 if length(beVocal)==1
-    beVocal = logical(ones(3,1)*beVocal);
+    beVocal = true(3,1)*beVocal;
 end
 if nargin < 5
     outputFile = 'HCTSA.mat';
@@ -96,30 +96,28 @@ end
 % Get time series, operations, master operations into structure arrays
 % ------------------------------------------------------------------------------
 TimeSeries = SQL_add('ts',INP_ts,false,beVocal(1));
-if height(TimeSeries)==0 % The user did not approve of the set of inputs
-    return;
-end
 numTS = height(TimeSeries);
+if numTS==0
+    return; % The user did not approve of the set of inputs
+end
 
 MasterOperations = SQL_add('mops',INP_mops,false,beVocal(2));
-if height(MasterOperations)==0 % The user did not approve of the set of inputs
-    return;
-end
 numMops = height(MasterOperations);
+if numMops==0
+    return; % The user did not approve of the set of inputs
+end
 
 Operations = SQL_add('ops',INP_ops,false,beVocal(3));
-if height(Operations)==0
-    return;
-end % The user did not approve of the set of inputs
 numOps = height(Operations);
+if numOps==0
+    return; % The user did not approve of the set of inputs
+end
 
 %-------------------------------------------------------------------------------
 % Link operations to their masters using label matching
 % and update the structure arrays using the TS_LinkOperationsWithMasters function
 %-------------------------------------------------------------------------------
-
 [Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
-
 % MasterOperations may have been trimmed by TS_LinkOperationsWithMasters:
 numMops = height(MasterOperations);
 
