@@ -100,7 +100,7 @@ whatDistance = inputP.Results.whatDistance;
 % clusterMeth = inputP.Results.clusterMeth;
 linkageMeth = inputP.Results.linkageMeth;
 % plotBig = inputP.Results.plotBig;
-clear inputP;
+clear('inputP');
 
 %-------------------------------------------------------------------------------
 % Work with vector form of distances (hopefully enough memory)
@@ -182,16 +182,15 @@ cluster_Groupi = cluster_Groupi(ix);
 % Select the closest to cluster centre in each group
 clusterCenters = cellfun(@(x)x(1),cluster_Groupi);
 
-cluster_Groupi_cl = cellfun(@(x)arrayfun(@(y)find(ord==y),x),cluster_Groupi,'UniformOutput',0);
+cluster_Groupi_cl = cellfun(@(x)arrayfun(@(y)find(ord==y),x),cluster_Groupi,...
+                                                'UniformOutput',false);
 clusterCenters_cl = arrayfun(@(y)find(ord==y),clusterCenters);
 
 % ------------------------------------------------------------------------------
 % Now plot it:
 % ------------------------------------------------------------------------------
-
 % Make a square distance matrix, and plot as a pairwise similarity matrix
 % (reordered by ord determined above)
-
 ax2 = subplot(1,6,2:5);
 switch whatDistance
 case {'corr','abscorr_ii'}
