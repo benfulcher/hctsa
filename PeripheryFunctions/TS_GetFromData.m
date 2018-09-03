@@ -3,7 +3,8 @@ function result = TS_GetFromData(dataSource,dataField)
 %                   (loaded from file).
 %
 %---INPUTS:
-% dataSource: either a .mat filename or a structure generated from e.g.,
+% dataSource: either a .mat filename or a structure generated from loading an
+%               HCTSA file, e.g.,
 %               dataSource = load('HCTSA.mat');
 % dataField: the variable to extract
 %
@@ -13,6 +14,7 @@ function result = TS_GetFromData(dataSource,dataField)
 %
 %---EXAMPLE USAGE:
 % fromDatabase = TS_GetFromData('HCTSA_EEGDataset.mat','fromDatabase');
+% MasterOperations = TS_GetFromData('HCTSA_EEGDataset.mat','MasterOperations');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -71,7 +73,11 @@ elseif ischar(dataSource)
         result = [];
     end
 else
-    error('Unknown data source type');
+    error('Unknown data source type: %s',class(dataSource));
 end
 
+% Check for legacy structure array format and convert to table:
+if ismember(dataField,{'TimeSeries','Operations','MasterOperations'}) && isstruct(result)
+    warning('Loaded metadata, %s, is still in structure array format; converted to table',dataField)
+    result = struct2table(result);
 end

@@ -115,7 +115,6 @@ if ~isempty(customOrder{1}) % reorder rows
 	TS_DataMat = TS_DataMat(customOrder{1},:);
     TimeSeries = TimeSeries(customOrder{1},:);
 end
-
 if ~isempty(customOrder{2}) % reorder columns
 	fprintf(1,'Reordering operations according to custom order specified.\n');
 	TS_DataMat = TS_DataMat(:,customOrder{2});
@@ -263,8 +262,6 @@ end
 % ------------------------------------------------------------------------------
 %% Plot the data matrix
 % ------------------------------------------------------------------------------
-% Surround by zeros for an accurate and inclusive pcolor:
-% (alternative is to use imagesc)
 colormap(customColorMap)
 imagesc(TS_DataMat);
 
@@ -287,7 +284,7 @@ end
 % Axis labels:
 ax2 = gca;
 ax2.FontSize = 8; % small font size (often large datasets)
-ax2.TickLabelInterpreter = 'none'; % Stop from displaying underscores as subscripts
+ax2.TickLabelInterpreter = 'none'; % prevent displaying underscores as subscripts
 
 % Rows: time series
 ax2.YTick = 1:numTS;

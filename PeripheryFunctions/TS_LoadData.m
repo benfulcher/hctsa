@@ -46,7 +46,6 @@ function [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataF
 %-------------------------------------------------------------------------------
 % Check inputs, set defaults
 %-------------------------------------------------------------------------------
-
 if nargin < 1 || isempty(whatDataFile)
     whatDataFile = 'norm';
 end
@@ -68,21 +67,25 @@ if isstruct(whatDataFile)
     if isfield(whatDataFile,'TimeSeries')
         TimeSeries = whatDataFile.TimeSeries;
     else
-        TimeSeries = struct();
+        TimeSeries = table();
     end
     if isfield(whatDataFile,'Operations')
         Operations = whatDataFile.Operations;
     else
-        Operations = struct();
+        Operations = table();
     end
 
-    % Cluster the data if necessary:
+    % Check if used legacy structure array format for metadata:
+    [TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations);
+
+    % Cluster the data if necessary/possible:
     if getClustered
         [TS_DataMat,TimeSeries,Operations] = clusterMe(TS_DataMat,TimeSeries,Operations);
     end
 
     % Name the datafile going out of the function as an input structure:
     whatDataFile = '--INPUT_STRUCTURE--'; % revive this, so this output is always a string
+
     return
 end
 
@@ -114,17 +117,31 @@ fprintf(1,'Loading data from %s...',whatDataFile);
 load(whatDataFile,'TS_DataMat','Operations','TimeSeries');
 fprintf(1,' Done.\n');
 
-%-------------------------------------------------------------------------------
-% Change order according to stored clustering (if none has been run, by default
-% returns the same ordering as the original dataset)
-%-------------------------------------------------------------------------------
+% Check whether an old version of hctsa using structure arrays
+[TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations);
+
 if getClustered
     [TS_DataMat,TimeSeries,Operations] = clusterMe(TS_DataMat,TimeSeries,Operations);
 end
 
 %-------------------------------------------------------------------------------
+function [TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations)
+    % Check whether an old version of hctsa using structure arrays
+    if isstruct(TimeSeries) || isstruct(Operations)
+        warning(['Metadata stored in old structure-array format; run ',...
+                'TS_ConvertToTable on your hctsa data file to update?'])
+    end
+    if isstruct(TimeSeries)
+        TimeSeries = struct2table(TimeSeries);
+    end
+    if isstruct(Operations)
+        Operations = struct2table(Operations);
+    end
+end
+%-------------------------------------------------------------------------------
 function [TS_DataMat,TimeSeries,Operations] = clusterMe(TS_DataMat,TimeSeries,Operations)
-    % Load the clustering permutations and apply them to the data:
+    % Change order according to stored clustering (if none has been run, by default
+    % returns the same ordering as the original dataset)
     ts_clust = TS_GetFromData(whatDataFile,'ts_clust');
     op_clust = TS_GetFromData(whatDataFile,'op_clust');
     if isempty(ts_clust) && isempty(op_clust)
