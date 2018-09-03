@@ -60,7 +60,7 @@ end
 clusterCenterInd = cellfun(@(x)x(1),cluster_Groupi);
 
 % Convert to feature IDs:
-reducedIDs = [Operations(clusterCenterInd).ID];
+reducedIDs = Operations.ID(clusterCenterInd);
 
 % Give user feedback:
 fprintf(1,'Reduced to set of %u features using complete linkage clustering on abscorr distances (%.2f)\n',...
