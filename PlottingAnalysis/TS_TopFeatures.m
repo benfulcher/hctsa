@@ -117,10 +117,9 @@ end
 %% Define the train/test classification rate function, fn_testStat
 % --------------------------------------------------------------------------
 % Also the chanceLine -- where you'd expect by chance (for equiprobable groups...)
-if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','svm_linear'})
 
-    %-------------------------------------------------------------------------------
-    % Set up the loss function
+% Set up the loss function for classifier-based metrics
+if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','svm_linear'})
 
     % (first check for possible class imbalance):
     classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),1:numClasses);
@@ -132,28 +131,38 @@ if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','
         fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'balancedAcc',1);
         fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
     end
-
-    % fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                    % mean(yTest == classify(Xtest,XTrain,yTrain,'linear'))*100;
     chanceLine = 100/numClasses;
-    cfnUnit = '%';
 end
 
 switch whatTestStat
 case {'linear','linclass','fast_linear'}
     cfnName = 'linear classifier';
+    statUnit = '%%';
 case 'diaglinear'
     cfnName = 'Naive bayes classifier';
+    statUnit = '%%';
 case {'svm','svm_linear'}
     cfnName = 'linear SVM classifier';
+    statUnit = '%%';
+case {'ustat','ranksum'}
+    cfnName = 'Mann-Whitney approx p-value';
+    statUnit = ' (log10(p))';
+    chanceLine = NaN;
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),false);
+case {'ustatExact','ranksumExact'}
+    cfnName = 'Mann-Whitney exact p-value';
+    statUnit = ' (log10(p))';
+    chanceLine = NaN;
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),true);
+    statUnit = ' (log10(p))';
 case {'ttest','tstat'}
     cfnName = 'Welch''s t-stat';
-    cfnUnit = '';
+    statUnit = ' (log10(p))';
+    chanceLine = 0; % by chance, t-stats averge to zero
     if numClasses > 2
         error('Cannot use t-test as test statistic with more than two groups :/');
     end
     fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
-    chanceLine = 0; % by chance, t-stats averge to zero
 otherwise
     error('Unknown method ''%s''',whatTestStat)
 end
@@ -172,10 +181,16 @@ if all(isnan(testStat))
     error('Error computing statistics for %s (may be due to inclusion of missing data?)',cfnName);
 end
 
-% Give mean and that expected from random classifier (may be a little overfitting)
-fprintf(1,['Mean %s performance across %u operations = %4.2f%s\n' ...
+%-------------------------------------------------------------------------------
+% Give mean and that expected from random classifier (there may be a little overfitting)
+if ~isnan(chanceLine)
+    fprintf(1,['Mean %s performance across %u features = %4.2f%s\n' ...
             '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
-        cfnName,numOps,nanmean(testStat),cfnUnit,numClasses,chanceLine,cfnUnit);
+        cfnName,numOps,nanmean(testStat),statUnit,numClasses,chanceLine,statUnit);
+else
+    fprintf(1,'Mean %s performance across %u features = %4.2f%s\n',...
+        cfnName,numOps,nanmean(testStat),statUnit);
+end
 
 % --------------------------------------------------------------------------
 %% Display information about the top features (numTopFeatures)
@@ -188,8 +203,10 @@ ifeat = ifeat(~isNaN);
 
 % List the top features:
 for i = 1:numTopFeatures
-    fprintf(1,'[%u] %s (%s) -- %4.2f%%\n',Operations.ID(ifeat(i)), ...
-            Operations.Name{ifeat(i)},Operations.Keywords{ifeat(i)},testStat_sort(i));
+    ind = ifeat(i);
+    fprintf(1,'[%u] %s (%s) -- %4.2f%s\n',Operations.ID(ind),...
+            Operations.Name{ind},Operations.Keywords{ind},...
+            testStat_sort(i),statUnit);
 end
 
 %-------------------------------------------------------------------------------
@@ -201,7 +218,7 @@ end
 %-------------------------------------------------------------------------------
 % Histogram of distribution of test statistics for labeled and null data
 %-------------------------------------------------------------------------------
-if any(ismember(whatPlots,'histogram'))
+if ismember('histogram',whatPlots)
     % A figure to show the distribution of test statistics across all
     % features:
 
@@ -286,7 +303,7 @@ end
 %-------------------------------------------------------------------------------
 % Distributions across classes for top features
 %-------------------------------------------------------------------------------
-if any(ismember(whatPlots,'distributions'))
+if ismember('distributions',whatPlots)
     subPerFig = 16; % subplots per figure
 
     % Set the colors to be assigned to groups:
@@ -325,7 +342,7 @@ end
 %-------------------------------------------------------------------------------
 % Data matrix containing top features
 %-------------------------------------------------------------------------------
-if any(ismember(whatPlots,'datamatrix'))
+if ismember('datamatrix',whatPlots)
     featInd = ifeat(1:numTopFeatures);
     ixFeat = BF_ClusterReorder(TS_DataMat(:,featInd)','corr','average');
     dataLocal = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
@@ -337,7 +354,7 @@ end
 %-------------------------------------------------------------------------------
 % Inter-dependence of top features
 %-------------------------------------------------------------------------------
-if any(ismember(whatPlots,'cluster'))
+if ismember('cluster',whatPlots)
 
     % 1. Get pairwise similarity matrix
     op_ind = ifeat(1:numTopFeatures); % plot these operations indices
@@ -359,7 +376,7 @@ if any(ismember(whatPlots,'cluster'))
         distanceMetric = 'abscorr';
     end
     makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations.ID(x),Operations.Name{x},...
-                        testStat(x),cfnUnit);
+                        testStat(x),statUnit);
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
     clusterThreshold = 0.2; % threshold at which split into clusters
     [~,cluster_Groupi] = BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
@@ -371,9 +388,20 @@ end
 
 % Don't display crap to screen unless the user wants it:
 if nargout == 0
-    clear('ifeat','testStat','testStat_rand')
+    clear('ifeat','testStat','testStat_rand');
 end
 
+%-------------------------------------------------------------------------------
+function uStatP = fn_uStat(d1,d2,doExact)
+    % Return test statistic from Mann-Whitney U-test
+    if doExact
+        [p,~,stats] = ranksum(d1,d2,'method','exact');
+    else
+        [p,~,stats] = ranksum(d1,d2,'method','approx');
+    end
+    uStatP = -log10(p);
+    % uStat = stats.ranksum;
+end
 %-------------------------------------------------------------------------------
 function tStat = fn_tStat(d1,d2)
     % Return test statistic from a 2-sample Welch's t-test
