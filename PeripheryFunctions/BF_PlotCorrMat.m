@@ -14,7 +14,7 @@ function BF_PlotCorrMat(D_corr,rangeHow,makeFigure)
 % makeFigure, whether to generate a new figure
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

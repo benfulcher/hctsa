@@ -11,7 +11,7 @@ function BF_AnnotateRect(whatCfn,featureVector,groupLabels,numClasses,colors,ax,
 % underOrLeft, where to annotate (bottom, or to the left of the plot)
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

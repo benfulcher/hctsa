@@ -11,7 +11,7 @@ function out = SY_RangeEvolve(y)
 %---OUTPUTS: based on the dynamics of how new extreme events occur with time.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

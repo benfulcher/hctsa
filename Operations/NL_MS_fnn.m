@@ -37,7 +37,7 @@ function out = NL_MS_fnn(y,de,tau,th,kth,justBest,bestp)
 % Vol. 52 (2005)
 % Code available at http://small.eie.polyu.edu.hk/matlab/
 % ------------------------------------------------------------------------------
-% Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

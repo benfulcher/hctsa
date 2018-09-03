@@ -14,7 +14,7 @@ function out = MF_StateSpaceCompOrder(y,maxOrder)
 % maxOrder, the maximum model order to consider.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2017, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:
