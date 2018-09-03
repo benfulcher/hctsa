@@ -1,4 +1,4 @@
-function TS_plot_2d(featureData,TimeSeries,featureLabels,groupNames,annotateParams,showDistr,whatClassifier)
+function f = TS_plot_2d(featureData,TimeSeries,featureLabels,groupNames,annotateParams,showDistr,whatClassifier)
 % TS_plot_2d   Plots a dataset in a two-dimensional space.
 %
 % e.g., The space of two chosen features, or two principal components.
@@ -98,7 +98,9 @@ end
 % ------------------------------------------------------------------------------
 if makeFigure % can set extras.makeFigure = 0 to plot within a given setting
     f = figure('color','w'); box('on'); % white figure
-    f.Position = [f.Position(1), f.Position(2), 600, 550];
+    f.Position = [f.Position(1),f.Position(2),600,550];
+else
+    f = gcf;
 end
 
 % Set colors

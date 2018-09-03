@@ -1,4 +1,4 @@
-function TS_PlotLowDim(whatData,whatAlgorithm,showDist,classMeth,annotateParams)
+function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,classMeth,annotateParams)
 % TS_PlotLowDim   2-dimensional feature-based representation of a time-series dataset.
 %
 % The low-dimensional representation is computed using PCA.
@@ -12,6 +12,9 @@ function TS_PlotLowDim(whatData,whatAlgorithm,showDist,classMeth,annotateParams)
 % annotateParams, the annotation parameters used when plotting the dataset using
 %                 TS_plot_2d. Can also specify an integer; will annotate this
 %                 many time series segments to the 2d scatter plot.
+%
+%---OUTPUT:
+% Figure handle, f
 %
 %---EXAMPLE USAGE:
 % (*) Plot a PCA projection of the normalized data stored in HCTSA_N.mat
@@ -80,7 +83,7 @@ end
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm
 % ------------------------------------------------------------------------------
 switch whatAlgorithm
-case 'pca'
+case {'pca','PCA'}
     fprintf(1,'Calculating 2-dimensional principal components of the %u x %u data matrix...\n', ...
                         size(TS_DataMat,1),size(TS_DataMat,2));
 
@@ -103,7 +106,7 @@ case 'pca'
     % Display the features loading strongly into the two components:
     numTopLoadFeat = min(numFeatures,20); % display this many features loading onto each PC
     for j = 1:2
-        fprintf(1,'---Top feature loadings for PC%u---:\n',j);
+        fprintf(1,'\n---Top feature loadings for PC%u---:\n',j);
         [~,ix] = sort(abs(pcCoeff(:,j)),'descend');
         for i = 1:numTopLoadFeat
             ind = ix(i);
@@ -123,7 +126,7 @@ case 'pca'
         featureLabels{i} = sprintf('PC-%u (%.2f%% var)',i,percVar(i));
     end
 
-case 'tSNE'
+case {'tSNE','tsne'}
     fprintf(1,['Computing a two-dimensional t-SNE embedding (using barnes-hut',...
                     ' approximation after 50-dim PC reduction) of the %u x %u data matrix...\n'], ...
                         size(TS_DataMat,1),size(TS_DataMat,2));
@@ -140,6 +143,6 @@ end
 %-------------------------------------------------------------------------------
 % Set up for plotting two-dimensional representation of the data using TS_plot_2d
 
-TS_plot_2d(Y(:,1:2),TimeSeries,featureLabels,groupNames,annotateParams,showDist,classMeth);
+f = TS_plot_2d(Y(:,1:2),TimeSeries,featureLabels,groupNames,annotateParams,showDist,classMeth);
 
 end
