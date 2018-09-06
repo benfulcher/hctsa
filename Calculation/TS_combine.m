@@ -136,7 +136,7 @@ else
 end
 
 % Get a list of variables stored for each:
-theVariables = cell{1,2};
+theVariables = cell(1,2);
 theVariables{1} = loadedData{1}.TimeSeries.Properties.VariableNames;
 theVariables{2} = loadedData{2}.TimeSeries.Properties.VariableNames;
 
