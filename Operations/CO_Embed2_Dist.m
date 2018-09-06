@@ -42,7 +42,7 @@ function out = CO_Embed2_Dist(y,tau)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doPlot = 0; % whether to plot results
+doPlot = false; % whether to plot results
 
 % ------------------------------------------------------------------------------
 %% Check inputs:

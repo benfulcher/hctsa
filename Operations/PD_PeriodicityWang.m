@@ -66,7 +66,8 @@ end
 %% Foreplay
 % ------------------------------------------------------------------------------
 N = length(y); % length of the time series
-ths = [0,0.01,0.1,0.2,1/sqrt(N),5/sqrt(N),10/sqrt(N)]; % the thresholds with which to count a peak
+% The thresholds with which to count a peak:
+ths = [0,0.01,0.1,0.2,1/sqrt(N),5/sqrt(N),10/sqrt(N)];
 numThresholds = length(ths); % the number of thresholds
 
 %-------------------------------------------------------------------------------

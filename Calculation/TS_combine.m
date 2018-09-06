@@ -395,7 +395,7 @@ function [gotTheField,theCombinedMatrix] = MergeMe(loadedData,theField,merge_fea
     if nargin < 4
         ix_ts = [];
     end
-    if ismember(loadedData{1},theField) && isfield(loadedData{2},theField)
+    if isfield(loadedData{1},theField) && isfield(loadedData{2},theField)
         gotTheField = true;
     else
         gotTheField = false;

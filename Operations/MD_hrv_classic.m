@@ -64,7 +64,6 @@ N = length(y); % time-series length
 % ------------------------------------------------------------------------------
 % pNNx: recommendation as per Mietus et. al. 2002, "The pNNx files: ...", Heart
 % strange to do this for a z-scored time series...
-% pnntime = 20;
 
 Dy = abs(diffy) * 1000;
 

@@ -69,7 +69,7 @@ function out = DN_OutlierInclude(y,thresholdHow,inc)
 % Check a Curve Fitting toolbox license is available
 BF_CheckToolbox('curve_fitting_toolbox');
 
-doPlot = 0; % Plot some outputs
+doPlot = false; % Plot some outputs
 
 % ------------------------------------------------------------------------------
 %% Check Inputs
@@ -93,7 +93,6 @@ if nargin < 3
     inc = 0.01; % increment through z-scored time-series values
 end
 
-
 % ------------------------------------------------------------------------------
 %% Initialize thresholds
 % ------------------------------------------------------------------------------
@@ -101,15 +100,12 @@ switch thresholdHow
     case 'abs' % analyze absolute value deviations
         thr = (0:inc:max(abs(y)));
         tot = N;
-
     case 'p' % analyze only positive deviations
         thr = (0:inc:max(y));
         tot = sum(y >= 0);
-
     case 'n' % analyze only negative deviations
         thr = (0:inc:max(-y));
         tot = sum(y <= 0);
-
 otherwise
     error('Error thresholding with ''%s''. Must select either ''abs'', ''p'', or ''n''.',thresholdHow)
 end

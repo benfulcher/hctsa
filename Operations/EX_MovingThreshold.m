@@ -54,7 +54,7 @@ function out = EX_MovingThreshold(y,a,b)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doPlot = 0; % can set to 1 to plot outputs
+doPlot = false; % can set to 1 to plot outputs
 
 % ------------------------------------------------------------------------------
 %% Check inputs:

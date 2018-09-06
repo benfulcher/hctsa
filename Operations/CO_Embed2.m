@@ -1,7 +1,7 @@
 function out = CO_Embed2(y,tau)
 % CO_Embed2    Statistics of the time series in a 2-dimensional embedding space
 %
-% Embeds the z-scored time series in a two-dimensional time-delay
+% Embeds the (z-scored) time series in a two-dimensional time-delay
 % embedding space with a given time-delay, tau, and outputs a set of
 % statistics about the structure in this space, including angular
 % distribution, etc.
@@ -43,8 +43,7 @@ function out = CO_Embed2(y,tau)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-
-doPlot = 0; % can set to 1 to plot some outputs
+doPlot = false; % can set to 1 to plot some outputs
 
 %-------------------------------------------------------------------------------
 %% Check inputs and set defaults

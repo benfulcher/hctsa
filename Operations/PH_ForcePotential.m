@@ -82,11 +82,10 @@ if nargin < 3 || isempty(params)
     end
 end
 
-doPlot = 0; % plot results
+doPlot = false; % plot results
 N = length(y); % length of the time series
 
 % ------------------------------------------------------------------------------
-
 
 alpha = params(1);
 kappa = params(2);

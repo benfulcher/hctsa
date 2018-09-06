@@ -277,7 +277,7 @@ end
 % First spline interpolate to get an even sampling of the interval
 % (currently, in the log scale, there are relatively more at large scales
 
-% Deterine the errors
+% Determine the errors
 sserr = nan(ntt,1); % don't choose the end points
 minPoints = 6;
 for i = minPoints:ntt-minPoints
