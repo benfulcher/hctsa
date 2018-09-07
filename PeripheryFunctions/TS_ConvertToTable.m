@@ -34,9 +34,15 @@ end
 MasterOperations = TS_GetFromData(whatDataFile,'MasterOperations');
 
 % Convert the three structure arrays to tables:
-TimeSeries = struct2table(TimeSeries);
-Operations = struct2table(Operations);
-MasterOperations = struct2table(MasterOperations);
+if isstruct(TimeSeries)
+    TimeSeries = struct2table(TimeSeries);
+end
+if isstruct(Operations)
+    Operations = struct2table(Operations);
+end
+if isstruct(MasterOperations)
+    MasterOperations = struct2table(MasterOperations);
+end
 
 % Save back to file
 fprintf(1,'Converted TimeSeries, Operations, and MasterOperations to table, saving back to %s...',whatDataFile);

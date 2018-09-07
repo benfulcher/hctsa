@@ -169,7 +169,7 @@ if any(unlabeled)
         % Filter data and save to new file:
         newFileName = TS_FilterData(theFile,TimeSeries.ID(~unlabeled));
         % Label this dataset with the same groups:
-        groupLabels = TS_LabelGroups(keywordGroups,newFileName,saveBack,false);
+        groupLabels = TS_LabelGroups(newFileName,keywordGroups,saveBack,false);
         return
     end
 end
@@ -184,7 +184,7 @@ end
 %-------------------------------------------------------------------------------
 % User feedback:
 %-------------------------------------------------------------------------------
-fprintf(1,'We found:\n');
+fprintf(1,'We found data for %u labeled classes:\n',numGroups);
 for i = 1:numGroups
     fprintf(1,'%s -- %u matches (/%u)\n',keywordGroups{i},sum(groupIndices(:,i)),numTimeSeries);
 end
