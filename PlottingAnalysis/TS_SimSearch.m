@@ -146,7 +146,7 @@ targetInd = find(dataTable.ID==targetID);
 if isempty(targetInd)
     error('ID %u not found in the index for %s in %s.',targetID,tsOrOps,which(whatDataFile));
 else
-    fprintf(1,'\n---TARGET: [%u] %s---\n',dataStruct.ID{targetInd},dataStruct.Name{targetInd});
+    fprintf(1,'\n---TARGET: [%u] %s---\n',dataTable.ID(targetInd),dataTable.Name{targetInd});
 end
 
 % ------------------------------------------------------------------------------
@@ -282,7 +282,7 @@ if any(ismember('matrix',whatPlots))
         for j = 1:numNeighbors+1
             tsData = dataTable.Data{neighborInd(ord(j))};
             lengthHere = min(tsLength,length(tsData));
-            plot(1:lengthHere,j-0.5+NormMinMax(tsData),'-k');
+            plot(1:lengthHere,j-0.5+NormMinMax(tsData(1:lengthHere)),'-k');
             if j < numNeighbors+1
                 plot([1,tsLength],(j+0.5)*ones(2,1),':k')
             end
