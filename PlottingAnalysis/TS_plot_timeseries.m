@@ -8,7 +8,7 @@ function TS_plot_timeseries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOp
 %
 % whatTimeSeries, Can provide indices to plot that subset, a keyword to plot
 %                   matches to the keyword, 'all' to plot all, or an empty vector
-%                   to plot default groups in TimeSeries.Group
+%                   to plot group information assigned to TimeSeries.Group
 %
 % maxLength, the maximum number of samples of each time series to plot
 %
@@ -47,6 +47,9 @@ end
 if nargin < 2 || isempty(numPerGroup)
     % Default: plot 10 time series per group
     numPerGroup = 10;
+end
+if numPerGroup==0
+    error('numPerGroup cannot be zero');
 end
 
 % Can specify a reduced set of time series by keyword
@@ -157,7 +160,7 @@ numGroups = length(groupIndices);
 %-------------------------------------------------------------------------------
 %% Do the plotting
 %-------------------------------------------------------------------------------
-% Want numPerGroup from each time series group
+% Want to plot numPerGroup from each time-series group
 iPlot = zeros(numGroups*numPerGroup,1);
 classes = zeros(numGroups*numPerGroup,1);
 nhere = zeros(numGroups,1);

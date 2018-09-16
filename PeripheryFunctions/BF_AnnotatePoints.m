@@ -61,7 +61,12 @@ end
 % textAnnotation can be: 'Name' (annotate name),
 % 'ID' (annotate ts_id), or 'none' (not annotation)
 if isfield(annotateParams,'textAnnotation')
-    textAnnotation = annotateParams.textAnnotation;
+    if ismember(annotateParams.textAnnotation,{'Name','ID','none'})
+        textAnnotation = annotateParams.textAnnotation;
+    else
+        warning('Unknown annotation type: %s',annotateParams.textAnnotation);
+        textAnnotation = 'none'; % no annotations by default
+    end
 else
     textAnnotation = 'none'; % no annotations by default
 end

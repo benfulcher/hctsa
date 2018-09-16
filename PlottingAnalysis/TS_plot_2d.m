@@ -14,12 +14,12 @@ function f = TS_plot_2d(featureData,TimeSeries,featureLabels,groupNames,annotate
 % groupNames, cell containing a label for each class of time series
 %
 % annotateParams, a structure containing all the information about how to annotate
-%           data points. Fields can include:
+%           data points. Fields can include (cf. BF_AnnotatePoints):
 %               - n, the number of data points to annotate
 %               - userInput, 0: randomly selected datapoints, 1: user clicks to annotate datapoints
 %               - fdim, 1x2 vector with width and height of time series as fraction of plot size
 %               - maxL, maximum length of annotated time series
-%               - textAnnotation: 'Name', 'tsid', or 'none' to annotate this data
+%               - textAnnotation: 'Name', 'ID', or 'none' to annotate this data
 %               - cmap, a cell of colors, with elements for each group
 %               - theMarkerSize, a custom marker size
 %               - theLineWidth: line width for annotated time series
