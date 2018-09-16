@@ -1,7 +1,7 @@
-function out = EN_MS_shannon(y,nbin,depth)
+function out = EN_MS_shannon(y,numBin,depth)
 % EN_MS_shannon     Approximate Shannon entropy of a time series.
 %
-% Uses an nbin-bin encoding and depth-symbol sequences.
+% Uses an numBin-bin encoding and depth-symbol sequences.
 % Uniform population binning is used, and the implementation uses Michael Small's code
 % MS_shannon.m (renamed from the original, simply shannon.m)
 %
@@ -11,12 +11,12 @@ function out = EN_MS_shannon(y,nbin,depth)
 % Michael Small's code is available at available at http://small.eie.polyu.edu.hk/matlab/
 %
 % In this wrapper function, you can evaluate the code at a given n and d, and
-% also across a range of depth and nbin to return statistics on how the obtained
+% also across a range of depth and numBin to return statistics on how the obtained
 % entropies change.
 %
 %---INPUTS:
 % y, the input time series
-% nbin, the number of bins to discretize the time series into (i.e., alphabet size)
+% numBin, the number of bins to discretize the time series into (i.e., alphabet size)
 % depth, the length of strings to analyze
 
 % ------------------------------------------------------------------------------
@@ -49,80 +49,67 @@ function out = EN_MS_shannon(y,nbin,depth)
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check Inputs:
+% Check inputs:
 %-------------------------------------------------------------------------------
-
-if nargin < 2 || isempty(nbin)
-    nbin = 2; % two bins to discretize the time series, y
+if nargin < 2 || isempty(numBin)
+    numBin = 2; % two bins to discretize the time series, y
 end
 if nargin < 3 || isempty(depth)
     depth = 3; % three-long strings
 end
+binRangeSize = length(numBin);
+depthRangeSize = length(depth);
 
 % ------------------------------------------------------------------------------
-%% Evaluate the shannon entropy for a given set of parameters
-% ------------------------------------------------------------------------------
-if (length(nbin) == 1) && (length(depth) == 1)
-    % Run the code, just return a number
-    % scales with depth, so it's nice to normalize by this factor:
-    out = MS_shannon(y,nbin,depth) / depth;
-end
-
-% ------------------------------------------------------------------------------
-%% (*) Return statistics over depths (constant number of bins)
-% ------------------------------------------------------------------------------
-% Somewhat strange behaviour -- very variable
-if (length(nbin) == 1) && (length(depth) > 1)
-    % Range over depths specified in the vector and return statistics on results
-    numDepths = length(depth);
-    ents = zeros(numDepths,1);
-    for i = 1:numDepths
-        ents(i) = MS_shannon(y,nbin,depth(i));
+if binRangeSize == 1
+    if depthRangeSize == 1
+        %% Evaluate the shannon entropy of discretization
+        % Run the code, just return a number
+        % This scales with depth, so it's nice to normalize by this factor:
+        out = MS_shannon(y,numBin,depth) / depth;
+    elseif depthRangeSize > 1
+        % Range over depths specified in the vector and return statistics on results
+        % (constant number of bins)
+        % Somewhat strange behaviour -- very variable
+        numDepths = length(depth);
+        ent = zeros(numDepths,1);
+        for i = 1:numDepths
+            ent(i) = MS_shannon(y,numBin,depth(i)) / depth(i);
+        end
+        % Output statistics on variation across the range tested:
+        out.maxent = max(entNorm);
+        out.minent = min(entNorm);
+        out.medent = median(entNorm);
+        out.meanent = mean(entNorm);
+        out.stdent = std(entNorm);
     end
-    % Should scale with depth: normalize by this:
-    ents = ents./depth';
-    out.maxent = max(ents);
-    out.minent = min(ents);
-    out.medent = median(ents);
-    out.meanent = mean(ents);
-    out.stdent = std(ents);
-end
+elseif binRangeSize > 1
+    if depthRangeSize==1
+        %% (*) Statistics over different bin numbers (constant depth)
+        % Range over bins specified in the vector numBin; return statistics on results
+        ents = zeros(binRangeSize,1);
+        for i = 1:binRangeSize
+            ents(i) = MS_shannon(y,numBin(i),depth);
+        end
+        out.maxent = max(ents);
+        out.minent = min(ents);
+        out.medent = median(ents);
+        out.meanent = mean(ents);
+        out.stdent = std(ents);
+    elseif depthRangeSize > 1
+        % Don't know what quite to do -- I think stick to above, where only one
+        % input is a vector at a time.
+        % ***INCOMPLETE*** don't do this.
+        error('Comparing both bins and depth not implemented')
 
-% ------------------------------------------------------------------------------
-%% (*) Statistics over different bin numbers
-% ------------------------------------------------------------------------------
-if (length(nbin) > 1) && (length(depth) == 1)
-    % Range over bins specified in the vector nbin; return statistics on results
-    nbins = length(nbin);
-    ents = zeros(nbins,1);
-    for i = 1:nbins
-        ents(i) = MS_shannon(y,nbin(i),depth);
-    end
-    out.maxent = max(ents);
-    out.minent = min(ents);
-    out.medent = median(ents);
-    out.meanent = mean(ents);
-    out.stdent = std(ents);
-end
-
-% ------------------------------------------------------------------------------
-%% (*) statistics over both nbins and depths
-% ------------------------------------------------------------------------------
-if (length(nbin) > 1) && (length(depth) > 1)
-    nbins = length(nbin);
-    numDepths = length(depth);
-
-    ents = zeros(nbins,numDepths);
-    for i = 1:nbins
-        for j = 1:numDepths
-            ents(i,j) = MS_shannon(y,nbin(i),depth(j))/depth(j);
+        %% (*) stats over numBins and depths
+        ents = zeros(binRangeSize,depthRangeSize);
+        for i = 1:numBins
+            for j = 1:numDepths
+                ents(i,j) = MS_shannon(y,numBin(i),depth(j))/depth(j);
+            end
         end
     end
-    % Don't know what quite to do -- I think stick to above, where only one
-    % input is a vector at a time.
-    % ***INCOMPLETE*** don't do this.
-    error('Comparing both bins and depth not implemented')
 end
-
 
 end

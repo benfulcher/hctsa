@@ -214,30 +214,29 @@ end
 %% Do the series of predictions
 % ------------------------------------------------------------------------------
 for i = 1:numPred
-    % retrieve the test set
-
-    ytest = y(r(i,1):r(i,2));
+    % Retrieve the test data:
+    yTest = y(r(i,1):r(i,2));
 
     % Compute step-ahead predictions using System Identification Toolbox:
-    yp = predict(m, ytest, steps); % across test set using model, m,
+    yp = predict(m, yTest, steps); % across test set using model, m,
                                    % fitted to entire data set
 
-%     e = pe(m, ytest); % prediction errors -- exactly the same as returning
-%                       % residuals of 1-step-ahead prediction model
+    %     e = pe(m, yTest); % prediction errors -- exactly the same as returning
+    %                       % residuals of 1-step-ahead prediction model
 
     % plot the two:
-%     plot(y,yp);
+    % plot(y,yp);
 
-    % Get statistics on residuals
-    mres = yp.y - ytest.y;
+    % Get statistics on residuals:
+    mres = yp.y - yTest.y;
 
     rmserrs(i) = sqrt(mean(mres.^2));
     mabserrs(i) = mean(abs(mres));
     ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
 
     % Get statistics on output time series
-    meandiffs(i) = abs(mean(yp.y) - mean(ytest.y));
-    stdrats(i) = abs(std(yp.y)/std(ytest.y));
+    meandiffs(i) = abs(mean(yp.y) - mean(yTest.y));
+    stdrats(i) = abs(std(yp.y)/std(yTest.y));
 
 %     % 1) Get statistics on residuals
 %     residout = MF_ResidualAnalysis(mresiduals);
@@ -266,8 +265,7 @@ out.mabserr_std = std(mabserrs);
 out.mabserr_iqr = iqr(mabserrs);
 
 % Autocorrelations at lag 1, ac1s
-% NOT absolute values of ac1s... absolute values of operations on *raw*
-% ac1s...
+% NOT absolute values of ac1s... absolute values of operations on *raw* ac1s...
 out.ac1s_mean = abs(mean(ac1s));
 out.ac1s_median = abs(median(ac1s));
 out.ac1s_std = std(ac1s);

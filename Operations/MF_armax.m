@@ -131,7 +131,7 @@ out.noisevar = m.NoiseVariance; % covariance matrix of noise source
 out.lossfn = m.EstimationInfo.LossFcn;
 out.fpe = m.EstimationInfo.FPE; % Final prediction error of model
 
-out.lastimprovement = m.EstimationInfo.LastImprovement; % Last improvement made in interation
+% out.lastimprovement = m.EstimationInfo.LastImprovement; % Last improvement made in iteration
 out.aic = aic(m); % ~ log(fpe)
 
 % ------------------------------------------------------------------------------
