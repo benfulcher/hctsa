@@ -41,7 +41,7 @@ thresh = 1/exp(1); % 1/e threshold
 a = zeros(N,1); % autocorrelations
 a(1) = 1; % perfect autocorrelation when no lag
 for i = 2:N
-    a(i) = CO_AutoCorr(y,i,'Fourier');
+    a(i) = CO_AutoCorr(y,i-1,'Fourier');
     if ((a(i-1)-thresh)*(a(i)-thresh) < 0)
         % Crossed the 1/e line
         out = i-1; % -1 since i is tau+1
