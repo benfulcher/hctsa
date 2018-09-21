@@ -44,7 +44,7 @@ if nargin < 3 || isempty(r)
     r = 0.1*std(y);
 end
 if nargin < 4 || isempty(justM)
-    justM = 0;
+    justM = false;
 end
 
 %-------------------------------------------------------------------------------

@@ -99,11 +99,7 @@ catch
     warning('No mex file found: using a slower native Matlab implementation instead');
     % No mex version available; use (much slower) Matlab implementation
     % if isempty(b) || length(y) < 3000 % faster to run within Matlab
-    % No compiled C version detected (for time series longer than 3000 samples):
-    % run in Matlab (slower):
-    % (length of 2000 because of read/write overhead)
-    sampEn = PN_sampenc(y,M+1,r);
-    % else
+    sampEn = PN_sampenc(y,M+1,r,false);
     %     fprintf('Using compiled C code~~~\n')
     %     % http://www.physionet.org/physiotools/sampen/c/
     %     % (use Makefile in Toolboxes/Physionet/ to run make, then make install)
