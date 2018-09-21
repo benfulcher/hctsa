@@ -40,13 +40,26 @@ thresh = 1/exp(1); % 1/e threshold
 
 % With Fourier method you can compute the whole spectrum at once:
 acf = CO_AutoCorr(y,[],'Fourier');
-crossedThreshold = ((acf(1:end-1)-thresh).*(acf(2:end)-thresh) < 0);
-if any(crossedThreshold)
-    out = find(crossedThreshold,1,'first');
+
+% First crossing of 1/e (always positive to negative, because a(1)=1)
+firstCrossing = find((acf - thresh < 0),1,'first');
+
+if ~isempty(firstCrossing)
+    out = firstCrossing;
 else
     out = N; % no crossing point anywhere across full ACF
 end
 
+%-------------------------------------------------------------------------------
+% More general crossing events:
+% crossedThreshold = ((acf(1:end-1)-thresh).*(acf(2:end)-thresh) < 0);
+% if any(crossedThreshold)
+    % out = find(crossedThreshold,1,'first');
+% else
+    % out = N; % no crossing point anywhere across full ACF
+% end
+
+%-------------------------------------------------------------------------------
 % Plot to check:
 % f = figure('color','w');
 % hold on
