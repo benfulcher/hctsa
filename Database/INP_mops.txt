@@ -898,10 +898,10 @@ SC_FluctAnal(y,2,'rsrange',50,[],[],1)	SC_FluctAnal_2_rsrange_50_logi
 SC_FluctAnal(y,2,'rsrangefit',50,1,[],1)	SC_FluctAnal_2_rsrangefit_50_1_logi
 SC_FluctAnal(y,2,'dfa',50,0,[],1)	SC_FluctAnal_2_dfa_50_0_logi
 SC_FluctAnal(y,2,'dfa',50,1,[],1)	SC_FluctAnal_2_dfa_50_1_logi
-SC_FluctAnal(y,2,'dfa',50,2,[],1)	SC_FluctAnal_2_dfa_50_2_logi
-SC_FluctAnal(y,2,'dfa',50,3,[],1)	SC_FluctAnal_2_dfa_50_3_logi
 SC_FluctAnal(y,2,'dfa',50,1,2,1)	SC_FluctAnal_2_dfa_50_1_2_logi
 SC_FluctAnal(y,2,'dfa',50,1,3,1)	SC_FluctAnal_2_dfa_50_1_3_logi
+SC_FluctAnal(y,2,'dfa',50,2,[],1)	SC_FluctAnal_2_dfa_50_2_logi
+SC_FluctAnal(y,2,'dfa',50,3,[],1)	SC_FluctAnal_2_dfa_50_3_logi
 SC_FluctAnal(zscore(abs(y)),2,'dfa',50,2,[],1)	SC_FluctAnal_mag_2_dfa_50_2_logi
 SC_FluctAnal(zscore(sign(y)),2,'dfa',50,2,[],1)	SC_FluctAnal_sign_2_dfa_50_2_logi
 SC_MMA(y,0,[],[-5,5]) SC_MMA_0__n5_5

@@ -26,8 +26,8 @@ function out = DN_OutlierInclude(y,thresholdHow,inc)
 % inc, the increment to move through (fraction of std if input time series is
 %       z-scored)
 %
-% Most of the outputs measure either exponential, i.e., f(x) = Aexp(Bx)+C, or
-% linear, i.e., f(x) = Ax + B, fits to the sequence of statistics obtained in
+% Most of the outputs measure either exponential [f(x) = Aexp(Bx)+C] or
+% linear [f(x) = Ax + B] fits to the sequence of statistics obtained in
 % this way.
 %
 % [future: could compare differences in outputs obtained with 'p', 'n', and
@@ -120,29 +120,30 @@ msDt = zeros(length(thr),6); % mean, std, proportion_of_time_series_included,
 for i = 1:length(thr)
     th = thr(i); % the threshold
 
-    % Construct a time series consisting of inter-event intervals for parts
-    % of the time serie exceeding the threshold, th
+    % Construct a series consisting of inter-event intervals for parts
+    % of the time series exceeding the threshold, th (in a given direction)
 
-    if strcmp(thresholdHow,'abs')% look at absolute value deviations
+    switch thresholdHow
+    case 'abs' % look at absolute value deviations
         r = find(abs(y) >= th);
-    elseif strcmp(thresholdHow,'n')% look at only positive deviations
-        r = find(y <= -th);
-    elseif strcmp(thresholdHow,'p')% look at only negative deviations
+    case 'p' % look at only positive deviations
         r = find(y >= th);
+    case 'n' % look at only negative deviations
+        r = find(y <= -th);
     end
 
-    Dt_exc = diff(r); % Delta t (interval) time series; exceeding threshold
+    % Delta t (interval) time series; exceeding threshold:
+    Dt_exc = diff(r);
 
-    msDt(i,1) = mean(Dt_exc); % the mean value of this sequence
+    msDt(i,1) = mean(Dt_exc); % the mean value of successive intervals
     msDt(i,2) = std(Dt_exc)/sqrt(length(r)); % error on the mean
     msDt(i,3) = length(Dt_exc)/tot*100; % this is just really measuring the distribution
                                       % : the proportion of possible values
                                       % that are actually used in
                                       % calculation
-    msDt(i,4) = median(r)/(N/2)-1;
+    msDt(i,4) = median(r)/(N/2)-1; % the median value of successive intervals
     msDt(i,5) = mean(r)/(N/2)-1; % between -1 and 1
     msDt(i,6) = std(r)/sqrt(length(r));
-
 end
 
 % ------------------------------------------------------------------------------
@@ -178,18 +179,18 @@ if doPlot
     plot(thr,msDt(:,6),'.-c'); hold off
 end
 
-% ------------------------------------------------------------------------------
-%%% Generate outputs:
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% Quantify outputs:
+%-------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Fit an Exponential to the mean as a function of the threshold
+%% Fit an exponential to the mean as a function of the threshold
 % ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[0.1 2.5 1]);
 f = fittype('a*exp(b*x)+c','options',s);
 emsg = '';
 try
-    [c, gof] = fit(thr',msDt(:,1),f);
+    [c,gof] = fit(thr',msDt(:,1),f);
 catch emsg
     fprintf(1,'DN_OutlierInclude: error fitting exponential growth to means: %s\n',emsg);
 end
@@ -213,23 +214,23 @@ end
 % ------------------------------------------------------------------------------
 %% Fit an exponential to N: the valid proportion left in calculation
 % ------------------------------------------------------------------------------
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[120, -1, -16]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[120,-1,-16]);
 f = fittype('a*exp(b*x)+c','options',s);
-[c, gof] = fit(thr',msDt(:,3),f);
+[c,gof] = fit(thr',msDt(:,3),f);
 
 out.nfexpa = c.a;
 out.nfexpb = c.b;
-out.nfexpc = c.c; % linearly anticorrelated with c.a
+out.nfexpc = c.c; % (is linearly anticorrelated with c.a)
 out.nfexpr2 = gof.rsquare;
 out.nfexpadjr2 = gof.adjrsquare;
 out.nfexprmse = gof.rmse;
 
 % ------------------------------------------------------------------------------
-%% Fit an linaer to N: the valid proportion left in calculation
+%% Fit an linear trend to N: the valid proportion left in calculation
 % ------------------------------------------------------------------------------
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-40, 100]);
+s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-40,100]);
 f = fittype('a*x+b','options',s);
-[c, gof] = fit(thr',msDt(:,3),f);
+[c,gof] = fit(thr',msDt(:,3),f);
 
 out.nfla = c.a;
 out.nflb = c.b;
@@ -240,7 +241,7 @@ out.nflrmse = gof.rmse;
 % ------------------------------------------------------------------------------
 %% Stationarity assumption
 % ------------------------------------------------------------------------------
-% mean, median and std of the median and mean of range indices
+% mean, median and std of the median and mean of inter-intervals
 out.mdrm = mean(msDt(:,4));
 out.mdrmd = median(msDt(:,4));
 out.mdrstd = std(msDt(:,4));
@@ -263,7 +264,7 @@ s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[5, 1, 15]);
 f = fittype('a*exp(b*x)+c','options',s);
 emsg = [];
 try
-    [c, gof] = fit(thr',msDt(:,6),f);
+    [c,gof] = fit(thr',msDt(:,6),f);
 catch emsg
     warning('Error fitting exponential growth to std: %s\n',emsg.message);
 end
@@ -289,7 +290,7 @@ end
 % ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[40, 4]);
 f = fittype('a*x +b','options',s);
-[c, gof] = fit(thr',msDt(:,6),f);
+[c,gof] = fit(thr',msDt(:,6),f);
 
 out.stdrfla = c.a;
 out.stdrflb = c.b;

@@ -19,19 +19,15 @@ function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
 %       (i) 'endptdiff', calculates the differences in end points in each segment
 %       (ii) 'range' calculates the range in each segment
 %       (iii) 'std' takes the standard deviation in each segment
-%
 %           cf. "Evaluating scaled windowed variance methods for estimating the
 %               Hurst coefficient of time series", M. J. Cannon et al. Physica A
 %               241(3-4) 606 (1997)
-%
 %       (iv) 'iqr' takes the interquartile range in each segment
 %       (v) 'dfa' removes a polynomial trend of order k in each segment,
 %       (vi) 'rsrange' returns the range after removing a straight line fit
-%
 %           cf. "Analyzing exact fractal time series: evaluating dispersional
 %           analysis and rescaled range methods",  D. C. Caccia et al., Physica
 %           A 246(3-4) 609 (1997)
-%
 %       (vii) 'rsrangefit' fits a polynomial of order k and then returns the
 %           range. The parameter q controls the order of fluctuations, for which
 %           we mostly use the standard choice, q = 2, corresponding to root mean
@@ -50,14 +46,14 @@ function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
 %           221(1-3) 180 (1995)
 %
 %           Max A. Little's fractal paper used L = 4 to L = N/2:
-%           "Exploiting Nonlinear Recurrence and Fractal Scaling Properties for Voice Disorder Detection"
-%           M. A. Little et al. Biomed. Eng. Online 6(1) 23 (2007)
+%           "Exploiting Nonlinear Recurrence and Fractal Scaling Properties for
+%           Voice Disorder Detection", Little et al. Biomed. Eng. Online 6 23 (2007)
 %
-% k, polynomial order of detrending for 'dfa', 'rsrangefit'
+% k, polynomial order of detrending (for 'dfa' & 'rsrangefit')
 %
 % lag, optional time-lag, as in Alvarez-Ramirez (see (vii) above)
 %
-% logInc, whether to use logarithmic increments in tau (it should be logarithmic).
+% logInc, whether to use logarithmic increments in tau (it should be logarithmic)
 %
 %---OUTPUTS: include statistics of fitting a linear function to a plot of log(F) as
 % a function of log(tau), and for fitting two straight lines to the same data,
@@ -104,47 +100,38 @@ function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
 % ------------------------------------------------------------------------------
 % Check Inputs:
 % ------------------------------------------------------------------------------
-
 if nargin < 2 || isempty(q)
     q = 2; % RMS fluctuations
 end
-
 if nargin < 3 || isempty(wtf)
     wtf = 'rsrange'; % re-scaled range analysis by default
 end
-
 if nargin < 4 || isempty(tauStep)
     % the increment of tau (for linear)
     % or number of points in logarithmic range (for logarithmic)
     tauStep = 1;
 end
-
 if nargin < 5 || isempty(k)
     k = 1; % often not needed, only for 'dfa' and 'rsrangefit'
 end
-
 if nargin < 6
     lag = '';
 end
-
 if nargin < 7
-	logInc = true; % use linear spacing (this shouldn't really be default, but this
-				% is for consistency with already-implemented precedent)
+	logInc = true;
 end
 
 % ------------------------------------------------------------------------------
-% ------------------------------------------------------------------------------
-
 N = length(x); % length of the time series
 doPlot = false; % plot relevant outputs to figure
 
+%-------------------------------------------------------------------------------
 % 1) Compute integrated sequence
-
-if isempty(lag)
-    % didn't specify a lag, do a normal cumsum:
+if isempty(lag) || lag==1
+    % A normal cumsum:
     y = cumsum(x);
 else
-    % specified a lag, do a decimation:
+    % If a lag is specified, do a decimation:
     y = cumsum(x(1:lag:end));
 end
 
@@ -168,11 +155,10 @@ if ntau < 8 % fewer than 8 points
     return
 end
 
-% 2) Compute the fluctuation function as follows
+%-------------------------------------------------------------------------------
+% 2) Compute the fluctuation function, F
 F = zeros(1,ntau);
-% F is the fluctuation function
-% each entry correponds to a given scale tau, and contains
-% the fluctuation function at that scale
+% Each entry correponds to a given scale, tau
 
 for i = 1:ntau
     % buffer the time series at the scale tau
@@ -243,11 +229,11 @@ end
 if logInc
 	logtt = log(taur);
 	logFF = log(F);
-	ntt = ntau;
+	numTimeScales = ntau;
 else % need to smooth the unevenly-distributed points (using a spline)
 	logtaur = log(taur); logF = log(F);
-	ntt = 50; % number of sampling points across the range
-	logtt = linspace(min(logtaur),max(logtaur),ntt); % even sampling in tau
+	numTimeScales = 50; % number of sampling points across the range
+	logtt = linspace(min(logtaur),max(logtaur),numTimeScales); % even sampling in tau
 	logFF = spline(logtaur,logF,logtt);
 end
 
@@ -256,7 +242,7 @@ end
 % Linear fit the log-log plot: full range
 %-------------------------------------------------------------------------------
 out = struct();
-out = DoRobustLinearFit(out,logtt,logFF,1:ntt,'');
+out = DoRobustLinearFit(out,logtt,logFF,1:numTimeScales,'');
 
 % PLOT THIS?:
 if doPlot
@@ -278,12 +264,12 @@ end
 % (currently, in the log scale, there are relatively more at large scales
 
 % Determine the errors
-sserr = nan(ntt,1); % don't choose the end points
+sserr = nan(numTimeScales,1); % don't choose the end points
 minPoints = 6;
-for i = minPoints:ntt-minPoints
+for i = minPoints:numTimeScales-minPoints
     r1 = 1:i;
     p1 = polyfit(logtt(r1),logFF(r1),1);
-    r2 = i:ntt;
+    r2 = i:numTimeScales;
     p2 = polyfit(logtt(r2),logFF(r2),1);
     % Sum of errors from fitting lines to both segments:
     sserr(i) = norm(polyval(p1,logtt(r1))-logFF(r1)) + norm(polyval(p2,logtt(r2))-logFF(r2));
@@ -292,10 +278,12 @@ end
 % breakPt is the point where it's best to fit a line before and another line after
 breakPt = find(sserr == min(sserr),1,'first');
 r1 = 1:breakPt;
-r2 = breakPt:ntt;
+r2 = breakPt:numTimeScales;
+
+% Proportion of the domain of timescales corresponding to the first good linear fit
+out.prop_r1 = length(r1)/numTimeScales;
 
 out.logtausplit = logtt(breakPt);
-out.prop_r1 = length(r1)/ntt;
 out.ratsplitminerr = min(sserr)/out.ssr;
 out.meanssr = nanmean(sserr);
 out.stdssr = nanstd(sserr);
