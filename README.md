@@ -46,7 +46,7 @@ There are two licenses applied to the core parts of the repository:
 
 2. Sections implementing the framework for running *hctsa* analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
 
-To use *hctsa* for commercial applications, please contact [Ben Fulcher](ben.d.fulcher@gmail.com).
+To use *hctsa* for commercial applications, please contact [Ben Fulcher](mailto:ben.d.fulcher@gmail.com).
 
 A range of external code packages are provided in the **Toolboxes** directory of the repository, and each have their own associated license (as outlined below).
 
