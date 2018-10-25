@@ -178,7 +178,7 @@ canonicalVariables = {'ID','Name','Keywords','Length','Data'};
 for i = 1:2
     isExtraField = ~ismember(theVariables{i},canonicalVariables);
     if any(isExtraField)
-        theExtraFields = TimeSeries.Properties.VariableNames(isExtraField);
+        theExtraFields = theVariables{i}(isExtraField);
         loadedData{i}.TimeSeries(:,theExtraFields) = [];
         for j = 1:sum(isExtraField)
             fprintf(1,'Removed non-canonical variable, %s, from %s.\n',theExtraFields{j},HCTSAs{i});
