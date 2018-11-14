@@ -202,7 +202,7 @@ else
 end
 
 %-------------------------------------------------------------------------------
-% Plot confusion matrix
+% Plot a confusion matrix
 %-------------------------------------------------------------------------------
 % Convert real and predicted class labels to matrix form (numClasses x N),
 % required as input to plotconfusion:

@@ -67,7 +67,7 @@ if nargin < 2
     keywordGroups = {};
     % Try to assign by unique keywords later
 end
-if ~isempty(keywordGroups) && ischar(keywordGroups);
+if ~isempty(keywordGroups) && ischar(keywordGroups)
     fprintf(1,'Grouping all items with ''%s''.\n',keywordGroups);
     keywordGroups = {keywordGroups};
 end
