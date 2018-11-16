@@ -8022,10 +8022,10 @@ MD_hrv_classic.pnn10	MD_hrv_classic_pnn10	medical
 MD_hrv_classic.pnn20	MD_hrv_classic_pnn20	medical
 MD_hrv_classic.pnn30	MD_hrv_classic_pnn30	medical
 MD_hrv_classic.pnn40	MD_hrv_classic_pnn40	medical
-MD_hrv_classic.lfhf	MD_hrv_classic_lfhf	medical
-MD_hrv_classic.vlf	MD_hrv_classic_vlf	medical
-MD_hrv_classic.lf	MD_hrv_classic_lf	medical
-MD_hrv_classic.hf	MD_hrv_classic_hf	medical
+MD_hrv_classic.lfhf	MD_hrv_classic_lfhf	medical,FourierSpectrum
+MD_hrv_classic.vlf	MD_hrv_classic_vlf	medical,FourierSpectrum
+MD_hrv_classic.lf	MD_hrv_classic_lf	medical,FourierSpectrum
+MD_hrv_classic.hf	MD_hrv_classic_hf	medical,FourierSpectrum
 MD_hrv_classic.tri	MD_hrv_classic_tri	medical
 MD_hrv_classic.SD2	MD_hrv_classic_SD2	medical
 CP_ML_StepDetect_l1pwc_10.E	CP_ML_StepDetect_l1pwc_10_E	stepdetection
