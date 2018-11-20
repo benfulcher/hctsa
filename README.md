@@ -4,12 +4,16 @@
 
 The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualizations and analyses.
 
-If you use this software, please read and cite these (open access) articles:
+**For help with real-world applications of _hctsa_, contact [Ben Fulcher](mailto:ben.d.fulcher@gmail.com)** :nerd_face:.
+
+If you use this software, please read and cite these open-access articles:
 
 * B.D. Fulcher and N.S. Jones. [_hctsa_: A computational framework for automated time-series phenotyping using massive feature extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). *Cell Systems* **5**, 527 (2017).
-* B.D. Fulcher, M.A. Little, N.S. Jones [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83 (2013).
+* B.D. Fulcher, M.A. Little, N.S. Jones. [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83 (2013).
 
-Any feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
+Feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
+
+**For commercial use of *hctsa*, including licensing and consulting, contact [Engine Analytics](http://www.engineanalytics.org/).**
 
 ### Getting started
 &#x1F4D6; &#x1F4D6;
@@ -26,7 +30,7 @@ For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of
 ```
 git remote add upstream git://github.com/benfulcher/hctsa.git
 ```
-(make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your github account).
+(make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your Github account).
 
 You can then update to the latest stable version of the repository by pulling the master branch to your local repository:
 ```
@@ -42,11 +46,10 @@ Details on how to merge the latest version of the repository with the local chan
 
 There are two licenses applied to the core parts of the repository:
 
-1. Sections of the repository required to compute features from time-series data is licensed as [GNU General Public License version 3](http://www.gnu.org/licenses/gpl-3.0.en.html).
+1. The framework for running *hctsa* analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+A license for commercial use is available from [Engine Analytics](http://www.engineanalytics.org/).
 
-2. Sections implementing the framework for running *hctsa* analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
-
-To use *hctsa* for commercial applications, please contact [Ben Fulcher](mailto:ben.d.fulcher@gmail.com).
+2. Code for computing features from time-series data is licensed as [GNU General Public License version 3](http://www.gnu.org/licenses/gpl-3.0.en.html).
 
 A range of external code packages are provided in the **Toolboxes** directory of the repository, and each have their own associated license (as outlined below).
 
