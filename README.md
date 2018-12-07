@@ -120,6 +120,13 @@ Matlab code for computing features for an initialized `HCTSA.mat` file, by distr
 
 This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
 
+### `hctsaAnalysisPython`
+Some beginner-level python code for analyzing the results of _hctsa_ calculations is [here](https://github.com/benfulcher/hctsaAnalysisPython).
+
+### Generating time-series data from synthetic models
+
+A Matlab repository for generating time-series data from diverse model systems is [here](https://github.com/benfulcher/TimeSeriesGeneration).
+
 ### `tsfresh`
 
 Native python time-series code to extract hundreds of time-series features, with in-built feature filtering, is [tsfresh](https://github.com/blue-yonder/tsfresh); cf. [their paper](https://www.sciencedirect.com/science/article/pii/S0925231218304843).
@@ -129,9 +136,6 @@ Native python time-series code to extract hundreds of time-series features, with
 These R packages are by [Rob Hyndman](https://twitter.com/robjhyndman).
 The first, [`tscompdata`](https://github.com/robjhyndman/tscompdata), makes available existing collections of time-series data for analysis.
 The second, [`tsfeatures`](https://github.com/robjhyndman/tsfeatures), includes implementations of a range of time-series features.
-
-### `hctsaAnalysisPython`
-Some beginner-level python code for analyzing the results of hctsa calculations is [here](https://github.com/benfulcher/hctsaAnalysisPython).
 
 ### `pyunicorn`
 
