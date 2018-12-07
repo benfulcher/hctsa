@@ -110,7 +110,11 @@ There are a range of open datasets with pre-computed _hctsa_ features.
 ### CompEngine
 
 An accompanying web resource for this project is [CompEngine](http://www.comp-engine.org), which allows users to upload and compare thousands of diverse types of time-series data.
-The vast and growing data resource can also be downloaded.
+The vast and growing collection of time-series data can also be downloaded.
+
+### Code for distributing _hctsa_ calculations on a cluster
+
+Matlab code for computing features for an initialized `HCTSA.mat` file, by distributing the computation across a large number of cluster jobs (using pbs or slurm schedulers) is [here](https://github.com/benfulcher/distributed_hctsa).
 
 ### `pyopy`
 

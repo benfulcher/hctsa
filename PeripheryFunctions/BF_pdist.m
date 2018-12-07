@@ -34,13 +34,13 @@ if nargin < 2 || isempty(distMetric)
     fprintf(1,'Using the Euclidean distance metric\n');
 end
 if nargin < 3 || isempty(toVector)
-    toVector = 0;
+    toVector = false;
 end
 if nargin < 4
     opts = [];
 end
 if nargin < 5
-    beSilent = 0;
+    beSilent = false;
 end
 if nargin < 6
     % By default, don't require a minimum proportion of good values to be
