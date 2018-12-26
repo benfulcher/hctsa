@@ -4,7 +4,7 @@
 
 The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualizations and analyses.
 
-**For help with real-world applications of _hctsa_, contact [Ben Fulcher](mailto:ben.d.fulcher@gmail.com)** :nerd_face:.
+**Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for help with real-world applications of _hctsa_** :nerd_face:
 
 If you use this software, please read and cite these open-access articles:
 
@@ -137,7 +137,7 @@ These R packages are by [Rob Hyndman](https://twitter.com/robjhyndman).
 The first, [`tscompdata`](https://github.com/robjhyndman/tscompdata), makes available existing collections of time-series data for analysis.
 The second, [`tsfeatures`](https://github.com/robjhyndman/tsfeatures), includes implementations of a range of time-series features.
 
-### Khiva
+### `Khiva`
 [Khiva](https://github.com/shapelets/khiva) is an open-source library of efficient algorithms to analyse time series in GPU and CPU.
 
 ### `pyunicorn`
