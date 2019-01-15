@@ -87,7 +87,7 @@ The following time-series analysis packages are provided with the software (in t
 ## Publications
 
 See the following publications for examples of *hctsa* use:
-* ***Implementation paper introducing the hctsa package, with applications to high throughput phenotyping of C. Elegans and Drosophila movement time series*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction. *Cell Systems* **5**, 527 (2017). [Link](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).
+* ***Implementation paper introducing the hctsa package, with applications to high throughput phenotyping of _C. Elegans_ and Drosophila movement time series*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction. *Cell Systems* **5**, 527 (2017). [Link](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).
 * ***Introduction to feature-based time-series analysis*** &#x1F4D7; : B. D. Fulcher. Feature-based time-series analysis. *Feature Engineering for Machine Learning and Data Analytics*, CRC Press, 87-116 (2018).  [Link](https://www.crcpress.com/Feature-Engineering-for-Machine-Learning-and-Data-Analytics/Dong-Liu/p/book/9781138744387), [Preprint](https://arxiv.org/abs/1709.08055).
 * ***Application to fMRI data*** &#x1F4D7; : S. S. Sethi, V. Zerbi, N. Wenderoth, A. Fornito, B. D. Fulcher. Structural connectome topology relates to regional BOLD signal dynamics in the mouse brain. *Chaos* **27**, 047405 (2017). [Link](http://aip.scitation.org/doi/10.1063/1.4979281), [preprint](http://biorxiv.org/lookup/doi/10.1101/085514).
 * ***Application to time-series data mining*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. Highly comparative feature-based time-series classification. *IEEE Trans. Knowl. Data Eng.* **26**, 3026 (2014). [Link](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425).
@@ -104,7 +104,7 @@ Many thanks go to [Romesh Abeysuriya](https://github.com/RomeshA) for helping wi
 There are a range of open datasets with pre-computed _hctsa_ features.
 (If you have data to share and host, let me know and I'll add it to this list):
 * [1000 empirical time series](https://figshare.com/articles/1000_Empirical_Time_series/5436136)
-* [C. elegans movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
+* [_C. elegans_ movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
 * [Drosophila movement speed](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Drosophila_melanogaster_movement_speed/3863553) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingFly).
 
 ### CompEngine

@@ -747,7 +747,7 @@ SY_Trend.gradientYC     SY_Trend_gradientYC     stationarity
 SY_Trend.interceptYC    SY_Trend_interceptYC    stationarity
 SY_Trend.meanYC12       SY_Trend_meanYC12       stationarity
 SY_Trend.meanYC22       SY_Trend_meanYC22       stationarity
-SC_fastdfa	    SC_fastdfa_exponent	    dfa,scaling,mex
+SC_fastdfa	    SC_fastdfa_exponent	    scaling,mex
 SY_StdNthDer_1	SY_StdNthDer_1	entropy
 SY_StdNthDer_2	SY_StdNthDer_2	entropy
 SY_StdNthDer_3	SY_StdNthDer_3	entropy
