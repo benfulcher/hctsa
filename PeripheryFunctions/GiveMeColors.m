@@ -47,8 +47,9 @@ elseif numColors < 10
 elseif numColors <= 12
     colorCell = BF_getcmap('set3',numColors,true);
 elseif numColors <= 22
-    colorCell = [BF_getcmap('set1',numColors,true);...
-                 BF_getcmap('set3',numColors,true)];
+    colorCell = [BF_getcmap('set1',ceil(numColors/2),true);...
+                 BF_getcmap('set3',ceil(numColors/2),true)];
+    colorCell = colorCell(1:numColors);
 elseif numColors <= 50
     colorCell = num2cell(jet(numColors),2);
 else

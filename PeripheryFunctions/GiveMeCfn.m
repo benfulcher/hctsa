@@ -172,6 +172,8 @@ else
     case 'svm_rbf'
         t = templateSVM('KernelFunction','rbf');
         if beVerbose, fprintf(1,'Using a rbf svm classifier\n'); end
+    otherwise
+        error('Unknown classifier: ''%s''',whatClassifier);
     end
 
     %-------------------------------------------------------------------------------

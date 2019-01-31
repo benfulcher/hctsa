@@ -226,7 +226,7 @@ case 'summary'
     % Text output:
     % ------------
     problemOps = Operations(hadProblem,:);
-    for i = 1:length(problemOps)
+    for i = 1:height(problemOps)
         ind = ix(i);
         fprintf('[%u] %s (%s) -- %.1f%% special values.\n',problemOps.ID(ind),problemOps.Name{ind},...
                 problemOps.CodeString{ind},100*(1 - propGood(ind)));
