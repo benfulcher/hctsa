@@ -1,5 +1,5 @@
 function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,classMeth,annotateParams)
-% TS_PlotLowDim   2-dimensional feature-based representation of a time-series dataset.
+% TS_PlotLowDim   2-dimensional feature-based representation of a time-series dataset
 %
 % The low-dimensional representation is computed using PCA.
 %
