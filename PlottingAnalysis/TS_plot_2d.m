@@ -67,7 +67,7 @@ if nargin < 3 || isempty(featureLabels)
 end
 
 if nargin < 5 || isempty(annotateParams)
-    annotateParams = struct('n',6); % don't annotate
+    annotateParams = struct('n',6); % annotate for six points
 end
 
 % By default, plot kernel density estimates above and on the side of the plot:
@@ -79,7 +79,11 @@ if nargin < 7 || isempty(whatClassifier)
     whatClassifier = 'svm_linear';
 end
 
-makeFigure = true; % default is to plot on a brand new figure('color','w')
+if isfield(annotateParams,'makeFigure')
+    makeFigure = annotateParams.makeFigure;
+else
+    makeFigure = true; % default is to plot on a brand new figure('color','w')
+end
 
 %-------------------------------------------------------------------------------
 % Preliminaries
