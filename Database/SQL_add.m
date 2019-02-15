@@ -551,6 +551,10 @@ case 'ops'
                         'Inputting %u -> %u operations...'], ...
             height(Operations)-length(uniqueOpNames),...
             height(Operations),length(uniqueOpNames));
+        % Check for duplicates:
+        nameTable = tabulate(Operations.Name);
+        isDuplicate = find([nameTable{:,2}] > 1);
+        fprintf(1,'E.g., %s is a duplicate\n',nameTable{isDuplicate(1),1});
         % Only keep the unique ones:
         Operations = Operations(ia,:);
         numItems = height(Operations);
