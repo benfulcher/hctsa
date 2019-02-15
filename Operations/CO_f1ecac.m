@@ -1,6 +1,6 @@
 function out = CO_f1ecac(y)
 % CO_f1ecac     The 1/e correlation length
-% 
+%
 % Finds where autocorrelation function first crosses 1/e
 %
 %---INPUT:
@@ -38,18 +38,32 @@ function out = CO_f1ecac(y)
 N = length(y); % time-series length
 thresh = 1/exp(1); % 1/e threshold
 
-a = zeros(N,1); % autocorrelations
-a(1) = 1; % perfect autocorrelation when no lag
-for i = 2:N
-    a(i) = CO_AutoCorr(y,i,'Fourier');
-    if ((a(i-1)-thresh)*(a(i)-thresh) < 0)
-        % Crossed the 1/e line
-        out = i-1; % -1 since i is tau+1
-        return
-    end
+% With Fourier method you can compute the whole spectrum at once:
+acf = CO_AutoCorr(y,[],'Fourier');
+
+% First crossing of 1/e (always positive to negative, because a(1)=1)
+firstCrossing = find((acf - thresh < 0),1,'first');
+
+if ~isempty(firstCrossing)
+    out = firstCrossing;
+else
+    out = N; % no crossing point anywhere across full ACF
 end
 
-% If no minimum in entire spectrum return the maximum value
-out = N;
+%-------------------------------------------------------------------------------
+% More general crossing events:
+% crossedThreshold = ((acf(1:end-1)-thresh).*(acf(2:end)-thresh) < 0);
+% if any(crossedThreshold)
+    % out = find(crossedThreshold,1,'first');
+% else
+    % out = N; % no crossing point anywhere across full ACF
+% end
+
+%-------------------------------------------------------------------------------
+% Plot to check:
+% f = figure('color','w');
+% hold on
+% plot(0:length(acf)-1,acf,'o-k')
+% plot([0,out],thresh*ones(2,1),'--r')
 
 end

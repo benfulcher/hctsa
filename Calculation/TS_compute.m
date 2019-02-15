@@ -85,14 +85,14 @@ end
 fileVarsStruct = whos('-file',customFile);
 fileVars = {fileVarsStruct.name};
 if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat'},fileVars))
-	error('\nCannot compute on %s: missing variables.',customFile);
+	error('\nCannot compute on %s: there are missing variables',customFile);
 end
-load(customFile,'MasterOperations');
+MasterOperations = TS_GetFromData(customFile,'MasterOperations');
 if ismember('TS_CalcTime',fileVars)
-	load(customFile,'TS_CalcTime');
+	TS_CalcTime = TS_GetFromData(customFile,'TS_CalcTime');
 end
 if ismember('TS_Quality',fileVars)
-	load(customFile,'TS_Quality');
+	TS_Quality = TS_GetFromData(customFile,'TS_Quality');
 end
 
 % ------------------------------------------------------------------------------

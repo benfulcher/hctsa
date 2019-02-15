@@ -74,7 +74,8 @@ end
 evalr = lp+1:N; % range over which to evaluate the forecast
 if length(evalr)==0
     warning('Time series too short for forecasting');
-    out = NaN; return
+    out = NaN;
+    return
 end
 res = zeros(length(evalr),1); % residuals
 
@@ -103,7 +104,7 @@ end
 % plot(res);
 
 % ------------------------------------------------------------------------------
-% Output statistics on the residuals
+% Output statistics on the residuals, res
 % ------------------------------------------------------------------------------
 
 % Mean residual (mean error/bias):
@@ -122,7 +123,7 @@ tmp = DN_SimpleFit(res,'gauss1',0);
 if ~isstruct(tmp) && isnan(tmp) % fitting failed
     out.gofr2 = NaN;
 else
-    out.gofr2 = tmp.r2; % rsqured
+    out.gofr2 = tmp.r2; % r-squared
 end
 
 % Autocorrelation structure of the residuals:

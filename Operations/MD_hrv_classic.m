@@ -68,14 +68,14 @@ N = length(y); % time-series length
 Dy = abs(diffy) * 1000;
 
 % Anonymous function to do the PNNx calcualtion:
+% proportion of difference magnitudes greater than X*sigma
 PNNxfn = @(x) sum(Dy > x)/(N-1);
 
-% exceed  = sum(Dy > pnntime);
-out.pnn5  = PNNxfn(5); %sum(Dy > 5)/(N-1); % proportion of difference magnitudes greater than 0.005*sigma
-out.pnn10 = PNNxfn(10); %sum(Dy > 10)/(N-1);
-out.pnn20 = PNNxfn(20); %sum(Dy > 20)/(N-1);
-out.pnn30 = PNNxfn(30); %sum(Dy > 30)/(N-1);
-out.pnn40 = PNNxfn(40); %sum(Dy > 40)/(N-1);
+out.pnn5  = PNNxfn(5); % 0.005*sigma
+out.pnn10 = PNNxfn(10); % 0.01*sigma
+out.pnn20 = PNNxfn(20);
+out.pnn30 = PNNxfn(30);
+out.pnn40 = PNNxfn(40);
 
 % ------------------------------------------------------------------------------
 % Calculate PSD

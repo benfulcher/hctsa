@@ -27,7 +27,6 @@ function out = DN_SimpleFit(x,dmodel,numBins)
 % numBins, the number of bins for a histogram-estimate of the distribution of
 %       time-series values. If numBins = 0, uses ksdensity instead of histogram.
 %
-%
 %---OUTPUTS: the goodness of fifit, R^2, rootmean square error, the
 % autocorrelation of the residuals, and a runs test on the residuals.
 
@@ -74,30 +73,31 @@ BF_CheckToolbox('curve_fitting_toolbox');
 distModels = {'gauss1','gauss2','exp1','power1'}; % valid distribution models
 TSmodels = {'sin1','sin2','sin3','fourier1','fourier2','fourier3'}; % valid time-series models
 
-if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
-    if nargin < 3 || isempty(numBins); % haven't specified numBins
+if any(strcmp(distModels,dmodel)) % valid DISTRIBUTION model name
+    if nargin < 3 || isempty(numBins) % haven't specified numBins
         numBins = 'sqrt'; % use sqrt of number of data points
     end
 
     % Compute the histogram counts:
     if ischar(numBins) % specify a binning method
-        [dny, binEdges] = histcounts(x,'BinMethod',numBins);
+        [dny,binEdges] = histcounts(x,'BinMethod',numBins);
         dnx = mean([binEdges(1:end-1); binEdges(2:end)]);
-    elseif numBins == 0; % use ksdensity instead of a histogram
-        [dny, dnx] = ksdensity(x);
+    elseif numBins == 0 % use ksdensity instead of a histogram
+        [dny,dnx] = ksdensity(x);
     else
-        [dny, binEdges] = histcounts(x,numBins);
+        [dny,binEdges] = histcounts(x,numBins);
         dnx = mean([binEdges(1:end-1); binEdges(2:end)]);
     end
 
     % Both must be column vectors:
-    if size(dnx,2) > size(dnx,1);
-        dnx = dnx'; dny = dny';
+    if size(dnx,2) > size(dnx,1)
+        dnx = dnx';
+        dny = dny';
     end
 
     % Fit the distribution model:
     try
-        [cfun, gof, output] = fit(dnx,dny,dmodel); % fit the model
+        [cfun,gof,output] = fit(dnx,dny,dmodel);
 	catch emsg % this model can't even be fitted OR license problem...
         if strcmp(emsg.identifier,'curvefit:fit:nanComputed') ...
                 || strcmp(emsg.identifier,'curvefit:fit:infComputed')
@@ -112,19 +112,19 @@ if any(strcmp(distModels,dmodel)); % valid DISTRIBUTION model name
         end
 	end
 
-elseif any(strcmp(TSmodels,dmodel)); % Valid time-series model name
+elseif ismember(dmodel,TSmodels) % Valid time-series model name
     if size(x,2) > size(x,1)
         x = x';
     end % x must be a column vector
     t = (1:length(x))'; % Time variable for equal sampling of the univariate time series
     try
-        [cfun, gof, output] = fit(t,x,dmodel); % fit the model
+        [cfun,gof,output] = fit(t,x,dmodel); % fit the model
 	catch emsg % this model can't even be fitted OR license problem
         if strcmp(emsg.message,'NaN computed by model function.') || strcmp(emsg.message,'Inf computed by model function.')
             fprintf(1,'The model %s failed for this data -- returning NaNs for all fitting outputs\n',dmodel);
             out = NaN; return
         else
-            error('DN_SimpleFit(x,%s,%u): Unexpected error fitting ''%s'' to the time series',dmodel,numBins,dmodel)
+            error('Unexpected error fitting ''%s'' to the time series',dmodel)
         end
 	end
 else
@@ -138,7 +138,7 @@ end
 out.r2 = gof.rsquare; % rsquared
 out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsqured
 
-out.rmse = gof.rmse;  % root mean square error
+out.rmse = gof.rmse; % root mean square error
 out.resAC1 = CO_AutoCorr(output.residuals,1,'Fourier'); % autocorrelation of residuals at lag 1
 out.resAC2 = CO_AutoCorr(output.residuals,2,'Fourier'); % autocorrelation of residuals at lag 2
 out.resruns = HT_HypothesisTest(output.residuals,'runstest'); % runs test on residuals -- outputs p-value

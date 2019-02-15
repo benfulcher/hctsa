@@ -1,5 +1,5 @@
-function TS_plot_timeseries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOptions)
-% TS_plot_timeseries    Plots examples of time series in an hctsa analysis.
+function TS_PlotTimeSeries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOptions)
+% TS_PlotTimeSeries    Plots examples of time series in an hctsa analysis.
 %
 %---INPUTS:
 % whatData, The hctsa data to load information from (cf. TS_LoadData)
@@ -52,7 +52,7 @@ if numPerGroup==0
     error('numPerGroup cannot be zero');
 end
 
-% Can specify a reduced set of time series by keyword
+% Can specify a reduced set of time series by keyword (or indices)
 if nargin < 3
     whatTimeSeries = '';
 end

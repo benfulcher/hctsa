@@ -6,7 +6,7 @@ function out = MF_FitSubsegments(y,model,order,subsetHow,samplep,randomSeed)
 %
 % Values of goodness of fit provide some indication of model suitability.
 %
-% N.B., this code inherits strongly from this MF_CompareTestSets
+% This code inherits strongly from MF_CompareTestSets
 %
 %---INPUTS:
 % y, the input time series.
@@ -295,10 +295,6 @@ switch model
             out.(['p_',num2str(i),'_mean']) = mean(ps(:,i+1));
             out.(['p_',num2str(i),'_max']) = max(ps(:,i+1));
             out.(['p_',num2str(i),'_min']) = min(ps(:,i+1));
-            % eval(sprintf('out.p_%u_std = std(ps(:,%u+1));',i,i));
-            % eval(sprintf('out.p_%u_mean = mean(ps(:,%u+1));',i,i));
-            % eval(sprintf('out.p_%u_max = max(ps(:,%u+1));',i,i));
-            % eval(sprintf('out.p_%u_min = min(ps(:,%u+1));',i,i));
         end
 
         % Statistics on fitted MA parameters, q
@@ -307,10 +303,6 @@ switch model
             out.(['q_',num2str(i),'_mean']) = mean(qs(:,i+1));
             out.(['q_',num2str(i),'_max']) = max(qs(:,i+1));
             out.(['q_',num2str(i),'_min']) = min(qs(:,i+1));
-            % eval(sprintf('out.q_%u_std = std(qs(:,%u+1));',i,i));
-            % eval(sprintf('out.q_%u_mean = mean(qs(:,%u+1));',i,i));
-            % eval(sprintf('out.q_%u_max = max(qs(:,%u+1));',i,i));
-            % eval(sprintf('out.q_%u_min = min(qs(:,%u+1));',i,i));
         end
     otherwise
         error('Unknown model ''%s''',model);

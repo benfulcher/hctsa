@@ -86,25 +86,26 @@ N = length(y); % Length of the time series
 % ------------------------------------------------------------------------------
 switch subsetHow
     case 'l'
-        % Takes first n points of time series:
+        % Take first n points of time series
         r = (1:min(n,N));
     case 'p'
-        % Takes initial proportion n of time series
+        % Take initial proportion n of time series
     	r = (1:round(N*n));
     case 'unicg'
-        % Takes n uniformly distributed points in time series:
+        % Take n uniformly distributed points in time series
         r = round(linspace(1,N,n));
     case 'randcg'
         if nargin < 4
             randomSeed = [];
         end
+
         % Reset the random seed if specified (for reproducibility):
         BF_ResetSeed(randomSeed);
 
         % Take n random points in time series; there could be repeats:
         r = randi(N,n,1);
 
-        % This is not very robust, as it's taking just a single stochastic
+        % This is not very statistically robust: just a single stochastic
         % sample with a (possibly) large variance
     otherwise
         error('Unknown specifier, ''%s''',subsetHow);
@@ -112,20 +113,20 @@ end
 
 if length(r) < 5
     % It's not really appropriate to compute statistics on less than 5 datapoints
-    warning('Time series too short')
+    warning('Time series (of length %u) is too short',N)
     out = NaN;
 end
 
 % ------------------------------------------------------------------------------
 % Compare statistics of this subset to those obtained from the full time series
 % ------------------------------------------------------------------------------
-out.absmean = abs(mean(y(r))); %/mean(y); % ** INPUT Y MUST BE Z-SCORED;
-out.std = std(y(r)); %/std(y); % ** INPUT Y MUST BE Z-SCORED
-out.median = median(y(r)); %/median(y); % if median is very small;; could be very noisy
-out.iqr = abs(1-iqr(y(r)) / iqr(y));
-out.skewness = abs(1-skewness(y(r)) / skewness(y)); % how far from true
-out.kurtosis = abs(1-kurtosis(y(r)) / kurtosis(y)); % how far from true
-out.ac1 = abs(1 - CO_AutoCorr(y(r),1,'Fourier') / CO_AutoCorr(y,1,'Fourier')); % how far from true
-out.sampen101 = PN_sampenc(y(r),1,0.1,1) / PN_sampenc(y,1,0.1,1);
+out.absmean = abs(mean(y(r))); %/mean(y); % Makes sense without normalization if y is z-scored
+out.std = std(y(r)); %/std(y); % Makes sense without normalization if y is z-scored
+out.median = median(y(r)); %/median(y); % if median is very small then normalization could be very noisy
+out.iqr = abs(1 - iqr(y(r))/iqr(y));
+out.skewness = abs(1 - skewness(y(r))/skewness(y)); % how far from true
+out.kurtosis = abs(1 - kurtosis(y(r))/kurtosis(y)); % how far from true
+out.ac1 = abs(1 - CO_AutoCorr(y(r),1,'Fourier')/CO_AutoCorr(y,1,'Fourier')); % how far from true
+out.sampen101 = PN_sampenc(y(r),1,0.1,1)/PN_sampenc(y,1,0.1,1);
 
 end

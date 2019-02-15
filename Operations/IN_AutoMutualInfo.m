@@ -1,5 +1,5 @@
 function out = IN_AutoMutualInfo(y,timeDelay,estMethod,extraParam)
-% IN_AutoMutualInfo     Automutual information of a time series.
+% IN_AutoMutualInfo     Time-series automutual information
 %
 %---INPUTS:
 %
@@ -53,7 +53,6 @@ if nargin < 2 || isempty(timeDelay)
 end
 if ischar(timeDelay) && ismember(timeDelay,{'ac','tau'})
     timeDelay = CO_FirstZero(y,'ac');
-    % fprintf(1,'timeDelay = %u set to fist zero-crossing of ACF.\n',timeDelay);
 end
 
 if nargin < 3 || isempty(estMethod)
@@ -65,27 +64,28 @@ if nargin < 4
 end
 
 N = length(y);
-doPlot = 0; % whether to plot outputs to screen
+doPlot = false; % plot outputs to screen
+minSamples = 5; % minimum 5 samples to compute a mutual information (could make higher?)
 
 % ------------------------------------------------------------------------------
 % Loop over time delays if a vector
 numTimeDelays = length(timeDelay);
-amis = zeros(numTimeDelays,1);
+amis = nan(numTimeDelays,1);
 
 if numTimeDelays > 1
     timeDelay = sort(timeDelay);
 end
 
 % Initialize miCalc object (needs to be reinitialized within the loop for kraskov):
-miCalc = IN_Initialize_MI(estMethod,extraParam,0); % NO ADDED NOISE!
+if ~strcmp(estMethod,'gaussian')
+    miCalc = IN_Initialize_MI(estMethod,extraParam,false); % NO ADDED NOISE!
+end
 
 for k = 1:numTimeDelays
 
     % Check enough samples to compute an automutual information
-    if timeDelay(k) > N - 5
-        % Minimum 5 samples to compute a mutual information (make higher?)
-        % Time series is too short -- set the remaining to NaNs
-        amis(k:end) = NaN;
+    if timeDelay(k) > N - minSamples
+        % Time series is too short -- keep the remaining values as NaNs
         break
     end
 
@@ -93,24 +93,31 @@ for k = 1:numTimeDelays
     y1 = y(1:end-timeDelay(k));
     y2 = y(1+timeDelay(k):end);
 
-    % Reinitialize for Kraskov:
-    miCalc.initialise(1,1);
+    if strcmp(estMethod,'gaussian')
+        r = corr(y1,y2,'type','Pearson');
+        amis(k) = -0.5*log(1-r^2);
+    else
+        % Reinitialize for Kraskov:
+        miCalc.initialise(1,1);
 
-    % Set observations to time-delayed versions of the time series:
-    miCalc.setObservations(y1,y2);
+        % Set observations to time-delayed versions of the time series:
+        miCalc.setObservations(y1,y2);
 
-    % Compute:
-    amis(k) = miCalc.computeAverageLocalOfObservations();
+        % Compute:
+        amis(k) = miCalc.computeAverageLocalOfObservations();
+    end
 
     % Plot:
     if doPlot
-        plot(y1,y2,'.k'); title(sprintf('ami = %.3f',amis(k))); pause(0.1)
+        plot(y1,y2,'.k')
+        title(sprintf('ami = %.3f',amis(k)))
+        pause(0.1)
     end
 end
 
 if any(isnan(amis))
-    warning(['time series too short for automutual information calculations',...
-                ' up to lags of %u'],max(timeDelay))
+    warning(['Time series (N=%u) is too short for automutual information calculations',...
+                ' up to lags of %u'],N,max(timeDelay))
 end
 
 if doPlot
@@ -118,14 +125,12 @@ if doPlot
 end
 
 %-------------------------------------------------------------------------------
-% Make outputs:
+% Outputs:
 %-------------------------------------------------------------------------------
-
 if numTimeDelays == 1
-    % output a scalar
-    out = amis;
+    out = amis; % a scalar
 else
-    % Output a structure:
+    % A structure
     for k = 1:numTimeDelays
         out.(sprintf('ami%u',timeDelay(k))) = amis(k);
     end

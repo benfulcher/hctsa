@@ -1,5 +1,5 @@
 function out = CO_Embed2_Dist(y,tau)
-% CO_Embed2_Dist    Analyzes distances in a 2-d embedding space of a time series.
+% CO_Embed2_Dist    Analyzes distances in a 2-dim embedding space of a time series.
 %
 % Returns statistics on the sequence of successive Euclidean distances between
 % points in a two-dimensional time-delay embedding space with a given
@@ -43,6 +43,7 @@ function out = CO_Embed2_Dist(y,tau)
 % ------------------------------------------------------------------------------
 
 doPlot = false; % whether to plot results
+N = length(y); % time-series length
 
 % ------------------------------------------------------------------------------
 %% Check inputs:
@@ -50,16 +51,12 @@ doPlot = false; % whether to plot results
 if nargin < 2 || isempty(tau)
     tau = 'tau'; % set to the first minimum of autocorrelation function
 end
-
-N = length(y); % time-series length
-
 if strcmp(tau,'tau'),
     tau = CO_FirstZero(y,'ac');
     if tau > N/10
         tau = floor(N/10);
     end
 end
-
 % Make sure the time series is a column vector
 if size(y,2) > size(y,1);
     y = y';
@@ -68,7 +65,6 @@ end
 % ------------------------------------------------------------------------------
 % 2-dimensional time-delay embedding:
 % ------------------------------------------------------------------------------
-
 m = [y(1:end-tau), y(1+tau:end)];
 
 % ------------------------------------------------------------------------------
@@ -87,18 +83,20 @@ end
 % d = diff(m(:,1)).^2 + diff(m(:,2)).^2; % sum of squared differences
 d = sqrt(diff(m(:,1)).^2 + diff(m(:,2)).^2); % Euclidean distance
 
-% Outputs statistics obtained from ordered set of distances between successive points in the recurrence space
-out.d_ac1 = CO_AutoCorr(d,1,'Fourier'); % Autocorrelation at lag 1
-out.d_ac2 = CO_AutoCorr(d,2,'Fourier'); % Autocorrelation at lag 2
-out.d_ac3 = CO_AutoCorr(d,3,'Fourier'); % Autocorrelation at lag 3
+% Outputs statistics obtained from ordered set of distances between successive
+% points in the recurrence space:
+acf = CO_AutoCorr(d,[],'Fourier');
+out.d_ac1 = acf(2); %CO_AutoCorr(d,1,'Fourier'); % Autocorrelation at lag 1
+out.d_ac2 = acf(3); %CO_AutoCorr(d,2,'Fourier'); % Autocorrelation at lag 2
+out.d_ac3 = acf(4); %CO_AutoCorr(d,3,'Fourier'); % Autocorrelation at lag 3
 
 out.d_mean = mean(d); % Mean distance
 out.d_median = median(d); % Median distance
-out.d_std = std(d); % standard deviation of distances
+out.d_std = std(d); % Standard deviation of distances
 out.d_iqr = iqr(d); % Interquartile range of distances
 out.d_max = max(d); % Maximum distance
 out.d_min = min(d); % Minimum distance
-out.d_cv = mean(d)/std(d); % coefficient of variation of distances
+out.d_cv = mean(d)/std(d); % Coefficient of variation of distances
 
 % ------------------------------------------------------------------------------
 % Empirical distance distribution often fits Exponential distribution quite well

@@ -9,8 +9,8 @@ function result = TS_GetFromData(dataSource,dataField)
 % dataField: the variable to extract
 %
 %---OUTPUTS:
-% Result is the variable extracted from either the file or structure (depending
-% on the type of dataSource)
+% result: the variable extracted from either the file or structure (depending
+%           on the type of dataSource)
 %
 %---EXAMPLE USAGE:
 % fromDatabase = TS_GetFromData('HCTSA_EEGDataset.mat','fromDatabase');
@@ -80,4 +80,6 @@ end
 if ismember(dataField,{'TimeSeries','Operations','MasterOperations'}) && isstruct(result)
     warning('Loaded metadata, %s, is still in structure array format; converted to table',dataField)
     result = struct2table(result);
+end
+
 end

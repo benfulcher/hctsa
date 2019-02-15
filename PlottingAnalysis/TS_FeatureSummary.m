@@ -166,7 +166,7 @@ if doViolin
     ylabel('Feature value');
 
     %-------------------------------------------------------------------------------
-    % Time series annotations using TS_plot_timeseries
+    % Time series annotations using TS_PlotTimeSeries
     % (cycling through groups of 10 rainbow colors):
     ax = subplot(1,4,3:4);
     plotOptions.newFigure = false;
@@ -178,7 +178,7 @@ if doViolin
 
     dataStruct = struct('TimeSeries',TimeSeries);
     dataStruct.groupNames = groupNames;
-    TS_plot_timeseries(dataStruct,annotateParams.n,flipud(highlightInd),annotateParams.maxL,plotOptions);
+    TS_PlotTimeSeries(dataStruct,annotateParams.n,flipud(highlightInd),annotateParams.maxL,plotOptions);
 
     % Put rectangles if data is grouped
     if ismember('Group',TimeSeries.Properties.VariableNames)

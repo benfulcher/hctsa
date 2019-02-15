@@ -11,8 +11,8 @@ function out = SB_BinaryStats(y,binaryMethod)
 % binaryMethod, the symbolization rule:
 %         (i) 'diff': by whether incremental differences of the time series are
 %                      positive (1), or negative (0),
-%          (ii) 'mean': by whether each point is above (1) or below the mean (0)
-%          (iii) 'iqr': by whether the time series is within the interquartile range
+%         (ii) 'mean': by whether each point is above (1) or below the mean (0)
+%         (iii) 'iqr': by whether the time series is within the interquartile range
 %                      (1), or not (0).
 %
 %---OUTPUTS:

@@ -45,7 +45,7 @@ if nargin < 2
     extraParam = [];
 end
 if nargin < 3
-    addNoise = 0; % deterministic by default
+    addNoise = false; % deterministic by default
 end
 
 % ------------------------------------------------------------------------------

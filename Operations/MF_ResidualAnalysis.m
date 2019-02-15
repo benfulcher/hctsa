@@ -117,14 +117,14 @@ out.ac2n = abs(autoCorrResid(2))*sqrtN; % units of 1/sqrtN from zero
 out.ac3n = abs(autoCorrResid(3))*sqrtN; % units of 1/sqrtN from zero
 
 % Median normalized distance from zero
-out.acmnd0 = median(abs(autoCorrResid))*sqrtN;
-out.acsnd0 = std(abs(autoCorrResid))*sqrtN;
+out.acmnd0 = median(abs(autoCorrResid))*sqrtN; % units of 1/sqrtN from zero
+out.acsnd0 = std(abs(autoCorrResid))*sqrtN; % units of 1/sqrtN from zero
 out.propbth = sum(abs(autoCorrResid) < 2.6/sqrtN)/maxLag;
 
 % First time to get below the significance threshold
 out.ftbth = find(abs(autoCorrResid) < 2.6/sqrtN,1,'first');
 if isempty(out.ftbth)
-    out.ftbth = maxLag+1;
+    out.ftbth = maxLag + 1;
 end
 
 % Durbin-Watson test statistic (like AC1)

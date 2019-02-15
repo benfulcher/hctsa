@@ -67,17 +67,19 @@ end
 %-------------------------------------------------------------------------------
 % Initial checks on tau:
 %-------------------------------------------------------------------------------
+N = length(y); % time-series length
+
 if ~isempty(tau)
-    if max(tau) > length(y)-1 % -1 because acf(1) is lag 0
-        warning('Time lag %u is too long for time-series length %u',max(tau),length(y))
+    if max(tau) > N-1 % -1 because acf(1) is lag 0
+        warning('Time lag %u is too long for time-series length %u',max(tau),N)
     end
-    if min(tau) < 0
+    if any(tau < 0)
         warning('Negative time lags not applicable')
     end
 end
 
 % ------------------------------------------------------------------------------
-% Evaluate the time-series autocorrelation
+% Compute the autocorrelation function
 % ------------------------------------------------------------------------------
 
 switch whatMethod
@@ -88,14 +90,13 @@ case 'Fourier'
     %     Analysis: Forecasting and Control. 3rd edition. Upper Saddle River,
     %     NJ: Prentice-Hall, 1994.
 
-    nFFT = 2^(nextpow2(length(y))+1);
-    F = fft(y-mean(y),nFFT);
+    nFFT = 2^(nextpow2(N)+1);
+    F = fft(y - mean(y),nFFT);
     F = F.*conj(F);
-    acf = ifft(F);
+    acf = ifft(F); % Wiener–Khinchin
     acf = acf./acf(1); % Normalize
     acf = real(acf);
-
-    acf = acf(1:length(y));
+    acf = acf(1:N);
 
     if isempty(tau) % return the full function
         out = acf;
@@ -115,7 +116,6 @@ case 'TimeDomainStat'
     % Assume a stationary process and estimate mean and standard deviation from the full time
     % series, although this method can produce outputs that are outside the range [-1,1]
 
-    N = length(y); % time-series length
     sigma2 = var(y); % time-series standard deviation
     mu = mean(y); % time-series mean
 
@@ -128,8 +128,6 @@ case 'TimeDomainStat'
 case 'TimeDomain'
     % ------------------------------------------------------------------------------
     % Estimate mean and standard deviation from each portion of the time series
-
-    N = length(y); % time-series length
 
     if length(tau) == 1
         % Output a single value at the given time-lag:
@@ -163,7 +161,6 @@ case 'TimeDomain'
 
 otherwise
     error('Unknown autocorrelation estimation method ''%s''',whatMethod)
-
 end
 
 end
