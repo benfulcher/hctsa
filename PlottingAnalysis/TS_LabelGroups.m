@@ -29,7 +29,8 @@ function [groupLabels,newFileName] = TS_LabelGroups(whatData,keywordGroups,saveB
 %
 % saveBack: Can set to false to stop saving the grouping back to the input file.
 %
-% filterMissing: Set to true to remove data that don't match any keywords.
+% filterMissing: Set to true to remove data that don't match any keywords (will
+%                  save out to a new, filtered version of the data)
 %
 %---OUTPUTS:
 % groupIndices: the indicies corresponding to each keyword in keywordGroups.
@@ -160,8 +161,9 @@ if any(unlabeled)
         end
         isUnlabeled = find(unlabeled);
         for i = 1:length(isUnlabeled)
-            fprintf('[%u] %s (%s)\n',TimeSeries.ID(isUnlabeled(i)),...
-                    TimeSeries.Name{isUnlabeled(i)},TimeSeries.Keywords{isUnlabeled(i)});
+            ind = isUnlabeled(i);
+            fprintf('[%u] %s (%s)\n',TimeSeries.ID(ind),TimeSeries.Name{ind},...
+                                    TimeSeries.Keywords{ind});
         end
         input('Look alright? (cntrl-C to cancel)')
 
