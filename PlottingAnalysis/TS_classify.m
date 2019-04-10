@@ -208,7 +208,7 @@ if numNulls > 0
     % (note that for a discrete quantity like classification accuracy with a
     % small sample size, equality cases become more likely):
     pValPermTest = mean(mean(foldLosses) <= nullStat);
-    fprintf(1,'Estimated p-value (permutation test) = %.2g\n',pValEst);
+    fprintf(1,'Estimated p-value (permutation test) = %.2g\n',pValPermTest);
 
     pValZ = 1 - normcdf(mean(foldLosses),mean(nullStat),std(nullStat));
     fprintf(1,'Estimated p-value (Gaussian fit) = %.2g\n',pValZ);

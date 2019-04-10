@@ -5,7 +5,7 @@ function yth = SB_CoarseGrain(y,howtocg,numGroups)
 % howtocg, the method of coarse-graining
 %
 % numGroups, either specifies the size of the alphabet for 'quantile' and 'updown'
-%       or sets the timedelay for the embedding subroutines
+%       or sets the time delay for the embedding subroutines
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

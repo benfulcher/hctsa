@@ -38,8 +38,9 @@ function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
 %           analysis of nonstationary signals" J. Alvarez-Ramirez et al. Phys.
 %           Rev. E 79(5) 057202 (2009)
 %
-% tauStep, increments in tau for linear range (i.e., if logInc = 0), or number of tau
-%           steps in logarithmic range if login = 1
+% tauStep, number of tau (locInc true), or increments in tau for linear range
+%               (if logInc = 0), or
+% 
 %           The spacing of time scales, tau, is commonly logarithmic through a range from
 %           5 samples to a quarter of the length of the time series, as suggested in
 %           "Statistical properties of DNA sequences", C.-K. Peng et al. Physica A

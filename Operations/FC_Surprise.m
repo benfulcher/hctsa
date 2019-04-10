@@ -1,4 +1,4 @@
-function out = FC_Surprise(y,whatPrior,memory,numGroups,cgmeth,numIters,randomSeed)
+function out = FC_Surprise(y,whatPrior,memory,numGroups,coarseGrainMethod,numIters,randomSeed)
 % FC_Surprise   How surprised you would be of the next data point given recent memory.
 %
 % Coarse-grains the time series, turning it into a sequence of symbols of a
@@ -28,7 +28,7 @@ function out = FC_Surprise(y,whatPrior,memory,numGroups,cgmeth,numIters,randomSe
 %
 % numGroups, the number of groups to coarse-grain the time series into
 %
-% cgmeth, the coarse-graining, or symbolization method:
+% coarseGrainMethod, the coarse-graining, or symbolization method:
 %          (i) 'quantile': an equiprobable alphabet by the value of each
 %                          time-series datapoint,
 %          (ii) 'updown': an equiprobable alphabet by the value of incremental
@@ -88,14 +88,14 @@ if (memory > 0) && (memory < 1) % specify memory as a proportion of the time-ser
     memory = round(memory*length(y));
 end
 
-% ng -- number of groups for the time-series coarse-graining/symbolization
+% numGroups -- number of groups for the time-series coarse-graining/symbolization
 if nargin < 4 || isempty(numGroups)
     numGroups = 3; % use three symbols to approximate the time-series values
 end
 
-% cgmeth: the coase-graining method to use
-if nargin < 5 || isempty(cgmeth)
-    cgmeth = 'quantile'; % symbolize time series by their values (quantile)
+% coarseGrainMethod: the coarse-graining method to use
+if nargin < 5 || isempty(coarseGrainMethod)
+    coarseGrainMethod = 'quantile'; % symbolize time series by their values (quantile)
 end
 
 % numIters: number of iterations
@@ -113,7 +113,7 @@ end
 % ------------------------------------------------------------------------------
 %% Course Grain
 % ------------------------------------------------------------------------------
-yth = SB_CoarseGrain(y,cgmeth,numGroups); % a coarse-grained time series using the numbers 1:numGroups
+yth = SB_CoarseGrain(y,coarseGrainMethod,numGroups); % a coarse-grained time series using the numbers 1:numGroups
 
 N = length(yth); % will be the same as y, for 'quantile', and 'updown'
 
