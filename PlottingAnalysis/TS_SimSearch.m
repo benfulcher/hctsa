@@ -211,16 +211,17 @@ fprintf(1,'\n');
 %   (needed for 'matrix' and 'network')
 % ------------------------------------------------------------------------------
 if any(ismember(whatPlots,'matrix')) || any(ismember(whatPlots,'network'))
-if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
-    % Use pre-computed distances:
-    Dij = Dij(neighborInd,neighborInd)/sqrt(size(TS_DataMat,2)+1);
-else
-    % Recompute distances:
-    switch tsOrOps
-    case 'ts'
-        Dij = squareform(pdist(TS_DataMat(neighborInd,:),'euclidean')/sqrt(size(TS_DataMat,2)+1));
-    case 'ops'
-        Dij = 1-abs(squareform(1-pdist(TS_DataMat(neighborInd,:),'corr')));
+    if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
+        % Use pre-computed distances:
+        Dij = Dij(neighborInd,neighborInd)/sqrt(size(TS_DataMat,2)+1);
+    else
+        % Recompute distances:
+        switch tsOrOps
+        case 'ts'
+            Dij = squareform(pdist(TS_DataMat(neighborInd,:),'euclidean')/sqrt(size(TS_DataMat,2)+1));
+        case 'ops'
+            Dij = 1-abs(squareform(1-pdist(TS_DataMat(neighborInd,:),'corr')));
+        end
     end
 end
 

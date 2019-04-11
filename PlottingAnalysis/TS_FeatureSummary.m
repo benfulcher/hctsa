@@ -194,7 +194,7 @@ if doViolin
     fig.Position(3:4) = [1151,886];
 
 else % kernel distributions
-    if smember('Group',TimeSeries.Properties.VariableNames)
+    if ismember('Group',TimeSeries.Properties.VariableNames)
         % Repeat for each group
         fx = cell(numGroups,1);
         lineHandles = cell(numGroups+1,1);
