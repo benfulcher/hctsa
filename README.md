@@ -86,7 +86,9 @@ The following time-series analysis packages are provided with the software (in t
 
 ## Publications
 
-See the following publications for examples of *hctsa* use:
+### Our publications
+
+See the following publications for details of *hctsa* was developed and has since been extended, as well as some example applications:
 * ***Feature-based time-series analysis for a self-organizing living library of time-series data, [CompEngine](https://www.comp-engine.org/)*** &#x1F4D7; : B.D. Fulcher, C.H. Lubba, S.S. Sethi & N.S. Jones. _CompEngine_: A self-organizing, living library of time-series data. *arXiv* (2019). [Link](https://arxiv.org/abs/1905.01042v1).
 * ***A reduced set of 22 efficiently coded features*** &#x1F4D7; : C.H. Lubba, S.S. Sethi, P. Knaute, S.R. Schultz, B.D. Fulcher & N.S. Jones. _catch22_: CAnonical Time-series CHaracteristics. *arXiv* (2019). [Link](https://arxiv.org/abs/1901.10200v2).
 * ***Implementation paper introducing the hctsa package, with applications to high throughput phenotyping of _C. Elegans_ and Drosophila movement time series*** &#x1F4D7; : B.D. Fulcher & N.S. Jones. _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction. *Cell Systems* **5**, 527 (2017). [Link](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).
@@ -97,11 +99,35 @@ See the following publications for examples of *hctsa* use:
 * ***Application to fetal heart rate time series*** &#x1F4D7; : B.D. Fulcher, A.E. Georgieva, C.W.G. Redman, N.S. Jones. Highly comparative fetal heart rate analysis. *34th Ann. Int. Conf. IEEE EMBC* 3135 (2012). [Link](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629).
 * ***Original paper, showing that the behavior of thousands of time-series methods on thousands of different time series can provide structure to the interdisciplinary time-series analysis literature*** &#x1F4D7; : B.D. Fulcher, M.A. Little, N.S. Jones. Highly comparative time-series analysis: the empirical structure of time series and their methods. *J. Roy. Soc. Interface* **10**, 20130048 (2013). [Link](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
 
+### Other Publications
+
+Here are some examples of external use of _hctsa_.
+Let me know if I've missed any!
+
+* Feature selection using genetic algorithms for fetal heart rate analysis. [Paper](http://iopscience.iop.org/article/10.1088/0967-3334/35/7/1357/meta)
+* Evaluating asphalt irregularity from smartphone sensors. [Paper](https://link.springer.com/chapter/10.1007/978-3-319-68765-0_27)
+* Assessing muscles for clinical rehabilitation. [Paper](https://ieeexplore.ieee.org/abstract/document/8037372/)
+* Detecting mild cognitive impairment using single-channel EEG to measure speech-evoked brain responses. [Paper](https://ieeexplore.ieee.org/abstract/document/8693868)
+* Non-intrusive load monitoring for appliance detection and electrical power saving for buildings. [Paper](https://doi.org/10.1016/j.enbuild.2019.05.028).
+
+
 ## Acknowledgements
 
 Many thanks go to [Romesh Abeysuriya](https://github.com/RomeshA) for helping with the mySQL database set-up and install scripts, and [Santi Villalba](https://github.com/sdvillal) for lots of helpful feedback and advice on the software.
 
 ## Related resources
+
+### CompEngine
+
+An accompanying web resource for this project is [CompEngine](http://www.comp-engine.org), which allows users to upload and compare thousands of diverse types of time-series data.
+The vast and growing collection of time-series data can also be downloaded.
+
+### _catch22_
+
+Is over 7000 just a few too many features for your application?
+Do you not have access to a Matlab license?
+_catch22_ has you all of your faux rhetorical questions covered.
+This reduced set of 22 features, determined through a combination of classification performance and mutual redundancy as explained in [this paper](https://arxiv.org/abs/1901.10200v2), is available [here](https://github.com/chlubba/catch22) as an efficiently coded C implementation with wrappers for python and R.
 
 ### _hctsa_ datasets
 There are a range of open datasets with pre-computed _hctsa_ features.
@@ -109,11 +135,6 @@ There are a range of open datasets with pre-computed _hctsa_ features.
 * [1000 empirical time series](https://figshare.com/articles/1000_Empirical_Time_series/5436136)
 * [_C. elegans_ movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
 * [Drosophila movement speed](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Drosophila_melanogaster_movement_speed/3863553) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingFly).
-
-### CompEngine
-
-An accompanying web resource for this project is [CompEngine](http://www.comp-engine.org), which allows users to upload and compare thousands of diverse types of time-series data.
-The vast and growing collection of time-series data can also be downloaded.
 
 ### Code for distributing _hctsa_ calculations on a cluster
 
