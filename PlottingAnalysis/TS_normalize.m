@@ -1,4 +1,4 @@
-function outputFileName = TS_normalize(normFunction,filterOptions,fileName_HCTSA,classVarFilter)
+function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA,classVarFilter)
 % TS_normalize  Trims and normalizes data from an hctsa analysis.
 %
 % Reads in data from HCTSA.mat, writes a trimmed, normalized version to HCTSA_N.mat
