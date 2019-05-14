@@ -127,12 +127,23 @@ case {'pca','PCA'}
     end
 
 case {'tSNE','tsne'}
-    fprintf(1,['Computing a two-dimensional t-SNE embedding (using barnes-hut',...
-                    ' approximation after 50-dim PC reduction) of the %u x %u data matrix...\n'], ...
-                        size(TS_DataMat,1),size(TS_DataMat,2));
-    rng default % for reproducibility
-    Y = tsne(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Algorithm','barneshut',...
-                        'Distance','euclidean','NumPCAComponents',50,'NumDimensions',2);
+    numPCAComponents = min(size(TS_DataMat,2),50);
+    rng('default') % for reproducibility
+
+    if numPCAComponents < size(TS_DataMat,2)
+        fprintf(1,['Computing a two-dimensional t-SNE embedding (using barnes-hut',...
+                        ' approximation after %u-dim PC reduction) of the %u x %u data matrix...\n'], ...
+                            numPCAComponents,size(TS_DataMat,1),size(TS_DataMat,2));
+        Y = tsne(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Algorithm','barneshut',...
+                        'Distance','euclidean','NumPCAComponents',numPCAComponents,'NumDimensions',2);
+
+    else
+        fprintf(1,['Computing a two-dimensional t-SNE embedding (using barnes-hut',...
+                        ' approximation) of the %u x %u data matrix...\n'], ...
+                            numPCAComponents,size(TS_DataMat,1),size(TS_DataMat,2));
+        Y = tsne(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Algorithm','barneshut',...
+                        'Distance','euclidean','NumDimensions',2);
+    end
     fprintf(1,'---Done.\n');
     % Axis labels for the plot:
     featureLabels = arrayfun(@(x)sprintf('tSNE-%u',x),1:2,'UniformOutput',false);

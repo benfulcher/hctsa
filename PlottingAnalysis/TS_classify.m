@@ -81,6 +81,10 @@ addParameter(inputP,'numFolds',default_numFolds,check_numFolds);
 default_numRepeats = 1;
 check_numRepeats = @(x) isnumeric(x);
 addParameter(inputP,'numRepeats',default_numRepeats,check_numRepeats);
+% doPlot:
+default_doPlot = true;
+check_doPlot = @(x) islogical(x);
+addParameter(inputP,'doPlot',default_doPlot,check_doPlot);
 
 % Parse input arguments:
 parse(inputP,varargin{:});
@@ -89,6 +93,7 @@ numNulls = inputP.Results.numNulls;
 seedReset = inputP.Results.seedReset;
 numFolds = inputP.Results.numFolds;
 numRepeats = inputP.Results.numRepeats;
+doPlot = inputP.Results.doPlot;
 clear('inputP');
 
 %-------------------------------------------------------------------------------
@@ -148,9 +153,11 @@ fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
                     std(foldLosses));
 
 % Plot as a histogram:
-% f = figure('color','w');
-% histogram(foldLosses*100)
-% xlim([0,100]);
+if doPlot
+    f = figure('color','w');
+    histogram(foldLosses*100)
+    xlim([0,100]);
+end
 
 %-------------------------------------------------------------------------------
 % Check nulls:
@@ -182,47 +189,53 @@ if numNulls > 0
                     std(nullStat));
 
     % Plot the null distribution:
-    f = figure('color','w'); hold('on')
-    ax = gca;
-    histogram(nullStat,'normalization','pdf');
-    plot(ones(2,1)*mean(foldLosses),ax.YLim,'r','LineWidth',2)
-    xlabel(outputStat)
-    ylabel('Probability density')
-    legend('shuffled labels','real labels')
+    if doPlot
+        f = figure('color','w'); hold('on')
+        ax = gca;
+        histogram(nullStat,'normalization','pdf');
+        plot(ones(2,1)*mean(foldLosses),ax.YLim,'r','LineWidth',2)
+        xlabel(outputStat)
+        ylabel('Probability density')
+        legend('shuffled labels','real labels')
+    end
 
     % Estimate a p-value:
     % (not exactly comparing like with like but if number of nulls is high
     % enough, my intuition is that this approximation will converge to 'true'
     % value; i.e., if you did the same numRepeats for each null sample as in
     % the real sample)
-    pValEst = mean(mean(foldLosses) < nullStat);
-    fprintf(1,'Approx. p-value = %.2g\n',pValEst);
+    % Label-randomization null:
+    % (note that for a discrete quantity like classification accuracy with a
+    % small sample size, equality cases become more likely):
+    pValPermTest = mean(mean(foldLosses) <= nullStat);
+    fprintf(1,'Estimated p-value (permutation test) = %.2g\n',pValPermTest);
+
+    pValZ = 1 - normcdf(mean(foldLosses),mean(nullStat),std(nullStat));
+    fprintf(1,'Estimated p-value (Gaussian fit) = %.2g\n',pValZ);
 else
     nullStat = [];
 end
 
 %-------------------------------------------------------------------------------
-% Plot confusion matrix
+% Plot a confusion matrix
 %-------------------------------------------------------------------------------
 % Convert real and predicted class labels to matrix form (numClasses x N),
 % required as input to plotconfusion:
 realLabels = BF_ToBinaryClass(TimeSeries.Group,numClasses,false);
 % Predict from the first CV-partition:
 predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),numClasses,false);
-f = figure('color','w');
-plotconfusion(realLabels,predictLabels);
-% (annoying that plotconfusion generates a new figure; it won't plot in the
-% current active figure)
+if doPlot
+    f = figure('color','w');
+    plotconfusion(realLabels,predictLabels);
 
-% Fix axis labels:
-ax = gca;
-ax.XTickLabel(1:numClasses) = groupNames;
-ax.YTickLabel(1:numClasses) = groupNames;
-ax.TickLabelInterpreter = 'none';
+    % Fix axis labels:
+    ax = gca;
+    ax.XTickLabel(1:numClasses) = groupNames;
+    ax.YTickLabel(1:numClasses) = groupNames;
+    ax.TickLabelInterpreter = 'none';
 
-% Make the figure background white:
-% f = gcf; f.Color = 'w';
-title(sprintf('Confusion matrix for a 10-fold repeated cross-validation run (of %u)',numRepeats));
+    title(sprintf('Confusion matrix for a 10-fold repeated cross-validation run (of %u)',numRepeats));
+end
 
 %-------------------------------------------------------------------------------
 % Compare performance of reduced PCs from the data matrix:
@@ -249,22 +262,23 @@ if numPCs > 0
         % fprintf(1,'%u PCs:   %.3f +/- %.3f%%\n',i,cfnRate(i,1),cfnRate(i,2));
     end
 
-    plotColors = BF_getcmap('spectral',3,1);
+    if doPlot
+        plotColors = BF_getcmap('spectral',3,1);
+        f = figure('color','w'); hold on
+        plot([1,numPCs],ones(2,1)*mean(foldLosses),'--','color',plotColors{3})
+        plot(1:numPCs,cfnRate(:,1),'o-k')
+        legend(sprintf('All %u features (%.1f%%)',numFeatures,mean(foldLosses)),...
+                    sprintf('PCs (%.1f-%.1f%%)',min(cfnRate),max(cfnRate)))
+        % plot(1:numPCs,cfnRate(:,1)+cfnRate(:,2),':k')
+        % plot(1:numPCs,cfnRate(:,1)-cfnRate(:,2),':k')
 
-    f = figure('color','w'); hold on
-    plot([1,numPCs],ones(2,1)*mean(foldLosses),'--','color',plotColors{3})
-    plot(1:numPCs,cfnRate(:,1),'o-k')
-    legend(sprintf('All %u features (%.1f%%)',numFeatures,mean(foldLosses)),...
-                sprintf('PCs (%.1f-%.1f%%)',min(cfnRate),max(cfnRate)))
-    % plot(1:numPCs,cfnRate(:,1)+cfnRate(:,2),':k')
-    % plot(1:numPCs,cfnRate(:,1)-cfnRate(:,2),':k')
+        xlabel('Number of PCs');
+        ylabel('Classification accuracy (%)')
 
-    xlabel('Number of PCs');
-    ylabel('Classification accuracy (%)')
-
-    titleText = sprintf('Classification rate (%u-class) using %u-fold %s classification',...
-                                numClasses,numFolds,whatClassifier);
-    title(titleText,'interpreter','none')
+        titleText = sprintf('Classification rate (%u-class) using %u-fold %s classification',...
+                                    numClasses,numFolds,whatClassifier);
+        title(titleText,'interpreter','none')
+    end
 end
 
 %-------------------------------------------------------------------------------

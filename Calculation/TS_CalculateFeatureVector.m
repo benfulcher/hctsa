@@ -77,7 +77,7 @@ if nargin < 3 || isempty(Operations) || ischar(Operations)
 		fprintf(1,'Importing default set of time-series features\n');
 		theINPfile = 'INP_ops.txt';
 	end
-	Operations = SQL_add('ops',theINPfile,false,false)';
+	Operations = SQL_add('ops',theINPfile,false,false);
 end
 if isnumeric(Operations)
 	error('Provide an input file or a structure array of Operations');
@@ -85,9 +85,9 @@ end
 
 if nargin < 4 || isempty(MasterOperations)
 	% Use the default library:
-	MasterOperations = SQL_add('mops','INP_mops.txt',false,false)';
+	MasterOperations = SQL_add('mops','INP_mops.txt',false,false);
 	% Need to link operations to masters if not already supplied:
-	[Operations, MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
+	[Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 end
 
 % Whether to code up special-valued outputs

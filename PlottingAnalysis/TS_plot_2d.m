@@ -56,8 +56,8 @@ function f = TS_plot_2d(featureData,TimeSeries,featureLabels,groupNames,annotate
 %% Check Inputs:
 % ------------------------------------------------------------------------------
 
-% featureData should be a Nx2 vector of where to plot each of the N data objects in
-% the two-dimensional space:
+% featureData should be a Nx2 vector of where to plot each of the N data objects
+% in the two-dimensional space:
 if nargin < 1
     error('You must provide two-dimensional feature vectors for the data.')
 end
@@ -200,18 +200,19 @@ end
 didClassify = false;
 if numClasses > 1
     % Compute the in-sample classification rate:
-    classRate = zeros(3,1); % classRate1, classRate2, classRateboth
+    classRate = nan(3,1); % classRate1, classRate2, classRateboth
     try
-        fprintf(1,'Estimating %u-class classification rates for each feature (and in combination)...\n',numClasses);
-        classRate(1) = GiveMeCfn(whatClassifier,featureData(:,1),groupLabels,featureData(:,1),groupLabels,numClasses);
-        classRate(2) = GiveMeCfn(whatClassifier,featureData(:,2),groupLabels,featureData(:,2),groupLabels,numClasses);
-        [classRate(3),~,whatLoss] = GiveMeCfn(whatClassifier,featureData,groupLabels,featureData(:,1:2),groupLabels,numClasses);
-        % Record that classification was performed successfully:
-        didClassify = true;
-        fprintf(1,'%s in 2-d space: %.2f%%\n',whatLoss,classRate(3));
+        if ~strcmp(whatClassifier,'none')
+            fprintf(1,'Estimating %u-class classification rates for each feature (and in combination)...\n',numClasses);
+            classRate(1) = GiveMeCfn(whatClassifier,featureData(:,1),groupLabels,featureData(:,1),groupLabels,numClasses);
+            classRate(2) = GiveMeCfn(whatClassifier,featureData(:,2),groupLabels,featureData(:,2),groupLabels,numClasses);
+            [classRate(3),~,whatLoss] = GiveMeCfn(whatClassifier,featureData,groupLabels,featureData(:,1:2),groupLabels,numClasses);
+            % Record that classification was performed successfully:
+            didClassify = true;
+            fprintf(1,'%s in 2-d space: %.2f%%\n',whatLoss,classRate(3));
+        end
     catch emsg
-        fprintf(1,'\nLinear classification rates not computed\n(%s)\n',emsg.message);
-        classRate(:) = NaN;
+        fprintf(1,'\nClassification rates not computed\n(%s)\n',emsg.message);
     end
 
     % Also plot an SVM classification boundary:

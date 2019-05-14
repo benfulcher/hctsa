@@ -112,7 +112,7 @@ if isempty(op_id_range)
     opCompute = ones(1,height(Operations));
 else
     op_id_range = intersect(op_id_range,allIDs);
-    opCompute = ismember(allIDs,op_id_range);
+    opCompute = ismember(allIDs,op_id_range)';
 end
 
 % Definitions

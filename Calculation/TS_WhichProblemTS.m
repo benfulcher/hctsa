@@ -1,9 +1,10 @@
-function [ts_ind, dataCell, codeEval] = TS_WhichProblemTS(opID,whatData)
+function [ts_ind,dataCell,codeEval] = TS_WhichProblemTS(opID,whatData,doPlot)
 % TS_WhichProblemTS Lists the indices of the time series with bad values for a given opID
 %
 %---INPUTS:
 % opID: the ID of the operation to investigate
 % whatData: hctsa data source (default: 'raw'; cf. TS_LoadData)
+% doPlot: plot some examples of problem time series
 %
 %---OUTPUTS:
 % ts_ind: the indices of the time series that produced special-valued outputs
@@ -40,6 +41,9 @@ function [ts_ind, dataCell, codeEval] = TS_WhichProblemTS(opID,whatData)
 if nargin < 2
     whatData = 'raw';
 end
+if nargin < 3
+    doPlot = true;
+end
 
 %-------------------------------------------------------------------------------
 % Load data:
@@ -52,7 +56,7 @@ TS_Quality = TS_GetFromData(whatData,'TS_Quality');
 %-------------------------------------------------------------------------------
 qualityLabels = TS_Quality(:,Operations.ID==opID);
 
-% indices of time series with bad values:
+% Indices of time series with bad values:
 ts_ind = find(qualityLabels > 0);
 
 if nargout > 1
@@ -63,6 +67,12 @@ end
 if nargout > 2
     MasterOperations = TS_GetFromData(whatData,'MasterOperations');
     codeEval = MasterOperations.Code{MasterOperations.ID==Operations.MasterID(Operations.ID==opID)};
+end
+
+%-------------------------------------------------------------------------------
+% Plot some bad ones
+if doPlot
+    TS_PlotTimeSeries(whatData,10,ts_ind);
 end
 
 end

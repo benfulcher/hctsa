@@ -1,4 +1,4 @@
-function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName)
+function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,forceWrite)
 % TS_combine   Combine two hctsa datasets (same features, different data)
 %
 % Takes a union of time series, and an intersection of operations from two hctsa
@@ -30,6 +30,7 @@ function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName)
 %                   Setting to true takes the union of the features present in
 %                   both (assumes disjoint).
 % outputFileName: output to a custom .mat file ('HCTSA.mat' by default).
+% forceWrite: whether to write to the custom filename (regardless of whether it already exists)
 %
 %---OUTPUTS:
 % Writes a new, combined .mat file (to the outputFileName)
@@ -93,6 +94,9 @@ if nargin < 5
 end
 if ~strcmp(outputFileName(end-3:end),'.mat')
     error('Specify a .mat filename to output');
+end
+if nargin < 6
+    forceWrite = false;
 end
 
 
@@ -178,7 +182,7 @@ canonicalVariables = {'ID','Name','Keywords','Length','Data'};
 for i = 1:2
     isExtraField = ~ismember(theVariables{i},canonicalVariables);
     if any(isExtraField)
-        theExtraFields = TimeSeries.Properties.VariableNames(isExtraField);
+        theExtraFields = theVariables{i}(isExtraField);
         loadedData{i}.TimeSeries(:,theExtraFields) = [];
         for j = 1:sum(isExtraField)
             fprintf(1,'Removed non-canonical variable, %s, from %s.\n',theExtraFields{j},HCTSAs{i});
@@ -353,11 +357,14 @@ end
 % ------------------------------------------------------------------------------
 % Save the results
 % ------------------------------------------------------------------------------
-% First check that the output file doesn't already exist:
 fprintf(1,'A %u x %u matrix\n',size(TS_DataMat,1),size(TS_DataMat,2));
-hereSheIs = which(fullfile(pwd,outputFileName));
-if ~isempty(hereSheIs) % already exists
-    outputFileName = [outputFileName(1:end-4),'_combined.mat'];
+
+% First check that the output file doesn't already exist:
+if ~forceWrite
+    hereSheIs = which(fullfile(pwd,outputFileName));
+    if ~isempty(hereSheIs) % already exists
+        outputFileName = [outputFileName(1:end-4),'_combined.mat'];
+    end
 end
 fprintf(1,'----------Saving to %s----------\n',outputFileName);
 

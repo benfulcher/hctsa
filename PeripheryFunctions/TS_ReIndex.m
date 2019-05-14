@@ -80,7 +80,7 @@ if strcmp(tsOrOps,'ts') || strcmp(tsOrOps,'both')
             fprintf(1,'Didn''t think so! Better to be save than sorry\n');
         end
     end
-    TimeSeries.ID = 1:numTimeSeries;
+    TimeSeries.ID = (1:numTimeSeries)';
     % Save back:
     save(dataFile,'TimeSeries','-append')
     fprintf(1,'Time series re-indexed and saved back to %s.\n',dataFile);
@@ -94,7 +94,7 @@ if strcmp(tsOrOps,'ops') || strcmp(tsOrOps,'both')
             fprintf(1,'Didn''t think so! Better to be save than sorry\n');
         end
     end
-    Operations.ID = 1:numOperations;
+    Operations.ID = (1:numOperations)';
     % Save back:
     save(dataFile,'Operations','-append')
     fprintf(1,'Operations re-indexed and saved back to %s.\n',dataFile);

@@ -4,12 +4,16 @@
 
 The software provides a code framework that allows thousands of time-series analysis features to be extracted from time series (or a time-series dataset), as well as tools for normalizing and clustering the data, producing low-dimensional representations of the data, identifying discriminating features between different classes of time series, learning multivariate classification models using large sets of time-series features, finding nearest matches to a time series of interest, and a range of other visualizations and analyses.
 
-If you use this software, please read and cite these (open access) articles:
+**Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for help with real-world applications of _hctsa_** :nerd_face:
+
+If you use this software, please read and cite these open-access articles:
 
 * B.D. Fulcher and N.S. Jones. [_hctsa_: A computational framework for automated time-series phenotyping using massive feature extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). *Cell Systems* **5**, 527 (2017).
-* B.D. Fulcher, M.A. Little, N.S. Jones [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83 (2013).
+* B.D. Fulcher, M.A. Little, N.S. Jones. [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83 (2013).
 
-Any feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
+Feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
+
+**For commercial use of *hctsa*, including licensing and consulting, contact [Engine Analytics](http://www.engineanalytics.org/).**
 
 ### Getting started
 &#x1F4D6; &#x1F4D6;
@@ -26,7 +30,7 @@ For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of
 ```
 git remote add upstream git://github.com/benfulcher/hctsa.git
 ```
-(make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your github account).
+(make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your Github account).
 
 You can then update to the latest stable version of the repository by pulling the master branch to your local repository:
 ```
@@ -42,11 +46,10 @@ Details on how to merge the latest version of the repository with the local chan
 
 There are two licenses applied to the core parts of the repository:
 
-1. Sections of the repository required to compute features from time-series data is licensed as [GNU General Public License version 3](http://www.gnu.org/licenses/gpl-3.0.en.html).
+1. The framework for running *hctsa* analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+A license for commercial use is available from [Engine Analytics](http://www.engineanalytics.org/).
 
-2. Sections implementing the framework for running *hctsa* analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
-
-To use *hctsa* for commercial applications, please contact [Ben Fulcher](ben.d.fulcher@gmail.com).
+2. Code for computing features from time-series data is licensed as [GNU General Public License version 3](http://www.gnu.org/licenses/gpl-3.0.en.html).
 
 A range of external code packages are provided in the **Toolboxes** directory of the repository, and each have their own associated license (as outlined below).
 
@@ -84,12 +87,15 @@ The following time-series analysis packages are provided with the software (in t
 ## Publications
 
 See the following publications for examples of *hctsa* use:
-* ***Implementation paper introducing the hctsa package, with applications to high throughput phenotyping of C. Elegans and Drosophila movement time series*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction. *Cell Systems* **5**, 527 (2017). [Link](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).
-* ***Introduction to feature-based time-series analysis*** &#x1F4D7; : B. D. Fulcher. Feature-based time-series analysis. *Feature Engineering for Machine Learning and Data Analytics*, CRC Press, 87-116 (2018).  [Link](https://www.crcpress.com/Feature-Engineering-for-Machine-Learning-and-Data-Analytics/Dong-Liu/p/book/9781138744387), [Preprint](https://arxiv.org/abs/1709.08055).
-* ***Application to fMRI data*** &#x1F4D7; : S. S. Sethi, V. Zerbi, N. Wenderoth, A. Fornito, B. D. Fulcher. Structural connectome topology relates to regional BOLD signal dynamics in the mouse brain. *Chaos* **27**, 047405 (2017). [Link](http://aip.scitation.org/doi/10.1063/1.4979281), [preprint](http://biorxiv.org/lookup/doi/10.1101/085514).
-* ***Application to time-series data mining*** &#x1F4D7; : B. D. Fulcher & N. S. Jones. Highly comparative feature-based time-series classification. *IEEE Trans. Knowl. Data Eng.* **26**, 3026 (2014). [Link](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425).
-* ***Application to fetal heart rate time series*** &#x1F4D7; : B. D. Fulcher, A. E. Georgieva, C. W. G. Redman, N. S. Jones. Highly comparative fetal heart rate analysis. *34th Ann. Int. Conf. IEEE EMBC* 3135 (2012). [Link](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629).
-* ***Original paper, showing that the behavior of thousands of time-series methods on thousands of different time series can provide structure to the interdisciplinary time-series analysis literature*** &#x1F4D7; : B. D. Fulcher, M. A. Little, N. S. Jones. Highly comparative time-series analysis: the empirical structure of time series and their methods. *J. Roy. Soc. Interface* **10**, 20130048 (2013). [Link](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
+* ***Feature-based time-series analysis for a self-organizing living library of time-series data, [CompEngine](https://www.comp-engine.org/)*** &#x1F4D7; : B.D. Fulcher, C.H. Lubba, S.S. Sethi & N.S. Jones. _CompEngine_: A self-organizing, living library of time-series data. *arXiv* (2019). [Link](https://arxiv.org/abs/1905.01042v1).
+* ***A reduced set of 22 efficiently coded features*** &#x1F4D7; : C.H. Lubba, S.S. Sethi, P. Knaute, S.R. Schultz, B.D. Fulcher & N.S. Jones. _catch22_: CAnonical Time-series CHaracteristics. *arXiv* (2019). [Link](https://arxiv.org/abs/1901.10200v2).
+* ***Implementation paper introducing the hctsa package, with applications to high throughput phenotyping of _C. Elegans_ and Drosophila movement time series*** &#x1F4D7; : B.D. Fulcher & N.S. Jones. _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction. *Cell Systems* **5**, 527 (2017). [Link](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).
+* ***Implementation paper introducing the hctsa package, with applications to high throughput phenotyping of _C. Elegans_ and Drosophila movement time series*** &#x1F4D7; : B.D. Fulcher & N.S. Jones. _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction. *Cell Systems* **5**, 527 (2017). [Link](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).
+* ***Introduction to feature-based time-series analysis*** &#x1F4D7; : B.D. Fulcher. Feature-based time-series analysis. *Feature Engineering for Machine Learning and Data Analytics*, CRC Press, 87-116 (2018).  [Link](https://www.crcpress.com/Feature-Engineering-for-Machine-Learning-and-Data-Analytics/Dong-Liu/p/book/9781138744387), [Preprint](https://arxiv.org/abs/1709.08055).
+* ***Application to fMRI data*** &#x1F4D7; : S.S. Sethi, V. Zerbi, N. Wenderoth, A. Fornito, B.D. Fulcher. Structural connectome topology relates to regional BOLD signal dynamics in the mouse brain. *Chaos* **27**, 047405 (2017). [Link](http://aip.scitation.org/doi/10.1063/1.4979281), [preprint](http://biorxiv.org/lookup/doi/10.1101/085514).
+* ***Application to time-series data mining*** &#x1F4D7; : B.D. Fulcher & N.S. Jones. Highly comparative feature-based time-series classification. *IEEE Trans. Knowl. Data Eng.* **26**, 3026 (2014). [Link](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425).
+* ***Application to fetal heart rate time series*** &#x1F4D7; : B.D. Fulcher, A.E. Georgieva, C.W.G. Redman, N.S. Jones. Highly comparative fetal heart rate analysis. *34th Ann. Int. Conf. IEEE EMBC* 3135 (2012). [Link](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629).
+* ***Original paper, showing that the behavior of thousands of time-series methods on thousands of different time series can provide structure to the interdisciplinary time-series analysis literature*** &#x1F4D7; : B.D. Fulcher, M.A. Little, N.S. Jones. Highly comparative time-series analysis: the empirical structure of time series and their methods. *J. Roy. Soc. Interface* **10**, 20130048 (2013). [Link](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
 
 ## Acknowledgements
 
@@ -101,18 +107,28 @@ Many thanks go to [Romesh Abeysuriya](https://github.com/RomeshA) for helping wi
 There are a range of open datasets with pre-computed _hctsa_ features.
 (If you have data to share and host, let me know and I'll add it to this list):
 * [1000 empirical time series](https://figshare.com/articles/1000_Empirical_Time_series/5436136)
-* [C. elegans movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
+* [_C. elegans_ movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
 * [Drosophila movement speed](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Drosophila_melanogaster_movement_speed/3863553) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingFly).
 
-### Comp-Engine Time Series
+### CompEngine
 
-An accompanying web resource for this project is [Comp-Engine Time Series](http://www.comp-engine.org/timeseries), which allows users to compare thousands of diverse types of time-series analysis code and time-series data.
-This website also allows you to download large volumes of univariate time-series data.
-Note that the code files on Comp-Engine Time Series are based on an early implementation and rarely match with the updated features and functions contained in this repository.
+An accompanying web resource for this project is [CompEngine](http://www.comp-engine.org), which allows users to upload and compare thousands of diverse types of time-series data.
+The vast and growing collection of time-series data can also be downloaded.
+
+### Code for distributing _hctsa_ calculations on a cluster
+
+Matlab code for computing features for an initialized `HCTSA.mat` file, by distributing the computation across a large number of cluster jobs (using pbs or slurm schedulers) is [here](https://github.com/benfulcher/distributed_hctsa).
 
 ### `pyopy`
 
 This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
+
+### `hctsaAnalysisPython`
+Some beginner-level python code for analyzing the results of _hctsa_ calculations is [here](https://github.com/benfulcher/hctsaAnalysisPython).
+
+### Generating time-series data from synthetic models
+
+A Matlab repository for generating time-series data from diverse model systems is [here](https://github.com/benfulcher/TimeSeriesGeneration).
 
 ### `tsfresh`
 
@@ -124,8 +140,8 @@ These R packages are by [Rob Hyndman](https://twitter.com/robjhyndman).
 The first, [`tscompdata`](https://github.com/robjhyndman/tscompdata), makes available existing collections of time-series data for analysis.
 The second, [`tsfeatures`](https://github.com/robjhyndman/tsfeatures), includes implementations of a range of time-series features.
 
-### `hctsaAnalysisPython`
-Some beginner-level python code for analyzing the results of hctsa calculations is [here](https://github.com/benfulcher/hctsaAnalysisPython).
+### `Khiva`
+[Khiva](https://github.com/shapelets/khiva) is an open-source library of efficient algorithms to analyse time series in GPU and CPU.
 
 ### `pyunicorn`
 
