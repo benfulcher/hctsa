@@ -53,7 +53,7 @@ function out = DN_RemovePoints(y,removeHow,p)
 %% Preliminaries
 % ------------------------------------------------------------------------------
 N = length(y); % time-series length
-doPlot = 0; % plot output
+doPlot = false; % plot output
 
 % ------------------------------------------------------------------------------
 %% Check inputs
