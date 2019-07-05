@@ -228,8 +228,8 @@ out.expnlogL = explike(mean(k),k);
 
 % Extreme Value Distribution
 paramhat = evfit(k);
-out.evparm1 = paramhat(1);
-out.evparm2 = paramhat(2);
+out.evparam1 = paramhat(1);
+out.evparam2 = paramhat(2);
 out.evnlogL = evlike(paramhat,k);
 
 % ------------------------------------------------------------------------------
