@@ -72,16 +72,16 @@ if binRangeSize == 1
         % (constant number of bins)
         % Somewhat strange behaviour -- very variable
         numDepths = length(depth);
-        ent = zeros(numDepths,1);
+        ents = zeros(numDepths,1);
         for i = 1:numDepths
-            ent(i) = MS_shannon(y,numBin,depth(i)) / depth(i);
+            ents(i) = MS_shannon(y,numBin,depth(i)) / depth(i);
         end
         % Output statistics on variation across the range tested:
-        out.maxent = max(entNorm);
-        out.minent = min(entNorm);
-        out.medent = median(entNorm);
-        out.meanent = mean(entNorm);
-        out.stdent = std(entNorm);
+        out.maxent = max(ents);
+        out.minent = min(ents);
+        out.medent = median(ents);
+        out.meanent = mean(ents);
+        out.stdent = std(ents);
     end
 elseif binRangeSize > 1
     if depthRangeSize==1
@@ -101,14 +101,13 @@ elseif binRangeSize > 1
         % input is a vector at a time.
         % ***INCOMPLETE*** don't do this.
         error('Comparing both bins and depth not implemented')
-
         %% (*) stats over numBins and depths
-        ents = zeros(binRangeSize,depthRangeSize);
-        for i = 1:numBins
-            for j = 1:numDepths
-                ents(i,j) = MS_shannon(y,numBin(i),depth(j))/depth(j);
-            end
-        end
+        % ents = zeros(binRangeSize,depthRangeSize);
+        % for i = 1:numBins
+        %     for j = 1:numDepths
+        %         ents(i,j) = MS_shannon(y,numBin(i),depth(j))/depth(j);
+        %     end
+        % end
     end
 end
 
