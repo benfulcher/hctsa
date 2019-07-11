@@ -138,6 +138,7 @@ out.maxk = max(k); % maximum degree
 out.mink = min(k); % minimum degree
 out.rangek = range(k); % range of degree distribution
 out.iqrk = iqr(k); % interquartile range of degree distribution
+out.skewnessk = skewness(k); % skewness of degree distribution
 out.maxonmedian = max(k)/median(k); % max on median (indicator of outlier)
 out.ol90 = mean(k(k>=quantile(k,0.05) & k<=quantile(k,0.95)))/mean(k);
 out.olu90 = (mean(k(k>=quantile(k,0.95)))-mean(k))/std(k); % top 5% of points are
@@ -227,8 +228,8 @@ out.expnlogL = explike(mean(k),k);
 
 % Extreme Value Distribution
 paramhat = evfit(k);
-out.evparm1 = paramhat(1);
-out.evparm2 = paramhat(2);
+out.evparam1 = paramhat(1);
+out.evparam2 = paramhat(2);
 out.evnlogL = evlike(paramhat,k);
 
 % ------------------------------------------------------------------------------

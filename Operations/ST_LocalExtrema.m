@@ -63,7 +63,7 @@ if nargin < 3 || isempty(n)
     end
 end
 
-doPlot = 0; % plot outputs to a figure
+doPlot = false; % plot outputs to a figure
 
 N = length(y); % length of time series
 
@@ -92,20 +92,21 @@ end
 %% Buffer the time series
 % ------------------------------------------------------------------------------
 y_buff = buffer(y,wl); % no overlap
-% each *column* is a window of samples
+% Each *column* is a window of samples:
 if y_buff(end) == 0
     y_buff = y_buff(:,1:end-1); % remove last window if zero-padded
 end
-nw = size(y_buff,2); % number of windows
+numWindows = size(y_buff,2); % number of windows
 
 % ------------------------------------------------------------------------------
 %% Find local extrema
 % ------------------------------------------------------------------------------
 locmax = max(y_buff); % summary of local maxima
 locmin = min(y_buff); % summary of local minima
-abslocmin = abs(locmin); % absoluate value of local minima
-exti = find(abslocmin>locmax);
-locext = locmax; locext(exti) = locmin(exti); % local extrema (furthest from mean; either maxs or mins)
+abslocmin = abs(locmin); % absolute value of local minima
+exti = find(abslocmin > locmax);
+locext = locmax;
+locext(exti) = locmin(exti); % local extrema (furthest from mean; either maxs or mins)
 abslocext = abs(locext); % the magnitude of the most extreme events in each window
 
 if doPlot
@@ -136,8 +137,8 @@ out.stdext = std(locext);
 out.zcext = ST_SimpleStats(locext,'zcross');
 out.meanabsext = mean(abslocext);
 out.medianabsext = median(abslocext);
-out.diffmaxabsmin = sum(abs(locmax-abslocmin))/nw;
-out.uord = sum(sign(locext))/nw; % whether extreme events are more up or down
+out.diffmaxabsmin = sum(abs(locmax-abslocmin))/numWindows;
+out.uord = sum(sign(locext))/numWindows; % whether extreme events are more up or down
 out.maxmaxmed = max(locmax)/median(locmax);
 out.minminmed = min(locmin)/median(locmin);
 out.maxabsext = max(abslocext)/median(abslocext);

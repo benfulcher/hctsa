@@ -53,7 +53,7 @@ function out = DN_RemovePoints(y,removeHow,p)
 %% Preliminaries
 % ------------------------------------------------------------------------------
 N = length(y); % time-series length
-doPlot = 0; % plot output
+doPlot = false; % plot output
 
 % ------------------------------------------------------------------------------
 %% Check inputs
@@ -108,6 +108,8 @@ end
 %% Compute output statistics
 % ------------------------------------------------------------------------------
 out.fzcacrat = CO_FirstZero(y_trim,'ac')/CO_FirstZero(y,'ac');
+out.ac1rat = acf_y_trim(1)/acf_y(1); % includes the sign
+out.ac1diff = abs(acf_y_trim(1)-acf_y(1));
 out.ac2rat = acf_y_trim(2)/acf_y(2); % includes the sign
 out.ac2diff = abs(acf_y_trim(2)-acf_y(2));
 out.ac3rat = acf_y_trim(3)/acf_y(3); % includes the sign

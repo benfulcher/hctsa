@@ -1,10 +1,12 @@
-function TS_local_clear_remove(tsOrOps,idRange,doRemove,whatData)
+function TS_local_clear_remove(whatData,tsOrOps,idRange,doRemove)
 % TS_local_clear_remove     Clear or remove data from an hctsa dataset
 %
-% 'Clear' means clearing any calculations performed about a given time series
-% or operation, but keeping it in the dataset.
-% 'Remove' means removing the time series or operation from the dataset completely.
-% The result is saved back to the hctsa .mat datafile provided.
+% 'clear' (doRemove = false) means clearing any calculations performed about a
+% given time series or operation, but keeping it in the dataset.
+% 'remove' (doRemove = true) means removing the time series or operation from
+% the dataset completely.
+%
+% The result is saved back to the hctsa-formatted .mat data file provided as whatData.
 %
 %---INPUTS:
 % tsOrOps -- either 'ts' or 'ops' for whether to work with either time series
@@ -17,10 +19,15 @@ function TS_local_clear_remove(tsOrOps,idRange,doRemove,whatData)
 %---EXAMPLE USAGE:
 % This clears the data about the time series with IDs 1,2,3,4, and 5 from the hctsa dataset
 % stored in HCTSA.mat:
-% >> TS_local_clear_remove('ts',1:5,0,'HCTSA.mat');
+% >> TS_local_clear_remove('HCTSA.mat','ts',1:5,false);
 %
 % This *removes* the time series with IDs from 1:5 from the dataset completely:
-% >> TS_local_clear_remove('ts',1:5,1,'HCTSA.mat');
+% >> TS_local_clear_remove('HCTSA.mat','ts',1:5,true);
+%
+% IDs for a given keyword can be retrieved using TS_getIDs. This example removes
+% all time series from HCTSA.mat that have the keyword 'noise':
+% >> noiseIDs = TS_getIDs('noise','HCTSA.mat','ts');
+% >> TS_local_clear_remove('HCTSA.mat','ts',noiseIDs,true);
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -48,7 +55,11 @@ function TS_local_clear_remove(tsOrOps,idRange,doRemove,whatData)
 %% Preliminaries and input checking
 %-------------------------------------------------------------------------------
 
-if nargin < 1
+if nargin < 1 || isempty(whatData)
+    whatData = 'raw'; % normally want to clear data from the local store
+end
+
+if nargin < 2
 	tsOrOps = 'ts';
 end
 switch tsOrOps
@@ -63,16 +74,12 @@ otherwise
 end
 
 % Must specify a set of time series
-if nargin < 2 || min(size(idRange)) ~= 1
+if nargin < 3 || min(size(idRange)) ~= 1
 	error('Specify a range of IDs');
 end
 
-if nargin < 3 % doRemove
+if nargin < 4 % doRemove
     error('You must specify whether to remove the %s or just clear their data results',theWhat)
-end
-
-if nargin < 4
-    whatData = 'raw'; % normally want to clear data from the local store
 end
 
 % ------------------------------------------------------------------------------

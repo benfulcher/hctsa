@@ -236,7 +236,7 @@ for i = 1:numPred
 
     % Get statistics on output time series
     meandiffs(i) = abs(mean(yp.y) - mean(yTest.y));
-    stdrats(i) = abs(std(yp.y)/std(yTest.y));
+    stdrats(i) = std(yp.y)/std(yTest.y);
 
 %     % 1) Get statistics on residuals
 %     residout = MF_ResidualAnalysis(mresiduals);
