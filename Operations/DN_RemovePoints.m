@@ -1,4 +1,4 @@
-function out = DN_RemovePoints(y,removeHow,p)
+function out = DN_RemovePoints(y,removeHow,p,removeOrSaturate)
 % DN_RemovePoints   How time-series properties change as points are removed.
 %
 % A proportion, p, of points are removed from the time series according to some
@@ -14,6 +14,8 @@ function out = DN_RemovePoints(y,removeHow,p)
 %               (v) 'random': at random.
 %
 % p, the proportion of points to remove
+%
+% removeOrSaturate, to remove points (false) or saturate their values (true)
 %
 %---OUTPUTS: Statistics include the change in autocorrelation, time scales, mean,
 % spread, and skewness.
@@ -83,6 +85,14 @@ end
 
 rKeep = sort(is(1:round(N*(1-p))),'ascend');
 y_trim = y(rKeep);
+
+if removeOrSaturate
+    if any(strcmp(removeHow, {'random', 'absclose'}))
+        error('Cannot saturate when using ''%s'' method', removeHow)
+    else
+        y_trim = min(max(y, min(y_trim)), max(y_trim));
+    end
+end
 
 if doPlot
     figure('color','w')
