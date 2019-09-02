@@ -66,6 +66,9 @@ end
 if nargin < 3 || isempty(p)
     p = 0.1; % 10%
 end
+if nargin < 4 || isempty(removeOrSaturate)
+    removeOrSaturate = 0;
+end
 
 % ------------------------------------------------------------------------------
 switch removeHow
