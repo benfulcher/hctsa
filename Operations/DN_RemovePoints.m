@@ -15,7 +15,7 @@ function out = DN_RemovePoints(y,removeHow,p,removeOrSaturate)
 %
 % p, the proportion of points to remove
 %
-% removeOrSaturate, to remove points (false) or saturate their values (true)
+% removeOrSaturate, to remove points ('remove') or saturate their values ('saturate')
 %
 %---OUTPUTS: Statistics include the change in autocorrelation, time scales, mean,
 % spread, and skewness.
@@ -67,81 +67,126 @@ if nargin < 3 || isempty(p)
     p = 0.1; % 10%
 end
 if nargin < 4 || isempty(removeOrSaturate)
-    removeOrSaturate = 0;
+    removeOrSaturate = 'remove';
+end
+
+if ~BF_iszscored(y)
+    warning('The input time series should be z-scored')
 end
 
 % ------------------------------------------------------------------------------
+% Sort time-series values on different criteria, ordered by those to be *kept*
 switch removeHow
-    case 'absclose' % remove a proportion p of points closest to the mean
-        [~, is] = sort(abs(y),'descend');
-    case 'absfar' % remove a proportion p of points furthest from the mean
-        [~, is] = sort(abs(y),'ascend');
+    case 'absclose'
+        % Remove a proportion p of points closest to the mean
+        [~,is] = sort(abs(y),'descend');
+    case 'absfar'
+        % Remove/saturate a proportion p of points furthest from the mean
+        [~,is] = sort(abs(y),'ascend');
     case 'min'
-        [~, is] = sort(y,'descend'); % remove a proportion p of points with the lowest values
+        % Remove/saturate a proportion p of points with the lowest values
+        [~,is] = sort(y,'descend');
     case 'max'
-        [~, is] = sort(y,'ascend'); % remove a proportion p of points with the highest values
+        % Remove/saturate a proportion p of points with the highest values
+        [~,is] = sort(y,'ascend');
     case 'random'
         is = randperm(N);
     otherwise
-        error('Unknwon method ''%s''',removeHow);
+        error('Unknown method ''%s''',removeHow);
 end
 
+% Indices of points to *keep*:
 rKeep = sort(is(1:round(N*(1-p))),'ascend');
-y_trim = y(rKeep);
 
-if removeOrSaturate
-    if any(strcmp(removeHow, {'random', 'absclose'}))
-        error('Cannot saturate when using ''%s'' method', removeHow)
-    else
-        y_trim = min(max(y, min(y_trim)), max(y_trim));
+% Indices of points to *transform*:
+rTransform = setxor(1:N,rKeep);
+
+%-------------------------------------------------------------------------------
+% Do the removing/saturating to convert y -> yTransform
+switch removeOrSaturate
+case 'remove'
+    % Remove the targeted points:
+    yTransform = y(rKeep);
+
+case 'saturate'
+    % Saturate out the targeted points:
+    switch removeHow
+    case 'max'
+        yTransform = y;
+        yTransform(rTransform) = max(y(rKeep));
+    case 'min'
+        yTransform = y;
+        yTransform(rTransform) = min(y(rKeep));
+    case 'absfar'
+        yTransform = y;
+        yTransform(rTransform) > median(y) = max(y(rKeep));
+        yTransform(rTransform) < median(y) = min(y(rKeep));
+    otherwise
+        error('Cannot ''saturate'' when using ''%s'' method',removeHow)
     end
+otherwise
+    error('Unknown removeOrSaturate option: ''%s''');
 end
 
+%-------------------------------------------------------------------------------
+% SIMPLE PLOT:
 if doPlot
     figure('color','w')
     hold off
     plot(y,'ok');
     hold on;
-    plot(rKeep,y_trim,'.r')
+    plot(rKeep,yTransform,'.r')
     hold off;
-    histogram(y_trim,50)
+    histogram(yTransform,50)
 end
 
+% Compute some autocorrelation properties:
 acf_y = SUB_acf(y,8);
-acf_y_trim = SUB_acf(y_trim,8);
+acf_yTransform = SUB_acf(yTransform,8);
 
 if doPlot
     figure('color','w')
     hold off;
     plot(acf_y,':b'); hold on;
-    plot(acf_y_trim,':r');
+    plot(acf_yTransform,':r');
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Compute output statistics
-% ------------------------------------------------------------------------------
-out.fzcacrat = CO_FirstZero(y_trim,'ac')/CO_FirstZero(y,'ac');
-out.ac1rat = acf_y_trim(1)/acf_y(1); % includes the sign
-out.ac1diff = abs(acf_y_trim(1)-acf_y(1));
-out.ac2rat = acf_y_trim(2)/acf_y(2); % includes the sign
-out.ac2diff = abs(acf_y_trim(2)-acf_y(2));
-out.ac3rat = acf_y_trim(3)/acf_y(3); % includes the sign
-out.ac3diff = abs(acf_y_trim(3)-acf_y(3));
-out.sumabsacfdiff = sum(abs(acf_y_trim-acf_y));
-out.mean = mean(y_trim);
-out.median = median(y_trim);
-out.std = std(y_trim);
-out.skewnessrat = skewness(y_trim)/skewness(y); % Statistics Toolbox
-out.kurtosisrat = kurtosis(y_trim)/kurtosis(y); % Statistics Toolbox
+%-------------------------------------------------------------------------------
+
+% Two main comparison functions:
+f_absDiff = @(x1,x2) abs(x1-x2); % ignores the sign
+f_ratio = @(x1,x2) x1/x2; % includes the sign
+
+out.fzcacrat = f_ratio(CO_FirstZero(yTransform,'ac'),CO_FirstZero(y,'ac');
+
+out.ac1rat = f_ratio(acf_yTransform(1),acf_y(1);
+out.ac1diff = f_absDiff(acf_yTransform(1),acf_y(1));
+
+out.ac2rat = f_ratio(acf_yTransform(2),acf_y(2));
+out.ac2diff = f_absDiff(acf_yTransform(2),acf_y(2));
+
+out.ac3rat = f_ratio(acf_yTransform(3),acf_y(3));
+out.ac3diff = f_absDiff(acf_yTransform(3),acf_y(3));
+
+out.sumabsacfdiff = sum(abs(acf_yTransform-acf_y));
+out.mean = mean(yTransform);
+out.median = median(yTransform);
+out.std = std(yTransform);
+
+% Requires Statistics Toolbox:
+out.skewnessrat = skewness(yTransform)/skewness(y);
+out.kurtosisrat = kurtosis(yTransform)/kurtosis(y);
 
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 function acf = SUB_acf(x,n)
     % computes autocorrelation of the input sequence, x, up to a maximum time
     % lag, n
     acf = zeros(n,1);
     for i = 1:n
-        acf(i) = CO_AutoCorr(x,i-1,'Fourier');
+        acf(i) = CO_AutoCorr(x,i,'Fourier');
     end
 end
 
