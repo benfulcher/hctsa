@@ -125,7 +125,7 @@ case 'saturate'
         error('Cannot ''saturate'' when using ''%s'' method',removeHow)
     end
 otherwise
-    error('Unknown removeOrSaturate option: ''%s''', removeOrSaturate);
+    error('Unknown removeOrSaturate option: ''%s''',removeOrSaturate);
 end
 
 %-------------------------------------------------------------------------------
