@@ -119,13 +119,13 @@ case 'saturate'
         yTransform(rTransform) = min(y(rKeep));
     case 'absfar'
         yTransform = y;
-        yTransform(rTransform) > median(y) = max(y(rKeep));
-        yTransform(rTransform) < median(y) = min(y(rKeep));
+        yTransform(yTransform > max(y(rKeep))) = max(y(rKeep));
+        yTransform(yTransform < min(y(rKeep))) = min(y(rKeep));
     otherwise
         error('Cannot ''saturate'' when using ''%s'' method',removeHow)
     end
 otherwise
-    error('Unknown removeOrSaturate option: ''%s''');
+    error('Unknown removeOrSaturate option: ''%s''', removeOrSaturate);
 end
 
 %-------------------------------------------------------------------------------
@@ -159,9 +159,9 @@ end
 f_absDiff = @(x1,x2) abs(x1-x2); % ignores the sign
 f_ratio = @(x1,x2) x1/x2; % includes the sign
 
-out.fzcacrat = f_ratio(CO_FirstZero(yTransform,'ac'),CO_FirstZero(y,'ac');
+out.fzcacrat = f_ratio(CO_FirstZero(yTransform,'ac'),CO_FirstZero(y,'ac'));
 
-out.ac1rat = f_ratio(acf_yTransform(1),acf_y(1);
+out.ac1rat = f_ratio(acf_yTransform(1),acf_y(1));
 out.ac1diff = f_absDiff(acf_yTransform(1),acf_y(1));
 
 out.ac2rat = f_ratio(acf_yTransform(2),acf_y(2));
