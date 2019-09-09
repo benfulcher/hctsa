@@ -23,7 +23,7 @@ for *hctsa* is on [gitbook](https://hctsa-users.gitbook.io/hctsa-manual).
 
 ### Downloading the repository
 
-For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the green *Download .zip* button.
+For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the green _Clone or download_ button, and then clicking _Download .zip_.
 
 It is recommended to use the repository with git.
 For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
