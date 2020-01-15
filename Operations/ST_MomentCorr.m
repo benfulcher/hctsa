@@ -71,7 +71,7 @@ if windowLength < 1
     windowLength = ceil(N*windowLength);
 end
 
-% sliding window overlap length
+% Sliding window overlap length
 if nargin < 3 || isempty(wOverlap)
     wOverlap = 1/5;
 end

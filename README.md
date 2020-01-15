@@ -109,6 +109,7 @@ Let me know if I've missed any!
 * Detecting mild cognitive impairment using single-channel EEG to measure speech-evoked brain responses. [Paper](https://ieeexplore.ieee.org/abstract/document/8693868)
 * Non-intrusive load monitoring for appliance detection and electrical power saving for buildings. [Paper](https://doi.org/10.1016/j.enbuild.2019.05.028).
 * Classification of heartbeats measured using single-lead ECG. [Paper](https://ieeexplore.ieee.org/abstract/document/8757135).
+* Hand gesture recognition. [Paper](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0227039).
 
 
 ## Acknowledgements
