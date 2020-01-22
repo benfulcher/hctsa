@@ -23,7 +23,7 @@ for *hctsa* is on [gitbook](https://hctsa-users.gitbook.io/hctsa-manual).
 
 ### Downloading the repository
 
-For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the green *Download .zip* button.
+For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the green _Clone or download_ button, and then clicking _Download .zip_.
 
 It is recommended to use the repository with git.
 For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
@@ -109,6 +109,7 @@ Let me know if I've missed any!
 * Detecting mild cognitive impairment using single-channel EEG to measure speech-evoked brain responses. [Paper](https://ieeexplore.ieee.org/abstract/document/8693868)
 * Non-intrusive load monitoring for appliance detection and electrical power saving for buildings. [Paper](https://doi.org/10.1016/j.enbuild.2019.05.028).
 * Classification of heartbeats measured using single-lead ECG. [Paper](https://ieeexplore.ieee.org/abstract/document/8757135).
+* Hand gesture recognition. [Paper](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0227039).
 
 
 ## Acknowledgements

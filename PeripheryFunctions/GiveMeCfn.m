@@ -154,7 +154,7 @@ else
     % (Multiclass model; harder)
     switch whatClassifier
     case 'knn'
-       t = templateKNN('NumNeighbors',3,'Standardize',1);
+       t = templateKNN('NumNeighbors',3,'Standardize',true);
        if beVerbose, fprintf(1,'Using knn classifier\n'); end
     case 'tree'
        t = templateTree('Surrogate','off');
