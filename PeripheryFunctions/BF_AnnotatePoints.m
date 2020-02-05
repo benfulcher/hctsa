@@ -51,7 +51,7 @@ end
 if isfield(annotateParams,'userInput')
     userInput = annotateParams.userInput;
 else
-    userInput = 1; % user input points rather than being randomly chosen
+    userInput = true; % user input points rather than being randomly chosen
 end
 if isfield(annotateParams,'fdim')
     fdim = annotateParams.fdim;
@@ -75,8 +75,13 @@ if isfield(annotateParams,'theLineWidth')
 else
     theLineWidth = 0.8; % % line width for time series
 end
-
-plotCircle = 1; % circle around annotated points
+% Work through colors of the rainbow if only one class:
+if isfield(annotateParams,'doRainbow')
+    doRainbow = annotateParams.doRainbow;
+else
+    doRainbow = true;
+end
+plotCircle = true; % circle around annotated points
 
 %-------------------------------------------------------------------------------
 
@@ -107,7 +112,13 @@ else
     groupColors = annotateParams.groupColors;
 end
 if numGroups==1
-    rainbowColors = [BF_getcmap('set1',5,1); BF_getcmap('dark2',6,1)];
+    if doRainbow
+        rainbowColors = [BF_getcmap('set1',5,1); BF_getcmap('dark2',6,1)];
+    else
+        % all black:
+        rainbowColors = repmat([0,0,0],20,1);
+        rainbowColors = mat2cell(rainbowColors,ones(20,1));
+    end
 end
 
 %-------------------------------------------------------------------------------
@@ -168,6 +179,8 @@ for j = 1:numAnnotate
     % Crop the time series:
     if ~isempty(maxL)
         timeSeriesSegment = TimeSeries.Data{iPlot}(1:min(maxL,end));
+    else
+        timeSeriesSegment = [];
     end
 
     % When only one group, cycle through rainbow colors for each annotation:
@@ -221,9 +234,11 @@ for j = 1:numAnnotate
     end
 
     % Annotate the time series
-    plot(px(1)+linspace(0,fdim(1)*pWidth,length(timeSeriesSegment)),...
-            py(1)+fdim(2)*pHeight*(timeSeriesSegment-min(timeSeriesSegment))/(max(timeSeriesSegment)-min(timeSeriesSegment)),...
-                '-','color',groupColors{theGroup},'LineWidth',theLineWidth);
+    if ~isempty(timeSeriesSegment)
+        plot(px(1)+linspace(0,fdim(1)*pWidth,length(timeSeriesSegment)),...
+                py(1)+fdim(2)*pHeight*(timeSeriesSegment-min(timeSeriesSegment))/(max(timeSeriesSegment)-min(timeSeriesSegment)),...
+                    '-','color',groupColors{theGroup},'LineWidth',theLineWidth);
+    end
 
 end
 

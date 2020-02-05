@@ -92,7 +92,7 @@ end
 numTopFeatures = inputP.Results.numTopFeatures;
 numFeaturesDistr = inputP.Results.numFeaturesDistr;
 numNulls = inputP.Results.numNulls;
-clear inputP;
+clear('inputP');
 
 % --------------------------------------------------------------------------
 %% Load the data
