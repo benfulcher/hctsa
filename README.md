@@ -129,7 +129,7 @@ The vast and growing collection of time-series data can also be downloaded.
 
 Is over 7000 just a few too many features for your application?
 Do you not have access to a Matlab license?
-_catch22_ has you all of your faux rhetorical questions covered.
+_catch22_ has all of your faux-rhetorical questions covered.
 This reduced set of 22 features, determined through a combination of classification performance and mutual redundancy as explained in [this paper](https://arxiv.org/abs/1901.10200v2), is available [here](https://github.com/chlubba/catch22) as an efficiently coded C implementation with wrappers for python and R.
 
 ### _hctsa_ datasets
