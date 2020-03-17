@@ -111,6 +111,7 @@ if doSpectral
 end
 
 %% 3) Remove piece-wise polynomials
+N = length(y);
 
 yp.p1_5 = SUB_rempt(y,1,5);
 yp.p1_10 = SUB_rempt(y,1,10);
@@ -317,7 +318,6 @@ end
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
     function ydt = SUB_rempt(y,order,nbits)
-        N = length(y);
         ydt = zeros(N,1);
         bits = round(linspace(0,N,nbits+1));
         for k = 1:nbits
