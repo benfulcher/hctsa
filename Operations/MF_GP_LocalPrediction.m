@@ -34,7 +34,7 @@ function out = MF_GP_LocalPrediction(y,covFunc,numTrain,numTest,numPreds,pmode,r
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

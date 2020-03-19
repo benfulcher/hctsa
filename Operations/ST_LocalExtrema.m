@@ -19,7 +19,7 @@ function out = ST_LocalExtrema(y,lorf,n)
 % n, somehow specifies the window length given the setting of lorf above.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

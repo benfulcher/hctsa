@@ -70,7 +70,7 @@ function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
 % scales tau.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

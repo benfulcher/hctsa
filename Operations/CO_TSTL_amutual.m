@@ -23,7 +23,7 @@ function out = CO_TSTL_amutual(y,maxTau,numBins,versionTwo)
 % extrema, and measures of periodicity in the positions of local maxima.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:
