@@ -149,13 +149,14 @@ The following time-series analysis packages are provided with the software (in t
 
 ## Other time-series analysis resources
 
-Other good resources for time-series analysis, e.g., in other programming languages are listed here.
+Other good resources for time-series analysis, e.g., in other programming languages (python and R) are listed here.
 
 ### `pyopy`
 
 This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
 
 ### `hctsaAnalysisPython`
+
 Some beginner-level python code for analyzing the results of _hctsa_ calculations is [here](https://github.com/benfulcher/hctsaAnalysisPython).
 
 ### Generating time-series data from synthetic models
@@ -172,7 +173,12 @@ These R packages are by [Rob Hyndman](https://twitter.com/robjhyndman).
 The first, [`tscompdata`](https://github.com/robjhyndman/tscompdata), makes available existing collections of time-series data for analysis.
 The second, [`tsfeatures`](https://github.com/robjhyndman/tsfeatures), includes implementations of a range of time-series features.
 
+### `TSFEL`
+
+[TSFEL](https://github.com/fraunhoferportugal/tsfel), 'Time Series Feature Extraction Library', is a python package with implementations of 60 simple time-series features (with unit tests).
+
 ### `Khiva`
+
 [Khiva](https://github.com/shapelets/khiva) is an open-source library of efficient algorithms to analyse time series in GPU and CPU.
 
 ### `pyunicorn`
