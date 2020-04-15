@@ -41,8 +41,8 @@ function out = CO_AutoCorrShape(y,stopWhen)
 % INPUTS:
 %-------------------------------------------------------------------------------
 if nargin < 2
-    % Stop at double the first time ACF hits within a threshold of ~zero
-    stopWhen = 10;
+    % Stop looking at a given time lag
+    stopWhen = 'posDrown';
 end
 
 % ------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ end
 % ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox');
 
-doPlot = 0; % plot outputs from this function
+doPlot = false; % plot outputs from this function
 N = length(y); % length of the time series
 
 % Only look up to when two consecutive values are under the significance threshold
@@ -63,13 +63,33 @@ th = 2/sqrt(N); % significance threshold, th
 % Compute the autocorrelation function, acf
 acf = zeros(N,1);
 
+% At what lag does the acf drop to zero, Ndrown (by my definition)?
 if isnumeric(stopWhen)
     acf = CO_AutoCorr(y,0:stopWhen,'Fourier');
     Ndrown = stopWhen;
 elseif ischar(stopWhen) % compute ACF up to a given threshold:
+    Ndrown = 0; % the point at which ACF ~ 0
     switch stopWhen
+    case 'posDrown'
+        % Stop when ACF drops below threshold, th
+        for i = 1:N
+            acf(i) = CO_AutoCorr(y,i-1,'Fourier'); % *** NOTE THIS! *** acf vector indicies are not lags
+            if acf(i) < th
+                % Ensure ACF is all positive:
+                if acf(i) > 0
+                    Ndrown = i;
+                    acf = acf(1:i);
+                else
+                    Ndrown = i-1;
+                    acf = acf(1:i-1);
+                end
+                break
+            end
+        end
+        % This should yield the initial, positive portion of the ACF
+        assert(all(acf > 0));
     case 'drown'
-        % Stop when ACF ~ 0
+        % Stop when ACF is very close to 0 (within threshold, th = 2/sqrt(N))
         for i = 1:N
             acf(i) = CO_AutoCorr(y,i-1,'Fourier'); % *** NOTE THIS! *** acf vector indicies are not lags
             if (i > 1) && (abs(acf(i)) < th)
@@ -80,7 +100,6 @@ elseif ischar(stopWhen) % compute ACF up to a given threshold:
         end
     case 'doubleDrown'
         % Stop at 2*tau, where tau is the lag where ACF ~ 0 (within 1/sqrt(N) threshold)
-        Ndrown = 0; % the point at which ACF ~ 0
         for i = 1:N
             acf(i) = CO_AutoCorr(y,i-1,'Fourier'); % *** NOTE acf vector indicies are not lags
             if (Ndrown > 0) && (i==Ndrown*2)
@@ -90,7 +109,16 @@ elseif ischar(stopWhen) % compute ACF up to a given threshold:
                 Ndrown = i;
             end
         end
+    otherwise
+        error('Unknown ACF decay criterion: ''%s''',stopWhen);
     end
+end
+
+% Check for good behavior:
+if any(isnan(acf))
+    % This is an anomalous time series (e.g., all constant, or conatining NaNs)
+    out = NaN;
+    return
 end
 
 if doPlot
@@ -101,19 +129,35 @@ if doPlot
     xlabel('time delay')
 end
 
-out.Nac = Ndrown; % the distance the acf lasts until significance is 'drowned out' (by my definition)
+out.Nac = Ndrown;
 
 Nac = length(acf);
 
 %-------------------------------------------------------------------------------
 % Basic stats on the ACF
 %-------------------------------------------------------------------------------
+out.sumacf = sum(acf);
 out.meanacf = mean(acf);
-out.meanabsacf = mean(abs(acf));
+if ~strcmp(stopWhen,'posDrown')
+    % Can have negative entries:
+    out.meanabsacf = mean(abs(acf));
+    out.sumabsacf = sum(abs(acf));
+end
 
 % Autocorrelation of the ACF
-out.ac1 = CO_AutoCorr(acf,1,'Fourier');
-out.actau = CO_AutoCorr(acf,CO_FirstZero(acf,'ac'),'Fourier');
+minPointsForACFofACF = 5; % can't take lots of complex stats with fewer than this
+if Nac > minPointsForACFofACF
+    out.ac1 = CO_AutoCorr(acf,1,'Fourier');
+    if all(acf > 0)
+        out.actau = NaN;
+    else
+        keyboard
+        out.actau = CO_AutoCorr(acf,CO_FirstZero(acf,'ac'),'Fourier');
+    end
+else
+    out.ac1 = NaN;
+    out.actau = NaN;
+end
 
 %-------------------------------------------------------------------------------
 % Local extrema
@@ -155,75 +199,40 @@ out.pextrema = length(sdsp)/Nac;
 %     out.ac1minima = NaN;
 % end
 
-if Nac > 3 % Need at least four points to fit exponential
-
+%-------------------------------------------------------------------------------
+% FIT EXPONENTIAL DECAY (only for 'posDrown', and if there are enough points)
+%-------------------------------------------------------------------------------
+% Should probably only do this up to the first zero crossing...
+fitSuccess = false;
+minPointsToFitExp = 4; % (need at least four points to fit exponential)
+if strcmp(stopWhen,'posDrown') & (Nac >= minPointsToFitExp)
     %-------------------------------------------------------------------------------
-    %% Fit exponential decay to absolute ACF:
+    %% Fit exponential decay to (absolute) ACF:
+    % (kind of only makes sense for the first positive period)
     %-------------------------------------------------------------------------------
-    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, -0.5]);
-    f = fittype('a*exp(b*x)','options',s);
-    fitSuccess = 0;
+    s = fitoptions('Method','NonlinearLeastSquares','StartPoint',0.5);
+    f = fittype('exp(-b*x)','options',s);
     try
-        [c, gof] = fit((1:Nac)',abs(acf),f); fitSuccess = 1;
+        [c, gof] = fit((0:Nac-1)',acf,f);
+        fitSuccess = true;
     end
-    if fitSuccess % Fit was successful
-        out.fexpabsacf_a = c.a;
-        out.fexpabsacf_b = c.b; % this is important
-        out.fexpabsacf_r2 = gof.rsquare; % this is more important!
-        out.fexpabsacf_adjr2 = gof.adjrsquare;
-        out.fexpabsacf_rmse = gof.rmse;
+end
+if fitSuccess % Fit was successful
+    out.decayTimescale = 1./c.b; % this is important
+    out.fexpacf_r2 = gof.rsquare; % this is more important!
+    % out.fexpacf_adjr2 = gof.adjrsquare;
+    % out.fexpacf_rmse = gof.rmse;
 
-        expfit = c.a*exp(c.b*(1:Nac)');
-        res = abs(acf)-expfit;
-        out.fexpabsacf_stdres = std(res);
+    expfit = exp(c.b*(0:Nac-1)');
+    residuals = acf - expfit;
+    out.fexpacf_stdres = std(residuals);
 
-    else % fit failed -- return NaNs
-        out.fexpabsacf_a = NaN;
-        out.fexpabsacf_b = NaN;
-        out.fexpabsacf_r2 = NaN;
-        out.fexpabsacf_adjr2 = NaN;
-        out.fexpabsacf_rmse = NaN;
-        out.fexpabsacf_stdres = NaN;
-    end
-
-    % %-------------------------------------------------------------------------------
-    % %% Fit linear to local maxima
-    % %-------------------------------------------------------------------------------
-    % s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-0.1 1]);
-    % f = fittype('a*x+b','options',s);
-    % if doPlot
-    %     figure('color','w');
-    %     plot(maxr,acf(maxr),'ok');
-    % end
-    %
-    % fitSuccess = 0;
-    % try [c, gof] = fit(maxr,acf(maxr),f); fitSuccess = 1;
-    % end
-    % if fitSuccess % Fit was successful
-    %     out.flinlmxacf_a = c.a;
-    %     out.flinlmxacf_b = c.b;
-    %     out.flinlmxacf_r2 = gof.rsquare;
-    %     out.flinlmxacf_adjr2 = gof.adjrsquare;
-    %     out.flinlmxacf_rmse = gof.rmse;
-    % else % Fit failed -- return NaNs
-    %     out.flinlmxacf_a = NaN;
-    %     out.flinlmxacf_b = NaN;
-    %     out.flinlmxacf_r2 = NaN;
-    %     out.flinlmxacf_adjr2 = NaN;
-    %     out.flinlmxacf_rmse = NaN;
-    % end
-else
-    out.fexpabsacf_a = NaN;
-    out.fexpabsacf_b = NaN;
-    out.fexpabsacf_r2 = NaN;
-    out.fexpabsacf_adjr2 = NaN;
-    out.fexpabsacf_rmse = NaN;
-    out.fexpabsacf_stdres = NaN;
-    % out.flinlmxacf_a = NaN;
-    % out.flinlmxacf_b = NaN;
-    % out.flinlmxacf_r2 = NaN;
-    % out.flinlmxacf_adjr2 = NaN;
-    % out.flinlmxacf_rmse = NaN;
+else % fit inappropriate (or failed): return NaNs for the relevant stats
+    out.decayTimescale = NaN;
+    out.fexpacf_r2 = NaN;
+    % out.fexpacf_adjr2 = NaN;
+    % out.fexpacf_rmse = NaN;
+    out.fexpacf_stdres = NaN;
 end
 
 

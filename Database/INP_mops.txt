@@ -739,6 +739,7 @@ SB_TransitionMatrix(y,'quantile',5,'ac')	SB_TransitionMatrix_5ac
 SB_TransitionpAlphabet(y,2:40,1)	SB_TransitionpAlphabet_40_1
 SB_TransitionpAlphabet(y,2:20,'ac')	SB_TransitionpAlphabet_20_ac
 CO_AutoCorrShape(y,'drown')	CO_AutoCorrShape_drown
+CO_AutoCorrShape(y,'posDrown')  CO_AutoCorrShape_posDrown
 CO_Embed2_Basic(y,1)	CO_Embed2_Basic_1
 CO_Embed2_Basic(y,'tau')	CO_Embed2_Basic_tau
 PD_PeriodicityWang(y)	PD_PeriodicityWang
