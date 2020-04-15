@@ -38,7 +38,9 @@ if OCTAVE                                                               % Octave
 else                                                                    % Matlab
   if ispc                                                              % Windows
     try                                       % take care of old Matlab versions
-      cc = mex.getCompilerConfigurations; cc = lower(cc.Manufacturer);% compiler
+      cc = mex.getCompilerConfigurations; 
+      cc = cc(1,1); 
+      cc = lower(cc.Manufacturer);% compiler
     catch
       cc = 'lcc';
     end

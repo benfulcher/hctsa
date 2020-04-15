@@ -41,7 +41,7 @@ function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,
 % TS_combine('HCTSA_1.mat','HCTSA_2.mat');
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

@@ -24,7 +24,7 @@ function [yp, best] = PP_PreProcess(y,chooseBest,order,beatThis,doSpectral,rando
 % Based on (really improvement/development of) PP_ModelFit.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:
@@ -57,7 +57,7 @@ function [yp, best] = PP_PreProcess(y,chooseBest,order,beatThis,doSpectral,rando
 
 % NOTE: yp is NOT z-scored -- needs to be z-scored after, if necessary.
 
-doPlot = 0; % plot outputs to figures
+doPlot = false; % plot outputs to figures
 
 % ------------------------------------------------------------------------------
 %% Check inputs, set defaults
@@ -77,7 +77,7 @@ if nargin < 4 || isempty(beatThis)
 end
 
 if nargin < 5 || isempty(doSpectral)
-    doSpectral = 1; % I did this because it's often worse to do a spectral
+    doSpectral = true; % I did this because it's often worse to do a spectral
                     % method when another would do better. i.e., the remove
                     % around a peak can just overpower the structure in the
                     % time series, when indeed all is necessary is a linear
@@ -94,6 +94,7 @@ end
 %% Preliminaries
 % ------------------------------------------------------------------------------
 yp.nothing = y; % this *has* to be the first element of yp
+N = length(y);
 
 %% 1) Differencing
 yp.d1 = diff(y,1);
@@ -111,7 +112,6 @@ if doSpectral
 end
 
 %% 3) Remove piece-wise polynomials
-
 yp.p1_5 = SUB_rempt(y,1,5);
 yp.p1_10 = SUB_rempt(y,1,10);
 yp.p1_20 = SUB_rempt(y,1,20);
@@ -121,9 +121,6 @@ yp.p2_5 = SUB_rempt(y,2,5);
 yp.p2_10 = SUB_rempt(y,2,10);
 yp.p2_20 = SUB_rempt(y,2,20);
 yp.p2_40 = SUB_rempt(y,2,40);
-
-%% Wavelet decomposition
-% Maybe later - don't want to worry about toolboxes so much.
 
 % ------------------------------------------------------------------------------
 %% Rank map onto Gaussian distribution
@@ -212,8 +209,6 @@ switch chooseBest
             % (ii) in-sample prediction error
             e = pe(m,data);
             rmserrs(i) = sqrt(mean(e.^2));
-%             statstore.mabserr(i) = mean(abs(e));
-%             statstore.ac1(i) = CO_AutoCorr(e,1,'Fourier');
         end
 
         % Now choose the one with the *most* error (!) -- i.e., the AR
@@ -249,92 +244,95 @@ end
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
-    function yboxcox = SUB_boxcox(x,lambda)
-        yboxcox = (x.^lambda-1)/lambda;
-    end
+function yboxcox = SUB_boxcox(x,lambda)
+    % Box-Cox transformation of input data, x.
+    yboxcox = (x.^lambda-1)/lambda;
+end
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
-    function ydt =  SUB_remps(y,n,method)
-        % Removes the first n (proportion) of power spectrum
-        % Based on my deseasonalize1.m code
+function ydt =  SUB_remps(y,n,method)
+    % Remove the first n (proportion) of power spectrum
+    % Based on deseasonalize1.m
 
-
-        %% Take the Fourier Transform
-
-        Ny = length(y); % number of samples in y
+    %% Take the Fourier Transform:
+    Ny = length(y); % number of samples in y
 %         t = linspace(0,1,Ny); % time vector
-        NFFT = 2^nextpow2(Ny); % next power of 2
-        Fy = fft(y,NFFT); % fast fourier transform of y
-        Fy1 = Fy(1:NFFT/2+1);
+    NFFT = 2^nextpow2(Ny); % next power of 2
+    Fy = fft(y,NFFT); % fast fourier transform of y
+    Fy1 = Fy(1:NFFT/2+1);
 %         f = 1/2*linspace(0,1,NFFT/2+1); % frequency vector
 
-        %% Remove this range
-        % set it to (mean of the rest) across this range
-        switch method
-            case 'lf'
-                cullr = 1:floor(length(Fy1)*n);
+    %% Remove this range
+    % set it to (mean of the rest) across this range
+    switch method
+        case 'lf'
+            cullr = 1:floor(length(Fy1)*n);
 
-            case 'biggest'
-                cullr = find(abs(Fy1) > quantile(abs(Fy1),n));
+        case 'biggest'
+            cullr = find(abs(Fy1) > quantile(abs(Fy1),n));
 
-            otherwise
-                error('Unknown method ''%s''', method);
-        end
-
-        meanrest = mean(abs(Fy1(setxor(1:end,cullr))));
-%         meanrest = 0;
-        FyF = Fy;
-        FyF(cullr) = meanrest;
-        FyF(end-cullr+2) = meanrest;
-
-
-        % PLOT
-        if doPlot
-            figure('color','w'); box('on');
-            plot(abs(Fy)),hold on; plot(abs(FyF),'--r'); hold off
-            input('Here''s the filtered one...')
-            plot(abs(FyF),'k');
-            % input('Again on it''s own...')
-        end
-
-        %% Inverse Fourier Transform
-        ydt = ifft(FyF,NFFT);
-        ydt = zscore(ydt(1:Ny)); % crop to desired length
-
-        % CRUDE REMOVAL OF EDGE EFFECTS
-        lose = min(5,floor(0.01*length(ydt))); % don't want to lose more than 1% of time series
-        ydt = ydt(1+lose:end-lose);
-
-        % PLOT
-        if doPlot
-            figure('color','w'); box('on');
-            plot(zscore(ydt),'b'); hold on; plot(y,'r'); hold off;
-            % input(['Mean difference is ' num2str(mean(y-ydt))])
-        end
+        otherwise
+            error('Unknown method ''%s''', method);
     end
+
+    meanRest = mean(abs(Fy1(setxor(1:end,cullr))));
+%         meanRest = 0;
+    FyF = Fy;
+    FyF(cullr) = meanRest;
+    FyF(end-cullr+2) = meanRest;
+
+
+    % PLOT
+    if doPlot
+        figure('color','w'); box('on');
+        plot(abs(Fy)),hold on; plot(abs(FyF),'--r'); hold off
+        input('Here''s the filtered one...')
+        plot(abs(FyF),'k');
+        % input('Again on it''s own...')
+    end
+
+    %% Inverse Fourier Transform
+    ydt = ifft(FyF,NFFT);
+    ydt = zscore(ydt(1:Ny)); % crop to desired length
+
+    % CRUDE REMOVAL OF EDGE EFFECTS
+    lose = min(5,floor(0.01*length(ydt))); % don't want to lose more than 1% of time series
+    ydt = ydt(1+lose:end-lose);
+
+    % PLOT
+    if doPlot
+        figure('color','w');
+        box('on');
+        plot(zscore(ydt),'b');
+        hold('on');
+        plot(y,'r');
+        hold('off');
+        % input(['Mean difference is ' num2str(mean(y-ydt))])
+    end
+end
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
-    function ydt = SUB_rempt(y,order,nbits)
-        N = length(y);
-        ydt = zeros(N,1);
-        bits = round(linspace(0,N,nbits+1));
-        for k = 1:nbits
-            r = bits(k)+1 : bits(k+1); % range defined by adjacent 'bits'
-            x = (1:length(r))'; % faux x-range
-            ybit = y(r); % y-range
-            p = polyfit(x,ybit,order);
-            ydt(r) = ybit-polyval(p,x);
-        end
-        ydt = zscore(ydt);
-        if doPlot
-            figure('color','w'); box('on');
-            plot(y,'b'); hold on; plot(ydt,'r');
-            % input('here we are')
-        end
+function ydt = SUB_rempt(tsData,order,numBits)
+    % Remove piece-wise polynomials from input tsData
+    tsDataLength = length(tsData);
+    ydt = zeros(tsDataLength,1);
+    bits = round(linspace(0,tsDataLength,numBits+1));
+    for k = 1:numBits
+        r = bits(k)+1 : bits(k+1); % range defined by adjacent 'bits'
+        x = (1:length(r))'; % faux x-range
+        tsDataBit = tsData(r); % y-range
+        p = polyfit(x,tsDataBit,order);
+        ydt(r) = tsDataBit - polyval(p,x);
     end
-
-
+    ydt = zscore(ydt);
+    if doPlot
+        figure('color','w'); box('on'); hold ('on');
+        plot(y,'b');
+        plot(ydt,'r');
+        % input('here we are')
+    end
+end
 
 end

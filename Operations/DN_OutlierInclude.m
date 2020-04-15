@@ -34,7 +34,7 @@ function out = DN_OutlierInclude(y,thresholdHow,inc)
 %               'abs' -- could give an idea as to asymmetries/nonstationarities??]
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:
@@ -132,18 +132,25 @@ for i = 1:length(thr)
         r = find(y <= -th);
     end
 
-    % Delta t (interval) time series; exceeding threshold:
+    % The Dt (interval) time series of values exceeding threshold
     Dt_exc = diff(r);
 
-    msDt(i,1) = mean(Dt_exc); % the mean value of successive intervals
+    % ~~~~~~~~~~~~
+    % Statistics on the interval time series:
+    % ~~~~~~~~~~~~
+    msDt(i,1) = mean(Dt_exc); % the mean value of inter-event intervals
     msDt(i,2) = std(Dt_exc)/sqrt(length(r)); % error on the mean
     msDt(i,3) = length(Dt_exc)/tot*100; % this is just really measuring the distribution
                                       % : the proportion of possible values
                                       % that are actually used in
                                       % calculation
-    msDt(i,4) = median(r)/(N/2)-1; % the median value of successive intervals
-    msDt(i,5) = mean(r)/(N/2)-1; % between -1 and 1
-    msDt(i,6) = std(r)/sqrt(length(r));
+    % ~~~~~~~~~~~~
+    % Statistics on the indices of over-threshold events:
+    % ~~~~~~~~~~~~
+    % The [x/(N/2)-1] rescales such that the middle index, N/2 => 0, and N maps to 1, 0 maps to -1.
+    msDt(i,4) = median(r)/(N/2)-1; % the median timing of events (relative to middle, N/2)
+    msDt(i,5) = mean(r)/(N/2)-1; % mean timing of events (relative to middle, N/2)
+    msDt(i,6) = std(r)/sqrt(length(r)); % variance of event timing
 end
 
 % ------------------------------------------------------------------------------

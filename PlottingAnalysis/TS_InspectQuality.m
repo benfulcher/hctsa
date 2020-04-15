@@ -21,7 +21,7 @@ function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 %             strings like 'raw' or 'norm' (cf. TS_LoadData)
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:
@@ -162,7 +162,7 @@ case 'master'
     % Text output:
     % ------------
     problemMops = MasterOperations(hadProblem,:);
-    for i = 1:length(problemMops)
+    for i = 1:height(problemMops)
         fprintf('[%u] %s -- %s\n',problemMops.ID(i), ...
                 problemMops.Label{i},problemMops.Code{i});
     end

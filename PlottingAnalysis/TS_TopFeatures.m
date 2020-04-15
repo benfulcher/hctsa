@@ -39,7 +39,7 @@ function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,v
 % testStat_rand, test statistics making up the null distributions
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:
@@ -92,7 +92,7 @@ end
 numTopFeatures = inputP.Results.numTopFeatures;
 numFeaturesDistr = inputP.Results.numFeaturesDistr;
 numNulls = inputP.Results.numNulls;
-clear inputP;
+clear('inputP');
 
 % --------------------------------------------------------------------------
 %% Load the data

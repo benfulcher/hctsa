@@ -44,7 +44,7 @@ function out = NL_TISEAN_d2(y, tau, maxm, theilerWin)
 % goodness of fit statistic, and a dimension estimate.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2018, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:
