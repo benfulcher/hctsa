@@ -185,6 +185,9 @@ The second, [`tsfeatures`](https://github.com/robjhyndman/tsfeatures), includes 
 
 A python-based nonlinear time-series analysis and complex systems code package, [pyunicorn](http://scitation.aip.org/content/aip/journal/chaos/25/11/10.1063/1.4934554).
 
+### `TSFuse` (python)
+[TSFuse](https://github.com/arnedb/tsfuse) can extract features from multivariate time series.
+
 ## Acknowledgements :wave:
 
 Many thanks go to [Romesh Abeysuriya](https://github.com/RomeshA) for helping with the mySQL database set-up and install scripts, and [Santi Villalba](https://github.com/sdvillal) for lots of helpful feedback and advice on the software.
