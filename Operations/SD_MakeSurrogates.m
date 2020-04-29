@@ -3,7 +3,7 @@ function out = SD_MakeSurrogates(x,surrMethod,numSurrs,extraParams,randomSeed)
 %
 % Method described relatively clearly in Guarin Lopez et al. (arXiv, 2010)
 % Used bits of aaft code that references (and presumably was obtained from)
-% "ìSurrogate data test for nonlinearity including monotonic
+% "Surrogate data test for nonlinearity including monotonic
 % transformations", D. Kugiumtzis, Phys. Rev. E, vol. 62, no. 1, 2000.
 %
 % Note that many other surrogate data methods exist that could later be
