@@ -209,7 +209,7 @@ if numClasses > 1
             [classRate(3),~,whatLoss] = GiveMeCfn(whatClassifier,featureData,groupLabels,featureData(:,1:2),groupLabels,numClasses);
             % Record that classification was performed successfully:
             didClassify = true;
-            fprintf(1,'%s in 2-d space: %.2f%%\n',whatLoss,classRate(3));
+            fprintf(1,'%s in 2-dim space: %.2f%%\n',whatLoss,classRate(3));
         end
     catch emsg
         fprintf(1,'\nClassification rates not computed\n(%s)\n',emsg.message);

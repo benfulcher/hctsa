@@ -1,4 +1,4 @@
-function [foldLosses,nullStat] = TS_classify(whatData,whatClassifier,varargin)
+function [foldLosses,nullStat] = TS_Classify(whatData,whatClassifier,varargin)
 % TS_classify   Classify groups in the data using all features (and PCs)
 %
 % This function uses a classifier to learn group labels assigned to time series
@@ -55,8 +55,7 @@ if nargin < 1
     whatData = 'norm';
 end
 if nargin < 2
-    whatClassifier = 'svm_linear';
-    % 'svm', 'discriminant', 'knn'
+    whatClassifier = 'svm_linear'; % 'svm', 'discriminant', 'knn'
 end
 
 % Use an inputParser to control additional plotting options as parameters:
@@ -142,15 +141,16 @@ foldLosses = zeros(numRepeats,1);
 for i = 1:numRepeats
     [foldLosses(i),CVMdl{i},outputStat] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group);
 end
-fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
-                 ' features:\n%.3f +/- %.3f%%\n\n'],...
-                    outputStat,...
-                    numClasses,...
-                    numFolds,...
-                    whatClassifier,...
-                    numFeatures,...
-                    mean(foldLosses),...
-                    std(foldLosses));
+
+% Display results to commandline:
+if numRepeats==1
+    accuracyBit = sprintf('%.3f%%',mean(foldLosses));
+else
+    accuracyBit = sprintf('%.3f +/- %.3f%%',mean(foldLosses),std(foldLosses));
+end
+fprintf(1,['\nMean (across folds) %s (%u-class) using %u-fold %s classification with %u' ...
+                 ' features:\n%s\n\n'],...
+        outputStat,numClasses,numFolds,whatClassifier,numFeatures,accuracyBit);
 
 % Plot as a histogram:
 if doPlot

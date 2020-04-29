@@ -101,7 +101,8 @@ Let me know if I've missed any!
 * Classification of heartbeats measured using single-lead ECG. [Paper in IEEE 42nd International Convention on Information and Communication Technology, Electronics and Microelectronics (MIPRO)](https://ieeexplore.ieee.org/abstract/document/8757135).
 * Hand gesture recognition. [Paper in PLoS ONE](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0227039).
 * Post-Cardiac Arrest Outcome Prediction. [Preprint on arXiv](https://arxiv.org/abs/2002.03309).
-* Assessing the stress controllability of neurons from their activity time series. [Paper in Nat Neurosci](https://www.nature.com/articles/s41593-020-0591-0).
+* Assessing the stress controllability of neurons from their activity time series. [Paper in Nat. Neurosci.](https://www.nature.com/articles/s41593-020-0591-0).
+* Assessing stress-induced changes in astrocyte calcium dynamics. [Paper in Nat. Comms](https://www.nature.com/articles/s41467-020-15778-9)
 
 ## *hctsa* licenses
 
