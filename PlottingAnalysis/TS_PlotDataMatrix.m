@@ -1,9 +1,9 @@
-function TS_plot_DataMatrix(varargin)
-% TS_plot_DataMatrix   Plot the data matrix.
+function TS_PlotDataMatrix(varargin)
+% TS_PlotDataMatrix   Plot the data matrix.
 %
 %---EXAMPLE USAGE:
-% TS_plot_DataMatrix; % plots clustered data if it exists
-% TS_plot_DataMatrix('whatData','norm'); % plots normalized data
+% TS_PlotDataMatrix; % plots clustered data if it exists
+% TS_PlotDataMatrix('whatData','norm'); % plots normalized data
 %
 %---INPUTS:
 % whatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
@@ -97,7 +97,7 @@ groupReorder = inputP.Results.groupReorder;
 customColorMap = inputP.Results.customColorMap;
 colorNaNs = inputP.Results.colorNaNs;
 customOrder = inputP.Results.customOrder;
-clear inputP;
+clear('inputP');
 
 % --------------------------------------------------------------------------
 %% Read in the data
@@ -186,8 +186,8 @@ if colorGroups
     fprintf(1,'Coloring data according to %u groups\n',numGroups);
 
     % Change range of TS_DataMat to make use of new colormap appropriately
-    ff = 0.9999999;
-    squashMe = @(x)ff*(x - min(x(:)))/(max(x(:))-min(x(:)));
+    almost1 = 1 - 1e-7;
+    squashMe = @(x) almost1*(x - min(x(:)))/(max(x(:))-min(x(:)));
     TS_DataMat = squashMe(TS_DataMat);
     for jo = 1:numGroups
         TS_DataMat(gi{jo},:) = squashMe(TS_DataMat(gi{jo},:)) + jo - 1;

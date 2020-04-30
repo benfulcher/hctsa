@@ -348,7 +348,7 @@ if ismember('datamatrix',whatPlots)
     dataLocal = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
                     'TimeSeries',TimeSeries,...
                     'Operations',Operations(featInd(ixFeat),:));
-    TS_plot_DataMatrix(dataLocal,'colorGroups',1,'groupReorder',1);
+    TS_PlotDataMatrix(dataLocal,'colorGroups',true,'groupReorder',true);
 end
 
 %-------------------------------------------------------------------------------
@@ -391,6 +391,8 @@ if nargout == 0
     clear('ifeat','testStat','testStat_rand');
 end
 
+
+%-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
 function uStatP = fn_uStat(d1,d2,doExact)
     % Return test statistic from Mann-Whitney U-test

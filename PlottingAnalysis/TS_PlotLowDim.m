@@ -10,7 +10,7 @@ function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,classMeth,annotatePar
 % showDist, whether to also plot marginal class distributions of each PC
 % classMeth, the classification method when running classification in the PC space
 % annotateParams, the annotation parameters used when plotting the dataset using
-%                 TS_plot_2d. Can also specify an integer; will annotate this
+%                 TS_Plot2d. Can also specify an integer; will annotate this
 %                 many time series segments to the 2d scatter plot.
 %
 %---OUTPUT:
@@ -152,8 +152,8 @@ otherwise
 end
 
 %-------------------------------------------------------------------------------
-% Set up for plotting two-dimensional representation of the data using TS_plot_2d
+% Set up for plotting two-dimensional representation of the data using TS_Plot2d
 
-f = TS_plot_2d(Y(:,1:2),TimeSeries,featureLabels,groupNames,annotateParams,showDist,classMeth);
+f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,groupNames,annotateParams,showDist,classMeth);
 
 end

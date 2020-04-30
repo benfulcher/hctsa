@@ -142,7 +142,7 @@ for i = 1:2
 end
 
 if sum(fs) > 1
-    TS_plot_2d(TS_DataMat(:,ifeat),TimeSeries,featureLabels,groupNames,annotateParams)
+    TS_Plot2d(TS_DataMat(:,ifeat),TimeSeries,featureLabels,groupNames,annotateParams)
 end
 
 end

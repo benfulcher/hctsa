@@ -1,5 +1,5 @@
-function f = TS_plot_2d(featureData,TimeSeries,featureLabels,groupNames,annotateParams,showDistr,whatClassifier)
-% TS_plot_2d   Plots a dataset in a two-dimensional space.
+function f = TS_Plot2d(featureData,TimeSeries,featureLabels,groupNames,annotateParams,showDistr,whatClassifier)
+% TS_Plot2d   Plots a dataset in a two-dimensional space.
 %
 % e.g., The space of two chosen features, or two principal components.
 %
@@ -272,11 +272,11 @@ if didClassify
                     round(classRate(3,1))),'interpreter','none');
 end
 
+
+%-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
 function labelAxes(didClassify)
-    %-------------------------------------------------------------------------------
-    %% Label Axes
-    % ------------------------------------------------------------------------------
+    % Label Axes
     if didClassify
         labelText = cell(2,1);
         for i = 1:2
@@ -290,5 +290,6 @@ function labelAxes(didClassify)
     xlabel(labelText{1},'interpreter','none')
     ylabel(labelText{2},'interpreter','none')
 end
+%-------------------------------------------------------------------------------
 
 end
