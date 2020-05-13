@@ -19,6 +19,8 @@ function [foldLosses,nullStat] = TS_classify(whatData,whatClassifier,varargin)
 %               random seed (for reproducible results from cross-validation)
 % 'numFolds', number of cross-validation folds to use.
 % 'numRepeats', number of times to repeat the prediction across different data partitions.
+% 'classifierFilename', MATLAB file to save the classifier to (not saved if
+% left empty).
 %
 %---OUTPUTS:
 % Text output on classification rate using all features, and if doPCs = true, also
@@ -86,6 +88,10 @@ default_doPlot = true;
 check_doPlot = @(x) islogical(x);
 addParameter(inputP,'doPlot',default_doPlot,check_doPlot);
 
+default_classifierFilename = '';
+check_classifierFilename = @(x) ischar(x);
+addParameter(inputP,'classifierFilename',default_classifierFilename,check_classifierFilename);
+
 % Parse input arguments:
 parse(inputP,varargin{:});
 numPCs = inputP.Results.numPCs;
@@ -94,6 +100,7 @@ seedReset = inputP.Results.seedReset;
 numFolds = inputP.Results.numFolds;
 numRepeats = inputP.Results.numRepeats;
 doPlot = inputP.Results.doPlot;
+classifierFilename = inputP.Results.classifierFilename;
 clear('inputP');
 
 %-------------------------------------------------------------------------------
@@ -151,12 +158,38 @@ fprintf(1,['\n%s (%u-class) using %u-fold %s classification with %u' ...
                     numFeatures,...
                     mean(foldLosses),...
                     std(foldLosses));
-
+                  
 % Plot as a histogram:
 if doPlot
     f = figure('color','w');
     histogram(foldLosses*100)
     xlim([0,100]);
+end
+
+%-------------------------------------------------------------------------------
+% Save classifier:
+%-------------------------------------------------------------------------------
+if ~isempty(classifierFilename)
+  [Acc,Mdl,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat,...
+                            TimeSeries.Group,TS_DataMat,TimeSeries.Group,numClasses,[],[],true,0);
+                        
+  Operations = TS_GetFromData(whatData,'Operations');
+  jointClassifier.Operation.ID = Operations.ID;
+  jointClassifier.Operation.Name = Operations.Name;
+  jointClassifier.Accuracy = mean(foldLosses); % For some reason the Acc retrieved as above is amazing?
+  jointClassifier.Mdl = Mdl;
+  jointClassifier.whatLoss = whatLoss;
+  jointClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
+  classes = groupNames;
+  
+  if exist(classifierFilename,'file')
+      out = input(sprintf('File %s already exists -- continuing will overwrite the file.\n[Press ''y'' to continue] ', classifierFilename), 's');
+      if out ~= 'y'
+          return;
+      end
+  end
+  save(classifierFilename,'jointClassifier','classes','-v7.3');
+  fprintf('Done.\n');
 end
 
 %-------------------------------------------------------------------------------
@@ -225,16 +258,20 @@ realLabels = BF_ToBinaryClass(TimeSeries.Group,numClasses,false);
 % Predict from the first CV-partition:
 predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),numClasses,false);
 if doPlot
-    f = figure('color','w');
-    plotconfusion(realLabels,predictLabels);
+    try
+        f = figure('color','w');
+        plotconfusion(realLabels,predictLabels);
 
-    % Fix axis labels:
-    ax = gca;
-    ax.XTickLabel(1:numClasses) = groupNames;
-    ax.YTickLabel(1:numClasses) = groupNames;
-    ax.TickLabelInterpreter = 'none';
+        % Fix axis labels:
+        ax = gca;
+        ax.XTickLabel(1:numClasses) = groupNames;
+        ax.YTickLabel(1:numClasses) = groupNames;
+        ax.TickLabelInterpreter = 'none';
 
-    title(sprintf('Confusion matrix for a 10-fold repeated cross-validation run (of %u)',numRepeats));
+        title(sprintf('Confusion matrix for a 10-fold repeated cross-validation run (of %u)',numRepeats));
+    catch
+        fprintf('No function confusionmatrix. Do you have the Deep Learning Toolbox?\n');
+    end
 end
 
 %-------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 function fn_handle = GiveMeFunctionHandle(whatClassifier,numClasses,whatLoss,reWeight)
-% GiveMeFunctionHandle    Returns a function handle for classification accuracy
+% GiveMeFunctionHandle    Returns a function handle for classification
+% accuracy and model
 %
 %---INPUTS:
 % whatClassifier -- a type of classifier to use (default: 'fast_linear')
@@ -54,8 +55,15 @@ end
 % Set the function handle to compute the accuracy/loss measure:
 %-------------------------------------------------------------------------------
 if strcmp(whatClassifier,'fast_linear')
+  
     fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
-    fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,classify(XTest,XTrain,yTrain,'linear'));
+    
+    % Need to force the prior to uniform otherwise we get poor results
+    % (makes it equiv. to 'classify' function)
+    fn_handle_mdl = @(XTrain, yTrain) fitcdiscr(XTrain,yTrain,'Prior','uniform');
+    
+    fn_handle_ac = @(XTest,yTest,Mdl) fn_loss(yTest,predict(Mdl,XTest));
+    fn_handle = @(XTrain,yTrain,XTest,yTest) fcnHandle(XTrain,yTrain,XTest,yTest,fn_handle_mdl,fn_handle_ac,whatLoss);
     return
 end
 
@@ -63,54 +71,55 @@ end
 % Binary model (easier), we can do it in one line:
 %-------------------------------------------------------------------------------
 if numClasses==2
-    % Set the loss function:
-    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
 
     switch whatClassifier
     case 'knn'
-        fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcknn(XTrain,yTrain),XTest));
+        fn_handle_mdl = @(XTrain,yTrain,XTest,yTest) fitcknn(XTrain,yTrain);
     case 'tree'
-        fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitctree(XTrain,yTrain),XTest));
+        fn_handle_mdl = @(XTrain,yTrain,XTest,yTest) fitctree(XTrain,yTrain);
     case {'linear','linclass'}
         if reWeight
-            fn_handle = @(XTrain,yTrain,XTest,yTest) ...
-                        fn_loss(yTest,predict(fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
-                                    'SaveMemory','on','Weights',InverseProbWeight(yTrain)),XTest));
+            fn_handle_mdl = @(XTrain,yTrain) fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
+                                    'SaveMemory','on','Weights',InverseProbWeight(yTrain));
         else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) ...
-                        fn_loss(yTest,predict(fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
-                                    'SaveMemory','on'),XTest));
+            fn_handle_mdl = @(XTrain,yTrain) fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
+                                    'SaveMemory','on');
         end
     case 'svm_linear'
         if reWeight
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
-                                    'KernelFunction','linear','Weights',InverseProbWeight(yTrain)),XTest));
+            fn_handle_mdl = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain));
         else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
-                                    'KernelFunction','linear'),XTest));
+            fn_handle_mdl = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','linear');
         end
     case 'svm_rbf'
         if reWeight
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
-                                    'KernelFunction','rbf','Weights',InverseProbWeight(yTrain)),XTest));
+            fn_handle_mdl = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain));
         else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
-                                    'KernelFunction','rbf'),XTest));
+            fn_handle_mdl = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','rbf');
         end
     case 'diaglinear'
         if reWeight
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcnb(XTrain,yTrain,...
-                                                    'Weights',InverseProbWeight(yTrain)),XTest));
+            fn_handle_mdl = @(XTrain,yTrain) fitcnb(XTrain,yTrain,'Weights',InverseProbWeight(yTrain));
         else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcnb(XTrain,yTrain),XTest));
+            fn_handle_mdl = @(XTrain,yTrain) fitcnb(XTrain,yTrain);
         end
     otherwise
         error('Unknown classifier label: ''%s''',whatClassifier);
     end
+    
+    % Set the loss function:
+    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
+    fn_handle_ac = @(XTest,yTest,Mdl) fn_loss(yTest,predict(Mdl,XTest));
+    
+    fn_handle = @(XTrain,yTrain,XTest,yTest) fcnHandle(XTrain,yTrain,XTest,yTest,fn_handle_mdl,fn_handle_ac,whatLoss);
 else
     % Multiclass, have to use the Cfn function (which is slower to use as a function handle)
-    fn_handle = @(XTrain,yTrain,XTest,yTest) ...
-        GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,0,whatLoss,reWeight);
+    fn_handle = @(XTrain,yTrain,XTest,yTest) GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,0,whatLoss,reWeight);
 end
+
+  function [accuracy,Mdl,whatLoss] = fcnHandle(XTrain, yTrain, xTest, yTest, fn_handle_mdl, fn_handle_ac, whatLoss)
+    Mdl = fn_handle_mdl(XTrain, yTrain);
+    accuracy = fn_handle_ac(xTest,yTest,Mdl);
+  end
 
 end

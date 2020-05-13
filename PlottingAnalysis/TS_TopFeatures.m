@@ -27,6 +27,8 @@ function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,v
 % 'numNulls', the number of shuffled nulls to generate (e.g., 10 shuffles pools
 %               shuffles for all M features, for a total of 10*M elements in the
 %               null distribution) [default: 0]
+% 'classifierFilename', MATLAB file to save the classifier to (not saved if
+% left empty).
 %
 %---EXAMPLE USAGE:
 %
@@ -83,6 +85,11 @@ addParameter(inputP,'numFeaturesDistr',default_numFeaturesDistr,@isnumeric);
 default_numNulls = 0; % by default, don't compute an empirical null distribution
                       % by randomizing class labels
 addParameter(inputP,'numNulls',default_numNulls,@isnumeric);
+
+default_classifierFilename = '';
+check_classifierFilename = @(x) ischar(x);
+addParameter(inputP,'classifierFilename',default_classifierFilename,check_classifierFilename);
+
 parse(inputP,varargin{:});
 
 whatPlots = inputP.Results.whatPlots;
@@ -92,6 +99,7 @@ end
 numTopFeatures = inputP.Results.numTopFeatures;
 numFeaturesDistr = inputP.Results.numFeaturesDistr;
 numNulls = inputP.Results.numNulls;
+classifierFilename = inputP.Results.classifierFilename;
 clear('inputP');
 
 % --------------------------------------------------------------------------
@@ -174,7 +182,7 @@ end
 fprintf(1,'Comparing the (in-sample) performance of %u operations for %u classes using a %s...\n',...
                                 height(Operations),numClasses,cfnName);
 timer = tic;
-testStat = giveMeStats(TS_DataMat,TimeSeries.Group,true);
+[testStat,Mdl] = giveMeStats(TS_DataMat,TimeSeries.Group,true);
 fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
 
 if all(isnan(testStat))
@@ -237,7 +245,7 @@ if ismember('histogram',whatPlots)
             end
             % Shuffle labels:
             groupLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-            testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,false);
+            testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,false); 
         end
         fprintf(1,'\n%u %s statistics computed in %s.\n',numOps*numNulls,...
                                         cfnName,BF_thetime(toc(timer)));
@@ -386,13 +394,36 @@ if ismember('cluster',whatPlots)
                             numTopFeatures,length(cluster_Groupi)))
 end
 
+%-------------------------------------------------------------------------------
+% Save classifier:
+%-------------------------------------------------------------------------------
+if ~isempty(classifierFilename)
+  fprintf(1,'Saving individual feature classifiers to %s...',classifierFilename);
+  
+  featureClassifier.Operation.ID = Operations.ID(ifeat(1)); % Sorted list of top operations
+  featureClassifier.Operation.Name = Operations.Name{ifeat(1)}; % Sorted list of top operations
+  featureClassifier.Mdl = Mdl{ifeat(1)}; % sorted feature models
+  featureClassifier.Accuracy = testStat_sort(1); % sorted accuracy of models
+  featureClassifier.whatTestStat = whatTestStat;
+  featureClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
+  classes = groupNames;
+  
+  % TODO: prompt user for overwrite, etc.
+  if exist(classifierFilename)
+    save(classifierFilename,'featureClassifier','classes','-append');
+  else
+    save(classifierFilename,'featureClassifier','classes','-v7.3');
+  end
+  fprintf('Done.\n');
+end
+
 % Don't display crap to screen unless the user wants it:
 if nargout == 0
     clear('ifeat','testStat','testStat_rand');
 end
 
 %-------------------------------------------------------------------------------
-function uStatP = fn_uStat(d1,d2,doExact)
+function [uStatP,Mdl] = fn_uStat(d1,d2,doExact)
     % Return test statistic from Mann-Whitney U-test
     if doExact
         [p,~,stats] = ranksum(d1,d2,'method','exact');
@@ -401,23 +432,28 @@ function uStatP = fn_uStat(d1,d2,doExact)
     end
     uStatP = -log10(p);
     % uStat = stats.ranksum;
+    Mdl = stats;
 end
 %-------------------------------------------------------------------------------
-function tStat = fn_tStat(d1,d2)
+function [tStat,Mdl] = fn_tStat(d1,d2)
     % Return test statistic from a 2-sample Welch's t-test
     [~,~,~,stats] = ttest2(d1,d2,'Vartype','unequal');
     tStat = stats.tstat;
+    Mdl = stats;
 end
 %-------------------------------------------------------------------------------
-function testStat = giveMeStats(dataMatrix,groupLabels,beVerbose)
+function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
     % Return test statistic for each operation
     testStat = zeros(numOps,1);
+    Mdl = cell(numOps,1);
     loopTimer = tic;
     for k = 1:numOps
         try
-            testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+%             [testStat(k),Mdl(k)] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+            [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
         catch
             testStat(k) = NaN;
+            Mdl(k) = NaN;
         end
         % Give estimate of time remaining:
         if beVerbose && k==100
