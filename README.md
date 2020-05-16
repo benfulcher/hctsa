@@ -117,7 +117,7 @@ We have used *hctsa* to:
 
 _hctsa_ has been used to:
 * Assess stress-induced changes in astrocyte calcium dynamics.
-  - [&#x1F4D7; Paper in _Nature Communications_](https://www.nature.com/articles/s41467-020-15778-9).
+  - [&#x1F4D7; Paper in _Nature Communications_ (2020)](https://www.nature.com/articles/s41467-020-15778-9).
 * Assess the stress controllability of neurons from their activity time series.
   - [&#x1F4D7; Paper in _Nature Neuroscience_ (2020)](https://www.nature.com/articles/s41593-020-0591-0).
 * Predicting post cardiac arrest outcomes.
@@ -189,7 +189,7 @@ Other good resources for time-series analysis, e.g., in other programming langua
 
 ### `pyopy`
 
-This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
+This excellent repository allows users to run *hctsa* software from within python: [`pyopy`](https://github.com/strawlab/pyopy).
 
 ### `hctsaAnalysisPython`
 
