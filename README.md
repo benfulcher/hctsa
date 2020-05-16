@@ -1,6 +1,6 @@
 # :wavy_dash: *hctsa* :wavy_dash:: highly comparative time-series analysis
 
-*hctsa* is a software package for running highly comparative time-series analysis using [Matlab](https://www.mathworks.com/products/matlab/) (full support for versions R2014b or later; for use in python cf. [pyopy](https://github.com/strawlab/pyopy)).
+*hctsa* is a software package for running highly comparative time-series analysis using [Matlab](https://www.mathworks.com/products/matlab/) (full support for versions R2018b or later).
 
 The software provides a code framework that enables the extraction of thousands of time-series features from a time series (or a time-series dataset).
 It also provides a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
