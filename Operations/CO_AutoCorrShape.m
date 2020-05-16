@@ -151,7 +151,6 @@ if Nac > minPointsForACFofACF
     if all(acf > 0)
         out.actau = NaN;
     else
-        keyboard
         out.actau = CO_AutoCorr(acf,CO_FirstZero(acf,'ac'),'Fourier');
     end
 else
