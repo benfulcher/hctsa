@@ -166,10 +166,10 @@ calcTimes = nan(numCalc,1); % Calculation time for each operation
 % --------------------------------------------------------------------------
 %% Pre-Processing
 % --------------------------------------------------------------------------
-% y is a z-scored transformation of the time series:
-y = zscore(x);
+% x_z is a z-scored transformation of the time series:
+x_z = zscore(x);
 
-% So we now have the raw time series x and the z-scored time series y.
+% So we now have the raw time series x and the z-scored time series x_z.
 % Operations take these as inputs.
 
 fullTimer = tic;
@@ -206,14 +206,14 @@ masterTimer = tic;
 if doParallel
 	parfor jj = 1:numMopsToCalc % PARFOR Loop
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
-					TS_compute_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
-								par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
+			TS_compute_masterloop(x,x_z,par_MasterOpCodeCalc{jj}, ...
+				par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
 	end
 else
 	for jj = 1:numMopsToCalc % Normal FOR Loop
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
-					TS_compute_masterloop(x,y,par_MasterOpCodeCalc{jj}, ...
-								par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
+			TS_compute_masterloop(x,x_z,par_MasterOpCodeCalc{jj}, ...
+				par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
 	end
 end
 
@@ -234,10 +234,11 @@ MasterOp_ind = arrayfun(@(x)find(MasterOperations.ID==x,1),Operations.MasterID);
 
 for jj = 1:numCalc
 	try
-		[featureVector(jj),calcQuality(jj),calcTimes(jj)] = TS_compute_oploop(MasterOutput{MasterOp_ind(jj)}, ...
-							   MasterCalcTime(MasterOp_ind(jj)), ...
-							   MasterOperations.Label{MasterOp_ind(jj)}, ... % Master label
-							   Operations.CodeString{jj}); % Code string for each operation to calculate (i.e., in toCalc)
+		[featureVector(jj),calcQuality(jj),calcTimes(jj)] = ...
+			TS_compute_oploop(MasterOutput{MasterOp_ind(jj)}, ...
+				MasterCalcTime(MasterOp_ind(jj)), ...
+				MasterOperations.Label{MasterOp_ind(jj)}, ... % Master label
+				Operations.CodeString{jj}); % Code string for each operation to calculate (i.e., in toCalc)
 	catch
 		fprintf(1,'---Error with %s\n',Operations.CodeString{jj});
 		if (MasterOperations.ID(MasterOp_ind(jj)) == 0)

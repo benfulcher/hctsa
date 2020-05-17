@@ -1,8 +1,8 @@
-function TS_compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,beVocal)
-% TS_compute    Computes missing elements of TS_DataMat
+function TS_Compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,beVocal)
+% TS_Compute    Computes missing elements of TS_DataMat
 %
 %---EXAMPLE USAGE:
-% TS_compute;
+% TS_Compute;
 %
 %---INPUTS:
 % doParallel:  if true, attempts to use the Parallel Computing Toolbox to run
