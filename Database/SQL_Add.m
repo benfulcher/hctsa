@@ -225,19 +225,19 @@ if ~isMatFile
             if forDatabase
                 reply = input(['If we go on, we will attempt to read all time series ' ...
                             'from file and add all ' ...
-                            'data to the database.\n<<<Type ''y'' to continue...>>>'],'s');
+                            'data to the database.\n<<<Type ''y'' to continue...>>> '],'s');
             else
                 reply = input(['If we go on, we will attempt to read all time series ' ...
                             'from file and add all ' ...
-                            'data to HCTSA.mat\n<<<Type ''y'' to continue...>>>'],'s');
+                            'data to HCTSA.mat\n<<<Type ''y'' to continue...>>> '],'s');
             end
         else
             if forDatabase
                 reply = input(['If we go on, we will attempt to add all ' ...
-                            'data to the database.\n<<<Type ''y'' to continue...>>>'],'s');
+                            'data to the database.\n<<<Type ''y'' to continue...>>> '],'s');
             else
                 reply = input(['If we go on, we will attempt to add all ' ...
-                            'data to HCTSA.mat\n<<<Type ''y'' to continue...>>>'],'s');
+                            'data to HCTSA.mat\n<<<Type ''y'' to continue...>>> '],'s');
             end
         end
 
@@ -316,10 +316,10 @@ else
         if forDatabase
             reply = input(sprintf(['Does this look ok for the first %u time series?\nIf we continue, ' ...
                 'we will attempt to add all %u time series in the input file' ...
-                ' to the database.\n<<<Type ''y'' to continue...>>>'],plotNum,numItems),'s');
+                ' to the database.\n<<<Type ''y'' to continue...>>> '],plotNum,numItems),'s');
         else
             reply = input(sprintf(['Does this look ok for the first %u time series?\n' ...
-                                    '<<<Type ''y'' to continue...>>>'],plotNum),'s');
+                                    '<<<Type ''y'' to continue...>>> '],plotNum),'s');
         end
         if ~strcmp(reply,'y')
             fprintf(1,'I didn''t think so. Come back later...\n');

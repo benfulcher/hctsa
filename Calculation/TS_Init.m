@@ -75,7 +75,7 @@ end
 % ------------------------------------------------------------------------------
 if exist(['./',outputFile],'file')
     reply = input(sprintf(['Warning: %s already exists -- if you continue, this ' ...
-        'file will be overwritten.\n[press ''y'' to continue]'],outputFile),'s');
+        'file will be overwritten.\n[press ''y'' to continue] '],outputFile),'s');
     if ~strcmp(reply,'y')
         return
     end

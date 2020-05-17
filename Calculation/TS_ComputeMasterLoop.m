@@ -1,4 +1,4 @@
-function [masterOutput, masterTime] = TS_ComputeMasterLoop(x, y, masterCode, masterID, numMasterOps, beVocal, theTsID, iterNum)
+function [masterOutput, masterTime] = TS_ComputeMasterLoop(x, x_z, masterCode, masterID, numMasterOps, beVocal, theTsID, iterNum)
 % TS_ComputeMasterLoop     Used in a loop by TS_Compute to evaluate a given master function.
 
 % ------------------------------------------------------------------------------
@@ -32,10 +32,10 @@ try
 	masterTimer = tic;
     if beVocal
         % Any output text is printed to screen
-    	masterOutput = BF_pareval(x,y,masterCode,1);
+    	masterOutput = BF_ParEval(x,x_z,masterCode,1);
     else
         % Output text stored in second output (could log this if you really want to)
-        masterOutput = BF_pareval(x,y,masterCode,0);
+        masterOutput = BF_ParEval(x,x_z,masterCode,0);
     end
 	masterTime = toc(masterTimer);
     if beVocal

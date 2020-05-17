@@ -1,8 +1,9 @@
-function [out, T] = BF_pareval(x,y,s,beVocal)
-% BF_pareval    Sneaky eval function for parfor loops
+function [out, T] = BF_ParEval(x,x_z,s,beVocal)
+% BF_ParEval    Sneaky eval function for parfor loops
 %
-% parfor loops don't allow the 'eval' function. This sneaky sneaky gets around
-% that.
+% parfor loops don't allow the 'eval' function.
+% This sneaky sneaky gets around that.
+%
 %---INPUTS:
 % x and y are possible elements of the string s to be evaluated
 % Stores any text output as T
