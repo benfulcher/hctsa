@@ -76,7 +76,7 @@ dbOutput = mysql_dbquery(dbc,selectString);
 % Is the table empty?:
 if isempty(dbOutput)
     % If there are entries in the keyword table, they're redundant (e.g., from an
-    % SQL_ClearRemove with nothing remaining afterwards)
+    % SQL_clear_remove with nothing remaining afterwards)
     % You still need to drop the rel table first because of the foreign key
     % constraint (even if it's an empty table)
     warning('No entries remaining in %s -- removing all keywords.',theTable);
