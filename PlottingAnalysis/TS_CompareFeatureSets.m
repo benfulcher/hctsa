@@ -1,20 +1,21 @@
-function TS_CompareFilters(whatData,whatClassifier)
-% TS_CompareFilters  Gives information about how different subsets of features
-%                   behave on the data (length-dependent, location-dependent,
-%                   spread-dependent features, and features operating on
-%                   the raw, rather than z-scored, time series)
+function TS_CompareFeatureSets(whatData,whatClassifier)
+% TS_CompareFeatureSets Compares classification performance of feature sets
+% Gives information about how different subsets of features behave on the data
+% (length-dependent, location-dependent, spread-dependent features, and features
+% that operate on the raw (rather than z-scored) time series)
 %
 % Runs a given classifier on the group labels assigned to the data, using
 % different filters on the features.
+%
 % Provides a quick way of determining if there are location/spread/etc.
 % differences between groups in a dataset
 %
 %---INPUTS:
-% whatData: the dataset to analyse (input to TS_LoadData)
+% whatData: the dataset to analyze (input to TS_LoadData)
 % whatClassifier: the classifier to apply to the different filters
 %
 %---USAGE:
-% TS_CompareFilters('norm','svm_linear');
+% TS_CompareFeatureSets('norm','svm_linear');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -85,8 +86,9 @@ names = cell(6,1);
 % Fit the classification model to the dataset (for each cross-validation fold)
 % and evaluate performance
 
-fprintf(1,['Training and evaluating a %u-class %s classifier using %u-fold cross validation...\n'],...
-                        numClasses,whatClassifier,numFolds);
+fprintf(1,['Training and evaluating a %u-class %s classifier',...
+                ' using %u-fold cross validation...\n'],...
+                    numClasses,whatClassifier,numFolds);
 
 for i = 1:6
     switch i
@@ -123,8 +125,9 @@ f = figure('color','w'); ax = gca;
 errorbar(1:6,mean(accuracy,2),std(accuracy,[],2))
 ax.XTick = 1:6;
 ax.XTickLabel = names;
-title(sprintf('%u-class classification with different feature sets using %u-fold cross validation',...
-                        numClasses,numFolds))
+title(sprintf(['%u-class classification with different feature sets',...
+                    ' using %u-fold cross validation'],...
+                    numClasses,numFolds))
 ax.TickLabelInterpreter = 'none';
 ylabel(whatLoss)
 
