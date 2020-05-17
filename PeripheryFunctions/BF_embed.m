@@ -1,5 +1,5 @@
-function y_embed = BF_embed(y,tau,m,makeSignal,randomSeed,beVocal)
-% BF_embed  Time-delay embedding
+function y_embed = BF_Embed(y,tau,m,makeSignal,randomSeed,beVocal)
+% BF_Embed  Time-delay embedding
 %
 % Returns a time-delay embedding of the input time series into an m dimensional
 % space at a time delay tau.

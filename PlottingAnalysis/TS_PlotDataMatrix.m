@@ -12,7 +12,7 @@ function TS_PlotDataMatrix(varargin)
 % addTimeSeries: set to 1 to annotate time series segments to the left of the data matrix
 % timeSeriesLength: length of time-series annotations (number of samples)
 % colorGroups: set to 1 to color time-series groups with different colormaps
-% customColorMap: use a custom color map (name to match an option in BF_getcmap)
+% customColorMap: use a custom color map (name to match an option in BF_GetColorMap)
 % colorNaNs: whether to plot rectangles over special-values in the matrix (default: 1)
 % customOrder: reorder rows and columns according to provided permutation vectors
 %
@@ -202,13 +202,13 @@ end
 if numGroups <= 1
     numColorMapGrads = 6; % number of gradations in each set of colourmap
     if strcmp(customColorMap,'redyellowblue');
-        customColorMap = flipud(BF_getcmap('redyellowblue',numColorMapGrads,0));
+        customColorMap = flipud(BF_GetColorMap('redyellowblue',numColorMapGrads,0));
     else
         customColorMap = gray(numColorMapGrads);
     end
 elseif numGroups == 2
 	% Special case to make a nice red and blue one
-	customColorMap = [flipud(BF_getcmap('blues',9,0));flipud(BF_getcmap('reds',9,0))];
+	customColorMap = [flipud(BF_GetColorMap('blues',9,0));flipud(BF_GetColorMap('reds',9,0))];
 else
 	% Use the same colors as GiveMeColors, but add brightness gradations to indicate magnitude
     numColorMapGrads = 20; % number of brightness gradations in each set of colourmap

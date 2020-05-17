@@ -214,7 +214,7 @@ for i = 1:numTimeSeries
     if i < numTimeSeries
         fprintf(1,'- - - - - - - -  %u time series remaining - - - - - - - -\n',numTimeSeries-i);
     	fprintf(1,'- - - - - - - -  %s remaining - - - - - - - - -\n', ...
-                                        	BF_thetime(((numTimeSeries-i)*mean(times(1:i))),1));
+                                        	BF_TheTime(((numTimeSeries-i)*mean(times(1:i))),1));
     else % The final time series
         fprintf(1,'- - - - - - - - - - All %u time series calculated! - - - - - - - - - -\n', ...
                                                     numTimeSeries);
@@ -231,14 +231,14 @@ end
 % --------------------------------------------------------------------------
 fprintf(1,['!! !! !! !! !! !! Calculation completed at %s !! !! ' ...
                                                 '!! !! !!\n'],datestr(now));
-fprintf(1,'Calculations complete in a total of %s.\n',BF_thetime(sum(times),1));
+fprintf(1,'Calculations complete in a total of %s.\n',BF_TheTime(sum(times),1));
 
 % Save back to local files (if results were computed):
 if any(numCalc_all > 0)
 	fprintf(1,'Saving all results to %s...',customFile);
 	saveTimer = tic;
 	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
-	fprintf(1,' Saved in %s.\n',BF_thetime(toc(saveTimer)));
+	fprintf(1,' Saved in %s.\n',BF_TheTime(toc(saveTimer)));
 	clear saveTimer
 end
 

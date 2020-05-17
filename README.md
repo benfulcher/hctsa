@@ -47,11 +47,12 @@ Details on how to merge the latest version of the repository with the local chan
 
 ## Related resources
 
-### CompEngine :collision:
+### _CompEngine_ :collision:
 
-[CompEngine](http://www.comp-engine.org) is an accompanying web resource for this project.
-It allows users to upload, explore, and compare thousands of diverse types of time-series data.
-The vast and growing collection of time-series data can also be downloaded.
+[_CompEngine_](http://www.comp-engine.org) is an accompanying web resource for this project.
+It is a self-organizing database of time-series data that allows users to upload, explore, and compare thousands of diverse types of time-series data.
+This vast and growing collection of time-series data can also be downloaded.
+You can read more about it in our [&#x1F4D9;preprint](https://arxiv.org/abs/1905.01042).
 
 ### _catch22_ :two::two:
 

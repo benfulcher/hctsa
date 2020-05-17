@@ -167,7 +167,7 @@ out.dataSurrCorr = corr(dvv_data(notNaN,2),mean_dvv_surr(notNaN,2));
 out.trendDataSurr = GiveMeGradient(dvv_data(notNaN,2),mean_dvv_surr(notNaN,2));
 
 % Number of zero crossings of data/surrogate data curve
-out.numZeroCrossings = sum(BF_sgnchange(dvv_data(notNaN,2)-mean_dvv_surr(notNaN,2)));
+out.numZeroCrossings = sum(BF_SignChange(dvv_data(notNaN,2)-mean_dvv_surr(notNaN,2)));
 
 % Difference in trend between real and surrogate:
 out.trendSurr = GiveMeGradient(mean_dvv_surr(notNaN,1),mean_dvv_surr(notNaN,2));

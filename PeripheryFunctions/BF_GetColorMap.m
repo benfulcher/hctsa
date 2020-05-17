@@ -1,5 +1,5 @@
-function cmapOut = BF_getcmap(whichMap,numGrads,cellOut,flipMe)
-% BF_getcmap    Colorbrewer colors for Matlab.
+function cmapOut = BF_GetColorMap(whichMap,numGrads,cellOut,flipMe)
+% BF_GetColorMap    Colorbrewer colors for Matlab.
 %
 % Returns a nice set of colors to make a nice colormap using the color schemes
 % from http://colorbrewer2.org/
@@ -24,14 +24,14 @@ function cmapOut = BF_getcmap(whichMap,numGrads,cellOut,flipMe)
 %---EXAMPLE USAGE:
 %
 % 1. Set the colormap to the redyellowblue colormap with 8 gradations:
-% colormap(BF_getcmap('redyellowblue',8));
+% colormap(BF_GetColorMap('redyellowblue',8));
 %
 % 2. Set blue/red maps for [-1,+1] bounded data:
 % caxis([-1,1])
-% colormap([flipud(BF_getcmap('blues',9));1,1,1;BF_getcmap('reds',9)])
+% colormap([flipud(BF_GetColorMap('blues',9));1,1,1;BF_GetColorMap('reds',9)])
 %
 % 3. Get colors for lines and plot data stored in 5 rows of matrix y:
-% myColors = BF_getcmap('accent',5); hold on
+% myColors = BF_GetColorMap('accent',5); hold on
 % for i = 1:5,
 %     plot(y(i,:),'color',myColors(i,:));
 % end

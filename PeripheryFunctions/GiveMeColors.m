@@ -1,7 +1,7 @@
 function colorCell = GiveMeColors(numColors)
 % GiveMeColors outputs a cell of colors for the specified number of colors
 %
-% Relies on the BF_getcmap function to pull out the appropriate colorbrewer
+% Relies on the BF_GetColorMap function to pull out the appropriate colorbrewer
 % colormaps
 
 % ------------------------------------------------------------------------------
@@ -36,19 +36,19 @@ function colorCell = GiveMeColors(numColors)
 if numColors == 1
     colorCell = {[0,0,0]}; % Just use black...
 elseif numColors==4
-    colorCell = BF_getcmap('set2',numColors,true); % set1, accent, set2
+    colorCell = BF_GetColorMap('set2',numColors,true); % set1, accent, set2
 elseif numColors <= 5
-    % colorCell = BF_getcmap('set1',5,1);
-    colorCell = BF_getcmap('set1',numColors,true); % set1, accent, set2
-    % colorCell = BF_getcmap('set2',5,1);
+    % colorCell = BF_GetColorMap('set1',5,1);
+    colorCell = BF_GetColorMap('set1',numColors,true); % set1, accent, set2
+    % colorCell = BF_GetColorMap('set2',5,1);
     % if numColors==2, colorCell = colorCell([2,4]); end
 elseif numColors < 10
-    colorCell = BF_getcmap('dark2',numColors,true);
+    colorCell = BF_GetColorMap('dark2',numColors,true);
 elseif numColors <= 12
-    colorCell = BF_getcmap('set3',numColors,true);
+    colorCell = BF_GetColorMap('set3',numColors,true);
 elseif numColors <= 22
-    colorCell = [BF_getcmap('set1',ceil(numColors/2),true);...
-                 BF_getcmap('set3',ceil(numColors/2),true)];
+    colorCell = [BF_GetColorMap('set1',ceil(numColors/2),true);...
+                 BF_GetColorMap('set3',ceil(numColors/2),true)];
     colorCell = colorCell(1:numColors);
 elseif numColors <= 50
     colorCell = num2cell(jet(numColors),2);

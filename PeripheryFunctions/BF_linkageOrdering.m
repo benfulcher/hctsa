@@ -1,5 +1,5 @@
-function ord = BF_linkageOrdering(distMat,links)
-% BF_linkageOrdering attempts to use optimalleaforder for dendrogram orderings
+function ord = BF_LinkageOrdering(distMat,links)
+% BF_LinkageOrdering attempts to use optimalleaforder for dendrogram orderings
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

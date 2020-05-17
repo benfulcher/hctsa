@@ -1,5 +1,5 @@
-function y_buffer = BF_makeBuffer(y,bufferSize)
-% BF_makeBuffer    Make a buffered version of a time series
+function y_buffer = BF_MakeBuffer(y,bufferSize)
+% BF_MakeBuffer    Make a buffered version of a time series
 %
 % y_buffer contains segments (rows) of length bufferSize (columns) corresponding
 % to consecutive, non-overlapping segments of the series of length bufferSize

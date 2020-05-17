@@ -1,5 +1,5 @@
-function theTable = SQL_add(addWhat,inputFile,forDatabase,beVocal)
-% SQL_add   Interpret a structured input file of time series, operations,
+function theTable = SQL_Add(addWhat,inputFile,forDatabase,beVocal)
+% SQL_Add   Interpret a structured input file of time series, operations,
 %           or master operations.
 %
 % By default adds the results to a linked mySQL database.
@@ -409,7 +409,7 @@ case 'ts' % Prepare toAdd cell for time series
         if Length(j) > maxL
             warning(['\n[%u/%u]%s contains %u samples, this framework can efficiently ' ...
                 'deal with time series up to %u samples\n',...
-                '[Note that this maximum length can be modified in SQL_add]\n',...
+                '[Note that this maximum length can be modified in SQL_Add]\n',...
                 'Skipping this time series...'],...
                 j,numItems,Name{j},Length(j),maxL)
             beep; continue
@@ -663,13 +663,13 @@ case 'ts' % Add time series to the TimeSeries table, X at a time
     % Calibrate to this:
     numPerChunk = max([floor(20000/maxLength*4),1]); % no fewer than 1 per chunk
     numPerChunk = min([numPerChunk,500]); % no more than 500 per chunk
-    SQL_add_chunked(dbc,['INSERT INTO TimeSeries (Name, Keywords, Length, ' ...
+    SQL_AddChunked(dbc,['INSERT INTO TimeSeries (Name, Keywords, Length, ' ...
                                     'Data) VALUES'],toAdd(~isBad),numPerChunk);
 case 'ops' % Add operations to the Operations table 500 at a time
-    SQL_add_chunked(dbc,['INSERT INTO Operations (Name, Code, MasterLabel, ' ...
+    SQL_AddChunked(dbc,['INSERT INTO Operations (Name, Code, MasterLabel, ' ...
                                     'Keywords) VALUES'],toAdd(~isBad),500);
 case 'mops' % Add master operations to the MasterOperations table 500 at a time
-    SQL_add_chunked(dbc,['INSERT INTO MasterOperations (MasterLabel, ' ...
+    SQL_AddChunked(dbc,['INSERT INTO MasterOperations (MasterLabel, ' ...
                                 'MasterCode) VALUES'],toAdd(~isBad),500);
 end
 fprintf(1,' Done.\n');
@@ -699,7 +699,7 @@ if ~strcmp(addWhat,'mops')
         fprintf(1,' Error. This is really really not good.\n%s',emsg);
         keyboard
     else
-        fprintf(1,' initialized in %s!\n',BF_thetime(toc(resultsTic)));
+        fprintf(1,' initialized in %s!\n',BF_TheTime(toc(resultsTic)));
     end
 end
 
@@ -747,7 +747,7 @@ if ~strcmp(addWhat,'mops')
         for k = 1:sum(isNew);
             toAdd{k} = sprintf('(''%s'',0)',ukws{fisNew(k)});
         end
-        SQL_add_chunked(dbc,insertString,toAdd,100);
+        SQL_AddChunked(dbc,insertString,toAdd,100);
         fprintf(1,' Added %u new keywords!\n',sum(isNew));
     else
         if beVocal
@@ -791,7 +791,7 @@ if ~strcmp(addWhat,'mops')
         end
     end
     % Add them all in 1000-sized chunks
-    SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell,1000);
+    SQL_AddChunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell,1000);
 
     % Update Nmatches in the keywords table
     fprintf(1,' Done.\nNow computing all match counts for all keywords...\n');
@@ -832,7 +832,7 @@ SQL_closedatabase(dbc)
 %% Tell the user all about it
 % ------------------------------------------------------------------------------
 fprintf('All tasks completed in %s.\nRead %s then added %u %s into %s.\n', ...
-            BF_thetime(toc(ticker)),inputFile,sum(~isBad),theWhat,databaseName);
+            BF_TheTime(toc(ticker)),inputFile,sum(~isBad),theWhat,databaseName);
 
 if strcmp(addWhat,'ts') && ~isMatFile
     fprintf(1,['**The imported data are now in %s and no longer ' ...

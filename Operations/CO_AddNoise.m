@@ -158,7 +158,7 @@ for i = 1:length(noiseLevels)
 end
 
 % Count number of times the AMI function crosses its mean
-out.pcrossmean = sum(BF_sgnchange(amis-mean(amis)))/(numRepeats-1);
+out.pcrossmean = sum(BF_SignChange(amis-mean(amis)))/(numRepeats-1);
 
 %-------------------------------------------------------------------------------
 % Fit exponential decay (using Curve Fitting Toolbox)
@@ -185,7 +185,7 @@ out.linfit_mse = mean((linfit' - amis).^2);
 % Plot output:
 if doPlot
     figure('color','w'); box('on');
-    cc = BF_getcmap('set1',2,1);
+    cc = BF_GetColorMap('set1',2,1);
     % figure('color','w');
     hold on; box('on')
     plot(noiseRange,c.a*exp(c.b*noiseRange),'color',cc{2},'linewidth',2)

@@ -113,7 +113,7 @@ if (numClasses == 1)
 else
     if isstruct(annotateParams) && isfield(annotateParams,'cmap')
         if ischar(annotateParams.cmap)
-            groupColors = BF_getcmap(annotateParams.cmap,numClasses,1);
+            groupColors = BF_GetColorMap(annotateParams.cmap,numClasses,1);
         else
             groupColors = annotateParams.cmap; % specify the cell itself
         end

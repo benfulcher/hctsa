@@ -1,5 +1,5 @@
-function y = BF_preprocess(y,preProcessHow)
-% BF_preprcoess   Preprocess a time series, y
+function y = BF_PreProcess(y,preProcessHow)
+% BF_PreProcess   Preprocess a time series, y
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -40,7 +40,7 @@ if ~isempty(preProcessHow)
         % Find first zero of the autocorrelation function
         tau = CO_FirstZero(y,'ac');
         % Buffer the time series into nonoverlapping windows of length tau
-        y_buffer = BF_makeBuffer(y,tau);
+        y_buffer = BF_MakeBuffer(y,tau);
         % Mean each window to get a coarse-grained time series
         y = mean(y_buffer,2);
     otherwise

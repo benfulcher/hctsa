@@ -58,9 +58,9 @@ if nargin < 3 || isempty(tau)
     tau = 1;
 end
 
-% Specified a way of determining m and/or tau, use BF_embed to estimate:
+% Specified a way of determining m and/or tau, use BF_Embed to estimate:
 if ischar(tau) || ischar(m)
-    tauAndM = BF_embed(x,tau,m,2);
+    tauAndM = BF_Embed(x,tau,m,2);
     tau = tauAndM(1);
     m = tauAndM(2);
 end

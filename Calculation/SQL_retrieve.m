@@ -243,7 +243,7 @@ for i = 1:numTS
     % We could do a (kind of blind) retrieval, i.e., without retrieving op_ids safely
     % as long as for a given ts_id, the op_ids are in ascending order in the Results table.
     % This will be the case if time series and operations are added
-    % using SQL_add because of the SORT BY specifier in SQL_add commands.
+    % using SQL_Add because of the SORT BY specifier in SQL_Add commands.
     % Otherwise op_ids should also be retrieved here, and used to sort
     % the other columns (i.e., outputs, quality codes, calculation times)
 
@@ -281,7 +281,7 @@ for i = 1:numTS
         if strcmp(retrieveWhatEntries,'all') % easy in this case
             % Assumes data is ordered by the op_id_string provided
             % This will be the case if all time series and operations
-            % were added using SQL_add.
+            % were added using SQL_Add.
             % Otherwise we'll have nonsense happening...
             switch retrieveWhatData
             case 'all'
@@ -320,10 +320,10 @@ for i = 1:numTS
     % Periodically display indication of time remaining
     if (i==50) && (i < numTS/10) % Give an initial indication of time after the first 50 iterations
         fprintf(1,['Based on the first 50 retrievals, this is taking ' ...
-                'approximately %s per time series...\n'],BF_thetime(toc(retrievalTimer)/i));
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(retrievalTimer)/i*(numTS-i)));
+                'approximately %s per time series...\n'],BF_TheTime(toc(retrievalTimer)/i));
+		fprintf(1,'Approximately %s remaining...\n',BF_TheTime(toc(retrievalTimer)/i*(numTS-i)));
     elseif (mod(i,floor(numTS/10))==0) && i~=numTS % Tell us the time remaining 10 times across the total retrieval
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(retrievalTimer)/i*(numTS-i)));
+		fprintf(1,'Approximately %s remaining...\n',BF_TheTime(toc(retrievalTimer)/i*(numTS-i)));
 	end
 end
 
@@ -332,11 +332,11 @@ end
 % --------------------------------------------------------------------------
 if any(didRetrieve)
     fprintf(1,'Retrieved data from %s over %u iterations in %s.\n',...
-                            dbname,numTS,BF_thetime(toc(retrievalTimer)));
+                            dbname,numTS,BF_TheTime(toc(retrievalTimer)));
 else
     fprintf(1,['Over %u iterations, no data was retrieved from %s (%s).\n' ...
                             'Not writing any data to file.\n'],...
-							numTS,dbname,BF_thetime(toc(retrievalTimer)));
+							numTS,dbname,BF_TheTime(toc(retrievalTimer)));
     SQL_closedatabase(dbc); return
 end
 
@@ -523,7 +523,7 @@ case 'quality'
     save(outputFileName,'TS_Quality','-append')
 end
 
-fprintf(1,' Done in %s.\n',BF_thetime(toc(saveTimer)));
+fprintf(1,' Done in %s.\n',BF_TheTime(toc(saveTimer)));
 clear saveTimer % stop timing
 
 didWrite = 1; % Tag to say that write to HCTSA.mat file is successful

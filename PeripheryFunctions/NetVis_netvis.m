@@ -168,7 +168,7 @@ anyLinks = find(cellfun(@(x)any(x(:)),Ath));
 if iscell(colorMap)
     c = colorMap; % specified a cell of colors
 else % specified the name of a color set to load
-    c = BF_getcmap(colorMap,numGroups,1);
+    c = BF_GetColorMap(colorMap,numGroups,1);
 end
 if length(c) < numGroups
     fprintf(1,'There aren''t enough colors to plot %u groups of the data\n',numGroups);
@@ -182,11 +182,11 @@ end
 
 % Color of links
 maxBrighten = 0.8;
-clinks = BF_getcmap('blues',3,1);
+clinks = BF_GetColorMap('blues',3,1);
 clinks = clinks{3};
 clinks = arrayfun(@(x) brighten(clinks,x),linspace(0,maxBrighten,length(linkThresh)),'UniformOutput',0);
 % clinks = flipud(clinks); % dark colours first
-% clinks = BF_getcmap('blues',max(3,length(linkThresh)),1);
+% clinks = BF_GetColorMap('blues',max(3,length(linkThresh)),1);
 % clinks = flipud(clinks); % dark colours first
 
 % Text color:

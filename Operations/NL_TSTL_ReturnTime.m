@@ -13,7 +13,7 @@ function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedParams)
 % maxT, maximum return time to consider
 % past, Theiler window
 % Nref, number of reference indicies
-% embedParams, to feed into BF_embed
+% embedParams, to feed into BF_Embed
 %
 %---OUTPUTS: include basic measures from the histogram, including the occurrence of
 % peaks, spread, proportion of zeros, and the distributional entropy.
@@ -97,7 +97,7 @@ doPlot = false; % plot outputs to figures
 % ------------------------------------------------------------------------------
 %% Embed the signal
 % ------------------------------------------------------------------------------
-s = BF_embed(y,embedParams{1},embedParams{2},1,true);
+s = BF_Embed(y,embedParams{1},embedParams{2},1,true);
 if ~isa(s,'signal') && isnan(s); % embedding failed
     warning('Embedding failed');
     out = NaN; return

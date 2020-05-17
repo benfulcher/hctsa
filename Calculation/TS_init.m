@@ -1,13 +1,12 @@
-function TS_init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
-% TS_init       Takes in time series, master operation, and operation input
-% files and produces a formatted HCTSA .mat file
+function TS_Init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
+% TS_Init  Produces a formatted HCTSA .mat file from input files
 %
 % This function is used instead to run hctsa analysis without a linked mySQL database.
 %
 %---EXAMPLE USAGE:
 % Initiate an HCTSA.mat file on a custom time-series dataset using default
 % feature library, using a formatted input file, 'my_TS_INP_file.mat'
-% >> TS_init('my_TS_INP_file.mat');
+% >> TS_Init('my_TS_INP_file.mat');
 %
 %---INPUTS:
 % INP_ts: A time-series input file
@@ -19,7 +18,7 @@ function TS_init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
 % outputFile: Specify an output filename
 %
 %---OUTPUTS:
-% Writes output into HCTSA.mat (or specified custom filename)
+% Writes output to HCTSA.mat (or specified custom filename)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -95,19 +94,19 @@ end
 % ------------------------------------------------------------------------------
 % Get time series, operations, master operations into structure arrays
 % ------------------------------------------------------------------------------
-TimeSeries = SQL_add('ts',INP_ts,false,beVocal(1));
+TimeSeries = SQL_Add('ts',INP_ts,false,beVocal(1));
 numTS = height(TimeSeries);
 if numTS==0
     return; % The user did not approve of the set of inputs
 end
 
-MasterOperations = SQL_add('mops',INP_mops,false,beVocal(2));
+MasterOperations = SQL_Add('mops',INP_mops,false,beVocal(2));
 numMops = height(MasterOperations);
 if numMops==0
     return; % The user did not approve of the set of inputs
 end
 
-Operations = SQL_add('ops',INP_ops,false,beVocal(3));
+Operations = SQL_Add('ops',INP_ops,false,beVocal(3));
 numOps = height(Operations);
 if numOps==0
     return; % The user did not approve of the set of inputs

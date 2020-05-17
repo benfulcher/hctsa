@@ -3,7 +3,7 @@ function SQL_store(writeWhat,dbname)
 %
 % Uploads data in the HCTSA.mat file in the current directory back into the
 % mySQL database. Should be done to store the result new computations done by
-% TS_compute.
+% TS_Compute.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -56,7 +56,7 @@ fid = 1; % haha no more logging option...
 loadTimer = tic;
 fprintf(fid,'Loading data from HCTSA.mat...');
 load('HCTSA.mat')
-fprintf(fid,' Done in %s.\n',BF_thetime(toc(loadTimer)));
+fprintf(fid,' Done in %s.\n',BF_TheTime(toc(loadTimer)));
 clear loadTimer
 
 % ------------------------------------------------------------------------------
@@ -147,7 +147,7 @@ elseif isempty(qrc)
     fprintf(1,'\nNo %s elements in this range in the database anymore! Nothing to write.\n',writeWhat);
     SQL_closedatabase(dbc); return
 else
-	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_thetime(toc(retrievalTimer)));
+	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_TheTime(toc(retrievalTimer)));
 end
 clear retrievalTimer % Stop timing
 
@@ -239,11 +239,11 @@ for i = 1:numWrite
     % Give user feedback on how long is remaining:
     if (i==50) && (i < numWrite/numReports) % give an initial estimate:
         fprintf(1,['Based on the first 50 retrievals, this is taking ' ...
-                'approximately %s per entry to write to the database.\n'],BF_thetime(toc(writeBackTimer)));
-		fprintf(1,'Approximately %s remaining...\n',BF_thetime(toc(writeBackTimer)/i*(numWrite-i)));
+                'approximately %s per entry to write to the database.\n'],BF_TheTime(toc(writeBackTimer)));
+		fprintf(1,'Approximately %s remaining...\n',BF_TheTime(toc(writeBackTimer)/i*(numWrite-i)));
     elseif mod(i,floor(numWrite/numReports))==0 % Give numReports more time updates...
 		fprintf(1,['Approximately %s remaining -- %u (/ %u possible) entries have been'  ...
-			' written to %s...\n'],BF_thetime(toc(writeBackTimer)/i*(numWrite-i)),sum(updateMe),i,dbname);
+			' written to %s...\n'],BF_TheTime(toc(writeBackTimer)/i*(numWrite-i)),sum(updateMe),i,dbname);
 	end
 end
 
@@ -253,7 +253,7 @@ end
 
 fprintf(1,['Successfully wrote %u new calculation results ' ...
             '(/ %u) to the Results table of %s in %s.\n'],...
-            sum(updateMe),numWrite,dbname,BF_thetime(toc(writeBackTimer)));
+            sum(updateMe),numWrite,dbname,BF_TheTime(toc(writeBackTimer)));
 
 if any(~updateMe) % Some entries were not written to the database
     fprintf(1,['%u entries were not written (previously-calculated errors) and remain ' ...

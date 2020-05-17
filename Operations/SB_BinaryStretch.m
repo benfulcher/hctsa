@@ -58,10 +58,10 @@ x(x <= 0) = 0;
 switch stretchWhat
     case 'lseq1'
         % longest stretch of 1s [this code doesn't actually measure this!]
-        out = max(diff(BF_sgnchange(diff(find(x == 1))-1.5,1)))/N;
+        out = max(diff(BF_SignChange(diff(find(x == 1))-1.5,1)))/N;
     case 'lseq0'
         % longest stretch of 0s [this code doesn't actualy measure this!]
-        out = max(diff(BF_sgnchange(diff(find(x == 0))-1.5,1)))/N;
+        out = max(diff(BF_SignChange(diff(find(x == 0))-1.5,1)))/N;
     otherwise
         error('Unknown input %s',stretchWhat)
 end

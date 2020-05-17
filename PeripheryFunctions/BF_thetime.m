@@ -1,5 +1,5 @@
-function timeString = BF_thetime(tsec,formatLong)
-% BF_thetime    Converts a duration (seconds) to a human-interpretable string
+function timeString = BF_TheTime(tsec,formatLong)
+% BF_TheTime    Converts a duration (seconds) to a human-interpretable string
 %
 % e.g., converts to minutes or hours or days as appropriate) output is something
 % like '25.5 minutes' or '3.2 days' -- always displays to one decimal place.

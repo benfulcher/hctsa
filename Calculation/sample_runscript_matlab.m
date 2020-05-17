@@ -74,5 +74,5 @@ for i = 1:length(ID_inc)-1
                             	tsIDs(ID_inc(i)),tsIDs(ID_inc(i+1)-1));
 
     % Compute any missing values for this range of time series, then save back:
-    TS_compute(doParallelize,tsIDs(ID_inc(i):ID_inc(i+1)-1),[],'missing',fileName);
+    TS_Compute(doParallelize,tsIDs(ID_inc(i):ID_inc(i+1)-1),[],'missing',fileName);
 end

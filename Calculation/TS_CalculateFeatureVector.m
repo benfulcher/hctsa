@@ -77,7 +77,7 @@ if nargin < 3 || isempty(Operations) || ischar(Operations)
 		fprintf(1,'Importing default set of time-series features\n');
 		theINPfile = 'INP_ops.txt';
 	end
-	Operations = SQL_add('ops',theINPfile,false,false);
+	Operations = SQL_Add('ops',theINPfile,false,false);
 end
 if isnumeric(Operations)
 	error('Provide an input file or a structure array of Operations');
@@ -85,7 +85,7 @@ end
 
 if nargin < 4 || isempty(MasterOperations)
 	% Use the default library:
-	MasterOperations = SQL_add('mops','INP_mops.txt',false,false);
+	MasterOperations = SQL_Add('mops','INP_mops.txt',false,false);
 	% Need to link operations to masters if not already supplied:
 	[Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 end
@@ -206,13 +206,13 @@ masterTimer = tic;
 if doParallel
 	parfor jj = 1:numMopsToCalc % PARFOR Loop
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
-			TS_compute_masterloop(x,x_z,par_MasterOpCodeCalc{jj}, ...
+			TS_ComputeMasterLoop(x,x_z,par_MasterOpCodeCalc{jj}, ...
 				par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
 	end
 else
 	for jj = 1:numMopsToCalc % Normal FOR Loop
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
-			TS_compute_masterloop(x,x_z,par_MasterOpCodeCalc{jj}, ...
+			TS_ComputeMasterLoop(x,x_z,par_MasterOpCodeCalc{jj}, ...
 				par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
 	end
 end
@@ -222,7 +222,7 @@ MasterOutput(Master_ind_calc) = MasterOutput_tmp;
 MasterCalcTime(Master_ind_calc) = MasterCalcTime_tmp;
 
 fprintf(1,'%u master operations evaluated in %s ///\n\n',...
-					numMopsToCalc,BF_thetime(toc(masterTimer)));
+					numMopsToCalc,BF_TheTime(toc(masterTimer)));
 clear('masterTimer')
 
 % --------------------------------------------------------------------------
@@ -235,7 +235,7 @@ MasterOp_ind = arrayfun(@(x)find(MasterOperations.ID==x,1),Operations.MasterID);
 for jj = 1:numCalc
 	try
 		[featureVector(jj),calcQuality(jj),calcTimes(jj)] = ...
-			TS_compute_oploop(MasterOutput{MasterOp_ind(jj)}, ...
+			TS_ComputeOpLoop(MasterOutput{MasterOp_ind(jj)}, ...
 				MasterCalcTime(MasterOp_ind(jj)), ...
 				MasterOperations.Label{MasterOp_ind(jj)}, ... % Master label
 				Operations.CodeString{jj}); % Code string for each operation to calculate (i.e., in toCalc)
@@ -319,7 +319,7 @@ fprintf(1,'Calculation complete for %s (ts_id = %u, N = %u)\n', ...
 					tsStruct.Name,tsStruct.ID,tsStruct.Length);
 fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored.\n',...
 					numGood,numErrors,numSpecial);
-fprintf(1,'All %u calculations for this time series took %s.\n',numCalc,BF_thetime(toc(fullTimer),1));
+fprintf(1,'All %u calculations for this time series took %s.\n',numCalc,BF_TheTime(toc(fullTimer),1));
 fprintf(1,'********************************************************************\n');
 
 end

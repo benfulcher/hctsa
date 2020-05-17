@@ -51,7 +51,7 @@ for i = 1:length(tsid_range)
 
 	% Loop over:
 	% (i) Running SQL_retrieve to retrieve data from the database -> HCTSA.mat
-	% (ii) Using TS_compute to calculate missing entries
+	% (ii) Using TS_Compute to calculate missing entries
 	% (iii) Running SQL_store to write results back into the database
 
     % (i) Retrieve uncomputed entries from the database
@@ -59,7 +59,7 @@ for i = 1:length(tsid_range)
     if didWrite % Only calculate if SQL_retrieve found time series to retrieve:
         % (ii) Compute all the missing data in the retrieved set of
         % time series and operations:
-        TS_compute(doParallelize);
+        TS_Compute(doParallelize);
         % (iii) Write the results back to the database:
         SQL_store(writeWhat);
     else

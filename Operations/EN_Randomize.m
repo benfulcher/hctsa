@@ -150,7 +150,7 @@ for i = 1:N*randp_max
     end
 
 end
-% fprintf(1,'Randomization took %s',BF_thetime(toc(randTimer)));
+% fprintf(1,'Randomization took %s',BF_TheTime(toc(randTimer)));
 
 if doPlot
     f = figure('color','w'); box('on');

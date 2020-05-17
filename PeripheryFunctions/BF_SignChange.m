@@ -1,5 +1,5 @@
-function out = BF_sgnchange(y,doFind)
-% BF_sgnchange      Where a data vector changes sign
+function out = BF_SignChange(y,doFind)
+% BF_SignChange      Where a data vector changes sign
 %
 %---INPUTS:
 % y, the input vector

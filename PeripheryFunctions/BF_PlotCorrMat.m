@@ -76,17 +76,17 @@ switch rangeHow
 case 'positive'
     maxDev = max(D_corr(:));
     caxis([0,maxDev])
-    colormap(BF_getcmap('greenblue',9,0))
+    colormap(BF_GetColorMap('greenblue',9,0))
 case 'balanced'
     maxDev = max(abs(D_corr(:)));
     caxis([-maxDev,maxDev])
-    colormap([flipud(BF_getcmap('blues',9,0));[1,1,1],;BF_getcmap('reds',9,0)])
+    colormap([flipud(BF_GetColorMap('blues',9,0));[1,1,1],;BF_GetColorMap('reds',9,0)])
 case '-1to1'
     caxis([-1,1])
-    colormap([flipud(BF_getcmap('blues',9,0));BF_getcmap('reds',9,0)])
+    colormap([flipud(BF_GetColorMap('blues',9,0));BF_GetColorMap('reds',9,0)])
 case '0to1' % assume [0,1] (a normalized distance metric)
     caxis([0,1])
-    colormap(BF_getcmap('reds',9,0))
+    colormap(BF_GetColorMap('reds',9,0))
 case 'auto'
     colormap(flipud(gray(64)))
 otherwise

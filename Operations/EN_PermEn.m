@@ -57,7 +57,7 @@ end
 % ------------------------------------------------------------------------------
 % Embed the signal:
 % ------------------------------------------------------------------------------
-x = BF_embed(y,tau,m,0);
+x = BF_Embed(y,tau,m,0);
 Nx = size(x,1); % number of embedding vectors produced
 if Nx < 5 % need at least 5 embedding vectors to actually do a computation
     error('Time series too short to embed');

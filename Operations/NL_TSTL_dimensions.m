@@ -9,7 +9,7 @@ function out = NL_TSTL_dimensions(y,nbins,embedParams)
 %---INPUTS:
 % y, column vector of time series data
 % nbins, maximum number of partitions per axis
-% embedParams, embedding parameters to feed BF_embed.m for embedding the
+% embedParams, embedding parameters to feed BF_Embed.m for embedding the
 %              signal in the form {tau,m}
 %
 %---OUTPUTS:
@@ -72,7 +72,7 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert to embedded signal object for TSTOOL
-s = BF_embed(y,embedParams{1},embedParams{2},1);
+s = BF_Embed(y,embedParams{1},embedParams{2},1);
 
 if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Time-delay embedding for TSTOOL failed')
@@ -82,7 +82,7 @@ if size(data(s),2) < 3 % embedded with dimension < 3
     % note the 'true' predicted embedding dimension
     mopt = size(data(s),2);
     % embed with dimension m = 3
-    s = BF_embed(y,embedParams{1},3,1);
+    s = BF_Embed(y,embedParams{1},3,1);
     fprintf(1,'Re-embedded with embedding dimension 3\n');
 else
 	mopt = size(data(s),2);

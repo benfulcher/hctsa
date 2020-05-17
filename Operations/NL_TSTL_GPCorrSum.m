@@ -9,7 +9,7 @@ function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedParams,doTwo)
 % thwin, number of samples to exclude before and after each reference index
 %        (~ Theiler window)
 % nbins, number of partitioned bins
-% embedParams, embedding parameters to feed BF_embed.m for embedding the
+% embedParams, embedding parameters to feed BF_Embed.m for embedding the
 %               signal in the form {tau,m}
 % doTwo, if this is set to 1, will use corrsum, if set to 2, will use corrsum2.
 %           For corrsum2, n specifies the number of pairs per bin. Default is 1,
@@ -112,7 +112,7 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert to embedded signal object for TSTOOL
-s = BF_embed(y,embedParams{1},embedParams{2},1);
+s = BF_Embed(y,embedParams{1},embedParams{2},1);
 
 if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding of the %u-sample time series failed',N)

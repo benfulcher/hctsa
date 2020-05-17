@@ -1,5 +1,5 @@
-function [masterOutput, masterTime] = TS_compute_masterloop(x, y, masterCode, masterID, numMasterOps, beVocal, theTsID, iterNum)
-% TS_compute_masterloop     Used in a loop by TS_compute to evaluate a given master function.
+function [masterOutput, masterTime] = TS_ComputeMasterLoop(x, y, masterCode, masterID, numMasterOps, beVocal, theTsID, iterNum)
+% TS_ComputeMasterLoop     Used in a loop by TS_Compute to evaluate a given master function.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -39,14 +39,14 @@ try
     end
 	masterTime = toc(masterTimer);
     if beVocal
-        fprintf(1,' evaluated (%s).\n',BF_thetime(masterTime));
+        fprintf(1,' evaluated (%s).\n',BF_TheTime(masterTime));
     end
 	% For not-applicable/'real NaN', masterOutput is a NaN, otherwise a
 	% structure with components to be called below by pointer operations.
 
 catch emsg
     if beVocal
-        fprintf(1,' error.\n'); % ,BF_thetime(masterTime)
+        fprintf(1,' error.\n'); % ,BF_TheTime(masterTime)
     end
 	fprintf(1,'---Error evaluating %s:\n%s\n',masterCode,emsg.message);
     masterOutput = {}; % Keep empty output

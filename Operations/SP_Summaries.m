@@ -418,7 +418,7 @@ out.statav5_s = std(std(split))/std(S);
 % Count crossings:
 % Get a horizontal line and count the number of crossings with the power spectrum
 % ------------------------------------------------------------------------------
-ncrossfn_rel = @(f) sum(BF_sgnchange(S - f*max(S)));
+ncrossfn_rel = @(f) sum(BF_SignChange(S - f*max(S)));
 
 out.ncross_f05 = ncrossfn_rel(0.05);
 out.ncross_f01 = ncrossfn_rel(0.1);

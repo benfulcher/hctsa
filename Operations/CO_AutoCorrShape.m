@@ -163,7 +163,7 @@ end
 %-------------------------------------------------------------------------------
 dacf = diff(acf);
 ddacf = diff(dacf);
-extrr = BF_sgnchange(dacf,1);
+extrr = BF_SignChange(dacf,1);
 sdsp = ddacf(extrr);
 % maxr = extrr(sdsp < 0);
 % minr = extrr(sdsp > 0);

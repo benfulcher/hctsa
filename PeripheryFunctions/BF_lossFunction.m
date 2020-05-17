@@ -1,5 +1,5 @@
-function outputMeasure = BF_lossFunction(yTest,yPredict,whatLoss,numClasses)
-% BF_lossFunction gives a measure of classification performance
+function outputMeasure = BF_LossFunction(yTest,yPredict,whatLoss,numClasses)
+% BF_LossFunction gives a measure of classification performance
 %
 % All labels are expected to be integers, ranging from 1 to the total number
 % of classes in the classification problem

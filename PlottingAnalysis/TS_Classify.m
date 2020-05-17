@@ -263,7 +263,7 @@ if numPCs > 0
     end
 
     if doPlot
-        plotColors = BF_getcmap('spectral',3,1);
+        plotColors = BF_GetColorMap('spectral',3,1);
         f = figure('color','w'); hold on
         plot([1,numPCs],ones(2,1)*mean(foldLosses),'--','color',plotColors{3})
         plot(1:numPCs,cfnRate(:,1),'o-k')

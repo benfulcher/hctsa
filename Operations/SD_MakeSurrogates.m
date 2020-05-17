@@ -235,7 +235,7 @@ end
 
 % Cute farewell message
 if beVocal
-    fprintf(1,'Generated %u %s surrogates in %s.\n',numSurrs,surrMethod,BF_thetime(toc,1))
+    fprintf(1,'Generated %u %s surrogates in %s.\n',numSurrs,surrMethod,BF_TheTime(toc,1))
 end
 
 

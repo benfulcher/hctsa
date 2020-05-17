@@ -1,5 +1,5 @@
-function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,forceWrite)
-% TS_combine   Combine two hctsa datasets (same features, different data)
+function TS_Combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,forceWrite)
+% TS_Combine   Combine two hctsa datasets (same features, different data)
 %
 % Takes a union of time series, and an intersection of operations from two hctsa
 % datasets and writes the new combined dataset to a new .mat file
@@ -12,7 +12,7 @@ function TS_combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,
 % When using TS_init to generate datasets, be aware that the *same* set of
 % operations and master operations must be used in both cases.
 %
-% NB: Use TS_merge if same data, different features
+% NB: Use TS_Merge if same data, different features
 %
 %---INPUTS:
 % HCTSA_1: the first hctsa dataset (a .mat filename)

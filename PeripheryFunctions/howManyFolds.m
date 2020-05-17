@@ -1,4 +1,4 @@
-function numFolds = howManyFolds(groupLabels,numClasses)
+function numFolds = HowManyFolds(groupLabels,numClasses)
 % Set the number of folds for k-fold cross validation using a heuristic
 % (for small datasets with fewer than 10 examples per class):
 %

@@ -1,5 +1,5 @@
-function [opOutput, opQuality, opTime] = TS_compute_oploop(masterOutput, masterCalcTime, masterLabel, operationCode)
-% TS_compute_oploop     Links operations to outputs of corresponding master operations,
+function [opOutput, opQuality, opTime] = TS_ComputeOpLoop(masterOutput,masterCalcTime,masterLabel,operationCode)
+% TS_ComputeOpLoop     Links operations to outputs of corresponding master operations,
 % including the assignment of error codes.
 
 % ------------------------------------------------------------------------------

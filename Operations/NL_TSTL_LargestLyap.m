@@ -7,7 +7,7 @@ function out = NL_TSTL_LargestLyap(y,Nref,maxtstep,past,NNR,embedParams)
 % maxtstep, maximum prediction length (samples)
 % past, exclude -- Theiler window idea
 % NNR, number of nearest neighbours
-% embedParams, input to BF_embed, how to time-delay-embed the time series, in
+% embedParams, input to BF_Embed, how to time-delay-embed the time series, in
 %               the form {tau,m}, where string specifiers can indicate standard
 %               methods of determining tau or m.
 %
@@ -118,7 +118,7 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % convert to embedded signal object for TSTOOL
-s = BF_embed(y,embedParams{1},embedParams{2},1);
+s = BF_Embed(y,embedParams{1},embedParams{2},1);
 
 if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding failed');

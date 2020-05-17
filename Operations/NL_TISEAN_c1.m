@@ -162,7 +162,7 @@ if isempty(res)
 elseif strfind(res,'dyld: Library not loaded')
     error('DYLD library not found -- try recompiling TISEAN:\n%s',res);
 else
-    fprintf(1,'TISEAN function ''c1'' took %s.\n',BF_thetime(toc,1));
+    fprintf(1,'TISEAN function ''c1'' took %s.\n',BF_TheTime(toc,1));
 end
 
 if ~exist([filePath '.c1'],'file')
@@ -181,7 +181,7 @@ if isempty(res) || ~isempty(regexp(res,'command not found', 'once')) % nothing c
     end
 end
 
-% fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_thetime(toc(c2dtimer),1))
+% fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_TheTime(toc(c2dtimer),1))
 if exist([filePath '.c1'],'file')
     delete([filePath '.c1']);
 end % remove the TISEAN file write output

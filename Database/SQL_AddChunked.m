@@ -1,5 +1,5 @@
-function SQL_add_chunked(dbc,insertString,dataSet,chunkSize)
-% SQL_add_chunked
+function SQL_AddChunked(dbc,insertString,dataSet,chunkSize)
+% SQL_AddChunked
 %
 % Insert a large set of time series or operations into the database using
 % repeated queries, adding smaller subsets over multiple iterations.
@@ -68,7 +68,7 @@ for k = 1:numChunks % loop over chunks
     % Execute this chunk:
     [~, emsg] = mysql_dbexecute(dbc,theQuery);
     if ~isempty(emsg)
-        error(['Error in SQL_add_chunked for chunk %u with chunk size %u...\n' ...
+        error(['Error in SQL_AddChunked for chunk %u with chunk size %u...\n' ...
                 'Attempted query: %s\n%s\n'],k,chunkSize,theQuery,emsg)
     end
 end

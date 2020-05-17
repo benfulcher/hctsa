@@ -119,7 +119,7 @@ for jo = 1:numGroups
         fprintf(1,'No matches found for ''%s''.\n',keywordGroups{jo});
     end
 end
-fprintf(1,'Group labeling complete in %s.\n',BF_thetime(toc(timer)));
+fprintf(1,'Group labeling complete in %s.\n',BF_TheTime(toc(timer)));
 clear timer % stop timing
 
 %-------------------------------------------------------------------------------

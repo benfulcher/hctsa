@@ -22,8 +22,8 @@ function gitInfo = TS_AddGitInfo(whatDir,whatData)
 % Check inputs
 %-------------------------------------------------------------------------------
 if nargin < 1
-    % look in the hctsa directory (one level higher than where TS_compute is)
-    calc_dir = which('TS_compute');
+    % look in the hctsa directory (one level higher than where TS_Compute is)
+    calc_dir = which('TS_Compute');
     iHere = regexp(calc_dir,'Calculation');
     whatDir = calc_dir(1:iHere-1);
     % whatDir = '.'; % now looky here

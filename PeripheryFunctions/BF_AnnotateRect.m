@@ -46,7 +46,7 @@ if nargin < 4
     numClasses = max(groupLabels);
 end
 if nargin < 5
-    colors = BF_getcmap('dark2',numClasses,1);
+    colors = BF_GetColorMap('dark2',numClasses,1);
 end
 if nargin < 6
     ax = gca;
