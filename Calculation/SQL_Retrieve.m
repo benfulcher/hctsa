@@ -1,5 +1,5 @@
-function didWrite = SQL_retrieve(ts_ids,op_ids,retrieveWhatEntries,retrieveWhatData)
-% SQL_retrieve 		Retrieve data from the mySQL database
+function didWrite = SQL_Retrieve(ts_ids,op_ids,retrieveWhatEntries,retrieveWhatData)
+% SQL_Retrieve 		Retrieve data from the mySQL database
 %
 % This function retreives data from the mySQL database for subsequent analysis
 % in Matlab. It takes as input a set of constraints on the time series and
@@ -75,7 +75,7 @@ if nargin < 3 || isempty(retrieveWhatEntries)
 end
 retrieveWhatEntriesCanBe = {'null','all','error'};
 if ~ischar(retrieveWhatEntries) || ~ismember(retrieveWhatEntries,retrieveWhatEntriesCanBe)
-    error(['The third input to SQL_retrieve must specify what type of entries to retrieve from ' ...
+    error(['The third input to SQL_Retrieve must specify what type of entries to retrieve from ' ...
                 'the database, one of the following: %s'],BF_cat(retrieveWhatEntriesCanBe))
 end
 
@@ -85,7 +85,7 @@ if nargin < 4 || isempty(retrieveWhatData)
 end
 retrieveWhatDataCanBe = {'all','nocalctime','outputs','quality'};
 if ~ischar(retrieveWhatData) || ~ismember(retrieveWhatData,retrieveWhatDataCanBe)
-    error(['The fourth input to SQL_retrieve must specify what data to retrieve from the database, ' ...
+    error(['The fourth input to SQL_Retrieve must specify what data to retrieve from the database, ' ...
                 'one of the following: %s'],BF_cat(retrieveWhatEntriesCanBe))
 end
 
@@ -121,7 +121,7 @@ end
 % Open a database connection
 % ------------------------------------------------------------------------------
 % (attempt to use the Matlab database toolbox, which is faster for retrievals)
-[dbc, dbname] = SQL_opendatabase('',false,true);
+[dbc, dbname] = SQL_OpenDatabase('',false,true);
 
 % ------------------------------------------------------------------------------
 % Refine the set of time series and operations to those that actually exist in
@@ -139,7 +139,7 @@ else
 	if length(tsids_db) < numTS
 	    if isempty(tsids_db) % Now there are no time series to retrieve
 	        fprintf(1,'None of the %u specified time series exist in ''%s''\n',numTS,dbname);
-	        SQL_closedatabase(dbc); return % Close the database connection before returning
+	        SQL_CloseDatabase(dbc); return % Close the database connection before returning
 	    end
 	    fprintf(1,['%u specified time series do not exist in ''%s'', retrieving' ...
 	                    ' the remaining %u\n'],numTS-length(tsids_db),dbname,length(tsids_db));
@@ -159,7 +159,7 @@ else
 	if length(opids_db) < numOps
 	    if isempty(opids_db) % Now there are no operations to retrieve
 	        fprintf(1,'None of the %u specified operations exist in ''%s''\n',numOps,dbname);
-	        SQL_closedatabase(dbc); return % Close the database connection before returning
+	        SQL_CloseDatabase(dbc); return % Close the database connection before returning
 	    end
 	    fprintf(1,['%u specified operations do not exist in ''%s'', retrieving' ...
 	                    ' the remaining %u\n'],numOps-length(opids_db),dbname,length(opids_db));
@@ -337,7 +337,7 @@ else
     fprintf(1,['Over %u iterations, no data was retrieved from %s (%s).\n' ...
                             'Not writing any data to file.\n'],...
 							numTS,dbname,BF_TheTime(toc(retrievalTimer)));
-    SQL_closedatabase(dbc); return
+    SQL_CloseDatabase(dbc); return
 end
 
 if ismember(retrieveWhatEntries,{'null','error'})
@@ -357,7 +357,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
     keepi = (sum(keepme,2) > 0); % there is at least one entry to calculate in this row
     if sum(keepi) == 0
     	fprintf(1,'After filtering, there are no time series remaining! Exiting...\n');
-        SQL_closedatabase(dbc); return % Close the database connection, then exit
+        SQL_CloseDatabase(dbc); return % Close the database connection, then exit
 	elseif sum(keepi) < numTS
 		fprintf(1,'Cutting down from %u to %u time series\n',numTS,sum(keepi));
 		tsids_db = tsids_db(keepi);
@@ -382,7 +382,7 @@ if ismember(retrieveWhatEntries,{'null','error'})
     keepi = (sum(keepme,1) > 0); % there is at least one entry to calculate in this column
 	if sum(keepi) == 0
     	fprintf(1,'After filtering, there are no operations remaining! Exiting...\n');
-        SQL_closedatabase(dbc); return % Close the database connection, then exit
+        SQL_CloseDatabase(dbc); return % Close the database connection, then exit
     elseif sum(keepi) < numOps
 		fprintf(1,'Cutting down from %u to %u operations\n',numOps,sum(keepi));
 		opids_db = opids_db(keepi);
@@ -477,7 +477,7 @@ end
 %-------------------------------------------------------------------------------
 % Close database connection
 %-------------------------------------------------------------------------------
-SQL_closedatabase(dbc)
+SQL_CloseDatabase(dbc)
 
 %-------------------------------------------------------------------------------
 % Compare git from database to git of local hctsa

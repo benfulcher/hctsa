@@ -1,5 +1,5 @@
-function SQL_reset()
-% SQL_reset      Drops all tables and data and recreates the default hctsa package
+function SQL_Reset()
+% SQL_Reset      Drops all tables and data and recreates the default hctsa package
 % in the mySQL database
 
 % ------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ function SQL_reset()
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-[dbc, databaseName] = SQL_opendatabase;
+[dbc, databaseName] = SQL_OpenDatabase;
 
 % ------------------------------------------------------------------------------
 % Get how many time series and operations are in the database
@@ -71,8 +71,8 @@ end
 mysql_dbexecute(dbc,sprintf('DROP DATABASE IF EXISTS %s;',databaseName));
 fprintf(1,'%s and all the data contained within it dropped.\n',databaseName);
 mysql_dbexecute(dbc,sprintf('CREATE DATABASE %s;',databaseName));
-SQL_closedatabase(dbc) % Close the database
-SQL_create_all_tables; % Create all basic tables required by the database
+SQL_CloseDatabase(dbc) % Close the database
+SQL_CreateAllTables; % Create all basic tables required by the database
 
 % Add operations
 SQL_Add('mops','Database/INP_mops.txt',1,0);

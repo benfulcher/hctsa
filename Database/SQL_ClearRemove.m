@@ -1,5 +1,5 @@
-function SQL_clear_remove(tsOrOps,idRange,doRemove,doLog)
-% SQL_clear_remove
+function SQL_ClearRemove(tsOrOps,idRange,doRemove,doLog)
+% SQL_ClearRemove
 %
 % Either clears results or removes entirely a given set of ts_ids
 % or op_ids from the database.
@@ -85,7 +85,7 @@ if nargin < 4 || isempty(doLog)
 end
 
 % Open connection to database
-[dbc, dbName] = SQL_opendatabase();
+[dbc, dbName] = SQL_OpenDatabase();
 
 % ------------------------------------------------------------------------------
 %% Provide some user feedback
@@ -250,7 +250,7 @@ end
 % ------------------------------------------------------------------------------
 %% Close connection to the mySQL database
 % ------------------------------------------------------------------------------
-SQL_closedatabase(dbc) % database closed
+SQL_CloseDatabase(dbc) % database closed
 
 % ------------------------------------------------------------------------------
 %% Write a log file of information

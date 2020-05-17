@@ -1,5 +1,5 @@
-function ids = SQL_getids(tsOrOps,lengthRange,keywordInclude,keywordRemove,idr)
-% SQL_getids
+function ids = SQL_GetIDs(tsOrOps,lengthRange,keywordInclude,keywordRemove,idr)
+% SQL_GetIDs
 %
 % Takes as input a set of constraints on the time series and operations to
 % include then runs the appropriate mySQL commands and outputs the relevant
@@ -93,7 +93,7 @@ else
 end
 
 % Open connection to mySQL database
-dbc = SQL_opendatabase;
+dbc = SQL_OpenDatabase;
 
 if strcmp(tsOrOps,'ts')
 
@@ -354,6 +354,6 @@ else
 end
 
 % if tolog, fclose(flog), end
-SQL_closedatabase(dbc)
+SQL_CloseDatabase(dbc)
 
 end

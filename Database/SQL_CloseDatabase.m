@@ -1,5 +1,5 @@
-function SQL_closedatabase(dbc)
-% SQL_closedatabase     Closes the connection to database, dbc.
+function SQL_CloseDatabase(dbc)
+% SQL_CloseDatabase     Closes the connection to database, dbc.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

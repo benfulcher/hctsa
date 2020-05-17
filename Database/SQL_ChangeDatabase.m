@@ -69,8 +69,8 @@ fclose(fid);
 % Test that the new connection settings work:
 % ------------------------------------------------------------------------------
 try
-	dbc = SQL_opendatabase;
-	SQL_closedatabase(dbc);
+	dbc = SQL_OpenDatabase;
+	SQL_CloseDatabase(dbc);
     fprintf(1,'Database %s at %s for %s opens and closes no problem!!\n',databaseName,hostName,local_u);
     fprintf(1,'We''re good to go!! :)\n');
 catch

@@ -1,5 +1,5 @@
-function SQL_create_all_tables()
-% SQL_create_all_tables      Create all the tables in the database
+function SQL_CreateAllTables()
+% SQL_CreateAllTables      Create all the tables in the database
 %
 % Uses SQL_TableCreateString to retrieve the appropriate mySQL CREATE TABLE
 % statements.
@@ -46,7 +46,7 @@ existString = arrayfun(@(x)['SHOW TABLES LIKE ''' tableNames{x} ''''],...
 % ------------------------------------------------------------------------------
 %% Write all of this to the database:
 % ------------------------------------------------------------------------------
-[dbc,dbname] = SQL_opendatabase; % opens dbc, the default database (named dbname)
+[dbc,dbname] = SQL_OpenDatabase; % opens dbc, the default database (named dbname)
 
 numPerLine = 3; % Make a new line after adding this many tables to the database
 fprintf(1,'Creating tables in %s:\n',dbname);
@@ -96,7 +96,7 @@ insertString = sprintf(['INSERT INTO GitInfo (branch,hash,remote,url) VALUES ',.
 
 %-------------------------------------------------------------------------------
 % Close the connection to the database
-SQL_closedatabase(dbc);
+SQL_CloseDatabase(dbc);
 
 %-------------------------------------------------------------------------------
 function sFriendly = makeSQLFriendly(s)

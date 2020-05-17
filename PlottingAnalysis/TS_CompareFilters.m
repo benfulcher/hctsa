@@ -1,5 +1,5 @@
-function TS_compareFilters(whatData,whatClassifier)
-% TS_compareFilters  Gives information about how different subsets of features
+function TS_CompareFilters(whatData,whatClassifier)
+% TS_CompareFilters  Gives information about how different subsets of features
 %                   behave on the data (length-dependent, location-dependent,
 %                   spread-dependent features, and features operating on
 %                   the raw, rather than z-scored, time series)
@@ -14,7 +14,7 @@ function TS_compareFilters(whatData,whatClassifier)
 % whatClassifier: the classifier to apply to the different filters
 %
 %---USAGE:
-% TS_compareFilters('norm','svm_linear');
+% TS_CompareFilters('norm','svm_linear');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -68,10 +68,10 @@ numFolds = howManyFolds(TimeSeries.Group,numClasses);
 dataStruct.TimeSeries = [];
 dataStruct.TS_DataMat = [];
 dataStruct.Operations = Operations;
-[ID_lengthDep,ID_notlengthDep] = TS_getIDs('lengthdep',dataStruct,'ops');
-[ID_locDep,ID_notlocDep] = TS_getIDs('locdep',dataStruct,'ops');
-[ID_spreadDep,ID_notspreadDep] = TS_getIDs('spreaddep',dataStruct,'ops');
-[ID_raw,ID_notraw] = TS_getIDs('raw',dataStruct,'ops');
+[ID_lengthDep,ID_notlengthDep] = TS_GetIDs('lengthdep',dataStruct,'ops');
+[ID_locDep,ID_notlocDep] = TS_GetIDs('locdep',dataStruct,'ops');
+[ID_spreadDep,ID_notspreadDep] = TS_GetIDs('spreaddep',dataStruct,'ops');
+[ID_raw,ID_notraw] = TS_GetIDs('raw',dataStruct,'ops');
 
 %-------------------------------------------------------------------------------
 % Compare each

@@ -1,5 +1,5 @@
-function [dbc, databaseName] = SQL_opendatabase(databaseName,beVocal,useDBToolbox)
-% SQL_opendatabase 		Open a connection to a mySQL database
+function [dbc, databaseName] = SQL_OpenDatabase(databaseName,beVocal,useDBToolbox)
+% SQL_OpenDatabase 		Open a connection to a mySQL database
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

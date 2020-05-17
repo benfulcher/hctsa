@@ -1,5 +1,5 @@
-function [IDs,notIDs] = TS_getIDs(theKeyword,whatData,tsOrOps)
-% TS_getIDs   Retrieve IDs of time series (or operations) in an hctsa dataset
+function [IDs,notIDs] = TS_GetIDs(theKeyword,whatData,tsOrOps)
+% TS_GetIDs   Retrieve IDs of time series (or operations) in an hctsa dataset
 %               using keyword matching.
 %
 %---INPUTS:
@@ -13,11 +13,11 @@ function [IDs,notIDs] = TS_getIDs(theKeyword,whatData,tsOrOps)
 % IDs, a vector of IDs matching the keyword constraint provided.
 %
 %---EXAMPLE USAGE:
-% >> ts_IDs = TS_getIDs('noisy','norm','ts');
+% >> ts_IDs = TS_GetIDs('noisy','norm','ts');
 % This retrieves the IDs of time series in 'HCTSA_N.mat' (specifying 'norm') that
 % contain the keyword 'noisy'.
 %
-% >> op_IDs = TS_getIDs('entropy','norm','ops');
+% >> op_IDs = TS_GetIDs('entropy','norm','ops');
 % This retrieves the IDs of operations in HCTSA_N.mat that have been tagged
 % with the keyword 'entropy'.
 

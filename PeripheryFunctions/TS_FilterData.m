@@ -1,7 +1,7 @@
 function newFileName = TS_FilterData(whatData,ts_keepIDs,op_keepIDs,newFileName)
 % TS_FilterData  Filters data in the hctsa data file, and saves to a new file
 %
-% Can use TS_getIDs to search keywords in hctsa data structures to get IDs
+% Can use TS_GetIDs to search keywords in hctsa data structures to get IDs
 % matching keyword constraints, and use them to input into this function to
 % generate hctsa files filtered by keyword matches.
 %
@@ -17,11 +17,11 @@ function newFileName = TS_FilterData(whatData,ts_keepIDs,op_keepIDs,newFileName)
 %
 % (*) Remove length-dependent features from a raw ('HCTSA.mat') file and save to a
 % new file, 'HCTSA_notLocDep.mat':
-% >>[~,IDs_notlocDep] = TS_getIDs('lengthdep','raw','ops');
+% >>[~,IDs_notlocDep] = TS_GetIDs('lengthdep','raw','ops');
 % >>TS_FilterData('raw',[],ID_notlocDep,'HCTSA_notLocDep.mat');
 %
 % (*) Keep only time series with the keyword 'patient' from an hctsa file:
-% >> IDs_patient = TS_getIDs('patient','raw','ts');
+% >> IDs_patient = TS_GetIDs('patient','raw','ts');
 % >> TS_FilterData('raw',IDs_Patient,[],'HCTSA_noPatient.mat');
 %
 % ------------------------------------------------------------------------------

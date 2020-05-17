@@ -45,7 +45,7 @@ if strcmp(reply,'y')
                                 ' to a mySQL server to do this\n']);
         % Walks the user through creating the database from a root account and sets
         % up a user account and password:
-        SQL_create_db;
+        SQL_CreateDatabase;
         fprintf(1,['Note that the database access ' ...
                     'settings are stored in ''sql_settings.conf''\n']);
     else
@@ -56,7 +56,7 @@ if strcmp(reply,'y')
     % ------------------------------------------------------------------------------
     %% 3. Create all (empty) tables in the database
     % ------------------------------------------------------------------------------
-    SQL_create_all_tables;
+    SQL_CreateAllTables;
     fprintf(1,'\n');
 
     % ------------------------------------------------------------------------------

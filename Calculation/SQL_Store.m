@@ -1,5 +1,5 @@
-function SQL_store(writeWhat,dbname)
-% SQL_store 	Upload data to the mySQL database.
+function SQL_Store(writeWhat,dbname)
+% SQL_Store 	Upload data to the mySQL database.
 %
 % Uploads data in the HCTSA.mat file in the current directory back into the
 % mySQL database. Should be done to store the result new computations done by
@@ -46,7 +46,7 @@ end
 % ------------------------------------------------------------------------------
 % Much faster to use java connector than the Matlab database toolbox
 % (exec commands are slow; update commands are even slower)
-[dbc, dbname] = SQL_opendatabase(dbname,0,0);
+[dbc, dbname] = SQL_OpenDatabase(dbname,0,0);
 
 % ------------------------------------------------------------------------------
 %% Load local files
@@ -112,7 +112,7 @@ else
     	fprintf(1,'There are %u operations that no longer match the database',(numOps-numOps_db));
     end
     error(['It could be dangerous to write back to a changed database. ' ...
-                'You should start a SQL_retrieve from scratch.'])
+                'You should start a SQL_Retrieve from scratch.'])
 end
 
 % ------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ case 'nullerror'
     					' AND op_id IN (%s) AND (QualityCode IS NULL OR QualityCode = 1)'], ...
         					ts_ids_string,op_ids_string);
 case 'error'
-    % Collect all previous errors (assume done a SQL_retrieve using 'error' input)
+    % Collect all previous errors (assume done a SQL_Retrieve using 'error' input)
     SelectString = sprintf(['SELECT ts_id, op_id FROM Results WHERE ts_id IN (%s)' ...
     					' AND op_id IN (%s) AND QualityCode = 1'], ...
         					ts_ids_string,op_ids_string);
@@ -145,7 +145,7 @@ if ~isempty(emsg)
     fprintf(1,'\n'); error('Error selecting %s elements from %s',writeWhat,dbname);
 elseif isempty(qrc)
     fprintf(1,'\nNo %s elements in this range in the database anymore! Nothing to write.\n',writeWhat);
-    SQL_closedatabase(dbc); return
+    SQL_CloseDatabase(dbc); return
 else
 	fprintf(1,' Retrieved %u entries in %s\n',length(qrc),BF_TheTime(toc(retrievalTimer)));
 end
@@ -230,7 +230,7 @@ for i = 1:numWrite
 						TS_CalcTime_string,ts_id_db(i),op_id_db(i));
         [~,emsg] = mysql_dbexecute(dbc, updateString);
         if ~isempty(emsg)
-            SQL_closedatabase(dbc) % close the database connection before calling the error...
+            SQL_CloseDatabase(dbc) % close the database connection before calling the error...
         	error('Error storing (ts_id,op_id) = (%u,%u) to %s??!!\n%s\n', ...
                 			TimeSeries.ID(localIndex(i,1)),Operations.ID(localIndex(i,2)),dbname,emsg);
         end
@@ -260,7 +260,7 @@ if any(~updateMe) % Some entries were not written to the database
                             'awaiting calculation in the database.\n'],sum(~updateMe));
 end
 
-SQL_closedatabase(dbc) % Close the database connection
+SQL_CloseDatabase(dbc) % Close the database connection
 
 
 end

@@ -1,5 +1,5 @@
-function SQL_create_db()
-% SQL_create_db
+function SQL_CreateDatabase()
+% SQL_CreateDatabase
 % Sets up the mySQL database for use with highly comparative time-series analysis.
 
 % ------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ try
         error('Please check your username/password and that the mySQL server is accessible');
     end
 catch
-    error('SQL_create_db:nojconn', ...
+    error('SQL_CreateDatabase:nojconn', ...
                 ['Could not activate the mySQL java connector. This must be added to ' ...
                 'Matlab''s ''javext'' directory and ' ...
                 ' the location added to Matlab''s ''classpath.txt'' ' ...
@@ -84,7 +84,7 @@ mysql_dbexecute(dbc,sprintf('GRANT ALL PRIVILEGES ON %s.* TO ''%s''@''localhost'
                             	databaseName,local_u,local_p));
 mysql_dbexecute(dbc,'FLUSH PRIVILEGES');
 
-SQL_closedatabase(dbc) % close the database
+SQL_CloseDatabase(dbc) % close the database
 
 
 % ------------------------------------------------------------------------------
@@ -98,8 +98,8 @@ fprintf(fid,'%s,%s,%s,%s,%u',hostname,databaseName,local_u,local_p,customPort);
 fclose(fid);
 
 try
-	dbc = SQL_opendatabase;
-	SQL_closedatabase(dbc);
+	dbc = SQL_OpenDatabase;
+	SQL_CloseDatabase(dbc);
     fprintf(1,'Database %s at %s for %s opens and closes no problem!!\n',databaseName,hostname,local_u);
     fprintf(1,'We''re good to go!! :)\n');
 catch
