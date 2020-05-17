@@ -1,5 +1,5 @@
-function SQL_clear_remove(tsOrOps,idRange,doRemove,doLog)
-% SQL_clear_remove
+function SQL_ClearRemove(tsOrOps,idRange,doRemove,doLog)
+% SQL_ClearRemove
 %
 % Either clears results or removes entirely a given set of ts_ids
 % or op_ids from the database.

@@ -1,5 +1,5 @@
-function SQL_create_all_tables()
-% SQL_create_all_tables      Create all the tables in the database
+function SQL_CreateAllTables()
+% SQL_CreateAllTables      Create all the tables in the database
 %
 % Uses SQL_TableCreateString to retrieve the appropriate mySQL CREATE TABLE
 % statements.

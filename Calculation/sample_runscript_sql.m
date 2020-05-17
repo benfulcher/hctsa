@@ -50,18 +50,18 @@ for i = 1:length(tsid_range)
 	fprintf(1,'\n\n\nWe''re looking at ts_id %u and all op_ids\n\n\n',tsid_range(i));
 
 	% Loop over:
-	% (i) Running SQL_retrieve to retrieve data from the database -> HCTSA.mat
+	% (i) Running SQL_Retrieve to retrieve data from the database -> HCTSA.mat
 	% (ii) Using TS_Compute to calculate missing entries
-	% (iii) Running SQL_store to write results back into the database
+	% (iii) Running SQL_Store to write results back into the database
 
     % (i) Retrieve uncomputed entries from the database
-	didWrite = SQL_retrieve(tsid_range(i),'all',writeWhat);
-    if didWrite % Only calculate if SQL_retrieve found time series to retrieve:
+	didWrite = SQL_Retrieve(tsid_range(i),'all',writeWhat);
+    if didWrite % Only calculate if SQL_Retrieve found time series to retrieve:
         % (ii) Compute all the missing data in the retrieved set of
         % time series and operations:
         TS_Compute(doParallelize);
         % (iii) Write the results back to the database:
-        SQL_store(writeWhat);
+        SQL_Store(writeWhat);
     else
         fprintf(1,'No calculation performed at ts_id = %u\n',tsid_range(i));
     end

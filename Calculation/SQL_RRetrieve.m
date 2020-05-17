@@ -1,5 +1,5 @@
-function didWrite = SQL_retrieve(ts_ids,op_ids,retrieveWhatEntries,retrieveWhatData)
-% SQL_retrieve 		Retrieve data from the mySQL database
+function didWrite = SQL_Retrieve(ts_ids,op_ids,retrieveWhatEntries,retrieveWhatData)
+% SQL_Retrieve 		Retrieve data from the mySQL database
 %
 % This function retreives data from the mySQL database for subsequent analysis
 % in Matlab. It takes as input a set of constraints on the time series and
@@ -75,7 +75,7 @@ if nargin < 3 || isempty(retrieveWhatEntries)
 end
 retrieveWhatEntriesCanBe = {'null','all','error'};
 if ~ischar(retrieveWhatEntries) || ~ismember(retrieveWhatEntries,retrieveWhatEntriesCanBe)
-    error(['The third input to SQL_retrieve must specify what type of entries to retrieve from ' ...
+    error(['The third input to SQL_Retrieve must specify what type of entries to retrieve from ' ...
                 'the database, one of the following: %s'],BF_cat(retrieveWhatEntriesCanBe))
 end
 
@@ -85,7 +85,7 @@ if nargin < 4 || isempty(retrieveWhatData)
 end
 retrieveWhatDataCanBe = {'all','nocalctime','outputs','quality'};
 if ~ischar(retrieveWhatData) || ~ismember(retrieveWhatData,retrieveWhatDataCanBe)
-    error(['The fourth input to SQL_retrieve must specify what data to retrieve from the database, ' ...
+    error(['The fourth input to SQL_Retrieve must specify what data to retrieve from the database, ' ...
                 'one of the following: %s'],BF_cat(retrieveWhatEntriesCanBe))
 end
 
