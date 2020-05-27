@@ -274,7 +274,6 @@ else
         % Check for duplicate IDs:
         [uniqueTsids,ix_ts] = unique(TimeSeries.ID); % will be sorted
         if length(uniqueTsids) < height(TimeSeries)
-            TimeSeries = TimeSeries(ix_ts,:);
             fprintf(1,'We''re assuming that TimeSeries IDs are equivalent between the two input files\n');
             fprintf(1,'We need to trim duplicate time series (with the same IDs)\n');
             fprintf(1,['(NB: This will NOT be appropriate if combinining time series from' ...
@@ -285,6 +284,10 @@ else
         else
             fprintf(1,'All time series were distinct, we now have a total of %u.\n',height(TimeSeries));
         end
+        
+        % Always re-order by ix_ts because MergeMe merges the TS_DataMat in
+        % this order too
+        TimeSeries = TimeSeries(ix_ts,:);
     else
         % Check that time series names are unique, and trim if not:
         [uniqueTimeSeriesNames,ix_ts] = unique(TimeSeries.Name,'stable');
