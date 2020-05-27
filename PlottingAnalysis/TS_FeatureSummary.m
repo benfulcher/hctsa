@@ -100,12 +100,12 @@ end
 f = figure('color','w'); box('on'); hold on
 if ismember('Group',TimeSeries.Properties.VariableNames)
     numGroups = length(unique(timeSeriesGroup));
-    annotateParams.groupColors = BF_getcmap('set1',numGroups,1);
+    annotateParams.groupColors = BF_GetColorMap('set1',numGroups,1);
 end
 
 if doViolin
     % Violin plots
-    rainbowColors = [BF_getcmap('set1',5,1); BF_getcmap('dark2',5,1)];
+    rainbowColors = [BF_GetColorMap('set1',5,1); BF_GetColorMap('dark2',5,1)];
 
     % Determine a subset, highlightInd, of time series to highlight:
     [~,ix] = sort(TS_DataMat(:,theOp),'ascend');

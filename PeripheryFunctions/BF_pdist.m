@@ -92,7 +92,7 @@ case 'mi'
         end
         if (mod(i,floor(n1/50)) == 0)
             fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
-                        BF_thetime(toc(mitimer)/i*(n1-i)),i,n1);
+                        BF_TheTime(toc(mitimer)/i*(n1-i)),i,n1);
         end
     end
     clear mitimer % stop timing
@@ -110,7 +110,7 @@ case {'corr_fast','abscorr_fast'}
     end
     tic
     R = BF_NaNCov(dataMatrix',1,1);
-    if ~beSilent, fprintf(1,' Done in %s.\n',BF_thetime(toc)); end
+    if ~beSilent, fprintf(1,' Done in %s.\n',BF_TheTime(toc)); end
 
 
 case {'euclidean','Euclidean','corr','correlation','abscorr'}
@@ -126,7 +126,7 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
     end
     R = squareform(R); % Make a matrix
     if ~beSilent
-        fprintf(1,' Done in %s.\n',BF_thetime(toc));
+        fprintf(1,' Done in %s.\n',BF_TheTime(toc));
     end
 
     % Now go through and fill in any NaNs
@@ -158,7 +158,7 @@ case {'euclidean','Euclidean','corr','correlation','abscorr'}
             % and then 5 more times...
             if ~beSilent && ((i==1000 && length(nani) > 10000) || (mod(i,floor(length(nani)/5))==0))
                 fprintf(1,'Approximately %s remaining! We''re at %u / %u.\n', ...
-                        BF_thetime(toc(NaNtimer)/i*(length(nani)-i)),i,length(nani));
+                        BF_TheTime(toc(NaNtimer)/i*(length(nani)-i)),i,length(nani));
             end
         end
         clear NaNtimer % stop the timer

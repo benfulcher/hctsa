@@ -109,7 +109,7 @@ else
 end
 
 % sequentialfs not compatible with nested function handles...? :/
-% classify_fn = @(XTrain,yTrain,XTest,yTest) BF_lossFunction(yTest,classify(XTest,XTrain,yTrain,'linear'),'sumLoss',3);
+% classify_fn = @(XTrain,yTrain,XTest,yTest) BF_LossFunction(yTest,classify(XTest,XTrain,yTrain,'linear'),'sumLoss',3);
 classify_fn = GiveMeFunctionHandle(criterion,numClasses,whatLoss,reWeight);
 
 % ------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ fprintf(1,'Selected %u features\n',sum(fs));
 
 % Finished selecting features!
 fprintf(1,'Feature selection to %u features completed in %s.\n',...
-            numFeatSelect,BF_thetime(toc(FS_timer)))
+            numFeatSelect,BF_TheTime(toc(FS_timer)))
 clear FS_timer;
 
 %-------------------------------------------------------------------------------
@@ -142,7 +142,7 @@ for i = 1:2
 end
 
 if sum(fs) > 1
-    TS_plot_2d(TS_DataMat(:,ifeat),TimeSeries,featureLabels,groupNames,annotateParams)
+    TS_Plot2d(TS_DataMat(:,ifeat),TimeSeries,featureLabels,groupNames,annotateParams)
 end
 
 end

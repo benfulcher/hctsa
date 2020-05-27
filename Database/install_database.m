@@ -45,7 +45,7 @@ if strcmp(reply,'y')
                                 ' to a mySQL server to do this\n']);
         % Walks the user through creating the database from a root account and sets
         % up a user account and password:
-        SQL_create_db;
+        SQL_CreateDatabase;
         fprintf(1,['Note that the database access ' ...
                     'settings are stored in ''sql_settings.conf''\n']);
     else
@@ -56,7 +56,7 @@ if strcmp(reply,'y')
     % ------------------------------------------------------------------------------
     %% 3. Create all (empty) tables in the database
     % ------------------------------------------------------------------------------
-    SQL_create_all_tables;
+    SQL_CreateAllTables;
     fprintf(1,'\n');
 
     % ------------------------------------------------------------------------------
@@ -67,19 +67,19 @@ if strcmp(reply,'y')
 
     fprintf(1,'Adding Master operations...\n');
     mop_timer = tic;
-    SQL_add('mops','INP_mops.txt','',0)
-    fprintf(1,'Master operations added in %s.\n',BF_thetime(toc(mop_timer)));
+    SQL_Add('mops','INP_mops.txt','',0)
+    fprintf(1,'Master operations added in %s.\n',BF_TheTime(toc(mop_timer)));
     clear mop_timer
 
     fprintf(1,'Adding the default set of operations...\n');
     op_timer = tic;
-    SQL_add('ops','INP_ops.txt','',0)
+    SQL_Add('ops','INP_ops.txt','',0)
 
-    fprintf(1,'Operations added in %s.\n\n',BF_thetime(toc(op_timer)));
+    fprintf(1,'Operations added in %s.\n\n',BF_TheTime(toc(op_timer)));
     clear op_timer
 
     fprintf(1,['All done! Ready when you are to add time series to the database using ' ...
-                            'SQL_add(''ts'',''<timeSeries_inputFile.txt>'')...!\n']);
+                            'SQL_Add(''ts'',''<timeSeries_inputFile.txt>'')...!\n']);
 else
     fprintf(1,'\n--- No link between Matlab and a mySQL database will be set up.\n');
     fprintf(1,'You can use TS_init to run hctsa analysis locally within Matlab.\n');

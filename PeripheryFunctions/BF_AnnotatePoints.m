@@ -113,7 +113,7 @@ else
 end
 if numGroups==1
     if doRainbow
-        rainbowColors = [BF_getcmap('set1',5,1); BF_getcmap('dark2',6,1)];
+        rainbowColors = [BF_GetColorMap('set1',5,1); BF_GetColorMap('dark2',6,1)];
     else
         % all black:
         rainbowColors = repmat([0,0,0],20,1);
@@ -249,18 +249,18 @@ title('')
 function groupColors = GiveMeGroupColors(annotateParams,numGroups) % Set colors
     if isstruct(annotateParams) && isfield(annotateParams,'cmap')
         if ischar(annotateParams.cmap)
-            groupColors = BF_getcmap(annotateParams.cmap,numGroups,1);
+            groupColors = BF_GetColorMap(annotateParams.cmap,numGroups,1);
         else
             groupColors = annotateParams.cmap; % specify the cell itself
         end
     else
         if numGroups < 10
-            groupColors = BF_getcmap('set1',numGroups,1);
+            groupColors = BF_GetColorMap('set1',numGroups,1);
         elseif numGroups <= 12
-            groupColors = BF_getcmap('set3',numGroups,1);
+            groupColors = BF_GetColorMap('set3',numGroups,1);
         elseif numGroups <= 22
-            groupColors = [BF_getcmap('set1',numGroups,1); ...
-                        BF_getcmap('set3',numGroups,1)];
+            groupColors = [BF_GetColorMap('set1',numGroups,1); ...
+                        BF_GetColorMap('set3',numGroups,1)];
         elseif numGroups <= 50
             groupColors = mat2cell(jet(numGroups),ones(numGroups,1));
         else

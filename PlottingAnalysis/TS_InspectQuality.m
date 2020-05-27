@@ -296,7 +296,7 @@ function formatYAxisColorBar(doYaxis,offSet)
     cb.TickLabels = allLabels(1:maxShow+1);
 
     % Set the colormap:
-    allColors = [BF_getcmap('spectral',8,0); 0,0,0];
+    allColors = [BF_GetColorMap('spectral',8,0); 0,0,0];
     allColors = allColors([8,1,2,3,4,5,6,7,9],:);
     colormap(allColors(1:maxShow+1,:))
 end

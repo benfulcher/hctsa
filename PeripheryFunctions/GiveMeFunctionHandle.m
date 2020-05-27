@@ -55,8 +55,7 @@ end
 % Set the function handle to compute the accuracy/loss measure:
 %-------------------------------------------------------------------------------
 if strcmp(whatClassifier,'fast_linear')
-  
-    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
+    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
     
     % Need to force the prior to uniform otherwise we get poor results
     % (makes it equiv. to 'classify' function)
@@ -71,6 +70,8 @@ end
 % Binary model (easier), we can do it in one line:
 %-------------------------------------------------------------------------------
 if numClasses==2
+    % Set the loss function:
+    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
 
     switch whatClassifier
     case 'knn'

@@ -67,7 +67,7 @@ doPlot = false;
 %-------------------------------------------------------------------------------
 
 % Embed the signal via time-delay method
-y_embed = BF_embed(y,tau,m,0);
+y_embed = BF_Embed(y,tau,m,0);
 
 if isnan(y_embed);
     % embedding parameters are unsuitable (likely that tau is too long...)

@@ -9,7 +9,7 @@ function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedParams, randomSe
 % Nref, the number of reference points (can be -1 to use all points)
 % rad, the maximum search radius (as a proportion of the attractor size)
 % past, the Theiler window
-% embedParams, the embedding parameters for BF_embed, in the form {tau,m}
+% embedParams, the embedding parameters for BF_Embed, in the form {tau,m}
 %
 %---OUTPUT: the Taken's estimator of the correlation dimension, d2.
 %
@@ -87,7 +87,7 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert to embedded signal object for TSTOOL
-s = BF_embed(y,embedParams{1},embedParams{2},1,randomSeed);
+s = BF_Embed(y,embedParams{1},embedParams{2},1,randomSeed);
 
 if ~isa(s,'signal') && isnan(s); % Embedding failed
     fprintf('Embedding failed.\n')
