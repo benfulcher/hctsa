@@ -5,7 +5,7 @@ function out = SQL_FlushKeywords(flushWhat)
 % time series ('ts') or operations ('ops').
 %
 % Useful for when there's a problem with the keyword relationships (e.g., when
-% an SQL_add is interrupted).
+% an SQL_Add is interrupted).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -40,7 +40,7 @@ end
 % ------------------------------------------------------------------------------
 %% Open Database
 % ------------------------------------------------------------------------------
-[dbc, databaseName] = SQL_opendatabase();
+[dbc, databaseName] = SQL_OpenDatabase();
 
 % ------------------------------------------------------------------------------
 % Preliminaries
@@ -76,7 +76,7 @@ dbOutput = mysql_dbquery(dbc,selectString);
 % Is the table empty?:
 if isempty(dbOutput)
     % If there are entries in the keyword table, they're redundant (e.g., from an
-    % SQL_clear_remove with nothing remaining afterwards)
+    % SQL_ClearRemove with nothing remaining afterwards)
     % You still need to drop the rel table first because of the foreign key
     % constraint (even if it's an empty table)
     warning('No entries remaining in %s -- removing all keywords.',theTable);
@@ -122,7 +122,7 @@ for k = 1:numKeywords
     toAdd{k} = sprintf('(''%s'',%u)',ukws{k},keywordCounts(k));
 end
 
-SQL_add_chunked(dbc,insertString,toAdd);
+SQL_AddChunked(dbc,insertString,toAdd);
 
 fprintf(1,'Added %u new keywords to %s!\n',numKeywords,theKeywordTable);
 
@@ -149,9 +149,9 @@ for i = 1:length(kwSplit)
 end
 
 % Add them all in chunks
-SQL_add_chunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell,500);
+SQL_AddChunked(dbc,sprintf('INSERT INTO %s (%s,%s) VALUES',theRelTable,theid,thekid),addCell,500);
 
-fprintf(1,' done in %s.\n',BF_thetime(toc(relTimer)));
+fprintf(1,' done in %s.\n',BF_TheTime(toc(relTimer)));
 
 % ------------------------------------------------------------------------------
 function dropTable(whatTable,theTables)

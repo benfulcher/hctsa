@@ -181,7 +181,7 @@ end
 if doPlot
     lw = 1; % set the line width for plotting
     figure('color','w'); box('on'); hold on;
-    c = BF_getcmap('set1',3,1);
+    c = BF_GetColorMap('set1',3,1);
     plot(y,'.-k','LineWidth',lw); % original time series
     plot(w,'.-','color',c{1},'LineWidth',lw); % walker
     plot([1,length(w)],ones(2,1)*mean(w),'color',c{2},'LineWidth',2); % mean

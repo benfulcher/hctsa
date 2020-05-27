@@ -3,7 +3,7 @@ function AddJavaClassPathInfoDynamics()
     % Required for the parallel workers, which don't always inherit the proper
     % javaclasspath
 
-    computeDir = which('TS_compute');
+    computeDir = which('TS_Compute');
     splits = regexp(computeDir,filesep);
     hctsaDir = computeDir(1:splits(end-1));
     javaaddpath(fullfile(hctsaDir,'Toolboxes','infodynamics-dist','infodynamics.jar'));

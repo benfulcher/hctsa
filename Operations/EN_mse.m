@@ -84,7 +84,7 @@ y_cg = cell(numScales,1);
 for i = 1:numScales
     % Want non-overlapping windows of length scaleRange(i)
     bufferSize = scaleRange(i);
-    y_buffer = BF_makeBuffer(y,bufferSize);
+    y_buffer = BF_MakeBuffer(y,bufferSize);
     y_cg{i} = mean(y_buffer,2);
 end
 

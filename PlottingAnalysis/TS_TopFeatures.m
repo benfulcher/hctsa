@@ -175,7 +175,7 @@ fprintf(1,'Comparing the (in-sample) performance of %u operations for %u classes
                                 height(Operations),numClasses,cfnName);
 timer = tic;
 testStat = giveMeStats(TS_DataMat,TimeSeries.Group,true);
-fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
+fprintf(1,' Done in %s.\n',BF_TheTime(toc(timer)));
 
 if all(isnan(testStat))
     error('Error computing statistics for %s (may be due to inclusion of missing data?)',cfnName);
@@ -240,7 +240,7 @@ if ismember('histogram',whatPlots)
             testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,false);
         end
         fprintf(1,'\n%u %s statistics computed in %s.\n',numOps*numNulls,...
-                                        cfnName,BF_thetime(toc(timer)));
+                                        cfnName,BF_TheTime(toc(timer)));
 
         % Pool nulls to estimate p-values
         pooledNulls = testStat_rand(:);
@@ -262,7 +262,7 @@ if ismember('histogram',whatPlots)
 
     % Plot histogram
     f = figure('color','w'); hold on
-    colors = BF_getcmap('spectral',5,1);
+    colors = BF_GetColorMap('spectral',5,1);
     if numNulls == 0
         % Just plot the real distribution of test statistics across all features
         h_real = histogram(testStat,'Normalization','probability',...
@@ -348,7 +348,7 @@ if ismember('datamatrix',whatPlots)
     dataLocal = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
                     'TimeSeries',TimeSeries,...
                     'Operations',Operations(featInd(ixFeat),:));
-    TS_plot_DataMatrix(dataLocal,'colorGroups',1,'groupReorder',1);
+    TS_PlotDataMatrix(dataLocal,'colorGroups',true,'groupReorder',true);
 end
 
 %-------------------------------------------------------------------------------
@@ -391,6 +391,8 @@ if nargout == 0
     clear('ifeat','testStat','testStat_rand');
 end
 
+
+%-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
 function uStatP = fn_uStat(d1,d2,doExact)
     % Return test statistic from Mann-Whitney U-test
@@ -422,7 +424,7 @@ function testStat = giveMeStats(dataMatrix,groupLabels,beVerbose)
         % Give estimate of time remaining:
         if beVerbose && k==100
             fprintf(1,'(should take approx %s to compute for all %u features)\n',...
-                            BF_thetime(toc(loopTimer)/100*(numOps)),numOps);
+                            BF_TheTime(toc(loopTimer)/100*(numOps)),numOps);
         end
     end
 end

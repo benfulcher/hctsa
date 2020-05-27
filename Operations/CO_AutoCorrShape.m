@@ -151,7 +151,6 @@ if Nac > minPointsForACFofACF
     if all(acf > 0)
         out.actau = NaN;
     else
-        keyboard
         out.actau = CO_AutoCorr(acf,CO_FirstZero(acf,'ac'),'Fourier');
     end
 else
@@ -164,7 +163,7 @@ end
 %-------------------------------------------------------------------------------
 dacf = diff(acf);
 ddacf = diff(dacf);
-extrr = BF_sgnchange(dacf,1);
+extrr = BF_SignChange(dacf,1);
 sdsp = ddacf(extrr);
 % maxr = extrr(sdsp < 0);
 % minr = extrr(sdsp > 0);

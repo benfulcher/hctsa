@@ -67,8 +67,8 @@ switch whatStat
 
     case 'pmcross'
         % ratio of times cross 1 to -1
-        c1sig = sum(BF_sgnchange(x-1)); % num times cross 1
-        c2sig = sum(BF_sgnchange(x+1)); % num times cross -1
+        c1sig = sum(BF_SignChange(x-1)); % num times cross 1
+        c2sig = sum(BF_SignChange(x+1)); % num times cross -1
         if c2sig == 0
             out = NaN;
         else

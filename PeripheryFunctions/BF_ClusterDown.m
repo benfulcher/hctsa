@@ -143,7 +143,7 @@ f.Position(3:4) = [1200,800];
 
 % Get the dendrogram reordering:
 ax1 = subplot(1,6,6);
-ord = BF_linkageOrdering(distVec,links);
+ord = BF_LinkageOrdering(distVec,links);
 h_dend = dendrogram(links,0,'Orientation','right','Reorder',ord);
 ax1.YDir = 'reverse'; % needs to be reversed to match the reversed y-axis of the imagesc plot
 
@@ -212,7 +212,7 @@ end
 %-------------------------------------------------------------------------------
 % Add rectangles to group highly correlated clusters:
 %-------------------------------------------------------------------------------
-rectangleColors = BF_getcmap('accent',5,1);
+rectangleColors = BF_GetColorMap('accent',5,1);
 for i = 1:numClusters
     % Label cluster borders:
     rectangle('Position',[min(cluster_Groupi_cl{i})-0.5,min(cluster_Groupi_cl{i})-0.5, ...

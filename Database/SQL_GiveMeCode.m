@@ -34,7 +34,7 @@ function theCode = SQL_GiveMeCode(op_id)
 
 % ------------------------------------------------------------------------------
 % Open connection to database
-[dbc, ~] = SQL_opendatabase;
+[dbc, ~] = SQL_OpenDatabase;
 
 % Get opCode:
 selectString = sprintf('SELECT Code FROM Operations WHERE op_id = %u',op_id);
@@ -48,7 +48,7 @@ mopData = mysql_dbquery(dbc,selectString);
 mopCode = mopData{1};
 
 % Close connection to the mySQL database
-SQL_closedatabase(dbc);
+SQL_CloseDatabase(dbc);
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------

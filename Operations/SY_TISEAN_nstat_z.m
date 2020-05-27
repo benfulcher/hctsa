@@ -27,7 +27,7 @@ function out = SY_TISEAN_nstat_z(y,numSeg,embedParams)
 % numSeg, the number of equally-spaced segments to divide the time series into,
 %       and used to predict the other time series segments
 %
-% embedParams, in the form {tau,m}, as usual for BF_embed. That is, for an
+% embedParams, in the form {tau,m}, as usual for BF_Embed. That is, for an
 %               embedding dimension, tau, and embedding dimension, m. E.g.,
 %               {1,3} has a time-delay of 1 and embedding dimension of 3.
 %
@@ -93,7 +93,7 @@ filePath = BF_WriteTempFile(y);
 % fprintf(1,'Wrote temporary data file ''%s'' for TISEAN.\n',filePath)
 
 % Get embedding parameters:
-tm = BF_embed(y,embedParams{1},embedParams{2},2);
+tm = BF_Embed(y,embedParams{1},embedParams{2},2);
 tau = tm(1); % time delay
 m = tm(2); % embedding dimension
 

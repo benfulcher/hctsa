@@ -1,6 +1,6 @@
 # :wavy_dash: *hctsa* :wavy_dash:: highly comparative time-series analysis
 
-*hctsa* is a software package for running highly comparative time-series analysis using [Matlab](https://www.mathworks.com/products/matlab/) (full support for versions R2014b or later; for use in python cf. [pyopy](https://github.com/strawlab/pyopy)).
+*hctsa* is a software package for running highly comparative time-series analysis using [Matlab](https://www.mathworks.com/products/matlab/) (full support for versions R2018b or later).
 
 The software provides a code framework that enables the extraction of thousands of time-series features from a time series (or a time-series dataset).
 It also provides a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
@@ -47,11 +47,12 @@ Details on how to merge the latest version of the repository with the local chan
 
 ## Related resources
 
-### CompEngine :collision:
+### _CompEngine_ :collision:
 
-[CompEngine](http://www.comp-engine.org) is an accompanying web resource for this project.
-It allows users to upload, explore, and compare thousands of diverse types of time-series data.
-The vast and growing collection of time-series data can also be downloaded.
+[_CompEngine_](http://www.comp-engine.org) is an accompanying web resource for this project.
+It is a self-organizing database of time-series data that allows users to upload, explore, and compare thousands of diverse types of time-series data.
+This vast and growing collection of time-series data can also be downloaded.
+You can read more about it in our [&#x1F4D9;preprint](https://arxiv.org/abs/1905.01042).
 
 ### _catch22_ :two::two:
 
@@ -74,34 +75,70 @@ Matlab code for computing features for an initialized `HCTSA.mat` file, by distr
 
 ## Publications :closed_book:
 
-Here is a list of publications in different disciplinary areas that have used _hctsa_, both by us and other groups of scientists:
+Here we provide a list of publications that have used _hctsa_.
 
 ### Our publications
 
-See the following publications for details of *hctsa* was developed and has since been extended, as well as some example applications:
-* ***Feature-based time-series analysis for a self-organizing living library of time-series data, [CompEngine](https://www.comp-engine.org/)*** &#x1F4D7; : B.D. Fulcher, C.H. Lubba, S.S. Sethi & N.S. Jones. _CompEngine_: A self-organizing, living library of time-series data. *arXiv* (2019). [Link](https://arxiv.org/abs/1905.01042v1).
-* ***A reduced set of 22 efficiently coded features*** &#x1F4D7; : C.H. Lubba, S.S. Sethi, P. Knaute, S.R. Schultz, B.D. Fulcher & N.S. Jones. _catch22_: CAnonical Time-series CHaracteristics. *Data Mining and Knowledge Discovery* **33**, 1821 (2019). [Link](https://doi.org/10.1007/s10618-019-00647-x). [Code](https://github.com/chlubba/catch22).
-* ***Implementation paper introducing the _hctsa_ package, with applications to high throughput phenotyping of _C. Elegans_ and Drosophila movement time series*** &#x1F4D7; : B.D. Fulcher & N.S. Jones. _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction. *Cell Systems* **5**, 527 (2017). [Link](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).
-* ***Introduction to feature-based time-series analysis*** &#x1F4D7; : B.D. Fulcher. Feature-based time-series analysis. *Feature Engineering for Machine Learning and Data Analytics*, CRC Press, 87-116 (2018).  [Link](https://www.crcpress.com/Feature-Engineering-for-Machine-Learning-and-Data-Analytics/Dong-Liu/p/book/9781138744387), [Preprint](https://arxiv.org/abs/1709.08055).
-* ***Application to fMRI data*** &#x1F4D7; : S.S. Sethi, V. Zerbi, N. Wenderoth, A. Fornito, B.D. Fulcher. Structural connectome topology relates to regional BOLD signal dynamics in the mouse brain. *Chaos* **27**, 047405 (2017). [Link](http://aip.scitation.org/doi/10.1063/1.4979281), [preprint](http://biorxiv.org/lookup/doi/10.1101/085514).
-* ***Application to time-series data mining*** &#x1F4D7; : B.D. Fulcher & N.S. Jones. Highly comparative feature-based time-series classification. *IEEE Trans. Knowl. Data Eng.* **26**, 3026 (2014). [Link](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425).
-* ***Application to fetal heart rate time series*** &#x1F4D7; : B.D. Fulcher, A.E. Georgieva, C.W.G. Redman, N.S. Jones. Highly comparative fetal heart rate analysis. *34th Ann. Int. Conf. IEEE EMBC* 3135 (2012). [Link](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629).
-* ***Original paper, showing that the behavior of thousands of time-series methods on thousands of different time series can provide structure to the interdisciplinary time-series analysis literature*** &#x1F4D7; : B.D. Fulcher, M.A. Little, N.S. Jones. Highly comparative time-series analysis: the empirical structure of time series and their methods. *J. Roy. Soc. Interface* **10**, 20130048 (2013). [Link](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
+Where journal articles (&#x1F4D7;) are not open access, we also provide a link to the preprint (&#x1F4D9;).
+Links to Github code repositories (:octocat:) are provided where appropriate.
+
+#### The development of *hctsa* and other resources for feature-based time-series analysis
+
+See the following publications for details of how the highly-comparative approach to time-series analysis has developed since our initial publication in 2013:
+
+* **We reduced *hctsa* down to a reduced set of 22 efficiently coded features**.
+  * [&#x1F4D7; CAnonical Time-series CHaracteristics](https://doi.org/10.1007/s10618-019-00647-x). *Data Mining and Knowledge Discovery* **33**, 1821 (2019).
+  * [:octocat: Code](https://github.com/chlubba/catch22).
+* **We developed a software package for highly-comparative time-series analysis, *hctsa*** (includes applications to high throughput phenotyping of _C. Elegans_ and Drosophila movement time series).
+  * [&#x1F4D7; _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).   *Cell Systems* **5**, 527 (2017).
+  * [:octocat: Code (fly)](https://github.com/benfulcher/hctsa_phenotypingFly) &
+  [:octocat: Code (worm)](https://github.com/benfulcher/hctsa_phenotypingWorm).
+* **Introduction to using features for time-series analysis**
+  * [&#x1F4D7; Feature-based time-series analysis](https://www.crcpress.com/Feature-Engineering-for-Machine-Learning-and-Data-Analytics/Dong-Liu/p/book/9781138744387).
+    *Feature Engineering for Machine Learning and Data Analytics*, CRC Press (2018).
+  * [&#x1F4D9; Preprint](https://arxiv.org/abs/1709.08055).
+* **The behavior of thousands of time-series methods on thousands of different time series can be used to organize an interdisciplinary time-series analysis literature**
+  * [&#x1F4D7; Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
+    *J. Roy. Soc. Interface* (2013).
+
+#### Applications of *hctsa*
+We have used *hctsa* to:
+* **Distinguish targeted perturbations to mouse fMRI dynamics**
+  * [&#x1F4D7; Cortical Excitation:Inhibition Imbalance Causes Abnormal Brain Network Dynamics as Observed in Neurodevelopmental Disorders](https://academic.oup.com/cercor/advance-article/doi/10.1093/cercor/bhaa084/5823074). *Cerebral Cortex* (2020).
+  * [:octocat: Code](https://github.com/benfulcher/hctsa_DREADD).
+* **Connect structural brain connectivity to fMRI dynamics**
+  * [&#x1F4D7; Structural connectome topology relates to regional BOLD signal dynamics in the mouse brain](http://aip.scitation.org/doi/10.1063/1.4979281). *Chaos* (2017).
+  * [&#x1F4D9; Preprint](http://biorxiv.org/lookup/doi/10.1101/085514).
+* **Distinguish time-series patterns for data-mining applications**
+  * [&#x1F4D7; Highly comparative feature-based time-series classification](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425). *IEEE Trans. Knowl. Data Eng.* (2014).
+* **Classify babies with low blood pH from fetal heart rate time series**
+  * [&#x1F4D7; Highly comparative fetal heart rate analysis](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629). *34th Ann. Int. Conf. IEEE EMBC* (2012).
 
 ### Other Publications
 
-Here are some examples of external use of _hctsa_.
-Let me know if I've missed any!
+_hctsa_ has been used to:
+* Assess stress-induced changes in astrocyte calcium dynamics.
+  - [&#x1F4D7; Paper in _Nature Communications_ (2020)](https://www.nature.com/articles/s41467-020-15778-9).
+* Assess the stress controllability of neurons from their activity time series.
+  - [&#x1F4D7; Paper in _Nature Neuroscience_ (2020)](https://www.nature.com/articles/s41593-020-0591-0).
+* Predicting post cardiac arrest outcomes.
+  - [&#x1F4D9; Preprint on _arXiv_ (2020)](https://arxiv.org/abs/2002.03309).
+* Recognition of hand gestures.
+  - [&#x1F4D7; Paper in _PLoS ONE_ (2020)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0227039).
+* Classification of heartbeats measured using single-lead ECG.
+  - [&#x1F4D7;Paper in _IEEE 42nd International Convention on Information and Communication Technology, Electronics and Microelectronics (MIPRO)_ (2019)](https://ieeexplore.ieee.org/abstract/document/8757135).
+* Non-intrusively monitor load for appliance detection and electrical power saving in buildings.
+  - [&#x1F4D7; Paper in _Energy and Buildings_ (2019)](https://doi.org/10.1016/j.enbuild.2019.05.028).
+* Detect mild cognitive impairment using single-channel EEG to measure speech-evoked brain responses.
+  - [&#x1F4D7; Paper in _IEEE Transactions on Neural Systems and Rehabilitation Engineering_ (2019)](https://ieeexplore.ieee.org/abstract/document/8693868).
+* Assess muscles for clinical rehabilitation.
+  - [&#x1F4D7; Paper in _39th Annual International Conference of the IEEE Engineering in Medicine and Biology Society (EMBC)_ (2017)](https://ieeexplore.ieee.org/abstract/document/8037372/).
+* Evaluate asphalt irregularity from smartphone sensors.
+  - [&#x1F4D7; Paper in _International Symposium on Intelligent Data Analysis_ (2018)](https://link.springer.com/chapter/10.1007/978-3-319-68765-0_27).
+* Select features for fetal heart rate analysis using genetic algorithms.
+  - [&#x1F4D7; Paper in _Physiological Measurement_ (2014)](http://iopscience.iop.org/article/10.1088/0967-3334/35/7/1357/meta).
 
-* Feature selection using genetic algorithms for fetal heart rate analysis. [Paper](http://iopscience.iop.org/article/10.1088/0967-3334/35/7/1357/meta)
-* Evaluating asphalt irregularity from smartphone sensors. [Paper](https://link.springer.com/chapter/10.1007/978-3-319-68765-0_27)
-* Assessing muscles for clinical rehabilitation. [Paper](https://ieeexplore.ieee.org/abstract/document/8037372/)
-* Detecting mild cognitive impairment using single-channel EEG to measure speech-evoked brain responses. [Paper](https://ieeexplore.ieee.org/abstract/document/8693868)
-* Non-intrusive load monitoring for appliance detection and electrical power saving for buildings. [Paper](https://doi.org/10.1016/j.enbuild.2019.05.028).
-* Classification of heartbeats measured using single-lead ECG. [Paper in IEEE 42nd International Convention on Information and Communication Technology, Electronics and Microelectronics (MIPRO)](https://ieeexplore.ieee.org/abstract/document/8757135).
-* Hand gesture recognition. [Paper in PLoS ONE](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0227039).
-* Post-Cardiac Arrest Outcome Prediction. [Preprint on arXiv](https://arxiv.org/abs/2002.03309).
-* Assessing the stress controllability of neurons from their activity time series. [Paper in Nat Neurosci](https://www.nature.com/articles/s41593-020-0591-0).
+(Let me know if I've missed any!)
 
 ## *hctsa* licenses
 
@@ -153,7 +190,7 @@ Other good resources for time-series analysis, e.g., in other programming langua
 
 ### `pyopy`
 
-This excellent repository allows users to run *hctsa* software from within python: [pyopy](https://github.com/strawlab/pyopy).
+This excellent repository allows users to run *hctsa* software from within python: [`pyopy`](https://github.com/strawlab/pyopy).
 
 ### `hctsaAnalysisPython`
 

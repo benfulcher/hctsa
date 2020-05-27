@@ -304,10 +304,10 @@ if any(ismember('matrix',whatPlots))
         dRescale = @(x) dLims(1) + numGroups/8*diff(dLims)*(-1 + 0.9999*(x - min(x))./(max(x)-min(x)));
         imagesc(0,1,dRescale(dataTable_clust.Group'))
         plot(ones(2,1)*0.5,[0.5,numNeighbors+1.5],'k')
-        colormap([BF_getcmap('dark2',numGroups,0);BF_getcmap('redyellowblue',8,0)]);
+        colormap([BF_GetColorMap('dark2',numGroups,0);BF_GetColorMap('redyellowblue',8,0)]);
         caxis([dLims(1)-diff(dLims)*numGroups/8,dLims(2)])
     else
-        colormap(BF_getcmap('redyellowblue',8,0));
+        colormap(BF_GetColorMap('redyellowblue',8,0));
         caxis([min(Dij(Dij>0)),max(Dij(:))])
     end
 

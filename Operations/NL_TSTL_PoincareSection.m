@@ -12,7 +12,7 @@ function out = NL_TSTL_PoincareSection(y,ref,embedParams)
 %      in the (embedded) time series) or a string like 'max' or 'min' that takes
 %      the first maximum, ... in the (scalar) time series, ...
 %
-% embedParams: the usual thing to give BF_embed for the time-delay embedding, as
+% embedParams: the usual thing to give BF_Embed for the time-delay embedding, as
 %               {tau,m}. A common choice for m is 3 -- i.e., embed in a 3
 %               dimensional space so that the Poincare section is 2-dimensional.
 %
@@ -100,7 +100,7 @@ doPlot = 0; % plot outputs to a figure
 % ------------------------------------------------------------------------------
 % time-delay embed the signal:
 N = length(y); % length of the time series
-s = BF_embed(y,embedParams{1},3,1);
+s = BF_Embed(y,embedParams{1},3,1);
 
 if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding failed');

@@ -206,7 +206,7 @@ if CVFolds == 0
         return
     else
         yPredict = predict(Mdl,XTest);
-        accuracy = BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
+        accuracy = BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
     end
 else
     % Test data is mixed through the training data provided using k-fold cross validation
@@ -215,12 +215,12 @@ else
     computePerFold = false;
     if computePerFold
         % Compute separately for each fold, store in vector accuracy:
-        accuracy = arrayfun(@(x) BF_lossFunction(yTrain(Mdl.Partition.test(x)),...
+        accuracy = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
                                     yPredict(Mdl.Partition.test(x)),whatLoss,numClasses),...
                                         1:CVFolds);
     else
         % Compute aggregate across all folds:
-        accuracy = BF_lossFunction(yTrain,yPredict,whatLoss,numClasses);
+        accuracy = BF_LossFunction(yTrain,yPredict,whatLoss,numClasses);
     end
 end
 

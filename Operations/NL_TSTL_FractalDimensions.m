@@ -119,7 +119,7 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert the scalar time series, y, to embedded signal object s for TSTOOL
-s = BF_embed(y,embedParams{1},embedParams{2},1);
+s = BF_Embed(y,embedParams{1},embedParams{2},1);
 
 if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding of the %u-sample time series failed',N)

@@ -78,7 +78,7 @@ m = mean(x);
 % 1. Number of peaks
 df = diff(f);
 ddf = diff(df);
-sdsp = ddf(BF_sgnchange(df,1));
+sdsp = ddf(BF_SignChange(df,1));
 out.npeaks = sum(sdsp < -0.0002); % 'large enough' maxima
 
 % 2. Max
@@ -104,7 +104,7 @@ out.plsym = out1/out2;
 if ~isempty(numcross) % calculate crossing statistics
     thresholds = numcross;
     for i = 1:length(thresholds)
-        numCrosses = sum(BF_sgnchange(f - thresholds(i)));
+        numCrosses = sum(BF_SignChange(f - thresholds(i)));
         outName = regexprep(sprintf('numcross_%.2f',thresholds(i)),'\.',''); % remove dots from 2-d.pl.
         out.(outName) = numCrosses;
     end

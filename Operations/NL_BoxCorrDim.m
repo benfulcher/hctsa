@@ -10,7 +10,7 @@ function out = NL_BoxCorrDim(y,numBins,embedParams)
 % y, column vector of time series data
 % numBins, maximum number of partitions per axis
 % embedParams [opt], embedding parameters as {tau,m} in 2-entry cell for a
-%                   time-delay, tau, and embedding dimension, m. As inputs to BF_embed.
+%                   time-delay, tau, and embedding dimension, m. As inputs to BF_Embed.
 %
 %---OUTPUTS: Simple summaries of the outputs from corrdim.
 
@@ -66,7 +66,7 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % convert to embedded signal object for TSTOOL
-s = BF_embed(y,embedParams{1},embedParams{2},1);
+s = BF_Embed(y,embedParams{1},embedParams{2},1);
 
 if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Time-series embedding to signal class for TSTOOL failed')

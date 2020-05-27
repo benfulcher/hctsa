@@ -87,7 +87,7 @@ links = linkage(R,linkageMethod);
 % ------------------------------------------------------------------------------
 f = figure('color','w');
 set(gcf,'Visible','off'); % suppress figure output
-ord = BF_linkageOrdering(R,links);
+ord = BF_LinkageOrdering(R,links);
 close(f); % close the invisible figure used for the dendrogram
 
 if ~all(keepers==1)

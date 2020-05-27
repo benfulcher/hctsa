@@ -112,7 +112,7 @@ dataStruct = struct();
 dataStruct.Operations = Operations;
 dataStruct.TimeSeries = [];
 dataStruct.TS_DataMat = [];
-stochasticIDs = TS_getIDs('stochastic',dataStruct,'ops');
+stochasticIDs = TS_GetIDs('stochastic',dataStruct,'ops');
 isStochastic = ismember(Operations.ID,stochasticIDs)';
 
 for j = 1:2

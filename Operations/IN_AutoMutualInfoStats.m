@@ -137,10 +137,10 @@ else
 end
 
 %----Number of crossings at mean/median level, percentiles
-out.pcrossmean = mean(BF_sgnchange(ami-mean(ami)));
-out.pcrossmedian = mean(BF_sgnchange(ami-median(ami)));
-out.pcrossq10 = mean(BF_sgnchange(ami-quantile(ami,0.1)));
-out.pcrossq90 = mean(BF_sgnchange(ami-quantile(ami,0.9)));
+out.pcrossmean = mean(BF_SignChange(ami-mean(ami)));
+out.pcrossmedian = mean(BF_SignChange(ami-median(ami)));
+out.pcrossq10 = mean(BF_SignChange(ami-quantile(ami,0.1)));
+out.pcrossq90 = mean(BF_SignChange(ami-quantile(ami,0.9)));
 
 % ac1
 out.amiac1 = CO_AutoCorr(ami,1,'Fourier');

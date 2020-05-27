@@ -1,4 +1,4 @@
-function out = CP_wavelet_varchg(y, wname, level, maxnchpts, minDelay)
+function out = CP_wavelet_varchg(y, wName, level, maxnchpts, minDelay)
 % CP_wavelet_varchg     Variance change points in a time series.
 %
 % Finds variance change points using functions from Matlab's Wavelet Toolbox,
@@ -9,7 +9,7 @@ function out = CP_wavelet_varchg(y, wname, level, maxnchpts, minDelay)
 %
 % y, the input time series
 %
-% wname, the name of the mother wavelet to analyze the data with: e.g., 'db3',
+% wName, the name of the mother wavelet to analyze the data with: e.g., 'db3',
 %           'sym2', cf. Wavelet Toolbox Documentation for details
 %
 % level, the level of wavelet decomposition
@@ -62,15 +62,15 @@ BF_CheckToolbox('wavelet_toolbox');
 % ------------------------------------------------------------------------------
 N = length(y); % time-series length
 
-if nargin < 2 || isempty(wname)
-    wname = 'db3'; % default wavelet
+if nargin < 2 || isempty(wName)
+    wName = 'db3'; % default wavelet
 end
 
 if nargin < 3 || isempty(level)
    level = 3; % level of wavelet decomposition
 end
 if strcmp(level,'max')
-    level = wmaxlev(N,wname);
+    level = wmaxlev(N,wName);
 end
 
 if nargin < 4 || isempty(maxnchpts)
@@ -84,7 +84,7 @@ if (minDelay > 0) && (minDelay < 1)
    minDelay = ceil(minDelay*N);
 end
 
-if wmaxlev(N, wname) < level
+if wmaxlev(N, wName) < level
     error('Chosen level, %u, is too large for this wavelet on this signal. Sorry.', level);
 end
 
@@ -97,10 +97,10 @@ end
 % ------------------------------------------------------------------------------
 
 % Perform a single-level wavelet decomposition :
-[c, l] = wavedec(y,level,wname);
+[c, l] = wavedec(y,level,wName);
 
 % Reconstruct detail at the same level.
-det = wrcoef('d',c,l,wname,level);
+det = wrcoef('d',c,l,wName,level);
 
 % ------------------------------------------------------------------------------
 % 2. Replace 2% of the greatest (absolute) values by the mean

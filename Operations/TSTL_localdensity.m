@@ -15,9 +15,9 @@ function out = TSTL_localdensity(y,NNR,past,embedParams)
 %
 % past, number of time-correlated points to discard (samples)
 %
-% embedParams, the embedding parameters, inputs to BF_embed as {tau,m}, where
+% embedParams, the embedding parameters, inputs to BF_Embed as {tau,m}, where
 %               tau and m can be characters specifying a given automatic method
-%               of determining tau and/or m (see BF_embed).
+%               of determining tau and/or m (see BF_Embed).
 %
 %---OUTPUTS: various statistics on the local density estimates at each point in
 % the time-delay embedding, including the minimum and maximum values, the range,
@@ -71,7 +71,7 @@ end
 % ------------------------------------------------------------------------------
 %% Embed the signal
 % ------------------------------------------------------------------------------
-s = BF_embed(y,embedParams{1},embedParams{2},1);
+s = BF_Embed(y,embedParams{1},embedParams{2},1);
 
 if ~isa(s,'signal') && isnan(s); % embedding failed
     error('Embedding failed.')

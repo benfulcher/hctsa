@@ -54,7 +54,7 @@ end
 % Set the function handle to compute the accuracy/loss measure:
 %-------------------------------------------------------------------------------
 if strcmp(whatClassifier,'fast_linear')
-    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
+    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
     fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,classify(XTest,XTrain,yTrain,'linear'));
     return
 end
@@ -64,7 +64,7 @@ end
 %-------------------------------------------------------------------------------
 if numClasses==2
     % Set the loss function:
-    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
+    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
 
     switch whatClassifier
     case 'knn'
