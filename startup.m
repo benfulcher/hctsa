@@ -1,3 +1,5 @@
+function startup
+
 % STARTUP   Add all paths required for the hctsa package.
 
 % ------------------------------------------------------------------------------
@@ -134,3 +136,5 @@ fprintf(1,'DYLD library path (for TISEAN).');
 % ------------------------------------------------------------------------------
 clear addfcn % clear the add function
 fprintf(1,'\n---Done.\n')
+
+end

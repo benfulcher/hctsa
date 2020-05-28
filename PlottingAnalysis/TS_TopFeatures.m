@@ -85,6 +85,10 @@ addParameter(inputP,'numFeaturesDistr',default_numFeaturesDistr,@isnumeric);
 default_numNulls = 0; % by default, don't compute an empirical null distribution
                       % by randomizing class labels
 addParameter(inputP,'numNulls',default_numNulls,@isnumeric);
+% numFolds:
+default_numFolds = [];
+check_numFolds = @(x) isnumeric(x);
+addParameter(inputP,'numFolds',default_numFolds,check_numFolds);
 
 default_classifierFilename = '';
 check_classifierFilename = @(x) ischar(x);
@@ -100,6 +104,7 @@ numTopFeatures = inputP.Results.numTopFeatures;
 numFeaturesDistr = inputP.Results.numFeaturesDistr;
 numNulls = inputP.Results.numNulls;
 classifierFilename = inputP.Results.classifierFilename;
+numFolds = inputP.Results.numFolds;
 clear('inputP');
 
 % --------------------------------------------------------------------------
@@ -121,6 +126,15 @@ if isempty(groupNames)
     error('No group label info in the data source');
 end
 
+%-------------------------------------------------------------------------------
+% Fit the model
+%-------------------------------------------------------------------------------
+if isempty(numFolds) || numFolds==0
+    % Use a heuristic to set a default number of folds given the data set size,
+    % number of classes
+    numFolds = HowManyFolds(TimeSeries.Group,numClasses);
+end
+
 % --------------------------------------------------------------------------
 %% Define the train/test classification rate function, fn_testStat
 % --------------------------------------------------------------------------
@@ -133,10 +147,12 @@ if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','
     classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),1:numClasses);
     isBalanced = all(classNumbers==classNumbers(1));
     if isBalanced
-        fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'acc',0);
+        fn_testStat = @(XTrain,yTrain,XTest,yTest,numFolds) GiveMeCfn(whatTestStat,...
+                            XTrain,yTrain,XTest,yTest,numClasses,0,'acc',[],numFolds);
         fprintf(1,'Using overall classification accuracy as output measure\n');
     else
-        fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'balancedAcc',1);
+        fn_testStat = @(XTrain,yTrain,XTest,yTest,numFolds) GiveMeCfn(whatTestStat,...
+                            XTrain,yTrain,XTest,yTest,numClasses,0,'balancedAcc',[],numFolds);
         fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
     end
     chanceLine = 100/numClasses;
@@ -156,12 +172,12 @@ case {'ustat','ranksum'}
     cfnName = 'Mann-Whitney approx p-value';
     statUnit = ' (log10(p))';
     chanceLine = NaN;
-    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),false);
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest,numFolds) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),false);
 case {'ustatExact','ranksumExact'}
     cfnName = 'Mann-Whitney exact p-value';
     statUnit = ' (log10(p))';
     chanceLine = NaN;
-    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),true);
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest,numFolds) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),true);
     statUnit = ' (log10(p))';
 case {'ttest','tstat'}
     cfnName = 'Welch''s t-stat';
@@ -170,7 +186,7 @@ case {'ttest','tstat'}
     if numClasses > 2
         error('Cannot use t-test as test statistic with more than two groups :/');
     end
-    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
+    fn_testStat = @(XTrain,yTrain,Xtest,yTest,numFolds) fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
 otherwise
     error('Unknown method ''%s''',whatTestStat)
 end
@@ -182,8 +198,8 @@ end
 fprintf(1,'Comparing the (in-sample) performance of %u operations for %u classes using a %s...\n',...
                                 height(Operations),numClasses,cfnName);
 timer = tic;
-testStat = giveMeStats(TS_DataMat,TimeSeries.Group,true);
-fprintf(1,' Done in %s.\n',BF_thetime(toc(timer)));
+[testStat,CVMdl] = giveMeStats(TS_DataMat,TimeSeries.Group,true);
+fprintf(1,' Done in %s.\n',BF_TheTime(toc(timer)));
 
 if all(isnan(testStat))
     error('Error computing statistics for %s (may be due to inclusion of missing data?)',cfnName);
@@ -399,11 +415,13 @@ end
 %-------------------------------------------------------------------------------
 if ~isempty(classifierFilename)
   fprintf(1,'Saving individual feature classifiers to %s...',classifierFilename);
+  [bestTestStat,bestMdl,whatTestStat] = fn_testStat(TS_DataMat(:,ifeat(1)),TimeSeries.Group,TS_DataMat(:,ifeat(1)),TimeSeries.Group,0);
   
   featureClassifier.Operation.ID = Operations.ID(ifeat(1)); % Sorted list of top operations
   featureClassifier.Operation.Name = Operations.Name{ifeat(1)}; % Sorted list of top operations
-  featureClassifier.Mdl = Mdl{ifeat(1)}; % sorted feature models
-  featureClassifier.Accuracy = testStat_sort(1); % sorted accuracy of models
+  featureClassifier.Mdl = bestMdl; % sorted feature models
+  featureClassifier.CVAccuracy = testStat_sort(1); % sorted accuracy of models
+  featureClassifier.Accuracy = bestTestStat;
   featureClassifier.whatTestStat = whatTestStat;
   featureClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
   classes = groupNames;
@@ -444,18 +462,17 @@ function [tStat,Mdl] = fn_tStat(d1,d2)
     Mdl = stats;
 end
 %-------------------------------------------------------------------------------
-function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
+function [testStat,CVMdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
     % Return test statistic for each operation
     testStat = zeros(numOps,1);
-    Mdl = cell(numOps,1);
+    CVMdl = cell(numOps,1);
     loopTimer = tic;
     for k = 1:numOps
         try
-%             [testStat(k),Mdl(k)] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
-            [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+            [testStat(k),CVMdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels,numFolds);
         catch
             testStat(k) = NaN;
-            Mdl(k) = NaN;
+            CVMdl(k) = NaN;
         end
         % Give estimate of time remaining:
         if beVerbose && k==100

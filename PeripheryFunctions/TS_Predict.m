@@ -1,4 +1,4 @@
-function [tab,myAcc] = TS_predict(timeSeriesData,labels,fileName_classifier,varargin)
+function [tab,myAcc] = TS_Predict(timeSeriesData,labels,fileName_classifier,varargin)
 % TS_predict Predict classes using new time-series data
 %
 % This function uses a previously learnt classifier to predict group labels
@@ -73,8 +73,12 @@ fprintf('Done.\n');
 
 classes = reshape(classes,length(classes),1);
 
+%-------------------------------------------------------------------------------
+% Choose classifier:
+%-------------------------------------------------------------------------------
 useAllFeatures = true;
 if ~isempty(classifierType)
+    % If we've explicitly asked for a classifier type
     switch classifierType
         case 'allFeatures'
             useAllFeatures = true;
@@ -82,9 +86,10 @@ if ~isempty(classifierType)
             useAllFeatures = false;
     end
 else
+    % Otherwise, select the model with the best cross-validated accuracy
     if exist('featureClassifier','var')
       if exist('jointClassifier','var')
-        if any(featureClassifier.Accuracy > jointClassifier.Accuracy)
+        if any(featureClassifier.CVAccuracy > jointClassifier.CVAccuracy)
           useAllFeatures = false;
         end
       else
@@ -117,7 +122,7 @@ removeFile = false;
 
 toRecompute = true;
 if exist(predictionFilename,'file')
-    out = input(sprintf('Warning: %s already exists -- override? [y/N] ',...
+    out = input(sprintf('Warning: %s already exists -- override? [yn] ',...
                     predictionFilename),'s');
     if out ~= 'y'
         toRecompute = false;
@@ -148,7 +153,7 @@ if toRecompute
 
     if exist(tsFilename,'file')
         [~,name] = fileparts(tsFilename);
-        out = input(sprintf('Warning: %s already exists -- override? [y/N] ',...
+        out = input(sprintf('Warning: %s already exists -- override? [yn] ',...
                     name),'s');
         if out ~= 'y'
             return
@@ -156,17 +161,21 @@ if toRecompute
     end
 
     save(tsFilename,'timeSeriesData','labels','keywords','-v7.3');
-    TS_init(tsFilename,'','',0,predictionFilename);
+    TS_Init(tsFilename,'','',0,predictionFilename);
     delete(tsFilename);
 
-    TS_compute(isParallel,[],myOps,'',predictionFilename,0);
+    TS_Compute(isParallel,[],myOps,'',predictionFilename,0);
 end
 
 if isfield(myClassifier,'normalizationInfo')
-    TS_normalize(myClassifier.normalizationInfo.normFunction,...
+    TS_Normalize(myClassifier.normalizationInfo.normFunction,...
                     [0 1],...
                     predictionFilename);
-    predictionFilename = [predictionFilename(1:end-4) '_N.mat'];
+                
+    if exist([predictionFilename(1:end-4) '_N.mat'],'file')
+        delete(predictionFilename);
+        predictionFilename = [predictionFilename(1:end-4) '_N.mat'];
+    end
 end
 
 whatData = load(predictionFilename);

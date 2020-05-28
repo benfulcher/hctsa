@@ -70,8 +70,6 @@ end
 % Binary model (easier), we can do it in one line:
 %-------------------------------------------------------------------------------
 if numClasses==2
-    % Set the loss function:
-    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
 
     switch whatClassifier
     case 'knn'
@@ -109,7 +107,7 @@ if numClasses==2
     end
     
     % Set the loss function:
-    fn_loss = @(yTest,yPredict) BF_lossFunction(yTest,yPredict,whatLoss,numClasses);
+    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
     fn_handle_ac = @(XTest,yTest,Mdl) fn_loss(yTest,predict(Mdl,XTest));
     
     fn_handle = @(XTrain,yTrain,XTest,yTest) fcnHandle(XTrain,yTrain,XTest,yTest,fn_handle_mdl,fn_handle_ac,whatLoss);

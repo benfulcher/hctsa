@@ -1,16 +1,19 @@
-function [IDs,notIDs] = TS_GetIDs(theKeyword,whatData,tsOrOps)
+function IDs = TS_GetIDs(theFields,whatData,tsOrOps,nameOrKeywords)
 % TS_GetIDs   Retrieve IDs of time series (or operations) in an hctsa dataset
-%               using keyword matching.
+%               using that matches a string in either the Name or Keyword
+%               fields.
 %
 %---INPUTS:
-% theKeyword, the keyword to match on (string).
+% theFields, the fields to match on (string).
 % whatData, the source of the hctsa dataset (e.g., a filename, cf. TS_LoadData).
 %           (default: 'norm')
 % tsOrOps, whether to retrieve IDs for TimeSeries ('ts', default) or
 %           Operations ('ops').
+% nameOrKeywords, what field to match, either the "Name" field or the
+% "Keyword" field
 %
 %---OUTPUTS:
-% IDs, a vector of IDs matching the keyword constraint provided.
+% IDs, a (sorted) vector of IDs matching the field constraint provided.
 %
 %---EXAMPLE USAGE:
 % >> ts_IDs = TS_GetIDs('noisy','norm','ts');
@@ -52,6 +55,9 @@ end
 if nargin < 3
     tsOrOps = 'ts';
 end
+if nargin < 4
+    nameOrKeywords = 'Keywords';
+end
 
 %-------------------------------------------------------------------------------
 % Load data:
@@ -67,29 +73,27 @@ case 'ts'
 case 'ops'
     theDataTable = Operations;
 otherwise
-    error('Specify ''ts'' or ''ops''');
+    error('Specify ''ts'', ''ops'', or ''opsName''');
 end
 
-% The cell of comma-delimited keyword strings:
-theKeywordCell = theDataTable.Keywords;
-
-% Split into sub-cells using comma delimiter:
-Keywords = SUB_cell2cellcell(theKeywordCell);
-
-% Find objects with a keyword that matchees that given:
-matches = cellfun(@(x)any(ismember(theKeyword,x)),Keywords);
-
-% Return the IDs of the matches:
-IDs = theDataTable.ID(matches);
-
-% Check for empty:
-if isempty(IDs)
-    warning('No matches to ''%s'' found in %s',theKeyword,theDataFile)
+% OC: below has been changed so that we return a set in the same order as
+%       above, and nan's otherwise
+matches = nan(length(theFields),1);
+for i = 1:length(theFields)
+    cmatch = find(strcmp(theDataTable.(nameOrKeywords),theFields{i}));
+    if ~isempty(cmatch)
+        matches(i) = cmatch;
+    end
 end
 
-% Also provide IDs not matching the constraint, if required
-if nargout > 1
-    notIDs = setxor(IDs,theDataTable.ID);
+foundIDs = ~isnan(matches);
+
+IDs = zeros(size(matches));
+IDs(foundIDs) = theDataTable.ID(matches(foundIDs));
+IDs(~foundIDs) = nan;
+
+if all(isnan(IDs))
+    warning('No matches to ''%s'' found in %s',theFields,theDataFile)
 end
 
 end

@@ -131,7 +131,7 @@ end
 if isempty(numFolds) || numFolds==0
     % Use a heuristic to set a default number of folds given the data set size,
     % number of classes
-    numFolds = howManyFolds(TimeSeries.Group,numClasses);
+    numFolds = HowManyFolds(TimeSeries.Group,numClasses);
 end
 
 % Reset the random seed:
@@ -164,32 +164,6 @@ if doPlot
     f = figure('color','w');
     histogram(foldLosses*100)
     xlim([0,100]);
-end
-
-%-------------------------------------------------------------------------------
-% Save classifier:
-%-------------------------------------------------------------------------------
-if ~isempty(classifierFilename)
-  [Acc,Mdl,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat,...
-                            TimeSeries.Group,TS_DataMat,TimeSeries.Group,numClasses,[],[],true,0);
-                        
-  Operations = TS_GetFromData(whatData,'Operations');
-  jointClassifier.Operation.ID = Operations.ID;
-  jointClassifier.Operation.Name = Operations.Name;
-  jointClassifier.Accuracy = mean(foldLosses); % For some reason the Acc retrieved as above is amazing?
-  jointClassifier.Mdl = Mdl;
-  jointClassifier.whatLoss = whatLoss;
-  jointClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
-  classes = groupNames;
-  
-  if exist(classifierFilename,'file')
-      out = input(sprintf('File %s already exists -- continuing will overwrite the file.\n[Press ''y'' to continue] ', classifierFilename), 's');
-      if out ~= 'y'
-          return;
-      end
-  end
-  save(classifierFilename,'jointClassifier','classes','-v7.3');
-  fprintf('Done.\n');
 end
 
 %-------------------------------------------------------------------------------
@@ -316,6 +290,33 @@ if numPCs > 0
                                     numClasses,numFolds,whatClassifier);
         title(titleText,'interpreter','none')
     end
+end
+
+%-------------------------------------------------------------------------------
+% Save classifier:
+%-------------------------------------------------------------------------------
+if ~isempty(classifierFilename)
+  [Acc,Mdl,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat,...
+                            TimeSeries.Group,TS_DataMat,TimeSeries.Group,numClasses,[],[],true,0);
+                        
+  Operations = TS_GetFromData(whatData,'Operations');
+  jointClassifier.Operation.ID = Operations.ID;
+  jointClassifier.Operation.Name = Operations.Name;
+  jointClassifier.CVAccuracy = mean(foldLosses); % Cross-validated accuracy
+  jointClassifier.Accuracy = Acc; % For some reason the Acc retrieved as above is amazing?
+  jointClassifier.Mdl = Mdl;
+  jointClassifier.whatLoss = whatLoss;
+  jointClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
+  classes = groupNames;
+  
+  if exist(classifierFilename,'file')
+      out = input(sprintf('File %s already exists -- continuing will overwrite the file.\n[Press ''y'' to continue] ', classifierFilename), 's');
+      if out ~= 'y'
+          return;
+      end
+  end
+  save(classifierFilename,'jointClassifier','classes','-v7.3');
+  fprintf('Done.\n');
 end
 
 %-------------------------------------------------------------------------------
