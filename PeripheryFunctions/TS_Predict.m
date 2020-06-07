@@ -1,16 +1,16 @@
 function [tab,myAcc] = TS_Predict(timeSeriesData,labels,fileName_classifier,varargin)
-% TS_predict Predict classes using new time-series data
+% TS_Predict Predict classes for new time-series data using a pre-trained model
 %
 % This function uses a previously learnt classifier to predict group labels
 % of input time series.
 %
 %---USAGE:
-% TS_predict(timeSeriesData,labels,fileName_classifier);
+% TS_Predict(timeSeriesData,labels,fileName_classifier);
 %
 %---INPUTS:
 % timeSeriesData, the new time-series data to predict (cell array)
 % labels, the labels for each time series
-% fileName_classifier, the MAT-file previously saved using TS_classify
+% fileName_classifier, the MAT-file previously saved using TS_Classify
 % and/or TS_TopFeatures
 %
 % (OPTIONAL):
@@ -45,6 +45,7 @@ function [tab,myAcc] = TS_Predict(timeSeriesData,labels,fileName_classifier,vara
 
 % Use an inputParser to control additional plotting options as parameters:
 inputP = inputParser;
+
 % classifierType:
 default_classifierType = '';
 check_classifierType = @(x) ischar(x);
@@ -97,7 +98,7 @@ else
       end
     elseif ~exist('jointClassifier','var')
       useAllFeatures = false;
-    end 
+    end
 end
 
 if useAllFeatures
@@ -109,7 +110,7 @@ if useAllFeatures
 else
   myClassifier = featureClassifier;
   myAcc = myClassifier.Accuracy;
-  
+
   fprintf('Using classifier for feature "%s" (%i) [acc=%.2f%% for %i classes].\n',...
                 myClassifier.Operation.Name, myClassifier.Operation.ID,...
                 myAcc, length(myClassifier.Mdl.ClassNames));
@@ -128,7 +129,7 @@ if exist(predictionFilename,'file')
         toRecompute = false;
     end
 end
-    
+
 if toRecompute
     if isempty(predictionFilename)
         removeFile = true;
@@ -171,7 +172,7 @@ if isfield(myClassifier,'normalizationInfo')
     TS_Normalize(myClassifier.normalizationInfo.normFunction,...
                     [0 1],...
                     predictionFilename);
-                
+
     if exist([predictionFilename(1:end-4) '_N.mat'],'file')
         delete(predictionFilename);
         predictionFilename = [predictionFilename(1:end-4) '_N.mat'];
@@ -187,7 +188,8 @@ whatData = load(predictionFilename);
 predictGroups = predict(myMdl,TS_DataMat(:,myOpId));
 predictKeywords = classes(predictGroups); % Predict labels from new time-series data
 
-tab = table(labels,timeSeriesData,predictKeywords,predictGroups,'VariableNames',{'labels','timeSeries','predictKeywords','predictGroups'});
+tab = table(labels,timeSeriesData,predictKeywords,predictGroups,'VariableNames',...
+                {'labels','timeSeries','predictKeywords','predictGroups'});
 
 if removeFile
     delete(predictionFilename);
