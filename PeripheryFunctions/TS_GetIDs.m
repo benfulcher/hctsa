@@ -4,24 +4,23 @@ function IDs = TS_GetIDs(theFields,whatData,tsOrOps,nameOrKeywords)
 %               fields.
 %
 %---INPUTS:
-% theFields, the fields to match on (string).
+% theFields, the string to match
 % whatData, the source of the hctsa dataset (e.g., a filename, cf. TS_LoadData).
 %           (default: 'norm')
 % tsOrOps, whether to retrieve IDs for TimeSeries ('ts', default) or
-%           Operations ('ops').
-% nameOrKeywords, what field to match, either the "Name" field or the
-% "Keyword" field
+%           Operations ('ops')
+% nameOrKeywords, what field to match: 'Keywords' (default) or 'Name'
 %
 %---OUTPUTS:
 % IDs, a (sorted) vector of IDs matching the field constraint provided.
 %
 %---EXAMPLE USAGE:
-% >> ts_IDs = TS_GetIDs('noisy','norm','ts');
+% >> tsIDs = TS_GetIDs('noisy','norm','ts','Keywords');
 % This retrieves the IDs of time series in 'HCTSA_N.mat' (specifying 'norm') that
 % contain the keyword 'noisy'.
 %
-% >> op_IDs = TS_GetIDs('entropy','norm','ops');
-% This retrieves the IDs of operations in HCTSA_N.mat that have been tagged
+% >> opIDs = TS_GetIDs('entropy','norm','ops','Keywords');
+% This retrieves the IDs of operations in 'HCTSA_N.mat' that have been tagged
 % with the keyword 'entropy'.
 
 % ------------------------------------------------------------------------------
@@ -65,7 +64,7 @@ end
 [~,TimeSeries,Operations,theDataFile] = TS_LoadData(whatData);
 
 %-------------------------------------------------------------------------------
-% Match time series/operations on an input keyword:
+% Match IDs of time series or operations:
 %-------------------------------------------------------------------------------
 switch tsOrOps
 case 'ts'
@@ -73,11 +72,11 @@ case 'ts'
 case 'ops'
     theDataTable = Operations;
 otherwise
-    error('Specify ''ts'', ''ops'', or ''opsName''');
+    error('Specify ''ts'' (time series) or ''ops'' (operations)');
 end
 
 % OC: below has been changed so that we return a set in the same order as
-%       above, and nan's otherwise
+%       above, and NaNs otherwise
 matches = nan(length(theFields),1);
 for i = 1:length(theFields)
     cmatch = find(strcmp(theDataTable.(nameOrKeywords),theFields{i}));
