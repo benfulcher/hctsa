@@ -1,10 +1,10 @@
-function IDs = TS_GetIDs(theFields,whatData,tsOrOps,nameOrKeywords)
+function [IDs,notIDs] = TS_GetIDs(theMatchString,whatData,tsOrOps,nameOrKeywords)
 % TS_GetIDs   Retrieve IDs of time series (or operations) in an hctsa dataset
 %               using that matches a string in either the Name or Keyword
 %               fields.
 %
 %---INPUTS:
-% theFields, the string to match
+% theMatchString, the string to match
 % whatData, the source of the hctsa dataset (e.g., a filename, cf. TS_LoadData).
 %           (default: 'norm')
 % tsOrOps, whether to retrieve IDs for TimeSeries ('ts', default) or
@@ -75,24 +75,56 @@ otherwise
     error('Specify ''ts'' (time series) or ''ops'' (operations)');
 end
 
-% OC: below has been changed so that we return a set in the same order as
-%       above, and NaNs otherwise
-matches = nan(length(theFields),1);
-for i = 1:length(theFields)
-    cmatch = find(strcmp(theDataTable.(nameOrKeywords),theFields{i}));
-    if ~isempty(cmatch)
-        matches(i) = cmatch;
+switch nameOrKeywords
+case 'Keywords'
+    % (Default): matches by string to one of the keywords (exactly)
+
+    % The cell of comma-delimited keyword strings:
+    theKeywordCell = theDataTable.Keywords;
+
+    % Split into sub-cells using comma delimiter:
+    Keywords = SUB_cell2cellcell(theKeywordCell);
+
+    % Find objects with a keyword that matches the input string:
+    matches = cellfun(@(x)any(ismember(theMatchString,x)),Keywords);
+
+    % Return the IDs of the matches:
+    IDs = theDataTable.ID(matches);
+
+    % Check for empty:
+    if isempty(IDs)
+        warning('No matches to ''%s'' found in %s',theMatchString,theDataFile)
     end
-end
 
-foundIDs = ~isnan(matches);
+    % Also provide IDs not matching the constraint, if required
+    if nargout > 1
+        notIDs = setxor(IDs,theDataTable.ID);
+    end
 
-IDs = zeros(size(matches));
-IDs(foundIDs) = theDataTable.ID(matches(foundIDs));
-IDs(~foundIDs) = nan;
+case 'Name'
 
-if all(isnan(IDs))
-    warning('No matches to ''%s'' found in %s',theFields,theDataFile)
+    % OC: below has been changed so that we return a set in the same order as
+    %       above, and NaNs otherwise
+    matches = nan(length(theMatchString),1);
+    for i = 1:length(theMatchString)
+        cmatch = find(strcmp(theDataTable.(nameOrKeywords),theMatchString{i}));
+        if ~isempty(cmatch)
+            matches(i) = cmatch;
+        end
+    end
+
+    foundIDs = ~isnan(matches);
+
+    IDs = zeros(size(matches));
+    IDs(foundIDs) = theDataTable.ID(matches(foundIDs));
+    IDs(~foundIDs) = nan;
+
+    if all(isnan(IDs))
+        warning('No matches to ''%s'' found in %s',theMatchString,theDataFile)
+    end
+
+otherwise
+    error('Must specify either ''Keywords'' or ''Name''');
 end
 
 end
