@@ -9,7 +9,7 @@ function TS_Combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,
 % Note that in the case of duplicates, HCTSA_1 takes precedence over
 % HCTSA_2.
 %
-% When using TS_init to generate datasets, be aware that the *same* set of
+% When using TS_Init to generate datasets, be aware that the *same* set of
 % operations and master operations must be used in both cases.
 %
 % NB: Use TS_Merge if same data, different features
@@ -268,7 +268,7 @@ else
 
     if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., retrieved from the same mySQL database)
         if ~fromDatabase
-            fprintf(1,'Be careful, we are assuming that time series IDs were assigned from a *single* TS_init\n')
+            fprintf(1,'Be careful, we are assuming that time series IDs were assigned from a *single* TS_Init\n')
         end
 
         % Check for duplicate IDs:
@@ -278,7 +278,7 @@ else
             fprintf(1,'We''re assuming that TimeSeries IDs are equivalent between the two input files\n');
             fprintf(1,'We need to trim duplicate time series (with the same IDs)\n');
             fprintf(1,['(NB: This will NOT be appropriate if combinining time series from' ...
-                    ' different databases, or produced using separate TS_init commands)\n']);
+                    ' different databases, or produced using separate TS_Init commands)\n']);
             fprintf(1,'Trimming %u duplicate time series to a total of %u\n', ...
                         height(TimeSeries)-length(uniqueTsids),length(uniqueTsids));
             didTrim = true;
@@ -311,7 +311,7 @@ else
     if ~fromDatabase
         numOperations = arrayfun(@(x)height(loadedData{x}.Operations),1:2);
         if ~(numOperations(1)==numOperations(2))
-            error(sprintf(['TS_init used to generate hctsa datasets with different numbers of\n' ...
+            error(sprintf(['TS_Init used to generate hctsa datasets with different numbers of\n' ...
                     'operations; Operation IDs are not comparable.']))
         end
         numOperations = numOperations(1); % both the same
@@ -319,7 +319,7 @@ else
         % Check that all operation names match:
         namesMatch = strcmp(loadedData{1}.Operations.Name,loadedData{2}.Operations.Name);
         if ~all(namesMatch)
-            error('TS_init used to generate hctsa datasets, and the names of operations do not match');
+            error('TS_Init used to generate hctsa datasets, and the names of operations do not match');
         end
 
         % Ok so same number of operations in both, and all names match:
@@ -331,7 +331,7 @@ else
         % --Both datasets are from a database (assume the same database, or
         % the same operation IDs in both databases)
 
-        % Take intersection of operation ids, and take information from first input
+        % Take intersection of operation IDs, and take information from first input
         [~,keepopi_1,keepopi_2] = intersect(loadedData{1}.Operations.ID,loadedData{2}.Operations.ID);
 
         % Data from first file goes in (should be identical to keepopi_2 in the second file)
@@ -369,7 +369,8 @@ end
 fprintf(1,'----------Saving to %s----------\n',outputFileName);
 
 %--- Now actually save it:
-save(outputFileName,'TimeSeries','Operations','MasterOperations','fromDatabase','gitInfo','-v7.3');
+save(outputFileName,'TimeSeries','Operations','MasterOperations',...
+                                'fromDatabase','gitInfo','-v7.3');
 if gotData % add data matrix
     save(outputFileName,'TS_DataMat','-append');
 end
