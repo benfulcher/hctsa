@@ -237,7 +237,7 @@ predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),numClasses,false);
 if doPlot
     f = figure('color','w');
     try
-        if exist('confusionchart')
+        if exist('confusionchart','file') ~= 0
             % Requires Matlab 2020 (Stats/ML Toolbox):
             confusionchart(realLabels,predictLabels);
         else

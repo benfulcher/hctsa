@@ -14,7 +14,7 @@ function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,v
 %               (e.g., 'fast_linear', 'tstat', 'svm', 'linear', 'diaglinear',
 %                or others supported by GiveMeFunctionHandle)
 %
-% ***Additional (optional) plotting options***:
+% ***Additional (OPTIONAL) plotting inputs***:
 % 'whatPlots', can specify what output plots to produce (cell of strings), e.g.,
 %               specify {'histogram','distributions','cluster','datamatrix'} to
 %               produce all four possible output plots (this is the default).
@@ -27,12 +27,11 @@ function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,v
 % 'numNulls', the number of shuffled nulls to generate (e.g., 10 shuffles pools
 %               shuffles for all M features, for a total of 10*M elements in the
 %               null distribution) [default: 0]
-% 'classifierFilename', MATLAB file to save the classifier to (not saved if
-% left empty).
+% 'classifierFilename', .mat file to save the classifier to (not saved if empty).
 %
 %---EXAMPLE USAGE:
 %
-% TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions',...
+% TS_TopFeatures('norm','tstat','whatPlots',{'histogram','distributions',...
 %           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
 %
 %---OUTPUTS:
@@ -261,7 +260,7 @@ if ismember('histogram',whatPlots)
             end
             % Shuffle labels:
             groupLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-            testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,false); 
+            testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,false);
         end
         fprintf(1,'\n%u %s statistics computed in %s.\n',numOps*numNulls,...
                                         cfnName,BF_TheTime(toc(timer)));
@@ -416,7 +415,7 @@ end
 if ~isempty(classifierFilename)
   fprintf(1,'Saving individual feature classifiers to %s...',classifierFilename);
   [bestTestStat,bestMdl,whatTestStat] = fn_testStat(TS_DataMat(:,ifeat(1)),TimeSeries.Group,TS_DataMat(:,ifeat(1)),TimeSeries.Group,0);
-  
+
   featureClassifier.Operation.ID = Operations.ID(ifeat(1)); % Sorted list of top operations
   featureClassifier.Operation.Name = Operations.Name{ifeat(1)}; % Sorted list of top operations
   featureClassifier.Mdl = bestMdl; % sorted feature models
@@ -425,7 +424,7 @@ if ~isempty(classifierFilename)
   featureClassifier.whatTestStat = whatTestStat;
   featureClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
   classes = groupNames;
-  
+
   % TODO: prompt user for overwrite, etc.
   if exist(classifierFilename)
     save(classifierFilename,'featureClassifier','classes','-append');
