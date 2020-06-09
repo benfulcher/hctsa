@@ -230,6 +230,7 @@ end
 % required as input to plotconfusion:
 realLabels = BF_ToBinaryClass(TimeSeries.Group,numClasses,false);
 % Predict from the first CV-partition:
+kfoldPredict(CVMdl{1})
 predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),numClasses,false);
 if doPlot
     try

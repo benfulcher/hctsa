@@ -132,7 +132,7 @@ end
 if isempty(numFolds) || numFolds==0
     % Use a heuristic to set a default number of folds given the data set size,
     % number of classes
-    numFolds = HowManyFolds(TimeSeries.Group,numClasses);
+    numFolds = 2;
 end
 
 % --------------------------------------------------------------------------
@@ -472,7 +472,7 @@ function [testStat,CVMdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
             [testStat(k),CVMdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels,numFolds);
         catch
             testStat(k) = NaN;
-            CVMdl(k) = NaN;
+            CVMdl{k} = NaN;
         end
         % Give estimate of time remaining:
         if beVerbose && k==100
