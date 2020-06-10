@@ -1,4 +1,4 @@
-function [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataFile,getClustered)
+function [TS_DataMat,TimeSeries,Operations,whatDataFile,MasterOperations] = TS_LoadData(whatDataFile,getClustered)
 % TS_LoadData   Load HCTSA data from file.
 %
 % Reorders a data matrix and TimeSeries and Operation structures according to the
@@ -52,7 +52,7 @@ end
 if nargin < 2 || isempty(getClustered)
     getClustered = false;
 end
-
+    
 %-------------------------------------------------------------------------------
 % In some cases, you provide a structure with the pre-loaded data already in it
 % e.g., as a whatDataFile = load('HCTSA.mat');
@@ -74,9 +74,14 @@ if isstruct(whatDataFile)
     else
         Operations = table();
     end
-
+    if isfield(whatDataFile,'MasterOperations')
+        MasterOperations = whatDataFile.MasterOperations;
+    else
+        MasterOperations = table();
+    end
+    
     % Check if used legacy structure array format for metadata:
-    [TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations);
+    [TimeSeries,Operations,MasterOperations] = CheckStructureToTable(TimeSeries,Operations,MasterOperations);
 
     % Cluster the data if necessary/possible:
     if getClustered
@@ -114,20 +119,20 @@ if ~exist(whatDataFile,'file')
     error('%s not found',whatDataFile);
 end
 fprintf(1,'Loading data from %s...',whatDataFile);
-load(whatDataFile,'TS_DataMat','Operations','TimeSeries');
+load(whatDataFile,'TS_DataMat','Operations','TimeSeries','MasterOperations');
 fprintf(1,' Done.\n');
 
 % Check whether an old version of hctsa using structure arrays
-[TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations);
+[TimeSeries,Operations,MasterOperations] = CheckStructureToTable(TimeSeries,Operations,MasterOperations);
 
 if getClustered
     [TS_DataMat,TimeSeries,Operations] = clusterMe(TS_DataMat,TimeSeries,Operations);
 end
 
 %-------------------------------------------------------------------------------
-function [TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations)
+function [TimeSeries,Operations,MasterOperations] = CheckStructureToTable(TimeSeries,Operations,MasterOperations)
     % Check whether an old version of hctsa using structure arrays
-    if isstruct(TimeSeries) || isstruct(Operations)
+    if isstruct(TimeSeries) || isstruct(Operations) || isstruct(MasterOperations)
         warning(['Metadata stored in old structure-array format; run ',...
                 'TS_ConvertToTable on your hctsa data file to update?'])
     end
@@ -136,6 +141,9 @@ function [TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations)
     end
     if isstruct(Operations)
         Operations = struct2table(Operations);
+    end
+    if isstruct(MasterOperations)
+        MasterOperations = struct2table(MasterOperations);
     end
 end
 %-------------------------------------------------------------------------------

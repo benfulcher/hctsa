@@ -1,4 +1,4 @@
-function OutputToCSV(whatData,writeTimeSeriesData)
+function OutputToCSV(whatData,writeTimeSeriesData,writeMasterFeatures)
 % OutputToCSV     Outputs data to csv for analysis in other enrivonments
 %
 %---INPUTS:
@@ -28,7 +28,7 @@ function OutputToCSV(whatData,writeTimeSeriesData)
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check Inputs:
+% Check Inputs: Set default values
 %-------------------------------------------------------------------------------
 if nargin < 1
     whatData = 'raw';
@@ -36,10 +36,13 @@ end
 if nargin < 2
     writeTimeSeriesData = false;
 end
+if nargin < 3
+    writeMasterFeatures = false;
+end
 %-------------------------------------------------------------------------------
 
 % Load in the data:
-[TS_DataMat,TimeSeries,Operations,whatData] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations,whatData,MasterOperations] = TS_LoadData(whatData);
 
 % Get the quality info:
 TS_Quality = TS_GetFromData(whatData,'TS_Quality');
@@ -60,7 +63,7 @@ fprintf(1,'Wrote data to %s\n',fileName);
 fileName = 'hctsa_timeseries-info.csv';
 fid = fopen(fileName,'w');
 for i = 1:height(TimeSeries)
-    fprintf(fid,'%s,%s\n',TimeSeries.Name{i},TimeSeries.Keywords{i});
+    fprintf(fid,'%s,%u\n',TimeSeries.Name{i},TimeSeries.Length(i),TimeSeries.Keywords{i});
 end
 fclose(fid);
 fprintf(1,'Wrote time-series info to %s\n',fileName);
@@ -84,10 +87,25 @@ end
 fileName = 'hctsa_features.csv';
 fid = fopen(fileName,'w');
 for i = 1:height(Operations)
-    fprintf(fid,'%s,%s\n',Operations.Name{i},Operations.CodeString{i});
+    fprintf(fid,'%s,%s,%u,%u,',Operations.Name{i},Operations.CodeString{i},Operations.ID(i),Operations.MasterID(i));
+    keyword = replace(Operations.Keywords{i},',','_');
+    fprintf(fid,'%s\n',keyword);
 end
 fclose(fid);
 fprintf(1,'Wrote feature info to %s\n',fileName);
+
+%-------------------------------------------------------------------------------
+% Output master features info to file:
+%-------------------------------------------------------------------------------
+if writeMasterFeatures
+    fileName = 'hctsa_masterfeatures.csv';
+    fid = fopen(fileName,'w');
+    for i = 1:height(MasterOperations)
+        fprintf(fid,'%u,%s\n',MasterOperations.ID(i),MasterOperations.Label{i});
+    end
+    fclose(fid);
+    fprintf(1,'Wrote master feature info to %s\n',fileName);
+end
 
 %-------------------------------------------------------------------------------
 % Output time-series data to file:
@@ -106,6 +124,4 @@ if writeTimeSeriesData
     end
     fclose(fid);
     fprintf(1,'Wrote time-series data to %s\n',fileName);
-end
-
 end
