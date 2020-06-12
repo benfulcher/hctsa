@@ -1,4 +1,4 @@
-function [TS_DataMat,TimeSeries,Operations,whatDataFile,MasterOperations] = TS_LoadData(whatDataFile,getClustered)
+function [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataFile,getClustered)
 % TS_LoadData   Load HCTSA data from file.
 %
 % Reorders a data matrix and TimeSeries and Operation structures according to the
@@ -52,7 +52,7 @@ end
 if nargin < 2 || isempty(getClustered)
     getClustered = false;
 end
-    
+
 %-------------------------------------------------------------------------------
 % In some cases, you provide a structure with the pre-loaded data already in it
 % e.g., as a whatDataFile = load('HCTSA.mat');
@@ -79,7 +79,7 @@ if isstruct(whatDataFile)
     else
         MasterOperations = table();
     end
-    
+
     % Check if used legacy structure array format for metadata:
     [TimeSeries,Operations,MasterOperations] = CheckStructureToTable(TimeSeries,Operations,MasterOperations);
 
