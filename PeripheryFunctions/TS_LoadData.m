@@ -127,7 +127,7 @@ end
 %-------------------------------------------------------------------------------
 function [TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations)
     % Check whether an old version of hctsa using structure arrays
-    if isstruct(TimeSeries) || isstruct(Operations) || isstruct(MasterOperations)
+    if isstruct(TimeSeries) || isstruct(Operations)
         warning(['Metadata stored in old structure-array format; run ',...
                 'TS_ConvertToTable on your hctsa data file to update?'])
     end
