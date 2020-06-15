@@ -1,9 +1,10 @@
-function OutputToCSV(whatData,writeTimeSeriesData)
-% OutputToCSV     Outputs data to csv for analysis in other enrivonments
+function OutputToCSV(whatData,writeTimeSeriesData,writeMasterFeatures)
+% OutputToCSV     Outputs data to csv for external analysis
 %
 %---INPUTS:
-% whatData, which HCTSA.mat file to use (default: HCTSA.mat)
+% whatData, which hctsa .mat file to use (default: HCTSA.mat)
 % writeTimeSeriesData, (logical) whether to also output time-series data to file
+% writeMasterFeatures, (logical) whether to also output master operation info
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -28,18 +29,27 @@ function OutputToCSV(whatData,writeTimeSeriesData)
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check Inputs:
+% Check inputs and set defaults
 %-------------------------------------------------------------------------------
-if nargin < 1
+if nargin < 1 || isempty(whatData)
     whatData = 'raw';
 end
-if nargin < 2
+if nargin < 2 || isempty(writeTimeSeriesData)
     writeTimeSeriesData = false;
 end
+if nargin < 3
+    writeMasterFeatures = false;
+end
+theDelimiter = ',';
 %-------------------------------------------------------------------------------
 
-% Load in the data:
+% Load in the hctsa data:
 [TS_DataMat,TimeSeries,Operations,whatData] = TS_LoadData(whatData);
+
+% Get the master operations
+if writeMasterFeatures
+    MasterOperations = TS_GetFromData(whatData,'MasterOperations');
+end
 
 % Get the quality info:
 TS_Quality = TS_GetFromData(whatData,'TS_Quality');
@@ -51,52 +61,44 @@ TS_DataMat(TS_Quality~=0) = NaN;
 % Output data matrix to file:
 %-------------------------------------------------------------------------------
 fileName = 'hctsa_datamatrix.csv';
-dlmwrite(fileName,TS_DataMat,'delimiter',',');
-fprintf(1,'Wrote data to %s\n',fileName);
+dlmwrite(fileName,TS_DataMat,'delimiter',theDelimiter);
+fprintf(1,'Wrote feature matrix to %s.\n',fileName);
 
 %-------------------------------------------------------------------------------
-% Output time-series info (Name + Keyword) to csv file:
+% Output time-series info to .csv file:
 %-------------------------------------------------------------------------------
 fileName = 'hctsa_timeseries-info.csv';
-fid = fopen(fileName,'w');
-for i = 1:height(TimeSeries)
-    fprintf(fid,'%s,%s\n',TimeSeries.Name{i},TimeSeries.Keywords{i});
+if strcmp(theDelimiter,',')
+    doQuoteStrings = true;
+    % warning(['The comma-delimited Keywords variable may cause trouble for ',...
+        % 'the comma-delimited %s file: quoting strings should help'],fileName);
+else
+    doQuoteStrings = false;
 end
-fclose(fid);
-fprintf(1,'Wrote time-series info to %s\n',fileName);
 
-%-------------------------------------------------------------------------------
-% Output time-series group info to file:
-%-------------------------------------------------------------------------------
-if ismember('Group',TimeSeries.Properties.VariableNames)
-    fileName = 'hctsa_grouplabel-info.csv';
-    fid = fopen(fileName,'w');
-    for i = 1:height(TimeSeries)
-        fprintf(fid,'%s,%u\n',TimeSeries.Name{i},TimeSeries.Group(i));
-    end
-    fclose(fid);
-    fprintf(1,'Wrote time-series info to %s\n',fileName);
-end
+% We don't want the data to be written out in this info file:
+TimeSeries = removevars(TimeSeries,{'Data'});
+writetable(TimeSeries,fileName,'FileType','text','WriteVariableNames',true,...
+                'Delimiter',theDelimiter,'QuoteStrings',doQuoteStrings)
+fprintf(1,'Wrote the TimeSeries table to %s.\n',fileName);
 
 %-------------------------------------------------------------------------------
 % Output feature info to file:
 %-------------------------------------------------------------------------------
 fileName = 'hctsa_features.csv';
-fid = fopen(fileName,'w');
-for i = 1:height(Operations)
-    fprintf(fid,'%s,%s\n',Operations.Name{i},Operations.CodeString{i});
-end
-fclose(fid);
-fprintf(1,'Wrote feature info to %s\n',fileName);
+writetable(Operations,fileName,'FileType','text','WriteVariableNames',true,...
+                            'Delimiter',theDelimiter)
+fprintf(1,'Wrote the Operations table to %s.\n',fileName);
 
 %-------------------------------------------------------------------------------
 % Output time-series data to file:
 %-------------------------------------------------------------------------------
 if writeTimeSeriesData
-    fprintf(1,'Writing time-series data for %u time series...\n',height(TimeSeries));
+    numTimeSeries = height(TimeSeries);
+    fprintf(1,'Writing time-series data for %u time series...\n',numTimeSeries);
     fileName = 'hctsa_timeseries-data.csv';
     fid = fopen(fileName,'w');
-    for i = 1:height(TimeSeries)
+    for i = 1:numTimeSeries
         x = TimeSeries.Data{i};
         L = length(x);
         for t = 1:L-1
@@ -105,7 +107,34 @@ if writeTimeSeriesData
         fprintf(fid,'%.6g\n',x(L)); % final value with new line
     end
     fclose(fid);
-    fprintf(1,'Wrote time-series data to %s\n',fileName);
+    fprintf(1,'Wrote comma-delimited time-series data (6-decimal precision) to %s.\n',fileName);
 end
+
+%-------------------------------------------------------------------------------
+% Output master features info to file:
+%-------------------------------------------------------------------------------
+if writeMasterFeatures
+    fileName = 'hctsa_masterfeatures.csv';
+    writetable(MasterOperations,fileName,'FileType','text','WriteVariableNames',true,...
+                                'Delimiter',theDelimiter)
+    fprintf(1,'Wrote the MasterOperations table to %s.\n',fileName);
+end
+
+%-------------------------------------------------------------------------------
+% Output time-series group info to file:
+% (it's accessible from the time-series table)
+%-------------------------------------------------------------------------------
+% if ismember('Group',TimeSeries.Properties.VariableNames)
+%     fileName = 'hctsa_grouplabel-info.csv';
+%     fid = fopen(fileName,'w');
+%     % Header:
+%     fprintf(fid,'%s%s%s\n','Name',theDelimiter,'Group');
+%     for i = 1:height(TimeSeries)
+%         fprintf(fid,'%s%s%u\n',TimeSeries.Name{i},theDelimiter,TimeSeries.Group(i));
+%     end
+%     fclose(fid);
+%     fprintf(1,'Wrote time-series info to %s.\n',fileName);
+% end
+
 
 end
