@@ -70,12 +70,14 @@ fprintf(1,'Wrote feature matrix to %s.\n',fileName);
 fileName = 'hctsa_timeseries-info.csv';
 if strcmp(theDelimiter,',')
     doQuoteStrings = true;
-    warning(['The comma-delimited Keywords variable may cause trouble for ',...
-        'the comma-delimited %s file: quoting strings should help'],fileName);
+    % warning(['The comma-delimited Keywords variable may cause trouble for ',...
+        % 'the comma-delimited %s file: quoting strings should help'],fileName);
 else
     doQuoteStrings = false;
 end
 
+% We don't want the data to be written out in this info file:
+TimeSeries = removevars(TimeSeries,{'Data'});
 writetable(TimeSeries,fileName,'FileType','text','WriteVariableNames',true,...
                 'Delimiter',theDelimiter,'QuoteStrings',doQuoteStrings)
 fprintf(1,'Wrote the TimeSeries table to %s.\n',fileName);
