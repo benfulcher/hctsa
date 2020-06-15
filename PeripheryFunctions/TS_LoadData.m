@@ -74,14 +74,9 @@ if isstruct(whatDataFile)
     else
         Operations = table();
     end
-    if isfield(whatDataFile,'MasterOperations')
-        MasterOperations = whatDataFile.MasterOperations;
-    else
-        MasterOperations = table();
-    end
 
     % Check if used legacy structure array format for metadata:
-    [TimeSeries,Operations,MasterOperations] = CheckStructureToTable(TimeSeries,Operations,MasterOperations);
+    [TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations);
 
     % Cluster the data if necessary/possible:
     if getClustered
@@ -119,18 +114,18 @@ if ~exist(whatDataFile,'file')
     error('%s not found',whatDataFile);
 end
 fprintf(1,'Loading data from %s...',whatDataFile);
-load(whatDataFile,'TS_DataMat','Operations','TimeSeries','MasterOperations');
+load(whatDataFile,'TS_DataMat','Operations','TimeSeries');
 fprintf(1,' Done.\n');
 
 % Check whether an old version of hctsa using structure arrays
-[TimeSeries,Operations,MasterOperations] = CheckStructureToTable(TimeSeries,Operations,MasterOperations);
+[TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations);
 
 if getClustered
     [TS_DataMat,TimeSeries,Operations] = clusterMe(TS_DataMat,TimeSeries,Operations);
 end
 
 %-------------------------------------------------------------------------------
-function [TimeSeries,Operations,MasterOperations] = CheckStructureToTable(TimeSeries,Operations,MasterOperations)
+function [TimeSeries,Operations] = CheckStructureToTable(TimeSeries,Operations)
     % Check whether an old version of hctsa using structure arrays
     if isstruct(TimeSeries) || isstruct(Operations) || isstruct(MasterOperations)
         warning(['Metadata stored in old structure-array format; run ',...
@@ -141,9 +136,6 @@ function [TimeSeries,Operations,MasterOperations] = CheckStructureToTable(TimeSe
     end
     if isstruct(Operations)
         Operations = struct2table(Operations);
-    end
-    if isstruct(MasterOperations)
-        MasterOperations = struct2table(MasterOperations);
     end
 end
 %-------------------------------------------------------------------------------
