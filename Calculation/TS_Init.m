@@ -140,7 +140,7 @@ gitInfo = TS_AddGitInfo();
 % TS_init and shouldn't be written back to a database
 fromDatabase = false;
 save(outputFile,'TimeSeries','Operations','MasterOperations',...
-            'TS_DataMat','TS_Quality','TS_CalcTime','fromDatabase','gitInfo');
+            'TS_DataMat','TS_Quality','TS_CalcTime','fromDatabase','gitInfo','-v7.3');
 
 fprintf(1,'Successfully initialized %s with %u time series, %u master operations, and %u operations\n',...
                         outputFile,numTS,numMops,numOps);
