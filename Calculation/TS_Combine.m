@@ -204,7 +204,7 @@ if merge_features
     numTimeSeries = numTimeSeries(1); % both the same
 
     % Check that all TimeSeries names match:
-    namesMatch = (loadedData{1}.TimeSeries.Name == loadedData{2}.TimeSeries.Name);
+    namesMatch = strcmp(loadedData{1}.TimeSeries.Name, loadedData{2}.TimeSeries.Name);
     if ~all(namesMatch)
         error('The names of time series in the two files do not match');
     end
