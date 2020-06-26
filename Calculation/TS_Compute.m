@@ -191,7 +191,7 @@ for i = 1:numTimeSeries
 	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd,:),...
 								doParallel,Operations(toCalc,:),MasterOperations,true,beVocal);
 		catch
-			skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
+			% skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
 			warning('Calculation for time series %u / %u failed...',i,numTimeSeries)
 			continue
 		end
