@@ -74,6 +74,10 @@ elseif ischar(stopWhen) % compute ACF up to a given threshold:
         % Stop when ACF drops below threshold, th
         for i = 1:N
             acf(i) = CO_AutoCorr(y,i-1,'Fourier'); % *** NOTE THIS! *** acf vector indicies are not lags
+            if isnan(acf(i))
+                warning('Weird time series (constant?)');
+                out = NaN; return
+            end
             if acf(i) < th
                 % Ensure ACF is all positive:
                 if acf(i) > 0
