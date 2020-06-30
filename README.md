@@ -117,7 +117,7 @@ We have used *hctsa* to:
 ### Other Publications
 
 _hctsa_ has been used by others in neuroscience, engineering, and biomedicine.
-An updated list of publications using _hctsa_ is on this [wiki page](https://github.com/benfulcher/hctsa/wiki/External-publications).
+An updated list of publications using _hctsa_ is on this [wiki page](https://github.com/benfulcher/hctsa/wiki/Publications-using-hctsa).
 
 ## *hctsa* licenses
 
