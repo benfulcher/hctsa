@@ -116,29 +116,8 @@ We have used *hctsa* to:
 
 ### Other Publications
 
-_hctsa_ has been used to:
-* Assess stress-induced changes in astrocyte calcium dynamics.
-  - [&#x1F4D7; Paper in _Nature Communications_ (2020)](https://www.nature.com/articles/s41467-020-15778-9).
-* Assess the stress controllability of neurons from their activity time series.
-  - [&#x1F4D7; Paper in _Nature Neuroscience_ (2020)](https://www.nature.com/articles/s41593-020-0591-0).
-* Predicting post cardiac arrest outcomes.
-  - [&#x1F4D9; Preprint on _arXiv_ (2020)](https://arxiv.org/abs/2002.03309).
-* Recognition of hand gestures.
-  - [&#x1F4D7; Paper in _PLoS ONE_ (2020)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0227039).
-* Classification of heartbeats measured using single-lead ECG.
-  - [&#x1F4D7;Paper in _IEEE 42nd International Convention on Information and Communication Technology, Electronics and Microelectronics (MIPRO)_ (2019)](https://ieeexplore.ieee.org/abstract/document/8757135).
-* Non-intrusively monitor load for appliance detection and electrical power saving in buildings.
-  - [&#x1F4D7; Paper in _Energy and Buildings_ (2019)](https://doi.org/10.1016/j.enbuild.2019.05.028).
-* Detect mild cognitive impairment using single-channel EEG to measure speech-evoked brain responses.
-  - [&#x1F4D7; Paper in _IEEE Transactions on Neural Systems and Rehabilitation Engineering_ (2019)](https://ieeexplore.ieee.org/abstract/document/8693868).
-* Assess muscles for clinical rehabilitation.
-  - [&#x1F4D7; Paper in _39th Annual International Conference of the IEEE Engineering in Medicine and Biology Society (EMBC)_ (2017)](https://ieeexplore.ieee.org/abstract/document/8037372/).
-* Evaluate asphalt irregularity from smartphone sensors.
-  - [&#x1F4D7; Paper in _International Symposium on Intelligent Data Analysis_ (2018)](https://link.springer.com/chapter/10.1007/978-3-319-68765-0_27).
-* Select features for fetal heart rate analysis using genetic algorithms.
-  - [&#x1F4D7; Paper in _Physiological Measurement_ (2014)](http://iopscience.iop.org/article/10.1088/0967-3334/35/7/1357/meta).
-
-(Let me know if I've missed any!)
+_hctsa_ has been used by others in neuroscience, engineering, and biomedicine.
+An updated list of publications using _hctsa_ is on this [wiki page](https://github.com/benfulcher/hctsa/wiki/External-publications).
 
 ## *hctsa* licenses
 
