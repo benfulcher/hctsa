@@ -1,5 +1,6 @@
 function out = DN_pleft(y,th)
-% DN_pleft      Distance from the mean at which a given proportion of data are more distant.
+% DN_pleft  Distance from the mean at which a given proportion of data are
+%                   more distant.
 %
 % Measures the maximum distance from the mean at which a given fixed proportion,
 % p, of the time-series data points are further.

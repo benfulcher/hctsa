@@ -65,17 +65,12 @@ if ischar(tau) || ischar(m)
     m = tauAndM(2);
 end
 
-if (nargin < 4)
+if nargin < 4
     epsilon = 0.12;
 end
 
-if (nargin < 5)
+if nargin < 5
     T_max = -1;
-end
-
-if (nargin > 5)
-    help rpde;
-    return
 end
 % ------------------------------------------------------------------------------
 

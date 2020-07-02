@@ -2,6 +2,7 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 % EN_SampEn     Sample Entropy of a time series
 %
 % SampEn(m,r), using code from PhysioNet.
+% 
 % Uses a compiled C version of the code if available, otherwise uses a (slower)
 % Matlab implementation (which can actually be faster for shorter time series
 % due to overheads of reading/writing to disk)
@@ -77,6 +78,7 @@ end
 if nargin < 4
     preProcessHow = ''; % don't apply any preprocessing
 end
+
 %-------------------------------------------------------------------------------
 % Can specify to first apply an incremental differencing of the time series
 % thus yielding the 'Control Entropy':
@@ -92,34 +94,36 @@ end
 % Check if a compiled C version exists:
 % [a,b] = system('which sampen');
 
-try
-    sampEn = sampen_mex(y',M+1,r);
-    sampEn = sampEn(1:M+1); % always that extra one for the M=0
-catch
-    warning('No mex file found: using a slower native Matlab implementation instead');
-    % No mex version available; use (much slower) Matlab implementation
-    % if isempty(b) || length(y) < 3000 % faster to run within Matlab
-    sampEn = PN_sampenc(y,M+1,r,false);
-    %     fprintf('Using compiled C code~~~\n')
-    %     % http://www.physionet.org/physiotools/sampen/c/
-    %     % (use Makefile in Toolboxes/Physionet/ to run make, then make install)
-    %
-    %     % Run compiled C code:
-    %     filePath = BF_WriteTempFile(y);
-    %     command = sprintf('sampen -m %u -r %f < %s',M,r,filePath);
-    %     [~,res] = system(command);
-    %     fprintf(1,'%s\n',res)
-    %     s = textscan(res,'%[^\n]'); s = s{1};
-    %     sampEn = zeros(M,1);
-    %     for i = 1:M
-    %         [~,params] = regexp(s{i},'\((\S+)\)','tokens','match');
-    %         params = regexp(params{1}(2:end-1),',','split');
-    %         [~,result] = regexp(s{i},'= (\S+)','tokens','match');
-    %         result = str2num(result{1}(3:end));
-    %         sampEn(i) = result;
-    %     end
-    % end
-end
+sampEn = sampen_mex(y',M+1,r);
+sampEn = sampEn(1:M+1); % always that extra one for the M=0
+
+%-------------------------------------------------------------------------------
+% This is dangerous because it could lead to inconsistent implementations across runs
+%-------------------------------------------------------------------------------
+% warning('No mex file found: using a slower native Matlab implementation instead');
+% No mex version available; use (much slower) Matlab implementation
+% if isempty(b) || length(y) < 3000 % faster to run within Matlab
+% sampEn = PN_sampenc(y,M+1,r,false);
+%     fprintf('Using compiled C code~~~\n')
+%     % http://www.physionet.org/physiotools/sampen/c/
+%     % (use Makefile in Toolboxes/Physionet/ to run make, then make install)
+%
+%     % Run compiled C code:
+%     filePath = BF_WriteTempFile(y);
+%     command = sprintf('sampen -m %u -r %f < %s',M,r,filePath);
+%     [~,res] = system(command);
+%     fprintf(1,'%s\n',res)
+%     s = textscan(res,'%[^\n]'); s = s{1};
+%     sampEn = zeros(M,1);
+%     for i = 1:M
+%         [~,params] = regexp(s{i},'\((\S+)\)','tokens','match');
+%         params = regexp(params{1}(2:end-1),',','split');
+%         [~,result] = regexp(s{i},'= (\S+)','tokens','match');
+%         result = str2num(result{1}(3:end));
+%         sampEn(i) = result;
+%     end
+% end
+% end
 
 % ------------------------------------------------------------------------------
 % Compute outputs from the code
