@@ -76,7 +76,7 @@ if nargin < 2 || isempty(tau)
     tau = 1; % time delay
 end
 if strcmp(tau,'ac')
-    tau = CO_FirstZero(y,'ac'); % first zero-crossing of autocorrelation function
+    tau = CO_FirstCrossing(y,'ac',0,'discrete'); % first zero-crossing of autocorrelation function
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
 end

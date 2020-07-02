@@ -70,7 +70,7 @@ if nargin < 4 || isempty(tau)
     tau = 1;
 end
 if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
 end
 if isnan(tau)
     error('Time series too short to estimate tau');

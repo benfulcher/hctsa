@@ -129,8 +129,8 @@ CO_AutoCorr(x_z,37,'Fourier')	AC_37
 CO_AutoCorr(x_z,38,'Fourier')	AC_38
 CO_AutoCorr(x_z,39,'Fourier')	AC_39
 CO_AutoCorr(x_z,40,'Fourier')	AC_40
-CO_FirstZero(x_z,'ac')	CO_FirstZero_ac
-CO_f1ecac(x_z)			CO_f1ecac
+CO_FirstCrossing(x_z,'ac',0,'both')	CO_FirstCrossing_acf_0
+CO_FirstCrossing(x_z,'ac',1/exp(1),'both')	CO_FirstCrossing_acf_1e
 CO_FirstMin(x_z,'ac')	CO_FirstMin_ac
 CO_FirstMin(x_z,'mi-gaussian')	CO_FirstMin_mi-gaussian
 CO_FirstMin(x_z,'mi-kraskov1','4')  CO_FirstMin_mi-kraskov1_4
@@ -750,9 +750,9 @@ PH_ForcePotential(x_z,'dblwell',[3,0.01,0.1])	PH_ForcePotential_dblwell_3_001_01
 PH_ForcePotential(x_z,'sine',[3,0.5,1])	    PH_ForcePotential_sine_3_05_1
 PH_ForcePotential(x_z,'sine',[1,1,1])	        PH_ForcePotential_sine_1_1_1
 PH_ForcePotential(x_z,'sine',[10,0.04,10])	PH_ForcePotential_sine_10_004_10
-DN_RemovePoints(x_z,'absclose',0.1,'saturate')	DN_RemovePoints_absclose_01_saturate
-DN_RemovePoints(x_z,'absclose',0.5,'saturate')	DN_RemovePoints_absclose_05_saturate
-DN_RemovePoints(x_z,'absclose',0.8,'saturate')	DN_RemovePoints_absclose_08_saturate
+DN_RemovePoints(x_z,'absclose',0.1,'remove')	DN_RemovePoints_absclose_01_remove
+DN_RemovePoints(x_z,'absclose',0.5,'remove')	DN_RemovePoints_absclose_05_remove
+DN_RemovePoints(x_z,'absclose',0.8,'remove')	DN_RemovePoints_absclose_08_remove
 DN_RemovePoints(x_z,'absfar',0.1,'remove')	DN_RemovePoints_absfar_01_remove
 DN_RemovePoints(x_z,'absfar',0.8,'remove')	DN_RemovePoints_absfar_08_remove
 DN_RemovePoints(x_z,'absfar',0.1,'saturate')	DN_RemovePoints_absfar_01_saturate

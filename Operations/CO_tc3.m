@@ -60,7 +60,7 @@ end
 % ------------------------------------------------------------------------------
 % Can set the time lag, tau, to be 'ac' or 'mi'
 if strcmp(tau,'ac')
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
     % tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');

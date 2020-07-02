@@ -70,7 +70,7 @@ end
 if strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 elseif strcmp(tau,'ac')
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
 end
 if isnan(tau)
     error('Time series cannot be embedded (too short?)');

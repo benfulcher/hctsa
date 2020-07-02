@@ -70,7 +70,7 @@ if nargin < 3 || isempty(tau)
     tau = 1;
 end
 if strcmp(tau,'ac')
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
 elseif strcmp(tau,'mi')
     tau = CO_FirstMin(y,'mi');
 end

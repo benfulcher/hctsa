@@ -64,7 +64,8 @@ case {'embed2quadrants','embed2octants'}
 	% Construct the embedding
 
 	if strcmp(numGroups,'tau')
-        tau = CO_FirstZero(y,'ac'); % first zero-crossing of the autocorrelation function
+        % First zero-crossing of the autocorrelation function
+        tau = CO_FirstCrossing(y,'ac',0,'discrete');
     else
         tau = numGroups;
 	end

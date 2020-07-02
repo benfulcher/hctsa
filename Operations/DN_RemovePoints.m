@@ -159,7 +159,7 @@ end
 f_absDiff = @(x1,x2) abs(x1-x2); % ignores the sign
 f_ratio = @(x1,x2) x1/x2; % includes the sign
 
-out.fzcacrat = f_ratio(CO_FirstZero(yTransform,'ac'),CO_FirstZero(y,'ac'));
+out.fzcacrat = f_ratio(CO_FirstCrossing(yTransform,'ac',0,'continuous'),CO_FirstCrossing(y,'ac',0,'continuous'));
 
 out.ac1rat = f_ratio(acf_yTransform(1),acf_y(1));
 out.ac1diff = f_absDiff(acf_yTransform(1),acf_y(1));

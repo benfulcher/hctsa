@@ -56,7 +56,7 @@ end
 
 % Set tau to first zero-crossing of the autocorrelation function with the input 'tau'
 if strcmp(tau,'tau')
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
 end
 
 % Take magnitudes of time-delayed versions of the time series:

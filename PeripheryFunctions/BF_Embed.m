@@ -80,7 +80,7 @@ else
                 end
                 sstau = sprintf('by first minimum of mutual information to tau = ');
             case 'ac' % first zero-crossing of ACF
-                tau = CO_FirstZero(y,'ac');
+                tau = CO_FirstCrossing(y,'ac',0,'discrete');
                 sstau = sprintf('by first zero crossing of autocorrelation function to tau = ');
                 if isnan(tau)
                     error('Could not get time delay by ACF (time series too short?)');

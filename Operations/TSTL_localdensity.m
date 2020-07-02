@@ -107,7 +107,7 @@ for i = 1:5
 end
 
 % Estimates of correlation length:
-out.tauacden = CO_FirstZero(locden,'ac'); % first zero-crossing of autocorrelation function
+out.tauacden = CO_FirstCrossing(locden,'ac',0,'continuous'); % first zero-crossing of autocorrelation function
 out.taumiden = CO_FirstMin(locden,'mi'); % first minimum of automutual information function
 
 end

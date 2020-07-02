@@ -64,7 +64,7 @@ end
 N = length(y); % time-series length
 
 if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
     if isnan(tau)
         error('Time series too short to estimate tau');
     end

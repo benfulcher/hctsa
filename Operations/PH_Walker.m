@@ -211,7 +211,7 @@ out.w_median = median(w);
 out.w_std = std(w);
 out.w_ac1 = CO_AutoCorr(w,1,'Fourier');
 out.w_ac2 = CO_AutoCorr(w,2,'Fourier');
-out.w_tau = CO_FirstZero(w,'ac');
+out.w_tau = CO_FirstCrossing(w,'ac',0,'continuous');
 out.w_min = min(w);
 out.w_max = max(w);
 out.w_propzcross = sum(w(1:end-1).*w(2:end) < 0) / (N-1);
@@ -219,7 +219,7 @@ out.w_propzcross = sum(w(1:end-1).*w(2:end) < 0) / (N-1);
 
 % (ii) Differences between the walk at signal
 out.sw_meanabsdiff = mean(abs(y-w));
-out.sw_taudiff = CO_FirstZero(y,'ac') - CO_FirstZero(w,'ac');
+out.sw_taudiff = CO_FirstCrossing(y,'ac',0,'continuous') - CO_FirstCrossing(w,'ac',0,'continuous');
 out.sw_stdrat = std(w)/std(y); % will be the same as w_std for z-scored signal
 out.sw_ac1rat = out.w_ac1/CO_AutoCorr(y,1);
 out.sw_minrat = min(w)/min(y);

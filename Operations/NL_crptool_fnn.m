@@ -66,10 +66,11 @@ if nargin < 4 || isempty(taum)
     taum = 'mi'; % by default determine time delay by first minimum of AMI
 end
 if ischar(taum)
+    % time delay
     if strcmp(taum,'mi')
-        tau = CO_FirstMin(y,'mi'); % time-delay
+        tau = CO_FirstMin(y,'mi');
     elseif strcmp(taum,'ac')
-        tau = CO_FirstZero(y,'ac'); % time-delay
+        tau = CO_FirstCrossing(y,'ac',0,'discrete');
     else
         error('Invalid time-delay method ''%s''.',taum)
     end

@@ -155,7 +155,7 @@ if Nac > minPointsForACFofACF
     if all(acf > 0)
         out.actau = NaN;
     else
-        out.actau = CO_AutoCorr(acf,CO_FirstZero(acf,'ac'),'Fourier');
+        out.actau = CO_AutoCorr(acf,CO_FirstCrossing(acf,'ac',0,'discrete'),'Fourier');
     end
 else
     out.ac1 = NaN;

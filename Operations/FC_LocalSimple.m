@@ -67,7 +67,8 @@ N = length(y); % Time-series length
 % Do the local prediction
 % ------------------------------------------------------------------------------
 if strcmp(trainLength,'ac')
-    lp = CO_FirstZero(y,'ac'); % make it tau
+    % Make it first zero-crossing of ACF:
+    lp = CO_FirstCrossing(y,'ac',0,'discrete');
 else
     lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
 end
@@ -129,7 +130,7 @@ end
 % Autocorrelation structure of the residuals:
 out.ac1 = CO_AutoCorr(res,1,'Fourier');
 out.ac2 = CO_AutoCorr(res,2,'Fourier');
-out.taures = CO_FirstZero(res,'ac');
-out.tauresrat = CO_FirstZero(res,'ac')/CO_FirstZero(y,'ac');
+out.taures = CO_FirstCrossing(res,'ac',0,'continuous');
+out.tauresrat = CO_FirstCrossing(res,'ac',0,'continuous')/CO_FirstCrossing(y,'ac',0,'continuous');
 
 end

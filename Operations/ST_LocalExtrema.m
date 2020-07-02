@@ -77,7 +77,7 @@ switch lorf
         wl = floor(N/n); % number of windows
     case 'tau'
         % this may not be a good idea!
-        wl = CO_FirstZero(y,'ac');
+        wl = CO_FirstCrossing(y,'ac',0,'discrete');
     otherwise
         error('Unknown method ''%s''',lorf);
 end

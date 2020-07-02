@@ -2,7 +2,7 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 % EN_SampEn     Sample Entropy of a time series
 %
 % SampEn(m,r), using code from PhysioNet.
-% 
+%
 % Uses a compiled C version of the code if available, otherwise uses a (slower)
 % Matlab implementation (which can actually be faster for shorter time series
 % due to overheads of reading/writing to disk)
@@ -85,7 +85,7 @@ end
 % "Control Entropy: A complexity measure for nonstationary signals"
 % E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
 if ~isempty(preProcessHow)
-    y = BF_preprocess(y,preProcessHow);
+    y = BF_PreProcess(y,preProcessHow);
 end
 
 % ------------------------------------------------------------------------------

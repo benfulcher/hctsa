@@ -52,7 +52,7 @@ if nargin < 2 || isempty(timeDelay)
     timeDelay = 1;
 end
 if ischar(timeDelay) && ismember(timeDelay,{'ac','tau'})
-    timeDelay = CO_FirstZero(y,'ac');
+    timeDelay = CO_FirstCrossing(y,'ac',0,'discrete');
 end
 
 if nargin < 3 || isempty(estMethod)

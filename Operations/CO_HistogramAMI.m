@@ -62,7 +62,7 @@ if nargin < 2 || isempty(tau)
     tau = 1;  % time-lag of 1
 end
 if ischar(tau) && ismember(tau,{'ac','tau'})
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
 end
 
 if nargin < 3 || isempty(meth)

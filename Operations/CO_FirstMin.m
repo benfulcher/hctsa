@@ -11,7 +11,7 @@ function out = CO_FirstMin(y,minWhat,extraParam)
 %           or 'mi-hist' (histogram-based method).
 %
 % Note that selecting 'ac' is unusual operation: standard operations are the
-% first zero-crossing of the autocorrelation (as in CO_FirstZero), or the first
+% first zero-crossing of the autocorrelation (as in CO_FirstCrossing), or the first
 % minimum of the mutual information function ('mi').
 
 % ------------------------------------------------------------------------------
@@ -92,7 +92,8 @@ for i = 1:N-1
     % Hit a NaN before got to a minimum -- there is no minimum
     if isnan(autoCorr(i))
         warning('No minimum in %s [[time series too short to find it?]]',minWhat)
-        out = NaN; return
+        out = NaN;
+        return
     end
 
     % We're at a minimum:

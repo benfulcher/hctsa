@@ -1,10 +1,13 @@
-function out = CO_f1ecac(y)
-% CO_f1ecac     The 1/e correlation length
-%
-% Finds where autocorrelation function first crosses 1/e
+function [firstCrossing, pointOfCrossing] = BF_PointOfCrossing(x,threshold)
+% BF_PointOfCrossing  Linearly interpolate to the point of crossing a threshold
 %
 %---INPUT:
-% y, the input time series.
+% x, a vector
+% threshold, a threshold x crosses.
+%
+%---OUTPUTS:
+% firstCrossing, the first discrete value after which a crossing event has occurred
+% pointOfCrossing, the (linearly) interpolated point of crossing
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -35,35 +38,23 @@ function out = CO_f1ecac(y)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-N = length(y); % time-series length
-thresh = 1/exp(1); % 1/e threshold
-
-% With Fourier method you can compute the whole spectrum at once:
-acf = CO_AutoCorr(y,[],'Fourier');
-
-% First crossing of 1/e (always positive to negative, because a(1)=1)
-firstCrossing = find((acf - thresh < 0),1,'first');
-
-if ~isempty(firstCrossing)
-    out = firstCrossing;
+% Find index of x at which the first crossing event occurs:
+if x(1) > threshold
+    firstCrossing = find((x - threshold < 0),1,'first');
 else
-    out = N; % no crossing point anywhere across full ACF
+    firstCrossing = find((x - threshold > 0),1,'first');
 end
 
-%-------------------------------------------------------------------------------
-% More general crossing events:
-% crossedThreshold = ((acf(1:end-1)-thresh).*(acf(2:end)-thresh) < 0);
-% if any(crossedThreshold)
-    % out = find(crossedThreshold,1,'first');
-% else
-    % out = N; % no crossing point anywhere across full ACF
-% end
-
-%-------------------------------------------------------------------------------
-% Plot to check:
-% f = figure('color','w');
-% hold on
-% plot(0:length(acf)-1,acf,'o-k')
-% plot([0,out],thresh*ones(2,1),'--r')
+if isempty(firstCrossing)
+    % Never crosses
+    N = length(x);
+    firstCrossing = N;
+    pointOfCrossing = N;
+else
+    % Continuous version---the point of crossing
+    valueBeforeCrossing = x(firstCrossing - 1);
+    valueAfterCrossing = x(firstCrossing);
+    pointOfCrossing = firstCrossing - 1 + (threshold - valueBeforeCrossing)/(valueAfterCrossing - valueBeforeCrossing);
+end
 
 end

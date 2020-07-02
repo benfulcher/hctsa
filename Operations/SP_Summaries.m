@@ -256,7 +256,7 @@ end
 autoCorrs_S = CO_AutoCorr(S,1:4,'Fourier');
 out.ac1 = autoCorrs_S(1);
 out.ac2 = autoCorrs_S(2);
-out.tau = CO_FirstZero(S,'ac');
+out.tau = CO_FirstCrossing(S,'ac',0,'continuous');
 
 % ------------------------------------------------------------------------------
 % Shape of cumulative sum curve

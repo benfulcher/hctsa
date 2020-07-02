@@ -132,7 +132,8 @@ end
 % Check trajectory didn't blow out:
 if isnan(x(end)) || abs(x(end)) > 1E10
     fprintf(1,'Trajectory blew out!\n');
-    out = NaN; return % not suitable for this time series
+    out = NaN;
+    return % not suitable for this time series
 end
 
 % ------------------------------------------------------------------------------
@@ -147,7 +148,7 @@ out.pcross = sum((x(1:end-1)).*(x(2:end)) < 0)/(N-1); % n crosses middle
 out.ac1 = abs(CO_AutoCorr(x,1,'Fourier')); % magnitude of autocorrelation at lag 1
 out.ac10 = abs(CO_AutoCorr(x,10,'Fourier')); % magnitude of autocorrelation at lag 10
 out.ac50 = abs(CO_AutoCorr(x,50,'Fourier')); % magnitude of autocorrelation at lag 50
-out.tau = CO_FirstZero(x,'ac'); % first zero crossing of the autocorrelation function
+out.tau = CO_FirstCrossing(x,'ac',0,'continuous'); % first zero-crossing of the autocorrelation function
 out.finaldev = abs(x(end)); % final position
 
 % A couple of additional outputs for double well:

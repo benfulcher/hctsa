@@ -145,7 +145,7 @@ out.iqrx = iqr(x);
 out.meanx = mean(x);
 out.ac1x = CO_AutoCorr(x,1,'Fourier');
 out.ac2x = CO_AutoCorr(x,2,'Fourier');
-out.tauacx = CO_FirstZero(x,'ac');
+out.tauacx = CO_FirstCrossing(x,'ac',0,'continuous');
 
 out.maxy = max(y);
 out.miny = min(y);
@@ -154,7 +154,7 @@ out.iqry = iqr(y);
 out.meany = mean(y);
 out.ac1y = CO_AutoCorr(y,1,'Fourier');
 out.ac2y = CO_AutoCorr(y,2,'Fourier');
-out.tauacy = CO_FirstZero(y,'ac');
+out.tauacy = CO_FirstCrossing(y,'ac',0,'continuous');
 
 out.boxarea = range(x)*range(y);
 
@@ -190,7 +190,7 @@ out.iqrD = iqr(D);
 out.meanD = mean(D);
 out.ac1D = CO_AutoCorr(D,1,'Fourier');
 out.ac2D = CO_AutoCorr(D,2,'Fourier');
-out.tauacD = CO_FirstZero(D,'ac');
+out.tauacD = CO_FirstCrossing(D,'ac',0,'continuous');
 
 % ------------------------------------------------------------------------------
 %% Statistics of the boxed distribution:

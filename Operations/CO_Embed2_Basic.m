@@ -46,7 +46,7 @@ doPlot = false; % plot outputs to a figure
 
 if strcmp(tau,'tau')
 	% Make tau the first zero crossing of the autocorrelation function
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
 end
 
 xt = y(1:end-tau); % part of the time series

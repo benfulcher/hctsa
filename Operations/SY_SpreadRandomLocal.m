@@ -62,7 +62,8 @@ if nargin < 2 || isempty(l)
 end
 
 if ischar(l)
-    taug = CO_FirstZero(y,'ac'); % tau (global)
+    % tau (global)
+    taug = CO_FirstCrossing(y,'ac',0,'discrete');
     switch l
     case 'ac2'
         l = 2*taug;
@@ -111,19 +112,17 @@ for j = 1:numSegs
     ist = randi(N-1-l,1); % random start point (not exceeding the endpoint)
     ifh = ist+l-1; % finish index
     rs = ist:ifh; % sample range (from starting to finishing index)
-    ysub = y(rs); % subsection of the time series
+    ySub = y(rs); % contiguous subsegment of the time series
 
-    taul = CO_FirstZero(ysub,'ac');
-
-    qs(j,1) = mean(ysub); % mean
-    qs(j,2) = std(ysub); % standard deviation
-    qs(j,3) = skewness(ysub); % skewness
-    qs(j,4) = kurtosis(ysub); % kurtosis
-    entropyStruct = EN_SampEn(ysub,1,0.15);
+    qs(j,1) = mean(ySub); % mean
+    qs(j,2) = std(ySub); % standard deviation
+    qs(j,3) = skewness(ySub); % skewness
+    qs(j,4) = kurtosis(ySub); % kurtosis
+    entropyStruct = EN_SampEn(ySub,1,0.15);
     qs(j,5) = entropyStruct.quadSampEn1; % SampEn_1_01
-    qs(j,6) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
-    qs(j,7) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
-    qs(j,8) = taul;
+    qs(j,6) = CO_AutoCorr(ySub,1,'Fourier'); % AC1
+    qs(j,7) = CO_AutoCorr(ySub,2,'Fourier'); % AC2
+    qs(j,8) = CO_FirstCrossing(ySub,'ac',0,'continuous'); % first zero crossing
 end
 
 % ------------------------------------------------------------------------------

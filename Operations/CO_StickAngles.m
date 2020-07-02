@@ -235,7 +235,7 @@ out.statav5_all_s = statav_s;
 
 %% correlations?
 if ~isempty(zangles{1});
-    out.tau_p = CO_FirstZero(zangles{1},'ac');
+    out.tau_p = CO_FirstCrossing(zangles{1},'ac',0,'continuous');
     out.ac1_p = CO_AutoCorr(zangles{1},1,'Fourier');
     out.ac2_p = CO_AutoCorr(zangles{1},2,'Fourier');
 else
@@ -243,14 +243,14 @@ else
 end
 
 if ~isempty(zangles{2});
-    out.tau_n = CO_FirstZero(zangles{2},'ac');
+    out.tau_n = CO_FirstCrossing(zangles{2},'ac',0,'continuous');
     out.ac1_n = CO_AutoCorr(zangles{2},1,'Fourier');
     out.ac2_n = CO_AutoCorr(zangles{2},2,'Fourier');
 else
     out.tau_n=NaN; out.ac1_n = NaN; out.ac2_n = NaN;
 end
 
-out.tau_all = CO_FirstZero(zallAngles,'ac');
+out.tau_all = CO_FirstCrossing(zallAngles,'ac',0,'continuous');
 out.ac1_all = CO_AutoCorr(zallAngles,1,'Fourier');
 out.ac2_all = CO_AutoCorr(zallAngles,2,'Fourier');
 
@@ -292,9 +292,8 @@ out.q99_all = F_quantz(0.99);
 out.skewness_all = skewness(allAngles);
 out.kurtosis_all = kurtosis(allAngles);
 
-%% Outliers?
-% forget about this, I think.
 
+%-------------------------------------------------------------------------------
 function [statavmean, statavstd] = SUB_statav(x,n)
     % Does a n-partition statav.
     % Require 2*n points (i.e., minimum of 2 in each partition) to do a
@@ -306,7 +305,10 @@ function [statavmean, statavstd] = SUB_statav(x,n)
     end
 
     x_buff = buffer(x,floor(NN/n));
-    if size(x_buff,2) > n, x_buff = x_buff(:,1:n); end % lose last point
+    if size(x_buff,2) > n
+        % Remove final point
+        x_buff = x_buff(:,1:n);
+    end
     statavmean = std(mean(x_buff))/std(x);
     statavstd = std(std(x_buff))/std(x);
 end

@@ -66,7 +66,7 @@ end
 
 % Can set time lag equal to first zero crossing of the autocorrelation function with the 'tau' input
 if strcmp(tau,'tau'),
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
     % Cannot set the time delay greater than 10% the length of the time series
     if tau > length(y)/10
         tau = floor(length(y)/10);
@@ -125,7 +125,7 @@ end
 out.ac1 = CO_AutoCorr(counts,1,'Fourier');
 out.ac2 = CO_AutoCorr(counts,2,'Fourier');
 out.ac3 = CO_AutoCorr(counts,3,'Fourier');
-out.tau = CO_FirstZero(counts,'ac');
+out.tau = CO_FirstCrossing(counts,'ac',0,'continuous');
 out.max = max(counts);
 out.std = std(counts);
 out.median = median(counts);

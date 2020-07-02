@@ -54,7 +54,7 @@ end
 
 % Set tau to the first zero-crossing of the autocorrelation function, with the 'tau' input
 if strcmp(tau,'tau'),
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
     if tau > length(y)/10
         tau = floor(length(y)/10);
     end

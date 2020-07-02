@@ -37,14 +37,16 @@ end
 
 % Other options for tau
 if strcmp(tau,'ac')
-    tau = CO_FirstZero(y,'ac'); % first zero-crossing of autocorrelation function
+    % First zero-crossing of autocorrelation function
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
 elseif strcmp(tau,'mi')
-    tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
+    % First minimum of automutual information function
+    tau = CO_FirstMin(y,'mi');
 end
 if isnan(tau)
     error('Time series cannot be embedded (too short?)');
 end
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 
 dsp = 5; % separation cutoff
 y = y(:);
@@ -52,7 +54,7 @@ y = y(:);
 n = 2*tau; % exclude nearpoints
 
 nfnn = [];
-localmin = 0; % Ben Fulcher, 2015-03-20 fixed to locamin -> localmin
+localMin = 0; % Ben Fulcher, 2015-03-20 fixed to locamin -> localMin
 
 for d = de
 
@@ -60,11 +62,8 @@ for d = de
     X = MS_embed(y,d,tau); % changed from embed -> MS_embed ++BF
     [d,nx] = size(X);
 
-    falseneighbours = 0;
-    total = 0;
-
     % find the nearest neighbours of each point
-    ind = MS_nearest(X(:,1:(nx-1)),tau); %whooh hooo!
+    ind = MS_nearest(X(:,1:(nx-1)),tau); % whooh hooo!
 
     % Distance between each point and its nearest neighbour
     d0 = MS_rms(X(:,(1:(nx-1)))'-X(:,ind)');
@@ -89,8 +88,8 @@ for d = de
     % Or maybe a local minimum
     if (length(nfnn) > 1)
         if (min(prop,nfnn(end)) > nfnn(end-1)),
-          localmin = 1;
-          localmini = length(nfnn)-1;
+          localMin = 1;
+          localMini = length(nfnn)-1;
         end
     end
 
@@ -98,10 +97,10 @@ for d = de
 end
 
 
-if (localmin)
+if (localMin)
     % we didn't go subthreshold, but we did have a local min.
-    nfnn = nfnn(localmini);
-    d = de(localmini);% changed from i->localmini ++BF
+    nfnn = nfnn(localMini);
+    d = de(localMini);% changed from i->localMini ++BF
 else
     % otherwise, just do the best we can
     [nfnn, i] = min(nfnn);

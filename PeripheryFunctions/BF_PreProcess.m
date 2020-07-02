@@ -38,7 +38,7 @@ if ~isempty(preProcessHow)
     case 'rescale_tau'
         % Coarse-graining at a given scale, as in multiscale entropy approaches
         % Find first zero of the autocorrelation function
-        tau = CO_FirstZero(y,'ac');
+        tau = CO_FirstCrossing(y,'ac',0,'discrete');
         % Buffer the time series into nonoverlapping windows of length tau
         y_buffer = BF_MakeBuffer(y,tau);
         % Mean each window to get a coarse-grained time series

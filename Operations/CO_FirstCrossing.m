@@ -1,5 +1,5 @@
-function out = CO_FirstZero(y,corrFun,maxTau)
-% CO_FirstZero      The first zero-crossing of a given autocorrelation function
+function out = CO_FirstCrossing(y,corrFun,threshold,whatOut)
+% CO_FirstCrossing  The first crossing of a given autocorrelation across a given threshold
 %
 %---INPUTS:
 %
@@ -7,11 +7,7 @@ function out = CO_FirstZero(y,corrFun,maxTau)
 % corrFun, the self-correlation function to measure:
 %         (i) 'ac': normal linear autocorrelation function. Uses CO_AutoCorr to
 %                   calculate autocorrelations.
-% maxTau, a maximum time-delay to search up to.
-%
-% In future, could add an option to return the point at which the function
-% crosses the axis, rather than the first integer lag at which it has already
-% crossed (what is currently implemented).
+% threshold, to cross: e.g., 0, 1/exp(1).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -49,34 +45,42 @@ function out = CO_FirstZero(y,corrFun,maxTau)
 N = length(y); % the length of the time series
 
 if nargin < 2 || isempty(corrFun)
-    corrFun = 'ac'; % autocorrelation by default
+    corrFun = 'ac'; % linear autocorrelation function
 end
-if nargin < 3 || isempty(maxTau)
-    maxTau = N; % search up to a maximum of the length of the time series
-    % maxTau = 400; % searches up to this maximum time lag
-    % maxTau = min(maxTau,N); % searched up to the length of the time series if this is less than maxTau
+if nargin < 3 || isempty(threshold)
+    threshold = 0;
+end
+if nargin < 4 || isempty(whatOut)
+    whatOut = 'both';
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Select the self-correlation function as an inline function
 % Eventually could add additional self-correlation functions
 switch corrFun
 case 'ac'
     % Autocorrelation at all time lags
     corrs = CO_AutoCorr(y,[],'Fourier');
-    corrs = corrs(2:end); % remove the zero-lag result
 otherwise
     error('Unknown correlation function ''%s''',corrFun);
 end
 
-% Calculate autocorrelation at increasing lags, until you find a negative one
-for tau = 1:maxTau-1
-    if corrs(tau) < 0 % we know it starts positive (1), so first negative will be the zero-crossing
-        out = tau; return
-    end
+%-------------------------------------------------------------------------------
+% Calculate point of crossing:
+[firstCrossingIndex, pointOfCrossingIndex] = BF_PointOfCrossing(corrs,threshold);
+
+%-------------------------------------------------------------------------------
+% Assemble the appropriate output (structure or double):
+% Convert from index space (1,2,…) to lag space (0,1,2,…):
+switch whatOut
+case 'both'
+    out.firstCrossing = firstCrossingIndex - 1;
+    out.pointOfCrossing = pointOfCrossingIndex - 1;
+case 'discrete'
+    out = firstCrossingIndex - 1;
+case 'continuous'
+    out = pointOfCrossingIndex - 1;
 end
 
-% If haven't left yet, set output to maxTau
-out = maxTau;
 
 end

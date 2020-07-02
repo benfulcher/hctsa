@@ -241,7 +241,7 @@ out.entropy = EN_DistributionEntropy(k,'hist','sqrt');
 out.kac1 = CO_AutoCorr(k,1,'Fourier');
 out.kac2 = CO_AutoCorr(k,2,'Fourier');
 out.kac3 = CO_AutoCorr(k,3,'Fourier');
-out.ktau = CO_FirstZero(k,'ac');
+out.ktau = CO_FirstCrossing(k,'ac',0,'continuous');
 
 %-------------------------------------------------------------------------------
 function A = symmetrize(A)

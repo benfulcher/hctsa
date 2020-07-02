@@ -82,7 +82,7 @@ if ischar(tau) % determine by some other method
         case 'mi'
             tau = CO_FirstMin(y,'mi');
         case 'ac'
-            tau = CO_FirstZero(y,'ac');
+            tau = CO_FirstCrossing(y,'ac',0,'discrete');
         otherwise
             error('Unknown time-delay method ''%s''',tau);
     end

@@ -65,7 +65,7 @@ end
 % (should probably be even higher...?)
 minTSLength = 20;
 
-doPlot = 0; % whether to plot outputs
+doPlot = false; % whether to plot outputs
 numScales = length(scaleRange);
 
 %-------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ numScales = length(scaleRange);
 %-------------------------------------------------------------------------------
 % Do the specified pre-processing BEFORE applying the coarse-graining
 if ~isempty(preProcessHow)
-    y = zscore(BF_preprocess(y,preProcessHow));
+    y = zscore(BF_PreProcess(y,preProcessHow));
 end
 
 %-------------------------------------------------------------------------------

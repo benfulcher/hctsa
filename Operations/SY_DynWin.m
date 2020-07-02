@@ -1,4 +1,4 @@
-function out = SY_DynWin(y,maxnseg)
+function out = SY_DynWin(y,maxNumSegments)
 % SY_DynWin  How stationarity estimates depend on the number of time-series subsegments
 %
 % Specifically, variation in a range of local measures are implemented: mean,
@@ -11,10 +11,10 @@ function out = SY_DynWin(y,maxnseg)
 %
 %---INPUTS:
 %
-% y, the input time series
+% y, the input time series.
 %
-% maxnseg, the maximum number of segments to consider. Will sweep from 2
-%           segments to maxnseg.
+% maxNumSegments, the maximum number of segments to consider. Sweeps from 2 to
+%                   maxNumSegments.
 %
 %
 %---OUTPUTS:
@@ -51,16 +51,16 @@ function out = SY_DynWin(y,maxnseg)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-if nargin < 2 || isempty(maxnseg)
-    maxnseg = 10;
+if nargin < 2 || isempty(maxNumSegments)
+    maxNumSegments = 10;
 end
 
-nsegr = (2:1:maxnseg); % range of nseg to sweep across
+nsegr = (2:1:maxNumSegments); % range of nseg to sweep across
 nmov = 1; % controls window overlap
 
 numFeatures = 11; % number of features
 fs = zeros(length(nsegr),numFeatures); % standard deviation of feature values over windows
-taug = CO_FirstZero(y,'ac'); % global tau
+taug = CO_FirstCrossing(y,'ac',0,'discrete'); % global tau
 
 for i = 1:length(nsegr)
     nseg = nsegr(i);
@@ -75,34 +75,34 @@ for i = 1:length(nsegr)
     qs = zeros(numSteps,numFeatures);
 
     for j = 1:numSteps
-        ysub = y((j-1)*inc+1:(j-1)*inc+wlen);
-        taul = CO_FirstZero(ysub,'ac');
+        ySub = y((j-1)*inc+1:(j-1)*inc+wlen);
+        taul = CO_FirstCrossing(ySub,'ac',0,'discrete');
 
-        % qs.mean(j) = mean(ysub); % mean
-        % qs.std(j) = std(ysub); % standard deviation
-        % qs.skew(j) = skewness(ysub); % skewness
-        % qs.kurt(j) = kurtosis(ysub); % kurtosis
-        % qs.apen(j) = EN_ApEn(ysub,1,0.2); % ApEn_1
-        % qs.sampen(j) = EN_sampenc(ysub,1,0.2); % SampEn_1
-        % qs.ac1(j) = CO_AutoCorr(ysub,1); % AC1
-        % qs.ac2(j) = CO_AutoCorr(ysub,2); % AC2
-        % qs.tauglob(j) = CO_AutoCorr(ysub,taug); % AC_glob_tau
-        % qs.tauloc(j) = CO_AutoCorr(ysub,taul); % AC_loc_tau
+        % qs.mean(j) = mean(ySub); % mean
+        % qs.std(j) = std(ySub); % standard deviation
+        % qs.skew(j) = skewness(ySub); % skewness
+        % qs.kurt(j) = kurtosis(ySub); % kurtosis
+        % qs.apen(j) = EN_ApEn(ySub,1,0.2); % ApEn_1
+        % qs.sampen(j) = EN_sampenc(ySub,1,0.2); % SampEn_1
+        % qs.ac1(j) = CO_AutoCorr(ySub,1); % AC1
+        % qs.ac2(j) = CO_AutoCorr(ySub,2); % AC2
+        % qs.tauglob(j) = CO_AutoCorr(ySub,taug); % AC_glob_tau
+        % qs.tauloc(j) = CO_AutoCorr(ySub,taul); % AC_loc_tau
         % qs.taul(j) = taul;
 
-        qs(j,1) = mean(ysub); % mean
-        qs(j,2) = std(ysub); % standard deviation
-        qs(j,3) = skewness(ysub); % skewness
-        qs(j,4) = kurtosis(ysub); % kurtosis
-        % qs(j,5) = EN_ApEn(ysub,1,0.2); % ApEn_1_02
-        sampenStruct = EN_SampEn(ysub,2,0.15);
+        qs(j,1) = mean(ySub); % mean
+        qs(j,2) = std(ySub); % standard deviation
+        qs(j,3) = skewness(ySub); % skewness
+        qs(j,4) = kurtosis(ySub); % kurtosis
+        % qs(j,5) = EN_ApEn(ySub,1,0.2); % ApEn_1_02
+        sampenStruct = EN_SampEn(ySub,2,0.15);
         qs(j,5) = sampenStruct.quadSampEn1; % SampEn_1_015
         qs(j,6) = sampenStruct.quadSampEn2; % SampEn_2_015
-        qs(j,7) = CO_AutoCorr(ysub,1,'Fourier'); % AC1
-        qs(j,8) = CO_AutoCorr(ysub,2,'Fourier'); % AC2
-        % (Sometimes taug or taul can be longer than ysub; then these will output NaNs:)
-        qs(j,9) = CO_AutoCorr(ysub,taug,'Fourier'); % AC_glob_tau
-        qs(j,10) = CO_AutoCorr(ysub,taul,'Fourier'); % AC_loc_tau
+        qs(j,7) = CO_AutoCorr(ySub,1,'Fourier'); % AC1
+        qs(j,8) = CO_AutoCorr(ySub,2,'Fourier'); % AC2
+        % (Sometimes taug or taul can be longer than ySub; then these will output NaNs:)
+        qs(j,9) = CO_AutoCorr(ySub,taug,'Fourier'); % AC_glob_tau
+        qs(j,10) = CO_AutoCorr(ySub,taul,'Fourier'); % AC_loc_tau
         qs(j,11) = taul;
     end
 

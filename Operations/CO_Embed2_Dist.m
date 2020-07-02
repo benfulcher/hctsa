@@ -52,7 +52,7 @@ if nargin < 2 || isempty(tau)
     tau = 'tau'; % set to the first minimum of autocorrelation function
 end
 if strcmp(tau,'tau'),
-    tau = CO_FirstZero(y,'ac');
+    tau = CO_FirstCrossing(y,'ac',0,'discrete');
     if tau > N/10
         tau = floor(N/10);
     end
