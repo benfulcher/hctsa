@@ -1,24 +1,26 @@
-function [IDs,notIDs] = TS_GetIDs(theKeyword,whatData,tsOrOps)
+function [IDs,notIDs] = TS_GetIDs(theMatchString,whatData,tsOrOps,nameOrKeywords)
 % TS_GetIDs   Retrieve IDs of time series (or operations) in an hctsa dataset
-%               using keyword matching.
+%               using that matches a string in either the Name or Keyword
+%               fields.
 %
 %---INPUTS:
-% theKeyword, the keyword to match on (string).
+% theMatchString, the string to match
 % whatData, the source of the hctsa dataset (e.g., a filename, cf. TS_LoadData).
 %           (default: 'norm')
 % tsOrOps, whether to retrieve IDs for TimeSeries ('ts', default) or
-%           Operations ('ops').
+%           Operations ('ops')
+% nameOrKeywords, what field to match: 'Keywords' (default) or 'Name'
 %
 %---OUTPUTS:
-% IDs, a vector of IDs matching the keyword constraint provided.
+% IDs, a (sorted) vector of IDs matching the field constraint provided.
 %
 %---EXAMPLE USAGE:
-% >> ts_IDs = TS_GetIDs('noisy','norm','ts');
+% >> tsIDs = TS_GetIDs('noisy','norm','ts','Keywords');
 % This retrieves the IDs of time series in 'HCTSA_N.mat' (specifying 'norm') that
 % contain the keyword 'noisy'.
 %
-% >> op_IDs = TS_GetIDs('entropy','norm','ops');
-% This retrieves the IDs of operations in HCTSA_N.mat that have been tagged
+% >> opIDs = TS_GetIDs('entropy','norm','ops','Keywords');
+% This retrieves the IDs of operations in 'HCTSA_N.mat' that have been tagged
 % with the keyword 'entropy'.
 
 % ------------------------------------------------------------------------------
@@ -52,44 +54,80 @@ end
 if nargin < 3
     tsOrOps = 'ts';
 end
+if nargin < 4
+    nameOrKeywords = 'Keywords';
+end
 
 %-------------------------------------------------------------------------------
 % Load data:
 %-------------------------------------------------------------------------------
 [~,TimeSeries,Operations,theDataFile] = TS_LoadData(whatData);
-
-%-------------------------------------------------------------------------------
-% Match time series/operations on an input keyword:
-%-------------------------------------------------------------------------------
 switch tsOrOps
 case 'ts'
     theDataTable = TimeSeries;
 case 'ops'
     theDataTable = Operations;
 otherwise
-    error('Specify ''ts'' or ''ops''');
+    error('Specify ''ts'' (time series) or ''ops'' (operations)');
 end
 
-% The cell of comma-delimited keyword strings:
-theKeywordCell = theDataTable.Keywords;
+%-------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
+switch nameOrKeywords
+    %--------------------------------------------------------------------------
+    % KEYWORDS: match IDs of time series or operations by exact keyword match
+    %--------------------------------------------------------------------------
+    case 'Keywords'
+        % The cell of comma-delimited keyword strings:
+        theKeywordCell = theDataTable.Keywords;
 
-% Split into sub-cells using comma delimiter:
-Keywords = SUB_cell2cellcell(theKeywordCell);
+        % Split into sub-cells using comma delimiter:
+        Keywords = SUB_cell2cellcell(theKeywordCell);
 
-% Find objects with a keyword that matchees that given:
-matches = cellfun(@(x)any(ismember(theKeyword,x)),Keywords);
+        % Find objects with a keyword that matches the input string:
+        matches = cellfun(@(x)any(ismember(theMatchString,x)),Keywords);
 
-% Return the IDs of the matches:
-IDs = theDataTable.ID(matches);
+        % Return the IDs of the matches:
+        IDs = theDataTable.ID(matches);
 
-% Check for empty:
-if isempty(IDs)
-    warning('No matches to ''%s'' found in %s',theKeyword,theDataFile)
-end
+        % Check for empty:
+        if isempty(IDs)
+            warning('No matches to ''%s'' found in %s',theMatchString,theDataFile)
+        end
 
-% Also provide IDs not matching the constraint, if required
-if nargout > 1
-    notIDs = setxor(IDs,theDataTable.ID);
+        % Also provide IDs not matching the constraint, if required
+        if nargout > 1
+            notIDs = setxor(IDs,theDataTable.ID);
+        end
+
+    case 'Name'
+        %----------------------------------------------------------------------
+        % NAME: Find match for each element of input, and return an ordered set
+        % (with NaN when we don't find a match)
+        %----------------------------------------------------------------------
+
+        assert(nargout == 1,'Only one output argument (IDs) allowed for Name input.')
+
+        matches = nan(length(theMatchString),1);
+        for i = 1:length(theMatchString)
+            cmatch = find(strcmp(theDataTable.Name,theMatchString{i}));
+            if ~isempty(cmatch)
+                matches(i) = cmatch;
+            end
+        end
+
+        foundIDs = ~isnan(matches);
+
+        IDs = zeros(size(matches));
+        IDs(foundIDs) = theDataTable.ID(matches(foundIDs));
+        IDs(~foundIDs) = nan;
+
+        if all(isnan(IDs))
+            warning('No matches to ''%s'' found in %s',theMatchString,theDataFile)
+        end
+
+    otherwise
+        error('Must specify either ''Keywords'' or ''Name''');
 end
 
 end

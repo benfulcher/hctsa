@@ -1,4 +1,4 @@
-function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,reWeight,CVFolds)
+function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,doReweight,CVFolds)
 % GiveMeCfn    Returns classification results from training a classifier on
 %               training/test data
 %
@@ -11,6 +11,8 @@ function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,
 % numClasses -- number of classes of labels
 % beVerbose -- whether to give text output of progress
 % whatLoss -- what loss function to compute on the data
+% doReweight -- whether to reweight for class imbalance
+% CVFolds -- number of CV folds (if CV is desired)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -37,7 +39,7 @@ function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,
 %-------------------------------------------------------------------------------
 % Check inputs:
 %-------------------------------------------------------------------------------
-% Make sure y a column vector
+% Ensure y is a column vector
 if size(yTrain,1) < size(yTrain,2)
     yTrain = yTrain';
 end
@@ -60,143 +62,156 @@ if nargin < 8 || isempty(whatLoss)
     isBalanced = all(classNumbers==classNumbers(1));
     if isBalanced
         whatLoss = 'acc';
-        reWeight = false;
+        doReweight = false;
     else
         whatLoss = 'balancedAcc';
-        reWeight = true;
+        doReweight = true;
         if beVerbose
             fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
         end
     end
 end
-if ~exist('reWeight','var')
+if ~exist('doReweight','var')
     % Reweighted observations by inverse probability weight
     % (for class imbalanced problems)
-    reWeight = true;
+    doReweight = true;
 end
 if nargin < 10
     CVFolds = 0;
 end
 
-% Reinterpret input: "fast_linear"
+%-------------------------------------------------------------------------------
+% Define the classification model
+%------------------------------------------------------------------------------
 if strcmp(whatClassifier,'fast_linear')
-    if beVerbose
-        fprintf(1,'Using diaglinear instead of fast_linear\n');
-    end
-    whatClassifier = 'diaglinear';
-end
-
-%-------------------------------------------------------------------------------
-% Set the classification model:
-%-------------------------------------------------------------------------------
-if numClasses==2
-    % Binary model (easier):
-    switch whatClassifier
-    case 'knn'
-        if beVerbose
-            fprintf(1,'Using three neighbors for knn\n');
-        end
-        if CVFolds > 0
-            Mdl = fitcknn(XTrain,yTrain,'NumNeighbors',3,'KFold',CVFolds);
+    %--------------------------------------------------------------------------
+    % Special case -- the `classify` function is faster than others
+    %--------------------------------------------------------------------------
+    if CVFolds > 0
+        Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform','KFold',CVFolds);
+    else
+        if nargout == 1
+            % It's faster to use classify if we only want the accuracy
+            accuracy = BF_LossFunction(yTest,classify(yTest,XTrain,yTrain),whatLoss,numClasses);
+            return;
         else
-            Mdl = fitcknn(XTrain,yTrain,'NumNeighbors',3);
-        end
-    case 'tree'
-        if CVFolds > 0
-            Mdl = fitctree(XTrain,yTrain,'KFold',CVFolds)
-        else
-            Mdl = fitctree(XTrain,yTrain)
-        end
-    case {'linear','linclass'}
-        if CVFolds > 0
-            Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on','KFold',CVFolds);
-        else
-            Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on');
-        end
-    case {'svm','svm_linear'}
-        % Weight observations by inverse class probability:
-        if reWeight
-            if CVFolds > 0
-                Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
-            else
-                Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain));
-            end
-        else
-            if CVFolds > 0
-                Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','KFold',CVFolds);
-            else
-                Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear');
-            end
-        end
-    case 'svm_rbf'
-        % Weight observations by inverse class probability:
-        if reWeight
-            if CVFolds > 0
-                Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
-            else
-                Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain));
-            end
-        else
-            if CVFolds > 0
-                Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','KFold',CVFolds);
-            else
-                Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf');
-            end
-        end
-    case 'diaglinear'
-        if CVFolds > 0
-            Mdl = fitcnb(XTrain,yTrain,'KFold',CVFolds);
-        else
-            Mdl = fitcnb(XTrain,yTrain);
+            Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform');
         end
     end
 else
-    % (Multiclass model; harder)
-    switch whatClassifier
-    case 'knn'
-       t = templateKNN('NumNeighbors',3,'Standardize',true);
-       if beVerbose, fprintf(1,'Using knn classifier\n'); end
-    case 'tree'
-       t = templateTree('Surrogate','off');
-       if beVerbose, fprintf(1,'Using a tree classifier\n'); end
-    case {'linear','linclass'}
-        t = templateDiscriminant('DiscrimType','linear','FillCoeffs','off','SaveMemory','on');
-        if beVerbose, fprintf(1,'Using a linear classifier\n'); end
-    case 'diaglinear'
-        % Naive Bayes classifier:
-        t = templateNaiveBayes('DistributionNames','normal');
-        if beVerbose, fprintf(1,'Using a naive Bayes classifier\n'); end
-    case {'svm','svm_linear'}
-        t = templateSVM('KernelFunction','linear');
-        if beVerbose, fprintf(1,'Using a linear svm classifier\n'); end
-    case 'svm_rbf'
-        t = templateSVM('KernelFunction','rbf');
-        if beVerbose, fprintf(1,'Using a rbf svm classifier\n'); end
-    otherwise
-        error('Unknown classifier: ''%s''',whatClassifier);
-    end
-
-    %-------------------------------------------------------------------------------
-    % Fit the model:
-    if ismember(whatClassifier,{'svm_linear','svm_rbf','linear','linclass','diaglinear'}) && reWeight
-        % Weight across potential class imbalance:
-        if CVFolds > 0
-            Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
-        else
-            Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain));
+    if numClasses==2
+        %----------------------------------------------------------------------
+        % Special case: a two-class model
+        %----------------------------------------------------------------------
+        switch whatClassifier
+        case 'knn'
+            if beVerbose
+                fprintf(1,'Using three neighbors for knn\n');
+            end
+            if CVFolds > 0
+                Mdl = fitcknn(XTrain,yTrain,'NumNeighbors',3,'KFold',CVFolds);
+            else
+                Mdl = fitcknn(XTrain,yTrain,'NumNeighbors',3);
+            end
+        case 'tree'
+            if CVFolds > 0
+                Mdl = fitctree(XTrain,yTrain,'KFold',CVFolds);
+            else
+                Mdl = fitctree(XTrain,yTrain);
+            end
+        case {'linear','linclass'}
+            if CVFolds > 0
+                Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on','KFold',CVFolds);
+            else
+                Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on');
+            end
+        case {'svm','svm_linear'}
+            % Weight observations by inverse class probability:
+            if doReweight
+                if CVFolds > 0
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
+                else
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain));
+                end
+            else
+                if CVFolds > 0
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','KFold',CVFolds);
+                else
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear');
+                end
+            end
+        case 'svm_rbf'
+            % Weight observations by inverse class probability:
+            if doReweight
+                if CVFolds > 0
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
+                else
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain));
+                end
+            else
+                if CVFolds > 0
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','KFold',CVFolds);
+                else
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf');
+                end
+            end
+        case 'diaglinear'
+            if CVFolds > 0
+                Mdl = fitcnb(XTrain,yTrain,'KFold',CVFolds);
+            else
+                Mdl = fitcnb(XTrain,yTrain);
+            end
         end
     else
-        % Don't reweight:
-        if CVFolds > 0
-            Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'KFold',CVFolds);
+        %----------------------------------------------------------------------
+        % Define and fit a classification model involving 3 or more classes
+        %----------------------------------------------------------------------
+        % Define the model:
+        switch whatClassifier
+        case 'knn'
+            t = templateKNN('NumNeighbors',3,'Standardize',true);
+            if beVerbose, fprintf(1,'Using knn classifier\n'); end
+        case 'tree'
+            t = templateTree('Surrogate','off');
+            if beVerbose, fprintf(1,'Using a tree classifier\n'); end
+        case {'linear','linclass'}
+            t = templateDiscriminant('DiscrimType','linear','FillCoeffs','off','SaveMemory','on');
+            if beVerbose, fprintf(1,'Using a linear classifier\n'); end
+        case 'diaglinear'
+            % Naive Bayes classifier:
+            t = templateNaiveBayes('DistributionNames','normal');
+            if beVerbose, fprintf(1,'Using a naive Bayes classifier\n'); end
+        case {'svm','svm_linear'}
+            t = templateSVM('KernelFunction','linear');
+            if beVerbose, fprintf(1,'Using a linear svm classifier\n'); end
+        case 'svm_rbf'
+            t = templateSVM('KernelFunction','rbf');
+            if beVerbose, fprintf(1,'Using a rbf svm classifier\n'); end
+        otherwise
+            error('Unknown classifier: ''%s''',whatClassifier);
+        end
+
+        % Fit the model:
+        if ismember(whatClassifier,{'svm_linear','svm_rbf','linear','linclass','diaglinear'}) && doReweight
+            % Reweight to give equal weight to each class (in case of class imbalance)
+            if CVFolds > 0
+                Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
+            else
+                Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain));
+            end
         else
-            Mdl = fitcecoc(XTrain,yTrain,'Learners',t);
+            % Don't reweight:
+            if CVFolds > 0
+                Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'KFold',CVFolds);
+            else
+                Mdl = fitcecoc(XTrain,yTrain,'Learners',t);
+            end
         end
     end
 end
 
 %-------------------------------------------------------------------------------
-% Evaluate performance on test data:
+% Evaluate performance on test data
 %-------------------------------------------------------------------------------
 % Predict the test data:
 if CVFolds == 0

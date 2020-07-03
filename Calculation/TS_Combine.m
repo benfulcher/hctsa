@@ -273,8 +273,10 @@ else
 
         % Check for duplicate IDs:
         [uniqueTsids,ix_ts] = unique(TimeSeries.ID); % will be sorted
+        TimeSeries = TimeSeries(ix_ts,:);
+
+        % Check whether trimming just occurred:
         if length(uniqueTsids) < height(TimeSeries)
-            TimeSeries = TimeSeries(ix_ts,:);
             fprintf(1,'We''re assuming that TimeSeries IDs are equivalent between the two input files\n');
             fprintf(1,'We need to trim duplicate time series (with the same IDs)\n');
             fprintf(1,['(NB: This will NOT be appropriate if combinining time series from' ...
@@ -283,7 +285,8 @@ else
                         height(TimeSeries)-length(uniqueTsids),length(uniqueTsids));
             didTrim = true;
         else
-            fprintf(1,'All time series were distinct, we now have a total of %u.\n',height(TimeSeries));
+            fprintf(1,'All time series were distinct, we have a total of %u.\n',...
+                        height(TimeSeries));
         end
     else
         % Check that time series names are unique, and trim if not:
@@ -430,6 +433,5 @@ function [gotTheField,theCombinedMatrix] = MergeMe(loadedData,theField,merge_fea
         theCombinedMatrix = [];
     end
 end
-
 
 end

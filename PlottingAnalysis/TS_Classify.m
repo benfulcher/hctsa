@@ -1,11 +1,13 @@
-function [foldLosses,nullStat] = TS_Classify(whatData,whatClassifier,varargin)
-% TS_classify   Classify groups in the data using all features (and PCs)
+function [foldLosses,nullStat,jointClassifier] = TS_Classify(whatData,whatClassifier,varargin)
+% TS_Classify   Classify groups in the data using all features
 %
 % This function uses a classifier to learn group labels assigned to time series
 % in the dataset.
+% It can also provide insights into the dimensionality required for good performance
+% by classifying with the leading principal components of the feature space
 %
 %---USAGE:
-% TS_classify();
+% TS_Classify();
 %
 %---INPUTS:
 % whatData, the hctsa data to use (input to TS_LoadData)
@@ -19,6 +21,7 @@ function [foldLosses,nullStat] = TS_Classify(whatData,whatClassifier,varargin)
 %               random seed (for reproducible results from cross-validation)
 % 'numFolds', number of cross-validation folds to use.
 % 'numRepeats', number of times to repeat the prediction across different data partitions.
+% 'classifierFilename', .mat file to save the classifier to (not saved if empty).
 %
 %---OUTPUTS:
 % Text output on classification rate using all features, and if doPCs = true, also
@@ -84,6 +87,10 @@ addParameter(inputP,'numRepeats',default_numRepeats,check_numRepeats);
 default_doPlot = true;
 check_doPlot = @(x) islogical(x);
 addParameter(inputP,'doPlot',default_doPlot,check_doPlot);
+% classifierFilename (save trained classifer out to file):
+default_classifierFilename = '';
+check_classifierFilename = @(x) ischar(x);
+addParameter(inputP,'classifierFilename',default_classifierFilename,check_classifierFilename);
 
 % Parse input arguments:
 parse(inputP,varargin{:});
@@ -93,6 +100,7 @@ seedReset = inputP.Results.seedReset;
 numFolds = inputP.Results.numFolds;
 numRepeats = inputP.Results.numRepeats;
 doPlot = inputP.Results.doPlot;
+classifierFilename = inputP.Results.classifierFilename;
 clear('inputP');
 
 %-------------------------------------------------------------------------------
@@ -124,7 +132,7 @@ end
 if isempty(numFolds) || numFolds==0
     % Use a heuristic to set a default number of folds given the data set size,
     % number of classes
-    numFolds = howManyFolds(TimeSeries.Group,numClasses);
+    numFolds = HowManyFolds(TimeSeries.Group,numClasses);
 end
 
 % Reset the random seed:
@@ -134,7 +142,7 @@ BF_ResetSeed(seedReset); % reset the random seed for CV-reproducibility
 % Fit the classification model to the dataset (for each cross-validation fold)
 % and evaluate performance
 fprintf(1,['Training and evaluating a %u-class %s classifier in a %u-feature' ...
-                ' space using %u-fold cross validation (with %u repeats)...\n'],...
+                ' space using %u-fold cross validation (with %u repeat(s))...\n'],...
                 numClasses,whatClassifier,numFeatures,numFolds,numRepeats);
 CVMdl = cell(numRepeats,1);
 foldLosses = zeros(numRepeats,1);
@@ -144,13 +152,15 @@ end
 
 % Display results to commandline:
 if numRepeats==1
+    foldBit = sprintf('%u-fold',numFolds);
     accuracyBit = sprintf('%.3f%%',mean(foldLosses));
 else
+    foldBit = sprintf('%u-fold (%u repeats)',numFolds,numRepeats);
     accuracyBit = sprintf('%.3f +/- %.3f%%',mean(foldLosses),std(foldLosses));
 end
-fprintf(1,['\nMean (across folds) %s (%u-class) using %u-fold %s classification with %u' ...
+fprintf(1,['\nMean (across folds) %s (%u-class) using %s %s classification with %u' ...
                  ' features:\n%s\n\n'],...
-        outputStat,numClasses,numFolds,whatClassifier,numFeatures,accuracyBit);
+        outputStat,numClasses,foldBit,whatClassifier,numFeatures,accuracyBit);
 
 % Plot as a histogram:
 if doPlot
@@ -225,16 +235,26 @@ realLabels = BF_ToBinaryClass(TimeSeries.Group,numClasses,false);
 % Predict from the first CV-partition:
 predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),numClasses,false);
 if doPlot
-    f = figure('color','w');
-    plotconfusion(realLabels,predictLabels);
+    try
+        if exist('confusionchart','file') ~= 0
+            % Requires Matlab 2020 (Stats/ML Toolbox):
+            f = figure('color','w');
+            confusionchart(realLabels,predictLabels);
+        else
+            % Requires the Deep Learning Toolbox:
+            plotconfusion(realLabels,predictLabels);
+        end
 
-    % Fix axis labels:
-    ax = gca;
-    ax.XTickLabel(1:numClasses) = groupNames;
-    ax.YTickLabel(1:numClasses) = groupNames;
-    ax.TickLabelInterpreter = 'none';
+        % Fix axis labels:
+        ax = gca;
+        ax.XTickLabel(1:numClasses) = groupNames;
+        ax.YTickLabel(1:numClasses) = groupNames;
+        ax.TickLabelInterpreter = 'none';
 
-    title(sprintf('Confusion matrix for a 10-fold repeated cross-validation run (of %u)',numRepeats));
+        title(sprintf('Confusion matrix from 10-fold (%u repeats) cross-validation',numRepeats));
+    catch
+        warning('No available confusion matrix plotting functions')
+    end
 end
 
 %-------------------------------------------------------------------------------
@@ -279,6 +299,35 @@ if numPCs > 0
                                     numClasses,numFolds,whatClassifier);
         title(titleText,'interpreter','none')
     end
+end
+
+%-------------------------------------------------------------------------------
+% Save classifier:
+%-------------------------------------------------------------------------------
+if ~isempty(classifierFilename)
+    [Acc,Mdl,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat,...
+                            TimeSeries.Group,TS_DataMat,TimeSeries.Group,...
+                            numClasses,[],[],true,0);
+
+    Operations = TS_GetFromData(whatData,'Operations');
+    jointClassifier.Operation.ID = Operations.ID;
+    jointClassifier.Operation.Name = Operations.Name;
+    jointClassifier.CVAccuracy = mean(foldLosses); % Cross-validated accuracy
+    jointClassifier.Accuracy = Acc; % For some reason the Acc retrieved as above is amazing?
+    jointClassifier.Mdl = Mdl;
+    jointClassifier.whatLoss = whatLoss;
+    jointClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
+    classes = groupNames;
+
+    if exist(classifierFilename,'file')
+        out = input(sprintf(['File %s already exists -- continuing will overwrite the file.'...
+                  '\n[Press ''y'' to continue] '], classifierFilename), 's');
+        if ~strcmp(out,'y')
+            return;
+        end
+    end
+    save(classifierFilename,'jointClassifier','classes','-v7.3');
+    fprintf('Saved trained classifier to ''%s''.\n',classifierFilename);
 end
 
 %-------------------------------------------------------------------------------

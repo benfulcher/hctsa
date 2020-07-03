@@ -1,3 +1,4 @@
+function startup()
 % STARTUP   Add all paths required for the hctsa package.
 
 % ------------------------------------------------------------------------------
@@ -120,9 +121,7 @@ if isempty(regexp(getenv('PATH'),tiseanBinaryLocation))
     sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
     setenv('PATH', sysPath)
     fprintf(1,'System path to TISEAN binaries: %s\n',tiseanBinaryLocation);
-    clear sysPath
 end
-clear homeDir tiseanBinaryLocation
 
 % TISEAN also requires this DYLD path to be set (I assume this works also on
 % cygwin/Windows?):
@@ -132,5 +131,6 @@ fprintf(1,'DYLD library path (for TISEAN).');
 % ------------------------------------------------------------------------------
 %% Finished:
 % ------------------------------------------------------------------------------
-clear addfcn % clear the add function
 fprintf(1,'\n---Done.\n')
+
+end

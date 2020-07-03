@@ -1,4 +1,4 @@
-function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,varargin)
+function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatData,whatTestStat,varargin)
 % TS_TopFeatures  Top individual features for discriminating labeled time series
 %
 % This function compares each feature in an hctsa dataset individually for its
@@ -12,25 +12,27 @@ function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,v
 % whatData, the hctsa data to use (input to TS_LoadData, default: 'raw')
 % whatTestStat, the test statistic to quantify the goodness of each feature
 %               (e.g., 'fast_linear', 'tstat', 'svm', 'linear', 'diaglinear',
-%                or others supported by GiveMeFunctionHandle)
+%                or others supported by GiveMeCfn)
 %
-% ***Additional (optional) plotting options***:
+%---OPTIONAL extra inputs:
+%
 % 'whatPlots', can specify what output plots to produce (cell of strings), e.g.,
 %               specify {'histogram','distributions','cluster','datamatrix'} to
 %               produce all four possible output plots (this is the default).
 % 'numTopFeatures', can specify the number of top features to analyze, both in
 %                   terms of the list of outputs, the histogram plots, and the
 %                   cluster plot.
-% 'numFeaturesDistr', can optionally also set a custom number of distributions
-%                       to display (often want to set this lower to avoid producing
-%                       large numbers of figures).
+% 'numFeaturesDistr', can set a custom number of distributions to display (can
+%                   set this lower to avoid producing large numbers of figures).
+% 'numFolds', the number of folds used in cross-validation
 % 'numNulls', the number of shuffled nulls to generate (e.g., 10 shuffles pools
 %               shuffles for all M features, for a total of 10*M elements in the
 %               null distribution) [default: 0]
+% 'classifierFilename', .mat file to save the classifier to (not saved if empty).
 %
 %---EXAMPLE USAGE:
 %
-% TS_TopFeatures('norm','tstat',1,'whatPlots',{'histogram','distributions',...
+% TS_TopFeatures('norm','tstat','whatPlots',{'histogram','distributions',...
 %           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
 %
 %---OUTPUTS:
@@ -60,9 +62,9 @@ function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,v
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-% --------------------------------------------------------------------------
-%% Check inputs
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%% Check inputs and set defaults
+%-------------------------------------------------------------------------------
 if nargin < 1 || isempty(whatData)
     whatData = 'raw';
 end
@@ -71,18 +73,31 @@ if nargin < 2 || isempty(whatTestStat)
     fprintf(1,'Using ''%s'' test statistic by default\n', whatTestStat);
 end
 
-% Use an inputParser to control additional plotting options as parameters:
+% Use an inputParser to control additional options as parameters:
 inputP = inputParser;
-default_whatPlots = {'histogram','distributions','cluster'}; % datamatrix
+% whatPlots
+default_whatPlots = {'histogram','distributions','cluster'}; % 'datamatrix'
 check_whatPlots = @(x) iscell(x) || ischar(x);
 addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
+% numTopFeatures
 default_numTopFeatures = 40;
 addParameter(inputP,'numTopFeatures',default_numTopFeatures,@isnumeric);
+% numFeaturesDistr
 default_numFeaturesDistr = 16;
 addParameter(inputP,'numFeaturesDistr',default_numFeaturesDistr,@isnumeric);
+% numNulls
 default_numNulls = 0; % by default, don't compute an empirical null distribution
                       % by randomizing class labels
 addParameter(inputP,'numNulls',default_numNulls,@isnumeric);
+% numFolds
+default_numFolds = [];
+check_numFolds = @(x) isnumeric(x);
+addParameter(inputP,'numFolds',default_numFolds,check_numFolds);
+% classifierFilename
+default_classifierFilename = '';
+check_classifierFilename = @(x) ischar(x);
+addParameter(inputP,'classifierFilename',default_classifierFilename,check_classifierFilename);
+
 parse(inputP,varargin{:});
 
 whatPlots = inputP.Results.whatPlots;
@@ -92,11 +107,13 @@ end
 numTopFeatures = inputP.Results.numTopFeatures;
 numFeaturesDistr = inputP.Results.numFeaturesDistr;
 numNulls = inputP.Results.numNulls;
+numFolds = inputP.Results.numFolds;
+classifierFilename = inputP.Results.classifierFilename;
 clear('inputP');
 
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Load the data
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 numOps = height(Operations);
 numTopFeatures = min(numTopFeatures,numOps);
@@ -113,72 +130,90 @@ if isempty(groupNames)
     error('No group label info in the data source');
 end
 
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+% Fit the model
+%-------------------------------------------------------------------------------
+if isempty(numFolds) || numFolds==0
+    % Use a heuristic to set a default number of folds
+    numFolds = HowManyFolds(TimeSeries.Group,numClasses);
+end
+
+%-------------------------------------------------------------------------------
 %% Define the train/test classification rate function, fn_testStat
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Also the chanceLine -- where you'd expect by chance (for equiprobable groups...)
 
-% Set up the loss function for classifier-based metrics
-if ismember(whatTestStat,{'linear','linclass','fast_linear','diaglinear','svm','svm_linear'})
-
-    % (first check for possible class imbalance):
-    classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),1:numClasses);
-    isBalanced = all(classNumbers==classNumbers(1));
-    if isBalanced
-        fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'acc',0);
-        fprintf(1,'Using overall classification accuracy as output measure\n');
-    else
-        fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'balancedAcc',1);
-        fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
-    end
-    chanceLine = 100/numClasses;
-end
-
 switch whatTestStat
-case {'linear','linclass','fast_linear'}
-    cfnName = 'linear classifier';
-    statUnit = '%%';
-case 'diaglinear'
-    cfnName = 'Naive bayes classifier';
-    statUnit = '%%';
-case {'svm','svm_linear'}
-    cfnName = 'linear SVM classifier';
-    statUnit = '%%';
-case {'ustat','ranksum'}
-    cfnName = 'Mann-Whitney approx p-value';
-    statUnit = ' (log10(p))';
-    chanceLine = NaN;
-    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),false);
-case {'ustatExact','ranksumExact'}
-    cfnName = 'Mann-Whitney exact p-value';
-    statUnit = ' (log10(p))';
-    chanceLine = NaN;
-    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),true);
-    statUnit = ' (log10(p))';
-case {'ttest','tstat'}
-    cfnName = 'Welch''s t-stat';
-    statUnit = ' (log10(p))';
-    chanceLine = 0; % by chance, t-stats averge to zero
-    if numClasses > 2
-        error('Cannot use t-test as test statistic with more than two groups :/');
-    end
-    fn_testStat = @(XTrain,yTrain,Xtest,yTest) fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
-otherwise
-    error('Unknown method ''%s''',whatTestStat)
+    case {'linear','linclass','fast_linear','diaglinear','svm','svm_linear'}
+        % Set up the loss function for a classifier-based metric
+
+        % (first check for possible class imbalance):
+        classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),1:numClasses);
+        isBalanced = all(classNumbers==classNumbers(1));
+        if isBalanced
+            fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'acc',false);
+            fprintf(1,'Using total classification accuracy as output measure\n');
+        else
+            fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'balancedAcc',true);
+            fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
+        end
+        chanceLine = 100/numClasses;
+    case {'ustat','ranksum'}
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                                fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),false);
+        chanceLine = NaN;
+    case {'ustatExact','ranksumExact'}
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                                fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),true);
+        chanceLine = NaN;
+    case {'ttest','tstat'}
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest,numFolds) ...
+                                fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
+        chanceLine = 0; % chance-level t statistic is zero
+    otherwise
+        error('Unknown test statistics, ''%s''',whatTestStat);
 end
 
-% --------------------------------------------------------------------------
+% Now get information about the statistic and its units to display:
+switch whatTestStat
+    case {'linear','linclass','fast_linear'}
+        testStatText = 'linear classifier';
+        statUnit = '%';
+    case 'diaglinear'
+        testStatText = 'Naive bayes classifier';
+        statUnit = '%';
+    case {'svm','svm_linear'}
+        testStatText = 'linear SVM classifier';
+        statUnit = '%';
+    case {'ustat','ranksum'}
+        testStatText = 'Mann-Whitney approx p-value';
+        statUnit = ' (log10(p))';
+    case {'ustatExact','ranksumExact'}
+        testStatText = 'Mann-Whitney exact p-value';
+        statUnit = ' (log10(p))';
+    case {'ttest','tstat'}
+        testStatText = 'Welch''s t-stat';
+        statUnit = ' (log10(p))';
+        if numClasses > 2
+            error('Cannot use t-test as test statistic with more than two groups :/');
+        end
+    otherwise
+        error('Unknown method ''%s''',whatTestStat)
+end
+
+%-------------------------------------------------------------------------------
 %% Loop over all features
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Use the same data for training and testing:
 fprintf(1,'Comparing the (in-sample) performance of %u operations for %u classes using a %s...\n',...
-                                height(Operations),numClasses,cfnName);
+                                height(Operations),numClasses,testStatText);
 timer = tic;
 testStat = giveMeStats(TS_DataMat,TimeSeries.Group,true);
 fprintf(1,' Done in %s.\n',BF_TheTime(toc(timer)));
 
 if all(isnan(testStat))
-    error('Error computing statistics for %s (may be due to inclusion of missing data?)',cfnName);
+    error('Error computing test statistics for %s (maybe there are missing data?)',...
+                testStatText);
 end
 
 %-------------------------------------------------------------------------------
@@ -186,15 +221,15 @@ end
 if ~isnan(chanceLine)
     fprintf(1,['Mean %s performance across %u features = %4.2f%s\n' ...
             '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
-        cfnName,numOps,nanmean(testStat),statUnit,numClasses,chanceLine,statUnit);
+        testStatText,numOps,nanmean(testStat),statUnit,numClasses,chanceLine,statUnit);
 else
     fprintf(1,'Mean %s performance across %u features = %4.2f%s\n',...
-        cfnName,numOps,nanmean(testStat),statUnit);
+        testStatText,numOps,nanmean(testStat),statUnit);
 end
 
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Display information about the top features (numTopFeatures)
-% --------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 [testStat_sort,ifeat] = sort(testStat,'descend'); % bigger is better
 
 isNaN = isnan(testStat_sort);
@@ -219,8 +254,7 @@ end
 % Histogram of distribution of test statistics for labeled and null data
 %-------------------------------------------------------------------------------
 if ismember('histogram',whatPlots)
-    % A figure to show the distribution of test statistics across all
-    % features:
+    % Plot the distribution of test statistics across all features:
 
     %-------------------------------------------------------------------------------
     %% Compute null distribution
@@ -233,14 +267,14 @@ if ismember('histogram',whatPlots)
             if j < numNulls
                 fprintf(1,'%u,',j);
             else
-                fprintf(1,'%u',j);
+                fprintf(1,'%u.',j);
             end
             % Shuffle labels:
             groupLabels = TimeSeries.Group(randperm(height(TimeSeries)));
             testStat_rand(:,j) = giveMeStats(TS_DataMat,groupLabels,false);
         end
         fprintf(1,'\n%u %s statistics computed in %s.\n',numOps*numNulls,...
-                                        cfnName,BF_TheTime(toc(timer)));
+                                        testStatText,BF_TheTime(toc(timer)));
 
         % Pool nulls to estimate p-values
         pooledNulls = testStat_rand(:);
@@ -250,16 +284,18 @@ if ismember('histogram',whatPlots)
         fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls\n',numNulls);
         fprintf(1,'(Given strong dependences across %u features, will produce conservative p-values)\n',numOps);
         % Give summary:
-        if any(FDR_qvals < 0.05)
+        sigThreshold = 0.05;
+        if any(FDR_qvals < sigThreshold)
             fprintf(1,['%u/%u features show better performance using %s than the null distribution' ...
                         '\nat the magical 0.05 threshold (FDR corrected)\n'],...
-                            sum(FDR_qvals < 0.05),length(FDR_qvals),cfnName);
+                            sum(FDR_qvals < 0.05),length(FDR_qvals),testStatText);
         else
             fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...
                     'the null distribution at a FDR of 0.05.\nDon''t you go p-hacking now, will you?\n']);
         end
     end
 
+    %---------------------------------------------------------------------------
     % Plot histogram
     f = figure('color','w'); hold on
     colors = BF_GetColorMap('spectral',5,1);
@@ -288,7 +324,7 @@ if ismember('histogram',whatPlots)
     l_mean = plot(nanmean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
 
     % Labels:
-    xlabel(sprintf('Individual %s performance across %u features',cfnName,numOps))
+    xlabel(sprintf('Individual %s performance across %u features',testStatText,numOps))
     ylabel('Probability')
 
     % Legend:
@@ -298,6 +334,8 @@ if ismember('histogram',whatPlots)
     else
         legend([h_real,l_chance,l_mean],{'real','chance','mean'});
     end
+else
+    testStat_rand = [];
 end
 
 %-------------------------------------------------------------------------------
@@ -386,15 +424,54 @@ if ismember('cluster',whatPlots)
                             numTopFeatures,length(cluster_Groupi)))
 end
 
-% Don't display crap to screen unless the user wants it:
-if nargout == 0
-    clear('ifeat','testStat','testStat_rand');
+%-------------------------------------------------------------------------------
+% Save a classifier (for the single best feature) to file
+%-------------------------------------------------------------------------------
+featureClassifier = struct();
+if ~isempty(classifierFilename)
+    theTopFeatureIndex = ifeat(1);
+    topFeatureValues = TS_DataMat(:,theTopFeatureIndex);
+    numFoldsNow = 0;
+
+    % Train a classification model on the top feature:
+    [bestTestStat,bestMdl,whatTestStat] = fn_testStat(topFeatureValues,...
+                TimeSeries.Group,topFeatureValues,TimeSeries.Group,numFoldsNow);
+
+    % Prepare the featureClassifier structure:
+    featureClassifier.Operation.ID = Operations.ID(theTopFeatureIndex); % Sorted list of top operations
+    featureClassifier.Operation.Name = Operations.Name{theTopFeatureIndex}; % Sorted list of top operations
+    featureClassifier.Mdl = bestMdl; % sorted feature models
+    if numFolds > 0
+        % From sorted accuracy of models
+        featureClassifier.CVAccuracy = testStat_sort(1);
+    else
+        % CV was never done
+        featureClassifier.CVAccuracy = NaN;
+    end
+    featureClassifier.Accuracy = bestTestStat;
+    featureClassifier.whatTestStat = whatTestStat;
+    featureClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
+    classes = groupNames;
+
+    % Save to file
+    if exist(classifierFilename,'file')~=0
+        save(classifierFilename,'featureClassifier','classes','-append');
+        fprintf(1,'Appended individual-feature classifiers to %s\n',classifierFilename);
+    else
+        save(classifierFilename,'featureClassifier','classes','-v7.3');
+        fprintf(1,'Saved individual-feature classifiers to %s\n',classifierFilename);
+    end
 end
 
+%-------------------------------------------------------------------------------
+% Don't display crap to screen unless the user wants it:
+if nargout == 0
+    clear('ifeat','testStat','testStat_rand','featureClassifier');
+end
 
 %-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
-function uStatP = fn_uStat(d1,d2,doExact)
+function [uStatP,Mdl] = fn_uStat(d1,d2,doExact)
     % Return test statistic from Mann-Whitney U-test
     if doExact
         [p,~,stats] = ranksum(d1,d2,'method','exact');
@@ -403,23 +480,32 @@ function uStatP = fn_uStat(d1,d2,doExact)
     end
     uStatP = -log10(p);
     % uStat = stats.ranksum;
+    Mdl = stats;
 end
 %-------------------------------------------------------------------------------
-function tStat = fn_tStat(d1,d2)
+function [tStat,Mdl] = fn_tStat(d1,d2)
     % Return test statistic from a 2-sample Welch's t-test
     [~,~,~,stats] = ttest2(d1,d2,'Vartype','unequal');
     tStat = stats.tstat;
+    Mdl = stats;
 end
 %-------------------------------------------------------------------------------
-function testStat = giveMeStats(dataMatrix,groupLabels,beVerbose)
+function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
     % Return test statistic for each operation
     testStat = zeros(numOps,1);
+    Mdl = cell(numOps,1);
     loopTimer = tic;
     for k = 1:numOps
         try
-            testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+            if nargout == 2
+                % This is slower for the fast_linear classifier (but returns a model)
+                [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+            else
+                testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+            end
         catch
-            testStat(k) = NaN;
+            % keyboard
+            fprintf('Could not return model for operation %u',k);
         end
         % Give estimate of time remaining:
         if beVerbose && k==100
