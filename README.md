@@ -167,44 +167,8 @@ The following time-series analysis packages are provided with the software (in t
 
 ## Other time-series analysis resources
 
-Other good resources for time-series analysis, e.g., in other programming languages (python and R) are listed here.
+A collection of good resources for time-series analysis (including in other programming languages like python and R) are on the [wiki](https://github.com/benfulcher/hctsa/wiki/Related-time-series-resources).
 
-### `pyopy`
-
-This excellent repository allows users to run *hctsa* software from within python: [`pyopy`](https://github.com/strawlab/pyopy).
-
-### `hctsaAnalysisPython`
-
-Some beginner-level python code for analyzing the results of _hctsa_ calculations is [here](https://github.com/benfulcher/hctsaAnalysisPython).
-
-### Generating time-series data from synthetic models
-
-A Matlab repository for generating time-series data from diverse model systems is [here](https://github.com/benfulcher/TimeSeriesGeneration).
-
-### `tsfresh`
-
-Native python time-series code to extract hundreds of time-series features, with in-built feature filtering, is [tsfresh](https://github.com/blue-yonder/tsfresh); cf. [their paper](https://www.sciencedirect.com/science/article/pii/S0925231218304843).
-
-### `tscompdata` and `tsfeatures`
-
-These R packages are by [Rob Hyndman](https://twitter.com/robjhyndman).
-The first, [`tscompdata`](https://github.com/robjhyndman/tscompdata), makes available existing collections of time-series data for analysis.
-The second, [`tsfeatures`](https://github.com/robjhyndman/tsfeatures), includes implementations of a range of time-series features.
-
-### `TSFEL`
-
-[TSFEL](https://github.com/fraunhoferportugal/tsfel), 'Time Series Feature Extraction Library', is a python package with implementations of 60 simple time-series features (with unit tests).
-
-### `Khiva`
-
-[Khiva](https://github.com/shapelets/khiva) is an open-source library of efficient algorithms to analyse time series in GPU and CPU.
-
-### `pyunicorn`
-
-A python-based nonlinear time-series analysis and complex systems code package, [pyunicorn](http://scitation.aip.org/content/aip/journal/chaos/25/11/10.1063/1.4934554).
-
-### `TSFuse` (python)
-[TSFuse](https://github.com/arnedb/tsfuse) can extract features from multivariate time series.
 
 ## Acknowledgements :wave:
 
