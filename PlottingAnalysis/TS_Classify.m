@@ -142,7 +142,7 @@ BF_ResetSeed(seedReset); % reset the random seed for CV-reproducibility
 % Fit the classification model to the dataset (for each cross-validation fold)
 % and evaluate performance
 fprintf(1,['Training and evaluating a %u-class %s classifier in a %u-feature' ...
-                ' space using %u-fold cross validation (with %u repeats)...\n'],...
+                ' space using %u-fold cross validation (with %u repeat(s))...\n'],...
                 numClasses,whatClassifier,numFeatures,numFolds,numRepeats);
 CVMdl = cell(numRepeats,1);
 foldLosses = zeros(numRepeats,1);
@@ -235,10 +235,10 @@ realLabels = BF_ToBinaryClass(TimeSeries.Group,numClasses,false);
 % Predict from the first CV-partition:
 predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),numClasses,false);
 if doPlot
-    f = figure('color','w');
     try
         if exist('confusionchart','file') ~= 0
             % Requires Matlab 2020 (Stats/ML Toolbox):
+            f = figure('color','w');
             confusionchart(realLabels,predictLabels);
         else
             % Requires the Deep Learning Toolbox:
