@@ -434,8 +434,9 @@ if ~isempty(classifierFilename)
     numFoldsNow = 0;
 
     % Train a classification model on the top feature:
-    [bestTestStat,bestMdl,whatTestStat] = fn_testStat(topFeatureValues,...
-                TimeSeries.Group,topFeatureValues,TimeSeries.Group,numFoldsNow);
+    [bestTestStat,bestMdl,whatTestStat] = GiveMeCfn(whatTestStat,topFeatureValues,...
+                                                        TimeSeries.Group,topFeatureValues,TimeSeries.Group,...
+                                                        numClasses,0,'acc',[],numFoldsNow);
 
     % Prepare the featureClassifier structure:
     featureClassifier.Operation.ID = Operations.ID(theTopFeatureIndex); % Sorted list of top operations
