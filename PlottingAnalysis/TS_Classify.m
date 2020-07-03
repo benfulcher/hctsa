@@ -1,4 +1,4 @@
-function [foldLosses,nullStat] = TS_Classify(whatData,whatClassifier,varargin)
+function [foldLosses,nullStat,jointClassifier] = TS_Classify(whatData,whatClassifier,varargin)
 % TS_Classify   Classify groups in the data using all features
 %
 % This function uses a classifier to learn group labels assigned to time series
@@ -87,7 +87,7 @@ addParameter(inputP,'numRepeats',default_numRepeats,check_numRepeats);
 default_doPlot = true;
 check_doPlot = @(x) islogical(x);
 addParameter(inputP,'doPlot',default_doPlot,check_doPlot);
-% classifierFilename:
+% classifierFilename (save trained classifer out to file):
 default_classifierFilename = '';
 check_classifierFilename = @(x) ischar(x);
 addParameter(inputP,'classifierFilename',default_classifierFilename,check_classifierFilename);
@@ -327,7 +327,7 @@ if ~isempty(classifierFilename)
         end
     end
     save(classifierFilename,'jointClassifier','classes','-v7.3');
-    fprintf('Done.\n');
+    fprintf('Saved trained classifier to ''%s''.\n',classifierFilename);
 end
 
 %-------------------------------------------------------------------------------

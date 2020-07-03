@@ -62,10 +62,6 @@ end
 % Load data:
 %-------------------------------------------------------------------------------
 [~,TimeSeries,Operations,theDataFile] = TS_LoadData(whatData);
-
-%-------------------------------------------------------------------------------
-% Match IDs of time series or operations:
-%-------------------------------------------------------------------------------
 switch tsOrOps
 case 'ts'
     theDataTable = TimeSeries;
@@ -75,10 +71,13 @@ otherwise
     error('Specify ''ts'' (time series) or ''ops'' (operations)');
 end
 
+%-------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 switch nameOrKeywords
+    %--------------------------------------------------------------------------
+    % KEYWORDS: match IDs of time series or operations by exact keyword match
+    %--------------------------------------------------------------------------
     case 'Keywords'
-        % (Default): matches by string to one of the keywords (exactly)
-
         % The cell of comma-delimited keyword strings:
         theKeywordCell = theDataTable.Keywords;
 
@@ -102,7 +101,10 @@ switch nameOrKeywords
         end
 
     case 'Name'
-        % Return an ordered set with NaN when we don't find a match
+        %----------------------------------------------------------------------
+        % NAME: Find match for each element of input, and return an ordered set
+        % (with NaN when we don't find a match)
+        %----------------------------------------------------------------------
 
         assert(nargout == 1,'Only one output argument (IDs) allowed for Name input.')
 

@@ -110,7 +110,7 @@ end
 
 % sequentialfs not compatible with nested function handles...? :/
 % classify_fn = @(XTrain,yTrain,XTest,yTest) BF_LossFunction(yTest,classify(XTest,XTrain,yTrain,'linear'),'sumLoss',3);
-classify_fn = GiveMeFunctionHandle(criterion,numClasses,whatLoss,reWeight);
+classify_fn = GiveMeCfn(criterion,numClasses,whatLoss,reWeight);
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------

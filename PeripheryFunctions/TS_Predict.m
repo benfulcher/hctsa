@@ -11,7 +11,7 @@ function [tab,myAcc] = TS_Predict(timeSeriesData,labels,fileName_classifier,vara
 % timeSeriesData, the new time-series data to predict (cell array)
 % labels, the labels for each time series
 % fileName_classifier, the MAT-file previously saved using TS_Classify
-% and/or TS_TopFeatures
+%                   and/or TS_TopFeatures
 %
 % (OPTIONAL):
 % classifierType, 'topFeature', or 'allFeatures' (default)
@@ -66,9 +66,8 @@ predictionFilename = inputP.Results.predictionFilename;
 isParallel = inputP.Results.isParallel;
 clear('inputP');
 
-%#ok<*NASGU>
-
-fprintf('Loading %s...', fileName_classifier);
+%-------------------------------------------------------------------------------
+fprintf('Loading pre-trained classifier from %s...', fileName_classifier);
 load(fileName_classifier);
 fprintf('Done.\n');
 
@@ -105,24 +104,24 @@ if useAllFeatures
     % The joint classifier combines all features in the feature matrix
     myClassifier = jointClassifier;
     myAcc = myClassifier.Accuracy;
-    
-    fprintf('Using joint classifier (%i features) [acc=%.2f%% for %i classes].\n',...
-    length(jointClassifier.Operation.ID),...
-    myAcc, length(myClassifier.Mdl.ClassNames));
+
+    fprintf('Using joint classifier (%u features) [acc=%.2f%% for %u classes].\n',...
+            length(jointClassifier.Operation.ID),myAcc, ...
+            length(myClassifier.Mdl.ClassNames));
 else
     % Otherwise, we use an individual classifier
     myClassifier = featureClassifier;
     myAcc = myClassifier.Accuracy;
 
-    % We can't normalise for only one feature.
+    % We can't normalize for only one feature
     if isfield(myClassifier,'normalizationInfo') ...
-        && ~strcmp(myClassifier.normalizationInfo.normFunction, 'none')
+        && ~strcmp(myClassifier.normalizationInfo.normFunction,'none')
         error('Normalization can not be used for topFeature classifier.');
     end
 
-    fprintf('Using classifier for feature "%s" (%i) [acc=%.2f%% for %i classes].\n',...
+    fprintf('Using classifier for feature "%s" (%u) [acc=%.2f%% for %u classes].\n',...
                 myClassifier.Operation.Name, myClassifier.Operation.ID,...
-                myAcc, length(myClassifier.Mdl.ClassNames));
+                myAcc,length(myClassifier.Mdl.ClassNames));
 end
 
 % Select the operations and classification model used in prediction
@@ -136,7 +135,7 @@ if exist(predictionFilename,'file')
     % If user-supplied file exists, check they're happy with overwriting
     out = input(sprintf('Warning: %s already exists -- override? [yn] ',...
                     predictionFilename),'s');
-    if out ~= 'y'
+    if ~strcmp(out,'y')
         toRecompute = false;
     end
 end
@@ -218,4 +217,6 @@ if removeFile
 else
     % ...or add the predictions into it if there was
     save(predictionFilename,'predictGroups','predictKeywords','-append');
+end
+
 end

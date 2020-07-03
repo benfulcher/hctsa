@@ -37,7 +37,7 @@ function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,
 %-------------------------------------------------------------------------------
 % Check inputs:
 %-------------------------------------------------------------------------------
-% Make sure y a column vector
+% Ensure y is a column vector
 if size(yTrain,1) < size(yTrain,2)
     yTrain = yTrain';
 end
@@ -78,7 +78,13 @@ if nargin < 10
     CVFolds = 0;
 end
 
+%-------------------------------------------------------------------------------
+% Define the classification model
+%------------------------------------------------------------------------------
 if strcmp(whatClassifier,'fast_linear')
+    %--------------------------------------------------------------------------
+    % Special case -- the `classify` function is faster than others
+    %--------------------------------------------------------------------------
     if CVFolds > 0
         Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform','KFold',CVFolds);
     else
@@ -90,12 +96,11 @@ if strcmp(whatClassifier,'fast_linear')
             Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform');
         end
     end
-else    
-    %-------------------------------------------------------------------------------
-    % Set the classification model:
-    %-------------------------------------------------------------------------------
+else
     if numClasses==2
-        % Binary model (easier):
+        %----------------------------------------------------------------------
+        % Special case: a two-class model
+        %----------------------------------------------------------------------
         switch whatClassifier
         case 'knn'
             if beVerbose
@@ -156,7 +161,10 @@ else
             end
         end
     else
-        % (Multiclass model; harder)
+        %----------------------------------------------------------------------
+        % Define and fit a classification model involving 3 or more classes
+        %----------------------------------------------------------------------
+        % Define the model:
         switch whatClassifier
         case 'knn'
             t = templateKNN('NumNeighbors',3,'Standardize',true);
@@ -181,10 +189,9 @@ else
             error('Unknown classifier: ''%s''',whatClassifier);
         end
 
-        %-------------------------------------------------------------------------------
         % Fit the model:
         if ismember(whatClassifier,{'svm_linear','svm_rbf','linear','linclass','diaglinear'}) && reWeight
-            % Weight across potential class imbalance:
+            % Reweight to give equal weight to each class (in case of class imbalance)
             if CVFolds > 0
                 Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
             else
@@ -202,7 +209,7 @@ else
 end
 
 %-------------------------------------------------------------------------------
-% Evaluate performance on test data:
+% Evaluate performance on test data
 %-------------------------------------------------------------------------------
 % Predict the test data:
 if CVFolds == 0

@@ -1,4 +1,4 @@
-function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,varargin)
+function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatData,whatTestStat,varargin)
 % TS_TopFeatures  Top individual features for discriminating labeled time series
 %
 % This function compares each feature in an hctsa dataset individually for its
@@ -12,7 +12,7 @@ function [ifeat,testStat,testStat_rand] = TS_TopFeatures(whatData,whatTestStat,v
 % whatData, the hctsa data to use (input to TS_LoadData, default: 'raw')
 % whatTestStat, the test statistic to quantify the goodness of each feature
 %               (e.g., 'fast_linear', 'tstat', 'svm', 'linear', 'diaglinear',
-%                or others supported by GiveMeFunctionHandle)
+%                or others supported by GiveMeCfn)
 %
 %---OPTIONAL extra inputs:
 %
@@ -422,8 +422,9 @@ if ismember('cluster',whatPlots)
 end
 
 %-------------------------------------------------------------------------------
-% Save a classifier for the single best feature:
+% Save a classifier (for the single best feature) to file
 %-------------------------------------------------------------------------------
+featureClassifier = struct();
 if ~isempty(classifierFilename)
     theTopFeatureIndex = ifeat(1);
     topFeatureValues = TS_DataMat(:,theTopFeatureIndex);
@@ -459,9 +460,10 @@ if ~isempty(classifierFilename)
     end
 end
 
+%-------------------------------------------------------------------------------
 % Don't display crap to screen unless the user wants it:
 if nargout == 0
-    clear('ifeat','testStat','testStat_rand');
+    clear('ifeat','testStat','testStat_rand','featureClassifier');
 end
 
 %-------------------------------------------------------------------------------
