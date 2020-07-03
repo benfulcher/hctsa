@@ -9,7 +9,7 @@ function TS_CompareFeatureSets(whatData,whatClassifier,whatFeatureSets)
 % different filters on the features.
 %
 % Provides a quick way of determining if there are location/spread/etc.
-% differences between groups in a dataset
+% differences between groups in a dataset.
 %
 %---INPUTS:
 % whatData: the dataset to analyze (input to TS_LoadData)
@@ -55,19 +55,21 @@ if nargin < 3
                         'notLengthDependent','lengthDependent',...
                         'notSpreadDependent','spreadDependent'};
 end
+numRepeats = 2;
 
 %-------------------------------------------------------------------------------
 % Load in data:
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,dataFile] = TS_LoadData(whatData);
-TS_GetFromData(whatData,'groupNames');
 
 % Check that group labels have been assigned
 if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
-
+dataStruct = makeDataStruct();
 numFeatures = height(Operations);
+
+TellMeAboutLabeling(dataStruct);
 
 %-------------------------------------------------------------------------------
 % Define the feature sets by feature IDs
@@ -75,27 +77,26 @@ numFeatures = height(Operations);
 numFeatureSets = length(whatFeatureSets);
 featureIDs = cell(numFeatureSets,1);
 % Prep for pulling out IDs efficiently
-opStruct = makeOpStruct();
 
 for i = 1:numFeatureSets
     switch whatFeatureSets{i}
         case 'all'
             featureIDs{i} = Operations.ID;
         case 'notLengthDependent'
-            [~,featureIDs{i}] = TS_GetIDs('lengthdep',opStruct,'ops','Keywords');
+            [~,featureIDs{i}] = TS_GetIDs('lengthdep',dataStruct,'ops','Keywords');
         case 'lengthDependent'
-            featureIDs{i} = TS_GetIDs('lengthdep',opStruct,'ops','Keywords');
-            % featureIDs{i} = TS_GetIDs('lengthDependent',opStruct,'ops','Keywords');
+            featureIDs{i} = TS_GetIDs('lengthdep',dataStruct,'ops','Keywords');
+            % featureIDs{i} = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
         case 'notLocationDependent'
-            [~,featureIDs{i}] = TS_GetIDs('locdep',opStruct,'ops','Keywords');
+            [~,featureIDs{i}] = TS_GetIDs('locdep',dataStruct,'ops','Keywords');
         case 'locationDependent'
-            featureIDs{i} = TS_GetIDs('locdep',opStruct,'ops','Keywords');
-            % featureIDs{i} = TS_GetIDs('locationDependent',opStruct,'ops','Keywords');
+            featureIDs{i} = TS_GetIDs('locdep',dataStruct,'ops','Keywords');
+            % featureIDs{i} = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
         case 'notSpreadDependent'
-            [~,featureIDs{i}] = TS_GetIDs('spreaddep',opStruct,'ops','Keywords');
+            [~,featureIDs{i}] = TS_GetIDs('spreaddep',dataStruct,'ops','Keywords');
         case 'spreadDependent'
-            featureIDs{i} = TS_GetIDs('spreaddep',opStruct,'ops','Keywords');
-            % featureIDs{i} = TS_GetIDs('spreadDependent',opStruct,'ops','Keywords');
+            featureIDs{i} = TS_GetIDs('spreaddep',dataStruct,'ops','Keywords');
+            % featureIDs{i} = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
         case {'catch22','sarab16'}
             featureIDs{i} = GiveMeFeatureSet(whatFeatureSets{i},Operations);
         otherwise
@@ -112,28 +113,32 @@ numClasses = max(TimeSeries.Group); % assumes group in form of integer class lab
 numFolds = HowManyFolds(TimeSeries.Group,numClasses);
 
 fprintf(1,['Training and evaluating a %u-class %s classifier',...
-                ' using %u-fold cross validation...\n'],...
-                    numClasses,whatClassifier,numFolds);
+                ' using %u-fold cross validation with %u repeats...\n'],...
+                    numClasses,whatClassifier,numFolds,numRepeats);
 
-accuracy = zeros(numFeatureSets,numFolds);
+accuracy = zeros(numFeatureSets,numFolds*numRepeats);
 for i = 1:numFeatureSets
     filter = ismember(Operations.ID,featureIDs{i});
-    [foldLosses,~,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat(:,filter),...
+    for j = 1:numRepeats
+        [foldLosses,~,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat(:,filter),...
                     TimeSeries.Group,[],[],numClasses,[],[],true,numFolds,true);
-
-    accuracy(i,:) = foldLosses;
-    fprintf('Classified using the ''%s'' feature set (%u): (fold-average) %s = %.2f%%\n',...
-                whatFeatureSets{i},numFeaturesIncluded(i),whatLoss,mean(accuracy(i,:)));
+        accuracy(i,1+(j-1)*numFolds:j*numFolds) = foldLosses;
+    end
+    fprintf(['Classified using the ''%s'' set (%u features): (%u fold-average, ',...
+                        '%u repeats) average %s = %.2f%%\n'],...
+            whatFeatureSets{i},numFeaturesIncluded(i),numFolds,numRepeats,...
+            whatLoss,mean(accuracy(i,:)));
 end
 
 
 %-------------------------------------------------------------------------------
 % Plot the result
-dataCell = mat2cell(accuracy,ones(numFeatureSets,1),numFolds);
+dataCell = mat2cell(accuracy,ones(numFeatureSets,1),numFolds*numRepeats);
 BF_JitteredParallelScatter(dataCell,true,true,true);
 ax = gca();
 ax.XTick = 1:numFeatureSets;
 ax.XTickLabel = whatFeatureSets;
+ax.XTickLabelRotation = 45;
 title(sprintf(['%u-class classification with different feature sets',...
                     ' using %u-fold cross validation'],...
                     numClasses,numFolds))
@@ -141,12 +146,13 @@ ax.TickLabelInterpreter = 'none';
 ylabel(whatLoss)
 
 %-------------------------------------------------------------------------------
-function opStruct = makeOpStruct()
-    % Generate a structure that contains the Operations table
-    opStruct = struct();
-    opStruct.TimeSeries = [];
-    opStruct.TS_DataMat = [];
-    opStruct.Operations = Operations;
+function dataStruct = makeDataStruct()
+    % Generate a structure for the dataset
+    dataStruct = struct();
+    dataStruct.TimeSeries = TimeSeries;
+    dataStruct.TS_DataMat = TS_DataMat;
+    dataStruct.Operations = Operations;
+    dataStruct.groupNames = TS_GetFromData(whatData,'groupNames');
 end
 %-------------------------------------------------------------------------------
 

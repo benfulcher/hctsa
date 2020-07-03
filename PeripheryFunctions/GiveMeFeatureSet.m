@@ -63,7 +63,7 @@ fprintf(1,'Matched %u/%u features!\n',length(opIDs),length(featureNames));
 if length(opIDs) < length(featureNames)
     didNotMatch = find(~ismember(featureNames,Operations.Name));
     for i = 1:length(didNotMatch)
-        fprintf(1,'%s did not match\n',featureNames{didNotMatch(i)});
+        fprintf(1,'''%s'' does not exist in the HCTSA dataset\n',featureNames{didNotMatch(i)});
     end
 end
 
