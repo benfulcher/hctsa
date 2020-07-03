@@ -1,22 +1,22 @@
 function [tab,myAcc] = TS_Predict(timeSeriesData,labels,fileName_classifier,varargin)
-% TS_predict Predict classes using new time-series data
+% TS_Predict Predict classes for new time-series data using a pre-trained model
 %
 % This function uses a previously learnt classifier to predict group labels
 % of input time series.
 %
 %---USAGE:
-% TS_predict(timeSeriesData,labels,fileName_classifier);
+% TS_Predict(timeSeriesData,labels,fileName_classifier);
 %
 %---INPUTS:
 % timeSeriesData, the new time-series data to predict (cell array)
 % labels, the labels for each time series
-% fileName_classifier, the MAT-file previously saved using TS_classify
+% fileName_classifier, the MAT-file previously saved using TS_Classify
 % and/or TS_TopFeatures
 %
 % (OPTIONAL):
-% classifierType, 'topFeature', or 'allFeatures'
+% classifierType, 'topFeature', or 'allFeatures' (default)
 % predictionFilename, the output filename containing predicted keywords,
-% and associated input time series/labels
+% and associated input time series/labels (default: not saved)
 %
 %---OUTPUTS:
 % Table of timeSeries, labels, and their predicted keywords (classes)
@@ -45,6 +45,7 @@ function [tab,myAcc] = TS_Predict(timeSeriesData,labels,fileName_classifier,vara
 
 % Use an inputParser to control additional plotting options as parameters:
 inputP = inputParser;
+
 % classifierType:
 default_classifierType = '';
 check_classifierType = @(x) ischar(x);
@@ -97,40 +98,52 @@ else
       end
     elseif ~exist('jointClassifier','var')
       useAllFeatures = false;
-    end 
+    end
 end
 
 if useAllFeatures
-  myClassifier = jointClassifier;
-  myAcc = myClassifier.Accuracy;
-  fprintf('Using joint classifier (%i features) [acc=%.2f%% for %i classes].\n',...
-                length(jointClassifier.Operation.ID),...
-                myAcc, length(myClassifier.Mdl.ClassNames));
+    % The joint classifier combines all features in the feature matrix
+    myClassifier = jointClassifier;
+    myAcc = myClassifier.Accuracy;
+    
+    fprintf('Using joint classifier (%i features) [acc=%.2f%% for %i classes].\n',...
+    length(jointClassifier.Operation.ID),...
+    myAcc, length(myClassifier.Mdl.ClassNames));
 else
-  myClassifier = featureClassifier;
-  myAcc = myClassifier.Accuracy;
-  
-  fprintf('Using classifier for feature "%s" (%i) [acc=%.2f%% for %i classes].\n',...
+    % Otherwise, we use an individual classifier
+    myClassifier = featureClassifier;
+    myAcc = myClassifier.Accuracy;
+
+    % We can't normalise for only one feature.
+    if isfield(myClassifier,'normalizationInfo') ...
+        && ~strcmp(myClassifier.normalizationInfo.normFunction, 'none')
+        error('Normalization can not be used for topFeature classifier.');
+    end
+
+    fprintf('Using classifier for feature "%s" (%i) [acc=%.2f%% for %i classes].\n',...
                 myClassifier.Operation.Name, myClassifier.Operation.ID,...
                 myAcc, length(myClassifier.Mdl.ClassNames));
 end
 
+% Select the operations and classification model used in prediction
 myOps = myClassifier.Operation.ID;
 myMdl = myClassifier.Mdl;
 
+% Need some dummy files to save hctsa.mat in the interim
 removeFile = false;
-
 toRecompute = true;
 if exist(predictionFilename,'file')
+    % If user-supplied file exists, check they're happy with overwriting
     out = input(sprintf('Warning: %s already exists -- override? [yn] ',...
                     predictionFilename),'s');
     if out ~= 'y'
         toRecompute = false;
     end
 end
-    
+
 if toRecompute
     if isempty(predictionFilename)
+        % If no user-supplied file exists, ensure sure we have a valid temporary file
         removeFile = true;
         predictionFilename = 'tmp';
         i = 1;
@@ -141,10 +154,8 @@ if toRecompute
         predictionFilename = [predictionFilename '.mat'];
     end
 
-    keywords = cell(length(timeSeriesData),1);
-
+    % Temp files for hctsa computation
     [filePath,name] = fileparts(predictionFilename);
-
     if ~isempty(filePath)
         tsFilename = [filePath '/' name '_T.mat'];
     else
@@ -152,6 +163,7 @@ if toRecompute
     end
 
     if exist(tsFilename,'file')
+        % Check we're allowed to overwrite the temp file if it happens to exist
         [~,name] = fileparts(tsFilename);
         out = input(sprintf('Warning: %s already exists -- override? [yn] ',...
                     name),'s');
@@ -160,37 +172,50 @@ if toRecompute
         end
     end
 
+    keywords = cell(length(timeSeriesData),1); % Dummy
+
+    % Init hctsa matrix...
     save(tsFilename,'timeSeriesData','labels','keywords','-v7.3');
     TS_Init(tsFilename,'','',0,predictionFilename);
     delete(tsFilename);
 
+    % ...and compute the features that we'll need
     TS_Compute(isParallel,[],myOps,'',predictionFilename,0);
 end
 
+% Check whether we need to normalize the data (was the classifier trained on normalized data)
 if isfield(myClassifier,'normalizationInfo')
     TS_Normalize(myClassifier.normalizationInfo.normFunction,...
                     [0 1],...
                     predictionFilename);
-                
+
     if exist([predictionFilename(1:end-4) '_N.mat'],'file')
         delete(predictionFilename);
         predictionFilename = [predictionFilename(1:end-4) '_N.mat'];
     end
 end
 
+% Load the computed features...
 whatData = load(predictionFilename);
 
 [TS_DataMat,~,Operations] = TS_LoadData(whatData);
 
+% ...finding the relevant operation IDs
 [myOpId,~] = find(Operations.ID == myOps');
 
+% Prediction which group each new time series belongs to from the computed features with the chosen classifier
 predictGroups = predict(myMdl,TS_DataMat(:,myOpId));
-predictKeywords = classes(predictGroups); % Predict labels from new time-series data
 
-tab = table(labels,timeSeriesData,predictKeywords,predictGroups,'VariableNames',{'labels','timeSeries','predictKeywords','predictGroups'});
+% Convert these predictions into keywords
+predictKeywords = classes(predictGroups);
+
+tab = table(labels,timeSeriesData,predictKeywords,predictGroups,'VariableNames',...
+                {'labels','timeSeries','predictKeywords','predictGroups'});
 
 if removeFile
+    % Remove temp file if there wasn't a user-specified one...
     delete(predictionFilename);
 else
+    % ...or add the predictions into it if there was
     save(predictionFilename,'predictGroups','predictKeywords','-append');
 end

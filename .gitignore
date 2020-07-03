@@ -13,6 +13,9 @@ Thumbs.db
 # HCTSA data files:
 HCTSA*.mat
 
+# Any .mat data files:
+*.mat
+
 # Database configuration
 sql_settings.conf
 
@@ -29,16 +32,6 @@ plugininstall_*.m
 
 # TISEAN generates platform-specific files:
 /Toolboxes/Tisean_3.0.1/
-
-# Documentation auxiliary tex files:
-# *.pdf
-# *.png
-# *.aux
-# *.bbl
-# *.blg
-# *.end
-# *.log
-# *.synctex.gz
 
 # Windows-compiled Physionet file
 sampen_mex.exp

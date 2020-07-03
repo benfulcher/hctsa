@@ -1,27 +1,26 @@
-function IDs = TS_GetIDs(theFields,whatData,tsOrOps,nameOrKeywords)
+function [IDs,notIDs] = TS_GetIDs(theMatchString,whatData,tsOrOps,nameOrKeywords)
 % TS_GetIDs   Retrieve IDs of time series (or operations) in an hctsa dataset
 %               using that matches a string in either the Name or Keyword
 %               fields.
 %
 %---INPUTS:
-% theFields, the fields to match on (string).
+% theMatchString, the string to match
 % whatData, the source of the hctsa dataset (e.g., a filename, cf. TS_LoadData).
 %           (default: 'norm')
 % tsOrOps, whether to retrieve IDs for TimeSeries ('ts', default) or
-%           Operations ('ops').
-% nameOrKeywords, what field to match, either the "Name" field or the
-% "Keyword" field
+%           Operations ('ops')
+% nameOrKeywords, what field to match: 'Keywords' (default) or 'Name'
 %
 %---OUTPUTS:
 % IDs, a (sorted) vector of IDs matching the field constraint provided.
 %
 %---EXAMPLE USAGE:
-% >> ts_IDs = TS_GetIDs('noisy','norm','ts');
+% >> tsIDs = TS_GetIDs('noisy','norm','ts','Keywords');
 % This retrieves the IDs of time series in 'HCTSA_N.mat' (specifying 'norm') that
 % contain the keyword 'noisy'.
 %
-% >> op_IDs = TS_GetIDs('entropy','norm','ops');
-% This retrieves the IDs of operations in HCTSA_N.mat that have been tagged
+% >> opIDs = TS_GetIDs('entropy','norm','ops','Keywords');
+% This retrieves the IDs of operations in 'HCTSA_N.mat' that have been tagged
 % with the keyword 'entropy'.
 
 % ------------------------------------------------------------------------------
@@ -65,7 +64,7 @@ end
 [~,TimeSeries,Operations,theDataFile] = TS_LoadData(whatData);
 
 %-------------------------------------------------------------------------------
-% Match time series/operations on an input keyword:
+% Match IDs of time series or operations:
 %-------------------------------------------------------------------------------
 switch tsOrOps
 case 'ts'
@@ -73,27 +72,60 @@ case 'ts'
 case 'ops'
     theDataTable = Operations;
 otherwise
-    error('Specify ''ts'', ''ops'', or ''opsName''');
+    error('Specify ''ts'' (time series) or ''ops'' (operations)');
 end
 
-% OC: below has been changed so that we return a set in the same order as
-%       above, and nan's otherwise
-matches = nan(length(theFields),1);
-for i = 1:length(theFields)
-    cmatch = find(strcmp(theDataTable.(nameOrKeywords),theFields{i}));
-    if ~isempty(cmatch)
-        matches(i) = cmatch;
-    end
-end
+switch nameOrKeywords
+    case 'Keywords'
+        % (Default): matches by string to one of the keywords (exactly)
 
-foundIDs = ~isnan(matches);
+        % The cell of comma-delimited keyword strings:
+        theKeywordCell = theDataTable.Keywords;
 
-IDs = zeros(size(matches));
-IDs(foundIDs) = theDataTable.ID(matches(foundIDs));
-IDs(~foundIDs) = nan;
+        % Split into sub-cells using comma delimiter:
+        Keywords = SUB_cell2cellcell(theKeywordCell);
 
-if all(isnan(IDs))
-    warning('No matches to ''%s'' found in %s',theFields,theDataFile)
+        % Find objects with a keyword that matches the input string:
+        matches = cellfun(@(x)any(ismember(theMatchString,x)),Keywords);
+
+        % Return the IDs of the matches:
+        IDs = theDataTable.ID(matches);
+
+        % Check for empty:
+        if isempty(IDs)
+            warning('No matches to ''%s'' found in %s',theMatchString,theDataFile)
+        end
+
+        % Also provide IDs not matching the constraint, if required
+        if nargout > 1
+            notIDs = setxor(IDs,theDataTable.ID);
+        end
+
+    case 'Name'
+        % Return an ordered set with NaN when we don't find a match
+
+        assert(nargout == 1,'Only one output argument (IDs) allowed for Name input.')
+
+        matches = nan(length(theMatchString),1);
+        for i = 1:length(theMatchString)
+            cmatch = find(strcmp(theDataTable.Name,theMatchString{i}));
+            if ~isempty(cmatch)
+                matches(i) = cmatch;
+            end
+        end
+
+        foundIDs = ~isnan(matches);
+
+        IDs = zeros(size(matches));
+        IDs(foundIDs) = theDataTable.ID(matches(foundIDs));
+        IDs(~foundIDs) = nan;
+
+        if all(isnan(IDs))
+            warning('No matches to ''%s'' found in %s',theMatchString,theDataFile)
+        end
+
+    otherwise
+        error('Must specify either ''Keywords'' or ''Name''');
 end
 
 end

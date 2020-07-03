@@ -1,6 +1,5 @@
-function fn_handle = GiveMeFunctionHandle(whatClassifier,numClasses,whatLoss,reWeight)
-% GiveMeFunctionHandle    Returns a function handle for classification
-% accuracy and model
+function fn_handle = GiveMeFunctionHandle(whatClassifier,numClasses,whatLoss,doReweight)
+% GiveMeFunctionHandle  A function handle for classification accuracy and model
 %
 %---INPUTS:
 % whatClassifier -- a type of classifier to use (default: 'fast_linear')
@@ -10,7 +9,7 @@ function fn_handle = GiveMeFunctionHandle(whatClassifier,numClasses,whatLoss,reW
 %               (*) 'balancedAcc': mean classification rate of each class (%,
 %                                        same as acc when balanced classes)
 %               (*) 'sumLoss': total number of misclassifications
-% reWeight -- whether to reweight observations for compatible classifiers (for
+% doReweight -- whether to reweight observations for compatible classifiers (for
 %               class imbalanced problems)
 
 % ------------------------------------------------------------------------------
@@ -47,78 +46,92 @@ if nargin < 3
     whatLoss = 'acc'; % total accuracy (by default)
 end
 if nargin < 4
-    reWeight = 1;
+    doReweight = true;
 end
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Set the function handle to compute the accuracy/loss measure:
+% Aim is to set the function handle for computing the accuracy/loss measure
+% as a function of: @(XTrain,yTrain,XTest,yTest)
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% This is quick for the 'fast_linear' classifier:
 %-------------------------------------------------------------------------------
 if strcmp(whatClassifier,'fast_linear')
-    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
-    
-    % Need to force the prior to uniform otherwise we get poor results
-    % (makes it equiv. to 'classify' function)
-    fn_handle_mdl = @(XTrain, yTrain) fitcdiscr(XTrain,yTrain,'Prior','uniform');
-    
-    fn_handle_ac = @(XTest,yTest,Mdl) fn_loss(yTest,predict(Mdl,XTest));
-    fn_handle = @(XTrain,yTrain,XTest,yTest) fcnHandle(XTrain,yTrain,XTest,yTest,fn_handle_mdl,fn_handle_ac,whatLoss);
+
+    % Function for fitting the model
+    % (forcing a uniform prior makes this equivalent to the 'classify' function)
+    fn_FitModel = @(XTrain,yTrain) fitcdiscr(XTrain,yTrain,'Prior','uniform');
+
+    % Function for computing the loss:
+    fn_Loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
+
+    % Combined function for computing loss and model:
+    fn_handle = @(XTrain,yTrain,XTest,yTest) makeClassifyFun(XTrain,yTrain,XTest,yTest,fn_FitModel,fn_Loss,whatLoss);
     return
 end
 
 %-------------------------------------------------------------------------------
-% Binary model (easier), we can do it in one line:
+% Other classifiers:
 %-------------------------------------------------------------------------------
 if numClasses==2
+    % Binary model is easier, we can do it in one line:
 
     switch whatClassifier
     case 'knn'
-        fn_handle_mdl = @(XTrain,yTrain,XTest,yTest) fitcknn(XTrain,yTrain);
+        fn_FitModel = @(XTrain,yTrain,XTest,yTest) fitcknn(XTrain,yTrain);
     case 'tree'
-        fn_handle_mdl = @(XTrain,yTrain,XTest,yTest) fitctree(XTrain,yTrain);
+        fn_FitModel = @(XTrain,yTrain,XTest,yTest) fitctree(XTrain,yTrain);
     case {'linear','linclass'}
-        if reWeight
-            fn_handle_mdl = @(XTrain,yTrain) fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
+        if doReweight
+            fn_FitModel = @(XTrain,yTrain) fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
                                     'SaveMemory','on','Weights',InverseProbWeight(yTrain));
         else
-            fn_handle_mdl = @(XTrain,yTrain) fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
+            fn_FitModel = @(XTrain,yTrain) fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
                                     'SaveMemory','on');
         end
     case 'svm_linear'
-        if reWeight
-            fn_handle_mdl = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain));
+        if doReweight
+            fn_FitModel = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','linear',...
+                                                    'Weights',InverseProbWeight(yTrain));
         else
-            fn_handle_mdl = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','linear');
+            fn_FitModel = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','linear');
         end
     case 'svm_rbf'
-        if reWeight
-            fn_handle_mdl = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain));
+        if doReweight
+            fn_FitModel = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain));
         else
-            fn_handle_mdl = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','rbf');
+            fn_FitModel = @(XTrain,yTrain) fitcsvm(XTrain,yTrain,'KernelFunction','rbf');
         end
     case 'diaglinear'
-        if reWeight
-            fn_handle_mdl = @(XTrain,yTrain) fitcnb(XTrain,yTrain,'Weights',InverseProbWeight(yTrain));
+        if doReweight
+            fn_FitModel = @(XTrain,yTrain) fitcnb(XTrain,yTrain,'Weights',InverseProbWeight(yTrain));
         else
-            fn_handle_mdl = @(XTrain,yTrain) fitcnb(XTrain,yTrain);
+            fn_FitModel = @(XTrain,yTrain) fitcnb(XTrain,yTrain);
         end
     otherwise
-        error('Unknown classifier label: ''%s''',whatClassifier);
+        error('Unknown classifier: ''%s''',whatClassifier);
     end
-    
+
     % Set the loss function:
-    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
-    fn_handle_ac = @(XTest,yTest,Mdl) fn_loss(yTest,predict(Mdl,XTest));
-    
-    fn_handle = @(XTrain,yTrain,XTest,yTest) fcnHandle(XTrain,yTrain,XTest,yTest,fn_handle_mdl,fn_handle_ac,whatLoss);
+    fn_Loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
+
+    % Combine into a single function handle:
+    fn_handle = @(XTrain,yTrain,XTest,yTest) makeClassifyFun(XTrain,yTrain,XTest,yTest,fn_FitModel,fn_Loss,whatLoss);
 else
     % Multiclass, have to use the Cfn function (which is slower to use as a function handle)
-    fn_handle = @(XTrain,yTrain,XTest,yTest) GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,0,whatLoss,reWeight);
+    fn_handle = @(XTrain,yTrain,XTest,yTest) GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,0,whatLoss,doReweight);
 end
 
-  function [accuracy,Mdl,whatLoss] = fcnHandle(XTrain, yTrain, xTest, yTest, fn_handle_mdl, fn_handle_ac, whatLoss)
-    Mdl = fn_handle_mdl(XTrain, yTrain);
-    accuracy = fn_handle_ac(xTest,yTest,Mdl);
-  end
+%-------------------------------------------------------------------------------
+function [accuracy,Mdl,whatLoss] = makeClassifyFun(XTrain,yTrain,xTest,yTest,fn_FitModel,fn_Loss,whatLoss)
+    % A function that:
+    % 1. trains the model (Mdl)
+    % 2. computes its accuracy on test data
+    % 3. returns the type of loss function used
+    Mdl = fn_FitModel(XTrain,yTrain);
+    accuracy = fn_Loss(yTest,predict(Mdl,XTest));
+end
 
 end
