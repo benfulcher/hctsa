@@ -145,43 +145,46 @@ end
 
 switch whatTestStat
     case {'linear','linclass','fast_linear','diaglinear','svm','svm_linear'}
-        % Set up the loss function for classifier-based metrics
+        % Set up the loss function for a classifier-based metric
 
         % (first check for possible class imbalance):
         classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),1:numClasses);
         isBalanced = all(classNumbers==classNumbers(1));
         if isBalanced
-            fn_testStat = @(XTrain,yTrain,XTest,yTest,numFolds) GiveMeCfn(whatTestStat,...
-                                XTrain,yTrain,XTest,yTest,numClasses,0,'acc',[],numFolds);
-            fprintf(1,'Using overall classification accuracy as output measure\n');
+            fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'acc',false);
+            fprintf(1,'Using total classification accuracy as output measure\n');
         else
-            fn_testStat = @(XTrain,yTrain,XTest,yTest,numFolds) GiveMeCfn(whatTestStat,...
-                                XTrain,yTrain,XTest,yTest,numClasses,0,'balancedAcc',[],numFolds);
+            fn_testStat = GiveMeFunctionHandle(whatTestStat,numClasses,'balancedAcc',true);
             fprintf(1,'Due to class imbalance, using balanced classification accuracy as output measure\n');
         end
         chanceLine = 100/numClasses;
     case {'ustat','ranksum'}
-        fn_testStat = @(XTrain,yTrain,Xtest,yTest,numFolds) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),false);
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                                fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),false);
         chanceLine = NaN;
     case {'ustatExact','ranksumExact'}
-        fn_testStat = @(XTrain,yTrain,Xtest,yTest,numFolds) fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),true);
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                                fn_uStat(XTrain(yTrain==1),XTrain(yTrain==2),true);
         chanceLine = NaN;
     case {'ttest','tstat'}
-        fn_testStat = @(XTrain,yTrain,Xtest,yTest,numFolds) fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest,numFolds) ...
+                                fn_tStat(XTrain(yTrain==1),XTrain(yTrain==2));
         chanceLine = 0; % chance-level t statistic is zero
+    otherwise
+        error('Unknown test statistics, ''%s''',whatTestStat);
 end
 
 % Now get information about the statistic and its units to display:
 switch whatTestStat
     case {'linear','linclass','fast_linear'}
         testStatText = 'linear classifier';
-        statUnit = '%%';
+        statUnit = '%';
     case 'diaglinear'
         testStatText = 'Naive bayes classifier';
-        statUnit = '%%';
+        statUnit = '%';
     case {'svm','svm_linear'}
         testStatText = 'linear SVM classifier';
-        statUnit = '%%';
+        statUnit = '%';
     case {'ustat','ranksum'}
         testStatText = 'Mann-Whitney approx p-value';
         statUnit = ' (log10(p))';
@@ -496,12 +499,13 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
         try
             if nargout == 2
                 % This is slower for the fast_linear classifier (but returns a model)
-                [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels,numFolds);
+                [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
             else
-                testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels,numFolds);
+                testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
             end
         catch
-            fprintf('Could not return model for operation %d', numOps);
+            % keyboard
+            fprintf('Could not return model for operation %u',k);
         end
         % Give estimate of time remaining:
         if beVerbose && k==100

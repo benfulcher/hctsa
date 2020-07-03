@@ -1,4 +1,4 @@
-function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,reWeight,CVFolds)
+function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,doReweight,CVFolds)
 % GiveMeCfn    Returns classification results from training a classifier on
 %               training/test data
 %
@@ -11,6 +11,8 @@ function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,
 % numClasses -- number of classes of labels
 % beVerbose -- whether to give text output of progress
 % whatLoss -- what loss function to compute on the data
+% doReweight -- whether to reweight for class imbalance
+% CVFolds -- number of CV folds (if CV is desired)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -60,19 +62,19 @@ if nargin < 8 || isempty(whatLoss)
     isBalanced = all(classNumbers==classNumbers(1));
     if isBalanced
         whatLoss = 'acc';
-        reWeight = false;
+        doReweight = false;
     else
         whatLoss = 'balancedAcc';
-        reWeight = true;
+        doReweight = true;
         if beVerbose
             fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
         end
     end
 end
-if ~exist('reWeight','var')
+if ~exist('doReweight','var')
     % Reweighted observations by inverse probability weight
     % (for class imbalanced problems)
-    reWeight = true;
+    doReweight = true;
 end
 if nargin < 10
     CVFolds = 0;
@@ -113,9 +115,9 @@ else
             end
         case 'tree'
             if CVFolds > 0
-                Mdl = fitctree(XTrain,yTrain,'KFold',CVFolds)
+                Mdl = fitctree(XTrain,yTrain,'KFold',CVFolds);
             else
-                Mdl = fitctree(XTrain,yTrain)
+                Mdl = fitctree(XTrain,yTrain);
             end
         case {'linear','linclass'}
             if CVFolds > 0
@@ -125,7 +127,7 @@ else
             end
         case {'svm','svm_linear'}
             % Weight observations by inverse class probability:
-            if reWeight
+            if doReweight
                 if CVFolds > 0
                     Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
                 else
@@ -140,7 +142,7 @@ else
             end
         case 'svm_rbf'
             % Weight observations by inverse class probability:
-            if reWeight
+            if doReweight
                 if CVFolds > 0
                     Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
                 else
@@ -190,7 +192,7 @@ else
         end
 
         % Fit the model:
-        if ismember(whatClassifier,{'svm_linear','svm_rbf','linear','linclass','diaglinear'}) && reWeight
+        if ismember(whatClassifier,{'svm_linear','svm_rbf','linear','linclass','diaglinear'}) && doReweight
             % Reweight to give equal weight to each class (in case of class imbalance)
             if CVFolds > 0
                 Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
