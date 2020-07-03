@@ -105,7 +105,8 @@ rng('default');
 if makeFigure
     figure('color','w');
 end
-hold on; box('on');
+hold('on');
+box('on');
 
 % ------------------------------------------------------------------------------
 % Add kernel distribution

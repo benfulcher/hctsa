@@ -1,4 +1,4 @@
-function TS_CompareFeatureSets(whatData,whatClassifier,whatFeatureSets)
+function TS_CompareFeatureSets(whatData,whatFeatureSets,cfnParams)
 % TS_CompareFeatureSets Compares classification performance of feature sets
 %
 % Gives information about how different subsets of features behave on the data
@@ -13,11 +13,11 @@ function TS_CompareFeatureSets(whatData,whatClassifier,whatFeatureSets)
 %
 %---INPUTS:
 % whatData: the dataset to analyze (input to TS_LoadData)
-% whatClassifier: the classifier to apply to the different filters
 % whatFeatureSets: custom set of feature-sets to compare against
+% cfnParams: custom classification parameters for running classificaiton algorithms
 %
 %---USAGE:
-% TS_CompareFeatureSets('norm','svm_linear');
+% TS_CompareFeatureSets('norm');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -48,14 +48,11 @@ if nargin < 1
     whatData = 'norm';
 end
 if nargin < 2
-    whatClassifier = 'svm_linear';
-end
-if nargin < 3
     whatFeatureSets = {'all','catch22','notLocationDependent','locationDependent',...
                         'notLengthDependent','lengthDependent',...
                         'notSpreadDependent','spreadDependent'};
 end
-numRepeats = 2;
+% <set default classificaiton parameters after inspecting TimeSeries labeling below>
 
 %-------------------------------------------------------------------------------
 % Load in data:
@@ -72,33 +69,49 @@ numFeatures = height(Operations);
 TellMeAboutLabeling(dataStruct);
 
 %-------------------------------------------------------------------------------
+% Set classification parameters
+%-------------------------------------------------------------------------------
+if nargin < 3
+    cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
+end
+
+%-------------------------------------------------------------------------------
 % Define the feature sets by feature IDs
 %-------------------------------------------------------------------------------
 numFeatureSets = length(whatFeatureSets);
 featureIDs = cell(numFeatureSets,1);
+theColors = cell(numFeatureSets,1);
 % Prep for pulling out IDs efficiently
 
 for i = 1:numFeatureSets
     switch whatFeatureSets{i}
         case 'all'
             featureIDs{i} = Operations.ID;
+            theColors{i} = [203,90,76]/255;
         case 'notLengthDependent'
             [~,featureIDs{i}] = TS_GetIDs('lengthdep',dataStruct,'ops','Keywords');
+            theColors{i} = brighten([193,92,165]/255,+0.5);
         case 'lengthDependent'
             featureIDs{i} = TS_GetIDs('lengthdep',dataStruct,'ops','Keywords');
             % featureIDs{i} = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
+            theColors{i} = brighten([193,92,165]/255,-0.5);
         case 'notLocationDependent'
             [~,featureIDs{i}] = TS_GetIDs('locdep',dataStruct,'ops','Keywords');
+            theColors{i} = brighten([180,148,62]/255,+0.5);
         case 'locationDependent'
             featureIDs{i} = TS_GetIDs('locdep',dataStruct,'ops','Keywords');
             % featureIDs{i} = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
+            theColors{i} = brighten([180,148,62]/255,-0.5);
         case 'notSpreadDependent'
             [~,featureIDs{i}] = TS_GetIDs('spreaddep',dataStruct,'ops','Keywords');
+            theColors{i} = brighten([114,124,206]/255,+0.5);
         case 'spreadDependent'
             featureIDs{i} = TS_GetIDs('spreaddep',dataStruct,'ops','Keywords');
             % featureIDs{i} = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
+            theColors{i} = brighten([114,124,206]/255,-0.5);
         case {'catch22','sarab16'}
             featureIDs{i} = GiveMeFeatureSet(whatFeatureSets{i},Operations);
+            theColors{i} = [96,168,98]/255;
         otherwise
             error('Unknown feature set: ''%s''',whatFeatureSets{i});
     end
@@ -109,39 +122,38 @@ numFeaturesIncluded = cellfun(@length,featureIDs);
 %-------------------------------------------------------------------------------
 % Fit the classification model to the dataset (for each cross-validation fold)
 % and evaluate performance
-numClasses = max(TimeSeries.Group); % assumes group in form of integer class labels starting at 1
-numFolds = HowManyFolds(TimeSeries.Group,numClasses);
+% This needs to be on for the below to work:
+cfnParams.computePerFold = true;
+TellMeAboutClassification(cfnParams);
 
-fprintf(1,['Training and evaluating a %u-class %s classifier',...
-                ' using %u-fold cross validation with %u repeats...\n'],...
-                    numClasses,whatClassifier,numFolds,numRepeats);
-
-accuracy = zeros(numFeatureSets,numFolds*numRepeats);
+accuracy = zeros(numFeatureSets,cfnParams.numFolds*cfnParams.numRepeats);
 for i = 1:numFeatureSets
     filter = ismember(Operations.ID,featureIDs{i});
-    for j = 1:numRepeats
-        [foldLosses,~,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat(:,filter),...
-                    TimeSeries.Group,[],[],numClasses,[],[],true,numFolds,true);
-        accuracy(i,1+(j-1)*numFolds:j*numFolds) = foldLosses;
+    for j = 1:cfnParams.numRepeats
+        [foldLosses,~,whatLoss] = GiveMeCfn(cfnParams.whatClassifier,TS_DataMat(:,filter),...
+                    TimeSeries.Group,[],[],cfnParams.numClasses,[],[],cfnParams.doReweight,cfnParams.numFolds,true);
+        accuracy(i,1+(j-1)*cfnParams.numFolds:j*cfnParams.numFolds) = foldLosses;
     end
     fprintf(['Classified using the ''%s'' set (%u features): (%u fold-average, ',...
                         '%u repeats) average %s = %.2f%%\n'],...
-            whatFeatureSets{i},numFeaturesIncluded(i),numFolds,numRepeats,...
+            whatFeatureSets{i},numFeaturesIncluded(i),cfnParams.numFolds,cfnParams.numRepeats,...
             whatLoss,mean(accuracy(i,:)));
 end
 
 
 %-------------------------------------------------------------------------------
 % Plot the result
-dataCell = mat2cell(accuracy,ones(numFeatureSets,1),numFolds*numRepeats);
-BF_JitteredParallelScatter(dataCell,true,true,true);
+dataCell = mat2cell(accuracy,ones(numFeatureSets,1),size(accuracy,2));
+extraParams = struct();
+extraParams.theColors = theColors;
+BF_JitteredParallelScatter(dataCell,true,true,true,extraParams);
 ax = gca();
 ax.XTick = 1:numFeatureSets;
 ax.XTickLabel = whatFeatureSets;
 ax.XTickLabelRotation = 45;
 title(sprintf(['%u-class classification with different feature sets',...
                     ' using %u-fold cross validation'],...
-                    numClasses,numFolds))
+                    cfnParams.numClasses,cfnParams.numFolds))
 ax.TickLabelInterpreter = 'none';
 ylabel(whatLoss)
 
