@@ -1,5 +1,6 @@
-function TS_CompareFeatureSets(whatData,whatClassifier)
+function TS_CompareFeatureSets(whatData,whatClassifier,whatFeatureSets)
 % TS_CompareFeatureSets Compares classification performance of feature sets
+%
 % Gives information about how different subsets of features behave on the data
 % (length-dependent, location-dependent, spread-dependent features, and features
 % that operate on the raw (rather than z-scored) time series)
@@ -13,6 +14,7 @@ function TS_CompareFeatureSets(whatData,whatClassifier)
 %---INPUTS:
 % whatData: the dataset to analyze (input to TS_LoadData)
 % whatClassifier: the classifier to apply to the different filters
+% whatFeatureSets: custom set of feature-sets to compare against
 %
 %---USAGE:
 % TS_CompareFeatureSets('norm','svm_linear');
@@ -48,88 +50,104 @@ end
 if nargin < 2
     whatClassifier = 'svm_linear';
 end
+if nargin < 3
+    whatFeatureSets = {'all','catch22','notLocationDependent','locationDependent',...
+                        'notLengthDependent','lengthDependent',...
+                        'notSpreadDependent','spreadDependent'};
+end
 
 %-------------------------------------------------------------------------------
 % Load in data:
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,dataFile] = TS_LoadData(whatData);
+TS_GetFromData(whatData,'groupNames');
 
 % Check that group labels have been assigned
 if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
-load(dataFile,'groupNames');
-numClasses = max(TimeSeries.Group); % assuming group in form of integer class labels starting at 1
+
 numFeatures = height(Operations);
-numFolds = howManyFolds(TimeSeries.Group,numClasses);
 
 %-------------------------------------------------------------------------------
-% Get the filters
+% Define the feature sets by feature IDs
 %-------------------------------------------------------------------------------
-dataStruct.TimeSeries = [];
-dataStruct.TS_DataMat = [];
-dataStruct.Operations = Operations;
-[ID_lengthDep,ID_notlengthDep] = TS_GetIDs('lengthdep',dataStruct,'ops');
-[ID_locDep,ID_notlocDep] = TS_GetIDs('locdep',dataStruct,'ops');
-[ID_spreadDep,ID_notspreadDep] = TS_GetIDs('spreaddep',dataStruct,'ops');
-[ID_raw,ID_notraw] = TS_GetIDs('raw',dataStruct,'ops');
+numFeatureSets = length(whatFeatureSets);
+featureIDs = cell(numFeatureSets,1);
+% Prep for pulling out IDs efficiently
+opStruct = makeOpStruct();
 
-%-------------------------------------------------------------------------------
-% Compare each
-%-------------------------------------------------------------------------------
-accuracy = zeros(6,numFolds);
-numFeaturesIncluded = zeros(6,1);
-names = cell(6,1);
-% (i) all features, (ii) no length, (iii) no spread, (iv) no location, (v) no length/spread/location
+for i = 1:numFeatureSets
+    switch whatFeatureSets{i}
+        case 'all'
+            featureIDs{i} = Operations.ID;
+        case 'notLengthDependent'
+            [~,featureIDs{i}] = TS_GetIDs('lengthdep',opStruct,'ops','Keywords');
+        case 'lengthDependent'
+            featureIDs{i} = TS_GetIDs('lengthdep',opStruct,'ops','Keywords');
+            % featureIDs{i} = TS_GetIDs('lengthDependent',opStruct,'ops','Keywords');
+        case 'notLocationDependent'
+            [~,featureIDs{i}] = TS_GetIDs('locdep',opStruct,'ops','Keywords');
+        case 'locationDependent'
+            featureIDs{i} = TS_GetIDs('locdep',opStruct,'ops','Keywords');
+            % featureIDs{i} = TS_GetIDs('locationDependent',opStruct,'ops','Keywords');
+        case 'notSpreadDependent'
+            [~,featureIDs{i}] = TS_GetIDs('spreaddep',opStruct,'ops','Keywords');
+        case 'spreadDependent'
+            featureIDs{i} = TS_GetIDs('spreaddep',opStruct,'ops','Keywords');
+            % featureIDs{i} = TS_GetIDs('spreadDependent',opStruct,'ops','Keywords');
+        case {'catch22','sarab16'}
+            featureIDs{i} = GiveMeFeatureSet(whatFeatureSets{i},Operations);
+        otherwise
+            error('Unknown feature set: ''%s''',whatFeatureSets{i});
+    end
+end
+
+numFeaturesIncluded = cellfun(@length,featureIDs);
 
 %-------------------------------------------------------------------------------
 % Fit the classification model to the dataset (for each cross-validation fold)
 % and evaluate performance
+numClasses = max(TimeSeries.Group); % assumes group in form of integer class labels starting at 1
+numFolds = HowManyFolds(TimeSeries.Group,numClasses);
 
 fprintf(1,['Training and evaluating a %u-class %s classifier',...
                 ' using %u-fold cross validation...\n'],...
                     numClasses,whatClassifier,numFolds);
 
-for i = 1:6
-    switch i
-    case 1
-        filter = true(height(Operations),1);
-        names{1} = 'all';
-    case 2
-        filter = ismember(Operations.ID,ID_notlengthDep);
-        names{2} = 'no length';
-    case 3
-        filter = ismember(Operations.ID,ID_notlocDep);
-        names{3} = 'no location';
-    case 4
-        filter = ismember(Operations.ID,ID_notspreadDep);
-        names{4} = 'no spread';
-    case 5
-        filter = ismember(Operations.ID,ID_notraw);
-        names{5} = 'no raw';
-    case 6
-        filter = ismember(Operations.ID,intersect(intersect(ID_notlengthDep,ID_notlocDep),ID_notspreadDep));
-        names{6} = 'no length, location, spread';
-    end
+accuracy = zeros(numFeatureSets,numFolds);
+for i = 1:numFeatureSets
+    filter = ismember(Operations.ID,featureIDs{i});
     [foldLosses,~,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat(:,filter),...
-                            timeSeriesGroup,[],[],numClasses,[],[],1,numFolds);
+                    TimeSeries.Group,[],[],numClasses,[],[],true,numFolds,true);
 
     accuracy(i,:) = foldLosses;
-    numFeaturesIncluded(i) = sum(filter);
-    names{i} = sprintf('%s (%u)',names{i},numFeaturesIncluded(i));
+    fprintf('Classified using the ''%s'' feature set (%u): (fold-average) %s = %.2f%%\n',...
+                whatFeatureSets{i},numFeaturesIncluded(i),whatLoss,mean(accuracy(i,:)));
 end
+
 
 %-------------------------------------------------------------------------------
 % Plot the result
-f = figure('color','w'); ax = gca;
-errorbar(1:6,mean(accuracy,2),std(accuracy,[],2))
-ax.XTick = 1:6;
-ax.XTickLabel = names;
+dataCell = mat2cell(accuracy,ones(numFeatureSets,1),numFolds);
+BF_JitteredParallelScatter(dataCell,true,true,true);
+ax = gca();
+ax.XTick = 1:numFeatureSets;
+ax.XTickLabel = whatFeatureSets;
 title(sprintf(['%u-class classification with different feature sets',...
                     ' using %u-fold cross validation'],...
                     numClasses,numFolds))
 ax.TickLabelInterpreter = 'none';
 ylabel(whatLoss)
 
+%-------------------------------------------------------------------------------
+function opStruct = makeOpStruct()
+    % Generate a structure that contains the Operations table
+    opStruct = struct();
+    opStruct.TimeSeries = [];
+    opStruct.TS_DataMat = [];
+    opStruct.Operations = Operations;
+end
+%-------------------------------------------------------------------------------
 
 end

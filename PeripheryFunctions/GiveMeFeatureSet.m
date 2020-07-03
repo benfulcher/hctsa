@@ -11,6 +11,7 @@ end
 
 switch whatFeatureSet
 case 'sarab16'
+    % Sarab's top 16 features
     featureNames = {'DN_HistogramMode_10', ...
                     'AC_9', ...
                     'first_min_acf', ...
@@ -28,6 +29,7 @@ case 'sarab16'
                     'SB_MotifTwo_mean_hhh', ...
                     'SC_FluctAnal_2_rsrangefit_50_1_logi_prop_r1'};
 case 'catch22'
+    % The catch22 feature set:
     % cf. https://github.com/chlubba/catch22
     featureNames = {'DN_HistogramMode_5', ...
                     'DN_HistogramMode_10', ...
@@ -57,5 +59,12 @@ end
 
 opIDs = Operations.ID(ismember(Operations.Name,featureNames));
 fprintf(1,'Matched %u/%u features!\n',length(opIDs),length(featureNames));
+
+if length(opIDs) < length(featureNames)
+    didNotMatch = find(~ismember(featureNames,Operations.Name));
+    for i = 1:length(didNotMatch)
+        fprintf(1,'%s did not match\n',featureNames{didNotMatch(i)});
+    end
+end
 
 end

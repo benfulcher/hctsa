@@ -1,4 +1,4 @@
-function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,doReweight,CVFolds)
+function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,doReweight,CVFolds,computePerFold)
 % GiveMeCfn    Returns classification results from training a classifier on
 %               training/test data
 %
@@ -13,6 +13,7 @@ function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,
 % whatLoss -- what loss function to compute on the data
 % doReweight -- whether to reweight for class imbalance
 % CVFolds -- number of CV folds (if CV is desired)
+% computePerFold -- whether to give the full accuracy data (for each fold)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -78,6 +79,9 @@ if ~exist('doReweight','var')
 end
 if nargin < 10
     CVFolds = 0;
+end
+if nargin < 1
+    computePerFold = false;
 end
 
 %-------------------------------------------------------------------------------
@@ -227,7 +231,6 @@ else
     % Test data is mixed through the training data provided using k-fold cross validation
     % Output is the accuracy/loss measure for each fold, can mean it themselves if they want to
     yPredict = kfoldPredict(Mdl);
-    computePerFold = false;
     if computePerFold
         % Compute separately for each fold, store in vector accuracy:
         accuracy = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
