@@ -56,10 +56,13 @@ end
 if nargin < 3
     numNulls = 10;
 end
-doParallel = false;
 
 % Use an inputParser to parse additional options as parameters:
 inputP = inputParser;
+% doParallel: use parfor to speed up null computation
+default_doParallel = false;
+check_doParallel = @(x) islogical(x);
+addParameter(inputP,'doParallel',default_doParallel,check_doParallel);
 % seedReset:
 default_seedReset = 'default';
 check_seedReset = @(x) ischar(x);
@@ -71,6 +74,7 @@ addParameter(inputP,'doPlot',default_doPlot,check_doPlot);
 
 % Parse input arguments:
 parse(inputP,varargin{:});
+doParallel = inputP.Results.doParallel;
 seedReset = inputP.Results.seedReset;
 doPlot = inputP.Results.doPlot;
 clear('inputP');
@@ -179,7 +183,7 @@ if numNulls > 0
         plot(ones(2,1)*mean(foldLosses),ax.YLim,'r','LineWidth',2)
         xlabel(cfnParams.whatLoss)
         ylabel('Probability density')
-        legend('Shuffled labels','Real labels')
+        legend(sprintf('Shuffled labels (%u)',numNulls),'Real labels')
     end
 
     % Estimate a p-value:
@@ -237,7 +241,7 @@ end
 %-------------------------------------------------------------------------------
 if ~isempty(cfnParams.classifierFilename)
     [Acc,Mdl] = GiveMeCfn(TS_DataMat,TimeSeries.Group,TS_DataMat,...
-                                        TimeSeries.Group,cfnParams);
+                                            TimeSeries.Group,cfnParams);
 
     Operations = TS_GetFromData(whatData,'Operations');
     jointClassifier.Operation.ID = Operations.ID;
@@ -249,15 +253,15 @@ if ~isempty(cfnParams.classifierFilename)
     jointClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
     classes = classLabels;
 
-    if exist(classifierFilename,'file')
+    if exist(cfnParams.classifierFilename,'file')
         out = input(sprintf(['File %s already exists -- continuing will overwrite the file.'...
-                  '\n[Press ''y'' to continue] '],classifierFilename), 's');
+                  '\n[Press ''y'' to continue] '],cfnParams.classifierFilename), 's');
         if ~strcmp(out,'y')
             return;
         end
     end
-    save(classifierFilename,'jointClassifier','classes','cfnParams','-v7.3');
-    fprintf('Saved trained classifier to ''%s''.\n',classifierFilename);
+    save(cfnParams.classifierFilename,'jointClassifier','classes','cfnParams','-v7.3');
+    fprintf('Saved trained classifier to ''%s''.\n',cfnParams.classifierFilename);
 end
 
 %-------------------------------------------------------------------------------

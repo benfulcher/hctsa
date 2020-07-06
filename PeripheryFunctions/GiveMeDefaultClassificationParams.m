@@ -29,12 +29,12 @@ if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
 
-% Assume every class is represented in the data:
+% Number of classes to classify
+% (Assume every class is represented in the data):
 params.classLabels = categories(TimeSeries.Group);
 if nargin < 2
     numClasses = length(params.classLabels);
 end
-% Number of classes to classify
 params.numClasses = numClasses;
 
 % Get numbers in each class:
@@ -44,7 +44,7 @@ isBalanced = all(classNumbers==classNumbers(1));
 % Set the performance metric, and balancing settings based on class balance statistics
 if isBalanced
     params.doReweight = false;
-    params.whatLoss = 'Accuracy';
+    params.whatLoss = 'accuracy';
     params.whatLossUnits = '%';
 else
     fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
@@ -54,13 +54,12 @@ else
 end
 
 % Set the classifier:
-params.whatClassifier = 'fast_linear'; % ('svm_linear', 'knn', 'linear')
+params.whatClassifier = 'svm_linear'; % ('svm_linear', 'knn', 'linear', 'fast_linear')
 
-% Number of repeats of cross-validation:
-% (reduce variance due to 'lucky splits')
-params.numRepeats = 2;
+% Number of repeats of cross-validation (reduce variance due to 'lucky splits')
+params.numRepeats = 1;
 
-% Cross validation: number of folds
+% Cross validation: number of folds (set to 0 for no CV)
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);
 
 % Whether to output information about each fold, or average over folds
@@ -68,5 +67,17 @@ params.computePerFold = false;
 
 % .mat file to save the classifier to (not saved if empty).
 params.classifierFilename = ''; % (don't save classifier information to file)
+
+% Set text to name the classifier
+switch params.whatClassifier
+    case {'linear','linclass','fast_linear'}
+        params.classifierText = 'linear classifier';
+    case 'diaglinear'
+        params.classifierText = 'linear naive bayes classifier';
+    case {'svm','svm_linear'}
+        testStatText = 'linear SVM classifier';
+    otherwise
+        testStatText = params.whatClassifier;
+end
 
 end

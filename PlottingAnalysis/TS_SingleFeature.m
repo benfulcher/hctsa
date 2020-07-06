@@ -97,6 +97,7 @@ if makeViolin
     ax.XLim = [0.5+extraParams.customOffset,numClasses+0.5+extraParams.customOffset];
     ax.XTick = extraParams.customOffset+(1:numClasses);
     ax.XTickLabel = classLabels(ix);
+    ax.XTickLabelRotation = 30;
     ylabel('Output')
     ax.TickLabelInterpreter = 'none';
     if makeNewFigure
@@ -104,7 +105,9 @@ if makeViolin
     end
 
     % Annotate rectangles for predicted intervals:
-    BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),TimeSeries.Group,numClasses,colors,ax,'left');
+    cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
+    cfnParams.numFolds = 0;
+    BF_AnnotateRect(TS_DataMat(:,op_ind),TimeSeries.Group,cfnParams,colors,ax,'left');
 
     % Trim y-limits (with 2% overreach)
     ax.YLim(1) = min(TS_DataMat(:,op_ind))-0.02*range(TS_DataMat(:,op_ind));
