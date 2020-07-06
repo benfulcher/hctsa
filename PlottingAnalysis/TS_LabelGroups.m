@@ -207,4 +207,9 @@ if saveBack
     fprintf(1,' Saved.\n');
 end
 
+% Check whether to suppress output to screen
+if nargout==0
+    clear('groupLabels','newFileName');
+end
+
 end

@@ -1,27 +1,24 @@
-function [foldLosses,nullStat,jointClassifier] = TS_Classify(whatData,whatClassifier,varargin)
+function [foldLosses,nullStat,jointClassifier] = TS_Classify(whatData,cfnParams,varargin)
 % TS_Classify   Classify groups in the data using all features
 %
-% This function uses a classifier to learn group labels assigned to time series
+% TS_Classify uses a classifier to learn group labels assigned to time series
 % in the dataset.
+%
 % It can also provide insights into the dimensionality required for good performance
-% by classifying with the leading principal components of the feature space
+% by classifying with the leading principal components of the feature space.
 %
 %---USAGE:
 % TS_Classify();
 %
 %---INPUTS:
 % whatData, the hctsa data to use (input to TS_LoadData)
-% whatClassifier, the classification method to use (e.g., 'svm_linear', 'knn', 'linear')
+% cfnParams, parameters for the classification algorithm (cf GiveMeDefaultClassificationParams)
 %
 % (OPTIONAL):
-% 'numPCs', investigate classification using up to this many PCs of the data
-%              matrix (default: 0).
 % 'numNulls' (numeric), number of nulls to compute (0 for no null comparison)
 % 'seedReset', input to BF_ResetSeed, specifying whether (and how) to reset the
 %               random seed (for reproducible results from cross-validation)
-% 'numFolds', number of cross-validation folds to use.
-% 'numRepeats', number of times to repeat the prediction across different data partitions.
-% 'classifierFilename', .mat file to save the classifier to (not saved if empty).
+% 'doPlot', whether to plot outputs (including confusion matrix)
 %
 %---OUTPUTS:
 % Text output on classification rate using all features, and if doPCs = true, also
@@ -57,16 +54,10 @@ function [foldLosses,nullStat,jointClassifier] = TS_Classify(whatData,whatClassi
 if nargin < 1
     whatData = 'norm';
 end
-if nargin < 2
-    whatClassifier = 'svm_linear'; % 'svm', 'discriminant', 'knn'
-end
+% <set default classificaiton parameters after inspecting TimeSeries labeling below>
 
-% Use an inputParser to control additional plotting options as parameters:
+% Use an inputParser to parse additional options as parameters:
 inputP = inputParser;
-% numPCs:
-default_numPCs = 0;
-check_numPCs = @(x) isnumeric(x);
-addParameter(inputP,'numPCs',default_numPCs,check_numPCs);
 % numNulls:
 default_numNulls = 20;
 check_numNulls = @(x) isnumeric(x);
@@ -75,92 +66,69 @@ addParameter(inputP,'numNulls',default_numNulls,check_numNulls);
 default_seedReset = 'default';
 check_seedReset = @(x) ischar(x);
 addParameter(inputP,'seedReset',default_seedReset,check_seedReset);
-% numFolds:
-default_numFolds = [];
-check_numFolds = @(x) isnumeric(x);
-addParameter(inputP,'numFolds',default_numFolds,check_numFolds);
-% numRepeats:
-default_numRepeats = 1;
-check_numRepeats = @(x) isnumeric(x);
-addParameter(inputP,'numRepeats',default_numRepeats,check_numRepeats);
 % doPlot:
 default_doPlot = true;
 check_doPlot = @(x) islogical(x);
 addParameter(inputP,'doPlot',default_doPlot,check_doPlot);
-% classifierFilename (save trained classifer out to file):
-default_classifierFilename = '';
-check_classifierFilename = @(x) ischar(x);
-addParameter(inputP,'classifierFilename',default_classifierFilename,check_classifierFilename);
 
 % Parse input arguments:
 parse(inputP,varargin{:});
-numPCs = inputP.Results.numPCs;
 numNulls = inputP.Results.numNulls;
 seedReset = inputP.Results.seedReset;
-numFolds = inputP.Results.numFolds;
-numRepeats = inputP.Results.numRepeats;
 doPlot = inputP.Results.doPlot;
-classifierFilename = inputP.Results.classifierFilename;
 clear('inputP');
 
 %-------------------------------------------------------------------------------
 % Load in data:
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 
 % Check that group labels have been assigned
 if ~ismember('Group',TimeSeries.Properties.VariableNames)
-    error('Group labels not assigned to time series. Use TS_LabelGroups.');
+    error('Group labels not assigned to time series in %s. Use TS_LabelGroups.',whatDataFile);
+end
+
+if nargin < 2
+    cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
 groupNames = TS_GetFromData(whatData,'groupNames');
-if any(TimeSeries.Group==0)
-    error('Error labeling time series groups');
-end
-numClasses = max(TimeSeries.Group); % assuming group in form of integer class labels starting at 1
 numFeatures = height(Operations);
 
 %-------------------------------------------------------------------------------
 % Give basic info about the represented classes:
-fprintf(1,'%u-class classification using %s:\n',numClasses,whatClassifier);
-for i = 1:numClasses
-    fprintf(1,'%u time series of class ''%s''\n',sum(TimeSeries.Group==i),groupNames{i});
-end
+dataStruct = makeDataStruct();
+TellMeAboutLabeling(dataStruct);
 
 %-------------------------------------------------------------------------------
 % Fit the model
 %-------------------------------------------------------------------------------
-if isempty(numFolds) || numFolds==0
-    % Use a heuristic to set a default number of folds given the data set size,
-    % number of classes
-    numFolds = HowManyFolds(TimeSeries.Group,numClasses);
-end
-
 % Reset the random seed:
 BF_ResetSeed(seedReset); % reset the random seed for CV-reproducibility
 
 %-------------------------------------------------------------------------------
 % Fit the classification model to the dataset (for each cross-validation fold)
 % and evaluate performance
-fprintf(1,['Training and evaluating a %u-class %s classifier in a %u-feature' ...
-                ' space using %u-fold cross validation (with %u repeat(s))...\n'],...
-                numClasses,whatClassifier,numFeatures,numFolds,numRepeats);
-CVMdl = cell(numRepeats,1);
-foldLosses = zeros(numRepeats,1);
-for i = 1:numRepeats
-    [foldLosses(i),CVMdl{i},outputStat] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group);
+TellMeAboutClassification(cfnParams);
+
+CVMdl = cell(cfnParams.numRepeats,1);
+foldLosses = zeros(cfnParams.numRepeats,1);
+cfnParams.computePerFold = false;
+for i = 1:cfnParams.numRepeats
+    [foldLosses(i),CVMdl{i}] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group);
 end
 
 % Display results to commandline:
-if numRepeats==1
-    foldBit = sprintf('%u-fold',numFolds);
+if cfnParams.numRepeats==1
+    foldBit = sprintf('%u-fold',cfnParams.numFolds);
     accuracyBit = sprintf('%.3f%%',mean(foldLosses));
 else
-    foldBit = sprintf('%u-fold (%u repeats)',numFolds,numRepeats);
+    foldBit = sprintf('%u-fold (%u repeats)',cfnParams.numFolds,cfnParams.numRepeats);
     accuracyBit = sprintf('%.3f +/- %.3f%%',mean(foldLosses),std(foldLosses));
 end
 fprintf(1,['\nMean (across folds) %s (%u-class) using %s %s classification with %u' ...
                  ' features:\n%s\n\n'],...
-        outputStat,numClasses,foldBit,whatClassifier,numFeatures,accuracyBit);
+        cfnParams.whatLoss,cfnParams.numClasses,foldBit,...
+        cfnParams.whatClassifier,numFeatures,accuracyBit);
 
 % Plot as a histogram:
 if doPlot
@@ -173,14 +141,12 @@ end
 % Check nulls:
 %-------------------------------------------------------------------------------
 if numNulls > 0
-    fprintf(1,'Computing %s across %u null permutations...',outputStat,numNulls);
+    fprintf(1,'Computing %s across %u null permutations...',cfnParams.whatLoss,numNulls);
     nullStat = zeros(numNulls,1);
     parfor i = 1:numNulls
         % Compute for shuffled data labels:
         shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-        nullStat(i) = GiveMeCfn(whatClassifier,TS_DataMat,shuffledLabels,[],[],numClasses,[],[],true,numFolds);
-        % nullStat(i) = GiveMeFoldLosses(TS_DataMat,shuffledLabels);
-        % meanNull(i) = mean(foldLosses_null);
+        nullStat(i) = GiveMeCfn(TS_DataMat,shuffledLabels,[],[],cfnParams);
         if i==1
             fprintf(1,'%u',i);
         else
@@ -189,10 +155,10 @@ if numNulls > 0
     end
     fprintf(1,['\n\nMean %s (%u-class) using %u-fold %s classification with %u' ...
                      ' features across %u nulls:\n%.3f +/- %.3f%%\n\n'],...
-                    outputStat,...
-                    numClasses,...
-                    numFolds,...
-                    whatClassifier,...
+                    cfnParams.whatLoss,...
+                    cfnParams.numClasses,...
+                    cfnParams.numFolds,...
+                    cfnParams.whatClassifier,...
                     numFeatures,...
                     numNulls,...
                     mean(nullStat),...
@@ -204,7 +170,7 @@ if numNulls > 0
         ax = gca;
         histogram(nullStat,'normalization','pdf');
         plot(ones(2,1)*mean(foldLosses),ax.YLim,'r','LineWidth',2)
-        xlabel(outputStat)
+        xlabel(cfnParams.whatLoss)
         ylabel('Probability density')
         legend('shuffled labels','real labels')
     end
@@ -233,7 +199,7 @@ end
 % required as input to plotconfusion:
 realLabels = BF_ToBinaryClass(TimeSeries.Group,numClasses,false);
 % Predict from the first CV-partition:
-predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),numClasses,false);
+predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),cfnParams.numClasses,false);
 if doPlot
     try
         if exist('confusionchart','file') ~= 0
@@ -258,56 +224,11 @@ if doPlot
 end
 
 %-------------------------------------------------------------------------------
-% Compare performance of reduced PCs from the data matrix:
-%-------------------------------------------------------------------------------
-if numPCs > 0
-    if any(isnan(TS_DataMat(:)))
-        warning(['Cannot compute PCs of data matrix containing NaNs...\n' ...
-                    '(to compute PCs, re-run TS_Normalize to filter out all NaNs)'])
-        return
-    end
-
-    % Compute top X PCs of the data matrix:
-    fprintf('Computing top %u PCs...',numPCs)
-    [~,pcScore,~,~,~] = pca(zscore(TS_DataMat),'NumComponents',numPCs);
-    fprintf(' Done.\n')
-    numPCs = min(numPCs,size(pcScore,2)); % sometimes lower than attempted 10
-
-    % Compute cumulative performance of PCs:
-    cfnRate = zeros(numPCs,1);
-    fprintf('Computing classification rates keeping top 1-%u PCs...\n',numPCs)
-    for i = 1:numPCs
-        cfnRate(i) = GiveMeFoldLosses(pcScore(:,1:i),TimeSeries.Group);
-        fprintf(1,'%u PCs:  %.3f%%\n',i,cfnRate(i));
-        % fprintf(1,'%u PCs:   %.3f +/- %.3f%%\n',i,cfnRate(i,1),cfnRate(i,2));
-    end
-
-    if doPlot
-        plotColors = BF_GetColorMap('spectral',3,1);
-        f = figure('color','w'); hold on
-        plot([1,numPCs],ones(2,1)*mean(foldLosses),'--','color',plotColors{3})
-        plot(1:numPCs,cfnRate(:,1),'o-k')
-        legend(sprintf('All %u features (%.1f%%)',numFeatures,mean(foldLosses)),...
-                    sprintf('PCs (%.1f-%.1f%%)',min(cfnRate),max(cfnRate)))
-        % plot(1:numPCs,cfnRate(:,1)+cfnRate(:,2),':k')
-        % plot(1:numPCs,cfnRate(:,1)-cfnRate(:,2),':k')
-
-        xlabel('Number of PCs');
-        ylabel('Classification accuracy (%)')
-
-        titleText = sprintf('Classification rate (%u-class) using %u-fold %s classification',...
-                                    numClasses,numFolds,whatClassifier);
-        title(titleText,'interpreter','none')
-    end
-end
-
-%-------------------------------------------------------------------------------
 % Save classifier:
 %-------------------------------------------------------------------------------
-if ~isempty(classifierFilename)
-    [Acc,Mdl,whatLoss] = GiveMeCfn(whatClassifier,TS_DataMat,...
-                            TimeSeries.Group,TS_DataMat,TimeSeries.Group,...
-                            numClasses,[],[],true,0);
+if ~isempty(cfnParams.classifierFilename)
+    [Acc,Mdl] = GiveMeCfn(TS_DataMat,TimeSeries.Group,TS_DataMat,...
+                                        TimeSeries.Group,cfnParams);
 
     Operations = TS_GetFromData(whatData,'Operations');
     jointClassifier.Operation.ID = Operations.ID;
@@ -321,20 +242,29 @@ if ~isempty(classifierFilename)
 
     if exist(classifierFilename,'file')
         out = input(sprintf(['File %s already exists -- continuing will overwrite the file.'...
-                  '\n[Press ''y'' to continue] '], classifierFilename), 's');
+                  '\n[Press ''y'' to continue] '],classifierFilename), 's');
         if ~strcmp(out,'y')
             return;
         end
     end
-    save(classifierFilename,'jointClassifier','classes','-v7.3');
+    save(classifierFilename,'jointClassifier','classes','cfnParams','-v7.3');
     fprintf('Saved trained classifier to ''%s''.\n',classifierFilename);
 end
 
 %-------------------------------------------------------------------------------
-function [foldLosses,CVMdl,whatLoss] = GiveMeFoldLosses(dataMatrix,dataLabels)
+function [foldLosses,CVMdl] = GiveMeFoldLosses(dataMatrix,dataLabels)
     % Returns the output (e.g., loss) for the custom fn_loss function across all folds
-    [foldLosses,CVMdl,whatLoss] = GiveMeCfn(whatClassifier,dataMatrix,...
-                            dataLabels,[],[],numClasses,[],[],true,numFolds);
+    [foldLosses,CVMdl] = GiveMeCfn(dataMatrix,dataLabels,[],[],cfnParams);
 end
+%-------------------------------------------------------------------------------
+function dataStruct = makeDataStruct()
+    % Generate a structure for the dataset
+    dataStruct = struct();
+    dataStruct.TimeSeries = TimeSeries;
+    dataStruct.TS_DataMat = TS_DataMat;
+    dataStruct.Operations = Operations;
+    dataStruct.groupNames = TS_GetFromData(whatData,'groupNames');
+end
+%-------------------------------------------------------------------------------
 
 end

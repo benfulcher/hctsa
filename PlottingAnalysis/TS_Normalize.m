@@ -293,6 +293,11 @@ save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
         'gitInfo','ts_clust','op_clust','-v7.3');
 fprintf(1,' Done.\n');
 
+% Check whether output to screen is required:
+if nargout == 0
+    clear('outputFileName');
+end
+
 %-------------------------------------------------------------------------------
 function keepInd = filterNaNs(XMat,nan_thresh,objectName)
     % Returns an index of rows of XMat with at least nan_thresh good values.

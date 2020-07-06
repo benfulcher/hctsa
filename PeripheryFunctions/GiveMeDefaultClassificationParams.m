@@ -21,6 +21,18 @@ function params = GiveMeDefaultClassificationParams(TimeSeries,numClasses)
 % California, 94041, USA.
 %-------------------------------------------------------------------------------
 
+if nargin < 1
+    [~,TimeSeries] = TS_LoadData('HCTSA.mat');
+end
+
+% Check group labeling:
+if ~ismember('Group',TimeSeries.Properties.VariableNames)
+    error('Group labels not assigned to time series. Use TS_LabelGroups.');
+end
+if any(TimeSeries.Group==0)
+    error('Error labeling time-series groups');
+end
+
 if nargin < 2
     numClasses = max(TimeSeries.Group);
     % Assumes group in form of integer class labels starting at 1
@@ -28,8 +40,16 @@ end
 % Number of classes to classify
 params.numClasses = numClasses;
 
+% Get numbers in each class:
+classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),1:numClasses);
+isBalanced = all(classNumbers==classNumbers(1));
+
+if ~isBalanced
+    fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
+end
+
 % Set the classifier:
-params.whatClassifier = 'svm_linear';
+params.whatClassifier = 'fast_linear'; % ('svm_linear', 'knn', 'linear')
 
 % Number of repeats of cross-validation:
 % (reduce variance due to 'lucky splits')
@@ -39,9 +59,25 @@ params.numRepeats = 2;
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);
 
 % Balance weighting
-params.doReweight = true;
+if isBalanced
+    params.doReweight = false;
+else
+    params.doReweight = true;
+end
 
 % Whether to output information about each fold, or average over folds
 params.computePerFold = false;
+
+% .mat file to save the classifier to (not saved if empty).
+params.classifierFilename = ''; % (don't save classifier information to file)
+
+% Set as default when needed (by context)
+if isBalanced
+    params.whatLoss = 'Accuracy';
+    params.whatLossUnits = '%';
+else
+    params.whatLoss = 'balancedAccuracy';
+    params.whatLossUnits = '%';
+end
 
 end
