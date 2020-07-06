@@ -84,14 +84,14 @@ if nargin < 6
     annotateParams = struct('n',6,'textAnnotation','Name');
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Load the data
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 
 % Retrieve group names also:
-groupNames = TS_GetFromData(whatData,'groupNames');
-numClasses = length(groupNames);
+classLabels = categories(TimeSeries.Group);
+numClasses = length(classLabels);
 
 % ------------------------------------------------------------------------------
 %% Set up the classification function
@@ -129,7 +129,7 @@ fprintf(1,'Selected %u features\n',sum(fs));
 % Finished selecting features!
 fprintf(1,'Feature selection to %u features completed in %s.\n',...
             numFeatSelect,BF_TheTime(toc(FS_timer)))
-clear FS_timer;
+clear('FS_timer');
 
 %-------------------------------------------------------------------------------
 % Plot in a 2-D space
@@ -142,7 +142,7 @@ for i = 1:2
 end
 
 if sum(fs) > 1
-    TS_Plot2d(TS_DataMat(:,ifeat),TimeSeries,featureLabels,groupNames,annotateParams)
+    TS_Plot2d(TS_DataMat(:,ifeat),TimeSeries,featureLabels,annotateParams);
 end
 
 end

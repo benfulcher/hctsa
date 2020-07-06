@@ -21,9 +21,15 @@ function TellMeAboutClassification(cfnParams)
 % California, 94041, USA.
 %-------------------------------------------------------------------------------
 
+if cfnParams.numRepeats==1
+    repeatText = '';
+else
+    repeatText = sprintf(' with %u repeats!',cfnParams.numRepeats);
+end
+
 fprintf(1,['\nTraining and evaluating a %u-class %s classifier',...
-                ' using %u-fold cross validation with %u repeats!\n'],...
+                ' using %u-fold cross validation%s\n'],...
             cfnParams.numClasses,cfnParams.whatClassifier,...
-            cfnParams.numFolds,cfnParams.numRepeats);
+            cfnParams.numFolds,repeatText);
 
 end

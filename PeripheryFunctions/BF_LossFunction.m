@@ -43,11 +43,6 @@ function outputMeasure = BF_LossFunction(yTest,yPredict,whatLoss,numClasses)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-% Check valid format of class labeling:
-if any(yTest==0) || any(yPredict==0)
-    error('Class labels should be of the form 1, 2, ..., numClasses (no class labels should be zeros)')
-end
-
 % Set the loss/accuracy function:
 switch whatLoss
 case {'acc','accuracy','Accuracy'}

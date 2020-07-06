@@ -178,7 +178,6 @@ function dataStruct = makeDataStruct()
     dataStruct.TimeSeries = TimeSeries;
     dataStruct.TS_DataMat = TS_DataMat;
     dataStruct.Operations = Operations;
-    dataStruct.groupNames = TS_GetFromData(whatData,'groupNames');
 end
 %-------------------------------------------------------------------------------
 

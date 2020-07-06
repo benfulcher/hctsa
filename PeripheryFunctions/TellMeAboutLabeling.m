@@ -27,17 +27,23 @@ function TellMeAboutLabeling(whatData)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 %------------------------------------------------------------------------------
 
-[~,TimeSeries] = TS_LoadData(whatData);
-groupNames = TS_GetFromData(whatData,'groupNames');
+% Can input TimeSeries table, or reference to where it is stored.
+if istable(whatData)
+    TimeSeries = whatData;
+else
+    [~,TimeSeries] = TS_LoadData(whatData);
+end
 
+% Check that the data are labeled:
 if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
 
-numClasses = max(TimeSeries.Group);
+classLabels = categories(TimeSeries.Group);
+numClasses = length(classLabels);
 fprintf(1,'%u classes assigned to the time series in this dataset:\n',numClasses);
 for i = 1:numClasses
-    fprintf(1,'Class %u: %s (%u time series)\n',i,groupNames{i},sum(TimeSeries.Group==i));
+    fprintf(1,'Class %u: %s (%u time series)\n',i,classLabels{i},sum(TimeSeries.Group==classLabels{i}));
 end
 
 end

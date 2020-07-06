@@ -49,14 +49,15 @@ end
 %-------------------------------------------------------------------------------
 % Load data:
 [TS_DataMat,TimeSeries,Operations,whatDataSource] = TS_LoadData(whatData);
-% Get groupNames if it exists:
-groupNames = TS_GetFromData(whatData,'groupNames');
-if isempty(groupNames)
+% Get classLabels:
+if ismember('Group',TimeSeries.Properties.VariableNames)
+    classLabels = categories(TimeSeries.Group);
+else
     error('You must assign groups to data to use TS_SingleFeature. Use TS_LabelGroups.');
 end
+numClasses = length(classLabels);
 
 %-------------------------------------------------------------------------------
-numClasses = max(TimeSeries.Group);
 op_ind = find(Operations.ID==featID);
 
 if isempty(op_ind)
@@ -78,7 +79,7 @@ colors = GiveMeColors(numClasses);
 if makeViolin
     dataCell = cell(numClasses,1);
     for i = 1:numClasses
-        dataCell{i} = (TS_DataMat(TimeSeries.Group==i,op_ind));
+        dataCell{i} = (TS_DataMat(TimeSeries.Group==classLabels{i},op_ind));
     end
 
     % Re-order groups by mean (excluding any NaNs, descending):
@@ -95,7 +96,7 @@ if makeViolin
     ax = gca;
     ax.XLim = [0.5+extraParams.customOffset,numClasses+0.5+extraParams.customOffset];
     ax.XTick = extraParams.customOffset+(1:numClasses);
-    ax.XTickLabel = groupNames(ix);
+    ax.XTickLabel = classLabels(ix);
     ylabel('Output')
     ax.TickLabelInterpreter = 'none';
     if makeNewFigure
@@ -112,7 +113,7 @@ if makeViolin
 else
     linePlots = cell(numClasses,1);
     for i = 1:numClasses
-        featVector = TS_DataMat(TimeSeries.Group==i,op_ind);
+        featVector = TS_DataMat(TimeSeries.Group==classLabels{i},op_ind);
         [~,~,linePlots{i}] = BF_plot_ks(featVector,colors{i},0,2,20,1);
     end
     % Trim x-limits (with 2% overreach)
@@ -120,7 +121,7 @@ else
     ax.XLim(2) = max(TS_DataMat(:,op_ind))+0.02*range(TS_DataMat(:,op_ind));
 
     % Add a legend:
-    legend([linePlots{:}],groupNames,'interpreter','none','Location','best')
+    legend([linePlots{:}],classLabels,'interpreter','none','Location','best')
     ylabel('Probability density')
 
     % Annotate rectangles:

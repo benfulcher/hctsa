@@ -66,18 +66,11 @@ if ~isstruct(annotateParams)
     annotateParams = struct('n',annotateParams);
 end
 
-% ------------------------------------------------------------------------------
-%% Load the data and group labeling from file
-% ------------------------------------------------------------------------------
-% Load in data:
+%-------------------------------------------------------------------------------
+%% Load the data
+%-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 numFeatures = height(Operations);
-
-% Retrieve group names also:
-groupNames = TS_GetFromData(whatData,'groupNames');
-if isempty(groupNames)
-    groupNames = {};
-end
 
 % ------------------------------------------------------------------------------
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm
@@ -96,7 +89,8 @@ case {'pca','PCA'}
                     '(Could take some time...)'],100*mean(isnan(TS_DataMat(:)))))
         % Data matrix contains NaNs; try the pairwise rows approximation to the
         % covariance matrix:
-        [pcCoeff,Y,~,~,percVar] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Rows','pairwise');
+        [pcCoeff,Y,~,~,percVar] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),...
+                                        'Rows','pairwise','NumComponents',2);
         % If this fails (covariance matrix not positive definite), can try the
         % (...,'algorithm','als') option in pca... (or toolbox for probabilistic PCA)
     end
@@ -152,8 +146,7 @@ otherwise
 end
 
 %-------------------------------------------------------------------------------
-% Set up for plotting two-dimensional representation of the data using TS_Plot2d
-
-f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,groupNames,annotateParams,showDist,classMeth);
+% Plot two-dimensional representation of the data using TS_Plot2d:
+f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,annotateParams,showDist,classMeth);
 
 end

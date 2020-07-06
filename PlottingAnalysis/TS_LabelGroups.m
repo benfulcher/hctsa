@@ -66,16 +66,15 @@ if nargin < 1 || isempty(whatData)
 end
 if nargin < 2
     keywordGroups = {};
-    % Try to assign by unique keywords later
+    % Try to automatically assign by unique keywords later
 end
 if ~isempty(keywordGroups) && ischar(keywordGroups)
     fprintf(1,'Grouping all items with ''%s''.\n',keywordGroups);
     keywordGroups = {keywordGroups};
 end
 if nargin < 3 || isempty(saveBack)
-    saveBack = true; % Saves the grouping back to the HCTSA_*.loc file
+    saveBack = true; % Saves the grouping back to the HCTSA_*.mat file
 end
-
 if nargin < 4
     filterMissing = false; % don't filter out data with missing labels -- error if not all data are labeled
 end
@@ -120,7 +119,7 @@ for jo = 1:numGroups
     end
 end
 fprintf(1,'Group labeling complete in %s.\n',BF_TheTime(toc(timer)));
-clear timer % stop timing
+clear('timer') % stop timing
 
 %-------------------------------------------------------------------------------
 %% Checks:
@@ -134,9 +133,9 @@ if any(emptyGroups)
 end
 
 % Check overlaps:
-overlapping = (sum(groupIndices,2)>1);
+overlapping = (sum(groupIndices,2) > 1);
 if any(overlapping)
-    error('%u time series have multiple group assignments: %s',sum(overlapping),...
+    error('%u time series have multiple group assignments: %s.',sum(overlapping),...
                     BF_cat(TimeSeries.Name(overlapping),','));
 end
 
@@ -178,36 +177,40 @@ end
 
 %-------------------------------------------------------------------------------
 % Everything checks out so now we can make group labels:
-groupLabels = zeros(1,numTimeSeries);
+groupLabelsInteger = zeros(1,numTimeSeries);
 for i = 1:numGroups
-    groupLabels(groupIndices(:,i)) = i;
+    groupLabelsInteger(groupIndices(:,i)) = i;
 end
+% Convert to categorical:
+groupLabels = categorical(groupLabelsInteger,1:numGroups,keywordGroups);
 
 %-------------------------------------------------------------------------------
 % User feedback:
 %-------------------------------------------------------------------------------
 fprintf(1,'We found data for %u labeled classes:\n',numGroups);
 for i = 1:numGroups
-    fprintf(1,'%s -- %u matches (/%u)\n',keywordGroups{i},sum(groupIndices(:,i)),numTimeSeries);
+    fprintf(1,'%s -- %u matches (/%u)\n',keywordGroups{i},...
+                            sum(groupIndices(:,i)),numTimeSeries);
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Save back to the input file?
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 if saveBack
     % You don't need to check variables, you can just append back to the input file:
-    fprintf(1,'Saving group labels and information back to %s...',theFile);
+    fprintf(1,'Saving group labeling back to %s...',theFile);
 
-    % First append/overwrite group names
-    groupNames = keywordGroups;
+    % Append/overwrite group names:
     TimeSeries.Group = groupLabels';
 
-    % Save everything back to file:
-    save(theFile,'TimeSeries','groupNames','-append')
+    % Save:
+    save(theFile,'TimeSeries','-append')
     fprintf(1,' Saved.\n');
 end
 
+%-------------------------------------------------------------------------------
 % Check whether to suppress output to screen
+%-------------------------------------------------------------------------------
 if nargout==0
     clear('groupLabels','newFileName');
 end

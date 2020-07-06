@@ -1,30 +1,28 @@
-function [foldLosses,nullStat,jointClassifier] = TS_Classify(whatData,cfnParams,varargin)
-% TS_Classify   Classify groups in the data using all features
+function [foldLosses,nullStats,jointClassifier] = TS_Classify(whatData,cfnParams,numNulls,varargin)
+% TS_Classify   Classify class labels assigned to the data using all features
 %
-% TS_Classify uses a classifier to learn group labels assigned to time series
-% in the dataset.
-%
-% It can also provide insights into the dimensionality required for good performance
-% by classifying with the leading principal components of the feature space.
+% Requires the time-series data to have been labeled using TS_LabelGroups, which
+% stores in the Group column of the TimeSeries table.
 %
 %---USAGE:
 % TS_Classify();
 %
 %---INPUTS:
 % whatData, the hctsa data to use (input to TS_LoadData)
-% cfnParams, parameters for the classification algorithm (cf GiveMeDefaultClassificationParams)
+% cfnParams, parameters for the classification algorithm (cf. GiveMeDefaultClassificationParams)
+% numNulls (numeric), number of nulls to compute (0 for no null comparison)
 %
 % (OPTIONAL):
-% 'numNulls' (numeric), number of nulls to compute (0 for no null comparison)
-% 'seedReset', input to BF_ResetSeed, specifying whether (and how) to reset the
+% seedReset, input to BF_ResetSeed, specifying whether (and how) to reset the
 %               random seed (for reproducible results from cross-validation)
-% 'doPlot', whether to plot outputs (including confusion matrix)
+% doPlot, whether to plot outputs (including confusion matrix)
 %
 %---OUTPUTS:
 % Text output on classification rate using all features, and if doPCs = true, also
 % shows how this varies as a function of reduced PCs (text and as an output plot)
-% 'foldLosses', the performance metric across repeats of cross-validation
-% 'nullStat', the performance metric across randomizations of the data labels
+% foldLosses, the performance metric across repeats of cross-validation
+% nullStats, the performance metric across randomizations of the data labels
+% jointClassifier, details of the saved all-features classifier
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -55,13 +53,13 @@ if nargin < 1
     whatData = 'norm';
 end
 % <set default classificaiton parameters after inspecting TimeSeries labeling below>
+if nargin < 3
+    numNulls = 10;
+end
+doParallel = false;
 
 % Use an inputParser to parse additional options as parameters:
 inputP = inputParser;
-% numNulls:
-default_numNulls = 20;
-check_numNulls = @(x) isnumeric(x);
-addParameter(inputP,'numNulls',default_numNulls,check_numNulls);
 % seedReset:
 default_seedReset = 'default';
 check_seedReset = @(x) ischar(x);
@@ -73,7 +71,6 @@ addParameter(inputP,'doPlot',default_doPlot,check_doPlot);
 
 % Parse input arguments:
 parse(inputP,varargin{:});
-numNulls = inputP.Results.numNulls;
 seedReset = inputP.Results.seedReset;
 doPlot = inputP.Results.doPlot;
 clear('inputP');
@@ -91,7 +88,7 @@ end
 if nargin < 2
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
-groupNames = TS_GetFromData(whatData,'groupNames');
+classLabels = categories(TimeSeries.Group);
 numFeatures = height(Operations);
 
 %-------------------------------------------------------------------------------
@@ -131,26 +128,34 @@ fprintf(1,['\nMean (across folds) %s (%u-class) using %s %s classification with 
         cfnParams.whatClassifier,numFeatures,accuracyBit);
 
 % Plot as a histogram:
-if doPlot
-    f = figure('color','w');
-    histogram(foldLosses*100)
-    xlim([0,100]);
-end
+% if doPlot
+%     f_histogram = figure('color','w');
+%     h = histogram(foldLosses);
+%     h.FaceColor = ones(1,3)*0.5;
+% end
 
 %-------------------------------------------------------------------------------
 % Check nulls:
 %-------------------------------------------------------------------------------
 if numNulls > 0
     fprintf(1,'Computing %s across %u null permutations...',cfnParams.whatLoss,numNulls);
-    nullStat = zeros(numNulls,1);
-    parfor i = 1:numNulls
-        % Compute for shuffled data labels:
-        shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-        nullStat(i) = GiveMeCfn(TS_DataMat,shuffledLabels,[],[],cfnParams);
-        if i==1
-            fprintf(1,'%u',i);
-        else
-            fprintf(1,',%u',i);
+    nullStats = zeros(numNulls,1);
+    % Compute for shuffled data labels:
+    if doParallel
+        fprintf(1,'Using parfor for speed...\n');
+        parfor i = 1:numNulls
+            shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
+            nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,[],[],cfnParams);
+        end
+    else
+        for i = 1:numNulls
+            shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
+            nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,[],[],cfnParams);
+            if i==1
+                fprintf(1,'%u',i);
+            else
+                fprintf(1,',%u',i);
+            end
         end
     end
     fprintf(1,['\n\nMean %s (%u-class) using %u-fold %s classification with %u' ...
@@ -161,18 +166,20 @@ if numNulls > 0
                     cfnParams.whatClassifier,...
                     numFeatures,...
                     numNulls,...
-                    mean(nullStat),...
-                    std(nullStat));
+                    mean(nullStats),...
+                    std(nullStats));
 
     % Plot the null distribution:
     if doPlot
-        f = figure('color','w'); hold('on')
+        f = figure('color','w');
+        hold('on')
         ax = gca;
-        histogram(nullStat,'normalization','pdf');
+        h = histogram(nullStats,'normalization','pdf');
+        h.FaceColor = ones(1,3)*0.5;
         plot(ones(2,1)*mean(foldLosses),ax.YLim,'r','LineWidth',2)
         xlabel(cfnParams.whatLoss)
         ylabel('Probability density')
-        legend('shuffled labels','real labels')
+        legend('Shuffled labels','Real labels')
     end
 
     % Estimate a p-value:
@@ -183,13 +190,13 @@ if numNulls > 0
     % Label-randomization null:
     % (note that for a discrete quantity like classification accuracy with a
     % small sample size, equality cases become more likely):
-    pValPermTest = mean(mean(foldLosses) <= nullStat);
+    pValPermTest = mean(mean(foldLosses) <= nullStats);
     fprintf(1,'Estimated p-value (permutation test) = %.2g\n',pValPermTest);
 
-    pValZ = 1 - normcdf(mean(foldLosses),mean(nullStat),std(nullStat));
+    pValZ = 1 - normcdf(mean(foldLosses),mean(nullStats),std(nullStats));
     fprintf(1,'Estimated p-value (Gaussian fit) = %.2g\n',pValZ);
 else
-    nullStat = [];
+    nullStats = [];
 end
 
 %-------------------------------------------------------------------------------
@@ -197,7 +204,7 @@ end
 %-------------------------------------------------------------------------------
 % Convert real and predicted class labels to matrix form (numClasses x N),
 % required as input to plotconfusion:
-realLabels = BF_ToBinaryClass(TimeSeries.Group,numClasses,false);
+realLabels = BF_ToBinaryClass(TimeSeries.Group,cfnParams.numClasses,false);
 % Predict from the first CV-partition:
 predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),cfnParams.numClasses,false);
 if doPlot
@@ -208,16 +215,18 @@ if doPlot
             confusionchart(realLabels,predictLabels);
         else
             % Requires the Deep Learning Toolbox:
+            f_confusion = figure('color','w');
             plotconfusion(realLabels,predictLabels);
         end
 
         % Fix axis labels:
         ax = gca;
-        ax.XTickLabel(1:numClasses) = groupNames;
-        ax.YTickLabel(1:numClasses) = groupNames;
+        ax.XTickLabel(1:cfnParams.numClasses) = classLabels;
+        ax.YTickLabel(1:cfnParams.numClasses) = classLabels;
         ax.TickLabelInterpreter = 'none';
 
-        title(sprintf('Confusion matrix from 10-fold (%u repeats) cross-validation',numRepeats));
+        title(sprintf('Confusion matrix from %u-fold (%u repeats) cross-validation',...
+                                cfnParams.numFolds,cfnParams.numRepeats));
     catch
         warning('No available confusion matrix plotting functions')
     end
@@ -238,7 +247,7 @@ if ~isempty(cfnParams.classifierFilename)
     jointClassifier.Mdl = Mdl;
     jointClassifier.whatLoss = whatLoss;
     jointClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
-    classes = groupNames;
+    classes = classLabels;
 
     if exist(classifierFilename,'file')
         out = input(sprintf(['File %s already exists -- continuing will overwrite the file.'...
@@ -263,7 +272,7 @@ function dataStruct = makeDataStruct()
     dataStruct.TimeSeries = TimeSeries;
     dataStruct.TS_DataMat = TS_DataMat;
     dataStruct.Operations = Operations;
-    dataStruct.groupNames = TS_GetFromData(whatData,'groupNames');
+    dataStruct.classLabels = TS_GetFromData(whatData,'classLabels');
 end
 %-------------------------------------------------------------------------------
 

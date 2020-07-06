@@ -124,11 +124,8 @@ numTopFeatures = min(numTopFeatures,numOps);
 if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
-numClasses = max(TimeSeries.Group); % Assuming classes labeled with integers starting at 1
-groupNames = TS_GetFromData(whatData,'groupNames');
-if isempty(groupNames)
-    error('No group label info in the data source');
-end
+classLabels = categories(TimeSeries.Group);
+numClasses = length(classLabels);
 
 %-------------------------------------------------------------------------------
 % Fit the model
@@ -353,7 +350,7 @@ if ismember('distributions',whatPlots)
     % Make data structure for TS_SingleFeature
     data = struct('TS_DataMat',TS_DataMat,'TimeSeries',TimeSeries,...
                 'Operations',Operations);
-    data.groupNames = groupNames;
+    data.classLabels = classLabels;
 
     for figi = 1:numFigs
         if figi*subPerFig > length(ifeat)
@@ -452,7 +449,7 @@ if ~isempty(classifierFilename)
     featureClassifier.Accuracy = bestTestStat;
     featureClassifier.whatTestStat = whatTestStat;
     featureClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
-    classes = groupNames;
+    classes = classLabels;
 
     % Save to file
     if exist(classifierFilename,'file')~=0

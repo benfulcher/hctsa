@@ -1,8 +1,5 @@
 function params = GiveMeDefaultClassificationParams(TimeSeries,numClasses)
 %-------------------------------------------------------------------------------
-% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
-% <http://www.benfulcher.com>
-%
 % If you use this code for your research, please cite these papers:
 %
 % (1) B.D. Fulcher and N.S. Jones, "hctsa: A Computational Framework for Automated
@@ -21,31 +18,39 @@ function params = GiveMeDefaultClassificationParams(TimeSeries,numClasses)
 % California, 94041, USA.
 %-------------------------------------------------------------------------------
 
+% Get TimeSeries labeling information from HCTSA.mat by default
 if nargin < 1
     [~,TimeSeries] = TS_LoadData('HCTSA.mat');
+    warning('DEFAULT: Retrieving time-series labeling information from HCTSA.mat')
 end
 
 % Check group labeling:
 if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
-if any(TimeSeries.Group==0)
-    error('Error labeling time-series groups');
-end
 
+% Assume every class is represented in the data:
+params.classLabels = categories(TimeSeries.Group);
 if nargin < 2
-    numClasses = max(TimeSeries.Group);
-    % Assumes group in form of integer class labels starting at 1
+    numClasses = length(params.classLabels);
 end
 % Number of classes to classify
 params.numClasses = numClasses;
 
 % Get numbers in each class:
-classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),1:numClasses);
+classNumbers = arrayfun(@(x)sum(TimeSeries.Group==x),params.classLabels);
 isBalanced = all(classNumbers==classNumbers(1));
 
-if ~isBalanced
+% Set the performance metric, and balancing settings based on class balance statistics
+if isBalanced
+    params.doReweight = false;
+    params.whatLoss = 'Accuracy';
+    params.whatLossUnits = '%';
+else
     fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
+    params.doReweight = true;
+    params.whatLoss = 'balancedAccuracy';
+    params.whatLossUnits = '%';
 end
 
 % Set the classifier:
@@ -55,29 +60,13 @@ params.whatClassifier = 'fast_linear'; % ('svm_linear', 'knn', 'linear')
 % (reduce variance due to 'lucky splits')
 params.numRepeats = 2;
 
-% Number of folds:
+% Cross validation: number of folds
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);
-
-% Balance weighting
-if isBalanced
-    params.doReweight = false;
-else
-    params.doReweight = true;
-end
 
 % Whether to output information about each fold, or average over folds
 params.computePerFold = false;
 
 % .mat file to save the classifier to (not saved if empty).
 params.classifierFilename = ''; % (don't save classifier information to file)
-
-% Set as default when needed (by context)
-if isBalanced
-    params.whatLoss = 'Accuracy';
-    params.whatLossUnits = '%';
-else
-    params.whatLoss = 'balancedAccuracy';
-    params.whatLossUnits = '%';
-end
 
 end

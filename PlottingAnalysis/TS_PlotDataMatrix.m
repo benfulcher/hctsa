@@ -304,12 +304,13 @@ cB = colorbar('eastoutside');
 cB.Label.String = 'Output';
 if numGroups > 0
 	cB.Ticks = 0.5:1:numGroups;
-	cB.TickLabels = TS_GetFromData(whatData,'groupNames');
+	cB.TickLabels = categories(timeSeriesGroups);
 	cB.TickLabelInterpreter = 'none';
 end
 
 title(sprintf('Data matrix (%u x %u)',numTS,numOps))
 
+% Add time-series annotations:
 if addTimeSeries
     ax2.YTickLabel = {};
     % Reposition tight

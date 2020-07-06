@@ -130,19 +130,12 @@ if doSave
         save(outputFileName,'TS_CalcTime','-append');
     end
 
-    % Possible inconsistency with grouping (e.g., if you remove a whole group of time series)
-    % Matlab doesn't allow you to remove a variable from a .mat file easily
-    if ~isempty(ts_ids_keep) && ismember('groupNames',varNames)
-        groupNames = {};
-        save(outputFileName,'groupNames','-append');
-    end
-
     fprintf(1,'Data saved to %s!\n',outputFileName);
+end
 
-    % Don't display all of this info to screen if it's been saved and not stored
-    if nargout == 0
-        clear('TS_DataMat','TimeSeries','Operations');
-    end
+% Don't display all of this info to screen if it's been saved and not stored
+if nargout == 0
+    clear('TS_DataMat','TimeSeries','Operations');
 end
 
 %-------------------------------------------------------------------------------

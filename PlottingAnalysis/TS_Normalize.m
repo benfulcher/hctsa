@@ -44,8 +44,8 @@ function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA
 %% Check Inputs
 % --------------------------------------------------------------------------
 if nargin < 1 || isempty(normFunction)
-    fprintf(1,'Using the default, scaled quantile-based sigmoidal transform: ''scaledRobustSigmoid''\n')
-    normFunction = 'scaledRobustSigmoid';
+    fprintf(1,'Using the mixed sigmoidal transform: ''mixedSigmoid''\n')
+    normFunction = 'mixedSigmoid';
 end
 
 if nargin < 2 || isempty(filterOptions)
@@ -82,12 +82,6 @@ MasterOperations = TS_GetFromData(fileName_HCTSA,'MasterOperations');
 fromDatabase = TS_GetFromData(fileName_HCTSA,'fromDatabase');
 if isempty(fromDatabase)
     fromDatabase = true; % (legacy)
-end
-
-% Check that we have the groupNames if already assigned labels
-groupNames = TS_GetFromData(fileName_HCTSA,'groupNames');
-if isempty(groupNames)
-    groupnames = {};
 end
 
 % Maybe we kept the git repository info
@@ -289,7 +283,7 @@ outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 
 fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName);
 save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-        'MasterOperations','fromDatabase','groupNames','normalizationInfo',...
+        'MasterOperations','fromDatabase','normalizationInfo',...
         'gitInfo','ts_clust','op_clust','-v7.3');
 fprintf(1,' Done.\n');
 

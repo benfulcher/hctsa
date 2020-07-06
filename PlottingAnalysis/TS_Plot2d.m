@@ -1,4 +1,4 @@
-function f = TS_Plot2d(featureData,TimeSeries,featureLabels,groupNames,annotateParams,showDistr,whatClassifier)
+function f = TS_Plot2d(featureData,TimeSeries,featureLabels,annotateParams,showDistr,whatClassifier)
 % TS_Plot2d   Plots a dataset in a two-dimensional space.
 %
 % e.g., The space of two chosen features, or two principal components.
@@ -10,8 +10,6 @@ function f = TS_Plot2d(featureData,TimeSeries,featureLabels,groupNames,annotateP
 % TimeSeries, table of time-series metadata
 %
 % featureLabels, cell of labels for each feature
-%
-% groupNames, cell containing a label for each class of time series
 %
 % annotateParams, a structure containing all the information about how to annotate
 %           data points. Fields can include (cf. BF_AnnotatePoints):
@@ -66,16 +64,16 @@ if nargin < 3 || isempty(featureLabels)
     featureLabels = {'',''};
 end
 
-if nargin < 5 || isempty(annotateParams)
+if nargin < 4 || isempty(annotateParams)
     annotateParams = struct('n',6); % annotate for six points
 end
 
 % By default, plot kernel density estimates above and on the side of the plot:
-if nargin < 6 || isempty(showDistr)
+if nargin < 5 || isempty(showDistr)
     showDistr = true;
 end
 
-if nargin < 7 || isempty(whatClassifier)
+if nargin < 6 || isempty(whatClassifier)
     whatClassifier = 'svm_linear';
 end
 
@@ -90,7 +88,8 @@ end
 %-------------------------------------------------------------------------------
 if ismember('Group',TimeSeries.Properties.VariableNames)
     groupLabels = TimeSeries.Group; % Convert GroupIndices to group form
-    numClasses = length(unique(groupLabels));
+    classLabels = categories(groupLabels);
+    numClasses = length(classLabels);
 else
     % No group information assigned to time series
     numClasses = 1;
@@ -253,8 +252,8 @@ end
 if numClasses > 1
     legendText = cell(numClasses,1);
     for i = 1:numClasses
-        if ~isempty(groupNames)
-            legendText{i} = sprintf('%s (%u)',groupNames{i},sum(groupLabels==i));
+        if ~isempty(classLabels)
+            legendText{i} = sprintf('%s (%u)',classLabels{i},sum(groupLabels==i));
         else
             legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==i));
         end
