@@ -32,7 +32,7 @@ function fn_handle = GiveMeFunctionHandle(cfnParams)
 % Set the function handle to compute the accuracy/loss measure:
 %-------------------------------------------------------------------------------
 if strcmp(cfnParams.whatClassifier,'fast_linear')
-    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.numClasses);
+    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
     fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,classify(XTest,XTrain,yTrain,'linear'));
     return
 end
@@ -40,9 +40,9 @@ end
 %-------------------------------------------------------------------------------
 % Binary model (easier), we can do it in one line:
 %-------------------------------------------------------------------------------
-if numClasses==2
+if cfnParams.numClasses==2
     % Set the loss function:
-    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.numClasses);
+    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
 
     switch whatClassifier
     case 'knn'

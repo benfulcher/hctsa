@@ -360,7 +360,6 @@ end
 % Inter-dependence of top features
 %-------------------------------------------------------------------------------
 if ismember('cluster',whatPlots)
-
     % 1. Get pairwise similarity matrix
     op_ind = ifeat(1:numTopFeatures); % plot these operations indices
 

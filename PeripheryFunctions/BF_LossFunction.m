@@ -1,4 +1,4 @@
-function outputMeasure = BF_LossFunction(yTest,yPredict,whatLoss,numClasses)
+function outputMeasure = BF_LossFunction(yTest,yPredict,whatLoss,classLabels)
 % BF_LossFunction gives a measure of classification performance
 %
 % All labels are expected to be integers, ranging from 1 to the total number
@@ -12,7 +12,7 @@ function outputMeasure = BF_LossFunction(yTest,yPredict,whatLoss,numClasses)
 %               (*) 'balancedAcc': mean classification rate of each class (%,
 %                                        same as acc when balanced classes)
 %               (*) 'sumLoss': total number of misclassifications
-% numClasses, the total number of classes
+% classLabels, labels for each class
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -42,6 +42,9 @@ function outputMeasure = BF_LossFunction(yTest,yPredict,whatLoss,numClasses)
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
+if nargin < 4
+    classLabels = categories([yPredict;yTest]);
+end
 
 % Set the loss/accuracy function:
 switch whatLoss
@@ -49,16 +52,13 @@ case {'acc','accuracy','Accuracy'}
     % Overall classification rate:
     outputMeasure = 100*mean(yTest==yPredict);
 case {'balancedAcc','balancedAccuracy'}
-    if nargin < 4
-        numClasses = max(yTest);
-    end
-    outputMeasure = 100*mean(arrayfun(@(x) mean(yPredict(yTest==x)==yTest(yTest==x)),1:numClasses));
+    outputMeasure = 100*mean(arrayfun(@(x) mean(yPredict(yTest==x)==yTest(yTest==x)),classLabels));
 case 'sumLoss'
     % Sum of errors:
     outputMeasure = sum(yTest~=yPredict);
 case 'balancedLoss'
     % Weighted sum of errors:
-    classTotals = arrayfun(@(x)sum(yTest==x),1:max(yTest));
+    classTotals = arrayfun(@(x)sum(yTest==x),classLabels);
     classWeights = zeros(length(yTest),1);
     for i = 1:length(yTest)
         classWeights(i) = 1/classTotals(yTest(i));

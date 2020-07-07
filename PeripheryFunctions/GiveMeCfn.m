@@ -62,7 +62,7 @@ if strcmp(cfnParams.whatClassifier,'fast_linear')
         if nargout == 1
             % It's faster to use classify if we only want the accuracy
             accuracy = BF_LossFunction(yTest,classify(yTest,XTrain,yTrain),...
-                            cfnParams.whatLoss,cfnParams.numClasses);
+                            cfnParams.whatLoss,cfnParams.classLabels);
             return;
         else
             Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform');
@@ -191,7 +191,7 @@ if cfnParams.numFolds == 0
         return
     else
         yPredict = predict(Mdl,XTest);
-        accuracy = BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.numClasses);
+        accuracy = BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
     end
 else
     % Test data is mixed through the training data provided using k-fold cross validation
@@ -201,10 +201,10 @@ else
         % Compute separately for each fold, store in vector accuracy:
         accuracy = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
                         yPredict(Mdl.Partition.test(x)),cfnParams.whatLoss,...
-                        cfnParams.numClasses),1:cfnParams.numFolds);
+                        cfnParams.classLabels),1:cfnParams.numFolds);
     else
         % Compute aggregate across all folds:
-        accuracy = BF_LossFunction(yTrain,yPredict,cfnParams.whatLoss,cfnParams.numClasses);
+        accuracy = BF_LossFunction(yTrain,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
     end
 end
 

@@ -1,4 +1,4 @@
-function params = GiveMeDefaultClassificationParams(TimeSeries,numClasses)
+function params = GiveMeDefaultClassificationParams(TimeSeries,numClasses,beVocal)
 %-------------------------------------------------------------------------------
 % If you use this code for your research, please cite these papers:
 %
@@ -27,6 +27,9 @@ if ~istable(TimeSeries)
     % Actually specified TimeSeries as a filename or structure:
     TimeSeries = TS_GetFromData(TimeSeries,'TimeSeries');
 end
+if nargin < 3
+    beVocal = true;
+end
 
 % Check group labeling:
 if ~ismember('Group',TimeSeries.Properties.VariableNames)
@@ -36,7 +39,7 @@ end
 % Number of classes to classify
 % (Assume every class is represented in the data):
 params.classLabels = categories(TimeSeries.Group);
-if nargin < 2
+if nargin < 2 || isempty(numClasses);
     numClasses = length(params.classLabels);
 end
 params.numClasses = numClasses;
@@ -51,7 +54,9 @@ if isBalanced
     params.whatLoss = 'accuracy';
     params.whatLossUnits = '%';
 else
-    fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
+    if beVocal
+        fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
+    end
     params.doReweight = true;
     params.whatLoss = 'balancedAccuracy';
     params.whatLossUnits = '%';
@@ -79,9 +84,9 @@ switch params.whatClassifier
     case 'diaglinear'
         params.classifierText = 'linear naive bayes classifier';
     case {'svm','svm_linear'}
-        testStatText = 'linear SVM classifier';
+        params.classifierText = 'linear SVM classifier';
     otherwise
-        testStatText = params.whatClassifier;
+        params.classifierText = params.whatClassifier;
 end
 
 end

@@ -105,7 +105,7 @@ if makeViolin
     end
 
     % Annotate rectangles for predicted intervals:
-    cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
+    cfnParams = GiveMeDefaultClassificationParams(TimeSeries,[],false);
     cfnParams.numFolds = 0;
     BF_AnnotateRect(TS_DataMat(:,op_ind),TimeSeries.Group,cfnParams,colors,ax,'left');
 
