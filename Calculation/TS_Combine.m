@@ -152,7 +152,7 @@ if sum(hasGit)==0
     % git info not present in either; keep an empty structure:
     gitInfo = struct();
 elseif sum(hasGit)==1
-    % Git only stored in one of the HCTSA files (but not the other)
+    % Git only stored in one of the HCTSA files
     warning(sprintf(['!!!!!!!!!!%s contains git version info, but %s does not.\n',...
         'If hctsa versions are inconsistent, results may not be comparable!!!!!!!!!!'],...
                 HCTSAs{find(hasGit)},HCTSAs{find(~hasGit)}))
