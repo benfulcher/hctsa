@@ -64,14 +64,20 @@ elseif ischar(dataSource)
         dataSource = 'HCTSA_N.mat';
     end
 
-    fileVarsStruct = whos('-file',dataSource);
-    fileVars = {fileVarsStruct.name};
-    if ismember(dataField,fileVars)
+    try
         loadAgain = load(dataSource,dataField);
         result = loadAgain.(dataField);
-    else
+    catch
         result = [];
     end
+    % fileVarsStruct = whos('-file',dataSource);
+    % fileVars = {fileVarsStruct.name};
+    % if ismember(dataField,fileVars)
+    %     loadAgain = load(dataSource,dataField);
+    %     result = loadAgain.(dataField);
+    % else
+    %     result = [];
+    % end
 else
     error('Unknown data source type: %s',class(dataSource));
 end

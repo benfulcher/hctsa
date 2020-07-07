@@ -25,9 +25,9 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %                   cluster plot.
 % 'numFeaturesDistr', can set a custom number of distributions to display (can
 %                   set this lower to avoid producing large numbers of figures).
-% 'numNulls', the number of shuffled nulls to generate (e.g., 10 shuffles pools
+% 'numNulls' [0], the number of shuffled nulls to generate (e.g., 10 shuffles pools
 %               shuffles for all M features, for a total of 10*M elements in the
-%               null distribution) [default: 0]
+%               null distribution)
 %
 %---EXAMPLE USAGE:
 %
