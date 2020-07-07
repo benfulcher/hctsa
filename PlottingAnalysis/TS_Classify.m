@@ -86,24 +86,18 @@ clear('inputP');
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 
-% Check that group labels have been assigned
-if ~ismember('Group',TimeSeries.Properties.VariableNames)
-    error('Group labels not assigned to time series in %s. Use TS_LabelGroups.',whatDataFile);
-end
+% Assign group labels (removing unlabeled data):
+[TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
+[groupLabels,classLabels,groupLabelsInteger,numGroups] = ExtractGroupLabels(TimeSeries);
+% Give basic info about the represented classes:
+TellMeAboutLabeling(TimeSeries);
 
+% Settings for the classification model:
 if nargin < 2 || isempty(fields(cfnParams))
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
-classLabels = categories(TimeSeries.Group);
+TellMeAboutClassification(cfnParams);
 numFeatures = height(Operations);
-
-%-------------------------------------------------------------------------------
-% Ignore unlabeled data:
-[TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-
-%-------------------------------------------------------------------------------
-% Give basic info about the represented classes:
-TellMeAboutLabeling(TimeSeries);
 
 %-------------------------------------------------------------------------------
 % Fit the model
@@ -111,10 +105,8 @@ TellMeAboutLabeling(TimeSeries);
 % Reset the random seed:
 BF_ResetSeed(seedReset); % reset the random seed for CV-reproducibility
 
-%-------------------------------------------------------------------------------
 % Fit the classification model to the dataset (for each cross-validation fold)
-% and evaluate performance
-TellMeAboutClassification(cfnParams);
+% and evaluate performance:
 
 CVMdl = cell(cfnParams.numRepeats,1);
 foldLosses = zeros(cfnParams.numRepeats,1);
@@ -187,8 +179,8 @@ if numNulls > 0
         h = histogram(nullStats);
         h.FaceColor = ones(1,3)*0.5;
         plot(ones(2,1)*mean(foldLosses),ax.YLim,'r','LineWidth',2)
-        xlabel(cfnParams.whatLoss)
-        ylabel('Probability density')
+        xlabel(sprintf('%s (%s)',cfnParams.whatLoss,cfnParams.whatLossUnits))
+        ylabel('Number of nulls')
         legend(sprintf('Shuffled labels (%u)',numNulls),'Real labels')
     end
 
@@ -266,6 +258,11 @@ if ~isempty(cfnParams.classifierFilename)
     end
     save(cfnParams.classifierFilename,'jointClassifier','classes','cfnParams','-v7.3');
     fprintf('Saved trained classifier to ''%s''.\n',cfnParams.classifierFilename);
+end
+
+% Save my sensitive eyes an overload:
+if nargout==0
+    clear('foldLosses','nullStats','jointClassifier')
 end
 
 %-------------------------------------------------------------------------------

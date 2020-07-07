@@ -30,6 +30,12 @@ end
 if nargin < 3
     beVocal = true;
 end
+%-------------------------------------------------------------------------------
+% Set the classifier:
+params.whatClassifier = 'svm_linear'; % ('svm_linear', 'knn', 'linear', 'fast_linear')
+
+% Number of repeats of cross-validation (reduce variance due to 'lucky splits')
+params.numRepeats = 1;
 
 % Check group labeling:
 if ~ismember('Group',TimeSeries.Properties.VariableNames) || all(isundefined(TimeSeries.Group))
@@ -63,12 +69,6 @@ else
     params.whatLoss = 'balancedAccuracy';
     params.whatLossUnits = '%';
 end
-
-% Set the classifier:
-params.whatClassifier = 'svm_linear'; % ('svm_linear', 'knn', 'linear', 'fast_linear')
-
-% Number of repeats of cross-validation (reduce variance due to 'lucky splits')
-params.numRepeats = 1;
 
 % Cross validation: number of folds (set to 0 for no CV)
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);

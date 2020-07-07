@@ -59,18 +59,18 @@ end
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,dataFile] = TS_LoadData(whatData);
 
-% Check that group labels have been assigned
-if ~ismember('Group',TimeSeries.Properties.VariableNames)
-    error('Group labels not assigned to time series. Use TS_LabelGroups.');
-end
+% Assign group labels (removing unlabeled data):
+[TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
+[groupLabels,classLabels,groupLabelsInteger,numGroups] = ExtractGroupLabels(TimeSeries);
+TellMeAboutLabeling(TimeSeries);
 
 % Set classification parameters if needed:
 if nargin < 2 || isempty(cfnParams)
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
 
+% Set up data for Get_IDs
 dataStruct = makeDataStruct();
-TellMeAboutLabeling(dataStruct);
 
 %-------------------------------------------------------------------------------
 % Define the feature sets by feature IDs
@@ -140,7 +140,7 @@ for i = 1:numFeatureSets
                     TimeSeries.Group,[],[],cfnParams);
         accuracy(i,1+(j-1)*cfnParams.numFolds:j*cfnParams.numFolds) = foldLosses;
     end
-    fprintf(['Classified using the ''%s'' set (%u features): (%u fold-average, ',...
+    fprintf(['Classified using the ''%s'' set (%u features): (%u-fold average, ',...
                         '%u repeats) average %s = %.2f%%\n'],...
             whatFeatureSets{i},numFeaturesIncluded(i),cfnParams.numFolds,cfnParams.numRepeats,...
             cfnParams.whatLoss,mean(accuracy(i,:)));
@@ -162,7 +162,7 @@ BF_JitteredParallelScatter(dataCell,true,true,false,extraParams);
 ax = gca();
 ax.XTick = 1:numFeatureSets;
 ax.XTickLabel = whatFeatureSets;
-ax.XTickLabelRotation = 45;
+ax.XTickLabelRotation = 30;
 title(sprintf(['%u-class classification with different feature sets',...
                     ' using %u-fold cross validation'],...
                     cfnParams.numClasses,cfnParams.numFolds))

@@ -100,20 +100,7 @@ case {'pca','PCA'}
     %-------------------------------------------------------------------------------
     % Display the features loading strongly into the two components:
     numTopLoadFeat = min(numFeatures,20); % display this many features loading onto each PC
-    for j = 1:2
-        fprintf(1,'\n---Top feature loadings for PC%u---:\n',j);
-        [~,ix] = sort(abs(pcCoeff(:,j)),'descend');
-        for i = 1:numTopLoadFeat
-            ind = ix(i);
-            fprintf(1,'(%.3f, r = %.2f) [%u] %s (%s)\n',...
-                            pcCoeff(ind,j),...
-                            corr(Y(:,j),...
-                            TS_DataMat(:,ind)),...
-                            Operations.ID(ind),...
-                            Operations.Name{ind},...
-                            Operations.Keywords{ind});
-        end
-    end
+    LowDimDisplayTopLoadings(numTopLoadFeat,2,pcCoeff,Y,TS_DataMat,Operations);
 
     % Axis labels for the plot:
     featureLabels = cell(2,1);

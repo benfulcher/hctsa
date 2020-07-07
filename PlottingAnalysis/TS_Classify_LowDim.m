@@ -1,6 +1,9 @@
 function TS_Classify_LowDim(whatData,cfnParams,numPCs)
 % TS_Classify_LowDim compare performance of reduced PCs from the data matrix
 %-------------------------------------------------------------------------------
+% 'whatData', HCTSA data file (or structure).
+% 'cfnParams', parameters of the classification to be performed (cf.
+%                   GiveMeDefaultClassificationParams)
 % 'numPCs', investigate classification using up to this many PCs of the data
 %              matrix (default: 0).
 
@@ -23,6 +26,9 @@ function TS_Classify_LowDim(whatData,cfnParams,numPCs)
 % California, 94041, USA.
 %-------------------------------------------------------------------------------
 
+if nargin < 1
+    whatData = 'norm';
+end
 if nargin < 3
     numPCs = 5;
 end
@@ -30,8 +36,13 @@ end
 %-------------------------------------------------------------------------------
 % Load data
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,~,whatDataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+numFeatures = size(TS_DataMat,2);
 
+% Assign group labels (removing unlabeled data):
+[TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
+[groupLabels,classLabels,groupLabelsInteger,numGroups] = ExtractGroupLabels(TimeSeries);
+TellMeAboutLabeling(TimeSeries);
 if nargin < 2
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
@@ -64,6 +75,12 @@ fprintf(' Done.\n')
 numPCs = min(numPCs,size(pcScore,2)); % sometimes lower than the number attempted
 
 %-------------------------------------------------------------------------------
+% Display some info about feature loading onto the reduced components:
+%-------------------------------------------------------------------------------
+numTopLoadFeat = min(numFeatures,20); % display this many features loading onto each PC
+LowDimDisplayTopLoadings(numTopLoadFeat,numPCs,pcCoeff,pcScore,TS_DataMat,Operations);
+
+%-------------------------------------------------------------------------------
 % Compute cumulative performance in PC space:
 %-------------------------------------------------------------------------------
 cfnRatePCs = zeros(numPCs,1);
@@ -78,7 +95,6 @@ end
 %-------------------------------------------------------------------------------
 % Comparison to all features
 %-------------------------------------------------------------------------------
-numFeatures = size(TS_DataMat,2);
 fprintf('Now with all %u features for comparison...\n',numFeatures)
 cfnRateAll = GiveMeCfn(TS_DataMat,TimeSeries.Group,[],[],cfnParams);
 
@@ -88,6 +104,7 @@ cfnRateAll = GiveMeCfn(TS_DataMat,TimeSeries.Group,[],[],cfnParams);
 plotColors = BF_GetColorMap('spectral',3,1);
 lineWidth = 2;
 f = figure('color','w');
+f.Position(3:4) = [506,324];
 hold('on')
 ax = gca();
 plot([1,numPCs],ones(2,1)*cfnRateAll,'--','color',plotColors{3},'LineWidth',lineWidth)
