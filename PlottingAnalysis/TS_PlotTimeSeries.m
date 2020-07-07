@@ -2,7 +2,8 @@ function TS_PlotTimeSeries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOpt
 % TS_PlotTimeSeries    Plots examples of time series in an hctsa analysis.
 %
 %---INPUTS:
-% whatData, The hctsa data to load information from (cf. TS_LoadData)
+% whatData, The hctsa data to load information from (cf. TS_LoadData) [or can
+%               specify a TimeSeries table directly]
 %
 % numPerGroup, If plotting groups, plots this many examples per group
 %
@@ -122,9 +123,13 @@ else
 end
 
 % ------------------------------------------------------------------------------
-%% Load data
+%% Load TimeSeries table
 % ------------------------------------------------------------------------------
-[~,TimeSeries] = TS_LoadData(whatData);
+if istable(whatData)
+    TimeSeries = whatData;
+else
+    TimeSeries = TS_GetFromData(whatData,'TimeSeries');
+end
 if sortByLength
     TimeSeries = sortrows(TimeSeries,'Length','descend');
 end

@@ -1,4 +1,4 @@
-function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,classMeth,annotateParams)
+function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,annotateParams,cfnParams)
 % TS_PlotLowDim   2-dimensional feature-based representation of a time-series dataset
 %
 % The low-dimensional representation is computed using PCA.
@@ -8,10 +8,10 @@ function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,classMeth,annotatePar
 % whatAlgorithm, what dimensionality-reduction algorithm to use ('pca' is default),
 %                   also 'tSNE'.
 % showDist, whether to also plot marginal class distributions of each PC
-% classMeth, the classification method when running classification in the PC space
 % annotateParams, the annotation parameters used when plotting the dataset using
 %                 TS_Plot2d. Can also specify an integer; will annotate this
 %                 many time series segments to the 2d scatter plot.
+% cfnParams, parameters for classification in 2-d space (cf., GiveMeDefaultClassificationParams)
 %
 %---OUTPUT:
 % Figure handle, f
@@ -54,10 +54,7 @@ end
 if nargin < 3 || isempty(showDist)
     showDist = true;
 end
-if nargin < 4 || isempty(classMeth)
-    classMeth = 'svm_linear';
-end
-if nargin < 5 || isempty(annotateParams)
+if nargin < 4 || isempty(annotateParams)
     % Annotate 6 points by default
     fprintf(1,'Annotating 6 points by default with time series segment and names\n');
     annotateParams = struct('n',6,'textAnnotation','Name','userInput',false);
@@ -71,6 +68,10 @@ end
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 numFeatures = height(Operations);
+
+if nargin < 5 || isempty(cfnParams)
+    cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
+end
 
 % ------------------------------------------------------------------------------
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm
@@ -147,6 +148,6 @@ end
 
 %-------------------------------------------------------------------------------
 % Plot two-dimensional representation of the data using TS_Plot2d:
-f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,annotateParams,showDist,classMeth);
+f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,annotateParams,showDist);
 
 end

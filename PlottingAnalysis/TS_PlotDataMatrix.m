@@ -126,13 +126,13 @@ end
 %-------------------------------------------------------------------------------
 if ismember('Group',TimeSeries.Properties.VariableNames)
 	timeSeriesGroups = TimeSeries.Group;
-	numClasses = max(timeSeriesGroups);
+	numClasses = length(categories(timeSeriesGroups));
 else
 	timeSeriesGroups = [];
 end
 if colorGroups
 	if ~isempty(timeSeriesGroups)
-	    fprintf(1,'Coloring groups of time series...\n');
+	    fprintf(1,'Coloring time series by group assignment...\n');
 	else
 	    warning('No group information found')
 	    colorGroups = false;
@@ -146,7 +146,7 @@ if groupReorder
 	if isempty(timeSeriesGroups)
 		warning('Cannot reorder by time series group; no group information found')
 	else
-	    [~,ixData] = sort(timeSeriesGroups,'ascend');
+	    [~,ixData] = sort(timeSeriesGroups);
 	    dataMatReOrd = TS_DataMat(ixData,:);
 	    ixAgain = ixData;
 	    for i = 1:numClasses

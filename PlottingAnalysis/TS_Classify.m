@@ -13,9 +13,11 @@ function [foldLosses,nullStats,jointClassifier] = TS_Classify(whatData,cfnParams
 % numNulls (numeric), number of nulls to compute (0 for no null comparison)
 %
 % (OPTIONAL):
+% doParallel [false], whether to speed up the null computation using a parfor loop
+% doPlot [true], whether to plot outputs (including confusion matrix)
 % seedReset, input to BF_ResetSeed, specifying whether (and how) to reset the
 %               random seed (for reproducible results from cross-validation)
-% doPlot, whether to plot outputs (including confusion matrix)
+
 %
 %---OUTPUTS:
 % Text output on classification rate using all features, and if doPCs = true, also
@@ -177,8 +179,9 @@ if numNulls > 0
     if doPlot
         f = figure('color','w');
         hold('on')
+        f.Position(3:4) = [551,277];
         ax = gca;
-        h = histogram(nullStats,'normalization','pdf');
+        h = histogram(nullStats);
         h.FaceColor = ones(1,3)*0.5;
         plot(ones(2,1)*mean(foldLosses),ax.YLim,'r','LineWidth',2)
         xlabel(cfnParams.whatLoss)

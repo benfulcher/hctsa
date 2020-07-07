@@ -16,7 +16,7 @@ function [groupLabels,newFileName] = TS_LabelGroups(whatData,keywordGroups,saveB
 % keyword 'healthy' in another group -- saving the group information back to
 % HCTSA_N.mat:
 %
-% groupIndices = TS_LabelGroups({'disease','healthy'});
+% groupIndices = TS_LabelGroups('norm',{'disease','healthy'});
 %
 %---INPUTS:
 % whatData: Where to retrive from (and write back to): 'HCTSA.mat' (default),
@@ -27,9 +27,9 @@ function [groupLabels,newFileName] = TS_LabelGroups(whatData,keywordGroups,saveB
 %                   Can also use an empty label, '', to select unique keywords
 %                   automatically from the dataset.
 %
-% saveBack: Can set to false to stop saving the grouping back to the input file.
+% saveBack [true]: Can set to false to stop saving the grouping back to the input file.
 %
-% filterMissing: Set to true to remove data that don't match any keywords (will
+% filterMissing [false]: Set to true to remove data that don't match any keywords (will
 %                  save out to a new, filtered version of the data)
 %
 %---OUTPUTS:
@@ -144,7 +144,7 @@ newFileName = theFile; % by default you save back to the same file
 unlabeled = (sum(groupIndices,2)==0);
 if any(unlabeled)
     if ~filterMissing
-        reply = input(sprintf('ERROR: %u/%u time series remain unlabeled (press enter to see them)',...
+        reply = input(sprintf('%u/%u time series remain unlabeled (press enter to see them)',...
                                     sum(unlabeled),length(unlabeled)));
         isUnlabeled = find(unlabeled);
         for i = 1:length(isUnlabeled)

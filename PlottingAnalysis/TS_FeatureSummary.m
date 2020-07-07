@@ -71,9 +71,13 @@ end
 if ~ismember('Group',TimeSeries.Properties.VariableNames)
     timeSeriesGroup = [];
     classLabels = {};
+    numGroups = 0;
 else
     timeSeriesGroup = TimeSeries.Group; % Use group form
     classLabels = categories(timeSeriesGroup);
+    timeSeriesGroupInteger = arrayfun(@(x)find(classLabels==x),timeSeriesGroup);
+    numGroups = length(classLabels);
+    annotateParams.groupColors = BF_GetColorMap('set1',numGroups,1);
 end
 
 %-------------------------------------------------------------------------------
@@ -97,11 +101,8 @@ end
 %-------------------------------------------------------------------------------
 % Plot the kernel-smoothed probability density
 %-------------------------------------------------------------------------------
-f = figure('color','w'); box('on'); hold on
-if ismember('Group',TimeSeries.Properties.VariableNames)
-    numGroups = length(categories(timeSeriesGroup));
-    annotateParams.groupColors = BF_GetColorMap('set1',numGroups,1);
-end
+f = figure('color','w');
+box('on'); hold('on');
 
 if doViolin
     % Violin plots
@@ -115,7 +116,7 @@ if doViolin
         dataCell = cell(numGroups+1,1);
         dataCell{1} = TS_DataMat(:,theOp); % global distribution
         for i = 1:numGroups
-            dataCell{i+1} = TS_DataMat(timeSeriesGroup==i,theOp);
+            dataCell{i+1} = TS_DataMat(timeSeriesGroup==classLabels{i},theOp);
         end
 
         myColors = cell(numGroups+1,1);
@@ -133,8 +134,7 @@ if doViolin
         for i = 1:annotateParams.n
             ri = find(xx{1}>=TS_DataMat(highlightInd(i),theOp),1);
             plot(0.5+0.35*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColors{rem(i-1,10)+1},'LineWidth',2)
-            groupID = find(classLabels==timeSeriesGroup(highlightInd(i)));
-            groupColor = myColors{1+groupID};
+            groupColor = myColors{1+timeSeriesGroupInteger(highlightInd(i))};
             plot(0.5+0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
             plot(0.5-0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
         end
@@ -177,16 +177,15 @@ if doViolin
     end
     plotOptions.colorMap = flipud(plotOptions.colorMap);
 
-    dataStruct = struct('TimeSeries',TimeSeries);
     TS_PlotTimeSeries(TimeSeries,annotateParams.n,flipud(highlightInd),annotateParams.maxL,plotOptions);
 
     % Put rectangles if data is grouped
-    if ismember('Group',TimeSeries.Properties.VariableNames)
+    if ~isempty(timeSeriesGroup)
         rectHeight = 1/annotateParams.n;
         rectWidth = 0.1;
         for i = 1:annotateParams.n
             rectangle('Position',[-rectWidth*1,(i-1)*rectHeight,rectWidth,rectHeight],...
-                                    'FaceColor',myColors{1+timeSeriesGroup(highlightInd(i))});
+                            'FaceColor',myColors{1+timeSeriesGroupInteger(highlightInd(i))});
         end
         ax.XLim = [-rectWidth,1];
     end
@@ -194,7 +193,7 @@ if doViolin
     fig.Position(3:4) = [1151,886];
 
 else % kernel distributions
-    if ismember('Group',TimeSeries.Properties.VariableNames)
+    if ~isempty(timeSeriesGroup)
         % Repeat for each group
         fx = cell(numGroups,1);
         lineHandles = cell(numGroups+1,1);
@@ -205,10 +204,10 @@ else % kernel distributions
 
         % Distribution for each group:
         for k = 1:numGroups
-            [fr,xr,lineHandles{k+1}] = BF_plot_ks(dataVector(timeSeriesGroup==k),...
+            [fr,xr,lineHandles{k+1}] = BF_plot_ks(dataVector(timeSeriesGroup==classLabels{k}),...
                                 annotateParams.groupColors{k},0,2,12);
             fx{k} = [xr',fr'];
-            tsInd{k} = find(timeSeriesGroup==k);
+            tsInd{k} = find(timeSeriesGroup==classLabels{k});
         end
         xy = vertcat(fx{:});
         % Now make sure that elements of TimeSeries matches ordering of xy

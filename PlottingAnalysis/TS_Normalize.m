@@ -159,10 +159,11 @@ if classVarFilter
     if ~ismember('Group',TimeSeries.Properties.VariableNames)
         fprintf(1,'Group labels not assigned to time series, so cannot filter on class variance\n');
     end
-    numClasses = length(unique(TimeSeries.Group));
+    classNames = categories(TimeSeries.Group);
+    numClasses = length(classNames);
     classVars = zeros(numClasses,size(TS_DataMat,2));
     for i = 1:numClasses
-        classVars(i,:) = nanstd(TS_DataMat(TimeSeries.Group==i,:));
+        classVars(i,:) = nanstd(TS_DataMat(TimeSeries.Group==classNames{i},:));
     end
     zeroClassVar = any(classVars < 10*eps,1);
     if all(zeroClassVar)
@@ -199,9 +200,9 @@ else
 
     percGoodCols = mean(~isnan(TS_DataMat),1)*100;
     percGoodRows = mean(~isnan(TS_DataMat),2)*100;
-    fprintf(1,'(post-filtering): Time series vary from %.2f--%.2f%% good values\n',...
+    fprintf(1,'(post-filtering): Time series vary from %.2f--%.2f%% good values.\n',...
                                 min(percGoodRows),max(percGoodRows));
-    fprintf(1,'(post-filtering): Features vary from %.2f--%.2f%% good values\n',...
+    fprintf(1,'(post-filtering): Features vary from %.2f--%.2f%% good values.\n',...
                                 min(percGoodCols),max(percGoodCols));
 end
 fprintf(1,'\n');

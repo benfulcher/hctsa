@@ -116,8 +116,8 @@ numTopFeatures = min(numTopFeatures,numFeatures);
 if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series. Use TS_LabelGroups.');
 end
-numClasses = length(categories(TimeSeries.Group));
-
+classLabels = categories(TimeSeries.Group);
+numClasses = length(classLabels);
 
 if strcmp(whatTestStat,'classification')
     if nargin < 3 || isempty(fieldnames(cfnParams))
@@ -321,7 +321,6 @@ if ismember('distributions',whatPlots)
     % Make data structure for TS_SingleFeature
     data = struct('TS_DataMat',TS_DataMat,'TimeSeries',TimeSeries,...
                 'Operations',Operations);
-    data.classLabels = cfnParams.classLabels;
 
     for figi = 1:numFigs
         if figi*subPerFig > length(ifeat)
@@ -396,7 +395,7 @@ end
 % Save a classifier (for the single best feature) to file
 %-------------------------------------------------------------------------------
 featureClassifier = struct();
-if ~isempty(cfnParams.classifierFilename)
+if isfield(cfnParams,'classifierFilename') && ~isempty(cfnParams.classifierFilename)
     theTopFeatureIndex = ifeat(1);
     topFeatureValues = TS_DataMat(:,theTopFeatureIndex);
 
@@ -424,7 +423,7 @@ if ~isempty(cfnParams.classifierFilename)
     featureClassifier.Accuracy = bestTestStat;
     featureClassifier.whatTestStat = whatTestStat;
     featureClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
-    classes = classLabels;
+    classes = cfnParams.classLabels;
 
     % Save to file
     if exist(cfnParams.classifierFilename,'file')~=0

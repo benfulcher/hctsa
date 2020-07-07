@@ -1,4 +1,4 @@
-function f = TS_Plot2d(featureData,TimeSeries,featureLabels,annotateParams,showDistr,whatClassifier)
+function f = TS_Plot2d(featureData,TimeSeries,featureLabels,annotateParams,showDistr,cfnParams)
 % TS_Plot2d   Plots a dataset in a two-dimensional space.
 %
 % e.g., The space of two chosen features, or two principal components.
@@ -25,8 +25,7 @@ function f = TS_Plot2d(featureData,TimeSeries,featureLabels,annotateParams,showD
 % showDistr, if true (default), plots marginal density estimates for each variable
 %                   (above and to the right of the plot), otherwise set to false.
 %
-% whatClassifier, can select a classifier to fit to the different classes (e.g.,
-%               'linclass' for a linear classifier).
+% cfnParams, (optional) custom classification parameters to fit.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -73,9 +72,10 @@ if nargin < 5 || isempty(showDistr)
     showDistr = true;
 end
 
-if nargin < 6 || isempty(whatClassifier)
-    whatClassifier = 'svm_linear';
+if nargin < 6
+    cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
+cfnParams.numFolds = 0;
 
 if isfield(annotateParams,'makeFigure')
     makeFigure = annotateParams.makeFigure;
@@ -87,21 +87,23 @@ end
 % Preliminaries
 %-------------------------------------------------------------------------------
 if ismember('Group',TimeSeries.Properties.VariableNames)
-    groupLabels = TimeSeries.Group; % Convert GroupIndices to group form
+    groupLabels = TimeSeries.Group;
     classLabels = categories(groupLabels);
     numClasses = length(classLabels);
 else
     % No group information assigned to time series
+    groupLabels = nan(height(TimeSeries),1);
+    classLabels = {};
     numClasses = 1;
-    groupLabels = ones(height(TimeSeries),1);
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 %% Plot
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 if makeFigure % can set extras.makeFigure = 0 to plot within a given setting
-    f = figure('color','w'); box('on'); % white figure
-    f.Position = [f.Position(1),f.Position(2),600,550];
+    f = figure('color','w');
+    box('on'); % white figure
+    f.Position(3:4) = [600, 550];
 else
     f = gcf;
 end
@@ -130,7 +132,7 @@ if showDistr
     subplot(4,4,1:3); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numClasses
-        fr = BF_plot_ks(featureData(groupLabels==i,1),groupColors{i},0);
+        fr = BF_plot_ks(featureData(groupLabels==classLabels{i},1),groupColors{i},0);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     axTop = gca;
@@ -142,7 +144,7 @@ if showDistr
     subplot(4,4,[8,12,16]); hold on; box('on')
     maxx = 0; minn = 100;
     for i = 1:numClasses
-        fr = BF_plot_ks(featureData(groupLabels==i,2),groupColors{i},1);
+        fr = BF_plot_ks(featureData(groupLabels==classLabels{i},2),groupColors{i},1);
         maxx = max([maxx,fr]); minn = min([minn,fr]);
     end
     axSide = gca;
@@ -158,7 +160,7 @@ if showDistr
     subplot(4,4,[5:7,9:11,13:15]); box('on');
     axMain = gca;
 end
-hold on;
+hold('on');
 
 if isfield(annotateParams,'theMarkerSize');
     theMarkerSize = annotateParams.theMarkerSize; % specify custom marker size
@@ -168,7 +170,8 @@ end
 
 handles = cell(numClasses,1);
 for i = 1:numClasses
-    handles{i} = plot(featureData(groupLabels==i,1),featureData(groupLabels==i,2),...
+    handles{i} = plot(featureData(groupLabels==classLabels{i},1),...
+                featureData(groupLabels==classLabels{i},2),...
                 '.','color',groupColors{i},'MarkerSize',theMarkerSize);
 end
 
@@ -184,7 +187,7 @@ end
 % Label axes first without classification rates so the user can see what they're doing when annotating
 labelAxes(0);
 if ismember('Data',TimeSeries.Properties.VariableNames)
-    % Only attempt to annotate if time-series data is provided
+    % Annotate if time-series data is provided
 
     % Produce xy points
     xy = featureData;
@@ -201,15 +204,13 @@ if numClasses > 1
     % Compute the in-sample classification rate:
     classRate = nan(3,1); % classRate1, classRate2, classRateboth
     try
-        if ~strcmp(whatClassifier,'none')
-            fprintf(1,'Estimating %u-class classification rates for each feature (and in combination)...\n',numClasses);
-            classRate(1) = GiveMeCfn(whatClassifier,featureData(:,1),groupLabels,featureData(:,1),groupLabels,numClasses);
-            classRate(2) = GiveMeCfn(whatClassifier,featureData(:,2),groupLabels,featureData(:,2),groupLabels,numClasses);
-            [classRate(3),~,whatLoss] = GiveMeCfn(whatClassifier,featureData,groupLabels,featureData(:,1:2),groupLabels,numClasses);
-            % Record that classification was performed successfully:
-            didClassify = true;
-            fprintf(1,'%s in 2-dim space: %.2f%%\n',whatLoss,classRate(3));
-        end
+        fprintf(1,'Estimating %u-class classification rates for each feature (and in combination)...\n',numClasses);
+        classRate(1) = GiveMeCfn(featureData(:,1),groupLabels,featureData(:,1),groupLabels,cfnParams);
+        classRate(2) = GiveMeCfn(featureData(:,2),groupLabels,featureData(:,2),groupLabels,cfnParams);
+        classRate(3) = GiveMeCfn(featureData,groupLabels,featureData(:,1:2),groupLabels,cfnParams);
+        % Record that classification was performed successfully:
+        didClassify = true;
+        fprintf(1,'%s in 2-dim space: %.2f%%\n',cfnParams.whatLoss,classRate(3));
     catch emsg
         fprintf(1,'\nClassification rates not computed\n(%s)\n',emsg.message);
     end
@@ -217,31 +218,29 @@ if numClasses > 1
     % Also plot an SVM classification boundary:
     if numClasses < 5
         fprintf(1,'Estimating classification boundaries...\n');
-        try
-            % Train the model (in-sample):
-            [~,Mdl] = GiveMeCfn(whatClassifier,featureData,groupLabels,featureData,groupLabels,numClasses);
+        % Train the model (in-sample):
+        [~,Mdl] = GiveMeCfn(featureData,groupLabels,featureData,groupLabels,cfnParams);
 
-            % Predict scores over the 150x150 grid through space
-            gridInc = 150;
-            [x1Grid,x2Grid] = meshgrid(linspace(min(featureData(:,1)),max(featureData(:,1)),gridInc),...
-                                       linspace(min(featureData(:,2)),max(featureData(:,2)),gridInc));
-            fullGrid = [x1Grid(:),x2Grid(:)];
-            predLabels = predict(Mdl,fullGrid);
+        % Predict scores over the 150x150 grid through space
+        gridInc = 150;
+        [x1Grid,x2Grid] = meshgrid(linspace(min(featureData(:,1)),max(featureData(:,1)),gridInc),...
+                                   linspace(min(featureData(:,2)),max(featureData(:,2)),gridInc));
+        fullGrid = [x1Grid(:),x2Grid(:)];
+        predLabels = predict(Mdl,fullGrid);
 
-            % For each class plot the contour of their region of the space:
-            if numClasses==2
-                contour(x1Grid,x2Grid,reshape(predLabels-1.5,size(x1Grid)),[0 0],'--k','LineWidth',2);
-            else
-                for i = 1:numClasses
-                    % isMostProbable = scores(:,i) > max(scores(:,setxor(1:size(scores,2),i)),[],2);
-                    isMostProbable = (predLabels==i);
-                    if ~all(isMostProbable==isMostProbable(1));
-                        contour(x1Grid,x2Grid,reshape(isMostProbable,size(x1Grid)),[0.5 0.5],'-','LineWidth',2,'color',groupColors{i});
-                    end
+        % For each class plot the contour of their region of the space:
+        if numClasses==2
+            integerPredLabels = arrayfun(@(x)find(classLabels==x),predLabels);
+            contour(x1Grid,x2Grid,reshape(integerPredLabels-1.5,size(x1Grid)),[0 0],...
+                                    '--k','LineWidth',2);
+        else
+            for i = 1:numClasses
+                isMostProbable = (predLabels==classLabels{i});
+                if ~all(isMostProbable==isMostProbable(1));
+                    contour(x1Grid,x2Grid,reshape(isMostProbable,size(x1Grid)),...
+                            [0.5 0.5],'-','LineWidth',2,'color',groupColors{i});
                 end
             end
-        catch emsg
-            warning('Error fitting classification model in 2-d space')
         end
     end
 end
@@ -253,9 +252,9 @@ if numClasses > 1
     legendText = cell(numClasses,1);
     for i = 1:numClasses
         if ~isempty(classLabels)
-            legendText{i} = sprintf('%s (%u)',classLabels{i},sum(groupLabels==i));
+            legendText{i} = sprintf('%s (%u)',classLabels{i},sum(groupLabels==classLabels{i}));
         else
-            legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==i));
+            legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==classLabels{i}));
         end
     end
     legend([handles{:}],legendText,'interpreter','none');
@@ -267,7 +266,7 @@ end
 %-------------------------------------------------------------------------------
 if didClassify
     labelAxes(1);
-    title(sprintf('Combined classification rate (%s) = %.2f%%',whatClassifier, ...
+    title(sprintf('Combined classification rate (%s) = %.2f%%',cfnParams.whatClassifier, ...
                     round(classRate(3,1))),'interpreter','none');
 end
 

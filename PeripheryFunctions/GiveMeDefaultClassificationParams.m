@@ -19,9 +19,13 @@ function params = GiveMeDefaultClassificationParams(TimeSeries,numClasses)
 %-------------------------------------------------------------------------------
 
 % Get TimeSeries labeling information from HCTSA.mat by default
-if nargin < 1
+if nargin < 1 || isempty(TimeSeries)
     [~,TimeSeries] = TS_LoadData('HCTSA.mat');
     warning('DEFAULT: Retrieving time-series labeling information from HCTSA.mat')
+end
+if ~istable(TimeSeries)
+    % Actually specified TimeSeries as a filename or structure:
+    TimeSeries = TS_GetFromData(TimeSeries,'TimeSeries');
 end
 
 % Check group labeling:
