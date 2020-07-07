@@ -65,38 +65,6 @@ dlmwrite(fileName,TS_DataMat,'delimiter',theDelimiter);
 fprintf(1,'Wrote feature matrix to %s.\n',fileName);
 
 %-------------------------------------------------------------------------------
-% Output time-series info to .csv file:
-%-------------------------------------------------------------------------------
-fileName = 'hctsa_timeseries-info.csv';
-if strcmp(theDelimiter,',')
-    doQuoteStrings = true;
-    % warning(['The comma-delimited Keywords variable may cause trouble for ',...
-        % 'the comma-delimited %s file: quoting strings should help'],fileName);
-else
-    doQuoteStrings = false;
-end
-
-% We don't want the data to be written out in this info file:
-v = version;
-if str2double(v(1:3)) < 9.4 
-    % 2017 or older MATLAB version
-    TimeSeries(:,'Data') = [];
-else
-    TimeSeries = removevars(TimeSeries,{'Data'});
-end
-writetable(TimeSeries,fileName,'FileType','text','WriteVariableNames',true,...
-                'Delimiter',theDelimiter,'QuoteStrings',doQuoteStrings)
-fprintf(1,'Wrote the TimeSeries table to %s.\n',fileName);
-
-%-------------------------------------------------------------------------------
-% Output feature info to file:
-%-------------------------------------------------------------------------------
-fileName = 'hctsa_features.csv';
-writetable(Operations,fileName,'FileType','text','WriteVariableNames',true,...
-                            'Delimiter',theDelimiter)
-fprintf(1,'Wrote the Operations table to %s.\n',fileName);
-
-%-------------------------------------------------------------------------------
 % Output time-series data to file:
 %-------------------------------------------------------------------------------
 if writeTimeSeriesData
@@ -115,6 +83,38 @@ if writeTimeSeriesData
     fclose(fid);
     fprintf(1,'Wrote comma-delimited time-series data (6-decimal precision) to %s.\n',fileName);
 end
+
+%-------------------------------------------------------------------------------
+% Output time-series info to .csv file:
+%-------------------------------------------------------------------------------
+fileName = 'hctsa_timeseries-info.csv';
+if strcmp(theDelimiter,',')
+    doQuoteStrings = true;
+    % warning(['The comma-delimited Keywords variable may cause trouble for ',...
+        % 'the comma-delimited %s file: quoting strings should help'],fileName);
+else
+    doQuoteStrings = false;
+end
+
+% We don't want the data to be written out in this info file:
+v = version;
+if str2double(v(1:3)) < 9.4
+    % 2017 or older MATLAB version
+    TimeSeries(:,'Data') = [];
+else
+    TimeSeries = removevars(TimeSeries,{'Data'});
+end
+writetable(TimeSeries,fileName,'FileType','text','WriteVariableNames',true,...
+                'Delimiter',theDelimiter,'QuoteStrings',doQuoteStrings)
+fprintf(1,'Wrote the TimeSeries table to %s.\n',fileName);
+
+%-------------------------------------------------------------------------------
+% Output feature info to file:
+%-------------------------------------------------------------------------------
+fileName = 'hctsa_features.csv';
+writetable(Operations,fileName,'FileType','text','WriteVariableNames',true,...
+                            'Delimiter',theDelimiter)
+fprintf(1,'Wrote the Operations table to %s.\n',fileName);
 
 %-------------------------------------------------------------------------------
 % Output master features info to file:

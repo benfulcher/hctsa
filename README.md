@@ -75,50 +75,9 @@ There are a range of open datasets with pre-computed _hctsa_ features, as well a
 
 Matlab code for computing features for an initialized `HCTSA.mat` file, by distributing the computation across a large number of cluster jobs (using pbs or slurm schedulers) is [here](https://github.com/benfulcher/distributed_hctsa).
 
-## Publications :closed_book:
+### Publications
 
-Here we provide a list of publications that have used _hctsa_.
-
-### Our publications
-
-Where journal articles (&#x1F4D7;) are not open access, we also provide a link to the preprint (&#x1F4D9;).
-Links to Github code repositories (:octocat:) are provided where appropriate.
-
-#### The development of *hctsa* and other resources for feature-based time-series analysis
-
-See the following publications for details of how the highly-comparative approach to time-series analysis has developed since our initial publication in 2013:
-
-* **We reduced *hctsa* down to a reduced set of 22 efficiently coded features**.
-  * [&#x1F4D7; CAnonical Time-series CHaracteristics](https://doi.org/10.1007/s10618-019-00647-x). *Data Mining and Knowledge Discovery* **33**, 1821 (2019).
-  * [:octocat: Code](https://github.com/chlubba/catch22).
-* **We developed a software package for highly-comparative time-series analysis, *hctsa*** (includes applications to high throughput phenotyping of _C. Elegans_ and Drosophila movement time series).
-  * [&#x1F4D7; _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).   *Cell Systems* **5**, 527 (2017).
-  * [:octocat: Code (fly)](https://github.com/benfulcher/hctsa_phenotypingFly) &
-  [:octocat: Code (worm)](https://github.com/benfulcher/hctsa_phenotypingWorm).
-* **Introduction to using features for time-series analysis**
-  * [&#x1F4D7; Feature-based time-series analysis](https://www.crcpress.com/Feature-Engineering-for-Machine-Learning-and-Data-Analytics/Dong-Liu/p/book/9781138744387).
-    *Feature Engineering for Machine Learning and Data Analytics*, CRC Press (2018).
-  * [&#x1F4D9; Preprint](https://arxiv.org/abs/1709.08055).
-* **The behavior of thousands of time-series methods on thousands of different time series can be used to organize an interdisciplinary time-series analysis literature**
-  * [&#x1F4D7; Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
-    *J. Roy. Soc. Interface* (2013).
-
-#### Applications of *hctsa*
-We have used *hctsa* to:
-* **Distinguish targeted perturbations to mouse fMRI dynamics**
-  * [&#x1F4D7; Cortical Excitation:Inhibition Imbalance Causes Abnormal Brain Network Dynamics as Observed in Neurodevelopmental Disorders](https://academic.oup.com/cercor/advance-article/doi/10.1093/cercor/bhaa084/5823074). *Cerebral Cortex* (2020).
-  * [:octocat: Code](https://github.com/benfulcher/hctsa_DREADD).
-* **Connect structural brain connectivity to fMRI dynamics**
-  * [&#x1F4D7; Structural connectome topology relates to regional BOLD signal dynamics in the mouse brain](http://aip.scitation.org/doi/10.1063/1.4979281). *Chaos* (2017).
-  * [&#x1F4D9; Preprint](http://biorxiv.org/lookup/doi/10.1101/085514).
-* **Distinguish time-series patterns for data-mining applications**
-  * [&#x1F4D7; Highly comparative feature-based time-series classification](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425). *IEEE Trans. Knowl. Data Eng.* (2014).
-* **Classify babies with low blood pH from fetal heart rate time series**
-  * [&#x1F4D7; Highly comparative fetal heart rate analysis](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629). *34th Ann. Int. Conf. IEEE EMBC* (2012).
-
-### Other Publications
-
-_hctsa_ has been used by others in neuroscience, engineering, and biomedicine.
+_hctsa_ has been used by us and others to do new science in neuroscience, engineering, and biomedicine.
 An updated list of publications using _hctsa_ is on this [wiki page](https://github.com/benfulcher/hctsa/wiki/Publications-using-hctsa).
 
 ## *hctsa* licenses
