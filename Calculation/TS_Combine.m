@@ -148,10 +148,10 @@ theVariables{2} = loadedData{2}.TimeSeries.Properties.VariableNames;
 % Check the git data
 %-------------------------------------------------------------------------------
 hasGit = cellfun(@(x)ismember('gitInfo',x),theVariables);
-if all(hasGit==0)
+if sum(hasGit)==0
     % git info not present in either; keep an empty structure:
     gitInfo = struct();
-elseif sum(hasGit==1)
+elseif sum(hasGit)==1
     % Git only stored in one of the HCTSA files (but not the other)
     warning(sprintf(['!!!!!!!!!!%s contains git version info, but %s does not.\n',...
         'If hctsa versions are inconsistent, results may not be comparable!!!!!!!!!!'],...
