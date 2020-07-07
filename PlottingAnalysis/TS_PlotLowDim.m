@@ -148,6 +148,12 @@ end
 
 %-------------------------------------------------------------------------------
 % Plot two-dimensional representation of the data using TS_Plot2d:
-f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,annotateParams,showDist);
+f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,annotateParams,showDist,cfnParams);
+
+%-------------------------------------------------------------------------------
+% Clear output
+if nargout==0
+    clear('f')
+end
 
 end

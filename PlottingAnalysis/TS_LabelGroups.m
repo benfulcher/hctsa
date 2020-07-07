@@ -26,6 +26,7 @@ function [groupLabels,newFileName] = TS_LabelGroups(whatData,keywordGroups,saveB
 %                   {'keyword_1', 'keyword2',...}
 %                   Can also use an empty label, '', to select unique keywords
 %                   automatically from the dataset.
+%                   Can set to 'clear' to clear all class labels.
 %
 % saveBack [true]: Can set to false to stop saving the grouping back to the input file.
 %
@@ -68,9 +69,15 @@ if nargin < 2
     keywordGroups = {};
     % Try to automatically assign by unique keywords later
 end
-if ~isempty(keywordGroups) && ischar(keywordGroups)
-    fprintf(1,'Grouping all items with ''%s''.\n',keywordGroups);
-    keywordGroups = {keywordGroups};
+% Check for 'clear' mode
+if ischar(keywordGroups) && strcmp(keywordGroups,'clear')
+    doClear = true;
+else
+    doClear = false;
+    if ~isempty(keywordGroups) && ischar(keywordGroups)
+        fprintf(1,'Grouping all items with ''%s''.\n',keywordGroups);
+        keywordGroups = {keywordGroups};
+    end
 end
 if nargin < 3 || isempty(saveBack)
     saveBack = true; % Saves the grouping back to the HCTSA_*.mat file
@@ -83,12 +90,26 @@ end
 %% Load data from file
 % ------------------------------------------------------------------------------
 [~,TimeSeries,~,theFile] = TS_LoadData(whatData);
-Keywords = SUB_cell2cellcell(TimeSeries.Keywords); % Split into sub-cells using comma delimiter
 numTimeSeries = height(TimeSeries);
+
+%-------------------------------------------------------------------------------
+% Check for 'clear' mode:
+%-------------------------------------------------------------------------------
+if doClear
+    TimeSeries.Group = categorical(nan(numTimeSeries,1));
+    assert(saveBack)
+    fprintf(1,'Cleared group labels; saving back to %s...',theFile);
+    save(theFile,'TimeSeries','-append')
+    fprintf(1,' Saved.\n');
+    return
+end
 
 % ------------------------------------------------------------------------------
 % Set default keywords?
 % ------------------------------------------------------------------------------
+% Split keywords by comma delimiter:
+Keywords = SUB_cell2cellcell(TimeSeries.Keywords);
+
 % Set group labels as each unique keyword in the data. Works only in simple cases.
 if isempty(keywordGroups)
     fprintf(1,'No keywords assigned for labeling. Attempting to use unique keywords from data...\n');
@@ -144,14 +165,12 @@ newFileName = theFile; % by default you save back to the same file
 unlabeled = (sum(groupIndices,2)==0);
 if any(unlabeled)
     if ~filterMissing
-        reply = input(sprintf('%u/%u time series remain unlabeled (press enter to see them)',...
-                                    sum(unlabeled),length(unlabeled)));
+        fprintf(1,'%u/%u time series remain unlabeled:',sum(unlabeled),length(unlabeled));
         isUnlabeled = find(unlabeled);
         for i = 1:length(isUnlabeled)
             fprintf('[%u] %s (%s)\n',TimeSeries.ID(isUnlabeled(i)), ...
                     TimeSeries.Name{isUnlabeled(i)},TimeSeries.Keywords{isUnlabeled(i)});
         end
-        error('Unable to provide a unique label to all time series (NB: Can set filterMissing input to deal with this)');
     else
         reply = input(sprintf('%u/%u time series were unlabeled and WILL BE REMOVED from the dataset (press enter to see them)',...
                                     sum(unlabeled),length(unlabeled)));
@@ -177,7 +196,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Everything checks out so now we can make group labels:
-groupLabelsInteger = zeros(1,numTimeSeries);
+groupLabelsInteger = nan(1,numTimeSeries);
 for i = 1:numGroups
     groupLabelsInteger(groupIndices(:,i)) = i;
 end

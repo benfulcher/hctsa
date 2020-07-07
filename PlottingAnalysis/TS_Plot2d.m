@@ -75,7 +75,9 @@ end
 if nargin < 6
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
-cfnParams.numFolds = 0;
+if isfield(cfnParams,'numFolds')
+    cfnParams.numFolds = 0;
+end
 
 if isfield(annotateParams,'makeFigure')
     makeFigure = annotateParams.makeFigure;
@@ -86,16 +88,9 @@ end
 %-------------------------------------------------------------------------------
 % Preliminaries
 %-------------------------------------------------------------------------------
-if ismember('Group',TimeSeries.Properties.VariableNames)
-    groupLabels = TimeSeries.Group;
-    classLabels = categories(groupLabels);
-    numClasses = length(classLabels);
-else
-    % No group information assigned to time series
-    groupLabels = nan(height(TimeSeries),1);
-    classLabels = {};
-    numClasses = 1;
-end
+groupLabels = ExtractGroupLabels(TimeSeries);
+classLabels = categories(groupLabels);
+numClasses = length(classLabels);
 
 %-------------------------------------------------------------------------------
 %% Plot
@@ -109,7 +104,7 @@ else
 end
 
 % Set colors
-if (numClasses == 1)
+if (numClasses==0) || (numClasses==1)
     groupColors = {[0,0,0]}; % Just use black...
 else
     if isstruct(annotateParams) && isfield(annotateParams,'cmap')
@@ -129,7 +124,7 @@ annotateParams.groupColors = groupColors;
 % ------------------------------------------------------------------------------
 if showDistr
     % Top distribution (marginal of first feature)
-    subplot(4,4,1:3); hold on; box('on')
+    subplot(4,4,1:3); hold('on'); box('on')
     maxx = 0; minn = 100;
     for i = 1:numClasses
         fr = BF_plot_ks(featureData(groupLabels==classLabels{i},1),groupColors{i},0);

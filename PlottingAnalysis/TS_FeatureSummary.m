@@ -143,6 +143,7 @@ if doViolin
         axisLabels{1} = 'all';
         axisLabels(2:end) = classLabels;
         ax.XTickLabel = axisLabels;
+        ax.XTickLabelRotation = 20;
     else
         % Just run a single global one
         extraParams = struct();

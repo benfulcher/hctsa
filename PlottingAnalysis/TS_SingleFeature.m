@@ -142,18 +142,14 @@ end
 %-------------------------------------------------------------------------------
 % Get cross-validated accuracy for this single feature using a Naive Bayes linear classifier:
 if isempty(whatStat)
-    numFolds = 10;
-    try
-        accuracy = GiveMeCfn('diaglinear',TS_DataMat(:,op_ind),TimeSeries.Group,...
-                            [],[],numClasses,true,[],[],numFolds);
-        fprintf(1,'%u-fold cross validated balanced accuracy: %.2f +/- %.2f%%\n',...
-                            numFolds,mean(accuracy),std(accuracy));
-        statText = sprintf('%.1f%%',mean(accuracy));
-    catch emsg
-        accuracy = NaN;
-        statText = '--';
-        warning('Error fitting classification model: %s',emsg.message)
-    end
+    cfnParams = GiveMeDefaultClassificationParams(TimeSeries,[],false);
+    cfnParams.whatClassifier = 'fast_linear';
+    cfnParams.numFolds = 10;
+    cfnParams.computePerFold = true;
+    accuracy = GiveMeCfn(TS_DataMat(:,op_ind),TimeSeries.Group,[],[],cfnParams);
+    fprintf(1,'%u-fold cross-validated %s: %.2f +/- %.2f%%\n',...
+                cfnParams.numFolds,cfnParams.whatLoss,mean(accuracy),std(accuracy));
+    statText = sprintf('%.1f%s',mean(accuracy),cfnParams.whatLossUnits);
 else
     if isnumeric(whatStat)
         statText = sprintf('%.1f',whatStat);

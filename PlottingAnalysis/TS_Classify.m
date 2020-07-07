@@ -91,16 +91,19 @@ if ~ismember('Group',TimeSeries.Properties.VariableNames)
     error('Group labels not assigned to time series in %s. Use TS_LabelGroups.',whatDataFile);
 end
 
-if nargin < 2
+if nargin < 2 || isempty(fields(cfnParams))
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
 classLabels = categories(TimeSeries.Group);
 numFeatures = height(Operations);
 
 %-------------------------------------------------------------------------------
+% Ignore unlabeled data:
+[TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
+
+%-------------------------------------------------------------------------------
 % Give basic info about the represented classes:
-dataStruct = makeDataStruct();
-TellMeAboutLabeling(dataStruct);
+TellMeAboutLabeling(TimeSeries);
 
 %-------------------------------------------------------------------------------
 % Fit the model
@@ -245,8 +248,6 @@ end
 if ~isempty(cfnParams.classifierFilename)
     [Acc,Mdl] = GiveMeCfn(TS_DataMat,TimeSeries.Group,TS_DataMat,...
                                             TimeSeries.Group,cfnParams);
-
-    Operations = TS_GetFromData(whatData,'Operations');
     jointClassifier.Operation.ID = Operations.ID;
     jointClassifier.Operation.Name = Operations.Name;
     jointClassifier.CVAccuracy = mean(foldLosses); % Cross-validated accuracy
@@ -279,7 +280,6 @@ function dataStruct = makeDataStruct()
     dataStruct.TimeSeries = TimeSeries;
     dataStruct.TS_DataMat = TS_DataMat;
     dataStruct.Operations = Operations;
-    dataStruct.classLabels = TS_GetFromData(whatData,'classLabels');
 end
 %-------------------------------------------------------------------------------
 

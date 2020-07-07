@@ -32,8 +32,10 @@ if nargin < 3
 end
 
 % Check group labeling:
-if ~ismember('Group',TimeSeries.Properties.VariableNames)
-    error('Group labels not assigned to time series. Use TS_LabelGroups.');
+if ~ismember('Group',TimeSeries.Properties.VariableNames) || all(isundefined(TimeSeries.Group))
+    warning('Group labels not assigned to time series. Cannot perform classification.');
+    params = struct();
+    return
 end
 
 % Number of classes to classify
