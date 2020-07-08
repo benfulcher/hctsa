@@ -48,7 +48,7 @@ function TS_PlotDataMatrix(varargin)
 inputP = inputParser;
 
 % whatDataFile
-default_whatData = 'cl';
+default_whatData = 'norm';
 check_whatData = @(x) ischar(x) || isstruct(x);
 addOptional(inputP,'whatData',default_whatData,check_whatData);
 

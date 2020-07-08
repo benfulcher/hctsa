@@ -75,7 +75,7 @@ There are a range of open datasets with pre-computed _hctsa_ features, as well a
 
 Matlab code for computing features for an initialized `HCTSA.mat` file, by distributing the computation across a large number of cluster jobs (using pbs or slurm schedulers) is [here](https://github.com/benfulcher/distributed_hctsa).
 
-### Publications
+### Publications :closed_book:
 
 _hctsa_ has been used by us and others to do new science in neuroscience, engineering, and biomedicine.
 An updated list of publications using _hctsa_ is on this [wiki page](https://github.com/benfulcher/hctsa/wiki/Publications-using-hctsa).
