@@ -179,7 +179,7 @@ for i = 1:numTimeSeries
     % -----
     if sum(toCalc) < numCalc
         % Error in the database structure; some operations are missing MasterID assignment
-        error('??Database structure error: some operations have not been assigned a valid master operation');
+        error('?? Database structure error: some operations have not been assigned a valid master operation');
     end
 
 	fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');

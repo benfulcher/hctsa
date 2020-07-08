@@ -56,7 +56,7 @@ if nargin < 1
 end
 % <set default classificaiton parameters after inspecting TimeSeries labeling below>
 if nargin < 3
-    numNulls = 10;
+    numNulls = 0;
 end
 
 % Use an inputParser to parse additional options as parameters:

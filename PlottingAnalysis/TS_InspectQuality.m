@@ -108,6 +108,7 @@ case 'reduced'
 
     if sum(hadProblem)==0
         fprintf(1,'No operations have problems! Nothing to inspect.\n');
+        if nargout==0, clear('hadProblem'), end
         return
     end
 
@@ -200,6 +201,7 @@ case 'summary'
     % Stop if there are no special values:
     if sum(hadProblem)==0
         fprintf(1,'No operations have problems! Nothing to inspect.\n');
+        if nargout==0, clear('hadProblem'), end
         return
     else
         fprintf(1,'%u operations have special values:\n',sum(hadProblem));
@@ -259,6 +261,7 @@ otherwise
     error('Unknown input option ''%s''',inspectWhat);
 end
 
+% Be nice (to the eyes):
 if nargout==0
     clear all
 end
@@ -300,7 +303,6 @@ function formatYAxisColorBar(doYaxis,offSet)
     allColors = allColors([8,1,2,3,4,5,6,7,9],:);
     colormap(allColors(1:maxShow+1,:))
 end
-
 
 % ------------------------------------------------------------------------------
 function checkSize(A)
