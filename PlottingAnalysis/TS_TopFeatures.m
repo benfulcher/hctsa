@@ -69,11 +69,7 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 if nargin < 1 || isempty(whatData)
     whatData = 'raw';
 end
-if nargin < 2 || isempty(whatTestStat)
-    whatTestStat = 'fast_linear'; % Way faster than proper prediction models
-    fprintf(1,'Using ''%s'' test statistic by default\n', whatTestStat);
-end
-% Set cfnParams default later after loading the time series
+% Set other defaults later when we know what we're dealing with
 
 % Use an inputParser to control additional options as parameters:
 inputP = inputParser;
@@ -113,15 +109,28 @@ numTopFeatures = min(numTopFeatures,numFeatures);
 %-------------------------------------------------------------------------------
 %% Check that grouping information exists:
 %-------------------------------------------------------------------------------
-if ~ismember('Group',TimeSeries.Properties.VariableNames)
-    error('Group labels not assigned to time series. Use TS_LabelGroups.');
-end
-classLabels = categories(TimeSeries.Group);
-numClasses = length(classLabels);
+[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 
+% Assign group labels (removing unlabeled data):
+[TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
+[groupLabels,classLabels,groupLabelsInteger,numClasses] = ExtractGroupLabels(TimeSeries);
+% Give basic info about the represented classes:
+TellMeAboutLabeling(TimeSeries);
+
+if nargin < 2 || isempty(whatTestStat)
+    if numClasses == 2
+        whatTestStat = 'ustat'; % Way faster than proper prediction models
+    else
+        whatTestStat = 'classification';
+    end
+    fprintf(1,'Using ''%s'' test statistic by default\n', whatTestStat);
+end
+% Set cfnParams default (if using 'classification') later after loading the time series
 if strcmp(whatTestStat,'classification')
     if nargin < 3 || isempty(fieldnames(cfnParams))
         cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
+        cfnParams.whatClassifier = 'fast_linear';
+        cfnParams = UpdateClassifierText(cfnParams);
     end
 else
     cfnParams = struct();

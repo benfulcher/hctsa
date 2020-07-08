@@ -43,7 +43,8 @@ classLabels = categories(TimeSeries.Group);
 numClasses = length(classLabels);
 fprintf(1,'%u classes assigned to the time series in this dataset:\n',numClasses);
 for i = 1:numClasses
-    fprintf(1,'Class %u: %s (%u time series)\n',i,classLabels{i},sum(TimeSeries.Group==classLabels{i}));
+    fprintf(1,'Class %u: %s (%u time series)\n',i,classLabels{i},...
+            sum(TimeSeries.Group==classLabels{i}));
 end
 
 end

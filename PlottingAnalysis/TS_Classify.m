@@ -54,7 +54,7 @@ function [foldLosses,nullStats,jointClassifier] = TS_Classify(whatData,cfnParams
 if nargin < 1
     whatData = 'norm';
 end
-% <set default classificaiton parameters after inspecting TimeSeries labeling below>
+% <set default classification parameters after inspecting TimeSeries labeling below>
 if nargin < 3
     numNulls = 0;
 end

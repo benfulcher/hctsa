@@ -80,15 +80,6 @@ params.computePerFold = false;
 params.classifierFilename = ''; % (don't save classifier information to file)
 
 % Set text to name the classifier
-switch params.whatClassifier
-    case {'linear','linclass','fast_linear'}
-        params.classifierText = 'linear classifier';
-    case 'diaglinear'
-        params.classifierText = 'linear naive bayes classifier';
-    case {'svm','svm_linear'}
-        params.classifierText = 'linear SVM classifier';
-    otherwise
-        params.classifierText = params.whatClassifier;
-end
+params = UpdateClassifierText(params);
 
 end
