@@ -100,6 +100,10 @@ addpath(fullfile(pwd,'Toolboxes','Max_Little','rpde'));
 fprintf(1,', misc')
 addpath(fullfile(pwd,'Toolboxes','Misc'));
 
+% catch22
+fprintf(1,', catch22')
+addpath(fullfile(pwd,'Toolboxes','catch22'));
+
 % TSTOOL
 fprintf(1,', TSTOOL\n')
 addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));

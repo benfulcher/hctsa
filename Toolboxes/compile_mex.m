@@ -38,14 +38,14 @@ if ~strcmp(weHere{end},'Toolboxes')
 end
 
 % Sweet. Toolbox path is:
-toolDir = [currentDir,filesep];
+toolDir = currentDir;
 
 % ------------------------------------------------------------------------------
 % Max Little's fastdfa code
 % ------------------------------------------------------------------------------
 fprintf(1,'fastdfa...');
 try
-    cd([toolDir,'Max_Little',filesep,'fastdfa']);
+    cd(fullfile(toolDir,'Max_Little','fastdfa'));
 	mex ML_fastdfa_core.c
     fprintf(1,' done.\n');
 catch emsg
@@ -61,8 +61,8 @@ end
 % Max Little's Steps Bumps Toolkit
 % ------------------------------------------------------------------------------
 fprintf(1,'Max Little''s ''Steps and bumps'' toolkit...');
-cd([toolDir,'Max_Little',filesep,'steps_bumps_toolkit'])
-anyErrors = 0;
+cd(fullfile(toolDir,'Max_Little','steps_bumps_toolkit'))
+anyErrors = false;
 try
     mex ML_kvsteps_core.cpp
 catch
@@ -74,8 +74,8 @@ if ~anyErrors, fprintf(1,' done.\n'); end
 % Max Little's RPDE toolkit
 % ------------------------------------------------------------------------------
 fprintf(1,'Max Little''s ''RPDE'' code...');
-cd([toolDir,'Max_Little',filesep,'rpde'])
-anyErrors = 0;
+cd(fullfile(toolDir,'Max_Little','rpde'))
+anyErrors = false;
 try
     mex ML_close_ret.c
 catch
@@ -87,7 +87,7 @@ if ~anyErrors, fprintf(1,' done.\n'); end
 % Michael Small's code
 % ------------------------------------------------------------------------------
 fprintf(1,'Michael Small''s code...');
-cd([toolDir,'Michael_Small'])
+cd(fullfile(toolDir,'Michael_Small'))
 anyErrors = 0;
 try
     mex MS_complexitybs.c % compile Michael Small's complexitybs C code
@@ -110,7 +110,7 @@ if ~anyErrors, fprintf(1,' done.\n'); end
 % Gaussian Process code, gpml
 % ------------------------------------------------------------------------------
 fprintf(1,'Gaussian Process Toolbox, Carl Edward Rasmussen and Hannes Nickisch...');
-cd([toolDir,'gpml',filesep,'util'])
+cd(fullfile(toolDir,'gpml','util'))
 anyErrors = 0;
 try
     make
@@ -123,7 +123,7 @@ if ~anyErrors, fprintf(1,' done.\n'); end
 % Physionet sample entropy code (turned to mex)
 %-------------------------------------------------------------------------------
 fprintf(1,'Sample entropy...');
-cd([toolDir,'Physionet'])
+cd(fullfile(toolDir,'Physionet'))
 anyErrors = 0;
 try
     mex sampen_mex.c
@@ -136,7 +136,7 @@ if ~anyErrors, fprintf(1,' done.\n'); end
 % TSTOOL routines (such a mess)
 % ------------------------------------------------------------------------------
 fprintf(1,'TSTOOL...');
-cd([toolDir,'OpenTSTOOL',filesep,'mex-dev'])
+cd(fullfile(toolDir,'OpenTSTOOL','mex-dev'))
 anyErrors = 0;
 try
     makemex
@@ -154,6 +154,12 @@ fprintf(1,['NB: To use TISEAN routines, you need to compile and install them on 
     'In the commandline, navigate to the Toolboxes%sTisean_3.0.1 directory\n  ''./configure'',' ...
     ' ''make'' and ''make install'' commands\n(cf. Documentation for instructions,' ...
     ' including implementations for Windows)...\n'],filesep);
+
+%-------------------------------------------------------------------------------
+% CATCH22
+%-------------------------------------------------------------------------------
+cd(fullfile(toolDir,'catch22'))
+mexAll
 
 % Return to base directory
 cd(toolDir);
