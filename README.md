@@ -95,19 +95,12 @@ A range of external code packages are provided in the **Toolboxes** directory of
 
 ### External packages and dependencies
 
-The following [Matlab toolboxes](https://mathworks.com/programs/nrd/matlab-toolbox-price-request.html?ref=ggl&s_eid=ppc_18665571802&q=matlab%20toolboxes%20price) are used by *hctsa* and are required for full functionality of the software.
-In the case that some toolboxes are unavailable, the *hctsa* software can still be used, but only a reduced set of time-series features will be computed.
-
-1. Statistics Toolbox
-2. Signal Processing Toolbox
-3. Curve Fitting Toolbox
-4. System Identification Toolbox
-5. Wavelet Toolbox
-6. Econometrics Toolbox
+The following [Matlab toolboxes](https://mathworks.com/programs/nrd/matlab-toolbox-price-request.html?ref=ggl&s_eid=ppc_18665571802&q=matlab%20toolboxes%20price) are used by *hctsa* and are required for full functionality of the software: Statistics, Signal Processing, Curve Fitting, System Identification, Wavelet, and Econometrics.
+In the case that some of these toolboxes are unavailable, the *hctsa* software can still be used, but only a reduced set of time-series features will be computed.
 
 ---
 
-The following time-series analysis packages are provided with the software (in the **Toolboxes** directory), and are used by our main feature extraction algorithms to compute meaningful structural features from time series:
+The following time-series analysis packages are provided with the software (in the **Toolboxes** directory), and are used by our main feature-extraction algorithms to compute meaningful structural features from time series:
 
 * [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
 * [*TSTOOL* package for nonlinear time-series analysis, version 1.2](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
