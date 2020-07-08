@@ -20,10 +20,10 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 % 'whatPlots', can specify what output plots to produce (cell of strings), e.g.,
 %               specify {'histogram','distributions','cluster','datamatrix'} to
 %               produce all four possible output plots (this is the default).
-% 'numTopFeatures', can specify the number of top features to analyze, both in
+% 'numTopFeatures' [40], specifies the number of top features to analyze, both in
 %                   terms of the list of outputs, the histogram plots, and the
 %                   cluster plot.
-% 'numFeaturesDistr', can set a custom number of distributions to display (can
+% 'numFeaturesDistr' [16], sets a custom number of distributions to display (can
 %                   set this lower to avoid producing large numbers of figures).
 % 'numNulls' [0], the number of shuffled nulls to generate (e.g., 10 shuffles pools
 %               shuffles for all M features, for a total of 10*M elements in the
@@ -138,7 +138,7 @@ end
 %-------------------------------------------------------------------------------
 %% Define the train/test classification rate function, fn_testStat
 %-------------------------------------------------------------------------------
-% chanceLine -- what you'd expect by chance
+% chanceLevel -- what you'd expect by chance
 
 % Check that simple stats are being applied just for pairs:
 if ismember(whatTestStat,{'ustat','ranksum','ustatExact','ranksumExact','ttest','tstat'})
@@ -152,25 +152,25 @@ switch whatTestStat
     case 'classification'
         % Set up the loss function for a classifier-based metric:
         fn_testStat = GiveMeFunctionHandle(cfnParams);
-        chanceLine = 100/numClasses; % (could be a bad assumption: accuracy for equiprobable groups...)
+        chanceLevel = 100/numClasses; % (could be a bad assumption: accuracy for equiprobable groups...)
         testStatText = sprintf('%s %s',cfnParams.classifierText,cfnParams.whatLoss);
         statUnit = cfnParams.whatLossUnits;
     case {'ustat','ranksum'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                     fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false);
-        chanceLine = NaN;
+        chanceLevel = NaN;
         testStatText = 'Mann-Whitney approx p-value';
         statUnit = ' (-log10(p))';
     case {'ustatExact','ranksumExact'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                     fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true);
-        chanceLine = NaN;
+        chanceLevel = NaN;
         testStatText = 'Mann-Whitney exact p-value';
         statUnit = ' (-log10(p))';
     case {'ttest','tstat'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                         fn_tStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}));
-        chanceLine = 0; % chance-level t statistic is zero
+        chanceLevel = 0; % chance-level t statistic is zero
         testStatText = 'Welch''s t-stat';
         statUnit = '';
     otherwise
@@ -195,10 +195,10 @@ end
 
 %-------------------------------------------------------------------------------
 % Give mean and that expected from random classifier (there may be a little overfitting)
-if ~isnan(chanceLine)
+if ~isnan(chanceLevel)
     fprintf(1,['Mean %s across %u features = %4.2f%s\n' ...
             '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
-        testStatText,numFeatures,nanmean(testStat),statUnit,numClasses,chanceLine,statUnit);
+        testStatText,numFeatures,nanmean(testStat),statUnit,numClasses,chanceLevel,statUnit);
 else
     fprintf(1,'Mean %s across %u features = %4.2f%s\n',...
         testStatText,numFeatures,nanmean(testStat),statUnit);
@@ -295,7 +295,9 @@ if ismember('histogram',whatPlots)
     end
 
     % Add chance line:
-    l_chance = plot(chanceLine*ones(2,1),[0,maxH],'--','color',colors{1},'LineWidth',2);
+    if ~isnan(chanceLevel)
+        l_chance = plot(chanceLevel*ones(2,1),[0,maxH],'--','color',colors{1},'LineWidth',2);
+    end
 
     % Add mean of real distribution:
     l_mean = plot(nanmean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
@@ -306,10 +308,18 @@ if ismember('histogram',whatPlots)
 
     % Legend:
     if numNulls > 0
-        legend([h_null,h_real,l_chance,l_meannull,l_mean],'null','real','chance','null mean','mean')
+        if ~isnan(chanceLevel)
+            legend([h_null,h_real,l_chance,l_meannull,l_mean],'null','real','chance','null mean','mean')
+        else
+            legend([h_null,h_real,l_meannull,l_mean],'null','real','null mean','mean')
+        end
         title(sprintf('%u features significantly informative of groups (FDR-corrected at 0.05)',sum(FDR_qvals < 0.05)))
     else
-        legend([h_real,l_chance,l_mean],{'real','chance','mean'});
+        if ~isnan(chanceLevel)
+            legend([h_real,l_chance,l_mean],{'real','chance','mean'});
+        else
+            legend([h_real,l_mean],{'real','mean'});
+        end
     end
 else
     testStat_rand = [];

@@ -165,12 +165,14 @@ newFileName = theFile; % by default you save back to the same file
 unlabeled = (sum(groupIndices,2)==0);
 if any(unlabeled)
     if ~filterMissing
-        fprintf(1,'%u/%u time series remain unlabeled:',sum(unlabeled),length(unlabeled));
-        isUnlabeled = find(unlabeled);
-        for i = 1:length(isUnlabeled)
-            fprintf('[%u] %s (%s)\n',TimeSeries.ID(isUnlabeled(i)), ...
-                    TimeSeries.Name{isUnlabeled(i)},TimeSeries.Keywords{isUnlabeled(i)});
-        end
+        fprintf(1,'%u/%u time series remain unlabeled (and will be ignored in any classification).\n',...
+                                sum(unlabeled),length(unlabeled));
+        % Show them?:
+        % isUnlabeled = find(unlabeled);
+        % for i = 1:length(isUnlabeled)
+        %     fprintf('[%u] %s (%s)\n',TimeSeries.ID(isUnlabeled(i)), ...
+        %             TimeSeries.Name{isUnlabeled(i)},TimeSeries.Keywords{isUnlabeled(i)});
+        % end
     else
         reply = input(sprintf('%u/%u time series were unlabeled and WILL BE REMOVED from the dataset (press enter to see them)',...
                                     sum(unlabeled),length(unlabeled)));

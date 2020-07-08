@@ -193,7 +193,7 @@ clusterCenters_cl = arrayfun(@(y)find(ord==y),clusterCenters);
 % (reordered by ord determined above)
 ax2 = subplot(1,6,2:5);
 switch whatDistance
-case {'corr','abscorr_ii'}
+case {'corr','abscorr_ii','corr_fast'}
     % Input is a correlation distance matrix, plot correlation coefficients:
     distMat0 = squareform(distVec0);
     BF_PlotCorrMat(1-distMat0(ord,ord),'auto');
