@@ -1,4 +1,8 @@
 function TellMeAboutClassification(cfnParams)
+% TellMeAboutClassification Gives some user-interpretable information about the
+%                           classification settings
+%
+
 %-------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -20,6 +24,10 @@ function TellMeAboutClassification(cfnParams)
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 %-------------------------------------------------------------------------------
+
+if nargin < 1
+    cfnParams = GiveMeDefaultClassificationParams('norm');
+end
 
 if cfnParams.numRepeats==1
     repeatText = '';

@@ -47,5 +47,8 @@ for i = 1:numUniqueKeywords
     fprintf(1,'''%s''   %u\n',UKeywords{ix(i)},keywordCounts(ix(i)));
 end
 
+if nargout==0
+    clear('UKeywords')
+end
 
 end

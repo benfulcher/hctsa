@@ -1,5 +1,5 @@
-function TS_Classify_LowDim(whatData,cfnParams,numPCs)
-% TS_Classify_LowDim compare performance of reduced PCs from the data matrix
+function TS_ClassifyLowDim(whatData,cfnParams,numPCs)
+% TS_ClassifyLowDim compare performance of reduced PCs from the data matrix
 %-------------------------------------------------------------------------------
 % 'whatData', HCTSA data file (or structure).
 % 'cfnParams', parameters of the classification to be performed (cf.
@@ -26,6 +26,7 @@ function TS_Classify_LowDim(whatData,cfnParams,numPCs)
 % California, 94041, USA.
 %-------------------------------------------------------------------------------
 
+% Check inputs and set defaults:
 if nargin < 1
     whatData = 'norm';
 end

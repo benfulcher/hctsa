@@ -17,7 +17,7 @@ function TS_PlotDataMatrix(varargin)
 % customOrder: reorder rows and columns according to provided permutation vectors
 %
 %---OUTPUT:
-% Produces a colormap plot of the data matrix with time series as rows and
+% Produces a heat map of the data matrix with time series as rows and
 %   operations as columns.
 
 % ------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ check_addTimeSeries = @(x) (isnumeric(x) || islogical(x)) && (x==0 || x==1);
 addOptional(inputP,'addTimeSeries',default_addTimeSeries,check_addTimeSeries);
 
 % timeSeriesLength, length of time-series annotations to the left of the main plot
-default_timeSeriesLength = 100;
+default_timeSeriesLength = 200;
 addOptional(inputP,'timeSeriesLength',default_timeSeriesLength,@isnumeric);
 
 % colorGroups, color groups of time series differently:

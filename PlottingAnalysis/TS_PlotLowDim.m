@@ -69,9 +69,15 @@ end
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 numFeatures = height(Operations);
 
+% (for classification in the embedding space):
 if nargin < 5 || isempty(cfnParams)
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
+
+% Assign group labels (removing unlabeled data):
+[TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
+% Give basic info about the represented classes:
+TellMeAboutLabeling(TimeSeries);
 
 % ------------------------------------------------------------------------------
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm

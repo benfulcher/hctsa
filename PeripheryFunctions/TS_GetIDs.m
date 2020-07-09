@@ -77,7 +77,7 @@ switch nameOrKeywords
     %--------------------------------------------------------------------------
     % KEYWORDS: match IDs of time series or operations by exact keyword match
     %--------------------------------------------------------------------------
-    case 'Keywords'
+    case {'keywords','Keywords'}
         % The cell of comma-delimited keyword strings:
         theKeywordCell = theDataTable.Keywords;
 
@@ -100,7 +100,7 @@ switch nameOrKeywords
             notIDs = setxor(IDs,theDataTable.ID);
         end
 
-    case 'Name'
+    case {'name','Name'}
         %----------------------------------------------------------------------
         % NAME: Find match for each element of input, and return an ordered set
         % (with NaN when we don't find a match)

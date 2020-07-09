@@ -94,7 +94,7 @@ case {'full','all'}
     TS_Quality(isnan(TS_Quality)) = 8;
     imagesc(TS_Quality)
 
-    xlabel('Operations (op_id)','interpreter','none')
+    xlabel('Operation ID','interpreter','none')
     ax.XTick = 1:height(Operations);
     ax.XTickLabel = Operations.ID;
     ax.XTickLabelRotation = 90;
@@ -239,9 +239,13 @@ case 'summary'
     % ------------
     % Get handles for figure (f) and axes (ax):
     f = figure('color','w');
-    ax = gca;
+    f.Position(3:4) = [877,481];
+    ax = gca();
 
-    bar(whatLabel','stacked');
+    b = bar(whatLabel',1,'stacked','FaceColor','flat');
+    for k = 1:size(whatLabel,1)
+        b(k).CData = k;
+    end
 
     ax.XTick = 1:sum(hadProblem);
     unSortedTicks = Operations.ID(hadProblem);
@@ -254,7 +258,7 @@ case 'summary'
 
     formatYAxisColorBar(0,1);
 
-    xlabel('Operations (op_id)','interpreter','none')
+    xlabel('Operation ID','interpreter','none')
     ylabel(sprintf('Proportion of outputs (across %u time series)',size(TS_Quality,1)))
 
 otherwise
@@ -263,7 +267,7 @@ end
 
 % Be nice (to the eyes):
 if nargout==0
-    clear all
+    clear('all')
 end
 
 % ------------------------------------------------------------------------------
