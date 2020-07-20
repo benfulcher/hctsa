@@ -64,7 +64,7 @@ if nargin < 4
     end
 end
 if length(beVocal)==1
-    beVocal = true(3,1)*beVocal;
+    beVocal = repmat(beVocal,1,3);
 end
 if nargin < 5
     outputFile = 'HCTSA.mat';
