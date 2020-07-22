@@ -124,10 +124,9 @@ end
 % Do the matching by feature name for feature sets that are lists of feature names
 %-------------------------------------------------------------------------------
 if matchByName
-    isMatch = cellfun(@(x)any(ismember(Operations.Name,x)),featureNames);
+    isMatch = cellfun(@(x)find(ismember(Operations.Name,x)),featureNames);
     opIDs = Operations.ID(isMatch);
     fprintf(1,'Matched %u/%u features!\n',length(opIDs),length(featureNames));
-
 
     if length(opIDs) < length(featureNames)
         didNotMatch = find(~isMatch);

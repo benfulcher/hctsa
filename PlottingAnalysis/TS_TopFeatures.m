@@ -103,20 +103,19 @@ clear('inputP');
 %% Load the data
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-numFeatures = height(Operations);
-numTopFeatures = min(numTopFeatures,numFeatures);
 
 %-------------------------------------------------------------------------------
-%% Check that grouping information exists:
+%% Checks
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-
+% Does the grouping information exist?:
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
 [groupLabels,classLabels,groupLabelsInteger,numClasses] = ExtractGroupLabels(TimeSeries);
 % Give basic info about the represented classes:
 TellMeAboutLabeling(TimeSeries);
 
+%-------------------------------------------------------------------------------
+% Set defaults for the test statistic:
 if nargin < 2 || isempty(whatTestStat)
     if numClasses == 2
         whatTestStat = 'ustat'; % Way faster than proper prediction models
@@ -135,6 +134,13 @@ if strcmp(whatTestStat,'classification')
 else
     cfnParams = struct();
 end
+
+%-------------------------------------------------------------------------------
+% Filter down to reduced features if specified/required:
+[TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams);
+numFeatures = size(TS_DataMat,2);
+numTopFeatures = min(numTopFeatures,numFeatures);
+
 %-------------------------------------------------------------------------------
 %% Define the train/test classification rate function, fn_testStat
 %-------------------------------------------------------------------------------
