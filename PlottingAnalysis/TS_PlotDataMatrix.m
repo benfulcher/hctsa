@@ -17,7 +17,7 @@ function TS_PlotDataMatrix(varargin)
 % customOrder: reorder rows and columns according to provided permutation vectors
 %
 %---OUTPUT:
-% Produces a colormap plot of the data matrix with time series as rows and
+% Produces a heat map of the data matrix with time series as rows and
 %   operations as columns.
 
 % ------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ function TS_PlotDataMatrix(varargin)
 inputP = inputParser;
 
 % whatDataFile
-default_whatData = 'cl';
+default_whatData = 'norm';
 check_whatData = @(x) ischar(x) || isstruct(x);
 addOptional(inputP,'whatData',default_whatData,check_whatData);
 
@@ -58,7 +58,7 @@ check_addTimeSeries = @(x) (isnumeric(x) || islogical(x)) && (x==0 || x==1);
 addOptional(inputP,'addTimeSeries',default_addTimeSeries,check_addTimeSeries);
 
 % timeSeriesLength, length of time-series annotations to the left of the main plot
-default_timeSeriesLength = 100;
+default_timeSeriesLength = 200;
 addOptional(inputP,'timeSeriesLength',default_timeSeriesLength,@isnumeric);
 
 % colorGroups, color groups of time series differently:
@@ -126,13 +126,13 @@ end
 %-------------------------------------------------------------------------------
 if ismember('Group',TimeSeries.Properties.VariableNames)
 	timeSeriesGroups = TimeSeries.Group;
-	numClasses = max(timeSeriesGroups);
+	numClasses = length(categories(timeSeriesGroups));
 else
 	timeSeriesGroups = [];
 end
 if colorGroups
 	if ~isempty(timeSeriesGroups)
-	    fprintf(1,'Coloring groups of time series...\n');
+	    fprintf(1,'Coloring time series by group assignment...\n');
 	else
 	    warning('No group information found')
 	    colorGroups = false;
@@ -146,7 +146,7 @@ if groupReorder
 	if isempty(timeSeriesGroups)
 		warning('Cannot reorder by time series group; no group information found')
 	else
-	    [~,ixData] = sort(timeSeriesGroups,'ascend');
+	    [~,ixData] = sort(timeSeriesGroups);
 	    dataMatReOrd = TS_DataMat(ixData,:);
 	    ixAgain = ixData;
 	    for i = 1:numClasses
@@ -304,12 +304,13 @@ cB = colorbar('eastoutside');
 cB.Label.String = 'Output';
 if numGroups > 0
 	cB.Ticks = 0.5:1:numGroups;
-	cB.TickLabels = TS_GetFromData(whatData,'groupNames');
+	cB.TickLabels = categories(timeSeriesGroups);
 	cB.TickLabelInterpreter = 'none';
 end
 
 title(sprintf('Data matrix (%u x %u)',numTS,numOps))
 
+% Add time-series annotations:
 if addTimeSeries
     ax2.YTickLabel = {};
     % Reposition tight

@@ -1,16 +1,10 @@
-function fn_handle = GiveMeFunctionHandle(whatClassifier,numClasses,whatLoss,reWeight)
-% GiveMeFunctionHandle    Returns a function handle for classification accuracy
+function fn_handle = GiveMeFunctionHandle(cfnParams)
+% GiveMeFunctionHandle    Returns a function handle for computing classification
+%                               accuracy
 %
 %---INPUTS:
-% whatClassifier -- a type of classifier to use (default: 'fast_linear')
-% numClasses -- the number of classes
-% whatLoss -- a custom loss function:
-%               (*) 'acc': classification rate (%)
-%               (*) 'balancedAcc': mean classification rate of each class (%,
-%                                        same as acc when balanced classes)
-%               (*) 'sumLoss': total number of misclassifications
-% reWeight -- whether to reweight observations for compatible classifiers (for
-%               class imbalanced problems)
+% cfnParams, parameters for the classification, e.g., set with
+%           GiveMeDefaultClassificationParams.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -35,26 +29,10 @@ function fn_handle = GiveMeFunctionHandle(whatClassifier,numClasses,whatLoss,reW
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-if nargin < 1
-    whatClassifier = 'fast_linear';
-end
-if nargin < 2
-    warning('How many classes?! Assuming a multiclass problem')
-    numClasses = 3; % assume multiclass
-end
-if nargin < 3
-    whatLoss = 'acc'; % total accuracy (by default)
-end
-if nargin < 4
-    reWeight = 1;
-end
-%-------------------------------------------------------------------------------
-
-%-------------------------------------------------------------------------------
 % Set the function handle to compute the accuracy/loss measure:
 %-------------------------------------------------------------------------------
-if strcmp(whatClassifier,'fast_linear')
-    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
+if strcmp(cfnParams.whatClassifier,'fast_linear')
+    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
     fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,classify(XTest,XTrain,yTrain,'linear'));
     return
 end
@@ -62,9 +40,9 @@ end
 %-------------------------------------------------------------------------------
 % Binary model (easier), we can do it in one line:
 %-------------------------------------------------------------------------------
-if numClasses==2
+if cfnParams.numClasses==2
     % Set the loss function:
-    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
+    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
 
     switch whatClassifier
     case 'knn'
@@ -72,7 +50,7 @@ if numClasses==2
     case 'tree'
         fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitctree(XTrain,yTrain),XTest));
     case {'linear','linclass'}
-        if reWeight
+        if cfnParams.doReweight
             fn_handle = @(XTrain,yTrain,XTest,yTest) ...
                         fn_loss(yTest,predict(fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
                                     'SaveMemory','on','Weights',InverseProbWeight(yTrain)),XTest));
@@ -82,7 +60,7 @@ if numClasses==2
                                     'SaveMemory','on'),XTest));
         end
     case 'svm_linear'
-        if reWeight
+        if cfnParams.doReweight
             fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
                                     'KernelFunction','linear','Weights',InverseProbWeight(yTrain)),XTest));
         else
@@ -90,7 +68,7 @@ if numClasses==2
                                     'KernelFunction','linear'),XTest));
         end
     case 'svm_rbf'
-        if reWeight
+        if cfnParams.doReweight
             fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
                                     'KernelFunction','rbf','Weights',InverseProbWeight(yTrain)),XTest));
         else
@@ -98,19 +76,19 @@ if numClasses==2
                                     'KernelFunction','rbf'),XTest));
         end
     case 'diaglinear'
-        if reWeight
+        if cfnParams.doReweight
             fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcnb(XTrain,yTrain,...
                                                     'Weights',InverseProbWeight(yTrain)),XTest));
         else
             fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcnb(XTrain,yTrain),XTest));
         end
     otherwise
-        error('Unknown classifier label: ''%s''',whatClassifier);
+        error('Unknown classifier: ''%s''',cfnParams.whatClassifier);
     end
 else
     % Multiclass, have to use the Cfn function (which is slower to use as a function handle)
     fn_handle = @(XTrain,yTrain,XTest,yTest) ...
-        GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,0,whatLoss,reWeight);
+        GiveMeCfn(XTrain,yTrain,XTest,yTest,cfnParams,false);
 end
 
 end

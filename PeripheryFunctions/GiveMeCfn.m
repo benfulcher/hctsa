@@ -1,18 +1,14 @@
-function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,yTest,numClasses,beVerbose,whatLoss,doReweight,CVFolds)
+function [accuracy,Mdl] = GiveMeCfn(XTrain,yTrain,XTest,yTest,cfnParams,beVerbose)
 % GiveMeCfn    Returns classification results from training a classifier on
 %               training/test data
 %
 %---INPUTS:
-% whatClassifier -- a type of classifier to use (default: 'fast_linear')
 % XTrain -- training data matrix
 % yTrain -- training data labels
 % XTest -- testing data matrix
 % yTest -- testing data labels
-% numClasses -- number of classes of labels
+% cfnParams -- parameters for classification
 % beVerbose -- whether to give text output of progress
-% whatLoss -- what loss function to compute on the data
-% doReweight -- whether to reweight for class imbalance
-% CVFolds -- number of CV folds (if CV is desired)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -43,121 +39,95 @@ function [accuracy,Mdl,whatLoss] = GiveMeCfn(whatClassifier,XTrain,yTrain,XTest,
 if size(yTrain,1) < size(yTrain,2)
     yTrain = yTrain';
 end
-if nargin < 4
+if nargin < 3
     XTest = [];
 end
-if nargin < 5
+if nargin < 4
     yTest = [];
 end
 if nargin < 6
-    numClasses = max(yTrain);
-end
-if nargin < 7
     beVerbose = false;
-end
-if nargin < 8 || isempty(whatLoss)
-    % See if it's a balanced problem, and set defaults accordingly
-    yAll = [yTrain;yTest];
-    classNumbers = arrayfun(@(x)sum(yAll==x),1:numClasses);
-    isBalanced = all(classNumbers==classNumbers(1));
-    if isBalanced
-        whatLoss = 'acc';
-        doReweight = false;
-    else
-        whatLoss = 'balancedAcc';
-        doReweight = true;
-        if beVerbose
-            fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
-        end
-    end
-end
-if ~exist('doReweight','var')
-    % Reweighted observations by inverse probability weight
-    % (for class imbalanced problems)
-    doReweight = true;
-end
-if nargin < 10
-    CVFolds = 0;
 end
 
 %-------------------------------------------------------------------------------
 % Define the classification model
 %------------------------------------------------------------------------------
-if strcmp(whatClassifier,'fast_linear')
+if strcmp(cfnParams.whatClassifier,'fast_linear')
     %--------------------------------------------------------------------------
     % Special case -- the `classify` function is faster than others
     %--------------------------------------------------------------------------
-    if CVFolds > 0
-        Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform','KFold',CVFolds);
+    if cfnParams.numFolds > 0
+        Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform','KFold',cfnParams.numFolds);
     else
         if nargout == 1
             % It's faster to use classify if we only want the accuracy
-            accuracy = BF_LossFunction(yTest,classify(yTest,XTrain,yTrain),whatLoss,numClasses);
+            accuracy = BF_LossFunction(yTest,classify(yTest,XTrain,yTrain),...
+                            cfnParams.whatLoss,cfnParams.classLabels);
             return;
         else
             Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform');
         end
     end
 else
-    if numClasses==2
+    if cfnParams.numClasses==2
         %----------------------------------------------------------------------
         % Special case: a two-class model
         %----------------------------------------------------------------------
-        switch whatClassifier
+        switch cfnParams.whatClassifier
         case 'knn'
             if beVerbose
                 fprintf(1,'Using three neighbors for knn\n');
             end
-            if CVFolds > 0
-                Mdl = fitcknn(XTrain,yTrain,'NumNeighbors',3,'KFold',CVFolds);
+            if cfnParams.numFolds > 0
+                Mdl = fitcknn(XTrain,yTrain,'NumNeighbors',3,'KFold',cfnParams.numFolds);
             else
                 Mdl = fitcknn(XTrain,yTrain,'NumNeighbors',3);
             end
         case 'tree'
-            if CVFolds > 0
-                Mdl = fitctree(XTrain,yTrain,'KFold',CVFolds);
+            if cfnParams.numFolds > 0
+                Mdl = fitctree(XTrain,yTrain,'KFold',cfnParams.numFolds);
             else
                 Mdl = fitctree(XTrain,yTrain);
             end
         case {'linear','linclass'}
-            if CVFolds > 0
-                Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on','KFold',CVFolds);
+            if cfnParams.numFolds > 0
+                Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on','KFold',cfnParams.numFolds);
             else
                 Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on');
             end
         case {'svm','svm_linear'}
             % Weight observations by inverse class probability:
-            if doReweight
-                if CVFolds > 0
-                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
+            if cfnParams.doReweight
+                if cfnParams.numFolds > 0
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
                 else
                     Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain));
                 end
             else
-                if CVFolds > 0
-                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','KFold',CVFolds);
+                if cfnParams.numFolds > 0
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','KFold',cfnParams.numFolds);
                 else
                     Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear');
                 end
             end
         case 'svm_rbf'
             % Weight observations by inverse class probability:
-            if doReweight
-                if CVFolds > 0
-                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
+            if cfnParams.doReweight
+                if cfnParams.numFolds > 0
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
                 else
                     Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain));
                 end
             else
-                if CVFolds > 0
-                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','KFold',CVFolds);
+                if cfnParams.numFolds > 0
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','KFold',cfnParams.numFolds);
                 else
                     Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf');
                 end
             end
         case 'diaglinear'
-            if CVFolds > 0
-                Mdl = fitcnb(XTrain,yTrain,'KFold',CVFolds);
+            if cfnParams.numFolds > 0
+                Mdl = fitcnb(XTrain,yTrain,'KFold',cfnParams.numFolds);
             else
                 Mdl = fitcnb(XTrain,yTrain);
             end
@@ -167,7 +137,7 @@ else
         % Define and fit a classification model involving 3 or more classes
         %----------------------------------------------------------------------
         % Define the model:
-        switch whatClassifier
+        switch cfnParams.whatClassifier
         case 'knn'
             t = templateKNN('NumNeighbors',3,'Standardize',true);
             if beVerbose, fprintf(1,'Using knn classifier\n'); end
@@ -188,21 +158,21 @@ else
             t = templateSVM('KernelFunction','rbf');
             if beVerbose, fprintf(1,'Using a rbf svm classifier\n'); end
         otherwise
-            error('Unknown classifier: ''%s''',whatClassifier);
+            error('Unknown classifier: ''%s''',cfnParams.whatClassifier);
         end
 
         % Fit the model:
-        if ismember(whatClassifier,{'svm_linear','svm_rbf','linear','linclass','diaglinear'}) && doReweight
+        if ismember(cfnParams.whatClassifier,{'svm_linear','svm_rbf','linear','linclass','diaglinear'}) && cfnParams.doReweight
             % Reweight to give equal weight to each class (in case of class imbalance)
-            if CVFolds > 0
-                Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain),'KFold',CVFolds);
+            if cfnParams.numFolds > 0
+                Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
             else
                 Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain));
             end
         else
             % Don't reweight:
-            if CVFolds > 0
-                Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'KFold',CVFolds);
+            if cfnParams.numFolds > 0
+                Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'KFold',cfnParams.numFolds);
             else
                 Mdl = fitcecoc(XTrain,yTrain,'Learners',t);
             end
@@ -214,28 +184,27 @@ end
 % Evaluate performance on test data
 %-------------------------------------------------------------------------------
 % Predict the test data:
-if CVFolds == 0
+if cfnParams.numFolds == 0
     if isempty(XTest) || isempty(yTest)
         % No need to compute this if you're just after the model
         accuracy = [];
         return
     else
         yPredict = predict(Mdl,XTest);
-        accuracy = BF_LossFunction(yTest,yPredict,whatLoss,numClasses);
+        accuracy = BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
     end
 else
     % Test data is mixed through the training data provided using k-fold cross validation
     % Output is the accuracy/loss measure for each fold, can mean it themselves if they want to
     yPredict = kfoldPredict(Mdl);
-    computePerFold = false;
-    if computePerFold
+    if cfnParams.computePerFold
         % Compute separately for each fold, store in vector accuracy:
         accuracy = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
-                                    yPredict(Mdl.Partition.test(x)),whatLoss,numClasses),...
-                                        1:CVFolds);
+                        yPredict(Mdl.Partition.test(x)),cfnParams.whatLoss,...
+                        cfnParams.classLabels),1:cfnParams.numFolds);
     else
         % Compute aggregate across all folds:
-        accuracy = BF_LossFunction(yTrain,yPredict,whatLoss,numClasses);
+        accuracy = BF_LossFunction(yTrain,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
     end
 end
 

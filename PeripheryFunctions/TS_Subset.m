@@ -10,7 +10,7 @@ function [TS_DataMat,TimeSeries,Operations] = TS_Subset(whatData,ts_ids_keep,op_
 %
 %---OUTPUTS:
 % TS_DataMat, TimeSeries, Operations: the subset of the hctsa dataset.
-% (if doSave==1): the full subset of the hctsa dataset saved to file.
+% (if doSave==true): the full subset of the hctsa dataset saved to file.
 %
 %---EXAMPLE USAGE:
 % Import data from 'HCTSA_N.mat', then create a new dataset containing time
@@ -99,7 +99,11 @@ if doSave
     end
 
     % Copy to a new subset .mat file, then save over with the new subset variables
-    copyfile(whatDataFile,outputFileName);
+    try
+        copyfile(whatDataFile,outputFileName);
+    catch
+        system(sprintf('cp %s %s',whatDataFile,outputFileName));
+    end
     save(outputFileName,'TS_DataMat','TimeSeries','Operations','-append');
 
     % Add additional variables to the new file, if they exist in the previous file:
@@ -130,19 +134,12 @@ if doSave
         save(outputFileName,'TS_CalcTime','-append');
     end
 
-    % Possible inconsistency with grouping (e.g., if you remove a whole group of time series)
-    % Matlab doesn't allow you to remove a variable from a .mat file easily
-    if ~isempty(ts_ids_keep) && ismember('groupNames',varNames)
-        groupNames = {};
-        save(outputFileName,'groupNames','-append');
-    end
-
     fprintf(1,'Data saved to %s!\n',outputFileName);
+end
 
-    % Don't display all of this info to screen if it's been saved and not stored
-    if nargout == 0
-        clear('TS_DataMat','TimeSeries','Operations');
-    end
+% Don't display all of this info to screen if it's been saved and not stored
+if nargout == 0
+    clear('TS_DataMat','TimeSeries','Operations');
 end
 
 %-------------------------------------------------------------------------------

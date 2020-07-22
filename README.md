@@ -1,6 +1,7 @@
 # :wavy_dash: *hctsa* :wavy_dash:: highly comparative time-series analysis
 
 [![DOI](https://zenodo.org/badge/10790340.svg)](https://zenodo.org/badge/latestdoi/10790340)
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries)](https://twitter.com/compTimeSeries)
 
 *hctsa* is a software package for running highly comparative time-series analysis using [Matlab](https://www.mathworks.com/products/matlab/) (full support for versions R2018b or later).
 
@@ -75,50 +76,9 @@ There are a range of open datasets with pre-computed _hctsa_ features, as well a
 
 Matlab code for computing features for an initialized `HCTSA.mat` file, by distributing the computation across a large number of cluster jobs (using pbs or slurm schedulers) is [here](https://github.com/benfulcher/distributed_hctsa).
 
-## Publications :closed_book:
+### Publications :closed_book:
 
-Here we provide a list of publications that have used _hctsa_.
-
-### Our publications
-
-Where journal articles (&#x1F4D7;) are not open access, we also provide a link to the preprint (&#x1F4D9;).
-Links to Github code repositories (:octocat:) are provided where appropriate.
-
-#### The development of *hctsa* and other resources for feature-based time-series analysis
-
-See the following publications for details of how the highly-comparative approach to time-series analysis has developed since our initial publication in 2013:
-
-* **We reduced *hctsa* down to a reduced set of 22 efficiently coded features**.
-  * [&#x1F4D7; CAnonical Time-series CHaracteristics](https://doi.org/10.1007/s10618-019-00647-x). *Data Mining and Knowledge Discovery* **33**, 1821 (2019).
-  * [:octocat: Code](https://github.com/chlubba/catch22).
-* **We developed a software package for highly-comparative time-series analysis, *hctsa*** (includes applications to high throughput phenotyping of _C. Elegans_ and Drosophila movement time series).
-  * [&#x1F4D7; _hctsa_: A Computational Framework for Automated Time-Series Phenotyping Using Massive Feature Extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6).   *Cell Systems* **5**, 527 (2017).
-  * [:octocat: Code (fly)](https://github.com/benfulcher/hctsa_phenotypingFly) &
-  [:octocat: Code (worm)](https://github.com/benfulcher/hctsa_phenotypingWorm).
-* **Introduction to using features for time-series analysis**
-  * [&#x1F4D7; Feature-based time-series analysis](https://www.crcpress.com/Feature-Engineering-for-Machine-Learning-and-Data-Analytics/Dong-Liu/p/book/9781138744387).
-    *Feature Engineering for Machine Learning and Data Analytics*, CRC Press (2018).
-  * [&#x1F4D9; Preprint](https://arxiv.org/abs/1709.08055).
-* **The behavior of thousands of time-series methods on thousands of different time series can be used to organize an interdisciplinary time-series analysis literature**
-  * [&#x1F4D7; Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full).
-    *J. Roy. Soc. Interface* (2013).
-
-#### Applications of *hctsa*
-We have used *hctsa* to:
-* **Distinguish targeted perturbations to mouse fMRI dynamics**
-  * [&#x1F4D7; Cortical Excitation:Inhibition Imbalance Causes Abnormal Brain Network Dynamics as Observed in Neurodevelopmental Disorders](https://academic.oup.com/cercor/advance-article/doi/10.1093/cercor/bhaa084/5823074). *Cerebral Cortex* (2020).
-  * [:octocat: Code](https://github.com/benfulcher/hctsa_DREADD).
-* **Connect structural brain connectivity to fMRI dynamics**
-  * [&#x1F4D7; Structural connectome topology relates to regional BOLD signal dynamics in the mouse brain](http://aip.scitation.org/doi/10.1063/1.4979281). *Chaos* (2017).
-  * [&#x1F4D9; Preprint](http://biorxiv.org/lookup/doi/10.1101/085514).
-* **Distinguish time-series patterns for data-mining applications**
-  * [&#x1F4D7; Highly comparative feature-based time-series classification](http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=6786425). *IEEE Trans. Knowl. Data Eng.* (2014).
-* **Classify babies with low blood pH from fetal heart rate time series**
-  * [&#x1F4D7; Highly comparative fetal heart rate analysis](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=6346629). *34th Ann. Int. Conf. IEEE EMBC* (2012).
-
-### Other Publications
-
-_hctsa_ has been used by others in neuroscience, engineering, and biomedicine.
+_hctsa_ has been used by us and others to do new science in neuroscience, engineering, and biomedicine.
 An updated list of publications using _hctsa_ is on this [wiki page](https://github.com/benfulcher/hctsa/wiki/Publications-using-hctsa).
 
 ## *hctsa* licenses
@@ -136,19 +96,12 @@ A range of external code packages are provided in the **Toolboxes** directory of
 
 ### External packages and dependencies
 
-The following [Matlab toolboxes](https://mathworks.com/programs/nrd/matlab-toolbox-price-request.html?ref=ggl&s_eid=ppc_18665571802&q=matlab%20toolboxes%20price) are used by *hctsa* and are required for full functionality of the software.
-In the case that some toolboxes are unavailable, the *hctsa* software can still be used, but only a reduced set of time-series features will be computed.
+Many features in _hctsa_ rely on external packages and Matlab toolboxes.
+In the case that some of them are unavailable, *hctsa* can still be used, but only a reduced set of time-series features will be computed.
 
-1. Statistics Toolbox
-2. Signal Processing Toolbox
-3. Curve Fitting Toolbox
-4. System Identification Toolbox
-5. Wavelet Toolbox
-6. Econometrics Toolbox
+_hctsa_ uses the following [Matlab toolboxes](https://mathworks.com/programs/nrd/matlab-toolbox-price-request.html?ref=ggl&s_eid=ppc_18665571802&q=matlab%20toolboxes%20price): Statistics, Signal Processing, Curve Fitting, System Identification, Wavelet, and Econometrics.
 
----
-
-The following time-series analysis packages are provided with the software (in the **Toolboxes** directory), and are used by our main feature extraction algorithms to compute meaningful structural features from time series:
+The following external time-series analysis code packages are provided with the software (in the **Toolboxes** directory), and are used by our main feature-extraction algorithms to compute meaningful structural features from time series:
 
 * [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
 * [*TSTOOL* package for nonlinear time-series analysis, version 1.2](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).

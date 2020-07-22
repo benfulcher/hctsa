@@ -56,12 +56,20 @@ if iscell(groupIndices) % Convert to vector of group indices
     end
 
 else
-    % Convert from vector of group labels to cell of group indices:
-
-    numGroups = max(groupIndices);
-    group = cell(numGroups,1);
-    for i = 1:numGroups
-        group{i} = find(groupIndices==i);
+    % Convert from vector of categorical group labels to cell of group indices:
+    if iscategorical(groupIndices)
+        classLabels = categories(groupIndices);
+        numGroups = length(classLabels);
+        group = cell(numGroups,1);
+        for i = 1:numGroups
+            group{i} = find(groupIndices==classLabels{i});
+        end
+    else
+        numGroups = max(groupIndices);
+        group = cell(numGroups,1);
+        for i = 1:numGroups
+            group{i} = find(groupIndices==i);
+        end
     end
 end
 

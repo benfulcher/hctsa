@@ -94,10 +94,8 @@ end
 switch whatDataFile
 case {'raw','loc'} % the raw, un-normalized data:
     whatDataFile = 'HCTSA.mat';
-    getClustered = false;
 case 'norm' % the normalized data:
     whatDataFile = 'HCTSA_N.mat';
-    getClustered = false;
 case 'cl' % the clustered data:
     whatDataFile = 'HCTSA_N.mat';
     getClustered = true;

@@ -3,7 +3,7 @@ function BF_AnnotatePoints(xy,TimeSeries,annotateParams)
 %
 %---INPUTS:
 % xy, a vector (or cell) of x-y co-ordinates of points on the plot
-% TimeSeries, a structure array of time series making up the plot
+% TimeSeries, a table of time series making up the plot
 % annotateParams, structure of custom plotting parameters
 
 % ------------------------------------------------------------------------------
@@ -99,11 +99,7 @@ pHeight = diff(pylim); % plot height
 alreadyPicked = zeros(numAnnotate,1); % record those already picked
 
 % Groups:
-if ismember('Group',TimeSeries.Properties.VariableNames)
-    numGroups = length(unique(TimeSeries.Group));
-else
-    numGroups = 1;
-end
+[groupLabels,classLabels,groupLabelsInteger,numGroups] = ExtractGroupLabels(TimeSeries);
 
 % Colors:
 if ~isfield(annotateParams,'groupColors')
@@ -145,7 +141,7 @@ for j = 1:numAnnotate
         % Keep selecting until you get a new point (can't get stuck in infinite
         % loop because maximum annotations is number of datapoints). Still, you
         % get 3 attempts to pick a new point
-        while ~newPointPicked && numAttempts < 3
+        while ~newPointPicked && (numAttempts < 3)
             point = ginput(1);
             point_z = (point-xy_mean)./xy_std;
             iPlot = BF_ClosestPoint_ginput(xy_zscore,point_z);
@@ -170,11 +166,7 @@ for j = 1:numAnnotate
     plotPoint = xy(iPlot,:);
 
     % Get the group index of the selected time series:
-    if ismember('Group',TimeSeries.Properties.VariableNames)
-        theGroup = TimeSeries.Group(iPlot);
-    else
-        theGroup = 1;
-    end
+    theGroupIndex = groupLabelsInteger(iPlot);
 
     % Crop the time series:
     if ~isempty(maxL)
@@ -191,8 +183,8 @@ for j = 1:numAnnotate
 
     % Plot a circle around the annotated point:
     if plotCircle
-        plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',groupColors{theGroup},...
-                            'MarkerFaceColor',brighten(groupColors{theGroup},0.5));
+        plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',groupColors{theGroupIndex},...
+                            'MarkerFaceColor',brighten(groupColors{theGroupIndex},0.5));
     end
 
     % Add text annotations:
@@ -203,23 +195,23 @@ for j = 1:numAnnotate
             text(plotPoint(1),plotPoint(2)-0.01*pHeight,sprintf('%s-%u',...
                     TimeSeries.Name{iPlot},TimeSeries.Group(iPlot)),...
                     'interpreter','none','FontSize',8,...
-                    'color',brighten(groupColors{theGroup},-0.6));
+                    'color',brighten(groupColors{theGroupIndex},-0.6));
         else
             text(plotPoint(1),plotPoint(2)-0.01*pHeight,TimeSeries.Name{iPlot},...
                     'interpreter','none','FontSize',8,...
-                    'color',brighten(groupColors{theGroup},-0.6));
+                    'color',brighten(groupColors{theGroupIndex},-0.6));
         end
     case 'ID'
         % Annotate text with ts_id:
         text(plotPoint(1),plotPoint(2)-0.01*pHeight,...
                 num2str(TimeSeries.ID(iPlot)),...
                     'interpreter','none','FontSize',8,...
-                    'color',brighten(groupColors{theGroup},-0.6));
+                    'color',brighten(groupColors{theGroupIndex},-0.6));
     case 'length'
         text(plotPoint(1),plotPoint(2)-0.01*pHeight,...
                 num2str(length(TimeSeries.Data{iPlot})),...
                 'interpreter','none','FontSize',8,...
-                'color',brighten(groupColors{theGroup},-0.6));
+                'color',brighten(groupColors{theGroupIndex},-0.6));
     end
 
     % Adjust if annotation goes off axis x-limits
@@ -237,7 +229,7 @@ for j = 1:numAnnotate
     if ~isempty(timeSeriesSegment)
         plot(px(1)+linspace(0,fdim(1)*pWidth,length(timeSeriesSegment)),...
                 py(1)+fdim(2)*pHeight*(timeSeriesSegment-min(timeSeriesSegment))/(max(timeSeriesSegment)-min(timeSeriesSegment)),...
-                    '-','color',groupColors{theGroup},'LineWidth',theLineWidth);
+                    '-','color',groupColors{theGroupIndex},'LineWidth',theLineWidth);
     end
 
 end

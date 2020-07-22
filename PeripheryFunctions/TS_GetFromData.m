@@ -64,21 +64,27 @@ elseif ischar(dataSource)
         dataSource = 'HCTSA_N.mat';
     end
 
-    fileVarsStruct = whos('-file',dataSource);
-    fileVars = {fileVarsStruct.name};
-    if ismember(dataField,fileVars)
+    try
         loadAgain = load(dataSource,dataField);
         result = loadAgain.(dataField);
-    else
+    catch
         result = [];
     end
+    % fileVarsStruct = whos('-file',dataSource);
+    % fileVars = {fileVarsStruct.name};
+    % if ismember(dataField,fileVars)
+    %     loadAgain = load(dataSource,dataField);
+    %     result = loadAgain.(dataField);
+    % else
+    %     result = [];
+    % end
 else
     error('Unknown data source type: %s',class(dataSource));
 end
 
 % Check for legacy structure array format and convert to table:
 if ismember(dataField,{'TimeSeries','Operations','MasterOperations'}) && isstruct(result)
-    warning('Loaded metadata, %s, is still in structure array format; converted to table',dataField)
+    warning('Loaded metadata, %s, is still in the old structure-array format; converted to table',dataField)
     result = struct2table(result);
 end
 

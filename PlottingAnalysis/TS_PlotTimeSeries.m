@@ -2,7 +2,8 @@ function TS_PlotTimeSeries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOpt
 % TS_PlotTimeSeries    Plots examples of time series in an hctsa analysis.
 %
 %---INPUTS:
-% whatData, The hctsa data to load information from (cf. TS_LoadData)
+% whatData, The hctsa data to load information from (cf. TS_LoadData) [or can
+%               specify a TimeSeries table directly]
 %
 % numPerGroup, If plotting groups, plots this many examples per group
 %
@@ -122,9 +123,13 @@ else
 end
 
 % ------------------------------------------------------------------------------
-%% Load data
+%% Load TimeSeries table
 % ------------------------------------------------------------------------------
-[~,TimeSeries] = TS_LoadData(whatData);
+if istable(whatData)
+    TimeSeries = whatData;
+else
+    TimeSeries = TS_GetFromData(whatData,'TimeSeries');
+end
 if sortByLength
     TimeSeries = sortrows(TimeSeries,'Length','descend');
 end
@@ -135,24 +140,24 @@ end
 if (isempty(whatTimeSeries) || strcmp(whatTimeSeries,'grouped')) && ismember('Group',TimeSeries.Properties.VariableNames)
     % Use default groups assigned by TS_LabelGroups
     groupIndices = BF_ToGroup(TimeSeries.Group);
-    numGroups = length(groupIndices);
-    groupNames = TS_GetFromData(whatData,'groupNames');
+    classLabels = categories(TimeSeries.Group);
+    numGroups = length(classLabels);
     fprintf(1,'Plotting from %u groups of time series from file.\n',numGroups);
 elseif isempty(whatTimeSeries) || strcmp(whatTimeSeries,'all')
     % Nothing specified but no groups assigned, or specified 'all': plot from all time series
     groupIndices = {1:height(TimeSeries)};
-    groupNames = {};
+    classLabels = {};
 elseif ischar(whatTimeSeries)
     % Just plot the specified group
     % First load group names:
-    groupNames = TS_GetFromData(dataSource,'groupNames');
-    a = strcmp(whatTimeSeries,groupNames);
+    classLabels = TS_GetFromData(dataSource,'classLabels');
+    a = strcmp(whatTimeSeries,classLabels);
     groupIndices = {find(TimeSeries.Group==find(a))};
-    groupNames = {whatTimeSeries};
+    classLabels = {whatTimeSeries};
     fprintf(1,'Plotting %u time series matching group name ''%s''\n',length(groupIndices{1}),whatTimeSeries);
 else % Provided a custom range as a vector
     groupIndices = {whatTimeSeries};
-    groupNames = {};
+    classLabels = {};
     fprintf(1,'Plotting the %u time series matching indices provided\n',length(whatTimeSeries));
 end
 numGroups = length(groupIndices);
@@ -309,9 +314,9 @@ if plotFreeForm
 	end
 
     % Legend:
-    if ~isempty(groupNames)
+    if ~isempty(classLabels)
         [~,b] = unique(classes);
-        legend(pHandles(b),groupNames,'interpreter','none');
+        legend(pHandles(b),classLabels,'interpreter','none');
     end
 
     % Set up axes:

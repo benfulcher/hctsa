@@ -1,4 +1,4 @@
-function BF_AnnotateRect(whatCfn,featureVector,groupLabels,numClasses,colors,ax,underOrLeft)
+function BF_AnnotateRect(featureVector,groupLabels,cfnParams,colors,ax,underOrLeft)
 % BF_AnnotateRect Annotates rectangles under distributions for group classification
 %
 %---INPUTS:
@@ -39,19 +39,16 @@ function BF_AnnotateRect(whatCfn,featureVector,groupLabels,numClasses,colors,ax,
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-if isempty(whatCfn)
-    whatCfn = 'fast_linear';
-end
+%-------------------------------------------------------------------------------
+% Check Inputs:
+%-------------------------------------------------------------------------------
 if nargin < 4
-    numClasses = max(groupLabels);
-end
-if nargin < 5
     colors = BF_GetColorMap('dark2',numClasses,1);
 end
-if nargin < 6
+if nargin < 5
     ax = gca;
 end
-if nargin < 7
+if nargin < 6
     underOrLeft = 'under'; % under the plot (from 0) by default
 end
 
@@ -61,8 +58,7 @@ numIncrements = 100;
 %--------------------------------------------------------------------
 % Learn a basic classification model from the 1-d feature vector:
 try
-    [~,Mdl] = GiveMeCfn(whatCfn,featureVector,groupLabels,...
-                        featureVector,groupLabels,numClasses,false,'balancedAcc');
+    [~,Mdl] = GiveMeCfn(featureVector,groupLabels,[],[],cfnParams,false);
 catch emsg
     warning('Unable to fit classification model')
     return
@@ -79,7 +75,6 @@ otherwise
 end
 predRange = linspace(dataPlotted(1),dataPlotted(2),numIncrements)'; % numIncrements-grid through x
 predLabels = predict(Mdl,predRange);
-
 
 %-------------------------------------------------------------------------------
 % Annotate rectangles under the distribution reflecting the predictive model:

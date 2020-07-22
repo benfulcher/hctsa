@@ -1,4 +1,4 @@
-function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,classMeth,annotateParams)
+function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,annotateParams,cfnParams)
 % TS_PlotLowDim   2-dimensional feature-based representation of a time-series dataset
 %
 % The low-dimensional representation is computed using PCA.
@@ -8,10 +8,10 @@ function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,classMeth,annotatePar
 % whatAlgorithm, what dimensionality-reduction algorithm to use ('pca' is default),
 %                   also 'tSNE'.
 % showDist, whether to also plot marginal class distributions of each PC
-% classMeth, the classification method when running classification in the PC space
 % annotateParams, the annotation parameters used when plotting the dataset using
 %                 TS_Plot2d. Can also specify an integer; will annotate this
 %                 many time series segments to the 2d scatter plot.
+% cfnParams, parameters for classification in 2-d space (cf., GiveMeDefaultClassificationParams)
 %
 %---OUTPUT:
 % Figure handle, f
@@ -54,10 +54,7 @@ end
 if nargin < 3 || isempty(showDist)
     showDist = true;
 end
-if nargin < 4 || isempty(classMeth)
-    classMeth = 'svm_linear';
-end
-if nargin < 5 || isempty(annotateParams)
+if nargin < 4 || isempty(annotateParams)
     % Annotate 6 points by default
     fprintf(1,'Annotating 6 points by default with time series segment and names\n');
     annotateParams = struct('n',6,'textAnnotation','Name','userInput',false);
@@ -66,18 +63,21 @@ if ~isstruct(annotateParams)
     annotateParams = struct('n',annotateParams);
 end
 
-% ------------------------------------------------------------------------------
-%% Load the data and group labeling from file
-% ------------------------------------------------------------------------------
-% Load in data:
+%-------------------------------------------------------------------------------
+%% Load the data
+%-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 numFeatures = height(Operations);
 
-% Retrieve group names also:
-groupNames = TS_GetFromData(whatData,'groupNames');
-if isempty(groupNames)
-    groupNames = {};
+% (for classification in the embedding space):
+if nargin < 5 || isempty(cfnParams)
+    cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
+
+% Assign group labels (removing unlabeled data):
+[TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
+% Give basic info about the represented classes:
+TellMeAboutLabeling(TimeSeries);
 
 % ------------------------------------------------------------------------------
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm
@@ -96,7 +96,8 @@ case {'pca','PCA'}
                     '(Could take some time...)'],100*mean(isnan(TS_DataMat(:)))))
         % Data matrix contains NaNs; try the pairwise rows approximation to the
         % covariance matrix:
-        [pcCoeff,Y,~,~,percVar] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Rows','pairwise');
+        [pcCoeff,Y,~,~,percVar] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),...
+                                        'Rows','pairwise','NumComponents',2);
         % If this fails (covariance matrix not positive definite), can try the
         % (...,'algorithm','als') option in pca... (or toolbox for probabilistic PCA)
     end
@@ -105,20 +106,7 @@ case {'pca','PCA'}
     %-------------------------------------------------------------------------------
     % Display the features loading strongly into the two components:
     numTopLoadFeat = min(numFeatures,20); % display this many features loading onto each PC
-    for j = 1:2
-        fprintf(1,'\n---Top feature loadings for PC%u---:\n',j);
-        [~,ix] = sort(abs(pcCoeff(:,j)),'descend');
-        for i = 1:numTopLoadFeat
-            ind = ix(i);
-            fprintf(1,'(%.3f, r = %.2f) [%u] %s (%s)\n',...
-                            pcCoeff(ind,j),...
-                            corr(Y(:,j),...
-                            TS_DataMat(:,ind)),...
-                            Operations.ID(ind),...
-                            Operations.Name{ind},...
-                            Operations.Keywords{ind});
-        end
-    end
+    LowDimDisplayTopLoadings(numTopLoadFeat,2,pcCoeff,Y,TS_DataMat,Operations);
 
     % Axis labels for the plot:
     featureLabels = cell(2,1);
@@ -152,8 +140,13 @@ otherwise
 end
 
 %-------------------------------------------------------------------------------
-% Set up for plotting two-dimensional representation of the data using TS_Plot2d
+% Plot two-dimensional representation of the data using TS_Plot2d:
+f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,annotateParams,showDist,cfnParams);
 
-f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,groupNames,annotateParams,showDist,classMeth);
+%-------------------------------------------------------------------------------
+% Clear output
+if nargout==0
+    clear('f')
+end
 
 end

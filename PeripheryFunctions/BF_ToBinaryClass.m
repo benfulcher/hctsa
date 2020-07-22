@@ -2,8 +2,9 @@ function binMatrix = BF_Binarize(groupLabels,numClasses,makeLogical)
 % BF_ToBinaryClass Converts a group vector to a binary class coded matrix
 %
 % Columns code observations, rows represent classes
+%
 %---INPUTS:
-% groupLabels, a vector of integers coding the class of each observation
+% groupLabels, a vector of integers (or categorical labels) coding the class of each observation
 % numClasses, the (integer) number of classes
 % makeLogical, (logical) whether to output a logical or numeric matrix
 %---OUTPUT: binMatrix, a binary matrix coding the groupLabels
@@ -39,7 +40,11 @@ function binMatrix = BF_Binarize(groupLabels,numClasses,makeLogical)
 
 % Set default number of classes to max of groupLabels
 if nargin < 2
-    numClasses = max(groupLabels);
+    if iscategorical(groupLabels)
+        numClasses = length(categories(groupLabels));
+    else
+        numClasses = max(groupLabels);
+    end
 end
 if nargin < 3
     makeLogical = false;
@@ -49,13 +54,19 @@ end
 numObs = length(groupLabels);
 
 % Generate the binary matrix:
-if makeLogical
-    binMatrix = false(numClasses,numObs);
+binMatrix = zeros(numClasses,numObs);
+if iscategorical(groupLabels)
+    classLabels = categories(groupLabels);
+    for i = 1:numClasses
+        binMatrix(i,groupLabels==classLabels{i}) = 1;
+    end
 else
-    binMatrix = zeros(numClasses,numObs);
+    for i = 1:numClasses
+        binMatrix(i,groupLabels==i) = 1;
+    end
 end
-for i = 1:numClasses
-    binMatrix(i,groupLabels==i) = 1;
+if makeLogical
+    binMatrix = logical(binMatrix);
 end
 
 end

@@ -44,8 +44,8 @@ function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA
 %% Check Inputs
 % --------------------------------------------------------------------------
 if nargin < 1 || isempty(normFunction)
-    fprintf(1,'Using the default, scaled quantile-based sigmoidal transform: ''scaledRobustSigmoid''\n')
-    normFunction = 'scaledRobustSigmoid';
+    fprintf(1,'Using the mixed sigmoidal transform: ''mixedSigmoid''\n')
+    normFunction = 'mixedSigmoid';
 end
 
 if nargin < 2 || isempty(filterOptions)
@@ -82,12 +82,6 @@ MasterOperations = TS_GetFromData(fileName_HCTSA,'MasterOperations');
 fromDatabase = TS_GetFromData(fileName_HCTSA,'fromDatabase');
 if isempty(fromDatabase)
     fromDatabase = true; % (legacy)
-end
-
-% Check that we have the groupNames if already assigned labels
-groupNames = TS_GetFromData(fileName_HCTSA,'groupNames');
-if isempty(groupNames)
-    groupnames = {};
 end
 
 % Maybe we kept the git repository info
@@ -165,10 +159,11 @@ if classVarFilter
     if ~ismember('Group',TimeSeries.Properties.VariableNames)
         fprintf(1,'Group labels not assigned to time series, so cannot filter on class variance\n');
     end
-    numClasses = length(unique(TimeSeries.Group));
+    classNames = categories(TimeSeries.Group);
+    numClasses = length(classNames);
     classVars = zeros(numClasses,size(TS_DataMat,2));
     for i = 1:numClasses
-        classVars(i,:) = nanstd(TS_DataMat(TimeSeries.Group==i,:));
+        classVars(i,:) = nanstd(TS_DataMat(TimeSeries.Group==classNames{i},:));
     end
     zeroClassVar = any(classVars < 10*eps,1);
     if all(zeroClassVar)
@@ -205,9 +200,9 @@ else
 
     percGoodCols = mean(~isnan(TS_DataMat),1)*100;
     percGoodRows = mean(~isnan(TS_DataMat),2)*100;
-    fprintf(1,'(post-filtering): Time series vary from %.2f--%.2f%% good values\n',...
+    fprintf(1,'(post-filtering): Time series vary from %.2f--%.2f%% good values.\n',...
                                 min(percGoodRows),max(percGoodRows));
-    fprintf(1,'(post-filtering): Features vary from %.2f--%.2f%% good values\n',...
+    fprintf(1,'(post-filtering): Features vary from %.2f--%.2f%% good values.\n',...
                                 min(percGoodCols),max(percGoodCols));
 end
 fprintf(1,'\n');
@@ -289,9 +284,14 @@ outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 
 fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName);
 save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-        'MasterOperations','fromDatabase','groupNames','normalizationInfo',...
+        'MasterOperations','fromDatabase','normalizationInfo',...
         'gitInfo','ts_clust','op_clust','-v7.3');
 fprintf(1,' Done.\n');
+
+% Check whether output to screen is required:
+if nargout == 0
+    clear('outputFileName');
+end
 
 %-------------------------------------------------------------------------------
 function keepInd = filterNaNs(XMat,nan_thresh,objectName)

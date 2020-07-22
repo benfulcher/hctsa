@@ -3,10 +3,10 @@ function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStr
 %
 %---INPUTS:
 % tsStruct, either (i) a vector of time-series data to compute
-% 				or (ii) an hctsa-style structure of time-series data
+% 				or (ii) an hctsa-style table of time-series data
 % doParallel, (binary) whether to compute the features using parallel processing
-% Operations, an hctsa-style structure array of Operations
-% MasterOperations, an hctsa-style structure array of MasterOperations
+% Operations, an hctsa-style table of Operations
+% MasterOperations, an hctsa-style table of MasterOperations
 % codeSpecial, whether to code special values with quality labels (for mySQL database)
 % 				this makes sure the featureVector is all real numbers, and any
 %				special values (like NaNs, Infs, etc.) are coded with corresponding
@@ -192,8 +192,6 @@ numMopsToCalc = length(Master_IDs_calc); % Number of master operations to calcul
 par_MasterOpCodeCalc = MasterOperations.Code(Master_ind_calc); % String array of strings of Code to evaluate
 par_mop_ids = MasterOperations.ID(Master_ind_calc); % mop_id for each master operation
 
-fprintf(1,'Evaluating %u master operations...\n',length(Master_IDs_calc));
-
 % Store in temporary variables for parfor loop then map back later
 MasterOutput_tmp = cell(numMopsToCalc,1);
 MasterCalcTime_tmp = zeros(numMopsToCalc,1);
@@ -201,6 +199,7 @@ MasterCalcTime_tmp = zeros(numMopsToCalc,1);
 % ----
 % Evaluate all the master operations
 % ----
+fprintf(1,'Evaluating %u master operations...\n',length(Master_IDs_calc));
 TimeSeries_i_ID = tsStruct.ID; % Make a PARFOR-friendly version of the ID
 masterTimer = tic;
 if doParallel

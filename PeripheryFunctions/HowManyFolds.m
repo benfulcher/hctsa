@@ -36,10 +36,20 @@ function numFolds = HowManyFolds(groupLabels,numClasses)
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    numClasses = max(groupLabels);
+    if iscategorical(groupLabels)
+        numClasses = length(categories(groupLabels));
+    else
+        numClasses = max(groupLabels);
+    end
 end
 
-numPerClass = arrayfun(@(x)sum(groupLabels==x),1:numClasses);
+if iscategorical(groupLabels)
+    classLabels = categories(groupLabels);
+    numPerClass = arrayfun(@(x)sum(groupLabels==x),classLabels);
+else
+    numPerClass = arrayfun(@(x)sum(groupLabels==x),1:numClasses);
+end
+
 
 % Make sure there are enough points in the smallest class to do proper
 % cross-validation:

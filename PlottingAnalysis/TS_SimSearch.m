@@ -299,13 +299,16 @@ if any(ismember('matrix',whatPlots))
     Dij_clust(Dij_clust==0) = NaN; % all zeros mess things up
     dLims = [min(Dij_clust(~isnan(Dij_clust))),max(Dij_clust(~isnan(Dij_clust)))];
     imagesc(Dij_clust)
-    if ismember('Group',dataTable.Properties.VariableNames)
-        numGroups = length(unique(dataTable_clust.Group));
-        dRescale = @(x) dLims(1) + numGroups/8*diff(dLims)*(-1 + 0.9999*(x - min(x))./(max(x)-min(x)));
-        imagesc(0,1,dRescale(dataTable_clust.Group'))
+
+    % Get group labeling if possible (time series):
+    [groupLabels,classLabels,groupLabelsInteger,numClasses] = ExtractGroupLabels(dataTable);
+
+    if numClasses > 1
+        dRescale = @(x) dLims(1) + numClasses/8*diff(dLims)*(-1 + 0.9999*(x - min(x))./(max(x)-min(x)));
+        imagesc(0,1,dRescale(groupLabelsInteger))
         plot(ones(2,1)*0.5,[0.5,numNeighbors+1.5],'k')
-        colormap([BF_GetColorMap('dark2',numGroups,0);BF_GetColorMap('redyellowblue',8,0)]);
-        caxis([dLims(1)-diff(dLims)*numGroups/8,dLims(2)])
+        colormap([BF_GetColorMap('dark2',numClasses,0);BF_GetColorMap('redyellowblue',8,0)]);
+        caxis([dLims(1)-diff(dLims)*numClasses/8,dLims(2)])
     else
         colormap(BF_GetColorMap('redyellowblue',8,0));
         caxis([min(Dij(Dij>0)),max(Dij(:))])
@@ -326,13 +329,13 @@ if any(ismember('matrix',whatPlots))
     % Add a color bar:
     cB = colorbar('northoutside');
     cB.Label.String = 'Distance';
-    if ismember('Group',dataTable.Properties.VariableNames)
+    if numClasses > 1
         cB.Limits = dLims;
     end
 
     % Set axes:
     axis('square')
-    if ismember('Group',dataTable.Properties.VariableNames)
+    if numClasses > 1
         ax2.XLim = [-0.5,numNeighbors+1.5];
     else
         ax2.XLim = [0.5,numNeighbors+1.5];
