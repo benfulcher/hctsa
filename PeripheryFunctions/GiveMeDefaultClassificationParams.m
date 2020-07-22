@@ -85,7 +85,9 @@ params.classifierFilename = ''; % (don't save classifier information to file)
 % Set text to name the classifier
 params = UpdateClassifierText(params);
 
-% Which features?
-params.reducedFeatureSet = 'catchaMouse16'; % '', 'catch22', 'catchaMouse16'
+% Restrict to a reduced set of features?
+% '' (all), 'catch22', 'catchaMouse16', 'noLengthLocationSpread'
+% (cf. GiveMeFeatureSet)
+params.reducedFeatureSet = 'noLengthLocationSpread';
 
 end

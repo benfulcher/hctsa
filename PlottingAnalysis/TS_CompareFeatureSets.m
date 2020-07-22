@@ -81,6 +81,12 @@ theColors = cell(numFeatureSets,1);
 featureSetNames = cell(numFeatureSets,1);
 % Prep for pulling out IDs efficiently
 
+% Check whether the old keyword labeling is relevant:
+IDs = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
+if isempty(IDs)
+    doOld = true;
+end
+
 for i = 1:numFeatureSets
     switch whatFeatureSets{i}
         case 'all'
@@ -92,29 +98,53 @@ for i = 1:numFeatureSets
             featureSetNames{i} = sprintf('%s (%u)',whatFeatureSets{i},length(featureIDs{i}));
             theColors{i} = [151,205,104]/255;
         case 'notLengthDependent'
-            [~,featureIDs{i}] = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
+            if doOld
+                [~,featureIDs{i}] = TS_GetIDs('lengthdep',dataStruct,'ops','Keywords');
+            else
+                [~,featureIDs{i}] = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
+            end
             featureSetNames{i} = sprintf('hctsa without length-dependent (%u)',length(featureIDs{i}));
             theColors{i} = brighten([187,149,219]/255,+0.3);
         case 'lengthDependent'
-            featureIDs{i} = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
+            if doOld
+                featureIDs{i} = TS_GetIDs('lengthdep',dataStruct,'ops','Keywords');
+            else
+                featureIDs{i} = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
+            end
             featureSetNames{i} = sprintf('Length-dependent (%u)',length(featureIDs{i}));
             % featureIDs{i} = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
             theColors{i} = brighten([187,149,219]/255,-0.3);
         case 'notLocationDependent'
-            [~,featureIDs{i}] = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
+            if doOld
+                [~,featureIDs{i}] = TS_GetIDs('locdep',dataStruct,'ops','Keywords');
+            else
+                [~,featureIDs{i}] = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
+            end
             featureSetNames{i} = sprintf('hctsa without location-dependent (%u)',length(featureIDs{i}));
             theColors{i} = brighten([214,175,90]/255,+0.3);
         case 'locationDependent'
-            featureIDs{i} = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
+            if doOld
+                featureIDs{i} = TS_GetIDs('locdep',dataStruct,'ops','Keywords');
+            else
+                featureIDs{i} = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
+            end
             featureSetNames{i} = sprintf('Location-dependent (%u)',length(featureIDs{i}));
             % featureIDs{i} = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
             theColors{i} = brighten([214,175,90]/255,-0.3);
         case 'notSpreadDependent'
-            [~,featureIDs{i}] = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
+            if doOld
+                [~,featureIDs{i}] = TS_GetIDs('spreaddep',dataStruct,'ops','Keywords');
+            else
+                [~,featureIDs{i}] = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
+            end
             featureSetNames{i} = sprintf('hctsa without spread-dependent (%u)',length(featureIDs{i}));
             theColors{i} = brighten([111,204,180]/255,+0.3);
         case 'spreadDependent'
-            featureIDs{i} = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
+            if doOld
+                featureIDs{i} = TS_GetIDs('spreaddep',dataStruct,'ops','Keywords');
+            else
+                featureIDs{i} = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
+            end
             featureSetNames{i} = sprintf('Spread-dependent (%u)',length(featureIDs{i}));
             % featureIDs{i} = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
             theColors{i} = brighten([111,204,180]/255,-0.3);

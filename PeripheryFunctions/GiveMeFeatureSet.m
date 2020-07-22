@@ -40,7 +40,7 @@ switch whatFeatureSet
 case 'noLengthLocationSpread'
     matchByName = false;
     % Remove length, location, spread-dependent features
-    doOld = false;
+    doOld = true;
     if doOld
         lengthIDs = TS_GetIDs('lengthdep',Operations,'ops','Keywords');
         locIDs = TS_GetIDs('locdep',Operations,'ops','Keywords');
@@ -50,7 +50,9 @@ case 'noLengthLocationSpread'
         locIDs = TS_GetIDs('locationDependent',Operations,'ops','Keywords');
         spreadIDs = TS_GetIDs('spreadDependent',Operations,'ops','Keywords');
     end
-    opIDs = unique([lengthIDs,locIDs,spreadIDs]);
+    depIDs = unique([lengthIDs; locIDs; spreadIDs]);
+    % Exclude:
+    opIDs = setxor(Operations.ID,depIDs);
 case 'sarab16'
     matchByName = true;
     % Sarab's top 16 features
@@ -118,21 +120,25 @@ otherwise
     error('Unknown feature set ''%s''',whatFeatureSet);
 end
 
+%-------------------------------------------------------------------------------
+% Do the matching by feature name for feature sets that are lists of feature names
+%-------------------------------------------------------------------------------
 if matchByName
     isMatch = cellfun(@(x)any(ismember(Operations.Name,x)),featureNames);
     opIDs = Operations.ID(isMatch);
     fprintf(1,'Matched %u/%u features!\n',length(opIDs),length(featureNames));
-end
 
-if length(opIDs) < length(featureNames)
-    didNotMatch = find(~isMatch);
-    for i = 1:length(didNotMatch)
-        if iscell(featureNames{didNotMatch(i)})
-            theFeatureName = featureNames{didNotMatch(i)}{1};
-        else
-            theFeatureName = featureNames{didNotMatch(i)};
+
+    if length(opIDs) < length(featureNames)
+        didNotMatch = find(~isMatch);
+        for i = 1:length(didNotMatch)
+            if iscell(featureNames{didNotMatch(i)})
+                theFeatureName = featureNames{didNotMatch(i)}{1};
+            else
+                theFeatureName = featureNames{didNotMatch(i)};
+            end
+            fprintf(1,'''%s'' does not exist in this HCTSA dataset\n',theFeatureName);
         end
-        fprintf(1,'''%s'' does not exist in this HCTSA dataset\n',theFeatureName);
     end
 end
 

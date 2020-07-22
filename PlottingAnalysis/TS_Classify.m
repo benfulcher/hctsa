@@ -98,16 +98,8 @@ if nargin < 2 || isempty(fields(cfnParams))
 end
 TellMeAboutClassification(cfnParams);
 
-%-------------------------------------------------------------------------------
-% Filter a reduced feature set?
-if ~isempty(cfnParams.reducedFeatureSet)
-    opIDs = GiveMeFeatureSet(cfnParams.reducedFeatureSet,Operations);
-    keepMe = ismember(Operations.ID,opIDs);
-    Operations = Operations(keepMe,:);
-    TS_DataMat = TS_DataMat(:,keepMe);
-    fprintf(1,'Only using %u features from the %s set...\n',sum(keepMe),cfnParams.reducedFeatureSet);
-end
-numFeatures = height(Operations);
+% Filter down a reduced feature set if required:
+[TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams);
 
 %-------------------------------------------------------------------------------
 % Fit the model
