@@ -56,13 +56,13 @@ case 'sarab16'
                     'SB_MotifTwo_mean_hhh', ...
                     'SC_FluctAnal_2_rsrangefit_50_1_logi_prop_r1'};
 case 'catch22'
-    % The catch22 feature set:
+    % The catch22 feature set (EXCLUDES MEAN/SPREAD-DEPENDENT FEATURES)
     % cf. https://github.com/chlubba/catch22
     featureNames = {'DN_HistogramMode_5', ...
                     'DN_HistogramMode_10', ...
-                    'first1e_acf_tau', 'first_1e_ac', ... % (new name)
-                    'firstMin_acf', 'first_min_acf', ... % (new name)
-                    'CO_HistogramAMI_even_2_5', ...
+                    {'first1e_acf_tau', 'first_1e_ac'}, ... % (new name)
+                    {'firstMin_acf', 'first_min_acf'}, ... % (new name)
+                    {'CO_HistogramAMI_even_5_2','CO_HistogramAMI_even_5bin_tau2'}, ... % (new name; CO_HistogramAMI_even_2_5)
                     'CO_trev_1_num', ...
                     'MD_hrv_classic_pnn40', ...
                     'SB_BinaryStats_mean_longstretch1', ...
@@ -84,7 +84,8 @@ otherwise
     error('Unknown feature set ''%s''',whatFeatureSet);
 end
 
-opIDs = Operations.ID(ismember(Operations.Name,featureNames));
+isMatch = cellfun(@(x)any(ismember(Operations.Name,x)),featureNames);
+opIDs = Operations.ID(isMatch);
 fprintf(1,'Matched %u/%u features!\n',length(opIDs),length(featureNames));
 
 if length(opIDs) < length(featureNames)
