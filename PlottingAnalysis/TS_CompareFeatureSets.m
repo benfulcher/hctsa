@@ -73,7 +73,7 @@ end
 dataStruct = makeDataStruct();
 
 %-------------------------------------------------------------------------------
-% Define the feature sets by feature IDs
+% Define the feature sets as sets of IDs
 %-------------------------------------------------------------------------------
 numFeatureSets = length(whatFeatureSets);
 featureIDs = cell(numFeatureSets,1);
@@ -92,29 +92,29 @@ for i = 1:numFeatureSets
             featureSetNames{i} = sprintf('%s (%u)',whatFeatureSets{i},length(featureIDs{i}));
             theColors{i} = [151,205,104]/255;
         case 'notLengthDependent'
-            [~,featureIDs{i}] = TS_GetIDs('lengthdep',dataStruct,'ops','Keywords');
+            [~,featureIDs{i}] = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
             featureSetNames{i} = sprintf('hctsa without length-dependent (%u)',length(featureIDs{i}));
             theColors{i} = brighten([187,149,219]/255,+0.3);
         case 'lengthDependent'
-            featureIDs{i} = TS_GetIDs('lengthdep',dataStruct,'ops','Keywords');
+            featureIDs{i} = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
             featureSetNames{i} = sprintf('Length-dependent (%u)',length(featureIDs{i}));
             % featureIDs{i} = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
             theColors{i} = brighten([187,149,219]/255,-0.3);
         case 'notLocationDependent'
-            [~,featureIDs{i}] = TS_GetIDs('locdep',dataStruct,'ops','Keywords');
+            [~,featureIDs{i}] = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
             featureSetNames{i} = sprintf('hctsa without location-dependent (%u)',length(featureIDs{i}));
             theColors{i} = brighten([214,175,90]/255,+0.3);
         case 'locationDependent'
-            featureIDs{i} = TS_GetIDs('locdep',dataStruct,'ops','Keywords');
+            featureIDs{i} = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
             featureSetNames{i} = sprintf('Location-dependent (%u)',length(featureIDs{i}));
             % featureIDs{i} = TS_GetIDs('locationDependent',dataStruct,'ops','Keywords');
             theColors{i} = brighten([214,175,90]/255,-0.3);
         case 'notSpreadDependent'
-            [~,featureIDs{i}] = TS_GetIDs('spreaddep',dataStruct,'ops','Keywords');
+            [~,featureIDs{i}] = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
             featureSetNames{i} = sprintf('hctsa without spread-dependent (%u)',length(featureIDs{i}));
             theColors{i} = brighten([111,204,180]/255,+0.3);
         case 'spreadDependent'
-            featureIDs{i} = TS_GetIDs('spreaddep',dataStruct,'ops','Keywords');
+            featureIDs{i} = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
             featureSetNames{i} = sprintf('Spread-dependent (%u)',length(featureIDs{i}));
             % featureIDs{i} = TS_GetIDs('spreadDependent',dataStruct,'ops','Keywords');
             theColors{i} = brighten([111,204,180]/255,-0.3);
@@ -136,8 +136,7 @@ accuracy = zeros(numFeatureSets,cfnParams.numFolds*cfnParams.numRepeats);
 for i = 1:numFeatureSets
     filter = ismember(Operations.ID,featureIDs{i});
     for j = 1:cfnParams.numRepeats
-        foldLosses = GiveMeCfn(TS_DataMat(:,filter),...
-                    TimeSeries.Group,[],[],cfnParams);
+        foldLosses = GiveMeCfn(TS_DataMat(:,filter),TimeSeries.Group,[],[],cfnParams);
         accuracy(i,1+(j-1)*cfnParams.numFolds:j*cfnParams.numFolds) = foldLosses;
     end
     fprintf(['Classified using the ''%s'' set (%u features): (%u-fold average, ',...

@@ -37,7 +37,22 @@ end
 %-------------------------------------------------------------------------------
 
 switch whatFeatureSet
+case 'noLengthLocationSpread'
+    matchByName = false;
+    % Remove length, location, spread-dependent features
+    doOld = false;
+    if doOld
+        lengthIDs = TS_GetIDs('lengthdep',Operations,'ops','Keywords');
+        locIDs = TS_GetIDs('locdep',Operations,'ops','Keywords');
+        spreadIDs = TS_GetIDs('spreaddep',Operations,'ops','Keywords');
+    else
+        lengthIDs = TS_GetIDs('lengthDependent',Operations,'ops','Keywords');
+        locIDs = TS_GetIDs('locationDependent',Operations,'ops','Keywords');
+        spreadIDs = TS_GetIDs('spreadDependent',Operations,'ops','Keywords');
+    end
+    opIDs = unique([lengthIDs,locIDs,spreadIDs]);
 case 'sarab16'
+    matchByName = true;
     % Sarab's top 16 features
     featureNames = {'DN_HistogramMode_10', ...
                     'AC_9', ...
@@ -56,6 +71,7 @@ case 'sarab16'
                     'SB_MotifTwo_mean_hhh', ...
                     'SC_FluctAnal_2_rsrangefit_50_1_logi_prop_r1'};
 case 'catch22'
+    matchByName = true;
     % The catch22 feature set (EXCLUDES MEAN/SPREAD-DEPENDENT FEATURES)
     % cf. https://github.com/chlubba/catch22
     featureNames = {'DN_HistogramMode_5', ...
@@ -81,6 +97,7 @@ case 'catch22'
                     'SP_Summaries_welch_rect_centroid', ...
                     'FC_LocalSimple_mean3_stderr'};
 case 'catchaMouse16'
+    matchByName = true;
     featureNames = {'SY_DriftingMean50_min',...
                     'MF_CompareAR_1_10_05_stddiff',...
                     'SC_FluctAnal_2_dfa_50_2_logi_r2_se2',...
@@ -101,9 +118,11 @@ otherwise
     error('Unknown feature set ''%s''',whatFeatureSet);
 end
 
-isMatch = cellfun(@(x)any(ismember(Operations.Name,x)),featureNames);
-opIDs = Operations.ID(isMatch);
-fprintf(1,'Matched %u/%u features!\n',length(opIDs),length(featureNames));
+if matchByName
+    isMatch = cellfun(@(x)any(ismember(Operations.Name,x)),featureNames);
+    opIDs = Operations.ID(isMatch);
+    fprintf(1,'Matched %u/%u features!\n',length(opIDs),length(featureNames));
+end
 
 if length(opIDs) < length(featureNames)
     didNotMatch = find(~isMatch);

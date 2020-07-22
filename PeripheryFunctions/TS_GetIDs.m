@@ -61,14 +61,21 @@ end
 %-------------------------------------------------------------------------------
 % Load data:
 %-------------------------------------------------------------------------------
-[~,TimeSeries,Operations,theDataFile] = TS_LoadData(whatData);
-switch tsOrOps
-case 'ts'
-    theDataTable = TimeSeries;
-case 'ops'
-    theDataTable = Operations;
-otherwise
-    error('Specify ''ts'' (time series) or ''ops'' (operations)');
+if istable(whatData)
+    theDataTable = whatData;
+    theDataFile = 'the table provided';
+else
+    switch tsOrOps
+    case 'ts'
+        % Retrieve the TimeSeries table:
+        [~,theDataTable,~,theDataFile] = TS_LoadData(whatData);
+        theDataTable = TimeSeries;
+    case 'ops'
+        % Retrieve the Operations table:
+        [~,~,theDataTable,theDataFile] = TS_LoadData(whatData);
+    otherwise
+        error('Specify ''ts'' (time series) or ''ops'' (operations)');
+    end
 end
 
 %-------------------------------------------------------------------------------
