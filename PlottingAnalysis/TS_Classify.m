@@ -97,17 +97,26 @@ if nargin < 2 || isempty(fields(cfnParams))
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
 TellMeAboutClassification(cfnParams);
+
+%-------------------------------------------------------------------------------
+% Filter a reduced feature set?
+if ~isempty(cfnParams.reducedFeatureSet)
+    opIDs = GiveMeFeatureSet(cfnParams.reducedFeatureSet,Operations);
+    keepMe = ismember(Operations.ID,opIDs);
+    Operations = Operations(keepMe,:);
+    TS_DataMat = TS_DataMat(:,keepMe);
+    fprintf(1,'Only using %u features from the %s set...\n',sum(keepMe),cfnParams.reducedFeatureSet);
+end
 numFeatures = height(Operations);
 
 %-------------------------------------------------------------------------------
 % Fit the model
 %-------------------------------------------------------------------------------
-% Reset the random seed:
-BF_ResetSeed(seedReset); % reset the random seed for CV-reproducibility
+% Reset the random seed for CV-reproducibility
+BF_ResetSeed(seedReset);
 
 % Fit the classification model to the dataset (for each cross-validation fold)
 % and evaluate performance:
-
 CVMdl = cell(cfnParams.numRepeats,1);
 foldLosses = zeros(cfnParams.numRepeats,1);
 cfnParams.computePerFold = false;
@@ -116,24 +125,24 @@ for i = 1:cfnParams.numRepeats
 end
 
 % Display results to commandline:
-if cfnParams.numRepeats==1
-    foldBit = sprintf('%u-fold',cfnParams.numFolds);
-    accuracyBit = sprintf('%.3f%%',mean(foldLosses));
+if cfnParams.numFolds == 0
+    assert(cfnParams.numRepeats==1)
+    fprintf(1,'In-sample %s using %s = %.3f%s\n',cfnParams.whatLoss,cfnParams.whatClassifier,...
+                                            foldLosses,cfnParams.whatLossUnits);
 else
-    foldBit = sprintf('%u-fold (%u repeats)',cfnParams.numFolds,cfnParams.numRepeats);
-    accuracyBit = sprintf('%.3f +/- %.3f%%',mean(foldLosses),std(foldLosses));
+    if cfnParams.numRepeats==1
+        foldBit = sprintf('%u-fold',cfnParams.numFolds);
+        accuracyBit = sprintf('%.3f%s',mean(foldLosses),cfnParams.whatLossUnits);
+    else
+        foldBit = sprintf('%u-fold (%u repeats)',cfnParams.numFolds,cfnParams.numRepeats);
+        accuracyBit = sprintf('%.3f +/- %.3f%s',mean(foldLosses),std(foldLosses),cfnParams.whatLossUnits);
+    end
+    fprintf(1,['\nMean (across folds) %s (%u-class) using %s %s classification with %u' ...
+                     ' features:\n%s\n\n'],...
+            cfnParams.whatLoss,cfnParams.numClasses,foldBit,...
+            cfnParams.whatClassifier,numFeatures,accuracyBit);
 end
-fprintf(1,['\nMean (across folds) %s (%u-class) using %s %s classification with %u' ...
-                 ' features:\n%s\n\n'],...
-        cfnParams.whatLoss,cfnParams.numClasses,foldBit,...
-        cfnParams.whatClassifier,numFeatures,accuracyBit);
 
-% Plot as a histogram:
-% if doPlot
-%     f_histogram = figure('color','w');
-%     h = histogram(foldLosses);
-%     h.FaceColor = ones(1,3)*0.5;
-% end
 
 %-------------------------------------------------------------------------------
 % Check nulls:
@@ -146,12 +155,12 @@ if numNulls > 0
         fprintf(1,'Using parfor for speed...\n');
         parfor i = 1:numNulls
             shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-            nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,[],[],cfnParams);
+            nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,TS_DataMat,shuffledLabels,cfnParams);
         end
     else
         for i = 1:numNulls
             shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-            nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,[],[],cfnParams);
+            nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,TS_DataMat,shuffledLabels,cfnParams);
             if i==1
                 fprintf(1,'%u',i);
             else
@@ -208,7 +217,13 @@ end
 % required as input to plotconfusion:
 realLabels = BF_ToBinaryClass(TimeSeries.Group,cfnParams.numClasses,false);
 % Predict from the first CV-partition:
-predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),cfnParams.numClasses,false);
+if cfnParams.numFolds > 0
+    % Just show results from the first CV repeat:
+    predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),cfnParams.numClasses,false);
+else
+    predictLabels = BF_ToBinaryClass(predict(CVMdl{1},TS_DataMat));
+end
+
 if doPlot
     try
         if exist('confusionchart','file') ~= 0
@@ -227,8 +242,13 @@ if doPlot
         ax.YTickLabel(1:cfnParams.numClasses) = classLabels;
         ax.TickLabelInterpreter = 'none';
 
-        title(sprintf('Confusion matrix from %u-fold (%u repeats) cross-validation',...
-                                cfnParams.numFolds,cfnParams.numRepeats));
+        if cfnParams.numFolds > 0
+            title(sprintf('Confusion matrix from %u-fold %s cross-validation (repeat 1)',...
+                    cfnParams.numFolds,cfnParams.whatClassifier),'interpreter','none');
+        else
+            title(sprintf('Confusion matrix from in-sample %s classification',...
+                                cfnParams.whatClassifier),'interpreter','none');
+        end
     catch
         warning('No available confusion matrix plotting functions')
     end
@@ -268,7 +288,7 @@ end
 %-------------------------------------------------------------------------------
 function [foldLosses,CVMdl] = GiveMeFoldLosses(dataMatrix,dataLabels)
     % Returns the output (e.g., loss) for the custom fn_loss function across all folds
-    [foldLosses,CVMdl] = GiveMeCfn(dataMatrix,dataLabels,[],[],cfnParams);
+    [foldLosses,CVMdl] = GiveMeCfn(dataMatrix,dataLabels,dataMatrix,dataLabels,cfnParams);
 end
 %-------------------------------------------------------------------------------
 function dataStruct = makeDataStruct()
