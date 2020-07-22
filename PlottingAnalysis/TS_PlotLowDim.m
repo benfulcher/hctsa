@@ -79,6 +79,9 @@ end
 % Give basic info about the represented classes:
 TellMeAboutLabeling(TimeSeries);
 
+% Filter down a reduced feature set if required:
+[TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams);
+
 % ------------------------------------------------------------------------------
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm
 % ------------------------------------------------------------------------------
@@ -128,7 +131,7 @@ case {'tSNE','tsne'}
     else
         fprintf(1,['Computing a two-dimensional t-SNE embedding (using barnes-hut',...
                         ' approximation) of the %u x %u data matrix...\n'], ...
-                            numPCAComponents,size(TS_DataMat,1),size(TS_DataMat,2));
+                            size(TS_DataMat,1),size(TS_DataMat,2));
         Y = tsne(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Algorithm','barneshut',...
                         'Distance','euclidean','NumDimensions',2);
     end
