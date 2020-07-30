@@ -48,7 +48,7 @@ function out = MF_CompareAR(y,orders,testHow)
 BF_CheckToolbox('identification_toolbox')
 
 % Preliminaries
-doplot = 0; % can set to 1 to plot outputs
+doPlot = false; % set to true to plot outputs
 N = length(y); % length of time series, N
 
 %% Check Inputs
@@ -81,18 +81,19 @@ end
 
 if ischar(testHow)
     if strcmp(testHow,'all')
-        ytrain = y;
-        ytest = y;
+        yTrain = y;
+        yTest = y;
     else
         error('Unknown testing set specifier ''%s''',testHow);
     end
-else % use first <proportion> to train, rest to test
+else
+    % use first <proportion> to train, rest to test
     co = floor(N*testHow); % cutoff
-    ytrain = y(1:co);
-    ytest = y(co+1:end);
+    yTrain = y(1:co);
+    yTest = y(co+1:end);
 end
 
-V = arxstruc(ytrain,ytest,orders);
+V = arxstruc(yTrain,yTest,orders);
 
 % ------------------------------------------------------------------------------
 %% Output
@@ -127,7 +128,7 @@ if isempty(out.whereen4), out.whereen4 = NaN; end
 % ------------------------------------------------------------------------------
 %% Plotting
 % ------------------------------------------------------------------------------
-if doplot
+if doPlot
     plot(v);
     plot(stdfromi,'r');
 end

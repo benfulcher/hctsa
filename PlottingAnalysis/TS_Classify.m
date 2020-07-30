@@ -100,6 +100,7 @@ TellMeAboutClassification(cfnParams);
 
 % Filter down a reduced feature set if required:
 [TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams);
+numFeatures = height(Operations);
 
 %-------------------------------------------------------------------------------
 % Fit the model

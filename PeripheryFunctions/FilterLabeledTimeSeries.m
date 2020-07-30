@@ -21,6 +21,9 @@ function [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+if isnumeric(TimeSeries.Group)
+    error('Time-series group labels are assigned as numeric labels (old format). Please re-run TS_LabelGroups on your HCTSA dataset.');
+end
 isLabeled = ~isundefined(TimeSeries.Group);
 if any(~isLabeled)
     TimeSeries = TimeSeries(isLabeled,:);
