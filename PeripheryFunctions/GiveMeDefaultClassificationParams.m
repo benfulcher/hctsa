@@ -88,6 +88,6 @@ params = UpdateClassifierText(params);
 % Restrict to a reduced set of features?
 % '' (all), 'catch22', 'catchaMouse16', 'noLengthLocationSpread'
 % (cf. GiveMeFeatureSet)
-params.reducedFeatureSet = 'noLengthLocationSpread';
+params.reducedFeatureSet = '';
 
 end

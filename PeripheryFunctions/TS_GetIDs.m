@@ -69,7 +69,6 @@ else
     case 'ts'
         % Retrieve the TimeSeries table:
         [~,theDataTable,~,theDataFile] = TS_LoadData(whatData);
-        theDataTable = TimeSeries;
     case 'ops'
         % Retrieve the Operations table:
         [~,~,theDataTable,theDataFile] = TS_LoadData(whatData);
