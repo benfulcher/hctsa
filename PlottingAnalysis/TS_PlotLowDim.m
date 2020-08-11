@@ -1,7 +1,7 @@
 function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,annotateParams,cfnParams)
-% TS_PlotLowDim   2-dimensional feature-based representation of a time-series dataset
+% TS_PlotLowDim   2-dim feature-based representation of a time-series dataset
 %
-% The low-dimensional representation is computed using PCA.
+% The low-dimensional representation is computed using PCA by default.
 %
 %---INPUTS:
 % whatData, the hctsa data file (or structure) to use (input to TS_LoadData)
@@ -118,7 +118,8 @@ case {'pca','PCA'}
     end
 
 case {'tSNE','tsne'}
-    numPCAComponents = min(size(TS_DataMat,2),50);
+    defaultNumPCs = 100;
+    numPCAComponents = min(size(TS_DataMat,2),defaultNumPCs);
     rng('default') % for reproducibility
 
     if numPCAComponents < size(TS_DataMat,2)

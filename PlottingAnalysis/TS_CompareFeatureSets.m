@@ -94,7 +94,7 @@ for i = 1:numFeatureSets
             featureSetNames{i} = sprintf('hctsa (%u)',height(Operations));
             theColors{i} = [233,129,126]/255;
         case {'catch22','sarab16'}
-            featureIDs{i} = GiveMeFeatureSet(whatFeatureSets{i},Operations);
+            featureIDs{i} = TS_GiveMeFeatureSet(whatFeatureSets{i},Operations);
             featureSetNames{i} = sprintf('%s (%u)',whatFeatureSets{i},length(featureIDs{i}));
             theColors{i} = [151,205,104]/255;
         case 'notLengthDependent'

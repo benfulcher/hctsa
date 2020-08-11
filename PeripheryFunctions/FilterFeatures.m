@@ -4,7 +4,7 @@ function [TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParam
 if isempty(cfnParams.reducedFeatureSet) || strcmp(cfnParams.reducedFeatureSet,'all')
     return
 else
-    opIDs = GiveMeFeatureSet(cfnParams.reducedFeatureSet,Operations);
+    opIDs = TS_GiveMeFeatureSet(cfnParams.reducedFeatureSet,Operations);
     keepMe = ismember(Operations.ID,opIDs);
     Operations = Operations(keepMe,:);
     TS_DataMat = TS_DataMat(:,keepMe);

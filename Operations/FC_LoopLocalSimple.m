@@ -56,7 +56,7 @@ BF_CheckToolbox('curve_fitting_toolbox');
 % ------------------------------------------------------------------------------
 BF_CheckToolbox('signal_toolbox');
 
-doPlot = 0; % plot outputs to a figure
+doPlot = false; % plot outputs to a figure
 
 if nargin < 2 || isempty(forecastMeth)
     forecastMeth = 'mean'; % do mean prediction by default
@@ -65,10 +65,8 @@ end
 switch forecastMeth
     case 'mean'
         trainLengthRange = (1:10)';
-
     case 'median'
         trainLengthRange = (1:2:19)';
-
     otherwise
         error('Unknown prediction method ''%s''',forecastMeth);
 end

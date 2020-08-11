@@ -87,7 +87,7 @@ params = UpdateClassifierText(params);
 
 % Restrict to a reduced set of features?
 % '' (all), 'catch22', 'catchaMouse16', 'noLengthLocationSpread'
-% (cf. GiveMeFeatureSet)
+% (cf. TS_GiveMeFeatureSet)
 params.reducedFeatureSet = '';
 
 end

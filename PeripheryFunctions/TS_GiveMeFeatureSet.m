@@ -1,5 +1,5 @@
-function opIDs = GiveMeFeatureSet(whatFeatureSet,Operations)
-% GiveMeFeatureSet Outputs a set of Operation IDs corresponding to a given set
+function opIDs = TS_GiveMeFeatureSet(whatFeatureSet,Operations)
+% TS_GiveMeFeatureSet Outputs a set of Operation IDs corresponding to a given set
 %
 % INPUTS:
 % ---whatFeatureSet, the type of feature set to retrieve/filter.
