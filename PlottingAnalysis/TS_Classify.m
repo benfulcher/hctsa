@@ -208,42 +208,47 @@ end
 %-------------------------------------------------------------------------------
 % Convert real and predicted class labels to matrix form (numClasses x N),
 % required as input to plotconfusion:
-realLabels = BF_ToBinaryClass(TimeSeries.Group,cfnParams.numClasses,false);
+realLabels = TimeSeries.Group;
 % Predict from the first CV-partition:
 if cfnParams.numFolds > 0
     % Just show results from the first CV repeat:
-    predictLabels = BF_ToBinaryClass(kfoldPredict(CVMdl{1}),cfnParams.numClasses,false);
+    predictLabels = kfoldPredict(CVMdl{1});
 else
-    predictLabels = BF_ToBinaryClass(predict(CVMdl{1},TS_DataMat));
+    predictLabels = predict(CVMdl{1},TS_DataMat);
 end
 
 if doPlot
-    try
+    if exist('confusionchart','file') == 0 && exist('plotconfusion','file') ==0
+        warning('No available confusion matrix plotting functions')
+    else
+        if cfnParams.numFolds > 0
+            titleText = sprintf('Confusion matrix from %u-fold %s cross-validation (repeat 1)',...
+                    cfnParams.numFolds,cfnParams.whatClassifier);
+        else
+            titleText = sprintf('Confusion matrix from in-sample %s classification',...
+                                cfnParams.whatClassifier);
+        end
+
+        % Prefer the confusionchart to plotconfusion?
         if exist('confusionchart','file') ~= 0
             % Requires Matlab 2020 (Stats/ML Toolbox):
-            f = figure('color','w');
+            f_confusion = figure('color','w');
             confusionchart(realLabels,predictLabels);
+            title(titleText)
+            % Wish I could set the interpreter to 'none', but the confusionchart
+            % title text doesn't seem to have this option... :-/
         else
             % Requires the Deep Learning Toolbox:
             f_confusion = figure('color','w');
             plotconfusion(realLabels,predictLabels);
+            % Fix axis labels:
+            ax = gca;
+            ax.XTickLabel(1:cfnParams.numClasses) = classLabels;
+            ax.YTickLabel(1:cfnParams.numClasses) = classLabels;
+            ax.TickLabelInterpreter = 'none';
+            title(titleText,'interpreter','none')
         end
 
-        % Fix axis labels:
-        ax = gca;
-        ax.XTickLabel(1:cfnParams.numClasses) = classLabels;
-        ax.YTickLabel(1:cfnParams.numClasses) = classLabels;
-        ax.TickLabelInterpreter = 'none';
-
-        if cfnParams.numFolds > 0
-            title(sprintf('Confusion matrix from %u-fold %s cross-validation (repeat 1)',...
-                    cfnParams.numFolds,cfnParams.whatClassifier),'interpreter','none');
-        else
-            title(sprintf('Confusion matrix from in-sample %s classification',...
-                                cfnParams.whatClassifier),'interpreter','none');
-        end
-    catch
-        warning('No available confusion matrix plotting functions')
     end
 end
 
