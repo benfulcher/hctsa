@@ -102,9 +102,9 @@ clear inputP;
 if isempty(whatDistMetric)
     switch tsOrOps
     case 'ts'
-        whatDistMetric = 'euclidean';
+        whatDistMetric = 'Euclidean';
     case 'ops'
-        whatDistMetric = 'spearman';
+        whatDistMetric = 'Spearman';
     end
     fprintf(1,'Using default distance metric: %s\n',whatDistMetric);
 end
@@ -164,16 +164,18 @@ else
     % Compute distances:
     % (Note that TS_DataMat has been transposed in the case of 'ops')
     switch whatDistMetric
-    case 'euclidean'
+    case 'Euclidean'
         fprintf(1,'Computing Euclidean distances to %u other time series...',numItems-1);
         Dj = bsxfun(@minus,TS_DataMat,TS_DataMat(targetInd,:));
         Dj = sqrt(mean(Dj.^2,2));
-    case {'spearman','pearson','corr'}
+    case {'Spearman','Pearson','corr'}
         switch whatDistMetric
-        case 'spearman'
+        case 'Spearman'
             theType = 'Spearman';
-        case {'pearson','corr'}
+        case {'Pearson','corr'}
             theType = 'Pearson';
+        otherwise
+            error('Unknown distance metric');
         end
         % Is there a nicer way of computing abs correlations?
         fprintf(1,'Computing absolute %s correlation distances to %u other features...',...
@@ -218,9 +220,9 @@ if any(ismember(whatPlots,'matrix')) || any(ismember(whatPlots,'network'))
         % Recompute distances:
         switch tsOrOps
         case 'ts'
-            Dij = squareform(pdist(TS_DataMat(neighborInd,:),'euclidean')/sqrt(size(TS_DataMat,2)+1));
+            Dij = squareform(pdist(TS_DataMat(neighborInd,:),whatDistMetric)/sqrt(size(TS_DataMat,2)+1));
         case 'ops'
-            Dij = 1-abs(squareform(1-pdist(TS_DataMat(neighborInd,:),'corr')));
+            Dij = 1-abs(squareform(1-pdist(TS_DataMat(neighborInd,:),whatDistMetric)));
         end
     end
 end
@@ -289,10 +291,10 @@ if any(ismember('matrix',whatPlots))
             end
         end
         % (II) Pairwise similarity matrix
-        ax2 = subplot(1,5,2:5); box('on'); hold on
+        ax2 = subplot(1,5,2:5); box('on'); hold('on')
     case 'ops'
         % Pairwise similarity matrix only
-        ax2 = gca; box('on'); hold on
+        ax2 = gca; box('on'); hold('on')
     end
 
     Dij_clust(logical(eye(numNeighbors+1))) = NaN; % zero diagonals mess things up
@@ -328,7 +330,7 @@ if any(ismember('matrix',whatPlots))
 
     % Add a color bar:
     cB = colorbar('northoutside');
-    cB.Label.String = 'Distance';
+    cB.Label.String = sprintf('%s distance',whatDistMetric);
     if numClasses > 1
         cB.Limits = dLims;
     end
@@ -342,6 +344,7 @@ if any(ismember('matrix',whatPlots))
     end
     ax2.XTick = 1:numNeighbors+1;
     ax2.XTickLabel = dataTable_clust.ID;
+    ax2.XTickLabelRotation = 40;
     xlabel('ID');
 
     ax2.YLim = [0.5,numNeighbors+1.5];

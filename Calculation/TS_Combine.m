@@ -1,18 +1,12 @@
 function TS_Combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,forceWrite)
-% TS_Combine   Combine two hctsa datasets (same features, different data)
+% TS_Combine   Combine two hctsa .mat datasets
 %
-% Takes a union of time series, and an intersection of operations from two hctsa
-% datasets and writes the new combined dataset to a new .mat file
-% Any data matrices are combined, and the structure arrays for TimeSeries and
-% Operations are updated to reflect the concatenation.
+% Writes the new combined dataset to a new .mat file
+% Any data matrices are combined, and the TimeSeries and Operations tables are
+% updated to reflect the concatenation.
 %
 % Note that in the case of duplicates, HCTSA_1 takes precedence over
 % HCTSA_2.
-%
-% When using TS_Init to generate datasets, be aware that the *same* set of
-% operations and master operations must be used in both cases.
-%
-% NB: Use TS_Merge if same data, different features
 %
 %---INPUTS:
 % HCTSA_1: the first hctsa dataset (a .mat filename)
@@ -24,7 +18,7 @@ function TS_Combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,
 %                However, if set to true (true, useful for different parts of a
 %                dataset stored in the same mySQL database), IDs are matched so
 %                that duplicate time series don't occur in the combined matrix.
-% merge_features: (logical) whehter to merge distinct feature sets that occur
+% merge_features: (logical) whether to merge distinct feature sets that occur
 %                   between the two datasets. By default (false) assumes that
 %                   both datasets were computed using the exact same feature set.
 %                   Setting to true takes the union of the features present in
@@ -201,7 +195,6 @@ if merge_features
         error(sprintf(['hctsa datasets contain different numbers of\n' ...
                 'time series; TimeSeries IDs are not comparable.']))
     end
-    numTimeSeries = numTimeSeries(1); % both the same
 
     % Check that all TimeSeries names match:
     namesMatch = strcmp(loadedData{1}.TimeSeries.Name, loadedData{2}.TimeSeries.Name);
@@ -259,7 +252,7 @@ else
     %-------------------------------------------------------------------------------
     % As a basic concatenation, then remove any duplicates
     % Fields now match the default fields, so can concatenate:
-    TimeSeries = [loadedData{1}.TimeSeries;loadedData{2}.TimeSeries];
+    TimeSeries = [loadedData{1}.TimeSeries; loadedData{2}.TimeSeries];
 
     %-------------------------------------------------------------------------------
     % Check for time series duplicates
