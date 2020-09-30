@@ -55,7 +55,7 @@ Details on how to merge the latest version of the repository with the local chan
 [_CompEngine_](http://www.comp-engine.org) is an accompanying web resource for this project.
 It is a self-organizing database of time-series data that allows users to upload, explore, and compare thousands of diverse types of time-series data.
 This vast and growing collection of time-series data can also be downloaded.
-You can read more about it in our [&#x1F4D9;preprint](https://arxiv.org/abs/1905.01042).
+Go have a play, read more about it in our [&#x1F4D9;paper](https://doi.org/10.1038/s41597-020-0553-0), or watch a talk on [YouTube](https://youtu.be/689Nw3RS690).
 
 ### _catch22_ :two::two:
 

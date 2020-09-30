@@ -1,4 +1,4 @@
-function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA,classVarFilter)
+function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA,classVarFilter,keepCalcTime)
 % TS_Normalize  Trims and normalizes data from an hctsa analysis.
 %
 % Reads in data from HCTSA.mat, writes a trimmed, normalized version to HCTSA_N.mat
@@ -17,6 +17,8 @@ function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA
 %
 % classVarFilter: whether to filter on zero variance of any given class (which
 %                 can cause problems for many classification algorithms).
+%
+% keepCalcTime: whether to keep TS_CalcTime
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -69,6 +71,11 @@ if nargin < 4
     classVarFilter = false; % don't filter on individual class variance > 0 by default
 end
 
+if nargin < 5
+    % Save space in normalized dataset
+    keepCalcTime = false;
+end
+
 % --------------------------------------------------------------------------
 %% Read data from local files
 % --------------------------------------------------------------------------
@@ -77,6 +84,10 @@ end
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(fileName_HCTSA);
 TS_Quality = TS_GetFromData(fileName_HCTSA,'TS_Quality');
 MasterOperations = TS_GetFromData(fileName_HCTSA,'MasterOperations');
+
+if keepCalcTime
+    TS_CalcTime = TS_GetFromData(fileName_HCTSA,'TS_Quality');
+end
 
 % Check that fromDatabase exists (legacy)
 fromDatabase = TS_GetFromData(fileName_HCTSA,'fromDatabase');
@@ -121,6 +132,9 @@ if any(~keepRows)
     TS_DataMat = TS_DataMat(keepRows,:);
     TS_Quality = TS_Quality(keepRows,:);
     TimeSeries = TimeSeries(keepRows,:);
+    if keepCalcTime
+        TS_CalcTime = TS_CalcTime(keepRows,:);
+    end
 end
 
 % Filter operations (columns)
@@ -129,6 +143,9 @@ if any(~keepCols)
     TS_DataMat = TS_DataMat(:,keepCols);
     TS_Quality = TS_Quality(:,keepCols);
     Operations = Operations(keepCols,:);
+    if keepCalcTime
+        TS_CalcTime = TS_CalcTime(:,keepCols);
+    end
 end
 
 % --------------------------------------------------------------------------
@@ -147,6 +164,9 @@ if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all 
         TS_DataMat = TS_DataMat(:,~bad_op);
         TS_Quality = TS_Quality(:,~bad_op);
         Operations = Operations(~bad_op,:);
+        if keepCalcTime
+            TS_CalcTime = TS_CalcTime(:,~bad_op);
+        end
     else
         fprintf(1,'No operations had near-constant outputs on the dataset\n');
     end
@@ -175,6 +195,9 @@ if classVarFilter
         TS_DataMat = TS_DataMat(:,~zeroClassVar);
         TS_Quality = TS_Quality(:,~zeroClassVar);
         Operations = Operations(~zeroClassVar,:);
+        if keepCalcTime
+            TS_CalcTime = TS_CalcTime(:,~zeroClassVar);
+        end
     end
 end
 
@@ -234,6 +257,9 @@ elseif any(nanCol) % there are columns that are all NaNs
     TS_DataMat = TS_DataMat(:,~nanCol);
     TS_Quality = TS_Quality(:,~nanCol);
     Operations = Operations(~nanCol,:);
+    if keepCalcTime
+        TS_CalcTime = TS_CalcTime(:,~nanCol);
+    end
     fprintf(1,'We just removed %u all-NaN columns introduced from %s normalization.\n',...
                         sum(nanCol),normFunction);
 end
@@ -247,6 +273,9 @@ if any(kc)
     TS_DataMat = TS_DataMat(:,~kc);
     TS_Quality = TS_Quality(:,~kc);
     Operations = Operations(~kc,:);
+    if keepCalcTime
+        TS_CalcTime = TS_CalcTime(:,~kc);
+    end
     fprintf(1,'%u operations had near-constant outputs after filtering: from %u to %u.\n', ...
                     sum(~kc),length(kc),sum(kc));
 end
@@ -275,7 +304,7 @@ op_clust = struct('distanceMetric','none','Dij',[],...
 % Make a structure with statistics on normalization:
 % Save the codeToRun, so you can check the settings used to run the normalization
 % At the moment, only saves the first two arguments
-codeToRun = sprintf('TS_normalize(''%s'',[%f,%f])',normFunction, ...
+codeToRun = sprintf('TS_Normalize(''%s'',[%f,%f])',normFunction, ...
                                         filterOptions(1),filterOptions(2));
 normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
                                     filterOptions,'codeToRun',codeToRun);
@@ -283,9 +312,15 @@ normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
 outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 
 fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName);
-save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-        'MasterOperations','fromDatabase','normalizationInfo',...
-        'gitInfo','ts_clust','op_clust','-v7.3');
+if keepCalcTime
+    save(outputFileName,'TS_DataMat','TS_Quality','TS_CalcTime','TimeSeries',...
+            'Operations','MasterOperations','fromDatabase','normalizationInfo',...
+            'gitInfo','ts_clust','op_clust','-v7.3');
+else
+    save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries',...
+            'Operations','MasterOperations','fromDatabase','normalizationInfo',...
+            'gitInfo','ts_clust','op_clust','-v7.3');
+end
 fprintf(1,' Done.\n');
 
 % Check whether output to screen is required:
