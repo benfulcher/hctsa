@@ -96,6 +96,10 @@ addpath(fullfile(pwd,'Toolboxes','Max_Little','fastdfa'));
 fprintf(1,', rpde')
 addpath(fullfile(pwd,'Toolboxes','Max_Little','rpde'));
 
+% nsamdf
+fprintf(1,', nsamdf\n');
+addpath(fullfile(pwd,'Toolboxes','nsamdf'));
+
 % Misc code
 fprintf(1,', misc')
 addpath(fullfile(pwd,'Toolboxes','Misc'));

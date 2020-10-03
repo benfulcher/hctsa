@@ -7700,3 +7700,5 @@ MD_rawHRVmeas.tri20	    MD_rawHRVmeas_tri20	    medical,raw
 MD_rawHRVmeas.trisqrt	MD_rawHRVmeas_trisqrt	medical,raw
 MD_rawHRVmeas.SD1	    MD_rawHRVmeas_SD1	    medical,raw,spreadDependent
 MD_rawHRVmeas.SD2	    MD_rawHRVmeas_SD2	    medical,raw,spreadDependent
+NL_nsamdf_1_14_05_1_7.L      NL_nsamdf_1_14_05_1_7_L         nonlinear,raw,spreadDependent
+NL_nsamdf_z_1_14_05_1_7.L    NL_nsamdf_z_1_14_05_1_7_L       nonlinear

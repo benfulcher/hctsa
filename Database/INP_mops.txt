@@ -1066,3 +1066,5 @@ ST_MomentCorr(x_z,0.02,0.2,'median','iqr','sqrt')	ST_MomentCorr_002_02_median_iq
 SD_SurrogateTest(x_z,'RP',99,[],{'ami1','fmmi','o3','tc3'},'default')	SD_SurrogateTest_RP_99
 MD_pNN(x)	MD_pNN_raw
 MD_rawHRVmeas(x)	MD_rawHRVmeas
+NL_nsamdf(x,1,14,0.5,1,7,false)     nsamdf_1_14_05_1_7
+NL_nsamdf(x_z,1,14,0.5,1,7,false)     nsamdf_z_1_14_05_1_7
