@@ -3,8 +3,8 @@ function OutputToCSV(whatData,writeTimeSeriesData,writeMasterFeatures)
 %
 %---INPUTS:
 % whatData, which hctsa .mat file to use (default: HCTSA.mat)
-% writeTimeSeriesData, (logical) whether to also output time-series data to file
-% writeMasterFeatures, (logical) whether to also output master operation info
+% writeTimeSeriesData, (logical)[false] whether to also output time-series data to file
+% writeMasterFeatures, (logical)[false] whether to also output master operation info
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
