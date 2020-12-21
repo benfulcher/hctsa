@@ -92,7 +92,7 @@ H = -sum(rpd(ip).*log(rpd(ip)));
 %    H = H - rpd(j) * logz(rpd(j));
 % end
 
-H_norm = H/log(N); % log(N) is the H for an iid process
+H_norm = H/log(N); % log(N) is the H for an i.i.d. process
 
 % ------------------------------------------------------------------------------
 % Make outputs for hctsa:

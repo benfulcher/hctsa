@@ -6,7 +6,7 @@ function out = EN_CID(y)
 %
 % cf. Batista, G. E. A. P. A., Keogh, E. J., Tataw, O. M. & de Souza, V. M. A.
 % CID: an efficient complexity-invariant distance for time series. Data Min.
-% Knowl. Disc. 28, 634–669 (2014).
+% Knowl. Disc. 28, 634–669 (2014). https://doi.org/10.1007/s10618-013-0312-3
 %
 %---INPUTS:
 %
