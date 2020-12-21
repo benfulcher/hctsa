@@ -137,6 +137,12 @@ CO_FirstMin(x_z,'mi-kraskov1','4')  CO_FirstMin_mi-kraskov1_4
 CO_FirstMin(x_z,'mi-kraskov2','4')  CO_FirstMin_mi-kraskov2_4
 CO_FirstMin(x_z,'mi-hist',5)  CO_FirstMin_mi-hist_5
 CO_FirstMin(x_z,'mi-hist',10)  CO_FirstMin_mi-hist_10
+CO_FirstMin(x_z,'ac',[],false)	CO_FirstMax_ac
+CO_FirstMin(x_z,'mi-gaussian',[],false)	CO_FirstMax_mi-gaussian
+CO_FirstMin(x_z,'mi-kraskov1','4',false)  CO_FirstMax_mi-kraskov1_4
+CO_FirstMin(x_z,'mi-kraskov2','4',false)  CO_FirstMax_mi-kraskov2_4
+CO_FirstMin(x_z,'mi-hist',5,false)  CO_FirstMax_mi-hist_5
+CO_FirstMin(x_z,'mi-hist',10,false)  CO_FirstMax_mi-hist_10
 CO_NonlinearAutocorr(x_z,[1,2])	AC_nl_12
 CO_NonlinearAutocorr(x_z,[1,2,3])	AC_nl_123
 CO_NonlinearAutocorr(x_z,[1,2,3,4])	AC_nl_1234
