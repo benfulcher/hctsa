@@ -5,7 +5,7 @@ function TS_ClassifyLowDim(whatData,cfnParams,numPCs)
 % 'cfnParams', parameters of the classification to be performed (cf.
 %                   GiveMeDefaultClassificationParams)
 % 'numPCs', investigate classification using up to this many PCs of the data
-%              matrix (default: 0).
+%              matrix (default: 5).
 
 %-------------------------------------------------------------------------------
 % If you use this code for your research, please cite these papers:
@@ -38,7 +38,6 @@ end
 % Load data
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-numFeatures = size(TS_DataMat,2);
 
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
@@ -48,6 +47,10 @@ if nargin < 2
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
 TellMeAboutClassification(cfnParams);
+
+% Filter down to reduced features if specified/required:
+[TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams);
+numFeatures = size(TS_DataMat,2);
 
 %-------------------------------------------------------------------------------
 % Check for NaNs in data matrix
@@ -85,7 +88,7 @@ LowDimDisplayTopLoadings(numTopLoadFeat,numPCs,pcCoeff,pcScore,TS_DataMat,Operat
 % Compute cumulative performance in PC space:
 %-------------------------------------------------------------------------------
 cfnRatePCs = zeros(numPCs,1);
-fprintf('Computing classification rates keeping top 1-%u PCs...\n',numPCs)
+fprintf('Computing %s, keeping top 1-%u PCs...\n',cfnParams.whatLoss,numPCs)
 cfnParams.computePerFold = false;
 for i = 1:numPCs
     cfnRatePCs(i) = GiveMeCfn(pcScore(:,1:i),TimeSeries.Group,[],[],cfnParams);

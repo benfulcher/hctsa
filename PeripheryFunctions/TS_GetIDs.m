@@ -22,6 +22,10 @@ function [IDs,notIDs] = TS_GetIDs(theMatchString,whatData,tsOrOps,nameOrKeywords
 % >> opIDs = TS_GetIDs('entropy','norm','ops','Keywords');
 % This retrieves the IDs of operations in 'HCTSA_N.mat' that have been tagged
 % with the keyword 'entropy'.
+%
+% NAME MODE:
+% >> opIDs = TS_GetIDs('length','norm','ops','Name');
+% >> opIDs = TS_GetIDs({'length','mean'},'norm','ops','Name');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -61,14 +65,20 @@ end
 %-------------------------------------------------------------------------------
 % Load data:
 %-------------------------------------------------------------------------------
-[~,TimeSeries,Operations,theDataFile] = TS_LoadData(whatData);
-switch tsOrOps
-case 'ts'
-    theDataTable = TimeSeries;
-case 'ops'
-    theDataTable = Operations;
-otherwise
-    error('Specify ''ts'' (time series) or ''ops'' (operations)');
+if istable(whatData)
+    theDataTable = whatData;
+    theDataFile = 'the table provided';
+else
+    switch tsOrOps
+    case 'ts'
+        % Retrieve the TimeSeries table:
+        [~,theDataTable,~,theDataFile] = TS_LoadData(whatData);
+    case 'ops'
+        % Retrieve the Operations table:
+        [~,~,theDataTable,theDataFile] = TS_LoadData(whatData);
+    otherwise
+        error('Specify ''ts'' (time series) or ''ops'' (operations)');
+    end
 end
 
 %-------------------------------------------------------------------------------
@@ -106,10 +116,14 @@ switch nameOrKeywords
         % (with NaN when we don't find a match)
         %----------------------------------------------------------------------
 
-        assert(nargout == 1,'Only one output argument (IDs) allowed for Name input.')
+        assert(nargout == 1,'One output argument (IDs) required for ''Name'' input.')
 
-        matches = nan(length(theMatchString),1);
-        for i = 1:length(theMatchString)
+        if ischar(theMatchString)
+            theMatchString = {theMatchString};
+        end
+        numStrings = length(theMatchString);
+        matches = nan(numStrings,1);
+        for i = 1:numStrings
             cmatch = find(strcmp(theDataTable.Name,theMatchString{i}));
             if ~isempty(cmatch)
                 matches(i) = cmatch;
@@ -123,7 +137,7 @@ switch nameOrKeywords
         IDs(~foundIDs) = nan;
 
         if all(isnan(IDs))
-            warning('No matches to ''%s'' found in %s',theMatchString,theDataFile)
+            warning('No matches to the %u input strings found in %s',numStrings,theDataFile)
         end
 
     otherwise

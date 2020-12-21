@@ -114,7 +114,7 @@ numRepeats = length(noiseRange);
 amis = zeros(numRepeats,1); % preassign
 switch amiMethod
 case {'std1','std2','quantiles','even'}
-    % histogram-based methods using my naive implementation in CO_Histogram.m
+    % histogram-based methods using my naive implementation in CO_Histogram
     for i = 1:numRepeats
         amis(i) = CO_HistogramAMI(y+noiseRange(i)*noise,tau,amiMethod,extraParam);
         if isnan(amis(i))
@@ -132,6 +132,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Output statistics
+%-------------------------------------------------------------------------------
 
 % Proportion decreases:
 out.pdec = sum(diff(amis) < 0)/(numRepeats-1);

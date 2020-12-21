@@ -122,7 +122,7 @@ if doSave
         save(outputFileName,'op_clust','-append');
     end
 
-    % Add the quality and calctime matrices if they exist:
+    % Add the Quality and CalcTime matrices if they exist:
     if ismember('TS_Quality',varNames)
         load(whatDataFile,'TS_Quality')
         TS_Quality = TS_Quality(i_keep.TimeSeries,i_keep.Operations);

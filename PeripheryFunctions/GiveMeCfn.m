@@ -8,7 +8,7 @@ function [accuracy,Mdl] = GiveMeCfn(XTrain,yTrain,XTest,yTest,cfnParams,beVerbos
 % XTest -- testing data matrix
 % yTest -- testing data labels
 % cfnParams -- parameters for classification
-% beVerbose -- whether to give text output of progress
+% beVerbose -- [default: false] whether to give text output of progress
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

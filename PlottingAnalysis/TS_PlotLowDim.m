@@ -1,7 +1,7 @@
 function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,annotateParams,cfnParams)
-% TS_PlotLowDim   2-dimensional feature-based representation of a time-series dataset
+% TS_PlotLowDim   2-dim feature-based representation of a time-series dataset
 %
-% The low-dimensional representation is computed using PCA.
+% The low-dimensional representation is computed using PCA by default.
 %
 %---INPUTS:
 % whatData, the hctsa data file (or structure) to use (input to TS_LoadData)
@@ -79,6 +79,9 @@ end
 % Give basic info about the represented classes:
 TellMeAboutLabeling(TimeSeries);
 
+% Filter down a reduced feature set if required:
+[TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams);
+
 % ------------------------------------------------------------------------------
 %% Do the dimensionality reduction using Matlab's built-in PCA algorithm
 % ------------------------------------------------------------------------------
@@ -115,7 +118,8 @@ case {'pca','PCA'}
     end
 
 case {'tSNE','tsne'}
-    numPCAComponents = min(size(TS_DataMat,2),50);
+    defaultNumPCs = 100;
+    numPCAComponents = min(size(TS_DataMat,2),defaultNumPCs);
     rng('default') % for reproducibility
 
     if numPCAComponents < size(TS_DataMat,2)
@@ -128,7 +132,7 @@ case {'tSNE','tsne'}
     else
         fprintf(1,['Computing a two-dimensional t-SNE embedding (using barnes-hut',...
                         ' approximation) of the %u x %u data matrix...\n'], ...
-                            numPCAComponents,size(TS_DataMat,1),size(TS_DataMat,2));
+                            size(TS_DataMat,1),size(TS_DataMat,2));
         Y = tsne(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Algorithm','barneshut',...
                         'Distance','euclidean','NumDimensions',2);
     end

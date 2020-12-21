@@ -18,7 +18,7 @@ function TS_SimSearch(varargin)
 % and network plot:
 % TS_SimSearch(30,'whatPlots',{'matrix','network'})
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
@@ -38,11 +38,11 @@ function TS_SimSearch(varargin)
 % this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Check inputs, and set defaults
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 
 % Check inputs using the inputParser:
 inputP = inputParser;
@@ -58,10 +58,10 @@ valid_tsOrOps = {'ts','ops'};
 check_tsOrOps = @(x) any(validatestring(x,valid_tsOrOps));
 addOptional(inputP,'tsOrOps',default_tsOrOps,check_tsOrOps);
 
-% whatDataFile
-default_whatDataFile = 'norm';
-check_whatDataFile = @(x)true;
-addOptional(inputP,'whatDataFile',default_whatDataFile,check_whatDataFile);
+% whatData
+default_whatData = 'norm';
+check_whatData = @(x)true;
+addOptional(inputP,'whatData',default_whatData,check_whatData);
 
 % numNeighbors
 default_numNeighbors = 20;
@@ -83,7 +83,7 @@ addOptional(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric)
 parse(inputP,varargin{:});
 
 % Additional checks:
-if strcmp(inputP.Results.whatDataFile,'cl')
+if strcmp(inputP.Results.whatData,'cl')
     error('Using clustered permutations of data not suppored');
 end
 
@@ -91,7 +91,7 @@ end
 targetID = inputP.Results.targetID;
 tsOrOps = inputP.Results.tsOrOps;
 numNeighbors = inputP.Results.numNeighbors;
-whatDataFile = inputP.Results.whatDataFile;
+whatData = inputP.Results.whatData;
 whatPlots = inputP.Results.whatPlots;
 if ischar(whatPlots)
     whatPlots = {whatPlots};
@@ -102,24 +102,24 @@ clear inputP;
 if isempty(whatDistMetric)
     switch tsOrOps
     case 'ts'
-        whatDistMetric = 'euclidean';
+        whatDistMetric = 'Euclidean';
     case 'ops'
-        whatDistMetric = 'spearman';
+        whatDistMetric = 'Spearman';
     end
     fprintf(1,'Using default distance metric: %s\n',whatDistMetric);
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Load data
-% ------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatDataFile);
+%-------------------------------------------------------------------------------
+[TS_DataMat,TimeSeries,Operations,whatData] = TS_LoadData(whatData);
 switch tsOrOps
 case 'ts'
     dataTable = TimeSeries;
-    clustStruct = TS_GetFromData(whatDataFile,'ts_clust');
+    clustStruct = TS_GetFromData(whatData,'ts_clust');
 case 'ops'
     dataTable = Operations;
-    clustStruct = TS_GetFromData(whatDataFile,'op_clust');
+    clustStruct = TS_GetFromData(whatData,'op_clust');
     % Transpose for consistency with later parts of the code
     % (items are rows)
     TS_DataMat = TS_DataMat';
@@ -139,41 +139,43 @@ else % specify a number of neighbours
     numNeighbors = min(numItems-1,numNeighbors);
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Match the specified index to the data structure
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 targetInd = find(dataTable.ID==targetID);
 if isempty(targetInd)
-    error('ID %u not found in the index for %s in %s.',targetID,tsOrOps,which(whatDataFile));
+    error('ID %u not found in the index for %s in %s.',targetID,tsOrOps,which(whatData));
 else
     fprintf(1,'\n---TARGET: [%u] %s---\n',dataTable.ID(targetInd),dataTable.Name{targetInd});
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Compute distance from target to all other objects
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % (There is potential to store pairwise distance information in the HCTSA*.mat
 % file for retrieval later). Use this if it exists, otherwise calculate for this one.
 
 if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
     % pairwise distances already computed, stored in the HCTSA .mat file
-    fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile);
+    fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatData);
     Dij = squareform(clustStruct.Dij);
     Dj = Dij(:,targetInd);
 else
     % Compute distances:
     % (Note that TS_DataMat has been transposed in the case of 'ops')
     switch whatDistMetric
-    case 'euclidean'
+    case 'Euclidean'
         fprintf(1,'Computing Euclidean distances to %u other time series...',numItems-1);
         Dj = bsxfun(@minus,TS_DataMat,TS_DataMat(targetInd,:));
         Dj = sqrt(mean(Dj.^2,2));
-    case {'spearman','pearson','corr'}
+    case {'Spearman','Pearson','corr'}
         switch whatDistMetric
-        case 'spearman'
+        case 'Spearman'
             theType = 'Spearman';
-        case {'pearson','corr'}
+        case {'Pearson','corr'}
             theType = 'Pearson';
+        otherwise
+            error('Unknown distance metric');
         end
         % Is there a nicer way of computing abs correlations?
         fprintf(1,'Computing absolute %s correlation distances to %u other features...',...
@@ -188,28 +190,33 @@ else
     fprintf(1,' Done.\n');
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Find N neighbors under the distance metric (used for Dj)
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Sort distances (ascending):
 [~,dix] = sort(Dj,'ascend');
 
 % Indices of nearest neighbors:
 neighborInd = dix(1:numNeighbors+1);
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % List matches to screen
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 for j = 1:numNeighbors
     theInd = neighborInd(j+1);
-    fprintf(1,'%u. [%u] %s (d = %.2f)\n',j,dataTable.ID(theInd),dataTable.Name{theInd},Dj(theInd));
+    switch whatDistMetric
+    case 'Euclidean'
+        fprintf(1,'%u. [%u] %s (d = %.2f)\n',j,dataTable.ID(theInd),dataTable.Name{theInd},Dj(theInd));
+    case {'Spearman','Pearson','corr'}
+        fprintf(1,'%u. [%u] %s (|rho| = %.2f)\n',j,dataTable.ID(theInd),dataTable.Name{theInd},1 - Dj(theInd));
+    end
 end
 fprintf(1,'\n');
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Compute/retrieve pairwise distances between all neighbors
 %   (needed for 'matrix' and 'network')
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'matrix')) || any(ismember(whatPlots,'network'))
     if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
         % Use pre-computed distances:
@@ -218,9 +225,9 @@ if any(ismember(whatPlots,'matrix')) || any(ismember(whatPlots,'network'))
         % Recompute distances:
         switch tsOrOps
         case 'ts'
-            Dij = squareform(pdist(TS_DataMat(neighborInd,:),'euclidean')/sqrt(size(TS_DataMat,2)+1));
+            Dij = squareform(pdist(TS_DataMat(neighborInd,:),whatDistMetric)/sqrt(size(TS_DataMat,2)+1));
         case 'ops'
-            Dij = 1-abs(squareform(1-pdist(TS_DataMat(neighborInd,:),'corr')));
+            Dij = 1 - abs(squareform(1 - pdist(TS_DataMat(neighborInd,:),whatDistMetric)));
         end
     end
 end
@@ -231,9 +238,9 @@ end
 %===============================================================================
 %===============================================================================
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Scatter plot for top (up to 12)
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'scatter'))
     f = figure('color','w');
     for j = 1:min(12,numNeighbors)
@@ -251,9 +258,9 @@ if any(ismember(whatPlots,'scatter'))
     f.Position = [f.Position(1:2),819,622];
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Clustered distance matrix
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 if any(ismember('matrix',whatPlots))
     % Do a quick cluster of distance matrix using euclidean distances
     % (just for visualization):
@@ -289,10 +296,12 @@ if any(ismember('matrix',whatPlots))
             end
         end
         % (II) Pairwise similarity matrix
-        ax2 = subplot(1,5,2:5); box('on'); hold on
+        ax2 = subplot(1,5,2:5);
+        box('on'); hold('on')
     case 'ops'
         % Pairwise similarity matrix only
-        ax2 = gca; box('on'); hold on
+        ax2 = gca;
+        box('on'); hold('on')
     end
 
     Dij_clust(logical(eye(numNeighbors+1))) = NaN; % zero diagonals mess things up
@@ -328,7 +337,7 @@ if any(ismember('matrix',whatPlots))
 
     % Add a color bar:
     cB = colorbar('northoutside');
-    cB.Label.String = 'Distance';
+    cB.Label.String = sprintf('%s distance',whatDistMetric);
     if numClasses > 1
         cB.Limits = dLims;
     end
@@ -342,6 +351,8 @@ if any(ismember('matrix',whatPlots))
     end
     ax2.XTick = 1:numNeighbors+1;
     ax2.XTickLabel = dataTable_clust.ID;
+    ax2.XTickLabelRotation = 60;
+    ax2.FontSize = 9;
     xlabel('ID');
 
     ax2.YLim = [0.5,numNeighbors+1.5];
@@ -369,9 +380,9 @@ if any(ismember('matrix',whatPlots))
     end
 end
 
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % Network Visualization
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'network'))
 
     % First ensure that no more than a maximum number of neighbors are plotted:

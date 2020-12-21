@@ -83,9 +83,10 @@ switch lorf
 end
 
 if (wl > N) || (wl <= 1)
-    % ++BF 19/3/2010: this is not suitable if window length longer than ts
+    % This feature is unsuitable if the window length exceeds ts
     fprintf(1,'The window length is longer than the time-series length!\n');
-    out = NaN; return
+    out = NaN;
+    return
 end
 
 % ------------------------------------------------------------------------------
@@ -110,7 +111,8 @@ locext(exti) = locmin(exti); % local extrema (furthest from mean; either maxs or
 abslocext = abs(locext); % the magnitude of the most extreme events in each window
 
 if doPlot
-    figure('color','w'); hold on;
+    figure('color','w');
+    hold('on');
     plot(locmax);
     plot(abslocext,'--g');
     plot(abslocmin,':r')

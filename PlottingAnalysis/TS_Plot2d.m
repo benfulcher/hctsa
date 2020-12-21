@@ -252,7 +252,7 @@ if numClasses > 1
             legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==classLabels{i}));
         end
     end
-    legend([handles{:}],legendText,'interpreter','none');
+    legend([handles{:}],legendText,'interpreter','none','Location','best');
 end
 
 %-------------------------------------------------------------------------------

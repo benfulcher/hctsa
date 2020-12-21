@@ -1,4 +1,7 @@
 function params = GiveMeDefaultClassificationParams(TimeSeries,numClasses,beVocal)
+% Set default parameters describing the feature-based time-series classification
+%
+
 %-------------------------------------------------------------------------------
 % If you use this code for your research, please cite these papers:
 %
@@ -81,5 +84,10 @@ params.classifierFilename = ''; % (don't save classifier information to file)
 
 % Set text to name the classifier
 params = UpdateClassifierText(params);
+
+% Restrict to a reduced set of features?
+% '' (all), 'catch22', 'catchaMouse16', 'noLengthLocationSpread'
+% (cf. TS_GiveMeFeatureSet)
+params.reducedFeatureSet = '';
 
 end
