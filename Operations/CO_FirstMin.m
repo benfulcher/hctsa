@@ -1,5 +1,5 @@
-function out = CO_FirstMin(y,minWhat,extraParam,minNotMax)
-% CO_FirstMin  Time of first minimum in a given self-correlation function
+function out = CO_FirstMin(y,minWhat,extraParam)
+% CO_FirstMin  Time of first minimum in a given correlation function
 %
 %---INPUTS:
 % y, the input time series
@@ -9,8 +9,6 @@ function out = CO_FirstMin(y,minWhat,extraParam,minNotMax)
 %           options can also be implemented as 'mi-kernel', 'mi-kraskov1',
 %           'mi-kraskov2' (all from Information Dynamics Toolkit implementations),
 %           or 'mi-hist' (histogram-based method).
-% extraParam, an additional parameter required from the minWhat (e.g., Kraskov)
-% minNotMax, return the max instead of min.
 %
 % Note that selecting 'ac' is unusual operation: standard operations are the
 % first zero-crossing of the autocorrelation (as in CO_FirstCrossing), or the first
@@ -55,9 +53,6 @@ end
 if nargin < 3
     extraParam = [];
 end
-if nargin < 4
-    minNotMax = true;
-end
 
 N = length(y); % Time-series length
 
@@ -89,52 +84,26 @@ end
 % ------------------------------------------------------------------------------
 % (Incrementally through time lags until a minimum is found)
 
-autoCorr = zeros(N-1,1); % pre-allocate maximum length autocorrelation vector
-if minNotMax
-    %---------------------------------------------------------------------------
-    % FIRST LOCAL MINUMUM
-    %---------------------------------------------------------------------------
-    for i = 1:N-1
-        % Calculate the auto-correlation at this lag:
-        autoCorr(i) = corrfn(i);
+autoCorr = zeros(N-1,1); % preallocate autocorrelation vector
+for i = 1:N-1
+    % Calculate the auto-correlation at this lag:
+    autoCorr(i) = corrfn(i);
 
-        % Hit a NaN before got to a minimum -- there is no minimum
-        if isnan(autoCorr(i))
-            warning('No minimum in %s [[time series too short to find it?]]',minWhat)
-            out = NaN;
-            return
-        end
-
-        % We're at a minimum:
-        if i==2 && (autoCorr(2) > autoCorr(1))
-            % already increases at lag of 2 from lag of 1: a minimum (since ac(0) is maximal)
-            out = 1;
-            return
-        elseif (i > 2) && (autoCorr(i-2) > autoCorr(i-1)) && (autoCorr(i-1) < autoCorr(i)); % minimum at previous i
-            out = i-1; % I found the first minimum!
-            return
-        end
+    % Hit a NaN before got to a minimum -- there is no minimum
+    if isnan(autoCorr(i))
+        warning('No minimum in %s [[time series too short to find it?]]',minWhat)
+        out = NaN;
+        return
     end
-else
-    %---------------------------------------------------------------------------
-    % FIRST LOCAL MAXIMUM
-    %---------------------------------------------------------------------------
-    for i = 1:N-1
-        % Calculate the auto-correlation at this lag:
-        autoCorr(i) = corrfn(i);
 
-        % Hit a NaN before got to a max -- there is no max
-        if isnan(autoCorr(i))
-            warning('No maximum in %s [[time series too short to find it?]]',minWhat)
-            out = NaN;
-            return
-        end
-
-        % We're at a local maximum:
-        if (i > 2) && (autoCorr(i-2) < autoCorr(i-1)) && (autoCorr(i-1) > autoCorr(i)); % minimum at previous i
-            out = i-1; % I found the first maximum!
-            return
-        end
+    % We're at a minimum:
+    if i==2 && (autoCorr(2) > autoCorr(1))
+        % already increases at lag of 2 from lag of 1: a minimum (since ac(0) is maximal)
+        out = 1;
+        return
+    elseif (i > 2) && (autoCorr(i-2) > autoCorr(i-1)) && (autoCorr(i-1) < autoCorr(i)); % minimum at previous i
+        out = i-1; % I found the first minimum!
+        return
     end
 end
 
