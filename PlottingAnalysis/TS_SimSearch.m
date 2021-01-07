@@ -310,7 +310,7 @@ if any(ismember('matrix',whatPlots))
     imagesc(Dij_clust)
 
     % Get group labeling if possible (time series):
-    [groupLabels,classLabels,groupLabelsInteger,numClasses] = ExtractGroupLabels(dataTable);
+    [groupLabels,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(dataTable);
 
     if numClasses > 1
         dRescale = @(x) dLims(1) + numClasses/8*diff(dLims)*(-1 + 0.9999*(x - min(x))./(max(x)-min(x)));

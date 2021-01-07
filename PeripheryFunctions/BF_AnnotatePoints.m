@@ -99,7 +99,7 @@ pHeight = diff(pylim); % plot height
 alreadyPicked = zeros(numAnnotate,1); % record those already picked
 
 % Groups:
-[groupLabels,classLabels,groupLabelsInteger,numGroups] = ExtractGroupLabels(TimeSeries);
+[groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
 
 % Colors:
 if ~isfield(annotateParams,'groupColors')

@@ -41,7 +41,7 @@ end
 
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-[groupLabels,classLabels,groupLabelsInteger,numGroups] = ExtractGroupLabels(TimeSeries);
+[groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
 TellMeAboutLabeling(TimeSeries);
 if nargin < 2
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);

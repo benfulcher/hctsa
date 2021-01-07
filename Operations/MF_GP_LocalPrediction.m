@@ -65,7 +65,7 @@ function out = MF_GP_LocalPrediction(y,covFunc,numTrain,numTest,numPreds,pmode,r
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
-doPlot = 0; % plot outputs
+doPlot = false; % whether to plot outputs
 N = length(y); % time-series length
 
 % ------------------------------------------------------------------------------

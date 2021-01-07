@@ -34,6 +34,9 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 % TS_TopFeatures('norm','tstat',struct(),'whatPlots',{'histogram','distributions',...
 %           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
 %
+% TS_TopFeatures('norm','classification',cfnParams,'whatPlots',{'histogram','distributions',...
+%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
+%
 %---OUTPUTS:
 % ifeat, the ordering of operations by their performance
 % testStat, the test statistic (whatTestStat) for each operation
@@ -110,7 +113,7 @@ clear('inputP');
 % Does the grouping information exist?:
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-[groupLabels,classLabels,groupLabelsInteger,numClasses] = ExtractGroupLabels(TimeSeries);
+[groupLabels,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(TimeSeries);
 % Give basic info about the represented classes:
 TellMeAboutLabeling(TimeSeries);
 

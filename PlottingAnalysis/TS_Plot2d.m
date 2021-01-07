@@ -88,7 +88,7 @@ end
 %-------------------------------------------------------------------------------
 % Preliminaries
 %-------------------------------------------------------------------------------
-groupLabels = ExtractGroupLabels(TimeSeries);
+groupLabels = TS_ExtractGroupLabels(TimeSeries);
 classLabels = categories(groupLabels);
 numClasses = length(classLabels);
 

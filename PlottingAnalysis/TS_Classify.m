@@ -88,7 +88,7 @@ clear('inputP');
 
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-[groupLabels,classLabels,groupLabelsInteger,numGroups] = ExtractGroupLabels(TimeSeries);
+[groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
 % Give basic info about the represented classes:
 TellMeAboutLabeling(TimeSeries);
 
@@ -287,14 +287,6 @@ end
 function [foldLosses,CVMdl] = GiveMeFoldLosses(dataMatrix,dataLabels)
     % Returns the output (e.g., loss) for the custom fn_loss function across all folds
     [foldLosses,CVMdl] = GiveMeCfn(dataMatrix,dataLabels,dataMatrix,dataLabels,cfnParams);
-end
-%-------------------------------------------------------------------------------
-function dataStruct = makeDataStruct()
-    % Generate a structure for the dataset
-    dataStruct = struct();
-    dataStruct.TimeSeries = TimeSeries;
-    dataStruct.TS_DataMat = TS_DataMat;
-    dataStruct.Operations = Operations;
 end
 %-------------------------------------------------------------------------------
 

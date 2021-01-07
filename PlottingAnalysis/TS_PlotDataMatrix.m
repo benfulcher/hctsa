@@ -125,8 +125,7 @@ end
 % Check group information
 %-------------------------------------------------------------------------------
 if ismember('Group',TimeSeries.Properties.VariableNames)
-	timeSeriesGroups = TimeSeries.Group;
-	numClasses = length(categories(timeSeriesGroups));
+    [timeSeriesGroups,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(TimeSeries);
 else
 	timeSeriesGroups = [];
 end
@@ -146,11 +145,11 @@ if groupReorder
 	if isempty(timeSeriesGroups)
 		warning('Cannot reorder by time series group; no group information found')
 	else
-	    [~,ixData] = sort(timeSeriesGroups);
+	    [~,ixData] = sort(groupLabelsInteger);
 	    dataMatReOrd = TS_DataMat(ixData,:);
 	    ixAgain = ixData;
 	    for i = 1:numClasses
-	        isGroup = TimeSeries.Group(ixData)==i;
+	        isGroup = groupLabelsInteger(ixData)==i;
 	        ordering = BF_ClusterReorder(dataMatReOrd(isGroup,:),'euclidean','average');
 	        istmp = ixData(isGroup);
 	        ixAgain(isGroup) = istmp(ordering);

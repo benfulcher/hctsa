@@ -66,7 +66,7 @@ end
 
 % argument 5, doSave, set defaults later
 if nargin >= 5
-    if length(doSave)==2
+    if length(doSave)==1
         doSave = ones(2,1)*doSave;
         warning('doSave has two components: for (i) time series and (ii) operations. Applying the same setting to both.');
     end

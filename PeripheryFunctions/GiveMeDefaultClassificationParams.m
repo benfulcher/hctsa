@@ -33,6 +33,7 @@ end
 if nargin < 3
     beVocal = true;
 end
+
 %-------------------------------------------------------------------------------
 % Set the classifier:
 params.whatClassifier = 'svm_linear'; % ('svm_linear', 'knn', 'linear', 'fast_linear')
