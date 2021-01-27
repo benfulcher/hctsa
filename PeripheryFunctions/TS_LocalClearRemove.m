@@ -1,10 +1,5 @@
-function TS_LocalClearRemove.m(whatData,tsOrOps,idRange,doRemove)
-% TS_LocalClearRemove.m     Clear or remove data from an hctsa dataset
-%
-% 'clear' (doRemove = false) means clearing any calculations performed about a
-% given time series or operation, but keeping it in the dataset.
-% 'remove' (doRemove = true) means removing the time series or operation from
-% the dataset completely.
+function TS_LocalClearRemove(whatData,tsOrOps,idRange,doRemove)
+% TS_LocalClearRemove     Clear or remove data from an hctsa dataset
 %
 % The result is saved back to the hctsa-formatted .mat data file provided as whatData.
 %
@@ -12,22 +7,25 @@ function TS_LocalClearRemove.m(whatData,tsOrOps,idRange,doRemove)
 % tsOrOps -- either 'ts' or 'ops' for whether to work with either time series
 % 				or operations
 % idRange -- a vector of the IDs (of either time series or operations) to remove
-% doRemove -- (binary) whether to remove entries (specify 1), or just clear
-% 				 their data (specify 0).
+% doRemove -- (binary):
+%           doRemove = false: clear mode---clears any calculations performed about
+%                  a given time series or operation, but keeps it in the dataset.
+%           doRemove = true: remove mode---removes the time series or operation from
+%                       the dataset entirely.
 % whatData -- the file to load the hctsa dataset from (cf. TS_LoadData).
 %
 %---EXAMPLE USAGE:
 % This clears the data about the time series with IDs 1,2,3,4, and 5 from the hctsa dataset
 % stored in HCTSA.mat:
-% >> TS_LocalClearRemove.m('HCTSA.mat','ts',1:5,false);
+% >> TS_LocalClearRemove('HCTSA.mat','ts',1:5,false);
 %
 % This *removes* the time series with IDs from 1:5 from the dataset completely:
-% >> TS_LocalClearRemove.m('HCTSA.mat','ts',1:5,true);
+% >> TS_LocalClearRemove('HCTSA.mat','ts',1:5,true);
 %
 % IDs for a given keyword can be retrieved using TS_GetIDs. This example removes
 % all time series from HCTSA.mat that have the keyword 'noise':
 % >> noiseIDs = TS_GetIDs('noise','HCTSA.mat','ts');
-% >> TS_LocalClearRemove.m('HCTSA.mat','ts',noiseIDs,true);
+% >> TS_LocalClearRemove('HCTSA.mat','ts',noiseIDs,true);
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

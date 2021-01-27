@@ -81,7 +81,7 @@ end
 
 % Write a .log file of the clearing process by default
 if nargin < 4 || isempty(doLog)
-	doLog = 0;
+	doLog = false;
 end
 
 % Open connection to database
@@ -90,18 +90,16 @@ end
 % ------------------------------------------------------------------------------
 %% Provide some user feedback
 % ------------------------------------------------------------------------------
-if (doRemove == 0) % clear data
+if ~doRemove % clear data
     input(sprintf(['Preparing to clear data for %u %s from %s.\n' ...
                                 '[press any key to continue]'], ...
                                     length(idRange),theWhat,dbName),'s');
     doWhat = 'clear data';
-elseif doRemove == 1
+elseif doRemove
     input(sprintf(['Preparing to REMOVE %u %s from %s -- DRASTIC STUFF! ' ...
                                 'I HOPE THIS IS OK?!\n[press any key to continue]'], ...
                                 length(idRange),theWhat,dbName),'s');
     doWhat = 'REMOVE';
-else
-    error('Third input must be (0 to clear), or (1 to remove)')
 end
 
 % ------------------------------------------------------------------------------
