@@ -15,6 +15,7 @@ It also provides a range of tools for visualizing and analyzing the resulting ti
 **Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for help with real-world applications of _hctsa_** :nerd_face:
 
 ### Acknowledgement :+1:
+
 If you use this software, please read and cite these open-access articles:
 
 * B.D. Fulcher and N.S. Jones. [_hctsa_: A computational framework for automated time-series phenotyping using massive feature extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). *Cell Systems* **5**, 527 (2017).
@@ -27,11 +28,12 @@ Feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://gi
 ## Getting Started :blush:
 
 ### Documentation &#x1F4D6;
+
 __Comprehensive documentation__ for *hctsa*, from getting started through to more advanced analyses is on [gitbook](https://hctsa-users.gitbook.io/hctsa-manual).
 
 ### Downloading the repository :arrow_down:
 
-For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the green _Clone or download_ button, and then clicking _Download .zip_.
+For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the green _Code_ button, and then clicking _Download ZIP_.
 
 It is recommended to use the repository with git.
 For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
