@@ -44,7 +44,7 @@ if cfnParams.numClasses==2
     % Set the loss function:
     fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
 
-    switch whatClassifier
+    switch cfnParams.whatClassifier
     case 'knn'
         fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcknn(XTrain,yTrain),XTest));
     case 'tree'
