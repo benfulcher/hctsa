@@ -7,6 +7,7 @@
 
 The software provides a code framework that enables the extraction of thousands of time-series features from a time series (or a time-series dataset).
 It also provides a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
+
 1. Normalizing and clustering the data,
 2. Producing low-dimensional representations of the data,
 3. Identifying and interpreting discriminating features between different classes of time series,
@@ -18,8 +19,8 @@ It also provides a range of tools for visualizing and analyzing the resulting ti
 
 If you use this software, please read and cite these open-access articles:
 
-* B.D. Fulcher and N.S. Jones. [_hctsa_: A computational framework for automated time-series phenotyping using massive feature extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). *Cell Systems* **5**, 527 (2017).
-* B.D. Fulcher, M.A. Little, N.S. Jones. [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83 (2013).
+- B.D. Fulcher and N.S. Jones. [_hctsa_: A computational framework for automated time-series phenotyping using massive feature extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). *Cell Systems* **5**, 527 (2017).
+- B.D. Fulcher, M.A. Little, N.S. Jones. [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83 (2013).
 
 Feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
 
@@ -68,9 +69,10 @@ This reduced set of 22 features, determined through a combination of classificat
 
 ### _hctsa_ datasets and example workflows :floppy_disk:
 There are a range of open datasets with pre-computed _hctsa_ features, as well as some examples of _hctsa_ workflows.
-* [_C. elegans_ movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
-* [Drosophila movement speed](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Drosophila_melanogaster_movement_speed/3863553) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingFly).
-* [1000 empirical time series](https://figshare.com/articles/1000_Empirical_Time_series/5436136)
+
+- [_C. elegans_ movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
+- [Drosophila movement speed](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Drosophila_melanogaster_movement_speed/3863553) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingFly).
+- [1000 empirical time series](https://figshare.com/articles/1000_Empirical_Time_series/5436136)
 
 (If you have data to share and host, let me know and I'll add it to this list)
 
@@ -105,20 +107,20 @@ _hctsa_ uses the following [Matlab toolboxes](https://mathworks.com/programs/nrd
 
 The following external time-series analysis code packages are provided with the software (in the **Toolboxes** directory), and are used by our main feature-extraction algorithms to compute meaningful structural features from time series:
 
-* [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
-* [*TSTOOL* package for nonlinear time-series analysis, version 1.2](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
-* Joseph T. Lizier's [Java Information Dynamics Toolkit (JIDT)](https://github.com/jlizier/jidt) for studying information-theoretic measures of computation in complex systems, version 1.3 (GPL license).
-* Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
-* Max Little's [Time-series analysis code](http://www.maxlittle.net/software/index.php) (GPL license).
-* Sample Entropy code from [Physionet](https://archive.physionet.org/faq.shtml#license) (GPL license).
-* [*ARFIT* Toolbox for AR model estimation](http://climate-dynamics.org/software/#arfit) (unlicensed).
-* [*gpml* Toolbox for Gaussian Process regression model estimation, version 3.5](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
-* Danilo P. Mandic's [delay vector variance code](http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm) (GPL license).
-* [Cross Recurrence Plot Toolbox](http://tocsy.pik-potsdam.de/CRPtoolbox/) (GPL license)
-* Zoubin Ghahramani's [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
-* Danny Kaplan's Code for embedding statistics (GPL license).
-* Two-dimensional histogram code from Matlab Central (BSD license).
-* Various histogram and entropy code by Rudy Moddemeijer (unlicensed).
+- [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
+- [*TSTOOL* package for nonlinear time-series analysis, version 1.2](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
+- Joseph T. Lizier's [Java Information Dynamics Toolkit (JIDT)](https://github.com/jlizier/jidt) for studying information-theoretic measures of computation in complex systems, version 1.3 (GPL license).
+- Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
+- Max Little's [Time-series analysis code](http://www.maxlittle.net/software/index.php) (GPL license).
+- Sample Entropy code from [Physionet](https://archive.physionet.org/faq.shtml#license) (GPL license).
+- [*ARFIT* Toolbox for AR model estimation](http://climate-dynamics.org/software/#arfit) (unlicensed).
+- [*gpml* Toolbox for Gaussian Process regression model estimation, version 3.5](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
+- Danilo P. Mandic's [delay vector variance code](http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm) (GPL license).
+- [Cross Recurrence Plot Toolbox](http://tocsy.pik-potsdam.de/CRPtoolbox/) (GPL license)
+- Zoubin Ghahramani's [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
+- Danny Kaplan's Code for embedding statistics (GPL license).
+- Two-dimensional histogram code from Matlab Central (BSD license).
+- Various histogram and entropy code by Rudy Moddemeijer (unlicensed).
 
 ## Other time-series analysis resources
 

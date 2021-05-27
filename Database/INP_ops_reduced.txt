@@ -23,7 +23,7 @@ SP_Summaries_fft.fpolysat_rmse	SP_Summaries_fft_fpolysat_rmse	powerspectrum
 
 # Features of the OSU Leaf dataset:
 EN_SampEn_5_005.sampen3	EN_SampEn_5_005_sampen3	entropy,sampen
-CO_HistogramAMI_std1_5.ami4     CO_HistogramAMI_std1_5_4    information,correlation,AMI
+CO_HistogramAMI_std1_5bin.ami4     CO_HistogramAMI_std1_5bin_ami4    information,correlation,AMI
 # CO_HistogramAMI_4_std1_4	CO_HistogramAMI_4_std1_4	information,correlation,AMI
 MF_armax_2_2_05_1.MA_1	MF_armax_2_2_05_1_MA_1	model,systemidentificationtoolbox,arma
 SB_MotifThree_diffquant.ba	benmotif_tri_diffquant_ba	motifs
@@ -79,7 +79,7 @@ CO_glscf_1_1_1	CO_glscf_1_1_1	correlation,glscf
 DN_RemovePoints_min_01.skewnessrat	DN_RemovePoints_min_01_skewnessrat	correlation,outliers,distribution
 DN_SimpleFit_gauss2_ks.r2	DN_SimpleFit_gauss2_r2_ks	distribution,gof,gauss2
 FC_LocalSimple_median3.ac1	FC_LocalSimple_median3_ac1	forecasting
-DN_RemovePoints_min_05.ac3rat	DN_RemovePoints_min_05_ac3rat	correlation,outliers
+DN_RemovePoints_min_05_saturate.ac3rat	DN_RemovePoints_min_05_saturate_ac3rat	correlation,outliers
 
 # Yoga dataset:
 MF_armax_1_1_05_1.maxdc	MF_armax_1_1_05_1_maxdc	model,systemidentificationtoolbox,arma
@@ -106,7 +106,7 @@ CO_trev_2.absnum	CO_trev_2_absnum	correlation,nonlinear,autocorrelation
 
 # Olive Oil dataset:
 # PP_Iterate_spline.swms5_2_exp	PP_Iterate_spline_swms5_2_exp	preprocessing,spline,raw
-DN_RemovePoints_max_01.median	DN_RemovePoints_max_01_median	correlation,outliers
+DN_RemovePoints_max_01_saturate.mean	DN_RemovePoints_max_01_saturate_mean	correlation,outliers
 
 # ------------------------------------------------------------------------------
 # 10/100 features from varied dataset
@@ -124,7 +124,7 @@ DN_cv_1	coeff_var_1	spread,cv,raw,locdep,spreaddep
 AC_4	AC_4	correlation,autocorrelation
 AC_38	AC_38	correlation,autocorrelation
 AC_nl_13	AC_nl_13	correlation,autocorrelation,nonlinearautocorr
-CO_HistogramAMI_std1_5.ami2     CO_HistogramAMI_std1_5_2    information,correlation,AMI
+CO_HistogramAMI_std1_5bin.ami2     CO_HistogramAMI_std1_5bin_ami2    information,correlation,AMI
 CO_glscf_1_2_5	CO_glscf_1_2_5	correlation,glscf
 CO_glscf_2_5_3	CO_glscf_2_5_3	correlation,glscf
 SY_SlidingWindow_m_s2_2	SY_SlidingWindow_m_s2_2	stationarity,slidingwin
@@ -171,10 +171,10 @@ PH_ForcePotential_dblwell_2_005_02.pcross	PH_ForcePotential_dblwell_2_005_02_pcr
 PH_ForcePotential_dblwell_3_001_01.pcross	PH_ForcePotential_dblwell_3_001_01_pcross	dynsys,dblwell
 PH_ForcePotential_sine_3_05_1.tau	PH_ForcePotential_sine_3_05_1_tau	dynsys,sine
 PH_ForcePotential_sine_10_004_10.proppos	PH_ForcePotential_sine_10_004_10_proppos	dynsys,sine
-DN_RemovePoints_absfar_08.median	DN_RemovePoints_absfar_08_median	correlation,outliers
-DN_RemovePoints_min_01.skewnessrat	DN_RemovePoints_min_01_skewnessrat	correlation,outliers,distribution
-DN_RemovePoints_min_08.ac3diff	DN_RemovePoints_min_08_ac3diff	correlation,outliers
-DN_RemovePoints_max_08.std	DN_RemovePoints_max_08_std	correlation,outliers
+DN_RemovePoints_absfar_08_remove.median	DN_RemovePoints_absfar_08_remove_median	correlation,outliers
+DN_RemovePoints_min_01_saturate.skewnessrat	DN_RemovePoints_min_01_saturate_skewnessrat	correlation,outliers,distribution
+DN_RemovePoints_min_08_saturate.ac3diff	DN_RemovePoints_min_08_saturate_ac3diff	correlation,outliers
+DN_RemovePoints_max_08_saturate.std	DN_RemovePoints_max_08_saturate_std	correlation,outliers
 CO_StickAngles_y.mean	CO_StickAngles_y_mean	correlation
 CO_Embed2_Shapes_tau_circle_1.std	CO_Embed2_Shapes_tau_circle_1_std	correlation,embedding
 SY_SpreadRandomLocal_ac2_100.meanac1	SY_SpreadRandomLocal_ac2_100_meanac1	stationarity
