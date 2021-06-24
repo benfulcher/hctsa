@@ -1,7 +1,7 @@
 function [TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams)
 % FilterFeatures filters down to a reduced feature set
 %-------------------------------------------------------------------------------
-if isempty(cfnParams.reducedFeatureSet) || strcmp(cfnParams.reducedFeatureSet,'all')
+if isempty(fieldnames(cfnParams)) || isempty(cfnParams.reducedFeatureSet) || strcmp(cfnParams.reducedFeatureSet,'all')
     return
 else
     opIDs = TS_GiveMeFeatureSet(cfnParams.reducedFeatureSet,Operations);

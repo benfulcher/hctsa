@@ -59,7 +59,7 @@ maxTau0 = maxTau;
 % Don't go above N/2
 maxTau = min(maxTau,ceil(N/2));
 
-% estimation method:
+% Estimation method:
 if nargin < 3
     estMethod = '';
 end

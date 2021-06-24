@@ -113,7 +113,7 @@ case {'corr_fast','abscorr_fast'}
     if ~beSilent, fprintf(1,' Done in %s.\n',BF_TheTime(toc)); end
 
 
-case {'euclidean','Euclidean','corr','correlation','abscorr'}
+case {'euclidean','Euclidean','corr','correlation','abscorr','Spearman'}
     % First use in-built pdist, which is fast
     if ~beSilent
         fprintf(1,'First computing pairwise distances using pdist...');

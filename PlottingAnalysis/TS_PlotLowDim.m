@@ -83,69 +83,13 @@ TellMeAboutLabeling(TimeSeries);
 [TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams);
 
 % ------------------------------------------------------------------------------
-%% Do the dimensionality reduction using Matlab's built-in PCA algorithm
+% Do the dimensionality reduction
 % ------------------------------------------------------------------------------
-switch whatAlgorithm
-case {'pca','PCA'}
-    fprintf(1,'Calculating 2-dimensional principal components of the %u x %u data matrix...\n', ...
-                        size(TS_DataMat,1),size(TS_DataMat,2));
-
-    % Use pca to compute the first two principal components:
-    % (project data into space of PC scores, Y)
-    if ~any(isnan(TS_DataMat))
-        [pcCoeff,Y,~,~,percVar] = pca(zscore(TS_DataMat),'NumComponents',2);
-    else
-        warning(sprintf(['Data matrix contains %.2g%% NaNs. Estimating covariances on remaining data...\n' ...
-                    '(Could take some time...)'],100*mean(isnan(TS_DataMat(:)))))
-        % Data matrix contains NaNs; try the pairwise rows approximation to the
-        % covariance matrix:
-        [pcCoeff,Y,~,~,percVar] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),...
-                                        'Rows','pairwise','NumComponents',2);
-        % If this fails (covariance matrix not positive definite), can try the
-        % (...,'algorithm','als') option in pca... (or toolbox for probabilistic PCA)
-    end
-    fprintf(1,'---Done.\n');
-
-    %-------------------------------------------------------------------------------
-    % Display the features loading strongly into the two components:
-    numTopLoadFeat = min(numFeatures,20); % display this many features loading onto each PC
-    LowDimDisplayTopLoadings(numTopLoadFeat,2,pcCoeff,Y,TS_DataMat,Operations);
-
-    % Axis labels for the plot:
-    featureLabels = cell(2,1);
-    for i = 1:2
-        featureLabels{i} = sprintf('PC-%u (%.2f%% var)',i,percVar(i));
-    end
-
-case {'tSNE','tsne'}
-    defaultNumPCs = 100;
-    numPCAComponents = min(size(TS_DataMat,2),defaultNumPCs);
-    rng('default') % for reproducibility
-
-    if numPCAComponents < size(TS_DataMat,2)
-        fprintf(1,['Computing a two-dimensional t-SNE embedding (using barnes-hut',...
-                        ' approximation after %u-dim PC reduction) of the %u x %u data matrix...\n'], ...
-                            numPCAComponents,size(TS_DataMat,1),size(TS_DataMat,2));
-        Y = tsne(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Algorithm','barneshut',...
-                        'Distance','euclidean','NumPCAComponents',numPCAComponents,'NumDimensions',2);
-
-    else
-        fprintf(1,['Computing a two-dimensional t-SNE embedding (using barnes-hut',...
-                        ' approximation) of the %u x %u data matrix...\n'], ...
-                            size(TS_DataMat,1),size(TS_DataMat,2));
-        Y = tsne(BF_NormalizeMatrix(TS_DataMat,'zscore'),'Algorithm','barneshut',...
-                        'Distance','euclidean','NumDimensions',2);
-    end
-    fprintf(1,'---Done.\n');
-    % Axis labels for the plot:
-    featureLabels = arrayfun(@(x)sprintf('tSNE-%u',x),1:2,'UniformOutput',false);
-otherwise
-    error('Unknown dimensionality-reduction algorithm: %s',whatAlgorithm);
-end
+[lowDimComponents,componentLabels] = BF_LowDimProject(TS_DataMat,whatAlgorithm,2);
 
 %-------------------------------------------------------------------------------
 % Plot two-dimensional representation of the data using TS_Plot2d:
-f = TS_Plot2d(Y(:,1:2),TimeSeries,featureLabels,annotateParams,showDist,cfnParams);
+f = TS_Plot2d(lowDimComponents,TimeSeries,componentLabels,annotateParams,showDist,cfnParams);
 
 %-------------------------------------------------------------------------------
 % Clear output

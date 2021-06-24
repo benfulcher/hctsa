@@ -65,7 +65,7 @@ Go have a play, read more about it in our [&#x1F4D9;paper](https://doi.org/10.10
 Is over 7000 just a few too many features for your application?
 Do you not have access to a Matlab license?
 _catch22_ has all of your faux-rhetorical questions covered.
-This reduced set of 22 features, determined through a combination of classification performance and mutual redundancy as explained in [this paper](https://arxiv.org/abs/1901.10200v2), is available [here](https://github.com/chlubba/catch22) as an efficiently coded C implementation with wrappers for python and R.
+This reduced set of 22 features, determined through a combination of classification performance and mutual redundancy as explained in [this paper](https://arxiv.org/abs/1901.10200v2), is available [here](https://github.com/chlubba/catch22) as an efficiently coded C implementation with wrappers for python, R, and Julia.
 
 ### _hctsa_ datasets and example workflows :floppy_disk:
 There are a range of open datasets with pre-computed _hctsa_ features, as well as some examples of _hctsa_ workflows.

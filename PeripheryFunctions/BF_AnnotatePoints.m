@@ -143,7 +143,7 @@ for j = 1:numAnnotate
         % get 3 attempts to pick a new point
         while ~newPointPicked && (numAttempts < 3)
             point = ginput(1);
-            point_z = (point-xy_mean)./xy_std;
+            point_z = (point - xy_mean)./xy_std;
             iPlot = BF_ClosestPoint_ginput(xy_zscore,point_z);
             if ~ismember(iPlot,alreadyPicked)
                 alreadyPicked(j) = iPlot;

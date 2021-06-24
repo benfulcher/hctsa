@@ -32,7 +32,7 @@ function TS_Combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,
 %---USAGE:
 % Combine two datasets computed using the same set of features, 'HCTSA_1.mat' and
 % 'HCTSA_2.mat', into a new combined HCTSA file:
-% TS_combine('HCTSA_1.mat','HCTSA_2.mat');
+% TS_Combine('HCTSA_1.mat','HCTSA_2.mat');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -170,7 +170,7 @@ else
 end
 
 %-------------------------------------------------------------------------------
-% Remove any additional fields from the TimeSeries structure array:
+% Remove any additional fields from the TimeSeries table:
 %-------------------------------------------------------------------------------
 canonicalVariables = {'ID','Name','Keywords','Length','Data'};
 for i = 1:2

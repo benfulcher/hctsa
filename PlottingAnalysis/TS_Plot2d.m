@@ -1,5 +1,6 @@
-function f = TS_Plot2d(featureData,TimeSeries,featureLabels,annotateParams,showDistr,cfnParams)
-% TS_Plot2d   Plots a dataset in a two-dimensional space.
+function [f,handles] = TS_Plot2d(featureData,TimeSeries,featureLabels,annotateParams,...
+                                            showDistr,cfnParams)
+% TS_Plot2d   Plot a dataset in a two-dimensional space.
 %
 % e.g., The space of two chosen features, or two principal components.
 %
@@ -195,7 +196,7 @@ end
 %% Do classification and plot a classify boundary?
 % ------------------------------------------------------------------------------
 didClassify = false;
-if numClasses > 1
+if numClasses > 1 && ~isempty(fields(cfnParams))
     % Compute the in-sample classification rate:
     classRate = nan(3,1); % classRate1, classRate2, classRateboth
     try
@@ -252,7 +253,7 @@ if numClasses > 1
             legendText{i} = sprintf('Group %u (%u)',i,sum(groupLabels==classLabels{i}));
         end
     end
-    legend([handles{:}],legendText,'interpreter','none','Location','best');
+    legend([handles{:}],legendText,'interpreter','none','Location','best','AutoUpdate','off');
 end
 
 %-------------------------------------------------------------------------------

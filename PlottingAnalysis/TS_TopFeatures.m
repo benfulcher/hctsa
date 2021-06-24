@@ -121,7 +121,8 @@ TellMeAboutLabeling(TimeSeries);
 % Set defaults for the test statistic:
 if nargin < 2 || isempty(whatTestStat)
     if numClasses == 2
-        whatTestStat = 'ustat'; % Way faster than proper prediction models
+        % ustat or ttest are way faster than proper prediction models
+        whatTestStat = 'ustat';
     else
         whatTestStat = 'classification';
     end
@@ -150,7 +151,8 @@ numTopFeatures = min(numTopFeatures,numFeatures);
 % chanceLevel -- what you'd expect by chance
 
 % Check that simple stats are being applied just for pairs:
-if ismember(whatTestStat,{'ustat','ranksum','ustatExact','ranksumExact','ttest','tstat'})
+if ismember(whatTestStat,{'ustat','ranksum','ustatExact','ustatP','ranksumExact',...
+                            'ttest','ttestP','tstat'})
     if numClasses~=2
         error('Simple statistics like ''%s'' are only valid for two-class classification',whatTestStat);
     end
@@ -164,24 +166,36 @@ switch whatTestStat
         chanceLevel = 100/numClasses; % (could be a bad assumption: accuracy for equiprobable groups...)
         testStatText = sprintf('%s %s',cfnParams.classifierText,cfnParams.whatLoss);
         statUnit = cfnParams.whatLossUnits;
-    case {'ustat','ranksum'}
+    case {'ustatP','ranksumP'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                    fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false);
+                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true);
         chanceLevel = NaN;
         testStatText = 'Mann-Whitney approx p-value';
         statUnit = ' (-log10(p))';
-    case {'ustatExact','ranksumExact'}
+    case {'ustatExactP','ranksumExactP'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                    fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true);
+                    fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true,true);
         chanceLevel = NaN;
         testStatText = 'Mann-Whitney exact p-value';
         statUnit = ' (-log10(p))';
+    case {'ustat','ranksum'}
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,false);
+        chanceLevel = NaN; % (check if you can compute the chance level stat?)
+        testStatText = 'Mann-Whitney approx test statistic';
+        statUnit = '';
     case {'ttest','tstat'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                        fn_tStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}));
+                        fn_tStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false);
         chanceLevel = 0; % chance-level t statistic is zero
         testStatText = 'Welch''s t-stat';
         statUnit = '';
+    case {'ttestP','tstatP'}
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                        fn_tStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true);
+        chanceLevel = NaN;
+        testStatText = 'Welch''s t-test p-value';
+        statUnit = ' (-log10(p))';
     otherwise
         error('Unknown test statistic: ''%s''',whatTestStat);
 end
@@ -312,7 +326,7 @@ if ismember('histogram',whatPlots)
     l_mean = plot(nanmean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
 
     % Labels:
-    xlabel(sprintf('Individual %s across %u features',testStatText,numFeatures))
+    xlabel(sprintf('Individual %s %s across %u features',testStatText,statUnit,numFeatures))
     ylabel('Probability')
 
     % Legend:
@@ -470,23 +484,30 @@ end
 
 %-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
-function [uStatP,Mdl] = fn_uStat(d1,d2,doExact)
-    % Return test statistic from Mann-Whitney U-test
+function [theStatistic,stats] = fn_uStat(d1,d2,doExact,doP)
+    % Return -log10(p) from a Mann-Whitney U-test
     if doExact
         [p,~,stats] = ranksum(d1,d2,'method','exact');
     else
         [p,~,stats] = ranksum(d1,d2,'method','approx');
     end
-    uStatP = -log10(p);
-    % uStat = stats.ranksum;
-    Mdl = stats;
+    if doP
+        theStatistic = -log10(p);
+    else
+        theStatistic = stats.ranksum;
+    end
+    % theStatistic = sign(stats.ranksum)*(-log10(p)); % (signed p-value)
 end
 %-------------------------------------------------------------------------------
-function [tStat,Mdl] = fn_tStat(d1,d2)
+function [theStatistic,stats] = fn_tStat(d1,d2,doP)
     % Return test statistic from a 2-sample Welch's t-test
-    [~,~,~,stats] = ttest2(d1,d2,'Vartype','unequal');
-    tStat = stats.tstat;
-    Mdl = stats;
+    [~,p,~,stats] = ttest2(d1,d2,'Vartype','unequal');
+    if doP
+        theStatistic = -log10(p);
+    else
+        % Code assumes bigger is better:
+        theStatistic = abs(stats.tstat);
+    end
 end
 %-------------------------------------------------------------------------------
 function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
@@ -503,7 +524,7 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
                 testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
             end
         catch
-            warning('Could not return model for feature %u',k);
+            warning('Error computing %s test statistic for feature %u',whatTestStat,k);
         end
         % Give estimate of time remaining:
         if beVerbose && k==100
