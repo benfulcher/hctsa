@@ -7,6 +7,10 @@ function out = SB_TransitionMatrix(y,howtocg,numGroups,tau)
 % equiprobable alphabet of numGroups letters. The transition probabilities are
 % calculated at a lag tau.
 %
+% Related to the idea of quantile graphs from time series. cf.
+% Andriana et al. (2011). Duality between Time Series and Networks. PLoS ONE.
+% https://doi.org/10.1371/journal.pone.0023378
+%
 %---INPUTS:
 % y, the input time series
 %

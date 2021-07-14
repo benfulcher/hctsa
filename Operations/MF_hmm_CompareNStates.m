@@ -82,11 +82,11 @@ BF_ResetSeed(randomSeed); % reset the random seed if specified
 % ------------------------------------------------------------------------------
 %% Train the HMM
 % ------------------------------------------------------------------------------
-% Divide up dataset into training (ytrain) and test (ytest) portions
-ytrain = y(1:Ntrain);
+% Divide up dataset into training (yTrain) and test (yTest) portions
+yTrain = y(1:Ntrain);
 if Ntrain < N
-    ytest = y(Ntrain+1:end);
-    Ntest = length(ytest);
+    yTest = y(Ntrain+1:end);
+    Ntest = length(yTest);
 end
 
 Nstate = length(nstater);
@@ -97,12 +97,12 @@ for j = 1:Nstate
     numStates = nstater(j);
     % train HMM with <numStates> states for 30 cycles of EM (or until
     % convergence); default termination tolerance
-    [Mu, Cov, P, Pi, LL] = ZG_hmm(ytrain,Ntrain,numStates,30);
+    [Mu, Cov, P, Pi, LL] = ZG_hmm(yTrain,Ntrain,numStates,30);
 
     LLtrains(j) = LL(end)/Ntrain;
 
     %% Calculate log likelihood for the test data
-    lik = ZG_hmm_cl(ytest,Ntest,numStates,Mu,Cov,P,Pi);
+    lik = ZG_hmm_cl(yTest,Ntest,numStates,Mu,Cov,P,Pi);
 
     LLtests(j) = lik/Ntest;
 end
@@ -112,8 +112,8 @@ out.meanLLtrain = mean(LLtrains);
 out.meanLLtest = mean(LLtests);
 out.maxLLtrain = max(LLtrains);
 out.maxLLtest = max(LLtests);
-out.chLLtrain = LLtrains(end)-LLtrains(1);
-out.chLLtest = LLtests(end)-LLtests(1);
+out.chLLtrain = LLtrains(end) - LLtrains(1);
+out.chLLtest = LLtests(end) - LLtests(1);
 out.meandiffLLtt = mean(abs(LLtests-LLtrains));
 
 for i = 1:Nstate-1

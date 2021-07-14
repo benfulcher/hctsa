@@ -139,7 +139,8 @@ p = data(rs);
 t = spacing(rs);
 
 if doPlot
-    figure('color','w'); box('on');
+    figure('color','w');
+    box('on');
     plot(t,p,'.-k')
 end
 
@@ -308,14 +309,14 @@ else
 end
 
 if doPlot
-    hold on
+    hold('on')
     plot(t,c.a*(1-exp(c.b*t)),':r');
-    hold off
+    hold('off')
 end
 
     % ------------------------------------------------------------------------------
     function badness = lfitbadness(x,y,gamma)
-        if nargin < 3,
+        if nargin < 3
             gamma = 0.006; % regularization parameter, gamma, chosen empirically
         end
         pp = polyfit(x,y,1);

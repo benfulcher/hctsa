@@ -527,7 +527,7 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
             warning('Error computing %s test statistic for feature %u',whatTestStat,k);
         end
         % Give estimate of time remaining:
-        if beVerbose && k==100
+        if beVerbose && k==200
             fprintf(1,'(should take approx %s to compute for all %u features)\n',...
                             BF_TheTime(toc(loopTimer)/100*(numFeatures)),numFeatures);
         end
