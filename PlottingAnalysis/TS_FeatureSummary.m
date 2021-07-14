@@ -80,12 +80,6 @@ annotateParams.groupColors = BF_GetColorMap('set1',numGroups,true);
 
 %-------------------------------------------------------------------------------
 % Apply default plotting settings in the annotateParams structure
-if ~isfield(annotateParams,'userInput')
-    annotateParams.userInput = true; % user clicks to annotate rather than randomly chosen
-end
-if ~isfield(annotateParams,'textAnnotation') % what text annotation to use
-    annotateParams.textAnnotation = 'Name';
-end
 if ~isfield(annotateParams,'n')
     annotateParams.n = min(15,height(TimeSeries));
 end
@@ -131,7 +125,7 @@ if doViolin
         extraParams.dontHitMe = true;
     end
 
-    if numGroups > 0
+    if numGroups > 1
         dataCell = cell(numGroups+1,1);
         dataCell{1} = TS_DataMat(:,theOp); % global distribution
         for i = 1:numGroups
@@ -230,7 +224,7 @@ if doViolin
 
 else
     % Horizontal kernel-smoothed distribution(s)
-    if ~isempty(timeSeriesGroup)
+    if numGroups > 1
         % Repeat for each group
         fx = cell(numGroups,1);
         lineHandles = cell(numGroups+1,1);
@@ -275,7 +269,8 @@ else
     xlabel('Outputs','Interpreter','none');
 end
 
-
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 function annotateFigure_Callback(hObject,eventData)
     % Bits and pieces from BF_AnnotatePoints(lowDimComponents,TimeSeries,annotateParams);
 
@@ -289,8 +284,8 @@ function annotateFigure_Callback(hObject,eventData)
     else
         delete(tHandle)
     end
-    if numGroups == 0
-        xyData = [xScatter{i},yScatter{i}];
+    if numGroups == 1
+        xyData = [xScatter{1},yScatter{1}];
     else
         xyData = arrayfun(@(x)[xScatter{x},yScatter{x}],1:numGroups+1,'UniformOutput',false);
     end
@@ -300,7 +295,7 @@ function annotateFigure_Callback(hObject,eventData)
 
     % point_z = (point - xy_mean)./xy_std;
     % Match the point
-    if numGroups==0
+    if numGroups == 1
         iPlot = BF_ClosestPoint_ginput(xyData,point);
         plotPoint = xyData(iPlot,:);
     else
@@ -321,7 +316,7 @@ function annotateFigure_Callback(hObject,eventData)
             % iPlot should be an index of the TimeSeries table
         end
     end
-    if numGroups > 0
+    if numGroups > 1
         theGroupIndex = groupLabelsInteger(iPlot);
         theColor = myColors{1 + theGroupIndex};
         if theGroupIndex==0
@@ -333,7 +328,7 @@ function annotateFigure_Callback(hObject,eventData)
         titleText = sprintf('%s (%s) [%.3f]',TimeSeries.Name{iPlot},thisClassLabel,plotPoint(1));
     else
         theColor = zeros(1,3);
-        titleText = sprintf('%s (%.3f)',TimeSeries.Name{iPlot},plotPoint(1));
+        titleText = sprintf('%s [%.3f]',TimeSeries.Name{iPlot},plotPoint(1));
     end
 
     % Plot a circle around the annotated point:
