@@ -1,10 +1,10 @@
-function [groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries)
+function [timeSeriesGroup,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries)
 % TS_ExtractGroupLabels     Extract group labels from a TimeSeries table
 %---INPUT:
 % TimeSeries, the input TimeSeries table in HCTSA format.
 %
 %---OUTPUT:
-% variables extracting relevant group information from the table
+%
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -36,16 +36,26 @@ function [groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGrou
 % ------------------------------------------------------------------------------
 
 if ismember('Group',TimeSeries.Properties.VariableNames) && ~all(isundefined(TimeSeries.Group))
-    groupLabels = TimeSeries.Group;
+    timeSeriesGroup = TimeSeries.Group;
 else
     % No group information assigned to time series
-    groupLabels = cell(height(TimeSeries),1);
-    groupLabels(:) = {'allData'};
-    groupLabels = categorical(groupLabels);
+    timeSeriesGroup = cell(height(TimeSeries),1);
+    timeSeriesGroup(:) = {'allData'};
+    timeSeriesGroup = categorical(timeSeriesGroup);
 end
 
-classLabels = categories(groupLabels);
-groupLabelsInteger = arrayfun(@(x)find(classLabels==x),groupLabels);
+classLabels = categories(timeSeriesGroup);
+groupLabelsInteger = arrayfun(@(x) findMe(x,classLabels),timeSeriesGroup);
 numGroups = length(classLabels);
+
+%-------------------------------------------------------------------------------
+function index = findMe(thisClass,myCategories)
+    % Return the integer category index in myCategories for thisClass (1, 2, 3, ...),
+    % or 0 if no match exists.
+    index = find(myCategories==thisClass);
+    if isempty(index)
+        index = 0;
+    end
+end
 
 end

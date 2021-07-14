@@ -1,4 +1,4 @@
-function TS_FeatureSummary(opID,whatData,doViolin,annotateParams)
+function TS_FeatureSummary(opID,whatData,doViolin,doInspect,annotateParams)
 % TS_FeatureSummary   How a given feature behaves across a time-series dataset
 %
 % Plots the distribution of outputs of an operation across the given dataset
@@ -8,7 +8,10 @@ function TS_FeatureSummary(opID,whatData,doViolin,annotateParams)
 %---INPUTS:
 % opID, the operation ID to plot
 % whatData, the data to visualize (HCTSA.mat by default; cf. TS_LoadData)
-% annotateParams, a structure of custom plotting options
+% doViolin, (logical) show distributions as a violin plot (instead of
+%           conventional kernel-smoothed distributions).
+% doInspect, (logical) whether to use an interactive version of the plot.
+% annotateParams, a structure of custom plotting options.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -44,7 +47,10 @@ end
 if nargin < 3 || isempty(doViolin) % annotation parameters
     doViolin = true;
 end
-if nargin < 4 || isempty(annotateParams) % annotation parameters
+if nargin < 4
+    doInspect = true;
+end
+if nargin < 5 || isempty(annotateParams) % annotation parameters
     annotateParams = struct();
 end
 
@@ -61,6 +67,7 @@ dataVector = TS_DataMat(:,theOp); % the outputs of interest
 notNaN = find(~isnan(dataVector));
 dataVector = dataVector(notNaN); % remove bad values
 TimeSeries = TimeSeries(notNaN,:); % remove bad values
+numTimeSeries = height(TimeSeries);
 theOperation = table2struct(Operations(theOp,:));
 
 if isempty(dataVector)
@@ -68,17 +75,8 @@ if isempty(dataVector)
 end
 
 % Retrieve group names also:
-if ~ismember('Group',TimeSeries.Properties.VariableNames)
-    timeSeriesGroup = [];
-    classLabels = {};
-    numGroups = 0;
-else
-    timeSeriesGroup = TimeSeries.Group; % Use group form
-    classLabels = categories(timeSeriesGroup);
-    timeSeriesGroupInteger = arrayfun(@(x)find(classLabels==x),timeSeriesGroup);
-    numGroups = length(classLabels);
-    annotateParams.groupColors = BF_GetColorMap('set1',numGroups,1);
-end
+[timeSeriesGroup,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
+annotateParams.groupColors = BF_GetColorMap('set1',numGroups,true);
 
 %-------------------------------------------------------------------------------
 % Apply default plotting settings in the annotateParams structure
@@ -99,20 +97,41 @@ if ~isfield(annotateParams,'maxL')
 end
 
 %-------------------------------------------------------------------------------
-% Plot the kernel-smoothed probability density
+% Plot the distribution of feature-values across the dataset
 %-------------------------------------------------------------------------------
 f = figure('color','w');
-box('on'); hold('on');
+box('on');
+hold('on');
 
 if doViolin
-    % Violin plots
-    rainbowColors = [BF_GetColorMap('set1',5,1); BF_GetColorMap('dark2',5,1)];
+    %-------------------------------------------------------------------------------
+    % Violin plot of a distribution for each labeled time-series class
 
-    % Determine a subset, highlightInd, of time series to highlight:
-    [~,ix] = sort(TS_DataMat(:,theOp),'ascend');
-    highlightInd = ix(round(linspace(1,length(ix),annotateParams.n)));
+    if ~doInspect
+        % Spaced time-series annotations shown on the right of the plot.
+        % Determine a subset, highlightInd, of time series to highlight:
+        [~,ix] = sort(TS_DataMat(:,theOp),'ascend');
+        highlightInd = ix(round(linspace(1,length(ix),annotateParams.n)));
+        rainbowColors = [BF_GetColorMap('set1',5,1); BF_GetColorMap('dark2',5,1)];
+    end
 
-    if ~isempty(timeSeriesGroup)
+    % First the distribution(s):
+    if doInspect
+        h_violin = subplot(3,1,1:2);
+        h_violin.ButtonDownFcn = {@annotateFigure_Callback};
+        h_violin.HitTest = 'on';
+    else
+        h_violin = subplot(1,4,1:2);
+    end
+
+    % Set up parameters:
+    extraParams = struct();
+    if doInspect
+        extraParams.makeHorizontal = true;
+        extraParams.dontHitMe = true;
+    end
+
+    if numGroups > 0
         dataCell = cell(numGroups+1,1);
         dataCell{1} = TS_DataMat(:,theOp); % global distribution
         for i = 1:numGroups
@@ -122,78 +141,95 @@ if doViolin
         myColors = cell(numGroups+1,1);
         myColors{1} = ones(3,1)*0.5; % gray for combined
         myColors(2:numGroups+1) = GiveMeColors(numGroups);
-        extraParams = struct();
         extraParams.theColors = myColors;
         extraParams.customOffset = -0.5;
         extraParams.offsetRange = 0.7;
+        [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter(dataCell,true,true,false,extraParams);
 
-        ax = subplot(1,4,1:2);
-        [ff,xx] = BF_JitteredParallelScatter(dataCell,1,1,0,extraParams);
-
-        % Annotate lines for each feature in the distribution:
-        for i = 1:annotateParams.n
-            ri = find(xx{1}>=TS_DataMat(highlightInd(i),theOp),1);
-            plot(0.5+0.35*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColors{rem(i-1,10)+1},'LineWidth',2)
-            groupColor = myColors{1+timeSeriesGroupInteger(highlightInd(i))};
-            plot(0.5+0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
-            plot(0.5-0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
+        % Add lines denoting each annotated time-series in the distribution:
+        if ~doInspect
+            for i = 1:annotateParams.n
+                ri = find(xx{1} >= TS_DataMat(highlightInd(i),theOp),1);
+                groupColor = myColors{1 + groupLabelsInteger(highlightInd(i))};
+                plot(0.5 + 0.35*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColors{rem(i-1,10) + 1},'LineWidth',2)
+                plot(0.5 + 0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
+                plot(0.5 - 0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
+            end
         end
-        ax.XTick = 0.5+(0:numGroups);
-        axisLabels = cell(numGroups+1,1);
+
+        % Label axes:
+        axisLabels = cell(numGroups + 1,1);
         axisLabels{1} = 'all';
         axisLabels(2:end) = classLabels;
-        ax.XTickLabel = axisLabels;
-        ax.XTickLabelRotation = 20;
+        if doInspect
+            h_violin.YTick = 0.5 + (0:numGroups);
+            h_violin.YTickLabel = axisLabels;
+            h_violin.YTickLabelRotation = 20;
+        else
+            h_violin.XTick = 0.5 + (0:numGroups);
+            h_violin.XTickLabel = axisLabels;
+            h_violin.XTickLabelRotation = 20;
+        end
     else
-        % Just run a single global one
-        extraParams = struct();
+        % No groups: just show the global distribution
         extraParams.theColors = {ones(3,1)*0.5};
-
-        ax = subplot(1,4,1:2);
-        [ff,xx] = BF_JitteredParallelScatter({TS_DataMat(:,theOp)},1,1,0,extraParams);
+        [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter({TS_DataMat(:,theOp)},false,true,false,extraParams);
 
         % Annotate lines for each feature in the distribution:
-        for i = 1:annotateParams.n
-            ri = find(xx{1}>=TS_DataMat(highlightInd(i),theOp),1);
-            rainbowColor = rainbowColors{rem(i-1,10)+1};
-            plot(1+0.25*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColor,'LineWidth',2)
-            plot(1+0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
-            plot(1-0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
+        if ~doInspect
+            for i = 1:annotateParams.n
+                ri = find(xx{1} >= TS_DataMat(highlightInd(i),theOp),1);
+                rainbowColor = rainbowColors{rem(i - 1,10)+1};
+                plot(1 + 0.25*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColor,'LineWidth',2)
+                plot(1 + 0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
+                plot(1 - 0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
+            end
+            h_violin.XTick = [];
         end
-        ax.XTick = [];
     end
-    ax.TickLabelInterpreter = 'none';
+
+    h_violin.TickLabelInterpreter = 'none';
     title(sprintf('[%u]%s (%s)',theOperation.ID,theOperation.Name,theOperation.Keywords),...
                                 'interpreter','none')
-    ylabel('Feature value');
+
+    if ~doInspect
+        ylabel('Feature value');
+    else
+        xlabel('Feature value');
+    end
 
     %-------------------------------------------------------------------------------
     % Time series annotations using TS_PlotTimeSeries
     % (cycling through groups of 10 rainbow colors):
-    ax = subplot(1,4,3:4);
-    plotOptions.newFigure = false;
-    plotOptions.colorMap = cell(annotateParams.n,1);
-    for i = 1:annotateParams.n
-        plotOptions.colorMap{i} = rainbowColors{rem(i-1,10)+1};
-    end
-    plotOptions.colorMap = flipud(plotOptions.colorMap);
-
-    TS_PlotTimeSeries(TimeSeries,annotateParams.n,flipud(highlightInd),annotateParams.maxL,plotOptions);
-
-    % Put rectangles if data is grouped
-    if ~isempty(timeSeriesGroup)
-        rectHeight = 1/annotateParams.n;
-        rectWidth = 0.1;
+    if doInspect
+        h_TimeSeries = subplot(3,1,3);
+        tHandle = text(0.2,0.5,'Click near a point above to inspect a time series!');
+    else
+        h_TimeSeries = subplot(1,4,3:4);
+        plotOptions.newFigure = false;
+        plotOptions.colorMap = cell(annotateParams.n,1);
         for i = 1:annotateParams.n
-            rectangle('Position',[-rectWidth*1,(i-1)*rectHeight,rectWidth,rectHeight],...
-                            'FaceColor',myColors{1+timeSeriesGroupInteger(highlightInd(i))});
+            plotOptions.colorMap{i} = rainbowColors{rem(i-1,10)+1};
         end
-        ax.XLim = [-rectWidth,1];
+        plotOptions.colorMap = flipud(plotOptions.colorMap);
+
+        TS_PlotTimeSeries(TimeSeries,annotateParams.n,flipud(highlightInd),annotateParams.maxL,plotOptions);
+
+        % Put rectangles if data is grouped
+        if ~isempty(timeSeriesGroup)
+            rectHeight = 1/annotateParams.n;
+            rectWidth = 0.1;
+            for i = 1:annotateParams.n
+                rectangle('Position',[-rectWidth*1,(i - 1)*rectHeight,rectWidth,rectHeight],...
+                                'FaceColor',myColors{1 + groupLabelsInteger(highlightInd(i))});
+            end
+            h_TimeSeries.XLim = [-rectWidth,1];
+        end
+        f.Position(3:4) = [1151,886];
     end
 
-    fig.Position(3:4) = [1151,886];
-
-else % kernel distributions
+else
+    % Horizontal kernel-smoothed distribution(s)
     if ~isempty(timeSeriesGroup)
         % Repeat for each group
         fx = cell(numGroups,1);
@@ -213,7 +249,7 @@ else % kernel distributions
         xy = vertcat(fx{:});
         % Now make sure that elements of TimeSeries matches ordering of xy
         tsInd = vertcat(tsInd{:});
-        ix = arrayfun(@(x)find(x==tsInd),1:height(TimeSeries));
+        % ix = arrayfun(@(x)find(x==tsInd),1:height(TimeSeries));
         TimeSeries = TimeSeries(tsInd,:);
 
         % Set up legend:
@@ -221,7 +257,6 @@ else % kernel distributions
         legendText{1} = 'combined';
         legendText(2:end) = classLabels;
         legend(horzcat(lineHandles{:}),legendText)
-
     else
         % Just run a single global one (black)
         [fr,xr] = BF_plot_ks(dataVector,'k',0,1.5,10);
@@ -238,6 +273,81 @@ else % kernel distributions
     title(sprintf('[%u] %s (%u-sample annotations)',opID,theOperation.Name, ...
                     annotateParams.maxL),'Interpreter','none');
     xlabel('Outputs','Interpreter','none');
+end
+
+
+function annotateFigure_Callback(hObject,eventData)
+    % Bits and pieces from BF_AnnotatePoints(lowDimComponents,TimeSeries,annotateParams);
+
+    % Get the coordinates of the current cursor position
+    coordinates = get(h_violin,'CurrentPoint');
+    point = coordinates(1,1:2);
+
+    if ~isempty(hObject.UserData)
+        pC = hObject.UserData;
+        delete(pC);
+    else
+        delete(tHandle)
+    end
+    if numGroups == 0
+        xyData = [xScatter{i},yScatter{i}];
+    else
+        xyData = arrayfun(@(x)[xScatter{x},yScatter{x}],1:numGroups+1,'UniformOutput',false);
+    end
+    % xy_std = std(xyData);
+    % xy_mean = mean(xyData);
+    % xy_zscore = zscore(xyData);
+
+    % point_z = (point - xy_mean)./xy_std;
+    % Match the point
+    if numGroups==0
+        iPlot = BF_ClosestPoint_ginput(xyData,point);
+        plotPoint = xyData(iPlot,:);
+    else
+        iPlots = zeros(numGroups + 1,1);
+        minDists = zeros(numGroups + 1,1);
+        for g = 1:numGroups+1
+            [iPlots(g),minDists(g)] = BF_ClosestPoint_ginput(xyData{g},point);
+        end
+        [~,theIndex] = min(minDists);
+        plotPoint = xyData{theIndex}(iPlots(theIndex),:);
+        if theIndex==1 % from the full distribution
+            iPlot = iPlots(1);
+        else % from a specific group
+            % Find its index from TimeSeries
+            theIndices = 1:numTimeSeries;
+            theIndicesGroup = theIndices(timeSeriesGroup==classLabels{theIndex-1});
+            iPlot = theIndicesGroup(iPlots(theIndex));
+            % iPlot should be an index of the TimeSeries table
+        end
+    end
+    if numGroups > 0
+        theGroupIndex = groupLabelsInteger(iPlot);
+        theColor = myColors{1 + theGroupIndex};
+        if theGroupIndex==0
+            % Can only happen in the rare case of a partially group-labeled dataset
+            thisClassLabel = '<Unlabeled>';
+        else
+            thisClassLabel = classLabels{theGroupIndex};
+        end
+        titleText = sprintf('%s (%s) [%.3f]',TimeSeries.Name{iPlot},thisClassLabel,plotPoint(1));
+    else
+        theColor = zeros(1,3);
+        titleText = sprintf('%s (%.3f)',TimeSeries.Name{iPlot},plotPoint(1));
+    end
+
+    % Plot a circle around the annotated point:
+    pC = plot(plotPoint(1),plotPoint(2),'o','MarkerSize',10,'MarkerEdgeColor',theColor,...
+                    'MarkerFaceColor',brighten(theColor,0.5),'Parent',h_violin);
+    hObject.UserData = pC;
+
+    % Plot the time series in the inspector plot
+    timeSeriesData = TimeSeries.Data{iPlot};
+    plot(timeSeriesData,'-','color',theColor,'LineWidth',2,'Parent',h_TimeSeries);
+    h_TimeSeries.Title.Interpreter = 'none';
+    h_TimeSeries.XLabel.String = 'Time';
+    h_TimeSeries.XLim = [0,annotateParams.maxL];
+    h_TimeSeries.Title.String = titleText;
 end
 
 end

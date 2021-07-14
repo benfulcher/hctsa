@@ -1,4 +1,4 @@
-function iPlot = BF_ClosestPoint_ginput(xy,inputPoint)
+function [iPlot,minDist] = BF_ClosestPoint_ginput(xy,inputPoint)
 % ClosestPoint_ginput   The closest point in a dataset to the input co-ordinates given.
 %
 %---INPUTS:
@@ -41,6 +41,6 @@ end
 % Calculate distances from each point to input inputPoint
 %-------------------------------------------------------------------------------
 dpxy = sum((xy - repmat(inputPoint,size(xy,1),1)).^2,2); % Euclidean distances to the input point
-[~,iPlot] = min(dpxy);
+[minDist,iPlot] = min(dpxy);
 
 end

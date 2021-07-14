@@ -1,6 +1,5 @@
-function [ff,xx] = BF_JitteredParallelScatter(dataCell,addMeans,doveTail,makeFigure,extraParams)
-% Plots a scatter of a set of distributions with data offset randomly in x
-% input is a cell with each element containing a collection of data.
+function [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter(dataCell,addMeans,doveTail,makeFigure,extraParams)
+% Plots a scatter of a set of distributions with data points offset randomly (jittered)
 %
 %---INPUTS:
 % dataCell, a cell where each element is a vector of numbers specifying a distribution
@@ -82,6 +81,20 @@ else
     offsetRange = extraParams.offsetRange;
 end
 
+% Horizontal or vertical
+if ~isfield(extraParams,'makeHorizontal')
+    makeHorizontal = false;
+else
+    makeHorizontal = extraParams.makeHorizontal;
+end
+
+% Custom HitTest settings
+if ~isfield(extraParams,'dontHitMe')
+    dontHitMe = false;
+else
+    dontHitMe = extraParams.dontHitMe;
+end
+
 % Custom colormap
 if ~isfield(extraParams,'theColors')
     if numGroups <= 3
@@ -97,8 +110,7 @@ else
     % fprintf(1,'Using custom colors\n');
 end
 
-% ------------------------------------------------------------------------------
-
+%-------------------------------------------------------------------------------
 % Reset random number generator for reproducibility:
 rng('default');
 
@@ -121,44 +133,68 @@ if doveTail
         if any(isnan(dataCell{i}))
             warning('NaNs in dataCell')
         end
-        [f, x] = ksdensity(dataCell{i},'npoints',500);
+        [f,x] = ksdensity(dataCell{i},'npoints',500);
         f = f/max(f);
+
         % Only keep range where data exists:
-        minKeep = max([1,find(x>=min(dataCell{i}),1,'first')]);
-        maxKeep = min([length(x),find(x>=max(dataCell{i}),1,'first')]);
+        minKeep = max([1,find(x >= min(dataCell{i}),1,'first')]);
+        maxKeep = min([length(x),find(x >= max(dataCell{i}),1,'first')]);
         keepR = minKeep:maxKeep;
-        % keepR = (x>=min(dataCell{i}) & x<=max(dataCell{i}));
         x = x(keepR);
         f = f(keepR);
-        plot(customOffset+i+f*offsetRange/2,x,'-','color',theColors{i},'LineWidth',2)
-        plot(customOffset+i-f*offsetRange/2,x,'-','color',theColors{i},'LineWidth',2)
+        if makeHorizontal
+            plot(x,customOffset + i + f*offsetRange/2,'-','color',theColors{i},'LineWidth',2)
+            plot(x,customOffset + i - f*offsetRange/2,'-','color',theColors{i},'LineWidth',2)
 
-        % Plot top and bottom
-        plot(customOffset+i+[-f(1),+f(1)]*offsetRange/2,min(x)*ones(2,1),'-','color',theColors{i},'LineWidth',0.1)
-        plot(customOffset+i+[-f(end),f(end)]*offsetRange/2,max(x)*ones(2,1),'-','color',theColors{i},'LineWidth',0.1)
+            % Plot top and bottom
+            plot(min(x)*ones(2,1),customOffset + i + [-f(1),f(1)]*offsetRange/2,'-','color',theColors{i},'LineWidth',0.1)
+            plot(max(x)*ones(2,1),customOffset + i + [-f(end),f(end)]*offsetRange/2,'-','color',theColors{i},'LineWidth',0.1)
+        else
+            plot(customOffset + i + f*offsetRange/2,x,'-','color',theColors{i},'LineWidth',2)
+            plot(customOffset + i - f*offsetRange/2,x,'-','color',theColors{i},'LineWidth',2)
+
+            % Plot top and bottom
+            plot(customOffset + i + [-f(1),f(1)]*offsetRange/2,min(x)*ones(2,1),'-','color',theColors{i},'LineWidth',0.1)
+            plot(customOffset + i + [-f(end),f(end)]*offsetRange/2,max(x)*ones(2,1),'-','color',theColors{i},'LineWidth',0.1)
+        end
 
         % Keep for dovetailing the jittered scatter points:
-        xx{i} = x; ff{i} = f;
+        xx{i} = x;
+        ff{i} = f;
     end
 end
 
 % ------------------------------------------------------------------------------
 % Plot jittered scatter for each group
 % ------------------------------------------------------------------------------
+xScatter = cell(numGroups,1);
+yScatter = cell(numGroups,1);
 if ~isempty(customSpot)
+    pHandles = cell(numGroups,1);
     for i = 1:numGroups
         if doveTail
             xRand = zeros(length(dataCell{i}),1);
             for j = 1:length(dataCell{i})
                 try
-                    xRand(j) = (rand(1)*offsetRange-offsetRange/2)*ff{i}(find(xx{i} >= dataCell{i}(j),1));
+                    xRand(j) = (rand(1)*offsetRange - offsetRange/2)*ff{i}(find(xx{i} >= dataCell{i}(j),1));
                 end
             end
-            %i + rand([length(dataCell{i}),1])*offsetRange-offsetRange/2;
         else
-            xRand = rand([length(dataCell{i}),1])*offsetRange-offsetRange/2;
+            xRand = rand([length(dataCell{i}),1])*offsetRange - offsetRange/2;
         end
-        plot(customOffset + i + xRand,dataCell{i},customSpot,'color',theColors{i})
+        if makeHorizontal
+            xScatter{i} = dataCell{i};
+            yScatter{i} = customOffset + i + xRand;
+        else
+            xScatter{i} = customOffset + i + xRand;
+            yScatter{i} = dataCell{i};
+        end
+        pHandles{i} = plot(xScatter{i},yScatter{i},customSpot,'color',theColors{i});
+    end
+    if dontHitMe
+        for i = 1:length(pHandles)
+            pHandles{i}.HitTest = 'off';
+        end
     end
 end
 
@@ -174,8 +210,15 @@ for i = 1:numGroups
         brightColor = theColors{i};
     end
 
-    plot([customOffset + i - offsetRange/2,customOffset + i + offsetRange/2],nanmean(dataCell{i})*ones(2,1),'-',...
+    if addMeans
+        if makeHorizontal
+            plot(nanmean(dataCell{i})*ones(2,1),[customOffset + i - offsetRange/2,customOffset + i + offsetRange/2],'-',...
                             'color',brightColor,'LineWidth',2)
+        else
+            plot([customOffset + i - offsetRange/2,customOffset + i + offsetRange/2],nanmean(dataCell{i})*ones(2,1),'-',...
+                            'color',brightColor,'LineWidth',2)
+        end
+    end
     % plot([customOffset + i - offsetRange/2,customOffset + i + offsetRange/2],(nanmean(dataCell{i})-nanstd(dataCell{i}))*ones(2,1),'--',...
                             % 'color',brightColor,'LineWidth',2)
     % plot([customOffset + i - offsetRange/2,customOffset + i + offsetRange/2],(nanmean(dataCell{i})+nanstd(dataCell{i}))*ones(2,1),'--',...
