@@ -86,9 +86,9 @@ plotCircle = true; % circle around annotated points
 %-------------------------------------------------------------------------------
 
 % Want on a common scale for finding neighbors:
-xy_std = std(xy);
-xy_mean = mean(xy);
-xy_zscore = zscore(xy);
+% xy_std = std(xy);
+% xy_mean = mean(xy);
+% xy_zscore = zscore(xy);
 
 % Initializing basic parameters/variables:
 ax = gca;
@@ -143,8 +143,8 @@ for j = 1:numAnnotate
         % get 3 attempts to pick a new point
         while ~newPointPicked && (numAttempts < 3)
             point = ginput(1);
-            point_z = (point - xy_mean)./xy_std;
-            iPlot = BF_ClosestPoint_ginput(xy_zscore,point_z);
+            % point_z = (point - xy_mean)./xy_std;
+            iPlot = BF_ClosestPoint_ginput(xy,point,true);
             if ~ismember(iPlot,alreadyPicked)
                 alreadyPicked(j) = iPlot;
                 newPointPicked = true;

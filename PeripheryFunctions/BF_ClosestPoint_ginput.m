@@ -1,9 +1,11 @@
-function [iPlot,minDist] = BF_ClosestPoint_ginput(xy,inputPoint)
+function [iPlot,minDist] = BF_ClosestPoint_ginput(xy,inputPoint,doNormalize)
 % ClosestPoint_ginput   The closest point in a dataset to the input co-ordinates given.
 %
 %---INPUTS:
-% xy is a Nx2 vector of x-y co-ordinates
-% inputPoint is the output of a ginput
+% xy, A Nx2 vector of x-y co-ordinates.
+% inputPoint, The output of a ginput.
+% doNormalize, whether to normalize the input space so that relative differences
+%               in x and y are treated (rather than raw Euclidean distances).
 %
 %---OUTPUT:
 % plotMe, the closest point.
@@ -35,6 +37,23 @@ function [iPlot,minDist] = BF_ClosestPoint_ginput(xy,inputPoint)
 %-------------------------------------------------------------------------------
 if nargin < 2 || isempty(inputPoint)
     inputPoint = ginput(1);
+end
+if nargin < 3
+    doNormalize = true;
+end
+
+%-------------------------------------------------------------------------------
+% Normalize
+%-------------------------------------------------------------------------------
+% Normalizing the space to a unit square treats distances in both axes similarly
+% relative to their ranges.
+if doNormalize
+    minMaxx = [min(xy(:,1)),max(xy(:,1))];
+    minMaxy = [min(xy(:,2)),max(xy(:,2))];
+    xy(:,1) = (xy(:,1) - minMaxx(1))/(minMaxx(2)-minMaxx(1));
+    inputPoint(1) = (inputPoint(1) - minMaxx(1))/(minMaxx(2)-minMaxx(1));
+    xy(:,2) = (xy(:,2) - minMaxy(1))/(minMaxy(2)-minMaxy(1));
+    inputPoint(2) = (inputPoint(2) - minMaxy(1))/(minMaxy(2)-minMaxy(1));
 end
 
 %-------------------------------------------------------------------------------

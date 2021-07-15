@@ -289,20 +289,16 @@ function annotateFigure_Callback(hObject,eventData)
     else
         xyData = arrayfun(@(x)[xScatter{x},yScatter{x}],1:numGroups+1,'UniformOutput',false);
     end
-    % xy_std = std(xyData);
-    % xy_mean = mean(xyData);
-    % xy_zscore = zscore(xyData);
 
-    % point_z = (point - xy_mean)./xy_std;
     % Match the point
     if numGroups == 1
-        iPlot = BF_ClosestPoint_ginput(xyData,point);
+        iPlot = BF_ClosestPoint_ginput(xyData,point,true);
         plotPoint = xyData(iPlot,:);
     else
         iPlots = zeros(numGroups + 1,1);
         minDists = zeros(numGroups + 1,1);
         for g = 1:numGroups+1
-            [iPlots(g),minDists(g)] = BF_ClosestPoint_ginput(xyData{g},point);
+            [iPlots(g),minDists(g)] = BF_ClosestPoint_ginput(xyData{g},point,true);
         end
         [~,theIndex] = min(minDists);
         plotPoint = xyData{theIndex}(iPlots(theIndex),:);

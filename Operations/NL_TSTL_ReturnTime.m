@@ -2,7 +2,7 @@ function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedParams)
 % NL_TSTL_ReturnTime    Analysis of the histogram of return times.
 %
 % Return times are the time taken for the time series to return to a similar
-% location in phase space for a given reference point
+% location in phase space for a given reference point.
 %
 % Strong peaks in the histogram are indicative of periodicities in the data.
 %
@@ -169,7 +169,9 @@ for i = 1:numBins
     cglav(i) = sum(Trett(inds(i)+1:inds(i+1)));
 end
 if doPlot
-    figure('color','w'); box('on'); plot(cglav,'k')
+    figure('color','w');
+    box('on');
+    plot(cglav,'k')
 end
 out.hcgdist = -sum(cglav(cglav > 0).*log(cglav(cglav > 0)));
 out.rangecgdist = range(cglav);
@@ -181,7 +183,8 @@ out.pzeroscgdist = sum(cglav == 0)/numBins;
 [nhist, binEdges] = histcounts(Trett,'BinMethod','sqrt','Normalization','probability');
 if doPlot
     binCenters = mean([binEdges(1:end-1); binEdges(2:end)]);
-    figure('color','w'); plot(binCenters,nhist,'o-k')
+    figure('color','w');
+    plot(binCenters,nhist,'o-k')
 end
 out.maxhisthist = max(nhist);
 out.phisthistmin = nhist(1); % this is the same as maxhisthist

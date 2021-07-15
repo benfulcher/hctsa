@@ -89,28 +89,32 @@ function annotateFigure_Callback(hObject,eventdata)
         delete(tHandle)
     end
 
-    xy_std = std(lowDimComponents);
-    xy_mean = mean(lowDimComponents);
-    xy_zscore = zscore(lowDimComponents);
-
     coordinates = get(h_LowDim,'CurrentPoint');
     point = coordinates(1,1:2);
-    point_z = (point - xy_mean)./xy_std;
-    iPlot = BF_ClosestPoint_ginput(xy_zscore,point_z);
+    iPlot = BF_ClosestPoint_ginput(lowDimComponents,point,true);
     plotPoint = lowDimComponents(iPlot,:);
     theGroupIndex = groupLabelsInteger(iPlot);
 
+    if theGroupIndex==0
+        % An unassigned class
+        theColor = ones(1,3)*0.5;
+        thisClassLabel = '<Unlabeled>';
+    else
+        theColor = groupColors{theGroupIndex};
+        thisClassLabel = classLabels{theGroupIndex};
+    end
+
     % Plot a circle around the annotated point:
-    pC = plot(plotPoint(1),plotPoint(2),'o','MarkerSize',10,'MarkerEdgeColor',groupColors{theGroupIndex},...
-                    'MarkerFaceColor',brighten(groupColors{theGroupIndex},0.5),'Parent',h_LowDim);
+    pC = plot(plotPoint(1),plotPoint(2),'o','MarkerSize',10,'MarkerEdgeColor',theColor,...
+                    'MarkerFaceColor',brighten(theColor,0.5),'Parent',h_LowDim);
     hObject.UserData = pC;
 
     % Plot the time series in the inspector plot
     timeSeriesData = TimeSeries.Data{iPlot}; % (1:min(maxLength,end))
-    plot(timeSeriesData,'-','color',groupColors{theGroupIndex},'LineWidth',2,...
+    plot(timeSeriesData,'-','color',theColor,'LineWidth',2,...
                     'Parent',h_TimeSeries);
     h_TimeSeries.Title.String = sprintf('%s (%s)',...
-                    TimeSeries.Name{iPlot},classLabels{theGroupIndex});
+                    TimeSeries.Name{iPlot},thisClassLabel);
     h_TimeSeries.Title.Interpreter = 'none';
     h_TimeSeries.XLabel.String = 'Time';
     h_TimeSeries.XLim = [0,maxLength];
