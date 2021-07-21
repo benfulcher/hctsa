@@ -66,7 +66,7 @@ elseif strcmp(tau,'mi')
     % tau is the first minimum of the automutual information function
 end
 if isnan(tau)
-    error('No valid setting for time delay (time series too short?)');
+    error('No valid setting for time delay. (Is the time series too short?)');
 end
 
 %-------------------------------------------------------------------------------

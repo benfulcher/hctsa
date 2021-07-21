@@ -177,7 +177,8 @@ end
 %% Plot output
 % ------------------------------------------------------------------------------
 if doPlot
-    figure('color','w'); hold on
+    figure('color','w');
+    hold('on')
     plot(thr,msDt(:,1),'.-k');
     plot(thr,msDt(:,2),'.-b');
     plot(thr,msDt(:,3),'.-g');

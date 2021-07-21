@@ -1,4 +1,4 @@
-function TS_FeatureSummary(opID,whatData,doViolin,doInspect,annotateParams)
+function TS_FeatureSummary(opID,whatData,doViolin,doInspect,annotateParams,customAnnotation)
 % TS_FeatureSummary   How a given feature behaves across a time-series dataset
 %
 % Plots the distribution of outputs of an operation across the given dataset
@@ -12,6 +12,7 @@ function TS_FeatureSummary(opID,whatData,doViolin,doInspect,annotateParams)
 %           conventional kernel-smoothed distributions).
 % doInspect, (logical) whether to use an interactive version of the plot.
 % annotateParams, a structure of custom plotting options.
+% customAnnotation, function handle to plot something unique.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -52,6 +53,9 @@ if nargin < 4
 end
 if nargin < 5 || isempty(annotateParams) % annotation parameters
     annotateParams = struct();
+end
+if nargin < 6
+    customAnnotation = [];
 end
 
 %-------------------------------------------------------------------------------
@@ -334,11 +338,17 @@ function annotateFigure_Callback(hObject,eventData)
 
     % Plot the time series in the inspector plot
     timeSeriesData = TimeSeries.Data{iPlot};
-    plot(timeSeriesData,'-','color',theColor,'LineWidth',2,'Parent',h_TimeSeries);
-    h_TimeSeries.Title.Interpreter = 'none';
-    h_TimeSeries.XLabel.String = 'Time';
-    h_TimeSeries.XLim = [0,annotateParams.maxL];
+    if ~isempty(customAnnotation)
+        f.CurrentAxes = h_TimeSeries;
+        customAnnotation(timeSeriesData);
+    else
+        plot(timeSeriesData,'-','color',theColor,'LineWidth',2,'Parent',h_TimeSeries);
+        h_TimeSeries.XLim = [0,annotateParams.maxL];
+        h_TimeSeries.XLabel.String = 'Time';
+    end
+
     h_TimeSeries.Title.String = titleText;
+    h_TimeSeries.Title.Interpreter = 'none';
 end
 
 end

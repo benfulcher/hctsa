@@ -1,4 +1,4 @@
-function out = DN_HistogramMode(y,numBins)
+function out = DN_HistogramMode(y,numBins,doPlot)
 % DN_HistogramMode      Mode of a data vector.
 %
 % Measures the mode of the data vector using histograms with a given number
@@ -6,9 +6,9 @@ function out = DN_HistogramMode(y,numBins)
 %
 %---INPUTS:
 %
-% y, the input data vector
-%
+% y, the input data vector.
 % numBins, the number of bins to use in the histogram.
+% doPlot, whether to show a plot of what was computed.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -57,5 +57,13 @@ binCenters = mean([binEdges(1:end-1); binEdges(2:end)]);
 
 % Mean position of maximums (if multiple):
 out = mean(binCenters(N == max(N)));
+
+% Plot a summary of what was computed:
+if doPlot
+    histogram('BinEdges',binEdges,'BinCounts',N,'EdgeColor','k','FaceColor',0.6*ones(1,3));
+    hold('on');
+    plot(out*ones(2,1),[0,max(N)],'r','LineWidth',2);
+    hold('off')
+end
 
 end

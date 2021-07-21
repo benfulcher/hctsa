@@ -5,7 +5,7 @@ function TS_Compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,be
 % TS_Compute;
 %
 %---INPUTS:
-% doParallel:  if true, attempts to use the Parallel Computing Toolbox to run
+% doParallel: if true, attempts to use the Parallel Computing Toolbox to run
 %               computations in parallel over multiple cores.
 % ts_id_range: a custom range of time series IDs to compute (default: [] -- compute all)
 % op_id_range: a custom range of operation IDs to compute (default: [] -- compute all)
@@ -126,6 +126,11 @@ if numTimeSeries==0 || numOps==0
     return
 end
 
+if (nargin < 6) && (numOps < 30)
+    beVocal = false;
+end
+
+%-------------------------------------------------------------------------------
 fprintf(1,['Calculation has begun on %s using %u datasets ' ...
                             'and %u operations\n'],datestr(now),numTimeSeries,numOps);
 
