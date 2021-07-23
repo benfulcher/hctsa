@@ -39,14 +39,14 @@ function out = SY_RangeEvolve(y)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doPlot = 0; % plot outputs
+doPlot = false; % whether to plot outputs
 N = length(y); % length of the time series
 cums = zeros(N,1);
 
 for i = 1:N
     cums(i) = range(y(1:i));
 end
-% cums=cums/range(y);
+% cums = cums/range(y);
 
 if doPlot
     figure('color','w');

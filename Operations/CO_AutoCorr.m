@@ -12,7 +12,7 @@ function out = CO_AutoCorr(y,tau,whatMethod)
 % whatMethod, the method of computing the autocorrelation: 'Fourier',
 %             'TimeDomainStat', or 'TimeDomain'.
 %
-%---OUTPUT: the autocorrelation at the given time-lag.
+%---OUTPUT: the autocorrelation at the given time lag.
 %
 %---NOTES:
 % Specifying whatMethod = 'TimeDomain' can tolerate NaN values in the time
