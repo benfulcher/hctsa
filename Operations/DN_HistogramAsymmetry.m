@@ -1,15 +1,13 @@
-function out = DN_HistogramMode(y,numBins,doSimple,doPlot)
-% DN_HistogramMode      Mode of a data vector.
+function out = DN_HistogramAsymmetry(y,numBins,doSimple)
+% DN_HistogramAsymmetry  Measures of distributional asymmetry
 %
-% Measures the mode of the data vector using histograms with a given number
-% of bins.
+% Measures the asymmetry of the histogram distribution of the input data vector.
 %
 %---INPUTS:
 %
 % y, the input data vector.
 % numBins, the number of bins to use in the histogram.
 % doSimple, whether to use a simple binning method (linearly spaced bins).
-% doPlot, whether to show a plot of what was computed.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -44,41 +42,52 @@ function out = DN_HistogramMode(y,numBins,doSimple,doPlot)
 % Check inputs and set defaults:
 %-------------------------------------------------------------------------------
 if nargin < 2
-    numBins = 'auto';
+    numBins = 10;
 end
 if nargin < 3
     doSimple = true;
 end
-if nargin < 4
-    doPlot = false;
-end
-%-------------------------------------------------------------------------------
 
-% Compute the histogram from the data:
-if isnumeric(numBins)
-    if doSimple
-        [N,binEdges] = BF_SimpleBinner(y,numBins);
-    else
-        [N,binEdges] = histcounts(y,numBins);
-    end
-elseif ischar(numBins)
-    [N,binEdges] = histcounts(y,'BinMethod',numBins);
-else
-    error('Unknown format for numBins');
+%-------------------------------------------------------------------------------
+% Check z-score standardization (since it is assumed that positive and negative
+% values can be treated separately):
+iszscored = BF_iszscored(y);
+if ~iszscored
+    warning('DN_HistogramAsymmetry assumes a z-scored (or standardized) input')
 end
+
+%-------------------------------------------------------------------------------
+% Compute the histogram separately from positive and negative values in the data:
+yPos = y(y > 0);
+yNeg = y(y < 0);
+if doSimple
+    [countsPos,binEdgesPos] = BF_SimpleBinner(yPos,numBins);
+    [countsNeg,binEdgesNeg] = BF_SimpleBinner(yNeg,numBins);
+else
+    [countsPos,binEdgesPos] = histcounts(yPos,numBins);
+    [countsNeg,binEdgesNeg] = histcounts(yNeg,numBins);
+end
+
+% Normalize by total counts:
+NnonZero = sum(y~=0);
+pPos = countsPos/NnonZero;
+pNeg = countsNeg/NnonZero;
 
 % Compute bin centers from bin edges:
-binCenters = mean([binEdges(1:end-1); binEdges(2:end)]);
+binCentersPos = mean([binEdgesPos(1:end-1); binEdgesPos(2:end)]);
+binCentersNeg = mean([binEdgesNeg(1:end-1); binEdgesNeg(2:end)]);
+
+% Histogram counts and overall density differences:
+out.densityDiff = sum(y > 0) - sum(y < 0); % measure of asymmetry about the mean
+out.modeProbPos = max(pPos);
+out.modeProbNeg = max(pNeg);
+out.modeDiff = out.modeProbPos - out.modeProbNeg;
 
 % Mean position of maximums (if multiple):
-out = mean(binCenters(N == max(N)));
+out.posMode = mean(binCentersPos(pPos == out.modeProbPos));
+out.negMode = mean(binCentersNeg(pNeg == out.modeProbNeg));
+out.modeAsymmetry = out.posMode + out.negMode;
 
-% Plot a summary of what was computed:
-if doPlot
-    histogram('BinEdges',binEdges,'BinCounts',N,'EdgeColor','k','FaceColor',0.6*ones(1,3));
-    hold('on');
-    plot(out*ones(2,1),[0,max(N)],'r','LineWidth',2);
-    hold('off')
-end
+
 
 end

@@ -7,9 +7,13 @@ DN_Mean(x,'harm')	DN_hmean
 DN_Mean(x,'rms')	DN_rms
 DN_Mean(x,'median')	DN_median
 DN_Mean(x,'midhinge')	DN_midhinge
-DN_HistogramMode(x_z,5)	DN_HistogramMode_5
-DN_HistogramMode(x_z,10)	DN_HistogramMode_10
-DN_HistogramMode(x_z,20)	DN_HistogramMode_20
+DN_HistogramMode(x_z,5,true,false)	DN_HistogramMode_5
+DN_HistogramMode(x_z,10,true,false)	DN_HistogramMode_10
+DN_HistogramMode(x_z,21,true,false)	DN_HistogramMode_21
+DN_HistogramMode(abs(x_z),5,true,false)	DN_HistogramMode_abs_5
+DN_HistogramMode(abs(x_z),10,true,false)	DN_HistogramMode_abs_10
+DN_HistogramMode(abs(x_z),21,true,false)	DN_HistogramMode_abs_21
+DN_HistogramAsymmetry(x_z,11,false) DN_HistogramAsymmetry_11
 DN_TrimmedMean(x,1)		DN_TrimmedMean_1
 DN_TrimmedMean(x,5)		DN_TrimmedMean_5
 DN_TrimmedMean(x,10)	DN_TrimmedMean_10
