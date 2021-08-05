@@ -109,10 +109,10 @@ if (numClasses==0) || (numClasses==1)
     groupColors = {[0,0,0]}; % Just use black...
 else
     if isstruct(annotateParams) && isfield(annotateParams,'cmap')
-        if ischar(annotateParams.cmap)
-            groupColors = BF_GetColorMap(annotateParams.cmap,numClasses,1);
-        else
+        if iscell(annotateParams.cmap)
             groupColors = annotateParams.cmap; % specify the cell itself
+        elseif ischar(annotateParams.cmap)
+            groupColors = BF_GetColorMap(annotateParams.cmap,numClasses,1);
         end
     else
         groupColors = GiveMeColors(numClasses);
