@@ -20,8 +20,8 @@ function out = DN_OutlierInclude(y,thresholdHow,inc)
 %
 % thresholdHow, the method of how to determine outliers:
 %     (i) 'abs': outliers are furthest from the mean,
-%     (ii) 'p': outliers are the greatest positive deviations from the mean, or
-%     (iii) 'n': outliers are the greatest negative deviations from the mean.
+%     (ii) 'pos': outliers are the greatest positive deviations from the mean, or
+%     (iii) 'neg': outliers are the greatest negative deviations from the mean.
 %
 % inc, the increment to move through (fraction of std if input time series is
 %       z-scored)
@@ -72,13 +72,16 @@ BF_CheckToolbox('curve_fitting_toolbox');
 doPlot = false; % Plot some outputs
 
 % ------------------------------------------------------------------------------
-%% Check Inputs
+%% Check inputs and set defaults
 % ------------------------------------------------------------------------------
-% If time series is all the same value -- ridiculous! ++BF 21/3/2010
-if all(y == y(1)) % the whole time series is just a single value
+% If the time series is a constant causes issues
+if all(y == y(1))
+    % This method is not suitable for such time series: return a NaN
     fprintf(1,'The time series is a constant!\n');
-    out = NaN; return % this method is not suitable for such time series: return a NaN
+    out = NaN;
+    return
 end
+
 % Check z-scored time series
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored')
@@ -96,24 +99,29 @@ end
 % ------------------------------------------------------------------------------
 %% Initialize thresholds
 % ------------------------------------------------------------------------------
+% Could be better to just use a fixed number of increments here, from 0 to the max.
+% (rather than forcing a fixed inc)
 switch thresholdHow
     case 'abs' % analyze absolute value deviations
         thr = (0:inc:max(abs(y)));
         tot = N;
-    case 'p' % analyze only positive deviations
+    case 'pos' % analyze only positive deviations
         thr = (0:inc:max(y));
         tot = sum(y >= 0);
-    case 'n' % analyze only negative deviations
+    case 'neg' % analyze only negative deviations
         thr = (0:inc:max(-y));
         tot = sum(y <= 0);
 otherwise
-    error('Error thresholding with ''%s''. Must select either ''abs'', ''p'', or ''n''.',thresholdHow)
+    error('Error thresholding with ''%s''. Must select either ''abs'', ''pos'', or ''neg''.',thresholdHow)
 end
 
 if isempty(thr)
-    error('I suspect that this is a highly peculiar time series?!!!')
+    error('Error setting increments through the time-series values...')
 end
 
+%-------------------------------------------------------------------------------
+% Calculate statistics of over-threshold events, looping over thresholds
+%-------------------------------------------------------------------------------
 msDt = zeros(length(thr),6); % mean, std, proportion_of_time_series_included,
                              % median of index relative to middle, mean,
                              % error
@@ -126,9 +134,9 @@ for i = 1:length(thr)
     switch thresholdHow
     case 'abs' % look at absolute value deviations
         r = find(abs(y) >= th);
-    case 'p' % look at only positive deviations
+    case 'pos' % look at only positive deviations
         r = find(y >= th);
-    case 'n' % look at only negative deviations
+    case 'neg' % look at only negative deviations
         r = find(y <= -th);
     end
 
@@ -156,6 +164,8 @@ end
 % ------------------------------------------------------------------------------
 %% Trim
 % ------------------------------------------------------------------------------
+% NB: would be more efficient to catch this within the loop above
+
 % Trim off where the number of events is only one; hence the differenced
 % series returns NaN
 fbi = find(isnan(msDt(:,1)),1,'first'); % first bad index
@@ -192,7 +202,7 @@ end
 %-------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Fit an exponential to the mean as a function of the threshold
+%% Fit an exponential to the mean inter-event interval as a function of the threshold
 % ------------------------------------------------------------------------------
 s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[0.1 2.5 1]);
 f = fittype('a*exp(b*x)+c','options',s);
@@ -247,9 +257,14 @@ out.nfladjr2 = gof.adjrsquare;
 out.nflrmse = gof.rmse;
 
 % ------------------------------------------------------------------------------
-%% Stationarity assumption
+%% Stationarity metrics
 % ------------------------------------------------------------------------------
-% mean, median and std of the median and mean of inter-intervals
+% Mean, median and std of the mean inter-event interval:
+out.mdtm = mean(msDt(:,1));
+out.mdtmd = median(msDt(:,1));
+out.mdtstd = std(msDt(:,1));
+
+% Mean, median and std of the median and mean of indices over-threshold events occur
 out.mdrm = mean(msDt(:,4));
 out.mdrmd = median(msDt(:,4));
 out.mdrstd = std(msDt(:,4));

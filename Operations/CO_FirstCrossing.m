@@ -7,7 +7,7 @@ function out = CO_FirstCrossing(y,corrFun,threshold,whatOut)
 % corrFun, the self-correlation function to measure:
 %         (i) 'ac': normal linear autocorrelation function. Uses CO_AutoCorr to
 %                   calculate autocorrelations.
-% threshold, to cross: e.g., 0, 1/exp(1).
+% threshold, to cross. Examples: 0 [first zero crossing], 1/exp(1) [first 1/e crossing].
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -60,6 +60,8 @@ end
 switch corrFun
 case 'ac'
     % Autocorrelation at all time lags
+    % (a little inefficient to not do it incrementally, but maybe Fourier method)
+    % (does it anyway...)
     corrs = CO_AutoCorr(y,[],'Fourier');
 otherwise
     error('Unknown correlation function ''%s''',corrFun);

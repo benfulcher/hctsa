@@ -15,8 +15,9 @@ function out = CO_NonlinearAutocorr(y,taus,doAbs)
 % y  -- should be the z-scored time series (Nx1 vector)
 % taus -- should be a vector of the time delays as above (mx1 vector)
 %   e.g., [2] computes <x_i x_{i-2}>
-%   e.g., [1,2] computes <x_i x_{i-1} x{i-2}>
-%   e.g., [1,1,3] computes <x_i x_{i-1}^2 x{i-3}>
+%   e.g., [1,2] computes <x_i x_{i-1} x_{i-2}>
+%   e.g., [1,1,3] computes <x_i x_{i-1}^2 x_{i-3}>
+%   e.g., [0,0,1] computes <x_i^3 x_{i-1}>
 % doAbs [opt] -- a boolean (0,1) -- if one, takes an absolute value before
 %                taking the final mean -- useful for an odd number of
 %                contributions to the sum. Default is to do this for odd
@@ -27,10 +28,10 @@ function out = CO_NonlinearAutocorr(y,taus,doAbs)
 %         taus vectors) the result will be near zero due to fluctuations
 %         below the mean; even for highly-correlated signals. (doAbs)
 %
-% (*) doAbs = 1 is really a different operation that can't be compared with
-%         the values obtained from taking doAbs = 0 (i.e., for odd lengths
+% (*) doAbs = true is really a different operation that can't be compared with
+%         the values obtained from taking doAbs = false (i.e., for odd lengths
 %         of taus)
-% (*) It can be helpful to look at nlac at each iteration.
+% (*) It can be helpful to look at nonlinearAC at each iteration.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -66,27 +67,29 @@ function out = CO_NonlinearAutocorr(y,taus,doAbs)
 % ------------------------------------------------------------------------------
 if nargin < 3 || isempty(doAbs) % use default settings for doAbs
     if rem(length(taus),2) == 1
-        doAbs = 0;
+        doAbs = false;
     else
         % Even number of time-lags
-        doAbs = 1; % take abs, otherwise will be a very small number
+        doAbs = true; % take abs, otherwise will be a very small number
     end
 end
+%-------------------------------------------------------------------------------
 
 N = length(y); % time-series length
-tmax = max(taus); % the maximum delay time
+tMax = max(taus); % the maximum delay time
 
 % Compute the autocorrelation sum iteratively
-nlac = y(tmax+1:N);
+nonlinearAC = y(tMax+1:N);
 for i = 1:length(taus)
-    nlac = nlac.*y(tmax-taus(i)+1:N-taus(i));
+    nonlinearAC = nonlinearAC .* y(tMax-taus(i)+1:N-taus(i));
 end
 
+%-------------------------------------------------------------------------------
 % Compute output
 if doAbs
-    out = mean(abs(nlac));
+    out = mean(abs(nonlinearAC));
 else
-    out = mean(nlac);
+    out = mean(nonlinearAC);
 end
 
 end

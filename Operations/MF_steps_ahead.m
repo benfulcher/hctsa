@@ -6,9 +6,9 @@ function out = MF_steps_ahead(y,model,order,maxSteps)
 % 1-step ahead to maxSteps steps-ahead predictions.
 %
 % Models are fit using code from Matlab's System Identification Toolbox:
-% (i) AR models using the ar function,
-% (ii) ARMA models using armax code, and
-% (iii) state-space models using n4sid code.
+%       (i) AR models using the ar function,
+%       (ii) ARMA models using armax code, and
+%       (iii) state-space models using n4sid code.
 %
 % The model is fitted on the full time series and then used to predict the same
 % data.
@@ -22,9 +22,9 @@ function out = MF_steps_ahead(y,model,order,maxSteps)
 %---OUTPUTS: include the errors, for prediction lengths l = 1, 2, ..., maxSteps,
 % returned for each model relative to the best performance from basic null
 % predictors, including sliding 1- and 2-sample mean predictors and simply
-% predicting each point as the mean of the full time series. Additional outputs
-% quantify how the errors change as the prediction length increases from l = 1,
-% ..., maxSteps (relative to a simple predictor).
+% predicting each point as the mean of the full time series.
+% Additional outputs quantify how the errors change as the prediction length
+% increases from l = 1, ..., maxSteps (relative to a simple predictor).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -157,7 +157,7 @@ for i = 1:maxSteps
     % A sliding mean of length 1
     % for n-step-ahead prediction, will predict using the value n steps
     % before it.
-    mres = yy(i+1:end)-yy(1:N-i);
+    mres = yy(i+1:end) - yy(1:N-i);
 
     sm1.rmserrs(i) = sqrt(mean(mres.^2));
     sm1.mabserrs(i) = mean(abs(mres));
@@ -168,7 +168,7 @@ for i = 1:maxSteps
     sm2p = zeros(N-i-1,1);
     for j = 1:N-i-1
         seeds = yy(j:j+1);
-        for k=1:i % average with itself this many times
+        for k = 1:i % average with itself this many times
             p = mean(seeds);
             seeds = [seeds(2),p];
         end
@@ -210,7 +210,7 @@ for i = 1:maxSteps
     out.(sprintf('ac1_%u',i)) = makeItSo;
 end
 
-out.meandiffrmsabs = abs(mean(mf.rmserrs-mf.mabserrs));
+out.meandiffrmsabs = abs(mean(mf.rmserrs - mf.mabserrs));
 
 % ------------------------------------------------------------------------------
 % Quantify shape:

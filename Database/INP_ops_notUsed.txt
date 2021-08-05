@@ -1,0 +1,23 @@
+# Features are computed by hctsa but not used
+
+# These are not relevant for stationary processes, but may be relevant for characterizing shorter series
+# (for a dataset containing time series all of the same length, these will be identical to the original features
+# (that do not have 'norm' appended to their names))
+SB_BinaryStats_mean.longstretch1norm	SB_BinaryStats_mean_longstretch1norm	symbolic,distribution,correlation
+SB_BinaryStats_mean.meanstretch1norm	SB_BinaryStats_mean_meanstretch1norm	symbolic,distribution,correlation
+SB_BinaryStats_mean.stdstretch1norm	    SB_BinaryStats_mean_stdstretch1norm	    symbolic,distribution,correlation
+SB_BinaryStats_mean.longstretch0norm	SB_BinaryStats_mean_longstretch0norm	symbolic,distribution,correlation
+SB_BinaryStats_mean.meanstretch0norm	SB_BinaryStats_mean_meanstretch0norm	symbolic,distribution,correlation
+SB_BinaryStats_mean.stdstretch0norm	    SB_BinaryStats_mean_stdstretch0norm	    symbolic,distribution,correlation
+SB_BinaryStats_diff.longstretch1norm	SB_BinaryStats_diff_longstretch1norm	symbolic,distribution,correlation
+SB_BinaryStats_diff.longstretch0norm	SB_BinaryStats_diff_longstretch0norm	symbolic,distribution,correlation
+SB_BinaryStats_diff.meanstretch1norm	SB_BinaryStats_diff_meanstretch1norm	symbolic,distribution,correlation
+SB_BinaryStats_diff.meanstretch0norm	SB_BinaryStats_diff_meanstretch0norm	symbolic,distribution,correlation
+SB_BinaryStats_diff.stdstretch1norm	    SB_BinaryStats_diff_stdstretch1norm	    symbolic,distribution,correlation
+SB_BinaryStats_diff.stdstretch0norm	    SB_BinaryStats_diff_stdstretch0norm	    symbolic,distribution,correlation
+SB_BinaryStats_iqr.longstretch1norm	    SB_BinaryStats_iqr_longstretch1norm	    symbolic,distribution,correlation
+SB_BinaryStats_iqr.longstretch0norm	    SB_BinaryStats_iqr_longstretch0norm	    symbolic,distribution,correlation
+SB_BinaryStats_iqr.meanstretch1norm	    SB_BinaryStats_iqr_meanstretch1norm	    symbolic,distribution,correlation
+SB_BinaryStats_iqr.meanstretch0norm	    SB_BinaryStats_iqr_meanstretch0norm	    symbolic,distribution,correlation
+SB_BinaryStats_iqr.stdstretch1norm	    SB_BinaryStats_iqr_stdstretch1norm	    symbolic,distribution,correlation
+SB_BinaryStats_iqr.stdstretch0norm	    SB_BinaryStats_iqr_stdstretch0norm	    symbolic,distribution,correlation

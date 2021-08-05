@@ -72,17 +72,17 @@ N = length(y); % length of time series
 % ------------------------------------------------------------------------------
 switch lorf
     case 'l'
-        wl = n; % window length
+        windowLength = n; % window length
     case 'n'
-        wl = floor(N/n); % number of windows
+        windowLength = floor(N/n); % number of windows
     case 'tau'
         % this may not be a good idea!
-        wl = CO_FirstCrossing(y,'ac',0,'discrete');
+        windowLength = CO_FirstCrossing(y,'ac',0,'discrete');
     otherwise
         error('Unknown method ''%s''',lorf);
 end
 
-if (wl > N) || (wl <= 1)
+if (windowLength > N) || (windowLength <= 1)
     % This feature is unsuitable if the window length exceeds ts
     fprintf(1,'The window length is longer than the time-series length!\n');
     out = NaN;
@@ -92,7 +92,7 @@ end
 % ------------------------------------------------------------------------------
 %% Buffer the time series
 % ------------------------------------------------------------------------------
-y_buff = buffer(y,wl); % no overlap
+y_buff = buffer(y,windowLength); % no overlap
 % Each *column* is a window of samples:
 if y_buff(end) == 0
     y_buff = y_buff(:,1:end-1); % remove last window if zero-padded

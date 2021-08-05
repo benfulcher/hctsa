@@ -73,8 +73,8 @@ else
     lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
 end
 evalr = lp+1:N; % range over which to evaluate the forecast
-if length(evalr)==0
-    warning('Time series too short for forecasting');
+if isempty(evalr)
+    warning('This time series is too short for forecasting');
     out = NaN;
     return
 end
@@ -83,11 +83,11 @@ res = zeros(length(evalr),1); % residuals
 switch forecastMeth
     case 'mean'
         for i = 1:length(evalr)
-            res(i) = mean(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction-value
+            res(i) = mean(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction - value
         end
     case 'median'
         for i = 1:length(evalr)
-            res(i) = median(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction-value
+            res(i) = median(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction - value
         end
     case 'lfit'
         for i = 1:length(evalr)

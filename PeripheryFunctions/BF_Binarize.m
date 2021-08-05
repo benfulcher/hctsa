@@ -38,17 +38,6 @@ if nargin < 2 || isempty(binarizeHow)
 end
 
 %-------------------------------------------------------------------------------
-% function to transform real values to 0 if <=0 and 1 if >0:
-%-------------------------------------------------------------------------------
-
-function Y = stepBinary(X)
-
-    Y = zeros(size(X),'like',X);
-    Y(X > 0) = 1;
-    
-end
-
-%-------------------------------------------------------------------------------
 % Do the binary transformation:
 %-------------------------------------------------------------------------------
 
@@ -74,6 +63,13 @@ switch binarizeHow
 
     otherwise
         error('Unknown binary transformation setting ''%s''',binarizeHow)
+end
+
+%-------------------------------------------------------------------------------
+function Y = stepBinary(X)
+    % Transform real values to 0 if <=0 and 1 if >0:
+    Y = zeros(size(X),'like',X);
+    Y(X > 0) = 1;
 end
 
 end
