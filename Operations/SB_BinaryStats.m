@@ -83,7 +83,7 @@ stretch1 = difffy(difffy ~= 1) - 1;
 %-------------------------------------------------------------------------------
 % pstretches
 %-------------------------------------------------------------------------------
-% Number of different stretches as proportion of time series
+% Number of different stretches as proportion of the time-series length
 out.pstretch1 = length(stretch1)/N;
 % The following are trivially dependent on pstretch1:
 % out.pstretch0 = length(stretch0)/N;
@@ -91,26 +91,37 @@ out.pstretch1 = length(stretch1)/N;
 
 if isempty(stretch0) % all 1s (almost impossible to actually occur)
     out.longstretch0 = 0;
+    out.longstretch0norm = 0;
     out.meanstretch0 = 0;
+    out.meanstretch0norm = 0;
     out.stdstretch0 = NaN;
+    out.stdstretch0norm = NaN;
 else
     out.longstretch0 = max(stretch0); % longest consecutive stretch of zeros
+    out.longstretch0norm = max(stretch0)/N; % longest consecutive stretch of zeros as proportion of time-series length
     out.meanstretch0 = mean(stretch0); % mean stretch of zeros
+    out.meanstretch0norm = mean(stretch0)/N; % mean stretch of zeros
     out.stdstretch0 = std(stretch0); % standard deviation of stretch lengths of consecutive zeros
+    out.stdstretch0norm = std(stretch0)/N; % standard deviation of stretch lengths of consecutive zeros
 end
 
 if isempty(stretch1) % all 0s (almost impossible to actually occur)
     out.longstretch1 = 0;
+    out.longstretch1norm = 0;
     out.meanstretch1 = 0;
+    out.meanstretch1norm = 0;
     out.stdstretch1 = NaN;
 else
     out.longstretch1 = max(stretch1); % longest consecutive stretch of ones
+    out.longstretch1norm = max(stretch1)/N; % longest consecutive stretch of ones as proportion of the time-series length
     out.meanstretch1 = mean(stretch1);
+    out.meanstretch1norm = mean(stretch1)/N;
     out.stdstretch1 = std(stretch1);
+    out.stdstretch1norm = std(stretch1)/N;
 end
 
-out.meanstretchdiff = out.meanstretch1 - out.meanstretch0;
-out.stdstretchdiff = out.stdstretch1 - out.stdstretch0;
+out.meanstretchdiff = (out.meanstretch1 - out.meanstretch0)/N;
+out.stdstretchdiff = (out.stdstretch1 - out.stdstretch0)/N;
 
 out.diff21stretch1 = mean(stretch1 == 2) - mean(stretch1 == 1);
 out.diff21stretch0 = mean(stretch0 == 2) - mean(stretch0 == 1);

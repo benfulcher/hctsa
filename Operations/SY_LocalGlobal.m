@@ -115,6 +115,7 @@ if length(r) < 5
     % It's not really appropriate to compute statistics on less than 5 datapoints
     warning('Time series (of length %u) is too short',N)
     out = NaN;
+    return
 end
 
 % ------------------------------------------------------------------------------

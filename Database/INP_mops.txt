@@ -7,9 +7,13 @@ DN_Mean(x,'harm')	DN_hmean
 DN_Mean(x,'rms')	DN_rms
 DN_Mean(x,'median')	DN_median
 DN_Mean(x,'midhinge')	DN_midhinge
-DN_HistogramMode(x_z,5)	DN_HistogramMode_5
-DN_HistogramMode(x_z,10)	DN_HistogramMode_10
-DN_HistogramMode(x_z,20)	DN_HistogramMode_20
+DN_HistogramMode(x_z,5,true,false)	DN_HistogramMode_5
+DN_HistogramMode(x_z,10,true,false)	DN_HistogramMode_10
+DN_HistogramMode(x_z,21,true,false)	DN_HistogramMode_21
+DN_HistogramMode(abs(x_z),5,true,false)	DN_HistogramMode_abs_5
+DN_HistogramMode(abs(x_z),10,true,false)	DN_HistogramMode_abs_10
+DN_HistogramMode(abs(x_z),21,true,false)	DN_HistogramMode_abs_21
+DN_HistogramAsymmetry(x_z,11,false) DN_HistogramAsymmetry_11
 DN_TrimmedMean(x,1)		DN_TrimmedMean_1
 DN_TrimmedMean(x,5)		DN_TrimmedMean_5
 DN_TrimmedMean(x,10)	DN_TrimmedMean_10
@@ -870,8 +874,8 @@ DN_CompareKSFit(x,'gamma')		DN_CompareKSFit_gamma
 DN_CompareKSFit(x,'logn')		DN_CompareKSFit_logn
 DN_CompareKSFit(x,'wbl')		DN_CompareKSFit_wbl
 DN_OutlierInclude(x_z,'abs',0.01)	DN_OutlierInclude_abs_001
-DN_OutlierInclude(x_z,'p',0.01)	DN_OutlierInclude_p_001
-DN_OutlierInclude(x_z,'n',0.01)	DN_OutlierInclude_n_001
+DN_OutlierInclude(x_z,'pos',0.01)	DN_OutlierInclude_p_001
+DN_OutlierInclude(x_z,'neg',0.01)	DN_OutlierInclude_n_001
 ST_LocalExtrema(x_z,'l',50)	ST_LocalExtrema_l50
 ST_LocalExtrema(x_z,'l',100)	ST_LocalExtrema_l100
 ST_LocalExtrema(x_z,'n',25)	ST_LocalExtrema_n25
@@ -881,8 +885,8 @@ EX_MovingThreshold(x_z,0.1,0.1)	EX_MovingThreshold_01_01
 EX_MovingThreshold(x_z,0.1,0.02)	EX_MovingThreshold_01_002
 EX_MovingThreshold(x_z,1,0.1)	EX_MovingThreshold_1_01
 EX_MovingThreshold(x_z,1,0.02)	EX_MovingThreshold_1_002
-SB_BinaryStats(x_z,'diff')	SB_BinaryStats_diff
 SB_BinaryStats(x_z,'mean')	SB_BinaryStats_mean
+SB_BinaryStats(x_z,'diff')	SB_BinaryStats_diff
 SB_BinaryStats(x_z,'iqr')	SB_BinaryStats_iqr
 SB_MotifTwo(x_z,'diff')	SB_MotifTwo_diff
 SB_MotifTwo(x_z,'mean')	SB_MotifTwo_mean
