@@ -1,4 +1,4 @@
-function out = SP_Summaries(y,psdMeth,windowType,nf,dologabs)
+function out = SP_Summaries(y,psdMeth,windowType,nf,doLogAbs)
 % SP_Summaries  Statistics of the power spectrum of a time series
 %
 % The estimation can be done using a periodogram, using the periodogram code in
@@ -21,10 +21,10 @@ function out = SP_Summaries(y,psdMeth,windowType,nf,dologabs)
 %               (v) 'hamming'
 %               (vi) 'none'
 %
-% nf, the number of frequency components to include, if
-%           empty (default), it's approx length(y)
+% nf, the number of frequency components to include. If
+%           empty (default), it's approximately length(y).
 %
-% dologabs, if 1, takes log amplitude of the signal before
+% doLogAbs, if 1, takes log amplitude of the signal before
 %           transforming to the frequency domain.
 %
 % doPower, analyzes the power spectrum rather than amplitudes of a Fourier
@@ -86,11 +86,11 @@ end
 if nargin < 4
     nf = [];
 end
-if nargin < 5 || isempty(dologabs)
-    dologabs = false;
+if nargin < 5 || isempty(doLogAbs)
+    doLogAbs = false;
 end
 
-if dologabs % a boolean
+if doLogAbs % a boolean
     % Analyze the spectrum of logarithmic absolute deviations
     y = log(abs(y));
 end

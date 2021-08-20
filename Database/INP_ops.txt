@@ -9,7 +9,7 @@ DN_TrimmedMean_25	trimmed_mean_25	    distribution,location,raw,locationDependen
 DN_TrimmedMean_50	trimmed_mean_50	    distribution,location,raw,locationDependent
 DN_midhinge			midhinge	        distribution,location,raw,locationDependent
 DN_max	            maximum	            distribution
-DN_min	            miminmum	        distribution
+DN_min	            mimimum	            distribution
 DN_rms	            rms	                distribution,location,raw,locationDependent,spreadDependent
 DN_burstiness.B	    burstiness_Goh	        distribution,raw,locationDependent,spreadDependent
 DN_burstiness.B_Kim	burstiness_Kim	        distribution,raw,locationDependent,spreadDependent
@@ -1062,10 +1062,10 @@ DN_OutlierTest5.mean	DN_OutlierTest5_mean	spread,distribution,outliers
 DN_OutlierTest5.std		DN_OutlierTest5_std		spread,distribution,outliers
 DN_OutlierTest10.mean	DN_OutlierTest10_mean	spread,distribution,outliers
 DN_OutlierTest10.std	DN_OutlierTest10_std	spread,distribution,outliers
-ST_FitPolynomial_1	    ST_FitPolynomial_1	    trend
-ST_FitPolynomial_2	    ST_FitPolynomial_2	    trend
-ST_FitPolynomial_3	    ST_FitPolynomial_3	    trend
-ST_FitPolynomial_4	    ST_FitPolynomial_4	    trend
+ST_FitPolynomial_1	    ST_FitPolynomial_1	    trend,stationarity
+ST_FitPolynomial_2	    ST_FitPolynomial_2	    trend,stationarity
+ST_FitPolynomial_3	    ST_FitPolynomial_3	    trend,stationarity
+ST_FitPolynomial_4	    ST_FitPolynomial_4	    trend,stationarity
 DK_crinkle_statistic	DK_crinkle_statistic	misc
 DK_TheilerQ	            DK_TheilerQ	            misc
 CP_wavelet_varchg_db3_2_10_001	CP_wavelet_varchg_db3_2_10_001	wavelet,varchg
