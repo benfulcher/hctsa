@@ -354,9 +354,6 @@ end
 if ismember('distributions',whatPlots)
     subPerFig = 16; % subplots per figure
 
-    % Set the colors to be assigned to groups:
-    colors = GiveMeColors(numClasses);
-
     % Space the figures out properly:
     numFigs = ceil(numFeaturesDistr/subPerFig);
 

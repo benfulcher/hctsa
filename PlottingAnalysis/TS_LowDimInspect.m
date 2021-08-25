@@ -78,9 +78,8 @@ movegui(f,'center')
 f.Visible = 'on';
 
 %-------------------------------------------------------------------------------
-% function annotateButton_Callback(source,eventdata)
-function annotateFigure_Callback(hObject,eventdata)
-    % Bits and pieces from BF_AnnotatePoints(lowDimComponents,TimeSeries,annotateParams);
+function annotateFigure_Callback(hObject,eventData)
+    % Bits and pieces from BF_AnnotatePoints
 
     if ~isempty(hObject.UserData)
         pC = hObject.UserData;

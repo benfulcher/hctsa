@@ -102,7 +102,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Check Statistics toolbox is available (needed throughout hctsa, including for
-% zscoring)
+% z-scoring)
 %-------------------------------------------------------------------------------
 BF_CheckToolbox('statistics_toolbox');
 
