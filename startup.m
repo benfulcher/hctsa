@@ -116,7 +116,7 @@ settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
 
 % Java information dynamics toolkit written by Joseph Lizier
 % (should be ok to re-add this every time startup is run)
-fprintf(1,'Information dynamics toolkit, ')
+fprintf(1,', Information dynamics toolkit, ')
 javaaddpath(fullfile(pwd,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 
 % ------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ javaaddpath(fullfile(pwd,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 [~,homeDir] = system('echo $HOME'); % get system home directory
 homeDir = regexprep(homeDir,'[\s]',''); % remove whitespace
 tiseanBinaryLocation = fullfile(homeDir,'bin');
-if isempty(regexp(getenv('PATH'),tiseanBinaryLocation))
+if isempty(regexp(getenv('PATH'),tiseanBinaryLocation,'once'))
     sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
     setenv('PATH', sysPath)
     fprintf(1,'System path to TISEAN binaries: %s\n',tiseanBinaryLocation);

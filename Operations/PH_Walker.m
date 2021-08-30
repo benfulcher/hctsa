@@ -23,7 +23,7 @@ function out = PH_Walker(y,walkerRule,walkerParams)
 %                         series, it narrows the gap by a proportion p_{up},
 %                         and when it is being pushed down by the time series,
 %                         it narrows the gap by a (potentially different)
-%                         proportion p_{down}. walkerParams = [pup,pdown].
+%                         proportion p_{down}. walkerParams = [pup, pdown].
 %
 %            (iii) 'momentum': the walker moves as if it has mass m and inertia
 %                         from the previous time step and the time series acts
@@ -33,12 +33,12 @@ function out = PH_Walker(y,walkerRule,walkerParams)
 %             (iv) 'runningvar': the walker moves with inertia as above, but
 %                         its values are also adjusted so as to match the local
 %                         variance of time series by a multiplicative factor.
-%                         walkerParams = [m,wl], where m is the inertial mass and wl
+%                         walkerParams = [m, wl], where m is the inertial mass and wl
 %                         is the window length.
 %
 % walkerParams, the parameters for the specified walkerRule, explained above.
 %
-%---OUTPUTS: include the mean, spread, maximum, minimum, and autocorrelation of
+%---OUTPUTS: Include the mean, spread, maximum, minimum, and autocorrelation of
 % the walker's trajectory, the number of crossings between the walker and the
 % original time series, the ratio or difference of some basic summary statistics
 % between the original time series and the walker, an Ansari-Bradley test

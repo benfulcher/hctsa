@@ -1,12 +1,14 @@
-function BF_CheckToolbox(theToolbox)
+function outFlag = BF_CheckToolbox(theToolbox,infoMode)
 % BF_CheckToolbox   Check for a Matlab Toolbox license
 %
 % Checks for the given Matlab Toolbox license and produces an appropriate error
 % message if there's a problem.
 %
-%---INPUT:
+%---INPUTS:
+%
 % theToolbox, the string identifying the toolbox (in format of license command
 %               in Matlab)
+% infoMode, set true to just output information about a toolbox (not errors if missing)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -30,6 +32,13 @@ function BF_CheckToolbox(theToolbox)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Check inputs
+%-------------------------------------------------------------------------------
+if nargin < 2 || isempty(infoMode)
+    infoMode = false;
+end
+
 % ------------------------------------------------------------------------------
 % First get a more interpretable string for user feedback: theName
 % ------------------------------------------------------------------------------
@@ -37,29 +46,29 @@ switch theToolbox
 case 'statistics_toolbox'
     theName = 'Matlab''s Statistics Toolbox';
 
-case 'identification_toolbox'
-    theName = 'Matlab''s System Identification Toolbox';
-
-case 'econometrics_toolbox'
-    theName = 'Matlab''s Econometrics Toolbox';
-
 case 'curve_fitting_toolbox'
     theName = 'Matlab''s Curve Fitting Toolbox';
-
-case 'wavelet_toolbox'
-    theName = 'Matlab''s Wavelet Toolbox';
 
 case 'signal_toolbox'
     theName = 'Matlab''s Signal Processing Toolbox';
 
-case 'database_toolbox'
-    theName = 'Matlab''s Database Toolbox';
+case 'identification_toolbox'
+    theName = 'Matlab''s System Identification Toolbox';
+
+case 'wavelet_toolbox'
+    theName = 'Matlab''s Wavelet Toolbox';
+
+case 'econometrics_toolbox'
+    theName = 'Matlab''s Econometrics Toolbox';
 
 case 'robust_toolbox'
     theName = 'Matlab''s Robust Control Toolbox';
 
 case 'financial_toolbox'
     theName = 'Matlab''s Financial Toolbox';
+
+case 'database_toolbox'
+    theName = 'Matlab''s Database Toolbox';
 
 case 'distrib_computing_toolbox'
     theName = 'Matlab''s Parallel Computing Toolbox';
@@ -73,14 +82,21 @@ end
 % ------------------------------------------------------------------------------
 % 1. Check the toolbox exists in the current Matlab environment:
 a = license('test',theToolbox);
-if a == 0
-    error('This function requires %s',theName);
-end
+if infoMode
+    if a == 0
+        warning('Some hctsa features require %s, but no installation was found.',theName)
+    end
+    outFlag = true;
+else
+    if a == 0
+        error('This function requires %s',theName);
+    end
 
-% 2. Check to see if there's an available license for this toolbox:
-[lic_free,~] = license('checkout',theToolbox); % Attempt to check out a license
-if lic_free == 0
-    error('Could not obtain a license for %s',theName);
+    % 2. Check to see if there's an available license for this toolbox:
+    [licenseFree,~] = license('checkout',theToolbox); % Attempt to check out a license
+    if licenseFree == 0
+        error('Could not obtain a license for %s',theName);
+    end
 end
 
 end

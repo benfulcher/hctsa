@@ -26,7 +26,8 @@ fprintf(1,['This script will set up the Highly Comparative Time-Series ' ...
                         'Analysis (hctsa) code package from scratch!\n']);
 fprintf(1,['We will:' ...
             '\n-1- Add the paths needed for the repository,' ...
-            '\n-2- Compile the external time-series toolboxes for this system.\n\n']);
+            '\n-2- Check toolboxes,' ...
+            '\n-3- Compile the external time-series toolboxes for this system.\n\n']);
 
 % ------------------------------------------------------------------------------
 %% 1. Add the paths:
@@ -41,7 +42,29 @@ end
 fprintf(1,'\n');
 
 % ------------------------------------------------------------------------------
-%% Attempt to compile the executables required by the periphery Toolboxes:
+%% 2. Check the toolboxes:
+% ------------------------------------------------------------------------------
+fprintf(1,'-2- Checking installation of relevant Matlab Toolboxes...\n');
+
+% Essential:
+flags = zeros(9,1);
+flags(1) = BF_CheckToolbox('statistics_toolbox',true);
+% Desirable:
+flags(2) = BF_CheckToolbox('curve_fitting_toolbox',true);
+flags(3) = BF_CheckToolbox('signal_toolbox',true);
+flags(4) = BF_CheckToolbox('identification_toolbox',true);
+flags(5) = BF_CheckToolbox('wavelet_toolbox',true);
+flags(6) = BF_CheckToolbox('econometrics_toolbox',true);
+flags(7) = BF_CheckToolbox('robust_toolbox',true);
+flags(8) = BF_CheckToolbox('financial_toolbox',true);
+% Extra
+flags(9) = BF_CheckToolbox('distrib_computing_toolbox',true);
+
+fprintf(1,'%u/%u relevant Matlab toolboxes are installed.\n',sum(flags),length(flags));
+input('<<Press any key to continue>>')
+
+% ------------------------------------------------------------------------------
+%% 3. Attempt to compile the executables required by the periphery Toolboxes:
 % ------------------------------------------------------------------------------
 fprintf(1,['\n-2- Compile the binary executables needed for evaluating ' ...
                                                 'some operations.\n']);
@@ -59,7 +82,7 @@ cd('../');
 fprintf(1,'Hope everything compiled ok?!\n\n');
 
 fprintf(1,['All done! Ready when you are to initiate hctsa analysis\nusing a time-series dataset: ' ...
-                            'e.g.: TS_init(''INP_test_ts.mat'');\n']);
+                            'e.g.: TS_Init(''INP_test_ts.mat'');\n']);
 
 % Attempt to add a time series
 % SQL_Add('ts','INP_test_ts.txt')

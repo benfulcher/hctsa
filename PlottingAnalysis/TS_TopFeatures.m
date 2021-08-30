@@ -277,17 +277,17 @@ if ismember('histogram',whatPlots)
 
         % Pool nulls to estimate p-values
         pooledNulls = testStat_rand(:);
-        pvals = arrayfun(@(x)mean(testStat(x) < pooledNulls),1:length(testStat));
+        pVals = arrayfun(@(x)mean(testStat(x) < pooledNulls),1:length(testStat));
         % FDR-corrected q-values:
-        FDR_qvals = mafdr(pvals,'BHFDR','true');
+        FDR_qVals = mafdr(pVals,'BHFDR','true');
         fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls\n',numNulls);
         fprintf(1,'(Given strong dependences across %u features, will produce conservative p-values)\n',numFeatures);
         % Give summary:
         sigThreshold = 0.05;
-        if any(FDR_qvals < sigThreshold)
+        if any(FDR_qVals < sigThreshold)
             fprintf(1,['%u/%u features show better performance using %s than the null distribution' ...
                         '\nat the magical 0.05 threshold (FDR corrected)\n'],...
-                            sum(FDR_qvals < 0.05),length(FDR_qvals),testStatText);
+                            sum(FDR_qVals < 0.05),length(FDR_qVals),testStatText);
         else
             fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...
                     'the null distribution at a FDR of 0.05.\nDon''t you go p-hacking now, will you?\n']);
@@ -307,7 +307,7 @@ if ismember('histogram',whatPlots)
     else
         % Plot both real distribution and null distribution:
         numBins = 20;
-        allTestStat = [testStat(:);testStat_rand(:)];
+        allTestStat = [testStat(:); testStat_rand(:)];
         minMax = [min(allTestStat),max(allTestStat)];
         histEdges = linspace(minMax(1),minMax(2),numBins+1);
         h_null = histogram(testStat_rand(:),histEdges,'Normalization','probability','FaceColor',colors{1});
@@ -336,7 +336,7 @@ if ismember('histogram',whatPlots)
         else
             legend([h_null,h_real,l_meannull,l_mean],'null','real','null mean','mean')
         end
-        title(sprintf('%u features significantly informative of groups (FDR-corrected at 0.05)',sum(FDR_qvals < 0.05)))
+        title(sprintf('%u features significantly informative of groups (FDR-corrected at 0.05)',sum(FDR_qVals < 0.05)))
     else
         if ~isnan(chanceLevel)
             legend([h_real,l_chance,l_mean],{'real','chance','mean'});
@@ -368,7 +368,7 @@ if ismember('distributions',whatPlots)
         % Get the indices of features to plot
         r = ((figi-1)*subPerFig+1:figi*subPerFig);
         if figi==numFigs % filter down for last one
-            r = r(r<=numFeaturesDistr);
+            r = r(r <= numFeaturesDistr);
         end
         featHere = ifeat(r); % features to plot on this figure
         % Make the figure

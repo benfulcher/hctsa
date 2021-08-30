@@ -66,18 +66,17 @@ elseif istable(tsStruct)
 end
 
 if nargin < 2
+    fprintf(1,'Computing features in parallel by default\n');
 	doParallel = true;
 end
 
-if nargin < 3 || isempty(Operations) || ischar(Operations)
-	% Use a default library:
-	if nargin >=3 && ischar(Operations)
-		theINPfile = Operations;
-	else
-		fprintf(1,'Importing default set of time-series features\n');
-		theINPfile = 'INP_ops.txt';
-	end
-	Operations = SQL_Add('ops',theINPfile,false,false);
+if nargin < 3 || isempty(Operations)
+    fprintf(1,'Importing the default set of time-series features\n');
+    theINPfile = 'INP_ops.txt';
+    Operations = SQL_Add('ops',theINPfile,false,false);
+elseif ischar(Operations)
+    theINPfile = Operations;
+    Operations = SQL_Add('ops',theINPfile,false,false);
 end
 if isnumeric(Operations)
 	error('Provide an input file or a structure array of Operations');
