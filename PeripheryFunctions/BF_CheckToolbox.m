@@ -1,4 +1,4 @@
-function outFlag = BF_CheckToolbox(theToolbox,infoMode)
+function [outFlag,theName] = BF_CheckToolbox(theToolbox,infoMode)
 % BF_CheckToolbox   Check for a Matlab Toolbox license
 %
 % Checks for the given Matlab Toolbox license and produces an appropriate error

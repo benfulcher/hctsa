@@ -47,20 +47,32 @@ fprintf(1,'\n');
 fprintf(1,'-2- Checking installation of relevant Matlab Toolboxes...\n');
 
 % Essential:
-flags = zeros(9,1);
-flags(1) = BF_CheckToolbox('statistics_toolbox',true);
+flagStat = BF_CheckToolbox('statistics_toolbox',true);
+if ~flagStat
+    fprintf(1,'The Statistics and Machine Learning Toolbox is required for hctsa and needs to be installed.\n');
+end
 % Desirable:
-flags(2) = BF_CheckToolbox('curve_fitting_toolbox',true);
-flags(3) = BF_CheckToolbox('signal_toolbox',true);
-flags(4) = BF_CheckToolbox('identification_toolbox',true);
-flags(5) = BF_CheckToolbox('wavelet_toolbox',true);
-flags(6) = BF_CheckToolbox('econometrics_toolbox',true);
-flags(7) = BF_CheckToolbox('robust_toolbox',true);
-flags(8) = BF_CheckToolbox('financial_toolbox',true);
-% Extra
-flags(9) = BF_CheckToolbox('distrib_computing_toolbox',true);
+toolboxCodes = {'curve_fitting_toolbox','signal_toolbox','identification_toolbox',...
+                    'wavelet_toolbox','econometrics_toolbox','robust_toolbox',...
+                    'financial_toolbox','distrib_computing_toolbox'};
+flags = zeros(8,1);
+names = cell(8,1);
+for i = 1:length(toolboxCodes)
+    [flags(i),names{i}] = BF_CheckToolbox(toolboxCodes{i},true);
+end
 
-fprintf(1,'%u/%u relevant Matlab toolboxes are installed.\n',sum(flags),length(flags));
+fprintf(1,'%u/%u hctsa-relevant Matlab toolboxes are installed.\n',sum(flags),length(flags));
+if ~all(flags)
+    fprintf(1,'For full functionality, please install:\n');
+    theNo = find(~flags);
+    numNo = length(theNo);
+    for i = 1:numNo
+        fprintf(1,'%s\n',names{theNo(i)});
+    end
+else
+    fprintf(1,'Looks good on the Matlab toolbox side of things! :)\n');
+end
+fprintf(1,'\n');
 input('<<Press any key to continue>>')
 
 % ------------------------------------------------------------------------------
