@@ -52,7 +52,7 @@ doPlot = false;
 BF_CheckToolbox('curve_fitting_toolbox')
 
 % ------------------------------------------------------------------------------
-%% FOREPLAY
+%% Preparation
 % ------------------------------------------------------------------------------
 N = length(y); % Length of the input time series
 

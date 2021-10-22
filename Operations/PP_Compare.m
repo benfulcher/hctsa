@@ -99,7 +99,7 @@ if nargin < 2 || isempty(detrndmeth)
 end
 
 %-------------------------------------------------------------------------------
-% FOREPLAY
+% Preparation
 N = length(y); % time-series length
 r = (1:N)'; % the time-range over which to fit
 

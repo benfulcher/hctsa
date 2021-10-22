@@ -58,7 +58,7 @@ function out = TSTL_predict(y, plen, NNR, stepSize, pmode, embedParams)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Foreplay
+%% Check inputs, set defaults
 % ------------------------------------------------------------------------------
 doPlot = 0; % plot outputs to figure (e.g., for debugging)
 

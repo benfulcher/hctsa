@@ -109,7 +109,7 @@ BF_CheckToolbox('statistics_toolbox');
 %% Open parallel processing worker pool
 % ------------------------------------------------------------------------------
 if doParallel
-    % Check that a parallel worker pool is open (if not attempt to initiate it):
+    % Check that a parallel worker pool is open (if not, attempt to initiate it):
 	doParallel = TS_InitiateParallel(false);
 end
 if doParallel

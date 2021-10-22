@@ -1,6 +1,5 @@
 function fn_handle = GiveMeFunctionHandle(cfnParams)
-% GiveMeFunctionHandle    Returns a function handle for computing classification
-%                               accuracy
+% GiveMeFunctionHandle  Returns a function handle for computing classification accuracy
 %
 %---INPUTS:
 % cfnParams, parameters for the classification, e.g., set with

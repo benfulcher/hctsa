@@ -63,7 +63,7 @@ if ~BF_iszscored(y)
 end
 
 % ------------------------------------------------------------------------------
-%% Foreplay
+%% Preparation
 % ------------------------------------------------------------------------------
 N = length(y); % length of the time series
 % The thresholds with which to count a peak:

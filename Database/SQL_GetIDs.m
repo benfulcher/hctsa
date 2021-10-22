@@ -77,7 +77,7 @@ if nargin < 5
 end
 
 % ------------------------------------------------------------------------------
-%% Foreplay:
+%% Preparation:
 % ------------------------------------------------------------------------------
 % Seperate into keywords to include: kyes
 % and the number of that keyword to include: kyesn
