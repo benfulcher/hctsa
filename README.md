@@ -38,13 +38,16 @@ For users unfamiliar with git, the current version of the repository can be down
 
 It is recommended to use the repository with git.
 For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
-```
+
+```bash
 git remote add upstream git://github.com/benfulcher/hctsa.git
 ```
+
 (make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your Github account).
 
 You can then update to the latest stable version of the repository by pulling the master branch to your local repository:
-```
+
+```bash
 git pull upstream master
 ```
 
@@ -125,7 +128,6 @@ The following external time-series analysis code packages are provided with the 
 ## Other time-series analysis resources
 
 A collection of good resources for time-series analysis (including in other programming languages like python and R) are on the [wiki](https://github.com/benfulcher/hctsa/wiki/Related-time-series-resources).
-
 
 ## Acknowledgements :wave:
 

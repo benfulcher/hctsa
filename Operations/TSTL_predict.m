@@ -60,7 +60,7 @@ function out = TSTL_predict(y, plen, NNR, stepSize, pmode, embedParams)
 % ------------------------------------------------------------------------------
 %% Check inputs, set defaults
 % ------------------------------------------------------------------------------
-doPlot = 0; % plot outputs to figure (e.g., for debugging)
+doPlot = false; % plot outputs to figure (e.g., for debugging)
 
 % (*) Prediction length, plen (the length of the output time series)
 if nargin < 2 || isempty(plen)

@@ -252,7 +252,8 @@ case 'high'
     [testStat_sort,ifeat] = sort(testStat,'descend');
 case 'abs'
     % Bigger magnitudes indicate better features:
-    [testStat_sort,ifeat] = sort(abs(testStat),'descend');
+    [~,ifeat] = sort(abs(testStat),'descend');
+    testStat_sort = testStat(ifeat);
 otherwise
     error('Unknown ''whatIsBetter'' option: %s',whatIsBetter)
 end
@@ -445,7 +446,7 @@ if ismember('cluster',whatPlots)
     end
     makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations.ID(x),Operations.Name{x},...
                         testStat(x),statUnit);
-    objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
+    objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',false);
     clusterThreshold = 0.2; % threshold at which split into clusters
     [~,cluster_Groupi] = BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
                         'whatDistance',distanceMetric,...
