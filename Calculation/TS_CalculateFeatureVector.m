@@ -66,18 +66,17 @@ elseif istable(tsStruct)
 end
 
 if nargin < 2
+    fprintf(1,'Computing features in parallel by default\n');
 	doParallel = true;
 end
 
-if nargin < 3 || isempty(Operations) || ischar(Operations)
-	% Use a default library:
-	if nargin >=3 && ischar(Operations)
-		theINPfile = Operations;
-	else
-		fprintf(1,'Importing default set of time-series features\n');
-		theINPfile = 'INP_ops.txt';
-	end
-	Operations = SQL_Add('ops',theINPfile,false,false);
+if nargin < 3 || isempty(Operations)
+    fprintf(1,'Importing the default set of time-series features\n');
+    theINPfile = 'INP_ops.txt';
+    Operations = SQL_Add('ops',theINPfile,false,false);
+elseif ischar(Operations)
+    theINPfile = Operations;
+    Operations = SQL_Add('ops',theINPfile,false,false);
 end
 if isnumeric(Operations)
 	error('Provide an input file or a structure array of Operations');
@@ -102,7 +101,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Check Statistics toolbox is available (needed throughout hctsa, including for
-% zscoring)
+% z-scoring)
 %-------------------------------------------------------------------------------
 BF_CheckToolbox('statistics_toolbox');
 
@@ -110,7 +109,7 @@ BF_CheckToolbox('statistics_toolbox');
 %% Open parallel processing worker pool
 % ------------------------------------------------------------------------------
 if doParallel
-    % Check that a parallel worker pool is open (if not attempt to initiate it):
+    % Check that a parallel worker pool is open (if not, attempt to initiate it):
 	doParallel = TS_InitiateParallel(false);
 end
 if doParallel
@@ -136,6 +135,15 @@ if size(x,2) ~= 1
 		fprintf(1,'******************************************************************************************\n');
 		error('ERROR WITH ''%s'' -- is it multivariate or something weird? Skipping!\n',tsStruct.Name);
 	end
+end
+% Basics checks on data type:
+if ~isa(x,'numeric')
+    error('The time series provided must be numerical data')
+elseif isa(x,'integer')
+    error('Methods in hctsa are generally not well-suited to integer-valued time-series data. Convert to double.')
+elseif isa(x,'single')
+    warning('Your data is provided in single precision. Converting to double for compatibility with hctsa methods.')
+    x = double(x);
 end
 % (x contains no special values)
 if ~all(isfinite(x))

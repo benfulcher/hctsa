@@ -51,7 +51,7 @@ out.tri10 = N/max(histcounts(x,10));
 out.tri20 = N/max(histcounts(x,20));
 out.trisqrt = N/max(histcounts(x,'BinMethod','sqrt'));
 
-% Poincare plot measures: see
+% 'Poincare plot measures': see
 % "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)
 diffx = diff(x);
 out.SD1 = 1/sqrt(2) * std(diffx) * 1000;

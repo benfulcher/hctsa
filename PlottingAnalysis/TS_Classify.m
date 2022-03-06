@@ -1,4 +1,4 @@
-function [foldLosses,nullStats,jointClassifier] = TS_Classify(whatData,cfnParams,numNulls,varargin)
+function [meanAcc,nullStats,jointClassifier] = TS_Classify(whatData,cfnParams,numNulls,varargin)
 % TS_Classify   Classify class labels assigned to the data using all features
 %
 % Requires the time-series data to have been labeled using TS_LabelGroups, which
@@ -108,31 +108,30 @@ numFeatures = height(Operations);
 % Reset the random seed for CV-reproducibility
 BF_ResetSeed(seedReset);
 
-% Fit the classification model to the dataset (for each cross-validation fold)
-% and evaluate performance:
+% Fit the classification model to the dataset and evaluate performance:
 CVMdl = cell(cfnParams.numRepeats,1);
 foldLosses = zeros(cfnParams.numRepeats,1);
 cfnParams.computePerFold = false;
 for i = 1:cfnParams.numRepeats
-    [foldLosses(i),CVMdl{i}] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group);
+    [meanAcc(i),CVMdl{i}] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group);
 end
 
 % Display results to commandline:
 if cfnParams.numFolds == 0
     assert(cfnParams.numRepeats==1)
     fprintf(1,'In-sample %s using %s = %.3f%s\n',cfnParams.whatLoss,cfnParams.whatClassifier,...
-                                            foldLosses,cfnParams.whatLossUnits);
+                                            meanAcc,cfnParams.whatLossUnits);
 else
     if cfnParams.numRepeats==1
-        foldBit = sprintf('%u-fold',cfnParams.numFolds);
-        accuracyBit = sprintf('%.3f%s',mean(foldLosses),cfnParams.whatLossUnits);
+        whatStat = sprintf('Mean (across %u folds)',cfnParams.numFolds);
+        accuracyBit = sprintf('%.3f%s',meanAcc,cfnParams.whatLossUnits);
     else
-        foldBit = sprintf('%u-fold (%u repeats)',cfnParams.numFolds,cfnParams.numRepeats);
-        accuracyBit = sprintf('%.3f +/- %.3f%s',mean(foldLosses),std(foldLosses),cfnParams.whatLossUnits);
+        whatStat = sprintf('Mean (across %u folds, then across %u repeats)',cfnParams.numFolds,cfnParams.numRepeats);
+        accuracyBit = sprintf('%.3f +/- %.3f%s',mean(meanAcc),std(meanAcc),cfnParams.whatLossUnits);
     end
-    fprintf(1,['\nMean (across folds) %s (%u-class) using %s %s classification with %u' ...
+    fprintf(1,['\n%s %s (%u-class) using %s classification with %u' ...
                      ' features:\n%s\n\n'],...
-            cfnParams.whatLoss,cfnParams.numClasses,foldBit,...
+            whatStat,cfnParams.whatLoss,cfnParams.numClasses,...
             cfnParams.whatClassifier,numFeatures,accuracyBit);
 end
 

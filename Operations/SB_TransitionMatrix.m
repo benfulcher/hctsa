@@ -7,8 +7,8 @@ function out = SB_TransitionMatrix(y,howtocg,numGroups,tau)
 % equiprobable alphabet of numGroups letters. The transition probabilities are
 % calculated at a lag tau.
 %
-% Related to the idea of quantile graphs from time series. cf.
-% Andriana et al. (2011). Duality between Time Series and Networks. PLoS ONE.
+% Related to the idea of quantile graphs from time series.
+% cf. Andriana et al. (2011). Duality between Time Series and Networks. PLoS ONE.
 % https://doi.org/10.1371/journal.pone.0023378
 %
 %---INPUTS:
@@ -80,7 +80,7 @@ if isnan(tau)
     error('Time series too short to estimate tau');
 end
 
-if tau > 1; % calculate transition matrix at non-unity lag
+if tau > 1 % calculate transition matrix at a non-unit lag
     % downsample at rate 1:tau
     y = resample(y,1,tau);
 end
@@ -88,7 +88,7 @@ end
 N = length(y); % time-series length
 
 % ------------------------------------------------------------------------------
-%% (((1))) Discretize the time series
+%% (((1))) Discretize the time series to a symbolic string
 % ------------------------------------------------------------------------------
 yth = SB_CoarseGrain(y,howtocg,numGroups);
 
@@ -100,7 +100,7 @@ if size(yth,2) > size(yth,1)
 end
 
 % ------------------------------------------------------------------------------
-%% (((2))) find 1-time transition matrix
+%% (((2))) Compute the 1-time (Markov) transition matrix
 % ------------------------------------------------------------------------------
 % Probably implemented already, but I'll do it myself
 T = zeros(numGroups); % probability of transition from state i -> state j
@@ -110,7 +110,7 @@ for i = 1:numGroups
         T(i,:) = 0; % all transition probabilities are zero (could be NaN)
     else
         % Indices of states immediately following a state i:
-        ri_next = [logical(0);ri(1:end-1)];
+        ri_next = [false; ri(1:end-1)];
         % Compute transitions from state i to each of the states j:
         for j = 1:numGroups
             T(i,j) = sum(yth(ri_next) == j); % the next element is of this class
@@ -122,15 +122,15 @@ end
 T = T/(N-1); % N-1 is appropriate because it's a 1-time transition matrix
 
 % ------------------------------------------------------------------------------
-%% (((3))) output measures from the transition matrix
+%% (((3))) Output measures from the transition matrix
 % ------------------------------------------------------------------------------
 % (i) Raw values of the transition matrix
 % [this has to be done bulkily (only for numGroups = 2,3)]:
-if numGroups == 2; % return all elements of T
+if numGroups == 2 % return all elements of T
     for i = 1:4
         out.(sprintf('T%u',i)) = T(i);
     end
-elseif numGroups == 3; % return all elements of T
+elseif numGroups == 3 % return all elements of T
     for i = 1:9
         out.(sprintf('T%u',i)) = T(i);
     end

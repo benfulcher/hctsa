@@ -8,7 +8,12 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 % Can also compare this performance to a set of randomized null features to
 % evaluate the statistical significance of the result (pooled permutation testing).
 %
+% Note that it can be more interpretable to run this function on filtered but
+% un-normalized data (e.g., from TS_Normalize('none')), so that feature values
+% correspond to raw feature outputs.
+%
 %---INPUTS:
+%
 % whatData, the hctsa data to use (input to TS_LoadData, default: 'raw')
 % whatTestStat, the test statistic to quantify the goodness of each feature
 %               (e.g., 'tstat','ustat'; or set 'classification' to use classifier
@@ -38,6 +43,7 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
 %
 %---OUTPUTS:
+%
 % ifeat, the ordering of operations by their performance
 % testStat, the test statistic (whatTestStat) for each operation
 % testStat_rand, test statistics making up the null distributions
@@ -152,9 +158,10 @@ numTopFeatures = min(numTopFeatures,numFeatures);
 
 % Check that simple stats are being applied just for pairs:
 if ismember(whatTestStat,{'ustat','ranksum','ustatExact','ustatP','ranksumExact',...
-                            'ttest','ttestP','tstat'})
+                            'ttest','ttestP','tstat','svmBeta'})
     if numClasses~=2
-        error('Simple statistics like ''%s'' are only valid for two-class classification',whatTestStat);
+        error(['There are %u labeled classes.\nStatistics like ''%s'' are only valid',...
+                    ' for problems with 2 labeled classes'],numClasses,whatTestStat);
     end
 end
 
@@ -166,36 +173,49 @@ switch whatTestStat
         chanceLevel = 100/numClasses; % (could be a bad assumption: accuracy for equiprobable groups...)
         testStatText = sprintf('%s %s',cfnParams.classifierText,cfnParams.whatLoss);
         statUnit = cfnParams.whatLossUnits;
+        whatIsBetter = 'high';
+    case 'svmBeta'
+        % Feature weight from a linear (in-sample) SVM
+        fn_testStat = [];
+        chanceLevel = NaN;
+        testStatText = '(multivariate) Linear SVM (in-sample) feature weight';
+        statUnit = '';
+        whatIsBetter = 'abs';
     case {'ustatP','ranksumP'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                 fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true);
         chanceLevel = NaN;
         testStatText = 'Mann-Whitney approx p-value';
         statUnit = ' (-log10(p))';
+        whatIsBetter = 'high';
     case {'ustatExactP','ranksumExactP'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                     fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true,true);
         chanceLevel = NaN;
         testStatText = 'Mann-Whitney exact p-value';
         statUnit = ' (-log10(p))';
+        whatIsBetter = 'high';
     case {'ustat','ranksum'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                 fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,false);
         chanceLevel = NaN; % (check if you can compute the chance level stat?)
         testStatText = 'Mann-Whitney approx test statistic';
         statUnit = '';
+        whatIsBetter = 'high';
     case {'ttest','tstat'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                         fn_tStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false);
         chanceLevel = 0; % chance-level t statistic is zero
         testStatText = 'Welch''s t-stat';
         statUnit = '';
+        whatIsBetter = 'abs';
     case {'ttestP','tstatP'}
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                         fn_tStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true);
         chanceLevel = NaN;
         testStatText = 'Welch''s t-test p-value';
         statUnit = ' (-log10(p))';
+        whatIsBetter = 'high';
     otherwise
         error('Unknown test statistic: ''%s''',whatTestStat);
 end
@@ -230,7 +250,17 @@ end
 %-------------------------------------------------------------------------------
 %% Display information about the top features (numTopFeatures)
 %-------------------------------------------------------------------------------
-[testStat_sort,ifeat] = sort(testStat,'descend'); % bigger is better
+switch whatIsBetter
+case 'high'
+    % Bigger numbers indicate better features:
+    [testStat_sort,ifeat] = sort(testStat,'descend');
+case 'abs'
+    % Bigger magnitudes indicate better features:
+    [~,ifeat] = sort(abs(testStat),'descend');
+    testStat_sort = testStat(ifeat);
+otherwise
+    error('Unknown ''whatIsBetter'' option: %s',whatIsBetter)
+end
 
 isNaN = isnan(testStat_sort);
 testStat_sort = testStat_sort(~isNaN);
@@ -277,17 +307,17 @@ if ismember('histogram',whatPlots)
 
         % Pool nulls to estimate p-values
         pooledNulls = testStat_rand(:);
-        pvals = arrayfun(@(x)mean(testStat(x) < pooledNulls),1:length(testStat));
+        pVals = arrayfun(@(x)mean(testStat(x) < pooledNulls),1:length(testStat));
         % FDR-corrected q-values:
-        FDR_qvals = mafdr(pvals,'BHFDR','true');
+        FDR_qVals = mafdr(pVals,'BHFDR','true');
         fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls\n',numNulls);
         fprintf(1,'(Given strong dependences across %u features, will produce conservative p-values)\n',numFeatures);
         % Give summary:
         sigThreshold = 0.05;
-        if any(FDR_qvals < sigThreshold)
+        if any(FDR_qVals < sigThreshold)
             fprintf(1,['%u/%u features show better performance using %s than the null distribution' ...
                         '\nat the magical 0.05 threshold (FDR corrected)\n'],...
-                            sum(FDR_qvals < 0.05),length(FDR_qvals),testStatText);
+                            sum(FDR_qVals < 0.05),length(FDR_qVals),testStatText);
         else
             fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...
                     'the null distribution at a FDR of 0.05.\nDon''t you go p-hacking now, will you?\n']);
@@ -307,7 +337,7 @@ if ismember('histogram',whatPlots)
     else
         % Plot both real distribution and null distribution:
         numBins = 20;
-        allTestStat = [testStat(:);testStat_rand(:)];
+        allTestStat = [testStat(:); testStat_rand(:)];
         minMax = [min(allTestStat),max(allTestStat)];
         histEdges = linspace(minMax(1),minMax(2),numBins+1);
         h_null = histogram(testStat_rand(:),histEdges,'Normalization','probability','FaceColor',colors{1});
@@ -336,7 +366,7 @@ if ismember('histogram',whatPlots)
         else
             legend([h_null,h_real,l_meannull,l_mean],'null','real','null mean','mean')
         end
-        title(sprintf('%u features significantly informative of groups (FDR-corrected at 0.05)',sum(FDR_qvals < 0.05)))
+        title(sprintf('%u features significantly informative of groups (FDR-corrected at 0.05)',sum(FDR_qVals < 0.05)))
     else
         if ~isnan(chanceLevel)
             legend([h_real,l_chance,l_mean],{'real','chance','mean'});
@@ -354,9 +384,6 @@ end
 if ismember('distributions',whatPlots)
     subPerFig = 16; % subplots per figure
 
-    % Set the colors to be assigned to groups:
-    colors = GiveMeColors(numClasses);
-
     % Space the figures out properly:
     numFigs = ceil(numFeaturesDistr/subPerFig);
 
@@ -371,7 +398,7 @@ if ismember('distributions',whatPlots)
         % Get the indices of features to plot
         r = ((figi-1)*subPerFig+1:figi*subPerFig);
         if figi==numFigs % filter down for last one
-            r = r(r<=numFeaturesDistr);
+            r = r(r <= numFeaturesDistr);
         end
         featHere = ifeat(r); % features to plot on this figure
         % Make the figure
@@ -423,7 +450,7 @@ if ismember('cluster',whatPlots)
     end
     makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations.ID(x),Operations.Name{x},...
                         testStat(x),statUnit);
-    objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',0);
+    objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',false);
     clusterThreshold = 0.2; % threshold at which split into clusters
     [~,cluster_Groupi] = BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
                         'whatDistance',distanceMetric,...
@@ -505,31 +532,41 @@ function [theStatistic,stats] = fn_tStat(d1,d2,doP)
     if doP
         theStatistic = -log10(p);
     else
-        % Code assumes bigger is better:
-        theStatistic = abs(stats.tstat);
+        theStatistic = stats.tstat;
     end
 end
 %-------------------------------------------------------------------------------
 function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
-    % Return test statistic for each operation
+    % Return a test statistic for each feature:
     testStat = zeros(numFeatures,1);
-    Mdl = cell(numFeatures,1);
-    loopTimer = tic;
-    for k = 1:numFeatures
-        try
-            if nargout == 2
-                % This is slower for the fast_linear classifier (but returns a model)
-                [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
-            else
-                testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+    if nargout==2
+        Mdl = cell(numFeatures,1);
+    end
+
+    if strcmp(whatTestStat,'svmBeta')
+        % Fit a linear SVM (multivariate) and return feature weights:
+        % Mdl = fitcsvm(dataMatrix,dataLabels,'KernelFunction','linear');
+        Mdl = fitcsvm(dataMatrix,groupLabels,'KernelFunction','linear','Weights',InverseProbWeight(groupLabels));
+        testStat = Mdl.Beta; % (code assumes bigger is better)
+        testStat = testStat/max(abs(testStat)); % rescale by max-abs
+    else
+        loopTimer = tic;
+        for k = 1:numFeatures
+            try
+                if nargout == 2
+                    % This is slower for the fast_linear classifier (but returns a model)
+                    [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+                else
+                    testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+                end
+            catch
+                warning('Error computing %s test statistic for feature %u',whatTestStat,k);
             end
-        catch
-            warning('Error computing %s test statistic for feature %u',whatTestStat,k);
-        end
-        % Give estimate of time remaining:
-        if beVerbose && k==200
-            fprintf(1,'(should take approx %s to compute for all %u features)\n',...
-                            BF_TheTime(toc(loopTimer)/100*(numFeatures)),numFeatures);
+            % Give estimate of time remaining:
+            if beVerbose && k==200
+                fprintf(1,'(should take approx %s to compute for all %u features)\n',...
+                                BF_TheTime(toc(loopTimer)/100*(numFeatures)),numFeatures);
+            end
         end
     end
 end

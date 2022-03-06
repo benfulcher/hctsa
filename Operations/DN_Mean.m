@@ -62,7 +62,7 @@ switch meanType
 		out = geomean(y); %(prod(y))^(1/N);
 
 	case 'harm' % harmonic mean
-		out = harmmean(y); %N/sum(y.^(-1));
+		out = harmmean(y); % N/sum(y.^(-1));
 
 	case 'rms' % rms
 		out = sqrt(sum(y.^2)/N);

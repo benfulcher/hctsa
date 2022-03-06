@@ -74,7 +74,7 @@ end
 % Display welcome message:
 % ------------------------------------------------------------------------------
 if beVocal
-    fprintf(1,'Using input file: %s\n',inputFile);
+    fprintf(1,'Using input file: %s.\n',inputFile);
 end
 ticker = tic;
 
@@ -218,7 +218,7 @@ if ~isMatFile
             end
         end
 
-        fprintf(1,['\nHow does it look? Make sure the metadata matches the headings\n']);
+        fprintf(1,'\nHow does it look? Make sure the metadata matches the headings\n');
 
         % Ask the question:
         if strcmp(addWhat,'ts')

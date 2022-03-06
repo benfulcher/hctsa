@@ -21,3 +21,6 @@ SB_BinaryStats_iqr.meanstretch1norm	    SB_BinaryStats_iqr_meanstretch1norm	    
 SB_BinaryStats_iqr.meanstretch0norm	    SB_BinaryStats_iqr_meanstretch0norm	    symbolic,distribution,correlation
 SB_BinaryStats_iqr.stdstretch1norm	    SB_BinaryStats_iqr_stdstretch1norm	    symbolic,distribution,correlation
 SB_BinaryStats_iqr.stdstretch0norm	    SB_BinaryStats_iqr_stdstretch0norm	    symbolic,distribution,correlation
+
+# This feature must always be NaN (all computed ACF values must be positive)
+CO_AutoCorrShape_posDrown.actau	CO_AutoCorrShape_posDrown_actau	correlation

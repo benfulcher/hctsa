@@ -155,7 +155,6 @@ numCalc_all = zeros(numTimeSeries,1);
 for i = 1:numTimeSeries
 
     tsInd = tsIndex(i);
-
 	bigTimer = tic;
 
     % ----
@@ -195,9 +194,9 @@ for i = 1:numTimeSeries
 		try
 	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd,:),...
 								doParallel,Operations(toCalc,:),MasterOperations,true,beVocal);
-		catch
-			% skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
-			warning('Calculation for time series %u / %u failed...',i,numTimeSeries)
+		catch ME
+			% Skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
+			warning('Calculation for time series %u / %u failed:\n%s',i,numTimeSeries,ME.message)
 			continue
 		end
 
@@ -214,7 +213,7 @@ for i = 1:numTimeSeries
 	end
 
     % The time taken to calculate (or not, if numCalc = 0) all operations for this time series:
-    times(i) = toc(bigTimer); clear bigTimer
+    times(i) = toc(bigTimer);
 
     if i < numTimeSeries
         fprintf(1,'- - - - - - - -  %u time series remaining - - - - - - - -\n',numTimeSeries-i);
@@ -244,7 +243,6 @@ if any(numCalc_all > 0)
 	saveTimer = tic;
 	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
 	fprintf(1,' Saved in %s.\n',BF_TheTime(toc(saveTimer)));
-	clear saveTimer
 end
 
 fprintf(1,'Calculation complete!\n');

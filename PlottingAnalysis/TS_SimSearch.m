@@ -72,7 +72,7 @@ default_whatPlots = {'matrix'};
 check_whatPlots = @(x) iscell(x) || ischar(x);
 addOptional(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 
-% whatPlots
+% whatDistMetric
 default_whatDistMetric = '';
 check_whatDistMetric = @(x) islogical(x) || (isnumeric(x) && (x==0 || x==1));
 addOptional(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric);
@@ -131,7 +131,7 @@ if isempty(clustStruct)
                 'ord',1:size(TS_DataMat,1),'linkageMethod','none');
 end
 numItems = height(dataTable);
-clear TimeSeries Operations
+clear('TimeSeries','Operations')
 
 if numNeighbors == 0 % code for 'all'
     numNeighbors = numItems - 1;
@@ -242,17 +242,49 @@ end
 % Scatter plot for top (up to 12)
 %-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'scatter'))
+    doRank = false;
     f = figure('color','w');
-    for j = 1:min(12,numNeighbors)
-        subplot(3,4,j);
+    numScatters = min(12,numNeighbors);
+    h = cell(numScatters,1);
+
+    xData = TS_DataMat(targetInd,:);
+    [~,ix] = sort(xData,'ascend');
+    xDataRanks = 1:length(xData);
+    xDataRanks(ix) = xDataRanks;
+
+    for j = 1:numScatters
+        h{j} = subplot(3,4,j);
+        % Get data and rank it:
         theNeighborInd = neighborInd(j+1); % Since exclude self-match (neighbor 1)
-        plot(TS_DataMat(targetInd,:),TS_DataMat(theNeighborInd,:),'.k','MarkerSize',4)
+        yData = TS_DataMat(theNeighborInd,:);
+        [~,iy] = sort(yData,'ascend');
+        yDataRanks = 1:length(yData);
+        yDataRanks(iy) = yDataRanks;
+
+        hold('on')
+        h{j}.UserData = struct();
+        h{j}.UserData.hRaw = plot(xData,yData,'.k','MarkerSize',4,'Visible','off');
+        h{j}.UserData.hRank = plot(xDataRanks,yDataRanks,'.b','MarkerSize',4,'Visible','off');
+        if doRank
+            h{j}.UserData.hRank.Visible = 'on';
+        else
+            h{j}.UserData.hRaw.Visible = 'on';
+        end
         xlabel(sprintf('[%u] %s',dataTable.ID(targetInd),dataTable.Name{targetInd}),...
                                         'interpreter','none','FontSize',9);
         ylabel(sprintf('[%u] %s',dataTable.ID(theNeighborInd),dataTable.Name{theNeighborInd}),...
                                         'interpreter','none','FontSize',9);
         title(sprintf('Match %u: d = %.3f',j,Dj(theNeighborInd)));
         axis('square')
+
+        h{j}.ButtonDownFcn = {@swapRanked};
+        h{j}.HitTest = 'on';
+        h{j}.UserData.doRank = doRank;
+        % h{j}.UserData.hRaw = hRaw;
+        % h{j}.UserData.hRank = hRank;
+        % h{j}.UserData.yData = yData;
+        % h{j}.UserData.xDataRanks = xDataRanks;
+        % h{j}.UserData.yDataRanks = yDataRanks;
     end
     % Set width and height to make a reasonable size:
     f.Position = [f.Position(1:2),819,622];
@@ -421,5 +453,24 @@ if any(ismember(whatPlots,'network'))
                     'colorMap','set1',...
                     'makeFigure',true);
 end
+
+
+%-------------------------------------------------------------------------------
+function swapRanked(hObject,eventData)
+    % Swap between raw and ranked values for a scatter plot
+    if hObject.UserData.doRank
+        hObject.UserData.hRaw.Visible = 'on';
+        hObject.UserData.hRank.Visible = 'off';
+        hObject.XLabel.String = hObject.XLabel.String(1:end-8);
+        hObject.YLabel.String = hObject.YLabel.String(1:end-8);
+    else
+        hObject.UserData.hRaw.Visible = 'off';
+        hObject.UserData.hRank.Visible = 'on';
+        hObject.XLabel.String = sprintf('%s%s',hObject.XLabel.String,' [RANKS]');
+        hObject.YLabel.String = sprintf('%s%s',hObject.YLabel.String,' [RANKS]');
+    end
+    hObject.UserData.doRank = ~hObject.UserData.doRank;
+end
+%-------------------------------------------------------------------------------
 
 end

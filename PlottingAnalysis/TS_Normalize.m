@@ -277,7 +277,7 @@ if any(kc)
         TS_CalcTime = TS_CalcTime(:,~kc);
     end
     fprintf(1,'%u operations had near-constant outputs after filtering: from %u to %u.\n', ...
-                    sum(~kc),length(kc),sum(kc));
+                    sum(kc),length(kc),sum(~kc));
 end
 
 numBadEntries = sum(isnan(TS_DataMat(:)));

@@ -38,13 +38,16 @@ For users unfamiliar with git, the current version of the repository can be down
 
 It is recommended to use the repository with git.
 For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
-```
+
+```bash
 git remote add upstream git://github.com/benfulcher/hctsa.git
 ```
+
 (make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your Github account).
 
 You can then update to the latest stable version of the repository by pulling the master branch to your local repository:
-```
+
+```bash
 git pull upstream master
 ```
 
@@ -103,7 +106,7 @@ A range of external code packages are provided in the **Toolboxes** directory of
 Many features in _hctsa_ rely on external packages and Matlab toolboxes.
 In the case that some of them are unavailable, *hctsa* can still be used, but only a reduced set of time-series features will be computed.
 
-_hctsa_ uses the following [Matlab toolboxes](https://mathworks.com/programs/nrd/matlab-toolbox-price-request.html?ref=ggl&s_eid=ppc_18665571802&q=matlab%20toolboxes%20price): Statistics, Signal Processing, Curve Fitting, System Identification, Wavelet, and Econometrics.
+_hctsa_ uses the following [Matlab Add-On Toolboxes](https://au.mathworks.com/products.html): Statistics and Machine Learning, Signal Processing, Curve Fitting, System Identification, Wavelet, and Econometrics.
 
 The following external time-series analysis code packages are provided with the software (in the **Toolboxes** directory), and are used by our main feature-extraction algorithms to compute meaningful structural features from time series:
 
@@ -125,7 +128,6 @@ The following external time-series analysis code packages are provided with the 
 ## Other time-series analysis resources
 
 A collection of good resources for time-series analysis (including in other programming languages like python and R) are on the [wiki](https://github.com/benfulcher/hctsa/wiki/Related-time-series-resources).
-
 
 ## Acknowledgements :wave:
 

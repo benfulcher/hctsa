@@ -1,13 +1,13 @@
 function out = CO_Embed2_Basic(y,tau)
-% CO_Embed2_Basic Point density statistics in a 2-d embedding space
+% CO_Embed2_Basic Point density statistics in a 2-d embedding space.
 %
-% Computes a set of point density measures in a plot of y_i against y_{i-tau}.
+% Computes a set of point-density statistics in a plot of y_i against y_{i-tau}.
 %
 % INPUTS:
-% y, the input time series
+% y, the input time series.
 %
 % tau, the time lag (can be set to 'tau' to set the time lag the first zero
-%                       crossing of the autocorrelation function)
+%                       crossing of the autocorrelation function).
 %
 % Outputs include the number of points near the diagonal, and similarly, the
 % number of points that are close to certain geometric shapes in the y_{i-tau},
@@ -41,6 +41,10 @@ function out = CO_Embed2_Basic(y,tau)
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
+
+if nargin < 2
+    tau = 1;
+end
 
 doPlot = false; % plot outputs to a figure
 

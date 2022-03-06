@@ -89,7 +89,7 @@ end
 % ------------------------------------------------------------------------------
 switch howtocg
     case 'quantile'
-        th = quantile(y,linspace(0,1,numGroups+1)); % thresholds for dividing the time series values
+        th = quantile(y,linspace(0,1,numGroups+1)); % thresholds for dividing the time-series values
         th(1) = th(1)-1; % this ensures the first point is included
         % turn the time series into a set of numbers from 1:numGroups
         yth = zeros(N,1);

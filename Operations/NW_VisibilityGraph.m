@@ -13,6 +13,7 @@ function out = NW_VisibilityGraph(y,meth,maxL)
 % Phys. Rev. E. 80(4) 046103 (2009)
 %
 %---INPUTS:
+%
 % y, the time series (a column vector)
 %
 % meth, the method for constructing:
@@ -25,9 +26,9 @@ function out = NW_VisibilityGraph(y,meth,maxL)
 %               samples.
 %
 %---OUTPUTS:
-% Statistics on the degree distribution, including the mode, mean,
-% spread, histogram entropy, and fits to gaussian, exponential, and powerlaw
-% distributions.
+%
+% Statistics on the degree distribution, including the mode, mean, spread,
+% histogram entropy, and fits to gaussian, exponential, and power-law distributions.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

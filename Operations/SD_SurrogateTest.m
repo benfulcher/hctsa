@@ -120,13 +120,12 @@ z = SD_MakeSurrogates(x,surrMeth,numSurrs,extrap,randomSeed);
 % Evaluate test statistic on each surrogate
 % ------------------------------------------------------------------------------
 if ismember('ami1',theTestStat)
-    % look at AMI(1) of surrogates compared to that of signal itself
+    % Investigate AMI(1) of surrogates compared to that of signal itself
     % This statistic is used by Nakamura et al. (2006), PRE
-    % could use CO_HistogramAMI or TSTL, but I'll use BF_MutualInformation
-    % Apparently there are upper and lower bounds on the number of bins to
-    % use: [1+log_2(N)], [sqrt(N)]
-    % BF_MutualInformation(x(1:end-1),x(2:end),'quantile','quantile',nbins);
-    % nbins = ceil(1+log2(N)); %round(mean([1+log2(N),sqrt(N)]));
+    % Could use CO_HistogramAMI or TSTL, but I'll use IN_AutoMutualInfo with
+    % Gaussian kernel…
+    % FYI: for a histogram method, there are upper and lower bounds on the number of
+    % bins to use: [1+log_2(N)], [sqrt(N)].
 
     % Use the gaussian approximation to estimate automutual information using the
     % Information Dynamics Toolkit:
@@ -137,7 +136,7 @@ if ismember('ami1',theTestStat)
     for i = 1:numSurrs
         AMIsurr(i) = ami_fn(z(:,i),1);
     end
-    % so we have a value AMIx, and a distribution for the surrogates
+    % So we have a value AMIx, and a distribution for the surrogates
     % AMIsurr -- we must compare and return something meaningful
     % surrogates should always have lower AMI than original signal
     someStats = SDgivemestats(AMIx,AMIsurr,'right');
@@ -148,30 +147,31 @@ if ismember('ami1',theTestStat)
 end
 
 if ismember('fmmi',theTestStat)
-    % look at first minimum of mutual information of surrogates compared to
+    % Investigate the first minimum of mutual information of surrogates compared to
     % that of signal itself
     fmmix = CO_FirstMin(x,'mi');
-    fmmisurr = zeros(numSurrs,1);
+    fmmiSurr = zeros(numSurrs,1);
     for i = 1:numSurrs
         try
-            fmmisurr(i) = CO_FirstMin(z(i,:),'mi');
+            fmmiSurr(i) = CO_FirstMin(z(:,i),'mi');
         catch
-            out = NaN; return
+            fmmiSurr(i) = NaN;
         end
     end
-    if any(isnan(fmmisurr))
+    if any(isnan(fmmiSurr))
         error('fmmi failed');
     end
 
     % FMMI should be higher for signal than surrogates
-    someStats = SDgivemestats(fmmix,fmmisurr,'right');
+    someStats = SDgivemestats(fmmix,fmmiSurr,'right');
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
         out.(sprintf('fmmi_%s',fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('o3',theTestStat) % third order statistic in Schreiber, Schmitz (Physica D)
+if ismember('o3',theTestStat)
+    % Third-order statistic in Schreiber, Schmitz (Physica D)
     tau = 1;
     o3x = 1/(N-tau)*sum((x(1+tau:end) - x(1:end-tau)).^3);
     o3surr = zeros(numSurrs,1);
@@ -185,7 +185,8 @@ if ismember('o3',theTestStat) % third order statistic in Schreiber, Schmitz (Phy
     end
 end
 
-if ismember('tc3',theTestStat) % TC3 statistic -- another time-reversal asymmetry measure
+if ismember('tc3',theTestStat)
+    % TC3 statistic -- another time-reversal asymmetry measure
     tau = 1;
     tmp = CO_tc3(x,tau);
     tc3x = tmp.raw;
@@ -202,7 +203,8 @@ if ismember('tc3',theTestStat) % TC3 statistic -- another time-reversal asymmetr
     end
 end
 
-if ismember('nlpe',theTestStat) % locally constant phase space prediction error
+if ismember('nlpe',theTestStat)
+    % Locally constant phase space prediction error
     warning('''nlpe'' can be very time consuming...')
     de = 3; tau = 1; % embedding parameters: fixed like a dummy!
     tmp = NL_MS_nlpe(x,de,tau);
@@ -222,7 +224,7 @@ if ismember('nlpe',theTestStat) % locally constant phase space prediction error
 end
 
 if ismember('fnn',theTestStat)
-    warning('fnn takes forever...')
+    warning('fnn takes like *literally forever*...')
 
     % false nearest neighbours at d=2;
     tmp = NL_MS_fnn(x,2,1,5,1);
@@ -254,9 +256,9 @@ function someStats = SDgivemestats(statx,statsurr,leftrightboth)
 
     % ASSUME GAUSSIAN DISTRIBUTION:
     % so can use 1/2-sided z-statistic
-    [~, p, ~, zscore] = ztest(statx, mean(statsurr), std(statsurr), 0.05, leftrightboth);
+    [~, p, ~, zStat] = ztest(statx, mean(statsurr), std(statsurr), 0.05, leftrightboth);
     someStats.p = p; % pvalue
-    someStats.zscore = zscore; % z-statistic
+    someStats.zscore = zStat; % z-statistic
 
     % fit a kernel distribution to zscored distribution:
     if std(statsurr) == 0
@@ -315,7 +317,7 @@ function someStats = SDgivemestats(statx,statsurr,leftrightboth)
     if doPlot
         figure('color','w')
         plot(statsurr,ones(numSurrs,1),'.k');
-        hold on;
+        hold('on');
         plot(statx*ones(2,1),[0,2],'r')
     end
 end

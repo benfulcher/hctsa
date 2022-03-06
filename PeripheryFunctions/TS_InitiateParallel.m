@@ -47,40 +47,26 @@ end
 success = true;
 
 %-------------------------------------------------------------------------------
-matlabVersion = version('-release');
-
-% Syntax changed in Matlab 2015a
+% Assume everyone is using Matlab 2015 or later (suports parpool)
 try
-    if str2num(matlabVersion(1:4)) >= 2014
+    % If no pool already, create a new one:
+    poolObj = gcp('nocreate');
 
-        poolObj = gcp('nocreate'); % If no pool already, create a new one
-
-        if isempty(poolObj) % no matlab pool started yet
-            % Open pool of workers:
-            poolObj = parpool;
-            % Get number of workers:
-            numWorkers = poolObj.NumWorkers;
-            % User feedback:
-            fprintf(1,['Matlab parallel processing pool opened with %u ' ...
-                                    'workers\n'],numWorkers);
-            % Regardless of what you input -- must initiate in this case:
-            doInitiate = true;
-        else
-            % Get number of workers:
-            numWorkers = poolObj.NumWorkers;
-            fprintf(1,['Matlab parallel processing pool already open with ' ...
-                                        '%u workers\n'],numWorkers);
-        end
+    if isempty(poolObj) % no matlab pool started yet
+        % Open pool of workers:
+        poolObj = parpool;
+        % Get number of workers:
+        numWorkers = poolObj.NumWorkers;
+        % User feedback:
+        fprintf(1,['Matlab parallel processing pool opened with %u ' ...
+                                'workers\n'],numWorkers);
+        % Regardless of what you input -- must initiate in this case:
+        doInitiate = true;
     else
-        if (matlabpool('size') == 0)
-            % Open pool of workers:
-            matlabpool open;
-            fprintf(1,['Matlab parallel processing pool opened with %u ' ...
-                                    'workers\n'],matlabpool('size'));
-        else
-            fprintf(1,['Matlab parallel processing pool already open with ' ...
-                                        '%u workers\n'],matlabpool('size'));
-        end
+        % Get number of workers:
+        numWorkers = poolObj.NumWorkers;
+        fprintf(1,['Matlab parallel processing pool already open with ' ...
+                                    '%u workers\n'],numWorkers);
     end
 catch emsg
     warning('\nError starting parallel processing pool -- running serially instead:\n%s',...

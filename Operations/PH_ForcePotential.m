@@ -70,6 +70,7 @@ function out = PH_ForcePotential(y,whatPotential,params)
 if nargin < 2 || isempty(whatPotential)
     whatPotential = 'dblwell'; % by default
 end
+
 if nargin < 3 || isempty(params)
     % default parameters
     switch whatPotential

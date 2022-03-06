@@ -99,7 +99,7 @@ if nargin < 2 || isempty(detrndmeth)
 end
 
 %-------------------------------------------------------------------------------
-% FOREPLAY
+% Preparation
 N = length(y); % time-series length
 r = (1:N)'; % the time-range over which to fit
 
@@ -162,11 +162,15 @@ elseif length(detrndmeth) > 3 && strcmp(detrndmeth(1:3),'rav') && ~isempty(str2d
 elseif length(detrndmeth) > 9 && strcmp(detrndmeth(1:9),'resample_')
     % check a valid structure
     ss = textscan(detrndmeth,'%s%n%n','delimiter','_');
-    if ~isempty(ss{2}), p = ss{2};
-    else return
+    if ~isempty(ss{2})
+        p = ss{2};
+    else
+        return
     end
-    if ~isempty(ss{3}), q = ss{3};
-    else return
+    if ~isempty(ss{3})
+        q = ss{3};
+    else
+        return
     end
     y_d = resample(y,p,q);
 
@@ -174,7 +178,8 @@ elseif length(detrndmeth) > 9 && strcmp(detrndmeth(1:9),'resample_')
 elseif strcmp(detrndmeth,'logr')
     if all(y > 0), y_d = diff(log(y));
     else
-        out = NaN; return % return all NaNs
+        out = NaN;
+        return % return all NaNs
     end
 
 % 9) Box-Cox Transformation
@@ -184,7 +189,8 @@ elseif strcmp(detrndmeth,'boxcox')
 
     if all(y > 0), y_d = boxcox(y);
     else
-        out = NaN; return % return all NaNs
+        out = NaN;
+        return % return all NaNs
     end
 else
     error('Invalid detrending method ''%s''',detrendmeth)
@@ -193,7 +199,8 @@ end
 %-------------------------------------------------------------------------------
 %% Quick check that outputs are meaningful
 if all(y_d == 0)
-    out = NaN; return
+    out = NaN;
+    return
 end
 
 %-------------------------------------------------------------------------------

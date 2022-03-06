@@ -10,8 +10,9 @@ function out = PD_PeriodicityWang(y)
 %
 % Detrends the time series using a single-knot cubic regression spline
 % and then computes autocorrelations up to one third of the length of
-% the time series. The frequency is the first peak in the autocorrelation
-% function satisfying a set of conditions.
+% the time series.
+% The frequency is the first peak in the autocorrelation function satisfying
+% a set of conditions.
 %
 %---INPUT:
 % y, the input time series.
@@ -63,7 +64,7 @@ if ~BF_iszscored(y)
 end
 
 % ------------------------------------------------------------------------------
-%% Foreplay
+%% Preparation
 % ------------------------------------------------------------------------------
 N = length(y); % length of the time series
 % The thresholds with which to count a peak:

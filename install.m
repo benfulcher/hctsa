@@ -26,7 +26,8 @@ fprintf(1,['This script will set up the Highly Comparative Time-Series ' ...
                         'Analysis (hctsa) code package from scratch!\n']);
 fprintf(1,['We will:' ...
             '\n-1- Add the paths needed for the repository,' ...
-            '\n-2- Compile the external time-series toolboxes for this system.\n\n']);
+            '\n-2- Check toolboxes,' ...
+            '\n-3- Compile the external time-series toolboxes for this system.\n\n']);
 
 % ------------------------------------------------------------------------------
 %% 1. Add the paths:
@@ -41,7 +42,41 @@ end
 fprintf(1,'\n');
 
 % ------------------------------------------------------------------------------
-%% Attempt to compile the executables required by the periphery Toolboxes:
+%% 2. Check the toolboxes:
+% ------------------------------------------------------------------------------
+fprintf(1,'-2- Checking installation of relevant Matlab Toolboxes...\n');
+
+% Essential:
+flagStat = BF_CheckToolbox('statistics_toolbox',true);
+if ~flagStat
+    fprintf(1,'The Statistics and Machine Learning Toolbox is required for hctsa and needs to be installed.\n');
+end
+% Desirable:
+toolboxCodes = {'curve_fitting_toolbox','signal_toolbox','identification_toolbox',...
+                    'wavelet_toolbox','econometrics_toolbox','robust_toolbox',...
+                    'financial_toolbox','distrib_computing_toolbox'};
+flags = zeros(8,1);
+names = cell(8,1);
+for i = 1:length(toolboxCodes)
+    [flags(i),names{i}] = BF_CheckToolbox(toolboxCodes{i},true);
+end
+
+fprintf(1,'%u/%u hctsa-relevant Matlab toolboxes are installed.\n',sum(flags),length(flags));
+if ~all(flags)
+    fprintf(1,'For full functionality, please install:\n');
+    theNo = find(~flags);
+    numNo = length(theNo);
+    for i = 1:numNo
+        fprintf(1,'%s\n',names{theNo(i)});
+    end
+else
+    fprintf(1,'Looks good on the Matlab toolbox side of things! :)\n');
+end
+fprintf(1,'\n');
+input('<<Press any key to continue>>')
+
+% ------------------------------------------------------------------------------
+%% 3. Attempt to compile the executables required by the periphery Toolboxes:
 % ------------------------------------------------------------------------------
 fprintf(1,['\n-2- Compile the binary executables needed for evaluating ' ...
                                                 'some operations.\n']);
@@ -59,7 +94,7 @@ cd('../');
 fprintf(1,'Hope everything compiled ok?!\n\n');
 
 fprintf(1,['All done! Ready when you are to initiate hctsa analysis\nusing a time-series dataset: ' ...
-                            'e.g.: TS_init(''INP_test_ts.mat'');\n']);
+                            'e.g.: TS_Init(''INP_test_ts.mat'');\n']);
 
 % Attempt to add a time series
 % SQL_Add('ts','INP_test_ts.txt')

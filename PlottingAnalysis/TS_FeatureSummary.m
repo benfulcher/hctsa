@@ -6,7 +6,7 @@ function TS_FeatureSummary(opID,whatData,doViolin,doInspect,annotateParams,custo
 % how the operation is behaving.
 %
 %---INPUTS:
-% opID, the operation ID to plot
+% opID, the operation ID to plot.
 % whatData, the data to visualize (HCTSA.mat by default; cf. TS_LoadData)
 % doViolin, (logical) show distributions as a violin plot (instead of
 %           conventional kernel-smoothed distributions).
@@ -80,7 +80,9 @@ end
 
 % Retrieve group names also:
 [timeSeriesGroup,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
-annotateParams.groupColors = BF_GetColorMap('set1',numGroups,true);
+if ~isfield(annotateParams,'groupColors')
+    annotateParams.groupColors = BF_GetColorMap('set1',numGroups,true);
+end
 
 %-------------------------------------------------------------------------------
 % Apply default plotting settings in the annotateParams structure
@@ -115,7 +117,11 @@ if doViolin
 
     % First the distribution(s):
     if doInspect
-        h_violin = subplot(3,1,1:2);
+        if isempty(customAnnotation)
+            h_violin = subplot(3,1,1:2);
+        else
+            h_violin = subplot(4,1,1:2);
+        end
         h_violin.ButtonDownFcn = {@annotateFigure_Callback};
         h_violin.HitTest = 'on';
     else
@@ -138,7 +144,7 @@ if doViolin
 
         myColors = cell(numGroups+1,1);
         myColors{1} = ones(3,1)*0.5; % gray for combined
-        myColors(2:numGroups+1) = GiveMeColors(numGroups);
+        myColors(2:numGroups+1) = annotateParams.groupColors;
         extraParams.theColors = myColors;
         extraParams.customOffset = -0.5;
         extraParams.offsetRange = 0.7;
@@ -197,10 +203,15 @@ if doViolin
     end
 
     %-------------------------------------------------------------------------------
-    % Time series annotations using TS_PlotTimeSeries
+    % Time-series annotations using TS_PlotTimeSeries
     % (cycling through groups of 10 rainbow colors):
     if doInspect
-        h_TimeSeries = subplot(3,1,3);
+        if isempty(customAnnotation)
+            h_TimeSeries = subplot(3,1,3);
+        else
+            h_TimeSeries = subplot(4,1,3);
+            h_Custom = subplot(4,1,4);
+        end
         tHandle = text(0.2,0.5,'Click near a point above to inspect a time series!');
     else
         h_TimeSeries = subplot(1,4,3:4);
@@ -268,8 +279,12 @@ else
     xlabel(theOperation.Name,'Interpreter','none');
     ylabel('Probability Density')
     BF_AnnotatePoints(xy,TimeSeries,annotateParams);
-    title(sprintf('[%u] %s (%u-sample annotations)',opID,theOperation.Name, ...
-                    annotateParams.maxL),'Interpreter','none');
+    if isnumeric(annotateParams.maxL)
+        sampleText = sprintf(' (%u-sample annotations)',annotateParams.maxL);
+    else
+        sampleText = '';
+    end
+    title(sprintf('[%u] %s%s',opID,theOperation.Name,sampleText),'Interpreter','none');
     xlabel('Outputs','Interpreter','none');
 end
 
@@ -336,19 +351,25 @@ function annotateFigure_Callback(hObject,eventData)
                     'MarkerFaceColor',brighten(theColor,0.5),'Parent',h_violin);
     hObject.UserData = pC;
 
-    % Plot the time series in the inspector plot
-    timeSeriesData = TimeSeries.Data{iPlot};
-    if ~isempty(customAnnotation)
-        f.CurrentAxes = h_TimeSeries;
-        customAnnotation(timeSeriesData);
+    % Plot the time series in the inspector plot:
+    timeSeriesData = zscore(TimeSeries.Data{iPlot});
+    plot(timeSeriesData,'-','color',theColor,'LineWidth',2,'Parent',h_TimeSeries);
+    if isempty(annotateParams.maxL)
+        h_TimeSeries.XLim = [0,length(timeSeriesData)];
     else
-        plot(timeSeriesData,'-','color',theColor,'LineWidth',2,'Parent',h_TimeSeries);
-        h_TimeSeries.XLim = [0,annotateParams.maxL];
-        h_TimeSeries.XLabel.String = 'Time';
+        h_TimeSeries.XLim = [0,min(length(timeSeriesData),annotateParams.maxL)];
     end
-
+    h_TimeSeries.XLabel.String = 'Time';
     h_TimeSeries.Title.String = titleText;
     h_TimeSeries.Title.Interpreter = 'none';
+
+    % Also add a custom annotation:
+    if ~isempty(customAnnotation)
+        f.CurrentAxes = h_Custom;
+        customAnnotation(timeSeriesData);
+        % More complicated would be to give the annotation function access to both axes:
+        % customAnnotation(timeSeriesData,[h_TimeSeries,h_Custom]);
+    end
 end
 
 end

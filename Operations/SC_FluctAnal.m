@@ -40,8 +40,8 @@ function out = SC_FluctAnal(x,q,wtf,tauStep,k,lag,logInc)
 %
 % tauStep, number of tau (locInc true), or increments in tau for linear range
 %               (if logInc = 0), or
-% 
-%           The spacing of time scales, tau, is commonly logarithmic through a range from
+%
+%           The spacing of timescales, tau, is commonly logarithmic through a range from
 %           5 samples to a quarter of the length of the time series, as suggested in
 %           "Statistical properties of DNA sequences", C.-K. Peng et al. Physica A
 %           221(1-3) 180 (1995)
@@ -201,7 +201,7 @@ for i = 1:ntau
             y_dt = reshape(y_buff,nn,1);
         case 'rsrange'
             % Remove straight line first: Caccia et al. Physica A, 1997
-            % Straight line connects end points
+            % Straight line connects end points of each window:
             b = y_buff(1,:);
             m = y_buff(end,:) - b;
             y_buff = y_buff - (linspace(0,1,tau)'*m + ones(tau,1)*b);
@@ -262,7 +262,7 @@ end
 % Find point with the minimum sum of squared errors
 
 % First spline interpolate to get an even sampling of the interval
-% (currently, in the log scale, there are relatively more at large scales
+% (currently, in the log scale, there are relatively more at slower timescales)
 
 % Determine the errors
 sserr = nan(numTimeScales,1); % don't choose the end points
