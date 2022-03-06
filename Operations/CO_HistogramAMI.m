@@ -77,34 +77,48 @@ end
 % remove outliers first?, number of bins, range of bins, bin sizes
 
 % ------------------------------------------------------------------------------
-%% Bins by standard deviation (=1)
+%% Bins for the data:
 % ------------------------------------------------------------------------------
 
 % same for both -- assume same distribution (true for stationary processes,
 % or small lags)
 switch meth
     case 'even'
-        b = linspace(min(y)-0.1,max(y)+0.1,numBins+1); % +0.1 to make sure all points included
+        b = linspace(min(y),max(y),numBins+1);
+        % Add increment buffer to ensure all points are included:
+        inc = 0.1;
+        b(1) = b(1) - inc;
+        b(end) = b(end) + inc;
 
     case 'std1' % std bins up to 1
         b = linspace(-1,1,numBins+1);
-        if min(y) < -1; b = [min(y)-0.1, b]; end
-        if max(y) > 1; b = [b, max(y)+0.1]; end
+        if min(y) < -1
+            b = [min(y)-0.1, b];
+        end
+        if max(y) > 1
+            b = [b, max(y)+0.1];
+        end
 
     case 'std2'
         b = linspace(-2,2,numBins+1);
-        if min(y) < -2; b = [min(y)-0.1, b]; end
-        if max(y) > 2; b = [b, max(y)+0.1]; end
+        if min(y) < -2
+            b = [min(y)-0.1, b];
+        end
+        if max(y) > 2
+            b = [b, max(y)+0.1];
+        end
 
     case 'quantiles' % use quantiles with ~equal number in each bin
         b = quantile(y,linspace(0,1,numBins+1));
-        b(1) = b(1) - 0.1; b(end) = b(end) + 0.1;
+        b(1) = b(1) - 0.1;
+        b(end) = b(end) + 0.1;
 
     otherwise
         error('Unknown method ''%s''',meth)
 end
 
-nb = length(b) - 1; % number of bins (-1 since b defines edges)
+assert numBins == length(b)-1;
+% numBins = length(b) - 1; % number of bins (-1 since b defines edges)
 
 % ------------------------------------------------------------------------------
 % Form the time-delay vectors y1 and y2
@@ -116,17 +130,17 @@ for i = 1:length(tau)
 
     % (1) Joint distribution of y1 and y2
     pij = NK_hist2(y1,y2,b,b);
-    pij = pij(1:nb,1:nb); % joint
-    pij = pij/sum(sum(pij)); % joint
+    pij = pij(1:numBins,1:numBins); % joint
+    pij = pij/sum(pij(:)); % joint
     pi = sum(pij,1); % marginal
     pj = sum(pij,2); % other marginal
 
     % Old-fashioned method (should give same result):
-    % pi = histc(y1,b); pi = pi(1:nb); pi = pi/sum(pi); % marginal
-    % pj = histc(y2,b); pj= pj(1:nb); pj = pj/sum(pj); % other marginal
+    % pi = histc(y1,b); pi = pi(1:numBins); pi = pi/sum(pi); % marginal
+    % pj = histc(y2,b); pj= pj(1:numBins); pj = pj/sum(pj); % other marginal
 
-    pii = ones(nb,1)*pi;
-    pjj = pj*ones(1,nb);
+    pii = ones(numBins,1)*pi;
+    pjj = pj*ones(1,numBins);
 
     r = (pij > 0); % Defining the range in this way, we set log(0) = 0
     amis(i) = sum(pij(r).*log(pij(r)./pii(r)./pjj(r)));
