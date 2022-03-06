@@ -8,6 +8,10 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 % Can also compare this performance to a set of randomized null features to
 % evaluate the statistical significance of the result (pooled permutation testing).
 %
+% Note that it can be more interpretable to run this function on filtered but
+% un-normalized data (e.g., from TS_Normalize('none')), so that feature values
+% correspond to raw feature outputs.
+%
 %---INPUTS:
 %
 % whatData, the hctsa data to use (input to TS_LoadData, default: 'raw')

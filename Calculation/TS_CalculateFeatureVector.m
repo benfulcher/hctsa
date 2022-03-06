@@ -136,6 +136,15 @@ if size(x,2) ~= 1
 		error('ERROR WITH ''%s'' -- is it multivariate or something weird? Skipping!\n',tsStruct.Name);
 	end
 end
+% Basics checks on data type:
+if ~isa(x,'numeric')
+    error('The time series provided must be numerical data')
+elseif isa(x,'integer')
+    error('Methods in hctsa are generally not well-suited to integer-valued time-series data. Convert to double.')
+elseif isa(x,'single')
+    warning('Your data is provided in single precision. Converting to double for compatibility with hctsa methods.')
+    x = double(x);
+end
 % (x contains no special values)
 if ~all(isfinite(x))
 	error('ERROR WITH ''%s'' -- contains non-finite values',tsStruct.Name);

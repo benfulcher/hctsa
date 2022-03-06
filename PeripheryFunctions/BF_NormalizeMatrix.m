@@ -167,7 +167,9 @@ end
 
 function xhat = Sigmoid(x,doScale)
     % Classic sigmoidal transformation (optionally scaled to the unit interval)
-    if nargin < 2, doScale = 1; end
+    if nargin < 2
+        doScale = true;
+    end
 
     goodVals = (~isnan(x) & isTraining);
     meanX = mean(x(goodVals));
@@ -184,7 +186,9 @@ end
 
 function xhat = RobustSigmoid(x,doScale)
     % Outlier-adjusted sigmoid (optionally scaled to unit interval)
-    if nargin < 2, doScale = 1; end
+    if nargin < 2
+        doScale = true;
+    end
 
     goodVals = (~isnan(x) & isTraining);
     medianX = median(x(goodVals));
