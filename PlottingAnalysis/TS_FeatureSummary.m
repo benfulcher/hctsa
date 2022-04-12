@@ -173,7 +173,7 @@ if doViolin
         extraParams.theColors = myColors;
         extraParams.customOffset = -0.5;
         extraParams.offsetRange = 0.7;
-        extraParams.customSpot = '';
+        extraParams.customSpot = '.';
         [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter(dataCell,false,true,false,extraParams);
 
         % Add lines denoting each annotated time-series in the distribution:

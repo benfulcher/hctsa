@@ -77,7 +77,7 @@ There are a range of open datasets with pre-computed _hctsa_ features, as well a
 - [Drosophila movement speed](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Drosophila_melanogaster_movement_speed/3863553) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingFly).
 - [1000 empirical time series](https://figshare.com/articles/1000_Empirical_Time_series/5436136)
 
-(If you have data to share and host, let me know and I'll add it to this list)
+(If you have data to share and host, let me know and I'll add it to this list).
 
 ### Running _hctsa_ on a cluster :computer:
 

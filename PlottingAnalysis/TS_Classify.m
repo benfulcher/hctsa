@@ -252,15 +252,15 @@ if doPlot
 end
 
 %-------------------------------------------------------------------------------
-% Save classifier:
+% Save trained classifier:
 %-------------------------------------------------------------------------------
 if ~isempty(cfnParams.classifierFilename)
     [Acc,Mdl] = GiveMeCfn(TS_DataMat,TimeSeries.Group,TS_DataMat,...
                                             TimeSeries.Group,cfnParams);
     jointClassifier.Operation.ID = Operations.ID;
     jointClassifier.Operation.Name = Operations.Name;
-    jointClassifier.CVAccuracy = mean(foldLosses); % Cross-validated accuracy
-    jointClassifier.Accuracy = Acc; % For some reason the Acc retrieved as above is amazing?
+    jointClassifier.CVAccuracy = mean(foldLosses);
+    jointClassifier.Accuracy = Acc;
     jointClassifier.Mdl = Mdl;
     jointClassifier.whatLoss = whatLoss;
     jointClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
