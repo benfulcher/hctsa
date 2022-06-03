@@ -36,7 +36,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Set the classifier:
-params.whatClassifier = 'svm_linear'; % ('svm_linear', 'knn', 'linear', 'fast_linear')
+params.whatClassifier = 'svm-linear'; % ('svm-linear', 'knn', 'linear', 'fast-linear')
 
 % Number of repeats of cross-validation (reduce variance due to 'lucky splits')
 params.numRepeats = 1;
@@ -74,12 +74,22 @@ else
     params.whatLossUnits = '%';
 end
 
-% Cross validation: number of folds (set to 0 for no CV)
+%-------------------------------------------------------------------------------
+%% CROSS VALIDATION
+%-------------------------------------------------------------------------------
+
+% Number of folds (set to 0 for no CV)
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);
 
 % Whether to output information about each fold, or average over folds
 params.computePerFold = false;
 
+% Aggregate (single accuracy computed from all predicted labels), or mean across folds (default)
+params.doAggregate = false;
+
+%-------------------------------------------------------------------------------
+% Classifer name:
+%-------------------------------------------------------------------------------
 % .mat file to save the classifier to (not saved if empty).
 params.classifierFilename = ''; % (don't save classifier information to file)
 

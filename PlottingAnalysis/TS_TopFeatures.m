@@ -138,7 +138,7 @@ end
 if strcmp(whatTestStat,'classification')
     if nargin < 3 || isempty(fieldnames(cfnParams))
         cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
-        cfnParams.whatClassifier = 'fast_linear';
+        cfnParams.whatClassifier = 'fast-linear';
         cfnParams = UpdateClassifierText(cfnParams);
     end
 else
@@ -554,7 +554,7 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
         for k = 1:numFeatures
             try
                 if nargout == 2
-                    % This is slower for the fast_linear classifier (but returns a model)
+                    % This is slower for the fast-linear classifier (but returns a model)
                     [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
                 else
                     testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);

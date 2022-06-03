@@ -52,7 +52,7 @@ end
 %-------------------------------------------------------------------------------
 % Define the classification model
 %------------------------------------------------------------------------------
-if strcmp(cfnParams.whatClassifier,'fast_linear')
+if strcmp(cfnParams.whatClassifier,'fast-linear')
     %--------------------------------------------------------------------------
     % Special case -- the `classify` function is faster than others
     %--------------------------------------------------------------------------
@@ -95,7 +95,7 @@ else
             else
                 Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on');
             end
-        case {'svm','svm_linear'}
+        case {'svm','svm-linear'}
             % Weight observations by inverse class probability:
             if cfnParams.doReweight
                 if cfnParams.numFolds > 0
@@ -110,7 +110,7 @@ else
                     Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear');
                 end
             end
-        case 'svm_rbf'
+        case 'svm-rbf'
             % Weight observations by inverse class probability:
             if cfnParams.doReweight
                 if cfnParams.numFolds > 0
@@ -151,10 +151,10 @@ else
             % Naive Bayes classifier:
             t = templateNaiveBayes('DistributionNames','normal');
             if beVerbose, fprintf(1,'Using a naive Bayes classifier\n'); end
-        case {'svm','svm_linear'}
+        case {'svm','svm-linear'}
             t = templateSVM('KernelFunction','linear');
             if beVerbose, fprintf(1,'Using a linear svm classifier\n'); end
-        case 'svm_rbf'
+        case 'svm-rbf'
             t = templateSVM('KernelFunction','rbf');
             if beVerbose, fprintf(1,'Using a rbf svm classifier\n'); end
         otherwise
@@ -162,7 +162,7 @@ else
         end
 
         % Fit the model:
-        if ismember(cfnParams.whatClassifier,{'svm_linear','svm_rbf','linear','linclass','diaglinear'}) && cfnParams.doReweight
+        if ismember(cfnParams.whatClassifier,{'svm-linear','svm-rbf','linear','linclass','diaglinear'}) && cfnParams.doReweight
             % Reweight to give equal weight to each class (in case of class imbalance)
             if cfnParams.numFolds > 0
                 Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
@@ -198,13 +198,25 @@ else
     % Output is the accuracy/loss measure for each fold, can mean it themselves if they want to
     yPredict = kfoldPredict(Mdl);
     if cfnParams.computePerFold
-        % Compute separately for each fold, store in vector accuracy:
-        accuracy = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
-                        yPredict(Mdl.Partition.test(x)),cfnParams.whatLoss,...
-                        cfnParams.classLabels),1:cfnParams.numFolds);
+        % Compute separately for each fold, store in 2-component vector accuracy = [trainAcc,testAcc]:
+        accuracyTestFolds = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
+                            yPredict(Mdl.Partition.test(x)),cfnParams.whatLoss,...
+                            cfnParams.classLabels),1:cfnParams.numFolds);
+        accuracyTrainFolds = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.train(x)),...
+                            yPredict(Mdl.Partition.train(x)),cfnParams.whatLoss,...
+                            cfnParams.classLabels),1:cfnParams.numFolds);
+        accuracy = {accuracyTrainFolds,accuracyTestFolds};
     else
-        % Compute aggregate across all folds:
-        accuracy = BF_LossFunction(yTrain,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
+        if cfnParams.doAggregate
+            % Aggregate all outputs from folds and compute accuracy once from that aggregate:
+            accuracy = BF_LossFunction(yTrain,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
+        else
+            % Compute accuracy in each test fold, then summarize as the mean across folds:
+            accuracyTestFolds = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
+                            yPredict(Mdl.Partition.test(x)),cfnParams.whatLoss,...
+                            cfnParams.classLabels),1:cfnParams.numFolds);
+            accuracy = mean(accuracyTestFolds);
+        end
     end
 end
 

@@ -60,16 +60,23 @@ if nargin < 3
 end
 
 % Use an inputParser to parse additional options as parameters:
-
 inputP = inputParser;
+
+% simpleNull: use simple label shuffles as nulls
+default_simpleNull = true;
+check_simpleNull = @(x) islogical(x);
+addParameter(inputP,'simpleNull',default_simpleNull,check_simpleNull);
+
 % doParallel: use parfor to speed up null computation
 default_doParallel = false;
 check_doParallel = @(x) islogical(x);
 addParameter(inputP,'doParallel',default_doParallel,check_doParallel);
+
 % seedReset:
 default_seedReset = 'default';
 check_seedReset = @(x) ischar(x);
 addParameter(inputP,'seedReset',default_seedReset,check_seedReset);
+
 % doPlot:
 default_doPlot = true;
 check_doPlot = @(x) islogical(x);
@@ -77,6 +84,7 @@ addParameter(inputP,'doPlot',default_doPlot,check_doPlot);
 
 % Parse input arguments:
 parse(inputP,varargin{:});
+simpleNull = inputP.Results.simpleNull;
 doParallel = inputP.Results.doParallel;
 seedReset = inputP.Results.seedReset;
 doPlot = inputP.Results.doPlot;
@@ -112,13 +120,15 @@ BF_ResetSeed(seedReset);
 
 % Fit the classification model to the dataset and evaluate performance:
 CVMdl = cell(cfnParams.numRepeats,1);
-foldLosses = zeros(cfnParams.numRepeats,1);
+meanAcc = zeros(cfnParams.numRepeats,1);
 cfnParams.computePerFold = false;
 for i = 1:cfnParams.numRepeats
     [meanAcc(i),CVMdl{i}] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group);
 end
 
-% Display results to commandline:
+%-------------------------------------------------------------------------------
+% Display results to commandline
+%-------------------------------------------------------------------------------
 if cfnParams.numFolds == 0
     assert(cfnParams.numRepeats==1)
     fprintf(1,'In-sample %s using %s = %.3f%s\n',cfnParams.whatLoss,cfnParams.whatClassifier,...
@@ -128,7 +138,8 @@ else
         whatStat = sprintf('Mean (across %u folds)',cfnParams.numFolds);
         accuracyBit = sprintf('%.3f%s',meanAcc,cfnParams.whatLossUnits);
     else
-        whatStat = sprintf('Mean (across %u folds, then across %u repeats)',cfnParams.numFolds,cfnParams.numRepeats);
+        whatStat = sprintf('Mean (across %u folds, then across %u repeats)',...
+                            cfnParams.numFolds,cfnParams.numRepeats);
         accuracyBit = sprintf('%.3f +/- %.3f%s',mean(meanAcc),std(meanAcc),cfnParams.whatLossUnits);
     end
     fprintf(1,['\n%s %s (%u-class) using %s classification with %u' ...
@@ -142,32 +153,63 @@ end
 % Check nulls:
 %-------------------------------------------------------------------------------
 if numNulls > 0
-    fprintf(1,'Computing %s across %u null permutations...',cfnParams.whatLoss,numNulls);
-    nullStats = zeros(numNulls,1);
-    % Compute for shuffled data labels:
-    if doParallel
-        fprintf(1,'Using parfor for speed...\n');
-        parfor i = 1:numNulls
-            shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-            nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,TS_DataMat,shuffledLabels,cfnParams);
-        end
-    else
+
+    if simpleNull && (cfnParams.numFolds == 0)
+        warning('The simple null is invalid for in-sample classification: using a full model-based null')
+        simpleNull = false;
+    end
+
+    if simpleNull
+        % Null approximates null classifer output as random label shuffles.
+        % Will be a bad approximation when the classifier has e.g., class-balance bias
+        % Will be a very poor approximation when CV is off (overfitting)
+        fprintf(1,'Assessing %s across %u (simple permutation-based) nulls...',cfnParams.whatLoss,numNulls);
+
+        nullStats = zeros(numNulls,1);
         for i = 1:numNulls
             shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-            nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,TS_DataMat,shuffledLabels,cfnParams);
-            if i==1
-                fprintf(1,'%u',i);
-            else
-                fprintf(1,',%u',i);
+            cvFolds = cvpartition(TimeSeries.Group,'KFold',cfnParams.numFolds,'Stratify',true);
+            nullAcc_k = zeros(cfnParams.numFolds,1);
+            for k = 1:cfnParams.numFolds
+                yTrue = TimeSeries.Group(cvFolds.test(k));
+                yPredict = shuffledLabels(cvFolds.test(k));
+                nullAcc_k(k) = BF_LossFunction(yTrue,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
+            end
+            nullStats(i) = mean(nullAcc_k);
+        end
+    else
+        % Null is output from classifier from shuffled-label input.
+        % More computationally intensive, but accurate.
+        fprintf(1,'Computing %s across %u (full model-based) null permutations...',cfnParams.whatLoss,numNulls);
+
+        % Compute for shuffled group label inputs:
+        nullStats = zeros(numNulls,1);
+        if doParallel
+            fprintf(1,'Using parfor for speed...\n');
+            parfor i = 1:numNulls
+                shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
+                nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,TS_DataMat,shuffledLabels,cfnParams);
+            end
+        else
+            for i = 1:numNulls
+                shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
+                nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,TS_DataMat,shuffledLabels,cfnParams);
+                if i==1
+                    fprintf(1,'%u',i);
+                else
+                    fprintf(1,',%u',i);
+                end
             end
         end
     end
+
+    % Display to commandline
     fprintf(1,['\n\nMean %s (%u-class) using %u-fold %s classification with %u' ...
                      ' features across %u nulls:\n%.3f +/- %.3f%%\n\n'],...
                     cfnParams.whatLoss,...
                     cfnParams.numClasses,...
                     cfnParams.numFolds,...
-                    cfnParams.whatClassifier,...
+                    cfnParams.classifierText,...
                     numFeatures,...
                     numNulls,...
                     mean(nullStats),...
@@ -178,13 +220,16 @@ if numNulls > 0
         f = figure('color','w');
         hold('on')
         f.Position(3:4) = [551,277];
-        ax = gca;
         h = histogram(nullStats);
         h.FaceColor = ones(1,3)*0.5;
-        plot(ones(2,1)*mean(foldLosses),ax.YLim,'r','LineWidth',2)
+        xline(mean(meanAcc),'r','LineWidth',2)
         xlabel(sprintf('%s (%s)',cfnParams.whatLoss,cfnParams.whatLossUnits))
         ylabel('Number of nulls')
-        legend(sprintf('Shuffled labels (%u)',numNulls),'Real labels')
+        if simpleNull
+            legend(sprintf('Simple shuffled *output* labels (%u)',numNulls),'Real labels')
+        else
+            legend(sprintf('Model-based (shuffled input labels) (%u)',numNulls),'Real labels')
+        end
     end
 
     % Estimate a p-value:
@@ -195,10 +240,10 @@ if numNulls > 0
     % Label-randomization null:
     % (note that for a discrete quantity like classification accuracy with a
     % small sample size, equality cases become more likely):
-    pValPermTest = mean(mean(foldLosses) <= nullStats);
+    pValPermTest = mean(mean(meanAcc) <= nullStats);
     fprintf(1,'Estimated p-value (permutation test) = %.2g\n',pValPermTest);
 
-    pValZ = 1 - normcdf(mean(foldLosses),mean(nullStats),std(nullStats));
+    pValZ = 1 - normcdf(mean(meanAcc),mean(nullStats),std(nullStats));
     fprintf(1,'Estimated p-value (Gaussian fit) = %.2g\n',pValZ);
 else
     nullStats = [];
@@ -224,10 +269,10 @@ if doPlot
     else
         if cfnParams.numFolds > 0
             titleText = sprintf('Confusion matrix from %u-fold %s cross-validation (repeat 1)',...
-                    cfnParams.numFolds,cfnParams.whatClassifier);
+                    cfnParams.numFolds,cfnParams.classifierText);
         else
             titleText = sprintf('Confusion matrix from in-sample %s classification',...
-                                cfnParams.whatClassifier);
+                                cfnParams.classifierText);
         end
 
         % Prefer the confusionchart to plotconfusion?

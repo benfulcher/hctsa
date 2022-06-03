@@ -143,7 +143,7 @@ end
 % Get cross-validated accuracy for this single feature using a Naive Bayes linear classifier:
 if isempty(whatStat)
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries,[],false);
-    cfnParams.whatClassifier = 'fast_linear';
+    cfnParams.whatClassifier = 'fast-linear';
     cfnParams.numFolds = 10;
     cfnParams.computePerFold = true;
     accuracy = GiveMeCfn(TS_DataMat(:,op_ind),TimeSeries.Group,[],[],cfnParams);

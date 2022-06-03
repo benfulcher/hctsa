@@ -30,7 +30,7 @@ function fn_handle = GiveMeFunctionHandle(cfnParams)
 %-------------------------------------------------------------------------------
 % Set the function handle to compute the accuracy/loss measure:
 %-------------------------------------------------------------------------------
-if strcmp(cfnParams.whatClassifier,'fast_linear')
+if strcmp(cfnParams.whatClassifier,'fast-linear')
     fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
     fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,classify(XTest,XTrain,yTrain,'linear'));
     return
@@ -58,7 +58,7 @@ if cfnParams.numClasses==2
                         fn_loss(yTest,predict(fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
                                     'SaveMemory','on'),XTest));
         end
-    case 'svm_linear'
+    case 'svm-linear'
         if cfnParams.doReweight
             fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
                                     'KernelFunction','linear','Weights',InverseProbWeight(yTrain)),XTest));
@@ -66,7 +66,7 @@ if cfnParams.numClasses==2
             fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
                                     'KernelFunction','linear'),XTest));
         end
-    case 'svm_rbf'
+    case 'svm-rbf'
         if cfnParams.doReweight
             fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
                                     'KernelFunction','rbf','Weights',InverseProbWeight(yTrain)),XTest));

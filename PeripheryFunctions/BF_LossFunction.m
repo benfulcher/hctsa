@@ -64,7 +64,6 @@ case 'balancedLoss'
         classWeights(i) = 1/classTotals(yTest(i));
     end
     outputMeasure = sum((yTest~=yPredict).*classWeights);
-    outputMeasure = sum((yTest~=yPredict).*classWeights);
 otherwise
     error('Unknown loss function ''%s''',whatLoss);
 end
