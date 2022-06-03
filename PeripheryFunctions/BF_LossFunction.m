@@ -42,11 +42,17 @@ function outputMeasure = BF_LossFunction(yTest,yPredict,whatLoss,classLabels)
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+%% Check Inputs
+%-------------------------------------------------------------------------------
 if nargin < 4
     classLabels = categories([yPredict;yTest]);
 end
 
-% Set the loss/accuracy function:
+%-------------------------------------------------------------------------------
+%% Set the loss/accuracy function:
+%-------------------------------------------------------------------------------
 switch whatLoss
 case {'acc','accuracy','Accuracy'}
     % Overall classification rate:

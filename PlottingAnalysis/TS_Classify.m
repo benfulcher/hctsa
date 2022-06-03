@@ -49,7 +49,7 @@ function [meanAcc,nullStats,jointClassifier] = TS_Classify(whatData,cfnParams,nu
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check Inputs:
+%% Check Inputs
 %-------------------------------------------------------------------------------
 if nargin < 1
     whatData = 'norm';
@@ -91,8 +91,9 @@ doPlot = inputP.Results.doPlot;
 clear('inputP');
 
 %-------------------------------------------------------------------------------
-% Load in data:
+%% Load in data
 %-------------------------------------------------------------------------------
+
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 
 % Assign group labels (removing unlabeled data):
@@ -113,21 +114,29 @@ TellMeAboutClassification(cfnParams);
 numFeatures = height(Operations);
 
 %-------------------------------------------------------------------------------
-% Fit the model
+%% Fit the model
 %-------------------------------------------------------------------------------
+
 % Reset the random seed for CV-reproducibility
 BF_ResetSeed(seedReset);
 
 % Fit the classification model to the dataset and evaluate performance:
 CVMdl = cell(cfnParams.numRepeats,1);
 meanAcc = zeros(cfnParams.numRepeats,1);
-cfnParams.computePerFold = false;
+stdAcc = zeros(cfnParams.numRepeats,1);
+if cfnParams.computePerFold
+    inSampleStats = zeros(cfnParams.numRepeats,2);
+end
 for i = 1:cfnParams.numRepeats
-    [meanAcc(i),CVMdl{i}] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group);
+    if cfnParams.computePerFold
+        [meanAcc(i),stdAcc(i),CVMdl{i},inSampleStats(i,:)] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group,cfnParams);
+    else
+        [meanAcc(i),stdAcc(i),CVMdl{i}] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group,cfnParams);
+    end
 end
 
 %-------------------------------------------------------------------------------
-% Display results to commandline
+%% Display results to commandline
 %-------------------------------------------------------------------------------
 if cfnParams.numFolds == 0
     assert(cfnParams.numRepeats==1)
@@ -135,22 +144,40 @@ if cfnParams.numFolds == 0
                                             meanAcc,cfnParams.whatLossUnits);
 else
     if cfnParams.numRepeats==1
-        whatStat = sprintf('Mean (across %u folds)',cfnParams.numFolds);
-        accuracyBit = sprintf('%.3f%s',meanAcc,cfnParams.whatLossUnits);
+        if cfnParams.computePerFold
+            whatStat = sprintf('Mean +/- std (across %u folds)',cfnParams.numFolds);
+            accuracyBit = sprintf('%.3f +/- %.3f%s',meanAcc,stdAcc,cfnParams.whatLossUnits);
+        else
+            whatStat = sprintf('Mean (across %u folds)',cfnParams.numFolds);
+            accuracyBit = sprintf('%.3f%s',meanAcc,cfnParams.whatLossUnits);
+        end
     else
-        whatStat = sprintf('Mean (across %u folds, then across %u repeats)',...
-                            cfnParams.numFolds,cfnParams.numRepeats);
-        accuracyBit = sprintf('%.3f +/- %.3f%s',mean(meanAcc),std(meanAcc),cfnParams.whatLossUnits);
+        if cfnParams.computePerFold
+            whatStat = sprintf('Mean +/- std (across %u folds, means across %u repeats)',...
+                                cfnParams.numFolds,cfnParams.numRepeats);
+            accuracyBit = sprintf('%.3f +/- %.3f%s',mean(meanAcc),mean(stdAcc),...
+                                        cfnParams.whatLossUnits);
+        else
+            whatStat = sprintf('Mean +/- std (mean across %u folds; std of this mean across %u repeats)',...
+                                cfnParams.numFolds,cfnParams.numRepeats);
+            accuracyBit = sprintf('%.3f +/- %.3f%s',mean(meanAcc),std(meanAcc),cfnParams.whatLossUnits);
+        end
     end
     fprintf(1,['\n%s %s (%u-class) using %s classification with %u' ...
-                     ' features:\n%s\n\n'],...
+                     ' features:\n%s\n'],...
             whatStat,cfnParams.whatLoss,cfnParams.numClasses,...
             cfnParams.whatClassifier,numFeatures,accuracyBit);
+    if cfnParams.computePerFold
+        fprintf(1,'[Training folds: mean = %.3f%s, std = %.3f%s across %u folds]\n',...
+                    mean(inSampleStats(:,1)),cfnParams.whatLossUnits,...
+                    mean(inSampleStats(:,2)),cfnParams.whatLossUnits,cfnParams.numFolds);
+    end
+    fprintf(1,'\n');
 end
 
 
 %-------------------------------------------------------------------------------
-% Check nulls:
+%% Compute nulls for permutation testing
 %-------------------------------------------------------------------------------
 if numNulls > 0
 
@@ -186,14 +213,16 @@ if numNulls > 0
         nullStats = zeros(numNulls,1);
         if doParallel
             fprintf(1,'Using parfor for speed...\n');
+            assert(cfnParms.computePerFold == false);
+            tsGroup = TimeSeries.Group; % set up for parfor
             parfor i = 1:numNulls
-                shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
+                shuffledLabels = tsGroup(randperm(height(TimeSeries)));
                 nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,TS_DataMat,shuffledLabels,cfnParams);
             end
         else
             for i = 1:numNulls
                 shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-                nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,TS_DataMat,shuffledLabels,cfnParams);
+                nullStats(i) = GiveMeFoldLosses(TS_DataMat,shuffledLabels,cfnParams);
                 if i==1
                     fprintf(1,'%u',i);
                 else
@@ -223,13 +252,20 @@ if numNulls > 0
         h = histogram(nullStats);
         h.FaceColor = ones(1,3)*0.5;
         xline(mean(meanAcc),'r','LineWidth',2)
+        if cfnParams.computePerFold
+            xline(mean(inSampleStats(:,1)),'--r');
+        end
         xlabel(sprintf('%s (%s)',cfnParams.whatLoss,cfnParams.whatLossUnits))
         ylabel('Number of nulls')
         if simpleNull
-            legend(sprintf('Simple shuffled *output* labels (%u)',numNulls),'Real labels')
+            legendEntries = {sprintf('Simple shuffled *output* label null (%u)',numNulls),'Real labels (out-of-sample)'};
         else
-            legend(sprintf('Model-based (shuffled input labels) (%u)',numNulls),'Real labels')
+            legendEntries = {sprintf('Model-based (shuffled input label) null (%u)',numNulls),'Real labels (out-of-sample)'};
         end
+        if cfnParams.computePerFold
+            legendEntries{3} = 'Real labels (in-sample)';
+        end
+        legend(legendEntries)
     end
 
     % Estimate a p-value:
@@ -250,11 +286,12 @@ else
 end
 
 %-------------------------------------------------------------------------------
-% Plot a confusion matrix
+%% Plot a confusion matrix
 %-------------------------------------------------------------------------------
 % Convert real and predicted class labels to matrix form (numClasses x N),
 % required as input to plotconfusion:
 realLabels = TimeSeries.Group;
+
 % Predict from the first CV-partition:
 if cfnParams.numFolds > 0
     % Just show results from the first CV repeat:
@@ -264,12 +301,12 @@ else
 end
 
 if doPlot
-    if exist('confusionchart','file') == 0 && exist('plotconfusion','file') ==0
+    if exist('confusionchart','file') == 0 && exist('plotconfusion','file') == 0
         warning('No available confusion matrix plotting functions')
     else
         if cfnParams.numFolds > 0
-            titleText = sprintf('Confusion matrix from %u-fold %s cross-validation (repeat 1)',...
-                    cfnParams.numFolds,cfnParams.classifierText);
+            titleText = sprintf('Confusion matrix from %u-fold %s cross-validation (REPEAT 1/%u SHOWN)',...
+                    cfnParams.numFolds,cfnParams.classifierText,cfnParams.numRepeats);
         else
             titleText = sprintf('Confusion matrix from in-sample %s classification',...
                                 cfnParams.classifierText);
@@ -299,8 +336,9 @@ if doPlot
 end
 
 %-------------------------------------------------------------------------------
-% Save trained classifier:
+%% Save trained classifier
 %-------------------------------------------------------------------------------
+% E.g., for loading in later for classifying a new dataset
 if ~isempty(cfnParams.classifierFilename)
     [Acc,Mdl] = GiveMeCfn(TS_DataMat,TimeSeries.Group,TS_DataMat,...
                                             TimeSeries.Group,cfnParams);
@@ -330,9 +368,17 @@ if nargout==0
 end
 
 %-------------------------------------------------------------------------------
-function [foldLosses,CVMdl] = GiveMeFoldLosses(dataMatrix,dataLabels)
-    % Returns the output (e.g., loss) for the custom fn_loss function across all folds
-    [foldLosses,CVMdl] = GiveMeCfn(dataMatrix,dataLabels,dataMatrix,dataLabels,cfnParams);
+function [accuracy,accuracyStd,CVMdl,inSampleAccStd] = GiveMeFoldLosses(dataMatrix,dataLabels,cfnParams)
+    % Returns the output (e.g., loss) for the custom fn_loss function in each test fold
+    [foldAcc,CVMdl] = GiveMeCfn(dataMatrix,dataLabels,dataMatrix,dataLabels,cfnParams);
+    if cfnParams.computePerFold
+        accuracy = mean(foldAcc{2}); % test folds
+        accuracyStd = std(foldAcc{2}); % test folds
+        inSampleAccStd = [mean(foldAcc{1}),std(foldAcc{1})]; % training folds
+    else
+        accuracy = foldAcc;
+        accuracyStd = NaN;
+    end
 end
 %-------------------------------------------------------------------------------
 

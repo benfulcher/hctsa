@@ -35,10 +35,13 @@ if nargin < 3
 end
 
 %-------------------------------------------------------------------------------
-% Set the classifier:
-params.whatClassifier = 'svm-linear'; % ('svm-linear', 'knn', 'linear', 'fast-linear')
+%% Set the classifier:
+%-------------------------------------------------------------------------------
+% Choices in GiveMeCfn: 'svm-linear', 'knn', 'linear', 'fast-linear', 'logistic', 'svm-linear-lowdim'
+params.whatClassifier = 'svm-linear';
 
 % Number of repeats of cross-validation (reduce variance due to 'lucky splits')
+% numRepeats = 1 corresponds to a single run (i.e., no repeats).
 params.numRepeats = 1;
 
 % Check group labeling:
@@ -51,7 +54,7 @@ end
 % Number of classes to classify
 % (Assume every class is represented in the data):
 params.classLabels = categories(TimeSeries.Group);
-if nargin < 2 || isempty(numClasses);
+if nargin < 2 || isempty(numClasses)
     numClasses = length(params.classLabels);
 end
 params.numClasses = numClasses;
@@ -67,7 +70,7 @@ if isBalanced
     params.whatLossUnits = '%';
 else
     if beVocal
-        fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
+        fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using re-weighting)...\n');
     end
     params.doReweight = true;
     params.whatLoss = 'balancedAccuracy';
@@ -82,7 +85,7 @@ end
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);
 
 % Whether to output information about each fold, or average over folds
-params.computePerFold = false;
+params.computePerFold = true;
 
 % Aggregate (single accuracy computed from all predicted labels), or mean across folds (default)
 params.doAggregate = false;

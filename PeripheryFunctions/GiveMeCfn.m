@@ -33,7 +33,7 @@ function [accuracy,Mdl] = GiveMeCfn(XTrain,yTrain,XTest,yTest,cfnParams,beVerbos
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check inputs:
+%% Check Inputs:
 %-------------------------------------------------------------------------------
 % Ensure y is a column vector
 if size(yTrain,1) < size(yTrain,2)
@@ -50,14 +50,21 @@ if nargin < 6
 end
 
 %-------------------------------------------------------------------------------
-% Define the classification model
+%% Define the classification model
 %------------------------------------------------------------------------------
 if strcmp(cfnParams.whatClassifier,'fast-linear')
     %--------------------------------------------------------------------------
     % Special case -- the `classify` function is faster than others
     %--------------------------------------------------------------------------
     if cfnParams.numFolds > 0
-        Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform','KFold',cfnParams.numFolds);
+        if cfnParams.doReweight
+            Mdl = fitcdiscr(XTrain,yTrain,'Prior','empirical',...
+            'DiscrimType','linear','Weights',InverseProbWeight(yTrain),...
+            'KFold',cfnParams.numFolds);
+        else
+            Mdl = fitcdiscr(XTrain,yTrain,'Prior','empirical',...
+            'DiscrimType','linear','KFold',cfnParams.numFolds);
+        end
     else
         if nargout == 1
             % It's faster to use classify if we only want the accuracy
@@ -65,7 +72,7 @@ if strcmp(cfnParams.whatClassifier,'fast-linear')
                             cfnParams.whatLoss,cfnParams.classLabels);
             return;
         else
-            Mdl = fitcdiscr(XTrain,yTrain,'Prior','uniform');
+            Mdl = fitcdiscr(XTrain,yTrain,'Prior','empirical');
         end
     end
 else
@@ -95,8 +102,46 @@ else
             else
                 Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on');
             end
+        case 'logistic'
+            if cfnParams.doReweight
+                if cfnParams.numFolds > 0
+                    Mdl = fitclinear(XTrain,yTrain,'Learner','logistic','Regularization','ridge',...
+                                'Lambda','auto','Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
+                else
+                    Mdl = fitclinear(XTrain,yTrain,'Learner','logistic','Regularization','ridge',...
+                                'Lambda','auto','Weights',InverseProbWeight(yTrain));
+                end
+            else
+                if cfnParams.numFolds > 0
+                    Mdl = fitclinear(XTrain,yTrain,'Learner','logistic','Regularization','ridge',...
+                                'Lambda','auto','KFold',cfnParams.numFolds);
+                else
+                    Mdl = fitclinear(XTrain,yTrain,'Learner','logistic','Regularization','ridge',...
+                                'Lambda','auto');
+                end
+            end
         case {'svm','svm-linear'}
             % Weight observations by inverse class probability:
+            % lambdaDefault = 1/size(XTrain,1);
+            if cfnParams.doReweight
+                if cfnParams.numFolds > 0
+                    Mdl = fitclinear(XTrain,yTrain,'Learner','svm','Lambda','auto','Regularization','ridge',...
+                                'Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
+                else
+                    Mdl = fitclinear(XTrain,yTrain,'Learner','svm','Lambda','auto','Regularization','ridge',...
+                                'Weights',InverseProbWeight(yTrain));
+                end
+            else
+                if cfnParams.numFolds > 0
+                    Mdl = fitclinear(XTrain,yTrain,'Learner','svm','Lambda','auto',...
+                                        'Regularization','ridge','KFold',cfnParams.numFolds);
+                else
+                    Mdl = fitclinear(XTrain,yTrain,'Learner','svm','Lambda','auto','Regularization','ridge');
+                end
+            end
+        case 'svm-linear-lowdim'
+            % For low-dim datasets (e.g., using a reduced feature set), the 'traditional' linear SVM (fitcsvm)
+            % can be preferable to the above (fitclinear)
             if cfnParams.doReweight
                 if cfnParams.numFolds > 0
                     Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
@@ -114,9 +159,11 @@ else
             % Weight observations by inverse class probability:
             if cfnParams.doReweight
                 if cfnParams.numFolds > 0
-                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',...
+                                    InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
                 else
-                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',InverseProbWeight(yTrain));
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','rbf','Weights',...
+                                                    InverseProbWeight(yTrain));
                 end
             else
                 if cfnParams.numFolds > 0
@@ -131,6 +178,8 @@ else
             else
                 Mdl = fitcnb(XTrain,yTrain);
             end
+        otherwise
+            error('Unknown classifier: ''%s''',cfnParams.whatClassifier);
         end
     else
         %----------------------------------------------------------------------
@@ -157,6 +206,8 @@ else
         case 'svm-rbf'
             t = templateSVM('KernelFunction','rbf');
             if beVerbose, fprintf(1,'Using a rbf svm classifier\n'); end
+        case 'logistic'
+            error('Logistic regression is not applicable to problems with >2 classes')
         otherwise
             error('Unknown classifier: ''%s''',cfnParams.whatClassifier);
         end
@@ -181,7 +232,7 @@ else
 end
 
 %-------------------------------------------------------------------------------
-% Evaluate performance on test data
+%% Evaluate performance on test data (in-sample, or from CV folds)
 %-------------------------------------------------------------------------------
 % Predict the test data:
 if cfnParams.numFolds == 0
@@ -195,18 +246,33 @@ if cfnParams.numFolds == 0
     end
 else
     % Test data is mixed through the training data provided using k-fold cross validation
-    % Output is the accuracy/loss measure for each fold, can mean it themselves if they want to
-    yPredict = kfoldPredict(Mdl);
+    % Output is the accuracy/loss measure for each fold
     if cfnParams.computePerFold
-        % Compute separately for each fold, store in 2-component vector accuracy = [trainAcc,testAcc]:
+        % Compute separately for each test fold:
+        yPredict = kfoldPredict(Mdl);
         accuracyTestFolds = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
                             yPredict(Mdl.Partition.test(x)),cfnParams.whatLoss,...
                             cfnParams.classLabels),1:cfnParams.numFolds);
-        accuracyTrainFolds = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.train(x)),...
-                            yPredict(Mdl.Partition.train(x)),cfnParams.whatLoss,...
-                            cfnParams.classLabels),1:cfnParams.numFolds);
+
+        % Compute for each training fold:
+        accuracyTrainFolds = zeros(cfnParams.numFolds,1);
+        for k = 1:cfnParams.numFolds
+            XTrain_k = XTrain(Mdl.Partition.training(k),:);
+            yTrain_k = yTrain(Mdl.Partition.training(k));
+            yPredict_k = predict(Mdl.Trained{k},XTrain_k);
+            accuracyTrainFolds(k) = BF_LossFunction(yTrain_k,yPredict_k,cfnParams.whatLoss,...
+                            cfnParams.classLabels);
+        end
+
+        % Combine train/test accuracies:
         accuracy = {accuracyTrainFolds,accuracyTestFolds};
+
+        % Warning for training fold over-fitting:
+        if all(accuracyTrainFolds==100)
+            warning('Over-fitting alert (100% in-sample accuracy): consider reducing feature space or regularizing')
+        end
     else
+        yPredict = kfoldPredict(Mdl);
         if cfnParams.doAggregate
             % Aggregate all outputs from folds and compute accuracy once from that aggregate:
             accuracy = BF_LossFunction(yTrain,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
