@@ -60,6 +60,7 @@ if nargin < 3
 end
 
 % Use an inputParser to parse additional options as parameters:
+
 inputP = inputParser;
 % doParallel: use parfor to speed up null computation
 default_doParallel = false;
@@ -89,6 +90,7 @@ clear('inputP');
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
 [groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
+
 % Give basic info about the represented classes:
 TellMeAboutLabeling(TimeSeries);
 
