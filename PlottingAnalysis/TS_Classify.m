@@ -119,6 +119,7 @@ numFeatures = height(Operations);
 
 % Reset the random seed for CV-reproducibility
 BF_ResetSeed(seedReset);
+fprintf(1,'Resetting random seed for reproducibility\n');
 
 % Fit the classification model to the dataset and evaluate performance:
 CVMdl = cell(cfnParams.numRepeats,1);
@@ -129,9 +130,9 @@ if cfnParams.computePerFold
 end
 for i = 1:cfnParams.numRepeats
     if cfnParams.computePerFold
-        [meanAcc(i),stdAcc(i),CVMdl{i},inSampleStats(i,:)] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group,cfnParams);
+        [meanAcc(i),stdAcc(i),CVMdl{i},inSampleStats(i,:)] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams);
     else
-        [meanAcc(i),stdAcc(i),CVMdl{i}] = GiveMeFoldLosses(TS_DataMat,TimeSeries.Group,cfnParams);
+        [meanAcc(i),stdAcc(i),CVMdl{i}] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams);
     end
 end
 
@@ -217,12 +218,12 @@ if numNulls > 0
             tsGroup = TimeSeries.Group; % set up for parfor
             parfor i = 1:numNulls
                 shuffledLabels = tsGroup(randperm(height(TimeSeries)));
-                nullStats(i) = GiveMeCfn(TS_DataMat,shuffledLabels,TS_DataMat,shuffledLabels,cfnParams);
+                nullStats(i) = ComputeCVAccuracies(TS_DataMat,shuffledLabels,cfnParams);
             end
         else
             for i = 1:numNulls
                 shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-                nullStats(i) = GiveMeFoldLosses(TS_DataMat,shuffledLabels,cfnParams);
+                nullStats(i) = ComputeCVAccuracies(TS_DataMat,shuffledLabels,cfnParams);
                 if i==1
                     fprintf(1,'%u',i);
                 else
@@ -366,20 +367,5 @@ end
 if nargout==0
     clear('foldLosses','nullStats','jointClassifier')
 end
-
-%-------------------------------------------------------------------------------
-function [accuracy,accuracyStd,CVMdl,inSampleAccStd] = GiveMeFoldLosses(dataMatrix,dataLabels,cfnParams)
-    % Returns the output (e.g., loss) for the custom fn_loss function in each test fold
-    [foldAcc,CVMdl] = GiveMeCfn(dataMatrix,dataLabels,dataMatrix,dataLabels,cfnParams);
-    if cfnParams.computePerFold
-        accuracy = mean(foldAcc{2}); % test folds
-        accuracyStd = std(foldAcc{2}); % test folds
-        inSampleAccStd = [mean(foldAcc{1}),std(foldAcc{1})]; % training folds
-    else
-        accuracy = foldAcc;
-        accuracyStd = NaN;
-    end
-end
-%-------------------------------------------------------------------------------
 
 end

@@ -273,16 +273,15 @@ else
         end
     else
         yPredict = kfoldPredict(Mdl);
-        if cfnParams.doAggregate
-            % Aggregate all outputs from folds and compute accuracy once from that aggregate:
-            accuracy = BF_LossFunction(yTrain,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
-        else
-            % Compute accuracy in each test fold, then summarize as the mean across folds:
-            accuracyTestFolds = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
-                            yPredict(Mdl.Partition.test(x)),cfnParams.whatLoss,...
-                            cfnParams.classLabels),1:cfnParams.numFolds);
-            accuracy = mean(accuracyTestFolds);
-        end
+        % Aggregate all outputs from folds and compute accuracy once from that aggregate:
+        accuracy = BF_LossFunction(yTrain,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
+
+        % % Above is equivalent to computing the accuracy in each test fold, then computing the mean
+        % % across folds:
+        % accuracyTestFolds = arrayfun(@(x) BF_LossFunction(yTrain(Mdl.Partition.test(x)),...
+        %                 yPredict(Mdl.Partition.test(x)),cfnParams.whatLoss,...
+        %                 cfnParams.classLabels),1:cfnParams.numFolds);
+        % accuracy = mean(accuracyTestFolds);
     end
 end
 

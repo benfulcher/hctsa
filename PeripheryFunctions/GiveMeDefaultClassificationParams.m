@@ -84,14 +84,12 @@ end
 % Number of folds (set to 0 for no CV)
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);
 
-% Whether to output information about each fold, or average over folds
+% Whether to output information about each fold (including training set errors),
+% or just average over folds
 params.computePerFold = true;
 
-% Aggregate (single accuracy computed from all predicted labels), or mean across folds (default)
-params.doAggregate = false;
-
 %-------------------------------------------------------------------------------
-% Classifer name:
+%% Classifer name:
 %-------------------------------------------------------------------------------
 % .mat file to save the classifier to (not saved if empty).
 params.classifierFilename = ''; % (don't save classifier information to file)
