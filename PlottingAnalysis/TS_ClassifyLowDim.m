@@ -207,13 +207,16 @@ plot(1:numPCs,cfnRatePCs - stdAcc,'-','Color',0.5*ones(1,3),'LineWidth',lineWidt
 % yline(cfnRateAll - stdAll,':','color',plotColors{4},'LineWidth',lineWidth)
 % yline(cfnRateAll + stdAll,':','color',plotColors{4},'LineWidth',lineWidth)
 
-
 legend([l_testSet,l_trainSet],{legendEntryPCs,legendEntryPCs_inSample},...
         'Location','SouthEast')
 
 ax.XTick = 1:numPCs;
 xlabel('Number of PCs');
 ylabel('Classification accuracy (%)')
+
+titleText = sprintf('Classification rate (%u-class) using %u-fold %s',...
+            cfnParams.numClasses,cfnParams.numFolds,cfnParams.classifierText);
+title(titleText,'interpreter','none')
 
 %-------------------------------------------------------------------------------
 ax_bar = subplot(1,3,3);
@@ -244,10 +247,6 @@ ax_bar.XTickLabel = xTickLabels;
 
 ax_bar.YLim = ax.YLim;
 linkaxes([ax,ax_bar],'y')
-
-titleText = sprintf('Classification rate (%u-class) using %u-fold %s',...
-            cfnParams.numClasses,cfnParams.numFolds,cfnParams.classifierText);
-title(titleText,'interpreter','none')
 
 
 end
