@@ -116,30 +116,21 @@ numFeatures = height(Operations);
 %-------------------------------------------------------------------------------
 %% Fit the model
 %-------------------------------------------------------------------------------
-
 % Reset the random seed for CV-reproducibility
 BF_ResetSeed(seedReset);
 fprintf(1,'Resetting random seed for reproducibility\n');
 
 % Fit the classification model to the dataset and evaluate performance:
-CVMdl = cell(cfnParams.numRepeats,1);
-meanAcc = zeros(cfnParams.numRepeats,1);
-stdAcc = zeros(cfnParams.numRepeats,1);
 if cfnParams.computePerFold
-    inSampleStats = zeros(cfnParams.numRepeats,2);
-end
-for i = 1:cfnParams.numRepeats
-    if cfnParams.computePerFold
-        [meanAcc(i),stdAcc(i),CVMdl{i},inSampleStats(i,:)] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams);
-    else
-        [meanAcc(i),stdAcc(i),CVMdl{i}] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams);
-    end
+    [meanAcc,stdAcc,inSampleAccStd,~,CVMdl] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams,false);
+else
+    [meanAcc,stdAcc,~,~,CVMdl] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams,false);
 end
 
 %-------------------------------------------------------------------------------
 %% Display results to commandline
 %-------------------------------------------------------------------------------
-if cfnParams.numFolds == 0
+if cfnParams.numFolds==0
     assert(cfnParams.numRepeats==1)
     fprintf(1,'In-sample %s using %s = %.3f%s\n',cfnParams.whatLoss,cfnParams.whatClassifier,...
                                             meanAcc,cfnParams.whatLossUnits);
@@ -170,8 +161,8 @@ else
             cfnParams.whatClassifier,numFeatures,accuracyBit);
     if cfnParams.computePerFold
         fprintf(1,'[Training folds: mean = %.3f%s, std = %.3f%s across %u folds]\n',...
-                    mean(inSampleStats(:,1)),cfnParams.whatLossUnits,...
-                    mean(inSampleStats(:,2)),cfnParams.whatLossUnits,cfnParams.numFolds);
+                    mean(inSampleAccStd(:,1)),cfnParams.whatLossUnits,...
+                    mean(inSampleAccStd(:,2)),cfnParams.whatLossUnits,cfnParams.numFolds);
     end
     fprintf(1,'\n');
 end
@@ -181,7 +172,6 @@ end
 %% Compute nulls for permutation testing
 %-------------------------------------------------------------------------------
 if numNulls > 0
-
     if simpleNull && (cfnParams.numFolds == 0)
         warning('The simple null is invalid for in-sample classification: using a full model-based null')
         simpleNull = false;
@@ -192,19 +182,7 @@ if numNulls > 0
         % Will be a bad approximation when the classifier has e.g., class-balance bias
         % Will be a very poor approximation when CV is off (overfitting)
         fprintf(1,'Assessing %s across %u (simple permutation-based) nulls...',cfnParams.whatLoss,numNulls);
-
-        nullStats = zeros(numNulls,1);
-        for i = 1:numNulls
-            shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-            cvFolds = cvpartition(TimeSeries.Group,'KFold',cfnParams.numFolds,'Stratify',true);
-            nullAcc_k = zeros(cfnParams.numFolds,1);
-            for k = 1:cfnParams.numFolds
-                yTrue = TimeSeries.Group(cvFolds.test(k));
-                yPredict = shuffledLabels(cvFolds.test(k));
-                nullAcc_k(k) = BF_LossFunction(yTrue,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
-            end
-            nullStats(i) = mean(nullAcc_k);
-        end
+        nullStats = GiveMeSimpleNullStats(TimeSeries.Group,numNulls,cfnParams);
     else
         % Null is output from classifier from shuffled-label input.
         % More computationally intensive, but accurate.
@@ -218,12 +196,12 @@ if numNulls > 0
             tsGroup = TimeSeries.Group; % set up for parfor
             parfor i = 1:numNulls
                 shuffledLabels = tsGroup(randperm(height(TimeSeries)));
-                nullStats(i) = ComputeCVAccuracies(TS_DataMat,shuffledLabels,cfnParams);
+                nullStats(i) = ComputeCVAccuracies(TS_DataMat,shuffledLabels,cfnParams,true);
             end
         else
             for i = 1:numNulls
                 shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-                nullStats(i) = ComputeCVAccuracies(TS_DataMat,shuffledLabels,cfnParams);
+                nullStats(i) = ComputeCVAccuracies(TS_DataMat,shuffledLabels,cfnParams,true);
                 if i==1
                     fprintf(1,'%u',i);
                 else
@@ -254,7 +232,7 @@ if numNulls > 0
         h.FaceColor = ones(1,3)*0.5;
         xline(mean(meanAcc),'r','LineWidth',2)
         if cfnParams.computePerFold
-            xline(mean(inSampleStats(:,1)),'--r');
+            xline(mean(inSampleAccStd(:,1)),'--r');
         end
         xlabel(sprintf('%s (%s)',cfnParams.whatLoss,cfnParams.whatLossUnits))
         ylabel('Number of nulls')

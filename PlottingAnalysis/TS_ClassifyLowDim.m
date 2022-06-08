@@ -63,7 +63,8 @@ numFeatures = size(TS_DataMat,2);
 if doComputeAtMaxInSample
     if ~cfnParams.computePerFold
         cfnParams.computePerFold = true;
-        warning('You must compute in-sample accuracies (per fold) for doComputeAtMaxInSample to work: setting to true.');
+        warning(['You must compute in-sample accuracies (per fold) for',...
+                        'doComputeAtMaxInSample to work: setting to true.']);
     end
 end
 
@@ -115,12 +116,13 @@ cfnRatePCs = zeros(numPCs,1);
 stdAcc = zeros(numPCs,1);
 if cfnParams.computePerFold
     inSampleStats = zeros(numPCs,2);
+    allFoldPCs = cell(numPCs,1);
 end
 fprintf('Computing %s, keeping top 1-%u PCs...\n',cfnParams.whatLoss,numPCs)
 for i = 1:numPCs
     topPCs = pcScore(:,1:i);
     if cfnParams.computePerFold
-        [cfnRatePCs(i),stdAcc(i),~,inSampleStats(i,:)] = ComputeCVAccuracies(topPCs,TimeSeries.Group,cfnParams);
+        [cfnRatePCs(i),stdAcc(i),inSampleStats(i,:),allFoldPCs{i}] = ComputeCVAccuracies(topPCs,TimeSeries.Group,cfnParams,true);
         fprintf(1,'%u PCs: [in-fold: %.1f%%] %.1f +/- %.1f%%\n',i,inSampleStats(i,1),cfnRatePCs(i),stdAcc(i));
     else
         [cfnRatePCs(i),stdAcc(i)] = ComputeCVAccuracies(topPCs,TimeSeries.Group,cfnParams);
@@ -136,6 +138,7 @@ if doComputeAtMaxInSample
         theNumPCs = find(inSampleStats(:,1)==100,1,'first');
         accAtPerfectInSample = cfnRatePCs(theNumPCs);
         stdAtPerfectInSample = stdAcc(theNumPCs);
+        allFoldsAtPerfectInSample = allFoldPCs{theNumPCs};
     else
         % Keep searching
         fprintf(1,'Let''s keep searching for perfect in-sample accuracy...\n');
@@ -144,12 +147,13 @@ if doComputeAtMaxInSample
         while PC_inSampleMeanAcc < 100
             i = i + 1;
             topPCs = pcScore(:,1:i);
-            [PCacc_mean,PCAcc_std,~,PC_inSampleMeanAcc] = ComputeCVAccuracies(topPCs,TimeSeries.Group,cfnParams);
+            [PCacc_mean,PCAcc_std,PC_inSampleMeanAcc,PC_allFoldData] = ComputeCVAccuracies(topPCs,TimeSeries.Group,cfnParams,true);
             fprintf(1,'%u PCs: [%.1f%%] %.1f +/- %.1f%%\n',i,PC_inSampleMeanAcc(1),PCacc_mean,PCAcc_std);
         end
         theNumPCs = i;
         accAtPerfectInSample = PCacc_mean;
         stdAtPerfectInSample = PCAcc_std;
+        allFoldsAtPerfectInSample = PC_allFoldData;
     end
 end
 
@@ -158,37 +162,59 @@ end
 %-------------------------------------------------------------------------------
 fprintf('Now with all %u features for comparison...\n',numFeatures)
 if cfnParams.computePerFold
-    [cfnRateAll,stdAll,~,inSampleAll] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams);
+    [cfnRateAll,stdAll,inSampleAll,allFoldData] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams,true);
 else
     [cfnRateAll,stdAll] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams);
 end
 
 %-------------------------------------------------------------------------------
+%% Simple null estimate
+%-------------------------------------------------------------------------------
+numNulls = 1000;
+nullStatsAll = GiveMeSimpleNullStats(TimeSeries.Group,numNulls,cfnParams,false);
+nullStatsFoldMeans = mean(nullStatsAll,2);
+
+%-------------------------------------------------------------------------------
 %% Plot
 %-------------------------------------------------------------------------------
-plotColors = BF_GetColorMap('spectral',4,1);
+plotColors = {[0,114,178]/255,[213,94,0]/255,[0,158,115]/255,[204,121,167]/255,...
+                [230,159,0]/255,[86,180,233]/255,[240,215,66]/255,[0,0,0]/255};
 lineWidth = 2;
 f = figure('color','w');
 f.Position(3:4) = [506,324];
-ax = subplot(1,3,1:2);
+ax = subplot(1,4,1:2);
 hold('on')
 
-% All-feature accuracies:
+%-------------------------------------------------------------------------------
+% All-feature out-of-sample:
 l_allfeats = yline(cfnRateAll,'-','color',plotColors{4},'LineWidth',lineWidth,...
             'Label',sprintf('All %u features (%.1f +/- %.1f%%)',numFeatures,cfnRateAll,stdAll));
 legendEntryAllFeatures = sprintf('All %u features (%.1f%%)',numFeatures,cfnRateAll);
-% All feature in-sample
+
+% All-feature in-sample:
 if cfnParams.computePerFold
     legendEntryAllFeatures_inSample = sprintf('All features (in-fold): %.1f%%',inSampleAll(1));
-    yline(inSampleAll(1),'-','color',brighten(plotColors{3},-0.5),'LineWidth',lineWidth,...
+    yline(inSampleAll(1),'--','color',brighten(plotColors{3},-0.5),'LineWidth',lineWidth,...
                     'Label',legendEntryAllFeatures_inSample)
 
 end
 
+%-------------------------------------------------------------------------------
+% Naive null estimate
+l_naive_null = yline(mean(nullStatsFoldMeans),'-','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
+                        'Label','Naive null');
+l_naive_null_over = yline(quantile(nullStatsFoldMeans,0.95),'--','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
+                        'Label','Naive null 95% quantile');
+
+%-------------------------------------------------------------------------------
 % Out-of-fold accuracy at perfect in-fold accuracy:
 if doComputeAtMaxInSample
     yline(accAtPerfectInSample,'-','color','r','LineWidth',lineWidth,...
-            'Label',sprintf('At perfect in-fold acc (%.1f +/- %.1f%%)',accAtPerfectInSample,stdAtPerfectInSample));
+            'Label',sprintf('At perfect in-fold acc (%.1f +/- %.1f%%)',...
+                        accAtPerfectInSample,stdAtPerfectInSample));
+    if theNumPCs < numPCs
+        xline(theNumPCs,'--r');
+    end
 end
 
 % Leading PCA accuracies:
@@ -196,7 +222,8 @@ l_testSet = plot(1:numPCs,cfnRatePCs,'o-k','LineWidth',lineWidth);
 legendEntryPCs = sprintf('PCs (%.1f-%.1f%%)',min(cfnRatePCs),max(cfnRatePCs));
 if cfnParams.computePerFold
     l_trainSet = plot(1:numPCs,inSampleStats(:,1),'o-','Color',plotColors{2},'LineWidth',lineWidth);
-    legendEntryPCs_inSample = sprintf('In-sample (%.1f-%.1f%%)',min(inSampleStats(:,1)),max(inSampleStats(:,1)));
+    legendEntryPCs_inSample = sprintf('In-sample (%.1f-%.1f%%)',...
+                                min(inSampleStats(:,1)),max(inSampleStats(:,1)));
 end
 
 % Error bars:
@@ -219,34 +246,76 @@ titleText = sprintf('Classification rate (%u-class) using %u-fold %s',...
 title(titleText,'interpreter','none')
 
 %-------------------------------------------------------------------------------
-ax_bar = subplot(1,3,3);
-hold('on')
+% Violin plots of individual fold accuracies
+%-------------------------------------------------------------------------------
+ax_bar_folds = subplot(1,4,4);
 
 if doComputeAtMaxInSample
-    accData = [cfnRateAll,inSampleAll(1),accAtPerfectInSample];
-    b = bar(accData,'FaceColor','flat');
-    b.CData(1,:) = plotColors{4};
-    b.CData(2,:) = brighten(plotColors{3},-0.5);
-    b.CData(3,:) = [1,0,0];
-    ax_bar.XTick = 1:3;
-    xTickLabels = {sprintf('all %u features',numFeatures),'all features (in-fold)',...
-                    sprintf('perfect-in-fold (%u PCs)',theNumPCs)};
-    % Error bars:
-    stdData = [stdAll,0,stdAtPerfectInSample];
-    er = errorbar(1:3,accData,stdData);
-    er.Color = [0 0 0];
-    er.LineStyle = 'none';
+    allFeatures_allTrainFolds = squeeze(allFoldData(:,1,:));
+    allFeatures_allTestFolds = squeeze(allFoldData(:,2,:));
+    allFoldsAtPerfectInSample_allTrainFolds = squeeze(allFoldsAtPerfectInSample(:,1,:));
+    allFoldsAtPerfectInSample_allTestFolds = squeeze(allFoldsAtPerfectInSample(:,2,:));
+    nullStatsAllFolds = nullStatsAll(:);
+    accData = {nullStatsAllFolds,allFeatures_allTrainFolds(:),allFeatures_allTestFolds(:),...
+            allFoldsAtPerfectInSample_allTrainFolds(:),allFoldsAtPerfectInSample_allTestFolds(:)};
+    extraParams = struct();
+    plotColors{1} = ones(1,3)*0.5;
+    extraParams.theColors = plotColors;
+    BF_ViolinPlot(accData,[],[],false,extraParams);
+
+    ax_bar_folds.XTick = [1:5+0.5];
+    xTickLabels = {'Naive-shuffle null',sprintf('all %u features train folds',numFeatures),...
+                    'all features test folds',...
+                    sprintf('perfect-in-fold (%u PCs) train folds',theNumPCs),...
+                    sprintf('perfect-in-fold (%u PCs) test folds',theNumPCs)};
+
+    % Bar + error bars:
+    % hold('on')
+    % b = bar(accData,'FaceColor','flat');
+    % b.CData(1,:) = plotColors{4};
+    % b.CData(2,:) = brighten(plotColors{3},-0.5);
+    % b.CData(3,:) = [1,0,0];
+    % stdData = [stdAll,0,stdAtPerfectInSample];
+    % er = errorbar(1:3,accData,stdData);
+    % er.Color = [0 0 0];
+    % er.LineStyle = 'none';
 else
+    hold('on')
     b = bar([cfnRateAll,inSampleAll(1)],'FaceColor','flat');
     b.CData(1,:) = plotColors{4};
     b.CData(2,:) = brighten(plotColors{3},-0.5);
-    ax_bar.XTick = 1:2;
+    ax_bar_folds.XTick = 1:2;
     xTickLabels = {'all','all (in-fold)'};
 end
+ax_bar_folds.XTickLabel = xTickLabels;
+ax_bar_folds.YLim = ax.YLim;
+linkaxes([ax,ax_bar_folds],'y')
+
+%-------------------------------------------------------------------------------
+% Violin plots of fold-average accuracies
+%-------------------------------------------------------------------------------
+ax_bar = subplot(1,4,3);
+hold('on')
+allFeatures_allTrainFoldMeans = mean(squeeze(allFoldData(:,1,:)),1);
+allFeatures_allTestFoldMeans = mean(squeeze(allFoldData(:,2,:)),1);
+allFoldsAtPerfectInSample_allTrainFoldMeans = mean(squeeze(allFoldsAtPerfectInSample(:,1,:)),1);
+allFoldsAtPerfectInSample_allTestFoldMeans = mean(squeeze(allFoldsAtPerfectInSample(:,2,:)),1);
+accData = {nullStatsFoldMeans,allFeatures_allTrainFoldMeans,allFeatures_allTestFoldMeans,...
+        allFoldsAtPerfectInSample_allTrainFoldMeans,allFoldsAtPerfectInSample_allTestFoldMeans};
+extraParams = struct();
+plotColors{1} = ones(1,3)*0.5;
+extraParams.theColors = plotColors;
+BF_ViolinPlot(accData,[],[],false,extraParams);
+l_naive_null_over = yline(quantile(nullStatsFoldMeans,0.95),'--','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
+                        'Label','Naive null 95% quantile');
+
+ax_bar.XTick = [1:5+0.5];
+xTickLabels = {'Naive-shuffle null',sprintf('all %u features train-fold-means',numFeatures),...
+                'all features train-fold-means',...
+                sprintf('perfect-in-fold (%u PCs) train-fold-means',theNumPCs),...
+                sprintf('perfect-in-fold (%u PCs) test-fold-means',theNumPCs)};
 ax_bar.XTickLabel = xTickLabels;
-
 ax_bar.YLim = ax.YLim;
-linkaxes([ax,ax_bar],'y')
-
+linkaxes([ax_bar,ax_bar_folds],'y')
 
 end

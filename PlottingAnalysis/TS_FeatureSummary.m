@@ -174,7 +174,7 @@ if doViolin
         extraParams.customOffset = -0.5;
         extraParams.offsetRange = 0.7;
         extraParams.customSpot = '.';
-        [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter(dataCell,false,true,false,extraParams);
+        [ff,xx,xScatter,yScatter] = BF_ViolinPlot(dataCell,false,true,false,extraParams);
 
         % Add lines denoting each annotated time-series in the distribution:
         if ~doInspect & annotateParams.showGlobalDist
@@ -207,7 +207,7 @@ if doViolin
     else
         % No groups: just show the global distribution
         extraParams.theColors = {ones(3,1)*0.5};
-        [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter({dataVector},false,true,false,extraParams);
+        [ff,xx,xScatter,yScatter] = BF_ViolinPlot({dataVector},false,true,false,extraParams);
 
         % Annotate lines for each feature in the distribution:
         if ~doInspect

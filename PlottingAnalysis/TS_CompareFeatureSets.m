@@ -187,7 +187,7 @@ if ismember('all',whatFeatureSets)
     allIndex = find(strcmp(whatFeatureSets,'all'));
     plot([1,numFeatureSets],mean(dataCell{allIndex}),'--','color',theColors{allIndex})
 end
-BF_JitteredParallelScatter(dataCell,true,true,false,extraParams);
+BF_ViolinPlot(dataCell,true,true,false,extraParams);
 ax = gca();
 ax.XTick = 1:numFeatureSets;
 ax.XTickLabel = whatFeatureSets;

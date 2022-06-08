@@ -269,7 +269,7 @@ else
 
         % Warning for training fold over-fitting:
         if all(accuracyTrainFolds==100)
-            warning('Over-fitting alert (100% in-sample accuracy): consider reducing feature space or regularizing')
+            warning('100% in-sample accuracy alert: consider reducing feature space or regularizing!')
         end
     else
         yPredict = kfoldPredict(Mdl);

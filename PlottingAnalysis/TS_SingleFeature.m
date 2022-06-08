@@ -90,7 +90,7 @@ if makeViolin
     extraParams.theColors = colors(ix);
     extraParams.customOffset = -0.5;
     extraParams.offsetRange = 0.7;
-    BF_JitteredParallelScatter(dataCell(ix),1,1,0,extraParams);
+    BF_ViolinPlot(dataCell(ix),1,1,0,extraParams);
 
     % Adjust appearance:
     ax = gca;
