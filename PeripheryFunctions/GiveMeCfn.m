@@ -144,7 +144,8 @@ else
             % can be preferable to the above (fitclinear)
             if cfnParams.doReweight
                 if cfnParams.numFolds > 0
-                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
+                    Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',...
+                                    InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
                 else
                     Mdl = fitcsvm(XTrain,yTrain,'KernelFunction','linear','Weights',InverseProbWeight(yTrain));
                 end

@@ -2,7 +2,7 @@ function p = MD_polvar(x, d, D)
 % MD_polvar     The POLVARd measure of a time series.
 %
 % Measures the probability of obtaining a sequence of consecutive ones or zeros.
-% 
+%
 % The first mention may be in Wessel et al., PRE (2000), called Plvar
 % cf. "Short-term forecasting of life-threatening cardiac arrhythmias based on
 % symbolic dynamics and finite-time growth rates",
@@ -19,8 +19,8 @@ function p = MD_polvar(x, d, D)
 %
 %---INPUTS:
 % x, the input time series
-% d, the symbolic coding (amplitude) difference,
-% D, the word length (classically words of length 6).
+% d, the symbolic coding (amplitude) difference
+% D, the word length (classically words of length 6)
 %
 %---OUPUT:
 % p - probability of obtaining a sequence of consecutive ones/zeros

@@ -1,4 +1,4 @@
-function out = MF_armax(y, orders, ptrain, numSteps)
+function out = MF_armax(y, orders, pTrain, numSteps)
 % MF_armax  Statistics on a fitted ARMA model.
 %
 % Uses the functions iddata, armax, aic, and predict from Matlab's System
@@ -9,10 +9,10 @@ function out = MF_armax(y, orders, ptrain, numSteps)
 % y, the input time series
 %
 % orders, a two-vector for p and q, the AR and MA components of the model,
-%           respectively,
+%           respectively
 %
-% ptrain, the proportion of data to train the model on (the remainder is used
-%           for testing),
+% pTrain, the proportion of data to train the model on (the remainder is used
+%           for testing)
 %
 % numSteps, number of steps to predict into the future for testing the model.
 %
@@ -70,11 +70,11 @@ y = iddata(y,[],1);
 if nargin < 2 || isempty(orders)
     orders = [3, 3]; % AR3, MA3
 end
-if nargin < 3 || isempty(ptrain)
-    ptrain = 0.8; % train on 80% of the data
+if nargin < 3 || isempty(pTrain)
+    pTrain = 0.8; % train on 80% of the data
 end
 % if nargin < 4 || isempty(trainmode)
-%     trainmode = 'first'; % trains on first ptrain proportion of the data.
+%     trainmode = 'first'; % trains on first pTrain proportion of the data.
 % end
 if nargin < 4 || isempty(numSteps)
     numSteps = 1; % one-step-ahead predictions
@@ -83,8 +83,8 @@ end
 % ------------------------------------------------------------------------------
 %% Fit the model
 % ------------------------------------------------------------------------------
-% Uses the System Identification Toolbox function armax
 
+% Uses the System Identification Toolbox function armax
 m = armax(y, orders);
 
 % ------------------------------------------------------------------------------
@@ -141,9 +141,9 @@ out.aic = aic(m); % ~ log(fpe)
 % Select first portion of data for estimation
 % This could be any portion, actually... Maybe could look at robustness of
 % model to different training sets...
-ytrain = y(1:floor(ptrain*N));
+ytrain = y(1:floor(pTrain*N));
 % ytest = y;
-ytest = y(floor(ptrain*N):end); % overlap
+ytest = y(floor(pTrain*N):end); % overlap
 
 % Train the model on just this portion
 mp = armax(ytrain, orders);
