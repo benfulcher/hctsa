@@ -56,10 +56,12 @@ end
 switch distMetric
     case {'Euclidean','euclidean'}
         dij = @(v1,v2) sqrt(sum((v1-v2).^2))/length(v1)*n2; % if less entries, don't bias
-    case {'corr','correlation','abscorr','Pearson'}
+    case {'PearsonCorr','Pearson'}
         dij = @(v1,v2) subdc(v1,v2,'Pearson');
-    case 'Spearman'
+    case {'Spearman','corr','correlation','abscorr'}
         dij = @(v1,v2) subdc(v1,v2,'Spearman');
+    otherwise
+        error('Unknown distance metric: ''%s''',distMetric)
 end
 
 % ------------------------------------------------------------------------------
@@ -69,11 +71,13 @@ switch distMetric
 case 'mi'
     % Mutual information distances: can't make use of the inbuilt pdist function
     if ~isempty(opts)
-        nbins = opts; % for MI, extra argument specifies nbins
+        numBins = opts; % for MI, extra argument specifies numBins
     else
-        nbins = 10;
+        numBins = 10;
     end
-    if ~beSilent, fprintf(1,'Using a histogram with %u bins\n',nbins); end
+    if ~beSilent,
+        fprintf(1,'Using a histogram with %u bins\n',numBins);
+    end
 
     goodies = ~isnan(dataMatrix); % now we can deal with NaNs into design matrix
 
@@ -87,7 +91,7 @@ case 'mi'
             goodboth = (goodi & goodj);
             % Using Information Dynamics Toolkit:
             mis(i,j) = IN_MutualInfo(dataMatrix(i,goodboth),dataMatrix(j,goodboth),'gaussian');
-            % mis(i,j) = BF_MutualInformation(dataMatrix(i,goodboth),dataMatrix(j,goodboth),'quantile','quantile',nbins); % by quantile with nbins
+            % mis(i,j) = BF_MutualInformation(dataMatrix(i,goodboth),dataMatrix(j,goodboth),'quantile','quantile',numBins); % by quantile with numBins
             mis(j,i) = mis(i,j);
         end
         if (mod(i,floor(n1/50)) == 0)
@@ -113,14 +117,15 @@ case {'corr_fast','abscorr_fast'}
     if ~beSilent, fprintf(1,' Done in %s.\n',BF_TheTime(toc)); end
 
 
-case {'euclidean','Euclidean','corr','correlation','abscorr','Spearman'}
+case {'euclidean','Euclidean','corr','correlation','abscorr','Spearman','PearsonCorr'}
     % First use in-built pdist, which is fast
     if ~beSilent
         fprintf(1,'First computing pairwise distances using pdist...');
     end
     tic
     if strcmp(distMetric,'abscorr')
-        R = pdist(dataMatrix,'corr');
+        % Feature-feature Correlations are Spearman by default
+        R = pdist(dataMatrix,'Spearman');
     else
         R = pdist(dataMatrix,distMetric);
     end

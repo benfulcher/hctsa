@@ -121,8 +121,8 @@ else
                 end
             end
         case {'svm','svm-linear'}
-            % Weight observations by inverse class probability:
             % lambdaDefault = 1/size(XTrain,1);
+            % Weight observations by inverse class probability:
             if cfnParams.doReweight
                 if cfnParams.numFolds > 0
                     Mdl = fitclinear(XTrain,yTrain,'Learner','svm','Lambda','auto','Regularization','ridge',...
@@ -269,7 +269,7 @@ else
         accuracy = {accuracyTrainFolds,accuracyTestFolds};
 
         % Warning for training fold over-fitting:
-        if all(accuracyTrainFolds==100)
+        if ~cfnParams.suppressWarning && all(accuracyTrainFolds==100)
             warning('100% in-sample accuracy alert: consider reducing feature space or regularizing!')
         end
     else

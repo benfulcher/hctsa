@@ -21,6 +21,9 @@ function params = GiveMeDefaultClassificationParams(TimeSeries,numClasses,beVoca
 % California, 94041, USA.
 %-------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Get information about time series and set defaults
+%-------------------------------------------------------------------------------
 % Get TimeSeries labeling information from HCTSA.mat by default
 if nargin < 1 || isempty(TimeSeries)
     [~,TimeSeries] = TS_LoadData('HCTSA.mat');
@@ -34,11 +37,18 @@ if nargin < 3
     beVocal = true;
 end
 
+% Suppress warnings (about 100% in-fold accuracy)
+if beVocal
+    params.suppressWarning = false;
+else
+    params.suppressWarning = true;
+end
+
 %-------------------------------------------------------------------------------
 %% Set the classifier:
 %-------------------------------------------------------------------------------
 % Choices in GiveMeCfn: 'svm-linear', 'knn', 'linear', 'fast-linear', 'logistic', 'svm-linear-lowdim'
-params.whatClassifier = 'svm-linear';
+params.whatClassifier = 'svm-linear-lowdim';
 
 % Number of repeats of cross-validation (reduce variance due to 'lucky splits')
 % numRepeats = 1 corresponds to a single run (i.e., no repeats).
@@ -78,11 +88,12 @@ else
 end
 
 %-------------------------------------------------------------------------------
-%% CROSS VALIDATION
+%% Cross Validation
 %-------------------------------------------------------------------------------
 
 % Number of folds (set to 0 for no CV)
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);
+params.numFolds = 10;
 
 % Whether to output information about each fold (including training set errors),
 % or just average over folds

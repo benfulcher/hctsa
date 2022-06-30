@@ -432,26 +432,33 @@ if ismember('cluster',whatPlots)
     % 1. Get pairwise similarity matrix
     op_ind = ifeat(1:numTopFeatures); % plot these operations indices
 
-    % (if it exists already, use that; otherwise compute it on the fly)
-    clustStruct = TS_GetFromData(whatData,'op_clust');
-    if isempty(clustStruct) % doesn't exist
-        clustStruct = struct();
-    end
-    if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
-        % pairwise distances already computed, stored in the HCTSA .mat file
-        fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile);
-        Dij = squareform(clustStruct.Dij);
-        Dij = Dij(op_ind,op_ind);
-        distanceMetric = clustStruct.distanceMetric;
-    else
-        % Compute correlations on the fly
-        Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
-        distanceMetric = 'abscorr';
-    end
+    % (If it exists already, use that; otherwise compute it on the fly)
+    % clustStruct = TS_GetFromData(whatData,'op_clust');
+    % if isempty(clustStruct) % doesn't exist
+    %     clustStruct = struct();
+    % end
+    % if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
+    %     % pairwise distances already computed, stored in the HCTSA .mat file
+    %     fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile);
+    %     Dij = squareform(clustStruct.Dij);
+    %     Dij = Dij(op_ind,op_ind);
+    %     distanceMetric = clustStruct.distanceMetric;
+    % else
+    %     % Compute correlations on the fly
+    %     Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
+    %     distanceMetric = 'abscorr';
+    % end
+
+    % 1. Compute pairwise correlations on the dataset
+    % spearmanCorrs = corr(TS_DataMat(:,op_ind)','abscorr');
+    Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
+    distanceMetric = 'abscorr';
+
+    % 2. Plot it:
     makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations.ID(x),Operations.Name{x},...
                         testStat(x),statUnit);
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',false);
-    clusterThreshold = 0.2; % threshold at which split into clusters
+    clusterThreshold = 0.25; % threshold at which split into clusters
     [~,cluster_Groupi] = BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
                         'whatDistance',distanceMetric,...
                         'objectLabels',objectLabels);
@@ -504,7 +511,7 @@ if isfield(cfnParams,'classifierFilename') && ~isempty(cfnParams.classifierFilen
 end
 
 %-------------------------------------------------------------------------------
-% Don't display crap to screen unless the user wants it:
+% Don't display unused outputs to screen:
 if nargout == 0
     clear('ifeat','testStat','testStat_rand','featureClassifier');
 end

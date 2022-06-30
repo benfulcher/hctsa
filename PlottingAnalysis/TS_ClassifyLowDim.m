@@ -119,6 +119,7 @@ if cfnParams.computePerFold
     allFoldPCs = cell(numPCs,1);
 end
 fprintf('Computing %s, keeping top 1-%u PCs...\n',cfnParams.whatLoss,numPCs)
+cfnParams.suppressWarning = true;
 for i = 1:numPCs
     topPCs = pcScore(:,1:i);
     if cfnParams.computePerFold
@@ -131,7 +132,7 @@ for i = 1:numPCs
 end
 
 %-------------------------------------------------------------------------------
-%% Compute at first time hitting max in-sample accuracy
+%% Compute accuracy in low-dimensional space (first time hitting max in-sample accuracy)
 %-------------------------------------------------------------------------------
 if doComputeAtMaxInSample
     if any(inSampleStats(:,1)==100)
@@ -248,6 +249,7 @@ title(titleText,'interpreter','none')
 %-------------------------------------------------------------------------------
 % Violin plots of individual fold accuracies
 %-------------------------------------------------------------------------------
+title(sprintf('All (%u) individual folds',cfnParams.numRepeats*cfnParams.numFolds))
 ax_bar_folds = subplot(1,4,4);
 
 if doComputeAtMaxInSample
@@ -294,6 +296,7 @@ linkaxes([ax,ax_bar_folds],'y')
 %-------------------------------------------------------------------------------
 % Violin plots of fold-average accuracies
 %-------------------------------------------------------------------------------
+title(sprintf('%u repeats of %u-fold averages',cfnParams.numRepeats,cfnParams.numFolds))
 ax_bar = subplot(1,4,3);
 hold('on')
 allFeatures_allTrainFoldMeans = mean(squeeze(allFoldData(:,1,:)),1);
