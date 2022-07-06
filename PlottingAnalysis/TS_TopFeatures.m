@@ -182,22 +182,33 @@ switch whatTestStat
         statUnit = '';
         whatIsBetter = 'abs';
     case {'ustatP','ranksumP'}
+        % Approximate p-value from ranksum test
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true);
+                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true,false);
         chanceLevel = NaN;
         testStatText = 'Mann-Whitney approx p-value';
         statUnit = ' (-log10(p))';
         whatIsBetter = 'high';
-    case {'ustatExactP','ranksumExactP'}
+    case {'ustatPsign','ranksumPsign'}
+        % Approximate p-value from ranksum test, signed by the direction of difference
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                    fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true,true);
+                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true,true);
+        chanceLevel = NaN;
+        testStatText = 'Mann-Whitney approx p-value (signed)';
+        statUnit = ' signed(-log10(p))';
+        whatIsBetter = 'abs';
+    case {'ustatExactP','ranksumExactP'}
+        % Exact p-value from ranksum test
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                    fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true,true,false);
         chanceLevel = NaN;
         testStatText = 'Mann-Whitney exact p-value';
         statUnit = ' (-log10(p))';
         whatIsBetter = 'high';
     case {'ustat','ranksum'}
+        % Approximate test statistic from ranksum test
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,false);
+                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,false,false);
         chanceLevel = NaN; % (check if you can compute the chance level stat?)
         testStatText = 'Mann-Whitney approx test statistic';
         statUnit = '';
@@ -518,27 +529,38 @@ end
 
 %-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
-function [theStatistic,stats] = fn_uStat(d1,d2,doExact,doP)
-    % Return -log10(p) from a Mann-Whitney U-test
+function [theStatistic,stats] = fn_uStat(d1,d2,doExact,doP,doSigned)
+    % Return a statistic from a Mann-Whitney U-test
     if doExact
+        % use the exact method (slower)
         [p,~,stats] = ranksum(d1,d2,'method','exact');
     else
+        % use the approximate method (faster)
         [p,~,stats] = ranksum(d1,d2,'method','approx');
     end
     if doP
+        % -log10(p) from a Mann-Whitney U-test
         theStatistic = -log10(p);
     else
+        % ranksum test statistic from a Mann-Whitney U-test
         theStatistic = stats.ranksum;
+    end
+    if doSigned
+        % Gives the statistic the sign of the z statistic
+        % (tracks wether higher or lower in the class)
+        theStatistic = sign(stats.zval)*theStatistic;
     end
     % theStatistic = sign(stats.ranksum)*(-log10(p)); % (signed p-value)
 end
 %-------------------------------------------------------------------------------
 function [theStatistic,stats] = fn_tStat(d1,d2,doP)
-    % Return test statistic from a 2-sample Welch's t-test
+    % Return a statistic from a 2-sample Welch's t-test
     [~,p,~,stats] = ttest2(d1,d2,'Vartype','unequal');
     if doP
+        % -log10(p) from the 2-sample Welch's t-test
         theStatistic = -log10(p);
     else
+        % t-statistic from the 2-sample Welch's t-test
         theStatistic = stats.tstat;
     end
 end
