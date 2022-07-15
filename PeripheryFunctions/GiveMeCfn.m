@@ -201,7 +201,7 @@ else
             % Naive Bayes classifier:
             t = templateNaiveBayes('DistributionNames','normal');
             if beVerbose, fprintf(1,'Using a naive Bayes classifier\n'); end
-        case {'svm','svm-linear'}
+        case {'svm','svm-linear','svm-linear-lowdim'}
             t = templateSVM('KernelFunction','linear');
             if beVerbose, fprintf(1,'Using a linear svm classifier\n'); end
         case 'svm-rbf'
