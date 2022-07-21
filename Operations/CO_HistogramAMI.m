@@ -84,20 +84,20 @@ end
 % or small lags)
 switch meth
     case 'even'
-        b = linspace(min(y)-0.1,max(y)+0.1,numBins+1); % +0.1 to make sure all points included
+        b = linspace(min(y)-0.1,max(y) + 0.1,numBins + 1); % +0.1 to make sure all points included
 
     case 'std1' % std bins up to 1
-        b = linspace(-1,1,numBins+1);
-        if min(y) < -1; b = [min(y)-0.1, b]; end
-        if max(y) > 1; b = [b, max(y)+0.1]; end
+        b = linspace(-1,1,numBins + 1);
+        if min(y) < -1; b = [min(y) - 0.1, b]; end
+        if max(y) > 1; b = [b, max(y) + 0.1]; end
 
     case 'std2'
-        b = linspace(-2,2,numBins+1);
-        if min(y) < -2; b = [min(y)-0.1, b]; end
-        if max(y) > 2; b = [b, max(y)+0.1]; end
+        b = linspace(-2,2,numBins + 1);
+        if min(y) < -2; b = [min(y) - 0.1, b]; end
+        if max(y) > 2; b = [b, max(y) + 0.1]; end
 
     case 'quantiles' % use quantiles with ~equal number in each bin
-        b = quantile(y,linspace(0,1,numBins+1));
+        b = quantile(y,linspace(0,1,numBins + 1));
         b(1) = b(1) - 0.1; b(end) = b(end) + 0.1;
 
     otherwise

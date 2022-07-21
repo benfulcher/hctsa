@@ -1,4 +1,4 @@
-function out = ST_LocalExtrema(y,lorf,n)
+function out = ST_LocalExtrema(y,howToWindow,n)
 % ST_LocalExtrema   How local maximums and minimums vary across the time series.
 %
 % Finds maximums and minimums within given segments of the time series and
@@ -7,7 +7,7 @@ function out = ST_LocalExtrema(y,lorf,n)
 %---INPUTS:
 % y, the input time series
 %
-% lorf, whether to use:
+% howToWindow, whether to use:
 %     (i) 'l', windows of a given length (in which case the third input, n
 %             specifies the length)
 %     (ii) 'n', a specified number of windows to break the time series up into
@@ -16,7 +16,7 @@ function out = ST_LocalExtrema(y,lorf,n)
 %                 time series, the first zero-crossing of the autocorrelation
 %                 function.
 %
-% n, somehow specifies the window length given the setting of lorf above.
+% n, somehow specifies the window length given the setting of howToWindow above.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -51,11 +51,11 @@ function out = ST_LocalExtrema(y,lorf,n)
 % Check Inputs
 % ------------------------------------------------------------------------------
 
-if nargin < 2 || isempty(lorf)
-    lorf = 'l';
+if nargin < 2 || isempty(howToWindow)
+    howToWindow = 'l';
 end
 if nargin < 3 || isempty(n)
-    switch lorf
+    switch howToWindow
        case 'l'
            n = 100; % 100-sample windows
        case 'n'
@@ -70,7 +70,7 @@ N = length(y); % length of time series
 % ------------------------------------------------------------------------------
 %% Set window length
 % ------------------------------------------------------------------------------
-switch lorf
+switch howToWindow
     case 'l'
         windowLength = n; % window length
     case 'n'
@@ -79,7 +79,7 @@ switch lorf
         % this may not be a good idea!
         windowLength = CO_FirstCrossing(y,'ac',0,'discrete');
     otherwise
-        error('Unknown method ''%s''',lorf);
+        error('Unknown method ''%s''',howToWindow);
 end
 
 if (windowLength > N) || (windowLength <= 1)
@@ -102,48 +102,48 @@ numWindows = size(y_buff,2); % number of windows
 % ------------------------------------------------------------------------------
 %% Find local extrema
 % ------------------------------------------------------------------------------
-locmax = max(y_buff); % summary of local maxima
-locmin = min(y_buff); % summary of local minima
-abslocmin = abs(locmin); % absolute value of local minima
-exti = find(abslocmin > locmax);
-locext = locmax;
-locext(exti) = locmin(exti); % local extrema (furthest from mean; either maxs or mins)
-abslocext = abs(locext); % the magnitude of the most extreme events in each window
+locMax = max(y_buff); % summary of local maxima
+locMin = min(y_buff); % summary of local minima
+absLocMin = abs(locMin); % absolute value of local minima
+exti = find(absLocMin > locMax);
+locExt = locMax;
+locExt(exti) = locMin(exti); % local extrema (furthest from mean; either maxs or mins)
+absLocExt = abs(locExt); % the magnitude of the most extreme events in each window
 
 if doPlot
     figure('color','w');
     hold('on');
-    plot(locmax);
-    plot(abslocext,'--g');
-    plot(abslocmin,':r')
-    plot(locext,'k');
+    plot(locMax);
+    plot(absLocExt,'--g');
+    plot(absLocMin,':r')
+    plot(locExt,'k');
 end
 
 % ------------------------------------------------------------------------------
 %% Return outputs
 % ------------------------------------------------------------------------------
-out.meanrat = mean(locmax)/mean(abslocmin);
-out.medianrat = median(locmax)/median(abslocmin);
-out.minmax = min(locmax);
-out.minabsmin = min(abslocmin);
-out.minmaxonminabsmin = min(locmax)/min(abslocmin);
-out.meanmax = mean(locmax);
-out.meanabsmin = mean(abslocmin);
-out.meanext = mean(locext);
-out.medianmax = median(locmax);
-out.medianabsmin = median(abslocmin);
-out.medianext = median(locext);
-out.stdmax = std(locmax);
-out.stdmin = std(locmin);
-out.stdext = std(locext);
-out.zcext = ST_SimpleStats(locext,'zcross');
-out.meanabsext = mean(abslocext);
-out.medianabsext = median(abslocext);
-out.diffmaxabsmin = sum(abs(locmax-abslocmin))/numWindows;
-out.uord = sum(sign(locext))/numWindows; % whether extreme events are more up or down
-out.maxmaxmed = max(locmax)/median(locmax);
-out.minminmed = min(locmin)/median(locmin);
-out.maxabsext = max(abslocext)/median(abslocext);
+out.meanrat = mean(locMax)/mean(absLocMin);
+out.medianrat = median(locMax)/median(absLocMin);
+out.minmax = min(locMax);
+out.minabsmin = min(absLocMin);
+out.minmaxonminabsmin = min(locMax)/min(absLocMin);
+out.meanmax = mean(locMax);
+out.meanabsmin = mean(absLocMin);
+out.meanext = mean(locExt);
+out.medianmax = median(locMax);
+out.medianabsmin = median(absLocMin);
+out.medianext = median(locExt);
+out.stdmax = std(locMax);
+out.stdmin = std(locMin);
+out.stdext = std(locExt);
+out.zcext = ST_SimpleStats(locExt,'zcross');
+out.meanabsext = mean(absLocExt);
+out.medianabsext = median(absLocExt);
+out.diffmaxabsmin = sum(abs(locMax - absLocMin))/numWindows;
+out.uord = sum(sign(locExt))/numWindows; % whether extreme events are more up or down
+out.maxmaxmed = max(locMax)/median(locMax);
+out.minminmed = min(locMin)/median(locMin);
+out.maxabsext = max(absLocExt)/median(absLocExt);
 
 
 end

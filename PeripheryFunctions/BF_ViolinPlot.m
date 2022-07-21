@@ -103,7 +103,7 @@ if ~isfield(extraParams,'theColors')
         theColors = BF_GetColorMap('accent',numGroups,1);
     end
     if length(theColors) < numGroups
-        theColors = arrayfun(@(x)zeros(3,1),1:numGroups,'UniformOutput',0);
+        theColors = arrayfun(@(x) zeros(3,1),1:numGroups,'UniformOutput',false);
     end
 else
     theColors = extraParams.theColors;
@@ -127,7 +127,7 @@ if doveTail
     ff = cell(numGroups,1);
     xx = cell(numGroups,1);
     for i = 1:numGroups
-        if isempty(dataCell{i})
+        if isempty(dataCell{i}) || all(isnan(dataCell{i}))
             continue
         end
         if any(isnan(dataCell{i}))

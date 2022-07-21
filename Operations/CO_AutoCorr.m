@@ -106,7 +106,7 @@ case 'Fourier'
             if (tau(i) > length(acf)-1) || (tau(i) < 0)
                 out(i) = NaN;
             else
-                out(i) = acf(tau(i)+1);
+                out(i) = acf(tau(i) + 1);
             end
         end
     end

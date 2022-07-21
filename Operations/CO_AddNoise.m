@@ -95,7 +95,8 @@ if nargin < 5
 end
 
 %-------------------------------------------------------------------------------
-% Preliminaries
+%% Preliminaries
+%-------------------------------------------------------------------------------
 
 % Generate noise:
 BF_ResetSeed(randomSeed); % reset the random seed if specified
@@ -106,7 +107,7 @@ noiseRange = linspace(0,3,50); % compare properties across this noise range
 numRepeats = length(noiseRange);
 
 % ------------------------------------------------------------------------------
-% Compute the automutual information across a range of noise levels
+%% Compute the automutual information across a range of noise levels
 % ------------------------------------------------------------------------------
 % The *same* noise vector, noise, is added to the signal, with increasing
 % standard deviation (one could imagine repeating the calculation with different
@@ -131,7 +132,7 @@ case {'gaussian','kernel','kraskov1','kraskov2'}
 end
 
 %-------------------------------------------------------------------------------
-% Output statistics
+%% Output statistics
 %-------------------------------------------------------------------------------
 
 % Proportion decreases:
