@@ -48,9 +48,9 @@ if nargin < 1
     whatData = 'norm';
 end
 if nargin < 3 || isempty(whatFeatureSets)
-    whatFeatureSets = {'all','catch22','notLocationDependent','locationDependent',...
-                        'notLengthDependent','lengthDependent',...
-                        'notSpreadDependent','spreadDependent'};
+    whatFeatureSets = {'all','catch22','linearAutoCorrs','quantiles','linearAutoCorrsAndQuantiles','notLocationDependent',...
+                'locationDependent','notLengthDependent','lengthDependent',...
+                'notSpreadDependent','spreadDependent'};
 end
 % <set default classificaiton parameters after inspecting TimeSeries labeling below>
 
@@ -93,10 +93,19 @@ for i = 1:numFeatureSets
             featureIDs{i} = Operations.ID;
             featureSetNames{i} = sprintf('hctsa (%u)',height(Operations));
             theColors{i} = [233,129,126]/255;
-        case {'catch22','sarab16'}
+        case {'catch22','sarab16','linearAutoCorrs','quantiles','linearAutoCorrsAndQuantiles'}
             featureIDs{i} = TS_GiveMeFeatureSet(whatFeatureSets{i},Operations);
             featureSetNames{i} = sprintf('%s (%u)',whatFeatureSets{i},length(featureIDs{i}));
-            theColors{i} = [151,205,104]/255;
+            switch whatFeatureSets{i}
+            case {'catch22','sarab16'}
+                theColors{i} = [151,205,104]/255;
+            case 'linearAutoCorrs'
+                theColors{i} = [80,80,204]/255;
+            case 'quantiles'
+                theColors{i} = [200,105,104]/255;
+            case 'linearAutoCorrsAndQuantiles'
+                theColors{i} = [200,205,24]/255;
+            end
         case 'notLengthDependent'
             if doOld
                 [~,featureIDs{i}] = TS_GetIDs('lengthdep',dataStruct,'ops','Keywords');
@@ -152,12 +161,19 @@ for i = 1:numFeatureSets
             error('Unknown feature set: ''%s''',whatFeatureSets{i});
     end
 end
-
+assert(sum(cellfun(@isempty,theColors))==0)
 numFeaturesIncluded = cellfun(@length,featureIDs);
+
+%-------------------------------------------------------------------------------
+% Clean up feature-set names
+%-------------------------------------------------------------------------------
+nicerFeatureSetNames = arrayfun(@(x) sprintf('%s (%u)',whatFeatureSets{x},length(featureIDs{x})),...
+                    1:length(whatFeatureSets),'UniformOutput',false);
 
 %-------------------------------------------------------------------------------
 % Fit the classification model to the dataset (for each cross-validation fold)
 % and evaluate performance
+%-------------------------------------------------------------------------------
 % This needs to be on for the below to work:
 cfnParams.computePerFold = true;
 TellMeAboutClassification(cfnParams);
@@ -165,9 +181,16 @@ TellMeAboutClassification(cfnParams);
 accuracy = zeros(numFeatureSets,cfnParams.numFolds*cfnParams.numRepeats);
 for i = 1:numFeatureSets
     filter = ismember(Operations.ID,featureIDs{i});
+    if ~any(filter)
+        % We don't have any matches for this feature set
+        warning('No matches for feature set %s',whatFeatureSets{i});
+        accuracy(i,:) = NaN;
+        continue
+    end
     for j = 1:cfnParams.numRepeats
         foldLosses = GiveMeCfn(TS_DataMat(:,filter),TimeSeries.Group,[],[],cfnParams);
-        accuracy(i,1+(j-1)*cfnParams.numFolds:j*cfnParams.numFolds) = foldLosses;
+        % We just care about the test folds: foldLosses{2}
+        accuracy(i,1+(j-1)*cfnParams.numFolds:j*cfnParams.numFolds) = foldLosses{2};
     end
     fprintf(['Classified using the ''%s'' set (%u features): (%u-fold average, ',...
                         '%u repeats) average %s = %.2f%%\n'],...
@@ -190,14 +213,14 @@ end
 BF_ViolinPlot(dataCell,true,true,false,extraParams);
 ax = gca();
 ax.XTick = 1:numFeatureSets;
-ax.XTickLabel = whatFeatureSets;
+ax.XTickLabel = nicerFeatureSetNames;
 ax.XTickLabelRotation = 30;
 title(sprintf(['%u-class classification with different feature sets',...
                     ' using %u-fold cross validation'],...
                     cfnParams.numClasses,cfnParams.numFolds))
 ax.TickLabelInterpreter = 'none';
 ylabel(sprintf('%s (%s)',cfnParams.whatLoss,cfnParams.whatLossUnits))
-f.Position(3:4) = [732   423];
+f.Position(3:4) = [732,423];
 
 
 %-------------------------------------------------------------------------------
