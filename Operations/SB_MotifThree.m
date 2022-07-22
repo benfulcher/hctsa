@@ -210,7 +210,8 @@ out.hhhh = f_entropy(out4); % entropy of this result
 %-------------------------------------------------------------------------------
 function h = f_entropy(x)
     % entropy of a set of counts, log(0)=0
-    h = -sum(x(x > 0).*log(x(x > 0)));
+    r = (x > 0);
+    h = -sum(x(r).*log(x(r)));
 end
 
 end

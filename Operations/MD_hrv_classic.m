@@ -65,17 +65,17 @@ N = length(y); % time-series length
 % pNNx: recommendation as per Mietus et. al. 2002, "The pNNx files: ...", Heart
 % strange to do this for a z-scored time series...
 
-Dy = abs(diffy) * 1000;
+Dy = abs(diffy);
 
 % Anonymous function to do the PNNx calcualtion:
 % proportion of difference magnitudes greater than X*sigma
-PNNxfn = @(x) sum(Dy > x)/(N-1);
+PNNxfn = @(x) mean(Dy > x/1000);
 
 out.pnn5  = PNNxfn(5); % 0.005*sigma
 out.pnn10 = PNNxfn(10); % 0.01*sigma
-out.pnn20 = PNNxfn(20);
-out.pnn30 = PNNxfn(30);
-out.pnn40 = PNNxfn(40);
+out.pnn20 = PNNxfn(20); % 0.02*sigma
+out.pnn30 = PNNxfn(30); % 0.03*sigma
+out.pnn40 = PNNxfn(40); % 0.04*sigma
 
 % ------------------------------------------------------------------------------
 % Calculate PSD

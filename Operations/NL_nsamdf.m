@@ -4,7 +4,7 @@ function out = NL_nsamdf(x,fs,winLenRel,shiftLenRel,lagRel,degree,doPlot)
 %
 % Ozkurt et al. (2020), "Identification of nonlinear features in cortical and
 % subcortical signals of Parkinson's Disease patients via a novel efficient
-% measure", Neuroimage.
+% measure", NeuroImage.
 %
 % Please refer to and cite this paper if you use this function in your work.
 %
@@ -16,21 +16,17 @@ function out = NL_nsamdf(x,fs,winLenRel,shiftLenRel,lagRel,degree,doPlot)
 %           low-passed the raw data for 40 Hz.
 %           The data should be long enough for proper estimation of nonlinearity.
 %
-% winlen = window length (a long enough segment is important to estimate the nonlinearity)
-%          We chose the window length as 14 sec., i.e., winlen = 14*fs
+% winLenRel = window length (a long enough segment is important to estimate the nonlinearity)
 %
-% shiftlen = This amounts to window length - overlap length btw windows
-%            We chose it as half the window length, i.e., shiftlen = 0.5*winlen
+% shiftLenRel = This amounts to window length - overlap length btw windows
 %
-% lag = TMaximum lag for nsAMDF, we chose it as 1 sec, i.e., lag = fs.
-%
-% fs = sampling frequency of the data
+% lagRel = TMaximum lag for nsAMDF, we chose it as 1.
 %
 % degree = The chosen degree p should ideally be large enough to capture the
 %           highest order of nonlinearity within the data.
 %           We chose p=7 for in our case of Parkinsonian data in the paper.
 %
-% doPlot = true to plot nsAMDF sequences, otherwise just assign it false
+% doPlot = true to plot nsAMDF sequences, otherwise just assign it false.
 %
 %---OUTPUTS:
 %
@@ -72,17 +68,16 @@ if nargin < 7
 end
 
 %-------------------------------------------------------------------------------
-% nsAMDF for p=2:
+% nsAMDF for p = 2:
 s2 = NormedSingleCurveLengthWindowed(x,windowLength,shiftLength,lag,fs,2);
 out.s2 = s2 ./ max(s2); % normalized
 
-% nsAMDF for p=degree:
+% nsAMDF for p = degree:
 sd = NormedSingleCurveLengthWindowed(x,windowLength,shiftLength,lag,fs,degree);
 out.sd = sd ./ max(sd); % normalized
 
 % If you like, you can bandpass filter s2 and sd for the specific frequency band
 % of nonlinear effect both to compute L and plot them as such
-
 out.L = norm(s2 - sd);
 
 %-------------------------------------------------------------------------------

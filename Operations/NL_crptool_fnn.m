@@ -5,7 +5,7 @@ function out = NL_crptool_fnn(y,maxm,r,taum,th,randomSeed)
 % y, the input time series
 % maxm, the maximum embedding dimension to consider
 % r, the threshold; neighbourhood criterion
-% taum, the method of determining the time delay, 'corr' for first zero-crossing
+% taum, the method of determining the time delay, 'ac' for first zero-crossing
 %       of autocorrelation function, or 'mi' for the first minimum of the mutual
 %       information
 %
@@ -78,7 +78,7 @@ else % give a numeric answer
     tau = taum;
 end
 % Don't want tau to be too large
-if tau > N/10;
+if tau > N/10
     tau = floor(N/10);
 end
 
@@ -115,12 +115,13 @@ if doPlot
     plot(1:maxm,nn,'o-k');
 end
 
-if isempty(th) % output summary statistics
+% Output some summary statistics
+if isempty(th)
 
     % nn drops
     dnn = diff(nn);
     out.mdrop = mean(dnn); % same information as in fnn(maxm)
-    out.pdrop = -sum(sign(dnn))/(maxm-1);
+    out.pdrop = -mean(sign(dnn)); % proportion of m -> m+1 for which fnn decreased
 
     % fnn
     for i = 2:maxm
