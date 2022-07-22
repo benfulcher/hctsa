@@ -32,6 +32,7 @@ fprintf(1,'Adding paths for the highly comparative time-series analysis package.
 %% First add all the basic paths:
 % ------------------------------------------------------------------------------
 addfcn('Database'); % code for setting up and communicating with the mySQL database
+addfcn('FeatureSets'); % files for setting input files corresponding to various feature sets
 addfcn('Calculation'); % code for calculating results
 addfcn('PlottingAnalysis'); % code for analysing and plotting results
 addfcn('Operations'); % core code files for performing operations
