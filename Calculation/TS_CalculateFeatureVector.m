@@ -1,4 +1,4 @@
-function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,codeSpecial,beVocal)
+function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,codeSpecial,howVocal)
 % TS_CalculateFeatureVector	Compute a feature vector from an input time series
 %
 %---INPUTS:
@@ -15,7 +15,7 @@ function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStr
 % 							feature vector, and any errors are coded as NaN.
 % 				codeSpecial = true: featureVector is all real numbers, and is set to
 % 							     zero where any special-valued outputs occur.
-% beVocal, whether to give user feedback on the computation.
+% howVocal, {'minimal' or 'full'}: how to give user feedback on the computation.
 %
 %---OUTPUTS:
 % featureVector, the feature vector obtained by running MasterOperations and
@@ -96,7 +96,7 @@ end
 
 % Whether to give information out to screen
 if nargin < 6
-	beVocal = true;
+	howVocal = 'minimal';
 end
 
 %-------------------------------------------------------------------------------
@@ -112,11 +112,14 @@ if doParallel
     % Check that a parallel worker pool is open (if not, attempt to initiate it):
 	doParallel = TS_InitiateParallel(false);
 end
-if doParallel
-	fprintf(1,['Computation will be performed across multiple cores' ...
-			' using Matlab''s Parallel Computing Toolbox.\n']);
-else % use single-threaded for loops
-	fprintf(1,'Computations will be performed serially without parallelization.\n');
+% Tell the user about it:
+if strcmp(howVocal,'full')
+    if doParallel
+        fprintf(1,['Computation will be performed across multiple cores' ...
+                ' using Matlab''s Parallel Computing Toolbox.\n']);
+    else % use single-threaded for loops
+        fprintf(1,'Computations will be performed serially without parallelization.\n');
+    end
 end
 
 % --------------------------------------------------------------------------
@@ -161,10 +164,12 @@ if numCalc == 0
 	error('Nothing to calculate :-/')
 end
 
-fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
-fprintf(1,'Preparing to calculate %s\nts_id = %u, N = %u samples\nComputing %u operations.\n', ...
-				tsStruct.Name,tsStruct.ID,tsStruct.Length,numCalc);
-fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n');
+if strcmp(howVocal,'full')
+    fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
+    fprintf(1,'Preparing to calculate %s\nts_id = %u, N = %u samples\nComputing %u features.\n', ...
+                    tsStruct.Name,tsStruct.ID,tsStruct.Length,numCalc);
+    fprintf(1,'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n');
+end
 
 % Initialize variables:
 featureVector = zeros(numCalc,1); % Output of each operation
@@ -207,29 +212,45 @@ MasterCalcTime_tmp = zeros(numMopsToCalc,1);
 % ----
 % Evaluate all the master operations
 % ----
-fprintf(1,'Evaluating %u master operations...\n',length(Master_IDs_calc));
+if strcmp(howVocal,'full')
+    fprintf(1,'Evaluating %u master operations...\n',length(Master_IDs_calc));
+end
 TimeSeries_i_ID = tsStruct.ID; % Make a PARFOR-friendly version of the ID
 masterTimer = tic;
 if doParallel
-	parfor jj = 1:numMopsToCalc % PARFOR Loop
+    % PARFOR Loop (parallel)
+	parfor jj = 1:numMopsToCalc
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
 			TS_ComputeMasterLoop(x,x_z,par_MasterOpCodeCalc{jj}, ...
-				par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
+				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj);
 	end
 else
-	for jj = 1:numMopsToCalc % Normal FOR Loop
+    % Normal FOR Loop (serial)
+    if strcmp(howVocal,'minimal')
+        BF_ProgressBar('new');
+    end
+	for jj = 1:numMopsToCalc
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
 			TS_ComputeMasterLoop(x,x_z,par_MasterOpCodeCalc{jj}, ...
-				par_mop_ids(jj),numMopsToCalc,beVocal,TimeSeries_i_ID,jj);
+				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj);
+
+        if strcmp(howVocal,'minimal')
+            BF_ProgressBar(jj/numMopsToCalc);
+        end
 	end
+    if strcmp(howVocal,'minimal')
+        BF_ProgressBar('close');
+    end
 end
 
 % Map from temporary versions to the full versions:
 MasterOutput(Master_ind_calc) = MasterOutput_tmp;
 MasterCalcTime(Master_ind_calc) = MasterCalcTime_tmp;
 
-fprintf(1,'%u master operations evaluated in %s ///\n\n',...
-					numMopsToCalc,BF_TheTime(toc(masterTimer)));
+if strcmp(howVocal,'full')
+    fprintf(1,'%u time-series analysis functions evaluated in %s ///\n\n',...
+                        numMopsToCalc,BF_TheTime(toc(masterTimer)));
+end
 clear('masterTimer')
 
 % --------------------------------------------------------------------------
@@ -320,13 +341,20 @@ numErrors = sum(calcQuality == 1);
 % The number of other special outputs, numSpecial:
 numSpecial = sum(calcQuality > 1);
 
-fprintf(1,'********************************************************************\n');
-fprintf(1,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now));
-fprintf(1,'Calculation complete for %s (ts_id = %u, N = %u)\n', ...
-					tsStruct.Name,tsStruct.ID,tsStruct.Length);
-fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored.\n',...
-					numGood,numErrors,numSpecial);
-fprintf(1,'All %u calculations for this time series took %s.\n',numCalc,BF_TheTime(toc(fullTimer),1));
-fprintf(1,'********************************************************************\n');
+if strcmp(howVocal,'full')
+    fprintf(1,'********************************************************************\n');
+    fprintf(1,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now));
+    fprintf(1,'Calculation complete for %s (ts_id = %u, N = %u)\n', ...
+                        tsStruct.Name,tsStruct.ID,tsStruct.Length);
+    fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored.\n',...
+                        numGood,numErrors,numSpecial);
+    fprintf(1,'All %u calculations for this time series took %s.\n',numCalc,BF_TheTime(toc(fullTimer),1));
+    fprintf(1,'********************************************************************\n');
+else
+    fprintf(1,'Calculation complete for %s (ts_id = %u, N = %u) in %s\n', ...
+                        tsStruct.Name,tsStruct.ID,tsStruct.Length,BF_TheTime(toc(fullTimer),1));
+    fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored.\n\n',...
+                        numGood,numErrors,numSpecial);
+end
 
 end

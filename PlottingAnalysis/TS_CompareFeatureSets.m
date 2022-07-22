@@ -85,6 +85,8 @@ featureSetNames = cell(numFeatureSets,1);
 IDs = TS_GetIDs('lengthDependent',dataStruct,'ops','Keywords');
 if isempty(IDs)
     doOld = true;
+else
+    doOld = false;
 end
 
 for i = 1:numFeatureSets

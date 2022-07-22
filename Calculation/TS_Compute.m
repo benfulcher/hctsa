@@ -1,4 +1,4 @@
-function TS_Compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,beVocal)
+function TS_Compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,howVocal)
 % TS_Compute    Computes missing elements of TS_DataMat
 %
 %---EXAMPLE USAGE:
@@ -13,8 +13,7 @@ function TS_Compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,be
 % 				ALSO retry results that previously threw an error ('error'), or
 % 				ALSO retry any result that previously did not return a good value ('bad')
 % customFile: reads in and writes to a custom output file
-% beVocal:     if true, gives additional user feedback about the calculation of
-%               each individual operation.
+% howVocal:   {'minimal','full'}: how much output to show about the calculation of operations.
 %
 %---OUTPUTS:
 % Writes output to customFile (HCTSA.mat by default)
@@ -74,7 +73,7 @@ end
 
 % Be vocal?
 if nargin < 6
-    beVocal = true; % Write back lots of information to screen
+    howVocal = 'minimal'; % Write back full information on all calculations to screen
     % prints every piece of code evaluated (nice for error checking)
 end
 
@@ -93,6 +92,16 @@ if ismember('TS_CalcTime',fileVars)
 end
 if ismember('TS_Quality',fileVars)
 	TS_Quality = TS_GetFromData(customFile,'TS_Quality');
+end
+
+%-------------------------------------------------------------------------------
+% Tell the user about settings
+%-------------------------------------------------------------------------------
+if doParallel
+    fprintf(1,['Computation will be performed across multiple cores' ...
+            ' using Matlab''s Parallel Computing Toolbox.\n']);
+else % use single-threaded for loops
+    fprintf(1,'Computations will be performed serially without parallelization.\n');
 end
 
 % ------------------------------------------------------------------------------
@@ -127,12 +136,12 @@ if numTimeSeries==0 || numOps==0
 end
 
 if (nargin < 6) && (numOps < 30)
-    beVocal = false;
+    howVocal = 'minimal';
 end
 
 %-------------------------------------------------------------------------------
-fprintf(1,['Calculation has begun on %s using %u datasets ' ...
-                            'and %u operations\n'],datestr(now),numTimeSeries,numOps);
+fprintf(1,'[%s]: Extracting %u features from %u time series\n',...
+                    datestr(now),numOps,numTimeSeries);
 
 
 % The times vector stores the time taken for each time series to have its
@@ -186,14 +195,18 @@ for i = 1:numTimeSeries
         error('?? Database structure error: some operations have not been assigned a valid master operation');
     end
 
-	fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
-	fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now));
-	fprintf(1,'- - - - - - - - - - - Time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries);
+    if strcmp(howVocal,'minimal')
+        fprintf(1,'- - - - - - - Time series %u / %u: %s - - - - -\n',i,numTimeSeries,TimeSeries.Name{tsInd});
+    else
+        fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
+        fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now));
+        fprintf(1,'- - - - - - - - - - - Time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries);
+    end
 
     if numCalc > 0 % some to calculate
 		try
 	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd,:),...
-								doParallel,Operations(toCalc,:),MasterOperations,true,beVocal);
+								doParallel,Operations(toCalc,:),MasterOperations,true,howVocal);
 		catch ME
 			% Skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
 			warning('Calculation for time series %u / %u failed:\n%s',i,numTimeSeries,ME.message)
@@ -215,15 +228,26 @@ for i = 1:numTimeSeries
     % The time taken to calculate (or not, if numCalc = 0) all operations for this time series:
     times(i) = toc(bigTimer);
 
-    if i < numTimeSeries
-        fprintf(1,'- - - - - - - -  %u time series remaining - - - - - - - -\n',numTimeSeries-i);
-    	fprintf(1,'- - - - - - - -  %s remaining - - - - - - - - -\n', ...
-                                        	BF_TheTime(((numTimeSeries-i)*mean(times(1:i))),1));
-    else % The final time series
-        fprintf(1,'- - - - - - - - - - All %u time series calculated! - - - - - - - - - -\n', ...
-                                                    numTimeSeries);
+    % Update progress to the user
+    if strcmp(howVocal,'minimal')
+        if i==1
+            BF_ProgressBar('new')
+        elseif i < numTimeSeries
+            BF_ProgressBar(i/numTimeSeries)
+        else
+
+        end
+    else
+        if i < numTimeSeries
+            fprintf(1,'- - - - - - - -  %u time series remaining - - - - - - - -\n',numTimeSeries-i);
+            fprintf(1,'- - - - - - - -  %s remaining - - - - - - - - -\n', ...
+                                                BF_TheTime(((numTimeSeries-i)*mean(times(1:i))),1));
+        else % The final time series
+            fprintf(1,'- - - - - - - - - - All %u time series calculated! - - - - - - - - - -\n', ...
+                                                        numTimeSeries);
+        end
+        fprintf(1,'********************************************************************\n');
     end
-    fprintf(1,'********************************************************************\n');
 
 end
 

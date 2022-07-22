@@ -168,7 +168,7 @@ if matchByName
     end
     isMatch = [isMatch{:}];
     opIDs = Operations.ID(isMatch);
-    fprintf(1,'Matched %u/%u features!\n',length(opIDs),length(featureNames));
+    fprintf(1,'Matched %u/%u features from %s!\n',length(opIDs),length(featureNames),whatFeatureSet);
 
     if length(opIDs) < length(featureNames)
         didNotMatch = find(~isMatch);
