@@ -13,11 +13,12 @@ persistent progressBar; % Text progress bar
 
 % Vizualization parameters
 if nargin < 2
-    PB_length = 20;   %   Length of progress bar
+    PB_length = 30;   %   Length of progress bar
 end
 if nargin < 3
     theChar = ':';    %   Character to show progress
 end
+notTheChar = ' ';
 
 %-------------------------------------------------------------------------------
 %% Main
@@ -25,10 +26,9 @@ end
 if isempty(progressBar) && ischar(progressProp) && strcmp(progressProp,'new')
     % Initialize progress bar
     progressBar = -1;
-    fprintf('|');
 elseif ~isempty(progressBar) && ischar(progressProp) && strcmp(progressProp,'close')
     % Progress bar  - termination
-    fprintf(1,'|\n');
+    fprintf(1,'\n');
     clear('progressBar')
 elseif isnumeric(progressProp)
     assert(progressProp >= 0)
@@ -36,11 +36,31 @@ elseif isnumeric(progressProp)
 
     % Check whether update to progress bar is required
     if round(progressProp*PB_length) > progressBar
-        fprintf(theChar)
+        % clear current text:
+        if progressBar~=-1
+            fprintf(repmat('\b',1,PB_length+2))
+        end
+
+        % Update and write:
         progressBar = round(progressProp*PB_length);
+        WriteProgressBar
     end
 else
     % Any other unexpected input
     warning('Unexpected input ''%s''',progressProp);
     progressBar = [];
+end
+
+function WriteProgressBar()
+    % Write progress bar text to commandline
+    fprintf('|');
+    for i = 1:progressBar
+        fprintf(theChar)
+    end
+    for i = 1:PB_length-progressBar
+        fprintf(1,notTheChar);
+    end
+    fprintf('|');
+end
+
 end

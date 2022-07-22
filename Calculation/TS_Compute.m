@@ -13,7 +13,7 @@ function TS_Compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,ho
 % 				ALSO retry results that previously threw an error ('error'), or
 % 				ALSO retry any result that previously did not return a good value ('bad')
 % customFile: reads in and writes to a custom output file
-% howVocal:   {'minimal','full'}: how much output to show about the calculation of operations.
+% howVocal:   {'fast','minimal','full'}: how much output to show about the calculation of operations.
 %
 %---OUTPUTS:
 % Writes output to customFile (HCTSA.mat by default)
@@ -136,11 +136,11 @@ if numTimeSeries==0 || numOps==0
 end
 
 if (nargin < 6) && (numOps < 30)
-    howVocal = 'minimal';
+    howVocal = 'fast';
 end
 
 %-------------------------------------------------------------------------------
-fprintf(1,'[%s]: Extracting %u features from %u time series\n',...
+fprintf(1,'[%s]: Extracting %u features from each of %u time series\n',...
                     datestr(now),numOps,numTimeSeries);
 
 
@@ -159,6 +159,12 @@ end
 % --------------------------------------------------------------------------
 %% Computation
 % --------------------------------------------------------------------------
+if strcmp(howVocal,'fast')
+    % Just show a progress bar over time series (not across features for a given time series)
+    % makes sense for, say, catch22, where computations are super fast
+    BF_ProgressBar('new')
+end
+
 numCalc_all = zeros(numTimeSeries,1);
 
 for i = 1:numTimeSeries
@@ -195,9 +201,10 @@ for i = 1:numTimeSeries
         error('?? Database structure error: some operations have not been assigned a valid master operation');
     end
 
-    if strcmp(howVocal,'minimal')
+    switch howVocal
+    case 'minimal'
         fprintf(1,'- - - - - - - Time series %u / %u: %s - - - - -\n',i,numTimeSeries,TimeSeries.Name{tsInd});
-    else
+    case 'full'
         fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
         fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now));
         fprintf(1,'- - - - - - - - - - - Time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries);
@@ -229,15 +236,12 @@ for i = 1:numTimeSeries
     times(i) = toc(bigTimer);
 
     % Update progress to the user
-    if strcmp(howVocal,'minimal')
-        if i==1
-            BF_ProgressBar('new')
-        elseif i < numTimeSeries
-            BF_ProgressBar(i/numTimeSeries)
-        else
+    switch howVocal
+    case 'fast'
+        BF_ProgressBar(i/numTimeSeries)
+    case 'minimal'
 
-        end
-    else
+    case 'full'
         if i < numTimeSeries
             fprintf(1,'- - - - - - - -  %u time series remaining - - - - - - - -\n',numTimeSeries-i);
             fprintf(1,'- - - - - - - -  %s remaining - - - - - - - - -\n', ...
@@ -257,9 +261,14 @@ end
 %% Finished calculating!!
 % --------------------------------------------------------------------------
 % --------------------------------------------------------------------------
-fprintf(1,['!! !! !! !! !! !! Calculation completed at %s !! !! ' ...
-                                                '!! !! !!\n'],datestr(now));
-fprintf(1,'Calculations complete in a total of %s.\n',BF_TheTime(sum(times),1));
+if strcmp(howVocal,'fast')
+    BF_ProgressBar('close')
+    fprintf(1,'Calculations complete in a total of %s.\n',BF_TheTime(sum(times),1));
+else
+    fprintf(1,'!! !! !! !! !! !! Calculation completed !! !! !! !! !!\n');
+    fprintf(1,'[%s]: Calculations complete in a total of %s.\n',...
+                        datestr(now),BF_TheTime(sum(times),1));
+end
 
 % Save back to local files (if results were computed):
 if any(numCalc_all > 0)
@@ -268,7 +277,5 @@ if any(numCalc_all > 0)
 	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
 	fprintf(1,' Saved in %s.\n',BF_TheTime(toc(saveTimer)));
 end
-
-fprintf(1,'Calculation complete!\n');
 
 end
