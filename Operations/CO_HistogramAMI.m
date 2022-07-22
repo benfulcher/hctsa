@@ -117,7 +117,7 @@ switch meth
         error('Unknown method ''%s''',meth)
 end
 
-assert numBins == length(b)-1;
+assert(numBins == length(b)-1);
 % numBins = length(b) - 1; % number of bins (-1 since b defines edges)
 
 % ------------------------------------------------------------------------------
