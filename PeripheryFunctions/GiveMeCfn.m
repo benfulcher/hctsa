@@ -9,6 +9,14 @@ function [accuracy,Mdl] = GiveMeCfn(XTrain,yTrain,XTest,yTest,cfnParams,beVerbos
 % yTest -- testing data labels
 % cfnParams -- parameters for classification
 % beVerbose -- [default: false] whether to give text output of progress
+%
+%---OUTPUTS:
+% accuracy -- IF cfnParams.computePerFold = true:
+%               a 2x1 cell of accuracy results in each fold for training data (element 1)
+%               and test data (element 2).
+%             IF cfnParams.computePerFold = false:
+%               A real number giving the average accuracy in the test folds.
+% Mdl -- the trained classification model.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -120,7 +128,8 @@ else
                                 'Lambda','auto');
                 end
             end
-        case {'svm','svm-linear'}
+        case {'svm-linear','svm-linear-highdim'}
+            % This one uses the fitclinear function (fast; suited for high-dimensional datasets)
             % lambdaDefault = 1/size(XTrain,1);
             % Weight observations by inverse class probability:
             if cfnParams.doReweight
@@ -139,7 +148,7 @@ else
                     Mdl = fitclinear(XTrain,yTrain,'Learner','svm','Lambda','auto','Regularization','ridge');
                 end
             end
-        case 'svm-linear-lowdim'
+        case {'svm','svm-linear-lowdim'}
             % For low-dim datasets (e.g., using a reduced feature set), the 'traditional' linear SVM (fitcsvm)
             % can be preferable to the above (fitclinear)
             if cfnParams.doReweight

@@ -93,7 +93,6 @@ clear('inputP');
 %-------------------------------------------------------------------------------
 %% Load in data
 %-------------------------------------------------------------------------------
-
 [TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
 
 % Assign group labels (removing unlabeled data):
@@ -128,7 +127,7 @@ else
 end
 
 %-------------------------------------------------------------------------------
-%% Display results to commandline
+%% Display results to command line
 %-------------------------------------------------------------------------------
 if cfnParams.numFolds==0
     assert(cfnParams.numRepeats==1)
@@ -166,7 +165,7 @@ else
     end
     fprintf(1,'\n');
 end
-
+fprintf(1,'Looks good? Don''t forget to compare results using (simpler) \n');
 
 %-------------------------------------------------------------------------------
 %% Compute nulls for permutation testing

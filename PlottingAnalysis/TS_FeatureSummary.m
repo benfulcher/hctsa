@@ -37,7 +37,7 @@ function TS_FeatureSummary(opID,whatData,doViolin,doInspect,annotateParams,custo
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check inputs
+% Check Inputs
 %-------------------------------------------------------------------------------
 if nargin < 1
     opID = 1;
@@ -49,7 +49,7 @@ if nargin < 3 || isempty(doViolin) % annotation parameters
     doViolin = true;
 end
 if nargin < 4
-    doInspect = true;
+    doInspect = false;
 end
 if nargin < 5 || isempty(annotateParams) % annotation parameters
     annotateParams = struct();
