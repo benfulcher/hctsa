@@ -1,4 +1,5 @@
 function [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries)
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -21,14 +22,21 @@ function [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+% Check that time series have been labeled
+if ~ismember('Group',TimeSeries.Properties.VariableNames)
+    error('Time series are not yet labeled. Please run TS_LabelGroups on your hctsa dataset.');
+end
+
+% Check that labeling is done with categoricals (rather than legacy integer labels)
 if isnumeric(TimeSeries.Group)
-    error('Time-series group labels are assigned as numeric labels (old format). Please re-run TS_LabelGroups on your HCTSA dataset.');
+    error(['Time-series group labels are assigned as numeric labels (old format).',...
+                    ' Please re-run TS_LabelGroups on your hctsa dataset.']);
 end
 isLabeled = ~isundefined(TimeSeries.Group);
 if any(~isLabeled)
     TimeSeries = TimeSeries(isLabeled,:);
     TS_DataMat = TS_DataMat(isLabeled,:);
-    fprintf(1,'Only considering the %u time series that have labels\n',sum(isLabeled));
+    fprintf(1,'Only considering the %u time series that have labels.\n',sum(isLabeled));
 end
 
 end
