@@ -347,7 +347,8 @@ for i = 1:numGroups
     % ------------------------------------------------------------------------------
     % Text annotations:
     % ------------------------------------------------------------------------------
-    inc = 0.0; textFontSize = 11;
+    inc = 0.0;
+    textFontSize = 11;
     switch tagStyle
     case 'coloredtext' % colored text
         for j = find(nodeLabels==i)
@@ -369,12 +370,12 @@ end
 
 %-------------------------------------------------------------------------------
 % Set a legend for links:
-legend([handles{:}],arrayfun(@(x)num2str(linkThresh(x)),sort(anyLinks,'descend'),'UniformOutput',false))
+legend([handles{:}],arrayfun(@(x)num2str(linkThresh(x)),sort(anyLinks,'ascend'),'UniformOutput',false))
 
 % ------------------------------------------------------------------------------
 % Tidy up:
 % ------------------------------------------------------------------------------
-axis square
+axis('square')
 set(gca,'XTick',[],'XTickLabel',{},'YTick',[],'YTickLabel',{});
 box('on')
 

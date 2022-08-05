@@ -90,22 +90,22 @@ switch meth
         b(1) = b(1) - inc;
         b(end) = b(end) + inc;
 
-    case 'std1' % std bins up to 1
+    case 'std1' % bins out to +/- 1 std
         b = linspace(-1,1,numBins+1);
         if min(y) < -1
-            b = [min(y)-0.1, b];
+            b = [min(y) - 0.1, b];
         end
         if max(y) > 1
-            b = [b, max(y)+0.1];
+            b = [b, max(y) + 0.1];
         end
 
-    case 'std2'
+    case 'std2' % bins out to +/- 1 std
         b = linspace(-2,2,numBins+1);
         if min(y) < -2
-            b = [min(y)-0.1, b];
+            b = [min(y) - 0.1, b];
         end
         if max(y) > 2
-            b = [b, max(y)+0.1];
+            b = [b, max(y) + 0.1];
         end
 
     case 'quantiles' % use quantiles with ~equal number in each bin
@@ -117,8 +117,9 @@ switch meth
         error('Unknown method ''%s''',meth)
 end
 
-assert numBins == length(b)-1;
-% numBins = length(b) - 1; % number of bins (-1 since b defines edges)
+
+% Sometimes bins can be added (e.g., with std1 and std2), so need to redefine numBins
+numBins = length(b) - 1; % number of bins (-1 since b defines edges)
 
 % ------------------------------------------------------------------------------
 % Form the time-delay vectors y1 and y2

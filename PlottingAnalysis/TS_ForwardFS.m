@@ -8,7 +8,7 @@ function [ifeat, testStat, trainErr, testErr, testClass] = TS_ForwardFS(whatData
 % applies the learned classification rule to the training and test sets to get
 % training and test classification errors.
 %
-% Typical usage uses 'fast_linear' for the criterion (linear classification rates),
+% Typical usage uses 'fast-linear' for the criterion (linear classification rates),
 % or 'diaglinear' when there are highly correlated features in the data matrix.
 %
 % NOTE: This function requires a training portion to be specified. If there
@@ -67,7 +67,7 @@ if nargin < 2
 end
 
 if nargin < 3 || isempty(criterion)
-    criterion = 'fast_linear';
+    criterion = 'fast-linear';
     fprintf(1,'Default test statistic: Using fast, in-sample linear classification rate\n');
 end
 

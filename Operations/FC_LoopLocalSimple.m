@@ -94,7 +94,7 @@ if doPlot
 end
 
 %-------------------------------------------------------------------------------
-% Compute statistics from the shapes of the curves
+%% Compute statistics from the shapes of the curves
 %-------------------------------------------------------------------------------
 
 % (1) root mean square error
@@ -102,7 +102,7 @@ end
 out.stderr_chn = mean(diff(stats_st(:,1)))/(range(stats_st(:,1)));
 out.stderr_meansgndiff = mean(sign(diff(stats_st(:,1))));
 
-% (ii) is there a peak?
+% (ii) Is there a peak?
 if out.stderr_chn < 1; % on the whole decreasing, as expected
     wigv = max(stats_st(:,1));
     wig = find(stats_st(:,1) == wigv,1,'first');

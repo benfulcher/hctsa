@@ -1,4 +1,4 @@
-function [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter(dataCell,addMeans,doveTail,makeFigure,extraParams)
+function [ff,xx,xScatter,yScatter] = BF_ViolinPlot(dataCell,addMeans,doveTail,makeFigure,extraParams)
 % Plots a scatter of a set of distributions with data points offset randomly (jittered)
 %
 %---INPUTS:
@@ -10,7 +10,7 @@ function [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter(dataCell,addMean
 %
 %---EXAMPLE USAGE:
 % dataCell = {randn(1000,1),randn(500,1)*2+1};
-% BF_JitteredParallelScatter(dataCell,true,true,true);
+% BF_ViolinPlot(dataCell,true,true,true);
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -41,16 +41,16 @@ function [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter(dataCell,addMean
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-if nargin < 2
+if nargin < 2 || isempty(addMeans)
     addMeans = true; % Add strip for mean of each group
 end
-if nargin < 3
+if nargin < 3 || isempty(doveTail)
     doveTail = true; % Add kernel distribution
 end
-if nargin < 4
+if nargin < 4 || isempty(makeFigure)
     makeFigure = true; % Generate a new figure
 end
-if nargin < 5
+if nargin < 5 || isempty(extraParams)
     extraParams = struct;
 end
 
@@ -103,7 +103,7 @@ if ~isfield(extraParams,'theColors')
         theColors = BF_GetColorMap('accent',numGroups,1);
     end
     if length(theColors) < numGroups
-        theColors = arrayfun(@(x)zeros(3,1),1:numGroups,'UniformOutput',0);
+        theColors = arrayfun(@(x) zeros(3,1),1:numGroups,'UniformOutput',false);
     end
 else
     theColors = extraParams.theColors;
@@ -127,7 +127,7 @@ if doveTail
     ff = cell(numGroups,1);
     xx = cell(numGroups,1);
     for i = 1:numGroups
-        if isempty(dataCell{i})
+        if isempty(dataCell{i}) || all(isnan(dataCell{i}))
             continue
         end
         if any(isnan(dataCell{i}))
@@ -201,7 +201,7 @@ end
 % ------------------------------------------------------------------------------
 % Add strips for means and stds:
 % ------------------------------------------------------------------------------
-brightenAmount = -0.3;
+brightenAmount = -0.5;
 if any(cellfun(@(x)any(isnan(x)),dataCell)), warning('NaNs in data'); end
 for i = 1:numGroups
     try
@@ -213,16 +213,12 @@ for i = 1:numGroups
     if addMeans
         if makeHorizontal
             plot(nanmean(dataCell{i})*ones(2,1),[customOffset + i - offsetRange/2,customOffset + i + offsetRange/2],'-',...
-                            'color',brightColor,'LineWidth',2)
+                            'color',brightColor,'LineWidth',3)
         else
             plot([customOffset + i - offsetRange/2,customOffset + i + offsetRange/2],nanmean(dataCell{i})*ones(2,1),'-',...
-                            'color',brightColor,'LineWidth',2)
+                            'color',brightColor,'LineWidth',3)
         end
     end
-    % plot([customOffset + i - offsetRange/2,customOffset + i + offsetRange/2],(nanmean(dataCell{i})-nanstd(dataCell{i}))*ones(2,1),'--',...
-                            % 'color',brightColor,'LineWidth',2)
-    % plot([customOffset + i - offsetRange/2,customOffset + i + offsetRange/2],(nanmean(dataCell{i})+nanstd(dataCell{i}))*ones(2,1),'--',...
-                            % 'color',brightColor,'LineWidth',2)
 end
 
 end

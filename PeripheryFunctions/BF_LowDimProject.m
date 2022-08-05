@@ -57,8 +57,8 @@ case {'pca','PCA'}
     if ~any(isnan(dataMatrix))
         [pcCoeff,lowDimComponents,~,~,percVar] = pca(zscore(dataMatrix),'NumComponents',numComponents);
     else
-        warning(sprintf(['Data matrix contains %.2g%% NaNs. Estimating covariances on remaining data...\n' ...
-                    '(Could take some time...)'],100*mean(isnan(dataMatrix(:)))))
+        warning(['Data matrix contains %.2g%% NaNs. Estimating covariances on remaining data...\n' ...
+                    '(Could take some time...)'],100*mean(isnan(dataMatrix(:))))
         % Data matrix contains NaNs; try the pairwise rows approximation to the
         % covariance matrix:
         [pcCoeff,lowDimComponents,~,~,percVar] = pca(BF_NormalizeMatrix(dataMatrix,'zscore'),...

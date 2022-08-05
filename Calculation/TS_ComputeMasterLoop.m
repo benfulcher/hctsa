@@ -1,4 +1,4 @@
-function [masterOutput, masterTime] = TS_ComputeMasterLoop(x, x_z, masterCode, masterID, numMasterOps, beVocal, theTsID, iterNum)
+function [masterOutput, masterTime] = TS_ComputeMasterLoop(x,x_z,masterCode,masterID,numMasterOps,howVocal,theTsID,iterNum)
 % TS_ComputeMasterLoop     Used in a loop by TS_Compute to evaluate a given master function.
 
 % ------------------------------------------------------------------------------
@@ -23,9 +23,16 @@ function [masterOutput, masterTime] = TS_ComputeMasterLoop(x, x_z, masterCode, m
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-if beVocal
+if strcmp(howVocal,'full')
+    beVocal = true;
+else
+    beVocal = false;
+end
+
+if strcmp(beVocal,'full')
     % Display code name for error checking
-    fprintf(1,'[ts_id = %u, mop_id = %u (%u/%u)] %s...', theTsID, masterID, iterNum, numMasterOps, masterCode);
+    fprintf(1,'[TimeSeries_ID = %u, MasterOperation_ID = %u (%u/%u)] %s...',...
+                theTsID, masterID, iterNum, numMasterOps, masterCode);
 end
 
 try

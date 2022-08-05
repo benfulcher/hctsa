@@ -37,7 +37,7 @@ function TS_FeatureSummary(opID,whatData,doViolin,doInspect,annotateParams,custo
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check inputs
+% Check Inputs
 %-------------------------------------------------------------------------------
 if nargin < 1
     opID = 1;
@@ -49,7 +49,7 @@ if nargin < 3 || isempty(doViolin) % annotation parameters
     doViolin = true;
 end
 if nargin < 4
-    doInspect = true;
+    doInspect = false;
 end
 if nargin < 5 || isempty(annotateParams) % annotation parameters
     annotateParams = struct();
@@ -85,6 +85,14 @@ if ~isfield(annotateParams,'groupColors')
 end
 
 %-------------------------------------------------------------------------------
+% Custom normalization
+if isfield(annotateParams,'customNormalization') && ~isempty(annotateParams.customNormalization)
+    dataVector = BF_NormalizeMatrix(dataVector,annotateParams.customNormalization);
+    warning('Applying an additional normalization to feature values: ''%s''',...
+        annotateParams.customNormalization)
+end
+
+%-------------------------------------------------------------------------------
 % Apply default plotting settings in the annotateParams structure
 if ~isfield(annotateParams,'n')
     annotateParams.n = min(15,height(TimeSeries));
@@ -94,6 +102,9 @@ if annotateParams.n < 1
 end
 if ~isfield(annotateParams,'maxL')
     annotateParams.maxL = 1000;
+end
+if ~isfield(annotateParams,'showGlobalDist')
+    annotateParams.showGlobalDist = true;
 end
 
 %-------------------------------------------------------------------------------
@@ -110,7 +121,7 @@ if doViolin
     if ~doInspect
         % Spaced time-series annotations shown on the right of the plot.
         % Determine a subset, highlightInd, of time series to highlight:
-        [~,ix] = sort(TS_DataMat(:,theOp),'ascend');
+        [~,ix] = sort(dataVector,'ascend');
         highlightInd = ix(round(linspace(1,length(ix),annotateParams.n)));
         rainbowColors = [BF_GetColorMap('set1',5,1); BF_GetColorMap('dark2',5,1)];
     end
@@ -130,30 +141,45 @@ if doViolin
 
     % Set up parameters:
     extraParams = struct();
+    % extraParams.customSpot = [];
     if doInspect
         extraParams.makeHorizontal = true;
         extraParams.dontHitMe = true;
     end
 
     if numGroups > 1
-        dataCell = cell(numGroups+1,1);
-        dataCell{1} = TS_DataMat(:,theOp); % global distribution
+        if annotateParams.showGlobalDist
+            dataCell = cell(numGroups+1,1);
+            dataCell{1} = dataVector; % global distribution
+        else
+            dataCell = cell(numGroups,1);
+        end
         for i = 1:numGroups
-            dataCell{i+1} = TS_DataMat(timeSeriesGroup==classLabels{i},theOp);
+            if annotateParams.showGlobalDist
+                theIndex = i+1;
+            else
+                theIndex = i;
+            end
+            dataCell{theIndex} = dataVector(timeSeriesGroup==classLabels{i});
         end
 
-        myColors = cell(numGroups+1,1);
-        myColors{1} = ones(3,1)*0.5; % gray for combined
-        myColors(2:numGroups+1) = annotateParams.groupColors;
+        if annotateParams.showGlobalDist
+            myColors = cell(numGroups+1,1);
+            myColors{1} = ones(3,1)*0.5; % gray for combined
+            myColors(2:numGroups+1) = annotateParams.groupColors;
+        else
+            myColors = annotateParams.groupColors;
+        end
         extraParams.theColors = myColors;
         extraParams.customOffset = -0.5;
         extraParams.offsetRange = 0.7;
-        [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter(dataCell,true,true,false,extraParams);
+        extraParams.customSpot = '.';
+        [ff,xx,xScatter,yScatter] = BF_ViolinPlot(dataCell,false,true,false,extraParams);
 
         % Add lines denoting each annotated time-series in the distribution:
-        if ~doInspect
+        if ~doInspect & annotateParams.showGlobalDist
             for i = 1:annotateParams.n
-                ri = find(xx{1} >= TS_DataMat(highlightInd(i),theOp),1);
+                ri = find(xx{1} >= dataVector(highlightInd(i)),1);
                 groupColor = myColors{1 + groupLabelsInteger(highlightInd(i))};
                 plot(0.5 + 0.35*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColors{rem(i-1,10) + 1},'LineWidth',2)
                 plot(0.5 + 0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
@@ -162,9 +188,13 @@ if doViolin
         end
 
         % Label axes:
-        axisLabels = cell(numGroups + 1,1);
-        axisLabels{1} = 'all';
-        axisLabels(2:end) = classLabels;
+        if annotateParams.showGlobalDist
+            axisLabels = cell(numGroups + 1,1);
+            axisLabels{1} = 'all';
+            axisLabels(2:end) = classLabels;
+        else
+            axisLabels = classLabels;
+        end
         if doInspect
             h_violin.YTick = 0.5 + (0:numGroups);
             h_violin.YTickLabel = axisLabels;
@@ -177,12 +207,12 @@ if doViolin
     else
         % No groups: just show the global distribution
         extraParams.theColors = {ones(3,1)*0.5};
-        [ff,xx,xScatter,yScatter] = BF_JitteredParallelScatter({TS_DataMat(:,theOp)},false,true,false,extraParams);
+        [ff,xx,xScatter,yScatter] = BF_ViolinPlot({dataVector},false,true,false,extraParams);
 
         % Annotate lines for each feature in the distribution:
         if ~doInspect
             for i = 1:annotateParams.n
-                ri = find(xx{1} >= TS_DataMat(highlightInd(i),theOp),1);
+                ri = find(xx{1} >= dataVector(highlightInd(i)),1);
                 rainbowColor = rainbowColors{rem(i - 1,10)+1};
                 plot(1 + 0.25*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColor,'LineWidth',2)
                 plot(1 + 0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
@@ -213,7 +243,7 @@ if doViolin
             h_Custom = subplot(4,1,4);
         end
         tHandle = text(0.2,0.5,'Click near a point above to inspect a time series!');
-    else
+    elseif annotateParams.showGlobalDist
         h_TimeSeries = subplot(1,4,3:4);
         plotOptions.newFigure = false;
         plotOptions.colorMap = cell(annotateParams.n,1);
@@ -246,7 +276,9 @@ else
         tsInd = cell(numGroups,1); % keeps track of indices from TimeSeries structure
 
         % Global distribution:
-        [~,~,lineHandles{1}] = BF_plot_ks(dataVector,ones(1,3)*0.5,0,1,8);
+        if annotateParams.showGlobalDist
+            [~,~,lineHandles{1}] = BF_plot_ks(dataVector,ones(1,3)*0.5,0,1,8);
+        end
 
         % Distribution for each group:
         for k = 1:numGroups
@@ -262,9 +294,13 @@ else
         TimeSeries = TimeSeries(tsInd,:);
 
         % Set up legend:
-        legendText = cell(length(classLabels)+1,1);
-        legendText{1} = 'combined';
-        legendText(2:end) = classLabels;
+        if annotateParams.showGlobalDist
+            legendText = cell(length(classLabels)+1,1);
+            legendText{1} = 'combined';
+            legendText(2:end) = classLabels;
+        else
+            legendText = classLabels;
+        end
         legend(horzcat(lineHandles{:}),legendText)
     else
         % Just run a single global one (black)

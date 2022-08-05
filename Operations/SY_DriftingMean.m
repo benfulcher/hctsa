@@ -1,4 +1,4 @@
-function out = SY_DriftingMean(y,howl,l)
+function out = SY_DriftingMean(y,segmentHow,l)
 % SY_DriftingMean   Mean and variance in local time-series subsegments.
 %
 % Splits the time series into segments, computes the mean and variance in each
@@ -22,8 +22,8 @@ function out = SY_DriftingMean(y,howl,l)
 %---INPUTS:
 % y, the input time series
 %
-% howl, (i) 'fix': fixed-length segments (of length l)
-%       (ii) 'num': a given number, l, of segments
+% segmentHow, (i) 'fix': fixed-length segments (of length l)
+%             (ii) 'num': a given number, l, of segments
 %
 % l, either the length ('fix') or number of segments ('num')
 
@@ -59,19 +59,19 @@ function out = SY_DriftingMean(y,howl,l)
 N = length(y); % length of the input time series
 
 % ------------------------------------------------------------------------------
-% Check inputs
+%% Check inputs
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(howl)
-    howl = 'num'; % a specified number of segments
+if nargin < 2 || isempty(segmentHow)
+    segmentHow = 'num'; % a specified number of segments
 end
-if strcmp(howl,'num')
+if strcmp(segmentHow,'num')
     l = floor(N/l);
-elseif ~strcmp(howl,'fix')
-    error('Unknown input setting ''%s''',howl)
+elseif ~strcmp(segmentHow,'fix')
+    error('Unknown input setting ''%s''',segmentHow)
 end
 
 if nargin < 3 || isempty(l)
-    switch howl
+    switch segmentHow
     case 'num'
         l = 5; % 5 segments
     case 'fix'
@@ -80,30 +80,37 @@ if nargin < 3 || isempty(l)
 end
 
 % ------------------------------------------------------------------------------
-
-% ++BF 19/3/2010
+%% Check for short time series
+%-------------------------------------------------------------------------------
 if l==0 || N < l % doesn't make sense to split into more windows than there are data points
     fprintf(1,'Time Series (N = %u < l = %u) is too short for this operation\n',N,l);
-    out = NaN; return
+    out = NaN;
+    return
 end
 
-% Get going
+%-------------------------------------------------------------------------------
+%% Get going
+%-------------------------------------------------------------------------------
 numFits = floor(N/l); % number of times l fits completely into N
 z = zeros(l,numFits);
 for i = 1:numFits
-    z(:,i) = y((i-1)*l+1:i*l);
+    z(:,i) = y((i-1)*l + 1:i*l);
 end
 zm = mean(z);
 zv = var(z);
-meanvar = mean(zv);
-maxmean = max(zm);
-minmean = min(zm);
-meanmean = mean(zm);
+meanVar = mean(zv);
+maxMean = max(zm);
+minMean = min(zm);
+meanMean = mean(zm);
 
-out.max = maxmean/meanvar;
-out.min = minmean/meanvar;
-out.mean = meanmean/meanvar;
-out.meanmaxmin = (out.max+out.min)/2;
-out.meanabsmaxmin = (abs(out.max)+abs(out.min))/2;
+%-------------------------------------------------------------------------------
+%% Output statistics
+%-------------------------------------------------------------------------------
+
+out.max = maxMean/meanVar;
+out.min = minMean/meanVar;
+out.mean = meanMean/meanVar;
+out.meanmaxmin = (out.max + out.min)/2;
+out.meanabsmaxmin = (abs(out.max) + abs(out.min))/2;
 
 end

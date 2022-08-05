@@ -43,7 +43,7 @@ if nargin < 2 || isempty(rangeHow)
     rangeHow = 'auto';
 end
 if nargin < 3
-    makeFigure = 0;
+    makeFigure = false;
 end
 
 %-------------------------------------------------------------------------------
@@ -81,12 +81,12 @@ case 'balanced'
     maxDev = max(abs(D_corr(:)));
     caxis([-maxDev,maxDev])
     colormap([flipud(BF_GetColorMap('blues',9,0));[1,1,1],;BF_GetColorMap('reds',9,0)])
-case '-1to1'
+case 'n1to1'
     caxis([-1,1])
     colormap([flipud(BF_GetColorMap('blues',9,0));BF_GetColorMap('reds',9,0)])
-case '0to1' % assume [0,1] (a normalized distance metric)
+case '0to1' % assume 0-1 range (a normalized distance metric)
     caxis([0,1])
-    colormap(BF_GetColorMap('reds',9,0))
+    colormap([1,1,1;BF_GetColorMap('reds',9,0)])
 case 'auto'
     colormap(flipud(gray(64)))
 otherwise

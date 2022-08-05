@@ -1,13 +1,18 @@
-function TellMeAboutClassification(cfnParams)
-% TellMeAboutClassification Gives some user-interpretable information about the
-%                           classification settings
+function [INP_mops,INP_ops] = TS_GiveMeInputFiles(whatFeatureSet)
+% TS_GiveMeInputFiles  Gives a set of input files corresponding to a named feature set
 %
+%---INPUT:
+% whatFeatureSet: The name of a feature set.
+%
+%---OUTPUTS:
+% INP_mops: the filename for a master operations input file.
+% INP_ops: the filename for an operations input file.
 
 %-------------------------------------------------------------------------------
-% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2022, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
-% If you use this code for your research, please cite these papers:
+% If you use this code for your research, please cite the following two papers:
 %
 % (1) B.D. Fulcher and N.S. Jones, "hctsa: A Computational Framework for Automated
 % Time-Series Phenotyping Using Massive Feature Extraction, Cell Systems 5: 527 (2017).
@@ -26,18 +31,18 @@ function TellMeAboutClassification(cfnParams)
 %-------------------------------------------------------------------------------
 
 if nargin < 1
-    cfnParams = GiveMeDefaultClassificationParams('norm');
+    whatFeatureSet = 'hctsa';
 end
 
-if cfnParams.numRepeats==1
-    repeatText = '';
-else
-    repeatText = sprintf(' with %u repeats!',cfnParams.numRepeats);
+switch whatFeatureSet
+case 'hctsa'
+    INP_mops = 'INP_mops_hctsa.txt';
+    INP_ops = 'INP_ops_hctsa.txt';
+case 'catch22'
+    INP_mops = 'INP_mops_catch22.txt';
+    INP_ops = 'INP_ops_catch22.txt';
+otherwise
+    error('Unknown feature set: ''%s''',whatFeatureSet)
 end
-
-fprintf(1,['\nTraining and evaluating a %u-class %s',...
-                ' using %u-fold cross validation%s\n'],...
-            cfnParams.numClasses,cfnParams.classifierText,...
-            cfnParams.numFolds,repeatText);
 
 end

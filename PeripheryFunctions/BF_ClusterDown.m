@@ -15,7 +15,7 @@ function [distMat_cl,cluster_Groupi,ord,handles] = BF_ClusterDown(distMat,vararg
 %                        done on abscorr distances (sign of R is ignored), and
 %                        correlations, R, are plotted
 %        (iii) 'abscorr_ii': provide correlation distances, 1-R, but clustering
-%                        is done on abscorr distances(sign of R is ignored), and
+%                        is done on abscorr distances (sign of R is ignored), and
 %                        absolute correlations, |R|, are plotted
 %        (iv) 'general': provide any distance matrix, plots the distance matrix
 % 'linkageMeth', the linkage method to use (for Matlab's linkage function)
@@ -63,7 +63,7 @@ addParameter(inputP,'clusterThreshold',default_clusterThreshold,@isnumeric);
 default_objectLabels = {};
 addParameter(inputP,'objectLabels',default_objectLabels,@iscell);
 
-% Default input is a distance matrix based on correlation coefficients
+% Default input is a distance matrix based on (Spearman) correlation coefficients
 default_whatDistance = 'corr';
 addParameter(inputP,'whatDistance',default_whatDistance,@ischar);
 
@@ -111,7 +111,7 @@ else
     distVec = squareform(distMat); % convert for vector version
 end
 % Solve for number of items from quadratic formula:
-numItems = (1+sqrt(1+8*length(distVec)))/2;
+numItems = (1 + sqrt(1 + 8*length(distVec)))/2;
 
 %-------------------------------------------------------------------------------
 % Convert to absolute correlations:
@@ -121,7 +121,7 @@ distVec0 = distVec; % keep distVec0 as the input distance matrix in all cases
 if ismember(whatDistance,{'abscorr','abscorr_ii'})
     % Compute distances on absolute correlation distances (where sign of correlation
     % is irrelevant, it's the magnitude that's important):
-    distVec = 1-abs(1-distVec);
+    distVec = 1 - abs(1 - distVec);
 end
 
 % We need the matrix form also:
@@ -130,7 +130,7 @@ distMat = squareform(distVec);
 %-------------------------------------------------------------------------------
 % Do the linkage clustering:
 %-------------------------------------------------------------------------------
-fprintf(1,'Computing linkage information for %ux%u data using %s clustering...',...
+fprintf(1,'Computing linkage information for %u x %u data using %s clustering...',...
             numItems,numItems,linkageMeth);
 links = linkage(distVec,linkageMeth);
 fprintf(1,' Done.\n');
@@ -168,7 +168,7 @@ fprintf(1,'Distance-based clustering with %u clusters\n',numClusters);
 cluster_Groupi = cell(numClusters,1);
 for j = 1:numClusters
     cluster_Groupi{j} = find(T==j);
-    if length(T==j) > 1
+    if sum(T==j) > 1
         % Sort by increasing sum of distances to other members of the cluster
         [~,ix] = sort(sum(distMat(cluster_Groupi{j},cluster_Groupi{j})),'ascend');
         cluster_Groupi{j} = cluster_Groupi{j}(ix);
@@ -180,11 +180,11 @@ end
 cluster_Groupi = cluster_Groupi(ix);
 
 % Select the closest to cluster centre in each group
-clusterCenters = cellfun(@(x)x(1),cluster_Groupi);
+clusterCenters = cellfun(@(x) x(1),cluster_Groupi);
 
-cluster_Groupi_cl = cellfun(@(x)arrayfun(@(y)find(ord==y),x),cluster_Groupi,...
+cluster_Groupi_cl = cellfun(@(x) arrayfun(@(y)find(ord==y),x),cluster_Groupi,...
                                                 'UniformOutput',false);
-clusterCenters_cl = arrayfun(@(y)find(ord==y),clusterCenters);
+clusterCenters_cl = arrayfun(@(y) find(ord==y),clusterCenters);
 
 % ------------------------------------------------------------------------------
 % Now plot it:
@@ -196,23 +196,27 @@ switch whatDistance
 case {'corr','abscorr_ii','corr_fast'}
     % Input is a correlation distance matrix, plot correlation coefficients:
     distMat0 = squareform(distVec0);
-    BF_PlotCorrMat(1-distMat0(ord,ord),'auto');
+    BF_PlotCorrMat(1 - distMat0(ord,ord),'n1to1');
+    rectangleColors = BF_GetColorMap('accent',5,true);
 case 'abscorr'
     distMat0 = squareform(distVec0);
     % Input is correlation distance matrix, plot absolute correlation coefficients:
-    BF_PlotCorrMat(abs(1-distMat0(ord,ord)),'auto');
+    BF_PlotCorrMat(abs(1 - distMat0(ord,ord)),'0to1');
+    % (red colormap)
+    rectangleColors = {[0,0,0],ones(1,3)*0.5};
 case 'general'
-    % Input is a general distance matrix:
+    % Input is a general distance matrix (grayscale colormap):
     BF_PlotCorrMat(distMat_cl);
+    rectangleColors = BF_GetColorMap('accent',5,true);
 otherwise
     warning('No special plotting options for distance metric: ''%s''',whatDistance);
     BF_PlotCorrMat(distMat_cl);
+    rectangleColors = BF_GetColorMap('accent',5,true);
 end
 
 %-------------------------------------------------------------------------------
 % Add rectangles to group highly correlated clusters:
 %-------------------------------------------------------------------------------
-rectangleColors = BF_GetColorMap('accent',5,1);
 for i = 1:numClusters
     % Label cluster borders:
     rectangle('Position',[min(cluster_Groupi_cl{i})-0.5,min(cluster_Groupi_cl{i})-0.5, ...
@@ -221,7 +225,7 @@ for i = 1:numClusters
 
     % Label cluster centers:
     rectangle('Position',[clusterCenters_cl(i)-0.5,clusterCenters_cl(i)-0.5,1,1], ...
-                                'EdgeColor',rectangleColors{5},'LineWidth',3);
+                                'EdgeColor',rectangleColors{2},'LineWidth',3);
 end
 
 %-------------------------------------------------------------------------------
@@ -244,9 +248,9 @@ ax2.XTick = [];
 cB = colorbar('southoutside');
 switch whatDistance
 case {'corr','abscorr_ii'}
-    cB.Label.String = 'correlation coefficient';
+    cB.Label.String = 'Spearman correlation, \rho';
 case 'abscorr'
-    cB.Label.String = 'absolute correlation coefficient';
+    cB.Label.String = 'Magnitude of Spearman correlation, |\rho|';
 case 'general'
     cB.Label.String = 'distance';
 end

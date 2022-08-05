@@ -1,24 +1,25 @@
-function TS_Init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
+function TS_Init(INP_ts,whatFeatureSet,beVocal,outputFile)
 % TS_Init  Produces a formatted HCTSA .mat file from input files
 %
 % This function is used instead to run hctsa analysis without a linked mySQL database.
 %
 %---EXAMPLE USAGE:
-% Initiate an HCTSA.mat file on a custom time-series dataset using default
+% Initiate an HCTSA.mat file on a custom time-series dataset using the hctsa
 % feature library, using a formatted input file, 'my_TS_INP_file.mat'
-% >> TS_Init('my_TS_INP_file.mat');
+% >> TS_Init('my_TS_INP_file.mat','hctsa');
 %
 %---INPUTS:
 % INP_ts: A time-series input file
-% INP_mops: A master operations input file
-% INP_ops: An operations input file
+% whatFeatureSet: EITHER a feature-set name (like 'hctsa' or 'catch22')
+%             OR a 1x2 cell of filenames for INP_mops (master operations input file)
+%                   and INP_ops (an operations input file)
 % beVocal: Whether to display details of the progress of the script to screen.
 %           a 3-vector, specifying for 1. time series, 2. master operations,
 %           and 3. operations.
 % outputFile: Specify an output filename
 %
 %---OUTPUTS:
-% Writes output to HCTSA.mat (or specified custom filename)
+% Writes output to HCTSA.mat (or specified custom filename: outputFile)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -48,25 +49,20 @@ function TS_Init(INP_ts,INP_mops,INP_ops,beVocal,outputFile)
 if nargin < 1 || isempty(INP_ts)
     error('Please supply a formatted time-series input file (see documentation for details).');
 end
-if nargin < 2 || isempty(INP_mops)
-    INP_mops = 'INP_mops.txt';
+if nargin < 2
+    whatFeatureSet = 'hctsa';
 end
-if nargin < 3 || isempty(INP_ops)
-    INP_ops = 'INP_ops.txt';
-end
-if nargin < 4
-    if nargin < 2
-        beVocal = [true,false,false]; % by default helps you just for the time series input file you provided
-    elseif nargin < 3
-        beVocal = [true,true,false]; % by help you through the master operations too
-    else
+if nargin < 3
+    if iscell(whatFeatureSet)
         beVocal = [true,true,true]; % Provided all custom input files--walks you through all of them
+    else
+        beVocal = [true,false,false]; % by default helps you just for the time series input file you provided
     end
 end
 if length(beVocal)==1
     beVocal = repmat(beVocal,1,3);
 end
-if nargin < 5
+if nargin < 4
     outputFile = 'HCTSA.mat';
 end
 
@@ -79,6 +75,20 @@ if exist(['./',outputFile],'file')
     if ~strcmp(reply,'y')
         return
     end
+end
+
+%-------------------------------------------------------------------------------
+% Convert a feature-set name to a set of input files
+%-------------------------------------------------------------------------------
+if ischar(whatFeatureSet)
+    [INP_mops,INP_ops] = TS_GiveMeInputFiles(whatFeatureSet);
+elseif iscell(whatFeatureSet)
+    INP_mops = whatFeatureSet{1};
+    fprintf(1,'Information about master operations taken from ''%s''\n',INP_mops);
+    INP_ops = whatFeatureSet{2};
+    fprintf(1,'Information about operations taken from ''%s''\n',INP_ops);
+else
+    error('Unknown format for setting the feature set')
 end
 
 %-------------------------------------------------------------------------------

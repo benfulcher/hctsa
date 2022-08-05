@@ -34,10 +34,10 @@ function TS_SingleFeature(whatData,featID,makeViolin,makeNewFigure,whatStat,beVo
 %-------------------------------------------------------------------------------
 % Check Inputs:
 if nargin < 3
-    makeViolin = false;
+    makeViolin = true;
 end
 if nargin < 4
-    makeNewFigure = false;
+    makeNewFigure = true;
 end
 if nargin < 5
     whatStat = [];
@@ -90,7 +90,7 @@ if makeViolin
     extraParams.theColors = colors(ix);
     extraParams.customOffset = -0.5;
     extraParams.offsetRange = 0.7;
-    BF_JitteredParallelScatter(dataCell(ix),1,1,0,extraParams);
+    BF_ViolinPlot(dataCell(ix),1,1,0,extraParams);
 
     % Adjust appearance:
     ax = gca;
@@ -127,8 +127,10 @@ else
     legend([linePlots{:}],classLabels,'interpreter','none','Location','best')
     ylabel('Probability density')
 
-    % Annotate rectangles:
-    BF_AnnotateRect('diaglinear',TS_DataMat(:,op_ind),TimeSeries.Group,numClasses,colors,ax,'under');
+    % Annotate rectangles for predicted intervals:
+    cfnParams = GiveMeDefaultClassificationParams(TimeSeries,[],false);
+    cfnParams.numFolds = 0;
+    BF_AnnotateRect(TS_DataMat(:,op_ind),TimeSeries.Group,cfnParams,colors,ax,'under');
 
     % Add x-label:
     xlabel('Output')
@@ -143,10 +145,11 @@ end
 % Get cross-validated accuracy for this single feature using a Naive Bayes linear classifier:
 if isempty(whatStat)
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries,[],false);
-    cfnParams.whatClassifier = 'fast_linear';
+    cfnParams.whatClassifier = 'fast-linear';
     cfnParams.numFolds = 10;
     cfnParams.computePerFold = true;
-    accuracy = GiveMeCfn(TS_DataMat(:,op_ind),TimeSeries.Group,[],[],cfnParams);
+    accuracyTrainTestFolds = GiveMeCfn(TS_DataMat(:,op_ind),TimeSeries.Group,[],[],cfnParams);
+    accuracy = accuracyTrainTestFolds{2}; % test folds only
     fprintf(1,'%u-fold cross-validated %s: %.2f +/- %.2f%%\n',...
                 cfnParams.numFolds,cfnParams.whatLoss,mean(accuracy),std(accuracy));
     statText = sprintf('%.1f%s',mean(accuracy),cfnParams.whatLossUnits);

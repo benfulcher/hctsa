@@ -67,7 +67,6 @@ end
 %% Load the data
 %-------------------------------------------------------------------------------
 [TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
-numFeatures = height(Operations);
 
 % (for classification in the embedding space):
 if nargin < 5 || isempty(cfnParams)
@@ -80,7 +79,7 @@ end
 TellMeAboutLabeling(TimeSeries);
 
 % Filter down a reduced feature set if required:
-[TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams);
+[TS_DataMat,~] = FilterFeatures(TS_DataMat,Operations,cfnParams);
 
 % ------------------------------------------------------------------------------
 % Do the dimensionality reduction

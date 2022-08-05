@@ -95,7 +95,7 @@ switch nameOrKeywords
         Keywords = SUB_cell2cellcell(theKeywordCell);
 
         % Find objects with a keyword that matches the input string:
-        matches = cellfun(@(x)any(ismember(theMatchString,x)),Keywords);
+        matches = cellfun(@(x) any(ismember(theMatchString,x)),Keywords);
 
         % Return the IDs of the matches:
         IDs = theDataTable.ID(matches);

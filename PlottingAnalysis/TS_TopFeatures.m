@@ -138,7 +138,7 @@ end
 if strcmp(whatTestStat,'classification')
     if nargin < 3 || isempty(fieldnames(cfnParams))
         cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
-        cfnParams.whatClassifier = 'fast_linear';
+        cfnParams.whatClassifier = 'fast-linear';
         cfnParams = UpdateClassifierText(cfnParams);
     end
 else
@@ -182,22 +182,33 @@ switch whatTestStat
         statUnit = '';
         whatIsBetter = 'abs';
     case {'ustatP','ranksumP'}
+        % Approximate p-value from ranksum test
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true);
+                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true,false);
         chanceLevel = NaN;
         testStatText = 'Mann-Whitney approx p-value';
         statUnit = ' (-log10(p))';
         whatIsBetter = 'high';
-    case {'ustatExactP','ranksumExactP'}
+    case {'ustatPsign','ranksumPsign'}
+        % Approximate p-value from ranksum test, signed by the direction of difference
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                    fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true,true);
+                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true,true);
+        chanceLevel = NaN;
+        testStatText = 'Mann-Whitney approx p-value (signed)';
+        statUnit = ' signed(-log10(p))';
+        whatIsBetter = 'abs';
+    case {'ustatExactP','ranksumExactP'}
+        % Exact p-value from ranksum test
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                    fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true,true,false);
         chanceLevel = NaN;
         testStatText = 'Mann-Whitney exact p-value';
         statUnit = ' (-log10(p))';
         whatIsBetter = 'high';
     case {'ustat','ranksum'}
+        % Approximate test statistic from ranksum test
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
-                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,false);
+                fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,false,false);
         chanceLevel = NaN; % (check if you can compute the chance level stat?)
         testStatText = 'Mann-Whitney approx test statistic';
         statUnit = '';
@@ -432,26 +443,33 @@ if ismember('cluster',whatPlots)
     % 1. Get pairwise similarity matrix
     op_ind = ifeat(1:numTopFeatures); % plot these operations indices
 
-    % (if it exists already, use that; otherwise compute it on the fly)
-    clustStruct = TS_GetFromData(whatData,'op_clust');
-    if isempty(clustStruct) % doesn't exist
-        clustStruct = struct();
-    end
-    if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
-        % pairwise distances already computed, stored in the HCTSA .mat file
-        fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile);
-        Dij = squareform(clustStruct.Dij);
-        Dij = Dij(op_ind,op_ind);
-        distanceMetric = clustStruct.distanceMetric;
-    else
-        % Compute correlations on the fly
-        Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
-        distanceMetric = 'abscorr';
-    end
+    % (If it exists already, use that; otherwise compute it on the fly)
+    % clustStruct = TS_GetFromData(whatData,'op_clust');
+    % if isempty(clustStruct) % doesn't exist
+    %     clustStruct = struct();
+    % end
+    % if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
+    %     % pairwise distances already computed, stored in the HCTSA .mat file
+    %     fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile);
+    %     Dij = squareform(clustStruct.Dij);
+    %     Dij = Dij(op_ind,op_ind);
+    %     distanceMetric = clustStruct.distanceMetric;
+    % else
+    %     % Compute correlations on the fly
+    %     Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
+    %     distanceMetric = 'abscorr';
+    % end
+
+    % 1. Compute pairwise correlations on the dataset
+    % spearmanCorrs = corr(TS_DataMat(:,op_ind)','abscorr');
+    Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
+    distanceMetric = 'abscorr';
+
+    % 2. Plot it:
     makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations.ID(x),Operations.Name{x},...
                         testStat(x),statUnit);
     objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',false);
-    clusterThreshold = 0.2; % threshold at which split into clusters
+    clusterThreshold = 0.25; % threshold at which split into clusters
     [~,cluster_Groupi] = BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
                         'whatDistance',distanceMetric,...
                         'objectLabels',objectLabels);
@@ -504,34 +522,45 @@ if isfield(cfnParams,'classifierFilename') && ~isempty(cfnParams.classifierFilen
 end
 
 %-------------------------------------------------------------------------------
-% Don't display crap to screen unless the user wants it:
+% Don't display unused outputs to screen:
 if nargout == 0
     clear('ifeat','testStat','testStat_rand','featureClassifier');
 end
 
 %-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
-function [theStatistic,stats] = fn_uStat(d1,d2,doExact,doP)
-    % Return -log10(p) from a Mann-Whitney U-test
+function [theStatistic,stats] = fn_uStat(d1,d2,doExact,doP,doSigned)
+    % Return a statistic from a Mann-Whitney U-test
     if doExact
+        % use the exact method (slower)
         [p,~,stats] = ranksum(d1,d2,'method','exact');
     else
+        % use the approximate method (faster)
         [p,~,stats] = ranksum(d1,d2,'method','approx');
     end
     if doP
+        % -log10(p) from a Mann-Whitney U-test
         theStatistic = -log10(p);
     else
+        % ranksum test statistic from a Mann-Whitney U-test
         theStatistic = stats.ranksum;
+    end
+    if doSigned
+        % Gives the statistic the sign of the z statistic
+        % (tracks wether higher or lower in the class)
+        theStatistic = sign(stats.zval)*theStatistic;
     end
     % theStatistic = sign(stats.ranksum)*(-log10(p)); % (signed p-value)
 end
 %-------------------------------------------------------------------------------
 function [theStatistic,stats] = fn_tStat(d1,d2,doP)
-    % Return test statistic from a 2-sample Welch's t-test
+    % Return a statistic from a 2-sample Welch's t-test
     [~,p,~,stats] = ttest2(d1,d2,'Vartype','unequal');
     if doP
+        % -log10(p) from the 2-sample Welch's t-test
         theStatistic = -log10(p);
     else
+        % t-statistic from the 2-sample Welch's t-test
         theStatistic = stats.tstat;
     end
 end
@@ -554,7 +583,7 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
         for k = 1:numFeatures
             try
                 if nargout == 2
-                    % This is slower for the fast_linear classifier (but returns a model)
+                    % This is slower for the fast-linear classifier (but returns a model)
                     [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
                 else
                     testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);

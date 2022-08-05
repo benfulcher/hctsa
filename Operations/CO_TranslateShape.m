@@ -109,12 +109,13 @@ switch howToMove
 end
 
 %-------------------------------------------------------------------------------
-% Output statistics:
+%% Output statistics
+%-------------------------------------------------------------------------------
 
-% Maximum possible hits in the shape:
-out.max = max(np);
-out.std = std(np);
-out.mean = mean(np);
+% Statistics on number of hits inside the shape:
+out.max = max(np); % max hits
+out.std = std(np); % std of hits
+out.mean = mean(np); % mean number of hits
 
 % Count the hits:
 histnp = arrayfun(@(x)sum(np==x),unique(np));

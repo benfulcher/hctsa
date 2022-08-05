@@ -21,6 +21,9 @@ function params = GiveMeDefaultClassificationParams(TimeSeries,numClasses,beVoca
 % California, 94041, USA.
 %-------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Get information about time series and set defaults
+%-------------------------------------------------------------------------------
 % Get TimeSeries labeling information from HCTSA.mat by default
 if nargin < 1 || isempty(TimeSeries)
     [~,TimeSeries] = TS_LoadData('HCTSA.mat');
@@ -34,11 +37,21 @@ if nargin < 3
     beVocal = true;
 end
 
+% Suppress warnings (about 100% in-fold accuracy)
+if beVocal
+    params.suppressWarning = false;
+else
+    params.suppressWarning = true;
+end
+
 %-------------------------------------------------------------------------------
-% Set the classifier:
-params.whatClassifier = 'svm_linear'; % ('svm_linear', 'knn', 'linear', 'fast_linear')
+%% Set the classifier:
+%-------------------------------------------------------------------------------
+% Choices in GiveMeCfn: 'svm-linear', 'knn', 'linear', 'fast-linear', 'logistic', 'svm-linear-lowdim'
+params.whatClassifier = 'svm-linear-lowdim';
 
 % Number of repeats of cross-validation (reduce variance due to 'lucky splits')
+% numRepeats = 1 corresponds to a single run (i.e., no repeats).
 params.numRepeats = 1;
 
 % Check group labeling:
@@ -51,7 +64,7 @@ end
 % Number of classes to classify
 % (Assume every class is represented in the data):
 params.classLabels = categories(TimeSeries.Group);
-if nargin < 2 || isempty(numClasses);
+if nargin < 2 || isempty(numClasses)
     numClasses = length(params.classLabels);
 end
 params.numClasses = numClasses;
@@ -67,19 +80,28 @@ if isBalanced
     params.whatLossUnits = '%';
 else
     if beVocal
-        fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using reweighting)...\n');
+        fprintf(1,'Unbalanced classes: using a balanced accuracy measure (& using re-weighting)...\n');
     end
     params.doReweight = true;
     params.whatLoss = 'balancedAccuracy';
     params.whatLossUnits = '%';
 end
 
-% Cross validation: number of folds (set to 0 for no CV)
+%-------------------------------------------------------------------------------
+%% Cross Validation
+%-------------------------------------------------------------------------------
+
+% Number of folds (set to 0 for no CV)
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);
+params.numFolds = 10;
 
-% Whether to output information about each fold, or average over folds
-params.computePerFold = false;
+% Whether to output information about each fold (including training set errors),
+% or just average over folds
+params.computePerFold = true;
 
+%-------------------------------------------------------------------------------
+%% Classifer name:
+%-------------------------------------------------------------------------------
 % .mat file to save the classifier to (not saved if empty).
 params.classifierFilename = ''; % (don't save classifier information to file)
 

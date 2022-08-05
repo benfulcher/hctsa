@@ -1,9 +1,9 @@
-# :wavy_dash: *hctsa* :wavy_dash:: highly comparative time-series analysis
+# :wavy_dash: _hctsa_ :wavy_dash:: highly comparative time-series analysis
 
 [![DOI](https://zenodo.org/badge/10790340.svg)](https://zenodo.org/badge/latestdoi/10790340)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries)](https://twitter.com/compTimeSeries)
 
-*hctsa* is a software package for running highly comparative time-series analysis using [Matlab](https://www.mathworks.com/products/matlab/) (full support for versions R2018b or later).
+_hctsa_ is a software package for running highly comparative time-series analysis using [Matlab](https://www.mathworks.com/products/matlab/) (full support for versions R2018b or later).
 
 The software provides a code framework that enables the extraction of thousands of time-series features from a time series (or a time-series dataset).
 It also provides a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
@@ -13,24 +13,24 @@ It also provides a range of tools for visualizing and analyzing the resulting ti
 3. Identifying and interpreting discriminating features between different classes of time series,
 4. Learning multivariate classification models.
 
-**Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for help with real-world applications of _hctsa_** :nerd_face:
+__Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on real-world applications__ of _hctsa_ :nerd_face:
 
 ### Acknowledgement :+1:
 
 If you use this software, please read and cite these open-access articles:
 
-- B.D. Fulcher and N.S. Jones. [_hctsa_: A computational framework for automated time-series phenotyping using massive feature extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). *Cell Systems* **5**, 527 (2017).
-- B.D. Fulcher, M.A. Little, N.S. Jones. [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). *J. Roy. Soc. Interface* **10**, 83 (2013).
+- B.D. Fulcher and N.S. Jones. [_hctsa_: A computational framework for automated time-series phenotyping using massive feature extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). _Cell Systems_: __5__, 527 (2017).
+- B.D. Fulcher, M.A. Little, N.S. Jones. [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). _J. Roy. Soc. Interface_: __10__, 83 (2013).
 
-Feedback, as [email](mailto:ben.d.fulcher@gmail.com), [github issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
+Feedback, as [email](mailto:ben.d.fulcher@gmail.com), [GitHub issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
 
-**For commercial use of *hctsa*, including licensing and consulting, contact [Engine Analytics](http://www.engineanalytics.org/).**
+__For commercial use of _hctsa_, including licensing and consulting, contact [Engine Analytics](http://www.engineanalytics.org/).__
 
 ## Getting Started :blush:
 
 ### Documentation &#x1F4D6;
 
-__Comprehensive documentation__ for *hctsa*, from getting started through to more advanced analyses is on [gitbook](https://hctsa-users.gitbook.io/hctsa-manual).
+__Comprehensive documentation__ for _hctsa_, from getting started through to more advanced analyses is on [gitbook](https://hctsa-users.gitbook.io/hctsa-manual).
 
 ### Downloading the repository :arrow_down:
 
@@ -68,16 +68,17 @@ Go have a play, read more about it in our [&#x1F4D9;paper](https://doi.org/10.10
 Is over 7000 just a few too many features for your application?
 Do you not have access to a Matlab license?
 _catch22_ has all of your faux-rhetorical questions covered.
-This reduced set of 22 features, determined through a combination of classification performance and mutual redundancy as explained in [this paper](https://arxiv.org/abs/1901.10200v2), is available [here](https://github.com/chlubba/catch22) as an efficiently coded C implementation with wrappers for python, R, and Julia.
+This reduced set of 22 features, determined through a combination of classification performance and mutual redundancy as explained in [this paper](https://arxiv.org/abs/1901.10200v2), is available [here](https://github.com/DynamicsAndNeuralSystems/catch22) as an efficiently coded C implementation with wrappers for python, R, and Julia.
 
 ### _hctsa_ datasets and example workflows :floppy_disk:
+
 There are a range of open datasets with pre-computed _hctsa_ features, as well as some examples of _hctsa_ workflows.
 
 - [_C. elegans_ movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
 - [Drosophila movement speed](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Drosophila_melanogaster_movement_speed/3863553) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingFly).
 - [1000 empirical time series](https://figshare.com/articles/1000_Empirical_Time_series/5436136)
 
-(If you have data to share and host, let me know and I'll add it to this list)
+(If you have data to share and host, let me know and I'll add it to this list).
 
 ### Running _hctsa_ on a cluster :computer:
 
@@ -88,30 +89,30 @@ Matlab code for computing features for an initialized `HCTSA.mat` file, by distr
 _hctsa_ has been used by us and others to do new science in neuroscience, engineering, and biomedicine.
 An updated list of publications using _hctsa_ is on this [wiki page](https://github.com/benfulcher/hctsa/wiki/Publications-using-hctsa).
 
-## *hctsa* licenses
+## _hctsa_ licenses
 
 ### Internal licenses
 
 There are two licenses applied to the core parts of the repository:
 
-1. The framework for running *hctsa* analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+1. The framework for running _hctsa_ analyses and visualizations is licensed as the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
 A license for commercial use is available from [Engine Analytics](http://www.engineanalytics.org/).
 
 2. Code for computing features from time-series data is licensed as [GNU General Public License version 3](http://www.gnu.org/licenses/gpl-3.0.en.html).
 
-A range of external code packages are provided in the **Toolboxes** directory of the repository, and each have their own associated license (as outlined below).
+A range of external code packages are provided in the `Toolboxes` directory of the repository, and each have their own associated license (as outlined below).
 
 ### External packages and dependencies
 
 Many features in _hctsa_ rely on external packages and Matlab toolboxes.
-In the case that some of them are unavailable, *hctsa* can still be used, but only a reduced set of time-series features will be computed.
+In the case that some of them are unavailable, _hctsa_ can still be used, but only a reduced set of time-series features will be computed.
 
 _hctsa_ uses the following [Matlab Add-On Toolboxes](https://au.mathworks.com/products.html): Statistics and Machine Learning, Signal Processing, Curve Fitting, System Identification, Wavelet, and Econometrics.
 
-The following external time-series analysis code packages are provided with the software (in the **Toolboxes** directory), and are used by our main feature-extraction algorithms to compute meaningful structural features from time series:
+The following external time-series analysis code packages are provided with the software (in the `Toolboxes` directory), and are used by our main feature-extraction algorithms to compute meaningful structural features from time series:
 
-- [*TISEAN* package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
-- [*TSTOOL* package for nonlinear time-series analysis, version 1.2](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
+- [_TISEAN_ package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
+- [_TSTOOL_ package for nonlinear time-series analysis, version 1.2](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
 - Joseph T. Lizier's [Java Information Dynamics Toolkit (JIDT)](https://github.com/jlizier/jidt) for studying information-theoretic measures of computation in complex systems, version 1.3 (GPL license).
 - Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
 - Max Little's [Time-series analysis code](http://www.maxlittle.net/software/index.php) (GPL license).

@@ -132,11 +132,11 @@ end
 % SIMPLE PLOT:
 if doPlot
     figure('color','w')
-    hold off
+    hold('off')
     plot(y,'ok');
-    hold on;
+    hold('on');
     plot(rKeep,yTransform,'.r')
-    hold off;
+    hold('off');
     histogram(yTransform,50)
 end
 
@@ -146,8 +146,9 @@ acf_yTransform = SUB_acf(yTransform,8);
 
 if doPlot
     figure('color','w')
-    hold off;
-    plot(acf_y,':b'); hold on;
+    hold('off');
+    plot(acf_y,':b');
+    hold('on');
     plot(acf_yTransform,':r');
 end
 
@@ -159,7 +160,8 @@ end
 f_absDiff = @(x1,x2) abs(x1-x2); % ignores the sign
 f_ratio = @(x1,x2) x1/x2; % includes the sign
 
-out.fzcacrat = f_ratio(CO_FirstCrossing(yTransform,'ac',0,'continuous'),CO_FirstCrossing(y,'ac',0,'continuous'));
+out.fzcacrat = f_ratio(CO_FirstCrossing(yTransform,'ac',0,'continuous'),...
+                            CO_FirstCrossing(y,'ac',0,'continuous'));
 
 out.ac1rat = f_ratio(acf_yTransform(1),acf_y(1));
 out.ac1diff = f_absDiff(acf_yTransform(1),acf_y(1));
@@ -184,10 +186,11 @@ out.kurtosisrat = kurtosis(yTransform)/kurtosis(y);
 function acf = SUB_acf(x,n)
     % computes autocorrelation of the input sequence, x, up to a maximum time
     % lag, n
-    acf = zeros(n,1);
-    for i = 1:n
-        acf(i) = CO_AutoCorr(x,i,'Fourier');
-    end
+    acf = CO_AutoCorr(x,1:n,'Fourier');
+    % acf = zeros(n,1);
+    % for i = 1:n
+    %     acf(i) = CO_AutoCorr(x,i,'Fourier');
+    % end
 end
 
 end
