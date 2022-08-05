@@ -133,6 +133,7 @@ CO_AutoCorr(x_z,37,'Fourier')	AC_37
 CO_AutoCorr(x_z,38,'Fourier')	AC_38
 CO_AutoCorr(x_z,39,'Fourier')	AC_39
 CO_AutoCorr(x_z,40,'Fourier')	AC_40
+CO_PartialAutoCorr(y,20,'ols')  CO_PartialAutoCorr_20_ols
 CO_FirstCrossing(x_z,'ac',0,'both')	CO_FirstCrossing_acf_0
 CO_FirstCrossing(x_z,'ac',1/exp(1),'both')	CO_FirstCrossing_acf_1e
 CO_FirstMin(x_z,'ac')	CO_FirstMin_ac
