@@ -88,10 +88,10 @@ yp = PP_PreProcess(y,'',[],[],[],randomSeed);
 %% ____________________FIT MODEL TO ALL:_______________________ %%
 
 fields = fieldnames(yp);
-nfields = length(fields);
+numFields = length(fields);
 % statstore = struct('fpes',{});
 
-for i = 1:nfields
+for i = 1:numFields
     data = [];
     % for each preprocessing, fit the model
     data = yp.(fields{i});
@@ -99,7 +99,7 @@ for i = 1:nfields
 
     switch model % SO MANY OPTIONS! ;-)
         case 'ar'
-            %% Check that a System Identification Toolbox license is available:
+            %% Check that a System Identification Toolbox license is available
             BF_CheckToolbox('identification_toolbox')
 
             data = zscore(data); % zscore the data from this preprocessing
@@ -128,12 +128,12 @@ end
 
 % (1) ratio of fpe of preprocessed to unprocessed time series
 % I think just this is ok.
-% for i=2:nfields
+% for i=2:numFields
 %     eval(['out.fperat_' fields{i} ' = ' num2str(statstore.fpe(i)/statstore.fpe(1)) ';']);
 % end
 
 % No, I'll just do in-sample rms error, for a single model no point fpeing
-for i = 2:nfields
+for i = 2:numFields
     out.(sprintf('rmserrrat_%s',fields{i})) = statstore.rmserr(i)/statstore.rmserr(1);
 end
 % In fact, greater error in this case means a better detrending in some
