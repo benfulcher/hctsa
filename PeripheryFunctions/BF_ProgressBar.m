@@ -1,6 +1,7 @@
 function BF_ProgressBar(progressProp,PB_length,theChar)
 % Create/update a text progress bar.
-% %---INPUTS:
+%
+%---INPUTS:
 % progressProp:   EITHER Text string to initialize ('new') or terminate ('close')
 %                     OR Proportion progress (numerical)
 % PB_length:      Length of progress bar (in characters)
@@ -13,7 +14,7 @@ persistent progressBar; % Text progress bar
 
 % Vizualization parameters
 if nargin < 2
-    PB_length = 30;   %   Length of progress bar
+    PB_length = 40;   %   Length of progress bar
 end
 if nargin < 3
     theChar = ':';    %   Character to show progress
