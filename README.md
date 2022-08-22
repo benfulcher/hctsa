@@ -3,7 +3,8 @@
 [![DOI](https://zenodo.org/badge/10790340.svg)](https://zenodo.org/badge/latestdoi/10790340)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries)](https://twitter.com/compTimeSeries)
 
-_hctsa_ is a software package for running highly comparative time-series analysis using [Matlab](https://www.mathworks.com/products/matlab/) (full support for versions R2018b or later).
+_hctsa_ is a Matlab toolbox that implements highly comparative time-series analysis.
+It extracts thousands of time-series features from a set of univariate time series and includes a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
 
 The software provides a code framework that enables the extraction of thousands of time-series features from a time series (or a time-series dataset).
 It also provides a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
@@ -36,23 +37,14 @@ __Comprehensive documentation__ for _hctsa_, from getting started through to mor
 
 For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the green _Code_ button, and then clicking _Download ZIP_.
 
-It is recommended to use the repository with git.
-For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
+For users familiar with git, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it and clone it to your local machine.
+If you want to update the repo you can set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) as `git remote add upstream git://github.com/benfulcher/hctsa.git`, so that you can easily update to the latest version of the repository by pulling the main branch to your local repository:
 
 ```bash
-git remote add upstream git://github.com/benfulcher/hctsa.git
-```
-
-(make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your Github account).
-
-You can then update to the latest stable version of the repository by pulling the master branch to your local repository:
-
-```bash
-git pull upstream master
+git pull upstream main
 ```
 
 For analyzing specific datasets, we recommend working outside of the repository so that incremental updates can be pulled from the upstream repository.
-Details on how to merge the latest version of the repository with the local changes in your fork can be found [here](https://help.github.com/articles/syncing-a-fork/).
 
 ## Related resources
 
