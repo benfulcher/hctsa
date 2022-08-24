@@ -1,17 +1,19 @@
 # :wavy_dash: _hctsa_ :wavy_dash:: highly comparative time-series analysis
 
+![](img/hctsa_logo_square.png)
+
 [![DOI](https://zenodo.org/badge/10790340.svg)](https://zenodo.org/badge/latestdoi/10790340)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries)](https://twitter.com/compTimeSeries)
 
-_hctsa_ implements highly comparative time-series analysis.
-It extracts thousands of time-series features from a set of univariate time series and includes a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
+_hctsa_ is a Matlab software package for running highly comparative time-series analysis.
+It extracts thousands of time-series features from a collection of univariate time series and includes a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
 
-1. Normalizing and clustering the data,
-2. Producing low-dimensional representations of the data,
-3. Identifying and interpreting discriminating features between different classes of time series, and
+1. Normalizing and clustering the data;
+2. Producing low-dimensional representations of the data;
+3. Identifying and interpreting discriminating features between different classes of time series; and
 4. Fitting and evaluating multivariate classification models.
 
-__Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on real-world applications__ of _hctsa_ :nerd_face:
+__Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on applications__ of _hctsa_ :nerd_face:
 
 ## Installation
 
