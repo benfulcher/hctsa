@@ -15,16 +15,13 @@ It extracts thousands of time-series features from a collection of univariate ti
 
 __Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on applications__ of _hctsa_ :nerd_face:
 
-## Installation
+## Installation :arrow_down:
 
-Users unfamiliar with git can download the repository by clicking the green "Code" button then "Download ZIP".
-Or, for users familiar with git (recommended), please instead [make a fork](https://help.github.com/articles/fork-a-repo/) of the repo and then clone it to your local machine.
+For users _familiar with git_ (recommended), please instead [make a fork](https://help.github.com/articles/fork-a-repo/) of the repo and then clone it to your local machine.
 
-Once downloaded, you can install the package using the `install.m` script in Matlab:
+Users _unfamiliar with git_ can instead download the repository by clicking the green "Code" button then "Download ZIP".
 
-```matlab
-install
-```
+Once downloaded, you can install _hctsa_ by running the `install.m` script (see [docs](https://hctsa-users.gitbook.io/hctsa-manual) for details).
 
 - You can update to the latest stable version of the repository by pulling the master branch to your local repository as `git pull upstream main` (but be careful not to do an upstream pull midway through an analysis, as the _hctsa_ features can change across successive labeled releases).
 - When analyzing specific datasets, we recommend working outside of the repository so that incremental updates can be pulled from the upstream repository.
@@ -35,14 +32,14 @@ __Comprehensive documentation__ for _hctsa_, from getting started through to mor
 
 There is also alot of additional information on the [__wiki__](https://github.com/benfulcher/hctsa/wiki/), including:
 
-- Information about alternative feature sets (including the much faster [catch22](https://github.com/DynamicsAndNeuralSystems/catch22)), and information about other time-series packages available in R, python, and Julia.
+- :point_right: Information about alternative feature sets (including the much faster [catch22](https://github.com/DynamicsAndNeuralSystems/catch22)), and information about other time-series packages available in R, python, and Julia.
 - :wavy_dash: The accompanying time-series data archive for this project, [_CompEngine_](http://www.comp-engine.org).
 - :floppy_disk: Downloadable _hctsa_ feature matrices from time-series datasets with example workflows.
 - :computer: Resources for [distributing an _hctsa_ computation](https://github.com/benfulcher/distributed_hctsa) on a computing cluster.
 - :closed_book: A [list of publications](https://github.com/benfulcher/hctsa/wiki/Publications-using-hctsa) that have used _hctsa_ to address different research questions.
-- Frequently asked questions about _hctsa_ and related feature-based time-series analyses.
+- :information_desk_person: Frequently asked questions about _hctsa_ and related feature-based time-series analyses.
 
-### Acknowledgement :+1:
+## Acknowledgement :+1:
 
 If you use this software, please read and cite these open-access articles:
 
