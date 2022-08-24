@@ -1,6 +1,6 @@
 # :wavy_dash: _hctsa_ :wavy_dash:: highly comparative time-series analysis
 
-![](img/hctsa_logo_square.png)
+![](img/hctsa_logo_banner.png)
 
 [![DOI](https://zenodo.org/badge/10790340.svg)](https://zenodo.org/badge/latestdoi/10790340)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries)](https://twitter.com/compTimeSeries)
