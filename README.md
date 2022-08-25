@@ -8,8 +8,8 @@
 _hctsa_ is a Matlab software package for running highly comparative time-series analysis.
 It extracts thousands of time-series features from a collection of univariate time series and includes a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
 
-1. Normalizing and clustering the data;
-2. Producing low-dimensional representations of the data;
+1. Normalizing and clustering time-series data;
+2. Producing low-dimensional representations of time-series data;
 3. Identifying and interpreting discriminating features between different classes of time series; and
 4. Fitting and evaluating multivariate classification models.
 
@@ -17,14 +17,14 @@ __Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on applicat
 
 ## Installation :arrow_down:
 
-For users _familiar with git_ (recommended), please instead [make a fork](https://help.github.com/articles/fork-a-repo/) of the repo and then clone it to your local machine.
+For users _familiar with git_ (recommended), please [make a fork](https://help.github.com/articles/fork-a-repo/) of the repo and then clone it to your local machine.
+To update, after setting an upstream remote (`git remote add upstream git://github.com/benfulcher/hctsa.git`) you can use `git pull upstream main`.
 
 Users _unfamiliar with git_ can instead download the repository by clicking the green "Code" button then "Download ZIP".
 
 Once downloaded, you can install _hctsa_ by running the `install.m` script (see [docs](https://hctsa-users.gitbook.io/hctsa-manual) for details).
 
-- You can update to the latest stable version of the repository by pulling the master branch to your local repository as `git pull upstream main` (but be careful not to do an upstream pull midway through an analysis, as the _hctsa_ features can change across successive labeled releases).
-- When analyzing specific datasets, we recommend working outside of the repository so that incremental updates can be pulled from the upstream repository.
+<!-- We recommend working outside of the repository so that incremental updates can be pulled from the upstream repository. -->
 
 ## Documentation and Wiki &#x1F4D6;
 
