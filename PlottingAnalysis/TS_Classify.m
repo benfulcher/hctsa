@@ -191,7 +191,7 @@ if numNulls > 0
         nullStats = zeros(numNulls,1);
         if doParallel
             fprintf(1,'Using parfor for speed...\n');
-            assert(cfnParms.computePerFold == false);
+            assert(cfnParams.computePerFold == false);
             tsGroup = TimeSeries.Group; % set up for parfor
             parfor i = 1:numNulls
                 shuffledLabels = tsGroup(randperm(height(TimeSeries)));

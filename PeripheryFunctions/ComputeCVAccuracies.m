@@ -19,6 +19,9 @@ accuracyMean = zeros(cfnParams.numRepeats,1);
 accuracyStd = zeros(cfnParams.numRepeats,1);
 if cfnParams.computePerFold
     inSampleAccStd = zeros(cfnParams.numRepeats,2);
+else
+    % Not appropriate: set to NaN in case output specified
+    inSampleAccStd = NaN;
 end
 allFoldData = zeros(cfnParams.numFolds,2,cfnParams.numRepeats); % folds, train/test, repeats
 
