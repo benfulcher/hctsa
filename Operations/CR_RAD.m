@@ -1,14 +1,14 @@
-function f = CR_RAD(x,tau,doCentre)
+function f = CR_RAD(x,tau,doAbs)
 % RAD Compute the rescaled auto-density, a metric for inferring the
-% distance to criticality that is insensitive to uncertainty in the noise strength
+% distance to criticality that is insensitive to uncertainty in the noise strength.
 % Calibrated to experiments on the Hopf bifurcation with variable and unknown
 % measurement noise.
 %
 % Devised and implemented by Brendan Harris, @brendanjohnharris (GitHub), 2023.
 
 %---INPUTS:
-%   x:        Ihe input time series (vector).
-%   doCentre:   Whether to centre the time series at 0 then take absolute values (logical flag)
+%   x:        The input time series (vector).
+%   doAbs:    Whether to centre the time series at 0 then take absolute values (logical flag)
 %   tau:      The embedding and differencing delay in units of the timestep (integer)
 %
 %---OUTPUTS:
@@ -20,8 +20,8 @@ function f = CR_RAD(x,tau,doCentre)
 if nargin < 2 || isempty(tau)
     tau = 1;
 end
-if nargin < 3 || isempty(centre)
-    centre = false;
+if nargin < 3 || isempty(doAbs)
+    doAbs = true;
 end
 %-------------------------------------------------------------------------------
 % Basic checks & preprocessing
@@ -29,7 +29,7 @@ end
 if isrow(x)
     x = x';
 end
-if doCentre
+if doAbs
     x = x - median(x);
     x = abs(x);
 end
