@@ -143,7 +143,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Get cross-validated accuracy for this single feature using a Naive Bayes linear classifier:
-if isempty(whatStat)
+if isempty(whatStat) || (ischar(whatStat) && strcmp(whatStat,'classification'))
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries,[],false);
     cfnParams.whatClassifier = 'fast-linear';
     cfnParams.numFolds = 10;

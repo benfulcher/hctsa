@@ -8,7 +8,12 @@ function [outFlag,theName] = BF_CheckToolbox(theToolbox,infoMode)
 %
 % theToolbox, the string identifying the toolbox (in format of license command
 %               in Matlab)
-% infoMode, set true to just output information about a toolbox (not errors if missing)
+% infoMode, set true to just output information about a toolbox (not errors if missing).
+%
+%---OUTPUTS:
+%
+% outFlag, true if the toolbox is NOT installed
+% theName, text of the toolbox name
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -33,15 +38,16 @@ function [outFlag,theName] = BF_CheckToolbox(theToolbox,infoMode)
 % ------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check inputs
+%% Check inputs
 %-------------------------------------------------------------------------------
+% By default, flag error if no toolbox
 if nargin < 2 || isempty(infoMode)
     infoMode = false;
 end
 
-% ------------------------------------------------------------------------------
-% First get a more interpretable string for user feedback: theName
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%% Get a more interpretable string for user feedback: theName
+%-------------------------------------------------------------------------------
 switch theToolbox
 case 'statistics_toolbox'
     theName = 'Matlab''s Statistics Toolbox';
@@ -77,9 +83,9 @@ otherwise
     error('Unknown toolbox ''%s''\n',theToolbox);
 end
 
-% ------------------------------------------------------------------------------
-% Now do the checks:
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%% Now do the checks:
+%-------------------------------------------------------------------------------
 % 1. Check the toolbox exists in the current Matlab environment:
 a = license('test',theToolbox);
 if infoMode
@@ -89,13 +95,14 @@ if infoMode
     outFlag = true;
 else
     if a == 0
-        error('This function requires %s',theName);
+        error('This function requires %s.',theName);
     end
 
     % 2. Check to see if there's an available license for this toolbox:
     [licenseFree,~] = license('checkout',theToolbox); % Attempt to check out a license
     if licenseFree == 0
-        error('Could not obtain a license for %s',theName);
+        error(['This function requires %s but it is not installed ',...
+                    '(or I could not obtain a license for it).'],theName);
     end
 end
 

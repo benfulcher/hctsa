@@ -279,7 +279,8 @@ else
 
         % Warning for training fold over-fitting:
         if ~cfnParams.suppressWarning && all(accuracyTrainFolds==100)
-            warning('100% in-sample accuracy alert: consider reducing feature space or regularizing!')
+            warning('100% in-sample accuracy alert (just FYI: no need for any action!)')
+            % Could suggest regularization or reducing the number of features
         end
     else
         yPredict = kfoldPredict(Mdl);

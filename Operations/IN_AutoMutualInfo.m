@@ -3,7 +3,7 @@ function out = IN_AutoMutualInfo(y,timeDelay,estMethod,extraParam)
 %
 %---INPUTS:
 %
-% y: input time series
+% y: input time series (column vector)
 %
 % timeDelay: time lag for automutual information calculation
 %
@@ -67,6 +67,12 @@ N = length(y);
 doPlot = false; % plot outputs to screen
 minSamples = 5; % minimum 5 samples to compute a mutual information (could make higher?)
 
+% Ensure y is a column vector
+if size(y,2) > size(y,1)
+    warning('Please input a column vector for y')
+    y = y';
+end
+
 % ------------------------------------------------------------------------------
 % Loop over time delays if a vector
 numTimeDelays = length(timeDelay);
@@ -95,7 +101,7 @@ for k = 1:numTimeDelays
 
     if strcmp(estMethod,'gaussian')
         r = corr(y1,y2,'type','Pearson');
-        amis(k) = -0.5*log(1-r^2);
+        amis(k) = -0.5*log(1 - r^2);
     else
         % Reinitialize for Kraskov:
         miCalc.initialise(1,1);

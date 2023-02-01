@@ -103,40 +103,12 @@ linkageMeth = inputP.Results.linkageMeth;
 clear('inputP');
 
 %-------------------------------------------------------------------------------
-% Work with vector form of distances (hopefully enough memory)
+%% Process input distance data
 %-------------------------------------------------------------------------------
-if any(size(distMat)==1)
-    distVec = distMat;
-else
-    distVec = squareform(distMat); % convert for vector version
-end
-% Solve for number of items from quadratic formula:
-numItems = (1 + sqrt(1 + 8*length(distVec)))/2;
-
-%-------------------------------------------------------------------------------
-% Convert to absolute correlations:
-%-------------------------------------------------------------------------------
-distVec0 = distVec; % keep distVec0 as the input distance matrix in all cases
-% distVec changes only for abscorr options
-if ismember(whatDistance,{'abscorr','abscorr_ii'})
-    % Compute distances on absolute correlation distances (where sign of correlation
-    % is irrelevant, it's the magnitude that's important):
-    distVec = 1 - abs(1 - distVec);
-end
-
-% We need the matrix form also:
-distMat = squareform(distVec);
-
-%-------------------------------------------------------------------------------
-% Do the linkage clustering:
-%-------------------------------------------------------------------------------
-fprintf(1,'Computing linkage information for %u x %u data using %s clustering...',...
-            numItems,numItems,linkageMeth);
-links = linkage(distVec,linkageMeth);
-fprintf(1,' Done.\n');
+[distVec,links,distVec0,numItems] = BF_DoLinkage(distMat,whatDistance,linkageMeth);
 
 % ------------------------------------------------------------------------------
-% Compute the dendrogram
+%% Compute dendrogram
 % ------------------------------------------------------------------------------
 f = figure('color','w');
 f.Position(3:4) = [1200,800];
@@ -156,13 +128,13 @@ ax1.YTickLabel = {};
 xlabel('Distance');
 
 %-------------------------------------------------------------------------------
-% Cluster into groups:
+%% Cluster into groups:
 %-------------------------------------------------------------------------------
 % Cluster the dendrogram:
 T = cluster(links,'cutoff',clusterThreshold,'criterion','distance');
 numClusters = max(T);
 
-fprintf(1,'Distance-based clustering with %u clusters\n',numClusters);
+fprintf(1,'%s distance-based clustering with %u clusters.\n',whatDistance,numClusters);
 
 % Reorder members of each cluster by distance to other members of the cluster:
 cluster_Groupi = cell(numClusters,1);
@@ -186,9 +158,9 @@ cluster_Groupi_cl = cellfun(@(x) arrayfun(@(y)find(ord==y),x),cluster_Groupi,...
                                                 'UniformOutput',false);
 clusterCenters_cl = arrayfun(@(y) find(ord==y),clusterCenters);
 
-% ------------------------------------------------------------------------------
-% Now plot it:
-% ------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+%% Plot it
+%-------------------------------------------------------------------------------
 % Make a square distance matrix, and plot as a pairwise similarity matrix
 % (reordered by ord determined above)
 ax2 = subplot(1,6,2:5);
@@ -215,7 +187,7 @@ otherwise
 end
 
 %-------------------------------------------------------------------------------
-% Add rectangles to group highly correlated clusters:
+%% Add rectangles to group highly correlated clusters:
 %-------------------------------------------------------------------------------
 for i = 1:numClusters
     % Label cluster borders:
@@ -229,7 +201,7 @@ for i = 1:numClusters
 end
 
 %-------------------------------------------------------------------------------
-% Tweak plot details:
+%% Tweak plot details:
 %-------------------------------------------------------------------------------
 
 % Add object labels on y-axis if provided

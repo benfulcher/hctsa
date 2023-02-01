@@ -1,21 +1,45 @@
 # :wavy_dash: _hctsa_ :wavy_dash:: highly comparative time-series analysis
 
+![](img/hctsa_logo_banner.png)
+
 [![DOI](https://zenodo.org/badge/10790340.svg)](https://zenodo.org/badge/latestdoi/10790340)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries)](https://twitter.com/compTimeSeries)
 
-_hctsa_ is a software package for running highly comparative time-series analysis using [Matlab](https://www.mathworks.com/products/matlab/) (full support for versions R2018b or later).
+_hctsa_ is a Matlab software package for running highly comparative time-series analysis.
+It extracts thousands of time-series features from a collection of univariate time series and includes a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
 
-The software provides a code framework that enables the extraction of thousands of time-series features from a time series (or a time-series dataset).
-It also provides a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
+1. Normalizing and clustering time-series data;
+2. Producing low-dimensional representations of time-series data;
+3. Identifying and interpreting discriminating features between different classes of time series; and
+4. Fitting and evaluating multivariate classification models.
 
-1. Normalizing and clustering the data,
-2. Producing low-dimensional representations of the data,
-3. Identifying and interpreting discriminating features between different classes of time series,
-4. Learning multivariate classification models.
+__Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on applications__ of _hctsa_ :nerd_face:
 
-__Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on real-world applications__ of _hctsa_ :nerd_face:
+## Installation :arrow_down:
 
-### Acknowledgement :+1:
+For users _familiar with git_ (recommended), please [make a fork](https://help.github.com/articles/fork-a-repo/) of the repo and then clone it to your local machine.
+To update, after setting an upstream remote (`git remote add upstream git://github.com/benfulcher/hctsa.git`) you can use `git pull upstream main`.
+
+Users _unfamiliar with git_ can instead download the repository by clicking the green "Code" button then "Download ZIP".
+
+Once downloaded, you can install _hctsa_ by running the `install.m` script (see [docs](https://hctsa-users.gitbook.io/hctsa-manual) for details).
+
+<!-- We recommend working outside of the repository so that incremental updates can be pulled from the upstream repository. -->
+
+## Documentation and Wiki &#x1F4D6;
+
+__Comprehensive documentation__ for _hctsa_, from getting started through to more advanced analyses is on [GitBook](https://hctsa-users.gitbook.io/hctsa-manual).
+
+There is also alot of additional information on the [__wiki__](https://github.com/benfulcher/hctsa/wiki/), including:
+
+- :point_right: Information about alternative feature sets (including the much faster [catch22](https://github.com/DynamicsAndNeuralSystems/catch22)), and information about other time-series packages available in R, python, and Julia.
+- :wavy_dash: The accompanying time-series data archive for this project, [_CompEngine_](http://www.comp-engine.org).
+- :floppy_disk: Downloadable _hctsa_ feature matrices from time-series datasets with example workflows.
+- :computer: Resources for [distributing an _hctsa_ computation](https://github.com/benfulcher/distributed_hctsa) on a computing cluster.
+- :closed_book: A [list of publications](https://github.com/benfulcher/hctsa/wiki/Publications-using-hctsa) that have used _hctsa_ to address different research questions.
+- :information_desk_person: Frequently asked questions about _hctsa_ and related feature-based time-series analyses.
+
+## Acknowledgement :+1:
 
 If you use this software, please read and cite these open-access articles:
 
@@ -26,70 +50,7 @@ Feedback, as [email](mailto:ben.d.fulcher@gmail.com), [GitHub issues](https://gi
 
 __For commercial use of _hctsa_, including licensing and consulting, contact [Engine Analytics](http://www.engineanalytics.org/).__
 
-## Getting Started :blush:
-
-### Documentation &#x1F4D6;
-
-__Comprehensive documentation__ for _hctsa_, from getting started through to more advanced analyses is on [gitbook](https://hctsa-users.gitbook.io/hctsa-manual).
-
-### Downloading the repository :arrow_down:
-
-For users unfamiliar with git, the current version of the repository can be downloaded by simply clicking the green _Code_ button, and then clicking _Download ZIP_.
-
-It is recommended to use the repository with git.
-For this, please [make a fork](https://help.github.com/articles/fork-a-repo/) of it, clone it to your local machine, and then set an [upstream remote](https://help.github.com/articles/fork-a-repo/#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository) to keep it synchronized with the main repository e.g., using the following code:
-
-```bash
-git remote add upstream git://github.com/benfulcher/hctsa.git
-```
-
-(make sure that you have [generated an ssh key](https://help.github.com/articles/generating-ssh-keys/) and associated it with your Github account).
-
-You can then update to the latest stable version of the repository by pulling the master branch to your local repository:
-
-```bash
-git pull upstream master
-```
-
-For analyzing specific datasets, we recommend working outside of the repository so that incremental updates can be pulled from the upstream repository.
-Details on how to merge the latest version of the repository with the local changes in your fork can be found [here](https://help.github.com/articles/syncing-a-fork/).
-
-## Related resources
-
-### _CompEngine_ :collision:
-
-[_CompEngine_](http://www.comp-engine.org) is an accompanying web resource for this project.
-It is a self-organizing database of time-series data that allows users to upload, explore, and compare thousands of diverse types of time-series data.
-This vast and growing collection of time-series data can also be downloaded.
-Go have a play, read more about it in our [&#x1F4D9;paper](https://doi.org/10.1038/s41597-020-0553-0), or watch a talk on [YouTube](https://youtu.be/689Nw3RS690).
-
-### _catch22_ :two::two:
-
-Is over 7000 just a few too many features for your application?
-Do you not have access to a Matlab license?
-_catch22_ has all of your faux-rhetorical questions covered.
-This reduced set of 22 features, determined through a combination of classification performance and mutual redundancy as explained in [this paper](https://arxiv.org/abs/1901.10200v2), is available [here](https://github.com/DynamicsAndNeuralSystems/catch22) as an efficiently coded C implementation with wrappers for python, R, and Julia.
-
-### _hctsa_ datasets and example workflows :floppy_disk:
-
-There are a range of open datasets with pre-computed _hctsa_ features, as well as some examples of _hctsa_ workflows.
-
-- [_C. elegans_ movement speed data](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Caenorhabditis_elegans_movement_speed/3863559) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingWorm).
-- [Drosophila movement speed](https://figshare.com/articles/Highly_comparative_time-series_analysis_of_Drosophila_melanogaster_movement_speed/3863553) and associated [analysis code](https://github.com/benfulcher/hctsa_phenotypingFly).
-- [1000 empirical time series](https://figshare.com/articles/1000_Empirical_Time_series/5436136)
-
-(If you have data to share and host, let me know and I'll add it to this list).
-
-### Running _hctsa_ on a cluster :computer:
-
-Matlab code for computing features for an initialized `HCTSA.mat` file, by distributing the computation across a large number of cluster jobs (using pbs or slurm schedulers) is [here](https://github.com/benfulcher/distributed_hctsa).
-
-### Publications :closed_book:
-
-_hctsa_ has been used by us and others to do new science in neuroscience, engineering, and biomedicine.
-An updated list of publications using _hctsa_ is on this [wiki page](https://github.com/benfulcher/hctsa/wiki/Publications-using-hctsa).
-
-## _hctsa_ licenses
+## Licenses
 
 ### Internal licenses
 
@@ -117,18 +78,14 @@ The following external time-series analysis code packages are provided with the 
 - Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
 - Max Little's [Time-series analysis code](http://www.maxlittle.net/software/index.php) (GPL license).
 - Sample Entropy code from [Physionet](https://archive.physionet.org/faq.shtml#license) (GPL license).
-- [*ARFIT* Toolbox for AR model estimation](http://climate-dynamics.org/software/#arfit) (unlicensed).
-- [*gpml* Toolbox for Gaussian Process regression model estimation, version 3.5](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
+- [_ARFIT_ Toolbox for AR model estimation](http://climate-dynamics.org/software/#arfit) (unlicensed).
+- [_gpml_ Toolbox for Gaussian Process regression model estimation, version 3.5](http://www.gaussianprocess.org/gpml/code/matlab/doc/) (FreeBSD license).
 - Danilo P. Mandic's [delay vector variance code](http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm) (GPL license).
 - [Cross Recurrence Plot Toolbox](http://tocsy.pik-potsdam.de/CRPtoolbox/) (GPL license)
 - Zoubin Ghahramani's [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
 - Danny Kaplan's Code for embedding statistics (GPL license).
 - Two-dimensional histogram code from Matlab Central (BSD license).
 - Various histogram and entropy code by Rudy Moddemeijer (unlicensed).
-
-## Other time-series analysis resources
-
-A collection of good resources for time-series analysis (including in other programming languages like python and R) are on the [wiki](https://github.com/benfulcher/hctsa/wiki/Related-time-series-resources).
 
 ## Acknowledgements :wave:
 

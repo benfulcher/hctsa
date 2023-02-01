@@ -1,5 +1,5 @@
-function [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries)
-%
+function BF_RecolorDendrogram(h_dend);
+% BF_RecolorDendrogram     Recolor a dendrogram using hctsa default colors
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -22,21 +22,31 @@ function [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-% Check that time series have been labeled
-if ~ismember('Group',TimeSeries.Properties.VariableNames)
-    error('Time series are not yet labeled. Please run TS_LabelGroups on your hctsa dataset.');
-end
+numLines = length(h_dend);
 
-% Check that labeling is done with categoricals (rather than legacy integer labels)
-if isnumeric(TimeSeries.Group)
-    error(['Time-series group labels are assigned as numeric labels (old format).',...
-                    ' Please re-run TS_LabelGroups on your hctsa dataset.']);
-end
-isLabeled = ~isundefined(TimeSeries.Group);
-if any(~isLabeled)
-    TimeSeries = TimeSeries(isLabeled,:);
-    TS_DataMat = TS_DataMat(isLabeled,:);
-    fprintf(1,'Only considering the %u time series that have labels.\n',sum(isLabeled));
+% Find (non-black) colored groups:
+allColors = vertcat(h_dend.Color);
+uniqueColors = unique(allColors,'rows');
+isBlack = @(x) x(1)==0 && x(2)==0 && x(3)==0;
+rowIsBlack = arrayfun(@(x)isBlack(uniqueColors(x,:)),1:size(uniqueColors,1));
+uniqueColors(rowIsBlack,:) = [];
+
+% Swap out weird colors for nicer hctsa default ones
+numColors = size(uniqueColors,1);
+colorCell = GiveMeColors(numColors);
+
+for i = 1:numColors
+    isMatch = zeros(numLines,1);
+    for j = 1:numLines
+        if allColors(j,:)==uniqueColors(i,:)
+            isMatch(j) = 1;
+        end
+    end
+    matchInd = find(isMatch);
+    numMatches = length(matchInd);
+    for j = 1:numMatches
+        h_dend(matchInd(j)).Color = colorCell{i};
+    end
 end
 
 end

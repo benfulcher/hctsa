@@ -36,11 +36,11 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %
 %---EXAMPLE USAGE:
 %
-% TS_TopFeatures('norm','tstat',struct(),'whatPlots',{'histogram','distributions',...
-%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
+% TS_TopFeatures('norm','ustat',struct(),'whatPlots',{'histogram','distributions',...
+%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10,'numNulls',10);
 %
 % TS_TopFeatures('norm','classification',cfnParams,'whatPlots',{'histogram','distributions',...
-%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
+%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10,'numNulls',10);
 %
 %---OUTPUTS:
 %
@@ -76,14 +76,14 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %% Check inputs and set defaults
 %-------------------------------------------------------------------------------
 if nargin < 1 || isempty(whatData)
-    whatData = 'raw';
+    whatData = 'norm';
 end
 % Set other defaults later when we know what we're dealing with
 
 % Use an inputParser to control additional options as parameters:
 inputP = inputParser;
 % whatPlots
-default_whatPlots = {'histogram','distributions','cluster'}; % 'datamatrix'
+default_whatPlots = {'histogram','distributions','dendrogram','cluster'}; % 'datamatrix'
 check_whatPlots = @(x) iscell(x) || ischar(x);
 addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 % numTopFeatures
@@ -132,7 +132,7 @@ if nargin < 2 || isempty(whatTestStat)
     else
         whatTestStat = 'classification';
     end
-    fprintf(1,'Using ''%s'' test statistic by default\n', whatTestStat);
+    fprintf(1,'Using ''%s'' test statistic by default.\n', whatTestStat);
 end
 % Set cfnParams default (if using 'classification') later after loading the time series
 if strcmp(whatTestStat,'classification')
@@ -286,19 +286,31 @@ for i = 1:numTopFeatures
 end
 
 %-------------------------------------------------------------------------------
+%% Define the indices of features we will go on to visualize
+% (and construct text labels for them)
+%-------------------------------------------------------------------------------
+featInd = ifeat(1:numTopFeatures);
+makeLabelMinimal = @(x) sprintf('[%u] %s (%4.2f%s)',Operations.ID(x),Operations.Name{x},...
+                        testStat(x),statUnit);
+makeLabelFull = @(x) sprintf('[%u] %s (%s) (%4.2f%s)',Operations.ID(x),Operations.Name{x},...
+                    Operations.Keywords{x}, testStat(x),statUnit);
+topFeatureLabelsMinimal = arrayfun(@(x) makeLabelMinimal(x),featInd,'UniformOutput',false);
+topFeatureLabelsFull = arrayfun(@(x) makeLabelFull(x),featInd,'UniformOutput',false);
+
+%-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
 %% Plot outputs
 %-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Histogram of distribution of test statistics for labeled and null data
+%% Histogram of distribution of test statistics for labeled and null data
 %-------------------------------------------------------------------------------
 if ismember('histogram',whatPlots)
     % Plot the distribution of test statistics across all features:
 
     %-------------------------------------------------------------------------------
-    %% Compute null distribution
+    % Compute null distribution
     %-------------------------------------------------------------------------------
     testStat_rand = zeros(numFeatures,numNulls);
     if numNulls > 0
@@ -318,16 +330,17 @@ if ismember('histogram',whatPlots)
 
         % Pool nulls to estimate p-values
         pooledNulls = testStat_rand(:);
-        pVals = arrayfun(@(x)mean(testStat(x) < pooledNulls),1:length(testStat));
+        pVals = arrayfun(@(x) mean(testStat(x) < pooledNulls),1:length(testStat));
         % FDR-corrected q-values:
         FDR_qVals = mafdr(pVals,'BHFDR','true');
-        fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls\n',numNulls);
+        fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls.\n',numNulls);
         fprintf(1,'(Given strong dependences across %u features, will produce conservative p-values)\n',numFeatures);
+
         % Give summary:
         sigThreshold = 0.05;
         if any(FDR_qVals < sigThreshold)
-            fprintf(1,['%u/%u features show better performance using %s than the null distribution' ...
-                        '\nat the magical 0.05 threshold (FDR corrected)\n'],...
+            fprintf(1,['%u/%u features show better performance using %s than the null distribution\n' ...
+                        'at the magical 0.05 threshold (FDR corrected).\n'],...
                             sum(FDR_qVals < 0.05),length(FDR_qVals),testStatText);
         else
             fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...
@@ -337,6 +350,7 @@ if ismember('histogram',whatPlots)
 
     %---------------------------------------------------------------------------
     % Plot histogram
+    %---------------------------------------------------------------------------
     f = figure('color','w'); hold('on')
     f.Position(3:4) = [559,278];
     colors = BF_GetColorMap('spectral',5,1);
@@ -377,7 +391,8 @@ if ismember('histogram',whatPlots)
         else
             legend([h_null,h_real,l_meannull,l_mean],'null','real','null mean','mean')
         end
-        title(sprintf('%u features significantly informative of groups (FDR-corrected at 0.05)',sum(FDR_qVals < 0.05)))
+        title(sprintf(['%u features significantly informative of groups',...
+                        ' (FDR-corrected at 0.05)'],sum(FDR_qVals < 0.05)))
     else
         if ~isnan(chanceLevel)
             legend([h_real,l_chance,l_mean],{'real','chance','mean'});
@@ -390,7 +405,7 @@ else
 end
 
 %-------------------------------------------------------------------------------
-% Distributions across classes for top features
+%% Distributions across classes for top features
 %-------------------------------------------------------------------------------
 if ismember('distributions',whatPlots)
     subPerFig = 16; % subplots per figure
@@ -425,10 +440,9 @@ if ismember('distributions',whatPlots)
 end
 
 %-------------------------------------------------------------------------------
-% Data matrix containing top features
+%% Data matrix containing top features
 %-------------------------------------------------------------------------------
 if ismember('datamatrix',whatPlots)
-    featInd = ifeat(1:numTopFeatures);
     ixFeat = BF_ClusterReorder(TS_DataMat(:,featInd)','corr','average');
     dataLocal = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
                     'TimeSeries',TimeSeries,...
@@ -437,11 +451,11 @@ if ismember('datamatrix',whatPlots)
 end
 
 %-------------------------------------------------------------------------------
-% Inter-dependence of top features
+%% Pre-computing pairwise dependencies
+% (for annotated dendrogram or feature–feature 'cluster' plot)
 %-------------------------------------------------------------------------------
-if ismember('cluster',whatPlots)
-    % 1. Get pairwise similarity matrix
-    op_ind = ifeat(1:numTopFeatures); % plot these operations indices
+if ismember('dendrogram',whatPlots) || ismember('cluster',whatPlots)
+    % 1. Compute pairwise Spearman correlations between all pairs of top features
 
     % (If it exists already, use that; otherwise compute it on the fly)
     % clustStruct = TS_GetFromData(whatData,'op_clust');
@@ -452,33 +466,85 @@ if ismember('cluster',whatPlots)
     %     % pairwise distances already computed, stored in the HCTSA .mat file
     %     fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatDataFile);
     %     Dij = squareform(clustStruct.Dij);
-    %     Dij = Dij(op_ind,op_ind);
+    %     Dij = Dij(featInd,featInd);
     %     distanceMetric = clustStruct.distanceMetric;
     % else
     %     % Compute correlations on the fly
-    %     Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
+    %     Dij = BF_pdist(TS_DataMat(:,featInd)','abscorr');
     %     distanceMetric = 'abscorr';
     % end
 
-    % 1. Compute pairwise correlations on the dataset
-    % spearmanCorrs = corr(TS_DataMat(:,op_ind)','abscorr');
-    Dij = BF_pdist(TS_DataMat(:,op_ind)','abscorr');
-    distanceMetric = 'abscorr';
+    % spearmanCorrs = corr(TS_DataMat(:,featInd)','abscorr');
+    distanceMetric = 'abscorr'; % absolute Spearman correlation distances
+    Dij = BF_pdist(TS_DataMat(:,featInd)',distanceMetric);
+end
 
-    % 2. Plot it:
-    makeLabel = @(x) sprintf('[%u] %s (%4.2f%s)',Operations.ID(x),Operations.Name{x},...
-                        testStat(x),statUnit);
-    objectLabels = arrayfun(@(x)makeLabel(x),op_ind,'UniformOutput',false);
+
+%-------------------------------------------------------------------------------
+%% Dendrogram
+% An annotated dendrogram showing the similarity between the set of top features
+% (like the feature–feature correlation matrix but without the matrix)
+%-------------------------------------------------------------------------------
+if ismember('dendrogram',whatPlots)
+    colorThreshold = 0.25;
+    doVertical = false;
+    f = figure('color','w');
+
+    if doVertical
+        f.Position(3:4) = [950,750];
+    else
+        f.Position(3:4) = [750,950];
+    end
+
+    [distVec,links] = BF_DoLinkage(Dij,distanceMetric,'average');
+    % Get the dendrogram reordering:
+    ord = BF_LinkageOrdering(distVec,links);
+    if doVertical
+        h_dend = dendrogram(links,0,'Orientation','right','Reorder',ord,...
+                    'ColorThreshold',colorThreshold);
+    else
+        h_dend = dendrogram(links,0,'Orientation','top','Reorder',ord,...
+                    'ColorThreshold',colorThreshold);
+    end
+
+    % Thicken lines:
+    set(h_dend,'LineWidth',2)
+
+    % Fix colors:
+    BF_RecolorDendrogram(h_dend);
+
+    % Label:
+    box('on')
+    ax = gca();
+    ax.TickLabelInterpreter = 'none';
+    if doVertical
+        ax.YDir = 'reverse'; % needs to be reversed to match the imagesc plot (if 'cluster' is selected)
+        ax.YTick = 1:numTopFeatures;
+        ax.YTickLabel = topFeatureLabelsFull(ord);
+        xlabel(sprintf('%s distance',distanceMetric));
+    else
+        ax.XTick = 1:numTopFeatures;
+        ax.XTickLabel = topFeatureLabelsFull(ord);
+        ylabel(sprintf('%s distance',distanceMetric));
+        ax.XTickLabelRotation = 40;
+    end
+end
+
+%-------------------------------------------------------------------------------
+%% Inter-dependence of top features
+%-------------------------------------------------------------------------------
+% Plot the pairwise feature–feature correlation matrix (using BF_ClusterDown)
+if ismember('cluster',whatPlots)
     clusterThreshold = 0.25; % threshold at which split into clusters
     [~,cluster_Groupi] = BF_ClusterDown(Dij,'clusterThreshold',clusterThreshold,...
                         'whatDistance',distanceMetric,...
-                        'objectLabels',objectLabels);
+                        'objectLabels',topFeatureLabelsMinimal);
     title(sprintf('Dependencies between %u top features (organized into %u clusters)',...
                             numTopFeatures,length(cluster_Groupi)))
 end
 
 %-------------------------------------------------------------------------------
-% Save a classifier (for the single best feature) to file
+%% Save a classifier (for the single best feature) to file
 %-------------------------------------------------------------------------------
 featureClassifier = struct();
 if isfield(cfnParams,'classifierFilename') && ~isempty(cfnParams.classifierFilename)
@@ -580,6 +646,7 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
         testStat = testStat/max(abs(testStat)); % rescale by max-abs
     else
         loopTimer = tic;
+        BF_ProgressBar('new')
         for k = 1:numFeatures
             try
                 if nargout == 2
@@ -589,14 +656,11 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
                     testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
                 end
             catch
-                warning('Error computing %s test statistic for feature %u',whatTestStat,k);
+                warning('Error computing %s test statistic for feature %u.',whatTestStat,k);
             end
-            % Give estimate of time remaining:
-            if beVerbose && k==200
-                fprintf(1,'(should take approx %s to compute for all %u features)\n',...
-                                BF_TheTime(toc(loopTimer)/100*(numFeatures)),numFeatures);
-            end
+            BF_ProgressBar(k/numFeatures)
         end
+        BF_ProgressBar('close')
     end
 end
 %-------------------------------------------------------------------------------
