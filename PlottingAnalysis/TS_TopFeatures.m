@@ -37,10 +37,10 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %---EXAMPLE USAGE:
 %
 % TS_TopFeatures('norm','ustat',struct(),'whatPlots',{'histogram','distributions',...
-%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
+%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10,'numNulls',10);
 %
 % TS_TopFeatures('norm','classification',cfnParams,'whatPlots',{'histogram','distributions',...
-%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10);
+%           'cluster','datamatrix'},'numTopFeatures',40,'numFeaturesDistr',10,'numNulls',10);
 %
 %---OUTPUTS:
 %
@@ -330,16 +330,17 @@ if ismember('histogram',whatPlots)
 
         % Pool nulls to estimate p-values
         pooledNulls = testStat_rand(:);
-        pVals = arrayfun(@(x)mean(testStat(x) < pooledNulls),1:length(testStat));
+        pVals = arrayfun(@(x) mean(testStat(x) < pooledNulls),1:length(testStat));
         % FDR-corrected q-values:
         FDR_qVals = mafdr(pVals,'BHFDR','true');
-        fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls\n',numNulls);
+        fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls.\n',numNulls);
         fprintf(1,'(Given strong dependences across %u features, will produce conservative p-values)\n',numFeatures);
+
         % Give summary:
         sigThreshold = 0.05;
         if any(FDR_qVals < sigThreshold)
-            fprintf(1,['%u/%u features show better performance using %s than the null distribution' ...
-                        '\nat the magical 0.05 threshold (FDR corrected)\n'],...
+            fprintf(1,['%u/%u features show better performance using %s than the null distribution\n' ...
+                        'at the magical 0.05 threshold (FDR corrected).\n'],...
                             sum(FDR_qVals < 0.05),length(FDR_qVals),testStatText);
         else
             fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...

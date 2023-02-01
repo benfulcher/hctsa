@@ -10,7 +10,7 @@ function [meanAcc,nullStats,jointClassifier] = TS_Classify(whatData,cfnParams,nu
 %---INPUTS:
 % whatData, the hctsa data to use (input to TS_LoadData)
 % cfnParams, parameters for the classification algorithm (cf. GiveMeDefaultClassificationParams)
-% numNulls (numeric), number of nulls to compute (0 for no null comparison)
+% numNulls (integer), number of nulls to compute (0 for no null comparison)
 %
 % (OPTIONAL):
 % doParallel [false], whether to speed up the null computation using a parfor loop
@@ -20,11 +20,10 @@ function [meanAcc,nullStats,jointClassifier] = TS_Classify(whatData,cfnParams,nu
 
 %
 %---OUTPUTS:
-% Text output on classification rate using all features, and if doPCs = true, also
-% shows how this varies as a function of reduced PCs (text and as an output plot)
-% foldLosses, the performance metric across repeats of cross-validation
-% nullStats, the performance metric across randomizations of the data labels
-% jointClassifier, details of the saved all-features classifier
+% (to commandline) output on classification performance on the dataset using the feature set.
+% - meanAcc, the performance metric across repeats of cross-validation
+% - nullStats, the performance metric across randomizations of the data labels
+% - jointClassifier, details of the saved all-features classifier
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -154,12 +153,11 @@ else
             accuracyBit = sprintf('%.3f +/- %.3f%s',mean(meanAcc),std(meanAcc),cfnParams.whatLossUnits);
         end
     end
-    fprintf(1,['\n%s %s (%u-class) using %s classification with %u' ...
-                     ' features:\n%s\n'],...
+    fprintf(1,['\n%s %s (%u-class) using %s classification with %u features:\n%s\n'],...
             whatStat,cfnParams.whatLoss,cfnParams.numClasses,...
             cfnParams.whatClassifier,numFeatures,accuracyBit);
     if cfnParams.computePerFold
-        fprintf(1,'[Training folds: mean = %.3f%s, std = %.3f%s across %u folds]\n',...
+        fprintf(1,'[Training folds: mean = %.3f%s, std = %.3f%s across %u folds].\n',...
                     mean(inSampleAccStd(:,1)),cfnParams.whatLossUnits,...
                     mean(inSampleAccStd(:,2)),cfnParams.whatLossUnits,cfnParams.numFolds);
     end
@@ -236,9 +234,11 @@ if numNulls > 0
         xlabel(sprintf('%s (%s)',cfnParams.whatLoss,cfnParams.whatLossUnits))
         ylabel('Number of nulls')
         if simpleNull
-            legendEntries = {sprintf('Simple shuffled *output* label null (%u)',numNulls),'Real labels (out-of-sample)'};
+            legendEntries = {sprintf('Simple shuffled *output* label null (%u)',numNulls),...
+                                        'Real labels (out-of-sample)'};
         else
-            legendEntries = {sprintf('Model-based (shuffled input label) null (%u)',numNulls),'Real labels (out-of-sample)'};
+            legendEntries = {sprintf('Model-based (shuffled input label) null (%u)',numNulls),...
+                                    'Real labels (out-of-sample)'};
         end
         if cfnParams.computePerFold
             legendEntries{3} = 'Real labels (in-sample)';
@@ -322,7 +322,7 @@ if ~isempty(cfnParams.classifierFilename)
                                             TimeSeries.Group,cfnParams);
     jointClassifier.Operation.ID = Operations.ID;
     jointClassifier.Operation.Name = Operations.Name;
-    jointClassifier.CVAccuracy = mean(foldLosses);
+    jointClassifier.CVAccuracy = mean(meanAcc);
     jointClassifier.Accuracy = Acc;
     jointClassifier.Mdl = Mdl;
     jointClassifier.whatLoss = whatLoss;
@@ -342,7 +342,7 @@ end
 
 % Save my sensitive eyes an overload:
 if nargout==0
-    clear('foldLosses','nullStats','jointClassifier')
+    clear('meanAcc','nullStats','jointClassifier')
 end
 
 end
