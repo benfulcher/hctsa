@@ -66,25 +66,25 @@ elseif istable(tsStruct)
 end
 
 if nargin < 2
-    fprintf(1,'Computing features in parallel by default\n');
+    fprintf(1,'Computing features in parallel by default.\n');
 	doParallel = true;
 end
 
 if nargin < 3 || isempty(Operations)
-    fprintf(1,'Importing the default set of time-series features\n');
-    theINPfile = 'INP_ops.txt';
+    fprintf(1,'Importing the default hctsa set of time-series features!\n');
+    theINPfile = 'INP_ops_hctsa.txt';
     Operations = SQL_Add('ops',theINPfile,false,false);
 elseif ischar(Operations)
     theINPfile = Operations;
     Operations = SQL_Add('ops',theINPfile,false,false);
 end
 if isnumeric(Operations)
-	error('Provide an input file or a structure array of Operations');
+	error('Provide an input file or a structure array of Operations.');
 end
 
 if nargin < 4 || isempty(MasterOperations)
 	% Use the default library:
-	MasterOperations = SQL_Add('mops','INP_mops.txt',false,false);
+	MasterOperations = SQL_Add('mops','INP_mops_hctsa.txt',false,false);
 	% Need to link operations to masters if not already supplied:
 	[Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 end

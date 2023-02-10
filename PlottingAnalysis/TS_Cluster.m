@@ -6,7 +6,7 @@ function TS_Cluster(distanceMetricRow,linkageMethodRow,distanceMetricCol,linkage
 % back to HCTSA_N.mat (or a custom hctsa file).
 %
 %---EXAMPLE USAGE:
-% TS_cluster;
+% TS_Cluster;
 %
 %---INPUTS:
 % distanceMetricRow: specifies the distance metric for computing distances
