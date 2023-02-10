@@ -92,7 +92,6 @@ numFields = length(fields);
 % statstore = struct('fpes',{});
 
 for i = 1:numFields
-    data = [];
     % for each preprocessing, fit the model
     data = yp.(fields{i});
     % data is the current preprocessed data
