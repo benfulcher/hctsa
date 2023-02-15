@@ -116,8 +116,8 @@ out.stderr = std(res);
 out.meanabserr = mean(abs(res));
 
 % Stationarity of residuals:
-out.sws = SY_SlidingWindow(res,'std','std',5,1);
-out.swm = SY_SlidingWindow(res,'mean','std',5,1);
+out.sws = SY_SlidingWindow(res,'std','std',5,1); % across five non-overlapping segments
+out.swm = SY_SlidingWindow(res,'mean','std',5,1); % across five non-overlapping segments
 
 % Normality of residuals:
 tmp = DN_SimpleFit(res,'gauss1',0);
