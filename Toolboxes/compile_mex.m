@@ -143,7 +143,7 @@ try
     settspath(fullfile(toolDir,'OpenTSTOOL'));
 catch emsg
     fprintf(1,'---ERROR: %s\n',emsg.message);
-    fprintf(1,'The TSTOOL package failed to compile correctly\n');
+    fprintf(1,'The TSTOOL package failed to compile correctly.\n');
 end
 if ~anyErrors, fprintf(1,'Done!\n'); end
 
@@ -158,7 +158,7 @@ fprintf(1,['NB: To use TISEAN routines, you need to compile and install them on 
 %-------------------------------------------------------------------------------
 % CATCH22
 %-------------------------------------------------------------------------------
-cd(fullfile(toolDir,'catch22'))
+cd(fullfile(toolDir,'catch22','wrap_Matlab'))
 mexAll
 
 % Return to base directory
