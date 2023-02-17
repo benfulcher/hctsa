@@ -1,4 +1,4 @@
-function out = NL_TSTL_dimensions(y,nbins,embedParams)
+function out = NL_TSTL_dimensions(y,numBins,embedParams)
 % NL_TSTL_dimensions Box counting, information, and correlation dimension of a time series.
 %
 % Computes the box counting, information, and correlation dimension of a
@@ -6,10 +6,12 @@ function out = NL_TSTL_dimensions(y,nbins,embedParams)
 % This function contains extensive code for estimating the best scaling range to
 % estimate the dimension using a penalized regression procedure.
 %
+% cf. TSTOOL, http://www.physik3.gwdg.de/tstool/
+%
 %---INPUTS:
 % y, column vector of time series data
-% nbins, maximum number of partitions per axis
-% embedParams, embedding parameters to feed BF_Embed.m for embedding the
+% numBins, maximum number of partitions per axis
+% embedParams, embedding parameters to feed BF_Embed() for embedding the
 %              signal in the form {tau,m}
 %
 %---OUTPUTS:
@@ -17,7 +19,6 @@ function out = NL_TSTL_dimensions(y,nbins,embedParams)
 % with m, the scaling range in r, and the embedding dimension at which the best
 % fit is obtained.
 
-% cf. TSTOOL, http://www.physik3.gwdg.de/tstool/
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -50,11 +51,11 @@ function out = NL_TSTL_dimensions(y,nbins,embedParams)
 % ------------------------------------------------------------------------------
 %% Preliminaries, check inputs
 % ------------------------------------------------------------------------------
-doPlot = 0; % plot outputs to screen
+doPlot = false; % plot outputs to screen
 
-% (1) Maximum number of bins, nbins
-if nargin < 2 || isempty(nbins)
-    nbins = 50; % 50 points
+% (1) Maximum number of bins, numBins
+if nargin < 2 || isempty(numBins)
+    numBins = 50; % 50 points
     fprintf(1,'Using a default of 50 bins per axis\n');
 end
 
@@ -96,7 +97,7 @@ if ~exist(fullfile('tstoolbox','@signal','dimensions'),'file')
     error('Cannot find the code ''dimensions'' from the TSTOOL package. Is it installed and in the Matlab path?');
 end
 try
-    [bc, ~, co] = dimensions(s,nbins);
+    [bc, ~, co] = dimensions(s,numBins);
 catch me
     error('Error running TSTOOL code dimensions: %s',me.message);
 end
@@ -177,45 +178,45 @@ out = SUB_mch(co_logr,co_logC,'co',out);
 %% What is the scaling range in r?
 % ------------------------------------------------------------------------------
 % ... and how good is the fit over this range?
-% Use SUB_scr
+% Use SUB_ScalingRange
 
 % Box counting dimension, m = 1
-out = SUB_scr(bc_logr,bc_logN(:,1),'scr_bc_m1',out);
+out = SUB_ScalingRange(bc_logr,bc_logN(:,1),'scr_bc_m1',out);
 
 % Box counting dimension m = 2
-out = SUB_scr(bc_logr,bc_logN(:,2),'scr_bc_m2',out);
+out = SUB_ScalingRange(bc_logr,bc_logN(:,2),'scr_bc_m2',out);
 
 % Box counting dimension m = 3
-out = SUB_scr(bc_logr,bc_logN(:,3),'scr_bc_m3',out);
+out = SUB_ScalingRange(bc_logr,bc_logN(:,3),'scr_bc_m3',out);
 
 % Box counting dimension m = chosen/given
-out = SUB_scr(bc_logr,bc_logN(:,mopt),'scr_bc_mopt',out);
+out = SUB_ScalingRange(bc_logr,bc_logN(:,mopt),'scr_bc_mopt',out);
 
 if compute_in
     % Information dimension, m = 1
-    out = SUB_scr(in_logr,in_logl(:,1),'scr_in_m1',out);
+    out = SUB_ScalingRange(in_logr,in_logl(:,1),'scr_in_m1',out);
 
     % Information dimension m = 2
-    out = SUB_scr(in_logr,in_logl(:,2),'scr_in_m2',out);
+    out = SUB_ScalingRange(in_logr,in_logl(:,2),'scr_in_m2',out);
 
     % Information dimension m = 3
-    out = SUB_scr(in_logr,in_logl(:,3),'scr_in_m3',out);
+    out = SUB_ScalingRange(in_logr,in_logl(:,3),'scr_in_m3',out);
 
     % Information dimension m = chosen/given
-    out = SUB_scr(in_logr,in_logl(:,mopt),'scr_in_mopt',out);
+    out = SUB_ScalingRange(in_logr,in_logl(:,mopt),'scr_in_mopt',out);
 end
 
 % Correlation dimension, m = 1
-out = SUB_scr(co_logr,co_logC(:,1),'scr_co_m1',out);
+out = SUB_ScalingRange(co_logr,co_logC(:,1),'scr_co_m1',out);
 
 % Correlation dimension m = 2
-out = SUB_scr(co_logr,co_logC(:,2),'scr_co_m2',out);
+out = SUB_ScalingRange(co_logr,co_logC(:,2),'scr_co_m2',out);
 
 % Correlation dimension m = 3
-out = SUB_scr(co_logr,co_logC(:,3),'scr_co_m3',out);
+out = SUB_ScalingRange(co_logr,co_logC(:,3),'scr_co_m3',out);
 
 % Correlation dimension m = chosen/given
-out = SUB_scr(co_logr,co_logC(:,mopt),'scr_co_mopt',out);
+out = SUB_ScalingRange(co_logr,co_logC(:,mopt),'scr_co_mopt',out);
 
 % ------------------------------------------------------------------------------
 %% What m gives best fit?
@@ -280,7 +281,7 @@ function out = SUB_mch(logr,logN,prefix,out)
 end
 
 % ------------------------------------------------------------------------------
-function out = SUB_scr(logr,logN,prefix,out)
+function out = SUB_ScalingRange(logr,logN,prefix,out)
     % determines the scaling range in r for some m
     % we remove points from either extreme in r until minimize some
     % error measure
@@ -296,7 +297,7 @@ function out = SUB_scr(logr,logN,prefix,out)
             mybad(i,j) = lfitbadness(logr(stptr(i):endptr(j)),logN(stptr(i):endptr(j))');
         end
     end
-    [a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+    [a,b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
 %         plot(logr,logN,'o-b'); hold on; plot(logr(stptr(a):endptr(b)),logN(stptr(a):endptr(b)),'o-r');
 %         hold off
 %         disp(['keep from ' num2str(stptr(a)) ' to ' num2str(endptr(b))])
@@ -304,7 +305,7 @@ function out = SUB_scr(logr,logN,prefix,out)
 
     out.([prefix,'_logrmin']) = logr(stptr(a)); % minimum of scaling range
     out.([prefix,'_logrmax']) = logr(endptr(b)); % maximum of scaling range
-    out.([prefix,'_logrrange']) = logr(endptr(b))-logr(stptr(a)); % range of scaling... range
+    out.([prefix,'_logrrange']) = logr(endptr(b)) - logr(stptr(a)); % range of scaling... range
     out.([prefix,'_pgone']) = (stptr(a)-1 + l - endptr(b))/length(logr); % number of points removed in process
                                                				  % of choosing the optimum scaling range
 
@@ -312,8 +313,8 @@ function out = SUB_scr(logr,logN,prefix,out)
 	x = logr(stptr(a):endptr(b));
 	y = logN(stptr(a):endptr(b))';
     p = polyfit(x,y,1);
-    pfit = p(1)*x+p(2);
-    res = pfit-y;
+    pfit = p(1)*x + p(2);
+    res = pfit - y;
     out.([prefix,'_meanabsres']) = mean(abs(res));
 	out.([prefix,'_meansqres']) = mean(res.^2);
     out.([prefix,'_scaling_exp']) = p(1);
@@ -324,7 +325,7 @@ function out = SUB_scr(logr,logN,prefix,out)
         gamma = 0.02; % reguralization parameter gamma selected empirically, could be tweaked in future work
         p = polyfit(x,y,1);
         pfit = p(1)*x+p(2);
-        res = pfit-y;
+        res = pfit - y;
         badness = mean(abs(res)) - gamma*length(x); % want to still maximize length(x)
     end
 end
@@ -359,7 +360,7 @@ function out = SUB_bestm(logr,logNN,prefix,out)
 		y = logN(stptr(a):endptr(b))';
         p = polyfit(x,y,1);
         pfit = p(1)*x+p(2);
-        res = pfit-y;
+        res = pfit - y;
 		% subout.meanabsres = mean(abs(res));
 		% subout.meansqres = mean(res.^2);
 		% subout.scaling_exp = p(1);

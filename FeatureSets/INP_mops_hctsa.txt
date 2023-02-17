@@ -133,6 +133,7 @@ CO_AutoCorr(x_z,37,'Fourier')	AC_37
 CO_AutoCorr(x_z,38,'Fourier')	AC_38
 CO_AutoCorr(x_z,39,'Fourier')	AC_39
 CO_AutoCorr(x_z,40,'Fourier')	AC_40
+CO_PartialAutoCorr(y,20,'ols')  CO_PartialAutoCorr_20_ols
 CO_FirstCrossing(x_z,'ac',0,'both')	CO_FirstCrossing_acf_0
 CO_FirstCrossing(x_z,'ac',1/exp(1),'both')	CO_FirstCrossing_acf_1e
 CO_FirstMin(x_z,'ac')	CO_FirstMin_ac
@@ -1078,3 +1079,6 @@ MD_pNN(x)	MD_pNN_raw
 MD_rawHRVmeas(x)	MD_rawHRVmeas
 NL_nsamdf(x,1,14,0.5,1,7,false)     NL_nsamdf_1_14_05_1_7
 NL_nsamdf(x_z,1,14,0.5,1,7,false)     NL_nsamdf_z_1_14_05_1_7
+CR_RAD(x_z,1,true)                 CR_RAD_1
+CR_RAD(x_z,2,true)                 CR_RAD_2
+CR_RAD(x_z,'tau',true)             CR_RAD_tau

@@ -1,7 +1,7 @@
 function out = ST_MomentCorr(x,windowLength,wOverlap,mom1,mom2,whatTransform)
 % ST_MomentCorr   Correlations between simple statistics in local windows of a time series.
 %
-% Idea to implement by Nick S. Jones.
+% The idea to implement this was that of Prof. Nick S. Jones (Imperial College London).
 %
 %---INPUTS:
 % x, the input time series
@@ -123,8 +123,8 @@ end
 % ok, now we have the sliding window ('buffered') signal, x_buff
 % first calculate the first moment in all the windows (each column is a
 % 'window' of the signal
-M1 = SUB_calcmemoments(x_buff,mom1);
-M2 = SUB_calcmemoments(x_buff,mom2);
+M1 = SUB_CalcMeMoments(x_buff,mom1);
+M2 = SUB_CalcMeMoments(x_buff,mom2);
 
 R = corrcoef(M1,M2);
 out.R = R(2,1); % correlation coefficient
@@ -141,7 +141,7 @@ if doPlot
 end
 
 % ------------------------------------------------------------------------------
-function moms = SUB_calcmemoments(x_buff,momType)
+function moms = SUB_CalcMeMoments(x_buff,momType)
     switch momType
         case 'mean'
             moms = mean(x_buff);
