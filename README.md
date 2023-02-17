@@ -19,6 +19,7 @@ __Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on applicat
 
 For users _familiar with git_ (recommended), please [make a fork](https://help.github.com/articles/fork-a-repo/) of the repo and then clone it to your local machine.
 To update, after setting an upstream remote (`git remote add upstream git://github.com/benfulcher/hctsa.git`) you can use `git pull upstream main`.
+To obtain the latest toolboxes (like the optimized _catch22_ faeture set) you should then run `git submodule update --init`.
 
 Users _unfamiliar with git_ can instead download the repository by clicking the green "Code" button then "Download ZIP".
 
