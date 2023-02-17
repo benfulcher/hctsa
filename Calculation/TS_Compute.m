@@ -73,7 +73,7 @@ end
 
 % Be vocal?
 if nargin < 6
-    howVocal = 'minimal'; % Write back full information on all calculations to screen
+    howVocal = 'full'; % Write back full information on all calculations to screen
     % prints every piece of code evaluated (nice for error checking)
 end
 
@@ -140,7 +140,7 @@ if (nargin < 6) && (numOps < 30)
 end
 
 %-------------------------------------------------------------------------------
-fprintf(1,'[%s]: Extracting %u features from each of %u time series\n',...
+fprintf(1,'[%s]: Extracting %u features from each of %u time series.\n',...
                     datestr(now),numOps,numTimeSeries);
 
 
