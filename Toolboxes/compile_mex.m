@@ -66,9 +66,11 @@ anyErrors = false;
 try
     mex ML_kvsteps_core.cpp
 catch
-    fprintf(1,'ERROR: Max Little''s ''Steps and bumps'' C++ code failed to compile correctly\n');
+    fprintf(1,'ERROR: Max Little''s ''Steps and bumps'' C++ code failed to compile correctly.\n');
 end
-if ~anyErrors, fprintf(1,' done.\n'); end
+if ~anyErrors
+    fprintf(1,' done.\n');
+end
 
 % ------------------------------------------------------------------------------
 % Max Little's RPDE toolkit
@@ -81,14 +83,16 @@ try
 catch
     fprintf(1,'ERROR: Max Little''s ''RPDE'' C code failed to compile correctly\n');
 end
-if ~anyErrors, fprintf(1,' done.\n'); end
+if ~anyErrors
+    fprintf(1,' done.\n');
+end
 
 % ------------------------------------------------------------------------------
 % Michael Small's code
 % ------------------------------------------------------------------------------
 fprintf(1,'Michael Small''s code...');
 cd(fullfile(toolDir,'Michael_Small'))
-anyErrors = 0;
+anyErrors = false;
 try
     mex MS_complexitybs.c % compile Michael Small's complexitybs C code
 catch
@@ -104,40 +108,46 @@ try
 catch
     fprintf(1,'ERROR: Michael Small''s ''shannon'' C code failed to compile correctly\n');
 end
-if ~anyErrors, fprintf(1,' done.\n'); end
+if ~anyErrors
+    fprintf(1,' done.\n');
+end
 
 % ------------------------------------------------------------------------------
 % Gaussian Process code, gpml
 % ------------------------------------------------------------------------------
 fprintf(1,'Gaussian Process Toolbox, Carl Edward Rasmussen and Hannes Nickisch...');
 cd(fullfile(toolDir,'gpml','util'))
-anyErrors = 0;
+anyErrors = false;
 try
     make
 catch
-    fprintf(1,'ERROR: Gaussian Process Toolbox failed to compile correctly\n');
+    fprintf(1,'ERROR: Gaussian Process Toolbox failed to compile correctly.\n');
 end
-if ~anyErrors, fprintf(1,' done.\n'); end
+if ~anyErrors
+    fprintf(1,' done.\n');
+end
 
 %-------------------------------------------------------------------------------
 % Physionet sample entropy code (turned to mex)
 %-------------------------------------------------------------------------------
 fprintf(1,'Sample entropy...');
 cd(fullfile(toolDir,'Physionet'))
-anyErrors = 0;
+anyErrors = false;
 try
     mex sampen_mex.c
 catch
     fprintf(1,'ERROR: Physionet implementation of sample entropy failed to compile.\n');
 end
-if ~anyErrors, fprintf(1,' done.\n'); end
+if ~anyErrors
+    fprintf(1,' done.\n');
+end
 
 % ------------------------------------------------------------------------------
 % TSTOOL routines (such a mess)
 % ------------------------------------------------------------------------------
 fprintf(1,'TSTOOL...');
 cd(fullfile(toolDir,'OpenTSTOOL','mex-dev'))
-anyErrors = 0;
+anyErrors = false;
 try
     makemex
     settspath(fullfile(toolDir,'OpenTSTOOL'));
@@ -145,7 +155,9 @@ catch emsg
     fprintf(1,'---ERROR: %s\n',emsg.message);
     fprintf(1,'The TSTOOL package failed to compile correctly\n');
 end
-if ~anyErrors, fprintf(1,'Done!\n'); end
+if ~anyErrors
+    fprintf(1,'Done!\n');
+end
 
 % ------------------------------------------------------------------------------
 % TISEAN

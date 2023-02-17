@@ -15,7 +15,7 @@ function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStr
 % 							feature vector, and any errors are coded as NaN.
 % 				codeSpecial = true: featureVector is all real numbers, and is set to
 % 							     zero where any special-valued outputs occur.
-% howVocal, {'minimal' or 'full'}: how to give user feedback on the computation.
+% howVocal, {'fast', 'minimal', or 'full'}: how to give user feedback on the computation.
 %
 %---OUTPUTS:
 % featureVector, the feature vector obtained by running MasterOperations and
@@ -248,7 +248,7 @@ MasterOutput(Master_ind_calc) = MasterOutput_tmp;
 MasterCalcTime(Master_ind_calc) = MasterCalcTime_tmp;
 
 if strcmp(howVocal,'full')
-    fprintf(1,'%u time-series analysis functions evaluated in %s ///\n\n',...
+    fprintf(1,'%u time-series features evaluated in %s///\n\n',...
                         numMopsToCalc,BF_TheTime(toc(masterTimer)));
 end
 clear('masterTimer')

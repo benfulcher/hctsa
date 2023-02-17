@@ -311,6 +311,7 @@ else
             if j==plotNum
                 xlabel('Time (samples)')
             end
+            drawnow
         end
 
         if forDatabase

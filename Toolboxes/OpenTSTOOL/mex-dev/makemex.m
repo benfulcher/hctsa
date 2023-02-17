@@ -47,9 +47,9 @@ end
 
 destpath = fullfile(TSTOOLpath, 'mex', mexext);
 
-if(~(exist(destpath)==7))
-    fprintf('Directory %s does not exist. Should I create it? ', destpath);
-    answer = input('(y/n): ','s');
+if ~(exist(destpath)==7)
+    warning('Creating directory %s for TSTOOL.', destpath);
+    answer = 'y'; %input('(y/n): ','s');
     if(answer=='y')
         if(~(exist(fullfile(TSTOOLpath,'mex'))==7))
             mkdir(TSTOOLpath,'mex');
@@ -93,7 +93,7 @@ try
 	'largelyap', 'TSTOOLpredict',  'predict2', 'cao', ... % BF changed this -- predict is a Matlab built-in
 	'takens_estimator', 'return_time', 'nn_prepare', ...
 	'nn_search', 'range_search', 'crossprediction', ...
-	'emb_nn_search'};	
+	'emb_nn_search'};
 
 	make(files, suffix, ' -O -I. -I.. -DPARTIAL_SEARCH ', destpath);
 
@@ -138,13 +138,13 @@ try
 	cd Utils
 	files = {'loadascii', 'mtrand', 'randref', 'mixembed'};
 	make(files, suffix, '-O -I..', destpath);
-	
+
 	cd(olddir)
 
 	cd SplineInterpol
 	files = {'akimaspline', 'cubicspline'};
 	make(files, suffix, '-O -I..', destpath);
-	
+
 	cd(olddir)
 
 
@@ -224,4 +224,3 @@ for i=1:length(filenames)
 		end
 	end
 end
-

@@ -29,7 +29,7 @@ else
     beVocal = false;
 end
 
-if strcmp(beVocal,'full')
+if beVocal
     % Display code name for error checking
     fprintf(1,'[TimeSeries_ID = %u, MasterOperation_ID = %u (%u/%u)] %s...',...
                 theTsID, masterID, iterNum, numMasterOps, masterCode);
@@ -55,7 +55,7 @@ catch emsg
     if beVocal
         fprintf(1,' error.\n'); % ,BF_TheTime(masterTime)
     end
-	fprintf(1,'---Error evaluating %s:\n%s\n',masterCode,emsg.message);
+	fprintf(1,'---Error evaluating %s:\n%s.\n',masterCode,emsg.message);
     masterOutput = {}; % Keep empty output
     masterTime = 0; % Set zero calculation time
 	% Remains an empty cell entry.
