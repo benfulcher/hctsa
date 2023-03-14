@@ -108,7 +108,7 @@ maxLag = 25;
 autoCorrResid = CO_AutoCorr(e,1:maxLag,'Fourier');
 sqrtN = sqrt(N);
 
-% Output first three acfs
+% Output first three ACs (at lags 1,2,3)
 out.ac1 = autoCorrResid(1);
 out.ac2 = autoCorrResid(2);
 out.ac3 = autoCorrResid(3);
@@ -128,7 +128,7 @@ if isempty(out.ftbth)
 end
 
 % Durbin-Watson test statistic (like AC1)
-out.dwts = sum((e(2:end)-e(1:end-1)).^2) / sum(e.^2);
+out.dwts = sum((e(2:end) - e(1:end-1)).^2) / sum(e.^2);
 
 %-------------------------------------------------------------------------------
 % Do the residuals contain Linear correlation structure?
@@ -147,7 +147,7 @@ end
 
 if ~isempty(emsg)
     % (strcmp(emsg.message,'Time series too short.') || strcmp(emsg.message,'Matrix must be positive definite.'))
-    warning('Error fitting AR model to residuals using ARFIT package: %s\n',emsg.message)
+    warning('Error fitting AR model to residuals using ARFIT package: %s.\n',emsg.message)
     out.popt = NaN; % Optimum order
     out.minsbc = NaN; % Best sbc
     out.minfpe = NaN; % Best fpe

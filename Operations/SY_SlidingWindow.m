@@ -184,10 +184,11 @@ switch acrossWinStat
         sampEn_struct = EN_SampEn(qs,2,0.15);
         out = sampEn_struct.quadSampEn1;
     case 'ent'
-        kssimpouts = DN_FitKernelSmooth(qs); % get a load of statistics from kernel-smoothed distribution
+        % get a load of statistics from kernel-smoothed distribution (inefficient since only one is used)
+        kssimpouts = DN_FitKernelSmooth(qs);
         out = kssimpouts.entropy; % distributional entropy
     otherwise
-        error('Unknown statistic: ''%s''',acrossWinStat)
+        error('Unknown statistic: ''%s''.',acrossWinStat)
 end
 
 end
