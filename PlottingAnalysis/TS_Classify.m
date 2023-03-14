@@ -318,6 +318,7 @@ end
 %-------------------------------------------------------------------------------
 % E.g., for loading in later for classifying a new dataset
 if ~isempty(cfnParams.classifierFilename)
+    warning('Saving classifier is not yet supported.')
     [Acc,Mdl] = GiveMeCfn(TS_DataMat,TimeSeries.Group,TS_DataMat,...
                                             TimeSeries.Group,cfnParams);
     jointClassifier.Operation.ID = Operations.ID;
@@ -325,7 +326,7 @@ if ~isempty(cfnParams.classifierFilename)
     jointClassifier.CVAccuracy = mean(meanAcc);
     jointClassifier.Accuracy = Acc;
     jointClassifier.Mdl = Mdl;
-    jointClassifier.whatLoss = whatLoss;
+    jointClassifier.whatLoss = cfnParams.whatLoss;
     jointClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
     classes = classLabels;
 

@@ -48,21 +48,8 @@ if nargin < 6
     minPropGood = 0;
 end
 
-[n1, n2] = size(dataMatrix); % We're computing for rows (operations are rows)
-
-% ------------------------------------------------------------------------------
-% Define the distance function
-% ------------------------------------------------------------------------------
-switch distMetric
-    case {'Euclidean','euclidean'}
-        dij = @(v1,v2) sqrt(sum((v1-v2).^2))/length(v1)*n2; % if less entries, don't bias
-    case {'PearsonCorr','Pearson'}
-        dij = @(v1,v2) subdc(v1,v2,'Pearson');
-    case {'Spearman','corr','correlation','abscorr'}
-        dij = @(v1,v2) subdc(v1,v2,'Spearman');
-    otherwise
-        error('Unknown distance metric: ''%s''',distMetric)
-end
+% We're computing for rows (operations are rows):
+[n1, n2] = size(dataMatrix);
 
 % ------------------------------------------------------------------------------
 % Compute pairwise distances
@@ -99,9 +86,8 @@ case 'mi'
                         BF_TheTime(toc(mitimer)/i*(n1-i)),i,n1);
         end
     end
-    clear mitimer % stop timing
-    R = mis; clear mis; % not really an R but ok.
-
+    R = mis; % not really an R but ok.
+    clear('mitimer','mis');
 
 case {'corr_fast','abscorr_fast'}
     % Try using fast approximation to correlation coefficients when data includes NaNs
@@ -114,10 +100,24 @@ case {'corr_fast','abscorr_fast'}
     end
     tic
     R = BF_NaNCov(dataMatrix',1,1);
-    if ~beSilent, fprintf(1,' Done in %s.\n',BF_TheTime(toc)); end
+    if ~beSilent
+        fprintf(1,' Done in %s.\n',BF_TheTime(toc));
+    end
 
+case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correlation','abscorr'}
 
-case {'euclidean','Euclidean','corr','correlation','abscorr','Spearman','PearsonCorr'}
+    % ------------------------------------------------------------------------------
+    % Define the distance function
+    % ------------------------------------------------------------------------------
+    switch distMetric
+        case {'Euclidean','euclidean'}
+            dij = @(v1,v2) sqrt(sum((v1-v2).^2))/length(v1)*n2; % if less entries, don't bias
+        case {'PearsonCorr','Pearson'}
+            dij = @(v1,v2) subdc(v1,v2,'Pearson');
+        case {'Spearman','corr','correlation','abscorr'}
+            dij = @(v1,v2) subdc(v1,v2,'Spearman');
+    end
+
     % First use in-built pdist, which is fast
     if ~beSilent
         fprintf(1,'First computing pairwise distances using pdist...');
@@ -179,7 +179,7 @@ end
 % Transform from correlation distance to absolute correlation distance:
 % ------------------------------------------------------------------------------
 if ismember(distMetric,{'abscorr','abscorr_fast'})
-    R = 1 - abs(1-R);
+    R = 1 - abs(1 - R);
 end
 
 % ------------------------------------------------------------------------------

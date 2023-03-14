@@ -1,0 +1,3 @@
+[submodule "Toolboxes/catch22"]
+	path = Toolboxes/catch22
+	url = https://github.com/DynamicsAndNeuralSystems/catch22

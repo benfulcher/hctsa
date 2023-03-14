@@ -51,49 +51,42 @@ end
 switch theToolbox
 case 'statistics_toolbox'
     theName = 'Matlab''s Statistics Toolbox';
-
 case 'curve_fitting_toolbox'
     theName = 'Matlab''s Curve Fitting Toolbox';
-
 case 'signal_toolbox'
     theName = 'Matlab''s Signal Processing Toolbox';
-
 case 'identification_toolbox'
     theName = 'Matlab''s System Identification Toolbox';
-
 case 'wavelet_toolbox'
     theName = 'Matlab''s Wavelet Toolbox';
-
 case 'econometrics_toolbox'
     theName = 'Matlab''s Econometrics Toolbox';
-
 case 'robust_toolbox'
     theName = 'Matlab''s Robust Control Toolbox';
-
 case 'financial_toolbox'
     theName = 'Matlab''s Financial Toolbox';
-
 case 'database_toolbox'
     theName = 'Matlab''s Database Toolbox';
-
 case 'distrib_computing_toolbox'
     theName = 'Matlab''s Parallel Computing Toolbox';
-
 otherwise
-    error('Unknown toolbox ''%s''\n',theToolbox);
+    error('Unknown toolbox ''%s''.\n',theToolbox);
 end
 
 %-------------------------------------------------------------------------------
 %% Now do the checks:
 %-------------------------------------------------------------------------------
 % 1. Check the toolbox exists in the current Matlab environment:
+outFlag = false;
 a = license('test',theToolbox);
 if infoMode
+    % Just checking availability for info (e.g., during installation)
     if a == 0
         warning('Some hctsa features require %s, but no installation was found.',theName)
+        outFlag = true;
     end
-    outFlag = true;
 else
+    % Want to use a license
     if a == 0
         error('This function requires %s.',theName);
     end

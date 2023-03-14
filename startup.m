@@ -107,7 +107,7 @@ addpath(fullfile(pwd,'Toolboxes','Misc'));
 
 % catch22
 fprintf(1,', catch22')
-addpath(fullfile(pwd,'Toolboxes','catch22'));
+addpath(fullfile(pwd,'Toolboxes','catch22','wrap_Matlab'));
 
 % TSTOOL
 fprintf(1,', TSTOOL')
