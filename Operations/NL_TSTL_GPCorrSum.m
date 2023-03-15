@@ -189,12 +189,12 @@ out.rangelnCr = range(lnCr);
 out.meanlnCr = mean(lnCr);
 
 % Fit linear to log-log plot (full range)
-enoughpoints = 1;
+enoughpoints = true;
 try
     [a, stats] = robustfit(lnr,lnCr);
 catch me
     if strcmp(me.message,'Not enough points to perform robust estimation.')
-        enoughpoints = 0;
+        enoughpoints = false;
     end
 end
 
