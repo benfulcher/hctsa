@@ -47,21 +47,25 @@ fprintf(1,'\n');
 fprintf(1,'-2- Checking installation of relevant Matlab Toolboxes...\n');
 
 % Essential:
-noStatToolbox = BF_CheckToolbox('statistics_toolbox',true);
+noStatToolbox = BF_CheckToolbox('statistics_toolbox',true,true);
 if noStatToolbox
     fprintf(1,'The Statistics and Machine Learning Toolbox is required for hctsa and needs to be installed.\n');
 end
-% Desirable:
+% For distributed computing
+noDistributedToolbox = BF_CheckToolbox('parallel_computing_toolbox',true,true);
+if noDistributedToolbox
+    fprintf(1,'Matlab''s Parallel Computing Toolbox is required for distributed calculation but is not installed.\n');
+end
+% Desirable (needed for some hctsa features):
 toolboxCodes = {'curve_fitting_toolbox','signal_toolbox','identification_toolbox',...
-                    'wavelet_toolbox','econometrics_toolbox','robust_toolbox',...
-                    'financial_toolbox','distrib_computing_toolbox'};
+                    'wavelet_toolbox','econometrics_toolbox','financial_toolbox'};
 flags = zeros(8,1);
 names = cell(8,1);
 for i = 1:length(toolboxCodes)
-    [flags(i),names{i}] = BF_CheckToolbox(toolboxCodes{i},true);
+    [flags(i),names{i}] = BF_CheckToolbox(toolboxCodes{i},true,true);
 end
 
-fprintf(1,'%u/%u hctsa-relevant Matlab toolboxes are installed.\n',sum(flags),length(flags));
+fprintf(1,'%u/%u hctsa-relevant Matlab toolboxes are installed.\n',sum(~flags),length(flags));
 if any(flags)
     fprintf(1,'For full functionality, please install:\n');
     theNo = find(flags);
@@ -70,7 +74,7 @@ if any(flags)
         fprintf(1,'%s\n',names{theNo(i)});
     end
 else
-    fprintf(1,'Looks good on the Matlab toolbox side of things! :)\n');
+    fprintf(1,'Looking good for Matlab toolbox installation! :)\n');
 end
 fprintf(1,'\n');
 input('<<Press any key to continue>>')
