@@ -96,7 +96,7 @@ DN_Quantile_99	quantile_99	distribution
 DN_HighLowMu	HighLowMu	distribution,raw,locationDependent,spreadDependent
 DN_Unique       propUnique  distribution,raw
 ST_SimpleStats_zcross	ST_SimpleStats_zcross	noisiness
-ST_SimpleStats_pmcross	ST_SimpleStats_pmcross	distribution
+ST_SimpleStats_pmcross	ST_SimpleStats_pmcross	noisiness
 DN_ProportionValues_zeros	DN_ProportionValues_zeros	distribution,raw
 DN_ProportionValues_geq0	DN_ProportionValues_geq0	distribution,raw,locationDependent
 DN_ProportionValues_positive	DN_ProportionValues_positive	distribution,raw,locationDependent
