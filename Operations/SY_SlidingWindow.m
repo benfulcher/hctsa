@@ -177,6 +177,7 @@ end
 % ------------------------------------------------------------------------------
 switch acrossWinStat
     case 'std'
+        % normalized by std of full time series
         out = std(qs)/std(y);
     case 'apen'
         out = EN_ApEn(qs,1,0.2); % ApEn of the sliding window measures
