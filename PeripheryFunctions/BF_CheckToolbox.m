@@ -45,6 +45,9 @@ function [outFlag,theName] = BF_CheckToolbox(theToolbox,infoMode,doInstallCheck)
 if nargin < 2 || isempty(infoMode)
     infoMode = false;
 end
+if nargin < 3 || isempty(doInstallCheck)
+    doInstallCheck = true;
+end
 
 %-------------------------------------------------------------------------------
 %% Get a more interpretable string for user feedback: theName
