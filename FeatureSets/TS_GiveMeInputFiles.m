@@ -41,8 +41,11 @@ case 'hctsa'
 case 'catch22'
     INP_mops = 'INP_mops_catch22.txt';
     INP_ops = 'INP_ops_catch22.txt';
+case 'catch24'
+    INP_mops = 'INP_mops_catch24.txt';
+    INP_ops = 'INP_ops_catch24.txt';
 otherwise
-    error('Unknown feature set: ''%s''',whatFeatureSet)
+    error('Unknown feature set: ''%s''.',whatFeatureSet)
 end
 
 end
