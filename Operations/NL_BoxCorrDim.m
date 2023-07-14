@@ -43,7 +43,7 @@ function out = NL_BoxCorrDim(y,numBins,embedParams)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doPlot = 0; % plot outputs to a figure
+doPlot = false; % plot outputs to a figure
 
 % ------------------------------------------------------------------------------
 %% Check inputs, preliminaries

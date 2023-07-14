@@ -10,7 +10,7 @@ function out = EN_wentropy(y,whaten,p)
 %               'logenergy',
 %               'threshold' (with a given threshold),
 %               'sure' (with a given parameter).
-%               (see the wentropy documentaiton for information)
+%               (see the wentropy documentation for information)
 % p, the additional parameter needed for threshold and sure entropies
 %
 %---NOTE:
@@ -74,7 +74,7 @@ switch whaten
         out = wentropy(y,'sure',p)/N;
 
     otherwise
-        error('Unknown entropy type ''%s''', whaten);
+        error('Unknown entropy type ''%s''.', whaten);
 end
 
 end

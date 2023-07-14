@@ -59,7 +59,7 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 
 % Check y is a column vector:
 if isempty(y)
-    error('Must input a valid data vector');
+    error('Must input a valid data vector.');
 end
 if size(y,1)==1
     y = y';
@@ -95,7 +95,7 @@ end
 % [a,b] = system('which sampen');
 
 sampEn = sampen_mex(y',M+1,r);
-sampEn = sampEn(1:M+1); % always that extra one for the M=0
+sampEn = sampEn(1:M+1); % always that extra one for the M = 0
 
 %-------------------------------------------------------------------------------
 % This is dangerous because it could lead to inconsistent implementations across runs

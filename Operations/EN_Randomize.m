@@ -2,7 +2,7 @@ function out = EN_Randomize(y,randomizeHow,randomSeed)
 % EN_Randomize  How time-series properties change with increasing randomization.
 %
 % Progressively randomizes the input time series according to a specified
-% randomization procedure
+% randomization procedure.
 %
 % The procedure is repeated 2N times, where N is the length of the time series.
 %

@@ -27,7 +27,7 @@ function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
 % acrossWinStat, controls how the obtained sequence of local estimates is
 %                   compared (as a ratio to the full time series):
 %                       (i) 'std': standard deviation
-%                       (ii) 'ent' histogram entropy
+%                       (ii) 'ent' (kernel-smoothed) distributional entropy
 %                       (iii) 'apen': Approximate Entropy, ApEn(1,0.2)
 %                       (iii) 'sampen': Sample Entropy, SampEn(2,0.1)
 %
