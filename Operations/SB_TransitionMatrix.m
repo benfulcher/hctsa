@@ -100,7 +100,8 @@ if size(yth,2) > size(yth,1)
 end
 
 % ------------------------------------------------------------------------------
-%% (((2))) Compute the 1-time (Markov) transition matrix
+%% (((2))) Compute the tau-step transition matrix
+%               (Markov for tau = 1)
 % ------------------------------------------------------------------------------
 % Probably implemented already, but I'll do it myself
 T = zeros(numGroups); % probability of transition from state i -> state j
@@ -145,23 +146,27 @@ out.ondiag = sum(diag(T)); % trace
 out.stddiag = std(diag(T)); % std of diagonal elements
 
 % (iii) Measures of symmetry:
-out.symdiff = sum(sum(abs((T-T')))); % sum of differences of individual elements
-out.symsumdiff = sum(sum(tril(T,-1)))-sum(sum(triu(T,+1))); % difference in sums of upper and lower
+out.symdiff = sum(sum(abs((T - T')))); % sum of differences of individual elements
+out.symsumdiff = sum(sum(tril(T,-1))) - sum(sum(triu(T,+1))); % difference in sums of upper and lower
                                                           % triangular parts of T
-% (iv) Measures from covariance matrix:
-covT = cov(T);
-out.sumdiagcov = sum(diag(covT)); % trace of covariance matrix
 
-% (v) Measures from eigenvalues of T
+% (iv) Measures from eigenvalues of T
 eigT = eig(T);
 out.stdeig = std(eigT); % std of eigenvalues
 out.maxeig = max(real(eigT)); % maximum eigenvalue
 out.mineig = min(real(eigT)); % minimum eigenvalue
 % mean eigenvalue is equivalent to trace
 % (ought to be always zero? Not necessary to measure:)
-out.maximeig = max(imag(eigT)); % maximum imaginary part of eigenavlues
+out.maximeig = max(imag(eigT)); % maximum imaginary part of eigenvalues
 
-% (vi) Eigenvalues of covariance matrix:
+%-------------------------------------------------------------------------------
+% (v) Measures from covariance matrix:
+covT = cov(T);
+out.sumdiagcov = trace(covT); % trace of covariance matrix
+% This is equivalent to the sum of column variances: sum([var(T(:,1)),var(T(:,2)),var(T(:,3))])
+% (or, similarly, to the sum of row variances): sum([var(T(1,:)),var(T(2,:)),var(T(3,:))])
+
+% (vi) Eigenvalues of covariance matrix
 % (mean eigenvalue of covariance matrix equivalent to trace of covariance matrix).
 % (these measures don't make much sense in the case of 2 groups):
 eigcovT = eig(covT);

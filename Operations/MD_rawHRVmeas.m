@@ -1,5 +1,6 @@
 function out = MD_rawHRVmeas(x)
-% MD_rawHRVmeas     Heart rate variability (HRV) measures of a time series.
+% MD_rawHRVmeas     Poincare plot measures used in HRV analysis.
+%                   HRV: heart rate variability.
 %
 % Computes the triangular histogram index and Poincare plot measures to a time
 % series assumed to measure sequences of consecutive RR intervals measured in

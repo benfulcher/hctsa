@@ -14,7 +14,7 @@ catch22_SB_BinaryStats_mean_longstretch1            SB_BinaryStats_mean_longstre
 catch22_FC_LocalSimple_mean3_stderr                 FC_LocalSimple_mean3_stderr	                forecasting
 catch22_SP_Summaries_welch_rect_area_5_1            SP_Summaries_welch_rect_area_5_1            FourierSpectrum
 catch22_SP_Summaries_welch_rect_centroid            SP_Summaries_welch_rect_centroid            FourierSpectrum
-catch22_CO_f1ecac                                   firstCrossing_1e_acf_tau                             correlation,timescale
+catch22_CO_f1ecac                                   firstCrossing_1e_acf_tau                    correlation,timescale
 catch22_CO_FirstMin_ac                              firstMin_acf                                correlation,timescale
 catch22_IN_AutoMutualInfoStats_40_gaussian_fmmi     IN_AutoMutualInfoStats_40_gaussian_fmmi     information,correlation,AMI
 catch22_PD_PeriodicityWang_th0_01                   PD_PeriodicityWang_th0.01                   periodicity,spline

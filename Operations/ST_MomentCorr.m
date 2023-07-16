@@ -109,7 +109,7 @@ end
 % Create the windows:
 % ------------------------------------------------------------------------------
 x_buff = buffer(x,windowLength,wOverlap);
-numWindows = (N/(windowLength-wOverlap)); % number of windows
+numWindows = (N/(windowLength - wOverlap)); % number of windows
 
 if size(x_buff,2) > numWindows
     % fprintf(1,'Should have %u columns but we have %u: removing last one',numWindows,size(x_buff,2))
@@ -117,7 +117,7 @@ if size(x_buff,2) > numWindows
 end
 pointsPerWindow = size(x_buff,1);
 if pointsPerWindow==1
-    error('Time series (N=%u) too short for %u sliding windows',N,numWindows);
+    error('This time series (N = %u) is too short to extract %u windows.',N,numWindows);
 end
 
 % ok, now we have the sliding window ('buffered') signal, x_buff
@@ -152,7 +152,7 @@ function moms = SUB_CalcMeMoments(x_buff,momType)
         case 'iqr'
             moms = iqr(x_buff);
         otherwise
-            error('Unknown statistic ''%s''',momType)
+            error('Unknown statistic ''%s''.',momType)
     end
 end
 % ------------------------------------------------------------------------------

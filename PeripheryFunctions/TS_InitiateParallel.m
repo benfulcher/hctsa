@@ -40,14 +40,13 @@ try
     BF_CheckToolbox('distrib_computing_toolbox')
 catch
     fprintf(1,['License for Parallel Computing Toolbox could not be initiated' ...
-                    ' -- cannot perform computations across multiple cores\n']);
+                ' -- cannot perform computations across multiple cores.\n']);
     success = false;
     return
 end
 success = true;
 
 %-------------------------------------------------------------------------------
-% Assume everyone is using Matlab 2015 or later (suports parpool)
 try
     % If no pool already, create a new one:
     poolObj = gcp('nocreate');
@@ -59,14 +58,14 @@ try
         numWorkers = poolObj.NumWorkers;
         % User feedback:
         fprintf(1,['Matlab parallel processing pool opened with %u ' ...
-                                'workers\n'],numWorkers);
+                                'workers.\n'],numWorkers);
         % Regardless of what you input -- must initiate in this case:
         doInitiate = true;
     else
         % Get number of workers:
         numWorkers = poolObj.NumWorkers;
         fprintf(1,['Matlab parallel processing pool already open with ' ...
-                                    '%u workers\n'],numWorkers);
+                                    '%u workers.\n'],numWorkers);
     end
 catch emsg
     warning('\nError starting parallel processing pool -- running serially instead:\n%s',...

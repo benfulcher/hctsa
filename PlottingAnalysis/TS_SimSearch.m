@@ -206,9 +206,11 @@ for j = 1:numNeighbors
     theInd = neighborInd(j+1);
     switch whatDistMetric
     case 'Euclidean'
-        fprintf(1,'%u. [%u] %s (d = %.2f)\n',j,dataTable.ID(theInd),dataTable.Name{theInd},Dj(theInd));
+        fprintf(1,'%u. [%u] %s (%s): d = %.2f\n',j,dataTable.ID(theInd),...
+                dataTable.Name{theInd},dataTable.Keywords{theInd},Dj(theInd));
     case {'Spearman','Pearson','corr'}
-        fprintf(1,'%u. [%u] %s (|rho| = %.2f)\n',j,dataTable.ID(theInd),dataTable.Name{theInd},1 - Dj(theInd));
+        fprintf(1,'%u. [%u] %s (%s): |rho| = %.2f\n',j,dataTable.ID(theInd),...
+                dataTable.Name{theInd},dataTable.Keywords{theInd},1 - Dj(theInd));
     end
 end
 fprintf(1,'\n');
@@ -288,6 +290,9 @@ if any(ismember(whatPlots,'scatter'))
     end
     % Set width and height to make a reasonable size:
     f.Position = [f.Position(1:2),819,622];
+
+    fprintf(1,'DID YOU KNOW YOU CAN CLICK ON THE SCATTER PLOT TO SWITCH BETWEEN PLOTTING VALUES/RANKS?\n');
+    fprintf(1,'GIVE IT A GO?!\n');
 end
 
 %-------------------------------------------------------------------------------

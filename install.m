@@ -30,6 +30,14 @@ fprintf(1,['We will:' ...
             '\n-3- Compile the external time-series toolboxes for this system.\n\n']);
 
 % ------------------------------------------------------------------------------
+% 0. Check that the latest git submodules are loaded (catch22)
+% ------------------------------------------------------------------------------
+if exist(fullfile(pwd,'Toolboxes','catch22','wrap_Matlab'),'dir')==0
+    input('You may not have added the git submodule for catch22... Press any key to attempt this now...')
+    system('git submodule update --init --recursive');
+end
+
+% ------------------------------------------------------------------------------
 %% 1. Add the paths:
 % ------------------------------------------------------------------------------
 fprintf(1,'-1- Adding paths needed for the repository...\n');
@@ -98,7 +106,7 @@ cd('../');
 fprintf(1,'Hope everything compiled ok?!\n\n');
 
 fprintf(1,['All done! Ready when you are to initiate hctsa analysis\nusing a time-series dataset: ' ...
-                            'e.g.: TS_Init(''INP_test_ts.mat'');\n']);
+                            'e.g.: TS_Init(''INP_test_ts.mat'')\n']);
 
 % Attempt to add a time series
 % SQL_Add('ts','INP_test_ts.txt')

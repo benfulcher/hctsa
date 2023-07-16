@@ -63,7 +63,7 @@ if size(y,2) > size(y,1);
 end
 
 % ------------------------------------------------------------------------------
-% 2-dimensional time-delay embedding:
+% Construct a 2-dimensional time-delay embedding (delay of tau):
 % ------------------------------------------------------------------------------
 m = [y(1:end-tau), y(1+tau:end)];
 
@@ -71,7 +71,8 @@ m = [y(1:end-tau), y(1+tau:end)];
 % Plot the embedding:
 % ------------------------------------------------------------------------------
 if doPlot
-    figure('color','w'); box('on'); hold on
+    figure('color','w');
+    box('on'); hold('on')
     plot(m(:,1),m(:,2),'.');
     plot(m(1:min(200,end),1),m(1:min(200,end),2),'k');
 end

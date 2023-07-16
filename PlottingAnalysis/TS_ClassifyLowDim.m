@@ -156,6 +156,10 @@ if doComputeAtMaxInSample
         stdAtPerfectInSample = PCAcc_std;
         allFoldsAtPerfectInSample = PC_allFoldData;
     end
+else
+    accAtPerfectInSample = NaN;
+    stdAtPerfectInSample = NaN;
+    allFoldsAtPerfectInSample = NaN;
 end
 
 %-------------------------------------------------------------------------------
@@ -301,10 +305,15 @@ ax_bar = subplot(1,4,3);
 hold('on')
 allFeatures_allTrainFoldMeans = mean(squeeze(allFoldData(:,1,:)),1);
 allFeatures_allTestFoldMeans = mean(squeeze(allFoldData(:,2,:)),1);
-allFoldsAtPerfectInSample_allTrainFoldMeans = mean(squeeze(allFoldsAtPerfectInSample(:,1,:)),1);
-allFoldsAtPerfectInSample_allTestFoldMeans = mean(squeeze(allFoldsAtPerfectInSample(:,2,:)),1);
-accData = {nullStatsFoldMeans,allFeatures_allTrainFoldMeans,allFeatures_allTestFoldMeans,...
+if ~isnan(allFoldsAtPerfectInSample)
+    allFoldsAtPerfectInSample_allTrainFoldMeans = mean(squeeze(allFoldsAtPerfectInSample(:,1,:)),1);
+    allFoldsAtPerfectInSample_allTestFoldMeans = mean(squeeze(allFoldsAtPerfectInSample(:,2,:)),1);
+    accData = {nullStatsFoldMeans,allFeatures_allTrainFoldMeans,allFeatures_allTestFoldMeans,...
         allFoldsAtPerfectInSample_allTrainFoldMeans,allFoldsAtPerfectInSample_allTestFoldMeans};
+else
+    accData = {nullStatsFoldMeans,allFeatures_allTrainFoldMeans,allFeatures_allTestFoldMeans};
+end
+
 extraParams = struct();
 plotColors{1} = ones(1,3)*0.5;
 extraParams.theColors = plotColors;
@@ -312,11 +321,17 @@ BF_ViolinPlot(accData,[],[],false,extraParams);
 l_naive_null_over = yline(quantile(nullStatsFoldMeans,0.95),'--','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
                         'Label','Naive null 95% quantile');
 
-ax_bar.XTick = [1:5+0.5];
-xTickLabels = {'Naive-shuffle null',sprintf('all %u features train-fold-means',numFeatures),...
+if ~isnan(allFoldsAtPerfectInSample)
+    ax_bar.XTick = (1:5+0.5);
+    xTickLabels = {'Naive-shuffle null',sprintf('all %u features train-fold-means',numFeatures),...
                 'all features test-fold-means',...
                 sprintf('perfect-in-fold (%u PCs) train-fold-means',theNumPCs),...
                 sprintf('perfect-in-fold (%u PCs) test-fold-means',theNumPCs)};
+else
+    ax_bar.XTick = (1:3+0.5);
+    xTickLabels = {'Naive-shuffle null',sprintf('all %u features train-fold-means',numFeatures),...
+                'all features test-fold-means'};
+end
 ax_bar.XTickLabel = xTickLabels;
 ax_bar.YLim = ax.YLim;
 linkaxes([ax_bar,ax_bar_folds],'y')

@@ -27,7 +27,7 @@ function out = SY_SlidingWindow(y,windowStat,acrossWinStat,numSeg,incMove)
 % acrossWinStat, controls how the obtained sequence of local estimates is
 %                   compared (as a ratio to the full time series):
 %                       (i) 'std': standard deviation
-%                       (ii) 'ent' histogram entropy
+%                       (ii) 'ent' (kernel-smoothed) distributional entropy
 %                       (iii) 'apen': Approximate Entropy, ApEn(1,0.2)
 %                       (iii) 'sampen': Sample Entropy, SampEn(2,0.1)
 %
@@ -177,6 +177,7 @@ end
 % ------------------------------------------------------------------------------
 switch acrossWinStat
     case 'std'
+        % normalized by std of full time series
         out = std(qs)/std(y);
     case 'apen'
         out = EN_ApEn(qs,1,0.2); % ApEn of the sliding window measures
@@ -184,10 +185,11 @@ switch acrossWinStat
         sampEn_struct = EN_SampEn(qs,2,0.15);
         out = sampEn_struct.quadSampEn1;
     case 'ent'
-        kssimpouts = DN_FitKernelSmooth(qs); % get a load of statistics from kernel-smoothed distribution
+        % get a load of statistics from kernel-smoothed distribution (inefficient since only one is used)
+        kssimpouts = DN_FitKernelSmooth(qs);
         out = kssimpouts.entropy; % distributional entropy
     otherwise
-        error('Unknown statistic: ''%s''',acrossWinStat)
+        error('Unknown statistic: ''%s''.',acrossWinStat)
 end
 
 end
