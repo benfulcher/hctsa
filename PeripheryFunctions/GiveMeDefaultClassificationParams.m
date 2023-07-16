@@ -47,7 +47,7 @@ end
 %-------------------------------------------------------------------------------
 %% Set the classifier:
 %-------------------------------------------------------------------------------
-% Choices in GiveMeCfn: 'svm-linear', 'knn', 'linear', 'fast-linear', 'logistic', 'svm-linear-lowdim'
+% Choices in GiveMeCfn: 'svm-linear', 'knn', 'linear', 'fast-linear', 'logistic', 'svm-linear-lowdim', 'svm-rbf'
 params.whatClassifier = 'svm-linear-lowdim';
 
 % Number of repeats of cross-validation (reduce variance due to 'lucky splits')

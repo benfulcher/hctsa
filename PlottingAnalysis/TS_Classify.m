@@ -163,7 +163,7 @@ else
     end
     fprintf(1,'\n');
 end
-fprintf(1,'Looks good? Don''t forget to compare results using (simpler) \n');
+fprintf(1,'Looks good? Don''t forget to compare results using other (simpler) methods...\n');
 
 %-------------------------------------------------------------------------------
 %% Compute nulls for permutation testing
