@@ -146,7 +146,8 @@ targetInd = find(dataTable.ID==targetID);
 if isempty(targetInd)
     error('ID %u not found in the index for %s in %s.',targetID,tsOrOps,which(whatData));
 else
-    fprintf(1,'\n---TARGET: [%u] %s---\n',dataTable.ID(targetInd),dataTable.Name{targetInd});
+    fprintf(1,'\n---TARGET: [%u] %s (%s)---\n',...
+        dataTable.ID(targetInd),dataTable.Name{targetInd},dataTable.Keywords{targetInd});
 end
 
 %-------------------------------------------------------------------------------
@@ -348,7 +349,9 @@ if any(ismember('matrix',whatPlots))
 
     % Get group labeling if possible (time series):
     [groupLabels,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(dataTable);
+    keyboard
 
+    % Add class labels as rectangles along the edge…
     if numClasses > 1
         dRescale = @(x) dLims(1) + numClasses/8*diff(dLims)*(-1 + 0.9999*(x - min(x))./(max(x)-min(x)));
         imagesc(0,1,dRescale(groupLabelsInteger))

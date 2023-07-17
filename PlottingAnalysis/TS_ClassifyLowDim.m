@@ -38,7 +38,7 @@ if nargin < 3
     numPCs = 10;
 end
 if nargin < 4
-    doComputeAtMaxInSample = false;
+    doComputeAtMaxInSample = true;
 end
 
 %-------------------------------------------------------------------------------
@@ -123,8 +123,10 @@ cfnParams.suppressWarning = true;
 for i = 1:numPCs
     topPCs = pcScore(:,1:i);
     if cfnParams.computePerFold
-        [cfnRatePCs(i),stdAcc(i),inSampleStats(i,:),allFoldPCs{i}] = ComputeCVAccuracies(topPCs,TimeSeries.Group,cfnParams,true);
-        fprintf(1,'%u PCs: [in-fold: %.1f%%] %.1f +/- %.1f%%\n',i,inSampleStats(i,1),cfnRatePCs(i),stdAcc(i));
+        [cfnRatePCs(i),stdAcc(i),inSampleStats(i,:),allFoldPCs{i}] = ...
+                        ComputeCVAccuracies(topPCs,TimeSeries.Group,cfnParams,true);
+        fprintf(1,'%u PCs: [in-fold: %.1f%%] %.1f +/- %.1f%%\n',...
+                        i,inSampleStats(i,1),cfnRatePCs(i),stdAcc(i));
     else
         [cfnRatePCs(i),stdAcc(i)] = ComputeCVAccuracies(topPCs,TimeSeries.Group,cfnParams);
         fprintf(1,'%u PCs: %.1f +/- %.1f%%\n',i,cfnRatePCs(i),stdAcc(i));
@@ -132,7 +134,8 @@ for i = 1:numPCs
 end
 
 %-------------------------------------------------------------------------------
-%% Compute accuracy in low-dimensional space (first time hitting max in-sample accuracy)
+%% Compute accuracy in low-dimensional space
+% (first time hitting max in-sample accuracy if doComputeAtMaxInSample is true)
 %-------------------------------------------------------------------------------
 if doComputeAtMaxInSample
     if any(inSampleStats(:,1)==100)

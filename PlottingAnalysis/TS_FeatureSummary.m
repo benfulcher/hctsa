@@ -98,7 +98,7 @@ if ~isfield(annotateParams,'n')
     annotateParams.n = min(15,height(TimeSeries));
 end
 if annotateParams.n < 1
-    error('You need to specify at least one time series to annotate with TS_FeatureSummary');
+    error('You need to specify at least one time series to annotate with TS_FeatureSummary.');
 end
 if ~isfield(annotateParams,'maxL')
     annotateParams.maxL = 1000;
