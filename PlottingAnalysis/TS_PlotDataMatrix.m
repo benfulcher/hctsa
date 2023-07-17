@@ -50,40 +50,40 @@ inputP = inputParser;
 % whatDataFile
 default_whatData = 'norm';
 check_whatData = @(x) ischar(x) || isstruct(x);
-addOptional(inputP,'whatData',default_whatData,check_whatData);
+addParameter(inputP,'whatData',default_whatData,check_whatData);
 
 % addTimeSeries, annotates time series segments to the side of the plot
 default_addTimeSeries = true;
-check_addTimeSeries = @(x) (isnumeric(x) || islogical(x)) && (x==0 || x==1);
-addOptional(inputP,'addTimeSeries',default_addTimeSeries,check_addTimeSeries);
+check_addTimeSeries = @(x) (x==0 || x==1);
+addParameter(inputP,'addTimeSeries',default_addTimeSeries,check_addTimeSeries);
 
 % timeSeriesLength, length of time-series annotations to the left of the main plot
 default_timeSeriesLength = 200;
-addOptional(inputP,'timeSeriesLength',default_timeSeriesLength,@isnumeric);
+addParameter(inputP,'timeSeriesLength',default_timeSeriesLength,@isnumeric);
 
 % colorGroups, color groups of time series differently:
 default_colorGroups = false;
 check_colorGroups = @(x) (x==0 || x==1);
-addOptional(inputP,'colorGroups',default_colorGroups,check_colorGroups);
+addParameter(inputP,'colorGroups',default_colorGroups,check_colorGroups);
 
 % groupReorder, reorder within groups of time series:
 default_groupReorder = false;
 check_groupReorder = @(x) (x==0 || x==1);
-addOptional(inputP,'groupReorder',default_groupReorder,check_groupReorder);
+addParameter(inputP,'groupReorder',default_groupReorder,check_groupReorder);
 
 % custom color map, customColorMap
 default_customColorMap = 'redyellowblue';
-addOptional(inputP,'customColorMap',default_customColorMap,@ischar);
+addParameter(inputP,'customColorMap',default_customColorMap,@ischar);
 
 % colorNaNs
 default_colorNaNs = 1;
 check_colorNaNs = @(x) (x==0 || x==1);
-addOptional(inputP,'colorNaNs',default_colorNaNs,check_colorNaNs);
+addParameter(inputP,'colorNaNs',default_colorNaNs,check_colorNaNs);
 
 % customOrder (reorder before plotting)
 default_customOrder = {[],[]};
 check_customOrder = @(x)iscell(x) && length(x)==2;
-addOptional(inputP,'customOrder',default_customOrder,check_customOrder);
+addParameter(inputP,'customOrder',default_customOrder,check_customOrder);
 
 %% Parse inputs:
 parse(inputP,varargin{:});

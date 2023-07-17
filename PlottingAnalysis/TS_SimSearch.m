@@ -50,32 +50,32 @@ inputP = inputParser;
 % targetID
 default_targetID = 1;
 check_targetID = @(x) validateattributes(x,{'numeric'},{'positive'});
-addOptional(inputP,'targetID',default_targetID,check_targetID);
+addParameter(inputP,'targetID',default_targetID,check_targetID);
 
 % tsOrOps
 default_tsOrOps = 'ts';
 valid_tsOrOps = {'ts','ops'};
 check_tsOrOps = @(x) any(validatestring(x,valid_tsOrOps));
-addOptional(inputP,'tsOrOps',default_tsOrOps,check_tsOrOps);
+addParameter(inputP,'tsOrOps',default_tsOrOps,check_tsOrOps);
 
 % whatData
 default_whatData = 'norm';
 check_whatData = @(x)true;
-addOptional(inputP,'whatData',default_whatData,check_whatData);
+addParameter(inputP,'whatData',default_whatData,check_whatData);
 
 % numNeighbors
 default_numNeighbors = 20;
-addOptional(inputP,'numNeighbors',default_numNeighbors,@isnumeric);
+addParameter(inputP,'numNeighbors',default_numNeighbors,@isnumeric);
 
 % whatPlots
 default_whatPlots = {'matrix'};
 check_whatPlots = @(x) iscell(x) || ischar(x);
-addOptional(inputP,'whatPlots',default_whatPlots,check_whatPlots);
+addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 
 % whatDistMetric
 default_whatDistMetric = '';
 check_whatDistMetric = @(x) islogical(x) || (isnumeric(x) && (x==0 || x==1));
-addOptional(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric);
+addParameter(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric);
 
 %-------------------------------------------------------------------------------
 %% Parse inputs:
