@@ -42,7 +42,7 @@ function TS_PlotTimeSeries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOpt
 % ------------------------------------------------------------------------------
 % Get time-series data from where? ('norm' by default)
 if nargin < 1 || isempty(whatData)
-    whatData = 'norm';
+    whatData = 'raw';
 end
 
 if nargin < 2 || isempty(numPerGroup)

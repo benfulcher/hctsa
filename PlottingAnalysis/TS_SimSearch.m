@@ -349,7 +349,6 @@ if any(ismember('matrix',whatPlots))
 
     % Get group labeling if possible (time series):
     [groupLabels,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(dataTable);
-    keyboard
 
     % Add class labels as rectangles along the edge…
     if numClasses > 1

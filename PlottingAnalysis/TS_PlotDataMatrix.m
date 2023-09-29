@@ -7,7 +7,7 @@ function TS_PlotDataMatrix(varargin)
 %
 %---INPUTS:
 % whatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
-%         data in HCTSA_cl.mat (default), or specify a filename to load data
+%         data in HCTSA_N.mat (default), or specify a filename to load data
 %         from that file.
 % addTimeSeries: set to 1 to annotate time series segments to the left of the data matrix
 % timeSeriesLength: length of time-series annotations (number of samples)
@@ -76,7 +76,7 @@ default_customColorMap = 'redyellowblue';
 addParameter(inputP,'customColorMap',default_customColorMap,@ischar);
 
 % colorNaNs
-default_colorNaNs = 1;
+default_colorNaNs = true;
 check_colorNaNs = @(x) (x==0 || x==1);
 addParameter(inputP,'colorNaNs',default_colorNaNs,check_colorNaNs);
 
@@ -133,7 +133,7 @@ if colorGroups
 	if ~isempty(timeSeriesGroups)
 	    fprintf(1,'Coloring time series by group assignment...\n');
 	else
-	    warning('No group information found')
+	    warning('No group information found.')
 	    colorGroups = false;
 	end
 end
@@ -143,7 +143,7 @@ end
 %-------------------------------------------------------------------------------
 if groupReorder
 	if isempty(timeSeriesGroups)
-		warning('Cannot reorder by time series group; no group information found')
+		warning('Cannot reorder by time series group; no group information found.')
 	else
 	    [~,ixData] = sort(groupLabelsInteger);
 	    dataMatReOrd = TS_DataMat(ixData,:);
@@ -182,7 +182,7 @@ if colorGroups
         numGroups = numGroups + 1;
     end
 
-    fprintf(1,'Coloring data according to %u groups\n',numGroups);
+    fprintf(1,'Coloring data according to %u groups.\n',numGroups);
 
     % Change range of TS_DataMat to make use of new colormap appropriately
     almost1 = 1 - 1e-7;
@@ -199,7 +199,7 @@ end
 %% Set the colormap
 % --------------------------------------------------------------------------
 if numGroups <= 1
-    numColorMapGrads = 6; % number of gradations in each set of colourmap
+    numColorMapGrads = 8; % number of gradations in each set of colourmap
     if strcmp(customColorMap,'redyellowblue');
         customColorMap = flipud(BF_GetColorMap('redyellowblue',numColorMapGrads,0));
     else
