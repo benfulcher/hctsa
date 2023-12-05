@@ -1,6 +1,6 @@
-<p align="center"><img src="img/hctsa_logo_banner.png" alt="hctsa logo" height="150"/></p>
+<p align="center"><img src="img/hctsa_logo_banner.png" alt="hctsa logo" height="180"/></p>
 
-# :wavy_dash: _hctsa_ :wavy_dash:: highly comparative time-series analysis
+# :wavy_dash: _hctsa_ :wavy_dash:
 
 <p align="center">
  	<a href="https://zenodo.org/badge/latestdoi/10790340"><img src="https://zenodo.org/badge/10790340.svg" height="20"/></a>
