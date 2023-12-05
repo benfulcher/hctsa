@@ -1,9 +1,13 @@
+<p align="center"><img src="img/hctsa_logo_banner.png" alt="hctsa logo" height="150"/></p>
+
 # :wavy_dash: _hctsa_ :wavy_dash:: highly comparative time-series analysis
 
-![](img/hctsa_logo_banner.png)
-
-[![DOI](https://zenodo.org/badge/10790340.svg)](https://zenodo.org/badge/latestdoi/10790340)
-[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries)](https://twitter.com/compTimeSeries)
+<p align="center">
+ 	<a href="https://zenodo.org/badge/latestdoi/10790340"><img src="https://zenodo.org/badge/10790340.svg" height="20"/></a>
+ 	<a href="https://twitter.com/compTimeSeries"><img src="https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries" height="20"/></a>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img src="https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg" height="20"/></a>
+    <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" height="20"/></a>
+</p>
 
 _hctsa_ is a Matlab software package for running highly comparative time-series analysis.
 It extracts thousands of time-series features from a collection of univariate time series and includes a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
