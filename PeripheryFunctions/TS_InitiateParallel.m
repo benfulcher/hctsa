@@ -68,8 +68,8 @@ try
                                     '%u workers.\n'],numWorkers);
     end
 catch emsg
-    warning('\nError starting parallel processing pool -- running serially instead:\n%s',...
-                    emsg.message)
+    warning(['\nError starting parallel processing pool -- running serially instead:\n%s',...
+                    emsg.message])
     success = false;
 end
 
