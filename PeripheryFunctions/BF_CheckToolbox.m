@@ -71,7 +71,7 @@ case 'financial_toolbox'
     theName = 'Financial Toolbox';
 case 'database_toolbox'
     theName = 'Database Toolbox';
-case 'distrib_computing_toolbox'
+case 'parallel_computing_toolbox'
     theName = 'Parallel Computing Toolbox';
 otherwise
     error('Unknown toolbox ''%s''.\n',theToolbox);
