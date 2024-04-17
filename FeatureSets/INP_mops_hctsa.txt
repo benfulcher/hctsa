@@ -934,7 +934,7 @@ NL_TISEAN_d2(x_z,1,10,0)	         NL_TISEAN_d2_1_10_0
 NL_TISEAN_d2(x_z,'ac',10,0.01)	   NL_TISEAN_d2_ac_10_001
 NL_TISEAN_c1(x_z,1,[1,7],0.02,0.5)	NL_TISEAN_c1_1_1_7_002_05
 NL_TISEAN_c1(x_z,1,[2,6],25,0.1)	     NL_TISEAN_c1_1_2_6_25_01
-NL_BoxCorrDim(x_z,50,{'ac',5})	    NL_BoxCorrDim_50_ac_5
+NL_TSTL_BoxCorrDim(x_z,50,{'ac',5})	    NL_TSTL_BoxCorrDim_50_ac_5
 NL_TSTL_GPCorrSum(x_z,-1,0.5,40,20,{'ac','fnnmar'},1)	NL_TSTL_GPCorrSum2_n1_05_40_20_ac_fnnmar
 NL_TSTL_GPCorrSum(x_z,-1,0.5,100,20,{'ac','fnnmar'},1)	NL_TSTL_GPCorrSum2_n1_05_100_20_ac_fnnmar
 NL_TSTL_GPCorrSum(x_z,-1,0.1,40,20,{'ac','fnnmar'},1)	NL_TSTL_GPCorrSum2_n1_01_40_20_ac_fnnmar

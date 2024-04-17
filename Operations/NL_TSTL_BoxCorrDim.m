@@ -1,7 +1,7 @@
-function out = NL_BoxCorrDim(y,numBins,embedParams)
-% NL_BoxCorrDim  Correlation dimension of a time series.
+function out = NL_TSTL_BoxCorrDim(y,numBins,embedParams)
+% NL_TSTL_BoxCorrDim  Correlation dimension of a time series.
 %
-% References TSTOOL code, corrdim, to estimate the correlation dimension of a
+% Uses TSTOOL code, corrdim, to estimate the correlation dimension of a
 % time-delay embedded time series using a box-counting approach.
 %
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
