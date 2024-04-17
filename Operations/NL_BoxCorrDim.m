@@ -65,10 +65,10 @@ end
 % ------------------------------------------------------------------------------
 %% Embed the signal
 % ------------------------------------------------------------------------------
-% convert to embedded signal object for TSTOOL
+% Convert to embedded signal object for TSTOOL
 s = BF_Embed(y,embedParams{1},embedParams{2},1);
 
-if ~isa(s,'signal') && isnan(s); % embedding failed
+if ~isa(s,'signal') && isnan(s) % embedding failed
     error('Time-series embedding to signal class for TSTOOL failed')
 end
 
