@@ -20,3 +20,5 @@ catch22_IN_AutoMutualInfoStats_40_gaussian_fmmi         ami_timescale           
 catch22_PD_PeriodicityWang_th0_01                       periodicity             periodicity,spline
 catch22_SC_FluctAnal_2_rsrangefit_50_1_logi_prop_r1     rs_range	            scaling
 catch22_CO_trev_1_num                                   trev                    correlation,nonlinear
+catch22_DN_Mean                                         mean                    distribution,raw,locationDependent
+catch22_DN_Spread_Std                                   std                     distribution,raw,spreadDependent

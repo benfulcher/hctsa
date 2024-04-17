@@ -7,7 +7,7 @@ function TS_PlotDataMatrix(varargin)
 %
 %---INPUTS:
 % whatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
-%         data in HCTSA_cl.mat (default), or specify a filename to load data
+%         data in HCTSA_N.mat (default), or specify a filename to load data
 %         from that file.
 % addTimeSeries: set to 1 to annotate time series segments to the left of the data matrix
 % timeSeriesLength: length of time-series annotations (number of samples)
@@ -50,40 +50,40 @@ inputP = inputParser;
 % whatDataFile
 default_whatData = 'norm';
 check_whatData = @(x) ischar(x) || isstruct(x);
-addOptional(inputP,'whatData',default_whatData,check_whatData);
+addParameter(inputP,'whatData',default_whatData,check_whatData);
 
 % addTimeSeries, annotates time series segments to the side of the plot
 default_addTimeSeries = true;
-check_addTimeSeries = @(x) (isnumeric(x) || islogical(x)) && (x==0 || x==1);
-addOptional(inputP,'addTimeSeries',default_addTimeSeries,check_addTimeSeries);
+check_addTimeSeries = @(x) (x==0 || x==1);
+addParameter(inputP,'addTimeSeries',default_addTimeSeries,check_addTimeSeries);
 
 % timeSeriesLength, length of time-series annotations to the left of the main plot
 default_timeSeriesLength = 200;
-addOptional(inputP,'timeSeriesLength',default_timeSeriesLength,@isnumeric);
+addParameter(inputP,'timeSeriesLength',default_timeSeriesLength,@isnumeric);
 
 % colorGroups, color groups of time series differently:
 default_colorGroups = false;
 check_colorGroups = @(x) (x==0 || x==1);
-addOptional(inputP,'colorGroups',default_colorGroups,check_colorGroups);
+addParameter(inputP,'colorGroups',default_colorGroups,check_colorGroups);
 
 % groupReorder, reorder within groups of time series:
 default_groupReorder = false;
 check_groupReorder = @(x) (x==0 || x==1);
-addOptional(inputP,'groupReorder',default_groupReorder,check_groupReorder);
+addParameter(inputP,'groupReorder',default_groupReorder,check_groupReorder);
 
 % custom color map, customColorMap
 default_customColorMap = 'redyellowblue';
-addOptional(inputP,'customColorMap',default_customColorMap,@ischar);
+addParameter(inputP,'customColorMap',default_customColorMap,@ischar);
 
 % colorNaNs
-default_colorNaNs = 1;
+default_colorNaNs = true;
 check_colorNaNs = @(x) (x==0 || x==1);
-addOptional(inputP,'colorNaNs',default_colorNaNs,check_colorNaNs);
+addParameter(inputP,'colorNaNs',default_colorNaNs,check_colorNaNs);
 
 % customOrder (reorder before plotting)
 default_customOrder = {[],[]};
 check_customOrder = @(x)iscell(x) && length(x)==2;
-addOptional(inputP,'customOrder',default_customOrder,check_customOrder);
+addParameter(inputP,'customOrder',default_customOrder,check_customOrder);
 
 %% Parse inputs:
 parse(inputP,varargin{:});
@@ -133,7 +133,7 @@ if colorGroups
 	if ~isempty(timeSeriesGroups)
 	    fprintf(1,'Coloring time series by group assignment...\n');
 	else
-	    warning('No group information found')
+	    warning('No group information found.')
 	    colorGroups = false;
 	end
 end
@@ -143,7 +143,7 @@ end
 %-------------------------------------------------------------------------------
 if groupReorder
 	if isempty(timeSeriesGroups)
-		warning('Cannot reorder by time series group; no group information found')
+		warning('Cannot reorder by time series group; no group information found.')
 	else
 	    [~,ixData] = sort(groupLabelsInteger);
 	    dataMatReOrd = TS_DataMat(ixData,:);
@@ -182,7 +182,7 @@ if colorGroups
         numGroups = numGroups + 1;
     end
 
-    fprintf(1,'Coloring data according to %u groups\n',numGroups);
+    fprintf(1,'Coloring data according to %u groups.\n',numGroups);
 
     % Change range of TS_DataMat to make use of new colormap appropriately
     almost1 = 1 - 1e-7;
@@ -199,7 +199,7 @@ end
 %% Set the colormap
 % --------------------------------------------------------------------------
 if numGroups <= 1
-    numColorMapGrads = 6; % number of gradations in each set of colourmap
+    numColorMapGrads = 8; % number of gradations in each set of colourmap
     if strcmp(customColorMap,'redyellowblue');
         customColorMap = flipud(BF_GetColorMap('redyellowblue',numColorMapGrads,0));
     else

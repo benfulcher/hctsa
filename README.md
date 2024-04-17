@@ -1,9 +1,13 @@
-# :wavy_dash: _hctsa_ :wavy_dash:: highly comparative time-series analysis
+<p align="center"><img src="img/hctsa_logo_banner.png" alt="hctsa logo" height="180"/></p>
 
-![](img/hctsa_logo_banner.png)
+<h1 align="center"><em>hctsa</em></h1>
 
-[![DOI](https://zenodo.org/badge/10790340.svg)](https://zenodo.org/badge/latestdoi/10790340)
-[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries)](https://twitter.com/compTimeSeries)
+<p align="center">
+ 	<a href="https://zenodo.org/badge/latestdoi/10790340"><img src="https://zenodo.org/badge/10790340.svg" height="20"/></a>
+ 	<a href="https://twitter.com/compTimeSeries"><img src="https://img.shields.io/twitter/url/https/twitter.com/compTimeSeries.svg?style=social&label=Follow%20%40compTimeSeries" height="20"/></a>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img src="https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg" height="20"/></a>
+    <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" height="20"/></a>
+</p>
 
 _hctsa_ is a Matlab software package for running highly comparative time-series analysis.
 It extracts thousands of time-series features from a collection of univariate time series and includes a range of tools for visualizing and analyzing the resulting time-series feature matrix, including:
@@ -44,8 +48,8 @@ There is also alot of additional information on the [__wiki__](https://github.co
 
 If you use this software, please read and cite these open-access articles:
 
-- B.D. Fulcher and N.S. Jones. [_hctsa_: A computational framework for automated time-series phenotyping using massive feature extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). _Cell Systems_: __5__, 527 (2017).
-- B.D. Fulcher, M.A. Little, N.S. Jones. [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). _J. Roy. Soc. Interface_: __10__, 83 (2013).
+- &#x1F4D7; B.D. Fulcher and N.S. Jones. [_hctsa_: A computational framework for automated time-series phenotyping using massive feature extraction](http://www.cell.com/cell-systems/fulltext/S2405-4712\(17\)30438-6). _Cell Systems_: __5__, 527 (2017).
+- &#x1F4D7; B.D. Fulcher, M.A. Little, N.S. Jones. [Highly comparative time-series analysis: the empirical structure of time series and their methods](http://rsif.royalsocietypublishing.org/content/10/83/20130048.full). _J. Roy. Soc. Interface_: __10__, 83 (2013).
 
 Feedback, as [email](mailto:ben.d.fulcher@gmail.com), [GitHub issues](https://github.com/benfulcher/hctsa/issues) or [pull requests](https://help.github.com/articles/using-pull-requests/), is much appreciated.
 

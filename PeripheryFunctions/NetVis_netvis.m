@@ -41,33 +41,33 @@ inputP = inputParser;
 % graphs k = 0 is valid, k = 1/numNodes is more usual
 default_k = 0;
 check_k = @(x) validateattributes(x,{'numeric'},{'positive'});
-addOptional(inputP,'k',default_k,check_k);
+addParameter(inputP,'k',default_k,check_k);
 
 % Text labels for each node, textLabels
 default_textLabels = {};
-addOptional(inputP,'textLabels',default_textLabels,@iscell);
+addParameter(inputP,'textLabels',default_textLabels,@iscell);
 
 % linkThresholds, linkThresh (for plotting how-strong links)
 default_linkThresh = [];
-addOptional(inputP,'linkThresh',default_linkThresh,@isnumeric);
+addParameter(inputP,'linkThresh',default_linkThresh,@isnumeric);
 
 % nodeLabels, A group label (number) for each node
 default_nodeLabels = ones(numNodes,1);
-addOptional(inputP,'nodeLabels',default_nodeLabels,@isnumeric);
+addParameter(inputP,'nodeLabels',default_nodeLabels,@isnumeric);
 
 % labelLength
 default_labelLength = 0;
 check_labelLength = @(x) validateattributes(x,{'numeric'},{'positive'});
-addOptional(inputP,'labelLength',default_labelLength,check_labelLength);
+addParameter(inputP,'labelLength',default_labelLength,check_labelLength);
 
 % dataLabels, A piece of time-series data for each node
 default_dataLabels = cell(numNodes,1);
-addOptional(inputP,'dataLabels',default_dataLabels,@iscell);
+addParameter(inputP,'dataLabels',default_dataLabels,@iscell);
 
 % Number of iterations, repeats: nits
 default_nits = [2000,1]; % [maxIter,numRepeats];
 check_nits = @(x) isnumeric(x) && length(x)==2;
-addOptional(inputP,'nits',default_nits,check_nits);
+addParameter(inputP,'nits',default_nits,check_nits);
 
 % ---PARAMETERS:
 % Color map, colorMap

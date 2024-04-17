@@ -73,13 +73,16 @@ if nargin < 5 || isempty(cfnParams)
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
 
-% Assign group labels (removing unlabeled data):
-[TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-% Give basic info about the represented classes:
-TellMeAboutLabeling(TimeSeries);
+% If group labels are assigned, filter out unlabeled data:
+if ismember('Group',TimeSeries.Properties.VariableNames)
+    [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
 
-% Filter down a reduced feature set if required:
-[TS_DataMat,~] = FilterFeatures(TS_DataMat,Operations,cfnParams);
+    % Give basic info about the represented classes:
+    TellMeAboutLabeling(TimeSeries);
+
+    % Filter down a reduced feature set (if required):
+    [TS_DataMat,~] = FilterFeatures(TS_DataMat,Operations,cfnParams);
+end
 
 % ------------------------------------------------------------------------------
 % Do the dimensionality reduction

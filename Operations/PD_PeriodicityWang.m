@@ -4,11 +4,11 @@ function out = PD_PeriodicityWang(y)
 % Implements an idea based on the periodicity extraction measure proposed in:
 %
 % "Structure-based Statistical Features and Multivariate Time Series Clustering"
-% Wang, X. and Wirth, A. and Wang, L.
+% X. Wang and A. Wirth and L. Wang
 % Seventh IEEE International Conference on Data Mining, 351--360 (2007)
 % DOI: 10.1109/ICDM.2007.103
 %
-% Detrends the time series using a single-knot cubic regression spline
+% Detrends the time series using a three-knot cubic regression spline
 % and then computes autocorrelations up to one third of the length of
 % the time series.
 % The frequency is the first peak in the autocorrelation function satisfying
@@ -18,8 +18,8 @@ function out = PD_PeriodicityWang(y)
 % y, the input time series.
 %
 % The single threshold of 0.01 was considered in the original paper, this code
-% uses a range of thresholds: 0, 0.01, 0.1, 0.2, 1\sqrt{N}, 5\sqrt{N}, and
-% 10\sqrt{N}, where N is the length of the time series.
+% uses a range of thresholds: 0, 0.01, 0.1, 0.2, 1/sqrt{N}, 5/sqrt{N}, and
+% 10/sqrt{N}, where N is the length of the time series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -72,7 +72,7 @@ ths = [0,0.01,0.1,0.2,1/sqrt(N),5/sqrt(N),10/sqrt(N)];
 numThresholds = length(ths); % the number of thresholds
 
 %-------------------------------------------------------------------------------
-% 1: Detrend using a regression spline with 3 knots
+%% 1: Detrend using a regression spline with 3 knots
 %-------------------------------------------------------------------------------
 % I'm not quite sure how to do this, but I'm doing it like this:
 % y_or=y; % the original series
@@ -81,12 +81,16 @@ numThresholds = length(ths); % the number of thresholds
 % respline=spline(r,y_sp,1:N);
 % y=y-respline'; % the detrended series
 
-spline = spap2(2,4,1:N,y); % just a single middle knot with cubic interpolants
+numPolyPieces = 2; % number of polynomial pieces in the spline
+splineOrder = 4; % order of the spline
+spline = spap2(numPolyPieces,splineOrder,1:N,y); % just a single middle knot with cubic interpolants
 y_spl = fnval(spline,1:N); % evaluated at the 1:N time intervals
 y = y - y_spl';
 if doPlot
-    figure('color','w'); box('on');
-    plot(y_or,'k'); hold on; plot(y,'r'); hold off
+    figure('color','w');
+    box('on');
+    plot(y_or,'k'); hold('on');
+    plot(y,'r'); hold('off')
 end
 
 %-------------------------------------------------------------------------------
@@ -147,7 +151,8 @@ for k = 1:numThresholds
         end
 
         % We made it! Use this frequency!
-        theFreqs(k) = ipeak; break
+        theFreqs(k) = ipeak;
+        break
     end
 end
 

@@ -37,7 +37,7 @@ end
 
 % Check a license is available:
 try
-    BF_CheckToolbox('distrib_computing_toolbox')
+    BF_CheckToolbox('parallel_computing_toolbox')
 catch
     fprintf(1,['License for Parallel Computing Toolbox could not be initiated' ...
                 ' -- cannot perform computations across multiple cores.\n']);
@@ -68,8 +68,8 @@ try
                                     '%u workers.\n'],numWorkers);
     end
 catch emsg
-    warning('\nError starting parallel processing pool -- running serially instead:\n%s',...
-                    emsg.message)
+    warning(['\nError starting parallel processing pool -- running serially instead:\n%s',...
+                    emsg.message])
     success = false;
 end
 

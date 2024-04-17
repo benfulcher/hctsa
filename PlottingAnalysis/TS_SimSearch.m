@@ -50,32 +50,32 @@ inputP = inputParser;
 % targetID
 default_targetID = 1;
 check_targetID = @(x) validateattributes(x,{'numeric'},{'positive'});
-addOptional(inputP,'targetID',default_targetID,check_targetID);
+addParameter(inputP,'targetID',default_targetID,check_targetID);
 
 % tsOrOps
 default_tsOrOps = 'ts';
 valid_tsOrOps = {'ts','ops'};
 check_tsOrOps = @(x) any(validatestring(x,valid_tsOrOps));
-addOptional(inputP,'tsOrOps',default_tsOrOps,check_tsOrOps);
+addParameter(inputP,'tsOrOps',default_tsOrOps,check_tsOrOps);
 
 % whatData
 default_whatData = 'norm';
 check_whatData = @(x)true;
-addOptional(inputP,'whatData',default_whatData,check_whatData);
+addParameter(inputP,'whatData',default_whatData,check_whatData);
 
 % numNeighbors
 default_numNeighbors = 20;
-addOptional(inputP,'numNeighbors',default_numNeighbors,@isnumeric);
+addParameter(inputP,'numNeighbors',default_numNeighbors,@isnumeric);
 
 % whatPlots
 default_whatPlots = {'matrix'};
 check_whatPlots = @(x) iscell(x) || ischar(x);
-addOptional(inputP,'whatPlots',default_whatPlots,check_whatPlots);
+addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 
 % whatDistMetric
 default_whatDistMetric = '';
 check_whatDistMetric = @(x) islogical(x) || (isnumeric(x) && (x==0 || x==1));
-addOptional(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric);
+addParameter(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric);
 
 %-------------------------------------------------------------------------------
 %% Parse inputs:
@@ -146,7 +146,8 @@ targetInd = find(dataTable.ID==targetID);
 if isempty(targetInd)
     error('ID %u not found in the index for %s in %s.',targetID,tsOrOps,which(whatData));
 else
-    fprintf(1,'\n---TARGET: [%u] %s---\n',dataTable.ID(targetInd),dataTable.Name{targetInd});
+    fprintf(1,'\n---TARGET: [%u] %s (%s)---\n',...
+        dataTable.ID(targetInd),dataTable.Name{targetInd},dataTable.Keywords{targetInd});
 end
 
 %-------------------------------------------------------------------------------
@@ -349,6 +350,7 @@ if any(ismember('matrix',whatPlots))
     % Get group labeling if possible (time series):
     [groupLabels,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(dataTable);
 
+    % Add class labels as rectangles along the edge…
     if numClasses > 1
         dRescale = @(x) dLims(1) + numClasses/8*diff(dLims)*(-1 + 0.9999*(x - min(x))./(max(x)-min(x)));
         imagesc(0,1,dRescale(groupLabelsInteger))

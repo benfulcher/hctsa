@@ -21,14 +21,14 @@ function out = PH_ForcePotential(y,whatPotential,params)
 %                   params = [alpha, kappa, deltat]
 %
 %           (i) The double-well potential has three parameters:
-%               * alpha controls the relative positions of the wells,
-%               * kappa is the coefficient of friction,
-%               * deltat sets the time step for the simulation.
+%               - alpha controls the relative positions of the wells,
+%               - kappa is the coefficient of friction,
+%               - deltat sets the time step for the simulation.
 %
 %           (ii) The sinusoidal potential also has three parameters:
-%               * alpha controls the period of oscillations in the potential
-%               * kappa is the coefficient of friction,
-%               * deltat sets the time step for the simulation.
+%               - alpha controls the period of oscillations in the potential
+%               - kappa is the coefficient of friction,
+%               - deltat sets the time step for the simulation.
 %
 %---OUTPUTS:
 % Statistics summarizing the trajectory of the simulated particle,
