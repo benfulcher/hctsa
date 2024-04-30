@@ -20,4 +20,4 @@ jobs:
       - name: Run unit tests
         uses: matlab-actions/run-command@v2
         with:
-          command: results = runtests, assertSuccess(results)
+          command: cd Tests; results = runtests('BasicPipelineTests.m'); assertSuccess(results)
