@@ -1,9 +1,27 @@
 classdef BasicPipelineTests < matlab.unittest.TestCase
     
     methods(TestClassSetup)
+
+        function makeCopyofMat(testCase)
+            % make a copy of the base .mat file
+            duplicatedFileName = 'HCTSA_Bonn_EEG.mat';
+            originalFileName = 'HCTSA_Bonn_EEG_OG.mat';
+
+            % check original exists
+            doesOGExist = exist(originalFileName, 'file') == 2;
+            testCase.fatalAssertTrue(doesOGExist, 'Original HCTSA mat file not found.')
+        
+            % make a copy 
+            copyfile(originalFileName, duplicatedFileName);
+            % check for duplicated file
+            doesDuplicateExist = exist(duplicatedFileName, 'file') == 2;
+            testCase.fatalAssertTrue(doesDuplicateExist, 'Duplicated HCTSA mat file not found.')
+        end          
+
         function checkRequireFiles(testCase)
             % check that all the files required for unit tests exist
-            requiredFiles = {'INP_test_ts.mat', 'HCTSA_Bonn_EEG.mat', 'HCTSA_catch22_expected.mat'};
+            requiredFiles = {'INP_test_ts.mat', 'HCTSA_Bonn_EEG.mat', ...
+                'HCTSA_catch22_expected.mat'};
             for i = 1:numel(requiredFiles)
                 testCase.fatalAssertTrue(exist(requiredFiles{i}, 'file') == 2, ...
                     sprintf('Required file "%s" does not exist.', requiredFiles{i}));
@@ -18,7 +36,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
     methods(TestClassTeardown)
         % clean up any remaining artifcats after unit tests have finished. 
          function cleanupTestClass(testCase)
-                generatedFiles = {'HCTSA_catch22.mat', 'HCTSA_locDepFiltered.mat', 'HCTSA.mat', 'HCTSA_EEG_N.mat'};
+                generatedFiles = {'HCTSA_catch22.mat', 'HCTSA_locDepFiltered.mat', ...
+                    'HCTSA.mat', 'HCTSA_EEG_N.mat', 'HCTSA_Bonn_EEG.mat', ..., 
+                    'HCTSA_Bonn_EEG_N.mat'};
                 for i = 1:numel(generatedFiles)
                     if exist(generatedFiles{i}, 'file') == 2
                     delete(generatedFiles{i});
