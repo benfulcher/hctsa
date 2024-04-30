@@ -1,3 +1,5 @@
+% modified version of the original install.m, designed to run from the
+% command line in a Git Actions runner. 
 
 cd('../') 
 % ------------------------------------------------------------------------------
