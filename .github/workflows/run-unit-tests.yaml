@@ -18,5 +18,6 @@ jobs:
         with:
           command: cd Tests; run('silent_install.m')
       - name: Run unit tests
+        uses: matlab-actions/run-command@v2
         with:
           command: results = runtests, assertSuccess(results)
