@@ -13,7 +13,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
-        products: Statistics_and_Machine_Learning_Toolbox
+        with:
+          products: Statistics_and_Machine_Learning_Toolbox
       - name: Compile MEX files
         uses: matlab-actions/run-command@v2
         with:
