@@ -21,19 +21,11 @@
 % a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
-
-fprintf(1,['This script will set up the Highly Comparative Time-Series ' ...
-                        'Analysis (hctsa) code package from scratch!\n']);
-fprintf(1,['We will:' ...
-            '\n-1- Add the paths needed for the repository,' ...
-            '\n-2- Check toolboxes,' ...
-            '\n-3- Compile the external time-series toolboxes for this system.\n\n']);
-
+cd('../') 
 % ------------------------------------------------------------------------------
 % 0. Check that the latest git submodules are loaded (catch22)
 % ------------------------------------------------------------------------------
 if exist(fullfile(pwd,'Toolboxes','catch22','wrap_Matlab'),'dir')==0
-    input('You may not have added the git submodule for catch22... Press any key to attempt this now...')
     system('git submodule update --init --recursive');
 end
 
@@ -41,7 +33,6 @@ end
 %% 1. Add the paths:
 % ------------------------------------------------------------------------------
 fprintf(1,'-1- Adding paths needed for the repository...\n');
-input('<<Press any key to continue>>')
 try
 	startup
 catch emsg
@@ -85,28 +76,14 @@ else
     fprintf(1,'Looking good for Matlab toolbox installation! :)\n');
 end
 fprintf(1,'\n');
-input('<<Press any key to continue>>')
 
 % ------------------------------------------------------------------------------
 %% 3. Attempt to compile the executables required by the periphery Toolboxes:
 % ------------------------------------------------------------------------------
-fprintf(1,['\n-2- Compile the binary executables needed for evaluating ' ...
-                                                'some operations.\n']);
-fprintf(1,['Please make sure that mex is set up with the right compilers for' ...
-                                                            ' this system.\n']);
-fprintf(1,['Note that errors here are not the end of the world,\nbut mean that ' ...
-                        'some operations may fail to execute correctly...\n']);
-input('<<Press any key to continue>>')
 cd Toolboxes
 compile_mex
 cd('../');
 
 %-------------------------------------------------------------------------------
 %
-fprintf(1,'Hope everything compiled ok?!\n\n');
-
-fprintf(1,['All done! Ready when you are to initiate hctsa analysis\nusing a time-series dataset: ' ...
-                            'e.g.: TS_Init(''INP_test_ts.mat'')\n']);
-
-% Attempt to add a time series
-% SQL_Add('ts','INP_test_ts.txt')
+fprintf('All done!')
