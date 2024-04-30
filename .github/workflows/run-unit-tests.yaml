@@ -17,12 +17,7 @@ jobs:
         uses: matlab-actions/run-command@v2
         with:
            command: |
-            matlab -batch "matlab.addons.toolbox.installToolbox('Statistics and Machine Learning'); 
-                    matlab.addons.toolbox.installToolbox('Signal Processing'); 
-                    matlab.addons.toolbox.installToolbox('Curve Fitting'); 
-                    matlab.addons.toolbox.installToolbox('System Identification'); 
-                    matlab.addons.toolbox.installToolbox('Wavelet'); 
-                    matlab.addons.toolbox.installToolbox('Econometrics');"
+            matlab -batch "matlab.addons.toolbox.installToolbox('Statistics and Machine Learning'); matlab.addons.toolbox.installToolbox('Signal Processing'); 
       - name: Compile MEX files
         uses: matlab-actions/run-command@v1
         with:
