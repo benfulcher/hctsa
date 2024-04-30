@@ -16,4 +16,4 @@ jobs:
       - name: Compile MEX files
         uses: matlab-actions/run-command@v2
         with:
-          command: run('startup.m'); cd Toolboxes; run('compile_mex.m')
+          command: run('silent_install.m')
