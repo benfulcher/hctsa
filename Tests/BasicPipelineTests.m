@@ -2,6 +2,16 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
     
     methods(TestClassSetup)
 
+        function runStartup(testCase)
+            try
+                run("../startup.m")
+                pass = true;
+            catch ME
+                pass = false;
+            end
+            testCase.fatalAssertTrue(pass, 'HCTSA failed to startup successfully.')
+        end
+
         function makeCopyofMat(testCase)
             % make a copy of the base .mat file
             duplicatedFileName = 'HCTSA_Bonn_EEG.mat';
