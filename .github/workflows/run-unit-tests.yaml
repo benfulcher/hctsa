@@ -20,6 +20,12 @@ jobs:
         uses: matlab-actions/run-command@v2
         with:
           command: cd Tests; run('silent_install.m')
+      - name: Install TISEAN
+        run: |
+          cd Toolboxes/Tisean_3.0.1
+          ./configure
+          make
+          make install
       - name: Run unit tests
         uses: matlab-actions/run-command@v2
         with:
