@@ -454,7 +454,25 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             labels = logData{1};
             counts = logData{2};
     
-            table(labels, counts)
+            % Print header
+            fprintf('\n==============================================================\n');
+            fprintf('                    Unit Test Results                        \n');
+            fprintf('==============================================================\n\n');
+    
+            % Print table title
+            fprintf('              Noisy Sinusoid Benchmark Outputs              \n\n');
+    
+            % Print table header
+            fprintf('%-40s %10s\n', 'Output Type', 'Counts');
+            fprintf('%-40s %10s\n', '----------------------------------------', '----------');
+    
+            % Print table rows
+            for i = 1:length(labels)
+                fprintf('%-40s %10d\n', labels{i}, counts(i));
+            end
+    
+            % Print footer
+            fprintf('==============================================================\n');
         end
     end
     
