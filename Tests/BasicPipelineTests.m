@@ -2,6 +2,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
     properties
         logFileName = 'custom_log.txt'
+        footer = sprintf('==============================================================\n');
     end
 
     methods(TestClassSetup)
@@ -105,7 +106,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             lengths = [500, 1000, 5000];
             f = 10;
             fs = 100;
-
+            header = sprintf('\n  -------HCTSA Execution Time Benchmarks-------   \n');
+            testCase.writeToLog(header);
+            
             for i = 1:length(lengths)
                 N = lengths(i);
                 t = (0:N-1)/fs;
@@ -119,8 +122,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 catch
                     pass = false;
                 end
-                %fprintf("Time taken: %d: %.4f seconds\n", lengths(i), exectutionTime)
-                message = sprintf("Noisy Sinusoid of length %d samples, time taken: %.4f seconds", lengths(i), executionTime);
+                message = sprintf("Noisy sinusoid of length %d samples, time taken: %.4f seconds", lengths(i), executionTime);
                 testCase.writeToLog(message);
                 testCase.fatalAssertTrue(pass, 'TS_CalculateFeatureVector did not execute sucessfully.')
                 num_ts = size(featVector, 2);
@@ -180,6 +182,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 quality_labels_counts(i+1) = length(find(quality_labels == i));
             end
 
+
+            header = sprintf('\n  -------Noisy Sinusoid Benchmark Feature Outputs-------   \n');
+            testCase.writeToLog(header)
             quality_labels_names = {'successfully computed features','fatal errors','NaNs','positive infinities',...
                 'negative infinities','imaginary values','empty outputs','non-existent features'};
 
@@ -187,6 +192,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 message = sprintf("%s: %d", quality_labels_names{i}, quality_labels_counts(i));
                 testCase.writeToLog(message);
             end
+            testCase.writeToLog(testCase.footer)
 
             % (2) Check the size of the output
             num_ts = size(actual_output, 1);
@@ -474,14 +480,13 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             fclose(logFile);
 
             fprintf('\n==============================================================\n');
-            fprintf('                    Custom Log Contents                      \n');
+            fprintf('                    Unit Test Log                      \n');
             fprintf('==============================================================\n\n');
             
             for i = 1:length(logData{1})
                 fprintf('%s\n', logData{1}{i});
             end
             
-            fprintf('==============================================================\n');
         end
     end
 
@@ -502,7 +507,8 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
     %         % Print table title
     %         fprintf('              Noisy Sinusoid Benchmark Outputs              \n\n');
     % 
-    %         % Print table header
+    %         % Print tabidine
+    % le header
     %         fprintf('%-40s %10s\n', 'Output Type', 'Counts');
     %         fprintf('%-40s %10s\n', '----------------------------------------', '----------');
     % 
