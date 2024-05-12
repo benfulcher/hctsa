@@ -3,10 +3,12 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
     methods(TestClassSetup)
 
         function runStartup(testCase)
+            % run the startup script before executing the tests to ensure
+            % that all paths and toolboxes are available
             try
                 run("../startup.m")
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'HCTSA failed to startup successfully.')
@@ -30,7 +32,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
         function checkRequireFiles(testCase)
             % check that all the files required for unit tests exist
-            requiredFiles = {'INP_test_ts.mat', 'HCTSA_Bonn_EEG.mat', ...
+            requiredFiles = {'INP_unit_test.mat', 'HCTSA_Bonn_EEG.mat', ...
                 'HCTSA_catch22_expected.mat'};
             for i = 1:numel(requiredFiles)
                 testCase.fatalAssertTrue(exist(requiredFiles{i}, 'file') == 2, ...
@@ -72,13 +74,13 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             end
 
             % specify the input .mat file
-            inputFile = 'INP_test_ts.mat';
+            inputFile = 'INP_unit_test.mat';
 
             % call the TS_Init function in non-interactive mode
             try
                 TS_Init(inputFile, 'hctsa', false);
                 pass = true;
-            catch ME
+            catch
                 % catch any exceptions raised
                 pass = false;
             end
@@ -98,7 +100,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             try
                 featVector = TS_CalculateFeatureVector(x,false);
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_CalculateFeatureVector did not execute sucessfully.')
@@ -108,7 +110,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         end
 
         function test_TS_ComputeCatch22(testCase)
-            % test catch22 subset on 3 sample time series and compare to the expected output.
+            % test catch22 subset on 31 sample time series and compare to the expected output.
             % check if HCTSA_catch22.mat exists and delete if true. 
             % assumes that the TS_Init function works as expected from
             % previous unit test. 
@@ -116,11 +118,11 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             if exist('HCTSA_catch22.mat', 'file')
                 delete('HCTSA_catch22.mat')
             end
-            TS_Init('INP_test_ts.mat','catch22',false,'HCTSA_catch22.mat');
+            TS_Init('INP_unit_test.mat','catch22',false,'HCTSA_catch22.mat');
             try
                 TS_Compute(false, [], [], 'missing', 'HCTSA_catch22.mat');
                 pass = true;
-            catch ME
+            catch
                 % catch any exceptions raised
                 pass = false;
             end
@@ -135,11 +137,11 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         end
 
         function test_TS_ComputeHCTSA(testCase)
-            % test the entire feature set on 3 sample time series
+            % test the entire feature set on 1 sample time series
             try
-                TS_Compute(false, [], [], 'missing', '', 'minimal');
+                TS_Compute(false, [], [], 'missing', '', false );
                 pass = true;
-            catch ME
+            catch
                 % catch any exceptions raised
                 pass = false;
             end
@@ -158,7 +160,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             % (2) Check the size of the output
             
             num_ts = size(actual_output, 1);
-            testCase.verifyEqual(num_ts, 3, 'Expected 3 time series.')
+            testCase.verifyEqual(num_ts, 1, 'Expected 1 time series.')
 
 
             % (3) Compare actual output to expected output.
@@ -171,13 +173,15 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_TS_InspectQuality(testCase)
             % simple check of whether or not the function runs. 
             try
-                TS_InspectQuality('summary', 'HCTSA_Bonn_EEG.mat');
+                out = TS_InspectQuality('summary', 'HCTSA_Bonn_EEG.mat');
                 close()
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_InspectQuality did not execute sucessfully.')
+            % generate summary report of errors
+
         end
 
         function test_TS_Normalize(testCase)
@@ -189,7 +193,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             try
                 TS_Normalize('', [], 'HCTSA_Bonn_EEG.mat');
                 pass = true;
-            catch ME
+            catch
                  pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_Compute did not execute sucessfully for hctsa set.')
@@ -206,7 +210,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_PlotTimeSeries('HCTSA_Bonn_EEG.mat')
                 close()
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
 
@@ -220,7 +224,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_PlotDataMatrix('whatData','HCTSA_Bonn_EEG_N.mat') % uses norm. data
                 close()
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
 
@@ -240,7 +244,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 [IDs_locDep,IDs_notLocDep] = TS_GetIDs('locdep','HCTSA_Bonn_EEG.mat','ops','Keywords');
                 TS_Subset('HCTSA_Bonn_EEG.mat',[],IDs_notLocDep,true,newFilteredMatName);
                 pass = true;
-            catch ME
+            catch
                 % 
                 pass = false;
             end
@@ -262,7 +266,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_PlotLowDim('HCTSA_Bonn_EEG_N.mat', 'tsne')
                 close()
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_PlotLowDim did not execute sucessfully.');
@@ -273,7 +277,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             try
                 TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'eyesOpen', 'seizure'});
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_LabelGroups did not execute sucessfully.');
@@ -287,7 +291,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             try
                 cfnParams = GiveMeDefaultClassificationParams('HCTSA_Bonn_EEG_N.mat');
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'GiveMeDefaultClassificationParams did not execute sucessfully.');
@@ -317,7 +321,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             try
                 TS_Classify('HCTSA_Bonn_EEG_N.mat', struct(), '', doPlot=false);
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_Classify did not execute sucessfully with default params.');
@@ -328,7 +332,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             try
                 TS_Classify('HCTSA_Bonn_EEG_N.mat', struct(), numNulls, doPlot=false);
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_Classify did not execute sucessfully with num nulls setting.');
@@ -346,7 +350,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_CompareFeatureSets('HCTSA_Bonn_EEG_N.mat',cfnParams);
                 close();
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_CompareFeatureSets did not execute sucessfully.');
@@ -362,7 +366,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_ClassifyLowDim('HCTSA_Bonn_EEG_N.mat', cfnParams, 5, false);
                 close();
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_ClassifyLowDim did not execute sucessfully.');
@@ -375,7 +379,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_TopFeatures('HCTSA_Bonn_EEG_N.mat','classification', struct(), 'whatPlots',{'histogram'});
                 close();
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_TopFeatures did not execute sucessfully.');
@@ -388,7 +392,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_FeatureSummary(95, 'HCTSA_Bonn_EEG_N.mat', true, false);
                 close();
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_FeatureSummary did not execute sucessfully.');
@@ -400,7 +404,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_SimSearch('whatData', 'HCTSA_Bonn_EEG_N.mat');
                 close();
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_SimSearch did not execute sucessfully.');
@@ -411,7 +415,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_SimSearch('whatData', 'HCTSA_Bonn_EEG_N.mat', 'targetID', 30,'whatPlots',{'network'}, 'tsOrOps', 'ops');
                 close();
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_SimSearch network visualisation did not execute sucessfully.');
@@ -425,7 +429,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 TS_SingleFeature('HCTSA_Bonn_EEG_N.mat', opID, makeViolin);
                 close(); % close out the opened figure
                 pass = true;
-            catch ME
+            catch
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_SingleFeature did not execute sucessfully.');
