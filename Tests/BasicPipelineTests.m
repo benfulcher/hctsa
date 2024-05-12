@@ -108,7 +108,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             fs = 100;
             header = sprintf('\n  -------HCTSA Execution Time Benchmarks-------   \n');
             testCase.writeToLog(header);
-            
+
             for i = 1:length(lengths)
                 N = lengths(i);
                 t = (0:N-1)/fs;
@@ -153,7 +153,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             % compare to expected output
             actual_output = load('HCTSA_catch22.mat', 'TS_DataMat').TS_DataMat;
             expected_output = load('HCTSA_catch22_expected.mat', 'TS_DataMat').TS_DataMat;
-            testCase.verifyEqual(actual_output, expected_output, 'Expected output != actual output, catch22.', "RelTol",0.1)
+            testCase.verifyEqual(actual_output, expected_output, 'Expected output != actual output, catch22.', "RelTol", 0.1)
 
         end
 
@@ -187,9 +187,12 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             testCase.writeToLog(header)
             quality_labels_names = {'successfully computed features','fatal errors','NaNs','positive infinities',...
                 'negative infinities','imaginary values','empty outputs','non-existent features'};
-
+            
+            ops_all = load("HCTSA.mat", "Operations").Operations;
+            num_ops_total = size(ops_all, 1);
             for i = 1:length(quality_labels_counts)
-                message = sprintf("%s: %d", quality_labels_names{i}, quality_labels_counts(i));
+                percentage_op = (quality_labels_counts(i) / num_ops_total) * 100.0;
+               message = sprintf("%s: %d [%.2f%%]", quality_labels_names{i}, quality_labels_counts(i), percentage_op);
                 testCase.writeToLog(message);
             end
             testCase.writeToLog(testCase.footer)
