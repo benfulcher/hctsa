@@ -1,5 +1,9 @@
 classdef BasicPipelineTests < matlab.unittest.TestCase
 
+    properties
+        logFileName = 'custom_log.txt'
+    end
+
     methods(TestClassSetup)
 
         function runStartup(testCase)
@@ -51,16 +55,16 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 generatedFiles = {'HCTSA_catch22.mat', 'HCTSA_locDepFiltered.mat', ...
                     'HCTSA.mat', 'HCTSA_EEG_N.mat', 'HCTSA_Bonn_EEG.mat', ..., 
                     'HCTSA_Bonn_EEG_N.mat'};
+                % tidy up
+                close all;
+                % print summary table
+                testCase.printLogFile();
+                delete(testCase.logFileName);
                 for i = 1:numel(generatedFiles)
                     if exist(generatedFiles{i}, 'file') == 2
                     delete(generatedFiles{i});
                     end
                 end
-    
-                % tidy up
-                close all;
-                % print summary table
-                testCase.printLogTable();
          end
     end
     
@@ -97,22 +101,35 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         end
 
         function test_TS_CalculateFeatureVector(testCase)
-            % test that the function executes successfully
-            x = rand(500, 1); % random time series
-            try
-                featVector = TS_CalculateFeatureVector(x,false);
-                pass = true;
-            catch
-                pass = false;
+            % test three time series of varying lengths
+            lengths = [500, 1000, 5000];
+            f = 10;
+            fs = 100;
+
+            for i = 1:length(lengths)
+                N = lengths(i);
+                t = (0:N-1)/fs;
+                x = 1.0 * sin(2*pi*f*t);
+                x_noisy = x + 0.1 * randn(size(x));
+                try
+                    startTime = tic;
+                    featVector = TS_CalculateFeatureVector(x_noisy');
+                    executionTime = toc(startTime);
+                    pass = true;
+                catch
+                    pass = false;
+                end
+                %fprintf("Time taken: %d: %.4f seconds\n", lengths(i), exectutionTime)
+                message = sprintf("Noisy Sinusoid of length %d samples, time taken: %.4f seconds", lengths(i), executionTime);
+                testCase.writeToLog(message);
+                testCase.fatalAssertTrue(pass, 'TS_CalculateFeatureVector did not execute sucessfully.')
+                num_ts = size(featVector, 2);
+                testCase.verifyEqual(num_ts, 1, 'Feature vector output shape unexpected (not a vector).')
             end
-            testCase.fatalAssertTrue(pass, 'TS_CalculateFeatureVector did not execute sucessfully.')
-            % inspect output
-            num_ts = size(featVector, 2);
-            testCase.verifyEqual(num_ts, 1, 'Feature vector output shape unexpected (not a vector).')
         end
 
         function test_TS_ComputeCatch22(testCase)
-            % test catch22 subset on 31 sample time series and compare to the expected output.
+            % test catch22 subset on sample time series and compare to the expected output.
             % check if HCTSA_catch22.mat exists and delete if true. 
             % assumes that the TS_Init function works as expected from
             % previous unit test. 
@@ -165,14 +182,13 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
             quality_labels_names = {'successfully computed features','fatal errors','NaNs','positive infinities',...
                 'negative infinities','imaginary values','empty outputs','non-existent features'};
-            logFile = fopen('custom_log.txt', 'a');
+
             for i = 1:length(quality_labels_counts)
-                fprintf(logFile, "%s: %d\n", quality_labels_names{i}, quality_labels_counts(i));
+                message = sprintf("%s: %d", quality_labels_names{i}, quality_labels_counts(i));
+                testCase.writeToLog(message);
             end
-            fclose(logFile);
 
             % (2) Check the size of the output
-            
             num_ts = size(actual_output, 1);
             testCase.verifyEqual(num_ts, 1, 'Expected 1 time series.')
             
@@ -229,7 +245,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_TS_PlotDataMatrix(testCase)
             % basic check - does the function run
             try
-                TS_PlotDataMatrix('whatData','HCTSA_Bonn_EEG_N.mat') % uses norm. data
+                TS_PlotDataMatrix('whatData','HCTSA_Bonn_EEG_N.mat') % uses norm data
                 close()
                 pass = true;
             catch
@@ -249,7 +265,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             end
             try
                 % filter out location dependent features
-                [IDs_locDep,IDs_notLocDep] = TS_GetIDs('locdep','HCTSA_Bonn_EEG.mat','ops','Keywords');
+                [~,IDs_notLocDep] = TS_GetIDs('locdep','HCTSA_Bonn_EEG.mat','ops','Keywords');
                 TS_Subset('HCTSA_Bonn_EEG.mat',[],IDs_notLocDep,true,newFilteredMatName);
                 pass = true;
             catch
@@ -446,34 +462,58 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
     end
 
     methods(Access = private)
-        function printLogTable(testCase)
-            logFile = fopen('custom_log.txt', 'r');
-            logData = textscan(logFile, '%s %d', 'Delimiter', ':');
+        function writeToLog(testCase, message)
+            logFile = fopen(testCase.logFileName, 'a');
+            fprintf(logFile, '%s\n', message);
             fclose(logFile);
-    
-            labels = logData{1};
-            counts = logData{2};
-    
-            % Print header
+        end
+
+        function printLogFile(testCase)
+            logFile = fopen(testCase.logFileName, 'r');
+            logData = textscan(logFile, '%s', 'Delimiter', '\n');
+            fclose(logFile);
+
             fprintf('\n==============================================================\n');
-            fprintf('                    Unit Test Results                        \n');
+            fprintf('                    Custom Log Contents                      \n');
             fprintf('==============================================================\n\n');
-    
-            % Print table title
-            fprintf('              Noisy Sinusoid Benchmark Outputs              \n\n');
-    
-            % Print table header
-            fprintf('%-40s %10s\n', 'Output Type', 'Counts');
-            fprintf('%-40s %10s\n', '----------------------------------------', '----------');
-    
-            % Print table rows
-            for i = 1:length(labels)
-                fprintf('%-40s %10d\n', labels{i}, counts(i));
+            
+            for i = 1:length(logData{1})
+                fprintf('%s\n', logData{1}{i});
             end
-    
-            % Print footer
+            
             fprintf('==============================================================\n');
         end
     end
+
+    % methods(Access = private)
+    %     function printLogTable(testCase)
+    %         logFile = fopen('custom_log.txt', 'r');
+    %         logData = textscan(logFile, '%s %d', 'Delimiter', ':');
+    %         fclose(logFile);
+    % 
+    %         labels = logData{1};
+    %         counts = logData{2};
+    % 
+    %         % Print header
+    %         fprintf('\n==============================================================\n');
+    %         fprintf('                    Unit Test Results                        \n');
+    %         fprintf('==============================================================\n\n');
+    % 
+    %         % Print table title
+    %         fprintf('              Noisy Sinusoid Benchmark Outputs              \n\n');
+    % 
+    %         % Print table header
+    %         fprintf('%-40s %10s\n', 'Output Type', 'Counts');
+    %         fprintf('%-40s %10s\n', '----------------------------------------', '----------');
+    % 
+    %         % Print table rows
+    %         for i = 1:length(labels)
+    %             fprintf('%-40s %10d\n', labels{i}, counts(i));
+    %         end
+    % 
+    %         % Print footer
+    %         fprintf('==============================================================\n');
+    %     end
+    % end
     
 end
