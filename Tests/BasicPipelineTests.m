@@ -2,6 +2,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
     properties
         logFileName = 'custom_log.txt'
+        failedOpFileName = 'failed_operations_benchmark.txt'
         footer = sprintf('==============================================================\n');
     end
 
@@ -200,7 +201,12 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             % (2) Check the size of the output
             num_ts = size(actual_output, 1);
             testCase.verifyEqual(num_ts, 1, 'Expected 1 time series.')
-            
+
+            % (3) Write all fatal error operations
+            quality_labels = load("HCTSA.mat", "TS_Quality").TS_Quality;
+            fatal_error_ops_ids = quality_labels == 1;
+            fatal_error_ops_table = ops_all(fatal_error_ops_ids, :);
+            writetable(fatal_error_ops_table, testCase.failedOpFileName);
         end
 
         function test_TS_InspectQuality(testCase)
@@ -485,44 +491,18 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             fprintf('\n==============================================================\n');
             fprintf('                    Unit Test Log                      \n');
             fprintf('==============================================================\n\n');
-            
+            % print the contents of the custom log file
             for i = 1:length(logData{1})
                 fprintf('%s\n', logData{1}{i});
             end
-            
+            % print the table of fatal error operations
+            fprintf('\n==============================================================\n');
+            fprintf('      Noisy Sinusoid Benchmark Fatal Error Summary               \n');
+            fprintf('==============================================================\n\n');
+            failed_operations = readtable(testCase.failedOpFileName);
+            disp(failed_operations);
+  
         end
     end
 
-    % methods(Access = private)
-    %     function printLogTable(testCase)
-    %         logFile = fopen('custom_log.txt', 'r');
-    %         logData = textscan(logFile, '%s %d', 'Delimiter', ':');
-    %         fclose(logFile);
-    % 
-    %         labels = logData{1};
-    %         counts = logData{2};
-    % 
-    %         % Print header
-    %         fprintf('\n==============================================================\n');
-    %         fprintf('                    Unit Test Results                        \n');
-    %         fprintf('==============================================================\n\n');
-    % 
-    %         % Print table title
-    %         fprintf('              Noisy Sinusoid Benchmark Outputs              \n\n');
-    % 
-    %         % Print tabidine
-    % le header
-    %         fprintf('%-40s %10s\n', 'Output Type', 'Counts');
-    %         fprintf('%-40s %10s\n', '----------------------------------------', '----------');
-    % 
-    %         % Print table rows
-    %         for i = 1:length(labels)
-    %             fprintf('%-40s %10d\n', labels{i}, counts(i));
-    %         end
-    % 
-    %         % Print footer
-    %         fprintf('==============================================================\n');
-    %     end
-    % end
-    
 end
