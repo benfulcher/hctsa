@@ -1,5 +1,5 @@
 classdef BasicPipelineTests < matlab.unittest.TestCase
-    
+
     methods(TestClassSetup)
 
         function runStartup(testCase)
@@ -57,9 +57,11 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                     end
                 end
     
-                % close any opened figures
+                % tidy up
                 close all;
-           end
+                % print summary table
+                testCase.printLogTable();
+         end
     end
     
     methods(Test)
@@ -139,7 +141,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_TS_ComputeHCTSA(testCase)
             % test the entire feature set on 1 sample time series
             try
-                TS_Compute(false, [], [], 'missing', '', false );
+                TS_Compute(false, [], [], 'missing', '', false);
                 pass = true;
             catch
                 % catch any exceptions raised
@@ -150,30 +152,36 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
             % run basic checks on the output
             actual_output = load("HCTSA.mat", "TS_DataMat").TS_DataMat;
+            quality_labels = load("HCTSA.mat", "TS_Quality").TS_Quality;
 
-            % (1) Check that the output contains numerics (not NaNs) -
-            % which would indicate that features values weren't computed or
-            % filled in.
+            % (1) Check that the output contains numerics (not NaNs)
             testCase.verifyFalse(all(isnan(actual_output), 'all'), 'TS_DataMat contains all NaNs. Features not computed.')
             
+            % (2) Check the quality labels
+            quality_labels_counts = zeros(1, 8);
+            for i = 0:7
+                quality_labels_counts(i+1) = length(find(quality_labels == i));
+            end
+
+            quality_labels_names = {'successfully computed features','fatal errors','NaNs','positive infinities',...
+                'negative infinities','imaginary values','empty outputs','non-existent features'};
+            logFile = fopen('custom_log.txt', 'a');
+            for i = 1:length(quality_labels_counts)
+                fprintf(logFile, "%s: %d\n", quality_labels_names{i}, quality_labels_counts(i));
+            end
+            fclose(logFile);
 
             % (2) Check the size of the output
             
             num_ts = size(actual_output, 1);
             testCase.verifyEqual(num_ts, 1, 'Expected 1 time series.')
-
-
-            % (3) Compare actual output to expected output.
-            % load in benchmark values
-            %expected_output = load('HCTSA_expected.mat', 'TS_DataMat').TS_DataMat
-            %testCase.verifyEqual(actual_output, expected_output, 'Expected output not equal to actual output on test TS.', "RelTol",0.1)
             
         end
 
         function test_TS_InspectQuality(testCase)
             % simple check of whether or not the function runs. 
             try
-                out = TS_InspectQuality('summary', 'HCTSA_Bonn_EEG.mat');
+                TS_InspectQuality('summary', 'HCTSA_Bonn_EEG.mat');
                 close()
                 pass = true;
             catch
@@ -435,6 +443,19 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             testCase.fatalAssertTrue(pass, 'TS_SingleFeature did not execute sucessfully.');
         end
 
+    end
+
+    methods(Access = private)
+        function printLogTable(testCase)
+            logFile = fopen('custom_log.txt', 'r');
+            logData = textscan(logFile, '%s %d', 'Delimiter', ':');
+            fclose(logFile);
+    
+            labels = logData{1};
+            counts = logData{2};
+    
+            table(labels, counts)
+        end
     end
     
 end
