@@ -20,6 +20,12 @@
             uses: matlab-actions/run-command@v2
             with:
               command: install(true)
+          - name: Build and Install TISEAN (3.0.1)
+            run: |
+              cd Toolboxes/Tisean_3.0.1
+              sudo ./configure --prefix=/usr
+              sudo make
+              sudo make install
           - name: Run unit tests
             uses: matlab-actions/run-command@v2
             with:

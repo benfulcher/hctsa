@@ -62,6 +62,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 % print summary table
                 testCase.printLogFile();
                 delete(testCase.logFileName);
+                delete(testCase.failedOpFileName);
                 for i = 1:numel(generatedFiles)
                     if exist(generatedFiles{i}, 'file') == 2
                     delete(generatedFiles{i});
@@ -501,7 +502,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             fprintf('==============================================================\n\n');
             failed_operations = readtable(testCase.failedOpFileName);
             disp(failed_operations);
-  
+            
         end
     end
 
