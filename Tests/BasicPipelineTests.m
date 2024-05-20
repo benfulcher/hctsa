@@ -1,7 +1,7 @@
 classdef BasicPipelineTests < matlab.unittest.TestCase
 
     properties
-        logFileName = 'custom_log.txt'
+        logFileName = 'summary_log.txt'
         failedOpFileName = 'failed_operations_benchmark.txt'
         footer = sprintf('==============================================================\n');
     end
@@ -36,7 +36,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             testCase.fatalAssertTrue(doesDuplicateExist, 'Duplicated HCTSA mat file not found.')
         end          
 
-        function checkRequireFiles(testCase)
+        function checkRequiredFiles(testCase)
             % check that all the files required for unit tests exist
             requiredFiles = {'INP_unit_test.mat', 'HCTSA_Bonn_EEG.mat', ...
                 'HCTSA_catch22_expected.mat'};
