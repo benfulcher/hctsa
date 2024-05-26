@@ -91,7 +91,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Plot two-dimensional representation of the data using TS_Plot2d:
-f = TS_Plot2d(lowDimComponents,TimeSeries,componentLabels,annotateParams,showDist,cfnParams);
+f = TS_Plot2d(lowDimComponents,TimeSeries,componentLabels,annotateParams,showDist,cfnParams); 
 
 %-------------------------------------------------------------------------------
 % Clear output

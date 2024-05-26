@@ -9,8 +9,6 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
     methods(TestClassSetup)
 
         function runStartup(testCase)
-            % run the startup script before executing the tests to ensure
-            % that all paths and toolboxes are available
             try
                 run("../startup.m")
                 pass = true;
@@ -25,15 +23,12 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             duplicatedFileName = 'HCTSA_Bonn_EEG.mat';
             originalFileName = 'HCTSA_Bonn_EEG_OG.mat';
 
-            % check original exists
             doesOGExist = exist(originalFileName, 'file') == 2;
             testCase.fatalAssertTrue(doesOGExist, 'Original HCTSA mat file not found.')
         
-            % make a copy 
             copyfile(originalFileName, duplicatedFileName);
-            % check for duplicated file
             doesDuplicateExist = exist(duplicatedFileName, 'file') == 2;
-            testCase.fatalAssertTrue(doesDuplicateExist, 'Duplicated HCTSA mat file not found.')
+            testCase.fatalAssertTrue(doesDuplicateExist, 'Duplicated HCTSA .mat file not found.')
         end          
 
         function checkRequiredFiles(testCase)
@@ -48,9 +43,6 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
       
     end
     
-    methods(TestMethodSetup)
-    end
-
     methods(TestClassTeardown)
         % clean up any remaining artifcats after unit tests have finished. 
          function cleanupTestClass(testCase)
@@ -65,7 +57,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 delete(testCase.failedOpFileName);
                 for i = 1:numel(generatedFiles)
                     if exist(generatedFiles{i}, 'file') == 2
-                    delete(generatedFiles{i});
+                        delete(generatedFiles{i});
                     end
                 end
          end
@@ -220,7 +212,6 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'TS_InspectQuality did not execute sucessfully.')
-            % generate summary report of errors
 
         end
 
@@ -325,8 +316,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
         function test_GiveMeDefaultClassificationParams(testCase)
             % test the default classification params when using different
-            % labels
-            % (2 class problem)
+            % labels (2 class problem)
             TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'eyesOpen', 'eyesClosed'});
             try
                 cfnParams = GiveMeDefaultClassificationParams('HCTSA_Bonn_EEG_N.mat');
