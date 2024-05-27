@@ -117,14 +117,14 @@ switch amiMethod
 case {'std1','std2','quantiles','even'}
     % histogram-based methods using my naive implementation in CO_Histogram
     for i = 1:numRepeats
-        amis(i) = CO_HistogramAMI(y+noiseRange(i)*noise,tau,amiMethod,extraParam);
+        amis(i) = CO_HistogramAMI(y + noiseRange(i)*noise,tau,amiMethod,extraParam);
         if isnan(amis(i))
             error('Error computing AMI: Time series too short (?)');
         end
     end
 case {'gaussian','kernel','kraskov1','kraskov2'}
     for i = 1:numRepeats
-        amis(i) = IN_AutoMutualInfo(y+noiseRange(i)*noise,tau,amiMethod,extraParam);
+        amis(i) = IN_AutoMutualInfo(y + noiseRange(i)*noise,tau,amiMethod,extraParam);
         if isnan(amis(i))
             error('Error computing AMI: Time series too short (?)');
         end
@@ -136,7 +136,7 @@ end
 %-------------------------------------------------------------------------------
 
 % Proportion decreases:
-out.pdec = sum(diff(amis) < 0)/(numRepeats-1);
+out.pdec = sum(diff(amis) < 0)/(numRepeats - 1);
 
 % Mean change in AMI:
 out.meanch = mean(diff(amis));
@@ -156,7 +156,7 @@ end
 noiseLevels = [0.5,1,1.5,2];
 for i = 1:length(noiseLevels)
     out.(sprintf('ami_at_%u',noiseLevels(i)*10)) = ...
-                        amis(find(noiseRange>=noiseLevels(i),1,'first'));
+            amis(find(noiseRange >= noiseLevels(i),1,'first'));
 end
 
 % Count number of times the AMI function crosses its mean

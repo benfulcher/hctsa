@@ -117,7 +117,7 @@ classify_fn = GiveMeCfn(criterion,numClasses,whatLoss,reWeight);
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
 FS_timer = tic;
-fprintf(1,['Performing greedy forward feature selection using ''%s''...\n'],criterion);
+fprintf(1,'Performing greedy forward feature selection using ''%s''...\n',criterion);
 
 opts = statset('display','iter');
 % classify_fn = @(XTrain,yTrain,XTest,yTest) 1 - GiveMeCfn(criterion,XTrain,yTrain,XTest,yTest,numClasses);
