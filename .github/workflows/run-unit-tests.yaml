@@ -30,3 +30,8 @@
             uses: matlab-actions/run-command@v2
             with:
               command: cd Tests; results = runtests('BasicPipelineTests.m'); assertSuccess(results)
+          - name: Upload logs
+            uses: actions/upload-artifact@v4
+            with:
+              name: logfiles
+              path: Tests/*.txt

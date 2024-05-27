@@ -1,9 +1,17 @@
 classdef BasicPipelineTests < matlab.unittest.TestCase
 
     properties
-        logFileName = 'summary_log.txt'
-        failedOpFileName = 'failed_operations_benchmark.txt'
-        footer = sprintf('==============================================================\n');
+        % log outputs
+        logFileName = 'summary_log.txt';
+        failedOpFileName = 'failed_operations_benchmark.txt';
+        footer = [repmat('=', 1, 62), '\n'];
+        % benchmarking files
+        precomputedMatNameOG = 'HCTSA_Bonn_EEG_OG.mat';
+        precomputedMatName = 'HCTSA_Bonn_EEG.mat';
+        precomputedMatNormName = 'HCTSA_Bonn_EEG_N.mat'
+        precomputedCatch22Mat = 'HCTSA_catch22_expected.mat';
+        timeSeriesINP = 'INP_unit_test.mat';
+        requiredFiles;
     end
 
     methods(TestClassSetup)
@@ -16,12 +24,15 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 pass = false;
             end
             testCase.fatalAssertTrue(pass, 'HCTSA failed to startup successfully.')
+            % set the required files for benchmarking
+            testCase.requiredFiles = {testCase.timeSeriesINP, testCase.precomputedMatNameOG, testCase.precomputedCatch22Mat};
+            
         end
 
         function makeCopyofMat(testCase)
             % make a copy of the base .mat file
-            duplicatedFileName = 'HCTSA_Bonn_EEG.mat';
-            originalFileName = 'HCTSA_Bonn_EEG_OG.mat';
+            duplicatedFileName = testCase.precomputedMatName;
+            originalFileName = testCase.precomputedMatNameOG;
 
             doesOGExist = exist(originalFileName, 'file') == 2;
             testCase.fatalAssertTrue(doesOGExist, 'Original HCTSA mat file not found.')
@@ -33,33 +44,33 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
         function checkRequiredFiles(testCase)
             % check that all the files required for unit tests exist
-            requiredFiles = {'INP_unit_test.mat', 'HCTSA_Bonn_EEG.mat', ...
-                'HCTSA_catch22_expected.mat'};
-            for i = 1:numel(requiredFiles)
-                testCase.fatalAssertTrue(exist(requiredFiles{i}, 'file') == 2, ...
-                    sprintf('Required file "%s" does not exist.', requiredFiles{i}));
+            req_files = testCase.requiredFiles;
+            for i = 1:numel(req_files)
+                testCase.fatalAssertTrue(exist(req_files{i}, 'file') == 2, ...
+                    sprintf('Required file "%s" does not exist.', req_files{i}));
             end
         end
-      
+
     end
     
     methods(TestClassTeardown)
         % clean up any remaining artifcats after unit tests have finished. 
          function cleanupTestClass(testCase)
-                generatedFiles = {'HCTSA_catch22.mat', 'HCTSA_locDepFiltered.mat', ...
-                    'HCTSA.mat', 'HCTSA_EEG_N.mat', 'HCTSA_Bonn_EEG.mat', ..., 
-                    'HCTSA_Bonn_EEG_N.mat'};
+                allMatFiles = dir('*.mat');
+                allMatFiles = {allMatFiles.name};
+                filesToDelete = setdiff(allMatFiles, testCase.requiredFiles);
+                for i = 1:numel(filesToDelete)
+                    if exist(filesToDelete{i}, 'file') == 2
+                        delete(filesToDelete{i});
+                    end
+                end
                 % tidy up
                 close all;
                 % print summary table
                 testCase.printLogFile();
-                delete(testCase.logFileName);
-                delete(testCase.failedOpFileName);
-                for i = 1:numel(generatedFiles)
-                    if exist(generatedFiles{i}, 'file') == 2
-                        delete(generatedFiles{i});
-                    end
-                end
+                % delete log files
+                %delete(testCase.logFileName);
+                %delete(testCase.failedOpFileName);
          end
     end
     
@@ -75,7 +86,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             end
 
             % specify the input .mat file
-            inputFile = 'INP_unit_test.mat';
+            inputFile = testCase.timeSeriesINP;
 
             % call the TS_Init function in non-interactive mode
             try
@@ -129,13 +140,14 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             % check if HCTSA_catch22.mat exists and delete if true. 
             % assumes that the TS_Init function works as expected from
             % previous unit test. 
+            matName = 'HCTSA_catch22.mat';
 
-            if exist('HCTSA_catch22.mat', 'file')
-                delete('HCTSA_catch22.mat')
+            if exist(matName, 'file')
+                delete(matName)
             end
-            TS_Init('INP_unit_test.mat','catch22',false,'HCTSA_catch22.mat');
+            TS_Init(testCase.timeSeriesINP,'catch22',false,matName);
             try
-                TS_Compute(false, [], [], 'missing', 'HCTSA_catch22.mat');
+                TS_Compute(false, [], [], 'missing', matName);
                 pass = true;
             catch
                 % catch any exceptions raised
@@ -145,8 +157,8 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             testCase.fatalAssertTrue(pass, 'TS_Compute did not execute sucessfully for catch22 set.')
 
             % compare to expected output
-            actual_output = load('HCTSA_catch22.mat', 'TS_DataMat').TS_DataMat;
-            expected_output = load('HCTSA_catch22_expected.mat', 'TS_DataMat').TS_DataMat;
+            actual_output = load(matName, 'TS_DataMat').TS_DataMat;
+            expected_output = load(testCase.precomputedCatch22Mat, 'TS_DataMat').TS_DataMat;
             testCase.verifyEqual(actual_output, expected_output, 'Expected output != actual output, catch22.', "RelTol", 0.1)
 
         end
@@ -205,7 +217,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_TS_InspectQuality(testCase)
             % simple check of whether or not the function runs. 
             try
-                TS_InspectQuality('summary', 'HCTSA_Bonn_EEG.mat');
+                TS_InspectQuality('summary', testCase.precomputedMatName);
                 close()
                 pass = true;
             catch
@@ -217,12 +229,13 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
         function test_TS_Normalize(testCase)
             % check whether TS_Normalize executes successfully (w. default)
-            expectedOutputMatFile = 'HCTSA_Bonn_EEG_N.mat';
-            if exist(expectedOutputMatFile, 'file')
-                delete(expectedOutputMatFile);
+            expectedNormMatFile = testCase.precomputedMatNormName;
+
+            if exist(expectedNormMatFile, 'file')
+                delete(expectedNormMatFile);
             end
             try
-                TS_Normalize('', [], 'HCTSA_Bonn_EEG.mat');
+                TS_Normalize('', [], testCase.precomputedMatName);
                 pass = true;
             catch
                  pass = false;
@@ -230,7 +243,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             testCase.fatalAssertTrue(pass, 'TS_Compute did not execute sucessfully for hctsa set.')
 
             % check for generation of the normalized .mat file
-            fileExists = exist(expectedOutputMatFile, 'file') == 2;
+            fileExists = exist(expectedNormMatFile, 'file') == 2;
             testCase.fatalAssertTrue(fileExists, 'Normalized .mat file was not created');
 
         end
@@ -238,7 +251,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_TS_PlotTimeSeries(testCase)
             % basic check - does the function run
             try
-                TS_PlotTimeSeries('HCTSA_Bonn_EEG.mat')
+                TS_PlotTimeSeries(testCase.precomputedMatName)
                 close()
                 pass = true;
             catch
@@ -252,7 +265,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_TS_PlotDataMatrix(testCase)
             % basic check - does the function run
             try
-                TS_PlotDataMatrix('whatData','HCTSA_Bonn_EEG_N.mat') % uses norm data
+                TS_PlotDataMatrix('whatData', testCase.precomputedMatNormName) % uses norm data
                 close()
                 pass = true;
             catch
@@ -272,8 +285,8 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             end
             try
                 % filter out location dependent features
-                [~,IDs_notLocDep] = TS_GetIDs('locdep','HCTSA_Bonn_EEG.mat','ops','Keywords');
-                TS_Subset('HCTSA_Bonn_EEG.mat',[],IDs_notLocDep,true,newFilteredMatName);
+                [~,IDs_notLocDep] = TS_GetIDs('locdep',testCase.precomputedMatName,'ops','Keywords');
+                TS_Subset(testCase.precomputedMatName,[],IDs_notLocDep,true,newFilteredMatName);
                 pass = true;
             catch
                 % 
@@ -292,9 +305,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_TS_PlotLowDim(testCase)
             % basic check - does the function run without errors
             try
-                TS_PlotLowDim('HCTSA_Bonn_EEG_N.mat', 'pca')
+                TS_PlotLowDim(testCase.precomputedMatNormName, 'pca')
                 close()
-                TS_PlotLowDim('HCTSA_Bonn_EEG_N.mat', 'tsne')
+                TS_PlotLowDim(testCase.precomputedMatNormName, 'tsne')
                 close()
                 pass = true;
             catch
@@ -306,7 +319,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_TS_LabelGroups(testCase)
             % basic check - does the function run without errors
             try
-                TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'eyesOpen', 'seizure'});
+                TS_LabelGroups(testCase.precomputedMatNormName, {'eyesOpen', 'seizure'});
                 pass = true;
             catch
                 pass = false;
@@ -317,9 +330,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_GiveMeDefaultClassificationParams(testCase)
             % test the default classification params when using different
             % labels (2 class problem)
-            TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'eyesOpen', 'eyesClosed'});
+            TS_LabelGroups(testCase.precomputedMatNormName, {'eyesOpen', 'eyesClosed'});
             try
-                cfnParams = GiveMeDefaultClassificationParams('HCTSA_Bonn_EEG_N.mat');
+                cfnParams = GiveMeDefaultClassificationParams(testCase.precomputedMatNormName);
                 pass = true;
             catch
                 pass = false;
@@ -330,13 +343,13 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             testCase.verifyTrue(isTwoClasses, 'Expected 2 class problem for 2 labels.');
 
             % (5 class problem)
-            TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'eyesOpen', 'seizure', 'eyesClosed', 'epileptogenic', 'hippocampus'});
-            cfnParams = GiveMeDefaultClassificationParams('HCTSA_Bonn_EEG_N.mat');
+            TS_LabelGroups(testCase.precomputedMatNormName, {'eyesOpen', 'seizure', 'eyesClosed', 'epileptogenic', 'hippocampus'});
+            cfnParams = GiveMeDefaultClassificationParams(testCase.precomputedMatNormName);
             isFiveClasses = cfnParams.numClasses == 5;
             testCase.verifyTrue(isFiveClasses, 'Expected 5 class problem for 5 labels.');
 
             % check setting of fields
-            cfnParams = GiveMeDefaultClassificationParams('HCTSA_Bonn_EEG_N.mat');
+            cfnParams = GiveMeDefaultClassificationParams(testCase.precomputedMatNormName);
             cfnParams.numRepeats = 10;
             isNumRepeatsCorrect = cfnParams.numRepeats == 10;
             testCase.verifyTrue(isNumRepeatsCorrect, 'cfnParams num repeats not correctly set.');
@@ -347,9 +360,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
         function test_TS_Classify(testCase)
             % test default settings
-            TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'eyesOpen', 'seizure', 'eyesClosed', 'epileptogenic', 'hippocampus'});
+            TS_LabelGroups(testCase.precomputedMatNormName, {'eyesOpen', 'seizure', 'eyesClosed', 'epileptogenic', 'hippocampus'});
             try
-                TS_Classify('HCTSA_Bonn_EEG_N.mat', struct(), '', doPlot=false);
+                TS_Classify(testCase.precomputedMatNormName, struct(), '', doPlot=false);
                 pass = true;
             catch
                 pass = false;
@@ -357,10 +370,10 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             testCase.fatalAssertTrue(pass, 'TS_Classify did not execute sucessfully with default params.');
 
             % test setting of num nulls
-            TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'epileptogenic','hippocampus'});
+            TS_LabelGroups(testCase.precomputedMatNormName, {'epileptogenic','hippocampus'});
             numNulls = 10;
             try
-                TS_Classify('HCTSA_Bonn_EEG_N.mat', struct(), numNulls, doPlot=false);
+                TS_Classify(testCase.precomputedMatNormName, struct(), numNulls, doPlot=false);
                 pass = true;
             catch
                 pass = false;
@@ -370,14 +383,14 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
         function test_TS_CompareFeatureSets(testCase)
             % basic checks - does the function run without error
-            TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'epileptogenic','hippocampus'});
-            cfnParams = GiveMeDefaultClassificationParams('HCTSA_Bonn_EEG_N.mat');
+            TS_LabelGroups(testCase.precomputedMatNormName, {'epileptogenic','hippocampus'});
+            cfnParams = GiveMeDefaultClassificationParams(testCase.precomputedMatNormName);
             % use params for fast evaluation/basic checks for successful
             % execution
             cfnParams.numFolds = 2;
             cfnParams.numRepeats = 1;
             try
-                TS_CompareFeatureSets('HCTSA_Bonn_EEG_N.mat',cfnParams);
+                TS_CompareFeatureSets(testCase.precomputedMatNormName,cfnParams);
                 close();
                 pass = true;
             catch
@@ -388,12 +401,12 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
         function test_TS_ClassifyLowDim(testCase)
             % basic checks - does the function run without error
-            TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'epileptogenic','hippocampus'});
-            cfnParams = GiveMeDefaultClassificationParams('HCTSA_Bonn_EEG_N.mat');
+            TS_LabelGroups(testCase.precomputedMatNormName, {'epileptogenic','hippocampus'});
+            cfnParams = GiveMeDefaultClassificationParams(testCase.precomputedMatNormName);
             cfnParams.numFolds = 2;
             cfnParams.numRepeats = 1;
             try
-                TS_ClassifyLowDim('HCTSA_Bonn_EEG_N.mat', cfnParams, 5, false);
+                TS_ClassifyLowDim(testCase.precomputedMatNormName, cfnParams, 5, false);
                 close();
                 pass = true;
             catch
@@ -404,9 +417,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
         function test_TS_TopFeatures(testCase)
             % basic checks - does the function run without error
-            TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'epileptogenic','hippocampus'})
+            TS_LabelGroups(testCase.precomputedMatNormName, {'epileptogenic','hippocampus'})
             try
-                TS_TopFeatures('HCTSA_Bonn_EEG_N.mat','classification', struct(), 'whatPlots',{'histogram'});
+                TS_TopFeatures(testCase.precomputedMatNormName,'classification', struct(), 'whatPlots',{'histogram'});
                 close();
                 pass = true;
             catch
@@ -417,9 +430,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
         function test_TS_FeatureSummary(testCase)
             % basic checks - does the function run without error
-            TS_LabelGroups('HCTSA_Bonn_EEG_N.mat', {'epileptogenic','hippocampus'})
+            TS_LabelGroups(testCase.precomputedMatNormName, {'epileptogenic','hippocampus'})
             try
-                TS_FeatureSummary(95, 'HCTSA_Bonn_EEG_N.mat', true, false);
+                TS_FeatureSummary(95, testCase.precomputedMatNormName, true, false);
                 close();
                 pass = true;
             catch
@@ -431,7 +444,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
         function test_TS_SimSearch(testCase)
             % basic checks - does the function run without error
             try
-                TS_SimSearch('whatData', 'HCTSA_Bonn_EEG_N.mat');
+                TS_SimSearch('whatData', testCase.precomputedMatNormName);
                 close();
                 pass = true;
             catch
@@ -442,7 +455,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             % test network viz of op 30 neighbours
             try
                 % generate network visualisation for operation 30
-                TS_SimSearch('whatData', 'HCTSA_Bonn_EEG_N.mat', 'targetID', 30,'whatPlots',{'network'}, 'tsOrOps', 'ops');
+                TS_SimSearch('whatData', testCase.precomputedMatNormName, 'targetID', 30,'whatPlots',{'network'}, 'tsOrOps', 'ops');
                 close();
                 pass = true;
             catch
@@ -456,7 +469,7 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             opID = 500; % choose a random operation
             makeViolin = false;
             try
-                TS_SingleFeature('HCTSA_Bonn_EEG_N.mat', opID, makeViolin);
+                TS_SingleFeature(testCase.precomputedMatNormName, opID, makeViolin);
                 close(); % close out the opened figure
                 pass = true;
             catch
@@ -478,7 +491,6 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             logFile = fopen(testCase.logFileName, 'r');
             logData = textscan(logFile, '%s', 'Delimiter', '\n');
             fclose(logFile);
-
             fprintf('\n==============================================================\n');
             fprintf('                    Unit Test Log                      \n');
             fprintf('==============================================================\n\n');
