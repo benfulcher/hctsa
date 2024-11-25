@@ -45,7 +45,7 @@ function out = WL_coeffs(y, wname, level)
 
 % ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
-BF_CheckToolbox('wavelet_toolbox')
+BF_CheckToolbox('wavelet_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Check Inputs

@@ -58,7 +58,7 @@ function out = MF_steps_ahead(y,model,order,maxSteps)
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox')
+BF_CheckToolbox('identification_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Preliminaries

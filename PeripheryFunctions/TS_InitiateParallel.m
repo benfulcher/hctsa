@@ -37,9 +37,9 @@ end
 
 % Check a license is available:
 try
-    BF_CheckToolbox('parallel_computing_toolbox')
+    BF_CheckToolbox('distrib_computing_toolbox',true);
 catch
-    fprintf(1,['License for Parallel Computing Toolbox could not be initiated' ...
+    fprintf(1,['License for Parallel/Distributed Computing Toolbox could not be initiated' ...
                 ' -- cannot perform computations across multiple cores.\n']);
     success = false;
     return

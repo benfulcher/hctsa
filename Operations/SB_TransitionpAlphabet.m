@@ -52,7 +52,7 @@ function out = SB_TransitionpAlphabet(y,numGroups,tau)
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('curve_fitting_toolbox')
+BF_CheckToolbox('curve_fitting_toolbox');
 
 if nargin < 2 || isempty(numGroups)
     numGroups = (2:10); % compare across alphabet sizes from 2 to 10

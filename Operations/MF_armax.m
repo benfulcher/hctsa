@@ -53,7 +53,7 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox')
+BF_CheckToolbox('identification_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Prepare Inputs

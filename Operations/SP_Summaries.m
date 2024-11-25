@@ -69,7 +69,7 @@ function out = SP_Summaries(y,psdMeth,windowType,nf,doLogAbs)
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('curve_fitting_toolbox')
+BF_CheckToolbox('curve_fitting_toolbox');
 
 % ------------------------------------------------------------------------------
 % Check inputs, set defaults:

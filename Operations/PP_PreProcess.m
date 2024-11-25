@@ -193,7 +193,7 @@ nfields = length(fields);
 switch chooseBest
     case 'ar' % picks the *worst* fit to an AR(p) model
         %% Check that a System Identification Toolbox license is available:
-        BF_CheckToolbox('identification_toolbox')
+        BF_CheckToolbox('identification_toolbox');
 
         % order = 2; % should be set from inputs/defaults
         rmserrs = zeros(nfields,1);

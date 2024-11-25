@@ -44,7 +44,7 @@ function out = MF_ResidualAnalysis(e)
 % ------------------------------------------------------------------------------
 
 % Check that a System Identification Toolbox license is available (for spa):
-BF_CheckToolbox('identification_toolbox')
+BF_CheckToolbox('identification_toolbox');
 
 if size(e,2) > size(e,1)
     e = e'; % make sure residuals are a column vector

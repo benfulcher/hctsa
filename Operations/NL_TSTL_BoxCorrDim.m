@@ -1,7 +1,7 @@
-function out = NL_BoxCorrDim(y,numBins,embedParams)
-% NL_BoxCorrDim  Correlation dimension of a time series.
+function out = NL_TSTL_BoxCorrDim(y,numBins,embedParams)
+% NL_TSTL_BoxCorrDim  Correlation dimension of a time series.
 %
-% References TSTOOL code, corrdim, to estimate the correlation dimension of a
+% Uses TSTOOL code, corrdim, to estimate the correlation dimension of a
 % time-delay embedded time series using a box-counting approach.
 %
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
@@ -65,10 +65,10 @@ end
 % ------------------------------------------------------------------------------
 %% Embed the signal
 % ------------------------------------------------------------------------------
-% convert to embedded signal object for TSTOOL
+% Convert to embedded signal object for TSTOOL
 s = BF_Embed(y,embedParams{1},embedParams{2},1);
 
-if ~isa(s,'signal') && isnan(s); % embedding failed
+if ~isa(s,'signal') && isnan(s) % embedding failed
     error('Time-series embedding to signal class for TSTOOL failed')
 end
 

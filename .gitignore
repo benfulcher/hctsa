@@ -24,6 +24,7 @@ sql_settings.conf
 *.mexw64
 *.mexw64.manifest
 *.mexmaci64
+*.mexmaca64
 *.mexa64
 
 # Random stuff

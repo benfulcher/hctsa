@@ -47,7 +47,7 @@ function out = SY_VarRatioTest(y,periods,IIDs)
 % ------------------------------------------------------------------------------
 %% Check that an Econometrics Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('econometrics_toolbox')
+BF_CheckToolbox('econometrics_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:

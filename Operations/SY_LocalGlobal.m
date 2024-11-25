@@ -128,6 +128,8 @@ out.iqr = abs(1 - iqr(y(r))/iqr(y));
 out.skewness = abs(1 - skewness(y(r))/skewness(y)); % how far from true
 out.kurtosis = abs(1 - kurtosis(y(r))/kurtosis(y)); % how far from true
 out.ac1 = abs(1 - CO_AutoCorr(y(r),1,'Fourier')/CO_AutoCorr(y,1,'Fourier')); % how far from true
-out.sampen101 = PN_sampenc(y(r),1,0.1,1)/PN_sampenc(y,1,0.1,1);
+sampEn_struct_r = EN_SampEn(y(r),1,0.1);
+sampEn_struct = EN_SampEn(y,1,0.1);
+out.sampen101 = sampEn_struct_r.sampen1/sampEn_struct.sampen1;
 
 end

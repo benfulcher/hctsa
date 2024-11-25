@@ -56,7 +56,7 @@ doPlot = false; % plot outputs to screen
 % (1) Maximum number of bins, numBins
 if nargin < 2 || isempty(numBins)
     numBins = 50; % 50 points
-    fprintf(1,'Using a default of 50 bins per axis\n');
+    fprintf(1,'Using a default of 50 bins per axis.\n');
 end
 
 % (2) Set embedding parameters to defaults
@@ -273,7 +273,7 @@ function out = SUB_mch(logr,logN,prefix,out)
     function [m, b, meansqdev] = subsublinfit(x,y)
         p1 = polyfit(x,y,1);
         pfit = p1(1)*x + p1(2);
-        res = y-pfit;
+        res = y - pfit;
         m = p1(1); % gradient
         b = p1(2); % intercept
         meansqdev = mean(res.^2);
@@ -359,7 +359,7 @@ function out = SUB_bestm(logr,logNN,prefix,out)
 		x = logr(stptr(a):endptr(b));
 		y = logN(stptr(a):endptr(b))';
         p = polyfit(x,y,1);
-        pfit = p(1)*x+p(2);
+        pfit = p(1)*x + p(2);
         res = pfit - y;
 		% subout.meanabsres = mean(abs(res));
 		% subout.meansqres = mean(res.^2);

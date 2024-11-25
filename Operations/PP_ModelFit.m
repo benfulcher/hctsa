@@ -99,7 +99,7 @@ for i = 1:numFields
     switch model % SO MANY OPTIONS! ;-)
         case 'ar'
             %% Check that a System Identification Toolbox license is available
-            BF_CheckToolbox('identification_toolbox')
+            BF_CheckToolbox('identification_toolbox');
 
             data = zscore(data); % zscore the data from this preprocessing
             m = ar(data,order); % fit the model

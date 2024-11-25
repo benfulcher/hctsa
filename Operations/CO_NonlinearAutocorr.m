@@ -1,10 +1,9 @@
 function out = CO_NonlinearAutocorr(y,taus,doAbs)
 % CO_NonlinearAutocorr      A custom nonlinear autocorrelation of a time series.
 %
-% Nonlinear autocorrelations are of the form:
-% <x_i x_{i-\tau_1} x{i-\tau_2}...>
-% The usual two-point autocorrelations are
-% <x_i.x_{i-\tau}>
+% Nonlinear autocorrelations are of the form: <x_i x_{i-\tau_1} x{i-\tau_2}...>
+%
+% The usual two-point autocorrelations are: <x_i.x_{i-\tau}>
 %
 % Assumes that all the taus are much less than the length of the time
 % series, N, so that the means can be approximated as the sample means and the
@@ -12,25 +11,26 @@ function out = CO_NonlinearAutocorr(y,taus,doAbs)
 % the z-scored time series can simply be used straight-up.
 %
 %---INPUTS:
-% y  -- should be the z-scored time series (Nx1 vector)
+% y -- should be the z-scored time series (Nx1 vector)
 % taus -- should be a vector of the time delays as above (mx1 vector)
 %   e.g., [2] computes <x_i x_{i-2}>
 %   e.g., [1,2] computes <x_i x_{i-1} x_{i-2}>
 %   e.g., [1,1,3] computes <x_i x_{i-1}^2 x_{i-3}>
 %   e.g., [0,0,1] computes <x_i^3 x_{i-1}>
-% doAbs [opt] -- a boolean (0,1) -- if one, takes an absolute value before
+% doAbs [opt] -- a boolean (true/false) -- if true, takes an absolute value before
 %                taking the final mean -- useful for an odd number of
 %                contributions to the sum. Default is to do this for odd
 %                numbers anyway, if not specified.
 %
 %---NOTES:
 % (*) For odd numbers of regressions (i.e., even number length
-%         taus vectors) the result will be near zero due to fluctuations
-%         below the mean; even for highly-correlated signals. (doAbs)
+%         taus vectors) the result will be near zero (for reversible processes
+%         due to fluctuations about the mean; even for highly-correlated signals. (doAbs)
 %
 % (*) doAbs = true is really a different operation that can't be compared with
 %         the values obtained from taking doAbs = false (i.e., for odd lengths
-%         of taus)
+%         of taus).
+%
 % (*) It can be helpful to look at nonlinearAC at each iteration.
 
 % ------------------------------------------------------------------------------
@@ -63,10 +63,11 @@ function out = CO_NonlinearAutocorr(y,taus,doAbs)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Check Inputs:
+%% Check inputs & set defaults:
 % ------------------------------------------------------------------------------
 if nargin < 3 || isempty(doAbs) % use default settings for doAbs
     if rem(length(taus),2) == 1
+        % Odd number of time-lags
         doAbs = false;
     else
         % Even number of time-lags

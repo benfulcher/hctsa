@@ -71,7 +71,7 @@ if noStatToolbox
     fprintf(1,'The Statistics and Machine Learning Toolbox is required for hctsa and needs to be installed.\n');
 end
 % For distributed computing
-noDistributedToolbox = BF_CheckToolbox('parallel_computing_toolbox',true,true);
+noDistributedToolbox = BF_CheckToolbox('distrib_computing_toolbox',true,true);
 if noDistributedToolbox
     fprintf(1,'Matlab''s Parallel Computing Toolbox is required for distributed calculation but is not installed.\n');
 end

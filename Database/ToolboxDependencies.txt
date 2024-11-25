@@ -172,10 +172,10 @@ EXTERNAL TOOLBOXES (PROVIDED)
 
 Michael Small Package (provided)
 
-NL_BoxCorrDim.m
 NL_MS_LZcomplexity.m
 NL_MS_fnn.m
 NL_MS_nlpe.m
+NL_TSTL_BoxCorrDim.m
 NL_TSTL_PoincareSection.m
 NL_TSTL_ReturnTime.m
 NL_TSTL_TakensEstimator.m
@@ -194,7 +194,7 @@ TSTOOL Package (GPL; provided)
 CO_TSTL_AutoCorrMethod.m
 CO_TSTL_amutual.m
 CO_TSTL_amutual2.m
-NL_BoxCorrDim.m
+NL_TSTL_BoxCorrDim.m
 NL_CaosMethod.m
 NL_TSTL_FractalDimensions.m
 NL_TSTL_GPCorrSum.m
@@ -227,7 +227,7 @@ MF_GP_hyperparameters.m
 
 CRP Toolbox (GPL, provided)
 
-NL_BoxCorrDim.m
+NL_TSTL_BoxCorrDim.m
 NL_crptool_fnn.m
 
 HMM Toolbox (MIT License, provided)

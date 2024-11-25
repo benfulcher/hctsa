@@ -64,7 +64,7 @@ function out = MF_GARCHcompare(y,preProc,pr,qr,randomSeed,beVocal)
 % ------------------------------------------------------------------------------
 %% Check that an Econometrics Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('econometrics_toolbox')
+BF_CheckToolbox('econometrics_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Check inputs:
@@ -136,11 +136,11 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % (iii) Correlation in time series: autocorrelation
 % autocorrs_y = CO_AutoCorr(y,1:20);
 % autocorrs_var = CO_AutoCorr(y.^2,1:20);
-[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y,20,[],[]);
-[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2,20,[],[]);
+[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y,NumLags=20);
+[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2,NumLags=20);
 
 % (iv) Partial autocorrelation function: PACF
-[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y,20,[],[]);
+[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y,NumLags=20);
 
 % ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model

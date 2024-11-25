@@ -214,11 +214,11 @@ out.w_ac2 = CO_AutoCorr(w,2,'Fourier');
 out.w_tau = CO_FirstCrossing(w,'ac',0,'continuous');
 out.w_min = min(w);
 out.w_max = max(w);
+% fraction of time series length that walker crosses time series:
 out.w_propzcross = sum(w(1:end-1).*w(2:end) < 0) / (N-1);
-% fraction of time series length that walker crosses time series
 
 % (ii) Differences between the walk at signal
-out.sw_meanabsdiff = mean(abs(y-w));
+out.sw_meanabsdiff = mean(abs(y - w));
 out.sw_taudiff = CO_FirstCrossing(y,'ac',0,'continuous') - CO_FirstCrossing(w,'ac',0,'continuous');
 out.sw_stdrat = std(w)/std(y); % will be the same as w_std for z-scored signal
 out.sw_ac1rat = out.w_ac1/CO_AutoCorr(y,1);
@@ -230,7 +230,7 @@ out.sw_propcross = sum((w(1:end-1)-y(1:end-1)).*(w(2:end)-y(2:end)) < 0)/(N-1);
 % test from same distribution: Ansari-Bradley test
 % (this may not be valid given the dependence of w on y, and the
 % properties of the null hypothesis itself... But this is the name of the game!)
-[h, pval, stats] = ansaribradley(w,y);
+[~, pval] = ansaribradley(w,y);
 out.sw_ansarib_pval = pval; % p-value from the test
 % out.sw_ansarib_W = stats.W; % W (test statistic)
 % out.sw_ansarib_Wstar = stats.Wstar; % Approximate normal statistic
@@ -238,11 +238,11 @@ out.sw_ansarib_pval = pval; % p-value from the test
 
 r = linspace(min(min(y),min(w)),max(max(y),max(w)),200); % make range of ksdensity uniform across all subsegments
 dy = ksdensity(y,r); dw = ksdensity(w,r); % the kernel-smoothed distributions
-out.sw_distdiff = sum(abs(dy-dw));
+out.sw_distdiff = sum(abs(dy - dw));
 
 % (iii) Looking at residuals between time series and walker
 res = w - y;
-[h, pval] = runstest(res); % runs test
+[~, pval] = runstest(res); % runs test
 out.res_runstest = pval;
 out.res_swss5_1 = SY_SlidingWindow(res,'std','std',5,1); % sliding window stationarity
 out.res_ac1 = CO_AutoCorr(res,1); % auto correlation at lag-1

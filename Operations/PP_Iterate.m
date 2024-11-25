@@ -49,7 +49,7 @@ doPlot = false;
 % ------------------------------------------------------------------------------
 %% Check that a Curve-Fitting Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('curve_fitting_toolbox')
+BF_CheckToolbox('curve_fitting_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Preparation

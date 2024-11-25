@@ -45,7 +45,7 @@ function out = MF_CompareAR(y,orders,testHow)
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox')
+BF_CheckToolbox('identification_toolbox');
 
 % Preliminaries
 doPlot = false; % set to true to plot outputs

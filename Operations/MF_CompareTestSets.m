@@ -71,7 +71,7 @@ function out = MF_CompareTestSets(y,theModel,ord,subsetHow,samplep,steps,randomS
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox')
+BF_CheckToolbox('identification_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Preliminaries

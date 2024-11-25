@@ -56,7 +56,7 @@ function out = PD_PeriodicityWang(y)
 doPlot = false; % plot outputs to figure
 
 % Check that a Curve-Fitting Toolbox license is available (for the splines):
-BF_CheckToolbox('curve_fitting_toolbox')
+BF_CheckToolbox('curve_fitting_toolbox');
 
 % Check that the time series is z-scored:
 if ~BF_iszscored(y)
