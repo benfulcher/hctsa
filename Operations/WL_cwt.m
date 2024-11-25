@@ -59,7 +59,7 @@ end
 % ------------------------------------------------------------------------------
 % Preliminaries
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('wavelet_toolbox') % Check that a Wavelet Toolbox license is available:
+BF_CheckToolbox('wavelet_toolbox'); % Check that a Wavelet Toolbox license is available:
 doPlot = false; % plot outputs to figures
 N = length(y); % length of the time series
 

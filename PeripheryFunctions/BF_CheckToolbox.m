@@ -51,6 +51,7 @@ end
 
 %-------------------------------------------------------------------------------
 %% Get a more interpretable string for user feedback: theName
+%% (and for testing against text in matlab.addons.installedAddons)
 %-------------------------------------------------------------------------------
 switch theToolbox
 case 'statistics_toolbox'
@@ -72,6 +73,8 @@ case 'financial_toolbox'
 case 'database_toolbox'
     theName = 'Database Toolbox';
 case 'parallel_computing_toolbox'
+    theName = 'Parallel Computing Toolbox';
+case 'distrib_computing_toolbox'
     theName = 'Parallel Computing Toolbox';
 otherwise
     error('Unknown toolbox ''%s''.\n',theToolbox);
@@ -98,16 +101,15 @@ if infoMode
         outFlag = true;
     end
 else
-    % Want to use a license
+    % Want to use (and checkout) a license
     if ~haveToolbox
-        error('This function requires %s.',theName);
+        error('This function requires %s but you don''t have it installed'.',theName);
     end
 
     % 2. Check to see if there's an available license for this toolbox:
     [licenseFree,~] = license('checkout',theToolbox); % Attempt to check out a license
     if ~licenseFree
-        error(['This function requires %s but it is not installed ',...
-                    '(or I could not obtain a license for it).'],theName);
+        error('This function requires %s but I could not obtain a license for it).',theName);
     end
 end
 

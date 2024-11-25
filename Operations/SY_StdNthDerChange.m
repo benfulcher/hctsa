@@ -51,7 +51,7 @@ function out = SY_StdNthDerChange(y,maxd)
 
 
 % Check that a Curve-Fitting Toolbox license is available:
-BF_CheckToolbox('curve_fitting_toolbox')
+BF_CheckToolbox('curve_fitting_toolbox');
 
 doPlot = false; % plot outputs
 

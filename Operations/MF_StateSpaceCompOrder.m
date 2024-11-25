@@ -45,7 +45,7 @@ function out = MF_StateSpaceCompOrder(y,maxOrder)
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox')
+BF_CheckToolbox('identification_toolbox');
 
 % ------------------------------------------------------------------------------
 % Check inputs:

@@ -55,7 +55,7 @@ function out = MF_ARMA_orders(y,pr,qr)
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox')
+BF_CheckToolbox('identification_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Check Inputs

@@ -137,7 +137,7 @@ elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6),'spline') && ~isempty(s
     intp = str2double(detrndmeth(8));
 
     %% Check that a Curve-Fitting Toolbox license is available:
-    BF_CheckToolbox('curve_fitting_toolbox')
+    BF_CheckToolbox('curve_fitting_toolbox');
 
 	spline = spap2(nknots,intp,r,y); % just a single middle knot with cubic interpolants
 	y_spl = fnval(spline,1:N); % evaluate at the 1:N time intervals

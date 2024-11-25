@@ -40,7 +40,7 @@ function out = WL_fBM(y)
 % ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('wavelet_toolbox')
+BF_CheckToolbox('wavelet_toolbox');
 
 % Parameter estimation of fractional Brownian motion
 hest = wfbmesti(y);

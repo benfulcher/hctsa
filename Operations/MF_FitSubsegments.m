@@ -209,7 +209,7 @@ switch model
         % Return statistics on parameters and goodness of fit
 
         %% Check that a System Identification Toolbox license is available to run the 'ar' function:
-        BF_CheckToolbox('identification_toolbox')
+        BF_CheckToolbox('identification_toolbox');
 
         fpes = zeros(numPred,1);
         as = zeros(numPred,order+1);

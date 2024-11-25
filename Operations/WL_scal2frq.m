@@ -52,7 +52,7 @@ function out = WL_scal2frq(y, wname, amax, delta)
 % ------------------------------------------------------------------------------
 %% Check that a Wavelet Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('wavelet_toolbox')
+BF_CheckToolbox('wavelet_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Preliminaries

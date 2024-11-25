@@ -61,7 +61,7 @@ function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)
 % ------------------------------------------------------------------------------
 %% Check that a System Identification Toolbox license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox')
+BF_CheckToolbox('identification_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Check Inputs:

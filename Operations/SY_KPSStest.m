@@ -52,7 +52,7 @@ function out = SY_KPSStest(y,lags)
 % ------------------------------------------------------------------------------
 %% Check that an Econometrics license is available:
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('econometrics_toolbox')
+BF_CheckToolbox('econometrics_toolbox');
 
 %-------------------------------------------------------------------------------
 % Check inputs
