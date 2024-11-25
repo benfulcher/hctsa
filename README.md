@@ -27,13 +27,13 @@ To obtain the latest toolboxes (like the optimized _catch22_ faeture set) you sh
 
 Users _unfamiliar with git_ can instead download the repository by clicking the green "Code" button then "Download ZIP".
 
-Once downloaded, you can install _hctsa_ by running the `install.m` script (see [docs](https://hctsa-users.gitbook.io/hctsa-manual) for details).
+Once downloaded, you can install _hctsa_ by running the `install.m` script (see [docs](https://time-series-features.gitbook.io/hctsa-manual/) for details).
 
 <!-- We recommend working outside of the repository so that incremental updates can be pulled from the upstream repository. -->
 
 ## Documentation and Wiki &#x1F4D6;
 
-__Comprehensive documentation__ for _hctsa_, from getting started through to more advanced analyses is on [GitBook](https://hctsa-users.gitbook.io/hctsa-manual).
+__Comprehensive documentation__ for _hctsa_, from getting started through to more advanced analyses is on [GitBook](https://time-series-features.gitbook.io/hctsa-manual/).
 
 There is also alot of additional information on the [__wiki__](https://github.com/benfulcher/hctsa/wiki/), including:
 
