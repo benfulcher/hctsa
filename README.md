@@ -31,17 +31,17 @@ Once downloaded, you can install _hctsa_ by running the `install.m` script (see 
 
 <!-- We recommend working outside of the repository so that incremental updates can be pulled from the upstream repository. -->
 
-## Documentation and Wiki &#x1F4D6;
+## Documentation &#x1F4D6;
 
 __Comprehensive documentation__ for _hctsa_, from getting started through to more advanced analyses is on [GitBook](https://time-series-features.gitbook.io/hctsa-manual/).
 
-There is also alot of additional information on the [__wiki__](https://github.com/benfulcher/hctsa/wiki/), including:
+There is also alot of additional information in these docs, including:
 
 - :point_right: Information about alternative feature sets (including the much faster [catch22](https://github.com/DynamicsAndNeuralSystems/catch22)), and information about other time-series packages available in R, python, and Julia.
 - :wavy_dash: The accompanying time-series data archive for this project, [_CompEngine_](http://www.comp-engine.org).
 - :floppy_disk: Downloadable _hctsa_ feature matrices from time-series datasets with example workflows.
 - :computer: Resources for [distributing an _hctsa_ computation](https://github.com/benfulcher/distributed_hctsa) on a computing cluster.
-- :closed_book: A [list of publications](https://github.com/benfulcher/hctsa/wiki/Publications-using-hctsa) that have used _hctsa_ to address different research questions.
+- :closed_book: A list of publications that have used _hctsa_ to address different research questions.
 - :information_desk_person: Frequently asked questions about _hctsa_ and related feature-based time-series analyses.
 
 ## Acknowledgement :+1:
