@@ -7,6 +7,8 @@ function out = DN_CustomSkewness(y,whatSkew)
 % y, the input time series
 %
 % whatSkew, the skewness measure to calculate, either 'pearson' or 'bowley'
+%
+% cf. https://mathworld.wolfram.com/PearsonsSkewnessCoefficients.html
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -38,13 +40,16 @@ function out = DN_CustomSkewness(y,whatSkew)
 % ------------------------------------------------------------------------------
 
 switch whatSkew
-    case 'pearson'
-        out = (3*mean(y)-median(y))./std(y);
-
+    case 'pearsonMode'
+        % Pearson's First Skewness Coefficient: Pearson mode skewness
+        out = (mean(y) - DN_HistogramMode(y,'auto'))/std(y);
+    case {'pearson','pearsonMedian'}
+        % Pearson's Second Skewness Coefficient
+        out = 3*(mean(y) - median(y))/std(y);
     case 'bowley'
-        qs = quantile(y,[0.25, 0.5, 0.75]);
-        out = (qs(3)+qs(1) - 2*qs(2))./(qs(3)-qs(1));
         % Quartile skewness coefficient
+        qs = quantile(y,[0.25, 0.5, 0.75]);
+        out = (qs(3) + qs(1) - 2*qs(2))./(qs(3) - qs(1));
 
     otherwise
         error('Unknown skewness type ''%s''',whatSkew)
