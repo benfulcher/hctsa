@@ -112,7 +112,8 @@ if all(isnan(sampEns))
     end
     warning('Not enough samples (%u %s) to compute SampEn at multiple scales',...
                     length(y),ppText)
-    out = NaN; return
+    out = NaN;
+    return
 end
 
 if doPlot

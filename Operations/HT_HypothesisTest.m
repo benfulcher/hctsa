@@ -8,7 +8,7 @@ function p = HT_HypothesisTest(x,theTest)
 % x, the input time series
 %
 % theTest, the hypothesis test to perform:
-%           (i) sign test ('signtest'),
+%           (i) sign test ('signtest'), nonparametric test for the median of a population
 %           (ii) runs test ('runstest'),
 %           (iii) variance test ('vartest'),
 %           (iv) Z-test ('ztest'),

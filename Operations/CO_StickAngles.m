@@ -55,7 +55,7 @@ BF_CheckToolbox('signal_toolbox');
 %-------------------------------------------------------------------------------
 doPlot = 0; % whether to plot output
 
-ix = cell(2,1); % indicies for positive(1) and negative(2) entries of time series vector
+ix = cell(2,1); % indicies for positive(1) and negative(2) entries of time-series vector
 ix{1} = find(y >= 0); % bias here -- 'look up' if on 'ground'
 ix{2} = find(y < 0);
 
@@ -69,9 +69,9 @@ n = cellfun(@length,ix); % number of points in each category
 angles = cell(2,1); % stores the angles
 for j = 1:2
     angles{j} = zeros(n(j)-1,1);
-    for i = 1:n(j)-1
+    for i = 1:n(j) - 1
         % Compare to the next time series point with the same sign as the current one:
-        angles{j}(i) = (y(ix{j}(i+1))-y(ix{j}(i))) / (ix{j}(i+1)-ix{j}(i));
+        angles{j}(i) = (y(ix{j}(i+1)) - y(ix{j}(i))) / (ix{j}(i+1) - ix{j}(i));
     end
     angles{j} = atan(angles{j});
 end
@@ -112,7 +112,7 @@ ksx = linspace(min(allAngles),max(allAngles),200);
 if ~isempty(angles{1}) && ~isempty(angles{2})
     ksy1 = ksdensity(angles{1},ksx); % spans the range of full extent (of both positive and negative angles)
     ksy2 = ksdensity(angles{2},ksx); % spans the range of full extent (of both positive and negative angles)
-    out.pnsumabsdiff = sum(abs(ksy1-ksy2));
+    out.pnsumabsdiff = sum(abs(ksy1 - ksy2));
 else
     out.pnsumabsdiff = NaN;
 end
@@ -125,7 +125,7 @@ end
 if ~isempty(angles{1});
     maxdev = max(abs(angles{1}));
     ksy1 = ksdensity(angles{1},linspace(-maxdev,maxdev,201));
-    out.symks_p = sum(abs(ksy1(1:100)-fliplr(ksy1(102:end))));
+    out.symks_p = sum(abs(ksy1(1:100) - fliplr(ksy1(102:end))));
     out.ratmean_p = mean(angles{1}(angles{1}>0))/mean(angles{1}(angles{1}<0));
 else
     out.symks_p = NaN; out.ratmean_p = NaN;
@@ -134,14 +134,14 @@ end
 if ~isempty(angles{2})
     maxdev=max(abs(angles{2}));
     ksy2 = ksdensity(angles{2},linspace(-maxdev,maxdev,201));
-    out.symks_n = sum(abs(ksy2(1:100)-fliplr(ksy2(102:end))));
+    out.symks_n = sum(abs(ksy2(1:100) - fliplr(ksy2(102:end))));
     out.ratmean_n = mean(angles{2}(angles{2}>0))/mean(angles{2}(angles{2}<0));
 else
     out.symks_n = NaN; out.ratmean_n = NaN;
 end
 
 
-% z-score:
+%% z-score:
 zangles = cell(2,1);
 zangles{1} = zscore(angles{1});
 zangles{2} = zscore(angles{2});
