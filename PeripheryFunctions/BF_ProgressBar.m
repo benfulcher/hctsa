@@ -24,11 +24,11 @@ notTheChar = ' ';
 %-------------------------------------------------------------------------------
 %% Main
 %-------------------------------------------------------------------------------
-if isempty(progressBar) && ischar(progressProp) && strcmp(progressProp,'new')
+if isempty(progressBar) || (ischar(progressProp) && strcmp(progressProp,'new'))
     % Initialize progress bar
     progressBar = -1;
-elseif ~isempty(progressBar) && ischar(progressProp) && strcmp(progressProp,'close')
-    % Progress bar  - termination
+elseif ischar(progressProp) && strcmp(progressProp,'close')
+    % Progress bar - termination
     fprintf(1,'\n');
     clear('progressBar')
 elseif isnumeric(progressProp)
@@ -48,7 +48,7 @@ elseif isnumeric(progressProp)
     end
 else
     % Any other unexpected input
-    warning('Unexpected input ''%s''',progressProp);
+    warning('Unexpected input ''%s''.',progressProp);
     progressBar = [];
 end
 
