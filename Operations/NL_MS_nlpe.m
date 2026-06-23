@@ -83,6 +83,7 @@ if nargin < 4 || isempty(maxN)
     % with longer time series
     maxN = 5000;
 end
+%-------------------------------------------------------------------------------
 
 % nlpe can cause memory pains for long time series
 % Let's do this dirty cheat
@@ -98,11 +99,13 @@ if N < 20 % Short time series cause problems:
     out = NaN; return
 end
 
+%-------------------------------------------------------------------------------
 % Do false nearest neighbours to compute an appropriate embedding dimension, if needed
 if strcmp(de,'fnn')
     de = NL_MS_fnn(y,1:10,tau,5,1,1,0.05);
 end
 
+%-------------------------------------------------------------------------------
 % Run Michael Small's nonlinear prediction error code:
 res = MS_nlpe(y,de,tau); % residuals
 

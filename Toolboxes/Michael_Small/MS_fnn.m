@@ -67,7 +67,6 @@ for t=tau,
     %calculate the proportion fnn
     ifnn=sum((d1./d0)>th)/length(d0);
 
-    %disp
     % disp(['tau = ', int2str(t),', de = ',int2str(d),', nfnn = ',num2str(ifnn*100),'%']);
 
     px=[px ifnn];

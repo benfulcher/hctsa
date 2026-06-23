@@ -126,18 +126,20 @@ if ~isempty(angles{1});
     maxdev = max(abs(angles{1}));
     ksy1 = ksdensity(angles{1},linspace(-maxdev,maxdev,201));
     out.symks_p = sum(abs(ksy1(1:100) - fliplr(ksy1(102:end))));
-    out.ratmean_p = mean(angles{1}(angles{1}>0))/mean(angles{1}(angles{1}<0));
+    out.ratmean_p = mean(angles{1}(angles{1} > 0))/mean(angles{1}(angles{1} < 0));
 else
-    out.symks_p = NaN; out.ratmean_p = NaN;
+    out.symks_p = NaN;
+    out.ratmean_p = NaN;
 end
 
 if ~isempty(angles{2})
-    maxdev=max(abs(angles{2}));
+    maxdev = max(abs(angles{2}));
     ksy2 = ksdensity(angles{2},linspace(-maxdev,maxdev,201));
     out.symks_n = sum(abs(ksy2(1:100) - fliplr(ksy2(102:end))));
-    out.ratmean_n = mean(angles{2}(angles{2}>0))/mean(angles{2}(angles{2}<0));
+    out.ratmean_n = mean(angles{2}(angles{2} > 0))/mean(angles{2}(angles{2} < 0));
 else
-    out.symks_n = NaN; out.ratmean_n = NaN;
+    out.symks_n = NaN;
+    out.ratmean_n = NaN;
 end
 
 
