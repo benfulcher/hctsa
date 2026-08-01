@@ -122,23 +122,45 @@ end
 %-------------------------------------------------------------------------------
 % Calculate statistics of over-threshold events, looping over thresholds
 %-------------------------------------------------------------------------------
+% Break out of the loop as soon as too few points remain to be useful,
+% instead of computing statistics across the full threshold range and
+% trimming afterward: raising the threshold can only shrink the qualifying
+% set of points (never grow it), so once the "at least 2% of data included"
+% criterion fails (or too few points remain to form any interval), it will
+% keep failing for every higher threshold too -- continuing past that point
+% is pure wasted work.
+%
+% Also searches only within the previous threshold's qualifying indices
+% (rPrev) instead of rescanning the full series y at every threshold: since
+% the qualifying set only shrinks as the threshold rises, any index that
+% didn't qualify at a lower threshold can't qualify at a higher one either.
+% This also preserves ascending time-index order for free (logical indexing
+% preserves relative order), which matters because Dt_exc = diff(r) and the
+% median(r)/mean(r) stats below depend on r being in temporal order, not
+% sorted by value.
+%-------------------------------------------------------------------------------
+trimthr = 2; % percent
+
 msDt = zeros(length(thr),6); % mean, std, proportion_of_time_series_included,
                              % median of index relative to middle, mean,
                              % error
+rPrev = (1:N)'; % candidate index set, narrows each iteration
+numValid = 0;
 for i = 1:length(thr)
     th = thr(i); % the threshold
 
     % Construct a series consisting of inter-event intervals for parts
-    % of the time series exceeding the threshold, th (in a given direction)
-
+    % of the time series exceeding the threshold, th (in a given direction).
+    % Searches only the previous iteration's qualifying indices, rPrev:
     switch thresholdHow
     case 'abs' % look at absolute value deviations
-        r = find(abs(y) >= th);
+        r = rPrev(abs(y(rPrev)) >= th);
     case 'pos' % look at only positive deviations
-        r = find(y >= th);
+        r = rPrev(y(rPrev) >= th);
     case 'neg' % look at only negative deviations
-        r = find(y <= -th);
+        r = rPrev(y(rPrev) <= -th);
     end
+    rPrev = r; % narrower candidate set for the next (higher) threshold
 
     % The Dt (interval) time series of values exceeding threshold
     Dt_exc = diff(r);
@@ -146,42 +168,33 @@ for i = 1:length(thr)
     % ~~~~~~~~~~~~
     % Statistics on the interval time series:
     % ~~~~~~~~~~~~
-    msDt(i,1) = mean(Dt_exc); % the mean value of inter-event intervals
-    msDt(i,2) = std(Dt_exc)/sqrt(length(r)); % error on the mean
-    msDt(i,3) = length(Dt_exc)/tot*100; % this is just really measuring the distribution
-                                      % : the proportion of possible values
-                                      % that are actually used in
-                                      % calculation
+    meanDt = mean(Dt_exc); % the mean value of inter-event intervals
+    propIncluded = length(Dt_exc)/tot*100; % this is just really measuring the distribution
+                                            % : the proportion of possible values
+                                            % that are actually used in
+                                            % calculation
+
+    % Stop once too few events remain to say anything meaningful (Dt_exc
+    % empty/singleton -> NaN mean), or once statistical power is lacking
+    % (less than 2% of data included):
+    if isnan(meanDt) || propIncluded <= trimthr
+        break
+    end
+
+    numValid = numValid + 1;
+    msDt(numValid,1) = meanDt;
+    msDt(numValid,2) = std(Dt_exc)/sqrt(length(r)); % error on the mean
+    msDt(numValid,3) = propIncluded;
     % ~~~~~~~~~~~~
     % Statistics on the indices of over-threshold events:
     % ~~~~~~~~~~~~
     % The [x/(N/2)-1] rescales such that the middle index, N/2 => 0, and N maps to 1, 0 maps to -1.
-    msDt(i,4) = median(r)/(N/2)-1; % the median timing of events (relative to middle, N/2)
-    msDt(i,5) = mean(r)/(N/2)-1; % mean timing of events (relative to middle, N/2)
-    msDt(i,6) = std(r)/sqrt(length(r)); % variance of event timing
+    msDt(numValid,4) = median(r)/(N/2)-1; % the median timing of events (relative to middle, N/2)
+    msDt(numValid,5) = mean(r)/(N/2)-1; % mean timing of events (relative to middle, N/2)
+    msDt(numValid,6) = std(r)/sqrt(length(r)); % variance of event timing
 end
-
-% ------------------------------------------------------------------------------
-%% Trim
-% ------------------------------------------------------------------------------
-% NB: would be more efficient to catch this within the loop above
-
-% Trim off where the number of events is only one; hence the differenced
-% series returns NaN
-fbi = find(isnan(msDt(:,1)),1,'first'); % first bad index
-if ~isempty(fbi)
-    msDt = msDt(1:fbi-1,:);
-    thr = thr(1:fbi-1);
-end
-
-% Trim off where the statistic power is lacking: less than 2% of data
-% included
-trimthr = 2; % percent
-mj = find(msDt(:,3) > trimthr,1,'last');
-if ~isempty(mj)
-    msDt = msDt(1:mj,:);
-    thr = thr(1:mj);
-end
+msDt = msDt(1:numValid,:);
+thr = thr(1:numValid);
 
 % ------------------------------------------------------------------------------
 %% Plot output

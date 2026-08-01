@@ -491,6 +491,84 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % DN_OutlierInclude
+        %-------------------------------------------------------------
+        function test_DN_OutlierInclude_MatchesBruteForceLoop(testCase)
+            % DN_OutlierInclude used to loop across the full threshold range
+            % and trim off unusable trailing rows (NaN inter-event stats, or
+            % less than 2% of data included) afterward; it now breaks out of
+            % the loop as soon as either condition is hit (both are
+            % monotonic: raising the threshold only shrinks the qualifying
+            % point set), and searches only the previous iteration's
+            % qualifying indices instead of rescanning the full series each
+            % time. Cross-check simple msDt-derived stats against an
+            % independent reimplementation of the original brute-force
+            % loop + post-hoc trim, for all three thresholdHow modes.
+            rng(23);
+            N = 1000;
+            y = zscore(randn(N,1));
+            inc = 0.05; % coarser than the default 0.01, for a faster test
+
+            modes = {'abs','pos','neg'};
+            for mi = 1:numel(modes)
+                thresholdHow = modes{mi};
+
+                switch thresholdHow
+                case 'abs'
+                    thr = (0:inc:max(abs(y)));
+                    tot = N;
+                case 'pos'
+                    thr = (0:inc:max(y));
+                    tot = sum(y >= 0);
+                case 'neg'
+                    thr = (0:inc:max(-y));
+                    tot = sum(y <= 0);
+                end
+                msDt = zeros(length(thr),6);
+                for i = 1:length(thr)
+                    th = thr(i);
+                    switch thresholdHow
+                    case 'abs'
+                        r = find(abs(y) >= th);
+                    case 'pos'
+                        r = find(y >= th);
+                    case 'neg'
+                        r = find(y <= -th);
+                    end
+                    Dt_exc = diff(r);
+                    msDt(i,1) = mean(Dt_exc);
+                    msDt(i,2) = std(Dt_exc)/sqrt(length(r));
+                    msDt(i,3) = length(Dt_exc)/tot*100;
+                    msDt(i,4) = median(r)/(N/2)-1;
+                    msDt(i,5) = mean(r)/(N/2)-1;
+                    msDt(i,6) = std(r)/sqrt(length(r));
+                end
+                fbi = find(isnan(msDt(:,1)),1,'first');
+                if ~isempty(fbi)
+                    msDt = msDt(1:fbi-1,:);
+                end
+                trimthr = 2;
+                mj = find(msDt(:,3) > trimthr,1,'last');
+                if ~isempty(mj)
+                    msDt = msDt(1:mj,:);
+                end
+
+                expectedMdtm = mean(msDt(:,1));
+                expectedMdrmd = median(msDt(:,4));
+                expectedMrstd = std(msDt(:,5));
+
+                out = DN_OutlierInclude(y,thresholdHow,inc);
+
+                testCase.verifyEqual(out.mdtm, expectedMdtm, 'AbsTol', 1e-9, ...
+                    sprintf('mdtm mismatch for thresholdHow=''%s''',thresholdHow));
+                testCase.verifyEqual(out.mdrmd, expectedMdrmd, 'AbsTol', 1e-9, ...
+                    sprintf('mdrmd mismatch for thresholdHow=''%s''',thresholdHow));
+                testCase.verifyEqual(out.mrstd, expectedMrstd, 'AbsTol', 1e-9, ...
+                    sprintf('mrstd mismatch for thresholdHow=''%s''',thresholdHow));
+            end
+        end
+
+        %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
         function test_MasterCodeStringHandleEquivalence(testCase)
