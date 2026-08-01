@@ -599,6 +599,37 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % CO_TranslateShape
+        %-------------------------------------------------------------
+        function test_CO_TranslateShape_MatchesExplicitOnesBroadcast(testCase)
+            % CO_TranslateShape's 'circle' case used win - ones(2*w+1,1)*ty(...)
+            % to broadcast-subtract a row from every row of win; it now relies
+            % on implicit broadcasting. Cross-check against the original
+            % explicit-ones approach (same fix as CO_Embed2_Shapes).
+            rng(25);
+            N = 300;
+            y = randn(N,1);
+            d = 3;
+
+            ty = [(1:N)', y];
+            w = floor(d);
+            rnge = 1+w:N-w;
+            NN = length(rnge);
+            npExpected = zeros(NN,1);
+            for i = 1:NN
+                win = ty(rnge(i)-w:rnge(i)+w,:);
+                difwin = win - ones(2*w+1,1)*ty(rnge(i),:);
+                npExpected(i) = sum(sum(difwin.^2,2) <= d^2);
+            end
+
+            out = CO_TranslateShape(y,'circle',d,'pts');
+
+            testCase.verifyEqual(out.mean, mean(npExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.max, max(npExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.std, std(npExpected), 'AbsTol', 1e-10);
+        end
+
+        %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
         function test_MasterCodeStringHandleEquivalence(testCase)

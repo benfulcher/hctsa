@@ -89,7 +89,12 @@ switch howToMove
                 np = zeros(NN,1); % number of points
                 for i = 1:NN
                     win = ty(rnge(i)-w:rnge(i)+w,:); % create window
-                    difwin = win - ones(2*w+1,1)*ty(rnge(i),:);
+                    % win - ty(rnge(i),:) relies on implicit broadcasting to
+                    % subtract the row ty(rnge(i),:) from every row of win --
+                    % identical result to win - ones(2*w+1,1)*ty(rnge(i),:),
+                    % without allocating/multiplying by an explicit ones()
+                    % matrix on every iteration (same fix as CO_Embed2_Shapes):
+                    difwin = win - ty(rnge(i),:);
                     np(i) = sum(sum(difwin.^2,2) <= r^2); % number of points enclosed in shape
                 end
             case 'rectangle'
