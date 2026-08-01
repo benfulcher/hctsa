@@ -26,7 +26,7 @@ function out = DN_OutlierInclude(y,thresholdHow,inc)
 % inc, the increment to move through (fraction of std if input time series is
 %       z-scored)
 %
-% Most of the outputs measure either exponential [f(x) = Aexp(Bx)+C] or
+% Most of the outputs measure either exponential [f(x) = Aexp(Bx) + C] or
 % linear [f(x) = Ax + B] fits to the sequence of statistics obtained in
 % this way.
 %

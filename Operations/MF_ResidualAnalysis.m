@@ -88,11 +88,11 @@ gS = gS / (sum(gS)*(gf(2)-gf(1)));
 
 % Look at proportion of power in fifths
 b = round(linspace(0,length(gf),6));
-out.p1_5 = sum(gS(b(1)+1:b(2)))*(gf(2)-gf(1));
-out.p2_5 = sum(gS(b(2)+1:b(3)))*(gf(2)-gf(1));
-out.p3_5 = sum(gS(b(3)+1:b(4)))*(gf(2)-gf(1));
-out.p4_5 = sum(gS(b(4)+1:b(5)))*(gf(2)-gf(1));
-out.p5_5 = sum(gS(b(5)+1:b(6)))*(gf(2)-gf(1));
+out.p1_5 = sum(gS(b(1)+1:b(2)))*(gf(2) - gf(1));
+out.p2_5 = sum(gS(b(2)+1:b(3)))*(gf(2) - gf(1));
+out.p3_5 = sum(gS(b(3)+1:b(4)))*(gf(2) - gf(1));
+out.p4_5 = sum(gS(b(4)+1:b(5)))*(gf(2) - gf(1));
+out.p5_5 = sum(gS(b(5)+1:b(6)))*(gf(2) - gf(1));
 
 % ------------------------------------------------------------------------------
 %% Analyze autocorrelation in residuals

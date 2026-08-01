@@ -244,13 +244,13 @@ out.adiff = sum(abs(f-ffit)*(xi(2)-xi(1)));
 % NOT A GREAT STATISTIC FOR GENERAL DISTRIBUTIONS -- scales with variance
 max1 = max(f);
 max2 = max(ffit);
-out.peaksepy = max2-max1;
+out.peaksepy = max2 - max1;
 
 % PEAKSEPX: returns the seperation (in x) between the maxima of each distrn
 % NOT A VERY WELL POSED STATISTIC FOR GENERAL DISTRIBUTIONS since this scales with variance
 [~, i1] = max(f);
 [~, i2] = max(ffit);
-out.peaksepx = xi(i2)-xi(i1);
+out.peaksepx = xi(i2) - xi(i1);
 
 % OLAPINT: returns the overlap integral between the two curves; normalized by variance
 out.olapint = sum(f.*ffit*(xi(2)-xi(1)))*std(x);

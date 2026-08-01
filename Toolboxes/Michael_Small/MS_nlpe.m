@@ -5,6 +5,8 @@ function e = MS_nlpe(y,de,tau);
 % prediction error for embedding dimension de and lag tau or for embedding
 % strategy v (v>0)
 %
+% [[BF: edited to output residuals rather than mean squared error]]
+%
 % Michael Small
 % michael.small@uwa.edu.au, http://school.maths.uwa.edu.au/~small/
 % 3/3/2005
@@ -13,6 +15,7 @@ function e = MS_nlpe(y,de,tau);
 % Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
 % references therein.
 % (Minor edits by Ben Fulcher, 2010)
+%-------------------------------------------------------------------------------
 
 if min(size(y)) > 1
     x = y;
@@ -33,19 +36,20 @@ end
 
 % dd=sparse(n,n);
 dd = zeros(n,n);
-for i = 1:de %loop on de and compute the distance.^2
-    dd = dd + (ones(n,1)*x(i,:)-x(i,:)'*ones(1,n)).^2;
+for i = 1:de % loop on de and compute the distance.^2
+    dd = dd + (ones(n,1)*x(i,:) - x(i,:)'*ones(1,n)).^2;
 end
 % dd is the distance .^2 with inf on the diag
 % speye = sparse(1:n,1:n,1);
 warning('off','MATLAB:divideByZero')
-dd = dd+1./(1-eye(n,n));
+dd = dd + 1./(1 - eye(n,n));
 % dd=dd+1./(1-speye);
 warning('on','MATLAB:divideByZero')
-%near is the index of the nearest neighbour of each point
+% near is the index of the nearest neighbour of each point
 [dist,near] = min(dd);
-%the prediction error is
-e = y(near)-y;
+% The residuals are:
+e = y(near) - y;
+% the prediction error is:
 % e = mean(e.^2);
 % _________________________________________________________ %
 end

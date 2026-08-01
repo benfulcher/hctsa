@@ -104,10 +104,10 @@ end
 
 if doPlot
     figure('color','w'); box('on')
-    hold on
+    hold('on')
     plot(y,'.-k')
     plot(q,'--r')
-    hold off
+    hold('off')
 end
 
 % ------------------------------------------------------------------------------

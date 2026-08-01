@@ -1,5 +1,6 @@
 function out = CO_TranslateShape(y,shape,d,howToMove)
-% CO_TranslateShape  Statistics on datapoints inside geometric shapes across the time series.
+% CO_TranslateShape  Statistics on datapoints inside geometric shapes across
+%                    the time series.
 %
 % Inputs specify a shape and its size, and a method for moving this shape
 % through the time domain.
@@ -99,7 +100,7 @@ switch howToMove
                 NN = length(rnge); % number of admissible points
                 np = zeros(NN,1); % number of points
                 for i = 1:NN
-                    np(i) = sum(abs(y(rnge(i)-d:rnge(i)+d)) <= abs(y(i)));
+                    np(i) = sum(abs(y(rnge(i)-d:rnge(i)+d)) <= abs(y(rnge(i))));
                 end
         otherwise
             error('Unknown shape ''%s''',shape)

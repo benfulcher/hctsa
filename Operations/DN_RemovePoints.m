@@ -172,7 +172,7 @@ out.ac2diff = f_absDiff(acf_yTransform(2),acf_y(2));
 out.ac3rat = f_ratio(acf_yTransform(3),acf_y(3));
 out.ac3diff = f_absDiff(acf_yTransform(3),acf_y(3));
 
-out.sumabsacfdiff = sum(abs(acf_yTransform-acf_y));
+out.sumabsacfdiff = sum(abs(acf_yTransform - acf_y));
 out.mean = mean(yTransform);
 out.median = median(yTransform);
 out.std = std(yTransform);
