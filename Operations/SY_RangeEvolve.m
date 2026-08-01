@@ -41,11 +41,14 @@ function out = SY_RangeEvolve(y)
 
 doPlot = false; % whether to plot outputs
 N = length(y); % length of the time series
-cums = zeros(N,1);
 
-for i = 1:N
-    cums(i) = range(y(1:i));
-end
+% cums(i) = range(y(1:i)) = max(y(1:i)) - min(y(1:i)) for each i. Computing
+% this via running max/min (cummax/cummin) instead of calling range() on the
+% growing prefix at every i avoids O(N) rescans of the prefix each time --
+% O(N) total instead of O(N^2), giving the same values exactly (running
+% max/min are order-independent selections, not summations, so there's no
+% floating-point reordering involved):
+cums = cummax(y(:)) - cummin(y(:));
 % cums = cums/range(y);
 
 if doPlot

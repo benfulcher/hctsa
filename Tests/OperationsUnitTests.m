@@ -110,6 +110,242 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % SY_RangeEvolve
+        %-------------------------------------------------------------
+        function test_SY_RangeEvolve_MatchesBruteForcePrefixRange(testCase)
+            % SY_RangeEvolve used to compute cums(i) = range(y(1:i)) via a
+            % per-i call to range() on the growing prefix (O(N^2)); it now
+            % uses cummax(y)-cummin(y) (O(N)). Cross-check derived output
+            % fields against an independent brute-force reimplementation of
+            % cums to confirm the values are unchanged.
+            rng(7);
+            N = 1500;
+            y = randn(N,1);
+
+            cumsExpected = zeros(N,1);
+            for i = 1:N
+                cumsExpected(i) = range(y(1:i));
+            end
+            fullrExpected = range(y);
+
+            out = SY_RangeEvolve(y);
+
+            testCase.verifyEqual(out.totnuq, length(unique(cumsExpected)), 'AbsTol', 0);
+            testCase.verifyEqual(out.p50, cumsExpected(ceil(N*0.5))/fullrExpected, 'AbsTol', 1e-12);
+            testCase.verifyEqual(out.l100, cumsExpected(100)/fullrExpected, 'AbsTol', 1e-12);
+            testCase.verifyEqual(out.l1000, cumsExpected(1000)/fullrExpected, 'AbsTol', 1e-12);
+            testCase.verifyEqual(out.nuqp10, length(unique(cumsExpected(1:floor(N*0.1))))/out.totnuq, 'AbsTol', 1e-12);
+        end
+
+        %-------------------------------------------------------------
+        % WL_DetailCoeffs
+        %-------------------------------------------------------------
+        function test_WL_DetailCoeffs_MatchesPerLevelDecomposition(testCase)
+            % WL_DetailCoeffs used to call wavedec(y,level,wname) fresh at
+            % every level (redoing the full decomposition from scratch each
+            % time); it now decomposes once at maxlevel and extracts each
+            % level's detail via wrcoef from that single decomposition.
+            % Cross-check against an independent per-level reimplementation
+            % (the original approach) to confirm identical output.
+            rng(8);
+            N = 2000;
+            y = randn(N,1);
+            wname = 'db3';
+            maxlevel = 5;
+
+            means = zeros(maxlevel,1);
+            medians = zeros(maxlevel,1);
+            maxs = zeros(maxlevel,1);
+            for k = 1:maxlevel
+                [c,l] = wavedec(y,k,wname);
+                det = wrcoef('d',c,l,wname,k);
+                means(k) = mean(abs(det));
+                medians(k) = median(abs(det));
+                maxs(k) = max(abs(det));
+            end
+            means_s = sort(means,'descend');
+            medians_s = sort(medians,'descend');
+            maxs_s = sort(maxs,'descend');
+
+            out = WL_DetailCoeffs(y,wname,maxlevel);
+
+            testCase.verifyEqual(out.max_mean, means_s(1), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.max_median, medians_s(1), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.max_max, maxs_s(1), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.std_mean, std(means), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.std_median, std(medians), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.std_max, std(maxs), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.max1on2_mean, means_s(1)/means_s(2), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.max1on2_median, medians_s(1)/medians_s(2), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.max1on2_max, maxs_s(1)/maxs_s(2), 'AbsTol', 1e-10);
+            r = corrcoef(maxs,medians);
+            testCase.verifyEqual(out.corrcoef_max_medians, r(1,2), 'AbsTol', 1e-10);
+        end
+
+        %-------------------------------------------------------------
+        % NW_VisibilityGraph
+        %-------------------------------------------------------------
+        function test_NW_VisibilityGraph_MatchesDenseBruteForce(testCase)
+            % NW_VisibilityGraph's 'horiz' method used to build an N x N dense
+            % adjacency matrix (mostly zeros, since the graph has only O(N)
+            % edges); it now builds a sparse matrix from accumulated edge
+            % indices. Cross-check the resulting degree distribution (and a
+            % couple of downstream stats) against an independent dense
+            % reimplementation of the original algorithm.
+            rng(9);
+            N = 300;
+            y = randn(N,1);
+            y = y - min(y);
+
+            % Brute-force dense reimplementation (the original algorithm):
+            Aexpected = zeros(N);
+            yr = flipud(y);
+            for i = 1:N
+                if i < N
+                    nAhead = find(y(i+1:end) > y(i),1,'first');
+                    if ~isempty(nAhead)
+                        Aexpected(i,i+nAhead) = 1;
+                    end
+                end
+                if i > 1
+                    nBack = find(yr(N-i+2:end) > yr(N-i+1),1,'first');
+                    if ~isempty(nBack)
+                        Aexpected(i-nBack,i) = 1;
+                    end
+                end
+            end
+            At = Aexpected';
+            lowerT = logical(tril(ones(size(Aexpected))));
+            Aexpected(lowerT) = At(lowerT);
+            kExpected = full(sum(Aexpected));
+
+            out = NW_VisibilityGraph(y,'horiz');
+
+            testCase.verifyEqual(out.meank, mean(kExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.maxk, max(kExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.mink, min(kExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.stdk, std(kExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.modek, mode(kExpected), 'AbsTol', 1e-10);
+        end
+
+        %-------------------------------------------------------------
+        % CO_Embed2_Shapes
+        %-------------------------------------------------------------
+        function test_CO_Embed2_Shapes_MatchesExplicitOnesBroadcast(testCase)
+            % CO_Embed2_Shapes used m - ones(N,1)*m(i,:) to broadcast-subtract
+            % a row from every row of m; it now relies on implicit
+            % broadcasting (m - m(i,:)), which should give an identical
+            % result. Cross-check the 'circle' counts against the original
+            % explicit-ones approach.
+            rng(10);
+            N = 400;
+            y = randn(N,1);
+            tau = 3;
+            r = 1;
+
+            m = [y(1:end-tau), y(1+tau:end)];
+            Nm = length(m);
+            countsExpected = zeros(Nm,1);
+            for i = 1:Nm
+                m_c = m - ones(Nm,1)*m(i,:);
+                m_c_d = sum(m_c.^2,2);
+                countsExpected(i) = sum(m_c_d <= r^2);
+            end
+            countsExpected = countsExpected - 1;
+
+            out = CO_Embed2_Shapes(y,tau,'circle',r);
+
+            testCase.verifyEqual(out.mean, mean(countsExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.max, max(countsExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.median, median(countsExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.std, std(countsExpected), 'AbsTol', 1e-10);
+        end
+
+        %-------------------------------------------------------------
+        % EN_ApEn
+        %-------------------------------------------------------------
+        function test_EN_ApEn_MatchesBruteForceLoop(testCase)
+            % EN_ApEn used explicit for-loops to (a) build the Hankel-style
+            % embedding matrix x and (b) broadcast each row x(i,:) across an
+            % ax matrix before computing distances; both are now vectorized
+            % (implicit broadcasting / direct indexing). Cross-check against
+            % the original brute-force implementation.
+            rng(11);
+            N = 300;
+            y = randn(N,1);
+            mnom = 2;
+            rth = 0.2;
+
+            r = rth*std(y);
+            phiExpected = zeros(2,1);
+            for k = 1:2
+                m = mnom+k-1;
+                C = zeros(N-m+1,1);
+                x = zeros(N-m+1,m);
+                for i = 1:N-m+1
+                    x(i,:) = y(i:i+m-1);
+                end
+                ax = ones(N-m+1,m);
+                for i = 1:N-m+1
+                    for j = 1:m
+                        ax(:,j) = x(i,j);
+                    end
+                    d = abs(x-ax);
+                    if m > 1
+                        d = max(d,[],2)';
+                    end
+                    dr = (d<=r);
+                    C(i) = sum(dr)/(N-m+1);
+                end
+                phiExpected(k) = mean(log(C));
+            end
+            expected = phiExpected(1) - phiExpected(2);
+
+            actual = EN_ApEn(y,mnom,rth);
+
+            testCase.verifyEqual(actual, expected, 'AbsTol', 1e-10);
+        end
+
+        %-------------------------------------------------------------
+        % EN_PermEn
+        %-------------------------------------------------------------
+        function test_EN_PermEn_MatchesBruteForceSearch(testCase)
+            % EN_PermEn used to linearly scan permList (all m! permutations)
+            % for each embedding vector to find its matching permutation; it
+            % now uses a hash lookup built once from permList's own rows.
+            % Cross-check against the original brute-force linear search.
+            rng(12);
+            N = 500;
+            y = randn(N,1);
+            m = 4;
+            tau = 1;
+
+            x = BF_Embed(y,tau,m,0);
+            Nx = size(x,1);
+            permList = perms(1:m);
+            numPerms = length(permList);
+            countPermsExpected = zeros(numPerms,1);
+            for j = 1:Nx
+                [~,ix] = sort(x(j,:));
+                for k = 1:numPerms
+                    if all(permList(k,:)-ix == 0)
+                        countPermsExpected(k) = countPermsExpected(k) + 1;
+                        break
+                    end
+                end
+            end
+            pExpected = countPermsExpected/Nx;
+            p0Expected = pExpected(pExpected>0);
+            permEnExpected = -sum(p0Expected.*log2(p0Expected));
+            normPermEnExpected = permEnExpected/log2(factorial(m));
+
+            out = EN_PermEn(y,m,tau);
+
+            testCase.verifyEqual(out.permEn, permEnExpected, 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.normPermEn, normPermEnExpected, 'AbsTol', 1e-10);
+        end
+
+        %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
         function test_MasterCodeStringHandleEquivalence(testCase)

@@ -97,25 +97,45 @@ switch meth
 	case 'horiz'
         % Horizontal visibility graph
 
-        A = zeros(N); % adjacency matrix
+        % The graph has only O(N) edges, so accumulate (row,col) edge indices
+        % and build a sparse adjacency matrix at the end, instead of a dense
+        % N x N matrix (an O(N^2) allocation/initialization that's mostly
+        % zeros -- e.g., ~200MB at the default maxL=5000 cap):
         yr = flipud(y); % reversed order time series
+        rows = zeros(2*N,1);
+        cols = zeros(2*N,1);
+        numEdges = 0;
 
 		for i = 1:N
 			% Look forward to first blocker, then stop
             if i < N
     			nAhead = find(y(i+1:end) > y(i),1,'first');
-                A(i,i+nAhead) = 1;
+                if ~isempty(nAhead)
+                    numEdges = numEdges + 1;
+                    rows(numEdges) = i;
+                    cols(numEdges) = i+nAhead;
+                end
             end
 
             % Look back to the first hit, then stop
             if i > 1
     			nBack = find(yr(N-i+2:end) > yr(N-i+1),1,'first');
-                A(i-nBack,i) = 1;
+                if ~isempty(nBack)
+                    numEdges = numEdges + 1;
+                    rows(numEdges) = i-nBack;
+                    cols(numEdges) = i;
+                end
             end
 		end
+        % Every edge added above has row < col (no self-loops, strictly upper
+        % triangular), so collapsing any duplicate (row,col) pairs added from
+        % both directions back to 0/1 (sparse() sums duplicates) matches the
+        % original dense code's idempotent A(i,j)=1 assignment exactly:
+        A = double(sparse(rows(1:numEdges),cols(1:numEdges),1,N,N) > 0);
 
-        % Symmetrize A:
-        A = symmetrize(A);
+        % Symmetrize A (safe because A is strictly upper triangular: A and A'
+        % have disjoint nonzero support, so no double-counting):
+        A = A + A';
     otherwise
         error('Unknown visibility graph method ''%s''',meth);
 end

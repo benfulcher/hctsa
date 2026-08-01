@@ -82,12 +82,17 @@ means = zeros(maxlevel,1); % mean detail coefficient magnitude at each level
 medians = zeros(maxlevel,1); % median detail coefficient magnitude at each level
 maxs = zeros(maxlevel,1); % max detail coefficient magnitude at each level
 
-for k = 1:maxlevel
-    level = k;
+% Decompose once at the maximum level needed: a wavelet decomposition is
+% hierarchical/cascading, so the level-k detail coefficients embedded in a
+% maxlevel-deep decomposition are identical to those from a k-level-only
+% decomposition (each level's split only depends on the previous level's
+% approximation coefficients, not on how many further levels follow). This
+% avoids redoing the full decomposition from scratch at every level:
+[c, l] = wavedec(y,maxlevel,wname);
 
-    [c, l] = wavedec(y,level,wname);
+for k = 1:maxlevel
     % Reconstruct detail at this level
-    det = wrcoef('d',c,l,wname,level);
+    det = wrcoef('d',c,l,wname,k);
 
     means(k) = mean(abs(det));
     medians(k) = median(abs(det));

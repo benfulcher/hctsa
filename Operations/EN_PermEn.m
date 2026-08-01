@@ -69,6 +69,19 @@ numPerms = length(permList);
 % Initialize
 countPerms = zeros(numPerms,1);
 
+% Build a permutation -> row-index lookup once (keyed by a string encoding of
+% each permutation), instead of linearly scanning permList for every one of
+% the Nx embedding vectors below (an O(Nx * m!) search in the worst case).
+% This doesn't rely on knowing perms()'s row ordering -- the map is built
+% directly from permList's own rows, so looking up any permutation of 1:m
+% (which is exactly what sort()'s index output always is) is guaranteed to
+% find the same row that the original linear scan would have:
+permKeys = cell(numPerms,1);
+for k = 1:numPerms
+    permKeys{k} = sprintf('%d,',permList(k,:));
+end
+permIndexMap = containers.Map(permKeys,num2cell(1:numPerms));
+
 % Count each type of permutation through the time series
 for j = 1:Nx
 
@@ -76,19 +89,8 @@ for j = 1:Nx
     [~,ix] = sort(x(j,:));
 
     % Match this to one of the permutations:
-
-    % (i) Nicer but slower:
-    % thisPerm = find(all(bsxfun(@minus,ix,permList)==0,2),1);
-    % countPerms(thisPerm) = countPerms(thisPerm) + 1;
-
-    % (ii) Uglier but faster:
-    for k = 1:numPerms
-        if all(permList(k,:)-ix == 0)
-            % We found it! Increment:
-            countPerms(k) = countPerms(k) + 1;
-            break
-        end
-    end
+    thisPerm = permIndexMap(sprintf('%d,',ix));
+    countPerms(thisPerm) = countPerms(thisPerm) + 1;
 end
 
 % ------------------------------------------------------------------------------

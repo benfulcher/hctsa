@@ -99,7 +99,15 @@ switch shape
 
 		for i = 1:N % across all points in the time series
 
-			m_c = m - ones(N,1)*m(i,:); % points wrt current point i
+			% m - m(i,:) relies on implicit broadcasting to subtract the
+			% row m(i,:) from every row of m -- identical result to
+			% m - ones(N,1)*m(i,:), but without allocating/multiplying by an
+			% explicit ones(N,1) matrix on every iteration. (A single fully
+			% vectorized N x N pairwise-distance computation across all i
+			% would avoid the loop entirely, but would need an N x N x 2
+			% intermediate array -- risking excessive memory use for long
+			% time series -- so the per-i loop is kept.)
+			m_c = m - m(i,:); % points wrt current point i
 			m_c_d = sum(m_c.^2,2); % Euclidean distances from point i
 
 		    counts(i) = sum(m_c_d <= r^2); % number of points enclosed in a circle of radius r

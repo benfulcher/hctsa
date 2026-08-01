@@ -63,20 +63,22 @@ phi = zeros(2,1); % phi(1)=phi_m, phi(2)=phi_{m+1}
 for k = 1:2
     m = mnom+k-1; % pattern length
     C = zeros(N-m+1,1);
-    % Define the matrix x, containing subsequences of u
-    x = zeros(N-m+1,m);
 
-    % Form vector sequences x from the time series y
-    for i = 1:N-m+1
-        x(i,:) = y(i:i+m-1);
-    end
+    % Form vector sequences x from the time series y: x(i,:) = y(i:i+m-1).
+    % Built via one vectorized indexing operation instead of an N-m+1
+    % iteration loop:
+    idx = (1:N-m+1)' + (0:m-1);
+    x = y(idx);
 
-    ax = ones(N-m+1,m);
     for i = 1:N-m+1
-        for j = 1:m
-            ax(:,j) = x(i,j);
-        end
-        d = abs(x-ax);
+        % m - m(i,:)-style implicit broadcasting subtracts the row x(i,:)
+        % from every row of x, giving the same result as explicitly building
+        % ax (formerly done via an inner for-loop over j=1:m per i -- an
+        % O(N*m) rebuild on every one of the N-m+1 outer iterations) without
+        % that per-iteration loop. The outer loop over i is kept (rather than
+        % vectorizing across all i at once) to avoid an O(N^2*m) intermediate
+        % array that could be excessive memory for long time series:
+        d = abs(x - x(i,:));
         if m > 1 % Takes maximum distance
             d = max(d,[],2)';
         end
