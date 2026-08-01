@@ -46,25 +46,91 @@ function out = NL_crptool_fnn(y,maxm,r,taum,th,randomSeed)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Preliminaries, input checking
+% Resolve default inputs (must happen here, using the caller's nargin, before
+% the cache key below is built from these variables -- NL_crptool_fnn_Compute
+% below always receives all 6 arguments explicitly, so nargin there would
+% otherwise always read as 6).
+% ------------------------------------------------------------------------------
+if nargin < 2 || isempty(maxm)
+    maxm = 10; % default maximum embedding dimension
+end
+if nargin < 3 || isempty(r)
+    r = 2; % neighbourhood criterion
+end
+if nargin < 4 || isempty(taum)
+    taum = 'mi'; % by default determine time delay by first minimum of AMI
+end
+if nargin < 5
+    th = []; % default is to return statistics
+end
+if nargin < 6
+    randomSeed = []; % default
+end
+
+% ------------------------------------------------------------------------------
+% Cache the resolved output (keyed on an exact, NaN-safe match of all inputs
+% that affect the result). This computation resets the random seed to a fixed
+% value before running (BF_ResetSeed(randomSeed), which defaults to
+% rng(0,'twister')), so it is fully deterministic given its inputs -- a repeat
+% call with the same series and parameters always gives the same output,
+% making it safe to cache. Several operations share this function's default
+% parameters (via BF_Embed's 'fnnmar' embedding-dimension method), each
+% independently re-running Marwan's CRPToolbox false-nearest-neighbors code
+% for the same series. A miss falls through to exactly the same computation
+% as before (see CO_AutoCorr.m for the same pattern and rationale, including
+% why this is safe under parfor).
+% ------------------------------------------------------------------------------
+persistent cacheY cacheMaxm cacheR cacheTaum cacheTh cacheRandomSeed cacheOut
+maxCacheEntries = 4;
+if isempty(cacheY)
+    cacheY = {};
+    cacheMaxm = {};
+    cacheR = {};
+    cacheTaum = {};
+    cacheTh = {};
+    cacheRandomSeed = {};
+    cacheOut = {};
+end
+
+for ci = 1:numel(cacheY)
+    if isequaln(y,cacheY{ci}) && isequaln(maxm,cacheMaxm{ci}) && isequaln(r,cacheR{ci}) && ...
+            isequaln(taum,cacheTaum{ci}) && isequaln(th,cacheTh{ci}) && isequaln(randomSeed,cacheRandomSeed{ci})
+        out = cacheOut{ci};
+        return
+    end
+end
+
+out = NL_crptool_fnn_Compute(y,maxm,r,taum,th,randomSeed);
+
+cacheY{end+1} = y;
+cacheMaxm{end+1} = maxm;
+cacheR{end+1} = r;
+cacheTaum{end+1} = taum;
+cacheTh{end+1} = th;
+cacheRandomSeed{end+1} = randomSeed;
+cacheOut{end+1} = out;
+if numel(cacheY) > maxCacheEntries
+    cacheY(1) = [];
+    cacheMaxm(1) = [];
+    cacheR(1) = [];
+    cacheTaum(1) = [];
+    cacheTh(1) = [];
+    cacheRandomSeed(1) = [];
+    cacheOut(1) = [];
+end
+
+end
+
+% ------------------------------------------------------------------------------
+function out = NL_crptool_fnn_Compute(y,maxm,r,taum,th,randomSeed)
+% The original computation, unchanged -- moved into its own local function so
+% the cache wrapper above can store its result. All inputs are already
+% resolved (non-default) by the caller above.
 % ------------------------------------------------------------------------------
 doPlot = 0; % plot outputs to figure
 N = length(y); % length of the input time series
 
-% 1) maxm: the maximum embedding dimension
-if nargin < 2 || isempty(maxm)
-    maxm = 10; % default maximum embedding dimension
-end
-
-% 2) r, the neighbourhood criterion
-if nargin < 3 || isempty(r)
-    r = 2; % neighbourhood criterion
-end
-
-% 3) determine the time delay
-if nargin < 4 || isempty(taum)
-    taum = 'mi'; % by default determine time delay by first minimum of AMI
-end
+% determine the time delay
 if ischar(taum)
     % time delay
     if strcmp(taum,'mi')
@@ -80,17 +146,6 @@ end
 % Don't want tau to be too large
 if tau > N/10
     tau = floor(N/10);
-end
-
-% 4) Just output a scalar embedding dimension rather than statistics on the
-% method?
-if nargin < 5
-    th = []; % default is to return statistics
-end
-
-% 5) randomSeed: how to treat the randomization
-if nargin < 6
-    randomSeed = []; % default
 end
 
 % ------------------------------------------------------------------------------

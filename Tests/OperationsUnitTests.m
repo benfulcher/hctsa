@@ -25,7 +25,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % just the recomputation but also any warning() side effect the
             % computation would have raised, which a couple of tests below
             % check for directly).
-            clear CO_AutoCorr CO_FirstMin
+            clear CO_AutoCorr CO_FirstMin NL_crptool_fnn
         end
     end
 
@@ -446,6 +446,48 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
 
             testCase.verifyEqual(out.permEn, permEnExpected, 'AbsTol', 1e-10);
             testCase.verifyEqual(out.normPermEn, normPermEnExpected, 'AbsTol', 1e-10);
+        end
+
+        %-------------------------------------------------------------
+        % NL_crptool_fnn caching
+        %-------------------------------------------------------------
+        function test_NL_crptool_fnn_CacheDoesNotCrossContaminate(testCase)
+            % NL_crptool_fnn resets the random seed to a fixed value
+            % (BF_ResetSeed) before running Marwan's CRPToolbox code, so it is
+            % fully deterministic given its inputs, making it safe to cache.
+            % Confirm interleaved calls with different series don't get
+            % confused with each other's cached values, and that repeated
+            % calls give identical (not just similar) results.
+            rng(21);
+            y1 = randn(500,1);
+            y2 = randn(600,1);
+
+            out1a = NL_crptool_fnn(y1);
+            out2 = NL_crptool_fnn(y2);
+            out1b = NL_crptool_fnn(y1); % should hit the cache
+
+            testCase.verifyEqual(out1a.fnn2, out1b.fnn2, ...
+                'A cache hit for y1 must not be contaminated by the intervening call for y2.');
+            testCase.verifyEqual(out1a.firstunder05, out1b.firstunder05);
+            testCase.verifyNotEqual(out1a.fnn2, out2.fnn2, ...
+                'Sanity check: the two different series used here should not coincidentally match exactly.');
+        end
+
+        function test_NL_crptool_fnn_CacheEvictionStillCorrect(testCase)
+            % Push more distinct series through than the cache holds, then
+            % confirm a call for the very first (now-evicted) series still
+            % recomputes correctly rather than returning stale/wrong data.
+            rng(22);
+            N = 500;
+            firstSeries = randn(N,1);
+            out1a = NL_crptool_fnn(firstSeries);
+            for k = 1:6
+                NL_crptool_fnn(randn(N,1)); % evict firstSeries from the cache
+            end
+            out1b = NL_crptool_fnn(firstSeries); % must recompute correctly
+
+            testCase.verifyEqual(out1a.fnn2, out1b.fnn2);
+            testCase.verifyEqual(out1a.mdrop, out1b.mdrop);
         end
 
         %-------------------------------------------------------------
