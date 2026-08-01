@@ -87,6 +87,14 @@ if ~all(ismember({'TimeSeries','Operations','MasterOperations','TS_DataMat'},fil
 	error('\nCannot compute on %s: there are missing variables',customFile);
 end
 MasterOperations = TS_GetFromData(customFile,'MasterOperations');
+% Precompile each master operation's code string into a function handle once,
+% here (outside the per-time-series loop below), instead of having eval/evalc
+% re-parse the same text from scratch for every time series in
+% TS_ComputeMasterLoop:
+MasterOperations.Fn = cell(height(MasterOperations),1);
+for i = 1:height(MasterOperations)
+    MasterOperations.Fn{i} = str2func(['@(x,x_z) ',MasterOperations.Code{i}]);
+end
 if ismember('TS_CalcTime',fileVars)
 	TS_CalcTime = TS_GetFromData(customFile,'TS_CalcTime');
 end

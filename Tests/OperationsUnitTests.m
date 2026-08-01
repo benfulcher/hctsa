@@ -110,6 +110,38 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % Master-operation code string -> function handle equivalence
+        %-------------------------------------------------------------
+        function test_MasterCodeStringHandleEquivalence(testCase)
+            % TS_ComputeMasterLoop used to invoke each master operation's Code
+            % string via eval/evalc; it now calls a precompiled function handle
+            % (str2func(['@(x,x_z) ' code])) instead, built once in TS_Compute /
+            % TS_CalculateFeatureVector. This confirms that switch is behavior-
+            % preserving, using real Code strings taken from the mop definition
+            % files (FeatureSets/INP_mops_hctsa.txt, INP_mops_catch22.txt).
+            rng(6);
+            x = randn(300,1);
+            x_z = zscore(x);
+
+            sampleCodes = {
+                'DN_Mean(x,''norm'')', ...
+                'DN_Mean(x,''rms'')', ...
+                'DN_Spread(x,''std'')', ...
+                'DN_HistogramMode(x_z,5,true,false)', ...
+                'catch22_CO_FirstMin_ac(x'')', ...
+            };
+
+            for i = 1:numel(sampleCodes)
+                code = sampleCodes{i};
+                evalResult = eval(code);
+                fn = str2func(['@(x,x_z) ',code]);
+                handleResult = fn(x,x_z);
+                testCase.verifyEqual(handleResult, evalResult, ...
+                    sprintf('Handle-based call diverged from eval for code: %s',code));
+            end
+        end
+
+        %-------------------------------------------------------------
         % SC_MMA
         %-------------------------------------------------------------
         function test_SC_MMA_RunsAndProducesFiniteOutput(testCase)

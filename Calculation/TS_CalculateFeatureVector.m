@@ -201,12 +201,25 @@ MasterCalcTime = zeros(height(MasterOperations),1); % Calculation times for each
 % a master ID below is O(1) instead of a linear scan (via find) per lookup:
 masterIDToInd = containers.Map(num2cell(MasterOperations.ID),num2cell((1:height(MasterOperations))'));
 
+% Precompile each master operation's code string into a function handle, if not
+% already done by the caller (e.g., TS_Compute does this once, outside its
+% per-time-series loop, so it's only paid for here when calling this function
+% standalone): avoids eval/evalc re-parsing the same code string from scratch
+% on every call.
+if ~ismember('Fn',MasterOperations.Properties.VariableNames)
+    MasterOperations.Fn = cell(height(MasterOperations),1);
+    for i = 1:height(MasterOperations)
+        MasterOperations.Fn{i} = str2func(['@(x,x_z) ',MasterOperations.Code{i}]);
+    end
+end
+
 Master_IDs_calc = unique(Operations.MasterID); % Master_IDs that need to be calculated
 Master_ind_calc = arrayfun(@(x)masterIDToInd(x),Master_IDs_calc); % Indicies of MasterOperations that need to be calculated
 numMopsToCalc = length(Master_IDs_calc); % Number of master operations to calculate
 
 % Index sliced variables to minimize the communication overhead in the parallel processing
-par_MasterOpCodeCalc = MasterOperations.Code(Master_ind_calc); % String array of strings of Code to evaluate
+par_MasterOpCodeCalc = MasterOperations.Code(Master_ind_calc); % Code strings, kept only for display/error messages
+par_MasterOpFnCalc = MasterOperations.Fn(Master_ind_calc); % Precompiled function handles to evaluate
 par_mop_ids = MasterOperations.ID(Master_ind_calc); % mop_id for each master operation
 
 % Store in temporary variables for parfor loop then map back later
@@ -225,7 +238,7 @@ if doParallel
     % PARFOR Loop (parallel)
 	parfor jj = 1:numMopsToCalc
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
-			TS_ComputeMasterLoop(x,x_z,par_MasterOpCodeCalc{jj}, ...
+			TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
 				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj);
 	end
 else
@@ -235,7 +248,7 @@ else
     end
 	for jj = 1:numMopsToCalc
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
-			TS_ComputeMasterLoop(x,x_z,par_MasterOpCodeCalc{jj}, ...
+			TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
 				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj);
 
         if strcmp(howVocal,'minimal')

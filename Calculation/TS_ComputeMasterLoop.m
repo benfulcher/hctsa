@@ -1,5 +1,9 @@
-function [masterOutput, masterTime] = TS_ComputeMasterLoop(x,x_z,masterCode,masterID,numMasterOps,howVocal,theTsID,iterNum)
+function [masterOutput, masterTime] = TS_ComputeMasterLoop(x,x_z,masterFn,masterCode,masterID,numMasterOps,howVocal,theTsID,iterNum)
 % TS_ComputeMasterLoop     Used in a loop by TS_Compute to evaluate a given master function.
+%
+% masterFn is a function handle, precompiled once from masterCode (see
+% TS_CalculateFeatureVector/TS_Compute), taking (x,x_z) as inputs. masterCode
+% is kept only for display/error messages below.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -37,13 +41,10 @@ end
 
 try
 	masterTimer = tic;
-    if beVocal
-        % Any output text is printed to screen
-    	masterOutput = BF_ParEval(x,x_z,masterCode,1);
-    else
-        % Output text stored in second output (could log this if you really want to)
-        masterOutput = BF_ParEval(x,x_z,masterCode,0);
-    end
+    % Call the precompiled function handle directly. Function handles, unlike
+    % eval/evalc, are allowed inside parfor, so no eval-based indirection is
+    % needed here:
+    masterOutput = masterFn(x,x_z);
 	masterTime = toc(masterTimer);
     if beVocal
         fprintf(1,' evaluated (%s).\n',BF_TheTime(masterTime));
