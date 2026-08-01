@@ -82,6 +82,26 @@ end
 % Compute the autocorrelation function
 % ------------------------------------------------------------------------------
 
+% Many different operations (CO_FirstMin, CO_FirstCrossing, CO_AutoCorrShape,
+% BF_Embed, PH_Walker, PH_ForcePotential, SY_LocalGlobal, and more) call this
+% function with the same input series (typically the raw x or z-scored x_z
+% passed to every master operation for a given time series) and the 'Fourier'
+% method. Cache the last few computed ACFs (keyed on an exact, NaN-safe
+% content match of y) so repeated calls for the same series across different
+% operations can skip recomputing the FFT entirely. A miss falls through to
+% exactly the same computation as before, so this cannot change behavior --
+% only whether the result was already sitting in the cache. Each parfor
+% worker has its own independent copy of this cache (persistent variables are
+% per-process), so this is a purely opportunistic speed-up: worst case (no
+% hits) is identical to today, best case skips redundant FFTs across
+% operations that reuse the same series.
+persistent cacheY cacheACF
+maxCacheEntries = 4;
+if isempty(cacheY)
+    cacheY = {};
+    cacheACF = {};
+end
+
 switch whatMethod
 case 'Fourier'
     % ------------------------------------------------------------------------------
@@ -90,13 +110,32 @@ case 'Fourier'
     %     Analysis: Forecasting and Control. 3rd edition. Upper Saddle River,
     %     NJ: Prentice-Hall, 1994.
 
-    nFFT = 2^(nextpow2(N)+1);
-    F = fft(y - mean(y),nFFT);
-    F = F.*conj(F);
-    acf = ifft(F); % Wiener–Khinchin
-    acf = acf./acf(1); % Normalize
-    acf = real(acf);
-    acf = acf(1:N);
+    foundInCache = false;
+    for ci = 1:numel(cacheY)
+        if isequaln(y,cacheY{ci})
+            acf = cacheACF{ci};
+            foundInCache = true;
+            break
+        end
+    end
+
+    if ~foundInCache
+        nFFT = 2^(nextpow2(N)+1);
+        F = fft(y - mean(y),nFFT);
+        F = F.*conj(F);
+        acf = ifft(F); % Wiener–Khinchin
+        acf = acf./acf(1); % Normalize
+        acf = real(acf);
+        acf = acf(1:N);
+
+        % Remember this series' ACF (simple FIFO eviction once full):
+        cacheY{end+1} = y;
+        cacheACF{end+1} = acf;
+        if numel(cacheY) > maxCacheEntries
+            cacheY(1) = [];
+            cacheACF(1) = [];
+        end
+    end
 
     if isempty(tau) % return the full function
         out = acf;

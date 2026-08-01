@@ -58,6 +58,61 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % CO_AutoCorr caching
+        %-------------------------------------------------------------
+        function test_CO_AutoCorr_CacheDoesNotCrossContaminate(testCase)
+            % CO_AutoCorr caches the last few computed ACFs (keyed on an
+            % exact, NaN-safe content match of y) so repeated calls for the
+            % same series can skip recomputing the FFT. Confirm interleaved
+            % calls with different series don't get confused with each
+            % other's cached values, against an independent reference
+            % computation (the original, uncached algorithm).
+            rng(13);
+            y1 = randn(200,1);
+            y2 = randn(250,1);
+
+            out1a = CO_AutoCorr(y1,[],'Fourier');
+            out2 = CO_AutoCorr(y2,[],'Fourier');
+            out1b = CO_AutoCorr(y1,[],'Fourier'); % should hit the cache
+
+            testCase.verifyEqual(out1a, referenceFourierACF(y1), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out2, referenceFourierACF(y2), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out1b, referenceFourierACF(y1), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out1a, out1b, 'AbsTol', 0, ...
+                'Repeated calls for the same series should give identical results.');
+        end
+
+        function test_CO_AutoCorr_CacheHandlesConstantSeries(testCase)
+            % A constant series produces all-NaN ACF entries (0/0
+            % normalization). isequaln (not isequal) is used for the
+            % cache-match check specifically so a repeated call with the same
+            % NaN-containing series still hits the cache rather than being
+            % treated as perpetually distinct.
+            y = ones(30,1);
+            out1 = CO_AutoCorr(y,[],'Fourier');
+            out2 = CO_AutoCorr(y,[],'Fourier'); % should hit the cache
+            testCase.verifyTrue(all(isnan(out1)));
+            testCase.verifyEqual(out1, out2); % verifyEqual treats NaN==NaN as equal
+        end
+
+        function test_CO_AutoCorr_CacheEvictionStillCorrect(testCase)
+            % Push more distinct series through than the cache holds, then
+            % confirm a call for the very first (now-evicted) series still
+            % recomputes correctly rather than returning stale/wrong data.
+            rng(14);
+            N = 100;
+            firstSeries = randn(N,1);
+            out1a = CO_AutoCorr(firstSeries,[],'Fourier');
+            for k = 1:10
+                CO_AutoCorr(randn(N,1),[],'Fourier'); % evict firstSeries from the cache
+            end
+            out1b = CO_AutoCorr(firstSeries,[],'Fourier'); % must recompute correctly
+
+            testCase.verifyEqual(out1a, out1b, 'AbsTol', 1e-10);
+            testCase.verifyEqual(out1a, referenceFourierACF(firstSeries), 'AbsTol', 1e-10);
+        end
+
+        %-------------------------------------------------------------
         % CO_FirstMin
         %-------------------------------------------------------------
         function test_CO_FirstMin_SinusoidPeriod(testCase)
@@ -437,4 +492,18 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
     end
+end
+
+function acf = referenceFourierACF(y)
+    % Independent reference implementation of CO_AutoCorr's 'Fourier' method
+    % (the original, uncached algorithm), used to verify the caching layer
+    % added to CO_AutoCorr.m doesn't change its output.
+    N = length(y);
+    nFFT = 2^(nextpow2(N)+1);
+    F = fft(y - mean(y),nFFT);
+    F = F.*conj(F);
+    acf = ifft(F);
+    acf = acf./acf(1);
+    acf = real(acf);
+    acf = acf(1:N);
 end
