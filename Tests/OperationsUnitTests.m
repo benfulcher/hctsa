@@ -25,7 +25,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % just the recomputation but also any warning() side effect the
             % computation would have raised, which a couple of tests below
             % check for directly).
-            clear CO_AutoCorr CO_FirstMin NL_crptool_fnn
+            clear CO_AutoCorr CO_FirstMin NL_crptool_fnn BF_CheckToolbox
         end
     end
 
@@ -566,6 +566,36 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 testCase.verifyEqual(out.mrstd, expectedMrstd, 'AbsTol', 1e-9, ...
                     sprintf('mrstd mismatch for thresholdHow=''%s''',thresholdHow));
             end
+        end
+
+        %-------------------------------------------------------------
+        % BF_CheckToolbox caching
+        %-------------------------------------------------------------
+        function test_BF_CheckToolbox_CachingDoesNotChangeResult(testCase)
+            % BF_CheckToolbox caches the installed-addons list and
+            % license('test',...) results (both read-only queries that can't
+            % change during a single MATLAB session), since profiling showed
+            % installedAddons alone costs ~0.3s per call and this function is
+            % called by ~42 operations. Confirm interleaved/repeated calls
+            % (which exercise the cache) give results consistent with fresh
+            % queries to the underlying Matlab functions, for both the
+            % install-check and license-check paths -- without assuming any
+            % particular toolbox is absent (environment-independent).
+            toolboxes = {'curve_fitting_toolbox','statistics_toolbox','curve_fitting_toolbox'};
+            names = {'Curve Fitting Toolbox','Statistics and Machine Learning Toolbox','Curve Fitting Toolbox'};
+
+            for k = 1:numel(toolboxes)
+                [outFlag,theName] = BF_CheckToolbox(toolboxes{k},true,true);
+                expectedInstalled = any(ismember(matlab.addons.installedAddons().Name, names{k}));
+                testCase.verifyEqual(theName, names{k});
+                testCase.verifyEqual(outFlag, ~expectedInstalled, ...
+                    sprintf('Mismatch for toolbox %s at call %d',toolboxes{k},k));
+            end
+
+            % License-check path (doInstallCheck=false):
+            [outFlagLic,~] = BF_CheckToolbox('curve_fitting_toolbox',true,false);
+            expectedLicensed = license('test','curve_fitting_toolbox');
+            testCase.verifyEqual(outFlagLic, ~expectedLicensed);
         end
 
         %-------------------------------------------------------------
