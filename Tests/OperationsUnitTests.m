@@ -15,6 +15,18 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             end
             testCase.fatalAssertTrue(pass, 'HCTSA failed to startup successfully.')
         end
+
+        function clearSharedCaches(testCase)
+            % CO_AutoCorr.m and CO_FirstMin.m cache their results across
+            % calls (persistent variables) to avoid redundant recomputation
+            % across operations. Clear them here so tests are hermetic and
+            % order-independent regardless of how many times this test class
+            % runs within the same live MATLAB session (a cache hit skips not
+            % just the recomputation but also any warning() side effect the
+            % computation would have raised, which a couple of tests below
+            % check for directly).
+            clear CO_AutoCorr CO_FirstMin
+        end
     end
 
     methods(Test)
@@ -136,6 +148,42 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             [msg,~] = lastwarn();
             testCase.verifyTrue(isnan(out), 'CO_FirstMin should return NaN for a constant series.');
             testCase.verifyNotEmpty(msg, 'CO_FirstMin should warn when no minimum can be found.');
+        end
+
+        function test_CO_FirstMin_CacheDoesNotCrossContaminate(testCase)
+            % CO_FirstMin caches its resolved output (keyed on an exact,
+            % NaN-safe match of y, minWhat, extraParam, minNotMax). Confirm
+            % interleaved calls with different series don't get confused with
+            % each other's cached values, against an independent reference
+            % reimplementation of the 'ac'-branch algorithm (no caching).
+            rng(15);
+            y1 = randn(150,1);
+            y2 = randn(180,1);
+
+            out1a = CO_FirstMin(y1,'ac');
+            out2 = CO_FirstMin(y2,'ac');
+            out1b = CO_FirstMin(y1,'ac'); % should hit the cache
+
+            testCase.verifyEqual(out1a, referenceFirstMinAC(y1));
+            testCase.verifyEqual(out2, referenceFirstMinAC(y2));
+            testCase.verifyEqual(out1b, referenceFirstMinAC(y1), ...
+                'A cache hit for y1 must not be contaminated by the intervening call for y2.');
+        end
+
+        function test_CO_FirstMin_CacheEvictionStillCorrect(testCase)
+            % Push more distinct (series,method) combinations through than
+            % the cache holds, then confirm a call for the very first
+            % (now-evicted) combination still recomputes correctly.
+            rng(16);
+            N = 150;
+            firstSeries = randn(N,1);
+            out1a = CO_FirstMin(firstSeries,'ac');
+            for k = 1:10
+                CO_FirstMin(randn(N,1),'ac'); % evict firstSeries from the cache
+            end
+            out1b = CO_FirstMin(firstSeries,'ac'); % must recompute correctly
+
+            testCase.verifyEqual(out1a, out1b);
         end
 
         %-------------------------------------------------------------
@@ -492,6 +540,31 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
     end
+end
+
+function out = referenceFirstMinAC(y)
+    % Independent reference reimplementation of CO_FirstMin's 'ac' branch
+    % with default minNotMax=true (the original, uncached algorithm), used to
+    % verify CO_FirstMin's cache doesn't cross-contaminate results between
+    % different series.
+    N = length(y);
+    acf_all = CO_AutoCorr(y,[],'Fourier');
+    autoCorr = zeros(N-1,1);
+    for i = 1:N-1
+        autoCorr(i) = acf_all(i+1);
+        if isnan(autoCorr(i))
+            out = NaN;
+            return
+        end
+        if i==2 && (autoCorr(2) > autoCorr(1))
+            out = 1;
+            return
+        elseif (i > 2) && (autoCorr(i-2) > autoCorr(i-1)) && (autoCorr(i-1) < autoCorr(i))
+            out = i-1;
+            return
+        end
+    end
+    out = N;
 end
 
 function acf = referenceFourierACF(y)

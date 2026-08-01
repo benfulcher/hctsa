@@ -59,6 +59,58 @@ if nargin < 4
     minNotMax = true;
 end
 
+% ------------------------------------------------------------------------------
+% Cache the resolved output (keyed on an exact, NaN-safe match of all inputs
+% that affect the result), since many different operations call this function
+% to resolve a time delay for the same series and method (e.g., BF_Embed
+% defaults tau via CO_FirstMin(y,'mi') internally, and is itself called from
+% ~38 other operations). A miss falls through to exactly the same computation
+% as before, so this cannot change behavior -- only whether the result was
+% already sitting in the cache (see CO_AutoCorr.m for the same pattern and
+% rationale, including why this is safe under parfor).
+% ------------------------------------------------------------------------------
+persistent cacheY cacheMinWhat cacheExtraParam cacheMinNotMax cacheOut
+maxCacheEntries = 4;
+if isempty(cacheY)
+    cacheY = {};
+    cacheMinWhat = {};
+    cacheExtraParam = {};
+    cacheMinNotMax = {};
+    cacheOut = {};
+end
+
+for ci = 1:numel(cacheY)
+    if isequaln(y,cacheY{ci}) && isequal(minWhat,cacheMinWhat{ci}) && ...
+            isequaln(extraParam,cacheExtraParam{ci}) && isequal(minNotMax,cacheMinNotMax{ci})
+        out = cacheOut{ci};
+        return
+    end
+end
+
+out = CO_FirstMin_Compute(y,minWhat,extraParam,minNotMax);
+
+cacheY{end+1} = y;
+cacheMinWhat{end+1} = minWhat;
+cacheExtraParam{end+1} = extraParam;
+cacheMinNotMax{end+1} = minNotMax;
+cacheOut{end+1} = out;
+if numel(cacheY) > maxCacheEntries
+    cacheY(1) = [];
+    cacheMinWhat(1) = [];
+    cacheExtraParam(1) = [];
+    cacheMinNotMax(1) = [];
+    cacheOut(1) = [];
+end
+
+end
+
+% ------------------------------------------------------------------------------
+function out = CO_FirstMin_Compute(y,minWhat,extraParam,minNotMax)
+% The original computation, unchanged -- moved into its own local function so
+% the cache wrapper above can store its result regardless of which of the
+% early-return paths below produced it.
+% ------------------------------------------------------------------------------
+
 N = length(y); % Time-series length
 
 % ------------------------------------------------------------------------------
