@@ -197,8 +197,12 @@ fullTimer = tic;
 MasterOutput = cell(height(MasterOperations),1); % Ouput structures
 MasterCalcTime = zeros(height(MasterOperations),1); % Calculation times for each master operation
 
+% Map from MasterOperations.ID to its row index, built once, so that looking up
+% a master ID below is O(1) instead of a linear scan (via find) per lookup:
+masterIDToInd = containers.Map(num2cell(MasterOperations.ID),num2cell((1:height(MasterOperations))'));
+
 Master_IDs_calc = unique(Operations.MasterID); % Master_IDs that need to be calculated
-Master_ind_calc = arrayfun(@(x)find(MasterOperations.ID==x,1),Master_IDs_calc); % Indicies of MasterOperations that need to be calculated
+Master_ind_calc = arrayfun(@(x)masterIDToInd(x),Master_IDs_calc); % Indicies of MasterOperations that need to be calculated
 numMopsToCalc = length(Master_IDs_calc); % Number of master operations to calculate
 
 % Index sliced variables to minimize the communication overhead in the parallel processing
@@ -258,7 +262,7 @@ clear('masterTimer')
 % --------------------------------------------------------------------------
 % Set sliced version of matching indicies across the range toCalc
 % Indices of MasterOperations corresponding to each Operation (i.e., each index of toCalc)
-MasterOp_ind = arrayfun(@(x)find(MasterOperations.ID==x,1),Operations.MasterID);
+MasterOp_ind = arrayfun(@(x)masterIDToInd(x),Operations.MasterID);
 
 for jj = 1:numCalc
 	try

@@ -110,10 +110,14 @@ signal = y;
 
 prof = cumsum(signal);
 slength = size(prof);
-fqs = [];
 
 numIncrements = 20;
 sListFull = unique(round(linspace(minScale,maxScale,numIncrements)));
+
+% Preallocate fqs (one row per scale x q combination) instead of growing it
+% row-by-row with [fqs; ...] on every iteration:
+fqs = zeros(length(sListFull)*length(qList),3);
+rowIdx = 0;
 
 timer = tic;
 for s = sListFull
@@ -129,17 +133,20 @@ for s = sListFull
 
     segments = prof(coordinates);
     xbase = [1:1:s];
-    f2nis = [];
+    % Preallocate f2nis instead of growing it with f2nis(end+1) per segment:
+    numSegments = size(segments,1);
+    f2nis = zeros(1,numSegments);
 
-    for ni = 1:size(segments,1)
+    for ni = 1:numSegments
         seg = segments(ni,:);
         fit = polyfit(xbase,seg,2);
         variance = mean((seg - polyval(fit,xbase)).^2);
-        f2nis(end+1) = variance;
+        f2nis(ni) = variance;
     end
 
     for q = qList
-        fqs = [fqs; q s (mean(f2nis.^(q/2)))^(1/q)];
+        rowIdx = rowIdx + 1;
+        fqs(rowIdx,:) = [q, s, (mean(f2nis.^(q/2)))^(1/q)];
     end
 end
 % fprintf(1,'Detrended fluctuations computed in %s\n',BF_TheTime(toc(timer)));
@@ -150,7 +157,6 @@ fqsll = [fqs(:,1) fqs(:,2) log(fqs(:,2)) log(fqs(:,3))];
 % ------------------------------------------------------------------------------
 % Now compute hurst exponents as the gradients of F(q) curves
 % ------------------------------------------------------------------------------
-hqs = [];
 
 % if precisionMode == 0
 %     % Take 11 points through the space
@@ -164,6 +170,11 @@ hqs = [];
 
 if sum(sListFull<=maxScale/5)>=10
     sList = sListFull(sListFull<=maxScale/5);
+elseif minScale == maxScale/5
+    % Single-point range: minScale:0:(maxScale/5) would otherwise silently
+    % return empty (a zero-step colon range is always empty in Matlab, even
+    % when start == stop), so just take the one point directly:
+    sList = minScale;
 else
     % sample higher in the scale dimension:
     sspacing = ((maxScale/5)-minScale)/10;

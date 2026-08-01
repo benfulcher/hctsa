@@ -78,8 +78,11 @@ case 'mi-hist'
     % Automutual information implemented in super-naive box counting as in BF_MutualInformation
     corrfn = @(x) BF_MutualInformation(y(1:end-x), y(1+x:end), 'range', 'range',extraParam);
 case {'ac','corr'}
-    % Autocorrelation implemented as CO_AutoCorr
-    corrfn = @(x) CO_AutoCorr(y,x,'Fourier');
+    % Autocorrelation implemented as CO_AutoCorr.
+    % Compute the full ACF once (a single FFT/IFFT pass) instead of
+    % recomputing it from scratch for every lag queried in the loop below:
+    acf_all = CO_AutoCorr(y,[],'Fourier');
+    corrfn = @(x) acf_all(x+1); % lag x is stored at index x+1
 otherwise
     error('Unknown correlation type specified: ''%s''',minWhat);
 end

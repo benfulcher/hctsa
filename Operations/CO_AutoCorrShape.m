@@ -69,11 +69,14 @@ if isnumeric(stopWhen)
     Ndrown = stopWhen;
 elseif ischar(stopWhen) % compute ACF up to a given threshold:
     Ndrown = 0; % the point at which ACF ~ 0
+    % Compute the full ACF once (a single FFT/IFFT pass) instead of
+    % recomputing it from scratch for every lag queried in the loops below:
+    full_acf = CO_AutoCorr(y,[],'Fourier');
     switch stopWhen
     case 'posDrown'
         % Stop when ACF drops below threshold, th
         for i = 1:N
-            acf(i) = CO_AutoCorr(y,i-1,'Fourier'); % *** NOTE THIS! *** acf vector indicies are not lags
+            acf(i) = full_acf(i); % *** NOTE THIS! *** acf vector indicies are not lags
             if isnan(acf(i))
                 warning('Weird time series (constant?)');
                 out = NaN; return
@@ -95,7 +98,7 @@ elseif ischar(stopWhen) % compute ACF up to a given threshold:
     case 'drown'
         % Stop when ACF is very close to 0 (within threshold, th = 2/sqrt(N))
         for i = 1:N
-            acf(i) = CO_AutoCorr(y,i-1,'Fourier'); % *** NOTE THIS! *** acf vector indicies are not lags
+            acf(i) = full_acf(i); % *** NOTE THIS! *** acf vector indicies are not lags
             if (i > 1) && (abs(acf(i)) < th)
                 Ndrown = i;
                 acf = acf(1:i);
@@ -105,7 +108,7 @@ elseif ischar(stopWhen) % compute ACF up to a given threshold:
     case 'doubleDrown'
         % Stop at 2*tau, where tau is the lag where ACF ~ 0 (within 1/sqrt(N) threshold)
         for i = 1:N
-            acf(i) = CO_AutoCorr(y,i-1,'Fourier'); % *** NOTE acf vector indicies are not lags
+            acf(i) = full_acf(i); % *** NOTE acf vector indicies are not lags
             if (Ndrown > 0) && (i==Ndrown*2)
                 acf = acf(1:i);
                 break

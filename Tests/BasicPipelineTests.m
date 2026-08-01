@@ -159,7 +159,10 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             % compare to expected output
             actual_output = load(matName, 'TS_DataMat').TS_DataMat;
             expected_output = load(testCase.precomputedCatch22Mat, 'TS_DataMat').TS_DataMat;
-            testCase.verifyEqual(actual_output, expected_output, 'Expected output != actual output, catch22.', "RelTol", 0.1)
+            % Tightened from RelTol=0.1 (10%, loose enough to hide real regressions)
+            % down to 1e-4; loosen again if legitimate cross-platform/mex numerical
+            % differences make this too strict.
+            testCase.verifyEqual(actual_output, expected_output, 'Expected output != actual output, catch22.', "RelTol", 1e-4)
 
         end
 
