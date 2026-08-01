@@ -59,9 +59,40 @@ if strcmp(tau,'tau')
     tau = CO_FirstCrossing(y,'ac',0,'discrete');
 end
 
-% Take magnitudes of time-delayed versions of the time series:
-y1 = abs(y(1:end-tau));
-y2 = abs(y(1+tau:end));
+% Take magnitudes of time-delayed versions of the time series. abs(y) is
+% cached (keyed on an exact, NaN-safe content match of y) since this
+% function is called ~31 times directly as separate master operations with
+% different (alpha,beta,tau) on the same series (x_z), plus repeatedly from
+% CO_fzcglscf's internal loop over tau -- each call would otherwise
+% recompute abs(y) from scratch (see CO_AutoCorr.m for the same pattern and
+% rationale, including why this is safe under parfor).
+persistent cacheY cacheAy
+maxCacheEntries = 4;
+if isempty(cacheY)
+    cacheY = {};
+    cacheAy = {};
+end
+
+foundInCache = false;
+for ci = 1:numel(cacheY)
+    if isequaln(y,cacheY{ci})
+        ay = cacheAy{ci};
+        foundInCache = true;
+        break
+    end
+end
+if ~foundInCache
+    ay = abs(y);
+    cacheY{end+1} = y;
+    cacheAy{end+1} = ay;
+    if numel(cacheY) > maxCacheEntries
+        cacheY(1) = [];
+        cacheAy(1) = [];
+    end
+end
+
+y1 = ay(1:end-tau);
+y2 = ay(1+tau:end);
 
 glscf = (mean((y1.^alpha).*(y2.^beta)) - mean(y1.^alpha)*mean(y2.^beta)) / ...
      		    (sqrt(mean(y1.^(2*alpha)) - mean(y1.^alpha)^2) ...

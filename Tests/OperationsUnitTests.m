@@ -25,7 +25,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % just the recomputation but also any warning() side effect the
             % computation would have raised, which a couple of tests below
             % check for directly).
-            clear CO_AutoCorr CO_FirstMin NL_crptool_fnn BF_CheckToolbox
+            clear CO_AutoCorr CO_FirstMin NL_crptool_fnn BF_CheckToolbox CO_glscf
         end
     end
 
@@ -630,6 +630,34 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % CO_glscf caching
+        %-------------------------------------------------------------
+        function test_CO_glscf_CacheDoesNotCrossContaminate(testCase)
+            % CO_glscf caches abs(y) (keyed on an exact, NaN-safe match of
+            % y), since it's called ~31 times directly (as separate master
+            % operations with different alpha/beta/tau on the same series)
+            % plus repeatedly from CO_fzcglscf's internal loop. Confirm
+            % interleaved calls with different series/parameters don't get
+            % confused with each other's cached values, against an
+            % independent reference computation.
+            rng(26);
+            y1 = randn(200,1);
+            y2 = randn(250,1);
+            alpha = 1; beta = 2; tau = 3;
+
+            referenceGlscf = @(y) refGlscf(y,alpha,beta,tau);
+
+            out1a = CO_glscf(y1,alpha,beta,tau);
+            out2 = CO_glscf(y2,alpha,beta,tau);
+            out1b = CO_glscf(y1,alpha,beta,tau); % should hit the cache
+
+            testCase.verifyEqual(out1a, referenceGlscf(y1), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out2, referenceGlscf(y2), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out1b, referenceGlscf(y1), 'AbsTol', 1e-10, ...
+                'A cache hit for y1 must not be contaminated by the intervening call for y2.');
+        end
+
+        %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
         function test_MasterCodeStringHandleEquivalence(testCase)
@@ -760,4 +788,16 @@ function acf = referenceFourierACF(y)
     acf = acf./acf(1);
     acf = real(acf);
     acf = acf(1:N);
+end
+
+function glscf = refGlscf(y,alpha,beta,tau)
+    % Independent reference implementation of CO_glscf (the original,
+    % uncached algorithm: abs(y) recomputed directly, no caching), used to
+    % verify CO_glscf's cache doesn't cross-contaminate results between
+    % different series.
+    y1 = abs(y(1:end-tau));
+    y2 = abs(y(1+tau:end));
+    glscf = (mean((y1.^alpha).*(y2.^beta)) - mean(y1.^alpha)*mean(y2.^beta)) / ...
+                (sqrt(mean(y1.^(2*alpha)) - mean(y1.^alpha)^2) ...
+                      * sqrt(mean(y2.^(2*beta)) - mean(y2.^beta)^2));
 end
