@@ -290,7 +290,7 @@ switch model
 		out.fpe_range = range(fpes);
 
 		% Statistics on fitted AR parameters, p
-		for i = 1:order % first column will be ones
+		for i = 1:order(1) % first column will be ones
 			out.(['p_', num2str(i), '_std']) = std(ps(:, i + 1));
 			out.(['p_', num2str(i), '_mean']) = mean(ps(:, i + 1));
 			out.(['p_', num2str(i), '_max']) = max(ps(:, i + 1));
@@ -298,7 +298,7 @@ switch model
 		end
 
 		% Statistics on fitted MA parameters, q
-		for i = 1:order % first column will be ones
+		for i = 1:order(2) % first column will be ones
 			out.(['q_', num2str(i), '_std']) = std(qs(:, i + 1));
 			out.(['q_', num2str(i), '_mean']) = mean(qs(:, i + 1));
 			out.(['q_', num2str(i), '_max']) = max(qs(:, i + 1));
