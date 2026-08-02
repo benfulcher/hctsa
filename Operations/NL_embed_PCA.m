@@ -57,11 +57,11 @@ function out = NL_embed_PCA(y, tau, m)
 % Check Inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
-    tau = 'ac'; % embed by first zero-crossing of autocorrelation function
+	tau = 'ac'; % embed by first zero-crossing of autocorrelation function
 end
 
 if nargin < 3 || isempty(m)
-    m = 3; % three-dimensional embedding
+	m = 3; % three-dimensional embedding
 end
 doPlot = false;
 % -------------------------------------------------------------------------------
@@ -70,9 +70,9 @@ doPlot = false;
 y_embed = BF_Embed(y, tau, m, 0);
 
 if isnan(y_embed);
-    % embedding parameters are unsuitable (likely that tau is too long...)
-    fprintf(1, 'Embedding parameters are not suitable for this time series\n');
-    out = NaN; return
+	% embedding parameters are unsuitable (likely that tau is too long...)
+	fprintf(1, 'Embedding parameters are not suitable for this time series\n');
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
@@ -83,14 +83,14 @@ end
 perc = latent / sum(latent); % proportion of variance explained
 
 if doPlot
-    figure('color', 'w'); plot(perc, 'o-k'); ylim([0, 1]);
+	figure('color', 'w'); plot(perc, 'o-k'); ylim([0, 1]);
 end
 
 % -------------------------------------------------------------------------------
 % Raw outputs:
 % -------------------------------------------------------------------------------
 for i = 1:m
-    out.(sprintf('perc_%u', i)) = perc(i);
+	out.(sprintf('perc_%u', i)) = perc(i);
 end
 
 % ------------------------------------------------------------------------------
@@ -118,21 +118,21 @@ out.fb001 = first_fn(perc, 0.01, -1);
 
 % ------------------------------------------------------------------------------
 function firsti = first_fn(p, threshold, overOrUnder)
-    % Find the first time p goes under the threshold, x
+	% Find the first time p goes under the threshold, x
 
-    if overOrUnder == -1
-        % Under threshold
-        firsti = find(p < threshold, 1, 'first');
-    else
-        % Over threshold
-        firsti = find(p > threshold, 1, 'first');
-    end
+	if overOrUnder == -1
+		% Under threshold
+		firsti = find(p < threshold, 1, 'first');
+	else
+		% Over threshold
+		firsti = find(p > threshold, 1, 'first');
+	end
 
-    % If it never goes under -- saturate as m at the maximum
-    % (could be NaN, but this is more interpretable/comparable)
-    if isempty(firsti)
-        firsti = length(p) + 1;
-    end
+	% If it never goes under -- saturate as m at the maximum
+	% (could be NaN, but this is more interpretable/comparable)
+	if isempty(firsti)
+		firsti = length(p) + 1;
+	end
 
 end
 

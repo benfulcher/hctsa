@@ -58,42 +58,42 @@ doPlot = 0; % set to 1 to plot outputs to figure
 % Check Inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(l)
-    l = 100; % by default use 100 samples
+	l = 100; % by default use 100 samples
 end
 
 if ischar(l)
-    % tau (global)
-    taug = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-    switch l
-        case 'ac2'
-            l = 2 * taug;
-        case 'ac5'
-            l = 5 * taug;
-        otherwise
-            error('Unknown specifier ''%s''', l);
-    end
+	% tau (global)
+	taug = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	switch l
+		case 'ac2'
+			l = 2 * taug;
+		case 'ac5'
+			l = 5 * taug;
+		otherwise
+			error('Unknown specifier ''%s''', l);
+	end
 
-    % Very short l for this sort of time series:
-    if l < 5
-        warning(['This time series has a very short correlation length;\nSetting ' ...
-                 'l=%u means that changes estimates will be difficult to compare...'], l);
-    end
+	% Very short l for this sort of time series:
+	if l < 5
+		warning(['This time series has a very short correlation length;\nSetting ' ...
+				 'l=%u means that changes estimates will be difficult to compare...'], l);
+	end
 end
 
 if nargin < 3 || isempty(numSegs)
-    numSegs = 100; % 100 segments by default
+	numSegs = 100; % 100 segments by default
 end
 
 % Check the parameters are appropriate for the length of the input time series:
 N = length(y); % the length of the time series
 if l > 0.9 * N % operation is not suitable -- time series is too short
-    warning('This time series (N = %u) is too short to use l = %.1f\n', N, l)
-    out = NaN;
-    return % NaN means not suitable
+	warning('This time series (N = %u) is too short to use l = %.1f\n', N, l)
+	out = NaN;
+	return % NaN means not suitable
 end
 
 if nargin < 4
-    randomSeed = []; % use default random seed
+	randomSeed = []; % use default random seed
 end
 
 % ------------------------------------------------------------------------------
@@ -106,35 +106,35 @@ qs = zeros(numSegs, numFeat);
 BF_ResetSeed(randomSeed);
 
 for j = 1:numSegs
-    % pick a range
-    % in this implementation, ranges CAN overlap
+	% pick a range
+	% in this implementation, ranges CAN overlap
 
-    ist = randi(N - 1 - l, 1); % random start point (not exceeding the endpoint)
-    ifh = ist + l - 1; % finish index
-    rs = ist:ifh; % sample range (from starting to finishing index)
-    ySub = y(rs); % contiguous subsegment of the time series
+	ist = randi(N - 1 - l, 1); % random start point (not exceeding the endpoint)
+	ifh = ist + l - 1; % finish index
+	rs = ist:ifh; % sample range (from starting to finishing index)
+	ySub = y(rs); % contiguous subsegment of the time series
 
-    qs(j, 1) = mean(ySub); % mean
-    qs(j, 2) = std(ySub); % standard deviation
-    qs(j, 3) = skewness(ySub); % skewness
-    qs(j, 4) = kurtosis(ySub); % kurtosis
-    entropyStruct = EN_SampEn(ySub, 1, 0.15);
-    qs(j, 5) = entropyStruct.quadSampEn1; % SampEn_1_01
-    qs(j, 6) = CO_AutoCorr(ySub, 1, 'Fourier'); % AC1
-    qs(j, 7) = CO_AutoCorr(ySub, 2, 'Fourier'); % AC2
-    qs(j, 8) = CO_FirstCrossing(ySub, 'ac', 0, 'continuous'); % first zero crossing
+	qs(j, 1) = mean(ySub); % mean
+	qs(j, 2) = std(ySub); % standard deviation
+	qs(j, 3) = skewness(ySub); % skewness
+	qs(j, 4) = kurtosis(ySub); % kurtosis
+	entropyStruct = EN_SampEn(ySub, 1, 0.15);
+	qs(j, 5) = entropyStruct.quadSampEn1; % SampEn_1_01
+	qs(j, 6) = CO_AutoCorr(ySub, 1, 'Fourier'); % AC1
+	qs(j, 7) = CO_AutoCorr(ySub, 2, 'Fourier'); % AC2
+	qs(j, 8) = CO_FirstCrossing(ySub, 'ac', 0, 'continuous'); % first zero crossing
 end
 
 % ------------------------------------------------------------------------------
 % Plot some output?:
 % ------------------------------------------------------------------------------
 if doPlot
-    figure('color', 'w');
-    subplot(2, 1, 1); hold on;
-    plot(y, 'k');
-    plot(ists, y(ists), '.r');
-    title('time series')
-    subplot(2, 1, 2); plot(qs(:, 1), 'b'); title('local means')
+	figure('color', 'w');
+	subplot(2, 1, 1); hold on;
+	plot(y, 'k');
+	plot(ists, y(ists), '.r');
+	title('time series')
+	subplot(2, 1, 2); plot(qs(:, 1), 'b'); title('local means')
 end
 
 % ------------------------------------------------------------------------------

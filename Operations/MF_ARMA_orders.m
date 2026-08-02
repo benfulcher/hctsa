@@ -65,12 +65,12 @@ y = iddata(y, [], 1);
 
 % ARMA(p,q): p range, pr
 if nargin < 2 || isempty(pr)
-    pr = (1:10);
+	pr = (1:10);
 end
 
 % ARMA(p,q): q range, qr
 if nargin < 3 || isempty(qr)
-    qr = (1:5);
+	qr = (1:5);
 end
 
 % ------------------------------------------------------------------------------
@@ -83,17 +83,17 @@ aics = zeros(length(pr), length(qr));
 %% Fit the models
 % ------------------------------------------------------------------------------
 for i = 1:length(pr)
-    p = pr(i);
-    for j = 1:length(qr)
-        q = qr(j);
+	p = pr(i);
+	for j = 1:length(qr)
+		q = qr(j);
 
-        % Fit the ARMA(p,q) model
-        m = armax(y, [p, q]);
+		% Fit the ARMA(p,q) model
+		m = armax(y, [p, q]);
 
-        % Get statistics on it
-        fpes(i, j) = m.EstimationInfo.FPE;
-        aics(i, j) = aic(m);
-    end
+		% Get statistics on it
+		fpes(i, j) = m.EstimationInfo.FPE;
+		aics(i, j) = aic(m);
+	end
 end
 
 % global minimum, aic

@@ -38,11 +38,11 @@ function out = DN_Quantile(y, p)
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    fprintf(1, 'Using quantile p = 0.5 (median) by default\n');
-    p = 0.5;
+	fprintf(1, 'Using quantile p = 0.5 (median) by default\n');
+	p = 0.5;
 end
 if ~isnumeric(p) || (p < 0) || (p > 1)
-    error('p must specify a proportion, in (0,1)');
+	error('p must specify a proportion, in (0,1)');
 end
 
 out = quantile(y, p);

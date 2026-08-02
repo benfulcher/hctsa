@@ -68,19 +68,19 @@ function out = PH_ForcePotential(y, whatPotential, params)
 % Check inputs and set defaults
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(whatPotential)
-    whatPotential = 'dblwell'; % by default
+	whatPotential = 'dblwell'; % by default
 end
 
 if nargin < 3 || isempty(params)
-    % default parameters
-    switch whatPotential
-        case 'dblwell'
-            params = [2, 0.1, 0.1];
-        case 'sine'
-            params = [1, 1, 1];
-        otherwise
-            error('Unknown system ''%s''', whatPotential);
-    end
+	% default parameters
+	switch whatPotential
+		case 'dblwell'
+			params = [2, 0.1, 0.1];
+		case 'sine'
+			params = [1, 1, 1];
+		otherwise
+			error('Unknown system ''%s''', whatPotential);
+	end
 end
 
 doPlot = false; % plot results
@@ -94,47 +94,47 @@ deltat = params(3); % time step
 
 % Specify the potential function
 switch whatPotential
-    case 'sine'
-        V = @(x) -cos(x / alpha);
-        F = @(x) sin(x / alpha) / alpha;
-    case 'dblwell'
-        F = @(x) -x.^3 + alpha^2 * x; % the double well function (the force from a double well potential)
-        V = @(x) x.^4 / 4 - alpha^2 * x.^2 / 2;
-    otherwise
-        error('Unknown potential function ''%s'' specified', whatPotential);
+	case 'sine'
+		V = @(x) -cos(x / alpha);
+		F = @(x) sin(x / alpha) / alpha;
+	case 'dblwell'
+		F = @(x) -x.^3 + alpha^2 * x; % the double well function (the force from a double well potential)
+		V = @(x) x.^4 / 4 - alpha^2 * x.^2 / 2;
+	otherwise
+		error('Unknown potential function ''%s'' specified', whatPotential);
 end
 
 x = zeros(N, 1); % Position
 v = zeros(N, 1); % Velocity
 
 for i = 2:N
-    x(i) = x(i - 1) + v(i - 1) * deltat + (F(x(i - 1)) + y(i - 1) - kappa * v(i - 1)) * deltat^2;
-    v(i) = v(i - 1) + (F(x(i - 1)) + y(i - 1) - kappa * v(i - 1)) * deltat;
+	x(i) = x(i - 1) + v(i - 1) * deltat + (F(x(i - 1)) + y(i - 1) - kappa * v(i - 1)) * deltat^2;
+	v(i) = v(i - 1) + (F(x(i - 1)) + y(i - 1) - kappa * v(i - 1)) * deltat;
 end
 
 if doPlot
-    switch whatPotential
-        case 'dblwell'
-            figure('color', 'w'); hold on;
-            plot(-100:0.1:100, F(-100:0.1:100), 'k') % plot the potential
-            plot(x, V(x), 'or')
-            plot(x)
+	switch whatPotential
+		case 'dblwell'
+			figure('color', 'w'); hold on;
+			plot(-100:0.1:100, F(-100:0.1:100), 'k') % plot the potential
+			plot(x, V(x), 'or')
+			plot(x)
 
-        case 'sine'
-            figure('color', 'w');
-            subplot(3, 1, 1); plot(y, 'k'); title('Time series -> drive')
-            subplot(3, 1, 2); plot(x, 'k'); title('Simulated particle position')
-            subplot(3, 1, 3); box('on'); hold on;
-            plot(min(x):0.1:max(x), V(min(x):0.1:max(x)), 'k')
-            plot(x, V(x), '.r')
-    end
+		case 'sine'
+			figure('color', 'w');
+			subplot(3, 1, 1); plot(y, 'k'); title('Time series -> drive')
+			subplot(3, 1, 2); plot(x, 'k'); title('Simulated particle position')
+			subplot(3, 1, 3); box('on'); hold on;
+			plot(min(x):0.1:max(x), V(min(x):0.1:max(x)), 'k')
+			plot(x, V(x), '.r')
+	end
 end
 
 % Check trajectory didn't blow out:
 if isnan(x(end)) || abs(x(end)) > 1E10
-    fprintf(1, 'Trajectory blew out!\n');
-    out = NaN;
-    return % not suitable for this time series
+	fprintf(1, 'Trajectory blew out!\n');
+	out = NaN;
+	return % not suitable for this time series
 end
 
 % ------------------------------------------------------------------------------
@@ -154,10 +154,10 @@ out.finaldev = abs(x(end)); % final position
 
 % A couple of additional outputs for double well:
 if strcmp(whatPotential, 'dblwell')
-    % number of times the trajectory crosses the middle of the upper well
-    out.pcrossup = sum((x(1:end - 1) - alpha) .* (x(2:end) - alpha) < 0) / (N - 1);
-    % number of times the trajectory crosses the middle of the lower well
-    out.pcrossdown = sum((x(1:end - 1) + alpha) .* (x(2:end) + alpha) < 0) / (N - 1);
+	% number of times the trajectory crosses the middle of the upper well
+	out.pcrossup = sum((x(1:end - 1) - alpha) .* (x(2:end) - alpha) < 0) / (N - 1);
+	% number of times the trajectory crosses the middle of the lower well
+	out.pcrossdown = sum((x(1:end - 1) + alpha) .* (x(2:end) + alpha) < 0) / (N - 1);
 end
 
 end

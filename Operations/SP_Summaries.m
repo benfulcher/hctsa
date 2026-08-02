@@ -75,24 +75,24 @@ BF_CheckToolbox('curve_fitting_toolbox');
 % Check inputs, set defaults:
 % ------------------------------------------------------------------------------
 if size(y, 2) > size(y, 1)
-    y = y'; % Time series must be a column vector
+	y = y'; % Time series must be a column vector
 end
 if nargin < 2 || isempty(psdMeth)
-    psdMeth = 'fft'; % fft by default
+	psdMeth = 'fft'; % fft by default
 end
 if nargin < 3 || isempty(windowType)
-    windowType = 'hamming'; % Hamming window by default
+	windowType = 'hamming'; % Hamming window by default
 end
 if nargin < 4
-    nf = [];
+	nf = [];
 end
 if nargin < 5 || isempty(doLogAbs)
-    doLogAbs = false;
+	doLogAbs = false;
 end
 
 if doLogAbs % a boolean
-    % Analyze the spectrum of logarithmic absolute deviations
-    y = log(abs(y));
+	% Analyze the spectrum of logarithmic absolute deviations
+	y = log(abs(y));
 end
 
 doPlot = false; % plot outputs
@@ -102,79 +102,79 @@ Ny = length(y); % time-series length
 % Set window (for periodogram and welch):
 % -------------------------------------------------------------------------------
 if ismember(psdMeth, {'periodogram', 'welch'})
-    switch windowType % method to use for the window
-        case 'none'
-            window = [];
-        case 'hamming'
-            window = hamming(Ny);
-        case 'hann'
-            window = hann(Ny);
-        case 'bartlett'
-            window = bartlett(Ny);
-        case 'boxcar'
-            window = boxcar(Ny);
-        case 'rect'
-            window = rectwin(Ny);
-        otherwise
-            % There are other options, but these aren't implemented here
-            error('Unknown window, ''%s''', windowType);
-    end
+	switch windowType % method to use for the window
+		case 'none'
+			window = [];
+		case 'hamming'
+			window = hamming(Ny);
+		case 'hann'
+			window = hann(Ny);
+		case 'bartlett'
+			window = bartlett(Ny);
+		case 'boxcar'
+			window = boxcar(Ny);
+		case 'rect'
+			window = rectwin(Ny);
+		otherwise
+			% There are other options, but these aren't implemented here
+			error('Unknown window, ''%s''', windowType);
+	end
 end
 
 % ------------------------------------------------------------------------------
 % Compute the Fourier Transform
 % ------------------------------------------------------------------------------
 switch psdMeth
-    case 'periodogram'
-        if isempty(nf)
-            % (2) Estimate the spectrum
-            [S, w] = periodogram(y, window);
-        else
-            w = linspace(0, pi, nf);
-            [S, w] = periodogram(y, window, w);
-        end
+	case 'periodogram'
+		if isempty(nf)
+			% (2) Estimate the spectrum
+			[S, w] = periodogram(y, window);
+		else
+			w = linspace(0, pi, nf);
+			[S, w] = periodogram(y, window, w);
+		end
 
-    case 'fft'
-        % Fast Fourier Transform
-        Fs = 1; % sampling frequency
-        NFFT = 2^nextpow2(Ny);
-        f = Fs / 2 * linspace(0, 1, NFFT / 2 + 1); % frequency
-        w = 2 * pi * f'; % angular frequency (as column vector)
-        S = fft(y, NFFT); % Fourier Transform
-        S = 2 * abs(S(1:NFFT / 2 + 1)).^2 / Ny; % single-sided power spectral density
-        S = S / (2 * pi); % convert to angular frequency space
+	case 'fft'
+		% Fast Fourier Transform
+		Fs = 1; % sampling frequency
+		NFFT = 2^nextpow2(Ny);
+		f = Fs / 2 * linspace(0, 1, NFFT / 2 + 1); % frequency
+		w = 2 * pi * f'; % angular frequency (as column vector)
+		S = fft(y, NFFT); % Fourier Transform
+		S = 2 * abs(S(1:NFFT / 2 + 1)).^2 / Ny; % single-sided power spectral density
+		S = S / (2 * pi); % convert to angular frequency space
 
-    case 'welch'
-        % Welch power spectral density estimate:
-        Fs = 1; % sampling frequency
-        N = 2^nextpow2(Ny);
-        [S, f] = pwelch(y, window, [], N, Fs);
-        w = 2 * pi * f'; % angular frequency
-        S = S / (2 * pi); % adjust so that area remains normalized in angular frequency space
+	case 'welch'
+		% Welch power spectral density estimate:
+		Fs = 1; % sampling frequency
+		N = 2^nextpow2(Ny);
+		[S, f] = pwelch(y, window, [], N, Fs);
+		w = 2 * pi * f'; % angular frequency
+		S = S / (2 * pi); % adjust so that area remains normalized in angular frequency space
 
-    otherwise
-        error('Unknown spectral estimation method ''%s''', psdMeth);
+	otherwise
+		error('Unknown spectral estimation method ''%s''', psdMeth);
 end
 
 if ~any(isfinite(S)) % no finite values in the power spectrum
-    % This time series must be really weird -- return NaN (unsuitable operation)...
-    warning('NaN in power spectrum? A weird time series.');
-    out = NaN; return
+	% This time series must be really weird -- return NaN (unsuitable operation)...
+	warning('NaN in power spectrum? A weird time series.');
+	out = NaN; return
 end
 
 % Ensure both w and S are row vectors:
 if size(S, 1) > size(S, 2)
-    S = S';
+	S = S';
 end
 if size(w, 1) > size(w, 2)
-    w = w';
+	w = w';
 end
 
 if doPlot
-    figure('color', 'w')
-    plot(w, S, '.-k'); % plot the spectrum
-    % Area under S should sum to 1 if a power spectral density estimate:
-    title(sprintf('Area under psd curve = %.1f (= %.1f)', sum(S * (w(2) - w(1))), var(y)));
+	figure('color', 'w')
+	plot(w, S, '.-k'); % plot the spectrum
+	% Area under S should sum to 1 if a power spectral density estimate:
+	title(sprintf('Area under psd curve = %.1f (= %.1f)', sum(S * (w(2) - w(1))), var(y)));
 end
 
 N = length(S); % = length(w)
@@ -192,9 +192,9 @@ dw = w(2) - w(1); % spacing increment in w
 [out.maxS, i_maxS] = max(S);
 out.maxw = w(i_maxS);
 out.maxWidth = w(i_maxS + find(S(i_maxS + 1:end) < out.maxS, 1, 'first')) - ...
-                    w(find(S(1:i_maxS - 1) < out.maxS, 1, 'last'));
+					w(find(S(1:i_maxS - 1) < out.maxS, 1, 'last'));
 if isempty(out.maxWidth)
-    out.maxWidth = 0;
+	out.maxWidth = 0;
 end
 
 % Characterize all peaks using findpeaks function:
@@ -249,7 +249,7 @@ out.logstd = std(logS);
 out.mean = mean(S);
 out.logmean = mean(logS);
 for i = 3:5
-    out.(sprintf('mom%u', i)) = DN_Moments(S, i);
+	out.(sprintf('mom%u', i)) = DN_Moments(S, i);
 end
 
 % Autocorrelation of amplitude spectrum:
@@ -431,21 +431,21 @@ out.ncross_f05 = ncrossfn_rel(0.5);
 % end
 
 function out = giveMeRobustStats(xData, yData, textID, out)
-    % Add statistics to the output structure from a robust linear fit
-    % between xData and yData
+	% Add statistics to the output structure from a robust linear fit
+	% between xData and yData
 
-    % Perform the fit:
-    [a, stats] = robustfit(xData, yData);
+	% Perform the fit:
+	[a, stats] = robustfit(xData, yData);
 
-    % Add the statistics to the output structure:
-    out.(sprintf('%s_a1', textID)) = a(1); % robust intercept
-    out.(sprintf('%s_a2', textID)) = a(2); % robust gradient
-    % ratio of sigma estimates between ordinary least squares (ols) and the robust fit:
-    out.(sprintf('%s_sigrat', textID)) = stats.ols_s / stats.robust_s;
-    % esimate of sigma as the larger of robust_s and a weighted average of ols_s and robust_s:
-    out.(sprintf('%s_sigma', textID)) = stats.s;
-    out.(sprintf('%s_sea1', textID)) = stats.se(1); % standard error of 1st coefficient estimate
-    out.(sprintf('%s_sea2', textID)) = stats.se(2); % standard error of 2nd coefficient estimate
+	% Add the statistics to the output structure:
+	out.(sprintf('%s_a1', textID)) = a(1); % robust intercept
+	out.(sprintf('%s_a2', textID)) = a(2); % robust gradient
+	% ratio of sigma estimates between ordinary least squares (ols) and the robust fit:
+	out.(sprintf('%s_sigrat', textID)) = stats.ols_s / stats.robust_s;
+	% esimate of sigma as the larger of robust_s and a weighted average of ols_s and robust_s:
+	out.(sprintf('%s_sigma', textID)) = stats.s;
+	out.(sprintf('%s_sea1', textID)) = stats.se(1); % standard error of 1st coefficient estimate
+	out.(sprintf('%s_sea2', textID)) = stats.se(2); % standard error of 2nd coefficient estimate
 end
 
 end

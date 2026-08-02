@@ -58,7 +58,7 @@ BF_CheckToolbox('econometrics_toolbox');
 % Check inputs
 % -------------------------------------------------------------------------------
 if nargin < 2 || isempty(lags)
-    lags = 0;
+	lags = 0;
 end
 
 % ------------------------------------------------------------------------------
@@ -75,17 +75,17 @@ warning('on', 'econ:kpsstest:StatTooBig')
 %% (2) Return statistics on outputs of test(s)
 % ------------------------------------------------------------------------------
 if length(lags) > 1
-    % Return statistics on outputs
-    out.maxpValue = max(pValue);
-    out.minpValue = min(pValue);
-    out.maxstat = max(stat);
-    out.minstat = min(stat);
-    out.lagmaxstat = lags(stat == max(stat)); % lag at max test statistic
-    out.lagminstat = lags(stat == min(stat));
+	% Return statistics on outputs
+	out.maxpValue = max(pValue);
+	out.minpValue = min(pValue);
+	out.maxstat = max(stat);
+	out.minstat = min(stat);
+	out.lagmaxstat = lags(stat == max(stat)); % lag at max test statistic
+	out.lagminstat = lags(stat == min(stat));
 else
-    % return the statistic and pvalue
-    out.stat = stat;
-    out.pValue = pValue;
+	% return the statistic and pvalue
+	out.stat = stat;
+	out.pValue = pValue;
 end
 
 end

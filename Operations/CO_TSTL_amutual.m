@@ -61,51 +61,51 @@ s = signal(y); % convert to signal object for TSTOOL
 %% Check Inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(maxTau)
-    maxTau = ceil(N / 4);
+	maxTau = ceil(N / 4);
 end
 maxTau0 = maxTau; % keep this original number if changed
 maxTau = min(maxTau, ceil(N / 2)); % Don't go above N/2
 
 if nargin < 3 || isempty(numBins)
-    numBins = round(sqrt(N / 10)); % this is an arbitrary choice (!!) ;-)
+	numBins = round(sqrt(N / 10)); % this is an arbitrary choice (!!) ;-)
 end
 
 if nargin < 4 || isempty(versionTwo)
-    versionTwo = 0; % use amutual by default
+	versionTwo = 0; % use amutual by default
 end
 
 % ------------------------------------------------------------------------------
 %% Run
 % ------------------------------------------------------------------------------
 if versionTwo
-    % Check existence of code:
-    if ~exist('amutual2', 'file')
-        error('''amutual2'' not found -- ensure the TSTOOL package is installed correctly??\n');
-    end
-    ami = data(amutual2(s, maxTau));
+	% Check existence of code:
+	if ~exist('amutual2', 'file')
+		error('''amutual2'' not found -- ensure the TSTOOL package is installed correctly??\n');
+	end
+	ami = data(amutual2(s, maxTau));
 else
-    % Check existence of code:
-    if ~exist('amutual', 'file')
-        error('''amutual'' not found -- ensure the TSTOOL package is installed correctly??\n');
-    end
-    ami = data(amutual(s, maxTau, numBins));
+	% Check existence of code:
+	if ~exist('amutual', 'file')
+		error('''amutual'' not found -- ensure the TSTOOL package is installed correctly??\n');
+	end
+	ami = data(amutual(s, maxTau, numBins));
 end
 
 % Plot results
 if doPlot
-    figure('color', 'w'); box('on');
-    plot(ami, '-ok');
+	figure('color', 'w'); box('on');
+	plot(ami, '-ok');
 end
 
 % ------------------------------------------------------------------------------
 % Change automutual information vector to a structure for output
 % ------------------------------------------------------------------------------
 for i = 1:maxTau0 + 1
-    if i <= maxTau
-        out.(sprintf('ami%u', i)) = ami(i);
-    else
-        out.(sprintf('ami%u', i)) = NaN;
-    end
+	if i <= maxTau
+		out.(sprintf('ami%u', i)) = ami(i);
+	else
+		out.(sprintf('ami%u', i)) = NaN;
+	end
 end
 
 % ------------------------------------------------------------------------------
@@ -122,9 +122,9 @@ dami = diff(ami);
 extremai = find(dami(1:end - 1) .* dami(2:end) < 0);
 out.pextrema = length(extremai) / (lami - 1);
 if isempty(extremai)
-    out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
+	out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
 else
-    out.fmmi = extremai(1);
+	out.fmmi = extremai(1);
 end
 
 % Periodicities in local maxima?

@@ -51,12 +51,12 @@ function out = NL_TSTL_acp(y, tau, past, maxDelay, maxDim, Nref, randomSeed)
 % ------------------------------------------------------------------------------
 
 try
-    s = signal(y);
+	s = signal(y);
 catch
-    error('Error running ''signal'' on the input time series -- has TSTOOL been installed?')
+	error('Error running ''signal'' on the input time series -- has TSTOOL been installed?')
 end
 if ~isa(s, 'signal')
-    error('Error making a signal class of the input time series')
+	error('Error making a signal class of the input time series')
 end
 N = length(y); % length of the time series
 
@@ -65,56 +65,56 @@ N = length(y); % length of the time series
 % ------------------------------------------------------------------------------
 % (*) tau
 if nargin < 2
-    tau = 'ac'; % use first zero-crossing of autocorrelation function as default
+	tau = 'ac'; % use first zero-crossing of autocorrelation function as default
 end
 if strcmp(tau, 'mi')
-    tau = CO_FirstMin(y, 'mi');
+	tau = CO_FirstMin(y, 'mi');
 elseif strcmp(tau, 'ac')
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
 if isnan(tau)
-    error('Time series cannot be embedded (too short?)');
+	error('Time series cannot be embedded (too short?)');
 end
 % time delay can't be more than 1/20th of time series length
 if tau > N / 20
-    tau = floor(N / 20);
+	tau = floor(N / 20);
 end
 if tau == 0
-    tau = 1;
+	tau = 1;
 end
 
 % (*) past
 if nargin < 3 || isempty(past)
-    past = 1;
+	past = 1;
 end
 if (past > 0) && (past < 1)
-    past = floor(past * N); % specify a proportion of the time series length
+	past = floor(past * N); % specify a proportion of the time series length
 end
 
 % (*) maxDelay
 if nargin < 4 || isempty(maxDelay)
-    maxDelay = ceil(N / 4);
+	maxDelay = ceil(N / 4);
 end
 if (maxDelay > 0) && (maxDelay < 1)
-    maxDelay = ceil(maxDelay * N); % specify a proportion of the time series length
+	maxDelay = ceil(maxDelay * N); % specify a proportion of the time series length
 end
 
 % (*) maxDim
 if nargin < 5 || isempty(maxDim)
-    maxDim = 10;
+	maxDim = 10;
 end
 
 % (*) Nref
 if nargin < 6 || isempty(Nref)
-    Nref = ceil(N / 10); % 1/10 of the time series length (I think should be greater -- 50%)
+	Nref = ceil(N / 10); % 1/10 of the time series length (I think should be greater -- 50%)
 end
 if (Nref > 0) && (Nref < 1)
-    Nref = ceil(Nref * N); % specify a proportion of the time series length
+	Nref = ceil(Nref * N); % specify a proportion of the time series length
 end
 
 % (*) randomSeed: how to treat the randomization
 if nargin < 7
-    randomSeed = []; % default
+	randomSeed = []; % default
 end
 
 % ------------------------------------------------------------------------------
@@ -148,20 +148,20 @@ out.stdmacpfdiff = std(abs(dmacpf));
 out.propdecmacpf = sum(dmacpf < 0) / length(dmacpf);
 
 for i = 1:maxDim - 1
-    % Give proportion drop at each increase in m
-    out.(sprintf('macpfdrop_%u', i)) = abs(macpf(i) / macpf(i + 1) - 1);
+	% Give proportion drop at each increase in m
+	out.(sprintf('macpfdrop_%u', i)) = abs(macpf(i) / macpf(i + 1) - 1);
 end
 
 % output statistics on the acp at each dimension
 for i = 1:maxDim
-    % mean acp at each dimension
-    out.(sprintf('macpf_%u', i)) = macpf(i);
-    % std of acp at each dimension
-    out.(sprintf('sacpf_%u', i)) = sacpf(i);
-    % iqr of acp at each dimension
-    out.(sprintf('iqracpf_%u', i)) = iqracpf(i);
-    % abs(AC1) of acp at each dimension
-    out.(sprintf('ac1_acpf_%u', i)) = abs(CO_AutoCorr(acpf(:, i), 1, 'Fourier'));
+	% mean acp at each dimension
+	out.(sprintf('macpf_%u', i)) = macpf(i);
+	% std of acp at each dimension
+	out.(sprintf('sacpf_%u', i)) = sacpf(i);
+	% iqr of acp at each dimension
+	out.(sprintf('iqracpf_%u', i)) = iqracpf(i);
+	% abs(AC1) of acp at each dimension
+	out.(sprintf('ac1_acpf_%u', i)) = abs(CO_AutoCorr(acpf(:, i), 1, 'Fourier'));
 end
 
 % plot(macpf)

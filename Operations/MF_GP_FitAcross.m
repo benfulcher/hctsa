@@ -52,16 +52,16 @@ doplot = 0; % set to 1 to visualize behavior
 %% Check inputs
 % ------------------------------------------------------------------------------
 if size(y, 2) > size(y, 1);
-    y = y'; % make sure a column vector
+	y = y'; % make sure a column vector
 end
 
 if nargin < 2 || isempty(covFunc)
-    fprintf(1, 'Using default sum of SE and noise covariance function\n')
-    covFunc = {'covSum', {'covSEiso', 'covNoise'}};
+	fprintf(1, 'Using default sum of SE and noise covariance function\n')
+	covFunc = {'covSum', {'covSEiso', 'covNoise'}};
 end
 
 if nargin < 3 || isempty(npoints)
-    npoints = 20;
+	npoints = 20;
 end
 
 % ------------------------------------------------------------------------------
@@ -89,14 +89,14 @@ infAlg = @infLaplace; % Inference algorithm (Laplace approximation)
 nfevals = -50; % number of function evaluations (with negative)
 
 try
-    hyp = MF_GP_LearnHyperp(tt, yt, covFunc, meanFunc, likFunc, infAlg, nfevals, hyp);
+	hyp = MF_GP_LearnHyperp(tt, yt, covFunc, meanFunc, likFunc, infAlg, nfevals, hyp);
 catch emsg
-    error('Error learning hyperparameters for time series')
+	error('Error learning hyperparameters for time series')
 end
 loghyper = hyp.cov;
 if isnan(loghyper)
-    out = NaN;
-    return
+	out = NaN;
+	return
 end
 
 % ------------------------------------------------------------------------------
@@ -105,30 +105,30 @@ end
 % Evaluate at test points based on training time/data, predicting for
 % test times/data
 if N <= 2000
-    ts = (1:N)';
+	ts = (1:N)';
 else % memory constraints force us to crudely resample
-    ts = round(linspace(1, N, 2000))';
+	ts = round(linspace(1, N, 2000))';
 end
 try
-    % [mu, S2] = gpr(loghyper, covFunc, tt, yt, ts);
-    [mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt, ts); % evaluate at new time points, ts
+	% [mu, S2] = gpr(loghyper, covFunc, tt, yt, ts);
+	[mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt, ts); % evaluate at new time points, ts
 catch emsg
-    error('Error running Gaussian Process regression on time series: %s', emsg.message);
+	error('Error running Gaussian Process regression on time series: %s', emsg.message);
 end
 
 %% For Plotting
 if doplot
-    xstar = linspace(min(t), max(t), 1000)';
-    [mu, S2] = gpr(loghyper, covFunc, t, y, ts);
-    S2p = S2 - exp(2 * loghyper(3)); % remove noise from predictions
-    S2p = S2;
-    figure('color', 'w');
-    f = [mu + 2 * sqrt(S2p); flipdim(mu - 2 * sqrt(S2p), 1)];
-    fill([ts; flipdim(ts, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8);
-    % grayscale error bars
-    hold on;
-    plot(ts, mu, 'k-', 'LineWidth', 2); % mean function
-    plot(ts, y(ts), '.-k'); % original data
+	xstar = linspace(min(t), max(t), 1000)';
+	[mu, S2] = gpr(loghyper, covFunc, t, y, ts);
+	S2p = S2 - exp(2 * loghyper(3)); % remove noise from predictions
+	S2p = S2;
+	figure('color', 'w');
+	f = [mu + 2 * sqrt(S2p); flipdim(mu - 2 * sqrt(S2p), 1)];
+	fill([ts; flipdim(ts, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8);
+	% grayscale error bars
+	hold on;
+	plot(ts, mu, 'k-', 'LineWidth', 2); % mean function
+	plot(ts, y(ts), '.-k'); % original data
 end
 
 % ------------------------------------------------------------------------------
@@ -144,21 +144,21 @@ out.stdS = std(S);
 
 % Marginal Likelihood
 try
-    % out.mlikelihood = - gpr(loghyper, covFunc, ts, y(ts));
-    out.mlikelihood = gp(hyp, infAlg, meanFunc, covFunc, likFunc, ts, y(ts));
+	% out.mlikelihood = - gpr(loghyper, covFunc, ts, y(ts));
+	out.mlikelihood = gp(hyp, infAlg, meanFunc, covFunc, likFunc, ts, y(ts));
 catch
-    out.mlikelihood = NaN;
+	out.mlikelihood = NaN;
 end
 
 % Loghyperparameters
 for i = 1:nhps
-    out.(['logh', num2str(i)]) = loghyper(i); % dynamic field referencing
-    % eval(sprintf('out.logh%u = loghyper(%u);',i,i));
+	out.(['logh', num2str(i)]) = loghyper(i); % dynamic field referencing
+	% eval(sprintf('out.logh%u = loghyper(%u);',i,i));
 end
 
 if strcmp(covFunc{1}, 'covSum') && strcmp(covFunc{2}{1}, 'covSEiso') && strcmp(covFunc{2}{2}, 'covNoise')
-    % Give extra output based on length parameter on length of time series
-    out.h_lonN = exp(loghyper(1)) / N;
+	% Give extra output based on length parameter on length of time series
+	out.h_lonN = exp(loghyper(1)) / N;
 end
 
 %% Subfunctions

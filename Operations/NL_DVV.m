@@ -65,25 +65,25 @@ beVocal = false;
 % Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 1
-    error('Not enough input arguments');
+	error('Not enough input arguments');
 end
 if nargin < 2 || isempty(m)
-    m = 3;
+	m = 3;
 end
 if nargin < 3 || isempty(numDVs)
-    numDVs = 100;
+	numDVs = 100;
 end
 if nargin < 4 || isempty(nd)
-    nd = 2.0;
+	nd = 2.0;
 end
 if nargin < 5 || isempty(Ntv)
-    Ntv = 25 * nd;
+	Ntv = 25 * nd;
 end
 if nargin < 6 || isempty(numSurr)
-    numSurr = 10;
+	numSurr = 10;
 end
 if nargin < 7
-    randomSeed = [];
+	randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ if beVocal, fprintf(1, ' Done.\n'); end
 if beVocal, fprintf(1, 'Computing dvv for surrogates...'); end
 dvv_surr = zeros(Ntv, 2, numSurr);
 for i = 1:numSurr
-    dvv_surr(:, :, i) = DVV_dvv(x_surr(:, i), m, numDVs, nd, Ntv);
+	dvv_surr(:, :, i) = DVV_dvv(x_surr(:, i), m, numDVs, nd, Ntv);
 end
 mean_dvv_surr = mean(dvv_surr, 3);
 if beVocal, fprintf(1, ' Done.\n'); end
@@ -117,20 +117,20 @@ if beVocal, fprintf(1, ' Done.\n'); end
 % Plotting:
 % ------------------------------------------------------------------------------
 if doPlot
-    f = figure('color', 'w'); box('on');
-    subplot(1, 2, 1); hold on
-    plot(dvv_data(:, 1), dvv_data(:, 2), '.-k')
-    plot(mean_dvv_surr(:, 1), mean_dvv_surr(:, 2), '.-r')
-    legend({'data', 'surrogate mean'})
-    xlabel('~distance')
-    ylabel('target variance')
+	f = figure('color', 'w'); box('on');
+	subplot(1, 2, 1); hold on
+	plot(dvv_data(:, 1), dvv_data(:, 2), '.-k')
+	plot(mean_dvv_surr(:, 1), mean_dvv_surr(:, 2), '.-r')
+	legend({'data', 'surrogate mean'})
+	xlabel('~distance')
+	ylabel('target variance')
 
-    % DVV scatter plot
-    subplot(1, 2, 2); hold on
-    biSector = 0:0.5:1;
-    plot(biSector, biSector, ':k'); axis([0 1 0 1]);
-    title('DVV Scatter Plot'); xlabel('Original'); ylabel('Surrogates'); grid on; hold on
-    errorbar(dvv_data(:, 2), mean_dvv_surr(:, 2), std(dvv_surr(:, 2, :), [], 3));
+	% DVV scatter plot
+	subplot(1, 2, 2); hold on
+	biSector = 0:0.5:1;
+	plot(biSector, biSector, ':k'); axis([0 1 0 1]);
+	title('DVV Scatter Plot'); xlabel('Original'); ylabel('Surrogates'); grid on; hold on
+	errorbar(dvv_data(:, 2), mean_dvv_surr(:, 2), std(dvv_surr(:, 2, :), [], 3));
 end
 
 % ------------------------------------------------------------------------------
@@ -176,17 +176,17 @@ out.meanDiffTrendSurr = out.trendSurr - out.trend;
 probs = zeros(sum(notNaN), 1);
 fnotNaN = find(notNaN);
 for i = 1:sum(notNaN)
-    probs(i) = normcdf(dvv_data(fnotNaN(i), 2), mean(dvv_surr(fnotNaN(i), 2, :)), std(dvv_surr(fnotNaN(i), 2, :)));
+	probs(i) = normcdf(dvv_data(fnotNaN(i), 2), mean(dvv_surr(fnotNaN(i), 2, :)), std(dvv_surr(fnotNaN(i), 2, :)));
 end
 out.meanNormCDF = mean(probs);
 
 % ------------------------------------------------------------------------------
 function m = GiveMeGradient(xData, yData)
-    if size(xData, 1) ~= size(yData, 1);
-        yData = yData';
-    end
-    p = polyfit(xData, yData, 1);
-    m = p(1);
+	if size(xData, 1) ~= size(yData, 1);
+		yData = yData';
+	end
+	p = polyfit(xData, yData, 1);
+	m = p(1);
 end
 % ------------------------------------------------------------------------------
 

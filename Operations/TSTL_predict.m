@@ -64,30 +64,30 @@ doPlot = false; % plot outputs to figure (e.g., for debugging)
 
 % (*) Prediction length, plen (the length of the output time series)
 if nargin < 2 || isempty(plen)
-    plen = 1; % output the same length (proportion)
+	plen = 1; % output the same length (proportion)
 end
 % (proportion set after embedding, as the embedding will lose points
 % according to the dimension of the space)
 
 % (*) number of neighest neighbours, NNR
 if nargin < 3 || isempty(NNR)
-    NNR = 1; % use 1 nearest neighbour
+	NNR = 1; % use 1 nearest neighbour
 end
 
 % (*) stepSize (in samples)
 if nargin < 4 || isempty(stepSize)
-    stepSize = 2;
+	stepSize = 2;
 end
 
 % (*) prediction mode, pmode:
 if nargin < 5 || isempty(pmode)
-    pmode = 0; % output vectors are means of the images of nearest neighbours
+	pmode = 0; % output vectors are means of the images of nearest neighbours
 end
 
 % (*) embedParams
 if nargin < 6 || isempty(embedParams)
-    embedParams = {'ac', 'fnnmar'};
-    fprintf(1, 'Using default embedding using autocorrelation for tau and Cao''s method for m\n');
+	embedParams = {'ac', 'fnnmar'};
+	fprintf(1, 'Using default embedding using autocorrelation for tau and Cao''s method for m\n');
 end
 
 % ------------------------------------------------------------------------------
@@ -97,41 +97,41 @@ end
 % delay = embedpn(1);
 % dim = embedpn(2);
 if iscell(embedParams)
-    s = BF_Embed(y, embedParams{1}, embedParams{2}, 1); % last in
+	s = BF_Embed(y, embedParams{1}, embedParams{2}, 1); % last in
 elseif embedParams == 0
-    s = signal(y);
+	s = signal(y);
 end
 
 if ~isa(s, 'signal')
-    out = NaN; return
+	out = NaN; return
 end
 
 Ns = length(data(s));
 if Ns < 50
-    error('This is a very short time series! :(');
+	error('This is a very short time series! :(');
 end
 y = y(1:Ns); % for statistical purposes...
 if plen > 0 && plen <= 1
-    plen = floor(plen * Ns); % specify a proportion of the time series length
+	plen = floor(plen * Ns); % specify a proportion of the time series length
 end
 
 % ------------------------------------------------------------------------------
 %% Run the code
 % ------------------------------------------------------------------------------
 try
-    rs = predict(s, plen, NNR, stepSize, pmode);
+	rs = predict(s, plen, NNR, stepSize, pmode);
 catch
-    error('TSTOOL''s predict function didn''t run correctly')
+	error('TSTOOL''s predict function didn''t run correctly')
 end
 
 y_pred = data(rs);
 y_pred1 = y_pred(:, 1); % for this embedding dimension (?)
 
 if doPlot
-    figure('color', 'w'); box('on'); view(rs);
+	figure('color', 'w'); box('on'); view(rs);
 
-    figure('color', 'w'); box('on');
-    hold off; plot(y, 'k'), hold on; plot(y_pred1, 'm'), hold off;
+	figure('color', 'w'); box('on');
+	hold off; plot(y, 'k'), hold on; plot(y_pred1, 'm'), hold off;
 end
 
 % ------------------------------------------------------------------------------
@@ -177,17 +177,17 @@ out.pred1rmsres = sqrt(mean((y - y_pred1).^2));
 
 % align at best positive cross-correlation and then look at residuals
 if out.maxxcflag > 0
-    y_lagged = y(out.maxxcflag:end);
-    Nlag = length(y_lagged);
-    y_pred1_lagged = y_pred1(1:Nlag);
+	y_lagged = y(out.maxxcflag:end);
+	Nlag = length(y_lagged);
+	y_pred1_lagged = y_pred1(1:Nlag);
 elseif out.maxxcflag == 0
-    y_lagged = y;
-    y_pred1_lagged = y;
-    Nlag = length(y);
+	y_lagged = y;
+	y_pred1_lagged = y;
+	Nlag = length(y);
 else % negative
-    y_pred1_lagged = y_pred1(-out.maxxcflag:end);
-    Nlag = length(y_pred1_lagged);
-    y_lagged = y(1:Nlag);
+	y_pred1_lagged = y_pred1(-out.maxxcflag:end);
+	Nlag = length(y_pred1_lagged);
+	y_lagged = y(1:Nlag);
 end
 
 % hold off; plot(y_pred1_lagged);

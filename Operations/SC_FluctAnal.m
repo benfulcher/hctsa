@@ -102,24 +102,24 @@ function out = SC_FluctAnal(x, q, wtf, tauStep, k, lag, logInc)
 % Check Inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(q)
-    q = 2; % RMS fluctuations
+	q = 2; % RMS fluctuations
 end
 if nargin < 3 || isempty(wtf)
-    wtf = 'rsrange'; % re-scaled range analysis by default
+	wtf = 'rsrange'; % re-scaled range analysis by default
 end
 if nargin < 4 || isempty(tauStep)
-    % the increment of tau (for linear)
-    % or number of points in logarithmic range (for logarithmic)
-    tauStep = 1;
+	% the increment of tau (for linear)
+	% or number of points in logarithmic range (for logarithmic)
+	tauStep = 1;
 end
 if nargin < 5 || isempty(k)
-    k = 1; % often not needed, only for 'dfa' and 'rsrangefit'
+	k = 1; % often not needed, only for 'dfa' and 'rsrangefit'
 end
 if nargin < 6
-    lag = '';
+	lag = '';
 end
 if nargin < 7
-    logInc = true;
+	logInc = true;
 end
 
 % ------------------------------------------------------------------------------
@@ -129,11 +129,11 @@ doPlot = false; % plot relevant outputs to figure
 % -------------------------------------------------------------------------------
 % 1) Compute integrated sequence
 if isempty(lag) || lag == 1
-    % A normal cumsum:
-    y = cumsum(x);
+	% A normal cumsum:
+	y = cumsum(x);
 else
-    % If a lag is specified, do a decimation:
-    y = cumsum(x(1:lag:end));
+	% If a lag is specified, do a decimation:
+	y = cumsum(x(1:lag:end));
 end
 
 % -------------------------------------------------------------------------------
@@ -143,17 +143,17 @@ end
 % Caccia suggested from 10 to (N-1)/2...
 % -------------------------------------------------------------------------------
 if logInc
-    taur = unique(round(exp(linspace(log(5), log(floor(N / 2)), tauStep))));
-    % in this case tauStep is the number of points to compute
+	taur = unique(round(exp(linspace(log(5), log(floor(N / 2)), tauStep))));
+	% in this case tauStep is the number of points to compute
 else
-    taur = 5:tauStep:floor(N / 2); % maybe increased??
+	taur = 5:tauStep:floor(N / 2); % maybe increased??
 end
 ntau = length(taur); % analyze the time series across this many timescales
 
 if ntau < 8 % fewer than 8 points
-    fprintf(1, 'This time series (N = %u) is too short to analyze using this fluctuation analysis\n', N);
-    out = NaN;
-    return
+	fprintf(1, 'This time series (N = %u) is too short to analyze using this fluctuation analysis\n', N);
+	out = NaN;
+	return
 end
 
 % -------------------------------------------------------------------------------
@@ -162,79 +162,79 @@ F = zeros(1, ntau);
 % Each entry correponds to a given scale, tau
 
 for i = 1:ntau
-    % buffer the time series at the scale tau
-    tau = taur(i); % the scale on which to compute fluctuations
+	% buffer the time series at the scale tau
+	tau = taur(i); % the scale on which to compute fluctuations
 
-    y_buff = buffer(y, tau);
-    if size(y_buff, 2) > floor(N / tau) % zero-padded, remove trailing set of points...
-        y_buff = y_buff(:, 1:end - 1);
-    end
+	y_buff = buffer(y, tau);
+	if size(y_buff, 2) > floor(N / tau) % zero-padded, remove trailing set of points...
+		y_buff = y_buff(:, 1:end - 1);
+	end
 
-    % analyzed length of time series (with trailing end-points removed)
-    nn = size(y_buff, 2) * tau;
+	% analyzed length of time series (with trailing end-points removed)
+	nn = size(y_buff, 2) * tau;
 
-    switch wtf
-        case 'nothing'
-            y_dt = reshape(y_buff, nn, 1);
-        case 'endptdiff'
-            % look at differences in end-points in each subsegment
-            y_dt = y_buff(end, :) - y_buff(1, :);
-        case 'range'
-            y_dt = range(y_buff);
-        case 'std'
-            % something like what they do in Cannon et al., Physica A 1997,
-            % except with bridge/linear detrending and overlapping segments
-            % (scaled windowed variance methods). But I think we have
-            % enough of this sort of thing already...
-            y_dt = std(y_buff);
-        case 'iqr'
-            y_dt = iqr(y_buff);
-        case 'dfa'
-            tt = (1:tau)'; % faux time range
-            for j = 1:size(y_buff, 2);
-                % fit a polynomial of order k in each subsegment
-                p = polyfit(tt, y_buff(:, j), k);
-                % remove the trend, store back in y_buff
-                y_buff(:, j) = y_buff(:, j) - polyval(p, tt);
-            end
-            % reshape to a column vector, y_dt (detrended)
-            y_dt = reshape(y_buff, nn, 1);
-        case 'rsrange'
-            % Remove straight line first: Caccia et al. Physica A, 1997
-            % Straight line connects end points of each window:
-            b = y_buff(1, :);
-            m = y_buff(end, :) - b;
-            y_buff = y_buff - (linspace(0, 1, tau)' * m + ones(tau, 1) * b);
-            y_dt = range(y_buff);
-        case 'rsrangefit' % polynomial fit (order k) rather than endpoints fit: (~DFA)
-            tt = (1:tau)'; % faux time range
-            for j = 1:size(y_buff, 2);
-                % fit a polynomial of order k in each subsegment
-                p = polyfit(tt, y_buff(:, j), k);
-                % remove the trend, store back in y_buff
-                y_buff(:, j) = y_buff(:, j) - polyval(p, tt);
-            end
-            y_dt = range(y_buff);
-        otherwise
-            error('Unknown fluctuation analysis method ''%s''', wtf);
-    end
+	switch wtf
+		case 'nothing'
+			y_dt = reshape(y_buff, nn, 1);
+		case 'endptdiff'
+			% look at differences in end-points in each subsegment
+			y_dt = y_buff(end, :) - y_buff(1, :);
+		case 'range'
+			y_dt = range(y_buff);
+		case 'std'
+			% something like what they do in Cannon et al., Physica A 1997,
+			% except with bridge/linear detrending and overlapping segments
+			% (scaled windowed variance methods). But I think we have
+			% enough of this sort of thing already...
+			y_dt = std(y_buff);
+		case 'iqr'
+			y_dt = iqr(y_buff);
+		case 'dfa'
+			tt = (1:tau)'; % faux time range
+			for j = 1:size(y_buff, 2);
+				% fit a polynomial of order k in each subsegment
+				p = polyfit(tt, y_buff(:, j), k);
+				% remove the trend, store back in y_buff
+				y_buff(:, j) = y_buff(:, j) - polyval(p, tt);
+			end
+			% reshape to a column vector, y_dt (detrended)
+			y_dt = reshape(y_buff, nn, 1);
+		case 'rsrange'
+			% Remove straight line first: Caccia et al. Physica A, 1997
+			% Straight line connects end points of each window:
+			b = y_buff(1, :);
+			m = y_buff(end, :) - b;
+			y_buff = y_buff - (linspace(0, 1, tau)' * m + ones(tau, 1) * b);
+			y_dt = range(y_buff);
+		case 'rsrangefit' % polynomial fit (order k) rather than endpoints fit: (~DFA)
+			tt = (1:tau)'; % faux time range
+			for j = 1:size(y_buff, 2);
+				% fit a polynomial of order k in each subsegment
+				p = polyfit(tt, y_buff(:, j), k);
+				% remove the trend, store back in y_buff
+				y_buff(:, j) = y_buff(:, j) - polyval(p, tt);
+			end
+			y_dt = range(y_buff);
+		otherwise
+			error('Unknown fluctuation analysis method ''%s''', wtf);
+	end
 
-    % Compute fluctuation function:
-    F(i) = (mean(y_dt.^q)).^(1 / q);
+	% Compute fluctuation function:
+	F(i) = (mean(y_dt.^q)).^(1 / q);
 end
 
 % -------------------------------------------------------------------------------
 % Smooth unevenly-distributed points in log space:
 % -------------------------------------------------------------------------------
 if logInc
-    logtt = log(taur);
-    logFF = log(F);
-    numTimeScales = ntau;
+	logtt = log(taur);
+	logFF = log(F);
+	numTimeScales = ntau;
 else % need to smooth the unevenly-distributed points (using a spline)
-    logtaur = log(taur); logF = log(F);
-    numTimeScales = 50; % number of sampling points across the range
-    logtt = linspace(min(logtaur), max(logtaur), numTimeScales); % even sampling in tau
-    logFF = spline(logtaur, logF, logtt);
+	logtaur = log(taur); logF = log(F);
+	numTimeScales = 50; % number of sampling points across the range
+	logtt = linspace(min(logtaur), max(logtaur), numTimeScales); % even sampling in tau
+	logFF = spline(logtaur, logF, logtt);
 end
 
 % -------------------------------------------------------------------------------
@@ -245,9 +245,9 @@ out = DoRobustLinearFit(out, logtt, logFF, 1:numTimeScales, '');
 
 % PLOT THIS?:
 if doPlot
-    figure('color', 'w');
-    plot(logtt, logFF, 'o-k');
-    title(out.alpha)
+	figure('color', 'w');
+	plot(logtt, logFF, 'o-k');
+	title(out.alpha)
 end
 
 %% WE NEED SOME SORT OF AUTOMATIC DETECTION OF GRADIENT CHANGES/NUMBER
@@ -266,12 +266,12 @@ end
 sserr = nan(numTimeScales, 1); % don't choose the end points
 minPoints = 6;
 for i = minPoints:numTimeScales - minPoints
-    r1 = 1:i;
-    p1 = polyfit(logtt(r1), logFF(r1), 1);
-    r2 = i:numTimeScales;
-    p2 = polyfit(logtt(r2), logFF(r2), 1);
-    % Sum of errors from fitting lines to both segments:
-    sserr(i) = norm(polyval(p1, logtt(r1)) - logFF(r1)) + norm(polyval(p2, logtt(r2)) - logFF(r2));
+	r1 = 1:i;
+	p1 = polyfit(logtt(r1), logFF(r1), 1);
+	r2 = i:numTimeScales;
+	p2 = polyfit(logtt(r2), logFF(r2), 1);
+	% Sum of errors from fitting lines to both segments:
+	sserr(i) = norm(polyval(p1, logtt(r1)) - logFF(r1)) + norm(polyval(p2, logtt(r2)) - logFF(r2));
 end
 
 % breakPt is the point where it's best to fit a line before and another line after
@@ -288,14 +288,14 @@ out.meanssr = nanmean(sserr);
 out.stdssr = nanstd(sserr);
 
 if doPlot
-    subplot(3, 1, 1)
-    plot(y)
-    subplot(3, 1, 2)
-    plot(logtt(r1), logFF(r1), 'o-b')
-    hold on;
-    plot(logtt(r2), logFF(r2), 'o-r')
-    subplot(3, 1, 3)
-    plot(logtt, sserr, 'x-k')
+	subplot(3, 1, 1)
+	plot(y)
+	subplot(3, 1, 2)
+	plot(logtt(r1), logFF(r1), 'o-b')
+	hold on;
+	plot(logtt(r2), logFF(r2), 'o-r')
+	subplot(3, 1, 3)
+	plot(logtt, sserr, 'x-k')
 end
 
 % Check that at least 3 points are available
@@ -310,33 +310,33 @@ out = DoRobustLinearFit(out, logtt, logFF, r1, 'r1_');
 out = DoRobustLinearFit(out, logtt, logFF, r2, 'r2_');
 
 if isnan(out.r1_alpha) || isnan(out.r2_alpha)
-    out.alpharat = NaN;
+	out.alpharat = NaN;
 else
-    out.alpharat = out.r1_alpha / out.r2_alpha;
+	out.alpharat = out.r1_alpha / out.r2_alpha;
 end
 
 % -------------------------------------------------------------------------------
 function out = DoRobustLinearFit(out, logtt, logFF, theRange, fieldName)
-    % Get robust linear fit statistics on scaling range
-    % Adds fields to the output structure
+	% Get robust linear fit statistics on scaling range
+	% Adds fields to the output structure
 
-    if length(theRange) < 8 || all(isnan(logFF(theRange)))
-        out.([fieldName, 'linfitint']) = NaN;
-        out.([fieldName, 'alpha']) = NaN;
-        out.([fieldName, 'se1']) = NaN;
-        out.([fieldName, 'se2']) = NaN;
-        out.([fieldName, 'ssr']) = NaN;
-        out.([fieldName, 'resac1']) = NaN;
-    else
-        [linfit, stats] = robustfit(logtt(theRange), logFF(theRange));
+	if length(theRange) < 8 || all(isnan(logFF(theRange)))
+		out.([fieldName, 'linfitint']) = NaN;
+		out.([fieldName, 'alpha']) = NaN;
+		out.([fieldName, 'se1']) = NaN;
+		out.([fieldName, 'se2']) = NaN;
+		out.([fieldName, 'ssr']) = NaN;
+		out.([fieldName, 'resac1']) = NaN;
+	else
+		[linfit, stats] = robustfit(logtt(theRange), logFF(theRange));
 
-        out.([fieldName, 'linfitint']) = linfit(1); % linear fit intercept
-        out.([fieldName, 'alpha']) = linfit(2); % linear fit gradient
-        out.([fieldName, 'se1']) = stats.se(1); % standard error in intercept
-        out.([fieldName, 'se2']) = stats.se(2); % standard error in mean
-        out.([fieldName, 'ssr']) = mean(stats.resid.^2); % mean squares residual
-        out.([fieldName, 'resac1']) = CO_AutoCorr(stats.resid, 1, 'Fourier');
-    end
+		out.([fieldName, 'linfitint']) = linfit(1); % linear fit intercept
+		out.([fieldName, 'alpha']) = linfit(2); % linear fit gradient
+		out.([fieldName, 'se1']) = stats.se(1); % standard error in intercept
+		out.([fieldName, 'se2']) = stats.se(2); % standard error in mean
+		out.([fieldName, 'ssr']) = mean(stats.resid.^2); % mean squares residual
+		out.([fieldName, 'resac1']) = CO_AutoCorr(stats.resid, 1, 'Fourier');
+	end
 end
 
 end

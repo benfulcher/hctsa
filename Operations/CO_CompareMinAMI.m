@@ -55,7 +55,7 @@ function out = CO_CompareMinAMI(y, binMethod, numBins)
 % ------------------------------------------------------------------------------
 % Default number of bins
 if nargin < 3,
-    numBins = 10;
+	numBins = 10;
 end
 % ------------------------------------------------------------------------------
 
@@ -73,23 +73,23 @@ amiMins = zeros(numBinsRange, 1);
 
 % Calculate automutual information
 for i = 1:numBinsRange % vary over number of bins in histogram
-    amis = zeros(numTaus, 1);
-    for j = 1:numTaus % vary over time lags, tau
-        amis(j) = CO_HistogramAMI(y, tauRange(j), binMethod, numBins(i));
-        if (j > 2) && ((amis(j) - amis(j - 1)) * (amis(j - 1) - amis(j - 2)) < 0)
-            amiMins(i) = tauRange(j - 1);
-            break
-        end
-    end
-    if amiMins(i) == 0
-        amiMins(i) = tauRange(end);
-    end
+	amis = zeros(numTaus, 1);
+	for j = 1:numTaus % vary over time lags, tau
+		amis(j) = CO_HistogramAMI(y, tauRange(j), binMethod, numBins(i));
+		if (j > 2) && ((amis(j) - amis(j - 1)) * (amis(j - 1) - amis(j - 2)) < 0)
+			amiMins(i) = tauRange(j - 1);
+			break
+		end
+	end
+	if amiMins(i) == 0
+		amiMins(i) = tauRange(end);
+	end
 end
 
 % Plot:
 if doPlot
-    figure('color', 'w');
-    plot(numBins, amiMins, 'o-k');
+	figure('color', 'w');
+	plot(numBins, amiMins, 'o-k');
 end
 
 % -------------------------------------------------------------------------------

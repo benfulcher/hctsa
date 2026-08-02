@@ -49,38 +49,38 @@ function p = HT_HypothesisTest(x, theTest)
 % ------------------------------------------------------------------------------
 
 switch theTest
-    case 'signtest' % Statistics Toolbox
-        [p, ~] = signtest(x);
-        % for some reason this one has p-value as the first output
+	case 'signtest' % Statistics Toolbox
+		[p, ~] = signtest(x);
+		% for some reason this one has p-value as the first output
 
-    case 'runstest' % Statistics Toolbox
-        [~, p] = runstest(x);
+	case 'runstest' % Statistics Toolbox
+		[~, p] = runstest(x);
 
-    case 'vartest' % Statistics Toolbox
-        [~, p] = vartest(x, 1); % normal distribution of variance 1
+	case 'vartest' % Statistics Toolbox
+		[~, p] = vartest(x, 1); % normal distribution of variance 1
 
-    case 'ztest' % Statistics Toolbox
-        [~, p] = ztest(x, 0, 1);
+	case 'ztest' % Statistics Toolbox
+		[~, p] = ztest(x, 0, 1);
 
-    case 'signrank' % Statistics Toolbox
-        [p, ~] = signrank(x);
+	case 'signrank' % Statistics Toolbox
+		[p, ~] = signrank(x);
 
-    case 'jbtest' % Statistics Toolbox
-        warning('off', 'stats:jbtest:PTooBig'); % suspend this warning
-        warning('off', 'stats:jbtest:PTooSmall'); % suspend this warning
-        [~, p] = jbtest(x);
-        warning('on', 'stats:jbtest:PTooBig'); % resume this warning
-        warning('on', 'stats:jbtest:PTooSmall'); % resume this warning
+	case 'jbtest' % Statistics Toolbox
+		warning('off', 'stats:jbtest:PTooBig'); % suspend this warning
+		warning('off', 'stats:jbtest:PTooSmall'); % suspend this warning
+		[~, p] = jbtest(x);
+		warning('on', 'stats:jbtest:PTooBig'); % resume this warning
+		warning('on', 'stats:jbtest:PTooSmall'); % resume this warning
 
-    case 'lbq'
-        % Check that an Econometrics Toolbox license is available:
-        BF_CheckToolbox('econometrics_toolbox')
+	case 'lbq'
+		% Check that an Econometrics Toolbox license is available:
+		BF_CheckToolbox('econometrics_toolbox')
 
-        % Perform the test
-        [~, p] = lbqtest(x);
+		% Perform the test
+		[~, p] = lbqtest(x);
 
-    otherwise
-        error('Unknown hypothesis test ''%s''', theTest);
+	otherwise
+		error('Unknown hypothesis test ''%s''', theTest);
 end
 
 end

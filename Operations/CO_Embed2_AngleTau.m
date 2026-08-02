@@ -44,31 +44,31 @@ numTau = length(tauRange);
 
 % Ensure y is a column vector
 if size(y, 2) > size(y, 1);
-    y = y';
+	y = y';
 end
 
 stats_store = zeros(3, numTau);
 
 for i = 1:numTau
-    tau = tauRange(i);
+	tau = tauRange(i);
 
-    m = [y(1:end - tau), y(1 + tau:end)];
+	m = [y(1:end - tau), y(1 + tau:end)];
 
-    theta = diff(m(:, 2)) ./ diff(m(:, 1));
-    theta = atan(theta); % measured as deviation from the horizontal
+	theta = diff(m(:, 2)) ./ diff(m(:, 1));
+	theta = atan(theta); % measured as deviation from the horizontal
 
-    if isempty(theta)
-        error('Time series (N=%u) too short for embedding', length(y));
-    end
+	if isempty(theta)
+		error('Time series (N=%u) too short for embedding', length(y));
+	end
 
-    stats_store(1, i) = CO_AutoCorr(theta, 1, 'Fourier');
-    stats_store(2, i) = CO_AutoCorr(theta, 2, 'Fourier');
-    stats_store(3, i) = CO_AutoCorr(theta, 3, 'Fourier');
+	stats_store(1, i) = CO_AutoCorr(theta, 1, 'Fourier');
+	stats_store(2, i) = CO_AutoCorr(theta, 2, 'Fourier');
+	stats_store(3, i) = CO_AutoCorr(theta, 3, 'Fourier');
 end
 
 if doPlot
-    figure('color', 'w'); box('on');
-    plot(stats_store');
+	figure('color', 'w'); box('on');
+	plot(stats_store');
 end
 
 % ------------------------------------------------------------------------------

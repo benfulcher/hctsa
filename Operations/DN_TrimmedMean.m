@@ -36,7 +36,7 @@ function out = DN_TrimmedMean(y, n)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(n)
-    n = 0; % A normal mean by default
+	n = 0; % A normal mean by default
 end
 
 out = trimmean(y, n);

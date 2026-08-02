@@ -52,8 +52,8 @@ cums = cummax(y(:)) - cummin(y(:));
 % cums = cums/range(y);
 
 if doPlot
-    figure('color', 'w');
-    plot(cums);
+	figure('color', 'w');
+	plot(cums);
 end
 
 fullr = range(y);
@@ -74,11 +74,11 @@ out.nuqp50 = cumtox(0.5);
 
 Ns = [10, 50, 100, 1000];
 for i = 1:length(Ns)
-    if N >= Ns(i)
-        out.(sprintf('nuql%u', Ns(i))) = lunique(cums(1:Ns(i))) / out.totnuq;
-    else
-        out.(sprintf('nuql%u', Ns(i))) = NaN;
-    end
+	if N >= Ns(i)
+		out.(sprintf('nuql%u', Ns(i))) = lunique(cums(1:Ns(i))) / out.totnuq;
+	else
+		out.(sprintf('nuql%u', Ns(i))) = NaN;
+	end
 end
 
 % (**2**) Actual proportion of full range captured at different points
@@ -90,11 +90,11 @@ out.p50 = cums(ceil(N * 0.5)) / fullr;
 
 Ns = [10, 50, 100, 1000];
 for i = 1:length(Ns)
-    if N >= Ns(i)
-        out.(sprintf('l%u', Ns(i))) = cums(Ns(i)) / fullr;
-    else
-        out.(sprintf('l%u', Ns(i))) = NaN;
-    end
+	if N >= Ns(i)
+		out.(sprintf('l%u', Ns(i))) = cums(Ns(i)) / fullr;
+	else
+		out.(sprintf('l%u', Ns(i))) = NaN;
+	end
 end
 
 end

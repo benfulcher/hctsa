@@ -45,7 +45,7 @@ BF_CheckToolbox('signal_toolbox');
 
 % Check inputs, set defaults:
 if nargin < 2 || isempty(p)
-    p = 2; % Fit AR(2) model by default
+	p = 2; % Fit AR(2) model by default
 end
 
 % -------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ out.e = e; % variance
 
 % Output fitted parameters up to order, p (+1)
 for i = 1:p + 1
-    out.(sprintf('a%u', i)) = a(i);
+	out.(sprintf('a%u', i)) = a(i);
 end
 
 % ------------------------------------------------------------------------------

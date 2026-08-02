@@ -42,7 +42,7 @@ function out = SY_Trend(y)
 % ------------------------------------------------------------------------------
 
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored')
+	warning('The input time series should be z-scored')
 end
 
 N = length(y);
@@ -65,11 +65,11 @@ out.meanYC22 = mean(yC(floor(N / 2) + 1:end));
 
 % ------------------------------------------------------------------------------
 function [m, b] = LinearFit(xData, yData)
-    if size(xData, 1) ~= size(yData, 1);
-        yData = yData';
-    end
-    coeff = polyfit(xData, yData, 1);
-    m = coeff(1); b = coeff(2);
+	if size(xData, 1) ~= size(yData, 1);
+		yData = yData';
+	end
+	coeff = polyfit(xData, yData, 1);
+	m = coeff(1); b = coeff(2);
 end
 % ------------------------------------------------------------------------------
 

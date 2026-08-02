@@ -48,7 +48,7 @@ function out = SB_BinaryStretch(x, stretchWhat)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(stretchWhat)
-    stretchWhat = 'lseq1'; % by default
+	stretchWhat = 'lseq1'; % by default
 end
 
 N = length(x); % length of the time series
@@ -56,18 +56,18 @@ x(x > 0) = 1;
 x(x <= 0) = 0;
 
 switch stretchWhat
-    case 'lseq1'
-        % longest stretch of 1s [this code doesn't actually measure this!]
-        out = max(diff(BF_SignChange(diff(find(x == 1)) - 1.5, 1))) / N;
-    case 'lseq0'
-        % longest stretch of 0s [this code doesn't actualy measure this!]
-        out = max(diff(BF_SignChange(diff(find(x == 0)) - 1.5, 1))) / N;
-    otherwise
-        error('Unknown input %s', stretchWhat)
+	case 'lseq1'
+		% longest stretch of 1s [this code doesn't actually measure this!]
+		out = max(diff(BF_SignChange(diff(find(x == 1)) - 1.5, 1))) / N;
+	case 'lseq0'
+		% longest stretch of 0s [this code doesn't actualy measure this!]
+		out = max(diff(BF_SignChange(diff(find(x == 0)) - 1.5, 1))) / N;
+	otherwise
+		error('Unknown input %s', stretchWhat)
 end
 
 if isempty(out)
-    out = 0;
+	out = 0;
 end
 
 end

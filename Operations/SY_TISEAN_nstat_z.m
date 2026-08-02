@@ -70,16 +70,16 @@ function out = SY_TISEAN_nstat_z(y, numSeg, embedParams)
 % ------------------------------------------------------------------------------
 
 if nargin < 1
-    error('Input a time series')
+	error('Input a time series')
 end
 
 if nargin < 2 || isempty(numSeg)
-    numSeg = 5; % divide the data into 5 segments by default
+	numSeg = 5; % divide the data into 5 segments by default
 end
 
 if nargin < 3
-    embedParams = {1, 3};
-    fprintf(1, 'Using default embedding using tau = 1 and m = 3\n');
+	embedParams = {1, 3};
+	fprintf(1, 'Using default embedding using tau = 1 and m = 3\n');
 end
 
 N = length(y); % length of the time series
@@ -109,9 +109,9 @@ minNeighbors = 30; % minimum number of neighbors for fit
 % able to find enough neighbors and getting stuck in a while loop...
 % Try this heuristic (multiplying the actual minimum number by 1.5):
 if (clength - (m - 1) * tau - incStep) <= minNeighbors * 1.5
-    delete(filePath); % remove the temporary file
-    warning('Not enough neighbors to reliably estimate prediction errors with these settings');
-    out = NaN; return
+	delete(filePath); % remove the temporary file
+	warning('Not enough neighbors to reliably estimate prediction errors with these settings');
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
@@ -128,17 +128,17 @@ if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
 s = textscan(res, '%[^\n]'); s = s{1};
 wi = strmatch('Writing to stdout', s);
 if isempty(wi)
-    error('TISEAN routine ''nstat_z'' returned unexpected output...');
+	error('TISEAN routine ''nstat_z'' returned unexpected output...');
 end
 s = s(wi + 1:end);
 
 xperr = zeros(numSeg); % cross prediction error from using segment i to forecast segment j
 
 for i = 1:numSeg
-    for j = 1:numSeg
-        tmp = textscan(s{(i - 1) * numSeg + j}, '%n%n%n');
-        xperr(i, j) = tmp{3};
-    end
+	for j = 1:numSeg
+		tmp = textscan(s{(i - 1) * numSeg + j}, '%n%n%n');
+		xperr(i, j) = tmp{3};
+	end
 end
 
 % pcolor(xperr)
@@ -166,26 +166,26 @@ lowertri = tril(xperr, -1); lowertri = lowertri(lowertri > 0);
 uppertri = triu(xperr, 1); uppertri = uppertri(uppertri > 0);
 offdiag = [lowertri; uppertri];
 if isempty(lowertri)
-    out.minlower = NaN;
+	out.minlower = NaN;
 else
-    out.minlower = min(lowertri);
+	out.minlower = min(lowertri);
 end
 if isempty(uppertri)
-    out.minupper = NaN;
+	out.minupper = NaN;
 else
-    out.minupper = min(uppertri);
+	out.minupper = min(uppertri);
 end
 if isempty(offdiag)
-    out.minoffdiag = NaN;
-    out.iqroffdiag = NaN;
-    out.stdoffdiag = NaN;
-    out.rangeoffdiag = NaN;
+	out.minoffdiag = NaN;
+	out.iqroffdiag = NaN;
+	out.stdoffdiag = NaN;
+	out.rangeoffdiag = NaN;
 else
-    out.minoffdiag = min(offdiag);
-    % measures of spread: non-stationarity
-    out.iqroffdiag = iqr(offdiag);
-    out.stdoffdiag = std(offdiag);
-    out.rangeoffdiag = range(offdiag);
+	out.minoffdiag = min(offdiag);
+	% measures of spread: non-stationarity
+	out.iqroffdiag = iqr(offdiag);
+	out.stdoffdiag = std(offdiag);
+	out.rangeoffdiag = range(offdiag);
 end
 
 % Comparing columns/rows

@@ -54,11 +54,11 @@ function out = SY_StatAv(y, whatType, n)
 % Check Inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(whatType)
-    whatType = 'seg'; % divide into n segments by default
+	whatType = 'seg'; % divide into n segments by default
 end
 
 if nargin < 3 || isempty(n)
-    n = 5; % use 5 segments
+	n = 5; % use 5 segments
 end
 
 N = length(y); % Time-series length
@@ -68,27 +68,27 @@ N = length(y); % Time-series length
 % ------------------------------------------------------------------------------
 
 switch whatType
-    case 'seg'
-        % divide time series into n segments
-        M = zeros(n, 1);
-        p = floor(N / n); % lose the last N mod n data points
+	case 'seg'
+		% divide time series into n segments
+		M = zeros(n, 1);
+		p = floor(N / n); % lose the last N mod n data points
 
-        for j = 1:n
-            M(j) = mean(y(p * (j - 1) + 1:p * j));
-        end
-    case 'len'
-        if N > 2 * n
-            pn = floor(N / n);
-            M = zeros(pn, 1);
-            for j = 1:pn
-                M(j) = mean(y((j - 1) * n + 1:j * n));
-            end
-        else
-            fprintf(1, 'This time series (N = %u) is too short for StatAv(%s,''%u'')\n', N, whatType, n);
-            out = NaN; return
-        end
-    otherwise
-        error('Error evaluating StatAv of type ''%s'', please select either ''seg'' or ''len''', whatType)
+		for j = 1:n
+			M(j) = mean(y(p * (j - 1) + 1:p * j));
+		end
+	case 'len'
+		if N > 2 * n
+			pn = floor(N / n);
+			M = zeros(pn, 1);
+			for j = 1:pn
+				M(j) = mean(y((j - 1) * n + 1:j * n));
+			end
+		else
+			fprintf(1, 'This time series (N = %u) is too short for StatAv(%s,''%u'')\n', N, whatType, n);
+			out = NaN; return
+		end
+	otherwise
+		error('Error evaluating StatAv of type ''%s'', please select either ''seg'' or ''len''', whatType)
 end
 
 % ------------------------------------------------------------------------------

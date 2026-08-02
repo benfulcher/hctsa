@@ -47,12 +47,12 @@ function out = MF_ResidualAnalysis(e)
 BF_CheckToolbox('identification_toolbox');
 
 if size(e, 2) > size(e, 1)
-    e = e'; % make sure residuals are a column vector
+	e = e'; % make sure residuals are a column vector
 end
 if all(e > 0)
-    warning('Very weird that ALL model residuals are positive...')
+	warning('Very weird that ALL model residuals are positive...')
 elseif all(e < 0)
-    warning('Very weird that ALL model residuals are negative...')
+	warning('Very weird that ALL model residuals are negative...')
 end
 N = length(e);
 
@@ -67,9 +67,9 @@ out.mms = abs(mean(e)) + abs(std(e));
 out.maxonmean = max(e) / abs(mean(e));
 
 if std(e) == 0
-    e = zeros(length(e), 1);
+	e = zeros(length(e), 1);
 else
-    e = zscore(e);
+	e = zscore(e);
 end
 
 % ------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ out.propbth = sum(abs(autoCorrResid) < 2.6 / sqrtN) / maxLag;
 % First time to get below the significance threshold
 out.ftbth = find(abs(autoCorrResid) < 2.6 / sqrtN, 1, 'first');
 if isempty(out.ftbth)
-    out.ftbth = maxLag + 1;
+	out.ftbth = maxLag + 1;
 end
 
 % Durbin-Watson test statistic (like AC1)
@@ -141,22 +141,22 @@ out.dwts = sum((e(2:end) - e(1:end - 1)).^2) / sum(e.^2);
 % Fit a zero-mean AR process to residuals using the ARFIT package:
 emsg = '';
 try
-    [~, Aest, ~, SBC, FPE] = ARFIT_arfit(e, 1, 10, 'sbc', 'zero');
+	[~, Aest, ~, SBC, FPE] = ARFIT_arfit(e, 1, 10, 'sbc', 'zero');
 catch emsg
 end
 
 if ~isempty(emsg)
-    % (strcmp(emsg.message,'Time series too short.') || strcmp(emsg.message,'Matrix must be positive definite.'))
-    warning('Error fitting AR model to residuals using ARFIT package: %s.\n', emsg.message)
-    out.popt = NaN; % Optimum order
-    out.minsbc = NaN; % Best sbc
-    out.minfpe = NaN; % Best fpe
-    out.sbc1 = NaN; % SBC(1)
+	% (strcmp(emsg.message,'Time series too short.') || strcmp(emsg.message,'Matrix must be positive definite.'))
+	warning('Error fitting AR model to residuals using ARFIT package: %s.\n', emsg.message)
+	out.popt = NaN; % Optimum order
+	out.minsbc = NaN; % Best sbc
+	out.minfpe = NaN; % Best fpe
+	out.sbc1 = NaN; % SBC(1)
 else
-    out.popt = length(Aest); % Optimum order
-    out.minsbc = min(SBC); % Best sbc
-    out.minfpe = min(FPE); % Best fpe
-    out.sbc1 = SBC(1);
+	out.popt = length(Aest); % Optimum order
+	out.minsbc = min(SBC); % Best sbc
+	out.minfpe = min(FPE); % Best fpe
+	out.sbc1 = SBC(1);
 end
 
 % ------------------------------------------------------------------------------

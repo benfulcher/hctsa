@@ -82,28 +82,28 @@ doPlot = 0; % plot outputs to a figure
 %% Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(surrMeth)
-    surrMeth = 'RP'; % randomize phases
+	surrMeth = 'RP'; % randomize phases
 end
 
 if nargin < 3 || isempty(numSurrs)
-    numSurrs = 99; % create 99 surrogates for a 0.01 significance level 1-sided test
+	numSurrs = 99; % create 99 surrogates for a 0.01 significance level 1-sided test
 end
 
 if nargin < 4
-    extrap = [];
+	extrap = [];
 end
 
 if nargin < 5 || isempty(theTestStat)
-    theTestStat = 'AMI'; % automutual information
+	theTestStat = 'AMI'; % automutual information
 end
 
 if ischar(theTestStat)
-    theTestStat = {theTestStat};
+	theTestStat = {theTestStat};
 end
 
 % randomSeed: how to treat the randomization
 if nargin < 6
-    randomSeed = [];
+	randomSeed = [];
 end
 
 N = length(x); % time-series length
@@ -119,206 +119,206 @@ z = SD_MakeSurrogates(x, surrMeth, numSurrs, extrap, randomSeed);
 % Evaluate test statistic on each surrogate
 % ------------------------------------------------------------------------------
 if ismember('ami1', theTestStat)
-    % Investigate AMI(1) of surrogates compared to that of signal itself
-    % This statistic is used by Nakamura et al. (2006), PRE
-    % Could use CO_HistogramAMI or TSTL, but I'll use IN_AutoMutualInfo with
-    % Gaussian kernel…
-    % FYI: for a histogram method, there are upper and lower bounds on the number of
-    % bins to use: [1+log_2(N)], [sqrt(N)].
+	% Investigate AMI(1) of surrogates compared to that of signal itself
+	% This statistic is used by Nakamura et al. (2006), PRE
+	% Could use CO_HistogramAMI or TSTL, but I'll use IN_AutoMutualInfo with
+	% Gaussian kernel…
+	% FYI: for a histogram method, there are upper and lower bounds on the number of
+	% bins to use: [1+log_2(N)], [sqrt(N)].
 
-    % Use the gaussian approximation to estimate automutual information using the
-    % Information Dynamics Toolkit:
-    ami_fn = @(timeSeries, timeDelay) IN_AutoMutualInfo(timeSeries, timeDelay, 'gaussian');
+	% Use the gaussian approximation to estimate automutual information using the
+	% Information Dynamics Toolkit:
+	ami_fn = @(timeSeries, timeDelay) IN_AutoMutualInfo(timeSeries, timeDelay, 'gaussian');
 
-    AMIx = ami_fn(x, 1);
-    AMIsurr = zeros(numSurrs, 1);
-    for i = 1:numSurrs
-        AMIsurr(i) = ami_fn(z(:, i), 1);
-    end
-    % So we have a value AMIx, and a distribution for the surrogates
-    % AMIsurr -- we must compare and return something meaningful
-    % surrogates should always have lower AMI than original signal
-    someStats = SDgivemestats(AMIx, AMIsurr, 'right');
-    fnames = fieldnames(someStats);
-    for i = 1:length(fnames)
-        out.(sprintf('ami_%s', fnames{i})) = someStats.(fnames{i});
-    end
+	AMIx = ami_fn(x, 1);
+	AMIsurr = zeros(numSurrs, 1);
+	for i = 1:numSurrs
+		AMIsurr(i) = ami_fn(z(:, i), 1);
+	end
+	% So we have a value AMIx, and a distribution for the surrogates
+	% AMIsurr -- we must compare and return something meaningful
+	% surrogates should always have lower AMI than original signal
+	someStats = SDgivemestats(AMIx, AMIsurr, 'right');
+	fnames = fieldnames(someStats);
+	for i = 1:length(fnames)
+		out.(sprintf('ami_%s', fnames{i})) = someStats.(fnames{i});
+	end
 end
 
 if ismember('fmmi', theTestStat)
-    % Investigate the first minimum of mutual information of surrogates compared to
-    % that of signal itself
-    fmmix = CO_FirstMin(x, 'mi');
-    fmmiSurr = zeros(numSurrs, 1);
-    for i = 1:numSurrs
-        try
-            fmmiSurr(i) = CO_FirstMin(z(:, i), 'mi');
-        catch
-            fmmiSurr(i) = NaN;
-        end
-    end
-    if any(isnan(fmmiSurr))
-        error('fmmi failed');
-    end
+	% Investigate the first minimum of mutual information of surrogates compared to
+	% that of signal itself
+	fmmix = CO_FirstMin(x, 'mi');
+	fmmiSurr = zeros(numSurrs, 1);
+	for i = 1:numSurrs
+		try
+			fmmiSurr(i) = CO_FirstMin(z(:, i), 'mi');
+		catch
+			fmmiSurr(i) = NaN;
+		end
+	end
+	if any(isnan(fmmiSurr))
+		error('fmmi failed');
+	end
 
-    % FMMI should be higher for signal than surrogates
-    someStats = SDgivemestats(fmmix, fmmiSurr, 'right');
-    fnames = fieldnames(someStats);
-    for i = 1:length(fnames)
-        out.(sprintf('fmmi_%s', fnames{i})) = someStats.(fnames{i});
-    end
+	% FMMI should be higher for signal than surrogates
+	someStats = SDgivemestats(fmmix, fmmiSurr, 'right');
+	fnames = fieldnames(someStats);
+	for i = 1:length(fnames)
+		out.(sprintf('fmmi_%s', fnames{i})) = someStats.(fnames{i});
+	end
 end
 
 if ismember('o3', theTestStat)
-    % Third-order statistic in Schreiber, Schmitz (Physica D)
-    tau = 1;
-    o3x = 1 / (N - tau) * sum((x(1 + tau:end) - x(1:end - tau)).^3);
-    o3surr = zeros(numSurrs, 1);
-    for i = 1:numSurrs
-        o3surr(i) = 1 / (N - tau) * sum((z(1 + tau:end, i) - z(1:end - tau, i)).^3);
-    end
-    someStats = SDgivemestats(o3x, o3surr, 'both');
-    fnames = fieldnames(someStats);
-    for i = 1:length(fnames)
-        out.(sprintf('o3_%s', fnames{i})) = someStats.(fnames{i});
-    end
+	% Third-order statistic in Schreiber, Schmitz (Physica D)
+	tau = 1;
+	o3x = 1 / (N - tau) * sum((x(1 + tau:end) - x(1:end - tau)).^3);
+	o3surr = zeros(numSurrs, 1);
+	for i = 1:numSurrs
+		o3surr(i) = 1 / (N - tau) * sum((z(1 + tau:end, i) - z(1:end - tau, i)).^3);
+	end
+	someStats = SDgivemestats(o3x, o3surr, 'both');
+	fnames = fieldnames(someStats);
+	for i = 1:length(fnames)
+		out.(sprintf('o3_%s', fnames{i})) = someStats.(fnames{i});
+	end
 end
 
 if ismember('tc3', theTestStat)
-    % TC3 statistic -- another time-reversal asymmetry measure
-    tau = 1;
-    tmp = CO_tc3(x, tau);
-    tc3x = tmp.raw;
-    tc3surr = zeros(numSurrs, 1);
-    for i = 1:numSurrs
-        tmp = CO_tc3(z(:, i), tau);
-        tc3surr(i) = tmp.raw;
-    end
+	% TC3 statistic -- another time-reversal asymmetry measure
+	tau = 1;
+	tmp = CO_tc3(x, tau);
+	tc3x = tmp.raw;
+	tc3surr = zeros(numSurrs, 1);
+	for i = 1:numSurrs
+		tmp = CO_tc3(z(:, i), tau);
+		tc3surr(i) = tmp.raw;
+	end
 
-    someStats = SDgivemestats(tc3x, tc3surr, 'both');
-    fnames = fieldnames(someStats);
-    for i = 1:length(fnames)
-        out.(sprintf('tc3_%s', fnames{i})) = someStats.(fnames{i});
-    end
+	someStats = SDgivemestats(tc3x, tc3surr, 'both');
+	fnames = fieldnames(someStats);
+	for i = 1:length(fnames)
+		out.(sprintf('tc3_%s', fnames{i})) = someStats.(fnames{i});
+	end
 end
 
 if ismember('nlpe', theTestStat)
-    % Locally constant phase space prediction error
-    warning('''nlpe'' can be very time consuming...')
-    de = 3; tau = 1; % embedding parameters: fixed like a dummy!
-    tmp = NL_MS_nlpe(x, de, tau);
-    nlpex = tmp.msqerr;
-    nlpesurr = zeros(numSurrs, 1);
-    for i = 1:numSurrs
-        res = MS_nlpe(z(:, i), de, tau);
-        msqerr = sum(res.^2);
-        nlpesurr(i) = msqerr;
-    end
+	% Locally constant phase space prediction error
+	warning('''nlpe'' can be very time consuming...')
+	de = 3; tau = 1; % embedding parameters: fixed like a dummy!
+	tmp = NL_MS_nlpe(x, de, tau);
+	nlpex = tmp.msqerr;
+	nlpesurr = zeros(numSurrs, 1);
+	for i = 1:numSurrs
+		res = MS_nlpe(z(:, i), de, tau);
+		msqerr = sum(res.^2);
+		nlpesurr(i) = msqerr;
+	end
 
-    someStats = SDgivemestats(nlpex, nlpesurr, 'right'); % NLPE should be higher than surrogates
-    fnames = fieldnames(someStats);
-    for i = 1:length(fnames)
-        out.(sprintf('nlpe_%s', fnames{i})) = someStats.(fnames{i});
-    end
+	someStats = SDgivemestats(nlpex, nlpesurr, 'right'); % NLPE should be higher than surrogates
+	fnames = fieldnames(someStats);
+	for i = 1:length(fnames)
+		out.(sprintf('nlpe_%s', fnames{i})) = someStats.(fnames{i});
+	end
 end
 
 if ismember('fnn', theTestStat)
-    warning('fnn takes like *literally forever*...')
+	warning('fnn takes like *literally forever*...')
 
-    % false nearest neighbours at d=2;
-    tmp = NL_MS_fnn(x, 2, 1, 5, 1);
-    fnnx = tmp.pfnn_2;
-    fnnsurr = zeros(numSurrs, 1);
-    for i = 1:numSurrs
-        tmp = NL_MS_fnn(z(:, i), 2, 1, 5, 1);
-        fnnsurr(i) = tmp.pfnn_2;
-    end
+	% false nearest neighbours at d=2;
+	tmp = NL_MS_fnn(x, 2, 1, 5, 1);
+	fnnx = tmp.pfnn_2;
+	fnnsurr = zeros(numSurrs, 1);
+	for i = 1:numSurrs
+		tmp = NL_MS_fnn(z(:, i), 2, 1, 5, 1);
+		fnnsurr(i) = tmp.pfnn_2;
+	end
 
-    someStats = SDgivemestats(fnnx, fnnsurr, 'right'); % FNN(2) should be higher than surrogates?
-    fnames = fieldnames(someStats);
-    for i = 1:length(fnames)
-        out.(sprintf('fnn_%s', fnames{i})) = someStats.(fnames{i});
-    end
+	someStats = SDgivemestats(fnnx, fnnsurr, 'right'); % FNN(2) should be higher than surrogates?
+	fnames = fieldnames(someStats);
+	for i = 1:length(fnames)
+		out.(sprintf('fnn_%s', fnames{i})) = someStats.(fnames{i});
+	end
 end
 
 % ------------------------------------------------------------------------------
 function someStats = SDgivemestats(statx, statsurr, leftrightboth)
-    numSurrs = length(statsurr);
-    if any(isnan(statsurr))
-        error('SDgivemestats failed');
-    end
-    %         leftrightboth = {'left','right','both'}
-    % have a distribution of some statistic with samples statsurr
-    % and we have the value of the statistic for a given process in
-    % statx. Want to return measures of how consistant the measured
-    % statistic is with the sample statsurr.
+	numSurrs = length(statsurr);
+	if any(isnan(statsurr))
+		error('SDgivemestats failed');
+	end
+	%         leftrightboth = {'left','right','both'}
+	% have a distribution of some statistic with samples statsurr
+	% and we have the value of the statistic for a given process in
+	% statx. Want to return measures of how consistant the measured
+	% statistic is with the sample statsurr.
 
-    % ASSUME GAUSSIAN DISTRIBUTION:
-    % so can use 1/2-sided z-statistic
-    [~, p, ~, zStat] = ztest(statx, mean(statsurr), std(statsurr), 0.05, leftrightboth);
-    someStats.p = p; % pvalue
-    someStats.zscore = zStat; % z-statistic
+	% ASSUME GAUSSIAN DISTRIBUTION:
+	% so can use 1/2-sided z-statistic
+	[~, p, ~, zStat] = ztest(statx, mean(statsurr), std(statsurr), 0.05, leftrightboth);
+	someStats.p = p; % pvalue
+	someStats.zscore = zStat; % z-statistic
 
-    % fit a kernel distribution to zscored distribution:
-    if std(statsurr) == 0
-        % all surrogates have same value of this statistic
-        % cannot do a meaningful zscore -- do it raw
-        [f, xi] = ksdensity(statsurr);
-        % find where the statx value would be:
-        if statx < min(xi) || statx > max(xi)
-            someStats.f = 0; % out of range -- assume p=0 here
-        else
-            [~, minhere] = min(abs(statx - xi));
-            someStats.f = f(minhere); % return probability density where the point is
-        end
-    else
-        zscstatsurr = (statsurr - mean(statsurr)) / std(statsurr);
-        zscstatx = (statx - mean(statsurr)) / std(statsurr);
-        [f, xi] = ksdensity(zscstatsurr);
+	% fit a kernel distribution to zscored distribution:
+	if std(statsurr) == 0
+		% all surrogates have same value of this statistic
+		% cannot do a meaningful zscore -- do it raw
+		[f, xi] = ksdensity(statsurr);
+		% find where the statx value would be:
+		if statx < min(xi) || statx > max(xi)
+			someStats.f = 0; % out of range -- assume p=0 here
+		else
+			[~, minhere] = min(abs(statx - xi));
+			someStats.f = f(minhere); % return probability density where the point is
+		end
+	else
+		zscstatsurr = (statsurr - mean(statsurr)) / std(statsurr);
+		zscstatx = (statx - mean(statsurr)) / std(statsurr);
+		[f, xi] = ksdensity(zscstatsurr);
 
-        % find where the statx value would be:
-        if (zscstatx < min(xi)) || (zscstatx > max(xi))
-            someStats.f = 0; % out of range -- assume p=0 here
-        else
-            [~, minhere] = min(abs(zscstatx - xi));
-            someStats.f = f(minhere); % return probability density where the point is
-        end
-    end
+		% find where the statx value would be:
+		if (zscstatx < min(xi)) || (zscstatx > max(xi))
+			someStats.f = 0; % out of range -- assume p=0 here
+		else
+			[~, minhere] = min(abs(zscstatx - xi));
+			someStats.f = f(minhere); % return probability density where the point is
+		end
+	end
 
-    % What fraction of the range is the sample in?
-    medsurr = median(statsurr);
-    iqrsurr = iqr(statsurr);
-    if iqrsurr == 0
-        someStats.mediqr = NaN;
-    else
-        someStats.mediqr = abs(statx - medsurr) / iqrsurr;
-    end
+	% What fraction of the range is the sample in?
+	medsurr = median(statsurr);
+	iqrsurr = iqr(statsurr);
+	if iqrsurr == 0
+		someStats.mediqr = NaN;
+	else
+		someStats.mediqr = abs(statx - medsurr) / iqrsurr;
+	end
 
-    % rank statistic
-    [~, ix] = sort([statx; statsurr]);
-    xfitshere = find(ix == 1) - 1;
-    if strcmp(leftrightboth, 'right') % x statistic smaller than distribution
-        xfitshere = numSurrs + 1 - xfitshere; % how far from highest ranked value
-    elseif strcmp(leftrightboth, 'both')
-        xfitshere = min(xfitshere, numSurrs + 1 - xfitshere);
-    end
+	% rank statistic
+	[~, ix] = sort([statx; statsurr]);
+	xfitshere = find(ix == 1) - 1;
+	if strcmp(leftrightboth, 'right') % x statistic smaller than distribution
+		xfitshere = numSurrs + 1 - xfitshere; % how far from highest ranked value
+	elseif strcmp(leftrightboth, 'both')
+		xfitshere = min(xfitshere, numSurrs + 1 - xfitshere);
+	end
 
-    if isempty(xfitshere)
-        someStats.prank = 1 / (numSurrs + 1); % rank-based p-value
-    else
-        someStats.prank = (1 + xfitshere) / (numSurrs + 1); % rank-based p-value
-    end
-    if strcmp(leftrightboth, 'both')
-        someStats.prank = someStats.prank * 2; % I think this factor should be in here
-    end
+	if isempty(xfitshere)
+		someStats.prank = 1 / (numSurrs + 1); % rank-based p-value
+	else
+		someStats.prank = (1 + xfitshere) / (numSurrs + 1); % rank-based p-value
+	end
+	if strcmp(leftrightboth, 'both')
+		someStats.prank = someStats.prank * 2; % I think this factor should be in here
+	end
 
-    % DO PLOTTING:
-    if doPlot
-        figure('color', 'w')
-        plot(statsurr, ones(numSurrs, 1), '.k');
-        hold('on');
-        plot(statx * ones(2, 1), [0, 2], 'r')
-    end
+	% DO PLOTTING:
+	if doPlot
+		figure('color', 'w')
+		plot(statsurr, ones(numSurrs, 1), '.k');
+		hold('on');
+		plot(statx * ones(2, 1), [0, 2], 'r')
+	end
 end
 % ------------------------------------------------------------------------------
 

@@ -90,24 +90,24 @@ BF_CheckToolbox('econometrics_toolbox');
 %% Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(preproc)
-    % Do an autoregressive preprocessing that maximizes stationarity/whitening
-    preproc = 'ar';
+	% Do an autoregressive preprocessing that maximizes stationarity/whitening
+	preproc = 'ar';
 end
 
 % Fit what type of GARCH model?
 if nargin < 3 || isempty(P)
-    % Fit the default GARCH model
-    P = 1;
+	% Fit the default GARCH model
+	P = 1;
 end
 
 if nargin < 4 || isempty(Q)
-    % Fit the default GARCH model
-    Q = 1;
+	% Fit the default GARCH model
+	Q = 1;
 end
 
 % randomSeed: how to treat the randomization
 if nargin < 5
-    randomSeed = [];
+	randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------
@@ -167,14 +167,14 @@ GModel.Constant = NaN;
 
 % Fit the model
 try
-    [Gfit, estParamCov, LLF, info] = estimate(GModel, y, 'Display', 'off');
-    % Estimate standard errors using variance/covariance matrix:
-    errors = sqrt(diag(estParamCov));
-    % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(GModel,y);
+	[Gfit, estParamCov, LLF, info] = estimate(GModel, y, 'Display', 'off');
+	% Estimate standard errors using variance/covariance matrix:
+	errors = sqrt(diag(estParamCov));
+	% [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(GModel,y);
 catch emsg
-    error('GARCH fit failed (data does not allow a valid GARCH model to be estimated): %s', emsg.message);
-    % Sometimes this happens for some time series (e.g., when it removes some GARCH
-    % lags and makes the resulting model invalid)
+	error('GARCH fit failed (data does not allow a valid GARCH model to be estimated): %s', emsg.message);
+	% Sometimes this happens for some time series (e.g., when it removes some GARCH
+	% lags and makes the resulting model invalid)
 end
 
 % ------------------------------------------------------------------------------
@@ -185,14 +185,14 @@ end
 % ___Mean_Process___
 % --Constant--
 if isprop(Gfit, 'Constant')
-    out.constant = Gfit.Constant;
-    out.constanterr = errors(1);
+	out.constant = Gfit.Constant;
+	out.constanterr = errors(1);
 end
 
 % __Variance_Process___
 % -- Offset (should be zero for z-scored time series)--
 if isprop(Gfit, 'Offset')
-    out.offset = Gfit.Offset;
+	out.offset = Gfit.Offset;
 end
 
 indexAdjust = 0; % required because sometimes you fit at fewer lags than you
@@ -201,41 +201,41 @@ indexAdjust = 0; % required because sometimes you fit at fewer lags than you
 
 % -- GARCH component --
 for i = 1:P
-    if isprop(Gfit, 'GARCH') && length(Gfit.GARCH) >= i
-        out.(sprintf('GARCH_%u', i)) = Gfit.GARCH{i};
-        % New (in this way shit) format means that this no longer works for
-        % custom GARCH models (you can no longer index a particular
-        % error) ///
-        if Gfit.GARCH{i} == 0
-            % no fit at this lag, even though it was specified
-            indexAdjust = indexAdjust + 1;
-            out.(sprintf('GARCHerr_%u', i)) = NaN; % first is the constant
-        else
-            out.(sprintf('GARCHerr_%u', i)) = errors(1 + i - indexAdjust); % first is the constant
-        end
-    else
-        % fitted GARCH model not as specified
-        out.(sprintf('GARCH_%u', i)) = NaN;
-        out.(sprintf('GARCHerr_%u', i)) = NaN; % first is the constant
-    end
+	if isprop(Gfit, 'GARCH') && length(Gfit.GARCH) >= i
+		out.(sprintf('GARCH_%u', i)) = Gfit.GARCH{i};
+		% New (in this way shit) format means that this no longer works for
+		% custom GARCH models (you can no longer index a particular
+		% error) ///
+		if Gfit.GARCH{i} == 0
+			% no fit at this lag, even though it was specified
+			indexAdjust = indexAdjust + 1;
+			out.(sprintf('GARCHerr_%u', i)) = NaN; % first is the constant
+		else
+			out.(sprintf('GARCHerr_%u', i)) = errors(1 + i - indexAdjust); % first is the constant
+		end
+	else
+		% fitted GARCH model not as specified
+		out.(sprintf('GARCH_%u', i)) = NaN;
+		out.(sprintf('GARCHerr_%u', i)) = NaN; % first is the constant
+	end
 end
 
 % -- ARCH component --
 for i = 1:Q
-    if isprop(Gfit, 'ARCH') && length(Gfit.ARCH) >= i
-        out.(sprintf('ARCH_%u', i)) = Gfit.ARCH{i};
-        if Gfit.ARCH{i} == 0
-            % No fit at this specified lag
-            out.(sprintf('ARCHerr_%u', i)) = NaN; % constant, then GARCH, then ARCH
-            indexAdjust = indexAdjust + 1;
-        else
-            out.(sprintf('ARCHerr_%u', i)) = errors(1 + length(Gfit.GARCH) + i - indexAdjust); % constant, then GARCH, then ARCH
-        end
-    else
-        % ARCH fit not as specified
-        out.(sprintf('ARCH_%u', i)) = NaN;
-        out.(sprintf('ARCHerr_%u', i)) = NaN;
-    end
+	if isprop(Gfit, 'ARCH') && length(Gfit.ARCH) >= i
+		out.(sprintf('ARCH_%u', i)) = Gfit.ARCH{i};
+		if Gfit.ARCH{i} == 0
+			% No fit at this specified lag
+			out.(sprintf('ARCHerr_%u', i)) = NaN; % constant, then GARCH, then ARCH
+			indexAdjust = indexAdjust + 1;
+		else
+			out.(sprintf('ARCHerr_%u', i)) = errors(1 + length(Gfit.GARCH) + i - indexAdjust); % constant, then GARCH, then ARCH
+		end
+	else
+		% ARCH fit not as specified
+		out.(sprintf('ARCH_%u', i)) = NaN;
+		out.(sprintf('ARCHerr_%u', i)) = NaN;
+	end
 end
 
 % More statistics given from the fit
@@ -326,7 +326,7 @@ residout = MF_ResidualAnalysis(stde);
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
-    out.(sprintf('stde_%s', fields{k})) = residout.(fields{k});
+	out.(sprintf('stde_%s', fields{k})) = residout.(fields{k});
 end
 
 out.ac1_stde2 = CO_AutoCorr(stde2, 1, 'Fourier');

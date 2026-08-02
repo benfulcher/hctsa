@@ -67,30 +67,30 @@ N = length(y);
 % Check Inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(doOverlap)
-    doOverlap = false;
-    % 0 - time series is partitioned into non overlapping windows of analysis,
-    % 1- time series is partitioned into overlapping windows of analysis, step between consecutive windows is = 1 (much longer calculations)
+	doOverlap = false;
+	% 0 - time series is partitioned into non overlapping windows of analysis,
+	% 1- time series is partitioned into overlapping windows of analysis, step between consecutive windows is = 1 (much longer calculations)
 end
 
 if nargin < 3 || isempty(scaleRange)
-    scaleRange = [10, round(N / 40)];
-    % minimal s scale used, when calculating Fq(s) functions family (default 10)
-    % maximal s scale used, when calculating Fq(s) functions family, has to be multiple of 5 (default 600; in general should be near to N/50, where N is a time series length)
+	scaleRange = [10, round(N / 40)];
+	% minimal s scale used, when calculating Fq(s) functions family (default 10)
+	% maximal s scale used, when calculating Fq(s) functions family, has to be multiple of 5 (default 600; in general should be near to N/50, where N is a time series length)
 end
 minScale = scaleRange(1);
 maxScale = scaleRange(2);
 if (maxScale / 5) < minScale
-    warning('Time-series (N=%u) too short for multiscale multifractal analysis', N);
-    out = NaN;
-    return
+	warning('Time-series (N=%u) too short for multiscale multifractal analysis', N);
+	out = NaN;
+	return
 elseif rem(maxScale, 5) ~= 0
-    maxScale = round(maxScale / 5) * 5;
-    fprintf(1, 'adjusted maxScale to %u\n', maxScale);
+	maxScale = round(maxScale / 5) * 5;
+	fprintf(1, 'adjusted maxScale to %u\n', maxScale);
 end
 
 if nargin < 4 || isempty(qRange)
-    qRange = [-5, 5];
-    % minimal/maximal multifractal parameter q used (default -5)
+	qRange = [-5, 5];
+	% minimal/maximal multifractal parameter q used (default -5)
 end
 qMin = qRange(1);
 qMax = qRange(2);
@@ -122,32 +122,32 @@ rowIdx = 0;
 timer = tic;
 for s = sListFull
 
-    if doOverlap
-        vec = [0:s - 1];
-        ind = [1:slength - s + 1]';
-        coordinates = bsxfun(@plus, vec, ind);
-    else
-        ind2 = [1:size(prof, 1)];
-        coordinates = reshape(ind2(1:(size(prof, 1) - mod(size(prof, 1), s))), s, (size(prof, 1) - mod(size(prof, 1), s)) / s)';
-    end
+	if doOverlap
+		vec = [0:s - 1];
+		ind = [1:slength - s + 1]';
+		coordinates = bsxfun(@plus, vec, ind);
+	else
+		ind2 = [1:size(prof, 1)];
+		coordinates = reshape(ind2(1:(size(prof, 1) - mod(size(prof, 1), s))), s, (size(prof, 1) - mod(size(prof, 1), s)) / s)';
+	end
 
-    segments = prof(coordinates);
-    xbase = [1:1:s];
-    % Preallocate f2nis instead of growing it with f2nis(end+1) per segment:
-    numSegments = size(segments, 1);
-    f2nis = zeros(1, numSegments);
+	segments = prof(coordinates);
+	xbase = [1:1:s];
+	% Preallocate f2nis instead of growing it with f2nis(end+1) per segment:
+	numSegments = size(segments, 1);
+	f2nis = zeros(1, numSegments);
 
-    for ni = 1:numSegments
-        seg = segments(ni, :);
-        fit = polyfit(xbase, seg, 2);
-        variance = mean((seg - polyval(fit, xbase)).^2);
-        f2nis(ni) = variance;
-    end
+	for ni = 1:numSegments
+		seg = segments(ni, :);
+		fit = polyfit(xbase, seg, 2);
+		variance = mean((seg - polyval(fit, xbase)).^2);
+		f2nis(ni) = variance;
+	end
 
-    for q = qList
-        rowIdx = rowIdx + 1;
-        fqs(rowIdx, :) = [q, s, (mean(f2nis.^(q / 2)))^(1 / q)];
-    end
+	for q = qList
+		rowIdx = rowIdx + 1;
+		fqs(rowIdx, :) = [q, s, (mean(f2nis.^(q / 2)))^(1 / q)];
+	end
 end
 % fprintf(1,'Detrended fluctuations computed in %s\n',BF_TheTime(toc(timer)));
 
@@ -168,16 +168,16 @@ fqsll = [fqs(:, 1) fqs(:, 2) log(fqs(:, 2)) log(fqs(:, 3))];
 % sList = minScale:sspacing:(maxScale/5);
 
 if sum(sListFull <= maxScale / 5) >= 10
-    sList = sListFull(sListFull <= maxScale / 5);
+	sList = sListFull(sListFull <= maxScale / 5);
 elseif minScale == maxScale / 5
-    % Single-point range: minScale:0:(maxScale/5) would otherwise silently
-    % return empty (a zero-step colon range is always empty in Matlab, even
-    % when start == stop), so just take the one point directly:
-    sList = minScale;
+	% Single-point range: minScale:0:(maxScale/5) would otherwise silently
+	% return empty (a zero-step colon range is always empty in Matlab, even
+	% when start == stop), so just take the one point directly:
+	sList = minScale;
 else
-    % sample higher in the scale dimension:
-    sspacing = ((maxScale / 5) - minScale) / 10;
-    sList = minScale:sspacing:(maxScale / 5);
+	% sample higher in the scale dimension:
+	sspacing = ((maxScale / 5) - minScale) / 10;
+	sList = minScale:sspacing:(maxScale / 5);
 end
 
 % Coarser sampling of q space
@@ -188,16 +188,16 @@ qList = qMin:0.5:qMax; qList(qList == 0) = 0.0001;
 
 hqs = zeros(length(qList), length(sList));
 for si = 1:length(sList)
-    sit = sList(si);
-    for qi = 1:length(qList)
-        qit = qList(qi);
+	sit = sList(si);
+	for qi = 1:length(qList)
+		qit = qList(qi);
 
-        fitTemp = fqsll(fqsll(:, 1) == qit & fqsll(:, 2) >= sit & fqsll(:, 2) <= 5 * sit, :);
-        hTemp = polyfit(fitTemp(:, 3), fitTemp(:, 4), 1);
+		fitTemp = fqsll(fqsll(:, 1) == qit & fqsll(:, 2) >= sit & fqsll(:, 2) <= 5 * sit, :);
+		hTemp = polyfit(fitTemp(:, 3), fitTemp(:, 4), 1);
 
-        hqs(qi, si) = hTemp(1);
-        % hqs = [hqs; qit 3*sit hTemp(1)];
-    end
+		hqs(qi, si) = hTemp(1);
+		% hqs = [hqs; qit 3*sit hTemp(1)];
+	end
 end
 
 sListScaled = sList * 3; % Not completely on top of the algorithm, but for some reason
@@ -210,25 +210,25 @@ sListScaled = sList * 3; % Not completely on top of the algorithm, but for some 
 % ------------------------------------------------------------------------------
 
 if doPlot
-    if max(max(hqs)) < 1.5
-        hLim = 1.5;
-    elseif max(max(hqs)) < 2.5
-        hLim = 2.5;
-    else
-        hLim = ceil((max(max(hqs)) * 10)) / 10;
-    end
+	if max(max(hqs)) < 1.5
+		hLim = 1.5;
+	elseif max(max(hqs)) < 2.5
+		hLim = 2.5;
+	else
+		hLim = ceil((max(max(hqs)) * 10)) / 10;
+	end
 
-    f = figure('color', 'w'); box('on');
-    hqsplot = surf(sListScaled, qList, hqs);
-    colormap(jet);
-    colorbar;
-    caxis([0, hLim]);
-    set(gca, 'YDir', 'reverse');
-    view(-62, 50);
-    axis([sListScaled(1), sListScaled(end), qMin, qMax, 0, hLim]);
-    xlabel('scale')
-    ylabel('q')
-    zlabel('h')
+	f = figure('color', 'w'); box('on');
+	hqsplot = surf(sListScaled, qList, hqs);
+	colormap(jet);
+	colorbar;
+	caxis([0, hLim]);
+	set(gca, 'YDir', 'reverse');
+	view(-62, 50);
+	axis([sListScaled(1), sListScaled(end), qMin, qMax, 0, hLim]);
+	xlabel('scale')
+	ylabel('q')
+	zlabel('h')
 end
 
 % ------------------------------------------------------------------------------
@@ -272,11 +272,11 @@ out.stdStdHurstScale = std(stdS); % will be large if variance changes alot with 
 
 % ------------------------------------------------------------------------------
 function m = GiveMeGradient(xData, yData)
-    if size(xData, 1) ~= size(yData, 1);
-        yData = yData';
-    end
-    p = polyfit(xData, yData, 1);
-    m = p(1);
+	if size(xData, 1) ~= size(yData, 1);
+		yData = yData';
+	end
+	p = polyfit(xData, yData, 1);
+	m = p(1);
 end
 % ------------------------------------------------------------------------------
 

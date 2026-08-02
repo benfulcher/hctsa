@@ -61,26 +61,26 @@ function out = SD_TSTL_surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % ------------------------------------------------------------------------------
 % 1) time delay, TAU
 if nargin < 2 || isempty(tau)
-    tau = 1;
+	tau = 1;
 end
 if strcmp(tau, 'ac')
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 elseif strcmp(tau, 'mi')
-    tau = CO_FirstMin(y, 'mi');
+	tau = CO_FirstMin(y, 'mi');
 end
 if isnan(tau)
-    error('Time series cannot be embedded (too short?)');
+	error('Time series cannot be embedded (too short?)');
 end
 
 % 2) number of surrogate data sets to generate, NSURR
 if nargin < 3 || isempty(nsurr)
-    nsurr = 50;
+	nsurr = 50;
 end
 
 % 3) surrogate data method, SURRMETHOD
 if nargin < 4 || isempty(surrMethod)
-    fprintf(1, 'Surrogate method set to default: ''surrogate1''.\n');
-    surrMethod = 1;
+	fprintf(1, 'Surrogate method set to default: ''surrogate1''.\n');
+	surrMethod = 1;
 end
 % surrMethod = 1: randomizes phases of fourier spectrum
 % surrMethod = 2:  (see Theiler algorithm II)
@@ -88,13 +88,13 @@ end
 
 % 4) surrogate function, SURRFN
 if nargin < 5 || isempty(surrfn)
-    fprintf(1, 'surrogate function set to default value: ''tc3''.\n');
-    surrfn = 'tc3';
+	fprintf(1, 'surrogate function set to default value: ''tc3''.\n');
+	surrfn = 'tc3';
 end
 
 % 5) randomSeed: how to treat the randomization
 if nargin < 6
-    randomSeed = []; % default for BF_ResetSeed
+	randomSeed = []; % default for BF_ResetSeed
 end
 
 % ------------------------------------------------------------------------------
@@ -107,19 +107,19 @@ s = signal(y);
 BF_ResetSeed(randomSeed);
 
 switch surrfn
-    case 'tc3'
-        % Run external TSTOOL code, tc3
-        rs = tc3(s, tau, nsurr, surrMethod);
-    case 'trev'
-        % Run external TSTOOL code, trev
-        rs = trev(s, tau, nsurr, surrMethod);
-    otherwise
-        error('Unknown surrogate function ''%s''', surrfn)
+	case 'tc3'
+		% Run external TSTOOL code, tc3
+		rs = tc3(s, tau, nsurr, surrMethod);
+	case 'trev'
+		% Run external TSTOOL code, trev
+		rs = trev(s, tau, nsurr, surrMethod);
+	otherwise
+		error('Unknown surrogate function ''%s''', surrfn)
 end
 
 tc3dat = data(rs);
 if all(isnan(tc3dat))
-    error('TSTOOL: ''%s'' failed', surrfn);
+	error('TSTOOL: ''%s'' failed', surrfn);
 end
 tc3_y = tc3dat(1);
 tc3_surr = tc3dat(2:end);
@@ -160,15 +160,15 @@ ksdx = ksx(2) - ksx(1);
 ihit = find(ksx > tc3_y, 1, 'first');
 
 if isempty(ihit) %% off the scale!
-    out.kspminfromext = 0;
-    out.ksphereonmax = 0;
+	out.kspminfromext = 0;
+	out.ksphereonmax = 0;
 else % on the scale!
-    pfromleft = ksdx * sum(ksf(1:ihit));
-    % pfromright = ksdx*sum(ksf(ihit+1:end))
-    out.kspminfromext = min([pfromleft 1 - pfromleft]);
-    % out.phereonstd = ksf(ihit)/sigmahat;
-    out.ksphereonmax = ksf(ihit) / normpdf(muhat, muhat, sigmahat);
-    %     out.ksiqrsfrommode = abs(ksx(imode)-ksx(ihit))/iqr(tc3_surr);
+	pfromleft = ksdx * sum(ksf(1:ihit));
+	% pfromright = ksdx*sum(ksf(ihit+1:end))
+	out.kspminfromext = min([pfromleft 1 - pfromleft]);
+	% out.phereonstd = ksf(ihit)/sigmahat;
+	out.ksphereonmax = ksf(ihit) / normpdf(muhat, muhat, sigmahat);
+	%     out.ksiqrsfrommode = abs(ksx(imode)-ksx(ihit))/iqr(tc3_surr);
 end
 
 % iqrs from mode

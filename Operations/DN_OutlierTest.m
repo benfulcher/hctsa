@@ -47,10 +47,10 @@ function out = DN_OutlierTest(y, p, justMe)
 % -------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(p)
-    p = 2; % by default, remove 2% of values from upper and lower percentiles
+	p = 2; % by default, remove 2% of values from upper and lower percentiles
 end
 if nargin < 3
-    justMe = ''; % return a structure with both the mean and std
+	justMe = ''; % return a structure with both the mean and std
 end
 
 % -------------------------------------------------------------------------------
@@ -64,14 +64,14 @@ out.std = std(y(y > prctile(y, p) & y < prctile(y, 100 - p))) / std(y); % [altho
 
 % Output just a specified element of the output structure:
 if ~isempty(justMe)
-    switch justMe
-        case 'mean'
-            out = out.mean;
-        case 'std'
-            out = out.std;
-        otherwise
-            error('Unknown option ''%s''', justMe);
-    end
+	switch justMe
+		case 'mean'
+			out = out.mean;
+		case 'std'
+			out = out.std;
+		otherwise
+			error('Unknown option ''%s''', justMe);
+	end
 end
 
 end

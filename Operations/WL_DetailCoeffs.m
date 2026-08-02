@@ -60,19 +60,19 @@ doPlot = 0; % plot outputs to figure
 N = length(y); % time-series length
 
 if nargin < 2 || isempty(wname)
-    wname = 'db3'; % default wavelet
+	wname = 'db3'; % default wavelet
 end
 if nargin < 3 || isempty(maxlevel)
-    maxlevel = 20; % maximum wavelet decomposition level
+	maxlevel = 20; % maximum wavelet decomposition level
 end
 if strcmp(maxlevel, 'max')
-    maxlevel = wmaxlev(N, wname);
+	maxlevel = wmaxlev(N, wname);
 end
 
 if wmaxlev(N, wname) < maxlevel
-    fprintf(1, 'Chosen wavelet level is too large for the %s wavelet for this signal of length N = %u\n', wname, N);
-    maxlevel = wmaxlev(N, wname);
-    fprintf(1, 'Using a wavelet level of %u instead.\n', maxlevel);
+	fprintf(1, 'Chosen wavelet level is too large for the %s wavelet for this signal of length N = %u\n', wname, N);
+	maxlevel = wmaxlev(N, wname);
+	fprintf(1, 'Using a wavelet level of %u instead.\n', maxlevel);
 end
 
 % ------------------------------------------------------------------------------
@@ -91,26 +91,26 @@ maxs = zeros(maxlevel, 1); % max detail coefficient magnitude at each level
 [c, l] = wavedec(y, maxlevel, wname);
 
 for k = 1:maxlevel
-    % Reconstruct detail at this level
-    det = wrcoef('d', c, l, wname, k);
+	% Reconstruct detail at this level
+	det = wrcoef('d', c, l, wname, k);
 
-    means(k) = mean(abs(det));
-    medians(k) = median(abs(det));
-    maxs(k) = max(abs(det));
+	means(k) = mean(abs(det));
+	medians(k) = median(abs(det));
+	maxs(k) = max(abs(det));
 end
 
 % ------------------------------------------------------------------------------
 %% Plot the bad boy
 % ------------------------------------------------------------------------------
 if doPlot
-    subplot(5, 1, 1:2); title('signal')
-    plot(y);
-    subplot(5, 1, 3); title('means');
-    plot(means)
-    subplot(5, 1, 4); title('medians');
-    plot(medians)
-    subplot(5, 1, 5); title('maxs');
-    plot(maxs);
+	subplot(5, 1, 1:2); title('signal')
+	plot(y);
+	subplot(5, 1, 3); title('means');
+	plot(means)
+	subplot(5, 1, 4); title('medians');
+	plot(medians)
+	subplot(5, 1, 5); title('maxs');
+	plot(maxs);
 end
 
 % ------------------------------------------------------------------------------
@@ -153,13 +153,13 @@ out.corrcoef_max_medians = r(1, 2);
 
 % ------------------------------------------------------------------------------
 function meIsGorilla = SUB_slosr(xx)
-    theMaxLevel = length(xx);
-    slosr = zeros(theMaxLevel - 2, 1);
-    for i = 2:theMaxLevel - 1
-        slosr(i - 1) = sum(xx(1:i - 1)) / sum(xx(i + 1:end));
-    end
-    absm1 = abs(slosr - 1); % how close to 1 (the same sum on either side) each is
-    meIsGorilla = find(absm1 == min(absm1), 1, 'first') + 1;
+	theMaxLevel = length(xx);
+	slosr = zeros(theMaxLevel - 2, 1);
+	for i = 2:theMaxLevel - 1
+		slosr(i - 1) = sum(xx(1:i - 1)) / sum(xx(i + 1:end));
+	end
+	absm1 = abs(slosr - 1); % how close to 1 (the same sum on either side) each is
+	meIsGorilla = find(absm1 == min(absm1), 1, 'first') + 1;
 end
 % ------------------------------------------------------------------------------
 

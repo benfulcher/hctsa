@@ -63,63 +63,63 @@ doPlot = 0; % plot outputs to figure
 %% Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(histOrKS)
-    histOrKS = 'hist'; % use histogram by default
+	histOrKS = 'hist'; % use histogram by default
 end
 if nargin < 3 % (can be empty for default width for ksdensity)
-    numBins = 10; % use 10 bins
+	numBins = 10; % use 10 bins
 end
 if nargin < 4
-    olremp = 0;
+	olremp = 0;
 end
 
 % ------------------------------------------------------------------------------
 % (1) Remove outliers?
 % ------------------------------------------------------------------------------
 if olremp ~= 0
-    yHat = y(y >= quantile(y, olremp) & y <= quantile(y, 1 - olremp));
-    if isempty(yHat)
-        % removed the entire time series?!
-        % shouldn't be possible for good values of olremp with equality
-        % in the above inequalities
-        out = NaN; return
-    else
-        % Return the difference in entropy from removing outliers
-        out = EN_DistributionEntropy(y, histOrKS, numBins) - ...
-                EN_DistributionEntropy(yHat, histOrKS, numBins);
-        return
-    end
+	yHat = y(y >= quantile(y, olremp) & y <= quantile(y, 1 - olremp));
+	if isempty(yHat)
+		% removed the entire time series?!
+		% shouldn't be possible for good values of olremp with equality
+		% in the above inequalities
+		out = NaN; return
+	else
+		% Return the difference in entropy from removing outliers
+		out = EN_DistributionEntropy(y, histOrKS, numBins) - ...
+				EN_DistributionEntropy(yHat, histOrKS, numBins);
+		return
+	end
 end
 
 % ------------------------------------------------------------------------------
 % (2) Form the histogram
 % ------------------------------------------------------------------------------
 switch histOrKS
-    case 'hist' % Use histogram to calculate pdf
-        if isnumeric(numBins)
-            [px, binEdges] = histcounts(y, numBins, 'Normalization', 'probability');
-        else
-            [px, binEdges] = histcounts(y, 'BinMethod', numBins, 'Normalization', 'probability');
-        end
-        % Compute bin centers:
-        xr = mean([binEdges(1:end - 1); binEdges(2:end)]);
-        % Compute bin widths:
-        binWidths = diff(binEdges);
+	case 'hist' % Use histogram to calculate pdf
+		if isnumeric(numBins)
+			[px, binEdges] = histcounts(y, numBins, 'Normalization', 'probability');
+		else
+			[px, binEdges] = histcounts(y, 'BinMethod', numBins, 'Normalization', 'probability');
+		end
+		% Compute bin centers:
+		xr = mean([binEdges(1:end - 1); binEdges(2:end)]);
+		% Compute bin widths:
+		binWidths = diff(binEdges);
 
-    case 'ks' % Use ksdensity to calculate pdf
-        if isempty(numBins)
-            [px, xr] = ksdensity(y, 'function', 'pdf'); % selects optimal width
-        else
-            [px, xr] = ksdensity(y, 'width', numBins, 'function', 'pdf'); % uses specified width
-        end
-        binWidths = ones(1, length(px)) * (xr(2) - xr(1));
+	case 'ks' % Use ksdensity to calculate pdf
+		if isempty(numBins)
+			[px, xr] = ksdensity(y, 'function', 'pdf'); % selects optimal width
+		else
+			[px, xr] = ksdensity(y, 'width', numBins, 'function', 'pdf'); % uses specified width
+		end
+		binWidths = ones(1, length(px)) * (xr(2) - xr(1));
 
-    otherwise
-        error('Unknown distribution method -- specify ''ks'' or ''hist''') % error; must specify 'ks' or 'hist'
+	otherwise
+		error('Unknown distribution method -- specify ''ks'' or ''hist''') % error; must specify 'ks' or 'hist'
 end
 
 if doPlot
-    figure('color', 'w'); box('on');
-    plot(xr, px, 'k')
+	figure('color', 'w'); box('on');
+	plot(xr, px, 'k')
 end
 
 % ------------------------------------------------------------------------------

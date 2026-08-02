@@ -79,30 +79,30 @@ doPlot = false; % plot outputs
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(windowStat)
-    windowStat = 'mean'; % measure within each window
+	windowStat = 'mean'; % measure within each window
 end
 if nargin < 3 || isempty(acrossWinStat)
-    acrossWinStat = 'std'; % measure across all windows
+	acrossWinStat = 'std'; % measure across all windows
 end
 if nargin < 4 || isempty(numSeg)
-    numSeg = 5;
+	numSeg = 5;
 end
 if nargin < 5 || isempty(incMove)
-    incMove = 2;
+	incMove = 2;
 end
 
 % ------------------------------------------------------------------------------
 
 winLength = floor(length(y) / numSeg); % length of window
 if winLength == 0
-    warning('Time-series of length %u is too short for %u windows', length(y), numSeg);
-    out = NaN;
-    return
+	warning('Time-series of length %u is too short for %u windows', length(y), numSeg);
+	out = NaN;
+	return
 end
 inc = floor(winLength / incMove); % increment to move at each step
 % If increment rounded down to zero, prop it up:
 if inc == 0
-    inc = 1;
+	inc = 1;
 end
 
 numSteps = (floor((length(y) - winLength) / inc) + 1);
@@ -112,84 +112,84 @@ qs = zeros(numSteps, 1);
 getWindow = @(stepInd) ((stepInd - 1) * inc + 1:(stepInd - 1) * inc + winLength);
 
 switch windowStat
-    case 'mean' % Sliding window mean
-        for i = 1:numSteps
-            qs(i) = mean(y(getWindow(i)));
-        end
-    case 'std' % Sliding window std
-        for i = 1:numSteps
-            qs(i) = std(y(getWindow(i)));
-        end
-    case 'ent' % Sliding window distributional entropy
-        for i = 1:numSteps
-            qs(i) = EN_DistributionEntropy(y(getWindow(i)), 'ks', []);
-        end
-    case 'apen' % Sliding window ApEn
-        for i = 1:numSteps
-            qs(i) = EN_ApEn(y(getWindow(i)), 1, 0.2);
-        end
-    case 'sampen' % Sliding window SampEn
-        for i = 1:numSteps
-            sampEn_struct = EN_SampEn(y(getWindow(i)), 1, 0.1);
-            qs(i) = sampEn_struct.sampen1;
-        end
-    case 'mom3' % Third moment
-        for i = 1:numSteps
-            qs(i) = DN_Moments(y(getWindow(i)), 3);
-        end
-    case 'mom4' % Fourth moment
-        for i = 1:numSteps
-            qs(i) = DN_Moments(y(getWindow(i)), 4);
-        end
-    case 'mom5' % Fifth moment
-        for i = 1:numSteps
-            qs(i) = DN_Moments(y(getWindow(i)), 5);
-        end
-    case 'lillie' % Lilliefors test
-        for i = 1:numSteps
-            qs(i) = HT_DistributionTest(y(getWindow(i)), 'lillie', 'norm');
-        end
-    case 'AC1' % Lag-1 autocorrelation
-        for i = 1:numSteps
-            qs(i) = CO_AutoCorr(y(getWindow(i)), 1, 'Fourier');
-        end
-    otherwise
-        error('Unknown statistic ''%s''', windowStat)
+	case 'mean' % Sliding window mean
+		for i = 1:numSteps
+			qs(i) = mean(y(getWindow(i)));
+		end
+	case 'std' % Sliding window std
+		for i = 1:numSteps
+			qs(i) = std(y(getWindow(i)));
+		end
+	case 'ent' % Sliding window distributional entropy
+		for i = 1:numSteps
+			qs(i) = EN_DistributionEntropy(y(getWindow(i)), 'ks', []);
+		end
+	case 'apen' % Sliding window ApEn
+		for i = 1:numSteps
+			qs(i) = EN_ApEn(y(getWindow(i)), 1, 0.2);
+		end
+	case 'sampen' % Sliding window SampEn
+		for i = 1:numSteps
+			sampEn_struct = EN_SampEn(y(getWindow(i)), 1, 0.1);
+			qs(i) = sampEn_struct.sampen1;
+		end
+	case 'mom3' % Third moment
+		for i = 1:numSteps
+			qs(i) = DN_Moments(y(getWindow(i)), 3);
+		end
+	case 'mom4' % Fourth moment
+		for i = 1:numSteps
+			qs(i) = DN_Moments(y(getWindow(i)), 4);
+		end
+	case 'mom5' % Fifth moment
+		for i = 1:numSteps
+			qs(i) = DN_Moments(y(getWindow(i)), 5);
+		end
+	case 'lillie' % Lilliefors test
+		for i = 1:numSteps
+			qs(i) = HT_DistributionTest(y(getWindow(i)), 'lillie', 'norm');
+		end
+	case 'AC1' % Lag-1 autocorrelation
+		for i = 1:numSteps
+			qs(i) = CO_AutoCorr(y(getWindow(i)), 1, 'Fourier');
+		end
+	otherwise
+		error('Unknown statistic ''%s''', windowStat)
 end
 
 % Check for all errors (e.g., short time series):
 if all(isnan(qs))
-    warning('These sliding window settings are not suitable for this time series');
-    out = NaN;
-    return
+	warning('These sliding window settings are not suitable for this time series');
+	out = NaN;
+	return
 end
 
 % ------------------------------------------------------------------------------
 % Plot
 % ------------------------------------------------------------------------------
 if doPlot
-    figure('color', 'w'); box('on');
-    plot(round(winLength / 2):inc:(numSteps - 1) * inc + round(winLength / 2), qs, 'r');
+	figure('color', 'w'); box('on');
+	plot(round(winLength / 2):inc:(numSteps - 1) * inc + round(winLength / 2), qs, 'r');
 end
 
 % ------------------------------------------------------------------------------
 % Compute the output statistic
 % ------------------------------------------------------------------------------
 switch acrossWinStat
-    case 'std'
-        % normalized by std of full time series
-        out = std(qs) / std(y);
-    case 'apen'
-        out = EN_ApEn(qs, 1, 0.2); % ApEn of the sliding window measures
-    case 'sampen'
-        sampEn_struct = EN_SampEn(qs, 2, 0.15);
-        out = sampEn_struct.quadSampEn1;
-    case 'ent'
-        % get a load of statistics from kernel-smoothed distribution (inefficient since only one is used)
-        kssimpouts = DN_FitKernelSmooth(qs);
-        out = kssimpouts.entropy; % distributional entropy
-    otherwise
-        error('Unknown statistic: ''%s''.', acrossWinStat)
+	case 'std'
+		% normalized by std of full time series
+		out = std(qs) / std(y);
+	case 'apen'
+		out = EN_ApEn(qs, 1, 0.2); % ApEn of the sliding window measures
+	case 'sampen'
+		sampEn_struct = EN_SampEn(qs, 2, 0.15);
+		out = sampEn_struct.quadSampEn1;
+	case 'ent'
+		% get a load of statistics from kernel-smoothed distribution (inefficient since only one is used)
+		kssimpouts = DN_FitKernelSmooth(qs);
+		out = kssimpouts.entropy; % distributional entropy
+	otherwise
+		error('Unknown statistic: ''%s''.', acrossWinStat)
 end
 
 end

@@ -49,17 +49,17 @@ N = length(y); % time-series length
 %% Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
-    tau = 'tau'; % set to the first minimum of autocorrelation function
+	tau = 'tau'; % set to the first minimum of autocorrelation function
 end
 if strcmp(tau, 'tau'),
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-    if tau > N / 10
-        tau = floor(N / 10);
-    end
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if tau > N / 10
+		tau = floor(N / 10);
+	end
 end
 % Make sure the time series is a column vector
 if size(y, 2) > size(y, 1);
-    y = y';
+	y = y';
 end
 
 % ------------------------------------------------------------------------------
@@ -71,10 +71,10 @@ m = [y(1:end - tau), y(1 + tau:end)];
 % Plot the embedding:
 % ------------------------------------------------------------------------------
 if doPlot
-    figure('color', 'w');
-    box('on'); hold('on')
-    plot(m(:, 1), m(:, 2), '.');
-    plot(m(1:min(200, end), 1), m(1:min(200, end), 2), 'k');
+	figure('color', 'w');
+	box('on'); hold('on')
+	plot(m(:, 1), m(:, 2), '.');
+	plot(m(1:min(200, end), 1), m(1:min(200, end), 2), 'k');
 end
 
 % ------------------------------------------------------------------------------

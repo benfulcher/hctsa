@@ -51,12 +51,12 @@ function glscf = CO_glscf(y, alpha, beta, tau)
 %% Check inputs and set defaults
 % ------------------------------------------------------------------------------
 if nargin < 4 || isempty(tau)
-    tau = 'tau';
+	tau = 'tau';
 end
 
 % Set tau to first zero-crossing of the autocorrelation function with the input 'tau'
 if strcmp(tau, 'tau')
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
 
 % Take magnitudes of time-delayed versions of the time series. abs(y) is
@@ -69,33 +69,33 @@ end
 persistent cacheY cacheAy
 maxCacheEntries = 4;
 if isempty(cacheY)
-    cacheY = {};
-    cacheAy = {};
+	cacheY = {};
+	cacheAy = {};
 end
 
 foundInCache = false;
 for ci = 1:numel(cacheY)
-    if isequaln(y, cacheY{ci})
-        ay = cacheAy{ci};
-        foundInCache = true;
-        break
-    end
+	if isequaln(y, cacheY{ci})
+		ay = cacheAy{ci};
+		foundInCache = true;
+		break
+	end
 end
 if ~foundInCache
-    ay = abs(y);
-    cacheY{end + 1} = y;
-    cacheAy{end + 1} = ay;
-    if numel(cacheY) > maxCacheEntries
-        cacheY(1) = [];
-        cacheAy(1) = [];
-    end
+	ay = abs(y);
+	cacheY{end + 1} = y;
+	cacheAy{end + 1} = ay;
+	if numel(cacheY) > maxCacheEntries
+		cacheY(1) = [];
+		cacheAy(1) = [];
+	end
 end
 
 y1 = ay(1:end - tau);
 y2 = ay(1 + tau:end);
 
 glscf = (mean((y1.^alpha) .* (y2.^beta)) - mean(y1.^alpha) * mean(y2.^beta)) / ...
-                (sqrt(mean(y1.^(2 * alpha)) - mean(y1.^alpha)^2) ...
-                 * sqrt(mean(y2.^(2 * beta)) - mean(y2.^beta)^2));
+				(sqrt(mean(y1.^(2 * alpha)) - mean(y1.^alpha)^2) ...
+				 * sqrt(mean(y2.^(2 * beta)) - mean(y2.^beta)^2));
 
 end

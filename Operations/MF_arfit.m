@@ -59,24 +59,24 @@ function out = MF_arfit(y, pmin, pmax, selector)
 %% Check Inputs
 % ------------------------------------------------------------------------------
 if size(y, 2) > size(y, 1)
-    y = y'; % needs to be a column vector
+	y = y'; % needs to be a column vector
 end
 N = length(y); % time series length
 
 if nargin < 2 || isempty(pmin)
-    pmin = 1;
+	pmin = 1;
 end
 if nargin < 3 || isempty(pmax)
-    pmax = 10;
+	pmax = 10;
 end
 if nargin < 4 || isempty(selector)
-    selector = 'sbc';
-    % Use Schwartz's Bayesian Criterion to choose optimum model order
+	selector = 'sbc';
+	% Use Schwartz's Bayesian Criterion to choose optimum model order
 end
 
 % Check the ARfit toolbox is installed and in the Matlab path
 if ~exist('ARFIT_arfit', 'file')
-    error('Cannot find the function ''ARFIT_arfit''. There''s a problem with the ARfit toolbox.')
+	error('Cannot find the function ''ARFIT_arfit''. There''s a problem with the ARfit toolbox.')
 end
 
 % ------------------------------------------------------------------------------
@@ -105,12 +105,12 @@ popt = length(Aest);
 % returning the first 6, and 0s if don't exist
 out.A1 = Aest(1);
 for i = 2:6
-    if popt >= i
-        out.(sprintf('A%u', i)) = Aest(i);
-    else
-        % it's as if the higher order coefficients are all zero
-        out.(sprintf('A%u', i)) = 0;
-    end
+	if popt >= i
+		out.(sprintf('A%u', i)) = Aest(i);
+	else
+		% it's as if the higher order coefficients are all zero
+		out.(sprintf('A%u', i)) = 0;
+	end
 end
 
 % (ii) Summary statistics on the coefficients
@@ -136,8 +136,8 @@ out.C = Cest;
 % There will be a value for each model order from pmin:pmax
 % (i) Return all
 for i = 1:length(ps)
-    out.(sprintf('sbc_%u', ps(i))) = SBC(i);
-    % eval(sprintf('out.sbc_%u = SBC(%u);',ps(i),i));
+	out.(sprintf('sbc_%u', ps(i))) = SBC(i);
+	% eval(sprintf('out.sbc_%u = SBC(%u);',ps(i),i));
 end
 
 % (ii) Return minimum
@@ -147,13 +147,13 @@ out.popt_sbc = find(SBC == min(SBC), 1, 'first');
 % (iii) How convincing is the minimum?
 % adjacent values
 if (out.popt_sbc > 1) && (out.popt_sbc < length(SBC));
-    meanaround = mean(abs([SBC(out.popt_sbc - 1), SBC(out.popt_sbc + 1)]));
+	meanaround = mean(abs([SBC(out.popt_sbc - 1), SBC(out.popt_sbc + 1)]));
 elseif out.popt_sbc == 1
-    meanaround = abs(SBC(out.popt_sbc + 1)); % just the next value
+	meanaround = abs(SBC(out.popt_sbc + 1)); % just the next value
 elseif out.popt_sbc == length(SBC) % really an else
-    meanaround = abs(SBC(out.popt_sbc - 1)); % just the previous value
+	meanaround = abs(SBC(out.popt_sbc - 1)); % just the previous value
 else
-    error('Weird error!');
+	error('Weird error!');
 end
 out.aroundmin_sbc = abs(min(SBC)) / meanaround;
 
@@ -162,8 +162,8 @@ out.aroundmin_sbc = abs(min(SBC)) / meanaround;
 % ------------------------------------------------------------------------------
 % (i) Return all
 for i = 1:length(ps)
-    out.(['fpe_', num2str(ps(i))]) = FPE(i);
-    % eval(sprintf('out.fpe_%u = FPE(%u);',ps(i),i));
+	out.(['fpe_', num2str(ps(i))]) = FPE(i);
+	% eval(sprintf('out.fpe_%u = FPE(%u);',ps(i),i));
 end
 % (ii) Return minimum
 out.minfpe = min(FPE);
@@ -172,13 +172,13 @@ out.popt_fpe = find(FPE == min(FPE), 1, 'first');
 % (iii) How convincing is the minimum?
 % adjacent values
 if out.popt_fpe > 1 && out.popt_fpe < length(FPE);
-    meanaround = mean(abs([FPE(out.popt_fpe - 1), FPE(out.popt_fpe + 1)]));
+	meanaround = mean(abs([FPE(out.popt_fpe - 1), FPE(out.popt_fpe + 1)]));
 elseif out.popt_fpe == 1
-    meanaround = abs(FPE(out.popt_fpe + 1)); % just the next value
+	meanaround = abs(FPE(out.popt_fpe + 1)); % just the next value
 elseif out.popt_fpe == length(FPE) % really an else
-    meanaround = abs(FPE(out.popt_fpe - 1));
+	meanaround = abs(FPE(out.popt_fpe - 1));
 else
-    error('Weird error!!');
+	error('Weird error!!');
 end
 out.aroundmin_fpe = abs(min(FPE)) / meanaround;
 

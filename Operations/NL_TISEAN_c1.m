@@ -72,22 +72,22 @@ N = length(y); % time-series length (number of samples)
 
 % Don't compute on short data
 if N < 100
-    warning('Time series too short for c1')
-    out = NaN; return
+	warning('Time series too short for c1')
+	out = NaN; return
 end
 % ++BF 12/5/2010 -- for some reason timeseries of length near a multiple of 128
 % stalls the TISEAN routine c1... -- let's do a slight workaround by removing the
 % last (few) points in this case...
 freakyStat = mod(N, 128);
 if freakyStat <= 6
-    fprintf(1, 'You''re not going to believe this but TISEAN has a problem freezing with this length time series!\n');
-    fprintf(1, 'I''m ignoring the last %u points of this time series...\n', freakyStat + 1);
-    y = y(1:end - (freakyStat + 1));
-    N = length(y); % new time-series length
+	fprintf(1, 'You''re not going to believe this but TISEAN has a problem freezing with this length time series!\n');
+	fprintf(1, 'I''m ignoring the last %u points of this time series...\n', freakyStat + 1);
+	y = y(1:end - (freakyStat + 1));
+	N = length(y); % new time-series length
 end
 % Also freezes on constant data
 if length(unique(y)) == 1
-    out = NaN; return
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
@@ -95,50 +95,50 @@ end
 % ------------------------------------------------------------------------------
 % time delay, tau
 if nargin < 2 || isempty(tau)
-    tau = 1;
+	tau = 1;
 end
 if strcmp(tau, 'ac')
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 elseif strcmp(tau, 'mi')
-    tau = CO_FirstMin(y, 'mi');
+	tau = CO_FirstMin(y, 'mi');
 end
 if isnan(tau)
-    error('Time series cannot be embedded (too short?)');
+	error('Time series cannot be embedded (too short?)');
 end
 
 % Min/max embedding dimension, mmm
 if nargin < 3 || isempty(mmm)
-    mmm = [2, 10];
+	mmm = [2, 10];
 end
 if length(mmm) ~= 2
-    error('Please set a minimum and maximum embedding dimension as a length-2 vector');
+	error('Please set a minimum and maximum embedding dimension as a length-2 vector');
 end
 
 % Time separation, tsep
 if nargin < 4 || isempty(tsep)
-    tsep = 0.02; % 2% of data length
+	tsep = 0.02; % 2% of data length
 end
 if (tsep > 0) && (tsep < 1) % specify proportion of data length
-    tsep = round(tsep * N);
+	tsep = round(tsep * N);
 end
 
 % Number of reference points, Nref
 if nargin < 5 || isempty(Nref)
-    Nref = 0.5; % half the total data
+	Nref = 0.5; % half the total data
 end
 if (Nref > 0) && (Nref <= 1)
-    Nref = ceil(Nref * N); % specify a proportion of data length
+	Nref = ceil(Nref * N); % specify a proportion of data length
 end
 
 Nrefmin = 100; % can't have fewer than 100 reference points
 Nrefmax = 2500; % for time reasons, don't use more than 2500 reference points
 
 if Nref > Nrefmax
-    Nref = Nrefmax;
+	Nref = Nrefmax;
 end
 
 if (Nref < Nrefmin) && (N > Nrefmin)
-    Nref = Nrefmin;
+	Nref = Nrefmin;
 end
 
 % ------------------------------------------------------------------------------
@@ -153,37 +153,37 @@ filePath = BF_WriteTempFile(y);
 % run c1 code
 tic
 [~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s', ...
-                          tau, mmm(1), mmm(2), tsep, Nref, filePath, filePath));
+						  tau, mmm(1), mmm(2), tsep, Nref, filePath, filePath));
 delete(filePath) % remove the temporary data file
 
 if isempty(res)
-    if exist([filePath '.c1'], 'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
-    error('Call to TISEAN method ''c1'' failed.');
+	if exist([filePath '.c1'], 'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
+	error('Call to TISEAN method ''c1'' failed.');
 elseif strfind(res, 'dyld: Library not loaded')
-    error('DYLD library not found -- try recompiling TISEAN:\n%s', res);
+	error('DYLD library not found -- try recompiling TISEAN:\n%s', res);
 else
-    fprintf(1, 'TISEAN function ''c1'' took %s.\n', BF_TheTime(toc, 1));
+	fprintf(1, 'TISEAN function ''c1'' took %s.\n', BF_TheTime(toc, 1));
 end
 
 if ~exist([filePath '.c1'], 'file')
-    error([filePath, '.c1 not generated??! Could be due to an overly long filename...']);
+	error([filePath, '.c1 not generated??! Could be due to an overly long filename...']);
 end
 
 % Get local slopes from c1 file output of previous call
 [~, res] = system(sprintf('c2d -a2 %s.c1', filePath));
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once')) % nothing came out??
-    if exist([filePath '.c1'], 'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
-    if isempty(res)
-        error('Call to TISEAN function ''c1'' failed.');
-    else
-        error('Call to TISEAN function ''c1'' failed: %s.', res)
-    end
+	if exist([filePath '.c1'], 'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
+	if isempty(res)
+		error('Call to TISEAN function ''c1'' failed.');
+	else
+		error('Call to TISEAN function ''c1'' failed: %s.', res)
+	end
 end
 
 % fprintf(1,'TISEAN routine c2d on c1 output took %s\n',BF_TheTime(toc(c2dtimer),1))
 if exist([filePath '.c1'], 'file')
-    delete([filePath '.c1']);
+	delete([filePath '.c1']);
 end % remove the TISEAN file write output
 
 % ------------------------------------------------------------------------------
@@ -204,12 +204,12 @@ end % remove the TISEAN file write output
 s = textscan(res, '%[^\n]');
 s = s{1};
 if isempty(s)
-    error('Error reading TISEAN output file %s.c1', filePath)
+	error('Error reading TISEAN output file %s.c1', filePath)
 end
 
 c1dat = SUB_readTISEANout(s, '#m=', 2);
 if isempty(c1dat)
-    error('Error reading TISEAN output file %s.c1: %s', filePath, s{1})
+	error('Error reading TISEAN output file %s.c1: %s', filePath, s{1})
 end
 
 % issues: x-values differ for each dimension
@@ -236,16 +236,16 @@ end
 % Just do it for individual dimensions
 c1sc = zeros(length(c1dat), 6); % c1 scaling
 for i = 1:length(c1dat)
-    try
-        c1sc(i, 1:5) = findscalingr_ind(c1dat{i}(:, 2));
-    catch
-        error('Error finding scaling range')
-    end
+	try
+		c1sc(i, 1:5) = findscalingr_ind(c1dat{i}(:, 2));
+	catch
+		error('Error finding scaling range')
+	end
 end
 % scaling ranges
 for i = 1:length(c1dat)
-    c1sc(i, 1) = c1dat{i}(c1sc(i, 1), 1);
-    c1sc(i, 2) = c1dat{i}(c1sc(i, 2), 1);
+	c1sc(i, 1) = c1dat{i}(c1sc(i, 1), 1);
+	c1sc(i, 2) = c1dat{i}(c1sc(i, 2), 1);
 end
 c1sc(:, 6) = c1sc(:, 2) - c1sc(:, 1);
 
@@ -292,44 +292,44 @@ out.longestscr = max(c1sc(:, 6)); % (a log difference)
 %     -h show this message
 
 function dimdat = SUB_readTISEANout(s, blocker, nc)
-    % blocker the string distinguishing sections of output
-    % nc number of columns in string
+	% blocker the string distinguishing sections of output
+	% nc number of columns in string
 
-    %         w = zeros(maxm+1,1);
-    %         if nargin < 3 % use default blocker
-    %             for ii = 1:maxm
-    %                 w(ii)=strmatch(['#dim= ' num2str(ii)],s,'exact');
-    %             end
-    %         else
-    %            for ii = 1:maxm
-    %                 try
-    %                     w(ii) = strmatch([blocker num2str(ii)],s,'exact');
-    %                 catch
-    %                    keyboard
-    %                 end
-    %            end
-    %         end
-    w = strmatch(blocker, s);
-    %         if length(w)~=maxm
-    %             disp('error reading TISEAN output'); return
-    %         end
-    maxm = length(w);
-    w(end + 1) = length(s) + 1; % as if there were another marker at the entry after the last data row
+	%         w = zeros(maxm+1,1);
+	%         if nargin < 3 % use default blocker
+	%             for ii = 1:maxm
+	%                 w(ii)=strmatch(['#dim= ' num2str(ii)],s,'exact');
+	%             end
+	%         else
+	%            for ii = 1:maxm
+	%                 try
+	%                     w(ii) = strmatch([blocker num2str(ii)],s,'exact');
+	%                 catch
+	%                    keyboard
+	%                 end
+	%            end
+	%         end
+	w = strmatch(blocker, s);
+	%         if length(w)~=maxm
+	%             disp('error reading TISEAN output'); return
+	%         end
+	maxm = length(w);
+	w(end + 1) = length(s) + 1; % as if there were another marker at the entry after the last data row
 
-    dimdat = cell(maxm, 1); % stores data for each embedding dimension
-    for ii = 1:maxm
-        ss = s(w(ii) + 1:w(ii + 1) - 1);
-        nn = zeros(length(ss), nc);
-        for jj = 1:length(ss)
-            if nc == 2
-                tmp = textscan(ss{jj}, '%n%n');
-            elseif nc == 3
-                tmp = textscan(ss{jj}, '%n%n%n');
-            end
-            nn(jj, :) = horzcat(tmp{:});
-        end
-        dimdat{ii} = nn;
-    end
+	dimdat = cell(maxm, 1); % stores data for each embedding dimension
+	for ii = 1:maxm
+		ss = s(w(ii) + 1:w(ii + 1) - 1);
+		nn = zeros(length(ss), nc);
+		for jj = 1:length(ss)
+			if nc == 2
+				tmp = textscan(ss{jj}, '%n%n');
+			elseif nc == 3
+				tmp = textscan(ss{jj}, '%n%n%n');
+			end
+			nn(jj, :) = horzcat(tmp{:});
+		end
+		dimdat{ii} = nn;
+	end
 
 end
 %
@@ -360,40 +360,40 @@ end
 %     end
 
 function results = findscalingr_ind(x)
-    % AS ABOVE EXCEPT LOOKS FOR SCALING RANGES FOR INDIVIDUAL DIMENSIONS
-    % finds constant regions in VECTOR x
-    % if x a matrix, finds scaling regions requiring all columns to
-    % match up. (i.e., to exhibit scaling at the same time)
-    % starting point must be in first half of data
-    % end point must be in last half of data
+	% AS ABOVE EXCEPT LOOKS FOR SCALING RANGES FOR INDIVIDUAL DIMENSIONS
+	% finds constant regions in VECTOR x
+	% if x a matrix, finds scaling regions requiring all columns to
+	% match up. (i.e., to exhibit scaling at the same time)
+	% starting point must be in first half of data
+	% end point must be in last half of data
 
-    l = length(x); % number of distance/scaling points per dimension
-    gamma = 0.005; % regularization parameter, chosen empirically
+	l = length(x); % number of distance/scaling points per dimension
+	gamma = 0.005; % regularization parameter, chosen empirically
 
-    stptr = 1:floor(l / 4) - 1; % must be in the first quarter
-    endptr = ceil(l / 4) + 1:l; % must be in second three quarters
-    results = zeros(4, 1); % stpt, endpt, goodness, dim
+	stptr = 1:floor(l / 4) - 1; % must be in the first quarter
+	endptr = ceil(l / 4) + 1:l; % must be in second three quarters
+	results = zeros(4, 1); % stpt, endpt, goodness, dim
 
-    mybad = zeros(length(stptr), length(endptr));
-    v = x; % the vector of data for length scales
-    vnorm = v; % (v-min(v))./(max(v)-min(v)); % normalize regardless of range
-    for ii = 1:length(stptr)
-        for jj = 1:length(endptr)
-            mybad(ii, jj) = std(vnorm(stptr(ii):endptr(jj))) - gamma * (endptr(jj) - stptr(ii) + 1);
-        end
-    end
-    [a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range
-    results(1) = stptr(a);
-    results(2) = endptr(b);
-    results(3) = min(mybad(:));
-    results(4) = mean(v(stptr(a):endptr(b)));
-    results(5) = std(v(stptr(a):endptr(b)));
+	mybad = zeros(length(stptr), length(endptr));
+	v = x; % the vector of data for length scales
+	vnorm = v; % (v-min(v))./(max(v)-min(v)); % normalize regardless of range
+	for ii = 1:length(stptr)
+		for jj = 1:length(endptr)
+			mybad(ii, jj) = std(vnorm(stptr(ii):endptr(jj))) - gamma * (endptr(jj) - stptr(ii) + 1);
+		end
+	end
+	[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range
+	results(1) = stptr(a);
+	results(2) = endptr(b);
+	results(3) = min(mybad(:));
+	results(4) = mean(v(stptr(a):endptr(b)));
+	results(5) = std(v(stptr(a):endptr(b)));
 
-    %         hold off;
-    %         plot(1:l,v,'o-k');
-    %         hold on;
-    %         plot(stptr(a):endptr(b),mean(v(stptr(a):endptr(b)))*ones(endptr(b)-stptr(a)+1),'--r');
-    %         hold off;
+	%         hold off;
+	%         plot(1:l,v,'o-k');
+	%         hold on;
+	%         plot(stptr(a):endptr(b),mean(v(stptr(a):endptr(b)))*ones(endptr(b)-stptr(a)+1),'--r');
+	%         hold off;
 end
 
 end

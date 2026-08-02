@@ -50,18 +50,18 @@ function out = IN_MutualInfo(y1, y2, estMethod, extraParam)
 % Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(y1) || isempty(y2)
-    error('Need to provide two input vectors');
+	error('Need to provide two input vectors');
 end
 if size(y1) ~= size(y2)
-    error('Input vectors need to be the same size... :/');
+	error('Input vectors need to be the same size... :/');
 end
 
 if nargin < 3 || isempty(estMethod)
-    estMethod = 'kernel';
+	estMethod = 'kernel';
 end
 
 if nargin < 4
-    extraParam = [];
+	extraParam = [];
 end
 
 % ------------------------------------------------------------------------------

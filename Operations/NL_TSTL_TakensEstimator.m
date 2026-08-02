@@ -52,35 +52,35 @@ N = length(y); % time-series length
 
 % 1) Nref
 if nargin < 2 || isempty(Nref)
-    Nref = -1; % use all points
+	Nref = -1; % use all points
 end
 
 % 2) Maximum search radius (as proportion of attractor size)
 if nargin < 3 || isempty(rad)
-    rad = 0.05;
+	rad = 0.05;
 end
 
 % 3) Theiler window
 if nargin < 4 || isempty(past)
-    past = 1; % just exclude current point
+	past = 1; % just exclude current point
 end
 if (past > 0) && (past < 1)
-    past = floor(N * past); % specify a fraction of the time series length...
+	past = floor(N * past); % specify a fraction of the time series length...
 end
 
 % 4) Embedding parameters
 if nargin < 5 || isempty(embedParams)
-    embedParams = {'ac', 'fnnmar'};
-    fprintf(1, 'Using default time-delay embedding using autocorrelation and fnn-mar\n');
+	embedParams = {'ac', 'fnnmar'};
+	fprintf(1, 'Using default time-delay embedding using autocorrelation and fnn-mar\n');
 else
-    if length(embedParams) ~= 2
-        error('Embedding parameters are incorrectly formatted, we need {tau,m}')
-    end
+	if length(embedParams) ~= 2
+		error('Embedding parameters are incorrectly formatted, we need {tau,m}')
+	end
 end
 
 % 5) randomSeed: how to treat the randomization
 if nargin < 6
-    randomSeed = []; % default
+	randomSeed = []; % default
 end
 
 % ------------------------------------------------------------------------------
@@ -90,14 +90,14 @@ end
 s = BF_Embed(y, embedParams{1}, embedParams{2}, 1, randomSeed);
 
 if ~isa(s, 'signal') && isnan(s); % Embedding failed
-    fprintf('Embedding failed.\n')
-    out = NaN; return % assume an error with large time-lag or dimension
+	fprintf('Embedding failed.\n')
+	out = NaN; return % assume an error with large time-lag or dimension
 end
 
 % Check that there are enough points:
 if size(data(s), 1) < 10
-    % Too few data points:
-    out = NaN; return
+	% Too few data points:
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------

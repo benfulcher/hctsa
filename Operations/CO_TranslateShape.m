@@ -51,13 +51,13 @@ function out = CO_TranslateShape(y, shape, d, howToMove)
 %% Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(shape)
-    shape = 'circle';
+	shape = 'circle';
 end
 if nargin < 3 || isempty(d)
-    d = 2; % a default distance d = 2
+	d = 2; % a default distance d = 2
 end
 if nargin < 4 || isempty(howToMove)
-    howToMove = 'pts'; % by default, places shapes on each timepoint
+	howToMove = 'pts'; % by default, places shapes on each timepoint
 end
 
 % ------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ N = length(y); % the length of the time series
 
 % y must be a column vector, transpose it if it's a row vector
 if size(y, 2) > size(y, 1)
-    y = y';
+	y = y';
 end
 
 % Add a time index
@@ -78,40 +78,40 @@ ty = [(1:N)', y]; % has increasing integers as time in the first column
 % translated across the time series
 % -------------------------------------------------------------------------------
 switch howToMove
-    case 'pts' % Place shapes on each timepoint (excluding a range at start and end)
-        switch shape
-            case 'circle' % uses a circle of radius 'd'
-                r = d;
-                w = floor(r); % only consider a window radius w (these are the
-                %    only points that could possibly be inside)
-                rnge = 1 + w:N - w;
-                NN = length(rnge); % number of admissible points
-                np = zeros(NN, 1); % number of points
-                for i = 1:NN
-                    win = ty(rnge(i) - w:rnge(i) + w, :); % create window
-                    % win - ty(rnge(i),:) relies on implicit broadcasting to
-                    % subtract the row ty(rnge(i),:) from every row of win --
-                    % identical result to win - ones(2*w+1,1)*ty(rnge(i),:),
-                    % without allocating/multiplying by an explicit ones()
-                    % matrix on every iteration (same fix as CO_Embed2_Shapes):
-                    difwin = win - ty(rnge(i), :);
-                    np(i) = sum(sum(difwin.^2, 2) <= r^2); % number of points enclosed in shape
-                end
-            case 'rectangle'
-                % uses a rectangle of half-width d (integer), height as double the current time
-                % series value (on either side of origin)
-                w = d;
-                rnge = 1 + d:N - d;
-                NN = length(rnge); % number of admissible points
-                np = zeros(NN, 1); % number of points
-                for i = 1:NN
-                    np(i) = sum(abs(y(rnge(i) - d:rnge(i) + d)) <= abs(y(rnge(i))));
-                end
-            otherwise
-                error('Unknown shape ''%s''', shape)
-        end
-    otherwise
-        error('Unknown setting for ''howToMove'' input: ''%s''', howToMove)
+	case 'pts' % Place shapes on each timepoint (excluding a range at start and end)
+		switch shape
+			case 'circle' % uses a circle of radius 'd'
+				r = d;
+				w = floor(r); % only consider a window radius w (these are the
+				%    only points that could possibly be inside)
+				rnge = 1 + w:N - w;
+				NN = length(rnge); % number of admissible points
+				np = zeros(NN, 1); % number of points
+				for i = 1:NN
+					win = ty(rnge(i) - w:rnge(i) + w, :); % create window
+					% win - ty(rnge(i),:) relies on implicit broadcasting to
+					% subtract the row ty(rnge(i),:) from every row of win --
+					% identical result to win - ones(2*w+1,1)*ty(rnge(i),:),
+					% without allocating/multiplying by an explicit ones()
+					% matrix on every iteration (same fix as CO_Embed2_Shapes):
+					difwin = win - ty(rnge(i), :);
+					np(i) = sum(sum(difwin.^2, 2) <= r^2); % number of points enclosed in shape
+				end
+			case 'rectangle'
+				% uses a rectangle of half-width d (integer), height as double the current time
+				% series value (on either side of origin)
+				w = d;
+				rnge = 1 + d:N - d;
+				NN = length(rnge); % number of admissible points
+				np = zeros(NN, 1); % number of points
+				for i = 1:NN
+					np(i) = sum(abs(y(rnge(i) - d:rnge(i) + d)) <= abs(y(rnge(i))));
+				end
+			otherwise
+				error('Unknown shape ''%s''', shape)
+		end
+	otherwise
+		error('Unknown setting for ''howToMove'' input: ''%s''', howToMove)
 end
 
 % -------------------------------------------------------------------------------

@@ -52,19 +52,19 @@ function out = NL_crptool_fnn(y, maxm, r, taum, th, randomSeed)
 % otherwise always read as 6).
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(maxm)
-    maxm = 10; % default maximum embedding dimension
+	maxm = 10; % default maximum embedding dimension
 end
 if nargin < 3 || isempty(r)
-    r = 2; % neighbourhood criterion
+	r = 2; % neighbourhood criterion
 end
 if nargin < 4 || isempty(taum)
-    taum = 'mi'; % by default determine time delay by first minimum of AMI
+	taum = 'mi'; % by default determine time delay by first minimum of AMI
 end
 if nargin < 5
-    th = []; % default is to return statistics
+	th = []; % default is to return statistics
 end
 if nargin < 6
-    randomSeed = []; % default
+	randomSeed = []; % default
 end
 
 % ------------------------------------------------------------------------------
@@ -83,21 +83,21 @@ end
 persistent cacheY cacheMaxm cacheR cacheTaum cacheTh cacheRandomSeed cacheOut
 maxCacheEntries = 4;
 if isempty(cacheY)
-    cacheY = {};
-    cacheMaxm = {};
-    cacheR = {};
-    cacheTaum = {};
-    cacheTh = {};
-    cacheRandomSeed = {};
-    cacheOut = {};
+	cacheY = {};
+	cacheMaxm = {};
+	cacheR = {};
+	cacheTaum = {};
+	cacheTh = {};
+	cacheRandomSeed = {};
+	cacheOut = {};
 end
 
 for ci = 1:numel(cacheY)
-    if isequaln(y, cacheY{ci}) && isequaln(maxm, cacheMaxm{ci}) && isequaln(r, cacheR{ci}) && ...
-            isequaln(taum, cacheTaum{ci}) && isequaln(th, cacheTh{ci}) && isequaln(randomSeed, cacheRandomSeed{ci})
-        out = cacheOut{ci};
-        return
-    end
+	if isequaln(y, cacheY{ci}) && isequaln(maxm, cacheMaxm{ci}) && isequaln(r, cacheR{ci}) && ...
+			isequaln(taum, cacheTaum{ci}) && isequaln(th, cacheTh{ci}) && isequaln(randomSeed, cacheRandomSeed{ci})
+		out = cacheOut{ci};
+		return
+	end
 end
 
 out = NL_crptool_fnn_Compute(y, maxm, r, taum, th, randomSeed);
@@ -110,13 +110,13 @@ cacheTh{end + 1} = th;
 cacheRandomSeed{end + 1} = randomSeed;
 cacheOut{end + 1} = out;
 if numel(cacheY) > maxCacheEntries
-    cacheY(1) = [];
-    cacheMaxm(1) = [];
-    cacheR(1) = [];
-    cacheTaum(1) = [];
-    cacheTh(1) = [];
-    cacheRandomSeed(1) = [];
-    cacheOut(1) = [];
+	cacheY(1) = [];
+	cacheMaxm(1) = [];
+	cacheR(1) = [];
+	cacheTaum(1) = [];
+	cacheTh(1) = [];
+	cacheRandomSeed(1) = [];
+	cacheOut(1) = [];
 end
 
 end
@@ -132,27 +132,27 @@ N = length(y); % length of the input time series
 
 % determine the time delay
 if ischar(taum)
-    % time delay
-    if strcmp(taum, 'mi')
-        tau = CO_FirstMin(y, 'mi');
-    elseif strcmp(taum, 'ac')
-        tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-    else
-        error('Invalid time-delay method ''%s''.', taum)
-    end
+	% time delay
+	if strcmp(taum, 'mi')
+		tau = CO_FirstMin(y, 'mi');
+	elseif strcmp(taum, 'ac')
+		tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	else
+		error('Invalid time-delay method ''%s''.', taum)
+	end
 else % give a numeric answer
-    tau = taum;
+	tau = taum;
 end
 % Don't want tau to be too large
 if tau > N / 10
-    tau = floor(N / 10);
+	tau = floor(N / 10);
 end
 
 % ------------------------------------------------------------------------------
 %% Here's where the action happens:
 % ------------------------------------------------------------------------------
 if ~exist(fullfile('Marwan_crptool', 'crptool_fnn'), 'file')
-    error('Error -- the CRP Toolbox functions for calculating nearest neighbours can not be found');
+	error('Error -- the CRP Toolbox functions for calculating nearest neighbours can not be found');
 end
 
 % Control the random seed (for reproducibility):
@@ -162,47 +162,47 @@ BF_ResetSeed(randomSeed);
 nn = crptool_fnn(y, maxm, tau, r, 'silent');
 
 if isnan(nn);
-    error('Error running the function ''fnn'' from Marwan''s CRPToolbox')
+	error('Error running the function ''fnn'' from Marwan''s CRPToolbox')
 end
 
 if doPlot
-    figure('color', 'w')
-    plot(1:maxm, nn, 'o-k');
+	figure('color', 'w')
+	plot(1:maxm, nn, 'o-k');
 end
 
 % Output some summary statistics
 if isempty(th)
 
-    % nn drops
-    dnn = diff(nn);
-    out.mdrop = mean(dnn); % same information as in fnn(maxm)
-    out.pdrop = -mean(sign(dnn)); % proportion of m -> m+1 for which fnn decreased
+	% nn drops
+	dnn = diff(nn);
+	out.mdrop = mean(dnn); % same information as in fnn(maxm)
+	out.pdrop = -mean(sign(dnn)); % proportion of m -> m+1 for which fnn decreased
 
-    % fnn
-    for i = 2:maxm
-        out.(sprintf('fnn%u', i)) = nn(i);
-    end
+	% fnn
+	for i = 2:maxm
+		out.(sprintf('fnn%u', i)) = nn(i);
+	end
 
-    % first time NN error goes below a set of thresholds
-    % firstunderfn = @(x) find(nn < x,1,'first');
-    out.firstunder08 = firstunderf(0.8, 1:maxm, nn);
-    out.firstunder07 = firstunderf(0.7, 1:maxm, nn);
-    out.firstunder05 = firstunderf(0.5, 1:maxm, nn);
-    out.firstunder02 = firstunderf(0.2, 1:maxm, nn);
-    out.firstunder01 = firstunderf(0.1, 1:maxm, nn);
-    out.firstunder005 = firstunderf(0.05, 1:maxm, nn);
+	% first time NN error goes below a set of thresholds
+	% firstunderfn = @(x) find(nn < x,1,'first');
+	out.firstunder08 = firstunderf(0.8, 1:maxm, nn);
+	out.firstunder07 = firstunderf(0.7, 1:maxm, nn);
+	out.firstunder05 = firstunderf(0.5, 1:maxm, nn);
+	out.firstunder02 = firstunderf(0.2, 1:maxm, nn);
+	out.firstunder01 = firstunderf(0.1, 1:maxm, nn);
+	out.firstunder005 = firstunderf(0.05, 1:maxm, nn);
 
 else % in this case return a scalar of embedding dimension as output
-    out = firstunderf(th, 1:maxm, nn);
+	out = firstunderf(th, 1:maxm, nn);
 end
 
 % ------------------------------------------------------------------------------
 function firsti = firstunderf(x, m, p)
-    %% Find m for the first time p goes under x%
-    firsti = m(find(p < x, 1, 'first'));
-    if isempty(firsti)
-        firsti = m(end) + 1;
-    end
+	%% Find m for the first time p goes under x%
+	firsti = m(find(p < x, 1, 'first'));
+	if isempty(firsti)
+		firsti = m(end) + 1;
+	end
 end
 
 end

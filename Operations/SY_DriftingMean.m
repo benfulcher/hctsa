@@ -62,30 +62,30 @@ N = length(y); % length of the input time series
 %% Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(segmentHow)
-    segmentHow = 'num'; % a specified number of segments
+	segmentHow = 'num'; % a specified number of segments
 end
 if strcmp(segmentHow, 'num')
-    l = floor(N / l);
+	l = floor(N / l);
 elseif ~strcmp(segmentHow, 'fix')
-    error('Unknown input setting ''%s''', segmentHow)
+	error('Unknown input setting ''%s''', segmentHow)
 end
 
 if nargin < 3 || isempty(l)
-    switch segmentHow
-        case 'num'
-            l = 5; % 5 segments
-        case 'fix'
-            l = 200; % 200-sample segments
-    end
+	switch segmentHow
+		case 'num'
+			l = 5; % 5 segments
+		case 'fix'
+			l = 200; % 200-sample segments
+	end
 end
 
 % ------------------------------------------------------------------------------
 %% Check for short time series
 % -------------------------------------------------------------------------------
 if l == 0 || N < l % doesn't make sense to split into more windows than there are data points
-    fprintf(1, 'Time Series (N = %u < l = %u) is too short for this operation\n', N, l);
-    out = NaN;
-    return
+	fprintf(1, 'Time Series (N = %u < l = %u) is too short for this operation\n', N, l);
+	out = NaN;
+	return
 end
 
 % -------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ end
 numFits = floor(N / l); % number of times l fits completely into N
 z = zeros(l, numFits);
 for i = 1:numFits
-    z(:, i) = y((i - 1) * l + 1:i * l);
+	z(:, i) = y((i - 1) * l + 1:i * l);
 end
 zm = mean(z);
 zv = var(z);

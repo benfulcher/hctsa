@@ -53,7 +53,7 @@ BF_CheckToolbox('identification_toolbox');
 % Maximum model order, maxOrder (compare models from order 1 up to
 %           this)
 if nargin < 2 || isempty(maxOrder)
-    maxOrder = 10;
+	maxOrder = 10;
 end
 % orders = 1:maxOrder;
 
@@ -78,16 +78,16 @@ fpes = zeros(maxOrder, 1); % Akaike's final prediction error
 aics = zeros(maxOrder, 1); % Akaike's information criterion
 
 for k = 1:maxOrder
-    % Fit the state space model for this order, k
-    try
-        m = n4sid(y, k);
-    catch emsg
-        error('Model fitting failed for k = %u', k)
-    end
+	% Fit the state space model for this order, k
+	try
+		m = n4sid(y, k);
+	catch emsg
+		error('Model fitting failed for k = %u', k)
+	end
 
-    lossfns(k) = m.EstimationInfo.LossFcn;
-    fpes(k) = m.EstimationInfo.FPE;
-    aics(k) = aic(m);
+	lossfns(k) = m.EstimationInfo.LossFcn;
+	fpes(k) = m.EstimationInfo.FPE;
+	aics(k) = aic(m);
 end
 
 % Optimum model orders

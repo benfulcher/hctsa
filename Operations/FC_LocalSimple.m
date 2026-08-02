@@ -54,11 +54,11 @@ function out = FC_LocalSimple(y, forecastMeth, trainLength)
 % ------------------------------------------------------------------------------
 % Forecasting method, forecastMeth
 if nargin < 2 || isempty(forecastMeth)
-    forecastMeth = 'mean';
+	forecastMeth = 'mean';
 end
 % Number of samples to train with, trainLength
 if nargin < 2 || isempty(trainLength)
-    trainLength = 3;
+	trainLength = 3;
 end
 
 N = length(y); % Time-series length
@@ -67,38 +67,38 @@ N = length(y); % Time-series length
 % Do the local prediction
 % ------------------------------------------------------------------------------
 if strcmp(trainLength, 'ac')
-    % Make it first zero-crossing of ACF:
-    lp = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	% Make it first zero-crossing of ACF:
+	lp = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 else
-    lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
+	lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
 end
 evalr = lp + 1:N; % range over which to evaluate the forecast
 if isempty(evalr)
-    warning('This time series is too short for forecasting');
-    out = NaN;
-    return
+	warning('This time series is too short for forecasting');
+	out = NaN;
+	return
 end
 res = zeros(length(evalr), 1); % residuals
 
 switch forecastMeth
-    case 'mean'
-        for i = 1:length(evalr)
-            res(i) = mean(y(evalr(i) - lp:evalr(i) - 1)) - y(evalr(i)); % prediction - value
-        end
-    case 'median'
-        for i = 1:length(evalr)
-            res(i) = median(y(evalr(i) - lp:evalr(i) - 1)) - y(evalr(i)); % prediction - value
-        end
-    case 'lfit'
-        for i = 1:length(evalr)
-            % Fit linear
-            warning('off', 'MATLAB:polyfit:PolyNotUnique'); % Disable (potentially important ;)) warning
-            p = polyfit((1:lp)', y(evalr(i) - lp:evalr(i) - 1), 1);
-            warning('on', 'MATLAB:polyfit:PolyNotUnique'); % Re-enable warning
-            res(i) = polyval(p, lp + 1) - y(evalr(i)); % prediction - value
-        end
-    otherwise
-        error('Unknown forecasting method ''%s''', forecastMeth);
+	case 'mean'
+		for i = 1:length(evalr)
+			res(i) = mean(y(evalr(i) - lp:evalr(i) - 1)) - y(evalr(i)); % prediction - value
+		end
+	case 'median'
+		for i = 1:length(evalr)
+			res(i) = median(y(evalr(i) - lp:evalr(i) - 1)) - y(evalr(i)); % prediction - value
+		end
+	case 'lfit'
+		for i = 1:length(evalr)
+			% Fit linear
+			warning('off', 'MATLAB:polyfit:PolyNotUnique'); % Disable (potentially important ;)) warning
+			p = polyfit((1:lp)', y(evalr(i) - lp:evalr(i) - 1), 1);
+			warning('on', 'MATLAB:polyfit:PolyNotUnique'); % Re-enable warning
+			res(i) = polyval(p, lp + 1) - y(evalr(i)); % prediction - value
+		end
+	otherwise
+		error('Unknown forecasting method ''%s''', forecastMeth);
 end
 
 % out=res;
@@ -122,9 +122,9 @@ out.swm = SY_SlidingWindow(res, 'mean', 'std', 5, 1); % across five non-overlapp
 % Normality of residuals:
 tmp = DN_SimpleFit(res, 'gauss1', 0);
 if ~isstruct(tmp) && isnan(tmp) % fitting failed
-    out.gofr2 = NaN;
+	out.gofr2 = NaN;
 else
-    out.gofr2 = tmp.r2; % r-squared
+	out.gofr2 = tmp.r2; % r-squared
 end
 
 % Autocorrelation structure of the residuals:

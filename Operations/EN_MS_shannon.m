@@ -52,63 +52,63 @@ function out = EN_MS_shannon(y, numBin, depth)
 % Check inputs:
 % -------------------------------------------------------------------------------
 if nargin < 2 || isempty(numBin)
-    numBin = 2; % two bins to discretize the time series, y
+	numBin = 2; % two bins to discretize the time series, y
 end
 if nargin < 3 || isempty(depth)
-    depth = 3; % three-long strings
+	depth = 3; % three-long strings
 end
 binRangeSize = length(numBin);
 depthRangeSize = length(depth);
 
 % ------------------------------------------------------------------------------
 if binRangeSize == 1
-    if depthRangeSize == 1
-        %% Evaluate the shannon entropy of discretization
-        % Run the code, just return a number
-        % This scales with depth, so it's nice to normalize by this factor:
-        out = MS_shannon(y, numBin, depth) / depth;
-    elseif depthRangeSize > 1
-        % Range over depths specified in the vector and return statistics on results
-        % (constant number of bins)
-        % Somewhat strange behaviour -- very variable
-        numDepths = length(depth);
-        ents = zeros(numDepths, 1);
-        for i = 1:numDepths
-            ents(i) = MS_shannon(y, numBin, depth(i)) / depth(i);
-        end
-        % Output statistics on variation across the range tested:
-        out.maxent = max(ents);
-        out.minent = min(ents);
-        out.medent = median(ents);
-        out.meanent = mean(ents);
-        out.stdent = std(ents);
-    end
+	if depthRangeSize == 1
+		%% Evaluate the shannon entropy of discretization
+		% Run the code, just return a number
+		% This scales with depth, so it's nice to normalize by this factor:
+		out = MS_shannon(y, numBin, depth) / depth;
+	elseif depthRangeSize > 1
+		% Range over depths specified in the vector and return statistics on results
+		% (constant number of bins)
+		% Somewhat strange behaviour -- very variable
+		numDepths = length(depth);
+		ents = zeros(numDepths, 1);
+		for i = 1:numDepths
+			ents(i) = MS_shannon(y, numBin, depth(i)) / depth(i);
+		end
+		% Output statistics on variation across the range tested:
+		out.maxent = max(ents);
+		out.minent = min(ents);
+		out.medent = median(ents);
+		out.meanent = mean(ents);
+		out.stdent = std(ents);
+	end
 elseif binRangeSize > 1
-    if depthRangeSize == 1
-        %% (*) Statistics over different bin numbers (constant depth)
-        % Range over bins specified in the vector numBin; return statistics on results
-        ents = zeros(binRangeSize, 1);
-        for i = 1:binRangeSize
-            ents(i) = MS_shannon(y, numBin(i), depth);
-        end
-        out.maxent = max(ents);
-        out.minent = min(ents);
-        out.medent = median(ents);
-        out.meanent = mean(ents);
-        out.stdent = std(ents);
-    elseif depthRangeSize > 1
-        % Don't know what quite to do -- I think stick to above, where only one
-        % input is a vector at a time.
-        % ***INCOMPLETE*** don't do this.
-        error('Comparing both bins and depth not implemented')
-        %% (*) stats over numBins and depths
-        % ents = zeros(binRangeSize,depthRangeSize);
-        % for i = 1:numBins
-        %     for j = 1:numDepths
-        %         ents(i,j) = MS_shannon(y,numBin(i),depth(j))/depth(j);
-        %     end
-        % end
-    end
+	if depthRangeSize == 1
+		%% (*) Statistics over different bin numbers (constant depth)
+		% Range over bins specified in the vector numBin; return statistics on results
+		ents = zeros(binRangeSize, 1);
+		for i = 1:binRangeSize
+			ents(i) = MS_shannon(y, numBin(i), depth);
+		end
+		out.maxent = max(ents);
+		out.minent = min(ents);
+		out.medent = median(ents);
+		out.meanent = mean(ents);
+		out.stdent = std(ents);
+	elseif depthRangeSize > 1
+		% Don't know what quite to do -- I think stick to above, where only one
+		% input is a vector at a time.
+		% ***INCOMPLETE*** don't do this.
+		error('Comparing both bins and depth not implemented')
+		%% (*) stats over numBins and depths
+		% ents = zeros(binRangeSize,depthRangeSize);
+		% for i = 1:numBins
+		%     for j = 1:numDepths
+		%         ents(i,j) = MS_shannon(y,numBin(i),depth(j))/depth(j);
+		%     end
+		% end
+	end
 end
 
 end

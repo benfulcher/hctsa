@@ -52,15 +52,15 @@ function out = ST_LocalExtrema(y, howToWindow, n)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(howToWindow)
-    howToWindow = 'l';
+	howToWindow = 'l';
 end
 if nargin < 3 || isempty(n)
-    switch howToWindow
-        case 'l'
-            n = 100; % 100-sample windows
-        case 'n'
-            n = 5; % 5 windows
-    end
+	switch howToWindow
+		case 'l'
+			n = 100; % 100-sample windows
+		case 'n'
+			n = 5; % 5 windows
+	end
 end
 
 doPlot = false; % plot outputs to a figure
@@ -71,22 +71,22 @@ N = length(y); % length of time series
 %% Set window length
 % ------------------------------------------------------------------------------
 switch howToWindow
-    case 'l'
-        windowLength = n; % window length
-    case 'n'
-        windowLength = floor(N / n); % number of windows
-    case 'tau'
-        % this may not be a good idea!
-        windowLength = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-    otherwise
-        error('Unknown method ''%s''', howToWindow);
+	case 'l'
+		windowLength = n; % window length
+	case 'n'
+		windowLength = floor(N / n); % number of windows
+	case 'tau'
+		% this may not be a good idea!
+		windowLength = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	otherwise
+		error('Unknown method ''%s''', howToWindow);
 end
 
 if (windowLength > N) || (windowLength <= 1)
-    % This feature is unsuitable if the window length exceeds ts
-    fprintf(1, 'The window length is longer than the time-series length!\n');
-    out = NaN;
-    return
+	% This feature is unsuitable if the window length exceeds ts
+	fprintf(1, 'The window length is longer than the time-series length!\n');
+	out = NaN;
+	return
 end
 
 % ------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ end
 y_buff = buffer(y, windowLength); % no overlap
 % Each *column* is a window of samples:
 if y_buff(end) == 0
-    y_buff = y_buff(:, 1:end - 1); % remove last window if zero-padded
+	y_buff = y_buff(:, 1:end - 1); % remove last window if zero-padded
 end
 numWindows = size(y_buff, 2); % number of windows
 
@@ -111,12 +111,12 @@ locExt(exti) = locMin(exti); % local extrema (furthest from mean; either maxs or
 absLocExt = abs(locExt); % the magnitude of the most extreme events in each window
 
 if doPlot
-    figure('color', 'w');
-    hold('on');
-    plot(locMax);
-    plot(absLocExt, '--g');
-    plot(absLocMin, ':r')
-    plot(locExt, 'k');
+	figure('color', 'w');
+	hold('on');
+	plot(locMax);
+	plot(absLocExt, '--g');
+	plot(absLocMin, ':r')
+	plot(locExt, 'k');
 end
 
 % ------------------------------------------------------------------------------

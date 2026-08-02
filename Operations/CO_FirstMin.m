@@ -49,14 +49,14 @@ function out = CO_FirstMin(y, minWhat, extraParam, minNotMax)
 % Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(minWhat)
-    % Mutual information using gaussian method from Information Dynamics Toolkit:
-    minWhat = 'mi-gaussian';
+	% Mutual information using gaussian method from Information Dynamics Toolkit:
+	minWhat = 'mi-gaussian';
 end
 if nargin < 3
-    extraParam = [];
+	extraParam = [];
 end
 if nargin < 4
-    minNotMax = true;
+	minNotMax = true;
 end
 
 % ------------------------------------------------------------------------------
@@ -72,19 +72,19 @@ end
 persistent cacheY cacheMinWhat cacheExtraParam cacheMinNotMax cacheOut
 maxCacheEntries = 4;
 if isempty(cacheY)
-    cacheY = {};
-    cacheMinWhat = {};
-    cacheExtraParam = {};
-    cacheMinNotMax = {};
-    cacheOut = {};
+	cacheY = {};
+	cacheMinWhat = {};
+	cacheExtraParam = {};
+	cacheMinNotMax = {};
+	cacheOut = {};
 end
 
 for ci = 1:numel(cacheY)
-    if isequaln(y, cacheY{ci}) && isequal(minWhat, cacheMinWhat{ci}) && ...
-            isequaln(extraParam, cacheExtraParam{ci}) && isequal(minNotMax, cacheMinNotMax{ci})
-        out = cacheOut{ci};
-        return
-    end
+	if isequaln(y, cacheY{ci}) && isequal(minWhat, cacheMinWhat{ci}) && ...
+			isequaln(extraParam, cacheExtraParam{ci}) && isequal(minNotMax, cacheMinNotMax{ci})
+		out = cacheOut{ci};
+		return
+	end
 end
 
 out = CO_FirstMin_Compute(y, minWhat, extraParam, minNotMax);
@@ -95,11 +95,11 @@ cacheExtraParam{end + 1} = extraParam;
 cacheMinNotMax{end + 1} = minNotMax;
 cacheOut{end + 1} = out;
 if numel(cacheY) > maxCacheEntries
-    cacheY(1) = [];
-    cacheMinWhat(1) = [];
-    cacheExtraParam(1) = [];
-    cacheMinNotMax(1) = [];
-    cacheOut(1) = [];
+	cacheY(1) = [];
+	cacheMinWhat(1) = [];
+	cacheExtraParam(1) = [];
+	cacheMinNotMax(1) = [];
+	cacheOut(1) = [];
 end
 
 end
@@ -117,26 +117,26 @@ N = length(y); % Time-series length
 % Define the autocorrelation function
 % ------------------------------------------------------------------------------
 switch minWhat
-    case {'mi', 'mi-gaussian'} % default method (using Information Dynamics Toolkit)
-        corrfn = @(x) IN_AutoMutualInfo(y, x, 'gaussian');
-    case 'mi-kernel' % (using Information Dynamics Toolkit)
-        corrfn = @(x) IN_AutoMutualInfo(y, x, 'kernel');
-    case 'mi-kraskov1' % (using Information Dynamics Toolkit)
-        corrfn = @(x) IN_AutoMutualInfo(y, x, 'kraskov1');
-    case 'mi-kraskov2' % (using Information Dynamics Toolkit)
-        % extraParam is the number of nearest neighbors:
-        corrfn = @(x) IN_AutoMutualInfo(y, x, 'kraskov2', extraParam);
-    case 'mi-hist'
-        % Automutual information implemented in super-naive box counting as in BF_MutualInformation
-        corrfn = @(x) BF_MutualInformation(y(1:end - x), y(1 + x:end), 'range', 'range', extraParam);
-    case {'ac', 'corr'}
-        % Autocorrelation implemented as CO_AutoCorr.
-        % Compute the full ACF once (a single FFT/IFFT pass) instead of
-        % recomputing it from scratch for every lag queried in the loop below:
-        acf_all = CO_AutoCorr(y, [], 'Fourier');
-        corrfn = @(x) acf_all(x + 1); % lag x is stored at index x+1
-    otherwise
-        error('Unknown correlation type specified: ''%s''', minWhat);
+	case {'mi', 'mi-gaussian'} % default method (using Information Dynamics Toolkit)
+		corrfn = @(x) IN_AutoMutualInfo(y, x, 'gaussian');
+	case 'mi-kernel' % (using Information Dynamics Toolkit)
+		corrfn = @(x) IN_AutoMutualInfo(y, x, 'kernel');
+	case 'mi-kraskov1' % (using Information Dynamics Toolkit)
+		corrfn = @(x) IN_AutoMutualInfo(y, x, 'kraskov1');
+	case 'mi-kraskov2' % (using Information Dynamics Toolkit)
+		% extraParam is the number of nearest neighbors:
+		corrfn = @(x) IN_AutoMutualInfo(y, x, 'kraskov2', extraParam);
+	case 'mi-hist'
+		% Automutual information implemented in super-naive box counting as in BF_MutualInformation
+		corrfn = @(x) BF_MutualInformation(y(1:end - x), y(1 + x:end), 'range', 'range', extraParam);
+	case {'ac', 'corr'}
+		% Autocorrelation implemented as CO_AutoCorr.
+		% Compute the full ACF once (a single FFT/IFFT pass) instead of
+		% recomputing it from scratch for every lag queried in the loop below:
+		acf_all = CO_AutoCorr(y, [], 'Fourier');
+		corrfn = @(x) acf_all(x + 1); % lag x is stored at index x+1
+	otherwise
+		error('Unknown correlation type specified: ''%s''', minWhat);
 end
 
 % ------------------------------------------------------------------------------
@@ -146,51 +146,51 @@ end
 
 autoCorr = zeros(N - 1, 1); % pre-allocate maximum length autocorrelation vector
 if minNotMax
-    % ---------------------------------------------------------------------------
-    % FIRST LOCAL MINUMUM
-    % ---------------------------------------------------------------------------
-    for i = 1:N - 1
-        % Calculate the auto-correlation at this lag:
-        autoCorr(i) = corrfn(i);
+	% ---------------------------------------------------------------------------
+	% FIRST LOCAL MINUMUM
+	% ---------------------------------------------------------------------------
+	for i = 1:N - 1
+		% Calculate the auto-correlation at this lag:
+		autoCorr(i) = corrfn(i);
 
-        % Hit a NaN before got to a minimum -- there is no minimum
-        if isnan(autoCorr(i))
-            warning('No minimum in %s [[time series too short to find it?]]', minWhat)
-            out = NaN;
-            return
-        end
+		% Hit a NaN before got to a minimum -- there is no minimum
+		if isnan(autoCorr(i))
+			warning('No minimum in %s [[time series too short to find it?]]', minWhat)
+			out = NaN;
+			return
+		end
 
-        % We're at a minimum:
-        if i == 2 && (autoCorr(2) > autoCorr(1))
-            % already increases at lag of 2 from lag of 1: a minimum (since ac(0) is maximal)
-            out = 1;
-            return
-        elseif (i > 2) && (autoCorr(i - 2) > autoCorr(i - 1)) && (autoCorr(i - 1) < autoCorr(i)); % minimum at previous i
-            out = i - 1; % I found the first minimum!
-            return
-        end
-    end
+		% We're at a minimum:
+		if i == 2 && (autoCorr(2) > autoCorr(1))
+			% already increases at lag of 2 from lag of 1: a minimum (since ac(0) is maximal)
+			out = 1;
+			return
+		elseif (i > 2) && (autoCorr(i - 2) > autoCorr(i - 1)) && (autoCorr(i - 1) < autoCorr(i)); % minimum at previous i
+			out = i - 1; % I found the first minimum!
+			return
+		end
+	end
 else
-    % ---------------------------------------------------------------------------
-    % FIRST LOCAL MAXIMUM
-    % ---------------------------------------------------------------------------
-    for i = 1:N - 1
-        % Calculate the auto-correlation at this lag:
-        autoCorr(i) = corrfn(i);
+	% ---------------------------------------------------------------------------
+	% FIRST LOCAL MAXIMUM
+	% ---------------------------------------------------------------------------
+	for i = 1:N - 1
+		% Calculate the auto-correlation at this lag:
+		autoCorr(i) = corrfn(i);
 
-        % Hit a NaN before got to a max -- there is no max
-        if isnan(autoCorr(i))
-            warning('No maximum in %s [[time series too short to find it?]]', minWhat)
-            out = NaN;
-            return
-        end
+		% Hit a NaN before got to a max -- there is no max
+		if isnan(autoCorr(i))
+			warning('No maximum in %s [[time series too short to find it?]]', minWhat)
+			out = NaN;
+			return
+		end
 
-        % We're at a local maximum:
-        if (i > 2) && (autoCorr(i - 2) < autoCorr(i - 1)) && (autoCorr(i - 1) > autoCorr(i)); % minimum at previous i
-            out = i - 1; % I found the first maximum!
-            return
-        end
-    end
+		% We're at a local maximum:
+		if (i > 2) && (autoCorr(i - 2) < autoCorr(i - 1)) && (autoCorr(i - 1) > autoCorr(i)); % minimum at previous i
+			out = i - 1; % I found the first maximum!
+			return
+		end
+	end
 end
 
 % Still decreasing -- no minimum was found after searching all across the time series:

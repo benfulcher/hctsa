@@ -49,20 +49,20 @@ doPlot = false; % can set to 1 to plot some outputs
 %% Check inputs and set defaults
 % -------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
-    tau = 'tau';
+	tau = 'tau';
 end
 
 % Set tau to the first zero-crossing of the autocorrelation function, with the 'tau' input
 if strcmp(tau, 'tau'),
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-    if tau > length(y) / 10
-        tau = floor(length(y) / 10);
-    end
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if tau > length(y) / 10
+		tau = floor(length(y) / 10);
+	end
 end
 
 % Ensure that y is a column vector
 if size(y, 2) > size(y, 1);
-    y = y';
+	y = y';
 end
 
 % Construct the two-dimensional recurrence space
@@ -70,8 +70,8 @@ m = [y(1:end - tau), y(1 + tau:end)];
 N = size(m, 1); % number of points in the recurrence space
 
 if doPlot
-    figure('color', 'w');
-    plot(m(:, 1), m(:, 2), '.');
+	figure('color', 'w');
+	plot(m(:, 1), m(:, 2), '.');
 end
 
 % 1) Distribution of angles time series; angles between successive points in
@@ -102,7 +102,7 @@ x = linspace(-pi / 2, pi / 2, 5); % 4 bins
 afifth = floor((N - 1) / 5); % -1 because angles are correlations *between* points
 n = zeros(length(x), 5);
 for i = 1:5
-    n(:, i) = histc(theta(afifth * (i - 1) + 1:afifth * i), x);
+	n(:, i) = histc(theta(afifth * (i - 1) + 1:afifth * i), x);
 end
 n = n / afifth;
 n(4, :) = n(4, :) + n(5, :);
@@ -110,7 +110,7 @@ n(5, :) = [];
 
 % Output the standard deviation in each bin:
 for i = 1:4
-    out.(sprintf('stdb%u', i)) = std(n(:, i));
+	out.(sprintf('stdb%u', i)) = std(n(:, i));
 end
 
 % -------------------------------------------------------------------------------
@@ -121,13 +121,13 @@ end
 afifth = floor(N / 5);
 buffer_m = cell(5, 1); % stores a fifth of the time series (embedding vector) in each entry
 for i = 1:5
-    buffer_m{i} = m(afifth * (i - 1) + 1:afifth * i, :);
+	buffer_m{i} = m(afifth * (i - 1) + 1:afifth * i, :);
 end
 
 % Mean euclidean distance in each segment
 eucdm = cellfun(@(x)mean(sqrt(x(:, 1).^2 + x(:, 2).^2)), buffer_m);
 for i = 1:5
-    out.(sprintf('eucdm%u', i)) = eucdm(i);
+	out.(sprintf('eucdm%u', i)) = eucdm(i);
 end
 out.std_eucdm = std(eucdm);
 out.mean_eucdm = mean(eucdm);
@@ -135,7 +135,7 @@ out.mean_eucdm = mean(eucdm);
 % Standard deviation of Euclidean distances in each segment
 eucds = cellfun(@(x)std(sqrt(x(:, 1).^2 + x(:, 2).^2)), buffer_m);
 for i = 1:5
-    out.(sprintf('eucds%u', i)) = eucds(i);
+	out.(sprintf('eucds%u', i)) = eucds(i);
 end
 out.std_eucds = std(eucds);
 out.mean_eucds = mean(eucds);

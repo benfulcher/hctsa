@@ -42,19 +42,19 @@ function out = SB_MotifThree(y, cgHow)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(cgHow)
-    cgHow = 'quantile';
+	cgHow = 'quantile';
 end
 
 % -------------------------------------------------------------------------------
 % Coarse-grain the data y -> yt
 numLetters = 3;
 switch cgHow
-    case 'quantile'
-        yt = SB_CoarseGrain(y, 'quantile', numLetters);
-    case 'diffquant'
-        yt = SB_CoarseGrain(diff(y), 'quantile', numLetters);
-    otherwise
-        error('Unknown coarse-graining method ''%s''');
+	case 'quantile'
+		yt = SB_CoarseGrain(y, 'quantile', numLetters);
+	case 'diffquant'
+		yt = SB_CoarseGrain(diff(y), 'quantile', numLetters);
+	otherwise
+		error('Unknown coarse-graining method ''%s''');
 end
 % So we have a vector yt with entries in {1,2,3}
 
@@ -67,8 +67,8 @@ r1 = cell(3, 1); % stores ranges as vectors
 out1 = zeros(3, 1); % stores probabilities as doubles
 
 for i = 1:3
-    r1{i} = find(yt == i);
-    out1(i) = length(r1{i}) / N;
+	r1{i} = find(yt == i);
+	out1(i) = length(r1{i}) / N;
 end
 
 % ------ Record these -------
@@ -82,18 +82,18 @@ out.h = f_entropy(out1); % entropy of this result
 % ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
 for i = 1:3
-    if (~isempty(r1{i})) && (r1{i}(end) == N)
-        r1{i} = r1{i}(1:end - 1);
-    end
+	if (~isempty(r1{i})) && (r1{i}(end) == N)
+		r1{i} = r1{i}(1:end - 1);
+	end
 end
 
 r2 = cell(3, 3);
 out2 = zeros(3, 3);
 for i = 1:3
-    for j = 1:3
-        r2{i, j} = r1{i}(yt(r1{i} + 1) == j);
-        out2(i, j) = length(r2{i, j}) / (N - 1);
-    end
+	for j = 1:3
+		r2{i, j} = r1{i}(yt(r1{i} + 1) == j);
+		out2(i, j) = length(r2{i, j}) / (N - 1);
+	end
 end
 
 % ------ Record these -------
@@ -108,20 +108,20 @@ out.hh = f_entropy(out2); % entropy of this result
 % ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
 for i = 1:3
-    for j = 1:3
-        if ~isempty(r2{i, j}) && r2{i, j}(end) == N - 1; r2{i, j} = r2{i, j}(1:end - 1); end
-    end
+	for j = 1:3
+		if ~isempty(r2{i, j}) && r2{i, j}(end) == N - 1; r2{i, j} = r2{i, j}(1:end - 1); end
+	end
 end
 
 % Do the calculation
 r3 = cell(3, 3, 3); out3 = zeros(3, 3, 3);
 for i = 1:3
-    for j = 1:3
-        for k = 1:3
-            r3{i, j, k} = r2{i, j}(yt(r2{i, j} + 2) == k);
-            out3(i, j, k) = length(r3{i, j, k}) / (N - 2);
-        end
-    end
+	for j = 1:3
+		for k = 1:3
+			r3{i, j, k} = r2{i, j}(yt(r2{i, j} + 2) == k);
+			out3(i, j, k) = length(r3{i, j, k}) / (N - 2);
+		end
+	end
 end
 
 % ------ Record these -------
@@ -144,26 +144,26 @@ out.hhh = f_entropy(out3); % entropy of this result
 % ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
 for i = 1:3
-    for j = 1:3
-        for k = 1:3
-            if (~isempty(r3{i, j, k}) && r3{i, j, k}(end) == N - 2)
-                r3{i, j, k} = r3{i, j, k}(1:end - 1);
-            end
-        end
-    end
+	for j = 1:3
+		for k = 1:3
+			if (~isempty(r3{i, j, k}) && r3{i, j, k}(end) == N - 2)
+				r3{i, j, k} = r3{i, j, k}(1:end - 1);
+			end
+		end
+	end
 end
 
 % Do the calculation
 r4 = cell(3, 3, 3, 3); out4 = zeros(3, 3, 3, 3);
 for i = 1:3
-    for j = 1:3
-        for k = 1:3
-            for l = 1:3
-                r4{i, j, k, l} = r3{i, j, k}(yt(r3{i, j, k} + 3) == l);
-                out4(i, j, k, l) = length(r4{i, j, k, l}) / (N - 3);
-            end
-        end
-    end
+	for j = 1:3
+		for k = 1:3
+			for l = 1:3
+				r4{i, j, k, l} = r3{i, j, k}(yt(r3{i, j, k} + 3) == l);
+				out4(i, j, k, l) = length(r4{i, j, k, l}) / (N - 3);
+			end
+		end
+	end
 end
 
 % ------ Record these -------
@@ -207,9 +207,9 @@ out.hhhh = f_entropy(out4); % entropy of this result
 
 % -------------------------------------------------------------------------------
 function h = f_entropy(x)
-    % entropy of a set of counts, log(0)=0
-    r = (x > 0);
-    h = -sum(x(r) .* log(x(r)));
+	% entropy of a set of counts, log(0)=0
+	r = (x > 0);
+	h = -sum(x(r) .* log(x(r)));
 end
 
 end

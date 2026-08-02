@@ -37,14 +37,14 @@ function out = DN_MinMax(y, minOrMax)
 % ------------------------------------------------------------------------------
 
 switch minOrMax
-    case 'max'
-        out = max(y);
+	case 'max'
+		out = max(y);
 
-    case 'min'
-        out = min(y);
+	case 'min'
+		out = min(y);
 
-    otherwise
-        error('Unknown method ''%s''', minOrMax)
+	otherwise
+		error('Unknown method ''%s''', minOrMax)
 end
 
 end

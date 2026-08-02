@@ -42,10 +42,10 @@ function out = DN_HistogramAsymmetry(y, numBins, doSimple)
 % Check inputs and set defaults:
 % -------------------------------------------------------------------------------
 if nargin < 2
-    numBins = 10;
+	numBins = 10;
 end
 if nargin < 3
-    doSimple = true;
+	doSimple = true;
 end
 
 % -------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ end
 % values can be treated separately):
 iszscored = BF_iszscored(y);
 if ~iszscored
-    warning('DN_HistogramAsymmetry assumes a z-scored (or standardized) input')
+	warning('DN_HistogramAsymmetry assumes a z-scored (or standardized) input')
 end
 
 % -------------------------------------------------------------------------------
@@ -61,11 +61,11 @@ end
 yPos = y(y > 0);
 yNeg = y(y < 0);
 if doSimple
-    [countsPos, binEdgesPos] = BF_SimpleBinner(yPos, numBins);
-    [countsNeg, binEdgesNeg] = BF_SimpleBinner(yNeg, numBins);
+	[countsPos, binEdgesPos] = BF_SimpleBinner(yPos, numBins);
+	[countsNeg, binEdgesNeg] = BF_SimpleBinner(yNeg, numBins);
 else
-    [countsPos, binEdgesPos] = histcounts(yPos, numBins);
-    [countsNeg, binEdgesNeg] = histcounts(yNeg, numBins);
+	[countsPos, binEdgesPos] = histcounts(yPos, numBins);
+	[countsNeg, binEdgesNeg] = histcounts(yNeg, numBins);
 end
 
 % Normalize by total counts:

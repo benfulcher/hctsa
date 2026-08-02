@@ -44,27 +44,27 @@ function out = DN_HistogramMode(y, numBins, doSimple, doPlot)
 % Check inputs and set defaults:
 % -------------------------------------------------------------------------------
 if nargin < 2
-    numBins = 'auto';
+	numBins = 'auto';
 end
 if nargin < 3
-    doSimple = true;
+	doSimple = true;
 end
 if nargin < 4
-    doPlot = false;
+	doPlot = false;
 end
 % -------------------------------------------------------------------------------
 
 % Compute the histogram from the data:
 if isnumeric(numBins)
-    if doSimple
-        [N, binEdges] = BF_SimpleBinner(y, numBins);
-    else
-        [N, binEdges] = histcounts(y, numBins);
-    end
+	if doSimple
+		[N, binEdges] = BF_SimpleBinner(y, numBins);
+	else
+		[N, binEdges] = histcounts(y, numBins);
+	end
 elseif ischar(numBins)
-    [N, binEdges] = histcounts(y, 'BinMethod', numBins);
+	[N, binEdges] = histcounts(y, 'BinMethod', numBins);
 else
-    error('Unknown format for numBins');
+	error('Unknown format for numBins');
 end
 
 % Compute bin centers from bin edges:
@@ -75,10 +75,10 @@ out = mean(binCenters(N == max(N)));
 
 % Plot a summary of what was computed:
 if doPlot
-    histogram('BinEdges', binEdges, 'BinCounts', N, 'EdgeColor', 'k', 'FaceColor', 0.6 * ones(1, 3));
-    hold('on');
-    plot(out * ones(2, 1), [0, max(N)], 'r', 'LineWidth', 2);
-    hold('off')
+	histogram('BinEdges', binEdges, 'BinCounts', N, 'EdgeColor', 'k', 'FaceColor', 0.6 * ones(1, 3));
+	hold('on');
+	plot(out * ones(2, 1), [0, max(N)], 'r', 'LineWidth', 2);
+	hold('off')
 end
 
 end

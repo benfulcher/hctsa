@@ -43,14 +43,14 @@ function out = CO_Embed2_Basic(y, tau)
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    tau = 1;
+	tau = 1;
 end
 
 doPlot = false; % plot outputs to a figure
 
 if strcmp(tau, 'tau')
-    % Make tau the first zero crossing of the autocorrelation function
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	% Make tau the first zero crossing of the autocorrelation function
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
 
 xt = y(1:end - tau); % part of the time series
@@ -106,16 +106,16 @@ out.incircle_1 = sum(xtp.^2 + xt.^2 < 1) / N;
 out.incircle_2 = sum(xtp.^2 + xt.^2 < 2) / N;
 out.incircle_3 = sum(xtp.^2 + xt.^2 < 3) / N;
 out.medianincircle = median([out.incircle_01, out.incircle_02, out.incircle_05 ...
-                             out.incircle_1, out.incircle_2, out.incircle_3]);
+							 out.incircle_1, out.incircle_2, out.incircle_3]);
 out.stdincircle = std([out.incircle_01, out.incircle_02, out.incircle_05 ...
-                       out.incircle_1, out.incircle_2, out.incircle_3]);
+					   out.incircle_1, out.incircle_2, out.incircle_3]);
 
 if doPlot
-    figure('color', 'w'); box('on');
-    plot(xt, xtp, '.k');
-    hold on
-    r = (xtp.^2 + xt.^2 < 0.2);
-    plot(xt(r), xtp(r), '.g')
+	figure('color', 'w'); box('on');
+	plot(xt, xtp, '.k');
+	hold on
+	r = (xtp.^2 + xt.^2 < 0.2);
+	plot(xt(r), xtp(r), '.g')
 end
 
 end

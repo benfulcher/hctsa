@@ -46,31 +46,31 @@ function out = DN_Spread(y, spreadMeasure)
 % Check Inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(spreadMeasure)
-    spreadMeasure = 'std'; % return std by default
+	spreadMeasure = 'std'; % return std by default
 end
 
 % ------------------------------------------------------------------------------
 % Evaluate the spread measure
 % ------------------------------------------------------------------------------
 switch spreadMeasure
-    case 'std'
-        % Standard deviation
-        out = std(y);
+	case 'std'
+		% Standard deviation
+		out = std(y);
 
-    case 'iqr'
-        % Interquartile range
-        out = iqr(y);
+	case 'iqr'
+		% Interquartile range
+		out = iqr(y);
 
-    case 'mad'
-        % Mean absolute deviation
-        out = mad(y, 0);
+	case 'mad'
+		% Mean absolute deviation
+		out = mad(y, 0);
 
-    case 'mead'
-        % Median absolute deviation
-        out = mad(y, 1);
+	case 'mead'
+		% Median absolute deviation
+		out = mad(y, 1);
 
-    otherwise
-        error('Unknown spread measure ''%s''', spreadMeasure)
+	otherwise
+		error('Unknown spread measure ''%s''', spreadMeasure)
 end
 
 end

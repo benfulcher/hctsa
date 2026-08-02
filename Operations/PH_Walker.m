@@ -85,21 +85,21 @@ N = length(y); % the length of the input time series, y
 %% Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(walkerRule)
-    walkerRule = 'prop'; % default
+	walkerRule = 'prop'; % default
 end
 
 if nargin < 3 || isempty(walkerParams)
-    % Set default parameter for this type of walker dynamics
-    switch walkerRule
-        case 'prop'
-            walkerParams = 0.5;
-        case 'biasprop'
-            walkerParams = [0.1, 0.2];
-        case 'momentum'
-            walkerParams = 2;
-        case 'runningvar'
-            walkerParams = [1.5, 50];
-    end
+	% Set default parameter for this type of walker dynamics
+	switch walkerRule
+		case 'prop'
+			walkerParams = 0.5;
+		case 'biasprop'
+			walkerParams = [0.1, 0.2];
+		case 'momentum'
+			walkerParams = 2;
+		case 'runningvar'
+			walkerParams = [1.5, 50];
+	end
 end
 
 % ------------------------------------------------------------------------------
@@ -109,97 +109,97 @@ end
 w = zeros(N, 1); % the walker's trajectory, w
 
 switch walkerRule
-    case 'prop'
-        % walker starts at zero and narrows the gap between its position
-        % and the time series value at that point by the proportion given
-        % in walkerParams, to give the value at the subsequent time step
-        p = walkerParams;
+	case 'prop'
+		% walker starts at zero and narrows the gap between its position
+		% and the time series value at that point by the proportion given
+		% in walkerParams, to give the value at the subsequent time step
+		p = walkerParams;
 
-        w(1) = 0; % start at zero
-        for i = 2:N
-            w(i) = w(i - 1) + p * (y(i - 1) - w(i - 1));
-        end
+		w(1) = 0; % start at zero
+		for i = 2:N
+			w(i) = w(i - 1) + p * (y(i - 1) - w(i - 1));
+		end
 
-    case 'biasprop'
-        % walker is biased in one or the other direction (i.e., prefers to
-        % go up, or down). Requires a vector of inputs: [p_up, p_down]
-        pup = walkerParams(1);
-        pdown = walkerParams(2);
+	case 'biasprop'
+		% walker is biased in one or the other direction (i.e., prefers to
+		% go up, or down). Requires a vector of inputs: [p_up, p_down]
+		pup = walkerParams(1);
+		pdown = walkerParams(2);
 
-        w(1) = 0;
-        for i = 2:N
-            if y(i) > y(i - 1) % time series increases
-                w(i) = w(i - 1) + pup * (y(i - 1) - w(i - 1));
-            else
-                w(i) = w(i - 1) + pdown * (y(i - 1) - w(i - 1));
-            end
-        end
+		w(1) = 0;
+		for i = 2:N
+			if y(i) > y(i - 1) % time series increases
+				w(i) = w(i - 1) + pup * (y(i - 1) - w(i - 1));
+			else
+				w(i) = w(i - 1) + pdown * (y(i - 1) - w(i - 1));
+			end
+		end
 
-    case 'momentum'
-        % walker moves as if it had inertia from the previous time step,
-        % i.e., it 'wants' to move the same amount; the time series acts as
-        % a force changing its motion
-        m = walkerParams(1); % 'inertial mass'
-        %         F=walkerParams(2); % weight of 'force' from time series
+	case 'momentum'
+		% walker moves as if it had inertia from the previous time step,
+		% i.e., it 'wants' to move the same amount; the time series acts as
+		% a force changing its motion
+		m = walkerParams(1); % 'inertial mass'
+		%         F=walkerParams(2); % weight of 'force' from time series
 
-        w(1) = y(1);
-        w(2) = y(2);
-        for i = 3:N
-            w_inert = w(i - 1) + (w(i - 1) - w(i - 2));
-            %             w(i)=w_inert+(y(i-1)-w(i-1))/m; % dissipative term
-            w(i) = w_inert + (y(i) - w_inert) / m; % dissipative term
-            % equation of motion (s-s_0=ut+F/m*t^2)
-            % where the 'force' F is the change in the original time series
-            % at that point
-        end
+		w(1) = y(1);
+		w(2) = y(2);
+		for i = 3:N
+			w_inert = w(i - 1) + (w(i - 1) - w(i - 2));
+			%             w(i)=w_inert+(y(i-1)-w(i-1))/m; % dissipative term
+			w(i) = w_inert + (y(i) - w_inert) / m; % dissipative term
+			% equation of motion (s-s_0=ut+F/m*t^2)
+			% where the 'force' F is the change in the original time series
+			% at that point
+		end
 
-    case 'runningvar'
-        % walker moves with momentum defined by amplitude of past values in
-        % a given length window
-        m = walkerParams(1); % 'inertial mass'
-        wl = walkerParams(2); % window length
+	case 'runningvar'
+		% walker moves with momentum defined by amplitude of past values in
+		% a given length window
+		m = walkerParams(1); % 'inertial mass'
+		wl = walkerParams(2); % window length
 
-        w(1) = y(1);
-        w(2) = y(2);
-        for i = 3:N
-            w_inert = w(i - 1) + (w(i - 1) - w(i - 2));
-            w_mom = w_inert + (y(i) - w_inert) / m; % dissipative term from time series
-            if i > wl
-                w(i) = w_mom * (std(y(i - wl:i)) / std(w(i - wl:i))); % adjust by local standard deviation
-            else
-                w(i) = w_mom;
-            end
-        end
+		w(1) = y(1);
+		w(2) = y(2);
+		for i = 3:N
+			w_inert = w(i - 1) + (w(i - 1) - w(i - 2));
+			w_mom = w_inert + (y(i) - w_inert) / m; % dissipative term from time series
+			if i > wl
+				w(i) = w_mom * (std(y(i - wl:i)) / std(w(i - wl:i))); % adjust by local standard deviation
+			else
+				w(i) = w_mom;
+			end
+		end
 
-    otherwise
-        error('Unknown method ''%s'' for simulating walker on the time series', walkerRule)
+	otherwise
+		error('Unknown method ''%s'' for simulating walker on the time series', walkerRule)
 end
 
 % ------------------------------------------------------------------------------
 %% PLOT WALKER AND ORIGINAL TIME SERIES TOGETHER:
 % ------------------------------------------------------------------------------
 if doPlot
-    lw = 1; % set the line width for plotting
-    figure('color', 'w'); box('on'); hold on;
-    c = BF_GetColorMap('set1', 3, 1);
-    plot(y, '.-k', 'LineWidth', lw); % original time series
-    plot(w, '.-', 'color', c{1}, 'LineWidth', lw); % walker
-    plot([1, length(w)], ones(2, 1) * mean(w), 'color', c{2}, 'LineWidth', 2); % mean
-    % running variance:
-    stds = nan(N, 2);
-    for i = wl + 1:N
-        stds(i, 1) = std(y(i - wl:i));
-        stds(i, 2) = std(w(i - wl:i));
-    end
-    % plot(stds(:,1),':r'); % this is the time series
-    plot(stds(:, 1) ./ stds(:, 2), 'color', c{3}, 'LineWidth', lw); % this is the adjustment factor
-    % means = zeros(N,1);
-    % for i = 1:N
-    %     means(i) = mean(w(1:i));
-    % end
-    % plot(means,'g')
-    % plot(y-w,'m'); % residual
-    legend('y', 'walker', 'mean: walker', 'localvariancefactor', 'accumulative walker mean')
+	lw = 1; % set the line width for plotting
+	figure('color', 'w'); box('on'); hold on;
+	c = BF_GetColorMap('set1', 3, 1);
+	plot(y, '.-k', 'LineWidth', lw); % original time series
+	plot(w, '.-', 'color', c{1}, 'LineWidth', lw); % walker
+	plot([1, length(w)], ones(2, 1) * mean(w), 'color', c{2}, 'LineWidth', 2); % mean
+	% running variance:
+	stds = nan(N, 2);
+	for i = wl + 1:N
+		stds(i, 1) = std(y(i - wl:i));
+		stds(i, 2) = std(w(i - wl:i));
+	end
+	% plot(stds(:,1),':r'); % this is the time series
+	plot(stds(:, 1) ./ stds(:, 2), 'color', c{3}, 'LineWidth', lw); % this is the adjustment factor
+	% means = zeros(N,1);
+	% for i = 1:N
+	%     means(i) = mean(w(1:i));
+	% end
+	% plot(means,'g')
+	% plot(y-w,'m'); % residual
+	legend('y', 'walker', 'mean: walker', 'localvariancefactor', 'accumulative walker mean')
 end
 
 % ------------------------------------------------------------------------------

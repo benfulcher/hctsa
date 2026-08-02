@@ -58,17 +58,17 @@ y = iddata(y, [], 1);
 
 % (2) Model orders:
 if nargin < 2 || isempty(orders)
-    orders = (1:10)';
+	orders = (1:10)';
 end
 if size(orders, 1) == 1
-    orders = orders'; % make sure a column vector
+	orders = orders'; % make sure a column vector
 end
 
 % (3) testHow -- either all (trains and tests on the whole time series);
 % or a proportion of the time series to train on; will test on the
 % remaining portion.
 if nargin < 3 || isempty(testHow)
-    testHow = 'all';
+	testHow = 'all';
 end
 
 % ------------------------------------------------------------------------------
@@ -80,17 +80,17 @@ end
 % MF_StateSpaceCompOrder, or MF_StateSpace_n4sid...
 
 if ischar(testHow)
-    if strcmp(testHow, 'all')
-        yTrain = y;
-        yTest = y;
-    else
-        error('Unknown testing set specifier ''%s''', testHow);
-    end
+	if strcmp(testHow, 'all')
+		yTrain = y;
+		yTest = y;
+	else
+		error('Unknown testing set specifier ''%s''', testHow);
+	end
 else
-    % use first <proportion> to train, rest to test
-    co = floor(N * testHow); % cutoff
-    yTrain = y(1:co);
-    yTest = y(co + 1:end);
+	% use first <proportion> to train, rest to test
+	co = floor(N * testHow); % cutoff
+	yTrain = y(1:co);
+	yTest = y(co + 1:end);
 end
 
 V = arxstruc(yTrain, yTest, orders);
@@ -116,7 +116,7 @@ out.meddiff = median(diff(v));
 % where does it steady off?
 stdfromi = zeros(length(v), 1);
 for i = 1:length(stdfromi)
-    stdfromi(i) = std(v(i:end)) / sqrt(length(v) - i + 1);
+	stdfromi(i) = std(v(i:end)) / sqrt(length(v) - i + 1);
 end
 out.minstdfromi = min(stdfromi(stdfromi > 0));
 if isempty(out.minstdfromi), out.minstdfromi = NaN; end
@@ -129,8 +129,8 @@ if isempty(out.whereen4), out.whereen4 = NaN; end
 %% Plotting
 % ------------------------------------------------------------------------------
 if doPlot
-    plot(v);
-    plot(stdfromi, 'r');
+	plot(v);
+	plot(stdfromi, 'r');
 end
 
 % ------------------------------------------------------------------------------

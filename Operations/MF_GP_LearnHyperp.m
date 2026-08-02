@@ -47,22 +47,22 @@ function hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, nfeva
 % ------------------------------------------------------------------------------
 
 if nargin < 3 || isempty(covFunc)
-    covFunc = @covSEiso;
+	covFunc = @covSEiso;
 end
 if nargin < 4 || isempty(meanFunc)
-    % Mean function (mean zero process):
-    meanFunc = {'meanZero'}; hyp.mean = [];
+	% Mean function (mean zero process):
+	meanFunc = {'meanZero'}; hyp.mean = [];
 end
 if nargin < 5 || isempty(likFunc)
-    likFunc = @likGauss; % negative: specifies maximum number of allowed function evaluations
-    hyp.lik = log(0.1);
+	likFunc = @likGauss; % negative: specifies maximum number of allowed function evaluations
+	hyp.lik = log(0.1);
 end
 if nargin < 6 || isempty(infAlg)
-    % Inference algorithm:
-    infAlg = @infLaplace;
+	% Inference algorithm:
+	infAlg = @infLaplace;
 end
 if nargin < 7 || isempty(nfevals)
-    nfevals = -50; % negative: specifies maximum number of allowed function evaluations
+	nfevals = -50; % negative: specifies maximum number of allowed function evaluations
 end
 % ------------------------------------------------------------------------------
 
@@ -74,29 +74,29 @@ nhps = eval(s);
 covFunc1 = covFunc{1};
 covFunc2 = covFunc{2};
 if strcmp(covFunc1, 'covSum') && strcmp(covFunc2{1}, 'covSEiso') && strcmp(covFunc2{2}, 'covNoise')
-    hyp.cov = zeros(3, 1);
-    % length parameter is in the ballpark of the difference between time
-    % elements
-    hyp.cov(1) = log(mean(diff(t)));
+	hyp.cov = zeros(3, 1);
+	% length parameter is in the ballpark of the difference between time
+	% elements
+	hyp.cov(1) = log(mean(diff(t)));
 else
-    hyp.cov = zeros(nhps, 1); % Default: initialize all log hyperparameters at -1
+	hyp.cov = zeros(nhps, 1); % Default: initialize all log hyperparameters at -1
 end
 
 % ------------------------------------------------------------------------------
 % Perform the optimization
 % ------------------------------------------------------------------------------
 try
-    % loghyper = minimize(init_loghyper, 'gpr', nfevals, covFunc, t, y);
-    hyp = minimize(hyp, @gp, nfevals, infAlg, meanFunc, covFunc, likFunc, t, y);
+	% loghyper = minimize(init_loghyper, 'gpr', nfevals, covFunc, t, y);
+	hyp = minimize(hyp, @gp, nfevals, infAlg, meanFunc, covFunc, likFunc, t, y);
 catch emsg
-    if strcmp(emsg.identifier, 'MATLAB:posdef')
-        fprintf(1, 'Error with lack of positive definite matrix for this function\n');
-        hyp = NaN; return % return NaN -- the data is not suited to GP fitting
-    elseif strcmp(emsg.identifier, 'MATLAB:nomem')
-        error('Not enough memory to fit a Gaussian Process to this data');
-    else
-        error('Error fitting Gaussian Process to data: %s\n', emsg.message)
-    end
+	if strcmp(emsg.identifier, 'MATLAB:posdef')
+		fprintf(1, 'Error with lack of positive definite matrix for this function\n');
+		hyp = NaN; return % return NaN -- the data is not suited to GP fitting
+	elseif strcmp(emsg.identifier, 'MATLAB:nomem')
+		error('Not enough memory to fit a Gaussian Process to this data');
+	else
+		error('Error fitting Gaussian Process to data: %s\n', emsg.message)
+	end
 end
 
 end

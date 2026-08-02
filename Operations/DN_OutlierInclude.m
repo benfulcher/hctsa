@@ -76,24 +76,24 @@ doPlot = false; % Plot some outputs
 % ------------------------------------------------------------------------------
 % If the time series is a constant causes issues
 if all(y == y(1))
-    % This method is not suitable for such time series: return a NaN
-    fprintf(1, 'The time series is a constant!\n');
-    out = NaN;
-    return
+	% This method is not suitable for such time series: return a NaN
+	fprintf(1, 'The time series is a constant!\n');
+	out = NaN;
+	return
 end
 
 % Check z-scored time series
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored')
+	warning('The input time series should be z-scored')
 end
 N = length(y); % length of the time series
 
 if nargin < 2 || isempty(thresholdHow)
-    thresholdHow = 'abs'; % Analyze absolute value deviations in the time series by default
+	thresholdHow = 'abs'; % Analyze absolute value deviations in the time series by default
 end
 
 if nargin < 3
-    inc = 0.01; % increment through z-scored time-series values
+	inc = 0.01; % increment through z-scored time-series values
 end
 
 % ------------------------------------------------------------------------------
@@ -102,21 +102,21 @@ end
 % Could be better to just use a fixed number of increments here, from 0 to the max.
 % (rather than forcing a fixed inc)
 switch thresholdHow
-    case 'abs' % analyze absolute value deviations
-        thr = (0:inc:max(abs(y)));
-        tot = N;
-    case 'pos' % analyze only positive deviations
-        thr = (0:inc:max(y));
-        tot = sum(y >= 0);
-    case 'neg' % analyze only negative deviations
-        thr = (0:inc:max(-y));
-        tot = sum(y <= 0);
-    otherwise
-        error('Error thresholding with ''%s''. Must select either ''abs'', ''pos'', or ''neg''.', thresholdHow)
+	case 'abs' % analyze absolute value deviations
+		thr = (0:inc:max(abs(y)));
+		tot = N;
+	case 'pos' % analyze only positive deviations
+		thr = (0:inc:max(y));
+		tot = sum(y >= 0);
+	case 'neg' % analyze only negative deviations
+		thr = (0:inc:max(-y));
+		tot = sum(y <= 0);
+	otherwise
+		error('Error thresholding with ''%s''. Must select either ''abs'', ''pos'', or ''neg''.', thresholdHow)
 end
 
 if isempty(thr)
-    error('Error setting increments through the time-series values...')
+	error('Error setting increments through the time-series values...')
 end
 
 % -------------------------------------------------------------------------------
@@ -147,51 +147,51 @@ msDt = zeros(length(thr), 6); % mean, std, proportion_of_time_series_included,
 rPrev = (1:N)'; % candidate index set, narrows each iteration
 numValid = 0;
 for i = 1:length(thr)
-    th = thr(i); % the threshold
+	th = thr(i); % the threshold
 
-    % Construct a series consisting of inter-event intervals for parts
-    % of the time series exceeding the threshold, th (in a given direction).
-    % Searches only the previous iteration's qualifying indices, rPrev:
-    switch thresholdHow
-        case 'abs' % look at absolute value deviations
-            r = rPrev(abs(y(rPrev)) >= th);
-        case 'pos' % look at only positive deviations
-            r = rPrev(y(rPrev) >= th);
-        case 'neg' % look at only negative deviations
-            r = rPrev(y(rPrev) <= -th);
-    end
-    rPrev = r; % narrower candidate set for the next (higher) threshold
+	% Construct a series consisting of inter-event intervals for parts
+	% of the time series exceeding the threshold, th (in a given direction).
+	% Searches only the previous iteration's qualifying indices, rPrev:
+	switch thresholdHow
+		case 'abs' % look at absolute value deviations
+			r = rPrev(abs(y(rPrev)) >= th);
+		case 'pos' % look at only positive deviations
+			r = rPrev(y(rPrev) >= th);
+		case 'neg' % look at only negative deviations
+			r = rPrev(y(rPrev) <= -th);
+	end
+	rPrev = r; % narrower candidate set for the next (higher) threshold
 
-    % The Dt (interval) time series of values exceeding threshold
-    Dt_exc = diff(r);
+	% The Dt (interval) time series of values exceeding threshold
+	Dt_exc = diff(r);
 
-    % ~~~~~~~~~~~~
-    % Statistics on the interval time series:
-    % ~~~~~~~~~~~~
-    meanDt = mean(Dt_exc); % the mean value of inter-event intervals
-    propIncluded = length(Dt_exc) / tot * 100; % this is just really measuring the distribution
-    % : the proportion of possible values
-    % that are actually used in
-    % calculation
+	% ~~~~~~~~~~~~
+	% Statistics on the interval time series:
+	% ~~~~~~~~~~~~
+	meanDt = mean(Dt_exc); % the mean value of inter-event intervals
+	propIncluded = length(Dt_exc) / tot * 100; % this is just really measuring the distribution
+	% : the proportion of possible values
+	% that are actually used in
+	% calculation
 
-    % Stop once too few events remain to say anything meaningful (Dt_exc
-    % empty/singleton -> NaN mean), or once statistical power is lacking
-    % (less than 2% of data included):
-    if isnan(meanDt) || propIncluded <= trimthr
-        break
-    end
+	% Stop once too few events remain to say anything meaningful (Dt_exc
+	% empty/singleton -> NaN mean), or once statistical power is lacking
+	% (less than 2% of data included):
+	if isnan(meanDt) || propIncluded <= trimthr
+		break
+	end
 
-    numValid = numValid + 1;
-    msDt(numValid, 1) = meanDt;
-    msDt(numValid, 2) = std(Dt_exc) / sqrt(length(r)); % error on the mean
-    msDt(numValid, 3) = propIncluded;
-    % ~~~~~~~~~~~~
-    % Statistics on the indices of over-threshold events:
-    % ~~~~~~~~~~~~
-    % The [x/(N/2)-1] rescales such that the middle index, N/2 => 0, and N maps to 1, 0 maps to -1.
-    msDt(numValid, 4) = median(r) / (N / 2) - 1; % the median timing of events (relative to middle, N/2)
-    msDt(numValid, 5) = mean(r) / (N / 2) - 1; % mean timing of events (relative to middle, N/2)
-    msDt(numValid, 6) = std(r) / sqrt(length(r)); % variance of event timing
+	numValid = numValid + 1;
+	msDt(numValid, 1) = meanDt;
+	msDt(numValid, 2) = std(Dt_exc) / sqrt(length(r)); % error on the mean
+	msDt(numValid, 3) = propIncluded;
+	% ~~~~~~~~~~~~
+	% Statistics on the indices of over-threshold events:
+	% ~~~~~~~~~~~~
+	% The [x/(N/2)-1] rescales such that the middle index, N/2 => 0, and N maps to 1, 0 maps to -1.
+	msDt(numValid, 4) = median(r) / (N / 2) - 1; % the median timing of events (relative to middle, N/2)
+	msDt(numValid, 5) = mean(r) / (N / 2) - 1; % mean timing of events (relative to middle, N/2)
+	msDt(numValid, 6) = std(r) / sqrt(length(r)); % variance of event timing
 end
 msDt = msDt(1:numValid, :);
 thr = thr(1:numValid);
@@ -200,14 +200,14 @@ thr = thr(1:numValid);
 %% Plot output
 % ------------------------------------------------------------------------------
 if doPlot
-    figure('color', 'w');
-    hold('on')
-    plot(thr, msDt(:, 1), '.-k');
-    plot(thr, msDt(:, 2), '.-b');
-    plot(thr, msDt(:, 3), '.-g');
-    plot(thr, msDt(:, 4) * 100, '.-m');
-    plot(thr, msDt(:, 5) * 100, '.-r');
-    plot(thr, msDt(:, 6), '.-c'); hold off
+	figure('color', 'w');
+	hold('on')
+	plot(thr, msDt(:, 1), '.-k');
+	plot(thr, msDt(:, 2), '.-b');
+	plot(thr, msDt(:, 3), '.-g');
+	plot(thr, msDt(:, 4) * 100, '.-m');
+	plot(thr, msDt(:, 5) * 100, '.-r');
+	plot(thr, msDt(:, 6), '.-c'); hold off
 end
 
 % -------------------------------------------------------------------------------
@@ -221,25 +221,25 @@ s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [0.1 2.5 1]);
 f = fittype('a*exp(b*x)+c', 'options', s);
 emsg = '';
 try
-    [c, gof] = fit(thr', msDt(:, 1), f);
+	[c, gof] = fit(thr', msDt(:, 1), f);
 catch emsg
-    fprintf(1, 'DN_OutlierInclude: error fitting exponential growth to means: %s\n', emsg);
+	fprintf(1, 'DN_OutlierInclude: error fitting exponential growth to means: %s\n', emsg);
 end
 
 if isempty(emsg)
-    out.mfexpa = c.a;
-    out.mfexpb = c.b;
-    out.mfexpc = c.c;
-    out.mfexpr2 = gof.rsquare;
-    out.mfexpadjr2 = gof.adjrsquare;
-    out.mfexprmse = gof.rmse;
+	out.mfexpa = c.a;
+	out.mfexpb = c.b;
+	out.mfexpc = c.c;
+	out.mfexpr2 = gof.rsquare;
+	out.mfexpadjr2 = gof.adjrsquare;
+	out.mfexprmse = gof.rmse;
 else
-    out.mfexpa = NaN;
-    out.mfexpb = NaN;
-    out.mfexpc = NaN;
-    out.mfexpr2 = NaN;
-    out.mfexpadjr2 = NaN;
-    out.mfexprmse = NaN;
+	out.mfexpa = NaN;
+	out.mfexpb = NaN;
+	out.mfexpc = NaN;
+	out.mfexpr2 = NaN;
+	out.mfexpadjr2 = NaN;
+	out.mfexprmse = NaN;
 end
 
 % ------------------------------------------------------------------------------
@@ -300,25 +300,25 @@ s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [5, 1, 15]);
 f = fittype('a*exp(b*x)+c', 'options', s);
 emsg = [];
 try
-    [c, gof] = fit(thr', msDt(:, 6), f);
+	[c, gof] = fit(thr', msDt(:, 6), f);
 catch emsg
-    warning('Error fitting exponential growth to std: %s\n', emsg.message);
+	warning('Error fitting exponential growth to std: %s\n', emsg.message);
 end
 
 if isempty(emsg)
-    out.stdrfexpa = c.a;
-    out.stdrfexpb = c.b;
-    out.stdrfexpc = c.c;
-    out.stdrfexpr2 = gof.rsquare;
-    out.stdrfexpadjr2 = gof.adjrsquare;
-    out.stdrfexprmse = gof.rmse;
+	out.stdrfexpa = c.a;
+	out.stdrfexpb = c.b;
+	out.stdrfexpc = c.c;
+	out.stdrfexpr2 = gof.rsquare;
+	out.stdrfexpadjr2 = gof.adjrsquare;
+	out.stdrfexprmse = gof.rmse;
 else
-    out.stdrfexpa = NaN;
-    out.stdrfexpb = NaN;
-    out.stdrfexpc = NaN;
-    out.stdrfexpr2 = NaN;
-    out.stdrfexpadjr2 = NaN;
-    out.stdrfexprmse = NaN;
+	out.stdrfexpa = NaN;
+	out.stdrfexpb = NaN;
+	out.stdrfexpc = NaN;
+	out.stdrfexpr2 = NaN;
+	out.stdrfexpadjr2 = NaN;
+	out.stdrfexprmse = NaN;
 end
 
 % ------------------------------------------------------------------------------
@@ -335,8 +335,8 @@ out.stdrfladjr2 = gof.adjrsquare;
 out.stdrflrmse = gof.rmse;
 
 if doPlot
-    figure('color', 'w')
-    errorbar(thr, msDt(:, 1), msDt(:, 2), 'k');
+	figure('color', 'w')
+	errorbar(thr, msDt(:, 1), msDt(:, 2), 'k');
 end
 
 end

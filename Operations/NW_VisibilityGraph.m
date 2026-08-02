@@ -66,21 +66,21 @@ N = length(y); % time-series length
 
 if size(y, 2) > size(y, 1), y = y'; end % make sure a column vector
 if nargin < 2
-    % compute the horizontal visibility graph by default
-    meth = 'horiz';
+	% compute the horizontal visibility graph by default
+	meth = 'horiz';
 end
 if nargin < 3
-    maxL = 5000; % crops time series longer than this maximum length
+	maxL = 5000; % crops time series longer than this maximum length
 end
 
 if N > maxL % too long to store in memory
-    % ++BF changed on 8/3/2010 to reduce down to first maxL samples. In future,
-    % could alter to take different subsets, or set a maximum distance range
-    % allowed to make a link (using sparse), etc.
-    warning(sprintf(['Time series (%u > %u) is too long for visibility graph...' ...
-                     ' Analyzing the first %u samples'], N, maxL, maxL));
-    y = y(1:maxL);
-    N = length(y); % new time-series length
+	% ++BF changed on 8/3/2010 to reduce down to first maxL samples. In future,
+	% could alter to take different subsets, or set a maximum distance range
+	% allowed to make a link (using sparse), etc.
+	warning(sprintf(['Time series (%u > %u) is too long for visibility graph...' ...
+					 ' Analyzing the first %u samples'], N, maxL, maxL));
+	y = y(1:maxL);
+	N = length(y); % new time-series length
 end
 
 y = y - min(y); % adjust so that minimum of y is at zero
@@ -89,54 +89,54 @@ y = y - min(y); % adjust so that minimum of y is at zero
 %% Compute the visibility graph:
 % ------------------------------------------------------------------------------
 switch meth
-    case 'norm'
-        % Normal visibility graph:
-        A = EZ_VisibilityGraph(y);
+	case 'norm'
+		% Normal visibility graph:
+		A = EZ_VisibilityGraph(y);
 
-    case 'horiz'
-        % Horizontal visibility graph
+	case 'horiz'
+		% Horizontal visibility graph
 
-        % The graph has only O(N) edges, so accumulate (row,col) edge indices
-        % and build a sparse adjacency matrix at the end, instead of a dense
-        % N x N matrix (an O(N^2) allocation/initialization that's mostly
-        % zeros -- e.g., ~200MB at the default maxL=5000 cap):
-        yr = flipud(y); % reversed order time series
-        rows = zeros(2 * N, 1);
-        cols = zeros(2 * N, 1);
-        numEdges = 0;
+		% The graph has only O(N) edges, so accumulate (row,col) edge indices
+		% and build a sparse adjacency matrix at the end, instead of a dense
+		% N x N matrix (an O(N^2) allocation/initialization that's mostly
+		% zeros -- e.g., ~200MB at the default maxL=5000 cap):
+		yr = flipud(y); % reversed order time series
+		rows = zeros(2 * N, 1);
+		cols = zeros(2 * N, 1);
+		numEdges = 0;
 
-        for i = 1:N
-            % Look forward to first blocker, then stop
-            if i < N
-                nAhead = find(y(i + 1:end) > y(i), 1, 'first');
-                if ~isempty(nAhead)
-                    numEdges = numEdges + 1;
-                    rows(numEdges) = i;
-                    cols(numEdges) = i + nAhead;
-                end
-            end
+		for i = 1:N
+			% Look forward to first blocker, then stop
+			if i < N
+				nAhead = find(y(i + 1:end) > y(i), 1, 'first');
+				if ~isempty(nAhead)
+					numEdges = numEdges + 1;
+					rows(numEdges) = i;
+					cols(numEdges) = i + nAhead;
+				end
+			end
 
-            % Look back to the first hit, then stop
-            if i > 1
-                nBack = find(yr(N - i + 2:end) > yr(N - i + 1), 1, 'first');
-                if ~isempty(nBack)
-                    numEdges = numEdges + 1;
-                    rows(numEdges) = i - nBack;
-                    cols(numEdges) = i;
-                end
-            end
-        end
-        % Every edge added above has row < col (no self-loops, strictly upper
-        % triangular), so collapsing any duplicate (row,col) pairs added from
-        % both directions back to 0/1 (sparse() sums duplicates) matches the
-        % original dense code's idempotent A(i,j)=1 assignment exactly:
-        A = double(sparse(rows(1:numEdges), cols(1:numEdges), 1, N, N) > 0);
+			% Look back to the first hit, then stop
+			if i > 1
+				nBack = find(yr(N - i + 2:end) > yr(N - i + 1), 1, 'first');
+				if ~isempty(nBack)
+					numEdges = numEdges + 1;
+					rows(numEdges) = i - nBack;
+					cols(numEdges) = i;
+				end
+			end
+		end
+		% Every edge added above has row < col (no self-loops, strictly upper
+		% triangular), so collapsing any duplicate (row,col) pairs added from
+		% both directions back to 0/1 (sparse() sums duplicates) matches the
+		% original dense code's idempotent A(i,j)=1 assignment exactly:
+		A = double(sparse(rows(1:numEdges), cols(1:numEdges), 1, N, N) > 0);
 
-        % Symmetrize A (safe because A is strictly upper triangular: A and A'
-        % have disjoint nonzero support, so no double-counting):
-        A = A + A';
-    otherwise
-        error('Unknown visibility graph method ''%s''', meth);
+		% Symmetrize A (safe because A is strictly upper triangular: A and A'
+		% have disjoint nonzero support, so no double-counting):
+		A = A + A';
+	otherwise
+		error('Unknown visibility graph method ''%s''', meth);
 end
 
 % ------------------------------------------------------------------------------
@@ -169,72 +169,72 @@ out.olu90 = (mean(k(k >= quantile(k, 0.95))) - mean(k)) / std(k); % top 5% of po
 % ------------------------------------------------------------------------------
 % (1) Gauss1: Gaussian fit to degree distribution
 try
-    dgaussout = DN_SimpleFit(k, 'gauss1', range(k)); % range(k)-bin single gaussian fit
+	dgaussout = DN_SimpleFit(k, 'gauss1', range(k)); % range(k)-bin single gaussian fit
 catch emsg
-    warning(sprintf('Error fitting gaussian distribution to data:\n%s', emsg.message))
-    dgaussout = NaN;
+	warning(sprintf('Error fitting gaussian distribution to data:\n%s', emsg.message))
+	dgaussout = NaN;
 end
 
 if ~isstruct(dgaussout) && isnan(dgaussout)
-    out.dgaussk_r2 = NaN;
-    out.dgaussk_adjr2 = NaN;
-    out.dgaussk_rmse = NaN;
-    out.dgaussk_resAC1 = NaN;
-    out.dgaussk_resAC2 = NaN;
-    out.dgaussk_resruns = NaN;
+	out.dgaussk_r2 = NaN;
+	out.dgaussk_adjr2 = NaN;
+	out.dgaussk_rmse = NaN;
+	out.dgaussk_resAC1 = NaN;
+	out.dgaussk_resAC2 = NaN;
+	out.dgaussk_resruns = NaN;
 else
-    out.dgaussk_r2 = dgaussout.r2; % rsquared
-    out.dgaussk_adjr2 = dgaussout.adjr2; % degrees of freedom-adjusted rsqured
-    out.dgaussk_rmse = dgaussout.rmse;  % root mean square error
-    out.dgaussk_resAC1 = dgaussout.resAC1; % autocorrelation of residuals at lag 1
-    out.dgaussk_resAC2 = dgaussout.resAC2; % autocorrelation of residuals at lag 2
-    out.dgaussk_resruns = dgaussout.resruns; % runs test on residuals -- outputs p-value
+	out.dgaussk_r2 = dgaussout.r2; % rsquared
+	out.dgaussk_adjr2 = dgaussout.adjr2; % degrees of freedom-adjusted rsqured
+	out.dgaussk_rmse = dgaussout.rmse;  % root mean square error
+	out.dgaussk_resAC1 = dgaussout.resAC1; % autocorrelation of residuals at lag 1
+	out.dgaussk_resAC2 = dgaussout.resAC2; % autocorrelation of residuals at lag 2
+	out.dgaussk_resruns = dgaussout.resruns; % runs test on residuals -- outputs p-value
 end
 
 % (2) Exponential1: Exponential fit to degree distribution
 try
-    dexpout = DN_SimpleFit(k, 'exp1', range(k)); % range(k)-bin single exponential fit
+	dexpout = DN_SimpleFit(k, 'exp1', range(k)); % range(k)-bin single exponential fit
 catch emsg
-    warning(sprintf('Error fitting exponential distribution to data:\n%s', emsg.message))
-    dexpout = NaN;
+	warning(sprintf('Error fitting exponential distribution to data:\n%s', emsg.message))
+	dexpout = NaN;
 end
 if ~isstruct(dexpout) && isnan(dexpout)
-    out.dexpk_r2 = NaN;
-    out.dexpk_adjr2 = NaN;
-    out.dexpk_rmse = NaN;
-    out.dexpk_resAC1 = NaN;
-    out.dexpk_resAC2 = NaN;
-    out.dexpk_resruns = NaN;
+	out.dexpk_r2 = NaN;
+	out.dexpk_adjr2 = NaN;
+	out.dexpk_rmse = NaN;
+	out.dexpk_resAC1 = NaN;
+	out.dexpk_resAC2 = NaN;
+	out.dexpk_resruns = NaN;
 else
-    out.dexpk_r2 = dexpout.r2; % rsquared
-    out.dexpk_adjr2 = dexpout.adjr2; % degrees of freedom-adjusted rsqured
-    out.dexpk_rmse = dexpout.rmse;  % root mean square error
-    out.dexpk_resAC1 = dexpout.resAC1; % autocorrelation of residuals at lag 1
-    out.dexpk_resAC2 = dexpout.resAC2; % autocorrelation of residuals at lag 2
-    out.dexpk_resruns = dexpout.resruns; % runs test on residuals -- outputs p-value
+	out.dexpk_r2 = dexpout.r2; % rsquared
+	out.dexpk_adjr2 = dexpout.adjr2; % degrees of freedom-adjusted rsqured
+	out.dexpk_rmse = dexpout.rmse;  % root mean square error
+	out.dexpk_resAC1 = dexpout.resAC1; % autocorrelation of residuals at lag 1
+	out.dexpk_resAC2 = dexpout.resAC2; % autocorrelation of residuals at lag 2
+	out.dexpk_resruns = dexpout.resruns; % runs test on residuals -- outputs p-value
 end
 
 % (3) Power1: Power-law fit to degree distribution
 try
-    dpowerout = DN_SimpleFit(k, 'power1', range(k)); % range(k)-bin single power law fit
+	dpowerout = DN_SimpleFit(k, 'power1', range(k)); % range(k)-bin single power law fit
 catch emsg
-    warning(sprintf('Error fitting power-law distribution to data:\n%s', emsg.message))
-    dpowerout = NaN;
+	warning(sprintf('Error fitting power-law distribution to data:\n%s', emsg.message))
+	dpowerout = NaN;
 end
 if ~isstruct(dpowerout) && isnan(dpowerout)
-    out.dpowerk_r2 = NaN;
-    out.dpowerk_adjr2 = NaN;
-    out.dpowerk_rmse = NaN;
-    out.dpowerk_resAC1 = NaN;
-    out.dpowerk_resAC2 = NaN;
-    out.dpowerk_resruns = NaN;
+	out.dpowerk_r2 = NaN;
+	out.dpowerk_adjr2 = NaN;
+	out.dpowerk_rmse = NaN;
+	out.dpowerk_resAC1 = NaN;
+	out.dpowerk_resAC2 = NaN;
+	out.dpowerk_resruns = NaN;
 else
-    out.dpowerk_r2 = dpowerout.r2; % rsquared
-    out.dpowerk_adjr2 = dpowerout.adjr2; % degrees of freedom-adjusted rsqured
-    out.dpowerk_rmse = dpowerout.rmse;  % root mean square error
-    out.dpowerk_resAC1 = dpowerout.resAC1; % autocorrelation of residuals at lag 1
-    out.dpowerk_resAC2 = dpowerout.resAC2; % autocorrelation of residuals at lag 2
-    out.dpowerk_resruns = dpowerout.resruns; % runs test on residuals -- outputs p-value
+	out.dpowerk_r2 = dpowerout.r2; % rsquared
+	out.dpowerk_adjr2 = dpowerout.adjr2; % degrees of freedom-adjusted rsqured
+	out.dpowerk_rmse = dpowerout.rmse;  % root mean square error
+	out.dpowerk_resAC1 = dpowerout.resAC1; % autocorrelation of residuals at lag 1
+	out.dpowerk_resAC2 = dpowerout.resAC2; % autocorrelation of residuals at lag 2
+	out.dpowerk_resruns = dpowerout.resruns; % runs test on residuals -- outputs p-value
 end
 
 % ------------------------------------------------------------------------------
@@ -265,22 +265,22 @@ out.ktau = CO_FirstCrossing(k, 'ac', 0, 'continuous');
 
 % -------------------------------------------------------------------------------
 function A = symmetrize(A)
-    % Symmetrize an upper triangular matrix:
-    At = A';
-    lowerT = logical(tril(ones(size(A))));
-    A(lowerT) = At(lowerT);
+	% Symmetrize an upper triangular matrix:
+	At = A';
+	lowerT = logical(tril(ones(size(A))));
+	A(lowerT) = At(lowerT);
 end
 
 function ind = findFirst(vector, threshold)
-    % Find index of the first time a vector exceeds a threshold
-    % -- not used because just as fast to use find(x,1,'first')
-    for k = 1:length(vector)
-        if vector(k) > threshold
-            ind = k;
-            return;
-        end
-    end
-    ind = length(vector);
+	% Find index of the first time a vector exceeds a threshold
+	% -- not used because just as fast to use find(x,1,'first')
+	for k = 1:length(vector)
+		if vector(k) > threshold
+			ind = k;
+			return;
+		end
+	end
+	ind = length(vector);
 end
 
 end

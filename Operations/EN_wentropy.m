@@ -54,27 +54,27 @@ BF_CheckToolbox('wavelet_toolbox');
 % Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(whaten)
-    whaten = 'shannon'; % default
+	whaten = 'shannon'; % default
 end
 
 N = length(y); % time-series length
 
 switch whaten
-    case 'shannon' % Shannon entropy
-        out = wentropy(y, 'shannon') / N; % scales with N for large N
+	case 'shannon' % Shannon entropy
+		out = wentropy(y, 'shannon') / N; % scales with N for large N
 
-    case 'logenergy' % Log Energy entropy
-        out = wentropy(y, 'log energy') / N; % scales with N for large N
+	case 'logenergy' % Log Energy entropy
+		out = wentropy(y, 'log energy') / N; % scales with N for large N
 
-    case 'threshold' % Magnitude of the signal greater than some value
-        out = wentropy(y, 'threshold', p) / N;
+	case 'threshold' % Magnitude of the signal greater than some value
+		out = wentropy(y, 'threshold', p) / N;
 
-    case 'sure'
-        % Equivalent to threshold entropy?
-        out = wentropy(y, 'sure', p) / N;
+	case 'sure'
+		% Equivalent to threshold entropy?
+		out = wentropy(y, 'sure', p) / N;
 
-    otherwise
-        error('Unknown entropy type ''%s''.', whaten);
+	otherwise
+		error('Unknown entropy type ''%s''.', whaten);
 end
 
 end

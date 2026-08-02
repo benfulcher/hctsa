@@ -61,38 +61,38 @@ doPlot = false; % plot output
 %% Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(removeHow)
-    removeHow = 'absfar'; % default
+	removeHow = 'absfar'; % default
 end
 if nargin < 3 || isempty(p)
-    p = 0.1; % 10%
+	p = 0.1; % 10%
 end
 if nargin < 4 || isempty(removeOrSaturate)
-    removeOrSaturate = 'remove';
+	removeOrSaturate = 'remove';
 end
 
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored')
+	warning('The input time series should be z-scored')
 end
 
 % ------------------------------------------------------------------------------
 % Sort time-series values on different criteria, ordered by those to be *kept*
 switch removeHow
-    case 'absclose'
-        % Remove a proportion p of points closest to the mean
-        [~, is] = sort(abs(y), 'descend');
-    case 'absfar'
-        % Remove/saturate a proportion p of points furthest from the mean
-        [~, is] = sort(abs(y), 'ascend');
-    case 'min'
-        % Remove/saturate a proportion p of points with the lowest values
-        [~, is] = sort(y, 'descend');
-    case 'max'
-        % Remove/saturate a proportion p of points with the highest values
-        [~, is] = sort(y, 'ascend');
-    case 'random'
-        is = randperm(N);
-    otherwise
-        error('Unknown method ''%s''', removeHow);
+	case 'absclose'
+		% Remove a proportion p of points closest to the mean
+		[~, is] = sort(abs(y), 'descend');
+	case 'absfar'
+		% Remove/saturate a proportion p of points furthest from the mean
+		[~, is] = sort(abs(y), 'ascend');
+	case 'min'
+		% Remove/saturate a proportion p of points with the lowest values
+		[~, is] = sort(y, 'descend');
+	case 'max'
+		% Remove/saturate a proportion p of points with the highest values
+		[~, is] = sort(y, 'ascend');
+	case 'random'
+		is = randperm(N);
+	otherwise
+		error('Unknown method ''%s''', removeHow);
 end
 
 % Indices of points to *keep*:
@@ -104,40 +104,40 @@ rTransform = setxor(1:N, rKeep);
 % -------------------------------------------------------------------------------
 % Do the removing/saturating to convert y -> yTransform
 switch removeOrSaturate
-    case 'remove'
-        % Remove the targeted points:
-        yTransform = y(rKeep);
+	case 'remove'
+		% Remove the targeted points:
+		yTransform = y(rKeep);
 
-    case 'saturate'
-        % Saturate out the targeted points:
-        switch removeHow
-            case 'max'
-                yTransform = y;
-                yTransform(rTransform) = max(y(rKeep));
-            case 'min'
-                yTransform = y;
-                yTransform(rTransform) = min(y(rKeep));
-            case 'absfar'
-                yTransform = y;
-                yTransform(yTransform > max(y(rKeep))) = max(y(rKeep));
-                yTransform(yTransform < min(y(rKeep))) = min(y(rKeep));
-            otherwise
-                error('Cannot ''saturate'' when using ''%s'' method', removeHow)
-        end
-    otherwise
-        error('Unknown removeOrSaturate option: ''%s''', removeOrSaturate);
+	case 'saturate'
+		% Saturate out the targeted points:
+		switch removeHow
+			case 'max'
+				yTransform = y;
+				yTransform(rTransform) = max(y(rKeep));
+			case 'min'
+				yTransform = y;
+				yTransform(rTransform) = min(y(rKeep));
+			case 'absfar'
+				yTransform = y;
+				yTransform(yTransform > max(y(rKeep))) = max(y(rKeep));
+				yTransform(yTransform < min(y(rKeep))) = min(y(rKeep));
+			otherwise
+				error('Cannot ''saturate'' when using ''%s'' method', removeHow)
+		end
+	otherwise
+		error('Unknown removeOrSaturate option: ''%s''', removeOrSaturate);
 end
 
 % -------------------------------------------------------------------------------
 % SIMPLE PLOT:
 if doPlot
-    figure('color', 'w')
-    hold('off')
-    plot(y, 'ok');
-    hold('on');
-    plot(rKeep, yTransform, '.r')
-    hold('off');
-    histogram(yTransform, 50)
+	figure('color', 'w')
+	hold('off')
+	plot(y, 'ok');
+	hold('on');
+	plot(rKeep, yTransform, '.r')
+	hold('off');
+	histogram(yTransform, 50)
 end
 
 % Compute some autocorrelation properties:
@@ -145,11 +145,11 @@ acf_y = SUB_acf(y, 8);
 acf_yTransform = SUB_acf(yTransform, 8);
 
 if doPlot
-    figure('color', 'w')
-    hold('off');
-    plot(acf_y, ':b');
-    hold('on');
-    plot(acf_yTransform, ':r');
+	figure('color', 'w')
+	hold('off');
+	plot(acf_y, ':b');
+	hold('on');
+	plot(acf_yTransform, ':r');
 end
 
 % -------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ f_absDiff = @(x1, x2) abs(x1 - x2); % ignores the sign
 f_ratio = @(x1, x2) x1 / x2; % includes the sign
 
 out.fzcacrat = f_ratio(CO_FirstCrossing(yTransform, 'ac', 0, 'continuous'), ...
-                       CO_FirstCrossing(y, 'ac', 0, 'continuous'));
+					   CO_FirstCrossing(y, 'ac', 0, 'continuous'));
 
 out.ac1rat = f_ratio(acf_yTransform(1), acf_y(1));
 out.ac1diff = f_absDiff(acf_yTransform(1), acf_y(1));
@@ -183,13 +183,13 @@ out.kurtosisrat = kurtosis(yTransform) / kurtosis(y);
 
 % -------------------------------------------------------------------------------
 function acf = SUB_acf(x, n)
-    % computes autocorrelation of the input sequence, x, up to a maximum time
-    % lag, n
-    acf = CO_AutoCorr(x, 1:n, 'Fourier');
-    % acf = zeros(n,1);
-    % for i = 1:n
-    %     acf(i) = CO_AutoCorr(x,i,'Fourier');
-    % end
+	% computes autocorrelation of the input sequence, x, up to a maximum time
+	% lag, n
+	acf = CO_AutoCorr(x, 1:n, 'Fourier');
+	% acf = zeros(n,1);
+	% for i = 1:n
+	%     acf(i) = CO_AutoCorr(x,i,'Fourier');
+	% end
 end
 
 end

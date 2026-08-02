@@ -72,43 +72,43 @@ N = length(y); % time-series length
 %% Check Inputs
 % ------------------------------------------------------------------------------
 if size(y, 2) > size(y, 1)
-    y = y'; % ensure a column vector input
+	y = y'; % ensure a column vector input
 end
 if nargin < 2 || isempty(covFunc),
-    fprintf(1, 'Using a default covariance function: sum of squared exponential and noise\n');
-    covFunc = {'covSum', {'covSEiso', 'covNoise'}};
+	fprintf(1, 'Using a default covariance function: sum of squared exponential and noise\n');
+	covFunc = {'covSum', {'covSEiso', 'covNoise'}};
 end
 
 if nargin < 3 || isempty(numTrain)
-    numTrain = 20; % 20 previous data points to predict the next
+	numTrain = 20; % 20 previous data points to predict the next
 end
 
 if nargin < 4 || isempty(numTest)
-    numTest = 5; % test on 5 data points into the future
+	numTest = 5; % test on 5 data points into the future
 end
 
 if nargin < 5 || isempty(numPreds) % number of predictions
-    numPreds = 10; % do it 10 times (equally-spaced) through the time series
+	numPreds = 10; % do it 10 times (equally-spaced) through the time series
 end
 
 if nargin < 6 || isempty(pmode)
-    pmode = 'frombefore'; % predicts from previous numTrain datapoints
-    % can also be 'randomgap' -- fills in random gaps in the middle of a string of
-    % data
+	pmode = 'frombefore'; % predicts from previous numTrain datapoints
+	% can also be 'randomgap' -- fills in random gaps in the middle of a string of
+	% data
 end
 
 % randomSeed: how to treat the randomization
 if nargin < 7
-    randomSeed = [];
+	randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------
 %% Set up loop
 % ------------------------------------------------------------------------------
 if ismember(pmode, {'frombefore', 'randomgap'})
-    spns = floor(linspace(1, N - (numTest + numTrain), numPreds)); % starting positions
+	spns = floor(linspace(1, N - (numTest + numTrain), numPreds)); % starting positions
 elseif strcmp(pmode, 'beforeafter')
-    spns = floor(linspace(1, N - (numTest + numTrain * 2), numPreds)); % starting positions
+	spns = floor(linspace(1, N - (numTest + numTrain * 2), numPreds)); % starting positions
 end
 
 % Details of GP:
@@ -128,113 +128,113 @@ nhps = eval(feval(covFunc{:})); % number of hyperparameters
 loghypers = zeros(nhps, numPreds); % loghyperparameters
 
 for i = 1:numPreds
-    %% (0) Set up test and training sets
-    switch pmode
-        case 'frombefore'
-            tt = (1:numTrain)'; % times (make from 1)
-            rt = spns(i):spns(i) + numTrain - 1; % training range
-            yt = y(rt); % training data
+	%% (0) Set up test and training sets
+	switch pmode
+		case 'frombefore'
+			tt = (1:numTrain)'; % times (make from 1)
+			rt = spns(i):spns(i) + numTrain - 1; % training range
+			yt = y(rt); % training data
 
-            ts = (numTrain + 1:numTrain + 1 + numTest - 1)'; % times
-            rs = spns(i) + numTrain:spns(i) + numTrain + numTest - 1; % test range
-            ys = y(rs); % test data
+			ts = (numTrain + 1:numTrain + 1 + numTest - 1)'; % times
+			rs = spns(i) + numTrain:spns(i) + numTrain + numTest - 1; % test range
+			ys = y(rs); % test data
 
-        case 'randomgap'
-            % Control the random seed (for reproducibility):
-            BF_ResetSeed(randomSeed);
+		case 'randomgap'
+			% Control the random seed (for reproducibility):
+			BF_ResetSeed(randomSeed);
 
-            t = (1:numTrain + numTest)';
-            r = randperm(numTrain + numTest);
-            yy = y(spns(i):spns(i) + numTrain + numTest - 1);
+			t = (1:numTrain + numTest)';
+			r = randperm(numTrain + numTest);
+			yy = y(spns(i):spns(i) + numTrain + numTest - 1);
 
-            rt = sort(r(1:numTrain), 'ascend');
-            tt = t(rt);
-            yt = yy(rt);
+			rt = sort(r(1:numTrain), 'ascend');
+			tt = t(rt);
+			yt = yy(rt);
 
-            rs = sort(r(numTrain + 1:end), 'ascend');
-            ts = t(rs);
-            ys = yy(rs);
+			rs = sort(r(numTrain + 1:end), 'ascend');
+			ts = t(rs);
+			ys = yy(rs);
 
-        case 'beforeafter'
-            t = (1:2 * numTrain + numTest)';
-            yy = y(spns(i):spns(i) + 2 * numTrain + numTest - 1);
+		case 'beforeafter'
+			t = (1:2 * numTrain + numTest)';
+			yy = y(spns(i):spns(i) + 2 * numTrain + numTest - 1);
 
-            rt = [1:numTrain, numTrain + numTest + 1:numTrain * 2 + numTest];
-            tt = t(rt);
-            yt = yy(rt);
+			rt = [1:numTrain, numTrain + numTest + 1:numTrain * 2 + numTest];
+			tt = t(rt);
+			yt = yy(rt);
 
-            rs = (numTrain + 1:numTrain + numTest);
-            ts = t(rs);
-            ys = yy(rs);
+			rs = (numTrain + 1:numTrain + numTest);
+			ts = t(rs);
+			ys = yy(rs);
 
-        otherwise
-            error('Unknown prediction mode ''%s''', pmode);
-    end
+		otherwise
+			error('Unknown prediction mode ''%s''', pmode);
+	end
 
-    % Process to normalize scales
-    ys = (ys - mean(yt)) / std(yt); % same transformation as training set
-    yt = (yt - mean(yt)) / std(yt); % zscore training set
+	% Process to normalize scales
+	ys = (ys - mean(yt)) / std(yt); % same transformation as training set
+	yt = (yt - mean(yt)) / std(yt); % zscore training set
 
-    % ------------------------------------------------------------------------------
-    %% (1) Learn hyperparameters from training set (t)
-    % ------------------------------------------------------------------------------
+	% ------------------------------------------------------------------------------
+	%% (1) Learn hyperparameters from training set (t)
+	% ------------------------------------------------------------------------------
 
-    % Initialize mean and likelihood
-    hyp.mean = []; hyp.lik = log(0.1);
-    hyp.cov = [];
+	% Initialize mean and likelihood
+	hyp.mean = []; hyp.lik = log(0.1);
+	hyp.cov = [];
 
-    % loghyper = MF_GP_LearnHyperp(covFunc,-50,tt,yt);
-    hyp = MF_GP_LearnHyperp(tt, yt, covFunc, meanFunc, likFunc, infAlg, nfevals, hyp);
-    loghyper = hyp.cov;
+	% loghyper = MF_GP_LearnHyperp(covFunc,-50,tt,yt);
+	hyp = MF_GP_LearnHyperp(tt, yt, covFunc, meanFunc, likFunc, infAlg, nfevals, hyp);
+	loghyper = hyp.cov;
 
-    if isnan(loghyper)
-        fprintf(1, 'Unable to learn hyperparameters for this time series\n');
-        out = NaN; return
-    end
+	if isnan(loghyper)
+		fprintf(1, 'Unable to learn hyperparameters for this time series\n');
+		out = NaN; return
+	end
 
-    loghypers(:, i) = loghyper;
+	loghypers(:, i) = loghyper;
 
-    % Get marginal likelihood for this model with hyperparameters optimized
-    % over training data
-    % mlikelihoods(i) = - gpr(loghyper, covFunc, tt, yt);
-    mlikelihoods(i) = -gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt);
+	% Get marginal likelihood for this model with hyperparameters optimized
+	% over training data
+	% mlikelihoods(i) = - gpr(loghyper, covFunc, tt, yt);
+	mlikelihoods(i) = -gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt);
 
-    % ------------------------------------------------------------------------------
-    %% (2) Evaluate at test set (s)
-    % ------------------------------------------------------------------------------
+	% ------------------------------------------------------------------------------
+	%% (2) Evaluate at test set (s)
+	% ------------------------------------------------------------------------------
 
-    % Evaluate at test points based on training time/data, predicting for
-    % test times/data
-    % [mu, S2] = gpr(loghyper, covFunc, tt, yt, ts); % old version
-    [mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt, ts); % evaluate at new time points, ts
+	% Evaluate at test points based on training time/data, predicting for
+	% test times/data
+	% [mu, S2] = gpr(loghyper, covFunc, tt, yt, ts); % old version
+	[mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt, ts); % evaluate at new time points, ts
 
-    % Compare to actual test data --> store in row of errs
-    mus(:, i) = mu; % ~predicted values for time series points
-    stderrs(:, i) = 2 * sqrt(S2); % ~errors on those predictions
-    yss(:, i) = ys;
+	% Compare to actual test data --> store in row of errs
+	mus(:, i) = mu; % ~predicted values for time series points
+	stderrs(:, i) = 2 * sqrt(S2); % ~errors on those predictions
+	yss(:, i) = ys;
 
-    % Plot
-    if doPlot
-        if strcmp(pmode, 'frombefore')
-            plot(tt, yt, '.-k');
-            hold on;
-            plot(ts, ys, '.-b');
-            errorbar(ts, mu, 2 * sqrt(S2), 'm');
-            hold off;
-        else
-            plot(tt, yt, 'ok');
-            hold on;
-            plot(ts, ys, 'ob');
-            errorbar(ts, mu, 2 * sqrt(S2), 'm');
-            hold off;
-        end
-    end
+	% Plot
+	if doPlot
+		if strcmp(pmode, 'frombefore')
+			plot(tt, yt, '.-k');
+			hold on;
+			plot(ts, ys, '.-b');
+			errorbar(ts, mu, 2 * sqrt(S2), 'm');
+			hold off;
+		else
+			plot(tt, yt, 'ok');
+			hold on;
+			plot(ts, ys, 'ob');
+			errorbar(ts, mu, 2 * sqrt(S2), 'm');
+			hold off;
+		end
+	end
 
-    %     for j=1:numTest
-    %         % set up structure output
-    %         err = abs(mu(j)-ys(j))/sqrt(S2(j)); % in units of std at this point
-    %         eval(['out.abserr' num2str(i) '_' num2str(j) ' = err;']);
-    %     end
+	%     for j=1:numTest
+	%         % set up structure output
+	%         err = abs(mu(j)-ys(j))/sqrt(S2(j)); % in units of std at this point
+	%         eval(['out.abserr' num2str(i) '_' num2str(j) ' = err;']);
+	%     end
 
 end
 
@@ -299,8 +299,8 @@ out.minerrbar = min(stderrs(:)); % minimum error bar length
 % ------------------------------------------------------------------------------
 % mean and std for each hyperparameter
 for i = 1:nhps
-    out.(sprintf('meanlogh%u', i)) = mean(loghypers(i, :));
-    out.(sprintf('stdlogh%u', i)) = std(loghypers(i, :));
+	out.(sprintf('meanlogh%u', i)) = mean(loghypers(i, :));
+	out.(sprintf('stdlogh%u', i)) = std(loghypers(i, :));
 end
 
 % ------------------------------------------------------------------------------

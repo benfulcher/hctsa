@@ -59,24 +59,24 @@ function out = EN_SampEn(y, M, r, preProcessHow)
 
 % Check y is a column vector:
 if isempty(y)
-    error('Must input a valid data vector.');
+	error('Must input a valid data vector.');
 end
 if size(y, 1) == 1
-    y = y';
+	y = y';
 end
 
 % Embedding dimension:
 if nargin < 2
-    M = 2;
+	M = 2;
 end
 
 % Tolerance:
 if nargin < 3
-    r = 0.1 * std(y);
+	r = 0.1 * std(y);
 end
 
 if nargin < 4
-    preProcessHow = ''; % don't apply any preprocessing
+	preProcessHow = ''; % don't apply any preprocessing
 end
 
 % -------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ end
 % "Control Entropy: A complexity measure for nonstationary signals"
 % E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
 if ~isempty(preProcessHow)
-    y = BF_PreProcess(y, preProcessHow);
+	y = BF_PreProcess(y, preProcessHow);
 end
 
 % ------------------------------------------------------------------------------
@@ -129,20 +129,20 @@ sampEn = sampEn(1:M + 1); % always that extra one for the M = 0
 % Compute outputs from the code
 % ------------------------------------------------------------------------------
 for i = 1:M + 1
-    % Sample entropy:
-    out.(sprintf('sampen%u', i - 1)) = sampEn(i);
+	% Sample entropy:
+	out.(sprintf('sampen%u', i - 1)) = sampEn(i);
 
-    % Quadratic sample entropy (QSE), Lake (2006):
-    % (allows better comparison across r values)
-    out.(sprintf('quadSampEn%u', i - 1)) = sampEn(i) + log(2 * r);
+	% Quadratic sample entropy (QSE), Lake (2006):
+	% (allows better comparison across r values)
+	out.(sprintf('quadSampEn%u', i - 1)) = sampEn(i) + log(2 * r);
 
-    % COSEn (Lake and Moorman, 2011), doesn't really make sense in general;
-    % especially for z-scored series!:
-    % out.(sprintf('COSEn%u',i)) = sampEn(i) + log(2*r) - log(mean(y));
+	% COSEn (Lake and Moorman, 2011), doesn't really make sense in general;
+	% especially for z-scored series!:
+	% out.(sprintf('COSEn%u',i)) = sampEn(i) + log(2*r) - log(mean(y));
 end
 
 if M > 1
-    out.meanchsampen = mean(diff(sampEn));
+	out.meanchsampen = mean(diff(sampEn));
 end
 
 end

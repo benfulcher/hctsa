@@ -58,18 +58,18 @@ doPlot = false; % plot outputs
 % Set defaults:
 % -------------------------------------------------------------------------------
 if nargin < 2 || isempty(maxd)
-    maxd = 10; % do 10 by default
+	maxd = 10; % do 10 by default
 end
 % -------------------------------------------------------------------------------
 
 ms = zeros(maxd, 1);
 for i = 1:maxd
-    ms(i) = SY_StdNthDer(y, i);
+	ms(i) = SY_StdNthDer(y, i);
 end
 
 if doPlot
-    figure('color', 'w'); box('on');
-    plot(ms, 'o-k')
+	figure('color', 'w'); box('on');
+	plot(ms, 'o-k')
 end
 
 % Fit exponential growth/decay using the Curve-Fitting Toolbox

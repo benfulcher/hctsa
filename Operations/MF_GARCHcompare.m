@@ -70,26 +70,26 @@ BF_CheckToolbox('econometrics_toolbox');
 %% Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(preProc)
-    preProc = 'none';
+	preProc = 'none';
 end
 
 % GARCH (p) ARCH (q) parameters
 if nargin < 3 || isempty(pr)
-    pr = (1:3); % i.e., GARCH(1:3,qr)
+	pr = (1:3); % i.e., GARCH(1:3,qr)
 end
 
 if nargin < 4 || isempty(qr)
-    qr = (1:3); % i.e., GARCH(pr,1:3);
+	qr = (1:3); % i.e., GARCH(pr,1:3);
 end
 
 % randomSeed: how to treat the randomization (in BF_Whiten)
 if nargin < 5
-    randomSeed = [];
+	randomSeed = [];
 end
 
 % beVocal: whether to speak to the command line
 if nargin < 6
-    beVocal = 0; % (no by default)
+	beVocal = 0; % (no by default)
 end
 
 % ------------------------------------------------------------------------------
@@ -158,72 +158,72 @@ maxlbqps = NaN * ones(np, nq); % maximum p-value over 20 lags from Q-test on squ
 isBad = zeros(np, nq);
 
 for i = 1:np
-    p = pr(i); % garch order
-    for j = 1:nq
-        q = qr(j); % arch order
+	p = pr(i); % garch order
+	for j = 1:nq
+		q = qr(j); % arch order
 
-        % (i) specify a zero-mean, Gaussian innovation GARCH(P,Q) model.
-        GModel = garch(p, q);
-        GModel.Constant = NaN;
+		% (i) specify a zero-mean, Gaussian innovation GARCH(P,Q) model.
+		GModel = garch(p, q);
+		GModel.Constant = NaN;
 
-        % (ii) fit the model
-        [Gfit, estParamCov, LLF, info] = estimate(GModel, y, 'Display', 'off');
-        % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
+		% (ii) fit the model
+		[Gfit, estParamCov, LLF, info] = estimate(GModel, y, 'Display', 'off');
+		% [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
 
-        numParams = sum(any(estParamCov)); % number of parameters
-        if numParams < p + q + 1
-            if beVocal
-                fprintf(1, 'Bad fit at p = %u, q = %u\n', p, q);
-            end
-            isBad(i, j) = 1;
-            continue; % didn't fit successfully; everything stays NaN
-        end
+		numParams = sum(any(estParamCov)); % number of parameters
+		if numParams < p + q + 1
+			if beVocal
+				fprintf(1, 'Bad fit at p = %u, q = %u\n', p, q);
+			end
+			isBad(i, j) = 1;
+			continue; % didn't fit successfully; everything stays NaN
+		end
 
-        % (iii) store derived statistics on the fitted model
-        LLFs(i, j) = LLF;
-        [AIC, BIC] = aicbic(LLF, numParams, N); % aic and bic of fit
-        AICs(i, j) = AIC;
-        BICs(i, j) = BIC;
-        Ks(i, j) = Gfit.Constant;
+		% (iii) store derived statistics on the fitted model
+		LLFs(i, j) = LLF;
+		[AIC, BIC] = aicbic(LLF, numParams, N); % aic and bic of fit
+		AICs(i, j) = AIC;
+		BICs(i, j) = BIC;
+		Ks(i, j) = Gfit.Constant;
 
-        % (iv) store summaries of standardized errors
-        %    (less need to compare to original because now we're only
-        %    comparing *between* models, which should all have the same
-        %    baseline...?) It's just that the absolute values of these
-        %    summaries are less meaningful; should be with respect to the
-        %    original time series
-        innovations = (y - Gfit.Offset); % residuals (departures from mean process)
-        [sigmas, logL] = infer(Gfit, y); % estimate time series of conditional variance, sigmas
-        stde = innovations ./ sqrt(sigmas); % standardized residuals
-        stde2 = stde.^2; % squared
+		% (iv) store summaries of standardized errors
+		%    (less need to compare to original because now we're only
+		%    comparing *between* models, which should all have the same
+		%    baseline...?) It's just that the absolute values of these
+		%    summaries are less meaningful; should be with respect to the
+		%    original time series
+		innovations = (y - Gfit.Offset); % residuals (departures from mean process)
+		[sigmas, logL] = infer(Gfit, y); % estimate time series of conditional variance, sigmas
+		stde = innovations ./ sqrt(sigmas); % standardized residuals
+		stde2 = stde.^2; % squared
 
-        % (i) Engle's ARCH test
-        %       look at autoregressive lags 1:20
-        [Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde, 'lags', 1:20, 'alpha', 0.1);
+		% (i) Engle's ARCH test
+		%       look at autoregressive lags 1:20
+		[Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde, 'lags', 1:20, 'alpha', 0.1);
 
-        meanarchps(i, j) = mean(Engle_pValue_stde);
-        maxarchps(i, j) = max(Engle_pValue_stde);
+		meanarchps(i, j) = mean(Engle_pValue_stde);
+		maxarchps(i, j) = max(Engle_pValue_stde);
 
-        % (ii) Ljung-Box Q-test
-        %       look at autocorrelation at lags 1:20
-        %       use the 10% significance level
-        %       departure from randomness hypothesis test
-        [lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2, 'lags', 1:20, 'alpha', 0.1);
+		% (ii) Ljung-Box Q-test
+		%       look at autocorrelation at lags 1:20
+		%       use the 10% significance level
+		%       departure from randomness hypothesis test
+		[lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2, 'lags', 1:20, 'alpha', 0.1);
 
-        meanlbqps(i, j) = mean(lbq_pValue_stde2);
-        maxlbqps(i, j) = max(lbq_pValue_stde2);
+		meanlbqps(i, j) = mean(lbq_pValue_stde2);
+		maxlbqps(i, j) = max(lbq_pValue_stde2);
 
-        % Difficult to take parameter values since their number if
-        % changing...
-    end
+		% Difficult to take parameter values since their number if
+		% changing...
+	end
 end
 
 % Check if fits went well...
 if all(isBad(:))
-    % Nothing fit well! Output a NaN:
-    warning('None of the ARCH or GARCH models could be fit.')
-    out = NaN;
-    return
+	% Nothing fit well! Output a NaN:
+	warning('None of the ARCH or GARCH models could be fit.')
+	out = NaN;
+	return
 end
 
 % ------------------------------------------------------------------------------

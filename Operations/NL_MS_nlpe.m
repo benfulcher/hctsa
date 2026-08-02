@@ -52,7 +52,7 @@ function out = NL_MS_nlpe(y, de, tau, maxN)
 % ------------------------------------------------------------------------------
 
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored')
+	warning('The input time series should be z-scored')
 end
 
 N = length(y); % time-series length
@@ -62,47 +62,47 @@ N = length(y); % time-series length
 % ------------------------------------------------------------------------------
 % Embedding dimension:
 if nargin < 2 || isempty(de)
-    de = 3;
+	de = 3;
 end
 
 % Time-delay, tau
 if nargin < 3 || isempty(tau)
-    tau = 1;
+	tau = 1;
 end
 if strcmp(tau, 'ac')
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 elseif strcmp(tau, 'mi')
-    tau = CO_FirstMin(y, 'mi');
+	tau = CO_FirstMin(y, 'mi');
 end
 if isnan(tau)
-    error('Time series cannot be embedded (too short?)');
+	error('Time series cannot be embedded (too short?)');
 end
 
 if nargin < 4 || isempty(maxN)
-    % Set a maximum time-series length to analyze, due to memory constraints
-    % with longer time series
-    maxN = 5000;
+	% Set a maximum time-series length to analyze, due to memory constraints
+	% with longer time series
+	maxN = 5000;
 end
 % -------------------------------------------------------------------------------
 
 % nlpe can cause memory pains for long time series
 % Let's do this dirty cheat
 if N > maxN
-    % Crop the time series to the first maxN samples:
-    y = y(1:maxN);
-    fprintf(1, ['Michael Small''s ''nlpe'' code is only being evaluated ' ...
-                'on the first %u (/%u) time-series samples...\n'], maxN, N);
-    N = maxN;
+	% Crop the time series to the first maxN samples:
+	y = y(1:maxN);
+	fprintf(1, ['Michael Small''s ''nlpe'' code is only being evaluated ' ...
+				'on the first %u (/%u) time-series samples...\n'], maxN, N);
+	N = maxN;
 end
 if N < 20 % Short time series cause problems:
-    fprintf(1, 'Time series (N = %u) is too short.\n', length(y));
-    out = NaN; return
+	fprintf(1, 'Time series (N = %u) is too short.\n', length(y));
+	out = NaN; return
 end
 
 % -------------------------------------------------------------------------------
 % Do false nearest neighbours to compute an appropriate embedding dimension, if needed
 if strcmp(de, 'fnn')
-    de = NL_MS_fnn(y, 1:10, tau, 5, 1, 1, 0.05);
+	de = NL_MS_fnn(y, 1:10, tau, 5, 1, 1, 0.05);
 end
 
 % -------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ residstats = MF_ResidualAnalysis(res);
 % Convert output of residual analysis to local outputs in quick loop
 fields = fieldnames(residstats);
 for k = 1:length(fields);
-    out.(fields{k}) = residstats.(fields{k});
+	out.(fields{k}) = residstats.(fields{k});
 end
 
 end

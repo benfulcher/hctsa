@@ -51,9 +51,9 @@ function out = TSTL_delaytime(y, maxDelay, past, randomSeed)
 % ------------------------------------------------------------------------------
 N = length(y); % length of time series
 try
-    s = signal(y); % convert to a signal for TSTOOL
+	s = signal(y); % convert to a signal for TSTOOL
 catch
-    error('Error converting time series to signal class using TSTOOL function ''signal''')
+	error('Error converting time series to signal class using TSTOOL function ''signal''')
 end
 
 % ------------------------------------------------------------------------------
@@ -61,25 +61,25 @@ end
 % ------------------------------------------------------------------------------
 % (1) Maximum delay, maxDelay
 if nargin < 2 || isempty(maxDelay)
-    maxDelay = 0.2; % 1/5 the length of the time series
+	maxDelay = 0.2; % 1/5 the length of the time series
 end
 if maxDelay < 1 && maxDelay > 0
-    maxDelay = round(N * maxDelay); % specify a proportion of time series length
+	maxDelay = round(N * maxDelay); % specify a proportion of time series length
 end
 
 if maxDelay < 10
-    maxDelay = 10;
-    fprintf(1, 'Max delay set to its minimum: delaytime = 10\n');
+	maxDelay = 10;
+	fprintf(1, 'Max delay set to its minimum: delaytime = 10\n');
 end
 if maxDelay >= N / 2
-    % Heuristic for appropriate time delay
-    warning('Max delay, %u, too long for time series of length %u', maxDelay, N)
-    out = NaN; return
+	% Heuristic for appropriate time delay
+	warning('Max delay, %u, too long for time series of length %u', maxDelay, N)
+	out = NaN; return
 end
 
 % randomSeed: how to treat the randomization
 if nargin < 4
-    randomSeed = [];
+	randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------

@@ -70,40 +70,40 @@ function out = NL_MS_fnn(y, de, tau, th, kth, justBest, bestp)
 % ------------------------------------------------------------------------------
 % Embedding dimension(s), de
 if nargin < 2 || isempty(de)
-    de = (1:10);
+	de = (1:10);
 end
 
 % Time delay, tau
 if nargin < 3 || isempty(tau)
-    tau = 1;
+	tau = 1;
 end
 if strcmp(tau, 'ac')
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete'); % first zero-crossing of autocorrelation function
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete'); % first zero-crossing of autocorrelation function
 elseif strcmp(tau, 'mi')
-    tau = CO_FirstMin(y, 'mi'); % first minimum of automutual information function
+	tau = CO_FirstMin(y, 'mi'); % first minimum of automutual information function
 end
 if isnan(tau)
-    error('Time series too short for fnn');
+	error('Time series too short for fnn');
 end
 
 % A distance threshold for neighbours
 if nargin < 4
-    th = 5;
+	th = 5;
 end
 
 % Distance to next points
 if nargin < 5
-    kth = 1;
+	kth = 1;
 end
 
 % (Actually better to use MS_unfolding now -- does a near-identical thing
 % to this...)
 if nargin < 6 || isempty(justBest)
-    justBest = 0;
+	justBest = 0;
 end
 
 if nargin < 7 || isempty(bestp)
-    bestp = 0.1; % first time under 10% of neighest neighbours
+	bestp = 0.1; % first time under 10% of neighest neighbours
 end
 
 % ------------------------------------------------------------------------------
@@ -119,39 +119,39 @@ p = MS_fnn(y, de, tau, th, kth);
 % dimensions) as vectors
 
 if justBest
-    % We just want a scalar to choose the embedding with
-    out = firstunderf(bestp);
-    return
+	% We just want a scalar to choose the embedding with
+	out = firstunderf(bestp);
+	return
 else
-    % Output all of them
-    for i = 1:length(de)
-        out.(sprintf('pfnn_%u', de(i))) = p(i);
-    end
+	% Output all of them
+	for i = 1:length(de)
+		out.(sprintf('pfnn_%u', de(i))) = p(i);
+	end
 
-    % Output mean
-    out.meanpfnn = mean(p);
+	% Output mean
+	out.meanpfnn = mean(p);
 
-    % Standard deviation
-    out.stdpfnn = std(p);
+	% Standard deviation
+	out.stdpfnn = std(p);
 
-    % Find embedding dimension for the first time p goes under x%
-    out.firstunder02 = firstunderf(0.2); % 20%
-    out.firstunder01 = firstunderf(0.1); % 10%
-    out.firstunder005 = firstunderf(0.05); % 5%
-    out.firstunder002 = firstunderf(0.02); % 2%
-    out.firstunder001 = firstunderf(0.01); % 1%
+	% Find embedding dimension for the first time p goes under x%
+	out.firstunder02 = firstunderf(0.2); % 20%
+	out.firstunder01 = firstunderf(0.1); % 10%
+	out.firstunder005 = firstunderf(0.05); % 5%
+	out.firstunder002 = firstunderf(0.02); % 2%
+	out.firstunder001 = firstunderf(0.01); % 1%
 
-    % Maximum step-wise change across p
-    out.max1stepchange = max(abs(diff(p)));
+	% Maximum step-wise change across p
+	out.max1stepchange = max(abs(diff(p)));
 end
 
 % ------------------------------------------------------------------------------
 function firsti = firstunderf(x)
-    %% Find de for the first time p goes under x%
-    firsti = de(find(p < x, 1, 'first'));
-    if isempty(firsti)
-        firsti = de(end) + 1;
-    end
+	%% Find de for the first time p goes under x%
+	firsti = de(find(p < x, 1, 'first'));
+	if isempty(firsti)
+		firsti = de(end) + 1;
+	end
 end
 
 end

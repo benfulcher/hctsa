@@ -61,18 +61,18 @@ doPlot = false; % can set to 1 to plot outputs
 % ------------------------------------------------------------------------------
 % Check that the time series is z-scored (just a warning)
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored')
+	warning('The input time series should be z-scored')
 end
 
 if nargin < 2 || isempty(a)
-    a = 1; % set default
+	a = 1; % set default
 end
 
 if nargin < 2 || isempty(b)
-    b = 0.1; % set default
+	b = 0.1; % set default
 end
 if (b < 0) || (b > 1)
-    error('The decay proportion, b, should be between 0 and 1');
+	error('The decay proportion, b, should be between 0 and 1');
 end
 
 % ------------------------------------------------------------------------------
@@ -93,21 +93,21 @@ kicks = zeros(N, 1);
 q(1) = 1; % begin at sigma
 
 for i = 2:N
-    if y(i) > q(i - 1) % Extreme event -- time series value more extreme than the barrier
-        % q(i) = (1+a)*q(i-1); % increase barrier by proportion a
-        q(i) = (1 + a) * y(i); % increase barrier above the new observation by a factor a
-        kicks(i) = q(i) - q(i - 1); % The size of the increase
-    else
-        q(i) = (1 - b) * q(i - 1); % Decrease barrier by proportion b
-    end
+	if y(i) > q(i - 1) % Extreme event -- time series value more extreme than the barrier
+		% q(i) = (1+a)*q(i-1); % increase barrier by proportion a
+		q(i) = (1 + a) * y(i); % increase barrier above the new observation by a factor a
+		kicks(i) = q(i) - q(i - 1); % The size of the increase
+	else
+		q(i) = (1 - b) * q(i - 1); % Decrease barrier by proportion b
+	end
 end
 
 if doPlot
-    figure('color', 'w'); box('on')
-    hold('on')
-    plot(y, '.-k')
-    plot(q, '--r')
-    hold('off')
+	figure('color', 'w'); box('on')
+	hold('on')
+	plot(y, '.-k')
+	plot(q, '--r')
+	hold('off')
 end
 
 % ------------------------------------------------------------------------------

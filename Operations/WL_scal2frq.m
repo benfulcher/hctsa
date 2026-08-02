@@ -64,26 +64,26 @@ N = length(y); % length of the time series
 %% Check Inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(wname)
-    fprintf(1, 'Wavelet not specified -- using the default db3 wavelet\n');
-    wname = 'db3';
+	fprintf(1, 'Wavelet not specified -- using the default db3 wavelet\n');
+	wname = 'db3';
 end
 
 if nargin < 3 || isempty(amax)
-    amax = 5; % maximum 'scale'
+	amax = 5; % maximum 'scale'
 end
 maxlevel = wmaxlev(N, wname); % maximum level for this time-series length
 if strcmp(amax, 'max') % set to maximum for this wavelet
-    amax = wmaxlev(N, wname);
+	amax = wmaxlev(N, wname);
 end
 
 if nargin < 4 || isempty(delta)
-    delta = 1; % the sampling period
+	delta = 1; % the sampling period
 end
 
 if maxlevel < amax
-    fprintf(1, 'Chosen level (%u) is too large for this wavelet on this signal...', amax);
-    amax = maxlevel;
-    fprintf(1, ' changed to maximum level computed with wmaxlev: %u\n', amax);
+	fprintf(1, 'Chosen level (%u) is too large for this wavelet on this signal...', amax);
+	amax = maxlevel;
+	fprintf(1, ' changed to maximum level computed with wmaxlev: %u\n', amax);
 end
 
 % ------------------------------------------------------------------------------
@@ -115,8 +115,8 @@ per = 1 ./ f;
 stdc = wnoisest(c, l, scales);
 
 if doplot
-    figure('color', 'w'); box('on');
-    plot(stdc, 'k') % plot them
+	figure('color', 'w'); box('on');
+	plot(stdc, 'k') % plot them
 end
 
 % Compute identified period.

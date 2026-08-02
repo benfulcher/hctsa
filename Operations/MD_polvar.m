@@ -61,12 +61,12 @@ function p = MD_polvar(x, d, D)
 
 % coding time difference, d
 if nargin < 2 || isempty(d)
-    d = 1;
+	d = 1;
 end
 
 % Word length, D
 if nargin < 3 || isempty(D)
-    D = 6;   % Look for symbol words of this default length
+	D = 6;   % Look for symbol words of this default length
 end
 
 % ------------------------------------------------------------------------------
@@ -86,14 +86,14 @@ pc = 0;
 
 % seqcnt = 0;
 while (i <= (N - D))
-    xseq = xsym(i:(i + D - 1));
-    %    seqcnt = seqcnt + 1;
-    if (sum(xseq == zseq) == D) || (sum(xseq == oseq) == D)
-        pc = pc + 1;
-        i  = i + D;
-    else
-        i = i + 1;
-    end
+	xseq = xsym(i:(i + D - 1));
+	%    seqcnt = seqcnt + 1;
+	if (sum(xseq == zseq) == D) || (sum(xseq == oseq) == D)
+		pc = pc + 1;
+		i  = i + D;
+	else
+		i = i + 1;
+	end
 end
 
 p = pc / N;

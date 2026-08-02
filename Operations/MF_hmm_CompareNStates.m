@@ -60,18 +60,18 @@ function out = MF_hmm_CompareNStates(y, trainp, nstater, randomSeed)
 N = length(y); % number of samples in time series
 
 if nargin < 2 || isempty(trainp)
-    fprintf(1, 'Training the model on 60%% of the data by default\n');
-    trainp = 0.6; % train on 60% of the data
+	fprintf(1, 'Training the model on 60%% of the data by default\n');
+	trainp = 0.6; % train on 60% of the data
 end
 Ntrain = floor(trainp * N); % number of initial samples to train the model on
 
 if nargin < 3 || isempty(nstater)
-    fprintf(1, 'Using 2--4 states by default\n');
-    nstater = (2:4); % use 2:4 states
+	fprintf(1, 'Using 2--4 states by default\n');
+	nstater = (2:4); % use 2:4 states
 end
 
 if nargin < 4
-    randomSeed = [];
+	randomSeed = [];
 end
 
 % -------------------------------------------------------------------------------
@@ -85,8 +85,8 @@ BF_ResetSeed(randomSeed); % reset the random seed if specified
 % Divide up dataset into training (yTrain) and test (yTest) portions
 yTrain = y(1:Ntrain);
 if Ntrain < N
-    yTest = y(Ntrain + 1:end);
-    Ntest = length(yTest);
+	yTest = y(Ntrain + 1:end);
+	Ntest = length(yTest);
 end
 
 Nstate = length(nstater);
@@ -94,17 +94,17 @@ LLtrains = zeros(Nstate, 1);
 LLtests = zeros(Nstate, 1);
 
 for j = 1:Nstate
-    numStates = nstater(j);
-    % train HMM with <numStates> states for 30 cycles of EM (or until
-    % convergence); default termination tolerance
-    [Mu, Cov, P, Pi, LL] = ZG_hmm(yTrain, Ntrain, numStates, 30);
+	numStates = nstater(j);
+	% train HMM with <numStates> states for 30 cycles of EM (or until
+	% convergence); default termination tolerance
+	[Mu, Cov, P, Pi, LL] = ZG_hmm(yTrain, Ntrain, numStates, 30);
 
-    LLtrains(j) = LL(end) / Ntrain;
+	LLtrains(j) = LL(end) / Ntrain;
 
-    %% Calculate log likelihood for the test data
-    lik = ZG_hmm_cl(yTest, Ntest, numStates, Mu, Cov, P, Pi);
+	%% Calculate log likelihood for the test data
+	lik = ZG_hmm_cl(yTest, Ntest, numStates, Mu, Cov, P, Pi);
 
-    LLtests(j) = lik / Ntest;
+	LLtests(j) = lik / Ntest;
 end
 
 %% Output some statistics
@@ -117,7 +117,7 @@ out.chLLtest = LLtests(end) - LLtests(1);
 out.meandiffLLtt = mean(abs(LLtests - LLtrains));
 
 for i = 1:Nstate - 1
-    out.(sprintf('LLtestdiff%u', i)) = LLtests(i + 1) - LLtests(i);
+	out.(sprintf('LLtestdiff%u', i)) = LLtests(i + 1) - LLtests(i);
 end
 
 end

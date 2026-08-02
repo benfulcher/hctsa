@@ -48,12 +48,12 @@ function out = WL_cwt(y, wname, maxScale)
 %% Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(wname)
-    wname = 'db3';
-    fprintf(1, 'Using default wavelet ''%s''\n', wname);
+	wname = 'db3';
+	fprintf(1, 'Using default wavelet ''%s''\n', wname);
 end
 if nargin < 3 || isempty(maxScale)
-    maxScale = 32;
-    fprintf(1, 'Using default maxScale of %u\n', maxScale);
+	maxScale = 32;
+	fprintf(1, 'Using default maxScale of %u\n', maxScale);
 end
 
 % ------------------------------------------------------------------------------
@@ -74,11 +74,11 @@ SC = 100 * S ./ sum(S(:)); % scaled power is length-dependent
 % displayed in a scalogram (c.f., wscalogram function)
 
 if doPlot
-    figure('color', 'w'); box('on');
-    subplot(3, 1, 1)
-    plot(y);
-    subplot(3, 1, 2:3);
-    pcolor(SC); shading interp;
+	figure('color', 'w'); box('on');
+	subplot(3, 1, 1)
+	plot(y);
+	subplot(3, 1, 2:3);
+	pcolor(SC); shading interp;
 end
 
 % ------------------------------------------------------------------------------
@@ -112,8 +112,8 @@ out.pover80 = poverfn(0.80);
 % Fit using Statistics Toolbox
 
 if doPlot
-    figure('color', 'w');
-    ksdensity(SC(:));
+	figure('color', 'w');
+	ksdensity(SC(:));
 end
 
 gamma_phat = gamfit(SC(:));
@@ -138,14 +138,14 @@ out.SC_h = -sum(SC_a .* log(SC_a));
 % average, ...)
 numBoxes = 10;
 if N < numBoxes
-    error('Time series too short');
+	error('Time series too short');
 end
 dd_SC = zeros(maxScale, numBoxes);
 cutoffs = round(linspace(0, N, numBoxes + 1));
 for i = 1:maxScale
-    for j = 1:numBoxes
-        dd_SC(i, j) = max(SC(i, cutoffs(j) + 1:cutoffs(j + 1)));
-    end
+	for j = 1:numBoxes
+		dd_SC(i, j) = max(SC(i, cutoffs(j) + 1:cutoffs(j + 1)));
+	end
 end
 
 % Turn into probabilities
@@ -193,8 +193,8 @@ SCs{4} = SC(:, floor(3 * N / 5) + 1:floor(4 * N / 5));
 SCs{5} = SC(:, floor(4 * N / 5) + 1:end);
 
 for i = 1:5
-    out.(sprintf('mean5_%u', i)) = mean(SCs{i}(:));
-    out.(sprintf('std5_%u', i)) = std(SCs{i}(:));
+	out.(sprintf('mean5_%u', i)) = mean(SCs{i}(:));
+	out.(sprintf('std5_%u', i)) = std(SCs{i}(:));
 end
 
 out.stat_5_m_s = mean([out.std5_1, out.std5_2, out.std5_3, out.std5_4, out.std5_5]) / mean(SC(:));

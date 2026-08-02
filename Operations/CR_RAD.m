@@ -18,24 +18,24 @@ function f = CR_RAD(x, tau, doAbs)
 % Check inputs, set defaults
 % -------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
-    tau = 1;
+	tau = 1;
 end
 if nargin < 3 || isempty(doAbs)
-    doAbs = true;
+	doAbs = true;
 end
 % -------------------------------------------------------------------------------
 % Basic checks & preprocessing
 % -------------------------------------------------------------------------------
 if isrow(x)
-    x = x';
+	x = x';
 end
 if doAbs
-    x = x - median(x);
-    x = abs(x);
+	x = x - median(x);
+	x = abs(x);
 end
 if ischar(tau) && strcmp(tau, 'tau')
-    % Make tau the first zero crossing of the autocorrelation function
-    tau = CO_FirstCrossing(x, 'ac', 0, 'discrete');
+	% Make tau the first zero crossing of the autocorrelation function
+	tau = CO_FirstCrossing(x, 'ac', 0, 'discrete');
 end
 % -------------------------------------------------------------------------------
 

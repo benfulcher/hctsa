@@ -47,11 +47,11 @@ function out = EN_PermEn(y, m, tau)
 % -------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(m)
-    m = 2; % order 2
+	m = 2; % order 2
 end
 
 if nargin < 3 || isempty(tau)
-    tau = 1;
+	tau = 1;
 end
 
 % ------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ end
 x = BF_Embed(y, tau, m, 0);
 Nx = size(x, 1); % number of embedding vectors produced
 if Nx < 5 % need at least 5 embedding vectors to actually do a computation
-    error('Time series too short to embed');
+	error('Time series too short to embed');
 end
 % Generate permutations up to the embedding dimension, m:
 permList = perms(1:m);
@@ -78,19 +78,19 @@ countPerms = zeros(numPerms, 1);
 % find the same row that the original linear scan would have:
 permKeys = cell(numPerms, 1);
 for k = 1:numPerms
-    permKeys{k} = sprintf('%d,', permList(k, :));
+	permKeys{k} = sprintf('%d,', permList(k, :));
 end
 permIndexMap = containers.Map(permKeys, num2cell(1:numPerms));
 
 % Count each type of permutation through the time series
 for j = 1:Nx
 
-    % Get the permutation for this local time-series segment:
-    [~, ix] = sort(x(j, :));
+	% Get the permutation for this local time-series segment:
+	[~, ix] = sort(x(j, :));
 
-    % Match this to one of the permutations:
-    thisPerm = permIndexMap(sprintf('%d,', ix));
-    countPerms(thisPerm) = countPerms(thisPerm) + 1;
+	% Match this to one of the permutations:
+	thisPerm = permIndexMap(sprintf('%d,', ix));
+	countPerms(thisPerm) = countPerms(thisPerm) + 1;
 end
 
 % ------------------------------------------------------------------------------

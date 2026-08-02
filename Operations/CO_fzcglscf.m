@@ -47,25 +47,25 @@ function out = CO_fzcglscf(y, alpha, beta, maxtau)
 N = length(y); % the length of the time series
 
 if nargin < 4 || isempty(maxtau)
-    maxtau = N;
-    % maxtau = 400; % searches up to this maximum time lag
-    % maxtau = min(maxtau,N); % make sure no longer than the time series itself
+	maxtau = N;
+	% maxtau = 400; % searches up to this maximum time lag
+	% maxtau = min(maxtau,N); % make sure no longer than the time series itself
 end
 
 glscfs = zeros(maxtau, 1);
 
 for i = 1:maxtau
-    tau = i;
-    % y1 = abs(y(1:end-tau));
-    % y2 = abs(y(1+tau:end));
+	tau = i;
+	% y1 = abs(y(1:end-tau));
+	% y2 = abs(y(1+tau:end));
 
-    glscfs(i) = CO_glscf(y, alpha, beta, tau);
+	glscfs(i) = CO_glscf(y, alpha, beta, tau);
 
-    if (i > 1) && (glscfs(i) * glscfs(i - 1) < 0)
-        % Draw a straight line between these two and look at where hits zero
-        out = i - 1 + glscfs(i) / (glscfs(i) - glscfs(i - 1));
-        return
-    end
+	if (i > 1) && (glscfs(i) * glscfs(i - 1) < 0)
+		% Draw a straight line between these two and look at where hits zero
+		out = i - 1 + glscfs(i) / (glscfs(i) - glscfs(i - 1));
+		return
+	end
 end
 
 out = maxtau; % if the function hasn't exited yet, set output to maxtau

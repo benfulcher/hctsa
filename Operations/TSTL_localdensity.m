@@ -56,16 +56,16 @@ function out = TSTL_localdensity(y, NNR, past, embedParams)
 %% Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(NNR)
-    NNR = 3; % 3 nearest neighbours
+	NNR = 3; % 3 nearest neighbours
 end
 
 if nargin < 3 || isempty(past)
-    past = 40;
+	past = 40;
 end
 
 if nargin < 4 || isempty(embedParams)
-    embedParams = {'ac', 'fnnmar'};
-    fprintf(1, 'Using default embedding using autocorrelation and cao''s method.\n');
+	embedParams = {'ac', 'fnnmar'};
+	fprintf(1, 'Using default embedding using autocorrelation and cao''s method.\n');
 end
 
 % ------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ end
 s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
 
 if ~isa(s, 'signal') && isnan(s); % embedding failed
-    error('Embedding failed.')
+	error('Embedding failed.')
 end
 
 % ------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ rs = localdensity(s, NNR, past);
 % ------------------------------------------------------------------------------
 locden = data(rs);
 if all(locden == 0)
-    out = NaN; return
+	out = NaN; return
 end
 % locden is a vector of length equal to the number of points in the
 % embedding space (length of time series - m + 1), presumably the local
@@ -103,7 +103,7 @@ out.medianden = median(locden);
 
 F_acden = @(x) CO_AutoCorr(locden, x, 'Fourier'); % autocorrelation of locden for 1:5
 for i = 1:5
-    out.(sprintf('ac%uden', i)) = F_acden(i);
+	out.(sprintf('ac%uden', i)) = F_acden(i);
 end
 
 % Estimates of correlation length:

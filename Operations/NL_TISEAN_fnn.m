@@ -64,47 +64,47 @@ doPlot = false; % can turn on to see plotted summaries
 %% Check inputs / set defaults
 % ------------------------------------------------------------------------------
 if nargin < 1
-    error('Input a time series')
+	error('Input a time series')
 end
 N = length(y);
 if N < 10
-    warning('Time series (N=%u) too short for fnn', N);
-    out = NaN; return
+	warning('Time series (N=%u) too short for fnn', N);
+	out = NaN; return
 end
 
 if nargin < 2 || isempty(tau)
-    tau = 1; % time delay
+	tau = 1; % time delay
 end
 if strcmp(tau, 'ac')
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete'); % first zero-crossing of autocorrelation function
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete'); % first zero-crossing of autocorrelation function
 elseif strcmp(tau, 'mi')
-    tau = CO_FirstMin(y, 'mi'); % first minimum of automutual information function
+	tau = CO_FirstMin(y, 'mi'); % first minimum of automutual information function
 end
 if isnan(tau)
-    error('Time series cannot be embedded (too short?)');
+	error('Time series cannot be embedded (too short?)');
 end
 
 % Maximum embedding dimension:
 if nargin < 3
-    maxm = 10;
+	maxm = 10;
 end
 
 % Theiler window:
 if nargin < 4 || isempty(theilerWin)
-    theilerWin = 0.05; % 5% of the time-series length
+	theilerWin = 0.05; % 5% of the time-series length
 end
 if (theilerWin > 0) && (theilerWin < 1) % specify proportion of time-series length
-    theilerWin = round(theilerWin * N);
+	theilerWin = round(theilerWin * N);
 end
 
 % Just return best dimension:
 if nargin < 5 || isempty(justBest)
-    justBest = true; % just return the best embedding dimension
+	justBest = true; % just return the best embedding dimension
 end
 
 % How to return the best embedding dimension:
 if nargin < 6
-    bestp = 0.4; % stop when under 40% false nearest neighbors
+	bestp = 0.4; % stop when under 40% false nearest neighbors
 end
 
 % ------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ delete(filePath) % remove the temporary time-series data file
 
 % Read TISEAN output:
 if isempty(res)
-    error('No output from TISEAN routine false_nearest on the data');
+	error('No output from TISEAN routine false_nearest on the data');
 end
 data = textscan(res, '%u%f%f%f');
 
@@ -138,35 +138,35 @@ nHoodSize2 = data{4}; % average squared size of the neighbourhood
 
 % Check that some data exists:
 if isempty(mDim) || isempty(pNN) || isempty(nHoodSize2)
-    error('Error running TISEAN false_nearest on input data');
+	error('Error running TISEAN false_nearest on input data');
 end
 
 if doPlot
-    f = figure('color', 'w'); box('on'); hold on
-    plot(pNN, 'o-k'); plot(nHoodSize2, 'o-r')
-    legend('pNN', 'mean squared size of neighbourhood')
-    xlabel('Embedding dimension');
+	f = figure('color', 'w'); box('on'); hold on
+	plot(pNN, 'o-k'); plot(nHoodSize2, 'o-r')
+	legend('pNN', 'mean squared size of neighbourhood')
+	xlabel('Embedding dimension');
 end
 
 % ------------------------------------------------------------------------------
 % Output(s)
 % ------------------------------------------------------------------------------
 if justBest
-    % We just want a scalar to choose the embedding with
-    out = firstunderf(bestp, mDim, pNN);
-    return
+	% We just want a scalar to choose the embedding with
+	out = firstunderf(bestp, mDim, pNN);
+	return
 end
 
 % Output all of them
 for i = 1:maxm
-    if i <= length(mDim)
-        out.(sprintf('pfnn_%u', i)) = pNN(i); % proportion of false nearest neighbors
-        out.(sprintf('nHood2_%u', i)) = nHoodSize2(i); % mean squared size of neighbourhood
-    else
-        % Not enough points found to estimate at this dimension
-        out.(sprintf('pfnn_%u', i)) = NaN;
-        out.(sprintf('nHood2_%u', i)) = NaN;
-    end
+	if i <= length(mDim)
+		out.(sprintf('pfnn_%u', i)) = pNN(i); % proportion of false nearest neighbors
+		out.(sprintf('nHood2_%u', i)) = nHoodSize2(i); % mean squared size of neighbourhood
+	else
+		% Not enough points found to estimate at this dimension
+		out.(sprintf('pfnn_%u', i)) = NaN;
+		out.(sprintf('nHood2_%u', i)) = NaN;
+	end
 end
 
 % pNN summaries:
@@ -195,11 +195,11 @@ out.max1stepchange = max(abs(diff(pNN)));
 
 % ------------------------------------------------------------------------------
 function firsti = firstunderf(x, m, p)
-    %% Find m for the first time p goes under x%
-    firsti = m(find(p < x, 1, 'first'));
-    if isempty(firsti)
-        firsti = m(length(m)) + 1;
-    end
+	%% Find m for the first time p goes under x%
+	firsti = m(find(p < x, 1, 'first'));
+	if isempty(firsti)
+		firsti = m(length(m)) + 1;
+	end
 end
 
 end

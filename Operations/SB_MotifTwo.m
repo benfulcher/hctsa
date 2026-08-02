@@ -47,8 +47,8 @@ function out = SB_MotifTwo(y, binarizeHow)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(binarizeHow)
-    % Use changes in the time series as the basis for the transformation
-    binarizeHow = 'diff';
+	% Use changes in the time series as the basis for the transformation
+	binarizeHow = 'diff';
 end
 
 % Generate a binarized version of the input time series:
@@ -58,8 +58,8 @@ yBin = BF_Binarize(y, binarizeHow);
 N = length(yBin);
 
 if N < 5
-    warning('Time series too short');
-    out = NaN; return
+	warning('Time series too short');
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
@@ -207,13 +207,13 @@ out.uuud = mean(r1110);
 out.uuuu = mean(r1111);
 
 pppp = [out.dddd, out.dddu, out.ddud, out.dduu, out.dudd, out.dudu, out.duud, out.duuu, out.uddd, ...
-        out.uddu, out.udud, out.uduu, out.uudd, out.uudu, out.uuud, out.uuuu];
+		out.uddu, out.udud, out.uduu, out.uudd, out.uudu, out.uuud, out.uuuu];
 out.hhhh = f_entropy(pppp);
 
 % -------------------------------------------------------------------------------
 function h = f_entropy(x)
-    % entropy of a set of counts, log(0)=0
-    h = -sum(x(x > 0) .* log(x(x > 0)));
+	% entropy of a set of counts, log(0)=0
+	h = -sum(x(x > 0) .* log(x(x > 0)));
 end
 
 end

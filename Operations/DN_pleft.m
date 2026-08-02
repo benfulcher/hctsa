@@ -43,7 +43,7 @@ function out = DN_pleft(y, th)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(th)
-    th = 0.1; % default
+	th = 0.1; % default
 end
 
 p = quantile(abs(y - mean(y)), 1 - th);

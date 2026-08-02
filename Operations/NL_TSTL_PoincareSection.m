@@ -59,35 +59,35 @@ function out = NL_TSTL_PoincareSection(y, ref, embedParams)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(ref)
-    ref = 'max'; % reference point is the first maximum of the time series
+	ref = 'max'; % reference point is the first maximum of the time series
 end
 
 if nargin < 3 || isempty(embedParams)
-    embedParams = {'mi', 3};
-    fprintf(1, 'Using default embedding settings: minimum of the automutual information for tau and m = 3\n');
+	embedParams = {'mi', 3};
+	fprintf(1, 'Using default embedding settings: minimum of the automutual information for tau and m = 3\n');
 end
 
 if embedParams{2} ~= 3
-    embedParams{2} = 3;
-    fprintf(1, 'Three-dimensional embedding\n');
+	embedParams{2} = 3;
+	fprintf(1, 'Three-dimensional embedding\n');
 end
 
 % set ref
 if ischar(ref)
-    switch ref
-        case 'max'
-            % first local maximum
-            dydt = diff(y);
-            ref = find(dydt(1:end - 1) >= 0 & dydt(2:end) < 0, 1, 'first') + 1;
+	switch ref
+		case 'max'
+			% first local maximum
+			dydt = diff(y);
+			ref = find(dydt(1:end - 1) >= 0 & dydt(2:end) < 0, 1, 'first') + 1;
 
-        case 'min'
-            % first local minimum
-            dydt = diff(y);
-            ref = find(dydt(1:end - 1) <= 0 & dydt(2:end) > 0, 1, 'first') + 1;
+		case 'min'
+			% first local minimum
+			dydt = diff(y);
+			ref = find(dydt(1:end - 1) <= 0 & dydt(2:end) > 0, 1, 'first') + 1;
 
-        otherwise
-            error('Unknown reference setting ''%s''', ref);
-    end
+		otherwise
+			error('Unknown reference setting ''%s''', ref);
+	end
 end
 
 if isempty(ref), out = NaN; return; end % ridiculous
@@ -103,20 +103,20 @@ N = length(y); % length of the time series
 s = BF_Embed(y, embedParams{1}, 3, 1);
 
 if ~isa(s, 'signal') && isnan(s); % embedding failed
-    error('Embedding failed');
+	error('Embedding failed');
 end
 
 % Run external TSTOOL code, poincare:
 try
-    rs = poincare(s, ref);
+	rs = poincare(s, ref);
 catch me
-    if strcmp(me.message, 'No section points found') ...
-            || strcmp(me.identifier, 'MATLAB:badsubscript')
-        fprintf(1, 'No section points found to run NL_TSTL_PoincareSection\n');
-        out = NaN; return
-    else
-        error(me.message)
-    end
+	if strcmp(me.message, 'No section points found') ...
+			|| strcmp(me.identifier, 'MATLAB:badsubscript')
+		fprintf(1, 'No section points found to run NL_TSTL_PoincareSection\n');
+		out = NaN; return
+	else
+		error(me.message)
+	end
 end
 
 % Convert back to Matlab forms
@@ -127,8 +127,8 @@ x = (v(:, 1));
 y = (v(:, 2));
 
 if doPlot
-    figure('color', 'w'); box('on');
-    plot(x, y, '.k'); axis equal
+	figure('color', 'w'); box('on');
+	plot(x, y, '.k'); axis equal
 end
 
 % ------------------------------------------------------------------------------
@@ -201,17 +201,17 @@ numPartitions = [5, 10];
 % (ii) 10 partitions per axis
 
 for i = 1:length(numPartitions)
-    boxcounts = subcountboxes(x, y, numPartitions(i));
-    pbox = boxcounts / NN;
+	boxcounts = subcountboxes(x, y, numPartitions(i));
+	pbox = boxcounts / NN;
 
-    out.(sprintf('maxpbox%u', numPartitions(i))) = max(pbox(:));
-    out.(sprintf('minpbox%u', numPartitions(i))) = min(pbox(:));
-    out.(sprintf('zerospbox%u', numPartitions(i))) = sum(pbox(:) == 0);
-    out.(sprintf('meanpbox%u', numPartitions(i))) = mean(pbox(:));
-    out.(sprintf('rangepbox%u', numPartitions(i))) = range(pbox(:));
-    % This probably needs to be normalized:
-    out.(sprintf('hboxcounts%u', numPartitions(i))) = -sum(pbox(pbox > 0) .* log(pbox(pbox > 0)));
-    out.(sprintf('tracepbox%u', numPartitions(i))) = sum(diag(pbox)); % trace
+	out.(sprintf('maxpbox%u', numPartitions(i))) = max(pbox(:));
+	out.(sprintf('minpbox%u', numPartitions(i))) = min(pbox(:));
+	out.(sprintf('zerospbox%u', numPartitions(i))) = sum(pbox(:) == 0);
+	out.(sprintf('meanpbox%u', numPartitions(i))) = mean(pbox(:));
+	out.(sprintf('rangepbox%u', numPartitions(i))) = range(pbox(:));
+	% This probably needs to be normalized:
+	out.(sprintf('hboxcounts%u', numPartitions(i))) = -sum(pbox(pbox > 0) .* log(pbox(pbox > 0)));
+	out.(sprintf('tracepbox%u', numPartitions(i))) = sum(diag(pbox)); % trace
 end
 
 % NOTE: max and range provide almost the same information on real data.
@@ -222,20 +222,20 @@ end
 
 % ------------------------------------------------------------------------------
 function boxcounts = subcountboxes(x, y, nbox)
-    boxcounts = zeros(nbox);
-    % boxes are quantiles along each axis
-    xbox = quantile(x, linspace(0, 1, nbox + 1));
-    ybox = quantile(y, linspace(0, 1, nbox + 1));
-    xbox(end) = xbox(end) + 1;
-    ybox(end) = ybox(end) + 1;
+	boxcounts = zeros(nbox);
+	% boxes are quantiles along each axis
+	xbox = quantile(x, linspace(0, 1, nbox + 1));
+	ybox = quantile(y, linspace(0, 1, nbox + 1));
+	xbox(end) = xbox(end) + 1;
+	ybox(end) = ybox(end) + 1;
 
-    for ii = 1:nbox % x
-        rx = (x >= xbox(ii) & x < xbox(ii + 1)); % these x are in range
-        for jj = 1:nbox % y
-            % only need to look at those ys for which the xs are in range
-            boxcounts(ii, jj) = sum(y(rx) >= ybox(jj) & y(rx) < ybox(jj + 1));
-        end
-    end
+	for ii = 1:nbox % x
+		rx = (x >= xbox(ii) & x < xbox(ii + 1)); % these x are in range
+		for jj = 1:nbox % y
+			% only need to look at those ys for which the xs are in range
+			boxcounts(ii, jj) = sum(y(rx) >= ybox(jj) & y(rx) < ybox(jj + 1));
+		end
+	end
 end
 % ------------------------------------------------------------------------------
 

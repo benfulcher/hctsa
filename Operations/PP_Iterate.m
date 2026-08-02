@@ -61,65 +61,65 @@ N = length(y); % Length of the input time series
 % ------------------------------------------------------------------------------
 % This information is stored in nRange.
 switch dtMeth
-    case 'spline'
-        nRange = (1:20);
-    case 'diff'
-        nRange = (1:5);
-    case 'medianf'
-        nRange = round(linspace(1, N / 25, 25));
-    case 'rav'
-        nRange = round(linspace(1, N / 25, 25));
-    case 'resampleup'
-        nRange = (1:20);
-    case 'resampledown'
-        nRange = (1:20);
-    otherwise
-        error('Unknown detrending method ''%s''', dtMeth);
+	case 'spline'
+		nRange = (1:20);
+	case 'diff'
+		nRange = (1:5);
+	case 'medianf'
+		nRange = round(linspace(1, N / 25, 25));
+	case 'rav'
+		nRange = round(linspace(1, N / 25, 25));
+	case 'resampleup'
+		nRange = (1:20);
+	case 'resampledown'
+		nRange = (1:20);
+	otherwise
+		error('Unknown detrending method ''%s''', dtMeth);
 end
 
 % ------------------------------------------------------------------------------
 %% Do the progessive processing with running statistical evaluation
 % ------------------------------------------------------------------------------
 if doPlot
-    f = figure('color', 'w'); box('on'); hold on
-    h1 = plot(y, 'k');
+	f = figure('color', 'w'); box('on'); hold on
+	h1 = plot(y, 'k');
 end
 
 outmat = zeros(length(nRange), 10);
 for q = 1:length(nRange)
-    n = nRange(q);
-    switch dtMeth
-        case 'spline' % Spline detrend
-            nknots = n; % progressively make more knots
-            intp = 4; % cubic interpolants
-            spline = spap2(nknots, intp, [1:N]', y); % just a single middle knot with cubic interpolants
-            y_spl = fnval(spline, 1:N); % evaluate at the 1:N time intervals
-            y_d = y - y_spl';
+	n = nRange(q);
+	switch dtMeth
+		case 'spline' % Spline detrend
+			nknots = n; % progressively make more knots
+			intp = 4; % cubic interpolants
+			spline = spap2(nknots, intp, [1:N]', y); % just a single middle knot with cubic interpolants
+			y_spl = fnval(spline, 1:N); % evaluate at the 1:N time intervals
+			y_d = y - y_spl';
 
-        case 'diff' % Differencing
-            ndiffs = n; % progressively difference
-            y_d = diff(y, ndiffs);
+		case 'diff' % Differencing
+			ndiffs = n; % progressively difference
+			y_d = diff(y, ndiffs);
 
-        case 'medianf' % Median Filter; n is the order of filtering
-            y_d = medfilt1(y, n);
+		case 'medianf' % Median Filter; n is the order of filtering
+			y_d = medfilt1(y, n);
 
-        case 'rav' % Running Average; n is the window size
-            y_d = filter(ones(1, n) / n, 1, y);
+		case 'rav' % Running Average; n is the window size
+			y_d = filter(ones(1, n) / n, 1, y);
 
-        case 'resampleup' % upsample
-            y_d = resample(y, n, 1);
+		case 'resampleup' % upsample
+			y_d = resample(y, n, 1);
 
-        case 'resampledown' % downsample
-            y_d = resample(y, 1, n);
-    end
-    outmat(q, :) = doYourCalcThing(y, y_d);
-    if doPlot
-        if q == 1
-            h2 = plot(y_d, 'r');
-        else
-            h2.YData = (y_d);
-        end
-    end
+		case 'resampledown' % downsample
+			y_d = resample(y, 1, n);
+	end
+	outmat(q, :) = doYourCalcThing(y, y_d);
+	if doPlot
+		if q == 1
+			h2 = plot(y_d, 'r');
+		else
+			h2.YData = (y_d);
+		end
+	end
 end
 
 % ------------------------------------------------------------------------------
@@ -128,12 +128,12 @@ end
 
 stats = zeros(10, 3);
 for t = 1:10;
-    if any(~isfinite(outmat(:, t)))
-        if ~(strcmp(dtMeth, 'diff') && t > 7) % expected that these won't work
-            fprintf(1, '%u is a bad statistic\n', t)
-        end
-    end
-    stats(t, :) = doYourTestThing(outmat(:, t));
+	if any(~isfinite(outmat(:, t)))
+		if ~(strcmp(dtMeth, 'diff') && t > 7) % expected that these won't work
+			fprintf(1, '%u is a bad statistic\n', t)
+		end
+	end
+	stats(t, :) = doYourTestThing(outmat(:, t));
 end
 
 % ------------------------------------------------------------------------------
@@ -203,107 +203,107 @@ out.normdiff_lin = stats(10, 3);
 %% TESTS:
 % ------------------------------------------------------------------------------
 function f = doYourCalcThing(y, y_d)
-    y = zscore(y);
-    y_d = zscore(y_d);
+	y = zscore(y);
+	y_d = zscore(y_d);
 
-    f = zeros(10, 1); % vector of features to output
-    % 1) Stationarity
-    % (a) StatAv
-    f(1) = SY_StatAv(y_d, 'seg', 5);
-    % (b) Sliding window mean
-    f(2) = SY_SlidingWindow(y_d, 'mean', 'std', 5, 2);
-    % (c) Sliding window std
-    f(3) = SY_SlidingWindow(y_d, 'std', 'std', 5, 2) / SY_SlidingWindow(y, 'std', 'std', 5, 2);
+	f = zeros(10, 1); % vector of features to output
+	% 1) Stationarity
+	% (a) StatAv
+	f(1) = SY_StatAv(y_d, 'seg', 5);
+	% (b) Sliding window mean
+	f(2) = SY_SlidingWindow(y_d, 'mean', 'std', 5, 2);
+	% (c) Sliding window std
+	f(3) = SY_SlidingWindow(y_d, 'std', 'std', 5, 2) / SY_SlidingWindow(y, 'std', 'std', 5, 2);
 
-    % 2) Gaussianity
-    %   (a) kernel density estimation method
-    me1 = DN_SimpleFit(y_d, 'gauss1', 0); % kernel density fit to 1-peak gaussian
+	% 2) Gaussianity
+	%   (a) kernel density estimation method
+	me1 = DN_SimpleFit(y_d, 'gauss1', 0); % kernel density fit to 1-peak gaussian
 
-    if ~isstruct(me1) && isnan(me1)
-        f(4) = NaN;
-    else
-        f(4) = me1.rmse;
-    end
+	if ~isstruct(me1) && isnan(me1)
+		f(4) = NaN;
+	else
+		f(4) = me1.rmse;
+	end
 
-    %   (b) histogram 10 bins
-    try
-        me1 = DN_SimpleFit(y_d, 'gauss1', 'sqrt'); % histogram fit to 1-peak gaussian
-        if ~isstruct(me1) && isnan(me1)
-            f(5) = NaN;
-        else
-            f(5) = me1.rmse;
-        end
-    catch
-        f(5) = NaN;
-    end
+	%   (b) histogram 10 bins
+	try
+		me1 = DN_SimpleFit(y_d, 'gauss1', 'sqrt'); % histogram fit to 1-peak gaussian
+		if ~isstruct(me1) && isnan(me1)
+			f(5) = NaN;
+		else
+			f(5) = me1.rmse;
+		end
+	catch
+		f(5) = NaN;
+	end
 
-    %   (c) compare distribution to fitted normal distribution
-    me1 = DN_CompareKSFit(y_d, 'norm');
-    if ~isstruct(me1) && isnan(me1)
-        f(6) = NaN;
-    else
-        f(6) = me1.adiff;
-    end
+	%   (c) compare distribution to fitted normal distribution
+	me1 = DN_CompareKSFit(y_d, 'norm');
+	if ~isstruct(me1) && isnan(me1)
+		f(6) = NaN;
+	else
+		f(6) = me1.adiff;
+	end
 
-    % 3) Outliers
-    f(7) = DN_OutlierTest(y_d, 5, 'mean');
+	% 3) Outliers
+	f(7) = DN_OutlierTest(y_d, 5, 'mean');
 
-    % Cross Correlation to original signal
-    if length(y) == length(y_d)
-        xc = xcorr(y, y_d, 1, 'coeff');
-        f(8) = xc(1);
-        f(9) = xc(3);
+	% Cross Correlation to original signal
+	if length(y) == length(y_d)
+		xc = xcorr(y, y_d, 1, 'coeff');
+		f(8) = xc(1);
+		f(9) = xc(3);
 
-        % Norm of differences between original and randomized signals
-        f(10) = norm(y - y_d) / length(y);
-    else
-        f(8:10) = NaN; % like for differencing where lose some points
-    end
+		% Norm of differences between original and randomized signals
+		f(10) = norm(y - y_d) / length(y);
+	else
+		f(8:10) = NaN; % like for differencing where lose some points
+	end
 end
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
 function g = doYourTestThing(f)
-    if ~all(isfinite(f))
-        g = NaN * ones(3, 1); return
-    else
-        g = zeros(3, 1);
-    end
-    f = zscore(f);
+	if ~all(isfinite(f))
+		g = NaN * ones(3, 1); return
+	else
+		g = zeros(3, 1);
+	end
+	f = zscore(f);
 
-    % for each return a set of simple little tests:
-    % (1) Is it increasing/decreasing? (trend)
-    %       do this by the sum of differences; could take sign?
-    g(1) = sum(diff(f));
+	% for each return a set of simple little tests:
+	% (1) Is it increasing/decreasing? (trend)
+	%       do this by the sum of differences; could take sign?
+	g(1) = sum(diff(f));
 
-    % (2) Is there a jump anywhere? If so, where?
-    % this is done crudely -- needs to be a sudden jump in a single
-    % step
-    % find running differnce between mean before and mean after
-    mbfatd = zeros(length(f), 4);
-    for j = 1:length(f)
-        mbfatd(j, 1) = mean(f(1:j));
-        mbfatd(j, 2) = mean(f(j:end));
-        mbfatd(j, 3) = std(f(1:j)) / sqrt(length(1:j));
-        mbfatd(j, 4) = std(f(j:end)) / sqrt(length(j:length(f)));
-    end
+	% (2) Is there a jump anywhere? If so, where?
+	% this is done crudely -- needs to be a sudden jump in a single
+	% step
+	% find running differnce between mean before and mean after
+	mbfatd = zeros(length(f), 4);
+	for j = 1:length(f)
+		mbfatd(j, 1) = mean(f(1:j));
+		mbfatd(j, 2) = mean(f(j:end));
+		mbfatd(j, 3) = std(f(1:j)) / sqrt(length(1:j));
+		mbfatd(j, 4) = std(f(j:end)) / sqrt(length(j:length(f)));
+	end
 
-    % Pick the maximum difference
-    [c, ind] = max(abs(mbfatd(:, 1) - mbfatd(:, 2)));
+	% Pick the maximum difference
+	[c, ind] = max(abs(mbfatd(:, 1) - mbfatd(:, 2)));
 
-    % t-statistic at this point
-    tstat = abs((mbfatd(ind, 1) - mbfatd(ind, 2)) / sqrt(mbfatd(ind, 3)^2 + mbfatd(ind, 4)^2));
-    g(2) = tstat;
+	% t-statistic at this point
+	tstat = abs((mbfatd(ind, 1) - mbfatd(ind, 2)) / sqrt(mbfatd(ind, 3)^2 + mbfatd(ind, 4)^2));
+	g(2) = tstat;
 
-    % (3) is it linear?
-    try
-        [cfun, gof] = fit((1:length(f))', f, 'poly1');
-    catch emsg
-        if ~(strcmp(emsg.message, 'Inf computed by model function.') || strcmp(emsg.message, 'NaN computed by model function.'))
-            return
-        end
-    end
-    % The gradient of the line
-    g(3) = cfun.p1;
+	% (3) is it linear?
+	try
+		[cfun, gof] = fit((1:length(f))', f, 'poly1');
+	catch emsg
+		if ~(strcmp(emsg.message, 'Inf computed by model function.') || strcmp(emsg.message, 'NaN computed by model function.'))
+			return
+		end
+	end
+	% The gradient of the line
+	g(3) = cfun.p1;
 end
 % ------------------------------------------------------------------------------
 end

@@ -44,28 +44,28 @@ function out = DN_Fit_mle(y, fitWhat)
 % Check Inputs:
 % -------------------------------------------------------------------------------
 if nargin < 2
-    fitWhat = 'gaussian'; % fit a Gaussian by default
+	fitWhat = 'gaussian'; % fit a Gaussian by default
 end
 
 % -------------------------------------------------------------------------------
 % Do the fitting:
 % -------------------------------------------------------------------------------
 switch fitWhat
-    case 'gaussian'
-        phat = mle(y);
-        out.mean = phat(1); % mean of Gaussian fit
-        out.std = phat(2); % std of Gaussian fit
+	case 'gaussian'
+		phat = mle(y);
+		out.mean = phat(1); % mean of Gaussian fit
+		out.std = phat(2); % std of Gaussian fit
 
-    case 'uniform' % turns out to be shit
-        phat = mle(y, 'distribution', 'uniform');
-        out.a = phat(1);
-        out.b = phat(2);
+	case 'uniform' % turns out to be shit
+		phat = mle(y, 'distribution', 'uniform');
+		out.a = phat(1);
+		out.b = phat(2);
 
-    case 'geometric'
-        out = mle(y, 'distribution', 'geometric'); % just a single output
+	case 'geometric'
+		out = mle(y, 'distribution', 'geometric'); % just a single output
 
-    otherwise
-        error('Invalid fit specifier, ''%s''', fitWhat)
+	otherwise
+		error('Invalid fit specifier, ''%s''', fitWhat)
 end
 
 end

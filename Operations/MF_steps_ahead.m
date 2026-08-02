@@ -73,19 +73,19 @@ y = iddata(y, [], 1); % Convert y to time series object
 
 % model, a string specifying the model type to fit
 if nargin < 2 || isempty(model)
-    model = 'ar'; % use an AR model as default
+	model = 'ar'; % use an AR model as default
 end
 
 % order, an extra parameter specific to the model choice specifying
 % additional parameters, typically an integer or set of integers indicating
 % the 'order' of the model.
 if nargin < 3 || isempty(order)
-    order = 2; % hopefully this is meaningful!
+	order = 2; % hopefully this is meaningful!
 end
 
 % maxSteps, maximum number of steps ahead for prediction
 if nargin < 4 || isempty(maxSteps)
-    maxSteps = 6; % compare up to 5 steps ahead by default
+	maxSteps = 6; % compare up to 5 steps ahead by default
 end
 
 % ------------------------------------------------------------------------------
@@ -98,25 +98,25 @@ yTest = y; % the whole time series
 %% Fit the model on training data, yTrain (all data)
 % ------------------------------------------------------------------------------
 switch model
-    case 'ar' % AR model
-        if strcmp(order, 'best') % fit 'best' AR model; by sbc
-            % Use arfit software to retrieve the optimum ar order by some
-            % criterion (Schwartz's Bayesian Criterion, SBC)
-            % Uses Matlab code from ARfit
-            % http://www.gps.caltech.edu/~tapio/arfit/
-            [~, Aest] = ARFIT_arfit(yTrain.y, 1, 10, 'sbc', 'zero');
-            order = length(Aest);
-        end
-        m = ar(yTrain, order);
+	case 'ar' % AR model
+		if strcmp(order, 'best') % fit 'best' AR model; by sbc
+			% Use arfit software to retrieve the optimum ar order by some
+			% criterion (Schwartz's Bayesian Criterion, SBC)
+			% Uses Matlab code from ARfit
+			% http://www.gps.caltech.edu/~tapio/arfit/
+			[~, Aest] = ARFIT_arfit(yTrain.y, 1, 10, 'sbc', 'zero');
+			order = length(Aest);
+		end
+		m = ar(yTrain, order);
 
-    case 'arma'
-        m = armax(yTrain, order);
+	case 'arma'
+		m = armax(yTrain, order);
 
-    case 'ss'
-        m = n4sid(yTrain, order);
+	case 'ss'
+		m = n4sid(yTrain, order);
 
-    otherwise
-        error('Unknown model ''%s''', model);
+	otherwise
+		error('Unknown model ''%s''', model);
 end
 
 % ------------------------------------------------------------------------------
@@ -142,43 +142,43 @@ sm2.mabserrs = zeros(maxSteps, 1);
 sm2.ac1s = zeros(maxSteps, 1);
 
 for i = 1:maxSteps
-    % (1) *** Model m ***
-    yp = predict(m, yTest, steps(i)); % across test set
+	% (1) *** Model m ***
+	yp = predict(m, yTest, steps(i)); % across test set
 
-    % Get statistics on residuals
-    mres = yp.y - yTest.y;
-    mres = mres(i:end);
+	% Get statistics on residuals
+	mres = yp.y - yTest.y;
+	mres = mres(i:end);
 
-    mf.rmserrs(i) = sqrt(mean(mres.^2));
-    mf.mabserrs(i) = mean(abs(mres));
-    mf.ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
+	mf.rmserrs(i) = sqrt(mean(mres.^2));
+	mf.mabserrs(i) = mean(abs(mres));
+	mf.ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
 
-    % (2) *** Sliding mean 1 ***
-    % A sliding mean of length 1
-    % for n-step-ahead prediction, will predict using the value n steps
-    % before it.
-    mres = yy(i + 1:end) - yy(1:N - i);
+	% (2) *** Sliding mean 1 ***
+	% A sliding mean of length 1
+	% for n-step-ahead prediction, will predict using the value n steps
+	% before it.
+	mres = yy(i + 1:end) - yy(1:N - i);
 
-    sm1.rmserrs(i) = sqrt(mean(mres.^2));
-    sm1.mabserrs(i) = mean(abs(mres));
-    sm1.ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
+	sm1.rmserrs(i) = sqrt(mean(mres.^2));
+	sm1.mabserrs(i) = mean(abs(mres));
+	sm1.ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
 
-    % (3) *** Sliding mean 2 ***
-    % A sliding mean of length 2
-    sm2p = zeros(N - i - 1, 1);
-    for j = 1:N - i - 1
-        seeds = yy(j:j + 1);
-        for k = 1:i % average with itself this many times
-            p = mean(seeds);
-            seeds = [seeds(2), p];
-        end
-        sm2p(j) = p;
-    end
-    mres = yy(i + 2:end) - sm2p;
+	% (3) *** Sliding mean 2 ***
+	% A sliding mean of length 2
+	sm2p = zeros(N - i - 1, 1);
+	for j = 1:N - i - 1
+		seeds = yy(j:j + 1);
+		for k = 1:i % average with itself this many times
+			p = mean(seeds);
+			seeds = [seeds(2), p];
+		end
+		sm2p(j) = p;
+	end
+	mres = yy(i + 2:end) - sm2p;
 
-    sm2.rmserrs(i) = sqrt(mean(mres.^2));
-    sm2.mabserrs(i) = mean(abs(mres));
-    sm2.ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
+	sm2.rmserrs(i) = sqrt(mean(mres.^2));
+	sm2.mabserrs(i) = mean(abs(mres));
+	sm2.ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
 end
 
 % ------------------------------------------------------------------------------
@@ -198,16 +198,16 @@ sminf.ac1 = CO_AutoCorr(sminf.res, 1, 'Fourier');
 % bestdumbac1 = min(abs([sm1.ac1,sm2.ac1,sminf.ac1]));
 
 for i = 1:maxSteps
-    % Relative to the best null (dumb) predictor
-    mirms = mf.rmserrs(i) / min([sm1.rmserrs(i), sm2.rmserrs(i), sminf.rmserr]); % rms error
-    miabs = mf.mabserrs(i) / min([sm1.mabserrs(i), sm2.mabserrs(i), sminf.mabserr]); % absolute error
+	% Relative to the best null (dumb) predictor
+	mirms = mf.rmserrs(i) / min([sm1.rmserrs(i), sm2.rmserrs(i), sminf.rmserr]); % rms error
+	miabs = mf.mabserrs(i) / min([sm1.mabserrs(i), sm2.mabserrs(i), sminf.mabserr]); % absolute error
 
-    out.(sprintf('rmserr_%u', i)) = mirms;
-    out.(sprintf('mabserr_%u', i)) = miabs;
+	out.(sprintf('rmserr_%u', i)) = mirms;
+	out.(sprintf('mabserr_%u', i)) = miabs;
 
-    % raw ac1 values -- ratios don't really make sense
-    makeItSo = abs(mf.ac1s(i));
-    out.(sprintf('ac1_%u', i)) = makeItSo;
+	% raw ac1 values -- ratios don't really make sense
+	makeItSo = abs(mf.ac1s(i));
+	out.(sprintf('ac1_%u', i)) = makeItSo;
 end
 
 out.meandiffrmsabs = abs(mean(mf.rmserrs - mf.mabserrs));

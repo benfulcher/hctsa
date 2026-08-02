@@ -60,23 +60,23 @@ function out = SY_LocalGlobal(y, subsetHow, n, randomSeed)
 
 % Check input time series is z-scored:
 if ~BF_iszscored(y)
-    warning('The input time series should be z-scored (mean=%g and std-1=%g)', ...
-            mean(y), std(y) - 1)
+	warning('The input time series should be z-scored (mean=%g and std-1=%g)', ...
+			mean(y), std(y) - 1)
 end
 
 % Set default l
 if nargin < 2 || isempty(subsetHow)
-    subsetHow = 'l';
+	subsetHow = 'l';
 end
 
 % Set default n
 if nargin < 3 || isempty(n)
-    switch subsetHow
-        case {'l', 'unicg', 'randcg'}
-            n = 100; % 100 samples
-        case 'p'
-            n = 0.1; % 10% of the time series
-    end
+	switch subsetHow
+		case {'l', 'unicg', 'randcg'}
+			n = 100; % 100 samples
+		case 'p'
+			n = 0.1; % 10% of the time series
+	end
 end
 
 N = length(y); % Length of the time series
@@ -85,37 +85,37 @@ N = length(y); % Length of the time series
 % Determine subset range to use: r
 % ------------------------------------------------------------------------------
 switch subsetHow
-    case 'l'
-        % Take first n points of time series
-        r = (1:min(n, N));
-    case 'p'
-        % Take initial proportion n of time series
-        r = (1:round(N * n));
-    case 'unicg'
-        % Take n uniformly distributed points in time series
-        r = round(linspace(1, N, n));
-    case 'randcg'
-        if nargin < 4
-            randomSeed = [];
-        end
+	case 'l'
+		% Take first n points of time series
+		r = (1:min(n, N));
+	case 'p'
+		% Take initial proportion n of time series
+		r = (1:round(N * n));
+	case 'unicg'
+		% Take n uniformly distributed points in time series
+		r = round(linspace(1, N, n));
+	case 'randcg'
+		if nargin < 4
+			randomSeed = [];
+		end
 
-        % Reset the random seed if specified (for reproducibility):
-        BF_ResetSeed(randomSeed);
+		% Reset the random seed if specified (for reproducibility):
+		BF_ResetSeed(randomSeed);
 
-        % Take n random points in time series; there could be repeats:
-        r = randi(N, n, 1);
+		% Take n random points in time series; there could be repeats:
+		r = randi(N, n, 1);
 
-        % This is not very statistically robust: just a single stochastic
-        % sample with a (possibly) large variance
-    otherwise
-        error('Unknown specifier, ''%s''', subsetHow);
+		% This is not very statistically robust: just a single stochastic
+		% sample with a (possibly) large variance
+	otherwise
+		error('Unknown specifier, ''%s''', subsetHow);
 end
 
 if length(r) < 5
-    % It's not really appropriate to compute statistics on less than 5 datapoints
-    warning('Time series (of length %u) is too short', N)
-    out = NaN;
-    return
+	% It's not really appropriate to compute statistics on less than 5 datapoints
+	warning('Time series (of length %u) is too short', N)
+	out = NaN;
+	return
 end
 
 % ------------------------------------------------------------------------------

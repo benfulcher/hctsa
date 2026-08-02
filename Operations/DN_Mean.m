@@ -46,37 +46,37 @@ function out = DN_Mean(y, meanType)
 % Check Inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(meanType)
-    meanType = 'arithmetic'; % normal mean
+	meanType = 'arithmetic'; % normal mean
 end
 
 N = length(y); % time-series length
 
 switch meanType
-    case {'norm', 'arithmetic'} % mean
-        out = mean(y);
+	case {'norm', 'arithmetic'} % mean
+		out = mean(y);
 
-    case 'median' % median
-        out = median(y);
+	case 'median' % median
+		out = median(y);
 
-    case 'geom' % geometric mean
-        out = geomean(y); % (prod(y))^(1/N);
+	case 'geom' % geometric mean
+		out = geomean(y); % (prod(y))^(1/N);
 
-    case 'harm' % harmonic mean
-        out = harmmean(y); % N/sum(y.^(-1));
+	case 'harm' % harmonic mean
+		out = harmmean(y); % N/sum(y.^(-1));
 
-    case 'rms' % rms
-        out = sqrt(sum(y.^2) / N);
+	case 'rms' % rms
+		out = sqrt(sum(y.^2) / N);
 
-    case 'iqm' % interquartile mean, cf. DN_TrimmedMean
-        p = prctile(y, [25; 75]);
-        out = mean(y(y >= p(1) & y <= p(2)));
+	case 'iqm' % interquartile mean, cf. DN_TrimmedMean
+		p = prctile(y, [25; 75]);
+		out = mean(y(y >= p(1) & y <= p(2)));
 
-    case 'midhinge' % average of 1st and third quartiles
-        p = prctile(y, [25; 75]);
-        out = mean(p);
+	case 'midhinge' % average of 1st and third quartiles
+		p = prctile(y, [25; 75]);
+		out = mean(p);
 
-    otherwise
-        error('Unknown mean type ''%s''', meanType);
+	otherwise
+		error('Unknown mean type ''%s''', meanType);
 end
 
 end

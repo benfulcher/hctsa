@@ -39,7 +39,7 @@ function out = SC_fastdfa(y)
 % ------------------------------------------------------------------------------
 
 if size(y, 2) > size(y, 1);
-    y = y'; % Ensure input time series is a column vector
+	y = y'; % Ensure input time series is a column vector
 end
 
 out = ML_fastdfa(y);

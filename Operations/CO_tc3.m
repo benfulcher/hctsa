@@ -52,7 +52,7 @@ function out = CO_tc3(y, tau)
 %% Set defaults:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
-    tau = 'ac';
+	tau = 'ac';
 end
 
 % ------------------------------------------------------------------------------
@@ -60,14 +60,14 @@ end
 % ------------------------------------------------------------------------------
 % Can set the time lag, tau, to be 'ac' or 'mi'
 if strcmp(tau, 'ac')
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-    % tau is first zero crossing of the autocorrelation function
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	% tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau, 'mi')
-    tau = CO_FirstMin(y, 'mi');
-    % tau is the first minimum of the automutual information function
+	tau = CO_FirstMin(y, 'mi');
+	% tau is the first minimum of the automutual information function
 end
 if isnan(tau)
-    error('No valid setting for time delay (time series too short?)');
+	error('No valid setting for time delay (time series too short?)');
 end
 
 % ------------------------------------------------------------------------------

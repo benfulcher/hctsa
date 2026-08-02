@@ -47,7 +47,7 @@ BF_CheckToolbox('curve_fitting_toolbox');
 
 % Make sure the input time series, y, is a column vector
 if size(y, 2) > size(y, 1)
-    y = y';
+	y = y';
 end
 N = length(y); % length of input time series
 r = (1:N)'; % range over which to fit
@@ -67,9 +67,9 @@ th_fit = 0.3; % r2 > th_fit
 th_ampl = 0.5; % a1 > th_ampl
 
 if gof.rsquare > th_fit && abs(cfun.a1 > th_ampl)
-    out = 1; % test thinks the time series has strong periodicities
+	out = 1; % test thinks the time series has strong periodicities
 else
-    out = 0; % test thinks the time series doesn't have any strong periodicities
+	out = 0; % test thinks the time series doesn't have any strong periodicities
 end
 
 end

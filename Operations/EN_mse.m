@@ -48,16 +48,16 @@ function out = EN_mse(y, scaleRange, m, r, preProcessHow)
 % Check inputs, set defaults
 % -------------------------------------------------------------------------------
 if nargin < 2
-    m = 2;
+	m = 2;
 end
 if nargin < 3
-    r = 0.15;
+	r = 0.15;
 end
 if nargin < 4
-    scaleRange = 1:10;
+	scaleRange = 1:10;
 end
 if nargin < 5
-    preProcessHow = '';
+	preProcessHow = '';
 end
 
 % -------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ numScales = length(scaleRange);
 % -------------------------------------------------------------------------------
 % Do the specified pre-processing BEFORE applying the coarse-graining
 if ~isempty(preProcessHow)
-    y = zscore(BF_PreProcess(y, preProcessHow));
+	y = zscore(BF_PreProcess(y, preProcessHow));
 end
 
 % -------------------------------------------------------------------------------
@@ -82,10 +82,10 @@ end
 % cf. Eq. (16) in Costa et al. (2005)
 y_cg = cell(numScales, 1);
 for i = 1:numScales
-    % Want non-overlapping windows of length scaleRange(i)
-    bufferSize = scaleRange(i);
-    y_buffer = BF_MakeBuffer(y, bufferSize);
-    y_cg{i} = mean(y_buffer, 2);
+	% Want non-overlapping windows of length scaleRange(i)
+	bufferSize = scaleRange(i);
+	y_buffer = BF_MakeBuffer(y, bufferSize);
+	y_cg{i} = mean(y_buffer, 2);
 end
 
 % -------------------------------------------------------------------------------
@@ -93,40 +93,40 @@ end
 % -------------------------------------------------------------------------------
 sampEns = zeros(numScales, 1);
 for si = 1:numScales
-    if length(y_cg{si}) >= minTSLength
-        sampEnStruct = EN_SampEn(y_cg{si}, m, r);
-        sampEns(si) = sampEnStruct.(sprintf('sampen%u', m));
-    else
-        sampEns(si) = NaN;
-    end
+	if length(y_cg{si}) >= minTSLength
+		sampEnStruct = EN_SampEn(y_cg{si}, m, r);
+		sampEns(si) = sampEnStruct.(sprintf('sampen%u', m));
+	else
+		sampEns(si) = NaN;
+	end
 end
 
 % -------------------------------------------------------------------------------
 % Outputs: multiscale entropy
 % -------------------------------------------------------------------------------
 if all(isnan(sampEns))
-    if ~isempty(preProcessHow)
-        ppText = sprintf('after %s pre-processing', preProcessHow);
-    else
-        ppText = '';
-    end
-    warning('Not enough samples (%u %s) to compute SampEn at multiple scales', ...
-            length(y), ppText)
-    out = NaN;
-    return
+	if ~isempty(preProcessHow)
+		ppText = sprintf('after %s pre-processing', preProcessHow);
+	else
+		ppText = '';
+	end
+	warning('Not enough samples (%u %s) to compute SampEn at multiple scales', ...
+			length(y), ppText)
+	out = NaN;
+	return
 end
 
 if doPlot
-    figure('color', 'w')
-    subplot(2, 1, 1);
-    plot(y);
-    subplot(2, 1, 2);
-    plot(sampEns, 'o-k')
+	figure('color', 'w')
+	subplot(2, 1, 1);
+	plot(y);
+	subplot(2, 1, 2);
+	plot(sampEns, 'o-k')
 end
 
 % Output raw values
 for i = 1:numScales
-    out.(sprintf('sampen_s%u', scaleRange(i))) = sampEns(i);
+	out.(sprintf('sampen_s%u', scaleRange(i))) = sampEns(i);
 end
 
 % -------------------------------------------------------------------------------

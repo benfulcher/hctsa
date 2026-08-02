@@ -46,25 +46,25 @@ function out = NL_nsamdf(x, fs, winLenRel, shiftLenRel, lagRel, degree, doPlot)
 % -------------------------------------------------------------------------------
 % Set defaults:
 if nargin < 2
-    fs = 1;
+	fs = 1;
 end
 if nargin < 3
-    winLenRel = 14;
+	winLenRel = 14;
 end
 windowLength = winLenRel * fs;
 if nargin < 4
-    shiftLenRel = 0.5;
+	shiftLenRel = 0.5;
 end
 shiftLength = shiftLenRel * windowLength;
 if nargin < 5
-    lagRel = 1;
+	lagRel = 1;
 end
 lag = fs * lagRel;
 if nargin < 6
-    degree = 7;
+	degree = 7;
 end
 if nargin < 7
-    doPlot = false
+	doPlot = false
 end
 
 % -------------------------------------------------------------------------------
@@ -82,10 +82,10 @@ out.L = norm(s2 - sd);
 
 % -------------------------------------------------------------------------------
 if doPlot
-    figure
-    plot(s2, 'b')
-    hold on
-    plot(sd, 'g')
+	figure
+	plot(s2, 'b')
+	hold on
+	plot(sd, 'g')
 end
 
 end

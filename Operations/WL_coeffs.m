@@ -52,22 +52,22 @@ BF_CheckToolbox('wavelet_toolbox');
 N = length(y); % time-series length
 
 if nargin < 2 || isempty(wname)
-    wname = 'db3'; % default wavelet
+	wname = 'db3'; % default wavelet
 end
 if nargin < 3 || isempty(level)
-    level = 3; % level of wavelet decomposition
+	level = 3; % level of wavelet decomposition
 end
 if strcmp(level, 'max')
-    level = wmaxlev(N, wname);
-    if level == 0
-        error('Cannot compute wavelet coefficients (short time series?)');
-    end
+	level = wmaxlev(N, wname);
+	if level == 0
+		error('Cannot compute wavelet coefficients (short time series?)');
+	end
 end
 
 if wmaxlev(N, wname) < level
-    fprintf(1, 'Chosen level is too large for this wavelet on this signal\n');
-    out = NaN;
-    return
+	fprintf(1, 'Chosen level is too large for this wavelet on this signal\n');
+	out = NaN;
+	return
 end
 
 % ------------------------------------------------------------------------------
@@ -99,12 +99,12 @@ out.wb1m = findMyThreshold(0.01);
 
 % ------------------------------------------------------------------------------
 function propt = findMyThreshold(x)
-    % where drops below proportion x of maximum
-    propt = find(det_s < x * max(det_s), 1, 'first') / N;
-    % (as a proportion of time-series length)
-    if isempty(propt)
-        propt = NaN;
-    end
+	% where drops below proportion x of maximum
+	propt = find(det_s < x * max(det_s), 1, 'first') / N;
+	% (as a proportion of time-series length)
+	if isempty(propt)
+		propt = NaN;
+	end
 end
 % ------------------------------------------------------------------------------
 

@@ -71,8 +71,8 @@ function out = CP_ML_StepDetect(y, method, params)
 % -------------------------------------------------------------------------------
 % Check inputs:
 if nargin < 2 || isempty(method)
-    fprintf(1, 'Using Kalafut-Visscher step detection by default\n');
-    method = 'kv';
+	fprintf(1, 'Using Kalafut-Visscher step detection by default\n');
+	method = 'kv';
 end
 
 % -------------------------------------------------------------------------------
@@ -84,138 +84,138 @@ N = length(y); % time-series length
 % Do the step detection:
 % ------------------------------------------------------------------------------
 switch method
-    case 'kv'
-        % Kalafut-Visscher step detection
-        [steppedy, steps] = ML_kvsteps(y);
+	case 'kv'
+		% Kalafut-Visscher step detection
+		[steppedy, steps] = ML_kvsteps(y);
 
-        % Put in chpts form: a vector specifying indicies of starts of
-        % constant runs.
-        if length(steps) == 2
-            chpts = 1;
-        else
-            chpts = [1; steps(2:end - 1) + 1];
-        end
+		% Put in chpts form: a vector specifying indicies of starts of
+		% constant runs.
+		if length(steps) == 2
+			chpts = 1;
+		else
+			chpts = [1; steps(2:end - 1) + 1];
+		end
 
-        % case 'ck'
-        %     % ------------------------------------------------------------------------------
-        %     %% Chung-Kennedy
-        %     % ------------------------------------------------------------------------------
-        %     % The algorithm is described in:
-        %     % S.H. Chung, R.A. Kennedy (1991), "Forward-backward non-linear filtering
-        %     % technique for extracting small biological signals from noise",
-        %     % J. Neurosci. Methods. 40(1):71-86.
-        %     % It is quite slow...
-        %     % And not supported!
-        %
-        %     % Inputs:
-        %     %  y - Input signal
-        %     %  K - Maximum forward/backward moving average filter length (samples)
-        %     %  M - Prediction error analysis window size (samples)
-        %     %  p - Positive scaling of prediction error
-        %     % Outputs:
-        %     %  x - Step-filtered output signal
-        %
-        %     % Set defaults, params should be [K,M,p]
-        %     if nargin < 3
-        %         params = [];
-        %     end
-        %     if length(params) >= 1
-        %         K = params(1);
-        %     else
-        %         K = 1/20; % 1/20th of time series length
-        %     end
-        %     if K < 1
-        %         K = floor(N*K);
-        %     end
-        %     if length(params) >= 2
-        %         M = params(2);
-        %     else
-        %         M = 1/10; % 1/10th the time series length
-        %     end
-        %     if M < 1
-        %         M = floor(N*M);
-        %     end
-        %     if length(params) >= 3
-        %         p = params(3);
-        %     else
-        %         p = 10;
-        %     end
-        %     steppedy = ML_ckfilter(y, K, M, p);
+		% case 'ck'
+		%     % ------------------------------------------------------------------------------
+		%     %% Chung-Kennedy
+		%     % ------------------------------------------------------------------------------
+		%     % The algorithm is described in:
+		%     % S.H. Chung, R.A. Kennedy (1991), "Forward-backward non-linear filtering
+		%     % technique for extracting small biological signals from noise",
+		%     % J. Neurosci. Methods. 40(1):71-86.
+		%     % It is quite slow...
+		%     % And not supported!
+		%
+		%     % Inputs:
+		%     %  y - Input signal
+		%     %  K - Maximum forward/backward moving average filter length (samples)
+		%     %  M - Prediction error analysis window size (samples)
+		%     %  p - Positive scaling of prediction error
+		%     % Outputs:
+		%     %  x - Step-filtered output signal
+		%
+		%     % Set defaults, params should be [K,M,p]
+		%     if nargin < 3
+		%         params = [];
+		%     end
+		%     if length(params) >= 1
+		%         K = params(1);
+		%     else
+		%         K = 1/20; % 1/20th of time series length
+		%     end
+		%     if K < 1
+		%         K = floor(N*K);
+		%     end
+		%     if length(params) >= 2
+		%         M = params(2);
+		%     else
+		%         M = 1/10; % 1/10th the time series length
+		%     end
+		%     if M < 1
+		%         M = floor(N*M);
+		%     end
+		%     if length(params) >= 3
+		%         p = params(3);
+		%     else
+		%         p = 10;
+		%     end
+		%     steppedy = ML_ckfilter(y, K, M, p);
 
-    case 'l1pwc'
-        % ------------------------------------------------------------------------------
-        % Based around code originally written by
-        % S.J. Kim, K. Koh, S. Boyd and D. Gorinevsky. If you use this code for
-        % your research, please cite:
-        % M.A. Little, Nick S. Jones (2010)
-        % "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
-        % Machine Dynamics", in 2010 IEEE International Conference on Acoustics,
-        % Speech and Signal Processing, 2010, ICASSP 2010 Proceedings.
-        % ------------------------------------------------------------------------------
+	case 'l1pwc'
+		% ------------------------------------------------------------------------------
+		% Based around code originally written by
+		% S.J. Kim, K. Koh, S. Boyd and D. Gorinevsky. If you use this code for
+		% your research, please cite:
+		% M.A. Little, Nick S. Jones (2010)
+		% "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
+		% Machine Dynamics", in 2010 IEEE International Conference on Acoustics,
+		% Speech and Signal Processing, 2010, ICASSP 2010 Proceedings.
+		% ------------------------------------------------------------------------------
 
-        % Input arguments:
-        % - y          Original signal to denoise, size N x 1.
-        % - lambda     A vector of positive regularization parameters, size L x 1.
-        %              TVD will be applied to each value in the vector.
-        % - display    (Optional) Set to 0 to turn off progress display, 1 to turn
-        %              on. If not specifed, defaults to progress display on.
-        % - stoptol    (Optional) Precision as determined by duality gap tolerance,
-        %              if not specified, defaults to 1e-3.
-        % - maxiter    (Optional) Maximum interior-point iterations, if not
-        %              specified defaults to 60.
-        %
-        % Outputs:
-        % - x          Denoised output signal for each value of lambda, size N x L.
-        % - E          Objective functional at minimum for each lambda, size L x 1.
-        % - s          Optimization result, 1 = solved, 0 = maximum iterations
-        %              exceeded before reaching duality gap tolerance, size L x 1.
-        % - lambdamax  Maximum value of lambda for the given y. If
-        %              lambda >= lambdamax, the output is the trivial constant
-        %              solution x = mean(y).
+		% Input arguments:
+		% - y          Original signal to denoise, size N x 1.
+		% - lambda     A vector of positive regularization parameters, size L x 1.
+		%              TVD will be applied to each value in the vector.
+		% - display    (Optional) Set to 0 to turn off progress display, 1 to turn
+		%              on. If not specifed, defaults to progress display on.
+		% - stoptol    (Optional) Precision as determined by duality gap tolerance,
+		%              if not specified, defaults to 1e-3.
+		% - maxiter    (Optional) Maximum interior-point iterations, if not
+		%              specified defaults to 60.
+		%
+		% Outputs:
+		% - x          Denoised output signal for each value of lambda, size N x L.
+		% - E          Objective functional at minimum for each lambda, size L x 1.
+		% - s          Optimization result, 1 = solved, 0 = maximum iterations
+		%              exceeded before reaching duality gap tolerance, size L x 1.
+		% - lambdamax  Maximum value of lambda for the given y. If
+		%              lambda >= lambdamax, the output is the trivial constant
+		%              solution x = mean(y).
 
-        % Set defaults, params should be [lambda]
-        if nargin < 3
-            params = [];
-        end
-        if length(params) >= 1
-            lambda = params(1);
-        else
-            lambda = 10; % higher lambda --> less steps
-        end
-        if lambda < 1 % specify as a proportion of lambdamax
-            lambda = ML_l1pwclmax(y) * lambda;
-        end
+		% Set defaults, params should be [lambda]
+		if nargin < 3
+			params = [];
+		end
+		if length(params) >= 1
+			lambda = params(1);
+		else
+			lambda = 10; % higher lambda --> less steps
+		end
+		if lambda < 1 % specify as a proportion of lambdamax
+			lambda = ML_l1pwclmax(y) * lambda;
+		end
 
-        % Run the code
-        [steppedy, E, s, lambdaMax] = ML_l1pwc(y, lambda, 0); % use defaults for stoptol and maxiter
+		% Run the code
+		[steppedy, E, s, lambdaMax] = ML_l1pwc(y, lambda, 0); % use defaults for stoptol and maxiter
 
-        % Round to remove numberical flucuations of order less than 1e-4
-        steppedy = round(steppedy * 1e4) / 1e4;
+		% Round to remove numberical flucuations of order less than 1e-4
+		steppedy = round(steppedy * 1e4) / 1e4;
 
-        % Compute outputs specific to this method:
-        out.E = E;
-        out.s = s; % for some parameter values, this is 1
-        out.lambdamax = lambdaMax;
+		% Compute outputs specific to this method:
+		out.E = E;
+		out.s = s; % for some parameter values, this is 1
+		out.lambdamax = lambdaMax;
 
-        % Get step indicies from steppedy
-        % these give the index of the start of each run
-        whch = find(diff(steppedy) ~= 0);
-        if ~isempty(whch)
-            chpts = [1; whch + 1];
-        else
-            chpts = 1; % no changes
-        end
-    otherwise
-        error('Unknown step detection method ''%s''', method);
+		% Get step indicies from steppedy
+		% these give the index of the start of each run
+		whch = find(diff(steppedy) ~= 0);
+		if ~isempty(whch)
+			chpts = [1; whch + 1];
+		else
+			chpts = 1; % no changes
+		end
+	otherwise
+		error('Unknown step detection method ''%s''', method);
 end
 
 % -------------------------------------------------------------------------------
 % Plot computed change points onto the time series:
 if doPlot
-    f = figure('color', 'w');
-    hold('on')
-    plot(y, 'k')
-    plot(chpts, y(chpts), 'or')
+	f = figure('color', 'w');
+	hold('on')
+	plot(y, 'k')
+	plot(chpts, y(chpts), 'or')
 end
 
 % -------------------------------------------------------------------------------
@@ -242,13 +242,13 @@ out.rmsoffpstep = out.rmsoff / numChangePoints;
 sum1 = sum(chpts < N / 2) - 1; % (exclude the chpt that's always sitting at 1)
 sum2 = sum(chpts >= N / 2);
 if (sum2 > 0) && (sum1 > 0)
-    if sum2 > sum1
-        out.ratn12 = sum1 / sum2;
-    else
-        out.ratn12 = sum2 / sum1;
-    end
+	if sum2 > sum1
+		out.ratn12 = sum1 / sum2;
+	else
+		out.ratn12 = sum2 / sum1;
+	end
 else
-    out.ratn12 = 0;
+	out.ratn12 = 0;
 end
 % Difference between number of change points in first and second half of data
 % as a proportion of total number of change points

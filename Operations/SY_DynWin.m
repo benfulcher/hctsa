@@ -52,7 +52,7 @@ function out = SY_DynWin(y, maxNumSegments)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(maxNumSegments)
-    maxNumSegments = 10;
+	maxNumSegments = 10;
 end
 
 nsegr = (2:1:maxNumSegments); % range of nseg to sweep across
@@ -63,55 +63,55 @@ fs = zeros(length(nsegr), numFeatures); % standard deviation of feature values o
 taug = CO_FirstCrossing(y, 'ac', 0, 'discrete'); % global tau
 
 for i = 1:length(nsegr)
-    nseg = nsegr(i);
-    wlen = floor(length(y) / nseg); % window length
-    inc = floor(wlen / nmov); % increment to move at each step
-    % If increment rounded down to zero, prop it up
-    if inc == 0
-        inc = 1;
-    end
+	nseg = nsegr(i);
+	wlen = floor(length(y) / nseg); % window length
+	inc = floor(wlen / nmov); % increment to move at each step
+	% If increment rounded down to zero, prop it up
+	if inc == 0
+		inc = 1;
+	end
 
-    numSteps = (floor((length(y) - wlen) / inc) + 1);
-    qs = zeros(numSteps, numFeatures);
+	numSteps = (floor((length(y) - wlen) / inc) + 1);
+	qs = zeros(numSteps, numFeatures);
 
-    for j = 1:numSteps
-        ySub = y((j - 1) * inc + 1:(j - 1) * inc + wlen);
-        taul = CO_FirstCrossing(ySub, 'ac', 0, 'discrete');
+	for j = 1:numSteps
+		ySub = y((j - 1) * inc + 1:(j - 1) * inc + wlen);
+		taul = CO_FirstCrossing(ySub, 'ac', 0, 'discrete');
 
-        % qs.mean(j) = mean(ySub); % mean
-        % qs.std(j) = std(ySub); % standard deviation
-        % qs.skew(j) = skewness(ySub); % skewness
-        % qs.kurt(j) = kurtosis(ySub); % kurtosis
-        % qs.apen(j) = EN_ApEn(ySub,1,0.2); % ApEn_1
-        % qs.sampen(j) = EN_sampenc(ySub,1,0.2); % SampEn_1
-        % qs.ac1(j) = CO_AutoCorr(ySub,1); % AC1
-        % qs.ac2(j) = CO_AutoCorr(ySub,2); % AC2
-        % qs.tauglob(j) = CO_AutoCorr(ySub,taug); % AC_glob_tau
-        % qs.tauloc(j) = CO_AutoCorr(ySub,taul); % AC_loc_tau
-        % qs.taul(j) = taul;
+		% qs.mean(j) = mean(ySub); % mean
+		% qs.std(j) = std(ySub); % standard deviation
+		% qs.skew(j) = skewness(ySub); % skewness
+		% qs.kurt(j) = kurtosis(ySub); % kurtosis
+		% qs.apen(j) = EN_ApEn(ySub,1,0.2); % ApEn_1
+		% qs.sampen(j) = EN_sampenc(ySub,1,0.2); % SampEn_1
+		% qs.ac1(j) = CO_AutoCorr(ySub,1); % AC1
+		% qs.ac2(j) = CO_AutoCorr(ySub,2); % AC2
+		% qs.tauglob(j) = CO_AutoCorr(ySub,taug); % AC_glob_tau
+		% qs.tauloc(j) = CO_AutoCorr(ySub,taul); % AC_loc_tau
+		% qs.taul(j) = taul;
 
-        qs(j, 1) = mean(ySub); % mean
-        qs(j, 2) = std(ySub); % standard deviation
-        qs(j, 3) = skewness(ySub); % skewness
-        qs(j, 4) = kurtosis(ySub); % kurtosis
-        % qs(j,5) = EN_ApEn(ySub,1,0.2); % ApEn_1_02
-        sampenStruct = EN_SampEn(ySub, 2, 0.15);
-        qs(j, 5) = sampenStruct.quadSampEn1; % SampEn_1_015
-        qs(j, 6) = sampenStruct.quadSampEn2; % SampEn_2_015
-        qs(j, 7) = CO_AutoCorr(ySub, 1, 'Fourier'); % AC1
-        qs(j, 8) = CO_AutoCorr(ySub, 2, 'Fourier'); % AC2
-        % (Sometimes taug or taul can be longer than ySub; then these will output NaNs:)
-        qs(j, 9) = CO_AutoCorr(ySub, taug, 'Fourier'); % AC_glob_tau
-        qs(j, 10) = CO_AutoCorr(ySub, taul, 'Fourier'); % AC_loc_tau
-        qs(j, 11) = taul;
-    end
+		qs(j, 1) = mean(ySub); % mean
+		qs(j, 2) = std(ySub); % standard deviation
+		qs(j, 3) = skewness(ySub); % skewness
+		qs(j, 4) = kurtosis(ySub); % kurtosis
+		% qs(j,5) = EN_ApEn(ySub,1,0.2); % ApEn_1_02
+		sampenStruct = EN_SampEn(ySub, 2, 0.15);
+		qs(j, 5) = sampenStruct.quadSampEn1; % SampEn_1_015
+		qs(j, 6) = sampenStruct.quadSampEn2; % SampEn_2_015
+		qs(j, 7) = CO_AutoCorr(ySub, 1, 'Fourier'); % AC1
+		qs(j, 8) = CO_AutoCorr(ySub, 2, 'Fourier'); % AC2
+		% (Sometimes taug or taul can be longer than ySub; then these will output NaNs:)
+		qs(j, 9) = CO_AutoCorr(ySub, taug, 'Fourier'); % AC_glob_tau
+		qs(j, 10) = CO_AutoCorr(ySub, taul, 'Fourier'); % AC_loc_tau
+		qs(j, 11) = taul;
+	end
 
-    % plot(qs,'o-');
-    % input('what do you think?')
+	% plot(qs,'o-');
+	% input('what do you think?')
 
-    % fs(i,1:numFeatures) = structfun(@(x)std(x),qs,'UniformOutput',1);
-    % fs(i) = structfun(@(x)std(x),qs,'UniformOutput',0);
-    fs(i, 1:numFeatures) = std(qs);
+	% fs(i,1:numFeatures) = structfun(@(x)std(x),qs,'UniformOutput',1);
+	% fs(i) = structfun(@(x)std(x),qs,'UniformOutput',0);
+	fs(i, 1:numFeatures) = std(qs);
 end
 
 % fs contains std of quantities at all different 'scales' (segment lengths)

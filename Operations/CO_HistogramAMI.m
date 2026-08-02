@@ -59,18 +59,18 @@ function out = CO_HistogramAMI(y, tau, meth, numBins)
 % ------------------------------------------------------------------------------
 % Time-lag, tau
 if nargin < 2 || isempty(tau)
-    tau = 1;  % time-lag of 1
+	tau = 1;  % time-lag of 1
 end
 if ischar(tau) && ismember(tau, {'ac', 'tau'})
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
 
 if nargin < 3 || isempty(meth)
-    meth = 'even'; % default
+	meth = 'even'; % default
 end
 
 if nargin < 4 || isempty(numBins)
-    numBins = 10; % default number of bins: 10
+	numBins = 10; % default number of bins: 10
 end
 
 % Number of options:
@@ -83,38 +83,38 @@ end
 % same for both -- assume same distribution (true for stationary processes,
 % or small lags)
 switch meth
-    case 'even'
-        b = linspace(min(y), max(y), numBins + 1);
-        % Add increment buffer to ensure all points are included:
-        inc = 0.1;
-        b(1) = b(1) - inc;
-        b(end) = b(end) + inc;
+	case 'even'
+		b = linspace(min(y), max(y), numBins + 1);
+		% Add increment buffer to ensure all points are included:
+		inc = 0.1;
+		b(1) = b(1) - inc;
+		b(end) = b(end) + inc;
 
-    case 'std1' % bins out to +/- 1 std
-        b = linspace(-1, 1, numBins + 1);
-        if min(y) < -1
-            b = [min(y) - 0.1, b];
-        end
-        if max(y) > 1
-            b = [b, max(y) + 0.1];
-        end
+	case 'std1' % bins out to +/- 1 std
+		b = linspace(-1, 1, numBins + 1);
+		if min(y) < -1
+			b = [min(y) - 0.1, b];
+		end
+		if max(y) > 1
+			b = [b, max(y) + 0.1];
+		end
 
-    case 'std2' % bins out to +/- 1 std
-        b = linspace(-2, 2, numBins + 1);
-        if min(y) < -2
-            b = [min(y) - 0.1, b];
-        end
-        if max(y) > 2
-            b = [b, max(y) + 0.1];
-        end
+	case 'std2' % bins out to +/- 1 std
+		b = linspace(-2, 2, numBins + 1);
+		if min(y) < -2
+			b = [min(y) - 0.1, b];
+		end
+		if max(y) > 2
+			b = [b, max(y) + 0.1];
+		end
 
-    case 'quantiles' % use quantiles with ~equal number in each bin
-        b = quantile(y, linspace(0, 1, numBins + 1));
-        b(1) = b(1) - 0.1;
-        b(end) = b(end) + 0.1;
+	case 'quantiles' % use quantiles with ~equal number in each bin
+		b = quantile(y, linspace(0, 1, numBins + 1));
+		b(1) = b(1) - 0.1;
+		b(end) = b(end) + 0.1;
 
-    otherwise
-        error('Unknown method ''%s''', meth)
+	otherwise
+		error('Unknown method ''%s''', meth)
 end
 
 % Sometimes bins can be added (e.g., with std1 and std2), so need to redefine numBins
@@ -125,33 +125,33 @@ numBins = length(b) - 1; % number of bins (-1 since b defines edges)
 % ------------------------------------------------------------------------------
 amis = zeros(length(tau), 1);
 for i = 1:length(tau)
-    y1 = y(1:end - tau(i));
-    y2 = y(1 + tau(i):end);
+	y1 = y(1:end - tau(i));
+	y2 = y(1 + tau(i):end);
 
-    % (1) Joint distribution of y1 and y2
-    pij = NK_hist2(y1, y2, b, b);
-    pij = pij(1:numBins, 1:numBins); % joint
-    pij = pij / sum(pij(:)); % joint
-    pi = sum(pij, 1); % marginal
-    pj = sum(pij, 2); % other marginal
+	% (1) Joint distribution of y1 and y2
+	pij = NK_hist2(y1, y2, b, b);
+	pij = pij(1:numBins, 1:numBins); % joint
+	pij = pij / sum(pij(:)); % joint
+	pi = sum(pij, 1); % marginal
+	pj = sum(pij, 2); % other marginal
 
-    % Old-fashioned method (should give same result):
-    % pi = histc(y1,b); pi = pi(1:numBins); pi = pi/sum(pi); % marginal
-    % pj = histc(y2,b); pj= pj(1:numBins); pj = pj/sum(pj); % other marginal
+	% Old-fashioned method (should give same result):
+	% pi = histc(y1,b); pi = pi(1:numBins); pi = pi/sum(pi); % marginal
+	% pj = histc(y2,b); pj= pj(1:numBins); pj = pj/sum(pj); % other marginal
 
-    pii = ones(numBins, 1) * pi;
-    pjj = pj * ones(1, numBins);
+	pii = ones(numBins, 1) * pi;
+	pjj = pj * ones(1, numBins);
 
-    r = (pij > 0); % Defining the range in this way, we set log(0) = 0
-    amis(i) = sum(pij(r) .* log(pij(r) ./ pii(r) ./ pjj(r)));
+	r = (pij > 0); % Defining the range in this way, we set log(0) = 0
+	amis(i) = sum(pij(r) .* log(pij(r) ./ pii(r) ./ pjj(r)));
 end
 
 if length(tau) == 1
-    out = amis;
+	out = amis;
 else
-    for i = 1:length(tau)
-        out.(sprintf('ami%u', i)) = amis(i);
-    end
+	for i = 1:length(tau)
+		out.(sprintf('ami%u', i)) = amis(i);
+	end
 end
 
 end

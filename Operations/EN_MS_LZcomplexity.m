@@ -52,20 +52,20 @@ function out = EN_MS_LZcomplexity(y, n, preProc)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(n)
-    n = 2; % n-bit encoding
+	n = 2; % n-bit encoding
 end
 if nargin < 3
-    preProc = []; % no preprocessing
+	preProc = []; % no preprocessing
 end
 
 % Apply some pre-processing to the time series before performing the analysis
 if ischar(preProc)
-    switch preProc
-        case 'diff'
-            y = zscore(diff(y));
-        otherwise
-            error('Unknown preprocessing setting ''%s''', preProc);
-    end
+	switch preProc
+		case 'diff'
+			y = zscore(diff(y));
+		otherwise
+			error('Unknown preprocessing setting ''%s''', preProc);
+	end
 end
 
 % Run Michael Small's (mexed) code for calcaulting the Lempel-Ziv complexity:

@@ -65,44 +65,44 @@ N = length(x); % number of samples in the input signal
 
 % Sliding window length (samples)
 if nargin < 2 || isempty(windowLength)
-    windowLength = 0.02; % 2% of the time-series length
+	windowLength = 0.02; % 2% of the time-series length
 end
 if windowLength < 1
-    windowLength = ceil(N * windowLength);
+	windowLength = ceil(N * windowLength);
 end
 
 % Sliding window overlap length
 if nargin < 3 || isempty(wOverlap)
-    wOverlap = 1 / 5;
+	wOverlap = 1 / 5;
 end
 if wOverlap < 1 % specify a fraction OF THE WINDOW LENGTH
-    wOverlap = floor(windowLength * wOverlap);
+	wOverlap = floor(windowLength * wOverlap);
 end
 
 if nargin < 4 || isempty(mom1)
-    mom1 = 'mean';
+	mom1 = 'mean';
 end
 if nargin < 5 || isempty(mom2)
-    mom2 = 'std';
+	mom2 = 'std';
 end
 if nargin < 6 || isempty(whatTransform)
-    whatTransform = 'none';
+	whatTransform = 'none';
 end
 
 % ------------------------------------------------------------------------------
 % Apply the specified whatTransformormation:
 % ------------------------------------------------------------------------------
 switch whatTransform
-    case 'abs'
-        x = abs(x);
-    case 'sq'
-        x = x.^2;
-    case 'sqrt'
-        x = sqrt(abs(x));
-    case 'none'
-        % x = x;
-    otherwise
-        error('Unknown tranformation ''%s''', whatTransform)
+	case 'abs'
+		x = abs(x);
+	case 'sq'
+		x = x.^2;
+	case 'sqrt'
+		x = sqrt(abs(x));
+	case 'none'
+		% x = x;
+	otherwise
+		error('Unknown tranformation ''%s''', whatTransform)
 end
 
 % ------------------------------------------------------------------------------
@@ -112,12 +112,12 @@ x_buff = buffer(x, windowLength, wOverlap);
 numWindows = (N / (windowLength - wOverlap)); % number of windows
 
 if size(x_buff, 2) > numWindows
-    % fprintf(1,'Should have %u columns but we have %u: removing last one',numWindows,size(x_buff,2))
-    x_buff = x_buff(:, 1:end - 1); % lose last point
+	% fprintf(1,'Should have %u columns but we have %u: removing last one',numWindows,size(x_buff,2))
+	x_buff = x_buff(:, 1:end - 1); % lose last point
 end
 pointsPerWindow = size(x_buff, 1);
 if pointsPerWindow == 1
-    error('This time series (N = %u) is too short to extract %u windows.', N, numWindows);
+	error('This time series (N = %u) is too short to extract %u windows.', N, numWindows);
 end
 
 % ok, now we have the sliding window ('buffered') signal, x_buff
@@ -136,24 +136,24 @@ out.mi = IN_MutualInfo(M1, M2, 'gaussian');
 % this is a poor choice of bin number -- M1 and M2 are not length N
 
 if doPlot
-    figure('color', 'w');
-    plot(M1, M2, '.k');
+	figure('color', 'w');
+	plot(M1, M2, '.k');
 end
 
 % ------------------------------------------------------------------------------
 function moms = SUB_CalcMeMoments(x_buff, momType)
-    switch momType
-        case 'mean'
-            moms = mean(x_buff);
-        case 'std'
-            moms = std(x_buff);
-        case 'median'
-            moms = median(x_buff);
-        case 'iqr'
-            moms = iqr(x_buff);
-        otherwise
-            error('Unknown statistic ''%s''.', momType)
-    end
+	switch momType
+		case 'mean'
+			moms = mean(x_buff);
+		case 'std'
+			moms = std(x_buff);
+		case 'median'
+			moms = median(x_buff);
+		case 'iqr'
+			moms = iqr(x_buff);
+		otherwise
+			error('Unknown statistic ''%s''.', momType)
+	end
 end
 % ------------------------------------------------------------------------------
 

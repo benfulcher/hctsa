@@ -41,8 +41,8 @@ function out = CO_AutoCorrShape(y, stopWhen)
 % INPUTS:
 % -------------------------------------------------------------------------------
 if nargin < 2
-    % Stop looking at a given time lag
-    stopWhen = 'posDrown';
+	% Stop looking at a given time lag
+	stopWhen = 'posDrown';
 end
 
 % ------------------------------------------------------------------------------
@@ -65,75 +65,75 @@ acf = zeros(N, 1);
 
 % At what lag does the acf drop to zero, Ndrown (by my definition)?
 if isnumeric(stopWhen)
-    acf = CO_AutoCorr(y, 0:stopWhen, 'Fourier');
-    Ndrown = stopWhen;
+	acf = CO_AutoCorr(y, 0:stopWhen, 'Fourier');
+	Ndrown = stopWhen;
 elseif ischar(stopWhen) % compute ACF up to a given threshold:
-    Ndrown = 0; % the point at which ACF ~ 0
-    % Compute the full ACF once (a single FFT/IFFT pass) instead of
-    % recomputing it from scratch for every lag queried in the loops below:
-    full_acf = CO_AutoCorr(y, [], 'Fourier');
-    switch stopWhen
-        case 'posDrown'
-            % Stop when ACF drops below threshold, th
-            for i = 1:N
-                acf(i) = full_acf(i); % *** NOTE THIS! *** acf vector indicies are not lags
-                if isnan(acf(i))
-                    warning('Weird time series (constant?)');
-                    out = NaN; return
-                end
-                if acf(i) < th
-                    % Ensure ACF is all positive:
-                    if acf(i) > 0
-                        Ndrown = i;
-                        acf = acf(1:i);
-                    else
-                        Ndrown = i - 1;
-                        acf = acf(1:i - 1);
-                    end
-                    break
-                end
-            end
-            % This should yield the initial, positive portion of the ACF
-            assert(all(acf > 0));
-        case 'drown'
-            % Stop when ACF is very close to 0 (within threshold, th = 2/sqrt(N))
-            for i = 1:N
-                acf(i) = full_acf(i); % *** NOTE THIS! *** acf vector indicies are not lags
-                if (i > 1) && (abs(acf(i)) < th)
-                    Ndrown = i;
-                    acf = acf(1:i);
-                    break
-                end
-            end
-        case 'doubleDrown'
-            % Stop at 2*tau, where tau is the lag where ACF ~ 0 (within 1/sqrt(N) threshold)
-            for i = 1:N
-                acf(i) = full_acf(i); % *** NOTE acf vector indicies are not lags
-                if (Ndrown > 0) && (i == Ndrown * 2)
-                    acf = acf(1:i);
-                    break
-                elseif (i > 1) && (abs(acf(i)) < th)
-                    Ndrown = i;
-                end
-            end
-        otherwise
-            error('Unknown ACF decay criterion: ''%s''', stopWhen);
-    end
+	Ndrown = 0; % the point at which ACF ~ 0
+	% Compute the full ACF once (a single FFT/IFFT pass) instead of
+	% recomputing it from scratch for every lag queried in the loops below:
+	full_acf = CO_AutoCorr(y, [], 'Fourier');
+	switch stopWhen
+		case 'posDrown'
+			% Stop when ACF drops below threshold, th
+			for i = 1:N
+				acf(i) = full_acf(i); % *** NOTE THIS! *** acf vector indicies are not lags
+				if isnan(acf(i))
+					warning('Weird time series (constant?)');
+					out = NaN; return
+				end
+				if acf(i) < th
+					% Ensure ACF is all positive:
+					if acf(i) > 0
+						Ndrown = i;
+						acf = acf(1:i);
+					else
+						Ndrown = i - 1;
+						acf = acf(1:i - 1);
+					end
+					break
+				end
+			end
+			% This should yield the initial, positive portion of the ACF
+			assert(all(acf > 0));
+		case 'drown'
+			% Stop when ACF is very close to 0 (within threshold, th = 2/sqrt(N))
+			for i = 1:N
+				acf(i) = full_acf(i); % *** NOTE THIS! *** acf vector indicies are not lags
+				if (i > 1) && (abs(acf(i)) < th)
+					Ndrown = i;
+					acf = acf(1:i);
+					break
+				end
+			end
+		case 'doubleDrown'
+			% Stop at 2*tau, where tau is the lag where ACF ~ 0 (within 1/sqrt(N) threshold)
+			for i = 1:N
+				acf(i) = full_acf(i); % *** NOTE acf vector indicies are not lags
+				if (Ndrown > 0) && (i == Ndrown * 2)
+					acf = acf(1:i);
+					break
+				elseif (i > 1) && (abs(acf(i)) < th)
+					Ndrown = i;
+				end
+			end
+		otherwise
+			error('Unknown ACF decay criterion: ''%s''', stopWhen);
+	end
 end
 
 % Check for good behavior:
 if any(isnan(acf))
-    % This is an anomalous time series (e.g., all constant, or conatining NaNs)
-    out = NaN;
-    return
+	% This is an anomalous time series (e.g., all constant, or conatining NaNs)
+	out = NaN;
+	return
 end
 
 if doPlot
-    f = figure('color', 'w'); hold on
-    plot(acf, 'o-k')
-    plot([1, length(acf)], th * ones(2, 1), '--k')
-    plot([1, length(acf)], -th * ones(2, 1), '--k')
-    xlabel('time delay')
+	f = figure('color', 'w'); hold on
+	plot(acf, 'o-k')
+	plot([1, length(acf)], th * ones(2, 1), '--k')
+	plot([1, length(acf)], -th * ones(2, 1), '--k')
+	xlabel('time delay')
 end
 
 out.Nac = Ndrown;
@@ -146,23 +146,23 @@ Nac = length(acf);
 out.sumacf = sum(acf);
 out.meanacf = mean(acf);
 if ~strcmp(stopWhen, 'posDrown')
-    % Can have negative entries:
-    out.meanabsacf = mean(abs(acf));
-    out.sumabsacf = sum(abs(acf));
+	% Can have negative entries:
+	out.meanabsacf = mean(abs(acf));
+	out.sumabsacf = sum(abs(acf));
 end
 
 % Autocorrelation of the ACF
 minPointsForACFofACF = 5; % can't take lots of complex stats with fewer than this
 if Nac > minPointsForACFofACF
-    out.ac1 = CO_AutoCorr(acf, 1, 'Fourier');
-    if all(acf > 0)
-        out.actau = NaN;
-    else
-        out.actau = CO_AutoCorr(acf, CO_FirstCrossing(acf, 'ac', 0, 'discrete'), 'Fourier');
-    end
+	out.ac1 = CO_AutoCorr(acf, 1, 'Fourier');
+	if all(acf > 0)
+		out.actau = NaN;
+	else
+		out.actau = CO_AutoCorr(acf, CO_FirstCrossing(acf, 'ac', 0, 'discrete'), 'Fourier');
+	end
 else
-    out.ac1 = NaN;
-    out.actau = NaN;
+	out.ac1 = NaN;
+	out.actau = NaN;
 end
 
 % -------------------------------------------------------------------------------
@@ -212,33 +212,33 @@ out.pextrema = length(sdsp) / Nac;
 fitSuccess = false;
 minPointsToFitExp = 4; % (need at least four points to fit exponential)
 if strcmp(stopWhen, 'posDrown') & (Nac >= minPointsToFitExp)
-    % -------------------------------------------------------------------------------
-    %% Fit exponential decay to (absolute) ACF:
-    % (kind of only makes sense for the first positive period)
-    % -------------------------------------------------------------------------------
-    s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', 0.5);
-    f = fittype('exp(-b*x)', 'options', s);
-    try
-        [c, gof] = fit((0:Nac - 1)', acf, f);
-        fitSuccess = true;
-    end
+	% -------------------------------------------------------------------------------
+	%% Fit exponential decay to (absolute) ACF:
+	% (kind of only makes sense for the first positive period)
+	% -------------------------------------------------------------------------------
+	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', 0.5);
+	f = fittype('exp(-b*x)', 'options', s);
+	try
+		[c, gof] = fit((0:Nac - 1)', acf, f);
+		fitSuccess = true;
+	end
 end
 if fitSuccess % Fit was successful
-    out.decayTimescale = 1 ./ c.b; % this is important
-    out.fexpacf_r2 = gof.rsquare; % this is more important!
-    % out.fexpacf_adjr2 = gof.adjrsquare;
-    % out.fexpacf_rmse = gof.rmse;
+	out.decayTimescale = 1 ./ c.b; % this is important
+	out.fexpacf_r2 = gof.rsquare; % this is more important!
+	% out.fexpacf_adjr2 = gof.adjrsquare;
+	% out.fexpacf_rmse = gof.rmse;
 
-    expfit = exp(c.b * (0:Nac - 1)');
-    residuals = acf - expfit;
-    out.fexpacf_stdres = std(residuals);
+	expfit = exp(c.b * (0:Nac - 1)');
+	residuals = acf - expfit;
+	out.fexpacf_stdres = std(residuals);
 
 else % fit inappropriate (or failed): return NaNs for the relevant stats
-    out.decayTimescale = NaN;
-    out.fexpacf_r2 = NaN;
-    % out.fexpacf_adjr2 = NaN;
-    % out.fexpacf_rmse = NaN;
-    out.fexpacf_stdres = NaN;
+	out.decayTimescale = NaN;
+	out.fexpacf_r2 = NaN;
+	% out.fexpacf_adjr2 = NaN;
+	% out.fexpacf_rmse = NaN;
+	out.fexpacf_stdres = NaN;
 end
 
 end

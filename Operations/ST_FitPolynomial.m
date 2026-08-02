@@ -43,7 +43,7 @@ function out = ST_FitPolynomial(y, k)
 doPlot = 0; % Plot stuff to screen
 
 if nargin < 2 || isempty(k)
-    k = 1; % Linear by default
+	k = 1; % Linear by default
 end
 
 N = length(y); % Length of the time series (number of samples)
@@ -64,17 +64,17 @@ out = mean((y - f).^2); % mean RMS ERROR OF FIT
 % Plot
 % ------------------------------------------------------------------------------
 if doPlot
-    n = 10;
-    errs = zeros(n, 1);
-    x = 1:length(y);
-    for i = 1:n
-        cf = polyfit(x, y', i);
-        f = polyval(cf, x);
-        errs(i) = sum((y' - f).^2);
-    end
-    f = figure('color', 'w'); hold on;
-    plot(f, 'k')
-    plot(errs);
+	n = 10;
+	errs = zeros(n, 1);
+	x = 1:length(y);
+	for i = 1:n
+		cf = polyfit(x, y', i);
+		f = polyval(cf, x);
+		errs(i) = sum((y' - f).^2);
+	end
+	f = figure('color', 'w'); hold on;
+	plot(f, 'k')
+	plot(errs);
 end
 
 end

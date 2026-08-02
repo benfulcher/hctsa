@@ -62,27 +62,27 @@ function out = SB_TransitionMatrix(y, howtocg, numGroups, tau)
 % Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(howtocg)
-    howtocg = 'quantile';
+	howtocg = 'quantile';
 end
 if nargin < 3 || isempty(numGroups)
-    numGroups = 2;
+	numGroups = 2;
 end
 if numGroups < 2
-    error('Too few groups for coarse-graining')
+	error('Too few groups for coarse-graining')
 end
 if nargin < 4 || isempty(tau)
-    tau = 1;
+	tau = 1;
 end
 if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
 if isnan(tau)
-    error('Time series too short to estimate tau');
+	error('Time series too short to estimate tau');
 end
 
 if tau > 1 % calculate transition matrix at a non-unit lag
-    % downsample at rate 1:tau
-    y = resample(y, 1, tau);
+	% downsample at rate 1:tau
+	y = resample(y, 1, tau);
 end
 
 N = length(y); % time-series length
@@ -96,7 +96,7 @@ yth = SB_CoarseGrain(y, howtocg, numGroups);
 % (*) yth: a thresholded y containing integers from 1 to numGroups
 
 if size(yth, 2) > size(yth, 1)
-    yth = yth';
+	yth = yth';
 end
 
 % ------------------------------------------------------------------------------
@@ -106,17 +106,17 @@ end
 % Probably implemented already, but I'll do it myself
 T = zeros(numGroups); % probability of transition from state i -> state j
 for i = 1:numGroups
-    ri = (yth == i); % indices where the time series is in state i
-    if sum(ri) == 0 % is never in state i
-        T(i, :) = 0; % all transition probabilities are zero (could be NaN)
-    else
-        % Indices of states immediately following a state i:
-        ri_next = [false; ri(1:end - 1)];
-        % Compute transitions from state i to each of the states j:
-        for j = 1:numGroups
-            T(i, j) = sum(yth(ri_next) == j); % the next element is of this class
-        end
-    end
+	ri = (yth == i); % indices where the time series is in state i
+	if sum(ri) == 0 % is never in state i
+		T(i, :) = 0; % all transition probabilities are zero (could be NaN)
+	else
+		% Indices of states immediately following a state i:
+		ri_next = [false; ri(1:end - 1)];
+		% Compute transitions from state i to each of the states j:
+		for j = 1:numGroups
+			T(i, j) = sum(yth(ri_next) == j); % the next element is of this class
+		end
+	end
 end
 
 % Normalize from counts to probabilities:
@@ -128,17 +128,17 @@ T = T / (N - 1); % N-1 is appropriate because it's a 1-time transition matrix
 % (i) Raw values of the transition matrix
 % [this has to be done bulkily (only for numGroups = 2,3)]:
 if numGroups == 2 % return all elements of T
-    for i = 1:4
-        out.(sprintf('T%u', i)) = T(i);
-    end
+	for i = 1:4
+		out.(sprintf('T%u', i)) = T(i);
+	end
 elseif numGroups == 3 % return all elements of T
-    for i = 1:9
-        out.(sprintf('T%u', i)) = T(i);
-    end
+	for i = 1:9
+		out.(sprintf('T%u', i)) = T(i);
+	end
 elseif numGroups > 3 % return just diagonal elements of T
-    for i = 1:numGroups
-        out.(sprintf('TD%u', i)) = T(i, i);
-    end
+	for i = 1:numGroups
+		out.(sprintf('TD%u', i)) = T(i, i);
+	end
 end
 
 % (ii) Measures on the diagonal

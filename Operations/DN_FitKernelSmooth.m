@@ -102,12 +102,12 @@ out.plsym = out1 / out2;
 % ------------------------------------------------------------------------------
 % Specified in input
 if ~isempty(numcross) % calculate crossing statistics
-    thresholds = numcross;
-    for i = 1:length(thresholds)
-        numCrosses = sum(BF_SignChange(f - thresholds(i)));
-        outName = regexprep(sprintf('numcross_%.2f', thresholds(i)), '\.', ''); % remove dots from 2-d.pl.
-        out.(outName) = numCrosses;
-    end
+	thresholds = numcross;
+	for i = 1:length(thresholds)
+		numCrosses = sum(BF_SignChange(f - thresholds(i)));
+		outName = regexprep(sprintf('numcross_%.2f', thresholds(i)), '\.', ''); % remove dots from 2-d.pl.
+		out.(outName) = numCrosses;
+	end
 end
 
 % ------------------------------------------------------------------------------
@@ -116,12 +116,12 @@ end
 % Specified in input
 
 if ~isempty(area) % calculate area statistics
-    thresholds = area;
-    for i = 1:length(thresholds)
-        areaHere = sum(f(f < thresholds(i)) .* (xi(2) - xi(1))); % integral under this portion
-        outName = regexprep(sprintf('area_%.2f', thresholds(i)), '\.', ''); % remove dots from 2-d.pl.
-        out.(outName) = areaHere;
-    end
+	thresholds = area;
+	for i = 1:length(thresholds)
+		areaHere = sum(f(f < thresholds(i)) .* (xi(2) - xi(1))); % integral under this portion
+		outName = regexprep(sprintf('area_%.2f', thresholds(i)), '\.', ''); % remove dots from 2-d.pl.
+		out.(outName) = areaHere;
+	end
 end
 
 % ------------------------------------------------------------------------------
@@ -129,14 +129,14 @@ end
 % ------------------------------------------------------------------------------
 % Specified in input
 if ~isempty(arclength) % calcualte arc length statistics
-    thresholds = arclength;
-    for i = 1:length(thresholds)
-        % The integrand in the path length formula:
-        fd = abs(diff(f(xi > m - thresholds(i) & xi < m + thresholds(i))));
-        arclengthHere = sum(fd .* (xi(2) - xi(1)));
-        outName = regexprep(sprintf('arclength_%.2f', thresholds(i)), '\.', ''); % remove dots from 2-d.pl.
-        out.(outName) = arclengthHere;
-    end
+	thresholds = arclength;
+	for i = 1:length(thresholds)
+		% The integrand in the path length formula:
+		fd = abs(diff(f(xi > m - thresholds(i) & xi < m + thresholds(i))));
+		arclengthHere = sum(fd .* (xi(2) - xi(1)));
+		outName = regexprep(sprintf('arclength_%.2f', thresholds(i)), '\.', ''); % remove dots from 2-d.pl.
+		out.(outName) = arclengthHere;
+	end
 end
 
 end

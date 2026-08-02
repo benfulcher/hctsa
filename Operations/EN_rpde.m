@@ -52,25 +52,25 @@ function out = EN_rpde(x, m, tau, epsilon, T_max)
 % Check inputs and set defaults
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(m)
-    m = 2;
+	m = 2;
 end
 if nargin < 3 || isempty(tau)
-    tau = 1;
+	tau = 1;
 end
 
 % Specified a way of determining m and/or tau, use BF_Embed to estimate:
 if ischar(tau) || ischar(m)
-    tauAndM = BF_Embed(x, tau, m, 2);
-    tau = tauAndM(1);
-    m = tauAndM(2);
+	tauAndM = BF_Embed(x, tau, m, 2);
+	tau = tauAndM(1);
+	m = tauAndM(2);
 end
 
 if nargin < 4
-    epsilon = 0.12;
+	epsilon = 0.12;
 end
 
 if nargin < 5
-    T_max = -1;
+	T_max = -1;
 end
 % ------------------------------------------------------------------------------
 
@@ -78,7 +78,7 @@ end
 rpd = ML_close_ret(x, m, tau, epsilon);
 
 if (T_max > -1)
-    rpd = rpd(1:T_max);
+	rpd = rpd(1:T_max);
 end
 rpd = rpd / sum(rpd);
 

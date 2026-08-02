@@ -66,13 +66,13 @@ function out = CO_NonlinearAutocorr(y, taus, doAbs)
 %% Check inputs & set defaults:
 % ------------------------------------------------------------------------------
 if nargin < 3 || isempty(doAbs) % use default settings for doAbs
-    if rem(length(taus), 2) == 1
-        % Odd number of time-lags
-        doAbs = false;
-    else
-        % Even number of time-lags
-        doAbs = true; % take abs, otherwise will be a very small number
-    end
+	if rem(length(taus), 2) == 1
+		% Odd number of time-lags
+		doAbs = false;
+	else
+		% Even number of time-lags
+		doAbs = true; % take abs, otherwise will be a very small number
+	end
 end
 % -------------------------------------------------------------------------------
 
@@ -82,15 +82,15 @@ tMax = max(taus); % the maximum delay time
 % Compute the autocorrelation sum iteratively
 nonlinearAC = y(tMax + 1:N);
 for i = 1:length(taus)
-    nonlinearAC = nonlinearAC .* y(tMax - taus(i) + 1:N - taus(i));
+	nonlinearAC = nonlinearAC .* y(tMax - taus(i) + 1:N - taus(i));
 end
 
 % -------------------------------------------------------------------------------
 % Compute output
 if doAbs
-    out = mean(abs(nonlinearAC));
+	out = mean(abs(nonlinearAC));
 else
-    out = mean(nonlinearAC);
+	out = mean(nonlinearAC);
 end
 
 end

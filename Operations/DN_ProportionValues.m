@@ -46,23 +46,23 @@ function out = DN_ProportionValues(x, propWhat)
 % Check Inputs:
 % -------------------------------------------------------------------------------
 if nargin < 2
-    propWhat = 'positive';
+	propWhat = 'positive';
 end
 
 N = length(x); % length of the time series
 
 switch propWhat
-    case 'zeros' % returns the proportion of zeros in the input vector
-        out = sum(x == 0) / N;
+	case 'zeros' % returns the proportion of zeros in the input vector
+		out = sum(x == 0) / N;
 
-    case 'positive'
-        out = sum(x > 0) / N;
+	case 'positive'
+		out = sum(x > 0) / N;
 
-    case 'geq0'
-        out = sum(x >= 0) / N;
+	case 'geq0'
+		out = sum(x >= 0) / N;
 
-    otherwise
-        error('Unknown condition to measure: ''%s''', propWhat);
+	otherwise
+		error('Unknown condition to measure: ''%s''', propWhat);
 end
 
 end

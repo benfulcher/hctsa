@@ -60,7 +60,7 @@ BF_CheckToolbox('identification_toolbox');
 % ------------------------------------------------------------------------------
 % (1) y, the time series as a column vector
 if size(y, 2) > size(y, 1)
-    y = y'; % ensure a column vector
+	y = y'; % ensure a column vector
 end
 N = length(y); % number of samples
 % Convert y to time series object
@@ -68,16 +68,16 @@ y = iddata(y, [], 1);
 
 % orders; vector specifying the AR and MA components
 if nargin < 2 || isempty(orders)
-    orders = [3, 3]; % AR3, MA3
+	orders = [3, 3]; % AR3, MA3
 end
 if nargin < 3 || isempty(pTrain)
-    pTrain = 0.8; % train on 80% of the data
+	pTrain = 0.8; % train on 80% of the data
 end
 % if nargin < 4 || isempty(trainmode)
 %     trainmode = 'first'; % trains on first pTrain proportion of the data.
 % end
 if nargin < 4 || isempty(numSteps)
-    numSteps = 1; % one-step-ahead predictions
+	numSteps = 1; % one-step-ahead predictions
 end
 
 % ------------------------------------------------------------------------------
@@ -98,25 +98,25 @@ dc = m.dc; % must uncertainties in MA coeffs
 
 % Make these outputs
 if length(c_ar) > 1
-    for i = 2:length(c_ar)
-        out.(sprintf('AR_%u', i - 1)) = c_ar(i);
-    end
+	for i = 2:length(c_ar)
+		out.(sprintf('AR_%u', i - 1)) = c_ar(i);
+	end
 end
 if length(c_ma) > 1
-    for i = 2:length(c_ma)
-        out.(sprintf('MA_%u', i - 1)) = c_ma(i);
-    end
+	for i = 2:length(c_ma)
+		out.(sprintf('MA_%u', i - 1)) = c_ma(i);
+	end
 end
 
 if isempty(da)
-    out.maxda = NaN;
+	out.maxda = NaN;
 else
-    out.maxda = max(da);
+	out.maxda = max(da);
 end
 if isempty(dc)
-    out.maxdc = NaN;
+	out.maxdc = NaN;
 else
-    out.maxdc = max(dc);
+	out.maxdc = max(dc);
 end
 
 % ------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ residout = MF_ResidualAnalysis(mresiduals);
 % correlated with the stde field
 fields = fieldnames(residout);
 for k = 1:length(fields);
-    out.(fields{k}) = residout.(fields{k});
+	out.(fields{k}) = residout.(fields{k});
 end
 
 end

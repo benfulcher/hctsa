@@ -51,15 +51,15 @@ function out = SY_StdNthDer(y, n)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(n)
-    n = 2;
+	n = 2;
 end
 
 yd = diff(y, n); % crude method of taking a derivative that could be improved
 % upon in future
 
 if isempty(yd)
-    error('Time series (N = %u) too short to compute differences at %u', ...
-          length(y), n);
+	error('Time series (N = %u) too short to compute differences at %u', ...
+		  length(y), n);
 end
 out = std(yd);
 

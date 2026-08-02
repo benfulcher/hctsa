@@ -52,30 +52,30 @@ doPlot = 0; % plot results for debugging
 %% Check inputs, set defaults:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
-    fprintf(1, ['Setting tau as the first zero crossing ' ...
-                'of the autocorrelation function.\n']);
-    tau = 'tau';
+	fprintf(1, ['Setting tau as the first zero crossing ' ...
+				'of the autocorrelation function.\n']);
+	tau = 'tau';
 end
 if nargin < 3 || isempty(shape)
-    shape = 'circle'; % use a circle by default
-    fprintf(1, 'Using a circle.\n');
+	shape = 'circle'; % use a circle by default
+	fprintf(1, 'Using a circle.\n');
 end
 if nargin < 4 || isempty(r)
-    r = 1; % default radius of 1
+	r = 1; % default radius of 1
 end
 
 % Can set time lag equal to first zero crossing of the autocorrelation function with the 'tau' input
 if strcmp(tau, 'tau'),
-    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-    % Cannot set the time delay greater than 10% the length of the time series
-    if tau > length(y) / 10
-        tau = floor(length(y) / 10);
-    end
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	% Cannot set the time delay greater than 10% the length of the time series
+	if tau > length(y) / 10
+		tau = floor(length(y) / 10);
+	end
 end
 
 % Ensure y is a column vector:
 if size(y, 2) > size(y, 1);
-    y = y';
+	y = y';
 end
 
 % ------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ m = [y(1:end - tau), y(1 + tau:end)];
 N = length(m);
 
 if doPlot % plot the recurrence space:
-    plot(m(:, 1), m(:, 2), '.');
+	plot(m(:, 1), m(:, 2), '.');
 end
 
 %% Start the analysis
@@ -93,28 +93,28 @@ end
 counts = zeros(N, 1); % stores the counts for points within circle
 
 switch shape
-    case 'circle'
-        % Puts a circle around each point in the embedding space in turn
-        % counts how many points are inside this shape, looks at the time series thus formed
+	case 'circle'
+		% Puts a circle around each point in the embedding space in turn
+		% counts how many points are inside this shape, looks at the time series thus formed
 
-        for i = 1:N % across all points in the time series
+		for i = 1:N % across all points in the time series
 
-            % m - m(i,:) relies on implicit broadcasting to subtract the
-            % row m(i,:) from every row of m -- identical result to
-            % m - ones(N,1)*m(i,:), but without allocating/multiplying by an
-            % explicit ones(N,1) matrix on every iteration. (A single fully
-            % vectorized N x N pairwise-distance computation across all i
-            % would avoid the loop entirely, but would need an N x N x 2
-            % intermediate array -- risking excessive memory use for long
-            % time series -- so the per-i loop is kept.)
-            m_c = m - m(i, :); % points wrt current point i
-            m_c_d = sum(m_c.^2, 2); % Euclidean distances from point i
+			% m - m(i,:) relies on implicit broadcasting to subtract the
+			% row m(i,:) from every row of m -- identical result to
+			% m - ones(N,1)*m(i,:), but without allocating/multiplying by an
+			% explicit ones(N,1) matrix on every iteration. (A single fully
+			% vectorized N x N pairwise-distance computation across all i
+			% would avoid the loop entirely, but would need an N x N x 2
+			% intermediate array -- risking excessive memory use for long
+			% time series -- so the per-i loop is kept.)
+			m_c = m - m(i, :); % points wrt current point i
+			m_c_d = sum(m_c.^2, 2); % Euclidean distances from point i
 
-            counts(i) = sum(m_c_d <= r^2); % number of points enclosed in a circle of radius r
-        end
+			counts(i) = sum(m_c_d <= r^2); % number of points enclosed in a circle of radius r
+		end
 
-    otherwise
-        error('Unknown shape ''%s''', shape)
+	otherwise
+		error('Unknown shape ''%s''', shape)
 end
 counts = counts - 1; % ignore self-counts
 
@@ -123,8 +123,8 @@ counts = counts - 1; % ignore self-counts
 % ------------------------------------------------------------------------------
 % (radius, r, is probably too small)
 if all(counts == 0)
-    fprintf(1, 'No counts detected!\n');
-    out = NaN; return
+	fprintf(1, 'No counts detected!\n');
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
@@ -151,15 +151,15 @@ out.mode = binCentres(mix);
 out.hist_ent = sum(binP(binP > 0) .* log(binP(binP > 0)));
 
 if doPlot
-    plot(binCentres, poisspdf(binCentres, l), 'g'); hold on;
-    plot(binCentres, n, 'k'); hold off
+	plot(binCentres, poisspdf(binCentres, l), 'g'); hold on;
+	plot(binCentres, n, 'k'); hold off
 end
 
 % --- Stationarity measure for fifths of the time series
 afifth = floor(N / 5);
 buffer_m = zeros(afifth, 5); % stores a fifth of the time series (embedding vector) in each entry
 for i = 1:5
-    buffer_m(:, i) = counts(afifth * (i - 1) + 1:afifth * i);
+	buffer_m(:, i) = counts(afifth * (i - 1) + 1:afifth * i);
 end
 out.statav5_m = std(mean(buffer_m)) / std(counts);
 out.statav5_s = std(std(buffer_m)) / std(counts);

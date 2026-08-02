@@ -47,7 +47,7 @@ function out = MF_hmm_fit(y, trainp, numStates, randomSeed)
 
 % Check required function files exist:
 if ~exist(fullfile('ZG_hmm', 'ZG_hmm_cl'), 'file') || ~exist(fullfile('ZG_hmm', 'ZG_hmm_cl'), 'file')
-    error('Could not find the required HMM fitting functions (Zoubin Gharamani''s code)');
+	error('Could not find the required HMM fitting functions (Zoubin Gharamani''s code)');
 end
 
 % ------------------------------------------------------------------------------
@@ -56,17 +56,17 @@ end
 N = length(y); % number of samples in time series
 
 if nargin < 2 || isempty(trainp)
-    fprintf(1, 'Training on 80%% of the data by default\n');
-    trainp = 0.8; % train on 80% of the data
+	fprintf(1, 'Training on 80%% of the data by default\n');
+	trainp = 0.8; % train on 80% of the data
 end
 
 if nargin < 3 || isempty(numStates)
-    fprintf(1, 'Using 3 states by default\n');
-    numStates = 3; % use 3 states
+	fprintf(1, 'Using 3 states by default\n');
+	numStates = 3; % use 3 states
 end
 
 if nargin < 4
-    randomSeed = [];
+	randomSeed = [];
 end
 
 % -------------------------------------------------------------------------------
@@ -80,13 +80,13 @@ BF_ResetSeed(randomSeed); % reset the random seed if specified
 % Divide up dataset into training (ytrain) and test (ytest) portions
 Ntrain = floor(trainp * N);
 if Ntrain == N
-    error('No data for test set for HMM fitting?!')
+	error('No data for test set for HMM fitting?!')
 end
 
 ytrain = y(1:Ntrain);
 if Ntrain < N
-    ytest = y(Ntrain + 1:end);
-    Ntest = length(ytest);
+	ytest = y(Ntrain + 1:end);
+	Ntest = length(ytest);
 end
 
 % Train HMM with <numStates> states for 30 cycles of EM (or until
@@ -100,8 +100,8 @@ end
 % Mean vector, Mu
 Musort = sort(Mu, 'ascend');
 for i = 1:length(Mu)
-    out.(sprintf('Mu_%u', i)) = Musort(i); % use dynamic field referencing
-    % eval(sprintf('out.Mu_%u = Musort(%u);',i,i));
+	out.(sprintf('Mu_%u', i)) = Musort(i); % use dynamic field referencing
+	% eval(sprintf('out.Mu_%u = Musort(%u);',i,i));
 end
 out.meanMu = mean(Mu);
 out.rangeMu = max(Mu) - min(Mu);

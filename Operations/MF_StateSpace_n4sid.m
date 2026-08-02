@@ -75,17 +75,17 @@ y = iddata(y, [], 1);
 % (2) Order, the order of the state space model to fit. Can specify a positive
 % integer or the string 'best'.
 if nargin < 2 || isempty(ord)
-    ord = 2;
+	ord = 2;
 end
 
 % (3) train model on this proportion.
 if nargin < 3 || isempty(ptrain)
-    ptrain = 0.5;
+	ptrain = 0.5;
 end
 
 % (4) steps, step-ahead prediction
 if nargin < 4 || isempty(steps)
-    steps = 1; % one-step ahead prediction
+	steps = 1; % one-step ahead prediction
 end
 
 % ------------------------------------------------------------------------------
@@ -95,8 +95,8 @@ end
 m = n4sid(y, ord); % fits a state-space model of given order
 
 if strcmp(ord, 'best')
-    % also return the best order as an output statistic
-    out.bestorder = length(m.k);
+	% also return the best order as an output statistic
+	out.bestorder = length(m.k);
 end
 
 % ------------------------------------------------------------------------------
@@ -114,13 +114,13 @@ m_np = length(m.ParameterVector); % number of parameters fitted
 % Output model parameters
 allm_as = m_as(:);
 for i = 1:length(allm_as)
-    out.(sprintf('A_%u', i)) = allm_as(i);
+	out.(sprintf('A_%u', i)) = allm_as(i);
 end
 for i = 1:length(m_ks)
-    out.(sprintf('k_%u', i)) = m_ks(i);
+	out.(sprintf('k_%u', i)) = m_ks(i);
 end
 for i = 1:length(m_cs)
-    out.(sprintf('c_%u', i)) = m_cs(i);
+	out.(sprintf('c_%u', i)) = m_cs(i);
 end
 out.x0mod = sqrt(sum(m_x0.^2));
 out.np = m_np; % the number of parameters, only a useful output if not specified
@@ -151,10 +151,10 @@ ytest = y(floor(ptrain * N):end); % overlap
 % Train the model on just this portion
 % mp = armax(ytrain, orders);
 try
-    mp = n4sid(ytrain, ord);
+	mp = n4sid(ytrain, ord);
 catch emsg
-    error('Couldn''t fit the model to this time series: %s', emsg.message)
-    % out = NaN; return
+	error('Couldn''t fit the model to this time series: %s', emsg.message)
+	% out = NaN; return
 end
 
 % -------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ residout = MF_ResidualAnalysis(mresiduals);
 % Convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
-    out.(fields{k}) = residout.(fields{k});
+	out.(fields{k}) = residout.(fields{k});
 end
 
 out.ac1diff = abs(CO_AutoCorr(y.y, 1, 'Fourier')) - abs(CO_AutoCorr(mresiduals, 1, 'Fourier'));

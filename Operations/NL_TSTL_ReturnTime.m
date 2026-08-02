@@ -57,39 +57,39 @@ N = length(y); % length of the input time series
 
 % Number of nearest neighbours, NNR
 if nargin < 2 || isempty(NNR)
-    NNR = 5;
+	NNR = 5;
 end
 if (NNR > 0) && (NNR < 1) % specify a proportion of time series length
-    NNR = floor(NNR * N); if NNR == 0, NNR = 1; end
+	NNR = floor(NNR * N); if NNR == 0, NNR = 1; end
 end
 
 % Maximum return time, maxT
 if nargin < 3 || isempty(maxT)
-    maxT = 0.1;
+	maxT = 0.1;
 end
 if (maxT > 0) && (maxT <= 1) % specify a proportion
-    maxT = floor(N * maxT);
-    if maxT == 0, maxT = 1; end
+	maxT = floor(N * maxT);
+	if maxT == 0, maxT = 1; end
 end
 
 % Theiler window, past
 if nargin < 4 || isempty(past)
-    past = 10;
+	past = 10;
 end
 if (past > 0) && (past < 1) % specify a proportion
-    past = floor(N * past);
-    if past == 0, past = 1; end % round up from 0
+	past = floor(N * past);
+	if past == 0, past = 1; end % round up from 0
 end
 
 % Number of reference points
 if nargin < 5 || isempty(Nref)
-    Nref = -1; % use all available points
+	Nref = -1; % use all available points
 end
 
 % embed parameters
 if nargin < 6 || isempty(embedParams)
-    embedParams = {'ac', 'fnnmar'};
-    fprintf(1, 'Using default embedding using autocorrelation and cao\n');
+	embedParams = {'ac', 'fnnmar'};
+	fprintf(1, 'Using default embedding using autocorrelation and cao\n');
 end
 
 doPlot = false; % plot outputs to figures
@@ -99,28 +99,28 @@ doPlot = false; % plot outputs to figures
 % ------------------------------------------------------------------------------
 s = BF_Embed(y, embedParams{1}, embedParams{2}, 1, true);
 if ~isa(s, 'signal') && isnan(s); % embedding failed
-    warning('Embedding failed');
-    out = NaN; return
+	warning('Embedding failed');
+	out = NaN; return
 end
 numPoints = size(data(s), 1);
 if numPoints < 10
-    % Set heuristic minimum (10) on the number of points needed to perform a meaningful analysis
-    warning('Time series not long enough for return time analysis')
-    out = NaN; return
+	% Set heuristic minimum (10) on the number of points needed to perform a meaningful analysis
+	warning('Time series not long enough for return time analysis')
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
 %% Run the code
 % ------------------------------------------------------------------------------
 try
-    rs = return_time(s, NNR, maxT, past, Nref);
+	rs = return_time(s, NNR, maxT, past, Nref);
 catch emsg
-    if strcmp(emsg.message, 'Index exceeds matrix dimensions.')
-        fprintf(1, 'Error evaluating return_time\n');
-        out = NaN; return
-    else
-        error(emsg.message);
-    end
+	if strcmp(emsg.message, 'Index exceeds matrix dimensions.')
+		fprintf(1, 'Error evaluating return_time\n');
+		out = NaN; return
+	else
+		error(emsg.message);
+	end
 end
 
 Trett = data(rs);
@@ -138,20 +138,20 @@ out.iqr = iqr(Trett);
 % recurrent peaks:
 icross05 = find((Trett(1:end - 1) - 0.5 * max(Trett)) .* (Trett(2:end) - 0.5 * max(Trett)) < 0);
 if ~isempty(icross05) && length(icross05) > 2
-    difficross05 = diff(icross05);
-    difficross05 = difficross05(difficross05 > 0.4 * max(difficross05)); % remove small entries, crossing peaks
+	difficross05 = diff(icross05);
+	difficross05 = difficross05(difficross05 > 0.4 * max(difficross05)); % remove small entries, crossing peaks
 
-    out.meanpeaksep = mean(difficross05) / NN;
-    out.maxpeaksep = max(difficross05) / NN;
-    out.minpeaksep = min(difficross05) / NN;
-    out.rangepeaksep = range(difficross05) / NN;
-    out.stdpeaksep = std(difficross05) / sqrt(NN);
+	out.meanpeaksep = mean(difficross05) / NN;
+	out.maxpeaksep = max(difficross05) / NN;
+	out.minpeaksep = min(difficross05) / NN;
+	out.rangepeaksep = range(difficross05) / NN;
+	out.stdpeaksep = std(difficross05) / sqrt(NN);
 else
-    out.meanpeaksep = NaN;
-    out.maxpeaksep = NaN;
-    out.minpeaksep = NaN;
-    out.rangepeaksep = NaN;
-    out.stdpeaksep = NaN;
+	out.meanpeaksep = NaN;
+	out.maxpeaksep = NaN;
+	out.minpeaksep = NaN;
+	out.rangepeaksep = NaN;
+	out.stdpeaksep = NaN;
 end
 
 out.statrtys = std(Trett(1:floor(end / 2))) / std(Trett(floor(end / 2) + 1:end));
@@ -166,12 +166,12 @@ numBins = 20;
 cglav = zeros(numBins, 1);
 inds = round(linspace(0, NN, numBins + 1));
 for i = 1:numBins
-    cglav(i) = sum(Trett(inds(i) + 1:inds(i + 1)));
+	cglav(i) = sum(Trett(inds(i) + 1:inds(i + 1)));
 end
 if doPlot
-    figure('color', 'w');
-    box('on');
-    plot(cglav, 'k')
+	figure('color', 'w');
+	box('on');
+	plot(cglav, 'k')
 end
 out.hcgdist = -sum(cglav(cglav > 0) .* log(cglav(cglav > 0)));
 out.rangecgdist = range(cglav);
@@ -182,9 +182,9 @@ out.pzeroscgdist = sum(cglav == 0) / numBins;
 % ------------------------------------------------------------------------------
 [nhist, binEdges] = histcounts(Trett, 'BinMethod', 'sqrt', 'Normalization', 'probability');
 if doPlot
-    binCenters = mean([binEdges(1:end - 1); binEdges(2:end)]);
-    figure('color', 'w');
-    plot(binCenters, nhist, 'o-k')
+	binCenters = mean([binEdges(1:end - 1); binEdges(2:end)]);
+	figure('color', 'w');
+	plot(binCenters, nhist, 'o-k')
 end
 out.maxhisthist = max(nhist);
 out.phisthistmin = nhist(1); % this is the same as maxhisthist

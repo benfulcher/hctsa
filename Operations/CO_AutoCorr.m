@@ -57,11 +57,11 @@ function out = CO_AutoCorr(y, tau, whatMethod)
 % Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2
-    tau = 1; % Use a lag of 1 by default
+	tau = 1; % Use a lag of 1 by default
 end
 
 if nargin < 3 || isempty(whatMethod)
-    whatMethod = 'Fourier';
+	whatMethod = 'Fourier';
 end
 
 % -------------------------------------------------------------------------------
@@ -70,12 +70,12 @@ end
 N = length(y); % time-series length
 
 if ~isempty(tau)
-    if max(tau) > N - 1 % -1 because acf(1) is lag 0
-        warning('Time lag %u is too long for time-series length %u', max(tau), N)
-    end
-    if any(tau < 0)
-        warning('Negative time lags not applicable')
-    end
+	if max(tau) > N - 1 % -1 because acf(1) is lag 0
+		warning('Time lag %u is too long for time-series length %u', max(tau), N)
+	end
+	if any(tau < 0)
+		warning('Negative time lags not applicable')
+	end
 end
 
 % ------------------------------------------------------------------------------
@@ -98,108 +98,108 @@ end
 persistent cacheY cacheACF
 maxCacheEntries = 4;
 if isempty(cacheY)
-    cacheY = {};
-    cacheACF = {};
+	cacheY = {};
+	cacheACF = {};
 end
 
 switch whatMethod
-    case 'Fourier'
-        % ------------------------------------------------------------------------------
-        % Estimation based on Matlab function autocorr, based on method of:
-        % [1] Box, G. E. P., G. M. Jenkins, and G. C. Reinsel. Time Series
-        %     Analysis: Forecasting and Control. 3rd edition. Upper Saddle River,
-        %     NJ: Prentice-Hall, 1994.
+	case 'Fourier'
+		% ------------------------------------------------------------------------------
+		% Estimation based on Matlab function autocorr, based on method of:
+		% [1] Box, G. E. P., G. M. Jenkins, and G. C. Reinsel. Time Series
+		%     Analysis: Forecasting and Control. 3rd edition. Upper Saddle River,
+		%     NJ: Prentice-Hall, 1994.
 
-        foundInCache = false;
-        for ci = 1:numel(cacheY)
-            if isequaln(y, cacheY{ci})
-                acf = cacheACF{ci};
-                foundInCache = true;
-                break
-            end
-        end
+		foundInCache = false;
+		for ci = 1:numel(cacheY)
+			if isequaln(y, cacheY{ci})
+				acf = cacheACF{ci};
+				foundInCache = true;
+				break
+			end
+		end
 
-        if ~foundInCache
-            nFFT = 2^(nextpow2(N) + 1);
-            F = fft(y - mean(y), nFFT);
-            F = F .* conj(F);
-            acf = ifft(F); % Wiener–Khinchin
-            acf = acf ./ acf(1); % Normalize
-            acf = real(acf);
-            acf = acf(1:N);
+		if ~foundInCache
+			nFFT = 2^(nextpow2(N) + 1);
+			F = fft(y - mean(y), nFFT);
+			F = F .* conj(F);
+			acf = ifft(F); % Wiener–Khinchin
+			acf = acf ./ acf(1); % Normalize
+			acf = real(acf);
+			acf = acf(1:N);
 
-            % Remember this series' ACF (simple FIFO eviction once full):
-            cacheY{end + 1} = y;
-            cacheACF{end + 1} = acf;
-            if numel(cacheY) > maxCacheEntries
-                cacheY(1) = [];
-                cacheACF(1) = [];
-            end
-        end
+			% Remember this series' ACF (simple FIFO eviction once full):
+			cacheY{end + 1} = y;
+			cacheACF{end + 1} = acf;
+			if numel(cacheY) > maxCacheEntries
+				cacheY(1) = [];
+				cacheACF(1) = [];
+			end
+		end
 
-        if isempty(tau) % return the full function
-            out = acf;
-        else % return a specific set of values
-            out = zeros(length(tau), 1);
-            for i = 1:length(tau)
-                if (tau(i) > length(acf) - 1) || (tau(i) < 0)
-                    out(i) = NaN;
-                else
-                    out(i) = acf(tau(i) + 1);
-                end
-            end
-        end
+		if isempty(tau) % return the full function
+			out = acf;
+		else % return a specific set of values
+			out = zeros(length(tau), 1);
+			for i = 1:length(tau)
+				if (tau(i) > length(acf) - 1) || (tau(i) < 0)
+					out(i) = NaN;
+				else
+					out(i) = acf(tau(i) + 1);
+				end
+			end
+		end
 
-    case 'TimeDomainStat'
-        % ------------------------------------------------------------------------------
-        % Assume a stationary process and estimate mean and standard deviation from the full time
-        % series, although this method can produce outputs that are outside the range [-1,1]
+	case 'TimeDomainStat'
+		% ------------------------------------------------------------------------------
+		% Assume a stationary process and estimate mean and standard deviation from the full time
+		% series, although this method can produce outputs that are outside the range [-1,1]
 
-        sigma2 = var(y); % time-series standard deviation
-        mu = mean(y); % time-series mean
+		sigma2 = var(y); % time-series standard deviation
+		mu = mean(y); % time-series mean
 
-        % Define the time-domain autocorrelation function:
-        ACFy = @(tau) mean((y(1:N - tau) - mu) .* (y(tau + 1:N) - mu)) / sigma2;
+		% Define the time-domain autocorrelation function:
+		ACFy = @(tau) mean((y(1:N - tau) - mu) .* (y(tau + 1:N) - mu)) / sigma2;
 
-        % Output a value for each time-lag provided (one or multiple):
-        out = arrayfun(ACFy, tau);
+		% Output a value for each time-lag provided (one or multiple):
+		out = arrayfun(ACFy, tau);
 
-    case 'TimeDomain'
-        % ------------------------------------------------------------------------------
-        % Estimate mean and standard deviation from each portion of the time series
+	case 'TimeDomain'
+		% ------------------------------------------------------------------------------
+		% Estimate mean and standard deviation from each portion of the time series
 
-        if length(tau) == 1
-            % Output a single value at the given time-lag:
+		if length(tau) == 1
+			% Output a single value at the given time-lag:
 
-            if any(isnan(y))
-                % If NaNs exist in the time series, compute just for a subset
-                % of points
-                goodR = ((~isnan(y(1:N - tau))) & ~isnan(y(tau + 1:N)));
-                fprintf(1, 'NaNs in time series, computing for %u/%u pairs of points\n', ...
-                        sum(goodR), length(goodR));
-                % original time series:
-                y1 = y(1:N - tau);
-                y1N = y1(goodR) - mean(y1(goodR)); % (relative to mean for included points)
-                % lagged time series:
-                y2 = y(tau + 1:N);
-                y2N = y2(goodR) - mean(y2(goodR)); % (relative to mean for included points)
-                % std() flag 1 is used to be consistent with numerator's N normalization
-                out = mean(y1N .* y2N) / std(y1(goodR), 1) / std(y2(goodR), 1);
-            else
-                out = mean((y(1:N - tau) - mean(y(1:N - tau))) .* ...
-                           (y(tau + 1:N) - mean(y(tau + 1:N)))) / std(y(1:N - tau), 1) / std(y(tau + 1:N), 1);
-            end
-        else
-            % Output values over a range of time lags:
-            out = zeros(length(tau), 1);
-            for i = 1:length(tau)
-                out(i) = mean((y(1:N - tau(i)) - mean(y(1:N - tau(i)))) .* (y(tau(i) + 1:N) ...
-                                                                            - mean(y(tau(i) + 1:N)))) / std(y(1:N - tau(i)), 1) / std(y(tau(i) + 1:N), 1);
-            end
-        end
+			if any(isnan(y))
+				% If NaNs exist in the time series, compute just for a subset
+				% of points
+				goodR = ((~isnan(y(1:N - tau))) & ~isnan(y(tau + 1:N)));
+				fprintf(1, 'NaNs in time series, computing for %u/%u pairs of points\n', ...
+						sum(goodR), length(goodR));
+				% original time series:
+				y1 = y(1:N - tau);
+				y1N = y1(goodR) - mean(y1(goodR)); % (relative to mean for included points)
+				% lagged time series:
+				y2 = y(tau + 1:N);
+				y2N = y2(goodR) - mean(y2(goodR)); % (relative to mean for included points)
+				% std() flag 1 is used to be consistent with numerator's N normalization
+				out = mean(y1N .* y2N) / std(y1(goodR), 1) / std(y2(goodR), 1);
+			else
+				out = mean((y(1:N - tau) - mean(y(1:N - tau))) .* ...
+						   (y(tau + 1:N) - mean(y(tau + 1:N)))) / std(y(1:N - tau), 1) / std(y(tau + 1:N), 1);
+			end
+		else
+			% Output values over a range of time lags:
+			out = zeros(length(tau), 1);
+			for i = 1:length(tau)
+				out(i) = mean((y(1:N - tau(i)) - mean(y(1:N - tau(i)))) .* (y(tau(i) + 1:N) ...
+																			- mean(y(tau(i) + 1:N)))) / std(y(1:N - tau(i)), 1) / std(y(tau(i) + 1:N), 1);
+			end
+		end
 
-    otherwise
-        error('Unknown autocorrelation estimation method ''%s''', whatMethod)
+	otherwise
+		error('Unknown autocorrelation estimation method ''%s''', whatMethod)
 end
 
 end

@@ -95,7 +95,7 @@ function out = PP_Compare(y, detrndmeth)
 % ------------------------------------------------------------------------------
 %% Check inputs, set default:
 if nargin < 2 || isempty(detrndmeth)
-    detrndmeth = 'medianf'; % median filter by default
+	detrndmeth = 'medianf'; % median filter by default
 end
 
 % -------------------------------------------------------------------------------
@@ -114,93 +114,93 @@ r = (1:N)'; % the time-range over which to fit
 % starts with 'poly' and ends with integer from 1--9
 if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isempty(str2double(detrndmeth(5)))
 
-    % Check a curve-fitting toolbox license is available:
-    BF_CheckToolbox('curve_fitting_toolbox');
+	% Check a curve-fitting toolbox license is available:
+	BF_CheckToolbox('curve_fitting_toolbox');
 
-    [cfun, gof] = fit(r, y, detrndmeth);
-    y_fit = feval(cfun, r);
-    y_d = y - y_fit;
+	[cfun, gof] = fit(r, y, detrndmeth);
+	y_fit = feval(cfun, r);
+	y_d = y - y_fit;
 
-    % 2) Seasonal detrend
+	% 2) Seasonal detrend
 elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3), 'sin') && ~isempty(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4), '9')
 
-    % Check a curve-fitting toolbox license is available:
-    BF_CheckToolbox('curve_fitting_toolbox');
+	% Check a curve-fitting toolbox license is available:
+	BF_CheckToolbox('curve_fitting_toolbox');
 
-    [cfun, gof] = fit(r, y, detrndmeth);
-    y_fit = feval(cfun, r);
-    y_d = y - y_fit;
+	[cfun, gof] = fit(r, y, detrndmeth);
+	y_fit = feval(cfun, r);
+	y_d = y - y_fit;
 
-    % 3) Spline detrend
+	% 3) Spline detrend
 elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6), 'spline') && ~isempty(str2double(detrndmeth(7))) && ~isempty(str2double(detrndmeth(8)))
-    nknots = str2double(detrndmeth(7));
-    intp = str2double(detrndmeth(8));
+	nknots = str2double(detrndmeth(7));
+	intp = str2double(detrndmeth(8));
 
-    %% Check that a Curve-Fitting Toolbox license is available:
-    BF_CheckToolbox('curve_fitting_toolbox');
+	%% Check that a Curve-Fitting Toolbox license is available:
+	BF_CheckToolbox('curve_fitting_toolbox');
 
-    spline = spap2(nknots, intp, r, y); % just a single middle knot with cubic interpolants
-    y_spl = fnval(spline, 1:N); % evaluate at the 1:N time intervals
-    y_d = y - y_spl';
+	spline = spap2(nknots, intp, r, y); % just a single middle knot with cubic interpolants
+	y_spl = fnval(spline, 1:N); % evaluate at the 1:N time intervals
+	y_d = y - y_spl';
 
-    % 4) Differencing
+	% 4) Differencing
 elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'diff') && ~isempty(str2double(detrndmeth(5)))
-    ndiffs = str2double(detrndmeth(5));
-    y_d = diff(y, ndiffs); % difference the series n times
+	ndiffs = str2double(detrndmeth(5));
+	y_d = diff(y, ndiffs); % difference the series n times
 
-    % 5) Median Filter
+	% 5) Median Filter
 elseif length(detrndmeth) > 7 && strcmp(detrndmeth(1:7), 'medianf') && ~isempty(str2double(detrndmeth(8:end)))
-    n = str2double(detrndmeth(8:end)); % order of filtering
-    y_d = medfilt1(y, n);
+	n = str2double(detrndmeth(8:end)); % order of filtering
+	y_d = medfilt1(y, n);
 
-    % 6) Running Average
+	% 6) Running Average
 elseif length(detrndmeth) > 3 && strcmp(detrndmeth(1:3), 'rav') && ~isempty(str2double(detrndmeth(4:end)))
-    n = str2double(detrndmeth(4:end)); % the window size
-    y_d = filter(ones(1, n) / n, 1, y);
+	n = str2double(detrndmeth(4:end)); % the window size
+	y_d = filter(ones(1, n) / n, 1, y);
 
-    % 7) Resample
+	% 7) Resample
 elseif length(detrndmeth) > 9 && strcmp(detrndmeth(1:9), 'resample_')
-    % check a valid structure
-    ss = textscan(detrndmeth, '%s%n%n', 'delimiter', '_');
-    if ~isempty(ss{2})
-        p = ss{2};
-    else
-        return
-    end
-    if ~isempty(ss{3})
-        q = ss{3};
-    else
-        return
-    end
-    y_d = resample(y, p, q);
+	% check a valid structure
+	ss = textscan(detrndmeth, '%s%n%n', 'delimiter', '_');
+	if ~isempty(ss{2})
+		p = ss{2};
+	else
+		return
+	end
+	if ~isempty(ss{3})
+		q = ss{3};
+	else
+		return
+	end
+	y_d = resample(y, p, q);
 
-    % 8) Log Returns
+	% 8) Log Returns
 elseif strcmp(detrndmeth, 'logr')
-    if all(y > 0), y_d = diff(log(y));
-    else
-        out = NaN;
-        return % return all NaNs
-    end
+	if all(y > 0), y_d = diff(log(y));
+	else
+		out = NaN;
+		return % return all NaNs
+	end
 
-    % 9) Box-Cox Transformation
+	% 9) Box-Cox Transformation
 elseif strcmp(detrndmeth, 'boxcox')
-    % Requires a financial toolbox to run boxcox, check one is available:
-    BF_CheckToolbox('financial_toolbox');
+	% Requires a financial toolbox to run boxcox, check one is available:
+	BF_CheckToolbox('financial_toolbox');
 
-    if all(y > 0), y_d = boxcox(y);
-    else
-        out = NaN;
-        return % return all NaNs
-    end
+	if all(y > 0), y_d = boxcox(y);
+	else
+		out = NaN;
+		return % return all NaNs
+	end
 else
-    error('Invalid detrending method ''%s''', detrendmeth)
+	error('Invalid detrending method ''%s''', detrendmeth)
 end
 
 % -------------------------------------------------------------------------------
 %% Quick check that outputs are meaningful
 if all(y_d == 0)
-    out = NaN;
-    return
+	out = NaN;
+	return
 end
 
 % -------------------------------------------------------------------------------
@@ -239,20 +239,20 @@ out.swss10_2 = SY_SlidingWindow(y_d, 'std', 'std', 10, 2) / SY_SlidingWindow(y, 
 me1 = DN_SimpleFit(y_d, 'gauss1', 0); % kernel density fit to 1-peak gaussian
 me2 = DN_SimpleFit(y, 'gauss1', 0); % kernel density fit to 1-peak gaussian
 if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
-    % fitting gaussian failed -- returns a NaN rather than a structure
-    out.gauss1_kd_r2 = NaN;
-    out.gauss1_kd_adjr2 = NaN;
-    out.gauss1_kd_rmse = NaN;
-    out.gauss1_kd_resAC1 = NaN;
-    out.gauss1_kd_resAC2 = NaN;
-    out.gauss1_kd_resruns = NaN;
+	% fitting gaussian failed -- returns a NaN rather than a structure
+	out.gauss1_kd_r2 = NaN;
+	out.gauss1_kd_adjr2 = NaN;
+	out.gauss1_kd_rmse = NaN;
+	out.gauss1_kd_resAC1 = NaN;
+	out.gauss1_kd_resAC2 = NaN;
+	out.gauss1_kd_resruns = NaN;
 else
-    out.gauss1_kd_r2 = me1.r2 / me2.r2;
-    out.gauss1_kd_adjr2 = me1.adjr2 / me2.adjr2;
-    out.gauss1_kd_rmse = me1.rmse / me2.rmse;
-    out.gauss1_kd_resAC1 = me1.resAC1 / me2.resAC1;
-    out.gauss1_kd_resAC2 = me1.resAC2 / me2.resAC2;
-    out.gauss1_kd_resruns = me1.resruns / me2.resruns;
+	out.gauss1_kd_r2 = me1.r2 / me2.r2;
+	out.gauss1_kd_adjr2 = me1.adjr2 / me2.adjr2;
+	out.gauss1_kd_rmse = me1.rmse / me2.rmse;
+	out.gauss1_kd_resAC1 = me1.resAC1 / me2.resAC1;
+	out.gauss1_kd_resAC2 = me1.resAC2 / me2.resAC2;
+	out.gauss1_kd_resruns = me1.resruns / me2.resruns;
 end
 
 % (c) compare distribution to fitted normal distribution

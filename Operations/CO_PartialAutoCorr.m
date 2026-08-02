@@ -44,13 +44,13 @@ function out = CO_PartialAutoCorr(y, maxTau, whatMethod)
 %% Check inputs and set defaults:
 % ------------------------------------------------------------------------------
 if nargin < 2
-    % Use a maximum lag of 10 by default
-    maxTau = 10;
+	% Use a maximum lag of 10 by default
+	maxTau = 10;
 end
 
 if nargin < 3 || isempty(whatMethod)
-    % ordinary least square by default
-    whatMethod = 'ols';
+	% ordinary least square by default
+	whatMethod = 'ols';
 end
 
 % -------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ N = length(y); % time-series length
 assert(maxTau > 0)
 
 if maxTau < 0
-    error('Negative time lags not applicable')
+	error('Negative time lags not applicable')
 end
 
 % ------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ pacf = parcorr(y, 'NumLags', maxTau, 'Method', whatMethod);
 % Zero lag is the first entry in the PACF (and should always be 1)
 
 for i = 1:maxTau
-    out.(sprintf('pac_%u', i)) = pacf(i + 1);
+	out.(sprintf('pac_%u', i)) = pacf(i + 1);
 end
 
 end

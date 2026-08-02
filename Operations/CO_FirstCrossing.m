@@ -45,26 +45,26 @@ function out = CO_FirstCrossing(y, corrFun, threshold, whatOut)
 N = length(y); % the length of the time series
 
 if nargin < 2 || isempty(corrFun)
-    corrFun = 'ac'; % linear autocorrelation function
+	corrFun = 'ac'; % linear autocorrelation function
 end
 if nargin < 3 || isempty(threshold)
-    threshold = 0;
+	threshold = 0;
 end
 if nargin < 4 || isempty(whatOut)
-    whatOut = 'both';
+	whatOut = 'both';
 end
 
 % -------------------------------------------------------------------------------
 % Select the self-correlation function as an inline function
 % Eventually could add additional self-correlation functions
 switch corrFun
-    case 'ac'
-        % Autocorrelation at all time lags
-        % (a little inefficient to not do it incrementally, but maybe Fourier method)
-        % (does it anyway...)
-        corrs = CO_AutoCorr(y, [], 'Fourier');
-    otherwise
-        error('Unknown correlation function ''%s''', corrFun);
+	case 'ac'
+		% Autocorrelation at all time lags
+		% (a little inefficient to not do it incrementally, but maybe Fourier method)
+		% (does it anyway...)
+		corrs = CO_AutoCorr(y, [], 'Fourier');
+	otherwise
+		error('Unknown correlation function ''%s''', corrFun);
 end
 
 % -------------------------------------------------------------------------------
@@ -75,13 +75,13 @@ end
 % Assemble the appropriate output (structure or double):
 % Convert from index space (1,2,…) to lag space (0,1,2,…):
 switch whatOut
-    case 'both'
-        out.firstCrossing = firstCrossingIndex - 1;
-        out.pointOfCrossing = pointOfCrossingIndex - 1;
-    case 'discrete'
-        out = firstCrossingIndex - 1;
-    case 'continuous'
-        out = pointOfCrossingIndex - 1;
+	case 'both'
+		out.firstCrossing = firstCrossingIndex - 1;
+		out.pointOfCrossing = pointOfCrossingIndex - 1;
+	case 'discrete'
+		out = firstCrossingIndex - 1;
+	case 'continuous'
+		out = pointOfCrossingIndex - 1;
 end
 
 end

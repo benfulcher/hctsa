@@ -53,7 +53,7 @@ N = length(y); % length of time series
 
 % maxTau: the maximum time delay to investigate
 if nargin < 2 || isempty(maxTau)
-    maxTau = ceil(N / 4);
+	maxTau = ceil(N / 4);
 end
 maxTau0 = maxTau;
 
@@ -62,12 +62,12 @@ maxTau = min(maxTau, ceil(N / 2));
 
 % Estimation method:
 if nargin < 3
-    estMethod = '';
+	estMethod = '';
 end
 
 % extraParam
 if nargin < 4
-    extraParam = [];
+	extraParam = [];
 end
 
 % ------------------------------------------------------------------------------
@@ -83,11 +83,11 @@ ami = [ami{:}];
 % Output the raw values:
 % ------------------------------------------------------------------------------
 for i = 1:maxTau0
-    if i <= maxTau
-        out.(sprintf('ami%u', i)) = ami(i);
-    else % we've trimmed the maximum back because time series is too short
-        out.(sprintf('ami%u', i)) = NaN;
-    end
+	if i <= maxTau
+		out.(sprintf('ami%u', i)) = ami(i);
+	else % we've trimmed the maximum back because time series is too short
+		out.(sprintf('ami%u', i)) = NaN;
+	end
 end
 
 % ------------------------------------------------------------------------------
@@ -104,9 +104,9 @@ dami = diff(ami);
 extremai = find(dami(1:end - 1) .* dami(2:end) < 0);
 out.pextrema = length(extremai) / (lami - 1);
 if isempty(extremai)
-    out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
+	out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
 else
-    out.fmmi = min(extremai);
+	out.fmmi = min(extremai);
 end
 
 % ----Look for periodicities in local maxima
@@ -116,11 +116,11 @@ dmaximai = diff(maximai);
 % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pmaxima = length(dmaximai) / floor(lami / 2);
 if isempty(dmaximai) % fewer than 2 local maxima
-    out.modeperiodmax = NaN;
-    out.pmodeperiodmax = NaN;
+	out.modeperiodmax = NaN;
+	out.pmodeperiodmax = NaN;
 else
-    out.modeperiodmax = mode(dmaximai);
-    out.pmodeperiodmax = sum(dmaximai == mode(dmaximai)) / length(dmaximai);
+	out.modeperiodmax = mode(dmaximai);
+	out.pmodeperiodmax = sum(dmaximai == mode(dmaximai)) / length(dmaximai);
 end
 
 % ----Look for periodicities in local minima
@@ -130,11 +130,11 @@ dminimai = diff(minimai);
 % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
 out.pminima = length(dminimai) / floor(lami / 2);
 if isempty(dminimai) % fewer than 2 local maxima
-    out.modeperiodmin = NaN;
-    out.pmodeperiodmin = NaN;
+	out.modeperiodmin = NaN;
+	out.pmodeperiodmin = NaN;
 else
-    out.modeperiodmin = mode(dminimai);
-    out.pmodeperiodmin = sum(dminimai == mode(dminimai)) / length(dminimai);
+	out.modeperiodmin = mode(dminimai);
+	out.pmodeperiodmin = sum(dminimai == mode(dminimai)) / length(dminimai);
 end
 
 % ----Number of crossings at mean/median level, percentiles

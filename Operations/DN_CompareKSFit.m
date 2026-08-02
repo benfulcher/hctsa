@@ -55,128 +55,128 @@ function out = DN_CompareKSFit(x, whatDistn)
 xStep = std(x) / 100; % set a step size
 
 switch whatDistn
-    case 'norm'
-        [a, b] = normfit(x);
-        peaky = normpdf(a, a, b);
-        thresh = peaky / 100; % stop when gets to 1/100 of peak value
-        xf(1) = mean(x);
-        ange = 10;
-        while ange > thresh, xf(1) = xf(1) - xStep; ange = normpdf(xf(1), a, b); end
-        xf(2) = mean(x);
-        ange = 10;
-        while ange > thresh, xf(2) = xf(2) + xStep; ange = normpdf(xf(2), a, b); end
+	case 'norm'
+		[a, b] = normfit(x);
+		peaky = normpdf(a, a, b);
+		thresh = peaky / 100; % stop when gets to 1/100 of peak value
+		xf(1) = mean(x);
+		ange = 10;
+		while ange > thresh, xf(1) = xf(1) - xStep; ange = normpdf(xf(1), a, b); end
+		xf(2) = mean(x);
+		ange = 10;
+		while ange > thresh, xf(2) = xf(2) + xStep; ange = normpdf(xf(2), a, b); end
 
-    case 'ev'
-        a = evfit(x);
-        peaky = evpdf(a(1), a(1), a(2)); thresh = peaky / 100;
-        xf(1) = 0;
-        ange = 10;
-        while ange > thresh, xf(1) = xf(1) - xStep; ange = evpdf(xf(1), a(1), a(2)); end
-        xf(2) = 0;
-        ange = 10;
-        while ange > thresh, xf(2) = xf(2) + xStep; ange = evpdf(xf(2), a(1), a(2)); end
+	case 'ev'
+		a = evfit(x);
+		peaky = evpdf(a(1), a(1), a(2)); thresh = peaky / 100;
+		xf(1) = 0;
+		ange = 10;
+		while ange > thresh, xf(1) = xf(1) - xStep; ange = evpdf(xf(1), a(1), a(2)); end
+		xf(2) = 0;
+		ange = 10;
+		while ange > thresh, xf(2) = xf(2) + xStep; ange = evpdf(xf(2), a(1), a(2)); end
 
-    case 'uni'
-        [a, b] = unifit(x);
-        peaky = unifpdf(mean(x), a, b); thresh = peaky / 100;
-        xf(1) = 0;
-        ange = 10;
-        while ange > thresh, xf(1) = xf(1) - xStep; ange = unifpdf(xf(1), a, b); end
-        xf(2) = 0;
-        ange = 10;
-        while ange > thresh, xf(2) = xf(2) + xStep; ange = unifpdf(xf(2), a, b); end
+	case 'uni'
+		[a, b] = unifit(x);
+		peaky = unifpdf(mean(x), a, b); thresh = peaky / 100;
+		xf(1) = 0;
+		ange = 10;
+		while ange > thresh, xf(1) = xf(1) - xStep; ange = unifpdf(xf(1), a, b); end
+		xf(2) = 0;
+		ange = 10;
+		while ange > thresh, xf(2) = xf(2) + xStep; ange = unifpdf(xf(2), a, b); end
 
-    case 'beta'
-        % clumsily scale to the range (0,1)
-        x = (x - min(x) + 0.01 * std(x)) / (max(x) - min(x) + 0.02 * std(x));
-        xStep = std(x) / 100; % will need a new step size for the rescaled data
-        a = betafit(x);
-        thresh = 1E-5; % ok -- consistent since all scaled to the same range
-        xf(1) = mean(x); ange = 10;
-        while ange > thresh, xf(1) = xf(1) - xStep; ange = betapdf(xf(1), a(1), a(2)); end
-        xf(2) = mean(x); ange = 10;
-        while ange > thresh, xf(2) = xf(2) + xStep; ange = betapdf(xf(2), a(1), a(2)); end
+	case 'beta'
+		% clumsily scale to the range (0,1)
+		x = (x - min(x) + 0.01 * std(x)) / (max(x) - min(x) + 0.02 * std(x));
+		xStep = std(x) / 100; % will need a new step size for the rescaled data
+		a = betafit(x);
+		thresh = 1E-5; % ok -- consistent since all scaled to the same range
+		xf(1) = mean(x); ange = 10;
+		while ange > thresh, xf(1) = xf(1) - xStep; ange = betapdf(xf(1), a(1), a(2)); end
+		xf(2) = mean(x); ange = 10;
+		while ange > thresh, xf(2) = xf(2) + xStep; ange = betapdf(xf(2), a(1), a(2)); end
 
-    case 'rayleigh'
-        if any(x < 0)
-            fprintf(1, 'The data are not positive, but Rayleigh is a positive-only distribution.\n');
-            out = NaN; return
-        elseif all(x == x(1))
-            fprintf(1, 'Data are a constant\n');
-            out = NaN; return
-        else % fit a Rayleigh distribution to the positive-only data
-            a = raylfit(x);
-            peaky = raylpdf(a, a); thresh = peaky / 100;
-            xf(1) = 0;
-            xf(2) = a;
-            ange = 10;
-            while ange > thresh, xf(2) = xf(2) + xStep; ange = raylpdf(xf(2), a); end
-        end
+	case 'rayleigh'
+		if any(x < 0)
+			fprintf(1, 'The data are not positive, but Rayleigh is a positive-only distribution.\n');
+			out = NaN; return
+		elseif all(x == x(1))
+			fprintf(1, 'Data are a constant\n');
+			out = NaN; return
+		else % fit a Rayleigh distribution to the positive-only data
+			a = raylfit(x);
+			peaky = raylpdf(a, a); thresh = peaky / 100;
+			xf(1) = 0;
+			xf(2) = a;
+			ange = 10;
+			while ange > thresh, xf(2) = xf(2) + xStep; ange = raylpdf(xf(2), a); end
+		end
 
-    case 'exp'
-        if any(x < 0)
-            fprintf(1, 'The data contains negative values, but Exponential is a positive-only distribution.\n');
-            out = NaN; return
-        elseif all(x == x(1))
-            fprintf(1, 'Data are a constant\n');
-            out = NaN; return
-        else a = expfit(x);
-            peaky = exppdf(0, a); thresh = peaky / 100;
-            xf(1) = 0;
-            xf(2) = 0;
-            ange = 10;
-            while ange > thresh, xf(2) = xf(2) + xStep; ange = exppdf(xf(2), a); end
-        end
+	case 'exp'
+		if any(x < 0)
+			fprintf(1, 'The data contains negative values, but Exponential is a positive-only distribution.\n');
+			out = NaN; return
+		elseif all(x == x(1))
+			fprintf(1, 'Data are a constant\n');
+			out = NaN; return
+		else a = expfit(x);
+			peaky = exppdf(0, a); thresh = peaky / 100;
+			xf(1) = 0;
+			xf(2) = 0;
+			ange = 10;
+			while ange > thresh, xf(2) = xf(2) + xStep; ange = exppdf(xf(2), a); end
+		end
 
-    case 'gamma'
-        if any(x < 0)
-            fprintf(1, 'The data contains negative values, but Gamma is a positive-only distribution.\n');
-            out = NaN; return
-        else a = gamfit(x);
-            if a(1) < 1
-                thresh = gampdf(0, a(1), a(2)) / 100;
-            else
-                peaky = gampdf((a(1) - 1) * a(2), a(1), a(2)); thresh = peaky / 100;
-            end
-            xf(1) = 0;
-            xf(2) = a(1) * a(2);
-            ange = 10;
-            while ange > thresh, xf(2) = xf(2) + xStep; ange = gampdf(xf(2), a(1), a(2)); end
-        end
+	case 'gamma'
+		if any(x < 0)
+			fprintf(1, 'The data contains negative values, but Gamma is a positive-only distribution.\n');
+			out = NaN; return
+		else a = gamfit(x);
+			if a(1) < 1
+				thresh = gampdf(0, a(1), a(2)) / 100;
+			else
+				peaky = gampdf((a(1) - 1) * a(2), a(1), a(2)); thresh = peaky / 100;
+			end
+			xf(1) = 0;
+			xf(2) = a(1) * a(2);
+			ange = 10;
+			while ange > thresh, xf(2) = xf(2) + xStep; ange = gampdf(xf(2), a(1), a(2)); end
+		end
 
-    case 'logn'
-        if any(x <= 0)
-            fprintf(1, 'The data are not positive, but Log-Normal is a positive-only distribution.\n');
-            out = NaN; return
-        else
-            a = lognfit(x);
-            peaky = lognpdf(exp(a(1) - a(2)^2), a(1), a(2)); thresh = peaky / 100;
-            xf(1) = 0;
-            xf(2) = exp(a(1) - a(2)^2);
-            ange = 10;
-            while ange > thresh, xf(2) = xf(2) + xStep; ange = lognpdf(xf(2), a(1), a(2)); end
-        end
+	case 'logn'
+		if any(x <= 0)
+			fprintf(1, 'The data are not positive, but Log-Normal is a positive-only distribution.\n');
+			out = NaN; return
+		else
+			a = lognfit(x);
+			peaky = lognpdf(exp(a(1) - a(2)^2), a(1), a(2)); thresh = peaky / 100;
+			xf(1) = 0;
+			xf(2) = exp(a(1) - a(2)^2);
+			ange = 10;
+			while ange > thresh, xf(2) = xf(2) + xStep; ange = lognpdf(xf(2), a(1), a(2)); end
+		end
 
-    case 'wbl'
-        if any(x <= 0)
-            fprintf(1, 'The data are not positive, but Weibull is a positive-only distribution.\n');
-            out = NaN; return
-        else
-            a = wblfit(x);
-            if a(2) <= 1;
-                thresh = wblpdf(0, a(1), a(2));
-            else
-                peaky = wblpdf(a(1) * ((a(2) - 1) / a(2))^(1 / a(2)), a(1), a(2));
-                thresh = peaky / 100;
-            end
-            xf(1) = 0;
-            xf(2) = 0;
-            ange = 10;
-            while ange > thresh, xf(2) = xf(2) + xStep; ange = wblpdf(xf(2), a(1), a(2)); end
-        end
+	case 'wbl'
+		if any(x <= 0)
+			fprintf(1, 'The data are not positive, but Weibull is a positive-only distribution.\n');
+			out = NaN; return
+		else
+			a = wblfit(x);
+			if a(2) <= 1;
+				thresh = wblpdf(0, a(1), a(2));
+			else
+				peaky = wblpdf(a(1) * ((a(2) - 1) / a(2))^(1 / a(2)), a(1), a(2));
+				thresh = peaky / 100;
+			end
+			xf(1) = 0;
+			xf(2) = 0;
+			ange = 10;
+			while ange > thresh, xf(2) = xf(2) + xStep; ange = wblpdf(xf(2), a(1), a(2)); end
+		end
 
-    otherwise
-        error('Unknown distribution: %s.', whatDistn)
+	otherwise
+		error('Unknown distribution: %s.', whatDistn)
 end
 % xtmafit=[floor(xtmafit(1)*10)/10 ceil(xtmafit(end)*10)/10];
 
@@ -186,9 +186,9 @@ end
 [f, xi] = ksdensity(x);
 xi = xi(f > 1E-6); % only keep values greater than 1E-6
 if isempty(xi)
-    out = NaN; return
-    % in future could change to the threshold from 1E-6 to some fraction
-    % of the peak value...
+	out = NaN; return
+	% in future could change to the threshold from 1E-6 to some fraction
+	% of the peak value...
 end
 
 xi = [floor(xi(1) * 10) / 10, ceil(xi(end) * 10) / 10];
@@ -204,31 +204,31 @@ x2 = max([xf(2), xi(end)]);
 xi = linspace(x1, x2, 1000);
 f = ksdensity(x, xi); % the smoothed empirical distribution
 switch whatDistn
-    case 'norm'
-        ffit = normpdf(xi, a, b);
-    case 'ev'
-        ffit = evpdf(xi, a(1), a(2));
-    case 'uni'
-        ffit = unifpdf(xi, a, b);
-    case 'beta'
-        %         if x1<0,x1=1E-5;end
-        %         if x2>1,x2=1-1E-5;end
-        ffit = betapdf(xi, a(1), a(2));
-    case 'rayleigh'
-        %         if x1<0,x1=0;end
-        ffit = raylpdf(xi, a);
-    case 'exp'
-        %         if x1<0,x1=0;end
-        ffit = exppdf(xi, a);
-    case 'gamma'
-        %         if x1<0,x1=0;end
-        ffit = gampdf(xi, a(1), a(2));
-    case 'logn'
-        %         if x1<0,x1=0;end
-        ffit = lognpdf(xi, a(1), a(2));
-    case 'wbl'
-        %         if x1<0,x1=0;end
-        ffit = wblpdf(xi, a(1), a(2));
+	case 'norm'
+		ffit = normpdf(xi, a, b);
+	case 'ev'
+		ffit = evpdf(xi, a(1), a(2));
+	case 'uni'
+		ffit = unifpdf(xi, a, b);
+	case 'beta'
+		%         if x1<0,x1=1E-5;end
+		%         if x2>1,x2=1-1E-5;end
+		ffit = betapdf(xi, a(1), a(2));
+	case 'rayleigh'
+		%         if x1<0,x1=0;end
+		ffit = raylpdf(xi, a);
+	case 'exp'
+		%         if x1<0,x1=0;end
+		ffit = exppdf(xi, a);
+	case 'gamma'
+		%         if x1<0,x1=0;end
+		ffit = gampdf(xi, a(1), a(2));
+	case 'logn'
+		%         if x1<0,x1=0;end
+		ffit = lognpdf(xi, a(1), a(2));
+	case 'wbl'
+		%         if x1<0,x1=0;end
+		ffit = wblpdf(xi, a(1), a(2));
 end
 
 % now the two cover the same range in x

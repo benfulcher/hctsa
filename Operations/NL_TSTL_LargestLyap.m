@@ -67,51 +67,51 @@ N = length(y); % length of time series
 
 % (1) Nref: number of randomly-chosen reference points
 if nargin < 2 || isempty(Nref)
-    Nref = 0.5; % use half the length of the time series
+	Nref = 0.5; % use half the length of the time series
 end
 if Nref < 1 && Nref > 0
-    Nref = round(N * Nref); % specify a proportion of time series length
+	Nref = round(N * Nref); % specify a proportion of time series length
 end
 if Nref > -1
-    fprintf('This algorithm relies on stochastic sampling of %u data points.\n', Nref)
+	fprintf('This algorithm relies on stochastic sampling of %u data points.\n', Nref)
 end
 
 % (2) maxtstep: maximum prediction length
 if nargin < 3 || isempty(maxtstep)
-    maxtstep = 0.1; % 10% length of time series
+	maxtstep = 0.1; % 10% length of time series
 end
 if maxtstep < 1 && maxtstep > 0
-    maxtstep = round(N * maxtstep); % specify a proportion of time series length
+	maxtstep = round(N * maxtstep); % specify a proportion of time series length
 end
 if maxtstep < 10;
-    maxtstep = 10; % minimum prediction length; for output stats purposes...
+	maxtstep = 10; % minimum prediction length; for output stats purposes...
 end
 if maxtstep > 0.5 * N;
-    maxtstep = 0.5 * N; % can't look further than half the time series length, methinks
+	maxtstep = 0.5 * N; % can't look further than half the time series length, methinks
 end
 
 % (3) past/theiler window
 if nargin < 4 || isempty(past)
-    past = 40;
+	past = 40;
 end
 if past < 1 && past > 0
-    past = floor(past * N);
-    if past == 0, past = 1; end
+	past = floor(past * N);
+	if past == 0, past = 1; end
 end
 
 % (4) Number of neighest neighbours
 if nargin < 5 || isempty(NNR)
-    NNR = 3;
+	NNR = 3;
 end
 
 % (5) Embedding parameters, embedParams
 if nargin < 6 || isempty(embedParams)
-    embedParams = {'ac', 'fnnmar'};
-    disp('using default embedding using autocorrelation and cao')
+	embedParams = {'ac', 'fnnmar'};
+	disp('using default embedding using autocorrelation and cao')
 else
-    if length(embedParams) ~= 2
-        error('Embedding parameters formatted incorrectly -- should be {tau,m}')
-    end
+	if length(embedParams) ~= 2
+		error('Embedding parameters formatted incorrectly -- should be {tau,m}')
+	end
 end
 
 % ------------------------------------------------------------------------------
@@ -121,27 +121,27 @@ end
 s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
 
 if ~isa(s, 'signal') && isnan(s); % embedding failed
-    error('Embedding failed');
+	error('Embedding failed');
 end
 
 % ------------------------------------------------------------------------------
 %% Run the TSTOOL code, largelyap (which is stochastic):
 % ------------------------------------------------------------------------------
 try
-    rs = largelyap(s, Nref, maxtstep, past, NNR);
+	rs = largelyap(s, Nref, maxtstep, past, NNR);
 catch
-    disp('Error evaluating the TSTOOL method ''largelyap''')
-    out = NaN;
-    return
+	disp('Error evaluating the TSTOOL method ''largelyap''')
+	out = NaN;
+	return
 end
 
 p = data(rs);
 t = spacing(rs);
 
 if doPlot
-    figure('color', 'w');
-    box('on');
-    plot(t, p, '.-k')
+	figure('color', 'w');
+	box('on');
+	plot(t, p, '.-k')
 end
 
 % we have the prediction error p as a function of the prediction length...?
@@ -154,14 +154,14 @@ end
 % ------------------------------------------------------------------------------
 
 if all(p == 0)
-    out = NaN; return
+	out = NaN; return
 end
 
 % p at lags up to 5
 % (note that p1 = 0, so not so useful to record)
 for i = 1:5
-    % evaluate p(1), p(2), ..., p(5) for the output structure
-    out.(sprintf('p%u', i)) = p(i);
+	% evaluate p(1), p(2), ..., p(5) for the output structure
+	out.(sprintf('p%u', i)) = p(i);
 end
 out.maxp = max(p);
 
@@ -203,84 +203,84 @@ if isempty(out.to05max), out.to05max = NaN; end
 imax = find(p > 0.95 * max(p), 1, 'first');
 
 if imax <= 3
-    % not a suitable range for finding scaling
-    % return NaNs for these
-    out.vse_meanabsres = NaN;
-    out.vse_rmsres = NaN;
-    out.vse_gradient = NaN;
-    out.vse_intercept = NaN;
-    out.vse_minbad = NaN;
+	% not a suitable range for finding scaling
+	% return NaNs for these
+	out.vse_meanabsres = NaN;
+	out.vse_rmsres = NaN;
+	out.vse_gradient = NaN;
+	out.vse_intercept = NaN;
+	out.vse_minbad = NaN;
 
-    out.ve_meanabsres = NaN;
-    out.ve_rmsres = NaN;
-    out.ve_gradient = NaN;
-    out.ve_intercept = NaN;
-    out.ve_minbad = NaN;
+	out.ve_meanabsres = NaN;
+	out.ve_rmsres = NaN;
+	out.ve_gradient = NaN;
+	out.ve_intercept = NaN;
+	out.ve_minbad = NaN;
 else
-    t_scal = t(1:imax);
-    p_scal = p(1:imax);
-    %     pp = polyfit(t_scal,p_scal',1); pfit = pp(1)*t_scal+pp(2);
-    % hold on; plot(t_scal,p_scal,'.-r'); hold off
-    % hold on; plot(t_scal,pfit,'-r'); hold off;
-    % keyboard
+	t_scal = t(1:imax);
+	p_scal = p(1:imax);
+	%     pp = polyfit(t_scal,p_scal',1); pfit = pp(1)*t_scal+pp(2);
+	% hold on; plot(t_scal,p_scal,'.-r'); hold off
+	% hold on; plot(t_scal,pfit,'-r'); hold off;
+	% keyboard
 
-    % ------------------------------------------------------------------------------
-    %% Adjust start and end times for best scaling
-    % ------------------------------------------------------------------------------
+	% ------------------------------------------------------------------------------
+	%% Adjust start and end times for best scaling
+	% ------------------------------------------------------------------------------
 
-    l = imax; % = length(t_scal)
-    stptr = 1:floor(l / 2) - 1; % start point must be in the first half (not necessarily, but for here)
-    endptr = ceil(l / 2) + 1:l; % end point must be in second half (not necessarily, but for here)
-    mybad = zeros(length(stptr), length(endptr));
-    for i = 1:length(stptr)
-        for j = 1:length(endptr)
-            mybad(i, j) = lfitbadness(t_scal(stptr(i):endptr(j)), p_scal(stptr(i):endptr(j))');
-        end
-    end
-    [a, b] = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
+	l = imax; % = length(t_scal)
+	stptr = 1:floor(l / 2) - 1; % start point must be in the first half (not necessarily, but for here)
+	endptr = ceil(l / 2) + 1:l; % end point must be in second half (not necessarily, but for here)
+	mybad = zeros(length(stptr), length(endptr));
+	for i = 1:length(stptr)
+		for j = 1:length(endptr)
+			mybad(i, j) = lfitbadness(t_scal(stptr(i):endptr(j)), p_scal(stptr(i):endptr(j))');
+		end
+	end
+	[a, b] = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
 
-    % Do the optimum fit again
-    t_opt = t_scal(stptr(a):endptr(b));
-    p_opt = p_scal(stptr(a):endptr(b))';
-    pp = polyfit(t_opt, p_opt, 1);
-    pfit = pp(1) * t_opt + pp(2);
-    res = pfit - p_opt;
+	% Do the optimum fit again
+	t_opt = t_scal(stptr(a):endptr(b));
+	p_opt = p_scal(stptr(a):endptr(b))';
+	pp = polyfit(t_opt, p_opt, 1);
+	pfit = pp(1) * t_opt + pp(2);
+	res = pfit - p_opt;
 
-    % hold on; plot(t_opt,p_opt,'og'); hold off;
-    % hold on; plot(t_opt,pfit,'-g'); hold off;
-    % vse == vary start and end times
-    out.vse_meanabsres = mean(abs(res));
-    out.vse_rmsres = sqrt(mean(res.^2));
-    out.vse_gradient = pp(1);
-    out.vse_intercept = pp(2);
-    out.vse_minbad = min(mybad(:));
-    if isempty(out.vse_minbad), out.vse_minbad = NaN; end
+	% hold on; plot(t_opt,p_opt,'og'); hold off;
+	% hold on; plot(t_opt,pfit,'-g'); hold off;
+	% vse == vary start and end times
+	out.vse_meanabsres = mean(abs(res));
+	out.vse_rmsres = sqrt(mean(res.^2));
+	out.vse_gradient = pp(1);
+	out.vse_intercept = pp(2);
+	out.vse_minbad = min(mybad(:));
+	if isempty(out.vse_minbad), out.vse_minbad = NaN; end
 
-    %% Adjust just end time for best scaling
-    imin = find(p > 0.50 * max(p), 1, 'first');
+	%% Adjust just end time for best scaling
+	imin = find(p > 0.50 * max(p), 1, 'first');
 
-    endptr = imin:imax; % end point is at least at 50% mark of maximum
-    mybad = zeros(length(endptr), 1);
-    for i = 1:length(endptr)
-        mybad(i) = lfitbadness(t_scal(1:endptr(i)), p_scal(1:endptr(i))');
-    end
-    b = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
+	endptr = imin:imax; % end point is at least at 50% mark of maximum
+	mybad = zeros(length(endptr), 1);
+	for i = 1:length(endptr)
+		mybad(i) = lfitbadness(t_scal(1:endptr(i)), p_scal(1:endptr(i))');
+	end
+	b = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
 
-    % Do the optimum fit again
-    t_opt = t_scal(1:endptr(b));
-    p_opt = p_scal(1:endptr(b))';
-    pp = polyfit(t_opt, p_opt, 1);
-    pfit = pp(1) * t_opt + pp(2);
-    res = pfit - p_opt;
+	% Do the optimum fit again
+	t_opt = t_scal(1:endptr(b));
+	p_opt = p_scal(1:endptr(b))';
+	pp = polyfit(t_opt, p_opt, 1);
+	pfit = pp(1) * t_opt + pp(2);
+	res = pfit - p_opt;
 
-    % hold on; plot(t_opt,p_opt,'om'); hold off;
-    % hold on; plot(t_opt,pfit,'-m'); hold off;
-    out.ve_meanabsres = mean(abs(res));
-    out.ve_rmsres = sqrt(mean(res.^2));
-    out.ve_gradient = pp(1);
-    out.ve_intercept = pp(2);
-    out.ve_minbad = min(mybad(:));
-    if isempty(out.ve_minbad), out.ve_minbad = NaN; end
+	% hold on; plot(t_opt,p_opt,'om'); hold off;
+	% hold on; plot(t_opt,pfit,'-m'); hold off;
+	out.ve_meanabsres = mean(abs(res));
+	out.ve_rmsres = sqrt(mean(res.^2));
+	out.ve_gradient = pp(1);
+	out.ve_intercept = pp(2);
+	out.ve_minbad = min(mybad(:));
+	if isempty(out.ve_minbad), out.ve_minbad = NaN; end
 
 end
 
@@ -289,39 +289,39 @@ s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [max(p) -0.5]);
 f = fittype('a*(1-exp(b*x))', 'options', s);
 fitWorked = 1;
 try
-    [c, gof] = fit(t', p, f);
+	[c, gof] = fit(t', p, f);
 catch
-    fitWorked = 0;
+	fitWorked = 0;
 end
 if fitWorked
-    out.expfit_a = c.a;
-    out.expfit_b = c.b;
-    out.expfit_r2 = gof.rsquare;
-    out.expfit_adjr2 = gof.adjrsquare;
-    out.expfit_rmse = gof.rmse;
+	out.expfit_a = c.a;
+	out.expfit_b = c.b;
+	out.expfit_r2 = gof.rsquare;
+	out.expfit_adjr2 = gof.adjrsquare;
+	out.expfit_rmse = gof.rmse;
 else
-    out.expfit_a = NaN;
-    out.expfit_b = NaN;
-    out.expfit_r2 = NaN;
-    out.expfit_adjr2 = NaN;
-    out.expfit_rmse = NaN;
+	out.expfit_a = NaN;
+	out.expfit_b = NaN;
+	out.expfit_r2 = NaN;
+	out.expfit_adjr2 = NaN;
+	out.expfit_rmse = NaN;
 end
 
 if doPlot
-    hold('on')
-    plot(t, c.a * (1 - exp(c.b * t)), ':r');
-    hold('off')
+	hold('on')
+	plot(t, c.a * (1 - exp(c.b * t)), ':r');
+	hold('off')
 end
 
 % ------------------------------------------------------------------------------
 function badness = lfitbadness(x, y, gamma)
-    if nargin < 3
-        gamma = 0.006; % regularization parameter, gamma, chosen empirically
-    end
-    pp = polyfit(x, y, 1);
-    pfit = pp(1) * x + pp(2);
-    res = pfit - y;
-    badness = mean(abs(res)) - gamma * length(x); % want to still maximize length(x)
+	if nargin < 3
+		gamma = 0.006; % regularization parameter, gamma, chosen empirically
+	end
+	pp = polyfit(x, y, 1);
+	pfit = pp(1) * x + pp(2);
+	res = pfit - y;
+	badness = mean(abs(res)) - gamma * length(x); % want to still maximize length(x)
 end
 % ------------------------------------------------------------------------------
 

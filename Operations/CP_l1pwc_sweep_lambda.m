@@ -55,12 +55,12 @@ rmserrs = zeros(Llambdar, 1);
 rmserrpsegs = zeros(Llambdar, 1);
 
 for i = 1:length(lambdar)
-    lambda = lambdar(i);
-    % Run the (stochastic) step detection algorithm:
-    outi = CP_ML_StepDetect(y, 'l1pwc', lambda);
-    nsegs(i) = outi.nsegments;
-    rmserrs(i) = outi.rmsoff;
-    rmserrpsegs(i) = outi.rmsoffpstep;
+	lambda = lambdar(i);
+	% Run the (stochastic) step detection algorithm:
+	outi = CP_ML_StepDetect(y, 'l1pwc', lambda);
+	nsegs(i) = outi.nsegments;
+	rmserrs(i) = outi.rmsoff;
+	rmserrpsegs(i) = outi.rmsoffpstep;
 end
 
 % ------------------------------------------------------------------------------
@@ -100,12 +100,12 @@ out.bestlambda = lambdar(indbest);
 % Subfunctions
 % ------------------------------------------------------------------------------
 function N = NaNIfEmpty(x)
-    % Returns a NaN if x is empty, otherwise returns x.
-    if isempty(x)
-        N = NaN;
-    else
-        N = x;
-    end
+	% Returns a NaN if x is empty, otherwise returns x.
+	if isempty(x)
+		N = NaN;
+	else
+		N = x;
+	end
 end
 
 end

@@ -42,12 +42,12 @@ function out = DN_cv(x, k)
 % Check inputs
 % -------------------------------------------------------------------------------
 if nargin < 2 || isempty(k)
-    k = 1; % Do standard CV by default
+	k = 1; % Do standard CV by default
 end
 
 if (rem(k, 1) ~= 0) || (k < 0)
-    warning('k should probably be a positive integer');
-    % Carry on with just this warning, though
+	warning('k should probably be a positive integer');
+	% Carry on with just this warning, though
 end
 
 % Compute the coefficient of variation (of order k) of the data
